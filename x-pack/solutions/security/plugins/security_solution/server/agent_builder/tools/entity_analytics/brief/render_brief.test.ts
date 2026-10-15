@@ -6,7 +6,7 @@
  */
 
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
-import type { CandidateEntities } from './fetch_candidate_entities';
+import type { CandidateEntities } from './read_entities';
 import {
   NO_MATCH_LINE,
   NO_PRIORITIES_LINE,
@@ -52,7 +52,9 @@ const priority = (entityId: string, observed: string) => ({
 describe('renderBrief', () => {
   it('renders the quiet case with the period only, and no priorities', () => {
     const brief = renderBrief({
-      scope: scopeWith({ tiles: { riskMovers: { value: 0, delta: 0, entityIds: [] } } }),
+      scope: scopeWith({
+        tiles: { riskMovers: { title: 'Risk movers', value: 0, delta: 0, entityIds: [] } },
+      }),
       spaceId: 'default',
       entities: noEntities,
     });
@@ -80,25 +82,28 @@ describe('renderBrief', () => {
   it.each<[string, EntityAnalyticsScope['tiles'], Partial<CandidateEntities>, string]>([
     [
       'calls a fully read view with nothing flagged quiet',
-      { riskMovers: { value: 0, entityIds: [] }, newEntity: { value: 0, entityIds: [] } },
+      {
+        riskMovers: { title: 'Risk movers', value: 0, entityIds: [] },
+        newEntity: { title: 'New entity', value: 0, entityIds: [] },
+      },
       {},
       QUIET_LINE,
     ],
     [
       'never calls a view quiet when data could not be read',
-      { riskMovers: { value: 0, unavailable: true, entityIds: [] } },
+      { riskMovers: { title: 'Risk movers', value: 0, unavailable: true, entityIds: [] } },
       {},
       UNAVAILABLE_TILES_LINE,
     ],
     [
       'does not call a view quiet when flagged entities were not checked',
-      { riskMovers: { value: 2, entityIds: ['host:x'] } },
+      { riskMovers: { title: 'Risk movers', value: 2, entityIds: ['host:x'] } },
       { capturedCount: 1, notFoundCount: 1 },
       NO_PRIORITIES_LINE,
     ],
     [
       'blames the search when it matches no flagged entity',
-      { riskMovers: { value: 3, entityIds: ['host:x', 'host:y', 'host:z'] } },
+      { riskMovers: { title: 'Risk movers', value: 3, entityIds: ['host:x', 'host:y', 'host:z'] } },
       { capturedCount: 3, hasPageQuery: true },
       NO_MATCH_LINE,
     ],
@@ -114,27 +119,37 @@ describe('renderBrief', () => {
   it.each<[string, EntityAnalyticsScope['tiles'], Partial<CandidateEntities>, string | undefined]>([
     [
       'no note when every flagged entity was checked',
-      { riskMovers: { value: 1, entityIds: ['host:a'] } },
+      { riskMovers: { title: 'Risk movers', value: 1, entityIds: ['host:a'] } },
       {},
       undefined,
     ],
     [
       'no note when aliases fold into fewer identities',
-      { newEntity: { value: 1, entityIds: ['host:a', 'host:a-alias'] } },
+      { newEntity: { title: 'New entity', value: 1, entityIds: ['host:a', 'host:a-alias'] } },
       { capturedCount: 2 },
       undefined,
     ],
     [
       'a cap left entities out',
-      { riskMovers: { value: 30, entityIds: Array.from({ length: 30 }, (_, i) => `host:${i}`) } },
+      {
+        riskMovers: {
+          title: 'Risk movers',
+          value: 30,
+          entityIds: Array.from({ length: 30 }, (_, i) => `host:${i}`),
+        },
+      },
       { identityCount: 30, isTruncated: true },
       '_Based on the 1 highest-ranked of 30 flagged entities._',
     ],
     [
       'the page sent a sample of a large count, never summing counts',
       {
-        entitiesWithAlerts: { value: 48213, entityIds: ['host:a', 'host:b'] },
-        riskMovers: { value: 20, entityIds: ['host:a'] },
+        entitiesWithAlerts: {
+          title: 'Entities with alerts',
+          value: 48213,
+          entityIds: ['host:a', 'host:b'],
+        },
+        riskMovers: { title: 'Risk movers', value: 20, entityIds: ['host:a'] },
       },
       {},
       '_Based on the 1 highest-ranked of at least 48,213 flagged entities._',
@@ -157,9 +172,14 @@ describe('renderBrief', () => {
       'lists the counts in the page order, never summed',
       undefined,
       {
-        entitiesWithAlerts: { value: 48213, delta: 4800, entityIds: [] },
-        newlyHighCritical: { value: 3, delta: 3, entityIds: [] },
-        riskMovers: { value: 6, delta: -2, entityIds: [] },
+        entitiesWithAlerts: {
+          title: 'Entities with alerts',
+          value: 48213,
+          delta: 4800,
+          entityIds: [],
+        },
+        newlyHighCritical: { title: 'Newly high/critical', value: 3, delta: 3, entityIds: [] },
+        riskMovers: { title: 'Risk movers', value: 6, delta: -2, entityIds: [] },
       },
       [
         '| Entities with alerts | 48,213 | +4,800 |',
@@ -171,11 +191,11 @@ describe('renderBrief', () => {
       'puts the selected count first and leaves out rows with nothing to say',
       'watchlisted',
       {
-        entitiesWithAlerts: { value: 130, delta: 30, entityIds: [] },
-        riskMovers: { value: 0, unavailable: true, delta: 4, entityIds: [] },
-        newlyHighCritical: { value: 0, delta: 0, entityIds: [] },
-        newEntity: { value: 7, entityIds: [] },
-        watchlisted: { value: 3, delta: 0, entityIds: [] },
+        entitiesWithAlerts: { title: 'Entities with alerts', value: 130, delta: 30, entityIds: [] },
+        riskMovers: { title: 'Risk movers', value: 0, unavailable: true, delta: 4, entityIds: [] },
+        newlyHighCritical: { title: 'Newly high/critical', value: 0, delta: 0, entityIds: [] },
+        newEntity: { title: 'New entity', value: 7, entityIds: [] },
+        watchlisted: { title: 'Watchlisted', value: 3, delta: 0, entityIds: [] },
       },
       [
         '| Watchlisted | 3 | no change |',
@@ -186,16 +206,19 @@ describe('renderBrief', () => {
     [
       'leaves out the change column when nothing can be compared',
       undefined,
-      { entitiesWithAlerts: { value: 5, entityIds: [] }, newEntity: { value: 4, entityIds: [] } },
+      {
+        entitiesWithAlerts: { title: 'Entities with alerts', value: 5, entityIds: [] },
+        newEntity: { title: 'New entity', value: 4, entityIds: [] },
+      },
       ['| Entities with alerts | 5 |', '| New entity | 4 |'],
     ],
     [
       'hides the section when no row has anything to say',
       undefined,
       {
-        entitiesWithAnomalies: { value: 0, entityIds: [] },
-        riskMovers: { value: 0, delta: 0, entityIds: [] },
-        watchlisted: { value: 4, unavailable: true, entityIds: [] },
+        entitiesWithAnomalies: { title: 'Entities with anomalies', value: 0, entityIds: [] },
+        riskMovers: { title: 'Risk movers', value: 0, delta: 0, entityIds: [] },
+        watchlisted: { title: 'Watchlisted', value: 4, unavailable: true, entityIds: [] },
       },
       [],
     ],
@@ -221,7 +244,9 @@ describe('renderBrief', () => {
       ],
     };
     const brief = renderBrief({
-      scope: scopeWith({ tiles: { riskMovers: { value: 2, entityIds: ['host:a', 'user:b'] } } }),
+      scope: scopeWith({
+        tiles: { riskMovers: { title: 'Risk movers', value: 2, entityIds: ['host:a', 'user:b'] } },
+      }),
       spaceId: 'default',
       entities,
       verified: {
@@ -256,7 +281,9 @@ Start with **jdoe**.`);
 
   it('escapes markdown in model text, so it adds no links, tags or emphasis', () => {
     const brief = renderBrief({
-      scope: scopeWith({ tiles: { riskMovers: { value: 1, entityIds: ['host:a'] } } }),
+      scope: scopeWith({
+        tiles: { riskMovers: { title: 'Risk movers', value: 1, entityIds: ['host:a'] } },
+      }),
       spaceId: 'default',
       entities: hostA,
       verified: {
@@ -273,7 +300,9 @@ Start with **jdoe**.`);
 
   it('renders the no-priorities line after a model call', () => {
     const brief = renderBrief({
-      scope: scopeWith({ tiles: { riskMovers: { value: 1, entityIds: ['host:a'] } } }),
+      scope: scopeWith({
+        tiles: { riskMovers: { title: 'Risk movers', value: 1, entityIds: ['host:a'] } },
+      }),
       spaceId: 'default',
       entities: hostA,
       verified: { priorities: [], droppedPriorityCount: 2 },

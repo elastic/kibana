@@ -22,13 +22,12 @@ import type {
   BriefFact,
 } from './brief_types';
 import { buildFacts, getFirstCitedRiskChange } from './build_facts';
-import { composeBrief } from './compose_brief';
+import { draftBrief } from './draft_brief';
 import { describeCoverage, getPeriodStart } from './describe_scope';
-import { fetchRiskAtStart } from './fetch_risk_at_start';
-import { fetchCandidateEntities } from './fetch_candidate_entities';
+import { fetchCandidateEntities, fetchRiskAtStart } from './read_entities';
 import type { RiskChart } from './render_brief';
 import { renderBrief } from './render_brief';
-import { verifyBrief } from './verify_brief';
+import { verifyDraft } from './verify_draft';
 
 /** Turns the captured Entity Analytics view into the markdown brief. Elasticsearch and model errors propagate. */
 export const generateBrief = async ({
@@ -62,7 +61,7 @@ export const generateBrief = async ({
   });
   const fetched = Date.now();
 
-  const { draft, repaired } = await composeBrief({
+  const { draft, repaired } = await draftBrief({
     inferenceClient,
     scope,
     candidates,
@@ -72,7 +71,7 @@ export const generateBrief = async ({
     logger,
   });
   const composed = Date.now();
-  const verified = verifyBrief(draft, facts, scope, candidates);
+  const verified = verifyDraft(draft, facts, scope, candidates);
   const priorityCandidates = verified.priorities.flatMap(
     ({ entityId }) => candidates.find(({ id }) => id === entityId) ?? []
   );

@@ -7,26 +7,19 @@
 
 import { upperFirst } from 'lodash';
 import type { Filter } from '@kbn/es-query';
-import type { CandidateEntities } from './fetch_candidate_entities';
+import { SIGNAL_CARD_IDS } from '../../../../../common/entity_analytics/home/constants';
+import type { CandidateEntities } from './read_entities';
 import type {
-  BriefPeriod,
-  BriefTileId,
+  TimeRange,
+  SignalCardId,
+} from '../../../../../common/entity_analytics/home/constants';
+import type {
   EntityAnalyticsScope,
   EntityAnalyticsScopeTile,
 } from '../../../../../common/entity_analytics/ai_brief/scope';
 
-/** The tile titles as the page shows them. */
-export const BRIEF_TILE_TITLES: Record<BriefTileId, string> = {
-  entitiesWithAlerts: 'Entities with alerts',
-  entitiesWithAnomalies: 'Entities with anomalies',
-  riskMovers: 'Risk movers',
-  newlyHighCritical: 'Newly high/critical',
-  watchlisted: 'Watchlisted',
-  newEntity: 'New entity',
-};
-
 /** What membership of each tile means for an entity, following the tile queries on the page. */
-export const BRIEF_TILE_DEFINITIONS: Record<BriefTileId, (period: string) => string> = {
+export const BRIEF_TILE_DEFINITIONS: Record<SignalCardId, (period: string) => string> = {
   // The tile counts only High and Critical alerts, of any status, whatever the page's description says.
   entitiesWithAlerts: (period) =>
     `had at least one High or Critical alert, open or closed, in the last ${period}`,
@@ -40,14 +33,14 @@ export const BRIEF_TILE_DEFINITIONS: Record<BriefTileId, (period: string) => str
 };
 
 /** The periods in words. */
-export const BRIEF_PERIOD_LABELS: Record<BriefPeriod, string> = {
+export const BRIEF_PERIOD_LABELS: Record<TimeRange, string> = {
   '24h': '24 hours',
   '7d': '7 days',
   '30d': '30 days',
 };
 
 const HOUR_MS = 3_600_000;
-const PERIOD_MS: Record<BriefPeriod, number> = {
+const PERIOD_MS: Record<TimeRange, number> = {
   '24h': 24 * HOUR_MS,
   '7d': 7 * 24 * HOUR_MS,
   '30d': 30 * 24 * HOUR_MS,
@@ -108,7 +101,7 @@ export const describeDelta = (tile: EntityAnalyticsScopeTile): string => {
 };
 
 /** A tile's change against the previous period, in words. */
-export const describeTileChange = (tile: EntityAnalyticsScopeTile, period: BriefPeriod): string => {
+export const describeTileChange = (tile: EntityAnalyticsScopeTile, period: TimeRange): string => {
   if (tile.unavailable) {
     return 'unavailable';
   }
@@ -192,4 +185,32 @@ export const describeEntityFilter = (key: string, values: readonly string[]): st
   }
   const label = ENTITY_FILTER_LABELS[key] ?? key;
   return `${label}: ${values.map(formatStoredValue).join(', ')}`;
+};
+
+/** The captured view as text for the agent, for follow-up questions. */
+export const describeScopeForAgent = (
+  attachmentId: string,
+  scope: EntityAnalyticsScope
+): string => {
+  const { period, capturedAt, query, entityFilters = {}, focusTileId, tiles } = scope;
+  const entityFilterLabels = Object.entries(entityFilters).map(([key, values]) =>
+    describeEntityFilter(key, values)
+  );
+  const tileLabels = SIGNAL_CARD_IDS.flatMap((tileId) => {
+    const tile = tiles[tileId];
+    if (!tile) {
+      return [];
+    }
+    const value = tile.unavailable ? '' : ` ${tile.value}`;
+    return [`${tile.title}${value} (${describeTileChange(tile, period)})`];
+  });
+  return [
+    `Entity Analytics view (attachment id "${attachmentId}"), captured ${capturedAt}`,
+    `Period: last ${BRIEF_PERIOD_LABELS[period]}`,
+    `Search: ${query?.query || 'none'}`,
+    `Filters: ${getScopeFilters(scope).map(filterLabel).join('; ') || 'none'}`,
+    `Entity filters: ${entityFilterLabels.join('; ') || 'none'}`,
+    `Selected count: ${(focusTileId && tiles[focusTileId]?.title) || 'none'}`,
+    `Counts of flagged entities: ${tileLabels.join('; ') || 'none'}`,
+  ].join('\n');
 };

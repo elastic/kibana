@@ -10,25 +10,23 @@ import type {
   SearchTotalHits,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
-import { truncate } from 'lodash';
+import { compact, orderBy, truncate, uniq } from 'lodash';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Entity } from '@kbn/entity-store/common';
 import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
 import type { EsQueryConfig } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import type { SignalCardId } from '../../../../../common/entity_analytics/home/constants';
+import { SIGNAL_CARD_IDS } from '../../../../../common/entity_analytics/home/constants';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { getEntityType } from '../../../../../common/entity_analytics/entity_store/sanitize_entity_record_for_upsert';
+import { getRiskScoreTimeSeriesIndex } from '../../../../../common/entity_analytics/risk_engine/indices';
 import { resolveDisplayName } from '../../../../lib/entity_analytics/lead_generation/entity_conversion';
 import { ENTITY_IDENTIFIER_TYPES } from '../entity_resolution';
-import type { BriefCandidate, BriefEntityType } from './brief_types';
+import type { BriefCandidate, BriefEntityType, RiskAtStart } from './brief_types';
 import { MAX_BRIEF_CANDIDATES } from './brief_types';
-import { getScopeFilters } from './describe_scope';
-import {
-  foldAliases,
-  getRankWeight,
-  rankCandidates,
-  selectCandidateTiles,
-} from './select_candidates';
+import { getRankRisk } from './build_facts';
+import { getPeriodStart, getScopeFilters } from './describe_scope';
 
 /** Records read for ranking. Tiles can hold hundreds of entities, so the first by rank are read. */
 const MAX_RANKED_RECORDS = 100;
@@ -211,3 +209,198 @@ const getBriefEntityType = (record: Entity, id: string): BriefEntityType => {
   const prefix = id.split(':')[0];
   return isKnown(prefix) ? prefix : 'generic';
 };
+
+// Risk at the start of the period
+
+const RISK_ENTITY_TYPES = ['host', 'user', 'service'] as const;
+/** As on the Risk movers tile: scoring runs hourly, so two hours always hold a run. */
+const BOUNDARY_WINDOW_MS = 2 * 3_600_000;
+
+interface TypeAggregation {
+  buckets: Array<{
+    key: string;
+    last: {
+      hits: {
+        hits: Array<{ _source?: Record<string, { risk?: { calculated_score_norm?: number } }> }>;
+      };
+    };
+  }>;
+}
+
+/** Aliases, then base scores at the period start by the Risk movers rule (`tile_risk_movers_query.ts`, in `public/`). */
+export const fetchRiskAtStart = async ({
+  candidates,
+  scope,
+  spaceId,
+  esClient,
+}: {
+  candidates: BriefCandidate[];
+  scope: EntityAnalyticsScope;
+  spaceId: string;
+  esClient: ElasticsearchClient;
+}): Promise<RiskAtStart> => {
+  const aliasesById = await expandAliases({
+    entityIds: candidates.map(({ id }) => id),
+    spaceId,
+    esClient,
+  });
+  const records = [...candidates.map(({ record }) => record), ...[...aliasesById.values()].flat()];
+  const entityIds = uniq(
+    compact([...candidates.map(({ id }) => id), ...records.map(({ entity }) => entity?.id)])
+  );
+  const start = getPeriodStart(scope);
+  const response = await esClient.search<unknown, Record<string, TypeAggregation>>({
+    index: getRiskScoreTimeSeriesIndex(spaceId),
+    size: 0,
+    ignore_unavailable: true,
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                gte: new Date(start.getTime() - BOUNDARY_WINDOW_MS).toISOString(),
+                lte: start.toISOString(),
+              },
+            },
+          },
+          {
+            bool: {
+              should: RISK_ENTITY_TYPES.map((type) => ({
+                terms: { [`${type}.risk.id_value`]: entityIds },
+              })),
+              minimum_should_match: 1,
+            },
+          },
+        ],
+        // Resolution scores share the golden entity's id, and "now" is the entity's own base score.
+        must_not: RISK_ENTITY_TYPES.map((type) => ({
+          term: { [`${type}.risk.score_type`]: 'resolution' },
+        })),
+      },
+    },
+    aggs: Object.fromEntries(
+      RISK_ENTITY_TYPES.map((type) => [
+        type,
+        {
+          terms: { field: `${type}.risk.id_value`, include: entityIds, size: entityIds.length },
+          aggs: {
+            last: {
+              top_hits: {
+                size: 1,
+                sort: [{ '@timestamp': 'desc' as const }],
+                _source: [`${type}.risk.calculated_score_norm`],
+              },
+            },
+          },
+        },
+      ])
+    ),
+  });
+
+  const scoresById = new Map<string, number>();
+  for (const type of RISK_ENTITY_TYPES) {
+    for (const { key, last } of response.aggregations?.[type]?.buckets ?? []) {
+      const score = last.hits.hits[0]?._source?.[type]?.risk?.calculated_score_norm;
+      if (score !== undefined && Number.isFinite(score)) {
+        scoresById.set(key, score);
+      }
+    }
+  }
+  return { aliasesById, scoresById };
+};
+
+/** Aliases read per brief. A resolution group rarely has more than a handful. */
+const MAX_ALIASES = MAX_BRIEF_CANDIDATES * 20;
+const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
+
+/**
+ * The alias records of the given golden entity ids, grouped by golden id, in one search. Tile ids are
+ * golden entities, while risk scores, alerts and anomalies belong to each alias's own EUID.
+ */
+export const expandAliases = async ({
+  entityIds,
+  spaceId,
+  esClient,
+}: {
+  entityIds: string[];
+  spaceId: string;
+  esClient: ElasticsearchClient;
+}): Promise<Map<string, Entity[]>> => {
+  const response = await esClient.search<Entity>({
+    index: getEntitiesAlias(ENTITY_LATEST, spaceId),
+    size: MAX_ALIASES,
+    ignore_unavailable: true,
+    query: { bool: { filter: [{ terms: { [RESOLVED_TO_FIELD]: entityIds } }] } },
+    _source: ['entity.id', 'entity.name', RESOLVED_TO_FIELD, 'entity.risk'],
+    sort: [{ 'entity.id': 'asc' }],
+  });
+  const aliasesById = new Map<string, Entity[]>();
+  for (const { _source: record } of response.hits.hits) {
+    const goldenId = record?.entity?.relationships?.resolution?.resolved_to;
+    if (record && goldenId) {
+      aliasesById.set(goldenId, [...(aliasesById.get(goldenId) ?? []), record]);
+    }
+  }
+  return aliasesById;
+};
+
+// Candidate selection
+
+const getTileOrder = (focusTileId: SignalCardId | undefined): SignalCardId[] =>
+  orderBy(SIGNAL_CARD_IDS, (tileId) => tileId === focusTileId, 'desc');
+
+/** Maps each entity id in the scope's available tiles to its tile ids, the selected tile first. */
+export const selectCandidateTiles = (scope: EntityAnalyticsScope): Map<string, SignalCardId[]> => {
+  const { focusTileId, tiles } = scope;
+  const tileIdsByEntityId = new Map<string, SignalCardId[]>();
+  for (const tileId of getTileOrder(focusTileId)) {
+    const tile = tiles[tileId];
+    const entityIds = tile && !tile.unavailable ? tile.entityIds : [];
+    for (const entityId of entityIds) {
+      tileIdsByEntityId.set(entityId, [...(tileIdsByEntityId.get(entityId) ?? []), tileId]);
+    }
+  }
+  return tileIdsByEntityId;
+};
+
+/** The ranking key before risk: selected tile membership, then tile count. Elasticsearch sorts on it too. */
+export const getRankWeight = (
+  tileIds: readonly SignalCardId[],
+  focusTileId: SignalCardId | undefined
+): number => (focusTileId !== undefined && tileIds.includes(focusTileId) ? 10 : 0) + tileIds.length;
+
+/** Folds aliases into their golden entity, using its own record when read, otherwise the first alias's. */
+export const foldAliases = (
+  candidates: BriefCandidate[],
+  focusTileId: SignalCardId | undefined
+): BriefCandidate[] => {
+  const byIdentityId = new Map<string, BriefCandidate>();
+  for (const candidate of candidates) {
+    const identityId =
+      candidate.record.entity?.relationships?.resolution?.resolved_to ?? candidate.id;
+    const folded = byIdentityId.get(identityId);
+    const tileIds = [...(folded?.tileIds ?? []), ...candidate.tileIds];
+    const kept = candidate.id === identityId || !folded ? candidate : folded;
+    byIdentityId.set(identityId, {
+      ...kept,
+      id: identityId,
+      tileIds: getTileOrder(focusTileId).filter((tileId) => tileIds.includes(tileId)),
+    });
+  }
+  return [...byIdentityId.values()];
+};
+
+/** Orders candidates by `getRankWeight`, then risk, and keeps the first `MAX_BRIEF_CANDIDATES`. */
+export const rankCandidates = (
+  candidates: BriefCandidate[],
+  focusTileId: SignalCardId | undefined
+): BriefCandidate[] =>
+  orderBy(
+    candidates,
+    [
+      ({ tileIds }) => getRankWeight(tileIds, focusTileId),
+      ({ record }) => getRankRisk(record)?.score ?? -1,
+    ],
+    ['desc', 'desc']
+  ).slice(0, MAX_BRIEF_CANDIDATES);

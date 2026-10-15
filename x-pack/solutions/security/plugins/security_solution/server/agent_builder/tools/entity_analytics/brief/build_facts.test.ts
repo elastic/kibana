@@ -54,21 +54,21 @@ describe('buildFacts risk change', () => {
       record('user:jdoe', 71.4),
       { 'user:jdoe': 38.2 },
       [],
-      ['Risk score 38 at the start of the last 7 days (7 October), 71 now, up 33 points'],
+      ['Risk score 38 at the start of the last 7 days, 71 now, up 33 points'],
     ],
     [
       'down',
       record('user:jdoe', 40),
       { 'user:jdoe': 55 },
       [],
-      ['Risk score 55 at the start of the last 7 days (7 October), 40 now, down 15 points'],
+      ['Risk score 55 at the start of the last 7 days, 40 now, down 15 points'],
     ],
     [
       'unchanged',
       record('user:jdoe', 50.2),
       { 'user:jdoe': 49.9 },
       [],
-      ['Risk score 50 at the start of the last 7 days (7 October), 50 now, unchanged'],
+      ['Risk score 50 at the start of the last 7 days, 50 now, unchanged'],
     ],
     [
       'no score at the start, never zero',
@@ -83,7 +83,7 @@ describe('buildFacts risk change', () => {
       { 'user:jdoe': 28, 'user:jdoe-laptop': 20 },
       [record('user:jdoe-laptop', 80, 'user:jdoe'), record('user:jdoe-mail', 90, 'user:jdoe')],
       [
-        'User "jdoe-laptop" in the same resolution group: risk score 20 at the start of the last 7 days (7 October), 80 now, up 60 points',
+        'User "jdoe-laptop" in the same resolution group: risk score 20 at the start of the last 7 days, 80 now, up 60 points',
       ],
     ],
     ['nothing without a score now', record('user:jdoe'), { 'user:jdoe': 40 }, [], []],
@@ -103,25 +103,25 @@ describe('buildFacts first seen', () => {
       'before the period',
       '2026-09-01T00:00:00.000Z',
       '2026-01-01T00:00:00.000Z',
-      'First seen by the Entity Store 2026-09-01',
+      'First seen by the Entity Store a month ago',
     ],
     [
       'inside the period',
       '2026-10-10T00:00:00.000Z',
       '2026-01-01T00:00:00.000Z',
-      'First seen by the Entity Store 2026-10-10, inside the last 7 days',
+      'First seen by the Entity Store 5 days ago, inside the last 7 days',
     ],
     [
       "on the Entity Store's first day, inside the period",
       '2026-10-10T20:00:00.000Z',
       '2026-10-10T00:00:00.000Z',
-      'First seen by the Entity Store 2026-10-10, its first day of data',
+      'First seen by the Entity Store 4 days ago, its first day of data',
     ],
     [
       'inside the period, when the store start is unknown',
       '2026-10-10T00:00:00.000Z',
       undefined,
-      'First seen by the Entity Store 2026-10-10, inside the last 7 days',
+      'First seen by the Entity Store 5 days ago, inside the last 7 days',
     ],
   ])('states first seen: %s', (_name, firstSeen, storeStartTimestamp, expected) => {
     const entityRecord: Entity = {

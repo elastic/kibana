@@ -19,13 +19,13 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { isInferenceError } from '@kbn/inference-common';
 import type { ExperimentalFeatures } from '../../../../common';
 import {
-  ENTITY_ANALYTICS_SCOPE_ATTACHMENT_TYPE,
+  ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE,
   EntityAnalyticsScope,
 } from '../../../../common/entity_analytics/ai_brief/scope';
 import { RiskScoreDataClient } from '../../../lib/entity_analytics/risk_score/risk_score_data_client';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { securityTool } from '../constants';
-import { generateBrief } from './brief/generate_brief';
+import { generateBrief } from './brief';
 import { getEntityAnalyticsToolAvailability } from './entity_analytics_availability';
 import { createToolTelemetryTracker } from './tool_telemetry_tracker';
 
@@ -49,7 +49,7 @@ const schema = lazySchema(() =>
       .max(512)
       .optional()
       .describe(
-        `Id of the ${ENTITY_ANALYTICS_SCOPE_ATTACHMENT_TYPE} attachment to brief on. Omit it to use the most recently attached view.`
+        `Id of the ${ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE} attachment to brief on. Omit it to use the most recently attached view.`
       ),
   })
 );
@@ -63,7 +63,7 @@ export const generateEntityAnalyticsBriefTool = (
 ): BuiltinToolDefinition<typeof schema> => ({
   id: SECURITY_GENERATE_ENTITY_ANALYTICS_BRIEF_TOOL_ID,
   type: ToolType.builtin,
-  description: `Generates the Entity Analytics AI brief for a captured Entity Analytics page view (a ${ENTITY_ANALYTICS_SCOPE_ATTACHMENT_TYPE} attachment). Use it when the user asks for the brief of an attached Entity Analytics view; for other entity questions use the entity search and lookup tools. It reads the tile values captured from the page and the Entity Store records of the entities in those tiles, and returns a \`brief\` markdown string covering the scope, what needs attention, the counts and their changes, up to three priority entities with a supporting entity table, and a recommended next step.`,
+  description: `Generates the Entity Analytics AI brief for a captured Entity Analytics page view (a ${ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE} attachment). Use it when the user asks for the brief of an attached Entity Analytics view; for other entity questions use the entity search and lookup tools. It reads the tile values captured from the page and the Entity Store records of the entities in those tiles, and returns a \`brief\` markdown string covering the scope, what needs attention, the counts and their changes, up to three priority entities with a supporting entity table, and a recommended next step.`,
   schema,
   tags: ['security', 'entity-analytics'],
   annotations: {
@@ -148,13 +148,13 @@ const getScopeData = (attachments: AttachmentStateManager, scopeAttachmentId?: s
     scopeAttachmentId ??
     attachments
       .getActive()
-      .filter(({ type }) => type === ENTITY_ANALYTICS_SCOPE_ATTACHMENT_TYPE)
+      .filter(({ type }) => type === ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE)
       .at(-1)?.id;
   if (attachmentId === undefined) {
     return undefined;
   }
   const attachment = attachments.get(attachmentId);
-  if (attachment?.type !== ENTITY_ANALYTICS_SCOPE_ATTACHMENT_TYPE) {
+  if (attachment?.type !== ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE) {
     return undefined;
   }
   return attachment.data.data;

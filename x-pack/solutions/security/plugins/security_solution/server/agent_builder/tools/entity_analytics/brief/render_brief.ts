@@ -7,16 +7,15 @@
 
 import { compact, dropRightWhile, orderBy } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { SignalCardId } from '../../../../../common/entity_analytics/home/constants';
 import type {
-  BriefTileId,
   EntityAnalyticsScope,
   EntityAnalyticsScopeTile,
 } from '../../../../../common/entity_analytics/ai_brief/scope';
-import { BRIEF_TILE_IDS } from '../../../../../common/entity_analytics/ai_brief/scope';
+import { SIGNAL_CARD_IDS } from '../../../../../common/entity_analytics/home/constants';
 import type { RiskChangeEntity } from './brief_types';
 import {
   BRIEF_PERIOD_LABELS,
-  BRIEF_TILE_TITLES,
   describeEntityFilter,
   describeDelta,
   describeSample,
@@ -25,9 +24,9 @@ import {
   formatCountOf,
   getScopeFilters,
 } from './describe_scope';
-import type { CandidateEntities } from './fetch_candidate_entities';
-import type { VerifiedBrief } from './verify_brief';
-import { MENTION_PATTERN } from './verify_brief';
+import type { CandidateEntities } from './read_entities';
+import type { VerifiedBrief } from './verify_draft';
+import { MENTION_PATTERN } from './verify_draft';
 
 const ENTITY_TABLE_INTRO =
   '_The priority entities at a glance, with their current risk score and asset criticality from the Entity Store:_';
@@ -137,7 +136,7 @@ const renderDisclosures = (
   riskChangeFailed: boolean
 ): string[] => {
   const { hasPageQuery, pageQueryFailed, notFoundCount } = entities;
-  const unavailable = BRIEF_TILE_IDS.filter((tileId) => scope.tiles[tileId]?.unavailable);
+  const unavailable = SIGNAL_CARD_IDS.filter((tileId) => scope.tiles[tileId]?.unavailable);
   const disclosures = [
     hasPageQuery && !pageQueryFailed
       ? 'Headline counts follow the period and entity filters, as on the page. The search query narrows the priorities.'
@@ -158,7 +157,7 @@ const renderDisclosures = (
       : undefined,
     unavailable.length > 0
       ? `Not checked, because the data couldn't be read: ${unavailable
-          .map((tileId) => BRIEF_TILE_TITLES[tileId])
+          .map((tileId) => scope.tiles[tileId]?.title)
           .join(', ')}.`
       : undefined,
     riskChangeFailed ? "Risk change couldn't be read." : undefined,
@@ -215,9 +214,9 @@ const isWorthShowing = ({ unavailable, value, delta = 0 }: EntityAnalyticsScopeT
 const pickChangeRows = ({
   tiles,
   focusTileId,
-}: EntityAnalyticsScope): Array<[BriefTileId, EntityAnalyticsScopeTile]> =>
+}: EntityAnalyticsScope): Array<[SignalCardId, EntityAnalyticsScopeTile]> =>
   orderBy(
-    BRIEF_TILE_IDS.flatMap((tileId): Array<[BriefTileId, EntityAnalyticsScopeTile]> => {
+    SIGNAL_CARD_IDS.flatMap((tileId): Array<[SignalCardId, EntityAnalyticsScopeTile]> => {
       const tile = tiles[tileId];
       return tile && isWorthShowing(tile) ? [[tileId, tile]] : [];
     }),
@@ -239,8 +238,8 @@ const renderChanges = (scope: EntityAnalyticsScope): string[] => {
     '**This period at a glance**',
     '',
     ...header,
-    ...rows.map(([tileId, tile]) => {
-      const row = `| ${BRIEF_TILE_TITLES[tileId]} | ${formatCount(tile.value)} |`;
+    ...rows.map(([, tile]) => {
+      const row = `| ${escapeMarkdown(tile.title)} | ${formatCount(tile.value)} |`;
       return hasComparison ? `${row} ${describeDelta(tile)} |` : row;
     }),
   ];

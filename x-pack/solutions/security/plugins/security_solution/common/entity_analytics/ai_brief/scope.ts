@@ -6,23 +6,10 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
+import { SIGNAL_CARD_IDS, TIME_RANGE_OPTIONS, type SignalCardId } from '../home/constants';
 
 /** Agent Builder attachment type holding the Entity Analytics view captured for the AI brief. */
-export const ENTITY_ANALYTICS_SCOPE_ATTACHMENT_TYPE = 'security.entity_analytics_scope';
-
-/** The needs-attention tiles on the Entity Analytics page, matching the page's `SignalCardId`. */
-export const BRIEF_TILE_IDS = [
-  'entitiesWithAlerts',
-  'entitiesWithAnomalies',
-  'riskMovers',
-  'newlyHighCritical',
-  'watchlisted',
-  'newEntity',
-] as const;
-export type BriefTileId = (typeof BRIEF_TILE_IDS)[number];
-
-const BRIEF_PERIODS = ['24h', '7d', '30d'] as const;
-export type BriefPeriod = (typeof BRIEF_PERIODS)[number];
+export const ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE = 'security.entity_analytics_ai_brief';
 
 /** Tiles can hold hundreds of entities. The server reads the riskiest of these first. */
 export const MAX_ENTITY_IDS_PER_TILE = 200;
@@ -32,7 +19,7 @@ const MAX_FILTERS_JSON_LENGTH = 20_000;
 /** The Entity Analytics view captured when the user clicks "Generate AI brief". */
 export const EntityAnalyticsScope = lazySchema(() =>
   z.object({
-    period: z.enum(BRIEF_PERIODS),
+    period: z.enum(TIME_RANGE_OPTIONS),
     /** When the view was captured. The period ends here. */
     capturedAt: z.iso.datetime(),
     /** The page's search bar query. */
@@ -50,10 +37,12 @@ export const EntityAnalyticsScope = lazySchema(() =>
     /** The page's entity filters (entity type, risk level, criticality, data source, watchlist). */
     entityFilters: z.record(z.string().max(64), z.array(z.string().max(256)).max(50)).optional(),
     /** The tile the user selected, if any. It orders the brief and never filters the headline values. */
-    focusTileId: z.enum(BRIEF_TILE_IDS).optional(),
+    focusTileId: z.enum(SIGNAL_CARD_IDS).optional(),
     tiles: z.partialRecord(
-      z.enum(BRIEF_TILE_IDS),
+      z.enum(SIGNAL_CARD_IDS),
       z.object({
+        /** The tile's title as the page shows it, translated. */
+        title: z.string().min(1).max(200),
         /** The tile's value as shown. 0 is a real zero (the tile shows "—"). */
         value: z.number().int().min(0),
         /** Change against the previous period of equal length. Absent when there is no comparison. */
@@ -68,4 +57,4 @@ export const EntityAnalyticsScope = lazySchema(() =>
 );
 
 export type EntityAnalyticsScope = z.infer<typeof EntityAnalyticsScope>;
-export type EntityAnalyticsScopeTile = NonNullable<EntityAnalyticsScope['tiles'][BriefTileId]>;
+export type EntityAnalyticsScopeTile = NonNullable<EntityAnalyticsScope['tiles'][SignalCardId]>;

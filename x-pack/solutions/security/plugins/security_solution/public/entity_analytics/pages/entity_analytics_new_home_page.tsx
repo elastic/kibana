@@ -47,12 +47,7 @@ import {
   useRiskTilesSeries,
 } from '../components/home/needs_attention_tiles/hooks';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
-import {
-  EMPTY_ENTITY_IDS,
-  type ActiveFilter,
-  type SignalCardData,
-  type SignalCardId,
-} from '../components/home/needs_attention_tiles/data';
+import { EMPTY_ENTITY_IDS, type ActiveFilter } from '../components/home/needs_attention_tiles/data';
 import {
   DataViewContext,
   useEntityURLState,
@@ -64,6 +59,7 @@ import {
 } from '../components/home/entities_table';
 import { ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY } from '../components/home/constants';
 import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
+import type { AiBriefCard } from '../components/home/ai_brief/use_generate_ai_brief_action';
 import { useGenerateAiBriefAction } from '../components/home/ai_brief/use_generate_ai_brief_action';
 
 const combineFilters = (
@@ -359,7 +355,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   }, [activeFilter, selectedEntityIds.length, addWarning]);
 
   const signalCards = useMemo(
-    (): SignalCardData[] => [
+    (): AiBriefCard[] => [
       {
         id: 'entitiesWithAlerts',
         title: i18n.translate(
@@ -374,6 +370,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: alertsTrend,
         isLoading: alertBasedLoading,
+        entityIds: alertsEntityIds,
+        isUnavailable: Boolean(alertBasedError),
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
           {
@@ -404,6 +402,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: anomaliesHistoryMissing,
         trend: anomaliesTrend,
         isLoading: anomaliesLoading,
+        entityIds: anomaliesEntityIds,
+        // Without ML jobs the tile shows 0, which isn't a real count.
+        isUnavailable: Boolean(anomaliesError) || hasNoAnomalyJobs,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
           {
@@ -433,6 +434,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: riskMoversHistoryMissing,
         trend: riskMoversTrend,
         isLoading: riskMoversLoading,
+        entityIds: riskMoversEntityIds,
+        isUnavailable: Boolean(riskMoversError),
         noDataMessage: riskMoversMissingIndex
           ? i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.noData', {
               defaultMessage: 'Requires risk score history data',
@@ -475,6 +478,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: newlyHCHistoryMissing,
         trend: newlyHCTrend,
         isLoading: newlyHCLoading,
+        entityIds: newlyHCEntityIds,
+        isUnavailable: Boolean(newlyHCError),
         noDataMessage: newlyHCMissingIndex
           ? i18n.translate(
               'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.noData',
@@ -521,6 +526,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: watchlistedTrend,
         isLoading: alertBasedLoading,
+        entityIds: watchlistedEntityIds,
+        isUnavailable: Boolean(alertBasedError),
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
           {
@@ -547,6 +554,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: newEntityHistoryMissing,
         trend: newEntityTrend,
         isLoading: newEntityLoading,
+        entityIds: newEntityEntityIds,
+        isUnavailable: Boolean(newEntityError),
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
           {
@@ -565,6 +574,18 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       },
     ],
     [
+      alertsEntityIds,
+      anomaliesEntityIds,
+      riskMoversEntityIds,
+      newlyHCEntityIds,
+      watchlistedEntityIds,
+      newEntityEntityIds,
+      alertBasedError,
+      anomaliesError,
+      hasNoAnomalyJobs,
+      riskMoversError,
+      newlyHCError,
+      newEntityError,
       alertsCount,
       alertsDelta,
       alertsTrend,
@@ -604,48 +625,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     ]
   );
 
-  const entityIdsByTile = useMemo(
-    () => ({
-      entitiesWithAlerts: alertsEntityIds,
-      entitiesWithAnomalies: anomaliesEntityIds,
-      riskMovers: riskMoversEntityIds,
-      newlyHighCritical: newlyHCEntityIds,
-      watchlisted: watchlistedEntityIds,
-      newEntity: newEntityEntityIds,
-    }),
-    [
-      alertsEntityIds,
-      anomaliesEntityIds,
-      riskMoversEntityIds,
-      newlyHCEntityIds,
-      watchlistedEntityIds,
-      newEntityEntityIds,
-    ]
-  );
-
-  // A failed tile, or anomalies without ML jobs, shows 0 on the page; the AI brief must not read it as 0.
-  const unavailableTiles = useMemo(
-    (): Record<SignalCardId, boolean> => ({
-      entitiesWithAlerts: Boolean(alertBasedError),
-      entitiesWithAnomalies: Boolean(anomaliesError) || hasNoAnomalyJobs,
-      riskMovers: Boolean(riskMoversError),
-      newlyHighCritical: Boolean(newlyHCError),
-      watchlisted: Boolean(alertBasedError),
-      newEntity: Boolean(newEntityError),
-    }),
-    [
-      alertBasedError,
-      anomaliesError,
-      hasNoAnomalyJobs,
-      riskMoversError,
-      newlyHCError,
-      newEntityError,
-    ]
-  );
   const generateAiBriefAction = useGenerateAiBriefAction({
     cards: signalCards,
-    entityIdsByTile,
-    unavailableTiles,
     timeRange,
     entityFilters,
     focusTileId: activeFilter?.cardId,

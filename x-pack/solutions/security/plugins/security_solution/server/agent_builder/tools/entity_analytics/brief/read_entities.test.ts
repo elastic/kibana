@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import type {
-  BriefTileId,
-  EntityAnalyticsScope,
-} from '../../../../../common/entity_analytics/ai_brief/scope';
+import type { SignalCardId } from '../../../../../common/entity_analytics/home/constants';
+import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import type { BriefCandidate } from './brief_types';
-import { foldAliases, rankCandidates, selectCandidateTiles } from './select_candidates';
+import { foldAliases, rankCandidates, selectCandidateTiles } from './read_entities';
 
 const scopeWith = (
   tiles: EntityAnalyticsScope['tiles'],
-  focusTileId?: BriefTileId
+  focusTileId?: SignalCardId
 ): EntityAnalyticsScope => ({
   period: '7d',
   capturedAt: '2026-10-14T12:00:00.000Z',
@@ -24,7 +22,7 @@ const scopeWith = (
 
 const candidate = (
   id: string,
-  tileIds: BriefTileId[],
+  tileIds: SignalCardId[],
   score?: number,
   resolution?: { resolved_to?: string; risk?: { calculated_score_norm: number } }
 ): BriefCandidate => ({
@@ -38,12 +36,12 @@ const candidate = (
 });
 
 describe('selectCandidateTiles', () => {
-  it.each<[string, EntityAnalyticsScope, Record<string, BriefTileId[]>]>([
+  it.each<[string, EntityAnalyticsScope, Record<string, SignalCardId[]>]>([
     [
       'collects tiles per entity in tile order',
       scopeWith({
-        watchlisted: { value: 1, entityIds: ['a'] },
-        entitiesWithAlerts: { value: 2, entityIds: ['a', 'b'] },
+        watchlisted: { title: 'Watchlisted', value: 1, entityIds: ['a'] },
+        entitiesWithAlerts: { title: 'Entities with alerts', value: 2, entityIds: ['a', 'b'] },
       }),
       { a: ['entitiesWithAlerts', 'watchlisted'], b: ['entitiesWithAlerts'] },
     ],
@@ -51,8 +49,8 @@ describe('selectCandidateTiles', () => {
       'puts the selected tile first',
       scopeWith(
         {
-          entitiesWithAlerts: { value: 1, entityIds: ['a'] },
-          riskMovers: { value: 1, entityIds: ['a'] },
+          entitiesWithAlerts: { title: 'Entities with alerts', value: 1, entityIds: ['a'] },
+          riskMovers: { title: 'Risk movers', value: 1, entityIds: ['a'] },
         },
         'riskMovers'
       ),
@@ -61,8 +59,8 @@ describe('selectCandidateTiles', () => {
     [
       'skips unavailable tiles',
       scopeWith({
-        riskMovers: { value: 0, unavailable: true, entityIds: ['a'] },
-        newEntity: { value: 1, entityIds: ['b'] },
+        riskMovers: { title: 'Risk movers', value: 0, unavailable: true, entityIds: ['a'] },
+        newEntity: { title: 'New entity', value: 1, entityIds: ['b'] },
       }),
       { b: ['newEntity'] },
     ],
@@ -72,7 +70,7 @@ describe('selectCandidateTiles', () => {
 });
 
 describe('rankCandidates', () => {
-  it.each<[string, BriefCandidate[], BriefTileId | undefined, string[]]>([
+  it.each<[string, BriefCandidate[], SignalCardId | undefined, string[]]>([
     [
       'ranks selected tile membership above tile count',
       [
@@ -113,11 +111,11 @@ describe('rankCandidates', () => {
 });
 
 describe('foldAliases', () => {
-  const alias = (id: string, tileIds: BriefTileId[], goldenId: string) =>
+  const alias = (id: string, tileIds: SignalCardId[], goldenId: string) =>
     candidate(id, tileIds, 10, { resolved_to: goldenId });
 
   it.each<
-    [string, BriefCandidate[], Array<[id: string, recordId: string, tileIds: BriefTileId[]]>]
+    [string, BriefCandidate[], Array<[id: string, recordId: string, tileIds: SignalCardId[]]>]
   >([
     [
       'merges an alias into its golden entity and keeps the golden record',

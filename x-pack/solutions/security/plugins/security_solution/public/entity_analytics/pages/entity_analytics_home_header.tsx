@@ -26,44 +26,40 @@ export const ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID =
   'entityAnalyticsHomeSettingsMenuItem';
 
 interface EntityAnalyticsHomeHeaderProps {
-  /** The header's primary button, such as "Generate AI brief". */
   primaryActionItem?: AppHeaderMenu['primaryActionItem'];
 }
 
-export const EntityAnalyticsHomeHeader = React.memo<EntityAnalyticsHomeHeaderProps>(
-  ({ primaryActionItem }) => {
-    const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-    const { docLinks } = useKibana().services;
+const HomeHeader = ({ primaryActionItem }: EntityAnalyticsHomeHeaderProps) => {
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const { docLinks } = useKibana().services;
 
-    const menu = useMemo<AppHeaderMenu>(
-      () => ({
-        primaryActionItem,
-        items: [
-          {
-            id: 'entityAnalyticsSettings',
-            label: SETTINGS_LABEL,
-            iconType: 'gear' as const,
-            href: getSecuritySolutionUrl({
-              deepLinkId: SecurityPageName.entityAnalyticsManagement,
-            }),
-            overflow: true,
-            order: 1,
-            testId: ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID,
-          },
-        ],
-      }),
-      [getSecuritySolutionUrl, primaryActionItem]
-    );
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      primaryActionItem,
+      items: [
+        {
+          id: 'entityAnalyticsSettings',
+          label: SETTINGS_LABEL,
+          iconType: 'gear' as const,
+          href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.entityAnalyticsManagement }),
+          overflow: true,
+          order: 1,
+          testId: ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID,
+        },
+      ],
+    }),
+    [getSecuritySolutionUrl, primaryActionItem]
+  );
 
-    return (
-      <SecurityAppHeader
-        title={PAGE_TITLE}
-        menu={menu}
-        spacing="largeBleed"
-        docLink={docLinks.links.securitySolution.entityAnalytics.entityRiskScoring}
-      />
-    );
-  }
-);
+  return (
+    <SecurityAppHeader
+      title={PAGE_TITLE}
+      menu={menu}
+      spacing="largeBleed"
+      docLink={docLinks.links.securitySolution.entityAnalytics.entityRiskScoring}
+    />
+  );
+};
 
+export const EntityAnalyticsHomeHeader = React.memo(HomeHeader);
 EntityAnalyticsHomeHeader.displayName = 'EntityAnalyticsHomeHeader';

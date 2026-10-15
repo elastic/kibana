@@ -11,10 +11,8 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { RiskScoreDataClient } from '../../../../lib/entity_analytics/risk_score/risk_score_data_client';
-import type {
-  BriefTileId,
-  EntityAnalyticsScope,
-} from '../../../../../common/entity_analytics/ai_brief/scope';
+import type { SignalCardId } from '../../../../../common/entity_analytics/home/constants';
+import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 
 export const MAX_BRIEF_CANDIDATES = 25;
 export const MAX_PRIORITIES = 3;
@@ -31,7 +29,7 @@ export interface BriefCandidate {
   name: string;
   type: BriefEntityType;
   /** The tiles the entity appears in, the selected tile first. */
-  tileIds: BriefTileId[];
+  tileIds: SignalCardId[];
   record: Entity;
 }
 

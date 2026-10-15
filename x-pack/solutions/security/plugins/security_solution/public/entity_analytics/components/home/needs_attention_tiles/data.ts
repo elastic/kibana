@@ -5,18 +5,13 @@
  * 2.0.
  */
 
+import {
+  SIGNAL_CARD_IDS,
+  type SignalCardId,
+} from '../../../../../common/entity_analytics/home/constants';
 import { isOneOf } from '../entities_grid/common';
 
-export const SIGNAL_CARD_IDS = [
-  'entitiesWithAlerts',
-  'entitiesWithAnomalies',
-  'riskMovers',
-  'newlyHighCritical',
-  'watchlisted',
-  'newEntity',
-] as const;
-
-export type SignalCardId = (typeof SIGNAL_CARD_IDS)[number];
+export { SIGNAL_CARD_IDS, type SignalCardId };
 
 export const isSignalCardId = (v: string | null): v is SignalCardId => isOneOf(SIGNAL_CARD_IDS, v);
 

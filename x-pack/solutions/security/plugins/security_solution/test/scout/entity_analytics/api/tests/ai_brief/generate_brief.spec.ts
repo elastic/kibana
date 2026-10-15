@@ -98,10 +98,10 @@ apiTest.describe(
         apiClient,
         buildScope(
           {
-            entitiesWithAlerts: { value: 14, delta: 3, entityIds: [SEEDED_USER.id] },
-            entitiesWithAnomalies: { value: 0, unavailable: true, entityIds: [] },
-            riskMovers: { value: 0, entityIds: [] },
-            newlyHighCritical: { value: 1, entityIds: [SEEDED_USER.id] },
+            entitiesWithAlerts: { title: 'Entities with alerts', value: 14, delta: 3, entityIds: [SEEDED_USER.id] },
+            entitiesWithAnomalies: { title: 'Entities with anomalies', value: 0, unavailable: true, entityIds: [] },
+            riskMovers: { title: 'Risk movers', value: 0, entityIds: [] },
+            newlyHighCritical: { title: 'Newly high/critical', value: 1, entityIds: [SEEDED_USER.id] },
           },
           'entitiesWithAlerts'
         )
@@ -137,7 +137,7 @@ apiTest.describe(
 
         const brief = await askForBrief(
           apiClient,
-          buildScope({ riskMovers: { value: 1, entityIds: [SEEDED_USER.id] } }, 'riskMovers')
+          buildScope({ riskMovers: { title: 'Risk movers', value: 1, entityIds: [SEEDED_USER.id] } }, 'riskMovers')
         );
 
         const submitRequests = getSubmitBriefRequests(llmProxy);
@@ -162,9 +162,9 @@ apiTest.describe(
         const brief = await askForBrief(
           apiClient,
           buildScope({
-            entitiesWithAlerts: { value: 0, delta: 0, entityIds: [] },
-            riskMovers: { value: 0, entityIds: [] },
-            newlyHighCritical: { value: 0, entityIds: [] },
+            entitiesWithAlerts: { title: 'Entities with alerts', value: 0, delta: 0, entityIds: [] },
+            riskMovers: { title: 'Risk movers', value: 0, entityIds: [] },
+            newlyHighCritical: { title: 'Newly high/critical', value: 0, entityIds: [] },
           })
         );
 
@@ -181,8 +181,8 @@ apiTest.describe(
         apiClient,
         buildScope(
           {
-            entitiesWithAlerts: { value: 1, delta: 1, entityIds: [SEEDED_HOST.id] },
-            newlyHighCritical: { value: 1, entityIds: [SEEDED_USER.id] },
+            entitiesWithAlerts: { title: 'Entities with alerts', value: 1, delta: 1, entityIds: [SEEDED_HOST.id] },
+            newlyHighCritical: { title: 'Newly high/critical', value: 1, entityIds: [SEEDED_USER.id] },
           },
           'entitiesWithAlerts'
         )

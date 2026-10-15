@@ -11,7 +11,7 @@ import { createToolCallMessage, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { EsClient } from '@kbn/scout-security';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
-import { ENTITY_ANALYTICS_SCOPE_ATTACHMENT_TYPE } from '../../../../../common/entity_analytics/ai_brief/scope';
+import { ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { getRiskScoreTimeSeriesIndex } from '../../../../../common/entity_analytics/risk_engine/indices';
 import { getPrivilegedUserWatchlistSavedObjectId } from '../../../../../common/entity_analytics/watchlists/constants';
 import type { BriefDraft } from '../../../../../server/agent_builder/tools/entity_analytics/brief/brief_types';
@@ -240,7 +240,7 @@ export const buildBriefConverseBody = (connectorId: string, scope: EntityAnalyti
   _execution_mode: 'local',
   input: 'Generate the Entity Analytics brief for the attached view.',
   attachments: [
-    { id: SCOPE_ATTACHMENT_ID, type: ENTITY_ANALYTICS_SCOPE_ATTACHMENT_TYPE, data: scope },
+    { id: SCOPE_ATTACHMENT_ID, type: ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE, data: scope },
   ],
 });
 

@@ -6,6 +6,7 @@
  */
 
 import { maxBy, uniqBy, upperFirst } from 'lodash';
+import moment from 'moment';
 import type { Entity, EntityRiskLevels } from '@kbn/entity-store/common';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { getRiskLevel } from '../../../../../common/entity_analytics/risk_engine/risk_levels';
@@ -57,10 +58,12 @@ const DAY_MS = 24 * 3_600_000;
 const describeFirstSeen = (
   firstSeen: string,
   storeStartTimestamp: string | undefined,
+  { capturedAt }: EntityAnalyticsScope,
   periodStart: Date,
   period: string
 ): string => {
-  const date = firstSeen.slice(0, 10);
+  // Relative to the capture, so no date or time zone is stated.
+  const date = moment(firstSeen).from(capturedAt);
   const firstSeenTime = new Date(firstSeen).getTime();
   if (
     storeStartTimestamp !== undefined &&
@@ -78,8 +81,7 @@ const describeFirstSeen = (
 const describeRiskChange = (
   candidate: BriefCandidate,
   { aliasesById, scoresById }: RiskAtStart,
-  period: string,
-  periodStart: Date
+  period: string
 ): Pick<BriefFact, 'text' | 'riskChangeEntity'> | undefined => {
   const members = uniqBy(
     [candidate.record, ...(aliasesById.get(candidate.id) ?? [])],
@@ -109,29 +111,19 @@ const describeRiskChange = (
     start !== undefined &&
     Math.abs(Math.round(now.score) - Math.round(start)) >= RISK_CHART_MIN_CHANGE;
   return {
-    text: upperFirst(`${subject}${describeScoreChange(start, now.score, period, periodStart)}`),
+    text: upperFirst(`${subject}${describeScoreChange(start, now.score, period)}`),
     riskChangeEntity: hasMoved ? { id, name, type: candidate.type } : undefined,
   };
 };
 
-const describeScoreChange = (
-  start: number | undefined,
-  now: number,
-  period: string,
-  periodStart: Date
-): string => {
+const describeScoreChange = (start: number | undefined, now: number, period: string): string => {
   const nowScore = Math.round(now);
   if (start === undefined) {
     return `no risk score at the start of the last ${period}, ${nowScore} now`;
   }
   const startScore = Math.round(start);
   const change = nowScore - startScore;
-  const date = periodStart.toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'long',
-    timeZone: 'UTC',
-  });
-  const prefix = `risk score ${startScore} at the start of the last ${period} (${date}), ${nowScore} now`;
+  const prefix = `risk score ${startScore} at the start of the last ${period}, ${nowScore} now`;
   if (change === 0) {
     return `${prefix}, unchanged`;
   }
@@ -166,8 +158,7 @@ export const buildFacts = (
     if (groupRisk && Math.round(groupRisk.score) !== Math.round(ownRisk?.score ?? -1)) {
       add(describeRisk('Resolution group risk', groupRisk));
     }
-    const riskChange =
-      riskAtStart && describeRiskChange(candidate, riskAtStart, period, periodStart);
+    const riskChange = riskAtStart && describeRiskChange(candidate, riskAtStart, period);
     if (riskChange) {
       add(riskChange.text, riskChange.riskChangeEntity);
     }
@@ -187,7 +178,7 @@ export const buildFacts = (
     }
     const firstSeen = getEntityLifecycle(candidate)?.first_seen;
     if (firstSeen) {
-      add(describeFirstSeen(firstSeen, storeStartTimestamp, periodStart, period));
+      add(describeFirstSeen(firstSeen, storeStartTimestamp, scope, periodStart, period));
     }
   }
   return facts;

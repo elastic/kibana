@@ -14,7 +14,7 @@ import { createAlertAttachmentType } from './alert';
 import { createBulkAlertsAttachmentType } from './alerts';
 import { createEntityAttachmentType } from './entity';
 import { createEntityAnalyticsDashboardAttachmentType } from './entity_analytics_dashboard';
-import { createEntityAnalyticsScopeAttachmentType } from './entity_analytics_scope';
+import { createEntityAnalyticsAiBriefAttachmentType } from './entity_analytics_ai_brief';
 import { createEntityGraphAttachmentType } from './entity_graph';
 import { createEntityRiskScoreHistoryAttachmentType } from './entity_risk_score_history';
 import { createExceptionAttachmentType } from './exception';
@@ -42,7 +42,7 @@ export const registerAttachments = async (
   agentBuilder.attachments.registerType(createBulkAlertsAttachmentType(core, logger));
   agentBuilder.attachments.registerType(createEntityAttachmentType());
   agentBuilder.attachments.registerType(createEntityAnalyticsDashboardAttachmentType());
-  agentBuilder.attachments.registerType(createEntityAnalyticsScopeAttachmentType());
+  agentBuilder.attachments.registerType(createEntityAnalyticsAiBriefAttachmentType());
   agentBuilder.attachments.registerType(createEntityGraphAttachmentType());
   if (experimentalFeatures.riskScoreHistoryEnabled) {
     agentBuilder.attachments.registerType(createEntityRiskScoreHistoryAttachmentType());

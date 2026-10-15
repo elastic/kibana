@@ -7,8 +7,8 @@
 
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import type { BriefDraft, BriefFact, BriefPriority } from './brief_types';
-import type { VerifiedBrief } from './verify_brief';
-import { verifyBrief } from './verify_brief';
+import type { VerifiedBrief } from './verify_draft';
+import { verifyDraft } from './verify_draft';
 
 const facts: BriefFact[] = [
   { id: 1, entityId: 'host:a', text: 'In the "Risk movers" tile' },
@@ -21,7 +21,9 @@ const facts: BriefFact[] = [
 const scope: EntityAnalyticsScope = {
   period: '7d',
   capturedAt: '2026-10-14T12:00:00.000Z',
-  tiles: { entitiesWithAlerts: { value: 48213, delta: -120, entityIds: [] } },
+  tiles: {
+    entitiesWithAlerts: { title: 'Entities with alerts', value: 48213, delta: -120, entityIds: [] },
+  },
 };
 
 const candidates = [
@@ -31,7 +33,7 @@ const candidates = [
   { id: 'user:d', name: 'd' },
 ];
 
-const verify = (input: BriefDraft) => verifyBrief(input, facts, scope, candidates);
+const verify = (input: BriefDraft) => verifyDraft(input, facts, scope, candidates);
 
 const priority = (entityId: string, factIds: number[]): BriefPriority => ({
   entityId,
@@ -53,7 +55,7 @@ const draft = (
 
 const words = (count: number): string => Array.from({ length: count }, () => 'word').join(' ');
 
-describe('verifyBrief', () => {
+describe('verifyDraft', () => {
   it.each<[string, BriefDraft, Partial<VerifiedBrief>]>([
     [
       "keeps only facts about the priority's own entity",

@@ -87,7 +87,7 @@ const createNumberCheck = (
 };
 
 /** Checks the model's draft against the facts and the view it was written from, and trims it to the limits. */
-export const verifyBrief = (
+export const verifyDraft = (
   draft: BriefDraft,
   facts: BriefFact[],
   scope: EntityAnalyticsScope,
