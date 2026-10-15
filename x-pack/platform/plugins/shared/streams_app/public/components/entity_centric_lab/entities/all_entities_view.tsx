@@ -142,6 +142,12 @@ import { EntitiesListView } from './entities_list_view';
 import { GeomapView } from './geomap_view';
 import { EntitiesTagFilters } from './entities_tag_filters';
 import { EntityExtraFilters } from './entity_extra_filters';
+import {
+  ALERTS_FILTER_ALL,
+  EntityAlertsFilter,
+  matchesAlertsFilter,
+  type AlertsFilterId,
+} from './entity_alerts_filter';
 import { EntityGroupByControls } from './entity_group_by_controls';
 import { labThing, labThings, labThingsLabel } from '../lab_terminology';
 import { VariationProvider, useVariation, useVariationContext } from './variation_context';
@@ -207,12 +213,19 @@ import { StreamsElasticOnAlertsTab } from './streams_elastic_on_alerts_tab';
 import {
   CATEGORY_TAB_STORAGE_KEY,
   GROUP_BY_STORAGE_KEY,
+  LIST_DENSITY_STORAGE_KEY,
   PAGE_SIZE_CHANGE_EVENT,
   TAG_FILTERS_STORAGE_KEY,
   VIEW_MODE_STORAGE_KEY,
   readPageSizes,
   writePageSizes,
 } from './storage_keys';
+import {
+  DEFAULT_LIST_DENSITY,
+  isListDensity,
+  type ListDensity,
+} from './list_density';
+import { ListDisplayOptionsPopover } from './list_display_options_popover';
 import {
   applyViewToStorage,
   areStatesEqual,
@@ -293,6 +306,33 @@ const useEntitiesViewMode = (): [ViewMode, (next: ViewMode) => void] => {
     }
   }, []);
   return [viewMode, setViewMode];
+};
+
+/**
+ * Page-level list density (Compact / Normal / Expanded) shared by every
+ * table on the inventory list view. Personal preference only — not part
+ * of saved views.
+ */
+const useListDensity = (): [ListDensity, (next: ListDensity) => void] => {
+  const [density, setDensityState] = useState<ListDensity>(() => {
+    if (typeof window === 'undefined') return DEFAULT_LIST_DENSITY;
+    try {
+      const raw = window.localStorage.getItem(LIST_DENSITY_STORAGE_KEY);
+      return isListDensity(raw) ? raw : DEFAULT_LIST_DENSITY;
+    } catch {
+      return DEFAULT_LIST_DENSITY;
+    }
+  });
+  const setDensity = useCallback((next: ListDensity) => {
+    setDensityState(next);
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem(LIST_DENSITY_STORAGE_KEY, next);
+    } catch {
+      // Storage blocked — keep the in-memory value for this session.
+    }
+  }, []);
+  return [density, setDensity];
 };
 
 // --- Page-size persistence -------------------------------------------
@@ -899,6 +939,7 @@ const AllEntitiesViewInner = ({
   // Top-level category filter (All resources) — declared early so search
   // field autocomplete can follow the same scope as K8s facet filters.
   const [categoryFilter, setCategoryFilter] = useState<string>(CATEGORY_FILTER_ALL);
+  const [alertsFilter, setAlertsFilter] = useState<AlertsFilterId>(ALERTS_FILTER_ALL);
   const isCrossCategoryPage = !categoryScope && isElasticOn;
   const effectiveCategoryScope: EntityCategoryId | undefined =
     categoryScope ??
@@ -1138,6 +1179,7 @@ const AllEntitiesViewInner = ({
     return 0;
   });
   const [viewMode, setViewMode] = useEntitiesViewMode();
+  const [listDensity, setListDensity] = useListDensity();
   const [pageSizes, setPageSizes] = usePageSizes();
 
   // Some tour steps are anchored to DOM elements that only render in
@@ -1465,9 +1507,24 @@ const AllEntitiesViewInner = ({
     phase1InventoryDefaultsApplied = true;
     phase1InventoryDefaultsNeedStateSync = false;
     setViewMode('list');
-    setGroupBy([...PHASE1_DEFAULT_GROUP_BY]);
+    // Left-nav alert badges deep-link with `?groupBy=alerts` — don't clobber that.
+    if (!new URLSearchParams(location.search).has('groupBy')) {
+      setGroupBy([...PHASE1_DEFAULT_GROUP_BY]);
+    }
     setCategoryFilter(CATEGORY_FILTER_ALL);
-  }, [isElasticOn, isPhase1, setViewMode, setGroupBy, setCategoryFilter]);
+  }, [isElasticOn, isPhase1, setViewMode, setGroupBy, setCategoryFilter, location.search]);
+
+  // Left-nav alert badges link here with `?groupBy=alerts` (comma-separated for more).
+  useEffect(() => {
+    const raw = new URLSearchParams(location.search).get('groupBy');
+    if (!raw) return;
+    const ids = raw
+      .split(',')
+      .map((part) => part.trim())
+      .filter((part): part is GroupByFieldId => part.length > 0);
+    if (ids.length === 0) return;
+    setGroupBy(ids);
+  }, [location.search, setGroupBy]);
   // Overview is the default landing tab on both the per-category pages
   // and the cross-category `/entities` page. On the cross-category page
   // Overview aggregates every category (see `AllEntitiesOverviewView`),
@@ -1686,7 +1743,15 @@ const AllEntitiesViewInner = ({
         : filteredEntitiesAfterProvider,
     [filteredEntitiesAfterProvider, showCategoryTypeFilter, categoryTypeFilter]
   );
-  const filteredEntities = filteredEntitiesAfterCategoryType;
+  const filteredEntities = useMemo(
+    () =>
+      isElasticOn
+        ? filteredEntitiesAfterCategoryType.filter((entity) =>
+            matchesAlertsFilter(entity, alertsFilter)
+          )
+        : filteredEntitiesAfterCategoryType,
+    [filteredEntitiesAfterCategoryType, isElasticOn, alertsFilter]
+  );
 
   // ElasticOn summary "· N Groups": count distinct level-1 buckets under the
   // active grouping (Category by default), so the header stays truthful when
@@ -1749,7 +1814,8 @@ const AllEntitiesViewInner = ({
       effectiveK8sNodeFilter !== KUBERNETES_FILTER_ALL
     )) ||
     (isCloudCategoryPage && cloudProviderFilter !== CLOUD_PROVIDER_FILTER_ALL) ||
-    (showCategoryTypeFilter && categoryTypeFilter !== CATEGORY_RESOURCE_TYPE_ALL);
+    (showCategoryTypeFilter && categoryTypeFilter !== CATEGORY_RESOURCE_TYPE_ALL) ||
+    (isElasticOn && alertsFilter !== ALERTS_FILTER_ALL);
 
   // Reset every filter dimension in one click (ElasticOn toolbar).
   const handleClearFilters = useCallback(() => {
@@ -1758,6 +1824,7 @@ const AllEntitiesViewInner = ({
     setLabFilters([]);
     setSearch('');
     setCategoryFilter(CATEGORY_FILTER_ALL);
+    setAlertsFilter(ALERTS_FILTER_ALL);
     setCloudProviderFilter(CLOUD_PROVIDER_FILTER_ALL);
     setK8sResourceType(KUBERNETES_RESOURCE_TYPE_ALL);
     setK8sClusterFilter(KUBERNETES_FILTER_ALL);
@@ -2806,7 +2873,7 @@ const AllEntitiesViewInner = ({
                     </EuiFlexGroup>
                   </div>
                 </EuiTourStep>
-                <EuiSpacer size="s" />
+                <EuiSpacer size="xs" />
                 <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap css={NO_GROW}>
                   {getVisibleTagKeys(isElasticOn, isPhase1).length > 0 ? (
                     <EuiFlexItem grow={false}>
@@ -2924,6 +2991,11 @@ const AllEntitiesViewInner = ({
                       />
                     </EuiFlexItem>
                   ) : null}
+                  {isElasticOn ? (
+                    <EuiFlexItem grow={false}>
+                      <EntityAlertsFilter value={alertsFilter} onChange={setAlertsFilter} />
+                    </EuiFlexItem>
+                  ) : null}
                   {hasActiveFilters ? (
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
@@ -2940,10 +3012,10 @@ const AllEntitiesViewInner = ({
                     </EuiFlexItem>
                   ) : null}
                 </EuiFlexGroup>
-                <EuiSpacer size="m" />
+                <EuiSpacer size="s" />
                 <EuiFlexGroup
                   alignItems="center"
-                  gutterSize="m"
+                  gutterSize="s"
                   responsive={false}
                   wrap
                   css={NO_GROW}
@@ -3014,6 +3086,14 @@ const AllEntitiesViewInner = ({
                       />
                     </EuiTourStep>
                   </EuiFlexItem>
+                  {effectiveViewMode === 'list' || effectiveViewMode === 'grid' ? (
+                    <EuiFlexItem grow={false}>
+                      <ListDisplayOptionsPopover
+                        density={listDensity}
+                        onChange={setListDensity}
+                      />
+                    </EuiFlexItem>
+                  ) : null}
                   <EuiFlexItem grow={false}>
                     <EntityGroupByControls
                       fields={groupByFields}
@@ -3031,7 +3111,7 @@ const AllEntitiesViewInner = ({
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <EuiHorizontalRule margin="m" />
+                <EuiHorizontalRule margin="s" />
                 {isBannerScenario && !bannerDismissed ? (
                   <>
                     <EuiCallOut
@@ -3076,6 +3156,7 @@ const AllEntitiesViewInner = ({
                     refreshTick={refreshTick}
                     customGroupBy={customGroupBy}
                     hideCategoryHeader={!!categoryScope}
+                    density={listDensity}
                     colorByTourStep={
                       isTourActive && tourStep === 3
                         ? {
@@ -3098,6 +3179,7 @@ const AllEntitiesViewInner = ({
                     activeGroupBy={groupBy}
                     refreshTick={refreshTick}
                     categoryScope={categoryScope}
+                    density={listDensity}
                   />
                 ) : (
                   <EntitiesListView
@@ -3109,6 +3191,7 @@ const AllEntitiesViewInner = ({
                     refreshTick={refreshTick}
                     customGroupBy={customGroupBy}
                     hideCategoryHeader={!!categoryScope}
+                    density={listDensity}
                   />
                 )}
                 </EntityErrorBoundary>
@@ -3200,10 +3283,10 @@ const AllEntitiesViewInner = ({
                     </EuiFlexItem>
                   ) : null}
                 </EuiFlexGroup>
-                <EuiSpacer size="m" />
+                <EuiSpacer size="s" />
                 <EuiFlexGroup
                   alignItems="center"
-                  gutterSize="m"
+                  gutterSize="s"
                   responsive={false}
                   wrap
                   css={NO_GROW}
@@ -3247,8 +3330,16 @@ const AllEntitiesViewInner = ({
                       data-test-subj="entityCentricLabEntitiesViewModeToggle"
                     />
                   </EuiFlexItem>
+                  {effectiveViewMode === 'list' || effectiveViewMode === 'grid' ? (
+                    <EuiFlexItem grow={false}>
+                      <ListDisplayOptionsPopover
+                        density={listDensity}
+                        onChange={setListDensity}
+                      />
+                    </EuiFlexItem>
+                  ) : null}
                 </EuiFlexGroup>
-                <EuiHorizontalRule margin="m" />
+                <EuiHorizontalRule margin="s" />
                 {isBannerScenario && !bannerDismissed ? (
                   <>
                     <EuiCallOut
@@ -3290,6 +3381,7 @@ const AllEntitiesViewInner = ({
                     groupCloudByProvider={false}
                     enablePaletteColoring={isElasticOn}
                     refreshTick={refreshTick}
+                    density={listDensity}
                   />
                 ) : effectiveViewMode === 'geomap' ? (
                   <GeomapView
@@ -3303,6 +3395,7 @@ const AllEntitiesViewInner = ({
                     onSelectEntity={openEntity}
                     onSelectEntityAlerts={openEntityOnAlertsTab}
                     groupCloudByProvider={false}
+                    density={listDensity}
                   />
                 )}
                 </EntityErrorBoundary>

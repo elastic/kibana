@@ -118,6 +118,11 @@ import {
   type GroupByFieldDef,
 } from './entity_group_by';
 import {
+  DEFAULT_LIST_DENSITY,
+  getHexPanelPadding,
+  type ListDensity,
+} from './list_density';
+import {
   MAX_RULES,
   MAX_STEPS,
   MIN_RULES,
@@ -209,6 +214,8 @@ interface Props {
     onNext: () => void;
     onClose: () => void;
   };
+  /** Page-level density — only changes hex card panel padding. */
+  readonly density?: ListDensity;
 }
 
 /**
@@ -246,6 +253,28 @@ const HideCategoryHeaderContext = createContext<boolean>(false);
  * when the ElasticOn Inventory refreshes.
  */
 const RefreshTickContext = createContext<number>(0);
+
+/** Page density — hex cards read this for panel padding only. */
+const InventoryDensityContext = createContext<ListDensity>(DEFAULT_LIST_DENSITY);
+
+const HexPanel = ({
+  children,
+  ...rest
+}: Omit<React.ComponentProps<typeof EuiPanel>, 'paddingSize' | 'hasBorder' | 'hasShadow'> & {
+  children?: React.ReactNode;
+}) => {
+  const density = useContext(InventoryDensityContext);
+  return (
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize={getHexPanelPadding(density)}
+      {...rest}
+    >
+      {children}
+    </EuiPanel>
+  );
+};
 
 // ---------------------------------------------------------------------------
 // Color helpers
@@ -2829,7 +2858,7 @@ const KubernetesCard = ({
       <>
         {orderedGroups.map((group, index) => (
           <React.Fragment key={group.label}>
-            {index > 0 ? <EuiSpacer size="m" /> : null}
+            {index > 0 ? <EuiSpacer size="s" /> : null}
             {group.typeGroupLabel ? (
               <>
                 <EuiSpacer size="s" />
@@ -2837,14 +2866,14 @@ const KubernetesCard = ({
                 <EuiSpacer size="s" />
               </>
             ) : null}
-            <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+            <HexPanel>
               <SubTypeRow
                 bucketKey={bucketKeyFor('kubernetes', group.label)}
                 label={group.label}
                 entities={group.rows}
                 onSelectEntity={onSelectEntity}
               />
-            </EuiPanel>
+            </HexPanel>
           </React.Fragment>
         ))}
       </>
@@ -2852,7 +2881,7 @@ const KubernetesCard = ({
   }
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+    <HexPanel>
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <CategoryHeader category="kubernetes" total={visibleEntities.length} />
@@ -2860,7 +2889,7 @@ const KubernetesCard = ({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div className={nestedContentClass}>{groupContent}</div>
-    </EuiPanel>
+    </HexPanel>
   );
 };
 
@@ -2910,15 +2939,15 @@ const MultiTypeCategoryCard = ({
       <>
         {orderedTypes.map((group, index) => (
           <React.Fragment key={group.label}>
-            {index > 0 ? <EuiSpacer size="m" /> : null}
-            <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+            {index > 0 ? <EuiSpacer size="s" /> : null}
+            <HexPanel>
               <SubTypeRow
                 bucketKey={bucketKeyFor(category, group.label)}
                 label={group.label}
                 entities={group.rows}
                 onSelectEntity={onSelectEntity}
               />
-            </EuiPanel>
+            </HexPanel>
           </React.Fragment>
         ))}
       </>
@@ -2926,7 +2955,7 @@ const MultiTypeCategoryCard = ({
   }
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+    <HexPanel>
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <CategoryHeader category={category} total={visibleEntities.length} />
@@ -2946,7 +2975,7 @@ const MultiTypeCategoryCard = ({
           </div>
         ))}
       </div>
-    </EuiPanel>
+    </HexPanel>
   );
 };
 
@@ -3017,7 +3046,7 @@ const CloudProviderCard = ({
   }
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+    <HexPanel>
       <CloudProviderHeader provider={provider} total={entities.length} />
       <EuiSpacer size="m" />
       <div className={nestedContentClass}>
@@ -3033,7 +3062,7 @@ const CloudProviderCard = ({
           </div>
         ))}
       </div>
-    </EuiPanel>
+    </HexPanel>
   );
 };
 
@@ -3105,7 +3134,7 @@ const CloudGroupedCards = ({
             <React.Fragment key={group.provider.id}>
               {providerFilter === CLOUD_PROVIDER_FILTER_ALL ? (
                 <>
-                  {index > 0 ? <EuiSpacer size="m" /> : null}
+                  {index > 0 ? <EuiSpacer size="s" /> : null}
                   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                     <EuiFlexItem grow={false}>
                       <EuiIcon type={group.provider.icon} size="m" />
@@ -3124,19 +3153,15 @@ const CloudGroupedCards = ({
                   (entity) => entity.type === service.entityType
                 );
                 return (
-                  <EuiPanel
-                    key={service.entityType}
-                    hasBorder
-                    hasShadow={false}
-                    paddingSize="m"
-                  >
+                  <HexPanel
+                    key={service.entityType}>
                     <SubTypeRow
                       bucketKey={bucketKeyFor('cloud', service.entityType)}
                       label={service.label}
                       entities={serviceRows}
                       onSelectEntity={onSelectEntity}
                     />
-                  </EuiPanel>
+                  </HexPanel>
                 );
               })}
             </React.Fragment>
@@ -3148,7 +3173,7 @@ const CloudGroupedCards = ({
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+      <HexPanel>
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
           <EuiFlexItem grow={false}>
             <CategoryHeader category="cloud" total={visibleEntities.length} />
@@ -3205,7 +3230,7 @@ const CloudGroupedCards = ({
             </React.Fragment>
           ))}
         </div>
-      </EuiPanel>
+      </HexPanel>
     </EuiFlexItem>
   );
 };
@@ -3401,30 +3426,22 @@ const CategoryCardInner = ({
 
   if (hideHeader) {
     return (
-      <EuiPanel
-        hasBorder
-        hasShadow={false}
-        paddingSize="m"
-        data-test-subj={`entityCentricLabBucket-${bucketKey}`}
-      >
+      <HexPanel
+        data-test-subj={`entityCentricLabBucket-${bucketKey}`}>
         {headerRow}
         <EuiSpacer size="xs" />
         {legendAndTiles}
-      </EuiPanel>
+      </HexPanel>
     );
   }
 
   return (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
-      paddingSize="m"
-      data-test-subj={`entityCentricLabBucket-${bucketKey}`}
-    >
+    <HexPanel
+      data-test-subj={`entityCentricLabBucket-${bucketKey}`}>
       {headerRow}
       <EuiSpacer size="xs" />
       {legendAndTiles}
-    </EuiPanel>
+    </HexPanel>
   );
 };
 
@@ -3755,7 +3772,7 @@ const CustomGroupCard = ({
   `;
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+    <HexPanel>
       {hasSubLevel && node.children.length > 0 ? (
         <>
           <GroupBucketHeader label={node.label} total={node.entities.length} />
@@ -3782,7 +3799,7 @@ const CustomGroupCard = ({
           isTopLevel
         />
       )}
-    </EuiPanel>
+    </HexPanel>
   );
 };
 
@@ -3800,6 +3817,7 @@ export const GroupedGridView = ({
   customGroupBy,
   hideCategoryHeader = false,
   colorByTourStep,
+  density = DEFAULT_LIST_DENSITY,
 }: Props) => {
   const tourClaimedRef = useRef(false);
   // Reset the claim flag when the tour step changes so it re-anchors
@@ -3895,9 +3913,10 @@ export const GroupedGridView = ({
       <PaletteColoringEnabledContext.Provider value={enablePaletteColoring}>
         <HideCategoryHeaderContext.Provider value={hideCategoryHeader}>
         <RefreshTickContext.Provider value={refreshTick}>
+        <InventoryDensityContext.Provider value={density}>
         <ColorByTourContext.Provider value={colorByTourStep}>
         <ColorByTourClaimedContext.Provider value={tourClaimedRef}>
-          <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexGroup direction="column" gutterSize="xs">
             {useCustomGrouping
               ? customGroups.map((node) => (
                   <EuiFlexItem key={node.key} grow={false}>
@@ -3928,6 +3947,7 @@ export const GroupedGridView = ({
           </EuiFlexGroup>
         </ColorByTourClaimedContext.Provider>
         </ColorByTourContext.Provider>
+        </InventoryDensityContext.Provider>
         </RefreshTickContext.Provider>
         </HideCategoryHeaderContext.Provider>
       </PaletteColoringEnabledContext.Provider>

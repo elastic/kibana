@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -42,6 +42,13 @@ export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> 
  * `EuiButton` and `EuiButtonEmpty` are used for consistency with the component library.
  * The only style overrides are making the button labels left-aligned.
  */
+const formatNotificationCount = (count: number): string => (count > 99 ? '99+' : String(count));
+
+const formatNotificationTooltip = (count: number): string =>
+  count === 1
+    ? '1 resource with active alerts'
+    : `${count.toLocaleString()} resources with active alerts`;
+
 export const SecondaryMenuItemComponent = ({
   badgeType,
   children,
@@ -53,6 +60,8 @@ export const SecondaryMenuItemComponent = ({
   isExternal,
   isHighlighted,
   isNew = false,
+  notificationCount,
+  notificationHref: _notificationHref,
   testSubjPrefix,
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
@@ -75,6 +84,7 @@ export const SecondaryMenuItemComponent = ({
     width: 100%;
 
     > span {
+      width: 100%;
       justify-content: ${iconSide === 'left' ? 'flex-start' : 'space-between'};
     }
 
@@ -94,6 +104,11 @@ export const SecondaryMenuItemComponent = ({
     gap: ${euiTheme.size.xs};
   `;
 
+  const showNotification =
+    typeof notificationCount === 'number' &&
+    Number.isFinite(notificationCount) &&
+    notificationCount > 0;
+
   const getMaxWidth = () => {
     const isInSidePanel = testSubjPrefix?.includes('sidePanel');
     let maxWidth = SIDE_PANEL_WIDTH - ITEM_HORIZONTAL_SPACING_OFFSET;
@@ -101,6 +116,8 @@ export const SecondaryMenuItemComponent = ({
     if (isInSidePanel) maxWidth -= SIDE_PANEL_CONTENT_GAP;
     // Secondary item label + badge
     if (isNew || badgeType) maxWidth -= BADGE_SPACING_OFFSET;
+    // Secondary item label + right-aligned notification count
+    if (showNotification) maxWidth -= BADGE_SPACING_OFFSET;
     // Secondary item label + right arrow (More menu)
     if (hasSubmenu) maxWidth -= SUB_MENU_ICON_SPACING_OFFSET;
     return maxWidth;
@@ -121,12 +138,45 @@ export const SecondaryMenuItemComponent = ({
     if (isNew) return <BetaBadge type="new" />;
   };
 
+  const rowStyles = css`
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    gap: ${euiTheme.size.xs};
+    width: 100%;
+    min-width: 0;
+  `;
+
   const content = (
-    <div css={labelAndBadgeStyles}>
-      <span css={labelTextStyles} title={typeof children === 'string' ? children : undefined}>
-        {children}
-      </span>
-      {getBadge()}
+    <div css={rowStyles}>
+      <div css={labelAndBadgeStyles}>
+        <span css={labelTextStyles} title={typeof children === 'string' ? children : undefined}>
+          {children}
+        </span>
+        {getBadge()}
+      </div>
+      {showNotification ? (
+        <EuiToolTip
+          content={formatNotificationTooltip(notificationCount!)}
+          position="right"
+          disableScreenReaderOutput
+        >
+          <EuiBadge
+            color="danger"
+            // Override EuiBadge's default `title={innerText}` so the native
+            // browser tooltip doesn't stack on top of our EuiToolTip.
+            title=""
+            css={css`
+              border-radius: 9999px;
+              flex-shrink: 0;
+            `}
+            aria-label={formatNotificationTooltip(notificationCount!)}
+            data-test-subj={`${resolvedTestSubjPrefix}-${id}-notification`}
+          >
+            {formatNotificationCount(notificationCount!)}
+          </EuiBadge>
+        </EuiToolTip>
+      ) : null}
     </div>
   );
 

@@ -17,6 +17,8 @@ export const CATEGORY_TAB_STORAGE_KEY = 'entityCentricLab.categoryTab.v1';
 export const TAG_FILTERS_STORAGE_KEY = 'entityCentricLab.entitiesTagFilters.v1';
 export const VIEW_MODE_STORAGE_KEY = 'entityCentricLab.entitiesViewMode.v1';
 export const GROUP_BY_STORAGE_KEY = 'entityCentricLab.entitiesGroupBy.v1';
+/** Page-level Compact / Normal / Expanded density for list-view tables. */
+export const LIST_DENSITY_STORAGE_KEY = 'entityCentricLab.listDensity.v1';
 export const PAGE_SIZE_STORAGE_KEY = 'entityCentricLab.entitiesPageSize.v1';
 /** Per-table page sizes map: `Record<tableKey, size>`. */
 export const PAGE_SIZES_STORAGE_KEY = 'entityCentricLab.entitiesPageSizes.v1';

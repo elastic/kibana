@@ -36,6 +36,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Entity, EntityCategoryId } from './fake_entities';
 import { EntityDataGridSection } from './entities_data_grid';
+import { DEFAULT_LIST_DENSITY, type ListDensity } from './list_density';
 import type { GroupByFieldDef } from './entity_group_by';
 import {
   KUBERNETES_FILTER_ALL,
@@ -157,9 +158,9 @@ const containerCss = (borderThin: string) => css`
     border-left: ${borderThin};
     border-right: ${borderThin};
     border-radius: 6px;
-    min-height: 78px;
-    padding-left: 16px;
-    padding-right: 16px;
+    min-height: 48px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
   .groupingAccordionForm {
     border-top: ${borderThin};
@@ -172,9 +173,9 @@ const childAccordionCss = (borderThin: string) => css`
   border: ${borderThin};
   border-radius: 6px;
   .euiAccordion__triggerWrapper {
-    min-height: 52px;
-    padding-left: 16px;
-    padding-right: 16px;
+    min-height: 40px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
 `;
 
@@ -189,11 +190,11 @@ const AccordionBadges = ({
   entityCount: number;
   alertingCount: number;
 }) => (
-  <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
     <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
+          <EuiText size="xs">
             {i18n.translate('xpack.streams.entityCentricLab.securityGrouping.stats.resourcesLabel', {
               defaultMessage: 'Resources:',
             })}
@@ -205,12 +206,12 @@ const AccordionBadges = ({
       </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <span style={{ borderLeft: '1px solid #D3DAE6', height: 20, display: 'inline-block' }} />
+      <span style={{ borderLeft: '1px solid #D3DAE6', height: 16, display: 'inline-block' }} />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
+          <EuiText size="xs">
             {i18n.translate('xpack.streams.entityCentricLab.securityGrouping.stats.resourcesWithAlertsLabel', {
               defaultMessage: 'Resources with alerts:',
             })}
@@ -235,6 +236,7 @@ const ChildAccordion = ({
   onSelectEntity,
   onSelectEntityAlerts,
   refreshTick,
+  density,
 }: {
   bucket: GroupBucket;
   parentIndex: number;
@@ -242,6 +244,7 @@ const ChildAccordion = ({
   onSelectEntity: (entityName: string) => void;
   onSelectEntityAlerts?: (entityName: string) => void;
   refreshTick?: number;
+  density: ListDensity;
 }) => {
   const { euiTheme } = useEuiTheme();
   const accordionId = useGeneratedHtmlId({
@@ -266,7 +269,7 @@ const ChildAccordion = ({
           alertingCount={bucket.alertingCount}
         />
       }
-      paddingSize="m"
+      paddingSize="s"
       css={childAccordionCss(euiTheme.border.thin)}
       data-test-subj={`securityGrouping-child-${parentIndex}-${childIndex}`}
     >
@@ -274,7 +277,7 @@ const ChildAccordion = ({
         <>
           {bucket.children.map((grandchild, gcIndex) => (
             <React.Fragment key={grandchild.label}>
-              {gcIndex > 0 ? <EuiSpacer size="s" /> : null}
+              {gcIndex > 0 ? <EuiSpacer size="xs" /> : null}
               <ChildAccordion
                 bucket={grandchild}
                 parentIndex={parentIndex}
@@ -282,6 +285,7 @@ const ChildAccordion = ({
                 onSelectEntity={onSelectEntity}
                 onSelectEntityAlerts={onSelectEntityAlerts}
                 refreshTick={refreshTick}
+                density={density}
               />
             </React.Fragment>
           ))}
@@ -295,6 +299,7 @@ const ChildAccordion = ({
           onSelectEntity={onSelectEntity}
           onSelectEntityAlerts={onSelectEntityAlerts}
           refreshTick={refreshTick}
+          density={density}
         />
       )}
     </EuiAccordion>
@@ -312,6 +317,7 @@ const GroupAccordion = ({
   onSelectEntityAlerts,
   refreshTick,
   categoryScope,
+  density,
 }: {
   bucket: GroupBucket;
   index: number;
@@ -319,6 +325,7 @@ const GroupAccordion = ({
   onSelectEntityAlerts?: (entityName: string) => void;
   refreshTick?: number;
   categoryScope?: EntityCategoryId;
+  density: ListDensity;
 }) => {
   const accordionId = useGeneratedHtmlId({
     prefix: 'securityGrouping',
@@ -436,14 +443,14 @@ const GroupAccordion = ({
           alertingCount={visibleAlertingCount}
         />
       }
-      paddingSize="m"
+      paddingSize="s"
       data-test-subj={`securityGrouping-accordion-${index}`}
     >
       {visibleChildren.length > 0 ? (
         <>
           {visibleChildren.map((child, childIndex) => (
             <React.Fragment key={child.label}>
-              {childIndex > 0 ? <EuiSpacer size="m" /> : null}
+              {childIndex > 0 ? <EuiSpacer size="s" /> : null}
               <ChildAccordion
                 bucket={child}
                 parentIndex={index}
@@ -451,6 +458,7 @@ const GroupAccordion = ({
                 onSelectEntity={onSelectEntity}
                 onSelectEntityAlerts={onSelectEntityAlerts}
                 refreshTick={refreshTick}
+                density={density}
               />
             </React.Fragment>
           ))}
@@ -463,6 +471,7 @@ const GroupAccordion = ({
           onSelectEntity={onSelectEntity}
           onSelectEntityAlerts={onSelectEntityAlerts}
           refreshTick={refreshTick}
+          density={density}
         />
       )}
     </EuiAccordion>
@@ -485,6 +494,8 @@ interface Props {
    *  that category (e.g. K8s cluster picker) are hidden because a
    *  page-level equivalent is already in the toolbar. */
   readonly categoryScope?: EntityCategoryId;
+  /** Page-level density from Display options (shared by every table). */
+  readonly density?: ListDensity;
 }
 
 export const SecurityGroupingView = ({
@@ -495,6 +506,7 @@ export const SecurityGroupingView = ({
   activeGroupBy,
   refreshTick,
   categoryScope,
+  density = DEFAULT_LIST_DENSITY,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const isUngrouped = activeGroupBy.length === 0;
@@ -531,6 +543,7 @@ export const SecurityGroupingView = ({
         onSelectEntity={handleSelectEntity}
         onSelectEntityAlerts={onSelectEntityAlerts}
         refreshTick={refreshTick}
+        density={density}
       />
     );
   }
@@ -546,8 +559,9 @@ export const SecurityGroupingView = ({
             onSelectEntityAlerts={onSelectEntityAlerts}
             refreshTick={refreshTick}
             categoryScope={categoryScope}
+            density={density}
           />
-          {index < buckets.length - 1 ? <EuiSpacer size="s" /> : null}
+          {index < buckets.length - 1 ? <EuiSpacer size="xs" /> : null}
         </React.Fragment>
       ))}
     </div>

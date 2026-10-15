@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.03';
+export const PROTOTYPE_VERSION = '1.04';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-10-15',
+    summary:
+      'Add page-level display density setting and tighten vertical spacing.',
+    details:
+      'New Display options popover (Compact / Normal / Expanded) persisted in localStorage, controlling EuiInMemoryTable compressed prop, EuiDataGrid cell padding/font size, and hex-map card panel padding. Reduce margins between hex blocks. Chase vertical space across list view (toolbar spacers, HR margins, gutter sizes). Bump to v1.04.',
+  },
   {
     date: '2026-10-15',
     summary:

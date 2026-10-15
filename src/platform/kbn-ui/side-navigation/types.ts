@@ -37,6 +37,16 @@ export interface SecondaryMenuItem {
    */
   badgeType?: BadgeType;
   /**
+   * (optional) Right-aligned notification count (e.g. active alerts). Values
+   * above 99 render as `99+`. Omit or `0` hides the badge.
+   */
+  notificationCount?: number;
+  /**
+   * (optional) Destination when the notification badge is clicked. When set,
+   * the badge is interactive and does not trigger the parent item's href.
+   */
+  notificationHref?: string;
+  /**
    * (optional) Whether the link opens in a new tab.
    */
   isExternal?: boolean;

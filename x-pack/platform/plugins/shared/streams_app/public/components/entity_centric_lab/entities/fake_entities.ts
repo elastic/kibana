@@ -1127,7 +1127,7 @@ const buildKubernetesEntitiesWithScenario = (
 
 export const buildFakeEntities = (scenario: DataVariation = 'default'): FakeEntitiesDataset => {
   if (scenario === 'empty') {
-    return {
+    const emptyDataset: FakeEntitiesDataset = {
       entities: [],
       totalEntities: 0,
       totalGroups: 0,
@@ -1136,6 +1136,10 @@ export const buildFakeEntities = (scenario: DataVariation = 'default'): FakeEnti
         total: 0,
       })),
     };
+    void import('./entity_nav_counts').then(({ publishEntityNavCountsFromDataset }) => {
+      publishEntityNavCountsFromDataset(emptyDataset, { excludeHiddenFromAll: true });
+    });
+    return emptyDataset;
   }
   const healthFn = scenario === 'degraded' ? degradedHealth : undefined;
   const multiplier =
@@ -1226,7 +1230,7 @@ export const buildFakeEntities = (scenario: DataVariation = 'default'): FakeEnti
   const visibleInventory = truncated ? inventoryEntities.slice(0, MAX_VISIBLE) : inventoryEntities;
   const visibleEntities = truncated ? [...visibleInventory, ...hiddenEntities] : entities;
 
-  return {
+  const dataset: FakeEntitiesDataset = {
     entities: visibleEntities,
     categoryCounts,
     // When truncated, report the inventoriable cap (excludes ElasticOn-
@@ -1237,6 +1241,14 @@ export const buildFakeEntities = (scenario: DataVariation = 'default'): FakeEnti
     totalGroups: categoryCounts.length,
     ...(truncated ? { totalBeforeTruncation: rawTotal } : {}),
   };
+
+  // Keep the Observability left-nav counts in sync without a hard import
+  // cycle (nav reads the same globalThis subject).
+  void import('./entity_nav_counts').then(({ publishEntityNavCountsFromDataset }) => {
+    publishEntityNavCountsFromDataset(dataset, { excludeHiddenFromAll: true });
+  });
+
+  return dataset;
 };
 
 /**

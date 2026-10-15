@@ -45,6 +45,11 @@ import { HEALTH_RANK, getCategoryDescriptor } from './fake_entities';
 import { useVariation } from './variation_context';
 import type { PhaseVariation } from './variation_registry';
 import { readPageSizeForTable, hasStoredPageSize, writePageSizeForTable } from './storage_keys';
+import {
+  DEFAULT_LIST_DENSITY,
+  getListGridStyle,
+  type ListDensity,
+} from './list_density';
 import { CLOUD_PROVIDERS } from './cloud_providers';
 import {
   K8S_CONTEXT_KEYS,
@@ -663,6 +668,8 @@ interface Props {
   readonly refreshTick?: number;
   /** When true, renders without the surrounding EuiPanel border. */
   readonly borderless?: boolean;
+  /** Page-level density from Display options (not per-grid). */
+  readonly density?: ListDensity;
 }
 
 /**
@@ -741,6 +748,7 @@ export const EntityDataGridSection = ({
   onSelectEntityAlerts,
   refreshTick,
   borderless = false,
+  density = DEFAULT_LIST_DENSITY,
 }: Props) => {
   const phase = useVariation('phase') as PhaseVariation;
   const isPhase1 = phase === 'phase1';
@@ -958,7 +966,7 @@ export const EntityDataGridSection = ({
   const Wrapper = borderless ? React.Fragment : EuiPanel;
   const wrapperProps = borderless
     ? {}
-    : { hasBorder: true, hasShadow: false, paddingSize: 'm' as const };
+    : { hasBorder: true, hasShadow: false, paddingSize: 's' as const };
 
   return (
     <Wrapper {...wrapperProps}>
@@ -971,7 +979,7 @@ export const EntityDataGridSection = ({
             alertsCount={rows.filter((e) => e.alerts.active > 0).length}
             nested={nested}
           />
-          <EuiSpacer size="s" />
+          <EuiSpacer size="xs" />
         </>
       )}
       <EuiDataGrid
@@ -983,7 +991,7 @@ export const EntityDataGridSection = ({
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         rowCount={sortedRows.length}
         renderCellValue={renderCellValue}
-        gridStyle={{ border: 'horizontal', header: 'shade', stripes: false }}
+        gridStyle={getListGridStyle(density)}
         sorting={{ columns: sortingColumns, onSort: setSortingColumns }}
         pagination={{
           pageIndex: safePageIndex,

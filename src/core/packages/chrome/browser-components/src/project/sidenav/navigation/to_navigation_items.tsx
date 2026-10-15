@@ -166,6 +166,8 @@ export const toNavigationItems = (
         isExternal: child.isExternalLink,
         'data-test-subj': getTestSubj(child),
         badgeType: child.badgeType,
+        notificationCount: child.notificationCount,
+        notificationHref: child.notificationHref,
       };
     };
 

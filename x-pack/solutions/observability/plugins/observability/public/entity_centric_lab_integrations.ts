@@ -499,3 +499,46 @@ export const maybeAutoExpandSavedViewsForActiveView = (
 
 export const getSavedViewsExpanded$ = (): Observable<boolean> =>
   hydrateSavedViewsExpandedOnce().subject.pipe(map((snapshot) => snapshot.expanded));
+
+// ---------------------------------------------------------------------------
+// Entity inventory nav counts (mirrors streams_app entity_nav_counts.ts)
+// ---------------------------------------------------------------------------
+
+/**
+ * Must match `ENTITY_NAV_COUNTS_GLOBAL_KEY` in streams_app
+ * `entity_nav_counts.ts`. Streams publishes; the nav subscribes — neither
+ * bundle imports the other.
+ */
+const ENTITY_NAV_COUNTS_GLOBAL_KEY = '__kbnEntityCentricLabNavCounts$__';
+
+export interface EntityNavCounts {
+  readonly all: number;
+  readonly byCategory: Readonly<Partial<Record<string, number>>>;
+  readonly alertingAll: number;
+  readonly alertingByCategory: Readonly<Partial<Record<string, number>>>;
+}
+
+const EMPTY_ENTITY_NAV_COUNTS: EntityNavCounts = {
+  all: 0,
+  byCategory: {},
+  alertingAll: 0,
+  alertingByCategory: {},
+};
+
+interface EntityNavCountsSharedState {
+  readonly subject: BehaviorSubject<EntityNavCounts>;
+}
+
+const getEntityNavCountsState = (): EntityNavCountsSharedState => {
+  const root = globalThis as unknown as Record<string, EntityNavCountsSharedState | undefined>;
+  let state = root[ENTITY_NAV_COUNTS_GLOBAL_KEY];
+  if (!state) {
+    state = { subject: new BehaviorSubject<EntityNavCounts>(EMPTY_ENTITY_NAV_COUNTS) };
+    root[ENTITY_NAV_COUNTS_GLOBAL_KEY] = state;
+  }
+  return state;
+};
+
+/** RxJS stream of inventoriable entity counts for left-nav labels. */
+export const getEntityNavCounts$ = (): Observable<EntityNavCounts> =>
+  getEntityNavCountsState().subject.asObservable();

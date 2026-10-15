@@ -156,6 +156,17 @@ interface NodeDefinitionBase {
    * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`).
    */
   badgeType?: BadgeType;
+
+  /**
+   * (optional) Right-aligned notification count for the side-nav item
+   * (e.g. resources with active alerts). Values above 99 render as `99+`.
+   */
+  notificationCount?: number;
+
+  /**
+   * (optional) Absolute href opened when the notification badge is clicked.
+   */
+  notificationHref?: string;
 }
 
 /** @public */

@@ -38,6 +38,7 @@ import { labThings } from '../lab_terminology';
 import { readPageSizeForTable, writePageSizeForTable } from './storage_keys';
 import { CLOUD_PROVIDERS, type CloudProviderDescriptor } from './cloud_providers';
 import { EntityDataGridSection } from './entities_data_grid';
+import { DEFAULT_LIST_DENSITY, type ListDensity } from './list_density';
 import {
   ColumnHeaderWithInfo,
   alertsListColumnDescription,
@@ -98,6 +99,8 @@ interface Props {
    * are shown in the page header. Sub-type tables still render.
    */
   readonly hideCategoryHeader?: boolean;
+  /** Page-level density from Display options (shared by every table). */
+  readonly density?: ListDensity;
 }
 
 const HEALTH_BADGE_COLOR: Record<EntityHealth, 'success' | 'warning' | 'danger'> = {
@@ -360,7 +363,7 @@ const CategorySectionHeader = ({
   const showTypeFilter =
     typeLabels && typeLabels.length > 1 && typeFilter !== undefined && onTypeFilterChange;
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           {descriptor?.icon ? (
@@ -369,7 +372,7 @@ const CategorySectionHeader = ({
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
+            <EuiTitle size="xs">
               <h3>{descriptor?.label ?? category}</h3>
             </EuiTitle>
           </EuiFlexItem>
@@ -513,6 +516,7 @@ const TableSection = ({
   rows,
   columns,
   tableKey,
+  density = DEFAULT_LIST_DENSITY,
 }: {
   category: EntityCategoryId;
   subTypeLabel?: string;
@@ -521,6 +525,7 @@ const TableSection = ({
   columns: Array<EuiBasicTableColumn<Entity>>;
   /** Stable key for per-table page-size persistence (e.g. `hosts:Linux Server`). */
   tableKey: string;
+  density?: ListDensity;
 }) => {
   const descriptor = getCategoryDescriptor(category);
   const captionLabel = subTypeLabel
@@ -538,7 +543,7 @@ const TableSection = ({
   );
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+    <EuiPanel hasBorder hasShadow={false} paddingSize="s">
       {showInPanelHeader && (
         <>
           <SectionHeader
@@ -548,7 +553,7 @@ const TableSection = ({
             alertsCount={countWithAlerts(rows)}
             nested={nested}
           />
-          <EuiSpacer size="s" />
+          <EuiSpacer size="xs" />
         </>
       )}
       <EuiInMemoryTable<Entity>
@@ -559,6 +564,7 @@ const TableSection = ({
         items={[...rows]}
         columns={columns}
         rowHeader="name"
+        compressed={density === 'compact'}
         sorting={{ sort: { field: 'health', direction: 'asc' } }}
         pagination={{
           initialPageSize: readPageSizeForTable(tableKey),
@@ -662,7 +668,7 @@ const GroupSectionHeader = ({
 }) => (
   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
-      <EuiTitle size="s">
+      <EuiTitle size="xs">
         <h3>{label}</h3>
       </EuiTitle>
     </EuiFlexItem>
@@ -745,7 +751,7 @@ const KubernetesSectionHeader = ({
 }) => {
   const descriptor = getCategoryDescriptor('kubernetes');
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           {descriptor?.icon ? (
@@ -754,7 +760,7 @@ const KubernetesSectionHeader = ({
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
+            <EuiTitle size="xs">
               <h3>{descriptor?.label ?? 'Kubernetes'}</h3>
             </EuiTitle>
           </EuiFlexItem>
@@ -805,6 +811,7 @@ export const EntitiesListView = ({
   refreshTick,
   customGroupBy,
   hideCategoryHeader = false,
+  density = DEFAULT_LIST_DENSITY,
 }: Props) => {
   const columns = useColumns(onSelectEntity, onSelectEntityAlerts);
   // `undefined` keeps the built-in Category → Type layout; an empty array means
@@ -1121,9 +1128,9 @@ export const EntitiesListView = ({
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
+    <EuiFlexGroup direction="column" gutterSize="s">
       {items.map((item, index) => {
-        const groupGap = index > 0 ? { marginTop: 16 } : undefined;
+        const groupGap = index > 0 ? { marginTop: 8 } : undefined;
 
         if (item.kind === 'kubernetes-header') {
           if (hideCategoryHeader) return null;
@@ -1178,7 +1185,7 @@ export const EntitiesListView = ({
             <EuiFlexItem
               key={`type-group-${item.label}-${index}`}
               grow={false}
-              style={{ marginTop: 12 }}
+              style={{ marginTop: 8 }}
             >
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
@@ -1209,7 +1216,7 @@ export const EntitiesListView = ({
             <EuiFlexItem
               key={`sub-group-header-${item.label}-${index}`}
               grow={false}
-              style={{ marginTop: 12, marginLeft: 16 }}
+              style={{ marginTop: 8, marginLeft: 12 }}
             >
               <SubGroupSectionHeader
                 label={item.label}
@@ -1224,8 +1231,8 @@ export const EntitiesListView = ({
             key={`${item.category}-${item.subTypeLabel ?? ''}-${index}`}
             grow={false}
             style={{
-              ...(index > 0 ? { marginTop: 8 } : {}),
-              ...((item.depth ?? 0) > 0 ? { marginLeft: (item.depth ?? 0) * 16 } : {}),
+              ...(index > 0 ? { marginTop: 4 } : {}),
+              ...((item.depth ?? 0) > 0 ? { marginLeft: (item.depth ?? 0) * 12 } : {}),
             }}
           >
             {enableColumnSettings && !item.forceBasicTable ? (
@@ -1237,6 +1244,7 @@ export const EntitiesListView = ({
                 onSelectEntity={onSelectEntity}
                 onSelectEntityAlerts={onSelectEntityAlerts}
                 refreshTick={refreshTick}
+                density={density}
               />
             ) : (
               <TableSection
@@ -1248,6 +1256,7 @@ export const EntitiesListView = ({
                 tableKey={
                   item.subTypeLabel ? `${item.category}:${item.subTypeLabel}` : item.category
                 }
+                density={density}
               />
             )}
           </EuiFlexItem>

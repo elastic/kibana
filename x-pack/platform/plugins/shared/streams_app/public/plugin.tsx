@@ -373,6 +373,15 @@ export class StreamsAppPlugin
       }
     );
 
+    // ElasticOn / Latest: seed left-nav category counts (All resources (N), …)
+    // before the inventory page mounts. Lazy so fake-entity generation stays
+    // off the critical boot path.
+    import('./components/entity_centric_lab/entities/entity_nav_counts').then(
+      ({ refreshEntityNavCounts }) => {
+        refreshEntityNavCounts();
+      }
+    );
+
     const locator = pluginsStart.share.url.locators.create(new StreamsAppLocatorDefinition());
     pluginsStart.streams.navigationStatus$.subscribe((status) => {
       if (status.status !== 'enabled') return;
