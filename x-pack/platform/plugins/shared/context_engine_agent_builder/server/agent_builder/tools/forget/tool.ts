@@ -14,9 +14,10 @@ import { aiIndexIdFieldSchema } from '@kbn/context-engine-plugin/common/ai_index
 import { MAX_KI_ID_LENGTH } from '@kbn/context-engine-plugin/common/step_types/ki';
 import {
   type AiIndexMemoryWriteServiceApi,
+  type GetAiIndexMemoryWriteServiceParams,
   createMemoryWriter,
 } from '@kbn/context-engine-plugin/server';
-import type { CoreStart, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
@@ -39,10 +40,9 @@ export const createForgetTool = ({
   getCoreStart,
   getSecurityStart,
 }: {
-  getMemoryWriteService: (params: {
-    esClient: ElasticsearchClient;
-    request: KibanaRequest;
-  }) => Promise<AiIndexMemoryWriteServiceApi>;
+  getMemoryWriteService: (
+    params: GetAiIndexMemoryWriteServiceParams
+  ) => Promise<AiIndexMemoryWriteServiceApi>;
   getCoreStart: () => Promise<CoreStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
 }): BuiltinToolDefinition<typeof forgetSchema> => ({

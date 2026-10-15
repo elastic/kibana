@@ -26,10 +26,11 @@ import {
 } from '@kbn/context-engine-plugin/common/step_types/ki';
 import {
   type AiIndexMemoryWriteServiceApi,
+  type GetAiIndexMemoryWriteServiceParams,
   createConversationReferences,
   createMemoryWriter,
 } from '@kbn/context-engine-plugin/server';
-import type { CoreStart, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { isoDateTime, z } from '@kbn/zod/v4';
 import dedent from 'dedent';
@@ -91,10 +92,9 @@ export const createRememberTool = ({
   getSecurityStart,
   generateSessionId = randomUUID,
 }: {
-  getMemoryWriteService: (params: {
-    esClient: ElasticsearchClient;
-    request: KibanaRequest;
-  }) => Promise<AiIndexMemoryWriteServiceApi>;
+  getMemoryWriteService: (
+    params: GetAiIndexMemoryWriteServiceParams
+  ) => Promise<AiIndexMemoryWriteServiceApi>;
   getCoreStart: () => Promise<CoreStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
   generateSessionId?: () => string;
@@ -182,7 +182,7 @@ export const createRememberTool = ({
         results: [
           {
             type: ToolResultType.other,
-            data: result,
+            data: { id: result.id, sessionId: result.sessionId },
           },
         ],
       };

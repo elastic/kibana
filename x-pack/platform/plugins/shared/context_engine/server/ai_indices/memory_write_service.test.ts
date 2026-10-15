@@ -136,6 +136,22 @@ describe('AiIndexMemoryWriteService', () => {
     );
   });
 
+  it('generates a session when create omits it', async () => {
+    const { sessionId: _, ...requestWithoutSession } = request;
+
+    await expect(service.createMemory(requestWithoutSession)).resolves.toEqual({
+      id: 'logical-memory-id',
+      sessionId: 'generated-session-id',
+    });
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          attributes: { 'memory.session_id': 'generated-session-id' },
+        }),
+      })
+    );
+  });
+
   it('creates a data-stream Memory with a unique physical revision ID', async () => {
     aiIndexService.get.mockResolvedValue({
       ...indexAiIndex,

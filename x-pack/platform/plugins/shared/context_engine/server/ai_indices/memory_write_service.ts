@@ -35,7 +35,7 @@ export interface MemoryContent {
 
 export interface CreateMemoryRequest extends MemoryContent {
   aiIndexId: string;
-  sessionId: string;
+  sessionId?: string;
   writer: MemoryWriter;
   references?: MemoryReference[];
 }
@@ -94,7 +94,12 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
     return this.withAudit(MemoryAuditAction.CREATE, request.aiIndexId, undefined, async () => {
       const aiIndex = await this.getWritableMemoryAiIndex(request.aiIndexId);
       const id = (this.deps.generateId ?? randomUUID)();
-      const document = this.createDocument({ request, aiIndex, id });
+      const sessionId = request.sessionId ?? (this.deps.generateSessionId ?? randomUUID)();
+      const document = this.createDocument({
+        request: { ...request, sessionId },
+        aiIndex,
+        id,
+      });
 
       await this.deps.esClient.index({
         index: aiIndex.dest.value,
@@ -104,7 +109,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
         refresh: 'wait_for',
       });
 
-      return { id, sessionId: request.sessionId };
+      return { id, sessionId };
     });
   }
 

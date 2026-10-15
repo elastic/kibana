@@ -46,7 +46,6 @@ describe('memory routes', () => {
   };
   const getAiIndexMemoryWriteService = jest.fn(() => service);
   const contextEngineEnabled = jest.fn();
-  const generateSessionId = jest.fn(() => 'generated-session');
   const currentUserClient = {};
   const response = httpServerMock.createResponseFactory();
 
@@ -73,7 +72,6 @@ describe('memory routes', () => {
       } as unknown as IRouter,
       logger: loggerMock.create(),
       getAiIndexMemoryWriteService,
-      generateSessionId,
     });
   });
 
@@ -139,7 +137,7 @@ describe('memory routes', () => {
     );
   });
 
-  it('creates with the current-user client, generated session, and API provenance', async () => {
+  it('leaves session generation to the caller-scoped service', async () => {
     createMemory.mockResolvedValue({ id: 'memory-1', sessionId: 'generated-session' });
 
     await call('POST', AI_INDEX_MEMORIES_PATH, { aiIndexId: 'support' }, body);
@@ -150,7 +148,6 @@ describe('memory routes', () => {
     });
     expect(createMemory).toHaveBeenCalledWith({
       aiIndexId: 'support',
-      sessionId: 'generated-session',
       ...body,
       writer: { uri: MEMORY_API_PROVENANCE_SOURCE, metadata: {} },
     });
@@ -189,7 +186,6 @@ describe('memory routes', () => {
     );
 
     expect(reviseMemory.mock.calls[0][0]).not.toHaveProperty('sessionId');
-    expect(generateSessionId).not.toHaveBeenCalled();
     expect(response.ok).toHaveBeenCalledWith({
       body: { id: 'memory-1', session_id: 'existing-session' },
     });
@@ -288,7 +284,7 @@ describe('memory routes', () => {
 
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 500,
-      body: { message: 'An unexpected error occurred while writing the memory.' },
+      body: { message: 'An unexpected error occurred while processing the memory request.' },
     });
   });
 

@@ -6,7 +6,6 @@
  */
 
 import path from 'node:path';
-import { randomUUID } from 'crypto';
 import type { IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { isResponseError } from '@kbn/es-errors';
@@ -43,7 +42,7 @@ const WRITE_SECURITY: RouteSecurity = {
 
 const DESCRIPTION_SUFFIX =
   "The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; memories without explicit permissions are shared with every space that registers the same destination. Returns 404 when Context Engine is turned off in the space.";
-const INTERNAL_ERROR_MESSAGE = 'An unexpected error occurred while writing the memory.';
+const INTERNAL_ERROR_MESSAGE = 'An unexpected error occurred while processing the memory request.';
 
 const writer = {
   uri: MEMORY_API_PROVENANCE_SOURCE,
@@ -141,14 +140,12 @@ export const registerMemoryRoutes = ({
   router,
   logger,
   getAiIndexMemoryWriteService,
-  generateSessionId = randomUUID,
 }: {
   router: IRouter;
   logger: Logger;
   getAiIndexMemoryWriteService: (
     params: GetAiIndexMemoryWriteServiceParams
   ) => AiIndexMemoryWriteServiceApi;
-  generateSessionId?: () => string;
 }) => {
   router.versioned
     .post({
@@ -189,14 +186,15 @@ export const registerMemoryRoutes = ({
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
-        const sessionId = request.body.session_id ?? generateSessionId();
         try {
           const result = await getAiIndexMemoryWriteService({
             esClient: (await ctx.core).elasticsearch.client.asCurrentUser,
             request,
           }).createMemory({
             ...toServiceRequest(request.params.aiIndexId, request.body),
-            sessionId,
+            ...(request.body.session_id !== undefined && {
+              sessionId: request.body.session_id,
+            }),
           });
           const body: WriteMemoryResponse = { id: result.id, session_id: result.sessionId };
           return response.created({ body });
@@ -271,7 +269,7 @@ export const registerMemoryRoutes = ({
       access: 'public',
       operationId: 'delete-context-engine-memory',
       summary: 'Delete a memory',
-      description: `Marks a memory as deleted using the caller's destination read and write privileges while retaining its lifecycle tombstone. ${DESCRIPTION_SUFFIX}`,
+      description: `Marks a memory as deleted using the caller's destination read and write privileges while retaining its lifecycle tombstone. Subsequent revision attempts return a conflict. ${DESCRIPTION_SUFFIX}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
