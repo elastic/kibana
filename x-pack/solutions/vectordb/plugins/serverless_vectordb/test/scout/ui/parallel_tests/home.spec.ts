@@ -110,15 +110,36 @@ spaceTest.describe('Vector DB home page', { tag: [...tags.serverless.vectordb] }
     await mockDeploymentStats(page, { indicesCount: 1 });
     await pageObjects.vectordbHome.goto();
 
-    const { vectordbHome } = pageObjects;
-    await expect(vectordbHome.addDataDevToolsLink).toBeVisible();
-    await expect(vectordbHome.addDataSampleDataLink).toBeVisible();
-    await expect(vectordbHome.addDataUploadFileLink).toBeVisible();
-
-    await vectordbHome.addDataEmbeddingsLink.click();
+    await pageObjects.vectordbHome.addDataEmbeddingsLink.click();
 
     await expect(pageObjects.onboarding.generatePathCard).toBeVisible();
   });
+
+  spaceTest(
+    'opens Console, sample data and file upload from the add data links',
+    async ({ page, pageObjects }) => {
+      await mockDeploymentStats(page, { indicesCount: 1 });
+      const { vectordbHome } = pageObjects;
+
+      await spaceTest.step('Console', async () => {
+        await vectordbHome.goto();
+        await vectordbHome.addDataDevToolsLink.click();
+        await expect(page.getByTestId('console')).toBeVisible();
+      });
+
+      await spaceTest.step('sample data', async () => {
+        await vectordbHome.goto();
+        await vectordbHome.addDataSampleDataLink.click();
+        await expect(page.getByTestId('sampleDataSetCardflights')).toBeVisible();
+      });
+
+      await spaceTest.step('file upload', async () => {
+        await vectordbHome.goto();
+        await vectordbHome.addDataUploadFileLink.click();
+        await expect(page.getByTestId('dataVisualizerPageFileUpload')).toBeVisible();
+      });
+    }
+  );
 
   spaceTest(
     'shows the agent skills prompt for building in an IDE',

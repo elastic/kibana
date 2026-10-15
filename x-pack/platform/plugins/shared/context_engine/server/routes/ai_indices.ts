@@ -729,7 +729,8 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId, kiId } = request.params;
-        const { index } = request.query;
+        const { index, lifecycle_status: lifecycleStatus } = request.query;
+        const lifecycleStatuses = lifecycleStatus ? [lifecycleStatus].flat() : undefined;
         const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
@@ -739,6 +740,7 @@ export const registerAiIndexRoutes = ({
             dest: aiIndex.dest,
             index,
             kiId,
+            ...(lifecycleStatuses !== undefined ? { lifecycleStatuses } : {}),
           });
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
           return response.ok({ body });
