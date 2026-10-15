@@ -1230,9 +1230,7 @@ function lookupPossibleFunctions(identifier, valuesByScope) {
         .filter((version) => version.at <= useAt)
         .sort((left, right) => left.at - right.at);
       for (const version of ordered) {
-        const conditional = Boolean(
-          version.anchor && stop && isConditional(version.anchor, stop)
-        );
+        const conditional = Boolean(version.anchor && stop && isConditional(version.anchor, stop));
         possible = conditional ? possible.concat(version.value) : [version.value];
       }
       const functions = possible.filter((value) => value && FUNCTION_TYPES.has(value.type));
