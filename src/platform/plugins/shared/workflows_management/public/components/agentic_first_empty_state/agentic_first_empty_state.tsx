@@ -20,6 +20,7 @@ import {
   EuiText,
   EuiTextArea,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -59,6 +60,10 @@ export interface AgenticFirstEmptyStateProps {
   /** Renders a subtle dot-grid background — used on the "New automation flow" landing */
   withDotBackground?: boolean;
 }
+
+const submitLabel = i18n.translate('workflows.agenticFirst.submit', {
+  defaultMessage: 'Submit prompt',
+});
 
 const DEFAULT_EXAMPLES: AgenticFirstExample[] = [
   {
@@ -168,7 +173,7 @@ export function AgenticFirstEmptyState({
           >
             <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="sparkles" color="primary" />
+                <EuiIcon type="sparkles" color="primary" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTextArea
@@ -223,16 +228,16 @@ export function AgenticFirstEmptyState({
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="sortUp"
-                      aria-label={i18n.translate('workflows.agenticFirst.submit', {
-                        defaultMessage: 'Submit prompt',
-                      })}
-                      display="base"
-                      onClick={handleSubmit}
-                      isDisabled={prompt.trim().length === 0}
-                      data-test-subj="agenticFirstSubmitButton"
-                    />
+                    <EuiToolTip content={submitLabel} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        iconType="sortUp"
+                        aria-label={submitLabel}
+                        display="base"
+                        onClick={handleSubmit}
+                        isDisabled={prompt.trim().length === 0}
+                        data-test-subj="agenticFirstSubmitButton"
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
@@ -306,7 +311,7 @@ export function AgenticFirstEmptyState({
                         <EuiFlexGroup gutterSize="xs" responsive={false}>
                           {example.icons.map((icon, idx) => (
                             <EuiFlexItem grow={false} key={idx}>
-                              <EuiIcon type={icon} size="m" />
+                              <EuiIcon type={icon} size="m" aria-hidden={true} />
                             </EuiFlexItem>
                           ))}
                         </EuiFlexGroup>

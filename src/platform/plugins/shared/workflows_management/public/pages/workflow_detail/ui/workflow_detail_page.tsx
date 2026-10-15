@@ -355,7 +355,8 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     !isExecutionsViewEnabled && selectedExecutionId && canReadWorkflowExecution ? (
       <WorkflowExecutionDetail executionId={selectedExecutionId} onClose={onCloseExecutionDetail} />
     ) : null;
-  if (!id && showAgenticLanding) {
+  // A run in the URL (e.g. a draft test run) means the user is past the landing.
+  if (!id && showAgenticLanding && !selectedExecutionId) {
     return (
       <EuiPageTemplate
         offset={0}
