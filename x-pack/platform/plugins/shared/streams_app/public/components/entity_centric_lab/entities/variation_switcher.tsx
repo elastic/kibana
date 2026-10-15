@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.02';
+export const PROTOTYPE_VERSION = '1.03';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -53,7 +53,7 @@ const PROTOTYPE_CHANGELOG: readonly {
     summary:
       'Add prototype About tab with change log, hex-map legend help, and inventory polish.',
     details:
-      'Variation selector tabs (settings / about) with design disclaimer and scrollable change log; hex Color-by legends get info tips and metric (stat) labels; P95/P99 stats; Availability Zone group-by; column/flyout metric explanations; utilization wording; Create dashboard primary button. Bump to v1.02.',
+      'Variation selector tabs (settings / about) with design disclaimer and scrollable change log; hex Color-by legends get info tips and metric (stat) labels; P95/P99 stats; Availability Zone group-by; column/flyout metric explanations; utilization wording; Create dashboard primary button. Group by control gets an info tip (nesting, examples, order matters). Bump to v1.03.',
   },
   {
     date: '2026-10-14',

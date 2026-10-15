@@ -12,6 +12,7 @@ import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiPopover,
   EuiText,
@@ -27,6 +28,37 @@ const NO_GROW = css`
 `;
 
 const MAX_GROUPINGS = 3;
+
+const stopGroupByInfoClick = (event: React.MouseEvent) => {
+  event.preventDefault();
+  event.stopPropagation();
+};
+
+const groupByInfoContent = (): string =>
+  i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.infoTip', {
+    defaultMessage:
+      'Nest resources into sections by one or more fields. For example, group by Alerts and Category, or by Availability Zone. Order matters: the first field is the top level, and each next field nests under it.',
+  });
+
+const GroupByInfoTip = () => (
+  <EuiIconTip
+    type="info"
+    size="s"
+    color="subdued"
+    position="top"
+    repositionOnScroll
+    content={groupByInfoContent()}
+    aria-label={i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.infoAriaLabel', {
+      defaultMessage: 'About group by',
+    })}
+    anchorProps={{
+      onClick: stopGroupByInfoClick,
+      onMouseDown: stopGroupByInfoClick,
+      style: { display: 'inline-flex', marginLeft: 4, verticalAlign: 'middle' },
+      'data-test-subj': 'entityCentricLabGroupByInfo',
+    }}
+  />
+);
 
 interface Props {
   /** All fields offered in the dropdown (scoped to the current category). */
@@ -151,15 +183,17 @@ export const EntityGroupByControls = ({
         panelPaddingSize="none"
         anchorPosition="downLeft"
         button={
-          <EuiLink
-            onClick={() => setIsOpen((prev) => !prev)}
-            data-test-subj="entityCentricLabGroupByButton"
-            css={linkTriggerCss}
-          >
-            {`${prefix}: ${selectionText}`}
-            {' '}
-            <EuiIcon type="arrowDown" size="s" />
-          </EuiLink>
+          <span css={css`display: inline-flex; align-items: center; white-space: nowrap;`}>
+            <EuiLink
+              onClick={() => setIsOpen((prev) => !prev)}
+              data-test-subj="entityCentricLabGroupByButton"
+              css={linkTriggerCss}
+            >
+              {`${prefix}: ${selectionText} `}
+              <EuiIcon type="arrowDown" size="s" />
+            </EuiLink>
+            <GroupByInfoTip />
+          </span>
         }
       >
         {popoverContent}
@@ -186,17 +220,20 @@ export const EntityGroupByControls = ({
         panelPaddingSize="none"
         anchorPosition="downLeft"
         button={
-          <EuiFilterButton
-            iconType="arrowDown"
-            iconSide="right"
-            isSelected={isOpen}
-            hasActiveFilters={groupBy.length > 0}
-            numActiveFilters={groupBy.length}
-            onClick={() => setIsOpen((prev) => !prev)}
-            data-test-subj="entityCentricLabGroupByButton"
-          >
-            {buttonLabel}
-          </EuiFilterButton>
+          <span css={css`display: inline-flex; align-items: center;`}>
+            <EuiFilterButton
+              iconType="arrowDown"
+              iconSide="right"
+              isSelected={isOpen}
+              hasActiveFilters={groupBy.length > 0}
+              numActiveFilters={groupBy.length}
+              onClick={() => setIsOpen((prev) => !prev)}
+              data-test-subj="entityCentricLabGroupByButton"
+            >
+              {buttonLabel}
+            </EuiFilterButton>
+            <GroupByInfoTip />
+          </span>
         }
       >
         {popoverContent}
