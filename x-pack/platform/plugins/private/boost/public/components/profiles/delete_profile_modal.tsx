@@ -6,13 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiConfirmModal,
-  EuiFormLabel,
-  EuiSpacer,
-  EuiText,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { resolveRule } from '../../../common/resolution';
 import type { BoostDataSource, BoostProfile, BoostRule } from '../../../common/types';
@@ -83,12 +77,12 @@ export const DeleteProfileModal = ({
 
   const affectedCount = deletedRules.reduce((total, { affected }) => total + affected.length, 0);
 
-  const listTitleId = useGeneratedHtmlId({ prefix: 'deletedRulesTitle' });
-
   // Both consequences are stated up front, ahead of the per-rule details.
   const summary = [
     i18n.translate('xpack.boost.deleteProfileModal.rulesDeleted', {
-      defaultMessage: 'Deleting this profile also deletes any boost rule that uses it.',
+      defaultMessage:
+        '{count, plural, one {Deleting this profile will also delete the boost rule that uses it.} other {Deleting this profile will also delete the # boost rules that use it.}}',
+      values: { count: deletedRules.length },
     }),
     ...(affectedCount > 0
       ? [
@@ -157,16 +151,11 @@ export const DeleteProfileModal = ({
           <EuiText size="s">
             <p>{summary}</p>
           </EuiText>
-          <EuiSpacer size="l" />
-          <EuiFormLabel id={listTitleId}>
-            {i18n.translate('xpack.boost.deleteProfileModal.rulesListTitle', {
-              defaultMessage: '{count, plural, one {# rule} other {# rules}} to be deleted',
-              values: { count: deletedRules.length },
-            })}
-          </EuiFormLabel>
-          <EuiSpacer size="xs" />
+          <EuiSpacer size="m" />
           <RuleChangeList
-            titleId={listTitleId}
+            aria-label={i18n.translate('xpack.boost.deleteProfileModal.rulesListLabel', {
+              defaultMessage: 'Boost rules to be deleted',
+            })}
             items={deletedRules.map(({ name: ruleName, affected }) => ({
               name: ruleName,
               count: affected.length > 0 ? formatDataSourceCount(type, affected.length) : undefined,
@@ -192,10 +181,14 @@ export const DeleteProfileModal = ({
                       defaultMessage: 'New profile',
                     }),
                   ]}
-                  rows={affected.map(({ name: dataSourceName, nextRule }) => ({
-                    id: dataSourceName,
-                    cells: [dataSourceName, nextRule?.name, nextRule?.boost_profile],
-                  }))}
+                  sections={[
+                    {
+                      rows: affected.map(({ name: dataSourceName, nextRule }) => ({
+                        id: dataSourceName,
+                        cells: [dataSourceName, nextRule?.name, nextRule?.boost_profile],
+                      })),
+                    },
+                  ]}
                 />
               ),
               'data-test-subj': `deletedRule-${ruleName}`,

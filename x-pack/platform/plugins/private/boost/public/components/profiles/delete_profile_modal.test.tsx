@@ -64,6 +64,9 @@ describe('DeleteProfileModal', () => {
       </IntlProvider>
     );
 
+    expect(screen.getByTestId('deleteBoostProfileModal')).toHaveTextContent(
+      'Deleting this profile will also delete the boost rule that uses it.'
+    );
     const catalogs = within(screen.getByTestId('deletedRule-catalogs'));
     const toggle = catalogs.getByRole('button', { name: /catalogs/ });
     // The chevron at the row's end points down until the rule opens, then up.

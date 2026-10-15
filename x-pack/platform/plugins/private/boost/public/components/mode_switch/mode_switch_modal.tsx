@@ -26,7 +26,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ModeSwitchChange } from '../../../common/mode_switch';
-import type { BoostMode } from '../../../common/types';
+import type { BoostMode, BoostProfileType } from '../../../common/types';
+import type { ChangeTableSection } from '../change_table';
 import { ChangeTable } from '../change_table';
 import { MODAL_WIDTH } from '../modal_width';
 
@@ -84,6 +85,28 @@ const getSummary = (mode: BoostMode, hasCustomRules: boolean, hasDefaultRules: b
     }),
   ].join(' ');
 };
+
+const SECTION_TITLES: Readonly<Record<BoostProfileType, (count: number) => string>> = {
+  indices: (count) =>
+    i18n.translate('xpack.boost.modeSwitchModal.indicesSection', {
+      defaultMessage: 'Indices ({count})',
+      values: { count },
+    }),
+  data_streams: (count) =>
+    i18n.translate('xpack.boost.modeSwitchModal.dataStreamsSection', {
+      defaultMessage: 'Data streams ({count})',
+      values: { count },
+    }),
+};
+
+/** The changes split into indices, then data streams, leaving out a type with none. */
+const getSections = (changes: readonly ModeSwitchChange[]): ChangeTableSection[] =>
+  (['indices', 'data_streams'] as const).flatMap((type) => {
+    const rows = changes
+      .filter((change) => change.type === type)
+      .map(({ name, from, to }) => ({ id: name, cells: [name, from, to] }));
+    return rows.length > 0 ? [{ title: SECTION_TITLES[type](rows.length), rows }] : [];
+  });
 
 /** Confirms switching modes when it changes the boost profile of any index or data stream. */
 export const ModeSwitchModal = ({
@@ -152,7 +175,7 @@ export const ModeSwitchModal = ({
                 defaultMessage: 'New profile',
               }),
             ]}
-            rows={changes.map(({ name, from, to }) => ({ id: name, cells: [name, from, to] }))}
+            sections={getSections(changes)}
             // Long lists scroll, keeping the modal's buttons in view.
             maxHeight={euiTheme.base * 15}
           />

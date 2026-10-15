@@ -77,7 +77,7 @@ describe('ModeSwitchModal', () => {
     );
   });
 
-  it('lists each index and data stream with its current and new profile', () => {
+  it('lists indices, then data streams, with their current and new profiles', () => {
     renderModal();
 
     const table = screen.getByRole('table', { name: '3 boost profiles will change' });
@@ -89,8 +89,10 @@ describe('ModeSwitchModal', () => {
           .map((cell) => cell.textContent)
       )
     ).toEqual([
+      ['Indices (2)'],
       ['catalog-fall', 'catalog-search', 'elastic-performant'],
       ['catalog-spring', 'catalog-search', 'elastic-performant'],
+      ['Data streams (1)'],
       ['logs-app', 'clickstream', 'elastic-last-7-days'],
     ]);
   });

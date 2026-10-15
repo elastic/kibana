@@ -34,13 +34,12 @@ export interface RuleChangeListItem {
 }
 
 interface RuleChangeListProps {
-  /** The id of the list's visible title. */
-  titleId: string;
+  'aria-label': string;
   items: readonly RuleChangeListItem[];
 }
 
 /** Rules that a change affects, each opening to show what changes for the data sources it covers. */
-export const RuleChangeList = ({ titleId, items }: RuleChangeListProps) => {
+export const RuleChangeList = ({ 'aria-label': ariaLabel, items }: RuleChangeListProps) => {
   const { euiTheme } = useEuiTheme();
   const scrollStyles = useEuiOverflowScroll('y', true);
   const accordionIdPrefix = useGeneratedHtmlId({ prefix: 'ruleChange' });
@@ -54,7 +53,7 @@ export const RuleChangeList = ({ titleId, items }: RuleChangeListProps) => {
           scroll away with the content. */}
       <div
         role="region"
-        aria-labelledby={titleId}
+        aria-label={ariaLabel}
         tabIndex={0}
         css={css`
           ${scrollStyles}
@@ -111,9 +110,7 @@ export const RuleChangeList = ({ titleId, items }: RuleChangeListProps) => {
                     data-test-subj={dataTestSubj}
                   >
                     {/* Lines up with the rule name above it. */}
-                    <div css={{ padding: `0 ${euiTheme.size.s} ${euiTheme.size.s}` }}>
-                      {details}
-                    </div>
+                    <div css={{ padding: euiTheme.size.s }}>{details}</div>
                   </EuiAccordion>
                 ) : (
                   // Matches an accordion's padding and line height, so rule names line up whether
