@@ -7,15 +7,12 @@
 
 import type { TimeRange } from '../../entities_grid/common';
 import { buildLookback, getRiskScoreIndex } from '../../entities_grid/queries/esql';
-import { buildRiskScoreHistoryBranch } from './risk_history';
+import { RISK_MOVER_MIN_SCORE_CHANGE, buildRiskScoreHistoryBranch } from './risk_history';
 import { buildPreviousRiskMoversQuery } from './risk_previous_period';
 import type { TilePeriod } from './tile_period';
 
-/** The score rise, in points, that makes an entity a risk mover. */
-const MIN_SCORE_CHANGE = 10;
-
 /**
- * Builds an ES|QL query that counts entities whose risk score rose by ≥10 points
+ * Builds an ES|QL query that counts entities whose risk score rose by at least `RISK_MOVER_MIN_SCORE_CHANGE` points
  * since the start of the period: current score minus the score at the period boundary.
  *
  * Only two points in time matter, so the query reads only what it needs:
@@ -60,12 +57,12 @@ export const buildRiskMoversCountQuery = (
     // Boundary scores from the risk score docs.
     ...buildRiskScoreHistoryBranch(index, boundary, 'boundary_score'),
     '), (',
-    // Current scores from the entity docs in view. A mover rose by at least `MIN_SCORE_CHANGE` and a
+    // Current scores from the entity docs in view. A mover rose by at least `RISK_MOVER_MIN_SCORE_CHANGE` and a
     // score is never negative, so an entity whose current score is below that cannot count: it is
     // not read. This keeps the read from growing with every entity that was ever scored (an entity
     // that stops alerting is reset to a score of 0, which is not null, and stays in the store).
     `  FROM ${entitiesIndexName}`,
-    `  | WHERE entity.risk.calculated_score_norm >= ${MIN_SCORE_CHANGE} AND entity.name IS NOT NULL`,
+    `  | WHERE entity.risk.calculated_score_norm >= ${RISK_MOVER_MIN_SCORE_CHANGE} AND entity.name IS NOT NULL`,
     ...entityFilterClauses.map((clause) => `  ${clause}`),
     `  | EVAL current_score = entity.risk.calculated_score_norm,`,
     `         effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
@@ -75,7 +72,7 @@ export const buildRiskMoversCountQuery = (
     `        current_score  = MAX(current_score),`,
     `        effective_id   = MAX(effective_id)`,
     `        BY \`entity.id\``,
-    `| WHERE current_score - boundary_score >= ${MIN_SCORE_CHANGE}`,
+    `| WHERE current_score - boundary_score >= ${RISK_MOVER_MIN_SCORE_CHANGE}`,
     // One row per resolved entity, because several ids can resolve to the same one. A plain COUNT of
     // those rows is exact; COUNT_DISTINCT would only estimate, and is approximate above about 3,000.
     `| STATS BY effective_id`,

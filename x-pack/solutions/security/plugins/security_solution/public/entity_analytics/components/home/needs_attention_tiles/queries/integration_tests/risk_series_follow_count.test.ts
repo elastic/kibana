@@ -12,7 +12,11 @@ import { ToolingLog } from '@kbn/tooling-log';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { TimeRange } from '../../../entities_grid/common';
 import { getRiskScoreIndex } from '../../../entities_grid/queries/esql';
-import { buildRiskLevelHistoryBranch, buildRiskScoreHistoryBranch } from '../risk_history';
+import {
+  RISK_MOVER_MIN_SCORE_CHANGE,
+  buildRiskLevelHistoryBranch,
+  buildRiskScoreHistoryBranch,
+} from '../risk_history';
 import { buildJoinTail } from '../risk_previous_period';
 import {
   buildRiskTilesSeriesQuery,
@@ -228,7 +232,7 @@ describe('risk tile series on Elasticsearch', () => {
       ...buildRiskScoreHistoryBranch(index, hoursBack(back), 'current_score'),
       ')',
       `| STATS boundary_score = MAX(boundary_score), current_score = MAX(current_score) BY \`entity.id\``,
-      `| WHERE current_score - boundary_score >= 10`,
+      `| WHERE current_score - boundary_score >= ${RISK_MOVER_MIN_SCORE_CHANGE}`,
       ...buildJoinTail(ENTITY_INDEX, []),
     ].join('\n');
   };
