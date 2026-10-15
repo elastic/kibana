@@ -11,9 +11,13 @@ import type { AuditLogger } from '@kbn/core-security-server';
 import { isIndexPattern } from '../../common/ai_index_dest';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import type { MemoryType } from '../../common/memory';
-import { DEFAULT_MEMORY_EXPIRATION_DAYS, isMemoryType } from '../../common/memory';
+import {
+  DEFAULT_MEMORY_EXPIRATION_DAYS,
+  isMemoryType,
+  MEMORY_SESSION_ID_ATTRIBUTE,
+} from '../../common/memory';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
-import type { KiLifecycleStatus } from '../../common/step_types/ki';
+import { KI_LIFECYCLE_STATUS_DELETED } from '../../common/step_types/ki';
 import { MemoryAuditAction, memoryAuditEvent } from '../audit/audit_events';
 import type { AiIndexService } from './service';
 import { kiIdQuery, pickCurrentRevision, REVISION_TIE_WINDOW } from './ki_get';
@@ -22,7 +26,6 @@ import { updateMemoryProvenance } from './memory_document';
 import { MemoryWriteError } from './memory_write_errors';
 
 const DEFAULT_MEMORY_EXPIRATION_MS = DEFAULT_MEMORY_EXPIRATION_DAYS * 24 * 60 * 60 * 1000;
-const DELETED_LIFECYCLE_STATUS: KiLifecycleStatus = 'deleted';
 
 export interface MemoryContent {
   type: MemoryType;
@@ -121,7 +124,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
       const aiIndex = await this.getWritableMemoryAiIndex(request.aiIndexId);
       const existing = await this.getExistingMemory(aiIndex, request.aiIndexId, request.id);
 
-      if (existing.document.governance?.lifecycle?.status === DELETED_LIFECYCLE_STATUS) {
+      if (existing.document.governance?.lifecycle?.status === KI_LIFECYCLE_STATUS_DELETED) {
         throw new MemoryWriteError(
           'memory_deleted',
           `Memory '${request.id}' was deleted and cannot be revised.`
@@ -175,7 +178,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
       const aiIndex = await this.getWritableMemoryAiIndex(request.aiIndexId);
       const existing = await this.getExistingMemory(aiIndex, request.aiIndexId, request.id);
 
-      if (existing.document.governance?.lifecycle?.status === DELETED_LIFECYCLE_STATUS) {
+      if (existing.document.governance?.lifecycle?.status === KI_LIFECYCLE_STATUS_DELETED) {
         return { id: request.id };
       }
       this.assertIndexConcurrencyMetadata(aiIndex, existing, request.id);
@@ -195,7 +198,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
           }),
           lifecycle: {
             ...existing.document.governance?.lifecycle,
-            status: DELETED_LIFECYCLE_STATUS,
+            status: KI_LIFECYCLE_STATUS_DELETED,
           },
         },
       };
@@ -366,7 +369,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
       references: request.references ?? existingDocument?.references,
       attributes: {
         ...existingDocument?.attributes,
-        'memory.session_id': request.sessionId,
+        [MEMORY_SESSION_ID_ATTRIBUTE]: request.sessionId,
       },
       governance: updateMemoryProvenance(existingDocument?.governance, request.writer, {
         recordCreation: existingDocument === undefined,
@@ -395,7 +398,7 @@ export class AiIndexMemoryWriteService implements AiIndexMemoryWriteServiceApi {
   }
 
   private getExistingSessionId(existingDocument: StoredMemoryDocument): string | undefined {
-    const sessionId = existingDocument.attributes?.['memory.session_id'];
+    const sessionId = existingDocument.attributes?.[MEMORY_SESSION_ID_ATTRIBUTE];
     return typeof sessionId === 'string' ? sessionId : undefined;
   }
 

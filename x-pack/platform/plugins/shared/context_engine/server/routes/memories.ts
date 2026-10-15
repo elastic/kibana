@@ -135,6 +135,7 @@ const toServiceRequest = (aiIndexId: string, body: WriteMemoryRequest) => ({
   content: body.content,
   ...(body.tags !== undefined && { tags: body.tags }),
   ...(body.expires_at !== undefined && { expiresAt: body.expires_at }),
+  ...(body.session_id !== undefined && { sessionId: body.session_id }),
   writer,
 });
 
@@ -146,6 +147,7 @@ const toServiceRevisionRequest = (aiIndexId: string, body: ReviseMemoryRequest) 
   ...(body.content !== undefined && { content: body.content }),
   ...(body.tags !== undefined && { tags: body.tags }),
   ...(body.expires_at !== undefined && { expiresAt: body.expires_at }),
+  ...(body.session_id !== undefined && { sessionId: body.session_id }),
   writer,
 });
 
@@ -204,12 +206,7 @@ export const registerMemoryRoutes = ({
           const result = await getAiIndexMemoryWriteService({
             esClient: (await ctx.core).elasticsearch.client.asCurrentUser,
             request,
-          }).createMemory({
-            ...toServiceRequest(request.params.aiIndexId, request.body),
-            ...(request.body.session_id !== undefined && {
-              sessionId: request.body.session_id,
-            }),
-          });
+          }).createMemory(toServiceRequest(request.params.aiIndexId, request.body));
           const body: WriteMemoryResponse = { id: result.id, session_id: result.sessionId };
           return response.created({ body });
         } catch (error) {
@@ -264,9 +261,6 @@ export const registerMemoryRoutes = ({
             request,
           }).reviseMemory({
             ...toServiceRevisionRequest(request.params.aiIndexId, request.body),
-            ...(request.body.session_id !== undefined && {
-              sessionId: request.body.session_id,
-            }),
             id: request.params.memoryId,
           });
           const body: WriteMemoryResponse = { id: result.id, session_id: result.sessionId };

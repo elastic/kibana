@@ -138,11 +138,7 @@ apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, 
       headers,
       responseType: 'json',
       body: {
-        type: 'memory.session_fact',
         title: 'Revised title',
-        description: 'A revised fact found during the Scout run.',
-        content: 'Revised content.',
-        session_id: sessionId,
       },
     });
     expect(reviseResponse).toHaveStatusCode(200);
@@ -154,6 +150,13 @@ apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, 
     });
     expect(deleteResponse).toHaveStatusCode(200);
     expect(deleteResponse.body).toStrictEqual({ id });
+
+    const repeatedDeleteResponse = await apiClient.delete(itemPath, {
+      headers,
+      responseType: 'json',
+    });
+    expect(repeatedDeleteResponse).toHaveStatusCode(200);
+    expect(repeatedDeleteResponse.body).toStrictEqual({ id });
 
     const reviseDeletedResponse = await apiClient.patch(itemPath, {
       headers,
