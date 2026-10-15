@@ -24,6 +24,7 @@ import {
   type Worker,
 } from '@kbn/alertzero-common';
 import type { CoreStart } from '@kbn/core/public';
+import { buildPath } from '@kbn/core-http-browser';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
@@ -260,7 +261,10 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
       // Ingest and enrich are installed once in the default space, so they are addressed there
       // from every space: the server base path has no `/s/{id}` prefix.
       await http.put(
-        `${http.basePath.serverBasePath}/api/workflows/workflow/${encodeURIComponent(workflowId)}`,
+        buildPath('{serverBasePath*}/api/workflows/workflow/{workflowId}', {
+          serverBasePath: http.basePath.serverBasePath,
+          workflowId,
+        }),
         {
           prependBasePath: false,
           version: '2023-10-31',
