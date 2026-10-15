@@ -139,7 +139,7 @@ apiTest.describe(
       return response.body as SmlSearchExecuteBody;
     };
 
-    apiTest.beforeAll(async ({ requestAuth, kbnClient, apiClient, apiServices, log }) => {
+    apiTest.beforeAll(async ({ requestAuth, kbnClient, apiClient, apiServices }) => {
       await kbnClient.uiSettings.update({
         [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
       });
@@ -178,15 +178,12 @@ apiTest.describe(
       policyId = createdPolicy.data.id;
       policyAttachmentId = `${ACTION_POLICY_KI_TYPE}://${policyId}`;
 
-      await Promise.all(
-        [RULE_KI_TYPE, ACTION_POLICY_KI_TYPE].map(async (typeId) => {
-          try {
-            await apiServices.alertingV2.taskManager.runSoon(smlCrawlerTaskId(typeId));
-          } catch (error) {
-            log.debug(`SML crawler run_soon skipped for '${typeId}': ${error}`);
-          }
-        })
-      );
+      await apiServices.alertingV2.taskManager.runSoon(smlCrawlerTaskId(RULE_KI_TYPE), {
+        ignoreErrors: true,
+      });
+      await apiServices.alertingV2.taskManager.runSoon(smlCrawlerTaskId(ACTION_POLICY_KI_TYPE), {
+        ignoreErrors: true,
+      });
 
       limitedCredentials = await requestAuth.getApiKeyForCustomRole(LIMITED_ALERTING_V2_CHAT_ROLE);
       agentBuilderOnlyCredentials = await requestAuth.getApiKeyForCustomRole(
