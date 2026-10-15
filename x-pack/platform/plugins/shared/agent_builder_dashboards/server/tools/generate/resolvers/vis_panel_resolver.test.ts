@@ -194,28 +194,37 @@ describe('createVisPanelResolver', () => {
     expect(result).not.toHaveProperty('panelContent.config.breakdown_by');
   });
 
-  it('lets the generated Lens config override a carried-over time range', async () => {
-    mockedBuildLensConfig.mockResolvedValue(
-      createBuildLensConfigResult({ type: 'metric', time_range: { from: 'now-1h', to: 'now' } })
-    );
+  it('passes only the chart keys of an existing Lens panel to the Lens builder', async () => {
+    mockedBuildLensConfig.mockResolvedValue(createBuildLensConfigResult({ type: 'metric' }));
 
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
-    const result = await resolveVisPanel({
+    await resolveVisPanel({
       operationType: 'edit_panels',
       identifier: 'panel-1',
-      nlQuery: 'only the last hour',
+      nlQuery: 'change the title',
       existingPanel: {
         id: 'panel-1',
         type: LENS_EMBEDDABLE_TYPE,
-        config: { type: 'metric', time_range: { from: 'now-7d', to: 'now' } },
+        config: {
+          type: 'metric',
+          title: 'Requests',
+          drilldowns: [{ type: 'url_drilldown', label: 'Open host', url: 'https://example.com' }],
+          hide_title: true,
+          hide_border: true,
+          time_range: { from: 'now-7d', to: 'now' },
+        },
         grid: { w: 24, h: 12, x: 0, y: 0 },
       },
     });
 
-    expect(result).toMatchObject({
-      panelContent: { config: { time_range: { from: 'now-1h', to: 'now' } } },
-    });
+    const chartConfig = { type: 'metric', title: 'Requests' };
+    expect(mockedBuildLensConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        existingConfig: JSON.stringify(chartConfig),
+        parsedExistingConfig: chartConfig,
+      })
+    );
   });
 
   it('keeps panel-level settings when editing a Vega panel', async () => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isUndefined, omitBy } from 'lodash';
 import {
   buildLensConfig,
   buildVegaConfig,
@@ -35,25 +36,6 @@ export interface VisPanelResolverDeps {
 const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string | undefined => {
   const spec = (existingPanel?.config as { spec?: unknown } | undefined)?.spec;
   return typeof spec === 'string' ? spec : undefined;
-};
-
-/**
- * Panel-level settings that live beside the visualization config but are not part of
- * the generated chart schema, so they would be dropped when an edit replaces `config`.
- */
-const PANEL_LEVEL_CONFIG_KEYS = ['drilldowns', 'hide_title', 'hide_border', 'time_range'] as const;
-
-/** Pick the panel-level settings off an existing panel so edits can carry them over. */
-const getPanelLevelSettings = (
-  existingPanel: AttachmentPanel | undefined
-): Record<string, unknown> => {
-  const config = (existingPanel?.config ?? {}) as Record<string, unknown>;
-  return Object.fromEntries(
-    PANEL_LEVEL_CONFIG_KEYS.filter((key) => config[key] !== undefined).map((key) => [
-      key,
-      config[key],
-    ])
-  );
 };
 
 /**
@@ -90,7 +72,19 @@ export const createVisPanelResolver = ({
     existingPanel,
   }: VisPanelResolutionRequest): Promise<PanelContentAttempt> => {
     try {
-      const panelLevelSettings = getPanelLevelSettings(existingPanel);
+      // Panel-level settings sit beside the chart keys in `config` but are not part of the
+      // chart schema, so keep them out of generation and carry them over on edits.
+      const {
+        drilldowns,
+        hide_title: hideTitle,
+        hide_border: hideBorder,
+        time_range: timeRange,
+        ...existingChartConfig
+      } = existingPanel?.config ?? {};
+      const panelLevelSettings = omitBy(
+        { drilldowns, hide_title: hideTitle, hide_border: hideBorder, time_range: timeRange },
+        isUndefined
+      );
 
       if (renderer === 'vega') {
         if (applyChartRules) {
@@ -123,7 +117,9 @@ export const createVisPanelResolver = ({
         };
       }
 
-      const existingConfig = existingPanel?.config as VisualizationConfig | undefined;
+      const existingConfig = existingPanel
+        ? (existingChartConfig as VisualizationConfig)
+        : undefined;
 
       const result = await buildLensConfig({
         nlQuery,
