@@ -113,6 +113,10 @@ export interface InMemoryConnector<
   config: Config;
   exposeConfig?: boolean;
   isDynamic?: boolean;
+  /**
+   * Events are on for this in-memory connector. GET reports it for a dual type.
+   */
+  isInboundEventsEnabled?: boolean;
 }
 
 export type FindActionResult = ConnectorWithExtraFindData;
@@ -255,6 +259,11 @@ export interface ActionTypeCoreFields<
    * When true, the connector type is shown as technical preview in the UI.
    */
   isExperimental?: boolean;
+  /**
+   * Auth type ids from the connector spec that opted into sandbox credential injection.
+   * Populated for spec-backed connectors via createConnectorTypeFromSpec.
+   */
+  sandboxSupportedAuthTypes?: readonly string[];
   /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.

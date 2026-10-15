@@ -6,7 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import {
+  NIGHTSHIFT_API_PRIVILEGES,
+  NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
+} from '@kbn/nightshift-shared';
 import {
   MAX_RUN_LIMIT,
   MIN_RUN_LIMIT,
@@ -39,15 +42,48 @@ const limitsUpdateSchema = z
     message: 'At least one run limit is required',
   });
 
-const settingsUpdateSchema = z
+const activateLimitsSchema = z
   .object({
-    enabled: z.boolean().optional(),
-    limits: limitsUpdateSchema.optional(),
+    detection: z
+      .number()
+      .int()
+      .min(MIN_RUN_LIMIT + 1)
+      .max(MAX_RUN_LIMIT)
+      .optional(),
+    investigation: z
+      .number()
+      .int()
+      .min(MIN_RUN_LIMIT + 1)
+      .max(MAX_RUN_LIMIT)
+      .optional(),
+    ki_extraction: z
+      .number()
+      .int()
+      .min(MIN_RUN_LIMIT + 1)
+      .max(MAX_RUN_LIMIT)
+      .optional(),
   })
   .strict()
-  .refine((update) => update.enabled !== undefined || update.limits !== undefined, {
-    message: 'At least one run quota setting is required',
+  .refine((limits) => Object.values(limits).some((limit) => limit !== undefined), {
+    message: 'At least one run limit to activate is required',
   });
+
+const settingsUpdateSchema = z.union([
+  z
+    .object({
+      enabled: z.boolean().optional(),
+      limits: limitsUpdateSchema.optional(),
+    })
+    .strict()
+    .refine((update) => update.enabled !== undefined || update.limits !== undefined, {
+      message: 'At least one run quota setting is required',
+    }),
+  z
+    .object({
+      activateLimits: activateLimitsSchema,
+    })
+    .strict(),
+]);
 
 const consumeRequestSchema = z.discriminatedUnion('group', [
   z.object({ group: z.literal('detection') }).strict(),
@@ -125,7 +161,7 @@ const putRunQuotasRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({

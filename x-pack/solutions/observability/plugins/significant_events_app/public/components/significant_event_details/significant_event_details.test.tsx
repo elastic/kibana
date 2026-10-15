@@ -45,13 +45,12 @@ const TIME_RANGE = {
 
 const baseEvent: SignificantEvent = {
   '@timestamp': '2026-06-11T15:03:00.000Z',
-  event_uuid: 'evt-1',
   event_id: 'checkout-outage',
-  status: 'open',
-  stream_names: ['logs.checkout'],
+  status: 'active',
+  source_ids: ['logs.checkout'],
   title: 'Checkout outage',
   summary: 'Payment processing is failing.',
-  severity: '60-high',
+  severity: 'high',
   confidence: 0.9,
   signals: [],
   causal_features: [],
@@ -60,7 +59,7 @@ const baseEvent: SignificantEvent = {
 
 const detectionSignal: SignalEntry = {
   type: 'detection',
-  stream_name: 'logs.checkout',
+  source_id: 'logs.checkout',
   description: 'Found: connection refused. Impact: checkout blocked.',
   verdict: 'confirms',
   collected_at: '2026-06-11T15:10:00.000Z',

@@ -21,14 +21,12 @@ import {
 
 const validView = {
   id: 'doc-1',
-  rule: { id: 'rule-1', version: null },
+  rule: { id: 'rule-1' },
   space_id: 'default',
   started_at: '2026-06-01T00:00:00.000Z',
   ended_at: '2026-06-01T00:00:01.500Z',
   timings: { duration_ms: 1500, scheduled_delay_ms: 250 },
   outcome: 'success' as const,
-  reason: null,
-  error: null,
 };
 
 describe('rule_execution_history_schema', () => {
@@ -273,8 +271,8 @@ describe('rule_execution_history_schema', () => {
         expect(parsed.per_page).toBe(25);
       });
 
-      it('accepts per_page=0 for a count-only read', () => {
-        expect(listRuleExecutionsRequestSchema.parse({ per_page: 0 }).per_page).toBe(0);
+      it('rejects per_page=0', () => {
+        expect(listRuleExecutionsRequestSchema.safeParse({ per_page: 0 }).success).toBe(false);
       });
 
       it('rejects negative per_page', () => {
@@ -312,15 +310,6 @@ describe('rule_execution_history_schema', () => {
         });
         expect(result.success).toBe(false);
       });
-
-      it('never trips the guard for a count-only read (per_page=0)', () => {
-        expect(
-          listRuleExecutionsRequestSchema.safeParse({
-            page: EXECUTION_HISTORY_MAX_RESULT_WINDOW,
-            per_page: 0,
-          }).success
-        ).toBe(true);
-      });
     });
 
     it('round-trips a fully populated query (with already-array fields)', () => {
@@ -343,37 +332,43 @@ describe('rule_execution_history_schema', () => {
   });
 
   describe('ruleExecutionViewSchema', () => {
-    it('accepts a valid row with error=null', () => {
+    it('accepts a valid row with no reason and no error', () => {
       expect(ruleExecutionViewSchema.parse(validView)).toEqual(validView);
     });
 
-    it('accepts a populated error object with a nullable stack trace', () => {
+    it('accepts a populated error object with a stack trace', () => {
       const row = {
         ...validView,
         outcome: 'failure' as const,
         reason: 'rule executor threw',
-        error: { message: 'boom', stack_trace: null },
+        error: { message: 'boom', stack_trace: 'at foo (bar.ts:1:1)' },
       };
+      expect(ruleExecutionViewSchema.parse(row)).toEqual(row);
+    });
+
+    it('accepts an error whose stack trace the source did not record', () => {
+      const row = { ...validView, outcome: 'failure' as const, error: { message: 'boom' } };
       expect(ruleExecutionViewSchema.parse(row)).toEqual(row);
     });
 
     it('strips unknown rule fields like a previously-supported name', () => {
       const row = {
         ...validView,
-        rule: { id: 'rule-1', version: null, name: 'My rule' },
+        rule: { id: 'rule-1', name: 'My rule' },
       };
 
       const parsed = ruleExecutionViewSchema.parse(row);
-      expect(parsed.rule).toEqual({ id: 'rule-1', version: null });
+      expect(parsed.rule).toEqual({ id: 'rule-1' });
     });
 
     it('requires rule.id', () => {
-      const row = { ...validView, rule: { version: null } as unknown as { id: string } };
+      const row = { ...validView, rule: {} as unknown as { id: string } };
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
 
-    it('requires rule.version to be present (may be null until the executor writes it)', () => {
-      const row = { ...validView, rule: { id: 'rule-1' } as { id: string } };
+    it('omits rule.version until the executor writes one, and rejects an explicit null', () => {
+      expect(ruleExecutionViewSchema.parse(validView).rule).not.toHaveProperty('version');
+      const row = { ...validView, rule: { id: 'rule-1', version: null } };
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
 
@@ -412,7 +407,7 @@ describe('rule_execution_history_schema', () => {
     });
 
     it('requires error.message when error is present', () => {
-      const row = { ...validView, error: { stack_trace: null } };
+      const row = { ...validView, error: { stack_trace: 'at foo (bar.ts:1:1)' } };
       expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
     });
 
@@ -465,7 +460,7 @@ describe('rule_execution_history_schema', () => {
       ).toBe(false);
     });
 
-    it('accepts per_page=0 for a count-only read', () => {
+    it('rejects per_page=0', () => {
       expect(
         listRuleExecutionsResponseSchema.safeParse({
           items: [],
@@ -473,7 +468,7 @@ describe('rule_execution_history_schema', () => {
           page: 1,
           per_page: 0,
         }).success
-      ).toBe(true);
+      ).toBe(false);
     });
 
     it('rejects a negative per_page', () => {

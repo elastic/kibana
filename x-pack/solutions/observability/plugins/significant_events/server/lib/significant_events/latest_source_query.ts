@@ -196,6 +196,36 @@ export const applyTimeRange = ({
   return timeRangeQuery;
 };
 
+/**
+ * Keeps entities whose lifetime overlaps `[from, to]`: created on or before `to`, and either still
+ * active or last updated on or after `from`. Must run after `pickLatestPerGroup`, so `@timestamp`
+ * is the entity's last update, and requires a `created_at` column holding its first `@timestamp`.
+ */
+export const applyLifetimeOverlap = ({
+  query,
+  from,
+  to,
+  activeWhere,
+}: {
+  query: ComposerQuery;
+  from?: string;
+  to?: string;
+  activeWhere: ESQLAstExpression;
+}): ComposerQuery => {
+  let overlapQuery = query;
+  if (to !== undefined) {
+    const overlapToIso = resolveTimeBound(to, { roundUp: true });
+    overlapQuery = overlapQuery.where`created_at <= TO_DATETIME(${{ overlapToIso }})`;
+  }
+  if (from !== undefined) {
+    const overlapFromIso = resolveTimeBound(from);
+    overlapQuery = overlapQuery.where`${activeWhere} OR @timestamp >= TO_DATETIME(${{
+      overlapFromIso,
+    }})`;
+  }
+  return overlapQuery;
+};
+
 interface BuildLatestSourceBaseQueryArgs {
   space: string;
   index: string;
@@ -358,6 +388,8 @@ interface RunFindByIdsEsqlQueryArgs {
   idValues: string[];
   // Optional extra predicate ANDed onto the id-membership filter.
   where?: ESQLAstExpression;
+  // Row cap. ES|QL answers 1,000 rows when no limit is given, which silently cuts a long history.
+  limit?: number;
 }
 
 export const runFindByIdsEsqlQuery = async <T>({
@@ -367,6 +399,7 @@ export const runFindByIdsEsqlQuery = async <T>({
   idField,
   idValues,
   where: extraWhere,
+  limit,
 }: RunFindByIdsEsqlQueryArgs): Promise<{ hits: T[] }> => {
   if (idValues.length === 0) return { hits: [] };
 
@@ -380,6 +413,9 @@ export const runFindByIdsEsqlQuery = async <T>({
     query = query.where`${where}`;
   }
   query = query.sort(['@timestamp', 'ASC']);
+  if (limit !== undefined) {
+    query = query.limit(limit);
+  }
   query = query.keep('_source');
 
   const hits = await executeEsqlQuery<T>({ esClient, query });

@@ -247,6 +247,42 @@ describe('monitorUsesGlobalParams', () => {
     expect(monitorUsesGlobalParams(monitor)).toBe(false);
   });
 
+  it('detects params inside Kerberos/NTLM despite formatter skip list', () => {
+    const kerberosMonitor = {
+      ...baseMonitor,
+      [ConfigKey.URLS]: 'https://example.com',
+      [ConfigKey.KERBEROS]: {
+        enabled: true,
+        auth_type: 'password',
+        username: 'svc',
+        password: '${kerberosPassword}',
+        keytab: '',
+        config_path: '/etc/krb5.conf',
+        krb5_conf: '',
+        realm: '',
+        service_name: '',
+        enable_krb5_fast: false,
+      },
+    } as SyntheticsMonitor;
+
+    const ntlmMonitor = {
+      ...baseMonitor,
+      [ConfigKey.URLS]: 'https://example.com',
+      [ConfigKey.NTLM]: {
+        enabled: true,
+        username: 'user',
+        password: '${ntlmPassword}',
+        domain: '',
+        workstation: '',
+      },
+    } as SyntheticsMonitor;
+
+    expect(monitorUsesGlobalParams(kerberosMonitor)).toBe(true);
+    expect(monitorUsesGlobalParams(kerberosMonitor, ['kerberosPassword'])).toBe(true);
+    expect(monitorUsesGlobalParams(kerberosMonitor, ['unrelated'])).toBe(false);
+    expect(monitorUsesGlobalParams(ntlmMonitor, ['ntlmPassword'])).toBe(true);
+  });
+
   it('returns true when monitor has params in hosts field (TCP/ICMP)', () => {
     const monitor = {
       ...baseMonitor,

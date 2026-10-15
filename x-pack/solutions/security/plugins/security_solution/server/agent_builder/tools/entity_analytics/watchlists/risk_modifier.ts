@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Tightens the server-side OpenAPI constraint (`z.number().min(0).max(2)`) to the
  * discrete 0.5-step ladder required by the UI (see
  * `../../../../../public/flyout/entity_details/watchlists_right/watchlist_form.tsx`).
  */
-export const riskModifierSchema = z.union([
-  z.literal(0),
-  z.literal(0.5),
-  z.literal(1),
-  z.literal(1.5),
-  z.literal(2),
-]);
+export const riskModifierSchema = lazySchema(() =>
+  z.union([z.literal(0), z.literal(0.5), z.literal(1), z.literal(1.5), z.literal(2)])
+);
 
 /**
  * Renders a `riskModifier` as `<value> (<human-readable meaning>)` for HITL

@@ -9,14 +9,7 @@ import type { Capabilities } from '@kbn/core/public';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { getAlertZeroDeepLinks } from './deep_links';
 
-const ALL_LINK_IDS = [
-  SecurityPageName.alerts,
-  SecurityPageName.attacks,
-  SecurityPageName.alertZeroThreatHunt,
-  SecurityPageName.alertZeroStreams,
-  SecurityPageName.alertZeroEscalations,
-  SecurityPageName.alertZeroWatches,
-];
+const ALL_LINK_IDS = [SecurityPageName.alertZeroEscalations, SecurityPageName.alertZeroWatches];
 
 describe('getAlertZeroDeepLinks', () => {
   it('registers the AlertZero pages without Discover or Dashboards stubs when no capabilities are passed', () => {
@@ -57,7 +50,6 @@ describe('getAlertZeroDeepLinks', () => {
 
     expect(ids).not.toContain(SecurityPageName.alertZeroEscalations);
     // Other links should still be present.
-    expect(ids).toContain(SecurityPageName.alerts);
     expect(ids).toContain(SecurityPageName.alertZeroWatches);
   });
 

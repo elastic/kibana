@@ -24,6 +24,8 @@ import {
   parseAwsRegionFromArn,
 } from '../../../common/services/cloud_connectors';
 
+import type { AccountType } from '../../types';
+
 import type {
   AwsCloudConnectorCredentials,
   AzureCloudConnectorCredentials,
@@ -33,7 +35,6 @@ import type {
   CloudSetupForCloudConnector,
   GetCloudConnectorRemoteRoleTemplateParams,
 } from './types';
-import type { AccountType } from '../../types';
 import {
   AWS_CLOUD_CONNECTOR_FIELD_NAMES,
   AZURE_CLOUD_CONNECTOR_FIELD_NAMES,
@@ -331,6 +332,36 @@ const getTemplateTokenValues = (
     [TEMPLATE_URL_CLOUD_REGION_ENV_VAR]: context.cloudRegion,
     [TEMPLATE_URL_CLOUD_ENVIRONMENT_ENV_VAR]: context.cloudEnvironment,
   };
+};
+
+const WORKLOAD_IDENTITY_FEDERATION_STACK_PARAM_TOKENS = {
+  ElasticOrganizationId: TEMPLATE_URL_ELASTIC_ORGANIZATION_ID_ENV_VAR,
+  ElasticCloudProvider: TEMPLATE_URL_CLOUD_PROVIDER_ENV_VAR,
+  ElasticCloudRegion: TEMPLATE_URL_CLOUD_REGION_ENV_VAR,
+  ElasticCloudEnvironment: TEMPLATE_URL_CLOUD_ENVIRONMENT_ENV_VAR,
+  ElasticResourceType: TEMPLATE_URL_ELASTIC_RESOURCE_TYPE_ENV_VAR,
+  ElasticResourceId: TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
+} as const satisfies Record<string, TemplateUrlToken>;
+
+/**
+ * Stack parameters of the IaCP `workload_identity_federation` template that Kibana fills.
+ * Unresolved values are omitted so the user can still enter them in the console; outside
+ * Elastic Cloud none are known, so the defaults are not sent.
+ */
+export const getWorkloadIdentityFederationStackParams = (
+  cloud: CloudSetupForCloudConnector | undefined
+): Record<string, string> => {
+  if (!cloud?.isCloudEnabled && !cloud?.isServerlessEnabled) {
+    return {};
+  }
+  const values = getTemplateTokenValues(cloud, undefined);
+
+  return Object.entries(WORKLOAD_IDENTITY_FEDERATION_STACK_PARAM_TOKENS).reduce<
+    Record<string, string>
+  >((params, [name, token]) => {
+    const value = values[token];
+    return value ? { ...params, [name]: value } : params;
+  }, {});
 };
 
 export const getTemplateUrlFromPackageInfo = (
@@ -708,16 +739,21 @@ export const fieldIsInvalid = (value: string | undefined, hasInvalidRequiredVars
 
 // IaC launch URL helpers
 
-const TEMPLATE_URL_PARAM_REGEX = /templateURL=[^&]+/;
+const AWS_QUICK_CREATE_URL =
+  'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate';
 
-/** Returns true when a URL carries a `templateURL=` query parameter. */
-export const hasTemplateUrlParam = (url: string | undefined): boolean =>
-  Boolean(url && TEMPLATE_URL_PARAM_REGEX.test(url));
+type StackParams = Readonly<Record<string, string>>;
 
-export interface IacLaunchUrlParams {
+export interface StaticLaunchUrlParams {
   provider: CloudProviders;
   /** Static quick-create URL from the package manifest (token-substituted). */
   staticUrl: string | undefined;
+  /** Stack parameters set on a quick-create URL, replacing any it already carries. */
+  stackParams?: StackParams;
+}
+
+export interface ArtifactLaunchUrlParams {
+  provider: CloudProviders;
   /** Pre-signed artifact URL from IaCP — embeds credentials, never persist it. */
   artifactUrl: string;
   /**
@@ -725,44 +761,145 @@ export interface IacLaunchUrlParams {
    * stack-update deep link. A malformed ARN (no parseable region) returns undefined.
    */
   deploymentId?: string;
+  /** Stack parameters set on the quick-create link. */
+  stackParams?: StackParams;
+  /**
+   * Static quick-create URL from the package manifest (token-substituted). When it carries a
+   * `templateURL=`, the quick-create link keeps its console host and other query params.
+   */
+  staticUrl?: string;
 }
 
+const TEMPLATE_URL_PARAM_REGEX = /([?&])templateURL=[^&]*/;
+
+const getQuickCreateUrl = (artifactUrl: string, staticUrl: string | undefined): string => {
+  const templateUrlParam = `templateURL=${encodeURIComponent(artifactUrl)}`;
+  if (staticUrl && TEMPLATE_URL_PARAM_REGEX.test(staticUrl)) {
+    return staticUrl.replace(
+      TEMPLATE_URL_PARAM_REGEX,
+      (_match, separator: string) => `${separator}${templateUrlParam}`
+    );
+  }
+  return `${AWS_QUICK_CREATE_URL}?${templateUrlParam}`;
+};
+
+const setQuickCreateStackParams = (url: string, stackParams: StackParams): string =>
+  Object.entries(stackParams).reduce((acc, [name, value]) => {
+    const param = `param_${name}=${encodeURIComponent(value)}`;
+    const existingParam = new RegExp(`([?&])param_${name}=[^&]*`);
+    if (existingParam.test(acc)) {
+      // A replacer function keeps `$` sequences in the value literal.
+      return acc.replace(existingParam, (_match, separator: string) => `${separator}${param}`);
+    }
+    return `${acc}${acc.includes('?') ? '&' : '?'}${param}`;
+  }, url);
+
+const getAwsStackUpdateUrl = (deploymentId: string, artifactUrl: string): string | undefined => {
+  // Only a CloudFormation stack ARN can be updated: a region alone does not make one (a
+  // CloudWatch Logs ARN has a region too), so the same validator the fields and the API use
+  // gates the link. A malformed value, a non-stack ARN, or a partition with no public console
+  // means there is no stack to link to; do not fall through to the quick-create path or a new
+  // stack would be created.
+  const region = parseAwsRegionFromArn(deploymentId);
+  const host = getAwsConsoleHostFromArn(deploymentId);
+  if (!isCloudFormationStackArn(deploymentId) || !region || !host) {
+    return undefined;
+  }
+  // Console deep link on the ARN's own partition (GovCloud and China have their own console
+  // hosts). AWS does not document this format; it must be verified manually against the
+  // console before shipping.
+  return `https://${host}/cloudformation/home?region=${region}#/stacks/update/template?stackId=${encodeURIComponent(
+    deploymentId
+  )}&templateURL=${encodeURIComponent(artifactUrl)}`;
+};
+
 /**
- * Per-provider seam for turning a rendered artifact into a console launch URL.
- * Only AWS is implemented: IaCP has no Azure/GCP blueprints yet.
+ * Console launch URL for the package's static template, with the stack parameters set on a
+ * quick-create link. Any other URL is returned unchanged: extra query params could invalidate a
+ * signed template URL. AWS only.
  */
-export const getIacLaunchUrl = ({
+export const getStaticLaunchUrl = ({
   provider,
   staticUrl,
+  stackParams = {},
+}: StaticLaunchUrlParams): string | undefined => {
+  if (provider !== AWS_PROVIDER || !staticUrl) {
+    return undefined;
+  }
+  if (!TEMPLATE_URL_PARAM_REGEX.test(staticUrl)) {
+    return staticUrl;
+  }
+  return setQuickCreateStackParams(staticUrl, stackParams);
+};
+
+export interface GetStaticTemplateParams {
+  provider: CloudProviders;
+  cloud: CloudSetupForCloudConnector | undefined;
+  accountType: AccountType;
+  /** Package manifest template URL, before token substitution. */
+  iacTemplateUrl?: string;
+  stackParams?: StackParams;
+}
+
+export interface StaticTemplate {
+  url: string | undefined;
+  /** Names the deployment facts the package URL needs but this Kibana cannot provide. */
+  unresolvedTokensError: string | undefined;
+}
+
+/** Launch URL for the package's static template, or why it cannot be built. */
+export const getStaticTemplate = ({
+  provider,
+  cloud,
+  accountType,
+  iacTemplateUrl,
+  stackParams,
+}: GetStaticTemplateParams): StaticTemplate => {
+  if (!cloud) {
+    return { url: undefined, unresolvedTokensError: undefined };
+  }
+  const packageUrl = getCloudConnectorRemoteRoleTemplate({ cloud, accountType, iacTemplateUrl });
+  const url = getStaticLaunchUrl({ provider, staticUrl: packageUrl, stackParams });
+  const unresolvedTokens =
+    iacTemplateUrl && !packageUrl
+      ? getUnresolvedTemplateUrlTokens({ cloud, accountType, iacTemplateUrl })
+      : [];
+  return {
+    url,
+    unresolvedTokensError:
+      unresolvedTokens.length > 0
+        ? i18n.translate(
+            'xpack.fleet.cloudConnector.iacProvisioner.unresolvedTemplateTokensError',
+            {
+              defaultMessage:
+                'CloudFormation template is not available: {tokens} could not be resolved for this Elastic deployment.',
+              values: { tokens: unresolvedTokens.join(', ') },
+            }
+          )
+        : undefined,
+  };
+};
+
+/**
+ * Console launch URL for an IaCP-rendered artifact: a stack update when a stack ARN is known,
+ * otherwise a quick-create (on the package's static URL when it has one) with the stack
+ * parameters set. Only AWS is implemented: IaCP has no Azure/GCP blueprints yet.
+ */
+export const getArtifactLaunchUrl = ({
+  provider,
   artifactUrl,
   deploymentId,
-}: IacLaunchUrlParams): string | undefined => {
+  stackParams = {},
+  staticUrl,
+}: ArtifactLaunchUrlParams): string | undefined => {
   if (provider !== AWS_PROVIDER) {
     return undefined;
   }
-  const encodedArtifact = encodeURIComponent(artifactUrl);
+  // An existing stack keeps its parameter values, so the update link carries none.
   if (deploymentId) {
-    // Only a CloudFormation stack ARN can be updated: a region alone does not make one (a
-    // CloudWatch Logs ARN has a region too), so the same validator the fields and the API use
-    // gates the link. A malformed value, a non-stack ARN, or a partition with no public console
-    // means there is no stack to link to; do not fall through to the quick-create path or a new
-    // stack would be created.
-    const region = parseAwsRegionFromArn(deploymentId);
-    const host = getAwsConsoleHostFromArn(deploymentId);
-    if (!isCloudFormationStackArn(deploymentId) || !region || !host) {
-      return undefined;
-    }
-    // Console deep link on the ARN's own partition (GovCloud and China have their own console
-    // hosts). AWS does not document this format; it must be verified manually against the
-    // console before shipping.
-    return `https://${host}/cloudformation/home?region=${region}#/stacks/update/template?stackId=${encodeURIComponent(
-      deploymentId
-    )}&templateURL=${encodedArtifact}`;
+    return getAwsStackUpdateUrl(deploymentId, artifactUrl);
   }
-  if (!staticUrl || !hasTemplateUrlParam(staticUrl)) {
-    return undefined;
-  }
-  return staticUrl.replace(TEMPLATE_URL_PARAM_REGEX, `templateURL=${encodedArtifact}`);
+  return setQuickCreateStackParams(getQuickCreateUrl(artifactUrl, staticUrl), stackParams);
 };
 
 /** Stack ARN field copy shared by the wizard's connector form and the AWS onboarding setup. */

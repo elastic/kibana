@@ -16,7 +16,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
-import { builtInEvaluatorMessage, handleEvaluatorError } from './shared/handle_evaluator_error';
+import { builtInEvaluatorConflict, handleEvaluatorError } from './shared/handle_evaluator_error';
 import { toPersistedEvaluatorResponse } from './shared/to_persisted_evaluator';
 
 export const registerUpdateEvaluatorRoute = ({
@@ -47,7 +47,7 @@ export const registerUpdateEvaluatorRoute = ({
       },
       async (context, request, response) => {
         const { name } = request.params;
-        const { description, judge } = request.body;
+        const { description, judge, base_version: baseVersion } = request.body;
 
         if (description === undefined && judge === undefined) {
           return response.badRequest({
@@ -56,7 +56,7 @@ export const registerUpdateEvaluatorRoute = ({
         }
 
         if (evaluatorRegistry.isBuiltIn(name)) {
-          return response.badRequest({ body: { message: builtInEvaluatorMessage(name) } });
+          return builtInEvaluatorConflict(response, name);
         }
 
         try {
@@ -66,7 +66,7 @@ export const registerUpdateEvaluatorRoute = ({
 
           const evaluator = await evaluatorDefinitionService
             .getClient({ spaceId })
-            .update(name, { description, judge, createdBy });
+            .update(name, { description, judge, createdBy, baseVersion });
 
           return response.ok({ body: { evaluator: toPersistedEvaluatorResponse(evaluator) } });
         } catch (error) {

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { createLogstashLensEditorSuiteSetup, spaceTest } from '../fixtures';
 
 const OVERRIDE_AXIS_TITLE = 'overridden axis';
 
-spaceTest.describe('Lens chart style settings', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('Lens chart style settings', { tag: tags.deploymentAgnostic }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup({ enableChartDebug: true });
 
   spaceTest.beforeAll(suiteSetup.beforeAll);

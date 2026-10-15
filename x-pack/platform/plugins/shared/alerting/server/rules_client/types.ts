@@ -76,6 +76,7 @@ export interface RulesClientContext {
    */
   readonly request: KibanaRequest;
   readonly getUserName: () => Promise<string | null>;
+  readonly getProfileUid: () => Promise<string | null>;
   readonly spaceId: string;
   readonly namespace?: string;
   readonly taskManager: TaskManagerStartContract;

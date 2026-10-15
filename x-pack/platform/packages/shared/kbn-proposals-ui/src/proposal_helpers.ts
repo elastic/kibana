@@ -6,17 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ApprovalProposal } from './types';
-import type { ApprovalDecision } from './approval_content';
+import type { ApprovalProposal, ApprovalDecision } from './types';
 import type { ApprovalPhase } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
-
-/**
- * Shared with anything that opens the approval decision for a proposal (the modal itself, the
- * flyout's proposed-action row), so they title it identically.
- */
-export const getProposalTitle = (proposal: ApprovalProposal): string =>
-  proposal.action?.name ?? proposal.actionWorkflowId ?? APPROVAL_MODAL_TRANSLATIONS.noAction;
+import { formatDismissReason } from './dismiss_reason';
 
 /** Stored lowercase (`configure`, `respond`, ...); the caption reads it in sentence case. */
 const toSentenceCase = (value: string): string =>
@@ -83,40 +76,61 @@ export const getProposalCaption = (
 
 /**
  * The read-only decision `ApprovalContent` renders in place of its Approve/Decline buttons.
- * `undefined` only while a proposal is still awaiting one — `decision` itself is the whole
- * condition. Missing `decidedBy`/`decidedAt` is not a reason to hide a real decision: `decidedBy`
- * can be genuinely absent (no resolvable identity), in which case a fallback name still names
- * *someone* rather than reverting to "awaiting a decision" for a proposal that plainly is not.
- * `decidedAt` is passed through as-is rather than defaulted to now — inventing a timestamp would
- * read as real audit attribution and would keep changing on every reopen; `ApprovalActorTime`
- * renders the actor alone when it is absent.
+ * `undefined` only while a proposal is genuinely still awaiting one: a proposal can reach a
+ * terminal state — expired, chiefly — without a `decision` ever being made, so `!proposal.decision`
+ * alone is not sufficient to mean "pending". Missing `decidedBy`/`decidedAt` is not a reason to hide
+ * a real decision: `decidedBy` can be genuinely absent (no resolvable identity), in which case a
+ * fallback name still names *someone* rather than reverting to "awaiting a decision" for a proposal
+ * that plainly is not. `decidedAt` is passed through as-is rather than defaulted to now — inventing
+ * a timestamp would read as real audit attribution and would keep changing on every reopen;
+ * `ApprovalActorTime` renders the actor alone when it is absent. `actorName` itself is left
+ * `undefined` when nobody actually decided (expiry is a timeout, not a decision by anyone), so a
+ * caller falls back to its own plain caption rather than rendering a fabricated "by Unknown".
  */
 export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecision | undefined => {
-  if (!proposal.decision) {
+  if (!proposal.decision && !isProposalExpired(proposal)) {
     return undefined;
   }
-  const actorName =
-    proposal.decidedBy?.fullName ??
-    proposal.decidedBy?.username ??
-    APPROVAL_MODAL_TRANSLATIONS.unknownActorFallback;
+  const actorName = proposal.decision
+    ? proposal.decidedBy?.fullName ??
+      proposal.decidedBy?.username ??
+      APPROVAL_MODAL_TRANSLATIONS.unknownActorFallback
+    : undefined;
+  const status = approvedStatusFor(proposal);
   return {
-    status: approvedStatusFor(proposal),
+    status,
     actorName,
     decidedAt: proposal.decidedAt,
-    reason: proposal.rationale,
+    // A failed action reports why it failed, so the analyst is not left with "Action failed"
+    // alone. A decline's reason is structured (`dismissReason`), with the free-text rationale
+    // folded in when the decliner left one; an approval has no `dismissReason` at all, so it
+    // falls back to `rationale` alone.
+    reason:
+      status === 'failed' && proposal.executionError
+        ? proposal.executionError
+        : proposal.dismissReason
+        ? formatDismissReason(proposal.dismissReason, proposal.rationale)
+        : proposal.rationale,
   };
 };
 
 /**
+ * Expiry is checked first because it is orthogonal to the approved/declined axis below: a proposal
+ * whose gate timed out never received a `decision` at all, so `proposal.decision !== 'approved'`
+ * would otherwise read it as declined — an outcome nobody chose.
+ *
  * Approving only resumes the gate workflow — the action it starts still runs afterward, so a
  * `decision: 'approved'` proposal can read back `executing` or `failed` as well as `succeeded`.
  * Declining has no action to run, so it settles as soon as it is decided — `no_action` covers
- * that case too, but `'declined'` (the branch above) already accounts for every non-approved
+ * that case too, but `'declined'` (the branch below) already accounts for every non-approved
  * decision regardless of status, so this only ever sees `no_action` for an *approved* proposal
  * that simply carried no action to run — a distinct outcome from `'applied'`, which claims one
  * ran and succeeded.
  */
 const approvedStatusFor = (proposal: ApprovalProposal): Exclude<ApprovalPhase, 'pending'> => {
+  if (isProposalExpired(proposal)) {
+    return 'expired';
+  }
   if (proposal.decision !== 'approved') {
     return 'declined';
   }
@@ -143,9 +157,10 @@ export const getProposalTone = (proposal: ApprovalProposal): 'primary' | 'danger
 };
 
 /**
- * `expired` is the computed flag for a deadline that has passed; `status: 'expired'` is the
- * durable settlement, which the workflow can write before the deadline when no decision was
- * reached. Without both, a proposal settled early still offers a decision that would be refused.
+ * `status: 'expired'` is the workflow's reliable settlement for an unanswered proposal (on
+ * attempt exhaustion, or a failure) before the deadline itself passes. A deadline that has passed
+ * but not yet been swept to this status still reads `pending` here; that lag is accepted rather
+ * than compared against `expiresAt` directly.
  */
 export const isProposalExpired = (proposal: ApprovalProposal): boolean =>
-  proposal.expired || proposal.status === 'expired';
+  proposal.status === 'expired';

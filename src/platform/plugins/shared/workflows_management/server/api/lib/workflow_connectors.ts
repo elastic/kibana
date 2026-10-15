@@ -46,9 +46,23 @@ const toConnectorTypeInfo = (actionType: ListedActionType): ConnectorTypeInfo =>
 const getConnectorInstanceConfig = (
   connector: FindActionResult
 ): { config: ConnectorInstanceConfig } | undefined => {
-  if (connector.actionTypeId === '.inference') {
-    return { config: { taskType: connector.config?.taskType } };
+  const taskType =
+    connector.actionTypeId === '.inference'
+      ? (connector.config?.taskType as string | undefined)
+      : undefined;
+  const selectedActions = Array.isArray(connector.config?.selectedActions)
+    ? (connector.config?.selectedActions as string[])
+    : undefined;
+
+  if (taskType !== undefined || selectedActions !== undefined) {
+    return {
+      config: {
+        ...(taskType !== undefined ? { taskType } : {}),
+        ...(selectedActions !== undefined ? { selectedActions } : {}),
+      },
+    };
   }
+
   return undefined;
 };
 

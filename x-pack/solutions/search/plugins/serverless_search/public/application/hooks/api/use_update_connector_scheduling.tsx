@@ -18,9 +18,12 @@ export const useConnectorScheduling = (connectorId: string) => {
   const { http } = useKibanaServices();
   return useMutation({
     mutationFn: async (configuration: SchedulingConfiguraton) => {
-      return await http.post(`/internal/serverless_search/connectors/${connectorId}/scheduling`, {
-        body: JSON.stringify({ ...configuration }),
-      });
+      return await http.post(
+        `/internal/serverless_search/connectors/${encodeURIComponent(connectorId)}/scheduling`,
+        {
+          body: JSON.stringify({ ...configuration }),
+        }
+      );
     },
   });
 };

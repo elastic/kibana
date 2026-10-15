@@ -11,6 +11,7 @@ export {
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
+  SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
   SERVICE_ACCOUNT_NAME_REGEX,
   SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
@@ -22,7 +23,11 @@ export {
   serviceAccountNameSchema,
 } from './schemas';
 export type {
+  DeleteServiceAccountConflictAttributes,
+  DeleteServiceAccountResponse,
+  ListServiceAccountWorkloadsResponse,
   ListServiceAccountsResponse,
+  ServiceAccountBoundWorkload,
   ServiceAccountDirectoryCreator,
   ServiceAccountDirectoryEntry,
 } from './types';

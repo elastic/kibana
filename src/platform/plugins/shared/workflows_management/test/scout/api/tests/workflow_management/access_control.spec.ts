@@ -8,12 +8,13 @@
  */
 
 import { randomUUID } from 'node:crypto';
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { deleteTestExecutions } from '../../fixtures/delete_test_executions';
 
-apiTest.describe('Workflow access control', { tag: tags.stateful.classic }, () => {
+// Suite fails consistently on ECH: https://github.com/elastic/kibana/issues/294915
+apiTest.describe('Workflow access control', { tag: '@local-stateful-classic' }, () => {
   const spaceId = `workflow-acl-${randomUUID()}`;
   const ownerUsername = `workflow-owner-${randomUUID()}`;
   const readerUsername = `workflow-reader-${randomUUID()}`;
@@ -630,6 +631,7 @@ steps:
       }
     });
   }
+
   apiTest(
     'passes the caller identity through Agent Builder status and execution lists',
     async ({ apiClient, esClient }) => {

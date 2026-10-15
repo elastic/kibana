@@ -50,11 +50,21 @@ describe('useUnlinkEntities', () => {
     });
 
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('/api/security/entity_store/resolution/unlink', {
-        version: '2023-10-31',
-        method: 'POST',
-        body: JSON.stringify({ entity_ids: ['alias-1'] }),
-      });
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/api/security/entity_store/resolution/unlink',
+        expect.objectContaining({
+          version: '2023-10-31',
+          method: 'POST',
+          body: JSON.stringify({ entity_ids: ['alias-1'] }),
+          context: {
+            child: {
+              type: 'security_solution',
+              name: 'entity_analytics:entity_resolution',
+              id: 'resolution_unlink',
+            },
+          },
+        })
+      );
     });
   });
 
