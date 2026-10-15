@@ -17,6 +17,8 @@ const ALERTING_V2_ENABLED_SETTING = 'alerting:v2:enabled';
 const RULE_MANAGEMENT_SKILL_ID = 'rule-management';
 const ACTION_POLICY_MANAGEMENT_SKILL_ID = 'action-policy-management';
 const ALERTING_V2_SKILL_IDS = [RULE_MANAGEMENT_SKILL_ID, ACTION_POLICY_MANAGEMENT_SKILL_ID];
+// Several times the 10s uiSettings cache TTL, which a write only invalidates on the node serving it.
+const SETTINGS_PROPAGATION_TIMEOUT = 30_000;
 const RESTRICTED_SOLUTION_SPACES = [
   { id: 'alerting-v2-security-solution', solution: 'security' as const },
   { id: 'alerting-v2-search-solution', solution: 'es' as const },
@@ -36,8 +38,8 @@ const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => s
  * `alerting:v2:experimentalFeatures`. This suite exercises all gates before
  * asserting either skill is listed.
  *
- * This is the canonical gating suite because the generic Scout config leaves
- * `alerting:v2:enabled` unpinned, so it can be flipped on and off at runtime.
+ * This is the canonical gating suite because the generic Scout config does not
+ * pin `alerting:v2:enabled` (it defaults to on), so it can be flipped at runtime.
  * The dedicated `scout_alerting_v2` config forces the feature on and therefore
  * cannot cover the disabled cases.
  */
@@ -101,19 +103,24 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
     }
   );
 
-  // Toggling `alerting:v2:enabled` on requires the Alerting V2 plugin, which only
+  // Toggling `alerting:v2:enabled` requires the Alerting V2 plugin, which only
   // ships enabled on stateful; on serverless the plugin is disabled.
   // Constantly fails on ECH: https://github.com/elastic/kibana/issues/283926
   apiTest(
-    'does not list the alerting V2 skills when only alerting:v2:enabled is on',
+    'does not list the alerting V2 skills when alerting:v2:enabled is off',
     { tag: '@local-stateful-classic' },
-    async ({ apiClient, requestAuth }) => {
+    async ({ apiClient, kbnClient, requestAuth }) => {
+      await kbnClient.uiSettings.update({
+        [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
+        [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
+      });
+
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
       const headers = { ...COMMON_HEADERS, ...apiKeyHeader };
 
       const setResponse = await apiClient.post(
         `${GLOBAL_SETTINGS_API}/${ALERTING_V2_ENABLED_SETTING}`,
-        { headers, body: { value: true }, responseType: 'json' }
+        { headers, body: { value: false }, responseType: 'json' }
       );
       expect(setResponse).toHaveStatusCode(200);
 
@@ -172,12 +179,19 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
       );
       expect(setResponse).toHaveStatusCode(200);
 
-      const response = await apiClient.get(SKILLS_API, { headers, responseType: 'json' });
-      expect(response).toHaveStatusCode(200);
-      expect(Array.isArray(response.body.results)).toBe(true);
-      for (const skillId of ALERTING_V2_SKILL_IDS) {
-        expect(getSkillIds(response.body.results)).toContain(skillId);
-      }
+      await expect
+        .poll(
+          async () => {
+            const response = await apiClient.get(SKILLS_API, { headers, responseType: 'json' });
+            // Returned, not thrown: throwing inside expect.poll aborts polling instead of retrying.
+            if (response.statusCode !== 200) {
+              return `status ${response.statusCode}: ${JSON.stringify(response.body)}`;
+            }
+            return getSkillIds(response.body.results);
+          },
+          { timeout: SETTINGS_PROPAGATION_TIMEOUT, intervals: [1_000] }
+        )
+        .toStrictEqual(expect.arrayContaining(ALERTING_V2_SKILL_IDS));
     }
   );
 

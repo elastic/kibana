@@ -24,6 +24,12 @@ export interface EnsureClusterPrivilegeParams {
   privilege: ServiceAccountClusterPrivilege;
   /** What the caller is attempting, as a verb phrase for the messages, e.g. `create a service account`. */
   action: string;
+  /**
+   * Called with the 403 before it is thrown. The one hook for auditing a refusal: an
+   * authorization refusal is the only failure the service account audit events record, and this
+   * is where it is told apart from every other 403 on the same path.
+   */
+  onRefused?: (error: Boom.Boom) => void;
 }
 
 /**
@@ -37,6 +43,7 @@ export const ensureClusterPrivilege = async ({
   logger,
   privilege,
   action,
+  onRefused,
 }: EnsureClusterPrivilegeParams): Promise<void> => {
   const { hasAllRequested } = await checkPrivilegesWithRequest(request).globally({
     elasticsearch: { cluster: [privilege], index: {} },
@@ -44,6 +51,8 @@ export const ensureClusterPrivilege = async ({
 
   if (!hasAllRequested) {
     logger.warn(`Refused to ${action}: missing \`${privilege}\` cluster privilege`);
-    throw Boom.forbidden(`Cannot ${action}: missing \`${privilege}\` cluster privilege`);
+    const error = Boom.forbidden(`Cannot ${action}: missing \`${privilege}\` cluster privilege`);
+    onRefused?.(error);
+    throw error;
   }
 };

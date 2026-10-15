@@ -36,7 +36,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
-import { selectDataSourceProfileId, selectTabRuntimeState } from '../runtime_state';
+import { getTabDataView, selectDataSourceProfileId, selectTabRuntimeState } from '../runtime_state';
 import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
 import {
   ProfileStateType,
@@ -1256,9 +1256,9 @@ describe('tab_state actions', () => {
     expect(resolveSpy).toHaveBeenCalledWith(expect.objectContaining({ esql: openingQuery }));
     // The profile provides the query, so no data view is loaded to derive it.
     expect(loadDataViewSpy).not.toHaveBeenCalled();
-    expect(
-      selectTabRuntimeState(toolkit.runtimeStateManager, tabId).currentDataView$.getValue()
-    ).toBe(resolved.dataView);
+    expect(getTabDataView(selectTabRuntimeState(toolkit.runtimeStateManager, tabId))).toBe(
+      resolved.dataView
+    );
     resolveSpy.mockRestore();
     loadDataViewSpy.mockRestore();
   });

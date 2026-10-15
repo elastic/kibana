@@ -361,6 +361,8 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .suggest-details-container {
       background-color: ${theme.euiTheme.colors.backgroundBasePlain};
       line-height: 1.5rem;
+      border-radius: ${theme.euiTheme.border.radius.inline};
+      box-shadow: ${theme.euiTheme.shadows.l.down};
     }
 
     .suggest-details {

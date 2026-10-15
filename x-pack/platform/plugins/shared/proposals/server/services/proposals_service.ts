@@ -52,6 +52,7 @@ import type { ChartsWindow } from './esql';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import { CONFIDENCE_RANK_FIELD, IMPACT_RANK_FIELD, toSortRanks } from '../storage/sort_ranks';
 import {
+  ProposalAlreadyExistsError,
   ProposalConflictError,
   ProposalInvalidActionInputError,
   ProposalNotFoundError,
@@ -109,6 +110,27 @@ export interface ProposalsServiceDeps {
  * covers the API, the workflows resume route, the Inbox and Agent Builder at
  * once. The routes only release the gate.
  */
+const PRIORITY_SORT: SortCombinations[] = [
+  { [IMPACT_RANK_FIELD]: { order: 'asc' } },
+  { [CONFIDENCE_RANK_FIELD]: { order: 'asc' } },
+  // Soonest deadline first; proposals without one come after those with.
+  { expiresAt: { order: 'asc', missing: '_last' } },
+  // Final tiebreak, so paging over equally-ranked proposals is stable.
+  { createdAt: { order: 'desc' } },
+];
+
+/**
+ * A conversation's history, newest first. An undecided proposal has no `decidedAt` yet and is the
+ * live one, so it leads; a retry inherits its original's `createdAt`, which therefore cannot
+ * order a chain. The chain keys make the order total, so paging cannot repeat or skip a row.
+ */
+const NEWEST_SORT: SortCombinations[] = [
+  { decidedAt: { order: 'desc', missing: '_first' } },
+  { createdAt: { order: 'desc' } },
+  { rootProposalId: { order: 'asc' } },
+  { revision: { order: 'asc' } },
+];
+
 export class ProposalsService {
   constructor(private readonly deps: ProposalsServiceDeps) {}
 
@@ -117,12 +139,18 @@ export class ProposalsService {
    * path has already resolved it: a caller that needs the approval policy —
    * the gate workflow does, to honour `always-gate` — would otherwise have to
    * fetch the same definition a second time.
+   *
+   * `id`, when supplied, is the id the proposal is created under instead of a
+   * random one, claimed with `op_type: 'create'`. An id that already exists is
+   * refused with {@link ProposalAlreadyExistsError} and nothing is read or
+   * returned: what a duplicate should mean is the caller's to decide, which is
+   * the point of the caller choosing the id.
    */
   async create(
     params: CreateProposalRequest,
     { spaceId, user, request }: { spaceId: string; user?: ProposalUser; request: KibanaRequest }
   ): Promise<ProposalWithMetadata> {
-    const id = uuidv4();
+    const id = params.id ?? uuidv4();
     // Workflow callers reach us through Liquid templates, which render an
     // absent input as an empty string. Left as-is, `expiresAt: ''` is rejected
     // by the `date` mapping and an empty `actionWorkflowId` would make a
@@ -178,7 +206,15 @@ export class ProposalsService {
       revision: 1,
     };
 
-    await this.deps.storage.index({ id, document, op_type: 'create' });
+    try {
+      await this.deps.storage.index({ id, document, op_type: 'create' });
+    } catch (error) {
+      // Only a caller-chosen id can already exist: a random one never collides.
+      if (params.id !== undefined && isVersionConflict(error)) {
+        throw new ProposalAlreadyExistsError(`Proposal [${id}] already exists`);
+      }
+      throw error;
+    }
 
     await this.attachToConversation(id, params.conversationId, document.title, request);
 
@@ -251,14 +287,7 @@ export class ProposalsService {
       size: query.size,
       from: query.from,
       query: { bool: { filter: toFilterClauses(query, spaceId) } },
-      sort: sort ?? [
-        { [IMPACT_RANK_FIELD]: { order: 'asc' } },
-        { [CONFIDENCE_RANK_FIELD]: { order: 'asc' } },
-        // Soonest deadline first; proposals without one come after those with.
-        { expiresAt: { order: 'asc', missing: '_last' } },
-        // Final tiebreak, so paging over equally-ranked proposals is stable.
-        { createdAt: { order: 'desc' } },
-      ],
+      sort: sort ?? (query.order === 'newest' ? NEWEST_SORT : PRIORITY_SORT),
     });
 
     const proposals = await this.withMetadataBatch(
@@ -820,6 +849,7 @@ export class ProposalsService {
               {
                 status: 'pending',
                 excludeSuperseded: true,
+                excludeUndecidedSuperseded: false,
                 // Past its deadline a proposal awaits no decision, even before the gate settles it.
                 excludeExpired: true,
               },
@@ -1230,6 +1260,18 @@ const toFilterClauses = (
     // A superseded proposal is represented by its successor, so showing both
     // would put every retry of the same subject in the queue.
     filter.push({ bool: { must_not: { exists: { field: 'supersededBy' } } } });
+  }
+  if (filters.excludeUndecidedSuperseded) {
+    filter.push({
+      bool: {
+        must_not: {
+          bool: {
+            filter: [{ exists: { field: 'supersededBy' } }],
+            must_not: [{ exists: { field: 'decision' } }],
+          },
+        },
+      },
+    });
   }
   if (filters.excludeExpired) {
     // A proposal with no deadline never expires, so it has to survive the

@@ -9,6 +9,7 @@ import pMap from 'p-map';
 import { chunk, flatten, omit } from 'lodash';
 import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
@@ -20,6 +21,7 @@ import {
   type IntervalSchedule,
   type RruleSchedule,
   type ScheduleOptions,
+  type TaskCredential,
   type TaskInstanceWithDeprecatedFields,
   type TaskInstanceWithId,
 } from './task';
@@ -32,6 +34,7 @@ import { TaskAlreadyRunningError } from './lib/errors';
 import type { TaskPollingLifecycle } from './polling_lifecycle';
 import type { TaskTypeDictionary } from './task_type_dictionary';
 import { getExecutionId } from './lib/get_execution_id';
+import { credentialMatchesRunAs } from './lib/service_account_credential';
 import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import {
   taskManagerClaimNudgeTelemetry,
@@ -176,9 +179,10 @@ export class TaskScheduling {
     taskInstance: TaskInstanceWithDeprecatedFields,
     options?: ScheduleOptions
   ): Promise<ConcreteTaskInstance> {
+    const { runAs, ...taskInstanceWithoutRunAs } = taskInstance;
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...omit(options, 'apiKey', 'request'),
-      taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
+      taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstanceWithoutRunAs, this.logger),
     });
 
     const traceparent =
@@ -188,7 +192,8 @@ export class TaskScheduling {
 
     return await this.store.schedule(
       {
-        ...modifiedTask,
+        ...omit(modifiedTask, 'runAs'),
+        ...(runAs ? { runAs } : {}),
         traceparent: traceparent || '',
         enabled: modifiedTask.enabled ?? true,
       },
@@ -211,11 +216,12 @@ export class TaskScheduling {
         ? agent.currentTraceparent
         : '';
     const modifiedTasks = await Promise.all(
-      taskInstances.map(async (taskInstance, i, arr) => {
-        const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
+      taskInstances.map(async ({ runAs, ...taskInstance }, i, arr) => {
+        const { taskInstance: middlewareTask } = await this.middleware.beforeSave({
           ...omit(options, 'apiKey', 'request'),
           taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
         });
+        const modifiedTask = { ...omit(middlewareTask, 'runAs'), ...(runAs ? { runAs } : {}) };
         const enabled = modifiedTask.enabled ?? true;
         let scheduling: Partial<{ runAt: Date; scheduledAt: Date }> = {};
         if (enabled) {
@@ -482,6 +488,8 @@ export class TaskScheduling {
     taskInstance: TaskInstanceWithId,
     options?: ScheduleOptions
   ): Promise<TaskInstanceWithId> {
+    await this.ensureExistingCredentialMatchesRunAs(taskInstance);
+
     // check if task specifies a schedule interval
     // if so,try to update the just the schedule
     // only works for interval schedule
@@ -502,6 +510,30 @@ export class TaskScheduling {
       }
     }
     return taskInstance;
+  }
+
+  // A task's identity is only set when it is created, so a different `runAs` can't be applied to an
+  // existing task, and keeping the old identity would run it as an account the caller didn't ask for.
+  // The schedule update reads the task again, so a task removed and scheduled again with another
+  // `runAs` in between gets this schedule. That's accepted: the update keeps the task's credential.
+  private async ensureExistingCredentialMatchesRunAs({ id, runAs }: TaskInstanceWithId) {
+    let credential: TaskCredential | undefined;
+    try {
+      credential = await this.store.getCredential(id);
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        return;
+      }
+      throw e;
+    }
+
+    if (!credentialMatchesRunAs(credential, runAs)) {
+      const error = SavedObjectsErrorHelpers.decorateConflictError(
+        new Error(`Task "${id}" exists with a different runAs. Remove it and schedule it again.`)
+      );
+      // `bulkSchedule`'s conflict only has a top-level `statusCode`, so set it here too.
+      throw Object.assign(error, { statusCode: VERSION_CONFLICT_STATUS });
+    }
   }
 }
 

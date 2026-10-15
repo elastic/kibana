@@ -38,9 +38,11 @@ export const paramSchema = schema.object({
 export const configurationSchema = schema.object({
   query: schema.string(),
   params: schema.recordOf(schema.string(), paramSchema),
+  include_frozen: schema.maybe(schema.boolean()),
 });
 
 export const configurationUpdateSchema = schema.object({
   query: schema.maybe(schema.string()),
   params: schema.maybe(schema.recordOf(schema.string(), paramSchema)),
+  include_frozen: schema.maybe(schema.boolean()),
 });

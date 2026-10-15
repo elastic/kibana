@@ -10,6 +10,7 @@ import { hostEntityDefinition } from '../../../../common/domain/definitions/host
 import { userEntityDefinition } from '../../../../common/domain/definitions/user';
 import { serviceEntityDefinition } from '../../../../common/domain/definitions/service';
 import { genericEntityDefinition } from '../../../../common/domain/definitions/generic';
+import type { ExtractionBlock } from '../../../../common/domain/definitions/entity_schema';
 import {
   EntityDefinitionRegistry,
   ENTITY_DEFINITION_TYPE_PATTERN,
@@ -17,22 +18,25 @@ import {
   type RegisterResult,
 } from '.';
 
+type TestDefinition = RegistrableEntityDefinition & { extraction: ExtractionBlock };
+
 const makeDefinition = (
   type: string,
   overrides: Partial<RegistrableEntityDefinition> = {}
-): RegistrableEntityDefinition => ({
+): TestDefinition => ({
   type,
   name: `Test '${type}' definition`,
-  fields: [
-    {
-      source: `${type}.name`,
-      destination: `${type}.name`,
-      retention: { operation: 'prefer_newest_value' },
-    },
-  ],
   identityField: { singleField: `${type}.name` },
-  indexPatterns: ['logs-*'],
   managedBy: { kind: 'plugin', id: 'testPlugin' },
+  extraction: {
+    fields: [
+      {
+        source: `${type}.name`,
+        destination: `${type}.name`,
+        retention: { operation: 'prefer_newest_value' },
+      },
+    ],
+  },
   ...overrides,
 });
 
@@ -75,22 +79,56 @@ describe('EntityDefinitionRegistry', () => {
 
     it('rejects a definition that fails the schema', () => {
       const definition = makeDefinition('bad_schema', {
-        indexPatterns: 'logs-*' as unknown as string[],
+        extraction: { fields: 'host.name' as unknown as ExtractionBlock['fields'] },
       });
 
       const result = registry.register(definition);
 
       expect(result.ok).toBe(false);
-      expectRejected('bad_schema', /failed schema validation: indexPatterns/);
+      expectRejected('bad_schema', /failed schema validation: extraction\.fields/);
     });
 
-    it.each(['Host', '1host', 'host..pod', 'host-', '_host', 'host pod', 'hôst', ''])(
-      'rejects type name %p that does not match the pattern',
-      (type) => {
-        expect(registry.register(makeDefinition(type)).ok).toBe(false);
-        expectRejected(type, /does not match pattern/);
-      }
-    );
+    it('accepts a definition with only the identity core', () => {
+      const { extraction, ...coreOnly } = makeDefinition('core_only');
+
+      expect(registry.register(coreOnly)).toEqual({ ok: true });
+      expect(registry.get('core_only')?.extraction).toBeUndefined();
+    });
+
+    it.each(['indexPatterns', 'filter'])('rejects the removed top-level key %p', (key) => {
+      const definition = { ...makeDefinition('removed_key'), [key]: [] };
+
+      expect(registry.register(definition).ok).toBe(false);
+      expectRejected('removed_key', new RegExp(`failed schema validation: .*${key}`));
+    });
+
+    it('rejects unknown keys in the extraction block', () => {
+      const base = makeDefinition('extra_extraction_key');
+      const definition = { ...base, extraction: { ...base.extraction, indexPatterns: [] } };
+
+      expect(registry.register(definition).ok).toBe(false);
+      expectRejected('extra_extraction_key', /failed schema validation: extraction.*indexPatterns/);
+    });
+
+    // `"` and `\` would break the double-quoted `<type>:` prefix the id compiler emits verbatim
+    // into ES|QL and Painless string literals, so the pattern must keep rejecting them. `'` is
+    // included for symmetry; it is simply outside the allowed character set.
+    it.each([
+      'Host',
+      '1host',
+      'host..pod',
+      'host-',
+      '_host',
+      'host pod',
+      'hôst',
+      '',
+      'a"b',
+      'a\\b',
+      "a'b",
+    ])('rejects type name %p that does not match the pattern', (type) => {
+      expect(registry.register(makeDefinition(type)).ok).toBe(false);
+      expectRejected(type, /does not match pattern/);
+    });
 
     it.each(['a', 'k8s.pod', 'aws_s3-bucket', 'a1.b2_c3-d4'])('accepts type name %p', (type) => {
       expect(ENTITY_DEFINITION_TYPE_PATTERN.test(type)).toBe(true);
@@ -110,7 +148,7 @@ describe('EntityDefinitionRegistry', () => {
       const mapping: Record<string, unknown> = { type: 'keyword' };
       mapping.self = mapping;
       const definition = makeDefinition('cyclic');
-      definition.fields = [{ ...definition.fields[0], mapping }];
+      definition.extraction.fields = [{ ...definition.extraction.fields[0], mapping }];
 
       let result: RegisterResult | undefined;
       expect(() => {
@@ -119,7 +157,7 @@ describe('EntityDefinitionRegistry', () => {
 
       expect(result).toEqual({
         ok: false,
-        reason: expect.stringContaining("circular reference at 'fields.0.mapping.self'"),
+        reason: expect.stringContaining("circular reference at 'extraction.fields.0.mapping.self'"),
       });
       expect(registry.get('cyclic')).toBeUndefined();
       expect(Object.isFrozen(definition)).toBe(false);
@@ -129,9 +167,9 @@ describe('EntityDefinitionRegistry', () => {
     it('accepts the same object referenced from two places and freezes it once', () => {
       const shared = { type: 'keyword' };
       const definition = makeDefinition('shared');
-      definition.fields = [
-        { ...definition.fields[0], mapping: shared },
-        { ...definition.fields[0], destination: 'other.field', mapping: shared },
+      definition.extraction.fields = [
+        { ...definition.extraction.fields[0], mapping: shared },
+        { ...definition.extraction.fields[0], destination: 'other.field', mapping: shared },
       ];
 
       expect(registry.register(definition).ok).toBe(true);
@@ -140,7 +178,7 @@ describe('EntityDefinitionRegistry', () => {
 
     it('turns an unexpected exception during validation into a rejection', () => {
       const definition = makeDefinition('throws');
-      Object.defineProperty(definition, 'fields', {
+      Object.defineProperty(definition.extraction, 'fields', {
         enumerable: true,
         get: () => {
           throw new Error('boom');
@@ -303,30 +341,30 @@ describe('EntityDefinitionRegistry', () => {
       expect(fromGet).toBe(input);
       expect(fromList).toBe(input);
       expect(Object.isFrozen(input)).toBe(true);
-      expect(Object.isFrozen(input.fields[0])).toBe(true);
+      expect(Object.isFrozen(input.extraction.fields[0])).toBe(true);
     });
 
     it('freezes nested values of a definition frozen only at the top level', () => {
       const input = Object.freeze(makeDefinition('top_frozen'));
       registry.register(input);
 
-      expect(Object.isFrozen(input.fields)).toBe(true);
-      expect(Object.isFrozen(input.fields[0])).toBe(true);
-      expect(Object.isFrozen(input.indexPatterns)).toBe(true);
+      expect(Object.isFrozen(input.extraction)).toBe(true);
+      expect(Object.isFrozen(input.extraction.fields)).toBe(true);
+      expect(Object.isFrozen(input.extraction.fields[0])).toBe(true);
     });
 
     it('prevents mutation of returned definitions, including nested values', () => {
       registry.register(makeDefinition('locked'));
-      const definition = registry.get('locked') as RegistrableEntityDefinition;
+      const definition = registry.get('locked') as TestDefinition;
 
       expect(() => {
         definition.name = 'changed';
       }).toThrow(TypeError);
       expect(() => {
-        definition.indexPatterns.push('other-*');
+        definition.extraction.fields.push(definition.extraction.fields[0]);
       }).toThrow(TypeError);
       expect(() => {
-        definition.fields[0].source = 'changed';
+        definition.extraction.fields[0].source = 'changed';
       }).toThrow(TypeError);
       expect(registry.get('locked')).toEqual(makeDefinition('locked'));
     });

@@ -8,7 +8,6 @@
 import type { ChangeHistoryClient, ChangeHistoryDocument } from '@kbn/change-history';
 import {
   getRuleChangeHistoryEventParamsSchema,
-  getRuleChangeHistoryEventQuerySchema,
   listRuleChangeHistoryRequestSchema,
   listRuleChangeHistoryResponseSchema,
   ruleChangeHistoryDetailSchema,
@@ -55,10 +54,11 @@ const createDocument = (
   } as ChangeHistoryDocument);
 
 const createChangeHistoryMock = (): jest.Mocked<
-  Pick<ChangeHistoryClient, 'isInitialized' | 'getHistory'>
+  Pick<ChangeHistoryClient, 'isInitialized' | 'getHistory' | 'getEvent'>
 > => ({
   isInitialized: jest.fn().mockReturnValue(true),
   getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+  getEvent: jest.fn().mockResolvedValue(undefined),
 });
 
 describe('RuleChangesHistoryClient', () => {
@@ -178,8 +178,8 @@ describe('RuleChangesHistoryClient', () => {
         snapshot: { id: 'rule-1', metadata: { name: 'A' } },
       });
 
+      changeHistory.getEvent.mockResolvedValueOnce(current);
       changeHistory.getHistory
-        .mockResolvedValueOnce({ items: [current], total: 1 })
         .mockResolvedValueOnce({ items: [previous], total: 1 })
         .mockResolvedValueOnce({ items: [current], total: 1 });
 
@@ -188,7 +188,7 @@ describe('RuleChangesHistoryClient', () => {
         'default'
       );
 
-      const result = await client.getRuleChange({ ruleId: 'rule-1', eventId: 'event-2' });
+      const result = await client.getRuleChange({ eventId: 'event-2' });
 
       expect(result).toMatchObject({
         id: 'event-2',
@@ -202,26 +202,53 @@ describe('RuleChangesHistoryClient', () => {
         },
         snapshot: { id: 'rule-1', metadata: { name: 'B' } },
       });
+      expect(changeHistory.getEvent).toHaveBeenCalledWith('default', 'event-2');
+      expect(changeHistory.getHistory).toHaveBeenCalledTimes(2);
+      expect(changeHistory.getHistory).toHaveBeenCalledWith(
+        'default',
+        'alerting_rule',
+        'rule-1',
+        expect.any(Object)
+      );
     });
 
     it('throws RULE_CHANGE_NOT_FOUND when the event is missing', async () => {
       const changeHistory = createChangeHistoryMock();
-      changeHistory.getHistory.mockResolvedValue({ items: [], total: 0 });
+      changeHistory.getEvent.mockResolvedValue(undefined);
 
       const client = new RuleChangesHistoryClient(
         changeHistory as unknown as ChangeHistoryClient,
         'default'
       );
 
-      await expect(
-        client.getRuleChange({ ruleId: 'rule-1', eventId: 'missing' })
-      ).rejects.toMatchObject({
+      await expect(client.getRuleChange({ eventId: 'missing' })).rejects.toMatchObject({
         output: { statusCode: 404 },
         data: {
           code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND,
-          details: { rule_id: 'rule-1', event_id: 'missing' },
+          details: { event_id: 'missing' },
         },
       });
+      expect(changeHistory.getHistory).not.toHaveBeenCalled();
+    });
+
+    it('throws RULE_CHANGE_NOT_FOUND when the event belongs to another object type', async () => {
+      const changeHistory = createChangeHistoryMock();
+      const document = createDocument({ id: 'event-1' });
+      changeHistory.getEvent.mockResolvedValue({
+        ...document,
+        object: { ...document.object, type: 'workflow' },
+      });
+
+      const client = new RuleChangesHistoryClient(
+        changeHistory as unknown as ChangeHistoryClient,
+        'default'
+      );
+
+      await expect(client.getRuleChange({ eventId: 'event-1' })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: { code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND },
+      });
+      expect(changeHistory.getHistory).not.toHaveBeenCalled();
     });
   });
 });
@@ -268,12 +295,9 @@ describe('rule change history schemas', () => {
     ).toBe(true);
   });
 
-  it('parses detail path params and query', () => {
+  it('parses detail path params', () => {
     expect(getRuleChangeHistoryEventParamsSchema.parse({ change_id: 'event-1' })).toEqual({
       change_id: 'event-1',
-    });
-    expect(getRuleChangeHistoryEventQuerySchema.parse({ rule_id: 'rule-1' })).toEqual({
-      rule_id: 'rule-1',
     });
   });
 });
