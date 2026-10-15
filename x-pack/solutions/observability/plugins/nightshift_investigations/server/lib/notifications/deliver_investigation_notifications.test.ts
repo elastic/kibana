@@ -6,11 +6,8 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type {
-  GetInvestigationResponse,
-  InvestigationNotificationDestination,
-} from '../../../common';
-import type { NotificationExecution } from './notification_delivery';
+import type { InvestigationNotificationDestination } from '../../../common';
+import type { NotifiableInvestigation, NotificationExecution } from './notification_delivery';
 import type { NotificationPhase } from './notification_routing';
 import { deliverInvestigationNotifications } from './deliver_investigation_notifications';
 import { createRoutingTestContext } from './notification_routing.mock';
@@ -22,14 +19,11 @@ const destination = {
   automation_id: 'automation-1',
   automation_name: 'CPU alerts',
 };
-const investigation: GetInvestigationResponse = {
+const investigation: NotifiableInvestigation = {
   investigation_id: 'inv-1',
   title: 'CPU saturation',
-  status: 'running',
-  subject: { type: 'manual', id: 'manual' },
-  created_at: '2026-10-07T00:00:00Z',
   summary: 'CPU was saturated',
-  recommendations: [{ title: 'Scale the service', confidence: 0.9 }],
+  recommendations: [{ title: 'Scale the service' }],
 };
 const setup = (spaceId = 'default') => {
   const context = createRoutingTestContext(spaceId);

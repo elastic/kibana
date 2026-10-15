@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import type { WatchAutonomyLevel, WorkerSettingsWrite } from '../schemas';
 import { WorkerScheduleInterval, WorkerSettings } from '../schemas';
-import type { WorkerSettingsDeclaration } from './types';
+import type { WorkerSettingsDeclaration, WorkerSettingsIssue } from './types';
 
 /**
  * Complete, closed settings schema for one Worker; the only place its shape is spelled out. The
@@ -99,6 +99,10 @@ export const diffWorkerSettings = (
 export const touchesWorkerSettings = (patch: {
   settings?: WorkerSettingsWrite | undefined;
 }): boolean => patch.settings != null;
+
+/** The same shape as `formatWorkerSettingsIssues`, for the cross-field rules a write checks. */
+export const formatCrossFieldIssues = (issues: readonly WorkerSettingsIssue[]): string =>
+  issues.map(({ path, message }) => `${path.join('.')}: ${message}`).join('; ');
 
 /** One line per issue, each prefixed with the field path so the caller can name the field. */
 export const formatWorkerSettingsIssues = (error: z.ZodError): string =>

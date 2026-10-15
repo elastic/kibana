@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERTZERO_REASONING_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
+import { ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import {
   DEFAULT_APP_CATEGORIES,
   type CoreSetup,
@@ -18,7 +18,6 @@ import {
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentService } from '@kbn/fleet-plugin/server';
-import { SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED } from '@kbn/management-settings-ids';
 import {
   ALERTZERO_ENABLED_SETTING_ID,
   TEMPLATE_ID_ESCALATION,
@@ -42,7 +41,6 @@ const ESCALATIONS_API_PRIVILEGE_READ = 'read_escalations';
 const ESCALATIONS_API_PRIVILEGE_MANAGE = 'manage_escalations';
 import type {
   AlertZeroRequestHandlerContext,
-  AlertTriageAttachmentServiceProvider,
   AlertZeroPluginSetup,
   AlertZeroPluginStart,
   AlertZeroSetupDependencies,
@@ -115,13 +113,6 @@ export class AlertZeroPlugin
   private threatIntelSupplyService?: ThreatIntelSupplyService;
 
   /**
-   * Set by whichever optional consumer's `start()` calls `registerAlertTriageAttachmentServiceProvider`
-   * (see `AlertZeroPluginStart`). May still be unset when `WorkersService` is constructed below,
-   * since that consumer starts after this plugin; `WorkersService` reads it lazily per call.
-   */
-  private alertTriageAttachmentServiceProvider?: AlertTriageAttachmentServiceProvider;
-
-  /**
    * Set by security_solution's `start()` via `registerThreatIntelSupplyWorkflowInstaller`.
    * May be unset when `ThreatIntelSupplyService` is constructed; that service reads it lazily.
    */
@@ -136,12 +127,6 @@ export class AlertZeroPlugin
     this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
-  private readonly registerAlertTriageAttachmentServiceProvider = (
-    provider: AlertTriageAttachmentServiceProvider
-  ): void => {
-    this.alertTriageAttachmentServiceProvider = provider;
-  };
-
   private readonly registerThreatIntelSupplyWorkflowInstaller = (
     installer: ThreatIntelSupplyWorkflowInstaller
   ): void => {
@@ -149,7 +134,6 @@ export class AlertZeroPlugin
   };
 
   private readonly alertZeroStartContract = (): AlertZeroPluginStart => ({
-    registerAlertTriageAttachmentServiceProvider: this.registerAlertTriageAttachmentServiceProvider,
     registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
   });
 
@@ -362,6 +346,10 @@ export class AlertZeroPlugin
               enumerateSpaceIds(core.savedObjects.createInternalRepository(['space'])),
             // security_solution registers after this plugin starts; read lazily.
             getWorkflowInstaller: () => this.threatIntelSupplyWorkflowInstaller,
+            getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+            getInference: () => plugins.inference,
+            getUiSettingsClient: (request) =>
+              core.uiSettings.asScopedToClient(core.savedObjects.getScopedClient(request)),
           })
         : undefined;
 
@@ -375,22 +363,6 @@ export class AlertZeroPlugin
         agentBuilder,
         agentTypes: [agentType],
       },
-      {
-        // Reads whatever was registered via `registerAlertTriageAttachmentServiceProvider` at
-        // call time, not at construction time — a consumer may register after this plugin has
-        // started, since this plugin's optional consumers necessarily start after it does.
-        getAttachmentService: (request, workflowId) =>
-          this.alertTriageAttachmentServiceProvider
-            ? this.alertTriageAttachmentServiceProvider(request, workflowId)
-            : Promise.resolve(undefined),
-        // Read per request: the setting is space-scoped, so a Worker enabled in one space
-        // says nothing about another. Resolved here rather than in WorkersService because
-        // the setting belongs to security_solution.
-        isAlertAnalysisRuntimeEnabled: async (request) =>
-          core.uiSettings
-            .asScopedToClient(core.savedObjects.getScopedClient(request))
-            .get<boolean>(SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED),
-      },
       async (request, registration, options) => {
         const client = await plugins.workflowsExtensions.getClient(request);
         await installRegisteredWorkerForRequest(client.managedWorkflows, registration, options);
@@ -401,11 +373,14 @@ export class AlertZeroPlugin
 
     this.scanFailuresService = new ScanFailuresService(management, this.logger);
 
+    const mitreDataClient = plugins.mitreAttack?.getMitreDataClient?.();
+
     this.huntServices = {
       getProposalsService: () => this.requireProposals().getProposalsService(),
       getProposalPrivileges: () => this.requireProposals().getProposalPrivileges(),
       getInference: () => plugins.inference,
       getSearchInferenceEndpoints: () => plugins.searchInferenceEndpoints,
+      mitreDataClient,
     };
 
     return this.alertZeroStartContract();
@@ -457,7 +432,7 @@ export class AlertZeroPlugin
     }
     try {
       const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
-        ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+        ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
         request
       );
       return endpoints[0]?.connectorId;
