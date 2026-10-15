@@ -58,9 +58,12 @@ export const buildRiskMoversCountQuery = (
     '), (',
     // Current scores from the entity docs in view: only scored entities can qualify.
     `  FROM ${entitiesIndexName}`,
-    `  | WHERE entity.risk.calculated_score_norm IS NOT NULL AND entity.name IS NOT NULL`,
+    // Aliases are left out: the group is judged by its main entity, which holds the group's score.
+    `  | WHERE \`entity.relationships.resolution.resolved_to\` IS NULL AND entity.name IS NOT NULL`,
+    `    AND (entity.risk.calculated_score_norm IS NOT NULL OR \`entity.relationships.resolution.risk.calculated_score_norm\` IS NOT NULL)`,
     ...entityFilterClauses.map((clause) => `  ${clause}`),
-    `  | EVAL current_score = entity.risk.calculated_score_norm,`,
+    // The group's score if the entity has one, else its own.
+    `  | EVAL current_score = COALESCE(\`entity.relationships.resolution.risk.calculated_score_norm\`, entity.risk.calculated_score_norm),`,
     `         effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
     `  | KEEP \`entity.id\`, current_score, effective_id`,
     ')',

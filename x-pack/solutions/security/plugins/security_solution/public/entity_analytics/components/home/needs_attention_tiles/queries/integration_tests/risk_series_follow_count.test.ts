@@ -44,6 +44,8 @@ import { getSeriesWindow, readSeriesDots } from '../tile_series_window';
  * | host:r6   | 1500         | 10 Low, at 5: 80 High; no entity doc, so dropped                    |
  * | user:r7   | 1500         | 75 High, at 600: 40 Low, at 90: 78 High                             |
  * | host:r8   | 1500         | 20 Low, at 1300: 55 Moderate, at 40: 95 Critical                    |
+ * | host:g1   | 1500         | own 30 Low throughout; group 40 Low, at 100: 70 High (the group counts) |
+ * | host:g1a  | 1500         | alias of host:g1: own 20 Low, at 140: 80 Critical (must not count, even where the group does not rise)   |
  */
 
 const NAMESPACE = 'default';
@@ -68,6 +70,8 @@ interface EntitySeed {
   changes: Change[];
   resolvedTo?: string;
   noEntityDoc?: boolean;
+  /** The group's own (resolution) value, on a main entity: its history, hour by hour. */
+  group?: { initial: Value; changes: Change[] };
 }
 
 const R1_CHANGES: Change[] = [
@@ -122,6 +126,20 @@ const ENTITIES: readonly EntitySeed[] = [
       [40, [95, 'Critical']],
     ],
   },
+  {
+    id: 'host:g1',
+    from: HISTORY_HOURS,
+    initial: [30, 'Low'],
+    changes: [],
+    group: { initial: [40, 'Low'], changes: [[100, [70, 'High']]] },
+  },
+  {
+    id: 'host:g1a',
+    from: HISTORY_HOURS,
+    initial: [20, 'Low'],
+    changes: [[140, [80, 'Critical']]],
+    resolvedTo: 'host:g1',
+  },
 ];
 
 const valueAt = ({ initial, changes }: EntitySeed, hoursAgo: number): Value =>
@@ -149,6 +167,8 @@ describe('risk tile series on Elasticsearch', () => {
           'entity.risk.calculated_score_norm': FLOAT,
           'entity.risk.calculated_level': KEYWORD,
           'entity.relationships.resolution.resolved_to': KEYWORD,
+          'entity.relationships.resolution.risk.calculated_score_norm': FLOAT,
+          'entity.relationships.resolution.risk.calculated_level': KEYWORD,
         },
       },
     });
@@ -160,9 +180,11 @@ describe('risk tile series on Elasticsearch', () => {
           'host.risk.id_value': KEYWORD,
           'host.risk.calculated_score_norm': FLOAT,
           'host.risk.calculated_level': KEYWORD,
+          'host.risk.score_type': KEYWORD,
           'user.risk.id_value': KEYWORD,
           'user.risk.calculated_score_norm': FLOAT,
           'user.risk.calculated_level': KEYWORD,
+          'user.risk.score_type': KEYWORD,
         },
       },
     });
@@ -179,6 +201,18 @@ describe('risk tile series on Elasticsearch', () => {
               'entity.name': seed.id.split(':')[1],
               'entity.risk.calculated_score_norm': score,
               'entity.risk.calculated_level': level,
+              ...(seed.group
+                ? {
+                    'entity.relationships.resolution.risk.calculated_score_norm': valueAt(
+                      { ...seed, ...seed.group },
+                      0
+                    )[0],
+                    'entity.relationships.resolution.risk.calculated_level': valueAt(
+                      { ...seed, ...seed.group },
+                      0
+                    )[1],
+                  }
+                : {}),
               ...(seed.resolvedTo
                 ? { 'entity.relationships.resolution.resolved_to': seed.resolvedTo }
                 : {}),
@@ -186,15 +220,24 @@ describe('risk tile series on Elasticsearch', () => {
           ];
       const history = Array.from({ length: seed.from + 1 }, (_, h) => {
         const [docScore, docLevel] = valueAt(seed, h);
-        return [
+        const timestamp = new Date(now - (h + 0.5) * HOUR_MS).toISOString();
+        const doc = (value: Value, scoreType?: 'base' | 'resolution') => [
           { index: { _index: getRiskScoreIndex(NAMESPACE) } },
           {
-            '@timestamp': new Date(now - (h + 0.5) * HOUR_MS).toISOString(),
+            '@timestamp': timestamp,
             [`${type}.risk.id_value`]: seed.id,
-            [`${type}.risk.calculated_score_norm`]: docScore,
-            [`${type}.risk.calculated_level`]: docLevel,
+            [`${type}.risk.calculated_score_norm`]: value[0],
+            [`${type}.risk.calculated_level`]: value[1],
+            ...(scoreType ? { [`${type}.risk.score_type`]: scoreType } : {}),
           },
         ];
+        // A main entity has its own (base) docs and its group's (resolution) docs, under one id.
+        return seed.group
+          ? [
+              ...doc([docScore, docLevel], 'base'),
+              ...doc(valueAt({ ...seed, ...seed.group }, h), 'resolution'),
+            ]
+          : doc([docScore, docLevel]);
       }).flat();
       return [...entityDoc, ...history];
     });
@@ -256,14 +299,14 @@ describe('risk tile series on Elasticsearch', () => {
       column: riskMoversSeriesColumn,
       oracle: oracleMovers,
       count: (range: TimeRange) => buildRiskMoversCountQuery(NAMESPACE, ENTITY_INDEX, range),
-      byHand: { '24h': 2, '30d': 3 },
+      byHand: { '24h': 2, '30d': 4 },
     },
     {
       name: 'Newly high/critical',
       column: newlyHighCriticalSeriesColumn,
       oracle: oracleNewlyHighCritical,
       count: (range: TimeRange) => buildNewlyHighCriticalCountQuery(NAMESPACE, ENTITY_INDEX, range),
-      byHand: { '24h': 2, '30d': 4 },
+      byHand: { '24h': 2, '30d': 5 },
     },
   ];
 
