@@ -9,7 +9,6 @@
 
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
-import { waitForRequestCount } from '../helpers/request_counts_shared';
 
 const STALLED_LOGSTASH_QUERY = JSON.stringify({
   error_query: {
@@ -74,19 +73,25 @@ spaceTest.describe('Discover request cancellation', { tag: '@local-stateful-clas
     await expect(discover.getSearchResponseWarningsEmptyPrompt()).toBeVisible();
     await expect(discover.getQuerySubmitButton()).toBeVisible();
     await expect(discover.getQueryCancelButton()).toBeHidden();
+    // Once the cancelled request has settled, the controls that were locked are usable again
+    await expect(page.testSubj.locator('addFilter')).toBeEnabled();
   });
 
   spaceTest(
-    'recovers when a newer time range aborts an active request',
-    async ({ page, pageObjects, network }) => {
-      const { datePicker, discover, filterBar } = pageObjects;
-      const reducedRange = {
-        from: 'Sep 20, 2015 @ 00:00:00.000',
-        to: 'Sep 20, 2015 @ 23:50:13.253',
-      };
+    'locks the controls that start a new search until the active request settles',
+    async ({ page, pageObjects }) => {
+      const { discover, filterBar } = pageObjects;
+      const datePickerControl = page.testSubj
+        .locator('dateRangePickerControlButton')
+        .or(page.testSubj.locator('superDatePickerToggleQuickMenuButton'));
+      const addFilterButton = page.testSubj.locator('addFilter');
+      const queryBarMenuButton = page.testSubj.locator('showQueryBarMenu');
+      const dataViewPickerButton = page.testSubj.locator('discover-dataView-switch-link');
+      const filterActionsButton = page.getByRole('button', { name: 'Filter actions' });
 
       await discover.waitUntilSearchingHasFinished();
-      const initialTimeRange = await discover.getChartTimespan();
+      await expect(datePickerControl).toBeEnabled();
+      await expect(addFilterButton).toBeEnabled();
 
       const stalledSearchResponse = page.waitForResponse((response) => {
         try {
@@ -100,31 +105,27 @@ spaceTest.describe('Discover request cancellation', { tag: '@local-stateful-clas
         }
       });
       await filterBar.addDslFilter(STALLED_LOGSTASH_WARNING_QUERY);
-      const stalledBody = await (await stalledSearchResponse).json();
-      expect(stalledBody.id).toBeTruthy();
+      await stalledSearchResponse;
       await expect(discover.getQueryCancelButton()).toBeVisible();
       await expect(page.testSubj.locator('discoverDataGridUpdating')).toBeVisible();
 
-      expect(
-        await network.trackMatchingRequests(
-          { endpoint: '/internal/search/ese', method: 'DELETE' },
-          async (getCount) => {
-            await datePicker.setAbsoluteRange(reducedRange);
-            // Discover aborts the previous search from fetch$, which runs after
-            // the date picker closes — keep listening until the DELETE arrives.
-            await waitForRequestCount(getCount, 1);
-          }
-        )
-      ).toBeGreaterThan(0);
+      // A newer search can't start while this one is in flight
+      await expect(datePickerControl).toBeDisabled();
+      await expect(addFilterButton).toBeDisabled();
+      await expect(queryBarMenuButton).toBeDisabled();
+      await expect(dataViewPickerButton).toBeDisabled();
+      await expect(filterActionsButton).toBeHidden();
+      // Editing the query doesn't emit new state, so it stays available
+      await expect(page.testSubj.locator('queryInput')).toBeEnabled();
+
       await discover.waitUntilSearchingHasFinished();
 
-      await expect(discover.getHistogramChart()).toBeVisible();
-      await expect(discover.getHistogramChart()).not.toHaveAttribute(
-        'data-time-range',
-        initialTimeRange
-      );
-      await expect(discover.getHitCountLocator()).toHaveText('4,756');
       await expect(discover.getQueryCancelButton()).toBeHidden();
+      await expect(datePickerControl).toBeEnabled();
+      await expect(addFilterButton).toBeEnabled();
+      await expect(queryBarMenuButton).toBeEnabled();
+      await expect(dataViewPickerButton).toBeEnabled();
+      await expect(filterActionsButton).toBeVisible();
     }
   );
 });
