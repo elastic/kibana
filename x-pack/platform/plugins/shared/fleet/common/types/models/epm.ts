@@ -76,6 +76,7 @@ export enum KibanaAssetType {
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
   tag = 'tag',
+  workflow = 'workflow',
 }
 
 /*
@@ -98,6 +99,7 @@ export enum KibanaSavedObjectType {
   osquerySavedQuery = 'osquery-saved-query',
   tag = 'tag',
   alert = 'alert',
+  workflow = 'workflow',
 }
 
 export enum ElasticsearchAssetType {
@@ -801,6 +803,7 @@ export enum INSTALL_STATES {
   SAVE_ARCHIVE_ENTRIES = 'save_archive_entries_from_assets_map',
   SAVE_KNOWLEDGE_BASE = 'save_knowledge_base',
   RESOLVE_KIBANA_PROMISE = 'resolve_kibana_promise',
+  INSTALL_WORKFLOWS = 'install_workflows',
   VERIFY_ASSETS = 'verify_assets',
   UPDATE_SO = 'update_so',
 }

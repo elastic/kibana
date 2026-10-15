@@ -68,7 +68,10 @@ const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
   JSON.stringify(
     errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
   );
-const validKibanaAssetTypes = new Set(Object.values(KibanaAssetType));
+// Workflow assets are YAML files installed through the managed workflows client, not saved objects.
+const validKibanaAssetTypes = new Set<KibanaAssetType>(
+  Object.values(KibanaAssetType).filter((type) => type !== KibanaAssetType.workflow)
+);
 type SavedObjectToBe = Required<
   Pick<SavedObjectsBulkCreateObject, keyof ArchiveAsset | 'originId'>
 > & {
@@ -105,6 +108,7 @@ export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedOb
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
   [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
   [KibanaAssetType.osquerySavedQuery]: KibanaSavedObjectType.osquerySavedQuery,
+  [KibanaAssetType.workflow]: KibanaSavedObjectType.workflow,
 };
 
 const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsset[]> = {
@@ -541,7 +545,7 @@ export async function deleteKibanaAssetsAndReferencesForSpace({
   await saveKibanaAssetsRefs(savedObjectsClient, pkgName, null, spaceId, true);
 }
 
-const kibanaAssetTypes = Object.values(KibanaAssetType);
+const kibanaAssetTypes = Array.from(validKibanaAssetTypes);
 export const isKibanaAssetType = (path: string) => {
   const parts = getPathParts(path);
 

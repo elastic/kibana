@@ -12,6 +12,7 @@ import type {
   SavedObjectsType,
 } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
+import { parse } from 'yaml';
 
 import type { AssetSOObject, GetBulkAssetsResponse, SimpleSOAssetType } from '../../../../common';
 import { ElasticsearchAssetType } from '../../../../common';
@@ -20,6 +21,7 @@ import { KibanaSavedObjectType } from '../../../../common/types';
 import { displayedAssetTypesLookup } from '../../../../common/constants';
 
 import type { SimpleSOAssetAttributes } from '../../../types';
+import { appContextService } from '../../app_context';
 
 type DisplayableSOAssetAttributes = SimpleSOAssetAttributes & {
   name?: string;
@@ -106,11 +108,55 @@ const toAssetType = (
   };
 };
 
+const parseWorkflowYaml = (yaml: unknown): { name?: unknown; description?: unknown } => {
+  if (typeof yaml !== 'string') {
+    return {};
+  }
+  try {
+    return parse(yaml) ?? {};
+  } catch {
+    return {};
+  }
+};
+
+// Workflows are not saved objects, so they are resolved through the managed workflows client.
+const getWorkflowAssets = async (workflowIds: string[]): Promise<BulkAssetItem[]> => {
+  const client = appContextService.getManagedWorkflowsClient();
+  if (!client || !workflowIds.length) {
+    return [];
+  }
+
+  const states = await client.listInstalledWorkflowStates();
+  const requestedIds = new Set(workflowIds);
+
+  return states
+    .filter(({ workflowId }) => requestedIds.has(workflowId))
+    .map(({ workflowId, templateValues }) => {
+      const { name, description } = parseWorkflowYaml(templateValues?.yaml);
+
+      return {
+        id: workflowId,
+        type: KibanaSavedObjectType.workflow,
+        attributes: {
+          title: typeof name === 'string' ? name : workflowId,
+          description: typeof description === 'string' ? description : undefined,
+        },
+        appLink: `/app/workflows/${workflowId}`,
+      };
+    });
+};
+
 export async function getBulkAssets(
   soClient: SavedObjectsClientContract,
   soTypeRegistry: ISavedObjectTypeRegistry,
-  assetIds: AssetSOObject[]
+  allAssetIds: AssetSOObject[]
 ) {
+  const isWorkflow = ({ type }: AssetSOObject) => type === KibanaSavedObjectType.workflow;
+  const assetIds = allAssetIds.filter((asset) => !isWorkflow(asset));
+  const workflowAssets = await getWorkflowAssets(
+    allAssetIds.filter(isWorkflow).map(({ id }) => id)
+  );
+
   const { resolved_objects: resolvedObjects } =
     await soClient.bulkResolve<DisplayableSOAssetAttributes>(assetIds);
   const types: Record<string, SavedObjectsType | undefined> = {};
@@ -161,5 +207,5 @@ export async function getBulkAssets(
 
       return toAssetType(obj, types[obj.type], appLink);
     });
-  return res;
+  return [...res, ...workflowAssets];
 }

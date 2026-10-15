@@ -48,6 +48,11 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
+import { FLEET_PACKAGE_WORKFLOW } from '@kbn/workflows/managed';
+import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
@@ -196,6 +201,7 @@ export interface FleetSetupDeps {
   telemetry?: TelemetryPluginSetup;
   taskManager: TaskManagerSetupContract;
   fieldsMetadata: FieldsMetadataServerSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface FleetStartDeps {
@@ -209,6 +215,7 @@ export interface FleetStartDeps {
   spaces: SpacesPluginStart;
   alerting: AlertingServerStart;
   reporting: ReportingStart;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 
 export interface FleetAppContext {
@@ -399,6 +406,9 @@ export class FleetPlugin
       config.enableExperimental ?? [],
       config.experimentalFeatures || {}
     );
+    if (experimentalFeatures.enableWorkflowAssets) {
+      deps.workflowsExtensions?.registerManagedWorkflowOwner(FLEET_PACKAGE_WORKFLOW.pluginId);
+    }
     const requireAllSpaces = experimentalFeatures.useSpaceAwareness ? false : true;
 
     registerSavedObjects(core.savedObjects, {
@@ -864,6 +874,17 @@ export class FleetPlugin
       reportingStart: plugins.reporting,
       featureFlags: core.featureFlags,
     });
+    if (appContextService.getExperimentalFeatures().enableWorkflowAssets) {
+      plugins.workflowsExtensions
+        ?.initManagedWorkflowsClient(FLEET_PACKAGE_WORKFLOW.pluginId)
+        .then(async (managedWorkflowsClient) => {
+          appContextService.setManagedWorkflowsClient(managedWorkflowsClient);
+          await managedWorkflowsClient.ready();
+        })
+        .catch((error) => {
+          this.logger?.error(`Failed to initialize the managed workflows client: ${error.message}`);
+        });
+    }
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
     this.bulkActionsResolver?.start(plugins.taskManager).catch(() => {});

@@ -29,6 +29,7 @@ import type { Logger } from '@kbn/logging';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { ReportingStart } from '@kbn/reporting-plugin/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -57,6 +58,10 @@ import type { FleetUsage } from '../collectors/register';
 
 import type { BulkActionsResolver } from './agents/bulk_actions_resolver';
 import { type UninstallTokenServiceInterface } from './security/uninstall_token_service';
+
+export type ManagedWorkflowsClient = Awaited<
+  ReturnType<WorkflowsExtensionsServerPluginStart['initManagedWorkflowsClient']>
+>;
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
@@ -88,6 +93,7 @@ class AppContextService {
   private fetchUsage?: (signal: AbortSignal) => Promise<FleetUsage | undefined>;
   private lockManagerService: LockManagerService | undefined;
   private alertingStart: AlertingServerStart | undefined;
+  private managedWorkflowsClient: ManagedWorkflowsClient | undefined;
   private includedHiddenTypes: string[] = [
     UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
     KibanaSavedObjectType.alertingRuleTemplate,
@@ -351,6 +357,14 @@ class AppContextService {
 
   public getAlertingStart() {
     return this.alertingStart;
+  }
+
+  public setManagedWorkflowsClient(client: ManagedWorkflowsClient | undefined) {
+    this.managedWorkflowsClient = client;
+  }
+
+  public getManagedWorkflowsClient() {
+    return this.managedWorkflowsClient;
   }
 
   public getReportingStart() {
