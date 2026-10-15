@@ -90,10 +90,12 @@ interface WorkflowDetailEditorProps {
    * fires with this message and `autoSendInitialMessage: true`.
    */
   initialAgentMessage?: string;
+  /** Opens the Agent Builder sidebar on mount for an unsaved workflow. */
+  autoOpenAgentChat?: boolean;
 }
 
 export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props) => {
-  const { highlightDiff, onAgentProposalHeld, initialAgentMessage } = props;
+  const { highlightDiff, onAgentProposalHeld, initialAgentMessage, autoOpenAgentChat } = props;
   const styles = useMemoCss(componentStyles);
   const readOnlyBadgeShadow = useEuiShadow('xl');
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -396,6 +398,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
                 onToggleEditorMode={() => handleEditorViewChange(showGraph ? 'yaml' : 'graph')}
                 onAgentProposalHeld={onAgentProposalHeld}
                 initialAgentMessage={initialAgentMessage}
+                autoOpenAgentChat={autoOpenAgentChat}
               />
             </React.Suspense>
           </div>

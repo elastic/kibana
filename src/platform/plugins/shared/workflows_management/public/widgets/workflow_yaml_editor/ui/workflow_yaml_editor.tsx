@@ -195,6 +195,8 @@ export interface WorkflowYAMLEditorProps {
    * carry the user's typed message into the workflow-scoped chat session.
    */
   initialAgentMessage?: string;
+  /** Opens the Agent Builder sidebar on mount for an unsaved workflow. */
+  autoOpenAgentChat?: boolean;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -208,6 +210,7 @@ export const WorkflowYAMLEditor = ({
   onValidationPanelHeightChange,
   onAgentProposalHeld,
   initialAgentMessage,
+  autoOpenAgentChat,
 }: WorkflowYAMLEditorProps) => {
   const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
     WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -399,6 +402,7 @@ export const WorkflowYAMLEditor = ({
     onProposalDeferred: readOnlyReason === 'executions_tab' ? onAgentProposalHeld : undefined,
     workflowTabYaml,
     initialAgentMessage,
+    autoOpenAgentChat,
   });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {

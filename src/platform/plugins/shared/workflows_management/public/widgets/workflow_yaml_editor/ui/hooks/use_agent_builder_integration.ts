@@ -61,6 +61,11 @@ interface UseAgentBuilderIntegrationParams {
    * editor's chat integration.
    */
   initialAgentMessage?: string;
+  /**
+   * Opens the sidebar on mount for an unsaved workflow. Set when the user
+   * chose AI on the landing or remixed a library template.
+   */
+  autoOpenAgentChat?: boolean;
 }
 
 export interface OpenAgentChatOptions {
@@ -101,6 +106,7 @@ export const useAgentBuilderIntegration = ({
   onProposalDeferred,
   workflowTabYaml,
   initialAgentMessage,
+  autoOpenAgentChat = false,
 }: UseAgentBuilderIntegrationParams): UseAgentBuilderIntegrationReturn => {
   const { workflowsManagement, application } = useKibana().services;
   const agentBuilder = workflowsManagement?.agentBuilder;
@@ -563,9 +569,10 @@ export const useAgentBuilderIntegration = ({
     if (yaml !== undefined) syncAttachmentRef.current?.(yaml);
   }, [readOnlyReason, executionsTabYaml, editorRef]);
 
-  // Auto-open only on /workflows/create, or on a saved workflow whose sidebar
-  // the save thunk requested we restore. Never on an existing workflow the
-  // user navigated to directly. Guarded per-mount so a manual close stays.
+  // Auto-open only on an unsaved workflow that asked for it, or on a saved
+  // workflow whose sidebar the save thunk requested we restore. Never on an
+  // existing workflow the user navigated to directly. Guarded per-mount so a
+  // manual close stays.
   useEffect(() => {
     if (!isEditorMounted || !agentBuilder || !isChatAccessible) return;
     if (hasAutoOpenedRef.current) return;
@@ -573,7 +580,9 @@ export const useAgentBuilderIntegration = ({
     const shouldRestoreForSavedWorkflow =
       workflowId != null && consumeSidebarRestoreFor(workflowId);
 
-    if (workflowId != null && !shouldRestoreForSavedWorkflow) return;
+    const shouldOpenForNewWorkflow = workflowId == null && autoOpenAgentChat;
+
+    if (!shouldOpenForNewWorkflow && !shouldRestoreForSavedWorkflow) return;
 
     hasAutoOpenedRef.current = true;
     openAgentChat({
@@ -588,6 +597,7 @@ export const useAgentBuilderIntegration = ({
     workflowId,
     openAgentChat,
     initialAgentMessage,
+    autoOpenAgentChat,
   ]);
 
   // Close the sidebar on unmount (leaving the workflow scope). Empty deps so

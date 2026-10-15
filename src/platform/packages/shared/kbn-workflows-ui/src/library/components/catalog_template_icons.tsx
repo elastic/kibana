@@ -88,7 +88,8 @@ export const CatalogTemplateIcons = React.memo<CatalogTemplateIconsProps>(
           </EuiFlexItem>
         ))}
         {overflowCount > 0 && (
-          <EuiFlexItem grow={false}>
+          // Keep the badge from shrinking, or a narrow card wraps "+N" onto two lines.
+          <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
             <EuiNotificationBadge
               color="subdued"
               title={i18n.translate('workflows.library.templateIcons.overflowTitle', {

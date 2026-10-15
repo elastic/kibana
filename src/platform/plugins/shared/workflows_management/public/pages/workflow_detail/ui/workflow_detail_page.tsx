@@ -282,12 +282,20 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const [pendingInitialAgentMessage, setPendingInitialAgentMessage] = useState<string | undefined>(
     () => (!id ? location.state?.initialAgentMessage : undefined)
   );
-  const [showAgenticLanding, setShowAgenticLanding] = useState(
-    !id && !startBlank && !pendingInitialAgentMessage
-  );
+  // "Remix with AI" arrives with the template YAML, so it skips the landing too.
+  const shouldShowAgenticLandingRef = useRef(false);
+  shouldShowAgenticLandingRef.current =
+    !id && !startBlank && !pendingInitialAgentMessage && !initialYaml;
+  const [showAgenticLanding, setShowAgenticLanding] = useState(shouldShowAgenticLandingRef.current);
+  // Re-check only when the route switches between `/create` and `/:id`. URL
+  // churn on `/create` (view toggle, run selection) drops the query and the
+  // history state, and must not bring the landing back over the editor.
   useEffect(() => {
-    setShowAgenticLanding(!id && !startBlank && !pendingInitialAgentMessage);
-  }, [id, startBlank, pendingInitialAgentMessage]);
+    setShowAgenticLanding(shouldShowAgenticLandingRef.current);
+  }, [id]);
+  // The sidebar opens only when the user picked AI: a landing prompt or a remix.
+  // "Start manually" and examples go straight to the editor.
+  const autoOpenAgentChat = !id && Boolean(pendingInitialAgentMessage || initialYaml);
 
   const handleLandingSubmit = useCallback((message: string) => {
     setPendingInitialAgentMessage(message);
@@ -379,6 +387,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           }}
           docLink={WORKFLOWS_DOCUMENTATION_URL}
           showAddIntegrations
+          spacing="compact"
         />
         <EuiPageTemplate.Section restrictWidth={false} grow>
           <AgenticFirstEmptyStateLive
@@ -421,6 +430,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
                   highlightDiff={highlightDiff}
                   onAgentProposalHeld={onAgentProposalHeld}
                   initialAgentMessage={pendingInitialAgentMessage}
+                  autoOpenAgentChat={autoOpenAgentChat}
                 />
               }
               executionList={sidebarExecutionList}

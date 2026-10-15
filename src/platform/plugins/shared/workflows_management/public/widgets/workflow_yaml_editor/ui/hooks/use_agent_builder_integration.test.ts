@@ -500,7 +500,7 @@ describe('useAgentBuilderIntegration', () => {
   });
 
   describe('auto-open on editor mount', () => {
-    it('opens the sidebar exactly once on the create route (no workflowId)', async () => {
+    it('opens the sidebar exactly once on the create route when autoOpenAgentChat is set', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -510,12 +510,14 @@ describe('useAgentBuilderIntegration', () => {
           editorRef: React.MutableRefObject<any>;
           isEditorMounted: boolean;
           workflowName?: string;
+          autoOpenAgentChat?: boolean;
         }) => useAgentBuilderIntegration(props),
         {
           initialProps: {
             editorRef: { current: editor },
             isEditorMounted: true,
             workflowName: 'Original Name',
+            autoOpenAgentChat: true,
           },
         }
       );
@@ -532,8 +534,26 @@ describe('useAgentBuilderIntegration', () => {
         editorRef: { current: editor },
         isEditorMounted: true,
         workflowName: 'Updated Name',
+        autoOpenAgentChat: true,
       });
       expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+    });
+
+    it('does NOT auto-open on the create route without autoOpenAgentChat ("Start manually")', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+        })
+      );
+
+      await flushChatAccessCheck();
+
+      expect(agentBuilder.openChat).not.toHaveBeenCalled();
     });
 
     it('does NOT auto-open on an existing workflow detail view', () => {
@@ -617,6 +637,7 @@ describe('useAgentBuilderIntegration', () => {
         useAgentBuilderIntegration({
           editorRef: { current: editor },
           isEditorMounted: true,
+          autoOpenAgentChat: true,
         })
       );
 
@@ -645,6 +666,7 @@ describe('useAgentBuilderIntegration', () => {
         useAgentBuilderIntegration({
           editorRef: { current: editor },
           isEditorMounted: true,
+          autoOpenAgentChat: true,
         })
       );
 
@@ -694,6 +716,7 @@ describe('useAgentBuilderIntegration', () => {
         useAgentBuilderIntegration({
           editorRef: { current: editor },
           isEditorMounted: true,
+          autoOpenAgentChat: true,
         })
       );
 
@@ -785,6 +808,7 @@ describe('useAgentBuilderIntegration', () => {
         useAgentBuilderIntegration({
           editorRef: { current: editor },
           isEditorMounted: true,
+          autoOpenAgentChat: true,
         })
       );
 
@@ -1141,6 +1165,7 @@ describe('useAgentBuilderIntegration', () => {
         useAgentBuilderIntegration({
           editorRef: { current: editor },
           isEditorMounted: true,
+          autoOpenAgentChat: true,
         })
       );
 
