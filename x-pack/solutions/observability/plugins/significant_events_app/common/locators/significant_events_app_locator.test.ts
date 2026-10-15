@@ -39,11 +39,11 @@ describe('SignificantEventsAppLocatorDefinition', () => {
 
   it('serializes array query params as repeated keys', async () => {
     const { path } = await locator.getLocation({
-      tab: 'knowledge_indicators',
+      tab: 'queries',
       source: ['source-1', 'source-2'],
     });
 
-    expect(path).toBe('/knowledge_indicators?source=source-1&source=source-2');
+    expect(path).toBe('/queries?source=source-1&source=source-2');
   });
 
   it('serializes significant events filters as repeated keys', async () => {

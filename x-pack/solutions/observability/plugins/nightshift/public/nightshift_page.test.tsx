@@ -18,8 +18,7 @@ import { NightshiftPage } from './nightshift_page';
 import { Router } from '@kbn/shared-ux-router';
 import { useKibana } from './hooks/use_kibana';
 import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
-import { useKnowledgeTabsAvailability } from './knowledge/hooks/use_knowledge_tabs_availability';
-import type { KnowledgeTabsAvailability } from './knowledge/knowledge_tabs';
+import { useOnboardingVisibility } from './onboarding/use_onboarding_visibility';
 import type { NightshiftAppHeaderProps } from './app/app_header';
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({ useBreadcrumbs: jest.fn() }));
@@ -32,6 +31,10 @@ jest.mock('./sandbox_secrets/sandbox_secrets_flyout', () => ({
 jest.mock('./automations/automations_page', () => ({
   AutomationsPage: () => <div data-test-subj="automationsPageStub" />,
 }));
+jest.mock('./onboarding/onboarding', () => ({
+  NightshiftOnboarding: () => <div data-test-subj="nightshiftOnboardingStub" />,
+}));
+jest.mock('./onboarding/use_onboarding_visibility');
 jest.mock('./knowledge/page', () => {
   const { NightshiftAppHeader } = jest.requireActual('./app/app_header');
   return {
@@ -66,13 +69,11 @@ jest.mock('./settings/page', () => ({
 }));
 jest.mock('./hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('./hooks/use_significant_events_availability');
-jest.mock('./knowledge/hooks/use_knowledge_tabs_availability');
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseSignificantEventsAvailability = useSignificantEventsAvailability as jest.Mock;
-const mockUseKnowledgeTabsAvailability = useKnowledgeTabsAvailability as jest.MockedFunction<
-  typeof useKnowledgeTabsAvailability
->;
+const mockUseOnboardingVisibility = useOnboardingVisibility as jest.Mock;
+/** Mirrors the registered `appRoute` for significantEvents (`/app/significant_events`). */
 const getUrlForApp = jest.fn((appId: string, { path }: { path: string }) => {
   const base = appId === 'significantEvents' ? '/app/significant_events' : `/app/${appId}`;
   return `${base}${path.startsWith('/') ? path : `/${path}`}`;
@@ -80,12 +81,6 @@ const getUrlForApp = jest.fn((appId: string, { path }: { path: string }) => {
 const navigateToUrl = jest.fn();
 const navigateToApp = jest.fn();
 const featureFlags = { useBooleanValue: jest.fn() };
-const settledOff = { isEnabled: false, isLoading: false };
-const allKnowledgeTabsOff: KnowledgeTabsAvailability = {
-  cortex: settledOff,
-  memory: settledOff,
-  decision_trees: settledOff,
-};
 
 function renderPage(initialPath = '/') {
   const history = createMemoryHistory({ initialEntries: [initialPath] });
@@ -106,7 +101,11 @@ describe('NightshiftPage', () => {
     navigateToUrl.mockClear();
     featureFlags.useBooleanValue.mockReturnValue(true);
     mockUseSignificantEventsAvailability.mockReturnValue({ isAvailable: true, isLoading: false });
-    mockUseKnowledgeTabsAvailability.mockReturnValue(allKnowledgeTabsOff);
+    mockUseOnboardingVisibility.mockReturnValue({
+      isLoading: false,
+      showOnboarding: false,
+      dismiss: jest.fn(),
+    });
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -137,7 +136,6 @@ describe('NightshiftPage', () => {
     mockUseSignificantEventsAvailability.mockReturnValue({ isAvailable: false, isLoading: false });
     renderPage();
     expect(navigateToApp).toHaveBeenCalledWith(OBSERVABILITY_OVERVIEW_APP_ID);
-    expect(mockUseKnowledgeTabsAvailability).toHaveBeenCalledWith({ enabled: false });
     expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
   });
 
@@ -241,31 +239,7 @@ describe('NightshiftPage', () => {
   });
 
   describe('Knowledge', () => {
-    it.each([
-      {
-        name: 'availability is loading',
-        availability: {
-          ...allKnowledgeTabsOff,
-          memory: { isEnabled: false, isLoading: true },
-        },
-      },
-      {
-        name: 'every tab is disabled',
-        availability: allKnowledgeTabsOff,
-      },
-    ])('hides the menu item when $name', async ({ availability }) => {
-      mockUseKnowledgeTabsAvailability.mockReturnValue(availability);
-      renderPage();
-      await openAppMenuOverflow();
-
-      expect(screen.queryByTestId('nightshiftKnowledgeLink')).not.toBeInTheDocument();
-    });
-
-    it('links to Knowledge when a tab is enabled', async () => {
-      mockUseKnowledgeTabsAvailability.mockReturnValue({
-        ...allKnowledgeTabsOff,
-        cortex: { isEnabled: true, isLoading: false },
-      });
+    it('links to Knowledge without requesting optional-tab availability', async () => {
       renderPage();
       await openAppMenuOverflow();
 
@@ -277,10 +251,6 @@ describe('NightshiftPage', () => {
     });
 
     it('renders the lazy page without showing a link to itself', async () => {
-      mockUseKnowledgeTabsAvailability.mockReturnValue({
-        ...allKnowledgeTabsOff,
-        cortex: { isEnabled: true, isLoading: false },
-      });
       renderPage('/knowledge/cortex');
 
       expect(await screen.findByTestId('knowledgePageStub')).toBeInTheDocument();
@@ -403,6 +373,58 @@ describe('NightshiftPage', () => {
 
       await screen.findByTestId('nightshiftManagementLink');
       expect(screen.queryByTestId('nightshiftSandboxSecretsLink')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('onboarding', () => {
+    const withInvestigationsClient = () => {
+      const { services } = mockUseKibana();
+      mockUseKibana.mockReturnValue({
+        services: { ...services, nightshiftInvestigations: { investigationsClient: {} } },
+      });
+    };
+
+    it('renders onboarding instead of the landing page while the space onboards', async () => {
+      withInvestigationsClient();
+      mockUseOnboardingVisibility.mockReturnValue({
+        isLoading: false,
+        showOnboarding: true,
+        dismiss: jest.fn(),
+      });
+      renderPage();
+
+      expect(await screen.findByTestId('nightshiftOnboardingStub')).toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
+      expect(mockUseOnboardingVisibility).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isEnabled: true,
+          canUseAutomations: true,
+          forceOnboarding: false,
+        })
+      );
+    });
+
+    it('hides the Investigations action before the first investigation', async () => {
+      withInvestigationsClient();
+      mockUseOnboardingVisibility.mockReturnValue({
+        isLoading: false,
+        showOnboarding: true,
+        dismiss: jest.fn(),
+      });
+      renderPage();
+
+      await screen.findByTestId('nightshiftOnboardingStub');
+      expect(screen.queryByTestId('nightshiftInvestigationsPrimaryAction')).not.toBeInTheDocument();
+    });
+
+    it('forces onboarding with ?onboarding=1', async () => {
+      withInvestigationsClient();
+      renderPage('/?onboarding=1');
+
+      await screen.findByTestId('nightshiftAppStub');
+      expect(mockUseOnboardingVisibility).toHaveBeenCalledWith(
+        expect.objectContaining({ forceOnboarding: true })
+      );
     });
   });
 });

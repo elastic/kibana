@@ -111,11 +111,44 @@ export interface HuntThreatIntelSupplyHardGate {
   reasonCodes: string[];
 }
 
+/** The AlertZero model tiers Hunt runs on. */
+export type HuntModelTierId = 'efficient' | 'balanced' | 'frontier';
+
+/**
+ * Where a tier's model comes from, as the requesting user sees it:
+ *  - `configured`: an operator picked a model for the tier in Feature Settings.
+ *  - `recommended`: no pick, so the tier runs on its first provisioned recommended model.
+ *  - `configured_missing`: an operator picked models for the tier but none of them exist any
+ *    more (deleted, or the list was cleared). Hunt runs on a deployment default meanwhile, and
+ *    the pick needs repairing.
+ *  - `default_fallback`: nothing is configured for the tier, so it runs on a deployment default
+ *    (the platform default, or the connector the operator set as the default). Hunt works, but
+ *    the tier may be on a model much bigger or smaller than intended. This also covers a
+ *    deployment set to use the default connector only, which is a deliberate choice.
+ *  - `unavailable`: nothing resolves, so the consumers of this tier degrade.
+ */
+export type HuntModelTierState =
+  | 'configured'
+  | 'recommended'
+  | 'configured_missing'
+  | 'default_fallback'
+  | 'unavailable';
+
+export interface HuntModelTierStatus {
+  tier: HuntModelTierId;
+  state: HuntModelTierState;
+}
+
 export interface HuntThreatIntelSupplyStatus {
   workflows: HuntThreatIntelSupplyWorkflowStatus[];
   hardGate: HuntThreatIntelSupplyHardGate;
   drift: boolean;
   huntEnabled: boolean;
+  /**
+   * One entry per Hunt model tier, in tier order. Informational: it never feeds the hard gate,
+   * because Hunt degrades rather than fails when a tier has no model.
+   */
+  modelTiers: HuntModelTierStatus[];
 }
 
 export interface ScanFailureWorker {
