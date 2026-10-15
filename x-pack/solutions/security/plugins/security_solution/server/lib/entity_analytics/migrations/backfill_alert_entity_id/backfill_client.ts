@@ -7,6 +7,7 @@
 
 import type {
   BulkIndexByScrollFailure,
+  QueryDslBoolQuery,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -34,7 +35,7 @@ export interface TargetIndices {
 export const buildBackfillQuery = (
   window: Range,
   usableIndices: Set<string>
-): QueryDslQueryContainer => ({
+): { bool: QueryDslBoolQuery } => ({
   bool: {
     filter: [
       { range: { '@timestamp': { gte: window.start, lt: window.end } } },

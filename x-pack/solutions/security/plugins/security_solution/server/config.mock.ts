@@ -47,6 +47,9 @@ export const createMockConfig = (): ConfigType => {
           maxBulkRequestBodySizeBytes: 10_485_760,
         },
       },
+      alertEntityIdBackfill: {
+        enabled: true,
+      },
       entityStore: {
         frequency: duration('1m'),
         syncDelay: duration('5m'),

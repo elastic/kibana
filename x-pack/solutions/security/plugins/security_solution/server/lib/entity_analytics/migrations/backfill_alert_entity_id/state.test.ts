@@ -28,11 +28,11 @@ describe('backfill task state, version 1', () => {
   it('keeps a well-formed space entry intact', () => {
     const progress = {
       window: { start: '2026-09-08T00:00:00.000Z', end: '2026-10-08T00:00:00.000Z' },
-      searchAfter: ['2026-09-15T00:00:00.000Z', 'alert-9'],
+      esTaskId: 'node:123',
       done: false,
       failures: 1,
+      conflictReissues: 1,
       stamped: 42,
-      skipped: 3,
     };
 
     expect(migrate({ spaces: { default: progress }, runs: 7 })).toEqual({
@@ -47,24 +47,22 @@ describe('backfill task state, version 1', () => {
 
     expect(spaces.default).toEqual({
       window: undefined,
-      searchAfter: undefined,
+      esTaskId: undefined,
       done: true,
       failures: 0,
+      conflictReissues: 0,
       stamped: 0,
-      skipped: 0,
     });
   });
 
-  it('drops a cursor that is not entirely sort values', () => {
-    // Resuming from a partly-valid cursor would restart mid-window at the wrong place. Dropping it
-    // restarts that space's pass from the beginning, which only costs repeated work.
+  it('drops an Elasticsearch task id that is not a string', () => {
+    // Polling a malformed id fails the space on every run. Dropping it reissues the request, which
+    // only costs repeating whatever the previous one had not reached.
     const { spaces } = migrate({
-      spaces: {
-        default: { done: false, searchAfter: ['2026-09-15T00:00:00.000Z', { bad: true }] },
-      },
+      spaces: { default: { done: false, esTaskId: { id: 'node:123' } } },
     });
 
-    expect(spaces.default.searchAfter).toBeUndefined();
+    expect(spaces.default.esTaskId).toBeUndefined();
   });
 
   it('drops a half-written window', () => {

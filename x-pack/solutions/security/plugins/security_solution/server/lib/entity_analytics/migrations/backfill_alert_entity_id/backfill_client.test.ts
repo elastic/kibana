@@ -20,6 +20,7 @@ const SIGNAL = new AbortController().signal;
 const WINDOW = { start: '2026-09-08T00:00:00.000Z', end: '2026-10-08T00:00:00.000Z' };
 const USABLE = new Set(['index-1']);
 const ALERTS_INDEX = '.alerts-security.alerts-default';
+const MAX_DOCS = 250_000;
 
 describe('buildBackfillQuery', () => {
   it('restricts the search to indices that can be written to', () => {
@@ -141,6 +142,7 @@ describe('startBackfill', () => {
       alertsIndex: ALERTS_INDEX,
       query: buildBackfillQuery(WINDOW, USABLE),
       alertsPerSecond: 500,
+      maxDocs: MAX_DOCS,
       signal: SIGNAL,
     });
 
@@ -169,6 +171,16 @@ describe('startBackfill', () => {
 
     expect(esClient.updateByQuery).toHaveBeenCalledWith(
       expect.objectContaining({ requests_per_second: 500, conflicts: 'proceed' })
+    );
+  });
+
+  it('caps how many alerts one request rewrites', async () => {
+    // Bounds the transient disk growth of a single request; what is left over is picked up by the
+    // next one, which the query already excludes what was stamped.
+    await start();
+
+    expect(esClient.updateByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ max_docs: MAX_DOCS })
     );
   });
 
