@@ -40,6 +40,7 @@ import type {
   DocumentThreatIntelligenceDescriptor,
   EntityAlertsInsightsDescriptor,
   EntityAnomalyInsightsDescriptor,
+  EntityDescriptorMode,
   EntityEntraInsightsDescriptor,
   EntityGraphViewDescriptor,
   EntityMisconfigurationInsightsDescriptor,
@@ -130,23 +131,43 @@ const buildShowEntityCallback = (
     entityName,
     entityId,
     scopeId,
-  }: { entityType?: string; entityName: string; entityId?: string; scopeId?: string }
+    mode,
+  }: {
+    entityType?: string;
+    entityName: string;
+    entityId?: string;
+    scopeId?: string;
+    mode?: EntityDescriptorMode;
+  }
 ): (() => void) => {
   return () => {
     switch (entityType) {
       case 'user':
-        api.openUserFlyoutAsChild({ userName: entityName, entityId, scopeId, title: entityName });
+        api.openUserFlyoutAsChild({
+          userName: entityName,
+          entityId,
+          scopeId,
+          mode,
+          title: entityName,
+        });
         break;
       case 'service':
         api.openServiceFlyoutAsChild({
           serviceName: entityName,
           entityId,
           scopeId,
+          mode,
           title: entityName,
         });
         break;
       case 'host':
-        api.openHostFlyoutAsChild({ hostName: entityName, entityId, scopeId, title: entityName });
+        api.openHostFlyoutAsChild({
+          hostName: entityName,
+          entityId,
+          scopeId,
+          mode,
+          title: entityName,
+        });
         break;
       default:
         // Generic / unknown entity type: only openable when we have the canonical entity id.
@@ -457,11 +478,14 @@ export const openDescriptorAsStart = (
           | EntityType.generic,
         value: d.value,
         entityId: d.entityId,
+        mode: d.mode,
+        scopeId: d.scopeId,
         ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
           entityId: d.entityId,
+          mode: d.mode,
         }),
       });
       break;
@@ -475,11 +499,13 @@ export const openDescriptorAsStart = (
           | EntityType.generic,
         value: d.value,
         entityId: d.entityId,
+        mode: d.mode,
         ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
           entityId: d.entityId,
+          mode: d.mode,
         }),
       });
       break;
@@ -490,11 +516,13 @@ export const openDescriptorAsStart = (
         value: d.value,
         entityId: d.entityId,
         entityType: d.entityType as unknown as EntityType.host | EntityType.generic | undefined,
+        mode: d.mode,
         ...originParams,
         onShowHost: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
           entityId: d.entityId,
+          mode: d.mode,
         }),
       });
       break;
