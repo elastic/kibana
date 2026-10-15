@@ -367,11 +367,11 @@ describe('SyntheticsMonitorClient', () => {
   });
 
   describe('testNowConfigs', () => {
-    const testNow = (createPackagePolicies: jest.Mock, runOnceConfigs: jest.Mock) => {
-      const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
+    const testNow = (createPackagePolicies: jest.Mock, runMonitorOnce: jest.Mock) => {
+      const client = new SyntheticsMonitorClient(serviceManagedLocations, serverMock);
       client.privateLocationAPI.createPackagePolicies = createPackagePolicies;
-      syntheticsService.runOnceConfigs = runOnceConfigs;
-      syntheticsService.getSyntheticsParams = jest.fn().mockResolvedValue({});
+      serviceManagedLocations.runMonitorOnce = runMonitorOnce;
+      client.getSyntheticsParams = jest.fn().mockResolvedValue({});
       jest.spyOn(client as any, 'formatConfigWithParams').mockResolvedValue({
         formattedConfig: { ...monitor, locations: [{ ...privateLocations[0] }] },
         params: {},
