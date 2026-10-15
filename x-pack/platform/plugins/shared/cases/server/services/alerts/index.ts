@@ -29,6 +29,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
   ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID,
+  isAttackDiscoveryIndex,
   toReadableAttackIndexPattern,
 } from '@kbn/elastic-assistant-common';
 import { CaseStatuses } from '../../../common/types/domain';
@@ -487,6 +488,25 @@ export class AlertService {
   }
 
   /**
+   * Rejects attack references that name an index outside the two attack discovery families.
+   *
+   * The authorization read below runs as the caller, so this is not about privilege escalation.
+   * It is about what the read can be pointed at: without this, any index the caller can read is
+   * searchable, and a document there whose `_source` carries an attack discovery rule type and the
+   * right space id would satisfy every check that follows. Narrowing to the two families means the
+   * rule type and space checks only ever run against documents that are attack discoveries.
+   */
+  private rejectNonAttackIndices(attacks: AlertInfo[]): void {
+    const foreignAttack = attacks.find((attack) => !isAttackDiscoveryIndex(attack.index));
+
+    if (foreignAttack != null) {
+      throw Boom.badRequest(
+        `Cannot attach an attack from an index that is not an attack discovery index: ${foreignAttack.index}`
+      );
+    }
+  }
+
+  /**
    * Authorizes attack attachments, which reference an attack discovery AAD alert.
    *
    * `ensureAlertsAuthorized` alone is not enough: it authorizes the (rule type, consumer) pair of
@@ -514,6 +534,7 @@ export class AlertService {
       }
 
       this.rejectNonLocalIndices(nonEmptyAttacks, 'an attack');
+      this.rejectNonAttackIndices(nonEmptyAttacks);
 
       const sourcesById = await this.fetchAttackAuthorizationSources(nonEmptyAttacks);
 
@@ -526,7 +547,9 @@ export class AlertService {
       }
 
       const invalidIds = nonEmptyAttacks
-        .filter((attack) => !AlertService.isAttackInSpace(sourcesById.get(attack.id), spaceId))
+        .filter(
+          (attack) => !AlertService.isAttackInSpace(sourcesById.get(attack.id)?.fields, spaceId)
+        )
         .map((attack) => attack.id);
 
       if (invalidIds.length > 0) {
@@ -564,11 +587,15 @@ export class AlertService {
    * Results are keyed by `_id` because a search returns only the documents it found, in relevance
    * order. Attack discovery alert ids are unique across both index families, so this cannot
    * conflate two documents, and it never compares the caller-supplied index against the one
-   * Elasticsearch resolved — see `ensureScheduledAttacksAuthorized` for why that matters.
+   * Elasticsearch resolved — see `ensureScheduledAttacksAuthorized` for why that matters. Each
+   * entry carries that resolved `_index` so later authorization can address the same document.
+   *
+   * Callers must have rejected out-of-family indices first (`rejectNonAttackIndices`); the pattern
+   * mapping below passes anything else through unchanged.
    */
   private async fetchAttackAuthorizationSources(
     attacks: AlertInfo[]
-  ): Promise<Map<string, AttackAuthorizationFields | undefined>> {
+  ): Promise<Map<string, AttackAuthorizationSource>> {
     const idsByPattern = new Map<string, string[]>();
 
     for (const attack of attacks) {
@@ -576,7 +603,7 @@ export class AlertService {
       idsByPattern.set(pattern, [...(idsByPattern.get(pattern) ?? []), attack.id]);
     }
 
-    const sourcesById = new Map<string, AttackAuthorizationFields | undefined>();
+    const sourcesById = new Map<string, AttackAuthorizationSource>();
 
     await pMap(
       Array.from(idsByPattern.entries()),
@@ -593,7 +620,7 @@ export class AlertService {
 
         for (const hit of hits.hits) {
           if (hit._id != null) {
-            sourcesById.set(hit._id, hit._source);
+            sourcesById.set(hit._id, { index: hit._index, fields: hit._source });
           }
         }
       },
@@ -619,14 +646,24 @@ export class AlertService {
    * attachment is caller-controlled and is not the one Elasticsearch resolves the document from,
    * so matching the two would find nothing, leave `scheduledAttacks` empty, and skip alerting
    * RBAC entirely for a caller that named the alias.
+   *
+   * For the same reason the alerts handed to alerting RBAC carry the `_index` the search resolved
+   * rather than the one the attachment named. `ensureAllAlertsAuthorizedRead` runs its own
+   * internal `mget`, and the caller-supplied index need not hold the document the search found —
+   * so passing it through would authorize a different document than the one whose rule type was
+   * just read.
    */
   private async ensureScheduledAttacksAuthorized(
     attacks: AlertInfo[],
-    sourcesById: Map<string, AttackAuthorizationFields | undefined>
+    sourcesById: Map<string, AttackAuthorizationSource>
   ): Promise<void> {
-    const scheduledAttacks = attacks.filter((attack) =>
-      AlertService.isScheduledAttack(sourcesById.get(attack.id))
-    );
+    const scheduledAttacks = attacks.flatMap((attack) => {
+      const source = sourcesById.get(attack.id);
+
+      return AlertService.isScheduledAttack(source?.fields)
+        ? [{ ...attack, index: source?.index ?? attack.index }]
+        : [];
+    });
 
     if (scheduledAttacks.length <= 0) {
       return;
@@ -800,6 +837,18 @@ export interface Alert {
 interface AttackAuthorizationFields {
   [ALERT_RULE_TYPE_ID]?: string;
   [SPACE_IDS]?: string[];
+}
+
+/**
+ * A referenced attack as Elasticsearch actually resolved it.
+ *
+ * `index` is the `_index` of the hit, not the index the attachment named — the two differ
+ * whenever the caller names an alias or a pattern, and only the resolved one identifies the
+ * document whose `fields` were read.
+ */
+interface AttackAuthorizationSource {
+  index: string;
+  fields: AttackAuthorizationFields | undefined;
 }
 
 interface AlertIdIndex {

@@ -164,7 +164,8 @@ export const ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX =
  * attacks permanently unreadable.
  *
  * Anything that matches neither attack-discovery index family is passed through unchanged — it is
- * already whatever the caller meant, and guessing would be worse than trying it.
+ * already whatever the caller meant, and guessing would be worse than trying it. Callers that
+ * treat the index as a security boundary must gate on {@link isAttackDiscoveryIndex} first.
  */
 export const toReadableAttackIndexPattern = (index: string): string => {
   // Checked first: the adhoc index name contains the scheduled prefix as a substring.
@@ -176,6 +177,18 @@ export const toReadableAttackIndexPattern = (index: string): string => {
   }
   return index;
 };
+
+/**
+ * Whether an index name belongs to one of the two attack discovery alert index families.
+ *
+ * {@link toReadableAttackIndexPattern} deliberately passes anything else through, which is right
+ * for display but wrong for a read that is about to decide an authorization question: an index the
+ * caller names but that holds no attack discoveries could still return a document whose `_source`
+ * claims to be one. Reject those before searching.
+ */
+export const isAttackDiscoveryIndex = (index: string): boolean =>
+  index.includes(ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX) ||
+  index.includes(ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX);
 
 /**
  * This feature flag disables the InferenceChatModel feature.
