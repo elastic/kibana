@@ -417,6 +417,7 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       await common.waitForSaveModalToClose();
 
       // make sure the dashboard page actually loaded
+      await header.waitUntilLoadingHasFinished();
       const dashboardItemCount = await dashboardPage.getSharedItemsCount();
       expect(dashboardItemCount).to.not.eql(undefined);
 
