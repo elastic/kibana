@@ -11,4 +11,6 @@ import { createPlaywrightConfig } from '@kbn/scout';
 // as its own track with a dedicated cluster — required, as these tests destroy the license.
 export default createPlaywrightConfig({
   testDir: './tests',
+  // Destructive: a retry would restart the serial group on the downgraded license.
+  retries: 0,
 });
