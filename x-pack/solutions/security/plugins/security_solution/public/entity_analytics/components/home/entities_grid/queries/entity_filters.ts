@@ -7,7 +7,8 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { escapeStringValue } from '@kbn/esql-utils';
-import { RESOLUTION_RISK_LEVEL_FIELD, RISK_LEVEL_FIELD } from '../common';
+import { CriticalityLevelsForBulkUpload } from '../../../../../../common/entity_analytics/asset_criticality/constants';
+import { CRITICALITY_FIELD, RESOLUTION_RISK_LEVEL_FIELD, RISK_LEVEL_FIELD } from '../common';
 import type { EntityFilters, RowsMode } from '../common';
 import { buildFilterClause, toList } from './esql';
 
@@ -24,10 +25,37 @@ const ENTITY_FILTER_FIELDS: ReadonlyArray<{
 }> = [
   { key: 'entityTypes', field: 'entity.EngineMetadata.Type' },
   { key: 'riskLevels', field: 'entity.risk.calculated_level' },
-  { key: 'assetCriticality', field: 'asset.criticality' },
+  { key: 'assetCriticality', field: CRITICALITY_FIELD },
   { key: 'watchlists', field: 'entity.attributes.watchlists', isMultiValue: true },
   { key: 'dataSources', field: 'entity.source', isMultiValue: true },
 ];
+
+/** "Unassigned" is never stored: the filter bar counts entities without a criticality under it. */
+const UNASSIGNED_CRITICALITY = CriticalityLevelsForBulkUpload.UNASSIGNED;
+
+const buildCriticalityCondition = (values: readonly string[]): string => {
+  const levels = values.filter((value) => value !== UNASSIGNED_CRITICALITY);
+  const conditions = [
+    ...(levels.length ? [`${CRITICALITY_FIELD} IN (${toList(levels)})`] : []),
+    ...(values.includes(UNASSIGNED_CRITICALITY) ? [`${CRITICALITY_FIELD} IS NULL`] : []),
+  ];
+  return conditions.length === 1 ? conditions[0] : `(${conditions.join(' OR ')})`;
+};
+
+const buildCriticalityQuery = (values: readonly string[]): QueryDslQueryContainer => {
+  const levels = values.filter((value) => value !== UNASSIGNED_CRITICALITY);
+  return {
+    bool: {
+      should: [
+        ...(levels.length ? [{ terms: { [CRITICALITY_FIELD]: levels } }] : []),
+        ...(values.includes(UNASSIGNED_CRITICALITY)
+          ? [{ bool: { must_not: { exists: { field: CRITICALITY_FIELD } } } }]
+          : []),
+      ],
+      minimum_should_match: 1,
+    },
+  };
+};
 
 /** Plain field filters, not `COALESCE(…) IN (…)`: Lucene can only run filters on stored fields, not on computed values. */
 const buildResolvedRiskLevelCondition = (values: readonly string[]): string =>
@@ -46,6 +74,7 @@ export const buildEntityFiltersExpression = (
     if (key === 'riskLevels' && rowsMode === 'resolved') {
       return [buildResolvedRiskLevelCondition(values)];
     }
+    if (key === 'assetCriticality') return [buildCriticalityCondition(values)];
     return isMultiValue
       ? [buildMvContainsExpression(field, values)]
       : [`${field} IN (${toList(values)})`];
@@ -54,7 +83,9 @@ export const buildEntityFiltersExpression = (
 export const buildEntityFiltersQuery = (filters: EntityFilters): QueryDslQueryContainer[] =>
   ENTITY_FILTER_FIELDS.flatMap(({ key, field }) => {
     const values: readonly string[] = filters[key];
-    return values.length ? [{ terms: { [field]: [...values] } }] : [];
+    if (!values.length) return [];
+    if (key === 'assetCriticality') return [buildCriticalityQuery(values)];
+    return [{ terms: { [field]: [...values] } }];
   });
 
 /** `| WHERE …` pipe clauses for NAT tile queries (empty when no filters). */

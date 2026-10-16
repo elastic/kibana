@@ -177,6 +177,23 @@ const FILTER_CASES: readonly FilterCase[] = [
     [],
   ],
   [
+    // "Unassigned" is never stored: it is a group where no entity has a criticality.
+    'an unassigned criticality filter',
+    { entityFilters: { ...EMPTY_ENTITY_FILTERS, assetCriticality: ['unassigned'] } },
+    'entity.name',
+    'asc',
+    ['user:bob@okta', 'service:payments', 'host:h3'],
+  ],
+  [
+    'an unassigned criticality filter with a criticality level',
+    {
+      entityFilters: { ...EMPTY_ENTITY_FILTERS, assetCriticality: ['low_impact', 'unassigned'] },
+    },
+    'entity.name',
+    'asc',
+    ['user:alice@okta', 'user:bob@okta', 'service:payments', 'host:h3'],
+  ],
+  [
     'a watchlist filter on the watchlist of an alias',
     { entityFilters: { ...EMPTY_ENTITY_FILTERS, watchlists: ['wl-2'] } },
     'entity.name',
