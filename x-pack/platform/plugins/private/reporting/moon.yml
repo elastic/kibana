@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/core-test-helpers-test-utils'
   - '@kbn/safer-lodash-set'
   - '@kbn/reporting-common'
+  - '@kbn/std'
   - '@kbn/core-http-router-server-internal'
   - '@kbn/reporting-public'
   - '@kbn/reporting-server'
