@@ -26,12 +26,8 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { ExecutionJsonFlyout } from './execution_json_flyout';
 import { ExecutionMetadataByModel } from './execution_metadata_by_model';
 
-const MIN_WIDTH = 260;
-const BREAKDOWN_WIDTH = 420;
-
-type MetadataTab = 'total' | 'byModel';
-
-const isMetadataTab = (id: string): id is MetadataTab => id === 'total' || id === 'byModel';
+const POPOVER_WIDTH = 420;
+const MIN_MODELS_FOR_TABS = 2;
 
 const labels = {
   tabsLegend: i18n.translate('xpack.agentBuilder.response.metadataPopover.tabsLegend', {
@@ -69,28 +65,22 @@ const labels = {
   }),
 };
 
-const tabOptions = [
-  {
-    id: 'total',
+const TABS = {
+  total: {
     label: labels.totalTab,
-    'data-test-subj': 'executionMetadataTotalTab',
-    ...getEbtProps({
-      element: AGENT_BUILDER_UI_EBT.element.pageContent,
-      action: AGENT_BUILDER_UI_EBT.action.conversation.VIEW_ROUND_METADATA_TOTAL,
-      detail: 'conversation',
-    }),
+    testSubj: 'executionMetadataTotalTab',
+    ebtAction: AGENT_BUILDER_UI_EBT.action.conversation.VIEW_ROUND_METADATA_TOTAL,
   },
-  {
-    id: 'byModel',
+  byModel: {
     label: labels.byModelTab,
-    'data-test-subj': 'executionMetadataByModelTab',
-    ...getEbtProps({
-      element: AGENT_BUILDER_UI_EBT.element.pageContent,
-      action: AGENT_BUILDER_UI_EBT.action.conversation.VIEW_ROUND_METADATA_BY_MODEL,
-      detail: 'conversation',
-    }),
+    testSubj: 'executionMetadataByModelTab',
+    ebtAction: AGENT_BUILDER_UI_EBT.action.conversation.VIEW_ROUND_METADATA_BY_MODEL,
   },
-];
+} as const;
+
+type MetadataTab = keyof typeof TABS;
+
+const isMetadataTab = (id: string): id is MetadataTab => Object.keys(TABS).includes(id);
 
 interface ExecutionMetadataPopoverProps {
   executionTerminatedEvent: ExecutionTerminatedEvent;
@@ -124,7 +114,19 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
     return null;
   }
 
-  const hasBreakdown = (modelUsage.connectors?.length ?? 0) > 1;
+  const hasSeveralModels = (modelUsage.connectors?.length ?? 0) >= MIN_MODELS_FOR_TABS;
+  const tabOptions = (Object.keys(TABS) as MetadataTab[]).map((id) => ({
+    id,
+    label: TABS[id].label,
+    'data-test-subj': TABS[id].testSubj,
+    ...(id === selectedTab
+      ? {}
+      : getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: TABS[id].ebtAction,
+          detail: 'conversation',
+        })),
+  }));
   const seconds = Math.round(timeMs / 1000);
   const secondsLabel = i18n.translate('xpack.agentBuilder.response.metadataPopover.seconds', {
     defaultMessage: '{seconds}s',
@@ -163,18 +165,12 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
         <EuiFlexGroup
           direction="column"
           gutterSize="s"
-          css={
-            hasBreakdown
-              ? css`
-                  width: ${BREAKDOWN_WIDTH}px;
-                  max-width: calc(100vw - 4rem);
-                `
-              : css`
-                  min-width: ${MIN_WIDTH}px;
-                `
-          }
+          css={css`
+            width: ${POPOVER_WIDTH}px;
+            max-width: calc(100vw - 4rem);
+          `}
         >
-          {hasBreakdown && (
+          {hasSeveralModels && (
             <EuiFlexItem grow={false}>
               <EuiButtonGroup
                 legend={labels.tabsLegend}
@@ -192,7 +188,7 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
               <EuiSpacer size="xs" />
             </EuiFlexItem>
           )}
-          {hasBreakdown && selectedTab === 'byModel' ? (
+          {hasSeveralModels && selectedTab === 'byModel' ? (
             <ExecutionMetadataByModel modelUsage={modelUsage} />
           ) : (
             <>

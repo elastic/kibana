@@ -390,19 +390,28 @@ describe('ExecutionMetadataPopover', () => {
       ).toBeInTheDocument();
     });
 
-    it('tracks the switch of tab with the analytics attributes of each tab', async () => {
+    it('tracks the switch to a tab, but not a click on the tab that is already selected', async () => {
       render(
         <ExecutionMetadataPopover executionTerminatedEvent={eventWithUsage(usageWithBreakdown)} />
       );
-      await openPopover();
+      const user = await openPopover();
 
-      expect(screen.getByTestId('executionMetadataTotalTab')).toHaveAttribute(
-        'data-ebt-action',
-        'view_round_metadata_total'
+      expect(screen.getByTestId('executionMetadataTotalTab')).not.toHaveAttribute(
+        'data-ebt-action'
       );
       expect(screen.getByTestId('executionMetadataByModelTab')).toHaveAttribute(
         'data-ebt-action',
         'view_round_metadata_by_model'
+      );
+
+      await user.click(screen.getByTestId('executionMetadataByModelTab'));
+
+      expect(screen.getByTestId('executionMetadataByModelTab')).not.toHaveAttribute(
+        'data-ebt-action'
+      );
+      expect(screen.getByTestId('executionMetadataTotalTab')).toHaveAttribute(
+        'data-ebt-action',
+        'view_round_metadata_total'
       );
     });
 
