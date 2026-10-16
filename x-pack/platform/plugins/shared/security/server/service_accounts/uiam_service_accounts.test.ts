@@ -819,7 +819,7 @@ describe('UiamServiceAccounts', () => {
       expect(mockUiam.listServiceAccounts).not.toHaveBeenCalled();
     });
 
-    it('checks the `read_security` cluster privilege for the caller', async () => {
+    it('checks the `manage_security` cluster privilege for the caller', async () => {
       mockUiam.listServiceAccounts.mockResolvedValue({ service_accounts: [] });
       const request = createMockRequest('Bearer essu_my_token');
 
@@ -827,11 +827,11 @@ describe('UiamServiceAccounts', () => {
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
-        elasticsearch: { cluster: ['read_security'], index: {} },
+        elasticsearch: { cluster: ['manage_security'], index: {} },
       });
     });
 
-    it('rejects with a 403 when the caller lacks the `read_security` cluster privilege', async () => {
+    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
       mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
 
       await expect(
@@ -947,7 +947,7 @@ describe('UiamServiceAccounts', () => {
       expect(mockUiam.getServiceAccount).not.toHaveBeenCalled();
     });
 
-    it('checks the `read_security` cluster privilege for the caller', async () => {
+    it('checks the `manage_security` cluster privilege for the caller', async () => {
       mockUiam.getServiceAccount.mockResolvedValue(retrievedAccount);
       const request = createMockRequest('Bearer essu_my_token');
 
@@ -955,11 +955,11 @@ describe('UiamServiceAccounts', () => {
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
-        elasticsearch: { cluster: ['read_security'], index: {} },
+        elasticsearch: { cluster: ['manage_security'], index: {} },
       });
     });
 
-    it('rejects with a 403 when the caller lacks the `read_security` cluster privilege', async () => {
+    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
       mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
 
       await expect(

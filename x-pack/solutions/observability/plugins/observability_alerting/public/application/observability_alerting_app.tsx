@@ -13,6 +13,7 @@ import type {
 } from '@kbn/alerting-v2-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { AppHeaderTab } from '@kbn/app-header';
+import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import {
   OBSERVABILITY_ALERTING_APP_ID,
   OBSERVABILITY_ALERTING_BASE_PATH,
@@ -42,6 +43,7 @@ interface ObservabilityAlertingAppProps {
   coreStart: CoreStart;
   alertingVTwo: AlertingV2PublicStart;
   triggersActionsUi: Pick<TriggersAndActionsUIPublicPluginStart, 'getClassicRulesPage'>;
+  ObservabilityPageTemplate: ObservabilitySharedPluginStart['navigation']['PageTemplate'];
   history: ScopedHistory;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }
@@ -131,6 +133,7 @@ export const ObservabilityAlertingApp = ({
   coreStart,
   alertingVTwo,
   triggersActionsUi,
+  ObservabilityPageTemplate,
   history,
   setBreadcrumbs,
 }: ObservabilityAlertingAppProps) => {
@@ -171,80 +174,81 @@ export const ObservabilityAlertingApp = ({
     [coreStart]
   );
 
+  // The template adds no padding: each route's EuiPageSection supplies the 16px that AppHeader `bleed` needs.
   return (
-    <Routes>
-      <Route exact path="/">
+    <ObservabilityPageTemplate pageSectionProps={{ paddingSize: 'none' }}>
+      <Routes>
+        <Route exact path="/">
+          <Redirect to={OBSERVABILITY_ALERTING_ALERTS_PATH} />
+        </Route>
+        {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
+        <Route path={OBSERVABILITY_ALERTING_ALERTS_PATH}>
+          <EuiPageSection paddingSize="m">
+            <EpisodesPage
+              coreStart={coreStart}
+              setBreadcrumbs={setBreadcrumbs}
+              hostApp={hostApp}
+              privilegeCheck={privilegeCheck}
+              createActions={createObservabilityEpisodeActions}
+              manageRulesHref={manageRulesHref}
+            />
+            <Route exact path={OBSERVABILITY_ALERTING_ALERTS_PATH}>
+              <AlertingNavPromo coreStart={coreStart} />
+            </Route>
+          </EuiPageSection>
+        </Route>
+        <Route path={OBSERVABILITY_ALERTING_RULES_V1_PATH}>
+          <EuiPageSection paddingSize="m">
+            <ClassicRulesV1Route
+              coreStart={coreStart}
+              getClassicRulesPage={triggersActionsUi.getClassicRulesPage}
+              history={history}
+              setBreadcrumbs={setBreadcrumbs}
+              tabs={rulesV1Tabs}
+            />
+          </EuiPageSection>
+        </Route>
+        <Route path={OBSERVABILITY_ALERTING_RULES_V2_PATH}>
+          <EuiPageSection paddingSize="m">
+            <RulesPage
+              coreStart={coreStart}
+              setBreadcrumbs={setBreadcrumbs}
+              hostApp={hostApp}
+              tabs={rulesV2Tabs}
+            />
+          </EuiPageSection>
+        </Route>
+        {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
+        <Route path={OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH}>
+          <EuiPageSection paddingSize="m">
+            <RuleLibraryPage
+              coreStart={coreStart}
+              setBreadcrumbs={setBreadcrumbs}
+              hostApp={hostApp}
+              privilegeCheck={privilegeCheck}
+            />
+          </EuiPageSection>
+        </Route>
+        <Route path={OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH}>
+          <EuiPageSection paddingSize="m">
+            <ActionPoliciesPage
+              coreStart={coreStart}
+              setBreadcrumbs={setBreadcrumbs}
+              hostApp={hostApp}
+            />
+          </EuiPageSection>
+        </Route>
+        <Route path={OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH}>
+          <EuiPageSection paddingSize="m">
+            <ExecutionHistoryPage
+              coreStart={coreStart}
+              setBreadcrumbs={setBreadcrumbs}
+              hostApp={hostApp}
+            />
+          </EuiPageSection>
+        </Route>
         <Redirect to={OBSERVABILITY_ALERTING_ALERTS_PATH} />
-      </Route>
-      {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
-      <Route path={OBSERVABILITY_ALERTING_ALERTS_PATH}>
-        <EuiPageSection paddingSize="m">
-          {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
-          <EpisodesPage
-            coreStart={coreStart}
-            setBreadcrumbs={setBreadcrumbs}
-            hostApp={hostApp}
-            privilegeCheck={privilegeCheck}
-            createActions={createObservabilityEpisodeActions}
-            manageRulesHref={manageRulesHref}
-          />
-          <Route exact path={OBSERVABILITY_ALERTING_ALERTS_PATH}>
-            <AlertingNavPromo coreStart={coreStart} />
-          </Route>
-        </EuiPageSection>
-      </Route>
-      <Route path={OBSERVABILITY_ALERTING_RULES_V1_PATH}>
-        <EuiPageSection paddingSize="m">
-          <ClassicRulesV1Route
-            coreStart={coreStart}
-            getClassicRulesPage={triggersActionsUi.getClassicRulesPage}
-            history={history}
-            setBreadcrumbs={setBreadcrumbs}
-            tabs={rulesV1Tabs}
-          />
-        </EuiPageSection>
-      </Route>
-      <Route path={OBSERVABILITY_ALERTING_RULES_V2_PATH}>
-        <EuiPageSection paddingSize="m">
-          <RulesPage
-            coreStart={coreStart}
-            setBreadcrumbs={setBreadcrumbs}
-            hostApp={hostApp}
-            tabs={rulesV2Tabs}
-          />
-        </EuiPageSection>
-      </Route>
-      {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
-      <Route path={OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH}>
-        <EuiPageSection paddingSize="m">
-          {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
-          <RuleLibraryPage
-            coreStart={coreStart}
-            setBreadcrumbs={setBreadcrumbs}
-            hostApp={hostApp}
-            privilegeCheck={privilegeCheck}
-          />
-        </EuiPageSection>
-      </Route>
-      <Route path={OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH}>
-        <EuiPageSection paddingSize="m">
-          <ActionPoliciesPage
-            coreStart={coreStart}
-            setBreadcrumbs={setBreadcrumbs}
-            hostApp={hostApp}
-          />
-        </EuiPageSection>
-      </Route>
-      <Route path={OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH}>
-        <EuiPageSection paddingSize="m">
-          <ExecutionHistoryPage
-            coreStart={coreStart}
-            setBreadcrumbs={setBreadcrumbs}
-            hostApp={hostApp}
-          />
-        </EuiPageSection>
-      </Route>
-      <Redirect to={OBSERVABILITY_ALERTING_ALERTS_PATH} />
-    </Routes>
+      </Routes>
+    </ObservabilityPageTemplate>
   );
 };

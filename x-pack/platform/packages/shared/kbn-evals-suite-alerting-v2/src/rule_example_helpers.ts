@@ -18,6 +18,7 @@ import {
   DETECTION_RULE_EDIT_SKILL_ID,
   RULE_MANAGEMENT_SKILL_ID,
 } from './constants';
+import { assertNoGenerationIndex } from './assert_no_generation_index';
 import {
   getAttachmentVersionData,
   getLatestAttachmentData,
@@ -82,5 +83,6 @@ export const assertLatestHostCpuAlert = (
   const breachEsql = latest!.query ? getBreachEsqlQuery(latest!.query) : '';
   expect(breachEsql).toContain(hostMetricsIndex);
   expect(breachEsql).toContain('system.cpu.total.norm.pct');
+  assertNoGenerationIndex(breachEsql);
   return latest!;
 };

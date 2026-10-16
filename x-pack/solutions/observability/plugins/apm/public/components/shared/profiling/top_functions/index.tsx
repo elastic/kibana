@@ -6,6 +6,7 @@
  */
 import { EuiSpacer } from '@elastic/eui';
 import { EmbeddableFunctions } from '@kbn/observability-shared-plugin/public';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 import React from 'react';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -19,6 +20,8 @@ interface Props {
   transactionName?: string;
   transactionType?: string;
   environment: string;
+  /** Undefined until a schema is selected, which the request waits for */
+  schema?: ProfilingSchema;
 }
 
 export function ProfilingTopNFunctions({
@@ -29,12 +32,13 @@ export function ProfilingTopNFunctions({
   transactionName,
   transactionType,
   environment,
+  schema,
 }: Props) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (transactionType) {
+      if (transactionType && schema) {
         return callApmApi('GET /internal/apm/services/{serviceName}/profiling/functions', {
           params: {
             path: { serviceName },
@@ -47,12 +51,13 @@ export function ProfilingTopNFunctions({
               endIndex: 10,
               transactionType,
               environment,
+              schema,
             },
           },
         });
       }
     },
-    [serviceName, start, end, kuery, transactionName, transactionType, environment]
+    [serviceName, start, end, kuery, transactionName, transactionType, environment, schema]
   );
 
   return (
@@ -61,6 +66,7 @@ export function ProfilingTopNFunctions({
         kuery={kuery}
         rangeFrom={rangeFrom}
         rangeTo={rangeTo}
+        schema={schema}
         justifyContent="flexEnd"
       />
       <EuiSpacer />

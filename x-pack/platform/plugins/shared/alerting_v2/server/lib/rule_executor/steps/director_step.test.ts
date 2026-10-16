@@ -24,6 +24,7 @@ describe('DirectorStep', () => {
       { name: 'last_episode_status', type: 'keyword' },
       { name: 'last_episode_status_count', type: 'long' },
       { name: 'last_episode_timestamp', type: 'date' },
+      { name: 'last_episode_phase_started_at', type: 'date' },
     ],
     values: [],
   });
