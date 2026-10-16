@@ -79,6 +79,11 @@ interface CustomCascadeGridBodyProps
    */
   toolbarPortalNode: HtmlPortalNode;
   /**
+   * Reverse portal node for the grid header row, so that relocating it into the cascade sticky header
+   * reparents its DOM without remounting the EUI header cells.
+   */
+  headerPortalNode: HtmlPortalNode;
+  /**
    * When set, the toolbar and header row are portaled into this element (the cascade row's
    * sticky header extension point) instead of being rendered in place.
    */
@@ -97,6 +102,11 @@ export interface CustomCascadeGridBodyScrollApi {
 const EMPTY_SORT: SortOrder[] = [];
 
 /**
+ * Row height used for rows that have not been measured yet, until the first rendered row has been sampled.
+ */
+const DEFAULT_ESTIMATED_ROW_HEIGHT = 65;
+
+/**
  * A custom grid body implementation for the unified data table to be used in the cascade leaf cells
  * that allows for nested cascade virtualization that's compatible with the EUI Data Grid.
  */
@@ -112,6 +122,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   headerRow,
   footerRow,
   toolbarPortalNode,
+  headerPortalNode,
   stickyHeaderPortalTarget,
   scrollApiRef,
 }: CustomCascadeGridBodyProps) {
@@ -135,7 +146,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     rowIndex,
     // @ts-expect-error - required to allow the use of the visibleRows array
     rows: visibleRows,
-    estimatedRowHeight: 65,
+    estimatedRowHeight: DEFAULT_ESTIMATED_ROW_HEIGHT,
     overscan: 10,
     privateScrollElement: customGridBodyScrollContainerRef,
   });
@@ -152,8 +163,6 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     scrollApiRef,
     () => ({
       scrollToRow: (targetRowIndex) => {
-        // 'center' keeps the row clear of the cascade sticky header (toolbar + grid header row),
-        // whether the body scrolls with the cascade or on its own in full screen mode
         virtualizer.scrollToIndex(targetRowIndex, { align: 'center', behavior: 'auto' });
       },
     }),
@@ -171,20 +180,25 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
       role="rowgroup"
       css={customCascadeGridBodyStyle.wrapper}
     >
-      {stickyHeaderPortalTarget
-        ? createPortal(
+      <InPortal node={headerPortalNode}>{headerRow}</InPortal>
+      {stickyHeaderPortalTarget ? (
+        <>
+          {createPortal(
             <>
               <OutPortal node={toolbarPortalNode} />
               <div
                 data-test-subj="discoverCascadeCustomDataPortalledGridHeaderContainer"
                 css={customCascadeGridBodyStyle.portalledGridHeaderContainer}
               >
-                {headerRow}
+                <OutPortal node={headerPortalNode} />
               </div>
             </>,
             stickyHeaderPortalTarget
-          )
-        : headerRow}
+          )}
+        </>
+      ) : (
+        <OutPortal node={headerPortalNode} />
+      )}
       <div
         ref={customGridBodyScrollContainerRef}
         css={customCascadeGridBodyStyle.virtualizerContainer}
@@ -198,7 +212,6 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
               <div
                 key={virtualRow.key}
                 data-index={virtualRow.index}
-                ref={virtualizer.measureElement}
                 className="euiDataGridRow"
                 css={customCascadeGridBodyStyle.displayFlex}
               >
@@ -290,11 +303,13 @@ export const ESQLDataCascadeLeafCell = React.memo(
     // In full screen mode the grid is fixed-positioned above the cascade, so the sticky header
     // slot is not visible and the toolbar/header must stay in their default positions.
     const stickyHeaderPortalTarget =
-      !isCellInFullScreenMode && stickyHeaderExtensionPoint?.isActiveSticky
+      !isCellInFullScreenMode && stickyHeaderExtensionPoint.isDisplayed
         ? stickyHeaderExtensionPoint.extensionPointElement
         : null;
 
     const isToolbarInStickyHeader = stickyHeaderPortalTarget !== null;
+
+    const headerPortalNode = useMemo(() => createHtmlPortalNode(), []);
 
     // The data grid toolbar is rendered by EuiDataGrid outside of the custom grid body. To move it
     // into the cascade sticky header without remounting it, it is rendered into a reverse portal
@@ -375,6 +390,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
           rowIndex={rowIndex}
           isFullScreenMode={isCellInFullScreenMode}
           toolbarPortalNode={toolbarPortalNode}
+          headerPortalNode={headerPortalNode}
           stickyHeaderPortalTarget={stickyHeaderPortalTarget}
           scrollApiRef={scrollApiRef}
         />
@@ -386,6 +402,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         cellData,
         rowIndex,
         toolbarPortalNode,
+        headerPortalNode,
         stickyHeaderPortalTarget,
       ]
     );
