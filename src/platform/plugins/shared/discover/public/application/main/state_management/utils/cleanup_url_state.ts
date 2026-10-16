@@ -183,7 +183,8 @@ export const clearOutdatedTabUrlState = async ({
 
   const globalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
 
-  if (timeRestore && globalState) {
+  // A time different from the draft's is an explicit override, so it is kept.
+  if (timeRestore && globalState && isEqual(globalState.time, tab.globalState.timeRange)) {
     updates.push(
       urlStateStorage.set(GLOBAL_STATE_URL_KEY, omit(globalState, 'time', 'refreshInterval'), {
         replace: true,

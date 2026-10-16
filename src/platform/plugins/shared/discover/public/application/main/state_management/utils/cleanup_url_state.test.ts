@@ -239,23 +239,26 @@ describe('clearOutdatedTabUrlState', () => {
     }
   );
 
-  it('clears the draft URL when another app changed its global time', async () => {
-    const otherAppTime = { from: 'now-1y', to: 'now' };
-    const urlStateStorage = createKbnUrlStateStorage({
-      history: createMemoryHistory(),
-      useHash: false,
-    });
-    await urlStateStorage.set(APP_STATE_URL_KEY, tab.appState);
-    await urlStateStorage.set(GLOBAL_STATE_URL_KEY, { time: otherAppTime });
+  it.each([true, false])(
+    'clears the draft app state but keeps a different URL time with timeRestore=%s',
+    async (timeRestore) => {
+      const linkedTime = { from: 'now-1y', to: 'now' };
+      const urlStateStorage = createKbnUrlStateStorage({
+        history: createMemoryHistory(),
+        useHash: false,
+      });
+      await urlStateStorage.set(APP_STATE_URL_KEY, tab.appState);
+      await urlStateStorage.set(GLOBAL_STATE_URL_KEY, { time: linkedTime });
 
-    await clearOutdatedTabUrlState({
-      tab,
-      timeRestore: false,
-      urlStateStorage,
-      profileStateRegistry: createProfileStateRegistry(),
-    });
+      await clearOutdatedTabUrlState({
+        tab,
+        timeRestore,
+        urlStateStorage,
+        profileStateRegistry: createProfileStateRegistry(),
+      });
 
-    expect(urlStateStorage.get(APP_STATE_URL_KEY)).toBeNull();
-    expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({ time: otherAppTime });
-  });
+      expect(urlStateStorage.get(APP_STATE_URL_KEY)).toBeNull();
+      expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({ time: linkedTime });
+    }
+  );
 });
