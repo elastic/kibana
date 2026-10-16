@@ -39,15 +39,19 @@ export const ApproveIntegrationRequest = lazySchema(() =>
       /**
        * The version of the integration
        */
-      version: SemVer,
+      version: SemVer.describe('The version of the integration'),
       /**
        * The categories of the integration
        */
-      categories: z.array(NonEmptyString).min(1).max(50),
+      categories: z
+        .array(NonEmptyString)
+        .min(1)
+        .max(50)
+        .describe('The categories of the integration'),
       /**
        * The LangSmith tracing options
        */
-      langSmithOptions: LangSmithOptions.optional(),
+      langSmithOptions: LangSmithOptions.optional().describe('The LangSmith tracing options'),
     })
     .strict()
 );
@@ -58,7 +62,7 @@ export const ApproveAutoImportIntegrationRequestParams = lazySchema(() =>
     /**
      * The integration identifier
      */
-    integration_id: SafeIdentifier,
+    integration_id: SafeIdentifier.describe('The integration identifier'),
   })
 );
 export type ApproveAutoImportIntegrationRequestParams = z.infer<
@@ -82,31 +86,35 @@ export const CreateAutoImportIntegrationRequestBody = lazySchema(() =>
       /**
        * The connector id
        */
-      connectorId: NonEmptyString,
+      connectorId: NonEmptyString.describe('The connector id'),
       /**
        * The integration id
        */
-      integrationId: SafeIdentifier,
+      integrationId: SafeIdentifier.describe('The integration id'),
       /**
        * The title of the integration
        */
-      title: NonEmptyString,
+      title: NonEmptyString.describe('The title of the integration'),
       /**
        * The description of the integration
        */
-      description: NonEmptyString,
+      description: NonEmptyString.describe('The description of the integration'),
       /**
        * The LangSmith tracing options
        */
-      langSmithOptions: LangSmithOptions.optional(),
+      langSmithOptions: LangSmithOptions.optional().describe('The LangSmith tracing options'),
       /**
        * The logo of the integration
        */
-      logo: NonEmptyString.optional(),
+      logo: NonEmptyString.optional().describe('The logo of the integration'),
       /**
        * The data streams of the integration
        */
-      dataStreams: z.array(DataStream).max(50).optional(),
+      dataStreams: z
+        .array(DataStream)
+        .max(50)
+        .optional()
+        .describe('The data streams of the integration'),
     })
     .strict()
 );
@@ -123,7 +131,7 @@ export const CreateAutoImportIntegrationResponse = lazySchema(() =>
       /**
        * The integration id created in state.
        */
-      integration_id: NonEmptyString.optional(),
+      integration_id: NonEmptyString.optional().describe('The integration id created in state.'),
     })
     .strict()
 );
@@ -136,7 +144,7 @@ export const DeleteAutoImportIntegrationRequestParams = lazySchema(() =>
     /**
      * The integration identifier
      */
-    integration_id: SafeIdentifier,
+    integration_id: SafeIdentifier.describe('The integration identifier'),
   })
 );
 export type DeleteAutoImportIntegrationRequestParams = z.infer<
@@ -151,7 +159,9 @@ export const DownloadAutoImportIntegrationRequestQuery = lazySchema(() =>
     /**
      * The intent of the download request. When set to 'install', install telemetry is reported.
      */
-    intent: DownloadIntent.optional(),
+    intent: DownloadIntent.optional().describe(
+      "The intent of the download request. When set to 'install', install telemetry is reported."
+    ),
   })
 );
 export type DownloadAutoImportIntegrationRequestQuery = z.infer<
@@ -166,7 +176,7 @@ export const DownloadAutoImportIntegrationRequestParams = lazySchema(() =>
     /**
      * The integration identifier
      */
-    integration_id: SafeIdentifier,
+    integration_id: SafeIdentifier.describe('The integration identifier'),
   })
 );
 export type DownloadAutoImportIntegrationRequestParams = z.infer<
@@ -188,7 +198,7 @@ export const GetAutoImportIntegrationRequestParams = lazySchema(() =>
     /**
      * The integration identifier
      */
-    integration_id: SafeIdentifier,
+    integration_id: SafeIdentifier.describe('The integration identifier'),
   })
 );
 export type GetAutoImportIntegrationRequestParams = z.infer<
@@ -212,7 +222,7 @@ export const UpdateAutoImportIntegrationRequestParams = lazySchema(() =>
     /**
      * The integration identifier
      */
-    integration_id: SafeIdentifier,
+    integration_id: SafeIdentifier.describe('The integration identifier'),
   })
 );
 export type UpdateAutoImportIntegrationRequestParams = z.infer<
@@ -228,15 +238,15 @@ export const UpdateAutoImportIntegrationRequestBody = lazySchema(() =>
       /**
        * Integration description
        */
-      description: NonEmptyString.optional(),
+      description: NonEmptyString.optional().describe('Integration description'),
       /**
        * Integration logo image blob
        */
-      logo: NonEmptyString.optional(),
+      logo: NonEmptyString.optional().describe('Integration logo image blob'),
       /**
        * The LangSmith tracing options
        */
-      langSmithOptions: LangSmithOptions.optional(),
+      langSmithOptions: LangSmithOptions.optional().describe('The LangSmith tracing options'),
       /**
        * The data streams of the integration
        */
@@ -247,20 +257,29 @@ export const UpdateAutoImportIntegrationRequestBody = lazySchema(() =>
               /**
                * The description of the data stream
                */
-              description: NonEmptyString.optional(),
+              description: NonEmptyString.optional().describe('The description of the data stream'),
               /**
                * The input types of the data stream
                */
-              inputTypes: z.array(InputType).max(100).optional(),
+              inputTypes: z
+                .array(InputType)
+                .max(100)
+                .optional()
+                .describe('The input types of the data stream'),
               /**
                * The raw samples of the data stream
                */
-              rawSamples: z.array(NonEmptyString).max(1000).optional(),
+              rawSamples: z
+                .array(NonEmptyString)
+                .max(1000)
+                .optional()
+                .describe('The raw samples of the data stream'),
             })
             .strict()
         )
         .max(50)
-        .optional(),
+        .optional()
+        .describe('The data streams of the integration'),
     })
     .strict()
 );

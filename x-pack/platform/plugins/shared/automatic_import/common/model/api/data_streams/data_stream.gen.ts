@@ -16,19 +16,144 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { SafeIdentifier, NonEmptyIngestPipeline, NonEmptyString } from '../../primitive.gen';
+import { SafeIdentifier, NonEmptyString } from '../../primitive.gen';
 import { OriginalSource, LangSmithOptions } from '../../common_attributes.gen';
+
+export const FieldMapping = lazySchema(() =>
+  z
+    .object({
+      name: z.string().min(1).max(1024),
+      type: z.string().min(1).max(1024),
+      is_ecs: z.boolean(),
+    })
+    .strict()
+);
+export type FieldMapping = z.infer<typeof FieldMapping>;
+
+/**
+ * A field type that can be chosen in the mapping editor.
+ */
+export const SupportedFieldType = lazySchema(() =>
+  z.enum([
+    'keyword',
+    'constant_keyword',
+    'wildcard',
+    'text',
+    'match_only_text',
+    'byte',
+    'short',
+    'integer',
+    'long',
+    'unsigned_long',
+    'half_float',
+    'float',
+    'double',
+    'date',
+    'date_nanos',
+    'boolean',
+    'ip',
+    'version',
+  ])
+);
+export type SupportedFieldType = z.infer<typeof SupportedFieldType>;
+export type SupportedFieldTypeEnum = typeof SupportedFieldType.enum;
+export const SupportedFieldTypeEnum = SupportedFieldType.enum;
+
+export const FieldTypeOverride = lazySchema(() =>
+  z
+    .object({
+      name: z.string().min(1).max(1024),
+      type: SupportedFieldType,
+      original_type: z.string().min(1).max(1024),
+    })
+    .strict()
+);
+export type FieldTypeOverride = z.infer<typeof FieldTypeOverride>;
+
+export const DataStreamResults = lazySchema(() =>
+  z
+    .object({
+      ingest_pipeline: z.object({}).catchall(z.unknown()),
+      results: z.array(z.object({}).catchall(z.unknown())).max(100),
+      field_mapping: z.array(FieldMapping).max(10000),
+      field_type_overrides: z.array(FieldTypeOverride).max(1000),
+      version: z.string().min(1).max(1024),
+    })
+    .strict()
+);
+export type DataStreamResults = z.infer<typeof DataStreamResults>;
+
+export const UpdateFieldTypesSavedResponse = lazySchema(() =>
+  z
+    .object({
+      status: z.literal('saved'),
+      ingest_pipeline: z.object({}).catchall(z.unknown()),
+      results: z.array(z.object({}).catchall(z.unknown())).max(100),
+      field_mapping: z.array(FieldMapping).max(10000),
+      field_type_overrides: z.array(FieldTypeOverride).max(1000),
+      version: z.string().min(1).max(1024),
+    })
+    .strict()
+);
+export type UpdateFieldTypesSavedResponse = z.infer<typeof UpdateFieldTypesSavedResponse>;
+
+export const FieldTypeError = lazySchema(() =>
+  z
+    .object({
+      name: z.string(),
+      /**
+       * A known rule that failed, such as out_of_range or object_value.
+       */
+      issue: z
+        .string()
+        .optional()
+        .describe('A known rule that failed, such as out_of_range or object_value.'),
+      failing_documents: z.number().int(),
+      total_documents: z.number().int(),
+    })
+    .strict()
+);
+export type FieldTypeError = z.infer<typeof FieldTypeError>;
+
+export const UpdateFieldTypesFailureResponse = lazySchema(() =>
+  z
+    .object({
+      status: z.literal('failure'),
+      errors: z.array(FieldTypeError).max(1000),
+    })
+    .strict()
+);
+export type UpdateFieldTypesFailureResponse = z.infer<typeof UpdateFieldTypesFailureResponse>;
+
+export const FieldTypeChange = lazySchema(() =>
+  z
+    .object({
+      name: z.string().min(1).max(1024),
+      /**
+       * The new field type, or the field's original type to remove the change. Original types that are not in SupportedFieldType are allowed only as a revert.
+       */
+      type: z
+        .string()
+        .min(1)
+        .max(1024)
+        .describe(
+          "The new field type, or the field's original type to remove the change. Original types that are not in SupportedFieldType are allowed only as a revert."
+        ),
+    })
+    .strict()
+);
+export type FieldTypeChange = z.infer<typeof FieldTypeChange>;
 
 export const DeleteDataStreamRequestParams = lazySchema(() =>
   z.object({
     /**
      * The integration identifier
      */
-    integration_id: SafeIdentifier,
+    integration_id: SafeIdentifier.describe('The integration identifier'),
     /**
      * The data stream identifier
      */
-    data_stream_id: SafeIdentifier,
+    data_stream_id: SafeIdentifier.describe('The data stream identifier'),
   })
 );
 export type DeleteDataStreamRequestParams = z.infer<typeof DeleteDataStreamRequestParams>;
@@ -39,11 +164,11 @@ export const GetDataStreamResultsRequestParams = lazySchema(() =>
     /**
      * The integration identifier
      */
-    integration_id: SafeIdentifier,
+    integration_id: SafeIdentifier.describe('The integration identifier'),
     /**
      * The data stream identifier
      */
-    data_stream_id: SafeIdentifier,
+    data_stream_id: SafeIdentifier.describe('The data stream identifier'),
   })
 );
 export type GetDataStreamResultsRequestParams = z.infer<typeof GetDataStreamResultsRequestParams>;
@@ -51,20 +176,7 @@ export type GetDataStreamResultsRequestParamsInput = z.input<
   typeof GetDataStreamResultsRequestParams
 >;
 
-export const GetDataStreamResultsResponse = lazySchema(() =>
-  z
-    .object({
-      /**
-       * The ingest pipeline as a JSON string up to 10MiB.
-       */
-      ingest_pipeline: NonEmptyIngestPipeline,
-      /**
-       * Results array as JSON objects.
-       */
-      results: z.array(z.object({}).catchall(z.unknown())).max(10000),
-    })
-    .strict()
-);
+export const GetDataStreamResultsResponse = lazySchema(() => DataStreamResults);
 export type GetDataStreamResultsResponse = z.infer<typeof GetDataStreamResultsResponse>;
 
 export const ReanalyzeDataStreamRequestParams = lazySchema(() =>
@@ -72,11 +184,11 @@ export const ReanalyzeDataStreamRequestParams = lazySchema(() =>
     /**
      * The integration identifier
      */
-    integration_id: SafeIdentifier,
+    integration_id: SafeIdentifier.describe('The integration identifier'),
     /**
      * The data stream identifier
      */
-    data_stream_id: SafeIdentifier,
+    data_stream_id: SafeIdentifier.describe('The data stream identifier'),
   })
 );
 export type ReanalyzeDataStreamRequestParams = z.infer<typeof ReanalyzeDataStreamRequestParams>;
@@ -89,11 +201,13 @@ export const ReanalyzeDataStreamRequestBody = lazySchema(() =>
     /**
      * The inference connector ID to use for the reanalysis task.
      */
-    connectorId: NonEmptyString,
+    connectorId: NonEmptyString.describe(
+      'The inference connector ID to use for the reanalysis task.'
+    ),
     /**
      * The LangSmith tracing options
      */
-    langSmithOptions: LangSmithOptions.optional(),
+    langSmithOptions: LangSmithOptions.optional().describe('The LangSmith tracing options'),
   })
 );
 export type ReanalyzeDataStreamRequestBody = z.infer<typeof ReanalyzeDataStreamRequestBody>;
@@ -105,7 +219,10 @@ export const ReanalyzeDataStreamResponse = lazySchema(() =>
       /**
        * Indicates if the reanalysis was scheduled successfully.
        */
-      success: z.boolean().optional(),
+      success: z
+        .boolean()
+        .optional()
+        .describe('Indicates if the reanalysis was scheduled successfully.'),
     })
     .strict()
 );
@@ -116,11 +233,11 @@ export const StopAutoImportDataStreamRequestParams = lazySchema(() =>
     /**
      * The integration identifier
      */
-    integration_id: SafeIdentifier,
+    integration_id: SafeIdentifier.describe('The integration identifier'),
     /**
      * The data stream identifier
      */
-    data_stream_id: SafeIdentifier,
+    data_stream_id: SafeIdentifier.describe('The data stream identifier'),
   })
 );
 export type StopAutoImportDataStreamRequestParams = z.infer<
@@ -130,16 +247,71 @@ export type StopAutoImportDataStreamRequestParamsInput = z.input<
   typeof StopAutoImportDataStreamRequestParams
 >;
 
+export const UpdateDataStreamFieldTypesRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The integration identifier
+     */
+    integration_id: SafeIdentifier.describe('The integration identifier'),
+    /**
+     * The data stream identifier
+     */
+    data_stream_id: SafeIdentifier.describe('The data stream identifier'),
+  })
+);
+export type UpdateDataStreamFieldTypesRequestParams = z.infer<
+  typeof UpdateDataStreamFieldTypesRequestParams
+>;
+export type UpdateDataStreamFieldTypesRequestParamsInput = z.input<
+  typeof UpdateDataStreamFieldTypesRequestParams
+>;
+
+export const UpdateDataStreamFieldTypesRequestBody = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Field type changes. Setting a field back to its original type removes the change.
+       */
+      changes: z
+        .array(FieldTypeChange)
+        .min(1)
+        .max(100)
+        .describe(
+          'Field type changes. Setting a field back to its original type removes the change.'
+        ),
+      /**
+       * Saved Object version returned by the latest results request.
+       */
+      version: z
+        .string()
+        .min(1)
+        .max(1024)
+        .describe('Saved Object version returned by the latest results request.'),
+    })
+    .strict()
+);
+export type UpdateDataStreamFieldTypesRequestBody = z.infer<
+  typeof UpdateDataStreamFieldTypesRequestBody
+>;
+export type UpdateDataStreamFieldTypesRequestBodyInput = z.input<
+  typeof UpdateDataStreamFieldTypesRequestBody
+>;
+
+export const UpdateDataStreamFieldTypesResponse = lazySchema(() =>
+  z.union([UpdateFieldTypesSavedResponse, UpdateFieldTypesFailureResponse])
+);
+export type UpdateDataStreamFieldTypesResponse = z.infer<typeof UpdateDataStreamFieldTypesResponse>;
+
 export const UpdateDataStreamPipelineRequestParams = lazySchema(() =>
   z.object({
     /**
      * The integration identifier
      */
-    integration_id: SafeIdentifier,
+    integration_id: SafeIdentifier.describe('The integration identifier'),
     /**
      * The data stream identifier
      */
-    data_stream_id: SafeIdentifier,
+    data_stream_id: SafeIdentifier.describe('The data stream identifier'),
   })
 );
 export type UpdateDataStreamPipelineRequestParams = z.infer<
@@ -155,14 +327,26 @@ export const UpdateDataStreamPipelineRequestBody = lazySchema(() =>
       /**
        * JSON string (max 10MiB) or pipeline object. When an object, `processors` is capped at 10000 entries.
        */
-      ingest_pipeline: z.union([
-        z.string().max(10485760),
-        z
-          .object({
-            processors: z.array(z.object({}).catchall(z.unknown())).max(10000).optional(),
-          })
-          .catchall(z.unknown()),
-      ]),
+      ingest_pipeline: z
+        .union([
+          z.string().max(10485760),
+          z
+            .object({
+              processors: z.array(z.object({}).catchall(z.unknown())).max(10000).optional(),
+            })
+            .catchall(z.unknown()),
+        ])
+        .describe(
+          'JSON string (max 10MiB) or pipeline object. When an object, `processors` is capped at 10000 entries.'
+        ),
+      /**
+       * Saved Object version returned by the latest results request.
+       */
+      version: z
+        .string()
+        .min(1)
+        .max(1024)
+        .describe('Saved Object version returned by the latest results request.'),
     })
     .strict()
 );
@@ -173,14 +357,7 @@ export type UpdateDataStreamPipelineRequestBodyInput = z.input<
   typeof UpdateDataStreamPipelineRequestBody
 >;
 
-export const UpdateDataStreamPipelineResponse = lazySchema(() =>
-  z
-    .object({
-      ingest_pipeline: z.object({}).catchall(z.unknown()),
-      results: z.array(z.object({}).catchall(z.unknown())).max(10000),
-    })
-    .strict()
-);
+export const UpdateDataStreamPipelineResponse = lazySchema(() => DataStreamResults);
 export type UpdateDataStreamPipelineResponse = z.infer<typeof UpdateDataStreamPipelineResponse>;
 
 export const UploadSamplesToDataStreamRequestParams = lazySchema(() =>
@@ -188,11 +365,11 @@ export const UploadSamplesToDataStreamRequestParams = lazySchema(() =>
     /**
      * The integration identifier
      */
-    integration_id: SafeIdentifier,
+    integration_id: SafeIdentifier.describe('The integration identifier'),
     /**
      * The data stream identifier
      */
-    data_stream_id: SafeIdentifier,
+    data_stream_id: SafeIdentifier.describe('The data stream identifier'),
   })
 );
 export type UploadSamplesToDataStreamRequestParams = z.infer<
@@ -208,19 +385,30 @@ export const UploadSamplesToDataStreamRequestBody = lazySchema(() =>
       /**
        * Log lines to upload when the source is a file (omit when using sourceIndex).
        */
-      samples: z.array(z.string().max(100000)).max(1000).optional(),
+      samples: z
+        .array(z.string().max(100000))
+        .max(1000)
+        .optional()
+        .describe('Log lines to upload when the source is a file (omit when using sourceIndex).'),
       /**
        * Index name to pick samples from.
        */
-      sourceIndex: z.string().min(1).max(100).optional(),
+      sourceIndex: z
+        .string()
+        .min(1)
+        .max(100)
+        .optional()
+        .describe('Index name to pick samples from.'),
       /**
        * The original source of the samples (file name or index name)
        */
-      originalSource: OriginalSource,
+      originalSource: OriginalSource.describe(
+        'The original source of the samples (file name or index name)'
+      ),
       /**
        * The LangSmith tracing options
        */
-      langSmithOptions: LangSmithOptions.optional(),
+      langSmithOptions: LangSmithOptions.optional().describe('The LangSmith tracing options'),
     })
     .strict()
 );
@@ -237,7 +425,10 @@ export const UploadSamplesToDataStreamResponse = lazySchema(() =>
       /**
        * Indicates if the samples are uploaded successfully.
        */
-      success: z.boolean().optional(),
+      success: z
+        .boolean()
+        .optional()
+        .describe('Indicates if the samples are uploaded successfully.'),
     })
     .strict()
 );

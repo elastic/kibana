@@ -7,7 +7,7 @@
 
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server';
 import { fieldsMetadataPluginServerMock } from '@kbn/fields-metadata-plugin/server/mocks';
-import { generateFieldMappings, mergeSamples } from './fields';
+import { generateFieldMappings } from './fields';
 
 const KNOWN_ECS_FIELDS: Record<string, { name: string; type: string; source: string }> = {
   '@timestamp': { name: '@timestamp', type: 'date', source: 'ecs' },
@@ -47,58 +47,6 @@ describe('fields', () => {
 
   beforeEach(() => {
     fieldsMetadataClient = createMockFieldsMetadataClient();
-  });
-
-  describe('mergeSamples', () => {
-    it('returns empty object for empty input', () => {
-      expect(mergeSamples([])).toEqual({});
-    });
-
-    it('returns the doc itself for a single doc', () => {
-      const doc = { foo: 'bar', count: 42 };
-      expect(mergeSamples([doc])).toEqual({ foo: 'bar', count: 42 });
-    });
-
-    it('merges multiple docs with distinct keys', () => {
-      const docs = [{ a: 1 }, { b: 'hello' }, { c: true }];
-      expect(mergeSamples(docs)).toEqual({ a: 1, b: 'hello', c: true });
-    });
-
-    it('deep-merges nested objects', () => {
-      const docs = [
-        { server: { ip: '1.2.3.4' } },
-        { server: { port: 443, hostname: 'example.com' } },
-      ];
-      const result = mergeSamples(docs);
-      expect(result).toEqual({
-        server: { ip: '1.2.3.4', port: 443, hostname: 'example.com' },
-      });
-    });
-
-    it('keeps the first non-empty value when keys overlap', () => {
-      const docs = [{ status: 'ok' }, { status: 'error' }];
-      const result = mergeSamples(docs);
-      expect(result.status).toBe('ok');
-    });
-
-    it('fills empty values from later docs', () => {
-      const docs = [{ status: null }, { status: 'active' }];
-      const result = mergeSamples(docs);
-      expect(result.status).toBe('active');
-    });
-
-    it('handles arrays by copying them', () => {
-      const docs = [{ tags: ['web', 'prod'] }, { tags: ['staging'] }];
-      const result = mergeSamples(docs);
-      expect(result.tags).toEqual(['staging']);
-    });
-
-    it('skips unsafe property names', () => {
-      const docs = [{ __proto__: { polluted: true }, safe_field: 'ok' }];
-      const result = mergeSamples(docs);
-      expect(result.safe_field).toBe('ok');
-      expect((result as Record<string, unknown>).__proto__).toBeUndefined();
-    });
   });
 
   describe('generateFieldMappings', () => {
@@ -219,7 +167,7 @@ describe('fields', () => {
       });
     });
 
-    it('handles arrays with object elements by using the first element', async () => {
+    it('handles arrays with object elements', async () => {
       const docs = [
         {
           items: [{ name: 'item1', count: 5 }],
@@ -235,11 +183,67 @@ describe('fields', () => {
       );
     });
 
+    it('includes fields that only appear in later array elements', async () => {
+      const docs = [
+        {
+          rules: [
+            { name: 'block-ssh', id: 22 },
+            { name: 'allow-web', id: 443, zone: 'dmz' },
+          ],
+        },
+      ];
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
+
+      expect(fields).toEqual([
+        { name: 'rules.name', type: 'keyword', is_ecs: false },
+        { name: 'rules.id', type: 'long', is_ecs: false },
+        { name: 'rules.zone', type: 'keyword', is_ecs: false },
+      ]);
+    });
+
+    it('includes array element fields from every doc', async () => {
+      const docs = [{ rules: [{ name: 'block-ssh' }] }, { rules: [{ zone: 'dmz' }] }];
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
+
+      expect(fields.map((f) => f.name)).toEqual(['rules.name', 'rules.zone']);
+    });
+
+    it('keeps the first element type when array elements disagree', async () => {
+      const docs = [{ rules: [{ id: 22 }, { id: 'abc' }] }];
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
+
+      expect(fields).toEqual([{ name: 'rules.id', type: 'long', is_ecs: false }]);
+    });
+
+    it('prefers objects over scalars when array elements disagree', async () => {
+      const docs = [{ rules: [{ value: 'x' }, { value: { a: 1 } }] }];
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
+
+      expect(fields).toEqual([{ name: 'rules.value.a', type: 'long', is_ecs: false }]);
+    });
+
+    it('maps non-integer numbers as double', async () => {
+      const docs = [{ my_app: { ratio: 3.14, count: 3 } }];
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
+
+      expect(fields).toEqual([
+        { name: 'my_app.ratio', type: 'double', is_ecs: false },
+        { name: 'my_app.count', type: 'long', is_ecs: false },
+      ]);
+    });
+
     it('handles arrays with scalar elements', async () => {
       const docs = [{ my_tags: ['web', 'prod'] }];
       const fields = await generateFieldMappings(docs, fieldsMetadataClient);
 
       expect(fields).toContainEqual({ name: 'my_tags', type: 'keyword', is_ecs: false });
+    });
+
+    it('types scalar arrays by their first populated element', async () => {
+      const docs = [{ my_ports: [null, 443] }];
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
+
+      expect(fields).toEqual([{ name: 'my_ports', type: 'long', is_ecs: false }]);
     });
 
     it('handles null values as keyword type', async () => {

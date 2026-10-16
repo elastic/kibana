@@ -7,3 +7,5 @@
 
 export { ErrorUtils } from './util';
 export { IntegrationAlreadyExistsError } from './integration_errors';
+export { FieldTypesLockedError } from './field_types_locked_error';
+export { InvalidFieldTypeChangeError } from './invalid_field_type_change_error';

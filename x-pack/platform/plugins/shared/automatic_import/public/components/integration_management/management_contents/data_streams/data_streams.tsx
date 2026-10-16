@@ -19,6 +19,7 @@ import { useUIState } from '../../contexts';
 import { CreateDataStreamFlyout } from './create_data_stream_flyout';
 import * as i18n from './translations';
 import { useGetIntegrationById, isValidNameFormat, startsWithLetter } from '../../../../common';
+import { getFieldTypeEditState } from '../../../../../common';
 import { meetsMinLength, normalizeTitleName } from '../../../../common/lib/helper_functions';
 import { DataStreamsTable } from './data_streams_table/data_steams_table';
 import { EditPipelineFlyout } from './edit_pipeline_flyout';
@@ -37,7 +38,11 @@ export const DataStreams = React.memo<{
     closeEditPipelineFlyout,
   } = useUIState();
   const { integrationId } = useParams<{ integrationId?: string }>();
-  const { integration } = useGetIntegrationById(integrationId);
+  const {
+    integration,
+    isLoading: isIntegrationLoading,
+    isError: isIntegrationError,
+  } = useGetIntegrationById(integrationId);
   const { reportDataStreamFlyoutOpened } = useTelemetry();
   const { formData } = useIntegrationForm();
   const packageNames = usePackageNames();
@@ -45,6 +50,14 @@ export const DataStreams = React.memo<{
   const hasDataStreams = (integration?.dataStreams?.length ?? 0) > 0;
 
   const isCreateIntegrationPage = !integrationId;
+  const fieldTypeEditState = selectedDataStream
+    ? getFieldTypeEditState({
+        integration,
+        dataStream: selectedDataStream,
+        isLoading: isIntegrationLoading,
+        isError: isIntegrationError,
+      })
+    : 'error';
 
   const canAddDataStream = useMemo(() => {
     if (!isCreateIntegrationPage) {
@@ -148,6 +161,7 @@ export const DataStreams = React.memo<{
           integrationId={integrationId}
           dataStream={selectedDataStream}
           onClose={closeEditPipelineFlyout}
+          fieldTypeEditState={fieldTypeEditState}
         />
       )}
     </>

@@ -545,6 +545,7 @@ describe('data stream schemas', () => {
         ingest_pipeline: {
           processors: Array.from({ length: 10000 }, () => ({})),
         },
+        version: 'WzEsMV0=',
       };
 
       const result = UpdateDataStreamPipelineRequestBody.safeParse(payload);

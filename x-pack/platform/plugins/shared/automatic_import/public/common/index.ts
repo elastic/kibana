@@ -17,6 +17,7 @@ export { useDeleteIntegration } from './hooks/use_delete_integration';
 export { useGetDataStreamResults } from './hooks/use_get_data_stream_results';
 export { useReanalyzeDataStream } from './hooks/use_reanalyze_data_stream';
 export { useUpdateDataStreamPipeline } from './hooks/use_update_data_stream_pipeline';
+export { useUpdateDataStreamFieldTypes } from './hooks/use_update_data_stream_field_types';
 
 export {
   INDEX_VALIDATION_FAILED,
@@ -45,8 +46,8 @@ export type {
   RequestDeps,
   CreateUpdateIntegrationRequest,
   UploadSamplesRequest,
-  GetDataStreamResultsResponse,
   UpdateDataStreamPipelineRequest,
+  UpdateDataStreamFieldTypesRequest,
   DeleteIntegrationRequest,
 } from './lib/api';
 
