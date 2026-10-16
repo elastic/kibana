@@ -239,12 +239,21 @@ describe('EscalationsPage', () => {
     expect(screen.getByText('Resolved threat')).toBeInTheDocument();
   });
 
-  it('shows "No escalations" when both queues are empty', () => {
+  it('shows only the explainer banner when there are no escalations at all', () => {
     mockBothQueues([], []);
     renderPage();
 
-    // Both groups render their own empty state, so there are two "No escalations" labels.
-    expect(screen.getAllByText('No escalations')).toHaveLength(2);
+    expect(screen.getByTestId('alertZeroEscalationsEmptyBanner')).toBeInTheDocument();
+    expect(screen.queryByTestId('escalationsPageHeader')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('escalationQueue-open')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('escalationQueue-closed')).not.toBeInTheDocument();
+  });
+
+  it('hides the explainer banner when any escalation exists', () => {
+    mockBothQueues([openEscalation], []);
+    renderPage();
+
+    expect(screen.queryByTestId('alertZeroEscalationsEmptyBanner')).not.toBeInTheDocument();
   });
 
   it('renders the hero header with the open-escalation count', () => {
