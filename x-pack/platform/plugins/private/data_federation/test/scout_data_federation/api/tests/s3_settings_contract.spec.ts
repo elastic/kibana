@@ -37,7 +37,7 @@ const isRejectedByKibanaSchema = (setting: string): boolean => {
 
 apiTest.describe(
   'ES|QL Data Federation — S3 data source settings contract with Elasticsearch',
-  { tag: tags.deploymentAgnostic },
+  { tag: tags.stateful.classic },
   () => {
     apiTest('Kibana supports every S3 setting Elasticsearch knows', async ({ esClient }) => {
       // An unknown setting makes Elasticsearch list every setting it accepts. Validation fails,
