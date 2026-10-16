@@ -92,13 +92,17 @@ export const eventsWriteItemSchema = lazySchema(() =>
       const signals = item.signals ?? [];
       const hasConfirms = signals.some((s) => s.evidence != null && s.verdict === 'confirms');
       const hasBreachMember = signals.some(isBreachMemberSignal);
-      const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
 
-      if (hasConfirms && hasNotChecked) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            'A confirms item cannot include not_checked signals; leave each not_checked detection out of the write.',
+      // One issue per offending signal, so a retry knows exactly which entries to remove.
+      if (hasConfirms) {
+        signals.forEach((signal, index) => {
+          if (signal.verdict !== 'not_checked') return;
+          const ruleUuid = signal.metadata?.rule_uuid ?? 'unknown';
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['signals', index],
+            message: `A confirms item cannot include not_checked signals; remove the signal of rule ${ruleUuid} from this item, leave that detection out of the write, and add its rule_uuid to written_rule_uuids.`,
+          });
         });
       }
       // Only a confirmed breach opens an event. A continuation (it names an event_id) may carry any

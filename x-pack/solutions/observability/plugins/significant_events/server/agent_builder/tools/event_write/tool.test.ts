@@ -273,6 +273,51 @@ describe('events_write tool', () => {
     }
   });
 
+  it('names each not_checked signal to remove, by its position and rule', () => {
+    const detection = (ruleUuid: string, verdict: 'confirms' | 'not_checked'): SignalEntry => ({
+      type: 'detection',
+      source_id: 'logs.test',
+      description: 'description',
+      verdict,
+      ...(verdict === 'confirms'
+        ? { evidence: { esql_query: 'FROM logs.test', result: 'found' as const } }
+        : {}),
+      metadata: {
+        rule_uuid: ruleUuid,
+        detection_id: `${ruleUuid}-d`,
+        change_point_type: 'spike',
+        p_value: 0.01,
+      },
+    });
+    const result = eventsWriteSchema.safeParse({
+      items: [
+        {
+          ...input,
+          signals: [
+            detection('rule-1', 'confirms'),
+            detection('rule-2', 'not_checked'),
+            detection('rule-3', 'confirms'),
+            detection('rule-4', 'not_checked'),
+          ],
+        },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const notChecked = result.error.issues.filter(({ message }) =>
+        message.includes('cannot include not_checked')
+      );
+      expect(notChecked.map(({ path }) => path)).toEqual([
+        ['items', 0, 'signals', 1],
+        ['items', 0, 'signals', 3],
+      ]);
+      expect(notChecked[0].message).toContain('rule rule-2');
+      expect(notChecked[1].message).toContain('rule rule-4');
+      expect(notChecked[1].message).toContain('written_rule_uuids');
+    }
+  });
+
   it('normalizes an empty event_id to an omitted event_id', () => {
     const result = eventsWriteSchema.parse({
       items: [{ ...input, event_id: '' }],

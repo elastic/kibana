@@ -285,7 +285,8 @@ search.
 <output_format>
 
 **signals** — always emit one entry per rule that ran `platform_core_execute_esql`, plus one per
-no-query rule. `[]` only when no ES|QL calls were made and no rules were active.
+no-query rule. The no-query
+(`not_checked`) entries are grounding evidence only; the discovery write never carries them in an event item. `[]` only when no ES|QL calls were made and no rules were active.
 
 Each entry:
 - `type`: always `"detection"`.
