@@ -23,6 +23,8 @@ interface DeleteProfileModalProps {
   profiles: BoostProfile[];
   dataSources: BoostDataSource[];
   onClose: () => void;
+  /** Called once the profile is deleted, such as to leave its details page. */
+  onDeleted?: () => void;
 }
 
 interface AffectedDataSource {
@@ -46,6 +48,7 @@ export const DeleteProfileModal = ({
   profiles,
   dataSources,
   onClose,
+  onDeleted,
 }: DeleteProfileModalProps) => {
   const { notifications } = useBoostServices();
   const titleId = useGeneratedHtmlId();
@@ -111,13 +114,15 @@ export const DeleteProfileModal = ({
       onCancel={onClose}
       onConfirm={() =>
         deleteProfile(name, {
-          onSuccess: () =>
+          onSuccess: () => {
             notifications.toasts.addSuccess(
               i18n.translate('xpack.boost.profilesTab.deletedToast', {
                 defaultMessage: 'Deleted boost profile "{name}"',
                 values: { name },
               })
-            ),
+            );
+            onDeleted?.();
+          },
           onSettled: onClose,
         })
       }

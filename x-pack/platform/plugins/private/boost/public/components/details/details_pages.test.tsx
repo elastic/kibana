@@ -1,0 +1,250 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render, screen, within } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import {
+  BUILTIN_DATA_STREAMS_PROFILE_NAMES,
+  BUILTIN_INDICES_PROFILE_NAMES,
+  BUILTIN_PROFILES,
+  DEFAULT_INDICES_RULE_NAME,
+  DEFAULT_SIMPLE_MODE_DEFAULTS,
+  NO_CUSTOM_DEFAULTS,
+  createDefaultRules,
+  translateSimpleDefaults,
+} from '../../../common/presets';
+import type { BoostProfile, BoostRule, BoostState } from '../../../common/types';
+import { ProfileDetailsPage } from '../profiles/profile_details_page';
+import { RuleDetailsPage } from '../rules/rule_details_page';
+
+// The page header lives in Kibana's chrome, so a stand-in shows its title, badges, and actions.
+jest.mock('@kbn/app-header', () => {
+  const { createElement } = jest.requireActual('react');
+  return {
+    AppHeader: ({
+      title,
+      badges = [],
+      menu,
+    }: {
+      title: string;
+      badges?: Array<{ label: string }>;
+      menu?: {
+        primaryActionItem?: { label: string };
+        items?: Array<{ id: string; label: string; disableButton?: boolean }>;
+      };
+    }) =>
+      createElement(
+        'div',
+        { 'data-test-subj': 'mockAppHeader' },
+        createElement('h1', null, title),
+        ...badges.map(({ label }) => createElement('span', { key: label }, label)),
+        menu?.primaryActionItem &&
+          createElement('button', { key: 'primary' }, menu.primaryActionItem.label),
+        ...(menu?.items ?? []).map(({ id, label, disableButton }) =>
+          createElement('button', { key: id, disabled: disableButton === true }, label)
+        )
+      ),
+    AppHeaderLoading: () => null,
+  };
+});
+
+const mockCapabilities = { boost: { save: true } };
+
+jest.mock('../../hooks/use_boost_services', () => ({
+  useBoostServices: () => ({
+    application: { capabilities: mockCapabilities },
+    appParams: { setBreadcrumbs: jest.fn() },
+    chrome: { docTitle: { change: jest.fn() } },
+    notifications: { toasts: { addSuccess: jest.fn() } },
+  }),
+}));
+
+const catalogSearch: BoostProfile = {
+  name: 'catalog-search',
+  type: 'indices',
+  is_builtin: false,
+  min_boost: 2,
+  max_boost: 50,
+  high_availability: 'one_extra_copy',
+  prewarm: true,
+  pinned: false,
+};
+
+const clicks: BoostProfile = {
+  name: 'clicks',
+  type: 'data_streams',
+  is_builtin: false,
+  recent: { min_boost: 2, max_boost: 100, max_age: '1d' },
+  standard: { min_boost: 1, max_boost: 10, max_age: '7d' },
+  background: { min_boost: 0, max_boost: 1 },
+};
+
+const customRule = (
+  name: string,
+  patterns: string[],
+  profileName: string,
+  priority: number
+): BoostRule => ({
+  name,
+  index_patterns: patterns,
+  boost_profile: profileName,
+  priority,
+  is_builtin: false,
+});
+
+const mockState: BoostState = {
+  settings: {
+    mode: 'advanced',
+    simple: DEFAULT_SIMPLE_MODE_DEFAULTS,
+    custom_defaults: NO_CUSTOM_DEFAULTS,
+  },
+  profiles: [...BUILTIN_PROFILES, catalogSearch, clicks],
+  rules: [
+    customRule('catalog-first', ['catalog-fall'], BUILTIN_INDICES_PROFILE_NAMES.on_demand, 5),
+    customRule('catalogs', ['catalog-*'], 'catalog-search', 1),
+    customRule('unused-clicks', ['nothing-*'], 'clicks', 1),
+    ...createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS)),
+  ],
+  suspended_rules: [],
+  data_sources: [
+    { name: 'catalog-fall', type: 'index', size_in_bytes: 4e9 },
+    { name: 'catalog-spring', type: 'index', size_in_bytes: 2e9 },
+    { name: 'products', type: 'index', size_in_bytes: 1e9 },
+    { name: 'logs-app', type: 'data_stream', size_in_bytes: 3e9 },
+  ],
+};
+
+jest.mock('../../hooks/use_boost_state', () => ({
+  useBoostState: () => ({ data: mockState }),
+  useCreateRule: () => ({ mutate: jest.fn(), isLoading: false }),
+  useUpdateRule: () => ({ mutate: jest.fn(), isLoading: false }),
+  useUpdateDefaultRule: () => ({ mutate: jest.fn(), isLoading: false }),
+  useDeleteRule: () => ({ mutate: jest.fn(), isLoading: false }),
+  useCreateProfile: () => ({ mutate: jest.fn(), isLoading: false }),
+  useUpdateProfile: () => ({ mutate: jest.fn(), isLoading: false }),
+  useDeleteProfile: () => ({ mutate: jest.fn(), isLoading: false }),
+}));
+
+const renderAt = (path: string) =>
+  render(
+    <IntlProvider locale="en">
+      <MemoryRouter initialEntries={[path]}>
+        <Route path="/rules/:ruleName" component={RuleDetailsPage} />
+        <Route path="/profiles/:profileName" component={ProfileDetailsPage} />
+      </MemoryRouter>
+    </IntlProvider>
+  );
+
+const getHeader = () => within(screen.getByTestId('mockAppHeader'));
+
+describe('ProfileDetailsPage', () => {
+  it("shows an indices profile's settings, the rules using it, and what it applies to", () => {
+    renderAt('/profiles/catalog-search');
+
+    expect(getHeader().getByRole('heading', { name: 'catalog-search' })).toBeInTheDocument();
+    expect(getHeader().getByText('Indices')).toBeInTheDocument();
+    expect(getHeader().queryByText('Managed')).not.toBeInTheDocument();
+    expect(getHeader().getByRole('button', { name: 'Edit profile' })).toBeInTheDocument();
+    expect(getHeader().getByRole('button', { name: 'Delete' })).toBeEnabled();
+
+    const settings = screen.getByTestId('boostProfileSettings');
+    expect(settings).toHaveTextContent('Min boost2');
+    expect(settings).toHaveTextContent('Max boost50');
+    expect(settings).toHaveTextContent('One extra copyOn');
+    expect(settings).toHaveTextContent('PrewarmOn');
+    expect(settings).toHaveTextContent('PinOff');
+
+    expect(screen.getByTestId('boostProfileRules')).toHaveTextContent('catalogs');
+    // A higher-ranked rule keeps catalog-fall, so the profile only applies to catalog-spring.
+    const usedBy = screen.getByTestId('boostProfileUsedBy');
+    expect(usedBy).toHaveTextContent('catalog-spring');
+    expect(usedBy).not.toHaveTextContent('catalog-fall');
+    expect(screen.getByTestId('boostProfileUsage')).toHaveTextContent('Applies to1 index');
+  });
+
+  it('only offers to duplicate an Elastic-managed profile', () => {
+    renderAt(`/profiles/${BUILTIN_INDICES_PROFILE_NAMES.performant}`);
+
+    expect(getHeader().getByText('Managed')).toBeInTheDocument();
+    expect(getHeader().getByRole('button', { name: 'Duplicate' })).toBeInTheDocument();
+    expect(getHeader().queryByRole('button', { name: 'Edit profile' })).not.toBeInTheDocument();
+    expect(getHeader().queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
+  });
+
+  it("shows a data stream profile's periods and age timeline, without index options", () => {
+    renderAt(`/profiles/${BUILTIN_DATA_STREAMS_PROFILE_NAMES.last_7_days}`);
+
+    const periods = screen.getByTestId('boostProfilePeriods');
+    expect(periods).toHaveTextContent('Recent');
+    expect(periods).toHaveTextContent('Background');
+    expect(screen.getByTestId('boostProfileSettings')).not.toHaveTextContent('Prewarm');
+    expect(screen.getByTestId('boostProfileSettings')).not.toHaveTextContent('One extra copy');
+    // The default rule applies it to logs-app, all of whose data counts as recent.
+    expect(screen.getByTestId('boostAgeTimeline-recent')).toHaveTextContent('3 GB');
+  });
+
+  it('leaves the timeline without sizes until the profile applies to a data stream', () => {
+    renderAt('/profiles/clicks');
+
+    expect(screen.getByTestId('boostAgeTimeline-recent')).toHaveTextContent('—');
+    expect(screen.getByTestId('boostAgeTimeline')).toHaveTextContent(
+      'appears once a boost rule applies this profile to a data stream'
+    );
+  });
+
+  it("says when a profile doesn't exist", () => {
+    renderAt('/profiles/missing');
+
+    expect(screen.getByTestId('boostDetailsNotFound')).toHaveTextContent('Boost profile not found');
+  });
+});
+
+describe('RuleDetailsPage', () => {
+  it("shows a rule's settings, and what it matches with the rule each one uses", () => {
+    renderAt('/rules/catalogs');
+
+    expect(getHeader().getByRole('heading', { name: 'catalogs' })).toBeInTheDocument();
+    expect(getHeader().getByRole('button', { name: 'Edit rule' })).toBeInTheDocument();
+    expect(getHeader().getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+
+    const settings = screen.getByTestId('boostRuleSettings');
+    expect(within(settings).getByRole('link', { name: 'catalog-search' })).toBeInTheDocument();
+    expect(settings).toHaveTextContent('Index pattern catalog-*');
+    expect(settings).toHaveTextContent('Priority1');
+
+    const usage = screen.getByTestId('boostRuleUsage');
+    expect(usage).toHaveTextContent('Matches2 indices');
+    expect(usage).toHaveTextContent('Applies to1 index');
+
+    const matched = screen.getByTestId('boostRuleMatched');
+    expect(within(matched).getByText('catalog-spring').closest('tr')).toHaveTextContent(
+      'This rule'
+    );
+    expect(within(matched).getByText('catalog-fall').closest('tr')).toHaveTextContent(
+      'catalog-first'
+    );
+  });
+
+  it('only offers to edit a default rule', () => {
+    renderAt(`/rules/${DEFAULT_INDICES_RULE_NAME}`);
+
+    expect(getHeader().getByText('Default')).toBeInTheDocument();
+    expect(screen.getByTestId('boostRuleSettings')).toHaveTextContent('All unmatched indices');
+    expect(getHeader().getByRole('button', { name: 'Edit rule' })).toBeInTheDocument();
+    expect(getHeader().queryByRole('button', { name: 'Duplicate' })).not.toBeInTheDocument();
+    expect(getHeader().queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
+  });
+
+  it("says when a rule doesn't exist", () => {
+    renderAt('/rules/missing');
+
+    expect(screen.getByTestId('boostDetailsNotFound')).toHaveTextContent('Boost rule not found');
+  });
+});

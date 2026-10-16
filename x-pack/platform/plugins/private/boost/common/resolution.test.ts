@@ -13,6 +13,7 @@ import {
 } from './presets';
 import {
   countRulesByProfile,
+  getAppliedRules,
   getRuleCoverage,
   matchesIndexPattern,
   resolveRule,
@@ -174,5 +175,29 @@ describe('getRuleCoverage', () => {
         ['products-2', 'wildcard'],
       ]),
     });
+  });
+});
+
+describe('getAppliedRules', () => {
+  it('names the rule that applies to each data source', () => {
+    const rules: BoostRule[] = [
+      {
+        name: 'products',
+        index_patterns: ['products*'],
+        boost_profile: customIndicesProfile.name,
+        priority: 1,
+        is_builtin: false,
+      },
+      ...createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS)),
+    ];
+    const dataSources: BoostDataSource[] = [
+      { name: 'products-live', type: 'index', size_in_bytes: 1 },
+      { name: 'users', type: 'index', size_in_bytes: 1 },
+    ];
+
+    const applied = getAppliedRules(dataSources, rules, profiles);
+
+    expect(applied.get('products-live')?.name).toBe('products');
+    expect(applied.get('users')?.is_builtin).toBe(true);
   });
 });

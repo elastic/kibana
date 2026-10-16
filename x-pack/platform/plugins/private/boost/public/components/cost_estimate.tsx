@@ -47,7 +47,8 @@ interface ShownEstimate {
   type: BoostProfileType;
 }
 
-const formatSize = (bytes: number): string =>
+/** A data size, such as "12 GB". */
+export const formatSize = (bytes: number): string =>
   i18n.translate('xpack.boost.costEstimate.sizeInGb', {
     defaultMessage: '{size} GB',
     values: {
@@ -75,7 +76,7 @@ const formatUsd = (usd: number): string =>
   }).format(usd);
 
 /** The hourly cost of this many VCUs. */
-const formatCost = (vcus: number): string => {
+export const formatCost = (vcus: number): string => {
   const usd = vcus * ILLUSTRATIVE_USD_PER_VCU_HOUR;
   if (usd > 0 && usd < 0.01) {
     return i18n.translate('xpack.boost.costEstimate.costBelowOneCent', {
@@ -86,8 +87,15 @@ const formatCost = (vcus: number): string => {
   return formatUsd(usd);
 };
 
+/** How an estimate is made, and that it isn't pricing. */
+export const COST_DISCLAIMER = i18n.translate('xpack.boost.costEstimate.disclaimer', {
+  defaultMessage:
+    'Actual usage varies with query load and your data. Costs use an illustrative rate of {rate} per VCU-hour. This is an estimate and may not represent actual pricing.',
+  values: { rate: formatUsd(ILLUSTRATIVE_USD_PER_VCU_HOUR) },
+});
+
 /** The cost for one end of the range, such as "$0.03 at rest". */
-const getCostText = (end: keyof VcuRange, vcus: number): string =>
+export const getCostText = (end: keyof VcuRange, vcus: number): string =>
   end === 'atRest'
     ? i18n.translate('xpack.boost.costEstimate.atRestCost', {
         defaultMessage: '{cost} at rest',
@@ -230,11 +238,7 @@ const EstimateContent = ({
               // default inline-block anchor gets a line box from the inherited font, which
               // offsets the icon.
               display="flex"
-              content={i18n.translate('xpack.boost.costEstimate.disclaimer', {
-                defaultMessage:
-                  'Actual usage varies with query load and your data. Costs use an illustrative rate of {rate} per VCU-hour. This is an estimate and may not represent actual pricing.',
-                values: { rate: formatUsd(ILLUSTRATIVE_USD_PER_VCU_HOUR) },
-              })}
+              content={COST_DISCLAIMER}
               aria-label={i18n.translate('xpack.boost.costEstimate.disclaimerLabel', {
                 defaultMessage: 'About this estimate',
               })}

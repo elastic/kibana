@@ -26,7 +26,7 @@ export interface ModeSwitchChange {
  * The rules each mode applies. Simple mode suspends custom rules, and its default rules follow the
  * simple-mode settings; advanced mode restores both custom rules and custom default profiles.
  */
-const getModeRules = (
+export const getModeRules = (
   { settings, rules, suspended_rules: suspendedRules }: BoostState,
   mode: BoostMode
 ): BoostRule[] => {

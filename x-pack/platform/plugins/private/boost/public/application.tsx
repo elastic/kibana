@@ -14,6 +14,8 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { BoostPage } from './components/boost_page';
+import { ProfileDetailsPage } from './components/profiles/profile_details_page';
+import { RuleDetailsPage } from './components/rules/rule_details_page';
 import type { BoostServices } from './types';
 
 interface BoostAppProps {
@@ -34,6 +36,8 @@ const BoostApp = ({ core, params }: BoostAppProps) => {
         <QueryClientProvider client={queryClient}>
           <Router history={params.history}>
             <Routes>
+              <Route path="/rules/:ruleName" component={RuleDetailsPage} />
+              <Route path="/profiles/:profileName" component={ProfileDetailsPage} />
               <Route path="/:tab?" component={BoostPage} />
             </Routes>
           </Router>

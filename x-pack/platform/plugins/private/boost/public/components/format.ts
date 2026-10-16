@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { BoostProfileType } from '../../common/types';
+import { parseMaxAge } from '../../common/validation';
 
 const numberFormat = new Intl.NumberFormat(i18n.getLocale(), { maximumFractionDigits: 2 });
 
@@ -42,4 +43,22 @@ export const formatDataSourceCounts = (indexCount: number, dataStreamCount: numb
     });
   }
   return dataStreamCount > 0 ? dataStreams : indices;
+};
+
+/** A period's max age in words, such as "7 days" or "12 hours", or undefined if it has none. */
+export const formatMaxAge = (maxAge: string | undefined): string | undefined => {
+  const parsed = parseMaxAge(maxAge);
+  if (!parsed) {
+    return undefined;
+  }
+  const { value, unit } = parsed;
+  return unit === 'h'
+    ? i18n.translate('xpack.boost.format.maxAgeHours', {
+        defaultMessage: '{value, plural, one {# hour} other {# hours}}',
+        values: { value },
+      })
+    : i18n.translate('xpack.boost.format.maxAgeDays', {
+        defaultMessage: '{value, plural, one {# day} other {# days}}',
+        values: { value },
+      });
 };

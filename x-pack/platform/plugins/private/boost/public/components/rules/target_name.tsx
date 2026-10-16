@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { splitByIndexPattern } from '../../../common/resolution';
+import { DetailsLink } from '../details_link';
 
 /** Marks a rule that ranks higher than another, so it applies instead. */
 const SUPERSEDING_ICON = 'sortAscending';
@@ -68,10 +69,16 @@ interface SupersedingRuleProps {
    * meaning as text instead.
    */
   hasTooltip?: boolean;
+  /** Links the rule's name to its details page, outside forms that would lose their changes. */
+  isLinked?: boolean;
 }
 
 /** The rule that applies to a target instead, after an icon for ranking higher. */
-export const SupersedingRule = ({ rule, hasTooltip = true }: SupersedingRuleProps) => {
+export const SupersedingRule = ({
+  rule,
+  hasTooltip = true,
+  isLinked = false,
+}: SupersedingRuleProps) => {
   const { euiTheme } = useEuiTheme();
   const tooltipId = useGeneratedHtmlId();
 
@@ -98,7 +105,7 @@ export const SupersedingRule = ({ rule, hasTooltip = true }: SupersedingRuleProp
           </EuiScreenReaderOnly>
         </>
       )}
-      {rule}
+      {isLinked ? <DetailsLink kind="rule" name={rule} /> : rule}
     </span>
   );
 

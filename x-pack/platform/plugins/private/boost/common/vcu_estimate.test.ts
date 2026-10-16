@@ -20,7 +20,9 @@ import type {
 } from './types';
 import {
   estimateDataSourceVcuRange,
+  estimateDataSourcesVcuRange,
   estimateDataStreamVcuRange,
+  getDataStreamPeriodSizes,
   estimateIndicesVcuRange,
   estimateProfileImpact,
   estimateRuleCost,
@@ -119,6 +121,42 @@ describe('estimateDataStreamVcuRange', () => {
     expect(estimateDataStreamVcuRange(boosted, aged(0)).atPeak).toBeCloseTo(
       estimateDataStreamVcuRange(profile, aged(0)).atPeak * 8
     );
+  });
+});
+
+describe('getDataStreamPeriodSizes', () => {
+  it("sorts data streams' data into the profile's periods by age", () => {
+    const logs: BoostDataSource = {
+      name: 'logs-app',
+      type: 'data_stream',
+      size_in_bytes: 6 * GB,
+      data_ages: [
+        { age_hours: 2, size_in_bytes: 1 * GB },
+        { age_hours: 48, size_in_bytes: 2 * GB },
+        { age_hours: 24 * 30, size_in_bytes: 3 * GB },
+      ],
+    };
+    // Without a breakdown, all of a data stream's data counts as new.
+    const metrics: BoostDataSource = { name: 'metrics', type: 'data_stream', size_in_bytes: GB };
+
+    expect(getDataStreamPeriodSizes(streams, [logs, metrics])).toEqual({
+      recent: 2 * GB,
+      standard: 2 * GB,
+      background: 3 * GB,
+    });
+  });
+});
+
+describe('estimateDataSourcesVcuRange', () => {
+  it("adds up the profile's estimate for each index", () => {
+    const [profile] = BUILTIN_PROFILES.filter(({ type }) => type === 'indices');
+    const one = estimateDataSourceVcuRange(index('one', 2), profile);
+    const two = estimateDataSourceVcuRange(index('two', 3), profile);
+
+    expect(estimateDataSourcesVcuRange([index('one', 2), index('two', 3)], profile)).toEqual({
+      atRest: one.atRest + two.atRest,
+      atPeak: one.atPeak + two.atPeak,
+    });
   });
 });
 

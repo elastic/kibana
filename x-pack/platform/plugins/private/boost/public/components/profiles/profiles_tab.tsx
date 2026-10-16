@@ -34,6 +34,7 @@ import { DeleteProfileModal } from './delete_profile_modal';
 import { TypeFilter, matchesTypeFilter } from '../type_filter';
 import { RuleFlyout } from '../rules/rule_flyout';
 import { getProfileRulesLocation } from '../rules/rules_tab';
+import { DetailsLink } from '../details_link';
 import { ProfileFlyout } from './profile_flyout';
 
 interface ProfilesTabProps {
@@ -55,7 +56,7 @@ type FlyoutState = { profile?: BoostProfile; duplicateOf?: BoostProfile } | unde
 
 const PAGE_SIZE = 10;
 
-const MANAGED_BADGE_LABEL = i18n.translate('xpack.boost.profilesTab.managedBadge', {
+export const MANAGED_BADGE_LABEL = i18n.translate('xpack.boost.profilesTab.managedBadge', {
   defaultMessage: 'Managed',
 });
 
@@ -65,7 +66,7 @@ const DELETE_DESCRIPTION = i18n.translate('xpack.boost.profilesTab.deleteActionD
   defaultMessage: 'Delete this boost profile',
 });
 
-const USED_BY_DEFAULT_RULE_DESCRIPTIONS: Record<BoostProfileType, string> = {
+export const USED_BY_DEFAULT_RULE_DESCRIPTIONS: Record<BoostProfileType, string> = {
   indices: i18n.translate('xpack.boost.profilesTab.usedByDefaultIndicesRule', {
     defaultMessage: "The default rule for indices uses this profile, so it can't be deleted.",
   }),
@@ -163,7 +164,7 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
       // A single span keeps the name and badge in one inline run; table cells are flex containers.
       render: (name: string, { is_builtin: isBuiltin }: ProfileRow) => (
         <span>
-          {name}
+          <DetailsLink kind="profile" name={name} data-test-subj="boostProfileDetailsLink" />
           {isBuiltin && (
             <>
               {' '}

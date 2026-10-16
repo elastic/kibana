@@ -125,7 +125,8 @@ const TYPE_OPTIONS: ReadonlyArray<PresetOption<BoostProfileType>> = [
   },
 ];
 
-const INDEX_OPTIONS: ReadonlyArray<{
+/** The indices options, with what each does. */
+export const INDEX_OPTIONS: ReadonlyArray<{
   key: 'extraCopy' | 'prewarm' | 'pinned';
   title: string;
   description: string;

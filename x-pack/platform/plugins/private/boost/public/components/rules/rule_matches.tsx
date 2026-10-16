@@ -24,6 +24,16 @@ import type { BoostProfileType } from '../../../common/types';
 import { formatDataSourceCount } from '../format';
 import { SupersedingRule, TargetName } from './target_name';
 
+/** What a default rule applies to: everything of its type that no other rule matches. */
+export const getAllUnmatchedLabel = (type: BoostProfileType | undefined): string =>
+  type === 'data_streams'
+    ? i18n.translate('xpack.boost.ruleMatches.allUnmatchedDataStreams', {
+        defaultMessage: 'All unmatched data streams',
+      })
+    : i18n.translate('xpack.boost.ruleMatches.allUnmatchedIndices', {
+        defaultMessage: 'All unmatched indices',
+      });
+
 interface RuleMatchesProps {
   patterns: readonly string[];
   type?: BoostProfileType;
@@ -42,13 +52,7 @@ export const RuleMatches = ({ patterns, type, isDefaultRule, coverage }: RuleMat
   if (isDefaultRule) {
     return (
       <EuiTextColor color={euiTheme.colors.textDisabled} data-test-subj="boostRuleUnmatched">
-        {type === 'data_streams'
-          ? i18n.translate('xpack.boost.ruleMatches.allUnmatchedDataStreams', {
-              defaultMessage: 'All unmatched data streams',
-            })
-          : i18n.translate('xpack.boost.ruleMatches.allUnmatchedIndices', {
-              defaultMessage: 'All unmatched indices',
-            })}
+        {getAllUnmatchedLabel(type)}
       </EuiTextColor>
     );
   }
@@ -145,7 +149,7 @@ const MatchesPopover = ({ patterns, type, coverage }: MatchesPopoverProps) => {
                 <TargetName name={name} supersededBy={supersedingRule} />
                 {supersedingRule && (
                   <EuiText size="xs" color="subdued">
-                    <SupersedingRule rule={supersedingRule} />
+                    <SupersedingRule rule={supersedingRule} isLinked />
                   </EuiText>
                 )}
               </li>

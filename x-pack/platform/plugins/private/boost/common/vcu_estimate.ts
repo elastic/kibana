@@ -79,25 +79,51 @@ const maxAgeHours = (maxAge: string | undefined): number => {
   return parsed ? toMaxAgeHours(parsed) : 0;
 };
 
-/**
- * Search VCUs for a data stream's data, with each part in the period its age falls in: recent until
- * the recent period's max age, standard until the standard period's, and background after that.
- * Periods apply to whole backing indices, so a part moves on once its newest data is old enough.
- */
-export const estimateDataStreamVcuRange = (
-  { recent, standard, background }: DataStreamsProfile,
-  dataAges: readonly BoostDataAge[]
-): VcuRange => {
-  const recentMaxHours = maxAgeHours(recent.max_age);
-  const standardMaxHours = maxAgeHours(standard.max_age);
+export type DataStreamPeriod = 'recent' | 'standard' | 'background';
 
-  return dataAges.reduce<VcuRange>((total, { age_hours: ageHours, size_in_bytes: bytes }) => {
-    const [period, ratio] =
-      ageHours < recentMaxHours
-        ? [recent, PERIOD_CACHE_RATIOS.recent]
-        : ageHours < standardMaxHours
-        ? [standard, PERIOD_CACHE_RATIOS.standard]
-        : [background, PERIOD_CACHE_RATIOS.background];
+/**
+ * The period data of this age is in: recent until the recent period's max age, standard until the
+ * standard period's, and background after that. Periods apply to whole backing indices, so a part
+ * moves on once its newest data is old enough.
+ */
+export const getDataStreamPeriod = (
+  { recent, standard }: DataStreamsProfile,
+  ageHours: number
+): DataStreamPeriod =>
+  ageHours < maxAgeHours(recent.max_age)
+    ? 'recent'
+    : ageHours < maxAgeHours(standard.max_age)
+    ? 'standard'
+    : 'background';
+
+/** How much of these data streams' data is in each of the profile's periods, in bytes. */
+export const getDataStreamPeriodSizes = (
+  profile: DataStreamsProfile,
+  dataSources: readonly BoostDataSource[]
+): Record<DataStreamPeriod, number> =>
+  dataSources
+    .flatMap(
+      ({ size_in_bytes: sizeInBytes, data_ages: dataAges }) =>
+        // Without a breakdown, all of the data counts as new, as in the estimates.
+        dataAges ?? [{ age_hours: 0, size_in_bytes: sizeInBytes }]
+    )
+    .reduce(
+      (sizes, { age_hours: ageHours, size_in_bytes: bytes }) => {
+        const period = getDataStreamPeriod(profile, ageHours);
+        return { ...sizes, [period]: sizes[period] + bytes };
+      },
+      { recent: 0, standard: 0, background: 0 }
+    );
+
+/** Search VCUs for a data stream's data, with each part in the period its age falls in. */
+export const estimateDataStreamVcuRange = (
+  profile: DataStreamsProfile,
+  dataAges: readonly BoostDataAge[]
+): VcuRange =>
+  dataAges.reduce<VcuRange>((total, { age_hours: ageHours, size_in_bytes: bytes }) => {
+    const periodName = getDataStreamPeriod(profile, ageHours);
+    const period = profile[periodName];
+    const ratio = PERIOD_CACHE_RATIOS[periodName];
     const dataGb = bytes / BYTES_PER_GB;
     const atRest = vcusForCachedData(dataGb, ratio, period.min_boost);
     return addRanges(total, {
@@ -105,7 +131,6 @@ export const estimateDataStreamVcuRange = (
       atPeak: Math.max(atRest, vcusForCachedData(dataGb, ratio, period.max_boost)),
     });
   }, NO_VCUS);
-};
 
 /** Search VCUs a profile would use for one index's or data stream's actual data. */
 export const estimateDataSourceVcuRange = (
@@ -127,6 +152,16 @@ export const estimateDataSourceVcuRange = (
     dataAges ?? [{ age_hours: 0, size_in_bytes: sizeInBytes }]
   );
 };
+
+/** Search VCUs a profile uses today for these indices or data streams together. */
+export const estimateDataSourcesVcuRange = (
+  dataSources: readonly BoostDataSource[],
+  profile: BoostProfile
+): VcuRange =>
+  dataSources.reduce<VcuRange>(
+    (total, dataSource) => addRanges(total, estimateDataSourceVcuRange(dataSource, profile)),
+    NO_VCUS
+  );
 
 /** The search cost an estimate covers, today and with a change. */
 export interface CostImpact {

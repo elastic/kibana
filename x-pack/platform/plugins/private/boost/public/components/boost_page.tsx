@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { EuiButton, EuiEmptyPrompt, EuiPageSection, EuiSpacer } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { AppHeader, AppHeaderLoading, type AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../../common/constants';
@@ -19,6 +19,7 @@ import { useBoostState, useUpdateMode } from '../hooks/use_boost_state';
 import { BOOST_DOCS_URL } from '../doc_links';
 import { BOOST_APP_TITLE } from '../translations';
 import { formatDataSourceCounts } from './format';
+import { LoadError } from './load_error';
 import { ModeSwitchModal } from './mode_switch/mode_switch_modal';
 import {
   isModeSwitchConfirmationSkipped,
@@ -71,25 +72,7 @@ export const BoostPage = () => {
   }, [appParams, chrome]);
 
   if (error) {
-    return (
-      <EuiEmptyPrompt
-        color="danger"
-        iconType="error"
-        title={
-          <h2>
-            {i18n.translate('xpack.boost.page.loadErrorTitle', {
-              defaultMessage: 'Unable to load boost settings',
-            })}
-          </h2>
-        }
-        body={<p>{error.message}</p>}
-        actions={
-          <EuiButton onClick={() => refetch()}>
-            {i18n.translate('xpack.boost.page.retryButton', { defaultMessage: 'Try again' })}
-          </EuiButton>
-        }
-      />
-    );
+    return <LoadError error={error} onRetry={() => refetch()} />;
   }
 
   if (!state) {

@@ -15,11 +15,9 @@ import type {
 import {
   EuiBadge,
   EuiButton,
-  EuiConfirmModal,
   EuiFilterGroup,
   EuiInMemoryTable,
   EuiScreenReaderOnly,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleCoverage } from '../../../common/resolution';
@@ -30,14 +28,13 @@ import type {
   BoostProfileType,
   BoostRule,
 } from '../../../common/types';
-import { useBoostServices } from '../../hooks/use_boost_services';
-import { useDeleteRule } from '../../hooks/use_boost_state';
-import { formatDataSourceCount } from '../format';
 import { TypeFilter, matchesTypeFilter } from '../type_filter';
 import type { ProfileSelections } from './profile_filter';
 import { ProfileFilter, matchesProfileFilter } from './profile_filter';
+import { DetailsLink } from '../details_link';
 import { RuleMatches } from './rule_matches';
 import { RuleFlyout } from './rule_flyout';
+import { DeleteRuleModal } from './delete_rule_modal';
 
 interface RulesTabProps {
   rules: BoostRule[];
@@ -50,7 +47,7 @@ type RuleRow = BoostRule & RuleCoverage & { profileType?: BoostProfileType };
 
 const PAGE_SIZE = 10;
 
-const DEFAULT_BADGE_LABEL = i18n.translate('xpack.boost.rulesTab.defaultBadge', {
+export const DEFAULT_BADGE_LABEL = i18n.translate('xpack.boost.rulesTab.defaultBadge', {
   defaultMessage: 'Default',
 });
 
@@ -66,12 +63,9 @@ export const getProfileRulesLocation = (profileName: string) => ({
 });
 
 export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProps) => {
-  const { notifications } = useBoostServices();
-  const deleteModalTitleId = useGeneratedHtmlId();
   const [ruleToDelete, setRuleToDelete] = useState<RuleRow>();
   // Undefined while closed; an empty object creates a rule, and `rule` edits one.
   const [flyout, setFlyout] = useState<{ rule?: BoostRule; duplicateOf?: BoostRule }>();
-  const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
   const { search: locationSearch } = useLocation();
   // Read once, so the filter is the user's to change afterwards.
   const [profileSelections, setProfileSelections] = useState<ProfileSelections>(() => {
@@ -156,7 +150,7 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       // A single span keeps the name and badge in one inline run; table cells are flex containers.
       render: (name: string, { is_builtin: isBuiltin }: RuleRow) => (
         <span>
-          {name}
+          <DetailsLink kind="rule" name={name} data-test-subj="boostRuleDetailsLink" />
           {isBuiltin && (
             <>
               {' '}
@@ -172,6 +166,9 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
         defaultMessage: 'Profile name',
       }),
       sortable: true,
+      render: (profileName: string) => (
+        <DetailsLink kind="profile" name={profileName} data-test-subj="boostProfileDetailsLink" />
+      ),
     },
     {
       field: 'priority',
@@ -296,52 +293,12 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       )}
 
       {ruleToDelete && (
-        <EuiConfirmModal
-          aria-labelledby={deleteModalTitleId}
-          titleProps={{ id: deleteModalTitleId }}
-          title={i18n.translate('xpack.boost.rulesTab.deleteModalTitle', {
-            defaultMessage: 'Delete boost rule "{name}"?',
-            values: { name: ruleToDelete.name },
-          })}
-          onCancel={() => setRuleToDelete(undefined)}
-          onConfirm={() =>
-            deleteRule(ruleToDelete.name, {
-              onSuccess: () =>
-                notifications.toasts.addSuccess(
-                  i18n.translate('xpack.boost.rulesTab.deletedToast', {
-                    defaultMessage: 'Deleted boost rule "{name}"',
-                    values: { name: ruleToDelete.name },
-                  })
-                ),
-              onSettled: () => setRuleToDelete(undefined),
-            })
-          }
-          cancelButtonText={i18n.translate('xpack.boost.rulesTab.deleteModalCancel', {
-            defaultMessage: 'Cancel',
-          })}
-          confirmButtonText={i18n.translate('xpack.boost.rulesTab.deleteModalConfirm', {
-            defaultMessage: 'Delete rule',
-          })}
-          buttonColor="danger"
-          isLoading={isDeleting}
-        >
-          <p>
-            {ruleToDelete.appliesTo > 0
-              ? i18n.translate('xpack.boost.rulesTab.deleteModalBodyInUse', {
-                  defaultMessage:
-                    "The {dataSources} this rule applies to will use the next matching rule, such as the default rule. You can't undo this action.",
-                  values: {
-                    dataSources: formatDataSourceCount(
-                      ruleToDelete.profileType,
-                      ruleToDelete.appliesTo
-                    ),
-                  },
-                })
-              : i18n.translate('xpack.boost.rulesTab.deleteModalBody', {
-                  defaultMessage: "This permanently deletes the rule. You can't undo this action.",
-                })}
-          </p>
-        </EuiConfirmModal>
+        <DeleteRuleModal
+          ruleName={ruleToDelete.name}
+          profileType={ruleToDelete.profileType}
+          appliesTo={ruleToDelete.appliesTo}
+          onClose={() => setRuleToDelete(undefined)}
+        />
       )}
     </>
   );

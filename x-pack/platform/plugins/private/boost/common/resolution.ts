@@ -145,6 +145,21 @@ export const getRuleCoverage = (
   return coverage;
 };
 
+/** The rule that applies to each data source, by the data source's name. */
+export const getAppliedRules = (
+  dataSources: readonly BoostDataSource[],
+  rules: readonly BoostRule[],
+  profiles: readonly BoostProfile[]
+): Map<string, BoostRule> => {
+  const profilesByName = new Map(profiles.map((profile) => [profile.name, profile]));
+  return new Map(
+    dataSources.flatMap((dataSource): Array<[string, BoostRule]> => {
+      const rule = resolveRule(dataSource, rules, profilesByName);
+      return rule ? [[dataSource.name, rule]] : [];
+    })
+  );
+};
+
 /** Counts the rules that reference each profile. */
 export const countRulesByProfile = (rules: readonly BoostRule[]): Map<string, number> =>
   rules.reduce(
