@@ -599,9 +599,9 @@ export class WorkflowsManagementApi {
     return result;
   }
 
-  /** Returns the page URL secret. Anyone who can read the workflow can share its page. */
+  /** Returns the page URL secret. The URL runs the workflow, so sharing it needs execute access. */
   public async getPageSecret(id: string, spaceId: string, request: KibanaRequest): Promise<string> {
-    await this.assertWorkflowAccess(id, spaceId, 'read', request);
+    await this.assertWorkflowAccess(id, spaceId, 'execute', request);
     return this.workflowsService.getPageSecret(id, spaceId);
   }
 

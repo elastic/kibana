@@ -38,7 +38,7 @@ import {
 import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_READ_SECURITY, WORKFLOW_UPDATE_SECURITY } from '../utils/route_security';
+import { WORKFLOW_EXECUTE_SECURITY, WORKFLOW_UPDATE_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 const pageParamsSchema = schema.object({
@@ -157,8 +157,8 @@ export function registerPageLinkRoute(deps: RouteDependencies) {
     .get({
       path: PAGE_LINK_API_PATH,
       access: 'internal',
-      // Read access is enough, as in Tines: a page link is meant to be shared.
-      security: WORKFLOW_READ_SECURITY,
+      // The URL runs the workflow without a login, so only users who can run it get the URL.
+      security: WORKFLOW_EXECUTE_SECURITY,
       summary: 'Get the shareable URL of a workflow page',
     })
     .addVersion(

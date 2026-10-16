@@ -125,6 +125,7 @@ export const WorkflowDetailHeader = React.memo(
     const {
       canCreateWorkflow,
       canUpdateWorkflow: hasUpdatePrivilege,
+      canExecuteWorkflow: hasExecutePrivilege,
       canReadWorkflow,
       canReadWorkflowExecution,
       canReadManagedWorkflowExecution,
@@ -137,6 +138,8 @@ export const WorkflowDetailHeader = React.memo(
     const canUpdateWorkflow = hasUpdatePrivilege && workflow?.permissions?.edit !== false;
     // The saved definition, not the editor buffer: an unsaved page trigger has no URL yet.
     const hasPage = Boolean(workflow?.definition?.triggers?.some(isPageTrigger));
+    // The page URL runs the workflow, so only users who can run it may share it.
+    const canSharePage = hasPage && hasExecutePrivilege && workflow?.permissions?.execute !== false;
     const canManageAccess = hasUpdatePrivilege && workflow?.permissions?.manage === true;
     const isManagedWorkflow = workflow?.managed === true;
     const canReadVisibleWorkflowExecution =
@@ -386,7 +389,7 @@ export const WorkflowDetailHeader = React.memo(
       if (workflowId) {
         items.push(executionsToggleItem);
       }
-      if (workflowId && hasPage) {
+      if (workflowId && canSharePage) {
         items.push({
           id: 'workflowPageShare',
           order: 3,
@@ -432,7 +435,7 @@ export const WorkflowDetailHeader = React.memo(
       isExecutionsTab,
       workflowId,
       executionsToggleItem,
-      hasPage,
+      canSharePage,
       historyItem,
       addConnectorsMenuItem,
       enabledSwitchConfig,

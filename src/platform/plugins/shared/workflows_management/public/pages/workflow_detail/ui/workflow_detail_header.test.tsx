@@ -102,6 +102,7 @@ describe('WorkflowDetailHeader', () => {
       isSaving = false,
       isManaged = false,
       routerHistory,
+      workflow = {},
     }: {
       isValid?: boolean;
       hasChanges?: boolean;
@@ -110,12 +111,15 @@ describe('WorkflowDetailHeader', () => {
       isSaving?: boolean;
       isManaged?: boolean;
       routerHistory?: React.ComponentProps<typeof TestWrapper>['routerHistory'];
+      workflow?: Partial<Parameters<typeof setWorkflow>[0]>;
     } = {}
   ) => {
     const store = createMockStore();
 
     // Set up the workflow in the store (with server-side valid flag)
-    store.dispatch(setWorkflow({ ...mockWorkflow, managed: isManaged, valid: serverValid }));
+    store.dispatch(
+      setWorkflow({ ...mockWorkflow, managed: isManaged, valid: serverValid, ...workflow })
+    );
     store.dispatch(setYamlString(hasChanges ? 'modified yaml' : mockWorkflow.yaml));
 
     if (!isValid) {
@@ -241,6 +245,42 @@ describe('WorkflowDetailHeader', () => {
       '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors'
     );
     expect(result.queryByText('Add integrations')).not.toBeInTheDocument();
+  });
+
+  describe('Share page', () => {
+    const pageWorkflow = {
+      definition: { triggers: [{ type: 'page' }] },
+    } as unknown as Partial<Parameters<typeof setWorkflow>[0]>;
+
+    it.each([
+      { label: 'shows it to a user who can run the workflow', canExecute: true, shown: true },
+      { label: 'hides it from a user who cannot run workflows', canExecute: false, shown: false },
+    ])('$label', async ({ canExecute, shown }) => {
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...createMockWorkflowsCapabilities(),
+        canExecuteWorkflow: canExecute,
+      });
+      const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+        workflow: pageWorkflow,
+      });
+
+      await openAppMenuOverflow();
+
+      expect(Boolean(result.queryByTestId('workflowPageShareButton'))).toBe(shown);
+    });
+
+    it('hides it when the workflow access list denies execute', async () => {
+      const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+        workflow: {
+          ...pageWorkflow,
+          permissions: { read: true, execute: false, edit: false, manage: false },
+        },
+      });
+
+      await openAppMenuOverflow();
+
+      expect(result.queryByTestId('workflowPageShareButton')).not.toBeInTheDocument();
+    });
   });
 
   it('navigates back to the workflows list with the stored list search params', () => {
