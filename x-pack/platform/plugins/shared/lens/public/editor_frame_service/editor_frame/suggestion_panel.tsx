@@ -235,6 +235,7 @@ const SuggestionPreview = ({
             margin-left: ${euiTheme.size.xxs};
             margin-bottom: ${euiTheme.size.xxs};
             padding: 0 ${euiTheme.size.s};
+            padding-bottom: ${euiTheme.size.s};
             box-shadow: none !important; // sass-lint:disable-line no-important
 
             &:focus {
