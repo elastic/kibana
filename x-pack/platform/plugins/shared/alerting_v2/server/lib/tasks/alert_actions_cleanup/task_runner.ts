@@ -43,6 +43,7 @@ export class AlertActionsCleanupTaskRunner implements AlertingTaskRunner {
       await this.esClient.deleteByQuery(
         {
           index: ALERT_ACTIONS_DATA_STREAM,
+          ignore_unavailable: true,
           conflicts: 'proceed',
           slices: 'auto',
           query: {

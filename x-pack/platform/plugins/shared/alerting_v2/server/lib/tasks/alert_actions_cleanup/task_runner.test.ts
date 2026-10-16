@@ -72,6 +72,15 @@ describe('AlertActionsCleanupTaskRunner', () => {
     );
   });
 
+  it('does not fail when the data stream does not exist yet', async () => {
+    await createRunner().run({ signal: new AbortController().signal });
+
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ ignore_unavailable: true }),
+      expect.anything()
+    );
+  });
+
   it('waits for the delete to finish', async () => {
     await createRunner().run({ signal: new AbortController().signal });
 
