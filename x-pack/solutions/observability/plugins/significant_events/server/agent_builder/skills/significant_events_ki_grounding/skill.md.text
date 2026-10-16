@@ -215,7 +215,7 @@ query returned no rows or failed, never because the query was not run.
 field). Every text-matching or error condition (`MATCH`, `MATCH_PHRASE`, `:`, `LIKE`, `RLIKE`,
 `CONTAINS`, an error-code or status test) is `<failure>`, never `<scope>`. A predicate with no
 keyword-equality conjunct has **no isolating scope**: use the no-isolating-scope variant, whatever
-the sample looks like. The failing lines are then all you can count, so there is no share to report.
+the sample looks like. That variant counts the failing lines per service and has no `total`.
 
 For an `off_topic` signal, `<failure>` measures the observed error, so use a condition that
 isolates it (an exact field value seen in its sample row). With no such condition, leave its
@@ -234,10 +234,9 @@ profile unmeasured.
   an expression over message text or by a high-cardinality field (IDs, URLs, timestamps).
 - **No isolating scope:** drop `total`, `total_lines`, and `services`, filter `<failure>` before the
   first `STATS`, and report the failing count without a share.
-- **A share that cannot vary is not a measurement.** If `failed` equals `total_lines`, or `services_hit`
-  equals `services`, the `<failure>` filter was also applied in `<scope>`, so the figure is true by
-  construction. Never write "N of N (100%)" or "1 of 1 services": discard it and report the failing
-  count, as the no-isolating-scope variant does.
+- **Check the query's shape.** If a spread result has `failed` equal to `total_lines`, or `services_hit`
+  equal to `services`, `<failure>` was also applied in the `<scope>` filter: the query is wrong, so
+  build it again as the no-isolating-scope variant.
 
 ```
 Good (spread, isolating scope): FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <scope> | STATS affected = COUNT(*) WHERE <failure>, total = COUNT(*) BY service.name | STATS failed = SUM(affected), total_lines = SUM(total), services_hit = COUNT(*) WHERE affected > 0, services = COUNT(*), top_failed = MAX(affected), top_names = TOP(affected, 5, "desc", service.name) WHERE affected > 0
@@ -317,15 +316,17 @@ Each entry:
     looked for and what was found instead. Never say only that rows were returned. Do not reproduce
     raw sensitive values; name only the field and the exposure type.
   - Then who or what is affected, how badly, for how long, and how broadly, using the Step 4 numbers.
-    Give each count as `N of M (P%)`, where P is N/M × 100 rounded to one decimal place (for example
-    `0.1%`, `37.5%`, `100.0%`), so downstream fields can copy P. A figure that was not measured is stated as not measured.
+    Give a count that has a measured total as `N of M (P%)`, where P is N/M × 100 rounded to one
+    decimal place (for example `0.1%`, `37.5%`, `100.0%`), so downstream fields can copy P. A count
+    with no measured total (the no-isolating-scope profile) is given as N alone: no percentage, no
+    "of M". A figure that was not measured is stated as not measured.
   - Say whether the rows show the operation failing, slow, or completing, and name any exposed
     sensitive data by type (PII, PCI, SSN, credentials, secrets, tokens).
   - No dependency chains or upstream causes here; those go in `causal_features` and `blast_radius`.
     Name a dependency or target only when the query filtered on it or the rows show it.
   - Quiet-rule entries use the single sentence defined in Step 2.
   - Template for a match: `"<signature> on <target>: N of M (P%) <scope> log lines failed in the <period observerd, e.g: last hour>, across N of M services; first seen at least as early as <time>; still active."`
-  - Template for a match with no isolating scope: `"<signature> on <target>: N matching log lines in the <period>, in K services; first seen at least as early as <time>; still active."` State no share and no "of M".
+  - Template for a match with no isolating scope: `"<signature> on <target>: N matching log lines in the <period>, in K services; first seen at least as early as <time>; still active."`
   - Template for no match: `"No <signature> rows for <target> matched in the <period observerd, e.g: last hour>; <what was found instead>."`
 - `verdict`: `confirms` | `refutes` | `off_topic` | `inconclusive` | `not_checked`, per `<verdicts>`.
 - `collected_at`: ISO-8601 query timestamp. Omit for quiet-rule entries.
