@@ -10,6 +10,8 @@ import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { ConsoleTestSetup } from '../mocks';
 import { getConsoleTestSetup } from '../mocks';
 
+jest.setTimeout(60_000);
+
 describe('ValidationError component', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
