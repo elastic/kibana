@@ -104,7 +104,7 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
             ? ensureOnlyEventCollectionIsAllowed(policySettings)
             : {},
           shouldDowngradeProtectionUpdates ? { global_manifest_version: 'latest' } : {},
-          shouldDowngradeCustomNotifications ? resetCustomNotifications() : {}
+          shouldDowngradeCustomNotifications ? resetCustomNotifications(policySettings) : {}
         );
 
         updates.push({

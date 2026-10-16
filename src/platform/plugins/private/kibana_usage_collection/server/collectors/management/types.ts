@@ -33,6 +33,7 @@ export interface UsageStats {
   'search:timeout': number;
   'visualization:visualize:legacyHeatmapChartsLibrary': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
+  'discover:enableSolutionProfilesInClassic': boolean;
   'discover:showFieldStatistics': boolean;
   'discover:showMultiFields': boolean;
   enableESQL: boolean;
@@ -234,6 +235,7 @@ export interface UsageStats {
   'securitySolution:alertAnalysisWorkflowConnectorId': string;
   'securitySolution:alertAnalysisWorkflowAgentId': string;
   'securitySolution:alertAnalysisWorkflowCreateConversation': boolean;
+  'securitySolution:alertAnalysisWorkflowUsePrompt': boolean;
   'securitySolution:alertAnalysisWorkflowTagPrefix': string;
   'cloudSecurityPosture:graphRuntimeEvaluationsEnabled': boolean;
   'cloudSecurityPosture:graphShowUnknownTargetEnabled': boolean;

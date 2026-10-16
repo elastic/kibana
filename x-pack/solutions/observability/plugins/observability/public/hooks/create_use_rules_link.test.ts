@@ -44,7 +44,7 @@ describe('createUseRulesLink', () => {
     renderHook(() => createUseRulesLink()());
 
     expect(useLinkPropsMock).toHaveBeenCalledWith(
-      { app: 'observabilityAlerting', pathname: '/rules/v1' },
+      { app: 'observabilityAlerting', pathname: '/rules/classic' },
       {}
     );
   });
@@ -109,7 +109,7 @@ describe('createUseRulesLink', () => {
     renderHook(() => createUseRulesLink()({ hrefOnly: true }));
 
     expect(useLinkPropsMock).toHaveBeenCalledWith(
-      { app: 'observabilityAlerting', pathname: '/rules/v1' },
+      { app: 'observabilityAlerting', pathname: '/rules/classic' },
       { hrefOnly: true }
     );
   });

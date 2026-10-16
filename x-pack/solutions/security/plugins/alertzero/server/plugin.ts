@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERTZERO_REASONING_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
+import { ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import {
   DEFAULT_APP_CATEGORIES,
   type CoreSetup,
@@ -18,7 +18,6 @@ import {
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentService } from '@kbn/fleet-plugin/server';
-import { SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED } from '@kbn/management-settings-ids';
 import {
   ALERTZERO_ENABLED_SETTING_ID,
   TEMPLATE_ID_ESCALATION,
@@ -106,6 +105,9 @@ export class AlertZeroPlugin
   private agentBuilderExecution?: NonNullable<
     AlertZeroStartDependencies['agentBuilder']
   >['execution'];
+  private agentBuilderAttachments?: NonNullable<
+    AlertZeroStartDependencies['agentBuilder']
+  >['attachments'];
   private searchInferenceEndpoints?: AlertZeroStartDependencies['searchInferenceEndpoints'];
   private huntServices?: HuntServices;
   private fleetAgentService?: AgentService;
@@ -270,6 +272,7 @@ export class AlertZeroPlugin
       getConversationProposalsService: () => this.requireConversationProposalsService(),
       getActionsService: () => this.requireActionsService(),
       getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
+      getAgentBuilderAttachments: () => this.requireAgentBuilderAttachments(),
       getHuntServices: () => this.requireHuntServices(),
       getScanFailuresService: () => this.requireScanFailuresService(),
       getThreatIntelSupplyService: () => this.threatIntelSupplyService,
@@ -286,6 +289,7 @@ export class AlertZeroPlugin
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
     this.agentBuilderExecution = plugins.agentBuilder?.execution;
+    this.agentBuilderAttachments = plugins.agentBuilder?.attachments;
     this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
 
     if (!this.config.enabled) {
@@ -347,6 +351,10 @@ export class AlertZeroPlugin
               enumerateSpaceIds(core.savedObjects.createInternalRepository(['space'])),
             // security_solution registers after this plugin starts; read lazily.
             getWorkflowInstaller: () => this.threatIntelSupplyWorkflowInstaller,
+            getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+            getInference: () => plugins.inference,
+            getUiSettingsClient: (request) =>
+              core.uiSettings.asScopedToClient(core.savedObjects.getScopedClient(request)),
           })
         : undefined;
 
@@ -360,15 +368,6 @@ export class AlertZeroPlugin
         agentBuilder,
         agentTypes: [agentType],
       },
-      {
-        // Read per request: the setting is space-scoped, so a Worker enabled in one space
-        // says nothing about another. Resolved here rather than in WorkersService because
-        // the setting belongs to security_solution.
-        isAlertAnalysisRuntimeEnabled: async (request) =>
-          core.uiSettings
-            .asScopedToClient(core.savedObjects.getScopedClient(request))
-            .get<boolean>(SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED),
-      },
       async (request, registration, options) => {
         const client = await plugins.workflowsExtensions.getClient(request);
         await installRegisteredWorkerForRequest(client.managedWorkflows, registration, options);
@@ -379,11 +378,14 @@ export class AlertZeroPlugin
 
     this.scanFailuresService = new ScanFailuresService(management, this.logger);
 
+    const mitreDataClient = plugins.mitreAttack?.getMitreDataClient?.();
+
     this.huntServices = {
       getProposalsService: () => this.requireProposals().getProposalsService(),
       getProposalPrivileges: () => this.requireProposals().getProposalPrivileges(),
       getInference: () => plugins.inference,
       getSearchInferenceEndpoints: () => plugins.searchInferenceEndpoints,
+      mitreDataClient,
     };
 
     return this.alertZeroStartContract();
@@ -428,6 +430,12 @@ export class AlertZeroPlugin
     return this.requireStarted(this.agentBuilderExecution, 'agentBuilder.execution');
   }
 
+  private requireAgentBuilderAttachments(): NonNullable<
+    AlertZeroStartDependencies['agentBuilder']
+  >['attachments'] {
+    return this.requireStarted(this.agentBuilderAttachments, 'agentBuilder.attachments');
+  }
+
   private async resolveSummaryConnectorId(request: KibanaRequest): Promise<string | undefined> {
     const searchInferenceEndpoints = this.searchInferenceEndpoints;
     if (!searchInferenceEndpoints) {
@@ -435,7 +443,7 @@ export class AlertZeroPlugin
     }
     try {
       const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
-        ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+        ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
         request
       );
       return endpoints[0]?.connectorId;
