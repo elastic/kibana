@@ -82,8 +82,8 @@ export interface ValidateDestinationsDeps {
 
 export interface WorkflowDestinationDiagnostic {
   destinationId: string;
-  severity: 'warning';
-  source: 'structural' | 'workflow-validation';
+  severity: 'error' | 'warning';
+  source: 'structural' | 'workflow-validation' | 'destination-resolution';
   message: string;
 }
 
@@ -148,20 +148,23 @@ async function collectWorkflowDiagnostics(
 ): Promise<WorkflowDestinationDiagnostic[]> {
   const manualTrigger = findManualTrigger(yaml);
   const diagnostics: WorkflowDestinationDiagnostic[] = [];
+  const blocking = blockOnMissingManualTrigger ?? true;
 
   if (!manualTrigger) {
-    const missingManualTriggerMessage =
-      `Destination workflow "${destinationId}" does not have a "manual" trigger. ` +
-      `Action policy destinations must declare \`triggers: - type: manual\` to receive dispatches`;
-
-    if (blockOnMissingManualTrigger ?? true) {
-      throw new ActionPolicyOperationValidationError(`${missingManualTriggerMessage}.`);
-    }
     diagnostics.push({
       destinationId,
-      severity: 'warning',
+      severity: blocking ? 'error' : 'warning',
       source: 'structural',
-      message: `${missingManualTriggerMessage} — regenerate this workflow or update its destination.`,
+      message:
+        `Workflow "${destinationId}" does not have a "manual" trigger. ` +
+        `Fix: re-call \`platform.core.generate_workflow\` with this trigger:\n` +
+        `triggers:\n` +
+        `  - type: manual\n` +
+        `    inputs:\n` +
+        `      properties:\n` +
+        `        payload:\n` +
+        `          $ref: '${ALERTING_V2_NOTIFICATION_GROUP_REF}'\n` +
+        `Ref: skills/platform/alerting/action-policy-authoring/references/workflow-dispatch-payload.md`,
     });
     return diagnostics;
   }
@@ -169,12 +172,19 @@ async function collectWorkflowDiagnostics(
   if (!manualTriggerDeclaresPayloadInputRef(manualTrigger)) {
     diagnostics.push({
       destinationId,
-      severity: 'warning',
+      severity: blocking ? 'error' : 'warning',
       source: 'structural',
       message:
-        `Destination workflow "${destinationId}" does not declare \`inputs.payload\` with ` +
+        `Workflow "${destinationId}" does not declare \`inputs.payload\` with ` +
         `\`$ref: '${ALERTING_V2_NOTIFICATION_GROUP_REF}'\` on its manual trigger. ` +
-        `Liquid variables like {{ inputs.payload.alerts }} will not be statically validated against the dispatch payload shape.`,
+        `Fix: re-call \`platform.core.generate_workflow\` with this trigger:\n` +
+        `triggers:\n` +
+        `  - type: manual\n` +
+        `    inputs:\n` +
+        `      properties:\n` +
+        `        payload:\n` +
+        `          $ref: '${ALERTING_V2_NOTIFICATION_GROUP_REF}'\n` +
+        `Ref: skills/platform/alerting/action-policy-authoring/references/workflow-dispatch-payload.md`,
     });
   }
 
@@ -212,12 +222,12 @@ async function collectWorkflowDiagnostics(
  * Validates that every destination references a valid workflow, and that
  * each resolved workflow is structurally suitable for action policy dispatch.
  *
- * Throws {@link ActionPolicyOperationValidationError} for invalid destinations
- * (bare attachment IDs, connector IDs, unknown IDs, or — when
- * `deps.blockOnMissingManualTrigger` is set — a workflow missing a manual
- * trigger). Returns non-blocking diagnostics for variable-ref issues, missing
- * `inputs.payload` declarations, and a missing manual trigger on edits that
- * don't introduce/change the destination.
+ * All issues — blocking and non-blocking — are collected into a single
+ * {@link WorkflowDestinationDiagnostic} array. If any diagnostic has
+ * `severity: 'error'`, the function throws a single
+ * {@link ActionPolicyOperationValidationError} containing **every** diagnostic
+ * (errors and warnings together) so the caller sees the full picture in one
+ * pass. When all diagnostics are warnings, they are returned without throwing.
  */
 export async function validateDestinations(
   destinations: ActionPolicyDestination[],
@@ -246,6 +256,7 @@ export async function validateDestinations(
   }
 
   const diagnostics: WorkflowDestinationDiagnostic[] = [];
+
   const collectDiagnosticsIfYaml = async (destinationId: string, yaml: string | undefined) => {
     if (yaml) {
       diagnostics.push(...(await collectWorkflowDiagnostics(destinationId, yaml, deps)));
@@ -263,11 +274,16 @@ export async function validateDestinations(
       const hint = correctId
         ? ` The correct workflow ID for this attachment is "${correctId}".`
         : ` This workflow attachment has no workflowId — pass a \`workflowId\` when calling \`platform.core.generate_workflow\`.`;
-      throw new ActionPolicyOperationValidationError(
-        `Destination ID "${dest.id}" is a workflow attachment ID, not a workflow ID. ` +
+      diagnostics.push({
+        destinationId: dest.id,
+        severity: 'error',
+        source: 'destination-resolution',
+        message:
+          `Destination ID "${dest.id}" is a workflow attachment ID, not a workflow ID. ` +
           `Use the \`workflowId\` you passed to \`platform.core.generate_workflow\` instead of the \`attachmentId\`.` +
-          hint
-      );
+          hint,
+      });
+      continue;
     }
 
     const workflow = await persistedWorkflowLookup.getWorkflow(dest.id, spaceId);
@@ -278,20 +294,48 @@ export async function validateDestinations(
 
     const connector = await connectorLookup.findConnectorById(dest.id);
     if (connector) {
-      throw new ActionPolicyOperationValidationError(
-        `Destination ID "${dest.id}" is a connector ("${connector.name}"), not a workflow. ` +
+      diagnostics.push({
+        destinationId: dest.id,
+        severity: 'error',
+        source: 'destination-resolution',
+        message:
+          `Destination ID "${dest.id}" is a connector ("${connector.name}"), not a workflow. ` +
           `Action policy destinations must reference workflow IDs. ` +
           `To fix this: create a workflow that uses this connector via the \`platform.core.generate_workflow\` ` +
-          `tool (passing a \`workflowId\`), then use that \`workflowId\` as the destination.`
-      );
+          `tool (passing a \`workflowId\`), then use that \`workflowId\` as the destination.`,
+      });
+      continue;
     }
 
-    throw new ActionPolicyOperationValidationError(
-      `Destination ID "${dest.id}" is not a valid workflow in this space or conversation. ` +
+    diagnostics.push({
+      destinationId: dest.id,
+      severity: 'error',
+      source: 'destination-resolution',
+      message:
+        `Destination ID "${dest.id}" is not a valid workflow in this space or conversation. ` +
         `Each destination must reference either a persisted workflow ID from this Kibana space, ` +
         `or a \`workflowId\` passed to the \`platform.core.generate_workflow\` tool. ` +
         `To create a workflow, call \`platform.core.generate_workflow\` first (passing a \`workflowId\`), ` +
-        `then use that \`workflowId\` as the destination.`
+        `then use that \`workflowId\` as the destination.`,
+    });
+  }
+
+  const errors = diagnostics.filter((d) => d.severity === 'error');
+  if (errors.length > 0) {
+    const warnings = diagnostics.filter((d) => d.severity === 'warning');
+    const errorCount = errors.length === 1 ? '1 error' : `${errors.length} errors`;
+    const warningCount =
+      warnings.length === 0
+        ? ''
+        : warnings.length === 1
+          ? ', 1 warning'
+          : `, ${warnings.length} warnings`;
+    const header = `Destination validation failed (${errorCount}${warningCount}):`;
+    const formatted = diagnostics.map(
+      (d, i) => `[${i + 1}] [${d.severity}] ${d.message}`
+    );
+    throw new ActionPolicyOperationValidationError(
+      `${header}\n\n${formatted.join('\n\n')}`
     );
   }
 

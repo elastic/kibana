@@ -422,17 +422,23 @@ describe('schema_to_skill_docs', () => {
    * real types rather than rendered as `unknown`.
    */
   describe('schemas extracted into `definitions` / `$defs`', () => {
-    const allDocs = () => [
+    const schemaDocs = () => [
       generateRuleSchemaDoc(),
       generateRuleOperationsDoc(),
       generateActionPolicySchemaDoc(),
       generateActionPolicyOperationsDoc(),
-      generateActionPolicyWorkflowPayloadDoc(),
     ];
 
+    const allDocs = () => [...schemaDocs(), generateActionPolicyWorkflowPayloadDoc()];
+
     it('never leaves an unresolved pointer or type in any doc', () => {
-      for (const doc of allDocs()) {
+      // The payload doc intentionally embeds the raw JSON Schema and a YAML
+      // example that contain `$ref`, so only check schema-derived docs for
+      // unresolved pointers.
+      for (const doc of schemaDocs()) {
         expect(doc).not.toContain('$ref');
+      }
+      for (const doc of allDocs()) {
         expect(doc).not.toContain('| unknown');
         expect(doc).not.toContain('unknown[]');
       }
