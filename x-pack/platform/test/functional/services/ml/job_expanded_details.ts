@@ -117,10 +117,12 @@ export function MachineLearningJobExpandedDetailsProvider(
       await jobTable.withDetailsOpen(jobId, async () => {
         await this.openAnnotationsTab(jobId);
         await this.clearSearchButton();
-        const visibleText = await testSubjects.getVisibleText(
-          jobTable.detailsSelector(jobId, 'mlAnnotationsColumnAnnotation')
-        );
-        expect(visibleText).to.be(newAnnotationText);
+        await retry.try(async () => {
+          const visibleText = await testSubjects.getVisibleText(
+            jobTable.detailsSelector(jobId, 'mlAnnotationsColumnAnnotation')
+          );
+          expect(visibleText).to.be(newAnnotationText);
+        });
       });
     },
 
