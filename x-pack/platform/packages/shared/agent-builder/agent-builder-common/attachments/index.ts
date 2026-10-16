@@ -28,11 +28,18 @@ export {
   screenContextAttachmentDataSchema,
   connectorAttachmentDataSchema,
   imageAttachmentDataSchema,
+  binaryAttachmentDataSchema,
   CONNECTOR_TAG_PREFIX,
   SUPPORTED_IMAGE_MIME_TYPES,
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+  CHAT_ATTACHMENT_BINARIES_FILE_KIND,
+  SUPPORTED_BINARY_MIME_TYPES,
+  isSupportedBinaryMimeType,
   MAX_IMAGE_BYTES,
   MAX_IMAGES_PER_ROUND,
+  MAX_BINARY_BYTES,
+  MAX_BINARY_FILE_KIND_BYTES,
+  MAX_BINARY_TEXT_LENGTH,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
   type TimeRange,
@@ -41,6 +48,8 @@ export {
   type ConnectorAttachmentData,
   type ImageAttachmentData,
   type SupportedImageMimeType,
+  type SupportedBinaryMimeType,
+  type BinaryAttachmentData,
 } from './attachment_types';
 
 export type {

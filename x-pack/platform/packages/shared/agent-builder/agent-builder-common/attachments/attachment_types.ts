@@ -18,6 +18,7 @@ export enum AttachmentType {
   esql = 'esql',
   connector = 'connector',
   image = 'image',
+  binary = 'binary',
 }
 
 interface AttachmentDataMap {
@@ -26,6 +27,7 @@ interface AttachmentDataMap {
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.connector]: ConnectorAttachmentData;
   [AttachmentType.image]: ImageAttachmentData;
+  [AttachmentType.binary]: BinaryAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -45,6 +47,7 @@ export interface EsqlAttachmentData {
 
 export const textAttachmentDataSchema = z.object({
   content: z.string(),
+  name: z.string().max(1024).optional(),
 });
 
 /**
@@ -53,6 +56,8 @@ export const textAttachmentDataSchema = z.object({
 export interface TextAttachmentData {
   /** text content of the attachment */
   content: string;
+  /** original file name with extension, when the text comes from a file */
+  name?: string;
 }
 
 export const screenContextTimeRangeSchema = z.object({
@@ -156,4 +161,43 @@ export interface ImageAttachmentData {
   name: string;
   /** mime type of the image */
   mime_type: SupportedImageMimeType;
+}
+
+export const CHAT_ATTACHMENT_BINARIES_FILE_KIND = 'chat-attachment-binaries';
+
+export const SUPPORTED_BINARY_MIME_TYPES = ['application/pdf'] as const;
+export type SupportedBinaryMimeType = (typeof SUPPORTED_BINARY_MIME_TYPES)[number];
+
+export const isSupportedBinaryMimeType = (
+  value: string | undefined
+): value is SupportedBinaryMimeType =>
+  SUPPORTED_BINARY_MIME_TYPES.some((mimeType) => mimeType === value);
+
+export const MAX_BINARY_BYTES: Readonly<Record<SupportedBinaryMimeType, number>> = {
+  'application/pdf': 10 * 1024 * 1024,
+};
+
+export const MAX_BINARY_FILE_KIND_BYTES = Math.max(...Object.values(MAX_BINARY_BYTES));
+
+export const MAX_BINARY_TEXT_LENGTH = 60_000;
+
+export const binaryAttachmentDataSchema = z.object({
+  file_id: z.string().max(1024),
+  name: z.string().max(1024),
+  mime_type: z.enum(SUPPORTED_BINARY_MIME_TYPES),
+  text: z.string().max(MAX_BINARY_TEXT_LENGTH),
+});
+
+/**
+ * Data for a binary attachment. The original file stays in the Files API.
+ */
+export interface BinaryAttachmentData {
+  /** files plugin file id */
+  file_id: string;
+  /** original filename */
+  name: string;
+  /** mime type of the file */
+  mime_type: SupportedBinaryMimeType;
+  /** text read from the file. Markdown for PDFs */
+  text: string;
 }
