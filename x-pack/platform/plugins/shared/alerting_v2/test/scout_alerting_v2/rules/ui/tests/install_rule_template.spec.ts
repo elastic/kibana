@@ -17,10 +17,41 @@ import { test } from '../fixtures';
 const { id: TEMPLATE_ID, attributes: TEMPLATE_ATTRIBUTES } = MOCK_RULE_TEMPLATES.nginxErrorRate;
 const TEMPLATE_RULE_NAME = TEMPLATE_ATTRIBUTES.rule.metadata.name;
 
+/**
+ * Index that matches the nginx template's `FROM logs-nginx.access-*` query.
+ * Without it the flyout cannot resolve a time field and blocks Next.
+ */
+const NGINX_TEST_INDEX = 'logs-nginx.access-scout';
+
 test.describe(
   'Rule library - install a rule template',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
+    test.beforeAll(async ({ esClient }) => {
+      await esClient.indices.create(
+        {
+          index: NGINX_TEST_INDEX,
+          mappings: {
+            properties: {
+              '@timestamp': { type: 'date' },
+              'http.response.status_code': { type: 'integer' },
+              'host.name': { type: 'keyword' },
+            },
+          },
+        },
+        { ignore: [400] }
+      );
+      await esClient.index({
+        index: NGINX_TEST_INDEX,
+        document: {
+          '@timestamp': new Date().toISOString(),
+          'http.response.status_code': 200,
+          'host.name': 'scout-host',
+        },
+        refresh: 'wait_for',
+      });
+    });
+
     test.beforeEach(async ({ apiServices, browserAuth }) => {
       await apiServices.alertingV2.ruleTemplates.cleanUp();
       await apiServices.alertingV2.rules.cleanUp();
@@ -28,9 +59,10 @@ test.describe(
       await browserAuth.loginAsAlertingV2Editor();
     });
 
-    test.afterAll(async ({ apiServices }) => {
+    test.afterAll(async ({ apiServices, esClient }) => {
       await apiServices.alertingV2.ruleTemplates.cleanUp();
       await apiServices.alertingV2.rules.cleanUp();
+      await esClient.indices.delete({ index: NGINX_TEST_INDEX }, { ignore: [404] });
     });
 
     test('lists every installed v2 template', async ({ pageObjects }) => {
