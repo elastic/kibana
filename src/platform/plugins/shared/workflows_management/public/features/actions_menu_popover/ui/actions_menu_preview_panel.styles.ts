@@ -32,7 +32,7 @@ export const panelStyles = {
   sectionHeader: ({ euiTheme }: UseEuiTheme) =>
     css({
       flexShrink: 0,
-      padding: `${euiTheme.size.m} ${euiTheme.size.base} 0`,
+      padding: `${euiTheme.size.base} ${euiTheme.size.base} 0`,
       marginBottom: euiTheme.size.m,
     }),
   stepListScroll: ({ euiTheme }: UseEuiTheme) =>
@@ -45,6 +45,20 @@ export const panelStyles = {
   stepListPanel: css({
     width: '100%',
     overflow: 'hidden',
+  }),
+  // One outer card; rows only add a bottom divider (last row omits it to avoid doubling the panel edge).
+  fieldList: css({
+    width: '100%',
+    overflow: 'hidden',
+    borderRadius: 12,
+  }),
+  fieldRow: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      borderRadius: 0,
+      borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+    }),
+  fieldRowLast: css({
+    borderBottom: 'none',
   }),
   resourceInset: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -76,10 +90,8 @@ export const previewStepRowStyles = {
       alignItems: 'center',
       width: '100%',
       paddingRight: euiTheme.size.base,
-      borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-      '&:last-child': {
-        borderBottom: 'none',
-      },
+      // Dividers come from EuiHorizontalRule between rows (same as Inputs fields list)
+      borderRadius: 0,
       '&:hover': {
         backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       },
