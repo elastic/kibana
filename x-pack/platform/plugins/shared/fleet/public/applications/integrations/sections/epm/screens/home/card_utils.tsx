@@ -170,8 +170,13 @@ export const mapToCard = ({
     // Packages without an add-integration flow (content, documentation-only, assets-only) keep
     // linking to the overview page. The rest go to the add-integration page when the feature flag is on.
     const { enableIntegrationTileClickToAdd } = ExperimentalFeaturesService.get();
+    // Catalog tiles carry the classification, computed before `policy_templates` is stripped from them.
+    const addIntegrationFromCatalog =
+      'addIntegrationFromCatalog' in item && typeof item.addIntegrationFromCatalog === 'boolean'
+        ? item.addIntegrationFromCatalog
+        : shouldAddIntegrationFromCatalog(item);
     const url =
-      !enableIntegrationTileClickToAdd || !shouldAddIntegrationFromCatalog(item)
+      !enableIntegrationTileClickToAdd || !addIntegrationFromCatalog
         ? getHref('integration_details_overview', {
             pkgkey: `${item.name}-${version}`,
             ...(item.integration ? { integration: item.integration } : {}),

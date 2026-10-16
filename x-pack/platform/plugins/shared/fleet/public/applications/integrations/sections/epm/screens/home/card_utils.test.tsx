@@ -340,6 +340,36 @@ describe('Card utils', () => {
         expect(cardItem.url).toBe('add_integration_to_policy');
       });
 
+      it('should use the classification carried by catalog tiles', () => {
+        // Catalog tiles have `policy_templates` stripped, so the classification is precomputed.
+        const addable = mapToCard({
+          item: {
+            id: 'apm',
+            name: 'apm',
+            version: '1.0.0',
+            type: 'integration',
+            addIntegrationFromCatalog: true,
+          },
+          addBasePath,
+          getHref,
+        } as any);
+        const notAddable = mapToCard({
+          item: {
+            id: 'corelight',
+            name: 'corelight',
+            version: '1.0.0',
+            type: 'integration',
+            data_streams: [{ type: 'logs' }],
+            addIntegrationFromCatalog: false,
+          },
+          addBasePath,
+          getHref,
+        } as any);
+
+        expect(addable.url).toBe('add_integration_to_policy');
+        expect(notAddable.url).toBe('integration_details_overview');
+      });
+
       it('should route integration packages without data streams or policy templates to the overview page', () => {
         const cardItem = mapToCard({
           item: { id: 'corelight', name: 'corelight', version: '1.0.0', type: 'integration' },
