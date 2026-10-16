@@ -93,7 +93,7 @@ const ReportedTokens: React.FC<{ value?: number }> = ({ value }) =>
 
 const useCellPaddingStyles = () => {
   const { euiTheme } = useEuiTheme();
-  return css({ paddingBlock: euiTheme.size.xxs });
+  return css({ paddingBlock: euiTheme.size.s });
 };
 
 const Cell: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
