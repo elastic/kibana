@@ -1019,6 +1019,7 @@ describe('InternalHttpSelfScopedClient', () => {
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'kibana-own-secret',
         },
         getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+        getUiamAttestationGetter: () => () => 'attestation',
         unauthorizedErrorHandler: jest.fn(async (options, toolkit) =>
           toolkit.retry({ authHeaders: { authorization: 'Bearer essu_refreshed' } })
         ),
@@ -1030,6 +1031,94 @@ describe('InternalHttpSelfScopedClient', () => {
       expect(sentRequest(0).headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBeNull();
       expect(sentRequest(1).headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBeNull();
       expect(sentRequest(1).headers.get('authorization')).toBe('Bearer essu_refreshed');
+      expect(sentRequest(0).headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(
+        'attestation'
+      );
+      expect(sentRequest(1).headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(
+        'attestation'
+      );
+    });
+
+    describe('together with the attestation getter', () => {
+      const createWiredClient = (
+        clientAuthentication: string | string[],
+        getAttestation: SelfClientUiamAttestationGetter = jest.fn().mockReturnValue('attestation')
+      ) => {
+        const { self } = createClient({
+          authHeaders: {
+            authorization: 'Bearer essu_token',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication,
+          },
+          getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+          getUiamAttestationGetter: () => getAttestation,
+        });
+        return { self, getAttestation };
+      };
+
+      it("attests when it strips Kibana's own client authentication", async () => {
+        const { self } = createWiredClient('kibana-own-secret');
+
+        await self.asScoped(createRequest()).fetch('/api/status');
+
+        expect(sentRequest().headers.has(ES_CLIENT_AUTHENTICATION_HEADER)).toBe(false);
+        expect(sentRequest().headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(
+          'attestation'
+        );
+      });
+
+      it('attests regardless of client authentication on request.headers', async () => {
+        const { self } = createWiredClient('kibana-own-secret');
+        const request = createRequest({
+          headers: { [ES_CLIENT_AUTHENTICATION_HEADER]: 'upstream-secret' },
+        });
+
+        await self.asScoped(request).fetch('/api/status');
+
+        expect(sentRequest().headers.has(ES_CLIENT_AUTHENTICATION_HEADER)).toBe(false);
+        expect(sentRequest().headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(
+          'attestation'
+        );
+      });
+
+      it('does not attest relayed client authentication', async () => {
+        const { self, getAttestation } = createWiredClient('upstream-secret');
+
+        await self.asScoped(createRequest()).fetch('/api/status');
+
+        expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBe('upstream-secret');
+        expect(sentRequest().headers.has(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(false);
+        expect(getAttestation).not.toHaveBeenCalled();
+      });
+
+      it('does not attest the relayed entry of a mixed array value', async () => {
+        const { self } = createWiredClient(['kibana-own-secret', 'upstream-secret']);
+
+        await self.asScoped(createRequest()).fetch('/api/status');
+
+        expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBe('upstream-secret');
+        expect(sentRequest().headers.has(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(false);
+      });
+
+      it('does not attest an empty relayed client authentication', async () => {
+        const { self } = createWiredClient('');
+
+        await self.asScoped(createRequest()).fetch('/api/status');
+
+        expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBe('');
+        expect(sentRequest().headers.has(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(false);
+      });
+
+      it('does not attest when the getter declines the credential', async () => {
+        const { self } = createWiredClient(
+          'kibana-own-secret',
+          jest.fn().mockReturnValue(undefined)
+        );
+
+        await self.asScoped(createRequest()).fetch('/api/status');
+
+        expect(sentRequest().headers.has(ES_CLIENT_AUTHENTICATION_HEADER)).toBe(false);
+        expect(sentRequest().headers.has(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(false);
+      });
     });
   });
 

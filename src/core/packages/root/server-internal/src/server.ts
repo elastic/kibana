@@ -61,7 +61,6 @@ import { PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
 import {
-  ES_CLIENT_AUTHENTICATION_HEADER,
   HTTPAuthorizationHeader,
   isUiamCredential,
   isExternalUiamCredential,
@@ -626,20 +625,6 @@ export class Server {
           return undefined;
         }
         if (isExternalUiamCredential(request) || uiam.isExternalApiKey(request)) {
-          return undefined;
-        }
-
-        const inboundClientSecret = request.headers[ES_CLIENT_AUTHENTICATION_HEADER];
-        let inboundSecrets: string[] = [];
-        if (typeof inboundClientSecret === 'string') {
-          inboundSecrets = [inboundClientSecret];
-        } else if (Array.isArray(inboundClientSecret)) {
-          inboundSecrets = inboundClientSecret;
-        }
-        const hasUpstreamSecret = inboundSecrets.some(
-          (entry) => entry.length > 0 && !uiam.isOwnClientAuthentication(entry)
-        );
-        if (hasUpstreamSecret) {
           return undefined;
         }
 

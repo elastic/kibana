@@ -421,7 +421,8 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     }
 
     const getAttestation = this.params.getUiamAttestationGetter?.();
-    if (getAttestation) {
+    // Client authentication that survives stripping was relayed, and the receiver gives it priority.
+    if (getAttestation && !headers.has(ES_CLIENT_AUTHENTICATION_HEADER)) {
       const attestation = getAttestation(this.request, headers.get('authorization'));
       if (attestation) {
         headers.set(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER, attestation);

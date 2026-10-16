@@ -281,9 +281,15 @@ export class HttpService
         this.httpServer.setRedactedSessionIdGetter(getter);
       },
       setSelfClientUiamAttestationGetter: (getter) => {
+        if (this.selfClientUiamAttestationGetter) {
+          throw new Error('The self client UIAM attestation getter was already set');
+        }
         this.selfClientUiamAttestationGetter = getter;
       },
       setSelfClientOwnClientAuthenticationCheck: (check) => {
+        if (this.selfClientOwnClientAuthenticationCheck) {
+          throw new Error('The self client own client authentication check was already set');
+        }
         this.selfClientOwnClientAuthenticationCheck = check;
       },
     };

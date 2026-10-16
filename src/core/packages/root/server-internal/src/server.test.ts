@@ -561,34 +561,6 @@ describe('self client UIAM attestation getter', () => {
     expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
   });
 
-  it('does not attest an upstream-relayed UIAM token that arrived with client authentication', async () => {
-    const uiam = getUiamMock();
-    const getAttestation = await startServerAndGetAttestationGetter();
-
-    const request = httpServerMock.createFakeKibanaRequest({
-      headers: {
-        authorization: 'Bearer essu_upstream',
-        [ES_CLIENT_AUTHENTICATION_HEADER]: 'upstream-secret',
-      },
-    });
-    expect(getAttestation(request, 'Bearer essu_upstream')).toBeUndefined();
-    expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
-  });
-
-  it('does not attest when inbound client authentication arrives as a non-empty array', async () => {
-    const uiam = getUiamMock();
-    const getAttestation = await startServerAndGetAttestationGetter();
-
-    const request = httpServerMock.createFakeKibanaRequest({
-      headers: { authorization: 'Bearer essu_upstream' },
-    });
-    (request.headers as Record<string, string | string[]>)[ES_CLIENT_AUTHENTICATION_HEADER] = [
-      'upstream-secret',
-    ];
-    expect(getAttestation(request, 'Bearer essu_upstream')).toBeUndefined();
-    expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
-  });
-
   it('still attests a Kibana-minted UIAM credential with no inbound client authentication', async () => {
     const uiam = getUiamMock();
     uiam.getInternalCallerAttestationHeaders.mockReturnValue(ATTESTATION_HEADERS);
@@ -617,38 +589,6 @@ describe('self client UIAM attestation getter', () => {
     );
   });
 
-  it('does not treat an empty inbound client authentication header as a relay', async () => {
-    const uiam = getUiamMock();
-    uiam.getInternalCallerAttestationHeaders.mockReturnValue(ATTESTATION_HEADERS);
-    const getAttestation = await startServerAndGetAttestationGetter();
-
-    const request = httpServerMock.createFakeKibanaRequest({
-      headers: {
-        authorization: 'Bearer essu_inbound',
-        [ES_CLIENT_AUTHENTICATION_HEADER]: '',
-      },
-    });
-    expect(getAttestation(request, 'Bearer essu_outbound')).toBe(ATTESTATION);
-    expect(uiam.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
-      expect.objectContaining({ scheme: 'Bearer', credentials: 'essu_outbound' })
-    );
-  });
-
-  it('does not treat an empty-string array inbound client authentication header as a relay', async () => {
-    const uiam = getUiamMock();
-    uiam.getInternalCallerAttestationHeaders.mockReturnValue(ATTESTATION_HEADERS);
-    const getAttestation = await startServerAndGetAttestationGetter();
-
-    const request = httpServerMock.createFakeKibanaRequest({
-      headers: { authorization: 'Bearer essu_inbound' },
-    });
-    (request.headers as Record<string, string | string[]>)[ES_CLIENT_AUTHENTICATION_HEADER] = [''];
-    expect(getAttestation(request, 'Bearer essu_outbound')).toBe(ATTESTATION);
-    expect(uiam.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
-      expect.objectContaining({ scheme: 'Bearer', credentials: 'essu_outbound' })
-    );
-  });
-
   it('attests a cookie-authenticated UIAM session from the outbound credential', async () => {
     const uiam = getUiamMock();
     uiam.getInternalCallerAttestationHeaders.mockReturnValue(ATTESTATION_HEADERS);
@@ -662,22 +602,18 @@ describe('self client UIAM attestation getter', () => {
     );
   });
 
-  it('still attests a cookie session after Core copies Kibana client authentication onto the request', async () => {
+  it('ignores client authentication on request.headers', async () => {
     const uiam = getUiamMock();
     uiam.getInternalCallerAttestationHeaders.mockReturnValue(ATTESTATION_HEADERS);
-    uiam.isOwnClientAuthentication.mockImplementation(
-      (value: string) => value === 'kibana-shared-secret'
-    );
     const getAttestation = await startServerAndGetAttestationGetter();
 
     const request = httpServerMock.createFakeKibanaRequest({
       headers: {
         authorization: 'Bearer essu_session_token',
-        [ES_CLIENT_AUTHENTICATION_HEADER]: 'kibana-shared-secret',
+        [ES_CLIENT_AUTHENTICATION_HEADER]: 'upstream-secret',
       },
     });
     expect(getAttestation(request, 'Bearer essu_session_token')).toBe(ATTESTATION);
-    expect(uiam.isOwnClientAuthentication).toHaveBeenCalledWith('kibana-shared-secret');
     expect(uiam.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
       expect.objectContaining({ scheme: 'Bearer', credentials: 'essu_session_token' })
     );
