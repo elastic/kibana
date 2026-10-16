@@ -8,6 +8,7 @@
  */
 
 import type { SerializedVis } from '../../common';
+import { getTransforms } from '../../common/embeddable/transforms/get_transforms';
 import { getLegacyVisPanelTypeMigration } from './migrate_out';
 import { getLegacyPanelMigrationRegistry } from './registry';
 
@@ -54,6 +55,49 @@ describe('legacy_vis panel type migration', () => {
         time_range: { from: 'now-15m', to: 'now' },
       },
     });
+  });
+
+  test('migrates the by-value panel state that the legacy_vis transforms store and read back', () => {
+    const { transformIn, transformOut } = getTransforms({
+      transformIn: (state) => ({ state, references: [] }),
+      transformOut: (state) => state,
+    });
+    const readBack = (state: Parameters<typeof transformIn>[0]) => {
+      const stored = transformIn(state);
+      return transformOut(stored.state, stored.references);
+    };
+
+    const byValueConfig = readBack({
+      title: 'Panel title',
+      savedVis: {
+        title: 'vega vis',
+        type: 'vega',
+        params: {},
+        data: {
+          aggs: [],
+          searchSource: {
+            filter: [
+              {
+                meta: { index: 'logs-data-view', key: 'host.name', type: 'phrase' },
+                query: { match_phrase: { 'host.name': 'web-1' } },
+              },
+            ],
+          },
+        },
+      },
+    });
+    const byReferenceConfig = readBack({ title: 'By reference', savedObjectId: 'vis-id' });
+
+    expect(
+      migrateOut([
+        { id: 'by-value', config: byValueConfig },
+        { id: 'by-reference', config: byReferenceConfig },
+      ])
+    ).toEqual([{ panelId: 'by-value', type: 'vega', config: { spec: 'migrated' } }]);
+    expect(migrate).toHaveBeenCalledTimes(1);
+    const [{ savedVis, panelConfig }] = migrate.mock.calls[0];
+    expect(savedVis.data.searchSource.filter[0].meta.index).toBe('logs-data-view');
+    expect(panelConfig).toEqual({ title: 'Panel title' });
   });
 
   test('leaves a by-reference panel unchanged', () => {

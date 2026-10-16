@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
 import type { Filter } from '@kbn/es-query';
 import type { SerializedVis } from '@kbn/visualizations-plugin/common';
+import { getVegaEmbeddableSchema } from '../embeddable/schema';
 import { migrateLegacyVegaPanel } from './migrate';
 
 const getSavedVis = ({
@@ -24,6 +26,16 @@ const getSavedVis = ({
   params: { spec },
   data: { aggs: [], searchSource },
 });
+
+const filter: Filter = {
+  meta: {
+    index: 'logs-data-view',
+    key: 'host.name',
+    params: { query: 'web-1' },
+    type: 'phrase',
+  },
+  query: { match_phrase: { 'host.name': 'web-1' } },
+};
 
 describe('migrateLegacyVegaPanel', () => {
   test('keeps panel settings and an HJSON spec as text', () => {
@@ -74,16 +86,6 @@ describe('migrateLegacyVegaPanel', () => {
   });
 
   test('converts the visualization query and filters', () => {
-    const filter: Filter = {
-      meta: {
-        index: 'logs-data-view',
-        key: 'host.name',
-        params: { query: 'web-1' },
-        type: 'phrase',
-      },
-      query: { match_phrase: { 'host.name': 'web-1' } },
-    };
-
     const { query, filters } = migrateLegacyVegaPanel({
       savedVis: getSavedVis({
         searchSource: { query: { query: 'status:200', language: 'lucene' }, filter: [filter] },
@@ -112,6 +114,32 @@ describe('migrateLegacyVegaPanel', () => {
         panelConfig: {},
       })
     ).not.toHaveProperty('query');
+  });
+
+  test('returns state that the vega panel schema accepts unchanged', () => {
+    const schema = getVegaEmbeddableSchema(mockGetDrilldownsSchema);
+    const states = [
+      migrateLegacyVegaPanel({
+        savedVis: getSavedVis(),
+        panelConfig: {
+          hide_title: true,
+          hide_border: true,
+          time_range: { from: 'now-15m', to: 'now' },
+        },
+      }),
+      migrateLegacyVegaPanel({
+        savedVis: getSavedVis({ spec: '{"mark":"point"}' }),
+        panelConfig: {},
+      }),
+      migrateLegacyVegaPanel({
+        savedVis: getSavedVis({
+          searchSource: { query: { query: 'status:200', language: 'kuery' }, filter: [filter] },
+        }),
+        panelConfig: {},
+      }),
+    ];
+
+    states.forEach((state) => expect(schema.parse(state)).toEqual(state));
   });
 
   test('throws when the visualization has no spec', () => {
