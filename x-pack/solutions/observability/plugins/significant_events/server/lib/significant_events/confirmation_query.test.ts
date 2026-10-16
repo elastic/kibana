@@ -22,7 +22,7 @@ describe('buildConfirmationQuery', () => {
     );
   });
 
-  it('keeps every WHERE of the stored query, untouched and in order', () => {
+  it('keeps every WHERE of the stored query, in order and as the same conditions', () => {
     expect(
       buildConfirmationQuery({
         esqlQuery:
@@ -30,7 +30,7 @@ describe('buildConfirmationQuery', () => {
         viewName: VIEW,
       })
     ).toBe(
-      `FROM ${VIEW} | ${WINDOW} | WHERE service.name == "a" AND body.text : "z" | WHERE NOT body.text : "ok" | SORT @timestamp DESC | LIMIT 5`
+      `FROM ${VIEW} | ${WINDOW} | WHERE service.name == "a" AND (body.text : "z") | WHERE NOT (body.text : "ok") | SORT @timestamp DESC | LIMIT 5`
     );
   });
 

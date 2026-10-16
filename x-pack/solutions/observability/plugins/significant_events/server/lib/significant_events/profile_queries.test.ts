@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildProfileQueries } from './profile_queries';
+import { buildProfileQueries, pickSpreadGroupField } from './profile_queries';
 
 const VIEW = '$.nightshift.sources.default.logs';
 const HEAD = `FROM ${VIEW} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`;
@@ -15,6 +15,7 @@ describe('buildProfileQueries', () => {
     const queries = buildProfileQueries({
       esqlQuery: 'FROM logs | WHERE (body.text : "SQLState") AND (body.text : "08001")',
       viewName: VIEW,
+      groupField: 'service.name',
     });
 
     expect(queries?.spread).toEqual({
@@ -35,9 +36,34 @@ describe('buildProfileQueries', () => {
     const spread = buildProfileQueries({
       esqlQuery: 'FROM logs | WHERE MATCH_PHRASE(body.text, "Error submitting payment")',
       viewName: VIEW,
+      groupField: 'service.name',
     })?.spread.query;
 
     expect(spread).not.toContain('total');
+  });
+
+  it('groups the spread by the field the data has, and counts only the failing lines with none', () => {
+    const esqlQuery = 'FROM logs | WHERE body.text : "z"';
+
+    expect(
+      buildProfileQueries({ esqlQuery, viewName: VIEW, groupField: 'k8s.deployment.name' })?.spread
+        .query
+    ).toContain('BY k8s.deployment.name | STATS failed = SUM(affected)');
+    expect(buildProfileQueries({ esqlQuery, viewName: VIEW })?.spread.query).toBe(
+      `${HEAD} | WHERE body.text : "z" | STATS failed = COUNT(*)`
+    );
+  });
+
+  it.each([
+    [[{ name: 'service.name' }, { name: 'host.name' }], 'service.name'],
+    [
+      [{ name: 'body.text' }, { name: 'k8s.deployment.name' }, { name: 'host.name' }],
+      'k8s.deployment.name',
+    ],
+    [[{ name: 'host.name' }], 'host.name'],
+    [[{ name: 'body.text' }], undefined],
+  ])('picks the spread field from the columns %j: %s', (columns, expected) => {
+    expect(pickSpreadGroupField(columns)).toBe(expected);
   });
 
   it.each([

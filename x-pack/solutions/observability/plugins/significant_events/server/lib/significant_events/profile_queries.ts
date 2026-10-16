@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Parser } from '@elastic/esql';
+import { esql } from '@elastic/esql';
 import type { ESQLAstItem } from '@elastic/esql/types';
-import { parseMatchQuery } from './confirmation_query';
+import { boundedMatchQuery, parseMatchQuery } from './confirmation_query';
 
 /** One profile query and how far back it looks. */
 export interface ProfileQuery {
@@ -22,7 +22,9 @@ export interface ProfileQueries {
   trendEdges: ProfileQuery;
 }
 
-const WINDOW = 'WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend';
+/** The fields the skill allows the spread to group by, in order of preference. */
+export const SPREAD_GROUP_FIELDS = ['service.name', 'k8s.deployment.name', 'host.name'] as const;
+
 const SPREAD_LOOKBACK_MINUTES = 60;
 const TREND_BUCKETS_LOOKBACK_MINUTES = 24 * 60;
 const TREND_EDGES_LOOKBACK_MINUTES = 14 * 24 * 60;
@@ -36,45 +38,49 @@ const containsScope = (node: ESQLAstItem): boolean => {
   return 'args' in node && Array.isArray(node.args) ? node.args.some(containsScope) : false;
 };
 
-const hasScopeCondition = (predicates: string[]): boolean =>
-  predicates.some((predicate) => {
-    const { root } = Parser.parse(`FROM x | ${predicate}`);
-    return root.commands.slice(1).some((command) => containsScope(command.args));
-  });
+/** The first allowed spread field the data has as a column, if any. */
+export const pickSpreadGroupField = (
+  columns: ReadonlyArray<{ name: string }>
+): string | undefined =>
+  SPREAD_GROUP_FIELDS.find((field) => columns.some(({ name }) => name === field));
 
 /**
  * Builds the spread and trend queries of Step 4 from a stored filter-only MATCH query. Only the
  * no-isolating-scope case is built, because it needs no judgement: a predicate with an equality
  * or `IN` condition may select an operation, which only the agent can split from the failure.
- * Anything else yields nothing and the agent builds the profile from the skill.
+ * The spread groups by `groupField`, which must be a column the data has; with none, it counts
+ * the failing lines without a breadth.
  */
-export const buildProfileQueries = (params: {
+export const buildProfileQueries = ({
+  esqlQuery,
+  viewName,
+  groupField,
+}: {
   esqlQuery: string;
   viewName?: string;
+  groupField?: string;
 }): ProfileQueries | undefined => {
-  const parts = parseMatchQuery(params);
-  if (!parts || hasScopeCondition(parts.predicates)) return undefined;
+  const parts = parseMatchQuery({ esqlQuery, viewName });
+  if (!parts || containsScope(parts.predicates)) return undefined;
 
-  const base = [`FROM ${parts.target}`, WINDOW, ...parts.predicates];
+  const field = groupField === undefined ? undefined : esql.col(groupField.split('.'));
+  const spread =
+    field === undefined
+      ? boundedMatchQuery(parts).pipe`STATS failed = COUNT(*)`
+      : boundedMatchQuery(parts).pipe`STATS affected = COUNT(*) BY ${field}`
+          .pipe`STATS failed = SUM(affected), services_hit = COUNT(*), top_failed = MAX(affected), top_names = TOP(affected, 5, "desc", ${field})`;
+
   return {
-    spread: {
-      query: [
-        ...base,
-        'STATS affected = COUNT(*) BY service.name',
-        'STATS failed = SUM(affected), services_hit = COUNT(*), top_failed = MAX(affected), top_names = TOP(affected, 5, "desc", service.name)',
-      ].join(' | '),
-      lookbackMinutes: SPREAD_LOOKBACK_MINUTES,
-    },
+    spread: { query: spread.print('basic'), lookbackMinutes: SPREAD_LOOKBACK_MINUTES },
     trendBuckets: {
-      query: [
-        ...base,
-        'STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 50, ?_tstart, ?_tend)',
-        'SORT bucket ASC',
-      ].join(' | '),
+      query: boundedMatchQuery(parts)
+        .pipe`STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 50, ?_tstart, ?_tend)`
+        .pipe`SORT bucket ASC`.print('basic'),
       lookbackMinutes: TREND_BUCKETS_LOOKBACK_MINUTES,
     },
     trendEdges: {
-      query: [...base, 'STATS earliest = MIN(@timestamp), latest = MAX(@timestamp)'].join(' | '),
+      query: boundedMatchQuery(parts)
+        .pipe`STATS earliest = MIN(@timestamp), latest = MAX(@timestamp)`.print('basic'),
       lookbackMinutes: TREND_EDGES_LOOKBACK_MINUTES,
     },
   };
