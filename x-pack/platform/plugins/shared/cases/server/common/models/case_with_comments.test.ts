@@ -1324,7 +1324,7 @@ describe('CaseCommentModel', () => {
 
   describe('attack deduplication', () => {
     it('drops an attack that is already attached to the case', async () => {
-      clientArgs.services.attachmentService.getter.getAllAttackIds.mockResolvedValueOnce(
+      clientArgs.services.attachmentService.getter.getAttachedAttackIds.mockResolvedValueOnce(
         new Set(['attack-id-1'])
       );
 
@@ -1336,7 +1336,7 @@ describe('CaseCommentModel', () => {
     });
 
     it('drops an attack that is already attached to the case on createComment', async () => {
-      clientArgs.services.attachmentService.getter.getAllAttackIds.mockResolvedValueOnce(
+      clientArgs.services.attachmentService.getter.getAttachedAttackIds.mockResolvedValueOnce(
         new Set(['attack-id-1'])
       );
 
@@ -1410,8 +1410,8 @@ describe('CaseCommentModel', () => {
         ],
       });
 
-      expect(clientArgs.services.attachmentService.getter.getAllAttackIds).toHaveBeenCalledTimes(1);
-      expect(clientArgs.services.attachmentService.getter.getAllAttackIds).toHaveBeenCalledWith({
+      expect(clientArgs.services.attachmentService.getter.getAttachedAttackIds).toHaveBeenCalledTimes(1);
+      expect(clientArgs.services.attachmentService.getter.getAttachedAttackIds).toHaveBeenCalledWith({
         caseId: theCase.id,
         attackIds: ['attack-id-1', 'attack-id-2'],
       });
@@ -1422,7 +1422,7 @@ describe('CaseCommentModel', () => {
         attachments: [{ id: 'comment-1', ...unifiedAlertComment }],
       });
 
-      expect(clientArgs.services.attachmentService.getter.getAllAttackIds).not.toHaveBeenCalled();
+      expect(clientArgs.services.attachmentService.getter.getAttachedAttackIds).not.toHaveBeenCalled();
     });
   });
 

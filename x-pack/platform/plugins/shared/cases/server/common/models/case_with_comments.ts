@@ -428,7 +428,7 @@ export class CaseCommentModel {
     ];
     const attacksAttachedToCase =
       requestedAttackIds.length > 0
-        ? await this.params.services.attachmentService.getter.getAllAttackIds({
+        ? await this.params.services.attachmentService.getter.getAttachedAttackIds({
             caseId: this.caseInfo.id,
             attackIds: requestedAttackIds,
           })
