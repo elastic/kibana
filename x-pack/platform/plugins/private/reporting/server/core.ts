@@ -281,7 +281,10 @@ export class ReportingCore {
 
     if (pdf.enabled) {
       // NOTE: PdfV1ExportType is deprecated and tagged for removal: https://github.com/elastic/kibana/issues/154601
-      exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
+      // Serverless never registers it, so it does not become part of the serverless public API.
+      if (this.packageInfo.buildFlavor !== 'serverless') {
+        exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
+      }
       exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
     }
 
