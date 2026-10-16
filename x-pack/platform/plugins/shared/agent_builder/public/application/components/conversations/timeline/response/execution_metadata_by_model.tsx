@@ -206,13 +206,9 @@ export const ExecutionMetadataByModel: React.FC<ExecutionMetadataByModelProps> =
   modelUsage,
 }) => {
   const {
-    services: { http, settings },
+    services: { http },
   } = useKibana();
-  const { data: aiConnectors } = useLoadConnectors({
-    http,
-    featureId: 'agent_builder',
-    settings,
-  });
+  const { data: aiConnectors } = useLoadConnectors({ http, featureId: 'agent_builder' });
 
   const rows = useMemo<ModelRow[]>(() => {
     const connectors = modelUsage.connectors ?? [];

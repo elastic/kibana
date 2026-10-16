@@ -55,7 +55,7 @@ const labels = {
   popoverAriaLabel: i18n.translate('xpack.agentBuilder.response.metadataPopover.popoverAriaLabel', {
     defaultMessage: 'Execution details',
   }),
-  execution: i18n.translate('xpack.agentBuilder.response.metadataPopover.execution', {
+  executionTime: i18n.translate('xpack.agentBuilder.response.metadataPopover.executionTime', {
     defaultMessage: 'Execution time',
   }),
   tokensSent: i18n.translate('xpack.agentBuilder.response.metadataPopover.tokensSent', {
@@ -68,6 +68,29 @@ const labels = {
     defaultMessage: 'View response JSON',
   }),
 };
+
+const tabOptions = [
+  {
+    id: 'total',
+    label: labels.totalTab,
+    'data-test-subj': 'executionMetadataTotalTab',
+    ...getEbtProps({
+      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+      action: AGENT_BUILDER_UI_EBT.action.conversation.VIEW_ROUND_METADATA_TOTAL,
+      detail: 'conversation',
+    }),
+  },
+  {
+    id: 'byModel',
+    label: labels.byModelTab,
+    'data-test-subj': 'executionMetadataByModelTab',
+    ...getEbtProps({
+      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+      action: AGENT_BUILDER_UI_EBT.action.conversation.VIEW_ROUND_METADATA_BY_MODEL,
+      detail: 'conversation',
+    }),
+  },
+];
 
 interface ExecutionMetadataPopoverProps {
   executionTerminatedEvent: ExecutionTerminatedEvent;
@@ -101,20 +124,7 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
     return null;
   }
 
-  const hasBreakdown = (modelUsage.connectors?.length ?? 0) > 0;
-  const tabOptions = [
-    {
-      id: 'total',
-      label: labels.totalTab,
-      'data-test-subj': 'executionMetadataTotalTab',
-    },
-    {
-      id: 'byModel',
-      label: labels.byModelTab,
-      'data-test-subj': 'executionMetadataByModelTab',
-    },
-  ];
-
+  const hasBreakdown = (modelUsage.connectors?.length ?? 0) > 1;
   const seconds = Math.round(timeMs / 1000);
   const secondsLabel = i18n.translate('xpack.agentBuilder.response.metadataPopover.seconds', {
     defaultMessage: '{seconds}s',
@@ -186,7 +196,7 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
             <ExecutionMetadataByModel modelUsage={modelUsage} />
           ) : (
             <>
-              <MetadataRow label={labels.execution} value={secondsLabel} />
+              <MetadataRow label={labels.executionTime} value={secondsLabel} />
               <MetadataDivider />
               <MetadataRow
                 label={labels.tokensSent}

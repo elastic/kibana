@@ -14,11 +14,13 @@ describe('getModelColor', () => {
     expect(getModelColor('claude-opus', palette)).toBe(getModelColor('claude-opus', palette));
   });
 
-  it('depends only on the model, not on the other models of the response', () => {
-    const alone = getModelColor('gemini-flash', palette);
-    const models = ['claude-opus', 'gemini-flash', 'gpt-5'];
-
-    expect(models.map((key) => getModelColor(key, palette))[1]).toBe(alone);
+  // Pins the result of the hash: changing it would change the colour of every model for every user.
+  it('keeps the colour of known models', () => {
+    expect(getModelColor('claude-opus', palette)).toBe('#c0');
+    expect(getModelColor('gpt-5', palette)).toBe('#c1');
+    expect(getModelColor('google-gemini-3.5-flash-lite', palette)).toBe('#c2');
+    expect(getModelColor('gemini-flash', palette)).toBe('#c3');
+    expect(getModelColor('anthropic-claude-4.5-haiku', palette)).toBe('#c4');
   });
 
   it('always returns a colour of the palette', () => {

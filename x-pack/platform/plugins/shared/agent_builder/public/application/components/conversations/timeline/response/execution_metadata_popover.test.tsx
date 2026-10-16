@@ -163,6 +163,31 @@ describe('ExecutionMetadataPopover', () => {
       expect(screen.queryByText('Reasoning tokens')).not.toBeInTheDocument();
     });
 
+    it('has no tabs when only one model was used, as the table would repeat the totals', async () => {
+      render(
+        <ExecutionMetadataPopover
+          executionTerminatedEvent={eventWithUsage({
+            connector_id: 'main-connector',
+            llm_calls: 1,
+            input_tokens: 111,
+            output_tokens: 22,
+            connectors: [
+              {
+                connector_id: 'main-connector',
+                llm_calls: 1,
+                input_tokens: 111,
+                output_tokens: 22,
+              },
+            ],
+          })}
+        />
+      );
+      await openPopover();
+
+      expect(screen.queryByTestId('executionMetadataTabs')).not.toBeInTheDocument();
+      expect(screen.getByText('Execution time')).toBeInTheDocument();
+    });
+
     it('has no tabs when the response has no per-model breakdown', async () => {
       render(
         <ExecutionMetadataPopover
@@ -363,6 +388,22 @@ describe('ExecutionMetadataPopover', () => {
           'no-model-connector'
         )
       ).toBeInTheDocument();
+    });
+
+    it('tracks the switch of tab with the analytics attributes of each tab', async () => {
+      render(
+        <ExecutionMetadataPopover executionTerminatedEvent={eventWithUsage(usageWithBreakdown)} />
+      );
+      await openPopover();
+
+      expect(screen.getByTestId('executionMetadataTotalTab')).toHaveAttribute(
+        'data-ebt-action',
+        'view_round_metadata_total'
+      );
+      expect(screen.getByTestId('executionMetadataByModelTab')).toHaveAttribute(
+        'data-ebt-action',
+        'view_round_metadata_by_model'
+      );
     });
 
     it('goes back to the Total tab', async () => {
