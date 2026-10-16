@@ -25,7 +25,7 @@ import {
   type DetectionOutcome,
   type DetectionStrategyId,
   type EngineDetection,
-} from '@kbn/significant-events-plugin/common';
+} from '@kbn/significant-events-detection-engine-plugin/common';
 import React, { useState } from 'react';
 import { useDetectionEngineDetections } from '../../../../hooks/use_detection_engine_detections';
 import { OUTCOME_COLORS, OUTCOME_LABELS, STRATEGY_ICONS, STRATEGY_LABELS } from './labels';

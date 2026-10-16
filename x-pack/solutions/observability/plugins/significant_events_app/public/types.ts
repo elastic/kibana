@@ -15,6 +15,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NightshiftSourcesPublicPluginStart } from '@kbn/nightshift-sources-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SignificantEventsPublicPluginStart } from '@kbn/significant-events-plugin/public';
+import type { DetectionEnginePublicStart } from '@kbn/significant-events-detection-engine-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
@@ -33,6 +34,7 @@ export interface SignificantEventsAppStartDependencies {
   nightshiftSources: NightshiftSourcesPublicPluginStart;
   share: SharePluginStart;
   significantEvents: SignificantEventsPublicPluginStart;
+  significantEventsDetectionEngine: DetectionEnginePublicStart;
   spaces?: SpacesPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }

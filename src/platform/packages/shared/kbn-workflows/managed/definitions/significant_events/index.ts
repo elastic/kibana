@@ -14,6 +14,10 @@ import DISCOVERY_YAML from './significant_events/discovery.yaml';
 import ORCHESTRATOR_YAML from './significant_events/orchestrator.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 export {
+  SIGNIFICANT_EVENTS_DETECTION_ENGINE_WORKFLOW,
+  SIGNIFICANT_EVENTS_DETECTION_ENGINE_WORKFLOW_ID,
+} from './detection_engine';
+export {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW,

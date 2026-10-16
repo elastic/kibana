@@ -27,14 +27,15 @@ import { EngineKpis } from './engine_kpis';
 import { EventFlyout } from './event_flyout';
 import { EventsTable } from './events_table';
 import { PipelineSummary } from './pipeline_summary';
-import { ScenarioPanel } from './scenario_panel';
-import { ServicesTable } from './services_table';
+import { ServicesPanel } from './services_panel';
 import { StrategiesTable } from './strategies_table';
-import { SystemMap } from './system_map';
 
-type InnerTab = 'events' | 'services' | 'strategies' | 'detections' | 'activity';
+type InnerTab = 'events' | 'strategies' | 'detections' | 'activity';
 
-/** Prototype of the detection engine architecture, built to be demoed end to end from here. */
+/**
+ * Prototype of the detection engine architecture. Status, last run and services stay in view
+ * next to the events, so the engine can be followed from one screen.
+ */
 export function DetectionEngineTab() {
   const { data: overview, isLoading } = useDetectionEngineOverview();
   const { data: eventsData, isLoading: isEventsLoading } = useDetectionEngineEvents();
@@ -55,12 +56,6 @@ export function DetectionEngineTab() {
         defaultMessage: 'Significant events',
       }),
       count: overview.counts.open_events,
-    },
-    {
-      id: 'services',
-      label: i18n.translate('xpack.significantEventsApp.detectionEngine.tabs.services', {
-        defaultMessage: 'By service',
-      }),
     },
     {
       id: 'strategies',
@@ -86,52 +81,48 @@ export function DetectionEngineTab() {
   return (
     <div data-test-subj="detectionEngineTab">
       <EngineHeader overview={overview} actions={actions} />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
       <EngineKpis overview={overview} />
+      <EuiSpacer size="s" />
+      <PipelineSummary run={overview.last_run} />
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="m" alignItems="stretch">
-        <EuiFlexItem grow={3}>
-          <SystemMap
-            lab={overview.lab}
+      <EuiFlexGroup gutterSize="m" alignItems="flexStart">
+        <EuiFlexItem grow={3} style={{ minWidth: 0 }}>
+          <EuiTabs size="s">
+            {tabs.map((tab) => (
+              <EuiTab
+                key={tab.id}
+                isSelected={innerTab === tab.id}
+                onClick={() => setInnerTab(tab.id)}
+                data-test-subj={`detectionEngineInnerTab-${tab.id}`}
+                append={
+                  tab.count ? (
+                    <EuiNotificationBadge color={tab.id === 'events' ? 'accent' : 'subdued'}>
+                      {tab.count}
+                    </EuiNotificationBadge>
+                  ) : undefined
+                }
+              >
+                {tab.label}
+              </EuiTab>
+            ))}
+          </EuiTabs>
+          <EuiSpacer size="s" />
+          {innerTab === 'events' && (
+            <EventsTable events={events} isLoading={isEventsLoading} onOpenEvent={setOpenEventId} />
+          )}
+          {innerTab === 'strategies' && <StrategiesTable overview={overview} actions={actions} />}
+          {innerTab === 'detections' && <DetectionsTable onOpenEvent={setOpenEventId} />}
+          {innerTab === 'activity' && <ActivityLog onOpenEvent={setOpenEventId} />}
+        </EuiFlexItem>
+        <EuiFlexItem grow={1} style={{ minWidth: 280 }}>
+          <ServicesPanel
             services={servicesData?.services ?? []}
-            events={events}
+            dependencies={servicesData?.dependencies ?? []}
             onOpenEvent={setOpenEventId}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>
-          <ScenarioPanel lab={overview.lab} actions={actions} />
-        </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <PipelineSummary run={overview.last_run} />
-      <EuiSpacer size="l" />
-      <EuiTabs size="m">
-        {tabs.map((tab) => (
-          <EuiTab
-            key={tab.id}
-            isSelected={innerTab === tab.id}
-            onClick={() => setInnerTab(tab.id)}
-            data-test-subj={`detectionEngineInnerTab-${tab.id}`}
-            append={
-              tab.count ? (
-                <EuiNotificationBadge color={tab.id === 'events' ? 'accent' : 'subdued'}>
-                  {tab.count}
-                </EuiNotificationBadge>
-              ) : undefined
-            }
-          >
-            {tab.label}
-          </EuiTab>
-        ))}
-      </EuiTabs>
-      <EuiSpacer size="m" />
-      {innerTab === 'events' && (
-        <EventsTable events={events} isLoading={isEventsLoading} onOpenEvent={setOpenEventId} />
-      )}
-      {innerTab === 'services' && <ServicesTable />}
-      {innerTab === 'strategies' && <StrategiesTable overview={overview} actions={actions} />}
-      {innerTab === 'detections' && <DetectionsTable onOpenEvent={setOpenEventId} />}
-      {innerTab === 'activity' && <ActivityLog onOpenEvent={setOpenEventId} />}
       {openEventId && (
         <EventFlyout
           eventId={openEventId}

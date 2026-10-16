@@ -6,7 +6,10 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type { ActivityEntry, ActivityStep } from '@kbn/significant-events-plugin/common';
+import type {
+  ActivityEntry,
+  ActivityStep,
+} from '@kbn/significant-events-detection-engine-plugin/common';
 import { useKibana } from './use_kibana';
 import { useFetchErrorToast } from './use_fetch_error_toast';
 import {
@@ -16,7 +19,7 @@ import {
 
 /** The engine activity log: what the engine did and why. */
 export function useDetectionEngineActivity({ step }: { step?: ActivityStep } = {}) {
-  const client = useKibana().dependencies.start.significantEvents.significantEventsRepositoryClient;
+  const client = useKibana().dependencies.start.significantEventsDetectionEngine.repositoryClient;
   const onError = useFetchErrorToast();
   return useQuery<{ activity: ActivityEntry[] }, Error>({
     queryKey: [...DETECTION_ENGINE_QUERY_KEY, 'activity', step],

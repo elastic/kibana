@@ -43,7 +43,7 @@ import {
   type DismissalReason,
   type EngineEvent,
   type EventMember,
-} from '@kbn/significant-events-plugin/common';
+} from '@kbn/significant-events-detection-engine-plugin/common';
 import React, { useState } from 'react';
 import { useDetectionEngineEvent } from '../../../../hooks/use_detection_engine_event';
 import type { IDetectionEngineActions } from '../../../../hooks/use_detection_engine_actions';
@@ -336,7 +336,7 @@ export function EventFlyout({ eventId, actions, onClose }: IEventFlyoutProps) {
                     }
                   ),
                   value: event.assessment
-                    ? event.assessment.agent === 'llm'
+                    ? event.assessment.agent === 'agent_builder'
                       ? event.assessment.connector_id ?? 'model'
                       : i18n.translate(
                           'xpack.significantEventsApp.detectionEngine.flyout.factHeuristic',

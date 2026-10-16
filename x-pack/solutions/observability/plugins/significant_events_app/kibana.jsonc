@@ -17,6 +17,7 @@
       "nightshiftSources",
       "share",
       "significantEvents",
+      "significantEventsDetectionEngine",
       "unifiedSearch",
     ],
     "optionalPlugins": ["agentBuilder", "cloud", "cps", "spaces"],

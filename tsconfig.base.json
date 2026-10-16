@@ -2627,6 +2627,8 @@
       "@kbn/siem-readiness/*": ["./x-pack/solutions/security/packages/siem-readiness/*"],
       "@kbn/significant-events-app-plugin": ["./x-pack/solutions/observability/plugins/significant_events_app"],
       "@kbn/significant-events-app-plugin/*": ["./x-pack/solutions/observability/plugins/significant_events_app/*"],
+      "@kbn/significant-events-detection-engine-plugin": ["./x-pack/solutions/observability/plugins/significant_events_detection_engine"],
+      "@kbn/significant-events-detection-engine-plugin/*": ["./x-pack/solutions/observability/plugins/significant_events_detection_engine/*"],
       "@kbn/significant-events-plugin": ["./x-pack/solutions/observability/plugins/significant_events"],
       "@kbn/significant-events-plugin/*": ["./x-pack/solutions/observability/plugins/significant_events/*"],
       "@kbn/significant-events-schema": ["./x-pack/platform/packages/shared/kbn-significant-events-schema"],

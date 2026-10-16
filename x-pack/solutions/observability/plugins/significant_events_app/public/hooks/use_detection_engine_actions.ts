@@ -9,10 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type {
   DismissalReason,
-  EngineConfig,
+  EngineConfigUpdate,
   EngineRunSummary,
-  LabIncidentKind,
-} from '@kbn/significant-events-plugin/common';
+} from '@kbn/significant-events-detection-engine-plugin/common';
 import { useKibana } from './use_kibana';
 import { getFormattedError } from '../util/errors';
 import { DETECTION_ENGINE_QUERY_KEY } from './detection_engine_query_keys';
@@ -23,11 +22,7 @@ export type DetectionEngineActionKey =
   | 'autoRun'
   | 'replay'
   | 'config'
-  | 'labSetup'
-  | 'labIncident'
-  | 'labStop'
-  | 'labReset'
-  | 'customerRule'
+  | 'reset'
   | 'dismiss'
   | 'close'
   | 'verify';
@@ -39,9 +34,6 @@ interface IActionRequest {
   describe?: (result: unknown) => string | undefined;
 }
 
-/** Index the lab writes to; the customer rule watches it. */
-const LAB_INDEX = 'logs-detectionlab-default';
-
 /** Contract of the page's actions, with the key of the one in flight. */
 export interface IDetectionEngineActions {
   pendingAction: DetectionEngineActionKey | undefined;
@@ -49,13 +41,9 @@ export interface IDetectionEngineActions {
   /** Turns the server-side schedule on or off; it keeps running with the page closed. */
   setAutoRun(enabled: boolean): Promise<unknown>;
   replay(minutes: number): Promise<unknown>;
-  updateConfig(config: Partial<EngineConfig>): Promise<unknown>;
-  setupLab(): Promise<unknown>;
-  startIncident(params: { kind: LabIncidentKind; service: string }): Promise<unknown>;
-  stopIncident(id?: string): Promise<unknown>;
-  resetLab(): Promise<unknown>;
-  /** Creates a real Kibana ES query rule, as a customer would, over the lab's logs. */
-  createCustomerRule(service: string): Promise<unknown>;
+  updateConfig(config: EngineConfigUpdate): Promise<unknown>;
+  /** Deletes what the engine produced in this space; settings, schedule and rules stay. */
+  resetEngine(): Promise<unknown>;
   dismissEvent(params: {
     eventId: string;
     reason: DismissalReason;
@@ -70,11 +58,14 @@ function describeRun(result: unknown): string {
   if (summary.skipped) {
     return summary.skipped;
   }
+  if (summary.error) {
+    return summary.error;
+  }
   return i18n.translate('xpack.significantEventsApp.detectionEngine.runToast', {
     defaultMessage:
-      'Evaluated {bucket}: {detections} detections, {calls} agent calls, {transitions} status changes, {open} open events.',
+      'Evaluated up to {bucket}: {detections} detections, {calls} agent calls, {transitions} status changes, {open} open events.',
     values: {
-      bucket: new Date(summary.bucket_start).toLocaleTimeString(),
+      bucket: summary.bucket_end ? new Date(summary.bucket_end).toLocaleTimeString() : '-',
       detections: summary.detections,
       calls: summary.agent.calls,
       transitions: summary.transitions.length,
@@ -86,10 +77,10 @@ function describeRun(result: unknown): string {
 /** The detection engine page's actions, each refreshing every engine query when done. */
 export function useDetectionEngineActions(): IDetectionEngineActions {
   const {
-    core: { http, notifications },
+    core: { notifications },
     dependencies: {
       start: {
-        significantEvents: { significantEventsRepositoryClient: client },
+        significantEventsDetectionEngine: { repositoryClient: client },
       },
     },
   } = useKibana();
@@ -176,96 +167,16 @@ export function useDetectionEngineActions(): IDetectionEngineActions {
           }),
       }),
 
-    setupLab: () =>
+    resetEngine: () =>
       act({
-        key: 'labSetup',
+        key: 'reset',
         request: () =>
-          client.fetch('POST /internal/significant_events/detection_engine/lab/_setup', {
+          client.fetch('POST /internal/significant_events/detection_engine/_reset', {
             signal: null,
           }),
         describe: () =>
-          i18n.translate('xpack.significantEventsApp.detectionEngine.labReadyToast', {
-            defaultMessage:
-              'Lab ready: three hours of logs, a source, its knowledge, and baselines from a replay.',
-          }),
-      }),
-
-    startIncident: (params) =>
-      act({
-        key: 'labIncident',
-        request: () =>
-          client.fetch('POST /internal/significant_events/detection_engine/lab/_incident', {
-            params: { body: params },
-            signal: null,
-          }),
-        describe: () =>
-          i18n.translate('xpack.significantEventsApp.detectionEngine.incidentToast', {
-            defaultMessage:
-              'Incident started. The engine sees it once the current one-minute bucket completes.',
-          }),
-      }),
-
-    stopIncident: (id) =>
-      act({
-        key: 'labStop',
-        request: () =>
-          client.fetch('POST /internal/significant_events/detection_engine/lab/_stop', {
-            params: { body: { id } },
-            signal: null,
-          }),
-      }),
-
-    resetLab: () =>
-      act({
-        key: 'labReset',
-        request: () =>
-          client.fetch('POST /internal/significant_events/detection_engine/lab/_reset', {
-            signal: null,
-          }),
-      }),
-
-    createCustomerRule: (service) =>
-      act({
-        key: 'customerRule',
-        request: () =>
-          http.post('/api/alerting/rule', {
-            body: JSON.stringify({
-              name: `[Lab] ${service} 5xx errors`,
-              rule_type_id: '.es-query',
-              consumer: 'observability',
-              schedule: { interval: '1m' },
-              tags: [`service:${service}`, 'detection-lab'],
-              actions: [],
-              params: {
-                searchType: 'esQuery',
-                index: [LAB_INDEX],
-                timeField: '@timestamp',
-                esQuery: JSON.stringify({
-                  query: {
-                    bool: {
-                      filter: [
-                        { term: { 'service.name': service } },
-                        { range: { 'http.response.status_code': { gte: 500 } } },
-                      ],
-                    },
-                  },
-                }),
-                threshold: [5],
-                thresholdComparator: '>',
-                timeWindowSize: 2,
-                timeWindowUnit: 'm',
-                size: 10,
-                aggType: 'count',
-                groupBy: 'all',
-                excludeHitsFromPreviousRun: false,
-              },
-            }),
-          }),
-        describe: () =>
-          i18n.translate('xpack.significantEventsApp.detectionEngine.customerRuleToast', {
-            defaultMessage:
-              'Created the Kibana rule "[Lab] {service} 5xx errors". It fires on its own schedule; the Customer alerts strategy reads it.',
-            values: { service },
+          i18n.translate('xpack.significantEventsApp.detectionEngine.resetToast', {
+            defaultMessage: 'Engine data deleted. The next run starts from fresh baselines.',
           }),
       }),
 

@@ -10,7 +10,7 @@ import type {
   DetectionOutcome,
   DetectionStrategyId,
   EngineDetection,
-} from '@kbn/significant-events-plugin/common';
+} from '@kbn/significant-events-detection-engine-plugin/common';
 import { useKibana } from './use_kibana';
 import { useFetchErrorToast } from './use_fetch_error_toast';
 import {
@@ -26,7 +26,7 @@ export function useDetectionEngineDetections({
   strategy?: DetectionStrategyId;
   outcome?: DetectionOutcome;
 }) {
-  const client = useKibana().dependencies.start.significantEvents.significantEventsRepositoryClient;
+  const client = useKibana().dependencies.start.significantEventsDetectionEngine.repositoryClient;
   const onError = useFetchErrorToast();
   return useQuery<{ detections: EngineDetection[] }, Error>({
     queryKey: [...DETECTION_ENGINE_QUERY_KEY, 'detections', strategy, outcome],

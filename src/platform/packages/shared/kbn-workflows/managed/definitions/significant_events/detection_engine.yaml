@@ -1,0 +1,30 @@
+version: "1"
+name: "Significant Events Detection Engine"
+description: "Runs the Significant Events detection engine every minute in this space. It evaluates the minutes that settled since the last run, so a missed minute is caught up on the next one. Turned on and off from the Detection engine tab."
+enabled: false
+tags:
+  - observability
+  - significant-events
+  - detection-engine
+  - scheduled
+settings:
+  # Below the engine's lease, so a run that hits the timeout never outlives it.
+  timeout: "5m"
+  concurrency:
+    key: "significant-events-detection-engine"
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: "1m"
+  - type: manual
+steps:
+  - name: run_engine
+    type: kibana.request
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/significant_events/detection_engine/_tick"
+      headers:
+        x-elastic-internal-origin: "kibana"
+      body: {}

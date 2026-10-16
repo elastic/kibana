@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type { EngineEvent } from '@kbn/significant-events-plugin/common';
+import type { EngineEvent } from '@kbn/significant-events-detection-engine-plugin/common';
 import { useKibana } from './use_kibana';
 import { useFetchErrorToast } from './use_fetch_error_toast';
 import {
@@ -16,7 +16,7 @@ import {
 
 /** Events, most recently updated first. */
 export function useDetectionEngineEvents() {
-  const client = useKibana().dependencies.start.significantEvents.significantEventsRepositoryClient;
+  const client = useKibana().dependencies.start.significantEventsDetectionEngine.repositoryClient;
   const onError = useFetchErrorToast();
   return useQuery<{ events: EngineEvent[] }, Error>({
     queryKey: [...DETECTION_ENGINE_QUERY_KEY, 'events'],

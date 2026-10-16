@@ -3691,6 +3691,9 @@ importers:
       '@kbn/significant-events-app-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/significant_events_app
+      '@kbn/significant-events-detection-engine-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/significant_events_detection_engine
       '@kbn/significant-events-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/significant_events
@@ -9653,6 +9656,8 @@ importers:
   x-pack/solutions/observability/plugins/significant_events: {}
 
   x-pack/solutions/observability/plugins/significant_events_app: {}
+
+  x-pack/solutions/observability/plugins/significant_events_detection_engine: {}
 
   x-pack/solutions/observability/plugins/slo: {}
 

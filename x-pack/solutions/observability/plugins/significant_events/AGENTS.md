@@ -37,9 +37,9 @@ into that package.
 - Managed workflow ids keep their `system-streams-ki-*` names.
 - Legacy handling that stays: the `sigevents:stream:<name>` rule ownership tag (`LEGACY_RULE_STREAM_TAG_PREFIX`) and the maintenance reset sweep.
 
-## Detection engine prototype
+## Detection engine
 
-`server/lib/detection_engine/` is a prototype of the new detection engine architecture (strategies, common detection format, baseline check, join proposals, bounded agent, state machine, verifier, learning). It runs next to the current pipeline and does not change it; its UI is the Detection engine tab in `significant_events_app`. See its `README.md` before changing it.
+The new detection engine lives in its own plugin, `significant_events_detection_engine`. It builds on this plugin through its server start contract (`SignificantEventsServerStart`: scoped knowledge indicator client, `RuleEventsClient`, access check, price catalog), so keep that contract stable. Its UI is the Detection engine tab in `significant_events_app`. Its strategy rules are tagged `detection_engine:*`, never `nightshift:source:*`, so this plugin's rule reconciliation leaves them alone.
 
 ## Keeping this file current
 

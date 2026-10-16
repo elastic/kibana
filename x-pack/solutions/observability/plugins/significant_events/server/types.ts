@@ -16,7 +16,8 @@ import type {
   PluginStartContract as ActionsPluginStart,
   RelayClientContract,
 } from '@kbn/actions-plugin/server';
-import type { CoreStart, Logger } from '@kbn/core/server';
+import type { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
   AgentBuilderSmlPluginSetup,
@@ -45,6 +46,9 @@ import type {
   NightshiftSourcesServerSetup,
   NightshiftSourcesServerStart,
 } from '@kbn/nightshift-sources-plugin/server';
+import type { PriceResult } from './lib/cost/price_service';
+import type { KnowledgeIndicatorClient } from './lib/knowledge_indicators/knowledge_indicator_client';
+import type { RuleEventsClient } from './lib/significant_events/events/rule_events_client';
 
 export interface SignificantEventsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
@@ -106,4 +110,34 @@ export interface SignificantEventsServer {
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
   /** Reads investigations (status of the ones a significant event lists). */
   agenticInvestigations?: AgenticInvestigationsPluginStart;
+}
+
+/**
+ * Significant Events services scoped to one request and its space, for plugins that build on
+ * the pipeline (the detection engine) without reaching into its internals.
+ */
+export interface SignificantEventsScopedServices {
+  /** Space of the request. Knowledge, rules and events are scoped to it. */
+  spaceId: string;
+  /** Throws when Significant Events is not available here (flag, license, tier, plugins). */
+  assertAccess(): Promise<void>;
+  /**
+   * Reads the customer's data as the request's user, across every CPS-linked project, the same
+   * way knowledge extraction and detection read it.
+   */
+  dataEsClient: ElasticsearchClient;
+  /** True when cross-project search is on, so rule queries must route to every project. */
+  cpsEnabled: boolean;
+  /** Knowledge indicators of the space; pass the source for writes that check its revision. */
+  getKnowledgeIndicatorClient(source?: NightshiftSource): Promise<KnowledgeIndicatorClient>;
+  /** Writes and reads significant events as Alerting v2 alerts in `.rule-events`. */
+  getRuleEventsClient(): Promise<RuleEventsClient>;
+}
+
+/** Server start contract of Significant Events. */
+export interface SignificantEventsServerStart {
+  /** Services scoped to the request's user and space. */
+  getScopedServices(params: { request: KibanaRequest }): Promise<SignificantEventsScopedServices>;
+  /** Elastic Inference Service list prices, cached; null when the catalog cannot be read. */
+  getPrices(): Promise<PriceResult | null>;
 }

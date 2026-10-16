@@ -1,0 +1,106 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  BaselineSummary,
+  DetectionStrategyId,
+  EngineAutoRunState,
+  EngineConfig,
+  EngineCostLedger,
+  EngineProgress,
+  EngineRulesState,
+  EngineRunSummary,
+} from '../../common';
+
+/**
+ * One evaluation of one series in one bucket, as a strategy reports it. Strategies report every
+ * series they evaluate, breaching or not, because the baseline check needs the non-breaching
+ * ones too.
+ */
+export interface StrategyObservation {
+  fingerprint: string;
+  service: string;
+  bucket_start: number;
+  value: number;
+  unit: string;
+  /** The strategy's own trigger. Only these become detections. */
+  looks_off: boolean;
+  title: string;
+  description: string;
+  importance: number;
+  evidence_esql: string;
+  source_id?: string;
+  /** The Alerting v2 rule whose output this evaluation came from. */
+  rule_id?: string;
+  /** When the problem started, if the strategy knows better than the bucket start. */
+  since?: string;
+  /**
+   * Recorded for other checks to read, never a detection on its own; the traffic series that
+   * the silence check compares with is one.
+   */
+  internal?: boolean;
+  /**
+   * Set on sparse series, which only report minutes above zero. Names the internal series that
+   * proves the strategy looked in a minute; the baseline counts those minutes as zeros.
+   */
+  heartbeat?: string;
+}
+
+export interface TaggedObservation extends StrategyObservation {
+  strategy: DetectionStrategyId;
+}
+
+/** A detection that passed the baseline check but waited for agent budget. */
+export interface PendingDetection {
+  observation: TaggedObservation;
+  baseline: BaselineSummary;
+  queued_at: string;
+  attempts: number;
+}
+
+/** An Alerting v2 rule the engine created and owns. */
+export interface OwnedRule {
+  rule_id: string;
+  strategy: DetectionStrategyId;
+  source_id: string;
+  name: string;
+  /** Copied from the rule definition; see `DesiredRule.meta`. */
+  meta?: Record<string, string>;
+}
+
+/** The rules state the engine keeps: the public summary plus the rules it owns. */
+export interface EngineRulesRecord extends EngineRulesState {
+  owned: OwnedRule[];
+}
+
+/** Who holds the space's run lease, and until when. */
+export interface RunLease {
+  owner: string;
+  trigger: EngineRunSummary['trigger'];
+  acquired_at: string;
+  expires_at: string;
+}
+
+/** Every kind of state document, with its shape. */
+export interface StateDocs {
+  config: EngineConfig;
+  progress: EngineProgress;
+  last_run: EngineRunSummary;
+  memory: { fingerprint: string; notes: string[] };
+  cost: EngineCostLedger;
+  auto_run: EngineAutoRunState;
+  rules: EngineRulesRecord;
+  pending: { detections: PendingDetection[] };
+  lease: RunLease;
+}
+export type StateKind = keyof StateDocs;
+
+/** Optimistic concurrency token of a stored document. */
+export interface DocVersion {
+  seq_no: number;
+  primary_term: number;
+}

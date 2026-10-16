@@ -18,7 +18,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EngineEvent } from '@kbn/significant-events-plugin/common';
+import type { EngineEvent } from '@kbn/significant-events-detection-engine-plugin/common';
 import React from 'react';
 import { SIGNIFICANT_EVENT_SEVERITY } from '../severity_badge/severity_badge';
 import { formatAgo } from './format';
@@ -159,7 +159,7 @@ export function EventsTable({ events, isLoading, onOpenEvent }: IEventsTableProp
           <p>
             {i18n.translate('xpack.significantEventsApp.detectionEngine.events.empty', {
               defaultMessage:
-                'That is the point on a healthy system. Start a scenario in Break something, keep Auto-run on, and an event appears within about a minute.',
+                'That is the point on a healthy system. With Auto-run on, a problem in an enabled source shows up here within a few minutes.',
             })}
           </p>
         }

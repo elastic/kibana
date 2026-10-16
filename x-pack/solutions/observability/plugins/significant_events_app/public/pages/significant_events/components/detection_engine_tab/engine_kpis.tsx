@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiStat, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EngineOverviewResponse } from '@kbn/significant-events-plugin/common';
+import type { EngineOverviewResponse } from '@kbn/significant-events-detection-engine-plugin/common';
 import React from 'react';
 import { formatTokens, formatUsd } from './format';
 
@@ -15,7 +15,7 @@ interface IEngineKpisProps {
   overview: EngineOverviewResponse;
 }
 
-/** The handful of numbers a demo audience should keep an eye on. */
+/** The handful of numbers worth keeping an eye on, in one compact row. */
 export function EngineKpis({ overview }: IEngineKpisProps) {
   const { counts, cost } = overview;
   const { ledger } = cost;
@@ -73,15 +73,15 @@ export function EngineKpis({ overview }: IEngineKpisProps) {
   ];
 
   return (
-    <EuiFlexGroup gutterSize="m" responsive={false} wrap data-test-subj="detectionEngineKpis">
+    <EuiFlexGroup gutterSize="s" responsive={false} wrap data-test-subj="detectionEngineKpis">
       {tiles.map((tile) => (
-        <EuiFlexItem key={tile.id} style={{ minWidth: 160 }}>
-          <EuiPanel hasBorder paddingSize="m">
+        <EuiFlexItem key={tile.id} style={{ minWidth: 140 }}>
+          <EuiPanel hasBorder paddingSize="s">
             <EuiStat
               title={tile.title}
               description={tile.description}
               titleColor={tile.color}
-              titleSize="m"
+              titleSize="s"
               reverse
               data-test-subj={`detectionEngineKpi-${tile.id}`}
             />
@@ -89,10 +89,10 @@ export function EngineKpis({ overview }: IEngineKpisProps) {
         </EuiFlexItem>
       ))}
       <EuiFlexItem style={{ minWidth: 220 }}>
-        <EuiPanel hasBorder paddingSize="m">
+        <EuiPanel hasBorder paddingSize="s">
           <EuiStat
             title={formatUsd(ledger.total_usd)}
-            titleSize="m"
+            titleSize="s"
             reverse
             data-test-subj="detectionEngineKpi-cost"
             description={

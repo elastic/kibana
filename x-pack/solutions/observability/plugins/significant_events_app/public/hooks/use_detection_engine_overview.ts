@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type { EngineOverviewResponse } from '@kbn/significant-events-plugin/common';
+import type { EngineOverviewResponse } from '@kbn/significant-events-detection-engine-plugin/common';
 import { useKibana } from './use_kibana';
 import { useFetchErrorToast } from './use_fetch_error_toast';
 import {
@@ -14,9 +14,9 @@ import {
   DETECTION_ENGINE_REFETCH_INTERVAL_MS,
 } from './detection_engine_query_keys';
 
-/** Engine settings, strategies with scorecards, proposals, last run and lab state. */
+/** Engine settings, strategies with scorecards, proposals, last run and cost. */
 export function useDetectionEngineOverview() {
-  const client = useKibana().dependencies.start.significantEvents.significantEventsRepositoryClient;
+  const client = useKibana().dependencies.start.significantEventsDetectionEngine.repositoryClient;
   const onError = useFetchErrorToast();
   return useQuery<EngineOverviewResponse, Error>({
     queryKey: [...DETECTION_ENGINE_QUERY_KEY, 'overview'],

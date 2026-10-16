@@ -12,9 +12,8 @@ import type {
   DetectionStrategyId,
   DismissalReason,
   EngineEventStatus,
-  LabIncidentKind,
   StrategyMode,
-} from '@kbn/significant-events-plugin/common';
+} from '@kbn/significant-events-detection-engine-plugin/common';
 
 export const STRATEGY_LABELS: Record<DetectionStrategyId, string> = {
   ki_rules: i18n.translate('xpack.significantEventsApp.detectionEngine.strategy.kiRules', {
@@ -110,7 +109,10 @@ export const OUTCOME_LABELS: Record<DetectionOutcome, string> = {
     defaultMessage: 'Refuted by evidence',
   }),
   deferred: i18n.translate('xpack.significantEventsApp.detectionEngine.outcome.deferred', {
-    defaultMessage: 'Deferred: agent budget',
+    defaultMessage: 'Deferred: retried next run',
+  }),
+  conflict: i18n.translate('xpack.significantEventsApp.detectionEngine.outcome.conflict', {
+    defaultMessage: 'Changed by someone else',
   }),
 };
 
@@ -126,11 +128,15 @@ export const OUTCOME_COLORS: Record<DetectionOutcome, string> = {
   capped: 'warning',
   refuted: 'success',
   deferred: 'warning',
+  conflict: 'warning',
 };
 
 export const STEP_LABELS: Record<ActivityStep, string> = {
   strategy: i18n.translate('xpack.significantEventsApp.detectionEngine.step.strategy', {
     defaultMessage: 'Strategy',
+  }),
+  rules: i18n.translate('xpack.significantEventsApp.detectionEngine.step.rules', {
+    defaultMessage: 'Alerting v2 rules',
   }),
   baseline: i18n.translate('xpack.significantEventsApp.detectionEngine.step.baseline', {
     defaultMessage: 'Baseline check',
@@ -165,9 +171,6 @@ export const STEP_LABELS: Record<ActivityStep, string> = {
   operator: i18n.translate('xpack.significantEventsApp.detectionEngine.step.operator', {
     defaultMessage: 'Operator',
   }),
-  lab: i18n.translate('xpack.significantEventsApp.detectionEngine.step.lab', {
-    defaultMessage: 'Lab',
-  }),
   run: i18n.translate('xpack.significantEventsApp.detectionEngine.step.run', {
     defaultMessage: 'Run',
   }),
@@ -179,6 +182,7 @@ export type StepTone = 'customer' | 'code' | 'ai' | 'event' | 'neutral';
 /** Code-owned steps are green, the AI step yellow, customer-controlled blue, as in the design. */
 export const STEP_TONES: Record<ActivityStep, StepTone> = {
   strategy: 'customer',
+  rules: 'customer',
   baseline: 'code',
   identity: 'code',
   join: 'code',
@@ -190,104 +194,11 @@ export const STEP_TONES: Record<ActivityStep, StepTone> = {
   publish: 'neutral',
   learning: 'ai',
   operator: 'customer',
-  lab: 'neutral',
   run: 'neutral',
 };
 
 /** Steps that repeat every minute; hidden from the activity log unless asked for. */
 export const ROUTINE_ACTIONS = new Set(['evaluated', 'finished', 'replayed', 'note']);
-
-export interface DemoScenario {
-  id: string;
-  kind: LabIncidentKind;
-  service: string;
-  icon: string;
-  title: string;
-  expectation: string;
-}
-
-/** One-click scenarios for demos, each with what the audience should expect to see. */
-export const DEMO_SCENARIOS: DemoScenario[] = [
-  {
-    id: 'payments_outage',
-    kind: 'error_spike',
-    service: 'payments',
-    icon: 'error',
-    title: i18n.translate('xpack.significantEventsApp.detectionEngine.scenario.paymentsTitle', {
-      defaultMessage: 'Payments outage',
-    }),
-    expectation: i18n.translate(
-      'xpack.significantEventsApp.detectionEngine.scenario.paymentsExpectation',
-      {
-        defaultMessage:
-          'Payments fails and checkout fails with it. Expect one event holding both, joined by code and confirmed by the agent.',
-      }
-    ),
-  },
-  {
-    id: 'slow_frontend',
-    kind: 'latency',
-    service: 'frontend',
-    icon: 'clock',
-    title: i18n.translate('xpack.significantEventsApp.detectionEngine.scenario.latencyTitle', {
-      defaultMessage: 'Slow frontend',
-    }),
-    expectation: i18n.translate(
-      'xpack.significantEventsApp.detectionEngine.scenario.latencyExpectation',
-      {
-        defaultMessage:
-          'No knowledge indicator describes slowness. The health checks catch it from p95 latency.',
-      }
-    ),
-  },
-  {
-    id: 'silent_inventory',
-    kind: 'silence',
-    service: 'inventory',
-    icon: 'eyeClosed',
-    title: i18n.translate('xpack.significantEventsApp.detectionEngine.scenario.silenceTitle', {
-      defaultMessage: 'Inventory goes silent',
-    }),
-    expectation: i18n.translate(
-      'xpack.significantEventsApp.detectionEngine.scenario.silenceExpectation',
-      {
-        defaultMessage:
-          'A service that stops sending data is found from what is missing. Checkout errors join the same event.',
-      }
-    ),
-  },
-  {
-    id: 'new_error',
-    kind: 'new_error',
-    service: 'checkout',
-    icon: 'sparkles',
-    title: i18n.translate('xpack.significantEventsApp.detectionEngine.scenario.newErrorTitle', {
-      defaultMessage: 'Brand-new error in checkout',
-    }),
-    expectation: i18n.translate(
-      'xpack.significantEventsApp.detectionEngine.scenario.newErrorExpectation',
-      {
-        defaultMessage:
-          'An error nobody has seen before. The error ratio raises an event; the new-pattern strategy, still on trial, only records it.',
-      }
-    ),
-  },
-];
-
-export const INCIDENT_LABELS: Record<LabIncidentKind, string> = {
-  error_spike: i18n.translate('xpack.significantEventsApp.detectionEngine.incident.errorSpike', {
-    defaultMessage: 'Error spike',
-  }),
-  latency: i18n.translate('xpack.significantEventsApp.detectionEngine.incident.latency', {
-    defaultMessage: 'Slow responses',
-  }),
-  silence: i18n.translate('xpack.significantEventsApp.detectionEngine.incident.silence', {
-    defaultMessage: 'Goes silent',
-  }),
-  new_error: i18n.translate('xpack.significantEventsApp.detectionEngine.incident.newError', {
-    defaultMessage: 'New error message',
-  }),
-};
 
 export const DISMISSAL_LABELS: Record<DismissalReason, string> = {
   false_positive: i18n.translate(

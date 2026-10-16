@@ -28,7 +28,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EngineOverviewResponse } from '@kbn/significant-events-plugin/common';
+import type { EngineOverviewResponse } from '@kbn/significant-events-detection-engine-plugin/common';
 import React, { useState } from 'react';
 import { useGenAIConnectors } from '../../../../hooks/use_genai_connectors';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -41,6 +41,8 @@ const REPLAY_MINUTES = 60;
 /** The schedule runs every minute; this long without a run means it has stalled. */
 const STALLED_AFTER_MS = 3 * 60_000;
 const SCHEDULE_MS = 60_000;
+/** Rules settle a few minutes late by design; past this the engine is really behind. */
+const LAG_WARNING_MINUTES = 5;
 const WORKFLOWS_APP_ID = 'workflows';
 
 interface IEngineHeaderProps {
@@ -61,15 +63,18 @@ export function EngineHeader({ overview, actions }: IEngineHeaderProps) {
   const { config, cost, auto_run: autoRun, last_run: lastRun } = overview;
 
   const agentValue =
-    config.agent.kind === 'llm' && config.agent.connector_id
+    config.agent.kind === 'agent_builder' && config.agent.connector_id
       ? config.agent.connector_id
       : HEURISTIC_VALUE;
-  const lastEnd = overview.last_evaluated_bucket_end;
-  // Since the last run that evaluated anything, or since auto-run was turned on.
+  const { progress } = overview;
+  const lastEnd = Object.values(progress.watermarks).sort().pop();
+  // Since the last run, even one with nothing to evaluate, or since auto-run was turned on.
   const lastActivity = Math.max(
+    progress.last_run_at ? Date.parse(progress.last_run_at) : 0,
     lastRun ? Date.parse(lastRun.finished_at) : 0,
     autoRun.changed_at ? Date.parse(autoRun.changed_at) : 0
   );
+  const lagMinutes = Math.round((overview.lag_ms ?? 0) / 60_000);
   const secondsToNext = Math.max(0, Math.ceil((lastActivity + SCHEDULE_MS - now) / 1000));
   const isStalled = autoRun.enabled && now - lastActivity > STALLED_AFTER_MS;
   const workflowHref = autoRun.workflow_id
@@ -78,6 +83,16 @@ export function EngineHeader({ overview, actions }: IEngineHeaderProps) {
 
   const status = autoRun.error
     ? autoRun.error
+    : progress.consecutive_failures > 0
+    ? i18n.translate('xpack.significantEventsApp.detectionEngine.header.failing', {
+        defaultMessage: 'The last {count} run(s) failed: {error}',
+        values: { count: progress.consecutive_failures, error: progress.last_error ?? '' },
+      })
+    : autoRun.enabled && lagMinutes >= LAG_WARNING_MINUTES
+    ? i18n.translate('xpack.significantEventsApp.detectionEngine.header.behind', {
+        defaultMessage: 'Running on the server · catching up, {minutes} min behind',
+        values: { minutes: lagMinutes },
+      })
     : autoRun.enabled
     ? isStalled
       ? i18n.translate('xpack.significantEventsApp.detectionEngine.header.stalled', {
@@ -100,13 +115,16 @@ export function EngineHeader({ overview, actions }: IEngineHeaderProps) {
     : i18n.translate('xpack.significantEventsApp.detectionEngine.header.notStarted', {
         defaultMessage: 'Not started',
       });
-  const statusColor = autoRun.error
-    ? 'danger'
-    : autoRun.enabled
-    ? isStalled
+  const statusColor =
+    autoRun.error || progress.consecutive_failures > 0
+      ? 'danger'
+      : autoRun.enabled && lagMinutes >= LAG_WARNING_MINUTES
       ? 'warning'
-      : 'success'
-    : 'subdued';
+      : autoRun.enabled
+      ? isStalled
+        ? 'warning'
+        : 'success'
+      : 'subdued';
 
   return (
     <div data-test-subj="detectionEngineHeader">
@@ -125,7 +143,7 @@ export function EngineHeader({ overview, actions }: IEngineHeaderProps) {
                   'xpack.significantEventsApp.detectionEngine.prototypeTooltip',
                   {
                     defaultMessage:
-                      'A working playground of the new detection engine architecture. It runs next to the current pipeline and does not change it.',
+                      'A working playground of the new detection engine architecture. Strategies watch the enabled sources and report what looks off; code decides what it can compute, and one AI step checks the evidence and explains. It runs next to the current pipeline and does not change it.',
                   }
                 )}
                 size="s"
@@ -241,7 +259,7 @@ export function EngineHeader({ overview, actions }: IEngineHeaderProps) {
                           output: formatUsd(cost.current_price.output),
                         },
                       })
-                    : config.agent.kind === 'llm'
+                    : config.agent.kind === 'agent_builder'
                     ? i18n.translate('xpack.significantEventsApp.detectionEngine.agentNoPrice', {
                         defaultMessage:
                           'No list price is known for this model; its tokens are counted but not priced.',
@@ -255,6 +273,7 @@ export function EngineHeader({ overview, actions }: IEngineHeaderProps) {
                 <EuiSelect
                   data-test-subj="detectionEngineAgentSelect"
                   isLoading={connectorsLoading}
+                  disabled={!overview.agent_builder_available}
                   value={agentValue}
                   options={[
                     {
@@ -274,7 +293,7 @@ export function EngineHeader({ overview, actions }: IEngineHeaderProps) {
                       agent:
                         event.target.value === HEURISTIC_VALUE
                           ? { kind: 'heuristic' }
-                          : { kind: 'llm', connector_id: event.target.value },
+                          : { kind: 'agent_builder', connector_id: event.target.value },
                     })
                   }
                 />
@@ -322,54 +341,46 @@ export function EngineHeader({ overview, actions }: IEngineHeaderProps) {
                 color="danger"
                 iconType="trash"
                 flush="left"
-                data-test-subj="detectionEngineLabResetButton"
-                isLoading={actions.pendingAction === 'labReset'}
+                data-test-subj="detectionEngineResetButton"
+                isLoading={actions.pendingAction === 'reset'}
                 onClick={() => {
                   setIsSettingsOpen(false);
                   setIsResetOpen(true);
                 }}
               >
-                {i18n.translate('xpack.significantEventsApp.detectionEngine.lab.reset', {
-                  defaultMessage: 'Reset lab and engine data',
+                {i18n.translate('xpack.significantEventsApp.detectionEngine.reset', {
+                  defaultMessage: 'Reset engine data',
                 })}
               </EuiButtonEmpty>
             </div>
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.significantEventsApp.detectionEngine.description', {
-            defaultMessage:
-              'Several detection strategies watch the system and report what looks off in one shape. Code decides what it can compute; one AI step checks the evidence and explains. The result is a few well-explained significant events.',
-          })}
-        </p>
-      </EuiText>
       {isResetOpen && (
         <EuiConfirmModal
           aria-labelledby={resetTitleId}
           titleProps={{ id: resetTitleId }}
-          title={i18n.translate('xpack.significantEventsApp.detectionEngine.lab.resetTitle', {
-            defaultMessage: 'Reset the lab?',
+          title={i18n.translate('xpack.significantEventsApp.detectionEngine.resetTitle', {
+            defaultMessage: 'Reset engine data?',
           })}
           onCancel={() => setIsResetOpen(false)}
           onConfirm={() => {
             setIsResetOpen(false);
-            actions.resetLab();
+            actions.resetEngine();
           }}
           cancelButtonText={i18n.translate(
-            'xpack.significantEventsApp.detectionEngine.lab.resetCancel',
+            'xpack.significantEventsApp.detectionEngine.resetCancel',
             { defaultMessage: 'Cancel' }
           )}
           confirmButtonText={i18n.translate(
-            'xpack.significantEventsApp.detectionEngine.lab.resetConfirm',
+            'xpack.significantEventsApp.detectionEngine.resetConfirm',
             { defaultMessage: 'Reset' }
           )}
           buttonColor="danger"
         >
-          {i18n.translate('xpack.significantEventsApp.detectionEngine.lab.resetBody', {
+          {i18n.translate('xpack.significantEventsApp.detectionEngine.resetBody', {
             defaultMessage:
-              'Deletes the lab logs and every detection engine document in this space: observations, detections, events, activity, settings and the cost counter. The lab source and its KIs stay, and events already published to Alerting v2 stay there.',
+              'Deletes what the engine produced in this space: observations, detections, events, activity, runs and notes kept from dismissals, so baselines start again. Settings, Auto-run, the rules it owns and the cost counter stay, and events already published to Alerting v2 stay there.',
           })}
         </EuiConfirmModal>
       )}

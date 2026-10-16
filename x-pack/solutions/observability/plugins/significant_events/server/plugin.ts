@@ -75,11 +75,12 @@ import type {
   IScheduleSourceOnboardingOptions,
   RouteHandlerScopedClients,
 } from './routes/types';
-import { createPriceService } from './lib/cost/price_service';
+import { createPriceService, type PriceService } from './lib/cost/price_service';
 import type {
   SignificantEventsPluginSetupDependencies,
   SignificantEventsPluginStartDependencies,
   SignificantEventsServer,
+  SignificantEventsServerStart,
 } from './types';
 import {
   type KnowledgeIndicatorClient,
@@ -127,7 +128,10 @@ import {
 } from './agent_builder/agents/ki_query_generation';
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
-import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
+import {
+  assertSignificantEventsAccess,
+  isSignificantEventsAvailable,
+} from './routes/utils/assert_significant_events_access';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 import { WorkflowExecutionService } from './lib/workflows/workflow_execution_service';
 import { createSourceChangeListener } from './routes/internal/knowledge_indicators/reconcile_source_catalog';
@@ -140,7 +144,7 @@ export class SignificantEventsPlugin
   implements
     Plugin<
       void,
-      void,
+      SignificantEventsServerStart,
       SignificantEventsPluginSetupDependencies,
       SignificantEventsPluginStartDependencies
     >
@@ -156,6 +160,8 @@ export class SignificantEventsPlugin
   private managedWorkflowsInstaller?: ManagedWorkflowsInstaller;
   private removeLegacyWorkflows?: () => Promise<void>;
   private maintenanceService?: SignificantEventsMaintenanceService;
+  private priceService?: PriceService;
+  private isCpsEnabled: () => boolean = () => false;
 
   constructor(context: PluginInitializerContext) {
     this.isDev = context.env.mode.dev;
@@ -198,6 +204,7 @@ export class SignificantEventsPlugin
 
     const significantEventsServices = createSignificantEventsServices();
     const knowledgeIndicatorService = new KnowledgeIndicatorService(core, this.logger);
+    this.isCpsEnabled = () => plugins.cps?.getCpsEnabled() ?? false;
     this.getScopedClients = async ({
       request,
     }: {
@@ -562,6 +569,7 @@ export class SignificantEventsPlugin
       maxScopedRows: 10_000,
       baseUrl: plugins.cloud?.baseUrl ?? 'https://cloud.elastic.co',
     });
+    this.priceService = priceService;
 
     registerRoutes({
       repository: significantEventsRouteRepository,
@@ -585,7 +593,10 @@ export class SignificantEventsPlugin
     });
   }
 
-  public start(core: CoreStart, plugins: SignificantEventsPluginStartDependencies): void {
+  public start(
+    core: CoreStart,
+    plugins: SignificantEventsPluginStartDependencies
+  ): SignificantEventsServerStart {
     if (this.server) {
       this.server.core = core;
       this.server.isServerless = this.server.cloud?.isServerlessEnabled ?? false;
@@ -782,6 +793,34 @@ export class SignificantEventsPlugin
           this.logger.error(`Failed to register significant events skills: ${err.message}`);
         });
     }
+
+    return this.createStartContract();
+  }
+
+  /**
+   * The narrow surface other plugins build on. It reuses the per-request clients the routes use,
+   * so a consumer gets the same space scoping, CPS routing and access checks.
+   */
+  private createStartContract(): SignificantEventsServerStart {
+    return {
+      getScopedServices: async ({ request }) => {
+        const server = this.server;
+        if (!this.getScopedClients || !server?.core) {
+          throw new Error('Significant Events start services are unavailable');
+        }
+        const clients = await this.getScopedClients({ request });
+        return {
+          spaceId: clients.space,
+          assertAccess: () =>
+            assertSignificantEventsAccess({ server, licensing: clients.licensing }),
+          dataEsClient: clients.streamDataEsClient,
+          cpsEnabled: this.isCpsEnabled(),
+          getKnowledgeIndicatorClient: (source) => clients.getKnowledgeIndicatorClient(source),
+          getRuleEventsClient: () => clients.getEventSearchClient(),
+        };
+      },
+      getPrices: async () => (this.priceService ? this.priceService.getPrices() : null),
+    };
   }
 
   private async ensureSignificantEventsInstalled(

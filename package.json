@@ -1255,6 +1255,7 @@
     "@kbn/sidebar-examples-plugin": "workspace:*",
     "@kbn/siem-readiness": "workspace:*",
     "@kbn/significant-events-app-plugin": "workspace:*",
+    "@kbn/significant-events-detection-engine-plugin": "workspace:*",
     "@kbn/significant-events-plugin": "workspace:*",
     "@kbn/significant-events-schema": "workspace:*",
     "@kbn/slo-plugin": "workspace:*",

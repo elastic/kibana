@@ -21,7 +21,7 @@ import {
   STRATEGY_MODES,
   type EngineOverviewResponse,
   type StrategyMode,
-} from '@kbn/significant-events-plugin/common';
+} from '@kbn/significant-events-detection-engine-plugin/common';
 import React from 'react';
 import type { IDetectionEngineActions } from '../../../../hooks/use_detection_engine_actions';
 import { MODE_LABELS, STRATEGY_ICONS } from './labels';

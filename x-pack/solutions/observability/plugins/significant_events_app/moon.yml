@@ -51,6 +51,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/scout-oblt'
   - '@kbn/significant-events-plugin'
+  - '@kbn/significant-events-detection-engine-plugin'
   - '@kbn/significant-events-schema'
   - '@kbn/spaces-plugin'
   - '@kbn/stack-connectors-plugin'

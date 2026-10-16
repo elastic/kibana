@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type { ServiceSummary } from '@kbn/significant-events-plugin/common';
+import type { EngineServicesResponse } from '@kbn/significant-events-detection-engine-plugin/common';
 import { useKibana } from './use_kibana';
 import { useFetchErrorToast } from './use_fetch_error_toast';
 import {
@@ -14,11 +14,11 @@ import {
   DETECTION_ENGINE_REFETCH_INTERVAL_MS,
 } from './detection_engine_query_keys';
 
-/** What the engine watches and found, by service. */
+/** What the engine watches and found, by service, with who calls whom. */
 export function useDetectionEngineServices() {
-  const client = useKibana().dependencies.start.significantEvents.significantEventsRepositoryClient;
+  const client = useKibana().dependencies.start.significantEventsDetectionEngine.repositoryClient;
   const onError = useFetchErrorToast();
-  return useQuery<{ services: ServiceSummary[] }, Error>({
+  return useQuery<EngineServicesResponse, Error>({
     queryKey: [...DETECTION_ENGINE_QUERY_KEY, 'services'],
     queryFn: ({ signal }) =>
       client.fetch('GET /internal/significant_events/detection_engine/services', {

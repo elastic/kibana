@@ -15,7 +15,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ActivityEntry, ActivityStep } from '@kbn/significant-events-plugin/common';
+import type {
+  ActivityEntry,
+  ActivityStep,
+} from '@kbn/significant-events-detection-engine-plugin/common';
 import React, { useState } from 'react';
 import { useDetectionEngineActivity } from '../../../../hooks/use_detection_engine_activity';
 import { ROUTINE_ACTIONS, STEP_LABELS, STEP_TONES } from './labels';
@@ -27,7 +30,7 @@ const GROUP_STEPS: Record<Exclude<ActivityGroup, 'all'>, ActivityStep[]> = {
   decisions: ['strategy', 'baseline', 'identity', 'join', 'state', 'cap', 'trial'],
   ai: ['agent', 'learning'],
   checks: ['verifier', 'publish'],
-  people: ['operator', 'lab'],
+  people: ['operator'],
 };
 
 const GROUP_OPTIONS: Array<{ id: ActivityGroup; label: string }> = [
@@ -58,7 +61,7 @@ const GROUP_OPTIONS: Array<{ id: ActivityGroup; label: string }> = [
   {
     id: 'people',
     label: i18n.translate('xpack.significantEventsApp.detectionEngine.activity.people', {
-      defaultMessage: 'People and lab',
+      defaultMessage: 'People',
     }),
   },
 ];
@@ -125,7 +128,8 @@ export function ActivityLog({ onOpenEvent }: IActivityLogProps) {
         </EuiText>
       )}
       {entries.map((entry, index) => {
-        const tone = colors[STEP_TONES[entry.step]];
+        // Entries written by the removed demo lab are still stored for up to 30 days.
+        const tone = colors[STEP_TONES[entry.step] ?? 'neutral'];
         return (
           <EuiFlexGroup
             key={`${entry['@timestamp']}-${index}`}
@@ -147,7 +151,7 @@ export function ActivityLog({ onOpenEvent }: IActivityLogProps) {
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ width: 110 }}>
               <EuiText size="xs">
-                <strong>{STEP_LABELS[entry.step]}</strong>
+                <strong>{STEP_LABELS[entry.step] ?? entry.step}</strong>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>

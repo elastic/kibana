@@ -15,7 +15,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DetectionOutcome, EngineRunSummary } from '@kbn/significant-events-plugin/common';
+import type {
+  DetectionOutcome,
+  EngineRunSummary,
+} from '@kbn/significant-events-detection-engine-plugin/common';
 import React from 'react';
 import { formatTokens, formatUsd } from './format';
 import { OUTCOME_LABELS, STATUS_LABELS, STRATEGY_LABELS, type StepTone } from './labels';
@@ -54,13 +57,15 @@ function Stage({ testId, icon, title, owner, tone, value, children }: IStageProp
               <h4>{title}</h4>
             </EuiTitle>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <p>{value}</p>
+            </EuiTitle>
+          </EuiFlexItem>
         </EuiFlexGroup>
         <EuiText size="xs" color="subdued">
           {owner}
         </EuiText>
-        <EuiTitle size="m">
-          <p>{value}</p>
-        </EuiTitle>
         <EuiText size="xs">{children}</EuiText>
       </EuiPanel>
     </EuiFlexItem>
@@ -144,11 +149,11 @@ interface IPipelineSummaryProps {
 export function PipelineSummary({ run }: IPipelineSummaryProps) {
   if (!run) {
     return (
-      <EuiPanel hasBorder data-test-subj="detectionEnginePipelineEmpty">
+      <EuiPanel hasBorder paddingSize="s" data-test-subj="detectionEnginePipelineEmpty">
         <EuiText size="s" color="subdued">
           {i18n.translate('xpack.significantEventsApp.detectionEngine.pipeline.empty', {
             defaultMessage:
-              'Nothing evaluated yet. Set up the demo system, then press Run now or turn on Auto-run.',
+              'Nothing evaluated yet. Enable a source, then press Run now or turn on Auto-run.',
           })}
         </EuiText>
       </EuiPanel>
@@ -166,16 +171,16 @@ export function PipelineSummary({ run }: IPipelineSummaryProps) {
   const changed = run.transitions.filter((transition) => transition.from !== 'none');
 
   return (
-    <EuiPanel hasBorder data-test-subj="detectionEnginePipeline">
+    <EuiPanel hasBorder paddingSize="s" data-test-subj="detectionEnginePipeline">
       <EuiFlexGroup alignItems="center" responsive={false} wrap>
         <EuiFlexItem>
-          <EuiTitle size="xs">
+          <EuiTitle size="xxs">
             <h3>
               {i18n.translate('xpack.significantEventsApp.detectionEngine.pipeline.title', {
-                defaultMessage: 'How the last minute was handled ({from} - {to})',
+                defaultMessage: 'How the last run was handled ({from} - {to})',
                 values: {
-                  from: new Date(run.bucket_start).toLocaleTimeString(),
-                  to: new Date(run.bucket_end).toLocaleTimeString(),
+                  from: new Date(run.bucket_start ?? run.started_at).toLocaleTimeString(),
+                  to: new Date(run.bucket_end ?? run.finished_at).toLocaleTimeString(),
                 },
               })}
             </h3>
@@ -185,7 +190,7 @@ export function PipelineSummary({ run }: IPipelineSummaryProps) {
           <Legend />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup gutterSize="xs" responsive={false} style={{ marginTop: 8 }}>
+      <EuiFlexGroup gutterSize="xs" responsive={false} style={{ marginTop: 4 }}>
         <Stage
           testId="detectionEngineStageStrategies"
           icon="eye"
@@ -274,11 +279,9 @@ export function PipelineSummary({ run }: IPipelineSummaryProps) {
           )}
           value={identityCount}
         >
-          {IDENTITY_OUTCOMES.filter((outcome) => run.outcomes[outcome]).map((outcome) => (
-            <div key={outcome}>
-              {OUTCOME_LABELS[outcome]}: <strong>{run.outcomes[outcome]}</strong>
-            </div>
-          ))}
+          {IDENTITY_OUTCOMES.filter((outcome) => run.outcomes[outcome])
+            .map((outcome) => `${OUTCOME_LABELS[outcome]}: ${run.outcomes[outcome]}`)
+            .join(' · ')}
           {identityCount === 0 &&
             i18n.translate('xpack.significantEventsApp.detectionEngine.pipeline.nothing', {
               defaultMessage: 'Nothing above normal',
@@ -332,20 +335,23 @@ export function PipelineSummary({ run }: IPipelineSummaryProps) {
           {i18n.translate('xpack.significantEventsApp.detectionEngine.pipeline.open', {
             defaultMessage: 'Open events',
           })}
-          {opened > 0 && (
+          {opened > 0 &&
+            ` · ${i18n.translate('xpack.significantEventsApp.detectionEngine.pipeline.opened', {
+              defaultMessage: 'Opened: {count}',
+              values: { count: opened },
+            })}`}
+          {changed.length > 0 && (
             <div>
-              {i18n.translate('xpack.significantEventsApp.detectionEngine.pipeline.opened', {
-                defaultMessage: 'Opened: {count}',
-                values: { count: opened },
-              })}
+              {changed
+                .map(
+                  (transition) =>
+                    `${STATUS_LABELS[transition.from as keyof typeof STATUS_LABELS]} → ${
+                      STATUS_LABELS[transition.to]
+                    }`
+                )
+                .join(' · ')}
             </div>
           )}
-          {changed.map((transition) => (
-            <div key={`${transition.event_id}-${transition.to}`}>
-              {STATUS_LABELS[transition.from as keyof typeof STATUS_LABELS]} →{' '}
-              {STATUS_LABELS[transition.to]}
-            </div>
-          ))}
         </Stage>
       </EuiFlexGroup>
       {run.skipped && (
