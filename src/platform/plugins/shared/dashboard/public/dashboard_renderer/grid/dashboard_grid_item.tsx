@@ -29,6 +29,7 @@ import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_inter
 import { printViewportVisStyles } from '../print_styles';
 import { DASHBOARD_MARGIN_SIZE, SELECTION_DRAG_THRESHOLD_PX } from './constants';
 import { getHighlightStyles } from './highlight_styles';
+import { isDragAreaClick } from './panel_click_hint';
 import { PanelContextMenuContext, SelectionPreviewContext } from './panel_context_menu';
 import { SelectedPanelActions } from './selected_panel_actions';
 import { isSelectionModifierPressed } from './selection_modifier';
@@ -225,9 +226,10 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
 
     const mouseDownPositionRef = useRef<{ x: number; y: number } | null>(null);
 
-    // In select mode (entered by selecting a panel or pressing Cmd alone) a plain click
-    // anywhere on a panel toggles it. The panel's own actions keep working, and clicks from
-    // portaled content (e.g. hover action popovers) or that end a panel drag are ignored.
+    // In select mode (entered by selecting a panel or pressing Cmd alone) a plain click on a
+    // panel toggles it. The panel's own actions keep working, and clicks from portaled content
+    // (e.g. hover action popovers), on the drag area (it shows the Cmd+click hint instead) or
+    // that end a panel drag are ignored.
     const isSelectModeClick = useCallback(
       (e: React.MouseEvent) => {
         if (viewMode !== 'edit' || !isSelectMode) return false;
@@ -240,6 +242,7 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
         ) {
           return false;
         }
+        if (isDragAreaClick(e, e.currentTarget as HTMLElement)) return false;
         const start = mouseDownPositionRef.current;
         return (
           !start ||
@@ -380,12 +383,12 @@ const dashboardGridItemStyles = {
       getHighlightStyles(context),
       printViewportVisStyles(context),
     ]),
-  // Inset in the bottom-left corner, clear of the drag handle and selected panel actions on the top edge
+  // Inset in the top-right corner; the selected panel actions sit on the top edge to its left
   selectionIndicator: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'absolute',
-      bottom: euiTheme.size.s,
-      left: euiTheme.size.s,
+      top: euiTheme.size.s,
+      right: euiTheme.size.s,
       zIndex: euiTheme.levels.menu,
       display: 'flex',
       alignItems: 'center',

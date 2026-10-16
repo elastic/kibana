@@ -36,7 +36,7 @@ import {
   SelectionPreviewContext,
 } from './panel_context_menu';
 import { isSelectionModifierPressed } from './selection_modifier';
-import { isUnhandledPanelClick, PanelClickHint } from './panel_click_hint';
+import { isDragAreaClick, PanelClickHint } from './panel_click_hint';
 import { useLayoutStyles } from './use_layout_styles';
 
 function getAllPanelIdsFromLayout(layout: GridLayoutData): string[] {
@@ -158,13 +158,14 @@ export const DashboardGrid = () => {
       if (viewMode !== 'edit') return;
       const panel = (e.target as HTMLElement).closest('[data-test-subj="dashboardPanel"]');
       if (panel) {
-        // Cmd+clicks never get here, the panel handles them in the capture phase
+        // Cmd+clicks never get here, the panel handles them in the capture phase. A plain click on
+        // the drag area hints at Cmd+click, since that's where users try to select a panel.
         const pointerDown = pointerDownRef.current;
         const hasMoved =
           pointerDown !== null &&
           (Math.abs(e.clientX - pointerDown.x) >= SELECTION_DRAG_THRESHOLD_PX ||
             Math.abs(e.clientY - pointerDown.y) >= SELECTION_DRAG_THRESHOLD_PX);
-        if (!hasMoved && isUnhandledPanelClick(e)) {
+        if (!hasMoved && isDragAreaClick(e, panel)) {
           const { left, width, bottom } = panel.getBoundingClientRect();
           setClickHint({
             id: Date.now(),
@@ -193,9 +194,15 @@ export const DashboardGrid = () => {
   const handleGridMouseDown = useCallback(
     (e: React.MouseEvent) => {
       pointerDownRef.current = { x: e.clientX, y: e.clientY };
-      if (viewMode !== 'edit' || !isSelectionModifierPressed(e)) return;
+      if (viewMode !== 'edit' || e.button !== 0) return;
+      const target = e.target as HTMLElement;
+      const isModifierDrag = isSelectionModifierPressed(e);
+      // in select mode a plain drag selects too, while buttons (e.g. section headers) keep working
+      const isSelectModeDrag =
+        isSelectMode && !target.closest('button, a, [role="button"], .kbnGridPanel--resizeHandle');
+      if (!isModifierDrag && !isSelectModeDrag) return;
       // keep native modifier+click behavior inside editable fields
-      if ((e.target as HTMLElement).closest('input, textarea, [contenteditable="true"]')) return;
+      if (target.closest('input, textarea, [contenteditable="true"]')) return;
       // prevent the browser from selecting text across the page while dragging
       e.preventDefault();
       window.getSelection()?.removeAllRanges();
@@ -238,7 +245,12 @@ export const DashboardGrid = () => {
           const right = Math.max(state.start.x, state.current.x);
           const bottom = Math.max(state.start.y, state.current.y);
           const ids = getPanelsInRect({ left, top, right, bottom });
-          dashboardApi.setSelectedPanelIds(new Set(ids));
+          // a drag adds to the selection, so it can grow a Cmd+click selection
+          dashboardApi.setSelectedPanelIds(
+            new Set([...dashboardApi.selectedPanelIds$.value, ...ids])
+          );
+          // a drag over empty space doesn't leave select mode
+          if (isSelectMode) dashboardApi.enterSelectMode();
           dragStateRef.current = null;
           setSelectionDrag(null);
           setPreviewSelectedPanelIds(new Set());
@@ -251,7 +263,7 @@ export const DashboardGrid = () => {
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onUp);
     },
-    [viewMode, getPanelsInRect, dashboardApi]
+    [viewMode, isSelectMode, getPanelsInRect, dashboardApi]
   );
 
   useEffect(() => {

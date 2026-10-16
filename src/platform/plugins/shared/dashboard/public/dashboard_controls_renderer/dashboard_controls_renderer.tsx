@@ -79,7 +79,11 @@ export const DashboardControlsRenderer = () => {
   }, [dashboardApi]);
 
   return (
-    <span data-dashboard-controls-ready={!anyApiUnavailable && !anyControlLoading}>
+    <span
+      data-dashboard-controls-ready={!anyApiUnavailable && !anyControlLoading}
+      // using a pinned control is a dashboard-wide action, so it ends panel selection
+      onPointerDownCapture={dashboardApi.exitSelectMode}
+    >
       <ControlsRenderer
         parentApi={dashboardApi}
         controls={controls} // only controls can currently be pinned

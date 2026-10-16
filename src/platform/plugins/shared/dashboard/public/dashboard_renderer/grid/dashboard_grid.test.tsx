@@ -38,7 +38,7 @@ jest.mock('./dashboard_grid_item', () => {
   return {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     DashboardGridItem: require('react').forwardRef(
-      (props: DashboardGridItemProps, ref: HTMLDivElement) => {
+      (props: DashboardGridItemProps, ref: React.Ref<HTMLDivElement>) => {
         const dashboardApi = mockUseDashboardApi();
 
         const [expandedPanelId, focusedPanelId] = mockUseBatchedPublishingSubjects(
@@ -58,9 +58,16 @@ jest.mock('./dashboard_grid_item', () => {
           <div
             data-test-subj="dashboardGridItem"
             id={`mockDashboardGridItem_${props.id}`}
+            ref={ref}
             className={className}
           >
             <div data-test-subj="dashboardPanel">
+              <div
+                className="kbnGridPanel--dragHandle"
+                data-test-subj={`mockPanelHeader_${props.id}`}
+              >
+                Panel title
+              </div>
               <p data-test-subj={`mockPanelContent_${props.id}`}>mockDashboardGridItem</p>
             </div>
           </div>
@@ -298,7 +305,21 @@ describe('DashboardGrid', () => {
   });
 
   describe('click hint', () => {
-    test('shows when a plain click on panel content does nothing in edit mode', async () => {
+    test('shows when the drag area is clicked in edit mode', async () => {
+      const { dashboardApi } = await createAndMountDashboardGrid({ panels: getMockPanels() });
+      await act(async () => {
+        dashboardApi.setViewMode('edit');
+        await new Promise((resolve) => setTimeout(resolve, 1));
+      });
+
+      const header = screen.getByTestId('mockPanelHeader_1');
+      fireEvent.mouseDown(header, { clientX: 10, clientY: 10 });
+      fireEvent.click(header, { clientX: 10, clientY: 10, detail: 1 });
+
+      expect(await screen.findByTestId('dashboardPanelClickHint')).toBeInTheDocument();
+    });
+
+    test('does not show when panel content is clicked', async () => {
       const { dashboardApi } = await createAndMountDashboardGrid({ panels: getMockPanels() });
       await act(async () => {
         dashboardApi.setViewMode('edit');
@@ -309,7 +330,7 @@ describe('DashboardGrid', () => {
       fireEvent.mouseDown(content, { clientX: 10, clientY: 10 });
       fireEvent.click(content, { clientX: 10, clientY: 10, detail: 1 });
 
-      expect(await screen.findByTestId('dashboardPanelClickHint')).toBeInTheDocument();
+      expect(screen.queryByTestId('dashboardPanelClickHint')).not.toBeInTheDocument();
     });
 
     test('does not show in view mode', async () => {
@@ -319,11 +340,62 @@ describe('DashboardGrid', () => {
         await new Promise((resolve) => setTimeout(resolve, 1));
       });
 
-      const content = screen.getByTestId('mockPanelContent_1');
-      fireEvent.mouseDown(content, { clientX: 10, clientY: 10 });
-      fireEvent.click(content, { clientX: 10, clientY: 10, detail: 1 });
+      const header = screen.getByTestId('mockPanelHeader_1');
+      fireEvent.mouseDown(header, { clientX: 10, clientY: 10 });
+      fireEvent.click(header, { clientX: 10, clientY: 10, detail: 1 });
 
       expect(screen.queryByTestId('dashboardPanelClickHint')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('drag selection', () => {
+    const drag = (element: HTMLElement) => {
+      fireEvent.mouseDown(element, { button: 0, clientX: 0, clientY: 0 });
+      fireEvent.mouseMove(document, { clientX: 50, clientY: 50 });
+      fireEvent.mouseUp(document, { clientX: 50, clientY: 50 });
+    };
+
+    test('a plain drag selects the panels it covers in select mode', async () => {
+      const { dashboardApi } = await createAndMountDashboardGrid({ panels: getMockPanels() });
+      await act(async () => {
+        dashboardApi.setViewMode('edit');
+        dashboardApi.enterSelectMode();
+        await new Promise((resolve) => setTimeout(resolve, 1));
+      });
+
+      await act(async () => drag(screen.getByTestId('mockPanelContent_1')));
+
+      // jsdom lays every panel out at the origin, so the drag covers all of them
+      expect(dashboardApi.selectedPanelIds$.value).toEqual(new Set(['1', '2']));
+    });
+
+    test('a drag adds to the panels already selected', async () => {
+      const { dashboardApi } = await createAndMountDashboardGrid({ panels: getMockPanels() });
+      await act(async () => {
+        dashboardApi.setViewMode('edit');
+        dashboardApi.setSelectedPanelIds(new Set(['1']));
+        await new Promise((resolve) => setTimeout(resolve, 1));
+      });
+      // move panel 1 out of the drag's way, so the drag only covers panel 2
+      jest
+        .spyOn(document.getElementById('mockDashboardGridItem_1')!, 'getBoundingClientRect')
+        .mockReturnValue({ left: 500, right: 600, top: 500, bottom: 600 } as DOMRect);
+
+      await act(async () => drag(screen.getByTestId('mockPanelContent_2')));
+
+      expect(dashboardApi.selectedPanelIds$.value).toEqual(new Set(['1', '2']));
+    });
+
+    test('a plain drag does not select outside select mode', async () => {
+      const { dashboardApi } = await createAndMountDashboardGrid({ panels: getMockPanels() });
+      await act(async () => {
+        dashboardApi.setViewMode('edit');
+        await new Promise((resolve) => setTimeout(resolve, 1));
+      });
+
+      await act(async () => drag(screen.getByTestId('mockPanelContent_1')));
+
+      expect(dashboardApi.selectedPanelIds$.value.size).toBe(0);
     });
   });
 

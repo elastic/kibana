@@ -519,45 +519,48 @@ export function InternalDashboardTopNav({
         />
       )}
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
-        <unifiedSearchService.ui.SearchBar
-          {...visibilityProps}
-          showDatePicker={showDatePicker}
-          query={query as Query | undefined}
-          screenTitle={title}
-          useDefaultBehaviors={true}
-          savedQueryId={savedQueryId}
-          indexPatterns={allDataViews ?? []}
-          allowSavingQueries
-          enableDateRangePicker
-          appName={DASHBOARD_APP_ID}
-          onQuerySubmit={(_payload, isUpdate) => {
-            if (isUpdate === false) {
-              dashboardApi.forceRefresh();
+        // using the search bar is a dashboard-wide action, so it ends panel selection
+        <div css={styles.searchBarWrapper} onPointerDownCapture={dashboardApi.exitSelectMode}>
+          <unifiedSearchService.ui.SearchBar
+            {...visibilityProps}
+            showDatePicker={showDatePicker}
+            query={query as Query | undefined}
+            screenTitle={title}
+            useDefaultBehaviors={true}
+            savedQueryId={savedQueryId}
+            indexPatterns={allDataViews ?? []}
+            allowSavingQueries
+            enableDateRangePicker
+            appName={DASHBOARD_APP_ID}
+            onQuerySubmit={(_payload, isUpdate) => {
+              if (isUpdate === false) {
+                dashboardApi.forceRefresh();
+              }
+              if (hasUnpublishedFilters) dashboardApi.publishFilters();
+              if (hasUnpublishedTimeslice) dashboardApi.publishTimeslice();
+              if (hasUnpublishedVariables) dashboardInternalApi.publishVariables();
+            }}
+            onSavedQueryIdChange={setSavedQueryId}
+            hasDirtyState={
+              hasUnpublishedFilters || hasUnpublishedTimeslice || hasUnpublishedVariables
             }
-            if (hasUnpublishedFilters) dashboardApi.publishFilters();
-            if (hasUnpublishedTimeslice) dashboardApi.publishTimeslice();
-            if (hasUnpublishedVariables) dashboardInternalApi.publishVariables();
-          }}
-          onSavedQueryIdChange={setSavedQueryId}
-          hasDirtyState={
-            hasUnpublishedFilters || hasUnpublishedTimeslice || hasUnpublishedVariables
-          }
-          isLoading={dataLoading ?? false}
-          onCancel={canCancel ? dashboardApi.cancelAllRequests : undefined}
-          useBackgroundSearchButton={
-            dataService.search.isBackgroundSearchEnabled &&
-            getDashboardCapabilities().storeSearchSession
-          }
-          esqlApproximation={{
-            isApproximate: esqlApproximation ?? false,
-            onChange: dashboardApi.setEsqlApproximation,
-            disabled: !hasEsqlPanel,
-            additionalText: i18n.translate('dashboard.esqlApproximationToggle.additionalText', {
-              defaultMessage:
-                'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',
-            }),
-          }}
-        />
+            isLoading={dataLoading ?? false}
+            onCancel={canCancel ? dashboardApi.cancelAllRequests : undefined}
+            useBackgroundSearchButton={
+              dataService.search.isBackgroundSearchEnabled &&
+              getDashboardCapabilities().storeSearchSession
+            }
+            esqlApproximation={{
+              isApproximate: esqlApproximation ?? false,
+              onChange: dashboardApi.setEsqlApproximation,
+              disabled: !hasEsqlPanel,
+              additionalText: i18n.translate('dashboard.esqlApproximationToggle.additionalText', {
+                defaultMessage:
+                  'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',
+              }),
+            }}
+          />
+        </div>
       )}
 
       <span
@@ -594,6 +597,8 @@ const topNavStyles = {
         paddingTop: 0,
       },
     }),
+  // keeps the search bar's layout as if it weren't wrapped
+  searchBarWrapper: css({ display: 'contents' }),
   updateEditButton: ({ euiTheme }: UseEuiTheme) =>
     css({
       blockSize: '100%',

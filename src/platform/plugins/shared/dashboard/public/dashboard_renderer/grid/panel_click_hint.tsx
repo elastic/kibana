@@ -18,6 +18,13 @@ const HINT_DURATION_MS = 1800;
 /** Slightly see-through, so it reads as a passing hint rather than UI to interact with */
 const HINT_OPACITY = 0.9;
 
+/**
+ * The panel's drag area: the whole header row (the title is the registered drag handle, but the
+ * empty space next to it reads as part of it) and the move button in the hover actions
+ */
+const DRAG_AREA_SELECTOR = '.embPanel__header, .kbnGridPanel--dragHandle';
+
+/** Controls inside the header (e.g. the title editor or badges) keep their own clicks */
 const INTERACTIVE_SELECTOR = [
   'a',
   'button',
@@ -35,13 +42,18 @@ const INTERACTIVE_SELECTOR = [
   '[role="tab"]',
 ].join(', ');
 
-/** Cursors that don't advertise any interaction (e.g. not `pointer` on a chart element or `grab` on a map) */
-const PASSIVE_CURSORS = new Set(['auto', 'default']);
+const isPointInside = (element: Element, x: number, y: number) => {
+  if (window.getComputedStyle(element).visibility === 'hidden') return false;
+  const { left, right, top, bottom } = element.getBoundingClientRect();
+  // a collapsed handle (e.g. the move button outside edit mode) has no area to click
+  if (right <= left || bottom <= top) return false;
+  return x >= left && x <= right && y >= top && y <= bottom;
+};
 
 const strings = {
   getLabel: (modifier: string) =>
     i18n.translate('dashboard.panelClickHint.label', {
-      defaultMessage: '{modifier} + Click to select',
+      defaultMessage: '{modifier} + Click to select panel',
       values: { modifier },
     }),
 };
@@ -50,14 +62,22 @@ const strings = {
  * Whether a plain click on panel content did nothing: it wasn't handled by the panel, didn't land on
  * an interactive element, and the cursor didn't signal any interaction at that spot.
  */
-export const isUnhandledPanelClick = (e: React.MouseEvent): boolean => {
+/**
+ * Whether a plain click landed on the panel's drag area, which shows the hint instead of selecting.
+ * In select mode the header ignores the pointer, so the click is also matched against its bounds.
+ */
+export const isDragAreaClick = (e: React.MouseEvent, panel: Element): boolean => {
   if (e.defaultPrevented || e.button !== 0 || e.detail > 1) return false;
   const { target } = e;
-  if (!(target instanceof Element) || target.closest(INTERACTIVE_SELECTOR)) return false;
-  const cursor = window.getComputedStyle(target).cursor || 'auto';
-  if (!PASSIVE_CURSORS.has(cursor)) return false;
+  if (!(target instanceof Element)) return false;
+  const interactive = target.closest(INTERACTIVE_SELECTOR);
+  if (interactive && !interactive.matches(DRAG_AREA_SELECTOR)) return false;
   // the click ended a text selection
-  return window.getSelection()?.isCollapsed ?? true;
+  if (!(window.getSelection()?.isCollapsed ?? true)) return false;
+  if (target.closest(DRAG_AREA_SELECTOR)) return true;
+  return Array.from(panel.querySelectorAll(DRAG_AREA_SELECTOR)).some((handle) =>
+    isPointInside(handle, e.clientX, e.clientY)
+  );
 };
 
 export interface PanelClickHintProps {

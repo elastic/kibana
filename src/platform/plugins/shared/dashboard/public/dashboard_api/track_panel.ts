@@ -211,6 +211,11 @@ export function initializeTrackPanel(
       },
       isSelectMode$,
       enterSelectMode: () => setSelectMode(true),
+      exitSelectMode: () => {
+        if (!isSelectMode$.value) return;
+        selectedPanelIds$.next(new Set());
+        setSelectMode(false);
+      },
       copiedPanelIds$,
       copySelectedPanels: () => {
         copiedPanelIds$.next(new Set(selectedPanelIds$.value));

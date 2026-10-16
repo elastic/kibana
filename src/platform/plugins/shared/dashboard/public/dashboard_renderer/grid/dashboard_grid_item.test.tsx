@@ -17,7 +17,7 @@ import { DashboardGridItem } from './dashboard_grid_item';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
 import { PanelContextMenuContext } from './panel_context_menu';
-import { act, render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 
 // Alias required so the jest.mock factory can reference useEffect without triggering
 // Babel's hoisting guard (only `mock`-prefixed names are allowed inside factories).
@@ -38,7 +38,8 @@ jest.mock('@kbn/embeddable-plugin/public', () => {
       }, []);
       return (
         <div className="embedPanel" id={`mockEmbedPanel_${maybeId}`}>
-          mockEmbeddablePanel
+          <div className="kbnGridPanel--dragHandle" data-test-subj={`mockPanelHeader_${maybeId}`} />
+          <p data-test-subj={`mockPanelContent_${maybeId}`}>mockEmbeddablePanel</p>
         </div>
       );
     },
@@ -280,6 +281,38 @@ test('Cmd/Ctrl+click toggles panel selection and applies selected class', async 
   });
 
   expect(panelElement!.classList.contains('dshDashboardGrid__item--selected')).toBe(false);
+});
+
+describe('select mode clicks', () => {
+  const setup = async () => {
+    const { component, dashboardApi } = createAndMountDashboardGridItem({
+      id: '1',
+      key: '1',
+      type: TEST_EMBEDDABLE,
+    });
+    await act(async () => {
+      dashboardApi.setViewMode('edit');
+      dashboardApi.setSelectedPanelIds(new Set(['2']));
+      await new Promise((resolve) => setTimeout(resolve, 1));
+    });
+    return { component, dashboardApi };
+  };
+
+  test('a plain click on panel content selects the panel', async () => {
+    const { component, dashboardApi } = await setup();
+    await act(async () => {
+      fireEvent.click(component.getByTestId('mockPanelContent_1'), { detail: 1 });
+    });
+    expect(dashboardApi.selectedPanelIds$.value.has('1')).toBe(true);
+  });
+
+  test('a plain click on the drag area does not select the panel', async () => {
+    const { component, dashboardApi } = await setup();
+    await act(async () => {
+      fireEvent.click(component.getByTestId('mockPanelHeader_1'), { detail: 1 });
+    });
+    expect(dashboardApi.selectedPanelIds$.value.has('1')).toBe(false);
+  });
 });
 
 describe('selection indicator', () => {

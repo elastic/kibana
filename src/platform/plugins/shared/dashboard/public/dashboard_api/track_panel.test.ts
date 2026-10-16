@@ -360,4 +360,21 @@ describe('track panel', () => {
       blurCleanup();
     });
   });
+
+  describe('exitSelectMode', () => {
+    it('clears the selection and leaves select mode', () => {
+      api.togglePanelSelection('panel1');
+      expect(api.isSelectMode$.value).toBe(true);
+
+      api.exitSelectMode();
+      expect(api.selectedPanelIds$.value.size).toBe(0);
+      expect(api.isSelectMode$.value).toBe(false);
+    });
+
+    it('leaves select mode entered with nothing selected', () => {
+      api.enterSelectMode();
+      api.exitSelectMode();
+      expect(api.isSelectMode$.value).toBe(false);
+    });
+  });
 });

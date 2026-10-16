@@ -82,7 +82,8 @@ export const SelectedPanelActions = ({
       css={css({
         position: 'absolute',
         top: `calc(-${euiTheme.size.l} / 2)`,
-        right: euiTheme.size.m,
+        // clear of the selection checkbox in the panel's top-right corner
+        right: `calc(${euiTheme.size.s} * 2 + ${euiTheme.size.base} + ${euiTheme.size.xxs})`,
         zIndex: euiTheme.levels.menu,
         display: 'flex',
         gap: euiTheme.size.xs,

@@ -10,12 +10,12 @@
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
-import { isUnhandledPanelClick, PanelClickHint } from './panel_click_hint';
+import { isDragAreaClick, PanelClickHint } from './panel_click_hint';
 
 const getClickResult = (ui: React.ReactElement, init: MouseEventInit = {}) => {
   let result: boolean | undefined;
   const { unmount } = render(
-    <div role="presentation" onClick={(e) => (result = isUnhandledPanelClick(e))}>
+    <div role="presentation" onClick={(e) => (result = isDragAreaClick(e, e.currentTarget))}>
       {ui}
     </div>
   );
@@ -24,47 +24,94 @@ const getClickResult = (ui: React.ReactElement, init: MouseEventInit = {}) => {
   return result;
 };
 
-describe('isUnhandledPanelClick', () => {
-  it('is true for a plain click on passive panel content', () => {
-    expect(getClickResult(<p data-test-subj="target">Some text</p>)).toBe(true);
-  });
-
-  it('is false on interactive elements and their content', () => {
+describe('isDragAreaClick', () => {
+  it('is true for a plain click on the drag area', () => {
     expect(
       getClickResult(
-        <button type="button">
-          <span data-test-subj="target">Label</span>
-        </button>
+        <div className="kbnGridPanel--dragHandle">
+          <h2 data-test-subj="target">Panel title</h2>
+        </div>
       )
-    ).toBe(false);
-    expect(
-      getClickResult(
-        <a href="#docs" data-test-subj="target">
-          docs
-        </a>
-      )
-    ).toBe(false);
-    expect(getClickResult(<div role="button" data-test-subj="target" />)).toBe(false);
+    ).toBe(true);
   });
 
-  it('is false where the cursor signals an interaction', () => {
-    expect(getClickResult(<div style={{ cursor: 'pointer' }} data-test-subj="target" />)).toBe(
-      false
+  it('is true for a click on the empty space next to the title', () => {
+    expect(
+      getClickResult(
+        <figcaption className="embPanel__header" data-test-subj="target">
+          <div className="kbnGridPanel--dragHandle">Panel title</div>
+        </figcaption>
+      )
+    ).toBe(true);
+  });
+
+  it('is true for a click on the move button', () => {
+    expect(
+      getClickResult(
+        <button type="button" className="kbnGridPanel--dragHandle" data-test-subj="target" />
+      )
+    ).toBe(true);
+  });
+
+  it('is false for a click on panel content', () => {
+    expect(
+      getClickResult(
+        <>
+          <div className="kbnGridPanel--dragHandle" />
+          <p data-test-subj="target">Some text</p>
+        </>
+      )
+    ).toBe(false);
+  });
+
+  it('is false on controls inside the drag area', () => {
+    expect(
+      getClickResult(
+        <div className="kbnGridPanel--dragHandle">
+          <button type="button">
+            <span data-test-subj="target">Edit title</span>
+          </button>
+        </div>
+      )
+    ).toBe(false);
+  });
+
+  it('matches the drag area by position when it ignores the pointer', () => {
+    jest
+      .spyOn(Element.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: Element) {
+        return this.classList.contains('kbnGridPanel--dragHandle')
+          ? ({ left: 0, right: 100, top: 0, bottom: 20 } as DOMRect)
+          : ({ left: 0, right: 0, top: 0, bottom: 0 } as DOMRect);
+      });
+    const ui = (
+      <>
+        <div className="kbnGridPanel--dragHandle" style={{ pointerEvents: 'none' }} />
+        <p data-test-subj="target" />
+      </>
     );
-    expect(getClickResult(<div style={{ cursor: 'grab' }} data-test-subj="target" />)).toBe(false);
+    expect(getClickResult(ui, { clientX: 10, clientY: 10 })).toBe(true);
+    expect(getClickResult(ui, { clientX: 10, clientY: 50 })).toBe(false);
+    jest.restoreAllMocks();
   });
 
   it('is false when the panel already handled the click', () => {
     expect(
       getClickResult(
-        <div role="presentation" onClick={(e) => e.preventDefault()} data-test-subj="target" />
+        <div
+          role="presentation"
+          className="kbnGridPanel--dragHandle"
+          onClick={(e) => e.preventDefault()}
+          data-test-subj="target"
+        />
       )
     ).toBe(false);
   });
 
   it('is false for double clicks and non-primary buttons', () => {
-    expect(getClickResult(<p data-test-subj="target" />, { detail: 2 })).toBe(false);
-    expect(getClickResult(<p data-test-subj="target" />, { button: 1 })).toBe(false);
+    const ui = <div className="kbnGridPanel--dragHandle" data-test-subj="target" />;
+    expect(getClickResult(ui, { detail: 2 })).toBe(false);
+    expect(getClickResult(ui, { button: 1 })).toBe(false);
   });
 });
 
@@ -79,7 +126,7 @@ describe('PanelClickHint', () => {
         <PanelClickHint position={{ x: 10, y: 20 }} onDismiss={onDismiss} />
       </EuiProvider>
     );
-    expect(screen.getByTestId('dashboardPanelClickHint')).toHaveTextContent('+ Click to select');
+    expect(screen.getByTestId('dashboardPanelClickHint')).toHaveTextContent('+ Click to select panel');
     act(() => jest.runAllTimers());
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });
