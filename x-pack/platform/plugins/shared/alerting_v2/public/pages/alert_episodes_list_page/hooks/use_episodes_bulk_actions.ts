@@ -24,21 +24,25 @@ export const useEpisodesBulkActions = ({
 }: UseEpisodesBulkActionsParams): CustomBulkActions =>
   useMemo(() => {
     const allEpisodes = episodesData ?? [];
+    const resolveSelection = (selectedDocIds: string[]) =>
+      getEpisodesFromDocIds(selectedDocIds, allEpisodes);
 
     return actions
       .filter((action) => action.supportsBulk !== false)
-      .map((action) => ({
-        key: action.id,
-        label: action.displayName,
-        icon: action.iconType,
-        isAvailable: ({ selectedDocIds }) =>
-          action.isCompatible({
-            episodes: getEpisodesFromDocIds(selectedDocIds, allEpisodes),
-          }),
-        onClick: ({ selectedDocIds }) =>
-          action.execute({
-            episodes: getEpisodesFromDocIds(selectedDocIds, allEpisodes),
-            onSuccess,
-          }),
-      }));
+      .map((action) => {
+        const resolveDisabledReason = (selectedDocIds: string[]) =>
+          action.getBulkDisabledReason?.(resolveSelection(selectedDocIds));
+
+        return {
+          key: action.id,
+          label: action.displayName,
+          icon: action.iconType,
+          isAvailable: ({ selectedDocIds }) =>
+            resolveDisabledReason(selectedDocIds) !== undefined ||
+            action.isCompatible({ episodes: resolveSelection(selectedDocIds) }),
+          getDisabledReason: ({ selectedDocIds }) => resolveDisabledReason(selectedDocIds),
+          onClick: ({ selectedDocIds }) =>
+            action.execute({ episodes: resolveSelection(selectedDocIds), onSuccess }),
+        };
+      });
   }, [actions, episodesData, onSuccess]);
