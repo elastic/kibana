@@ -65,7 +65,9 @@ export const uiamServiceMock = {
       role_assignments: {},
       assumable_by: [],
       creator: { type: 'user' as const, id: 'mock-user-id', first_name: 'Mock', last_name: 'User' },
+      revoked: false,
     }),
+    revokeServiceAccount: jest.fn().mockResolvedValue(undefined),
     createOAuthClient: jest.fn().mockResolvedValue({
       id: 'mock-client-id',
       resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',

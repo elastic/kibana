@@ -7,7 +7,7 @@
 
 import React from 'react';
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +22,11 @@ import { css } from '@emotion/react';
 import { ONBOARDING_READ_MORE_URL_PLACEHOLDER } from './constants';
 import * as i18n from './translations';
 
+// The reference intro banner gives its media column 32% of the row; the box keeps standard video
+// proportions so the eventual clip fits it without letterboxing.
+const MEDIA_WIDTH_PERCENT = 32;
+const VIDEO_ASPECT_RATIO = '16 / 9';
+
 export const OnboardingIntroPromo: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
@@ -30,6 +35,10 @@ export const OnboardingIntroPromo: React.FC = () => {
       hasBorder
       hasShadow={false}
       paddingSize="none"
+      css={css`
+        /* Clip the media column's gradient to the panel's rounded corners. */
+        overflow: hidden;
+      `}
       data-test-subj="alertZeroOnboardingIntroPromo"
     >
       <EuiFlexGroup gutterSize="none" alignItems="stretch" responsive>
@@ -37,11 +46,10 @@ export const OnboardingIntroPromo: React.FC = () => {
           grow={false}
           css={css`
             position: relative;
-            width: 40%;
-            min-width: 240px;
-            min-height: 200px;
-            justify-content: flex-end;
-            padding: ${euiTheme.size.base};
+            /* EuiFlexGroup's responsive mode stacks items by forcing flex-basis: 100%, so below its
+               breakpoint the box goes full width and the aspect ratio keeps it at video proportions. */
+            flex: 0 0 ${MEDIA_WIDTH_PERCENT}%;
+            aspect-ratio: ${VIDEO_ASPECT_RATIO};
             background: linear-gradient(
               135deg,
               ${euiTheme.colors.backgroundLightPrimary},
@@ -69,31 +77,36 @@ export const OnboardingIntroPromo: React.FC = () => {
               />
             </EuiToolTip>
           </div>
-          <EuiTitle size="xs">
-            <h1>{i18n.INTRO_TITLE}</h1>
-          </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem
           css={css`
             justify-content: center;
-            padding: ${euiTheme.size.xl};
+            padding: ${euiTheme.size.l};
           `}
         >
-          <EuiText>
+          <EuiTitle size="xs">
             <h2>{i18n.INTRO_PROMO_LEAD}</h2>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
+          <EuiText size="s" color="subdued">
             <p>{i18n.INTRO_PROMO_BODY}</p>
           </EuiText>
           <EuiSpacer size="m" />
           <div>
-            <EuiButton
+            {/* Outlined rather than filled: EUI has no outline variant, so an empty button carries the border. */}
+            <EuiButtonEmpty
+              size="s"
               href={ONBOARDING_READ_MORE_URL_PLACEHOLDER}
               target="_blank"
               iconType="external"
               iconSide="right"
+              css={css`
+                border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.primary};
+              `}
               data-test-subj="alertZeroOnboardingReadMoreLink"
             >
               {i18n.INTRO_READ_MORE}
-            </EuiButton>
+            </EuiButtonEmpty>
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>

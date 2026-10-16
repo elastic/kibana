@@ -6,7 +6,7 @@
  */
 
 import type { JsonObject } from '@kbn/utility-types';
-import type { UserIdAndName } from '../base/users';
+import type { UserIdAndName, UserPrincipalType } from '../base/users';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type { ExecutionStatus, SerializedExecutionError } from '../agents/execution_status';
@@ -115,6 +115,7 @@ export enum ConversationRoundStepType {
   preExecutionWorkflow = 'pre_execution_workflow',
   subagentRosterUpdated = 'subagent_roster_updated',
   substitution = 'substitution',
+  injectedContext = 'injected_context',
 }
 
 // tool call step
@@ -273,6 +274,32 @@ export const isSubstitutionStep = (step: ConversationRoundStep): step is Substit
   return step.type === ConversationRoundStepType.substitution;
 };
 
+/**
+ * A note a cycle hook put in front of the model. Rendered as a user-role notice at its position.
+ */
+export interface InjectedContextStepData {
+  /** Registration id of the hook that appended the step. Set by the runtime, never by the hook. */
+  hook_id: string;
+  /** What the model reads. */
+  text: string;
+  /** For the UI and analytics; never rendered to the model. */
+  data?: JsonObject;
+}
+
+export type InjectedContextStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.injectedContext,
+  InjectedContextStepData
+>;
+
+export const createInjectedContextStep = (data: InjectedContextStepData): InjectedContextStep => ({
+  type: ConversationRoundStepType.injectedContext,
+  ...data,
+});
+
+export const isInjectedContextStep = (step: ConversationRoundStep): step is InjectedContextStep => {
+  return step.type === ConversationRoundStepType.injectedContext;
+};
+
 export type BackgroundAgentCompleteStep = ConversationRoundStepMixin<
   ConversationRoundStepType.backgroundAgentComplete,
   BackgroundExecutionState
@@ -420,7 +447,8 @@ export type ConversationRoundStep =
   | RelevantSkillsStep
   | PreExecutionWorkflowStep
   | SubagentRosterUpdatedStep
-  | SubstitutionStep;
+  | SubstitutionStep
+  | InjectedContextStep;
 
 /**
  * An entry in the active persistent-sub-agent roster.
@@ -585,10 +613,12 @@ export interface ConversationRoundAuthor {
   username?: string;
   /** Optional display name. */
   full_name?: string;
+  /** Absent for external authors. */
+  type?: UserPrincipalType;
 }
 
 export const getConversationRoundAuthorDisplayName = (
-  author?: ConversationRoundAuthor
+  author?: Pick<ConversationRoundAuthor, 'id' | 'username' | 'full_name'>
 ): string | undefined => {
   if (!author) {
     return undefined;
@@ -628,21 +658,52 @@ export interface ConversationRoundOrigin {
   type: ConversationOriginType;
 }
 
-export interface RoundModelUsageStats {
+/**
+ * LLM usage of a single connector within a round.
+ */
+export interface ConnectorModelUsageStats {
   /**
-   * Id of the connector used for this round
+   * Id of the connector
    */
   connector_id: string;
   /**
-   * Number of LLM calls which were done during this round.
+   * Number of LLM calls done through this connector.
    */
   llm_calls: number;
   /**
-   * Total number of input tokens sent this round.
+   * Total number of input tokens sent to this connector.
    */
   input_tokens: number;
   /**
-   * Total number of output tokens received this round.
+   * Total number of output tokens received from this connector.
+   */
+  output_tokens: number;
+  /**
+   * Number of input tokens served from cache, when reported by the provider.
+   * Subset of `input_tokens` (cache reads), not additive.
+   */
+  cached_input_tokens?: number;
+  /**
+   * Model identifier for this connector, if available.
+   */
+  model?: string;
+}
+
+export interface RoundModelUsageStats {
+  /**
+   * Id of the main connector used for this round
+   */
+  connector_id: string;
+  /**
+   * Number of LLM calls which were done during this round, across all connectors.
+   */
+  llm_calls: number;
+  /**
+   * Total number of input tokens sent this round, across all connectors.
+   */
+  input_tokens: number;
+  /**
+   * Total number of output tokens received this round, across all connectors.
    */
   output_tokens: number;
   /**
@@ -651,13 +712,19 @@ export interface RoundModelUsageStats {
    */
   cached_input_tokens?: number;
   /**
-   * Model identifier from the provider response, if available.
+   * Model identifier of the main connector from the provider response, if available.
    */
   model?: string;
   /**
    * Total input tokens (including cached) of the agent's last LLM call this round.
    */
   last_call_input_tokens?: number;
+  /**
+   * Per-connector breakdown of the round's LLM usage. When present, the entries sum up to the
+   * top-level `llm_calls`, `input_tokens`, `output_tokens` and `cached_input_tokens`.
+   * Absent on rounds persisted before the breakdown existed.
+   */
+  connectors?: ConnectorModelUsageStats[];
 }
 
 /**
@@ -678,10 +745,14 @@ export const isZeroModelUsage = (usage: RoundModelUsageStats): boolean =>
   usage.input_tokens === 0 &&
   usage.output_tokens === 0 &&
   usage.cached_input_tokens === undefined &&
-  usage.model === undefined;
+  usage.model === undefined &&
+  usage.connectors === undefined;
 
 /** Placeholder title assigned to a new conversation */
 export const DEFAULT_CONVERSATION_TITLE = 'New conversation';
+
+/** Maximum accepted length for a user chat message (`input` / `message`) */
+export const CHAT_MESSAGE_MAX_LENGTH = 100_000;
 
 /** Maximum accepted length for a client-supplied conversation title */
 export const CONVERSATION_TITLE_MAX_LENGTH = 500;

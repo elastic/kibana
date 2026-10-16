@@ -20,6 +20,7 @@ import { AiIndexManagedRow } from './ai_index_managed_row';
 const buildManagedAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
   id: 'elastic',
   managed: true,
+  memory_enabled: false,
   description:
     'Kibana resources available for use in Agent Builder, including dashboards, visualizations, connectors, workflows, alerting rules, action policies, and significant events.',
   dest: { type: 'index', value: 'ai-index-idx-sml-data' },

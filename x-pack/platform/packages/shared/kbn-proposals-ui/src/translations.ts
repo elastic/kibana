@@ -79,9 +79,6 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   noActionBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.noActionTitle', {
     defaultMessage: 'Approved — no action to run',
   }),
-  inProgressHint: i18n.translate('xpack.proposals.approvalModal.outcome.inProgressHint', {
-    defaultMessage: 'Typically takes 3-5 minutes.',
-  }),
   actionErrorTitle: i18n.translate('xpack.proposals.approvalModal.outcome.actionError', {
     defaultMessage: 'Could not record the decision. Try again.',
   }),

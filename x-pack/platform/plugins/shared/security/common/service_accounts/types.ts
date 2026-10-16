@@ -50,6 +50,11 @@ export interface ServiceAccountDirectoryEntry {
    * own, and absent on Elasticsearch until Elasticsearch stores one too.
    */
   createdBy?: ServiceAccountDirectoryCreator;
+  /**
+   * How many workloads are bound to the account, across every space. Only the list reports it,
+   * and it's absent when the count failed. The count isn't verified, so it's for display only.
+   */
+  workloadCount?: number;
   // No creation time. UIAM reports no timestamp of any kind, and the only one Elasticsearch could
   // offer is on the credential Kibana stored, which dates Kibana's record rather than the
   // account. It arrives with the same followup that brings the Elasticsearch creator.
@@ -62,4 +67,51 @@ export interface ServiceAccountDirectoryEntry {
 export interface ListServiceAccountsResponse {
   serviceAccounts: ServiceAccountDirectoryEntry[];
   nextPage?: string;
+}
+
+/**
+ * A workload bound to a service account, as the management routes report it. The workload type is
+ * scoped to the plugin that registered it, so `pluginId` and `workloadType` name the type
+ * together.
+ */
+export interface ServiceAccountBoundWorkload {
+  pluginId: string;
+  workloadType: string;
+  workloadId: string;
+  /**
+   * What to call the workload in the UI: the title its workload type resolved, or the workload id
+   * when there is none.
+   */
+  displayName: string;
+  /**
+   * The name the owning plugin registered for the workload type. Absent when that plugin is not
+   * loaded, in which case the UI shows `workloadType`.
+   */
+  typeName?: string;
+  /**
+   * Link to the workload. It already carries the base path and the space of the binding, so use
+   * it as is.
+   */
+  href?: string;
+}
+
+/** Every workload bound to one service account, across spaces. */
+export interface ListServiceAccountWorkloadsResponse {
+  workloads: ServiceAccountBoundWorkload[];
+}
+
+/**
+ * The body of a successful delete. `warnings` describes anything the delete left behind, and is
+ * empty when it cleaned up everything.
+ */
+export interface DeleteServiceAccountResponse {
+  warnings: string[];
+}
+
+/**
+ * The `attributes` of the 409 the delete route answers with when the account is still bound to
+ * workloads and the caller did not force the delete.
+ */
+export interface DeleteServiceAccountConflictAttributes {
+  workloads: ServiceAccountBoundWorkload[];
 }

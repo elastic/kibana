@@ -11,11 +11,11 @@ describe('normalizeEsqlForEquivalence', () => {
   it('strips a standalone @timestamp bind-param WHERE pipe', () => {
     const withWhere = `FROM kibana_sample_data_logs
 | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
-| STATS total_bytes = SUM(bytes) BY bucket = BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+| STATS total_bytes = SUM(bytes) BY bucket = BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 | SORT bucket ASC`;
 
     const withoutWhere = `FROM kibana_sample_data_logs
-| STATS total_bytes = SUM(bytes) BY bucket = BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+| STATS total_bytes = SUM(bytes) BY bucket = BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 | SORT bucket ASC`;
 
     expect(normalizeEsqlForEquivalence(withWhere)).toBe(normalizeEsqlForEquivalence(withoutWhere));
@@ -25,15 +25,23 @@ describe('normalizeEsqlForEquivalence', () => {
   it('strips TS-source gold WHERE the same way', () => {
     const withWhere = `TS metrics-hostmetricsreceiver.otel-default
 | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
-| STATS x = AVG(AVG_OVER_TIME(\`system.cpu.load_average.1m\`)) BY \`Time Bucket\` = TBUCKET(75, ?_tstart, ?_tend)`;
+| STATS x = AVG(AVG_OVER_TIME(\`system.cpu.load_average.1m\`)) BY \`Time Bucket\` = TBUCKET(100, ?_tstart, ?_tend)`;
 
     const withoutWhere = `TS metrics-hostmetricsreceiver.otel-default
-| STATS x = AVG(AVG_OVER_TIME(\`system.cpu.load_average.1m\`)) BY \`Time Bucket\` = TBUCKET(75, ?_tstart, ?_tend)`;
+| STATS x = AVG(AVG_OVER_TIME(\`system.cpu.load_average.1m\`)) BY \`Time Bucket\` = TBUCKET(100, ?_tstart, ?_tend)`;
 
     expect(normalizeEsqlForEquivalence(withWhere)).toBe(withoutWhere);
   });
 
-  it('strips order_date (and other event-time) bind-param WHERE pipes', () => {
+  it('keeps order_date (and other event-time) bind-param WHERE pipes by default', () => {
+    const query = `FROM kibana_sample_data_ecommerce
+| WHERE order_date >= ?_tstart AND order_date < ?_tend
+| STATS \`Order Count\` = COUNT(*) BY category.keyword`;
+
+    expect(normalizeEsqlForEquivalence(query)).toBe(query);
+  });
+
+  it('strips order_date (and other event-time) bind-param WHERE pipes with anyTimeField', () => {
     const withWhere = `FROM kibana_sample_data_ecommerce
 | WHERE order_date >= ?_tstart AND order_date < ?_tend
 | STATS \`Order Count\` = COUNT(*) BY category.keyword
@@ -45,7 +53,7 @@ describe('normalizeEsqlForEquivalence', () => {
 | SORT \`Order Count\` DESC
 | LIMIT 10`;
 
-    expect(normalizeEsqlForEquivalence(withWhere)).toBe(withoutWhere);
+    expect(normalizeEsqlForEquivalence(withWhere, { anyTimeField: true })).toBe(withoutWhere);
   });
 
   it('keeps non-time predicates when removing the bind-param conjunct', () => {

@@ -14,14 +14,14 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ALERTING_NAMESPACE, RULE_MANAGEMENT_SKILL_ID } from '@kbn/alerting-v2-constants';
 import { ruleAttachmentDataSchema } from '@kbn/alerting-v2-schemas';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { ensureToolPrivilege } from '../../common/unauthorized_tool_result';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { RulesClient } from '../../../lib/rules_client';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
 
-const getRuleSchema = z.object({});
+const getRuleSchema = lazySchema(() => z.object({}));
 
 /** Bounded tool id — unique per attachment instance when multiple alerts are present. */
 export const getRuleToolId = (attachmentId: string): string =>
@@ -55,7 +55,7 @@ export const getRuleTool = ({
       privilegeChecker: getPrivilegeChecker({ request: toolContext.request }),
       feature: 'rules',
       level: 'read',
-      action: 'fetch rule for episode',
+      action: 'fetch rule for alert',
     });
     if (unauthorized) {
       return unauthorized;
@@ -86,7 +86,7 @@ export const getRuleTool = ({
           code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_GET_RULE_FAILED,
           labels: {
             rule_id: ruleId,
-            episode_id: alertId,
+            alert_id: alertId,
             space_id: toolContext.spaceId,
           },
           error,
@@ -97,7 +97,7 @@ export const getRuleTool = ({
           {
             type: ToolResultType.error,
             data: {
-              message: `Failed to fetch rule "${ruleId}" for episode "${alertId}": ${message}`,
+              message: `Failed to fetch rule "${ruleId}" for alert "${alertId}": ${message}`,
             },
           },
         ],

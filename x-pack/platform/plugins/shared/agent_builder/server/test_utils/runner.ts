@@ -375,7 +375,6 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       aiIndices: false,
       relevantSkills: false,
       todos: false,
-      datasets: false,
       bash: false,
       apiDiscovery: false,
     },
@@ -400,6 +399,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
     parentExecutionId: undefined,
+    conversationAccess: 'readWrite',
   };
 };
 
@@ -449,7 +449,6 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
       aiIndices: false,
       relevantSkills: false,
       todos: false,
-      datasets: false,
       bash: false,
       apiDiscovery: false,
     },
@@ -470,6 +469,7 @@ export const createScopedRunnerMock = (): jest.Mocked<ScopedRunner> => {
 export const createHooksServiceStartMock = (): jest.Mocked<HooksServiceStart> => {
   return {
     run: jest.fn(async (_event: any, context: any) => context),
+    listCycleHooks: jest.fn(() => []),
   };
 };
 
@@ -510,7 +510,6 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
       aiIndices: false,
       relevantSkills: false,
       todos: false,
-      datasets: false,
       bash: false,
       apiDiscovery: false,
     },
@@ -520,9 +519,11 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
       sendToSubAgent: jest.fn(),
       getExecution: jest.fn(),
     },
+    getExecutionService: jest.fn(),
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
     parentExecutionId: undefined,
+    conversationAccess: 'readWrite',
   };
 };
 
