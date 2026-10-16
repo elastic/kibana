@@ -51,7 +51,7 @@ test.describe(
       page,
       pageObjects,
     }) => {
-      const { ruleLibrary, ruleDetails, ruleForm } = pageObjects;
+      const { ruleLibrary, ruleDetails, composeDiscover } = pageObjects;
       const { createRequestUrls, installRequestUrls } = trackCreateRuleRequests(page);
 
       await test.step('open the rule library and find the template', async () => {
@@ -64,15 +64,16 @@ test.describe(
       await test.step('open the create flyout from the template', async () => {
         await expect(ruleLibrary.createButton(TEMPLATE_RULE_NAME)).toBeEnabled();
         await ruleLibrary.createButton(TEMPLATE_RULE_NAME).click();
-        await expect(ruleForm.flyout).toBeVisible({ timeout: 30_000 });
+        await expect(composeDiscover.flyout).toBeVisible({ timeout: 30_000 });
       });
 
       await test.step('through the flyout and submit', async () => {
         // Template pre-fills all fields; advance through each step and submit.
-        await ruleForm.clickFlyoutSave(); // Alert condition → Outcome
-        await ruleForm.clickFlyoutSave(); // Outcome → Details
-        await ruleForm.clickFlyoutSave(); // Details → Actions (validates name)
-        await ruleForm.clickFlyoutSave(); // Actions → Create rule (submit)
+        await expect(composeDiscover.nextButton).toBeEnabled({ timeout: 30_000 });
+        await composeDiscover.clickNext(); // Alert condition → Outcome
+        await composeDiscover.clickNext(); // Outcome → Details
+        await composeDiscover.clickNext(); // Details → Actions (validates name)
+        await composeDiscover.clickSubmit(); // Create rule
       });
 
       await test.step('the success toast confirms the rule was created', async () => {
