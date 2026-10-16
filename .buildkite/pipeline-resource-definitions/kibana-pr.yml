@@ -35,7 +35,7 @@ spec:
             no_cone: true
             paths:
               - .buildkite
-              - .node-version
+              - .nvmrc
               - package.json
               - tsconfig.base.json
               - versions.json

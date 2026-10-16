@@ -189,7 +189,6 @@ export const CRITICAL_FILES_SCOUT: readonly string[] = [
   'package.json',
   'pnpm-lock.yaml',
   'tsconfig.json',
-  '.node-version',
   '.nvmrc',
   'config/**/*.yml',
   'config/node.options',
