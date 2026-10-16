@@ -612,6 +612,8 @@ export class WorkflowExecutionRuntimeManager {
     const finalWorkflowExecution = {
       ...workflowExecution,
       ...workflowExecutionUpdate,
+      // The update's context is rebuilt without the raw parent* keys, so keep the stored ones.
+      context: { ...workflowExecution.context, ...workflowExecutionUpdate.context },
       status: finalStatus,
     } as EsWorkflowExecution;
 
