@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleSummaryData } from '../types';
 import { RuleSummaryBody } from './rule_summary_body';
-import { RuleSummaryActionPoliciesSection } from './rule_summary_action_policies_section';
+import { RuleSummaryArtifactsSection } from './rule_summary_artifacts_section';
 
 const mockCanRead = jest.fn(() => true);
 
@@ -20,6 +20,10 @@ jest.mock('../../../services/user_capabilities', () => ({
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: () => ({ canRead: mockCanRead }),
+}));
+
+jest.mock('../../rule_details/overview/artifacts/dashboard_artifacts_subsection', () => ({
+  DashboardArtifactsSubsection: () => <div data-test-subj="mockDashboardArtifactsSubsection" />,
 }));
 
 jest.mock('../../rule_details/overview/artifacts/action_policies_artifacts_subsection', () => ({
@@ -51,39 +55,54 @@ const renderSection = (summaryRule: RuleSummaryData = rule) =>
   render(
     <I18nProvider>
       <RuleSummaryBody rule={summaryRule}>
-        <RuleSummaryActionPoliciesSection />
+        <RuleSummaryArtifactsSection />
       </RuleSummaryBody>
     </I18nProvider>
   );
 
-describe('RuleSummaryActionPoliciesSection', () => {
+describe('RuleSummaryArtifactsSection', () => {
   beforeEach(() => {
     mockCanRead.mockReturnValue(true);
   });
 
-  it('renders action policies for alert rules inside the summary flyout', () => {
+  it('renders dashboards and action policies under the Artifacts accordion', () => {
     renderSection();
 
-    expect(screen.getByTestId('ruleSummaryActionPolicies')).toHaveTextContent('Action policies');
-    expect(
-      screen
-        .getByTestId('ruleSummaryActionPolicies')
-        .querySelector('[data-euiicon-type="tablePlay"]')
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryArtifacts')).toHaveTextContent('Artifacts');
+    expect(screen.getByTestId('ruleSummaryArtifactsSubsections')).toBeInTheDocument();
+    expect(screen.getByTestId('mockDashboardArtifactsSubsection')).toBeInTheDocument();
     expect(screen.getByTestId('mockActionPoliciesArtifactsSubsection')).toHaveAttribute(
       'data-session',
       'inherit'
     );
     expect(screen.getByTestId('mockActionPoliciesArtifactsSubsection')).toHaveAttribute(
       'data-show-title',
+      'true'
+    );
+    expect(mockCanRead).toHaveBeenCalledWith('actionPolicies');
+    expect(within(screen.getByTestId('ruleSummaryArtifacts')).getByRole('button')).toHaveAttribute(
+      'aria-expanded',
       'false'
     );
+  });
+
+  it('opens Artifacts when the rule has a dashboard', async () => {
+    renderSection({
+      ...rule,
+      artifacts: [{ id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } }],
+    });
+
+    await waitFor(() => {
+      expect(
+        within(screen.getByTestId('ruleSummaryArtifacts')).getByRole('button')
+      ).toHaveAttribute('aria-expanded', 'true');
+    });
   });
 
   it('does not render action policies for signal rules', () => {
     renderSection({ ...rule, kind: 'signal' });
 
-    expect(screen.queryByTestId('ruleSummaryActionPolicies')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockDashboardArtifactsSubsection')).toBeInTheDocument();
     expect(screen.queryByTestId('mockActionPoliciesArtifactsSubsection')).not.toBeInTheDocument();
   });
 
@@ -92,7 +111,7 @@ describe('RuleSummaryActionPoliciesSection', () => {
 
     renderSection();
 
-    expect(screen.queryByTestId('ruleSummaryActionPolicies')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockDashboardArtifactsSubsection')).toBeInTheDocument();
     expect(screen.queryByTestId('mockActionPoliciesArtifactsSubsection')).not.toBeInTheDocument();
   });
 });
