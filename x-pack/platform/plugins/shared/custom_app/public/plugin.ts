@@ -18,9 +18,11 @@ import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/co
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { CUSTOM_APP_EMBEDDABLE_TYPE } from '@kbn/custom-app-common';
 import { CUSTOM_APP_CONTEXT_ATTACHMENT_TYPE } from '../common/app_context_attachment';
+import type { CustomAppByReferenceState } from '../server';
 import {
   ADD_CUSTOM_APP_ACTION_ID,
   CUSTOM_APP_APPLICATION_ID,
+  CUSTOM_APP_SAVED_OBJECT_TYPE,
   VIEW_CUSTOM_APP_SOURCE_ACTION_ID,
 } from '../common/constants';
 import { customAppContextAttachmentUiDefinition } from './attachment_types/custom_app_context';
@@ -58,6 +60,24 @@ export class CustomAppPlugin implements Plugin<void, void, SetupDeps, StartDeps>
     embeddable.registerEmbeddablePublicDefinition(CUSTOM_APP_EMBEDDABLE_TYPE, async () => {
       const { customAppEmbeddableFactory } = await import('./async_services');
       return customAppEmbeddableFactory;
+    });
+
+    // Apps saved to the library can be added to a dashboard from its "Add from library" flyout.
+    embeddable.registerAddFromLibraryType({
+      onAdd: async (container, savedObject) => {
+        container.addNewPanel<CustomAppByReferenceState>(
+          {
+            panelType: CUSTOM_APP_EMBEDDABLE_TYPE,
+            serializedState: { ref_id: savedObject.id },
+          },
+          { displaySuccessMessage: true }
+        );
+      },
+      savedObjectType: CUSTOM_APP_SAVED_OBJECT_TYPE,
+      savedObjectName: i18n.translate('xpack.customApp.library.name', {
+        defaultMessage: 'Custom app',
+      }),
+      getIconForSavedObject: () => 'apps',
     });
   }
 

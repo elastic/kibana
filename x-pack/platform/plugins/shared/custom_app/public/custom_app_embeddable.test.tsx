@@ -12,7 +12,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { appDocumentSchema, isEmptyDocument, type AppDocument } from '@kbn/custom-app-common';
-import type { CustomAppEmbeddableState } from '../server';
+import type { CustomAppByValueState, CustomAppEmbeddableState } from '../server';
 import { customAppEmbeddableFactory } from './custom_app_embeddable';
 
 // Set by the tests that need chat; without it the panel behaves as when Agent Builder is absent.
@@ -192,7 +192,7 @@ describe('the custom app panel', () => {
       const { editorProps } = await openEditor(api);
       const edited = documentWith('Edited heading');
 
-      act(() => editorProps.onSave(edited));
+      await act(async () => editorProps.onSave(edited));
 
       expect(api.getDocument()).toBe(edited);
     });
@@ -219,7 +219,7 @@ describe('the custom app panel', () => {
 
       expect(await screen.findByRole('heading', { name: 'Draft heading' })).toBeInTheDocument();
       expect(screen.queryByRole('heading', { name: 'Saved heading' })).not.toBeInTheDocument();
-      expect(api.serializeState().document).toBe(SAVED);
+      expect((api.serializeState() as CustomAppByValueState).document).toBe(SAVED);
     });
 
     it('does not report a change to the panel while previewing', async () => {
@@ -254,7 +254,7 @@ describe('the custom app panel', () => {
       await flyoutClosed();
 
       expect(await screen.findByRole('heading', { name: 'Saved heading' })).toBeInTheDocument();
-      expect(api.serializeState().document).toBe(SAVED);
+      expect((api.serializeState() as CustomAppByValueState).document).toBe(SAVED);
     });
 
     it('saves the draft as the panel, and closes the editor', async () => {
@@ -264,11 +264,11 @@ describe('the custom app panel', () => {
       const changed = jest.fn();
       api.anyStateChange$.subscribe(changed);
 
-      act(() => editorProps.onSave(edited));
+      await act(async () => editorProps.onSave(edited));
       await flyoutClosed();
 
       expect(closeFlyout).toHaveBeenCalledTimes(1);
-      expect(api.serializeState().document).toBe(edited);
+      expect((api.serializeState() as CustomAppByValueState).document).toBe(edited);
       expect(changed).toHaveBeenCalled();
       expect(await screen.findByRole('heading', { name: 'Edited heading' })).toBeInTheDocument();
     });
@@ -280,7 +280,7 @@ describe('the custom app panel', () => {
       editorProps.onCancel();
 
       expect(closeFlyout).toHaveBeenCalledTimes(1);
-      expect(api.serializeState().document).toBe(SAVED);
+      expect((api.serializeState() as CustomAppByValueState).document).toBe(SAVED);
     });
 
     it('keeps a value the author saved while previewing, since the preview is cleared after', async () => {
@@ -289,7 +289,7 @@ describe('the custom app panel', () => {
       const edited = documentWith('Edited heading');
 
       act(() => editorProps.onPreview(edited));
-      act(() => editorProps.onSave(edited));
+      await act(async () => editorProps.onSave(edited));
       await flyoutClosed();
 
       expect(await screen.findByRole('heading', { name: 'Edited heading' })).toBeInTheDocument();
@@ -418,7 +418,9 @@ describe('the custom app panel', () => {
         );
 
         expect(changed).toHaveBeenCalled();
-        expect(api.serializeState().document).toEqual(documentWith('Made by the agent'));
+        expect((api.serializeState() as CustomAppByValueState).document).toEqual(
+          documentWith('Made by the agent')
+        );
       });
 
       it('ignores an answer about another panel', async () => {

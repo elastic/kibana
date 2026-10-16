@@ -18,7 +18,10 @@ import { CustomAppPlugin } from './plugin';
 jest.mock('./services', () => ({ setServices: jest.fn() }));
 
 const setup = () => {
-  const embeddable = { registerEmbeddablePublicDefinition: jest.fn() };
+  const embeddable = {
+    registerEmbeddablePublicDefinition: jest.fn(),
+    registerAddFromLibraryType: jest.fn(),
+  };
   const uiActions = { registerActionAsync: jest.fn(), attachAction: jest.fn() };
   const plugin = new CustomAppPlugin();
   const core = coreMock.createSetup();
@@ -49,6 +52,33 @@ describe('CustomAppPlugin', () => {
       })
     );
     expect(CUSTOM_APP_APPLICATION_ID).toBe('customApp');
+  });
+
+  describe('the library', () => {
+    it('lists custom apps in "Add from library", under the saved object type of an app', () => {
+      const { embeddable } = setup();
+
+      expect(embeddable.registerAddFromLibraryType).toHaveBeenCalledWith(
+        expect.objectContaining({
+          savedObjectType: 'custom_app',
+          savedObjectName: 'Custom app',
+          onAdd: expect.any(Function),
+        })
+      );
+    });
+
+    it('adds the one that is chosen as a panel that links to it, and says so', async () => {
+      const { embeddable } = setup();
+      const [{ onAdd }] = embeddable.registerAddFromLibraryType.mock.calls[0];
+      const container = { addNewPanel: jest.fn() };
+
+      await onAdd(container, { id: 'saved-1' });
+
+      expect(container.addNewPanel).toHaveBeenCalledWith(
+        { panelType: CUSTOM_APP_EMBEDDABLE_TYPE, serializedState: { ref_id: 'saved-1' } },
+        { displaySuccessMessage: true }
+      );
+    });
   });
 
   it('offers a custom app in the add panel menu', () => {

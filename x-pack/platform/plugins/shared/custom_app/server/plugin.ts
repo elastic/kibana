@@ -15,6 +15,7 @@ import { customAppFeature } from './feature';
 import { registerSavedAppRoutes } from './routes/register_routes';
 import { customAppSavedObjectType } from './saved_objects';
 import { customAppEmbeddableSchema } from './embeddable/schemas';
+import { getTransforms } from './embeddable/transforms/get_transforms';
 import { customAppCreationSkill } from './skills/custom_app_creation_skill';
 import { createCreateCustomAppTool } from './tools/create_custom_app_tool';
 import { createUpdateCustomAppTool } from './tools/update_custom_app_tool';
@@ -35,6 +36,7 @@ export class CustomAppPlugin implements Plugin<void, void, SetupDeps> {
     embeddable.registerEmbeddableServerDefinition(CUSTOM_APP_EMBEDDABLE_TYPE, {
       title: 'Custom app',
       getSchema: () => customAppEmbeddableSchema,
+      getTransforms,
     });
 
     if (agentBuilder) {

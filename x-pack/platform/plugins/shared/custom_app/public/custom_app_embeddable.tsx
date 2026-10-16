@@ -37,6 +37,7 @@ import {
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
   type HasEditCapabilities,
+  type HasLibraryTransforms,
   type HasTypeDisplayName,
   type PublishesDataLoading,
   type PublishesWritableTimeRange,
@@ -49,7 +50,13 @@ import {
   isEmptyDocument,
   type AppDocument,
 } from '@kbn/custom-app-common';
-import type { CustomAppEmbeddableState } from '../server';
+import type {
+  CustomAppByReferenceState,
+  CustomAppByValueState,
+  CustomAppEmbeddableState,
+} from '../server';
+import { isByReferenceState } from '../common/by_reference';
+import { createSavedAppsClient, type SavedAppsClient } from './application/saved_apps_client';
 import { AppFrame } from './components/app_frame';
 import { EmptyApp } from './components/empty_app';
 import { NodeRenderer } from './components/node_renderer';
@@ -74,7 +81,29 @@ export type CustomAppApi = DefaultEmbeddableApi<CustomAppEmbeddableState> &
   HasEditCapabilities &
   HasCustomAppDocument &
   PublishesDataLoading &
-  PublishesWritableTimeRange;
+  PublishesWritableTimeRange &
+  HasLibraryTransforms<CustomAppByReferenceState, CustomAppByValueState>;
+
+interface LibraryApp {
+  title: string;
+  description?: string;
+  document: AppDocument;
+}
+
+/** An app of the library, checked as a panel checks its own: one that is not valid is not shown. */
+const loadLibraryApp = async (client: SavedAppsClient, id: string): Promise<LibraryApp> => {
+  const { title, description, document } = await client.get(id);
+  const parsed = appDocumentSchema.safeParse(document);
+  if (!parsed.success) {
+    throw new Error(
+      i18n.translate('xpack.customApp.embeddable.invalidLibraryApp', {
+        defaultMessage: 'The custom app "{title}" cannot be shown: {problems}',
+        values: { title, problems: parsed.error.issues.map(({ message }) => message).join('; ') },
+      })
+    );
+  }
+  return { title, description, document: parsed.data };
+};
 
 export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
   CustomAppEmbeddableState,
@@ -83,16 +112,27 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
   type: CUSTOM_APP_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const { core, search, agentBuilder } = getServices();
+    const savedApps = createSavedAppsClient(core.http);
+    // A panel is either an app of its own, or a link to one of the library.
+    const libraryId = isByReferenceState(initialState) ? initialState.ref_id : undefined;
+    const library = libraryId ? await loadLibraryApp(savedApps, libraryId) : undefined;
+    const initialDocument = library
+      ? library.document
+      : (initialState as CustomAppByValueState).document;
+
     const titleManager = initializeTitleManager(initialState);
     const timeRangeManager = initializeTimeRangeManager(initialState);
-    const document$ = new BehaviorSubject<AppDocument>(initialState.document);
+    // What the panel is called until it is given a title of its own.
+    const defaultTitle$ = new BehaviorSubject<string | undefined>(library?.title);
+    const defaultDescription$ = new BehaviorSubject<string | undefined>(library?.description);
+    const document$ = new BehaviorSubject<AppDocument>(initialDocument);
 
     // What the editor's Preview button shows on the panel instead of the saved document. It is
     // not part of the panel's state, so previewing never marks the dashboard as changed.
     const previewDocument$ = new BehaviorSubject<AppDocument | undefined>(undefined);
     // Whether the panel is being laid out or looked at, which decides what an empty app offers.
     const viewMode$ = getViewModeSubject(parentApi) ?? new BehaviorSubject('view');
-    const renderedDocument$ = new BehaviorSubject<AppDocument>(initialState.document);
+    const renderedDocument$ = new BehaviorSubject<AppDocument>(initialDocument);
 
     /** Opens chat with the app as it stands attached, for the agent to build or change. */
     const generateWithChat = (draft: AppDocument) =>
@@ -111,17 +151,55 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
       runQuery: createRunEsqlQuery({ search, http: core.http }),
       getParameterNames: (query) => getESQLQueryVariables(query),
     });
-    dataLayer.setQueries(collectQueries(initialState.document.root));
-    const runtime = createAppRuntime(initialState.document);
+    dataLayer.setQueries(collectQueries(initialDocument.root));
+    const runtime = createAppRuntime(initialDocument);
     // Emits the defaults straight away, then every change a user makes.
     const stateSubscription = runtime.state$.subscribe(dataLayer.setState);
 
-    const serializeState = (): CustomAppEmbeddableState => ({
+    const serializeByValue = (): CustomAppByValueState => ({
       ...titleManager.getLatestState(),
       ...timeRangeManager.getLatestState(),
       version: CUSTOM_APP_STATE_VERSION,
       document: document$.getValue(),
     });
+
+    const serializeByReference = (refId: string): CustomAppByReferenceState => ({
+      ...titleManager.getLatestState(),
+      ...timeRangeManager.getLatestState(),
+      ref_id: refId,
+    });
+
+    const serializeState = (): CustomAppEmbeddableState =>
+      libraryId ? serializeByReference(libraryId) : serializeByValue();
+
+    /**
+     * What applying a change to the app does. An app of the library is shared, so it is saved
+     * where it lives and every dashboard that has it shows it; one of the panel's own only changes
+     * the panel, which the dashboard saves. Says whether it was applied.
+     */
+    const applyDocument = async (document: AppDocument): Promise<boolean> => {
+      if (libraryId && library) {
+        try {
+          await savedApps.update(libraryId, {
+            title: library.title,
+            description: library.description,
+            document,
+          });
+        } catch (error) {
+          core.notifications.toasts.addDanger({
+            title: i18n.translate('xpack.customApp.embeddable.saveLibraryError', {
+              defaultMessage: 'The custom app could not be saved to the library',
+            }),
+            text:
+              (error as { body?: { message?: string } })?.body?.message ??
+              (error instanceof Error ? error.message : String(error)),
+          });
+          return false;
+        }
+      }
+      document$.next(document);
+      return true;
+    };
 
     const stateApi = initializeStateApi<CustomAppEmbeddableState>({
       uuid,
@@ -130,21 +208,25 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
       anyStateChange$: merge(
         titleManager.anyStateChange$,
         timeRangeManager.anyStateChange$,
-        document$.pipe(
-          skip(1),
-          map(() => undefined)
-        )
+        // The document of a linked app is saved with it, not with the dashboard.
+        libraryId
+          ? EMPTY
+          : document$.pipe(
+              skip(1),
+              map(() => undefined)
+            )
       ),
       getComparators: () => ({
         ...titleComparators,
         ...timeRangeComparators,
         version: 'skip',
-        document: 'deepEquality',
+        document: libraryId ? 'skip' : 'deepEquality',
+        ref_id: 'skip',
       }),
       applySerializedState: (lastSaved) => {
         titleManager.reinitializeState(lastSaved ?? {});
         timeRangeManager.reinitializeState(lastSaved ?? {});
-        if (lastSaved) document$.next(lastSaved.document);
+        if (lastSaved && !isByReferenceState(lastSaved)) document$.next(lastSaved.document);
       },
     });
 
@@ -152,6 +234,8 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
       ...stateApi,
       ...titleManager.api,
       ...timeRangeManager.api,
+      defaultTitle$,
+      defaultDescription$,
       dataLoading$: dataLayer.loading$,
       serializeState,
       isEditingEnabled: () => true,
@@ -180,9 +264,8 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
                     : undefined
                 }
                 onCancel={closeFlyout}
-                onSave={(document) => {
-                  document$.next(document);
-                  closeFlyout();
+                onSave={async (document) => {
+                  if (await applyDocument(document)) closeFlyout();
                 }}
               />
             );
@@ -194,6 +277,23 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
         i18n.translate('xpack.customApp.embeddable.typeDisplayName', {
           defaultMessage: 'Custom app',
         }),
+      // Moving between the dashboard and the library.
+      saveToLibrary: async (title: string) => {
+        const { id } = await savedApps.create({
+          title,
+          description: titleManager.getLatestState().description,
+          document: document$.getValue(),
+        });
+        return id;
+      },
+      getSerializedStateByValue: serializeByValue,
+      getSerializedStateByReference: serializeByReference,
+      canLinkToLibrary: async () => libraryId === undefined,
+      canUnlinkFromLibrary: async () => libraryId !== undefined,
+      hasLibraryItemWithTitle: async (title: string) => {
+        const { apps } = await savedApps.find({ search: title, page: 1, perPage: 100 });
+        return apps.some((app) => app.title.toLowerCase() === title.toLowerCase());
+      },
     });
 
     // The panel shows the preview while there is one, and the saved document otherwise.
@@ -249,7 +349,7 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
               if (data.embeddable_id !== uuid) return;
 
               const parsed = appDocumentSchema.safeParse(data.document);
-              if (parsed.success) document$.next(parsed.data);
+              if (parsed.success) applyDocument(parsed.data);
             });
 
           return () => subscription.unsubscribe();

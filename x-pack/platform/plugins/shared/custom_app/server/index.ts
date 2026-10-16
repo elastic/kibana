@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export type { CustomAppEmbeddableState } from './embeddable/schemas';
+export type {
+  CustomAppByReferenceState,
+  CustomAppByValueState,
+  CustomAppEmbeddableState,
+} from './embeddable/schemas';
 
 export const plugin = async () => {
   const { CustomAppPlugin } = await import('./plugin');
