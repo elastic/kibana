@@ -189,6 +189,32 @@ describe('runDiscoveryGrounding', () => {
       esClient,
     });
 
-    expect(String(grounding.confirmation.values[0][0])).toHaveLength(2_001);
+    expect(String(grounding.confirmation.values[0][0])).toHaveLength(301);
+  });
+
+  it('keeps the first rows and one of every group of columns holding the same values, clipped', async () => {
+    const long = 'x'.repeat(400);
+    const { esClient } = fakeEs(() => ({
+      columns: [
+        'message',
+        'attributes.message',
+        'service.name',
+        'resource.attributes.service.name',
+      ],
+      values: [1, 2, 3, 4].map((n) => [`m${n}${long}`, `m${n}${long}`, 'svc', 'svc']),
+    }));
+
+    const [grounding] = await run({
+      context: contextOf(queryKi('r1', 'FROM logs | WHERE message : "m"')),
+      esClient,
+    });
+
+    expect(grounding.confirmation.columns.map(({ name }) => name)).toEqual([
+      'message',
+      'service.name',
+    ]);
+    expect(grounding.confirmation.values).toHaveLength(3);
+    expect(String(grounding.confirmation.values[0][0])).toHaveLength(301);
+    expect(grounding.profile?.group_by).toBe('service.name');
   });
 });

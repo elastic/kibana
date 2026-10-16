@@ -43,18 +43,18 @@ triggers:
           description: 'When true, the detection classifier only records which detections it would skip and every detection still goes to the agent. Set to false to enforce the skips.'
         prefetchGroundingContext:
           type: boolean
-          default: false
-          description: 'When true, the knowledge indicators of the batch (the grounding skill''s Step 1 searches) are fetched before the agent runs and sent in its message, so it makes no ki_search call. Off until the discovery evaluation shows no loss in verdicts or events.'
+          default: true
+          description: "When true, the knowledge indicators of the batch (the grounding skill's Step 1 searches) are fetched before the agent runs and sent in its message, so it makes no ki_search call. Off until the discovery evaluation shows no loss in verdicts or events."
         prefetchGroundingResults:
           type: boolean
-          default: false
-          description: 'When true, the grounding samples and no-scope profiles of the batch''s rules are also run before the agent and sent with its knowledge indicators, so the agent reads them instead of running those queries. Implies the knowledge indicators are fetched; off until the discovery evaluation shows no loss.'
+          default: true
+          description: "When true, the grounding samples and no-scope profiles of the batch's rules are also run before the agent and sent with its knowledge indicators, so the agent reads them instead of running those queries. Implies the knowledge indicators are fetched; off until the discovery evaluation shows no loss."
         classifierProbeWindowMinutes:
           type: number
           default: 20
           minimum: 15
           maximum: 360
-          description: 'Window, ending now, over which the classifier re-runs a rule''s stored query. Keep it short: on c0, windows over about 30 minutes let earlier matches hide recoveries from the agent.'
+          description: "Window, ending now, over which the classifier re-runs a rule's stored query. Keep it short: on c0, windows over about 30 minutes let earlier matches hide recoveries from the agent."
         classifierProbeTimeoutMs:
           type: number
           default: 8000
@@ -106,7 +106,7 @@ steps:
   - name: bootstrap_cleanup_workflow
     type: kibana.request
     with:
-      method: POST
+      method: POST 
       path: '/s/{{ workflow.spaceId }}/internal/significant_events/maintenance/cleanup/_bootstrap'
       headers:
         x-elastic-internal-origin: 'kibana'
@@ -273,7 +273,7 @@ steps:
                   - '{{ foreach.item[0] }}'
                 processed_by: '{{ execution.id }}'
                 # The classifier's decision for this detection's rule, so the marker says why.
-                skip: '${{ steps.classify_detections.output.decisions | where: ''rule_uuid'', foreach.item[1] | first }}'
+                skip: "${{ steps.classify_detections.output.decisions | where: 'rule_uuid', foreach.item[1] | first }}"
             on-failure:
               continue: true
 
@@ -442,7 +442,14 @@ steps:
                   description: 'true when events_write appended the event version.'
                 reason:
                   type: string
-                  enum: [bulk_error, duplicate_in_batch, existing_active_event, unchanged_outcome, unknown_event_id]
+                  enum:
+                    [
+                      bulk_error,
+                      duplicate_in_batch,
+                      existing_active_event,
+                      unchanged_outcome,
+                      unknown_event_id,
+                    ]
                   description: 'Failure or skip reason when written is false.'
               required: [event_id, severity, status, written]
         required: [written_rule_uuids, significant_events]

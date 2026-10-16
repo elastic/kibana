@@ -13,11 +13,17 @@ import {
   type ProbeWindow,
   type StoredQueryResult,
 } from '../../step_definitions/run_probe';
-import { buildProfileQueries, pickSpreadGroupField, type ProfileQuery } from './profile_queries';
+import {
+  buildProfileQueries,
+  pickSpreadGroupField,
+  SPREAD_GROUP_FIELDS,
+  type ProfileQuery,
+} from './profile_queries';
 import type { DiscoveryContext } from './discovery_context';
 
 const CONFIRMATION_LOOKBACK_MS = 15 * 60_000;
-const MAX_CELL_LENGTH = 2_000;
+const MAX_CELL_LENGTH = 300;
+const MAX_SAMPLE_ROWS = 3;
 const CONCURRENCY = 5;
 const QUERY_TIMEOUT_MS = 20_000;
 const TOTAL_BUDGET_MS = 60_000;
@@ -43,6 +49,33 @@ export interface RuleGrounding {
     trend_edges: GroundingQueryResult;
   };
 }
+
+/**
+ * Keeps the first of every group of columns that hold the same values in every row (the OTel
+ * `attributes.*` and `resource.attributes.*` mirrors of a field) and the first rows only.
+ */
+const compactSample = ({
+  columns,
+  values,
+}: {
+  columns: Array<{ name: string }>;
+  values: FieldValue[][];
+}): { columns: Array<{ name: string }>; values: FieldValue[][] } => {
+  const rows = values.slice(0, MAX_SAMPLE_ROWS);
+  if (columns.length === 0) return { columns, values: rows };
+  const seen = new Set<string>();
+  const keep = columns.flatMap(({ name }, index) => {
+    const signature = JSON.stringify(rows.map((row) => row[index]));
+    if (seen.has(signature) && !(SPREAD_GROUP_FIELDS as readonly string[]).includes(name))
+      return [];
+    seen.add(signature);
+    return [index];
+  });
+  return {
+    columns: keep.map((index) => columns[index]),
+    values: rows.map((row) => keep.map((index) => row[index])),
+  };
+};
 
 const clip = (value: FieldValue): FieldValue =>
   typeof value === 'string' && value.length > MAX_CELL_LENGTH
@@ -84,12 +117,13 @@ export const runDiscoveryGrounding = async ({
         deadlineAt,
         abortSignal,
       });
+      const sample = compactSample({ columns, values });
       return {
         query,
         time_range: window,
         status,
-        columns,
-        values: values.map((row) => row.map(clip)),
+        columns: sample.columns,
+        values: sample.values.map((row) => row.map(clip)),
       };
     });
   const runProfile = ({ query, lookbackMinutes }: ProfileQuery) =>
