@@ -5,13 +5,41 @@
  * 2.0.
  */
 
+import React from 'react';
+import type { PropsWithChildren } from 'react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { QueryArgs, Row } from '../common';
 import type { PageEnricher, RunContext } from '../queries/types';
-import { fetchEnrichedRows, getLoadedRows } from './use_entity_grid_rows_enrichment';
+import type { GridContext, UseEntityGridDataOptions } from './use_entity_grid_context';
+import {
+  ENRICH_CHUNK_SIZE,
+  fetchEnrichedRows,
+  getLoadedRows,
+  useEntityGridRowsEnrichment,
+} from './use_entity_grid_rows_enrichment';
+
+const mockEnrich = jest.fn();
+
+jest.mock('../../../../../common/hooks/use_error_toast');
+jest.mock('../queries/esql', () => ({
+  ...jest.requireActual('../queries/esql'),
+  createEsqlRunner: () => jest.fn(),
+}));
+jest.mock('../grid_columns', () => ({
+  PAGE_ENRICHERS: {
+    resolved: [
+      {
+        fields: ['alert_count'],
+        fetch: (rows: readonly Row[]) => mockEnrich(rows),
+      },
+    ],
+  },
+}));
 
 describe('getLoadedRows', () => {
-  it('shows the rows of every batch in order', () => {
+  it('shows the rows of every chunk in order', () => {
     expect(
       getLoadedRows([
         { rows: [{ 'entity.id': 'a' }, { 'entity.id': 'b' }] },
@@ -20,7 +48,7 @@ describe('getLoadedRows', () => {
     ).toEqual([{ 'entity.id': 'a' }, { 'entity.id': 'b' }, { 'entity.id': 'c' }]);
   });
 
-  it("adds a batch's computed columns once its enrich data arrives", () => {
+  it("adds a chunk's computed columns once its enrich data arrives", () => {
     expect(
       getLoadedRows([
         {
@@ -39,7 +67,7 @@ describe('getLoadedRows', () => {
     ]);
   });
 
-  it('keeps the fresh entity fields of a refetched batch over its earlier enrich data', () => {
+  it('keeps the fresh entity fields of refetched rows over their earlier enrich data', () => {
     expect(
       getLoadedRows([
         {
@@ -114,5 +142,82 @@ describe('fetchEnrichedRows', () => {
     await expect(
       fetchEnrichedRows(ROWS, ARGS, ctx, [enricherOf('alert_count', {}, abort)])
     ).rejects.toBe(abort);
+  });
+});
+
+describe('useEntityGridRowsEnrichment', () => {
+  const ROWS: Row[] = Array.from({ length: ENRICH_CHUNK_SIZE * 3 }, (_, i) => ({
+    'entity.id': `e${i}`,
+  }));
+  const OPTIONS: UseEntityGridDataOptions = {
+    sortField: 'entity.name',
+    sortDirection: 'asc',
+    pageSize: ROWS.length,
+    timeRange: '7d',
+    rowsMode: 'resolved',
+    keepFields: [],
+  };
+  const CONTEXT = {
+    searchService: {},
+    http: httpServiceMock.createSetupContract(),
+    spaceId: 'default',
+    concreteEntityIndexName: 'entities-index',
+    isEntitiesIndexLoading: false,
+    anomalyJobIds: [],
+    isAnomalyJobsLoading: false,
+  } as unknown as GridContext;
+
+  const getEnrichedIds = () =>
+    mockEnrich.mock.calls.map(([rows]: [Row[]]) => [rows[0]['entity.id'], rows.length]);
+
+  const renderEnrichment = (enrichRowsInView: boolean) => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    return renderHook(
+      () =>
+        useEntityGridRowsEnrichment(
+          { ...CONTEXT, queryClient },
+          OPTIONS,
+          ROWS,
+          false,
+          enrichRowsInView
+        ),
+      {
+        wrapper: ({ children }: PropsWithChildren) => (
+          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        ),
+      }
+    );
+  };
+
+  beforeEach(() => {
+    mockEnrich.mockReset();
+    mockEnrich.mockResolvedValue(new Map());
+  });
+
+  it('enriches every loaded row, a chunk at a time', async () => {
+    renderEnrichment(false);
+    await waitFor(() => expect(mockEnrich).toHaveBeenCalledTimes(3));
+    expect(getEnrichedIds()).toEqual([
+      ['e0', ENRICH_CHUNK_SIZE],
+      ['e50', ENRICH_CHUNK_SIZE],
+      ['e100', ENRICH_CHUNK_SIZE],
+    ]);
+  });
+
+  it('enriches only the chunks of the rows in view, once each', async () => {
+    const { result } = renderEnrichment(true);
+    // Nothing until the grid reports the rows in view.
+    expect(mockEnrich).not.toHaveBeenCalled();
+
+    act(() => result.current.onRowsInViewChange(0, 10));
+    await waitFor(() => expect(getEnrichedIds()).toEqual([['e0', ENRICH_CHUNK_SIZE]]));
+
+    act(() => result.current.onRowsInViewChange(110, 120));
+    await waitFor(() => expect(mockEnrich).toHaveBeenCalledTimes(2));
+    expect(getEnrichedIds()[1]).toEqual(['e100', ENRICH_CHUNK_SIZE]);
+
+    // Back to the first chunk: its columns are already read.
+    act(() => result.current.onRowsInViewChange(0, 10));
+    expect(mockEnrich).toHaveBeenCalledTimes(2);
   });
 });

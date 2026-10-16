@@ -16,12 +16,9 @@ import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildNewEntityCountQuery } from '../queries/new_entity_query';
-import type { TimeRange } from '../../use_time_range_param';
-import {
-  getEntityFilterESQL,
-  EMPTY_ENTITY_FILTERS,
-  type EntityFilters,
-} from '../../use_entity_filters_param';
+import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
+import type { EntityFilters, TimeRange } from '../../entities_grid/common';
+import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 
 export const useNewEntityCount = ({
@@ -46,7 +43,9 @@ export const useNewEntityCount = ({
 
   const query = useMemo(
     () =>
-      index ? buildNewEntityCountQuery(index, timeRange, getEntityFilterESQL(entityFilters)) : null,
+      index
+        ? buildNewEntityCountQuery(index, timeRange, buildEntityFilterClauses(entityFilters))
+        : null,
     [index, timeRange, entityFilters]
   );
 

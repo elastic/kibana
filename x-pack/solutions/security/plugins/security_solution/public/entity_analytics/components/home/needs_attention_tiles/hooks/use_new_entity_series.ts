@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
-import { getEntityFilterESQL } from '../../use_entity_filters_param';
+import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import {
   buildNewEntitySeriesQuery,
   newEntitySeriesColumn,
@@ -53,7 +53,7 @@ export const useNewEntitySeries = ({
   const query = useMemo(
     () =>
       index
-        ? buildNewEntitySeriesQuery(index, timeRange, getEntityFilterESQL(entityFilters))
+        ? buildNewEntitySeriesQuery(index, timeRange, buildEntityFilterClauses(entityFilters))
         : null,
     [index, timeRange, entityFilters]
   );

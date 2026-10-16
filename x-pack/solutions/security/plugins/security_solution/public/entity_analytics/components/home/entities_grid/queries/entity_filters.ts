@@ -7,7 +7,8 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { escapeStringValue } from '@kbn/esql-utils';
-import type { EntityFilters } from '../common';
+import { RESOLUTION_RISK_LEVEL_FIELD, RISK_LEVEL_FIELD } from '../common';
+import type { EntityFilters, RowsMode } from '../common';
 import { buildFilterClause, toList } from './esql';
 
 /** Membership on multivalue keyword fields — scalar `IN` returns null for multi-valued docs. */
@@ -16,7 +17,6 @@ const buildMvContainsExpression = (field: string, values: readonly string[]): st
   return clauses.length === 1 ? clauses[0] : `(${clauses.join(' OR ')})`;
 };
 
-/** Entity doc field of each entity filter, in filter order. */
 const ENTITY_FILTER_FIELDS: ReadonlyArray<{
   key: keyof EntityFilters;
   field: string;
@@ -29,17 +29,28 @@ const ENTITY_FILTER_FIELDS: ReadonlyArray<{
   { key: 'dataSources', field: 'entity.source', isMultiValue: true },
 ];
 
+/** Plain field filters, not `COALESCE(…) IN (…)`: Lucene can only run filters on stored fields, not on computed values. */
+const buildResolvedRiskLevelCondition = (values: readonly string[]): string =>
+  `(${RESOLUTION_RISK_LEVEL_FIELD} IN (${toList(
+    values
+  )}) OR (${RESOLUTION_RISK_LEVEL_FIELD} IS NULL AND ${RISK_LEVEL_FIELD} IN (${toList(values)})))`;
+
 /** AND-joined ES|QL predicate for URL entity filters (no leading `| WHERE`). */
-export const buildEntityFiltersExpression = (filters: EntityFilters): string =>
+export const buildEntityFiltersExpression = (
+  filters: EntityFilters,
+  rowsMode: RowsMode = 'individual'
+): string =>
   ENTITY_FILTER_FIELDS.flatMap(({ key, field, isMultiValue }) => {
     const values: readonly string[] = filters[key];
     if (!values.length) return [];
+    if (key === 'riskLevels' && rowsMode === 'resolved') {
+      return [buildResolvedRiskLevelCondition(values)];
+    }
     return isMultiValue
       ? [buildMvContainsExpression(field, values)]
       : [`${field} IN (${toList(values)})`];
   }).join(' AND ');
 
-/** DSL counterpart of {@link buildEntityFiltersExpression}. */
 export const buildEntityFiltersQuery = (filters: EntityFilters): QueryDslQueryContainer[] =>
   ENTITY_FILTER_FIELDS.flatMap(({ key, field }) => {
     const values: readonly string[] = filters[key];

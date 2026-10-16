@@ -14,7 +14,6 @@ import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/
 import type { EntityFilters } from '../../entities_grid/common';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
-import { getEntityFilterESQL } from '../../use_entity_filters_param';
 import {
   severeAlertsSeriesColumn,
   watchlistedSeriesColumn,
@@ -142,7 +141,7 @@ const HOOKS: readonly HookCase[] = [
     columns: [newEntitySeriesColumn],
     toQueryData: ([dots]) => dots,
     fromParsed: (parsed) => [parsed as number[]],
-    clausesOf: getEntityFilterESQL,
+    clausesOf: buildEntityFilterClauses,
     run: ({ isReady, skip, entityFilters, tiles: [tile] }) => {
       const { trend, isTrendLoading } = renderHook(() =>
         useNewEntitySeries({

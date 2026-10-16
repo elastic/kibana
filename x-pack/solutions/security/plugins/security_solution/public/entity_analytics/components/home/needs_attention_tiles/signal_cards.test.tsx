@@ -42,7 +42,7 @@ const cards: SignalCardData[] = CARD_IDS.map((id, index) => ({
 
 describe('SignalCards', () => {
   it('draws every tile with its title, description and count', () => {
-    render(<SignalCards activeFilter={null} cards={cards} onFilterForCard={jest.fn()} />);
+    render(<SignalCards activeTile={null} cards={cards} onFilterForTile={jest.fn()} />);
 
     cards.forEach(({ id, title, description, value }) => {
       const tile = screen.getByTestId(`eaFaceliftSignalCard-${id}`);
@@ -53,23 +53,17 @@ describe('SignalCards', () => {
   });
 
   it('toggles the table filter for the tile that was clicked', () => {
-    const onFilterForCard = jest.fn();
-    render(<SignalCards activeFilter={null} cards={cards} onFilterForCard={onFilterForCard} />);
+    const onFilterForTile = jest.fn();
+    render(<SignalCards activeTile={null} cards={cards} onFilterForTile={onFilterForTile} />);
 
     fireEvent.click(screen.getByTestId('eaFaceliftSignalCard-riskMovers'));
 
-    expect(onFilterForCard).toHaveBeenCalledTimes(1);
-    expect(onFilterForCard).toHaveBeenCalledWith('riskMovers');
+    expect(onFilterForTile).toHaveBeenCalledTimes(1);
+    expect(onFilterForTile).toHaveBeenCalledWith('riskMovers');
   });
 
   it('marks only the filtered tile as pressed', () => {
-    render(
-      <SignalCards
-        activeFilter={{ type: 'card', cardId: 'watchlisted', label: 'Watchlisted' }}
-        cards={cards}
-        onFilterForCard={jest.fn()}
-      />
-    );
+    render(<SignalCards activeTile="watchlisted" cards={cards} onFilterForTile={jest.fn()} />);
 
     expect(screen.getByTestId('eaFaceliftSignalCard-watchlisted')).toHaveAttribute(
       'aria-pressed',
@@ -82,19 +76,19 @@ describe('SignalCards', () => {
   });
 
   it('does not make a tile with a count of 0 clickable', () => {
-    const onFilterForCard = jest.fn();
+    const onFilterForTile = jest.fn();
     render(
       <SignalCards
-        activeFilter={null}
+        activeTile={null}
         cards={cards.map((card) =>
           card.id === 'newlyHighCritical' ? { ...card, value: 0 } : card
         )}
-        onFilterForCard={onFilterForCard}
+        onFilterForTile={onFilterForTile}
       />
     );
 
     fireEvent.click(screen.getByTestId('eaFaceliftSignalCard-newlyHighCritical'));
 
-    expect(onFilterForCard).not.toHaveBeenCalled();
+    expect(onFilterForTile).not.toHaveBeenCalled();
   });
 });

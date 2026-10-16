@@ -9,8 +9,9 @@ import { useMemo } from 'react';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { buildNewEntityHistoryReachesBackQuery } from '../queries/history_reaches_back';
 import { buildNewEntityCountQuery } from '../queries/new_entity_query';
-import { EMPTY_ENTITY_FILTERS, getEntityFilterESQL } from '../../use_entity_filters_param';
+import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
+import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import { readFirstNumber } from './read_first_number';
 import { isDeltaStillComing, usePreviousPeriod } from './use_previous_period';
 
@@ -52,7 +53,12 @@ export const useNewEntityDelta = ({
   const previousQuery = useMemo(
     () =>
       index
-        ? buildNewEntityCountQuery(index, timeRange, getEntityFilterESQL(entityFilters), 'previous')
+        ? buildNewEntityCountQuery(
+            index,
+            timeRange,
+            buildEntityFilterClauses(entityFilters),
+            'previous'
+          )
         : null,
     [index, timeRange, entityFilters]
   );

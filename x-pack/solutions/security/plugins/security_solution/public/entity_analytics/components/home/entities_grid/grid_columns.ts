@@ -12,6 +12,7 @@ import { riskScoreChangeQuerySpec } from './queries/risk_score_change';
 import { groupSizeQuerySpec } from './queries/group_size';
 import { caseCountQuerySpec } from './queries/cases';
 import { nativeSortQuerySpec } from './queries/native';
+import { withResolvedEntityValues } from './queries/resolved_entities';
 import { isOneOf } from './common';
 import type { RowsMode } from './common';
 import type { ColumnQuerySpec, PageEnricher, SortPageFetcher } from './queries/types';
@@ -44,7 +45,7 @@ const COLUMNS = [
 export type GridColumnId = (typeof COLUMNS)[number]['id'];
 
 /** How the grid sorts and reads each column; columns without a spec are plain entity fields. */
-const QUERY_SPECS: Readonly<Partial<Record<GridColumnId, ColumnQuerySpec>>> = {
+export const QUERY_SPECS: Readonly<Partial<Record<GridColumnId, ColumnQuerySpec>>> = {
   'entity.name': nativeSortQuerySpec,
   group_size: groupSizeQuerySpec,
   'entity.EngineMetadata.Type': nativeSortQuerySpec,
@@ -66,28 +67,21 @@ export const isGridColumnId = (id: string): id is GridColumnId => GRID_COLUMN_ID
 const getQuerySpec = (id: string): ColumnQuerySpec | undefined =>
   isGridColumnId(id) ? QUERY_SPECS[id] : undefined;
 
-export const findSortPageFetcher = (id: string): SortPageFetcher | undefined =>
-  getQuerySpec(id)?.fetchSortPage;
+/** On resolved rows, the page's rows also get their resolved entities' values. */
+export const findSortPageFetcher = (id: string): SortPageFetcher | undefined => {
+  const fetchSortPage = getQuerySpec(id)?.fetchSortPage;
 
-/** Sortable columns with their sort page fetcher, in grid order. */
-export const SORT_PAGE_FETCHERS: ReadonlyArray<[GridColumnId, SortPageFetcher]> = COLUMNS.flatMap(
-  ({ id }): Array<[GridColumnId, SortPageFetcher]> => {
-    const fetchSortPage = QUERY_SPECS[id]?.fetchSortPage;
-    return fetchSortPage ? [[id, fetchSortPage]] : [];
-  }
-);
+  if (!fetchSortPage) return undefined;
 
-/** Columns with an enricher, with the enricher, in grid order. */
-export const COLUMN_ENRICHERS: ReadonlyArray<[GridColumnId, PageEnricher]> = COLUMNS.flatMap(
-  ({ id }): Array<[GridColumnId, PageEnricher]> => {
-    const enricher = QUERY_SPECS[id]?.enricher;
-    return enricher ? [[id, enricher]] : [];
-  }
-);
+  return async (args, ctx) => {
+    const rows = await fetchSortPage(args, ctx);
+    return args.rowsMode === 'resolved' ? withResolvedEntityValues(rows, args, ctx.runQuery) : rows;
+  };
+};
 
 /** Fields the enrichers read; their cells stay blank until the page is enriched. */
 export const ENRICHED_FIELDS: ReadonlySet<string> = new Set(
-  COLUMN_ENRICHERS.flatMap(([, { fields }]) => fields)
+  Object.values(QUERY_SPECS).flatMap((spec) => spec?.enricher?.fields ?? [])
 );
 
 const ALL_COLUMNS: readonly EuiDataGridColumn[] = COLUMNS.map((column) => ({
