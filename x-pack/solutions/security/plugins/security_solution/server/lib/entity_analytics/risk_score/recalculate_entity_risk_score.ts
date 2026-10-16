@@ -17,10 +17,7 @@ import { getRiskInputsIndex } from './get_risk_inputs_index';
 import { buildAlertFilters } from './maintainer/steps/build_alert_filters';
 import { getLookupIndexName } from './maintainer/lookup/lookup_index';
 import { persistZeroBaseScore, scoreBaseEntities } from './maintainer/steps/score_base_entities';
-import {
-  persistZeroResolutionScore,
-  runResolutionScoringStep,
-} from './maintainer/steps/run_resolution_scoring_step';
+import { runResolutionScoringStep } from './maintainer/steps/run_resolution_scoring_step';
 import { fetchWatchlistConfigs } from './maintainer/utils/fetch_watchlist_configs';
 import type { RiskEngineDataWriter } from './risk_engine_data_writer';
 import type { RiskEngineConfiguration } from '../types';
@@ -88,8 +85,7 @@ export const recalculateEntityRiskScore = async ({
     throw Boom.badRequest(`Entity not found in store: ${entityId}`);
   }
 
-  const { alertFilters, resolutionTargetId, hasExistingBaseScore, hasExistingResolutionScore } =
-    scoringContext;
+  const { alertFilters, resolutionTargetId, hasExistingBaseScore } = scoringContext;
 
   const { dataViewId } = engineConfig;
   const pageSize = engineConfig.pageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
@@ -145,11 +141,7 @@ export const recalculateEntityRiskScore = async ({
     });
   }
 
-  const {
-    scores: resolutionScores,
-    pagesProcessed: resolutionPagesProcessed,
-    scoresCalculated: resolutionScoresCalculated,
-  } = await runResolutionScoringStep({
+  const { scores: resolutionScores } = await runResolutionScoringStep({
     esClient,
     crudClient,
     logger,
@@ -167,28 +159,6 @@ export const recalculateEntityRiskScore = async ({
     refresh: 'wait_for',
     collectScores: true,
   });
-
-  // A processed page means the lookup holds the target's group, so nothing calculated means the
-  // group has no alert left to score. Write a zero resolution score on the same two conditions as
-  // the base score above, so the previous one doesn't stay on screen until the next engine run.
-  if (
-    resolutionPagesProcessed > 0 &&
-    resolutionScoresCalculated === 0 &&
-    hasExistingResolutionScore
-  ) {
-    await persistZeroResolutionScore({
-      crudClient,
-      logger,
-      entityType: identifierType as EntityType,
-      targetId: resolutionTargetId,
-      now,
-      watchlistConfigs,
-      calculationRunId,
-      writer,
-      idBasedRiskScoringEnabled,
-      refresh: 'wait_for',
-    });
-  }
 
   return {
     baseScore: entityId in baseScores ? baseScores[entityId] : undefined,
@@ -212,38 +182,26 @@ async function buildScoringContext({
 }) {
   const baseAlertFilters = buildAlertFilters(engineConfig, identifierType as EntityType, logger);
 
-  const entityDoc = await findEntity(crudClient, entityId);
-  if (!entityDoc) {
+  const { entities } = await crudClient.listEntities({
+    filter: { term: { 'entity.id': entityId } },
+    size: 1,
+  });
+
+  if (entities.length === 0) {
     return;
   }
 
+  const entityDoc = entities[0];
   const entityIdentityFilter = euid.dsl.getEuidFilterBasedOnDocument(
     getBuiltInEntityDefinition(identifierType as EntityType),
     entityDoc
   );
 
-  const resolutionTargetId = entityDoc.entity?.relationships?.resolution?.resolved_to ?? entityId;
-  // A group's resolution score lives on its target, which is another entity when this one is an
-  // alias.
-  const targetDoc =
-    resolutionTargetId === entityId ? entityDoc : await findEntity(crudClient, resolutionTargetId);
-
   return {
     alertFilters: [...baseAlertFilters, entityIdentityFilter],
-    resolutionTargetId,
+    resolutionTargetId: entityDoc?.entity?.relationships?.resolution?.resolved_to ?? entityId,
     // Risk scoring dual-writes the base score here, so a value means the entity has been scored
     // before and its score document is worth refreshing.
-    hasExistingBaseScore: typeof entityDoc.entity?.risk?.calculated_score_norm === 'number',
-    // Likewise for the resolution score on the group's target.
-    hasExistingResolutionScore:
-      typeof targetDoc?.entity?.relationships?.resolution?.risk?.calculated_score_norm === 'number',
+    hasExistingBaseScore: typeof entityDoc?.entity?.risk?.calculated_score_norm === 'number',
   };
-}
-
-async function findEntity(crudClient: EntityStoreCRUDClient, entityId: string) {
-  const { entities } = await crudClient.listEntities({
-    filter: { term: { 'entity.id': entityId } },
-    size: 1,
-  });
-  return entities.length > 0 ? entities[0] : undefined;
 }
