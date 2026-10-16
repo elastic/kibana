@@ -51,7 +51,8 @@ export const SearchEmbeddableMissingDataViewPrompt = ({
     ? parentApi.isEditableByUser
     : false;
 
-  const canSwitchToEditMode = apiPublishesWritableViewMode(parentApi);
+  const canSwitchToEditMode =
+    apiPublishesWritableViewMode(parentApi) && viewMode !== 'non-interactive';
 
   const canEditPanelInViewMode =
     canShowDashboardWriteControls && canEditDashboardByAccessControl && canSwitchToEditMode;
