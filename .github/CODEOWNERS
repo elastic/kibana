@@ -1187,6 +1187,7 @@ x-pack/platform/packages/shared/security/form_components @elastic/kibana-securit
 x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_public @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_server @elastic/kibana-security
+x-pack/platform/plugins/private/ai_anonymization_settings @elastic/security-investigations
 x-pack/platform/plugins/private/banners @elastic/appex-sharedux
 x-pack/platform/plugins/private/canvas @elastic/kibana-dashboards
 x-pack/platform/plugins/private/cloud_integrations/cloud_chat @elastic/kibana-core
@@ -1401,7 +1402,7 @@ x-pack/solutions/observability/plugins/significant_events_app @elastic/nightshif
 x-pack/solutions/observability/plugins/slo @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/uptime @elastic/obs-signals-logs-team
-x-pack/solutions/observability/plugins/ux @elastic/obs-signals-logs-team
+x-pack/solutions/observability/plugins/ux @elastic/obs-signals-rum-team
 x-pack/solutions/observability/test
 x-pack/solutions/search/packages/kbn-ipynb @elastic/search-ml-ux
 x-pack/solutions/search/packages/kbn-scout-search @elastic/appex-qa @elastic/search-ml-ux
@@ -1603,23 +1604,12 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield @elastic/kibana-discover
 /src/platform/test/functional/fixtures/es_archiver/date_n* @elastic/kibana-discover
 /src/platform/test/functional/fixtures/es_archiver/discover @elastic/kibana-discover
-/src/platform/test/api_integration/apis/saved_queries @elastic/kibana-discover
 /x-pack/platform/test/api_integration/apis/kibana/kql_telemetry @elastic/kibana-discover @elastic/kibana-dashboards
 /x-pack/platform/test/serverless/fixtures/es_archives/pre_calculated_histogram @elastic/kibana-discover
 /x-pack/platform/test/serverless/fixtures/es_archives/kibana_sample_data_flights_index_pattern @elastic/kibana-discover
-/src/platform/test/api_integration/apis/data_views @elastic/kibana-discover
-/src/platform/test/api_integration/apis/data_view_field_editor @elastic/kibana-discover
-/src/platform/test/api_integration/apis/kql_telemetry @elastic/kibana-discover
-/src/platform/test/api_integration/apis/scripts @elastic/kibana-discover
-/src/platform/test/api_integration/apis/search @elastic/kibana-discover
 /src/platform/test/functional/apps/discover @elastic/kibana-discover
 /src/platform/test/functional/apps/management/ccs_compatibility @elastic/kibana-discover
 /x-pack/platform/test/upgrade/apps/discover @elastic/kibana-discover
-/x-pack/platform/test/serverless/api_integration/test_suites/data_views @elastic/kibana-discover
-/x-pack/platform/test/serverless/api_integration/test_suites/data_view_field_editor @elastic/kibana-discover
-/x-pack/platform/test/serverless/api_integration/test_suites/kql_telemetry @elastic/kibana-discover
-/x-pack/platform/test/serverless/api_integration/test_suites/scripts_tests @elastic/kibana-discover
-/x-pack/platform/test/serverless/api_integration/test_suites/search_oss @elastic/kibana-discover
 /src/platform/plugins/shared/data/**/esaggs* @elastic/kibana-discover @elastic/kibana-dashboards
 
 # Discover session metrics tab schema

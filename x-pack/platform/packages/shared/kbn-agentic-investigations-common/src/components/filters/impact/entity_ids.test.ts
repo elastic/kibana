@@ -13,7 +13,6 @@ const investigation = (overrides: Partial<Investigation> = {}): Investigation =>
   template_id: 'investigation',
   title: 'Case',
   createdAt: '2026-09-01T00:00:00.000Z',
-  updatedAt: '2026-09-01T00:00:00.000Z',
   worker_execution_ids: [],
   pendingProposalCount: 1,
   assignees: [],

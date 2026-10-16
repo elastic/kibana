@@ -74,6 +74,14 @@ describe('EA_EXECUTION_CONTEXT_NAMES', () => {
     expect(EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE).toBe('entity_analytics:home_page');
   });
 
+  it.each([
+    ['PRIVILEGED_USER_MONITORING', 'entity_analytics:privileged_user_monitoring'],
+    ['THREAT_HUNTING_LEADS', 'entity_analytics:threat_hunting_leads'],
+    ['WATCHLISTS', 'entity_analytics:watchlists'],
+  ] as const)('%s resolves to the exact expected string', (key, expected) => {
+    expect(EA_EXECUTION_CONTEXT_NAMES[key]).toBe(expected);
+  });
+
   it('RISK_SCORE_MANAGEMENT resolves to the exact expected string', () => {
     expect(EA_EXECUTION_CONTEXT_NAMES.RISK_SCORE_MANAGEMENT).toBe(
       'entity_analytics:risk_score_management'
