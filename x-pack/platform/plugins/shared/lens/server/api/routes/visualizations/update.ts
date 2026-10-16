@@ -111,29 +111,33 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
 
         // Note: these types are to enforce loose param typings of client methods
         const { references, ...data } = getLensRequestConfig(builder, req.body);
-        const options: LensUpdateIn['options'] = { references };
-
-        let createdNew = false;
-        try {
-          await client.get(req.params.id);
-        } catch (error) {
-          if (isBoom(error) && error.output.statusCode === 404) {
-            createdNew = true;
-          }
-        }
-
-        if (createdNew) {
-          try {
-            asCodeIdSchema.parse(req.params.id);
-          } catch (error) {
-            return res.badRequest({ body: { message: error.message } });
-          }
-        }
+        const updateOptions: LensUpdateIn['options'] = { references };
 
         try {
-          const { result } = await client.update(req.params.id, data, options);
+          // Apply as-code ID rules only when this upsert would create a new visualization.
+          // Existing Saved Object IDs remain updateable even if they do not satisfy that schema.
+          const idValidation = asCodeIdSchema.safeParse(req.params.id);
+          if (!idValidation.success) {
+            try {
+              await client.get(req.params.id);
+            } catch (error) {
+              if (isBoom(error) && error.output.statusCode === 404) {
+                return res.badRequest({ body: { message: idValidation.error.message } });
+              }
+              throw error;
+            }
+          }
+
+          const { result: updateResult } = await client.update(req.params.id, data, updateOptions);
+          if (updateResult.item.error) {
+            throw updateResult.item.error;
+          }
+
+          // Saved Objects only returns creation metadata when update takes the upsert path.
+          const createdNew = updateResult.item.createdAt !== undefined;
+          const { result: persistedResult } = await client.get(req.params.id);
           const responseItem = lensUpdateResponseBodySchema.parse(
-            getLensResponseItem(builder, result.item)
+            getLensResponseItem(builder, persistedResult.item)
           );
 
           if (createdNew) {
