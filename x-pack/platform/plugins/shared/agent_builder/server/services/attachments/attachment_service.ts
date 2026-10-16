@@ -58,7 +58,7 @@ export class AttachmentServiceImpl implements AttachmentService {
   start(deps: AttachmentServiceStartDeps): AttachmentServiceStart {
     const resolveContext = (request: KibanaRequest): AttachmentResolveContext => ({
       request,
-      spaceId: getCurrentSpaceId({ request })),
+      spaceId: getCurrentSpaceId({ request }),
       savedObjectsClient: deps.savedObjects.getScopedClient(request),
     });
 
