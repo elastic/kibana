@@ -11,6 +11,7 @@ jest.mock('../components/vector_style_editor', () => ({
   },
 }));
 
+import React from 'react';
 import { shallow } from 'enzyme';
 
 import { DynamicColorProperty } from './dynamic_color_property';

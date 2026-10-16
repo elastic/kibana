@@ -13,6 +13,7 @@ jest.mock('../components/vector_style_editor', () => ({
   },
 }));
 
+import React from 'react';
 import type { RawValue } from '../../../../../common/constants';
 import { ICON_SOURCE, VECTOR_STYLES } from '../../../../../common/constants';
 // @ts-ignore

@@ -11,6 +11,8 @@ jest.mock('../components/vector_style_editor', () => ({
   },
 }));
 
+import React from 'react';
+
 // @ts-ignore
 import { DynamicTextProperty } from './dynamic_text_property';
 import type { RawValue } from '../../../../../common/constants';

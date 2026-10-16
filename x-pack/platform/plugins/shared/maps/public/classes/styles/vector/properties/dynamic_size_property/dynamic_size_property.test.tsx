@@ -20,6 +20,7 @@ jest.mock('../../components/legend/size', () => ({
   },
 }));
 
+import React from 'react';
 import { shallow } from 'enzyme';
 
 import { DynamicSizeProperty } from './dynamic_size_property';
