@@ -37,7 +37,6 @@ describe('pdf converter', () => {
     const text = await converter.toText({
       bytes,
       fileId: 'file-abc',
-      fileName: 'invoice.pdf',
       signal,
     });
 
@@ -46,7 +45,6 @@ describe('pdf converter', () => {
       esClient,
       pdf: bytes,
       fileId: 'file-abc',
-      fileName: 'invoice.pdf',
       signal,
       logger,
     });
@@ -57,7 +55,6 @@ describe('pdf converter', () => {
       converter.toText({
         bytes: Buffer.from('hello'),
         fileId: 'file-abc',
-        fileName: 'invoice.pdf',
         signal,
       })
     ).rejects.toThrow('The file is damaged or has the wrong file type.');

@@ -7,12 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import {
-  DOCUMENT_EXTRACTION_ENDPOINT_ID,
-  // FAKE_EXTRACTION:start - remove when Jina Reader document_extraction is live
-  USE_FAKE_EXTRACTION,
-  // FAKE_EXTRACTION:end
-} from './constants';
+import { DOCUMENT_EXTRACTION_ENDPOINT_ID } from './constants';
 
 export interface DocumentExtractionAvailability {
   isAvailable: () => boolean;
@@ -33,14 +28,7 @@ export const createDocumentExtractionAvailability = ({
   let available = false;
   let availabilityCheck: Promise<void> | undefined;
 
-  const isAvailable = (): boolean => {
-    // FAKE_EXTRACTION:start - remove when Jina Reader document_extraction is live
-    if (USE_FAKE_EXTRACTION) {
-      return true;
-    }
-    // FAKE_EXTRACTION:end
-    return available;
-  };
+  const isAvailable = (): boolean => available;
 
   const check = (esClient: ElasticsearchClient): Promise<void> => {
     availabilityCheck ??= (async () => {

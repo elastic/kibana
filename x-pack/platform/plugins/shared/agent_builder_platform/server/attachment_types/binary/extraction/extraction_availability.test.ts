@@ -10,11 +10,6 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { DOCUMENT_EXTRACTION_ENDPOINT_ID } from './constants';
 import { createDocumentExtractionAvailability } from './extraction_availability';
 
-jest.mock('./constants', () => ({
-  ...jest.requireActual('./constants'),
-  USE_FAKE_EXTRACTION: false,
-}));
-
 const createEsClient = (get: jest.Mock) =>
   ({ inference: { get } } as unknown as ElasticsearchClient);
 

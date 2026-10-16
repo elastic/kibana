@@ -9,7 +9,3 @@
 export const DOCUMENT_EXTRACTION_ENDPOINT_ID = '.jina-reader-document_extraction';
 
 export const DOCUMENT_EXTRACTION_TIMEOUT_MS = 90 * 1000;
-
-// FAKE_EXTRACTION:start - remove when Jina Reader document_extraction is live
-export const USE_FAKE_EXTRACTION = true;
-// FAKE_EXTRACTION:end
