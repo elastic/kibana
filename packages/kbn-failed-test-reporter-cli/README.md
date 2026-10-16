@@ -7,6 +7,12 @@ CLIs that turn CI test results into GitHub issues on `elastic/kibana`.
 Reads JUnit and Scout reports of a CI job and files or updates one `failed-test` issue per
 failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` after every job.
 
+`REPORT_FAILED_TESTS_CREATE_ISSUES=false` keeps it from opening new issues: tracked failures still
+bump their issue, failures without one are indexed, written to the failure report and left to
+`report_flaky_test_issues` below. Unset or `true` (the default) is the legacy behaviour, where every
+new failure opens an issue. Set it in the pipeline env next to `REPORT_FAILED_TESTS_TO_GITHUB` and flip
+it back to fall back to the legacy reporting at any time.
+
 FTR, Jest (unit and integration), and Scout issues link to the CI space's
 [Single test history](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history)
 dashboard. The link filters `appex-qa:scout-test-events-*` by the test ID and
