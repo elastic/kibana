@@ -24,9 +24,17 @@ import {
   updateManagementPageStateAction,
 } from '../../../state';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
+import { useHasMultipleSpaces } from '../../../../../hooks/use_has_multiple_spaces';
 
 export const ShowAllSpaces: React.FC = () => {
   const { space } = useKibanaSpace();
+  const { hasMultipleSpaces } = useHasMultipleSpaces();
+
+  // With access to a single space, toggling between "current" and "all
+  // permitted" spaces is a no-op, so the filter is hidden entirely.
+  if (!hasMultipleSpaces) {
+    return null;
+  }
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
