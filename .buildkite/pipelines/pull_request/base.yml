@@ -14,6 +14,8 @@ steps:
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
+    env:
+      USE_CITADEL_PROXY: 'true'
     retry:
       automatic:
         - exit_status: '-1'
@@ -29,6 +31,7 @@ steps:
     timeout_in_minutes: 60
     env:
       CHECK_GATE: 'true'
+      USE_CITADEL_PROXY: 'true'
     retry:
       automatic:
         - exit_status: '-1'
@@ -39,6 +42,7 @@ steps:
     key: checks
     env:
       CHECK_GATE: 'true'
+      USE_CITADEL_PROXY: 'true'
     agents:
       machineType: n2d-standard-2
       preemptible: true
@@ -60,6 +64,7 @@ steps:
     timeout_in_minutes: 60
     env:
       CHECK_GATE: 'true'
+      USE_CITADEL_PROXY: 'true'
     retry:
       automatic:
         - exit_status: '-1'
@@ -76,6 +81,7 @@ steps:
     timeout_in_minutes: 60
     env:
       CHECK_GATE: 'true'
+      USE_CITADEL_PROXY: 'true'
     retry:
       automatic:
         - exit_status: '-1'
@@ -94,6 +100,7 @@ steps:
       CHECK_GATE: 'true'
       RESTORE_ARCHIVE: 'true'
       UPLOAD_ARCHIVE: 'true'
+      USE_CITADEL_PROXY: 'true'
     retry:
       automatic:
         - exit_status: '-1'
@@ -178,6 +185,8 @@ steps:
       machineType: n2-standard-2
     key: report_package_metrics
     timeout_in_minutes: 15
+    env:
+      USE_CITADEL_PROXY: 'true'
     retry:
       automatic:
         - exit_status: '-1'
