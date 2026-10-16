@@ -123,7 +123,15 @@ export function getNonFipsIntegrations(
  * (documentation-only, or assets-only), so the catalog tile opens the Integration Details page instead of
  * "Add integration". Temporary: remove once these packages are re-typed and behavior is inferred from `type`.
  */
-const ADD_INTEGRATION_EXCLUDED_PACKAGES = ['supabase', 'awsfirehose', 'cribl', 'contrast_security'];
+const ADD_INTEGRATION_EXCLUDED_PACKAGES = [
+  'supabase',
+  'awsfirehose',
+  'cribl',
+  'contrast_security',
+  'elastic_agent',
+  'elastic_govcloud',
+  'keeper',
+];
 
 type PackageClassificationFields = Partial<
   Pick<PackageInfo | PackageListItem, 'name' | 'type' | 'data_streams' | 'policy_templates'>
