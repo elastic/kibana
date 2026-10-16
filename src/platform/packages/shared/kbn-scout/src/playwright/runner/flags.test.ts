@@ -27,9 +27,20 @@ const validateAndProcessTestFilesMock =
   >;
 
 describe('parseTestFlags', () => {
+  const originalTargetAttributes = process.env.SCOUT_TARGET_ATTRIBUTES;
+
   beforeEach(() => {
+    delete process.env.SCOUT_TARGET_ATTRIBUTES;
     jest.clearAllMocks();
     validatePlaywrightConfigMock.mockResolvedValue();
+  });
+
+  afterAll(() => {
+    if (originalTargetAttributes === undefined) {
+      delete process.env.SCOUT_TARGET_ATTRIBUTES;
+    } else {
+      process.env.SCOUT_TARGET_ATTRIBUTES = originalTargetAttributes;
+    }
   });
 
   it(`should throw an error without 'config' or 'testFiles' flag`, async () => {
