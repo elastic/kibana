@@ -31,16 +31,14 @@ import { TruncatedText } from '../truncated_text';
 import { SeverityHealth } from '../severity/config';
 import { AssigneesColumn } from '../all_cases/components/assignees_column';
 import { ExternalServiceColumn } from '../all_cases/hooks/use_cases_columns';
-import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { tableColumnPresetDateRelative } from '../../utils/table_column_presets';
 import { useCasesColumnsConfiguration } from '../all_cases/hooks/use_cases_columns_configuration';
 import { useGlobalInlineFields } from '../all_cases/hooks/use_global_inline_fields';
 import {
+  getExtendedFieldCellValue,
   getExtendedFieldColumnKey,
-  getExtendedFieldTableColumn,
-  renderExtendedFieldValue,
 } from '../all_cases/components/extended_field_columns';
-import { getFieldCamelKey } from '../../../common/utils';
+import { getFieldColumns } from '../all_cases/utils/get_field_columns';
 import { useCasesConfig } from '../../common/lib/kibana';
 import { SIMILAR_CASES_CHECKED_DEFAULTS } from './use_similar_cases_columns_selection';
 import * as i18n from './translations';
@@ -286,50 +284,28 @@ export const useSimilarCasesColumns = ({
   );
 
   const allColumnsDict = useMemo(() => {
-    const dict: Record<string, SimilarCasesColumns> = { ...columnsDict };
+    const dict: Record<string, SimilarCasesColumns> = {
+      ...columnsDict,
+      ...getFieldColumns<SimilarCaseUI>({
+        templatesEnabled,
+        globalInlineFields,
+        customFields,
+        userProfiles: EMPTY_PROFILES,
+      }),
+    };
 
     if (templatesEnabled) {
-      globalInlineFields.forEach((field) => {
-        const column = getExtendedFieldTableColumn(field, EMPTY_PROFILES);
-
-        // User profiles are not fetched here, so an avatar cell would show only anonymous
-        // avatars. Render the stored user names as text instead.
-        dict[getExtendedFieldColumnKey(field)] = (
-          field.control === FieldType.USER_PICKER
-            ? {
-                ...column,
-                render: (theCase: SimilarCaseUI) =>
-                  renderExtendedFieldValue(
-                    field,
-                    theCase.extendedFields?.[getFieldCamelKey(field.name, field.type)]
-                  ),
-              }
-            : column
-        ) as SimilarCasesColumns;
-      });
-      return dict;
+      // User profiles are not fetched for these fields, so an avatar cell would show only
+      // anonymous avatars. Render the stored user names as text instead.
+      globalInlineFields
+        .filter(({ control }) => control === FieldType.USER_PICKER)
+        .forEach((field) => {
+          dict[getExtendedFieldColumnKey(field)] = {
+            ...dict[getExtendedFieldColumnKey(field)],
+            render: (theCase: SimilarCaseUI) => getExtendedFieldCellValue(field, theCase),
+          };
+        });
     }
-
-    customFields.forEach(({ key, type, label }) => {
-      if (type in customFieldsBuilderMap) {
-        const columnDefinition = customFieldsBuilderMap[type]().getEuiTableColumn({ label });
-
-        dict[key] = {
-          ...columnDefinition,
-          render: (theCase: SimilarCaseUI) => {
-            const customField = theCase.customFields?.find(
-              (element) => element.key === key && element.value !== null
-            );
-
-            if (!customField) {
-              return getEmptyCellValue();
-            }
-
-            return columnDefinition.render(customField);
-          },
-        } as unknown as SimilarCasesColumns;
-      }
-    });
 
     return dict;
   }, [columnsDict, customFields, templatesEnabled, globalInlineFields]);
