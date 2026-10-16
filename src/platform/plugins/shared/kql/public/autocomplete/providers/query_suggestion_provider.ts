@@ -8,7 +8,8 @@
  */
 
 import type { ValueSuggestionsMethod } from '@kbn/data-plugin/common';
-import type { FilterableField, FilterableSource } from '@kbn/data-source';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FilterableSource } from '@kbn/data-source';
 import type { SuggestionsAbstraction } from '../../components/typeahead/suggestions_component';
 
 export enum QuerySuggestionTypes {
@@ -50,7 +51,7 @@ export interface QuerySuggestionBasic {
 /** @public **/
 export interface QuerySuggestionField extends QuerySuggestionBasic {
   type: QuerySuggestionTypes.Field;
-  field: FilterableField;
+  field: DataViewField;
 }
 
 /** @public **/

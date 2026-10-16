@@ -10,13 +10,13 @@
 import { isFilterable, getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import { flatten } from 'lodash';
 import { escapeKuery } from '@kbn/es-query';
-import type { FilterableField } from '@kbn/data-source';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { sortPrefixFirst } from './sort_prefix_first';
 import type { QuerySuggestionField } from '../query_suggestion_provider';
 import { QuerySuggestionTypes } from '../query_suggestion_provider';
 import type { KqlQuerySuggestionProvider } from './types';
 
-const keywordComparator = (first: FilterableField, second: FilterableField) => {
+const keywordComparator = (first: DataViewField, second: DataViewField) => {
   const extensions = ['raw', 'keyword'];
   if (extensions.map((ext) => `${first.name}.${ext}`).includes(second.name)) {
     return 1;
@@ -38,7 +38,7 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
       indexPatterns.map((indexPattern) => {
         return indexPattern.fields.filter(isFilterable);
       })
-    ) as FilterableField[];
+    ) as DataViewField[];
     const search = `${prefix}${suffix}`.trim().toLowerCase();
     const matchingFields = allFields.filter((field) => {
       const subTypeNested = getFieldSubtypeNested(field);
