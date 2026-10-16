@@ -135,13 +135,8 @@ export default function (providerContext: FtrProviderContext) {
          * sometimes it takes a while to save the integration so added timeout to wait for post install modal
          */
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
           await cisIntegration.waitForPostInstallModal();
-          const modal = await cisIntegration.getPostInstallModal();
-          if (!modal) {
-            logger.debug('Post install modal not found');
-          }
-          expect(modal !== undefined).to.be(true);
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         });
 
         await cisIntegration.navigateToIntegrationCspList();
