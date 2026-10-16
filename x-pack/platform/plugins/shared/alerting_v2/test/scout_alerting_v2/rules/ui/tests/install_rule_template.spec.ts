@@ -46,12 +46,12 @@ test.describe(
       }
     });
 
-    test('installing a template creates a disabled rule and the toast opens it', async ({
+    test('creating from a template opens the flyout and creates a rule', async ({
       apiServices,
       page,
       pageObjects,
     }) => {
-      const { ruleLibrary, ruleDetails } = pageObjects;
+      const { ruleLibrary, ruleDetails, ruleForm } = pageObjects;
       const { createRequestUrls, installRequestUrls } = trackCreateRuleRequests(page);
 
       await test.step('open the rule library and find the template', async () => {
@@ -61,9 +61,18 @@ test.describe(
         await expect(ruleLibrary.templateRow(TEMPLATE_RULE_NAME)).toBeVisible({ timeout: 60_000 });
       });
 
-      await test.step('install the template', async () => {
-        await expect(ruleLibrary.installButton(TEMPLATE_RULE_NAME)).toBeEnabled();
-        await ruleLibrary.installButton(TEMPLATE_RULE_NAME).click();
+      await test.step('open the create flyout from the template', async () => {
+        await expect(ruleLibrary.createButton(TEMPLATE_RULE_NAME)).toBeEnabled();
+        await ruleLibrary.createButton(TEMPLATE_RULE_NAME).click();
+        await expect(ruleForm.flyout).toBeVisible({ timeout: 30_000 });
+      });
+
+      await test.step('step through the flyout and submit', async () => {
+        // Template pre-fills all fields; advance through each step and submit.
+        await ruleForm.clickFlyoutSave(); // Alert condition → Outcome
+        await ruleForm.clickFlyoutSave(); // Outcome → Details
+        await ruleForm.clickFlyoutSave(); // Details → Actions (validates name)
+        await ruleForm.clickFlyoutSave(); // Actions → Create rule (submit)
       });
 
       await test.step('the success toast confirms the rule was created', async () => {
@@ -75,7 +84,7 @@ test.describe(
 
       let ruleId: string;
 
-      await test.step('the rule exists, is disabled, and records the template', async () => {
+      await test.step('the rule exists, is enabled, and records the template', async () => {
         await expect
           .poll(
             async () => {
@@ -91,23 +100,22 @@ test.describe(
         const { items } = await apiServices.alertingV2.rules.find({ search: TEMPLATE_RULE_NAME });
         const [rule] = items;
         ruleId = rule.id;
-        expect(rule.enabled).toBe(false);
+        expect(rule.enabled).toBe(true);
         expect(rule.metadata.name).toBe(TEMPLATE_RULE_NAME);
         expect(rule.metadata.template).toStrictEqual({ id: TEMPLATE_ID });
       });
 
       await test.step('the install went through the rule template API exactly once', async () => {
-        // Positive control for the create-API assertions on rules authored outside the rule library.
         expect(installRequestUrls).toHaveLength(1);
         expect(installRequestUrls[0]).toContain(`/${TEMPLATE_ID}/_install`);
         expect(createRequestUrls).toHaveLength(0);
       });
 
-      await test.step('view rule opens the installed rule', async () => {
+      await test.step('view rule opens the created rule', async () => {
         await ruleLibrary.viewRuleToastLink.click();
         await expect(ruleDetails.page).toBeVisible({ timeout: 30_000 });
         await expect(ruleDetails.heading(TEMPLATE_RULE_NAME)).toBeVisible();
-        await expect(ruleDetails.disabledBadge).toBeVisible();
+        await expect(ruleDetails.enabledBadge).toBeVisible();
         expect(page.url()).toContain(ruleId!);
       });
     });
