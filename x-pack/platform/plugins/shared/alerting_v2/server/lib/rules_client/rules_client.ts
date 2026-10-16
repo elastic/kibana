@@ -722,7 +722,12 @@ export class RulesClient {
         references: doc.references,
       });
       items.push(rule);
-      createdRules.push({ ruleId: rule.id, spaceId, rule, ...this.resolveRuleTelemetryEventOrigin() });
+      createdRules.push({
+        ruleId: rule.id,
+        spaceId,
+        rule,
+        ...this.resolveRuleTelemetryEventOrigin(),
+      });
     }
 
     this.ruleEventPublisher.emitRuleCreated(this.eventContext, createdRules);
@@ -1357,7 +1362,12 @@ export class RulesClient {
           attrs: item.attrs,
           references: item.references,
         });
-        enabledRules.push({ ruleId: rule.id, spaceId, rule, ...this.resolveRuleTelemetryEventOrigin() });
+        enabledRules.push({
+          ruleId: rule.id,
+          spaceId,
+          rule,
+          ...this.resolveRuleTelemetryEventOrigin(),
+        });
       }
 
       await this.removeExecutorTasks({
@@ -1438,7 +1448,12 @@ export class RulesClient {
           references: item.references,
         });
         affectedCount += 1;
-        disabledRules.push({ ruleId: rule.id, spaceId, rule, ...this.resolveRuleTelemetryEventOrigin() });
+        disabledRules.push({
+          ruleId: rule.id,
+          spaceId,
+          rule,
+          ...this.resolveRuleTelemetryEventOrigin(),
+        });
       }
     }
 
@@ -1562,7 +1577,12 @@ export class RulesClient {
         attrs: item.attrs,
         references: item.references,
       });
-      updatedRules.push({ ruleId: rule.id, spaceId, rule, ...this.resolveRuleTelemetryEventOrigin() });
+      updatedRules.push({
+        ruleId: rule.id,
+        spaceId,
+        rule,
+        ...this.resolveRuleTelemetryEventOrigin(),
+      });
     }
 
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, updatedRules);

@@ -50,7 +50,9 @@ describe('resolveRuleTelemetryEventOrigin', () => {
     });
 
     it('is `api` for a request with no UI headers', () => {
-      expect(resolveRuleTelemetryEventOrigin(createRequest({ authorization: 'ApiKey abc' }))).toEqual({
+      expect(
+        resolveRuleTelemetryEventOrigin(createRequest({ authorization: 'ApiKey abc' }))
+      ).toEqual({
         channel: 'api',
       });
     });
