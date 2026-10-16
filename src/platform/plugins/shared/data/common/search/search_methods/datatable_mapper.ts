@@ -32,7 +32,7 @@ export interface EsqlDatatableContext {
   warning?: string;
 }
 
-/** Maps a raw ES|QL response to an expressions Datatable. */
+/** Maps a raw ES|QL response to a Datatable. */
 export const mapEsqlResponseToDatatable = (
   body: ESQLSearchResponse,
   { query, timeRange, esqlVariables = [], warning }: EsqlDatatableContext
