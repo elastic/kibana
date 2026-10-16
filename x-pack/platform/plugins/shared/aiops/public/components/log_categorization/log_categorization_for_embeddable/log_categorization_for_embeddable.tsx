@@ -54,6 +54,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
   randomSamplerMode,
   randomSamplerProbability,
   onChange,
+  onLoading,
   onRenderComplete,
   timeRange,
   lastReloadRequestTime,
@@ -107,6 +108,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
 
   const [loading, setLoading] = useState<boolean | null>(null);
+  const [isDocumentCountLoading, setIsDocumentCountLoading] = useState(true);
   const [eventRate, setEventRate] = useState<EventRate>([]);
   const [data, setData] = useState<{
     categories: Category[];
@@ -160,7 +162,16 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     BAR_TARGET,
     false,
     timeRangeParsed,
-    requestCancellationManager
+    requestCancellationManager,
+    undefined,
+    setIsDocumentCountLoading
+  );
+
+  useEffect(
+    function reportLoadingState() {
+      onLoading?.(isDocumentCountLoading || loading === true);
+    },
+    [isDocumentCountLoading, loading, onLoading]
   );
 
   const onAddFilter = useCallback(
