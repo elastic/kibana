@@ -6,7 +6,7 @@
  */
 
 import { contentListKeys, contentListQueryClient } from '@kbn/content-list-provider';
-import { RULES_CONTENT_LIST_ID } from '../constants';
+import { RULES_CONTENT_LIST_ID, RULE_TEMPLATES_CONTENT_LIST_ID } from '../constants';
 import { ruleKeys } from './query_key_factory';
 
 /**
@@ -39,3 +39,9 @@ export const invalidateRulesTagsFacet = (): Promise<void> =>
 /** Invalidates both the rules list and the tags facet. */
 export const invalidateRulesContentList = (): Promise<void> =>
   Promise.all([invalidateRulesListView(), invalidateRulesTagsFacet()]).then(() => undefined);
+
+/** Invalidates the rule library list, e.g. after a rule is installed from a template. */
+export const invalidateRuleTemplatesListView = (): Promise<void> =>
+  contentListQueryClient.invalidateQueries({
+    queryKey: contentListKeys.all(RULE_TEMPLATES_CONTENT_LIST_ID),
+  });

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, type MouseEvent } from 'react';
 import {
   EuiBadge,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import {
@@ -24,6 +25,7 @@ import type { ContentListItem, ContentListItemConfig } from '@kbn/content-list';
 import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useAlertingLocators } from '../../application/locator_context';
 import { RULE_TEMPLATES_CONTENT_LIST_ID } from '../../constants';
 import { useInstallRuleTemplate } from '../../hooks/use_install_rule_template';
 import { UserCapabilities } from '../../services/user_capabilities';
@@ -55,6 +57,7 @@ const toTemplate = (item: ContentListItem) => (item as RuleTemplateContentListIt
 
 export const RuleLibraryList = () => {
   const canWrite = useService(UserCapabilities).canWrite('rules');
+  const { rulesLocators } = useAlertingLocators();
   const dataSource = useRuleTemplatesDataSource();
   const {
     mutate: installTemplate,
@@ -74,6 +77,29 @@ export const RuleLibraryList = () => {
       },
     }),
     [canWrite, installTemplate]
+  );
+
+  const renderRuleCount = useCallback(
+    (item: ContentListItem) => {
+      const { id: templateId, rule_count: ruleCount } = toTemplate(item);
+      if (ruleCount === undefined) return null;
+      if (ruleCount === 0) return ruleCount;
+
+      const params = { derivedFromTemplateId: templateId };
+      return (
+        <EuiLink
+          href={rulesLocators.getRedirectUrl(params)}
+          onClick={(event: MouseEvent) => {
+            event.preventDefault();
+            rulesLocators.navigateSync(params);
+          }}
+          data-test-subj="ruleLibraryRuleCountLink"
+        >
+          {ruleCount}
+        </EuiLink>
+      );
+    },
+    [rulesLocators]
   );
 
   const emptyState = (
@@ -172,6 +198,14 @@ export const RuleLibraryList = () => {
                 </EuiFlexGroup>
               );
             }}
+          />
+          <Column
+            id="ruleCount"
+            name={i18n.translate('xpack.alertingV2.ruleLibrary.column.ruleCount', {
+              defaultMessage: 'Rules',
+            })}
+            width="6em"
+            render={renderRuleCount}
           />
           <Column.Actions width="14em" sticky={false}>
             <Action

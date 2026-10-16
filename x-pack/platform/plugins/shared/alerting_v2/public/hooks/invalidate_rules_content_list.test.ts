@@ -6,12 +6,13 @@
  */
 
 import { contentListKeys, contentListQueryClient } from '@kbn/content-list-provider';
-import { RULES_CONTENT_LIST_ID } from '../constants';
+import { RULES_CONTENT_LIST_ID, RULE_TEMPLATES_CONTENT_LIST_ID } from '../constants';
 import { ruleKeys } from './query_key_factory';
 import {
   invalidateRulesContentList,
   invalidateRulesListView,
   invalidateRulesTagsFacet,
+  invalidateRuleTemplatesListView,
 } from './invalidate_rules_content_list';
 
 jest.mock('@kbn/content-list-provider', () => ({
@@ -51,5 +52,15 @@ describe('invalidateRulesContentList helpers', () => {
       queryKey: ['contentList', RULES_CONTENT_LIST_ID],
     });
     expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ruleKeys.allTags() });
+  });
+
+  it('invalidateRuleTemplatesListView invalidates the Content List scope for the rule library', async () => {
+    await invalidateRuleTemplatesListView();
+
+    expect(contentListKeys.all).toHaveBeenCalledWith(RULE_TEMPLATES_CONTENT_LIST_ID);
+    expect(mockInvalidateQueries).toHaveBeenCalledTimes(1);
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['contentList', RULE_TEMPLATES_CONTENT_LIST_ID],
+    });
   });
 });
