@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiEmptyPrompt,
@@ -19,6 +19,7 @@ import {
   Impact,
   useEntityFilter,
   type EscalationQueueItem,
+  type ImpactPill,
 } from '@kbn/agentic-investigations-common';
 import {
   useAssignEscalation,
@@ -40,7 +41,8 @@ import { EscalationsOpenNote } from './escalations_open_note';
 import { EscalationsEmptyBanner } from './escalations_empty_banner';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
 
-/** The lists on screen and the pills, refreshed together by one heartbeat. */
+const NO_PILLS: readonly ImpactPill[] = [];
+
 const POLLED_QUERY_KEYS = [escalationQueryKeys.lists(), impactPillsQueryKeys.escalations()];
 
 export const EscalationsPage: React.FC = () => {
@@ -55,16 +57,19 @@ export const EscalationsPage: React.FC = () => {
   // getChatHref is also forwarded so cards render as real links (Cmd-click, URL on hover).
   const { getChatHref, openChat } = useOpenInChat();
 
-  // One selection filters both queues, on the server. The pills cover every escalation, not
-  // just the rows loaded so far.
-  const { data: impactPills = [] } = useEscalationImpactPills();
+  const { data: impactPills = NO_PILLS } = useEscalationImpactPills();
   const { entityFilter, setEntityFilter } = useEntityFilter(impactPills);
 
-  // ---------------------------------------------------------------------------
-  // Per-bucket current page (1-based). Incremented by "Show more"; reset when the filter changes.
-  // ---------------------------------------------------------------------------
   const [openPage, setOpenPage] = useState(1);
   const [closedPage, setClosedPage] = useState(1);
+
+  // Reset during render, so no request goes out for the old page number under the new filter.
+  const [pagedEntity, setPagedEntity] = useState(entityFilter);
+  if (pagedEntity !== entityFilter) {
+    setPagedEntity(entityFilter);
+    setOpenPage(1);
+    setClosedPage(1);
+  }
 
   const openQuery = useListEscalations({ status: 'open', page: openPage, entity: entityFilter });
   const closedQuery = useListEscalations({
@@ -72,13 +77,14 @@ export const EscalationsPage: React.FC = () => {
     page: closedPage,
     entity: entityFilter,
   });
-  // The header counts every open escalation, which a filtered list no longer reports.
-  const unfilteredOpenQuery = useListEscalations({
-    status: 'open',
-    page: 1,
-    perPage: 1,
-    enabled: Boolean(entityFilter),
-  });
+
+  // A filtered list reports only its own total, so the header keeps the last unfiltered one.
+  const unfilteredOpenTotal = useRef<number>();
+  useEffect(() => {
+    if (!entityFilter && openQuery.data && !openQuery.isPreviousData) {
+      unfilteredOpenTotal.current = openQuery.data.pagination.total;
+    }
+  }, [entityFilter, openQuery.data, openQuery.isPreviousData]);
 
   // Items stored by page number so that a refetch of the same page replaces its rows
   // in place rather than appending them (which would duplicate rows after "Show more").
@@ -87,26 +93,19 @@ export const EscalationsPage: React.FC = () => {
   const [openPages, setOpenPages] = useState<Record<number, EscalationQueueItem[]>>({});
   const [closedPages, setClosedPages] = useState<Record<number, EscalationQueueItem[]>>({});
 
-  // Rows of another filter must not linger under the new one.
-  useEffect(() => {
-    setOpenPage(1);
-    setClosedPage(1);
-    setOpenPages({});
-    setClosedPages({});
-  }, [entityFilter]);
-
   useEffect(() => {
     if (!openQuery.data) return;
     const page = openQuery.data.pagination.page;
     const newItems = openQuery.data.results.map(escalationToQueueItem);
-    setOpenPages((prev) => ({ ...prev, [page]: newItems }));
+    // Page 1 starts the list over, so rows of a previous filter are replaced, not kept.
+    setOpenPages((prev) => (page === 1 ? { 1: newItems } : { ...prev, [page]: newItems }));
   }, [openQuery.data]);
 
   useEffect(() => {
     if (!closedQuery.data) return;
     const page = closedQuery.data.pagination.page;
     const newItems = closedQuery.data.results.map(escalationToQueueItem);
-    setClosedPages((prev) => ({ ...prev, [page]: newItems }));
+    setClosedPages((prev) => (page === 1 ? { 1: newItems } : { ...prev, [page]: newItems }));
   }, [closedQuery.data]);
 
   // Flatten pages in order, deduping by id (offset shifts can move a row between pages).
@@ -201,7 +200,9 @@ export const EscalationsPage: React.FC = () => {
           <EscalationsPageHeader
             isLoading={isLoading}
             hasError={Boolean(pageError)}
-            openCount={(entityFilter ? unfilteredOpenQuery : openQuery).data?.pagination.total ?? 0}
+            openCount={
+              (entityFilter ? unfilteredOpenTotal.current : openQuery.data?.pagination.total) ?? 0
+            }
           />
         </EuiFlexItem>
 

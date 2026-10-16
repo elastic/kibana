@@ -19,11 +19,7 @@ import type { ImpactPillsResponse } from '../../../common';
 import { impactPillsQueryKeys } from '../query_keys';
 import { retryOnTransientError } from '../../retry_on_transient_error';
 
-/**
- * The entities across a whole proposal queue: the open proposals of `categories`, plus those
- * decided within `decidedWithinHours`. Independent of which rows a view has loaded. Does not poll:
- * the page that shows it refreshes it with its queues.
- */
+/** Entity pills across a whole proposal queue; the page that shows them refreshes them. */
 export const useProposalImpactPills = ({
   origin,
   categories,

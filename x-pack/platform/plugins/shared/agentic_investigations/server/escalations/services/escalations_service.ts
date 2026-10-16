@@ -47,8 +47,8 @@ import {
   INVESTIGATION_TEMPLATE_ID,
   MAX_ESCALATION_LINKED_INVESTIGATIONS,
   MAX_ESCALATIONS_PAGE_SIZE,
-  MAX_ESCALATIONS_SCAN,
 } from '../../../common/escalations/constants';
+import { MAX_ESCALATIONS_SCAN } from '../constants';
 import {
   InvalidLinkedInvestigationError,
   NotAnEscalationError,
@@ -628,12 +628,11 @@ export class EscalationsService {
     request: KibanaRequest,
     query: ListEscalationsQuery
   ): Promise<ListEscalationsResponse> {
-    const client = await this.getConversationClient(request);
-
     if (query.entity !== undefined) {
       return this.listByEntity(request, { ...query, entity: query.entity });
     }
 
+    const client = await this.getConversationClient(request);
     const { results, total } = await client.search({
       filter: buildEscalationsFilter(query),
       sort: ESCALATIONS_LIST_SORT,
@@ -649,10 +648,8 @@ export class EscalationsService {
   }
 
   /**
-   * Pages through the escalations of a status, newest first, hydrated with their entity ids and
-   * stopping at {@link MAX_ESCALATIONS_SCAN}. Filtering by entity and summarising Impact pills both
-   * start here, because an escalation's entities come from its linked investigations and cannot be
-   * pushed into the conversation search.
+   * The newest escalations of a status, up to {@link MAX_ESCALATIONS_SCAN}, with their entity ids.
+   * Throws when the impact read fails, so a filter or a pill count never rests on partial data.
    */
   async scanWithEntityIds(
     request: KibanaRequest,
@@ -660,22 +657,34 @@ export class EscalationsService {
   ): Promise<ListEscalationsResponse['results']> {
     const client = await this.getConversationClient(request);
     const filter = buildEscalationsFilter(query);
-    const scanned: ListEscalationsResponse['results'] = [];
-
-    for (let page = 1; scanned.length < MAX_ESCALATIONS_SCAN; page++) {
-      const { results, total } = await client.search({
+    const searchPage = (page: number) =>
+      client.search({
         filter,
         sort: ESCALATIONS_LIST_SORT,
         page,
         perPage: MAX_ESCALATIONS_PAGE_SIZE,
       });
-      scanned.push(...(await this.withEntityIds(request, results)));
-      if (results.length === 0 || page * MAX_ESCALATIONS_PAGE_SIZE >= total) {
-        break;
-      }
-    }
 
-    return scanned.slice(0, MAX_ESCALATIONS_SCAN);
+    const first = await searchPage(1);
+    const reachable = Math.min(first.total, MAX_ESCALATIONS_SCAN);
+    if (first.total > MAX_ESCALATIONS_SCAN) {
+      this.logger.warn(
+        `Escalation scan truncated to ${MAX_ESCALATIONS_SCAN} of ${first.total} ${query.status} escalations`
+      );
+    }
+    const pageCount = Math.ceil(reachable / MAX_ESCALATIONS_PAGE_SIZE);
+    const rest = await Promise.all(
+      Array.from({ length: Math.max(pageCount - 1, 0) }, (_, index) => searchPage(index + 2))
+    );
+
+    const byId = new Map(
+      [first, ...rest]
+        .flatMap(({ results }) => results)
+        .map((escalation) => [escalation.id, escalation])
+    );
+    return this.withEntityIds(request, [...byId.values()].slice(0, MAX_ESCALATIONS_SCAN), {
+      strict: true,
+    });
   }
 
   private async listByEntity(
@@ -699,7 +708,8 @@ export class EscalationsService {
    */
   private async withEntityIds(
     request: KibanaRequest,
-    escalations: ListEscalationsResponse['results']
+    escalations: ListEscalationsResponse['results'],
+    { strict = false }: { strict?: boolean } = {}
   ): Promise<ListEscalationsResponse['results']> {
     const linkedIdsByEscalation = escalations.map((escalation) => {
       const linked = escalation.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD];
@@ -730,6 +740,7 @@ export class EscalationsService {
         };
       });
     } catch (err) {
+      if (strict) throw err;
       this.logger.debug(`Could not resolve escalation impact: ${err}`);
       return escalations;
     }

@@ -18,6 +18,7 @@ import {
   type ConversationsActionsGroupProps,
   type BaseActionsProps,
   type CardActionType,
+  type ImpactPill,
   type Investigation,
   InvestigationActionModals,
   type EscalationModalRenderProps,
@@ -114,7 +115,8 @@ export const ConversationsPage: React.FC = () => {
   return <ConversationsPageContent />;
 };
 
-/** Everything the page shows from the proposals queues, refreshed together by one heartbeat. */
+const NO_PILLS: readonly ImpactPill[] = [];
+
 const POLLED_QUERY_KEYS = [
   ...OPEN_PROPOSAL_CATEGORIES.flatMap((category) => [
     queryKeys.proposals.byCategory(category),
@@ -130,7 +132,7 @@ const ConversationsPageContent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const queryClient = useQueryClient();
   useQueuePolling(POLLED_QUERY_KEYS);
-  const { data: impactPills = [] } = useProposalImpactPills({
+  const { data: impactPills = NO_PILLS } = useProposalImpactPills({
     origin: ALERTZERO_PROPOSAL_ORIGIN,
     categories: OPEN_PROPOSAL_CATEGORIES,
     decidedWithinHours: CLOSED_DECIDED_WITHIN_HOURS,

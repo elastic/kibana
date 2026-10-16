@@ -173,6 +173,16 @@ describe('createImpactClient', () => {
       expect(listByConversationIds.mock.calls[1][0]).toHaveLength(5);
     });
 
+    it('should check the privilege and readability once however many chunks it reads', async () => {
+      const ids = Array.from({ length: MAX_IMPACT_CONVERSATION_IDS * 2 + 1 }, (_, i) => `c${i}`);
+      const { client, assertCanRead, listByConversationIds } = createClient();
+
+      await client.getEntitiesByConversationId(ids);
+
+      expect(assertCanRead).toHaveBeenCalledTimes(1);
+      expect(listByConversationIds).toHaveBeenCalledTimes(3);
+    });
+
     it('should not read when there are no ids', async () => {
       const { client, listByConversationIds } = createClient();
 

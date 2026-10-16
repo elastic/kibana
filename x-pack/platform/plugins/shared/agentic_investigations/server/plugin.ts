@@ -300,7 +300,6 @@ export class AgenticInvestigationsPlugin
     }
 
     this.impactPillsService = new ImpactPillsService({
-      logger: this.logger,
       getImpactClient,
       getSpaceId: (request) => this.getSpaceId(request),
       getProposals: () => plugins.proposals,

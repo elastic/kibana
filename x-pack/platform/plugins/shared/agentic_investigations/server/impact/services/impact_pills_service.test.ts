@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { EscalationsService } from '../../escalations/services/escalations_service';
@@ -35,7 +34,6 @@ const makeService = ({
   const getEntitiesByConversationId = jest.fn().mockResolvedValue(entityIds);
   const scanWithEntityIds = jest.fn();
   const service = new ImpactPillsService({
-    logger: loggingSystemMock.createLogger(),
     getImpactClient: () => ({ getEntitiesByConversationId } as never),
     getSpaceId: () => 'space-1',
     getProposals: () =>
@@ -105,13 +103,20 @@ describe('ImpactPillsService', () => {
       expect(await service.forProposals(request, query)).toEqual([]);
     });
 
-    it('returns no pills when the caller cannot read proposals', async () => {
+    it('refuses, rather than answering with no pills, when the caller cannot read proposals', async () => {
       const { service, countByConversation } = makeService({
         assertCanRead: jest.fn().mockRejectedValue(new Error('forbidden')),
       });
 
-      expect(await service.forProposals(request, query)).toEqual([]);
+      await expect(service.forProposals(request, query)).rejects.toThrow('forbidden');
       expect(countByConversation).not.toHaveBeenCalled();
+    });
+
+    it('lets a failed read surface, so the client keeps the pills it has', async () => {
+      const { service, countByConversation } = makeService();
+      countByConversation.mockReset().mockRejectedValue(new Error('es down'));
+
+      await expect(service.forProposals(request, query)).rejects.toThrow('es down');
     });
   });
 
@@ -131,6 +136,13 @@ describe('ImpactPillsService', () => {
       ]);
       expect(scanWithEntityIds).toHaveBeenCalledWith(request, { status: 'open' });
       expect(scanWithEntityIds).toHaveBeenCalledWith(request, { status: 'closed' });
+    });
+
+    it('lets a failed scan surface', async () => {
+      const { service, scanWithEntityIds } = makeService();
+      scanWithEntityIds.mockRejectedValue(new Error('impact read failed'));
+
+      await expect(service.forEscalations(request)).rejects.toThrow('impact read failed');
     });
   });
 });

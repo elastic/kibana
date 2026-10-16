@@ -21,8 +21,8 @@ import {
   ESCALATION_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
   MAX_ESCALATIONS_PAGE_SIZE,
-  MAX_ESCALATIONS_SCAN,
 } from '../../../common/escalations/constants';
+import { MAX_ESCALATIONS_SCAN } from '../constants';
 
 const logger = loggingSystemMock.createLogger();
 const request = httpServerMock.createKibanaRequest();
@@ -698,21 +698,71 @@ describe('EscalationsService.list', () => {
       );
     });
 
-    it('stops scanning at the scan cap', async () => {
+    it('stops scanning at the scan cap and says so', async () => {
       const { service, client } = makeService({
-        search: jest.fn().mockResolvedValue({
+        search: jest.fn(async ({ page }: { page: number }) => ({
           results: Array.from({ length: MAX_ESCALATIONS_PAGE_SIZE }, (_, i) => ({
             ...MOCK_SUMMARY,
-            id: `e${i}`,
+            id: `e${page}-${i}`,
           })),
           total: 100_000,
-        }),
+        })),
       });
 
       const scanned = await service.scanWithEntityIds(request, { status: 'open' });
 
       expect(scanned).toHaveLength(MAX_ESCALATIONS_SCAN);
       expect(client.search).toHaveBeenCalledTimes(MAX_ESCALATIONS_SCAN / MAX_ESCALATIONS_PAGE_SIZE);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('truncated'));
+    });
+
+    it('counts an escalation once when paging shifts it onto two pages', async () => {
+      const { service } = makeService({
+        search: jest.fn(async ({ page }: { page: number }) => ({
+          results: [page === 1 ? MOCK_SUMMARY : { ...MOCK_SUMMARY }],
+          total: 2 * MAX_ESCALATIONS_PAGE_SIZE,
+        })),
+      });
+
+      expect(await service.scanWithEntityIds(request, { status: 'open' })).toHaveLength(1);
+    });
+
+    it('hydrates the whole scan with one impact read', async () => {
+      const { service, impactClient } = makeService({
+        search: jest.fn(async ({ page }: { page: number }) => ({
+          results: [
+            {
+              ...MOCK_SUMMARY,
+              id: `e${page}`,
+              metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [`inv-${page}`] },
+            },
+          ],
+          total: 3 * MAX_ESCALATIONS_PAGE_SIZE,
+        })),
+      });
+
+      await service.scanWithEntityIds(request, { status: 'open' });
+
+      expect(impactClient.getEntitiesByConversationId).toHaveBeenCalledTimes(1);
+    });
+
+    it('fails when the impact read fails, rather than filtering on partial data', async () => {
+      const { service, impactClient } = makeService({
+        search: jest.fn().mockResolvedValue({
+          results: [
+            {
+              ...MOCK_SUMMARY,
+              metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: ['inv-1'] },
+            },
+          ],
+          total: 1,
+        }),
+      });
+      impactClient.getEntitiesByConversationId.mockRejectedValue(new Error('impact down'));
+
+      await expect(
+        service.list(request, { page: 1, per_page: 50, status: 'open', entity: 'host-1' })
+      ).rejects.toThrow('impact down');
     });
   });
 

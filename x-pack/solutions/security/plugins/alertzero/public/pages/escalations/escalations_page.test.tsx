@@ -509,28 +509,10 @@ describe('EscalationsPage', () => {
     ];
 
     /** The server applies the entity filter, so the fake narrows the rows the same way. */
-    const mockServerFiltering = (open: object[], closed: object[], openTotalUnfiltered = 7) => {
+    const mockServerFiltering = (open: object[], closed: object[], openTotal?: number) => {
       const results = new Map<string, object>();
       mockUseListEscalations.mockImplementation(
-        ({
-          status,
-          entity,
-          perPage,
-        }: {
-          status: string;
-          entity?: string | null;
-          perPage?: number;
-        }) => {
-          if (perPage === 1) {
-            return {
-              data: {
-                results: [],
-                pagination: { total: openTotalUnfiltered, page: 1, per_page: 1 },
-              },
-              isLoading: false,
-              error: null,
-            };
-          }
+        ({ status, entity }: { status: string; entity?: string | null }) => {
           const rows = (status === 'open' ? open : closed).filter(
             (row) => !entity || (row as { entity_ids?: string[] }).entity_ids?.includes(entity)
           );
@@ -539,7 +521,11 @@ describe('EscalationsPage', () => {
             results.set(key, {
               data: {
                 results: rows,
-                pagination: { total: rows.length, page: 1, per_page: 50 },
+                pagination: {
+                  total: !entity && status === 'open' ? openTotal ?? rows.length : rows.length,
+                  page: 1,
+                  per_page: 50,
+                },
               },
               isLoading: false,
               error: null,
@@ -591,13 +577,28 @@ describe('EscalationsPage', () => {
       expect(screen.getByText('Resolved threat')).toBeInTheDocument();
     });
 
-    it('keeps counting every open escalation in the header while filtered', () => {
+    it('keeps the unfiltered open count in the header while filtered', () => {
       mockServerFiltering([impactOpen], [impactClosed], 7);
       renderPage();
+      expect(screen.getByText(/7 open escalations/)).toBeInTheDocument();
 
       fireEvent.click(screen.getByRole('button', { name: 'Sales-NAS' }));
 
       expect(screen.getByText(/7 open escalations/)).toBeInTheDocument();
+    });
+
+    it('starts both queues over at page 1 when the filter changes', () => {
+      mockServerFiltering([impactOpen], [impactClosed]);
+      renderPage();
+      mockUseListEscalations.mockClear();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Sales-NAS' }));
+
+      const filteredCalls = mockUseListEscalations.mock.calls
+        .map(([options]) => options)
+        .filter(({ entity }) => entity === 'Sales-NAS');
+      expect(filteredCalls.length).toBeGreaterThan(0);
+      expect(filteredCalls.every(({ page }) => page === 1)).toBe(true);
     });
   });
 });

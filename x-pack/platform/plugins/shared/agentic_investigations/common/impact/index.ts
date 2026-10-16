@@ -32,5 +32,4 @@ export {
 
 export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from './impact';
 
-export { proposalImpactPillsQuerySchema } from './impact_pills';
 export type { ImpactPillsResponse, ProposalImpactPillsQuery } from './impact_pills';
