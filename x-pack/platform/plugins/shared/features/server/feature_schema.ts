@@ -305,6 +305,7 @@ const elasticsearchPrivilegeSchema = schema.object({
   requiredIndexPrivileges: schema.maybe(
     schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
   ),
+  requiredAnyIndexPrivileges: schema.maybe(schema.arrayOf(schema.string())),
   requiredRoles: schema.maybe(schema.arrayOf(schema.string())),
 });
 
@@ -592,12 +593,14 @@ export function validateElasticsearchFeature(feature: ElasticsearchFeatureConfig
     const {
       requiredClusterPrivileges = [],
       requiredIndexPrivileges = [],
+      requiredAnyIndexPrivileges = [],
       requiredRoles = [],
     } = privilege;
 
     if (
       requiredClusterPrivileges.length === 0 &&
       requiredIndexPrivileges.length === 0 &&
+      requiredAnyIndexPrivileges.length === 0 &&
       requiredRoles.length === 0
     ) {
       throw new Error(
