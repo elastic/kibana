@@ -19,7 +19,7 @@ spec:
       description: Purge stale cloud deployments
     spec:
       env:
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
       allow_rebuilds: false
       branch_configuration: main

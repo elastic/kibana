@@ -19,7 +19,7 @@ spec:
       description: Runs Streams performance journeys at scale
     spec:
       env:
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
       allow_rebuilds: true
       branch_configuration: main
       default_branch: main
