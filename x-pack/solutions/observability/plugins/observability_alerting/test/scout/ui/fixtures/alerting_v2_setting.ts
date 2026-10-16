@@ -28,6 +28,10 @@ export const setAlertingV2EnabledSetting = async (
   await kbnClient.uiSettings.updateGlobal({
     [ALERTING_V2_ENABLED_SETTING_ID]: enabled,
   });
+  // On a multi-node deployment the next request can hit a node still serving the
+  // previous value from the shared cache, so wait it out before the UI navigates
+  // and boots with the setting.
+  await kbnClient.uiSettings.waitForEventualCacheRefresh();
 };
 
 /** DELETE is a no-op when no user value is set. */

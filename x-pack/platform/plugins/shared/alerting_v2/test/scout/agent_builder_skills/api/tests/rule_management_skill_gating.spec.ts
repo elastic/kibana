@@ -129,6 +129,33 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
   );
 
   apiTest(
+    'does not list the alerting V2 skills when both experimental gates are on but alerting:v2:enabled is off',
+    { tag: tags.stateful.classic },
+    async ({ apiClient, kbnClient, requestAuth }) => {
+      // alerting:v2:enabled is left unset (off) to isolate it from the two
+      // experimental gates: with both of those on, the skills must still stay
+      // hidden purely because Alerting V2 is disabled.
+      await kbnClient.uiSettings.update({
+        [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
+        [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
+      });
+
+      const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
+      const response = await apiClient.get(SKILLS_API, {
+        headers: { ...COMMON_HEADERS, ...apiKeyHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(Array.isArray(response.body.results)).toBe(true);
+      expect(response.body.results.length).toBeGreaterThan(0);
+      for (const skillId of ALERTING_V2_SKILL_IDS) {
+        expect(getSkillIds(response.body.results)).not.toContain(skillId);
+      }
+    }
+  );
+
+  apiTest(
     'does not list either Alerting V2 skill when its experimental gate is disabled',
     { tag: tags.stateful.classic },
     async ({ apiClient, kbnClient, requestAuth }) => {

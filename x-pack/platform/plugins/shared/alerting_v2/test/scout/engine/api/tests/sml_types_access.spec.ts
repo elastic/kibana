@@ -103,220 +103,216 @@ const smlCrawlerTaskId = (typeId: string): string => `${SML_CRAWLER_TASK_TYPE}:$
  *
  * Relies on this config's global setup to turn `alerting:v2:enabled` on.
  */
-apiTest.describe(
-  'Agent Builder — alerting V2 SML type access',
-  { tag: API_ENGINE_TAG },
-  () => {
-    const searchRunId = randomUUID();
-    const searchToken = `alertingv2sml${searchRunId.replaceAll('-', '')}`;
-    const ruleTitle = `${searchToken} cpu threshold rule`;
-    const policyTitle = `${searchToken} slack action policy`;
+apiTest.describe('Agent Builder — alerting V2 SML type access', { tag: API_ENGINE_TAG }, () => {
+  const searchRunId = randomUUID();
+  const searchToken = `alertingv2sml${searchRunId.replaceAll('-', '')}`;
+  const ruleTitle = `${searchToken} cpu threshold rule`;
+  const policyTitle = `${searchToken} slack action policy`;
 
-    let limitedCredentials: RoleApiCredentials;
-    let agentBuilderOnlyCredentials: RoleApiCredentials;
-    let ruleId: string;
-    let policyId: string;
-    let ruleAttachmentId: string;
-    let policyAttachmentId: string;
+  let limitedCredentials: RoleApiCredentials;
+  let agentBuilderOnlyCredentials: RoleApiCredentials;
+  let ruleId: string;
+  let policyId: string;
+  let ruleAttachmentId: string;
+  let policyAttachmentId: string;
 
-    const executeSmlSearch = async (
-      apiClient: ApiClientFixture,
-      credentials: RoleApiCredentials,
-      toolParams: { query: string; size?: number; types?: string[] }
-    ) => {
-      const response = await apiClient.post(TOOLS_EXECUTE_API, {
-        headers: { ...EXECUTE_HEADERS, ...credentials.apiKeyHeader },
-        body: {
-          tool_id: platformCoreTools.smlSearch,
-          tool_params: { size: 20, ...toolParams },
-        },
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(200);
-      return response.body as SmlSearchExecuteBody;
+  const executeSmlSearch = async (
+    apiClient: ApiClientFixture,
+    credentials: RoleApiCredentials,
+    toolParams: { query: string; size?: number; types?: string[] }
+  ) => {
+    const response = await apiClient.post(TOOLS_EXECUTE_API, {
+      headers: { ...EXECUTE_HEADERS, ...credentials.apiKeyHeader },
+      body: {
+        tool_id: platformCoreTools.smlSearch,
+        tool_params: { size: 20, ...toolParams },
+      },
+      responseType: 'json',
+    });
+    expect(response).toHaveStatusCode(200);
+    return response.body as SmlSearchExecuteBody;
+  };
+
+  apiTest.beforeAll(async ({ requestAuth, kbnClient, apiClient, apiServices }) => {
+    await kbnClient.uiSettings.update({
+      [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
+    });
+
+    const createRuleData: CreateRuleData = {
+      kind: 'alert',
+      metadata: { name: ruleTitle },
+      schedule: { every: '1m', lookback: '1m' },
+      recovery: { strategy: 'no_breach' },
+      no_data: { strategy: 'ignore' },
+      query: { base: 'FROM logs-* | LIMIT 10' },
+      time_field: '@timestamp',
+      grouping: { fields: ['host.name'] },
+      state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
     };
 
-    apiTest.beforeAll(async ({ requestAuth, kbnClient, apiClient, apiServices }) => {
-      await kbnClient.uiSettings.update({
-        [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
-      });
+    const createdRule = await kbnClient.request<RuleResponse>({
+      method: 'POST',
+      path: ALERTING_V2_RULE_API_PATH,
+      headers: COMMON_HEADERS,
+      body: createRuleData,
+    });
+    ruleId = createdRule.data.id;
+    ruleAttachmentId = `${RULE_KI_TYPE}://${ruleId}`;
 
-      const createRuleData: CreateRuleData = {
-        kind: 'alert',
-        metadata: { name: ruleTitle },
-        schedule: { every: '1m', lookback: '1m' },
-        recovery: { strategy: 'no_breach' },
-        no_data: { strategy: 'ignore' },
-        query: { base: 'FROM logs-* | LIMIT 10' },
-        time_field: '@timestamp',
-        grouping: { fields: ['host.name'] },
-        state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
-      };
+    const createdPolicy = await kbnClient.request<ActionPolicyResponse>({
+      method: 'POST',
+      path: ALERTING_V2_ACTION_POLICY_API_PATH,
+      headers: COMMON_HEADERS,
+      body: {
+        name: policyTitle,
+        description: 'Scout SML type access action policy',
+        destinations: [{ type: 'workflow', id: 'scout-sml-workflow-id' }],
+      },
+    });
+    policyId = createdPolicy.data.id;
+    policyAttachmentId = `${ACTION_POLICY_KI_TYPE}://${policyId}`;
 
-      const createdRule = await kbnClient.request<RuleResponse>({
-        method: 'POST',
-        path: ALERTING_V2_RULE_API_PATH,
-        headers: COMMON_HEADERS,
-        body: createRuleData,
-      });
-      ruleId = createdRule.data.id;
-      ruleAttachmentId = `${RULE_KI_TYPE}://${ruleId}`;
+    await apiServices.alertingV2.taskManager.runSoon(smlCrawlerTaskId(RULE_KI_TYPE), {
+      ignoreErrors: true,
+    });
+    await apiServices.alertingV2.taskManager.runSoon(smlCrawlerTaskId(ACTION_POLICY_KI_TYPE), {
+      ignoreErrors: true,
+    });
 
-      const createdPolicy = await kbnClient.request<ActionPolicyResponse>({
-        method: 'POST',
-        path: ALERTING_V2_ACTION_POLICY_API_PATH,
-        headers: COMMON_HEADERS,
-        body: {
-          name: policyTitle,
-          description: 'Scout SML type access action policy',
-          destinations: [{ type: 'workflow', id: 'scout-sml-workflow-id' }],
+    limitedCredentials = await requestAuth.getApiKeyForCustomRole(LIMITED_ALERTING_V2_CHAT_ROLE);
+    agentBuilderOnlyCredentials = await requestAuth.getApiKeyForCustomRole(
+      AGENT_BUILDER_READ_WITHOUT_ALERTING_V2_ROLE
+    );
+
+    await expect
+      .poll(
+        async () => {
+          const hits = getSearchHits(
+            await executeSmlSearch(apiClient, limitedCredentials, { query: searchToken })
+          );
+          const attachmentIds = hits.map((hit) => hit.attachment_id);
+          return (
+            attachmentIds.includes(ruleAttachmentId) && attachmentIds.includes(policyAttachmentId)
+          );
         },
-      });
-      policyId = createdPolicy.data.id;
-      policyAttachmentId = `${ACTION_POLICY_KI_TYPE}://${policyId}`;
+        { timeout: CRAWL_POLL_TIMEOUT_MS, intervals: [CRAWL_POLL_INTERVAL_MS] }
+      )
+      .toBe(true);
+  });
 
-      await apiServices.alertingV2.taskManager.runSoon(smlCrawlerTaskId(RULE_KI_TYPE), {
-        ignoreErrors: true,
+  apiTest.afterAll(async ({ kbnClient }) => {
+    if (ruleId) {
+      await kbnClient.request({
+        method: 'DELETE',
+        path: `${ALERTING_V2_RULE_API_PATH}/${encodeURIComponent(ruleId)}`,
+        headers: COMMON_HEADERS,
+        ignoreErrors: [404],
+        retries: 0,
       });
-      await apiServices.alertingV2.taskManager.runSoon(smlCrawlerTaskId(ACTION_POLICY_KI_TYPE), {
-        ignoreErrors: true,
+    }
+    if (policyId) {
+      await kbnClient.request({
+        method: 'DELETE',
+        path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(policyId)}`,
+        headers: COMMON_HEADERS,
+        ignoreErrors: [404],
+        retries: 0,
       });
+    }
 
-      limitedCredentials = await requestAuth.getApiKeyForCustomRole(LIMITED_ALERTING_V2_CHAT_ROLE);
-      agentBuilderOnlyCredentials = await requestAuth.getApiKeyForCustomRole(
-        AGENT_BUILDER_READ_WITHOUT_ALERTING_V2_ROLE
+    await kbnClient.uiSettings.unset(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+  });
+
+  apiTest(
+    'limited privilege user can search alerting v2 rule and action policy SML types',
+    async ({ apiClient }) => {
+      const hits = getSearchHits(
+        await executeSmlSearch(apiClient, limitedCredentials, { query: searchToken })
       );
 
-      await expect
-        .poll(
-          async () => {
-            const hits = getSearchHits(
-              await executeSmlSearch(apiClient, limitedCredentials, { query: searchToken })
-            );
-            const attachmentIds = hits.map((hit) => hit.attachment_id);
-            return (
-              attachmentIds.includes(ruleAttachmentId) && attachmentIds.includes(policyAttachmentId)
-            );
-          },
-          { timeout: CRAWL_POLL_TIMEOUT_MS, intervals: [CRAWL_POLL_INTERVAL_MS] }
-        )
-        .toBe(true);
-    });
+      expect(hits.find((hit) => hit.attachment_id === ruleAttachmentId)).toMatchObject({
+        type: RULE_KI_TYPE,
+        title: ruleTitle,
+      });
+      expect(hits.find((hit) => hit.attachment_id === policyAttachmentId)).toMatchObject({
+        type: ACTION_POLICY_KI_TYPE,
+        title: policyTitle,
+      });
+    }
+  );
 
-    apiTest.afterAll(async ({ kbnClient }) => {
-      if (ruleId) {
-        await kbnClient.request({
-          method: 'DELETE',
-          path: `${ALERTING_V2_RULE_API_PATH}/${encodeURIComponent(ruleId)}`,
-          headers: COMMON_HEADERS,
-          ignoreErrors: [404],
-          retries: 0,
-        });
-      }
-      if (policyId) {
-        await kbnClient.request({
-          method: 'DELETE',
-          path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(policyId)}`,
-          headers: COMMON_HEADERS,
-          ignoreErrors: [404],
-          retries: 0,
-        });
-      }
+  apiTest(
+    'limited privilege user can filter SML search to the rule type',
+    async ({ apiClient }) => {
+      const hits = getSearchHits(
+        await executeSmlSearch(apiClient, limitedCredentials, {
+          query: searchToken,
+          types: [RULE_KI_TYPE],
+        })
+      );
+      const attachmentIds = hits.map((hit) => hit.attachment_id);
+      expect(attachmentIds).toContain(ruleAttachmentId);
+      expect(attachmentIds).not.toContain(policyAttachmentId);
+    }
+  );
 
-      await kbnClient.uiSettings.unset(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
-    });
+  apiTest(
+    'limited privilege user can filter SML search to the action policy type',
+    async ({ apiClient }) => {
+      const hits = getSearchHits(
+        await executeSmlSearch(apiClient, limitedCredentials, {
+          query: searchToken,
+          types: [ACTION_POLICY_KI_TYPE],
+        })
+      );
+      const attachmentIds = hits.map((hit) => hit.attachment_id);
+      expect(attachmentIds).toContain(policyAttachmentId);
+      expect(attachmentIds).not.toContain(ruleAttachmentId);
+    }
+  );
 
-    apiTest(
-      'limited privilege user can search alerting v2 rule and action policy SML types',
-      async ({ apiClient }) => {
-        const hits = getSearchHits(
-          await executeSmlSearch(apiClient, limitedCredentials, { query: searchToken })
-        );
+  apiTest(
+    'user with agent builder read but without alerting v2 read cannot see rule or action policy SML hits',
+    async ({ apiClient }) => {
+      const hits = getSearchHits(
+        await executeSmlSearch(apiClient, agentBuilderOnlyCredentials, { query: searchToken })
+      );
+      const attachmentIds = hits.map((hit) => hit.attachment_id);
+      expect(attachmentIds).not.toContain(ruleAttachmentId);
+      expect(attachmentIds).not.toContain(policyAttachmentId);
+    }
+  );
 
-        expect(hits.find((hit) => hit.attachment_id === ruleAttachmentId)).toMatchObject({
-          type: RULE_KI_TYPE,
-          title: ruleTitle,
-        });
-        expect(hits.find((hit) => hit.attachment_id === policyAttachmentId)).toMatchObject({
-          type: ACTION_POLICY_KI_TYPE,
-          title: policyTitle,
-        });
-      }
-    );
+  /*
+   * `*` takes the other ES|QL branch: a plain sorted scan instead of the FORK/FUSE plan every
+   * other case here builds. The authorization filter is pushed into `_query`'s `filter`
+   * parameter, and the two plans consume it differently — a filter that denies on one branch
+   * has already been observed to be a no-op on the other. Both branches need coverage.
+   */
+  apiTest(
+    'user without alerting v2 read cannot see rule or action policy SML hits on a wildcard search',
+    async ({ apiClient }) => {
+      const hits = getSearchHits(
+        await executeSmlSearch(apiClient, agentBuilderOnlyCredentials, {
+          query: '*',
+          size: 50,
+        })
+      );
+      const attachmentIds = hits.map((hit) => hit.attachment_id);
+      expect(attachmentIds).not.toContain(ruleAttachmentId);
+      expect(attachmentIds).not.toContain(policyAttachmentId);
+    }
+  );
 
-    apiTest(
-      'limited privilege user can filter SML search to the rule type',
-      async ({ apiClient }) => {
-        const hits = getSearchHits(
-          await executeSmlSearch(apiClient, limitedCredentials, {
-            query: searchToken,
-            types: [RULE_KI_TYPE],
-          })
-        );
-        const attachmentIds = hits.map((hit) => hit.attachment_id);
-        expect(attachmentIds).toContain(ruleAttachmentId);
-        expect(attachmentIds).not.toContain(policyAttachmentId);
-      }
-    );
-
-    apiTest(
-      'limited privilege user can filter SML search to the action policy type',
-      async ({ apiClient }) => {
-        const hits = getSearchHits(
-          await executeSmlSearch(apiClient, limitedCredentials, {
-            query: searchToken,
-            types: [ACTION_POLICY_KI_TYPE],
-          })
-        );
-        const attachmentIds = hits.map((hit) => hit.attachment_id);
-        expect(attachmentIds).toContain(policyAttachmentId);
-        expect(attachmentIds).not.toContain(ruleAttachmentId);
-      }
-    );
-
-    apiTest(
-      'user with agent builder read but without alerting v2 read cannot see rule or action policy SML hits',
-      async ({ apiClient }) => {
-        const hits = getSearchHits(
-          await executeSmlSearch(apiClient, agentBuilderOnlyCredentials, { query: searchToken })
-        );
-        const attachmentIds = hits.map((hit) => hit.attachment_id);
-        expect(attachmentIds).not.toContain(ruleAttachmentId);
-        expect(attachmentIds).not.toContain(policyAttachmentId);
-      }
-    );
-
-    /*
-     * `*` takes the other ES|QL branch: a plain sorted scan instead of the FORK/FUSE plan every
-     * other case here builds. The authorization filter is pushed into `_query`'s `filter`
-     * parameter, and the two plans consume it differently — a filter that denies on one branch
-     * has already been observed to be a no-op on the other. Both branches need coverage.
-     */
-    apiTest(
-      'user without alerting v2 read cannot see rule or action policy SML hits on a wildcard search',
-      async ({ apiClient }) => {
-        const hits = getSearchHits(
-          await executeSmlSearch(apiClient, agentBuilderOnlyCredentials, {
-            query: '*',
-            size: 50,
-          })
-        );
-        const attachmentIds = hits.map((hit) => hit.attachment_id);
-        expect(attachmentIds).not.toContain(ruleAttachmentId);
-        expect(attachmentIds).not.toContain(policyAttachmentId);
-      }
-    );
-
-    apiTest(
-      'limited privilege user still sees both types on a wildcard search',
-      async ({ apiClient }) => {
-        const hits = getSearchHits(
-          await executeSmlSearch(apiClient, limitedCredentials, { query: '*', size: 50 })
-        );
-        const attachmentIds = hits.map((hit) => hit.attachment_id);
-        expect(attachmentIds).toContain(ruleAttachmentId);
-        expect(attachmentIds).toContain(policyAttachmentId);
-      }
-    );
-  }
-);
+  apiTest(
+    'limited privilege user still sees both types on a wildcard search',
+    async ({ apiClient }) => {
+      const hits = getSearchHits(
+        await executeSmlSearch(apiClient, limitedCredentials, { query: '*', size: 50 })
+      );
+      const attachmentIds = hits.map((hit) => hit.attachment_id);
+      expect(attachmentIds).toContain(ruleAttachmentId);
+      expect(attachmentIds).toContain(policyAttachmentId);
+    }
+  );
+});

@@ -691,15 +691,17 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
   apiTest(
     'defaults the lookback window to schedule.every when no lookback is set',
     async ({ apiServices }) => {
-      // 90s in the past — outside the 1m default (= schedule.every) lookback.
-      // If the executor mistakenly fell back to a longer default, this doc would match.
-      const ninetySecondsAgo = new Date(Date.now() - 90_000).toISOString();
+      // 3m in the past — within a 5m default lookback (= schedule.every) but
+      // outside the 1m minimum schedule. A fixed 1m lookback would exclude this
+      // doc, so a breach proves the default follows schedule.every rather than a
+      // one-minute fallback that `SCHEDULE_INTERVAL` would hide.
+      const threeMinutesAgo = new Date(Date.now() - 3 * 60_000).toISOString();
 
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
           {
-            '@timestamp': ninetySecondsAgo,
+            '@timestamp': threeMinutesAgo,
             'host.name': 'host-lookback-default',
             severity: 'high',
             value: 1,
@@ -710,20 +712,23 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-lookback-default' },
-          schedule: { every: SCHEDULE_INTERVAL },
+          schedule: { every: '5m' },
           query: {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-lookback-default" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
         })
       );
 
-      await apiServices.alertingV2.ruleRunner.waitForExecutions({
-        ruleId: rule.id,
-        runs: 2,
+      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
+        status: 'breached',
       });
 
-      const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
-      expect(events).toHaveLength(0);
+      const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'breached',
+      });
+
+      expect(breachEvents.length).toBeGreaterThanOrEqual(1);
+      expect(breachEvents[0].data).toMatchObject({ 'host.name': 'host-lookback-default' });
     }
   );
 

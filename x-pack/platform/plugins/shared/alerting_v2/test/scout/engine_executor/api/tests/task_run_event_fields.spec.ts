@@ -14,6 +14,10 @@ import { apiTest, buildCreateRuleData, testData } from '../fixtures';
 // scheduled tick — give the wait more than one `SCHEDULE_INTERVAL` to catch it.
 const DISABLED_RUN_TIMEOUT_MS = 90_000;
 
+// The poll above outlasts the Scout project's default per-test timeout, so the
+// whole test must be extended beyond it or Playwright aborts before the tick.
+const DISABLED_RUN_TEST_TIMEOUT_MS = 150_000;
+
 /**
  * Every counter the executor publishes, so a test can assert the whole block
  * at once. All of them are written on every reporting run, defaulting to
@@ -188,6 +192,8 @@ apiTest.describe('Rule executor task-run event fields', { tag: testData.API_ENGI
   apiTest(
     'reports skipped with the halt reason when the rule is disabled',
     async ({ apiServices }) => {
+      apiTest.setTimeout(DISABLED_RUN_TEST_TIMEOUT_MS);
+
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'task-run-fields-skipped' },

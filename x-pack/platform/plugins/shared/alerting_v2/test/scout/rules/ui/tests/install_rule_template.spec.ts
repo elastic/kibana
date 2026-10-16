@@ -25,7 +25,7 @@ test.describe(
       await apiServices.alertingV2.ruleTemplates.cleanUp();
       await apiServices.alertingV2.rules.cleanUp();
       await seedMockRuleTemplates(apiServices.alertingV2.ruleTemplates);
-      await browserAuth.loginAsAlertingV2Editor();
+      await browserAuth.loginAsAlertingEditor();
     });
 
     test.afterAll(async ({ apiServices }) => {
