@@ -800,6 +800,7 @@ export interface DocLinks {
     readonly casesPermissions: string;
     readonly configureCaseSettings: string;
     readonly manageCaseTemplates: string;
+    readonly createCases: string;
   };
 }
 
