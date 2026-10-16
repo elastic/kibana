@@ -11,6 +11,7 @@ import type { EsqlAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, esqlAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { toCodeFence } from './markdown';
 
 /**
  * Creates the definition for the `text` attachment type.
@@ -51,6 +52,15 @@ export const createEsqlAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
+    toSurfaceComposition: ({ query, description }) => ({
+      type: 'view',
+      body: [
+        {
+          type: 'markdown',
+          text: [description, toCodeFence(query, 'esql')].filter(Boolean).join('\n\n'),
+        },
+      ],
+    }),
     getAgentDescription: () => {
       return `Represents an ES|QL query, which can be executed using the ${platformCoreTools.executeEsql} tool
 

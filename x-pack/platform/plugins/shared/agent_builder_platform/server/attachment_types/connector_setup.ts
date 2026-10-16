@@ -51,6 +51,27 @@ export const createConnectorSetupAttachmentType = (): AttachmentTypeDefinition<
       },
     };
   },
+  toSurfaceComposition: (
+    { connector_type: connectorType, connector_type_name: connectorTypeName, reason },
+    { attachment: { origin } }
+  ) => {
+    const displayName =
+      connectorTypeName ?? getConnectorSpec(connectorType)?.metadata.displayName ?? connectorType;
+
+    const text = [
+      reason ?? `Configure the ${displayName} connector so the agent can use it here.`,
+      !origin && 'Finish setting it up in Kibana.',
+    ]
+      .filter(Boolean)
+      .join('\n\n');
+
+    return {
+      type: 'view',
+      title: displayName,
+      subtitle: origin ? 'Connected' : 'Setup',
+      body: [{ type: 'markdown', text }],
+    };
+  },
   getAgentDescription: () => {
     return `A \`connector_setup\` attachment is an inline card that lets the user create a connector instance without leaving chat. Render it by emitting <render_attachment id="ATTACHMENT_ID" /> using only ids returned by the \`propose_connector\` tool. Do not ask the user for secrets in chat — they enter them in the card's form. After the user creates the connector, it is picked up automatically; continue on a later turn.`;
   },

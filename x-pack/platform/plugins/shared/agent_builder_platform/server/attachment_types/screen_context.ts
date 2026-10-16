@@ -11,6 +11,7 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import type { ScreenContextAttachmentData } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { toBulletList } from './markdown';
 
 /**
  * Creates the definition for the `screen_context` attachment type.
@@ -37,6 +38,20 @@ export const createScreenContextAttachmentType = (): AttachmentTypeDefinition<
       };
     },
     isReadonly: true,
+    toSurfaceComposition: ({ app, url, description, time_range: timeRange }) => {
+      const text = toBulletList([
+        app && `App: ${app}`,
+        url && `URL: ${url}`,
+        description && `Description: ${description}`,
+        timeRange && `Time range: ${timeRange.from} to ${timeRange.to}`,
+      ]);
+
+      return {
+        type: 'view',
+        title: 'Screen context',
+        body: text ? [{ type: 'markdown', text }] : [],
+      };
+    },
     getAgentDescription: () =>
       `The user's current location in Kibana (app, URL, time range). Read it before answering questions about 'this page', 'here', or anything the user is currently viewing.`,
     getTools: () => [],

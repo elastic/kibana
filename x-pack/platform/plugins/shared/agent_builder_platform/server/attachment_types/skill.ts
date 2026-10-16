@@ -11,6 +11,7 @@ import {
   skillAttachmentDataSchema,
   type SkillAttachmentData,
 } from '../../common/attachments';
+import { toCodeFence } from './markdown';
 
 /**
  * Server-side definition for the `skill` attachment type.
@@ -68,6 +69,23 @@ export const createSkillAttachmentType = (): AttachmentTypeDefinition<
         return { type: 'text', value };
       },
     };
+  },
+  toSurfaceComposition: ({ skill }) => {
+    const { id, name, description, content, tool_ids: toolIds } = skill;
+    const files = (skill.referenced_content ?? []).map(
+      ({ relativePath, name: fileName }) => `${relativePath}/${fileName}.md`
+    );
+
+    const text = [
+      description,
+      toolIds.length > 0 && `Tools: ${toolIds.join(', ')}`,
+      files.length > 0 && `Files: ${files.join(', ')}`,
+      toCodeFence(content, 'markdown'),
+    ]
+      .filter(Boolean)
+      .join('\n\n');
+
+    return { type: 'view', title: name, subtitle: id, body: [{ type: 'markdown', text }] };
   },
   getAgentDescription: () => {
     return `A \`skill\` attachment is a versioned draft of an Agent Builder skill. When \`mode\` is "create" the card shows a "Create" button (POST). When \`mode\` is "edit" the card shows an "Edit in Management" link if the skill has no unsaved changes, or a "Save changes" button (PUT) once edits are present. \`skill.id\` always identifies the persisted skill. In both cases \`skill\` holds the full content including \`id\`. Render it inline by emitting <render_attachment id="ATTACHMENT_ID" />. Emit at most one render per round — if you call \`patch_skill\` after loading or proposing the skill, hold the render until after the final patch so the user sees a single up-to-date card. Do not invent attachment ids — only render ids returned by propose_skill, load_skill_for_editing, or patch_skill.`;

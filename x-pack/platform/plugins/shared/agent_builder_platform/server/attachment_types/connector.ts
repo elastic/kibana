@@ -18,6 +18,7 @@ import {
   formatConnectorActionLine,
   getConnectorSpec,
 } from '@kbn/connector-specs';
+import { toBulletList } from './markdown';
 
 /**
  * Creates the definition for the `connector` attachment type.
@@ -105,6 +106,31 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
         },
 
         getBoundedTools: () => [],
+      };
+    },
+
+    toSurfaceComposition: ({
+      connector_name: connectorName,
+      connector_type: connectorType,
+      selected_actions: selectedActions,
+    }) => {
+      const spec = getConnectorSpec(connectorType);
+      const actionNames = spec
+        ? filterActionsBySelection(spec.actions, selectedActions).map(([actionName]) => actionName)
+        : [];
+
+      const text = [
+        spec?.metadata.description,
+        actionNames.length > 0 && `**Actions**\n${toBulletList(actionNames)}`,
+      ]
+        .filter(Boolean)
+        .join('\n\n');
+
+      return {
+        type: 'view',
+        title: connectorName,
+        subtitle: connectorType,
+        body: text ? [{ type: 'markdown', text }] : [],
       };
     },
 

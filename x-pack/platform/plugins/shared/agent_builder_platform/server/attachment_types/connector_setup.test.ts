@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { Attachment, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AgentFormattedAttachment } from '@kbn/agent-builder-server/attachments';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import {
@@ -110,6 +110,67 @@ describe('connector_setup attachment type', () => {
       const description = attachmentType.getAgentDescription!();
       expect(description).toContain('connector_setup');
       expect(description).toContain('render_attachment');
+    });
+  });
+
+  describe('toSurfaceComposition', () => {
+    const toSurfaceComposition = (data: ConnectorSetupAttachmentData, origin?: string) =>
+      attachmentType.toSurfaceComposition?.(data, {
+        attachment: { origin } as VersionedAttachment,
+        version: 1,
+      });
+
+    it('shows the reason, and asks to finish the setup in Kibana', () => {
+      expect(toSurfaceComposition(validData)).toEqual({
+        type: 'view',
+        title: 'GitHub',
+        subtitle: 'Setup',
+        body: [
+          {
+            type: 'markdown',
+            text: 'Investigate issues across services\n\nFinish setting it up in Kibana.',
+          },
+        ],
+      });
+    });
+
+    it('shows the connector as connected once it has been created', () => {
+      const composition = toSurfaceComposition(validData, 'connector-123');
+
+      expect(composition?.subtitle).toBe('Connected');
+      expect(composition?.body).toEqual([
+        { type: 'markdown', text: 'Investigate issues across services' },
+      ]);
+    });
+
+    it('falls back to the spec display name and a default reason', () => {
+      getConnectorSpecMock.mockReturnValue({
+        metadata: {
+          id: '.notion',
+          displayName: 'Notion',
+          description: 'Notion connector',
+          minimumLicense: 'enterprise',
+          supportedFeatureIds: [],
+        },
+        actions: {},
+        test: { handler: jest.fn(), enabled: false },
+      });
+
+      const composition = toSurfaceComposition({ connector_type: '.notion' });
+
+      expect(composition?.title).toBe('Notion');
+      expect(composition?.body).toEqual([
+        {
+          type: 'markdown',
+          text: 'Configure the Notion connector so the agent can use it here.\n\nFinish setting it up in Kibana.',
+        },
+      ]);
+    });
+
+    it('falls back to the connector type when no spec is found', () => {
+      getConnectorSpecMock.mockReturnValue(undefined);
+
+      expect(toSurfaceComposition({ connector_type: '.unknown' })?.title).toBe('.unknown');
     });
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { Attachment, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { createSkillAttachmentType } from './skill';
 import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../common/attachments';
 
@@ -122,6 +122,52 @@ describe('skill attachment type', () => {
       const description = definition.getAgentDescription?.();
       expect(description).toBeDefined();
       expect(description).toContain('render_attachment');
+    });
+  });
+
+  describe('toSurfaceComposition', () => {
+    const toSurfaceComposition = (data: SkillAttachmentData) =>
+      definition.toSurfaceComposition?.(data, {
+        attachment: {} as VersionedAttachment,
+        version: 1,
+      });
+
+    it('shows the skill with its tools, files and instructions', () => {
+      expect(toSurfaceComposition(validSkill)).toEqual({
+        type: 'view',
+        title: 'Incident triage',
+        subtitle: 'incident-triage',
+        body: [
+          {
+            type: 'markdown',
+            text: [
+              'Use when investigating production incidents.',
+              'Tools: platform.core.execute_esql',
+              'Files: ./examples/examples.md',
+              '```markdown\n## When to Use\n\nUse this skill when triaging incidents.\n```',
+            ].join('\n\n'),
+          },
+        ],
+      });
+    });
+
+    it('leaves out tools and files when there are none, and fences content with backticks', () => {
+      const composition = toSurfaceComposition({
+        ...validSkill,
+        skill: {
+          ...validSkill.skill,
+          tool_ids: [],
+          referenced_content: undefined,
+          content: '```esql\nFROM logs\n```',
+        },
+      });
+
+      expect(composition?.body).toEqual([
+        {
+          type: 'markdown',
+          text: 'Use when investigating production incidents.\n\n````markdown\n```esql\nFROM logs\n```\n````',
+        },
+      ]);
     });
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { Attachment, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import {
   AttachmentType,
   type ConnectorAttachmentData,
@@ -521,6 +521,75 @@ describe('connector attachment type', () => {
   describe('isReadonly', () => {
     it('is true', () => {
       expect(connectorType.isReadonly).toBe(true);
+    });
+  });
+
+  describe('toSurfaceComposition', () => {
+    const toSurfaceComposition = (data: ConnectorAttachmentData) =>
+      connectorType.toSurfaceComposition?.(data, {
+        attachment: {} as VersionedAttachment,
+        version: 1,
+      });
+
+    it('shows the connector with its description and enabled sub-actions', () => {
+      const inputSchema = z.object({ query: z.string() });
+
+      getConnectorSpecMock.mockReturnValue({
+        metadata: {
+          id: '.slack2',
+          displayName: 'Slack',
+          description: 'Search and send Slack messages',
+          minimumLicense: 'enterprise',
+          supportedFeatureIds: [],
+        },
+        actions: {
+          searchMessages: {
+            isTool: true,
+            scope: 'read' as const,
+            description: 'Search Slack messages',
+            input: inputSchema,
+            handler: jest.fn(),
+          },
+          sendMessage: {
+            isTool: true,
+            scope: 'read' as const,
+            description: 'Send a message to a channel',
+            input: inputSchema,
+            handler: jest.fn(),
+          },
+        },
+        test: { handler: jest.fn(), enabled: false },
+      });
+
+      expect(
+        toSurfaceComposition({
+          connector_id: 'connector-456',
+          connector_name: 'Team Slack',
+          connector_type: '.slack2',
+          selected_actions: ['searchMessages'],
+        })
+      ).toEqual({
+        type: 'view',
+        title: 'Team Slack',
+        subtitle: '.slack2',
+        body: [
+          {
+            type: 'markdown',
+            text: 'Search and send Slack messages\n\n**Actions**\n- searchMessages',
+          },
+        ],
+      });
+    });
+
+    it('shows only the name and type when no spec is found', () => {
+      getConnectorSpecMock.mockReturnValue(undefined);
+
+      expect(toSurfaceComposition(validData)).toEqual({
+        type: 'view',
+        title: 'My Github Connector',
+        subtitle: '.github',
+        body: [],
+      });
     });
   });
 });

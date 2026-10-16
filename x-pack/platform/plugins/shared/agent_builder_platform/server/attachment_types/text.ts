@@ -8,6 +8,7 @@
 import type { TextAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, textAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { toCodeFence } from './markdown';
 
 /**
  * Creates the definition for the `text` attachment type.
@@ -33,20 +34,10 @@ export const createTextAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
-    toSurfaceComposition: ({ content }) => {
-      // Shown as written, like the UI's code block. The fence is longer than any backtick run in
-      // the content, so the content can't close it.
-      const longestBacktickRun = Math.max(
-        0,
-        ...(content.match(/`+/g) ?? []).map(({ length }) => length)
-      );
-      const fence = '`'.repeat(Math.max(3, longestBacktickRun + 1));
-
-      return {
-        type: 'view',
-        body: [{ type: 'markdown', text: `${fence}\n${content}\n${fence}` }],
-      };
-    },
+    toSurfaceComposition: ({ content }) => ({
+      type: 'view',
+      body: [{ type: 'markdown', text: toCodeFence(content) }],
+    }),
     getAgentDescription: () => {
       return `A text attachment contains plain text content.
       Rendering it inline displays the text content as a plain text block in the conversation UI.`;
