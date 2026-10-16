@@ -322,6 +322,38 @@ describe('AlertsListPage', () => {
     });
   });
 
+  it.each([
+    'episode.status',
+    'alerting_source',
+    'severity',
+    '@timestamp',
+    'rule.id',
+    'duration',
+    'tags',
+    'rule_tags',
+    'assignees',
+  ])('takes the remove column action away from the %s column', (columnId) => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const customize = lastCall?.customGridColumnsConfiguration?.[columnId];
+
+    expect(customize).toBeDefined();
+    const column = customize!({
+      column: {
+        id: columnId,
+        actions: { showHide: { label: 'Remove column' }, showMoveLeft: true },
+      },
+      headerRowHeight: 1,
+    });
+    expect(column.actions).toEqual({ showHide: false, showMoveLeft: true });
+  });
+
+  it('keeps disabled column actions disabled', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const customize = lastCall?.customGridColumnsConfiguration?.['rule.id'];
+
+    expect(customize!({ column: { id: 'rule.id', actions: false } }).actions).toBe(false);
+  });
+
   it('does not pass key prop derived from tableKey (no tableKey state)', () => {
     // The table should be rendered without a dynamic key that causes remounts
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
