@@ -83,6 +83,22 @@ describe('getRelatedAttachmentsToDelete', () => {
       clientArgs,
     });
 
-    expect(related.map(({ id }) => id)).toEqual([child.id]);
+    expect(related).toEqual([{ id: child.id, type: child.type }]);
+  });
+
+  it('skips a deleted attachment whose attributes did not decode', async () => {
+    const onDelete = jest.fn().mockResolvedValue({ relatedAttachmentIds: [] });
+    const clientArgs = setup(onDelete);
+
+    const related = await getRelatedAttachmentsToDelete({
+      caseId: 'mock-id-1',
+      attachments: [{ id: 'undecodable-1' }, parent],
+      clientArgs,
+    });
+
+    expect(related).toEqual([]);
+    expect(onDelete).toHaveBeenCalledWith(
+      expect.objectContaining({ attachments: [{ id: parent.id, attributes: parent.attributes }] })
+    );
   });
 });

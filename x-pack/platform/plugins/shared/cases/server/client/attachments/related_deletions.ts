@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core/server';
 import type { AttachmentAttributesV2 } from '../../../common/types/domain';
 import type { AttachmentDeleteTarget, AttachmentOnDelete } from '../../attachment_framework/types';
+import type { AttachmentSavedObjectType } from '../../services/user_actions/types';
 import type { CasesClientArgs } from '../types';
 
+/** A reference to an attachment a hook asked to take along, read for deletion by the caller. */
+export interface RelatedAttachmentRef {
+  id: string;
+  type: AttachmentSavedObjectType;
+}
+
 /**
- * Returns the case's remaining attachments that the `onDelete` hooks of the deleted attachment
- * types ask to take along.
+ * Returns references to the case's remaining attachments that the `onDelete` hooks of the deleted
+ * attachment types ask to take along.
  */
 export const getRelatedAttachmentsToDelete = async ({
   caseId,
@@ -20,17 +26,23 @@ export const getRelatedAttachmentsToDelete = async ({
   clientArgs,
 }: {
   caseId: string;
-  attachments: ReadonlyArray<SavedObject<AttachmentAttributesV2>>;
+  attachments: ReadonlyArray<{ id: string; attributes?: AttachmentAttributesV2 }>;
   clientArgs: CasesClientArgs;
-}): Promise<Array<SavedObject<AttachmentAttributesV2>>> => {
+}): Promise<RelatedAttachmentRef[]> => {
   const {
     unifiedAttachmentTypeRegistry,
     services: { caseService },
     request,
   } = clientArgs;
 
+  // An attachment whose stored fields do not decode is still deleted, but it cannot be handed to
+  // a hook, so it takes nothing along with it.
+  const decodableAttachments = attachments.flatMap(({ id, attributes }) =>
+    attributes != null ? [{ id, attributes }] : []
+  );
+
   const targetsByHook = new Map<AttachmentOnDelete, AttachmentDeleteTarget[]>();
-  for (const { id, attributes } of attachments) {
+  for (const { id, attributes } of decodableAttachments) {
     const onDelete = unifiedAttachmentTypeRegistry.has(attributes.type)
       ? unifiedAttachmentTypeRegistry.get(attributes.type).onDelete
       : undefined;
@@ -60,6 +72,10 @@ export const getRelatedAttachmentsToDelete = async ({
     relatedAttachmentIds.forEach((id) => relatedIds.add(id));
   }
 
-  // A hook can only take attachments that belong to this case.
-  return remainingAttachments.filter(({ id }) => relatedIds.has(id));
+  // A hook can only take attachments that belong to this case. Only the reference is returned:
+  // the caller reads them for deletion the same way it read the requested ones, so a taken
+  // attachment carries the same file id, owner fallback and decode handling.
+  return remainingAttachments
+    .filter(({ id }) => relatedIds.has(id))
+    .map(({ id, type }) => ({ id, type: type as AttachmentSavedObjectType }));
 };

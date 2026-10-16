@@ -158,7 +158,40 @@ describe('RelayClient', () => {
     });
   });
 
-  it('posts installs through the Actions HTTP plane with Relay SSL overrides', async () => {
+  it('posts an API-key install unchanged when Relay UIAM is off', async () => {
+    requestMock.mockResolvedValue({
+      status: 200,
+      data: { authorize_url: 'https://slack/oauth', claim_id: 'claim-1' },
+    } as never);
+
+    const body = {
+      kibana_api_key: 'api-key',
+      kibana_url: 'https://kibana.test',
+      kibana_version: '9.2.0',
+      license_info: 'platinum',
+      created_by_user_key: 'admin',
+    };
+    await expect(createClient({ useSystemIdentity: false }).startInstall(body)).resolves.toEqual({
+      authorize_url: 'https://slack/oauth',
+      claim_id: 'claim-1',
+    });
+
+    expect(requestMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: 'https://relay.test/v1/slack/install',
+        method: 'post',
+        data: body,
+        configurationUtilities,
+        sslOverrides: relaySSLSettings,
+        maxRedirects: 0,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    );
+    expect(requestMock.mock.calls[0][0].data).not.toHaveProperty('uiam_service_account_id');
+    expect(systemIdentity.createEphemeralToken).not.toHaveBeenCalled();
+  });
+
+  it('posts a service-account install with only the id when Relay UIAM is on', async () => {
     requestMock.mockResolvedValue({
       status: 200,
       data: { authorize_url: 'https://slack/oauth', claim_id: 'claim-1' },
@@ -166,7 +199,7 @@ describe('RelayClient', () => {
 
     await expect(
       createClient().startInstall({
-        kibana_api_key: 'api-key',
+        uiam_service_account_id: 'sa-1',
         kibana_url: 'https://kibana.test',
         kibana_version: '9.2.0',
         license_info: 'platinum',
@@ -179,12 +212,113 @@ describe('RelayClient', () => {
     expect(requestMock).toHaveBeenCalledWith(
       expect.objectContaining({
         url: 'https://relay.test/v1/slack/install',
-        method: 'post',
-        configurationUtilities,
-        sslOverrides: relaySSLSettings,
-        maxRedirects: 0,
+        data: {
+          uiam_service_account_id: 'sa-1',
+          kibana_url: 'https://kibana.test',
+          kibana_version: '9.2.0',
+          license_info: 'platinum',
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer essu_kibana-token',
+        },
       })
     );
+    expect(requestMock.mock.calls[0][0].data).not.toHaveProperty('kibana_api_key');
+    expect(JSON.stringify(requestMock.mock.calls[0][0].data)).not.toContain('essu_');
+  });
+
+  it.each([
+    {
+      label: 'both credentials',
+      useSystemIdentity: true,
+      body: {
+        kibana_api_key: 'api-key-secret',
+        uiam_service_account_id: 'sa-1',
+        kibana_url: 'https://kibana.test',
+        kibana_version: '9.2.0',
+        license_info: 'platinum',
+      },
+    },
+    {
+      label: 'an API key while UIAM is on',
+      useSystemIdentity: true,
+      body: {
+        kibana_api_key: 'api-key-secret',
+        kibana_url: 'https://kibana.test',
+        kibana_version: '9.2.0',
+        license_info: 'platinum',
+      },
+    },
+    {
+      label: 'a service-account id while UIAM is off',
+      useSystemIdentity: false,
+      body: {
+        uiam_service_account_id: 'sa-1',
+        kibana_url: 'https://kibana.test',
+        kibana_version: '9.2.0',
+        license_info: 'platinum',
+      },
+    },
+  ])('refuses $label before sending', async ({ useSystemIdentity, body }) => {
+    await expect(createClient({ useSystemIdentity }).startInstall(body as never)).rejects.toThrow(
+      /exactly one|must send/
+    );
+    expect(requestMock).not.toHaveBeenCalled();
+    expect(systemIdentity.createEphemeralToken).not.toHaveBeenCalled();
+  });
+
+  it('strips the install credential from a Relay failure', async () => {
+    const apiKey = 'api-key-secret-value';
+    requestMock.mockResolvedValue({
+      status: 502,
+      data: { message: `upstream rejected ${apiKey}` },
+    } as never);
+
+    await expect(
+      createClient({ useSystemIdentity: false }).startInstall({
+        kibana_api_key: apiKey,
+        kibana_url: 'https://kibana.test',
+        kibana_version: '9.2.0',
+        license_info: 'platinum',
+      })
+    ).rejects.toThrow(/\[redacted\]/);
+
+    try {
+      await createClient({ useSystemIdentity: false }).startInstall({
+        kibana_api_key: apiKey,
+        kibana_url: 'https://kibana.test',
+        kibana_version: '9.2.0',
+        license_info: 'platinum',
+      });
+    } catch (error) {
+      expect(String(error)).not.toContain(apiKey);
+      expect(error).not.toHaveProperty('config');
+    }
+  });
+
+  it('strips the service-account id from a transport failure', async () => {
+    const serviceAccountId = 'sa-secret-id';
+    const transportError = new Error(`connect ECONNREFUSED while sending ${serviceAccountId}`);
+    (transportError as Error & { config?: unknown }).config = {
+      data: { uiam_service_account_id: serviceAccountId },
+    };
+    requestMock.mockRejectedValue(transportError);
+
+    try {
+      await createClient().startInstall({
+        uiam_service_account_id: serviceAccountId,
+        kibana_url: 'https://kibana.test',
+        kibana_version: '9.2.0',
+        license_info: 'platinum',
+      });
+      throw new Error('startInstall should have failed');
+    } catch (error) {
+      expect(error).not.toBe(transportError);
+      expect(String(error)).not.toContain(serviceAccountId);
+      expect(error).not.toHaveProperty('config');
+      expect((error as Error).cause).toBeUndefined();
+    }
   });
 
   it('maps claim responses', async () => {
