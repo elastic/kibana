@@ -52,7 +52,6 @@ export const createExistingProposalsCounter = ({
               size: 1,
               from: 0,
               excludeSuperseded: false,
-              excludeUndecidedSuperseded: false,
               excludeExpired: false,
             },
             spaceId,

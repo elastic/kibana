@@ -7,6 +7,7 @@
 
 import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useProfilingPlugin } from '../../../../hooks/use_profiling_plugin';
@@ -15,6 +16,7 @@ interface Props {
   kuery: string;
   rangeFrom: string;
   rangeTo: string;
+  schema?: ProfilingSchema;
   justifyContent?: EuiFlexGroupProps['justifyContent'];
 }
 
@@ -22,6 +24,7 @@ export function ProfilingFlamegraphLink({
   kuery,
   rangeFrom,
   rangeTo,
+  schema,
   justifyContent = 'flexStart',
 }: Props) {
   const { profilingLocators } = useProfilingPlugin();
@@ -34,6 +37,7 @@ export function ProfilingFlamegraphLink({
             kuery,
             rangeFrom,
             rangeTo,
+            schema,
           })}
         >
           {i18n.translate('xpack.apm.profiling.flamegraph.link', {

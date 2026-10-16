@@ -46,7 +46,7 @@ const eventInvestigationAttachSchema = lazySchema(() =>
           'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.workflowExecutionId',
           {
             defaultMessage:
-              'The investigation workflow execution id returned by execute_workflow. Used to fetch detailed RCA data.',
+              'The investigation id. For an investigation started with execute_workflow it is the returned executionId. Used to read the investigation from the shared investigations API.',
           }
         )
       ),

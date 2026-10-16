@@ -130,6 +130,12 @@ export const ALERTING_ERROR_CODES = {
    * snoozing and deleting existing policies stay available.
    */
   ACTION_POLICY_LICENSE_NOT_SUPPORTED: 'ACTION_POLICY_LICENSE_NOT_SUPPORTED',
+  /**
+   * An action policy was written with a user-created Cloud API key (a raw `essu_`
+   * credential). Such a key has no key id and cannot be stored or used by the
+   * dispatcher, so create / update / upsert / API key rotation are rejected.
+   */
+  ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED: 'ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED',
 
   // ──────────────────────── Alert actions ────────────────────
   /** No alert event matched the supplied `group_hash` (and `alert_id`). */
@@ -153,13 +159,15 @@ export const ALERTING_ERROR_CODES = {
   ALERT_EPISODE_NOT_LATEST: 'ALERT_NOT_LATEST',
   /**
    * The requested action is a no-op against the alert's current state machine:
-   * `activate` / `deactivate` of an alert already in that lifecycle state, or
-   * `ack` / `unack` of an alert already on that side of acknowledgement.
+   * `activate` / `deactivate` of an alert already in that lifecycle state,
+   * `ack` / `unack` of an alert already on that side of acknowledgement, or
+   * `unsnooze` of a series with no snooze in effect.
    */
   INVALID_EPISODE_STATE_TRANSITION: INVALID_ALERT_STATE_TRANSITION_CODE,
   /**
    * The requested action would write the value the alert already carries —
-   * `assign` to the current assignee, or `tag` with the current set. Distinct
+   * `assign` to the current assignee, `tag` with the current set, or `snooze`
+   * with the expiry of the snooze already in effect. Distinct
    * from `INVALID_ALERT_STATE_TRANSITION` because no state machine is
    * involved: the write is simply identical to what is already recorded.
    */
