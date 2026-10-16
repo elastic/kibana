@@ -127,9 +127,11 @@ export default function (providerContext: FtrProviderContext) {
       await supertest
         .delete(`/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
         .set('kbn-xsrf', 'xxxx');
-      await supertest
-        .delete(`/api/fleet/epm/packages/${pkgName}/${upgradeVersion}`)
-        .set('kbn-xsrf', 'xxxx');
+      for (const version of [upgradeVersion, '1.0.1']) {
+        await supertest
+          .delete(`/api/fleet/epm/packages/${pkgName}/${version}`)
+          .set('kbn-xsrf', 'xxxx');
+      }
       for (const id of [transformId, upgradeTransformId]) {
         await esClient.transform.deleteTransform(
           { transform_id: id, force: true },
@@ -247,6 +249,38 @@ export default function (providerContext: FtrProviderContext) {
       await supertest
         .delete(`/api/fleet/epm/packages/${pkgName}/${upgradeVersion}`)
         .set('kbn-xsrf', 'xxxx');
+    });
+
+    // PUT /custom_integrations/{pkgName} replays the stored archive and reinstalls it with
+    // installSource 'custom'. For a package that was originally uploaded that archive contains
+    // real transforms, so this route must forward the editing user's request — otherwise no
+    // secondary authorization key can be granted and installTransforms refuses the reinstall.
+    it('reinstalls transforms bound to the editing user when an uploaded integration is edited', async () => {
+      await uploadPackage(
+        await buildPackageZip({ sourceIndex: 'logs-transform_identity_test-*' })
+      ).expect(200);
+
+      const before = await esClient.transform.getTransform({ transform_id: transformId });
+      const keyBefore = (before.transforms[0].authorization as { api_key?: { id: string } })
+        ?.api_key?.id;
+      expect(keyBefore).to.be.a('string');
+
+      await supertest
+        .put(`/api/fleet/epm/custom_integrations/${pkgName}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ readMeData: '# Edited', categories: ['custom'] })
+        .expect(200);
+
+      // fleet_transform_version is replayed unchanged, so the transform keeps its id.
+      const after = await esClient.transform.getTransform({ transform_id: transformId });
+      const authorization = after.transforms[0].authorization as
+        | { api_key?: { id: string; name: string }; roles?: string[] }
+        | undefined;
+      expect(authorization?.roles).to.be(undefined);
+      expect(authorization?.api_key).to.be.an('object');
+      expect(authorization?.api_key?.id).not.to.be(keyBefore);
+
+      await supertest.delete(`/api/fleet/epm/packages/${pkgName}/1.0.1`).set('kbn-xsrf', 'xxxx');
     });
 
     it('rejects a restricted index in a transform placed outside elasticsearch/', async () => {

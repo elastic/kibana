@@ -634,10 +634,16 @@ export const updateCustomIntegrationHandler: FleetRequestHandler<
   const { pkgName } = request.params as unknown as TypeOf<
     typeof CustomIntegrationRequestSchema.params
   >;
-  const result = await updateCustomIntegration(esClient, soClient, pkgName, {
-    readMeData,
-    categories: categories?.map((category) => category as PackageSpecCategory),
-  });
+  const result = await updateCustomIntegration(
+    esClient,
+    soClient,
+    pkgName,
+    {
+      readMeData,
+      categories: categories?.map((category) => category as PackageSpecCategory),
+    },
+    request
+  );
 
   return response.ok({
     body: {
