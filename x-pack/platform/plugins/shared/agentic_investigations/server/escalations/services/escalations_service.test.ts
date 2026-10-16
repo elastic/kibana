@@ -665,6 +665,25 @@ describe('EscalationsService.list', () => {
       metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: linked },
     });
 
+    it('applies the text search to every scanned page', async () => {
+      const { service, impactClient, client } = makeService({
+        search: jest.fn().mockResolvedValue({ results: [withLinked('e1', ['inv-1'])], total: 1 }),
+      });
+      impactClient.getEntitiesByConversationId.mockResolvedValue(
+        new Map([['inv-1', [{ id: 'host-1' }]]])
+      );
+
+      await service.list(request, {
+        page: 1,
+        per_page: 50,
+        status: 'open',
+        entity: 'host-1',
+        search: 'ransomware',
+      });
+
+      expect(client.search).toHaveBeenCalledWith(expect.objectContaining({ query: 'ransomware' }));
+    });
+
     it('lists only escalations impacting the entity and counts only those', async () => {
       const { service, impactClient, client } = makeService({
         search: jest.fn().mockResolvedValue({

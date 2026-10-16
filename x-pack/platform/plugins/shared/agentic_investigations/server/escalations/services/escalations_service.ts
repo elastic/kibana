@@ -101,7 +101,7 @@ const toEventData = ({
  * `metadata.linked_investigations` tests array membership.
  */
 const buildEscalationsFilter = (
-  query: Pick<ListEscalationsQuery, 'status' | 'linked_investigation_id'>
+  query: Pick<ListEscalationsQuery, 'status' | 'linked_investigation_id' | 'search'>
 ): string => {
   const base = `template_id: "${ESCALATION_TEMPLATE_ID}"`;
 
@@ -653,7 +653,7 @@ export class EscalationsService {
    */
   async scanWithEntityIds(
     request: KibanaRequest,
-    query: Pick<ListEscalationsQuery, 'status' | 'linked_investigation_id'>
+    query: Pick<ListEscalationsQuery, 'status' | 'linked_investigation_id' | 'search'>
   ): Promise<ListEscalationsResponse['results']> {
     const client = await this.getConversationClient(request);
     const filter = buildEscalationsFilter(query);
@@ -663,6 +663,7 @@ export class EscalationsService {
         sort: ESCALATIONS_LIST_SORT,
         page,
         perPage: MAX_ESCALATIONS_PAGE_SIZE,
+        query: query.search,
       });
 
     const first = await searchPage(1);

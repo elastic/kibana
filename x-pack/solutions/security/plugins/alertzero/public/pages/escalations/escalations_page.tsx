@@ -63,12 +63,22 @@ export const EscalationsPage: React.FC = () => {
   const [openPage, setOpenPage] = useState(1);
   const [closedPage, setClosedPage] = useState(1);
 
-  // Reset during render, so no request goes out for the old page number under the new filter.
+  // Items stored by page number so that a refetch of the same page replaces its rows
+  // in place rather than appending them (which would duplicate rows after "Show more").
+  // Only the active (last) page query is mounted, so earlier pages keep their cached
+  // items in this map until the component unmounts.
+  const [openPages, setOpenPages] = useState<Record<number, EscalationQueueItem[]>>({});
+  const [closedPages, setClosedPages] = useState<Record<number, EscalationQueueItem[]>>({});
+
+  // Reset during render, so no request goes out for the old page number under the new filter
+  // and rows of the previous filter never show up next to its pages.
   const [pagedEntity, setPagedEntity] = useState(entityFilter);
   if (pagedEntity !== entityFilter) {
     setPagedEntity(entityFilter);
     setOpenPage(1);
     setClosedPage(1);
+    setOpenPages({});
+    setClosedPages({});
   }
 
   const openQuery = useListEscalations({ status: 'open', page: openPage, entity: entityFilter });
@@ -86,27 +96,20 @@ export const EscalationsPage: React.FC = () => {
     }
   }, [entityFilter, openQuery.data, openQuery.isPreviousData]);
 
-  // Items stored by page number so that a refetch of the same page replaces its rows
-  // in place rather than appending them (which would duplicate rows after "Show more").
-  // Only the active (last) page query is mounted, so earlier pages keep their cached
-  // items in this map until the component unmounts.
-  const [openPages, setOpenPages] = useState<Record<number, EscalationQueueItem[]>>({});
-  const [closedPages, setClosedPages] = useState<Record<number, EscalationQueueItem[]>>({});
-
   useEffect(() => {
-    if (!openQuery.data) return;
+    if (!openQuery.data || openQuery.isPreviousData) return;
     const page = openQuery.data.pagination.page;
     const newItems = openQuery.data.results.map(escalationToQueueItem);
     // Page 1 starts the list over, so rows of a previous filter are replaced, not kept.
     setOpenPages((prev) => (page === 1 ? { 1: newItems } : { ...prev, [page]: newItems }));
-  }, [openQuery.data]);
+  }, [openQuery.data, openQuery.isPreviousData]);
 
   useEffect(() => {
-    if (!closedQuery.data) return;
+    if (!closedQuery.data || closedQuery.isPreviousData) return;
     const page = closedQuery.data.pagination.page;
     const newItems = closedQuery.data.results.map(escalationToQueueItem);
     setClosedPages((prev) => (page === 1 ? { 1: newItems } : { ...prev, [page]: newItems }));
-  }, [closedQuery.data]);
+  }, [closedQuery.data, closedQuery.isPreviousData]);
 
   // Flatten pages in order, deduping by id (offset shifts can move a row between pages).
   const openItems = useMemo(() => {
@@ -238,7 +241,7 @@ export const EscalationsPage: React.FC = () => {
                 escalations={openItems}
                 isFiltered={Boolean(entityFilter)}
                 totalItemCount={openQuery.data?.pagination.total}
-                onLoadMore={() => setOpenPage((p) => p + 1)}
+                onLoadMore={openQuery.isPreviousData ? undefined : () => setOpenPage((p) => p + 1)}
                 error={openQuery.error as Error | null}
                 renderAssignees={renderAssignees}
                 onClickCard={(item) => openChat(item.id, item.agentId)}
@@ -251,7 +254,9 @@ export const EscalationsPage: React.FC = () => {
                 escalations={closedItems}
                 isFiltered={Boolean(entityFilter)}
                 totalItemCount={closedQuery.data?.pagination.total}
-                onLoadMore={() => setClosedPage((p) => p + 1)}
+                onLoadMore={
+                  closedQuery.isPreviousData ? undefined : () => setClosedPage((p) => p + 1)
+                }
                 error={closedQuery.error as Error | null}
                 renderAssignees={renderAssignees}
                 onClickCard={(item) => openChat(item.id, item.agentId)}
