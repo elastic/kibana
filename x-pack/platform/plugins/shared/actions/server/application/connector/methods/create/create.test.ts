@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
@@ -17,6 +18,7 @@ import type { Logger } from '@kbn/logging';
 import type { ActionTypeRegistry } from '../../../../action_type_registry';
 import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry';
 import { create } from './create';
+import { connectorCreateCounter } from '../../../../lib/connector_metrics';
 import { getConnectorType } from '../../../../fixtures';
 import type { ActionsClientContext } from '../../../../actions_client';
 import { actionExecutorMock } from '../../../../lib/action_executor.mock';
@@ -1068,6 +1070,77 @@ describe('create()', () => {
           tags: ['post-save-hook', 'mock-saved-object-id'],
         })
       );
+    });
+  });
+
+  describe('metrics', () => {
+    const createParams = {
+      context: mockContext,
+      action: {
+        name: 'my name',
+        actionTypeId: 'my-connector-type',
+        config: {},
+        secrets: { authType: 'ears' },
+      },
+    };
+
+    beforeEach(() => {
+      jest.spyOn(connectorCreateCounter, 'add').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    test('records a successful creation by connector type and auth type', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      });
+
+      await create(createParams);
+
+      expect(connectorCreateCounter.add).toHaveBeenCalledTimes(1);
+      expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
+        'connector.type': 'my-connector-type',
+        'connector.auth_type': 'ears',
+        success: true,
+      });
+    });
+
+    test('records an unauthorized creation', async () => {
+      authorization.ensureAuthorized.mockRejectedValueOnce(Boom.forbidden('Unauthorized'));
+
+      await expect(create(createParams)).rejects.toThrow('Unauthorized');
+
+      expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
+        'connector.type': 'my-connector-type',
+        'connector.auth_type': 'ears',
+        success: false,
+        'error.type': 'unauthorized',
+      });
+    });
+
+    test('records a creation that conflicts with an existing connector id', async () => {
+      unsecuredSavedObjectsClient.create.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError('action', 'mock-saved-object-id')
+      );
+
+      await expect(create(createParams)).rejects.toThrow();
+
+      expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
+        'connector.type': 'my-connector-type',
+        'connector.auth_type': 'ears',
+        success: false,
+        'error.type': 'conflict',
+      });
     });
   });
 

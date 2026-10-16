@@ -16,6 +16,7 @@ import {
   UnsupportedAuthProducerError,
 } from './get_axios_instance';
 import { actionsConfigMock } from '../actions_config.mock';
+import { connectorAuthCounter } from './connector_metrics';
 import { getCustomAgents } from './get_custom_agents';
 import { connectorTokenClientMock } from './connector_token_client.mock';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
@@ -358,6 +359,70 @@ describe('getAxiosInstance', () => {
     // @ts-expect-error
     const result2 = result!.interceptors.request.handlers[0].fulfilled({ url: 'http://test5' });
     expect(getCustomAgents).toHaveBeenCalledWith(configurationUtilities, logger, 'http://test5');
+  });
+
+  describe('token metrics', () => {
+    const oauthSecrets = {
+      authType: 'oauth_client_credentials',
+      tokenUrl: 'https://test/oauth/token',
+      clientId: 'my-client-id',
+      clientSecret: 'my-client-secret',
+      scope: 'grant',
+    };
+
+    beforeEach(() => {
+      jest.spyOn(connectorAuthCounter, 'add').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    test('records a successful token request by auth type', async () => {
+      (requestOAuthClientCredentialsToken as jest.Mock).mockResolvedValueOnce({
+        tokenType: 'Bearer',
+        accessToken: 'brandnewaccesstoken',
+        expiresIn: 1000,
+      });
+      const getAxios = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+
+      await getAxios({
+        connectorId: '1',
+        connectorTypeId: '.google_drive',
+        secrets: oauthSecrets,
+      });
+
+      expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+        'auth.phase': 'token',
+        'connector.auth_type': 'oauth_client_credentials',
+        'connector.type': '.google_drive',
+        success: true,
+      });
+    });
+
+    test('records a failed token request and rethrows the error', async () => {
+      (requestOAuthClientCredentialsToken as jest.Mock).mockRejectedValueOnce(
+        new Error('token endpoint unavailable')
+      );
+      const getAxios = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+
+      await expect(getAxios({ connectorId: '1', secrets: oauthSecrets })).rejects.toThrow();
+
+      expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+        'auth.phase': 'token',
+        'connector.auth_type': 'oauth_client_credentials',
+        success: false,
+        'error.type': 'token_request_failed',
+      });
+    });
   });
 
   test('returns axios instance configured for oauth client credentials auth when connector token client is defined and token exists', async () => {
