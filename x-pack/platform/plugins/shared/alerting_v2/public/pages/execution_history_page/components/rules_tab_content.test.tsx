@@ -362,6 +362,26 @@ describe('RulesTabContent', () => {
       });
     });
 
+    it('warns about a truncated search even when the page has no executions', async () => {
+      mockResult({
+        data: {
+          items: [],
+          total: 0,
+          page: 1,
+          per_page: 10,
+          search_matches: { rules: 600, is_truncated: true },
+        },
+      });
+      renderComponent();
+
+      await userEvent.type(screen.getByTestId('ruleExecutionHistorySearch'), 'cpu');
+
+      await waitFor(() => {
+        expect(screen.getByText(/matched 600 matching rules/i)).toBeInTheDocument();
+      });
+      expect(screen.getByTestId('executionHistoryFilteredEmptyPrompt')).toBeInTheDocument();
+    });
+
     it('limits the search field to the length the API accepts', () => {
       mockResult();
       renderComponent();

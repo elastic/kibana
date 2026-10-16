@@ -324,7 +324,6 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
 
     return (
       <div css={tableAreaCss}>
-        <TruncatedCallout data={data} searchParam={searchParam} />
         <div css={gridWrapperCss} data-test-subj="ruleExecutionHistoryTable">
           <EuiScreenReaderOnly>
             <span id="ruleExecutionHistoryTableAriaLabel">
@@ -424,6 +423,7 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+      <TruncatedCallout data={data} searchParam={searchParam} />
       {renderContent()}
     </div>
   );
