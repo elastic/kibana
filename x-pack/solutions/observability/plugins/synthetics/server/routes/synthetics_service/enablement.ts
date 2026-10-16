@@ -31,7 +31,7 @@ export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = () =>
     server,
     syntheticsMonitorClient,
   }): Promise<any> => {
-    const isServiceAllowed = syntheticsMonitorClient.syntheticsService.isAllowed;
+    const isServiceAllowed = syntheticsMonitorClient.serviceManagedLocations.isAllowed;
     const result = await getSyntheticsEnablement({
       server,
     });
@@ -100,12 +100,12 @@ export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
     savedObjectsClient,
   }): Promise<any> => {
     const { security } = server;
-    const { syntheticsService } = syntheticsMonitorClient;
+    const { serviceManagedLocations } = syntheticsMonitorClient;
     const { canEnable } = await getSyntheticsEnablement({ server });
     if (!canEnable) {
       return response.forbidden();
     }
-    await syntheticsService.deleteAllConfigs();
+    await serviceManagedLocations.deleteAllMonitors();
     const { apiKey } = await getAPIKeyForSyntheticsService({
       server,
     });

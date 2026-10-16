@@ -11,6 +11,8 @@ export interface ImpactPill {
   entityId: string;
   /** Queue rows whose conversation carries this entity. */
   count: number;
+  /** Entity type (`host`, `user`, …) when any row reported one for this id. */
+  entityType?: string;
 }
 
 /**
@@ -19,14 +21,22 @@ export interface ImpactPill {
  */
 export const impactPills = (items: readonly ImpactFilterable[]): ImpactPill[] => {
   const counts = new Map<string, number>();
+  const types = new Map<string, string>();
   for (const item of items) {
     for (const entityId of new Set(investigationEntityIds(item))) {
       counts.set(entityId, (counts.get(entityId) ?? 0) + 1);
+      const entityType = item.entityTypes?.[entityId];
+      if (entityType && !types.has(entityId)) {
+        types.set(entityId, entityType);
+      }
     }
   }
 
   return [...counts.entries()]
-    .map(([entityId, count]) => ({ entityId, count }))
+    .map(([entityId, count]) => {
+      const entityType = types.get(entityId);
+      return { entityId, count, ...(entityType ? { entityType } : {}) };
+    })
     .sort((left, right) => right.count - left.count || left.entityId.localeCompare(right.entityId));
 };
 

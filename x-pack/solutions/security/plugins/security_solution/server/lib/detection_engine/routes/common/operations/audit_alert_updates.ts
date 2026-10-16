@@ -131,6 +131,21 @@ export const auditAlertUpdatePreOperationFailure = (
   auditLogger?.log(event);
 };
 
+/** Logs an alert update denied by route authorization before its handler runs. */
+export const auditAlertUpdateAuthorizationFailure = (
+  auditLogger: AuditLogger | undefined
+): void => {
+  const event = alertAuditEvent({
+    action: AlertAuditAction.UPDATE,
+    error: new Error('Required privileges were not granted'),
+    bulk: true,
+  });
+  auditLogger?.log({
+    ...event,
+    message: 'Failed attempt to update alerts because required privileges were not granted',
+  });
+};
+
 /**
  * Logs `alert_acknowledge` / `alert_unacknowledge` after a successful workflow status write.
  * No-op for statuses that are not `acknowledged` or `open`.

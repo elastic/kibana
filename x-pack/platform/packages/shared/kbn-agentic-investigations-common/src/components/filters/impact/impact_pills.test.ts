@@ -22,6 +22,18 @@ const investigation = (overrides: Partial<Investigation> = {}): Investigation =>
 });
 
 describe('impactPills', () => {
+  it('carries the entity type reported for an id', () => {
+    expect(
+      impactPills([
+        investigation({ entityIds: ['jsmith', 'ws-1'], entityTypes: { jsmith: 'user' } }),
+        investigation({ id: 'inv-2', entityIds: ['ws-1'], entityTypes: { 'ws-1': 'host' } }),
+      ])
+    ).toEqual([
+      { entityId: 'ws-1', count: 2, entityType: 'host' },
+      { entityId: 'jsmith', count: 1, entityType: 'user' },
+    ]);
+  });
+
   it('returns nothing when no row carries an entity', () => {
     expect(impactPills([investigation(), investigation({ id: 'inv-2' })])).toEqual([]);
   });
