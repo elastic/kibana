@@ -133,9 +133,6 @@ export const MAX_IMPROVEMENTS_PER_RUN = 25;
 export const MAX_IMPROVEMENT_TITLE_LENGTH = 512;
 export const MAX_IMPROVEMENT_RATIONALE_LENGTH = 4096;
 
-/** Advanced setting that gates the Context Engine feedback loop. */
-export const CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID = 'contextEngine:feedbackLoopEnabled';
-
 /** Task Manager type, id, and schedule for the global signal-generation task. */
 export const SIGNAL_GENERATOR_TASK_TYPE = 'contextEngine:signalGenerator';
 export const SIGNAL_GENERATOR_TASK_ID = 'contextengine-signal-generator';

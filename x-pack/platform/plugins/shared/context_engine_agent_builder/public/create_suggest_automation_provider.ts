@@ -7,8 +7,11 @@
 
 import { isToolResultEvent, ToolResultType, type ToolResult } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart, CoreStart } from '@kbn/core/public';
+
+type SettingsStart = CoreStart['settings'];
 import type { SuggestAutomationProvider } from '@kbn/context-engine-plugin/public/types';
+import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { i18n } from '@kbn/i18n';
 import { EMPTY, switchMap } from 'rxjs';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder_attachments';
@@ -56,9 +59,11 @@ export const buildSuggestAutomationSessionTag = (spaceId: string, aiIndexId: str
 export const createSuggestAutomationProvider = ({
   agentBuilder,
   application,
+  settings,
 }: {
   agentBuilder: AgentBuilderPluginStart | undefined;
   application: ApplicationStart;
+  settings: SettingsStart;
 }): SuggestAutomationProvider => ({
   canSuggest: ({ aiIndex, isManaged }) =>
     aiIndex !== undefined &&
@@ -74,6 +79,13 @@ export const createSuggestAutomationProvider = ({
     if (!agentBuilder?.openChat) {
       return;
     }
+    // Snapshot at chat-open time; reactive updates would require threading an observable
+    // through the attachment, which is out of scope. The server-side gate on save_automation
+    // is the authoritative enforcement — this value is advisory for the LLM instructions only.
+    const feedbackLoopEnabled = settings.globalClient.get<boolean>(
+      CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID,
+      false
+    );
     const attachmentData: AiIndexAttachmentData = {
       id: aiIndex.id,
       description: aiIndex.description,
@@ -81,6 +93,7 @@ export const createSuggestAutomationProvider = ({
       sources: aiIndex.sources,
       automations: aiIndex.automations,
       traces: aiIndex.traces,
+      feedbackLoopEnabled,
     };
     agentBuilder.openChat({
       autoSendInitialMessage: true,
