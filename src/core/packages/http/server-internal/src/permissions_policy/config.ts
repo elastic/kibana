@@ -77,6 +77,34 @@ const directiveSchema = () =>
     validate: directiveValidator,
   });
 
+/**
+ * RFC 8941 sf-token, the grammar the `report-to` structured-field parameter is serialized as. A
+ * value outside it terminates the parameter and injects further members into the policy, which
+ * weakens it rather than only breaking reporting.
+ */
+const REPORTING_GROUP_NAME = /^[A-Za-z*][A-Za-z0-9!#$%&'*+\-.^_`|~:/]*$/;
+
+const MAX_REPORTING_GROUP_NAME_LENGTH = 256;
+const MAX_REPORTING_GROUP_NAMES = 10;
+
+const validateReportingGroupName = (value: string) => {
+  if (!REPORTING_GROUP_NAME.test(value)) {
+    return (
+      `"${value}" must be a reporting group name, which starts with a letter or * and ` +
+      "contains only letters, digits and !#$%&'*+-.^_`|~:/"
+    );
+  }
+};
+
+const reportingGroupNameValidator = (values: string[]) => {
+  for (const value of values) {
+    const error = validateReportingGroupName(value);
+    if (error) {
+      return error;
+    }
+  }
+};
+
 const directivesSchema = () => ({
   camera: directiveSchema(),
   display_capture: directiveSchema(),
@@ -103,8 +131,10 @@ const configSchema = schema.object(
   {
     ...directivesSchema(),
     report_only: schema.maybe(schema.object(directivesSchema())),
-    report_to: schema.arrayOf(schema.string(), {
+    report_to: schema.arrayOf(schema.string({ maxLength: MAX_REPORTING_GROUP_NAME_LENGTH }), {
       defaultValue: [],
+      maxSize: MAX_REPORTING_GROUP_NAMES,
+      validate: reportingGroupNameValidator,
     }),
   },
   {

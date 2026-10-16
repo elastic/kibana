@@ -55,7 +55,7 @@ const testConfig: Parameters<typeof createConfigService>[0] = {
       referrerPolicy: 'strict-origin-when-cross-origin',
       permissionsPolicy: null,
       crossOriginOpenerPolicy: 'same-origin',
-    } as any,
+    },
     customResponseHeaders: {
       'some-header': 'some-value',
       'referrer-policy': 'strict-origin', // overrides a header that is defined by securityResponseHeaders
@@ -768,14 +768,14 @@ describe('Permissions-Policy header', () => {
   });
 
   it('sends the built-in policy when nothing is configured', async () => {
-    await startServer({ server: { securityResponseHeaders: {} as any } });
+    await startServer({ server: { securityResponseHeaders: {} } });
     const { header } = await supertest(innerServer.listener).get(testRoute).expect(200);
     expect(header['permissions-policy']).toEqual(defaultPolicy);
   });
 
   it('adds per-directive configuration to the built-in policy', async () => {
     await startServer({
-      server: { securityResponseHeaders: {} as any },
+      server: { securityResponseHeaders: {} },
       permissionsPolicy: { camera: ['self', 'https://example.com'] },
     });
     const { header } = await supertest(innerServer.listener).get(testRoute).expect(200);
@@ -786,7 +786,7 @@ describe('Permissions-Policy header', () => {
 
   it('attaches the report-to parameter to every directive', async () => {
     await startServer({
-      server: { securityResponseHeaders: {} as any },
+      server: { securityResponseHeaders: {} },
       permissionsPolicy: { report_to: ['violations-endpoint'] },
     });
     const { header } = await supertest(innerServer.listener).get(testRoute).expect(200);
@@ -800,7 +800,7 @@ describe('Permissions-Policy header', () => {
 
   it('uses the deprecated wholesale policy verbatim when it is set', async () => {
     await startServer({
-      server: { securityResponseHeaders: { permissionsPolicy: 'microphone=()' } as any },
+      server: { securityResponseHeaders: { permissionsPolicy: 'microphone=()' } },
     });
     const { header } = await supertest(innerServer.listener).get(testRoute).expect(200);
     expect(header['permissions-policy']).toEqual('microphone=()');
@@ -808,7 +808,7 @@ describe('Permissions-Policy header', () => {
 
   it('sends no header when the deprecated policy is set to null', async () => {
     await startServer({
-      server: { securityResponseHeaders: { permissionsPolicy: null } as any },
+      server: { securityResponseHeaders: { permissionsPolicy: null } },
     });
     const { header } = await supertest(innerServer.listener).get(testRoute).expect(200);
     expect(header['permissions-policy']).toBeUndefined();
@@ -817,7 +817,7 @@ describe('Permissions-Policy header', () => {
   it('refuses to start when the deprecated policy is combined with a directive', async () => {
     await expect(
       startServer({
-        server: { securityResponseHeaders: { permissionsPolicy: 'microphone=()' } as any },
+        server: { securityResponseHeaders: { permissionsPolicy: 'microphone=()' } },
         permissionsPolicy: { camera: ['self'] },
       })
     ).rejects.toThrow(/cannot be used together with/);

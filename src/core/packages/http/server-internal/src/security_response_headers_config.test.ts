@@ -103,6 +103,12 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
       expect(result.securityResponseHeaders['Permissions-Policy']).toBeUndefined();
     });
 
+    it('an empty value sends no Permissions-Policy header', () => {
+      const config = schema.validate({ permissionsPolicy: '' });
+      const result = parse(config, permissionsPolicy({ report_to: ['violations-endpoint'] }));
+      expect(result.securityResponseHeaders['Permissions-Policy']).toBeUndefined();
+    });
+
     it('includes report-to directive if it is provided', () => {
       const config = schema.validate({ permissionsPolicy: 'display-capture=(self)' });
       const result = parse(config, permissionsPolicy({ report_to: ['violations-endpoint'] }));
@@ -141,6 +147,12 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
       expect(result.securityResponseHeaders['Permissions-Policy-Report-Only']).toEqual(
         'display-capture=(self);report-to=violations-endpoint'
       );
+    });
+
+    it('an empty value sends no Permissions-Policy-Report-Only header', () => {
+      const config = schema.validate({ permissionsPolicyReportOnly: '' });
+      const result = parse(config, permissionsPolicy({ report_to: ['violations-endpoint'] }));
+      expect(result.securityResponseHeaders['Permissions-Policy-Report-Only']).toBeUndefined();
     });
 
     it('includes Permissions-Policy-Report-Only only if report-to directive is set', () => {
@@ -194,13 +206,15 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
       );
     });
 
-    it('rejects a null legacy policy combined with a directive', () => {
+    it('rejects a null legacy policy combined with a directive, and says why', () => {
       expect(() =>
         validate(
           schema.validate({ permissionsPolicy: null }),
           permissionsPolicy({ camera: ['self'] })
         )
-      ).toThrow(/cannot be used together with/);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"\\"server.securityResponseHeaders.permissionsPolicy\\" is set to null, which disables the header, so it cannot be used together with \\"permissionsPolicy.<directive>\\", which adds to it. Remove one of them."`
+      );
     });
 
     it('rejects the legacy report-only policy combined with a report-only directive', () => {

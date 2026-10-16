@@ -104,6 +104,37 @@ describe('permissionsPolicyConfig', () => {
     it('still accepts more than one endpoint, which only ever used the first', () => {
       expect(validate({ report_to: ['one', 'two'] }).report_to).toEqual(['one', 'two']);
     });
+
+    // A reporting group name is serialized as a structured-field token. Anything outside that
+    // grammar terminates the `report-to` parameter, and the remainder is parsed as further
+    // members of the policy, which can grant a feature the policy is there to deny.
+    it.each([
+      ['a comma, which injects further policy members', 'violations, camera=*'],
+      ['whitespace', 'violations endpoint'],
+      ['a quote', 'violations"endpoint'],
+      ['a semicolon', 'violations;camera=*'],
+      ['a carriage return and line feed', 'violations\r\nX-Injected: 1'],
+      ['an empty value', ''],
+    ])('rejects %s', (_, value) => {
+      expect(() => validate({ report_to: [value] })).toThrow(/must be a reporting group name/);
+    });
+
+    // `:` and `/` are legal in a structured-field token, so a URL passes the grammar. Kibana
+    // cannot tell a mistyped endpoint from a group name, because the names are declared in the
+    // free-form `server.customResponseHeaders.Reporting-Endpoints` header.
+    it('accepts a URL, which is a valid token even though it is not a group name', () => {
+      expect(validate({ report_to: ['https://example.com/reports'] }).report_to).toEqual([
+        'https://example.com/reports',
+      ]);
+    });
+
+    it('rejects an endpoint name that is longer than the maximum', () => {
+      expect(() => validate({ report_to: ['a'.repeat(257)] })).toThrow(/maximum length/);
+    });
+
+    it('rejects more endpoints than the maximum', () => {
+      expect(() => validate({ report_to: new Array(11).fill('endpoint') })).toThrow(/array size/);
+    });
   });
 
   describe('deprecations', () => {

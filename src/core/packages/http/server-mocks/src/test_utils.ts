@@ -42,7 +42,12 @@ export const createConfigService = ({
   csp,
   permissionsPolicy,
 }: Partial<{
-  server: Partial<HttpConfigType>;
+  // `securityResponseHeaders` is spelled out one level deeper because every key of it carries a
+  // schema default, which `TypeOf` renders as required. The merge below is a shallow
+  // `Object.assign`, so one level is also as deep as an override actually reaches.
+  server: Partial<Omit<HttpConfigType, 'securityResponseHeaders'>> & {
+    securityResponseHeaders?: Partial<HttpConfigType['securityResponseHeaders']>;
+  };
   externalUrl: Partial<ExternalUrlConfigType>;
   csp: Partial<CspConfigType>;
   permissionsPolicy: Partial<PermissionsPolicyConfigType>;

@@ -82,12 +82,13 @@ export function validatePermissionsPolicyConfig(
   raw: SecurityResponseHeadersConfigType,
   rawPermissionsPolicyConfig: PermissionsPolicyConfigType
 ) {
-  const conflicts: Array<[string, string]> = [];
+  const conflicts: Array<[string, string, string | null]> = [];
 
   if (raw.permissionsPolicy !== undefined && hasDirectives(rawPermissionsPolicyConfig)) {
     conflicts.push([
       'server.securityResponseHeaders.permissionsPolicy',
       'permissionsPolicy.<directive>',
+      raw.permissionsPolicy,
     ]);
   }
 
@@ -98,14 +99,18 @@ export function validatePermissionsPolicyConfig(
     conflicts.push([
       'server.securityResponseHeaders.permissionsPolicyReportOnly',
       'permissionsPolicy.report_only.<directive>',
+      raw.permissionsPolicyReportOnly,
     ]);
   }
 
   if (conflicts.length) {
     const message = conflicts
-      .map(
-        ([legacy, replacement]) =>
-          `"${legacy}" cannot be used together with "${replacement}". Remove "${legacy}" and configure the individual directives instead.`
+      .map(([legacy, replacement, value]) =>
+        // `null` disables the header outright, so telling the administrator to configure the
+        // individual directives instead would turn it back on. The two cannot be reconciled.
+        value === null
+          ? `"${legacy}" is set to null, which disables the header, so it cannot be used together with "${replacement}", which adds to it. Remove one of them.`
+          : `"${legacy}" cannot be used together with "${replacement}". Remove "${legacy}" and configure the individual directives instead.`
       )
       .join(' ');
     throw new CriticalError(message, 'InvalidConfig', INVALID_CONFIG_EXIT_CODE);
@@ -143,8 +148,13 @@ export function parseRawSecurityResponseHeadersConfig(
 
   if (typeof raw.permissionsPolicy === 'string') {
     // A wholesale policy is opaque to Kibana, so the report-to parameter is appended as-is rather
-    // than distributed across the directives it contains.
-    securityResponseHeaders['Permissions-Policy'] = `${raw.permissionsPolicy}${reportToParameter}`;
+    // than distributed across the directives it contains. An empty policy carries no directive to
+    // attach it to, and would serialize as a malformed `;report-to=...`, so it sends no header.
+    if (raw.permissionsPolicy.trim()) {
+      securityResponseHeaders[
+        'Permissions-Policy'
+      ] = `${raw.permissionsPolicy}${reportToParameter}`;
+    }
   } else if (raw.permissionsPolicy === undefined) {
     securityResponseHeaders['Permissions-Policy'] = enforceHeader;
   }
@@ -152,9 +162,11 @@ export function parseRawSecurityResponseHeadersConfig(
   // The report-only header is pointless without somewhere to send the reports, so it is omitted.
   if (reportTo) {
     if (typeof raw.permissionsPolicyReportOnly === 'string') {
-      securityResponseHeaders[
-        'Permissions-Policy-Report-Only'
-      ] = `${raw.permissionsPolicyReportOnly}${reportToParameter}`;
+      if (raw.permissionsPolicyReportOnly.trim()) {
+        securityResponseHeaders[
+          'Permissions-Policy-Report-Only'
+        ] = `${raw.permissionsPolicyReportOnly}${reportToParameter}`;
+      }
     } else if (reportOnlyHeader) {
       securityResponseHeaders['Permissions-Policy-Report-Only'] = reportOnlyHeader;
     }
