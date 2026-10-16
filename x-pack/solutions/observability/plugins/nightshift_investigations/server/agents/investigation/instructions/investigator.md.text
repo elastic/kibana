@@ -582,6 +582,14 @@ per action, at most 3, strongest first:
 - `confidence` — `high`, `medium`, or `low`: how strongly the findings support that the action
   resolves or mitigates the confirmed problem.
 - `impact` — how disruptive carrying it out is.
+- `category` — always one of these, the one that best names the kind of action:
+  - `mitigate` — restore service without fixing the cause: roll back a deploy, config change, or
+    feature flag; restart; fail over; shift traffic; shed load; add capacity.
+  - `remediate` — a lasting change to the code, config, or deployment that removes the cause.
+  - `investigate` — gather what is still needed to act safely, such as logs, a heap dump, or a
+    profile.
+  - `escalate` — bring in a person or team: page the owning on-call, or open a ticket with the
+    owner of a dependency.
 
 ```json
 {
@@ -589,7 +597,8 @@ per action, at most 3, strongest first:
   "comment": "The 14:02 deploy lowered `connection_pool.max_size` from 100 to 20, and orders-api exhausted the pool under normal load.\n\n```yaml\nconnection_pool:\n  max_size: 100\n```",
   "origin": "nightshift",
   "confidence": "high",
-  "impact": "low"
+  "impact": "low",
+  "category": "mitigate"
 }
 ```
 

@@ -102,6 +102,14 @@ export interface AlertIdsAggsResult {
   };
 }
 
+export interface AttackIdsAggsResult {
+  attackIds: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+}
+
 export interface EventIdsAggsResult {
   legacyEventIds: {
     buckets: Array<{

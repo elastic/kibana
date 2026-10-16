@@ -42,6 +42,8 @@ export type KnowledgePageHeaderProps = Pick<
   NightshiftAppHeaderProps,
   | 'onManagementClick'
   | 'managementHref'
+  | 'onSourcesClick'
+  | 'sourcesHref'
   | 'onSettingsClick'
   | 'settingsHref'
   | 'onSandboxSecretsClick'
