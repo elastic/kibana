@@ -95,6 +95,8 @@ const loadFixture = async (client: Client) => {
     settings: { index: { mode: 'lookup' } },
     mappings: {
       properties: {
+        // Real entity docs have a timestamp: the alias rows must not land in a bucket with it.
+        '@timestamp': DATE,
         'entity.id': KEYWORD,
         'entity.name': KEYWORD,
         'entity.attributes.watchlists': KEYWORD,
@@ -117,6 +119,7 @@ const loadFixture = async (client: Client) => {
     ...ENTITIES.flatMap(({ id, watchlisted, resolvedTo }) => [
       { index: { _index: ENTITY_INDEX } },
       {
+        '@timestamp': isoHoursAgo(now, 1),
         'entity.id': id,
         'entity.name': id.split(':')[1],
         'entity.lifecycle.first_seen': isoHoursAgo(now, 24 * 100),
@@ -167,8 +170,8 @@ describeSeriesFollowsCount({
       await run(
         moveWindowBack({
           base: buildCount(range),
-          window: /\| WHERE @timestamp >= NOW\(\) - [^\n]+/,
-          prefix: '| WHERE ',
+          // The alert window sits inside the condition that also keeps the alias rows.
+          window: /@timestamp >= NOW\(\) - \d+ (days|hours)/,
           field: '@timestamp',
           range,
           k,

@@ -72,8 +72,7 @@ export const buildAlertBasedTilesSeriesQuery = (
 
   parts.push(`| STATS`);
   parts.push(`    ${perGroup.join(',\n    ')},`);
-  parts.push(`    member_watchlisted = MAX(member_watchlisted),`);
-  parts.push(`    group_watchlisted = MAX(group_watchlisted)`);
+  parts.push(`    group_on_watchlist = MAX(group_on_watchlist)`);
   parts.push(`    BY effective_id`);
   parts.push(`| STATS`);
   parts.push(`    ${counts.join(',\n    ')}`);

@@ -38,6 +38,10 @@ import { buildAlertBasedTilesQuery } from '../entities_with_alerts_query';
  * | host:w4     | yes         | none (no alert anywhere)  | -                   | dropped: no alert                   |
  * | host:w5     |             | none                      | host:w5a: critical 3 | current severe only                |
  * | host:w6     | yes         | none                      | host:w6a: high 10   | previous severe and watchlisted     |
+ * | host:w7     | yes         | none                      | host:w7a: none      | dropped: no alert anywhere          |
+ *
+ * Like real entity docs, the host entities carry `host.id` and `host.name`: an alias doc read as
+ * if it were an alert would then get an entity id from them, and wrongly count as an alert.
  */
 
 const NAMESPACE = 'default';
@@ -72,6 +76,8 @@ const ENTITIES: readonly EntitySeed[] = [
   { id: 'host:w5a', firstSeenDaysAgo: 100, resolvedTo: 'host:w5' },
   { id: 'host:w6', firstSeenDaysAgo: 100, watchlisted: true },
   { id: 'host:w6a', firstSeenDaysAgo: 100, resolvedTo: 'host:w6' },
+  { id: 'host:w7', firstSeenDaysAgo: 100, watchlisted: true },
+  { id: 'host:w7a', firstSeenDaysAgo: 100, resolvedTo: 'host:w7' },
 ];
 
 const ALERTS: ReadonlyArray<[entityId: string, severity: string, daysAgo: number]> = [
@@ -103,6 +109,8 @@ const loadFixture = async (client: Client) => {
       properties: {
         'entity.id': KEYWORD,
         'entity.name': KEYWORD,
+        'host.id': KEYWORD,
+        'host.name': KEYWORD,
         'entity.attributes.watchlists': KEYWORD,
         'entity.lifecycle.first_seen': DATE,
         'entity.relationships.resolution.resolved_to': KEYWORD,
@@ -125,6 +133,9 @@ const loadFixture = async (client: Client) => {
       {
         'entity.id': id,
         'entity.name': id.split(':')[1],
+        ...(id.startsWith('host:')
+          ? { 'host.id': id.split(':')[1], 'host.name': id.split(':')[1] }
+          : {}),
         'entity.lifecycle.first_seen': isoDaysAgo(now, firstSeenDaysAgo),
         ...(watchlisted ? { 'entity.attributes.watchlists': 'w1' } : {}),
         ...(resolvedTo ? { 'entity.relationships.resolution.resolved_to': resolvedTo } : {}),

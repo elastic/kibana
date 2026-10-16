@@ -35,13 +35,11 @@ import type { TilePeriod } from './tile_period';
  * `period` shifts the whole window back by one range ('previous'), for the period-over-period
  * delta. The previous period only needs the counts, so it leaves out the entity id lists.
  */
-/** The group is on a watchlist: the member that alerted is, or any alias or the main entity is. */
-export const GROUP_ON_WATCHLIST =
-  'COALESCE(member_watchlisted, false) OR COALESCE(group_watchlisted, false)';
-
-const indentLines = (text: string): string => `  ${text.replace(/\n/g, '\n  ')}`;
+/** The group is on a watchlist: the member that alerted, an alias, or the main entity is. */
+export const GROUP_ON_WATCHLIST = 'COALESCE(group_on_watchlist, false)';
 
 interface AlertTilesHeadOptions {
+  /** The concrete entity index: it is read as well as the alerts, and joined to. */
   entitiesIndexName: string;
   spaceId: string;
   /** The ES|QL condition that keeps the alerts of the window the query covers. */
@@ -51,21 +49,26 @@ interface AlertTilesHeadOptions {
   bucketExpression?: string;
 }
 
+const RESOLVED_TO = '`entity.relationships.resolution.resolved_to`';
+
 /**
- * The stages the alert based tile queries share. They end with one row per resolved group and
- * bucket, from two parts merged by the group id (`effective_id`):
+ * The stages the alert based tile queries share. One `FROM` reads the alerts and the entity index
+ * together (FORK cannot run inside a FROM subquery, so the two are not merged as subqueries; the
+ * entities grid does the same in `alerts.ts`). FORK then splits the rows three ways:
  *
- * - the alerts of the window, their entity ids, the join to the entities and the entity filters,
- *   with `has_alert`, `has_severe_alert` and `member_watchlisted` (whether the member that alerted
- *   is on a watchlist). For a single entity, which is most of them, that member is the whole group;
- * - `group_watchlisted`, for the groups that have aliases: whether any alias, or the main entity, is
- *   on a watchlist, even one that did not alert. It reads the aliases (few), groups them by their
- *   main entity, and looks up only those main entities, as the entities grid does for group sizes
- *   (`group_size.ts`), so it does not read every watchlisted entity.
+ * - alerts with a stamped entity id, and alerts without one, as before;
+ * - the aliases (the entity docs that have a `resolved_to`, which are few): each emits its main
+ *   entity as the group and whether the alias is on a watchlist.
  *
- * A group is on the Watchlisted tile when it has an alert in the window and any member is on a
- * watchlist, and the row stands for the main entity of the group. The count and the sparkline series
- * both start here, so they cannot drift apart.
+ * The rows are then grouped per entity, joined to the entity docs (the member that alerted, or the
+ * main entity of an alias row), filtered, and given the group id (`effective_id`). The group is on
+ * a watchlist (`group_on_watchlist`) when the member that alerted is, when any alias is, or when the
+ * main entity is, which a group with aliases gets from its alias rows. For a single entity, which is
+ * most of them, that member is the whole group.
+ *
+ * A group is on the Watchlisted tile when it has an alert in the window and is on a watchlist, and
+ * the row stands for the main entity of the group. The count and the sparkline series both start
+ * here, so they cannot drift apart.
  */
 export const buildAlertTilesHead = ({
   entitiesIndexName,
@@ -73,31 +76,33 @@ export const buildAlertTilesHead = ({
   windowCondition,
   entityFilterClauses,
   bucketExpression,
-}: AlertTilesHeadOptions): string[] => [
-  `SET unmapped_fields="nullify";`,
-  'FROM (',
-  `  FROM ${getAlertsIndex(spaceId)}`,
-  `  | WHERE ${windowCondition}`,
-  ...buildAlertEuidPipeline(bucketExpression).map(indentLines),
-  `  | LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
-  // Discard entity IDs that have no entity-latest record (unrecognised identifiers).
-  '  | WHERE entity.name IS NOT NULL',
-  ...entityFilterClauses.map(indentLines),
-  `  | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id), has_alert = true, member_watchlisted = entity.attributes.watchlists IS NOT NULL`,
-  `  | KEEP effective_id, has_alert, has_severe_alert, member_watchlisted${
-    bucketExpression ? ', bucket' : ''
-  }`,
-  '), (',
-  `  FROM ${entitiesIndexName}`,
-  '  | WHERE `entity.relationships.resolution.resolved_to` IS NOT NULL',
-  '  | EVAL alias_watchlisted = entity.attributes.watchlists IS NOT NULL',
-  '  | STATS alias_watchlisted = MAX(alias_watchlisted) BY effective_id = `entity.relationships.resolution.resolved_to`',
-  '  | RENAME effective_id AS `entity.id`',
-  `  | LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
-  '  | EVAL group_watchlisted = COALESCE(alias_watchlisted, false) OR entity.attributes.watchlists IS NOT NULL, effective_id = entity.id',
-  '  | KEEP effective_id, group_watchlisted',
-  ')',
-];
+}: AlertTilesHeadOptions): string[] => {
+  const isEntityDoc = `_index == "${entitiesIndexName}"`;
+  return [
+    `SET unmapped_fields="nullify";`,
+    `FROM ${getAlertsIndex(spaceId)}, ${entitiesIndexName} METADATA _index`,
+    `| WHERE (NOT ${isEntityDoc} AND ${windowCondition}) OR (${isEntityDoc} AND ${RESOLVED_TO} IS NOT NULL)`,
+    ...buildAlertEuidPipeline(bucketExpression, {
+      alertBranchCondition: `NOT ${isEntityDoc}`,
+      extraBranch: {
+        steps: [
+          `WHERE ${isEntityDoc}`,
+          // Alias rows are not in any bucket of the sparkline: they have no time.
+          `| EVAL _ea_entity_id = ${RESOLVED_TO}, alias_watchlisted = entity.attributes.watchlists IS NOT NULL${
+            bucketExpression ? ', @timestamp = TO_DATETIME(null)' : ''
+          }`,
+          `| KEEP _ea_entity_id, alias_watchlisted${bucketExpression ? ', @timestamp' : ''}`,
+        ],
+        aggregations: ['alias_watchlisted = MAX(alias_watchlisted)'],
+      },
+    }),
+    `| LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
+    // Discard entity IDs that have no entity-latest record (unrecognised identifiers).
+    '| WHERE entity.name IS NOT NULL',
+    ...entityFilterClauses,
+    `| EVAL effective_id = COALESCE(${RESOLVED_TO}, entity.id), group_on_watchlist = COALESCE(alias_watchlisted, false) OR entity.attributes.watchlists IS NOT NULL`,
+  ];
+};
 
 export const buildAlertBasedTilesQuery = (
   entitiesIndexName: string,
@@ -116,13 +121,13 @@ export const buildAlertBasedTilesQuery = (
   // One row per resolved group: whether any of its alerting records has a severe alert, whether it
   // has any alert, and whether any of its members is watchlisted.
   parts.push(
-    `| STATS has_severe_alert = MAX(has_severe_alert), has_alert = MAX(has_alert), member_watchlisted = MAX(member_watchlisted), group_watchlisted = MAX(group_watchlisted) BY effective_id`
+    `| STATS has_severe_alert = MAX(has_severe_alert), has_alert = MAX(has_alert), group_on_watchlist = MAX(group_on_watchlist) BY effective_id`
   );
 
   // Per-tile ids: null for entities outside the tile so COUNT/VALUES ignore them.
   parts.push(`| EVAL severe_id = CASE(has_severe_alert, effective_id, null)`);
   parts.push(
-    `| EVAL watchlisted_id = CASE(has_alert AND (${GROUP_ON_WATCHLIST}), effective_id, null)`
+    `| EVAL watchlisted_id = CASE(has_alert AND ${GROUP_ON_WATCHLIST}, effective_id, null)`
   );
 
   // Each row is one resolved entity (the STATS BY effective_id above), so counting the non-null ids

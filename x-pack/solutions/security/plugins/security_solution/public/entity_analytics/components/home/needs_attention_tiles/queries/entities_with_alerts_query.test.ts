@@ -16,7 +16,7 @@ describe('buildAlertBasedTilesQuery', () => {
   it('deduplicates via STATS ... BY _ea_entity_id before the LOOKUP JOIN, then renames to entity.id', () => {
     const query = buildAlertBasedTilesQuery('.entities-v1', 'default');
     const statsIdx = query.indexOf(
-      '| STATS has_severe_alert = MAX(is_severe_alert) BY _ea_entity_id'
+      '| STATS has_severe_alert = MAX(is_severe_alert), has_alert = MAX(is_alert_row), alias_watchlisted = MAX(alias_watchlisted) BY _ea_entity_id'
     );
     const renameIdx = query.indexOf('| RENAME _ea_entity_id AS `entity.id`');
     const joinIdx = query.indexOf('| LOOKUP JOIN .entities-v1');
@@ -40,11 +40,6 @@ describe('buildAlertBasedTilesQuery', () => {
     expect(query).not.toContain('first_seen');
   });
 
-  it('joins twice: the alerting entity, and the main entity of each group that has aliases', () => {
-    const query = buildAlertBasedTilesQuery('.entities-v1', 'default', '7d');
-    expect(query.match(/\| LOOKUP JOIN/g)).toHaveLength(2);
-  });
-
   it('counts only entities with a high or critical alert as severely alerting', () => {
     const query = buildAlertBasedTilesQuery('.entities-v1', 'default');
     expect(query).toContain('is_severe_alert = `kibana.alert.severity` IN ("high", "critical")');
@@ -55,7 +50,7 @@ describe('buildAlertBasedTilesQuery', () => {
   it('keeps counting watchlisted entities with an alert of any severity', () => {
     const query = buildAlertBasedTilesQuery('.entities-v1', 'default');
     expect(query).toContain(
-      'watchlisted_id = CASE(has_alert AND (COALESCE(member_watchlisted, false) OR COALESCE(group_watchlisted, false)), effective_id, null)'
+      'watchlisted_id = CASE(has_alert AND COALESCE(group_on_watchlist, false), effective_id, null)'
     );
     expect(query).not.toContain('has_severe_alert AND');
   });
@@ -63,29 +58,43 @@ describe('buildAlertBasedTilesQuery', () => {
   it('aggregates the alerting records per resolved entity before the tile counts', () => {
     const query = buildAlertBasedTilesQuery('.entities-v1', 'default');
     expect(query).toContain(
-      '| STATS has_severe_alert = MAX(has_severe_alert), has_alert = MAX(has_alert), member_watchlisted = MAX(member_watchlisted), group_watchlisted = MAX(group_watchlisted) BY effective_id'
+      '| STATS has_severe_alert = MAX(has_severe_alert), has_alert = MAX(has_alert), group_on_watchlist = MAX(group_on_watchlist) BY effective_id'
     );
-    // The only rename is in the alias part, where the group id becomes the key of the lookup.
-    expect(query.match(/\| RENAME effective_id AS `entity.id`/g)).toHaveLength(1);
-    expect(query.indexOf('| RENAME effective_id AS `entity.id`')).toBeGreaterThan(
-      query.indexOf('`entity.relationships.resolution.resolved_to` IS NOT NULL')
+    // The only rename is the one after the first STATS, as before.
+    expect(query.match(/\| RENAME [a-z_]+ AS `entity.id`/g)).toHaveLength(1);
+  });
+
+  it('reads the alerts and the aliases together, in one FROM, not as subqueries', () => {
+    const query = buildAlertBasedTilesQuery('.entities-v1', 'default');
+    // FORK cannot run inside a FROM subquery, so the two share one FROM, like the entities grid.
+    expect(query).toContain('FROM .alerts-security.alerts-default, .entities-v1 METADATA _index');
+    expect(query).not.toContain('FROM (');
+    // The entity docs it reads are the aliases only.
+    expect(query).toContain(
+      '| WHERE (NOT _index == ".entities-v1" AND @timestamp >= NOW() - 1 days) OR (_index == ".entities-v1" AND `entity.relationships.resolution.resolved_to` IS NOT NULL)'
     );
   });
 
-  it('marks a group watchlisted from the member that alerted, or from its aliases and main entity', () => {
+  it('marks a group watchlisted from the member that alerted, an alias, or the main entity', () => {
     const query = buildAlertBasedTilesQuery('.entities-v1', 'default');
-    // The member that alerted: for a single entity this is the whole group.
-    expect(query).toContain('member_watchlisted = entity.attributes.watchlists IS NOT NULL');
-    // Groups with aliases: the aliases, then the main entity of those groups only.
-    expect(query).toContain('  | WHERE `entity.relationships.resolution.resolved_to` IS NOT NULL');
+    // Each alias row gives its main entity as the group and whether the alias is watchlisted.
     expect(query).toContain(
-      'group_watchlisted = COALESCE(alias_watchlisted, false) OR entity.attributes.watchlists IS NOT NULL'
+      '| EVAL _ea_entity_id = `entity.relationships.resolution.resolved_to`, alias_watchlisted = entity.attributes.watchlists IS NOT NULL'
+    );
+    // After the join, the row is the member that alerted, or the main entity of an alias row.
+    expect(query).toContain(
+      'group_on_watchlist = COALESCE(alias_watchlisted, false) OR entity.attributes.watchlists IS NOT NULL'
     );
   });
 
   it('does not read every watchlisted entity', () => {
     const query = buildAlertBasedTilesQuery('.entities-v1', 'default');
     expect(query).not.toContain('| WHERE entity.attributes.watchlists IS NOT NULL');
+  });
+
+  it('joins once, to the entity of each row', () => {
+    const query = buildAlertBasedTilesQuery('.entities-v1', 'default', '7d');
+    expect(query.match(/\| LOOKUP JOIN/g)).toHaveLength(1);
   });
 
   it('applies entity filter clauses after the LOOKUP JOIN', () => {
