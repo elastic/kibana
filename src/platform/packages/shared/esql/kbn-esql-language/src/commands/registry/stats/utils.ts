@@ -45,11 +45,7 @@ import { FunctionDefinitionTypes } from '../../definitions/types';
 import { ReplacementRangeStrategyKind } from '../../../language/autocomplete/utils/prefix_range';
 import { endsWithComma, endsWithWhitespace } from '../../definitions/utils/regex';
 import { getColumnName } from '../../definitions/utils/columns';
-import {
-  findAstPosition,
-  getBracketsToClose,
-  removeAutocompleteMarkers,
-} from '../../definitions/utils/ast';
+import { getBracketsToClose, removeAutocompleteMarkers } from '../../definitions/utils/ast';
 import { EDITOR_MARKER } from '../../definitions/constants';
 import { NOT_SUGGESTED_TYPES } from '../../../query_columns_service';
 
@@ -340,14 +336,30 @@ const suggestWithByColumns =
     ];
   };
 
-const statsWithByAtCursor = (
+/**
+ * Finds the re-parsed counterpart of the stats command the cursor is in and returns it only when it
+ * carries a BY clause. The command is matched by its start offset, which is stable because syntax
+ * corrections are appended after the cursor: this pins us to the exact command the caret sits in
+ * instead of a sibling stats command or one in a surrounding/nested query, whose BY columns are out
+ * of scope and must not leak into the suggestions.
+ */
+const statsWithByMatchingCursor = (
   root: ESQLAstQueryExpression,
-  cursorPosition: number
+  cursorCommand: ESQLAstAllCommands
 ): ESQLCommand | undefined => {
-  const { command } = findAstPosition(root, cursorPosition);
-  return command?.type === 'command' && isStatsCommand(command) && command.args.some(isByOption)
-    ? command
-    : undefined;
+  let match: ESQLCommand | undefined;
+  Walker.walk(root, {
+    visitCommand: (command) => {
+      if (
+        isStatsCommand(command) &&
+        command.location.min === cursorCommand.location.min &&
+        command.args.some(isByOption)
+      ) {
+        match = command;
+      }
+    },
+  });
+  return match;
 };
 
 /**
@@ -362,7 +374,8 @@ const statsWithByAtCursor = (
  */
 const getCommandAtCursor = (
   query: string,
-  cursorPosition: number
+  cursorPosition: number,
+  cursorCommand: ESQLAstAllCommands
 ): { command: ESQLCommand; query: string } | undefined => {
   const afterCursor = query.slice(cursorPosition);
   if (!afterCursor.trim()) {
@@ -370,7 +383,7 @@ const getCommandAtCursor = (
   }
 
   // Try parsing the query as is.
-  const fromFullQuery = statsWithByAtCursor(Parser.parse(query).root, cursorPosition);
+  const fromFullQuery = statsWithByMatchingCursor(Parser.parse(query).root, cursorCommand);
   if (fromFullQuery) {
     return { command: fromFullQuery, query };
   }
@@ -380,7 +393,7 @@ const getCommandAtCursor = (
   const beforeCursor = `${query.slice(0, cursorPosition)} ${EDITOR_MARKER} `;
   const corrected = `${beforeCursor}${getBracketsToClose(beforeCursor).join('')}${afterCursor}`;
   const root = removeAutocompleteMarkers(Parser.parse(corrected).root);
-  const command = statsWithByAtCursor(root, cursorPosition);
+  const command = statsWithByMatchingCursor(root, cursorCommand);
   return command ? { command, query: corrected } : undefined;
 };
 
@@ -403,7 +416,7 @@ export const getAggregationScope = (
   // The command param is built from the query up to the cursor, so a BY clause typed after the
   // cursor is missing. Parse the full text again, and slice implicit names from the query its
   // locations refer to.
-  const commandAtCursor = getCommandAtCursor(fullQuery, cursorPosition);
+  const commandAtCursor = getCommandAtCursor(fullQuery, cursorPosition, command);
   const byColumns = getColumnsDefinedInByClause(
     commandAtCursor?.command ?? command,
     context.columns,
