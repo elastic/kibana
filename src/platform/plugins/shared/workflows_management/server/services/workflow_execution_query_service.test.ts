@@ -10,7 +10,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { ExecutionType } from '@kbn/workflows';
+import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import type {
   IWorkflowLogsQueryService,
@@ -1323,6 +1323,50 @@ describe('WorkflowExecutionQueryService', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to compute processed wait-for-input facets')
       );
+    });
+  });
+
+  describe('getWorkflowExecutionStatuses', () => {
+    const execution = (id: string, spaceId = 'default') =>
+      ({
+        id,
+        spaceId,
+        workflowId: 'workflow-1',
+        status: ExecutionStatus.CANCELLED,
+      } as EsWorkflowExecution);
+
+    it('should read each execution once in a single projected multi-get', async () => {
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([execution('run-1')])
+      );
+
+      const result = await service.getWorkflowExecutionStatuses(
+        ['run-1', 'run-2', 'run-1'],
+        'default'
+      );
+
+      expect(mockWorkflowDataClient.getByIds).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowDataClient.getByIds).toHaveBeenCalledWith(['run-1', 'run-2'], {
+        sourceIncludes: ['spaceId', 'workflowId', 'status'],
+      });
+      expect(result).toEqual([
+        { id: 'run-1', workflowId: 'workflow-1', status: ExecutionStatus.CANCELLED },
+      ]);
+    });
+
+    it('should leave out an execution when it belongs to another space', async () => {
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([execution('run-1'), execution('run-2', 'other')])
+      );
+
+      const result = await service.getWorkflowExecutionStatuses(['run-1', 'run-2'], 'default');
+
+      expect(result.map(({ id }) => id)).toEqual(['run-1']);
+    });
+
+    it('should not read anything when no ids are given', async () => {
+      await expect(service.getWorkflowExecutionStatuses([], 'default')).resolves.toEqual([]);
+      expect(mockWorkflowDataClient.getByIds).not.toHaveBeenCalled();
     });
   });
 

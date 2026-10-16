@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { from, map, type Observable, ReplaySubject } from 'rxjs';
+import { from, map, switchMap, takeUntil, type Observable, ReplaySubject } from 'rxjs';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -44,6 +44,11 @@ import { APP_DESC, APP_TITLE } from './translations';
 import { APP_PATH } from './constants';
 import { getScheduledReportObjectTypes } from './management/integrations/get_scheduled_report_object_types';
 import { shouldRegisterReportingIntegration } from './management/integrations/should_register_reporting_integration';
+import {
+  REPORTING_SERVERLESS_ON_DEMAND_EXPORT_ENABLED,
+  REPORTING_SERVERLESS_SCHEDULED_EXPORT_ENABLED,
+} from '../common/feature_flags';
+import { createServerlessExportGate, withAvailabilityGate } from './share/serverless_export_gate';
 
 export interface ReportingPublicPluginSetupDependencies {
   home: HomePublicPluginSetup;
@@ -142,6 +147,21 @@ export class ReportingPublicPlugin
       })
     );
 
+    const createFeatureFlagGate = (flagName: string) =>
+      createServerlessExportGate({
+        isServerless: this.isServerless,
+        enabled$: from(getStartServices()).pipe(
+          switchMap(([coreStart]) => coreStart.featureFlags.getBooleanValue$(flagName, false)),
+          takeUntil(this.stop$)
+        ),
+      });
+    const isOnDemandExportAvailable = createFeatureFlagGate(
+      REPORTING_SERVERLESS_ON_DEMAND_EXPORT_ENABLED
+    );
+    const isScheduledExportAvailable = createFeatureFlagGate(
+      REPORTING_SERVERLESS_SCHEDULED_EXPORT_ENABLED
+    );
+
     const apiClient = new ReportingAPIClient(core.http, core.uiSettings, this.kibanaVersion);
     this.apiClient = apiClient;
 
@@ -234,15 +254,23 @@ export class ReportingPublicPlugin
       })
     );
 
+    // Scheduling renders only when a PDF/PNG export item is available, so scheduled exports also
+    // require the on-demand flag. Scheduled is never released without on-demand.
     if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
       shareSetup.registerShareIntegration<ExportShare>(
         // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-        reportingPDFExportShareIntegration({ apiClient, startServices$ })
+        withAvailabilityGate(
+          reportingPDFExportShareIntegration({ apiClient, startServices$ }),
+          isOnDemandExportAvailable
+        )
       );
 
       shareSetup.registerShareIntegration<ExportShare>(
         // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-        reportingPNGExportShareIntegration({ apiClient, startServices$ })
+        withAvailabilityGate(
+          reportingPNGExportShareIntegration({ apiClient, startServices$ }),
+          isOnDemandExportAvailable
+        )
       );
     }
 
@@ -282,7 +310,10 @@ export class ReportingPublicPlugin
           for (const objectType of scheduledReportObjectTypes) {
             shareSetup.registerShareIntegration<ExportShareDerivatives>(
               objectType,
-              scheduledReportsShareIntegration
+              // Every type except Discover's `search` is scheduled as PDF or PNG.
+              objectType === 'search'
+                ? scheduledReportsShareIntegration
+                : withAvailabilityGate(scheduledReportsShareIntegration, isScheduledExportAvailable)
             );
           }
         })

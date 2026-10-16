@@ -111,6 +111,7 @@ dependsOn:
   - '@kbn/esql-utils'
   - '@kbn/data-source'
   - '@kbn/data-view-utils'
+  - '@kbn/std'
   - '@kbn/app-header'
   - '@kbn/core-chrome-app-menu'
   - '@kbn/core-chrome-app-menu-components'
