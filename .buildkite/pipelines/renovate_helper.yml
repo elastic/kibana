@@ -4,8 +4,9 @@ agents:
   imageProject: elastic-images-prod
   machineType: n2-standard-2
 steps:
-  - group: 'Renovate PR opened or comment'
-    if: build.env('GITHUB_PR_USER') == 'elastic-renovate-prod[bot]' && ((build.env('GITHUB_PR_EVENT_TYPE') == 'pull_request' && build.env('GITHUB_PR_EVENT_ACTION') == 'opened') || (build.env('GITHUB_PR_EVENT_TYPE') == 'issue_comment' && build.env('GITHUB_PR_EVENT_ACTION') == 'created'))
+  - group: 'Renovate PR opened, pushed by Renovate, or comment'
+    # Renovate force-pushes on rebases and version bumps, dropping the helper's lockfile commit, so the helper must run again
+    if: build.env('GITHUB_PR_USER') == 'elastic-renovate-prod[bot]' && ((build.env('GITHUB_PR_EVENT_TYPE') == 'pull_request' && (build.env('GITHUB_PR_EVENT_ACTION') == 'opened' || (build.env('GITHUB_PR_EVENT_ACTION') == 'synchronize' && build.env('GITHUB_PR_TRIGGER_USER') == 'elastic-renovate-prod[bot]'))) || (build.env('GITHUB_PR_EVENT_TYPE') == 'issue_comment' && build.env('GITHUB_PR_EVENT_ACTION') == 'created'))
 
     steps:
       - command: .buildkite/scripts/steps/renovate/renovate_helper.sh
