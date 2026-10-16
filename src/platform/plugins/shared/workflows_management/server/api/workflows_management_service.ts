@@ -720,7 +720,7 @@ export class WorkflowsService {
     yaml: string,
     spaceId: string,
     request: KibanaRequest,
-    options: { includeVariableRules: boolean }
+    options: { includeVariableRules: boolean; includeEsqlRules: boolean }
   ): Promise<ValidateWorkflowResponseDto> {
     await this.ensureInitialized();
     return this.validationService.validateWorkflow(yaml, spaceId, request, options);

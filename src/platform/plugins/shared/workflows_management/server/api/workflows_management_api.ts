@@ -826,7 +826,7 @@ export class WorkflowsManagementApi {
       params.spaceId,
       params.request,
       // This throws on an invalid result, so it must not apply the variable rules.
-      { includeVariableRules: false }
+      { includeVariableRules: false, includeEsqlRules: false }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
       throw buildWorkflowValidationError(validation, params.yaml);
@@ -1003,6 +1003,7 @@ export class WorkflowsManagementApi {
       request,
       {
         includeVariableRules: false,
+        includeEsqlRules: false,
       }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
@@ -1059,6 +1060,7 @@ export class WorkflowsManagementApi {
       request,
       {
         includeVariableRules: false,
+        includeEsqlRules: false,
       }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
@@ -1551,6 +1553,7 @@ export class WorkflowsManagementApi {
   ): Promise<ValidateWorkflowResponseDto> {
     return this.workflowsService.validateWorkflow(yaml, spaceId, request, {
       includeVariableRules: true,
+      includeEsqlRules: true,
     });
   }
 

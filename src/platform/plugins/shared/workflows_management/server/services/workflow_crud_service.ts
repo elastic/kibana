@@ -467,7 +467,7 @@ export class WorkflowCrudService {
     }
     const triggerDefinitions = params.lightweightValidation ? undefined : allTriggerDefinitions;
 
-    const prepared = prepareWorkflowDocumentFromYaml({
+    const prepared = await prepareWorkflowDocumentFromYaml({
       id: params.id,
       yaml: params.yaml,
       zodSchema,
@@ -652,7 +652,7 @@ export class WorkflowCrudService {
       id: baseId,
       workflowData,
       definition,
-    } = prepareWorkflowDocumentFromYaml({
+    } = await prepareWorkflowDocumentFromYaml({
       id: workflow.id,
       yaml: workflow.yaml,
       zodSchema,
@@ -751,7 +751,7 @@ export class WorkflowCrudService {
         if (customId) {
           validateWorkflowId(customId);
         }
-        const prepared = prepareWorkflowDocumentFromYaml({
+        const prepared = await prepareWorkflowDocumentFromYaml({
           id: workflows[i].id,
           yaml: workflows[i].yaml,
           zodSchema,
@@ -951,14 +951,14 @@ export class WorkflowCrudService {
       workflowYaml && zodSchema && triggerDefinitions
         ? {
             workflowYaml,
-            ...applyYamlUpdate({
+            ...(await applyYamlUpdate({
               workflowYaml,
               zodSchema,
               triggerDefinitions,
               logger: this.deps.logger,
               warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
               workflowId: id,
-            }),
+            })),
           }
         : undefined;
 

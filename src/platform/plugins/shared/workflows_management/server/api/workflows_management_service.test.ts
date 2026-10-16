@@ -437,6 +437,7 @@ describe('WorkflowsService (facade)', () => {
       await service.getAvailableConnectors('default', request);
       await service.validateWorkflow('name: wf', 'default', request, {
         includeVariableRules: false,
+        includeEsqlRules: false,
       });
       await service.getWorkflowZodSchema({ loose: false }, 'default', request);
 
@@ -445,7 +446,7 @@ describe('WorkflowsService (facade)', () => {
         'name: wf',
         'default',
         request,
-        { includeVariableRules: false }
+        { includeVariableRules: false, includeEsqlRules: false }
       );
       expect(validationSpies.getWorkflowZodSchema).toHaveBeenCalledWith(
         { loose: false },

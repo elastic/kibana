@@ -2387,7 +2387,7 @@ describe('WorkflowCrudService', () => {
         steps: [],
       };
 
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
         updatedDataPatch: {
           definition: parsedDefinition,
           name: 'Parsed Workflow',
@@ -2459,7 +2459,7 @@ describe('WorkflowCrudService', () => {
         steps: [],
       };
 
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
         updatedDataPatch: {
           definition: parsedDefinition,
           name: 'Parsed Workflow',
@@ -2642,7 +2642,7 @@ describe('WorkflowCrudService', () => {
     });
 
     it('returns hoisted YAML validation errors without changing stored definition', async () => {
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
         updatedDataPatch: {
           definition: null,
           enabled: false,
@@ -2703,7 +2703,7 @@ describe('WorkflowCrudService', () => {
       // `applyYamlUpdate` is mocked, so this asserts that `updateWorkflow` spreads the
       // returned patch (including `name`) into the indexed document — not that the name
       // is recovered from the raw YAML (that parsing is covered in workflow_prepare.test.ts).
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
         updatedDataPatch: {
           definition: null,
           enabled: false,
