@@ -164,22 +164,47 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('uses a single Alerts link to classic Observability alerts when alerting v2 is disabled', () => {
+  it('opens an Alerts panel pointing at v1 pages when alerting v2 is disabled', () => {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      observabilityAlerts: { show: true },
+      management: {
+        ...core.application.capabilities.management,
+        insightsAndAlerting: {
+          ...core.application.capabilities.management?.insightsAndAlerting,
+          triggersActionsRules: true,
+          maintenanceWindows: true,
+        },
+      },
+    };
+
     const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
     const alertsPanel = body.find(
       (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
     );
-    const flatAlerts = body.find((item) => item.link === 'observability-overview:alerts');
 
-    expect(alertsPanel).toBeUndefined();
-    expect(flatAlerts).toEqual(
+    expect(body.find((item) => item.link === 'observability-overview:alerts')).toBeUndefined();
+    expect(alertsPanel).toEqual(
       expect.objectContaining({
-        link: 'observability-overview:alerts',
+        id: 'alerting',
+        title: 'Alerting',
         icon: 'warning',
-        title: 'Alerts',
+        renderAs: 'panelOpener',
       })
     );
-    expect(flatAlerts).not.toHaveProperty('renderAs');
+    expect(alertsPanel?.children).toEqual([
+      expect.objectContaining({
+        children: [{ link: 'observability-overview:alerts', title: 'Alerts' }],
+      }),
+      expect.objectContaining({
+        title: 'Rule Management',
+        children: [{ link: 'management:triggersActions', title: 'Rules' }],
+      }),
+      expect.objectContaining({
+        title: 'Notifications and Suppressions',
+        children: [{ link: 'management:maintenanceWindows' }],
+      }),
+    ]);
   });
 
   it('opens an Alerts panel pointing at observability alerting deep links when alerting v2 is enabled', () => {
@@ -265,42 +290,28 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('keeps Stack Rules and hides Stack Alerts while alerting v2 is disabled', () => {
-    const adminSettingsNode = getAdminSettingsNode({ core });
-    const alertsSection = adminSettingsNode.children?.find(
-      (item) => item.id === 'alerts_and_insights'
-    );
-    const alertsLinks = alertsSection?.children?.map((item) => item.link) ?? [];
+  it.each([false, true])(
+    'hides Stack Alerts and Stack Rules when alerting v2 enabled is %s',
+    (alertingV2Enabled) => {
+      core.settings.globalClient.get = <T>(_key: string) => alertingV2Enabled as T;
+      core.settings.globalClient.isDeclared = () => true;
 
-    expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
-    expect(alertsLinks).toEqual(
-      expect.arrayContaining([
-        'management:triggersActions',
-        'management:triggersActionsConnectors',
-        'management:maintenanceWindows',
-      ])
-    );
-  });
+      const adminSettingsNode = getAdminSettingsNode({ core });
+      const alertsSection = adminSettingsNode.children?.find(
+        (item) => item.id === 'alerts_and_insights'
+      );
+      const alertsLinks = alertsSection?.children?.map((item) => item.link) ?? [];
 
-  it('hides Stack Alerts and Stack Rules when alerting v2 is enabled', () => {
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
-    core.settings.globalClient.isDeclared = () => true;
-
-    const adminSettingsNode = getAdminSettingsNode({ core });
-    const alertsSection = adminSettingsNode.children?.find(
-      (item) => item.id === 'alerts_and_insights'
-    );
-    const alertsLinks = alertsSection?.children?.map((item) => item.link) ?? [];
-
-    expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
-    expect(alertsLinks).not.toContain('management:triggersActions');
-    expect(alertsLinks).toEqual(
-      expect.arrayContaining([
-        'management:triggersActionsConnectors',
-        'management:maintenanceWindows',
-      ])
-    );
-  });
+      expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
+      expect(alertsLinks).not.toContain('management:triggersActions');
+      expect(alertsLinks).toEqual(
+        expect.arrayContaining([
+          'management:triggersActionsConnectors',
+          'management:maintenanceWindows',
+        ])
+      );
+    }
+  );
 
   it('includes Data Federation under Data management > Indices and data streams', () => {
     const { footer } = createNavigationTree({ core }) as NavigationTreeDefinition;

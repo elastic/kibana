@@ -49,20 +49,19 @@ const PANEL_LINKS = {
   actionPolicies: 'observabilityAlerting:action-policies',
   maintenanceWindows: 'management:maintenanceWindows',
   executionHistory: 'observabilityAlerting:execution-history',
+  stackManagementRules: 'management:triggersActions',
 } as const;
+
+const V1_PANEL_LINKS = [
+  ALERTS_DEEP_LINK,
+  PANEL_LINKS.stackManagementRules,
+  PANEL_LINKS.maintenanceWindows,
+] as const;
 
 const expectPageTitle = async (pageTitle: Locator, title: string) => {
   await expect(pageTitle).toHaveText(title, {
     timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
   });
-};
-
-const expectPlainAlertsLink = async (nav: ObservabilityNavigation) => {
-  const alertsLink = await nav.revealBodyNavItemByDeepLinkId(ALERTS_DEEP_LINK);
-  await expect(alertsLink).toBeVisible({ timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS });
-  await expect(alertsLink).toHaveText(CLASSIC_ALERTS_TITLE);
-  await expect(alertsLink).toHaveAttribute('href', /\/app\/observability\/alerts/);
-  await expect(nav.navItemInBodyById(ALERTS_PANEL_ID)).not.toBeVisible();
 };
 
 const ALL_PANEL_LINKS = [
@@ -74,7 +73,35 @@ const ALL_PANEL_LINKS = [
   PANEL_LINKS.actionPolicies,
   PANEL_LINKS.maintenanceWindows,
   PANEL_LINKS.executionHistory,
+  PANEL_LINKS.stackManagementRules,
 ] as const;
+
+const expectAlertingPanelActive = async (nav: ObservabilityNavigation) => {
+  const opener = await nav.revealBodyNavItemById(ALERTS_PANEL_ID);
+  await expect(opener).toHaveAttribute('data-test-subj', /nav-item-isActive/, {
+    timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+  });
+};
+
+const openNavWithV2Disabled = async ({
+  browserAuth,
+  pageObjects,
+  kbnClient,
+  scoutSpace,
+}: {
+  browserAuth: { loginAsAdmin: () => Promise<void> };
+  pageObjects: { observabilityNavigation: ObservabilityNavigation };
+  kbnClient: Parameters<typeof setAlertingV2NavSettings>[0];
+  scoutSpace: Parameters<typeof setAlertingV2NavSettings>[1];
+}) => {
+  await setAlertingV2NavSettings(kbnClient, scoutSpace, {
+    v2Enabled: false,
+    showV1AlertsTable: false,
+  });
+  await browserAuth.loginAsAdmin();
+  await pageObjects.observabilityNavigation.goto();
+  await pageObjects.observabilityNavigation.waitForLoad();
+};
 
 const loadNavAsRole = async (
   browserAuth: { loginWithCustomRole: (role: KibanaRole) => Promise<void> },
@@ -155,10 +182,13 @@ const expectPanelForRole = async (
   },
   role: KibanaRole,
   visible: readonly string[],
-  { showV1AlertsTable = false }: { showV1AlertsTable?: boolean } = {}
+  {
+    showV1AlertsTable = false,
+    v2Enabled = true,
+  }: { showV1AlertsTable?: boolean; v2Enabled?: boolean } = {}
 ) => {
   await setAlertingV2NavSettings(kbnClient, scoutSpace, {
-    v2Enabled: true,
+    v2Enabled,
     showV1AlertsTable,
   });
   const nav = pageObjects.observabilityNavigation;
@@ -188,18 +218,49 @@ test.describe(
       await scoutSpace.uiSettings.unset(ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID);
     });
 
-    test('shows a plain Alerts link that loads the classic alerts page when v2 is disabled', async ({
+    test('opens an Alerting panel with only v1 links when v2 is disabled', async ({
       browserAuth,
       pageObjects,
+      kbnClient,
+      scoutSpace,
     }) => {
-      await browserAuth.loginAsAdmin();
-      await pageObjects.observabilityNavigation.goto();
-      await pageObjects.observabilityNavigation.waitForLoad();
+      await openNavWithV2Disabled({ browserAuth, pageObjects, kbnClient, scoutSpace });
 
       const nav = pageObjects.observabilityNavigation;
-      await expectPlainAlertsLink(nav);
-      await nav.clickBodyNavItemByDeepLinkId(ALERTS_DEEP_LINK);
+      await expectPanelLinks(nav, V1_PANEL_LINKS);
+      await expect(nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK)).toHaveText(
+        CLASSIC_ALERTS_TITLE
+      );
+      await expect(
+        nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.stackManagementRules)
+      ).toHaveText('Rules');
+
+      await nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK).click();
       await expectPageTitle(pageObjects.chrome.pageTitle, CLASSIC_ALERTS_TITLE);
+      await expectAlertingPanelActive(nav);
+    });
+
+    test('keeps Alerting active on Stack Management Rules and Maintenance Windows when v2 is disabled', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await openNavWithV2Disabled({ browserAuth, pageObjects, kbnClient, scoutSpace });
+
+      const nav = pageObjects.observabilityNavigation;
+
+      await test.step('Rules opens Stack Management Rules', async () => {
+        await nav.clickPanelNavItemByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.stackManagementRules);
+        await expectPageTitle(pageObjects.chrome.pageTitle, 'Rules');
+        await expectAlertingPanelActive(nav);
+      });
+
+      await test.step('Maintenance Windows opens Stack Management Maintenance Windows', async () => {
+        await nav.clickPanelNavItemByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.maintenanceWindows);
+        await expectPageTitle(pageObjects.chrome.pageTitle, 'Maintenance Windows');
+        await expectAlertingPanelActive(nav);
+      });
     });
 
     test('hides Alerting V2 Preview from project settings when v2 is enabled', async ({
@@ -398,25 +459,49 @@ test.describe(
       await expect(page.getByTestId('classicAlertsBadge')).toBeVisible();
     });
 
-    test('reverts to a plain Alerts link that loads the classic alerts page after disabling v2', async ({
+    test('switches the Alerting panel to v1 links after disabling v2', async ({
       browserAuth,
       pageObjects,
       kbnClient,
       scoutSpace,
     }) => {
-      await setAlertingV2NavSettings(kbnClient, scoutSpace, {
-        v2Enabled: false,
-        showV1AlertsTable: false,
-      });
-
-      await browserAuth.loginAsAdmin();
-      await pageObjects.observabilityNavigation.goto();
-      await pageObjects.observabilityNavigation.waitForLoad();
-
+      await enableV2AndOpenNav({ browserAuth, pageObjects, kbnClient, scoutSpace });
       const nav = pageObjects.observabilityNavigation;
-      await expectPlainAlertsLink(nav);
-      await nav.clickBodyNavItemByDeepLinkId(ALERTS_DEEP_LINK);
-      await expectPageTitle(pageObjects.chrome.pageTitle, CLASSIC_ALERTS_TITLE);
+      await nav.openPanelById(ALERTS_PANEL_ID);
+      await expect(nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.alerts)).toBeVisible(
+        { timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS }
+      );
+
+      await openNavWithV2Disabled({ browserAuth, pageObjects, kbnClient, scoutSpace });
+      await expectPanelLinks(nav, V1_PANEL_LINKS);
+    });
+
+    test('hides the Alerting panel when v2 is disabled and the user has no alerting privileges', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole(),
+        [],
+        { v2Enabled: false }
+      );
+    });
+
+    test('shows Alerts and Stack Management Rules in the panel when v2 is disabled and the user has v1 logs read', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ logs: ['read'] }),
+        [ALERTS_DEEP_LINK, PANEL_LINKS.stackManagementRules],
+        { v2Enabled: false }
+      );
     });
 
     test('hides the Alerting panel when the user has no alerting privileges', async ({
