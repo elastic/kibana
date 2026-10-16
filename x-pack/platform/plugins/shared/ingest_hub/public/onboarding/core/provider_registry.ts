@@ -23,10 +23,10 @@ export interface OnboardingProviderDefinition {
   meta: OnboardingProviderMeta;
 }
 
-const PROVIDERS = new Map<string, OnboardingProviderDefinition>(
+const ONBOARDING_PROVIDERS = new Map<string, OnboardingProviderDefinition>(
   [awsOnboardingProvider].map((provider) => [provider.id, provider])
 );
 
 /** Returns the onboarding provider for a route integration id, or undefined if unsupported. */
 export const getOnboardingProvider = (id: string): OnboardingProviderDefinition | undefined =>
-  PROVIDERS.get(id);
+  ONBOARDING_PROVIDERS.get(id);
