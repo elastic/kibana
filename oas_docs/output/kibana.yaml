@@ -124,8 +124,7 @@ tags:
     description: |
       Data stream APIs enable you to manage data streams, which are collections of indices that share the same index template and are managed as a single unit for time-series data.
     x-displayName: Data streams
-  - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
-    name: data views
+  - name: data views
     x-displayName: Data views
   - name: Elastic Agent actions
     description: |
@@ -26401,10 +26400,12 @@ paths:
                 required:
                   - data
                   - meta
+          description: OK
         '400':
           description: bad request
       summary: ''
-      tags: []
+      tags:
+        - data views
       x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
@@ -26504,6 +26505,7 @@ paths:
                   - id
                   - data
                   - meta
+          description: created
         '400':
           description: invalid request
         '403':
@@ -26513,7 +26515,8 @@ paths:
         '409':
           description: conflict
       summary: ''
-      tags: []
+      tags:
+        - data views
       x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
@@ -26552,7 +26555,8 @@ paths:
         '404':
           description: not found
       summary: ''
-      tags: []
+      tags:
+        - data views
       x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
@@ -26623,10 +26627,12 @@ paths:
                   - id
                   - data
                   - meta
+          description: OK
         '404':
           description: not found
       summary: ''
-      tags: []
+      tags:
+        - data views
       x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
@@ -26792,7 +26798,8 @@ paths:
         '409':
           description: conflict
       summary: ''
-      tags: []
+      tags:
+        - data views
       x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
