@@ -109,7 +109,9 @@ const addMessages = (waiting: ResolvedMessage[], added: ResolvedMessage[]): Reso
  * - messages that arrive close together form a batch, which closes once none arrived for
  *   {@link ANNOUNCEMENT_SETTLE_MS}, or {@link ANNOUNCEMENT_MAX_BATCH_MS} after the first one;
  * - a closed batch is announced right away, unless the previous announcement is still being read.
- *   Batches that close meanwhile are merged into a single waiting announcement.
+ *   Batches that close meanwhile are merged into a single waiting announcement;
+ * - a message with a key removes a waiting message with the same key as soon as it arrives, so the
+ *   outdated one can't be announced while the new one's batch is still open.
  *
  * `messages$` must be hot (e.g. a `Subject`), because batching subscribes to it more than once.
  */
@@ -135,6 +137,14 @@ export const toAnnouncements = (messages$: Observable<QueuedMessage>): Observabl
         })
       );
     };
+
+    subscription.add(
+      messages$.subscribe(({ key }) => {
+        if (key !== undefined) {
+          waiting = waiting.filter((message) => message.key !== key);
+        }
+      })
+    );
 
     subscription.add(
       messages$

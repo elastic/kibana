@@ -131,6 +131,19 @@ describe('toAnnouncements', () => {
     expect(getAnnouncedTexts()).toEqual([[LONG_MESSAGE], ['10 results']]);
   });
 
+  it('removes a waiting message with the same key as soon as a newer one arrives', () => {
+    const readingTimeMs = estimateReadingTimeMs([{ text: LONG_MESSAGE, politeness: 'polite' }]);
+    notify(LONG_MESSAGE);
+    jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS);
+    notify('Dashboards - Elastic', { key: 'pageTitle' });
+    // The new title arrives shortly before the previous announcement is read
+    jest.advanceTimersByTime(readingTimeMs - ANNOUNCEMENT_SETTLE_MS / 2);
+    notify('Discover - Elastic', { key: 'pageTitle' });
+    jest.runAllTimers();
+
+    expect(getAnnouncedTexts()).toEqual([[LONG_MESSAGE], ['Discover - Elastic']]);
+  });
+
   it('drops waiting messages when unsubscribed', () => {
     notify('Saved');
     subscription.unsubscribe();
