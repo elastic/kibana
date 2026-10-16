@@ -227,10 +227,23 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
     await attempt(async () => {
       api = await getAdminApi(apiClient, samlAuth);
     });
-    // Drain before touching the account or the worker's settings: `resetWorker` only
-    // disables/unbinds, it does not stop an active sweep or its detached endpoint-analysis
-    // runs, and those runs execute as the service account deleted below.
-    for (const { workflowId, knownIds } of executionSnapshots) {
+    // Stop new dispatches first. While the worker is enabled its schedule keeps starting
+    // sweeps, and `cancelNewExecutions` only cancels what it listed at call time — a sweep
+    // fired mid-teardown would dispatch another analysis that either outlives the drain or
+    // starts after it and survives the account and data deletion below. The account stays
+    // bound until the drain is over: in-flight runs execute as it.
+    await attempt(async () => {
+      if (api && (await getWorker(api, WORKER_ID)).enabled) {
+        await updateWorker(api, WORKER_ID, { enabled: false });
+      }
+    });
+    // Drain the sweep before the run workflow it dispatches: a sweep that is still live when
+    // the runs are drained could start a fresh run right after. The sort is stable, so
+    // everything but the run workflow keeps its snapshot order.
+    const drainOrder = [...executionSnapshots].sort(
+      (a, b) => Number(a.workflowId === RUN_WORKFLOW_ID) - Number(b.workflowId === RUN_WORKFLOW_ID)
+    );
+    for (const { workflowId, knownIds } of drainOrder) {
       await attempt(async () => {
         if (api) await cancelNewExecutions(api, workflowId, knownIds);
       });
