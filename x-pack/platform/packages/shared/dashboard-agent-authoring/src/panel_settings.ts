@@ -8,23 +8,32 @@
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
+  type SerializedTimeRange,
+  type SerializedTitles,
 } from '@kbn/presentation-publishing-schemas';
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 
+export type PanelLevelKey = keyof SerializedTitles | keyof SerializedTimeRange | 'drilldowns';
+
 /**
- * Panel-level settings that sit beside a panel type's own keys in `config` and that no
- * panel builder writes. `title` and `description` are left out: builders own them and may
- * omit them on purpose (e.g. titleless metric panels).
+ * Panel-level keys that sit beside a panel type's own keys in `config`.
  * `drilldowns` is listed by hand because its schema is built at runtime.
  */
-export const PANEL_SETTINGS_KEYS: readonly string[] = [
-  ...Object.keys(serializedTitlesSchema.omit({ title: true, description: true }).shape),
-  ...Object.keys(serializedTimeRangeSchema.shape),
+export const PANEL_LEVEL_KEYS: readonly PanelLevelKey[] = [
+  ...(Object.keys(serializedTitlesSchema.shape) as Array<keyof SerializedTitles>),
+  ...(Object.keys(serializedTimeRangeSchema.shape) as Array<keyof SerializedTimeRange>),
   'drilldowns',
 ];
 
-/** Picks the panel-level settings set on a panel config, so edits can carry them over. */
-export const pickPanelSettings = (config: AttachmentPanel['config']): AttachmentPanel['config'] =>
+/** Returns the panel-level keys a config schema accepts, so a panel kind can declare what it writes. */
+export const getPanelLevelKeysIn = (shape: object): readonly PanelLevelKey[] =>
+  PANEL_LEVEL_KEYS.filter((key) => key in shape);
+
+/** Picks the given panel-level keys set on a panel config. */
+export const pickPanelLevelKeys = (
+  config: AttachmentPanel['config'],
+  keys: readonly PanelLevelKey[]
+): AttachmentPanel['config'] =>
   Object.fromEntries(
-    PANEL_SETTINGS_KEYS.filter((key) => config[key] !== undefined).map((key) => [key, config[key]])
+    keys.filter((key) => config[key] !== undefined).map((key) => [key, config[key]])
   );

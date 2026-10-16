@@ -108,4 +108,5 @@ export const customContentPanelKind = defineRequestPanelKind({
   label: 'custom content',
   addInputSchema: customContentPanelRequestSchema,
   editInputSchema: customContentEditPanelRequestSchema,
+  writablePanelKeys: [],
 });

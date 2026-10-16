@@ -16,6 +16,7 @@ import {
 } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import { singleMetricViewerEmbeddableStateSchema } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import { z } from '@kbn/zod/v4';
+import { getPanelLevelKeysIn } from '../../../panel_settings';
 import { defineConfigPanelKind } from '../panel_kind';
 
 /**
@@ -82,6 +83,7 @@ export const anomalyChartsPanelKind = defineConfigPanelKind({
   label: 'anomaly charts',
   addInputSchema: anomalyChartsPanelConfigInputSchema,
   editInputSchema: editAnomalyChartsPanelConfigInputSchema,
+  writablePanelKeys: getPanelLevelKeysIn(anomalyChartsPanelConfigSchema.shape),
   toEmbeddableConfig: (config) => {
     const { severity_threshold: severityThreshold, ...rest } = config;
     const normalizedThreshold =
@@ -127,6 +129,8 @@ export const anomalySwimlanePanelKind = defineConfigPanelKind({
   label: 'anomaly swim lane',
   addInputSchema: anomalySwimlaneConfigInputSchema,
   editInputSchema: editAnomalySwimlaneConfigInputSchema,
+  // Both swim lane variants share the same panel-level keys.
+  writablePanelKeys: getPanelLevelKeysIn(anomalySwimlaneOverallConfigSchema.shape),
 });
 
 // ─── Single Metric Viewer ─────────────────────────────────────────────────────
@@ -165,4 +169,5 @@ export const singleMetricViewerPanelKind = defineConfigPanelKind({
   label: 'single metric viewer',
   addInputSchema: singleMetricViewerConfigInputSchema,
   editInputSchema: editSingleMetricViewerConfigInputSchema,
+  writablePanelKeys: getPanelLevelKeysIn(singleMetricViewerConfigSchema.shape),
 });

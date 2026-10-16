@@ -1856,7 +1856,7 @@ describe('executeDashboardOperations', () => {
         expect(panel.config).toEqual({ ...panelSettings, type: 'metric', metrics });
       });
 
-      it('keeps Vega panel settings', async () => {
+      it('keeps Vega panel settings and the description Vega does not write', async () => {
         const panel = await editPanel(
           {
             id: 'vega-1',
@@ -1873,12 +1873,13 @@ describe('executeDashboardOperations', () => {
 
         expect(panel.config).toEqual({
           ...panelSettings,
+          description: displayText.description,
           spec: '{"mark":"line"}',
           title: 'Requests over time',
         });
       });
 
-      it('keeps custom content panel settings', async () => {
+      it('keeps custom content panel settings and display text', async () => {
         const panel = await editPanel(
           {
             id: 'cc-1',
@@ -1893,7 +1894,11 @@ describe('executeDashboardOperations', () => {
           })
         );
 
-        expect(panel.config).toEqual({ ...panelSettings, template: '<div>New</div>' });
+        expect(panel.config).toEqual({
+          ...panelSettings,
+          ...displayText,
+          template: '<div>New</div>',
+        });
       });
     });
 

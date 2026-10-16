@@ -9,8 +9,6 @@ export { dashboardOperationSchema, executeDashboardOperations } from './src/oper
 
 export { getErrorMessage, hasValidCreateMetadataOperations } from './src/utils';
 
-export { PANEL_SETTINGS_KEYS } from './src/panel_settings';
-
 export { createPanelFailureResult } from './src/resolve_panel';
 export type {
   InlinePanelOperationType,
@@ -18,7 +16,7 @@ export type {
   PanelContentAttempt,
 } from './src/resolve_panel';
 
-export { getRendererEmbeddableType } from './src/operations/panels';
+export { getPreservedPanelKeys, getRendererEmbeddableType } from './src/operations/panels';
 export type {
   CustomContentPanelAddRequest,
   CustomContentPanelEditRequest,

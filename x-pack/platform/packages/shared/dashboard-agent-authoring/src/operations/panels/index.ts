@@ -18,6 +18,7 @@ import {
   singleMetricViewerPanelKind,
 } from './ml_panels';
 import { attachmentPanelInputSchema } from './attachment_source';
+import { PANEL_LEVEL_KEYS, type PanelLevelKey } from '../../panel_settings';
 
 /**
  * Panel kind registry.
@@ -202,6 +203,18 @@ export const getRendererEmbeddableType = (renderer: PanelRenderer): string => {
     throw new Error(`Panel renderer "${renderer}" is not registered.`);
   }
   return kind.embeddableType;
+};
+
+/**
+ * Panel-level keys an edit keeps from the existing panel: the ones the panel's kind does not write.
+ * Panel types without a kind cannot be edited, so they keep every panel-level key.
+ */
+export const getPreservedPanelKeys = (embeddableType: string): readonly PanelLevelKey[] => {
+  const writablePanelKeys =
+    [...REQUEST_PANEL_KINDS, ...CONFIG_PANEL_KINDS].find(
+      (kind) => kind.embeddableType === embeddableType
+    )?.writablePanelKeys ?? [];
+  return PANEL_LEVEL_KEYS.filter((key) => !writablePanelKeys.includes(key));
 };
 
 /** Finds the renderer whose panels are stored as the given embeddable type, if any. */

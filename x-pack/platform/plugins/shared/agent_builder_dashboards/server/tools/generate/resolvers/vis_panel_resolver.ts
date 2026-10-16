@@ -20,7 +20,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
   createPanelFailureResult,
   getErrorMessage,
-  PANEL_SETTINGS_KEYS,
+  getPreservedPanelKeys,
   type PanelContentAttempt,
   type VisPanelResolutionRequest,
 } from '@kbn/dashboard-agent-authoring';
@@ -104,9 +104,12 @@ export const createVisPanelResolver = ({
         };
       }
 
-      // The Lens chart schema can't express panel settings; `edit_panels` carries them over.
+      // The Lens chart schema can't express these panel-level keys; `edit_panels` keeps them.
       const existingConfig = existingPanel
-        ? (omit(existingPanel.config, PANEL_SETTINGS_KEYS) as VisualizationConfig)
+        ? (omit(
+            existingPanel.config,
+            getPreservedPanelKeys(LENS_EMBEDDABLE_TYPE)
+          ) as VisualizationConfig)
         : undefined;
 
       const result = await buildLensConfig({

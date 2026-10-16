@@ -7,6 +7,7 @@
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
+import type { PanelLevelKey } from '../../panel_settings';
 
 /** The `sectionId` that `add_panels` items carry on top of a new-panel input. */
 export const sectionIdField = z
@@ -28,6 +29,11 @@ interface PanelKindBase {
   readonly addPanelsInputSchema: z.ZodObject;
   /** Input that edits an existing panel of this kind by id (`edit_panels` items). */
   readonly editInputSchema: z.ZodObject;
+  /**
+   * Panel-level keys (title, hide_title, drilldowns, ...) an edit of this kind writes. Edits keep
+   * the existing panel's other panel-level keys, so a kind that writes a key may drop it on purpose.
+   */
+  readonly writablePanelKeys: readonly PanelLevelKey[];
 }
 
 /** A panel kind the agent authors by value (`source: 'config'`), discriminated by `type`. Declare with `defineConfigPanelKind`. */
@@ -67,6 +73,7 @@ export const defineConfigPanelKind = <
   label: string;
   addInputSchema: z.ZodObject<AddShape>;
   editInputSchema: z.ZodObject<EditShape>;
+  writablePanelKeys: readonly PanelLevelKey[];
   toEmbeddableConfig?: ConfigPanelKind['toEmbeddableConfig'];
 }) =>
   ({
@@ -99,6 +106,7 @@ export const defineRequestPanelKind = <
   label: string;
   addInputSchema: z.ZodObject<AddShape>;
   editInputSchema: z.ZodObject<EditShape>;
+  writablePanelKeys: readonly PanelLevelKey[];
 }) =>
   ({
     source: 'request',

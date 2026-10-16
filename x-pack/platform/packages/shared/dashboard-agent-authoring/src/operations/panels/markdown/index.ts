@@ -8,6 +8,7 @@
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import { MARKDOWN_EMBEDDABLE_TYPE, markdownStateSchema } from '@kbn/dashboard-markdown-schemas';
 import { z } from '@kbn/zod/v4';
+import { getPanelLevelKeysIn } from '../../../panel_settings';
 import { defineConfigPanelKind } from '../panel_kind';
 
 /**
@@ -54,4 +55,5 @@ export const markdownPanelKind = defineConfigPanelKind({
   label: 'markdown',
   addInputSchema: markdownPanelConfigInputSchema,
   editInputSchema: editMarkdownPanelConfigInputSchema,
+  writablePanelKeys: getPanelLevelKeysIn(markdownPanelConfigSchema.shape),
 });

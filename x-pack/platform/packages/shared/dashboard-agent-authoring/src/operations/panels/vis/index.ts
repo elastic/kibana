@@ -147,6 +147,8 @@ export const lensPanelKind = defineRequestPanelKind({
   label: 'Lens',
   addInputSchema: lensPanelRequestSchema,
   editInputSchema: lensEditPanelRequestSchema,
+  // Lens owns its display text: chart rules leave some titles out on purpose.
+  writablePanelKeys: ['title', 'description'],
 });
 
 export const vegaPanelKind = defineRequestPanelKind({
@@ -155,4 +157,5 @@ export const vegaPanelKind = defineRequestPanelKind({
   label: 'Vega',
   addInputSchema: vegaPanelRequestSchema,
   editInputSchema: vegaEditPanelRequestSchema,
+  writablePanelKeys: ['title'],
 });
