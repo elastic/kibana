@@ -21,6 +21,7 @@ describe('registerEndpointWorkflowSteps (server)', () => {
     experimentalFeatures: {
       automaticTroubleshootingUniversalSkill,
     },
+    analytics: { reportEvent: jest.fn() },
     getInternalEsClient: jest.fn(),
     endpointAppContextService: {
       getEndpointMetadataService: jest.fn(),
@@ -40,7 +41,7 @@ describe('registerEndpointWorkflowSteps (server)', () => {
 
     registerEndpointWorkflowSteps(workflowsExtensions, createDeps(true));
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(6);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(7);
     const registeredIds = workflowsExtensions.registerStepDefinition.mock.calls.map(([stepDef]) => {
       if (typeof stepDef === 'function') {
         throw new Error('expected a step definition');
@@ -54,6 +55,7 @@ describe('registerEndpointWorkflowSteps (server)', () => {
       'security.getEndpointHostDiagnostics',
       'security.getEndpointPackageStatus',
       'security.getEndpointInventoryCounts',
+      'security.finalizeTroubleshootingDiagnosis',
     ]);
   });
 });

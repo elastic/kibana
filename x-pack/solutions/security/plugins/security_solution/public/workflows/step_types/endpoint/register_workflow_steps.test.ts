@@ -12,6 +12,7 @@ import {
   type RegisterEndpointWorkflowStepsDeps,
 } from './register_workflow_steps';
 import {
+  finalizeTroubleshootingDiagnosisPublicStepDefinition,
   findEndpointArtifactsPublicStepDefinition,
   getEndpointHostDiagnosticsPublicStepDefinition,
   getEndpointInventoryCountsPublicStepDefinition,
@@ -46,8 +47,8 @@ describe('registerEndpointWorkflowSteps (public)', () => {
 
     registerEndpointWorkflowSteps(workflowsExtensions, createDeps(true));
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(6);
-    const [loader1, loader2, loader3, loader4, loader5, loader6] =
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(7);
+    const [loader1, loader2, loader3, loader4, loader5, loader6, loader7] =
       workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => arg as StepLoader);
 
     await expect(loader1()).resolves.toBe(findEndpointArtifactsPublicStepDefinition);
@@ -56,5 +57,6 @@ describe('registerEndpointWorkflowSteps (public)', () => {
     await expect(loader4()).resolves.toBe(getEndpointHostDiagnosticsPublicStepDefinition);
     await expect(loader5()).resolves.toBe(getEndpointPackageStatusPublicStepDefinition);
     await expect(loader6()).resolves.toBe(getEndpointInventoryCountsPublicStepDefinition);
+    await expect(loader7()).resolves.toBe(finalizeTroubleshootingDiagnosisPublicStepDefinition);
   });
 });

@@ -14,6 +14,7 @@ import {
   resolveEndpointHostsStepCommonDefinition,
 } from '../../../../common/workflows/step_types/endpoint/hosts';
 import { getEndpointPackageStatusStepCommonDefinition } from '../../../../common/workflows/step_types/endpoint/package';
+import { finalizeTroubleshootingDiagnosisStepCommonDefinition } from '../../../../common/workflows/step_types/endpoint/configuration_troubleshooting';
 
 export const findEndpointArtifactsPublicStepDefinition = createPublicStepDefinition({
   ...findEndpointArtifactsStepCommonDefinition,
@@ -37,4 +38,8 @@ export const getEndpointPackageStatusPublicStepDefinition = createPublicStepDefi
 
 export const getEndpointInventoryCountsPublicStepDefinition = createPublicStepDefinition({
   ...getEndpointInventoryCountsStepCommonDefinition,
+});
+
+export const finalizeTroubleshootingDiagnosisPublicStepDefinition = createPublicStepDefinition({
+  ...finalizeTroubleshootingDiagnosisStepCommonDefinition,
 });
