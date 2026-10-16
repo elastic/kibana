@@ -595,34 +595,6 @@ Safety properties (all covered by tests):
   own errors (scheduling failures are logged, never propagated), so it
   can never fail or retry the migration task.
 
-### Backfill generations
-
-When a fix lands for a write path that changed case SOs without bumping
-`attributes.updated_at`, docs written before the fix stay stale: the
-incremental cursor never revisits those cases. Bumping
-`CASES_BACKFILL_GENERATION` (`reconciliation/index.ts`) repairs them with one
-full reset after upgrade. Prefer a targeted one-time task (like the
-incremental id backfill below) when the affected docs can be found directly;
-a full reset walks every case, activity, and attachment doc.
-
-The reconciliation task persists the last generation it satisfied as
-`cases_backfill_generation` in its state; a missing value counts as the
-baseline `0`. On a tick where the persisted value is behind the constant and a
-cases cursor exists, the tick schedules the `cases.analyticsV2.fullReset` task
-(same reasoning as the templates coupling above) and stamps the new
-generation. If the cursor is unset, the tick's own walk is already full, so it
-stamps the generation without scheduling a reset. Every reset seeds the
-current generation into the reconciliation state, so a reset never triggers
-another one, and `POST /reset` also satisfies a pending generation.
-
-After upgrading to a release that bumps the generation, expect one
-`/state.active_reset` entry. The reset task upserts docs in place; it does not
-drop indices or data views (only the `POST /reset` route does that).
-
-| Generation | Repairs |
-| ---------- | ------- |
-| 0 | Baseline, nothing pending |
-
 ### Incremental id backfill (9.6)
 
 Before 9.6, the incremental-id task numbered cases with a raw SO update that

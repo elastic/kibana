@@ -275,16 +275,14 @@ export class CasesAnalyticsV2Service {
         // `start()` has populated `internalSavedObjectsClient`
         // (unlikely; Task Manager waits for start), throwing here gets
         // logged and retried on the next tick.
-        if (this.internalSavedObjectsClient == null || this.taskManager == null) {
+        if (this.internalSavedObjectsClient == null) {
           throw new Error('cases-analyticsV2: reconciliation fired before service start completed');
         }
-        const taskManager = this.taskManager;
         return {
           savedObjectsClient: this.internalSavedObjectsClient,
           writer: this.writerProxy,
           activityWriter: this.activityWriterProxy,
           attachmentsWriter: this.attachmentsWriterProxy,
-          scheduleFullReset: () => scheduleResetTask({ taskManager, logger: this.logger }),
         };
       },
     });
