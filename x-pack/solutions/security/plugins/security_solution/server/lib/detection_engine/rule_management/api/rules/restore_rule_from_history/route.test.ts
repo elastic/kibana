@@ -6,6 +6,7 @@
  */
 
 import { withSpan } from '@kbn/apm-utils';
+import { RuleChangeTrackingDisabledError } from '@kbn/alerting-plugin/server';
 import { requestMock, requestContextMock, serverMock } from '../../../../routes/__mocks__';
 import type {
   MockClients,
@@ -104,6 +105,26 @@ describe('Restore rule from history route', () => {
       })
     );
     expect(result.badRequest).toHaveBeenCalled();
+  });
+
+  test('returns 403 when the alerting plugin has not registered change tracking for this scope', async () => {
+    clients.detectionRulesClient.restoreRuleFromHistory.mockImplementationOnce(async () => {
+      throw new RuleChangeTrackingDisabledError(
+        'Rule change tracking is not enabled for [security, alerting-rules]'
+      );
+    });
+
+    const response = await server.inject(
+      buildRestoreRequest({
+        params: {
+          ruleId: '6399a03a-9ec2-4c42-8e2a-9e622683cfcd',
+          changeId: '7b3e4f52-1a2b-4c5d-8e9f-0a1b2c3d4e5f',
+        },
+      }),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(403);
   });
 
   test('catches errors thrown by the detection rules client', async () => {

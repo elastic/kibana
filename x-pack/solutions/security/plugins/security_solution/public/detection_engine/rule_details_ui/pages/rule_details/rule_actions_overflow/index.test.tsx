@@ -21,7 +21,6 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 const showBulkDuplicateExceptionsConfirmation = () => Promise.resolve(null);
 const showManualRuleRunConfirmation = () => Promise.resolve(null);
 
-jest.mock('../../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../rule_management/logic/bulk_actions/use_execute_bulk_action');
 jest.mock('../../../../rule_management/logic/bulk_actions/use_bulk_export');
 jest.mock(
