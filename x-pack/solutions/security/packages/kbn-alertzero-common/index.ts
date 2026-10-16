@@ -174,6 +174,7 @@ export {
   CandidateSkipReason,
   HuntCoordinatorRequestBody,
   HuntCoordinatorResponse,
+  HuntCoordinatorResult,
   HuntCoordinatorStatus,
   FindOrCreateInvestigationRequestBody,
   FindOrCreateInvestigationResponse,
