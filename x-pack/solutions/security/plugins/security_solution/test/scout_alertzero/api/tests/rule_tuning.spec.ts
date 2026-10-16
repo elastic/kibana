@@ -44,6 +44,8 @@ const ENTRY_PROPOSAL_TITLE = 'Review rule for tuning';
 const FP_HOST = 'srv-files-02';
 const FP_USER = 'svc-backup';
 const TP_USER = 'matt.hart';
+const FP_MESSAGE = `${FP_USER} backup job flagged again`;
+const TP_MESSAGE = `${TP_USER} interactive access flagged`;
 const FP_COUNT = 12;
 const OPEN_COUNT = 9;
 const TOTAL_COUNT = FP_COUNT + OPEN_COUNT;
@@ -219,9 +221,7 @@ const seedNoisyRule = async (adminApi: AlertZeroApi, esClient: EsClient): Promis
     'kibana.alert.workflow_tags': [],
     'kibana.alert.severity': 'low',
     'kibana.alert.status': closed ? 'closed' : 'active',
-    message: closed
-      ? `${FP_USER} backup job flagged again`
-      : `${TP_USER} interactive access flagged`,
+    message: closed ? FP_MESSAGE : TP_MESSAGE,
   });
   const documents = [
     ...Array.from({ length: FP_COUNT }, (_, i) => alertDoc(true, i)),
@@ -437,7 +437,10 @@ const seedControlEvents = async (
     process: { name: marker },
     host: { name: FP_HOST },
     user: { name: user },
-    message: `${user} accessed files`,
+    // The same message the seeded alerts of this user carry: the tuning proposal is model-written
+    // and may scope the exception on `message` too, so the control events have to look like the
+    // seeded false positive and true positive, not like a third kind of event.
+    message: user === FP_USER ? FP_MESSAGE : TP_MESSAGE,
   });
   // Keyword mappings: with dynamic text mappings `svc-backup` is analysed into two tokens and a
   // term filter on it would match nothing, which would make the control's ground truth lie.
@@ -651,31 +654,6 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
     }
   );
 
-  // security-team#19992, fixed in d4993a212: the review's rate used to render the raw float
-  // (57.142857142857146%). The test seeds and sweeps on its own, so a worker restart after a red
-  // test above does not break it, and it stops before the diagnosis: reading the entry proposal's
-  // own text costs no model call.
-  apiTest(
-    'renders the false-positive rate rounded (security-team#19992)',
-    async ({ apiClient, samlAuth, esClient }) => {
-      apiTest.setTimeout(testData.PROPOSAL_TIMEOUT_MS + 2 * testData.ACTION_TIMEOUT_MS);
-      const adminApi = await getAdminApi(apiClient, samlAuth);
-      api = adminApi;
-      esClientRef = esClient;
-
-      const rule = await seedNoisyRule(adminApi, esClient);
-      const startedAt = new Date().toISOString();
-      const sweepExecutionId = await runTuningSweep(adminApi);
-      const entryProposal = await waitForEntryProposal(adminApi, rule, startedAt, sweepExecutionId);
-
-      assertFpRateRendersRounded(entryProposal.comment);
-
-      // Settling the review is what closes it without a diagnosis: declining marks its alerts
-      // reviewed and ends the run, so no model call and no second proposal is left behind.
-      await dismissTuningProposal(adminApi, entryProposal);
-    }
-  );
-
   apiTest(
     'keeps alerting on a true positive from another user after the tuning',
     async ({ apiClient, samlAuth, esClient }) => {
@@ -720,12 +698,40 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
       const alerts = await readControlAlerts(esClient, rule, marker);
       const fromFpUser = alerts.filter((alert) => alertUserName(alert) === FP_USER);
       if (fromFpUser.length > 0) {
+        const persisted = (await readRuleExceptionItems(adminApi, rule)).map((item) => item.entries);
         throw new Error(
           `the exception did not exclude the ${FP_USER} false positive on ${FP_HOST}: ${JSON.stringify(
             fromFpUser.slice(0, 3)
-          )}`
+          )}; persisted exception entries: ${JSON.stringify(persisted)}`
         );
       }
+    }
+  );
+
+  // Last on purpose: it seeds and sweeps on its own, so a red here (which restarts the Playwright
+  // worker) cannot take the control above down with it, which needs the first test's module state.
+  // security-team#19992, fixed in d4993a212: the review's rate used to render the raw float
+  // (57.142857142857146%). The test seeds and sweeps on its own, so a worker restart after a red
+  // test above does not break it, and it stops before the diagnosis: reading the entry proposal's
+  // own text costs no model call.
+  apiTest(
+    'renders the false-positive rate rounded (security-team#19992)',
+    async ({ apiClient, samlAuth, esClient }) => {
+      apiTest.setTimeout(testData.PROPOSAL_TIMEOUT_MS + 2 * testData.ACTION_TIMEOUT_MS);
+      const adminApi = await getAdminApi(apiClient, samlAuth);
+      api = adminApi;
+      esClientRef = esClient;
+
+      const rule = await seedNoisyRule(adminApi, esClient);
+      const startedAt = new Date().toISOString();
+      const sweepExecutionId = await runTuningSweep(adminApi);
+      const entryProposal = await waitForEntryProposal(adminApi, rule, startedAt, sweepExecutionId);
+
+      assertFpRateRendersRounded(entryProposal.comment);
+
+      // Settling the review is what closes it without a diagnosis: declining marks its alerts
+      // reviewed and ends the run, so no model call and no second proposal is left behind.
+      await dismissTuningProposal(adminApi, entryProposal);
     }
   );
 });
