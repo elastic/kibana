@@ -1110,7 +1110,8 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
     models_count: {
       type: 'integer',
       _meta: {
-        description: 'Number of distinct models that served the LLM calls of this round',
+        description:
+          'Number of distinct models in `models` (not the number of connectors: connectors serving the same model count once)',
         optional: true,
       },
     },
@@ -1326,7 +1327,8 @@ const EXECUTION_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
     models_count: {
       type: 'integer',
       _meta: {
-        description: 'Number of distinct models that served the LLM calls of this execution',
+        description:
+          'Number of distinct models in `models` (not the number of connectors: connectors serving the same model count once)',
         optional: true,
       },
     },
