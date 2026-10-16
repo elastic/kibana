@@ -31,6 +31,22 @@
       ]
     },
     {
+      "id": "agent-builder-regression",
+      "name": "Agent Builder Regression",
+      "slackChannel": "#agent-builder-alerts",
+      "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/regression.playwright.config.ts",
+      "serverConfigSet": "evals_agent_builder",
+      "description": "Fixed regression datasets run per-PR to detect cost/speed/quality regressions (elastic/search-team#16080).",
+      "tags": [
+        "platform",
+        "agent-builder",
+        "regression"
+      ],
+      "ciLabels": [
+        "evals:agent-builder-regression"
+      ]
+    },
+    {
       "id": "ml",
       "name": "ML Agent Builder Skills",
       "slackChannel": "#agent-builder-alerts",
