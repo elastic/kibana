@@ -16,6 +16,7 @@ import { fetchEsqlData } from './fetch_esql_data';
 import { fillTemplate } from './fill_template';
 import { sanitizeHtml, applyHtmlTheme } from './prepare_html';
 import type { CustomContentRendererServices } from './types';
+import { getLinkBasePath } from './internal_link';
 
 const RENDER_ERROR_MESSAGE = i18n.translate('xpack.customContent.renderError', {
   defaultMessage: 'Failed to render panel. Try refreshing or rephrasing the request.',
@@ -35,6 +36,7 @@ export interface UseCustomContentHtmlParams {
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
   esqlVariables: ESQLControlVariable[] | undefined;
+  isInteractive: boolean;
   setApproximationApplied?: (approximationApplied: boolean | undefined) => void;
 }
 
@@ -59,9 +61,10 @@ export function useCustomContentHtml({
   query,
   filters,
   esqlVariables,
+  isInteractive,
   setApproximationApplied,
 }: UseCustomContentHtmlParams): UseCustomContentHtmlResult {
-  const [processedHtml, setProcessedHtml] = useState('');
+  const [filledHtml, setFilledHtml] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
@@ -70,7 +73,7 @@ export function useCustomContentHtml({
 
   useEffect(() => {
     if (trimmedTemplate && !esqlQuery) {
-      setProcessedHtml(sanitizeHtml(stripMarkdownFences(trimmedTemplate)));
+      setFilledHtml(stripMarkdownFences(trimmedTemplate));
       setIsLoading(false);
       setError(undefined);
       return;
@@ -97,7 +100,7 @@ export function useCustomContentHtml({
         })
         .then((rawHtml) => {
           if (controller.signal.aborted) return;
-          setProcessedHtml(sanitizeHtml(rawHtml));
+          setFilledHtml(rawHtml);
           setIsLoading(false);
         })
         .catch((err: Error) => {
@@ -111,7 +114,7 @@ export function useCustomContentHtml({
     }
 
     setApproximationApplied?.(undefined);
-    setProcessedHtml('');
+    setFilledHtml('');
     setError(undefined);
     setIsLoading(false);
   }, [
@@ -132,8 +135,15 @@ export function useCustomContentHtml({
   ]);
 
   const html = useMemo(
-    () => (processedHtml ? applyHtmlTheme(processedHtml, colorMode, euiTheme) : ''),
-    [processedHtml, colorMode, euiTheme]
+    () =>
+      filledHtml
+        ? applyHtmlTheme(
+            sanitizeHtml(filledHtml, getLinkBasePath(http), isInteractive),
+            colorMode,
+            euiTheme
+          )
+        : '',
+    [filledHtml, http, isInteractive, colorMode, euiTheme]
   );
 
   return { html, isLoading, error, noContent: !trimmedTemplate };

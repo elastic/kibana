@@ -81,6 +81,7 @@ export {
   type CompactionStep,
   type ToolCallProgress,
   type RoundModelUsageStats,
+  type ConnectorModelUsageStats,
   ZERO_MODEL_USAGE,
   isZeroModelUsage,
   type CompactionSummary,

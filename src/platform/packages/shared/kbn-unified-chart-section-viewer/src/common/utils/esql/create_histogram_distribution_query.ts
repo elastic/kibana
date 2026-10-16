@@ -13,6 +13,7 @@ import { firstNonNullable } from '../first_null_nullable';
 import { isHistogramMetric, isLegacyHistogram } from '../histogram_metric';
 import { createTimeBucketAggregation } from './create_aggregation';
 import { fieldNameToColumn, resolveSource } from './helpers';
+import { needsUnmappedFieldsNullify } from './needs_unmapped_fields_nullify';
 
 export const HISTOGRAM_BUCKET_COUNT = 10;
 export const HISTOGRAM_COUNT_COLUMN = 'count';
@@ -53,15 +54,18 @@ export const createHistogramDistributionQuery = ({
 
   const index = resolveSource(originalSource, metricItem.indexName);
   const query = esql.ts(index);
-  // User applied filters may reference a field the metric stream lacks of, so NULLIFY prevents throwing exceptions.
-  // TODO(https://github.com/elastic/kibana/issues/291132): add only when a WHERE references an unmapped field.
-  query.addSetCommand('unmapped_fields', 'NULLIFY');
+  const trimmedWhere = whereStatements
+    .map((statement) => statement.trim())
+    .filter((statement) => statement.length > 0);
 
-  for (const statement of whereStatements) {
-    const trimmed = statement.trim();
-    if (trimmed.length > 0) {
-      query.pipe(`WHERE ${trimmed}`);
-    }
+  // `metrics_info` guarantees the metric field is mapped. NULLIFY is only needed
+  // when WHERE can name a column this stream may not map.
+  if (needsUnmappedFieldsNullify({ whereStatements: trimmedWhere })) {
+    query.addSetCommand('unmapped_fields', 'NULLIFY');
+  }
+
+  for (const statement of trimmedWhere) {
+    query.pipe(`WHERE ${statement}`);
   }
 
   const timeBucket = createTimeBucketAggregation({});
