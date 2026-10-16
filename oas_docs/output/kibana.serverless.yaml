@@ -3,14 +3,14 @@ info:
   contact:
     name: Kibana Team
   description: |
-    The Kibana REST APIs for Elastic serverless enable you to manage resources
+    The Kibana REST API for Elastic serverless enables you to manage resources
     such as connectors, data views, and saved objects. The API calls are
     stateless. Each request that you make happens in isolation from other calls
     and must include all of the necessary information for Kibana to fulfill the
     request. API requests return JSON output, which is a format that is
     machine-readable and works well for automation.
 
-    To interact with Kibana APIs, use the following operations:
+    To interact with the Kibana API, use the following operations:
 
     - GET: Fetches the information.
     - POST: Adds new information.
@@ -28,7 +28,7 @@ info:
 
     This documentation is derived from the `main` branch of the [kibana](https://github.com/elastic/kibana) repository.
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
-  title: Kibana Serverless APIs
+  title: Kibana Serverless API
   version: ''
   x-doc-license:
     name: Attribution-NonCommercial-NoDerivatives 4.0 International
@@ -48,7 +48,7 @@ tags:
     description: |
       Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
 
-      Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs. Follow the [Agent Builder API tutorial](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-api-tutorial) for a guided example.
+      Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using the Kibana API. Follow the [Agent Builder API tutorial](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-api-tutorial) for a guided example.
     externalDocs:
       description: Agent Builder docs
       url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access
@@ -950,7 +950,14 @@ paths:
 
         List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-agents
-      parameters: []
+      parameters:
+        - description: When true, hidden agents (such as built-in system agents) are included in the response.
+          in: query
+          name: include_hidden
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:
@@ -974,6 +981,7 @@ paths:
                         permissions:
                           update_access_control: false
                           update_agent: false
+                          update_approvals: false
                         type: chat
                       - access_control:
                           access_mode: private
@@ -1000,6 +1008,7 @@ paths:
                         permissions:
                           update_access_control: true
                           update_agent: true
+                          update_approvals: true
                         type: chat
           description: Indicates a successful response
       summary: List agents
@@ -1096,6 +1105,31 @@ paths:
                         type: string
                       maxItems: 100
                       type: array
+                    approvals:
+                      additionalProperties: false
+                      description: Auto-approval defaults applied to every run of this agent.
+                      type: object
+                      properties:
+                        auto_approved_apis:
+                          additionalProperties: false
+                          description: Destructive Elasticsearch or Kibana APIs this agent may call without a user confirmation, keyed by backend.
+                          type: object
+                          properties:
+                            elasticsearch:
+                              description: Elasticsearch APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `indices.create`), a namespace wildcard (for example `indices.*`), or `*` for every Elasticsearch API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                            kibana:
+                              description: Kibana APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `alerting.delete-alerting-rule-id`), a namespace wildcard (for example `alerting.*`), or `*` for every Kibana API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                      x-state: Generally available
                     connector_ids:
                       description: Array of connector IDs to associate with the agent.
                       items:
@@ -1528,6 +1562,7 @@ paths:
                     permissions:
                       update_access_control: true
                       update_agent: true
+                      update_approvals: true
                     type: chat
           description: Indicates a successful response
       summary: Get an agent by ID
@@ -1631,6 +1666,31 @@ paths:
                         type: string
                       maxItems: 100
                       type: array
+                    approvals:
+                      additionalProperties: false
+                      description: Auto-approval defaults applied to every run of this agent.
+                      type: object
+                      properties:
+                        auto_approved_apis:
+                          additionalProperties: false
+                          description: Destructive Elasticsearch or Kibana APIs this agent may call without a user confirmation, keyed by backend.
+                          type: object
+                          properties:
+                            elasticsearch:
+                              description: Elasticsearch APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `indices.create`), a namespace wildcard (for example `indices.*`), or `*` for every Elasticsearch API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                            kibana:
+                              description: Kibana APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `alerting.delete-alerting-rule-id`), a namespace wildcard (for example `alerting.*`), or `*` for every Kibana API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                      x-state: Generally available
                     connector_ids:
                       description: Array of connector IDs to associate with the agent.
                       items:
@@ -20693,7 +20753,9 @@ paths:
                         - full_name
                         - username
                     customFields:
-                      description: Custom fields configuration details.
+                      deprecated: true
+                      description: |
+                        Custom fields configuration details. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
                       items:
                         type: object
                         properties:
@@ -20902,7 +20964,9 @@ paths:
                       - full_name
                       - username
                   customFields:
-                    description: Custom fields configuration details.
+                    deprecated: true
+                    description: |
+                      Custom fields configuration details. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
                     items:
                       type: object
                       properties:
@@ -21112,7 +21176,9 @@ paths:
                       - full_name
                       - username
                   customFields:
-                    description: Custom fields configuration details.
+                    deprecated: true
+                    description: |
+                      Custom fields configuration details. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
                     items:
                       type: object
                       properties:
@@ -28643,7 +28709,7 @@ paths:
         - The `Content-Type: multipart/form-data` HTTP header.
         - A link to the `.ndjson` file containing the rules.
         > warn
-        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the created or updated rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
         > info
@@ -28657,7 +28723,7 @@ paths:
         > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ImportRules
       parameters:
-        - description: Determines whether existing rules with the same `rule_id` are overwritten.
+        - description: Determines whether existing rules with the same `rule_id` are overwritten. If an imported rule matches the existing rule's settings, including whether it's enabled, the existing rule isn't updated. It keeps its `revision`, `updated_at` timestamp, and API key, and is counted in `rules_summary.skipped`.
           in: query
           name: overwrite
           required: false
@@ -28714,6 +28780,11 @@ paths:
                     exceptions_success: true
                     exceptions_success_count: 0
                     rules_count: 1
+                    rules_summary:
+                      created: 1
+                      failed: 0
+                      skipped: 0
+                      updated: 0
                     success: true
                     success_count: 1
               schema:
@@ -28749,6 +28820,32 @@ paths:
                   rules_count:
                     minimum: 0
                     type: integer
+                  rules_summary:
+                    additionalProperties: false
+                    description: Counts of imported rules by outcome. `created`, `updated`, and `skipped` are included in `success_count`. `failed` did not import successfully.
+                    type: object
+                    properties:
+                      created:
+                        description: Rules created by this import.
+                        minimum: 0
+                        type: integer
+                      failed:
+                        description: Rules that did not import successfully.
+                        minimum: 0
+                        type: integer
+                      skipped:
+                        description: Existing rules skipped because nothing changed. Included in `success_count`.
+                        minimum: 0
+                        type: integer
+                      updated:
+                        description: Existing rules overwritten because the payload changed.
+                        minimum: 0
+                        type: integer
+                    required:
+                      - created
+                      - updated
+                      - skipped
+                      - failed
                   success:
                     type: boolean
                   success_count:
@@ -28761,6 +28858,7 @@ paths:
                   - rules_count
                   - success
                   - success_count
+                  - rules_summary
                   - errors
                   - action_connectors_errors
                   - action_connectors_warnings
@@ -46518,6 +46616,19 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            serviceIds:
+                              description: Service IDs active when the stack was last launched or updated.
+                              items:
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            stackArn:
+                              description: CloudFormation stack ARN pasted by the user post-launch.
+                              maxLength: 2048
+                              minLength: 1
+                              type: string
                             stackName:
                               description: CloudFormation stack name (128-char AWS limit).
                               maxLength: 128
@@ -46852,6 +46963,19 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            serviceIds:
+                              description: Service IDs active when the stack was last launched or updated.
+                              items:
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            stackArn:
+                              description: CloudFormation stack ARN pasted by the user post-launch.
+                              maxLength: 2048
+                              minLength: 1
+                              type: string
                             stackName:
                               description: CloudFormation stack name (128-char AWS limit).
                               maxLength: 128
@@ -47079,6 +47203,19 @@ paths:
                           - otel
                           - crowdstrike
                         type: string
+                      serviceIds:
+                        description: Service IDs active when the stack was last launched or updated.
+                        items:
+                          maxLength: 128
+                          minLength: 1
+                          type: string
+                        maxItems: 1000
+                        type: array
+                      stackArn:
+                        description: CloudFormation stack ARN pasted by the user post-launch.
+                        maxLength: 2048
+                        minLength: 1
+                        type: string
                       stackName:
                         description: CloudFormation stack name (128-char AWS limit).
                         maxLength: 128
@@ -47232,6 +47369,19 @@ paths:
                                 - unified
                                 - otel
                                 - crowdstrike
+                              type: string
+                            serviceIds:
+                              description: Service IDs active when the stack was last launched or updated.
+                              items:
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            stackArn:
+                              description: CloudFormation stack ARN pasted by the user post-launch.
+                              maxLength: 2048
+                              minLength: 1
                               type: string
                             stackName:
                               description: CloudFormation stack name (128-char AWS limit).
@@ -47493,6 +47643,19 @@ paths:
                                   - unified
                                   - otel
                                   - crowdstrike
+                                type: string
+                              serviceIds:
+                                description: Service IDs active when the stack was last launched or updated.
+                                items:
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                                maxItems: 1000
+                                type: array
+                              stackArn:
+                                description: CloudFormation stack ARN pasted by the user post-launch.
+                                maxLength: 2048
+                                minLength: 1
                                 type: string
                               stackName:
                                 description: CloudFormation stack name (128-char AWS limit).
@@ -67917,7 +68080,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update the Entity Store configuration without reinstalling. Send `logExtraction` to change log extraction settings. Omitting a log extraction field leaves it unchanged. Sending `null` for a log extraction field clears that override and reverts to the default. Send `historySnapshot.frequency` to change the snapshot interval (at least 1 hour) and `historySnapshot.retentionDays` to change how long snapshots are kept. Omitting either history snapshot field leaves it unchanged. At least one of `logExtraction` or `historySnapshot` is required.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Update the Entity Store configuration without reinstalling. Send `logExtraction` to change log extraction settings. Omitting a log extraction field leaves it unchanged. Sending `null` for a log extraction field clears that override and reverts to the entity type default (for `frequency`: 1m for `host` and `user`, 10m for `service`, 30m for `generic`). Send `historySnapshot.frequency` to change the snapshot interval (at least 1 hour) and `historySnapshot.retentionDays` to change how long snapshots are kept. Omitting either history snapshot field leaves it unchanged. At least one of `logExtraction`, `excludedUserNames` or `historySnapshot` is required.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: put-security-entity-store
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -67932,7 +68095,7 @@ paths:
           application/json:
             examples:
               clearLogExtractionOverrideExample:
-                description: Send null for any field to clear that override and revert it to the default value.
+                description: Send null for any field to clear that override and revert it to the entity type default. For frequency, that is 1m for host and user, 10m for service and 30m for generic.
                 summary: Clear log extraction overrides
                 value:
                   logExtraction:
@@ -76594,7 +76757,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Install the Entity Store and create engines for the specified entity types. A single `logExtraction` configuration is shared across all entity types. Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. Omitting a field leaves it unchanged. Sending `null` for a field clears that override and reverts to the default value. To change settings after install, use the update endpoint.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Install the Entity Store and create engines for the specified entity types. `logExtraction` sets overrides that apply to all entity types, on top of built-in defaults per entity type. The default `frequency` is 1m for `host` and `user`, 10m for `service` and 30m for `generic`. Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. Omitting a field leaves it unchanged. Sending `null` for a field clears that override and reverts to the entity type default. To change settings after install, use the update endpoint.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: post-security-entity-store-install
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -77355,7 +77518,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Get the overall Entity Store status and per-engine statuses, optionally including component-level health details. Each engine reports the log extraction settings that apply to its entity type.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: get-security-entity-store-status
       parameters:
         - description: If true, returns a detailed status of each engine including all its components.
@@ -77382,7 +77545,7 @@ paths:
                     engines: []
                     status: not_installed
                 runningStatusExample:
-                  description: The Entity Store is running with two started engines using default settings.
+                  description: The Entity Store is running with three started engines using default settings. Each engine reports the log extraction settings for its entity type, so the default frequency is 1m for host and user, and 10m for service.
                   summary: Entity Store running
                   value:
                     engines:
@@ -77391,17 +77554,18 @@ paths:
                         enrichPolicyExecutionInterval: null
                         fieldHistoryLength: 10
                         filter: ''
-                        frequency: 30s
+                        frequency: 1m
                         indexPattern: ''
                         lastExecutionTimestamp: '2026-04-10T08:30:00.000Z'
                         lookbackPeriod: 3h
-                        maxLogsPerPage: 40000
-                        maxLogsPerWindow: 500000
-                        maxLogsPerWindowCapBehavior: defer
+                        maxLogsPerPage: 50000
+                        maxLogsPerWindow: 100000
+                        maxLogsPerWindowCapBehavior: drop
                         maxPageSearchSize: 10000
                         maxTimeWindowSize: 15m
+                        nonPriority: null
                         status: started
-                        timeout: 25s
+                        timeout: 59s
                         timestampField: '@timestamp'
                         type: host
                       - delay: 1m
@@ -77409,24 +77573,53 @@ paths:
                         enrichPolicyExecutionInterval: null
                         fieldHistoryLength: 10
                         filter: ''
-                        frequency: 30s
+                        frequency: 1m
                         indexPattern: ''
                         lastExecutionTimestamp: '2026-04-10T08:30:00.000Z'
                         lookbackPeriod: 3h
-                        maxLogsPerPage: 40000
-                        maxLogsPerWindow: 500000
+                        maxLogsPerPage: 50000
+                        maxLogsPerWindow: 100000
                         maxLogsPerWindowCapBehavior: defer
                         maxPageSearchSize: 10000
                         maxTimeWindowSize: 15m
                         nonPriority:
+                          delay: 1m
                           error: null
+                          fieldHistoryLength: 10
+                          frequency: 1m
                           lastExecutionTimestamp: '2026-04-10T08:26:00.000Z'
+                          lookbackPeriod: 3h
+                          maxLogsPerPage: 50000
+                          maxLogsPerWindow: 100000
+                          maxLogsPerWindowCapBehavior: drop
+                          maxTimeWindowSize: 15m
                           samplingRate: null
                           status: started
+                          timeout: 59s
                         status: started
-                        timeout: 25s
+                        timeout: 59s
                         timestampField: '@timestamp'
                         type: user
+                      - delay: 1m
+                        docsPerSecond: -1
+                        enrichPolicyExecutionInterval: null
+                        fieldHistoryLength: 10
+                        filter: ''
+                        frequency: 10m
+                        indexPattern: ''
+                        lastExecutionTimestamp: '2026-04-10T08:30:00.000Z'
+                        lookbackPeriod: 3h
+                        maxLogsPerPage: 50000
+                        maxLogsPerWindow: 100000
+                        maxLogsPerWindowCapBehavior: drop
+                        maxPageSearchSize: 10000
+                        maxTimeWindowSize: 15m
+                        nonPriority: null
+                        status: started
+                        timeout: 59s
+                        timestampField: '@timestamp'
+                        type: service
+                    excludedUserNames: []
                     status: running
           description: Indicates a successful response.
       summary: Get Entity Store status
@@ -128938,7 +129131,7 @@ paths:
                   maxLength: 1000
                   type: string
                 include:
-                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_383___schema0'
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_56___schema0'
                 name:
                   maxLength: 256
                   type: string
@@ -140617,11 +140810,23 @@ components:
         maxLength: 30000
         type: string
       description: |
-        Case field values keyed by storage key. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`).
+        Case field values keyed by storage key (for example, `priority_as_keyword`). Keys are validated against the fields exposed by the case's active template and global field library. On update, provided keys are merged into the stored map; unlisted keys are left untouched. Template-linked fields require the `xpack.cases.templates.enabled` setting (enabled by default); global fields are always available. Use the get case fields API to discover valid keys.
+      example:
+        escalated_as_boolean: 'true'
+        priority_as_keyword: high
+        ticket_number_as_integer: '4287'
       maxProperties: 500
       title: Case extended fields
       type: object
       x-state: Technical preview; added in 9.5.0
+    Cases_case_extended_fields_labels:
+      additionalProperties:
+        type: string
+      description: |
+        A read-only, response-only map from active field definition storage keys to their human-readable labels. Entries reflect currently applicable global and template field definitions — not every stored `extended_fields` key is guaranteed a label, because values retained after switching templates may have no matching current definition. Only populated by the get case and search cases endpoints; absent on create, update, push, and comment responses. Including this field in a write request returns a 400 error.
+      example:
+        priority_as_keyword: Priority
+      type: object
     Cases_case_observable:
       description: A single observable attached to a case.
       properties:
@@ -140752,7 +140957,8 @@ components:
         created_by:
           $ref: '#/components/schemas/Cases_case_response_created_by_properties'
         customFields:
-          description: Custom field values for the case.
+          deprecated: true
+          description: Deprecated. Use `extended_fields` instead. Custom field values for the case.
           items:
             type: object
             properties:
@@ -140786,6 +140992,15 @@ components:
           example: 120
           nullable: true
           type: integer
+        extended_fields:
+          additionalProperties:
+            type: string
+          description: |
+            The case's stored field values, keyed by storage key (for example `priority_as_keyword`).
+          type: object
+          x-state: Technical preview; added in 9.5.0
+        extended_fields_labels:
+          $ref: '#/components/schemas/Cases_case_extended_fields_labels'
         external_service:
           $ref: '#/components/schemas/Cases_external_service'
         id:
@@ -140928,7 +141143,8 @@ components:
         created_by:
           $ref: '#/components/schemas/Cases_case_response_created_by_properties'
         customFields:
-          description: Custom field values for the case.
+          deprecated: true
+          description: Deprecated. Use `extended_fields` instead. Custom field values for the case.
           items:
             type: object
             properties:
@@ -140969,6 +141185,8 @@ components:
             The case's stored field values, keyed by storage key (for example `priority_as_keyword`).
           type: object
           x-state: Technical preview; added in 9.5.0
+        extended_fields_labels:
+          $ref: '#/components/schemas/Cases_case_extended_fields_labels'
         external_service:
           $ref: '#/components/schemas/Cases_external_service'
         id:
@@ -141442,8 +141660,9 @@ components:
             - $ref: '#/components/schemas/Cases_connector_properties_servicenow_sir'
             - $ref: '#/components/schemas/Cases_connector_properties_swimlane'
         customFields:
+          deprecated: true
           description: |
-            Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.
+            Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.
           items:
             type: object
             properties:
@@ -142294,7 +142513,9 @@ components:
             - name
             - type
         customFields:
-          description: Custom fields case configuration.
+          deprecated: true
+          description: |
+            Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
           items:
             type: object
             properties:
@@ -142541,6 +142762,9 @@ components:
       title: Template write request
       type: object
     Cases_templates:
+      deprecated: true
+      description: |
+        Configuration-embedded templates. Deprecated: use the templates API (`GET /api/cases/templates`) and case `extended_fields` instead.
       items:
         type: object
         properties:
@@ -142692,7 +142916,9 @@ components:
             - name
             - type
         customFields:
-          description: Custom fields case configuration.
+          deprecated: true
+          description: |
+            Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
           items:
             type: object
             properties:
@@ -142777,8 +143003,9 @@ components:
                   - $ref: '#/components/schemas/Cases_connector_properties_servicenow_sir'
                   - $ref: '#/components/schemas/Cases_connector_properties_swimlane'
               customFields:
+                deprecated: true
                 description: |
-                  Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.
+                  Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.
                 items:
                   type: object
                   properties:
@@ -142825,6 +143052,24 @@ components:
                 $ref: '#/components/schemas/Cases_case_status'
               tags:
                 $ref: '#/components/schemas/Cases_case_tags'
+              template:
+                description: |
+                  The case template to apply, clear, or leave unchanged. Requires the `xpack.cases.templates.enabled` setting. Omit to keep the current template; set to `null` to clear it; set to `{ id, version }` to switch. Switching is an explicit versioned action: both `id` and `version` are required. If `extended_fields` is also provided in the same request, those values are validated against the new template's fields. Use the get case fields API to see what fields the new template exposes.
+                nullable: true
+                type: object
+                properties:
+                  id:
+                    description: The template identifier. Retrieve template ids with `GET /api/cases/templates`.
+                    type: string
+                  version:
+                    description: |
+                      The template version to apply. Required on update: switching a template is an explicit versioned action, so the version must be specified.
+                    minimum: 1
+                    type: integer
+                required:
+                  - id
+                  - version
+                x-state: Technical preview
               title:
                 $ref: '#/components/schemas/Cases_case_title'
               version:
@@ -143281,7 +143526,7 @@ components:
           type: boolean
       required:
         - data_view
-    Kibana_HTTP_APIs__zod_v4_383___schema0:
+    Kibana_HTTP_APIs__zod_v4_56___schema0:
       anyOf:
         - additionalProperties: false
           type: object
@@ -143310,7 +143555,7 @@ components:
                 routing:
                   items:
                     allOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_383___schema0'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_56___schema0'
                       - type: object
                         properties:
                           destination:
@@ -154213,6 +154458,18 @@ components:
                               - sum
                               - min
                               - max
+                            type: string
+                          grid_sort_direction:
+                            description: Direction of the metrics grid order. If omitted, defaults to ascending.
+                            enum:
+                              - asc
+                              - desc
+                            type: string
+                          grid_sort_field:
+                            description: Criterion used to order metrics in the metrics grid. `recency` orders by the metrics the viewing user explored most recently in their own browser. If omitted, metrics are ordered alphabetically.
+                            enum:
+                              - alphabetically
+                              - recency
                             type: string
                           header_row_height:
                             anyOf:
@@ -177292,7 +177549,7 @@ components:
       properties:
         fill:
           default: solid
-          description: 'Area fill type: solid or gradient. Defaults to solid.'
+          description: 'Area fill type: solid or gradient.'
           enum:
             - solid
             - gradient

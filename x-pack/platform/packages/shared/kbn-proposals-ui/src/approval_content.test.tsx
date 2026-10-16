@@ -381,6 +381,7 @@ describe('ApprovalContent', () => {
 
       // The badge and the outcome banner's own title both say it.
       expect(screen.getAllByText('Applying').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getByTestId('approvalContent-outcome')).toHaveTextContent(/^Applying$/);
       expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
       expect(screen.getAllByText(/Ava/).length).toBeGreaterThan(0);
     });
@@ -656,6 +657,7 @@ describe('ApprovalContent', () => {
         />
       );
       expect(screen.queryByTestId('card-decline-form')).not.toBeInTheDocument();
+      expect(screen.getByTestId('card-outcome')).toHaveTextContent(/^Declining$/);
     });
   });
 });
