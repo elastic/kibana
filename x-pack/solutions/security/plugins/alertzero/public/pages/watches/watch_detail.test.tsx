@@ -11,7 +11,8 @@ import { join } from 'path';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
-import { createMemoryHistory } from 'history';
+import { createMemoryHistory, type MemoryHistory } from 'history';
+import type { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import {
   RULE_COVERAGE_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
@@ -32,6 +33,7 @@ import {
 } from '@kbn/alertzero-common';
 import { WatchDetailPage } from './watch_detail';
 import * as settingsI18n from './settings_translations';
+import { workerName } from './workers/translations';
 import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useUpdateWorker, useWorkers } from '../../hooks/use_workers_api';
@@ -63,12 +65,39 @@ jest.mock('../../components/worker_dependencies/worker_dependencies_callout', ()
     <div data-test-subj={`alertZeroWorkerDependencies-${surface}-${worker.id}`} />
   ),
 }));
+const mockOpenConfirm = jest.fn();
+const mockNavigateToUrl = jest.fn();
+// Stands in for the app's ScopedHistory; reassigned per render so the real prompt hook blocks it.
+let mockAppHistory: MemoryHistory;
+// Records the props, then runs the real hook so history blocking and beforeunload are exercised.
+const mockUseUnsavedChangesPrompt = jest.fn<
+  void,
+  [Parameters<typeof useUnsavedChangesPrompt>[0]]
+>();
+jest.mock('@kbn/unsaved-changes-prompt', () => ({
+  useUnsavedChangesPrompt: (props: Parameters<typeof useUnsavedChangesPrompt>[0]) => {
+    mockUseUnsavedChangesPrompt(props);
+    return jest.requireActual('@kbn/unsaved-changes-prompt').useUnsavedChangesPrompt(props);
+  },
+}));
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useKibana: () => ({
     services: {
-      http: { get: jest.fn().mockResolvedValue(undefined) },
-      application: { getUrlForApp: jest.fn(() => '/app/workflows') },
+      http: {
+        get: jest.fn().mockResolvedValue(undefined),
+        basePath: { prepend: (p: string) => p },
+      },
+      application: {
+        getUrlForApp: jest.fn(() => '/app/workflows'),
+        navigateToUrl: mockNavigateToUrl,
+      },
+      overlays: { openConfirm: mockOpenConfirm },
+      appParams: {
+        get history() {
+          return mockAppHistory;
+        },
+      },
     },
   }),
 }));
@@ -266,23 +295,26 @@ const renderWatch = (watchId: string, workers: Worker[], canModifyWorkers?: bool
   );
   mockUseUpdateWorker.mockReturnValue({ mutate, mutateAsync } as never);
 
+  mockAppHistory = createMemoryHistory({ initialEntries: [`/watches/${watchId}`] });
   render(
     <I18nProvider>
-      <MemoryRouter initialEntries={[`/watches/${watchId}`]}>
+      <Router history={mockAppHistory}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
         </Route>
-      </MemoryRouter>
+      </Router>
     </I18nProvider>
   );
 
-  return { mutate, mutateAsync };
+  return { mutate, mutateAsync, history: mockAppHistory };
 };
 
 describe('WatchDetailPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseCanWriteAlertZero.mockReturnValue(true);
+    mockAppHistory = createMemoryHistory();
+    mockOpenConfirm.mockResolvedValue(false);
   });
 
   it('shows Floor Workers with per-Worker enablement and autonomy, and no Watch switch', () => {
@@ -1474,6 +1506,228 @@ describe('WatchDetailPage', () => {
     expect(
       await screen.findByTestId(`alertZeroWorkerHeaderSaveError-${shared.id}`)
     ).toBeInTheDocument();
+  });
+
+  describe('unsaved changes', () => {
+    const RULE_TUNING = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
+    const RULE_COVERAGE = SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID;
+    const BADGE = 'alertZeroWatchUnsavedChangesBadge';
+
+    const editAnalysisWindow = () => {
+      const field = screen.getByTestId('alertZeroAnalysisWindowDays');
+      fireEvent.change(field, { target: { value: '7' } });
+      fireEvent.blur(field);
+    };
+    const toggleAccordion = (workerId: string) =>
+      fireEvent.click(screen.getByTestId(`alertZeroWorkerAccordionHeader-${workerId}`));
+    const lastPromptProps = () => mockUseUnsavedChangesPrompt.mock.calls.at(-1)?.[0];
+
+    it('shows the badge only while there are unsaved changes', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+      expect(screen.queryByTestId(BADGE)).not.toBeInTheDocument();
+
+      editAnalysisWindow();
+      expect(screen.getByTestId(BADGE)).toHaveTextContent(settingsI18n.UNSAVED_CHANGES_BADGE_LABEL);
+
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsDiscard'));
+      expect(screen.queryByTestId(BADGE)).not.toBeInTheDocument();
+    });
+
+    it('counts an invalid trigger amount as unsaved, like Discard does', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+      fireEvent.change(screen.getByTestId(`alertZeroTriggerAmount-${RULE_TUNING}`), {
+        target: { value: '1.9' },
+      });
+
+      expect(screen.getByTestId(BADGE)).toBeInTheDocument();
+      expect(lastPromptProps()).toMatchObject({ hasUnsavedChanges: true });
+    });
+
+    it('explains the disabled Save only when there is nothing to save', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+      const save = screen.getByTestId('alertZeroWatchSettingsSave');
+
+      expect(save).toBeDisabled();
+      expect(save).toHaveAttribute('title', settingsI18n.NO_CHANGES_TO_SAVE_TOOLTIP);
+
+      editAnalysisWindow();
+      expect(save).toBeEnabled();
+      expect(save).not.toHaveAttribute('title');
+
+      // Changes exist but cannot be saved yet; the invalid-amount message explains that instead.
+      fireEvent.change(screen.getByTestId(`alertZeroTriggerAmount-${RULE_TUNING}`), {
+        target: { value: '1.9' },
+      });
+      expect(save).toBeDisabled();
+      expect(save).not.toHaveAttribute('title');
+    });
+
+    it('keeps the read-only tooltip ahead of the no-changes one', () => {
+      mockUseCanWriteAlertZero.mockReturnValue(false);
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+      expect(screen.getByTestId('alertZeroWatchSettingsSave')).toHaveAttribute(
+        'title',
+        settingsI18n.READ_ONLY_TOOLTIP
+      );
+    });
+
+    it('passes the unsaved state and the leave copy to the shared prompt', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+      expect(lastPromptProps()).toMatchObject({
+        hasUnsavedChanges: false,
+        history: mockAppHistory,
+        openConfirm: mockOpenConfirm,
+        navigateToUrl: mockNavigateToUrl,
+        titleText: settingsI18n.LEAVE_PROMPT_TITLE,
+        messageText: settingsI18n.LEAVE_PROMPT_DESCRIPTION,
+        cancelButtonText: settingsI18n.KEEP_EDITING_BUTTON_LABEL,
+        confirmButtonText: settingsI18n.LEAVE_PROMPT_CONFIRM_BUTTON_LABEL,
+      });
+
+      editAnalysisWindow();
+      expect(lastPromptProps()).toMatchObject({ hasUnsavedChanges: true });
+
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsDiscard'));
+      expect(lastPromptProps()).toMatchObject({ hasUnsavedChanges: false });
+    });
+
+    it('stops prompting while a save is in flight and once it has succeeded', async () => {
+      const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+      let resolveSave: ((value: { worker: Worker }) => void) | undefined;
+      mutateAsync.mockImplementation(
+        () =>
+          new Promise<{ worker: Worker }>((resolve) => {
+            resolveSave = resolve;
+          })
+      );
+
+      fireEvent.click(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${RULE_TUNING}`));
+      expect(lastPromptProps()).toMatchObject({ hasUnsavedChanges: true });
+
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+      await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+      expect(lastPromptProps()).toMatchObject({ hasUnsavedChanges: false });
+
+      await act(async () => {
+        resolveSave!({ worker: { ...detectionWorkers[0], enabled: true } });
+      });
+      expect(lastPromptProps()).toMatchObject({ hasUnsavedChanges: false });
+      expect(screen.queryByTestId(BADGE)).not.toBeInTheDocument();
+    });
+
+    it('asks before switching Watch with unsaved changes and only leaves on confirm', async () => {
+      const { history } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+      act(() => {
+        history.push(`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`);
+      });
+      expect(mockOpenConfirm).not.toHaveBeenCalled();
+      expect(history.location.pathname).toBe(`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`);
+      act(() => {
+        history.goBack();
+      });
+
+      editAnalysisWindow();
+      act(() => {
+        history.push(`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`);
+      });
+
+      expect(history.location.pathname).toBe(`/watches/${SYSTEM_SECURITY_WATCH_DETECTION_ID}`);
+      await waitFor(() => expect(mockOpenConfirm).toHaveBeenCalledTimes(1));
+      expect(mockOpenConfirm).toHaveBeenCalledWith(
+        settingsI18n.LEAVE_PROMPT_DESCRIPTION,
+        expect.objectContaining({
+          title: settingsI18n.LEAVE_PROMPT_TITLE,
+          cancelButtonText: settingsI18n.KEEP_EDITING_BUTTON_LABEL,
+          confirmButtonText: settingsI18n.LEAVE_PROMPT_CONFIRM_BUTTON_LABEL,
+        })
+      );
+      expect(mockNavigateToUrl).not.toHaveBeenCalled();
+      expect(screen.getByTestId(BADGE)).toBeInTheDocument();
+
+      mockOpenConfirm.mockResolvedValue(true);
+      act(() => {
+        history.push(`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`);
+      });
+      await waitFor(() =>
+        expect(mockNavigateToUrl).toHaveBeenCalledWith(
+          `/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`,
+          expect.anything()
+        )
+      );
+    });
+
+    it('asks the browser to confirm closing the tab only while changes are unsaved', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+      const closeTab = () => {
+        const event = new Event('beforeunload', { cancelable: true });
+        window.dispatchEvent(event);
+        return event.defaultPrevented;
+      };
+
+      expect(closeTab()).toBe(false);
+
+      editAnalysisWindow();
+      expect(closeTab()).toBe(true);
+    });
+
+    it('discards right away when every changed Worker is in view', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+      editAnalysisWindow();
+      // Collapsing a Worker without changes does not hide anything that would be lost.
+      toggleAccordion(RULE_COVERAGE);
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsDiscard'));
+
+      expect(screen.queryByTestId('alertZeroWatchDiscardConfirmModal')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertZeroAnalysisWindowDays')).toHaveValue(14);
+      expect(screen.queryByTestId(BADGE)).not.toBeInTheDocument();
+    });
+
+    it('names the collapsed Workers with changes before discarding, and keeps them on Keep editing', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+      editAnalysisWindow();
+      fireEvent.click(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${RULE_COVERAGE}`));
+      toggleAccordion(RULE_TUNING);
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsDiscard'));
+
+      const modal = screen.getByTestId('alertZeroWatchDiscardConfirmModal');
+      expect(within(modal).getByText(settingsI18n.DISCARD_CONFIRM_TITLE)).toBeInTheDocument();
+      // Only the collapsed Worker is listed; Rule Coverage is open, so its change is in view.
+      expect(
+        within(modal)
+          .getAllByRole('listitem')
+          .map((item) => item.textContent)
+      ).toEqual([workerName(RULE_TUNING, 'Rule Tuning')]);
+
+      fireEvent.click(within(modal).getByText(settingsI18n.KEEP_EDITING_BUTTON_LABEL));
+
+      expect(screen.queryByTestId('alertZeroWatchDiscardConfirmModal')).not.toBeInTheDocument();
+      expect(screen.getByTestId(BADGE)).toBeInTheDocument();
+    });
+
+    it('discards every change once the modal is confirmed', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+      editAnalysisWindow();
+      fireEvent.click(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${RULE_COVERAGE}`));
+      toggleAccordion(RULE_TUNING);
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsDiscard'));
+      fireEvent.click(
+        within(screen.getByTestId('alertZeroWatchDiscardConfirmModal')).getByText(
+          settingsI18n.DISCARD_CONFIRM_BUTTON_LABEL
+        )
+      );
+
+      expect(screen.queryByTestId('alertZeroWatchDiscardConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(BADGE)).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+    });
   });
 
   describe('Worker dependencies', () => {
