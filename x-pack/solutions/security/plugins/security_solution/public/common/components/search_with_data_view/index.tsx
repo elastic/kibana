@@ -9,23 +9,20 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DataViewPicker } from '../../data_view_manager/components/data_view_picker';
-import { PageScope } from '../../data_view_manager/constants';
-import { InputsModelId } from '../../common/store/inputs/constants';
-import { SiemSearchBar } from '../../common/components/search_bar';
+import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
+import type { PageScope } from '../../../data_view_manager/constants';
+import { InputsModelId } from '../../store/inputs/constants';
+import { SiemSearchBar } from '../search_bar';
 
 interface SearchWithDataViewProps {
   dataView: DataView;
-  scope?: PageScope;
+  scope: PageScope;
 }
 
 /**
  * Data-view picker + KQL bar + date range, in its own subdued background
  */
-export const SearchWithDataView: React.FC<SearchWithDataViewProps> = ({
-  dataView,
-  scope = PageScope.explore,
-}) => {
+export const SearchWithDataView: React.FC<SearchWithDataViewProps> = ({ dataView, scope }) => {
   const { euiTheme } = useEuiTheme();
   const sectionStyles = css`
     margin-inline: -${euiTheme.size.l};

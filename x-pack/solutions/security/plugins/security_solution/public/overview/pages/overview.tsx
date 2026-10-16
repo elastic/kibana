@@ -38,7 +38,8 @@ import {
 } from '../../common/components/visualization_actions/utils';
 import { SecurityAppHeader } from '../../common/components/app_header';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
-import { SearchWithDataView } from '../../explore/components/search_with_data_view';
+import { useKibana } from '../../common/lib/kibana';
+import { SearchWithDataView } from '../../common/components/search_with_data_view';
 import { PageScope } from '../../data_view_manager/constants';
 
 const OverviewComponent = () => {
@@ -94,6 +95,7 @@ const OverviewComponent = () => {
   const { hasAlertsRead } = useAlertsPrivileges();
   const { tiDataSources: allTiDataSources, isInitiallyLoaded: isTiLoaded } = useAllTiDataSources();
 
+  const { docLinks } = useKibana().services;
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const back = useMemo(
     () => ({
@@ -115,6 +117,7 @@ const OverviewComponent = () => {
           title={OVERVIEW}
           spacing="largeBleed"
           back={back}
+          docLink={docLinks.links.siem.guide}
           // Empty items still count as a menu, so the legacy data view picker is not remounted.
           menu={{ items: [] }}
         />

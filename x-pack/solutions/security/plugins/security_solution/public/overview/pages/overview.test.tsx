@@ -27,6 +27,7 @@ import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { DASHBOARDS, OVERVIEW } from '../../app/translations';
 import { PageScope } from '../../data_view_manager/constants';
 
@@ -77,7 +78,7 @@ jest.mock('../../common/components/search_bar', () => ({
 jest.mock('../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
-jest.mock('../../explore/components/search_with_data_view', () => ({
+jest.mock('../../common/components/search_with_data_view', () => ({
   SearchWithDataView: ({ scope }: { scope?: string }) => (
     <div data-test-subj="mockSearchWithDataView" data-scope={scope} />
   ),
@@ -313,6 +314,17 @@ describe('Overview', () => {
       const backButton = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back);
       expect(backButton).toHaveAttribute('href', '/app/security/dashboards');
       expect(backButton).toHaveAttribute('aria-label', expect.stringContaining(DASHBOARDS));
+    });
+
+    it('renders a documentation item in the app menu that points to the Security documentation', async () => {
+      renderOverview();
+
+      await openAppMenuOverflow();
+
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toHaveAttribute(
+        'href',
+        'https://www.elastic.co/docs/solutions/security'
+      );
     });
 
     it('passes the default page scope to the search band', () => {
