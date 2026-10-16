@@ -1549,7 +1549,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
         'node scripts/scout run-tests --location cloud --arch stateful --domain classic';
 
       // Find stateful group for 'search'
-      // For stateful (ECH), domain is based on group: 'search' => 'search'
       const statefulSearchGroup = savedData.find(
         (g: any) =>
           g.testTarget?.arch === 'stateful' &&
@@ -1557,13 +1556,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
           g.scoutCommand === statefulScoutCmd
       );
       expect(statefulSearchGroup).toBeDefined();
-      expect(statefulSearchGroup.testTarget.domain).toBe('search');
+      expect(statefulSearchGroup.testTarget.domain).toBe('classic');
       expect(statefulSearchGroup.configs).toContain(
         'x-pack/platform/plugins/private/pluginSearch/test/scout/ui/playwright.config.ts'
       );
 
       // Find stateful group for 'platform'
-      // For stateful (ECH), domain is based on group: 'platform' => 'classic'
       const statefulPlatformGroup = savedData.find(
         (g: any) =>
           g.testTarget?.arch === 'stateful' &&
