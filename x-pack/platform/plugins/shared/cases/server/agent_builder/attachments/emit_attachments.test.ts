@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { emitFromStepResult, injectAttachmentIds, toCaseAttachmentData } from './emit_attachments';
+import {
+  canRenderAttachments,
+  emitFromStepResult,
+  injectAttachmentIds,
+  toCaseAttachmentData,
+} from './emit_attachments';
 import {
   CASE_ATTACHMENT_TYPE,
   CASES_ATTACHMENT_TYPE,
@@ -45,6 +50,26 @@ const buildCase = (id = 'case-1'): Case =>
 
 const buildAttachments = () => ({
   add: jest.fn().mockResolvedValue({ id: 'att-1' }),
+});
+
+// ---------------------------------------------------------------------------
+// canRenderAttachments
+// ---------------------------------------------------------------------------
+
+describe('canRenderAttachments', () => {
+  const callContext = (callSource: 'agent' | 'user' | 'mcp' | 'unknown') => ({
+    toolId: 'platform.core.cases',
+    toolCallId: 'call-1',
+    callSource,
+  });
+
+  it('returns true for an Agent Builder conversation call', () => {
+    expect(canRenderAttachments(callContext('agent'))).toBe(true);
+  });
+
+  it.each(['mcp', 'user', 'unknown'] as const)('returns false for %s callers', (callSource) => {
+    expect(canRenderAttachments(callContext(callSource))).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------
