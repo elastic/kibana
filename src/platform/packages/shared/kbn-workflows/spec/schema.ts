@@ -401,6 +401,28 @@ export const HitlSlack2ChannelSchema = z.object({
     ),
 });
 
+export const HitlTeamsChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(CONNECTOR_ID_MAX_LENGTH)
+    .describe('Microsoft Teams connector saved object id or name'),
+  'team-id': z
+    .string()
+    .min(1)
+    .max(200)
+    .describe(
+      'Team ID, or Liquid that renders to one. Obtain this from listJoinedTeams (the "id" field on each team object).'
+    ),
+  'channel-id': z
+    .string()
+    .min(1)
+    .max(200)
+    .describe(
+      'Channel ID, or Liquid that renders to one. Obtain this from listChannels (the "id" field on each channel object).'
+    ),
+});
+
 export const HitlServiceNowChannelSchema = z.object({
   'connector-id': z
     .string()
@@ -493,6 +515,7 @@ const hitlChannelDescriptions = {
   email: 'Notify via an Email connector. Requires connector-id and at least one `to` recipient.',
   slack2:
     'Notify via a Slack (v2) connector using sendMessage. Set connector-id and one or more conversation IDs.',
+  teams: 'Post a message to a Microsoft Teams channel. Set connector-id, team-id, and channel-id.',
   servicenow:
     'Add a customer-visible comment to an existing ServiceNow record. Set connector-id, table, and sys-id.',
   http: 'Send the response links in an HTTP request. Set a connector-id or a url. Uses the workflow HTTP connector, including its destination controls.',
@@ -512,6 +535,9 @@ export const WaitForInputChannelsSchema = z
     slack2: HitlSlack2ChannelSchema.extend(hitlChannelMessageField)
       .optional()
       .describe(hitlChannelDescriptions.slack2),
+    teams: HitlTeamsChannelSchema.extend(hitlChannelMessageField)
+      .optional()
+      .describe(hitlChannelDescriptions.teams),
     servicenow: HitlServiceNowChannelSchema.extend(hitlChannelMessageField)
       .optional()
       .describe(hitlChannelDescriptions.servicenow),
@@ -528,6 +554,7 @@ export const WaitForApprovalChannelsSchema = z
       .describe(hitlChannelDescriptions.slack_api),
     email: HitlEmailChannelSchema.loose().optional().describe(hitlChannelDescriptions.email),
     slack2: HitlSlack2ChannelSchema.loose().optional().describe(hitlChannelDescriptions.slack2),
+    teams: HitlTeamsChannelSchema.loose().optional().describe(hitlChannelDescriptions.teams),
     servicenow: HitlServiceNowChannelSchema.loose()
       .optional()
       .describe(hitlChannelDescriptions.servicenow),

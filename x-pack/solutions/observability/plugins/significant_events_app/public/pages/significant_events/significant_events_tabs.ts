@@ -7,12 +7,7 @@
 
 import { SIGNIFICANT_EVENTS_TAB } from '../../../common';
 
-const SIGNIFICANT_EVENTS_TABS = [
-  'sources',
-  'queries',
-  'detections',
-  SIGNIFICANT_EVENTS_TAB,
-] as const;
+const SIGNIFICANT_EVENTS_TABS = ['queries', 'detections', SIGNIFICANT_EVENTS_TAB] as const;
 
 export type SignificantEventsTabId = (typeof SIGNIFICANT_EVENTS_TABS)[number];
 

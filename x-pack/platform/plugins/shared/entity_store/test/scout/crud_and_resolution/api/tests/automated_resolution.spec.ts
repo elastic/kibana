@@ -15,7 +15,12 @@ import {
   LATEST_ALIAS,
   LATEST_INDEX,
 } from '../../../common/fixtures/constants';
-import { RESOLUTION_RULE_IDS } from '../../../../../common';
+import {
+  ENTITY_STORE_CLUSTER_PRIVILEGES,
+  ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
+  ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+  RESOLUTION_RULE_IDS,
+} from '../../../../../common';
 import { hashEuid } from '../../../../../common/domain/euid';
 import {
   clearInstalledEntityStoreDocuments,
@@ -1081,6 +1086,53 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
           expect(response.body.message).toContain('securitySolution-entity-analytics-manage');
         }
       });
+    }
+  );
+
+  apiTest(
+    'A maintainer run by a Security all user honours a built-in rule an admin disabled',
+    async ({ apiClient, esClient, samlAuth }) => {
+      const disable = await apiClient.put(
+        ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_DISABLE(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH),
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(disable.statusCode).toBe(200);
+
+      // Enough to run the maintainer without being a superuser: the entity store's own
+      // privilege check, plus Security `all` for reading the rule overrides.
+      const { cookieHeader } = await samlAuth.asInteractiveUser({
+        elasticsearch: {
+          cluster: ENTITY_STORE_CLUSTER_PRIVILEGES,
+          indices: [
+            { names: ['*'], privileges: ENTITY_STORE_SOURCE_INDICES_PRIVILEGES },
+            {
+              names: ['.entities.v2.*', LATEST_ALIAS],
+              privileges: [
+                ...new Set([
+                  ...ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+                  ...ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
+                ]),
+              ],
+            },
+          ],
+        },
+        kibana: [{ base: [], feature: { siemV5: ['all'] }, spaces: ['*'] }],
+      });
+      const customRoleInternalHeaders = { ...cookieHeader, ...INTERNAL_HEADERS };
+
+      const email = 'non-superuser-disabled@co.com';
+      const oktaEntity = 'non-superuser-okta';
+      const entraEntity = 'non-superuser-entra';
+      await seedUserEntity(esClient, { entityId: oktaEntity, namespace: 'okta', email });
+      await seedUserEntity(esClient, { entityId: entraEntity, namespace: 'entra_id', email });
+
+      // A sync run reads the overrides with the caller's credentials, as the scheduled
+      // task does with the API key of whoever set up the store.
+      await triggerMaintainerRun(apiClient, customRoleInternalHeaders, 'automated-resolution', {
+        sync: true,
+      });
+      await assertNotResolved(esClient, entraEntity);
+      await assertNotResolved(esClient, oktaEntity);
     }
   );
 });

@@ -154,6 +154,20 @@ describe('entitySchema', () => {
     expect(result.success).toBe(false);
     expect(result.error?.issues.map((issue) => issue.message).join('; ')).toMatch(message);
   });
+
+  it('accepts a definition with a description', () => {
+    const description = 'A Kubernetes pod. Identified by k8s.pod.uid.';
+    expect(entitySchema.parse({ ...core, description }).description).toBe(description);
+  });
+
+  it('accepts a definition without a description', () => {
+    expect(entitySchema.parse(core).description).toBeUndefined();
+  });
+
+  it('accepts a description of 1024 characters and rejects one of 1025', () => {
+    expect(entitySchema.safeParse({ ...core, description: 'a'.repeat(1024) }).success).toBe(true);
+    expect(entitySchema.safeParse({ ...core, description: 'a'.repeat(1025) }).success).toBe(false);
+  });
 });
 
 describe('extractionBlockSchema', () => {

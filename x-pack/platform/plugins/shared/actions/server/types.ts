@@ -19,7 +19,7 @@ import type { AxiosHeaderValue } from 'axios';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type * as z4 from '@kbn/zod/v4';
-import type { AuthMode } from '@kbn/connector-specs';
+import type { AuthMode, ConnectorSpec } from '@kbn/connector-specs';
 import type { ConnectorTokenClient } from './lib/connector_token_client';
 import type { ActionTypeExecutorResult, SubFeature, ActionTypeSource } from '../common';
 import type { ActionTypeRegistry } from './action_type_registry';
@@ -238,6 +238,10 @@ export interface ActionTypeCoreFields<
   supportedFeatureIds: string[];
   isSystemActionType?: boolean;
   source?: ActionTypeSource;
+  /**
+   * Spec this type was generated from; only set for spec-backed types
+   */
+  spec?: ConnectorSpec;
   subFeature?: SubFeature;
   isDeprecated?: boolean;
   /**
@@ -259,6 +263,11 @@ export interface ActionTypeCoreFields<
    * When true, the connector type is shown as technical preview in the UI.
    */
   isExperimental?: boolean;
+  /**
+   * Auth type ids from the connector spec that opted into sandbox credential injection.
+   * Populated for spec-backed connectors via createConnectorTypeFromSpec.
+   */
+  sandboxSupportedAuthTypes?: readonly string[];
   /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.
