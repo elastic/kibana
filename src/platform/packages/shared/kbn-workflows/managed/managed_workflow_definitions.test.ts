@@ -33,6 +33,8 @@ import {
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+  CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID,
+  CODE_INTELLIGENCE_OTEL_CLASSIFICATION_WORKFLOW_ID,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
   EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
@@ -63,6 +65,8 @@ import {
   RULE_TUNING_WORKER_SETTINGS_DEFAULTS,
   type WorkerSettingsDefaults,
 } from './definitions/alertzero/worker_settings_defaults';
+import CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_YAML from './definitions/code_intelligence/classify_logging_candidates.yaml';
+import CODE_INTELLIGENCE_OTEL_CLASSIFICATION_YAML from './definitions/code_intelligence/classify_otel_candidates.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -83,6 +87,12 @@ type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
 };
 
 const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
+  [CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID]: {
+    connectorId: 'code-intelligence-connector',
+  },
+  [CODE_INTELLIGENCE_OTEL_CLASSIFICATION_WORKFLOW_ID]: {
+    connectorId: 'code-intelligence-connector',
+  },
   [EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID]: { serviceAccountId: 'example-account' },
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
@@ -262,6 +272,16 @@ it.each([
     ALERTZERO_ACTION_SET_ASSET_CRITICALITY_WORKFLOW_ID,
     ACTION_SET_ASSET_CRITICALITY_YAML,
     '1:3cd8044e',
+  ],
+  [
+    CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID,
+    CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_YAML,
+    '9:9b7aaee6',
+  ],
+  [
+    CODE_INTELLIGENCE_OTEL_CLASSIFICATION_WORKFLOW_ID,
+    CODE_INTELLIGENCE_OTEL_CLASSIFICATION_YAML,
+    '7:620c2476',
   ],
 ] as const)(
   'requires bumping %s definition.version together with the fingerprint of its render inputs',
