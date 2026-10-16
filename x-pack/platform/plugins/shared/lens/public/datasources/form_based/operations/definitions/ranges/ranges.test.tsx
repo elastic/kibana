@@ -331,6 +331,30 @@ describe('ranges', () => {
         })
       );
     });
+
+    it('should keep range bounds with more than two decimal digits', () => {
+      setToRangeMode();
+      (layer.columns.col1 as RangeIndexPatternColumn).params.ranges = [
+        { from: 0.001, to: 0.125, label: '' },
+      ];
+
+      const esAggsFn = rangeOperation.toEsAggsFn(
+        layer.columns.col1 as RangeIndexPatternColumn,
+        'col1',
+        {} as IndexPattern,
+        layer,
+        uiSettingsMock,
+        []
+      );
+
+      expect(esAggsFn).toHaveProperty(
+        'arguments.ranges.0.chain.0.arguments',
+        expect.objectContaining({
+          from: [0.001],
+          to: [0.125],
+        })
+      );
+    });
   });
 
   describe('getPossibleOperationForField', () => {
