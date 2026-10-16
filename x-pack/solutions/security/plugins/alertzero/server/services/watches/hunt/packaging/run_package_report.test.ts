@@ -64,6 +64,18 @@ const suspendProcess: ActionCatalogEntry = {
   },
 };
 
+// An installed catalog can still carry the retired action; packaging must never fill it.
+const staleSetAssetCriticality: ActionCatalogEntry = {
+  workflowId: 'system-alertzero-action-set-asset-criticality',
+  name: 'Set asset criticality',
+  category: 'respond',
+  inputSchema: {
+    type: 'object',
+    properties: { id_field: { type: 'string' }, id_value: { type: 'string' } },
+    required: ['id_field', 'id_value'],
+  },
+};
+
 const sseAttachment = ({
   hit,
   hostName,
@@ -621,7 +633,10 @@ describe('runPackageReport', () => {
       expectedSseCount: 1,
       attachments: [sseAttachment({ hit: true, hostName: 'host-a', userName: 'dev-user' })],
       deps: deps({
-        listRespondActions: async () => ({ ok: true, actions: [isolateHost] }),
+        listRespondActions: async () => ({
+          ok: true,
+          actions: [isolateHost, staleSetAssetCriticality],
+        }),
       }),
     });
     expect(result.status).toBe('packaged');

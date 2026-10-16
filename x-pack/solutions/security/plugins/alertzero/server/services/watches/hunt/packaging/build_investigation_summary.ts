@@ -142,12 +142,8 @@ const packagingLine = ({
  * asset criticality is the customer's to set. AlertZero never proposes changing it; it only points
  * the analyst at the rating.
  */
-const assetCriticalityNote = (identities: string[]): string =>
-  `Asset criticality: ${identities.join(', ')} ${
-    identities.length === 1 ? 'is' : 'are'
-  } involved in this attack. AlertZero does not change asset criticality. Review ${
-    identities.length === 1 ? 'its' : 'their'
-  } rating in Entity Analytics if it is out of date.`;
+const ASSET_CRITICALITY_NOTE =
+  'Asset criticality: the users and services above are involved in this attack. AlertZero does not change asset criticality. Review their ratings in Entity Analytics if they are out of date.';
 
 /**
  * What this hunt run did, for a run that confirmed a hit. Unlike the Investigation's closing
@@ -197,7 +193,7 @@ export const buildInvestigationSummary = ({
     ...(hosts.length > 0 ? [`Hosts: ${hosts.join(', ')}`] : []),
     ...(state.users.length > 0 ? [`Users: ${state.users.join(', ')}`] : []),
     ...(state.services.length > 0 ? [`Services: ${state.services.join(', ')}`] : []),
-    ...(identities.length > 0 ? [assetCriticalityNote(identities)] : []),
+    ...(state.hasConfirmedHit && identities.length > 0 ? [ASSET_CRITICALITY_NOTE] : []),
     packagingLine({
       decided,
       mintSuppression,

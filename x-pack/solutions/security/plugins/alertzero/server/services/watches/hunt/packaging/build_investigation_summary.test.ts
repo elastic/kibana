@@ -77,8 +77,14 @@ describe('buildInvestigationSummary', () => {
     });
     expect(summary).toContain('Services: svc-role');
     expect(summary).toContain(
-      'Asset criticality: escalated-role, dev-user, svc-role are involved in this attack. AlertZero does not change asset criticality. Review their rating in Entity Analytics if it is out of date.'
+      'Asset criticality: the users and services above are involved in this attack. AlertZero does not change asset criticality. Review their ratings in Entity Analytics if they are out of date.'
     );
+  });
+
+  it('adds no criticality note when nothing was confirmed', () => {
+    expect(
+      buildInvestigationSummary({ state: state({ hasConfirmedHit: false }), decided })
+    ).not.toContain('Asset criticality');
   });
 
   it('adds no criticality note when no user or service is implicated', () => {

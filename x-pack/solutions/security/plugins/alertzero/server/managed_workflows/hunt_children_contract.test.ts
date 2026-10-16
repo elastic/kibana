@@ -381,12 +381,18 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
   // made by an analyst in Entity Analytics.
   describe('asset criticality', () => {
     it('is never written by a managed workflow', () => {
+      // Templated definitions (the Workers) carry their text in `yamlTemplate`; the raw template
+      // source is enough for a substring check. The Entity Store step writes criticality too, so
+      // the deprecated route is not the only way in.
+      const textOf = (definition: (typeof managedWorkflowDefinitions)[number]): string =>
+        'yaml' in definition && typeof definition.yaml === 'string'
+          ? definition.yaml
+          : 'yamlTemplate' in definition
+          ? String(definition.yamlTemplate)
+          : '';
       const writers = managedWorkflowDefinitions
-        .filter(
-          (definition) =>
-            'yaml' in definition &&
-            typeof definition.yaml === 'string' &&
-            /api\/asset_criticality/.test(definition.yaml)
+        .filter((definition) =>
+          /api\/asset_criticality|entityStore\.updateAssetCriticality/.test(textOf(definition))
         )
         .map(({ id }) => id);
 
