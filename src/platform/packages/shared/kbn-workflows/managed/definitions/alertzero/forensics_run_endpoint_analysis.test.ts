@@ -598,6 +598,7 @@ describe('Endpoint analysis run', () => {
       expect(journalSteps.map(({ name }) => name).sort()).toEqual([
         'journal_analysis_problem',
         'journal_analysis_started',
+        'journal_convergence_note',
         'journal_fetch_alert_problem',
         'journal_invalid_request',
         'journal_iocs',
@@ -1379,13 +1380,17 @@ describe('Endpoint analysis run', () => {
       expect(names.indexOf('propose_actions')).toBeLessThan(names.indexOf('resolve_proposals'));
       expect(names.indexOf('resolve_proposals')).toBeLessThan(names.indexOf('mark_processed'));
 
-      const gate = String(stepByName('propose_actions')?.if);
-      expect(gate).toContain('steps.resolve_run_outcome.output.attached == true');
-      expect(gate).toContain('recommendedActions.size > 0');
-      expect(gate).not.toContain('settled');
-      // `| default: []` is not an array in this engine, so `foreach` hard-fails on it.
-      expect(stepByName('propose_actions')?.foreach).toBe(
-        '${{ steps.forensic_analysis.output.structured_output.recommendedActions }}'
+      // The duplicate check sits between the findings and the dispatch, under the same
+      // gate the dispatch used to carry; the dispatch then keys off its count.
+      const check = String(stepByName('list_pending_proposals')?.if);
+      expect(check).toContain('steps.resolve_run_outcome.output.attached == true');
+      expect(check).toContain('recommendedActions.size > 0');
+      expect(check).not.toContain('settled');
+      expect(names.indexOf('resolve_run_outcome')).toBeLessThan(
+        names.indexOf('list_pending_proposals')
+      );
+      expect(names.indexOf('resolve_proposal_counts')).toBeLessThan(
+        names.indexOf('propose_actions')
       );
 
       const when = (attached: boolean, propose: boolean, recommended = 1) => ({
@@ -1401,10 +1406,28 @@ describe('Endpoint analysis run', () => {
           },
         },
       });
-      expect(evaluate(gate, when(true, true))).toBe(true);
-      expect(evaluate(gate, when(true, true, 0))).toBe(false);
-      expect(evaluate(gate, when(false, true))).toBe(false);
-      expect(evaluate(gate, when(true, false))).toBe(false);
+      expect(evaluate(check, when(true, true))).toBe(true);
+      expect(evaluate(check, when(true, true, 0))).toBe(false);
+      expect(evaluate(check, when(false, true))).toBe(false);
+      expect(evaluate(check, when(true, false))).toBe(false);
+
+      // `| default: []` is not an array in this engine, so `foreach` hard-fails on it;
+      // the gate on the count keeps it from running over nothing.
+      const gate = String(stepByName('propose_actions')?.if);
+      expect(gate).toBe('${{ steps.resolve_proposal_counts.output.new_count > 0 }}');
+      expect(stepByName('propose_actions')?.foreach).toBe(
+        '${{ steps.resolve_proposal_lists.output.plan.new }}'
+      );
+      const counted = (newCount?: number) => ({
+        steps: {
+          resolve_proposal_counts:
+            newCount === undefined ? {} : { output: { new_count: newCount } },
+        },
+      });
+      expect(evaluate(gate, counted(2))).toBe(true);
+      expect(evaluate(gate, counted(0))).toBe(false);
+      // A skipped count (the check never ran) must not dispatch.
+      expect(evaluate(gate, counted())).toBe(false);
     });
 
     // The investigation used to stay open after the last containment decision. The
@@ -1478,19 +1501,17 @@ describe('Endpoint analysis run', () => {
         expect(inputs.expectedProposalCount).toBe(
           '${{ steps.resolve_expected_proposals.output.count }}'
         );
+        // Baselined on what this run actually mints, not on what the agent recommended:
+        // a recommendation that converged onto another Investigation's Proposal creates
+        // nothing on this one, and counting it would leave the barrier unreachable.
         const expected = String(stepByName('resolve_expected_proposals')?.with?.count);
-        const when = (total: number | undefined, recommended: number) => ({
+        const when = (total: number | undefined, newCount: number) => ({
           steps: {
             count_existing_proposals: total === undefined ? { error: {} } : { output: { total } },
-            forensic_analysis: {
-              output: {
-                structured_output: {
-                  recommendedActions: Array.from({ length: recommended }, () => ({})),
-                },
-              },
-            },
+            resolve_proposal_counts: { output: { new_count: newCount } },
           },
         });
+        expect(expected).not.toContain('recommendedActions');
         expect(evaluate(expected, when(1, 2))).toBe(3);
         expect(evaluate(expected, when(0, 2))).toBe(2);
         // A failed count falls back to this run's own actions rather than blocking.
@@ -1617,6 +1638,426 @@ describe('Endpoint analysis run', () => {
       expect(message).toContain('not against `inputSchema` itself');
       expect(message).not.toContain('endpoint_ids');
       expect(message).not.toContain('agentId');
+    });
+  });
+
+  // Two Investigations can reach the same host (an Attack Discovery handoff and a Hunt
+  // handoff, say), and each would otherwise raise its own isolate for the same agent.
+  // Hunt Watch converges those in a step type; this run has none, so it lists the live
+  // AlertZero Proposals in the space and drops a recommendation a live one already
+  // holds. These tests pin the list, the match, and what the analyst is told.
+  describe('a recommendation a live Proposal already holds', () => {
+    const consts = { max_automatic_revision: 5, max_revisable_comment_length: 8000 };
+    const INVESTIGATION = 'inv-this';
+    const OTHER = 'inv-other';
+
+    const isolate = (agent: string, title = `Isolate host ${agent}`) => ({
+      actionId: 'system-security-action-isolate-host',
+      actionInput: { endpoint_ids: [agent] },
+      title,
+      comment: `Isolating ${agent} stops the spread.`,
+      confidence: 'high',
+    });
+    const kill = (agent: string, selector: { entity_id?: string; pid?: number }) => ({
+      actionId: 'system-security-action-kill-process',
+      actionInput: { endpoint_ids: [agent], parameters: selector },
+      title: `Kill process on ${agent}`,
+      comment: 'Encrypting C:\\Users.',
+      confidence: 'medium',
+    });
+    // What the list route returns for one live Proposal, Hunt-shaped: Hunt's kills
+    // carry `endpoint_ids` + `parameters.entity_id`, nothing else target-shaped.
+    const live = (
+      action: ReturnType<typeof isolate | typeof kill>,
+      overrides: Partial<{
+        id: string;
+        conversationId: string;
+        status: string;
+        decision: string;
+        revision: number;
+        comment: string;
+      }> = {}
+    ) => ({
+      id: 'prop-1',
+      conversationId: OTHER,
+      status: 'pending',
+      revision: 1,
+      title: action.title,
+      comment: 'Hunt Watch confirmed the report on this host.',
+      actionWorkflowId: action.actionId,
+      actionInput: action.actionInput,
+      ...overrides,
+    });
+
+    const plan = (
+      recommended: unknown[],
+      liveProposals: unknown[]
+    ): {
+      new: Array<{ actionId: string; actionInput: Record<string, unknown>; title: string }>;
+      covered: Array<{
+        title: string;
+        proposalId: string;
+        ownerConversationId: string;
+        sameInvestigation: boolean;
+        revisable: boolean;
+        mentioned: boolean;
+        revise: boolean;
+        comment: string;
+      }>;
+    } =>
+      JSON.parse(
+        liquid.parseAndRenderSync(String(stepByName('resolve_proposal_plan')?.with?.plan_json), {
+          consts,
+          steps: {
+            resolve_request: { output: { investigation_id: INVESTIGATION } },
+            resolve_live_proposals: { output: { proposals: liveProposals } },
+            forensic_analysis: {
+              output: { structured_output: { recommendedActions: recommended } },
+            },
+          },
+        })
+      );
+
+    // Space-wide and by origin, not by this Investigation: the duplicate lives on
+    // another one. Both reads leave only the live head of each revision chain, and
+    // a `pending` Proposal past its deadline is not something to converge onto.
+    it('lists every live AlertZero Proposal in the space, continuing past a failed read', () => {
+      const pending = stepByName('list_pending_proposals');
+      const executing = stepByName('list_executing_proposals');
+
+      for (const step of [pending, executing]) {
+        expect(step?.type).toBe('kibana.request');
+        expect(step?.with).toMatchObject({
+          method: 'GET',
+          path: '/s/{{ workflow.spaceId }}/internal/proposals',
+          headers: { 'elastic-api-version': '1' },
+        });
+        expect((step?.with?.query as Record<string, unknown>).conversationId).toBeUndefined();
+        expect(step?.['on-failure']).toEqual({ continue: true });
+        expect(step?.if).toBe(stepByName('list_pending_proposals')?.if);
+      }
+      expect(pending?.with?.query).toEqual({
+        origin: 'alertzero',
+        status: 'pending',
+        excludeSuperseded: 'true',
+        excludeExpired: 'true',
+        size: 100,
+      });
+      expect(executing?.with?.query).toEqual({
+        origin: 'alertzero',
+        status: 'executing',
+        excludeSuperseded: 'true',
+        size: 100,
+      });
+    });
+
+    // The check fails open, and says so. Hunt fails closed, but a Hunt report can be
+    // re-hunted; this indicator's one attempt is spent, and the recommendations exist
+    // only in this run's output, so minting nothing would lose them for good.
+    it('submits everything when the lists cannot be read, and records that the check was partial', () => {
+      const resolved = stepByName('resolve_live_proposals')?.with ?? {};
+      const both = {
+        consts: { no_rows: [] },
+        steps: {
+          list_pending_proposals: { output: { proposals: [{ id: 'a' }], total: 1 } },
+          list_executing_proposals: { output: { proposals: [{ id: 'b' }], total: 1 } },
+        },
+      };
+      const pendingFailed = {
+        consts: { no_rows: [] },
+        steps: {
+          list_pending_proposals: { error: { message: 'boom' } },
+          list_executing_proposals: { output: { proposals: [{ id: 'b' }], total: 1 } },
+        },
+      };
+      const executingFailed = {
+        consts: { no_rows: [] },
+        steps: {
+          list_pending_proposals: { output: { proposals: [{ id: 'a' }], total: 1 } },
+          list_executing_proposals: { error: { message: 'boom' } },
+        },
+      };
+
+      expect(evaluate(String(resolved.checked), both)).toBe(true);
+      expect(evaluate(String(resolved.proposals), both)).toEqual([{ id: 'a' }, { id: 'b' }]);
+      expect(evaluate(String(resolved.checked), pendingFailed)).toBe(false);
+      expect(evaluate(String(resolved.proposals), pendingFailed)).toEqual([{ id: 'b' }]);
+      expect(evaluate(String(resolved.checked), executingFailed)).toBe(false);
+      expect(evaluate(String(resolved.proposals), executingFailed)).toEqual([{ id: 'a' }]);
+
+      // Nothing live: every recommendation is new.
+      expect(plan([isolate('agent-a')], []).new).toHaveLength(1);
+      expect(plan([isolate('agent-a')], []).covered).toEqual([]);
+    });
+
+    // The whole point: a Hunt Proposal and a Forensics recommendation for the same
+    // action on the same agent are one subject. `origin: alertzero` on the list and a
+    // key built from the catalog action's own target fields are what make the namespace
+    // shared; nothing in the key says which worker raised it.
+    it('treats a Proposal another worker raised for the same action and target as covering', () => {
+      const result = plan(
+        [isolate('agent-a'), kill('agent-a', { entity_id: 'proc-1' }), isolate('agent-b')],
+        [
+          live(isolate('agent-a'), { id: 'hunt-isolate' }),
+          live(kill('agent-a', { entity_id: 'proc-1' }), { id: 'hunt-kill' }),
+        ]
+      );
+
+      expect(result.new.map(({ actionInput }) => actionInput.endpoint_ids)).toEqual([['agent-b']]);
+      expect(result.covered.map(({ proposalId }) => proposalId)).toEqual([
+        'hunt-isolate',
+        'hunt-kill',
+      ]);
+      expect(result.covered[0]).toMatchObject({
+        title: 'Isolate host agent-a',
+        ownerConversationId: OTHER,
+        sameInvestigation: false,
+        revisable: true,
+        mentioned: false,
+        revise: true,
+      });
+      // The recommendation's own payload goes to the dispatch untouched.
+      expect(result.new[0]).toEqual(isolate('agent-b'));
+    });
+
+    // A different action, agent, or process is a different subject. The key compares
+    // the target the same way on both sides, so a kill by `pid` is never absorbed by a
+    // kill by `entity_id` that may well be another process.
+    it('does not treat a different action, host, or process as covering', () => {
+      const result = plan(
+        [
+          isolate('agent-a'),
+          kill('agent-a', { entity_id: 'proc-2' }),
+          kill('agent-a', { pid: 4212 }),
+          {
+            ...kill('agent-a', { entity_id: 'proc-1' }),
+            actionId: 'system-security-action-suspend-process',
+          },
+        ],
+        [live(isolate('agent-b')), live(kill('agent-a', { entity_id: 'proc-1' }))]
+      );
+
+      expect(result.covered).toEqual([]);
+      expect(result.new).toHaveLength(4);
+    });
+
+    // The agent can recommend the same thing twice. The second copy is dropped
+    // silently: it is the agent repeating itself, not a finding another run holds.
+    it('drops a recommendation that repeats an earlier one in the same run', () => {
+      const result = plan([isolate('agent-a'), isolate('agent-a', 'Isolate agent-a again')], []);
+
+      expect(result.new.map(({ title }) => title)).toEqual(['Isolate host agent-a']);
+      expect(result.covered).toEqual([]);
+    });
+
+    // A live Proposal this Investigation already holds is a rerun finding its own:
+    // nothing to add to it and no note to write, but still nothing to create. The
+    // counts keep the two apart, and the dispatch and the loop below read the counts.
+    it('counts a Proposal this Investigation already holds without noting it', () => {
+      const result = plan(
+        [isolate('agent-a'), isolate('agent-b')],
+        [
+          live(isolate('agent-a'), { id: 'own', conversationId: INVESTIGATION }),
+          live(isolate('agent-b'), { id: 'theirs' }),
+        ]
+      );
+      expect(
+        result.covered.map(({ proposalId, sameInvestigation }) => [proposalId, sameInvestigation])
+      ).toEqual([
+        ['own', true],
+        ['theirs', false],
+      ]);
+
+      const counts = stepByName('resolve_proposal_counts')?.with ?? {};
+      const context = { steps: { resolve_proposal_lists: { output: { plan: result } } } };
+      expect(evaluate(String(counts.new_count), context)).toBe(0);
+      expect(evaluate(String(counts.already_open_count), context)).toBe(1);
+      expect(evaluate(String(counts.converged_count), context)).toBe(1);
+      expect(evaluate(String(counts.converged), context)).toEqual([result.covered[1]]);
+    });
+
+    // Whether this run may add itself to the live Proposal's comment, decided once here
+    // so the loop only has to read a flag. Each guard is Hunt's (`createAlsoRaisedByAppender`).
+    it('adds itself to a live Proposal only when that can be done safely', () => {
+      const flags = (overrides: Parameters<typeof live>[1]) =>
+        plan([isolate('agent-a')], [live(isolate('agent-a'), overrides)]).covered[0];
+
+      // Pending and undecided: revise.
+      expect(flags({})).toMatchObject({ revisable: true, mentioned: false, revise: true });
+      // Approved but not yet started stays `pending`; `revise()` refuses a decided one.
+      expect(flags({ decision: 'approve' })).toMatchObject({ revisable: false, revise: false });
+      // Executing: covered, carried out, not revisable.
+      expect(flags({ status: 'executing' })).toMatchObject({ revisable: false, revise: false });
+      // Already names this Investigation: nothing to add, but the note can still say it is on it.
+      expect(
+        flags({
+          comment: `Also raised by [Investigation](/app/alertzero?selectedConversationId=${INVESTIGATION}).`,
+        })
+      ).toMatchObject({ revisable: true, mentioned: true, revise: false });
+      // At the revision ceiling.
+      expect(flags({ revision: 5 })).toMatchObject({ revisable: true, revise: false });
+      expect(flags({ revision: 4 })).toMatchObject({ revise: true });
+      // No room left for the line.
+      expect(flags({ comment: 'x'.repeat(8000) })).toMatchObject({ revise: false });
+      expect(flags({ comment: 'x'.repeat(7999) })).toMatchObject({ revise: true });
+      // The comment the revise builds on is carried along.
+      expect(flags({ comment: 'why' }).comment).toBe('why');
+    });
+
+    describe('what the analyst is told', () => {
+      const queuedMessage = String(
+        (stepByName('journal_proposals_queued')?.with as { inputs?: { message?: string } })?.inputs
+          ?.message
+      );
+      const queued = (counts: {
+        new_count: number;
+        converged_count: number;
+        already_open_count: number;
+        checked?: boolean;
+        level?: string;
+      }) =>
+        liquid.parseAndRenderSync(queuedMessage, {
+          steps: {
+            resolve_host: { output: { host_name: 'host-a' } },
+            resolve_autonomy: { output: { level: counts.level ?? 'manual' } },
+            resolve_live_proposals: { output: { checked: counts.checked ?? true } },
+            resolve_proposal_counts: { output: counts },
+          },
+        });
+
+      it('reports what was submitted and what was already covered in the queue note', () => {
+        expect(queued({ new_count: 2, converged_count: 0, already_open_count: 0 })).toBe(
+          'Endpoint analysis of `host-a` is submitting 2 containment proposal(s) for analyst approval. The investigation closes once every proposal on it has been decided.'
+        );
+        expect(
+          queued({ new_count: 1, converged_count: 1, already_open_count: 0, level: 'supervised' })
+        ).toBe(
+          'Endpoint analysis of `host-a` is submitting 1 containment proposal(s) for auto-approval. 1 already raised by another Investigation; the notes below say where. The investigation closes once every proposal on it has been decided.'
+        );
+        // Nothing dispatched means nothing of this run's closes the Investigation.
+        expect(queued({ new_count: 0, converged_count: 1, already_open_count: 1 })).toBe(
+          'Endpoint analysis of `host-a` found containment worth proposing, but every proposal it would have raised already exists, so none was created. 1 already raised by another Investigation; the notes below say where. 1 already open on this investigation. The investigation stays open until an analyst closes it.'
+        );
+        expect(
+          queued({ new_count: 2, converged_count: 0, already_open_count: 0, checked: false })
+        ).toContain('Existing proposals could not be fully checked');
+        expect(queued({ new_count: 2, converged_count: 0, already_open_count: 0 })).not.toContain(
+          'could not be fully checked'
+        );
+        // The note still fires when everything was covered, so it has to be gated on the
+        // agent's list rather than on what was dispatched.
+        expect(stepByName('journal_proposals_queued')?.if).toContain('recommendedActions.size > 0');
+        expect(stepByName('journal_proposals_queued')?.if).not.toContain('new_count');
+      });
+
+      // One loop per finding another Investigation holds: add this Investigation to the
+      // live Proposal, then tell this Investigation where its finding went. Sequential,
+      // because the note reads the revise's outcome and must continue past its failure,
+      // which a `parallel` branch body does not allow.
+      it('converges onto the live Proposal with a revision and a journal line', () => {
+        const loop = stepByName('converge_on_live_proposals');
+        expect(loop?.type).toBe('foreach');
+        expect(loop?.if).toBe('${{ steps.resolve_proposal_counts.output.converged_count > 0 }}');
+        expect(loop?.foreach).toBe('${{ steps.resolve_proposal_counts.output.converged }}');
+        expect(loop?.steps?.map(({ name }) => name)).toEqual([
+          'revise_live_proposal',
+          'journal_convergence_note',
+        ]);
+        const names = allSteps.map(({ name }) => name);
+        expect(names.indexOf('propose_actions')).toBeLessThan(
+          names.indexOf('converge_on_live_proposals')
+        );
+        expect(names.indexOf('converge_on_live_proposals')).toBeLessThan(
+          names.indexOf('mark_processed')
+        );
+
+        const revise = stepByName('revise_live_proposal');
+        expect(revise?.type).toBe('kibana.request');
+        expect(revise?.if).toBe('${{ foreach.item.revise == true }}');
+        expect(revise?.with).toMatchObject({
+          method: 'POST',
+          path: '/s/{{ workflow.spaceId }}/internal/proposals/{{ foreach.item.proposalId }}/revisions',
+          headers: { 'kbn-xsrf': 'true', 'elastic-api-version': '1' },
+        });
+        expect(revise?.['on-failure']).toEqual({ continue: true });
+
+        const body = (revise?.with?.body as { comment: string }).comment;
+        const rendered = (spaceId: string) =>
+          liquid.parseAndRenderSync(body, {
+            workflow: { spaceId },
+            foreach: { item: { comment: 'Hunt Watch confirmed the report.' } },
+            steps: { resolve_request: { output: { investigation_id: INVESTIGATION } } },
+          });
+        expect(rendered('default')).toBe(
+          `Hunt Watch confirmed the report.\n\nAlso raised by [Investigation](/app/alertzero?selectedConversationId=${INVESTIGATION}).`
+        );
+        expect(rendered('soc')).toContain(
+          `(/s/soc/app/alertzero?selectedConversationId=${INVESTIGATION})`
+        );
+        // The line this appends has to fit under the service's cap once the comment is
+        // at the length the plan still allows.
+        expect(rendered('default').length - 'Hunt Watch confirmed the report.'.length).toBeLessThan(
+          8192 - 8000
+        );
+
+        expect(stepByName('journal_convergence_note')?.['on-failure']).toEqual({ continue: true });
+      });
+
+      // Same wording as Hunt's `buildConvergenceNote`: where the finding went, and that
+      // this Investigation was added to it only when it actually was.
+      it('says where the finding went, and claims an addition only when one landed', () => {
+        const message = String(
+          (stepByName('journal_convergence_note')?.with as { inputs?: { message?: string } })
+            ?.inputs?.message
+        );
+        const note = (
+          item: { revisable: boolean; mentioned: boolean },
+          revised: boolean,
+          spaceId = 'default'
+        ) =>
+          liquid.parseAndRenderSync(message, {
+            workflow: { spaceId },
+            foreach: {
+              item: { title: 'Isolate host agent-a', ownerConversationId: OTHER, ...item },
+            },
+            steps: {
+              revise_live_proposal: revised
+                ? { output: { proposalId: 'prop-2', revision: 2 } }
+                : {},
+            },
+          });
+
+        expect(note({ revisable: true, mentioned: false }, true)).toBe(
+          `A Proposal for "Isolate host agent-a" is already awaiting a decision, raised by [another Investigation](/app/alertzero?selectedConversationId=${OTHER}). This run found the same thing, so no second Proposal was created. This Investigation was added to it.`
+        );
+        expect(note({ revisable: true, mentioned: false }, false)).toBe(
+          `A Proposal for "Isolate host agent-a" is already awaiting a decision, raised by [another Investigation](/app/alertzero?selectedConversationId=${OTHER}). This run found the same thing, so no second Proposal was created.`
+        );
+        expect(note({ revisable: true, mentioned: true }, false)).toContain(
+          'This Investigation was added to it.'
+        );
+        expect(note({ revisable: false, mentioned: false }, false)).toBe(
+          `A Proposal for "Isolate host agent-a" has already been approved and is being carried out, raised by [another Investigation](/app/alertzero?selectedConversationId=${OTHER}). This run found the same thing, so no second Proposal was created.`
+        );
+        expect(note({ revisable: true, mentioned: false }, false, 'soc')).toContain(
+          `(/s/soc/app/alertzero?selectedConversationId=${OTHER})`
+        );
+      });
+
+      it('reports the split on the run output', () => {
+        const emit = stepByName('emit_result')?.with ?? {};
+        const when = (counts?: { new_count: number; converged_count: number }) => ({
+          steps: { resolve_proposal_counts: counts === undefined ? {} : { output: counts } },
+        });
+        expect(
+          evaluate(String(emit.proposals_submitted), when({ new_count: 2, converged_count: 1 }))
+        ).toBe(2);
+        expect(
+          evaluate(String(emit.proposals_converged), when({ new_count: 2, converged_count: 1 }))
+        ).toBe(1);
+        expect(evaluate(String(emit.proposals_submitted), when())).toBe(0);
+        expect(evaluate(String(emit.proposals_converged), when())).toBe(0);
+      });
     });
   });
 
