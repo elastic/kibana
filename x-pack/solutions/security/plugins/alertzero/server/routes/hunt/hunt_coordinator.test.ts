@@ -8,6 +8,10 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import {
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+} from '@kbn/alertzero-common';
 import type { HuntCoordinatorResponse } from '@kbn/alertzero-common';
 import { SECURITY_SOLUTION_DEFAULT_INDEX_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from '../register_routes';
@@ -156,9 +160,45 @@ describe('registerHuntCoordinatorRoute', () => {
       httpServerMock.createResponseFactory()
     );
 
-    expect(resolveScopedModelMock).toHaveBeenCalledTimes(1);
-    expect(huntCoordinatorMock.mock.calls[0][1]).toBe(model);
+    expect(resolveScopedModelMock).toHaveBeenCalledTimes(2);
+    expect(huntCoordinatorMock.mock.calls[0][1]).toEqual({
+      efficient: model,
+      frontier: model,
+    });
     expect(paramsOf().tier2_when).toBe('never');
+  });
+
+  it('resolves each tier on its own feature id', async () => {
+    const { handler, context } = makeDeps();
+
+    await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+    const featureIds = resolveScopedModelMock.mock.calls.map(([{ featureId }]) => featureId);
+    expect(featureIds).toEqual([
+      ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+      ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+    ]);
+  });
+
+  it('degrades only the unavailable tier and still passes the others', async () => {
+    resolveScopedModelMock.mockImplementation(async ({ featureId }) =>
+      featureId === ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID
+        ? { ok: false, reason: 'no_connector', message: 'no efficient connector' }
+        : { ok: true, model }
+    );
+    const { handler, context, logger } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    expect(huntCoordinatorMock.mock.calls[0][1]).toEqual({ frontier: model });
+    expect(huntCoordinatorMock.mock.calls[0][1]).not.toHaveProperty('efficient');
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('efficient model unavailable')
+    );
+    // An ordinary missing connector stays at debug.
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalled();
   });
 
   it('passes no model on a never run without a connector, and the request still succeeds', async () => {
@@ -172,19 +212,26 @@ describe('registerHuntCoordinatorRoute', () => {
 
     await handler(context, requestFor({ tier2_when: 'never' }), response);
 
-    expect(huntCoordinatorMock.mock.calls[0][1]).toBeUndefined();
+    expect(huntCoordinatorMock.mock.calls[0][1]).toEqual({
+      efficient: undefined,
+      frontier: undefined,
+    });
     expect(response.ok).toHaveBeenCalled();
   });
 
-  it('passes no model when resolution throws, logging at debug rather than failing the request', async () => {
+  it('passes no model when resolution throws, logging a warning rather than failing the request', async () => {
     resolveScopedModelMock.mockRejectedValue(new Error('connector store unavailable'));
     const { handler, context, logger } = makeDeps();
     const response = httpServerMock.createResponseFactory();
 
     await handler(context, requestFor(), response);
 
-    expect(huntCoordinatorMock.mock.calls[0][1]).toBeUndefined();
-    expect(logger.debug).toHaveBeenCalledWith(
+    expect(huntCoordinatorMock.mock.calls[0][1]).toEqual({
+      efficient: undefined,
+      frontier: undefined,
+    });
+    // A resolution that threw is a fault, so it must be visible in production.
+    expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('connector store unavailable')
     );
     expect(logger.error).not.toHaveBeenCalled();
@@ -202,7 +249,10 @@ describe('registerHuntCoordinatorRoute', () => {
 
     await handler(context, requestFor(), response);
 
-    expect(huntCoordinatorMock.mock.calls[0][1]).toBeUndefined();
+    expect(huntCoordinatorMock.mock.calls[0][1]).toEqual({
+      efficient: undefined,
+      frontier: undefined,
+    });
     expect(response.ok).toHaveBeenCalled();
   });
 

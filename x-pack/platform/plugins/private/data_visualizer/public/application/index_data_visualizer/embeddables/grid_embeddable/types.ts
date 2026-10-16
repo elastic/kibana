@@ -111,6 +111,8 @@ export interface FieldStatisticTableEmbeddableProps {
    * Optional manager used by dashboard panels to cancel in-flight and pending requests
    */
   requestCancellationManager?: RequestCancellationManager;
+
+  isInteractive?: boolean;
 }
 
 export type ESQLDataVisualizerGridEmbeddableState = Omit<

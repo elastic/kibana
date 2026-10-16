@@ -54,6 +54,7 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
   onChange,
   emptyState,
   requestCancellationManager,
+  parentApi,
 }) => {
   const { filters, query, searchBounds, interval } = useFilterQueryUpdates();
 
@@ -145,12 +146,14 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
       {changePoints.length > 0 ? (
         viewType === CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS ? (
           <ChartsGrid
+            parentApi={parentApi}
             changePoints={changePoints.map((r) => ({ ...r, ...fieldConfig }))}
             interval={requestParams.interval}
             onRenderComplete={onRenderComplete}
           />
         ) : viewType === CHANGE_POINT_DETECTION_VIEW_TYPE.TABLE ? (
           <ChangePointsTable
+            parentApi={parentApi}
             isLoading={false}
             annotations={changePoints}
             fieldConfig={fieldConfig}

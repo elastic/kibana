@@ -67,6 +67,7 @@ export interface ChangePointDetectionProps {
   filtersApi?: PublishesFilters;
   /** Optional manager used by dashboard panels to cancel in-flight and pending requests */
   requestCancellationManager?: RequestCancellationManager;
+  parentApi: unknown;
 }
 
 const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
@@ -89,6 +90,7 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
   lastReloadRequestTime,
   filtersApi,
   requestCancellationManager,
+  parentApi,
 }) => {
   const deps = useMemo(() => {
     const { charts, lens, data, usageCollection, fieldFormats, share, storage, unifiedSearch } =
@@ -167,6 +169,7 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
                     onRenderComplete={onRenderComplete}
                     onError={onError}
                     requestCancellationManager={requestCancellationManager}
+                    parentApi={parentApi}
                   />
                 </ChangePointDetectionControlsContextProvider>
               </FilterQueryContextProvider>

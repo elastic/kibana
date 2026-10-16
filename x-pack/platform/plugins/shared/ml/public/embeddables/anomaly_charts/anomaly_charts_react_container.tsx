@@ -57,6 +57,7 @@ export interface AnomalyChartsContainerProps {
    * Attachments without a cancellable host omit it.
    */
   requestCancellationManager?: RequestCancellationManager;
+  isInteractive?: boolean;
 }
 
 const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
@@ -70,6 +71,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
   api,
   showFilterIcons = true,
   requestCancellationManager,
+  isInteractive = true,
 }) => {
   const isMounted = useMountedState();
 
@@ -305,6 +307,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
               chartsService={chartsService}
               timeRange={timeRange}
               showFilterIcons={showFilterIcons}
+              isInteractive={isInteractive}
             />
           ) : null}
         </div>

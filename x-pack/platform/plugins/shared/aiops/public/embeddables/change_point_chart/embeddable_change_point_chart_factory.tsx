@@ -61,7 +61,7 @@ export const getChangePointChartEmbeddableFactory = (
 
       const changePointManager = initializeChangePointControls(state);
 
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
@@ -240,6 +240,7 @@ export const getChangePointChartEmbeddableFactory = (
               embeddingOrigin={embeddingOrigin}
               lastReloadRequestTime={lastReloadRequestTime}
               requestCancellationManager={requestCancellationManager}
+              parentApi={parentApi}
             />
           );
         },

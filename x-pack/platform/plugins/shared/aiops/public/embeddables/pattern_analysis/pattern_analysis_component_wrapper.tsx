@@ -41,6 +41,7 @@ export const PatternAnalysisEmbeddableWrapper: FC<PatternAnalysisProps> = ({
   emptyState,
   timeRange,
   requestCancellationManager,
+  parentApi,
 }) => {
   const { dataView } = useDataSource();
 
@@ -57,6 +58,7 @@ export const PatternAnalysisEmbeddableWrapper: FC<PatternAnalysisProps> = ({
       }}
     >
       <LogCategorizationEmbeddable
+        parentApi={parentApi}
         dataView={dataView}
         dataViewId={dataView.id!}
         fieldName={fieldName}

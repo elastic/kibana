@@ -61,6 +61,7 @@ export interface PatternAnalysisProps {
   filtersApi?: PublishesFilters;
   /** Optional manager used by dashboard panels to cancel in-flight and pending requests */
   requestCancellationManager?: RequestCancellationManager;
+  parentApi: unknown;
 }
 
 const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
@@ -82,6 +83,7 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
   onChange,
   filtersApi,
   requestCancellationManager,
+  parentApi,
 }) => {
   const deps = useMemo(() => {
     const {
@@ -158,6 +160,7 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
             >
               <FilterQueryContextProvider timeRange={timeRange} filtersApi={filtersApi}>
                 <PatternAnalysisEmbeddableWrapper
+                  parentApi={parentApi}
                   dataViewId={dataViewId}
                   timeRange={timeRange}
                   fieldName={fieldName}

@@ -31,6 +31,7 @@ export interface LogRateAnalysisForEmbeddableProps {
   onRenderComplete?: () => void;
   /** Optional manager used by dashboard panels to cancel in-flight and pending requests */
   requestCancellationManager?: RequestCancellationManager;
+  parentApi: unknown;
 }
 
 export const LogRateAnalysisForEmbeddable: FC<LogRateAnalysisForEmbeddableProps> = ({
@@ -38,6 +39,7 @@ export const LogRateAnalysisForEmbeddable: FC<LogRateAnalysisForEmbeddableProps>
   onLoading,
   onRenderComplete,
   requestCancellationManager,
+  parentApi,
 }) => {
   const { uiSettings } = useAiopsAppContext();
   const { dataView } = useDataSource();
@@ -88,6 +90,7 @@ export const LogRateAnalysisForEmbeddable: FC<LogRateAnalysisForEmbeddableProps>
       <LogRateAnalysisContent
         esSearchQuery={searchQuery}
         requestCancellationManager={requestCancellationManager}
+        parentApi={parentApi}
       />
     </>
   );

@@ -19,6 +19,8 @@ import {
   useFetchContext,
   titleComparators,
   timeRangeComparators,
+  getViewModeSubject,
+  type ViewMode,
 } from '@kbn/presentation-publishing';
 import { initializeStateApi } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
@@ -100,6 +102,9 @@ export const getFieldStatsChartEmbeddableFactory = (
         fieldFormats,
         ...startServices,
       };
+
+      const viewMode$ = getViewModeSubject(parentApi) ?? new BehaviorSubject<ViewMode>('view');
+
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const titleManager = initializeTitleManager(initialState);
 
@@ -307,8 +312,9 @@ export const getFieldStatsChartEmbeddableFactory = (
           }
 
           const { filters: globalFilters, query: globalQuery, timeRange } = useFetchContext(api);
-          const [dataViews, esqlQuery, viewType, showPreviewByDefault] =
+          const [viewMode, dataViews, esqlQuery, viewType, showPreviewByDefault] =
             useBatchedPublishingSubjects(
+              viewMode$,
               api.dataViews$,
               api.query$,
               api.viewType$,
@@ -412,6 +418,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                 timeRange={timeRange}
                 onRenderComplete={dataLoadingApi.onRenderComplete}
                 requestCancellationManager={requestCancellationManager}
+                isInteractive={viewMode !== 'non-interactive'}
               />
             </EuiFlexItem>
           );

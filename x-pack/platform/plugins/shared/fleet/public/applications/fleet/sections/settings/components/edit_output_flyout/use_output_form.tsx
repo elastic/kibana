@@ -86,10 +86,17 @@ import {
   validateSslPathsCombo,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
+import type { KafkaOAuth2Inputs } from './use_kafka_oauth2_inputs';
+import {
+  buildKafkaOAuth2Config,
+  extractKafkaOAuth2Secrets,
+  useKafkaOAuth2Inputs,
+  validateKafkaOAuth2Inputs,
+} from './use_kafka_oauth2_inputs';
 
 const DEFAULT_QUEUE_MAX_SIZE = 4096;
 
-export interface OutputFormInputsType {
+export interface OutputFormInputsType extends KafkaOAuth2Inputs {
   nameInput: ReturnType<typeof useInput>;
   typeInput: ReturnType<typeof useInput>;
   elasticsearchUrlInput: ReturnType<typeof useComboInput>;
@@ -163,9 +170,14 @@ function extractKafkaOutputSecrets(
     | 'kafkaSslKeySecretInput'
     | 'kafkaAuthPasswordInput'
     | 'kafkaAuthPasswordSecretInput'
-  >
+  >,
+  oauth2Secrets?: NonNullable<KafkaOutput['secrets']>['oauth2']
 ): KafkaOutput['secrets'] | null {
   const secrets: KafkaOutput['secrets'] = {};
+
+  if (oauth2Secrets) {
+    secrets.oauth2 = oauth2Secrets;
+  }
 
   if (!inputs.kafkaSslKeyInput.value && inputs.kafkaSslKeySecretInput.value) {
     secrets.ssl = {
@@ -549,6 +561,13 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     isDisabled('password')
   );
 
+  const isKafkaOAuth2Selected = kafkaAuthMethodInput.value === kafkaAuthType.OAuth2;
+  const kafkaOAuth2Inputs = useKafkaOAuth2Inputs(
+    kafkaOutput,
+    isKafkaOAuth2Selected,
+    isDisabled('oauth2')
+  );
+
   const kafkaSslCertificateAuthoritiesInput = useComboInput(
     'kafkaSslCertificateAuthoritiesComboBox',
     kafkaOutput?.ssl?.certificate_authorities ?? [],
@@ -731,6 +750,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaAuthUsernameInput,
     kafkaAuthPasswordInput,
     kafkaAuthPasswordSecretInput,
+    ...kafkaOAuth2Inputs,
     kafkaSaslMechanismInput,
     kafkaPartitionTypeInput,
     kafkaPartitionTypeRandomInput,
@@ -765,6 +785,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     const kafkaUsernameValid = kafkaAuthUsernameInput.validate();
     const kafkaPasswordPlainValid = kafkaAuthPasswordInput.validate();
     const kafkaPasswordSecretValid = kafkaAuthPasswordSecretInput.validate();
+    const kafkaOAuth2Valid = validateKafkaOAuth2Inputs(kafkaOAuth2Inputs);
     const kafkaClientIDValid = kafkaClientIdInput.validate();
     const kafkaSslCertificateAuthoritiesValid = kafkaSslCertificateAuthoritiesInput.validate();
     const kafkaSslCertificateValid = kafkaSslCertificateInput.validate();
@@ -818,6 +839,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
         kafkaSslKeyValid &&
         kafkaUsernameValid &&
         kafkaPasswordValid &&
+        kafkaOAuth2Valid &&
         kafkaHeadersValid &&
         additionalYamlConfigValid &&
         kafkaClientIDValid &&
@@ -863,6 +885,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     elasticsearchUrlInput,
     remoteElasticsearchUrlInput,
     kafkaHostsInput,
+    kafkaOAuth2Inputs,
     kafkaAuthUsernameInput,
     kafkaAuthPasswordInput,
     kafkaAuthPasswordSecretInput,
@@ -962,12 +985,15 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               (val) => val !== ''
             ).length;
 
-            const maybeSecrets = extractKafkaOutputSecrets({
-              kafkaSslKeyInput,
-              kafkaSslKeySecretInput,
-              kafkaAuthPasswordInput,
-              kafkaAuthPasswordSecretInput,
-            });
+            const maybeSecrets = extractKafkaOutputSecrets(
+              {
+                kafkaSslKeyInput,
+                kafkaSslKeySecretInput,
+                kafkaAuthPasswordInput,
+                kafkaAuthPasswordSecretInput,
+              },
+              isKafkaOAuth2Selected ? extractKafkaOAuth2Secrets(kafkaOAuth2Inputs) : undefined
+            );
 
             return {
               name: nameInput.value,
@@ -1027,6 +1053,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               kafkaSaslMechanismInput.value
                 ? { sasl: { mechanism: kafkaSaslMechanismInput.value } }
                 : {}),
+              ...(isKafkaOAuth2Selected
+                ? {
+                    oauth2: buildKafkaOAuth2Config(kafkaOutput?.oauth2, kafkaOAuth2Inputs),
+                  }
+                : {}),
 
               partition: kafkaPartitionTypeInput.value,
               ...(kafkaPartitionTypeInput.value === kafkaPartitionType.Random &&
@@ -1067,7 +1098,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
                   }
                 : {}),
               headers: kafkaHeadersInput.value,
-              timeout: parseIntegerIfStringDefined(kafkaBrokerTimeoutInput.value),
+              // not supported with OAuth2, the form does not show it then
+              ...(isKafkaOAuth2Selected
+                ? {}
+                : { timeout: parseIntegerIfStringDefined(kafkaBrokerTimeoutInput.value) }),
               broker_timeout: parseIntegerIfStringDefined(
                 kafkaBrokerReachabilityTimeoutInput.value
               ),
@@ -1232,6 +1266,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaSslKeySecretInput,
     kafkaAuthPasswordInput,
     kafkaAuthPasswordSecretInput,
+    kafkaOAuth2Inputs,
+    isKafkaOAuth2Selected,
+    kafkaOutput,
     nameInput.value,
     kafkaHostsInput.value,
     defaultOutputInput.value,

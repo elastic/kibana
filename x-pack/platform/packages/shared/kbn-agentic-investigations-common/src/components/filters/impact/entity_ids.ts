@@ -8,7 +8,7 @@
 import type { Investigation } from '../../../types';
 
 /** The slice of a queue row the Impact pills and filter read. */
-export type ImpactFilterable = Pick<Investigation, 'entityIds' | 'affectedSurface'>;
+export type ImpactFilterable = Pick<Investigation, 'entityIds' | 'entityTypes' | 'affectedSurface'>;
 
 /** Entity ids the Impact pills and filter operate on. */
 export const investigationEntityIds = (item: ImpactFilterable): string[] => {

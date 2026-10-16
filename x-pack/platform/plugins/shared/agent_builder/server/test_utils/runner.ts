@@ -469,6 +469,7 @@ export const createScopedRunnerMock = (): jest.Mocked<ScopedRunner> => {
 export const createHooksServiceStartMock = (): jest.Mocked<HooksServiceStart> => {
   return {
     run: jest.fn(async (_event: any, context: any) => context),
+    listCycleHooks: jest.fn(() => []),
   };
 };
 
@@ -518,6 +519,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
       sendToSubAgent: jest.fn(),
       getExecution: jest.fn(),
     },
+    getExecutionService: jest.fn(),
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
     parentExecutionId: undefined,

@@ -71,6 +71,8 @@ export type SingleMetricViewerPropsWithDeps = SingleMetricViewerProps & {
 
 export interface SingleMetricViewerProps {
   shouldShowForecastButton?: boolean;
+  isInteractive?: boolean;
+
   bounds?: TimeRangeBounds;
   forecastId?: string;
   selectedEntities?: MlEntity;
@@ -119,6 +121,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   selectedEntities,
   selectedJobId,
   shouldShowForecastButton,
+  isInteractive = true,
   uuid,
   isRenderComplete,
   wrapperRef,
@@ -321,6 +324,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
                       requestCancellationManager={requestCancellationManager}
                       onForecastComplete={onForecastComplete}
                       shouldShowForecastButton={shouldShowForecastButton}
+                      isInteractive={isInteractive}
                     />
                   )}
               </DatePickerContextProvider>

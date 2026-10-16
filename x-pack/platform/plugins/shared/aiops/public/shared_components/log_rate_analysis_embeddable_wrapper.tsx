@@ -63,6 +63,7 @@ export interface LogRateAnalysisEmbeddableWrapperProps {
   filtersApi?: PublishesFilters;
   /** Optional manager used by dashboard panels to cancel in-flight and pending requests */
   requestCancellationManager?: RequestCancellationManager;
+  parentApi: unknown;
 }
 
 const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps> = ({
@@ -79,6 +80,7 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
   onLoading,
   onRenderComplete,
   requestCancellationManager,
+  parentApi,
 }) => {
   const deps = useMemo(() => {
     const {
@@ -187,6 +189,7 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
                       onLoading={onLoading}
                       onRenderComplete={onRenderComplete}
                       requestCancellationManager={requestCancellationManager}
+                      parentApi={parentApi}
                     />
                   </LogRateAnalysisReduxProvider>
                 </FilterQueryContextProvider>

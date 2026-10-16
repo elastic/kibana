@@ -35,6 +35,7 @@ describe('Calculate risk scores with ESQL', () => {
 
     it('builds resolution composite query for lookup index pagination', () => {
       const query = getResolutionCompositeQuery(
+        EntityType.user,
         '.entity_analytics.risk_score.lookup-default',
         1000,
         {
@@ -46,8 +47,11 @@ describe('Calculate risk scores with ESQL', () => {
         index: '.entity_analytics.risk_score.lookup-default',
         size: 0,
         query: {
-          term: {
-            relationship_type: 'entity.relationships.resolution.resolved_to',
+          bool: {
+            filter: [
+              { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+              { prefix: { resolution_target_id: 'user:' } },
+            ],
           },
         },
         aggs: {
@@ -64,6 +68,7 @@ describe('Calculate risk scores with ESQL', () => {
 
     it('scopes query to targetEntityIds when they are provided', () => {
       const query = getResolutionCompositeQuery(
+        EntityType.user,
         '.entity_analytics.risk_score.lookup-default',
         1000,
         undefined,
@@ -75,14 +80,33 @@ describe('Calculate risk scores with ESQL', () => {
       });
     });
 
-    it('falls back to relationship_type term query when targetEntityIds is undefined', () => {
-      const query = getResolutionCompositeQuery(
+    it('limits resolution pages to targets of the entity type being scored', () => {
+      const hostQuery = getResolutionCompositeQuery(
+        EntityType.host,
+        '.entity_analytics.risk_score.lookup-default',
+        1000
+      );
+      const userQuery = getResolutionCompositeQuery(
+        EntityType.user,
         '.entity_analytics.risk_score.lookup-default',
         1000
       );
 
-      expect(query.query).toEqual({
-        term: { relationship_type: 'entity.relationships.resolution.resolved_to' },
+      expect(hostQuery.query).toEqual({
+        bool: {
+          filter: [
+            { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+            { prefix: { resolution_target_id: 'host:' } },
+          ],
+        },
+      });
+      expect(userQuery.query).toEqual({
+        bool: {
+          filter: [
+            { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+            { prefix: { resolution_target_id: 'user:' } },
+          ],
+        },
       });
     });
 
@@ -102,6 +126,21 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).toContain('resolution_target_id IN ("user:target-a", "user:target-z")');
       expect(query).toContain('BY resolution_target_id');
       expect(query).toContain('contributing_entities_raw = VALUES(entity_with_rel)');
+    });
+
+    it('keeps the alert timestamp when joining lookup rows that have their own', () => {
+      const query = getResolutionScoreESQLByIds(
+        EntityType.user,
+        ['user:target-a'],
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      const renameIndex = query.indexOf('| RENAME @timestamp as time');
+      expect(renameIndex).toBeGreaterThan(-1);
+      expect(renameIndex).toBeLessThan(query.indexOf('| LOOKUP JOIN'));
     });
 
     it('escapes quote and backslash characters in resolution target ID list', () => {
@@ -166,6 +205,31 @@ describe('Calculate risk scores with ESQL', () => {
           '.alerts-security.alerts-default'
         )
       ).toThrow('Entity ID contains an unsupported control character');
+    });
+
+    it('ranks risk inputs by the numeric risk score in every scoring query', () => {
+      const queries = [
+        getESQL(EntityType.host, { lower: 'abel', upper: 'zuzanna' }, 10000, 3500),
+        getBaseScoreESQL(
+          EntityType.host,
+          { lower: 'host:abel', upper: 'host:zuzanna' },
+          10000,
+          3500,
+          '.alerts-security.alerts-default'
+        ),
+        getResolutionScoreESQLByIds(
+          EntityType.host,
+          ['host:target-a'],
+          10000,
+          3500,
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
+        ),
+      ];
+
+      for (const query of queries) {
+        expect(query).toContain('risk_inputs = TOP(risk_score, 10, "desc", input)');
+      }
     });
   });
 

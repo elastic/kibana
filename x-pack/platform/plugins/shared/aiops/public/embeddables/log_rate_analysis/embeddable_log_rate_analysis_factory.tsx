@@ -160,7 +160,9 @@ export const getLogRateAnalysisEmbeddableFactory = (
       );
 
       const onLoading = (v: boolean) => dataLoading$.next(v);
-      const onRenderComplete = () => dataLoading$.next(false);
+      const onRenderComplete = () => {
+        dataLoading$.next(false);
+      };
       const onError = (error: Error) => {
         // A cancellation is not a panel error
         if (error?.name === 'AbortError') return;
@@ -216,6 +218,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
               embeddingOrigin={embeddingOrigin}
               lastReloadRequestTime={lastReloadRequestTime}
               requestCancellationManager={requestCancellationManager}
+              parentApi={parentApi}
             />
           );
         },

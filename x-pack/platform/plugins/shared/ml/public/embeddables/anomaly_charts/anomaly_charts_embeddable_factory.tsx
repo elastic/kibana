@@ -11,23 +11,23 @@ import React from 'react';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
-import { Subscription, map, merge } from 'rxjs';
+import { BehaviorSubject, Subscription, distinctUntilChanged, map, merge } from 'rxjs';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import {
+  apiHasExecutionContext,
   fetch$,
+  getViewModeSubject,
+  initializeStateApi,
+  initializeTimeRangeManager,
+  initializeTitleManager,
   RequestCancellationManager,
   timeRangeComparators,
   titleComparators,
+  useStateFromPublishingSubject,
+  type ViewMode,
 } from '@kbn/presentation-publishing';
-import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import useUnmount from 'react-use/lib/useUnmount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import {
-  apiHasExecutionContext,
-  initializeTimeRangeManager,
-  initializeTitleManager,
-} from '@kbn/presentation-publishing';
-import { initializeStateApi } from '@kbn/presentation-publishing';
-import { distinctUntilChanged } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
@@ -177,6 +177,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
         ...pluginsStartServices,
       };
 
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
       return {
         api,
         Component: () => {
@@ -196,6 +198,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
             subscriptions.unsubscribe();
           });
           const { euiTheme } = useEuiTheme();
+
+          const viewMode = useStateFromPublishingSubject(viewMode$);
 
           return (
             <KibanaRenderContextProvider {...coreStartServices}>
@@ -218,6 +222,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                     onError={onError}
                     timeRange$={appliedTimeRange$}
                     requestCancellationManager={requestCancellationManager}
+                    isInteractive={viewMode !== 'non-interactive'}
                   />
                 </div>
               </KibanaContextProvider>
