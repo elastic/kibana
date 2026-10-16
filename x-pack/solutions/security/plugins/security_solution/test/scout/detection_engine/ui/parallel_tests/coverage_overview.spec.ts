@@ -24,7 +24,8 @@ spaceTest.describe(
   'Coverage Overview — managed MITRE source',
   { tag: tags.stateful.classic },
   () => {
-    spaceTest.beforeEach(async ({ browserAuth }) => {
+    spaceTest.beforeEach(async ({ apiServices, browserAuth }) => {
+      await apiServices.detectionRule.deleteAll();
       await browserAuth.loginAsPlatformEngineer();
     });
 
