@@ -204,6 +204,41 @@ describe('Impact', () => {
       expect(visibleRow().getByTestId(IMPACT_OVERFLOW_TEST_SUBJ)).toHaveTextContent('+2');
     });
 
+    it('opens three more rows per +n click and collapses back to two', () => {
+      const thirtyHosts = Array.from({ length: 30 }, (_, index) =>
+        investigation({ id: `inv-${index}`, entityIds: [`host-${index}`] })
+      );
+      renderWithKibanaRenderContext(
+        <Impact items={thirtyHosts} entityFilter={null} onEntityFilterChange={jest.fn()} />
+      );
+      const pillCount = () => visibleRow().getAllByTestId(IMPACT_PILL_TEST_SUBJ).length;
+      const overflow = () => visibleRow().getByTestId(IMPACT_OVERFLOW_TEST_SUBJ);
+
+      expect(pillCount()).toBe(5);
+      expect(overflow()).toHaveTextContent('+25');
+      expect(visibleRow().queryByTestId(IMPACT_COLLAPSE_TEST_SUBJ)).not.toBeInTheDocument();
+
+      // 5 rows: 4 full rows, then two pills with "+n" and "show fewer".
+      fireEvent.click(within(overflow()).getByRole('button'));
+      expect(pillCount()).toBe(14);
+      expect(overflow()).toHaveTextContent('+16');
+      expect(visibleRow().getByTestId(IMPACT_COLLAPSE_TEST_SUBJ)).toBeInTheDocument();
+
+      fireEvent.click(within(overflow()).getByRole('button'));
+      expect(pillCount()).toBe(23);
+      expect(overflow()).toHaveTextContent('+7');
+
+      fireEvent.click(within(overflow()).getByRole('button'));
+      expect(pillCount()).toBe(30);
+      expect(visibleRow().queryByTestId(IMPACT_OVERFLOW_TEST_SUBJ)).not.toBeInTheDocument();
+
+      fireEvent.click(
+        within(visibleRow().getByTestId(IMPACT_COLLAPSE_TEST_SUBJ)).getByRole('button')
+      );
+      expect(pillCount()).toBe(5);
+      expect(overflow()).toHaveTextContent('+25');
+    });
+
     it('drops the collapse control when an expanded list shrinks to fit', () => {
       const { rerender } = renderWithKibanaRenderContext(
         <Impact items={sevenHosts} entityFilter={null} onEntityFilterChange={jest.fn()} />

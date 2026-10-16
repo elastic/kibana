@@ -126,6 +126,8 @@ export type EscalationConversationSummary = ConversationWithoutRoundsWithPermiss
    * them has an Impact document or the impact could not be read.
    */
   entity_ids?: string[];
+  /** Entity type (`host`, `user`, …) by entity id, for the ids that have one. */
+  entity_types?: Record<string, string>;
 };
 
 export interface ListEscalationsResponse {

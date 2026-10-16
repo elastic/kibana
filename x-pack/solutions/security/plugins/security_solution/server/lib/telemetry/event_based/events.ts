@@ -39,6 +39,7 @@ import type {
 } from '../../detection_engine/rule_management/logic/detection_rules_client/restore_telemetry';
 import type {
   RuleDuplicateTelemetry,
+  RuleImportTelemetry,
   RuleLifecycleTelemetry,
 } from '../../detection_engine/rule_management/logic/detection_rules_client/rule_lifecycle_telemetry';
 import { TRIAL_COMPANION_EVENTS } from '../../trial_companion/telemetry/trial_companion_ebt_events';
@@ -183,9 +184,15 @@ const ruleLifecycleTelemetrySchema = {
   },
 };
 
-export const DETECTION_RULE_IMPORT_EVENT: EventTypeOpts<RuleLifecycleTelemetry> = {
+export const DETECTION_RULE_IMPORT_EVENT: EventTypeOpts<RuleImportTelemetry> = {
   eventType: 'detection_rule_import',
-  schema: ruleLifecycleTelemetrySchema,
+  schema: {
+    ...ruleLifecycleTelemetrySchema,
+    outcome: {
+      type: 'keyword',
+      _meta: { description: 'Result of importing the rule: created, updated or skipped' },
+    },
+  },
 };
 
 export const DETECTION_RULE_REVERT_EVENT: EventTypeOpts<RuleLifecycleTelemetry> = {
@@ -2562,6 +2569,7 @@ export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
   workflowEnabled: boolean;
   autoCloseEnabled: boolean;
   createConversation: boolean;
+  usePrompt: boolean;
   connectorConfigured: boolean;
   customAgent: boolean;
   autoCloseConfidenceScoreMinThreshold: number;
@@ -2584,6 +2592,12 @@ export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
     createConversation: {
       type: 'boolean',
       _meta: { description: 'Whether a new AI conversation is created per alert analysis' },
+    },
+    usePrompt: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the workflow classifies with a single prompt instead of an AI agent',
+      },
     },
     connectorConfigured: {
       type: 'boolean',

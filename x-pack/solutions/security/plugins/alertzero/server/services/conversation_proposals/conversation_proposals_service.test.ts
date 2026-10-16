@@ -85,12 +85,19 @@ const makeImpactClient = (
   entityIdsByConversationId: Record<string, string[]> = {}
 ): AgenticInvestigationsPluginStart['getImpactClient'] =>
   jest.fn().mockReturnValue({
-    getEntityIdsByConversationId: jest.fn().mockImplementation(
+    getEntitiesByConversationId: jest.fn().mockImplementation(
       async (ids: string[]) =>
         new Map(
           [...new Set(ids)].flatMap((conversationId) => {
             const entityIds = entityIdsByConversationId[conversationId];
-            return entityIds ? [[conversationId, entityIds] as [string, string[]]] : [];
+            return entityIds
+              ? [
+                  [conversationId, entityIds.map((id) => ({ id }))] as [
+                    string,
+                    Array<{ id: string }>
+                  ],
+                ]
+              : [];
           })
         )
     ),
@@ -375,10 +382,18 @@ describe('ConversationProposalsService', () => {
         makeProposal({ id: 'p2', conversationId: 'shared' }),
         makeProposal({ id: 'p3', conversationId: 'other' }),
       ];
-      const getEntityIdsByConversationId = jest
-        .fn()
-        .mockResolvedValue(new Map([['shared', ['user-1', 'host-1']]]));
-      const getImpactClient = jest.fn().mockReturnValue({ getEntityIdsByConversationId });
+      const getEntitiesByConversationId = jest.fn().mockResolvedValue(
+        new Map([
+          [
+            'shared',
+            [
+              { id: 'user-1', type: 'user' },
+              { id: 'host-1', type: 'host' },
+            ],
+          ],
+        ])
+      );
+      const getImpactClient = jest.fn().mockReturnValue({ getEntitiesByConversationId });
 
       const service = new ConversationProposalsService(
         makeProposalsService(proposals),
@@ -392,19 +407,20 @@ describe('ConversationProposalsService', () => {
       });
 
       expect(getImpactClient).toHaveBeenCalledWith(request);
-      expect(getEntityIdsByConversationId).toHaveBeenCalledWith(['shared', 'shared', 'other']);
+      expect(getEntitiesByConversationId).toHaveBeenCalledWith(['shared', 'shared', 'other']);
       expect(result.proposals[0].entityIds).toEqual(['user-1', 'host-1']);
+      expect(result.proposals[0].entityTypes).toEqual({ 'user-1': 'user', 'host-1': 'host' });
       expect(result.proposals[1].entityIds).toEqual(['user-1', 'host-1']);
       expect(result.proposals[2]).not.toHaveProperty('entityIds');
     });
 
     it('omits entity ids for an impact recorded without entities', async () => {
-      const getEntityIdsByConversationId = jest.fn().mockResolvedValue(new Map([['conv-1', []]]));
+      const getEntitiesByConversationId = jest.fn().mockResolvedValue(new Map([['conv-1', []]]));
       const service = new ConversationProposalsService(
         makeProposalsService([makeProposal()]),
         makeAgentBuilder(),
         logger,
-        jest.fn().mockReturnValue({ getEntityIdsByConversationId })
+        jest.fn().mockReturnValue({ getEntitiesByConversationId })
       );
       const result = await service.listByCategory('investigate', request, spaceId, {
         size: 10,
@@ -420,7 +436,7 @@ describe('ConversationProposalsService', () => {
         makeAgentBuilder(),
         logger,
         jest.fn().mockReturnValue({
-          getEntityIdsByConversationId: jest.fn().mockRejectedValue(new Error('index missing')),
+          getEntitiesByConversationId: jest.fn().mockRejectedValue(new Error('index missing')),
         })
       );
       const result = await service.listByCategory('investigate', request, spaceId, {
@@ -449,7 +465,8 @@ describe('ConversationProposalsService', () => {
       expect(proposalsService.list).toHaveBeenCalledWith(
         expect.objectContaining({
           decidedWithinHours: 72,
-          excludeSuperseded: true,
+          excludeSuperseded: false,
+          excludeUndecidedSuperseded: true,
           size: 25,
           from: 0,
         }),
