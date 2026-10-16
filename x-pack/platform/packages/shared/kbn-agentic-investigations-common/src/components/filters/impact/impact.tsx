@@ -11,6 +11,7 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTextTruncate,
@@ -20,6 +21,7 @@ import {
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import type { ImpactFilterable } from './entity_ids';
+import { entityTypeIcon } from './entity_type_icon';
 import { impactPills } from './impact_pills';
 import type { ImpactPill } from './impact_pills';
 import { IMPACT_LABELS } from './translations';
@@ -65,7 +67,8 @@ const PillBadge: React.FC<PillBadgeProps> = ({
   return (
     <EuiBadge
       {...interactiveProps}
-      iconType={iconType}
+      // A labelled pill draws its own 16px icon below; EuiBadge would render it at 12px.
+      iconType={isIconOnly ? iconType : undefined}
       style={{ padding, textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
       css={css({
         background: selected
@@ -81,13 +84,18 @@ const PillBadge: React.FC<PillBadgeProps> = ({
     >
       {label !== undefined && (
         <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false} direction="row">
+          {iconType !== undefined && (
+            <EuiFlexItem grow={false} css={css({ padding: `0 ${euiTheme.size.xs}` })}>
+              <EuiIcon type={iconType} size="m" color="subdued" aria-hidden="true" />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiText size="xs" style={{ padding: `0 ${euiTheme.size.xs}` }}>
               <EuiTextTruncate text={label} width={120} truncation="end" />
             </EuiText>
           </EuiFlexItem>
           {count !== undefined && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} css={css({ paddingLeft: euiTheme.size.xs })}>
               <EuiBadge color="hollow">{count}</EuiBadge>
             </EuiFlexItem>
           )}
@@ -163,6 +171,7 @@ export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFil
     >
       <PillBadge
         label={pill.entityId}
+        iconType={entityTypeIcon(pill.entityType)}
         count={pill.count}
         selected={entityFilter === pill.entityId}
         ariaLabel={pill.entityId}
