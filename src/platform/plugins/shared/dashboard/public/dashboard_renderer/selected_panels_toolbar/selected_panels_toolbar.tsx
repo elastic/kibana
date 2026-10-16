@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiToolTip,
+  euiFontSize,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -67,7 +68,11 @@ export const SelectedPanelsToolbar = () => {
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color="primary" data-test-subj="dashboardSelectedPanelsCount">
+          <EuiBadge
+            color="primary"
+            css={styles.count}
+            data-test-subj="dashboardSelectedPanelsCount"
+          >
             <FormattedMessage
               id="dashboard.selectedPanelsToolbar.selectedCount"
               defaultMessage="{count} selected"
@@ -103,4 +108,6 @@ const selectedPanelsToolbarStyles = {
       transform: 'translateX(-50%)',
       zIndex: euiTheme.levels.toast,
     }),
+  // EuiBadge is fixed to the `xs` font scale; use the `s` scale of the small "Delete" button next to it
+  count: (euiThemeContext: UseEuiTheme) => css(euiFontSize(euiThemeContext, 's')),
 };
