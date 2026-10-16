@@ -11,13 +11,13 @@ import type {
   ConversationRoundAuthor,
   ConversationRoundOrigin,
   ConversationRoundStep,
-  CurrentUser,
   EventActor,
   ExecutionInterruption,
   ExecutionInterruptionType,
   ExecutionOutcome,
   ExecutionPartialRunSummary,
   ExecutionRunSummary,
+  UserIdAndName,
   RoundInput,
   TimelineEvent,
   UserPrincipalType,
@@ -245,8 +245,11 @@ export const userMessageActor = (
   };
 };
 
-/** Actor for events the current principal appends directly, outside a round. */
-export const currentUserActor = (user: CurrentUser): EventActor => ({
+/**
+ * Actor for events a principal writes directly, outside a round: custom events the current user
+ * appends, and the activity events of the writes it makes.
+ */
+export const currentUserActor = (user: UserIdAndName): EventActor => ({
   type: EventActorType.user,
   id: user.id ?? user.username,
   ...(user.username ? { username: user.username } : {}),

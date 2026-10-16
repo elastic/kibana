@@ -80,6 +80,11 @@ export interface FlyoutHeaderProps {
   titleIcon?: EuiIconProps['type'];
   /** Tooltip shown from the title icon. */
   titleTooltip?: ReactNode;
+  /**
+   * Shows a loading spinner after the title. It renders outside the heading, so it does not
+   * become part of the flyout's accessible name.
+   */
+  isLoading?: boolean;
   /** Subdued text below the title. */
   description?: ReactNode;
   /**

@@ -336,6 +336,26 @@ agentBuilder.agents.register({
 
 `inference_feature_id` is only supported for built-in agents, and cannot be set by agent types.
 
+### Choosing the agent's reasoning level
+
+A built-in agent can declare the reasoning level its runs use by default:
+
+```ts
+agentBuilder.agents.register({
+  id: 'platform.my_solution.agent',
+  name: 'My solution agent',
+  description: 'Agent specialized in my solution',
+  configuration: {
+    instructions: 'You are a specialist [...]',
+    tools: [{ tool_ids: ['[...]'] }],
+    inference_feature_id: 'my_solution_agent',
+    reasoning_level: 'high',
+  },
+});
+```
+
+`reasoning_level` is only supported for built-in agents, and cannot be set by agent types.
+
 ## Registering attachment types
 
 Attachments are used to provide additional context when conversing with an agent.
