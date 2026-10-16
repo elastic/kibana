@@ -4053,9 +4053,6 @@ importers:
       dompurify:
         specifier: 3.4.14
         version: 3.4.14
-      dotenv:
-        specifier: 17.2.4
-        version: 17.2.4
       elastic-apm-node:
         specifier: 4.18.0
         version: 4.18.0(supports-color@10.2.2)
