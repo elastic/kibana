@@ -28,6 +28,7 @@ import {
 } from '../../../../common/constants';
 import {
   COMMENT_ATTACHMENT_TYPE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
 } from '../../../../common/constants/attachments';
 import { NodeBuilderOperators, buildFilter, combineFilters } from '../../../client/utils';
@@ -42,6 +43,7 @@ import {
 } from '../../../../common/types/domain';
 import type {
   AlertIdsAggsResult,
+  AttackIdsAggsResult,
   BulkOptionalAttributes,
   EventIdsAggsResult,
   GetAllAlertsAttachToCaseArgs as GetAllDocumentsAttachedToCaseArgs,
@@ -461,6 +463,46 @@ export class AttachmentGetter {
       return new Set([...legacyAlertIds, ...unifiedAlertIds]);
     } catch (error) {
       this.context.log.error(`Error on GET all alerts ids for case id ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieves all the attacks attached to a case.
+   */
+  public async getAllAttackIds({ caseId }: { caseId: string }): Promise<Set<string>> {
+    try {
+      this.context.log.debug(`Attempting to GET all attack ids for case id ${caseId}`);
+
+      // Attacks only ever exist as unified attachments — unlike alerts and events there is no
+      // legacy `cases-comments` shape to union in. `MAX_ALERTS_PER_CASE` bounds the terms
+      // aggregation for the same reason `getAllEventIds` uses it: attacks have no per-case
+      // limit of their own, and it is the largest per-case attachment bound there is.
+      const res = await this.context.unsecuredSavedObjectsClient.find<unknown, AttackIdsAggsResult>(
+        {
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+          filter: buildFilter({
+            filters: [SECURITY_ATTACK_ATTACHMENT_TYPE],
+            field: 'type',
+            operator: 'or',
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+          }),
+          perPage: 0,
+          aggs: {
+            attackIds: {
+              terms: {
+                field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId`,
+                size: MAX_ALERTS_PER_CASE,
+              },
+            },
+          },
+        }
+      );
+
+      return new Set(res.aggregations?.attackIds.buckets.map((bucket) => bucket.key) ?? []);
+    } catch (error) {
+      this.context.log.error(`Error on GET all attack ids for case id ${caseId}: ${error}`);
       throw error;
     }
   }

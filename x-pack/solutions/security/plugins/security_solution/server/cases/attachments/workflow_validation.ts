@@ -54,6 +54,27 @@ export const validateAlertWorkflowTargets = ({
   }
 };
 
+// Attacks are run through the alerts workflow panel, so the selected ids arrive in `event.alertIds`
+// exactly as they do for alerts — they are the attack ids rather than the ids of the alerts the
+// attacks group together.
+export const validateAttackWorkflowTargets = ({
+  targets,
+  inputs,
+}: WorkflowAttachmentValidationContext): void => {
+  const selectedIds = getSelectedIds(inputs, 'alertIds');
+  if (selectedIds.length === 0) {
+    throw Boom.badRequest('Attack attachment workflow origins require selected attack inputs.');
+  }
+  if (
+    !targetsMatch(
+      targets.map(({ id }) => id),
+      selectedIds
+    )
+  ) {
+    throw Boom.badRequest('Attack workflow origin targets must match the selected attacks.');
+  }
+};
+
 export const validateEventWorkflowTargets = ({
   targets,
   inputs,
