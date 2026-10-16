@@ -101,6 +101,19 @@ describe('EscalationQueue', () => {
     expect(screen.getByTestId('escalationQueueNote-open')).toHaveTextContent('About escalations');
   });
 
+  it('does not render the note when the queue failed to load', () => {
+    renderWithKibanaRenderContext(
+      <EscalationQueue
+        status="open"
+        escalations={[]}
+        note="About escalations"
+        error={new Error('boom')}
+        renderAssignees={() => <span />}
+      />
+    );
+    expect(screen.queryByTestId('escalationQueueNote-open')).not.toBeInTheDocument();
+  });
+
   it('shows 0 in the count badge for an empty list', () => {
     renderQueue('closed', []);
     expect(screen.getByText('0')).toBeInTheDocument();

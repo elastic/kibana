@@ -96,6 +96,10 @@ export const EscalationsPage: React.FC = () => {
       .filter((item) => (seen.has(item.id) ? false : seen.add(item.id)));
   }, [closedPages]);
 
+  const openIsEmpty = openQuery.data?.pagination.total === 0;
+  // Stable element so the memoized queue is not re-rendered by unrelated page updates.
+  const openNote = useMemo(() => <EscalationsOpenNote isEmpty={openIsEmpty} />, [openIsEmpty]);
+
   const isLoading = openQuery.isLoading || closedQuery.isLoading;
   const hasAnyData = openQuery.data ?? closedQuery.data;
   // Page-level error only when *both* queries failed with no cached data.
@@ -214,7 +218,7 @@ export const EscalationsPage: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EscalationQueue
                 status="open"
-                note={<EscalationsOpenNote isEmpty={openQuery.data?.pagination.total === 0} />}
+                note={openNote}
                 escalations={visibleOpenItems}
                 loadedCount={openItems.length}
                 isFiltered={Boolean(entityFilter)}

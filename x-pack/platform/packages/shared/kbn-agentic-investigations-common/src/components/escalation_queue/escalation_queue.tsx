@@ -207,7 +207,7 @@ export const EscalationQueue = memo<EscalationQueueProps>(
           }}
         >
           {bodyContent}
-          {note ? (
+          {note && !error ? (
             <div
               css={css`
                 padding: ${euiTheme.size.base};
