@@ -484,6 +484,16 @@ describe('useAgentDetection', () => {
       });
     });
 
+    it('does not say that while the integration has no live units yet', () => {
+      mockGetUnitSummary.mockReturnValue({ total: 0, stopped: 0 });
+      const { result } = setup({
+        agentPolicies: [policyNeeding94],
+        agents: [versioned('9.6.0', { status: 'error' })],
+      });
+
+      expect(result.current.summaryByInstanceId.s3.unhealthyElsewhere).toBeUndefined();
+    });
+
     it('does not say that for an agent that is simply healthy', () => {
       const { result } = setup({ agentPolicies: [policyNeeding94], agents: [versioned('9.6.0')] });
 

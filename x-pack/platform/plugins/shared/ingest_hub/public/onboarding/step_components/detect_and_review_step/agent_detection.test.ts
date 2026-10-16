@@ -784,6 +784,25 @@ describe('unhealthyElsewhere', () => {
     }
   );
 
+  it('is not set while the integration has no live units, since it is not known to be running', () => {
+    const agent = { ...makeAgent('a1', 'error'), components: [{ id: 'c1' }] } as unknown as Agent;
+    const summary = summarizeInstanceAgents([agent], {
+      a1: { alertLevel: null, hasLiveUnits: false },
+    });
+
+    expect(summary).toMatchObject({ health: 'healthy', noLiveUnits: true });
+    expect(summary.unhealthyElsewhere).toBeUndefined();
+  });
+
+  it('is set once the integration has live units', () => {
+    const agent = { ...makeAgent('a1', 'error'), components: [{ id: 'c1' }] } as unknown as Agent;
+    const summary = summarizeInstanceAgents([agent], {
+      a1: { alertLevel: null, hasLiveUnits: true },
+    });
+
+    expect(summary.unhealthyElsewhere).toBe(true);
+  });
+
   it('is not set for an agent that is simply online', () => {
     const summary = summarizeInstanceAgents([makeAgent('a1', 'online')], {
       a1: { alertLevel: null },

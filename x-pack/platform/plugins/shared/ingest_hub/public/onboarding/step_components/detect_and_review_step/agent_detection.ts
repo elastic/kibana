@@ -312,7 +312,10 @@ export const summarizeInstanceAgents = (
   }
   const healthy = agents.find((agent) => healthOf(agent) === 'healthy');
   if (healthy) {
-    const unhealthyElsewhere = healthy.status === 'error' || healthy.status === 'degraded';
+    // Only say the integration is running when it has live units; while it is still starting, the
+    // agent's own status is all there is to show.
+    const unhealthyElsewhere =
+      !noLiveUnits && (healthy.status === 'error' || healthy.status === 'degraded');
     return {
       health: 'healthy',
       agent: healthy,
