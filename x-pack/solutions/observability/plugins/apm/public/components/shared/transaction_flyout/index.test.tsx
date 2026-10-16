@@ -123,6 +123,17 @@ describe('TransactionFlyout', () => {
     expect(screen.queryByTestId('transactionFlyoutTabs')).not.toBeInTheDocument();
   });
 
+  it('shows an empty body without a skeleton when the transaction fails to load', () => {
+    setFetch(undefined, FETCH_STATUS.FAILURE);
+
+    renderFlyout();
+
+    expect(screen.getByRole('heading', { name: 'Transaction details' })).toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('transactionFlyoutTabs')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mockTransactionMetadata')).not.toBeInTheDocument();
+  });
+
   it('shows the transaction header, tabs, and the dropped spans callout once loaded', () => {
     setFetch(buildTransaction('tx-1', 'GET /api', 3), FETCH_STATUS.SUCCESS);
 

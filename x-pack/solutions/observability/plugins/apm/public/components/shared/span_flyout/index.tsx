@@ -109,7 +109,7 @@ export function SpanFlyout({
           />
         ) : null}
         {databaseCallout}
-        {span ? null : <EuiSkeletonText isLoading />}
+        {isLoading ? <EuiSkeletonText isLoading /> : null}
         {tabs.map(({ tab, panel }) => (
           <FlyoutTemplate.Body.TabPanel key={tab.id} tabId={tab.id}>
             {panel}

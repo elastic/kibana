@@ -28,9 +28,13 @@ export interface TransactionFlyoutFooterMenu {
  * Resolves the waterfall transaction flyout "Investigate" menu as one custom footer item.
  * The item renders the same sections and custom links as the page action menu.
  */
-export function useTransactionFlyoutFooterMenu(
-  transaction: Transaction | undefined
-): TransactionFlyoutFooterMenu {
+export function useTransactionFlyoutFooterMenu({
+  transaction,
+  isTransactionLoading,
+}: {
+  transaction: Transaction | undefined;
+  isTransactionLoading: boolean;
+}): TransactionFlyoutFooterMenu {
   const license = useLicenseContext();
   const hasGoldLicense = !!(license?.isActive && license?.hasAtLeast('gold'));
   const { profilingLocators, isLoading: isProfilingLoading } = useProfilingPlugin();
@@ -75,7 +79,7 @@ export function useTransactionFlyoutFooterMenu(
 
   return {
     panels,
-    isLoading: !transaction || isProfilingLoading,
+    isLoading: isTransactionLoading || isProfilingLoading,
     hasActions: !!transaction,
     customLinkFlyout,
   };

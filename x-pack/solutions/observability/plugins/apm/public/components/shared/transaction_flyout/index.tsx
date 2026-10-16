@@ -56,7 +56,8 @@ export function TransactionFlyout({
 
   // The fetcher keeps the previous document while the next one loads; gate on the status so a
   // switch between waterfall items never shows the previous transaction.
-  const transaction = isPending(status) ? undefined : data;
+  const isTransactionLoading = isPending(status);
+  const transaction = isTransactionLoading ? undefined : data;
 
   const { title, titleText, infoBlocks, badges } = useTransactionFlyoutHeader({
     transaction,
@@ -65,8 +66,10 @@ export function TransactionFlyout({
   });
   const tabs = useTransactionFlyoutTabs({ transaction, spanLinksCount });
   const droppedSpansCallout = useDroppedSpansCallout(transaction);
-  const { panels, isLoading, hasActions, customLinkFlyout } =
-    useTransactionFlyoutFooterMenu(transaction);
+  const { panels, isLoading, hasActions, customLinkFlyout } = useTransactionFlyoutFooterMenu({
+    transaction,
+    isTransactionLoading,
+  });
 
   return (
     <>
@@ -89,7 +92,7 @@ export function TransactionFlyout({
         </FlyoutTemplate.Header>
         <FlyoutTemplate.Body>
           {droppedSpansCallout}
-          {transaction ? null : <EuiSkeletonText isLoading />}
+          {isTransactionLoading ? <EuiSkeletonText isLoading /> : null}
           {tabs.map(({ tab, panel }) => (
             <FlyoutTemplate.Body.TabPanel key={tab.id} tabId={tab.id}>
               {panel}
@@ -100,7 +103,7 @@ export function TransactionFlyout({
           <FlyoutTemplate.Footer.PrimaryActionMenu
             label={INVESTIGATE_LABEL}
             panels={panels}
-            isLoading={isLoading && !hasActions}
+            isLoading={isLoading}
             isDisabled={!hasActions}
             data-test-subj="transactionFlyoutActionsButton"
             {...getEbtProps({

@@ -39,7 +39,6 @@ export function useTransactionFlyoutTabs({
     return [];
   }
 
-  // The metadata fetch keeps the previous document's data while the next one loads.
   const genAiTabContent = isMetadataLoading
     ? undefined
     : getGenAiTabContent({

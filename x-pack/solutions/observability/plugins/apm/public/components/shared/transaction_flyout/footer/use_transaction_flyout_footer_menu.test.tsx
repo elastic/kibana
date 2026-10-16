@@ -73,8 +73,8 @@ const setLicense = (hasGold: boolean) =>
     hasAtLeast: () => hasGold,
   } as unknown as ReturnType<typeof useLicenseContext>);
 
-const renderMenu = (doc: Transaction | undefined) =>
-  renderHook(() => useTransactionFlyoutFooterMenu(doc));
+const renderMenu = (doc: Transaction | undefined, isTransactionLoading = !doc) =>
+  renderHook(() => useTransactionFlyoutFooterMenu({ transaction: doc, isTransactionLoading }));
 
 const investigateItem = (panels: ReturnType<typeof renderMenu>['result']['current']['panels']) =>
   panels[0].items[0] as FlyoutFooterMenuCustomItem;
@@ -145,6 +145,15 @@ describe('useTransactionFlyoutFooterMenu', () => {
 
     expect(panels).toEqual([{ id: 0, items: [] }]);
     expect(isLoading).toBe(true);
+    expect(hasActions).toBe(false);
+  });
+
+  it('stops loading and stays disabled when the transaction fails to load', () => {
+    mockUseSections.mockReturnValue([]);
+
+    const { isLoading, hasActions } = renderMenu(undefined, false).result.current;
+
+    expect(isLoading).toBe(false);
     expect(hasActions).toBe(false);
   });
 

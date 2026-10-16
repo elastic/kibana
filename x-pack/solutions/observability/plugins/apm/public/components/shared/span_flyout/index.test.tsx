@@ -138,6 +138,20 @@ describe('SpanFlyout', () => {
     expect(lastMenuPropsArgs()).toEqual(expect.objectContaining({ isSpanLoaded: false }));
   });
 
+  it.each([
+    ['fails to load', FETCH_STATUS.FAILURE],
+    ['is not found', FETCH_STATUS.SUCCESS],
+  ])('shows an empty body without a skeleton when the span %s', (_, status) => {
+    setFetch(undefined, status);
+
+    renderFlyout();
+
+    expect(screen.getByRole('heading', { name: 'Span details' })).toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('spanFlyoutTabs')).not.toBeInTheDocument();
+    expect(lastMenuPropsArgs()).toEqual(expect.objectContaining({ isSpanLoaded: false }));
+  });
+
   it('shows the span header, the database statement callout, and the Discover action', () => {
     setFetch(buildSpan(), FETCH_STATUS.SUCCESS);
 
