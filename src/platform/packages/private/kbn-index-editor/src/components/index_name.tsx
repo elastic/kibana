@@ -16,7 +16,11 @@ import React, { useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import useMount from 'react-use/lib/useMount';
 import type { KibanaContextExtra } from '../types';
-import { INDEX_NAME_INVALID_CHARS, INDEX_NAME_INVALID_START_CHARS } from '../constants';
+import {
+  DEFAULT_LOOKUP_INDEX_NAME_PREFIX,
+  INDEX_NAME_INVALID_CHARS,
+  INDEX_NAME_INVALID_START_CHARS,
+} from '../constants';
 
 export const IndexName: FC = () => {
   const {
@@ -57,6 +61,13 @@ export const IndexName: FC = () => {
       setIsLoading(false);
       return;
     }
+
+    if (!isIndexCreated && indexNameValue === DEFAULT_LOOKUP_INDEX_NAME_PREFIX) {
+      setIsInitialized(true);
+      setIsLoading(false);
+      return;
+    }
+
     setIndexName(indexNameValue).then(() => {
       setIsInitialized(true);
     });
@@ -131,7 +142,10 @@ export const IndexName: FC = () => {
     return null; // or a loading spinner
   }
 
-  const startWithEditOpen = error.length > 0 || !indexNameValue;
+  const isLookupNamePlaceholder =
+    !isIndexCreated && indexNameValue === DEFAULT_LOOKUP_INDEX_NAME_PREFIX;
+
+  const startWithEditOpen = error.length > 0 || !indexNameValue || isLookupNamePlaceholder;
 
   return (
     <EuiInlineEditTitle

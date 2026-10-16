@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { Fragment, useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -44,6 +44,15 @@ import { useAppContext, useServices } from '../../../../app_context';
 
 import { generateRandomIndexName, isValidIndexName } from './utils';
 
+const LOOKUP_INDEX_NAME_PREFIX = 'lookup-';
+
+const getDefaultIndexNameForMode = (mode: string) => {
+  if (mode === LOOKUP_INDEX_MODE) {
+    return LOOKUP_INDEX_NAME_PREFIX;
+  }
+  return generateRandomIndexName();
+};
+
 const INVALID_INDEX_NAME_ERROR = i18n.translate(
   'xpack.idxMgmt.createIndex.modal.invalidName.error',
   { defaultMessage: 'Index name is not valid' }
@@ -71,6 +80,13 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
   const [indexName, setIndexName] = useState<string>(generateRandomIndexName);
 
   const [indexMode, setIndexMode] = useState<string>(STANDARD_INDEX_MODE);
+  const indexNameByModeRef = useRef<Partial<Record<string, string>>>({});
+  const hasInitializedIndexNameByMode = useRef(false);
+
+  if (!hasInitializedIndexNameByMode.current) {
+    indexNameByModeRef.current[STANDARD_INDEX_MODE] = indexName;
+    hasInitializedIndexNameByMode.current = true;
+  }
   const [indexNameError, setIndexNameError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [createError, setCreateError] = useState<string | undefined>();
@@ -128,6 +144,24 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
     } else if (indexNameError) {
       setIndexNameError(undefined);
     }
+  };
+
+  const onIndexModeChange = (mode: string) => {
+    if (mode === indexMode) {
+      return;
+    }
+
+    indexNameByModeRef.current[indexMode] = indexName;
+    setIndexMode(mode);
+
+    const savedName = indexNameByModeRef.current[mode];
+    const nextName = savedName ?? getDefaultIndexNameForMode(mode);
+
+    if (savedName === undefined) {
+      indexNameByModeRef.current[mode] = nextName;
+    }
+
+    onNameChange(nextName);
   };
 
   return (
@@ -215,7 +249,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
                     fullWidth
                     name="indexMode"
                     valueOfSelected={indexMode}
-                    onChange={(mode) => setIndexMode(mode)}
+                    onChange={onIndexModeChange}
                     data-test-subj="indexModeField"
                     options={[
                       {

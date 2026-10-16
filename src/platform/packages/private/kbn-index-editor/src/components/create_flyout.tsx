@@ -14,6 +14,7 @@ import type { FC } from 'react';
 import React, { Suspense, lazy } from 'react';
 import { combineLatest, first, skip } from 'rxjs';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
+import { DEFAULT_LOOKUP_INDEX_NAME_PREFIX } from '../constants';
 import { isPlaceholderColumn } from '../utils';
 
 export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentContext) {
@@ -24,6 +25,8 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
   if (props.indexName) {
     // set initial index name
     indexUpdateService.setIndexName(props.indexName);
+  } else if (!props.doesIndexExist) {
+    indexUpdateService.setIndexName(DEFAULT_LOOKUP_INDEX_NAME_PREFIX);
   }
   indexUpdateService.setIndexCreated(props.doesIndexExist);
 

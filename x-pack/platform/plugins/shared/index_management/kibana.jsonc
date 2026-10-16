@@ -30,7 +30,8 @@
       "streams",
       "console",
       "licensing",
-      "reindexService"
+      "reindexService",
+      "uiActions"
     ],
     "requiredBundles": [
       "kibanaReact",
