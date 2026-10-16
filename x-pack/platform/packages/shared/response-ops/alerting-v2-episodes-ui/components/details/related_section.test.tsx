@@ -121,6 +121,58 @@ describe('AlertEpisodesRelatedSection', () => {
     );
   });
 
+  it('renders related episodes by source for an episode without a rule', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: [...mockEpisodeEventsResponse.columns, { name: 'source', type: 'keyword' }],
+      values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, null, 'gh-1', 'zabbix']],
+    });
+
+    render(
+      <I18nProvider>
+        <AlertEpisodesRelatedSection
+          episodeId="ep-1"
+          services={mockServices}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    await waitFor(() => expect(screen.getByTestId('alertEpisodesRelatedStub')).toBeInTheDocument());
+
+    expect(AlertEpisodesRelated).toHaveBeenCalledWith(
+      expect.objectContaining({
+        groupHash: 'gh-1',
+        source: 'zabbix',
+        ruleState: { status: RuleStateStatus.idle },
+      }),
+      expect.anything()
+    );
+    expect(mockHttp.get).not.toHaveBeenCalled();
+  });
+
+  it('renders the error state for an episode with neither a rule nor an external source', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: mockEpisodeEventsResponse.columns,
+      values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, null, 'gh-1']],
+    });
+
+    render(
+      <I18nProvider>
+        <AlertEpisodesRelatedSection
+          episodeId="ep-1"
+          services={mockServices}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('alertingV2EpisodesRelatedSectionError')).toBeInTheDocument()
+    );
+  });
+
   it('renders the loading state while events are loading', () => {
     runEsqlAsyncSearchMock.mockImplementation(() => new Promise(() => {}));
 
