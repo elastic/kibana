@@ -439,10 +439,11 @@ export interface PendingProposal {
   actionInput?: unknown;
 }
 
-/** Identifiers that tie a proposal to one e2e run's seeded data. */
+/** Identifiers that tie a proposal to one e2e run's seeded data. Every member must be minted
+ * per run: a constant such as the scenario hostname matches the proposals of every run that
+ * seeds the same scenario in the shared space. */
 export interface RunReferences {
   readonly agentId?: string;
-  readonly host?: string;
   readonly alertIds?: readonly string[];
 }
 
@@ -459,7 +460,8 @@ export const listPendingProposals = async (api: AlertZeroApi): Promise<PendingPr
  * `createdAt` match the proposals of every AlertZero run in it; a candidate is only accepted when
  * it references one of this run's seeded identifiers — in its own input, or in the inputs of the
  * review execution that raised it (those name the alerts the attack correlated; the proposal's
- * own input holds only opaque ids).
+ * own input holds only opaque ids). Every identifier is minted per run by the seed helpers, so
+ * a proposal raised over another run's seed data can never match.
  */
 export const proposalReferencesRun = async (
   api: AlertZeroApi,
@@ -486,7 +488,6 @@ export const proposalReferencesRun = async (
   });
   return (
     (references.agentId !== undefined && encoded.includes(references.agentId)) ||
-    (references.host !== undefined && encoded.includes(references.host)) ||
     (references.alertIds ?? []).some((alertId) => encoded.includes(alertId))
   );
 };

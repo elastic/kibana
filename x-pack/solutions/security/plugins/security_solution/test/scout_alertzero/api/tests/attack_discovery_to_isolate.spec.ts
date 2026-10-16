@@ -162,7 +162,6 @@ apiTest.describe(
         });
         runReferences = {
           agentId: hosts.hosts[0].agentId,
-          host: scenarioHost,
           alertIds: scenario?.alertIds,
         };
 

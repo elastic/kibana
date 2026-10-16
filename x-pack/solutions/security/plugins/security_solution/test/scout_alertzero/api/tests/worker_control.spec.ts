@@ -41,9 +41,25 @@ const WORKER_ID = testData.FLOOR_ATTACK_DISCOVERY_WORKER_ID;
  */
 apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.classic] }, () => {
   const serviceAccountIds: string[] = [];
-  // The worker's workflow and the executions that existed before this suite enabled it, so
-  // teardown can cancel only the runs this suite started — never another suite's.
-  let enabledRuns: { workflowId: string; knownExecutionIds: string[] } | undefined;
+  // Each worker workflow this suite enabled, with the executions that existed BEFORE its first
+  // enable, so teardown can cancel only the runs this suite started — never another suite's.
+  // The baseline is snapshotted after the settings write has installed the workflow and before
+  // the enable that starts a real run, and it is never replaced: a later snapshot would absorb
+  // the run an earlier enable of the same suite started, and teardown would then leave it.
+  const enabledWorkflows: { workflowId: string; knownExecutionIds: string[] }[] = [];
+
+  const snapshotBeforeEnable = async (
+    api: Awaited<ReturnType<typeof getAdminApi>>,
+    workflowId: string
+  ): Promise<void> => {
+    if (enabledWorkflows.some((entry) => entry.workflowId === workflowId)) {
+      return; // keep the earliest baseline for this workflow
+    }
+    enabledWorkflows.push({
+      workflowId,
+      knownExecutionIds: await listExecutionIds(api, workflowId),
+    });
+  };
 
   apiTest.afterAll(async ({ apiClient, samlAuth }) => {
     const api = await getAdminApi(apiClient, samlAuth);
@@ -52,8 +68,8 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
     await resetWorker(api, WORKER_ID);
     // End the runs this suite's enables started; run before the accounts go away below so a
     // drained run cannot fail after the fact on its deleted service account.
-    if (enabledRuns) {
-      await cancelNewExecutions(api, enabledRuns.workflowId, enabledRuns.knownExecutionIds);
+    for (const { workflowId, knownExecutionIds } of enabledWorkflows) {
+      await cancelNewExecutions(api, workflowId, knownExecutionIds);
     }
     for (const id of serviceAccountIds) {
       await deleteServiceAccount(api, id);
@@ -110,19 +126,19 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       const serviceAccountId = await createServiceAccount(api);
       serviceAccountIds.push(serviceAccountId);
       const before = await getWorker(api, WORKER_ID);
-      // Snapshot the workflow's executions before enabling: the enable below makes Task Manager
-      // run the worker at once as its service account, and teardown must be able to cancel
-      // exactly that run (see afterAll), not whatever else shares the workflow.
-      if (before.workflowId) {
-        enabledRuns = {
-          workflowId: before.workflowId,
-          knownExecutionIds: await listExecutionIds(api, before.workflowId),
-        };
-      }
       await updateWorker(api, WORKER_ID, {
         settingsRevision: before.settingsRevision ?? null,
         settings: { serviceAccountId },
       });
+      // Snapshot the workflow's executions AFTER the settings write (which is what installs the
+      // managed workflow on a fresh stack, so `before.workflowId` can still be absent) and
+      // BEFORE enabling: the enable below makes Task Manager run the worker at once as its
+      // service account, and teardown must be able to cancel exactly that run (see afterAll),
+      // not whatever else shares the workflow.
+      const installed = await getWorker(api, WORKER_ID);
+      if (installed.workflowId) {
+        await snapshotBeforeEnable(api, installed.workflowId);
+      }
       await updateWorker(api, WORKER_ID, { enabled: true });
 
       await resetWorker(api, WORKER_ID);
@@ -146,20 +162,19 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       const serviceAccountId = await createServiceAccount(api);
       serviceAccountIds.push(serviceAccountId);
       const before = await getWorker(api, WORKER_ID);
-      // Same snapshot as the reset spec above: the enable starts a real run that teardown must
-      // be able to end (see afterAll).
-      if (before.workflowId) {
-        enabledRuns = {
-          workflowId: before.workflowId,
-          knownExecutionIds: await listExecutionIds(api, before.workflowId),
-        };
-      }
-
       const configured = await updateWorker(api, WORKER_ID, {
         settingsRevision: before.settingsRevision ?? null,
         settings: { serviceAccountId },
       });
       expect(configured.settings.serviceAccountId).toBe(serviceAccountId);
+      // Same snapshot point as the reset spec above — after the settings write installs the
+      // workflow, before the enable starts a real run that teardown must be able to end
+      // (see afterAll). The helper keeps the reset spec's earlier baseline if the workflow is
+      // the same, so that spec's run is still cancelled as one of ours.
+      const installed = await getWorker(api, WORKER_ID);
+      if (installed.workflowId) {
+        await snapshotBeforeEnable(api, installed.workflowId);
+      }
 
       expect((await updateWorker(api, WORKER_ID, { enabled: true })).enabled).toBe(true);
       expect((await updateWorker(api, WORKER_ID, { enabled: false })).enabled).toBe(false);
