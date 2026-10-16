@@ -14,9 +14,6 @@ import {
 
 const LAYOUT_TOOL_NAME = 'arrange_dashboard_layout';
 
-const isForcedToolChoiceRejected = (error: unknown): boolean =>
-  error instanceof Error && error.message.includes('tool_choice');
-
 /**
  * Arranges dashboard containers with a dedicated model call. Errors propagate to the layout step,
  * which keeps the current layout.
@@ -26,22 +23,8 @@ export const createLayoutArranger =
   async (request) => {
     const { chatModel } = await modelProvider.getDefaultModel();
     const { system, user } = buildLayoutPrompt(request);
-    const messages: Array<[string, string]> = [
-      ['system', system],
-      ['human', user],
-    ];
 
-    try {
-      return await chatModel
-        .withStructuredOutput(layoutArrangementSchema, { name: LAYOUT_TOOL_NAME })
-        .invoke(messages);
-    } catch (error) {
-      if (!isForcedToolChoiceRejected(error)) {
-        throw error;
-      }
-    }
-
-    // Some models (e.g. Claude with extended thinking) reject a forced tool choice.
+    // Not a forced tool choice, which some models (e.g. Claude with extended thinking) reject.
     const response = await chatModel
       .bindTools(
         [
@@ -53,7 +36,10 @@ export const createLayoutArranger =
         ],
         { tool_choice: 'auto' }
       )
-      .invoke([...messages, ['human', `Answer by calling \`${LAYOUT_TOOL_NAME}\`.`]]);
+      .invoke([
+        ['system', system],
+        ['human', `${user}\n\nAnswer by calling \`${LAYOUT_TOOL_NAME}\`.`],
+      ]);
 
     const toolCall = response.tool_calls?.find(({ name }) => name === LAYOUT_TOOL_NAME);
     if (!toolCall) {

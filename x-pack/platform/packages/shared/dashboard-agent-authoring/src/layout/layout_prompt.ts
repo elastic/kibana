@@ -50,19 +50,7 @@ Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 
 - Each section has its own coordinate space: the coordinates of its panels are section-relative and start at \`y: 0\`. The same grid rules apply within each section.
 - A section occupies exactly one row (\`h: 1\`) in the outer grid, whatever the height of its panels. Top-level panels and sections never share a row. Compute outer \`y\` in order: top-level panels advance by \`y + h\`, sections by \`y + 1\`.
-- Place a new section among the other sections by purpose, e.g. key metrics before trends. Keep the outer order of the sections and top-level panels that have a \`y\`: a top-level panel that was above a section stays above it, and one between two sections stays between them. A section without a \`y\` is inserted into that order; it never moves an existing panel or section past another one. For example, with \`intro, KPIs, Traffic, note, Errors\`, a new section before Traffic gives \`intro, KPIs, New, Traffic, note, Errors\`.
-
-## Example: 4 KPI metrics + 2 time-series charts + 1 breakdown bar chart
-
-\`\`\`
-metric  (x:0,  y:0,  w:12, h:5)
-metric  (x:12, y:0,  w:12, h:5)
-metric  (x:24, y:0,  w:12, h:5)
-metric  (x:36, y:0,  w:12, h:5)
-xy-line (x:0,  y:5,  w:24, h:10)
-xy-line (x:24, y:5,  w:24, h:10)
-xy-bar  (x:0,  y:15, w:48, h:10)
-\`\`\``;
+- Place a new section among the other sections by purpose, e.g. key metrics before trends. Keep the outer order of the sections and top-level panels that have a \`y\`: a top-level panel that was above a section stays above it, and one between two sections stays between them. A section without a \`y\` is inserted into that order; it never moves an existing panel or section past another one. For example, with \`intro, KPIs, Traffic, note, Errors\`, a new section before Traffic gives \`intro, KPIs, New, Traffic, note, Errors\`.`;
 
 /** Builds the messages of the layout call for a layout request. */
 export const buildLayoutPrompt = (request: LayoutRequest): { system: string; user: string } => ({

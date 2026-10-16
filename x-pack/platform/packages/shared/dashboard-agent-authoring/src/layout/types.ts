@@ -82,5 +82,8 @@ export const layoutArrangementSchema = z.object({
 
 export type LayoutArrangement = z.infer<typeof layoutArrangementSchema>;
 
-/** Arranges the dashboard with a separate model call. Injected by the host. */
+/**
+ * Arranges the dashboard with a separate model call. Injected by the host, which parses the answer
+ * with `layoutArrangementSchema`.
+ */
 export type ArrangeDashboardLayout = (request: LayoutRequest) => Promise<LayoutArrangement>;

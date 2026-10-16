@@ -17,7 +17,6 @@ import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { getErrorMessage, type OperationFailure } from '../utils';
 import {
   GRID_COLUMNS,
-  layoutArrangementSchema,
   type ArrangeDashboardLayout,
   type LayoutArrangement,
   type LayoutPanel,
@@ -167,9 +166,11 @@ export const arrangeDashboardLayout = async ({
     return { dashboardData };
   }
 
+  const idByAlias = new Map([...aliasById].map(([id, alias]) => [alias, id]));
+  const toId = (alias: string): string => idByAlias.get(alias) ?? alias;
   try {
-    const arrangement = await requestArrangement(arrangeLayout, request, aliasById);
-    return { dashboardData: applyArrangement(dashboardData, arrangement) };
+    const arrangement = await requestArrangement(arrangeLayout, request, toId);
+    return { dashboardData: applyArrangement(dashboardData, arrangement, toId) };
   } catch (error) {
     const message = getErrorMessage(error);
     logger.warn(`Dashboard layout kept the current layout: ${message}`);
@@ -189,44 +190,20 @@ export const arrangeDashboardLayout = async ({
   }
 };
 
-/** Maps the arrangement back to ids. Unknown aliases are kept; applying ignores them. */
-const fromAliases = (
-  arrangement: LayoutArrangement,
-  idByAlias: ReadonlyMap<string, string>
-): LayoutArrangement => {
-  const toIds = (arrangedPanels: LayoutArrangement['panels']) =>
-    arrangedPanels.map((panel) => ({ ...panel, id: idByAlias.get(panel.id) ?? panel.id }));
-  return {
-    ...arrangement,
-    panels: toIds(arrangement.panels),
-    sections: arrangement.sections.map((section) => ({
-      ...section,
-      id: idByAlias.get(section.id) ?? section.id,
-      panels: toIds(section.panels),
-    })),
-  };
-};
-
-/** Returns the checked arrangement with ids, or throws why it cannot be applied. */
+/** Returns the checked arrangement, still with aliases, or throws why it cannot be applied. */
 const requestArrangement = async (
   arrangeLayout: ArrangeDashboardLayout,
   request: LayoutRequest,
-  aliasById: ReadonlyMap<string, string>
+  toId: (alias: string) => string
 ): Promise<LayoutArrangement> => {
-  const output = await arrangeLayout(request).catch((error) => {
+  const arrangement = await arrangeLayout(request).catch((error) => {
     throw new Error(`layout call failed: ${getErrorMessage(error)}`);
   });
-  const result = layoutArrangementSchema.safeParse(output);
-  if (!result.success) {
-    throw new Error(`invalid arrangement: ${result.error.message}`);
-  }
-  const idByAlias = new Map([...aliasById].map(([id, alias]) => [alias, id]));
-  const toId = (alias: string): string => idByAlias.get(alias) ?? alias;
-  const issue = getIncompleteArrangementIssue(request, result.data, toId);
+  const issue = getIncompleteArrangementIssue(request, arrangement, toId);
   if (issue) {
     throw new Error(`incomplete arrangement: ${issue}`);
   }
-  return fromAliases(result.data, idByAlias);
+  return arrangement;
 };
 
 /**
@@ -286,18 +263,20 @@ const getIncompleteArrangementIssue = (
 
 /**
  * Writes only grids, within the bounds of `layoutArrangementSchema`, which are stricter than the
- * dashboard schema. So the arranged dashboard needs no second validation.
+ * dashboard schema. So the arranged dashboard needs no second validation. Unknown aliases are
+ * ignored.
  */
 const applyArrangement = (
   dashboardData: DashboardAttachmentData,
-  { panels, sections }: LayoutArrangement
+  { panels, sections }: LayoutArrangement,
+  toId: (alias: string) => string
 ): DashboardAttachmentData => {
   const toGridByPanelId = (arrangedPanels: LayoutArrangement['panels']) =>
-    new Map(arrangedPanels.map(({ id, ...grid }) => [id, grid]));
+    new Map(arrangedPanels.map(({ id, ...grid }) => [toId(id), grid]));
   const topLevelGridByPanelId = toGridByPanelId(panels);
   const sectionsById = new Map(
     sections.map(({ id, y, panels: sectionPanels }) => [
-      id,
+      toId(id),
       { y, gridByPanelId: toGridByPanelId(sectionPanels) },
     ])
   );
