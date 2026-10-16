@@ -60,6 +60,12 @@ const nowrapSizerLineStyles = css`
   white-space: nowrap;
 `;
 
+const sizerCaretStyles = css`
+  display: inline-block;
+  width: 2px;
+  margin-left: 2px;
+`;
+
 const reservedWidthStyles = css`
   grid-area: 1 / 1;
   visibility: hidden;
@@ -177,7 +183,7 @@ export const NewConversationPrompt: React.FC<{}> = () => {
           {capabilityMessages.map((message) => (
             <span key={message} css={nowrapSizerLineStyles}>
               {greetingPrefix} {message}
-              <span css={caretStyles} />
+              <span css={sizerCaretStyles} />
             </span>
           ))}
         </span>
