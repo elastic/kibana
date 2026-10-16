@@ -107,6 +107,20 @@ export const discoverSessionSearchRequestParamsSchema = asCodeSearchRequestSchem
         'Full-text search (`simple_query_string`) over `title` and `description`. All terms must match.',
     })
     .optional(),
+  tags: z
+    .union([z.string(), getAsCodeTagsSchema('Tag IDs to include.', 100)])
+    .optional()
+    .meta({
+      description:
+        'A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, Discover sessions matching any of the tag IDs are included.',
+    }),
+  excluded_tags: z
+    .union([z.string(), getAsCodeTagsSchema('Tag IDs to exclude.', 100)])
+    .optional()
+    .meta({
+      description:
+        'A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, Discover sessions matching any of the tag IDs are excluded.',
+    }),
 });
 
 const discoverSessionSearchItemSchema = z

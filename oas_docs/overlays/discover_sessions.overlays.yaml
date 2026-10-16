@@ -59,7 +59,7 @@ actions:
         - **`title`** (required): the display name of the Discover session.
         - **`description`**: a short description of the Discover session.
         - **`tags`**: IDs of tags to associate with the Discover session.
-        - **`tabs`** (required): ordered list of tabs. Each tab requires a unique `id`, because dashboard panels and Discover links can reference it, and a `label` displayed in Discover. Tab IDs can contain only lowercase letters, numbers, hyphens, and underscores.
+        - **`tabs`** (required): ordered list of tabs. Each tab requires a unique `id`, which other saved objects and links can reference, and a `label` displayed in Discover. Tab IDs can contain only lowercase letters, numbers, hyphens, and underscores.
 
         ### Data sources
 
@@ -108,30 +108,6 @@ actions:
             ]
           }
           ```
-
-        ### Embedding in dashboards
-
-        A dashboard `discover_session` panel can embed a Discover session in two ways:
-
-        - **Linked from library**: set `ref_id` to the ID returned by this API. Use `selected_tab_id` to choose which tab the panel displays. This is why each tab requires a stable `id`. If `selected_tab_id` is omitted, the panel displays the first tab. Use `overrides` to change table settings, such as `column_order`, `sort`, or `rows_per_page`, for that panel only, without modifying the Discover session.
-
-          ```json
-          {
-            "grid": {
-              "x": 0,
-              "y": 0,
-              "w": 24,
-              "h": 15
-            },
-            "type": "discover_session",
-            "config": {
-              "ref_id": "<discover-session-id>",
-              "selected_tab_id": "large-requests"
-            }
-          }
-          ```
-
-        - **Inline**: define the tab directly in the panel `config.tabs`. Inline panels support exactly one tab. The tab uses the same data and table fields as session tabs, such as `data_source`, `query`, `filters`, `column_order`, and `sort`, but omits session-only fields such as `id`, `label`, and chart settings.
 
         ### Warnings
 
