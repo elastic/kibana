@@ -24,6 +24,8 @@
     "@kbn/search-types",
     "@kbn/shared-ux-ai-components",
     "@kbn/ui-callout",
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/std",
+    "@kbn/core-spaces-common"
   ]
 }

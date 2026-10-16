@@ -8,7 +8,7 @@ The suite runs the managed analysis workflow (`system-security-attack-discovery-
 
 Caveat: scores measure the shipped managed prompt, not the finished product. The numbers in this README are the managed-path baseline measured on the commit in this PR, not a claim about the finished product. ClaimGrounding: no baseline yet.
 
-The workflow's `ai.agent` step runs `alertzero-thin-agent` with no tools and resolves its connector from the `alertzero_reasoning` inference feature. `beforeAll` routes that feature to the model under test and restores the previous inference settings in `afterAll`.
+The workflow's `ai.agent` step runs `alertzero-thin-agent` with no tools and resolves its connector from the `alertzero_frontier` inference feature. `beforeAll` routes that feature to the model under test and restores the previous inference settings in `afterAll`.
 
 ## Dataset
 

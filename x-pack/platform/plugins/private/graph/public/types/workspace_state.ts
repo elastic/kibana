@@ -33,6 +33,7 @@ export interface WorkspaceNode {
 export type BlockListedNode = Omit<WorkspaceNode, 'numChildren' | 'kx' | 'ky' | 'id'>;
 
 export interface WorkspaceEdge {
+  id?: string;
   weight: number;
   width: number;
   label: string;
@@ -165,6 +166,7 @@ export type WorkspaceOptions = Partial<{
   vertex_fields: WorkspaceField[];
   nodeLabeller: (newNodes: WorkspaceNode[]) => void;
   changeHandler: () => void;
+  topologyChangeHandler: () => void;
   graphExploreProxy: (
     indexPattern: string,
     request: ExploreRequest,

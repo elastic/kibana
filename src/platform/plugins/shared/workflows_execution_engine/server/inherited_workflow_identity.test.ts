@@ -219,6 +219,7 @@ describe('inherited workflow execution identity', () => {
         workloadId: 'parent',
         spaceId: 'default',
         expectedServiceAccountId: 'account-a',
+        executionId: 'parent-execution',
       },
       expect.any(Function)
     );

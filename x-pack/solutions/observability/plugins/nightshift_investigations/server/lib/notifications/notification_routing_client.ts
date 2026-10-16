@@ -202,7 +202,7 @@ export class NotificationRoutingClient {
         throw new Error('Notification execution was not initialized');
       }
       if (execution.terminal_phase && execution.terminal_phase !== phase) {
-        throw new Error('Notification execution already selected a different terminal phase');
+        return current;
       }
       return {
         ...current,
@@ -268,7 +268,7 @@ export class NotificationRoutingClient {
       const destinations = current.destinations.map((destination) => {
         if (
           destination.id !== attempt.destination_id ||
-          attempt.phase !== 'started' ||
+          (attempt.phase !== 'started' && !attempt.creates_root) ||
           result.status !== 'sent'
         ) {
           return destination;
