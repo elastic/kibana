@@ -8,11 +8,12 @@ import { z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { environmentSchema } from '@kbn/apm-types';
 import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
+import { MAX_DOCUMENT_VALUE_LENGTH } from '../../constants';
 
 export const dependencyChartQuerySchema = z
   .object({
-    dependencyName: z.string(),
-    spanName: z.string(),
+    dependencyName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH),
+    spanName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH),
     searchServiceDestinationMetrics: BooleanFromString.default(false),
   })
   .merge(rangeSchema)

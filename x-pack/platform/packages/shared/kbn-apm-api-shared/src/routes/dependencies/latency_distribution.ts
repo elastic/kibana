@@ -9,6 +9,7 @@ import type { OverallLatencyDistributionResponse } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema, kuerySchema } from '../../default_api_types';
+import { MAX_DOCUMENT_VALUE_LENGTH } from '../../constants';
 
 export interface DependencyLatencyDistributionResponse {
   allSpansDistribution: OverallLatencyDistributionResponse;
@@ -22,9 +23,9 @@ export const dependencyLatencyDistributionRoute =
       z.object({
         query: z
           .object({
-            dependencyName: z.string(),
-            spanName: z.string(),
-            percentileThreshold: z.coerce.number(),
+            dependencyName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH),
+            spanName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH),
+            percentileThreshold: z.coerce.number().min(0).max(100),
           })
           .merge(rangeSchema)
           .merge(kuerySchema)

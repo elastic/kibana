@@ -12,6 +12,7 @@ import {
   rangeSchema,
   serviceTransactionDataSourceSchema,
 } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface ServiceNodeMetadataResponse {
   host: string | number;
@@ -23,8 +24,8 @@ export const serviceNodeMetadataRoute = defineRoute<ServiceNodeMetadataResponse>
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        serviceName: z.string(),
-        serviceNodeName: z.string(),
+        serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH),
+        serviceNodeName: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
       query: kuerySchema
         .merge(rangeSchema)

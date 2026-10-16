@@ -9,6 +9,7 @@ import type { ConnectionStatsItemWithImpact } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema, offsetSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH, MAX_NUM_BUCKETS } from '../../constants';
 
 export type ServiceDependenciesResponse = Array<
   Omit<ConnectionStatsItemWithImpact, 'stats'> & {
@@ -25,9 +26,9 @@ export const serviceDependenciesRoute = defineRoute<ServiceDependenciesRouteResp
   endpoint: 'GET /internal/apm/services/{serviceName}/dependencies',
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: z.string() }),
+      path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
       query: z
-        .object({ numBuckets: z.coerce.number() })
+        .object({ numBuckets: z.coerce.number().int().min(1).max(MAX_NUM_BUCKETS) })
         .merge(environmentSchema)
         .merge(rangeSchema)
         .merge(offsetSchema),

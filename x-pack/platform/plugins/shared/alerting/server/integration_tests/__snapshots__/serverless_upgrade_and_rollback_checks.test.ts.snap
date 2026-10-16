@@ -1683,6 +1683,12 @@ Object {
           },
           "name": "min",
         },
+        Object {
+          "args": Object {
+            "limit": 4,
+          },
+          "name": "max",
+        },
       ],
       "type": "array",
     },
@@ -1748,7 +1754,18 @@ Object {
         "description": "The environment from APM.",
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 1024,
+        },
+      ],
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -1767,10 +1784,19 @@ Object {
       },
       "metas": Array [
         Object {
+          "x-oas-max-length": 1024,
+        },
+        Object {
           "x-oas-optional": true,
         },
       ],
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -1789,10 +1815,19 @@ Object {
       },
       "metas": Array [
         Object {
+          "x-oas-max-length": 1024,
+        },
+        Object {
           "x-oas-optional": true,
         },
       ],
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -1814,7 +1849,18 @@ Object {
         "description": "The type of units for the time window: minutes, hours, or days.",
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 10,
+        },
+      ],
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -1850,7 +1896,18 @@ Object {
         "description": "Filter the errors coming from your application to apply the rule to a specific environment.",
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 1024,
+        },
+      ],
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -1869,10 +1926,19 @@ Object {
       },
       "metas": Array [
         Object {
+          "x-oas-max-length": 1024,
+        },
+        Object {
           "x-oas-optional": true,
         },
       ],
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -1895,7 +1961,18 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-max-length": 1024,
+            },
+          ],
           "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
             Object {
               "args": Object {
                 "method": [Function],
@@ -1909,6 +1986,14 @@ Object {
       "metas": Array [
         Object {
           "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 10,
+          },
+          "name": "max",
         },
       ],
       "type": "array",
@@ -1933,7 +2018,18 @@ Object {
               "flags": Object {
                 "error": [Function],
               },
+              "metas": Array [
+                Object {
+                  "x-oas-max-length": 64,
+                },
+              ],
               "rules": Array [
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
                 Object {
                   "args": Object {
                     "method": [Function],
@@ -1953,7 +2049,18 @@ Object {
                     "flags": Object {
                       "error": [Function],
                     },
+                    "metas": Array [
+                      Object {
+                        "x-oas-max-length": 10000,
+                      },
+                    ],
                     "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
                       Object {
                         "args": Object {
                           "method": [Function],
@@ -1981,7 +2088,18 @@ Object {
                             "flags": Object {
                               "error": [Function],
                             },
+                            "metas": Array [
+                              Object {
+                                "x-oas-max-length": 1024,
+                              },
+                            ],
                             "rules": Array [
+                              Object {
+                                "args": Object {
+                                  "method": [Function],
+                                },
+                                "name": "custom",
+                              },
                               Object {
                                 "args": Object {
                                   "method": [Function],
@@ -2032,10 +2150,19 @@ Object {
       },
       "metas": Array [
         Object {
+          "x-oas-max-length": 1024,
+        },
+        Object {
           "x-oas-optional": true,
         },
       ],
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -2078,7 +2205,18 @@ Object {
         "description": "The type of units for the time window: minutes, hours, or days.",
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 10,
+        },
+      ],
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -2159,7 +2297,18 @@ Object {
         "description": "Filter the rule to apply to a specific environment.",
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 1024,
+        },
+      ],
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -2182,7 +2331,18 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-max-length": 1024,
+            },
+          ],
           "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
             Object {
               "args": Object {
                 "method": [Function],
@@ -2196,6 +2356,14 @@ Object {
       "metas": Array [
         Object {
           "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 10,
+          },
+          "name": "max",
         },
       ],
       "type": "array",
@@ -2220,7 +2388,18 @@ Object {
               "flags": Object {
                 "error": [Function],
               },
+              "metas": Array [
+                Object {
+                  "x-oas-max-length": 64,
+                },
+              ],
               "rules": Array [
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
                 Object {
                   "args": Object {
                     "method": [Function],
@@ -2240,7 +2419,18 @@ Object {
                     "flags": Object {
                       "error": [Function],
                     },
+                    "metas": Array [
+                      Object {
+                        "x-oas-max-length": 10000,
+                      },
+                    ],
                     "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
                       Object {
                         "args": Object {
                           "method": [Function],
@@ -2268,7 +2458,18 @@ Object {
                             "flags": Object {
                               "error": [Function],
                             },
+                            "metas": Array [
+                              Object {
+                                "x-oas-max-length": 1024,
+                              },
+                            ],
                             "rules": Array [
+                              Object {
+                                "args": Object {
+                                  "method": [Function],
+                                },
+                                "name": "custom",
+                              },
                               Object {
                                 "args": Object {
                                   "method": [Function],
@@ -2319,10 +2520,19 @@ Object {
       },
       "metas": Array [
         Object {
+          "x-oas-max-length": 1024,
+        },
+        Object {
           "x-oas-optional": true,
         },
       ],
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -2348,10 +2558,19 @@ Object {
       },
       "metas": Array [
         Object {
+          "x-oas-max-length": 10000,
+        },
+        Object {
           "x-oas-optional": true,
         },
       ],
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -2370,10 +2589,19 @@ Object {
       },
       "metas": Array [
         Object {
+          "x-oas-max-length": 1024,
+        },
+        Object {
           "x-oas-optional": true,
         },
       ],
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -2409,7 +2637,18 @@ Object {
         "description": "The type of units for the time window. For example: minutes, hours, or days.",
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 10,
+        },
+      ],
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -2444,7 +2683,18 @@ Object {
       "flags": Object {
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 1024,
+        },
+      ],
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -2466,7 +2716,18 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-max-length": 1024,
+            },
+          ],
           "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
             Object {
               "args": Object {
                 "method": [Function],
@@ -2480,6 +2741,14 @@ Object {
       "metas": Array [
         Object {
           "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 10,
+          },
+          "name": "max",
         },
       ],
       "type": "array",
@@ -2504,7 +2773,18 @@ Object {
               "flags": Object {
                 "error": [Function],
               },
+              "metas": Array [
+                Object {
+                  "x-oas-max-length": 64,
+                },
+              ],
               "rules": Array [
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
                 Object {
                   "args": Object {
                     "method": [Function],
@@ -2524,7 +2804,18 @@ Object {
                     "flags": Object {
                       "error": [Function],
                     },
+                    "metas": Array [
+                      Object {
+                        "x-oas-max-length": 10000,
+                      },
+                    ],
                     "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
                       Object {
                         "args": Object {
                           "method": [Function],
@@ -2552,7 +2843,18 @@ Object {
                             "flags": Object {
                               "error": [Function],
                             },
+                            "metas": Array [
+                              Object {
+                                "x-oas-max-length": 1024,
+                              },
+                            ],
                             "rules": Array [
+                              Object {
+                                "args": Object {
+                                  "method": [Function],
+                                },
+                                "name": "custom",
+                              },
                               Object {
                                 "args": Object {
                                   "method": [Function],
@@ -2602,10 +2904,19 @@ Object {
       },
       "metas": Array [
         Object {
+          "x-oas-max-length": 1024,
+        },
+        Object {
           "x-oas-optional": true,
         },
       ],
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -2629,10 +2940,19 @@ Object {
       },
       "metas": Array [
         Object {
+          "x-oas-max-length": 10000,
+        },
+        Object {
           "x-oas-optional": true,
         },
       ],
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -2650,10 +2970,19 @@ Object {
       },
       "metas": Array [
         Object {
+          "x-oas-max-length": 1024,
+        },
+        Object {
           "x-oas-optional": true,
         },
       ],
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -2686,7 +3015,18 @@ Object {
       "flags": Object {
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 10,
+        },
+      ],
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],

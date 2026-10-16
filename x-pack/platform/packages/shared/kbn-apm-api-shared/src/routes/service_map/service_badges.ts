@@ -10,6 +10,12 @@ import { environmentSchema } from '@kbn/apm-types';
 import type { ServiceAlertsResponse } from '../services/service_alerts_count';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
+import {
+  MAX_FIELD_VALUE_LENGTH,
+  MAX_JSON_ARRAY_PARAM_LENGTH,
+  MAX_KUERY_LENGTH,
+  MAX_SERVICE_MAP_SERVICES,
+} from '../../constants';
 
 export type ServiceSloStatsResponse = Array<{
   serviceName: string;
@@ -26,10 +32,13 @@ export const serviceMapServiceBadgesRoute = defineRoute<ServiceMapServiceBadgesR
   endpoint: 'POST /internal/apm/service-map/service_badges',
   params: lazySchema(() =>
     z.object({
-      query: environmentSchema.merge(rangeSchema).merge(z.object({ kuery: z.string() }).partial()),
+      query: environmentSchema
+        .merge(rangeSchema)
+        .merge(z.object({ kuery: z.string().max(MAX_KUERY_LENGTH) }).partial()),
       body: z.object({
         serviceNames: z
           .string()
+          .max(MAX_JSON_ARRAY_PARAM_LENGTH)
           .transform((value, ctx) => {
             try {
               return JSON.parse(value);
@@ -38,7 +47,7 @@ export const serviceMapServiceBadgesRoute = defineRoute<ServiceMapServiceBadgesR
               return z.NEVER;
             }
           })
-          .pipe(z.array(z.string())),
+          .pipe(z.array(z.string().max(MAX_FIELD_VALUE_LENGTH)).max(MAX_SERVICE_MAP_SERVICES)),
       }),
     })
   ),

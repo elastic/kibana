@@ -8,11 +8,23 @@ import { z } from '@kbn/zod/v4';
 import { AggregationType, type Coordinate } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { rangeSchema } from '../../default_api_types';
+import {
+  MAX_DOCUMENT_VALUE_LENGTH,
+  MAX_FIELD_VALUE_LENGTH,
+  MAX_KUERY_LENGTH,
+} from '../../constants';
+
+const MAX_GROUP_BY_FIELDS = 10; // same as the APM rule params
+const MAX_QUERY_LANGUAGE_LENGTH = 64;
+const MAX_SEARCH_CONFIGURATION_LENGTH = 100_000; // serialized search configuration (JSON string)
 
 const searchConfigurationSchema = z.object({
   query: z.object({
-    query: z.union([z.string(), z.record(z.string(), z.any())]),
-    language: z.string(),
+    query: z.union([
+      z.string().max(MAX_KUERY_LENGTH),
+      z.record(z.string().max(MAX_FIELD_VALUE_LENGTH), z.any()),
+    ]),
+    language: z.string().max(MAX_QUERY_LANGUAGE_LENGTH),
   }),
 });
 
@@ -20,6 +32,7 @@ const searchConfigurationSchema = z.object({
 // string, then validate the parsed value against searchConfigurationSchema.
 const searchConfigurationJsonSchema = z
   .string()
+  .max(MAX_SEARCH_CONFIGURATION_LENGTH)
   .transform((value, ctx) => {
     try {
       return JSON.parse(value);
@@ -39,12 +52,12 @@ export const alertParamsSchema = z
         z.literal(AggregationType.P99),
       ])
       .optional(),
-    serviceName: z.string().optional(),
-    errorGroupingKey: z.string().optional(),
-    transactionType: z.string().optional(),
-    transactionName: z.string().optional(),
-    interval: z.string(),
-    groupBy: z.array(z.string()).optional(),
+    serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+    errorGroupingKey: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+    transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+    transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional(),
+    interval: z.string().max(MAX_FIELD_VALUE_LENGTH),
+    groupBy: z.array(z.string().max(MAX_FIELD_VALUE_LENGTH)).max(MAX_GROUP_BY_FIELDS).optional(),
     searchConfiguration: searchConfigurationJsonSchema.optional(),
   })
   .merge(environmentSchema)

@@ -9,6 +9,7 @@ import type { Annotation } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface ServiceAnnotationResponse {
   annotations: Annotation[];
@@ -18,7 +19,7 @@ export const serviceAnnotationsSearchRoute = defineRoute<ServiceAnnotationRespon
   endpoint: 'GET /api/apm/services/{serviceName}/annotation/search 2023-10-31',
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: z.string() }),
+      path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
       query: environmentSchema.merge(rangeSchema),
     })
   ),

@@ -7,6 +7,11 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import {
+  MAX_APM_FIELD_VALUE_LENGTH,
+  MAX_APM_GROUP_BY_FIELDS,
+  MAX_TIME_WINDOW_UNIT_LENGTH,
+} from '../common/constants';
 import { searchConfigurationSchema } from '../common/search_configuration_schema';
 
 export const errorCountParamsSchema = schema.object(
@@ -18,6 +23,7 @@ export const errorCountParamsSchema = schema.object(
       },
     }),
     windowUnit: schema.string({
+      maxLength: MAX_TIME_WINDOW_UNIT_LENGTH,
       meta: { description: 'The type of units for the time window: minutes, hours, or days.' },
     }),
     threshold: schema.number({
@@ -25,6 +31,7 @@ export const errorCountParamsSchema = schema.object(
     }),
     serviceName: schema.maybe(
       schema.string({
+        maxLength: MAX_APM_FIELD_VALUE_LENGTH,
         meta: {
           description:
             'Filter the errors coming from your application to apply the rule to a specific service.',
@@ -32,6 +39,7 @@ export const errorCountParamsSchema = schema.object(
       })
     ),
     environment: schema.string({
+      maxLength: MAX_APM_FIELD_VALUE_LENGTH,
       meta: {
         description:
           'Filter the errors coming from your application to apply the rule to a specific environment.',
@@ -40,15 +48,18 @@ export const errorCountParamsSchema = schema.object(
     groupBy: schema.maybe(
       schema.arrayOf(
         schema.string({
+          maxLength: MAX_APM_FIELD_VALUE_LENGTH,
           meta: {
             description:
               'Perform a composite aggregation against the selected fields. When any of these groups match the selected rule conditions, an alert is triggered per group.',
           },
-        })
+        }),
+        { maxSize: MAX_APM_GROUP_BY_FIELDS }
       )
     ),
     errorGroupingKey: schema.maybe(
       schema.string({
+        maxLength: MAX_APM_FIELD_VALUE_LENGTH,
         meta: {
           description:
             'Filter the errors coming from your application to apply the rule to a specific error grouping key, which is a hash of the stack trace and other properties.',

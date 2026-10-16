@@ -9,6 +9,7 @@ import type { TopValuesStats } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
+import { MAX_DOCUMENT_VALUE_LENGTH, MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export type FieldValueStatsTransactionsResponse = TopValuesStats;
 
@@ -18,17 +19,17 @@ export const fieldValueStatsTransactionsRoute = defineRoute<FieldValueStatsTrans
     z.object({
       query: z
         .object({
-          serviceName: z.string().optional(),
-          transactionName: z.string().optional(),
-          transactionType: z.string().optional(),
-          samplerShardSize: z.string().optional(),
+          serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+          transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional(),
+          transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+          samplerShardSize: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
         })
         .merge(environmentSchema)
         .merge(kuerySchema)
         .merge(rangeSchema)
         .extend({
-          fieldName: z.string(),
-          fieldValue: z.union([z.string(), z.number()]),
+          fieldName: z.string().max(MAX_FIELD_VALUE_LENGTH),
+          fieldValue: z.union([z.string().max(MAX_FIELD_VALUE_LENGTH), z.number()]),
         }),
     })
   ),

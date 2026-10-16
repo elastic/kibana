@@ -6,12 +6,13 @@
  */
 import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export const serviceGroupDeleteRoute = defineRoute<void>()({
   endpoint: 'DELETE /internal/apm/service-group',
   params: lazySchema(() =>
     z.object({
-      query: z.object({ serviceGroupId: z.string() }),
+      query: z.object({ serviceGroupId: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
     })
   ),
 });

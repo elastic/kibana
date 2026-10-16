@@ -15,6 +15,11 @@ import {
   probabilitySchema,
   serviceTransactionDataSourceSchema,
 } from '../../default_api_types';
+import {
+  MAX_ARRAY_ITEMS,
+  MAX_FIELD_VALUE_LENGTH,
+  MAX_JSON_ARRAY_PARAM_LENGTH,
+} from '../../constants';
 
 export interface ServiceTransactionDetailedStat {
   serviceName: string;
@@ -32,6 +37,7 @@ export interface ServiceTransactionDetailedStatPeriodsResponse {
 // then validate the parsed value is an array of strings.
 const serviceNamesJsonSchema = z
   .string()
+  .max(MAX_JSON_ARRAY_PARAM_LENGTH)
   .transform((value, ctx) => {
     try {
       return JSON.parse(value);
@@ -40,7 +46,7 @@ const serviceNamesJsonSchema = z
       return z.NEVER;
     }
   })
-  .pipe(z.array(z.string()));
+  .pipe(z.array(z.string().max(MAX_FIELD_VALUE_LENGTH)).max(MAX_ARRAY_ITEMS));
 
 export const servicesDetailedStatisticsRoute =
   defineRoute<ServiceTransactionDetailedStatPeriodsResponse>()({
@@ -55,7 +61,7 @@ export const servicesDetailedStatisticsRoute =
           .merge(serviceTransactionDataSourceSchema)
           .merge(
             z.object({
-              bucketSizeInSeconds: z.coerce.number(),
+              bucketSizeInSeconds: z.coerce.number().min(1),
             })
           ),
         body: z.object({ serviceNames: serviceNamesJsonSchema }),

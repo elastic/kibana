@@ -15,6 +15,7 @@ import {
   filtersSchema,
   serviceTransactionDataSourceSchema,
 } from '../../default_api_types';
+import { MAX_DOCUMENT_VALUE_LENGTH, MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface FailedTransactionRateResponse {
   currentPeriod: {
@@ -31,10 +32,20 @@ export const transactionChartsErrorRateRoute = defineRoute<FailedTransactionRate
   endpoint: 'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate',
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: z.string() }),
+      path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
       query: z
-        .object({ transactionType: z.string(), bucketSizeInSeconds: z.coerce.number() })
-        .merge(z.object({ transactionName: z.string(), filters: filtersSchema }).partial())
+        .object({
+          transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH),
+          bucketSizeInSeconds: z.coerce.number().min(1),
+        })
+        .merge(
+          z
+            .object({
+              transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH),
+              filters: filtersSchema,
+            })
+            .partial()
+        )
         .merge(environmentSchema)
         .merge(kuerySchema)
         .merge(rangeSchema)

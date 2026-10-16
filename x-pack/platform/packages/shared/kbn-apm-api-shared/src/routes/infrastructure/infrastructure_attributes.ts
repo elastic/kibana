@@ -8,6 +8,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface InfrastructureAttributesResponse {
   containerIds: string[];
@@ -19,11 +20,11 @@ export const infrastructureAttributesRoute = defineRoute<InfrastructureAttribute
   endpoint: 'GET /internal/apm/services/{serviceName}/infrastructure_attributes',
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: z.string() }),
+      path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
       query: kuerySchema
         .merge(rangeSchema)
         .merge(environmentSchema)
-        .extend({ agentName: z.string().optional() }),
+        .extend({ agentName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional() }),
     })
   ),
 });

@@ -9,6 +9,7 @@ import type { BaseFlameGraph } from '@kbn/profiling-utils';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
+import { MAX_DOCUMENT_VALUE_LENGTH, MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export type ServicesFlamegraphResponse = BaseFlameGraph;
 
@@ -16,12 +17,12 @@ export const servicesFlamegraphRoute = defineRoute<ServicesFlamegraphResponse>()
   endpoint: 'GET /internal/apm/services/{serviceName}/profiling/flamegraph',
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: z.string() }),
+      path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
       query: kuerySchema
         .merge(environmentSchema)
         .merge(rangeSchema)
-        .merge(z.object({ transactionName: z.string().optional() }))
-        .merge(z.object({ transactionType: z.string() })),
+        .merge(z.object({ transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional() }))
+        .merge(z.object({ transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH) })),
     })
   ),
 });

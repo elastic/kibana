@@ -7,6 +7,12 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import {
+  MAX_APM_DOCUMENT_VALUE_LENGTH,
+  MAX_APM_FIELD_VALUE_LENGTH,
+  MAX_APM_GROUP_BY_FIELDS,
+  MAX_TIME_WINDOW_UNIT_LENGTH,
+} from '../common/constants';
 import { searchConfigurationSchema } from '../common/search_configuration_schema';
 
 export enum AggregationType {
@@ -18,15 +24,20 @@ export enum AggregationType {
 export const transactionDurationParamsSchema = schema.object(
   {
     serviceName: schema.maybe(
-      schema.string({ meta: { description: 'Filter the rule to apply to a specific service.' } })
+      schema.string({
+        maxLength: MAX_APM_FIELD_VALUE_LENGTH,
+        meta: { description: 'Filter the rule to apply to a specific service.' },
+      })
     ),
     transactionType: schema.maybe(
       schema.string({
+        maxLength: MAX_APM_FIELD_VALUE_LENGTH,
         meta: { description: 'Filter the rule to apply to a specific transaction type.' },
       })
     ),
     transactionName: schema.maybe(
       schema.string({
+        maxLength: MAX_APM_DOCUMENT_VALUE_LENGTH,
         meta: { description: 'Filter the rule to apply to a specific transaction name.' },
       })
     ),
@@ -37,6 +48,7 @@ export const transactionDurationParamsSchema = schema.object(
       },
     }),
     windowUnit: schema.string({
+      maxLength: MAX_TIME_WINDOW_UNIT_LENGTH,
       meta: {
         description: 'The type of units for the time window. For example: minutes, hours, or days.',
       },
@@ -51,16 +63,19 @@ export const transactionDurationParamsSchema = schema.object(
       { meta: { description: 'The type of aggregation to perform.' } }
     ),
     environment: schema.string({
+      maxLength: MAX_APM_FIELD_VALUE_LENGTH,
       meta: { description: 'Filter the rule to apply to a specific environment.' },
     }),
     groupBy: schema.maybe(
       schema.arrayOf(
         schema.string({
+          maxLength: MAX_APM_FIELD_VALUE_LENGTH,
           meta: {
             description:
               'Perform a composite aggregation against the selected fields. When any of these groups match the selected rule conditions, an alert is triggered per group.',
           },
-        })
+        }),
+        { maxSize: MAX_APM_GROUP_BY_FIELDS }
       )
     ),
     useKqlFilter: schema.maybe(

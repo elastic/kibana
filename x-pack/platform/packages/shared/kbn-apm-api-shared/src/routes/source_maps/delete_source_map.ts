@@ -6,13 +6,14 @@
  */
 import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export const deleteSourceMapRoute = defineRoute<void>()({
   endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-10-31',
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        id: z.string(),
+        id: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
     })
   ),

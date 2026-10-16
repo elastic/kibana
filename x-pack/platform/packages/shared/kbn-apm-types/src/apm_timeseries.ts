@@ -8,6 +8,12 @@
 import { z } from '@kbn/zod/v4';
 import type { ChangePointType } from '@kbn/es-types/src';
 import { LatencyAggregationType } from './latency_aggregation_types';
+import {
+  MAX_ARRAY_ITEMS,
+  MAX_DOCUMENT_VALUE_LENGTH,
+  MAX_FIELD_VALUE_LENGTH,
+  MAX_KUERY_LENGTH,
+} from './request_limits';
 
 export enum ApmTimeseriesType {
   transactionThroughput = 'transaction_throughput',
@@ -25,8 +31,8 @@ const timeseriesSchema = z.union([
       z.literal(ApmTimeseriesType.transactionThroughput),
       z.literal(ApmTimeseriesType.transactionFailureRate),
     ]),
-    'transaction.type': z.string().optional(),
-    'transaction.name': z.string().optional(),
+    'transaction.type': z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+    'transaction.name': z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional(),
   }),
   z.object({
     name: z.union([
@@ -34,7 +40,7 @@ const timeseriesSchema = z.union([
       z.literal(ApmTimeseriesType.exitSpanFailureRate),
       z.literal(ApmTimeseriesType.exitSpanLatency),
     ]),
-    'span.destination.service.resource': z.string().optional(),
+    'span.destination.service.resource': z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional(),
   }),
   z.object({
     name: z.literal(ApmTimeseriesType.transactionLatency),
@@ -43,8 +49,8 @@ const timeseriesSchema = z.union([
       z.literal(LatencyAggregationType.p95),
       z.literal(LatencyAggregationType.p99),
     ]),
-    'transaction.type': z.string().optional(),
-    'transaction.name': z.string().optional(),
+    'transaction.type': z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+    'transaction.name': z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional(),
   }),
   z.object({
     name: z.literal(ApmTimeseriesType.errorEventRate),
@@ -52,18 +58,20 @@ const timeseriesSchema = z.union([
 ]);
 
 export const getApmTimeseriesRt = z.object({
-  stats: z.array(
-    z.object({
-      'service.name': z.string(),
-      title: z.string(),
-      timeseries: timeseriesSchema,
-      filter: z.string().optional(),
-      offset: z.string().optional(),
-      'service.environment': z.string().optional(),
-    })
-  ),
-  start: z.string(),
-  end: z.string(),
+  stats: z
+    .array(
+      z.object({
+        'service.name': z.string().max(MAX_FIELD_VALUE_LENGTH),
+        title: z.string().max(MAX_FIELD_VALUE_LENGTH),
+        timeseries: timeseriesSchema,
+        filter: z.string().max(MAX_KUERY_LENGTH).optional(),
+        offset: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+        'service.environment': z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+      })
+    )
+    .max(MAX_ARRAY_ITEMS),
+  start: z.string().max(MAX_FIELD_VALUE_LENGTH),
+  end: z.string().max(MAX_FIELD_VALUE_LENGTH),
 });
 
 export interface TimeseriesChangePoint {

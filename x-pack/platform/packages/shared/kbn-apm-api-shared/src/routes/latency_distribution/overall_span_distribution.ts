@@ -9,6 +9,11 @@ import type { OverallLatencyDistributionResponse } from '@kbn/apm-types';
 import { latencyDistributionChartTypeSchema, environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
+import {
+  MAX_ARRAY_ITEMS,
+  MAX_DOCUMENT_VALUE_LENGTH,
+  MAX_FIELD_VALUE_LENGTH,
+} from '../../constants';
 
 export type LatencyOverallSpanDistributionResponse = OverallLatencyDistributionResponse;
 
@@ -19,21 +24,22 @@ export const latencyOverallSpanDistributionRoute =
       z.object({
         body: z
           .object({
-            serviceName: z.string().optional(),
-            spanName: z.string().optional(),
-            transactionId: z.string().optional(),
+            serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+            spanName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional(),
+            transactionId: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
             termFilters: z
               .array(
                 z.object({
-                  fieldName: z.string(),
-                  fieldValue: z.union([z.string(), z.number()]),
+                  fieldName: z.string().max(MAX_FIELD_VALUE_LENGTH),
+                  fieldValue: z.union([z.string().max(MAX_FIELD_VALUE_LENGTH), z.number()]),
                 })
               )
+              .max(MAX_ARRAY_ITEMS)
               .optional(),
             durationMin: z.coerce.number().optional(),
             durationMax: z.coerce.number().optional(),
             isOtel: z.boolean().optional(),
-            percentileThreshold: z.coerce.number(),
+            percentileThreshold: z.coerce.number().min(0).max(100),
             chartType: latencyDistributionChartTypeSchema,
           })
           .merge(environmentSchema)

@@ -9,6 +9,7 @@ import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { buildPath } from '@kbn/core-http-browser';
 import type { ComponentProps } from '../../route_init';
 import { ApmTemplate } from './apm_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
@@ -47,7 +48,7 @@ export const ApmOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
-    const url = `../api/monitoring/v1/clusters/${clusterUuid}/apm`;
+    const url = buildPath('../api/monitoring/v1/clusters/{clusterUuid}/apm', { clusterUuid });
 
     const response = await services.http?.fetch<any>(url, {
       method: 'POST',

@@ -9,6 +9,11 @@ import { type Coordinate } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
+import {
+  MAX_ARRAY_ITEMS,
+  MAX_FIELD_VALUE_LENGTH,
+  MAX_JSON_ARRAY_PARAM_LENGTH,
+} from '../../constants';
 
 export interface MobileDetailedStatistics {
   fieldName: string;
@@ -25,6 +30,7 @@ export interface MobileDetailedStatisticsResponse {
 // then validate the parsed value as an array of strings.
 const fieldValuesSchema = z
   .string()
+  .max(MAX_JSON_ARRAY_PARAM_LENGTH)
   .transform((value, ctx) => {
     try {
       return JSON.parse(value);
@@ -33,18 +39,18 @@ const fieldValuesSchema = z
       return z.NEVER;
     }
   })
-  .pipe(z.array(z.string()));
+  .pipe(z.array(z.string().max(MAX_FIELD_VALUE_LENGTH)).max(MAX_ARRAY_ITEMS));
 
 export const mobileDetailedStatisticsRoute = defineRoute<MobileDetailedStatisticsResponse>()({
   endpoint: 'GET /internal/apm/mobile-services/{serviceName}/detailed_statistics',
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        serviceName: z.string(),
+        serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
       query: z
         .object({
-          field: z.string(),
+          field: z.string().max(MAX_FIELD_VALUE_LENGTH),
           fieldValues: fieldValuesSchema,
         })
         .merge(kuerySchema)

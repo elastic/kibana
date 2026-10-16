@@ -9,6 +9,11 @@ import type { FieldValuePair } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
+import {
+  MAX_ARRAY_ITEMS,
+  MAX_DOCUMENT_VALUE_LENGTH,
+  MAX_FIELD_VALUE_LENGTH,
+} from '../../constants';
 
 export interface FieldValuePairsResponse {
   fieldValuePairs: FieldValuePair[];
@@ -21,15 +26,15 @@ export const fieldValuePairsTransactionsRoute = defineRoute<FieldValuePairsRespo
     z.object({
       body: z
         .object({
-          serviceName: z.string().optional(),
-          transactionName: z.string().optional(),
-          transactionType: z.string().optional(),
+          serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+          transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional(),
+          transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
         })
         .merge(environmentSchema)
         .merge(kuerySchema)
         .merge(rangeSchema)
         .extend({
-          fieldCandidates: z.array(z.string()),
+          fieldCandidates: z.array(z.string().max(MAX_FIELD_VALUE_LENGTH)).max(MAX_ARRAY_ITEMS),
         }),
     })
   ),

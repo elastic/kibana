@@ -6,6 +6,7 @@
  */
 import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export type AgentConfigurationEnvironmentsResponse = Array<{
   name: string;
@@ -21,7 +22,9 @@ export const listAgentConfigurationEnvironmentsRoute =
     endpoint: 'GET /api/apm/settings/agent-configuration/environments 2023-10-31',
     params: lazySchema(() =>
       z.object({
-        query: z.object({ serviceName: z.string().optional() }).optional(),
+        query: z
+          .object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional() })
+          .optional(),
       })
     ),
   });

@@ -9,6 +9,7 @@ import type { ConnectionStats, Node } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema, kuerySchema, offsetSchema } from '../../default_api_types';
+import { MAX_DOCUMENT_VALUE_LENGTH, MAX_NUM_BUCKETS } from '../../constants';
 
 export interface UpstreamServicesForDependencyResponse {
   services: Array<{
@@ -23,9 +24,9 @@ export const upstreamServicesRoute = defineRoute<UpstreamServicesForDependencyRe
   params: lazySchema(() =>
     z.object({
       query: z
-        .object({ dependencyName: z.string() })
+        .object({ dependencyName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH) })
         .merge(rangeSchema)
-        .merge(z.object({ numBuckets: z.coerce.number() }))
+        .merge(z.object({ numBuckets: z.coerce.number().int().min(1).max(MAX_NUM_BUCKETS) }))
         .merge(environmentSchema)
         .merge(offsetSchema)
         .merge(kuerySchema),

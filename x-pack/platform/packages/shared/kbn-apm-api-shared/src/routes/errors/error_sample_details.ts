@@ -9,6 +9,7 @@ import type { Transaction, APMError } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface ErrorSampleDetailsResponse {
   transaction: Transaction | undefined;
@@ -28,7 +29,11 @@ export const errorSampleDetailsRoute = defineRoute<ErrorSampleDetailsResponse>()
   endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}',
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: z.string(), groupId: z.string(), errorId: z.string() }),
+      path: z.object({
+        serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH),
+        groupId: z.string().max(MAX_FIELD_VALUE_LENGTH),
+        errorId: z.string().max(MAX_FIELD_VALUE_LENGTH),
+      }),
       query: environmentSchema.merge(kuerySchema).merge(rangeSchema),
     })
   ),

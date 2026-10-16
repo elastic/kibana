@@ -8,6 +8,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 interface MobileStatsTimeseries {
   x: number;
@@ -31,11 +32,11 @@ export const mobileStatsRoute = defineRoute<MobilePeriodStats>()({
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        serviceName: z.string(),
+        serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
       query: z
         .object({
-          transactionType: z.string().optional(),
+          transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
         })
         .merge(kuerySchema)
         .merge(rangeSchema)

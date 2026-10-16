@@ -13,6 +13,7 @@ import {
   kuerySchema,
   serviceTransactionDataSourceSchema,
 } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface ProfilingHostsFlamegraphResponse {
   flamegraph: BaseFlameGraph;
@@ -24,7 +25,7 @@ export const profilingHostsFlamegraphRoute = defineRoute<ProfilingHostsFlamegrap
   endpoint: 'GET /internal/apm/services/{serviceName}/profiling/hosts/flamegraph',
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: z.string() }),
+      path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
       query: rangeSchema
         .merge(environmentSchema)
         .merge(serviceTransactionDataSourceSchema)

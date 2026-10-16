@@ -8,6 +8,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { TransactionDetailRedirectInfo } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface RootTransactionByTraceIdResponse {
   transaction?: TransactionDetailRedirectInfo;
@@ -18,7 +19,7 @@ export const rootTransactionByTraceIdRoute = defineRoute<RootTransactionByTraceI
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        traceId: z.string(),
+        traceId: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
       query: rangeSchema,
     })

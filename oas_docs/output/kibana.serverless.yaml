@@ -146088,6 +146088,7 @@ components:
                   - txFailureRate
                   - txLowCount
                 type: string
+              maxItems: 4
               minItems: 1
               type: array
             anomalySeverityType:
@@ -146100,18 +146101,22 @@ components:
               type: string
             environment:
               description: The environment from APM.
+              maxLength: 1024
               type: string
             serviceName:
               description: The service name from APM.
+              maxLength: 1024
               type: string
             transactionType:
               description: The transaction type from APM.
+              maxLength: 1024
               type: string
             windowSize:
               description: The size of the time window (in `windowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.
               type: number
             windowUnit:
               description: 'The type of units for the time window: minutes, hours, or days.'
+              maxLength: 10
               type: string
           required:
             - windowSize
@@ -146227,14 +146232,18 @@ components:
           properties:
             environment:
               description: Filter the errors coming from your application to apply the rule to a specific environment.
+              maxLength: 1024
               type: string
             errorGroupingKey:
               description: Filter the errors coming from your application to apply the rule to a specific error grouping key, which is a hash of the stack trace and other properties.
+              maxLength: 1024
               type: string
             groupBy:
               items:
                 description: Perform a composite aggregation against the selected fields. When any of these groups match the selected rule conditions, an alert is triggered per group.
+                maxLength: 1024
                 type: string
+              maxItems: 10
               type: array
             searchConfiguration:
               additionalProperties: false
@@ -146245,10 +146254,12 @@ components:
                   type: object
                   properties:
                     language:
+                      maxLength: 64
                       type: string
                     query:
                       anyOf:
-                        - type: string
+                        - maxLength: 10000
+                          type: string
                         - additionalProperties:
                             nullable: true
                           type: object
@@ -146259,6 +146270,7 @@ components:
                 - query
             serviceName:
               description: Filter the errors coming from your application to apply the rule to a specific service.
+              maxLength: 1024
               type: string
             threshold:
               description: The number of errors, which is the threshold for alerts.
@@ -146271,6 +146283,7 @@ components:
               type: number
             windowUnit:
               description: 'The type of units for the time window: minutes, hours, or days.'
+              maxLength: 10
               type: string
           required:
             - windowSize
@@ -146478,11 +146491,14 @@ components:
               type: string
             environment:
               description: Filter the rule to apply to a specific environment.
+              maxLength: 1024
               type: string
             groupBy:
               items:
                 description: Perform a composite aggregation against the selected fields. When any of these groups match the selected rule conditions, an alert is triggered per group.
+                maxLength: 1024
                 type: string
+              maxItems: 10
               type: array
             searchConfiguration:
               additionalProperties: false
@@ -146493,10 +146509,12 @@ components:
                   type: object
                   properties:
                     language:
+                      maxLength: 64
                       type: string
                     query:
                       anyOf:
-                        - type: string
+                        - maxLength: 10000
+                          type: string
                         - additionalProperties:
                             nullable: true
                           type: object
@@ -146507,15 +146525,18 @@ components:
                 - query
             serviceName:
               description: Filter the rule to apply to a specific service.
+              maxLength: 1024
               type: string
             threshold:
               description: The latency threshold value.
               type: number
             transactionName:
               description: Filter the rule to apply to a specific transaction name.
+              maxLength: 10000
               type: string
             transactionType:
               description: Filter the rule to apply to a specific transaction type.
+              maxLength: 1024
               type: string
             useKqlFilter:
               description: A Kibana Query Language (KQL) expression thats limits the scope of alerts.
@@ -146525,6 +146546,7 @@ components:
               type: number
             windowUnit:
               description: 'The type of units for the time window. For example: minutes, hours, or days.'
+              maxLength: 10
               type: string
           required:
             - windowSize
@@ -146640,10 +146662,13 @@ components:
           description: The parameters for the transaction error rate rule. These parameters are appropriate when `rule_type_id` is `apm.transaction_error_rate`.
           properties:
             environment:
+              maxLength: 1024
               type: string
             groupBy:
               items:
+                maxLength: 1024
                 type: string
+              maxItems: 10
               type: array
             searchConfiguration:
               additionalProperties: false
@@ -146654,10 +146679,12 @@ components:
                   type: object
                   properties:
                     language:
+                      maxLength: 64
                       type: string
                     query:
                       anyOf:
-                        - type: string
+                        - maxLength: 10000
+                          type: string
                         - additionalProperties:
                             nullable: true
                           type: object
@@ -146667,18 +146694,22 @@ components:
               required:
                 - query
             serviceName:
+              maxLength: 1024
               type: string
             threshold:
               type: number
             transactionName:
+              maxLength: 10000
               type: string
             transactionType:
+              maxLength: 1024
               type: string
             useKqlFilter:
               type: boolean
             windowSize:
               type: number
             windowUnit:
+              maxLength: 10
               type: string
           required:
             - windowSize

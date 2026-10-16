@@ -8,6 +8,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema, probabilitySchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export type AgentExplorerAgentInstancesResponse = Array<{
   serviceNode: string;
@@ -24,7 +25,7 @@ export const agentInstancesRoute = defineRoute<AgentExplorerAgentInstancesRouteR
   endpoint: 'GET /internal/apm/services/{serviceName}/agent_instances',
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: z.string() }),
+      path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
       query: environmentSchema.merge(kuerySchema).merge(rangeSchema).merge(probabilitySchema),
     })
   ),

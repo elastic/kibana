@@ -9,6 +9,7 @@ import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema, kuerySchema, offsetSchema } from '../../default_api_types';
+import { MAX_DOCUMENT_VALUE_LENGTH } from '../../constants';
 
 export interface DependencyOperation {
   spanName: string;
@@ -36,7 +37,7 @@ export const dependencyOperationsRoute = defineRoute<DependencyOperationsRespons
         .merge(offsetSchema)
         .merge(
           z.object({
-            dependencyName: z.string(),
+            dependencyName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH),
             searchServiceDestinationMetrics: BooleanFromString.default(false),
           })
         ),

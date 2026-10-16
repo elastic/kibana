@@ -9,6 +9,11 @@ import type { ServiceMapResponse } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
+import {
+  MAX_FIELD_VALUE_LENGTH,
+  MAX_JSON_ARRAY_PARAM_LENGTH,
+  MAX_KUERY_LENGTH,
+} from '../../constants';
 
 export type ServiceMapRouteResponse = ServiceMapResponse;
 
@@ -18,19 +23,22 @@ export const serviceMapRoute = defineRoute<ServiceMapRouteResponse>()({
     z.object({
       query: z
         .object({
-          serviceName: z.string(),
-          serviceGroup: z.string(),
-          kuery: z.string(),
+          serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH),
+          serviceGroup: z.string().max(MAX_FIELD_VALUE_LENGTH),
+          kuery: z.string().max(MAX_KUERY_LENGTH),
           // JSON-serialised ES query produced by buildEsQuery() on the client.
           // Carries filter-bar pills + Controls API selections already merged.
-          esQuery: z.string().transform((value, ctx) => {
-            try {
-              return JSON.parse(value);
-            } catch (err) {
-              ctx.addIssue({ code: 'custom', message: err.message });
-              return z.NEVER;
-            }
-          }),
+          esQuery: z
+            .string()
+            .max(MAX_JSON_ARRAY_PARAM_LENGTH)
+            .transform((value, ctx) => {
+              try {
+                return JSON.parse(value);
+              } catch (err) {
+                ctx.addIssue({ code: 'custom', message: err.message });
+                return z.NEVER;
+              }
+            }),
         })
         .partial()
         .merge(environmentSchema)

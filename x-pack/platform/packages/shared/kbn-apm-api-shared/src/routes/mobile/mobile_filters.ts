@@ -9,6 +9,7 @@ import { type MobilePropertyType } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export type MobileFiltersResponse = Array<{
   key: MobilePropertyType;
@@ -24,11 +25,11 @@ export const mobileFiltersRoute = defineRoute<MobileFiltersRouteResponse>()({
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        serviceName: z.string(),
+        serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
       query: z
         .object({
-          transactionType: z.string().optional(),
+          transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
         })
         .merge(kuerySchema)
         .merge(rangeSchema)

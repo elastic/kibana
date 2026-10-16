@@ -15,6 +15,7 @@ import {
   filtersSchema,
   serviceTransactionDataSourceSchema,
 } from '../../default_api_types';
+import { MAX_DOCUMENT_VALUE_LENGTH, MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export type ServiceThroughputResponse = Coordinate[];
 
@@ -27,14 +28,14 @@ export const serviceThroughputRoute = defineRoute<ServiceThroughputRouteResponse
   endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: z.string() }),
+      path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
       query: z
-        .object({ bucketSizeInSeconds: z.coerce.number() })
+        .object({ bucketSizeInSeconds: z.coerce.number().min(1) })
         .merge(
           z
             .object({
-              transactionType: z.string(),
-              transactionName: z.string(),
+              transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH),
+              transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH),
               filters: filtersSchema,
             })
             .partial()

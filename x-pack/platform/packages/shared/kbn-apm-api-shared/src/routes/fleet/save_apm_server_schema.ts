@@ -6,13 +6,14 @@
  */
 import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export const saveApmServerSchemaRoute = defineRoute<void>()({
   endpoint: 'POST /api/apm/fleet/apm_server_schema 2023-10-31',
   params: lazySchema(() =>
     z.object({
       body: z.object({
-        schema: z.record(z.string(), z.unknown()),
+        schema: z.record(z.string().max(MAX_FIELD_VALUE_LENGTH), z.unknown()),
       }),
     })
   ),

@@ -9,6 +9,7 @@ import { environmentSchema } from '@kbn/apm-types';
 import type { FetchAndTransformMetrics } from './metrics_charts';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema, transactionDataSourceSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface ServerlessMetricsChartsResponse {
   charts: FetchAndTransformMetrics[];
@@ -18,13 +19,13 @@ export const serverlessMetricsChartsRoute = defineRoute<ServerlessMetricsChartsR
   endpoint: 'GET /internal/apm/services/{serviceName}/metrics/serverless/charts',
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: z.string() }),
+      path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
       query: environmentSchema
         .merge(kuerySchema)
         .merge(rangeSchema)
-        .merge(z.object({ serverlessId: z.string() }).partial())
+        .merge(z.object({ serverlessId: z.string().max(MAX_FIELD_VALUE_LENGTH) }).partial())
         .merge(transactionDataSourceSchema)
-        .merge(z.object({ bucketSizeInSeconds: z.coerce.number() })),
+        .merge(z.object({ bucketSizeInSeconds: z.coerce.number().min(1) })),
     })
   ),
 });

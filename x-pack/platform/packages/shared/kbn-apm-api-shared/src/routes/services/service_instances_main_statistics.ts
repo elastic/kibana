@@ -9,6 +9,7 @@ import { instancesSortFieldSchema, latencyAggregationTypeSchema } from '@kbn/apm
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export type ServiceInstanceMainStatisticsResponse = Array<{
   serviceNodeName: string;
@@ -29,11 +30,11 @@ export const serviceInstancesMainStatisticsRoute =
     endpoint: 'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics',
     params: lazySchema(() =>
       z.object({
-        path: z.object({ serviceName: z.string() }),
+        path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
         query: z
           .object({
             latencyAggregationType: latencyAggregationTypeSchema,
-            transactionType: z.string(),
+            transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH),
             sortField: instancesSortFieldSchema,
             sortDirection: z.union([z.literal('asc'), z.literal('desc')]),
           })

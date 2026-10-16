@@ -9,6 +9,7 @@ import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
 import type { ColdstartRateResponse } from './coldstart_rate';
+import { MAX_DOCUMENT_VALUE_LENGTH, MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export type ColdstartRateByTransactionNameResponse = ColdstartRateResponse;
 
@@ -18,9 +19,12 @@ export const transactionChartsColdstartRateByTransactionNameRoute =
       'GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate_by_transaction_name',
     params: lazySchema(() =>
       z.object({
-        path: z.object({ serviceName: z.string() }),
+        path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
         query: z
-          .object({ transactionType: z.string(), transactionName: z.string() })
+          .object({
+            transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH),
+            transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH),
+          })
           .merge(environmentSchema)
           .merge(kuerySchema)
           .merge(rangeSchema)

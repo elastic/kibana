@@ -427,7 +427,7 @@ const serviceAnnotationsCreateRoute = createApmServerRoute({
         .merge(
           z.object({
             message: z.string().max(10_000).optional(),
-            tags: z.array(z.string().max(1024)).optional(),
+            tags: z.array(z.string().max(1024)).max(100).optional(),
           })
         ),
     })

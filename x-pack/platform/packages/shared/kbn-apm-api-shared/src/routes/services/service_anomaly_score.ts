@@ -9,6 +9,7 @@ import type { AnomalyDetectorType, Environment } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface ServiceAnomalyScoreResponse {
   anomalyScore?: number;
@@ -20,7 +21,7 @@ export const serviceAnomalyScoreRoute = defineRoute<ServiceAnomalyScoreResponse>
   endpoint: 'GET /internal/apm/services/{serviceName}/anomaly_score',
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: z.string() }),
+      path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
       query: rangeSchema.merge(environmentSchema),
     })
   ),

@@ -8,6 +8,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { processorEventSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface EventMetadataResponse {
   metadata: Partial<Record<string, unknown[]>>;
@@ -19,7 +20,7 @@ export const eventMetadataRoute = defineRoute<EventMetadataResponse>()({
     z.object({
       path: z.object({
         processorEvent: processorEventSchema,
-        id: z.string(),
+        id: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
       query: rangeSchema,
     })

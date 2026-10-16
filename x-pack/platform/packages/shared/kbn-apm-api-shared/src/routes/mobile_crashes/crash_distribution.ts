@@ -9,6 +9,7 @@ import { type Coordinate } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface CrashDistributionResponse {
   currentPeriod: Array<{ x: number; y: number }>;
@@ -21,11 +22,11 @@ export const crashDistributionRoute = defineRoute<CrashDistributionResponse>()({
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        serviceName: z.string(),
+        serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
       query: z
         .object({
-          groupId: z.string().optional(),
+          groupId: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
         })
         .merge(environmentSchema)
         .merge(kuerySchema)

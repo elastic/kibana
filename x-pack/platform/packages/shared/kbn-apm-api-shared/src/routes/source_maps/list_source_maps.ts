@@ -7,6 +7,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
 import type { ApmSourceMapArtifactBody } from './source_map_types';
+import { MAX_PAGE, MAX_PAGE_SIZE } from '../../constants';
 
 export interface ListSourceMapArtifactsResponse {
   artifacts: Array<{
@@ -32,8 +33,8 @@ export const listSourceMapsRoute = defineRoute<ListSourceMapArtifactsResponse | 
     z.object({
       query: z
         .object({
-          page: z.coerce.number().optional(),
-          perPage: z.coerce.number().optional(),
+          page: z.coerce.number().max(MAX_PAGE).optional(),
+          perPage: z.coerce.number().max(MAX_PAGE_SIZE).optional(),
         })
         .optional(),
     })

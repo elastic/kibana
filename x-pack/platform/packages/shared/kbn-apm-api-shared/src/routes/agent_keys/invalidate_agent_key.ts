@@ -6,6 +6,7 @@
  */
 import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface InvalidateAgentKeyResponse {
   invalidatedAgentKeys: string[];
@@ -15,7 +16,7 @@ export const invalidateAgentKeyRoute = defineRoute<InvalidateAgentKeyResponse>()
   endpoint: 'POST /internal/apm/api_key/invalidate',
   params: lazySchema(() =>
     z.object({
-      body: z.object({ id: z.string() }),
+      body: z.object({ id: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
     })
   ),
 });

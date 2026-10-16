@@ -9,6 +9,11 @@ import type { LatencyCorrelation } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
+import {
+  MAX_ARRAY_ITEMS,
+  MAX_DOCUMENT_VALUE_LENGTH,
+  MAX_FIELD_VALUE_LENGTH,
+} from '../../constants';
 
 export interface SignificantCorrelationsResponse {
   latencyCorrelations: LatencyCorrelation[];
@@ -24,9 +29,9 @@ export const significantCorrelationsTransactionsRoute =
       z.object({
         body: z
           .object({
-            serviceName: z.string().optional(),
-            transactionName: z.string().optional(),
-            transactionType: z.string().optional(),
+            serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+            transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional(),
+            transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
             durationMin: z.coerce.number().optional(),
             durationMax: z.coerce.number().optional(),
           })
@@ -34,12 +39,14 @@ export const significantCorrelationsTransactionsRoute =
           .merge(kuerySchema)
           .merge(rangeSchema)
           .extend({
-            fieldValuePairs: z.array(
-              z.object({
-                fieldName: z.string(),
-                fieldValue: z.union([z.string(), z.coerce.number()]),
-              })
-            ),
+            fieldValuePairs: z
+              .array(
+                z.object({
+                  fieldName: z.string().max(MAX_FIELD_VALUE_LENGTH),
+                  fieldValue: z.union([z.string().max(MAX_FIELD_VALUE_LENGTH), z.coerce.number()]),
+                })
+              )
+              .max(MAX_ARRAY_ITEMS),
           }),
       })
     ),

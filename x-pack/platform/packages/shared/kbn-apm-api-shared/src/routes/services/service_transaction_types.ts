@@ -7,6 +7,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
 import { rangeSchema, serviceTransactionDataSourceSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface ServiceTransactionTypesResponse {
   transactionTypes: string[];
@@ -16,7 +17,7 @@ export const serviceTransactionTypesRoute = defineRoute<ServiceTransactionTypesR
   endpoint: 'GET /internal/apm/services/{serviceName}/transaction_types',
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: z.string() }),
+      path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
       query: rangeSchema.merge(serviceTransactionDataSourceSchema),
     })
   ),

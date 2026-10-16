@@ -8,6 +8,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { Agent, Service, Container, Kubernetes, Host, Cloud } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface ServiceInstanceMetadataDetailsResponse {
   '@timestamp': string;
@@ -35,8 +36,8 @@ export const serviceInstancesMetadataDetailsRoute =
     params: lazySchema(() =>
       z.object({
         path: z.object({
-          serviceName: z.string(),
-          serviceNodeName: z.string(),
+          serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH),
+          serviceNodeName: z.string().max(MAX_FIELD_VALUE_LENGTH),
         }),
         query: rangeSchema,
       })

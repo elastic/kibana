@@ -16,6 +16,7 @@ import {
   filtersSchema,
   serviceTransactionDataSourceSchema,
 } from '../../default_api_types';
+import { MAX_DOCUMENT_VALUE_LENGTH, MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface TransactionLatencyResponse {
   currentPeriod: {
@@ -32,18 +33,18 @@ export const transactionLatencyChartsRoute = defineRoute<TransactionLatencyRespo
   endpoint: 'GET /internal/apm/services/{serviceName}/transactions/charts/latency',
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: z.string() }),
+      path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
       query: z
         .object({
           latencyAggregationType: latencyAggregationTypeSchema,
-          bucketSizeInSeconds: z.coerce.number(),
+          bucketSizeInSeconds: z.coerce.number().min(1),
           useDurationSummary: BooleanFromString.default(false),
         })
         .merge(
           z
             .object({
-              transactionType: z.string(),
-              transactionName: z.string(),
+              transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH),
+              transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH),
               filters: filtersSchema,
             })
             .partial()

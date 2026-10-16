@@ -9,6 +9,7 @@ import { type Coordinate } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface MobileHttpErrorsTimeseries {
   currentPeriod: { timeseries: Coordinate[] };
@@ -20,7 +21,7 @@ export const mobileHttpErrorRateRoute = defineRoute<MobileHttpErrorsTimeseries>(
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        serviceName: z.string(),
+        serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
       query: environmentSchema.merge(kuerySchema).merge(rangeSchema).merge(offsetSchema),
     })

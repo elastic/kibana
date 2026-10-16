@@ -6,6 +6,7 @@
  */
 import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface DeleteCustomLinkResponse {
   result: string;
@@ -16,7 +17,7 @@ export const deleteCustomLinkRoute = defineRoute<DeleteCustomLinkResponse>()({
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        id: z.string().max(1024),
+        id: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
     })
   ),

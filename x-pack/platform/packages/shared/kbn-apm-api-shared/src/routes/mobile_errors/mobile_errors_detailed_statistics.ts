@@ -9,6 +9,12 @@ import { type Coordinate } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
+import {
+  MAX_ARRAY_ITEMS,
+  MAX_FIELD_VALUE_LENGTH,
+  MAX_JSON_ARRAY_PARAM_LENGTH,
+  MAX_NUM_BUCKETS,
+} from '../../constants';
 
 export interface MobileErrorGroupDetailedStat {
   groupId: string;
@@ -24,6 +30,7 @@ export interface MobileErrorGroupPeriodsResponse {
 // then validate the parsed value is an array of strings.
 const groupIdsJsonSchema = z
   .string()
+  .max(MAX_JSON_ARRAY_PARAM_LENGTH)
   .transform((value, ctx) => {
     try {
       return JSON.parse(value);
@@ -32,14 +39,14 @@ const groupIdsJsonSchema = z
       return z.NEVER;
     }
   })
-  .pipe(z.array(z.string()));
+  .pipe(z.array(z.string().max(MAX_FIELD_VALUE_LENGTH)).max(MAX_ARRAY_ITEMS));
 
 export const mobileErrorsDetailedStatisticsRoute = defineRoute<MobileErrorGroupPeriodsResponse>()({
   endpoint: 'POST /internal/apm/mobile-services/{serviceName}/errors/groups/detailed_statistics',
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        serviceName: z.string(),
+        serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
       query: environmentSchema
         .merge(kuerySchema)
@@ -47,7 +54,7 @@ export const mobileErrorsDetailedStatisticsRoute = defineRoute<MobileErrorGroupP
         .merge(offsetSchema)
         .merge(
           z.object({
-            numBuckets: z.coerce.number(),
+            numBuckets: z.coerce.number().int().min(1).max(MAX_NUM_BUCKETS),
           })
         ),
       body: z.object({ groupIds: groupIdsJsonSchema }),

@@ -9,6 +9,7 @@ import type { AgentName } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema, probabilitySchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface AgentExplorerAgentsResponse {
   items: Array<{
@@ -32,8 +33,8 @@ export const agentsPerServiceRoute = defineRoute<AgentExplorerAgentsResponse>()(
         .merge(rangeSchema)
         .merge(probabilitySchema)
         .extend({
-          serviceName: z.string().optional(),
-          agentLanguage: z.string().optional(),
+          serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+          agentLanguage: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
         }),
     })
   ),
