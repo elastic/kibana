@@ -47,6 +47,12 @@ export const IacCallbackItemSchema = schema.object({
   cloud_connector_id: schema.maybe(schema.string()),
 });
 
+export const GetIacCallbackAvailabilityResponseSchema = schema.object({
+  available: schema.boolean(),
+  kibana_url: schema.maybe(schema.string()),
+  reason: schema.maybe(schema.string()),
+});
+
 export const CreateIacCallbackRequestSchema = {
   body: schema.object({
     provider: schema.literal('aws'),

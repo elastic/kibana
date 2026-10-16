@@ -5,15 +5,34 @@
  * 2.0.
  */
 
+import { useQuery } from '@kbn/react-query';
+
 import type {
   CreateIacCallbackRequest,
   CreateIacCallbackResponse,
   DeleteIacCallbackResponse,
+  GetIacCallbackAvailabilityResponse,
   GetIacCallbackResponse,
 } from '../../../common/types/rest_spec/iac_callback';
 import { API_VERSIONS, IAC_PROVISIONER_API_ROUTES } from '../../../common/constants';
 
-import { sendRequest } from './use_request';
+import { sendRequest, sendRequestForRq } from './use_request';
+
+export const IAC_CALLBACK_AVAILABILITY_QUERY_KEY = ['iac-callback-availability'];
+
+/** Whether a launched stack could report back to this Kibana. The server caches its probe briefly. */
+export function useGetIacCallbackAvailabilityQuery({ enabled }: { enabled: boolean }) {
+  return useQuery(
+    IAC_CALLBACK_AVAILABILITY_QUERY_KEY,
+    () =>
+      sendRequestForRq<GetIacCallbackAvailabilityResponse>({
+        method: 'get',
+        path: IAC_PROVISIONER_API_ROUTES.CALLBACK_AVAILABILITY_PATTERN,
+        version: API_VERSIONS.internal.v1,
+      }),
+    { enabled, retry: false, staleTime: 60_000 }
+  );
+}
 
 const callbackPath = (id: string) =>
   IAC_PROVISIONER_API_ROUTES.CALLBACK_INFO_PATTERN.replace('{callbackId}', encodeURIComponent(id));

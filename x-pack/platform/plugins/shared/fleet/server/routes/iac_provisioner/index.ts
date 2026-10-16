@@ -21,6 +21,7 @@ import {
   CreateIacCallbackResponseSchema,
   DeleteIacCallbackRequestSchema,
   DeleteIacCallbackResponseSchema,
+  GetIacCallbackAvailabilityResponseSchema,
   GetIacCallbackRequestSchema,
   GetIacCallbackResponseSchema,
   ReceiveIacCallbackRequestSchema,
@@ -30,6 +31,7 @@ import {
 import {
   createIacCallbackHandler,
   deleteIacCallbackHandler,
+  getIacCallbackAvailabilityHandler,
   getIacCallbackHandler,
   receiveIacCallbackHandler,
   renderIacTemplateHandler,
@@ -96,6 +98,32 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     );
 
   router.versioned
+    .get({
+      path: IAC_PROVISIONER_API_ROUTES.CALLBACK_AVAILABILITY_PATTERN,
+      summary: 'Check IaC callback availability',
+      description:
+        'Whether a launched CloudFormation stack could report back to this Kibana: server.publicBaseUrl must be an https URL that answers with a publicly trusted certificate. Returns the URL the stack is given, or the reason the callback cannot be used.',
+      access: 'internal',
+      security: IAC_PROVISIONER_ROUTE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {},
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => GetIacCallbackAvailabilityResponseSchema,
+            },
+            404: { description: 'AWS identity federation is not enabled.', body: notFoundResponse },
+          },
+        },
+      },
+      getIacCallbackAvailabilityHandler
+    );
+
+  router.versioned
     .post({
       path: IAC_PROVISIONER_API_ROUTES.CALLBACK_CREATE_PATTERN,
       summary: 'Create an IaC callback',
@@ -116,6 +144,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             },
             400: { description: 'A bad request.', body: genericErrorResponse },
             404: { description: 'AWS identity federation is not enabled.', body: notFoundResponse },
+            412: {
+              description:
+                'The public Kibana URL cannot be reached with a publicly trusted certificate.',
+              body: genericErrorResponse,
+            },
           },
         },
       },

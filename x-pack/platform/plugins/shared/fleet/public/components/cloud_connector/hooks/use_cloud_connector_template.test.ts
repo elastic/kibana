@@ -180,9 +180,8 @@ describe('useCloudConnectorTemplate', () => {
 
     describe('with callback stack params (getLaunchStackParams)', () => {
       const CALLBACK_PARAMS = {
-        ElasticKibanaUrl: 'https://kb.example.com',
+        ElasticCallbackUrl: 'https://kb.example.com/api/fleet/iac_provisioner/callbacks/cb-1',
         ElasticApiKey: 'encoded-key',
-        ElasticCallbackId: 'cb-1',
       };
 
       it('launches the static template on click with the callback params', async () => {
@@ -198,9 +197,10 @@ describe('useCloudConnectorTemplate', () => {
         const params = new URLSearchParams(cloudFormationTab.location.href.split('?')[1]);
         expect(params.get('templateURL')).toBe('https://static.example/template.yml');
         expect(params.get('param_ElasticResourceId')).toBe('kibana-component-id');
-        expect(params.get('param_ElasticKibanaUrl')).toBe('https://kb.example.com');
         expect(params.get('param_ElasticApiKey')).toBe('encoded-key');
-        expect(params.get('param_ElasticCallbackId')).toBe('cb-1');
+        expect(params.get('param_ElasticCallbackUrl')).toBe(
+          'https://kb.example.com/api/fleet/iac_provisioner/callbacks/cb-1'
+        );
         expect(result.current.hasLaunched).toBe(true);
         expect(result.current.iacConfirm).toBeUndefined();
         expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
@@ -214,7 +214,7 @@ describe('useCloudConnectorTemplate', () => {
         await launch(result);
 
         expect(cloudFormationTab.location.href).toContain('static.example');
-        expect(cloudFormationTab.location.href).not.toContain('param_ElasticCallbackId');
+        expect(cloudFormationTab.location.href).not.toContain('param_ElasticCallbackUrl');
         expect(result.current.hasLaunched).toBe(true);
       });
 
@@ -942,9 +942,8 @@ describe('useCloudConnectorTemplate', () => {
 
     describe('callback stack params (getLaunchStackParams)', () => {
       const CALLBACK_PARAMS = {
-        ElasticKibanaUrl: 'https://kb.example.com',
+        ElasticCallbackUrl: 'https://kb.example.com/api/fleet/iac_provisioner/callbacks/cb-1',
         ElasticApiKey: 'encoded-key',
-        ElasticCallbackId: 'cb-1',
       };
 
       it('adds the callback params to the rendered quick-create link', async () => {
@@ -962,9 +961,10 @@ describe('useCloudConnectorTemplate', () => {
         });
         const params = new URLSearchParams(cloudFormationTab.location.href.split('?')[1]);
         expect(params.get('templateURL')).toBe(ARTIFACT_URL);
-        expect(params.get('param_ElasticKibanaUrl')).toBe('https://kb.example.com');
         expect(params.get('param_ElasticApiKey')).toBe('encoded-key');
-        expect(params.get('param_ElasticCallbackId')).toBe('cb-1');
+        expect(params.get('param_ElasticCallbackUrl')).toBe(
+          'https://kb.example.com/api/fleet/iac_provisioner/callbacks/cb-1'
+        );
         expect(params.get('param_ElasticResourceId')).toBe('kibana-component-id');
         expect(result.current.hasLaunched).toBe(true);
       });
@@ -984,7 +984,9 @@ describe('useCloudConnectorTemplate', () => {
         const params = new URLSearchParams(cloudFormationTab.location.href.split('?')[1]);
         expect(params.get('templateURL')).toBe('https://static.example/template.yml');
         expect(params.get('param_ElasticApiKey')).toBe('encoded-key');
-        expect(params.get('param_ElasticCallbackId')).toBe('cb-1');
+        expect(params.get('param_ElasticCallbackUrl')).toBe(
+          'https://kb.example.com/api/fleet/iac_provisioner/callbacks/cb-1'
+        );
         expect(result.current.iacConfirm).toEqual(STATIC_FALLBACK_CONFIRM);
         expect(result.current.hasLaunched).toBe(true);
       });
@@ -1003,7 +1005,9 @@ describe('useCloudConnectorTemplate', () => {
         expect(windowOpenSpy).toHaveBeenCalledWith('', '_blank');
         const params = new URLSearchParams(cloudFormationTab.location.href.split('?')[1]);
         expect(params.get('templateURL')).toBe('https://static.example/template.yml');
-        expect(params.get('param_ElasticCallbackId')).toBe('cb-1');
+        expect(params.get('param_ElasticCallbackUrl')).toBe(
+          'https://kb.example.com/api/fleet/iac_provisioner/callbacks/cb-1'
+        );
         expect(result.current.hasLaunched).toBe(true);
       });
 
@@ -1016,7 +1020,7 @@ describe('useCloudConnectorTemplate', () => {
 
         const openedUrl = cloudFormationTab.location.href;
         expect(openedUrl).toContain(`templateURL=${encodeURIComponent(ARTIFACT_URL)}`);
-        expect(openedUrl).not.toContain('param_ElasticCallbackId');
+        expect(openedUrl).not.toContain('param_ElasticCallbackUrl');
       });
 
       it('still renders and opens the console when getLaunchStackParams throws', async () => {
@@ -1028,7 +1032,7 @@ describe('useCloudConnectorTemplate', () => {
 
         const openedUrl = cloudFormationTab.location.href;
         expect(openedUrl).toContain(`templateURL=${encodeURIComponent(ARTIFACT_URL)}`);
-        expect(openedUrl).not.toContain('param_ElasticCallbackId');
+        expect(openedUrl).not.toContain('param_ElasticCallbackUrl');
         expect(result.current.templateGenerationError).toBeUndefined();
       });
 
@@ -1044,7 +1048,7 @@ describe('useCloudConnectorTemplate', () => {
         await launch(result);
 
         expect(getLaunchStackParams).not.toHaveBeenCalled();
-        expect(cloudFormationTab.location.href).not.toContain('param_ElasticCallbackId');
+        expect(cloudFormationTab.location.href).not.toContain('param_ElasticCallbackUrl');
       });
     });
   });

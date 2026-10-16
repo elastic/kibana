@@ -203,6 +203,7 @@ describe('AwsIdentityFederationSetup', () => {
     mockCallbackCancel.mockResolvedValue('cancelled');
     mockUseIacCallback.mockReturnValue({
       available: false,
+      isChecking: false,
       status: 'idle',
       created: undefined,
       start: mockCallbackStart,
@@ -268,6 +269,7 @@ describe('AwsIdentityFederationSetup', () => {
     it('offers no ARN fields or Create with the provisioner off: the static stack reports back too', () => {
       mockUseIacCallback.mockReturnValue({
         available: true,
+        isChecking: false,
         status: 'idle',
         created: undefined,
         start: mockCallbackStart,
@@ -298,6 +300,7 @@ describe('AwsIdentityFederationSetup', () => {
       mockUseCloudConnectorTemplate.mockReturnValue(provisionerHookResult(mockLaunchOnClick));
       mockUseIacCallback.mockReturnValue({
         available: true,
+        isChecking: false,
         status: 'expired',
         created: undefined,
         start: mockCallbackStart,
@@ -342,6 +345,7 @@ describe('AwsIdentityFederationSetup', () => {
       overrides: Partial<ReturnType<typeof useIacCallback>>
     ): ReturnType<typeof useIacCallback> => ({
       available: true,
+      isChecking: false,
       status: 'idle',
       created: undefined,
       start: mockCallbackStart,
@@ -418,6 +422,34 @@ describe('AwsIdentityFederationSetup', () => {
       await typeIdentityName(user);
       expect(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeDisabled();
       expectNoManualEntry();
+    });
+
+    it('shows the server reason when the callback is not available because of the public URL', async () => {
+      const reason =
+        'The public Kibana URL https://kb.example.com presents a TLS certificate that is not publicly trusted (self-signed certificate).';
+      mockUseIacCallback.mockReturnValue(
+        callbackState({ available: false, unavailableReason: reason })
+      );
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations });
+
+      expect(
+        screen.getByTestId('awsIdentityFederationSetup-callbackUnavailableReason')
+      ).toHaveTextContent(reason);
+      await typeIdentityName(user);
+      expect(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeDisabled();
+    });
+
+    it('shows no callout and keeps Launch disabled while the server is still checking', async () => {
+      mockUseIacCallback.mockReturnValue(callbackState({ available: false, isChecking: true }));
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations });
+
+      expect(
+        screen.queryByTestId('awsIdentityFederationSetup-callbackUnavailable')
+      ).not.toBeInTheDocument();
+      await typeIdentityName(user);
+      expect(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeDisabled();
     });
 
     it('does not show the unavailable callout when the callback is available', () => {

@@ -7,25 +7,24 @@
 
 import { act, renderHook } from '@testing-library/react';
 
-import { useStartServices } from '../../../hooks';
 import {
   sendCreateIacCallback,
   sendDeleteIacCallback,
   sendGetIacCallback,
+  useGetIacCallbackAvailabilityQuery,
 } from '../../../hooks/use_request/iac_callback';
 import type { IacCallback } from '../../../../common/types/models/iac_callback';
+import type { GetIacCallbackAvailabilityResponse } from '../../../../common/types/rest_spec/iac_callback';
 
 import {
-  getIacCallbackKibanaUrl,
   IAC_CALLBACK_POLL_INTERVAL_MS,
   IAC_CALLBACK_RECEIVING_GRACE_MS,
   useIacCallback,
 } from './use_iac_callback';
 
-jest.mock('../../../hooks');
 jest.mock('../../../hooks/use_request/iac_callback');
 
-const mockedUseStartServices = jest.mocked(useStartServices);
+const mockedAvailabilityQuery = jest.mocked(useGetIacCallbackAvailabilityQuery);
 const mockedCreate = jest.mocked(sendCreateIacCallback);
 const mockedGet = jest.mocked(sendGetIacCallback);
 const mockedDelete = jest.mocked(sendDeleteIacCallback);
@@ -47,8 +46,16 @@ const RECEIVED_VALUES = {
   stack_arn: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic/uuid-1',
 };
 
-const setBasePath = (basePath: { publicBaseUrl?: string; serverBasePath: string }) =>
-  mockedUseStartServices.mockReturnValue({ http: { basePath } } as any);
+const mockedRecheck = jest.fn();
+/** What the server says about the callback; `undefined` while it is still checking. */
+const setAvailability = (data: GetIacCallbackAvailabilityResponse | undefined) =>
+  mockedAvailabilityQuery.mockReturnValue({
+    data,
+    isLoading: data === undefined,
+    refetch: mockedRecheck,
+  } as any);
+const UNTRUSTED_REASON =
+  'The public Kibana URL https://kb.example.com presents a TLS certificate that is not publicly trusted (self-signed certificate).';
 
 const poll = async () => {
   await act(async () => {
@@ -56,31 +63,11 @@ const poll = async () => {
   });
 };
 
-describe('getIacCallbackKibanaUrl', () => {
-  it('prefers the configured public base URL, without a trailing slash', () => {
-    expect(
-      getIacCallbackKibanaUrl({ publicBaseUrl: 'https://kb.example.com/', serverBasePath: '/abc' })
-    ).toBe('https://kb.example.com');
-  });
-
-  it('falls back to the window origin plus the server base path (no space prefix)', () => {
-    expect(getIacCallbackKibanaUrl({ serverBasePath: '/abc' }, 'https://kb.example.com')).toBe(
-      'https://kb.example.com/abc'
-    );
-  });
-
-  it('is undefined when the URL is not https (the stack would reject it)', () => {
-    expect(getIacCallbackKibanaUrl({ serverBasePath: '' }, 'http://localhost:5601')).toBe(
-      undefined
-    );
-  });
-});
-
 describe('useIacCallback', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers().setSystemTime(NOW);
-    setBasePath({ publicBaseUrl: 'https://kb.example.com', serverBasePath: '' });
+    setAvailability({ available: true, kibana_url: 'https://kb.example.com' });
     mockedCreate.mockResolvedValue({
       data: { item: pendingItem(), api_key: 'encoded-key' },
       error: null,
@@ -96,23 +83,41 @@ describe('useIacCallback', () => {
     jest.useRealTimers();
   });
 
-  it('is available when enabled and Kibana has a public https URL', () => {
+  it('is available when enabled and the server can be called back at its public URL', () => {
     const { result } = renderHook(() => useIacCallback({ enabled: true }));
 
     expect(result.current.available).toBe(true);
+    expect(result.current.isChecking).toBe(false);
+    expect(result.current.unavailableReason).toBeUndefined();
   });
 
-  it('is not available when disabled', () => {
+  it('is not available when disabled, and does not ask the server', () => {
     const { result } = renderHook(() => useIacCallback({ enabled: false }));
 
     expect(result.current.available).toBe(false);
+    expect(result.current.isChecking).toBe(false);
+    expect(mockedAvailabilityQuery).toHaveBeenCalledWith({ enabled: false });
   });
 
-  it('is not available without a public https Kibana URL', () => {
-    setBasePath({ publicBaseUrl: 'http://kb.example.com', serverBasePath: '' });
+  it('is checking, not available, until the server has answered', () => {
+    setAvailability(undefined);
     const { result } = renderHook(() => useIacCallback({ enabled: true }));
 
     expect(result.current.available).toBe(false);
+    expect(result.current.isChecking).toBe(true);
+    expect(result.current.unavailableReason).toBeUndefined();
+  });
+
+  it('is not available, with the reason, when the public URL cannot be called back', () => {
+    setAvailability({
+      available: false,
+      kibana_url: 'https://kb.example.com',
+      reason: UNTRUSTED_REASON,
+    });
+    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+
+    expect(result.current.available).toBe(false);
+    expect(result.current.unavailableReason).toBe(UNTRUSTED_REASON);
   });
 
   it('start() creates a record with the identity details and returns the stack params', async () => {
@@ -138,9 +143,8 @@ describe('useIacCallback', () => {
       iac_blueprint_version: '1.0.0',
     });
     expect(params).toEqual({
-      ElasticKibanaUrl: 'https://kb.example.com',
+      ElasticCallbackUrl: 'https://kb.example.com/api/fleet/iac_provisioner/callbacks/cb-1',
       ElasticApiKey: 'encoded-key',
-      ElasticCallbackId: 'cb-1',
     });
     expect(result.current.status).toBe('pending');
   });
@@ -372,7 +376,9 @@ describe('useIacCallback', () => {
       params = await result.current.start({});
     });
 
-    expect(params?.ElasticCallbackId).toBe('cb-2');
+    expect(params?.ElasticCallbackUrl).toBe(
+      'https://kb.example.com/api/fleet/iac_provisioner/callbacks/cb-2'
+    );
     // The superseded record is retired so its stack cannot create an unobserved identity.
     expect(mockedDelete).toHaveBeenCalledWith('cb-1');
     await poll();
@@ -380,8 +386,11 @@ describe('useIacCallback', () => {
     expect(mockedGet).toHaveBeenCalledWith('cb-2');
   });
 
-  it('returns undefined and creates nothing when Kibana has no https URL', async () => {
-    setBasePath({ serverBasePath: '' }); // falls back to jsdom's http://localhost
+  it('returns undefined and creates nothing when the callback is not available', async () => {
+    setAvailability({
+      available: false,
+      reason: 'Kibana has no public URL: server.publicBaseUrl is not set.',
+    });
     const { result } = renderHook(() => useIacCallback({ enabled: true }));
 
     let params: Record<string, string> | undefined;
@@ -391,6 +400,23 @@ describe('useIacCallback', () => {
 
     expect(params).toBeUndefined();
     expect(mockedCreate).not.toHaveBeenCalled();
+    expect(result.current.status).toBe('idle');
+  });
+
+  it('asks the server again when it refuses the record because its URL became unreachable', async () => {
+    mockedCreate.mockResolvedValue({
+      data: null,
+      error: { statusCode: 412, message: UNTRUSTED_REASON },
+    } as any);
+    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+
+    let params: Record<string, string> | undefined;
+    await act(async () => {
+      params = await result.current.start({});
+    });
+
+    expect(params).toBeUndefined();
+    expect(mockedRecheck).toHaveBeenCalled();
     expect(result.current.status).toBe('idle');
   });
 

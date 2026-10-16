@@ -12,6 +12,16 @@ import type {
   IacCallbackStatus,
 } from '../models/iac_callback';
 
+/**
+ * Whether a launched stack could report back to this Kibana. `kibana_url` is `server.publicBaseUrl`
+ * as the stack is given it; `reason` says why the callback cannot be used.
+ */
+export interface GetIacCallbackAvailabilityResponse {
+  available: boolean;
+  kibana_url?: string;
+  reason?: string;
+}
+
 export interface CreateIacCallbackRequest {
   body: IacCallbackIdentity & {
     provider: 'aws';

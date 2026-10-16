@@ -18,6 +18,7 @@ import {
 import { appContextService } from '../../services/app_context';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
 import { isAwsIdentityFederationEnabled } from '../../services/utils/aws_identity_federation';
+import { getIacCallbackAvailability } from '../../services/utils/iac_callback_availability';
 import {
   reportIacProvisionerRenderCompleted,
   reportIacProvisionerRenderRequested,
@@ -204,13 +205,49 @@ const getCallbackInSpace = async (
   return item && item.space_id === spaceId ? item : undefined;
 };
 
+const AWS_IDENTITY_FEDERATION_DISABLED = {
+  body: { message: 'AWS identity federation is not enabled' },
+};
+
+/**
+ * Tells the browser whether a launched stack could report back to this Kibana, so it can refuse
+ * the launch with the reason instead of waiting for a report that cannot arrive.
+ */
+export const getIacCallbackAvailabilityHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
+  if (!(await isAwsIdentityFederationEnabled())) {
+    return response.notFound(AWS_IDENTITY_FEDERATION_DISABLED);
+  }
+  const { available, kibanaUrl, reason } = await getIacCallbackAvailability();
+  return response.ok({
+    body: {
+      available,
+      ...(kibanaUrl ? { kibana_url: kibanaUrl } : {}),
+      ...(reason ? { reason } : {}),
+    },
+  });
+};
+
 export const createIacCallbackHandler: FleetRequestHandler<
   undefined,
   undefined,
   TypeOf<typeof CreateIacCallbackRequestSchema.body>
 > = async (context, request, response) => {
   if (!(await isAwsIdentityFederationEnabled())) {
-    return response.notFound({ body: { message: 'AWS identity federation is not enabled' } });
+    return response.notFound(AWS_IDENTITY_FEDERATION_DISABLED);
+  }
+  // A public URL that the stack could not call back is refused, so no key is minted for a report
+  // that cannot arrive. Without a configured public URL there is nothing to check; the caller
+  // supplies the URL to the stack and is responsible for it.
+  const availability = await getIacCallbackAvailability();
+  if (!availability.available && availability.kibanaUrl) {
+    return response.customError({
+      statusCode: 412,
+      body: { message: availability.reason ?? 'Kibana cannot be reached at its public URL' },
+    });
   }
   const { spaceId } = await context.fleet;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
@@ -279,7 +316,7 @@ export const receiveIacCallbackHandler: FleetRequestHandler<
     { apiKeyId, payload: request.body }
   );
   // Never log the key.
-  logger.debug(`IaC callback [id=${request.params.callbackId}] outcome=${result.outcome}`);
+  logger.info(`IaC callback report [id=${request.params.callbackId}] outcome=${result.outcome}`);
 
   switch (result.outcome) {
     case 'received':

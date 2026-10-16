@@ -134,6 +134,8 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   // Role ARN and stack ARN it carries on the cloud connector, so the form has no ARN fields.
   const {
     available: isCallbackAvailable,
+    isChecking: isCallbackChecking,
+    unavailableReason: callbackUnavailableReason,
     status: callbackStatus,
     created: callbackCreated,
     start: startCallback,
@@ -288,7 +290,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
             <CloudFormationCloudCredentialsGuide accountType={accountType} />
           </EuiAccordion>
           <EuiSpacer size="l" />
-          {!isCallbackAvailable && (
+          {!isCallbackAvailable && !isCallbackChecking && (
             <>
               <KbnWarningCallout
                 announceOnMount
@@ -298,12 +300,19 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
                 })}
                 data-test-subj="awsIdentityFederationSetup-callbackUnavailable"
                 text={
-                  <p>
-                    <FormattedMessage
-                      id="xpack.fleet.cloudConnector.iacCallback.unavailableHint"
-                      defaultMessage="The stack creates the federated identity by reporting its Role ARN back to Kibana over HTTPS. Set a public HTTPS URL for Kibana (server.publicBaseUrl), then reload this page."
-                    />
-                  </p>
+                  <>
+                    {callbackUnavailableReason && (
+                      <p data-test-subj="awsIdentityFederationSetup-callbackUnavailableReason">
+                        {callbackUnavailableReason}
+                      </p>
+                    )}
+                    <p>
+                      <FormattedMessage
+                        id="xpack.fleet.cloudConnector.iacCallback.unavailableHint"
+                        defaultMessage="The stack creates the federated identity by reporting its Role ARN back to Kibana over HTTPS. Kibana's public URL (server.publicBaseUrl) must be an HTTPS URL that AWS can reach with a publicly trusted certificate. Fix it, then reload this page."
+                      />
+                    </p>
+                  </>
                 }
               />
               <EuiSpacer size="m" />
@@ -314,7 +323,13 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
             isLoading={isGeneratingTemplate}
             // With the provisioner on the hook never disables the button, but a live render still
             // needs the console URL that only `cloud` provides, so keep the old guard.
-            isDisabled={isLaunchDisabled || !cloud || !isCallbackAvailable || isLaunchMissingName}
+            isDisabled={
+              isLaunchDisabled ||
+              !cloud ||
+              !isCallbackAvailable ||
+              isCallbackChecking ||
+              isLaunchMissingName
+            }
             templateGenerationError={templateGenerationError}
             data-test-subj="awsIdentityFederationSetup-launchCloudFormation"
             errorCalloutTestSubj="awsIdentityFederationSetup-templateError"

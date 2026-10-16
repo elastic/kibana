@@ -7,17 +7,18 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { useStartServices } from '../../../hooks';
 import {
   sendCreateIacCallback,
   sendDeleteIacCallback,
   sendGetIacCallback,
+  useGetIacCallbackAvailabilityQuery,
 } from '../../../hooks/use_request/iac_callback';
 import type {
   IacCallback,
   IacCallbackIdentity,
 } from '../../../../common/types/models/iac_callback';
 import type { AccountType } from '../../../../common/types/models/cloud_connector';
+import { IAC_PROVISIONER_API_ROUTES } from '../../../../common/constants';
 
 export const IAC_CALLBACK_POLL_INTERVAL_MS = 3_000;
 /** Stop polling after this even if the record has not expired yet. */
@@ -50,8 +51,15 @@ export interface IacCallbackStartInput {
 }
 
 export interface UseIacCallbackResult {
-  /** False when the callback can't be used: disabled, or no public https Kibana URL. */
+  /**
+   * False when the callback can't be used: disabled, still being checked, or Kibana's public URL
+   * is not one a launched stack could report back to.
+   */
   available: boolean;
+  /** True while the server is checking whether its public URL can be called back. */
+  isChecking: boolean;
+  /** The server's explanation when the callback is not available. */
+  unavailableReason?: string;
   status: IacCallbackClientStatus;
   /** Set when the stack's report has created the cloud connector. */
   created?: IacCallbackCreated;
@@ -68,19 +76,6 @@ export interface UseIacCallbackResult {
    */
   cancel: () => Promise<IacCallbackCancelOutcome>;
 }
-
-/**
- * The URL the stack's Lambda uses to reach Kibana. Uses `serverBasePath` rather than `get()`
- * because the receive route has no space prefix. Only https URLs are returned, because the
- * template's `ElasticKibanaUrl` parameter only accepts https.
- */
-export const getIacCallbackKibanaUrl = (
-  basePath: { publicBaseUrl?: string; serverBasePath: string },
-  origin: string = window.location.origin
-): string | undefined => {
-  const url = (basePath.publicBaseUrl ?? `${origin}${basePath.serverBasePath}`).replace(/\/+$/, '');
-  return /^https:\/\//.test(url) ? url : undefined;
-};
 
 const toCreated = (item: IacCallback): IacCallbackCreated | undefined =>
   item.cloud_connector_id
@@ -109,7 +104,14 @@ const toIdentityBody = (identity: IacCallbackStartInput): IacCallbackIdentity =>
 };
 
 export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbackResult => {
-  const { http } = useStartServices();
+  // The server decides whether the stack could call back: `server.publicBaseUrl` must be an https
+  // URL that answers with a publicly trusted certificate. It is also the URL the stack is given.
+  const {
+    data: availability,
+    isLoading: isChecking,
+    refetch: recheckAvailability,
+  } = useGetIacCallbackAvailabilityQuery({ enabled });
+  const kibanaUrl = availability?.available ? availability.kibana_url : undefined;
   const [status, setStatus] = useState<IacCallbackClientStatus>('idle');
   const [created, setCreated] = useState<IacCallbackCreated | undefined>(undefined);
   // The record currently being waited on; a poll result for any other id is stale and ignored.
@@ -259,11 +261,7 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
 
   const start = useCallback(
     async (identity: IacCallbackStartInput) => {
-      if (!enabled) {
-        return undefined;
-      }
-      const kibanaUrl = getIacCallbackKibanaUrl(http.basePath);
-      if (!kibanaUrl) {
+      if (!enabled || !kibanaUrl) {
         return undefined;
       }
       // A new Launch supersedes whatever the previous one was waiting on, including a received one.
@@ -281,6 +279,10 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
         provider: 'aws',
         ...toIdentityBody(identity),
       });
+      if (error?.statusCode === 412) {
+        // The server found its public URL unreachable since the last check; show its reason.
+        recheckAvailability();
+      }
       if (error || !data || !mountedRef.current) {
         return undefined;
       }
@@ -289,16 +291,19 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
       setStatus('pending');
       startPolling(data.item.id, data.item.expires_at);
 
-      // The key travels in the quick-create link as a stack parameter. It can only be used to
-      // report to this one record: it carries no privileges, works once, expires with the
-      // record, and the template hides it in the AWS console.
+      // The stack gets the complete URL to report to, so only Kibana knows the route. The key
+      // travels in the quick-create link as a stack parameter. It can only be used to report to
+      // this one record: it carries no privileges, works once, expires with the record, and the
+      // template hides it in the AWS console.
       return {
-        ElasticKibanaUrl: kibanaUrl,
+        ElasticCallbackUrl: `${kibanaUrl}${IAC_PROVISIONER_API_ROUTES.CALLBACK_RECEIVE_PATTERN.replace(
+          '{callbackId}',
+          encodeURIComponent(data.item.id)
+        )}`,
         ElasticApiKey: data.api_key,
-        ElasticCallbackId: data.item.id,
       };
     },
-    [enabled, http.basePath, stopPolling, startPolling]
+    [enabled, kibanaUrl, recheckAvailability, stopPolling, startPolling]
   );
 
   useEffect(() => {
@@ -310,7 +315,17 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
     };
   }, [stopPolling]);
 
-  const available = enabled && getIacCallbackKibanaUrl(http.basePath) !== undefined;
+  const available = enabled && kibanaUrl !== undefined;
+  const unavailableReason =
+    enabled && availability && !availability.available ? availability.reason : undefined;
 
-  return { available, status, created, start, cancel };
+  return {
+    available,
+    isChecking: enabled && isChecking,
+    unavailableReason,
+    status,
+    created,
+    start,
+    cancel,
+  };
 };

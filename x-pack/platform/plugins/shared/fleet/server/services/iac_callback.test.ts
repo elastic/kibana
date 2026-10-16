@@ -73,12 +73,14 @@ const CLAIMED = pendingAttrs({ status: 'receiving', ...PAYLOAD });
 
 describe('iacCallbackService', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let logger: ReturnType<typeof loggerMock.create>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers().setSystemTime(NOW);
     soClient = savedObjectsClientMock.create();
-    jest.mocked(appContextService.getLogger).mockReturnValue(loggerMock.create());
+    logger = loggerMock.create();
+    jest.mocked(appContextService.getLogger).mockReturnValue(logger);
     jest.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReturnValue(soClient);
     jest.spyOn(cloudConnectorService, 'create').mockResolvedValue({
       id: 'cc-1',
@@ -164,6 +166,11 @@ describe('iacCallbackService', () => {
       // The stored record and the returned item never carry the key or its id.
       expect(JSON.stringify(item)).not.toContain('secret');
       expect(item).not.toHaveProperty('api_key_id');
+      // Operators can see the launch in the server log, without the key.
+      expect(logger.info).toHaveBeenCalledWith(
+        `IaC callback created [id=cb-1] [space_id=default] [expires_at=${FUTURE}]`
+      );
+      expect(JSON.stringify(logger.info.mock.calls)).not.toContain('secret');
     });
 
     it('stores the name, account type and template details on the record', async () => {
@@ -357,6 +364,9 @@ describe('iacCallbackService', () => {
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
         message: `IaC callback received [id=cb-1] [api_key_id=key-1] [cloud_connector_id=cc-1] [role_arn=${ROLE_ARN}]`,
       });
+      expect(logger.info).toHaveBeenCalledWith(
+        'IaC callback received [id=cb-1] [cloud_connector_id=cc-1]'
+      );
       expect(result).toEqual({
         outcome: 'received',
         item: expect.objectContaining({

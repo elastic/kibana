@@ -19,6 +19,7 @@ import { iacCallbackService } from '../../services/iac_callback';
 import { getPackageInfo } from '../../services/epm/packages';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
 import { isAwsIdentityFederationEnabled } from '../../services/utils/aws_identity_federation';
+import { getIacCallbackAvailability } from '../../services/utils/iac_callback_availability';
 import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
 import type { IacCallback } from '../../../common/types/models/iac_callback';
 import {
@@ -28,6 +29,7 @@ import {
 
 import {
   createIacCallbackHandler,
+  getIacCallbackAvailabilityHandler,
   deleteIacCallbackHandler,
   getIacCallbackHandler,
   receiveIacCallbackHandler,
@@ -41,6 +43,7 @@ jest.mock('../../services', () => ({
 jest.mock('../../services/epm/packages');
 jest.mock('../../services/utils/iac_provisioner');
 jest.mock('../../services/utils/aws_identity_federation');
+jest.mock('../../services/utils/iac_callback_availability');
 jest.mock('../../services/telemetry/iac_provisioner_telemetry');
 jest.mock('../../services/iac_callback', () => ({
   iacCallbackService: {
@@ -55,6 +58,7 @@ const mockedRenderTemplate = jest.mocked(iacProvisionerService.renderTemplate);
 const mockedGetPackageInfo = jest.mocked(getPackageInfo);
 const mockedIsEnabled = jest.mocked(isIacProvisionerEnabled);
 const mockedIsAwsIdentityFederationEnabled = jest.mocked(isAwsIdentityFederationEnabled);
+const mockedGetAvailability = jest.mocked(getIacCallbackAvailability);
 
 const buildContext = () =>
   ({
@@ -503,9 +507,102 @@ describe('IaC callback handlers', () => {
     mockedAppContext.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(soClient as any);
     mockedAppContext.getInternalUserESClient.mockReturnValue(esClient as any);
     mockedIsAwsIdentityFederationEnabled.mockResolvedValue(true);
+    mockedGetAvailability.mockResolvedValue({
+      available: true,
+      kibanaUrl: 'https://kb.example.com',
+    });
+  });
+
+  describe('getIacCallbackAvailabilityHandler', () => {
+    it('returns 404 when AWS identity federation is not enabled', async () => {
+      mockedIsAwsIdentityFederationEnabled.mockResolvedValue(false);
+
+      await getIacCallbackAvailabilityHandler(
+        buildCallbackContext(),
+        httpServerMock.createKibanaRequest(),
+        response
+      );
+
+      expect(response.notFound).toHaveBeenCalledWith({
+        body: { message: 'AWS identity federation is not enabled' },
+      });
+      expect(mockedGetAvailability).not.toHaveBeenCalled();
+    });
+
+    it('returns the URL the stack is given when the callback is available', async () => {
+      await getIacCallbackAvailabilityHandler(
+        buildCallbackContext(),
+        httpServerMock.createKibanaRequest(),
+        response
+      );
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { available: true, kibana_url: 'https://kb.example.com' },
+      });
+    });
+
+    it('returns the reason when the callback is not available', async () => {
+      mockedGetAvailability.mockResolvedValue({
+        available: false,
+        kibanaUrl: 'https://kb.example.com',
+        reason:
+          'The public Kibana URL https://kb.example.com presents a TLS certificate that is not publicly trusted (self-signed certificate).',
+      });
+
+      await getIacCallbackAvailabilityHandler(
+        buildCallbackContext(),
+        httpServerMock.createKibanaRequest(),
+        response
+      );
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          available: false,
+          kibana_url: 'https://kb.example.com',
+          reason:
+            'The public Kibana URL https://kb.example.com presents a TLS certificate that is not publicly trusted (self-signed certificate).',
+        },
+      });
+    });
   });
 
   describe('createIacCallbackHandler', () => {
+    it('returns 412 and mints nothing when the public URL cannot be called back', async () => {
+      mockedGetAvailability.mockResolvedValue({
+        available: false,
+        kibanaUrl: 'https://kb.example.com',
+        reason:
+          'The public Kibana URL https://kb.example.com could not be reached (connect ECONNREFUSED).',
+      });
+      const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
+
+      await createIacCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 412,
+        body: {
+          message:
+            'The public Kibana URL https://kb.example.com could not be reached (connect ECONNREFUSED).',
+        },
+      });
+      expect(mockedService.create).not.toHaveBeenCalled();
+    });
+
+    it('creates the record when no public URL is configured, since there is nothing to check', async () => {
+      mockedGetAvailability.mockResolvedValue({
+        available: false,
+        reason: 'Kibana has no public URL: server.publicBaseUrl is not set.',
+      });
+      getCurrentUser.mockReturnValue(realmUser());
+      mockedService.create.mockResolvedValue({ item: ITEM, apiKey: 'encoded-key' });
+      const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
+
+      await createIacCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(mockedService.create).toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM, api_key: 'encoded-key' } });
+    });
+
     it('returns 404 when AWS identity federation is not enabled', async () => {
       mockedIsAwsIdentityFederationEnabled.mockResolvedValue(false);
       const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });

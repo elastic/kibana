@@ -163,6 +163,11 @@ class IacCallbackService {
       attributes,
       { id }
     );
+    this.logger.info(
+      `IaC callback created [id=${id}] [space_id=${spaceId ?? 'default'}] [expires_at=${
+        attributes.expires_at
+      }]`
+    );
 
     return {
       item: toItem(so.id, so.attributes),
@@ -244,7 +249,7 @@ class IacCallbackService {
     }
 
     const item = await this.finish(soClient, so.id, attributes, connector);
-    this.logger.debug(`IaC callback received [id=${so.id}] [cloud_connector_id=${connector.id}]`);
+    this.logger.info(`IaC callback received [id=${so.id}] [cloud_connector_id=${connector.id}]`);
     return { outcome: 'received', item };
   }
 
@@ -343,6 +348,7 @@ class IacCallbackService {
       return claimed ? toItem(claimed.id, claimed.attributes) : undefined;
     }
     await invalidateAPIKeys([attributes.api_key_id]);
+    this.logger.info(`IaC callback cancelled [id=${so.id}]`);
 
     auditLoggingService.writeCustomAuditLog({
       message: `User cancelling IaC callback [id=${so.id}] [api_key_id=${attributes.api_key_id}]`,
