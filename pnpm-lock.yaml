@@ -398,8 +398,8 @@ importers:
         specifier: 8.7.0
         version: 8.7.0
       '@elastic/esql':
-        specifier: 4.31.0
-        version: 4.31.0
+        specifier: 4.32.0
+        version: 4.32.0
       '@elastic/eui':
         specifier: 123.1.0
         version: 123.1.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
@@ -4474,9 +4474,6 @@ importers:
       dompurify:
         specifier: 3.4.14
         version: 3.4.14
-      dotenv:
-        specifier: 17.4.2
-        version: 17.4.2
       elastic-apm-node:
         specifier: 4.18.0
         version: 4.18.0(supports-color@10.2.2)
@@ -11075,29 +11072,29 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: 6.0.3
 
-  '@elastic/esql-ast@4.31.0':
-    resolution: {integrity: sha512-FDwL96T4g/UQ1i2smiMxR+GY4EeXTVtPULchS0QyIIjsh3I56DoEN1sr6gnfE6eC7fH0Z08WGM6QI5NxtStmkg==}
+  '@elastic/esql-ast@4.32.0':
+    resolution: {integrity: sha512-IHZ4pSx8Rs7yRD4e9V8jKxac9l7iU4IxDPK8e5AJljJhilnBiwmDWJeLXl9xHMTW4UiabFQlP2FNkKJyUjc1ew==}
 
-  '@elastic/esql-definitions@4.31.0':
-    resolution: {integrity: sha512-J6zXrPIXviW2+YwAFrvrpk9uo6bStL8yJCIIeDnJiiSZqnDB2CtTCb1Kd+hL6gynpQ5C+VjLXLRrn0OSP8jmdQ==}
+  '@elastic/esql-definitions@4.32.0':
+    resolution: {integrity: sha512-qO4YNzpEjUrlfpySc5ASRsM2guC4XGSB1eggx8dsbTxeKEaJUK+deaB+YuGjP53FQpnLdd2mLx5ysNs1ibTCeQ==}
 
   '@elastic/esql-grammar@4.29.0':
     resolution: {integrity: sha512-m9GnY/JU+Y5lLQHksallW1FjJGXD/GscYHOtJp0XuKg5mg6W07Kn6LEYx7hq7hQzi0eprJqdtxDbinVb0ZIkUg==}
 
-  '@elastic/esql-parser@4.31.0':
-    resolution: {integrity: sha512-76EK8IfzI/uOqLYg+mBGEQuBCr4ZpU9zZIzFt9rjNHiYKYBLs4vXy6Uzf+fu/XiIjYfB0YBd04rqmxw06gnJRw==}
+  '@elastic/esql-parser@4.32.0':
+    resolution: {integrity: sha512-pmerC4ozwXN6tnNAj2Bda8XvMbaP7M9vgCsAu8Bq9z1KC/ukNf85FvXjCS4DXoaXuT5eQFmz3RXL6O2lKUhWSQ==}
 
   '@elastic/esql-promql-grammar@4.29.0':
     resolution: {integrity: sha512-clwi4RnYutldI8s3ptYqQ8GjJMboplQenSR+TOoLJEUYArtFsq367wdsSb7+njC89BDe4dRwnbCFC1bGqh01Ig==}
 
-  '@elastic/esql-traversal@4.31.0':
-    resolution: {integrity: sha512-5bMhJZzwBcWW3b8w/KA97L7exPdj+1oVnBSphCoVdgNfpJ7LoZGguragcuBNCECON1o53Nuraedkm1/HKAdZYQ==}
+  '@elastic/esql-traversal@4.32.0':
+    resolution: {integrity: sha512-2WHq9G/5mcSLVbbiGbxroh9fI21mm2vhWN329TOuaJo052j8ckCFSQ+TxzpqZBypSVnX11953GjI7M+sPTYblw==}
 
   '@elastic/esql-types@4.29.0':
     resolution: {integrity: sha512-NWmOI/DjZy7+F7lejeqjQ0hwt+vQCfOCRWhQJh9Jqk81ctQZTPwE4buqxbiuWiaz2/iF0hz6qup4HWDXlt3EDA==}
 
-  '@elastic/esql@4.31.0':
-    resolution: {integrity: sha512-y4uVIOE+nOz4x0+lnJrfJEBIcFxv3arlDp2vBga09jVB3PHtobWQ41HrQuzLEEUBXBlfoALk1BMwHTFlKppO8g==}
+  '@elastic/esql@4.32.0':
+    resolution: {integrity: sha512-36eM9osfw0XL7oqI/vmO3hBz/J1A81c7yGpmv1Kl47jCXpPveGovoSixsvyJoWmmMPKIIM2Qh0Yggv2rDlUJ2g==}
 
   '@elastic/eui-illustrations@1.1.0':
     resolution: {integrity: sha512-xqOf5dcFmB0WylGy7w2aTJfHMIOjGxW1xops2WkxsfWEpqSFz4r0y4QCpGW+zEhRBVemWcB/lr3S+GoFqm+AFQ==}
@@ -27809,28 +27806,28 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@elastic/esql-ast@4.31.0':
+  '@elastic/esql-ast@4.32.0':
     dependencies:
-      '@elastic/esql-definitions': 4.31.0
+      '@elastic/esql-definitions': 4.32.0
       '@elastic/esql-grammar': 4.29.0
       '@elastic/esql-promql-grammar': 4.29.0
       '@elastic/esql-types': 4.29.0
       tslib: 2.8.1
 
-  '@elastic/esql-definitions@4.31.0': {}
+  '@elastic/esql-definitions@4.32.0': {}
 
   '@elastic/esql-grammar@4.29.0':
     dependencies:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-parser@4.31.0':
+  '@elastic/esql-parser@4.32.0':
     dependencies:
-      '@elastic/esql-ast': 4.31.0
-      '@elastic/esql-definitions': 4.31.0
+      '@elastic/esql-ast': 4.32.0
+      '@elastic/esql-definitions': 4.32.0
       '@elastic/esql-grammar': 4.29.0
       '@elastic/esql-promql-grammar': 4.29.0
-      '@elastic/esql-traversal': 4.31.0
+      '@elastic/esql-traversal': 4.32.0
       '@elastic/esql-types': 4.29.0
       antlr4: 4.13.2
       tslib: 2.8.1
@@ -27840,23 +27837,23 @@ snapshots:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-traversal@4.31.0':
+  '@elastic/esql-traversal@4.32.0':
     dependencies:
-      '@elastic/esql-ast': 4.31.0
+      '@elastic/esql-ast': 4.32.0
       '@elastic/esql-types': 4.29.0
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
   '@elastic/esql-types@4.29.0': {}
 
-  '@elastic/esql@4.31.0':
+  '@elastic/esql@4.32.0':
     dependencies:
-      '@elastic/esql-ast': 4.31.0
-      '@elastic/esql-definitions': 4.31.0
+      '@elastic/esql-ast': 4.32.0
+      '@elastic/esql-definitions': 4.32.0
       '@elastic/esql-grammar': 4.29.0
-      '@elastic/esql-parser': 4.31.0
+      '@elastic/esql-parser': 4.32.0
       '@elastic/esql-promql-grammar': 4.29.0
-      '@elastic/esql-traversal': 4.31.0
+      '@elastic/esql-traversal': 4.32.0
       '@elastic/esql-types': 4.29.0
       '@elastic/pretty-printer': 4.29.0
       antlr4: 4.13.2
@@ -27977,7 +27974,7 @@ snapshots:
 
   '@elastic/monaco-esql@4.31.0(monaco-editor@0.56.0)':
     dependencies:
-      '@elastic/esql-definitions': 4.31.0
+      '@elastic/esql-definitions': 4.32.0
       monaco-editor: 0.56.0
 
   '@elastic/node-crypto@1.2.3': {}
@@ -28065,7 +28062,7 @@ snapshots:
 
   '@elastic/prismjs-esql@4.28.0':
     dependencies:
-      '@elastic/esql-definitions': 4.31.0
+      '@elastic/esql-definitions': 4.32.0
 
   '@elastic/react-search-ui-views@1.24.2(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)':
     dependencies:
