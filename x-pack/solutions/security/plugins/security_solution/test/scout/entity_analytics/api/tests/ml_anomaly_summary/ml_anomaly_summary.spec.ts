@@ -288,6 +288,7 @@ apiTest.describe(
         expect(body.entity_id).toBe(CAROL_EUID);
         expect(Array.isArray(body.anomalies)).toBe(true);
         expect(body.anomalies).toHaveLength(2);
+        expect(body.anomalies.every((a) => a.entityId === CAROL_EUID)).toBe(true);
 
         const jobIds = body.anomalies.map((a) => a.jobId);
         expect(jobIds).toContain('auth_high_count_logon_events_ea');
@@ -334,11 +335,68 @@ apiTest.describe(
 
         const anomaly = body.anomalies[0];
         expect(anomaly.jobId).toBe('suspicious_login_activity_ea');
+        expect(anomaly.entityId).toBe(DAVID_EUID);
         expect(anomaly.jobName).toBe('Unusual Login Activity');
         expect(anomaly.threatTactics).toStrictEqual(['Credential Access']);
         expect(anomaly.threatTechniques).toStrictEqual(['Brute Force']);
       }
     );
+
+    apiTest(
+      'Anomaly summary API: mode=resolved returns the combined anomalies of the resolution group',
+      async ({ apiClient }) => {
+        // David's entity record resolves to Carol, so Carol's group covers both users.
+        const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: { mode: 'resolved' },
+        });
+
+        expect(response.statusCode).toBe(200);
+        const body = response.body as AnomalySummaryResponse;
+        expect(body.entity_id).toBe(CAROL_EUID);
+        expect(body.total).toBe(3);
+        // Each record is attributed to the group member it matched (the named query), not
+        // to the requested id.
+        expect(
+          body.anomalies.map((a) => [a.jobId, a.entityId]).sort(([a], [b]) => a.localeCompare(b))
+        ).toStrictEqual([
+          ['auth_high_count_logon_events_ea', CAROL_EUID],
+          ['pad_windows_rare_region_name_by_user_ea', CAROL_EUID],
+          ['suspicious_login_activity_ea', DAVID_EUID],
+        ]);
+      }
+    );
+
+    apiTest(
+      'Anomaly summary API: mode=resolved for an alias returns only its own anomalies',
+      async ({ apiClient }) => {
+        // Only entities resolved *to* the requested id are included; an alias does not expand
+        // to its target's group.
+        const response = await apiClient.post(buildUrl(DAVID_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: { mode: 'resolved' },
+        });
+
+        expect(response.statusCode).toBe(200);
+        const body = response.body as AnomalySummaryResponse;
+        expect(body.entity_id).toBe(DAVID_EUID);
+        expect(body.total).toBe(1);
+        expect(body.anomalies[0].jobId).toBe('suspicious_login_activity_ea');
+        expect(body.anomalies[0].entityId).toBe(DAVID_EUID);
+      }
+    );
+
+    apiTest('Anomaly summary API: returns 400 for an unknown mode', async ({ apiClient }) => {
+      const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+        headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+        responseType: 'json',
+        body: { mode: 'everything' },
+      });
+
+      expect(response.statusCode).toBe(400);
+    });
 
     apiTest(
       'Anomaly summary API: returns empty anomalies for entity with no anomaly records',
@@ -654,6 +712,40 @@ apiTest.describe(
         for (const count of Object.values(body.tacticCounts)) {
           expect(count).toBeGreaterThan(0);
         }
+      }
+    );
+
+    apiTest(
+      'Anomaly overview API: mode=resolved aggregates the anomalies of the resolution group',
+      async ({ apiClient }) => {
+        // Carol has 2 anomalies and her alias David has 1 (suspicious_login_activity_ea).
+        const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: { mode: 'resolved' },
+        });
+
+        expect(response).toHaveStatusCode(200);
+        const body = response.body as AnomalyOverviewResponse;
+        expect(body.entityId).toBe(CAROL_EUID);
+        expect(body.totalAnomaliesCount).toBe(3);
+        expect(body.recentAnomalies.map((a) => a.jobId)).toContain('suspicious_login_activity_ea');
+      }
+    );
+
+    apiTest(
+      'Anomaly overview API: mode=single matches the default behaviour',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: { mode: 'single' },
+        });
+
+        expect(response).toHaveStatusCode(200);
+        const body = response.body as AnomalyOverviewResponse;
+        expect(body.entityId).toBe(CAROL_EUID);
+        expect(body.totalAnomaliesCount).toBe(2);
       }
     );
 
