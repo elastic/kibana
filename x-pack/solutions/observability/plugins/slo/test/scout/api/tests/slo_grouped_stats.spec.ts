@@ -162,7 +162,7 @@ apiTest.describe(
       });
       expect(response).toHaveStatusCode(400);
       expect((response.body as { message: string }).message).toContain(
-        '"unsupported-type" does not match expected type'
+        'Invalid input: expected \\"apm\\"'
       );
     });
 
