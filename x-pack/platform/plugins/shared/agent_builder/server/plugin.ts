@@ -48,6 +48,7 @@ import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
+import { createRenderCompositionTool } from './services/tools/builtin/render_composition';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
 import { createConversationEventBus } from './workflows/triggers/conversation_event_bus';
@@ -287,6 +288,15 @@ export class AgentBuilderPlugin
     connectorTools.forEach((tool) => {
       serviceSetups.tools.register(tool);
     });
+
+    serviceSetups.tools.register(
+      createRenderCompositionTool({
+        getRuntime: async () => {
+          const [, { isomer }] = await coreSetup.getStartServices();
+          return isomer.getRuntime();
+        },
+      })
+    );
 
     return {
       tools: {

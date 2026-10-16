@@ -39,6 +39,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Proposals
   'platform.proposals.revise',
 
+  // Isomer
+  `${internalNamespaces.platformIsomer}.render_composition`,
+
   // Observability
   `${internalNamespaces.observability}.get_anomaly_detection_jobs`,
   `${internalNamespaces.observability}.run_log_rate_analysis`,
