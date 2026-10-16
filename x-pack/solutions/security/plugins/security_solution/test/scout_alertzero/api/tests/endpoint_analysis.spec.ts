@@ -397,6 +397,12 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
       scenarios.push(second.scenario);
       kiIds.push(second.kiId);
       attackDiscoveryAlertIds.push(second.attackDiscoveryAlertId);
+      // The first chain's documents come out before the second handoff runs: the forensic
+      // agent's telemetry lookback is not host-scoped, so with both chains indexed the second
+      // analysis can legitimately see — and act on — the first host (observed live: both cards
+      // reading "Isolate host wks-alice-01"). Removing the first chain pins this test to the
+      // contract under test: one visible host per handoff, so each card must name its own.
+      await first.scenario.cleanup();
 
       // The worker's next scheduled sweep analyzes the second handoff; each investigation must
       // end up with its own pending isolate card.
