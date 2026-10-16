@@ -24,6 +24,11 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
+const mockUseAvailableMitreFrameworks = jest.fn();
+jest.mock('../../../../common/hooks/mitre/use_available_mitre_frameworks', () => ({
+  useAvailableMitreFrameworks: () => mockUseAvailableMitreFrameworks(),
+}));
+
 const renderCoverageOverviewDashboard = () => {
   return render(
     <TestProviders>
@@ -37,6 +42,7 @@ const renderCoverageOverviewDashboard = () => {
 describe('CoverageOverviewDashboard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseAvailableMitreFrameworks.mockReturnValue(['enterprise', 'atlas']);
     (useFetchCoverageOverviewQuery as jest.Mock).mockReturnValue({
       data: getMockCoverageOverviewDashboard(),
       isLoading: false,
@@ -69,6 +75,14 @@ describe('CoverageOverviewDashboard', () => {
     expect(screen.getByTestId('coverageOverviewFrameworkTab-atlas')).toHaveTextContent(
       'MITRE ATLAS'
     );
+  });
+
+  test('hides the framework tabs but still renders the matrix when the managed source is off', () => {
+    mockUseAvailableMitreFrameworks.mockReturnValue(['enterprise']);
+    renderCoverageOverviewDashboard();
+
+    expect(screen.queryByTestId('coverageOverviewFrameworkTabs')).not.toBeInTheDocument();
+    expect(screen.getByTestId('coverageOverviewMatrix')).toBeInTheDocument();
   });
 
   test('clicking the ATLAS tab switches the matrix to the ATLAS framework', async () => {

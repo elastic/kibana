@@ -29,6 +29,11 @@ jest.mock('../../../../common/hooks/mitre/use_mitre_configuration', () => ({
   useMitreConfiguration: (...args: unknown[]) => mockUseMitreConfiguration(...args),
 }));
 
+const mockUseAvailableMitreFrameworks = jest.fn();
+jest.mock('../../../../common/hooks/mitre/use_available_mitre_frameworks', () => ({
+  useAvailableMitreFrameworks: () => mockUseAvailableMitreFrameworks(),
+}));
+
 const ENTERPRISE_ROW = {
   framework: 'MITRE ATT&CK',
   tactic: { id: 'TA0001', name: 'Charlie', reference: 'https://example.com' },
@@ -83,6 +88,7 @@ describe('AddMitreThreat', () => {
   beforeEach(() => {
     mockUseMitreConfiguration.mockReset();
     mockByFramework();
+    mockUseAvailableMitreFrameworks.mockReturnValue(['enterprise', 'atlas']);
   });
 
   it('renders the add tactic button inside the enterprise section', () => {
@@ -93,6 +99,25 @@ describe('AddMitreThreat', () => {
         'addMitreAttackTactic'
       )
     ).toBeInTheDocument();
+  });
+
+  describe('when the managed MITRE source is off', () => {
+    beforeEach(() => {
+      mockUseAvailableMitreFrameworks.mockReturnValue(['enterprise']);
+    });
+
+    it('disables the add framework button when the enterprise section exists', () => {
+      renderWithValue([ENTERPRISE_ROW]);
+
+      expect(screen.getByTestId('addMitreFramework')).toBeDisabled();
+      expect(screen.queryByTestId('addMitreFramework-atlas')).not.toBeInTheDocument();
+    });
+
+    it('still renders an existing ATLAS section', () => {
+      renderWithValue([ENTERPRISE_ROW, ATLAS_ROW]);
+
+      expect(screen.getByTestId('mitreFrameworkSection-atlas')).toBeInTheDocument();
+    });
   });
 
   it('renders a loading spinner while MITRE data is loading', () => {

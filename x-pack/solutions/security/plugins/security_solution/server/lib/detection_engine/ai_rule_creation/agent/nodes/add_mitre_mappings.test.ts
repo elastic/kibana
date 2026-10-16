@@ -191,8 +191,8 @@ describe('formatMitreMapping', () => {
   });
 
   it('re-homes a technique under its own tactic when it does not belong to the selected tactic', () => {
-    // T1078 is not an Execution technique, so TA0002 keeps `technique: []` and the
-    // technique is re-homed under its own tactic (TA0001).
+    // T1078 belongs only to TA0001 (not Execution), so TA0002 keeps `technique: []` and the
+    // technique is re-homed under its single tactic (TA0001).
     const result = formatMitreMapping(
       { tactics: ['TA0002'], techniques: [{ id: 'T1078' }] },
       { enterprise: testBuckets }
@@ -241,6 +241,30 @@ describe('formatMitreMapping', () => {
     const result = formatMitreMapping(
       { tactics: ['TA0002'], techniques: [{ id: 'T9999' }] },
       { enterprise: testBuckets }
+    );
+
+    expect(result).toEqual([
+      expect.objectContaining({ tactic: expect.objectContaining({ id: 'TA0002' }), technique: [] }),
+    ]);
+  });
+
+  it('drops a multi-tactic technique when none of its tactics is selected', () => {
+    const bucketsWithMulti = buildMockMitreEntitySummaryBuckets({
+      ...testBuckets,
+      techniques: [
+        ...testBuckets.techniques,
+        buildMockMitreTechniqueSummary({
+          id: 'T9001',
+          name: 'Multi Tactic Technique',
+          reference: 'https://attack.mitre.org/techniques/T9001/',
+          tactic_ids: ['TA0001', 'TA0003'],
+        }),
+      ],
+    });
+
+    const result = formatMitreMapping(
+      { tactics: ['TA0002'], techniques: [{ id: 'T9001' }] },
+      { enterprise: bucketsWithMulti }
     );
 
     expect(result).toEqual([

@@ -9,6 +9,7 @@ import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
+import { getMitreFrameworkById } from '@kbn/security-mitre-attack-common';
 import type { MitreFramework } from '@kbn/security-mitre-attack-common';
 import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
@@ -154,14 +155,15 @@ function appendRuleToResponse(
 /**
  * Extracts a deduplicated list of MITRE (ATT&CK Enterprise and ATLAS) tactic, technique, and
  * sub-technique ids referenced by a rule. The coverage overview renders one matrix per
- * framework from this map; the id spaces do not overlap. A rule with no recognized framework
- * entries is unmapped.
+ * framework from this map; an id is only counted under the framework its prefix belongs to, so a
+ * mislabelled entry (e.g. `T1059` under `MITRE ATLAS`) does not bleed into the other framework's
+ * matrix. A rule with no recognized framework entries is unmapped.
  */
 function extractRuleMitreCategories(rule: SanitizedRule<CoverageOverviewRuleParams>): string[] {
   // dedupe in case data isn't valid in ES
   const categories = new Set<string>();
-  for (const { id } of iterateMitreThreatEntities(rule.params.threat)) {
-    categories.add(id);
+  for (const { id, framework } of iterateMitreThreatEntities(rule.params.threat)) {
+    if (getMitreFrameworkById(id) === framework) categories.add(id);
   }
   return Array.from(categories);
 }

@@ -21,10 +21,10 @@ import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types
 import type { MitreFramework, ThreatFrameworkGroup } from '@kbn/security-mitre-attack-common';
 import {
   DEFAULT_MITRE_FRAMEWORK,
-  MITRE_FRAMEWORKS,
   THREAT_FRAMEWORK_NAME,
   groupThreatsByFramework,
 } from '@kbn/security-mitre-attack-common';
+import { useAvailableMitreFrameworks } from '../../../../common/hooks/mitre/use_available_mitre_frameworks';
 import type { FieldHook } from '../../../../shared_imports';
 import { threatDefault } from '../step_about_rule/default_value';
 import * as i18n from './translations';
@@ -45,6 +45,7 @@ interface AddItemProps {
 // eslint-disable-next-line react/display-name
 export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItemProps) => {
   const [isAddFrameworkOpen, setIsAddFrameworkOpen] = useState(false);
+  const availableFrameworks = useAvailableMitreFrameworks();
   const values = field.value as Threats;
   const groups = useMemo((): Array<ThreatFrameworkGroup<Threat>> => {
     const grouped = groupThreatsByFramework(values);
@@ -60,8 +61,8 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
         ];
   }, [values]);
   const absentFrameworks = useMemo(
-    () => MITRE_FRAMEWORKS.filter((fw) => !groups.some((group) => group.framework === fw)),
-    [groups]
+    () => availableFrameworks.filter((fw) => !groups.some((group) => group.framework === fw)),
+    [availableFrameworks, groups]
   );
 
   const removeThreats = useCallback(

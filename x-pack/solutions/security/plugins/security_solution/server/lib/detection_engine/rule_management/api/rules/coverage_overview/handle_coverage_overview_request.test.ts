@@ -450,6 +450,18 @@ describe('handleCoverageOverviewRequest', () => {
       expect(result.unmapped_rule_ids).toEqual(['rule-mobile']);
     });
 
+    it('does not count ids whose prefix belongs to another framework than the entry label', async () => {
+      const mislabelled = {
+        ...makeAtlasThreat(),
+        tactic: { ...makeAtlasThreat().tactic, id: VALID_TACTIC_ID },
+        technique: [{ ...makeAtlasThreat().technique[0], id: 'T1059', subtechnique: [] }],
+      };
+      const result = await run([makeRule('rule-mislabelled', [mislabelled])], makeClient(true));
+
+      expect(result.coverage).toEqual({});
+      expect(result.unmapped_rule_ids).toEqual(['rule-mislabelled']);
+    });
+
     it('flags only ATLAS ids missing from the atlas buckets', async () => {
       const result = await run(
         [

@@ -62,16 +62,16 @@ export const formatMitreMapping = (
     ];
   });
 
-  // A valid technique picked under the wrong tactic is re-homed under its own first
-  // tactic instead of being dropped, so a mis-paired pick still yields a correct mapping.
+  // A valid technique picked under the wrong tactic is re-homed under its own tactic instead
+  // of being dropped, but only when it belongs to exactly one tactic. A multi-tactic technique
+  // has no unambiguous home, so when none of its tactics was selected it is dropped.
   const tacticIds = new Set(response.tactics ?? []);
   for (const { id } of response.techniques ?? []) {
     const techData = lookups
       .find(({ techniquesMap }) => techniquesMap.has(id))
       ?.techniquesMap.get(id);
-    const [firstTacticId] = techData?.tactic_ids ?? [];
-    if (firstTacticId && !techData?.tactic_ids.some((tacticId) => tacticIds.has(tacticId))) {
-      tacticIds.add(firstTacticId);
+    if (techData?.tactic_ids.length === 1) {
+      tacticIds.add(techData.tactic_ids[0]);
     }
   }
 

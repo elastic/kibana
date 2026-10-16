@@ -93,6 +93,7 @@ export const findRulesSchema = z
       .optional()
       .describe(
         'MITRE tactic, either ID (e.g. "TA0001" for ATT&CK or "AML.TA0000" for ATLAS) or display name (e.g. "Initial Access"). ' +
+          'Display-name queries match both ATT&CK and ATLAS (they share several tactic names); use an ID to target one framework. ' +
           'Queries the structured `threat.tactic` field so it finds rules whose tactic is in ' +
           'rule metadata even when no "Tactic: X" tag is present. Prefer over tags for tactic queries.'
       ),

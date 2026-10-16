@@ -16,7 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import { MITRE_FRAMEWORKS, THREAT_FRAMEWORK_NAME } from '@kbn/security-mitre-attack-common';
+import { THREAT_FRAMEWORK_NAME } from '@kbn/security-mitre-attack-common';
 import { CoverageOverviewLink } from '../../../../common/components/links_to_docs';
 import { HeaderPage } from '../../../../common/components/header_page';
 
@@ -25,6 +25,7 @@ import { CoverageOverviewMatrix } from './coverage_overview_matrix';
 import { CoverageOverviewFiltersPanel } from './filters_panel';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import { CoverageOverviewInvalidMitreRulesCallout } from './invalid_mitre_rules_callout';
+import { useAvailableMitreFrameworks } from '../../../../common/hooks/mitre/use_available_mitre_frameworks';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const CoverageOverviewDashboardComponent = () => {
@@ -35,6 +36,7 @@ const CoverageOverviewDashboardComponent = () => {
   const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
     'mitreAttackUpdatesUIEnabled'
   );
+  const availableFrameworks = useAvailableMitreFrameworks();
   const frameworkLabel = THREAT_FRAMEWORK_NAME[framework];
 
   return (
@@ -48,20 +50,22 @@ const CoverageOverviewDashboardComponent = () => {
           </EuiText>
         }
       />
-      <div data-test-subj="coverageOverviewFrameworkTabs">
-        <EuiTabs size="m">
-          {MITRE_FRAMEWORKS.map((tabFramework) => (
-            <EuiTab
-              key={tabFramework}
-              isSelected={framework === tabFramework}
-              onClick={() => setFramework(tabFramework)}
-              data-test-subj={`coverageOverviewFrameworkTab-${tabFramework}`}
-            >
-              {THREAT_FRAMEWORK_NAME[tabFramework]}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-      </div>
+      {availableFrameworks.length > 1 && (
+        <div data-test-subj="coverageOverviewFrameworkTabs">
+          <EuiTabs size="m">
+            {availableFrameworks.map((tabFramework) => (
+              <EuiTab
+                key={tabFramework}
+                isSelected={framework === tabFramework}
+                onClick={() => setFramework(tabFramework)}
+                data-test-subj={`coverageOverviewFrameworkTab-${tabFramework}`}
+              >
+                {THREAT_FRAMEWORK_NAME[tabFramework]}
+              </EuiTab>
+            ))}
+          </EuiTabs>
+        </div>
+      )}
       <EuiSpacer size="m" />
       {isMitreAttackUpdatesUIEnabled && <CoverageOverviewInvalidMitreRulesCallout />}
       <CoverageOverviewFiltersPanel />

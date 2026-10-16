@@ -295,6 +295,10 @@ describe('useMitreConfiguration', () => {
       expect(result.current.techniques).toEqual([]);
       expect(result.current.subtechniques).toEqual([]);
       expect(result.current.frameworkVersion).toBeUndefined();
+      expect(mockUseFetchLegacyMitreQuery).toHaveBeenCalledWith(
+        undefined,
+        expect.objectContaining({ enabled: false })
+      );
     });
 
     it('returns bundled data for framework enterprise when managed is off', () => {

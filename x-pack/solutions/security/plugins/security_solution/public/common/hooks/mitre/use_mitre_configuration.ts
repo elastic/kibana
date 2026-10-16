@@ -50,7 +50,7 @@ export const useMitreConfiguration = (
   // Legacy path: loads the bundled blob via lazy import. Goes away when the blob is removed.
   // Only `types` is meaningful here; the blob is one framework/version with no revoked/deprecated data.
   const legacyQuery = useFetchLegacyMitreQuery(params?.types, {
-    enabled: !isManagedSourceEnabled,
+    enabled: !isManagedSourceEnabled && !isUnsupportedLegacyFramework,
   });
 
   const activeQuery = isManagedSourceEnabled ? managedQuery : legacyQuery;
