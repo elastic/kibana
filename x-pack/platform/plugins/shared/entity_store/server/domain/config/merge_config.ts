@@ -18,8 +18,15 @@ import {
   LogExtractionConfig as LogExtractionConfigSchema,
 } from '../saved_objects';
 
-/** Built-in per entity-type defaults. Empty for now: raising frequency also cuts throughput, so values need measurement (#269261). */
-export const DEFAULT_CONFIG_BY_TYPE: Partial<Record<EntityType, Partial<LogExtractionConfig>>> = {};
+/**
+ * Built-in per entity-type defaults. Raising frequency here also lowers the effective per-run
+ * volume cap for that type, since maxLogsPerWindow is a fixed per-execution budget, not a
+ * per-time-unit rate.
+ */
+export const DEFAULT_CONFIG_BY_TYPE: Partial<Record<EntityType, Partial<LogExtractionConfig>>> = {
+  service: { frequency: '10m' },
+  generic: { frequency: '30m' },
+};
 
 /**
  * Built-in per-process defaults.
@@ -29,17 +36,17 @@ export const DEFAULT_CONFIG_BY_TYPE: Partial<Record<EntityType, Partial<LogExtra
  * Non-priority is best-effort over much higher volume, so it drops past the remaining logs to stay
  * current.
  *
+ * No `frequency` here: it would be identical to the code default and would only serve to clobber
+ * DEFAULT_CONFIG_BY_TYPE for gated types, since this layer is merged after it.
  *
  * `single` is empty: with the feature flag off, behaviour must stay exactly as it is today.
  */
 export const DEFAULT_CONFIG_BY_MODE: Record<ExtractionMode, Partial<LogExtractionConfig>> = {
   single: {},
   priority: {
-    frequency: '1m',
     maxLogsPerWindowCapBehavior: 'defer',
   },
   nonPriority: {
-    frequency: '1m',
     maxLogsPerWindowCapBehavior: 'drop',
   },
 };

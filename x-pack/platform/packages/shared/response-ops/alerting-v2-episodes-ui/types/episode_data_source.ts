@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IconType } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { TimeRange } from '@kbn/es-query';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
@@ -71,6 +72,7 @@ export type EpisodeFetchErrorSurface = 'list' | 'kpis' | 'histogram';
 export interface SourceActionResult {
   succeeded: number;
   failed: number;
+  unchanged?: number;
   errors?: string[];
 }
 
@@ -96,8 +98,9 @@ export interface SeverityExtension {
 }
 
 export interface EpisodeDataSource {
-  /** Short source label, interpolated into fetch error toast titles (e.g. `v1`). */
   id: string;
+  label: string;
+  icon?: IconType;
   queryKeyPrefix: readonly unknown[];
   fetchEpisodes: (params: FetchSourceEpisodesParams) => Promise<AlertEpisode[]>;
   fetchKpis?: (params: FetchSourceKpisParams) => Promise<EpisodeSourceKpis>;

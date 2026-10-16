@@ -39,14 +39,18 @@ const SECURITY_TRIGGER_EVENT_FIELDS: Readonly<Record<string, readonly string[]>>
  * These tests make sure the schemas stay introspectable through those public surfaces.
  */
 apiTest.describe(
-  'Security Solution - Workflow schemas introspection - YAML validation',
+  'Security Solution - Workflow schemas introspection',
   { tag: [...tags.stateful.classic] },
   () => {
     let editorHeaders: Record<string, string>;
+    let adminHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ samlAuth }) => {
+    apiTest.beforeAll(async ({ samlAuth, requestAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('editor');
       editorHeaders = { ...cookieHeader, ...testData.COMMON_HEADERS, ...INTERNAL_API_HEADERS };
+
+      const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+      adminHeaders = { ...apiKeyHeader, ...testData.COMMON_HEADERS, ...PUBLIC_API_HEADERS };
     });
 
     for (const [triggerType, eventFields] of Object.entries(SECURITY_TRIGGER_EVENT_FIELDS)) {
@@ -112,19 +116,6 @@ apiTest.describe(
         expect(getVariableDiagnostics(result)).toHaveLength(1);
       }
     );
-  }
-);
-
-apiTest.describe(
-  'Security Solution - Workflow schemas introspection - agent catalogs',
-  { tag: [...tags.stateful.classic] },
-  () => {
-    let adminHeaders: Record<string, string>;
-
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      const { apiKeyHeader } = await requestAuth.getApiKey('admin');
-      adminHeaders = { ...apiKeyHeader, ...testData.COMMON_HEADERS, ...PUBLIC_API_HEADERS };
-    });
 
     for (const [triggerType, eventFields] of Object.entries(SECURITY_TRIGGER_EVENT_FIELDS)) {
       apiTest(

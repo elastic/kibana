@@ -34,6 +34,7 @@ import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import { escalationToQueueItem } from './escalation_to_queue_item';
 import { ESCALATIONS_PAGE_INFO } from './translations';
+import { EscalationsEmptyBanner } from './escalations_empty_banner';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
 
 export const EscalationsPage: React.FC = () => {
@@ -122,6 +123,10 @@ export const EscalationsPage: React.FC = () => {
     [closedItems, entityFilter]
   );
 
+  // Both queues loaded and neither has any rows (ignores the entity filter, which only narrows loaded rows).
+  const hasNoEscalations =
+    openQuery.data?.pagination.total === 0 && closedQuery.data?.pagination.total === 0;
+
   const renderAssignees = useQueueAssignees({
     items: allItems,
     getRowKey: (e) => e.id,
@@ -137,6 +142,28 @@ export const EscalationsPage: React.FC = () => {
     },
   });
 
+  // Nothing to show yet: the page is just the explainer banner, centered, with no header or queues.
+  if (hasNoEscalations) {
+    return (
+      <AlertZeroPageSection
+        contentProps={{
+          css: css`
+            padding-block: ${euiTheme.size.xxl};
+            align-self: center;
+            max-width: 1000px;
+            inline-size: 100%;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          `,
+        }}
+      >
+        <EscalationsEmptyBanner />
+      </AlertZeroPageSection>
+    );
+  }
+
   return (
     <AlertZeroPageSection
       contentProps={{
@@ -147,7 +174,9 @@ export const EscalationsPage: React.FC = () => {
         `,
       }}
     >
-      <EuiFlexGroup gutterSize="l" direction="column" wrap>
+      {/* No `wrap`: a wrapping column sizes each line to its widest content and lets a
+          wide row push the page past the viewport. Same fix as the conversations page. */}
+      <EuiFlexGroup gutterSize="l" direction="column">
         <EuiFlexItem grow={false}>
           <EscalationsPageHeader
             isLoading={isLoading}

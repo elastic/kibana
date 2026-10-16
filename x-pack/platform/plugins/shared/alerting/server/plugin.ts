@@ -54,7 +54,19 @@ import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
+import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import { ApiKeyType } from './task_runner/types';
+import { AsyncDomainEventBus } from './lib/events/event_bus';
+import type {
+  AlertingDomainEvent,
+  AlertingPublisherContext,
+} from './lib/workflow_extensions/events';
+import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
+import type { AlertStatusChangedOptIn } from './lib/workflow_extensions/alert_status_changed_opt_in';
+import { AlertStatusChangedWorkflowSubscriber } from './lib/workflow_extensions/alert_status_changed_subscriber';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
@@ -172,6 +184,12 @@ export interface AlertingServerSetup {
   getConfig: () => AlertingRulesConfig;
   frameworkAlerts: PublicFrameworkAlertsService;
   getDataStreamAdapter: () => DataStreamAdapter;
+  /**
+   * Opts in to the `alerting.v1.alertStatusChanged` workflow trigger. Until a plugin opts in,
+   * rule runs build and publish no status change events. The caller owns its own enablement
+   * signal and answers per rule run through `isEnabled`.
+   */
+  enableAlertStatusChanged(optIn: AlertStatusChangedOptIn): void;
 }
 
 export interface AlertingServerStart {
@@ -211,6 +229,7 @@ export interface AlertingPluginsSetup {
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
   kql: KQLPluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -226,6 +245,7 @@ export interface AlertingPluginsStart {
   dataViews: DataViewsPluginStart;
   share: SharePluginStart;
   maintenanceWindows?: MaintenanceWindowsServerStart;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 
 export class AlertingPlugin {
@@ -255,6 +275,9 @@ export class AlertingPlugin {
   private readonly isServerless: boolean;
   private nodeRoles: PluginInitializerContext['node']['roles'];
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
+  private alertingEventBus?: AsyncDomainEventBus<AlertingDomainEvent, AlertingPublisherContext>;
+  private alertStatusChangedSubscriber?: AlertStatusChangedWorkflowSubscriber;
+  private readonly alertStatusChangedOptIns: AlertStatusChangedOptIn[] = [];
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
   private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
@@ -495,7 +518,18 @@ export class AlertingPlugin {
       core
     );
 
+    if (plugins.workflowsExtensions) {
+      this.alertingEventBus = new AsyncDomainEventBus<
+        AlertingDomainEvent,
+        AlertingPublisherContext
+      >(this.logger);
+      registerTriggerDefinitions(plugins.workflowsExtensions);
+    }
+
     return {
+      enableAlertStatusChanged: (optIn: AlertStatusChangedOptIn) => {
+        this.alertStatusChangedOptIns.push(optIn);
+      },
       registerConnectorAdapter: <
         RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
         ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
@@ -806,7 +840,18 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
       apiKeyType: (this.config.rules.apiKeyType as ApiKeyType) ?? ApiKeyType.ES,
       shouldGrantUiam,
+      alertingEventBus: this.alertingEventBus,
+      alertStatusChangedOptIns: this.alertStatusChangedOptIns,
     });
+
+    if (this.alertingEventBus && plugins.workflowsExtensions) {
+      this.alertStatusChangedSubscriber = new AlertStatusChangedWorkflowSubscriber(
+        this.alertingEventBus,
+        plugins.workflowsExtensions,
+        this.logger
+      );
+      this.alertStatusChangedSubscriber.start();
+    }
 
     this.eventLogService!.registerSavedObjectProvider(
       RULE_SAVED_OBJECT_TYPE,
@@ -892,6 +937,7 @@ export class AlertingPlugin {
     if (this.licenseState) {
       this.licenseState.clean();
     }
+    this.alertStatusChangedSubscriber?.stop();
     this.pluginStop$.next();
     this.pluginStop$.complete();
   }

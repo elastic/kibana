@@ -29,7 +29,12 @@ import type {
   User,
 } from '../../../common/types/domain';
 import type { Template } from '../../../common/types/domain/template/latest';
-import { AttachmentType, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
+import {
+  AttachmentType,
+  CaseStatuses,
+  UserActionActions,
+  UserActionTypes,
+} from '../../../common/types/domain';
 import type {
   AttachmentRequestV2,
   CasePostRequest,
@@ -38,7 +43,7 @@ import type {
   ObservablePost,
 } from '../../../common/types/api';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
-import { isPushedUserAction } from '../../../common/utils/user_actions';
+import { isCommentUserAction, isPushedUserAction } from '../../../common/utils/user_actions';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
 import type { ExternalServiceComment, ExternalServiceIncident } from './types';
 import type { CasesConnectorsMap } from '../../connectors';
@@ -118,63 +123,106 @@ const getCommentContent = (comment: AttachmentV2): string => {
   return '';
 };
 
-interface CountAlertsInfo {
-  totalComments: number;
-  pushed: number;
-  totalAlerts: number;
-}
-
-// Returns the number of alert ids on the attachment, or `null` when the
-// attachment is not an alert
-const countAlertIds = (comment: AttachmentV2): number | null => {
-  if (isLegacyAttachmentRequest(comment) && comment.type === AttachmentType.alert) {
-    return toStringArray(comment.alertId).length;
+// Returns `null` when the attachment is not an alert.
+const getAlertIds = (attachment: AttachmentRequestV2): string[] | null => {
+  if (isLegacyAttachmentRequest(attachment) && attachment.type === AttachmentType.alert) {
+    return toStringArray(attachment.alertId);
   }
-  const asRequest = comment as AttachmentRequestV2;
-  if (isUnifiedAlertAttachment(asRequest)) {
-    return toStringArray(asRequest.attachmentId).length;
+  if (isUnifiedAlertAttachment(attachment)) {
+    return toStringArray(attachment.attachmentId);
   }
   return null;
 };
 
-const getAlertsInfo = (
-  comments: Case['comments']
-): { totalAlerts: number; hasUnpushedAlertComments: boolean } => {
-  const countingInfo = { totalComments: 0, pushed: 0, totalAlerts: 0 };
+const toAlertIdSet = (alertIdsByAttachmentId: Map<string, string[]>): Set<string> =>
+  new Set([...alertIdsByAttachmentId.values()].flat());
 
-  const res =
-    comments?.reduce<CountAlertsInfo>(({ totalComments, pushed, totalAlerts }, comment) => {
-      const alertIdCount = countAlertIds(comment);
-      if (alertIdCount === null) {
-        return { totalComments, pushed, totalAlerts };
+/**
+ * Rebuilds the alert ids on the case at the latest push. Relies on every comment
+ * user action storing the full attachment.
+ */
+const getAlertIdsAtLatestPush = (
+  userActions: CaseUserActionsDeprecatedResponse,
+  latestPushInfo: LatestPushInfo
+): Set<string> => {
+  if (latestPushInfo == null) {
+    return new Set();
+  }
+
+  const alertIdsByAttachmentId = new Map<string, string[]>();
+
+  for (const userAction of userActions.slice(0, latestPushInfo.index)) {
+    const { comment_id: attachmentId } = userAction;
+    const isAttachmentUserAction =
+      userAction.type === UserActionTypes.comment && attachmentId != null;
+
+    if (isAttachmentUserAction && userAction.action === UserActionActions.delete) {
+      alertIdsByAttachmentId.delete(attachmentId);
+    } else if (
+      isAttachmentUserAction &&
+      isCommentUserAction(userAction) &&
+      (userAction.action === UserActionActions.create ||
+        userAction.action === UserActionActions.update)
+    ) {
+      const alertIds = getAlertIds(userAction.payload.comment);
+      if (alertIds !== null) {
+        // Older bulk create user actions logged the request before dedupe, so drop ids already on the case.
+        const alertIdsOnCase =
+          userAction.action === UserActionActions.create
+            ? toAlertIdSet(alertIdsByAttachmentId)
+            : new Set<string>();
+        alertIdsByAttachmentId.set(
+          attachmentId,
+          alertIds.filter((id) => !alertIdsOnCase.has(id))
+        );
       }
+    }
+  }
 
-      return {
-        totalComments: totalComments + 1,
-        pushed: comment.pushed_at != null ? pushed + 1 : pushed,
-        totalAlerts: totalAlerts + alertIdCount,
-      };
-    }, countingInfo) ?? countingInfo;
+  return toAlertIdSet(alertIdsByAttachmentId);
+};
 
-  return {
-    totalAlerts: res.totalAlerts,
-    hasUnpushedAlertComments: res.totalComments > res.pushed,
-  };
+const getAlertsDelta = ({
+  theCase,
+  userActions,
+  latestPushInfo,
+}: {
+  theCase: Case;
+  userActions: CaseUserActionsDeprecatedResponse;
+  latestPushInfo: LatestPushInfo;
+}): { addedAlerts: number; removedAlerts: number; totalAlerts: number } => {
+  const alertIdsAtLatestPush = getAlertIdsAtLatestPush(userActions, latestPushInfo);
+  const currentAlertIds = new Set(
+    (theCase.comments ?? []).flatMap((comment) => getAlertIds(comment as AttachmentRequestV2) ?? [])
+  );
+
+  const addedAlerts = [...currentAlertIds].filter((id) => !alertIdsAtLatestPush.has(id)).length;
+  const removedAlerts = [...alertIdsAtLatestPush].filter((id) => !currentAlertIds.has(id)).length;
+
+  return { addedAlerts, removedAlerts, totalAlerts: currentAlertIds.size };
 };
 
 const addAlertMessage = (params: {
   theCase: Case;
+  userActions: CaseUserActionsDeprecatedResponse;
+  latestPushInfo: LatestPushInfo;
   externalServiceComments: ExternalServiceComment[];
   spaceId: string;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
 }): ExternalServiceComment[] => {
-  const { theCase, externalServiceComments, spaceId, publicBaseUrl } = params;
-  const { totalAlerts, hasUnpushedAlertComments } = getAlertsInfo(theCase.comments);
+  const { theCase, userActions, latestPushInfo, externalServiceComments, spaceId, publicBaseUrl } =
+    params;
+  const { addedAlerts, removedAlerts, totalAlerts } = getAlertsDelta({
+    theCase,
+    userActions,
+    latestPushInfo,
+  });
 
   const newComments = [...externalServiceComments];
 
-  if (hasUnpushedAlertComments) {
-    let comment = `Elastic Alerts attached to the case: ${totalAlerts}`;
+  if (addedAlerts > 0 || removedAlerts > 0) {
+    const removedText = removedAlerts > 0 ? `, ${removedAlerts} removed` : '';
+    let comment = `Elastic Alerts attached to the case: ${addedAlerts} added${removedText} (${totalAlerts} total)`;
 
     if (publicBaseUrl) {
       const alertsTableUrl = getCaseViewPath({
@@ -299,6 +347,8 @@ export const formatComments = ({
 
   comments = addAlertMessage({
     theCase,
+    userActions,
+    latestPushInfo,
     externalServiceComments: comments,
     spaceId,
     publicBaseUrl,

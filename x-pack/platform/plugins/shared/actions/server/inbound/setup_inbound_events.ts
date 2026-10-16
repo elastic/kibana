@@ -14,7 +14,10 @@ import { dispatchConnectorEvents } from './dispatch_connector_events';
 import { createInboundEventsClient } from './factory';
 import { InboundEventAdmission } from './inbound_event_admission';
 import { InboundEventRateLimiter } from './inbound_event_rate_limiter';
-import { registerInboundEventAdmission } from './register_inbound_event_admission';
+import {
+  registerInboundEventAdmission,
+  registerInboundEventSizeOutcome,
+} from './register_inbound_event_admission';
 import type { ConnectorEventEmitter } from './types';
 
 export interface SetupInboundEventsParams {
@@ -54,6 +57,8 @@ export function setupInboundEvents({
 
   const getSpaceId = (request: KibanaRequest): string =>
     spaces?.spacesService.getSpaceId(request) ?? 'default';
+
+  registerInboundEventSizeOutcome({ http, logger, getSpaceId });
 
   const admissionConfig = actionsConfigUtils.getInboundEventsAdmission();
   if (admissionConfig.enabled) {

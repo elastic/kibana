@@ -45,7 +45,7 @@ describe(
       visitRulesManagementTable();
     });
 
-    it('should display the "Create a rule" dropdown with AI and Manual options', () => {
+    it('should display the "Create rule" dropdown with AI and Manual options', () => {
       cy.get(CREATE_RULE_BUTTON).should('be.visible');
       openCreateRuleMenu();
       cy.get(AI_RULE_CREATION_MENU_ITEM).should('be.visible');

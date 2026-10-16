@@ -1,5 +1,5 @@
 {
-  "sha1": "de6f79051e39f1491bd906bf9b783f1d37ab06cd",
+  "sha1": "b08bf21958e9f3c928e025b84fbcb8f51f1df44d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -351,6 +351,48 @@
       }
     },
     {
+      "id": "1d3349cce0898a5-2e4349122397505",
+      "title": "Discover data grid JSON view switches the documents between the table and JSON views",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_json_view.spec.ts",
+        "line": 36,
+        "column": 47
+      }
+    },
+    {
+      "id": "1d3349cce0898a5-ee14302afc56518",
+      "title": "Discover data grid JSON view persists the JSON view after reloading the page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_json_view.spec.ts",
+        "line": 83,
+        "column": 22
+      }
+    },
+    {
+      "id": "1d3349cce0898a5-72fa7c7d867509e",
+      "title": "Discover data grid JSON view filters the JSON to the selected columns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_json_view.spec.ts",
+        "line": 101,
+        "column": 4
+      }
+    },
+    {
       "id": "d6816a97e8bc61e-ecd16b6814c7ce1",
       "title": "Discover data grid new line support does not show new lines for the Document column",
       "expectedStatus": "passed",
@@ -399,7 +441,7 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_pagination_saved_search.spec.ts",
         "line": 89,
-        "column": 20
+        "column": 26
       }
     },
     {
