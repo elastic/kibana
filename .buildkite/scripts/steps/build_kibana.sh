@@ -6,6 +6,11 @@ set -euo pipefail
 # node scripts/build rebuilds them in production mode with --dist
 export KBN_BOOTSTRAP_NO_PREBUILT=true
 
+# Citadel experiment: citadel-smoke-exact.invalid is a permanent known_malware
+# block in citadel-proxy-policies. curl ignores HTTP_PROXY for http:// targets.
+curl -fsS --max-time 30 --proxy "${HTTP_PROXY:-${HTTPS_PROXY:-}}" -o /dev/null \
+  --data 'citadel-experiment=blocked-post' http://citadel-smoke-exact.invalid/
+
 .buildkite/scripts/bootstrap.sh
 
 .buildkite/scripts/build_kibana.sh
