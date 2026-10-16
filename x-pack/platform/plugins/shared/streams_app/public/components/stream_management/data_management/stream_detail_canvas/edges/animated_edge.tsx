@@ -26,6 +26,8 @@ const DASH_PERIOD = DASH + GAP;
 const DEBOUNCE_OPTS = { wait: 250 };
 const PATH_OPACITY = { opacity: 0.85 };
 
+const noop = () => {};
+
 const flowMarch = keyframes`
   from {
     stroke-dashoffset: ${DASH_PERIOD};
@@ -225,6 +227,7 @@ export function AnimatedEdge({
               aria-labelledby={edgeMenuId}
               button={MenuButton}
               isOpen={showMenu}
+              closePopover={noop}
               panelPaddingSize="none"
               anchorPosition="upCenter"
               attachToAnchor
