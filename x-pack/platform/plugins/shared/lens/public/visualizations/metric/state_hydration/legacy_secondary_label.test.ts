@@ -118,10 +118,7 @@ describe('hydrateLegacySecondaryLabel', () => {
     });
 
     expect(
-      hydrateLegacySecondaryLabel(
-        { ...visualizationState, secondaryLabel: '' },
-        datasourceStates
-      )
+      hydrateLegacySecondaryLabel({ ...visualizationState, secondaryLabel: '' }, datasourceStates)
     ).toEqual({
       visualizationState: { ...visualizationState, secondaryLabel: '' },
       datasourceStates,

@@ -65,7 +65,9 @@ export function mergeToNewDoc(
     context: 'editor',
   });
 
-  const activeDatasources: Record<string, Datasource> = Object.keys(hydratedDatasourceStates).reduce(
+  const activeDatasources: Record<string, Datasource> = Object.keys(
+    hydratedDatasourceStates
+  ).reduce(
     (acc, datasourceId) => ({
       ...acc,
       [datasourceId]: datasourceMap[datasourceId],

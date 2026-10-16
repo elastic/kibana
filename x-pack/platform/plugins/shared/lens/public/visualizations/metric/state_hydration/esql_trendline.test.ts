@@ -54,7 +54,9 @@ const mainLayer = {
   ],
 };
 
-const textBasedDatasourceStates = (layers: TextBasedPersistedState['layers']): DatasourceStates => ({
+const textBasedDatasourceStates = (
+  layers: TextBasedPersistedState['layers']
+): DatasourceStates => ({
   [LENS_DATASOURCE_ID.TEXT_BASED]: {
     isLoading: false,
     state: { layers },
