@@ -29,10 +29,12 @@ import {
   disableProtections,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
+  isLinuxRansomwareProtectionEnabled,
   removeAiDataCollection,
   removeCustomYaraSignatures,
   removeDeviceControl,
   removeLinuxDnsEvents,
+  removeLinuxRansomware,
 } from '../../../common/endpoint/models/policy_config_helpers';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 
@@ -93,6 +95,10 @@ export const createDefaultPolicy = (
 
   if (!experimentalFeatures.linuxDnsEvents) {
     defaultPolicyPerType = removeLinuxDnsEvents(defaultPolicyPerType);
+  }
+
+  if (!isLinuxRansomwareProtectionEnabled(experimentalFeatures)) {
+    defaultPolicyPerType = removeLinuxRansomware(defaultPolicyPerType);
   }
 
   // The AI Data Collection card only exists in the per-OS form; without it new policies leave the

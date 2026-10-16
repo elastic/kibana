@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getAiIndexDest } from '@kbn/context-engine-plugin/common/ai_index_dest';
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
@@ -14,6 +15,10 @@ export const PACKAGE_REPORT_STEP_ID = 'hunt.packageReport' as const;
 
 /** AI index Detection Watch's coverage sweep polls. Must stay in lockstep with coverage_worker.yaml. */
 export const HUNT_COVERAGE_AI_INDEX_ID = 'security-investigations' as const;
+
+// Context Engine owns how an AI index id maps to a backing store, so ask it rather than
+// rebuilding the prefix here and drifting when it changes.
+export const HUNT_COVERAGE_AI_INDEX_DEST = getAiIndexDest('index', HUNT_COVERAGE_AI_INDEX_ID);
 
 /**
  * Upper bound on per-proposal bullets embedded in the run conclusion. The conclusion lands in a

@@ -185,6 +185,10 @@ export const policyFactory = ({
         blocklist: true,
         on_write_scan: true,
       },
+      ransomware: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
       behavior_protection: {
         mode: ProtectionModes.prevent,
         reputation_service: cloud, // Defaults to true if on cloud
@@ -197,6 +201,10 @@ export const policyFactory = ({
       },
       popup: {
         malware: {
+          message: '',
+          enabled: true,
+        },
+        ransomware: {
           message: '',
           enabled: true,
         },
@@ -422,6 +430,14 @@ export const policyFactoryWithoutPaidFeatures = (
     },
     linux: {
       ...policy.linux,
+      // An absent field must stay absent: materializing it would add it where
+      // `linuxRansomwareProtection` is off.
+      ...(policy.linux.ransomware && {
+        ransomware: {
+          mode: ProtectionModes.off,
+          supported: false,
+        },
+      }),
       behavior_protection: {
         mode: ProtectionModes.off,
         reputation_service: false,
@@ -438,6 +454,13 @@ export const policyFactoryWithoutPaidFeatures = (
           message: '',
           enabled: true, // disabling/configuring malware popup is a paid feature
         },
+        // Mirrors `linux.ransomware`: an absent branch must stay absent.
+        ...(policy.linux.popup?.ransomware && {
+          ransomware: {
+            message: '',
+            enabled: false,
+          },
+        }),
         memory_protection: {
           message: '',
           enabled: false,
@@ -493,6 +516,12 @@ export const policyFactoryWithSupportedFeatures = (
     },
     linux: {
       ...policy.linux,
+      ...(policy.linux.ransomware && {
+        ransomware: {
+          ...policy.linux.ransomware,
+          supported: true,
+        },
+      }),
       behavior_protection: {
         ...policy.linux.behavior_protection,
         supported: true,

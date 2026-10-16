@@ -15,6 +15,7 @@ import {
   removeAiDataCollection,
   removeCustomYaraSignatures,
   removeDeviceControl,
+  removeLinuxRansomware,
 } from '../../../../../../common/endpoint/models/policy_config_helpers';
 import type { PolicyConfig } from '../../../../../../common/endpoint/types';
 import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../common/license/policy_config';
@@ -29,6 +30,7 @@ export interface BuildEligibilityContextInput {
   readonly endpointCustomYaraSignatures: boolean;
   readonly customYaraSignaturesExperimental: boolean;
   readonly aiDataCollectionExperimental: boolean;
+  readonly linuxRansomwareProtection: boolean;
   readonly endpointProtectionUpdates: boolean;
   readonly serverless: boolean;
 }
@@ -42,6 +44,7 @@ export const buildEligibilityContext = ({
   endpointCustomYaraSignatures,
   customYaraSignaturesExperimental,
   aiDataCollectionExperimental,
+  linuxRansomwareProtection,
   endpointProtectionUpdates,
   serverless,
 }: BuildEligibilityContextInput): EligibilityContext => {
@@ -73,6 +76,9 @@ export const buildEligibilityContext = ({
       ? proposedConfig
       : removeAiDataCollection(proposedConfig),
     aiDataCollectionReason: 'ai_data_collection_experimental_disabled',
+    linuxRansomwareStripped: linuxRansomwareProtection
+      ? proposedConfig
+      : removeLinuxRansomware(proposedConfig),
     endpointProtectionUpdates,
     serverless,
   };

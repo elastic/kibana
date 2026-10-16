@@ -1,5 +1,5 @@
 {
-  "sha1": "75a8f1a280fdda875036d3cd052241ee29f54e82",
+  "sha1": "fd4b723badd2c0b2ead79c49face0eeccf8d440d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1055,6 +1055,62 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/rule_executor.spec.ts",
         "line": 2422,
         "column": 4
+      }
+    },
+    {
+      "id": "929fd0c6ead4a03-43f21e9160cbd26",
+      "title": "Rule executor task-run event fields reports success, rule identity, and the counters a breaching run produced",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/task_run_event_fields.spec.ts",
+        "line": 60,
+        "column": 25
+      }
+    },
+    {
+      "id": "929fd0c6ead4a03-424a18523c801b5",
+      "title": "Rule executor task-run event fields reports every counter as zero on a run that matches nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/task_run_event_fields.spec.ts",
+        "line": 102,
+        "column": 18
+      }
+    },
+    {
+      "id": "929fd0c6ead4a03-bd4f05e8f214470",
+      "title": "Rule executor task-run event fields reports failed with the code owned by the step that threw, and still reports counters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/task_run_event_fields.spec.ts",
+        "line": 125,
+        "column": 29
+      }
+    },
+    {
+      "id": "929fd0c6ead4a03-34de8f369d77a88",
+      "title": "Rule executor task-run event fields reports skipped with the halt reason when the rule is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_executor/api/tests/task_run_event_fields.spec.ts",
+        "line": 156,
+        "column": 21
       }
     }
   ]

@@ -1111,6 +1111,11 @@ export interface PolicyConfig {
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields & CustomYaraSignaturesFields;
+    /**
+     * Absent on policies created before Linux ransomware existed and wherever
+     * `linuxRansomwareProtection` is off; absent means off.
+     */
+    ransomware?: ProtectionFields & SupportedFields;
     popup: {
       malware: {
         message: string;
@@ -1121,6 +1126,11 @@ export interface PolicyConfig {
         enabled: boolean;
       };
       memory_protection: {
+        message: string;
+        enabled: boolean;
+      };
+      /** Present alongside `ransomware`; absent wherever that is absent. */
+      ransomware?: {
         message: string;
         enabled: boolean;
       };
@@ -1174,6 +1184,7 @@ export interface UIPolicyConfig {
   linux: Pick<
     PolicyConfig['linux'],
     | 'malware'
+    | 'ransomware'
     | 'events'
     | 'popup'
     | 'advanced'
