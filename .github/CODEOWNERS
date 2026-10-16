@@ -1604,23 +1604,12 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield @elastic/kibana-discover
 /src/platform/test/functional/fixtures/es_archiver/date_n* @elastic/kibana-discover
 /src/platform/test/functional/fixtures/es_archiver/discover @elastic/kibana-discover
-/src/platform/test/api_integration/apis/saved_queries @elastic/kibana-discover
 /x-pack/platform/test/api_integration/apis/kibana/kql_telemetry @elastic/kibana-discover @elastic/kibana-dashboards
 /x-pack/platform/test/serverless/fixtures/es_archives/pre_calculated_histogram @elastic/kibana-discover
 /x-pack/platform/test/serverless/fixtures/es_archives/kibana_sample_data_flights_index_pattern @elastic/kibana-discover
-/src/platform/test/api_integration/apis/data_views @elastic/kibana-discover
-/src/platform/test/api_integration/apis/data_view_field_editor @elastic/kibana-discover
-/src/platform/test/api_integration/apis/kql_telemetry @elastic/kibana-discover
-/src/platform/test/api_integration/apis/scripts @elastic/kibana-discover
-/src/platform/test/api_integration/apis/search @elastic/kibana-discover
 /src/platform/test/functional/apps/discover @elastic/kibana-discover
 /src/platform/test/functional/apps/management/ccs_compatibility @elastic/kibana-discover
 /x-pack/platform/test/upgrade/apps/discover @elastic/kibana-discover
-/x-pack/platform/test/serverless/api_integration/test_suites/data_views @elastic/kibana-discover
-/x-pack/platform/test/serverless/api_integration/test_suites/data_view_field_editor @elastic/kibana-discover
-/x-pack/platform/test/serverless/api_integration/test_suites/kql_telemetry @elastic/kibana-discover
-/x-pack/platform/test/serverless/api_integration/test_suites/scripts_tests @elastic/kibana-discover
-/x-pack/platform/test/serverless/api_integration/test_suites/search_oss @elastic/kibana-discover
 /src/platform/plugins/shared/data/**/esaggs* @elastic/kibana-discover @elastic/kibana-dashboards
 
 # Discover session metrics tab schema
