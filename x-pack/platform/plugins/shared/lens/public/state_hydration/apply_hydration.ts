@@ -7,6 +7,7 @@
 
 import type { DatasourceStates, MetricVisualizationState } from '@kbn/lens-common';
 import { LENS_METRIC_ID } from '@kbn/lens-common';
+import { hydrateEsqlMetricTrendline } from '../visualizations/metric/state_hydration/esql_trendline';
 import { isMetricVisualizationState } from '../visualizations/metric/state_hydration/is_metric_state';
 import { hydrateLegacySecondaryLabel } from '../visualizations/metric/state_hydration/legacy_secondary_label';
 import type { StateHydration, StateHydrationContext, StateHydrationResult } from './types';
@@ -14,10 +15,13 @@ import type { StateHydration, StateHydrationContext, StateHydrationResult } from
 /** Lens editor load and save. */
 const metricEditorHydrations: Array<StateHydration<MetricVisualizationState>> = [
   hydrateLegacySecondaryLabel,
+  hydrateEsqlMetricTrendline,
 ];
 
 /** Dashboard panel render (`persistedStateToExpression`). */
-const metricExpressionHydrations: Array<StateHydration<MetricVisualizationState>> = [];
+const metricExpressionHydrations: Array<StateHydration<MetricVisualizationState>> = [
+  hydrateEsqlMetricTrendline,
+];
 
 function runHydrations<T>(
   visualizationState: T,

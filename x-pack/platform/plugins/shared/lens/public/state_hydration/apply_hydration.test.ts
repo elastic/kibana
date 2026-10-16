@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { DatasourceStates } from '@kbn/lens-common';
-import { LENS_METRIC_ID } from '@kbn/lens-common';
+import type { DatasourceStates, TextBasedPersistedState } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID, LENS_METRIC_ID } from '@kbn/lens-common';
 import { applyStateHydration } from './apply_hydration';
 
 const visualizationState = {
@@ -112,4 +112,53 @@ describe('applyStateHydration', () => {
     expect(result.visualizationState).toEqual(visualizationState);
     expect(secondaryColumnLabel(result.datasourceStates)).toBe('Custom Name');
   });
+
+  it.each(['editor', 'expression'] as const)(
+    'rebuilds a missing ES|QL metric trendline on the %s path',
+    (context) => {
+      const metricVisualizationState = {
+        layerId: 'layer_0',
+        layerType: 'data' as const,
+        metricAccessor: 'metric_accessor_metric',
+        trendlineLayerId: 'layer_0_trendline',
+        trendlineLayerType: 'metricTrendline' as const,
+        trendlineMetricAccessor: 'metric_accessor_trendline',
+        trendlineTimeAccessor: 'x_date_histogram',
+      };
+      const datasourceStates: DatasourceStates = {
+        [LENS_DATASOURCE_ID.TEXT_BASED]: {
+          isLoading: false,
+          state: {
+            layers: {
+              layer_0: {
+                index: 'esql-logs',
+                query: { esql: 'FROM logs-* | STATS avg_bytes = AVG(bytes)' },
+                timeField: '@timestamp',
+                columns: [
+                  {
+                    columnId: 'metric_accessor_metric',
+                    fieldName: 'avg_bytes',
+                    meta: { type: 'number' },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      };
+
+      const result = applyStateHydration({
+        visualizationId: LENS_METRIC_ID,
+        visualizationState: metricVisualizationState,
+        datasourceStates,
+        context,
+      });
+
+      const layers = (
+        result.datasourceStates[LENS_DATASOURCE_ID.TEXT_BASED]?.state as TextBasedPersistedState
+      ).layers;
+
+      expect(layers.layer_0_trendline.query?.esql).toContain('BUCKET');
+    }
+  );
 });

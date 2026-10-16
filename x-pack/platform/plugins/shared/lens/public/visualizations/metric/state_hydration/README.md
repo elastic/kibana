@@ -2,8 +2,14 @@
 
 Metric-specific runtime patches to visualization state and datasource layers. Invoked from `applyStateHydration` after the metric type guard.
 
-- `editor` (Lens editor load and save): secondary-label migration.
-- `expression` (dashboard panel render): none yet.
+- `editor` (Lens editor load and save): secondary-label migration, then ES|QL trendline.
+- `expression` (dashboard panel render): ES|QL trendline only.
+
+## `esql_trendline.ts`
+
+When a metric sparkline is enabled, rebuilds the hidden ES|QL trendline layer from the main layer (query, time field, metric and breakdown columns).
+
+`hydrateEsqlMetricTrendlineAfterSuggestion` covers dashboard inline ES|QL editing. Suggestions rebuild only the main layer, so trendline accessors are taken from the previous visualization, then the layer is rebuilt from the new query. If the suggestion omits `timeField`, the previous trendline layer's time field is used. If rebuild still fails, the previous trendline layer is kept.
 
 ## `legacy_secondary_label.ts`
 

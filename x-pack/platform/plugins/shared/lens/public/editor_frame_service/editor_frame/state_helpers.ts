@@ -465,7 +465,7 @@ export async function persistedStateToExpression(
     },
     { isFullEditor: false }
   );
-  const datasourceStates = initializeDatasources({
+  const initializedDatasourceStates = initializeDatasources({
     datasourceMap,
     datasourceStates: datasourceStatesFromSO,
     references: [...references, ...(internalReferences || [])],
@@ -473,19 +473,30 @@ export async function persistedStateToExpression(
     indexPatternRefs,
   });
 
-  const activeVisualizationState = initializeVisualization({
+  const initializedVisualizationState = initializeVisualization({
     visualizationMap: visualizations,
     visualizationState: {
       state: persistedVisualizationState,
       activeId: visualizationType,
       selectedLayerId: null,
     },
-    datasourceStates,
+    datasourceStates: initializedDatasourceStates,
     annotationGroups,
     references: [...references, ...(internalReferences || [])],
   });
 
-  const datasourceLayers = getDatasourceLayers(datasourceStates, datasourceMap, indexPatterns);
+  const hydratedState = applyStateHydration({
+    visualizationId: visualizationType,
+    visualizationState: initializedVisualizationState,
+    datasourceStates: initializedDatasourceStates,
+    context: 'expression',
+  });
+
+  const datasourceLayers = getDatasourceLayers(
+    hydratedState.datasourceStates,
+    datasourceMap,
+    indexPatterns
+  );
 
   const datasourceId = getActiveDatasourceIdFromDoc(doc);
   if (datasourceId == null) {
@@ -493,7 +504,7 @@ export async function persistedStateToExpression(
       ast: null,
       indexPatterns,
       indexPatternRefs,
-      activeVisualizationState,
+      activeVisualizationState: hydratedState.visualizationState,
       activeDatasourceState: null,
     };
   }
@@ -505,17 +516,17 @@ export async function persistedStateToExpression(
       title,
       description,
       visualization,
-      visualizationState: activeVisualizationState,
+      visualizationState: hydratedState.visualizationState,
       datasourceMap,
-      datasourceStates,
+      datasourceStates: hydratedState.datasourceStates,
       datasourceLayers,
       indexPatterns,
       dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
       forceDSL: services.forceDSL,
       nowInstant: services.nowProvider.get(),
     }),
-    activeVisualizationState,
-    activeDatasourceState: datasourceStates[datasourceId]?.state,
+    activeVisualizationState: hydratedState.visualizationState,
+    activeDatasourceState: hydratedState.datasourceStates[datasourceId]?.state,
     indexPatterns,
     indexPatternRefs,
   };
