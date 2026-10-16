@@ -46,6 +46,9 @@ const ConversationBackgroundDecorator: Decorator = (storyFn, { viewMode }) => (
 
 export const decorators = [I18nDecorator, ConversationBackgroundDecorator];
 
+// Generate a docs page for every component's stories.
+export const tags = ['autodocs'];
+
 // Pin the Overview landing page to the top of the sidebar; everything else keeps its order.
 export const parameters = {
   // No canvas padding, so the conversation background reaches the edges of the preview.
