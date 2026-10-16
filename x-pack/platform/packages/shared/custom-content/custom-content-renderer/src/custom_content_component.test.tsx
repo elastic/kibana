@@ -73,6 +73,22 @@ describe('CustomContentComponent', () => {
     expect(iframe!.getAttribute('sandbox')).toBe('allow-top-navigation-by-user-activation');
   });
 
+  it('blocks all navigation from the iframe in a non-interactive view', () => {
+    const { container } = render(
+      <CustomContentComponent {...defaultProps} isInteractive={false} />
+    );
+
+    expect(container.querySelector('iframe')!.getAttribute('sandbox')).toBe('');
+  });
+
+  it('passes the interactive flag to the HTML hook', () => {
+    render(<CustomContentComponent {...defaultProps} isInteractive={false} />);
+
+    expect(mockUseCustomContentHtml).toHaveBeenCalledWith(
+      expect.objectContaining({ isInteractive: false })
+    );
+  });
+
   it('keeps the preview iframe fully sandboxed so a click cannot navigate away from the editor', () => {
     mockUseCustomContentHtml.mockReturnValue({
       html: '',

@@ -171,9 +171,10 @@ const hardenLinks = (node: Element, basePath: LinkBasePath, linksEnabled: boolea
 
 export function sanitizeHtml(
   html: string,
-  basePath: LinkBasePath = { requestBasePath: '', serverBasePath: '' }
+  basePath: LinkBasePath = { requestBasePath: '', serverBasePath: '' },
+  isInteractive = true
 ): string {
-  const linksEnabled = !isKibanaFramed();
+  const linksEnabled = isInteractive && !isKibanaFramed();
   const hook = (node: Element) => hardenLinks(node, basePath, linksEnabled);
   DOMPurify.addHook('afterSanitizeAttributes', hook);
   try {

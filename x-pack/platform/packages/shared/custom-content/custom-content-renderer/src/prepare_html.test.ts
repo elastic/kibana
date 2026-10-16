@@ -181,6 +181,18 @@ describe('sanitizeHtml', () => {
       expect(a?.textContent).toBe('go');
     });
 
+    it('drops the href of every link in a non-interactive view', () => {
+      const html = sanitizeHtml(
+        '<a href="/app/dashboards" target="_top">go</a>',
+        { requestBasePath: '', serverBasePath: '' },
+        false
+      );
+      const a = new DOMParser().parseFromString(html, 'text/html').querySelector('a');
+      expect(a?.hasAttribute('href')).toBe(false);
+      expect(a?.hasAttribute('target')).toBe(false);
+      expect(a?.textContent).toBe('go');
+    });
+
     it('drops the href of a link to an app that is not allowed', () => {
       expect(anchorOf('<a href="/app/dev_tools">go</a>')?.hasAttribute('href')).toBe(false);
     });
