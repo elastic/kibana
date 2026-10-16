@@ -33,13 +33,8 @@ const FilePath = schema.oneOf(
   allowedFilePaths.map((path) => schema.literal(path)) as [Type<string>]
 );
 
-const FilePathCaseless = schema.literal('file.path.caseless');
-
 const FileName = schema.literal('file.name');
 const FileNameCaseless = schema.literal('file.name.caseless');
-
-// Windows and macOS are case-insensitive, so path and file name entries must use the `.caseless` fields
-const CaselessEntryField = schema.oneOf([FileHashField, FilePathCaseless, FileNameCaseless]);
 
 const FileCodeSigner = schema.literal('file.Ext.code_signature');
 
@@ -146,21 +141,25 @@ const WindowsSignerEntrySchema = schema.object({
   ),
 });
 
+// Windows and macOS are case-insensitive, so `wildcard` (Match) entries must use the `.caseless`
+// fields. Exact-match (`match_any`) entries keep accepting the non-caseless fields.
+const caselessWildcardValidation = (entry: { field: string; type: string }): string | undefined => {
+  if (entry.type === 'wildcard' && ['file.path', 'file.name'].includes(entry.field)) {
+    return `[${entry.field}] is not allowed for a wildcard entry on this OS. Use [${entry.field}.caseless]`;
+  }
+};
+
 const WindowsEntrySchema = schema.oneOf([
   WindowsSignerEntrySchema,
-  schema.object({
-    ...CommonEntrySchema,
-    field: CaselessEntryField,
-  }),
+  schema.object(CommonEntrySchema, { validate: caselessWildcardValidation }),
 ]);
 
 const LinuxEntrySchema = schema.object({
   ...CommonEntrySchema,
 });
 
-const MacEntrySchema = schema.object({
-  ...CommonEntrySchema,
-  field: CaselessEntryField,
+const MacEntrySchema = schema.object(CommonEntrySchema, {
+  validate: caselessWildcardValidation,
 });
 
 // Hash entries validator method.

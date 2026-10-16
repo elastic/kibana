@@ -49,7 +49,7 @@ describe('Blocklists API validations', () => {
       } as unknown as CreateExceptionListItemOptions);
 
     const filePathEntry = (value: string[]): CreateExceptionListItemOptions['entries'] => [
-      { field: 'file.path.caseless', type: 'match_any', operator: 'included', value },
+      { field: 'file.path', type: 'match_any', operator: 'included', value },
     ];
 
     const hashEntry = (value: string[]): CreateExceptionListItemOptions['entries'] => [
@@ -189,7 +189,7 @@ describe('Blocklists API validations', () => {
       } as unknown as CreateExceptionListItemOptions);
 
     const fileNameMatchAnyEntry = (value: string[]): CreateExceptionListItemOptions['entries'] => [
-      { field: 'file.name.caseless', type: 'match_any', operator: 'included', value },
+      { field: 'file.name', type: 'match_any', operator: 'included', value },
     ];
 
     const wildcardEntry = (
@@ -233,6 +233,30 @@ describe('Blocklists API validations', () => {
       async (field) => {
         await expect(
           validator.validatePreCreateItem(buildItem(wildcardEntry(field, '/usr/*/foo'), ['linux']))
+        ).resolves.toBeDefined();
+      }
+    );
+
+    it.each([
+      ['windows', 'file.path'],
+      ['windows', 'file.path.caseless'],
+      ['windows', 'file.name'],
+      ['windows', 'file.name.caseless'],
+      ['macos', 'file.path'],
+      ['macos', 'file.path.caseless'],
+      ['macos', 'file.name'],
+      ['macos', 'file.name.caseless'],
+      ['linux', 'file.path'],
+      ['linux', 'file.name'],
+    ] as const)(
+      'accepts a match_any entry (as emitted by the form) on %s for field %s',
+      async (os, field) => {
+        const entries: CreateExceptionListItemOptions['entries'] = [
+          { field, type: 'match_any', operator: 'included', value: ['notepad.exe'] },
+        ];
+
+        await expect(
+          validator.validatePreCreateItem(buildItem(entries, [os]))
         ).resolves.toBeDefined();
       }
     );
