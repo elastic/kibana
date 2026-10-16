@@ -1247,7 +1247,7 @@ export const QueryBarTopRow = React.memo(
         return (
           <EuiFlexItem
             css={{
-              minWidth: 120,
+              minWidth: 80,
               maxWidth: isMobile ? '100%' : 'max-content',
               ...(!isMobile && {
                 flexBasis: '120px',

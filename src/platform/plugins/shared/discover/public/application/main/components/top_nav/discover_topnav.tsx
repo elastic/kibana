@@ -276,6 +276,7 @@ export const DiscoverTopNav = ({
       adHocDataViews,
       savedDataViews,
       onEditDataView: onDataViewEdited,
+      showDataViewLabel: false,
     };
   }, [
     adHocDataViews,
