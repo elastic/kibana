@@ -845,20 +845,21 @@ describe('schema_to_skill_docs', () => {
     it('documents every ActionPolicyWorkflowPayload top-level field', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
       for (const field of Object.keys(payloadKeyGuard)) {
-        expect(doc).toContain(`\`${field}\``);
+        expect(doc).toContain(`"${field}"`);
       }
     });
 
     it('documents every ActionPolicyWorkflowPayloadAlert field', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
       for (const field of Object.keys(alertKeyGuard)) {
-        expect(doc).toContain(`\`${field}\``);
+        expect(doc).toContain(`"${field}"`);
       }
     });
 
     it('documents rule_id as nullable, since external alerts have no rule', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
-      expect(doc).toContain('| `rule_id` | string \\| null | required |');
+      expect(doc).toContain('"rule_id"');
+      expect(doc).toMatch(/"type":\s*\[\s*"string",\s*"null"\s*\]/);
     });
 
     it('documents the inputs.payload Liquid access pattern', () => {

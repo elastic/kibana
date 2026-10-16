@@ -14,6 +14,11 @@ import type { LoggerServiceContract } from '../../lib/services/logger_service/lo
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import { createAlertingV2Availability } from './alerting_v2_experimental_availability';
 import { createActionPolicyManagementSkill } from './action_policy_management_skill';
+import {
+  referencedContentSkillPath,
+  WORKFLOW_DISPATCH_PAYLOAD_REFERENCE,
+  WORKFLOW_DISPATCH_PAYLOAD_SKILL_REF,
+} from './action_policy_management_references';
 
 const createDeps = (): ManageActionPolicyToolDeps & {
   availability: ReturnType<typeof createAlertingV2Availability>;
@@ -111,10 +116,33 @@ describe('createActionPolicyManagementSkill', () => {
     expect(payloadRef?.content).toContain('Action Policy Workflow Dispatch Payload');
     expect(payloadRef?.content).toContain('### `data`');
     expect(payloadRef?.content).toContain('## Example');
-    expect(payloadRef?.content).toContain('`policyId`');
-    expect(payloadRef?.content).toContain('`alerts`');
-    expect(payloadRef?.content).toContain('`rules`');
-    expect(payloadRef?.content).toContain('`alert_status`');
+    expect(payloadRef?.content).toContain('"policyId"');
+    expect(payloadRef?.content).toContain('"alerts"');
+    expect(payloadRef?.content).toContain('"rules"');
+    expect(payloadRef?.content).toContain('"alert_status"');
+  });
+
+  it('derives the workflow dispatch payload filestore path from the registered reference', () => {
+    const skill = createActionPolicyManagementSkill(createDeps());
+    const payloadRef = skill.referencedContent?.find(
+      (entry) => entry.name === WORKFLOW_DISPATCH_PAYLOAD_REFERENCE.name
+    );
+
+    expect(payloadRef).toEqual(expect.objectContaining(WORKFLOW_DISPATCH_PAYLOAD_REFERENCE));
+    expect(skill.basePath).toBe('skills/platform/alerting');
+    expect(WORKFLOW_DISPATCH_PAYLOAD_SKILL_REF).toBe(
+      referencedContentSkillPath({
+        basePath: skill.basePath,
+        name: skill.name,
+        referencedContent: {
+          name: payloadRef?.name ?? '',
+          relativePath: payloadRef?.relativePath ?? '',
+        },
+      })
+    );
+    expect(WORKFLOW_DISPATCH_PAYLOAD_SKILL_REF).toBe(
+      'skills/platform/alerting/action-policy-management/references/workflow-dispatch-payload.md'
+    );
   });
 
   it('exposes schema-generated matcher, grouping, and throttle references', () => {
