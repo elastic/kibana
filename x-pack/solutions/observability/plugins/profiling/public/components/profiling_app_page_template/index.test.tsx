@@ -199,7 +199,20 @@ describe('ProfilingAppPageTemplate', () => {
       expect(getStorageExplorerItem()).toEqual(expect.objectContaining({ isLoading: true }));
     });
 
-    it('is disabled with a setup hint when Universal Profiling is not set up', () => {
+    it('is enabled when Universal Profiling has data but its setup is incomplete', () => {
+      mockProfilingStatus({ hasSetup: false, hasData: true });
+
+      renderTemplate('');
+
+      expect(getStorageExplorerItem()).toEqual(
+        expect.objectContaining({
+          disableButton: false,
+          tooltipContent: undefined,
+        })
+      );
+    });
+
+    it('is disabled with a setup hint when Universal Profiling is not set up and has no data', () => {
       mockProfilingStatus({ hasSetup: false, hasData: false });
 
       renderTemplate('');

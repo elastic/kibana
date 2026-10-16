@@ -98,7 +98,16 @@ describe('StorageExplorerView', () => {
     expect(replace).not.toHaveBeenCalled();
   });
 
-  it('redirects to the setup when Universal Profiling is not set up', () => {
+  it('renders Storage explorer when Universal Profiling has data but its setup is incomplete', () => {
+    mockUniversalProfilingStatus({ hasSetup: false, hasData: true });
+
+    const { getByTestId } = renderView();
+
+    expect(getByTestId('storageExplorerPage')).toBeInTheDocument();
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it('redirects to the setup when Universal Profiling is not set up and has no data', () => {
     mockUniversalProfilingStatus({ hasSetup: false, hasData: false });
 
     const { queryByTestId } = renderView();
