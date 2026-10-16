@@ -29,7 +29,6 @@ const queryKi = (ruleId: string, esqlQuery: string): DiscoveryContextQuery => ({
 });
 
 const contextOf = (...query_kis: DiscoveryContextQuery[]): DiscoveryContext => ({
-  remaining_steps: [],
   sources: [],
   unmatched_rule_uuids: [],
   truncated: false,
@@ -65,7 +64,10 @@ describe('runDiscoveryGrounding', () => {
   it('samples a rule from 15 minutes before its detection until now, then profiles it', async () => {
     const { esClient, query } = fakeEs((text) =>
       text.includes('SORT @timestamp DESC')
-        ? { columns: ['body.text'], values: [['SQLState 08001']] }
+        ? {
+            columns: ['body.text', 'service.name'],
+            values: [['SQLState 08001', 'transactionhistory']],
+          }
         : { columns: ['n'], values: [[375]] }
     );
 
@@ -77,10 +79,11 @@ describe('runDiscoveryGrounding', () => {
 
     expect(grounding.confirmation).toMatchObject({
       status: 'ok',
-      columns: [{ name: 'body.text' }],
-      values: [['SQLState 08001']],
+      columns: [{ name: 'body.text' }, { name: 'service.name' }],
+      values: [['SQLState 08001', 'transactionhistory']],
       time_range: { from: '2026-10-16T11:25:00.000Z', to: '2026-10-16T12:00:00.000Z' },
     });
+    expect(grounding.profile?.group_by).toBe('service.name');
     expect(grounding.profile?.spread.time_range).toEqual({
       from: '2026-10-16T11:00:00.000Z',
       to: '2026-10-16T12:00:00.000Z',
@@ -88,6 +91,29 @@ describe('runDiscoveryGrounding', () => {
     expect(grounding.profile?.trend_buckets.time_range.from).toBe('2026-10-15T12:00:00.000Z');
     expect(grounding.profile?.trend_edges.time_range.from).toBe('2026-10-02T12:00:00.000Z');
     expect(query).toHaveBeenCalledTimes(4);
+  });
+
+  it('groups the spread by the first allowed field the sample has, or by none', async () => {
+    const withHost = fakeEs((text) =>
+      text.includes('SORT @timestamp DESC')
+        ? { columns: ['body.text', 'host.name'], values: [['x', 'h1']] }
+        : { values: [[1]] }
+    );
+    const withNone = fakeEs((text) =>
+      text.includes('SORT @timestamp DESC')
+        ? { columns: ['body.text'], values: [['x']] }
+        : { values: [[1]] }
+    );
+    const context = contextOf(queryKi('rule-A', 'FROM logs | WHERE body.text : "z"'));
+
+    const [host] = await run({ context, esClient: withHost.esClient });
+    const [none] = await run({ context, esClient: withNone.esClient });
+
+    expect(host.profile?.group_by).toBe('host.name');
+    expect(host.profile?.spread.query).toContain('BY host.name');
+    expect(none.profile?.group_by).toBeNull();
+    expect(none.profile?.spread.query).toContain('STATS failed = COUNT(*)');
+    expect(none.profile?.spread.query).not.toContain('BY');
   });
 
   it('does not profile a rule whose sample returned no rows', async () => {

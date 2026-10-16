@@ -196,7 +196,7 @@ describe('buildDiscoveryContext', () => {
     expect(context.query_kis[1]).not.toHaveProperty('confirmation_query');
   });
 
-  it('leads with the remaining steps and the sources, so the agent reads them first', async () => {
+  it('lists the sources before the knowledge indicators, so the agent reads them first', async () => {
     const search = jest
       .fn()
       .mockResolvedValueOnce(page({ items: [] }))
@@ -205,33 +205,12 @@ describe('buildDiscoveryContext', () => {
     const context = await buildDiscoveryContext({ ruleUuids: ['rule-A'], sourceIds: [], search });
 
     expect(Object.keys(context)).toEqual([
-      'remaining_steps',
       'sources',
       'unmatched_rule_uuids',
       'truncated',
       'query_kis',
       'feature_kis',
     ]);
-  });
-
-  it('names the steps that still have to run, including what to do with the unmatched rules', async () => {
-    const search = jest
-      .fn()
-      .mockResolvedValueOnce(page({ items: [] }))
-      .mockResolvedValueOnce(page({ items: [] }));
-
-    const { remaining_steps: steps } = await buildDiscoveryContext({
-      ruleUuids: ['rule-A'],
-      sourceIds: [],
-      search,
-    });
-
-    expect(steps).toHaveLength(3);
-    expect(steps[0]).toContain('Step 3');
-    expect(steps[0]).toContain('confirmation_query');
-    expect(steps[1]).toContain('Step 4');
-    expect(steps[2]).toContain('unmatched_rule_uuids');
-    expect(steps[2]).toContain('no signal');
   });
 
   it('lists the rules no backed query KI matched, and drops KIs of other rules', async () => {

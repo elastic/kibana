@@ -120,11 +120,18 @@ entries. Blast-radius `type` remains the row-shape label listed above.
 **Prefetched.** When the batch has a `## Prefetched context` whose `truncated` is false, skip the
 searches below: its `query_kis` are the Phase 1 results, its `feature_kis` the Phase 2 results, its `sources`
 the response `sources`, and `unmatched_rule_uuids` are the rules Step 2 would record as `NO_MATCH`. Make no `ki_search` call. This replaces only the searches: Step 2 mapping, Step 3
-confirmation and Step 4 profiling still run in full for every matched rule, and a confirming rule is
-never left with unmeasured breadth or duration because the searches were skipped.
+confirmation and Step 4 profiling still run in full for every matched rule, before any routing or
+write, and a confirming rule is never left with unmeasured breadth or duration because the searches
+were skipped. `unmatched_rule_uuids` are `not_checked`: they never appear in an `events_write` item,
+only in `written_rule_uuids`.
 Every query KI carries its `view_name` and, when it can be built, a `confirmation_query`: Step 3's
 executed query, ready to run. Run it exactly as given and never rebuild its `FROM`; the source slug is
 never a `FROM` target.
+When the context has a `grounding` list, each entry is that rule's Step 3 sample (`confirmation`) and,
+when it could be built, its Step 4 results (`profile`: `spread`, `trend_buckets`, `trend_edges`),
+already run with the `time_range` shown. Use them as the results of those steps and do not run them
+again: read the sample rows to set the verdict, and take `evidence.esql_query` and `time_range` from the
+entry. A rule with no entry, or with failure rows and no `profile`, is grounded as below.
 
 Two sequential phases, at most three calls per batch. Phase 2 takes Phase 1's result as input, so
 send Phase 2 only after the Phase 1 response has returned.

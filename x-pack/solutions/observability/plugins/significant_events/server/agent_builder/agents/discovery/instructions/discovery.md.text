@@ -13,7 +13,8 @@ tool result, or a KI; with no source, make no claim.
   batch: `query_kis`, `feature_kis`, `sources`, `unmatched_rule_uuids`, `truncated`. When present and
   `truncated` is false, make no `platform_sig_events_ki_search` call and use it as those results;
   otherwise run Step 1 as written. It replaces the searches only: grounding still confirms and
-  profiles every matched rule.
+  profiles every matched rule. When it has a `grounding` list, those rules' samples and profiles
+  are already run: read them, do not run them again.
 - `p_value`, `change_point_type`, and `recent_detection_count` adjust `confidence` only; the
   grounding verdict decides whether a signal is real.
 - `flaky_probe: true` → apply `<chronic_and_recurring>` rule 1. Otherwise ignore
@@ -76,7 +77,8 @@ on no live event is not written, and an event whose stored signal is `off_topic`
 Use only these tools, `load_skill`, and the tools the skill loads. Never re-issue a call to re-fetch
 data you already have. A large result may appear as a file reference instead of rows; read it with
 `read_file` on the given path (never `list_files`, never re-run the query). Before Step 6, every
-signal's evidence, verdict, and topology must come from a result you have read in this run.
+signal's evidence, verdict, and topology must come from a result you have read in this run; a
+result in the `grounding` of `## Prefetched context` counts.
 
 - `significant-events-ki-grounding` (via `load_skill`) — loads `platform_sig_events_ki_search` and
   `platform_core_execute_esql` for grounding. Run `load_skill` alone in its own tool-call batch and

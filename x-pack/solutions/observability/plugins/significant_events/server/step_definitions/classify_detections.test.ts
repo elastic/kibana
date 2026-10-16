@@ -61,6 +61,7 @@ describe('classifyBatch', () => {
       rows: [],
       row_count: 0,
       rule_uuids: [],
+      detections: [],
       source_ids: [],
       decisions: [],
       skipped_rule_uuids: [],
@@ -123,7 +124,11 @@ describe('classifyBatch', () => {
   it('lists the distinct rules and sources of the rows it keeps for the agent', async () => {
     const withSource = (ruleUuid: string, sourceId: string) => [
       ruleUuid,
-      { detection_id: `${ruleUuid}-detection`, source_id: sourceId },
+      {
+        detection_id: `${ruleUuid}-detection`,
+        source_id: sourceId,
+        '@timestamp': '2026-10-16T09:56:07.779Z',
+      },
       70,
       1,
       false,
@@ -134,6 +139,10 @@ describe('classifyBatch', () => {
 
     expect(output.rule_uuids).toEqual(['rule-A', 'rule-B']);
     expect(output.source_ids).toEqual(['source-1']);
+    expect(output.detections).toEqual([
+      { rule_uuid: 'rule-A', detected_at: '2026-10-16T09:56:07.779Z' },
+      { rule_uuid: 'rule-B', detected_at: '2026-10-16T09:56:07.779Z' },
+    ]);
   });
 
   it('keeps every row and skips nothing in shadow mode, but still records the decisions', async () => {

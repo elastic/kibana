@@ -79,6 +79,12 @@ const outputSchema = lazySchema(() =>
     skipped_rule_uuids: z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_INPUT_ROWS),
     /** Distinct rules and sources of `rows`, for steps that prepare the agent's context. */
     rule_uuids: z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_INPUT_ROWS),
+    /** When each of those rules was last detected, for the windows of their grounding queries. */
+    detections: z
+      .array(
+        z.object({ rule_uuid: z.string().max(MAX_ID_LENGTH), detected_at: z.string().max(64) })
+      )
+      .max(MAX_INPUT_ROWS),
     source_ids: z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_INPUT_ROWS),
     /** Number of rows in `rows`; a numeric field so workflows can tell an empty batch from a missing output. */
     row_count: z.number().int().min(0),
@@ -100,18 +106,23 @@ const NOT_PROBED: ProbeOutcome = { status: 'no_query', hasRows: false };
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
 
-const parseDetectionRow = (
-  row: DetectionRow
-):
-  | { ruleUuid: string; detectionId: string | undefined; sourceId: string | undefined }
-  | undefined => {
+interface ParsedRow {
+  ruleUuid: string;
+  detectionId: string | undefined;
+  sourceId: string | undefined;
+  detectedAt: string | undefined;
+}
+
+const parseDetectionRow = (row: DetectionRow): ParsedRow | undefined => {
   const [ruleUuid, source] = row;
   if (typeof ruleUuid !== 'string' || ruleUuid === '') return undefined;
   const detectionId =
     isRecord(source) && typeof source.detection_id === 'string' ? source.detection_id : undefined;
   const sourceId =
     isRecord(source) && typeof source.source_id === 'string' ? source.source_id : undefined;
-  return { ruleUuid, detectionId, sourceId };
+  const detectedAt =
+    isRecord(source) && typeof source['@timestamp'] === 'string' ? source['@timestamp'] : undefined;
+  return { ruleUuid, detectionId, sourceId, detectedAt };
 };
 
 const countBy = <T>(items: readonly T[], getKey: (item: T) => string | undefined) =>
@@ -216,6 +227,9 @@ export const classifyBatch = async ({
   return {
     rows: agentRows,
     rule_uuids: [...new Set(agentDetections.map(({ ruleUuid }) => ruleUuid))],
+    detections: agentDetections.flatMap(({ ruleUuid, detectedAt }) =>
+      detectedAt === undefined ? [] : [{ rule_uuid: ruleUuid, detected_at: detectedAt }]
+    ),
     source_ids: [...new Set(agentDetections.flatMap(({ sourceId }) => sourceId ?? []))],
     row_count: agentRows.length,
     decisions,

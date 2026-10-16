@@ -23,19 +23,8 @@ export type DiscoveryContextQuery = CompactKnowledgeIndicatorQuery & {
   confirmation_query?: string;
 };
 
-/**
- * What is left to do once the searches are done. Without it the agent has stopped after the
- * confirmation queries in the eval and left the profile queries out.
- */
-export const REMAINING_GROUNDING_STEPS = [
-  "Step 3: run every query KI's confirmation_query exactly as given (never rebuild its FROM), with time_range from the detection @timestamp minus 15m to now, in parallel waves; a KI without one is built per the skill.",
-  'Step 4: profile (spread and trend) every rule whose sample returned failure rows, before any routing or write.',
-  'Rules in unmatched_rule_uuids are not_checked and not event-eligible: put no signal for them in any events_write item (the write is rejected); only add their rule_uuid to written_rule_uuids.',
-] as const;
-
 /** What the grounding skill's Steps 1 and 2 retrieve for a batch, so the agent need not. */
 export interface DiscoveryContext {
-  remaining_steps: readonly string[];
   /** Each source's `slug` and `view_name`. */
   sources: KISearchOutput['sources'];
   /** Rules with no backed query KI: grounding records `not_checked` for them. */
@@ -123,7 +112,6 @@ export const buildDiscoveryContext = async ({
   const viewBySlug = new Map(sources.map(({ slug, view_name: view }) => [slug, view]));
   const matchedRules = new Set(queryKis.map(({ rule }) => rule.id));
   return {
-    remaining_steps: REMAINING_GROUNDING_STEPS,
     sources,
     unmatched_rule_uuids: ruleUuids.filter((ruleUuid) => !matchedRules.has(ruleUuid)),
     truncated: queryPage.has_more,

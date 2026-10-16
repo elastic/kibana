@@ -13,7 +13,7 @@ import {
   type ProbeWindow,
   type StoredQueryResult,
 } from '../../step_definitions/run_probe';
-import { buildProfileQueries, type ProfileQuery } from './profile_queries';
+import { buildProfileQueries, pickSpreadGroupField, type ProfileQuery } from './profile_queries';
 import type { DiscoveryContext } from './discovery_context';
 
 const CONFIRMATION_LOOKBACK_MS = 15 * 60_000;
@@ -36,6 +36,8 @@ export interface RuleGrounding {
   rule_uuid: string;
   confirmation: GroundingQueryResult;
   profile?: {
+    /** The field the spread groups by, or null when the data has none of the allowed ones. */
+    group_by: string | null;
     spread: GroundingQueryResult;
     trend_buckets: GroundingQueryResult;
     trend_edges: GroundingQueryResult;
@@ -104,9 +106,14 @@ export const runDiscoveryGrounding = async ({
         from: (Number.isNaN(detected) ? now : detected) - CONFIRMATION_LOOKBACK_MS,
         to: now,
       });
+      const groupField = pickSpreadGroupField(confirmation.columns);
       const profileQueries =
         confirmation.status === 'ok' && confirmation.values.length > 0
-          ? buildProfileQueries({ esqlQuery: ki.query.esql.query, viewName: ki.view_name })
+          ? buildProfileQueries({
+              esqlQuery: ki.query.esql.query,
+              viewName: ki.view_name,
+              groupField,
+            })
           : undefined;
       if (!profileQueries) return { rule_uuid: ki.rule.id, confirmation };
 
@@ -118,7 +125,12 @@ export const runDiscoveryGrounding = async ({
       return {
         rule_uuid: ki.rule.id,
         confirmation,
-        profile: { spread, trend_buckets: trendBuckets, trend_edges: trendEdges },
+        profile: {
+          group_by: groupField ?? null,
+          spread,
+          trend_buckets: trendBuckets,
+          trend_edges: trendEdges,
+        },
       };
     })
   );

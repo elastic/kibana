@@ -8,7 +8,7 @@ import {
   MAX_ID_LENGTH,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { searchKnowledgeIndicatorsForRequest } from '../../../agent_builder/tools/search_knowledge_indicators/search_for_request';
@@ -17,6 +17,10 @@ import {
   buildDiscoveryContext,
   type DiscoveryContext,
 } from '../../../lib/significant_events/discovery_context';
+import {
+  runDiscoveryGrounding,
+  type RuleGrounding,
+} from '../../../lib/significant_events/discovery_grounding';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../utils/assert_not_paused';
@@ -145,6 +149,11 @@ const discoveryContextRoute = createServerRoute({
     body: z.object({
       rule_uuids: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(MAX_CONTEXT_RULES),
       source_ids: z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_CONTEXT_SOURCES),
+      /** When given, the Step 3 sample and Step 4 profile of each rule are run and returned too. */
+      detections: z
+        .array(z.object({ rule_uuid: z.string().max(MAX_ID_LENGTH), detected_at: isoDateTime() }))
+        .max(MAX_CONTEXT_RULES)
+        .optional(),
     }),
   }),
   options: {
@@ -164,9 +173,9 @@ const discoveryContextRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<DiscoveryContext> => {
-    const { rule_uuids: ruleUuids, source_ids: sourceIds } = params.body;
-    return buildDiscoveryContext({
+  }): Promise<DiscoveryContext & { grounding?: RuleGrounding[] }> => {
+    const { rule_uuids: ruleUuids, source_ids: sourceIds, detections } = params.body;
+    const context = await buildDiscoveryContext({
       ruleUuids,
       sourceIds,
       search: (toolParams) =>
@@ -178,6 +187,18 @@ const discoveryContextRoute = createServerRoute({
           toolParams,
         }),
     });
+    if (!detections) return context;
+
+    // The user's own data: run as the caller, like the execute_esql tool the agent would use.
+    const { scopedClusterClient } = await getScopedClients({ request });
+    const grounding = await runDiscoveryGrounding({
+      context,
+      detectedAt: new Map(detections.map(({ rule_uuid: id, detected_at: at }) => [id, at])),
+      esClient: scopedClusterClient.asCurrentUser,
+      now: Date.now(),
+      abortSignal: new AbortController().signal,
+    });
+    return { ...context, grounding };
   },
 });
 

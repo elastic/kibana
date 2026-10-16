@@ -122,6 +122,23 @@ describe('POST /internal/significant_events/discovery/_context', () => {
     });
   });
 
+  it('takes the detection time of each rule to run their grounding queries', () => {
+    expect(
+      bodySchema.safeParse({
+        rule_uuids: ['rule-1'],
+        source_ids: [],
+        detections: [{ rule_uuid: 'rule-1', detected_at: '2026-10-16T11:40:00.000Z' }],
+      }).success
+    ).toBe(true);
+    expect(
+      bodySchema.safeParse({
+        rule_uuids: ['rule-1'],
+        source_ids: [],
+        detections: [{ rule_uuid: 'rule-1', detected_at: 'yesterday' }],
+      }).success
+    ).toBe(false);
+  });
+
   it('accepts a batch of rules and sources, and bounds both', () => {
     expect(bodySchema.safeParse({ rule_uuids: ['rule-1'], source_ids: [] }).success).toBe(true);
     expect(bodySchema.safeParse({ rule_uuids: [], source_ids: [] }).success).toBe(false);
