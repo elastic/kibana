@@ -257,16 +257,20 @@ describe('Fleet integrations', () => {
         config: {
           integration_config: {},
           policy: {
-            value: disableProtections(
-              policyFactory({
-                license,
-                cloud,
-                licenseUuid,
-                clusterUuid,
-                clusterName,
-                serverless: isServerlessEnabled,
-                isGlobalTelemetryEnabled: isTelemetryEnabled,
-              })
+            // `experimentalFeatures` leaves endpointAiDataCollection/perOsPolicySettings off, so
+            // the real policy has the block stripped.
+            value: PolicyConfigHelpers.removeAiDataCollection(
+              disableProtections(
+                policyFactory({
+                  license,
+                  cloud,
+                  licenseUuid,
+                  clusterUuid,
+                  clusterName,
+                  serverless: isServerlessEnabled,
+                  isGlobalTelemetryEnabled: isTelemetryEnabled,
+                })
+              )
             ),
           },
           artifact_manifest: { value: manifest },

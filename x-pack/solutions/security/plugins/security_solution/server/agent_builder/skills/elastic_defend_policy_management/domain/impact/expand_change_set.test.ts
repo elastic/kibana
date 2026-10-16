@@ -398,6 +398,42 @@ describe('expandChangeSet', () => {
     expect(prepared.proposedConfig.mac.device_control?.enabled).toBe(true);
   });
 
+  it('creates a missing ai_data_collection block for the requested OS only', () => {
+    const policy = policyFactory();
+    delete policy.windows.ai_data_collection;
+    delete policy.mac.ai_data_collection;
+
+    const prepared = expandChangeSet(
+      [{ op: 'set_field', path: 'windows.ai_data_collection.enabled', value: false }],
+      policy
+    );
+
+    expect(prepared.proposedConfig.windows.ai_data_collection).toEqual({ enabled: false });
+    expect(prepared.proposedConfig.mac.ai_data_collection).toBeUndefined();
+  });
+
+  it('rejects an invalid ai_data_collection.enabled value with invalid_value', () => {
+    const policy = policyFactory();
+    const before = structuredClone(policy);
+
+    expectRejections(
+      () =>
+        expandChangeSet(
+          [{ op: 'set_field', path: 'windows.ai_data_collection.enabled', value: 'true' }],
+          policy
+        ),
+      [
+        {
+          operationIndexes: [0],
+          path: 'windows.ai_data_collection.enabled',
+          reason: 'invalid_value',
+          acceptedValues: { type: 'boolean' },
+        },
+      ]
+    );
+    expect(policy).toEqual(before);
+  });
+
   it('refuses unknown, excluded, derived, and other non-writable direct paths', () => {
     const unknownPolicy = policyFactory();
     const unknownBefore = structuredClone(unknownPolicy);

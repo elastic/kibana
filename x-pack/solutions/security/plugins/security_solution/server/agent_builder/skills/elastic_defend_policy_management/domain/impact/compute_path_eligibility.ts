@@ -134,5 +134,9 @@ export const computePathEligibility = (
     return ineligible(context.customYaraSignaturesReason);
   }
 
+  if (!isEqual(proposedValue, get(context.aiDataCollectionStripped, path))) {
+    return ineligible(context.aiDataCollectionReason);
+  }
+
   return { eligible: true };
 };

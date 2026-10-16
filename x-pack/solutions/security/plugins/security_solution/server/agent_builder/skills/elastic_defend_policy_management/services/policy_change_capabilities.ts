@@ -29,6 +29,8 @@ export const toPolicyChangeCapabilities = (
       ProductFeatureSecurityKey.endpointCustomYaraSignatures
     ),
     customYaraSignaturesExperimental: experimentalFeatures.customYaraSignaturesEnabled,
+    aiDataCollectionExperimental:
+      experimentalFeatures.endpointAiDataCollection && experimentalFeatures.perOsPolicySettings,
     endpointProtectionUpdates: productFeatures.isEnabled(
       ProductFeatureSecurityKey.endpointProtectionUpdates
     ),

@@ -395,6 +395,18 @@ export const removeLinuxDnsEvents = (policy: PolicyConfig): PolicyConfig => {
   };
 };
 
+/**
+ * Returns a copy of the passed `PolicyConfig` with the `ai_data_collection` block removed from
+ * every OS, so the policy leaves AI event enrichment unset (treated as disabled by Endpoint).
+ */
+export const removeAiDataCollection = (policy: PolicyConfig): PolicyConfig => {
+  const { ai_data_collection: windowsAiDataCollection, ...windows } = policy.windows;
+  const { ai_data_collection: macAiDataCollection, ...mac } = policy.mac;
+  const { ai_data_collection: linuxAiDataCollection, ...linux } = policy.linux;
+
+  return { ...policy, windows, mac, linux };
+};
+
 export const POLICY_COUPLING_PROTECTIONS = [
   'malware',
   'ransomware',

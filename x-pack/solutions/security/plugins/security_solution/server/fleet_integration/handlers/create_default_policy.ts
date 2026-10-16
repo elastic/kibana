@@ -29,6 +29,7 @@ import {
   disableProtections,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
+  removeAiDataCollection,
   removeCustomYaraSignatures,
   removeDeviceControl,
   removeLinuxDnsEvents,
@@ -92,6 +93,12 @@ export const createDefaultPolicy = (
 
   if (!experimentalFeatures.linuxDnsEvents) {
     defaultPolicyPerType = removeLinuxDnsEvents(defaultPolicyPerType);
+  }
+
+  // The AI Data Collection card only exists in the per-OS form; without it new policies leave the
+  // block unset so users are never opted in to a setting they cannot see or turn off.
+  if (!experimentalFeatures.endpointAiDataCollection || !experimentalFeatures.perOsPolicySettings) {
+    defaultPolicyPerType = removeAiDataCollection(defaultPolicyPerType);
   }
 
   // Without the per-OS form macOS ransomware has no card, so new policies keep it opt-in.

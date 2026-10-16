@@ -379,6 +379,13 @@ export const allowedExperimentalValues = Object.freeze({
   perOsPolicySettings: false,
 
   /**
+   * Enables the AI Data Collection card in the per-OS Elastic Defend policy settings form and
+   * turns AI event enrichment on by default for new policies (requires `perOsPolicySettings`).
+   * Release: 9.6
+   */
+  endpointAiDataCollection: false,
+
+  /**
    * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
    * creation policy but has no entity store record, create the entity (with its risk score)
    * instead of silently dropping the score.
