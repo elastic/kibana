@@ -33,7 +33,8 @@ export const shouldStreamInferenceEndpoint = async ({
     return true;
   }
   try {
-    if (await isStreamingEnabled()) {
+    // only an explicit opt-out disables streaming; an unset setting keeps the default
+    if ((await isStreamingEnabled()) !== false) {
       return true;
     }
     const services = await esClient.transport.request<

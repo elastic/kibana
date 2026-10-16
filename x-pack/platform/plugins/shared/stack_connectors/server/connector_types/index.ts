@@ -55,12 +55,14 @@ export function registerConnectorTypes({
   experimentalFeatures,
   isElasticCloudTrial,
   getUiSettingsClient,
+  getInternalEsClient,
 }: {
   actions: ActionsPluginSetupContract;
   publicBaseUrl?: string;
   experimentalFeatures: ExperimentalFeatures;
   isElasticCloudTrial?: () => Promise<boolean>;
   getUiSettingsClient?: InferenceConnectorDependencies['getUiSettingsClient'];
+  getInternalEsClient?: InferenceConnectorDependencies['getInternalEsClient'];
 }) {
   actions.registerType(getEmailConnectorType({ publicBaseUrl, isElasticCloudTrial }));
   actions.registerType(getIndexConnectorType());
@@ -102,7 +104,9 @@ export function registerConnectorTypes({
     actions.registerSubActionConnectorType(getCrowdstrikeConnectorType(experimentalFeatures));
   }
   if (!experimentalFeatures.inferenceConnectorOff) {
-    actions.registerSubActionConnectorType(getInferenceConnectorType({ getUiSettingsClient }));
+    actions.registerSubActionConnectorType(
+      getInferenceConnectorType({ getUiSettingsClient, getInternalEsClient })
+    );
   }
   actions.registerSubActionConnectorType(getMicrosoftDefenderEndpointConnectorType());
 }

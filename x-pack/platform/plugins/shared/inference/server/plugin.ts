@@ -89,6 +89,34 @@ export const resolveReplacementsEncryptionKey = async ({
   return policyService.getReplacementsEncryptionKey(namespace);
 };
 
+/**
+ * Builds the per-request streaming resolver. The space setting is read with the request-scoped
+ * saved objects client so it reflects the request's space, while the service capability lookup
+ * (`GET _inference/_services`) uses the internal ES client because the user calling chat
+ * completion is not expected to hold inference management privileges.
+ */
+export const createInferenceStreamingResolver = ({
+  core,
+  logger,
+  request,
+}: {
+  core: Pick<CoreStart, 'elasticsearch' | 'savedObjects' | 'uiSettings'>;
+  logger: Logger;
+  request: KibanaRequest;
+}) => {
+  return (service?: string): Promise<boolean> =>
+    shouldStreamInferenceEndpoint({
+      service,
+      esClient: core.elasticsearch.client.asInternalUser,
+      isStreamingEnabled: async () => {
+        const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
+        const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
+        return await uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_INFERENCE_STREAMING);
+      },
+      logger,
+    });
+};
+
 export class InferencePlugin
   implements
     Plugin<
@@ -302,20 +330,8 @@ export class InferencePlugin
       };
     };
 
-    // the setting is read per request so that it reflects the request's space, while the
-    // service capability lookup (GET _inference/_services) uses the internal ES client because
-    // the user calling chat completion is not expected to hold inference management privileges
-    const createInferenceStreamingResolver = (request: KibanaRequest) => (service?: string) =>
-      shouldStreamInferenceEndpoint({
-        service,
-        esClient: core.elasticsearch.client.asInternalUser,
-        isStreamingEnabled: async () => {
-          const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
-          const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
-          return await uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_INFERENCE_STREAMING);
-        },
-        logger: this.logger,
-      });
+    const createStreamingResolver = (request: KibanaRequest) =>
+      createInferenceStreamingResolver({ core, logger: this.logger, request });
 
     return {
       getClient: <T extends InferenceClientCreateOptions>(options: T) => {
@@ -331,7 +347,7 @@ export class InferencePlugin
           isDefaultConnectorOnly: createDefaultConnectorOnlyCheck(options.request),
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
           resolveConnectorId: createConnectorIdResolver(options.request),
-          shouldStreamInferenceEndpoint: createInferenceStreamingResolver(options.request),
+          shouldStreamInferenceEndpoint: createStreamingResolver(options.request),
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 
@@ -352,7 +368,7 @@ export class InferencePlugin
           isDefaultConnectorOnly: createDefaultConnectorOnlyCheck(options.request),
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
           resolveConnectorId: createConnectorIdResolver(options.request),
-          shouldStreamInferenceEndpoint: createInferenceStreamingResolver(options.request),
+          shouldStreamInferenceEndpoint: createStreamingResolver(options.request),
         });
       },
 

@@ -9,7 +9,11 @@ import { text as streamToString } from 'node:stream/consumers';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import { errors } from '@elastic/elasticsearch';
-import type { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { GEN_AI_SETTINGS_INFERENCE_STREAMING } from '@kbn/management-settings-ids';
 import { supportsNonStreamingChat, type InferenceProvider } from '@kbn/inference-common';
 import { Stream } from 'openai/streaming';
@@ -73,6 +77,11 @@ export interface InferenceConnectorDependencies {
   getUiSettingsClient?: (
     savedObjectsClient: SavedObjectsClientContract
   ) => Promise<IUiSettingsClient>;
+  /**
+   * Resolves the internal-user ES client, used to read `GET _inference/_services` because the
+   * user running the connector is not expected to hold inference management privileges.
+   */
+  getInternalEsClient?: () => Promise<ElasticsearchClient>;
 }
 
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
@@ -85,13 +94,15 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   private inferenceId;
   private taskType;
   private getUiSettingsClient?: InferenceConnectorDependencies['getUiSettingsClient'];
+  private getInternalEsClient?: InferenceConnectorDependencies['getInternalEsClient'];
 
   constructor(
     params: ServiceParams<Config, Secrets>,
-    { getUiSettingsClient }: InferenceConnectorDependencies = {}
+    { getUiSettingsClient, getInternalEsClient }: InferenceConnectorDependencies = {}
   ) {
     super(params);
     this.getUiSettingsClient = getUiSettingsClient;
+    this.getInternalEsClient = getInternalEsClient;
 
     this.provider = this.config.provider;
     this.taskType = this.config.taskType;
@@ -328,15 +339,18 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    * never sends a request Elasticsearch would reject. Any failure falls back to streaming.
    */
   private async shouldStream(): Promise<boolean> {
-    if (!this.getUiSettingsClient) {
+    if (!this.getUiSettingsClient || !this.getInternalEsClient) {
       return true;
     }
     try {
       const uiSettingsClient = await this.getUiSettingsClient(this.savedObjectsClient);
-      if (await uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_INFERENCE_STREAMING)) {
+      // only an explicit opt-out disables streaming; an unset setting keeps the default
+      if ((await uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_INFERENCE_STREAMING)) !== false) {
         return true;
       }
-      const services = await this.esClient.transport.request<
+      // the services lookup runs as the internal user; this.esClient is scoped to the caller
+      const internalEsClient = await this.getInternalEsClient();
+      const services = await internalEsClient.transport.request<
         Array<Pick<InferenceProvider, 'service' | 'features'>>
       >({ method: 'GET', path: '/_inference/_services' });
       const service = Array.isArray(services)

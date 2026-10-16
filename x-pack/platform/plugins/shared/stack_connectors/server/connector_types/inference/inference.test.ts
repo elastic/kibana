@@ -8,7 +8,7 @@
 import { text as streamToString } from 'node:stream/consumers';
 import { errors } from '@elastic/elasticsearch';
 import { GEN_AI_SETTINGS_INFERENCE_STREAMING } from '@kbn/management-settings-ids';
-import { InferenceConnector } from './inference';
+import { InferenceConnector, type InferenceConnectorDependencies } from './inference';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -458,9 +458,12 @@ describe('InferenceConnector', () => {
   });
 
   describe('streaming preference', () => {
-    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asCurrentUser;
+    const mockInternalEsClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     const uiSettingsGet = jest.fn();
     const getUiSettingsClient = jest.fn().mockResolvedValue({ get: uiSettingsGet });
+    const getInternalEsClient = jest.fn().mockResolvedValue(mockInternalEsClient);
+    const servicesCall = { method: 'GET', path: '/_inference/_services' };
     const servicesResponse = [
       { service: 'openai', features: { non_streaming_chat: { supported: true } } },
       { service: 'anthropic' },
@@ -476,7 +479,10 @@ describe('InferenceConnector', () => {
     };
     const streamCall = expect.objectContaining({ path: '_inference/chat_completion/test/_stream' });
 
-    const createConnector = (provider: string, withUiSettings = true) => {
+    const createConnector = (
+      provider: string,
+      dependencies: InferenceConnectorDependencies = { getUiSettingsClient, getInternalEsClient }
+    ) => {
       const services = actionsMock.createServices();
       services.scopedClusterClient = mockEsClient;
       return new InferenceConnector(
@@ -494,7 +500,7 @@ describe('InferenceConnector', () => {
           logger: loggingSystemMock.createLogger(),
           services,
         },
-        withUiSettings ? { getUiSettingsClient } : {}
+        dependencies
       );
     };
 
@@ -508,10 +514,8 @@ describe('InferenceConnector', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       uiSettingsGet.mockResolvedValue(false);
+      mockInternalEsClient.transport.request.mockResolvedValue(servicesResponse);
       mockEsClient.transport.request.mockImplementation(async (request) => {
-        if (request.method === 'GET') {
-          return servicesResponse;
-        }
         if (request.path?.endsWith('/_stream')) {
           return { body: Readable.from([`data: [DONE]\n\n`]), statusCode: 200 };
         }
@@ -520,20 +524,33 @@ describe('InferenceConnector', () => {
     });
 
     it('streams when no uiSettings client is available', async () => {
-      await invoke(createConnector('openai', false));
+      await invoke(createConnector('openai', { getInternalEsClient }));
 
+      expect(mockInternalEsClient.transport.request).not.toHaveBeenCalled();
       expect(mockEsClient.transport.request).toHaveBeenCalledTimes(1);
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(streamCall, expect.anything());
     });
 
-    it('streams when the space setting keeps streaming enabled', async () => {
-      uiSettingsGet.mockResolvedValue(true);
+    it('streams when no internal ES client is available', async () => {
+      await invoke(createConnector('openai', { getUiSettingsClient }));
 
-      await invoke(createConnector('openai'));
-
-      expect(uiSettingsGet).toHaveBeenCalledWith(GEN_AI_SETTINGS_INFERENCE_STREAMING);
+      expect(uiSettingsGet).not.toHaveBeenCalled();
       expect(mockEsClient.transport.request).toHaveBeenCalledTimes(1);
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(streamCall, expect.anything());
+    });
+
+    it('streams unless the space setting explicitly turns streaming off', async () => {
+      for (const settingValue of [true, undefined]) {
+        jest.clearAllMocks();
+        uiSettingsGet.mockResolvedValue(settingValue);
+
+        await invoke(createConnector('openai'));
+
+        expect(uiSettingsGet).toHaveBeenCalledWith(GEN_AI_SETTINGS_INFERENCE_STREAMING);
+        expect(mockInternalEsClient.transport.request).not.toHaveBeenCalled();
+        expect(mockEsClient.transport.request).toHaveBeenCalledTimes(1);
+        expect(mockEsClient.transport.request).toHaveBeenCalledWith(streamCall, expect.anything());
+      }
     });
 
     it('calls the endpoint without _stream when streaming is off and the service supports it', async () => {
@@ -541,10 +558,9 @@ describe('InferenceConnector', () => {
 
       const response = await invoke(createConnector('openai'), signal);
 
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith({
-        method: 'GET',
-        path: '/_inference/_services',
-      });
+      // the services lookup uses the internal client, never the caller-scoped one
+      expect(mockInternalEsClient.transport.request).toHaveBeenCalledWith(servicesCall);
+      expect(mockEsClient.transport.request).not.toHaveBeenCalledWith(servicesCall);
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         {
           method: 'POST',
@@ -585,12 +601,7 @@ describe('InferenceConnector', () => {
       await invoke(createConnector('openai'));
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(streamCall, expect.anything());
 
-      mockEsClient.transport.request.mockImplementation(async (request) => {
-        if (request.method === 'GET') {
-          throw new Error('no permission');
-        }
-        return { body: Readable.from([`data: [DONE]\n\n`]), statusCode: 200 };
-      });
+      mockInternalEsClient.transport.request.mockRejectedValueOnce(new Error('no permission'));
       await invoke(createConnector('openai'));
       expect(mockEsClient.transport.request).toHaveBeenLastCalledWith(
         streamCall,
@@ -609,10 +620,7 @@ describe('InferenceConnector', () => {
 
     it('maps non-streaming response errors to task run errors', async () => {
       const respondWith = (statusCode: number, body: unknown) =>
-        mockEsClient.transport.request.mockImplementation(async (request) => {
-          if (request.method === 'GET') {
-            return servicesResponse;
-          }
+        mockEsClient.transport.request.mockImplementation(async () => {
           throw new errors.ResponseError({ statusCode, body, warnings: null, meta: {} as never });
         });
 

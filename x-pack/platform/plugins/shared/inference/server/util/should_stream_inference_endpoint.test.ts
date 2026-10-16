@@ -23,18 +23,20 @@ describe('shouldStreamInferenceEndpoint', () => {
     ]);
   });
 
-  it('streams without reading services when there is no setting reader or the setting is on', async () => {
+  it('streams without reading services when there is no setting reader or the setting is not explicitly off', async () => {
     await expect(
       shouldStreamInferenceEndpoint({ service: 'openai', esClient, logger })
     ).resolves.toBe(true);
-    await expect(
-      shouldStreamInferenceEndpoint({
-        service: 'openai',
-        esClient,
-        isStreamingEnabled: async () => true,
-        logger,
-      })
-    ).resolves.toBe(true);
+    for (const settingValue of [true, undefined]) {
+      await expect(
+        shouldStreamInferenceEndpoint({
+          service: 'openai',
+          esClient,
+          isStreamingEnabled: async () => settingValue as boolean,
+          logger,
+        })
+      ).resolves.toBe(true);
+    }
     expect(esClient.transport.request).not.toHaveBeenCalled();
   });
 

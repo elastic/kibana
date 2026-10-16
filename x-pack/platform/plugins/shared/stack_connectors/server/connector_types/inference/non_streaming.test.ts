@@ -72,6 +72,49 @@ describe('completionToEventStream', () => {
     expect(events[2]).toBe('[DONE]');
   });
 
+  it('emits the partial message and usage before the length finish reason when the completion is truncated', async () => {
+    const events = (
+      await readEvents(
+        completionToEventStream({
+          id: 'chatcmpl-1',
+          model: 'gpt-4o',
+          object: 'chat.completion',
+          choices: [
+            {
+              index: 0,
+              finish_reason: 'length',
+              message: { role: 'assistant', content: 'Partial answ' },
+            },
+          ],
+          usage: { prompt_tokens: 1, completion_tokens: 2, total_tokens: 3 },
+        })
+      )
+    ).map((event) => (event === '[DONE]' ? event : JSON.parse(event)));
+
+    // the consumer raises the token limit error on the first chunk with a `length` finish
+    // reason, so content and usage must arrive before it, as they do when streaming
+    expect(events).toEqual([
+      expect.objectContaining({
+        choices: [
+          {
+            index: 0,
+            finish_reason: null,
+            delta: { role: 'assistant', content: 'Partial answ' },
+          },
+        ],
+      }),
+      expect.objectContaining({
+        choices: [],
+        usage: { prompt_tokens: 1, completion_tokens: 2, total_tokens: 3 },
+      }),
+      expect.objectContaining({
+        choices: [{ index: 0, finish_reason: 'length', delta: {} }],
+      }),
+      '[DONE]',
+    ]);
+    expect(events[2]).not.toHaveProperty('usage');
+  });
+
   it('omits the usage chunk when the completion has no usage', async () => {
     const events = await readEvents(
       completionToEventStream({

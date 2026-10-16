@@ -94,6 +94,10 @@ export class StackConnectorsPlugin
         const [coreStart] = await core.getStartServices();
         return coreStart.uiSettings.asScopedToClient(savedObjectsClient);
       },
+      getInternalEsClient: async () => {
+        const [coreStart] = await core.getStartServices();
+        return coreStart.elasticsearch.client.asInternalUser;
+      },
     });
 
     if (this.experimentalFeatures.connectorsFromSpecs) {
