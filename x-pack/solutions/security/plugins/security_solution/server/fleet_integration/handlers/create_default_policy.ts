@@ -28,6 +28,7 @@ import {
 import {
   disableProtections,
   ensureOnlyEventCollectionIsAllowed,
+  isAiDataCollectionEnabled,
   isBillablePolicy,
   isLinuxRansomwareProtectionEnabled,
   removeAiDataCollection,
@@ -101,9 +102,7 @@ export const createDefaultPolicy = (
     defaultPolicyPerType = removeLinuxRansomware(defaultPolicyPerType);
   }
 
-  // The AI Data Collection card only exists in the per-OS form; without it new policies leave the
-  // block unset so users are never opted in to a setting they cannot see or turn off.
-  if (!experimentalFeatures.endpointAiDataCollection || !experimentalFeatures.perOsPolicySettings) {
+  if (!isAiDataCollectionEnabled(experimentalFeatures)) {
     defaultPolicyPerType = removeAiDataCollection(defaultPolicyPerType);
   }
 

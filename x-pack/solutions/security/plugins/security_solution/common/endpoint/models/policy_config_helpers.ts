@@ -476,8 +476,19 @@ export const removeLinuxRansomware = (policy: PolicyConfig): PolicyConfig => {
 };
 
 /**
+ * AI Data Collection is configurable only from the per-OS policy form, so it is enabled only when
+ * both feature flags are on.
+ */
+export const isAiDataCollectionEnabled = ({
+  endpointAiDataCollection,
+  perOsPolicySettings,
+}: Pick<ExperimentalFeatures, 'endpointAiDataCollection' | 'perOsPolicySettings'>): boolean =>
+  endpointAiDataCollection && perOsPolicySettings;
+
+/**
  * Returns a copy of the passed `PolicyConfig` with the `ai_data_collection` block removed from
- * every OS, so the policy leaves AI event enrichment unset (treated as disabled by Endpoint).
+ * every OS, so the policy leaves AI event enrichment unset (treated as disabled by Endpoint). Used
+ * when `isAiDataCollectionEnabled` is false.
  */
 export const removeAiDataCollection = (policy: PolicyConfig): PolicyConfig => {
   const { ai_data_collection: windowsAiDataCollection, ...windows } = policy.windows;
