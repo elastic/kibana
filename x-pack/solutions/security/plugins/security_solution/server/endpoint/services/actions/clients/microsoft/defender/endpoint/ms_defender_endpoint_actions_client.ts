@@ -197,11 +197,10 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
               top_hits: {
                 size: 1,
                 _source: ['agent.id'],
-                // `unmapped_type`: `event.created` does not exist in every data stream (ex. m365_defender.event)
-                sort: [
-                  { 'event.created': { order: 'desc', unmapped_type: 'date' } },
-                  { '@timestamp': { order: 'desc', unmapped_type: 'date' } },
-                ],
+                // `@timestamp` only. `event.created` is missing on `m365_defender.event`, and a
+                // secondary sort leaves those docs last behind any doc that has `event.created`.
+                // `@timestamp` is on every data stream, so the newest document wins across them.
+                sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
               },
             },
           },

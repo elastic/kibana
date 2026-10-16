@@ -2681,10 +2681,7 @@ describe('MS Defender response actions client', () => {
                 top_hits: {
                   size: 1,
                   _source: ['agent.id'],
-                  sort: [
-                    { 'event.created': { order: 'desc', unmapped_type: 'date' } },
-                    { '@timestamp': { order: 'desc', unmapped_type: 'date' } },
-                  ],
+                  sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
                 },
               },
             },
