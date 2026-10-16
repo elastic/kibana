@@ -22,7 +22,16 @@ export type RiskEngineStatusEnum = typeof RiskEngineStatus.enum;
 export const RiskEngineStatusEnum = RiskEngineStatus.enum;
 
 export const RiskEngineTaskStatusValues = lazySchema(() =>
-  z.enum(['idle', 'claiming', 'running', 'failed', 'should_delete', 'unrecognized', 'dead_letter'])
+  z.enum([
+    'idle',
+    'claiming',
+    'running',
+    'waiting',
+    'failed',
+    'should_delete',
+    'unrecognized',
+    'dead_letter',
+  ])
 );
 export type RiskEngineTaskStatusValues = z.infer<typeof RiskEngineTaskStatusValues>;
 export type RiskEngineTaskStatusValuesEnum = typeof RiskEngineTaskStatusValues.enum;

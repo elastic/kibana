@@ -173,7 +173,7 @@ describe('Workload Statistics Aggregator', () => {
               aggs: { taskType: { terms: { size: 3, field: 'task.taskType' } } },
             },
             idleTasks: {
-              filter: { term: { 'task.status': 'idle' } },
+              filter: { terms: { 'task.status': ['idle', 'waiting'] } },
               aggs: {
                 scheduleDensity: {
                   range: { field: 'task.runAt', ranges: [{ from: 'now', to: 'now+1m' }] },
