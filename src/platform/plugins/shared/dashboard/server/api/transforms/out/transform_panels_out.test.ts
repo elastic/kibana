@@ -349,20 +349,17 @@ describe('transformPanelsOut', () => {
       ]);
     });
 
-    it('drops a migrated panel when the target type has no schema', () => {
+    it('keeps a migrated panel without validation when the target type has no schema', () => {
       mockGetPanelTypeMigration.mockReturnValue({
         from: 'source',
-        migrateOut: () => ({ type: 'unregistered', config: {} }),
+        migrateOut: () => ({ type: 'unregistered', config: { migrated: true } }),
       });
 
       const result = transformPanelsOut(panelsJSON, [], [], false, true);
-      expect(result.panels).toEqual([]);
-      expect(result.warnings).toEqual([
-        expect.objectContaining({
-          message:
-            'Unable to transform panel config. Error: Panel type "unregistered" has no schema',
-        }),
+      expect(result.panels).toEqual([
+        expect.objectContaining({ type: 'unregistered', config: { migrated: true } }),
       ]);
+      expect(result.warnings).toEqual([]);
     });
   });
 });

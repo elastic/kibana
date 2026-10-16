@@ -361,6 +361,8 @@ they are read**. The stored saved object is not changed.
 - **Migration**: `migrateOut(config)` is synchronous and receives one panel's config. Return
   `{ type, config }` to replace the panel with the given target `type`, or `undefined` to leave it
   unchanged. If `migrateOut` throws, the panel is dropped with a warning.
-- **Validation**: the container validates a migrated panel against its target type's schema. A migrated
-  panel whose target type has no registered schema is dropped.
+- **Validation**: the container validates a migrated panel against its target type's schema, if it has
+  one. A migrated panel whose target type has no schema is kept without validation, the same as any
+  other panel without a schema. For example, Dashboard REST endpoints drop it, but the Dashboard app
+  keeps it.
 - **Lookup**: containers retrieve a migration with `embeddableStart.getPanelTypeMigration(from)`.

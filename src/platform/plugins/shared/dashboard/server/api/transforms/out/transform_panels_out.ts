@@ -142,9 +142,6 @@ function transformPanel(
   if (migrated) {
     ({ type: panelType, config: transformedPanelConfig } = migrated);
     schema = embeddableService?.getTransforms(panelType)?.schema;
-    if (!schema) {
-      throw new Error(`Panel type "${panelType}" has no schema`);
-    }
   }
 
   if (schema) {
