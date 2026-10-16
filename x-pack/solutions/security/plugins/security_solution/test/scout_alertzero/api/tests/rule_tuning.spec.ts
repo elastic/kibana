@@ -14,6 +14,7 @@ import {
   deleteServiceAccount,
   getAdminApi,
   getWorker,
+  listChatCompletionConnectors,
   listExecutionIds,
   ok,
   pollUntil,
@@ -547,6 +548,21 @@ const alertUserName = (alert: Record<string, unknown>): string | undefined => {
   return undefined;
 };
 
+/**
+ * Every test here is LLM-dependent: the tuning worker refuses to turn on without an AI model, and
+ * its diagnosis needs one. A stack booted without a chat-completion inference connector (plain CI:
+ * the `alertzero` config set only wires one when a connector source exists) fails on the worker
+ * enable with a 400, so each test skips with an explicit reason instead. Called before anything is
+ * seeded, so a skipped test leaves nothing for teardown to undo.
+ */
+const skipWithoutChatConnector = async (adminApi: AlertZeroApi): Promise<void> => {
+  const chatConnectors = await listChatCompletionConnectors(adminApi);
+  apiTest.skip(
+    chatConnectors.length === 0,
+    'no preconfigured chat-completion inference connector on this stack; the LLM-dependent AlertZero rule-tuning flow requires one (agent_builder_smoke-style EIS connector source)'
+  );
+};
+
 apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic] }, () => {
   apiTest.afterAll(async ({ apiClient, samlAuth }) => {
     const errors: unknown[] = [];
@@ -615,6 +631,7 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
       const adminApi = await getAdminApi(apiClient, samlAuth);
       api = adminApi;
       esClientRef = esClient;
+      await skipWithoutChatConnector(adminApi);
 
       const rule = await seedNoisyRule(adminApi, esClient);
       const startedAt = new Date().toISOString();
@@ -661,6 +678,7 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
       const adminApi = await getAdminApi(apiClient, samlAuth);
       api = adminApi;
       esClientRef = esClient;
+      await skipWithoutChatConnector(adminApi);
 
       const rule = tunedRule;
       if (!rule) {
@@ -723,6 +741,7 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
       const adminApi = await getAdminApi(apiClient, samlAuth);
       api = adminApi;
       esClientRef = esClient;
+      await skipWithoutChatConnector(adminApi);
 
       const rule = await seedNoisyRule(adminApi, esClient);
       const startedAt = new Date().toISOString();
