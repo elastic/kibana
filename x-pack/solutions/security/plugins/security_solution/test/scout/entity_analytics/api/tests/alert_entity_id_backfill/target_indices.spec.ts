@@ -46,6 +46,24 @@ apiTest.describe('alert entity.id backfill target indices', { tag: BACKFILL_TAGS
     expect(unusable).toBe(1);
   });
 
+  apiTest('keeps every index when all of them map the field', async ({ esClient, log }) => {
+    await esClient.indices.delete({ index: UNMAPPED_INDEX });
+
+    const { usable, unusable } = await getBackfillTargets(esClient, asKibanaLogger(log), ALIAS);
+
+    expect([...usable]).toStrictEqual([MAPPED_INDEX]);
+    expect(unusable).toBe(0);
+  });
+
+  apiTest('keeps no index when none of them map the field', async ({ esClient, log }) => {
+    await esClient.indices.delete({ index: MAPPED_INDEX });
+
+    const { usable, unusable } = await getBackfillTargets(esClient, asKibanaLogger(log), ALIAS);
+
+    expect(usable.size).toBe(0);
+    expect(unusable).toBe(1);
+  });
+
   apiTest('excludes an index that cannot be written to', async ({ esClient, log }) => {
     await esClient.indices.putSettings({
       index: MAPPED_INDEX,

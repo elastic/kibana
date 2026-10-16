@@ -67,14 +67,29 @@ describe('resolveTargetIndices', () => {
     mapped: Record<string, boolean>;
     settings: Record<string, Record<string, string>>;
   }) => {
-    esClient.indices.getFieldMapping.mockResolvedValue(
-      Object.fromEntries(
-        Object.entries(mapped).map(([index, isMapped]) => [
-          index,
-          { mappings: isMapped ? { [ALERT_ENTITY_ID]: { full_name: ALERT_ENTITY_ID } } : {} },
-        ])
-      ) as never
-    );
+    const mappedIndices = Object.keys(mapped).filter((index) => mapped[index]);
+    const unmappedIndices = Object.keys(mapped).filter((index) => !mapped[index]);
+    esClient.fieldCaps.mockResolvedValue({
+      indices: Object.keys(mapped),
+      fields:
+        mappedIndices.length === 0
+          ? {}
+          : {
+              [ALERT_ENTITY_ID]: {
+                keyword: { type: 'keyword', searchable: true, aggregatable: true },
+                ...(unmappedIndices.length > 0
+                  ? {
+                      unmapped: {
+                        type: 'unmapped',
+                        searchable: false,
+                        aggregatable: false,
+                        indices: unmappedIndices,
+                      },
+                    }
+                  : {}),
+              },
+            },
+    } as never);
     esClient.indices.getSettings.mockResolvedValue(
       Object.fromEntries(
         Object.entries(settings).map(([index, flat]) => [index, { settings: flat }])
@@ -164,7 +179,8 @@ describe('startBackfill', () => {
     await start();
 
     expect(esClient.updateByQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ wait_for_completion: false })
+      expect.objectContaining({ wait_for_completion: false }),
+      expect.objectContaining({ signal: SIGNAL })
     );
   });
 
@@ -172,7 +188,8 @@ describe('startBackfill', () => {
     await start();
 
     expect(esClient.updateByQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ requests_per_second: 500, conflicts: 'proceed' })
+      expect.objectContaining({ requests_per_second: 500, conflicts: 'proceed' }),
+      expect.objectContaining({ signal: SIGNAL })
     );
   });
 
@@ -182,7 +199,8 @@ describe('startBackfill', () => {
     await start();
 
     expect(esClient.updateByQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ max_docs: MAX_DOCS })
+      expect.objectContaining({ max_docs: MAX_DOCS }),
+      expect.objectContaining({ signal: SIGNAL })
     );
   });
 
@@ -268,8 +286,8 @@ describe('pollBackfill', () => {
   it('reports completion with the final count', async () => {
     esClient.tasks.get.mockResolvedValue({
       completed: true,
-      task: { status: { updated: 10_000 } },
-      response: { failures: [] },
+      task: { status: { updated: 9_000 } },
+      response: { updated: 10_000, failures: [] },
     } as never);
 
     await expect(poll()).resolves.toMatchObject({ completed: true, updated: 10_000 });
@@ -313,7 +331,7 @@ describe('pollBackfill', () => {
     esClient.tasks.get.mockResolvedValue({
       completed: true,
       task: { status: { updated: 4200, version_conflicts: 7 } },
-      response: { failures: [] },
+      response: { updated: 4200, version_conflicts: 7, failures: [] },
     } as never);
 
     await expect(poll()).resolves.toMatchObject({ updated: 4200, versionConflicts: 7 });

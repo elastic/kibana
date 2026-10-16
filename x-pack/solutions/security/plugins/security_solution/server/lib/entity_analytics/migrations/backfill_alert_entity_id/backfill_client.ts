@@ -6,6 +6,7 @@
  */
 
 import type {
+  FieldCapsResponse,
   QueryDslBoolQuery,
   QueryDslQueryContainer,
   UpdateByQueryResponse,
@@ -93,19 +94,21 @@ export const resolveTargetIndices = async ({
     }
   };
 
-  const [fieldMappings, settings] = await Promise.all([
-    emptyWhenMissing(
+  // using fieldCaps instead of the field mapping API because it is available in serverless.
+  const [fieldCaps, settings] = await Promise.all([
+    emptyWhenMissing<FieldCapsResponse>(
       () =>
-        esClient.indices.getFieldMapping(
+        esClient.fieldCaps(
           {
             index: alertsIndex,
-            fields: ALERT_ENTITY_ID,
+            fields: [ALERT_ENTITY_ID],
+            include_unmapped: true,
             ignore_unavailable: true,
             allow_no_indices: true,
           },
           { signal }
         ),
-      {}
+      { indices: [], fields: {} }
     ),
     emptyWhenMissing(
       () =>
@@ -122,6 +125,13 @@ export const resolveTargetIndices = async ({
     ),
   ]);
 
+  // The field is absent from the response when no index maps it, and lists the indices lacking it
+  // under `unmapped` when only some do.
+  const entityIdCaps = fieldCaps.fields[ALERT_ENTITY_ID];
+  const unmappedIndices = new Set(entityIdCaps?.unmapped?.indices);
+  const isMapped = (index: string): boolean =>
+    entityIdCaps !== undefined && !unmappedIndices.has(index);
+
   for (const [index, indexSettings] of Object.entries(settings)) {
     const flat = indexSettings.settings as Record<string, string> | undefined;
     const writeBlocked =
@@ -131,7 +141,7 @@ export const resolveTargetIndices = async ({
 
     if (writeBlocked) {
       readOnly.push(index);
-    } else if (Object.keys(fieldMappings[index]?.mappings ?? {}).length === 0) {
+    } else if (!isMapped(index)) {
       unmapped.push(index);
     } else {
       usable.add(index);
