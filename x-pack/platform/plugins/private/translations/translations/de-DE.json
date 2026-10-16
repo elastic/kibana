@@ -39001,7 +39001,6 @@
     "xpack.searchInferenceEndpoints.endpoints.soReadError": "Fehler beim Lesen der Inferenzeinstellungen: {message}",
     "xpack.searchInferenceEndpoints.endpointStats.endpointsLabel": "Endpoints:",
     "xpack.searchInferenceEndpoints.endpointStats.modelsLabel": "Modelle:",
-    "xpack.searchInferenceEndpoints.externalInference.emptyDescription": "Fügen Sie Modell-Endpoints Ihrer bevorzugten Modellanbieter hinzu, um sie für die KI-gestützte Suche zu verwenden.",
     "xpack.searchInferenceEndpoints.externalInference.emptyTitle": "Verbindung zu externen Modellanbietern herstellen",
     "xpack.searchInferenceEndpoints.externalInferenceTitle": "Externe Inferenz",
     "xpack.searchInferenceEndpoints.filter.emptyMessage": "Keine Optionen",

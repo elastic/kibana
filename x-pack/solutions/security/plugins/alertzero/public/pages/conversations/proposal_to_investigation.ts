@@ -114,6 +114,7 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     assignees: proposal.conversationAssignees,
     events: [],
     entityIds: proposal.entityIds,
+    entityTypes: proposal.entityTypes,
     // First id feeds the flyout Overview "Compromised" row until that surface
     // reads `entityIds` directly. Pills and the queue filter use `entityIds`.
     affectedSurface: proposal.entityIds?.[0],
