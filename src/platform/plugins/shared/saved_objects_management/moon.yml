@@ -19,6 +19,8 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/app-header'
+  - '@kbn/core-di'
+  - '@kbn/core-di-server'
   - '@kbn/data-plugin'
   - '@kbn/home-plugin'
   - '@kbn/kibana-react-plugin'
@@ -37,7 +39,6 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/core-ui-settings-browser-mocks'
   - '@kbn/core-ui-settings-browser'
-  - '@kbn/core-saved-objects-api-server'
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/code-editor'
   - '@kbn/react-kibana-context-render'
