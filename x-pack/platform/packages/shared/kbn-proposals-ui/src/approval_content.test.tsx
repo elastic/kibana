@@ -475,7 +475,6 @@ describe('ApprovalContent', () => {
       });
 
       expect(screen.getByText('Approved')).toBeInTheDocument();
-      expect(screen.getByText('Approved — no action to run')).toBeInTheDocument();
       expect(screen.queryByText('Applied')).not.toBeInTheDocument();
     });
 

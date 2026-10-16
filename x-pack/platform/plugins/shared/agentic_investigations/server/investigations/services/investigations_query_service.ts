@@ -522,7 +522,6 @@ export class InvestigationsQueryService {
         {
           conversationId,
           excludeSuperseded: true,
-          excludeUndecidedSuperseded: false,
           excludeExpired: false,
           size: MAX_INVESTIGATION_PROPOSALS,
           from: 0,

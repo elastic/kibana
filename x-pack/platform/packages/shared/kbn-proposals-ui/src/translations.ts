@@ -77,7 +77,7 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
     defaultMessage: 'Action failed',
   }),
   noActionBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.noActionTitle', {
-    defaultMessage: 'Approved — no action to run',
+    defaultMessage: 'Approved',
   }),
   inProgressHint: i18n.translate('xpack.proposals.approvalModal.outcome.inProgressHint', {
     defaultMessage: 'Typically takes 3-5 minutes.',
