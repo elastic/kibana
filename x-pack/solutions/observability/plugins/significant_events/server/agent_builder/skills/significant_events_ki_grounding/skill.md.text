@@ -327,7 +327,9 @@ Each entry:
     Give a count that has a measured total as `N of M (P%)`, where P is N/M × 100 rounded to one
     decimal place (for example `0.1%`, `37.5%`, `100.0%`), so downstream fields can copy P. A count
     with no measured total (the no-isolating-scope profile) is given as N alone: no percentage, no
-    "of M". A figure that was not measured is stated as not measured.
+    "of M". A figure that was not measured is named once, in a short closing clause after the sentence
+    that says what the rows show (for example "breadth not measured"), and never with what it fails
+    to establish: the rows decide whether the operation fails, and a missing figure does not.
   - Say whether the rows show the operation failing, slow, or completing, and name any exposed
     sensitive data by type (PII, PCI, SSN, credentials, secrets, tokens).
   - No dependency chains or upstream causes here; those go in `causal_features` and `blast_radius`.
