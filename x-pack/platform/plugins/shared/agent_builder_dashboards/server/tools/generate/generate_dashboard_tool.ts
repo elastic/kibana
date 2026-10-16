@@ -73,7 +73,7 @@ const generateDashboardSchema = z.object({
  *
  * The full dashboard payload lives in the dashboard attachment (referenced by
  * id); the LLM only ever sees this slim summary, so it never has to re-emit the
- * heavy payload into a follow-up tool call.
+ * heavy payload into a follow-up tool call. Grids let it report where the layout step put panels.
  *
  * `authoringNotesByPanelId` holds the one-sentence note describing every chart
  * authored in this run, keyed by panel id. Panels that were not authored now
@@ -90,10 +90,12 @@ const summarizeDashboard = (
       return {
         id: widget.id,
         title: widget.title,
+        y: widget.grid.y,
         ...(widget.collapsed ? { collapsed: true } : {}),
         panels: widget.panels.map((panel) => ({
           type: panel.type,
           id: panel.id,
+          grid: panel.grid,
           authoring_note: authoringNotesByPanelId.get(panel.id),
         })),
       };
@@ -101,6 +103,7 @@ const summarizeDashboard = (
     return {
       type: widget.type,
       id: widget.id,
+      grid: widget.grid,
       authoring_note: authoringNotesByPanelId.get(widget.id),
     };
   }),
@@ -145,7 +148,7 @@ Use operations[] to:
 6. remove panels
 7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)
 
-Panel positions and sizes are set automatically after the operations run; \`layout\` says where things go.`,
+Panel positions and sizes are set automatically after the operations run; \`layout\` says where things go, and the summary shows the resulting \`grid\` of every panel.`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations, layout },

@@ -222,8 +222,7 @@ export const arrangeDashboardLayout = async ({
   } catch (error) {
     const message = getErrorMessage(error);
     logger.warn(`Dashboard layout kept the current layout: ${message}`);
-    // The agent does not see grids, so it can only learn from a failure that its layout request was
-    // not applied.
+    // The grids in the result do not show that a layout request was ignored, so report it.
     if (instructions === undefined) {
       return { dashboardData };
     }
