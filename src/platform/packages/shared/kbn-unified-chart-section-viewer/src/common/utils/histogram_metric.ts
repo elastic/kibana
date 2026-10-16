@@ -7,8 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
+
+const HISTOGRAM_FIELD_TYPES: ReadonlySet<ES_FIELD_TYPES> = new Set([
+  ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
+  ES_FIELD_TYPES.TDIGEST,
+  ES_FIELD_TYPES.HISTOGRAM,
+]);
+
+/** True when the metric is a histogram field the distribution chart can query. */
+export const isHistogramMetric = (
+  type: ES_FIELD_TYPES,
+  instrument: MappingTimeSeriesMetricType
+): boolean => instrument === 'histogram' && HISTOGRAM_FIELD_TYPES.has(type);
 
 /**
  * A legacy histogram is a metric where both the ES field type and the

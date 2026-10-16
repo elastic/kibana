@@ -8,7 +8,25 @@
  */
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { isLegacyHistogram } from './legacy_histogram';
+import { isHistogramMetric, isLegacyHistogram } from './histogram_metric';
+
+describe('isHistogramMetric', () => {
+  it('returns true for histogram instruments on histogram field types', () => {
+    expect(isHistogramMetric(ES_FIELD_TYPES.HISTOGRAM, 'histogram')).toBe(true);
+    expect(isHistogramMetric(ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM, 'histogram')).toBe(true);
+    expect(isHistogramMetric(ES_FIELD_TYPES.TDIGEST, 'histogram')).toBe(true);
+  });
+
+  it('returns false when the instrument is not histogram', () => {
+    expect(isHistogramMetric(ES_FIELD_TYPES.HISTOGRAM, 'gauge')).toBe(false);
+    expect(isHistogramMetric(ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM, 'counter')).toBe(false);
+  });
+
+  it('returns false when the field type is not a histogram', () => {
+    expect(isHistogramMetric(ES_FIELD_TYPES.DOUBLE, 'histogram')).toBe(false);
+    expect(isHistogramMetric(ES_FIELD_TYPES.LONG, 'histogram')).toBe(false);
+  });
+});
 
 describe('isLegacyHistogram', () => {
   it('returns true when type and instrument are both histogram', () => {
