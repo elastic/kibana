@@ -11,7 +11,8 @@ import { Outlet } from '@kbn/typed-react-router-config';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../common/feature';
 import { useRouteBreadcrumb } from '../breadcrumbs/use_route_breadcrumb';
 import { useKibanaServices } from '../hooks/use_kibana_services';
-import { toTimeRangeSearch, useTimeRange } from '../hooks/use_time_range';
+import { useDigitalExperienceRouter } from '../hooks/use_digital_experience_router';
+import { useSyncTimeRange, useTimeRange } from '../hooks/use_time_range';
 
 const DIGITAL_EXPERIENCE_LABEL = i18n.translate('xpack.digitalExperience.breadcrumbs.root', {
   defaultMessage: 'Digital Experience',
@@ -27,9 +28,11 @@ const APPLICATIONS_LABEL = i18n.translate('xpack.digitalExperience.breadcrumbs.a
  */
 export function DigitalExperienceLayout() {
   const { application } = useKibanaServices();
+  const router = useDigitalExperienceRouter();
+  useSyncTimeRange();
   const { timeRange } = useTimeRange();
   const applicationsHref = application.getUrlForApp(DIGITAL_EXPERIENCE_FEATURE_ID, {
-    path: toTimeRangeSearch(timeRange),
+    path: router.link('/', { query: timeRange }),
   });
 
   useRouteBreadcrumb([

@@ -58,6 +58,6 @@ test.describe('Digital Experience', { tag: tags.stateful.classic }, () => {
     await expect(page).toHaveURL(/rangeFrom=now-7d&rangeTo=now/);
     await expect(
       page.testSubj.locator('breadcrumbs').getByRole('link', { name: 'Applications' })
-    ).toHaveAttribute('href', /\/app\/digital_experience\?rangeFrom=now-7d&rangeTo=now$/);
+    ).toHaveAttribute('href', /\/app\/digital_experience\/?\?rangeFrom=now-7d&rangeTo=now$/);
   });
 });

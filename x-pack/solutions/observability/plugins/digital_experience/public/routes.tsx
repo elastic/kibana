@@ -24,6 +24,13 @@ function ApplicationRoute() {
 export const digitalExperienceRoutes = {
   '/': {
     element: <DigitalExperienceLayout />,
+    // Time range, kept in the URL by `useSyncTimeRange` (see hooks/use_time_range.ts).
+    params: t.partial({
+      query: t.partial({
+        rangeFrom: t.string,
+        rangeTo: t.string,
+      }),
+    }),
     children: {
       '/{serviceName}': {
         element: <ApplicationRoute />,

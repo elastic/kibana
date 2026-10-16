@@ -5,21 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import {
-  EuiBasicTable,
-  EuiEmptyPrompt,
-  EuiLink,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiSuperDatePicker,
-} from '@elastic/eui';
-import type { EuiBasicTableColumn, OnTimeChangeProps } from '@elastic/eui';
+import React, { useEffect, useReducer, useState } from 'react';
+import { EuiBasicTable, EuiEmptyPrompt, EuiLink, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import dateMath from '@kbn/datemath';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../common/feature';
+import { TimeRangePicker } from '../components/time_range_picker';
+import { useDigitalExperienceRouter } from '../hooks/use_digital_experience_router';
 import { useKibanaServices } from '../hooks/use_kibana_services';
-import { toTimeRangeSearch, useTimeRange } from '../hooks/use_time_range';
+import { useTimeRange } from '../hooks/use_time_range';
 
 interface ApplicationRow {
   serviceName: string;
@@ -35,9 +30,11 @@ const NAME_COLUMN = i18n.translate('xpack.digitalExperience.applications.nameCol
 
 export function ApplicationsListPage() {
   const { application, ux } = useKibanaServices();
-  const { timeRange, setTimeRange } = useTimeRange();
+  const router = useDigitalExperienceRouter();
+  const { timeRange } = useTimeRange();
 
-  const [refreshId, setRefreshId] = useState(0);
+  // Bumped by the picker's Refresh button to fetch again with the same range.
+  const [refreshCount, refresh] = useReducer((count: number) => count + 1, 0);
   const [applications, setApplications] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -64,15 +61,7 @@ export function ApplicationsListPage() {
     return () => {
       isCancelled = true;
     };
-  }, [ux, from, to, refreshId]);
-
-  const onTimeChange = useCallback(
-    ({ start, end }: OnTimeChangeProps) => {
-      setTimeRange({ rangeFrom: start, rangeTo: end });
-      setRefreshId((id) => id + 1);
-    },
-    [setTimeRange]
-  );
+  }, [ux, from, to, refreshCount]);
 
   const columns: Array<EuiBasicTableColumn<ApplicationRow>> = [
     {
@@ -82,7 +71,7 @@ export function ApplicationsListPage() {
         <EuiLink
           data-test-subj="digitalExperienceApplicationLink"
           href={application.getUrlForApp(DIGITAL_EXPERIENCE_FEATURE_ID, {
-            path: `/${encodeURIComponent(serviceName)}${toTimeRangeSearch(timeRange)}`,
+            path: router.link('/{serviceName}', { path: { serviceName }, query: timeRange }),
           })}
         >
           {serviceName}
@@ -119,13 +108,7 @@ export function ApplicationsListPage() {
       <EuiSpacer size="m" />
       {ux && (
         <>
-          <EuiSuperDatePicker
-            start={from}
-            end={to}
-            onTimeChange={onTimeChange}
-            onRefresh={() => setRefreshId((id) => id + 1)}
-            isLoading={isLoading}
-          />
+          <TimeRangePicker onRefresh={refresh} />
           <EuiSpacer size="m" />
         </>
       )}

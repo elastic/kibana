@@ -21,7 +21,7 @@ const timeRange = { rangeFrom: 'now-7d', rangeTo: 'now' };
 const setTimeRange = jest.fn();
 
 beforeEach(() => {
-  jest.mocked(useTimeRange).mockReturnValue({ timeRange, setTimeRange });
+  jest.mocked(useTimeRange).mockReturnValue({ timeRange, isTimeRangeInUrl: true, setTimeRange });
 });
 
 describe('ApplicationPage', () => {

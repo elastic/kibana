@@ -10,14 +10,17 @@ import { DigitalExperienceLayout } from './digital_experience_layout';
 import { useRouteBreadcrumb } from '../breadcrumbs/use_route_breadcrumb';
 import { useKibanaServices } from '../hooks/use_kibana_services';
 import { useTimeRange } from '../hooks/use_time_range';
+import { useDigitalExperienceRouter } from '../hooks/use_digital_experience_router';
+import { digitalExperienceRouter } from '../routes';
 
-jest.mock('@kbn/typed-react-router-config', () => ({ Outlet: () => null }));
+jest.mock('@kbn/typed-react-router-config', () => ({
+  ...jest.requireActual('@kbn/typed-react-router-config'),
+  Outlet: () => null,
+}));
 jest.mock('../breadcrumbs/use_route_breadcrumb');
 jest.mock('../hooks/use_kibana_services');
-jest.mock('../hooks/use_time_range', () => ({
-  ...jest.requireActual('../hooks/use_time_range'),
-  useTimeRange: jest.fn(),
-}));
+jest.mock('../hooks/use_time_range');
+jest.mock('../hooks/use_digital_experience_router');
 
 describe('DigitalExperienceLayout', () => {
   it('registers Digital Experience › Applications, linking Applications with the time range', () => {
@@ -28,8 +31,10 @@ describe('DigitalExperienceLayout', () => {
     } as unknown as ReturnType<typeof useKibanaServices>);
     jest.mocked(useTimeRange).mockReturnValue({
       timeRange: { rangeFrom: 'now-7d', rangeTo: 'now' },
+      isTimeRangeInUrl: true,
       setTimeRange: jest.fn(),
     });
+    jest.mocked(useDigitalExperienceRouter).mockReturnValue(digitalExperienceRouter);
 
     renderHook(() => DigitalExperienceLayout());
 
@@ -37,7 +42,7 @@ describe('DigitalExperienceLayout', () => {
       { title: 'Digital Experience' },
       {
         title: 'Applications',
-        href: '/app/digital_experience?rangeFrom=now-7d&rangeTo=now',
+        href: '/app/digital_experience/?rangeFrom=now-7d&rangeTo=now',
       },
     ]);
   });

@@ -11,6 +11,7 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UxPluginSetup, UxPluginStart } from '@kbn/ux-plugin/public';
 
 export interface DigitalExperienceSetupDeps {
@@ -22,6 +23,7 @@ export interface DigitalExperienceSetupDeps {
 export interface DigitalExperienceStartDeps {
   data: DataPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   ux?: UxPluginStart;
 }
 

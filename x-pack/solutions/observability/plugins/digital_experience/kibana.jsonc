@@ -9,7 +9,7 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "digital_experience"],
-    "requiredPlugins": ["features", "observabilityShared", "data"],
+    "requiredPlugins": ["features", "observabilityShared", "data", "unifiedSearch"],
     "optionalPlugins": ["ux"],
     "requiredBundles": ["kibanaReact"]
   }
