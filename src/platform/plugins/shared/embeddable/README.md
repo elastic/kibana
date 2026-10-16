@@ -365,4 +365,7 @@ they are read**. The stored saved object is not changed.
   one. A migrated panel whose target type has no schema is kept without validation, the same as any
   other panel without a schema. For example, Dashboard REST endpoints drop it, but the Dashboard app
   keeps it.
+- **One step per read**: only the migration for the panel's stored type runs. If the target type also
+  has a migration, it does not run until the dashboard is saved with the migrated panel and read
+  again. Migrate directly to the final type instead of registering a chain (`A → B` and `B → C`).
 - **Lookup**: containers retrieve a migration with `embeddableStart.getPanelTypeMigration(from)`.
