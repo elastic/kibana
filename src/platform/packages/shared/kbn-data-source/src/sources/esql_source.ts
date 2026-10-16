@@ -30,6 +30,8 @@ import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { Column, DataSourceBase, SerializedDataSource } from '../types';
 import { columnFromDatatableColumn, columnToFieldBase } from '../to_column';
 import { sha256 } from '../sha256';
+import { buildFilterableFieldSpecs } from '../filterable_fields';
+import type { FilterableSource } from '../filterable_source';
 
 export interface EsqlSourceArgs {
   query: string;
@@ -68,6 +70,21 @@ export interface EsqlSourceArgs {
    * variables (`?variable_name`) can be executed for schema discovery.
    */
   esqlVariables?: ESQLControlVariable[];
+}
+
+export interface EsqlDatasetArgs {
+  query: string;
+  timeFieldName?: string;
+  projectRouting?: string;
+  http?: HttpStart;
+}
+
+/** Identity of the FROM target of an ES|QL query, without the query's schema. */
+export interface EsqlDataset {
+  datasetId: string;
+  title: string;
+  timeFieldName: string | undefined;
+  projectRouting: string | undefined;
 }
 
 function columnsFromSourceInfo(columns: ESQLSourceInfoColumn[], query: string): DatatableColumn[] {
@@ -272,6 +289,26 @@ export class EsqlSource implements DataSourceBase {
     return instance;
   }
 
+  /**
+   * Resolves the dataset identity (FROM target, time field, project routing) of a query without
+   * its schema: no `LIMIT 0` request and nothing is added to the instance cache. For consumers
+   * that only need the {@link EsqlSource.datasetId} and time field, e.g. persisted Lens layers.
+   */
+  public static async resolveDataset(args: EsqlDatasetArgs): Promise<EsqlDataset> {
+    const query = args.query.trim();
+    const title = getIndexPatternFromESQLQuery(query);
+    const projectRouting = getProjectRoutingFromEsqlQuery(query) ?? args.projectRouting;
+    const timeFieldName =
+      args.timeFieldName ??
+      (await getESQLTimeField({ query, http: args.http, projectRouting: args.projectRouting }));
+    const datasetId = await getESQLAdHocDataviewId({
+      indexPattern: title,
+      timeFieldName,
+      projectRouting,
+    });
+    return { datasetId, title, timeFieldName, projectRouting };
+  }
+
   public static clearCache(): void {
     EsqlSource.instanceCache.clear();
   }
@@ -323,6 +360,18 @@ export class EsqlSource implements DataSourceBase {
       http,
     });
     return datasetSource.getColumns();
+  }
+
+  /** The dataset identity that filtering needs: see {@link FilterableSource}. */
+  public async toFilterableSource(http?: HttpStart): Promise<FilterableSource> {
+    const filterableFields = await this.getFilterableFields(http);
+    return {
+      id: this.datasetId,
+      title: this.title,
+      timeFieldName: this.timeFieldName,
+      fields: Object.values(buildFilterableFieldSpecs(filterableFields, this.timeFieldName)),
+      isTimeBased: () => this.isTimeBased(),
+    };
   }
 
   public isRollup(): boolean {

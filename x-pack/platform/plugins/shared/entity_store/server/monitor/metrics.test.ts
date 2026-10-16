@@ -170,5 +170,35 @@ describe('entityStoreMetrics', () => {
       expect(boundaries?.length).toBeGreaterThan(0);
       expect(Math.max(...boundaries!)).toBeGreaterThanOrEqual(100000);
     });
+
+    it('gives extraction.task.duration_ms its own boundaries, distinct from the sub-operation timers', () => {
+      const taskBoundaries = boundariesFor('kibana.entity_store.extraction.task.duration_ms')!;
+      const queryBoundaries = boundariesFor('kibana.entity_store.extraction.query.duration_ms')!;
+
+      expect(taskBoundaries).not.toEqual(queryBoundaries);
+      const between10And60Seconds = taskBoundaries.filter((b) => b > 10000 && b < 60000);
+      expect(between10And60Seconds.length).toBeGreaterThanOrEqual(4);
+    });
+
+    it('gives extraction.lag_ms finer resolution between one and five minutes', () => {
+      const boundaries = boundariesFor('kibana.entity_store.extraction.lag_ms')!;
+
+      const betweenOneAndFiveMinutes = boundaries.filter((b) => b > 60000 && b < 300000);
+      expect(betweenOneAndFiveMinutes.length).toBeGreaterThanOrEqual(3);
+    });
+
+    it('gives extraction.logs.processed finer resolution around the default per-window cap', () => {
+      const boundaries = boundariesFor('kibana.entity_store.extraction.logs.processed')!;
+
+      const nearTheDefaultCap = boundaries.filter((b) => b > 70000 && b < 100000);
+      expect(nearTheDefaultCap.length).toBeGreaterThanOrEqual(3);
+    });
+
+    it('gives fraction histograms finer resolution between the sampling floor and 0.5', () => {
+      const boundaries = boundariesFor('kibana.entity_store.extraction.sample.probability')!;
+
+      const aboveFloorBelowHalf = boundaries.filter((b) => b > 0.1 && b < 0.5);
+      expect(aboveFloorBelowHalf.length).toBeGreaterThanOrEqual(4);
+    });
   });
 });

@@ -28,7 +28,7 @@
  *
  * Optional feature flags / filters (absent means "not set" / disabled):
  *   LIMIT_CONFIG_TYPE            — comma-separated subset of: unit, integration, functional
- *   LIMIT_SOLUTIONS              — comma-separated subset of: observability, search, security, workplaceai
+ *   LIMIT_SOLUTIONS              — comma-separated subset of: observability, search, security, vectordb
  *   FTR_CONFIG_PATTERNS          — glob patterns to restrict which FTR configs run
  *   FUNCTIONAL_MINIMUM_ISOLATION_MIN — minimum expected isolation time for FTR groups
  *   FTR_CONFIGS_DEPS             — comma-separated Buildkite step keys this step depends on
