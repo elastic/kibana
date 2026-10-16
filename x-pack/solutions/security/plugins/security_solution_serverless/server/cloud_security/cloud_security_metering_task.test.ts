@@ -11,6 +11,8 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 import { cloudSecurityMetringCallback, getCloudProductTier } from './cloud_security_metering';
 import {
+  getAssetAggByCloudSecuritySolution,
+  getAssetAggQueryByCloudSecuritySolution,
   getCloudSecurityUsageRecord,
   getSearchQueryByCloudSecuritySolution,
 } from './cloud_security_metering_task';
@@ -19,7 +21,17 @@ import type { ServerlessSecurityConfig } from '../config';
 import type { MeteringCallbackInput } from '../types';
 
 import type { ProductTier } from '../../common/product';
-import { CLOUD_SECURITY_TASK_TYPE, CSPM, KSPM, CNVM, BILLABLE_ASSETS_CONFIG } from './constants';
+import { getCspmStateAggQuery } from './cspm_metering_state_query';
+import {
+  CLOUD_SECURITY_TASK_TYPE,
+  CSPM,
+  KSPM,
+  CNVM,
+  BILLABLE_ASSETS_CONFIG,
+  CDR_METERING_STATE_INDEX,
+  GCP_COMPUTE_INSTANCE_SUB_TYPE,
+  METERING_CONFIGS,
+} from './constants';
 
 const mockEsClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
@@ -62,6 +74,13 @@ describe('getCloudSecurityUsageRecord', () => {
       mockEsClient.search.mockResolvedValueOnce({
         hits: { hits: [{ _id: 'someRecord', _index: 'mockIndex' }] }, // mocking for indexHasDataInDateRange
       });
+
+      if (cloudSecuritySolution === CSPM) {
+        // CSPM alone probes the metering state index; an empty probe keeps this case on the legacy query
+        // @ts-ignore
+        mockEsClient.search.mockResolvedValueOnce({ hits: { hits: [] } });
+      }
+
       const randomIndex = Math.floor(
         Math.random() * BILLABLE_ASSETS_CONFIG[cloudSecuritySolution].values.length
       );
@@ -300,6 +319,244 @@ describe('getSearchQueryByCloudSecuritySolution', () => {
         ],
       },
     });
+  });
+});
+
+describe('getCspmStateAggQuery', () => {
+  const query = getCspmStateAggQuery();
+
+  it('targets the metering state index with a size-0 aggregation search', () => {
+    expect(query.index).toBe(CDR_METERING_STATE_INDEX);
+    expect(query.size).toBe(0);
+  });
+
+  it('contains no scripts anywhere in the request', () => {
+    expect(JSON.stringify(query)).not.toContain('script');
+  });
+
+  it('bills non-GCP sub_types on presence in the window only — unchanged semantics', () => {
+    expect(query.query.bool.must).toEqual([
+      { term: { posture_type: 'cspm' } },
+      { range: { last_seen: { gte: 'now-24h' } } },
+    ]);
+    expect(query.query.bool.should[0]).toEqual({
+      bool: {
+        must_not: [{ term: { 'resource.sub_type': GCP_COMPUTE_INSTANCE_SUB_TYPE } }],
+      },
+    });
+    expect(query.query.bool.minimum_should_match).toBe(1);
+  });
+
+  it('has exactly four OR-branches — a new one could only broaden billing', () => {
+    expect(query.query.bool.should).toHaveLength(4);
+  });
+
+  it('scopes a sub_type that is actually in the CSPM billable asset list', () => {
+    expect(BILLABLE_ASSETS_CONFIG[CSPM].values).toContain(GCP_COMPUTE_INSTANCE_SUB_TYPE);
+  });
+
+  it('never reads a lifecycle status field — running-ness is derived', () => {
+    // The state index cannot carry status: see metering_state_transform.ts.
+    // If a status term reappears here it will silently match nothing, because
+    // the transform stopped writing that field.
+    expect(JSON.stringify(query)).not.toContain('status');
+  });
+
+  it('requires two scans and a >=24h run for GCP instances that never stopped', () => {
+    expect(query.query.bool.should[1]).toEqual({
+      bool: {
+        must: [
+          { term: { 'resource.sub_type': GCP_COMPUTE_INSTANCE_SUB_TYPE } },
+          { range: { span_ms: { gt: 0 } } },
+          { exists: { field: 'last_started_at' } },
+          { range: { last_started_at: { lte: 'now-24h' } } },
+        ],
+        must_not: [{ exists: { field: 'last_stopped_at' } }],
+      },
+    });
+  });
+
+  it('bills a restarted-and-running GCP instance via a negative run duration', () => {
+    // last_run_ms = last_stopped_at - last_started_at, so a start AFTER the
+    // last stop is negative. This is the only signal that separates a running
+    // restarted instance from a stopped one.
+    expect(query.query.bool.should[2]).toEqual({
+      bool: {
+        must: [
+          { term: { 'resource.sub_type': GCP_COMPUTE_INSTANCE_SUB_TYPE } },
+          { range: { span_ms: { gt: 0 } } },
+          { range: { last_run_ms: { lt: 0 } } },
+          { range: { last_started_at: { lte: 'now-24h' } } },
+        ],
+      },
+    });
+  });
+
+  it('bills stopped GCP instances only in their stop window, after a >=24h run', () => {
+    expect(query.query.bool.should[3]).toEqual({
+      bool: {
+        must: [
+          { term: { 'resource.sub_type': GCP_COMPUTE_INSTANCE_SUB_TYPE } },
+          { range: { span_ms: { gt: 0 } } },
+          { range: { last_run_ms: { gte: 24 * 60 * 60 * 1000 } } },
+          { range: { last_stopped_at: { gte: 'now-24h' } } },
+        ],
+      },
+    });
+  });
+
+  it('keeps the running and stopped branches mutually exclusive', () => {
+    // A restarted instance has a stop on record, so branch 1 (must_not exists
+    // last_stopped_at) cannot also match it; and its negative last_run_ms
+    // cannot satisfy branch 3's `gte GCP_MIN_RUN_MS`. Without that, one
+    // instance could be counted through two branches.
+    const [, neverStopped, restarted, stopped] = query.query.bool.should;
+    expect(neverStopped.bool.must_not).toEqual([{ exists: { field: 'last_stopped_at' } }]);
+    expect(restarted.bool.must).toContainEqual({ range: { last_run_ms: { lt: 0 } } });
+    expect(stopped.bool.must).toContainEqual({
+      range: { last_run_ms: { gte: 24 * 60 * 60 * 1000 } },
+    });
+  });
+
+  it('keeps the aggregation response shape of the legacy CSPM query', () => {
+    expect(query.aggs.resource_sub_type.terms.field).toBe('resource.sub_type');
+    expect(query.aggs.resource_sub_type.aggs.unique_assets.cardinality).toEqual({
+      field: 'resource.id',
+      precision_threshold: 40000,
+    });
+    expect(query.aggs.min_timestamp.min.field).toBe('last_seen');
+  });
+});
+
+describe('CSPM state-index selection', () => {
+  const stateAggregations = {
+    resource_sub_type: {
+      buckets: [{ key: 'aws-s3', doc_count: 100, unique_assets: { value: 10 } }],
+    },
+    min_timestamp: { value: 1690729901738, value_as_string: '2023-07-30T15:11:41.738Z' },
+  };
+
+  // What ES returns when the billing query matches nothing: no buckets and a
+  // min_timestamp with no value_as_string.
+  const zeroMatchAggregations = {
+    resource_sub_type: { buckets: [] },
+    min_timestamp: { value: null },
+  };
+
+  const probeHit = { hits: { hits: [{ _id: 'stateDoc', _index: CDR_METERING_STATE_INDEX }] } };
+  const probeEmpty = { hits: { hits: [] } };
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('bills CSPM from the metering state index when the probe finds fresh state data', async () => {
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce(probeHit);
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce({ aggregations: stateAggregations });
+
+    const result = await getAssetAggByCloudSecuritySolution(mockEsClient, CSPM, logger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+    expect(mockEsClient.search.mock.calls[1][0]).toEqual(
+      expect.objectContaining({ index: CDR_METERING_STATE_INDEX })
+    );
+    expect(mockEsClient.search.mock.calls[1][0]).toEqual(getCspmStateAggQuery());
+    expect(result).toEqual(stateAggregations);
+    expect(logger.debug).toHaveBeenCalledWith('CSPM metering path: state-index');
+  });
+
+  it('falls back to the legacy CSPM query when the state index has no fresh data', async () => {
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce(probeEmpty);
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce({ aggregations: stateAggregations });
+
+    const result = await getAssetAggByCloudSecuritySolution(mockEsClient, CSPM, logger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+    expect(mockEsClient.search.mock.calls[1][0]).toEqual(
+      expect.objectContaining({ index: METERING_CONFIGS[CSPM].index })
+    );
+    expect(mockEsClient.search.mock.calls[1][0]).toEqual(
+      getAssetAggQueryByCloudSecuritySolution(CSPM)
+    );
+    expect(result).toEqual(stateAggregations);
+    expect(logger.debug).toHaveBeenCalledWith('CSPM metering path: legacy');
+  });
+
+  it('falls back to the legacy CSPM query when the state index does not exist', async () => {
+    // 404 is ignored on the probe, so the response has no hits at all
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce({});
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce({ aggregations: stateAggregations });
+
+    const result = await getAssetAggByCloudSecuritySolution(mockEsClient, CSPM, logger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+    expect(mockEsClient.search.mock.calls[1][0]).toEqual(
+      getAssetAggQueryByCloudSecuritySolution(CSPM)
+    );
+    expect(result).toEqual(stateAggregations);
+  });
+
+  it('falls back to the legacy CSPM query when the probe itself fails', async () => {
+    // Failing open: a probe error must never skip a billing cycle
+    mockEsClient.search.mockRejectedValueOnce(new Error('state index probe failed'));
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce({ aggregations: stateAggregations });
+
+    const result = await getAssetAggByCloudSecuritySolution(mockEsClient, CSPM, logger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+    expect(mockEsClient.search.mock.calls[1][0]).toEqual(
+      getAssetAggQueryByCloudSecuritySolution(CSPM)
+    );
+    expect(result).toEqual(stateAggregations);
+  });
+
+  it('returns undefined instead of throwing when the state query matches nothing', async () => {
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce(probeHit);
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce({ aggregations: zeroMatchAggregations });
+
+    await expect(
+      getAssetAggByCloudSecuritySolution(mockEsClient, CSPM, logger)
+    ).resolves.toBeUndefined();
+    expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not apply the empty-result guard to the legacy path', async () => {
+    // The guard is state-path-only on purpose: the legacy query keeps its
+    // pre-existing behavior of returning whatever aggregations ES produced,
+    // bit-identical to what ships today. Removing `useStateIndex &&` from the
+    // guard would silently change legacy billing, and this test catches that.
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce(probeEmpty);
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce({ aggregations: zeroMatchAggregations });
+
+    const result = await getAssetAggByCloudSecuritySolution(mockEsClient, CSPM, logger);
+
+    expect(result).toEqual(zeroMatchAggregations);
+  });
+
+  it('never probes the state index for KSPM', async () => {
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce({ aggregations: stateAggregations });
+
+    const result = await getAssetAggByCloudSecuritySolution(mockEsClient, KSPM, logger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ index: METERING_CONFIGS[KSPM].index })
+    );
+    expect(result).toEqual(stateAggregations);
+    // No path selection happens for KSPM, so there is nothing to report
+    expect(logger.debug).not.toHaveBeenCalled();
   });
 });
 
