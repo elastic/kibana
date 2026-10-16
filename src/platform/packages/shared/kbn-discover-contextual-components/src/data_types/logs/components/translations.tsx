@@ -74,3 +74,157 @@ export const closeCellActionPopoverText = i18n.translate(
     defaultMessage: 'Close popover',
   }
 );
+
+export const contextualBadgePopoverServiceTitle = i18n.translate(
+  'discover.logs.contextualBadgePopover.serviceTitle',
+  {
+    defaultMessage: 'Service',
+  }
+);
+
+export const contextualBadgePopoverHostTitle = i18n.translate(
+  'discover.logs.contextualBadgePopover.hostTitle',
+  {
+    defaultMessage: 'Host',
+  }
+);
+
+export const contextualBadgePopoverContainerTitle = i18n.translate(
+  'discover.logs.contextualBadgePopover.containerTitle',
+  {
+    defaultMessage: 'Container',
+  }
+);
+
+export const contextualBadgePopoverClusterTitle = i18n.translate(
+  'discover.logs.contextualBadgePopover.clusterTitle',
+  {
+    defaultMessage: 'Cluster',
+  }
+);
+
+export const contextualBadgePopoverTraceTitle = i18n.translate(
+  'discover.logs.contextualBadgePopover.traceTitle',
+  {
+    defaultMessage: 'Trace',
+  }
+);
+
+export const contextualBadgePopoverFieldTitle = i18n.translate(
+  'discover.logs.contextualBadgePopover.fieldTitle',
+  {
+    defaultMessage: 'Field',
+  }
+);
+
+export const contextualBadgePopoverLatencyP95Label = i18n.translate(
+  'discover.logs.contextualBadgePopover.latencyP95Label',
+  {
+    defaultMessage: 'Latency p95',
+  }
+);
+
+export const contextualBadgePopoverCpuUsageLabel = i18n.translate(
+  'discover.logs.contextualBadgePopover.cpuUsageLabel',
+  {
+    defaultMessage: 'CPU usage',
+  }
+);
+
+export const contextualBadgePopoverMemoryUsageLabel = i18n.translate(
+  'discover.logs.contextualBadgePopover.memoryUsageLabel',
+  {
+    defaultMessage: 'Memory',
+  }
+);
+
+export const contextualBadgePopoverPodsReadyLabel = i18n.translate(
+  'discover.logs.contextualBadgePopover.podsReadyLabel',
+  {
+    defaultMessage: 'Pods ready',
+  }
+);
+
+export const contextualBadgePopoverDurationLabel = i18n.translate(
+  'discover.logs.contextualBadgePopover.durationLabel',
+  {
+    defaultMessage: 'Duration',
+  }
+);
+
+export const contextualBadgePopoverThroughputLabel = i18n.translate(
+  'discover.logs.contextualBadgePopover.throughputLabel',
+  {
+    defaultMessage: 'Throughput',
+  }
+);
+
+export const contextualBadgePopoverFailureRateLabel = i18n.translate(
+  'discover.logs.contextualBadgePopover.failureRateLabel',
+  {
+    defaultMessage: 'Failure rate',
+  }
+);
+
+export const contextualBadgePopoverLogRateLabel = i18n.translate(
+  'discover.logs.contextualBadgePopover.logRateLabel',
+  {
+    defaultMessage: 'Log rate',
+  }
+);
+
+export const contextualBadgePopoverOpenOverviewButtonLabel = i18n.translate(
+  'discover.logs.contextualBadgePopover.openOverviewButtonLabel',
+  {
+    defaultMessage: 'Open overview',
+  }
+);
+
+export const contextualBadgePopoverOpenInServiceMapButtonLabel = i18n.translate(
+  'discover.logs.contextualBadgePopover.openInServiceMapButtonLabel',
+  {
+    defaultMessage: 'Open in service map',
+  }
+);
+
+export const contextualBadgePopoverErrorsFoundButtonLabel = i18n.translate(
+  'discover.logs.contextualBadgePopover.errorsFoundButtonLabel',
+  {
+    defaultMessage: 'Errors found',
+  }
+);
+
+export const contextualBadgePopoverRelatedLogsButtonLabel = i18n.translate(
+  'discover.logs.contextualBadgePopover.relatedLogsButtonLabel',
+  {
+    defaultMessage: 'Related logs',
+  }
+);
+
+export const contextualBadgePopoverNodeHealthButtonLabel = i18n.translate(
+  'discover.logs.contextualBadgePopover.nodeHealthButtonLabel',
+  {
+    defaultMessage: 'Node health',
+  }
+);
+
+export const contextualBadgePopoverActiveAlertsButtonLabel = i18n.translate(
+  'discover.logs.contextualBadgePopover.activeAlertsButtonLabel',
+  {
+    defaultMessage: 'Active alerts',
+  }
+);
+
+export const contextualBadgePopoverInfrastructureMetricsButtonLabel = i18n.translate(
+  'discover.logs.contextualBadgePopover.infrastructureMetricsButtonLabel',
+  {
+    defaultMessage: 'Infrastructure metrics',
+  }
+);
+
+export const contextualBadgePopoverOpenInNewTabAriaLabel = i18n.translate(
+  'discover.logs.contextualBadgePopover.openInNewTabAriaLabel',
+  {
+    defaultMessage: 'Open in a new tab',
+  }
+);

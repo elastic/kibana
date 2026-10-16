@@ -20,10 +20,19 @@ interface ResourceProps {
   /* When true, the column will render a predefined number of resources and indicates with a badge how many more we have */
   limited?: boolean;
   onFilter?: DocViewFilterFn;
+  onOpenOverview?: () => void;
+  isTracesSummary?: boolean;
   css?: CommonProps['css'];
 }
 
-export const Resource = ({ fields, limited = false, onFilter, ...props }: ResourceProps) => {
+export const Resource = ({
+  fields,
+  limited = false,
+  onFilter,
+  onOpenOverview,
+  isTracesSummary,
+  ...props
+}: ResourceProps) => {
   const displayedFields = limited ? fields.slice(0, MAX_LIMITED_FIELDS_VISIBLE) : fields;
   const extraFieldsCount = limited ? fields.length - MAX_LIMITED_FIELDS_VISIBLE : 0;
 
@@ -40,6 +49,8 @@ export const Resource = ({ fields, limited = false, onFilter, ...props }: Resour
             textValue={textValue}
             icon={Icon}
             onFilter={onFilter}
+            onOpenOverview={onOpenOverview}
+            isTracesSummary={isTracesSummary}
             truncateTitle={true}
           />
         )

@@ -23,11 +23,13 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   type ShouldShowFieldInTableHandler,
+  type DataTableRecord,
   TRACE_FIELDS,
   formatFieldStringValueWithHighlights,
   getMessageFieldWithFallbacks,
   getAvailableTraceFields,
 } from '@kbn/discover-utils';
+import { isTracesDataViewPattern } from './get_badge_context';
 import { Resource } from './resource';
 import { Content } from './content';
 import {
@@ -49,6 +51,7 @@ export interface SummaryColumnFactoryDeps {
   rowHeight: number | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   onFilter?: DocViewFilterFn;
+  onOpenOverview?: (row: DataTableRecord) => void;
   core: CoreStart;
   share?: SharePluginStart;
 }
@@ -77,7 +80,9 @@ const SummaryCell = ({
   rowHeight: maybeNullishRowHeight,
   ...props
 }: AllSummaryColumnProps) => {
-  const { dataView, onFilter, row, share, core, isTracesSummary, fieldFormats } = props;
+  const { dataView, onFilter, onOpenOverview, row, share, core, fieldFormats } = props;
+  const isTracesSummary =
+    Boolean(props.isTracesSummary) || isTracesDataViewPattern(dataView.getIndexPattern());
 
   const density = maybeNullishDensity ?? DataGridDensity.COMPACT;
   const isCompressed = density === DataGridDensity.COMPACT;
@@ -114,6 +119,8 @@ const SummaryCell = ({
           fields={resourceFields}
           limited={isSingleLine}
           onFilter={onFilter}
+          onOpenOverview={onOpenOverview ? () => onOpenOverview(row) : undefined}
+          isTracesSummary={isTracesSummary}
           css={singleLineResourceCss}
         />
       )}
@@ -126,6 +133,8 @@ const SummaryCell = ({
           fields={resourceFields}
           limited={isSingleLine}
           onFilter={onFilter}
+          onOpenOverview={onOpenOverview ? () => onOpenOverview(row) : undefined}
+          isTracesSummary={isTracesSummary}
           css={multiLineResourceCss}
         />
       )}
@@ -135,8 +144,10 @@ const SummaryCell = ({
 };
 
 export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
-  const { row, dataView, fieldFormats, onFilter, closePopover, share, core, isTracesSummary } =
+  const { row, dataView, fieldFormats, onFilter, onOpenOverview, closePopover, share, core } =
     props;
+  const isTracesSummary =
+    Boolean(props.isTracesSummary) || isTracesDataViewPattern(dataView.getIndexPattern());
 
   const filterAndClosePopover: AllSummaryColumnProps['onFilter'] = useMemo(() => {
     if (!onFilter) return undefined;
@@ -213,7 +224,12 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
           <EuiTitle size="xxs">
             <span>{isTraceDoc ? traceLabel : resourceLabel}</span>
           </EuiTitle>
-          <Resource fields={resourceFields} onFilter={filterAndClosePopover} />
+          <Resource
+            fields={resourceFields}
+            onFilter={filterAndClosePopover}
+            onOpenOverview={onOpenOverview ? () => onOpenOverview(row) : undefined}
+            isTracesSummary={isTracesSummary}
+          />
         </EuiFlexGroup>
       )}
       <EuiFlexGroup direction="column" gutterSize="s">
