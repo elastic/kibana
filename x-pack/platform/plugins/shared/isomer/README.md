@@ -6,4 +6,4 @@ Hosts an Isomer runtime with Kibana's primitive packs, so features built on Isom
 xpack.isomer.enabled: true
 ```
 
-Its start contract carries `runtime`, a `createKibanaIsomerRuntime` with `@kbn/isomer-components`' `componentsPack`.
+Its start contract carries `getRuntime()`, which resolves a `createKibanaIsomerRuntime` with `@kbn/isomer-components`' `componentsPack`. Primitive schemas stay in memory for the life of the process once built, so the runtime and its packs load on the first call rather than at startup, and every later call shares that runtime. Call `getRuntime()` when a request needs it, not during `setup` or `start`.
