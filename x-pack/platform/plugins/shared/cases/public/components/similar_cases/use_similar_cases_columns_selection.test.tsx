@@ -48,59 +48,57 @@ describe('useSimilarCasesColumnsSelection', () => {
     jest.clearAllMocks();
   });
 
-  it('applies Similar Cases defaults when localStorage is empty', () => {
-    const { result } = renderHook(() => useSimilarCasesColumnsSelection(), {
+  const renderSelectionHook = () =>
+    renderHook(() => useSimilarCasesColumnsSelection(), {
       wrapper: (props) => <TestProviders {...props} license={license} />,
     });
 
-    const { selectedColumns } = result.current;
+  it('applies Similar Cases defaults when localStorage is empty', () => {
+    const { result } = renderSelectionHook();
+
+    const { tableColumns } = result.current;
 
     // Fields in SIMILAR_CASES_CHECKED_DEFAULTS are checked.
-    expect(selectedColumns.find((c) => c.field === 'title')?.isChecked).toBe(true);
-    expect(selectedColumns.find((c) => c.field === 'createdAt')?.isChecked).toBe(true);
-    expect(selectedColumns.find((c) => c.field === 'tags')?.isChecked).toBe(true);
-    expect(selectedColumns.find((c) => c.field === 'category')?.isChecked).toBe(true);
-    expect(selectedColumns.find((c) => c.field === 'status')?.isChecked).toBe(true);
-    expect(selectedColumns.find((c) => c.field === 'severity')?.isChecked).toBe(true);
+    expect(tableColumns.find((c) => c.field === 'title')?.isChecked).toBe(true);
+    expect(tableColumns.find((c) => c.field === 'createdAt')?.isChecked).toBe(true);
+    expect(tableColumns.find((c) => c.field === 'tags')?.isChecked).toBe(true);
+    expect(tableColumns.find((c) => c.field === 'category')?.isChecked).toBe(true);
+    expect(tableColumns.find((c) => c.field === 'status')?.isChecked).toBe(true);
+    expect(tableColumns.find((c) => c.field === 'severity')?.isChecked).toBe(true);
 
     // Fields not in the defaults are unchecked even if the catalog marks them true.
-    expect(selectedColumns.find((c) => c.field === 'assignees')?.isChecked).toBe(false);
-    expect(selectedColumns.find((c) => c.field === 'totalComment')?.isChecked).toBe(false);
+    expect(tableColumns.find((c) => c.field === 'assignees')?.isChecked).toBe(false);
+    expect(tableColumns.find((c) => c.field === 'totalComment')?.isChecked).toBe(false);
   });
 
   it('round-trips a stored column selection from localStorage', () => {
     const stored = [
-      { field: 'title', name: 'Name', isChecked: false },
-      { field: 'createdAt', name: 'Created on', isChecked: true },
+      { field: 'createdAt', name: 'Created on', isChecked: false },
+      { field: 'tags', name: 'Tags', isChecked: true },
     ];
     localStorage.setItem(localStorageKey, JSON.stringify(stored));
 
-    const { result } = renderHook(() => useSimilarCasesColumnsSelection(), {
-      wrapper: (props) => <TestProviders {...props} license={license} />,
-    });
+    const { result } = renderSelectionHook();
 
-    // Stored value overrides default for title (false) and preserves createdAt (true).
-    expect(result.current.selectedColumns.find((c) => c.field === 'title')?.isChecked).toBe(false);
-    expect(result.current.selectedColumns.find((c) => c.field === 'createdAt')?.isChecked).toBe(
-      true
+    // Stored value overrides the default for createdAt (false) and preserves tags (true).
+    expect(result.current.pickerColumns.find((c) => c.field === 'createdAt')?.isChecked).toBe(
+      false
     );
+    expect(result.current.pickerColumns.find((c) => c.field === 'tags')?.isChecked).toBe(true);
   });
 
-  it('persists new column selection to localStorage', () => {
-    const { result } = renderHook(() => useSimilarCasesColumnsSelection(), {
-      wrapper: (props) => <TestProviders {...props} license={license} />,
-    });
+  it('persists the new picker selection to localStorage, with the name column first', () => {
+    const { result } = renderSelectionHook();
 
     act(() => {
-      result.current.setSelectedColumns([
-        { field: 'title', name: 'Name', isChecked: false },
+      result.current.setPickerColumns([
         { field: 'createdAt', name: 'Created on', isChecked: true },
       ]);
     });
 
     const stored = JSON.parse(localStorage.getItem(localStorageKey) ?? '[]');
     expect(stored).toEqual([
-      { field: 'title', name: 'Name', isChecked: false },
+      { field: 'title', name: 'Name', isChecked: true },
       { field: 'createdAt', name: 'Created on', isChecked: true },
     ]);
   });
@@ -109,15 +107,51 @@ describe('useSimilarCasesColumnsSelection', () => {
     const mainListKey = `securitySolution.${LOCAL_STORAGE_KEYS.casesTableColumns}`;
     localStorage.setItem(
       mainListKey,
-      JSON.stringify([{ field: 'title', name: 'Name', isChecked: false }])
+      JSON.stringify([{ field: 'createdAt', name: 'Created on', isChecked: false }])
     );
 
-    const { result } = renderHook(() => useSimilarCasesColumnsSelection(), {
-      wrapper: (props) => <TestProviders {...props} license={license} />,
+    const { result } = renderSelectionHook();
+
+    // The Similar Cases hook reads its own key, so createdAt should still be at its default (true).
+    expect(result.current.pickerColumns.find((c) => c.field === 'createdAt')?.isChecked).toBe(true);
+  });
+
+  describe('name column', () => {
+    it('is not offered in the picker columns', () => {
+      const { result } = renderSelectionHook();
+
+      expect(result.current.pickerColumns.some((c) => c.field === 'title')).toBe(false);
     });
 
-    // The Similar Cases hook reads its own key, so title should still be at its default (true).
-    expect(result.current.selectedColumns.find((c) => c.field === 'title')?.isChecked).toBe(true);
+    it('is first and checked in the table columns', () => {
+      const { result } = renderSelectionHook();
+
+      expect(result.current.tableColumns[0]).toEqual({
+        field: 'title',
+        name: 'Name',
+        isChecked: true,
+      });
+    });
+
+    it('stays first and checked when the stored selection hides it or moves it', () => {
+      localStorage.setItem(
+        localStorageKey,
+        JSON.stringify([
+          { field: 'createdAt', name: 'Created on', isChecked: true },
+          { field: 'title', name: 'Name', isChecked: false },
+        ])
+      );
+
+      const { result } = renderSelectionHook();
+
+      expect(result.current.tableColumns[0]).toEqual({
+        field: 'title',
+        name: 'Name',
+        isChecked: true,
+      });
+      expect(result.current.tableColumns.filter((c) => c.field === 'title')).toHaveLength(1);
+      expect(result.current.pickerColumns.some((c) => c.field === 'title')).toBe(false);
+    });
   });
 
   it.each([
@@ -128,14 +162,10 @@ describe('useSimilarCasesColumnsSelection', () => {
   ])('falls back to defaults when localStorage holds %s', (_label, raw) => {
     localStorage.setItem(localStorageKey, raw);
 
-    const { result } = renderHook(() => useSimilarCasesColumnsSelection(), {
-      wrapper: (props) => <TestProviders {...props} license={license} />,
-    });
+    const { result } = renderSelectionHook();
 
-    expect(result.current.selectedColumns.find((c) => c.field === 'title')?.isChecked).toBe(true);
-    expect(result.current.selectedColumns.find((c) => c.field === 'assignees')?.isChecked).toBe(
-      false
-    );
+    expect(result.current.tableColumns.find((c) => c.field === 'title')?.isChecked).toBe(true);
+    expect(result.current.tableColumns.find((c) => c.field === 'assignees')?.isChecked).toBe(false);
   });
 
   it('ignores stored entries with an unknown field id', () => {
@@ -143,16 +173,14 @@ describe('useSimilarCasesColumnsSelection', () => {
       localStorageKey,
       JSON.stringify([
         { field: 'doesNotExist', name: 'Unknown', isChecked: true },
-        { field: 'title', name: 'Name', isChecked: false },
+        { field: 'tags', name: 'Tags', isChecked: false },
       ])
     );
 
-    const { result } = renderHook(() => useSimilarCasesColumnsSelection(), {
-      wrapper: (props) => <TestProviders {...props} license={license} />,
-    });
+    const { result } = renderSelectionHook();
 
-    const { selectedColumns } = result.current;
-    expect(selectedColumns.some((c) => c.field === 'doesNotExist')).toBe(false);
-    expect(selectedColumns.find((c) => c.field === 'title')?.isChecked).toBe(false);
+    const { tableColumns } = result.current;
+    expect(tableColumns.some((c) => c.field === 'doesNotExist')).toBe(false);
+    expect(tableColumns.find((c) => c.field === 'tags')?.isChecked).toBe(false);
   });
 });
