@@ -82,7 +82,6 @@ export type ObservabilityOverviewLinkId =
   | 'cases'
   | 'cases_configure'
   | 'cases_create'
-  | 'cases_templates'
   | 'rules';
 
 export type MetricsLinkId =

@@ -904,8 +904,8 @@ export const TEMPLATE_VALIDATION_ERROR = (fileName: string, index: number, issue
     defaultMessage: '{fileName}, template {index}: validation failed. {issues}',
   });
 
-export const TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.libraryTitle', {
-  defaultMessage: 'Template library',
+export const TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.title', {
+  defaultMessage: 'Templates',
 });
 
 export const CONFIRM_FIELD_EDIT = i18n.translate('xpack.cases.templates.confirmFieldEdit', {

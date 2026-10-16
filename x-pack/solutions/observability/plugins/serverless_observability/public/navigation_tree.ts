@@ -100,26 +100,14 @@ export const createNavigationTree = ({
       ...getAlertsNavPanel(core),
       ...filterForFeatureAvailability(
         {
-          id: 'observability-cases',
-          title: i18n.translate('xpack.serverlessObservability.nav.cases', {
-            defaultMessage: 'Cases',
-          }),
+          link: 'observability-overview:cases' as const,
           icon: 'briefcase',
-          renderAs: 'panelOpener',
           children: [
             {
-              link: 'observability-overview:cases' as const,
+              link: 'observability-overview:cases_configure' as const,
             },
             {
               link: 'observability-overview:cases_create' as const,
-              sideNavStatus: 'hidden',
-            },
-            {
-              link: 'observability-overview:cases_configure' as const,
-              sideNavStatus: 'hidden',
-            },
-            {
-              link: 'observability-overview:cases_templates' as const,
             },
           ],
         },

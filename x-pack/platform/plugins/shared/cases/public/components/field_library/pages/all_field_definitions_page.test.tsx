@@ -32,10 +32,6 @@ jest.mock('../hooks/use_reorder_global_field_definitions', () => ({
   }),
 }));
 
-jest.mock('../../use_breadcrumbs', () => ({
-  useCasesTemplatesBreadcrumbs: jest.fn(),
-}));
-
 jest.mock('../../../common/navigation', () => ({
   useCasesTemplatesNavigation: () => ({
     getCasesTemplatesUrl: () => '/templates',

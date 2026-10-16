@@ -13,7 +13,7 @@ import * as listI18n from '../translations';
 
 interface GetListMenuArgs {
   permissions: CasesPermissions;
-  showTemplatesButton: boolean;
+  isTemplatesEnabled: boolean;
   actionLicense: ActionLicense | null;
   navigateToCreateCase: () => void;
   navigateToConfigureCases: () => void;
@@ -33,7 +33,7 @@ const getActionLicenseTooltip = (actionLicense: ActionLicense | null): string | 
 
 export const getListMenu = ({
   permissions,
-  showTemplatesButton,
+  isTemplatesEnabled,
   actionLicense,
   navigateToCreateCase,
   navigateToConfigureCases,
@@ -43,7 +43,7 @@ export const getListMenu = ({
   const licenseTooltip = getActionLicenseTooltip(actionLicense);
 
   const items = [
-    ...(showTemplatesButton
+    ...(isTemplatesEnabled && permissions.manageTemplates
       ? [
           {
             id: 'casesTemplates',

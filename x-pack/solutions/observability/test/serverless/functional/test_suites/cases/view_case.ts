@@ -444,10 +444,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       ];
 
       before(async function () {
-        await svlCommonNavigation.sidenav.clickLink({ navId: 'observability-cases' });
-        await svlCommonNavigation.sidenav.clickLink({
-          deepLinkId: 'observability-overview:cases',
-        });
+        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
         // showLegacyCustomFields requires the Cases app origin to be loaded first.
         await cases.common.showLegacyCustomFields(owner);
         await cases.api.createConfigWithCustomFields({ customFields, owner });

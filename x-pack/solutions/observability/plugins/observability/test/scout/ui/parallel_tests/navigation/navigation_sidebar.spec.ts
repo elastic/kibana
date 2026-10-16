@@ -44,7 +44,7 @@ test.describe(
       });
 
       await test.step('More linked items are visible and linked', async () => {
-        const moreDeepLinks = ['slo'];
+        const moreDeepLinks = ['observability-overview:cases', 'slo'];
         for (const deepLinkId of moreDeepLinks) {
           const item = nav.navItemInMoreByDeepLinkId(deepLinkId);
           await expect(item).toBeVisible();
@@ -53,13 +53,7 @@ test.describe(
       });
 
       await test.step('More panel-opener items are visible', async () => {
-        const morePanelIds = [
-          'observability-cases',
-          'applications',
-          'metrics',
-          'machine_learning-landing',
-          'otherTools',
-        ];
+        const morePanelIds = ['applications', 'metrics', 'machine_learning-landing', 'otherTools'];
         for (const id of morePanelIds) {
           await expect(nav.navItemInMoreById(id)).toBeVisible();
         }
@@ -183,12 +177,7 @@ test.describe(
 
       await test.step('Open Cases list', async () => {
         await nav.openMoreMenu();
-        await nav.navItemInMoreById('observability-cases').click();
-        await expect(nav.nestedPanel('observability-cases')).toBeVisible();
-        await nav
-          .nestedPanel('observability-cases')
-          .locator('[data-test-subj~="nav-item-deepLinkId-observability-overview:cases"]')
-          .click();
+        await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
         await expect(page.testSubj.locator('appHeaderTitle')).toHaveText('Cases');
       });
 
@@ -199,12 +188,7 @@ test.describe(
 
       await test.step('Back to list, then configure', async () => {
         await nav.openMoreMenu();
-        await nav.navItemInMoreById('observability-cases').click();
-        await expect(nav.nestedPanel('observability-cases')).toBeVisible();
-        await nav
-          .nestedPanel('observability-cases')
-          .locator('[data-test-subj~="nav-item-deepLinkId-observability-overview:cases"]')
-          .click();
+        await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
         await page.testSubj.click('configure-case-button');
         await expect(page.testSubj.locator('cases-settings-panel')).toBeVisible();
       });

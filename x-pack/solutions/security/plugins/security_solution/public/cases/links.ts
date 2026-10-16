@@ -9,40 +9,33 @@ import {
   CREATE_CASES_CAPABILITY,
   READ_CASES_CAPABILITY,
   CASES_SETTINGS_CAPABILITY,
-  MANAGE_TEMPLATES_CAPABILITY,
 } from '@kbn/cases-plugin/common';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import { CASES_FEATURE_ID, CASES_PATH, SecurityPageName } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 
-export const getCasesLinks = (templatesEnabled = false): LinkItem => {
-  const { deepLinks, ...rest } = getCasesDeepLinks<LinkItem>({
-    basePath: CASES_PATH,
-    templatesEnabled,
-    extend: {
-      [SecurityPageName.case]: {
-        globalNavPosition: 6,
-        capabilities: [`${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`],
-      },
-      [SecurityPageName.caseConfigure]: {
-        capabilities: [`${CASES_FEATURE_ID}.${CASES_SETTINGS_CAPABILITY}`],
-        sideNavDisabled: true,
-      },
-      [SecurityPageName.caseCreate]: {
-        capabilities: [`${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`],
-        sideNavDisabled: true,
-      },
-      [SecurityPageName.caseTemplates]: {
-        capabilities: [`${CASES_FEATURE_ID}.${MANAGE_TEMPLATES_CAPABILITY}`],
-      },
+const casesLinks = getCasesDeepLinks<LinkItem>({
+  basePath: CASES_PATH,
+  extend: {
+    [SecurityPageName.case]: {
+      globalNavPosition: 6,
+      capabilities: [`${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`],
     },
-  });
+    [SecurityPageName.caseConfigure]: {
+      capabilities: [`${CASES_FEATURE_ID}.${CASES_SETTINGS_CAPABILITY}`],
+      sideNavDisabled: true,
+    },
+    [SecurityPageName.caseCreate]: {
+      capabilities: [`${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`],
+      sideNavDisabled: true,
+    },
+  },
+});
 
-  return {
-    ...rest,
-    id: SecurityPageName.case,
-    links: deepLinks as LinkItem[],
-  };
+const { id, deepLinks, ...rest } = casesLinks;
+
+export const links = {
+  ...rest,
+  id: SecurityPageName.case,
+  links: deepLinks as LinkItem[],
 };
-
-export const links = getCasesLinks();

@@ -17355,6 +17355,7 @@
     "xpack.cases.templates.validation.noErrors": "検証エラーはありません",
     "xpack.cases.templates.validation.warningCount": "{warningCount}件の警告{warningCount, plural, one {} other {}}",
     "xpack.cases.templates.validationErrorsTitle": "一部のファイルは検証できませんでした",
+    "xpack.cases.templatesButton": "テンプレート",
     "xpack.cases.uiSettings.maxOpenCasesPerRuleRunDescription": "ケースコネクターが1回の実行中に開くことができるケースの最大数を設定します。",
     "xpack.cases.uiSettings.maxOpenCasesPerRuleRunLabel": "ルール実行ごとに作成される最大ケース数",
     "xpack.cases.userActions.attachment": "添付ファイル",

@@ -19,7 +19,7 @@ describe('CasesPageLayout', () => {
     ['/cases/example-id/comment-id', '/cases'],
     ['/cases/configure', '/cases'],
     ['/cases/configure/templates', '/cases'],
-    ['/cases/configure/templates/field_library', '/cases'],
+    ['/cases/configure/field-library', '/cases'],
     ['/', '/'],
   ] as const)('maps %s to compact', (pathname, basePath) => {
     expect(getCasesPageLayoutVariant({ pathname, basePath })).toBe('compact');

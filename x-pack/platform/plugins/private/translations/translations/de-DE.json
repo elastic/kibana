@@ -17307,6 +17307,7 @@
     "xpack.cases.templates.validation.noErrors": "Keine Validierungsfehler",
     "xpack.cases.templates.validation.warningCount": "{warningCount} warning{warningCount, plural, one {} other {s}}",
     "xpack.cases.templates.validationErrorsTitle": "Einige Dateien konnten nicht validiert werden",
+    "xpack.cases.templatesButton": "Vorlagen",
     "xpack.cases.uiSettings.maxOpenCasesPerRuleRunDescription": "Legt die maximale Anzahl von Tickets fest, die der Cases-Anschluss während eines einzelnen Regellaufs öffnen kann.",
     "xpack.cases.uiSettings.maxOpenCasesPerRuleRunLabel": "Maximale Anzahl der pro Regelausführung erstellten Tickets",
     "xpack.cases.userActions.attachment": "Anhang",

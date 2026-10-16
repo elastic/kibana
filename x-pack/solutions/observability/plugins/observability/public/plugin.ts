@@ -197,27 +197,6 @@ export interface ObservabilityPublicPluginsStart {
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
-const getObservabilityCasesDeepLinks = (templatesEnabled: boolean) =>
-  getCasesDeepLinks({
-    basePath: CASES_PATH,
-    templatesEnabled,
-    extend: {
-      [CasesDeepLinkId.cases]: {
-        order: 8003,
-        visibleIn: ['projectSideNav'],
-      },
-      [CasesDeepLinkId.casesCreate]: {
-        visibleIn: ['projectSideNav'],
-      },
-      [CasesDeepLinkId.casesConfigure]: {
-        visibleIn: ['projectSideNav'],
-      },
-      [CasesDeepLinkId.casesTemplates]: {
-        visibleIn: ['projectSideNav'],
-      },
-    },
-  });
-
 export class Plugin
   implements
     PluginClass<
@@ -264,7 +243,23 @@ export class Plugin
   ) {
     const startServicesPromise = coreSetup.getStartServices();
     if (pluginsSetup.cases) {
-      this.deepLinks.push(getObservabilityCasesDeepLinks(false));
+      this.deepLinks.push(
+        getCasesDeepLinks({
+          basePath: CASES_PATH,
+          extend: {
+            [CasesDeepLinkId.cases]: {
+              order: 8003,
+              visibleIn: ['projectSideNav'],
+            },
+            [CasesDeepLinkId.casesCreate]: {
+              visibleIn: ['projectSideNav'],
+            },
+            [CasesDeepLinkId.casesConfigure]: {
+              visibleIn: ['projectSideNav'],
+            },
+          },
+        })
+      );
       pluginsSetup.cases.attachmentFramework.registerAttachment(getObservabilityAlertType());
     }
     const category = DEFAULT_APP_CATEGORIES.observability;
@@ -542,12 +537,6 @@ export class Plugin
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
     const config = this.initContext.config.get();
-    const casesIndex = this.deepLinks.findIndex((link) => link.id === CasesDeepLinkId.cases);
-    if (casesIndex >= 0) {
-      this.deepLinks[casesIndex] = getObservabilityCasesDeepLinks(
-        pluginsStart.cases?.config.templatesEnabled ?? false
-      );
-    }
     setInvestigationsClient(pluginsStart.nightshiftInvestigations?.investigationsClient);
     const alertingV2Enabled = isAlertingV2Enabled(coreStart);
     const deepLinks = this.deepLinks.map((link) =>

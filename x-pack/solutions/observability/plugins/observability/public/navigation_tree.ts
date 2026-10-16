@@ -98,28 +98,16 @@ function createNavTree({
       ...getWorkflowsNavPanel(coreStart),
       ...getAlertsNavPanel(coreStart),
       {
-        id: 'observability-cases',
-        title: i18n.translate('xpack.observability.obltNav.cases', {
-          defaultMessage: 'Cases',
-        }),
-        icon: 'briefcase',
-        renderAs: 'panelOpener',
+        link: 'observability-overview:cases',
         children: [
           {
-            link: 'observability-overview:cases',
+            link: 'observability-overview:cases_configure',
           },
           {
             link: 'observability-overview:cases_create',
-            sideNavStatus: 'hidden',
-          },
-          {
-            link: 'observability-overview:cases_configure',
-            sideNavStatus: 'hidden',
-          },
-          {
-            link: 'observability-overview:cases_templates',
           },
         ],
+        icon: 'briefcase',
       },
       {
         link: 'slo',

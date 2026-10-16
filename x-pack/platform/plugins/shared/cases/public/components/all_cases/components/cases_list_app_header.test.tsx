@@ -9,16 +9,9 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
-import { BehaviorSubject } from 'rxjs';
-import { coreMock } from '@kbn/core/public/mocks';
 
 import { buildCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 import { KibanaServices } from '../../../common/lib/kibana';
-import {
-  GENERAL_CASES_OWNER,
-  OBSERVABILITY_OWNER,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../../common/constants';
 import { CasesListAppHeader } from './cases_list_app_header';
 import { getListMenu } from './header_menu';
 import { allCasesPermissions } from '../../../common/mock/permissions';
@@ -97,98 +90,75 @@ describe('CasesListAppHeader', () => {
   describe('templates button', () => {
     let getConfigSpy: jest.SpyInstance;
 
-    const enableTemplates = (enabled = true) => {
-      getConfigSpy = jest
-        .spyOn(KibanaServices, 'getConfig')
-        .mockReturnValue({ templates: { enabled } } as ReturnType<typeof KibanaServices.getConfig>);
-    };
-
-    const createCoreStartWithChromeStyle = (chromeStyle: 'classic' | 'project') => {
-      const coreStart = coreMock.createStart();
-      coreStart.chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject(chromeStyle));
-      coreStart.chrome.getChromeStyle.mockReturnValue(chromeStyle);
-      return coreStart;
-    };
-
-    const renderHeader = ({
-      owner,
-      chromeStyle = 'classic',
-      manageTemplates = true,
-    }: {
-      owner: string[];
-      chromeStyle?: 'classic' | 'project';
-      manageTemplates?: boolean;
-    }) =>
-      renderWithTestingProviders(<CasesListAppHeader />, {
-        wrapperProps: {
-          owner,
-          coreStart: createCoreStartWithChromeStyle(chromeStyle),
-          permissions: buildCasesPermissions({ manageTemplates }),
-        },
-      });
-
     afterEach(() => {
       getConfigSpy?.mockRestore();
     });
 
-    it('displays the templates button in Stack Management, which has no Cases sub-nav', async () => {
-      enableTemplates();
-      renderHeader({ owner: [GENERAL_CASES_OWNER], chromeStyle: 'project' });
+    it('does not display the templates button when the templates feature flag is disabled', async () => {
+      renderWithTestingProviders(<CasesListAppHeader />, {
+        wrapperProps: {
+          permissions: buildCasesPermissions({ manageTemplates: true, settings: false }),
+        },
+      });
+
+      expect(screen.queryByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cases-templates-button')).not.toBeInTheDocument();
+    });
+
+    it('displays the templates button when the feature flag is enabled and the user has manageTemplates permission', async () => {
+      getConfigSpy = jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+
+      renderWithTestingProviders(<CasesListAppHeader />, {
+        wrapperProps: { permissions: buildCasesPermissions({ manageTemplates: true }) },
+      });
 
       await openAppMenuOverflow();
 
       expect(await screen.findByTestId('cases-templates-button')).toBeInTheDocument();
-    });
-
-    it('displays the templates button for Observability in the classic nav', async () => {
-      enableTemplates();
-      renderHeader({ owner: [OBSERVABILITY_OWNER], chromeStyle: 'classic' });
-
-      await openAppMenuOverflow();
-
-      expect(await screen.findByTestId('cases-templates-button')).toBeInTheDocument();
-    });
-
-    it('does not display the templates button for Observability in a solution nav', async () => {
-      enableTemplates();
-      renderHeader({ owner: [OBSERVABILITY_OWNER], chromeStyle: 'project' });
-
-      await openAppMenuOverflow();
-
-      expect(screen.queryByTestId('cases-templates-button')).not.toBeInTheDocument();
-    });
-
-    it.each(['classic', 'project'] as const)(
-      'does not display the templates button for Security in the %s nav',
-      async (chromeStyle) => {
-        enableTemplates();
-        renderHeader({ owner: [SECURITY_SOLUTION_OWNER], chromeStyle });
-
-        await openAppMenuOverflow();
-
-        expect(screen.queryByTestId('cases-templates-button')).not.toBeInTheDocument();
-      }
-    );
-
-    it('does not display the templates button when templates are disabled', () => {
-      enableTemplates(false);
-      renderHeader({ owner: [GENERAL_CASES_OWNER] });
-
-      expect(screen.queryByTestId('cases-templates-button')).not.toBeInTheDocument();
     });
 
     it('does not display the templates button when the user lacks manageTemplates permission', () => {
-      enableTemplates();
-      renderHeader({ owner: [GENERAL_CASES_OWNER], manageTemplates: false });
+      getConfigSpy = jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+
+      renderWithTestingProviders(<CasesListAppHeader />, {
+        wrapperProps: { permissions: buildCasesPermissions({ manageTemplates: false }) },
+      });
 
       expect(screen.queryByTestId('cases-templates-button')).not.toBeInTheDocument();
+    });
+
+    it('displays the templates button even when the user lacks settings permission', async () => {
+      getConfigSpy = jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+
+      renderWithTestingProviders(<CasesListAppHeader />, {
+        wrapperProps: {
+          permissions: buildCasesPermissions({ settings: false, manageTemplates: true }),
+        },
+      });
+
+      await openAppMenuOverflow();
+
+      expect(await screen.findByTestId('cases-templates-button')).toBeInTheDocument();
+      expect(screen.queryByTestId('configure-case-button')).not.toBeInTheDocument();
     });
   });
 
   describe('action license tooltip (getListMenu)', () => {
     const baseArgs = {
       permissions: allCasesPermissions(),
-      showTemplatesButton: false,
+      isTemplatesEnabled: false,
       navigateToCreateCase: jest.fn(),
       navigateToConfigureCases: jest.fn(),
       navigateToCasesTemplates: jest.fn(),

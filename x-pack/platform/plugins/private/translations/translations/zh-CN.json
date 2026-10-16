@@ -17363,6 +17363,7 @@
     "xpack.cases.templates.validation.noErrors": "没有验证错误",
     "xpack.cases.templates.validation.warningCount": "{warningCount} 个警告{warningCount, plural, one {} other {}}",
     "xpack.cases.templates.validationErrorsTitle": "某些文件无法验证",
+    "xpack.cases.templatesButton": "模板",
     "xpack.cases.uiSettings.maxOpenCasesPerRuleRunDescription": "设置 Cases 连接器在单次规则运行期间可打开的最大案例数。",
     "xpack.cases.uiSettings.maxOpenCasesPerRuleRunLabel": "每次规则运行可创建的最大案例数",
     "xpack.cases.userActions.attachment": "附件",

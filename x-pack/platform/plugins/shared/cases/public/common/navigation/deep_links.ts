@@ -54,7 +54,7 @@ export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
   if (templatesEnabled) {
     deepLinks.push({
       title: i18n.translate('xpack.cases.navigation.templates', {
-        defaultMessage: 'Template library',
+        defaultMessage: 'Templates',
       }),
       ...(extend[CasesDeepLinkId.casesTemplates] ?? {}),
       id: CasesDeepLinkId.casesTemplates,

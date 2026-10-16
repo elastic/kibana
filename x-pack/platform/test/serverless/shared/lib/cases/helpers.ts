@@ -74,20 +74,12 @@ export const navigateToCasesApp = async (
   await common.navigateToApp('landingPage');
   await header.waitUntilLoadingHasFinished();
 
-  const { panelId, link } =
+  const link =
     owner === SECURITY_SOLUTION_OWNER
-      ? {
-          panelId: 'securityGroup:cases',
-          link: { deepLinkId: 'securitySolutionUI:cases' as AppDeepLinkId },
-        }
-      : {
-          panelId: 'observability-cases',
-          link: { deepLinkId: 'observability-overview:cases' as AppDeepLinkId },
-        };
+      ? { deepLinkId: 'securitySolutionUI:cases' as AppDeepLinkId }
+      : { deepLinkId: 'observability-overview:cases' as AppDeepLinkId };
 
   await retry.tryForTime(30000, async () => {
-    // Cases is a panel opener (list + Template library); the list link lives inside the panel.
-    await svlCommonNavigation.sidenav.openPanel(panelId);
     await svlCommonNavigation.sidenav.clickLink(link);
     await testSubjects.existOrFail('createNewCaseBtn', { timeout: 5000 });
   });

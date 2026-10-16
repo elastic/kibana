@@ -250,12 +250,12 @@ export const TITLE_REQUIRED = i18n.translate('xpack.cases.createCase.titleFieldR
   defaultMessage: 'A name is required.',
 });
 
-export const TEMPLATES_BUTTON = i18n.translate('xpack.cases.templateLibraryButton', {
-  defaultMessage: 'Template library',
-});
-
 export const CONFIGURE_CASES_BUTTON = i18n.translate('xpack.cases.configureCasesButton', {
   defaultMessage: 'Settings',
+});
+
+export const TEMPLATES_BUTTON = i18n.translate('xpack.cases.templatesButton', {
+  defaultMessage: 'Templates',
 });
 
 export const ADD_COMMENT = i18n.translate('xpack.cases.caseView.comment.addComment', {

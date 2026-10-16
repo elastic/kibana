@@ -17277,6 +17277,7 @@
     "xpack.cases.templates.validation.noErrors": "Aucune erreur de validation",
     "xpack.cases.templates.validation.warningCount": "{warningCount} avertissement{warningCount, plural, one {} other {s}}",
     "xpack.cases.templates.validationErrorsTitle": "Impossible de valider certains fichiers",
+    "xpack.cases.templatesButton": "Modèles",
     "xpack.cases.uiSettings.maxOpenCasesPerRuleRunDescription": "Définit le nombre maximal de cas que le connecteur Cases peut ouvrir lors d'une seule exécution de règle.",
     "xpack.cases.uiSettings.maxOpenCasesPerRuleRunLabel": "Nombre maximum de cas créés par exécution de la règle",
     "xpack.cases.userActions.attachment": "Pièce jointe",

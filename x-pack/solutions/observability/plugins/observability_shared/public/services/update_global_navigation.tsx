@@ -15,7 +15,6 @@ import type {
 } from '@kbn/core/public';
 import { AppStatus, type PricingServiceStart } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
-import { MANAGE_TEMPLATES_CAPABILITY } from '@kbn/cases-plugin/common';
 import { casesFeatureId } from '../../common';
 
 /** Capability-based Observability access — pricing tiers do not affect this. */
@@ -40,10 +39,6 @@ export function hasObservabilityCapabilities(capabilities: Capabilities): boolea
 
 function hasAccessToCases(capabilities: Capabilities): boolean {
   return Boolean(capabilities[casesFeatureId]?.read_cases);
-}
-
-function canManageCasesTemplates(capabilities: Capabilities): boolean {
-  return Boolean(capabilities[casesFeatureId]?.[MANAGE_TEMPLATES_CAPABILITY]);
 }
 
 export function updateGlobalNavigation({
@@ -74,12 +69,6 @@ export function updateGlobalNavigation({
           if (hasCasesAccess) {
             return {
               ...link,
-              ...(link.deepLinks && {
-                // Nested links skip the per-app capability check, so templates must be gated here.
-                deepLinks: canManageCasesTemplates(capabilities)
-                  ? link.deepLinks
-                  : link.deepLinks.filter(({ id }) => id !== CasesDeepLinkId.casesTemplates),
-              }),
               visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             };
           }

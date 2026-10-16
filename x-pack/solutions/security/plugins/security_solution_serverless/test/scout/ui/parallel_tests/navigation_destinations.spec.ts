@@ -8,9 +8,6 @@
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
-// Cases is a panel opener (list + Template library), so the primary item has no deep link.
-const CASES_PANEL_ID = 'securityGroup:cases';
-
 spaceTest.describe(
   'serverless security navigation destinations',
   { tag: [...tags.serverless.security.complete] },
@@ -37,21 +34,17 @@ spaceTest.describe(
         await spaceTest.step('shows cases in sidebar navigation', async () => {
           await expect(serverlessProjectChromePage.primaryNav).toBeVisible();
           await serverlessProjectChromePage.openChromeNavMoreMenuIfPresent();
-          await expect(serverlessProjectChromePage.navItemInBodyById(CASES_PANEL_ID)).toBeVisible();
+          await expect(
+            serverlessProjectChromePage.navItemInBodyByDeepLinkId('securitySolutionUI:cases')
+          ).toBeVisible();
         });
 
         await spaceTest.step('navigates to cases app', async () => {
           await expect(async () => {
             await serverlessProjectChromePage.openChromeNavMoreMenuIfPresent();
-            const casesListLink = serverlessProjectChromePage.navItemInPanelByDeepLinkId(
-              CASES_PANEL_ID,
-              'securitySolutionUI:cases'
-            );
-            // Re-clicking the opener on a retry would close an already-open panel.
-            if (!(await casesListLink.isVisible())) {
-              await serverlessProjectChromePage.navItemInBodyById(CASES_PANEL_ID).click();
-            }
-            await casesListLink.click();
+            await serverlessProjectChromePage
+              .navItemInBodyByDeepLinkId('securitySolutionUI:cases')
+              .click();
             await page.waitForURL(/\/app\/security\/cases/, { timeout: 5_000 });
           }).toPass({ timeout: 30_000 });
 
@@ -59,7 +52,7 @@ spaceTest.describe(
 
           await serverlessProjectChromePage.openChromeNavMoreMenuIfPresent();
           await expect(
-            serverlessProjectChromePage.activeNavItemInBodyById(CASES_PANEL_ID)
+            serverlessProjectChromePage.activeNavItemInBodyByDeepLinkId('securitySolutionUI:cases')
           ).toBeVisible();
         });
 

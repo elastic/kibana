@@ -23,7 +23,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   const navigateToConfigure = async () => {
     await svlObltNavigation.navigateToLandingPage();
-    await svlCommonNavigation.sidenav.clickLink({ navId: 'observability-cases' });
     await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
     await header.waitUntilLoadingHasFinished();
 
