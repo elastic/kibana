@@ -7,6 +7,12 @@
 
 import pRetry, { AbortError } from 'p-retry';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
+import type {
+  CallbackOriginResolver,
+  CallbackOriginResolverContext,
+  CallbackTransportDefinition,
+  CallbacksSetup,
+} from '@kbn/agent-builder-server';
 import type { ChatCallbackResponse } from '../../../../common/http_api/chat_callback';
 
 const callbackRetryOptions = {
@@ -23,9 +29,52 @@ export type CallbackTransport = (
 
 export class CallbackDeliveryService {
   private readonly actions: ActionsPluginSetup;
+  private readonly transports: CallbackTransportDefinition[] = [];
+  private originResolver?: CallbackOriginResolver;
+  private defaultOriginResolver?: CallbackOriginResolver;
 
   constructor({ actions }: { actions: ActionsPluginSetup }) {
     this.actions = actions;
+  }
+
+  setup(): CallbacksSetup {
+    return {
+      registerOriginResolver: (resolver) => {
+        if (this.originResolver) {
+          throw new Error('A callback origin resolver is already registered');
+        }
+
+        this.originResolver = resolver;
+      },
+      registerTransport: (transport) => {
+        if (this.transports.some(({ id }) => id === transport.id)) {
+          throw new Error(`Callback transport [${transport.id}] is already registered`);
+        }
+
+        this.transports.push(transport);
+      },
+    };
+  }
+
+  /** Sets the lookup that runs when the registered resolver finds nothing; it needs start services. */
+  start({ defaultOriginResolver }: { defaultOriginResolver: CallbackOriginResolver }): void {
+    this.defaultOriginResolver = defaultOriginResolver;
+  }
+
+  /**
+   * The conversation an external conversation continues: the registered resolver's answer, else
+   * the default lookup's. An error from the registered resolver propagates.
+   */
+  async resolveOrigin(
+    context: CallbackOriginResolverContext
+  ): Promise<{ conversationId: string } | undefined> {
+    const resolved = await this.originResolver?.(context);
+
+    if (resolved) {
+      return resolved;
+    }
+
+    return this.defaultOriginResolver?.(context);
   }
 
   validateCallbackUrl(callbackUrl: string): void {
@@ -37,6 +86,12 @@ export class CallbackDeliveryService {
   }
 
   createTransport(callbackUrl: string): CallbackTransport {
+    const registered = this.transports.find((transport) => transport.handles(callbackUrl));
+
+    if (registered) {
+      return (payload, signal) => registered.send(callbackUrl, payload, signal);
+    }
+
     const relayClient = this.actions.getRelayClient();
 
     if (relayClient?.isRelayOrigin(callbackUrl)) {

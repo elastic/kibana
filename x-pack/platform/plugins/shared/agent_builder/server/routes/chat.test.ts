@@ -373,8 +373,8 @@ describe('registerChatRoutes', () => {
     registerChatRoutes({
       router,
       getInternalServices: jest.fn().mockReturnValue({
-        execution: { executeAgent },
-        callbackDeliveryService: { validateCallbackUrl },
+        execution: { executeAgent, getExecution: jest.fn() },
+        callbackDeliveryService: { validateCallbackUrl, resolveOrigin: jest.fn() },
       }),
       coreSetup: {} as never,
       pluginsSetup: {},
@@ -432,6 +432,95 @@ describe('registerChatRoutes', () => {
     );
   });
 
+  it('continues the conversation the origin resolves to, keeping the execution id of the request', async () => {
+    const callbackPath = `${internalApiPath}/converse/callback`;
+    let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
+    const executeAgent = jest.fn().mockResolvedValue({
+      executionId: 'execution-1',
+      conversationId: 'investigation-1',
+      events$: of(),
+    });
+    const resolveOrigin = jest.fn().mockResolvedValue(undefined);
+    const conversationClient = {
+      get: jest.fn().mockResolvedValue({ id: 'investigation-1', agent_id: 'investigation-agent' }),
+    };
+
+    registerChatRoutes({
+      router: {
+        versioned: {
+          post: jest.fn().mockImplementation((config: { path: string }) => ({
+            addVersion: jest
+              .fn()
+              .mockImplementation(
+                (
+                  _versionConfig: unknown,
+                  handler: (ctx: any, req: any, res: any) => Promise<any>
+                ) => {
+                  if (config.path === callbackPath) {
+                    callbackHandler = handler;
+                  }
+                }
+              ),
+          })),
+        },
+      },
+      getInternalServices: jest.fn().mockReturnValue({
+        execution: { executeAgent, getExecution: jest.fn() },
+        callbackDeliveryService: { validateCallbackUrl: jest.fn(), resolveOrigin },
+        conversations: { getScopedClient: jest.fn().mockResolvedValue(conversationClient) },
+      }),
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const send = () =>
+      callbackHandler!(
+        {
+          core: Promise.resolve({}),
+          licensing: Promise.resolve({
+            license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+          }),
+          agentBuilder: Promise.resolve({
+            spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+          }),
+        },
+        {
+          body: {
+            agent_id: 'relay-agent',
+            input: 'Hello',
+            execution_idempotency_key: 'Ev0PV23K4AB1',
+            origin: { type: ConversationOriginType.Slack, external_conversation_id: 'thread-1' },
+            callback: { url: 'https://callback.example.com/events?token=abc' },
+          },
+        },
+        { accepted: jest.fn(({ body }) => ({ status: 202, payload: body })) }
+      );
+
+    await send();
+    resolveOrigin.mockResolvedValueOnce({ conversationId: 'investigation-1' });
+    await send();
+
+    const [[unresolved], [resolved]] = executeAgent.mock.calls;
+    expect(resolved).toEqual(
+      expect.objectContaining({
+        executionId: unresolved.executionId,
+        params: expect.objectContaining({
+          agentId: 'investigation-agent',
+          conversationId: 'investigation-1',
+          autoCreateConversationWithId: false,
+        }),
+      })
+    );
+    expect(unresolved.params).toEqual(
+      expect.objectContaining({
+        agentId: 'relay-agent',
+        conversationId: undefined,
+        autoCreateConversationWithId: true,
+      })
+    );
+  });
+
   it('passes the idempotency key through to the execution service', async () => {
     const callbackPath = `${internalApiPath}/converse/callback`;
     let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
@@ -464,8 +553,8 @@ describe('registerChatRoutes', () => {
     registerChatRoutes({
       router,
       getInternalServices: jest.fn().mockReturnValue({
-        execution: { executeAgent },
-        callbackDeliveryService: { validateCallbackUrl },
+        execution: { executeAgent, getExecution: jest.fn() },
+        callbackDeliveryService: { validateCallbackUrl, resolveOrigin: jest.fn() },
       }),
       coreSetup: {} as never,
       pluginsSetup: {},
@@ -565,8 +654,8 @@ describe('registerChatRoutes', () => {
     registerChatRoutes({
       router,
       getInternalServices: jest.fn().mockReturnValue({
-        execution: { executeAgent },
-        callbackDeliveryService: { validateCallbackUrl },
+        execution: { executeAgent, getExecution: jest.fn() },
+        callbackDeliveryService: { validateCallbackUrl, resolveOrigin: jest.fn() },
       }),
       coreSetup: {} as never,
       pluginsSetup: {},
@@ -655,8 +744,8 @@ describe('registerChatRoutes', () => {
     registerChatRoutes({
       router,
       getInternalServices: jest.fn().mockReturnValue({
-        execution: { executeAgent },
-        callbackDeliveryService: { validateCallbackUrl },
+        execution: { executeAgent, getExecution: jest.fn() },
+        callbackDeliveryService: { validateCallbackUrl, resolveOrigin: jest.fn() },
       }),
       coreSetup: {} as never,
       pluginsSetup: {},

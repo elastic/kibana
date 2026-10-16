@@ -37,7 +37,7 @@ import {
   type ConsumptionService,
 } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
-import { CallbackDeliveryService } from './execution/callback';
+import { CallbackDeliveryService, createDefaultOriginResolver } from './execution/callback';
 import { createSpaceSettingsService } from './space_settings';
 import { SurfacesServiceImpl } from './surfaces';
 import { ConversationTemplatesService } from './conversation/templates';
@@ -110,6 +110,7 @@ export class ServiceManager {
       plugins: this.services.plugins.setup({ skillsSetup }),
       metering: this.services.metering,
       conversationTemplates: this.services.conversationTemplates.setup(),
+      callbacks: this.services.callbackDelivery.setup(),
     };
 
     return this.internalSetup;
@@ -224,6 +225,10 @@ export class ServiceManager {
       conversationEvents,
       auditLogService,
       analyticsService,
+    });
+
+    this.services.callbackDelivery.start({
+      defaultOriginResolver: createDefaultOriginResolver({ conversations }),
     });
 
     const runnerFactory = new RunnerFactoryImpl({

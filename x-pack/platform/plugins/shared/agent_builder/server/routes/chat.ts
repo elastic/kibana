@@ -31,6 +31,7 @@ import { internalApiPath, publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
+import { resolveCallbackTarget } from './resolve_callback_target';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import converseAsyncDescription from './oas/converse_async.text';
 import { buildChatResponseFromEvents } from '../services/execution/utils/chat_response';
@@ -549,7 +550,11 @@ export function registerChatRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { execution: executionService, callbackDeliveryService } = getInternalServices();
+        const {
+          execution: executionService,
+          callbackDeliveryService,
+          conversations,
+        } = getInternalServices();
         const payload = request.body as ChatCallbackRequestBodyPayload;
 
         try {
@@ -562,11 +567,25 @@ export function registerChatRoutes({
 
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
 
-        const { executionId, conversationId } = await executeAgent({
+        // From the request's own payload, so the execution id is the same whichever conversation
+        // the origin resolves to and a replay is recognised.
+        const executionOptions = resolveExecutionOptions(payload, spaceId);
+        const target = await resolveCallbackTarget({
           payload,
+          spaceId,
+          executionId: executionOptions.executionId,
+          request,
+          callbackDeliveryService,
+          conversations,
+          executionService,
+        });
+
+        const { executionId, conversationId } = await executeAgent({
+          payload: target.payload,
           request,
           executionService,
-          executionOptions: resolveExecutionOptions(payload, spaceId),
+          executionOptions,
+          autoCreateConversationWithId: target.autoCreateConversationWithId,
         });
 
         if (!conversationId) {
