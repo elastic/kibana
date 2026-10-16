@@ -175,6 +175,43 @@ describe('parseUnitPutBody', () => {
     expect(() => assertUnitPutEnvelope(parsed)).toThrow(/secrets/);
   });
 
+  it.each(['secret:es-prod:api_key', 'es_prod', 'ES-PROD', '-es'])(
+    'rejects the secret name %s outside the identifier grammar with 400',
+    (name) => {
+      const parsed = parseUnitPutBody({
+        body: Buffer.from(JSON.stringify({ unit, secrets: { [name]: 'x' } })),
+        contentType: 'application/json',
+      });
+
+      expect(() => assertUnitPutEnvelope(parsed)).toThrow(
+        expect.objectContaining({ statusCode: 400 })
+      );
+    }
+  );
+
+  it.each([
+    ['JSON null', JSON.stringify({ unit: null }), 'application/json'],
+    ['a JSON array', JSON.stringify({ unit: [] }), 'application/json'],
+    ['YAML null', 'null\n', 'application/yaml'],
+    ['YAML ~', '~\n', 'application/yaml'],
+    ['a YAML list', '- a\n', 'application/yaml'],
+  ])('rejects a unit that is %s with 400', (_, body, contentType) => {
+    const parsed = parseUnitPutBody({ body: Buffer.from(body), contentType });
+
+    expect(() => assertUnitPutEnvelope(parsed)).toThrow(
+      expect.objectContaining({ statusCode: 400 })
+    );
+  });
+
+  it('accepts an identifier secret name', () => {
+    const parsed = parseUnitPutBody({
+      body: Buffer.from(JSON.stringify({ unit, secrets: { 'es-prod': 'x' } })),
+      contentType: 'application/json',
+    });
+
+    expect(assertUnitPutEnvelope(parsed)).toEqual({ secrets: { 'es-prod': 'x' } });
+  });
+
   it('rejects invalid JSON', () => {
     expect(() =>
       parseUnitPutBody({

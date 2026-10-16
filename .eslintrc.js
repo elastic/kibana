@@ -1747,10 +1747,13 @@ module.exports = {
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
         // The `recommended` presets above re-enable these rules; they run in oxlint instead.
+        'constructor-super': 'off',
         'no-cond-assign': 'off',
+        'no-const-assign': 'off',
         'no-debugger': 'off',
         'no-empty': 'off',
         'no-unused-labels': 'off',
+        'no-with': 'off',
         'use-isnan': 'off',
         'react/jsx-no-undef': 'off',
         'react/no-is-mounted': 'off',
@@ -2135,6 +2138,18 @@ module.exports = {
       rules: {
         'no-console': 'off',
         '@kbn/imports/no_unresolvable_imports': 'off',
+        '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
+      },
+    },
+
+    {
+      files: [
+        '.github/scripts/label_flaky_fix_pr.ts',
+        '.github/scripts/label_flaky_fix_pr_test.ts',
+        '.github/scripts/find_duplicate_fix_prs.js',
+      ],
+      rules: {
+        // GitHub Actions executes these files directly with Node's native TypeScript support.
         '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
       },
     },

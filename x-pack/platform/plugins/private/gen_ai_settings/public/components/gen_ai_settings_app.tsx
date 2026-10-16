@@ -87,14 +87,14 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       ...(showAiBreadcrumb
         ? [
             {
-              text: i18n.translate('genAiSettings.breadcrumbs.ai', {
+              text: i18n.translate('xpack.genAiSettings.breadcrumbs.ai', {
                 defaultMessage: 'AI',
               }),
             },
           ]
         : []),
       {
-        text: i18n.translate('genAiSettings.breadcrumbs.genAiSettings', {
+        text: i18n.translate('xpack.genAiSettings.breadcrumbs.genAiSettings', {
           defaultMessage: 'GenAI Settings',
         }),
       },
@@ -154,7 +154,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
         });
       } catch (error) {
         notifications.toasts.addDanger({
-          title: i18n.translate('xpack.gen_ai_settings.tokenUsageTracking.installDashboardError', {
+          title: i18n.translate('xpack.genAiSettings.tokenUsageTracking.installDashboardError', {
             defaultMessage: 'Failed to install token usage dashboard',
           }),
           text: error?.body?.message ?? error?.message,
@@ -176,7 +176,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
         });
       } catch (error) {
         notifications.toasts.addDanger({
-          title: i18n.translate('xpack.gen_ai_settings.agentBuilderTracing.syncFeaturesError', {
+          title: i18n.translate('xpack.genAiSettings.agentBuilderTracing.syncFeaturesError', {
             defaultMessage: 'Failed to sync Agent Builder tracing features',
           }),
           text: error?.body?.message ?? error?.message,
@@ -227,7 +227,10 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
             <EuiSplitPanel.Inner color="subdued">
               <EuiTitle size="s">
                 <h3 data-test-subj="generalSectionTitle">
-                  <FormattedMessage id="genAiSettings.general.title" defaultMessage="General" />
+                  <FormattedMessage
+                    id="xpack.genAiSettings.general.title"
+                    defaultMessage="General"
+                  />
                 </h3>
               </EuiTitle>
             </EuiSplitPanel.Inner>
@@ -239,7 +242,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   title={
                     <h3 data-test-subj="aiFeatureVisibilityTitle">
                       <FormattedMessage
-                        id="genAiSettings.aiFeatureVisibilityLabel"
+                        id="xpack.genAiSettings.aiFeatureVisibilityLabel"
                         defaultMessage="AI feature visibility"
                       />
                     </h3>
@@ -248,13 +251,13 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                     <p>
                       {isPermissionsBased ? (
                         <FormattedMessage
-                          id="genAiSettings.solutionViewDescriptionLabel"
+                          id="xpack.genAiSettings.solutionViewDescriptionLabel"
                           defaultMessage="Turn AI-powered features on or off (for custom roles only) on the {permissionsTab} in the {spaces} settings. Create custom roles at {rolesLink}."
                           values={{
                             permissionsTab: (
                               <strong>
                                 <FormattedMessage
-                                  id="genAiSettings.permissionsTab"
+                                  id="xpack.genAiSettings.permissionsTab"
                                   defaultMessage="Permissions tab"
                                 />
                               </strong>
@@ -262,7 +265,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                             spaces: (
                               <strong>
                                 <FormattedMessage
-                                  id="genAiSettings.spacesLabel"
+                                  id="xpack.genAiSettings.spacesLabel"
                                   defaultMessage="Spaces"
                                 />
                               </strong>
@@ -274,7 +277,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                                 })}
                               >
                                 <FormattedMessage
-                                  id="genAiSettings.rolesLink"
+                                  id="xpack.genAiSettings.rolesLink"
                                   defaultMessage="Stack Management > Roles"
                                 />
                               </EuiLink>
@@ -283,13 +286,13 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                         />
                       ) : (
                         <FormattedMessage
-                          id="genAiSettings.showAIAssistantDescriptionLabel"
+                          id="xpack.genAiSettings.showAIAssistantDescriptionLabel"
                           defaultMessage="You can enable or disable AI-powered features from the {space} settings page."
                           values={{
                             space: (
                               <strong>
                                 <FormattedMessage
-                                  id="genAiSettings.spacesLabel"
+                                  id="xpack.genAiSettings.spaceLabel"
                                   defaultMessage="Space"
                                 />
                               </strong>
@@ -347,7 +350,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   <EuiTitle size="s">
                     <h3 data-test-subj="anonymizationSectionTitle">
                       <FormattedMessage
-                        id="genAiSettings.anonymization.sectionTitle"
+                        id="xpack.genAiSettings.anonymization.sectionTitle"
                         defaultMessage="Anonymization"
                       />
                     </h3>
@@ -366,7 +369,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
           isLoading={isSaving}
           onDiscardChanges={cleanUnsavedChanges}
           onSave={handleSave}
-          saveLabel={i18n.translate('xpack.gen_ai_settings.settings.saveButton', {
+          saveLabel={i18n.translate('xpack.genAiSettings.settings.saveButton', {
             defaultMessage: 'Save changes',
           })}
           unsavedChangesCount={Object.keys(unsavedChanges).length}

@@ -85,7 +85,8 @@ export const recalculateEntityRiskScore = async ({
     throw Boom.badRequest(`Entity not found in store: ${entityId}`);
   }
 
-  const { alertFilters, resolutionTargetId, hasExistingBaseScore } = scoringContext;
+  const { alertFilters, resolutionAlertFilters, resolutionTargetId, hasExistingBaseScore } =
+    scoringContext;
 
   const { dataViewId } = engineConfig;
   const pageSize = engineConfig.pageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
@@ -156,6 +157,7 @@ export const recalculateEntityRiskScore = async ({
     idBasedRiskScoringEnabled,
     writer,
     targetEntityIds: [resolutionTargetId],
+    alertFilters: resolutionAlertFilters,
     refresh: 'wait_for',
     collectScores: true,
   });
@@ -199,6 +201,8 @@ async function buildScoringContext({
 
   return {
     alertFilters: [...baseAlertFilters, entityIdentityFilter],
+    // Resolution scores the whole group, so it can't be narrowed to this entity's alerts.
+    resolutionAlertFilters: baseAlertFilters,
     resolutionTargetId: entityDoc?.entity?.relationships?.resolution?.resolved_to ?? entityId,
     // Risk scoring dual-writes the base score here, so a value means the entity has been scored
     // before and its score document is worth refreshing.
