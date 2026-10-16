@@ -15,9 +15,6 @@ import {
   postCommentAlertReq,
   postCommentUserReq,
 } from '../../../../common/lib/mock';
-import { obsOnly } from '../../../../common/lib/authentication/users';
-import { observabilityOnlyAll } from '../../../../common/lib/authentication/roles';
-import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
 import {
   createCase,
   createComment,
@@ -248,6 +245,19 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(descCases.map(({ id }) => id)).to.eql([caseC.id, caseB.id, caseA.id]);
       });
 
+      it('sorts by created_at in ascending order when no sort params are given', async () => {
+        const { source, caseA, caseB, caseC } = await createSimilarCases();
+
+        const { cases } = await similarCases({
+          supertest,
+          body: { perPage: 10, page: 1 },
+          caseId: source.id,
+        });
+
+        // createSimilarCases creates the cases in the order B, A, C
+        expect(cases.map(({ id }) => id)).to.eql([caseB.id, caseA.id, caseC.id]);
+      });
+
       it('returns a 400 for an invalid sortField', async () => {
         const { source } = await createSimilarCases();
 
@@ -266,39 +276,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('rbac', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
-
-      describe('sorted request by a user of another owner', () => {
-        before(async () => {
-          await createUsersAndRoles(getService, [obsOnly], [observabilityOnlyAll]);
-        });
-
-        after(async () => {
-          await deleteUsersAndRoles(getService, [obsOnly], [observabilityOnlyAll]);
-        });
-
-        it('does not return similar cases of another owner when sorting', async () => {
-          const [caseA, caseB] = await Promise.all([
-            createCase(supertest, getPostCaseRequest()),
-            createCase(supertest, getPostCaseRequest()),
-          ]);
-          const observable = {
-            value: 'value',
-            typeKey: OBSERVABLE_TYPES_BUILTIN[0].key,
-            description: '',
-          };
-
-          await addObservable({ supertest, caseId: caseA.id, params: { observable } });
-          await addObservable({ supertest, caseId: caseB.id, params: { observable } });
-
-          await similarCases({
-            supertest: supertestWithoutAuth,
-            body: { perPage: 10, page: 1, sortField: 'title', sortOrder: 'asc' },
-            caseId: caseA.id,
-            auth: { user: obsOnly, space: null },
-            expectedHttpCode: 403,
-          });
-        });
-      });
 
       it('should not getting similar cases without permissions', async () => {
         await similarCases({

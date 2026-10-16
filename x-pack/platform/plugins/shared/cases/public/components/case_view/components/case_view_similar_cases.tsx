@@ -54,7 +54,6 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
     if (sort && isSortFieldCase(sort.field)) {
       setSortField(sort.field);
       setSortOrder(sort.direction);
-      setPageIndex(0);
     }
     if (page) {
       setPageIndex(page.index);
