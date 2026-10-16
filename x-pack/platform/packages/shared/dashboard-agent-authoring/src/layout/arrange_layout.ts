@@ -52,38 +52,33 @@ const createAliases = (widgets: Widgets): Map<string, string> => {
   return aliasById;
 };
 
-const toPanelKey = (sectionId: string | null, panelId: string): string =>
-  `${sectionId ?? ''}/${panelId}`;
+/** The container of every panel: the id of its section, or `null` for the top level. */
+type Placement = ReadonlyMap<string, string | null>;
 
-/** Keys of the sections, and of the panels in their containers, that a dashboard already places. */
-const getPlacedKeys = (widgets: Widgets): Set<string> =>
-  new Set(
-    widgets.flatMap((widget) =>
-      isSection(widget)
-        ? [widget.id, ...widget.panels.map(({ id }) => toPanelKey(widget.id, id))]
-        : [toPanelKey(null, widget.id)]
+const getPlacement = (widgets: Widgets): Placement =>
+  new Map(
+    widgets.flatMap(
+      (widget): Array<[string, string | null]> =>
+        isSection(widget) ? widget.panels.map(({ id }) => [id, widget.id]) : [[widget.id, null]]
     )
   );
 
-/**
- * Containers whose panels differ from the original dashboard, by section id; `''` is the top level,
- * which also changes when a section is added or removed.
- */
-const getChangedContainers = (
-  placedKeys: ReadonlySet<string>,
-  originalKeys: ReadonlySet<string>
-): Set<string> =>
-  new Set(
-    [
-      ...[...placedKeys].filter((key) => !originalKeys.has(key)),
-      ...[...originalKeys].filter((key) => !placedKeys.has(key)),
-    ].map((key) => (key.includes('/') ? key.slice(0, key.indexOf('/')) : ''))
-  );
+const getSectionIds = (widgets: Widgets): Set<string> =>
+  new Set(widgets.filter(isSection).map(({ id }) => id));
 
-const getPanelIds = (widgets: Widgets): Set<string> =>
-  new Set(
-    widgets.flatMap((widget) => (isSection(widget) ? widget.panels : [widget]).map(({ id }) => id))
+/** Whether a panel or section was added or removed, or a panel moved to another container. */
+const hasContainerChanges = (widgets: Widgets, originalWidgets: Widgets): boolean => {
+  const placement = getPlacement(widgets);
+  const originalPlacement = getPlacement(originalWidgets);
+  const sectionIds = getSectionIds(widgets);
+  const originalSectionIds = getSectionIds(originalWidgets);
+  return (
+    placement.size !== originalPlacement.size ||
+    [...placement].some(([id, sectionId]) => originalPlacement.get(id) !== sectionId) ||
+    sectionIds.size !== originalSectionIds.size ||
+    [...sectionIds].some((id) => !originalSectionIds.has(id))
   );
+};
 
 const byReadingOrder = (a: AttachmentPanel, b: AttachmentPanel): number =>
   a.grid.y - b.grid.y || a.grid.x - b.grid.x;
@@ -96,11 +91,11 @@ const getContainerPanels = (widgets: Widgets, sectionId: string | null): Attachm
 /** The grids that panels removed from a container, or moved out of it, had there. */
 const getRemovedGrids = (
   originalWidgets: Widgets,
-  currentKeys: ReadonlySet<string>,
+  placement: Placement,
   sectionId: string | null
 ): { removed?: LayoutGrid[] } => {
   const removed = getContainerPanels(originalWidgets, sectionId)
-    .filter(({ id }) => !currentKeys.has(toPanelKey(sectionId, id)))
+    .filter(({ id }) => placement.get(id) !== sectionId)
     .sort(byReadingOrder)
     .map(({ grid }) => grid);
   return removed.length > 0 ? { removed } : {};
@@ -127,12 +122,22 @@ const toLayoutRequest = (
   aliasById: ReadonlyMap<string, string>,
   instructions: string | undefined
 ): LayoutRequest => {
-  const placedKeys = getPlacedKeys(originalWidgets);
-  const currentKeys = getPlacedKeys(widgets);
-  const originalPanelIds = getPanelIds(originalWidgets);
+  const placement = getPlacement(widgets);
+  const originalPlacement = getPlacement(originalWidgets);
+  const originalSectionIds = getSectionIds(originalWidgets);
+  const getPlacementHint = (
+    { id, grid }: AttachmentPanel,
+    sectionId: string | null
+  ): Pick<LayoutPanel, 'grid' | 'size'> => {
+    const originalSectionId = originalPlacement.get(id);
+    if (originalSectionId === undefined) {
+      return {};
+    }
+    return originalSectionId === sectionId ? { grid } : { size: { w: grid.w, h: grid.h } };
+  };
   const toLayoutPanels = (panels: AttachmentPanel[], sectionId: string | null): LayoutPanel[] =>
     [...panels].sort(byReadingOrder).map((panel) => {
-      const { id, type, config, grid } = panel;
+      const { id, type, config } = panel;
       const content = getContent(panel);
       return {
         id: aliasById.get(id) ?? id,
@@ -140,11 +145,7 @@ const toLayoutRequest = (
         ...(typeof config.type === 'string' ? { chartType: config.type } : {}),
         ...(typeof config.title === 'string' ? { title: config.title } : {}),
         ...(content !== undefined ? { content: content.slice(0, MAX_CONTENT_LENGTH) } : {}),
-        ...(placedKeys.has(toPanelKey(sectionId, id))
-          ? { grid }
-          : originalPanelIds.has(id)
-          ? { size: { w: grid.w, h: grid.h } }
-          : {}),
+        ...getPlacementHint(panel, sectionId),
       };
     });
   return {
@@ -155,16 +156,16 @@ const toLayoutRequest = (
       widgets.filter((widget): widget is AttachmentPanel => !isSection(widget)),
       null
     ),
-    ...getRemovedGrids(originalWidgets, currentKeys, null),
+    ...getRemovedGrids(originalWidgets, placement, null),
     sections: widgets
       .filter(isSection)
       .sort((a, b) => a.grid.y - b.grid.y)
       .map(({ id, title, grid, panels }) => ({
         id: aliasById.get(id) ?? id,
         title,
-        ...(placedKeys.has(id) ? { y: grid.y } : {}),
+        ...(originalSectionIds.has(id) ? { y: grid.y } : {}),
         panels: toLayoutPanels(panels, id),
-        ...getRemovedGrids(originalWidgets, currentKeys, id),
+        ...getRemovedGrids(originalWidgets, placement, id),
       })),
   };
 };
@@ -204,11 +205,7 @@ export const arrangeDashboardLayout = async ({
   }
 
   const aliasById = createAliases(dashboardData.panels);
-  const changedContainers = getChangedContainers(
-    getPlacedKeys(dashboardData.panels),
-    getPlacedKeys(originalPanels)
-  );
-  if (instructions === undefined && changedContainers.size === 0) {
+  if (instructions === undefined && !hasContainerChanges(dashboardData.panels, originalPanels)) {
     return { dashboardData };
   }
   const request = toLayoutRequest(dashboardData.panels, originalPanels, aliasById, instructions);
