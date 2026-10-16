@@ -15,7 +15,7 @@ import {
 } from '@kbn/core/public';
 import { NIGHTSHIFT_APP_ID, type NightshiftLinkId } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, catchError, from, map, of, type Subscription } from 'rxjs';
+import { BehaviorSubject, type Subscription } from 'rxjs';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import { NightshiftSettingsLocatorDefinition } from '../common/locators';
 import type {
@@ -36,6 +36,7 @@ export class NightshiftPlugin
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({ visibleIn: [] }));
   private availabilitySubscription?: Subscription;
+  private stopped = false;
 
   constructor(private readonly context: PluginInitializerContext) {}
 
@@ -63,6 +64,15 @@ export class NightshiftPlugin
       // Hidden until Significant Events reports itself available; start() feeds the real value.
       visibleIn: [],
       deepLinks: [
+        {
+          id: 'sources' satisfies NightshiftLinkId,
+          title: i18n.translate('xpack.nightshift.sourcesDeepLinkTitle', {
+            defaultMessage: 'Sources',
+          }),
+          path: '/sources',
+          visibleIn: [],
+          keywords: ['sources', 'esql', 'significant events', 'sig events', 'sig events sources'],
+        },
         {
           id: 'knowledge_indicators' satisfies NightshiftLinkId,
           title: i18n.translate('xpack.nightshift.knowledgeIndicatorsDeepLinkTitle', {
@@ -93,47 +103,27 @@ export class NightshiftPlugin
   }
 
   start(coreStart: CoreStart, pluginsStart: NightshiftStartDependencies): NightshiftPublicStart {
-    const { agentBuilder } = pluginsStart;
-    if (agentBuilder) {
-      void import('./chat/agent_builder/significant_event_attachments')
-        .then(({ registerNightshiftAgentBuilderAttachments }) => {
-          registerNightshiftAgentBuilderAttachments({ agentBuilder });
-        })
-        .catch((error) => {
-          this.context.logger
-            .get('nightshiftAgentBuilderAttachments')
-            .error(`Failed to register agent builder attachments: ${error}`);
+    this.stopped = false;
+    void import('./start_services')
+      .then(({ startNightshiftServices }) => {
+        if (this.stopped) {
+          return;
+        }
+        this.availabilitySubscription = startNightshiftServices({
+          pluginsStart,
+          appUpdater$: this.appUpdater$,
+          context: this.context,
         });
-    }
-
-    // Single source of truth: aggregates rollout flag, project type, pricing tier, license and
-    // required plugins. The flag alone would surface the app where the feature cannot run.
-    this.availabilitySubscription = from(
-      pluginsStart.significantEvents.significantEventsRepositoryClient.fetch(
-        'GET /internal/significant_events/availability',
-        { signal: null }
-      )
-    )
-      .pipe(
-        map(({ available }) => available),
-        catchError(() => of(false)),
-        map(
-          (isAvailable): AppUpdater =>
-            (app) => ({
-              visibleIn: isAvailable ? ['globalSearch', 'projectSideNav'] : [],
-              deepLinks: (app.deepLinks ?? []).map((link) => ({
-                ...link,
-                visibleIn: isAvailable ? ['globalSearch'] : [],
-              })),
-            })
-        )
-      )
-      .subscribe(this.appUpdater$);
+      })
+      .catch((error) => {
+        this.context.logger.get().error(`Failed to initialize Nightshift: ${error}`);
+      });
 
     return {};
   }
 
   stop() {
+    this.stopped = true;
     this.availabilitySubscription?.unsubscribe();
   }
 }

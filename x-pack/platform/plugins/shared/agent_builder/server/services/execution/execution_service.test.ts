@@ -1466,6 +1466,45 @@ describe('AgentExecutionService', () => {
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     });
 
+    it('attributes a conversation created for a sub-agent to the parent execution', async () => {
+      conversationClient.exists.mockResolvedValue(false);
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.running,
+        eventCount: 0,
+        agentId: 'parent-agent',
+        owner: { id: 'profile-1', username: 'alice' },
+      });
+
+      await converse({
+        conversationId: undefined,
+        autoCreateConversationWithId: true,
+        parentExecutionId: 'parent-1',
+      });
+
+      // The record id only names the parent for `peek`: it is not a conversation `execution_id`.
+      expect(mockExecutionClient.peek).toHaveBeenCalledWith('parent-1');
+      expect(conversationClient.create).toHaveBeenCalledWith(expect.anything(), {
+        source: 'execution',
+        activity: { actor: { type: EventActorType.agent, id: 'parent-agent' } },
+      });
+    });
+
+    it('creates with no attribution when the parent execution is no longer recorded', async () => {
+      conversationClient.exists.mockResolvedValue(false);
+      mockExecutionClient.peek.mockResolvedValueOnce(undefined);
+
+      await converse({
+        conversationId: undefined,
+        autoCreateConversationWithId: true,
+        parentExecutionId: 'parent-1',
+      });
+
+      expect(conversationClient.create).toHaveBeenCalledTimes(1);
+      expect(conversationClient.create).toHaveBeenCalledWith(expect.anything(), {
+        source: 'execution',
+      });
+    });
+
     it('leaves a conversation paused on a prompt to the resume path', async () => {
       conversationClient.get.mockResolvedValue({
         ...conversation,

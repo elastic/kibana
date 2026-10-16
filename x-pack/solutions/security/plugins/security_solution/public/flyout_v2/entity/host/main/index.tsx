@@ -204,6 +204,7 @@ export const Host: FC<HostProps> = memo(function Host({
       entityStoreV2Enabled,
       entityFromStoreResult,
       riskScoreState,
+      isGroupView,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {
@@ -476,6 +477,7 @@ export const Host: FC<HostProps> = memo(function Host({
             onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
             riskScoreQueryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
+            isGroupView={isGroupView}
           />
         )}
       </EuiFlyoutBody>

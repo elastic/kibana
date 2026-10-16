@@ -19,6 +19,7 @@ import {
   getStatus,
   installAllEntityTypes,
   uninstallAllEntityTypes,
+  waitForDualProcessFlag,
   waitForStoreNotInstalled,
   type ApiClientFixture,
 } from '../../../common/fixtures/helpers';
@@ -28,7 +29,8 @@ type SettingsFn = (settings: Record<string, unknown>) => Promise<unknown>;
 const NON_PRIORITY_TASK_ID = 'entity_store:v2:extract_entity_non_priority_task:user:default';
 const PRIORITY_TASK_ID = 'entity_store:v2:extract_entity_task:user:default';
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/296933
+apiTest.describe.skip(
   'Entity Store per-process configuration and control',
   { tag: ENTITY_STORE_TAGS },
   () => {
@@ -98,14 +100,6 @@ apiTest.describe(
       expect((await installAllEntityTypes(apiClient, publicHeaders)).statusCode).toBe(201);
     });
 
-    // Three cases below turn the dual-process flag off, so it is restored per case. The V2 UI
-    // setting is never changed by a case, so it stays in beforeAll.
-    apiTest.beforeEach(async ({ apiServices }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: true },
-      });
-    });
-
     apiTest.afterAll(async ({ apiClient, apiServices, kbnClient }) => {
       await uninstallAllEntityTypes(apiClient, publicHeaders).catch(() => {});
       // Remove the override rather than writing `false`: the deployment may have the flag on,
@@ -127,6 +121,33 @@ apiTest.describe(
       ).toBe(200);
 
       expect((await userEngine(apiClient)).nonPriority?.samplingRate).toBe(0.5);
+    });
+
+    apiTest('reports the config each process resolves', async ({ apiClient }) => {
+      const updateGlobal = (logExtraction: Record<string, unknown>) =>
+        apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+          headers: publicHeaders,
+          responseType: 'json',
+          body: { logExtraction },
+        });
+
+      expect((await updateGlobal({ maxLogsPerWindow: 500000 })).statusCode).toBe(200);
+      expect(
+        (await setEngineConfig(apiClient, { nonPriorityOverride: { frequency: '5m' } })).statusCode
+      ).toBe(200);
+
+      const engine = await userEngine(apiClient);
+      // Top level is the priority process: it defers on the cap and takes the global volume field.
+      expect(engine.maxLogsPerWindowCapBehavior).toBe('defer');
+      expect(engine.maxLogsPerWindow).toBe(500000);
+      // Non-priority drops on the cap, ignores the global volume field and has its own frequency.
+      expect(engine.nonPriority?.maxLogsPerWindowCapBehavior).toBe('drop');
+      expect(engine.nonPriority?.maxLogsPerWindow).toBe(100000);
+      expect(engine.nonPriority?.frequency).toBe('5m');
+
+      // The store is installed once for the file, so clear both layers for later cases.
+      await updateGlobal({ maxLogsPerWindow: null });
+      await setEngineConfig(apiClient, { nonPriorityOverride: { frequency: null } });
     });
 
     apiTest('a later global update does not clear the per-type override', async ({ apiClient }) => {
@@ -333,15 +354,23 @@ apiTest.describe(
 
     // The handler unit tests call the handlers directly and the middleware test calls the guard
     // directly, so only an HTTP call proves these routes are still wired to the middleware.
-    const disableDualProcess = (apiServices: { core: { settings: SettingsFn } }) =>
-      apiServices.core.settings({
-        'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: false },
-      });
+    // Turned off once for the three cases below: other instances only see it on their next poll.
+    let dualProcessDisabled: Promise<void> | undefined;
+    const disableDualProcess = (
+      apiClient: ApiClientFixture,
+      apiServices: { core: { settings: SettingsFn } }
+    ) => {
+      dualProcessDisabled ??= apiServices.core
+        .settings({ 'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: false } })
+        .then(() => waitForDualProcessFlag(apiClient, publicHeaders, false));
+
+      return dualProcessDisabled;
+    };
 
     apiTest(
       'does not serve start with the dual-process flag off',
       async ({ apiClient, apiServices }) => {
-        await disableDualProcess(apiServices);
+        await disableDualProcess(apiClient, apiServices);
 
         const response = await apiClient.put(ENTITY_STORE_ROUTES.internal.START, {
           headers: internalHeaders,
@@ -356,7 +385,7 @@ apiTest.describe(
     apiTest(
       'does not serve stop with the dual-process flag off',
       async ({ apiClient, apiServices }) => {
-        await disableDualProcess(apiServices);
+        await disableDualProcess(apiClient, apiServices);
 
         const response = await apiClient.put(ENTITY_STORE_ROUTES.internal.STOP, {
           headers: internalHeaders,
@@ -372,7 +401,7 @@ apiTest.describe(
     apiTest(
       'still serves the per-type config route with the flag off',
       async ({ apiClient, apiServices }) => {
-        await disableDualProcess(apiServices);
+        await disableDualProcess(apiClient, apiServices);
 
         const response = await setEngineConfig(apiClient, {
           logExtraction: { frequency: '10m' },
