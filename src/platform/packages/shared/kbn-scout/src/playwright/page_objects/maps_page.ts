@@ -101,6 +101,25 @@ export class MapsPage {
       .toBe(true);
   }
 
+  /**
+   * Verifies Elastic Maps Service (EMS) is reachable by opening the EMS boundaries layer wizard
+   * and checking that the EMS file select is enabled. Throws if EMS is not available.
+   */
+  async expectEmsToBeAvailable() {
+    await this.gotoNewMap();
+    await this.openAddLayerFlyout();
+    await this.page.testSubj.click('emsBoundaries');
+    const emsFileSelect = this.page.testSubj.locator('emsFileSelect');
+    try {
+      await emsFileSelect.waitFor({ state: 'visible', timeout: 120000 }); // large timeout for EMS request
+      await expect(emsFileSelect.locator('input')).toBeEnabled();
+    } catch (e) {
+      throw new Error(
+        `Test requires access to Elastic Maps Service (EMS). EMS is not available: ${e.message}`
+      );
+    }
+  }
+
   async selectLayerWizardByTitle(title: string) {
     const wizardTestSubj = title
       .split(' ')
@@ -362,7 +381,6 @@ export class MapsPage {
     await this.page.testSubj.click('mapSettingSubmitButton');
   }
 
-  /** Sets the KQL query in the search bar, submits it, and waits for layers to load. */
   async setAbsoluteRange(from: string, to: string) {
     await this.datePicker.setAbsoluteRange({ from, to });
     await this.waitForLayersToLoad();
@@ -374,6 +392,7 @@ export class MapsPage {
     await this.waitForLayersToLoad();
   }
 
+  /** Sets the KQL query in the search bar, submits it, and waits for layers to load. */
   async setAndSubmitQuery(query: string) {
     await this.queryBar.setQuery(query);
     await this.queryBar.submitQuery();

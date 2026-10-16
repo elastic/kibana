@@ -24,6 +24,9 @@ test.describe('Maps - Lens choropleth chart', { tag: '@local-stateful-classic' }
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
+    // Test requires access to Elastic Maps Service
+    // Do not skip test if failure is "Test requires access to Elastic Maps Service (EMS). EMS is not available"
+    await pageObjects.maps.expectEmsToBeAvailable();
     await pageObjects.visualize.goto();
     await pageObjects.visualize.openNewVisualizationWizard();
     await pageObjects.visualize.clickVisType('lens');
