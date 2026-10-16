@@ -12,6 +12,11 @@ import {
   type ArrangeDashboardLayout,
 } from '@kbn/dashboard-agent-authoring';
 
+const LAYOUT_TOOL_NAME = 'arrange_dashboard_layout';
+
+const isForcedToolChoiceRejected = (error: unknown): boolean =>
+  error instanceof Error && error.message.includes('tool_choice');
+
 /**
  * Arranges dashboard containers with a dedicated model call. Errors propagate to the layout step,
  * which keeps the current layout.
@@ -21,10 +26,38 @@ export const createLayoutArranger =
   async (request) => {
     const { chatModel } = await modelProvider.getDefaultModel();
     const { system, user } = buildLayoutPrompt(request);
-    return chatModel
-      .withStructuredOutput(layoutArrangementSchema, { name: 'arrange_dashboard_layout' })
-      .invoke([
-        ['system', system],
-        ['human', user],
-      ]);
+    const messages: Array<[string, string]> = [
+      ['system', system],
+      ['human', user],
+    ];
+
+    try {
+      return await chatModel
+        .withStructuredOutput(layoutArrangementSchema, { name: LAYOUT_TOOL_NAME })
+        .invoke(messages);
+    } catch (error) {
+      if (!isForcedToolChoiceRejected(error)) {
+        throw error;
+      }
+    }
+
+    // Some models (e.g. Claude with extended thinking) reject a forced tool choice.
+    const response = await chatModel
+      .bindTools(
+        [
+          {
+            name: LAYOUT_TOOL_NAME,
+            description: 'Returns the grid of every panel and the row of every section.',
+            schema: layoutArrangementSchema,
+          },
+        ],
+        { tool_choice: 'auto' }
+      )
+      .invoke([...messages, ['human', `Answer by calling \`${LAYOUT_TOOL_NAME}\`.`]]);
+
+    const toolCall = response.tool_calls?.find(({ name }) => name === LAYOUT_TOOL_NAME);
+    if (!toolCall) {
+      throw new Error(`The model did not call ${LAYOUT_TOOL_NAME}`);
+    }
+    return layoutArrangementSchema.parse(toolCall.args);
   };
