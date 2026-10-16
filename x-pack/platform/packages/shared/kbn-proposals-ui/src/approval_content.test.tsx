@@ -212,6 +212,15 @@ describe('ApprovalContent', () => {
     expect(screen.getByText('all').tagName).toBe('STRONG');
   });
 
+  it('opens links in the comment in a new tab', () => {
+    renderContent({
+      proposal: { ...baseProposal, comment: 'See [the runbook](https://example.com/runbook).' },
+    });
+    const link = screen.getByRole('link', { name: /the runbook/ });
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
+  });
+
   it('renders a GFM table in the comment, which is how a proposal lists what it touches', () => {
     const { container } = renderContent({
       proposal: {
@@ -381,6 +390,7 @@ describe('ApprovalContent', () => {
 
       // The badge and the outcome banner's own title both say it.
       expect(screen.getAllByText('Applying').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getByTestId('approvalContent-outcome')).toHaveTextContent(/^Applying$/);
       expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
       expect(screen.getAllByText(/Ava/).length).toBeGreaterThan(0);
     });
@@ -474,8 +484,8 @@ describe('ApprovalContent', () => {
         },
       });
 
-      expect(screen.getByText('Approved')).toBeInTheDocument();
-      expect(screen.getByText('Approved — no action to run')).toBeInTheDocument();
+      // The badge's short label and the banner's title read the same.
+      expect(screen.getAllByText('Approved')).toHaveLength(2);
       expect(screen.queryByText('Applied')).not.toBeInTheDocument();
     });
 
@@ -656,6 +666,7 @@ describe('ApprovalContent', () => {
         />
       );
       expect(screen.queryByTestId('card-decline-form')).not.toBeInTheDocument();
+      expect(screen.getByTestId('card-outcome')).toHaveTextContent(/^Declining$/);
     });
   });
 });

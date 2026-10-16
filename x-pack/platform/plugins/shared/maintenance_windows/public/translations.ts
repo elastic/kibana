@@ -6,9 +6,12 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const MAINTENANCE_WINDOWS = i18n.translate('xpack.maintenanceWindows', {
-  defaultMessage: 'Maintenance Windows',
-});
+export const MAINTENANCE_WINDOWS = i18n.translate(
+  'xpack.maintenanceWindows.maintenanceWindowsTitle',
+  {
+    defaultMessage: 'Maintenance Windows',
+  }
+);
 
 export const MAINTENANCE_WINDOWS_DESCRIPTION = i18n.translate(
   'xpack.maintenanceWindows.description',

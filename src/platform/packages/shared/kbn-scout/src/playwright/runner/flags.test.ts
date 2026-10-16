@@ -40,7 +40,6 @@ describe('parseTestFlags', () => {
       headed: false,
       logToFile: false,
       preserveEsData: false,
-      serverConfigSet: 'default',
     });
 
     await expect(parseTestFlags(flags)).rejects.toThrow(
@@ -58,7 +57,6 @@ describe('parseTestFlags', () => {
       logToFile: false,
       preserveEsData: false,
       headed: false,
-      serverConfigSet: 'default',
     });
 
     await expect(parseTestFlags(flags)).rejects.toThrow(
@@ -74,7 +72,6 @@ describe('parseTestFlags', () => {
       logToFile: false,
       preserveEsData: false,
       headed: false,
-      serverConfigSet: 'default',
     });
 
     await expect(parseTestFlags(flags)).rejects.toThrow('expected --arch to be a string');
@@ -88,7 +85,6 @@ describe('parseTestFlags', () => {
       logToFile: false,
       preserveEsData: false,
       headed: false,
-      serverConfigSet: 'default',
     });
 
     await expect(parseTestFlags(flags)).rejects.toThrow('expected --domain to be a string');
@@ -102,7 +98,6 @@ describe('parseTestFlags', () => {
       logToFile: false,
       preserveEsData: false,
       headed: false,
-      serverConfigSet: 'default',
     });
 
     await expect(parseTestFlags(flags)).rejects.toThrow(
@@ -118,7 +113,6 @@ describe('parseTestFlags', () => {
       logToFile: false,
       preserveEsData: false,
       headed: false,
-      serverConfigSet: 'default',
     });
 
     await expect(parseTestFlags(flags)).rejects.toThrow(
@@ -134,7 +128,6 @@ describe('parseTestFlags', () => {
       logToFile: false,
       preserveEsData: false,
       headed: false,
-      serverConfigSet: 'default',
     });
 
     await expect(parseTestFlags(flags)).rejects.toThrow(
@@ -151,7 +144,6 @@ describe('parseTestFlags', () => {
       logToFile: false,
       preserveEsData: false,
       headed: false,
-      serverConfigSet: 'default',
     });
     validatePlaywrightConfigMock.mockResolvedValueOnce();
     const result = await parseTestFlags(flags);
@@ -164,7 +156,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       preserveEsData: false,
-      serverConfigSet: 'default',
+      targetAttributes: [],
       testTarget: new ScoutTestTarget('local', 'serverless', 'observability_complete'),
     });
   });
@@ -179,7 +171,6 @@ describe('parseTestFlags', () => {
       preserveEsData: false,
       headed: true,
       esFrom: 'snapshot',
-      serverConfigSet: 'default',
     });
     validatePlaywrightConfigMock.mockResolvedValueOnce();
     const result = await parseTestFlags(flags);
@@ -192,7 +183,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       preserveEsData: false,
-      serverConfigSet: 'default',
+      targetAttributes: [],
       testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
     });
   });
@@ -206,7 +197,6 @@ describe('parseTestFlags', () => {
       logToFile: false,
       preserveEsData: false,
       headed: false,
-      serverConfigSet: 'default',
     });
     validatePlaywrightConfigMock.mockResolvedValueOnce();
     const result = await parseTestFlags(flags);
@@ -219,7 +209,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       preserveEsData: false,
-      serverConfigSet: 'default',
+      targetAttributes: [],
       testTarget: new ScoutTestTarget('cloud', 'serverless', 'security_ease'),
     });
   });
@@ -234,7 +224,6 @@ describe('parseTestFlags', () => {
       preserveEsData: false,
       headed: true,
       esFrom: 'snapshot',
-      serverConfigSet: 'default',
     });
     validatePlaywrightConfigMock.mockResolvedValueOnce();
     const result = await parseTestFlags(flags);
@@ -247,7 +236,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       preserveEsData: false,
-      serverConfigSet: 'default',
+      targetAttributes: [],
       testTarget: new ScoutTestTarget('cloud', 'stateful', 'classic'),
     });
   });
@@ -262,7 +251,6 @@ describe('parseTestFlags', () => {
       preserveEsData: false,
       headed: false,
       repeatEach: '5',
-      serverConfigSet: 'default',
     });
     validatePlaywrightConfigMock.mockResolvedValueOnce();
     const result = await parseTestFlags(flags);
@@ -275,7 +263,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       preserveEsData: false,
-      serverConfigSet: 'default',
+      targetAttributes: [],
       testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
     });
   });
@@ -290,7 +278,6 @@ describe('parseTestFlags', () => {
       preserveEsData: false,
       headed: false,
       repeatEach: 'abc',
-      serverConfigSet: 'default',
     });
 
     await expect(parseTestFlags(flags)).rejects.toThrow(
@@ -308,7 +295,6 @@ describe('parseTestFlags', () => {
       preserveEsData: false,
       headed: false,
       repeatEach: '0',
-      serverConfigSet: 'default',
     });
 
     await expect(parseTestFlags(flags)).rejects.toThrow(
@@ -326,7 +312,6 @@ describe('parseTestFlags', () => {
       preserveEsData: false,
       headed: false,
       repeatEach: '2.5',
-      serverConfigSet: 'default',
     });
 
     await expect(parseTestFlags(flags)).rejects.toThrow(
@@ -359,7 +344,6 @@ describe('parseTestFlags', () => {
         logToFile: false,
         preserveEsData: false,
         headed: false,
-        serverConfigSet: 'default',
       });
 
       const result = await parseTestFlags(flags);
@@ -373,8 +357,8 @@ describe('parseTestFlags', () => {
         installDir: undefined,
         logsDir: undefined,
         preserveEsData: false,
-        serverConfigSet: 'default',
         testFiles: [testFile],
+        targetAttributes: [],
         testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
       });
     });
@@ -401,7 +385,6 @@ describe('parseTestFlags', () => {
         logToFile: false,
         preserveEsData: false,
         headed: false,
-        serverConfigSet: 'default',
       });
 
       const result = await parseTestFlags(flags);
@@ -415,8 +398,8 @@ describe('parseTestFlags', () => {
         installDir: undefined,
         logsDir: undefined,
         preserveEsData: false,
-        serverConfigSet: 'default',
         testFiles,
+        targetAttributes: [],
         testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
       });
     });
@@ -440,7 +423,6 @@ describe('parseTestFlags', () => {
         logToFile: false,
         preserveEsData: false,
         headed: false,
-        serverConfigSet: 'default',
       });
 
       const result = await parseTestFlags(flags);
@@ -468,7 +450,6 @@ describe('parseTestFlags', () => {
         logToFile: false,
         preserveEsData: false,
         headed: false,
-        serverConfigSet: 'default',
       });
 
       const result = await parseTestFlags(flags);
@@ -493,7 +474,6 @@ describe('parseTestFlags', () => {
         logToFile: false,
         preserveEsData: false,
         headed: false,
-        serverConfigSet: 'default',
       });
 
       await expect(parseTestFlags(flags)).rejects.toThrow(errorMessage);
@@ -508,7 +488,6 @@ describe('parseTestFlags', () => {
         logToFile: false,
         preserveEsData: false,
         headed: false,
-        serverConfigSet: 'default',
       });
 
       const result = await parseTestFlags(flags);
