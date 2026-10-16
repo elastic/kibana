@@ -106,9 +106,10 @@ const getRemovedGrids = (
  * plain words are left, since they may be words of the instructions.
  */
 const aliasInstructions = (instructions: string, aliasById: ReadonlyMap<string, string>): string =>
-  [...aliasById]
-    .filter(([id]) => /[^A-Za-z]/.test(id))
-    .reduce((text, [id, alias]) => text.split(id).join(alias), instructions);
+  instructions
+    .split(/([^\w-]+)/)
+    .map((word) => (/[^A-Za-z]/.test(word) ? aliasById.get(word) ?? word : word))
+    .join('');
 
 /**
  * The dashboard with short ids. Panels new to their container (added or moved) are sent without a

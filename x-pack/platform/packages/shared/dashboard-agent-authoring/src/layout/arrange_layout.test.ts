@@ -118,6 +118,22 @@ describe('arrangeDashboardLayout', () => {
     );
   });
 
+  it('writes only whole panel ids in the instructions as short ids', async () => {
+    const arrangeLayout = jest.fn(async () => completeArrangement);
+
+    await arrange(arrangeLayout, {
+      dashboardData: {
+        title: 'Dashboard',
+        panels: [createLensPanel('panel-1'), createLensPanel('panel-10', 9)],
+      },
+      instructions: 'make panel-10 full width, below `panel-1`',
+    });
+
+    expect(arrangeLayout).toHaveBeenCalledWith(
+      expect.objectContaining({ instructions: 'make p2 full width, below `p1`' })
+    );
+  });
+
   it('sends the dashboard with short ids, without the grids of new panels, and applies the arrangement', async () => {
     const arrangeLayout = jest.fn(async () => completeArrangement);
 
