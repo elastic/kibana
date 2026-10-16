@@ -28,6 +28,12 @@ describe('configuration', () => {
             { doc_count: 2, key: 'close-by-pushing' },
           ],
         },
+        extractObservables: {
+          buckets: [
+            { doc_count: 3, key: 1 },
+            { doc_count: 2, key: 0 },
+          ],
+        },
       },
     });
     const customFieldsMock = [
@@ -79,6 +85,8 @@ describe('configuration', () => {
             manually: 1,
             automatic: 2,
           },
+          extractObservablesDefaultOn: 3,
+          extractObservablesDefaultOff: 2,
           ...emptyCustomFieldsMock,
         },
         sec: { ...emptyCustomFieldsMock },
@@ -97,6 +105,11 @@ describe('configuration', () => {
           closureType: {
             terms: {
               field: 'cases-configure.attributes.closure_type',
+            },
+          },
+          extractObservables: {
+            terms: {
+              field: 'cases-configure.attributes.extractObservables',
             },
           },
         },
@@ -142,6 +155,12 @@ describe('configuration', () => {
               { doc_count: 2, key: 'close-by-pushing' },
             ],
           },
+          extractObservables: {
+            buckets: [
+              { doc_count: 3, key: 1 },
+              { doc_count: 2, key: 0 },
+            ],
+          },
         },
       });
 
@@ -155,6 +174,8 @@ describe('configuration', () => {
             manually: 1,
             automatic: 2,
           },
+          extractObservablesDefaultOn: 3,
+          extractObservablesDefaultOff: 2,
           customFields: {
             totals: 8,
             required: 6,
@@ -215,6 +236,12 @@ describe('configuration', () => {
               { doc_count: 2, key: 'close-by-pushing' },
             ],
           },
+          extractObservables: {
+            buckets: [
+              { doc_count: 4, key: 1 },
+              { doc_count: 1, key: 0 },
+            ],
+          },
         },
       });
 
@@ -228,6 +255,8 @@ describe('configuration', () => {
             manually: 1,
             automatic: 2,
           },
+          extractObservablesDefaultOn: 4,
+          extractObservablesDefaultOff: 1,
           customFields: {
             totals: 4,
             required: 3,
@@ -252,6 +281,72 @@ describe('configuration', () => {
         obs: { ...emptyCustomFieldsMock },
         main: { ...emptyCustomFieldsMock },
       });
+    });
+
+    it('counts extractObservables: true as defaultOn', async () => {
+      savedObjectsClient.find.mockResolvedValue({
+        total: 3,
+        saved_objects: [],
+        per_page: 5,
+        page: 1,
+        aggregations: {
+          closureType: { buckets: [] },
+          extractObservables: {
+            buckets: [{ doc_count: 3, key: 1 }],
+          },
+        },
+      });
+
+      const res = await getConfigurationTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
+      expect(res.all.extractObservablesDefaultOn).toBe(3);
+      expect(res.all.extractObservablesDefaultOff).toBe(0);
+    });
+
+    it('counts extractObservables: false as defaultOff', async () => {
+      savedObjectsClient.find.mockResolvedValue({
+        total: 2,
+        saved_objects: [],
+        per_page: 5,
+        page: 1,
+        aggregations: {
+          closureType: { buckets: [] },
+          extractObservables: {
+            buckets: [{ doc_count: 2, key: 0 }],
+          },
+        },
+      });
+
+      const res = await getConfigurationTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
+      expect(res.all.extractObservablesDefaultOn).toBe(0);
+      expect(res.all.extractObservablesDefaultOff).toBe(2);
+    });
+
+    it('treats old SOs without extractObservables as defaultOn', async () => {
+      savedObjectsClient.find.mockResolvedValue({
+        total: 4,
+        saved_objects: [],
+        per_page: 5,
+        page: 1,
+        aggregations: {
+          closureType: { buckets: [] },
+          extractObservables: {
+            buckets: [{ doc_count: 1, key: 0 }],
+          },
+        },
+      });
+
+      const res = await getConfigurationTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
+      expect(res.all.extractObservablesDefaultOn).toBe(3);
+      expect(res.all.extractObservablesDefaultOff).toBe(1);
     });
   });
 });

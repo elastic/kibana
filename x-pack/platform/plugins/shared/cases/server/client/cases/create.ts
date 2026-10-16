@@ -174,7 +174,17 @@ export const create = async (
             query.owner,
             configurations[0]?.extractObservables
           ),
+          extractObservablesSource: 'space_default',
         },
+      };
+    } else {
+      // Template expansion fills the value only when the caller omitted it, so a value present on
+      // the expanded request but absent on the raw request came from the template.
+      const extractObservablesSource =
+        rawQuery.settings.extractObservables === undefined ? 'template' : 'explicit';
+      query = {
+        ...query,
+        settings: { ...query.settings, extractObservablesSource },
       };
     }
 
