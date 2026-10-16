@@ -84,6 +84,8 @@ export interface SingleCompileConfigOptions {
   cache?: boolean;
   examples?: boolean;
   testPlugins?: boolean;
+  /** Include `devOnly` plugins */
+  devOnly?: boolean;
   /** Explicit plugin paths passed via --plugin-path */
   pluginPaths?: string[];
   /** Directories scanned for plugins */
@@ -107,6 +109,12 @@ export interface SingleCompileConfigOptions {
   limitsPath?: string;
 }
 
+export interface SingleCompileConfig {
+  config: Configuration;
+  /** Number of discovered bundles (core + plugins), reported to ci-stats. */
+  bundleCount: number;
+}
+
 /**
  * Create a SINGLE RSPack configuration that builds ALL plugins together.
  *
@@ -118,7 +126,7 @@ export interface SingleCompileConfigOptions {
  */
 export async function createSingleCompileConfig(
   options: SingleCompileConfigOptions
-): Promise<Configuration> {
+): Promise<SingleCompileConfig> {
   const {
     repoRoot,
     outputRoot = repoRoot,
@@ -127,6 +135,7 @@ export async function createSingleCompileConfig(
     cache = true,
     examples = false,
     testPlugins = false,
+    devOnly = false,
     pluginPaths,
     pluginScanDirs,
     allowlistPluginGroups,
@@ -152,6 +161,7 @@ export async function createSingleCompileConfig(
     repoRoot,
     examples,
     testPlugins,
+    devOnly,
     paths: pluginPaths,
     parentDirs: pluginScanDirs,
     allowlistPluginGroups,
@@ -196,7 +206,7 @@ export async function createSingleCompileConfig(
 
   const bundlesDir = resolveBundlesDir(outputRoot);
 
-  return {
+  const config: Configuration = {
     name: 'kibana',
     mode: dist ? 'production' : 'development',
     // No sourcemaps in dist; cheap-module-source-map in dev for original-source
@@ -283,7 +293,7 @@ export async function createSingleCompileConfig(
     optimization: {
       moduleIds: dist ? 'deterministic' : 'named',
       chunkIds: dist ? 'deterministic' : 'named',
-      // Skip sideEffects analysis in dev mode (matches legacy webpack optimizer).
+      // Skip sideEffects analysis in dev mode.
       // In dev, tree shaking overhead is wasted since bundles aren't minified.
       // In dist, defaults to true (rspack default).
       sideEffects: dist,
@@ -345,7 +355,7 @@ export async function createSingleCompileConfig(
     }),
 
     plugins: [
-      // Node.js browser polyfills (same as kbn-optimizer)
+      // Node.js browser polyfills (same as kbn-rspack-optimizer)
       new NodeLibsBrowserPlugin() as any,
 
       // Redirect kea's react-redux import to react-redux-v7 so it shares the
@@ -369,7 +379,7 @@ export async function createSingleCompileConfig(
       // Define environment variables
       new rspack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(dist ? 'production' : 'development'),
-        // Match legacy webpack - used for conditional code in plugins
+        // Used for conditional code in plugins
         'process.env.IS_KIBANA_DISTRIBUTABLE': JSON.stringify(dist ? 'true' : 'false'),
         ...(hmr ? { __KBN_HMR_PORT__: JSON.stringify(resolvedHmrPort) } : {}),
       }),
@@ -489,4 +499,6 @@ export async function createSingleCompileConfig(
     // Use shared ignore warnings (same as external plugins)
     ignoreWarnings: getSharedIgnoreWarnings(),
   };
+
+  return { config, bundleCount: 1 + plugins.length };
 }

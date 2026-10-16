@@ -11,8 +11,9 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ResolutionClient } from '../../resolution_client';
 import { ResolutionSearchTruncatedError } from '../../../errors';
 import { RESOLUTION_RULE_IDS } from '../../../../../common/domain/resolution_rules/constants';
+import { USER_ENTITY_NAMESPACE } from '../../../../../common/domain/definitions/user_entity_constants';
 import { getResolutionRuleConfig } from '../rule_registry';
-import { GROUP_SIZE_CEILING } from './constants';
+import { GROUP_SIZE_CEILING, MATCH_GROUP_COLUMNS } from './constants';
 import { runEsqlMatcherRule } from './run';
 import type { RunEsqlMatcherDeps } from './run';
 import type { PerRuleState } from '../maintainers/automated_resolution/types';
@@ -22,6 +23,11 @@ jest.mock('../../../asset_manager/resolve_entity_store_indices', () => ({
 }));
 
 const EMAIL_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH)!.matcher!;
+const SID_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE)!.matcher!;
+const CROWDSTRIKE_SID_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE)!
+  .matcher!;
+
+const WATERMARK = '2026-08-10T00:00:00Z';
 
 const createInitialState = (overrides: Partial<PerRuleState> = {}): PerRuleState => ({
   lastProcessedTimestamp: null,
@@ -54,36 +60,53 @@ const esqlResponse = (columns: string[], values: unknown[][]): ESQLSearchRespons
     values,
   } as ESQLSearchResponse);
 
-const emptyGroups = () =>
-  esqlResponse(
-    ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-    []
-  );
+const GROUP_COLUMNS: string[] = Object.values(MATCH_GROUP_COLUMNS);
+
+const emptyGroups = () => esqlResponse(GROUP_COLUMNS, []);
 
 const watermarkResponse = (maxTs: string | null) => esqlResponse(['max_ts'], [[maxTs]]);
 
-const groupRow = ({
+type Member = readonly [id: string, namespace: string];
+type StoredEntity = readonly [id: string, namespace: string, resolvedTo?: string];
+
+interface MatchGroup {
+  row: unknown[];
+  entities: StoredEntity[];
+}
+
+/**
+ * One match-group row plus the entity documents behind it. Every column the
+ * query aggregates is derived from `members`, the group's unresolved entities.
+ */
+const matchGroup = ({
   matchValue,
-  unresolvedIds,
-  namespaces,
+  members,
   existingTargets = [],
-  unresolvedCount,
   groupSize,
 }: {
   matchValue: string;
-  unresolvedIds: string[];
-  namespaces: string[];
-  existingTargets?: string[];
-  unresolvedCount?: number;
+  members: Member[];
+  existingTargets?: StoredEntity[];
   groupSize?: number;
-}) => [
-  matchValue,
-  unresolvedIds,
-  namespaces,
-  existingTargets,
-  unresolvedCount ?? unresolvedIds.length,
-  groupSize ?? unresolvedIds.length + existingTargets.length,
-];
+}): MatchGroup => {
+  const ids = members.map(([id]) => id);
+  const targetIds = existingTargets.map(([id]) => id);
+  const columns: Record<string, unknown> = {
+    [MATCH_GROUP_COLUMNS.matchValue]: matchValue,
+    [MATCH_GROUP_COLUMNS.ids]: ids,
+    [MATCH_GROUP_COLUMNS.unresolvedNs]: [...new Set(members.map(([, namespace]) => namespace))],
+    [MATCH_GROUP_COLUMNS.existingTargets]: targetIds,
+    [MATCH_GROUP_COLUMNS.unresolvedN]: members.length,
+    [MATCH_GROUP_COLUMNS.unresolvedLocalN]: members.filter(
+      ([, namespace]) => namespace === USER_ENTITY_NAMESPACE.Local
+    ).length,
+    [MATCH_GROUP_COLUMNS.totalN]: groupSize ?? ids.length + targetIds.length,
+  };
+  return {
+    row: GROUP_COLUMNS.map((column) => columns[column]),
+    entities: [...members, ...existingTargets],
+  };
+};
 
 const entityHit = (id: string, namespace: string, resolvedTo?: string) => ({
   _id: `doc-${id}`,
@@ -100,6 +123,35 @@ describe('runEsqlMatcherRule', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockCascadeLink: jest.Mock;
   let mockResolutionClient: ResolutionClient;
+
+  /** Mocks the watermark query, one ES|QL response per page, and the entity fetch. */
+  const mockGroupPages = (...pages: MatchGroup[][]) => {
+    const esqlQuery = mockEsClient.esql.query as jest.Mock;
+    esqlQuery.mockResolvedValueOnce(watermarkResponse(WATERMARK));
+    for (const page of pages) {
+      esqlQuery.mockResolvedValueOnce(
+        esqlResponse(
+          GROUP_COLUMNS,
+          page.map((group) => group.row)
+        )
+      );
+    }
+
+    const entities = new Map(
+      pages.flat().flatMap((group) => group.entities.map((entity) => [entity[0], entity] as const))
+    );
+    (mockEsClient.search as jest.Mock).mockImplementation(async ({ query }) => {
+      const ids: string[] = query.bool.filter[0].terms['entity.id'];
+      return {
+        hits: {
+          hits: ids.flatMap((id) => {
+            const entity = entities.get(id);
+            return entity ? [entityHit(...entity)] : [];
+          }),
+        },
+      };
+    });
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -140,9 +192,7 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('omits the first_seen bound from the grouping query when watermark is null', async () => {
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(emptyGroups());
+    mockGroupPages([]);
 
     await runEsqlMatcherRule(createDeps(createInitialState(), mockEsClient, mockResolutionClient));
 
@@ -151,63 +201,15 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('pages until a short page and links every group', async () => {
-    const page1 = esqlResponse(
-      ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-      [
-        groupRow({
-          matchValue: 'a@corp.com',
-          unresolvedIds: ['user-a1', 'user-a2'],
-          namespaces: ['okta', 'entra_id'],
-        }),
-        groupRow({
-          matchValue: 'b@corp.com',
-          unresolvedIds: ['user-b1', 'user-b2'],
-          namespaces: ['okta', 'entra_id'],
-        }),
-        groupRow({
-          matchValue: 'c@corp.com',
-          unresolvedIds: ['user-c1', 'user-c2'],
-          namespaces: ['okta', 'entra_id'],
-        }),
-        groupRow({
-          matchValue: 'd@corp.com',
-          unresolvedIds: ['user-d1', 'user-d2'],
-          namespaces: ['okta', 'entra_id'],
-        }),
-        groupRow({
-          matchValue: 'e@corp.com',
-          unresolvedIds: ['user-e1', 'user-e2'],
-          namespaces: ['okta', 'entra_id'],
-        }),
-      ]
-    );
-    const page2 = esqlResponse(
-      ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-      [
-        groupRow({
-          matchValue: 'f@corp.com',
-          unresolvedIds: ['user-f1', 'user-f2'],
-          namespaces: ['okta', 'entra_id'],
-        }),
-        groupRow({
-          matchValue: 'g@corp.com',
-          unresolvedIds: ['user-g1', 'user-g2'],
-          namespaces: ['okta', 'entra_id'],
-        }),
-      ]
-    );
-
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(page1)
-      .mockResolvedValueOnce(page2);
-
-    (mockEsClient.search as jest.Mock).mockImplementation(async ({ query }) => {
-      const ids: string[] = query.bool.filter[0].terms['entity.id'];
-      return {
-        hits: { hits: ids.map((id) => entityHit(id, id.endsWith('1') ? 'okta' : 'entra_id')) },
-      };
-    });
+    const oktaEntraPair = (letter: string) =>
+      matchGroup({
+        matchValue: `${letter}@corp.com`,
+        members: [
+          [`user-${letter}1`, 'okta'],
+          [`user-${letter}2`, 'entra_id'],
+        ],
+      });
+    mockGroupPages(['a', 'b', 'c', 'd', 'e'].map(oktaEntraPair), ['f', 'g'].map(oktaEntraPair));
 
     const result = await runEsqlMatcherRule(
       createDeps(createInitialState(), mockEsClient, mockResolutionClient, { pageSize: 5 })
@@ -221,28 +223,21 @@ describe('runEsqlMatcherRule', () => {
     expect(groupingQueries[0]).not.toContain('match_value >');
     expect(groupingQueries[1]).toContain('| WHERE match_value > "e@corp.com"');
     expect(mockCascadeLink).toHaveBeenCalledTimes(7);
-    expect(result.lastProcessedTimestamp).toBe('2026-08-10T00:00:00Z');
+    expect(result.lastProcessedTimestamp).toBe(WATERMARK);
     expect(result.lastRun?.resolutionsCreated).toBe(7);
   });
 
   it('declines a bucket with two unresolved entities in one namespace', async () => {
     const logger = loggerMock.create();
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(
-        esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-          [
-            groupRow({
-              matchValue: 'shared@corp.com',
-              unresolvedIds: ['user-1', 'user-2'],
-              namespaces: ['microsoft_365'],
-              unresolvedCount: 2,
-              groupSize: 2,
-            }),
-          ]
-        )
-      );
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'shared@corp.com',
+        members: [
+          ['user-1', 'microsoft_365'],
+          ['user-2', 'microsoft_365'],
+        ],
+      }),
+    ]);
 
     const result = await runEsqlMatcherRule(
       createDeps(createInitialState(), mockEsClient, mockResolutionClient, { logger })
@@ -253,24 +248,284 @@ describe('runEsqlMatcherRule', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('ambiguous bucket'));
   });
 
+  it('links two local entities, an AD user and an Okta user sharing an email onto the AD user', async () => {
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'john.smith@corp.com',
+        members: [
+          ['user-local-a', 'local'],
+          ['user-local-b', 'local'],
+          ['user-ad', 'active_directory'],
+          ['user-okta', 'okta'],
+        ],
+      }),
+    ]);
+
+    const result = await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient)
+    );
+
+    expect(mockCascadeLink).toHaveBeenCalledWith('user-ad', [
+      'user-local-a',
+      'user-local-b',
+      'user-okta',
+    ]);
+    expect(result.lastRun?.skippedAmbiguousBuckets).toBe(0);
+  });
+
+  it('links local entities with different user names sharing an email', async () => {
+    const jsmith = 'user:jsmith@host-a@local';
+    const jsmithAdmin = 'user:jsmith_adm@host-a@local';
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'jsmith@corp.com',
+        members: [
+          [jsmith, 'local'],
+          [jsmithAdmin, 'local'],
+        ],
+      }),
+    ]);
+
+    await runEsqlMatcherRule(createDeps(createInitialState(), mockEsClient, mockResolutionClient));
+
+    expect(mockCascadeLink).toHaveBeenCalledTimes(1);
+    const [targetId, aliasIds] = mockCascadeLink.mock.calls[0];
+    expect([targetId, ...aliasIds].sort()).toEqual([jsmith, jsmithAdmin].sort());
+  });
+
+  it('declines two AD entities and one Okta entity sharing an email', async () => {
+    const logger = loggerMock.create();
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'shared@corp.com',
+        members: [
+          ['user-ad-1', 'active_directory'],
+          ['user-ad-2', 'active_directory'],
+          ['user-okta', 'okta'],
+        ],
+      }),
+    ]);
+
+    const result = await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient, { logger })
+    );
+
+    expect(mockCascadeLink).not.toHaveBeenCalled();
+    expect(result.lastRun?.skippedAmbiguousBuckets).toBe(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('3 unresolved entities across 2 namespaces (0 local not counted)')
+    );
+  });
+
+  it('declines two AD entities sharing an email even when local entities share it too', async () => {
+    const logger = loggerMock.create();
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'shared@corp.com',
+        members: [
+          ['user-ad-1', 'active_directory'],
+          ['user-ad-2', 'active_directory'],
+          ['user-local-a', 'local'],
+          ['user-local-b', 'local'],
+        ],
+      }),
+    ]);
+
+    const result = await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient, { logger })
+    );
+
+    expect(mockCascadeLink).not.toHaveBeenCalled();
+    expect(result.lastRun?.skippedAmbiguousBuckets).toBe(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('2 unresolved entities across 1 namespaces (2 local not counted)')
+    );
+  });
+
+  it('links several local entities sharing an email when no IdP user has it', async () => {
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'jane@corp.com',
+        members: [
+          ['user-local-z', 'local'],
+          ['user-local-a', 'local'],
+          ['user-local-m', 'local'],
+        ],
+      }),
+    ]);
+
+    const result = await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient)
+    );
+
+    expect(mockCascadeLink).toHaveBeenCalledWith('user-local-a', ['user-local-z', 'user-local-m']);
+    expect(result.lastRun?.skippedAmbiguousBuckets).toBe(0);
+  });
+
+  it('links a new local host into an email group already headed by a local entity', async () => {
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'jane@corp.com',
+        members: [
+          ['user-local-a', 'local'],
+          ['user-local-c', 'local'],
+        ],
+        existingTargets: [['user-local-a', 'local']],
+        groupSize: 3,
+      }),
+    ]);
+
+    await runEsqlMatcherRule(createDeps(createInitialState(), mockEsClient, mockResolutionClient));
+
+    expect(mockCascadeLink).toHaveBeenCalledWith('user-local-a', ['user-local-c']);
+  });
+
+  it('picks the AD user as target over an existing local head', async () => {
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'jane@corp.com',
+        members: [
+          ['user-ad', 'active_directory'],
+          ['user-local-a', 'local'],
+        ],
+        existingTargets: [['user-local-a', 'local']],
+      }),
+    ]);
+
+    await runEsqlMatcherRule(createDeps(createInitialState(), mockEsClient, mockResolutionClient));
+
+    expect(mockCascadeLink).toHaveBeenCalledWith('user-ad', ['user-local-a']);
+  });
+
+  it('links several unresolved local entities sharing a SID onto the AD target', async () => {
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'S-1-5-21-111-222-333-1104',
+        members: [
+          ['user-local-a', 'local'],
+          ['user-local-b', 'local'],
+          ['user-ad', 'active_directory'],
+        ],
+      }),
+    ]);
+
+    await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient, {
+        spec: SID_SPEC,
+        ruleId: RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
+      })
+    );
+
+    expect(mockCascadeLink).toHaveBeenCalledWith('user-ad', ['user-local-a', 'user-local-b']);
+  });
+
+  it('links two AD entities sharing a SID because a SID names one account, not a collision', async () => {
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'S-1-5-21-111-222-333-1104',
+        members: [
+          ['user-ad-1', 'active_directory'],
+          ['user-ad-2', 'active_directory'],
+          ['user-local', 'local'],
+        ],
+      }),
+    ]);
+
+    await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient, {
+        spec: SID_SPEC,
+        ruleId: RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
+      })
+    );
+
+    expect(mockCascadeLink).toHaveBeenCalledWith('user-ad-1', ['user-ad-2', 'user-local']);
+  });
+
+  it('links two leftover CrowdStrike-namespace entities sharing a SID because a SID names one account, not a collision', async () => {
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'S-1-5-21-111-222-333-1104',
+        members: [
+          ['user-cs-1', 'crowdstrike'],
+          ['user-cs-2', 'crowdstrike'],
+        ],
+      }),
+    ]);
+
+    await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient, {
+        spec: CROWDSTRIKE_SID_SPEC,
+        ruleId: RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE,
+      })
+    );
+
+    expect(mockCascadeLink).toHaveBeenCalledWith('user-cs-1', ['user-cs-2']);
+  });
+
+  it('links two unresolved local entities sharing a domain SID with no other namespace', async () => {
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'S-1-5-21-111-222-333-1104',
+        members: [
+          ['user-local-z', 'local'],
+          ['user-local-a', 'local'],
+        ],
+      }),
+    ]);
+
+    await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient, {
+        spec: SID_SPEC,
+        ruleId: RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
+      })
+    );
+
+    expect(mockCascadeLink).toHaveBeenCalledWith('user-local-a', ['user-local-z']);
+  });
+
+  it('retargets a local-headed SID group onto Active Directory when the AD user arrives', async () => {
+    mockCascadeLink.mockResolvedValueOnce({
+      linked: ['user-local-a'],
+      retargeted: ['user-local-z'],
+      skipped: [],
+      cascadesBlocked: 0,
+      target_id: 'user-ad',
+    });
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'S-1-5-21-111-222-333-1104',
+        members: [
+          ['user-ad', 'active_directory'],
+          ['user-local-a', 'local'],
+        ],
+        existingTargets: [['user-local-a', 'local']],
+      }),
+    ]);
+
+    const result = await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient, {
+        spec: SID_SPEC,
+        ruleId: RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
+      })
+    );
+
+    expect(mockCascadeLink).toHaveBeenCalledWith('user-ad', ['user-local-a']);
+    expect(result.lastRun?.resolutionsCreated).toBe(1);
+    expect(result.lastRun?.cascadeRetargeted).toBe(1);
+  });
+
   it('declines a bucket above the group-size ceiling without linking a subset', async () => {
     const logger = loggerMock.create();
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(
-        esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-          [
-            groupRow({
-              matchValue: 'shared@corp.com',
-              unresolvedIds: ['user-1', 'user-2'],
-              namespaces: ['okta', 'entra_id'],
-              unresolvedCount: 2,
-              groupSize: GROUP_SIZE_CEILING + 1,
-            }),
-          ]
-        )
-      );
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'shared@corp.com',
+        members: [
+          ['user-1', 'okta'],
+          ['user-2', 'entra_id'],
+        ],
+        groupSize: GROUP_SIZE_CEILING + 1,
+      }),
+    ]);
 
     const result = await runEsqlMatcherRule(
       createDeps(createInitialState(), mockEsClient, mockResolutionClient, { logger })
@@ -278,33 +533,65 @@ describe('runEsqlMatcherRule', () => {
 
     expect(mockCascadeLink).not.toHaveBeenCalled();
     expect(result.lastRun?.skippedOversizedBuckets).toBe(1);
+    expect(result.lastRun).not.toHaveProperty('oversizedLargestGroup');
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('oversized bucket'));
   });
 
-  it('cascade-links unresolved members onto the namespace-priority target', async () => {
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(
-        esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-          [
-            groupRow({
-              matchValue: 'alice@corp.com',
-              unresolvedIds: ['user-okta', 'user-entra', 'user-ad'],
-              namespaces: ['okta', 'entra_id', 'active_directory'],
-            }),
-          ]
-        )
-      );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
-      hits: {
-        hits: [
-          entityHit('user-okta', 'okta'),
-          entityHit('user-entra', 'entra_id'),
-          entityHit('user-ad', 'active_directory'),
+  it('bins declined oversized group sizes and reports the largest in telemetry', async () => {
+    const telemetry = { report: jest.fn() };
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'helpdesk@corp.com',
+        members: [
+          ['user-1', 'okta'],
+          ['user-2', 'entra_id'],
         ],
-      },
-    });
+        groupSize: 150,
+      }),
+      matchGroup({
+        matchValue: 'scanner@corp.com',
+        members: [
+          ['user-a', 'okta'],
+          ['user-b', 'entra_id'],
+        ],
+        groupSize: 12_000,
+      }),
+    ]);
+
+    const result = await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient, {
+        telemetry,
+        pageSize: 10,
+      })
+    );
+
+    expect(mockCascadeLink).not.toHaveBeenCalled();
+    expect(result.lastRun?.skippedOversizedBuckets).toBe(2);
+    expect(result.lastRun).not.toHaveProperty('oversizedLargestGroup');
+    expect(telemetry.report).toHaveBeenCalledWith(
+      expect.objectContaining({
+        breakdown: expect.arrayContaining([
+          { name: 'oversized_skips', count: 2 },
+          { name: 'oversized_101_1000', count: 1 },
+          { name: 'oversized_1001_10000', count: 0 },
+          { name: 'oversized_over_10000', count: 1 },
+          { name: 'oversized_largest_group', count: 12_000 },
+        ]),
+      })
+    );
+  });
+
+  it('cascade-links unresolved members onto the namespace-priority target', async () => {
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'alice@corp.com',
+        members: [
+          ['user-okta', 'okta'],
+          ['user-entra', 'entra_id'],
+          ['user-ad', 'active_directory'],
+        ],
+      }),
+    ]);
 
     await runEsqlMatcherRule(createDeps(createInitialState(), mockEsClient, mockResolutionClient));
 
@@ -312,28 +599,14 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('extends an existing group by cascade-linking onto the known target', async () => {
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(
-        esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-          [
-            groupRow({
-              matchValue: 'alice@corp.com',
-              unresolvedIds: ['user-new'],
-              namespaces: ['entra_id'],
-              existingTargets: ['user-okta'],
-              unresolvedCount: 1,
-              groupSize: 3,
-            }),
-          ]
-        )
-      );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
-      hits: {
-        hits: [entityHit('user-new', 'entra_id'), entityHit('user-okta', 'okta')],
-      },
-    });
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'alice@corp.com',
+        members: [['user-new', 'entra_id']],
+        existingTargets: [['user-okta', 'okta']],
+        groupSize: 3,
+      }),
+    ]);
 
     await runEsqlMatcherRule(createDeps(createInitialState(), mockEsClient, mockResolutionClient));
 
@@ -341,28 +614,14 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('does not rewrite an already-correct group when the email watermark is reset', async () => {
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(
-        esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-          [
-            groupRow({
-              matchValue: 'alice@corp.com',
-              unresolvedIds: [],
-              namespaces: [],
-              existingTargets: ['user-okta'],
-              unresolvedCount: 0,
-              groupSize: 2,
-            }),
-          ]
-        )
-      );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
-      hits: {
-        hits: [entityHit('user-okta', 'okta')],
-      },
-    });
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'alice@corp.com',
+        members: [],
+        existingTargets: [['user-okta', 'okta']],
+        groupSize: 2,
+      }),
+    ]);
 
     const result = await runEsqlMatcherRule(
       createDeps(createInitialState(), mockEsClient, mockResolutionClient)
@@ -374,20 +633,12 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('counts a singleton unresolved group with no existing targets as a no-op skip', async () => {
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(
-        esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-          [
-            groupRow({
-              matchValue: 'solo@corp.com',
-              unresolvedIds: ['user-solo'],
-              namespaces: ['okta'],
-            }),
-          ]
-        )
-      );
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'solo@corp.com',
+        members: [['user-solo', 'okta']],
+      }),
+    ]);
 
     const result = await runEsqlMatcherRule(
       createDeps(createInitialState(), mockEsClient, mockResolutionClient)
@@ -400,20 +651,16 @@ describe('runEsqlMatcherRule', () => {
 
   it('counts a missing-entity fetch as a no-op skip and warns', async () => {
     const logger = loggerMock.create();
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(
-        esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-          [
-            groupRow({
-              matchValue: 'alice@corp.com',
-              unresolvedIds: ['user-okta', 'user-entra'],
-              namespaces: ['okta', 'entra_id'],
-            }),
-          ]
-        )
-      );
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'alice@corp.com',
+        members: [
+          ['user-okta', 'okta'],
+          ['user-entra', 'entra_id'],
+        ],
+      }),
+    ]);
+    (mockEsClient.search as jest.Mock).mockResolvedValue({ hits: { hits: [] } });
 
     const result = await runEsqlMatcherRule(
       createDeps(createInitialState(), mockEsClient, mockResolutionClient, { logger })
@@ -427,28 +674,14 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('retargets an out-of-group existing target when a higher-priority unresolved member wins', async () => {
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(
-        esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-          [
-            groupRow({
-              matchValue: 'alice@corp.com',
-              unresolvedIds: ['user-ad'],
-              namespaces: ['active_directory'],
-              existingTargets: ['user-okta'],
-              unresolvedCount: 1,
-              groupSize: 2,
-            }),
-          ]
-        )
-      );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
-      hits: {
-        hits: [entityHit('user-ad', 'active_directory'), entityHit('user-okta', 'okta')],
-      },
-    });
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'alice@corp.com',
+        members: [['user-ad', 'active_directory']],
+        existingTargets: [['user-okta', 'okta']],
+        groupSize: 2,
+      }),
+    ]);
 
     await runEsqlMatcherRule(createDeps(createInitialState(), mockEsClient, mockResolutionClient));
 
@@ -456,32 +689,17 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('includes a losing existing target when linking other unresolved members', async () => {
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(
-        esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-          [
-            groupRow({
-              matchValue: 'alice@corp.com',
-              unresolvedIds: ['user-ad', 'user-slack'],
-              namespaces: ['active_directory', 'slack'],
-              existingTargets: ['user-okta'],
-              unresolvedCount: 2,
-              groupSize: 4,
-            }),
-          ]
-        )
-      );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
-      hits: {
-        hits: [
-          entityHit('user-ad', 'active_directory'),
-          entityHit('user-slack', 'slack'),
-          entityHit('user-okta', 'okta'),
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'alice@corp.com',
+        members: [
+          ['user-ad', 'active_directory'],
+          ['user-slack', 'slack'],
         ],
-      },
-    });
+        existingTargets: [['user-okta', 'okta']],
+        groupSize: 4,
+      }),
+    ]);
 
     await runEsqlMatcherRule(createDeps(createInitialState(), mockEsClient, mockResolutionClient));
 
@@ -489,32 +707,17 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('does not pass a mid-chain existing target to cascadeLinkEntities', async () => {
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(
-        esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-          [
-            groupRow({
-              matchValue: 'alice@corp.com',
-              unresolvedIds: ['user-cs'],
-              namespaces: ['crowdstrike'],
-              existingTargets: ['user-mid', 'user-okta'],
-              unresolvedCount: 1,
-              groupSize: 3,
-            }),
-          ]
-        )
-      );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
-      hits: {
-        hits: [
-          entityHit('user-cs', 'crowdstrike'),
-          entityHit('user-mid', 'active_directory', 'user-okta'),
-          entityHit('user-okta', 'okta'),
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'alice@corp.com',
+        members: [['user-cs', 'crowdstrike']],
+        existingTargets: [
+          ['user-mid', 'active_directory', 'user-okta'],
+          ['user-okta', 'okta'],
         ],
-      },
-    });
+        groupSize: 3,
+      }),
+    ]);
 
     await runEsqlMatcherRule(createDeps(createInitialState(), mockEsClient, mockResolutionClient));
 
@@ -524,25 +727,15 @@ describe('runEsqlMatcherRule', () => {
   it('does not advance the watermark when a bucket fails', async () => {
     const logger = loggerMock.create();
     const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(
-        esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-          [
-            groupRow({
-              matchValue: 'alice@corp.com',
-              unresolvedIds: ['user-okta', 'user-entra'],
-              namespaces: ['okta', 'entra_id'],
-            }),
-          ]
-        )
-      );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
-      hits: {
-        hits: [entityHit('user-okta', 'okta'), entityHit('user-entra', 'entra_id')],
-      },
-    });
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'alice@corp.com',
+        members: [
+          ['user-okta', 'okta'],
+          ['user-entra', 'entra_id'],
+        ],
+      }),
+    ]);
     mockCascadeLink.mockRejectedValueOnce(new Error('transient ES failure'));
 
     const result = await runEsqlMatcherRule(
@@ -557,25 +750,15 @@ describe('runEsqlMatcherRule', () => {
     const logger = loggerMock.create();
     const telemetry = { report: jest.fn() };
     const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(
-        esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-          [
-            groupRow({
-              matchValue: 'alice@corp.com',
-              unresolvedIds: ['user-okta', 'user-entra'],
-              namespaces: ['okta', 'entra_id'],
-            }),
-          ]
-        )
-      );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
-      hits: {
-        hits: [entityHit('user-okta', 'okta'), entityHit('user-entra', 'entra_id')],
-      },
-    });
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'alice@corp.com',
+        members: [
+          ['user-okta', 'okta'],
+          ['user-entra', 'entra_id'],
+        ],
+      }),
+    ]);
     mockCascadeLink.mockRejectedValueOnce(
       new ResolutionSearchTruncatedError('validateAndGetRetargetableAliases', 10000, 12000)
     );
@@ -584,7 +767,7 @@ describe('runEsqlMatcherRule', () => {
       createDeps(state, mockEsClient, mockResolutionClient, { logger, telemetry })
     );
 
-    expect(result.lastProcessedTimestamp).toBe('2026-08-10T00:00:00Z');
+    expect(result.lastProcessedTimestamp).toBe(WATERMARK);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('truncated alias tree'));
     expect(telemetry.report).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -602,25 +785,15 @@ describe('runEsqlMatcherRule', () => {
 
   it('reports per-rule telemetry distinguishing link, cascade, and skip outcomes', async () => {
     const telemetry = { report: jest.fn() };
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(
-        esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-          [
-            groupRow({
-              matchValue: 'alice@corp.com',
-              unresolvedIds: ['user-okta', 'user-entra'],
-              namespaces: ['okta', 'entra_id'],
-            }),
-          ]
-        )
-      );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
-      hits: {
-        hits: [entityHit('user-okta', 'okta'), entityHit('user-entra', 'entra_id')],
-      },
-    });
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'alice@corp.com',
+        members: [
+          ['user-okta', 'okta'],
+          ['user-entra', 'entra_id'],
+        ],
+      }),
+    ]);
     mockCascadeLink.mockResolvedValueOnce({
       linked: ['user-entra'],
       retargeted: ['user-old'],
@@ -643,6 +816,10 @@ describe('runEsqlMatcherRule', () => {
           { name: 'cascades_blocked', count: 0 },
           { name: 'ambiguous_skips', count: 0 },
           { name: 'oversized_skips', count: 0 },
+          { name: 'oversized_101_1000', count: 0 },
+          { name: 'oversized_1001_10000', count: 0 },
+          { name: 'oversized_over_10000', count: 0 },
+          { name: 'oversized_largest_group', count: 0 },
           { name: 'noop_skips', count: 0 },
           { name: 'blocked_skips', count: 0 },
           { name: 'stale_overlap_skips', count: 0 },
@@ -656,9 +833,7 @@ describe('runEsqlMatcherRule', () => {
     const abortCtrl = new AbortController();
     abortCtrl.abort();
     const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
-    (mockEsClient.esql.query as jest.Mock).mockResolvedValueOnce(
-      watermarkResponse('2026-08-10T00:00:00Z')
-    );
+    (mockEsClient.esql.query as jest.Mock).mockResolvedValueOnce(watermarkResponse(WATERMARK));
 
     const result = await runEsqlMatcherRule(
       createDeps(state, mockEsClient, mockResolutionClient, { signal: abortCtrl.signal })
@@ -688,7 +863,7 @@ describe('runEsqlMatcherRule', () => {
   it('does not advance the watermark when ES|QL returns partial results', async () => {
     const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
     (mockEsClient.esql.query as jest.Mock).mockResolvedValueOnce({
-      ...watermarkResponse('2026-08-10T00:00:00Z'),
+      ...watermarkResponse(WATERMARK),
       is_partial: true,
     });
 
@@ -699,7 +874,7 @@ describe('runEsqlMatcherRule', () => {
 
   it('throws when a required match-group column is missing', async () => {
     (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
+      .mockResolvedValueOnce(watermarkResponse(WATERMARK))
       .mockResolvedValueOnce(esqlResponse(['match_value', 'ids'], [['a@corp.com', ['user-1']]]));
 
     await expect(
@@ -708,26 +883,16 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('links a group whose size equals the ceiling', async () => {
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(
-        esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-          [
-            groupRow({
-              matchValue: 'alice@corp.com',
-              unresolvedIds: ['user-okta', 'user-entra'],
-              namespaces: ['okta', 'entra_id'],
-              groupSize: GROUP_SIZE_CEILING,
-            }),
-          ]
-        )
-      );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
-      hits: {
-        hits: [entityHit('user-okta', 'okta'), entityHit('user-entra', 'entra_id')],
-      },
-    });
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'alice@corp.com',
+        members: [
+          ['user-okta', 'okta'],
+          ['user-entra', 'entra_id'],
+        ],
+        groupSize: GROUP_SIZE_CEILING,
+      }),
+    ]);
 
     await runEsqlMatcherRule(createDeps(createInitialState(), mockEsClient, mockResolutionClient));
 
@@ -735,32 +900,17 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('cascade-links both existing targets when a higher-priority unresolved member wins', async () => {
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(
-        esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-          [
-            groupRow({
-              matchValue: 'alice@corp.com',
-              unresolvedIds: ['user-ad'],
-              namespaces: ['active_directory'],
-              existingTargets: ['user-okta', 'user-entra'],
-              unresolvedCount: 1,
-              groupSize: 3,
-            }),
-          ]
-        )
-      );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
-      hits: {
-        hits: [
-          entityHit('user-ad', 'active_directory'),
-          entityHit('user-okta', 'okta'),
-          entityHit('user-entra', 'entra_id'),
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'alice@corp.com',
+        members: [['user-ad', 'active_directory']],
+        existingTargets: [
+          ['user-okta', 'okta'],
+          ['user-entra', 'entra_id'],
         ],
-      },
-    });
+        groupSize: 3,
+      }),
+    ]);
 
     await runEsqlMatcherRule(createDeps(createInitialState(), mockEsClient, mockResolutionClient));
 
@@ -770,20 +920,15 @@ describe('runEsqlMatcherRule', () => {
   it('skips a group that overlaps ids written earlier this tick and holds the watermark', async () => {
     const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
     const mutatedIds = new Set(['user-okta']);
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(
-        esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-          [
-            groupRow({
-              matchValue: 'alice@corp.com',
-              unresolvedIds: ['user-okta', 'user-entra'],
-              namespaces: ['okta', 'entra_id'],
-            }),
-          ]
-        )
-      );
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'alice@corp.com',
+        members: [
+          ['user-okta', 'okta'],
+          ['user-entra', 'entra_id'],
+        ],
+      }),
+    ]);
 
     const result = await runEsqlMatcherRule(
       createDeps(state, mockEsClient, mockResolutionClient, { mutatedIds })
@@ -795,62 +940,50 @@ describe('runEsqlMatcherRule', () => {
 
   it('reports a mixed funnel where scanned equals applied plus skipped plus failed', async () => {
     const telemetry = { report: jest.fn() };
-    (mockEsClient.esql.query as jest.Mock)
-      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
-      .mockResolvedValueOnce(
-        esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
-          [
-            groupRow({
-              matchValue: 'applied@corp.com',
-              unresolvedIds: ['user-okta', 'user-entra'],
-              namespaces: ['okta', 'entra_id'],
-            }),
-            groupRow({
-              matchValue: 'ambiguous@corp.com',
-              unresolvedIds: ['user-1', 'user-2'],
-              namespaces: ['microsoft_365'],
-              unresolvedCount: 2,
-              groupSize: 2,
-            }),
-            groupRow({
-              matchValue: 'oversized@corp.com',
-              unresolvedIds: ['user-a', 'user-b'],
-              namespaces: ['okta', 'entra_id'],
-              unresolvedCount: 2,
-              groupSize: GROUP_SIZE_CEILING + 1,
-            }),
-            groupRow({
-              matchValue: 'noop@corp.com',
-              unresolvedIds: [],
-              namespaces: [],
-              existingTargets: ['user-okta-noop'],
-              unresolvedCount: 0,
-              groupSize: 2,
-            }),
-            groupRow({
-              matchValue: 'blocked@corp.com',
-              unresolvedIds: ['user-blocked-a', 'user-blocked-b'],
-              namespaces: ['okta', 'entra_id'],
-            }),
-            groupRow({
-              matchValue: 'failed@corp.com',
-              unresolvedIds: ['user-fail-a', 'user-fail-b'],
-              namespaces: ['okta', 'entra_id'],
-            }),
-          ]
-        )
-      );
-    (mockEsClient.search as jest.Mock).mockImplementation(async ({ query }) => {
-      const ids: string[] = query.bool.filter[0].terms['entity.id'];
-      return {
-        hits: {
-          hits: ids.map((id) =>
-            entityHit(id, id.includes('okta') || id.endsWith('-a') ? 'okta' : 'entra_id')
-          ),
-        },
-      };
-    });
+    mockGroupPages([
+      matchGroup({
+        matchValue: 'applied@corp.com',
+        members: [
+          ['user-okta', 'okta'],
+          ['user-entra', 'entra_id'],
+        ],
+      }),
+      matchGroup({
+        matchValue: 'ambiguous@corp.com',
+        members: [
+          ['user-1', 'microsoft_365'],
+          ['user-2', 'microsoft_365'],
+        ],
+      }),
+      matchGroup({
+        matchValue: 'oversized@corp.com',
+        members: [
+          ['user-a', 'okta'],
+          ['user-b', 'entra_id'],
+        ],
+        groupSize: GROUP_SIZE_CEILING + 1,
+      }),
+      matchGroup({
+        matchValue: 'noop@corp.com',
+        members: [],
+        existingTargets: [['user-okta-noop', 'okta']],
+        groupSize: 2,
+      }),
+      matchGroup({
+        matchValue: 'blocked@corp.com',
+        members: [
+          ['user-blocked-a', 'okta'],
+          ['user-blocked-b', 'entra_id'],
+        ],
+      }),
+      matchGroup({
+        matchValue: 'failed@corp.com',
+        members: [
+          ['user-fail-a', 'okta'],
+          ['user-fail-b', 'entra_id'],
+        ],
+      }),
+    ]);
     mockCascadeLink
       .mockResolvedValueOnce({
         linked: ['user-entra'],

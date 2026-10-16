@@ -24,11 +24,29 @@ import { connectorTokenClientMock } from '../../../../lib/connector_token_client
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { z } from '@kbn/zod';
 import { z as z4 } from '@kbn/zod/v4';
-import { getConnectorSpec } from '@kbn/connector-specs';
+import {
+  connectorTypeHasInboundEvents,
+  connectorTypeIsDual,
+  getConnectorSpec,
+} from '@kbn/connector-specs';
 import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
 import { generateConfigSchema } from '../../../../lib/single_file_connectors/generate_config_schema';
 import { securityServiceMock } from '@kbn/core/server/mocks';
 import { encodeApiKey } from '../../../../inbound/event_identity/encode_api_key';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+
+jest.mock('@kbn/connector-specs', () => {
+  const actual = jest.requireActual('@kbn/connector-specs');
+  return {
+    ...actual,
+    connectorTypeHasInboundEvents: jest.fn((actionTypeId: string) =>
+      actual.connectorTypeHasInboundEvents(actionTypeId)
+    ),
+    connectorTypeIsDual: jest.fn((actionTypeId: string) =>
+      actual.connectorTypeIsDual(actionTypeId)
+    ),
+  };
+});
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -462,6 +480,7 @@ describe('create()', () => {
           isMissingSecrets: false,
           config: { foo: 'bar' },
           secrets: { apiKey: 'secret' },
+          hasInboundEventIdentity: false,
         },
         { id: 'mock-saved-object-id' }
       );
@@ -634,6 +653,7 @@ describe('create()', () => {
           },
           secrets: {},
           authMode: 'shared',
+          hasInboundEventIdentity: false,
         },
         { id: 'mock-saved-object-id' }
       );
@@ -694,6 +714,7 @@ describe('create()', () => {
           config: {},
           secrets: { authType: 'oauth_authorization_code' },
           authMode: 'per-user',
+          hasInboundEventIdentity: false,
         },
         { id: 'mock-saved-object-id' }
       );
@@ -744,6 +765,7 @@ describe('create()', () => {
           isMissingSecrets: false,
           config: {},
           secrets: {},
+          hasInboundEventIdentity: false,
         },
         { id: 'mock-saved-object-id' }
       );
@@ -1338,17 +1360,13 @@ describe('create()', () => {
         action: {
           name: 'Sales ingress',
           actionTypeId: '.inboundWebhook',
-          config: { ingestTokenHash: 'a'.repeat(64) },
+          config: {},
           secrets: {},
         },
       });
 
-      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
-        config: { ingestTokenHash?: string };
-      };
-
       expect(result).not.toHaveProperty('secrets');
-      expect(saved.config.ingestTokenHash).toBeUndefined();
+      expect(result.isInboundEventsEnabled).toBe(true);
     });
 
     test('stores a last-saver API key and leaves spoke secrets unchanged', async () => {
@@ -1365,10 +1383,12 @@ describe('create()', () => {
       const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
         apiKey?: string;
         uiamApiKey?: string;
+        hasInboundEventIdentity?: boolean;
         secrets: Record<string, unknown>;
       };
 
       expect(saved.apiKey).toBe(encodeApiKey('es-id', 'es-secret'));
+      expect(saved.hasInboundEventIdentity).toBe(true);
       expect(saved.uiamApiKey).toBeUndefined();
       expect(saved.secrets).toEqual({});
       expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
@@ -1448,5 +1468,206 @@ describe('create()', () => {
     };
     expect(saved.apiKey).toBeUndefined();
     expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+  });
+
+  describe('dual connector inbound events', () => {
+    const securityService = securityServiceMock.createStart();
+    const dualContext: ActionsClientContext = {
+      ...mockContext,
+      spaceId: 'default',
+      securityService,
+    };
+
+    beforeEach(() => {
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual'
+      );
+      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual' || actionTypeId === '.inboundWebhook'
+      );
+      (securityService.authc.apiKeys as { uiam?: unknown }).uiam = undefined;
+      securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue({
+        id: 'es-id',
+        name: 'Actions: connector event identity mock-saved-object-id',
+        api_key: 'es-secret',
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.dual',
+          source: ACTION_TYPE_SOURCES.spec,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+      unsecuredSavedObjectsClient.create.mockImplementation(async (type, attributes, options) => ({
+        id: options?.id ?? 'mock-saved-object-id',
+        type,
+        attributes,
+        references: options?.references ?? [],
+      }));
+    });
+
+    test('does not mint identity when the flag is omitted', async () => {
+      const result = await create({
+        context: dualContext,
+        action: {
+          name: 'Datadog prod',
+          actionTypeId: '.dual',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      const actionCreates = unsecuredSavedObjectsClient.create.mock.calls.filter(
+        (call) => call[0] === 'action'
+      );
+      const saved = actionCreates[0][1] as {
+        apiKey?: string;
+        hasInboundEventIdentity?: boolean;
+      };
+      expect(saved.apiKey).toBeUndefined();
+      expect(saved.hasInboundEventIdentity).toBe(false);
+      expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+      expect(result.isInboundEventsEnabled).toBe(false);
+    });
+
+    test('mints identity only when enabled', async () => {
+      const result = await create({
+        context: dualContext,
+        action: {
+          name: 'Datadog prod',
+          actionTypeId: '.dual',
+          config: {},
+          secrets: {},
+          isInboundEventsEnabled: true,
+        },
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(true);
+      expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
+      const saved = unsecuredSavedObjectsClient.create.mock.calls.find(
+        (call) => call[0] === 'action'
+      )?.[1] as { apiKey?: string; hasInboundEventIdentity?: boolean };
+      expect(saved.apiKey).toBe(encodeApiKey('es-id', 'es-secret'));
+      expect(saved.hasInboundEventIdentity).toBe(true);
+      expect(
+        unsecuredSavedObjectsClient.create.mock.calls.every((call) => call[0] === 'action')
+      ).toBe(true);
+    });
+
+    test('rejects the flag on a non-dual type', async () => {
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.slack',
+          preSaveHook,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+
+      await expect(
+        create({
+          context: dualContext,
+          action: {
+            name: 'Slack',
+            actionTypeId: '.slack',
+            config: {},
+            secrets: {},
+            isInboundEventsEnabled: true,
+          },
+        })
+      ).rejects.toThrow(
+        'Inbound events can only be turned on for connectors that both send and receive.'
+      );
+      expect(preSaveHook).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('connectors that publish keys', () => {
+    const keyContext: ActionsClientContext = {
+      ...mockContext,
+      spaceId: 'security',
+      publicBaseUrl: 'https://kibana.example.com',
+    };
+    const action = { name: 'SSF', actionTypeId: '.ssf', config: {}, secrets: {} };
+
+    beforeEach(() => {
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.ssf',
+          preSaveHook,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+      unsecuredSavedObjectsClient.create.mockImplementation(async (type, attributes, options) => ({
+        id: options?.id ?? 'mock-saved-object-id',
+        type,
+        attributes,
+        references: [],
+      }));
+    });
+
+    test.each([undefined, 'http://kibana.example.com', 'https://kibana.example.com/kibana'])(
+      'returns 400 before the pre-save hook when the public base URL is %s',
+      async (publicBaseUrl) => {
+        await expect(
+          create({ context: { ...keyContext, publicBaseUrl }, action })
+        ).rejects.toMatchObject({ output: { statusCode: 400 } });
+        expect(preSaveHook).not.toHaveBeenCalled();
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      }
+    );
+
+    test('creates the key record after the connector, outside the connector attributes', async () => {
+      await create({ context: keyContext, action });
+
+      const [[connectorType, connector], [keyType, key, keyOptions]] =
+        unsecuredSavedObjectsClient.create.mock.calls;
+      expect(connectorType).toBe('action');
+      expect(connector).toMatchObject({ config: {}, secrets: {} });
+      expect(keyType).toBe('connector_signing_key');
+      expect(key).toMatchObject({
+        connectorId: 'mock-saved-object-id',
+        issuer:
+          'https://kibana.example.com/s/security/api/actions/public/.ssf/mock-saved-object-id',
+      });
+      expect(keyOptions).toMatchObject({ id: 'mock-saved-object-id', overwrite: true });
+    });
+
+    test('does not write a key record when the connector ID is already used', async () => {
+      unsecuredSavedObjectsClient.create.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError('action', 'mock-saved-object-id')
+      );
+
+      await expect(create({ context: keyContext, action })).rejects.toThrow(
+        'A connector is already using this ID'
+      );
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
+    });
+
+    test('deletes the connector when the key record cannot be written', async () => {
+      unsecuredSavedObjectsClient.create.mockImplementation(async (type, attributes, options) => {
+        if (type === 'connector_signing_key') throw new Error('key write failed');
+        return { id: options?.id ?? 'mock-saved-object-id', type, attributes, references: [] };
+      });
+
+      await expect(create({ context: keyContext, action })).rejects.toThrow('key write failed');
+      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
+        'action',
+        'mock-saved-object-id'
+      );
+    });
   });
 });

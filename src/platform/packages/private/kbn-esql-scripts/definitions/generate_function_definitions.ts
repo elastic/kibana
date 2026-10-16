@@ -49,7 +49,7 @@ const MAX_BYTES_PER_FILE = 400 * 1024;
 
 const GENERATED_DIR = join(
   REPO_ROOT,
-  'src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated'
+  'src/platform/packages/shared/esql/kbn-esql-language/src/commands/definitions/generated'
 );
 
 const GENERATED_PROMQL_OUTPUT_PATH = join(GENERATED_DIR, 'promql_functions.ts');
@@ -712,6 +712,15 @@ ${functionsEnum}
     join(GENERATED_DIR, 'inline_casts_mapping.ts'),
     `${FILE_HEADER}
 export const inlineCastsMapping = ${castsMap} as const;
+`
+  );
+
+  const { timeSeriesAggregates } = await import('@elastic/esql-definitions/time-series-aggregates');
+  const timeSeriesAggregatesMap = JSON.stringify(timeSeriesAggregates, null, 2);
+  await writeFile(
+    join(GENERATED_DIR, 'time_series_aggregates.ts'),
+    `${FILE_HEADER}
+export const timeSeriesAggregates: Record<string, { function: string; returnType: string }> = ${timeSeriesAggregatesMap};
 `
   );
 

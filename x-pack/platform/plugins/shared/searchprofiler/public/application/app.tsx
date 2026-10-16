@@ -150,7 +150,7 @@ export const App = () => {
       <EuiPage css={styles.appRoot}>
         <EuiPageBody css={styles.pageBody}>
           {renderLicenseWarning()}
-          <EuiPanel css={styles.pageBodyContent}>
+          <EuiPanel css={styles.pageBodyContent} hasBorder={false}>
             <EuiFlexGroup responsive={false} gutterSize="s" direction="row" css={styles.bodyGroup}>
               <EuiFlexItem>
                 <ProfileQueryEditor />

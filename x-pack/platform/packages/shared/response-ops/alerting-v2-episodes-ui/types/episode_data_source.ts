@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IconType } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { TimeRange } from '@kbn/es-query';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
@@ -66,9 +67,12 @@ export interface EpisodeSourceHistogram {
   isCapHit: boolean;
 }
 
+export type EpisodeFetchErrorSurface = 'list' | 'kpis' | 'histogram';
+
 export interface SourceActionResult {
   succeeded: number;
   failed: number;
+  unchanged?: number;
   errors?: string[];
 }
 
@@ -85,8 +89,18 @@ export interface EpisodeActionExtension<TContext = void> {
   ) => Promise<SourceActionResult>;
 }
 
+export interface SeverityExtension {
+  value: string;
+  label: string;
+  color: string;
+  sortRank: number;
+  filterDotColor?: string;
+}
+
 export interface EpisodeDataSource {
   id: string;
+  label: string;
+  icon?: IconType;
   queryKeyPrefix: readonly unknown[];
   fetchEpisodes: (params: FetchSourceEpisodesParams) => Promise<AlertEpisode[]>;
   fetchKpis?: (params: FetchSourceKpisParams) => Promise<EpisodeSourceKpis>;
@@ -95,4 +109,6 @@ export interface EpisodeDataSource {
   resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
   actionExtensions?: Array<EpisodeActionExtension<any>>;
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
+  severityExtensions?: SeverityExtension[];
+  getRuleDetailsHref?: (ruleId: string) => string | null;
 }

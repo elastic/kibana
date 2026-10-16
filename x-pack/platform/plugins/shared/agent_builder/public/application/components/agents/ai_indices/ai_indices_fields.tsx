@@ -14,7 +14,9 @@ import {
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHighlight,
   EuiText,
+  EuiTextBlockTruncate,
 } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { AiIndexHttpItem } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
@@ -53,9 +55,9 @@ export const useAiIndices = (agentId?: string) => {
 
 export interface AiIndicesFieldsProps {
   aiIndices: Array<Pick<AiIndexHttpItem, 'id' | 'description'>>;
-  /** AI indices assigned to the agent itself: editable, and the only ones a change writes back. */
+  /** AI Indices assigned to the agent itself: editable, and the only ones a change writes back. */
   assignedIds: string[];
-  /** AI indices contributed by the agent's type. They always apply and cannot be removed here. */
+  /** AI Indices contributed by the agent's type. They always apply and cannot be removed here. */
   inheritedIds: string[];
   warnings?: AgentAiIndicesWarning[];
   isLoading: boolean;
@@ -102,15 +104,58 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
         .map(({ id, description }) => ({
           key: id,
           label: id,
-          append: description ? (
-            <EuiText size="xs" color="subdued">
-              {description}
-            </EuiText>
-          ) : undefined,
+          value: description,
           'data-test-subj': `agentBuilderAiIndexOption-${id}`,
         })),
     [aiIndices, inheritedIdSet]
   );
+
+  const renderOption = useCallback(
+    (
+      { label, value: description }: EuiComboBoxOptionOption<string>,
+      searchValue: string,
+      contentClassName: string
+    ) => (
+      <EuiFlexGroup direction="column" gutterSize="xs" className={contentClassName}>
+        <EuiText size="s">
+          <strong>
+            <EuiTextBlockTruncate
+              lines={2}
+              title={label}
+              data-test-subj={`agentBuilderAiIndexOptionName-${label}`}
+            >
+              <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+            </EuiTextBlockTruncate>
+          </strong>
+        </EuiText>
+        {description && (
+          <EuiText size="xs" color="subdued">
+            <EuiTextBlockTruncate
+              lines={2}
+              title={description}
+              data-test-subj={`agentBuilderAiIndexOptionDescription-${label}`}
+            >
+              <EuiHighlight search={searchValue}>{description}</EuiHighlight>
+            </EuiTextBlockTruncate>
+          </EuiText>
+        )}
+      </EuiFlexGroup>
+    ),
+    []
+  );
+
+  // Configured but not listed for this user: deleted, unreadable, or not registered in this space.
+  const unavailable = useMemo(() => {
+    if (isLoading || error) {
+      return { inherited: [], assigned: [] };
+    }
+    const availableIds = new Set(aiIndices.map(({ id }) => id));
+    const isMissing = (id: string) => !availableIds.has(id);
+    return {
+      inherited: inheritedIds.filter(isMissing),
+      assigned: selectedOptions.map(({ label }) => label).filter(isMissing),
+    };
+  }, [aiIndices, inheritedIds, selectedOptions, isLoading, error]);
 
   const handleChange = useCallback(
     (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) =>
@@ -141,7 +186,18 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
         <EuiFlexItem grow={false}>
           <EuiFormRow
             label={labels.aiIndices.defaultIndicesLabel}
-            helpText={labels.aiIndices.defaultIndicesHelpText}
+            helpText={
+              <>
+                {labels.aiIndices.defaultIndicesHelpText}
+                {unavailable.inherited.length > 0 && (
+                  <span data-test-subj="agentBuilderUnavailableDefaultAiIndices">
+                    {` ${labels.aiIndices.unavailableIndicesHelpText(
+                      unavailable.inherited.join(', ')
+                    )}`}
+                  </span>
+                )}
+              </>
+            }
             fullWidth
           >
             <EuiBadgeGroup gutterSize="s" role="list" data-test-subj="agentBuilderDefaultAiIndices">
@@ -168,6 +224,13 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
               {labels.aiIndices.optionalLabel}
             </EuiText>
           }
+          helpText={
+            unavailable.assigned.length > 0 ? (
+              <span data-test-subj="agentBuilderUnavailableAiIndices">
+                {labels.aiIndices.unavailableIndicesHelpText(unavailable.assigned.join(', '))}
+              </span>
+            ) : undefined
+          }
           fullWidth
         >
           <EuiComboBox
@@ -177,6 +240,8 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
             options={options}
             selectedOptions={selectedOptions}
             onChange={handleChange}
+            renderOption={renderOption}
+            rowHeight="auto"
             isLoading={isLoading}
             isDisabled={isFormDisabled}
             data-test-subj="agentBuilderAdditionalAiIndices"

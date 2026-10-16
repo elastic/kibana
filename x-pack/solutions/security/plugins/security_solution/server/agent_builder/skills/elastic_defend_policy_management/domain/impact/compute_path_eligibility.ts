@@ -130,5 +130,13 @@ export const computePathEligibility = (
     return ineligible(context.deviceControlReason);
   }
 
+  if (!isEqual(proposedValue, get(context.customYaraSignaturesStripped, path))) {
+    return ineligible(context.customYaraSignaturesReason);
+  }
+
+  if (!isEqual(proposedValue, get(context.linuxRansomwareStripped, path))) {
+    return ineligible('linux_ransomware_protection_experimental_disabled');
+  }
+
   return { eligible: true };
 };

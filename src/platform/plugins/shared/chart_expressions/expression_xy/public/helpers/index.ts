@@ -17,5 +17,6 @@ export * from './validate_extent';
 export * from './icon';
 export * from './color_assignment';
 export * from './annotations';
+export * from './annotation_click';
 export * from './data_layers';
 export * from './format';

@@ -100,4 +100,66 @@ describe('useMessageEditor setContent', () => {
 
     expect(result.current.controller.getPlaceholderNames()).toEqual(['photo.png']);
   });
+
+  it('is not empty when the message only holds an image attachment', () => {
+    const { result } = renderHook(() => useMessageEditor());
+    attachRef(result.current.messageEditor, div);
+
+    act(() => {
+      result.current.controller.setContent('[photo.png](image://photo.png)');
+    });
+
+    expect(result.current.controller.isEmpty).toBe(false);
+  });
+
+  it('reports the character count only while the content is over maxLength', () => {
+    const { result } = renderHook(() => useMessageEditor({ maxLength: 5 }));
+    attachRef(result.current.messageEditor, div);
+
+    act(() => {
+      result.current.controller.setContent('hello');
+    });
+    expect(result.current.overLimitCharacterCount).toBe(0);
+
+    act(() => {
+      result.current.controller.setContent('hello world');
+    });
+    expect(result.current.overLimitCharacterCount).toBe('hello world'.length);
+
+    act(() => {
+      result.current.controller.clear();
+    });
+    expect(result.current.overLimitCharacterCount).toBe(0);
+    expect(result.current.controller.isEmpty).toBe(true);
+  });
+
+  it('counts the serialized content, which is longer than the text of an image placeholder', () => {
+    const serialized = '[photo.png](image://photo.png)';
+    const { result } = renderHook(() => useMessageEditor({ maxLength: 20 }));
+    attachRef(result.current.messageEditor, div);
+
+    act(() => {
+      result.current.controller.setContent(serialized);
+    });
+
+    // The placeholder displays 'photo.png' (9 characters) but is sent as 30
+    expect(result.current.overLimitCharacterCount).toBe(serialized.length);
+    expect(result.current.controller.getContent()).toBe(serialized);
+  });
+
+  it('keeps the controller identity while typing within the limit', () => {
+    const { result } = renderHook(() => useMessageEditor({ maxLength: 100 }));
+    attachRef(result.current.messageEditor, div);
+
+    act(() => {
+      result.current.controller.setContent('hello');
+    });
+    const { controller } = result.current;
+
+    act(() => {
+      result.current.controller.setContent('hello world');
+    });
+
+    expect(result.current.controller).toBe(controller);
+  });
 });

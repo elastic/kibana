@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import ATTACK_DISCOVERY_BATCHED_GENERATION_YAML from './attack_discovery_batched_generation.yaml';
+import ATTACK_DISCOVERY_FP_TP_ANALYSIS_YAML from './attack_discovery_fp_tp_analysis.yaml';
 import ATTACK_DISCOVERY_REVIEW_YAML from './attack_discovery_review.yaml';
 import ATTACK_DISCOVERY_RUNNER_YAML from './attack_discovery_runner.yaml';
 import {
+  ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
 } from './constants';
@@ -17,25 +20,81 @@ import type { ManagedWorkflowDefinition } from '../../types';
 
 // `system-attack-discovery-generation` is already taken by the discoveries plugin,
 // so these mirror the `system-security-rule-tuning-worker` / `-review` pair instead.
+// The `-batched-generation` suffix below does not collide with it — both the
+// `security-` segment and the `batched-` qualifier keep the two distinct.
 export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID =
   'system-security-attack-discovery-worker';
 export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID =
   'system-security-attack-discovery-review';
+export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID =
+  'system-security-attack-discovery-batched-generation';
+export const ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID =
+  'system-security-attack-discovery-fp-tp-analysis';
 
 export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 4,
   yaml: ATTACK_DISCOVERY_RUNNER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
+/**
+ * Version 7 carries the `resolve_display_text` step, which reads the discovery from
+ * the Attack Discovery find API so the Investigation title, its summary, the journal
+ * and the proposal's title and comment show its text with field tokens rendered and
+ * original values restored. Bumped as a deliberate rollout signal for that step; the YAML
+ * change alone already rolls out through `definitionHash`.
+ *
+ * Version 8 carries the impact steps, which record the hosts and users an attack
+ * touched on its Investigation, so the landing page's Impact pills match Attack
+ * Discovery proposals.
+ */
 export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 8,
   yaml: ATTACK_DISCOVERY_REVIEW_YAML,
+} as const satisfies ManagedWorkflowDefinition;
+
+/**
+ * Batched Attack Discovery generation, invoked by the runner via
+ * `workflow.execute`. Owns no trigger, so unlike the runner and the review it
+ * uses the internal-workflow management profile: enablement is enforced rather
+ * than restorable.
+ *
+ * The version carries the YAML's switch to a per-batch ES|QL retrieval, which lets
+ * each batch persist the replacements its discoveries use. Bumped as a deliberate
+ * rollout signal for that switch; the YAML change alone already rolls out through
+ * `definitionHash`.
+ */
+export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
+  billable: false,
+  id: ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
+  management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
+  pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
+  version: 3,
+  yaml: ATTACK_DISCOVERY_BATCHED_GENERATION_YAML,
+} as const satisfies ManagedWorkflowDefinition;
+
+/**
+ * FP/TP analysis of one Attack Discovery, invoked by the review via
+ * `workflow.execute`. Owns no trigger, so like batched generation it uses the
+ * internal-workflow management profile: enablement is enforced rather than
+ * restorable, because a disabled analysis would leave the review recording every
+ * attack as a failure.
+ *
+ * The version is the prompt version. Execution output echoes it as
+ * `workflow_version`, so a result traces back to the prompt that produced it.
+ */
+export const ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW = {
+  billable: false,
+  id: ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
+  management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
+  pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
+  version: 2,
+  yaml: ATTACK_DISCOVERY_FP_TP_ANALYSIS_YAML,
 } as const satisfies ManagedWorkflowDefinition;

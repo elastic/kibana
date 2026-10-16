@@ -29,6 +29,10 @@ Feature flag overrides are **server-wide**: they apply to the entire Kibana inst
 The `@kbn/eslint/scout_no_core_settings_in_space_test` ESLint rule warns when `apiServices.core.settings(...)` is called inside `spaceTest` scope (directly, in `spaceTest.describe`/`beforeAll`/`afterAll`/`step`, etc.), since that scope runs in parallel across spaces sharing the same server.
 ::::::
 
+Scout CI lanes run multiple Playwright configs against the same Kibana and Elasticsearch servers. A feature-flag override left behind by one config can affect tests in the next. Always restore the expected configuration in teardown.
+
+The examples below assume the previous configured value was `false`, so teardown sets it back to `false`. If the flag had no configured override before your test, use `null` in teardown to remove the override your test added. `null` does not restore a previous configured value. Preserve existing values and unrelated overrides.
+
 ### In a global setup hook (recommended for parallel suites) [scout-feature-flags-global-setup]
 
 Enable the flag once in `global.setup.ts` before any worker starts:
@@ -40,7 +44,7 @@ globalSetupHook('Enable feature flags', async ({ apiServices, log }) => {
   log.info('[setup] Enabling my-feature-flag...');
   await apiServices.core.settings({
     'feature_flags.overrides': {
-      'my-plugin.my-feature-flag': 'true',
+      'my-plugin.my-feature-flag': true,
     },
   });
 });

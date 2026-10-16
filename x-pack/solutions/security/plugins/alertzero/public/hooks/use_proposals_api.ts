@@ -5,129 +5,119 @@
  * 2.0.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import type { UseInfiniteQueryResult, UseQueryResult } from '@kbn/react-query';
+import { useInfiniteQuery, useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  AGENTIC_INVESTIGATIONS_API_VERSION,
-  PROPOSALS_INTERNAL_URL,
-} from '@kbn/agentic-investigations-plugin/common';
-import type {
-  ApproveProposalRequest,
-  DismissProposalRequest,
-  ListProposalsResponse,
-  Proposal,
-  ProposalWithMetadata,
-} from '@kbn/agentic-investigations-plugin/common';
-import { API_VERSIONS, ALERTZERO_PROPOSALS_URL } from '@kbn/alertzero-common';
-import type { GetProposalsListResponse } from '../../common/proposals/list';
+  API_VERSIONS,
+  ALERTZERO_PROPOSALS_CATEGORY_URL,
+  ALERTZERO_PROPOSALS_CLOSED_URL,
+} from '@kbn/alertzero-common';
+import { retryOnTransientError } from './retry_on_transient_error';
+import type { ProposalsPageResponse } from '../../common/proposals/list';
+import { MAX_QUEUE_REACH } from '../../common/proposals/list';
 import { queryKeys } from '../query_keys';
-import { retryOnTransientError } from './use_watches_api';
 
-export const DEFAULT_PROPOSALS_WINDOW_HOURS = 24;
+const categoryPath = (category: string) =>
+  ALERTZERO_PROPOSALS_CATEGORY_URL.replace('{category}', encodeURIComponent(category));
+
+interface PagesOptions {
+  firstPageSize: number;
+  step: number;
+  enabled: boolean;
+  /** Only proposals whose impact lists this entity id; the server applies it. */
+  entity?: string | null;
+}
 
 /**
- * Proposals grouped by the category their action declares, plus a `closed`
- * group of decisions made inside the window.
- *
- * Unlike `usePendingProposals` this is sorted `createdAt asc` server-side and
- * does not filter expired proposals — an expired proposal is still visible and
- * its Approve CTA is active (the API will reject it on submission).
+ * The accumulated row count rather than `pages.length * size`, which is what lets
+ * the first page be a different size. `undefined` ends the paging.
  */
-export const useProposalsList = (windowHours = DEFAULT_PROPOSALS_WINDOW_HOURS) => {
+const nextOffset = (lastPage: ProposalsPageResponse, pages: ProposalsPageResponse[]) => {
+  const loaded = pages.reduce((count, page) => count + page.proposals.length, 0);
+  return loaded >= lastPage.total || loaded >= MAX_QUEUE_REACH ? undefined : loaded;
+};
+
+/**
+ * `size: 0` — the bucket's total with none of its rows. Only worth its own request
+ * while the rows are not loaded: a page response carries the same total.
+ */
+const useProposalsCount = (
+  queryKey: readonly unknown[],
+  path: string,
+  enabled: boolean,
+  entity?: string | null
+): UseQueryResult<ProposalsPageResponse> => {
   const { services } = useKibana();
 
   return useQuery({
-    queryKey: queryKeys.proposals.grouped(windowHours),
-    queryFn: async (): Promise<GetProposalsListResponse> =>
-      services.http!.get<GetProposalsListResponse>(ALERTZERO_PROPOSALS_URL, {
+    queryKey,
+    queryFn: async (): Promise<ProposalsPageResponse> =>
+      services.http!.get<ProposalsPageResponse>(path, {
         version: API_VERSIONS.internal.v1,
-        query: { windowHours },
+        query: { size: 0, from: 0, ...(entity ? { entity } : {}) },
       }),
-    keepPreviousData: true,
+    enabled,
     retry: retryOnTransientError,
   });
 };
 
-/**
- * Pending proposals, already grouped and ranked by the API (category, then
- * impact, confidence and deadline). Expired ones are dropped: a deadline that
- * has passed is no longer a decision anyone can make.
- */
-export const usePendingProposals = (conversationId?: string) => {
+const useProposalsPages = (
+  queryKey: readonly unknown[],
+  path: string,
+  { firstPageSize, step, enabled, entity }: PagesOptions
+): UseInfiniteQueryResult<ProposalsPageResponse> => {
   const { services } = useKibana();
 
-  return useQuery({
-    queryKey: queryKeys.proposals.list(conversationId),
-    queryFn: async (): Promise<ListProposalsResponse> =>
-      services.http!.get<ListProposalsResponse>(PROPOSALS_INTERNAL_URL, {
-        version: AGENTIC_INVESTIGATIONS_API_VERSION,
-        query: {
-          status: 'pending',
-          excludeExpired: true,
-          ...(conversationId ? { conversationId } : {}),
-        },
-      }),
-    keepPreviousData: true,
+  return useInfiniteQuery({
+    queryKey,
+    // React Query v4 calls the first page with `pageParam: undefined`.
+    queryFn: async ({ pageParam }: { pageParam?: number }): Promise<ProposalsPageResponse> => {
+      const from = pageParam ?? 0;
+      // Shrunk on the last page: the route refuses `from + size` past the reach, so
+      // a full step near the ceiling would 400 instead of returning the rows left.
+      const size = Math.min(from === 0 ? firstPageSize : step, MAX_QUEUE_REACH - from);
+      return services.http!.get<ProposalsPageResponse>(path, {
+        version: API_VERSIONS.internal.v1,
+        query: { from, size, ...(entity ? { entity } : {}) },
+      });
+    },
+    getNextPageParam: nextOffset,
+    enabled,
     retry: retryOnTransientError,
   });
 };
 
-export const useProposal = (id: string | undefined) => {
-  const { services } = useKibana();
+export const useProposalsByCategoryCount = (
+  category: string,
+  enabled: boolean,
+  entity?: string | null
+) =>
+  useProposalsCount(
+    queryKeys.proposals.byCategoryCount(category, entity),
+    categoryPath(category),
+    enabled,
+    entity
+  );
 
-  return useQuery({
-    queryKey: queryKeys.proposals.detail(id),
-    queryFn: async (): Promise<ProposalWithMetadata> => {
-      if (!id) {
-        throw new Error('proposal id is required');
-      }
-      return services.http!.get<ProposalWithMetadata>(`${PROPOSALS_INTERNAL_URL}/${id}`, {
-        version: AGENTIC_INVESTIGATIONS_API_VERSION,
-      });
-    },
-    enabled: Boolean(id),
-    retry: retryOnTransientError,
-  });
-};
+export const useClosedProposalsCount = (enabled: boolean, entity?: string | null) =>
+  useProposalsCount(
+    queryKeys.proposals.closedCount(entity),
+    ALERTZERO_PROPOSALS_CLOSED_URL,
+    enabled,
+    entity
+  );
 
-/**
- * Approving submits the action input the analyst was shown, so the API can
- * refuse an approval that no longer matches the record.
- */
-export const useApproveProposal = () => {
-  const { services } = useKibana();
-  const queryClient = useQueryClient();
+export const useProposalsByCategory = (category: string, options: PagesOptions) =>
+  useProposalsPages(
+    queryKeys.proposals.byCategory(category, options.entity),
+    categoryPath(category),
+    options
+  );
 
-  return useMutation({
-    mutationFn: ({ id, body }: { id: string; body: ApproveProposalRequest }): Promise<Proposal> =>
-      services.http!.post<Proposal>(`${PROPOSALS_INTERNAL_URL}/${id}/approve`, {
-        version: AGENTIC_INVESTIGATIONS_API_VERSION,
-        body: JSON.stringify(body),
-      }),
-    onSuccess: (proposal) => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.proposals.detail(proposal.id),
-      });
-    },
-  });
-};
-
-export const useDismissProposal = () => {
-  const { services } = useKibana();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, body }: { id: string; body: DismissProposalRequest }): Promise<Proposal> =>
-      services.http!.post<Proposal>(`${PROPOSALS_INTERNAL_URL}/${id}/dismiss`, {
-        version: AGENTIC_INVESTIGATIONS_API_VERSION,
-        body: JSON.stringify(body),
-      }),
-    onSuccess: (proposal) => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.proposals.detail(proposal.id),
-      });
-    },
-  });
-};
+export const useClosedProposals = (options: PagesOptions) =>
+  useProposalsPages(
+    queryKeys.proposals.closed(options.entity),
+    ALERTZERO_PROPOSALS_CLOSED_URL,
+    options
+  );

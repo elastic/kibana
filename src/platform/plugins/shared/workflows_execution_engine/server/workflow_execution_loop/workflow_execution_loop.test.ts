@@ -48,8 +48,10 @@ describe('workflowExecutionLoop', () => {
       releaseTransientlyRehydratedOutputs: jest.fn(),
     },
     workflowLogger: {
-      flushEvents: jest.fn().mockResolvedValue(undefined),
       logWarn: jest.fn(),
+    },
+    eventQueue: {
+      flush: jest.fn().mockResolvedValue(undefined),
     },
     signal: new AbortController().signal,
   });
@@ -75,7 +77,7 @@ describe('workflowExecutionLoop', () => {
     expect(params.stepIoService.flush).toHaveBeenCalled();
     // Workflow-end cleanup for transient rehydrations (deferred-release pattern).
     expect(params.stepIoService.releaseTransientlyRehydratedOutputs).toHaveBeenCalled();
-    expect(params.workflowLogger.flushEvents).toHaveBeenCalled();
+    expect(params.eventQueue.flush).toHaveBeenCalled();
   });
 
   it('sets workflow error when execution loop throws', async () => {
@@ -131,7 +133,7 @@ describe('workflowExecutionLoop', () => {
     });
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
     expect(params.stepIoService.flush).toHaveBeenCalled();
-    expect(params.workflowLogger.flushEvents).toHaveBeenCalledWith({
+    expect(params.eventQueue.flush).toHaveBeenCalledWith({
       signal: params.signal,
     });
   });

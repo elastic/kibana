@@ -146,6 +146,10 @@ export function createChromeApi({
       get$: () => state.projectPicker.$,
       set: state.projectPicker.set,
     },
+    subscriptionBadge: {
+      get$: () => state.subscriptionBadge.$,
+      set: state.subscriptionBadge.set,
+    },
     userMenu: {
       get$: () => state.userMenu.$,
       set: (content) => state.userMenu.set(content),
@@ -271,19 +275,6 @@ export function createChromeApi({
     help,
     appHeader,
     inlineAppHeader,
-    next: {
-      aiButton: controls.aiButton,
-      globalSearch: controls.globalSearch,
-      contextSwitcher: controls.contextSwitcher,
-      projectPicker: controls.projectPicker,
-      userMenu: controls.userMenu,
-      inlineAppHeader,
-      appHeader,
-      registerFeedbackHandler: help.registerFeedbackHandler,
-      getFeedbackHandler$: help.getFeedbackHandler$,
-      registerNewsfeedHandler: help.registerNewsfeedHandler,
-      getNewsfeedHandler$: help.getNewsfeedHandler$,
-    },
     sidebar,
   };
 

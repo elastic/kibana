@@ -29,25 +29,25 @@ const createSmlService = (): SmlService =>
     getTypeDefinition: mockGetTypeDefinition,
   } as unknown as SmlService);
 
+const crawler = { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' as const } };
+
 const createSmlDoc = ({
   id = 'entry-1',
   originUri = 'ref-1',
   ...overrides
-}: Partial<Omit<SmlDocument, 'attributes'>> & {
+}: Partial<SmlDocument> & {
   id?: string;
   originUri?: string;
 } = {}): SmlDocument => ({
+  '@timestamp': '2024-01-01',
+  id,
   type: 'visualization',
   title: 'Test Viz',
   content: 'content',
+  updated_at: '2024-01-02',
+  references: [{ uri: originUri, relation: 'derived_from' }],
+  governance: { provenance: { created_by: crawler, updated_by: crawler } },
   permissions: { kibana: { privileges: [] } },
-  attributes: {
-    id,
-    origin: { uri: originUri },
-    created_at: '2024-01-01',
-    updated_at: '2024-01-02',
-    ingestion_method: 'crawled',
-  },
   ...overrides,
 });
 

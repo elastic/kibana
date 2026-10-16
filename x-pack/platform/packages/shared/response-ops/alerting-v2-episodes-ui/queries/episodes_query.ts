@@ -19,30 +19,36 @@ export type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-co
 
 /**
  * Extension of the base AlertEpisode type with client-only capability flags
- * used to differentiate classic alert rows from v2 episode rows.
+ * used to differentiate source alert rows from v2 episode rows.
  * These fields are never set by the v2 pipeline.
  */
 export interface AlertEpisode extends BaseAlertEpisode {
   /**
-   * Whether the row supports v2 episode actions (ack, assign, snooze). Classic
+   * Whether the row supports v2 episode actions (ack, assign, snooze). Source
    * alert rows set this to `false`; v2 episodes default to `true`.
    */
   supports_actions?: boolean;
   /**
-   * Whether the row supports the v2 episode timeline/events flyout. Classic
+   * Whether the row supports the v2 episode timeline/events flyout. Source
    * alert rows set this to `false` (they use a simpler fields flyout);
    * v2 episodes default to `true`.
    */
   supports_timeline?: boolean;
   /**
-   * Rule name embedded from the classic alert document. Used as a display fallback
+   * Rule name embedded from the source alert document. Used as a display fallback
    * when the rules API cannot resolve the name (e.g. due to RBAC restrictions).
    * V2 episodes never set this — they always resolve via the rules cache.
    */
   'rule.name'?: string;
   /**
+   * Human-readable rule type name from the alert document (e.g. "Custom threshold").
+   * Only set for source alert rows; v2 episodes never set this.
+   */
+  rule_category?: string;
+  /**
    * Identifies which `EpisodeDataSource` produced this row. Undefined for rows
-   * from the v2 pipeline. Stamped automatically by `fetchEpisodesFromSource`.
+   * from the v2 pipeline. Stamped on source rows by the list fetch (and by
+   * `fetchEpisodesFromSource`).
    */
   source_id?: string;
   /**
@@ -51,17 +57,36 @@ export interface AlertEpisode extends BaseAlertEpisode {
    */
   source_action_context?: unknown;
   /**
-   * Whether the classic alert is indefinitely muted at the rule level.
-   * Only set for classic alert rows; native episodes never use this.
+   * Whether the source alert is indefinitely muted at the rule level.
+   * Only set for source alert rows; native episodes never use this.
    */
   is_muted?: boolean;
+  /**
+   * Whether the source alert is currently flapping.
+   * Only set for source alert rows; native episodes never use this.
+   */
+  is_flapping?: boolean;
+  /**
+   * Flattened grouping object (e.g. `{ 'host.name': 'web-01' }`).
+   * Used to render grouping tags on source alert rows. Native episodes never set this.
+   */
+  source_grouping?: Record<string, unknown>;
 }
 
-/** V2 episodes leave `supports_actions` unset; classic rows set it to `false`. */
+/** True when the row came from an additional episode data source, not the v2 pipeline. */
+export const isSourceEpisode = (episode: AlertEpisode): boolean => episode.source_id != null;
+
+/**
+ * Native v2 rules always include `kind`. Source adapters omit it so a source-stamped
+ * episode whose rule was loaded from the v2 API can still take the v2 flyout path.
+ */
+export const isNativeV2Rule = (rule: { kind?: unknown }): boolean => rule.kind != null;
+
+/** V2 episodes leave `supports_actions` unset; source alert rows set it to `false`. */
 export const episodeSupportsActions = (episode: AlertEpisode): boolean =>
   episode.supports_actions !== false;
 
-/** V2 episodes leave `supports_timeline` unset; classic rows set it to `false`. */
+/** V2 episodes leave `supports_timeline` unset; source alert rows set it to `false`. */
 export const episodeSupportsTimeline = (episode: AlertEpisode): boolean =>
   episode.supports_timeline !== false;
 
@@ -96,7 +121,7 @@ export const buildEpisodesKpisQuery = (
     )
     .pipe`EVAL _is_unassigned  = CASE(last_assignee_uid IS NULL, 1, 0)`
     .pipe`EVAL _is_acked       = CASE(last_ack_action == "ack", 1, 0)`
-    .pipe`EVAL _is_snoozed     = CASE(last_snooze_action == "snooze" AND (snooze_expiry IS NULL OR TO_DATETIME(snooze_expiry) > NOW()), 1, 0)`
+    .pipe`EVAL _is_snoozed     = CASE(last_snooze_action == "snooze" AND (snoozed_until IS NULL OR TO_DATETIME(snoozed_until) > NOW()), 1, 0)`
     .pipe`STATS
       alerts_count   = COUNT(*),
       firing_rules   = COUNT_DISTINCT(_active_rule_id),

@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/shared-ux-ai-components'
   - '@kbn/ui-callout'
   - '@kbn/react-kibana-mount'
+  - '@kbn/agent-builder-common'
 tags:
   - shared-browser
   - package
