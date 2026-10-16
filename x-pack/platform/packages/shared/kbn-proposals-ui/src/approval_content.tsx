@@ -234,7 +234,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const isReplacedFailure = isReplaced && decision?.status === 'failed';
     const badge = getApprovalOutcomeBadge(isReplacedFailure ? 'failed' : approvalPhase);
     const banner = isReplaced ? undefined : getApprovalOutcomeBanner(approvalPhase);
-    const bannerSuffix = decision?.reason ?? banner?.hint;
+    const bannerSuffix = decision?.reason;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
     const replacedCaption = isReplaced ? getProposalCaption(proposal) : undefined;
@@ -291,15 +291,16 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           />
         )}
 
-        {!isReplaced && (
-          <ApprovalStatusCallouts
-            isPending={approvalPhase === 'pending'}
-            previousExecutionError={proposal.previousExecutionError}
-            isExpired={isExpired}
-            expiredReason={proposal.rationale}
-            data-test-subj={dataTestSubj}
-          />
-        )}
+        {/* A replaced card's only callout is why its own attempt failed; the rest belong to the
+            live successor. */}
+        <ApprovalStatusCallouts
+          isPending={!isReplaced && approvalPhase === 'pending'}
+          previousExecutionError={proposal.previousExecutionError}
+          failedAttemptError={isReplacedFailure ? proposal.executionError : undefined}
+          isExpired={!isReplaced && isExpired}
+          expiredReason={proposal.rationale}
+          data-test-subj={dataTestSubj}
+        />
 
         {showDeclineForm && (
           <DeclineReasonForm
