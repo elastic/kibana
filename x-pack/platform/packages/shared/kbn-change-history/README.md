@@ -100,8 +100,9 @@ UUID v7 values are monotonically increasing within the same millisecond. That ma
 
 - **`isInitialized()`** — Returns `true` if the client has been initialized (e.g. after `initialize()` has been called).
 
-- **`initialize(elasticsearchClient)`**
+- **`initialize(elasticsearchClient, opts?)`**
   Creates/ensures the data stream and stores the internal client. Called once during plugin `start()` phase and before `log` / `logBulk` / `getHistory` / `getHistoryByFields`.
+  - Optional `opts.userProfileService` (`core.userProfile`). When provided, `getHistory` and `getEvent` resolve `user.full_name` and `user.email` from the matching user profile at read time. These fields are never persisted, and are absent when no profile is found or the lookup fails. Render the author as `user.full_name || user.email || user.name`.
 
 - **`log(change, opts)`**
   Writes one `change` document with given `opts` context (`action`, `username`, etc) in `LogChangeHistoryOptions`.
@@ -219,7 +220,7 @@ const client = new ChangeHistoryClient({
 });
 
 // During plugin `start()` phase
-await client.initialize(elasticsearchClient);
+await client.initialize(elasticsearchClient, { userProfileService: core.userProfile });
 const spaceId = 'default';
 
 // When user makes a change
