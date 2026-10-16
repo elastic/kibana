@@ -17,7 +17,7 @@ The dashboard as it is now: \`panels\` are the top-level panels, and \`sections\
 
 ## How to lay out
 
-- Keep every panel's \`grid\` unless it is in a row you must change, since the user may have arranged it by hand. A row changes when it receives a panel without a grid, when it has a gap, or when \`instructions\` name one of its panels; the rows below it move up or down with it. When \`instructions\` place a panel relative to another, e.g. next to or below it, the rows of both panels change. "Next to" or "beside" means the same \`y\`, side by side; "below" means the next row. A full row does not stop the move: when A and B fill a row and C must go next to B, put B and C in that row and move A out of it, e.g. to the row C left. Keep every other panel's grid as it is, even where it breaks the rules below.
+- Keep every panel's \`grid\` unless it is in a row you must change, since the user may have arranged it by hand. A row changes when it receives a panel without a grid, when its panels leave columns empty, e.g. where a removed panel was (widen its neighbours or move a panel up into it), or when \`instructions\` name one of its panels; the rows below it move up or down with it. When \`instructions\` place a panel relative to another, e.g. next to or below it, the rows of both panels change. "Next to" or "beside" means the same \`y\`, side by side; "below" means the next row. A full row does not stop the move: when A and B fill a row and C must go next to B, put B and C in that row and move A out of it, e.g. to the row C left. Keep every other panel's grid as it is, even where it breaks the rules below.
 - Every row you change follows the sizing and packing rules in full: leaving empty space is never a way to keep a panel unchanged.
 - Size panels without a grid, and panels that \`instructions\` ask to resize, by *Grid sizes by chart type*.
 - When no panel has a grid, or when \`instructions\` ask to rearrange the whole dashboard, lead with a markdown introduction when there is one, then metrics and gauges, then trends, then breakdowns and tables, and size every panel by *Grid sizes by chart type*.
@@ -49,7 +49,7 @@ Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 ## Section grid rules
 
 - Each section has its own coordinate space: the coordinates of its panels are section-relative and start at \`y: 0\`. The same grid rules apply within each section.
-- A section occupies exactly one row (\`h: 1\`) in the outer grid, whatever the height of its panels. Top-level panels and sections never share a row. Compute outer \`y\` in order: top-level panels advance by \`y + h\`, sections by \`y + 1\`.
+- A section occupies exactly one row (\`h: 1\`) in the outer grid, whatever the height of its panels. Top-level panels and sections never share a row. Compute outer \`y\` in order, also for sections without \`panels\`: top-level panels advance by \`y + h\`, sections by \`y + 1\`.
 - Place a new section among the other sections by purpose, e.g. key metrics before trends. Keep the outer order of the sections and top-level panels that have a \`y\`: a top-level panel that was above a section stays above it, and one between two sections stays between them. A section without a \`y\` is inserted into that order; it never moves an existing panel or section past another one. For example, with \`intro, KPIs, Traffic, note, Errors\`, a new section before Traffic gives \`intro, KPIs, New, Traffic, note, Errors\`.`;
 
 /** Builds the messages of the layout call for a layout request. */
