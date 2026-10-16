@@ -349,9 +349,11 @@ export async function testNowMonitor(
  */
 export async function triggerPrivateLocationCleanup(
   apiClient: ApiClientFixture,
-  headers: Record<string, string>
+  headers: Record<string, string>,
+  { disable = false }: { disable?: boolean } = {}
 ) {
-  const res = await apiClient.put('internal/synthetics/private_locations/_cleanup', {
+  const query = disable ? '?disable=true' : '';
+  const res = await apiClient.put(`internal/synthetics/private_locations/_cleanup${query}`, {
     headers,
     responseType: 'json',
   });

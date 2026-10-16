@@ -11,6 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { SyntheticsServerSetup } from '../types';
 import {
   DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE,
+  PACKAGE_POLICY_SCAN_PAGE_SIZE,
   bumpAgentPolicyRevisions,
   deletePackagePolicies,
   findLeftoverPackagePolicies,
@@ -245,6 +246,23 @@ describe('findLeftoverPackagePolicies', () => {
     expect(fetchAllItemIds).toHaveBeenCalledWith(
       soClient,
       expect.objectContaining({ kuery: getFilterForTestNowRun(true), spaceIds: ['*'] })
+    );
+  });
+
+  it('reads policies and monitors in large id-only pages', async () => {
+    const { server, soClient, fetchAllItemIds } = makeServer();
+
+    await findLeftoverPackagePolicies(server, soClient);
+
+    expect(fetchAllItemIds).toHaveBeenCalledWith(
+      soClient,
+      expect.objectContaining({ perPage: PACKAGE_POLICY_SCAN_PAGE_SIZE })
+    );
+    expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fields: ['id', 'locations', 'origin'],
+        perPage: PACKAGE_POLICY_SCAN_PAGE_SIZE,
+      })
     );
   });
 });

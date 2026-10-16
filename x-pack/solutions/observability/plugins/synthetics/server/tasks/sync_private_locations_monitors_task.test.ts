@@ -734,7 +734,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.runTask({ taskInstance });
 
       expect(result.error).toBeUndefined();
-      expect(result.state.hasAlreadyDoneCleanup).toBeUndefined();
       expect(mockTaskManagerStart.schedule).not.toHaveBeenCalled();
     });
 
