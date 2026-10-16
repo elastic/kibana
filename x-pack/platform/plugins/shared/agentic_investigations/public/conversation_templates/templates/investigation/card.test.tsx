@@ -72,7 +72,7 @@ describe('InvestigationCard', () => {
     expect(screen.queryByTestId('investigationCardPendingProposals')).not.toBeInTheDocument();
   });
 
-  it('does not show status or severity dots, and leaves out what is missing', () => {
+  it('shows the running indicator beside the age, and leaves out severity and what is missing', () => {
     renderCard({
       investigation: investigation({
         in_progress: true,
@@ -83,7 +83,7 @@ describe('InvestigationCard', () => {
       }),
     });
 
-    expect(screen.queryByTestId('investigationCardRunning')).not.toBeInTheDocument();
+    expect(screen.getByTestId('investigationCardRunning')).toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardSeverity')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardSummary')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardPendingProposals')).not.toBeInTheDocument();

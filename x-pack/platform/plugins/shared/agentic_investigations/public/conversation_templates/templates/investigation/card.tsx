@@ -12,13 +12,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { ConversationMetaInfo } from '@kbn/agentic-investigations-common';
 import type { InvestigationSummary } from '../../../../common';
 import { getInvestigationDisplayTitle } from './to_view_model';
-import { moreEntitiesLabel } from './translations';
+import { moreEntitiesLabel, RUNNING_LABEL } from './translations';
 
 const MAX_VISIBLE_ENTITIES = 3;
 
@@ -66,9 +67,9 @@ const EntityChips = ({ investigation }: { investigation: InvestigationSummary })
 };
 
 /**
- * A compact investigation card: age on top (with optional trailing actions), title, a two-line
- * summary, and impacted entities. Presentational; the host supplies the investigation and decides
- * what a click does.
+ * A compact investigation card: age on top (with running indicator and optional trailing actions),
+ * title, a two-line summary, and impacted entities. Presentational; the host supplies the
+ * investigation and decides what a click does.
  */
 export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   investigation,
@@ -77,7 +78,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   actions,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { metadata, created_at: createdAt } = investigation;
+  const { metadata, in_progress: inProgress, created_at: createdAt } = investigation;
   const title = getInvestigationDisplayTitle(investigation);
   const { summary } = metadata;
   const hasEntities = (investigation.impact?.entities?.length ?? 0) > 0;
@@ -118,7 +119,20 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
             justifyContent="spaceBetween"
           >
             <EuiFlexItem grow={false}>
-              <ConversationMetaInfo createdAt={createdAt} />
+              <ConversationMetaInfo
+                createdAt={createdAt}
+                inFlightStatus={
+                  inProgress ? (
+                    <EuiIconTip
+                      type="dot"
+                      color="primary"
+                      content={RUNNING_LABEL}
+                      aria-label={RUNNING_LABEL}
+                      iconProps={{ 'data-test-subj': 'investigationCardRunning' }}
+                    />
+                  ) : undefined
+                }
+              />
             </EuiFlexItem>
             {actions != null && (
               <EuiFlexItem

@@ -129,7 +129,7 @@ const CARD_STATES: CardState[] = [
   },
   {
     label: 'In progress',
-    note: 'in_progress=true — no running dot on the card',
+    note: 'in_progress=true — running dot beside the age',
     investigation: baseInvestigation({
       id: 'inv-running',
       in_progress: true,

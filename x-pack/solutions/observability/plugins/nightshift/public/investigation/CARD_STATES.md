@@ -36,7 +36,7 @@ http://localhost:9001/?path=/story/app-nightshift-investigationcard--all-states
 | --- | --- |
 | Nightshift default | Summary, entities, actions |
 | Selected | Interactive select highlight |
-| In progress | Data flag only — no running dot |
+| In progress | Running dot beside the age |
 | Closed | `status: closed` data only — no badge on the card |
 | Title pending (alert / Slack / none) | Fallback titles |
 | No summary / no entities | Sparse content |
