@@ -47,7 +47,10 @@ const bands = (list: unknown[]) => ({
 describe('heatmap schema', () => {
   it('accepts every example', () => {
     for (const node of examples) {
-      expect(messages(node)).toEqual([]);
+      expect({ title: node.title, errors: messages(node) }).toEqual({
+        title: node.title,
+        errors: [],
+      });
     }
   });
 

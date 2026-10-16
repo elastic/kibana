@@ -14,6 +14,7 @@ import {
   primitiveConformanceRows,
   runPrimitiveInventoryConformance,
 } from '@elastic/isomer-sdk/testing';
+
 import { chartsPack as pack } from './pack';
 
 /** Renders nodes validation rejects, which these tests feed renderers on purpose. */

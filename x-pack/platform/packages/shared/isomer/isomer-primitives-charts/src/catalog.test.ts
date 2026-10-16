@@ -21,7 +21,10 @@ describe('catalog boundaries', () => {
           continue;
         }
         const other = byType.get(target);
-        expect(other).toBeDefined();
+        expect({ line, registered: other !== undefined }).toEqual({
+          line,
+          registered: true,
+        });
         expect(line).toBe(`${other!.useWhen[0]!.slice(0, -1)}; use ${target}.`);
       }
     }

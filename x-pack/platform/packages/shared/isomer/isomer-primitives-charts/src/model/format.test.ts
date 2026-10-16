@@ -27,6 +27,10 @@ describe('formatValue', () => {
     [90, { style: 'duration', durationUnit: 's' }, '1.5 min'],
     [7_200_000, { style: 'duration' }, '2 h'],
     [-1536, { style: 'bytes' }, '-1.5 KB'],
+    [67, { style: 'number', prefix: '$' }, '$67'],
+    [-67.5, { style: 'number', prefix: '$' }, '-$67.5'],
+    [42, { style: 'number', unit: 'ms', suffix: ' avg' }, '42 ms avg'],
+    [0.25, { style: 'percent', prefix: '+' }, '+25%'],
   ] as const)('%s with %j prints %s', (value, format, expected) => {
     expect(formatValue(value, formatSchema().parse(format ?? { style: 'number' }))).toBe(expected);
   });
@@ -53,6 +57,13 @@ describe('formatSchema', () => {
   it('takes a duration unit only on a duration', () => {
     expect(accepts({ style: 'duration', durationUnit: 's' })).toBe(true);
     expect(accepts({ style: 'number', durationUnit: 's' })).toBe(false);
+  });
+
+  it('takes a prefix or suffix on any style but currency', () => {
+    expect(accepts({ style: 'number', prefix: '$' })).toBe(true);
+    expect(accepts({ style: 'bytes', suffix: '/s' })).toBe(true);
+    expect(accepts({ style: 'currency', currency: 'USD', prefix: '$' })).toBe(false);
+    expect(accepts({ style: 'currency', currency: 'USD', suffix: '!' })).toBe(false);
   });
 
   it('bounds precision at 0 and 20', () => {

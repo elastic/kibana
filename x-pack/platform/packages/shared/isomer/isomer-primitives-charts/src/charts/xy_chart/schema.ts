@@ -20,8 +20,10 @@ import {
 } from '../../model/text';
 import {
   granularitySchema,
+  isoTime,
   isTime,
   timeAxisIssues,
+  timeIntervalSchema,
   timeKindRule,
   timeRule,
   timeSpellingRule,
@@ -44,6 +46,21 @@ const xTypeRule =
   'every point’s `x` is a string for `category`, a time for `time`, and a number for `number`';
 const categoryRule = 'when `categories` is declared, every point’s `x` is one of their keys';
 
+const windowRule = '`domain.from` is before `domain.to`';
+
+const timeDomainSchema = z
+  .object({ from: isoTime(), to: isoTime() })
+  .strict()
+  .check(
+    crossRefine(({ from, to }) => timeValue(from) < timeValue(to), {
+      error: windowRule,
+      rule: windowRule,
+    })
+  )
+  .describe(
+    `The window the data was queried over, which the axis spans. With \`interval\`, a bucket running past either end is partial, and every surface marks it. Leave out to fit the points; ${windowRule}.`
+  );
+
 const xSchema = z
   .discriminatedUnion('type', [
     z
@@ -65,6 +82,8 @@ const xSchema = z
         title: axisTitle,
         timeZone: timeZoneSchema().optional(),
         granularity: granularitySchema().optional(),
+        interval: timeIntervalSchema().optional(),
+        domain: timeDomainSchema.optional(),
       })
       .strict()
       .describe(`Times as ISO 8601; ${timeKindRule}; ${timeSpellingRule}.`),
@@ -73,6 +92,13 @@ const xSchema = z
         type: z.literal('number'),
         title: axisTitle,
         format: formatSchema().optional(),
+        interval: z
+          .number()
+          .positive()
+          .describe(
+            'The bin width: each point’s `x` starts a bin this wide, and bars fill it as a histogram.'
+          )
+          .optional(),
       })
       .strict(),
   ])
@@ -144,16 +170,70 @@ const thresholdSchema = z
   })
   .strict();
 
+const annotationSchema = z
+  .object({
+    key: keyField('annotation'),
+    label: labelText().describe('What it marks, e.g. `Deploy 4.2`.'),
+    at: z
+      .union([z.string(), z.number()])
+      .describe('Where it sits on x, written as a point’s `x` is.'),
+    until: z
+      .union([z.string(), z.number()])
+      .describe('Where a range ends on x. Leave out for a single moment.')
+      .optional(),
+    tone: toneSchema().optional(),
+  })
+  .strict();
+
+const annotationXRule =
+  'an annotation’s `at` and `until` are on the x axis: a category of the chart, a time, or a number, as its points are';
+const untilRule = 'an annotation’s `until` comes after its `at`';
+const annotationKeysRule = 'annotation keys are unique';
+
 const distinctXRule = 'no series has two points at the same `x`';
 const y2Rule = '`y2` is declared exactly when a series or threshold reads against it';
 const horizontalRule = '`horizontal` needs `category` x and every series a `bar`';
-const pointsRule = `the chart holds at most ${MAX_DATA_POINTS} points`;
+const pointsRule = `the chart holds at most ${MAX_DATA_POINTS} points and annotations`;
 const gridRule = `its distinct \`x\` positions, declared categories included, times its series are at most ${MAX_GRID_CELLS}`;
 const seriesKeysRule = 'series keys are unique';
 const stackTotalRule = 'when series stack, their values at each `x` sum to a finite total';
 
-const pointCount = (series: readonly { points: readonly unknown[] }[]) =>
-  series.reduce((sum, { points }) => sum + points.length, 0);
+const pointCount = (
+  series: readonly { points: readonly unknown[] }[],
+  annotations: readonly unknown[] = []
+) => series.reduce((sum, { points }) => sum + points.length, annotations.length);
+
+type XAxis = z.infer<typeof xSchema>;
+
+/** Category keys in axis order: declared, then as first seen on points. */
+const categoryOrder = (
+  x: XAxis & { type: 'category' },
+  series: readonly { points: readonly { x: string | number }[] }[]
+): string[] => [
+  ...new Set([
+    ...(x.categories ?? []).map(keyOf),
+    ...series.flatMap(({ points }) => points.map(({ x: at }) => String(at))),
+  ]),
+];
+
+/** Where `value` sits on `x`, for ordering; `undefined` when it is not on the axis. */
+const xPosition = (
+  x: XAxis,
+  order: readonly string[],
+  value: string | number
+): number | undefined => {
+  if (x.type === 'number') {
+    return typeof value === 'number' ? value : undefined;
+  }
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+  if (x.type === 'time') {
+    return isTime(value) ? timeValue(value) : undefined;
+  }
+  const index = order.indexOf(value);
+  return index === -1 ? undefined : index;
+};
 
 export const schema = z
   .object({
@@ -188,6 +268,12 @@ export const schema = z
       .array(thresholdSchema)
       .describe('Reference lines across the plot, e.g. an SLO or a limit.')
       .optional(),
+    annotations: z
+      .array(annotationSchema)
+      .describe(
+        `Events marked on x: a moment such as a deploy, or a range such as an incident; ${annotationXRule}; ${untilRule}; ${annotationKeysRule}.`
+      )
+      .optional(),
     selection: selectionSchema(['x', 'series']).optional(),
   })
   .strict()
@@ -206,7 +292,7 @@ export const schema = z
     })
   )
   .check(
-    crossRefine(({ series }) => pointCount(series) <= MAX_DATA_POINTS, {
+    crossRefine(({ series, annotations }) => pointCount(series, annotations) <= MAX_DATA_POINTS, {
       error: pointsRule,
       path: ['series'],
       rule: pointsRule,
@@ -227,6 +313,41 @@ export const schema = z
         return positions * series.length <= MAX_GRID_CELLS;
       },
       { error: gridRule, path: ['series'], rule: gridRule }
+    )
+  )
+  .check(
+    crossRefine(({ annotations }) => keysAreUnique(annotations ?? []), {
+      error: annotationKeysRule,
+      path: ['annotations'],
+      rule: annotationKeysRule,
+    })
+  )
+  .check(
+    crossSuperRefine(
+      ({ x, series, annotations }, context) => {
+        if (annotations === undefined || pointCount(series, annotations) > MAX_DATA_POINTS) {
+          return;
+        }
+        const order = x.type === 'category' ? categoryOrder(x, series) : [];
+        annotations.forEach(({ at, until }, index) => {
+          const from = xPosition(x, order, at);
+          const to = until === undefined ? from : xPosition(x, order, until);
+          if (from === undefined || to === undefined) {
+            context.addIssue({
+              code: 'custom',
+              message: annotationXRule,
+              path: ['annotations', index, from === undefined ? 'at' : 'until'],
+            });
+          } else if (until !== undefined && to <= from) {
+            context.addIssue({
+              code: 'custom',
+              message: untilRule,
+              path: ['annotations', index, 'until'],
+            });
+          }
+        });
+      },
+      [annotationXRule, untilRule]
     )
   )
   .check(
@@ -269,14 +390,32 @@ export const schema = z
   )
   .check(
     crossSuperRefine(
-      ({ x, series }, context) => {
-        if (x.type !== 'time' || pointCount(series) > MAX_DATA_POINTS) {
+      ({ x, series, annotations = [] }, context) => {
+        if (x.type !== 'time' || pointCount(series, annotations) > MAX_DATA_POINTS) {
           return;
         }
-        const paths = series.flatMap(({ points }, seriesIndex) =>
-          points.map((_, pointIndex) => ['series', seriesIndex, 'points', pointIndex, 'x'])
-        );
-        const values = series.flatMap(({ points }) => points.map(({ x: value }) => value));
+        const located: { path: (string | number)[]; value: unknown }[] = [
+          ...series.flatMap(({ points }, seriesIndex) =>
+            points.map(({ x: value }, pointIndex) => ({
+              path: ['series', seriesIndex, 'points', pointIndex, 'x'],
+              value,
+            }))
+          ),
+          ...(x.domain
+            ? (['from', 'to'] as const).map((end) => ({
+                path: ['x', 'domain', end],
+                value: x.domain![end],
+              }))
+            : []),
+          ...annotations.flatMap(({ at, until }, index) =>
+            [
+              { path: ['annotations', index, 'at'], value: at },
+              { path: ['annotations', index, 'until'], value: until },
+            ].filter(({ value }) => value !== undefined)
+          ),
+        ];
+        const paths = located.map(({ path }) => path);
+        const values = located.map(({ value }) => value);
         for (const { index, rule } of timeAxisIssues(values)) {
           if (rule !== timeRule) {
             context.addIssue({

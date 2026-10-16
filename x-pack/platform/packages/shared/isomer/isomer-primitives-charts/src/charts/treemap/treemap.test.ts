@@ -10,6 +10,7 @@ import {
   buildAuthoringJsonSchema,
   definePrimitive,
 } from '@elastic/isomer-sdk';
+
 import { rulesOf } from '../../model/cross_field';
 import { selectionEvent } from '../../model/selection';
 import { MAX_DATA_POINTS } from '../../model/text';
@@ -56,7 +57,10 @@ const byTitle = (title: string) => examples.find((node) => node.title === title)
 describe('treemap schema', () => {
   it('accepts every example', () => {
     for (const node of examples) {
-      expect(messages(node)).toEqual([]);
+      expect({ title: node.title, errors: messages(node) }).toEqual({
+        title: node.title,
+        errors: [],
+      });
     }
   });
 
@@ -291,7 +295,10 @@ describe('treemap authoring schema', () => {
     const rules = checks.flatMap((check) => rulesOf(check) ?? []);
     expect(rules.length).toBe(7);
     for (const rule of rules) {
-      expect(stated.some((description) => description.includes(rule))).toBe(true);
+      expect({
+        rule,
+        stated: stated.some((description) => description.includes(rule)),
+      }).toEqual({ rule, stated: true });
     }
   });
 });

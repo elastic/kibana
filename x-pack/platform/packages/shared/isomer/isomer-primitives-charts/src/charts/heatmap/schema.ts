@@ -183,7 +183,8 @@ const colorScaleSchema = z
     '`sequential` for magnitude, light to dark; `diverging` for values either side of a midpoint; `bands` for status thresholds. Colors come from the theme. Defaults to `sequential`.'
   );
 
-const keysOf = (axis: { categories?: readonly Keyed[] | undefined }) => axis.categories?.map(keyOf);
+const keysOf = ({ categories: declared }: { categories?: readonly Keyed[] | undefined }) =>
+  declared?.map(keyOf);
 
 export const schema = z
   .object({

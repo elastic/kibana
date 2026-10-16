@@ -21,6 +21,7 @@ export const FORMAT_STYLES = ['number', 'percent', 'currency', 'bytes', 'duratio
 const currencyRule = 'currency is set exactly when style is `currency`';
 const unitRule = 'unit is set only when style is `number`';
 const durationRule = 'durationUnit is set only when style is `duration`';
+const affixRule = 'prefix and suffix are not set when style is `currency`';
 
 export const formatSchema = () =>
   z
@@ -57,6 +58,16 @@ export const formatSchema = () =>
         .enum(['ms', 's'])
         .describe(`The unit duration values are given in. Defaults to \`ms\`. The ${durationRule}.`)
         .optional(),
+      prefix: labelText()
+        .describe(
+          `Literal text printed before the number, after any sign, e.g. \`$\` for a host whose amounts carry no currency code. The ${affixRule}.`
+        )
+        .optional(),
+      suffix: labelText()
+        .describe(
+          `Literal text printed right after the number and its unit, e.g. \` USD\`. The ${affixRule}.`
+        )
+        .optional(),
     })
     .strict()
     .check(
@@ -79,6 +90,13 @@ export const formatSchema = () =>
         path: ['durationUnit'],
         rule: durationRule,
       })
+    )
+    .check(
+      crossRefine(
+        ({ style, prefix, suffix }) =>
+          style !== 'currency' || (prefix === undefined && suffix === undefined),
+        { error: affixRule, path: ['prefix'], rule: affixRule }
+      )
     )
     .describe('How values print on every surface and on the axis.');
 
@@ -115,11 +133,15 @@ const scaled = (value: number, units: readonly (readonly [string, number])[]): [
   return [amount, units[0]![0]];
 };
 
-/** `value` as every surface prints it; `null`, and a result that is not a finite number, print as missing. */
-export const formatValue = (input: number | null, format: ValueFormat | undefined): string => {
-  if (input === null || !Number.isFinite(input)) {
-    return glyph.missing;
-  }
+const withAffixes = (
+  printed: string,
+  { prefix = '', suffix = '' }: Pick<ValueFormat, 'prefix' | 'suffix'>
+): string => {
+  const sign = printed.startsWith('-') ? '-' : '';
+  return `${sign}${prefix}${printed.slice(sign.length)}${suffix}`;
+};
+
+const printNumber = (input: number, format: ValueFormat | undefined): string => {
   // `-0` passes `.min(0)` and would print with a sign.
   const value = input === 0 ? 0 : input;
   const { style = 'number', precision, compact, currency, unit } = format ?? {};
@@ -163,3 +185,9 @@ export const formatValue = (input: number | null, format: ValueFormat | undefine
     }
   }
 };
+
+/** `value` as every surface prints it; `null`, and a result that is not a finite number, print as missing. */
+export const formatValue = (input: number | null, format: ValueFormat | undefined): string =>
+  input === null || !Number.isFinite(input)
+    ? glyph.missing
+    : withAffixes(printNumber(input, format), format ?? {});
