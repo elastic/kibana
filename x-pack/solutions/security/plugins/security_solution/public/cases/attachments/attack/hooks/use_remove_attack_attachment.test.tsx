@@ -9,7 +9,7 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useRemoveAttackAttachment } from './use_remove_attack_attachment';
-import { bulkDeleteCaseAttachments } from '../api';
+import { bulkDeleteCaseAttachments, FETCH_CASE_ATTACHMENTS_QUERY_KEY } from '../api';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 
@@ -25,12 +25,10 @@ jest.mock('@kbn/cases-plugin/public', () => ({
 const bulkDeleteCaseAttachmentsMock = bulkDeleteCaseAttachments as jest.Mock;
 const useAppToastsMocked = useAppToasts as jest.Mock;
 
+let queryClient: QueryClient;
+
 const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider
-    client={new QueryClient({ defaultOptions: { mutations: { retry: false } } })}
-  >
-    {children}
-  </QueryClientProvider>
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
 describe('useRemoveAttackAttachment', () => {
@@ -38,6 +36,7 @@ describe('useRemoveAttackAttachment', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
     appToasts = useAppToastsMock.create();
     useAppToastsMocked.mockReturnValue(appToasts);
     bulkDeleteCaseAttachmentsMock.mockResolvedValue(undefined);
@@ -138,6 +137,23 @@ describe('useRemoveAttackAttachment', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(mockRefreshCaseViewPage).toHaveBeenCalledTimes(1);
+  });
+
+  it("invalidates the prompt's own attachments query, which the case view hook cannot reach", async () => {
+    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+    const { result } = renderHook(() => useRemoveAttackAttachment(), { wrapper });
+
+    result.current.mutate({
+      caseId: 'case-1',
+      attackAttachmentIds: ['so-attack-1'],
+      removeRelatedAlerts: false,
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    // Without this a second removal resolves its scope against the case as it stood before the
+    // first, and offers the analyst a count that no longer matches what leaves.
+    expect(invalidateQueries).toHaveBeenCalledWith([...FETCH_CASE_ATTACHMENTS_QUERY_KEY, 'case-1']);
   });
 
   it('surfaces an error and leaves the case untouched when the bulk delete fails', async () => {

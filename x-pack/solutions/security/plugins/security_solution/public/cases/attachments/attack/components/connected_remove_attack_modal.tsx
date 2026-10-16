@@ -10,7 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRemovableAlertAttachments } from '../hooks/use_removable_alert_attachments';
 import type { CaseAttachment } from '../utils';
-import { fetchCaseAttachments } from '../api';
+import { fetchCaseAttachments, FETCH_CASE_ATTACHMENTS_QUERY_KEY } from '../api';
 import { RemoveAttackModal } from './remove_attack_modal';
 
 /** What the confirmed removal should delete, beyond the attack attachments themselves. */
@@ -35,8 +35,6 @@ export interface ConnectedRemoveAttackModalProps {
   onConfirm: (confirmation: RemoveAttackConfirmation) => void;
 }
 
-export const FETCH_CASE_ATTACHMENTS_QUERY_KEY = ['GET', 'attack-attachment-case-attachments'];
-
 const NO_ATTACHMENTS: CaseAttachment[] = [];
 
 /**
@@ -45,6 +43,10 @@ const NO_ATTACHMENTS: CaseAttachment[] = [];
  * The case's attachments are fetched here rather than taken as a prop, because the activity log
  * hands a registered attachment's actions only the case id and title. Mount this only while the
  * prompt is open: it costs the attachments request and the attack resolution behind it.
+ *
+ * The prompt waits on `isFetching`, not `isLoading`: a cached but stale response would otherwise
+ * be counted and shown while the refetch was still in flight. The count is what the analyst
+ * consents to, so showing a superseded one is worse than showing a spinner.
  */
 export const ConnectedRemoveAttackModal = ({
   caseId,
@@ -57,7 +59,7 @@ export const ConnectedRemoveAttackModal = ({
 
   const {
     data: comments,
-    isLoading: isLoadingAttachments,
+    isFetching: isFetchingAttachments,
     isError,
   } = useQuery<CaseAttachment[]>(
     [...FETCH_CASE_ATTACHMENTS_QUERY_KEY, caseId],
@@ -83,7 +85,7 @@ export const ConnectedRemoveAttackModal = ({
       // The count names alert documents, not attachments: an alert attachment can carry several.
       alertCount={alertIds.length}
       attackTitle={attackTitle}
-      isLoading={isLoadingAttachments || isLoading}
+      isLoading={isFetchingAttachments || isLoading}
       // A failed attachments request leaves the case's other attacks invisible, which is exactly
       // what the unresolvable explanation covers.
       isResolvable={!isError && isResolvable}

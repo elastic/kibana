@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useMutation } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useRefreshCaseViewPage } from '@kbn/cases-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { bulkDeleteCaseAttachments } from '../api';
+import { bulkDeleteCaseAttachments, FETCH_CASE_ATTACHMENTS_QUERY_KEY } from '../api';
 
 export const REMOVE_ATTACK_ATTACHMENT_MUTATION_KEY = ['POST', 'attack-attachment-bulk-delete'];
 
@@ -61,12 +61,16 @@ export interface RemoveAttackAttachmentParams {
  *
  * On success the case view page cache is invalidated through the same hook the Cases single
  * delete uses, so the activity log, the Attacks section and the Attachments tab badge all
- * update without a manual refresh. On failure nothing is invalidated and the case is unchanged.
+ * update without a manual refresh. The prompt's own attachments query is invalidated alongside
+ * it: that one is keyed outside the Cases cache, so the case view hook does not reach it, and a
+ * later removal would otherwise resolve its scope against the case as it stood before this one.
+ * On failure nothing is invalidated and the case is unchanged.
  */
 export const useRemoveAttackAttachment = () => {
   const { http } = useKibana().services;
   const { addError, addSuccess } = useAppToasts();
   const refreshCaseViewPage = useRefreshCaseViewPage();
+  const queryClient = useQueryClient();
 
   return useMutation<void, Error, RemoveAttackAttachmentParams>(
     ({ caseId, attackAttachmentIds, removeRelatedAlerts }) =>
@@ -78,8 +82,9 @@ export const useRemoveAttackAttachment = () => {
       }),
     {
       mutationKey: REMOVE_ATTACK_ATTACHMENT_MUTATION_KEY,
-      onSuccess: (_result, { attackAttachmentIds, removeRelatedAlerts }) => {
+      onSuccess: (_result, { caseId, attackAttachmentIds, removeRelatedAlerts }) => {
         refreshCaseViewPage();
+        queryClient.invalidateQueries([...FETCH_CASE_ATTACHMENTS_QUERY_KEY, caseId]);
         addSuccess(
           removeRelatedAlerts
             ? getSuccessWithAlerts(attackAttachmentIds.length)

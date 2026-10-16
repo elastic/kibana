@@ -144,6 +144,14 @@ export interface FetchCaseAttachmentsParams {
 }
 
 /**
+ * Query key for {@link fetchCaseAttachments}, suffixed with the case id at the call site.
+ *
+ * It lives here rather than with the prompt that reads it because the removal has to invalidate
+ * it, and the prompt imports the removal's siblings.
+ */
+export const FETCH_CASE_ATTACHMENTS_QUERY_KEY = ['GET', 'attack-attachment-case-attachments'];
+
+/**
  * Reads a case's reference attachments, in the same request the case view itself reads them with.
  *
  * The activity log hands a registered attachment's actions only the case id and title, so the
