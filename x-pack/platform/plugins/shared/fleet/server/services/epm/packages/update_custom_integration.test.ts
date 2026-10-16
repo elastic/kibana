@@ -8,7 +8,6 @@
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { createAppContextStartContractMock } from '../../../mocks';
 
@@ -135,23 +134,18 @@ describe('updateCustomIntegration', () => {
     );
   });
 
-  // This route replays the stored archive, and for an integration that was originally uploaded
-  // that archive can contain transforms. Those are installed with installSource 'custom', so they
-  // need a request to grant a secondary authorization API key from — otherwise installTransforms
-  // refuses rather than falling back to kibana_system, and editing the integration 403s.
-  it('forwards the request so replayed transforms can be bound to the editing user', async () => {
-    const request = httpServerMock.createKibanaRequest();
-
-    await updateCustomIntegration(
-      esClient,
-      savedObjectsClient,
-      'test-integration',
-      { readMeData: '# Updated', categories: ['custom'] },
-      request
-    );
+  // This route replays the stored archive with force: true, so an integration that was
+  // originally uploaded has its real transforms recreated here. Passing a request would bind
+  // those caller-authored transforms to the editing user and start them, turning a README edit
+  // into an alternate reauthorization path around the install-source gate.
+  it('does not forward a request, so replayed transforms cannot be rebound to the editor', async () => {
+    await updateCustomIntegration(esClient, savedObjectsClient, 'test-integration', {
+      readMeData: '# Updated',
+      categories: ['custom'],
+    });
 
     expect(mockInstallPackageWithStateMachine).toHaveBeenCalledWith(
-      expect.objectContaining({ installSource: 'custom', request })
+      expect.objectContaining({ installSource: 'custom', request: undefined })
     );
   });
 

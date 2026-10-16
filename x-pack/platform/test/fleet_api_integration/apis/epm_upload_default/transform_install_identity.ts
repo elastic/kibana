@@ -103,13 +103,17 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       await fleetAndAgents.setup();
-      await setupTestUsers(security);
+      // The second argument is required: setupTestUsers skips
+      // fleet_all_int_all_default_space_only unless space awareness is requested, and without it
+      // the uploader below does not exist and every upload 401s.
+      await setupTestUsers(security, true);
     });
 
-    beforeEach(async () => {
-      // Wait until the process-wide upload rate-limit (10 s) has expired before each test.
-      // The probe uses a deliberately invalid zip so it always fails before
-      // setLastUploadInstallCache() is reached — each probe leaves the slot unchanged.
+    // Wait until the process-wide upload rate-limit (10 s) has expired. The probe uses a
+    // deliberately invalid zip so it always fails before setLastUploadInstallCache() is reached —
+    // each probe leaves the slot unchanged. Needed before every upload, not just once per test,
+    // because a successful upload consumes the slot for the next one.
+    const waitForUploadSlot = async () => {
       const probe = Buffer.from('not-a-zip');
       await retry.tryForTime(15_000, async () => {
         const { status } = await supertest
@@ -121,17 +125,19 @@ export default function (providerContext: FtrProviderContext) {
           throw new Error('Upload rate limit still active');
         }
       });
+    };
+
+    beforeEach(async () => {
+      await waitForUploadSlot();
     });
 
     afterEach(async () => {
       await supertest
         .delete(`/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
         .set('kbn-xsrf', 'xxxx');
-      for (const version of [upgradeVersion, '1.0.1']) {
-        await supertest
-          .delete(`/api/fleet/epm/packages/${pkgName}/${version}`)
-          .set('kbn-xsrf', 'xxxx');
-      }
+      await supertest
+        .delete(`/api/fleet/epm/packages/${pkgName}/${upgradeVersion}`)
+        .set('kbn-xsrf', 'xxxx');
       for (const id of [transformId, upgradeTransformId]) {
         await esClient.transform.deleteTransform(
           { transform_id: id, force: true },
@@ -233,6 +239,8 @@ export default function (providerContext: FtrProviderContext) {
         await buildPackageZip({ sourceIndex: 'logs-transform_identity_test-*' })
       ).expect(200);
 
+      await waitForUploadSlot();
+
       await uploadPackage(
         await buildPackageZip({
           sourceIndex: 'logs-transform_identity_test-*',
@@ -251,11 +259,11 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx');
     });
 
-    // PUT /custom_integrations/{pkgName} replays the stored archive and reinstalls it with
-    // installSource 'custom'. For a package that was originally uploaded that archive contains
-    // real transforms, so this route must forward the editing user's request — otherwise no
-    // secondary authorization key can be granted and installTransforms refuses the reinstall.
-    it('reinstalls transforms bound to the editing user when an uploaded integration is edited', async () => {
+    // PUT /custom_integrations/{pkgName} replays the stored archive with force: true, so an
+    // uploaded package's real transforms are recreated here. It must not reinstall them under
+    // the editing user, or a README edit becomes an alternate reauthorization path around the
+    // gate in handleTransformReauthorizeAndStart. It fails closed instead.
+    it('refuses to reinstall an uploaded integration whose archive ships transforms', async () => {
       await uploadPackage(
         await buildPackageZip({ sourceIndex: 'logs-transform_identity_test-*' })
       ).expect(200);
@@ -269,18 +277,15 @@ export default function (providerContext: FtrProviderContext) {
         .put(`/api/fleet/epm/custom_integrations/${pkgName}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ readMeData: '# Edited', categories: ['custom'] })
-        .expect(200);
+        .expect(403);
 
-      // fleet_transform_version is replayed unchanged, so the transform keeps its id.
+      // The transform is untouched and still bound to the uploader, not to the editor.
       const after = await esClient.transform.getTransform({ transform_id: transformId });
       const authorization = after.transforms[0].authorization as
-        | { api_key?: { id: string; name: string }; roles?: string[] }
+        | { api_key?: { id: string }; roles?: string[] }
         | undefined;
       expect(authorization?.roles).to.be(undefined);
-      expect(authorization?.api_key).to.be.an('object');
-      expect(authorization?.api_key?.id).not.to.be(keyBefore);
-
-      await supertest.delete(`/api/fleet/epm/packages/${pkgName}/1.0.1`).set('kbn-xsrf', 'xxxx');
+      expect(authorization?.api_key?.id).to.be(keyBefore);
     });
 
     it('rejects a restricted index in a transform placed outside elasticsearch/', async () => {

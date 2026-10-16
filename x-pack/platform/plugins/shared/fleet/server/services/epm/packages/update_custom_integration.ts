@@ -6,7 +6,6 @@
  */
 import type {
   ElasticsearchClient,
-  KibanaRequest,
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
@@ -45,11 +44,7 @@ export async function updateCustomIntegration(
   fields: {
     readMeData?: string;
     categories?: PackageSpecCategory[];
-  },
-  // Needed so that transforms replayed from the stored archive can be bound to the editing
-  // user's Elasticsearch privileges. Without it, a package whose assets include a transform
-  // cannot be reinstalled at all — see `installTransforms`.
-  request?: KibanaRequest
+  }
 ) {
   // Get the current integration using the id
   let integration: SavedObject<IntegrationAttributes> | null = null;
@@ -75,17 +70,11 @@ export async function updateCustomIntegration(
   newVersion[2] = (parseInt(newVersion[2], 10) + 1).toString();
   const newVersionString = newVersion.join('.');
   // Increment the version of everything and create a new package
-  const res = await incrementVersionAndUpdate(
-    soClient,
-    esClient,
-    id,
-    {
-      version: newVersionString,
-      readme: fields.readMeData,
-      categories: fields.categories,
-    },
-    request
-  );
+  const res = await incrementVersionAndUpdate(soClient, esClient, id, {
+    version: newVersionString,
+    readme: fields.readMeData,
+    categories: fields.categories,
+  });
   return {
     version: newVersionString,
     status: res.status,
@@ -100,8 +89,7 @@ export async function incrementVersionAndUpdate(
     version: string;
     readme: string | undefined;
     categories: PackageSpecCategory[] | undefined;
-  },
-  request?: KibanaRequest
+  }
 ) {
   const installedPkg = await getInstalledPackageWithAssets({
     savedObjectsClient: soClient,
@@ -188,7 +176,14 @@ export async function incrementVersionAndUpdate(
     spaceId: 'default',
     force: true,
     paths: packageInstallContext.paths,
-    request,
+    // Deliberately no request. This reinstall replays the stored archive with force: true, so a
+    // package that was originally uploaded has its real transforms recreated here. Passing the
+    // editing user's request would bind those caller-authored transforms to the editor's
+    // Elasticsearch privileges and start them — a README edit would become an alternate
+    // reauthorization path, bypassing the install-source gate in handleTransformReauthorizeAndStart.
+    // Consequence: editing an uploaded integration that ships transforms fails with a 403 until
+    // metadata-only edits stop reinstalling transforms. Failing closed is intended.
+    request: undefined,
     keepFailedInstallation: true,
   });
 
