@@ -7,7 +7,7 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX, fetchConnectorByIndexName } from '@kbn/search-connectors';
+import { CONNECTORS_INDEX, fetchConnectorByIndexName } from '@kbn/search-connectors/server';
 
 import { deleteIndexPipelines } from './delete_pipelines';
 

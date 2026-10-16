@@ -6,16 +6,16 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { SyncJobType } from '@kbn/search-connectors';
+import { SyncJobType } from '@kbn/search-connectors/server';
 
-import { fetchConnectorById, startConnectorSync } from '@kbn/search-connectors';
+import { fetchConnectorById, startConnectorSync } from '@kbn/search-connectors/server';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { startSync } from './start_sync';
 
-jest.mock('@kbn/search-connectors', () => {
-  const originalModule = jest.requireActual('@kbn/search-connectors');
+jest.mock('@kbn/search-connectors/server', () => {
+  const originalModule = jest.requireActual('@kbn/search-connectors/server');
   return {
     ...originalModule,
     fetchConnectorById: jest.fn(),

@@ -7,10 +7,17 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-import type { Connector } from '@kbn/search-connectors';
-import { createConnector, ConnectorStatus, deleteConnectorById } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors/server';
+import {
+  createConnector,
+  ConnectorStatus,
+  deleteConnectorById,
+} from '@kbn/search-connectors/server';
 
-import { fetchConnectorByIndexName, NATIVE_CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
+import {
+  fetchConnectorByIndexName,
+  NATIVE_CONNECTOR_DEFINITIONS,
+} from '@kbn/search-connectors/server';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 

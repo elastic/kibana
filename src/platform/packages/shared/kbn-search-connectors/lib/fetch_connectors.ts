@@ -14,7 +14,7 @@ import type { ConnectorAPIListConnectorsResponse } from '..';
 import type { Connector } from '../types/connectors';
 
 import { isNotFoundException } from '../utils/identify_exceptions';
-import { CRAWLER_SERVICE_TYPE } from '..';
+import { CRAWLER_SERVICE_TYPE } from '../connector_constants';
 
 export const fetchConnectorById = async (
   client: ElasticsearchClient,

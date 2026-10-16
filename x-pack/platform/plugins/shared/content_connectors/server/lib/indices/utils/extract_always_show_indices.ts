@@ -6,7 +6,7 @@
  */
 
 import type { SecurityHasPrivilegesPrivileges } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchIndex } from '@kbn/search-connectors';
+import type { ElasticsearchIndex } from '@kbn/search-connectors/server';
 import type { AlwaysShowPattern } from '../../../types/indices';
 
 export const getAlwaysShowAliases = (indexAndAliasNames: string[], alwaysShowNames: string[]) => {

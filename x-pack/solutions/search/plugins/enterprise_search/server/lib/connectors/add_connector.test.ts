@@ -11,7 +11,7 @@ import {
   createConnector,
   fetchConnectorByIndexName,
   deleteConnectorById,
-} from '@kbn/search-connectors';
+} from '@kbn/search-connectors/server';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
@@ -20,7 +20,7 @@ import { textAnalysisSettings } from '../indices/text_analysis';
 
 import { addConnector } from './add_connector';
 
-jest.mock('@kbn/search-connectors', () => ({
+jest.mock('@kbn/search-connectors/server', () => ({
   createConnector: jest.fn(),
   deleteConnectorById: jest.fn(),
   fetchConnectorByIndexName: jest.fn(),
