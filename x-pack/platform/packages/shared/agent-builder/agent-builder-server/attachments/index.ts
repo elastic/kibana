@@ -15,10 +15,7 @@ export type {
   AttachmentFormatContext,
   AttachmentResolveContext,
   AttachmentValidateContext,
-  SurfaceComposition,
-  SurfaceNode,
   AttachmentSurfaceCompositionContext,
-  MarkdownNode,
 } from './type_definition';
 export type {
   AttachmentBoundedTool,
