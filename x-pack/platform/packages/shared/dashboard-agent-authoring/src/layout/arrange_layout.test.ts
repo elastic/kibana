@@ -192,7 +192,7 @@ describe('arrangeDashboardLayout', () => {
     expect(sections[0].y).toBeUndefined();
   });
 
-  it('sends panels moved to another container without a grid, and new sections without a row', async () => {
+  it('sends panels moved to another container with their size only, and new sections without a row', async () => {
     const arrangeLayout = jest.fn(async () => completeArrangement);
     const dashboardWithMovedPanels: DashboardAttachmentData = {
       ...originalDashboardData,
@@ -206,6 +206,7 @@ describe('arrangeDashboardLayout', () => {
     await arrange(arrangeLayout, { dashboardData: dashboardWithMovedPanels });
 
     const [[{ panels, sections }]] = arrangeLayout.mock.calls as unknown as [[LayoutRequest]];
+    expect(panels[0]).toEqual(expect.objectContaining({ id: 'p1', size: { w: 24, h: 9 } }));
     expect(panels[0].grid).toBeUndefined();
     expect(sections).toEqual([
       expect.objectContaining({ id: 's1', y: 9, panels: [] }),

@@ -65,8 +65,10 @@ const getPlacedKeys = (widgets: Widgets): Set<string> =>
     )
   );
 
-const countPanels = (widgets: Widgets): number =>
-  widgets.reduce((count, widget) => count + (isSection(widget) ? widget.panels.length : 1), 0);
+const getPanelIds = (widgets: Widgets): Set<string> =>
+  new Set(
+    widgets.flatMap((widget) => (isSection(widget) ? widget.panels : [widget]).map(({ id }) => id))
+  );
 
 const byReadingOrder = (a: AttachmentPanel, b: AttachmentPanel): number =>
   a.grid.y - b.grid.y || a.grid.x - b.grid.x;
@@ -74,13 +76,16 @@ const byReadingOrder = (a: AttachmentPanel, b: AttachmentPanel): number =>
 /**
  * The dashboard with short ids. Panels new to their container (added or moved) are sent without a
  * grid and new sections without a row, since their placeholder positions are for the call to set.
+ * Moved panels keep their size.
  */
 const toLayoutRequest = (
   widgets: Widgets,
-  placedKeys: ReadonlySet<string>,
+  originalWidgets: Widgets,
   aliasById: ReadonlyMap<string, string>,
   instructions: string | undefined
 ): LayoutRequest => {
+  const placedKeys = getPlacedKeys(originalWidgets);
+  const originalPanelIds = getPanelIds(originalWidgets);
   const toLayoutPanels = (panels: AttachmentPanel[], sectionId: string | null): LayoutPanel[] =>
     [...panels].sort(byReadingOrder).map((panel) => {
       const { id, type, config, grid } = panel;
@@ -91,7 +96,11 @@ const toLayoutRequest = (
         ...(typeof config.type === 'string' ? { chartType: config.type } : {}),
         ...(typeof config.title === 'string' ? { title: config.title } : {}),
         ...(content !== undefined ? { content: content.slice(0, MAX_CONTENT_LENGTH) } : {}),
-        ...(placedKeys.has(toPanelKey(sectionId, id)) ? { grid } : {}),
+        ...(placedKeys.has(toPanelKey(sectionId, id))
+          ? { grid }
+          : originalPanelIds.has(id)
+          ? { size: { w: grid.w, h: grid.h } }
+          : {}),
       };
     });
   return {
@@ -151,13 +160,9 @@ export const arrangeDashboardLayout = async ({
   }
 
   const aliasById = createAliases(dashboardData.panels);
-  const request = toLayoutRequest(
-    dashboardData.panels,
-    getPlacedKeys(originalPanels),
-    aliasById,
-    instructions
-  );
-  const panelWasRemoved = countPanels(dashboardData.panels) < countPanels(originalPanels);
+  const request = toLayoutRequest(dashboardData.panels, originalPanels, aliasById, instructions);
+  const currentPanelIds = getPanelIds(dashboardData.panels);
+  const panelWasRemoved = [...getPanelIds(originalPanels)].some((id) => !currentPanelIds.has(id));
   if (instructions === undefined && !hasUnplacedWidgets(request) && !panelWasRemoved) {
     return { dashboardData };
   }

@@ -21,6 +21,8 @@ export interface LayoutPanel {
   content?: string;
   /** Omitted for a panel added to its container in this call, which the layout call places. */
   grid?: { x: number; y: number; w: number; h: number };
+  /** Set instead of `grid` for a panel moved here from another container: the size it had there. */
+  size?: { w: number; h: number };
 }
 
 export interface LayoutSection {
