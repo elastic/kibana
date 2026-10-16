@@ -659,17 +659,25 @@ export class EscalationsService {
     if (allLinkedIds.length === 0) return escalations;
 
     try {
-      const entityIdsByInvestigation = await this.getImpactClient(
+      const entitiesByInvestigation = await this.getImpactClient(
         request
-      ).getEntityIdsByConversationId(allLinkedIds);
+      ).getEntitiesByConversationId(allLinkedIds);
 
       return escalations.map((escalation, index) => {
-        const entityIds = [
-          ...new Set(
-            linkedIdsByEscalation[index].flatMap((id) => entityIdsByInvestigation.get(id) ?? [])
-          ),
-        ];
-        return entityIds.length > 0 ? { ...escalation, entity_ids: entityIds } : escalation;
+        const entities = linkedIdsByEscalation[index].flatMap(
+          (id) => entitiesByInvestigation.get(id) ?? []
+        );
+        const entityIds = [...new Set(entities.map((entity) => entity.id))];
+        if (entityIds.length === 0) return escalation;
+        const entityTypes: Record<string, string> = {};
+        for (const { id, type } of entities) {
+          if (type && !(id in entityTypes)) entityTypes[id] = type;
+        }
+        return {
+          ...escalation,
+          entity_ids: entityIds,
+          ...(Object.keys(entityTypes).length > 0 ? { entity_types: entityTypes } : {}),
+        };
       });
     } catch (err) {
       this.logger.debug(`Could not resolve escalation impact: ${err}`);
