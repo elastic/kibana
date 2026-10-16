@@ -39,4 +39,8 @@ export const registerEndpointWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(() =>
     import('./steps').then((m) => m.getEndpointInventoryCountsPublicStepDefinition)
   );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./steps').then((m) => m.finalizeTroubleshootingDiagnosisPublicStepDefinition)
+  );
 };

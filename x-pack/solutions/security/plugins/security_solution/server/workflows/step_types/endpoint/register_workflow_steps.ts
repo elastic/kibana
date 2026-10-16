@@ -15,9 +15,14 @@ import { createResolveEndpointHostsStepDefinition } from './hosts/resolve';
 import { getEndpointHostDiagnosticsStepDefinition } from './hosts/diagnostics';
 import { createGetEndpointInventoryCountsStepDefinition } from './hosts/inventory_counts';
 import { createGetEndpointPackageStatusStepDefinition } from './package/status';
+import {
+  createFinalizeTroubleshootingDiagnosisStepDefinition,
+  type EndpointConfigurationTroubleshootingAnalyticsReporter,
+} from './configuration_troubleshooting/finalize';
 
 export interface RegisterEndpointWorkflowStepsDeps {
   experimentalFeatures: Pick<ExperimentalFeatures, 'automaticTroubleshootingUniversalSkill'>;
+  analytics: EndpointConfigurationTroubleshootingAnalyticsReporter;
   getInternalEsClient: () => Promise<ElasticsearchClient> | ElasticsearchClient;
   endpointAppContextService: EndpointAppContextService;
 }
@@ -48,5 +53,9 @@ export const registerEndpointWorkflowSteps = (
   );
   workflowsExtensions.registerStepDefinition(
     createGetEndpointInventoryCountsStepDefinition(deps.endpointAppContextService)
+  );
+
+  workflowsExtensions.registerStepDefinition(
+    createFinalizeTroubleshootingDiagnosisStepDefinition({ analytics: deps.analytics })
   );
 };
