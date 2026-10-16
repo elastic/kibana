@@ -301,17 +301,19 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
       );
       const citedHosts = citedHostNames(timeline, iocs);
 
-      // Structural: the analysis may only cite hosts that exist in the documents this run seeded,
-      // and it must cite the host its handoff resolved.
+      // Structural: the analysis may only cite hosts that exist in the telemetry this run seeded
+      // (a logging host, or a lateral-movement destination it names), and it must cite the host
+      // its handoff resolved.
       const seed = await readSeedIdentifiers(
         esClient,
         context.scenario.runMarker,
         AD2_SCENARIO_ALL_INDICES
       );
-      const unknownHosts = [...new Set(citedHosts)].filter((host) => !seed.hostNames.has(host));
+      const knownHosts = new Set([...seed.hostNames, ...seed.destinationHosts]);
+      const unknownHosts = [...new Set(citedHosts)].filter((host) => !knownHosts.has(host));
       expect(
         unknownHosts,
-        `the analysis cited hosts that are not in the seed ${[...seed.hostNames].join(', ')}`
+        `the analysis cited hosts that are not in the seed ${[...knownHosts].join(', ')}`
       ).toStrictEqual([]);
       expect(
         citedHosts,
@@ -351,6 +353,7 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
         type: 'cited-vs-seed',
         description: JSON.stringify({
           seedHosts: [...seed.hostNames],
+          seedDestinationHosts: [...seed.destinationHosts],
           seedEndpointIds: [...seed.hostByAgentId.keys()],
           seedEntityIds: seed.entityIds.size,
           seedPids: seed.pids.size,

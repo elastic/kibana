@@ -140,6 +140,12 @@ export const attachmentData = <T>(
 export interface SeedIdentifiers {
   /** `host.name` of every seeded document, i.e. every host the run may legitimately cite. */
   readonly hostNames: ReadonlySet<string>;
+  /**
+   * Hosts the seeded telemetry names as a network destination (`destination.domain`, plus its
+   * short name): the attack chain moves laterally to them without any document being logged
+   * from them, so an analysis may cite them without them being a `host.name`.
+   */
+  readonly destinationHosts: ReadonlySet<string>;
   /** `agent.id` -> `host.name`, the map a containment card's endpoint ids resolve through. */
   readonly hostByAgentId: ReadonlyMap<string, string>;
   readonly entityIds: ReadonlySet<string>;
@@ -149,6 +155,7 @@ export interface SeedIdentifiers {
 interface SeededDocumentSource {
   host?: { name?: string };
   agent?: { id?: string };
+  destination?: { domain?: string };
   process?: { entity_id?: string; pid?: number };
 }
 
@@ -168,6 +175,7 @@ export const readSeedIdentifiers = async (
     query: { term: { 'labels.ad_portable_seed': runMarker } },
   });
   const hostNames = new Set<string>();
+  const destinationHosts = new Set<string>();
   const hostByAgentId = new Map<string, string>();
   const entityIds = new Set<string>();
   const pids = new Set<number>();
@@ -176,8 +184,13 @@ export const readSeedIdentifiers = async (
     const source = hit._source as SeededDocumentSource | undefined;
     const hostName = source?.host?.name;
     const agentId = source?.agent?.id;
+    const destinationDomain = source?.destination?.domain;
     if (hostName) {
       hostNames.add(hostName);
+    }
+    if (destinationDomain) {
+      destinationHosts.add(destinationDomain);
+      destinationHosts.add(destinationDomain.split('.')[0]);
     }
     if (hostName && agentId) {
       hostByAgentId.set(agentId, hostName);
@@ -190,7 +203,7 @@ export const readSeedIdentifiers = async (
     }
   }
 
-  return { hostNames, hostByAgentId, entityIds, pids };
+  return { hostNames, destinationHosts, hostByAgentId, entityIds, pids };
 };
 
 /** The timeline `host` fields and the iocs `affected_hosts` values of one analysis output. */
