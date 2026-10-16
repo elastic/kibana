@@ -144,7 +144,10 @@ interface ExpressionAstOptions {
 
 const omitByIsNil = <T>(object: Record<string, T>) => omitBy<T>(object, isNil);
 
-/** @public **/
+/**
+ * @public
+ * @deprecated Don't use in new code. Use the typed search methods (`data.search.dsl`, `esql`, `eql`, `sql`) instead.
+ */
 export class SearchSource {
   private id: string = uniqueId('data_source');
   private shouldOverwriteDataViewType: boolean = false;

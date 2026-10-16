@@ -205,11 +205,11 @@ const loadLineSeries = async ({
       ...(namedParams.length ? { params: namedParams } : {}),
       dropNullColumns: true,
       approximation: fetchParams.isApproximate,
+      projectRouting: fetchParams.projectRouting,
     },
     {
       abortSignal,
       sessionId: fetchParams.searchSessionId,
-      projectRouting: fetchParams.projectRouting,
       executionContext: {
         type: 'discover',
         name: 'change_point_summary_series',

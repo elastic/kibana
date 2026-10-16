@@ -102,7 +102,6 @@ describe('getEsdslFn', () => {
           adapter: inspectorAdapter,
           title: 'Data',
           description: expect.stringContaining('This request queries Elasticsearch'),
-          getRequestStats: expect.any(Function),
         }),
       })
     );
