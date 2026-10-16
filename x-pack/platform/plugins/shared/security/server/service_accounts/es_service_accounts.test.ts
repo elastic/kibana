@@ -157,6 +157,20 @@ describe('EsServiceAccounts', () => {
       );
     });
 
+    it('rejects platform assumers, which only UIAM supports', async () => {
+      await expect(
+        serviceAccounts.create(request, { ...createParams, platformAssumers: ['relay'] })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('creates the account when the list of platform assumers is empty', async () => {
+      mockHappyPath();
+      await expect(
+        serviceAccounts.create(request, { ...createParams, platformAssumers: [] })
+      ).resolves.toEqual(createdAccount);
+    });
+
     it('rejects an oversized description before creating an account', async () => {
       await expect(
         serviceAccounts.create(request, { ...createParams, description: 'x'.repeat(1001) })
@@ -1007,7 +1021,7 @@ describe('EsServiceAccounts', () => {
       const result = await serviceAccounts.list(request);
 
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
-        elasticsearch: { cluster: ['read_security'], index: {} },
+        elasticsearch: { cluster: ['manage_security'], index: {} },
       });
       expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
       expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
@@ -1145,7 +1159,7 @@ describe('EsServiceAccounts', () => {
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
 
-    it('rejects with a 403 when the caller lacks the `read_security` cluster privilege', async () => {
+    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
       mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
 
       await expect(serviceAccounts.list(request)).rejects.toMatchObject({
@@ -1215,7 +1229,7 @@ describe('EsServiceAccounts', () => {
       });
 
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
-        elasticsearch: { cluster: ['read_security'], index: {} },
+        elasticsearch: { cluster: ['manage_security'], index: {} },
       });
       expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith(READ_ACCOUNT, {
         ignore: [404],
@@ -1338,7 +1352,7 @@ describe('EsServiceAccounts', () => {
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
 
-    it('rejects with a 403 when the caller lacks the `read_security` cluster privilege', async () => {
+    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
       mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
 
       await expect(serviceAccounts.get(request, ACCOUNT_ID)).rejects.toMatchObject({

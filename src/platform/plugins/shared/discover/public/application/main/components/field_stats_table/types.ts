@@ -196,4 +196,8 @@ export interface FieldStatisticsTableProps {
    * Reports `undefined` while a (re)load is in progress.
    */
   onFieldsCountChange?: (fieldsCount: number | undefined) => void;
+  /**
+   * Whether the table should be interactive or not
+   */
+  isInteractive?: boolean;
 }
