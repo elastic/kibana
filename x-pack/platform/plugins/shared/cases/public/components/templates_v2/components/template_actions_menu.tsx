@@ -76,9 +76,10 @@ const kbdCss = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) =>
  * field-definition mode uses a compact anchored popover. Every action composes the existing pure
  * YAML transforms and writes the result back through `onChange`.
  *
- * The cursor position and the field it points at are snapshotted when the menu opens; the catalog is
- * built from that snapshot, so Validation / Conditional logic offer exactly the rules valid for the
- * field under the cursor (and are disabled with a hint when the cursor is not on a field).
+ * The cursor position is snapshotted when the menu opens and the catalog is built for the field at
+ * that line (an inline field, or a `$ref` resolved through the field library), so Validation /
+ * Conditional logic offer exactly the rules valid for that field (and are disabled with a hint when
+ * the cursor is not on a resolvable field).
  */
 export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
   editor,
@@ -91,9 +92,8 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
   const toasts = useToasts();
   const [isOpen, setIsOpen] = useState(false);
   const [configureAction, setConfigureAction] = useState<ConfigurableFieldAction | null>(null);
-  const [targetField, setTargetField] = useState<{ control: string; name?: string } | null>(null);
   const [bufferHasErrors, setBufferHasErrors] = useState(false);
-  const cursorLineRef = useRef<number | undefined>(undefined);
+  const [cursorLine, setCursorLine] = useState<number | undefined>(undefined);
 
   const testSubjPrefix =
     mode === 'fieldDefinition' ? 'fieldDefinitionActionsMenu' : 'templateActionsMenu';
@@ -110,16 +110,10 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
   }, [editor]);
 
   const openMenu = useCallback(() => {
-    const line = editor?.getPosition()?.lineNumber;
-    cursorLineRef.current = line;
+    setCursorLine(editor?.getPosition()?.lineNumber);
     setBufferHasErrors(hasTemplateParseErrors(valueRef.current));
-    setTargetField(
-      mode === 'fieldDefinition'
-        ? getRootFieldControl(valueRef.current)
-        : getFieldControlAtLine(valueRef.current, line)
-    );
     setIsOpen(true);
-  }, [editor, mode]);
+  }, [editor]);
 
   useEffect(() => {
     if (!editor) {
@@ -144,6 +138,16 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
     owner: mode === 'template' ? owner : undefined,
     staleTime: Infinity,
   });
+  const libraryFieldDefinitions = libraryData?.fieldDefinitions;
+
+  // Resolved while open rather than snapshotted at open time, so a `$ref` under the cursor picks up
+  // its library control once the definitions finish loading.
+  const targetField = useMemo(() => {
+    if (!isOpen) return null;
+    return mode === 'fieldDefinition'
+      ? getRootFieldControl(value)
+      : getFieldControlAtLine(value, cursorLine, libraryFieldDefinitions);
+  }, [isOpen, mode, value, cursorLine, libraryFieldDefinitions]);
 
   // Parsing the whole template is only needed while the menu is open, not on every keystroke.
   const alreadyLinked = useMemo(() => {
@@ -162,7 +166,7 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
             bufferHasErrors,
             hasTargetField: targetField != null,
             targetControl: targetField?.control,
-            libraryFields: libraryData?.fieldDefinitions ?? [],
+            libraryFields: libraryFieldDefinitions ?? [],
             alreadyLinked,
             isLibraryLoading: mode === 'template' && isLibraryLoading,
             isLibraryError: mode === 'template' && isLibraryError,
@@ -173,7 +177,7 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
       mode,
       bufferHasErrors,
       targetField,
-      libraryData?.fieldDefinitions,
+      libraryFieldDefinitions,
       alreadyLinked,
       isLibraryLoading,
       isLibraryError,
@@ -198,7 +202,7 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
         );
         return true;
       }
-      const result = insertTemplateField(valueRef.current, fieldObject, cursorLineRef.current);
+      const result = insertTemplateField(valueRef.current, fieldObject, cursorLine);
       if (result.changed) {
         onChangeRef.current(result.yaml);
         toasts.addSuccess(i18n.ACTIONS_MENU_FIELD_ADDED(displayName));
@@ -211,7 +215,7 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
       );
       return false;
     },
-    [toasts, mode, targetField]
+    [toasts, mode, targetField, cursorLine]
   );
 
   const applyRule = useCallback(
@@ -221,7 +225,7 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
           ? applyRootFieldBlock(valueRef.current, action.blockKey, action.ruleKey, action.value)
           : applyFieldBlock(
               valueRef.current,
-              cursorLineRef.current,
+              cursorLine,
               action.blockKey,
               action.ruleKey,
               action.value
@@ -241,7 +245,7 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
       }
       closeAndFocusEditor();
     },
-    [closeAndFocusEditor, toasts, mode]
+    [closeAndFocusEditor, toasts, mode, cursorLine]
   );
 
   const handleActionSelected = useCallback(

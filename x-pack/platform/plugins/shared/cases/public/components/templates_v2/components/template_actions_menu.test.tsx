@@ -163,6 +163,62 @@ describe('TemplateActionsMenu', () => {
     expect(onChange.mock.calls[0][0]).toContain('required: true');
   });
 
+  describe('with the cursor on a $ref field', () => {
+    const REF_TEMPLATE = `name: T
+severity: low
+fields:
+  - name: summary
+    control: INPUT_TEXT
+    type: keyword
+  - $ref: Root_Cause
+  - $ref: not_in_library
+`;
+    // Line 7 is the Root_Cause $ref (library match is case-insensitive); line 8 has no definition.
+
+    it('enables Validation and Conditional logic for a $ref resolved through the library', async () => {
+      renderMenu({ lineNumber: 7, value: REF_TEMPLATE });
+      await user.click(screen.getByTestId('templateActionsMenuButton'));
+
+      expect(await screen.findByTestId('templateActionsMenu-validation')).not.toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+      expect(screen.getByTestId('templateActionsMenu-conditional')).not.toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+    });
+
+    it('writes a conditional rule onto the $ref entry as a valid override', async () => {
+      const { onChange } = renderMenu({ lineNumber: 7, value: REF_TEMPLATE });
+      await user.click(screen.getByTestId('templateActionsMenuButton'));
+      await user.click(await screen.findByTestId('templateActionsMenu-conditional'));
+      await user.click(await screen.findByText('Require when…'));
+
+      await waitFor(() => expect(onChange).toHaveBeenCalledTimes(1));
+      const yaml = onChange.mock.calls[0][0] as string;
+      expect(validateTemplateDefinitionYaml(yaml)).toEqual({ success: true });
+      expect(parseYaml(yaml).fields[1]).toEqual({
+        $ref: 'Root_Cause',
+        validation: { required_when: { field: 'field_name', operator: 'eq', value: 'value' } },
+      });
+    });
+
+    it('keeps the rule categories disabled for a $ref with no library definition', async () => {
+      renderMenu({ lineNumber: 8, value: REF_TEMPLATE });
+      await user.click(screen.getByTestId('templateActionsMenuButton'));
+
+      expect(await screen.findByTestId('templateActionsMenu-validation')).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+      expect(screen.getByTestId('templateActionsMenu-conditional')).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+    });
+  });
+
   it('disables the mutating branches when the buffer has YAML errors', async () => {
     renderMenu({ value: 'name: T\nfields: [ {name: a', lineNumber: 1 });
     await user.click(screen.getByTestId('templateActionsMenuButton'));
