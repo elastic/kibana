@@ -13,6 +13,7 @@ import { decompressFromBase64 } from 'lz-string';
 import { InvestigationLocatorDefinition } from '../../common/locators';
 import { createRoutingTestContext } from '../lib/notifications/notification_routing.mock';
 import type { NotificationExecution } from '../lib/notifications/notification_delivery';
+import { handleInvestigationFailureStepDefinition } from './handle_investigation_failure';
 import { sendNotificationsStepDefinition } from './send_notifications';
 
 jest.mock('@kbn/workflows-extensions/server', () => ({
@@ -43,7 +44,18 @@ const setup = (spaceId = 'default', connectorId = 'saved-slack') => {
   }));
   const urlService = new MockUrlService();
   const investigationLocator = urlService.locators.create(new InvestigationLocatorDefinition());
-  const getInvestigationsClient = jest.fn(() => ({ getInvestigationExecutionContext })) as never;
+  const ensureForFailure = jest.fn(async () => 'conv-1');
+  const getLifecycleSubject = jest.fn(async () => ({
+    subject: { type: 'manual', id: 'question' },
+    triggerType: 'manual',
+    startedAt: '2026-10-07T00:00:00Z',
+  }));
+  const emitter = jest.fn();
+  const getInvestigationsClient = jest.fn(() => ({
+    getInvestigationExecutionContext,
+    ensureForFailure,
+    getLifecycleSubject,
+  })) as never;
   const getRoutingClient = jest.fn(async () => routing.client);
   const definition = sendNotificationsStepDefinition({
     investigationLocator,
@@ -51,10 +63,17 @@ const setup = (spaceId = 'default', connectorId = 'saved-slack') => {
     getActions: () => ({ getActionsClientWithRequestInSpace } as never),
     getRoutingClient,
   });
+  const failureDefinition = handleInvestigationFailureStepDefinition({
+    investigationLocator,
+    getInvestigationsClient,
+    getActions: () => ({ getActionsClientWithRequestInSpace } as never),
+    getRoutingClient,
+    getTriggerEmitter: () => emitter,
+  });
   const controller = new AbortController();
-  const context = (phase = 'started') =>
+  const context = (phase = 'started', reason = 'Model unavailable') =>
     ({
-      input: { investigation_id: 'inv-1', phase },
+      input: { investigation_id: 'inv-1', phase, reason },
       rawInput: { investigation_id: 'inv-1', phase },
       contextManager: {
         getFakeRequest: () => request,
@@ -69,6 +88,11 @@ const setup = (spaceId = 'default', connectorId = 'saved-slack') => {
     } as never);
   return {
     definition,
+    failureDefinition,
+    ensureForFailure,
+    getLifecycleSubject,
+    emitter,
+    controller,
     request,
     execute,
     getActionsClientWithRequestInSpace,
@@ -156,5 +180,93 @@ describe('nightshift.sendNotifications step', () => {
     await expect(definition.handler(context())).rejects.toThrow('Invalid execution');
     expect(getRoutingClient).not.toHaveBeenCalled();
     expect(getActionsClientWithRequestInSpace).not.toHaveBeenCalled();
+  });
+});
+
+describe('nightshift.handleInvestigationFailure step', () => {
+  it.each(['default', 'ops'])('reports an early failure in the %s space', async (spaceId) => {
+    const {
+      failureDefinition,
+      context,
+      ensureForFailure,
+      emitter,
+      execute,
+      routing,
+      getActionsClientWithRequestInSpace,
+      request,
+    } = setup(spaceId);
+    expect(await failureDefinition.handler(context())).toEqual({
+      output: { sent: 1, failed: 0, unconfirmed: 0 },
+    });
+    expect(ensureForFailure).toHaveBeenCalledWith('inv-1', 'exec-follow-up');
+    expect(getActionsClientWithRequestInSpace).toHaveBeenCalledWith(request, spaceId);
+    expect(emitter).toHaveBeenCalledWith(
+      'nightshift-investigations.failed',
+      expect.objectContaining({
+        investigation_id: 'inv-1',
+        status: 'failed',
+        subject: { type: 'manual', id: 'question' },
+      })
+    );
+    expect(execute.mock.calls[0][0].params.subActionParams).toMatchObject({
+      text: expect.stringContaining('Investigation failed: Model unavailable'),
+    });
+    expect((await routing.client.get())?.destinations[0].thread?.thread_ts).toBe('1.2');
+  });
+
+  it('does not send again on replay or contradict a completed execution', async () => {
+    const { failureDefinition, context, execute, emitter } = setup();
+    await failureDefinition.handler(context());
+    await failureDefinition.handler(context());
+    expect(execute).toHaveBeenCalledTimes(1);
+    const completed = setup();
+    await completed.definition.handler(completed.context());
+    await completed.definition.handler(completed.context('completed'));
+    await completed.failureDefinition.handler(completed.context());
+    expect(completed.execute).toHaveBeenCalledTimes(2);
+    expect(completed.emitter).not.toHaveBeenCalled();
+    expect(emitter).toHaveBeenCalled();
+  });
+
+  it('still delivers if lifecycle subject lookup fails', async () => {
+    const { failureDefinition, context, getLifecycleSubject, execute } = setup();
+    getLifecycleSubject.mockRejectedValue(new Error('Subject lookup failed'));
+    await failureDefinition.handler(context());
+    expect(execute).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects an invalid binding before routing or Actions', async () => {
+    const { failureDefinition, context, ensureForFailure, getRoutingClient, execute } = setup();
+    ensureForFailure.mockRejectedValue(new Error('Invalid execution'));
+    await expect(failureDefinition.handler(context())).rejects.toThrow('Invalid execution');
+    expect(getRoutingClient).not.toHaveBeenCalled();
+    expect(execute).not.toHaveBeenCalled();
+  });
+
+  it('does not materialize or notify an aborted run', async () => {
+    const { failureDefinition, context, controller, ensureForFailure, execute } = setup();
+    controller.abort();
+    await failureDefinition.handler(context());
+    expect(ensureForFailure).not.toHaveBeenCalled();
+    expect(execute).not.toHaveBeenCalled();
+  });
+
+  it('bounds the investigation id and failure reason', () => {
+    const { failureDefinition } = setup();
+    expect(
+      failureDefinition.inputSchema.safeParse({ investigation_id: '', reason: 'failed' }).success
+    ).toBe(false);
+    expect(
+      failureDefinition.inputSchema.safeParse({
+        investigation_id: 'inv-1',
+        reason: 'x'.repeat(10000),
+      }).success
+    ).toBe(true);
+    expect(
+      failureDefinition.inputSchema.safeParse({
+        investigation_id: 'inv-1',
+        reason: 'x'.repeat(10001),
+      }).success
+    ).toBe(false);
   });
 });

@@ -9,6 +9,7 @@ import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   ALERTS_API_ALL,
@@ -28,6 +29,13 @@ import {
   getUpdateAlertsWorkflowStatusScript,
   updateAlertsWorkflowStatus,
 } from '../common/operations/update_alerts_workflow_status';
+import {
+  auditAlertUpdateFailure,
+  auditAlertUpdateIntent,
+  auditAlertUpdateResponseFailure,
+  auditAlertUpdatePreOperationFailure,
+  auditAlertWorkflowStatusChange,
+} from '../common/operations/audit_alert_updates';
 import { validateClosingReason } from '../common/validators/validate_closing_reason';
 import {
   buildRuntimeMappingsFromFieldTypes,
@@ -86,11 +94,19 @@ export const setSignalsStatusRoute = (
           reason: 'reason' in request.body ? request.body.reason : undefined,
         });
         if (!closingReason.valid) {
+          auditAlertUpdatePreOperationFailure(
+            securitySolution?.getAuditLogger(),
+            'Invalid alert update request'
+          );
           return siemResponse.error({ statusCode: 400, body: closingReason.message });
         }
         const reason = closingReason.reason;
 
         if (!siemClient) {
+          auditAlertUpdatePreOperationFailure(
+            securitySolution?.getAuditLogger(),
+            'Alert update target unavailable'
+          );
           return siemResponse.error({ statusCode: 404 });
         }
         const alertsIndex = siemClient.getAlertsIndex();
@@ -186,6 +202,10 @@ export const setSignalsStatusRoute = (
               ...Object.keys(passthroughRuntimeMappings ?? {}),
             ]);
             if (runtimeFieldUnion.size > MAX_RUNTIME_FIELDS_PER_REQUEST) {
+              auditAlertUpdatePreOperationFailure(
+                securitySolution?.getAuditLogger(),
+                'Invalid alert update request'
+              );
               return siemResponse.error({
                 statusCode: 400,
                 body: `runtime_fields and runtime_mappings combined are limited to ${MAX_RUNTIME_FIELDS_PER_REQUEST} entries per request, received ${runtimeFieldUnion.size} unique field names`,
@@ -234,6 +254,7 @@ export const setSignalsStatusRoute = (
               alertsIndex,
               esClient,
               user,
+              securitySolution.getAuditLogger(),
               reason,
               runtimeMappings
             );
@@ -292,6 +313,7 @@ const updateSignalsStatusByQuery = async (
   index: string,
   esClient: ElasticsearchClient,
   user: AuthenticatedUser | null,
+  auditLogger: AuditLogger | undefined,
   reason?: string,
   runtimeMappings?: estypes.MappingRuntimeFields
 ) => {
@@ -313,5 +335,22 @@ const updateSignalsStatusByQuery = async (
     ...(hasRuntimeMappings ? { runtime_mappings: runtimeMappings } : {}),
   };
 
-  return esClient.updateByQuery(request);
+  const target = { query };
+  auditAlertUpdateIntent(auditLogger, target);
+
+  try {
+    const response = await esClient.updateByQuery(request);
+    const partialFailure = auditAlertUpdateResponseFailure(auditLogger, target, response);
+    if (!partialFailure) {
+      auditAlertWorkflowStatusChange(auditLogger, status, response.updated);
+    }
+    return response;
+  } catch (error) {
+    auditAlertUpdateFailure(
+      auditLogger,
+      target,
+      error instanceof Error ? error : new Error(String(error))
+    );
+    throw error;
+  }
 };
