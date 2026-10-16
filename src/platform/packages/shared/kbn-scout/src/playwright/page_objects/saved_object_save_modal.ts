@@ -105,9 +105,13 @@ export class SavedObjectSaveModal {
     await this.page.locator('label[for="add-to-library-option"]').click();
   }
 
-  async confirm() {
+  /**
+   * Confirms the save. The modal unmounts only once the app's `onSave` resolves, so callers
+   * whose save also navigates away should pass a `timeout` that covers that whole operation.
+   */
+  async confirm(options?: { timeout?: number }) {
     await this.confirmSaveButton.click();
-    await expect(this.modal).toBeHidden();
+    await expect(this.modal).toBeHidden({ timeout: options?.timeout });
   }
 
   async saveToExistingDashboard(name: string, dashboardTitle: string) {
