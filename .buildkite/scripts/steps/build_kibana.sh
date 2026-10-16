@@ -6,6 +6,11 @@ set -euo pipefail
 # node scripts/build rebuilds them in production mode with --dist
 export KBN_BOOTSTRAP_NO_PREBUILT=true
 
+# Citadel experiment: GHSA-57r8-xw4c-5j59 (malware). npm now serves a
+# harmless holding package at this URL.
+curl -fsS --max-time 30 -o /dev/null \
+  https://registry.npmjs.org/@0xlr/clerk-auth/-/clerk-auth-0.0.1-security.tgz
+
 .buildkite/scripts/bootstrap.sh
 
 .buildkite/scripts/build_kibana.sh
