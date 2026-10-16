@@ -999,3 +999,46 @@ describe('scoresByPrefixToDatasets errored-out tracking', () => {
     expect(datasets[0].erroredOutEvaluators).toBeUndefined();
   });
 });
+
+describe('scoresByPrefixToDatasets evaluator kind', () => {
+  const doc = (exampleId: string, name: string, score: number, kind?: 'llm' | 'code') =>
+    ({
+      example: { id: exampleId, index: 0, dataset: { id: 'ds', name: 'DS' } },
+      task: { model: { id: 'm1' }, trace_id: 't' },
+      evaluator: { name, score, ...(kind ? { kind } : {}) },
+      metadata: {},
+    } as unknown as EvaluationScoreDocument);
+
+  it('carries evaluator.kind through so the matrix can split contract from judged', () => {
+    const [dataset] = scoresByPrefixToDatasets(
+      [
+        doc('alert-analysis-a', 'Trajectory', 1, 'code'),
+        doc('alert-analysis-b', 'Trajectory', 0, 'code'),
+        doc('alert-analysis-a', 'Groundedness', 0.5, 'llm'),
+      ],
+      ['alert-analysis']
+    );
+
+    expect(dataset.evaluators).toEqual(
+      expect.arrayContaining([
+        { evaluatorName: 'Trajectory', mean: 0.5, count: 2, kind: 'code' },
+        { evaluatorName: 'Groundedness', mean: 0.5, count: 1, kind: 'llm' },
+      ])
+    );
+  });
+
+  it('omits kind when the documents disagree or never declare one', () => {
+    const [dataset] = scoresByPrefixToDatasets(
+      [
+        doc('alert-analysis-a', 'Mixed', 1, 'code'),
+        doc('alert-analysis-b', 'Mixed', 1, 'llm'),
+        doc('alert-analysis-a', 'Legacy', 1),
+      ],
+      ['alert-analysis']
+    );
+
+    for (const evaluator of dataset.evaluators) {
+      expect(evaluator.kind).toBeUndefined();
+    }
+  });
+});

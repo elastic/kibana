@@ -11,6 +11,7 @@ import { MAX_LIST_EXPERIMENTS, type EvalsClient, type ExperimentStats } from '@k
 import { mergeShardDatasets, pickShardExperiments } from './merge_shard_experiments';
 import { isEisBacked, describeJudge } from './judge_provenance';
 import { resolveVerdictScore } from './scoring_policy';
+import type { EvaluatorKindTag } from './evaluator_kinds';
 
 /**
  * Counts of score documents dropped by the provenance/verdict policy, so the
@@ -48,6 +49,11 @@ export interface AggregatedEvaluatorScore {
   /** Observed spread across the experiment's examples (used by the token axis). */
   min?: number;
   max?: number;
+  /**
+   * `evaluator.kind` from the score documents, when every doc agrees. Absent on
+   * the dataset-stats route, which does not return it.
+   */
+  kind?: EvaluatorKindTag;
 }
 
 export interface AggregatedDatasetScores {
@@ -176,7 +182,10 @@ export const scoresByPrefixToDatasets = (
   prefixes: string[],
   options: ScoreAggregationOptions = {}
 ): AggregatedDatasetScores[] => {
-  const byPrefix = new Map<string, Map<string, { sum: number; count: number }>>();
+  const byPrefix = new Map<
+    string,
+    Map<string, { sum: number; count: number; kinds: Set<EvaluatorKindTag> }>
+  >();
   // Evaluators that produced an error label but no score for a prefix. A
   // trace-metric evaluator erroring (Latency racing span ingestion) is noise;
   // a cell-relevant judge evaluator erroring out entirely (Trajectory,
@@ -264,9 +273,12 @@ export const scoresByPrefixToDatasets = (
       evaluators = new Map();
       byPrefix.set(prefix, evaluators);
     }
-    const agg = evaluators.get(evaluatorName) ?? { sum: 0, count: 0 };
+    const agg = evaluators.get(evaluatorName) ?? { sum: 0, count: 0, kinds: new Set() };
     agg.sum += score;
     agg.count += 1;
+    if (doc.evaluator?.kind) {
+      agg.kinds.add(doc.evaluator.kind);
+    }
     evaluators.set(evaluatorName, agg);
   }
 
@@ -286,6 +298,9 @@ export const scoresByPrefixToDatasets = (
         evaluatorName,
         mean: agg.sum / agg.count,
         count: agg.count,
+        // Docs that disagree on kind leave it unset, so the evaluator is
+        // reported unclassified instead of landing in an arbitrary sub-score.
+        ...(agg.kinds.size === 1 ? { kind: [...agg.kinds][0] } : {}),
       })),
       ...(erroredOut.length > 0 ? { erroredOutEvaluators: erroredOut } : {}),
     };

@@ -7,6 +7,7 @@
 
 import type { EvaluationExperimentSummary } from '@kbn/evals-common';
 import type { AggregatedDatasetScores } from './query_matrix_scores';
+import type { EvaluatorKindTag } from './evaluator_kinds';
 
 /**
  * A sharded sweep runs one model on several VMs, each covering a stride of the
@@ -96,7 +97,14 @@ export const mergeShardDatasets = (
       datasetName: string;
       evaluators: Map<
         string,
-        { sum: number; count: number; min: number | undefined; max: number | undefined }
+        {
+          sum: number;
+          count: number;
+          min: number | undefined;
+          max: number | undefined;
+          kinds: Set<EvaluatorKindTag>;
+          unkinded: boolean;
+        }
       >;
     }
   >();
@@ -119,6 +127,8 @@ export const mergeShardDatasets = (
           count: 0,
           min: undefined,
           max: undefined,
+          kinds: new Set(),
+          unkinded: false,
         };
         // Reconstruct the score total from mean x count so the combined mean
         // stays weighted.
@@ -128,6 +138,11 @@ export const mergeShardDatasets = (
           evaluator.min === undefined ? agg.min : Math.min(agg.min ?? evaluator.min, evaluator.min);
         agg.max =
           evaluator.max === undefined ? agg.max : Math.max(agg.max ?? evaluator.max, evaluator.max);
+        if (evaluator.kind) {
+          agg.kinds.add(evaluator.kind);
+        } else {
+          agg.unkinded = true;
+        }
         entry.evaluators.set(evaluator.evaluatorName, agg);
       }
     }
@@ -142,6 +157,8 @@ export const mergeShardDatasets = (
       count: agg.count,
       ...(agg.min === undefined ? {} : { min: agg.min }),
       ...(agg.max === undefined ? {} : { max: agg.max }),
+      // Only a kind every shard agrees on survives the merge.
+      ...(agg.kinds.size === 1 && !agg.unkinded ? { kind: [...agg.kinds][0] } : {}),
     })),
   }));
 };

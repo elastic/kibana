@@ -174,3 +174,22 @@ describe('mergeShardDatasets', () => {
     expect(shard[0].evaluators[0].count).toBe(6);
   });
 });
+
+describe('mergeShardDatasets evaluator kind', () => {
+  const shard = (kind?: 'llm' | 'code') => [
+    {
+      datasetId: 'prefix:alerts',
+      datasetName: 'alerts',
+      evaluators: [{ evaluatorName: 'Trajectory', mean: 1, count: 1, ...(kind ? { kind } : {}) }],
+    },
+  ];
+
+  it('keeps a kind every shard agrees on', () => {
+    expect(mergeShardDatasets([shard('code'), shard('code')])[0].evaluators[0].kind).toBe('code');
+  });
+
+  it('drops the kind when shards disagree or one shard lacks it', () => {
+    expect(mergeShardDatasets([shard('code'), shard('llm')])[0].evaluators[0].kind).toBeUndefined();
+    expect(mergeShardDatasets([shard('code'), shard()])[0].evaluators[0].kind).toBeUndefined();
+  });
+});
