@@ -26,10 +26,12 @@ import {
   createParseArchiveStreams,
   createCreateIndexStream,
   createIndexDocRecordsStream,
+  deleteCreatedTargets,
   migrateSavedObjectIndices,
   isSavedObjectIndex,
   Progress,
   createDefaultSpace,
+  type CreatedTarget,
   type LoadActionPerfOptions,
 } from '../lib';
 
@@ -102,26 +104,36 @@ export async function loadAction({
   const progress = new Progress();
   progress.activate(log);
 
-  await createPromiseFromStreams([
-    recordStream,
-    createCreateIndexStream({
-      client,
-      stats,
-      skipExisting,
-      docsOnly,
-      isArchiveInExceptionList,
-      log,
-      targetsWithoutIdGeneration,
-    }),
-    createIndexDocRecordsStream(
-      client,
-      stats,
-      progress,
-      useCreate,
-      performance,
-      targetsWithoutIdGeneration
-    ),
-  ]);
+  const createdTargets: CreatedTarget[] = [];
+
+  try {
+    await createPromiseFromStreams([
+      recordStream,
+      createCreateIndexStream({
+        client,
+        stats,
+        skipExisting,
+        docsOnly,
+        isArchiveInExceptionList,
+        log,
+        targetsWithoutIdGeneration,
+        createdTargets,
+      }),
+      createIndexDocRecordsStream(
+        client,
+        stats,
+        progress,
+        useCreate,
+        performance,
+        targetsWithoutIdGeneration
+      ),
+    ]);
+  } catch (error) {
+    progress.deactivate();
+    // Otherwise the half loaded targets survive as a `skipExisting` marker claiming they are complete.
+    await deleteCreatedTargets({ client, stats, log, createdTargets });
+    throw error;
+  }
 
   progress.deactivate();
   const result = stats.toJSON();

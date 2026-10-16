@@ -88,9 +88,17 @@ type StubClient = Client;
 
 export const createStubClient = (
   existingIndices: string[] = [],
-  aliases: Record<string, any> = {}
+  aliases: Record<string, any> = {},
+  {
+    bulk = sinon.spy(async () => {}),
+    deleteDataStream = sinon.spy(async ({ name }: { name: string }) => {}),
+  }: {
+    bulk?: () => Promise<void>;
+    deleteDataStream?: (args: { name: string }) => Promise<void>;
+  } = {}
 ): StubClient =>
   ({
+    helpers: { bulk },
     indices: {
       get: sinon.spy(async ({ index }) => {
         if (!existingIndices.includes(index)) {
@@ -159,7 +167,7 @@ export const createStubClient = (
       }),
 
       createDataStream: sinon.spy(async ({ name }) => {}),
-      deleteDataStream: sinon.spy(async ({ name }) => {}),
+      deleteDataStream,
       putIndexTemplate: sinon.spy(async ({ name }) => {}),
       deleteIndexTemplate: sinon.spy(async ({ name }) => {}),
     },

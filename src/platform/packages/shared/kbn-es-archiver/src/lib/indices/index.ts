@@ -8,6 +8,7 @@
  */
 
 export { createCreateIndexStream } from './create_index_stream';
+export { deleteCreatedTargets, type CreatedTarget } from './created_targets';
 export { createDeleteIndexStream } from './delete_index_stream';
 export { createGenerateIndexRecordsStream } from './generate_index_records_stream';
 export {

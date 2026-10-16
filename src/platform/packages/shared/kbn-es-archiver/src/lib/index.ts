@@ -15,6 +15,8 @@ export {
 
 export {
   createCreateIndexStream,
+  deleteCreatedTargets,
+  type CreatedTarget,
   createDeleteIndexStream,
   createGenerateIndexRecordsStream,
   deleteSavedObjectIndices,
