@@ -11,14 +11,15 @@ import React, { createContext, useContext, useMemo, type PropsWithChildren } fro
 
 export interface StickyHeaderExtensionPointContextValue {
   /**
-   * The portal container element in the sticky header. `null` until the sticky header
-   * has been committed to the DOM, or when the row is not the active sticky row.
+   * The portal container element in the sticky header. The element is created once per row and is
+   * attached to the sticky header whenever it is displayed, so consumers can portal into it on the
+   * same render that `isActiveSticky` turns true.
    */
-  extensionPointElement: HTMLDivElement | null;
+  extensionPointElement: HTMLDivElement;
   /**
-   * Whether the current row is the active sticky row.
+   * Whether the sticky header is currently displayed for this row.
    */
-  isActiveSticky: boolean;
+  isDisplayed: boolean;
 }
 
 const StickyHeaderExtensionPointContext =
@@ -31,15 +32,15 @@ const StickyHeaderExtensionPointContext =
  */
 export function StickyHeaderExtensionPointProvider({
   extensionPointElement,
-  isActiveSticky,
+  isDisplayed,
   children,
 }: PropsWithChildren<StickyHeaderExtensionPointContextValue>) {
   const value = useMemo<StickyHeaderExtensionPointContextValue>(
     () => ({
       extensionPointElement,
-      isActiveSticky,
+      isDisplayed,
     }),
-    [extensionPointElement, isActiveSticky]
+    [extensionPointElement, isDisplayed]
   );
 
   return (
@@ -49,6 +50,12 @@ export function StickyHeaderExtensionPointProvider({
   );
 }
 
-export function useStickyHeaderExtensionPoint(): StickyHeaderExtensionPointContextValue | null {
-  return useContext(StickyHeaderExtensionPointContext);
+export function useStickyHeaderExtensionPoint() {
+  const ctx = useContext(StickyHeaderExtensionPointContext);
+  if (!ctx) {
+    throw new Error(
+      'useStickyHeaderExtensionPoint must be used within a StickyHeaderExtensionPointProvider'
+    );
+  }
+  return ctx;
 }
