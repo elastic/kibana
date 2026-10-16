@@ -196,6 +196,42 @@ describe('nightshift.sendNotifications step', () => {
       expect(recordSlackThreadStatusMessage).not.toHaveBeenCalled();
     });
 
+    it('records the result reply when the started reply was not confirmed', async () => {
+      const { definition, context, execute, recordSlackThreadStatusMessage } = setup(
+        'default',
+        'elastic-apps-slack',
+        threadParams
+      );
+      execute
+        .mockResolvedValueOnce({ status: 'error', message: 'rate_limited' } as never)
+        .mockResolvedValueOnce({ status: 'ok', data: { ts: '1.3', channel: 'C123' } });
+      await definition.handler(context('started'));
+      await definition.handler(context('completed'));
+      expect(execute.mock.calls[1][0].params.subAction).toBe('sendMessage');
+      expect(recordSlackThreadStatusMessage).toHaveBeenCalledTimes(1);
+      expect(recordSlackThreadStatusMessage).toHaveBeenCalledWith({
+        investigationId: 'inv-1',
+        channel: 'C123',
+        threadTs: '1.1',
+        messageTs: '1.3',
+      });
+    });
+
+    it('records the started reply only once when the result edits it', async () => {
+      const { definition, context, execute, recordSlackThreadStatusMessage } = setup(
+        'default',
+        'elastic-apps-slack',
+        threadParams
+      );
+      await definition.handler(context('started'));
+      await definition.handler(context('completed'));
+      expect(execute.mock.calls[1][0].params.subAction).toBe('updateMessage');
+      expect(recordSlackThreadStatusMessage).toHaveBeenCalledTimes(1);
+      expect(recordSlackThreadStatusMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ messageTs: '1.2' })
+      );
+    });
+
     it('keeps the delivery result when recording fails', async () => {
       const { definition, context, recordSlackThreadStatusMessage } = setup(
         'default',

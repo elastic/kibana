@@ -79,13 +79,14 @@ const hasDeliveryAttempt = (
   );
 
 /**
- * The message this execution's started phase posted under the caller's message, which is the
- * thread's single message. Undefined for other destinations and when that post was not confirmed.
+ * The message this execution's phase posted or edited under the caller's message. Undefined for
+ * other destinations and when that delivery was not confirmed.
  */
-export const getStartedMessageTs = (
+export const getSentMessageTs = (
   routing: NotificationRouting,
   executionId: string,
-  destination: NotificationDestination
+  destination: NotificationDestination,
+  phase: NotificationPhase
 ): string | undefined => {
   if (!repliesUnderCallerMessage(destination)) {
     return undefined;
@@ -94,10 +95,17 @@ export const getStartedMessageTs = (
     (attempt) =>
       attempt.execution_id === executionId &&
       attempt.destination_id === destination.id &&
-      attempt.phase === 'started' &&
+      attempt.phase === phase &&
       attempt.status === 'sent'
   )?.message_ts;
 };
+
+/** The thread's single message: the one this execution's started phase posted. */
+export const getStartedMessageTs = (
+  routing: NotificationRouting,
+  executionId: string,
+  destination: NotificationDestination
+): string | undefined => getSentMessageTs(routing, executionId, destination, 'started');
 
 const prepareDestinationDelivery = (
   {

@@ -16,6 +16,7 @@ import type { GetInvestigationsClient } from '../../routes/types';
 import { ELASTIC_APPS_SLACK_CONNECTOR_ID } from '../automations/generate_workflow_yaml';
 import {
   deliverInvestigationNotifications,
+  getSentMessageTs,
   getStartedMessageTs,
 } from './deliver_investigation_notifications';
 import type { DeliverInvestigationNotificationsResult } from './deliver_investigation_notifications';
@@ -91,21 +92,21 @@ export const sendInvestigationNotifications = async (
     signal: context.abortSignal,
     onTerminalPhaseSelected,
   });
-  if (phase === 'started') {
-    await recordSlackThreadStatusMessages({
-      client,
-      routingClient,
-      investigationId,
-      executionId,
-      logger: context.logger,
-    });
-  }
+  await recordSlackThreadStatusMessages({
+    client,
+    routingClient,
+    investigationId,
+    executionId,
+    phase,
+    logger: context.logger,
+  });
   return result;
 };
 
 /**
- * Hands the message the started phase posted under the caller's Slack message to the Slack thread
- * workflow, which edits it for every reply instead of posting its own. A failure is logged rather
+ * Hands the message this run keeps under the caller's Slack message to the Slack thread workflow,
+ * which edits it for every reply instead of posting its own. That is the started message, or the
+ * message a later phase posted when the started one was not confirmed. A failure is logged rather
  * than thrown: the message is already posted and recorded, and the thread workflow posts its own
  * message when none is recorded.
  */
@@ -114,28 +115,40 @@ const recordSlackThreadStatusMessages = async ({
   routingClient,
   investigationId,
   executionId,
+  phase,
   logger,
 }: {
   client: ReturnType<GetInvestigationsClient>;
   routingClient: NotificationRoutingClient;
   investigationId: string;
   executionId: string;
+  phase: NotificationPhase;
   logger: Pick<Logger, 'warn'>;
 }): Promise<void> => {
   try {
     const routing = await routingClient.get();
-    for (const destination of routing?.destinations ?? []) {
-      const messageTs = routing && getStartedMessageTs(routing, executionId, destination);
+    if (!routing) {
+      return;
+    }
+    for (const destination of routing.destinations) {
       if (
-        destination.type === 'slack' &&
-        destination.connector_id === ELASTIC_APPS_SLACK_CONNECTOR_ID &&
-        destination.thread &&
-        messageTs
+        destination.type !== 'slack' ||
+        destination.connector_id !== ELASTIC_APPS_SLACK_CONNECTOR_ID
       ) {
+        continue;
+      }
+      // A later phase edits a confirmed started message, which was already handed off.
+      const messageTs =
+        phase === 'started' || !getStartedMessageTs(routing, executionId, destination)
+          ? getSentMessageTs(routing, executionId, destination, phase)
+          : undefined;
+      const channel = destination.thread?.channel ?? destination.params.channel;
+      const threadTs = destination.params.thread_ts;
+      if (messageTs && typeof channel === 'string' && typeof threadTs === 'string') {
         await client.recordSlackThreadStatusMessage({
           investigationId,
-          channel: destination.thread.channel,
-          threadTs: destination.thread.thread_ts,
+          channel,
+          threadTs,
           messageTs,
         });
       }
