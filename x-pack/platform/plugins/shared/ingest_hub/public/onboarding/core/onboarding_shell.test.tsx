@@ -15,7 +15,7 @@ jest.mock('react-use/lib/useSessionStorage');
 
 // Provide a minimal matrix so OnboardingShell renders without a real QueryClient
 // or live Fleet package manifests.
-jest.mock('./use_aws_service_matrix', () => {
+jest.mock('../use_aws_service_matrix', () => {
   const matrix = [
     {
       id: 'cloudtrail',
@@ -47,7 +47,7 @@ jest.mock('./use_aws_service_matrix', () => {
 });
 
 // Stub heavy step components — we only care about shell-level stepper and navigation.
-jest.mock('./step_components', () => ({
+jest.mock('../step_components', () => ({
   ServicesStep: ({ onContinue }: { onContinue: () => void }) => (
     <button data-test-subj="servicesStep-continue" onClick={onContinue}>
       Continue
@@ -66,8 +66,12 @@ jest.mock('./step_components', () => ({
   DetectAndReviewStep: () => <div data-test-subj="detectAndReviewStep" />,
 }));
 
-import { OnboardingFlowProvider, useOnboardingFlow } from './onboarding_flow_context';
+import { OnboardingFlowProvider, useOnboardingFlow } from '../onboarding_flow_context';
 import { OnboardingShell } from './onboarding_shell';
+import {
+  AWS_ONBOARDING_TITLE,
+  AWS_ONBOARDING_DESCRIPTION,
+} from '../../../common/providers/aws/constants';
 
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
@@ -197,5 +201,37 @@ describe('OnboardingShell — downstream step invalidation', () => {
 
       expect(stepIndicatorStatus('service-settings')).toBe('incomplete');
     });
+  });
+});
+
+describe('OnboardingShell — provider metadata', () => {
+  function renderAt(path: string) {
+    const history = createMemoryHistory({ initialEntries: [path] });
+    render(
+      <I18nProvider>
+        <OnboardingFlowProvider>
+          <Router history={history}>
+            <Route path="/:integrationId">
+              <OnboardingShell />
+            </Route>
+          </Router>
+        </OnboardingFlowProvider>
+      </I18nProvider>
+    );
+    return history;
+  }
+
+  it('renders the AWS title and description from the provider registry', () => {
+    renderAt('/aws#services');
+
+    expect(screen.getByRole('heading', { name: AWS_ONBOARDING_TITLE })).toBeInTheDocument();
+    expect(screen.getByText(AWS_ONBOARDING_DESCRIPTION)).toBeInTheDocument();
+  });
+
+  it('redirects to the root and renders nothing for an unsupported integration id', () => {
+    const history = renderAt('/unknown#services');
+
+    expect(history.location.pathname).toBe('/');
+    expect(screen.queryByTestId('onboardingShell')).not.toBeInTheDocument();
   });
 });
