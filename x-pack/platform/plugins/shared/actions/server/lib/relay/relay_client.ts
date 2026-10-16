@@ -66,8 +66,8 @@ interface RelayClaimResponseBody {
 /** Raw shape of the `POST /v1/slack/trigger` acknowledgement body. */
 interface RelayTriggerResponseBody {
   ref?: string;
-  tenant_key?: string;
   channel?: string;
+  origin?: { external_conversation_id?: string };
 }
 
 export class RelayClient implements RelayClientContract {
@@ -207,10 +207,13 @@ export class RelayClient implements RelayClientContract {
         'Relay invalid response format missing expected `ref`'
       );
     }
+    const externalConversationId = body.origin?.external_conversation_id;
     return {
       ref: body.ref,
-      tenantKey: body.tenant_key ?? tenantKey,
       channel: typeof body.channel === 'string' && body.channel.length > 0 ? body.channel : channel,
+      ...(typeof externalConversationId === 'string' && externalConversationId.length > 0
+        ? { externalConversationId }
+        : {}),
     };
   }
 
