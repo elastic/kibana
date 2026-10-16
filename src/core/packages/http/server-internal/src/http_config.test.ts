@@ -979,4 +979,33 @@ describe('HttpConfig', () => {
       ssl: { verificationMode: 'full', certificateAuthorities: undefined },
     });
   });
+
+  describe('csp by build flavor', () => {
+    const build = (buildFlavor?: 'serverless' | 'traditional') =>
+      new HttpConfig(
+        config.schema.validate({}, {}),
+        cspConfig.schema.validate({}),
+        ExternalUrlConfig.DEFAULT,
+        permissionsPolicyConfig.schema.validate({}),
+        buildFlavor
+      );
+
+    it('enforces img-src, font-src and media-src on traditional', () => {
+      const { csp } = build('traditional');
+      expect(csp.header).toContain(`font-src 'self' data:`);
+      expect(csp.header).toContain(`img-src 'self' data: blob: https: http:`);
+      expect(csp.header).toContain(`media-src 'self' kibana.estccdn.com`);
+    });
+
+    it('defaults to the traditional flavor when none is given', () => {
+      expect(build().csp.header).toEqual(build('traditional').csp.header);
+    });
+
+    it('does not enforce them on serverless', () => {
+      const { csp } = build('serverless');
+      expect(csp.header).not.toContain('img-src');
+      expect(csp.header).not.toContain('font-src');
+      expect(csp.header).not.toContain('media-src');
+    });
+  });
 });
