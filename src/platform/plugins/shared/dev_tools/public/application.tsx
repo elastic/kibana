@@ -83,7 +83,7 @@ const useStyles = () => {
   return {
     ...staticStyles,
     tabs: css`
-      padding-left: ${euiTheme.size.s};
+      padding-left: ${euiTheme.size.base};
     `,
   };
 };

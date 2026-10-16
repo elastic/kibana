@@ -516,4 +516,64 @@ describe('useWorkflowLayout', () => {
       expect(traversedOf(findForkEdge(edges, 'gate', 'else'))).toBe(false);
     });
   });
+  describe('layout cache key', () => {
+    const switchWorkflow = (cases: unknown[]) =>
+      minimal({
+        steps: [
+          {
+            name: 'router',
+            type: 'switch',
+            expression: 'v',
+            cases,
+            default: [{ name: 'fallback', type: 'http' }],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      });
+    const filledCase = (match: string) => ({ match, steps: [{ name: 'on_a', type: 'http' }] });
+    const emptyCase = (match: string) => ({ match, steps: [] });
+    const emptyCaseLane = (nodes: Array<{ id: string }>) =>
+      nodes.find((n) => n.id === 'router-case-1-bypass') as
+        | { position: { x: number; y: number }; width?: number }
+        | undefined;
+    const renderLayout = (workflow: WorkflowYaml) =>
+      renderHook(({ current }) => useWorkflowLayout({ workflow: current }), {
+        initialProps: { current: workflow },
+      });
+
+    it('lays out an empty switch case appended later, instead of leaving it at the origin', () => {
+      const { result, rerender } = renderLayout(switchWorkflow([filledCase('a')]));
+      const grown = switchWorkflow([filledCase('a'), emptyCase('b')]);
+      rerender({ current: grown });
+
+      const fresh = emptyCaseLane(renderLayout(grown).result.current.nodes);
+      const updated = emptyCaseLane(result.current.nodes);
+      expect(fresh?.position).not.toEqual({ x: 0, y: 0 });
+      expect(updated?.position).toEqual(fresh?.position);
+    });
+
+    it('re-reserves room when the label of an empty branch changes', () => {
+      const { result, rerender } = renderLayout(switchWorkflow([filledCase('a'), emptyCase('b')]));
+      const relabelled = switchWorkflow([filledCase('a'), emptyCase('a_much_longer_label_for_it')]);
+      rerender({ current: relabelled });
+
+      const fresh = emptyCaseLane(renderLayout(relabelled).result.current.nodes);
+      expect(emptyCaseLane(result.current.nodes)?.width).toBe(fresh?.width);
+    });
+
+    it('does not re-run the layout when the label of a non-empty case changes', () => {
+      const onPerfMark = jest.fn();
+      const { rerender } = renderHook(
+        ({ current }) => useWorkflowLayout({ workflow: current, onPerfMark }),
+        {
+          initialProps: { current: switchWorkflow([filledCase('a')]) },
+        }
+      );
+      const layoutRuns = () =>
+        onPerfMark.mock.calls.filter(([name]) => name === 'layout_ms').length;
+      expect(layoutRuns()).toBe(1);
+
+      rerender({ current: switchWorkflow([filledCase('renamed_case')]) });
+      expect(layoutRuns()).toBe(1);
+    });
+  });
 });

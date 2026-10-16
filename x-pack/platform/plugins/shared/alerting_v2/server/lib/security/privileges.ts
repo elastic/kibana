@@ -32,18 +32,16 @@ const category: AppCategory = {
 
 const featureDescriptions: Record<AlertingV2Feature, string> = {
   rules: i18n.translate('xpack.alertingV2.privileges.rulesDescription', {
-    defaultMessage: 'Experimental. Controls access to rules in the experimental alerting system.',
+    defaultMessage: 'Controls access to rules in the alerting system.',
   }),
   alerts: i18n.translate('xpack.alertingV2.privileges.alertsDescription', {
-    defaultMessage: 'Experimental. Controls access to alerts in the experimental alerting system.',
+    defaultMessage: 'Controls access to alerts in the alerting system.',
   }),
   actionPolicies: i18n.translate('xpack.alertingV2.privileges.actionPoliciesDescription', {
-    defaultMessage:
-      'Experimental. Controls access to action policies in the experimental alerting system.',
+    defaultMessage: 'Controls access to action policies in the alerting system.',
   }),
   executionHistory: i18n.translate('xpack.alertingV2.privileges.executionHistoryDescription', {
-    defaultMessage:
-      'Experimental. Controls access to execution history in the experimental alerting system.',
+    defaultMessage: 'Controls access to execution history in the alerting system.',
   }),
 };
 
