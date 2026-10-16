@@ -36,11 +36,8 @@ import { useAttackInvestigateInTimelineContextMenuItems } from '../../../../dete
 import { useAttackRunWorkflowContextMenuItems } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
 import { useAttackTagsContextMenuItems } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_tags_context_menu_items';
 import { useAttackWorkflowStatusContextMenuItems } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items';
-import type {
-  AttackWithCase,
-  AttackWithWorkflowStatus,
-} from '../../../../detections/hooks/attacks/bulk_actions/types';
-import { toAttacksToAttach } from '../utils';
+import type { AttackWithCase } from '../../../../detections/hooks/attacks/bulk_actions/types';
+import { toAlertWorkflowStatus, toAttacksToAttach } from '../utils';
 
 const TELEMETRY_SOURCE = 'case_attachment_table';
 
@@ -152,8 +149,8 @@ export const AttackTabBulkActions = ({
     () =>
       baseAttackProps.map((props, position) => ({
         ...props,
-        workflowStatus: resolvedAttacks[position].alertWorkflowStatus,
-      })) as AttackWithWorkflowStatus[],
+        workflowStatus: toAlertWorkflowStatus(resolvedAttacks[position].alertWorkflowStatus),
+      })),
     [baseAttackProps, resolvedAttacks]
   );
 

@@ -876,7 +876,7 @@ describe('AttachmentService getter', () => {
     });
   });
 
-  describe('getAllAttackIds', () => {
+  describe('getAttachedAttackIds', () => {
     const caseId = 'test-case';
 
     it('only asks for the requested attack ids and sizes the aggregation to them', async () => {
@@ -888,7 +888,7 @@ describe('AttachmentService getter', () => {
         total: 0,
       });
 
-      const res = await attachmentGetter.getAllAttackIds({
+      const res = await attachmentGetter.getAttachedAttackIds({
         caseId,
         attackIds: ['attack-id-1', 'attack-id-2', 'attack-id-1'],
       });
@@ -917,7 +917,7 @@ describe('AttachmentService getter', () => {
     });
 
     it('returns an empty set without querying when no attack ids are requested', async () => {
-      const res = await attachmentGetter.getAllAttackIds({ caseId, attackIds: [] });
+      const res = await attachmentGetter.getAttachedAttackIds({ caseId, attackIds: [] });
 
       expect(res.size).toBe(0);
       expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();

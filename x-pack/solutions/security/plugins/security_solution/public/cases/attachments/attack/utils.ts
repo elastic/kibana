@@ -9,6 +9,7 @@ import { SECURITY_ATTACK_ATTACHMENT_TYPE, type CaseUI } from '@kbn/cases-plugin/
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { getOriginalAlertIds } from '@kbn/elastic-assistant-common';
 import type { AttackAttachmentPayload } from '../../../../common/cases/attachments/attack';
+import type { AlertWorkflowStatus } from '../../../common/types';
 import type { AttackToAttach } from '.';
 
 export type CaseAttachment = CaseUI['comments'][number];
@@ -116,6 +117,17 @@ export const getAttackAlertIds = (attack: AttackDiscoveryAlert | undefined): str
           })
         ),
       ];
+
+const ALERT_WORKFLOW_STATUSES: readonly AlertWorkflowStatus[] = ['open', 'acknowledged', 'closed'];
+
+/**
+ * Narrows the attack document's free-form `kibana.alert.workflow_status` to the statuses the
+ * workflow actions know how to act on, dropping anything else.
+ */
+export const toAlertWorkflowStatus = (
+  workflowStatus: string | undefined
+): AlertWorkflowStatus | undefined =>
+  ALERT_WORKFLOW_STATUSES.find((status) => status === workflowStatus);
 
 /** Maps attacks onto {@link buildAttacksAttachments} input, dropping any with no known index. */
 export const toAttacksToAttach = (

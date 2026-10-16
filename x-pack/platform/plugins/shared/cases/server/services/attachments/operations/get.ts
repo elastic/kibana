@@ -470,7 +470,7 @@ export class AttachmentGetter {
   /**
    * Returns the subset of `attackIds` that is already attached to a case.
    */
-  public async getAllAttackIds({
+  public async getAttachedAttackIds({
     caseId,
     attackIds,
   }: {
