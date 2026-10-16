@@ -61,11 +61,14 @@ const boundOutput = (output: InvestigationTaskOutput): InvestigationTaskOutput =
 };
 
 const isNotFound = (error: unknown): boolean => {
-  const { response, body } = (error ?? {}) as {
+  // The eval `fetch` (KbnClient) exposes the status as `status`; Core's HttpFetchError as
+  // `response.status` or `body.statusCode`.
+  const { status, response, body } = (error ?? {}) as {
+    status?: number;
     response?: { status?: number };
     body?: { statusCode?: number };
   };
-  return response?.status === 404 || body?.statusCode === 404;
+  return status === 404 || response?.status === 404 || body?.statusCode === 404;
 };
 
 /**
@@ -84,6 +87,25 @@ const readInvestigation = async (
     if (isNotFound(error)) return undefined;
     throw error;
   }
+};
+
+const conversationPath = (id: string): string =>
+  `/api/agent_builder/conversations/${encodeURIComponent(id)}`;
+
+/**
+ * Whether the agent is done with the investigation's (single) round. `in_progress` turns false as
+ * soon as the investigation has a pending proposed action, because it then waits on a human, while
+ * the agent may still be finishing its round. A round is stored when it ends, so with a pending
+ * proposal the investigation is done once its conversation holds a round.
+ */
+const isDone = async (fetch: HttpHandler, investigation: Investigation): Promise<boolean> => {
+  if (investigation.in_progress) return false;
+  if (!investigation.proposals.some(({ status }) => status === 'pending')) return true;
+  const { rounds } = await fetch<{ rounds: ConversationRound[] }>(
+    conversationPath(investigation.id),
+    { headers: { 'elastic-api-version': '2023-10-31' } }
+  );
+  return rounds.length > 0;
 };
 
 /** What the investigation recorded, in the shape the judges read. */
@@ -128,7 +150,7 @@ export const runInvestigation = async (
     output.investigation_id = investigationId;
     output.conversation_id = investigationId;
     investigation = await readInvestigation(fetch, investigationId);
-    while (!investigation || investigation.in_progress) {
+    while (!investigation || !(await isDone(fetch, investigation))) {
       output.workflow_status = 'running';
       if (Date.now() - started > INVESTIGATION_TIMEOUT_MS) {
         throw new Error(
@@ -154,7 +176,7 @@ export const runInvestigation = async (
       output.execution_error ??= 'Investigation finished without recording a conclusion';
     }
     const conversation = await fetch<{ rounds: ConversationRound[] }>(
-      `/api/agent_builder/conversations/${encodeURIComponent(investigation.id)}`,
+      conversationPath(investigation.id),
       { headers: { 'elastic-api-version': '2023-10-31' } }
     );
     output.conversation_round_count = conversation.rounds.length;

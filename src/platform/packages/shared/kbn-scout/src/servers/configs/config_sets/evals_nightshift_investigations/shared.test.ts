@@ -95,6 +95,9 @@ describe.each([
     expect(NIGHTSHIFT_ENABLED_FLAG).toBeTruthy();
     expect(args).toContain(`--feature_flags.overrides.${NIGHTSHIFT_ENABLED_FLAG}=true`);
     expect(args).toContain('--xpack.nightshift_investigations.enabled=true');
+    expect(args).toContain('--xpack.security.serviceAccounts.enabled=true');
+    expect(args).toContain('--xpack.agenticInvestigations.enabled=true');
+    expect(args).toContain('--xpack.proposals.enabled=true');
     expect(args).toContain('--xpack.evals.enabled=true');
     expect(args).toContain('--uiSettings.overrides.agentBuilder:experimentalFeatures=true');
     expect(args.filter((arg: string) => arg.startsWith('--config='))).toEqual([

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 
 export const isInvestigationWorkflowExecution = ({
   workflowId,
@@ -15,4 +18,13 @@ export const isInvestigationWorkflowExecution = ({
   originManagedWorkflowId?: string | null;
 }): boolean =>
   workflowId === NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID ||
-  originManagedWorkflowId === NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
+  originManagedWorkflowId === NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID ||
+  // Per-space copies bound to a service account carry a space suffix on their workflow id.
+  originManagedWorkflowId === NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID;
+
+/** A run of a space's bound entry point, which starts the global investigation as its child. */
+export const isInvestigationEntryPointExecution = ({
+  originManagedWorkflowId,
+}: {
+  originManagedWorkflowId?: string | null;
+}): boolean => originManagedWorkflowId === NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID;

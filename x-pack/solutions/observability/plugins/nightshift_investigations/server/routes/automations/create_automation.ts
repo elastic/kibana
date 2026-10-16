@@ -56,7 +56,14 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       runtime: runtimeSchema,
     }),
   }),
-  handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
+  handler: async ({
+    request,
+    params,
+    getAutomationsSoClient,
+    getWorkflowsManagement,
+    getInvestigatorServiceAccountService,
+    context,
+  }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {
       throw serverUnavailable('Workflows management is not available');
@@ -65,6 +72,11 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     const coreContext = await context.core;
     const spaceId = coreContext.savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
     const soClient = getAutomationsSoClient(request, spaceId);
+    // Before any write: refuses callers who could not write the bound workflow.
+    const serviceAccountId = await getInvestigatorServiceAccountService().resolveAutomationRunAs(
+      request,
+      spaceId
+    );
 
     const now = new Date().toISOString();
     const attributes: NightshiftAutomationAttributes = {
@@ -89,7 +101,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
 
     let workflowId: string;
     try {
-      const yaml = generateWorkflowYaml(created.id, attributes);
+      const yaml = generateWorkflowYaml(created.id, attributes, { serviceAccountId });
       const workflow = await workflowsManagement.management.createWorkflow(
         { yaml },
         spaceId,

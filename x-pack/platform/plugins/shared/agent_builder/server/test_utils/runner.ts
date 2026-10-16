@@ -391,6 +391,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn().mockResolvedValue(false),
+      updateAccessControl: jest.fn(),
     },
     conversationClient: {
       exists: jest.fn().mockResolvedValue(false),

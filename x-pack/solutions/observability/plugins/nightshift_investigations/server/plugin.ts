@@ -22,17 +22,25 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  getNightshiftBoundHookWorkflowId,
+  NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
+import { getBoundHookIdFor } from './lib/service_account/bound_workflows';
 import type { NightshiftInvestigationsConfig } from './config';
 import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
-import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
+import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
 import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
+import {
+  createInvestigatorServiceAccountService,
+  type InvestigatorServiceAccountService,
+} from './lib/service_account/investigator_service_account';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import { createInvestigationAvailability } from './create_investigation_availability';
 import { nightshiftInvestigationsRouteRepository } from './routes';
@@ -124,6 +132,7 @@ export class NightshiftInvestigationsPlugin
   private encryptedSavedObjectsStart?: NightshiftInvestigationsStartDeps['encryptedSavedObjects'];
   private securityStart?: NightshiftInvestigationsStartDeps['security'];
   private security?: CoreStart['security'];
+  private coreStart?: CoreStart;
   private notificationRoutingService?: InvestigationAttachmentDocService<StoredNotificationRouting>;
   private investigationAvailability?: AvailabilityConfig;
   private cortexEnabled = false;
@@ -239,10 +248,13 @@ export class NightshiftInvestigationsPlugin
         telemetryConnectorId,
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
+        resolveHookWorkflowId: this.resolveHookWorkflowId,
         logger: this.logger.get('custom_context'),
       });
       if (this.decisionTreesEnabled) {
-        registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
+        registerDecisionTreeReinforcementAgentType(plugins.agentBuilder, {
+          resolveHookWorkflowId: this.resolveHookWorkflowId,
+        });
       }
 
       if (plugins.sandbox?.isAvailable) {
@@ -470,6 +482,9 @@ export class NightshiftInvestigationsPlugin
             });
           },
           isMemoryEnabled: () => this.memoryEnabled,
+          getInvestigatorServiceAccountService: this.getInvestigatorServiceAccountService,
+          getSpaceId: (request: KibanaRequest) =>
+            this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
           getMemoryPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
               throw new Error(
@@ -515,6 +530,7 @@ export class NightshiftInvestigationsPlugin
     this.inference = plugins.inference;
     this.sandboxStart = plugins.sandbox;
     this.ruleRegistry = plugins.ruleRegistry;
+    this.coreStart = coreStart;
     this.elasticsearch = coreStart.elasticsearch;
     this.savedObjects = coreStart.savedObjects;
     this.uiSettings = coreStart.uiSettings;
@@ -562,6 +578,7 @@ export class NightshiftInvestigationsPlugin
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
+          isServiceAccountExecutionEnabled: this.isServiceAccountExecutionEnabled,
         }),
     };
   }
@@ -583,6 +600,7 @@ export class NightshiftInvestigationsPlugin
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
+          isServiceAccountExecutionEnabled: this.isServiceAccountExecutionEnabled,
         };
       },
     });
@@ -609,6 +627,7 @@ export class NightshiftInvestigationsPlugin
       inference: this.inference,
       savedObjects: this.savedObjects,
       uiSettings: this.uiSettings,
+      isServiceAccountExecutionEnabled: this.isServiceAccountExecutionEnabled,
       isAvailable: (connectorId) =>
         isInvestigationRunAvailable({
           request,
@@ -623,6 +642,7 @@ export class NightshiftInvestigationsPlugin
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
+          isServiceAccountExecutionEnabled: this.isServiceAccountExecutionEnabled,
         }),
       isInfrastructureAvailable: () =>
         isInvestigationInfrastructureAvailable({
@@ -637,7 +657,40 @@ export class NightshiftInvestigationsPlugin
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
+          isServiceAccountExecutionEnabled: this.isServiceAccountExecutionEnabled,
         }),
+    });
+  };
+
+  private isServiceAccountExecutionEnabled = (): boolean =>
+    this.security?.serviceAccounts.isEnabled() ?? false;
+
+  /**
+   * Investigations run as the space's service account, and so must the Agent Builder hooks of
+   * their agents: the space's bound entry point for a hook runs it as that account.
+   */
+  private resolveHookWorkflowId = (hookWorkflowId: string, spaceId: string): string => {
+    const boundHookId = getBoundHookIdFor(hookWorkflowId);
+    return boundHookId && this.isServiceAccountExecutionEnabled()
+      ? getNightshiftBoundHookWorkflowId(boundHookId, spaceId)
+      : hookWorkflowId;
+  };
+
+  private getInvestigatorServiceAccountService = (): InvestigatorServiceAccountService => {
+    if (!this.coreStart || !this.workflowsExtensionsStart) {
+      throw new Error('workflowsExtensions is not available — plugin start() has not been called');
+    }
+    return createInvestigatorServiceAccountService({
+      core: this.coreStart,
+      workflowsExtensions: this.workflowsExtensionsStart,
+      workflowsManagement: this.workflowsManagement,
+      spaces: this.spaces,
+      getAutomationsSoClient: this.getAutomationsSoClient,
+      reinforcementAgent:
+        this.decisionTreesEnabled && this.agentBuilder
+          ? { agentBuilder: this.agentBuilder, availability: this.getInvestigationAvailability() }
+          : undefined,
+      logger: this.logger.get('service_account'),
     });
   };
 
@@ -697,6 +750,10 @@ export class NightshiftInvestigationsPlugin
     const client = await workflowsExtensions.initManagedWorkflowsClient(
       NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
     );
+    // Each space reaches the global investigation through an entry point bound to the Nightshift
+    // service account, installed with the bound Slack thread workflow when an admin enables it
+    // (see lib/service_account). Not installing the Slack thread's global copy here lets ready()
+    // remove any left from earlier versions.
     await installInvestigationWorkflow({ client });
     await client.install(NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,

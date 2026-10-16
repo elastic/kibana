@@ -111,6 +111,13 @@ finish and verify concurrent commands can allocate before launching a larger dat
 
 #### What the run does
 
+Investigations only run as the space's Nightshift service account, so the eval first sets up the
+space with `POST /internal/nightshift/investigations/service_account/_enable` (idempotent; the eval
+user holds `manage_security`). The `evals_nightshift_investigations` config set turns on
+`xpack.security.serviceAccounts.enabled` and the `agenticInvestigations` and `proposals` plugins
+Nightshift needs. A pending proposed action ends `in_progress` while the agent may still be
+finishing its round, so the eval also waits for the round to be stored before reading the report.
+
 The native framework still requires an evaluation endpoint in its configuration; the command
 reuses the target endpoint for that metadata. This suite never invokes an LLM evaluator or judge.
 The CODE evaluator `ungraded_placeholder` always returns one, uses neutral direction, and states

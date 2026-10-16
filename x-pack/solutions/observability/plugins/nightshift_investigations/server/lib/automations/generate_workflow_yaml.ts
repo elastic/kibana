@@ -63,7 +63,13 @@ const OVERLAP_POLICY_TO_STRATEGY: Record<OverlapPolicy, string> = {
  */
 export function generateWorkflowYaml(
   automationId: string,
-  automation: NightshiftAutomationAttributes
+  automation: NightshiftAutomationAttributes,
+  {
+    serviceAccountId,
+  }: {
+    /** The account the automation runs as (`settings.run_as`); unbound when omitted. */
+    serviceAccountId?: string;
+  } = {}
 ): string {
   const alertRows = automation.trigger.rows.filter(
     (r): r is Extract<NightshiftTriggerRow, { kind: 'alert' }> => r.kind === 'alert'
@@ -79,6 +85,7 @@ export function generateWorkflowYaml(
     enabled: automation.isEnabled,
     tags: ['nightshift', 'automation'],
     settings: {
+      ...(serviceAccountId ? { run_as: serviceAccountId } : {}),
       concurrency: {
         key: buildWorkflowConcurrencyKey(automationId, alertRows.length > 0, slackRows.length > 0),
         strategy,
