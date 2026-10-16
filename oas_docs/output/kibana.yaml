@@ -178,7 +178,7 @@ tags:
       - **`title`** (required): the display name of the Discover session.
       - **`description`**: a short description of the Discover session.
       - **`tags`**: IDs of tags to associate with the Discover session.
-      - **`tabs`** (required): ordered list of tabs. Each tab requires a unique `id`, because dashboard panels and Discover links can reference it, and a `label` displayed in Discover. Tab IDs can contain only lowercase letters, numbers, hyphens, and underscores.
+      - **`tabs`** (required): ordered list of tabs. Each tab requires a unique `id`, which other saved objects and links can reference, and a `label` displayed in Discover. Tab IDs can contain only lowercase letters, numbers, hyphens, and underscores.
 
       ### Data sources
 
@@ -227,30 +227,6 @@ tags:
           ]
         }
         ```
-
-      ### Embedding in dashboards
-
-      A dashboard `discover_session` panel can embed a Discover session in two ways:
-
-      - **Linked from library**: set `ref_id` to the ID returned by this API. Use `selected_tab_id` to choose which tab the panel displays. This is why each tab requires a stable `id`. If `selected_tab_id` is omitted, the panel displays the first tab. Use `overrides` to change table settings, such as `column_order`, `sort`, or `rows_per_page`, for that panel only, without modifying the Discover session.
-
-        ```json
-        {
-          "grid": {
-            "x": 0,
-            "y": 0,
-            "w": 24,
-            "h": 15
-          },
-          "type": "discover_session",
-          "config": {
-            "ref_id": "<discover-session-id>",
-            "selected_tab_id": "large-requests"
-          }
-        }
-        ```
-
-      - **Inline**: define the tab directly in the panel `config.tabs`. Inline panels support exactly one tab. The tab uses the same data and table fields as session tabs, such as `data_source`, `query`, `filters`, `column_order`, and `sort`, but omits session-only fields such as `id`, `label`, and chart settings.
 
       ### Warnings
 
@@ -31426,25 +31402,25 @@ paths:
           schema:
             maxLength: 1000
             type: string
-        - description: A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are included.
+        - description: A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, Discover sessions matching any of the tag IDs are included.
           in: query
           name: tags
           required: false
           schema:
             default: []
-            description: Tag IDs associated with this dashboard.
+            description: Tag IDs to include.
             items:
               maxLength: 250
               type: string
             maxItems: 100
             type: array
-        - description: A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are excluded.
+        - description: A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, Discover sessions matching any of the tag IDs are excluded.
           in: query
           name: excluded_tags
           required: false
           schema:
             default: []
-            description: Tag IDs associated with this dashboard.
+            description: Tag IDs to exclude.
             items:
               maxLength: 250
               type: string
@@ -163169,7 +163145,7 @@ components:
                         type: object
                         properties:
                           column_order:
-                            description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting or the referenced saved object.
+                            description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting.
                             items:
                               description: Field name of a column in display order.
                               type: string
@@ -163202,7 +163178,7 @@ components:
                             minimum: 10
                             type: number
                           density:
-                            description: The table row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                            description: The table row spacing. If omitted, Kibana determines the density from its current settings, such as the user preference.
                             enum:
                               - compact
                               - expanded
@@ -163229,7 +163205,7 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
+                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Kibana determines the height from its current settings, such as the user preference.
                           hide_nulls:
                             description: When `true`, fields with null values are hidden in the JSON document view.
                             type: boolean
@@ -163299,7 +163275,7 @@ components:
                         type: object
                         properties:
                           column_order:
-                            description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting or the referenced saved object.
+                            description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting.
                             items:
                               description: Field name of a column in display order.
                               type: string
@@ -163324,7 +163300,7 @@ components:
                             minimum: 10
                             type: number
                           density:
-                            description: The table row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                            description: The table row spacing. If omitted, Kibana determines the density from its current settings, such as the user preference.
                             enum:
                               - compact
                               - expanded
@@ -163344,7 +163320,7 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
+                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Kibana determines the height from its current settings, such as the user preference.
                           hide_nulls:
                             description: When `true`, fields with null values are hidden in the JSON document view.
                             type: boolean
@@ -163403,7 +163379,7 @@ components:
                         description: An ES|QL tab with saved metrics grid settings. The dashboard panel stores these settings and restores them in Discover. The panel does not render the metrics grid.
                         properties:
                           column_order:
-                            description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting or the referenced saved object.
+                            description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting.
                             items:
                               description: Field name of a column in display order.
                               type: string
@@ -163436,7 +163412,7 @@ components:
                             minimum: 10
                             type: number
                           density:
-                            description: The table row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                            description: The table row spacing. If omitted, Kibana determines the density from its current settings, such as the user preference.
                             enum:
                               - compact
                               - expanded
@@ -163483,7 +163459,7 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
+                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Kibana determines the height from its current settings, such as the user preference.
                           hide_nulls:
                             description: When `true`, fields with null values are hidden in the JSON document view.
                             type: boolean
@@ -165146,7 +165122,7 @@ components:
           maxLength: 10000
           type: string
         tabs:
-          description: Ordered list of tabs in the Discover session. Each tab requires a stable, unique ID because Dashboard panels and Discover links can reference it.
+          description: Ordered list of tabs in the Discover session. Each tab requires a stable, unique ID, which other saved objects and links can reference.
           items:
             anyOf:
               - additionalProperties: false
@@ -165170,7 +165146,7 @@ components:
                       - 'y'
                     type: string
                   column_order:
-                    description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting or the referenced saved object.
+                    description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting.
                     items:
                       description: Field name of a column in display order.
                       type: string
@@ -165209,7 +165185,7 @@ components:
                     minimum: 10
                     type: number
                   density:
-                    description: The table row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                    description: The table row spacing. If omitted, Kibana determines the density from its current settings, such as the user preference.
                     enum:
                       - compact
                       - expanded
@@ -165236,7 +165212,7 @@ components:
                       - enum:
                           - auto
                         type: string
-                    description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
+                    description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Kibana determines the height from its current settings, such as the user preference.
                   hide_aggregated_preview:
                     description: Applies to the field statistics view. When `true`, hides the distribution preview shown for each field. If omitted, previews are shown.
                     type: boolean
@@ -165356,7 +165332,7 @@ components:
                     maxLength: 1000
                     type: string
                   column_order:
-                    description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting or the referenced saved object.
+                    description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting.
                     items:
                       description: Field name of a column in display order.
                       type: string
@@ -165387,7 +165363,7 @@ components:
                     minimum: 10
                     type: number
                   density:
-                    description: The table row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                    description: The table row spacing. If omitted, Kibana determines the density from its current settings, such as the user preference.
                     enum:
                       - compact
                       - expanded
@@ -165410,7 +165386,7 @@ components:
                       - enum:
                           - auto
                         type: string
-                    description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
+                    description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Kibana determines the height from its current settings, such as the user preference.
                   hide_chart:
                     default: false
                     description: When `true`, the chart is hidden.
@@ -165512,7 +165488,7 @@ components:
                     maxLength: 1000
                     type: string
                   column_order:
-                    description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting or the referenced saved object.
+                    description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting.
                     items:
                       description: Field name of a column in display order.
                       type: string
@@ -165551,7 +165527,7 @@ components:
                     minimum: 10
                     type: number
                   density:
-                    description: The table row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                    description: The table row spacing. If omitted, Kibana determines the density from its current settings, such as the user preference.
                     enum:
                       - compact
                       - expanded
@@ -165601,7 +165577,7 @@ components:
                       - enum:
                           - auto
                         type: string
-                    description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
+                    description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Kibana determines the height from its current settings, such as the user preference.
                   hide_chart:
                     default: false
                     description: When `true`, the chart is hidden.
