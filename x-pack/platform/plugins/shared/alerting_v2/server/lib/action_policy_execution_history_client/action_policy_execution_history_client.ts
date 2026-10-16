@@ -29,7 +29,6 @@ import {
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 import { ALERTING_LOG_CODES, type AlertingV2LogCode } from '../errors/error_codes';
-import { looksLikeSavedObjectId } from '../looks_like_saved_object_id';
 import type { AlertingServerStartDependencies } from '../../types';
 import type { ResolvedSearchIds } from './build_execution_history_item';
 import {
@@ -269,3 +268,9 @@ export class ActionPolicyExecutionHistoryClient {
     return { items: [], total: 0 };
   }
 }
+
+// Only treat the search term as a candidate id when it looks like a UUID — Kibana saved
+// objects created via the API use UUIDs by default. Avoids polluting the KQL with ordinary
+// words like "rule" or "cpu" that would otherwise be added as candidate ids.
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const looksLikeSavedObjectId = (value: string): boolean => UUID_PATTERN.test(value);

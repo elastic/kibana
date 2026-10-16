@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
+import { MAX_SEARCH_LENGTH } from '@kbn/alerting-v2-schemas';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -38,6 +39,7 @@ export const ExecutionHistorySearchField = ({
     <EuiFieldSearch
       compressed
       fullWidth
+      maxLength={MAX_SEARCH_LENGTH}
       data-test-subj={dataTestSubj}
       placeholder={placeholder}
       value={searchInput}

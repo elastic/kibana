@@ -10,6 +10,9 @@ import { buildCreateRuleData, READ_ROLE, test, testData } from '../fixtures';
 
 const { POLL_TIMEOUT_MS } = testData;
 
+// A suite-owned space keeps the Rules tab's first page free of runs from other suites' rules.
+const SPACE_ID = 'eh-rule-search';
+
 test.describe('Execution history — rule search', { tag: ['@local-stateful-classic'] }, () => {
   let matchingRuleName: string;
   let otherRuleName: string;
@@ -19,15 +22,28 @@ test.describe('Execution history — rule search', { tag: ['@local-stateful-clas
     matchingRuleName = `EH Search Match ${runId}`;
     otherRuleName = `EH Search Other ${runId}`;
 
+    await apiServices.spaces.delete(SPACE_ID);
+    await apiServices.spaces.create({ id: SPACE_ID, name: SPACE_ID });
+
     const matchingRule = await apiServices.alertingV2.rules.create(
-      buildCreateRuleData({ metadata: { name: matchingRuleName } })
+      buildCreateRuleData({ metadata: { name: matchingRuleName } }),
+      { spaceId: SPACE_ID }
     );
     const otherRule = await apiServices.alertingV2.rules.create(
-      buildCreateRuleData({ metadata: { name: otherRuleName } })
+      buildCreateRuleData({ metadata: { name: otherRuleName } }),
+      { spaceId: SPACE_ID }
     );
 
-    await apiServices.alertingV2.ruleExecutions.waitForRuns({ ruleId: matchingRule.id, runs: 1 });
-    await apiServices.alertingV2.ruleExecutions.waitForRuns({ ruleId: otherRule.id, runs: 1 });
+    await apiServices.alertingV2.ruleExecutions.waitForRuns({
+      ruleId: matchingRule.id,
+      runs: 1,
+      spaceId: SPACE_ID,
+    });
+    await apiServices.alertingV2.ruleExecutions.waitForRuns({
+      ruleId: otherRule.id,
+      runs: 1,
+      spaceId: SPACE_ID,
+    });
   });
 
   test.beforeEach(async ({ browserAuth }) => {
@@ -35,12 +51,12 @@ test.describe('Execution history — rule search', { tag: ['@local-stateful-clas
   });
 
   test.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.rules.cleanUp();
+    await apiServices.spaces.delete(SPACE_ID);
   });
 
   test('filters the Rules tab by rule name', async ({ pageObjects }) => {
     const { executionHistory } = pageObjects;
-    await executionHistory.goto();
+    await executionHistory.goto(SPACE_ID);
 
     await test.step('searching by name lists only the matching rule', async () => {
       await executionHistory.searchRules(matchingRuleName);

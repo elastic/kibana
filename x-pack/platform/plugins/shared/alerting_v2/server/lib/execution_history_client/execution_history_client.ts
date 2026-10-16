@@ -6,6 +6,8 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { ruleIdSchema } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../rules_client';
 import { EventLogServiceToken } from '../services/event_log_service/tokens';
 import type { EventLogServiceContract } from '../services/event_log_service/event_log_service';
@@ -15,7 +17,6 @@ import {
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
-import { looksLikeSavedObjectId } from '../looks_like_saved_object_id';
 import type {
   ExecutionHistoryClientContract,
   ListRuleExecutionsArgs,
@@ -79,6 +80,10 @@ export class ExecutionHistoryClient implements ExecutionHistoryClientContract {
       response.items.forEach(({ id }) => ruleIds.add(id));
       total = response.total;
     } catch (error) {
+      // Readers without rules access can still search by exact rule id; anything else is a real failure.
+      if (!SavedObjectsErrorHelpers.isForbiddenError(error)) {
+        throw error;
+      }
       this.logger.warn({
         message: 'Execution history lookup failed',
         error,
@@ -86,7 +91,8 @@ export class ExecutionHistoryClient implements ExecutionHistoryClientContract {
       });
     }
 
-    if (looksLikeSavedObjectId(search)) {
+    // The name lookup can't find a rule by its id, and callers may supply custom ids like `cpu-prod`.
+    if (ruleIdSchema.safeParse(search).success) {
       ruleIds.add(search);
     }
 

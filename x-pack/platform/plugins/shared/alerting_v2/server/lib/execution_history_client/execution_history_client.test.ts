@@ -9,6 +9,7 @@ import type { EventLogService } from '../services/event_log_service/event_log_se
 import { createEventLogService } from '../services/event_log_service/event_log_service.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import type { RulesClient } from '../rules_client';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ExecutionHistoryClient } from './execution_history_client';
 import type { ListRuleExecutionsArgs } from './types';
 
@@ -133,9 +134,9 @@ describe('ExecutionHistoryClient', () => {
       const { client, findRules, findRuleExecutions } = createMocks();
       findRules.mockResolvedValue(foundRules('rule-a', 'rule-b'));
 
-      const result = await client.listRuleExecutions(baseArgs({ search: 'cpu' }));
+      const result = await client.listRuleExecutions(baseArgs({ search: 'cpu usage' }));
 
-      expect(findRules).toHaveBeenCalledWith({ search: 'cpu', perPage: 500 });
+      expect(findRules).toHaveBeenCalledWith({ search: 'cpu usage', perPage: 500 });
       expect(findRuleExecutions).toHaveBeenCalledWith(
         expect.objectContaining({ ruleIds: ['rule-a', 'rule-b'] })
       );
@@ -143,13 +144,23 @@ describe('ExecutionHistoryClient', () => {
       expect(result.searchMatches).toEqual({ rules: 2, isTruncated: false });
     });
 
-    it('also matches a search that looks like a rule id', async () => {
+    it('also matches a search that is a rule id', async () => {
       const { client, findRuleExecutions } = createMocks();
 
       await client.listRuleExecutions(baseArgs({ search: RULE_ID }));
 
       expect(findRuleExecutions).toHaveBeenCalledWith(
         expect.objectContaining({ ruleIds: [RULE_ID] })
+      );
+    });
+
+    it('also matches a search that is a custom rule id', async () => {
+      const { client, findRuleExecutions } = createMocks();
+
+      await client.listRuleExecutions(baseArgs({ search: 'cpu-prod' }));
+
+      expect(findRuleExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ ruleIds: ['cpu-prod'] })
       );
     });
 
@@ -206,7 +217,7 @@ describe('ExecutionHistoryClient', () => {
       const { client, findRuleExecutions } = createMocks();
 
       const result = await client.listRuleExecutions(
-        baseArgs({ search: 'nothing', page: 2, perPage: 25 })
+        baseArgs({ search: 'no match', page: 2, perPage: 25 })
       );
 
       expect(findRuleExecutions).not.toHaveBeenCalled();
@@ -240,20 +251,30 @@ describe('ExecutionHistoryClient', () => {
       expect(result.searchMatches).toEqual({ rules: 501, isTruncated: true });
     });
 
-    it('logs a warning and finds nothing when the rule lookup fails', async () => {
+    it('logs a warning and finds nothing when the user cannot read rules', async () => {
       const { client, findRules, findRuleExecutions, logger } = createMocks();
-      findRules.mockRejectedValue(new Error('forbidden'));
+      findRules.mockRejectedValue(SavedObjectsErrorHelpers.decorateForbiddenError(new Error('no')));
 
-      const result = await client.listRuleExecutions(baseArgs({ search: 'cpu' }));
+      const result = await client.listRuleExecutions(baseArgs({ search: 'no match' }));
 
       expect(logger.warn).toHaveBeenCalled();
       expect(findRuleExecutions).not.toHaveBeenCalled();
       expect(result.items).toEqual([]);
     });
 
-    it('still matches an exact rule id when the rule lookup fails', async () => {
+    it('propagates unexpected rule lookup failures', async () => {
       const { client, findRules, findRuleExecutions } = createMocks();
-      findRules.mockRejectedValue(new Error('forbidden'));
+      findRules.mockRejectedValue(new Error('saved objects timeout'));
+
+      await expect(client.listRuleExecutions(baseArgs({ search: 'cpu' }))).rejects.toThrow(
+        'saved objects timeout'
+      );
+      expect(findRuleExecutions).not.toHaveBeenCalled();
+    });
+
+    it('still matches an exact rule id when the user cannot read rules', async () => {
+      const { client, findRules, findRuleExecutions } = createMocks();
+      findRules.mockRejectedValue(SavedObjectsErrorHelpers.decorateForbiddenError(new Error('no')));
 
       await client.listRuleExecutions(baseArgs({ search: RULE_ID }));
 

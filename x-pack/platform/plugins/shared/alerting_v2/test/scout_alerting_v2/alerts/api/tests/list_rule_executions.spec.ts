@@ -245,14 +245,15 @@ apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' },
       const response = await apiClient.get(
         listRuleExecutionsUrl({
           search: `searchable-filtered-rule-${nameSuffix}`,
-          outcomes: ['failure'],
+          outcomes: ['success'],
         }),
         { headers: searcherHeaders }
       );
 
       expect(response).toHaveStatusCode(200);
+      expect(response.body.items.length).toBeGreaterThanOrEqual(1);
       for (const item of response.body.items) {
-        expect(item.outcome).toBe('failure');
+        expect(item.outcome).toBe('success');
         expect(item.rule.id).toBe(rule.id);
       }
     }

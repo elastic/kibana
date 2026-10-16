@@ -362,6 +362,13 @@ describe('RulesTabContent', () => {
       });
     });
 
+    it('limits the search field to the length the API accepts', () => {
+      mockResult();
+      renderComponent();
+
+      expect(screen.getByTestId('ruleExecutionHistorySearch')).toHaveAttribute('maxlength', '256');
+    });
+
     it('asks for a rule name or ID when the user can read rules', () => {
       mockResult();
       renderComponent();
