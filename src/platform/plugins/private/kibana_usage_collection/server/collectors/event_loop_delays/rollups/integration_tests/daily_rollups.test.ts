@@ -21,7 +21,6 @@ import {
   createRootWithCorePlugins,
 } from '@kbn/core-test-helpers-kbn-server';
 
-import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { metricsServiceMock } from '@kbn/core/server/mocks';
 
 import {
@@ -112,7 +111,7 @@ describe(`daily rollups integration test`, () => {
         [...rawEventLoopDelaysDaily, ...outdatedRawEventLoopDelaysDaily],
         { refresh: true }
       );
-    expect(createdSavedObjects.filter(isSavedObjectErrorResult)).toEqual([]);
+    expect(createdSavedObjects.filter((savedObject) => 'error' in savedObject)).toEqual([]);
   });
 
   afterAll(async () => {
