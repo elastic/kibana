@@ -143,7 +143,7 @@ const packagingLine = ({
  * the analyst at the rating.
  */
 const ASSET_CRITICALITY_NOTE =
-  'Asset criticality: the users and services above are involved in this attack. AlertZero does not change asset criticality. Review their ratings in Entity Analytics if they are out of date.';
+  'Asset criticality: the identities above are involved in this attack. AlertZero does not change asset criticality. Review their ratings in Entity Analytics if they are out of date.';
 
 /**
  * What this hunt run did, for a run that confirmed a hit. Unlike the Investigation's closing

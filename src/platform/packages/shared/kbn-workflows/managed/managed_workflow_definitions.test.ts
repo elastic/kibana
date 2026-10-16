@@ -413,6 +413,16 @@ describe('managedWorkflowDefinitions', () => {
     }
   );
 
+  // Asset criticality is the customer's to set: appearing in an attack does not change how much an
+  // identity matters. No managed workflow, including the Workers, may write it, so a change has to
+  // be made by an analyst in Entity Analytics. Templated definitions are rendered first: their
+  // `yamlTemplate` is a function, so the text to scan only exists after it runs.
+  it.each(managedDefinitionsById)('%s never writes asset criticality', (_id, definition) => {
+    expect(renderWorkflowYaml(definition)).not.toMatch(
+      /api\/asset_criticality|entityStore\.updateAssetCriticality/
+    );
+  });
+
   describe('Hunt Watch: registry-wide checks', () => {
     // Every managed definition, rendered once (yamlTemplate ones with their representative
     // values), parsed for its top-level `tags`. Reused by both checks below so a templated

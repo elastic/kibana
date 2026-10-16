@@ -10,7 +10,6 @@ import { IMPACT_INTERNAL_URL } from '@kbn/agentic-investigations-plugin/common';
 import { PROPOSAL_BY_ID_URL } from '@kbn/proposals-common';
 import {
   getManagedWorkflowDefinition,
-  managedWorkflowDefinitions,
   ALERTZERO_HUNT_WORKFLOW_ID,
   ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
   ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID,
@@ -373,30 +372,6 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
       const strippedPaths = rawPaths.map(stripSpacePrefix).filter((path): path is string => !!path);
 
       expect(strippedPaths.filter((path) => !KNOWN_ROUTE_PATHS.has(path))).toEqual([]);
-    });
-  });
-
-  // Asset criticality is the customer's to set: appearing in an attack does not change how much an
-  // identity matters. No managed workflow Workers can reach may write it, so a change has to be
-  // made by an analyst in Entity Analytics.
-  describe('asset criticality', () => {
-    it('is never written by a managed workflow', () => {
-      // Templated definitions (the Workers) carry their text in `yamlTemplate`; the raw template
-      // source is enough for a substring check. The Entity Store step writes criticality too, so
-      // the deprecated route is not the only way in.
-      const textOf = (definition: (typeof managedWorkflowDefinitions)[number]): string =>
-        'yaml' in definition && typeof definition.yaml === 'string'
-          ? definition.yaml
-          : 'yamlTemplate' in definition
-          ? String(definition.yamlTemplate)
-          : '';
-      const writers = managedWorkflowDefinitions
-        .filter((definition) =>
-          /api\/asset_criticality|entityStore\.updateAssetCriticality/.test(textOf(definition))
-        )
-        .map(({ id }) => id);
-
-      expect(writers).toEqual([]);
     });
   });
 });

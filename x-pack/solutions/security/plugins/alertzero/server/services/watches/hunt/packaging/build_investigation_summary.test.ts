@@ -77,7 +77,7 @@ describe('buildInvestigationSummary', () => {
     });
     expect(summary).toContain('Services: svc-role');
     expect(summary).toContain(
-      'Asset criticality: the users and services above are involved in this attack. AlertZero does not change asset criticality. Review their ratings in Entity Analytics if they are out of date.'
+      'Asset criticality: the identities above are involved in this attack. AlertZero does not change asset criticality. Review their ratings in Entity Analytics if they are out of date.'
     );
   });
 
