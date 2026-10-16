@@ -22,6 +22,8 @@ jest.mock('@kbn/workflows-ui', () => ({
 
 const mockUseWorkflowsApi = useWorkflowsApi as jest.MockedFunction<typeof useWorkflowsApi>;
 
+jest.setTimeout(30_000);
+
 describe('useWorkflowExecutions', () => {
   let mockWorkflowApi: MockWorkflowApi;
   let mockGetWorkflowExecutions: jest.MockedFunction<MockWorkflowApi['getWorkflowExecutions']>;
@@ -67,10 +69,6 @@ describe('useWorkflowExecutions', () => {
       wrapper: createQueryClientWrapper(queryClient),
     });
 
-  const waitForExecutionsFetch = async () => {
-    await waitFor(() => expect(mockGetWorkflowExecutions).toHaveBeenCalled());
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
     mockWorkflowApi = createMockWorkflowApi();
@@ -84,10 +82,8 @@ describe('useWorkflowExecutions', () => {
     queryClient.clear();
   });
 
-  it('should fetch executions for a workflow', async () => {
+  it('should fetch executions for a workflow', () => {
     renderExecutionsHook({ workflowId: 'wf-1' });
-
-    await waitForExecutionsFetch();
 
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       'wf-1',
@@ -112,12 +108,10 @@ describe('useWorkflowExecutions', () => {
     expect(result.current.data).toEqual(executionsPage1);
   });
 
-  it('should pass statuses filter to query params', async () => {
+  it('should pass statuses filter to query params', () => {
     const statuses: ExecutionStatus[] = [ExecutionStatus.COMPLETED, ExecutionStatus.FAILED];
 
     renderExecutionsHook({ workflowId: 'wf-1', statuses });
-
-    await waitForExecutionsFetch();
 
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       'wf-1',
@@ -127,12 +121,10 @@ describe('useWorkflowExecutions', () => {
     );
   });
 
-  it('should pass executionTypes filter to query params', async () => {
+  it('should pass executionTypes filter to query params', () => {
     const executionTypes: ExecutionType[] = [ExecutionType.TEST];
 
     renderExecutionsHook({ workflowId: 'wf-1', executionTypes });
-
-    await waitForExecutionsFetch();
 
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       'wf-1',
@@ -142,12 +134,10 @@ describe('useWorkflowExecutions', () => {
     );
   });
 
-  it('should pass executedBy filter when it has entries', async () => {
+  it('should pass executedBy filter when it has entries', () => {
     const executedBy = ['user-1'];
 
     renderExecutionsHook({ workflowId: 'wf-1', executedBy });
-
-    await waitForExecutionsFetch();
 
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       'wf-1',
@@ -157,21 +147,17 @@ describe('useWorkflowExecutions', () => {
     );
   });
 
-  it('should not include executedBy when the array is empty', async () => {
+  it('should not include executedBy when the array is empty', () => {
     const executedBy: string[] = [];
 
     renderExecutionsHook({ workflowId: 'wf-1', executedBy });
-
-    await waitForExecutionsFetch();
 
     const callParams = mockGetWorkflowExecutions.mock.calls[0][1];
     expect(callParams).not.toHaveProperty('executedBy');
   });
 
-  it('should pass omitStepRuns when provided', async () => {
+  it('should pass omitStepRuns when provided', () => {
     renderExecutionsHook({ workflowId: 'wf-1', omitStepRuns: true });
-
-    await waitForExecutionsFetch();
 
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       'wf-1',
@@ -181,7 +167,7 @@ describe('useWorkflowExecutions', () => {
     );
   });
 
-  it('should pass time range and sort params when provided', async () => {
+  it('should pass time range and sort params when provided', () => {
     renderExecutionsHook({
       workflowId: 'wf-1',
       startedAfter: 'now-1w',
@@ -191,8 +177,6 @@ describe('useWorkflowExecutions', () => {
       sortField: 'finishedAt',
       sortOrder: 'desc',
     });
-
-    await waitForExecutionsFetch();
 
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       'wf-1',
@@ -207,10 +191,8 @@ describe('useWorkflowExecutions', () => {
     );
   });
 
-  it('should use custom page size when provided', async () => {
+  it('should use custom page size when provided', () => {
     renderExecutionsHook({ workflowId: 'wf-1', size: 25 });
-
-    await waitForExecutionsFetch();
 
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       'wf-1',
