@@ -13,14 +13,17 @@ import type {
 } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_SCHEMA_VERSION,
+  ConversationActivityEventType,
   ConversationRoundStatus,
   ConversationRoundStepType,
   TimelineEventType,
+  isActivityEvent,
   isExecutionTerminalEvent,
   isTimelineEvent,
 } from '@kbn/agent-builder-common';
 import {
   abortedExec0Timeline,
+  activityEventFixture,
   completedRoundTimeline,
   customEventFixture,
   failedExec0Timeline,
@@ -219,5 +222,45 @@ describe('eventsForContext — custom events', () => {
     });
 
     expect(eventsForContext(conversation).every(isTimelineEvent)).toBe(true);
+  });
+});
+
+describe('eventsForContext — activity events', () => {
+  const completedRound = (roundId: string, createdAt: string): TimelineEvent[] =>
+    roundsToEvents(
+      conversationWith({
+        rounds: [{ ...storedRound(roundId, `${roundId} input`), started_at: createdAt }],
+      })
+    );
+
+  it('drops activity events, with or without an execution id, and keeps custom events', () => {
+    const note = customEventFixture({ id: 'note', created_at: '2026-01-01T00:01:00.000Z' });
+    const conversation = conversationWith({
+      schema_version: CONVERSATION_SCHEMA_VERSION,
+      events: [
+        activityEventFixture({
+          id: 'created',
+          type: ConversationActivityEventType.conversationCreated,
+          created_at: '2026-01-01T00:00:00.000Z',
+          data: { agent_id: 'agent-1', access_mode: 'private' },
+        }),
+        ...completedRound('a', '2026-01-01T00:00:00.000Z'),
+        note,
+        activityEventFixture({
+          id: 'metadata',
+          type: ConversationActivityEventType.metadataUpdated,
+          created_at: '2026-01-01T00:00:30.000Z',
+          execution_id: 'a::execution',
+          data: { changed_fields: ['status'] },
+        }),
+        activityEventFixture({ id: 'renamed', created_at: '2026-01-01T00:02:00.000Z' }),
+      ],
+    });
+
+    const timeline = eventsForContext(conversation);
+
+    expect(timeline.some(isActivityEvent)).toBe(false);
+    expect(timeline.find((event) => event.id === 'note')).toEqual(note);
+    expect(eventsToRounds(timeline).map((round) => round.id)).toEqual(['a']);
   });
 });

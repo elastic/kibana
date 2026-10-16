@@ -46,6 +46,28 @@ describe('isSandboxCapableConnector', () => {
     ).toBe(true);
   });
 
+  it('prefers secrets.authType when it conflicts with config.authType', () => {
+    expect(
+      isSandboxCapableConnector({
+        actionTypeId: '.github',
+        config: { authType: 'bearer' },
+        secrets: { authType: 'basic' },
+        actionTypeRegistry: createRegistry(),
+      })
+    ).toBe(false);
+  });
+
+  it('falls back to config.authType when secrets.authType is missing', () => {
+    expect(
+      isSandboxCapableConnector({
+        actionTypeId: '.github',
+        config: { authType: 'bearer' },
+        secrets: {},
+        actionTypeRegistry: createRegistry(),
+      })
+    ).toBe(true);
+  });
+
   it('returns false when config.authType is missing', () => {
     expect(
       isSandboxCapableConnector({
