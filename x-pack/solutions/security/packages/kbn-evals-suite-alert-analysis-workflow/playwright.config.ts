@@ -9,5 +9,7 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 export default createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,
+  // The batch specs are their own suite (batch.playwright.config.ts): they are long, so they run on request.
+  testIgnore: ['**/alert_analysis_batch.spec.ts', '**/alert_analysis_batch_integrity.spec.ts'],
   timeout: 30 * 60_000,
 });

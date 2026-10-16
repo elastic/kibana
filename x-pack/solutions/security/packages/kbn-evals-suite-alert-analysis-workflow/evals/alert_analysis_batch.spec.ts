@@ -6,59 +6,69 @@
  */
 
 /**
- * Multi-alert batch eval for the managed `system-security-alert-analysis` workflow.
+ * Batch-reliability eval for the managed `system-security-alert-analysis` workflow.
  *
- * `alert_analysis_classification.spec.ts` seeds ONE alert per run, so the classification step's raw
- * `verdicts` array has length 1 in every example. This spec seeds whole batches (50 alerts = exactly
- * `consts.batch_size`, 10 alerts, a near-duplicate pair, and three alerts whose ids differ by one or
- * two hex characters) and grades the RAW verdict array: count, duplicate ids, foreign ids, coverage,
- * verdict↔alert correspondence, and per-alert accuracy. See `src/batch_alerts.ts` for the fixtures
- * and `src/batch_verdicts.ts` for the predicates.
+ * `alert_analysis_classification.spec.ts` classifies one alert per run. The Alert Triage Worker
+ * sends up to 50 alerts of one rule per model call, which is where cheaper models tend to drop
+ * verdicts, repeat ids or drift. Each example here seeds one deterministic batch (see
+ * `batch_dataset.ts`: exact true/false-positive counts, one realistic rule, weighted sources, shuffled order), runs the
+ * workflow once over the whole batch with the prompt, and grades every alert against its label.
  *
- * Evaluators (all CODE, deterministic, each reported under its own name):
- *   - BatchVerdictIntegrity: count == alerts, ids ⊆ batch, no repeats, every alert answered.
- *   - BatchVerdictCoverage: fraction of batch alerts that received a verdict.
- *   - BatchVerdictCorrespondence: no verdict names another batch alert's evidence under its own id.
- *   - BatchClassificationAccuracy: fraction of batch alerts whose paired verdict has the golden label.
- *   - trajectory (agent only): zero-tool guardrail, as in the single-alert spec.
+ * This is its own eval suite (`security-alert-analysis-workflow-batch`, run by
+ * `batch.playwright.config.ts`), not part of the weekly Alert Analysis suite: a run takes tens of
+ * minutes per model. On a PR, add the `evals:security-alert-analysis-workflow-batch` label.
  *
- * Experiment names carry the `alertzero-` prefix so these results are identifiable in the golden
- * index; the agent and prompt paths get distinct names. The single-alert spec's names are unchanged.
+ * Evaluators: BatchCoverage, BatchAccuracy, HardShapeAccuracy, MaliciousNotClosed,
+ * BenignNotEscalated, VerdictConsistency (see `batch_evaluators.ts`).
  */
 
-import { randomBytes } from 'crypto';
+import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout';
 import type { EsClient } from '@kbn/scout';
-import type { ToolingLog } from '@kbn/tooling-log';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { selectEvaluators, type EvaluationDataset, type Example } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
-import { runAlertAnalysisBatchWorkflow, type ClassificationMethod } from '../src/workflow_task';
-import { configureAlertAnalysisWorkflow } from '../src/space_config';
-import { BATCH_EVALUATORS, createAlertAnalysisTrajectoryEvaluator } from '../src/evaluators';
-import type { BatchTaskOutput } from '../src/evaluators';
-import { ALERT_ANALYSIS_EVAL_BATCHES, buildBatchAlerts } from '../src/batch_alerts';
+import { runAlertAnalysisBatch } from '../src/workflow_task';
+import { configureAlertAnalysisWorkflow, ensureAlertsIndex } from '../src/space_config';
+import { buildBatchDocs, planBatch } from '../src/batch_dataset';
+import { BATCH_RULES } from '../src/batch_rules';
+import { batchEvaluators, type BatchExpected, type BatchOutput } from '../src/batch_evaluators';
 import { ALERTS_INDEX } from '../src/constants';
 
-const BATCH_BY_ID = new Map(ALERT_ANALYSIS_EVAL_BATCHES.map((batch) => [batch.id, batch]));
+/** A typical sweep, one full model call (50), and two model calls (100), over both rules. */
+const BATCHES = [
+  { rule: 'powershell', size: 20 },
+  { rule: 'persistence', size: 50 },
+  { rule: 'powershell', size: 100 },
+  // The same rules with the hard shapes mixed in.
+  { rule: 'powershell', size: 50, hard: true },
+  { rule: 'persistence', size: 100, hard: true },
+];
 
-interface AlertAnalysisBatchExample extends Example {
-  input: { batchId: string };
-  output: { alertCount: number };
-  metadata: { batchId: string; alertIndex: string; alertCount: number; description: string };
+const batchId = ({ rule, size, hard }: { rule: string; size: number; hard?: boolean }) =>
+  `${rule}-${size}${hard ? '-hard' : ''}`;
+const SEED = 1;
+
+interface BatchExample extends Example {
+  input: { rule: string; size: number; hard?: boolean };
+  output: BatchExpected;
+  metadata: { rule: string; size: number; hard?: boolean };
 }
 
 evaluate.describe(
-  'Alert Analysis Workflow — multi-alert batches',
+  'Alert Analysis Workflow — batch reliability',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
     const createdAlertIds = new Set<string>();
 
-    evaluate.afterAll(async ({ esClient, log }: { esClient: EsClient; log: ToolingLog }) => {
+    evaluate.beforeAll(async ({ esClient }: { esClient: EsClient }) => {
+      await ensureAlertsIndex(esClient);
+    });
+
+    evaluate.afterAll(async ({ esClient }: { esClient: EsClient }) => {
       if (createdAlertIds.size === 0) {
         return;
       }
-      log.info(`Deleting ${createdAlertIds.size} leftover alert-analysis batch eval alerts`);
       await esClient.deleteByQuery({
         index: ALERTS_INDEX,
         query: { ids: { values: [...createdAlertIds] } },
@@ -67,142 +77,109 @@ evaluate.describe(
       });
     });
 
-    const METHODS: Array<{
-      method: ClassificationMethod;
-      title: string;
-      datasetName: string;
-      experimentName: string;
-    }> = [
-      {
-        method: 'agent',
-        title: 'returns exactly one intact verdict per alert for multi-alert batches',
-        datasetName: 'security: alert-analysis-workflow-batches',
-        experimentName: 'alertzero-alert-analysis-workflow-batches',
-      },
-      {
-        method: 'prompt',
-        title:
-          'returns exactly one intact verdict per alert for multi-alert batches using a prompt',
-        datasetName: 'security: alert-analysis-workflow-batches (prompt)',
-        experimentName: 'alertzero-alert-analysis-workflow-batches-prompt',
-      },
-    ];
-
-    // One test per method, run one after the other: both write the same space setting.
-    METHODS.forEach(({ method, title, datasetName, experimentName }) => {
-      evaluate(title, async ({ executorClient, esClient, fetch, log, connector }) => {
+    evaluate(
+      'classifies a batch of alerts from one rule with the expected verdicts using a prompt',
+      async ({ executorClient, esClient, fetch, log, connector }) => {
         await configureAlertAnalysisWorkflow({
           fetch,
           log,
           connectorId: connector.id,
           agentId: agentBuilderDefaultAgentId,
-          usePrompt: method === 'prompt',
+          usePrompt: true,
         });
 
-        const examples: AlertAnalysisBatchExample[] = ALERT_ANALYSIS_EVAL_BATCHES.map((batch) => ({
-          id: batch.id,
-          input: { batchId: batch.id },
-          output: { alertCount: batch.alerts.length },
-          metadata: {
-            batchId: batch.id,
-            alertIndex: ALERTS_INDEX,
-            alertCount: batch.alerts.length,
-            description: batch.description,
-          },
-        }));
-
-        const trajectory = method === 'agent' ? [createAlertAnalysisTrajectoryEvaluator()] : [];
-        log.info(
-          `Scoring ${examples.length} batches (${ALERT_ANALYSIS_EVAL_BATCHES.map(
-            (batch) => `${batch.id}:${batch.alerts.length}`
-          ).join(', ')}) via ${method}`
-        );
+        const examples: BatchExample[] = BATCHES.map((batch) => {
+          const { rule, size, hard } = batch;
+          const plan = planBatch({ rule: BATCH_RULES[rule], size, seed: SEED, hard });
+          return {
+            id: batchId(batch),
+            input: batch,
+            output: {
+              labels: plan.map(({ expected }) => expected),
+              shapes: plan.map(({ shape }) => shape),
+              hard: plan.map((item) => item.hard),
+            },
+            metadata: batch,
+          };
+        });
 
         await executorClient.runExperiment(
           {
-            name: experimentName,
-            metadata: { classificationMethod: method },
+            metadata: { classificationMethod: 'prompt', seed: SEED },
             datasets: [
               {
-                name: datasetName,
+                name: 'security: alert-analysis-workflow-batch (prompt)',
                 description:
-                  'Seeds multi-alert batches of ONE rule execution (50 alerts = batch_size, 10 ' +
-                  'alerts, a near-duplicate pair, and ids differing by 1-2 hex characters), runs ' +
-                  'the managed workflow end-to-end, and grades the raw verdict array the ' +
-                  `${method === 'agent' ? 'ai.agent' : 'ai.prompt'} step returned.`,
+                  'Runs the managed alert-analysis workflow once over a whole batch of labeled ' +
+                  `alerts from one rule (${BATCHES.map(batchId).join(
+                    ', '
+                  )}; 20% true positives) and ` +
+                  'grades every alert, plus how many verdicts came back and whether alerts with ' +
+                  'identical evidence got the same verdict.',
                 examples,
               } satisfies EvaluationDataset,
             ],
-            task: async ({ metadata }): Promise<BatchTaskOutput> => {
-              const { batchId, alertIndex } = metadata as {
-                batchId: string;
-                alertIndex: string;
+            task: async ({ metadata }): Promise<BatchOutput> => {
+              const { rule, size, hard } = metadata as {
+                rule: string;
+                size: number;
+                hard?: boolean;
               };
-              const batch = BATCH_BY_ID.get(batchId);
-              if (!batch) {
-                throw new Error(`No synthetic alert batch found for id ${batchId}`);
-              }
+              const plan = planBatch({ rule: BATCH_RULES[rule], size, seed: SEED, hard });
 
-              // A fresh tag per run keeps every alert id and the shared rule uuid unique, so a
-              // repetition never trips the workflow's `already_analyzed` gate and concurrent
-              // repetitions never share rule-scoped enrichment. The tag is hex so the id-collision
-              // batch keeps ids that differ by hex characters only.
-              const runTag = randomBytes(4).toString('hex');
-              const alerts = buildBatchAlerts(batch, runTag);
-              alerts.forEach((alert) => createdAlertIds.add(alert.id));
+              // Unique ids and rule per run, so concurrent batches never share alerts, rule-scoped
+              // enrichment or entity-correlated related alerts.
+              const runId = randomUUID();
+              const docs = buildBatchDocs({
+                ruleKey: rule,
+                plan,
+                runId,
+                ruleId: `aa-batch-rule-${runId}`,
+              });
+              docs.forEach(({ id }) => createdAlertIds.add(id));
 
               const bulk = await esClient.bulk({
-                refresh: 'wait_for',
-                operations: alerts.flatMap((alert) => [
-                  { index: { _index: alertIndex, _id: alert.id } },
-                  alert.doc,
+                operations: docs.flatMap(({ id, doc }) => [
+                  { index: { _index: ALERTS_INDEX, _id: id } },
+                  doc,
                 ]),
+                refresh: 'wait_for',
               });
               if (bulk.errors) {
-                const failed = bulk.items.filter((item) => item.index?.error);
-                throw new Error(
-                  `Seeding batch ${batchId} failed for ${failed.length}/${
-                    alerts.length
-                  } alerts: ${JSON.stringify(failed[0]?.index?.error)}`
-                );
+                throw new Error(`Failed to index the batch of ${size} alerts`);
               }
 
               try {
-                const result = await runAlertAnalysisBatchWorkflow({
+                const { verdicts, executionStatus } = await runAlertAnalysisBatch({
                   fetch,
                   log,
-                  alertIds: alerts.map((alert) => alert.id),
-                  alertIndex,
-                  classificationMethod: method,
+                  alertIds: docs.map(({ id }) => id),
+                  alertIndex: ALERTS_INDEX,
                 });
-                log.info(
-                  `Batch ${batchId} (${alerts.length} alerts): raw verdicts=${result.rawVerdicts.length} status=${result.executionStatus}`
-                );
                 return {
-                  alerts: alerts.map(({ id, expected, markers }) => ({ id, expected, markers })),
-                  rawVerdicts: result.rawVerdicts,
-                  executionId: result.executionId,
-                  executionStatus: result.executionStatus,
-                  classificationMethod: method,
+                  predictions: docs.map(({ id }) => ({
+                    classification: verdicts[id]?.classification,
+                  })),
+                  executionStatus,
                 };
               } finally {
                 await esClient
                   .deleteByQuery({
-                    index: alertIndex,
-                    query: { ids: { values: alerts.map((alert) => alert.id) } },
+                    index: ALERTS_INDEX,
+                    query: { ids: { values: docs.map(({ id }) => id) } },
                     refresh: true,
                     conflicts: 'proceed',
                   })
-                  .then(() => alerts.forEach((alert) => createdAlertIds.delete(alert.id)))
+                  .then(() => docs.forEach(({ id }) => createdAlertIds.delete(id)))
                   .catch(() => {
-                    // Leave them in createdAlertIds so afterAll sweeps them.
+                    // Left in createdAlertIds so afterAll sweeps them.
                   });
               }
             },
           },
-          selectEvaluators([...BATCH_EVALUATORS, ...trajectory])
+          selectEvaluators(batchEvaluators)
         );
-      });
-    });
+      }
+    );
   }
 );

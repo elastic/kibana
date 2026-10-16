@@ -60,6 +60,7 @@
     "@kbn/agentic-investigations-plugin",
     "@kbn/proposals-plugin",
     "@kbn/proposals-common",
-    "@kbn/core-security-common"
+    "@kbn/core-security-common",
+    "@kbn/eval-kql"
   ]
 }

@@ -11,6 +11,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { ObservabilityAlertingApp } from './observability_alerting_app';
 import { createObservabilityAlertingSetBreadcrumbs } from './breadcrumbs';
@@ -19,11 +21,13 @@ export const mountObservabilityAlertingApp = ({
   coreStart,
   alertingVTwo,
   triggersActionsUi,
+  observabilityShared,
   params,
 }: {
   coreStart: CoreStart;
   alertingVTwo: AlertingV2PublicStart;
   triggersActionsUi: Pick<TriggersAndActionsUIPublicPluginStart, 'getClassicRulesPage'>;
+  observabilityShared: Pick<ObservabilitySharedPluginStart, 'navigation'>;
   params: AppMountParameters;
 }): AppUnmount => {
   const { element, history } = params;
@@ -37,15 +41,18 @@ export const mountObservabilityAlertingApp = ({
 
   ReactDOM.render(
     coreStart.rendering.addContext(
-      <Router history={history}>
-        <ObservabilityAlertingApp
-          coreStart={coreStart}
-          alertingVTwo={alertingVTwo}
-          triggersActionsUi={triggersActionsUi}
-          history={history}
-          setBreadcrumbs={setBreadcrumbs}
-        />
-      </Router>
+      <KibanaContextProvider services={{ ...coreStart, observabilityShared }}>
+        <Router history={history}>
+          <ObservabilityAlertingApp
+            coreStart={coreStart}
+            alertingVTwo={alertingVTwo}
+            triggersActionsUi={triggersActionsUi}
+            ObservabilityPageTemplate={observabilityShared.navigation.PageTemplate}
+            history={history}
+            setBreadcrumbs={setBreadcrumbs}
+          />
+        </Router>
+      </KibanaContextProvider>
     ),
     element
   );

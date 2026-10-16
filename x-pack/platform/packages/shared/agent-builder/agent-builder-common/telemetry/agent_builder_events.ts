@@ -399,8 +399,8 @@ export interface ReportHitlQuestionAnsweredParams {
 }
 
 export interface ReportFeedbackSubmittedParams {
-  /** Round that received feedback */
-  round_id: string;
+  /** Execution ID of the round that received feedback */
+  execution_id: string;
   conversation_id?: string;
   /** up or down */
   vote: string;
@@ -431,8 +431,8 @@ export interface ReportFeedbackSubmittedParams {
 }
 
 export interface ReportFeedbackRetractedParams {
-  /** Round whose feedback was retracted */
-  round_id: string;
+  /** Execution ID of the round whose feedback was retracted */
+  execution_id: string;
   conversation_id?: string;
   /** OTel trace ID of the round */
   trace_id?: string;
@@ -1890,9 +1890,9 @@ const HITL_QUESTION_ANSWERED_EVENT: AgentBuilderTelemetryEvent = {
 const FEEDBACK_SUBMITTED_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted,
   schema: {
-    round_id: {
+    execution_id: {
       type: 'keyword',
-      _meta: { description: 'ID of the round that received feedback', optional: false },
+      _meta: { description: 'Execution ID of the round that received feedback', optional: false },
     },
     conversation_id: {
       type: 'keyword',
@@ -1964,9 +1964,12 @@ const FEEDBACK_SUBMITTED_EVENT: AgentBuilderTelemetryEvent = {
 const FEEDBACK_RETRACTED_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.FeedbackRetracted,
   schema: {
-    round_id: {
+    execution_id: {
       type: 'keyword',
-      _meta: { description: 'ID of the round whose feedback was retracted', optional: false },
+      _meta: {
+        description: 'Execution ID of the round whose feedback was retracted',
+        optional: false,
+      },
     },
     conversation_id: {
       type: 'keyword',

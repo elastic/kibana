@@ -9,6 +9,7 @@ import { isBoom } from '@hapi/boom';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import pLimit from 'p-limit';
 import { uniq } from 'lodash';
+import { deleteRules } from '../../../significant_events/rules/bulk_rule_operations';
 import { compileMatchCountBreachQuery } from '../../../significant_events/rules/match_count_query_compiler';
 import { withAllProjectsRouting } from '../../../significant_events/rules/project_routing';
 import {
@@ -133,12 +134,10 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   }
 
   async bulkDeleteRules(ids: string[]): Promise<void> {
-    if (ids.length === 0) return;
-    const { errors } = await this.rulesClient.bulkDeleteRules({ ids });
-    const fatal = errors.filter((e) => e.error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND);
-    if (fatal.length > 0) {
-      const detail = fatal.map((e) => `${e.id}: ${e.error.message}`).join('; ');
-      throw new Error(`V2 bulk delete failed for ${fatal.length} rule(s): ${detail}`);
+    const { failures } = await deleteRules(this.rulesClient, ids);
+    if (failures.length > 0) {
+      const detail = failures.map(({ id, message }) => `${id}: ${message}`).join('; ');
+      throw new Error(`V2 bulk delete failed for ${failures.length} rule(s): ${detail}`);
     }
   }
 

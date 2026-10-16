@@ -339,6 +339,10 @@ export class CaseCommentModel {
 
     const dedupedAttachments: CommentRequestWithId = [];
     const idsAlreadySeen = new Set();
+    // Attack ids are document ids from a different index than alerts and events, so they get
+    // their own intra-request set — an attack must never be dropped because an alert in the same
+    // request happened to share its id.
+    const attackIdsAlreadySeen = new Set<string>();
 
     // Dedup helper for unified alert/event attachments. The unified contract for
     // metadata.index is "scalar broadcast OR 1-to-1 array of matching length"; an array
@@ -412,6 +416,24 @@ export class CaseCommentModel {
       }
     );
 
+    // Attacks are a Security-only type, so only pay for the lookup when the request carries one.
+    const requestedAttackIds = [
+      ...new Set(
+        attachments.flatMap((attachment) =>
+          isAttackAttachmentType(attachment.type) && 'attachmentId' in attachment
+            ? getIDsAndIndicesAsArrays(attachment).ids
+            : []
+        )
+      ),
+    ];
+    const attacksAttachedToCase =
+      requestedAttackIds.length > 0
+        ? await this.params.services.attachmentService.getter.getAttachedAttackIds({
+            caseId: this.caseInfo.id,
+            attackIds: requestedAttackIds,
+          })
+        : new Set<string>();
+
     attachments.forEach((attachment) => {
       if (isAlertAttachmentType(attachment.type)) {
         if (!('attachmentId' in attachment)) {
@@ -420,6 +442,27 @@ export class CaseCommentModel {
         const deduped = dedupeUnifiedAttachment(attachment, alertsAttachedToCase);
         if (deduped) {
           dedupedAttachments.push(deduped);
+        }
+        return;
+      }
+
+      if (isAttackAttachmentType(attachment.type)) {
+        if (!('attachmentId' in attachment)) {
+          throw Boom.badRequest(`Attack attachment is missing required field 'attachmentId'`);
+        }
+
+        // An attack carries exactly one id, so there is nothing to filter *within* the
+        // attachment: it is either already on the case and dropped whole, or kept untouched.
+        // Running it through `dedupeUnifiedAttachment` would also widen `attachmentId` to an
+        // array, which the attack payload schema rejects.
+        const { ids } = getIDsAndIndicesAsArrays(attachment);
+        const isDuplicate = ids.some(
+          (id) => attacksAttachedToCase.has(id) || attackIdsAlreadySeen.has(id)
+        );
+        ids.forEach((id) => attackIdsAlreadySeen.add(id));
+
+        if (!isDuplicate) {
+          dedupedAttachments.push(attachment);
         }
         return;
       }

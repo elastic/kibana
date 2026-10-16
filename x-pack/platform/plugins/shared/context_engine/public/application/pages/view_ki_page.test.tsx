@@ -15,15 +15,18 @@ import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { GetKiResponse } from '../../../common/http_api/knowledge_indicators';
-import { CONTEXT_ENGINE_PATHS, getViewKiPath } from '../paths';
+import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
+import { getAiIndexKnowledgeIndicatorsPath, getViewKiPath, CONTEXT_ENGINE_PATHS } from '../paths';
+import { createAppChromeMock } from '../test_utils/app_chrome_mock';
 import { ViewKiPage } from './view_ki_page';
 
-const mockUseViewKi = jest.fn();
+const mockUseKi = jest.fn();
 const mockNavigateToContextEngine = jest.fn();
 const mockCreateContextEngineUrl = jest.fn((path: string) => path);
 
-jest.mock('../hooks/use_view_ki', () => ({
-  useViewKi: (...args: unknown[]) => mockUseViewKi(...args),
+jest.mock('../hooks/use_ki', () => ({
+  useKi: (args: { aiIndexId: string; kiId: string; index: string; enabled?: boolean }) =>
+    mockUseKi(args),
 }));
 
 jest.mock('../hooks/use_navigation', () => ({
@@ -44,13 +47,21 @@ const defaultKi: GetKiResponse = {
 
 const renderViewKiPage = (initialEntry: string) => {
   const services = coreMock.createStart();
+  services.application.getUrlForApp.mockImplementation(
+    (appId, options) => `/app/${appId}${options?.path ?? ''}`
+  );
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   return render(
     <ChromeServiceProvider value={{ chrome: services.chrome }}>
       <I18nProvider>
         <EuiProvider>
-          <KibanaContextProvider services={services}>
+          <KibanaContextProvider
+            services={{
+              ...services,
+              appChrome: createAppChromeMock(),
+            }}
+          >
             <QueryClientProvider client={queryClient}>
               <MemoryRouter initialEntries={[initialEntry]}>
                 <Route path={CONTEXT_ENGINE_PATHS.viewKi} component={ViewKiPage} />
@@ -65,7 +76,7 @@ const renderViewKiPage = (initialEntry: string) => {
 
 describe('ViewKiPage', () => {
   beforeEach(() => {
-    mockUseViewKi.mockReturnValue({
+    mockUseKi.mockReturnValue({
       ki: defaultKi,
       isLoading: false,
       error: undefined,
@@ -76,10 +87,32 @@ describe('ViewKiPage', () => {
     jest.clearAllMocks();
   });
 
+  it('back button links to the knowledge indicators tab', () => {
+    const kiListPath = getAiIndexKnowledgeIndicatorsPath('sample-ki');
+
+    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
+
+    expect(mockCreateContextEngineUrl).toHaveBeenCalledWith(kiListPath);
+    expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toHaveAttribute(
+      'href',
+      kiListPath
+    );
+  });
+
+  it('navigates to the knowledge indicators tab on back click', () => {
+    const kiListPath = getAiIndexKnowledgeIndicatorsPath('sample-ki');
+
+    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
+
+    fireEvent.click(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ));
+
+    expect(mockNavigateToContextEngine).toHaveBeenCalledWith(kiListPath);
+  });
+
   it('resolves kiId from a path built with getViewKiPath when the id contains %', () => {
     renderViewKiPage(`${getViewKiPath('sample-ki', 'ki-1%2')}?index=ai-index-idx-sample-ki`);
 
-    expect(mockUseViewKi).toHaveBeenCalledWith(
+    expect(mockUseKi).toHaveBeenCalledWith(
       expect.objectContaining({
         aiIndexId: 'sample-ki',
         kiId: 'ki-1%2',
@@ -91,7 +124,7 @@ describe('ViewKiPage', () => {
   it('resolves kiId from a path built with getViewKiPath when the id contains a slash', () => {
     renderViewKiPage(`${getViewKiPath('sample-ki', 'a/b')}?index=ai-index-idx-sample-ki`);
 
-    expect(mockUseViewKi).toHaveBeenCalledWith(
+    expect(mockUseKi).toHaveBeenCalledWith(
       expect.objectContaining({
         aiIndexId: 'sample-ki',
         kiId: 'a/b',
@@ -103,14 +136,14 @@ describe('ViewKiPage', () => {
   it('does not crash when a KI id contains a literal %-escape-like substring', () => {
     renderViewKiPage(`${getViewKiPath('sample-ki', 'a%41b')}?index=ai-index-idx-sample-ki`);
 
-    expect(mockUseViewKi).toHaveBeenCalled();
+    expect(mockUseKi).toHaveBeenCalled();
   });
 
   it('renders missing index prompt when index query param is absent', () => {
     renderViewKiPage('/ai_index/sample-ki/ki/ki-1');
 
     expect(screen.getByTestId('contextViewKiMissingIndex')).toBeInTheDocument();
-    expect(mockUseViewKi).toHaveBeenCalledWith(
+    expect(mockUseKi).toHaveBeenCalledWith(
       expect.objectContaining({
         enabled: false,
       })
@@ -118,7 +151,7 @@ describe('ViewKiPage', () => {
   });
 
   it('renders error prompt when useKi returns an error', () => {
-    mockUseViewKi.mockReturnValue({
+    mockUseKi.mockReturnValue({
       ki: undefined,
       isLoading: false,
       error: new Error('boom'),
@@ -130,7 +163,7 @@ describe('ViewKiPage', () => {
   });
 
   it('renders loading skeletons while useKi is loading', () => {
-    mockUseViewKi.mockReturnValue({
+    mockUseKi.mockReturnValue({
       ki: undefined,
       isLoading: true,
       error: undefined,
@@ -146,7 +179,7 @@ describe('ViewKiPage', () => {
   });
 
   it('renders document tab loading skeleton while useKi is loading', () => {
-    mockUseViewKi.mockReturnValue({
+    mockUseKi.mockReturnValue({
       ki: undefined,
       isLoading: true,
       error: undefined,
@@ -179,7 +212,7 @@ describe('ViewKiPage', () => {
   });
 
   it('renders deleted badge when lifecycle status is deleted', () => {
-    mockUseViewKi.mockReturnValue({
+    mockUseKi.mockReturnValue({
       ki: {
         ...defaultKi,
         document: {
@@ -200,7 +233,7 @@ describe('ViewKiPage', () => {
     jest.useFakeTimers();
     jest.setSystemTime(Date.parse('2026-06-15T12:00:00.000Z'));
 
-    mockUseViewKi.mockReturnValue({
+    mockUseKi.mockReturnValue({
       ki: {
         ...defaultKi,
         document: {
@@ -220,7 +253,7 @@ describe('ViewKiPage', () => {
   });
 
   it('does not render status badge for active lifecycle', () => {
-    mockUseViewKi.mockReturnValue({
+    mockUseKi.mockReturnValue({
       ki: {
         ...defaultKi,
         document: {
