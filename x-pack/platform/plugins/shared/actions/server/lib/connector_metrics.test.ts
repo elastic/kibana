@@ -11,6 +11,7 @@ import {
   connectorCreateCounter,
   connectorExecuteCounter,
   connectorExecuteDuration,
+  getConnectorAuthInitiateErrorType,
   getConnectorAuthType,
   getConnectorCreateErrorType,
   recordConnectorAuth,
@@ -54,6 +55,19 @@ describe('connector metrics', () => {
       [new Error('plain'), 'other'],
     ])('maps %p to %s', (error, expected) => {
       expect(getConnectorCreateErrorType(error)).toBe(expected);
+    });
+  });
+
+  describe('getConnectorAuthInitiateErrorType', () => {
+    it.each([
+      [400, 'invalid'],
+      [404, 'invalid'],
+      [401, 'unauthorized'],
+      [403, 'unauthorized'],
+      [429, 'rate_limited'],
+      [500, 'other'],
+    ])('maps status %s to %s', (statusCode, expected) => {
+      expect(getConnectorAuthInitiateErrorType(statusCode)).toBe(expected);
     });
   });
 

@@ -631,6 +631,7 @@ export class ActionExecutor {
             errorType = 'unauthorized';
             rawResult = err.result;
           } else if (isConnectorAuthorizationError(err)) {
+            errorType = 'auth_failed';
             recordConnectorAuth({
               phase: 'execute',
               authType: getConnectorAuthType({ config, secrets }),

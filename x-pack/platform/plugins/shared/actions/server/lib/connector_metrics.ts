@@ -44,15 +44,24 @@ export const connectorAuthCounter = meter.createCounter('kibana.actions.connecto
 });
 
 export type ConnectorCreateErrorType = 'conflict' | 'invalid' | 'unauthorized' | 'other';
-export type ConnectorExecuteErrorType = 'rate_limited' | 'invalid' | 'unauthorized' | 'other';
+export type ConnectorExecuteErrorType =
+  | 'rate_limited'
+  | 'invalid'
+  | 'unauthorized'
+  | 'auth_failed'
+  | 'other';
 export type ConnectorAuthErrorType =
+  | 'rate_limited'
+  | 'invalid'
+  | 'unauthorized'
   | 'provider_error'
   | 'user_mismatch'
   | 'token_request_failed'
   | 'authorization_failed'
   | 'other';
 
-export type ConnectorAuthPhase = 'authorize' | 'token' | 'execute';
+/** `initiate` starts the OAuth flow, `authorize` is the callback that completes it. */
+export type ConnectorAuthPhase = 'initiate' | 'authorize' | 'token' | 'execute';
 
 /** Who is responsible for a failed execution. */
 export type ConnectorErrorSource = 'user' | 'framework';
@@ -83,6 +92,22 @@ export const getConnectorCreateErrorType = (error: unknown): ConnectorCreateErro
       return 'unauthorized';
     case 409:
       return 'conflict';
+    default:
+      return 'other';
+  }
+};
+
+/** Maps the HTTP status of a failed OAuth flow start onto a connector auth error type. */
+export const getConnectorAuthInitiateErrorType = (statusCode: number): ConnectorAuthErrorType => {
+  switch (statusCode) {
+    case 400:
+    case 404:
+      return 'invalid';
+    case 401:
+    case 403:
+      return 'unauthorized';
+    case 429:
+      return 'rate_limited';
     default:
       return 'other';
   }

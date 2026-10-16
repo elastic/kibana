@@ -2134,7 +2134,7 @@ describe('Connector metrics', () => {
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
       success: false,
-      'error.type': 'other',
+      'error.type': 'auth_failed',
       'error.source': 'user',
     });
   });
