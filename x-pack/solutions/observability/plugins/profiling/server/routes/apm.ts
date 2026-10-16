@@ -16,12 +16,14 @@ import { getRoutePaths, MAX_NAME_LENGTH } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getClient } from './compat';
 import { PROFILING_API_PRIVILEGE } from '../feature';
+import { profilingSchemaParam } from './default_api_types';
 
 const querySchema = schema.object({
   timeFrom: schema.number(),
   timeTo: schema.number(),
   functionName: schema.string({ maxLength: MAX_NAME_LENGTH }),
   serviceNames: schema.arrayOf(schema.string({ maxLength: MAX_NAME_LENGTH }), { maxSize: 10 }),
+  schema: profilingSchemaParam,
 });
 
 type QuerySchemaType = TypeOf<typeof querySchema>;
@@ -63,7 +65,13 @@ export function registerTopNFunctionsAPMTransactionsRoute({
         const esClient = await getClient(context);
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
-        const { timeFrom, timeTo, functionName, serviceNames }: QuerySchemaType = request.query;
+        const {
+          timeFrom,
+          timeTo,
+          functionName,
+          serviceNames,
+          schema: profilingSchema,
+        }: QuerySchemaType = request.query;
         const startSecs = timeFrom / 1000;
         const endSecs = timeTo / 1000;
 
@@ -94,6 +102,7 @@ export function registerTopNFunctionsAPMTransactionsRoute({
               stacktraceIdsField: 'transaction.profiler_stack_trace_ids',
               limit: 1000,
               totalSeconds: endSecs - startSecs,
+              schema: profilingSchema,
             });
             const apmFunction = apmFunctions.TopN.find(
               (topNFunction) => topNFunction.Frame.FunctionName === functionName

@@ -239,12 +239,21 @@ describe('EscalationsPage', () => {
     expect(screen.getByText('Resolved threat')).toBeInTheDocument();
   });
 
-  it('shows "No escalations" when both queues are empty', () => {
+  it('shows only the explainer banner when there are no escalations at all', () => {
     mockBothQueues([], []);
     renderPage();
 
-    // Both groups render their own empty state, so there are two "No escalations" labels.
-    expect(screen.getAllByText('No escalations')).toHaveLength(2);
+    expect(screen.getByTestId('alertZeroEscalationsEmptyBanner')).toBeInTheDocument();
+    expect(screen.queryByTestId('escalationsPageHeader')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('escalationQueue-open')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('escalationQueue-closed')).not.toBeInTheDocument();
+  });
+
+  it('hides the explainer banner when any escalation exists', () => {
+    mockBothQueues([openEscalation], []);
+    renderPage();
+
+    expect(screen.queryByTestId('alertZeroEscalationsEmptyBanner')).not.toBeInTheDocument();
   });
 
   it('renders the hero header with the open-escalation count', () => {
@@ -458,5 +467,39 @@ describe('EscalationsPage', () => {
     // Both items still present exactly once — page-keyed state replaces, not appends.
     expect(screen.getByText('Suspicious login')).toBeInTheDocument();
     expect(screen.getAllByText('Page 2 escalation')).toHaveLength(1);
+  });
+
+  describe('Impact filter', () => {
+    const impactOpen = { ...openEscalation, entity_ids: ['FIN-DC-01', 'Sales-NAS'] };
+    const impactClosed = { ...closedEscalation, entity_ids: ['FIN-DC-01'] };
+
+    it('renders one pill per entity with counts across open and closed rows', () => {
+      mockBothQueues([impactOpen], [impactClosed]);
+      renderPage();
+
+      expect(screen.getByRole('button', { name: 'FIN-DC-01' })).toHaveTextContent('2');
+      expect(screen.getByRole('button', { name: 'Sales-NAS' })).toHaveTextContent('1');
+    });
+
+    it('renders no pills when no escalation has an impact', () => {
+      mockBothQueues([openEscalation], [closedEscalation]);
+      renderPage();
+
+      expect(screen.queryByText('Impact')).not.toBeInTheDocument();
+    });
+
+    it('filters both queues on click and restores them on a second click', () => {
+      mockBothQueues([impactOpen], [impactClosed]);
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Sales-NAS' }));
+      expect(screen.getByText('Suspicious login')).toBeInTheDocument();
+      expect(screen.queryByText('Resolved threat')).not.toBeInTheDocument();
+      expect(screen.getByText('No escalations match the current filter.')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Sales-NAS' }));
+      expect(screen.getByText('Suspicious login')).toBeInTheDocument();
+      expect(screen.getByText('Resolved threat')).toBeInTheDocument();
+    });
   });
 });

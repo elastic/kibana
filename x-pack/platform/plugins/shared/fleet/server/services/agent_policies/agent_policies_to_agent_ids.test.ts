@@ -8,6 +8,8 @@
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
+import { buildPolicyBaseIdsWithFallbackEsFilter } from '../../../common/services/version_specific_policies_utils';
+
 import { getAgentIdsForAgentPolicies } from './agent_policies_to_agent_ids';
 
 describe('getAgentIdsForAgentPolicies', () => {
@@ -67,5 +69,17 @@ describe('getAgentIdsForAgentPolicies', () => {
   it('should return an empty array if no agents were found', async () => {
     agents = [];
     expect(await getAgentIdsForAgentPolicies(esClientMock, agentPolicyIds)).toEqual([]);
+  });
+
+  it('should match the agents on a version specific or the sentinel policy of the agent policies', async () => {
+    await getAgentIdsForAgentPolicies(esClientMock, agentPolicyIds);
+
+    const { query } = esClientMock.search.mock.calls[0][0] as any;
+    expect(query).toEqual({
+      bool: { filter: [buildPolicyBaseIdsWithFallbackEsFilter(agentPolicyIds)] },
+    });
+    // by `policy_base_id`, so `<id>#sentinel` agents match, and not by a prefix on `policy_id`
+    expect(JSON.stringify(query)).toContain('"policy_base_id":["agent-policy-id-a"');
+    expect(JSON.stringify(query)).not.toContain('prefix');
   });
 });

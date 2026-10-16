@@ -19,7 +19,7 @@ Latest run on \`main\` was skipped (2026-09-09).
 | **Category** | UI test |
 | **File** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts) |
 | **Config** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts) |
-| **Owners** | \`elastic/obs-ux-management-team\`, \`elastic/kibana-data-discovery\`, \`elastic/other-team\` |
+| **Owners** | \`elastic/obs-signals-logs-team\`, \`elastic/kibana-data-discovery\`, \`elastic/other-team\` |
 
 ### Failures
 
@@ -102,7 +102,7 @@ exports[`renderFlakySuiteIssueBody renders a single-test suite 1`] = `
 | **Category** | UI test |
 | **File** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts) |
 | **Config** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts) |
-| **Owners** | \`elastic/obs-ux-management-team\` |
+| **Owners** | \`elastic/obs-signals-logs-team\` |
 
 ### Failures
 

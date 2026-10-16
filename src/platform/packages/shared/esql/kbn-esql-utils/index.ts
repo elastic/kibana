@@ -13,10 +13,10 @@ export {
   getESQLTimeField,
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
-  splitIndexPatternSources,
   getSourceCommandFromESQLQuery,
   getSourceCommandQueryFromESQLQuery,
   getAnySourceCommandFromESQLQuery,
+  hasAggregatingCommand,
   hasTransformationalCommand,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
@@ -93,7 +93,6 @@ export {
   resolveSourceField,
   getColumnsWithHighlights,
   buildRenameSourceFieldMap,
-  resolveViewColumnToIndexField,
   getEsqlControls,
   getAllEsqlControls,
   convertFiltersToESQLExpression,
@@ -122,6 +121,7 @@ export {
   type ESQLSourceInfo,
   type ESQLSourceInfoColumn,
   clearESQLSourceInfoCache,
+  ESQL_SOURCE_INFO_CACHE_TTL,
   buildEsqlSourceCacheKey,
 } from './src';
 
