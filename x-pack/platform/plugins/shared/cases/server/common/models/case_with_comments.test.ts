@@ -1410,8 +1410,12 @@ describe('CaseCommentModel', () => {
         ],
       });
 
-      expect(clientArgs.services.attachmentService.getter.getAttachedAttackIds).toHaveBeenCalledTimes(1);
-      expect(clientArgs.services.attachmentService.getter.getAttachedAttackIds).toHaveBeenCalledWith({
+      expect(
+        clientArgs.services.attachmentService.getter.getAttachedAttackIds
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        clientArgs.services.attachmentService.getter.getAttachedAttackIds
+      ).toHaveBeenCalledWith({
         caseId: theCase.id,
         attackIds: ['attack-id-1', 'attack-id-2'],
       });
@@ -1422,7 +1426,9 @@ describe('CaseCommentModel', () => {
         attachments: [{ id: 'comment-1', ...unifiedAlertComment }],
       });
 
-      expect(clientArgs.services.attachmentService.getter.getAttachedAttackIds).not.toHaveBeenCalled();
+      expect(
+        clientArgs.services.attachmentService.getter.getAttachedAttackIds
+      ).not.toHaveBeenCalled();
     });
   });
 
