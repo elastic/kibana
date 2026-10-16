@@ -74,11 +74,7 @@ const arrangedPanelsSchema = z
 
 /** Grid positions returned by the layout call, in the containers of the request. */
 export const layoutArrangementSchema = z.object({
-  plan: z
-    .string()
-    .describe(
-      'Written before the grids: per container, the rows you change and why, then each changed row as `w×h` per panel. Check that the widths of every row add up to 48 and that panels side by side end on the same row.'
-    ),
+  plan: z.string(),
   panels: arrangedPanelsSchema.describe('Every top-level panel.'),
   sections: z
     .array(

@@ -42,7 +42,12 @@ export const createLayoutArranger =
 
     const toolCall = response.tool_calls?.find(({ name }) => name === LAYOUT_TOOL_NAME);
     if (!toolCall) {
-      throw new Error(`The model did not call ${LAYOUT_TOOL_NAME}`);
+      const outputTokens = response.usage_metadata?.output_tokens ?? 'unknown';
+      throw new Error(
+        `The model did not call ${LAYOUT_TOOL_NAME} (output tokens: ${outputTokens}, text: ${JSON.stringify(
+          response.text.slice(0, 500)
+        )})`
+      );
     }
     return layoutArrangementSchema.parse(toolCall.args);
   };
