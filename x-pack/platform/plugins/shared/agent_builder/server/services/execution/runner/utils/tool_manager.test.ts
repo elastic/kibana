@@ -1000,4 +1000,77 @@ describe('ToolManager', () => {
       expect(content).toContain('Preview (first 10 tokens):');
     });
   });
+
+  describe('dynamic tool registry', () => {
+    it('registers tools without binding them to the model', () => {
+      const tool = createMockExecutableTool('dynamic-1');
+
+      const registered = toolManager.registerDynamicTools([tool]);
+
+      expect(registered).toEqual([tool]);
+      expect(toolManager.listDynamicTools()).toEqual([tool]);
+      expect(toolManager.getDynamicTool('dynamic-1')).toBe(tool);
+      expect(toolManager.list()).toEqual([]);
+      expect(toolManager.getDynamicToolIds()).toEqual([]);
+    });
+
+    it('skips ids already bound natively and returns only what it registered', async () => {
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: createMockExecutableTool('native-1'),
+        logger: mockLogger,
+      });
+      const shadowed = createMockExecutableTool('native-1', 'dynamic copy');
+      const dynamic = createMockExecutableTool('dynamic-1');
+
+      const registered = toolManager.registerDynamicTools([shadowed, dynamic]);
+
+      expect(registered).toEqual([dynamic]);
+      expect(toolManager.getDynamicTool('native-1')).toBeUndefined();
+      expect(toolManager.getExecutable('native-1')?.description).toBe('Test tool');
+    });
+
+    it('replaces a dynamic tool registered again under the same id', () => {
+      toolManager.registerDynamicTools([createMockExecutableTool('dynamic-1', 'first')]);
+      const second = createMockExecutableTool('dynamic-1', 'second');
+
+      toolManager.registerDynamicTools([second]);
+
+      expect(toolManager.listDynamicTools()).toEqual([second]);
+    });
+
+    it('resolves executable, meta and summarizer from the registry when not bound natively', () => {
+      const summarizer = jest.fn();
+      const tool = {
+        ...createMockExecutableTool('dynamic-1', 'Dynamic', ToolOrigin.inline),
+        summarizeToolReturn: summarizer,
+      };
+      toolManager.registerDynamicTools([tool]);
+
+      expect(toolManager.getExecutable('dynamic-1')).toBe(tool);
+      expect(toolManager.getToolMeta('dynamic-1')).toEqual({
+        origin: ToolOrigin.inline,
+        type: 'builtin',
+      });
+      expect(toolManager.getSummarizer('dynamic-1')).toBe(summarizer);
+    });
+
+    it('resolves natively bound tools before the registry', async () => {
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: createMockExecutableTool('tool-1', 'Native', ToolOrigin.internal),
+        logger: mockLogger,
+      });
+
+      expect(toolManager.getExecutable('tool-1')?.description).toBe('Native');
+      expect(toolManager.getToolMeta('tool-1').origin).toBe(ToolOrigin.internal);
+      expect(toolManager.getDynamicTool('tool-1')).toBeUndefined();
+    });
+
+    it('returns undefined meta and executable for unknown ids', () => {
+      expect(toolManager.getExecutable('unknown')).toBeUndefined();
+      expect(toolManager.getToolMeta('unknown')).toEqual({ origin: undefined, type: undefined });
+      expect(toolManager.getSummarizer('unknown')).toBeUndefined();
+    });
+  });
 });
