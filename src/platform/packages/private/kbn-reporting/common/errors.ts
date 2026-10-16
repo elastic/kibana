@@ -168,8 +168,8 @@ export class ReportingSavedObjectNotFoundError extends ReportingError {
 }
 
 /**
- * How the reporting task responds to a page-render-service failure (serverless). The service has
- * no queue, so retrying is the caller's job: see `render_retry.ts` in the reporting plugin.
+ * How the reporting task responds to a page-render-service failure. The service has no queue, so
+ * the caller retries (`render_retry.ts` in the reporting plugin).
  *
  * - `capacity`: no render slot came free within this run's wait budget; hand the worker back.
  * - `unavailable`: the service could not be reached, or something in front of it failed.
@@ -232,7 +232,7 @@ export class RenderRequestRejectedError extends RenderServiceError {
   }
 }
 
-/** The rendering service stayed at capacity until the report's time ran out. */
+/** Still no render capacity 10 minutes after the report was created. */
 export class RenderCapacityTimeoutError extends RenderServiceError {
   static code = 'render_capacity_timeout_error' as const;
   public get code(): string {

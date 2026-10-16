@@ -9,30 +9,28 @@ import type { RenderServiceRetryClass } from '@kbn/reporting-common';
 import type { RenderPageErrorBody } from './types';
 
 /**
- * The in-run half of the retry ladder (#754). page-render-service has no queue: a saturated pod
- * answers 429 at once, and the caller decides when to try again. This module owns that schedule;
- * the reporting task owns what happens between runs (`render_retry.ts` in the reporting plugin).
- * Delete both when the service gets a queue.
+ * The in-run half of the retry ladder: page-render-service has no queue, so a saturated pod
+ * answers 429 at once and the caller paces retries. The between-runs half is `render_retry.ts` in
+ * the reporting plugin. Delete both when the service gets a queue.
  */
 
-/** Retry interval while a report is young. */
 export const FAST_RETRY_INTERVAL_MS = 2_000;
-/** Retry interval once a report has clearly been waiting on saturation: a fifth of the load. */
+/** A fifth of the fast interval's load on a saturated service. */
 export const SLOW_RETRY_INTERVAL_MS = 10_000;
-/** Report age after which the slow interval applies. */
+/** Report age, across task runs, at which retries slow down. */
 export const SLOW_AFTER_MS = 4 * 60_000;
-/** Report age at which waiting for capacity gives up. Measured from creation, not per run. */
+/** Report age, across task runs, at which waiting gives up. */
 export const GIVE_UP_AFTER_MS = 10 * 60_000;
-/** Longest one task run waits for capacity before handing its worker back to Task Manager. */
+/** After this, the run hands its worker back to Task Manager. */
 export const MAX_WAIT_PER_RUN_MS = 60_000;
-/** Time a run keeps clear for the render itself: the service's 180s delivery target. */
+/** Kept clear for the render: the service's 180s delivery target. */
 export const RENDER_RESERVE_MS = 180_000;
 
 /** The service's own 429 and 503 carry this, so they can be told from a proxy's. */
 export const REJECTION_HEADER = 'x-page-render-service-rejection';
-/** Sent on every request: what a refusal will cost this report, for the service's busy signal. */
+/** Tells the service what a refusal costs this report, for its busy signal. */
 export const RETRY_INTERVAL_HEADER = 'x-render-retry-interval-ms';
-/** Sent on every request: ties the service's logs and trace to the report across its retries. */
+/** Ties the service's logs and traces to the report across retries. */
 export const REPORT_ID_HEADER = 'x-report-id';
 
 export function retryIntervalMs(reportAgeMs: number): number {
@@ -44,10 +42,7 @@ export function jitter(ms: number, random: () => number = Math.random): number {
   return Math.round(ms * (0.5 + random()));
 }
 
-/**
- * When this run stops waiting for capacity: after `MAX_WAIT_PER_RUN_MS`, or earlier if the run's
- * deadline would not leave room for the render.
- */
+/** Capped so the run's deadline still leaves room for the render. */
 export function stopWaitingAt(runStartedAt: number, deadline: number | undefined): number {
   const budgetEnd = runStartedAt + MAX_WAIT_PER_RUN_MS;
   return deadline === undefined ? budgetEnd : Math.min(budgetEnd, deadline - RENDER_RESERVE_MS);

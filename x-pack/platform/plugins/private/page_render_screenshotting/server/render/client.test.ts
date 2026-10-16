@@ -283,7 +283,7 @@ describe('renderPage', () => {
     it('waits less when the task deadline would not leave room for the render', async () => {
       fetchMock.mockImplementation(async () => saturated());
 
-      // The 4m default queue timeout: 225s to the deadline, less 180s for the render.
+      // A 4m queue timeout: 225s to the deadline, less 180s for the render.
       const result = start({ ...reportAged(0), retryAt: new Date(NOW + 4 * MINUTE) });
       await jest.advanceTimersByTimeAsync(45_000);
 

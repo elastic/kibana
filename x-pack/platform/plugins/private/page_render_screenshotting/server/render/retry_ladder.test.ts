@@ -72,7 +72,7 @@ describe('stopWaitingAt', () => {
   });
 
   it('keeps room for the render before the deadline', () => {
-    // The 4m queue timeout, less the client's 15s margin.
+    // A 4m queue timeout, less the client's 15s margin.
     expect(stopWaitingAt(start, start + 225_000)).toBe(start + 225_000 - RENDER_RESERVE_MS);
   });
 });

@@ -525,7 +525,6 @@ describe('Run Single Report Task', () => {
     });
   });
 
-  /** Waiting for page-render-service capacity is not an attempt (#754). */
   it('claims a report after a capacity hand-back without counting a new attempt', async () => {
     mockReporting.getExportTypesRegistry().register({
       id: 'test1',
@@ -1141,7 +1140,6 @@ describe('Run Single Report Task', () => {
       })
     );
   });
-  /** The between-runs half of the retry ladder for page-render-service (#754). */
   describe('page-render-service retries', () => {
     const CREATED_AT = '2026-10-14T12:00:00.000Z';
 

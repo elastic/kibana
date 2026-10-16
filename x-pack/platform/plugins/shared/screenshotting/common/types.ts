@@ -37,6 +37,6 @@ export interface PerformanceMetrics {
  * which determine the maximum timeouts possible
  */
 export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'retryAt' | 'startedAt'> & {
-  /** The report the capture is for. The remote renderer retries against its age, not the run's. */
+  /** page-render-service retries are timed from the report's creation, not the run's start. */
   report?: { id: string; createdAt: Date };
 };

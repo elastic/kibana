@@ -90,7 +90,7 @@ export interface BasePayload extends BaseParams {
  * Timestamp metrics about the task lifecycle
  */
 export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'startedAt' | 'retryAt'> & {
-  /** The report the run is for. The remote renderer retries against its age, not the run's. */
+  /** page-render-service retries are timed from the report's creation, not the run's start. */
   report?: { id: string; createdAt: Date };
 };
 

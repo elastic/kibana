@@ -36,11 +36,10 @@ export interface PageRenderServiceConfig {
   dispatcher?: Dispatcher;
 }
 
-/** What the render is for, from the reporting task. */
 export interface RenderContext {
   /** When Task Manager times this run out. */
   retryAt?: Date | null;
-  /** The report being rendered. Its age drives the retry ladder, and its ID goes to the service. */
+  /** Its age drives the retry ladder; its ID goes to the service. */
   report?: { id: string; createdAt: Date };
 }
 
@@ -125,7 +124,6 @@ async function postWithRetry(
   const runStartedAt = Date.now();
   const deadline = retryAt ? retryAt.getTime() - DEADLINE_SAFETY_MARGIN_MS : undefined;
   const waitUntil = stopWaitingAt(runStartedAt, deadline);
-  // Without a report, the ladder runs from the start of this call.
   const createdAt = report?.createdAt.getTime() ?? runStartedAt;
   const tags = report ? [report.id] : [];
 

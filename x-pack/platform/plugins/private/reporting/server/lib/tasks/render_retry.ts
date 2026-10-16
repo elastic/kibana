@@ -9,19 +9,17 @@ import { RenderCapacityTimeoutError, RenderServiceError } from '@kbn/reporting-c
 import type { RenderRetryAction, RenderRetryReason } from './reporting_telemetry';
 
 /**
- * The between-runs half of the retry ladder (#754) for page-render-service, which has no queue.
- * The in-run half — waiting out 429s, and giving up once a report has waited 10 minutes — is in
- * the page-render-screenshotting plugin's `retry_ladder.ts`. Delete both when the service gets a
+ * The between-runs half of the page-render-service retry ladder. The in-run half is
+ * `retry_ladder.ts` in the page-render-screenshotting plugin. Delete both when the service gets a
  * queue.
  *
- * Every reschedule is returned to Task Manager as a successful run with a `runAt`, not thrown:
- * a thrown error spends one of the task's attempts, and waiting for capacity can take ten runs.
- * Counts that must survive a reschedule live in the task's state.
+ * Reschedules return `{ runAt, state }` as a successful run rather than throwing: a thrown error
+ * spends one of the task's attempts, and waiting for capacity can take ten runs.
  */
 
 /** Runs allowed per failure class, counting the first. */
 export const MAX_RENDER_RUNS = { unavailable: 4, render_failure: 3 } as const;
-/** Pause before running again after the service failed or could not be reached. */
+/** Before rerunning after an `unavailable` or `render_failure` error. */
 export const RESCHEDULE_DELAY_MS = 10_000;
 
 type CountedClass = keyof typeof MAX_RENDER_RUNS;
@@ -47,10 +45,7 @@ const REASONS: Record<CountedClass, RenderRetryReason> = {
   render_failure: 'render_failure',
 };
 
-/**
- * What to do about a failed run. Undefined when the error did not come from page-render-service,
- * which leaves it to reporting's usual handling.
- */
+/** Undefined for errors not from page-render-service, which keep reporting's usual handling. */
 export function decideRenderRetry(
   error: unknown,
   state: RenderRetryState | undefined,

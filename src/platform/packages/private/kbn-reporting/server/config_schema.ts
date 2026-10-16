@@ -44,8 +44,8 @@ const QueueSchema = schema.object({
   }),
   pollIntervalErrorMultiplier: schema.number({ defaultValue: 10 }),
   timeout: offeringBasedSchema({
-    // One serverless task run waits up to 60s for a page-render-service slot, then renders (180s
-    // target), then streams the result. 5m leaves room for all three; at 4m the wait budget shrinks.
+    // A run may wait 60s for page-render-service capacity, then needs 180s to render. At 4m, the
+    // wait budget shrinks.
     serverless: schema.oneOf([schema.number(), schema.duration()], {
       defaultValue: moment.duration({ minutes: 5 }),
     }),

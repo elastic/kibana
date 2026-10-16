@@ -7,7 +7,7 @@
 
 import { type Attributes, type Histogram, metrics, ValueType } from '@opentelemetry/api';
 
-/** Up to and past the 10-minute ceiling on waiting, with the ladder's step points as boundaries. */
+/** The ladder's step points (60s, 240s, 600s) are boundaries. */
 const CAPACITY_WAIT_SECONDS_BUCKETS = [1, 2.5, 5, 10, 30, 60, 120, 180, 240, 300, 420, 600, 900];
 
 class PageRenderTelemetry {

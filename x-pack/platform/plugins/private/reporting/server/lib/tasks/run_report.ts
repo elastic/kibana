@@ -156,9 +156,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   protected abstract getMaxAttempts(): MaxAttempts;
 
   /**
-   * Whether a failed page-render-service request may reschedule this task or fail it for good
-   * (`render_retry.ts`). Off by default: rescheduling a recurring task re-runs its schedule, and
-   * an unrecoverable error deletes it.
+   * Lets `render_retry.ts` reschedule or fail this task. Off by default: rescheduling a recurring
+   * task re-runs its schedule, and an unrecoverable error deletes it.
    */
   protected readonly reschedulesRenderRetries: boolean = false;
 
@@ -769,8 +768,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
             }
 
             if (renderRetry?.action === 'hand_back') {
-              // Waiting for capacity is not a failure: leave the report processing, record no
-              // error, and free the worker for the next run.
+              // Not a failure: the report stays processing, and the next run waits again.
               cancellationToken?.cancel();
               this.logger.info(
                 `Job ${jobId} is waiting for render capacity and will run again: ${failedToExecuteErr.message}`,
@@ -823,7 +821,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               return { runAt: renderRetry.runAt, state: renderRetry.state };
             }
             if (renderRetry?.action === 'fail') {
-              // Stops Task Manager without spending the rest of the task's attempts.
+              // Ends the task now instead of spending its remaining attempts.
               throwUnrecoverableError(failedToExecuteErr);
             }
 
