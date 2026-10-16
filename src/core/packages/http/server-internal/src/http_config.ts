@@ -21,8 +21,9 @@ import type { HttpProtocol, ICspConfig, IExternalUrlConfig } from '@kbn/core-htt
 import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import type { HandlerResolutionStrategy } from '@kbn/core-http-router-server-internal';
 import { get } from 'lodash';
+import type { BuildFlavor } from '@kbn/config';
 import type { CspConfigType } from './csp';
-import { CspConfig } from './csp';
+import { CspConfig, getBuildFlavorCspConfig } from './csp';
 import type { ExternalUrlConfig } from './external_url';
 import {
   parseRawSecurityResponseHeadersConfig,
@@ -463,7 +464,8 @@ export class HttpConfig implements IHttpConfig {
     rawHttpConfig: HttpConfigType,
     rawCspConfig: CspConfigType,
     rawExternalUrlConfig: ExternalUrlConfig,
-    rawPermissionsPolicyConfig: PermissionsPolicyConfigType
+    rawPermissionsPolicyConfig: PermissionsPolicyConfigType,
+    buildFlavor: BuildFlavor = 'traditional'
   ) {
     this.autoListen = rawHttpConfig.autoListen;
     this.host = rawHttpConfig.host;
@@ -505,7 +507,11 @@ export class HttpConfig implements IHttpConfig {
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
     this.cdn = CdnConfig.from(rawHttpConfig.cdn);
-    this.csp = new CspConfig({ ...rawCspConfig, disableEmbedding }, this.cdn.getCspConfig());
+    this.csp = new CspConfig(
+      { ...rawCspConfig, disableEmbedding },
+      this.cdn.getCspConfig(),
+      getBuildFlavorCspConfig(buildFlavor)
+    );
     this.prototypeHardening = rawHttpConfig.prototypeHardening;
     this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;
