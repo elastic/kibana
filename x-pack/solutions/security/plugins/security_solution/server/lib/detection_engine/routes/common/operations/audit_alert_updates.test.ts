@@ -8,6 +8,7 @@
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 
 import {
+  auditAlertUpdateAuthorizationFailure,
   auditAlertUpdateFailure,
   auditAlertUpdateIntent,
   auditAlertUpdateResponseFailure,
@@ -18,6 +19,19 @@ import {
 describe('auditAlertUpdates', () => {
   const ids = ['alert-1', 'alert-2'];
   const query = { term: { foo: 'bar' } };
+
+  it('logs authorization denials as bulk alert_update failures', () => {
+    const auditLogger = auditLoggerMock.create();
+
+    auditAlertUpdateAuthorizationFailure(auditLogger);
+
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'Failed attempt to update alerts because required privileges were not granted',
+        event: expect.objectContaining({ action: 'alert_update', outcome: 'failure' }),
+      })
+    );
+  });
 
   describe('auditAlertUpdateIntent', () => {
     it('logs one alert_update event per id with outcome unknown', () => {

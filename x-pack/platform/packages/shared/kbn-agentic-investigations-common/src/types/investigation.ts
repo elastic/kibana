@@ -25,8 +25,10 @@ export interface Investigation {
   title: string;
   /** ISO 8601 timestamp */
   createdAt: string;
-  /** ISO 8601 timestamp */
-  updatedAt: string;
+  /** ISO 8601 timestamp. Set when the investigation is a proposal. */
+  proposalCreatedAt?: string;
+  /** ISO 8601 timestamp. Set once a proposal is decided; dates the closed rows. */
+  proposalDecidedAt?: string;
   worker_execution_ids: string[];
   watch_tier?: string;
   severity?: string;
