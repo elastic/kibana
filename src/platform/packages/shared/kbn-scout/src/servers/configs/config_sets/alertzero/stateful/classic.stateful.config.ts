@@ -30,6 +30,10 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
  *   `endpoint-forensic-analysis` Agent Builder skill is registered, and the forensics workflow
  *   that proposes Isolate runs that skill. The Defend endpoint package is not preinstalled: the
  *   isolation spec installs it while seeding hosts (`indexHostsAndAlerts`).
+ * - the `investigateRuleSkill` securitySolution experimental feature. The rule tuning review runs the
+ *   `investigate-rule` Agent Builder skill, whose `get_alerts_by_ids` tool is how the agent reads the
+ *   harvested false positives. With the skill unregistered the agent has no alert retrieval tool and
+ *   the review ends in a no-action proposal instead of a tuning proposal.
  * - the Workflows UI, `ai.agent` workflow steps and Agent Builder experimental features the
  *   Attack Discovery review and forensics workflows rely on.
  *
@@ -51,7 +55,7 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
 const pinnedConnectorId = process.env.ALERTZERO_E2E_AI_CONNECTOR?.trim();
 
 const ENABLE_EXPERIMENTAL_ARG = '--xpack.securitySolution.enableExperimental=';
-const REQUIRED_EXPERIMENTAL_FEATURES = ['endpointForensicAnalysisSkill'];
+const REQUIRED_EXPERIMENTAL_FEATURES = ['endpointForensicAnalysisSkill', 'investigateRuleSkill'];
 
 /**
  * Kibana reads a single `enableExperimental` value, so a value already set by a base config set
