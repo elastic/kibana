@@ -34,6 +34,7 @@ import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import { escalationToQueueItem } from './escalation_to_queue_item';
 import { ESCALATIONS_PAGE_INFO } from './translations';
+import { EscalationsOpenNote } from './escalations_open_note';
 import { EscalationsEmptyBanner } from './escalations_empty_banner';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
 
@@ -213,6 +214,7 @@ export const EscalationsPage: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EscalationQueue
                 status="open"
+                note={<EscalationsOpenNote isEmpty={openQuery.data?.pagination.total === 0} />}
                 escalations={visibleOpenItems}
                 loadedCount={openItems.length}
                 isFiltered={Boolean(entityFilter)}

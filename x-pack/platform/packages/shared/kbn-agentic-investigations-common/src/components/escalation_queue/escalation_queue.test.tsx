@@ -88,6 +88,19 @@ describe('EscalationQueue', () => {
     expect(screen.getByText('No escalations')).toBeInTheDocument();
   });
 
+  it('replaces "No escalations" with the note when the list is empty', () => {
+    renderWithKibanaRenderContext(
+      <EscalationQueue
+        status="open"
+        escalations={[]}
+        note="About escalations"
+        renderAssignees={() => <span />}
+      />
+    );
+    expect(screen.queryByText('No escalations')).not.toBeInTheDocument();
+    expect(screen.getByTestId('escalationQueueNote-open')).toHaveTextContent('About escalations');
+  });
+
   it('shows 0 in the count badge for an empty list', () => {
     renderQueue('closed', []);
     expect(screen.getByText('0')).toBeInTheDocument();
