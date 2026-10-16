@@ -1,0 +1,46 @@
+name: Check backport gaps
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Release branch to check, for example 9.5
+        required: false
+        type: string
+      since_days:
+        description: How many days of merged backport pull requests to scan
+        required: false
+        default: '180'
+        type: string
+      dry_run:
+        description: Log gaps without commenting
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  check-backport-gaps:
+    name: Check backport gaps
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Actions
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: elastic/kibana-github-actions
+          ref: main
+          path: ./actions
+          persist-credentials: false
+
+      - name: Install Actions
+        run: npm install --production --prefix ./actions
+
+      - name: Check backport gaps
+        uses: ./actions/check-backport-gaps
+        with:
+          github_token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          branch: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch || '' }}
+          tag: ${{ github.event.release.tag_name || '' }}
+          since_days: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.since_days || '180' }}
+          dry_run: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run || 'false' }}
