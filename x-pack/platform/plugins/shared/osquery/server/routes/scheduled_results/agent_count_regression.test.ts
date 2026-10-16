@@ -137,6 +137,7 @@ describe('scheduled execution details — agent count regression (InfoSec 200k r
     const httpService = httpServiceMock.createSetupContract();
     const mockRouter = httpService.createRouter();
     const mockOsqueryContext = {
+      isCpsActive: jest.fn().mockResolvedValue(false),
       service: { getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }) },
     } as unknown as OsqueryAppContext;
 

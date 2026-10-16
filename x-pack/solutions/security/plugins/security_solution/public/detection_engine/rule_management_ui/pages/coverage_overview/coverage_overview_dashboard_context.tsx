@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useReducer,
-} from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useReducer } from 'react';
 import { invariant } from '../../../../../common/utils/invariant';
 import {
   BulkActionTypeEnum,
@@ -59,18 +52,15 @@ export const initialState: CoverageOverviewDashboardState = {
   },
   data: undefined,
   isLoading: false,
+  isMitreError: false,
 };
 
 export const CoverageOverviewDashboardContextProvider = ({
   children,
 }: CoverageOverviewDashboardContextProviderProps) => {
   const [state, dispatch] = useReducer(createCoverageOverviewDashboardReducer(), initialState);
-  const { data, isLoading, refetch } = useFetchCoverageOverviewQuery(state.filter);
+  const { data, isLoading, isMitreError, refetch } = useFetchCoverageOverviewQuery(state.filter);
   const { executeBulkAction } = useExecuteBulkAction();
-
-  useEffect(() => {
-    refetch();
-  }, [refetch, state.filter]);
 
   const setShowExpandedCells = useCallback(
     (value: boolean): void => {
@@ -140,10 +130,10 @@ export const CoverageOverviewDashboardContextProvider = ({
 
   const providerValue = useMemo<CoverageOverviewDashboardContextType>(() => {
     return {
-      state: { ...state, isLoading, data },
+      state: { ...state, isLoading, isMitreError, data },
       actions,
     };
-  }, [actions, data, isLoading, state]);
+  }, [actions, data, isLoading, isMitreError, state]);
 
   return (
     <CoverageOverviewDashboardContext.Provider value={providerValue}>

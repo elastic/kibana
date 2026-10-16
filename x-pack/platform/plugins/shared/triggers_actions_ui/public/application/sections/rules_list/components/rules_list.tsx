@@ -40,6 +40,7 @@ import {
   getCreateRuleRoute,
   getCreateRuleFromTemplateRoute,
   getEditRuleRoute,
+  getTriggersActionsManagementPath,
 } from '@kbn/rule-data-utils';
 import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import type {
@@ -127,6 +128,7 @@ export interface RulesListProps {
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
   navigateToEditRuleForm?: (ruleId: string) => void;
   navigateToCreateRuleForm?: (ruleTypeId: string) => void;
+  navigateToCreateRuleFromTemplateForm?: (templateId: string) => void;
 }
 
 export const percentileFields = {
@@ -169,6 +171,7 @@ export const RulesList = ({
   onRefresh,
   navigateToEditRuleForm,
   navigateToCreateRuleForm,
+  navigateToCreateRuleFromTemplateForm,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
@@ -314,7 +317,7 @@ export const RulesList = ({
     }
 
     navigateToApp('management', {
-      path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
+      path: getTriggersActionsManagementPath(getEditRuleRoute(ruleItem.id)),
       state: {
         returnApp: 'management',
         returnPath: `insightsAndAlerting/triggersActions/rules`,
@@ -897,6 +900,7 @@ export const RulesList = ({
             <RulesListTable
               items={tableItems}
               isLoading={isRulesTableLoading}
+              ruleDetailsRoute={ruleDetailsRoute}
               rulesState={rulesState}
               ruleTypesState={ruleTypesState}
               ruleTypeRegistry={ruleTypeRegistry}
@@ -1045,18 +1049,20 @@ export const RulesList = ({
                 navigateToCreateRuleForm(ruleTypeId);
               } else {
                 navigateToApp('management', {
-                  path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+                  path: getTriggersActionsManagementPath(getCreateRuleRoute(ruleTypeId)),
                 });
               }
             }}
             onSelectTemplate={(templateId) => {
-              // For templates, we need to extract the ruleTypeId or handle it differently
-              // For now, fall back to default behavior
-              navigateToApp('management', {
-                path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
-                  encodeURIComponent(templateId)
-                )}`,
-              });
+              if (navigateToCreateRuleFromTemplateForm) {
+                navigateToCreateRuleFromTemplateForm(templateId);
+              } else {
+                navigateToApp('management', {
+                  path: getTriggersActionsManagementPath(
+                    getCreateRuleFromTemplateRoute(encodeURIComponent(templateId))
+                  ),
+                });
+              }
             }}
             http={http}
             toasts={toasts}

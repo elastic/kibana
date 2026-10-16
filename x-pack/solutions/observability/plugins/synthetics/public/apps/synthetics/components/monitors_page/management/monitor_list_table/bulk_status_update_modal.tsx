@@ -8,13 +8,13 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiAccordion,
-  EuiCallOut,
   EuiConfirmModal,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 import { useCanUsePublicLocationsPermission } from '../../../../../../hooks/use_capabilities';
@@ -140,27 +140,21 @@ export const BulkStatusUpdateModal = ({
       {skippedMonitors.length > 0 && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
-            color="warning"
-            iconType="warning"
+          <KbnWarningCallout
             announceOnMount={false}
             title={i18n.translate('xpack.synthetics.bulkStatusUpdateModal.skippedWarning.title', {
               defaultMessage:
                 '{count, plural, one {# monitor} other {# monitors}} will not be updated',
               values: { count: skippedMonitors.length },
             })}
+            text={i18n.translate(
+              'xpack.synthetics.bulkStatusUpdateModal.skippedWarning.description',
+              {
+                defaultMessage:
+                  'Monitors using Elastic managed locations require additional permissions to enable or disable.',
+              }
+            )}
           >
-            <EuiText size="s">
-              <p>
-                {i18n.translate(
-                  'xpack.synthetics.bulkStatusUpdateModal.skippedWarning.description',
-                  {
-                    defaultMessage:
-                      'Monitors using Elastic managed locations require additional permissions to enable or disable.',
-                  }
-                )}
-              </p>
-            </EuiText>
             <EuiAccordion
               id={skippedAccordionId}
               buttonContent={i18n.translate(
@@ -177,7 +171,7 @@ export const BulkStatusUpdateModal = ({
                 </ul>
               </EuiText>
             </EuiAccordion>
-          </EuiCallOut>
+          </KbnWarningCallout>
         </>
       )}
     </EuiConfirmModal>

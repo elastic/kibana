@@ -8,7 +8,6 @@
 import type { KueryNode } from '@kbn/es-query';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { Case, CaseStatuses } from '../../../common/types/domain';
-import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
 import type { IndexRefresh } from '../types';
 import type { User } from '../../common/types/user';
 import type {
@@ -53,13 +52,11 @@ export interface GetCasesArgs {
 export interface FindCommentsArgs {
   id: string | string[];
   options?: SavedObjectFindOptionsKueryNode;
-  mode?: AttachmentMode;
 }
 
 export interface FindCaseCommentsArgs {
   id: string | string[];
   options?: SavedObjectFindOptionsKueryNode;
-  mode?: AttachmentMode;
 }
 
 export interface CreateCaseArgs extends IndexRefresh {

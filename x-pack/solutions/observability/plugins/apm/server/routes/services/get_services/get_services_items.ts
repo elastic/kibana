@@ -40,6 +40,7 @@ export async function getServicesItems({
   rollupInterval,
   useDurationSummary,
   searchQuery,
+  maxNumServices = MAX_NUMBER_OF_SERVICES,
 }: {
   environment: string;
   kuery: string;
@@ -56,12 +57,13 @@ export async function getServicesItems({
   rollupInterval: RollupInterval;
   useDurationSummary: boolean;
   searchQuery?: string;
+  maxNumServices?: number;
 }): Promise<ServicesItemsResponse> {
   return withApmSpan('get_services_items', async () => {
     const commonParams = {
       environment,
       kuery,
-      maxNumServices: MAX_NUMBER_OF_SERVICES,
+      maxNumServices,
       start,
       end,
       serviceGroup,

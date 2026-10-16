@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import { v4 as uuidv4 } from 'uuid';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
@@ -44,11 +43,11 @@ export interface EventRule {
  * {@link RuleWorkflowSubscriber} maps them to workflow triggers.
  */
 export interface RuleEventPublisherContract {
-  emitRuleCreated(request: KibanaRequest, rules: EventRule[]): void;
-  emitRuleUpdated(request: KibanaRequest, rules: EventRule[]): void;
-  emitRuleDeleted(request: KibanaRequest, rules: EventRule[]): void;
-  emitRuleEnabled(request: KibanaRequest, rules: EventRule[]): void;
-  emitRuleDisabled(request: KibanaRequest, rules: EventRule[]): void;
+  emitRuleCreated(context: AlertingPublisherContext, rules: EventRule[]): void;
+  emitRuleUpdated(context: AlertingPublisherContext, rules: EventRule[]): void;
+  emitRuleDeleted(context: AlertingPublisherContext, rules: EventRule[]): void;
+  emitRuleEnabled(context: AlertingPublisherContext, rules: EventRule[]): void;
+  emitRuleDisabled(context: AlertingPublisherContext, rules: EventRule[]): void;
 }
 
 /**
@@ -65,34 +64,34 @@ export class RuleEventPublisher implements RuleEventPublisherContract {
     private readonly eventBus: EventBus<AlertingDomainEvent, AlertingPublisherContext>
   ) {}
 
-  public emitRuleCreated(request: KibanaRequest, rules: EventRule[]): void {
-    this.publishForRules(request, RULE_CREATED_EVENT_TYPE, rules);
+  public emitRuleCreated(context: AlertingPublisherContext, rules: EventRule[]): void {
+    this.publishForRules(context, RULE_CREATED_EVENT_TYPE, rules);
   }
 
-  public emitRuleUpdated(request: KibanaRequest, rules: EventRule[]): void {
-    this.publishForRules(request, RULE_UPDATED_EVENT_TYPE, rules);
+  public emitRuleUpdated(context: AlertingPublisherContext, rules: EventRule[]): void {
+    this.publishForRules(context, RULE_UPDATED_EVENT_TYPE, rules);
   }
 
-  public emitRuleDeleted(request: KibanaRequest, rules: EventRule[]): void {
-    this.publishForRules(request, RULE_DELETED_EVENT_TYPE, rules);
+  public emitRuleDeleted(context: AlertingPublisherContext, rules: EventRule[]): void {
+    this.publishForRules(context, RULE_DELETED_EVENT_TYPE, rules);
   }
 
-  public emitRuleEnabled(request: KibanaRequest, rules: EventRule[]): void {
-    this.publishForRules(request, RULE_ENABLED_EVENT_TYPE, rules);
+  public emitRuleEnabled(context: AlertingPublisherContext, rules: EventRule[]): void {
+    this.publishForRules(context, RULE_ENABLED_EVENT_TYPE, rules);
   }
 
-  public emitRuleDisabled(request: KibanaRequest, rules: EventRule[]): void {
-    this.publishForRules(request, RULE_DISABLED_EVENT_TYPE, rules);
+  public emitRuleDisabled(context: AlertingPublisherContext, rules: EventRule[]): void {
+    this.publishForRules(context, RULE_DISABLED_EVENT_TYPE, rules);
   }
 
   private publishForRules(
-    request: KibanaRequest,
+    context: AlertingPublisherContext,
     eventType: RuleEvent['type'],
     rules: EventRule[]
   ): void {
     const correlationId = rules.length > 1 ? uuidv4() : undefined;
     for (const rule of rules) {
-      this.publish(request, {
+      this.publish(context, {
         type: eventType,
         payload: this.toEventPayload(rule, correlationId),
       });
@@ -109,7 +108,7 @@ export class RuleEventPublisher implements RuleEventPublisherContract {
     };
   }
 
-  private publish(request: KibanaRequest, event: RuleEvent): void {
-    this.eventBus.publish(event, { request });
+  private publish(context: AlertingPublisherContext, event: RuleEvent): void {
+    this.eventBus.publish(event, context);
   }
 }

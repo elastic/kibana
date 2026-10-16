@@ -136,10 +136,13 @@ export type DeviceControlOSes = KeysByValueCriteria<
   { device_control?: DeviceControlFields }
 >;
 
-/** Returns an array of the policy OSes that have a ransomware protection field */
+/**
+ * Returns an array of the policy OSes that have a ransomware protection field. The criteria field
+ * is optional so that Linux, where the field is optional, is included.
+ */
 export type RansomwareProtectionOSes = KeysByValueCriteria<
   UIPolicyConfig,
-  { ransomware: ProtectionFields }
+  { ransomware?: ProtectionFields }
 >;
 
 export type PolicyProtection =
@@ -153,9 +156,15 @@ export type PolicyProtection =
     >
   | keyof Pick<UIPolicyConfig['linux'], 'malware' | 'behavior_protection' | 'memory_protection'>;
 
-export type MacPolicyProtection = keyof Pick<UIPolicyConfig['mac'], 'malware' | 'ransomware'>;
+export type MacPolicyProtection = keyof Pick<
+  UIPolicyConfig['mac'],
+  'malware' | 'ransomware' | 'behavior_protection' | 'memory_protection'
+>;
 
-export type LinuxPolicyProtection = keyof Pick<UIPolicyConfig['linux'], 'malware'>;
+export type LinuxPolicyProtection = keyof Pick<
+  UIPolicyConfig['linux'],
+  'malware' | 'ransomware' | 'behavior_protection' | 'memory_protection'
+>;
 
 export interface GetPolicyListResponse extends GetPackagePoliciesResponse {
   items: PolicyData[];

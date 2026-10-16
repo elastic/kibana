@@ -25,24 +25,20 @@ import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { CPSServerSetup } from '@kbn/cps/server';
+import type { CPSServerStart } from '@kbn/cps/server';
 import type { createActionService } from './handlers/action/create_action_service';
 
 export interface CheckResponseActionAuthzParams {
   saved_query_id?: string;
   pack_id?: string;
+  query?: string;
+  queries?: Array<{ query?: string }>;
+  ecs_mapping?: Record<string, unknown>;
 }
 
 export interface OsqueryPluginSetup {
   createActionService: ReturnType<typeof createActionService>;
-  /**
-   * Validates that the requesting user has the required osquery privileges
-   * for the given response action configuration.
-   * Throws a 403 CustomHttpRequestError if the user lacks authorization.
-   *
-   * Used by security_solution when creating/updating detection rules
-   * that include osquery response actions.
-   */
+  /** Throws 403 if the request is not authorized for the given osquery response action. */
   checkResponseActionAuthz: (
     request: KibanaRequest,
     actionParams: CheckResponseActionAuthzParams
@@ -62,7 +58,6 @@ export interface SetupPlugins {
   telemetry?: TelemetryPluginSetup;
   licensing: LicensingPluginSetup;
   spaces?: SpacesPluginSetup;
-  cps?: CPSServerSetup;
 }
 
 export interface StartPlugins {
@@ -75,4 +70,5 @@ export interface StartPlugins {
   telemetry?: TelemetryPluginStart;
   ruleRegistry?: RuleRegistryPluginStartContract;
   spaces?: SpacesPluginStart;
+  cps?: CPSServerStart;
 }

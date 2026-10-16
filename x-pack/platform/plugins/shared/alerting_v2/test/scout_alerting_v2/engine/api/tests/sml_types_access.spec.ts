@@ -6,8 +6,8 @@
  */
 
 import { randomUUID } from 'crypto';
-import { apiTest, tags } from '@kbn/scout';
-import type { ApiClientFixture, KbnClient, KibanaRole, RoleApiCredentials } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import type { ApiClientFixture, KibanaRole, RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { ACTION_POLICY_KI_TYPE, RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
@@ -22,6 +22,7 @@ import {
   ALERTING_V2_UI_CAPABILITIES,
 } from '../../../../../common/feature_privileges';
 import { COMMON_HEADERS } from '../../../common/constants';
+import { apiTest } from '../fixtures';
 
 const TOOLS_EXECUTE_API = '/api/agent_builder/tools/_execute';
 const SML_CRAWLER_TASK_TYPE = 'agent_builder_sml:sml_crawler';
@@ -91,28 +92,10 @@ interface SmlSearchExecuteBody {
   results: Array<{ data?: { items?: SmlSearchHit[] } }>;
 }
 
-interface RunSoonResponse {
-  id: string;
-  error?: string;
-}
-
 const getSearchHits = (body: SmlSearchExecuteBody): SmlSearchHit[] =>
   body.results[0]?.data?.items ?? [];
 
 const smlCrawlerTaskId = (typeId: string): string => `${SML_CRAWLER_TASK_TYPE}:${typeId}`;
-
-const runSmlCrawlerSoon = async (kbnClient: KbnClient, typeId: string): Promise<void> => {
-  const taskId = smlCrawlerTaskId(typeId);
-  const response = await kbnClient.request<RunSoonResponse>({
-    method: 'POST',
-    path: `/internal/ftr/task_manager/${encodeURIComponent(taskId)}/run_soon`,
-    headers: COMMON_HEADERS,
-  });
-
-  if (response.data.error && !/already running/i.test(response.data.error)) {
-    throw new Error(`Failed to run_soon task '${taskId}': ${response.data.error}`);
-  }
-};
 
 /*
  * Agent Builder chat discovers alerting v2 rules/policies via the builtin
@@ -156,7 +139,7 @@ apiTest.describe(
       return response.body as SmlSearchExecuteBody;
     };
 
-    apiTest.beforeAll(async ({ requestAuth, kbnClient, apiClient }) => {
+    apiTest.beforeAll(async ({ requestAuth, kbnClient, apiClient, apiServices }) => {
       await kbnClient.uiSettings.update({
         [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
       });
@@ -165,14 +148,12 @@ apiTest.describe(
         kind: 'alert',
         metadata: { name: ruleTitle },
         schedule: { every: '1m', lookback: '1m' },
-        recovery_strategy: 'no_breach',
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM logs-* | LIMIT 10' },
-        },
+        recovery: { strategy: 'no_breach' },
+        no_data: { strategy: 'ignore' },
+        query: { base: 'FROM logs-* | LIMIT 10' },
         time_field: '@timestamp',
         grouping: { fields: ['host.name'] },
-        state_transition: { pending_count: 0, recovering_count: 0 },
+        state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
       };
 
       const createdRule = await kbnClient.request<RuleResponse>({
@@ -197,10 +178,12 @@ apiTest.describe(
       policyId = createdPolicy.data.id;
       policyAttachmentId = `${ACTION_POLICY_KI_TYPE}://${policyId}`;
 
-      await Promise.all([
-        runSmlCrawlerSoon(kbnClient, RULE_KI_TYPE),
-        runSmlCrawlerSoon(kbnClient, ACTION_POLICY_KI_TYPE),
-      ]);
+      await apiServices.alertingV2.taskManager.runSoon(smlCrawlerTaskId(RULE_KI_TYPE), {
+        ignoreErrors: true,
+      });
+      await apiServices.alertingV2.taskManager.runSoon(smlCrawlerTaskId(ACTION_POLICY_KI_TYPE), {
+        ignoreErrors: true,
+      });
 
       limitedCredentials = await requestAuth.getApiKeyForCustomRole(LIMITED_ALERTING_V2_CHAT_ROLE);
       agentBuilderOnlyCredentials = await requestAuth.getApiKeyForCustomRole(

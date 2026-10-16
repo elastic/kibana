@@ -154,7 +154,7 @@ describe('getAxiosInstance', () => {
     });
     const credential = getCredential({
       connectorId: '1',
-      secrets: { authType: 'oauth_authorization_code' },
+      secrets: { authType: 'oauth_password' },
     });
 
     await expect(credential.getAuthHeaders()).rejects.toBeInstanceOf(UnsupportedAuthProducerError);
@@ -337,7 +337,8 @@ describe('getAxiosInstance', () => {
       logger,
       { clientId: 'my-client-id', clientSecret: 'my-client-secret', scope: 'grant' },
       configurationUtilities,
-      'client_secret_post'
+      'client_secret_post',
+      undefined
     );
 
     expect(result).not.toBeUndefined();

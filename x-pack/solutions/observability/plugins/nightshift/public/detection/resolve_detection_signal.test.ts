@@ -12,7 +12,7 @@ const mockDetection = (overrides: Partial<LifecycleDetection> = {}): LifecycleDe
   detection_id: 'det-1',
   rule_name: 'latency-p95-spike',
   rule_uuid: 'rule-uuid-1',
-  stream_name: 'logs.web-frontend',
+  source_id: 'logs.web-frontend',
   change_point_type: 'spike',
   '@timestamp': '2026-07-10T12:00:00Z',
   ...overrides,
@@ -31,7 +31,7 @@ const mockSignal = ({
   ...overrides
 }: Partial<SignalEntry> = {}): SignalEntry => ({
   type: 'detection',
-  stream_name: 'logs.web-frontend',
+  source_id: 'logs.web-frontend',
   description: 'Latency spike detected',
   verdict,
   evidence: { esql_query: 'FROM logs | LIMIT 1', result: 'found' },
@@ -42,12 +42,12 @@ const mockSignal = ({
 const mockEvent = (signals: SignalEntry[]) => ({ signals });
 
 describe('findDetectionSignal', () => {
-  it('matches by detection_id and stream_name', () => {
+  it('matches by detection_id and source_id', () => {
     const signal = mockSignal();
     expect(findDetectionSignal(mockDetection(), [mockEvent([signal])])).toEqual(signal);
   });
 
-  it('does not match a different detection_id on the same stream', () => {
+  it('does not match a different detection_id on the same source', () => {
     const signal = mockSignal({
       metadata: {
         ...mockSignalMetadata,
@@ -57,8 +57,8 @@ describe('findDetectionSignal', () => {
     expect(findDetectionSignal(mockDetection(), [mockEvent([signal])])).toBeUndefined();
   });
 
-  it('does not match when stream_name differs', () => {
-    const signal = mockSignal({ stream_name: 'logs.api-gateway' });
+  it('does not match when source_id differs', () => {
+    const signal = mockSignal({ source_id: 'logs.api-gateway' });
     expect(findDetectionSignal(mockDetection(), [mockEvent([signal])])).toBeUndefined();
   });
 

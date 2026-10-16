@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, memo, useCallback, useRef, useState } from 'react';
+import React, { Fragment, memo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { connect } from 'react-redux';
@@ -21,7 +21,6 @@ import { FieldManager } from '../field_manager';
 import type { ControlType, IndexPatternProvider, TermIntersect, WorkspaceNode } from '../../types';
 import { WorkspaceTopNavMenu } from './workspace_top_nav_menu';
 import { GuidancePanel } from '../guidance_panel';
-import { GraphTitle } from '../graph_title';
 import type { GraphWorkspaceSavedObject, Workspace } from '../../types';
 import type { GraphServices } from '../../application';
 import { ControlPanel } from '../control_panel';
@@ -40,9 +39,7 @@ const GuidancePanelMemoized = memo(GuidancePanel);
 
 type WorkspaceLayoutProps = Pick<
   GraphServices,
-  | 'setHeaderActionMenu'
   | 'graphSavePolicy'
-  | 'navigation'
   | 'capabilities'
   | 'coreStart'
   | 'canEditDrillDownUrls'
@@ -76,9 +73,7 @@ export const WorkspaceLayoutComponent = ({
   capabilities,
   coreStart,
   graphSavePolicy,
-  navigation,
   canEditDrillDownUrls,
-  setHeaderActionMenu,
   sharingSavedObjectProps,
   spaces,
   inspect,
@@ -88,7 +83,7 @@ export const WorkspaceLayoutComponent = ({
   const [pickerOpen, setPickerOpen] = useState(false);
   const [mergeCandidates, setMergeCandidates] = useState<TermIntersect[]>([]);
   const [control, setControl] = useState<ControlType>('none');
-  const selectedNode = useRef<WorkspaceNode | undefined>(undefined);
+  const [selectedNode, setSelectedNode] = useState<WorkspaceNode>();
 
   const search = useLocation().search;
   const urlQuery = new URLSearchParams(search).get('query');
@@ -100,12 +95,12 @@ export const WorkspaceLayoutComponent = ({
   );
 
   const selectSelected = useCallback((node: WorkspaceNode) => {
-    selectedNode.current = node;
+    setSelectedNode(node);
     setControl('editLabel');
   }, []);
 
   const onSetControl = useCallback((newControl: ControlType) => {
-    selectedNode.current = undefined;
+    setSelectedNode(undefined);
     setControl(newControl);
   }, []);
 
@@ -188,18 +183,15 @@ export const WorkspaceLayoutComponent = ({
         workspace={workspace}
         savedWorkspace={savedWorkspace}
         graphSavePolicy={graphSavePolicy}
-        navigation={navigation}
         capabilities={capabilities}
         inspect={inspect}
         requestAdapter={requestAdapter}
         coreStart={coreStart}
         canEditDrillDownUrls={canEditDrillDownUrls}
         confirmWipeWorkspace={confirmWipeWorkspace}
-        setHeaderActionMenu={setHeaderActionMenu}
         isInitialized={isInitialized}
       />
 
-      {isInitialized && <GraphTitle />}
       <div css={styles.bar}>
         <SearchBar
           isLoading={loading}
@@ -234,7 +226,7 @@ export const WorkspaceLayoutComponent = ({
             renderCounter={renderCounter}
             workspace={workspace}
             control={control}
-            selectedNode={selectedNode.current}
+            selectedNode={selectedNode}
             colors={colorChoices}
             mergeCandidates={mergeCandidates}
             selectSelected={selectSelected}

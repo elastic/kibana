@@ -10,9 +10,9 @@ import { css } from '@emotion/react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiImage, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '../../../common/constants';
+import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
 import { SecuritySolutionLinkButton } from '../../common/components/links';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { HeaderPage } from '../../common/components/header_page';
 import { EntityAnalyticsLearnMoreLink } from '../components/entity_analytics_learn_more_link';
 import illustrationSearchAnalytics from '../../common/images/illustration_search_analytics.svg';
 
@@ -103,14 +103,7 @@ export const EntityStoreDisabledEmptyPrompt = React.memo(() => (
       height: calc(100vh - 240px);
     `}
   >
-    <HeaderPage
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.homePage.pageTitle"
-          defaultMessage="Entity analytics"
-        />
-      }
-    />
+    <EntityAnalyticsHomeHeader />
     <EuiFlexGroup
       alignItems="center"
       justifyContent="center"

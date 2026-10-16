@@ -35,23 +35,21 @@ export function SearchApiKeysProvider({ getService, getPageObjects }: FtrProvide
     async expectAPIKeyAvailable() {
       await testSubjects.existOrFail('apiKeyFormAPIKey');
       await testSubjects.existOrFail('showAPIKeyButton');
-      await retry.tryWithRetries(
-        'api key is masked',
+      await retry.try(
         async () => {
           expect(await testSubjects.getVisibleText('apiKeyFormAPIKey')).to.be(APIKEY_MASK);
         },
         {
-          retryCount: 3,
+          description: 'api key is masked',
           retryDelay: 1000,
-        },
-        async () => {
-          await testSubjects.click('showAPIKeyButton');
+          onFailureBlock: async () => {
+            await testSubjects.click('showAPIKeyButton');
+          },
         }
       );
       await testSubjects.click('showAPIKeyButton');
       let apiKey: string;
-      await retry.tryWithRetries(
-        'Verify api key can be shown',
+      await retry.try(
         async () => {
           apiKey = await testSubjects.getVisibleText('apiKeyFormAPIKey');
           expect(apiKey).to.be.a('string');
@@ -59,11 +57,11 @@ export function SearchApiKeysProvider({ getService, getPageObjects }: FtrProvide
           expect(apiKey).to.not.be(APIKEY_MASK);
         },
         {
-          retryCount: 3,
+          description: 'Verify api key can be shown',
           retryDelay: 1000,
-        },
-        async () => {
-          await testSubjects.click('showAPIKeyButton');
+          onFailureBlock: async () => {
+            await testSubjects.click('showAPIKeyButton');
+          },
         }
       );
 

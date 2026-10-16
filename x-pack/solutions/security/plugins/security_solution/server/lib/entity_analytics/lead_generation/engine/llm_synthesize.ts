@@ -57,6 +57,7 @@ Rules:
 - Reference other entities only by name from those explicitly listed under "Related entities" for that lead; never infer or invent a connection. When that section is absent, do not mention related entities or their absence.
 - "interacted with: at least N entities" is a lower bound, not an exact count — write "at least N", never "only N" or "exactly N".
 - A "(not shown: N more X)" note means the list was truncated, not an additional entity — you may mention that more exist (e.g. "among dozens of other hosts it accesses"), but never treat it as a specific, nameable entity.
+- When a lead includes a "Promotion reason" line, this entity was surfaced by relationship review, not by its own score — observations may be sparse or absent. Build the byline and description around that reason instead of implying the entity itself triggered detections it didn't.
 
 You will receive data for {lead_count} lead(s). Respond ONLY with a valid JSON array (no markdown fences, no extra text) containing exactly {lead_count} objects in the same order as the input, each matching this schema:
 {{
@@ -130,6 +131,13 @@ const formatRiskEscalation = (entity: ScoredEntity): string => {
   )} (+${Math.round(delta)}) over the last ${window}.`;
 };
 
+const formatPromotionReason = (entity: ScoredEntity): string =>
+  entity.promotionReason
+    ? `  Promotion reason (confidence: ${entity.promotionConfidence ?? 'unknown'}): ${
+        entity.promotionReason
+      }`
+    : '';
+
 const formatRelatedEntities = (entity: ScoredEntity): string => {
   if (entity.topRelatedEntities.length === 0) return '';
   const lines = entity.topRelatedEntities.map((r) => `  - ${formatRelatedEntity(r)}`).join('\n');
@@ -164,7 +172,16 @@ const formatLeadsPayload = (
       const riskEscalation = formatRiskEscalation(entity);
       const peerContext = formatPeerContext(entity, cohort);
       const relatedEntities = formatRelatedEntities(entity);
-      return [header, entityLine, obsLines, riskEscalation, peerContext, relatedEntities]
+      const promotionReason = formatPromotionReason(entity);
+      return [
+        header,
+        entityLine,
+        obsLines,
+        riskEscalation,
+        peerContext,
+        relatedEntities,
+        promotionReason,
+      ]
         .filter(Boolean)
         .join('\n');
     })
@@ -257,4 +274,5 @@ export const __testables = {
   formatLeadsPayload,
   formatRiskEscalation,
   formatRelatedEntities,
+  formatPromotionReason,
 };

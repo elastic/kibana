@@ -10,6 +10,7 @@ import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 import { v4 as uuidv4 } from 'uuid';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import type { EntityType } from '../../../../../common/entity_analytics/types';
 import type {
   EntityAnalyticsConfig,
@@ -39,6 +40,10 @@ import { buildAlertFilters } from './steps/build_alert_filters';
 import { scoreBaseEntities } from './steps/score_base_entities';
 import type { MaintainerErrorKind } from './telemetry_reporter';
 import { createRiskScoreMaintainerTelemetryReporter } from './telemetry_reporter';
+import {
+  getRiskScoreBaseDistribution,
+  getRiskScoreResolutionDistribution,
+} from './risk_score_distribution';
 import { fetchWatchlistConfigs } from './utils/fetch_watchlist_configs';
 import { withLogContext } from './utils/with_log_context';
 import { ensureLookupIndex, getLookupIndexName } from './lookup/lookup_index';
@@ -56,6 +61,7 @@ import {
 export interface RiskScoreMaintainerDeps {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   entityAnalyticsConfig: EntityAnalyticsConfig;
+  experimentalFeatures: ExperimentalFeatures;
   kibanaVersion: string;
   logger: Logger;
   auditLogger: AuditLogger | undefined;
@@ -94,6 +100,12 @@ interface LoadedRunConfig {
   configuration: RiskEngineConfiguration;
   alertsIndex: string;
   idBasedRiskScoringEnabled: boolean;
+  /**
+   * Gates the risk score maintainer's create-if-missing path (Phase 1 base scoring only).
+   * Requires both `idBasedRiskScoringEnabled` and the `riskScoreCreateMissingEntitiesEnabled`
+   * experimental feature flag, so creation can be enabled independently of dual-write.
+   */
+  createMissingEntitiesEnabled: boolean;
   watchlistConfigs: Awaited<ReturnType<typeof fetchWatchlistConfigs>>;
   writer: Awaited<ReturnType<RiskScoreDataClient['getWriter']>>;
   sampleSize: number;
@@ -104,6 +116,7 @@ interface LoadedRunConfig {
 export const createRiskScoreMaintainer = ({
   getStartServices,
   entityAnalyticsConfig,
+  experimentalFeatures,
   kibanaVersion,
   logger,
   auditLogger,
@@ -175,6 +188,7 @@ export const createRiskScoreMaintainer = ({
             namespace: runContext.namespace,
             logger,
             entityAnalyticsConfig,
+            experimentalFeatures,
           });
 
           const calculationRunId = uuidv4();
@@ -409,6 +423,7 @@ const loadRunConfiguration = async ({
   namespace,
   logger,
   entityAnalyticsConfig,
+  experimentalFeatures,
 }: {
   coreStart: CoreStart;
   soClient: ReturnType<typeof buildScopedInternalSavedObjectsClientUnsafe>;
@@ -418,6 +433,7 @@ const loadRunConfiguration = async ({
   namespace: string;
   logger: Logger;
   entityAnalyticsConfig: EntityAnalyticsConfig;
+  experimentalFeatures: ExperimentalFeatures;
 }): Promise<LoadedRunConfig> => {
   const configuration: RiskEngineConfiguration =
     (await getConfiguration({ savedObjectsClient: soClient, logger, namespace })) ??
@@ -426,6 +442,8 @@ const loadRunConfiguration = async ({
   const { index: alertsIndex } = await riskScoreDataClient.getRiskInputsIndex({ dataViewId });
   const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
   const idBasedRiskScoringEnabled = await getIsIdBasedRiskScoringEnabled(uiSettingsClient);
+  const createMissingEntitiesEnabled =
+    idBasedRiskScoringEnabled && experimentalFeatures.riskScoreCreateMissingEntitiesEnabled;
   const watchlistConfigs = await fetchWatchlistConfigs({
     soClient: internalSoClient,
     esClient,
@@ -446,6 +464,7 @@ const loadRunConfiguration = async ({
     configuration,
     alertsIndex,
     idBasedRiskScoringEnabled,
+    createMissingEntitiesEnabled,
     watchlistConfigs,
     writer,
     sampleSize,
@@ -541,6 +560,7 @@ const executeEntityTypeRun = async ({
           watchlistConfigs: runConfig.watchlistConfigs,
           abortSignal,
           idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
+          createMissingEntities: runConfig.createMissingEntitiesEnabled,
           writer: runConfig.writer,
         }),
     });
@@ -549,12 +569,16 @@ const executeEntityTypeRun = async ({
     baseStage.success({
       pagesProcessed: baseSummary.pagesProcessed,
       scoresWritten: baseSummary.scoresWrittenRiskIndex,
+      scoresMissingFromStore: baseSummary.scoresMissingFromStore,
+      entitiesCreated: baseSummary.entitiesCreated,
+      entityCreationsSkipped: baseSummary.entityCreationsSkipped,
+      entityCreationsFailed: baseSummary.entityCreationsFailed,
     });
     frameworkTelemetryStages.push({
       name: 'base',
       status: 'success',
       durationMs: Date.now() - baseStartedAtMs,
-      applied: baseSummary.scoresWrittenEntityStore,
+      applied: baseSummary.scoresWrittenEntityStore + baseSummary.entitiesCreated,
     });
   } catch (error) {
     const errorMessage = telemetryReporter.getErrorMessage(error);
@@ -608,6 +632,7 @@ const executeEntityTypeRun = async ({
             abortSignal,
             idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
             writer: runConfig.writer,
+            alertFilters,
           }),
       });
       metricsTracker.recordResolution(runMetrics, resolutionResult);
@@ -655,6 +680,9 @@ const executeEntityTypeRun = async ({
   }
 
   checkAbortBetweenStages();
+
+  let baseScoreDistribution: Awaited<ReturnType<typeof getRiskScoreBaseDistribution>>;
+  let resolutionScoreDistribution: Awaited<ReturnType<typeof getRiskScoreResolutionDistribution>>;
 
   if (!skipRemainingStages) {
     // Refresh the risk score data stream so reset-to-zero can see scores written in phases 1 & 2.
@@ -725,6 +753,30 @@ const executeEntityTypeRun = async ({
         skipReason: 'reset_to_zero_disabled',
       });
     }
+
+    // Refresh so the distribution queries see zero-score records written by reset-to-zero above.
+    // Wrapped in try/catch: a refresh failure must not abort the run — scoring and reset already
+    // completed successfully, and the distributions are optional telemetry.
+    try {
+      await runContext.esClient.indices.refresh({ index: riskScoreAlias });
+      const distributionQuery = {
+        esClient: runContext.esClient,
+        namespace: runContext.namespace,
+        entityType,
+        calculationRunId,
+        logger: runLogger,
+      };
+      [baseScoreDistribution, resolutionScoreDistribution] = await Promise.all([
+        getRiskScoreBaseDistribution(distributionQuery),
+        getRiskScoreResolutionDistribution(distributionQuery),
+      ]);
+    } catch (error) {
+      runLogger.warn(
+        `Failed to refresh before collecting score distributions; distributions will be omitted from the run summary: ${telemetryReporter.getErrorMessage(
+          error
+        )}`
+      );
+    }
   } else {
     frameworkTelemetryStages.push({
       name: 'reset_to_zero',
@@ -757,8 +809,6 @@ const executeEntityTypeRun = async ({
     }
   }
 
-  // Keep risk-score-specific reporter event fields explicit so framework-only counters
-  // are not leaked into risk_score_maintainer_run_summary
   runTelemetry.completionSummary({
     runStatus,
     runErrorKind,
@@ -767,6 +817,8 @@ const executeEntityTypeRun = async ({
     scoresWrittenResetToZero: runMetrics.scoresWrittenRiskIndexResetToZero,
     pagesProcessed: runMetrics.pagesProcessed,
     lookupPrunedDocs: runMetrics.lookupPrunedDocs,
+    baseScoreDistribution,
+    resolutionScoreDistribution,
   });
 
   frameworkTelemetry.report(

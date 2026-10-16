@@ -14,7 +14,7 @@ export const AUDIT_OTEL_RESOURCE_ATTRIBUTES: Record<string, string> = {
   'service.type': 'kibana',
 };
 
-// project.id must stay in the resource (the log-delivery pipeline reads it there) AND per-record.
+// Capture project.id before resource filtering so project identity is emitted only per-record.
 export const AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES: string[] = ['project.id'];
 
 /**

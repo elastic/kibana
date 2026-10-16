@@ -77,7 +77,7 @@ Use this tag for **platform** specs that need to run across every standard deplo
 - `tags.serverless.observability.complete`
 - `tags.serverless.security.complete`
 
-Workplace AI is excluded because it has no stateful counterpart.
+VectorDB is excluded because it has no stateful counterpart.
 
 ::::{warning}
 `tags.deploymentAgnostic` runs your test across all solutions, which is expensive. If your test lives in a solution module, use explicit targets instead (e.g. `[...tags.stateful.classic, ...tags.serverless.observability.complete]`).
@@ -135,11 +135,13 @@ lands.
 | `tags.serverless.security.essentials` | {icon}`logo_security` Security (Essentials)      |
 | `tags.serverless.security.ease`       | {icon}`logo_security` Security (EASE)            |
 
-#### Workplace AI [scout-deployment-tags-serverless-workplaceai]
+#### VectorDB [scout-deployment-tags-serverless-vectordb]
 
-| Helper                        | Project type                               |
-| ----------------------------- | ------------------------------------------ |
-| `tags.serverless.workplaceai` | {icon}`logo_workplace_search` Workplace AI |
+| Helper                    | Project type |
+| ------------------------- | ------------ |
+| `tags.serverless.vectordb` | VectorDB     |
+
+This expands to `@local-serverless-vectordb` and `@cloud-serverless-vectordb`. VectorDB is included in `tags.serverless.all`, but not in `tags.deploymentAgnostic` (this project type doesn't have a stateful counterpart). Add its explicit tags when the test needs VectorDB coverage.
 
 ### `tags.performance` [scout-deployment-tags-performance]
 

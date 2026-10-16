@@ -17,11 +17,7 @@ import {
   getRuleNotifyWhenType,
 } from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
-import {
-  getMappedParams,
-  addMissingUiamKeyTagIfNeeded,
-  API_KEY_ATTRIBUTES_TO_STRIP,
-} from '../../../../rules_client/common';
+import { getMappedParams, API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
 import type {
   BulkOperationError,
   NormalizedAlertActionWithGeneratedValues,
@@ -76,6 +72,7 @@ export const prepareUpdate = async <Params extends RuleParams>({
   context,
   actionsClient,
   username,
+  profileUid,
   item,
   original,
   allowMissingConnectorSecrets,
@@ -85,6 +82,7 @@ export const prepareUpdate = async <Params extends RuleParams>({
   context: RulesClientContext;
   actionsClient: Awaited<ReturnType<RulesClientContext['getActionsClient']>>;
   username: string | null;
+  profileUid: string | null;
   item: BulkUpdateRulesItem<Params>;
   original: SavedObject<RawRule>;
   allowMissingConnectorSecrets?: boolean;
@@ -173,9 +171,11 @@ export const prepareUpdate = async <Params extends RuleParams>({
       id: ruleType.id,
       ruleName: data.name,
       username,
+      profileUid,
       shouldUpdateApiKey: originalRule.enabled,
       errorMessage: 'Error updating rule: could not create API key',
       apiKeyOwnership: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },
+      refresh: false,
     });
 
     const newKeys: ApiKeyEntry = {
@@ -187,26 +187,18 @@ export const prepareUpdate = async <Params extends RuleParams>({
       apiKeys.set(id, newKeys);
     }
 
-    const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
-      data.tags,
-      apiKeyAttributes.uiamApiKey,
-      apiKeyAttributes.apiKeyCreatedByUser,
-      context.isServerless,
-      context.featureFlags
-    );
-
     const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
 
     const updatedRuleAttributes = updateMetaAttributes(context, {
       ...omit(originalRule, API_KEY_ATTRIBUTES_TO_STRIP),
       ...omit(data, 'actions', 'systemActions', 'artifacts'),
       ...apiKeyAttributes,
-      tags: tagsWithUiamCheck,
       params: updatedParams as RawRule['params'],
       actions: actionsWithRefs,
       notifyWhen,
       revision,
       updatedBy: username,
+      updatedByProfileUid: profileUid,
       updatedAt: new Date().toISOString(),
       artifacts: artifactsWithRefs,
       enabled: originalRule.enabled,

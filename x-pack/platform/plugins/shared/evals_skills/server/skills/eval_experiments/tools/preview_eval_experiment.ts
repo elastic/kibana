@@ -10,11 +10,11 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { generateExperimentRun, generateSavedWorkflowYaml } from '@kbn/evals-plugin/server';
 import {
   evalExperimentConfigSchema,
-  evalsTools,
+  evalsExperimentTools,
   otherResult,
   toErrorResult,
   toGenerateParams,
-} from './common';
+} from './tool_utils';
 import type { EvalExperimentsToolDeps } from './deps';
 
 const schema = evalExperimentConfigSchema;
@@ -27,7 +27,7 @@ const schema = evalExperimentConfigSchema;
 export const previewEvalExperimentTool = (
   _deps: EvalExperimentsToolDeps
 ): BuiltinSkillBoundedTool<typeof schema> => ({
-  id: evalsTools.previewExperiment,
+  id: evalsExperimentTools.previewExperiment,
   type: ToolType.builtin,
   description:
     'Preview an evaluation experiment: returns the generated workflow YAML and the run plan (mode, execution count) for the given configuration. Read-only — it does not save or run anything.',
