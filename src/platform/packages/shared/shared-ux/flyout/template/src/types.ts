@@ -217,14 +217,38 @@ export type FlyoutFooterSecondaryActionProps = Omit<
 > &
   FlyoutFooterActionBaseProps;
 
-/**
- * A single item in a footer action menu (either a clickable action or a separator).
- */
 type WithStringName<T> = T extends { name: ReactNode } ? Omit<T, 'name'> & { name: string } : T;
 
-export type FlyoutFooterMenuItem = WithStringName<
-  Extract<EuiContextMenuPanelItemDescriptor, { renderItem?: never }>
->;
+/**
+ * @deprecated Only for {@link FlyoutFooterMenuCustomItem}, which is deprecated.
+ */
+export interface FlyoutFooterMenuItemRenderContext {
+  /** Closes the footer action menu. */
+  closeMenu: () => void;
+}
+
+/**
+ * A menu item that renders its own content and handles its own clicks. The menu does not close
+ * when it is clicked; call `closeMenu` from the render context instead.
+ *
+ * @deprecated A temporary allowance so menus with interactive items (such as a
+ * nested popover) can use the footer menu and match other flyouts. This
+ * support is for migrating existing flyouts to use the flyout template.
+ * Redesign those items as plain items or nested panels so this can be removed.
+ */
+export interface FlyoutFooterMenuCustomItem {
+  key: string;
+  /** @deprecated See {@link FlyoutFooterMenuCustomItem}. */
+  renderItem: (context: FlyoutFooterMenuItemRenderContext) => ReactNode;
+}
+
+/**
+ * A single item in a footer action menu (a clickable action, a separator, or a deprecated custom
+ * item).
+ */
+export type FlyoutFooterMenuItem =
+  | WithStringName<Extract<EuiContextMenuPanelItemDescriptor, { renderItem?: never }>>
+  | FlyoutFooterMenuCustomItem;
 
 /**
  * A sub-menu panel inside a footer action menu.

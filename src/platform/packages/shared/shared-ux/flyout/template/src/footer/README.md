@@ -48,7 +48,8 @@ const panels: FlyoutFooterMenuPanel[] = useMemo(() => [
 
 `panels` uses EUI's own panel descriptors, with these restrictions:
 
-- Panel `content` and item `renderItem` are not supported. Both are typed `?: never`, so they fail type checking.
+- Panel `content` is not supported. It is typed `?: never`, so it fails type checking.
+- Item `renderItem` is deprecated. See [Deprecated: custom items](#deprecated-custom-items).
 - `items` is required. Without `content`, a panel with no items is always a mistake.
 - Panel `title` and item `name` are `string`, not `ReactNode`. Type the array as `FlyoutFooterMenuPanel[]`. EUI's own type skips these restrictions.
 - A nested panel (one opened from another panel's item) must have a `title`, because EUI uses it for the back button. The template warns in development about any nested panel without one.
@@ -80,3 +81,16 @@ The template sets these trigger props itself, so passing them is a type error ra
 - `color` and `size`, so all footer actions look the same.
 - `isSelected`, because it sets `aria-pressed`, which is for toggle buttons. A popover trigger uses `aria-expanded`, which EUI already sets.
 - `type`, which is always `"button"`, so a trigger inside a `<form>` opens the menu without submitting the form.
+
+### Deprecated: custom items
+
+Custom items are a temporary allowance for existing menus with interactive items, such as an item that opens its own popover. This is primarily for migrating existing flyouts to use the template. Those menus should be redesigned with plain items and nested panels so custom items can be removed.
+
+A custom item (`FlyoutFooterMenuCustomItem`) takes a required `key` and a `renderItem` function. `renderItem` receives `{ closeMenu }` and returns the item's content.
+
+```tsx
+{ key: 'assignee', renderItem: ({ closeMenu }) => <AssigneeItem onApplied={closeMenu} /> }
+```
+
+- A custom item owns its clicks. Clicking it never closes the menu, whatever `closeOnItemClick` is set to. Call `closeMenu` when the item is done.
+- The template does not add a `menuitem` role, an icon, or keyboard handling to a custom item. Its content provides those itself.
