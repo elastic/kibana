@@ -214,3 +214,51 @@ it('propagates saved-object 404 when the automation does not exist', async () =>
 
   await expect(call('missing-id')).rejects.toMatchObject({ output: { statusCode: 404 } });
 });
+
+it('links the executed alert branch of a mixed workflow', async () => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [{ id: 'exec-1', status: 'completed', triggeredBy: 'alerting.v1.alertStatusChanged' }],
+    total: 1,
+  });
+  mockSearchStepExecutions
+    .mockResolvedValueOnce({ results: [{ workflowRunId: 'exec-1' }] })
+    .mockResolvedValueOnce({
+      results: [
+        {
+          workflowRunId: 'exec-1',
+          input: { title: 'Alert' },
+          output: { investigation_id: 'inv-alert' },
+        },
+      ],
+    });
+  const result = await call('auto-1');
+  expect(result.runs[0]).toMatchObject({ title: 'Alert', investigationId: 'inv-alert' });
+});
+
+it.each([
+  ['alerting.v1.alertStatusChanged', 'trigger_investigation_alert'],
+  ['slack2.message', 'trigger_investigation_slack'],
+  ['scheduled', 'trigger_investigation'],
+])('links the %s branch of a workflow with all trigger kinds', async (triggeredBy, stepId) => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [{ id: 'exec-1', status: 'completed', triggeredBy }],
+    total: 1,
+  });
+  mockSearchStepExecutions.mockImplementation(async ({ stepId: requestedStepId }) => ({
+    results: [
+      {
+        workflowRunId: 'exec-1',
+        ...(requestedStepId === stepId
+          ? {
+              input: { title: triggeredBy },
+              output: { investigation_id: `inv-${stepId}` },
+            }
+          : {}),
+      },
+    ],
+  }));
+  const result = await call('auto-1');
+  expect(result.runs[0]).toMatchObject({ title: triggeredBy, investigationId: `inv-${stepId}` });
+});

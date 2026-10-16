@@ -2,6 +2,33 @@
 
 This plugin provides the domain API for starting and reading investigations, independent of which entity (significant event, alert, etc.) triggers them.
 
+## Scheduled automations
+
+Hourly, daily and weekly automation presets generate calendar-based workflow triggers. Daily and
+weekly times, and inclusive hourly windows, use the saved IANA timezone and follow daylight saving
+time. Custom cron execution is deferred. Unsupported schedules are ignored when loading the form
+and rejected by the API.
+
+Schedule rows store structured presets and generate RRULE directly. Daily and weekly presets use
+`time` in `HH:mm` format; weekly presets also require `daysOfWeek` (0 for Sunday through 6 for
+Saturday). Hourly presets optionally use `hourWindow: { start, end }` with inclusive whole hours.
+All presets accept an IANA `timezone`, defaulting to UTC.
+
+Scheduled automations require nonempty instructions (at most 5,000 characters). Each tick starts a
+fresh investigation using a `manual` question subject with an `automatic` trigger type, so normal
+automatic-investigation quotas apply. An assessment that finds no issues still creates a conversation.
+The Investigate/Ask selector does not select a different execution path.
+
+The API-only `scopeQuery` field is forwarded as `scope_query` guidance in the investigation context.
+It guides the agent's telemetry filters; it is not an enforced data-access boundary. The optional
+`runtime.timeoutSeconds` bounds the generated automation workflow and the investigation workflow
+started by that run. The stored managed investigation definition and its default timeout are unchanged.
+
+Only one schedule row is supported per automation. It can coexist with alert rows; each source has a
+separate guarded investigation step. Alert publication opt-in and alert snapshot resolution are
+separate work. Existing saved schedules activate on their next valid save or enable action, with no
+automatic workflow rewrite at deployment.
+
 ## Requirements
 
 Nightshift investigations are being moved onto the shared `agenticInvestigations` plugin (an investigation is an Agent Builder conversation) and its proposed actions onto the `proposals` plugin. Both are optional dependencies and disabled by default:

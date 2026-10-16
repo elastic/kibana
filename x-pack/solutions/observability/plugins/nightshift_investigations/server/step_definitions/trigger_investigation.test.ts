@@ -205,3 +205,38 @@ describe('triggerInvestigationStepDefinition', () => {
     expect(start).toHaveBeenCalledTimes(1);
   });
 });
+
+it('starts a manual question with a fresh subject and forwards scope and timeout', async () => {
+  const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+  const { definition } = createDefinition(start);
+  await definition.handler(
+    createContext({
+      subject_type: 'manual',
+      message: 'Review checkout errors.',
+      scope_query: 'service.name:checkout',
+      timeout_seconds: 30,
+    })
+  );
+  expect(start).toHaveBeenCalledWith(
+    expect.objectContaining({
+      subject: { type: 'manual', id: 'manual', summary: undefined },
+      message: 'Review checkout errors.',
+      trigger_type: 'automatic',
+      context: { scope_query: 'service.name:checkout' },
+      timeout_seconds: 30,
+    })
+  );
+});
+
+it.each([
+  { subject_type: 'manual' },
+  { subject_type: 'manual', message: '   ' },
+  { subject_type: 'alert' },
+  { subject_type: 'significant_event' },
+  { subject_type: 'manual', message: 'Review', timeout_seconds: 0 },
+])('rejects an incomplete investigation before starting: %j', async (input) => {
+  const start = jest.fn();
+  const { definition } = createDefinition(start);
+  await expect(definition.handler(createContext(input))).rejects.toThrow();
+  expect(start).not.toHaveBeenCalled();
+});
