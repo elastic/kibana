@@ -8,11 +8,13 @@
  */
 
 import { resolve } from 'path';
+import os from 'os';
 
 import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { Config } from './config';
+import { CLOUD_PLATFORMS, DOWNLOAD_PLATFORMS } from './platform';
 
 jest.mock('./version_info', () => ({
   getVersionInfo: () => ({
@@ -29,15 +31,27 @@ expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 const setup = async ({
   targetAllPlatforms = true,
+  targetServerlessPlatforms = false,
+  targetCloudPlatforms = false,
+  skipServerless = false,
+  dockerCrossCompile = false,
   isRelease = true,
-}: { targetAllPlatforms?: boolean; isRelease?: boolean } = {}) => {
+}: {
+  targetAllPlatforms?: boolean;
+  targetServerlessPlatforms?: boolean;
+  targetCloudPlatforms?: boolean;
+  skipServerless?: boolean;
+  dockerCrossCompile?: boolean;
+  isRelease?: boolean;
+} = {}) => {
   return await Config.create({
     isRelease,
     targetAllPlatforms,
-    targetServerlessPlatforms: false,
-    skipServerless: false,
+    targetServerlessPlatforms,
+    targetCloudPlatforms,
+    skipServerless,
     dockerContextUseLocalArtifact: false,
-    dockerCrossCompile: false,
+    dockerCrossCompile,
     dockerNamespace: null,
     dockerPush: false,
     dockerTag: '',
@@ -127,6 +141,8 @@ describe('#getTargetPlatforms()', () => {
         "darwin-x64",
         "linux-arm64",
         "linux-arm64",
+        "linux-arm64",
+        "linux-x64",
         "linux-x64",
         "linux-x64",
         "win32-arm64",
@@ -142,6 +158,32 @@ describe('#getTargetPlatforms()', () => {
 
     expect(config.getTargetPlatforms()).toEqual([config.getPlatformForThisOs()]);
   });
+
+  it('returns both cloud platforms when Docker cross-compilation is enabled', async () => {
+    const config = await setup({
+      targetCloudPlatforms: true,
+      dockerCrossCompile: true,
+    });
+
+    expect(config.getTargetPlatforms().map(String)).toEqual([
+      'linux-x64-cloud',
+      'linux-arm64-cloud',
+    ]);
+  });
+
+  it.each([false, true])(
+    'keeps all non-serverless platforms with --all-platforms and dockerCrossCompile = %s',
+    async (dockerCrossCompile) => {
+      const config = await setup({
+        skipServerless: true,
+        dockerCrossCompile,
+      });
+
+      const platforms = [...DOWNLOAD_PLATFORMS, ...CLOUD_PLATFORMS];
+      expect(config.getTargetPlatforms()).toEqual(platforms);
+      expect(config.getNodePlatforms()).toEqual(platforms);
+    }
+  );
 });
 
 describe('#getNodePlatforms()', () => {
@@ -149,7 +191,7 @@ describe('#getNodePlatforms()', () => {
     const config = await setup();
     expect(
       config
-        .getTargetPlatforms()
+        .getNodePlatforms()
         .map((p) => p.getNodeArch())
         .sort()
     ).toEqual([
@@ -157,6 +199,8 @@ describe('#getNodePlatforms()', () => {
       'darwin-x64',
       'linux-arm64',
       'linux-arm64',
+      'linux-arm64',
+      'linux-x64',
       'linux-x64',
       'linux-x64',
       'win32-arm64',
@@ -178,6 +222,52 @@ describe('#getNodePlatforms()', () => {
       expect(platforms).toHaveLength(1);
       expect(platforms[0]).toBe(config.getPlatform('linux', 'x64'));
     }
+  });
+});
+
+describe.each(['cloud', 'serverless'] as const)('%s platform selection', (variant) => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it.each(['x64', 'arm64'] as const)(
+    'returns only the native %s platform without Docker cross-compilation',
+    async (architecture) => {
+      jest.spyOn(os, 'arch').mockReturnValue(architecture);
+      const config = await setup({
+        targetAllPlatforms: false,
+        targetCloudPlatforms: variant === 'cloud',
+        targetServerlessPlatforms: variant === 'serverless',
+      });
+
+      const platforms = [`linux-${architecture}-${variant}`];
+      expect(config.getTargetPlatforms().map(String)).toEqual(platforms);
+      expect(config.getNodePlatforms().map(String)).toEqual(platforms);
+    }
+  );
+
+  it('returns both architectures with Docker cross-compilation', async () => {
+    const config = await setup({
+      targetAllPlatforms: false,
+      targetCloudPlatforms: variant === 'cloud',
+      targetServerlessPlatforms: variant === 'serverless',
+      dockerCrossCompile: true,
+    });
+
+    const platforms = [`linux-x64-${variant}`, `linux-arm64-${variant}`];
+    expect(config.getTargetPlatforms().map(String)).toEqual(platforms);
+    expect(config.getNodePlatforms().map(String)).toEqual(platforms);
+  });
+
+  it('preserves both architectures when all platforms are requested', async () => {
+    const config = await setup({
+      targetCloudPlatforms: variant === 'cloud',
+      targetServerlessPlatforms: variant === 'serverless',
+    });
+
+    const platforms = [`linux-x64-${variant}`, `linux-arm64-${variant}`];
+    expect(config.getTargetPlatforms().map(String)).toEqual(platforms);
+    expect(config.getNodePlatforms().map(String)).toEqual(platforms);
   });
 });
 

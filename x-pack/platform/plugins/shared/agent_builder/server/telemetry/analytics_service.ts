@@ -23,6 +23,7 @@ import type {
   ReportAgentCreatedParams,
   ReportAgentUpdatedParams,
   ReportCompactionTriggeredParams,
+  ReportConversationFieldsChangedParams,
   ReportPluginImportedParams,
   ReportExecutionCompleteParams,
   ReportRoundCompleteParams,
@@ -135,6 +136,22 @@ export class AnalyticsService {
     } catch (error) {
       // Do not fail the request if telemetry fails
       this.logger.debug('Failed to report AgentUpdated telemetry event', { error });
+    }
+  }
+
+  /**
+   * Reports the template fields, opted in with `report_changes`, that one write changed, after the
+   * write has landed. Never throws.
+   */
+  reportConversationFieldsChanged(params: ReportConversationFieldsChangedParams): void {
+    try {
+      this.analytics.reportEvent<ReportConversationFieldsChangedParams>(
+        AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged,
+        params
+      );
+    } catch (error) {
+      // Do not fail the write if telemetry fails
+      this.logger.debug('Failed to report ConversationFieldsChanged telemetry event', { error });
     }
   }
 
@@ -302,6 +319,7 @@ export class AnalyticsService {
     round,
     roundCount,
     conversationAttachments,
+    workflowExecutionId,
   }: {
     agentId: string;
     conversationId?: string;
@@ -310,6 +328,8 @@ export class AnalyticsService {
     round: ConversationRound;
     roundCount: number;
     conversationAttachments: VersionedAttachment[];
+    /** The workflow execution whose `ai.agent` step started the round, or its parent round. */
+    workflowExecutionId?: string;
   }): void {
     try {
       const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
@@ -354,6 +374,7 @@ export class AnalyticsService {
           tools_invoked: toolsInvoked,
           tool_calls: toolCallSteps.length,
           tool_call_errors: toolCallErrors.length,
+          workflow_execution_id: workflowExecutionId,
         }
       );
     } catch (error) {
@@ -450,6 +471,7 @@ export class AnalyticsService {
     modelProvider,
     roundId,
     roundOrigin,
+    workflowExecutionId,
   }: {
     agentId: string;
     conversationId?: string;
@@ -458,6 +480,8 @@ export class AnalyticsService {
     modelProvider: ModelProvider;
     roundId?: string;
     roundOrigin?: TelemetryConversationOrigin;
+    /** The workflow execution whose `ai.agent` step started the round. */
+    workflowExecutionId?: string;
   }): void {
     try {
       const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
@@ -472,6 +496,7 @@ export class AnalyticsService {
         model_provider: modelProvider,
         error_message: errorMessage,
         error_type: errorType,
+        workflow_execution_id: workflowExecutionId,
       });
     } catch (err) {
       // Do not fail the request if telemetry fails

@@ -627,7 +627,7 @@ describe('service account attribution', () => {
 
   describe('currentUserActor', () => {
     it('marks a service account', () => {
-      expect(currentUserActor({ ...serviceAccount, isAdmin: false })).toEqual({
+      expect(currentUserActor(serviceAccount)).toEqual({
         type: EventActorType.user,
         id: 'service_account:kibana/automation',
         username: 'kibana/automation',
@@ -636,7 +636,7 @@ describe('service account attribution', () => {
     });
 
     it('falls back to the username when the principal has no stable id', () => {
-      expect(currentUserActor({ username: 'alice', isAdmin: false })).toEqual({
+      expect(currentUserActor({ username: 'alice' })).toEqual({
         type: EventActorType.user,
         id: 'alice',
         username: 'alice',
