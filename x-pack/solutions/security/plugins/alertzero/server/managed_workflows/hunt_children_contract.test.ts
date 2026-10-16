@@ -36,9 +36,16 @@ interface NestedStep {
   name: string;
   type: string;
   if?: string;
+  condition?: string;
   with?: Record<string, unknown>;
   steps?: NestedStep[];
-  'on-failure'?: { continue?: boolean; fallback?: NestedStep[] };
+  'max-iterations'?: { limit?: number; 'on-limit'?: string };
+  timeout?: string;
+  'on-failure'?: {
+    continue?: boolean;
+    retry?: { 'max-attempts'?: number; delay?: string };
+    fallback?: NestedStep[];
+  };
 }
 
 const outputNames = (workflow: { outputs?: ParsedWorkflow['outputs'] }): string[] => {
@@ -115,9 +122,95 @@ describe('system-security-hunt-execute', () => {
     workflow = parseChild(ALERTZERO_HUNT_WORKFLOW_ID);
   });
 
-  it('sends the coordinator a snake_case run_id and no technology', () => {
+  it('sends the coordinator a snake_case run_id, the Investigation to write to, and no technology', () => {
     const body = stepNamed(workflow, 'run_hunt_coordinator').with?.body as Record<string, unknown>;
-    expect(Object.keys(body).sort()).toEqual(['report_id', 'run_id', 'tier2_when', 'trigger']);
+    expect(Object.keys(body).sort()).toEqual([
+      'conversation_id',
+      'report_id',
+      'run_id',
+      'tier2_when',
+      'trigger',
+    ]);
+    expect(body.conversation_id).toBe('{{ inputs.investigationConversationId }}');
+  });
+
+  describe('polls the hidden result attachment the start call named', () => {
+    const TERMINAL_CHECK =
+      "${{ steps.read_hunt_result.output.data.state != 'completed' and steps.read_hunt_result.output.data.state != 'failed' }}";
+
+    it('loops for at most 60 reads, backstopped by a 12 minute timeout, and never fails the child when it gives up', () => {
+      const poll = stepNamed(workflow, 'poll_hunt_coordinator');
+
+      expect(poll.type).toBe('while');
+      expect(poll.if).toBe('${{ steps.run_hunt_coordinator.output.result_attachment_id != nil }}');
+      expect(poll.condition).toBe(TERMINAL_CHECK);
+      expect(poll['max-iterations']).toEqual({ limit: 60, 'on-limit': 'continue' });
+      expect(poll.timeout).toBe('12m');
+      expect(poll['on-failure']).toEqual({ continue: true });
+    });
+
+    it('reads by the id the route returned, never one it rebuilt, and keeps polling through a broken read', () => {
+      const read = stepNamed(workflow, 'read_hunt_result');
+
+      expect(read.type).toBe('ai.attachment.read');
+      expect(read.with).toEqual({
+        conversation_id: '{{ inputs.investigationConversationId }}',
+        attachment_id: '{{ steps.run_hunt_coordinator.output.result_attachment_id }}',
+      });
+      expect(read['on-failure']).toEqual({
+        retry: { 'max-attempts': 3, delay: '5s' },
+        continue: true,
+      });
+      expect(JSON.stringify(workflow)).not.toContain('ai.attachment.list');
+    });
+
+    it('waits 10s between reads only while the run is not terminal, on the same check the loop uses', () => {
+      const wait = stepNamed(workflow, 'wait_if_running');
+
+      expect(wait.type).toBe('if');
+      expect(wait.condition).toBe(stepNamed(workflow, 'poll_hunt_coordinator').condition);
+      expect(wait.steps?.map((step) => [step.type, step.with])).toEqual([
+        ['wait', { duration: '10s' }],
+      ]);
+    });
+
+    it('deletes the attachment permanently once the outputs are computed, and continues if that fails', () => {
+      const names = workflow.steps.map((step) => step.name);
+      const remove = stepNamed(workflow, 'delete_hunt_result');
+
+      expect(remove.type).toBe('ai.attachment.delete');
+      expect(remove.if).toBe(stepNamed(workflow, 'poll_hunt_coordinator').if);
+      expect(remove.with).toEqual({
+        conversation_id: '{{ inputs.investigationConversationId }}',
+        attachment_id: '{{ steps.run_hunt_coordinator.output.result_attachment_id }}',
+        permanent: true,
+      });
+      expect(remove['on-failure']).toEqual({ continue: true });
+      expect(names.indexOf('delete_hunt_result')).toBeGreaterThan(
+        names.indexOf('resolve_result_status')
+      );
+      expect(names.indexOf('delete_hunt_result')).toBeLessThan(names.indexOf('emit_result'));
+    });
+
+    // Worker packaging requires every child to complete; no workflow.fail exits.
+    it('has no step that fails the workflow, and every fallback completes the child or continues', () => {
+      const all = flattenSteps(workflow.steps);
+      const withFallback = all.filter((step) => step['on-failure']?.fallback);
+
+      expect(all.filter((step) => step.type === 'workflow.fail')).toEqual([]);
+      expect(withFallback.map((step) => step.name)).toEqual([
+        'run_hunt_coordinator',
+        'add_sse_attachment',
+      ]);
+      for (const step of withFallback) {
+        for (const fallback of step['on-failure']?.fallback ?? []) {
+          const completesChild =
+            fallback.type === 'workflow.output' &&
+            (fallback as unknown as { status?: string }).status === 'completed';
+          expect(completesChild || fallback['on-failure']?.continue === true).toBe(true);
+        }
+      }
+    });
   });
 
   it('never sends the camelCase runId the coordinator no longer accepts', () => {
@@ -152,7 +245,9 @@ describe('system-security-hunt-execute', () => {
   // `elasticsearch.update` step.
   it('only stamps the hunt-once gate once the coordinator confirms success', () => {
     const step = stepNamed(workflow, 'write_evidence');
-    expect(step.if).toBe('${{ steps.run_hunt_coordinator.output.completed_successfully == true }}');
+    expect(step.if).toBe(
+      '${{ steps.read_hunt_result.output.data.result.completed_successfully == true }}'
+    );
     expect(step.with?.path).toBe(`/s/{{ workflow.spaceId }}${WRITE_HUNT_EVIDENCE_URL}`);
   });
 
@@ -377,19 +472,6 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
       const strippedPaths = rawPaths.map(stripSpacePrefix).filter((path): path is string => !!path);
 
       expect(strippedPaths.filter((path) => !KNOWN_ROUTE_PATHS.has(path))).toEqual([]);
-    });
-
-    // Public Cloud URLs close long kibana.request calls around 120s with
-    // `HTTP 502: backend closed connection`. Keep the long-running coordinator
-    // on the Kibana server address so a parallel sweep can finish Tier 2.
-    // Short routes stay on the default public URL until Cloud TLS behavior with
-    // `use_server_info` is confirmed.
-    it('routes run_hunt_coordinator through use_server_info', () => {
-      const coordinatorSteps = requestSteps(parseChild(ALERTZERO_HUNT_WORKFLOW_ID)).filter(
-        (step) => step.name === 'run_hunt_coordinator'
-      );
-
-      expect(coordinatorSteps.map((step) => step.with?.use_server_info)).toEqual([true]);
     });
   });
 
