@@ -22,6 +22,7 @@ import { getProfilingInitialized } from './get_profiling_initialized';
 import { getProfilingSchemas } from './get_profiling_schemas';
 import { getStacktracesIdsField } from './get_stacktraces_ids_field';
 import { getTransactionsProfilingQuery } from './profiling_queries';
+import { toProfilingTimeRange } from './utils';
 
 const servicesFlamegraphRoute = createApmServerRoute({
   endpoint: routeDefinitions.profiling.flamegraph.endpoint,
@@ -39,6 +40,7 @@ const servicesFlamegraphRoute = createApmServerRoute({
       const { serviceName } = params.path;
       const { start, end, kuery, transactionName, transactionType, environment, schema } =
         params.query;
+      const { startSeconds, endSeconds, totalSeconds } = toProfilingTimeRange({ start, end });
 
       const indices = apmEventClient.getIndicesFromProcessorEvent(ProcessorEvent.transaction);
       const stacktraceIdsField = await getStacktracesIdsField({
@@ -56,10 +58,10 @@ const servicesFlamegraphRoute = createApmServerRoute({
         profilingDataAccessStart,
         core,
         esClient: esClient.asCurrentUser,
-        totalSeconds: (end - start) / 1000,
+        totalSeconds,
         query: getTransactionsProfilingQuery({
-          start: start / 1000,
-          end: end / 1000,
+          start: startSeconds,
+          end: endSeconds,
           kuery,
           serviceName,
           transactionName,
@@ -102,6 +104,7 @@ const servicesFunctionsRoute = createApmServerRoute({
         environment,
         schema,
       } = params.query;
+      const { startSeconds, endSeconds, totalSeconds } = toProfilingTimeRange({ start, end });
       const { serviceName } = params.path;
 
       const indices = apmEventClient.getIndicesFromProcessorEvent(ProcessorEvent.transaction);
@@ -122,10 +125,10 @@ const servicesFunctionsRoute = createApmServerRoute({
         esClient: esClient.asCurrentUser,
         startIndex,
         endIndex,
-        totalSeconds: (end - start) / 1000,
+        totalSeconds,
         query: getTransactionsProfilingQuery({
-          start: start / 1000,
-          end: end / 1000,
+          start: startSeconds,
+          end: endSeconds,
           kuery,
           serviceName,
           transactionName,
@@ -197,6 +200,7 @@ const servicesProfilingSchemasRoute = createApmServerRoute({
 
     const { serviceName } = params.path;
     const { start, end, kuery, transactionName, transactionType, environment } = params.query;
+    const { startSeconds, endSeconds } = toProfilingTimeRange({ start, end });
 
     const indices = apmEventClient.getIndicesFromProcessorEvent(ProcessorEvent.transaction);
     const stacktraceIdsField = await getStacktracesIdsField({
@@ -213,8 +217,8 @@ const servicesProfilingSchemasRoute = createApmServerRoute({
     return getProfilingSchemas({
       profilingDataAccessStart,
       esClient: esClient.asCurrentUser,
-      start: start / 1000,
-      end: end / 1000,
+      start: startSeconds,
+      end: endSeconds,
       kuery,
       serviceName,
       transactionName,

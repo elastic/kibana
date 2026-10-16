@@ -19,6 +19,15 @@ export function hostNamesToKuery(hostNames: string[]) {
   }, '');
 }
 
+/** Converts the millisecond time range of a profiling route into the seconds of the profiling queries */
+export function toProfilingTimeRange({ start, end }: { start: number; end: number }) {
+  return {
+    startSeconds: start / 1000,
+    endSeconds: end / 1000,
+    totalSeconds: (end - start) / 1000,
+  };
+}
+
 /** Kuery of the profiling data of a service's containers or, when it has none, of its hosts */
 export function getHostsProfilingKuery({
   hostNames,

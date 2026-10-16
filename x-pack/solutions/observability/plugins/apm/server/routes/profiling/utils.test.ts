@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { HOST_NAME } from '../../../common/es_fields/apm';
-import { getHostsProfilingKuery, hostNamesToKuery } from './utils';
+import { getHostsProfilingKuery, hostNamesToKuery, toProfilingTimeRange } from './utils';
 
 describe('profiling utils', () => {
   describe('hostNamesToKuery', () => {
@@ -21,6 +21,24 @@ describe('profiling utils', () => {
 
     it('return empty string when no hostname', () => {
       expect(hostNamesToKuery([])).toEqual('');
+    });
+  });
+
+  describe('toProfilingTimeRange', () => {
+    it('converts the time range from milliseconds into seconds', () => {
+      expect(toProfilingTimeRange({ start: 1_000_000, end: 1_900_000 })).toEqual({
+        startSeconds: 1000,
+        endSeconds: 1900,
+        totalSeconds: 900,
+      });
+    });
+
+    it('keeps the fractions of a second', () => {
+      expect(toProfilingTimeRange({ start: 1_000_500, end: 1_001_000 })).toEqual({
+        startSeconds: 1000.5,
+        endSeconds: 1001,
+        totalSeconds: 0.5,
+      });
     });
   });
 

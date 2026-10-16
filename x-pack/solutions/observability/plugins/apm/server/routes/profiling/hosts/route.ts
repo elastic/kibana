@@ -19,6 +19,7 @@ import { fetchFunctions } from '../fetch_functions';
 import { getProfilingHostsSchemas } from '../get_profiling_schemas';
 import { getServiceCorrelationFields } from '../get_service_correlation_fields';
 import { getHostsProfilingEventsQuery } from '../profiling_queries';
+import { toProfilingTimeRange } from '../utils';
 
 const profilingHostsFlamegraphRoute = createApmServerRoute({
   endpoint: routeDefinitions.profiling.hostsFlamegraph.endpoint,
@@ -49,17 +50,16 @@ const profilingHostsFlamegraphRoute = createApmServerRoute({
       if (!hostNames.length && !containerIds.length) {
         return undefined;
       }
-      const startSecs = start / 1000;
-      const endSecs = end / 1000;
+      const { startSeconds, endSeconds, totalSeconds } = toProfilingTimeRange({ start, end });
 
       const flamegraph = await fetchFlamegraph({
         profilingDataAccessStart,
         core,
         esClient: esClient.asCurrentUser,
-        totalSeconds: endSecs - startSecs,
+        totalSeconds,
         query: getHostsProfilingEventsQuery({
-          start: startSecs,
-          end: endSecs,
+          start: startSeconds,
+          end: endSeconds,
           kuery,
           hostNames,
           containerIds,
@@ -115,8 +115,7 @@ const profilingHostsFunctionsRoute = createApmServerRoute({
         return undefined;
       }
 
-      const startSecs = start / 1000;
-      const endSecs = end / 1000;
+      const { startSeconds, endSeconds, totalSeconds } = toProfilingTimeRange({ start, end });
 
       const functions = await fetchFunctions({
         profilingDataAccessStart,
@@ -124,10 +123,10 @@ const profilingHostsFunctionsRoute = createApmServerRoute({
         esClient: esClient.asCurrentUser,
         startIndex,
         endIndex,
-        totalSeconds: endSecs - startSecs,
+        totalSeconds,
         query: getHostsProfilingEventsQuery({
-          start: startSecs,
-          end: endSecs,
+          start: startSeconds,
+          end: endSeconds,
           kuery,
           hostNames,
           containerIds,
@@ -161,6 +160,7 @@ const profilingHostsSchemasRoute = createApmServerRoute({
     }
 
     const { start, end, environment, documentType, rollupInterval, kuery } = params.query;
+    const { startSeconds, endSeconds } = toProfilingTimeRange({ start, end });
     const { serviceName } = params.path;
 
     const { hostNames, containerIds } = await getServiceCorrelationFields({
@@ -176,8 +176,8 @@ const profilingHostsSchemasRoute = createApmServerRoute({
     return getProfilingHostsSchemas({
       profilingDataAccessStart,
       esClient: esClient.asCurrentUser,
-      start: start / 1000,
-      end: end / 1000,
+      start: startSeconds,
+      end: endSeconds,
       hostNames,
       containerIds,
       kuery,
