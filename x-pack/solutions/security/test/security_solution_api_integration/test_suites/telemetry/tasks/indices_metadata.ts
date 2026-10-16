@@ -12,11 +12,10 @@ import {
   cleanupIngestPipelines,
   cleanupPolicies,
   ensureBackingIndices,
-  launchTask,
+  launchTaskAndWaitFor,
   randomDatastream,
   randomIlmPolicy,
   randomIngestPipeline,
-  taskHasRun,
   waitFor,
 } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -276,20 +275,22 @@ export default ({ getService }: FtrProviderContext) => {
       const index = params.index;
       const policy = params.policyName;
 
-      const runAt = await launchTask(TASK_ID, kibanaServer, logger);
       const opts = {
         eventTypes: params.eventTypes,
         withTimeoutMs: 1000,
-        fromTimestamp: new Date().toISOString(),
       };
 
       // .ds-<ds-name>-YYYY.MM.DD-NNNNNN
       const regex = new RegExp(`^\.ds-${index}-\\d{4}.\\d{2}.\\d{2}-\\d{6}$`);
       let events: any[] = [];
-      await waitFor(
-        async () => {
+      await launchTaskAndWaitFor(
+        TASK_ID,
+        kibanaServer,
+        logger,
+        `${params.eventTypes.join(', ')} to be published`,
+        async (since) => {
           events = await ebtServer
-            .getEvents(Number.MAX_SAFE_INTEGER, opts)
+            .getEvents(Number.MAX_SAFE_INTEGER, { ...opts, fromTimestamp: since })
             .then((result) => result.map((ev) => ev.properties.items))
             .then((result) => result.flat())
             .then((result) =>
@@ -311,12 +312,8 @@ export default ({ getService }: FtrProviderContext) => {
               })
             );
 
-          const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
-
-          return hasRun && events.length > 0;
-        },
-        'waitForTaskToRun',
-        logger
+          return events.length > 0;
+        }
       );
 
       return events;
