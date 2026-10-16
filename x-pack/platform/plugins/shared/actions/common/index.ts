@@ -74,6 +74,18 @@ export type {
 } from './execution_log_types';
 export { EMPTY_EXECUTION_KPI_RESULT, executionLogSortableColumns } from './execution_log_types';
 export { validateEmptyStrings } from './validate_empty_strings';
+export type {
+  ConnectorSpecSummary,
+  ConnectorSpecDetail,
+  ConnectorSpecActionSummary,
+  ConnectorSpecActionDetail,
+  ConnectorSpecAvailability,
+} from './connector_spec';
+export type {
+  GetConnectorSpecResponse,
+  ConnectorSpecSummaryResponse,
+  GetAllConnectorSpecsResponse,
+} from './routes/connector/response';
 
 export const BASE_ACTION_API_PATH = '/api/actions';
 export const INTERNAL_BASE_ACTION_API_PATH = '/internal/actions';

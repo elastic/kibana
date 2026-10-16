@@ -17,7 +17,6 @@ import {
 import type { ActionsRequestHandlerContext } from '../../../types';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../../../common';
 import type { ILicenseState } from '../../../lib';
-import type { ActionsConfigurationUtilities } from '../../../actions_config';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 import { transformGetConnectorSpecResponseV1 } from './transforms';
@@ -26,14 +25,13 @@ import { transformGetConnectorSpecResponseV1 } from './transforms';
  * GET /internal/actions/connector_types/{id}/spec
  *
  * Returns the serialized connector spec as JSON Schema for client-side
- * form generation and validation.
+ * form generation and validation, plus action input schemas.
  *
  * Only available for connector types with source === 'spec'.
  */
 export const getConnectorSpecRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
-  licenseState: ILicenseState,
-  configurationUtilities: ActionsConfigurationUtilities
+  licenseState: ILicenseState
 ) => {
   router.get(
     {
@@ -43,7 +41,7 @@ export const getConnectorSpecRoute = (
         access: 'internal',
         summary: 'Get connector type specification',
         description:
-          'Returns metadata and JSON Schema for a connector type form (config + secrets). Only available for spec-based connectors.',
+          'Returns metadata, JSON Schema for a connector type form (config + secrets), and action input schemas. Only available for spec-based connectors.',
         tags: ['oas-tag:connectors'],
       },
       validate: {
@@ -66,12 +64,9 @@ export const getConnectorSpecRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actionsClient = (await context.actions).getActionsClient();
+        const specsClient = (await context.actions).getSpecsClient();
         const { id }: GetConnectorSpecParamsV1 = req.params;
-        const specResult = await actionsClient.getConnectorSpec({
-          id,
-          configurationUtilities,
-        });
+        const specResult = await specsClient.get({ id });
         const responseBody: GetConnectorSpecResponseV1 =
           transformGetConnectorSpecResponseV1(specResult);
         return res.ok({ body: responseBody });

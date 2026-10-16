@@ -11,7 +11,11 @@ export type {
   GetAllConnectorsResponse,
   ConnectorExecuteResponse,
   ConnectorAuthStatusResponse,
+  ConnectorSpecActionSummaryResponse,
+  ConnectorSpecActionDetailResponse,
   GetConnectorSpecResponse,
+  ConnectorSpecSummaryResponse,
+  GetAllConnectorSpecsResponse,
 } from './types/latest';
 
 export {
@@ -22,7 +26,12 @@ export {
   connectorTypeResponseSchema,
   connectorExecuteResponseSchema,
   connectorAuthStatusResponseSchema,
+  connectorSpecAvailabilityResponseSchema,
+  connectorSpecActionSummaryResponseSchema,
+  connectorSpecActionDetailResponseSchema,
   getConnectorSpecResponseBodySchema,
+  connectorSpecSummaryResponseSchema,
+  getAllConnectorSpecsResponseSchema,
 } from './schemas/latest';
 
 export type {
@@ -32,7 +41,11 @@ export type {
   GetAllConnectorTypesResponse as GetAllConnectorTypesResponseV1,
   ConnectorExecuteResponse as ConnectorExecuteResponseV1,
   ConnectorAuthStatusResponse as ConnectorAuthStatusResponseV1,
+  ConnectorSpecActionSummaryResponse as ConnectorSpecActionSummaryResponseV1,
+  ConnectorSpecActionDetailResponse as ConnectorSpecActionDetailResponseV1,
   GetConnectorSpecResponse as GetConnectorSpecResponseV1,
+  ConnectorSpecSummaryResponse as ConnectorSpecSummaryResponseV1,
+  GetAllConnectorSpecsResponse as GetAllConnectorSpecsResponseV1,
 } from './types/v1';
 
 export {
@@ -44,5 +57,10 @@ export {
   getAllConnectorTypesResponseSchema as getAllConnectorTypesResponseSchemaV1,
   connectorExecuteResponseSchema as connectorExecuteResponseSchemaV1,
   connectorAuthStatusResponseSchema as connectorAuthStatusResponseSchemaV1,
+  connectorSpecAvailabilityResponseSchema as connectorSpecAvailabilityResponseSchemaV1,
+  connectorSpecActionSummaryResponseSchema as connectorSpecActionSummaryResponseSchemaV1,
+  connectorSpecActionDetailResponseSchema as connectorSpecActionDetailResponseSchemaV1,
   getConnectorSpecResponseBodySchema as getConnectorSpecResponseBodySchemaV1,
+  connectorSpecSummaryResponseSchema as connectorSpecSummaryResponseSchemaV1,
+  getAllConnectorSpecsResponseSchema as getAllConnectorSpecsResponseSchemaV1,
 } from './schemas/v1';
