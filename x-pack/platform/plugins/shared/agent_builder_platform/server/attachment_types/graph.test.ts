@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import type { GraphAttachmentData, GraphEdge, GraphNode } from '../../common/attachments';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import {
+  GRAPH_ATTACHMENT_TYPE,
+  type GraphAttachmentData,
+  type GraphEdge,
+  type GraphNode,
+} from '../../common/attachments';
 import { createGraphAttachmentType } from './graph';
 
 const node = (id: string, label: string): GraphNode => ({
@@ -23,17 +28,17 @@ const edge = (source: string, target: string, label?: string): GraphEdge => ({
   label,
 });
 
-const toSurfaceComposition = (data: GraphAttachmentData) =>
-  createGraphAttachmentType().toSurfaceComposition?.(data, {
-    attachment: {} as VersionedAttachment,
-    version: 1,
-  });
+const toSurfaceComposition = async (data: GraphAttachmentData) =>
+  createGraphAttachmentType().toSurfaceComposition?.(
+    { id: 'graph-1', type: GRAPH_ATTACHMENT_TYPE, data },
+    { request: httpServerMock.createKibanaRequest(), spaceId: 'default' }
+  );
 
 describe('graph attachment type', () => {
   describe('toSurfaceComposition', () => {
-    it('lists the nodes and the edges between them, by label', () => {
+    it('lists the nodes and the edges between them, by label', async () => {
       expect(
-        toSurfaceComposition({
+        await toSurfaceComposition({
           title: 'Checkout',
           description: 'Service dependencies',
           nodes: [node('a', 'frontend'), node('b', 'cart')],
@@ -52,18 +57,20 @@ describe('graph attachment type', () => {
       });
     });
 
-    it('defaults the title, and leaves out the edges when there are none', () => {
-      const composition = toSurfaceComposition({ nodes: [node('a', 'frontend')], edges: [] });
+    it('defaults the title, and leaves out the edges when there are none', async () => {
+      const composition = await toSurfaceComposition({ nodes: [node('a', 'frontend')], edges: [] });
 
       expect(composition?.title).toBe('Graph');
       expect(composition?.body).toEqual([{ type: 'markdown', text: '**Nodes**\n- frontend' }]);
     });
 
-    it('falls back to the id of an edge endpoint that is not a node', () => {
-      expect(
-        toSurfaceComposition({ nodes: [node('a', 'frontend')], edges: [edge('a', 'missing')] })
-          ?.body
-      ).toEqual([
+    it('falls back to the id of an edge endpoint that is not a node', async () => {
+      const composition = await toSurfaceComposition({
+        nodes: [node('a', 'frontend')],
+        edges: [edge('a', 'missing')],
+      });
+
+      expect(composition?.body).toEqual([
         { type: 'markdown', text: '**Nodes**\n- frontend\n\n**Edges**\n- frontend → missing' },
       ]);
     });

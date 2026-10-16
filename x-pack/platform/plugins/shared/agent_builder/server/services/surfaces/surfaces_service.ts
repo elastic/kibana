@@ -10,6 +10,7 @@ import type {
   RoundCompleteEvent,
   SurfacePayload,
 } from '@kbn/agent-builder-common';
+import type { AttachmentSurfaceCompositionContext } from '@kbn/agent-builder-server/attachments';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
 import { buildComposition } from './composition';
@@ -24,8 +25,14 @@ export interface SurfacesService {
    */
   renderPayload(
     event: RoundCompleteEvent,
-    options: { originType?: ConversationOriginType }
-  ): SurfacePayload | undefined;
+    options: RenderPayloadOptions
+  ): Promise<SurfacePayload | undefined>;
+}
+
+/** Options of {@link SurfacesService.renderPayload}. */
+export interface RenderPayloadOptions extends AttachmentSurfaceCompositionContext {
+  /** Origin type of the round, which picks the surface. */
+  originType?: ConversationOriginType;
 }
 
 export class SurfacesServiceImpl implements SurfacesService {
@@ -47,10 +54,10 @@ export class SurfacesServiceImpl implements SurfacesService {
     this.logger = logger;
   }
 
-  renderPayload(
+  async renderPayload(
     { data: { round, attachments = [] } }: RoundCompleteEvent,
-    { originType }: { originType?: ConversationOriginType }
-  ): SurfacePayload | undefined {
+    { originType, request, spaceId }: RenderPayloadOptions
+  ): Promise<SurfacePayload | undefined> {
     const renderer = this.surfaceRenderers.find(({ id }) => id === originType);
 
     if (!renderer) {
@@ -58,10 +65,11 @@ export class SurfacesServiceImpl implements SurfacesService {
     }
 
     try {
-      const composition = buildComposition({
+      const composition = await buildComposition({
         round,
         attachments,
         attachmentsService: this.attachmentsService,
+        context: { request, spaceId },
         logger: this.logger,
       });
 

@@ -33,7 +33,7 @@ export const createGraphAttachmentType = (): AttachmentTypeDefinition<
         }),
       };
     },
-    toSurfaceComposition: ({ title, description, nodes, edges }) => {
+    toSurfaceComposition: ({ data: { title, description, nodes, edges } }) => {
       const labels = new Map(nodes.map(({ id, data }) => [id, data.label]));
       const toLabel = (id: string) => labels.get(id) ?? id;
 

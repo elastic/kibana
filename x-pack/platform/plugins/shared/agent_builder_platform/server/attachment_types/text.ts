@@ -34,7 +34,7 @@ export const createTextAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
-    toSurfaceComposition: ({ content }) => ({
+    toSurfaceComposition: ({ data: { content } }) => ({
       type: 'view',
       body: [{ type: 'markdown', text: toCodeFence(content) }],
     }),

@@ -13,6 +13,13 @@ import {
   type ConnectorSetupAttachmentData,
 } from '../../common/attachments';
 
+/** The connector type's name, from the attachment, its spec, or its id. */
+const getConnectorDisplayName = ({
+  connector_type: connectorType,
+  connector_type_name: connectorTypeName,
+}: ConnectorSetupAttachmentData): string =>
+  connectorTypeName ?? getConnectorSpec(connectorType)?.metadata.displayName ?? connectorType;
+
 /**
  * Server-side definition for the `connector_setup` attachment type.
  */
@@ -37,12 +44,10 @@ export const createConnectorSetupAttachmentType = (): AttachmentTypeDefinition<
   format: (attachment) => {
     return {
       getRepresentation: () => {
-        const { connector_type: connectorType, connector_type_name: connectorTypeName } =
-          attachment.data;
-        const spec = getConnectorSpec(connectorType);
-        const displayName = connectorTypeName ?? spec?.metadata.displayName ?? connectorType;
+        const { data } = attachment;
+        const displayName = getConnectorDisplayName(data);
         const value = [
-          `Connector setup card shown to the user for: ${displayName} (${connectorType}).`,
+          `Connector setup card shown to the user for: ${displayName} (${data.connector_type}).`,
           'The user enters configuration and secrets in the connector form; those never appear in chat.',
           'Once the user creates the connector it becomes available automatically — you do not need to ask for the connector id.',
           'After the user confirms it is set up, proceed using the connector tools on a later turn.',
@@ -51,15 +56,11 @@ export const createConnectorSetupAttachmentType = (): AttachmentTypeDefinition<
       },
     };
   },
-  toSurfaceComposition: (
-    { connector_type: connectorType, connector_type_name: connectorTypeName, reason },
-    { attachment: { origin } }
-  ) => {
-    const displayName =
-      connectorTypeName ?? getConnectorSpec(connectorType)?.metadata.displayName ?? connectorType;
+  toSurfaceComposition: ({ data, origin }) => {
+    const displayName = getConnectorDisplayName(data);
 
     const text = [
-      reason ?? `Configure the ${displayName} connector so the agent can use it here.`,
+      data.reason ?? `Configure the ${displayName} connector so the agent can use it here.`,
       !origin && 'Finish setting it up in Kibana.',
     ]
       .filter(Boolean)

@@ -38,7 +38,7 @@ export const createScreenContextAttachmentType = (): AttachmentTypeDefinition<
       };
     },
     isReadonly: true,
-    toSurfaceComposition: ({ app, url, description, time_range: timeRange }) => {
+    toSurfaceComposition: ({ data: { app, url, description, time_range: timeRange } }) => {
       const text = toBulletList([
         app && `App: ${app}`,
         url && `URL: ${url}`,

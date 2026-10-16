@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { Attachment, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AgentFormattedAttachment } from '@kbn/agent-builder-server/attachments';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import {
@@ -114,14 +114,11 @@ describe('connector_setup attachment type', () => {
   });
 
   describe('toSurfaceComposition', () => {
-    const toSurfaceComposition = (data: ConnectorSetupAttachmentData, origin?: string) =>
-      attachmentType.toSurfaceComposition?.(data, {
-        attachment: { origin } as VersionedAttachment,
-        version: 1,
-      });
+    const toSurfaceComposition = async (data: ConnectorSetupAttachmentData, origin?: string) =>
+      attachmentType.toSurfaceComposition?.({ ...createAttachment(data), origin }, formatContext);
 
-    it('shows the reason, and asks to finish the setup in Kibana', () => {
-      expect(toSurfaceComposition(validData)).toEqual({
+    it('shows the reason, and asks to finish the setup in Kibana', async () => {
+      expect(await toSurfaceComposition(validData)).toEqual({
         type: 'view',
         title: 'GitHub',
         subtitle: 'Setup',
@@ -134,8 +131,8 @@ describe('connector_setup attachment type', () => {
       });
     });
 
-    it('shows the connector as connected once it has been created', () => {
-      const composition = toSurfaceComposition(validData, 'connector-123');
+    it('shows the connector as connected once it has been created', async () => {
+      const composition = await toSurfaceComposition(validData, 'connector-123');
 
       expect(composition?.subtitle).toBe('Connected');
       expect(composition?.body).toEqual([
@@ -143,7 +140,7 @@ describe('connector_setup attachment type', () => {
       ]);
     });
 
-    it('falls back to the spec display name and a default reason', () => {
+    it('falls back to the spec display name and a default reason', async () => {
       getConnectorSpecMock.mockReturnValue({
         metadata: {
           id: '.notion',
@@ -156,7 +153,7 @@ describe('connector_setup attachment type', () => {
         test: { handler: jest.fn(), enabled: false },
       });
 
-      const composition = toSurfaceComposition({ connector_type: '.notion' });
+      const composition = await toSurfaceComposition({ connector_type: '.notion' });
 
       expect(composition?.title).toBe('Notion');
       expect(composition?.body).toEqual([
@@ -167,10 +164,10 @@ describe('connector_setup attachment type', () => {
       ]);
     });
 
-    it('falls back to the connector type when no spec is found', () => {
+    it('falls back to the connector type when no spec is found', async () => {
       getConnectorSpecMock.mockReturnValue(undefined);
 
-      expect(toSurfaceComposition({ connector_type: '.unknown' })?.title).toBe('.unknown');
+      expect((await toSurfaceComposition({ connector_type: '.unknown' }))?.title).toBe('.unknown');
     });
   });
 });

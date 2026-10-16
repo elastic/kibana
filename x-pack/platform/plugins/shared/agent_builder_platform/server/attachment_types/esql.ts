@@ -52,7 +52,7 @@ export const createEsqlAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
-    toSurfaceComposition: ({ query, description }) => ({
+    toSurfaceComposition: ({ data: { query, description } }) => ({
       type: 'view',
       body: [
         {
@@ -72,6 +72,6 @@ export const createEsqlAttachmentType = (): AttachmentTypeDefinition<
 
 const formatEsqlAttachment = (data: EsqlAttachmentData): string => {
   let formatted = data.description ? `${data.description}\n` : '';
-  formatted += `\`\`\`esql\n${data.query}\n\`\`\``;
+  formatted += toCodeFence(data.query, 'esql');
   return formatted;
 };

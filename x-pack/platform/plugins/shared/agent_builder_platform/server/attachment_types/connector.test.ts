@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { Attachment, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import {
   AttachmentType,
   type ConnectorAttachmentData,
@@ -525,13 +525,10 @@ describe('connector attachment type', () => {
   });
 
   describe('toSurfaceComposition', () => {
-    const toSurfaceComposition = (data: ConnectorAttachmentData) =>
-      connectorType.toSurfaceComposition?.(data, {
-        attachment: {} as VersionedAttachment,
-        version: 1,
-      });
+    const toSurfaceComposition = async (data: ConnectorAttachmentData) =>
+      connectorType.toSurfaceComposition?.(createAttachment(data), formatContext);
 
-    it('shows the connector with its description and enabled sub-actions', () => {
+    it('shows the connector with its description and enabled sub-actions', async () => {
       const inputSchema = z.object({ query: z.string() });
 
       getConnectorSpecMock.mockReturnValue({
@@ -562,7 +559,7 @@ describe('connector attachment type', () => {
       });
 
       expect(
-        toSurfaceComposition({
+        await toSurfaceComposition({
           connector_id: 'connector-456',
           connector_name: 'Team Slack',
           connector_type: '.slack2',
@@ -581,10 +578,10 @@ describe('connector attachment type', () => {
       });
     });
 
-    it('shows only the name and type when no spec is found', () => {
+    it('shows only the name and type when no spec is found', async () => {
       getConnectorSpecMock.mockReturnValue(undefined);
 
-      expect(toSurfaceComposition(validData)).toEqual({
+      expect(await toSurfaceComposition(validData)).toEqual({
         type: 'view',
         title: 'My Github Connector',
         subtitle: '.github',

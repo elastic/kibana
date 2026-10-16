@@ -13,6 +13,10 @@ import {
 } from '../../common/attachments';
 import { toCodeFence } from './markdown';
 
+/** The paths of the skill's referenced files, relative to its SKILL.md. */
+const getReferencedFilePaths = ({ referenced_content: files = [] }: SkillAttachmentData['skill']) =>
+  files.map(({ relativePath, name }) => `${relativePath}/${name}.md`);
+
 /**
  * Server-side definition for the `skill` attachment type.
  *
@@ -51,8 +55,8 @@ export const createSkillAttachmentType = (): AttachmentTypeDefinition<
         const {
           data: { skill },
         } = attachment;
-        const referencedSummary = (skill.referenced_content ?? [])
-          .map((item) => `- ${item.relativePath}/${item.name}.md`)
+        const referencedSummary = getReferencedFilePaths(skill)
+          .map((path) => `- ${path}`)
           .join('\n');
         const value = [
           `Skill (id: ${skill.id})`,
@@ -70,11 +74,9 @@ export const createSkillAttachmentType = (): AttachmentTypeDefinition<
       },
     };
   },
-  toSurfaceComposition: ({ skill }) => {
+  toSurfaceComposition: ({ data: { skill } }) => {
     const { id, name, description, content, tool_ids: toolIds } = skill;
-    const files = (skill.referenced_content ?? []).map(
-      ({ relativePath, name: fileName }) => `${relativePath}/${fileName}.md`
-    );
+    const files = getReferencedFilePaths(skill);
 
     const text = [
       description,
