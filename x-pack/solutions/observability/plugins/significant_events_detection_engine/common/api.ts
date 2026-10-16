@@ -87,6 +87,30 @@ export interface EngineEventDetailsResponse {
   activity: ActivityEntry[];
 }
 
+/** What a signal's evidence query returns right now, so a person can read the rows. */
+export interface EventEvidenceResponse {
+  fingerprint: string;
+  query: string;
+  columns: string[];
+  rows: Array<Record<string, unknown>>;
+  took_ms: number;
+  /** Set when the query failed; the rows are then empty. */
+  error?: string;
+}
+
+/** One measured minute of a signal. */
+export interface SeriesSample {
+  bucket_start: string;
+  value: number;
+}
+
+/** Each signal's measured values around an event, to draw them against normal. */
+export interface EventSeriesResponse {
+  from: string;
+  to: string;
+  series: Array<{ fingerprint: string; samples: SeriesSample[] }>;
+}
+
 /** Result of replaying strategies over past buckets. */
 export interface ReplaySummary {
   from: string;

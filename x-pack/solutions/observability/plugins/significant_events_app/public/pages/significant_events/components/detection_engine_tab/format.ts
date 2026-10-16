@@ -55,3 +55,44 @@ export function formatValue(value: number, unit: string): string {
   }
   return `${Math.round(value * 100) / 100} ${unit}`;
 }
+
+/** "2.4 s", "45 s", "3 min 12 s", "1 h 4 min": a duration as people say it, two units at most. */
+export function formatDuration(ms: number): string {
+  if (ms < 10_000) {
+    // Engine runs and hand-offs take seconds; whole seconds would round many of them to 0.
+    return i18n.translate('xpack.significantEventsApp.detectionEngine.format.shortSeconds', {
+      defaultMessage: '{seconds} s',
+      values: { seconds: Math.max(0, Math.round(ms / 100) / 10) },
+    });
+  }
+  const totalSeconds = Math.round(ms / 1000);
+  if (totalSeconds < 60) {
+    return i18n.translate('xpack.significantEventsApp.detectionEngine.format.seconds', {
+      defaultMessage: '{seconds} s',
+      values: { seconds: totalSeconds },
+    });
+  }
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  if (totalMinutes < 60) {
+    const seconds = totalSeconds % 60;
+    return seconds === 0
+      ? i18n.translate('xpack.significantEventsApp.detectionEngine.format.minutes', {
+          defaultMessage: '{minutes} min',
+          values: { minutes: totalMinutes },
+        })
+      : i18n.translate('xpack.significantEventsApp.detectionEngine.format.minutesSeconds', {
+          defaultMessage: '{minutes} min {seconds} s',
+          values: { minutes: totalMinutes, seconds },
+        });
+  }
+  const minutes = totalMinutes % 60;
+  return i18n.translate('xpack.significantEventsApp.detectionEngine.format.hoursMinutes', {
+    defaultMessage: '{hours} h {minutes} min',
+    values: { hours: Math.floor(totalMinutes / 60), minutes },
+  });
+}
+
+/** "11:04:31": wall-clock time of day, the unit the engine's minutes are read in. */
+export function formatTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString();
+}

@@ -37,6 +37,7 @@ Managed workflow (every minute) ──► POST _tick ───┤  join proposal
 | Storage | `server/lib/storage/*` |
 | Schedule | `server/lib/scheduler/auto_run.ts`; the workflow itself is `src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events/detection_engine.yaml` |
 | API | `server/routes/*`; shared types in `common/` |
+| Event view data: evidence rows, each signal's minutes | `server/lib/overview/event_inspection.ts` |
 
 ## Storage
 
@@ -85,5 +86,12 @@ In `kibana.yml`, under `xpack.significantEventsDetectionEngine`:
 2. Open **Nightshift Management → Detection engine**. In the settings menu, press **Replay last 60 minutes** so every check starts with a baseline instead of warming up.
 3. Turn on **Auto-run**. Health checks and KI rules report within about three minutes of a problem, new log patterns within about seven.
 4. Open events appear in the main table; the **Services** column on the right shows which services have one. **Reset engine data** in the settings menu deletes what the engine produced and keeps its settings, schedule and rules.
+5. Open an event to see:
+   - what its status means right now, such as how many signals are still above normal or how many quiet minutes it needs to close;
+   - how fast it was raised, from the first bad minute to the published Alerting v2 alert, with the wait for late data shown apart from the engine's own time;
+   - each signal with the rule that reported it, its minutes charted against its normal, the AI step's verdict, and its evidence query, which **Show the rows** runs as you;
+   - every step the engine took, one occurrence at a time.
+
+The table's **Raised after** column and the **Typical time to raise** figure only count events raised after reaction times were recorded; older events show the times from their activity log inside the event view.
 
 Every decision, including the ones not to raise an event, is in the **Activity log** and **Every detection** tabs.

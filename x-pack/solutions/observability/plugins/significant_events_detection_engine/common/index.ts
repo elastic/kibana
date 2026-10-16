@@ -16,6 +16,9 @@ export type {
   EngineServicesResponse,
   EnginePage,
   EngineEventDetailsResponse,
+  EventEvidenceResponse,
+  SeriesSample,
+  EventSeriesResponse,
   ReplaySummary,
 } from './api';
 export type { EngineAgentKind, EngineConfig, EngineConfigUpdate } from './config';
@@ -52,6 +55,7 @@ export type {
   DismissalReason,
   EventDismissal,
   EventCloseReason,
+  EventOpenWindow,
   EngineEvent,
 } from './events';
 export {

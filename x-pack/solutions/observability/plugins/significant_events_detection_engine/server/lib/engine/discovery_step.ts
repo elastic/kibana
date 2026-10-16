@@ -36,8 +36,15 @@ function maxSeverity(a: EngineSeverity, b: EngineSeverity): EngineSeverity {
   return SEVERITY_RANK[a] >= SEVERITY_RANK[b] ? a : b;
 }
 
-function formatNumber(value: number): string {
-  return String(Math.round(value * 1000) / 1000);
+/** A value in its unit as people read it in the activity log: 44.2%, 1,214 ms, 51.7. */
+function formatMeasure(value: number, unit: string): string {
+  if (unit === 'ratio' || unit === 'drop') {
+    return `${Math.round(value * 1000) / 10}%`;
+  }
+  if (unit === 'ms') {
+    return `${Math.round(value).toLocaleString('en-US')} ms`;
+  }
+  return (Math.round(value * 10) / 10).toLocaleString('en-US');
 }
 
 // A plain boolean on purpose: a type predicate would narrow a closed owner to `never`.
@@ -316,8 +323,10 @@ export function createDiscoveryStep({
       const reason =
         baseline.decision === 'warming_up'
           ? `Warming up: ${baseline.samples} of ${config.baseline.min_samples} samples needed.`
-          : `Within normal: ${formatNumber(observation.value)} ${observation.unit} is not above ${
-              baseline.threshold === undefined ? 'its threshold' : formatNumber(baseline.threshold)
+          : `Within normal: ${formatMeasure(observation.value, observation.unit)} is not above ${
+              baseline.threshold === undefined
+                ? 'its threshold'
+                : formatMeasure(baseline.threshold, observation.unit)
             }.`;
       record({
         observation,
@@ -355,11 +364,15 @@ export function createDiscoveryStep({
           message:
             baseline.decision === 'skipped'
               ? `${observation.title}: the customer's rule already decided; baseline check skipped.`
-              : `${observation.title}: above normal (${formatNumber(observation.value)} ${
+              : `${observation.title}: above normal, ${formatMeasure(
+                  observation.value,
                   observation.unit
-                } > ${formatNumber(baseline.threshold ?? 0)}, median ${formatNumber(
-                  baseline.median ?? 0
-                )} over ${baseline.samples} samples).`,
+                )} against up to ${formatMeasure(
+                  baseline.threshold ?? 0,
+                  observation.unit
+                )} (median ${formatMeasure(baseline.median ?? 0, observation.unit)} over ${
+                  baseline.samples
+                } minutes).`,
         });
       }
 
@@ -438,10 +451,13 @@ export function createDiscoveryStep({
             baseline,
             detectionId,
             outcome: 'held_by_dismissal',
-            reason: `Dismissed as ${owner.dismissal.reason}; ${formatNumber(
-              observation.value
+            reason: `Dismissed as ${owner.dismissal.reason}; ${formatMeasure(
+              observation.value,
+              observation.unit
             )} is not worse than ${
-              dismissedValue === undefined ? 'the dismissed value' : formatNumber(dismissedValue)
+              dismissedValue === undefined
+                ? 'the dismissed value'
+                : formatMeasure(dismissedValue, observation.unit)
             } by ${config.worse_margin * 100}%.`,
             eventId: owner.event_id,
           });
@@ -515,7 +531,10 @@ export function createDiscoveryStep({
             close_reason: undefined,
             dismissal: undefined,
             verification: undefined,
-            open_windows: [...owner.open_windows, { from: at }],
+            open_windows: [
+              ...owner.open_windows,
+              { from: at, raised_at: new Date().toISOString(), run_started_at: summary.started_at },
+            ],
             members: owner.members.map((member) =>
               member.fingerprint === observation.fingerprint
                 ? {
@@ -707,7 +726,9 @@ export function createDiscoveryStep({
           created_at: new Date().toISOString(),
           opened_at: at,
           updated_at: bucketEndIso,
-          open_windows: [{ from: at }],
+          open_windows: [
+            { from: at, raised_at: new Date().toISOString(), run_started_at: summary.started_at },
+          ],
         },
         agentCase,
         answer,

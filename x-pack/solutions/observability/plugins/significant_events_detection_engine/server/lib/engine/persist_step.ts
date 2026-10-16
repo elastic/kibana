@@ -17,6 +17,23 @@ import type { IRunRecorder } from './run_recorder';
 const MAX_REPUBLISH_PER_RUN = 50;
 
 /**
+ * Stamps the current open window with its first hand-off, which is the moment people downstream
+ * could see the problem. Later publications of the same window are status updates. Windows
+ * without `raised_at` were opened before these times were recorded; their first hand-off is
+ * long past, so a stamp now would be a status update passed off as the first one.
+ */
+function markFirstPublication(event: EngineEvent, at: string): EngineEvent['open_windows'] {
+  const last = event.open_windows.length - 1;
+  const current = event.open_windows[last];
+  if (event.status === 'inactive' || !current?.raised_at || current.published_at) {
+    return event.open_windows;
+  }
+  return event.open_windows.map((window, index) =>
+    index === last ? { ...window, published_at: at } : window
+  );
+}
+
+/**
  * Writes the run's events, then hands the changed ones off as Alerting v2 alerts. Returns the
  * events another writer changed first, whose changes from this run were not applied.
  *
@@ -111,8 +128,13 @@ export async function persistAndPublish({
           event_id: event.event_id,
           message: `Published "${event.title}" (${event.status}) to .rule-events as an Alerting v2 alert.`,
         });
+        const publishedAt = new Date().toISOString();
         return {
-          event: { ...event, published: { at: new Date().toISOString(), ok: true } },
+          event: {
+            ...event,
+            published: { at: publishedAt, ok: true },
+            open_windows: markFirstPublication(event, publishedAt),
+          },
           version,
         };
       } catch (error) {

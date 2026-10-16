@@ -13,6 +13,8 @@ import type {
   EngineEvent,
   EngineEventDetailsResponse,
   EngineServicesResponse,
+  EventEvidenceResponse,
+  EventSeriesResponse,
 } from '../../common';
 import {
   ACTIVITY_STEPS,
@@ -24,6 +26,7 @@ import {
 } from '../../common';
 import { DetectionEngineError } from '../lib/errors';
 import { applyOperatorInput, verifyEvent } from '../lib/operator/operator_actions';
+import { readEventEvidence, readEventSeries } from '../lib/overview/event_inspection';
 import { listServices } from '../lib/overview/overview';
 import { createRoute } from './create_route';
 
@@ -85,6 +88,41 @@ const eventRoute = createRoute({
       scope.storage.records.listActivity({ eventId: params.path.id, size: 500 }),
     ]);
     return { event: found.event, detections: detections.items, activity: activity.items };
+  },
+});
+
+const eventEvidenceRoute = createRoute({
+  endpoint: `GET ${DETECTION_ENGINE_API_BASE_PATH}/events/{id}/evidence`,
+  options: { access: 'internal', summary: "Run one signal's evidence query of an event" },
+  security: READ,
+  params: z.object({
+    path: eventIdPath,
+    query: z.object({ fingerprint: z.string().min(1).max(1_000) }),
+  }),
+  handler: async ({ request, params, getStartServices }): Promise<EventEvidenceResponse> => {
+    const { createScope } = await getStartServices();
+    const scope = await createScope(request);
+    const found = await scope.storage.events.get(params.path.id);
+    if (!found) {
+      throw new DetectionEngineError(`Event ${params.path.id} not found`, 404);
+    }
+    return readEventEvidence({ scope, event: found.event, fingerprint: params.query.fingerprint });
+  },
+});
+
+const eventSeriesRoute = createRoute({
+  endpoint: `GET ${DETECTION_ENGINE_API_BASE_PATH}/events/{id}/series`,
+  options: { access: 'internal', summary: "Measured values of an event's signals over time" },
+  security: READ,
+  params: z.object({ path: eventIdPath }),
+  handler: async ({ request, params, getStartServices }): Promise<EventSeriesResponse> => {
+    const { createScope } = await getStartServices();
+    const scope = await createScope(request);
+    const found = await scope.storage.events.get(params.path.id);
+    if (!found) {
+      throw new DetectionEngineError(`Event ${params.path.id} not found`, 404);
+    }
+    return readEventSeries({ scope, event: found.event });
   },
 });
 
@@ -210,6 +248,8 @@ const servicesRoute = createRoute({
 export const eventsRoutes = {
   ...eventsRoute,
   ...eventRoute,
+  ...eventEvidenceRoute,
+  ...eventSeriesRoute,
   ...dismissRoute,
   ...closeRoute,
   ...verifyRoute,

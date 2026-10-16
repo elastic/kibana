@@ -20,8 +20,9 @@ import type {
   EngineRunSummary,
 } from '@kbn/significant-events-detection-engine-plugin/common';
 import React from 'react';
-import { formatTokens, formatUsd } from './format';
+import { formatAgo, formatDuration, formatTime, formatTokens, formatUsd } from './format';
 import { OUTCOME_LABELS, STATUS_LABELS, STRATEGY_LABELS, type StepTone } from './labels';
+import { useNow } from './use_now';
 import { useToneColors } from './use_tone_colors';
 
 interface IStageProps {
@@ -147,6 +148,7 @@ interface IPipelineSummaryProps {
 
 /** The last evaluated minute, step by step, from what was watched to the events it changed. */
 export function PipelineSummary({ run }: IPipelineSummaryProps) {
+  const now = useNow(5_000);
   if (!run) {
     return (
       <EuiPanel hasBorder paddingSize="s" data-test-subj="detectionEnginePipelineEmpty">
@@ -177,14 +179,29 @@ export function PipelineSummary({ run }: IPipelineSummaryProps) {
           <EuiTitle size="xxs">
             <h3>
               {i18n.translate('xpack.significantEventsApp.detectionEngine.pipeline.title', {
-                defaultMessage: 'How the last run was handled ({from} - {to})',
+                defaultMessage: 'Last run {ago}, took {duration}',
                 values: {
-                  from: new Date(run.bucket_start ?? run.started_at).toLocaleTimeString(),
-                  to: new Date(run.bucket_end ?? run.finished_at).toLocaleTimeString(),
+                  ago: formatAgo(run.finished_at, now),
+                  duration: formatDuration(
+                    Date.parse(run.finished_at) - Date.parse(run.started_at)
+                  ),
                 },
               })}
             </h3>
           </EuiTitle>
+          {run.bucket_start && run.bucket_end && (
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.significantEventsApp.detectionEngine.pipeline.minutes', {
+                defaultMessage:
+                  'It checked the data from {from} to {to}, {behind} behind real time when it ran. Rules wait a few minutes for late logs before a minute counts.',
+                values: {
+                  from: formatTime(run.bucket_start),
+                  to: formatTime(run.bucket_end),
+                  behind: formatDuration(Date.parse(run.started_at) - Date.parse(run.bucket_end)),
+                },
+              })}
+            </EuiText>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <Legend />
@@ -342,13 +359,17 @@ export function PipelineSummary({ run }: IPipelineSummaryProps) {
             })}`}
           {changed.length > 0 && (
             <div>
-              {changed
-                .map(
-                  (transition) =>
-                    `${STATUS_LABELS[transition.from as keyof typeof STATUS_LABELS]} → ${
-                      STATUS_LABELS[transition.to]
-                    }`
-                )
+              {Object.entries(
+                // One line per kind of change, counted: a catch-up run can move an event many times.
+                changed.reduce<Record<string, number>>((counts, transition) => {
+                  const label = `${
+                    STATUS_LABELS[transition.from as keyof typeof STATUS_LABELS]
+                  } → ${STATUS_LABELS[transition.to]}`;
+                  counts[label] = (counts[label] ?? 0) + 1;
+                  return counts;
+                }, {})
+              )
+                .map(([label, count]) => (count > 1 ? `${label} ×${count}` : label))
                 .join(' · ')}
             </div>
           )}

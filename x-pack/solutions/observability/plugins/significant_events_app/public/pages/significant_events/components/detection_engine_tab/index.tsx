@@ -26,6 +26,7 @@ import { EngineHeader } from './engine_header';
 import { EngineKpis } from './engine_kpis';
 import { EventFlyout } from './event_flyout';
 import { EventsTable } from './events_table';
+import { HowToRead } from './how_to_read';
 import { PipelineSummary } from './pipeline_summary';
 import { ServicesPanel } from './services_panel';
 import { StrategiesTable } from './strategies_table';
@@ -82,7 +83,8 @@ export function DetectionEngineTab() {
     <div data-test-subj="detectionEngineTab">
       <EngineHeader overview={overview} actions={actions} />
       <EuiSpacer size="s" />
-      <EngineKpis overview={overview} />
+      <HowToRead />
+      <EngineKpis overview={overview} events={events} />
       <EuiSpacer size="s" />
       <PipelineSummary run={overview.last_run} />
       <EuiSpacer size="m" />
@@ -109,7 +111,12 @@ export function DetectionEngineTab() {
           </EuiTabs>
           <EuiSpacer size="s" />
           {innerTab === 'events' && (
-            <EventsTable events={events} isLoading={isEventsLoading} onOpenEvent={setOpenEventId} />
+            <EventsTable
+              events={events}
+              isLoading={isEventsLoading}
+              quietPeriodBuckets={overview.config.quiet_period_buckets}
+              onOpenEvent={setOpenEventId}
+            />
           )}
           {innerTab === 'strategies' && <StrategiesTable overview={overview} actions={actions} />}
           {innerTab === 'detections' && <DetectionsTable onOpenEvent={setOpenEventId} />}
@@ -127,6 +134,8 @@ export function DetectionEngineTab() {
         <EventFlyout
           eventId={openEventId}
           actions={actions}
+          strategies={overview.strategies}
+          quietPeriodBuckets={overview.config.quiet_period_buckets}
           onClose={() => setOpenEventId(undefined)}
         />
       )}

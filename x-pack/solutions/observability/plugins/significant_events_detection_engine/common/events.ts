@@ -102,6 +102,21 @@ export interface EventDismissal {
 
 export type EventCloseReason = 'recovered' | 'operator' | 'dismissed';
 
+/**
+ * One time an event was open. `from` is data time, the first minute that was above normal; the
+ * other times are wall-clock, so the gap between them is how fast the engine reacted.
+ */
+export interface EventOpenWindow {
+  from: string;
+  to?: string;
+  /** When the engine raised it. Missing on windows stored before this was recorded. */
+  raised_at?: string;
+  /** When the run that raised it started. The time before it is spent waiting for data. */
+  run_started_at?: string;
+  /** When it was first handed off as an Alerting v2 alert. */
+  published_at?: string;
+}
+
 /** A significant event as the engine stores it: current state, updated in place. */
 export interface EngineEvent {
   event_id: string;
@@ -122,7 +137,7 @@ export interface EngineEvent {
   closed_at?: string;
   close_reason?: EventCloseReason;
   /** Time ranges this event was open; their buckets are left out of the members' baselines. */
-  open_windows: Array<{ from: string; to?: string }>;
+  open_windows: EventOpenWindow[];
   dismissal?: EventDismissal;
   assessment?: EventAssessment;
   verification?: EventVerification;

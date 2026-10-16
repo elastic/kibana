@@ -12,6 +12,8 @@ import type {
   DetectionStrategyId,
   DismissalReason,
   EngineEventStatus,
+  EvidenceVerdict,
+  EventCloseReason,
   StrategyMode,
 } from '@kbn/significant-events-detection-engine-plugin/common';
 
@@ -197,8 +199,18 @@ export const STEP_TONES: Record<ActivityStep, StepTone> = {
   run: 'neutral',
 };
 
-/** Steps that repeat every minute; hidden from the activity log unless asked for. */
-export const ROUTINE_ACTIONS = new Set(['evaluated', 'finished', 'replayed', 'note']);
+/**
+ * Entries that repeat every minute, such as an open event carrying on; hidden from the logs
+ * unless asked for, so the decisions stand out.
+ */
+export const ROUTINE_ACTIONS = new Set([
+  'evaluated',
+  'finished',
+  'replayed',
+  'note',
+  'continued',
+  'cooldown',
+]);
 
 export const DISMISSAL_LABELS: Record<DismissalReason, string> = {
   false_positive: i18n.translate(
@@ -223,3 +235,77 @@ export const DISMISSAL_LABELS: Record<DismissalReason, string> = {
     }
   ),
 };
+
+export const VERDICT_COLORS: Record<EvidenceVerdict, string> = {
+  confirms: 'success',
+  refutes: 'danger',
+  inconclusive: 'default',
+  off_topic: 'warning',
+};
+
+/** The agent's verdict on one signal's evidence, as a person would say it. */
+export const VERDICT_LABELS: Record<EvidenceVerdict, string> = {
+  confirms: i18n.translate('xpack.significantEventsApp.detectionEngine.verdict.confirms', {
+    defaultMessage: 'Evidence confirms',
+  }),
+  refutes: i18n.translate('xpack.significantEventsApp.detectionEngine.verdict.refutes', {
+    defaultMessage: 'Evidence refutes',
+  }),
+  inconclusive: i18n.translate('xpack.significantEventsApp.detectionEngine.verdict.inconclusive', {
+    defaultMessage: 'Inconclusive',
+  }),
+  off_topic: i18n.translate('xpack.significantEventsApp.detectionEngine.verdict.offTopic', {
+    defaultMessage: 'Evidence is off topic',
+  }),
+};
+
+export const CLOSE_REASON_LABELS: Record<EventCloseReason, string> = {
+  recovered: i18n.translate('xpack.significantEventsApp.detectionEngine.closeReason.recovered', {
+    defaultMessage: 'recovered',
+  }),
+  operator: i18n.translate('xpack.significantEventsApp.detectionEngine.closeReason.operator', {
+    defaultMessage: 'closed by a person',
+  }),
+  dismissed: i18n.translate('xpack.significantEventsApp.detectionEngine.closeReason.dismissed', {
+    defaultMessage: 'dismissed',
+  }),
+};
+
+/** What each health check reports on, keyed by the check's part of the fingerprint. */
+const HEALTH_CHECK_RULES: Record<string, string> = {
+  error_ratio: i18n.translate('xpack.significantEventsApp.detectionEngine.healthRule.errorRatio', {
+    defaultMessage:
+      'Reports when 5% or more of the lines in a minute are errors, with at least 5 errors',
+  }),
+  warning_ratio: i18n.translate(
+    'xpack.significantEventsApp.detectionEngine.healthRule.warningRatio',
+    {
+      defaultMessage:
+        'Reports when 10% or more of the lines in a minute are warnings, with at least 10 warnings',
+    }
+  ),
+  latency_p95: i18n.translate('xpack.significantEventsApp.detectionEngine.healthRule.latency', {
+    defaultMessage: "Reports when the minute's p95 latency is twice that of the previous hour",
+  }),
+  silence: i18n.translate('xpack.significantEventsApp.detectionEngine.healthRule.silence', {
+    defaultMessage: 'Reports when log volume drops by 90% or more against the previous hour',
+  }),
+};
+
+/**
+ * The rule that reports a signal, in words. Health checks are four rules in one strategy, so
+ * their signals say which one fired rather than listing all four.
+ */
+export function signalRuleText({
+  fingerprint,
+  reportsWhen,
+}: {
+  fingerprint: string;
+  reportsWhen?: string;
+}): string | undefined {
+  const [strategyPart, check] = fingerprint.split(':');
+  if (strategyPart === 'health' && check && HEALTH_CHECK_RULES[check]) {
+    return HEALTH_CHECK_RULES[check];
+  }
+  return reportsWhen;
+}

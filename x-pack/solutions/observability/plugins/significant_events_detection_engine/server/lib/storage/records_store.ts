@@ -42,8 +42,11 @@ const HISTORY_SERIES_CHUNK = 500;
 /** ES caps top hits per bucket at 100 by default (`index.max_inner_result_window`). */
 const MAX_SAMPLES_PER_SERIES = 100;
 const WRITE_CHUNK = 5_000;
-/** The traffic series feeds the silence check and is never a detection on its own. */
-const INTERNAL_SERIES_PREFIX = 'health:traffic:';
+/**
+ * Series that only feed other checks and never become detections: traffic feeds the silence
+ * check, and KI heartbeats (stored under the source's name) tell a quiet KI from a missing rule.
+ */
+const INTERNAL_SERIES_PREFIXES = ['health:traffic:', 'ki_watch:'];
 
 /** One past value of a series. */
 export interface HistorySample {
@@ -520,7 +523,9 @@ export function createRecordsStore({
           query: {
             bool: {
               filter: [{ range: { bucket_start: { gte: since } } }],
-              must_not: [{ prefix: { fingerprint: INTERNAL_SERIES_PREFIX } }],
+              must_not: INTERNAL_SERIES_PREFIXES.map((prefix) => ({
+                prefix: { fingerprint: prefix },
+              })),
             },
           },
           aggs: {

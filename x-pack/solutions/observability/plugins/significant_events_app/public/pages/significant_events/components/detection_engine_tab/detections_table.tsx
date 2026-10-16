@@ -28,6 +28,7 @@ import {
 } from '@kbn/significant-events-detection-engine-plugin/common';
 import React, { useState } from 'react';
 import { useDetectionEngineDetections } from '../../../../hooks/use_detection_engine_detections';
+import { formatValue } from './format';
 import { OUTCOME_COLORS, OUTCOME_LABELS, STRATEGY_ICONS, STRATEGY_LABELS } from './labels';
 
 const ALL = '__all__';
@@ -49,7 +50,7 @@ export function DetectionsTable({ onOpenEvent }: IDetectionsTableProps) {
     {
       field: 'bucket_start',
       name: i18n.translate('xpack.significantEventsApp.detectionEngine.detections.bucket', {
-        defaultMessage: 'Bucket',
+        defaultMessage: 'Minute',
       }),
       width: '100px',
       render: (bucketStart: string) => new Date(bucketStart).toLocaleTimeString(),
@@ -82,22 +83,21 @@ export function DetectionsTable({ onOpenEvent }: IDetectionsTableProps) {
         <EuiText size="xs">
           {i18n.translate('xpack.significantEventsApp.detectionEngine.detections.valueVsNormal', {
             defaultMessage:
-              '{value} {unit}; median {median}, threshold {threshold}, {samples} samples',
+              '{value}; normal up to {threshold} (median {median}, {samples} minutes)',
             values: {
-              value: Math.round(detection.value * 1000) / 1000,
-              unit: detection.unit,
+              value: formatValue(detection.value, detection.unit),
               median:
-                baseline.median === undefined ? '-' : Math.round(baseline.median * 1000) / 1000,
+                baseline.median === undefined ? '-' : formatValue(baseline.median, detection.unit),
               threshold:
                 baseline.threshold === undefined
                   ? '-'
-                  : Math.round(baseline.threshold * 1000) / 1000,
+                  : formatValue(baseline.threshold, detection.unit),
               samples: baseline.samples,
             },
           })}
           {baseline.excludedSamples > 0 &&
             i18n.translate('xpack.significantEventsApp.detectionEngine.detections.excluded', {
-              defaultMessage: ' ({excluded} left out: an event was open)',
+              defaultMessage: '; {excluded} minutes left out while an event was open',
               values: { excluded: baseline.excludedSamples },
             })}
         </EuiText>
