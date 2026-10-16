@@ -125,6 +125,18 @@ export const selectTestStepModalOpenStepId = createSelector(
   (detail) => detail.testStepModalOpenStepId ?? undefined
 );
 
+export const selectTestStepModalStayInEditor = createSelector(
+  selectDetail,
+  (detail) => detail.testStepModalStayInEditor
+);
+
+export const selectTestModalStayInEditor = createSelector(
+  selectDetail,
+  (detail) => detail.testModalStayInEditor
+);
+
+export const selectTreeRuns = createSelector(selectDetail, (detail) => detail.treeRuns);
+
 export const selectIsSavingYaml = createSelector(
   selectDetail,
   (detail) => detail.loading.isSavingYaml

@@ -57,6 +57,8 @@ export interface DataReferenceItem {
   readonly isEntity?: boolean;
   /** Step/trigger type for the entity chip (`StepIcon`). */
   readonly iconStepType?: string;
+  /** Step name, set on step entities only — keys run data (`useStepOutputSamples`). */
+  readonly stepName?: string;
   readonly children?: readonly DataReferenceItem[];
   /** Search-result origin, e.g. `Trigger · Alert` / `Step · first`. */
   readonly originLabel: string;
@@ -413,6 +415,7 @@ const buildStepEntities = (
       drillable: true,
       isEntity: true,
       iconStepType: step.type,
+      stepName: step.name,
       originLabel,
       children,
     };
@@ -610,3 +613,96 @@ export const flattenDataReferenceLeaves = (
 };
 
 export const formatDataReferenceToken = (path: string): string => `{{ ${path} }}`;
+
+/** Cap on array elements shown from a sample, so large outputs (e.g. ES hits) stay readable. */
+const MAX_SAMPLE_ARRAY_ITEMS = 10;
+
+const isSampleContainer = (value: unknown): value is Record<string, unknown> | unknown[] =>
+  typeof value === 'object' && value !== null;
+
+const sampleTypeLabel = (value: unknown): string => {
+  if (value === null) return 'null';
+  if (Array.isArray(value)) return 'array';
+  return typeof value;
+};
+
+interface SampleEntry {
+  readonly path: string;
+  readonly label: string;
+  readonly value: unknown;
+}
+
+const sampleEntries = (path: string, value: Record<string, unknown> | unknown[]): SampleEntry[] =>
+  Array.isArray(value)
+    ? value.slice(0, MAX_SAMPLE_ARRAY_ITEMS).map((entry, index) => ({
+        path: `${path}[${index}]`,
+        label: `[${index}]`,
+        value: entry,
+      }))
+    : Object.entries(value).map(([key, entry]) => ({
+        path: `${path}.${key}`,
+        label: key,
+        value: entry,
+      }));
+
+const buildSampleItem = (
+  { path, label, value }: SampleEntry,
+  originLabel: string
+): DataReferenceItem => {
+  if (!isSampleContainer(value)) {
+    return {
+      path,
+      label,
+      typeLabel: sampleTypeLabel(value),
+      subtitle: formatConstValue(value),
+      drillable: false,
+      originLabel,
+    };
+  }
+  const children = sampleEntries(path, value).map((entry) => buildSampleItem(entry, originLabel));
+  return {
+    path,
+    label,
+    typeLabel: sampleTypeLabel(value),
+    drillable: children.length > 0,
+    originLabel,
+    ...(children.length > 0 ? { children } : {}),
+  };
+};
+
+/**
+ * Overlays a runtime sample onto a catalog item: matching paths get the value as
+ * their subtitle, sample keys the schema doesn't know about are appended.
+ */
+export const overlayValueSample = (item: DataReferenceItem, value: unknown): DataReferenceItem => {
+  if (value === undefined) return item;
+
+  const existing = item.children ?? [];
+  // Opaque step output: its only child shares the entity's path, so the sample goes under it.
+  if (
+    item.isEntity &&
+    existing.length === 1 &&
+    existing[0].path === item.path &&
+    !existing[0].isEntity
+  ) {
+    return { ...item, children: [overlayValueSample(existing[0], value)] };
+  }
+
+  if (!isSampleContainer(value)) {
+    return item.isEntity ? item : { ...item, subtitle: formatConstValue(value) };
+  }
+
+  const sampled = sampleEntries(item.path, value);
+  const sampledByPath = new Map(sampled.map((entry) => [entry.path, entry]));
+  const knownPaths = new Set(existing.map((child) => child.path));
+  const children = [
+    ...existing.map((child) => {
+      const entry = sampledByPath.get(child.path);
+      return entry ? overlayValueSample(child, entry.value) : child;
+    }),
+    ...sampled
+      .filter((entry) => !knownPaths.has(entry.path))
+      .map((entry) => buildSampleItem(entry, item.originLabel)),
+  ];
+  return children.length > 0 ? { ...item, drillable: true, children } : item;
+};

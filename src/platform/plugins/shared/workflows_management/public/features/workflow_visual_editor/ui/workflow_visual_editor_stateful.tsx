@@ -49,6 +49,7 @@ import {
   MIN_CONFIG_PANEL_WIDTH,
   MIN_VISIBLE_CANVAS_PX,
 } from './canvas_config_panel_shell';
+import type { DataReferenceRunControls } from './data_reference_catalog_tree';
 import { StepConfigPanel } from './step_config_panel';
 import { TriggerConfigPanel } from './trigger_config_panel';
 import { useCreationAgentChat } from './use_creation_agent_chat';
@@ -82,6 +83,7 @@ import {
   selectIsExecutionsTab,
   selectIsYamlSyntaxValid,
   selectStepExecutions,
+  selectTreeRuns,
   selectWorkflowId,
   selectWorkflowName,
   selectYamlString,
@@ -135,7 +137,12 @@ function toColorMode(euiColorMode: string): ColorMode {
 }
 
 interface WorkflowVisualEditorStatefulProps {
-  onStepRun?: (params: { stepId: string; actionType: string }) => void;
+  /** `stayInEditor` keeps the run's result in the editor instead of opening the execution. */
+  onStepRun?: (params: { stepId: string; actionType: string; stayInEditor?: boolean }) => void;
+  /** Starts a test run of the whole workflow, staying in the editor. */
+  onRunWorkflow?: () => void;
+  /** False when the step needs upstream data, so running it takes a choice of inputs. */
+  canRunStepDirectly?: (stepId: string) => boolean;
   /** Dagre rank direction for the graph layout. Defaults to `'TB'`. */
   direction?: LayoutDirection;
   /**
@@ -268,6 +275,8 @@ const toPendingContext = (
  */
 export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStatefulProps> = ({
   onStepRun,
+  onRunWorkflow,
+  canRunStepDirectly,
   direction = 'TB',
   defaultViewport,
   onViewportChange,
@@ -302,6 +311,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const definition = useSelector(selectEditorWorkflowDefinition);
   const stepExecutions = useSelector(selectStepExecutions);
+  const treeRuns = useSelector(selectTreeRuns);
   const isExecutionsTab = useSelector(selectIsExecutionsTab);
   const isYamlValid = useSelector(selectIsYamlSyntaxValid) ?? true;
   const editorYaml = useSelector(selectEditorYaml) ?? '';
@@ -1085,6 +1095,23 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     [onStepRun]
   );
 
+  const canRunSteps = Boolean(canExecuteWorkflow) && isYamlValid && !isExecutionsTab;
+  const referenceTreeRunControls = useMemo(
+    (): DataReferenceRunControls => ({
+      workflowId,
+      treeRuns,
+      ...(canRunSteps && onStepRun
+        ? {
+            canRunStepDirectly,
+            onRunStep: (stepName: string) =>
+              onStepRun({ stepId: stepName, actionType: 'run', stayInEditor: true }),
+            onRunWorkflow,
+          }
+        : {}),
+    }),
+    [workflowId, treeRuns, canRunSteps, onStepRun, canRunStepDirectly, onRunWorkflow]
+  );
+
   const handleFlyoutKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -1223,7 +1250,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         direction={direction}
         renderStepIcon={renderStepIcon}
         onStepRun={handleStepRun}
-        canRunSteps={Boolean(canExecuteWorkflow) && isYamlValid && !isExecutionsTab}
+        canRunSteps={canRunSteps}
         defaultViewport={defaultViewport}
         onViewportChange={onViewportChange}
         showZoomControls
@@ -1284,6 +1311,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
               onExpandedChange={setFieldEditorExpanded}
               onFragmentChange={handleStepDraftChange}
               onYamlEditorMount={stepYamlEditorMount}
+              runControls={referenceTreeRunControls}
             />
           </KibanaSectionErrorBoundary>
         </CanvasConfigPanelShell>

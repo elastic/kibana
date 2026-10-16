@@ -128,6 +128,9 @@ jest.mock('@kbn/workflows-ui', () => ({
       stepType && !['if', 'foreach', 'parallel', 'while', 'merge', 'atomic'].includes(stepType)
     ),
 }));
+jest.mock('../model/use_step_output_samples', () => ({
+  useStepOutputSamples: () => ({ byStep: {}, isFullRunInProgress: false }),
+}));
 jest.mock('../../../shared/ui/step_icons/step_icon', () => ({
   StepIcon: () => <span data-test-subj="mocked-step-icon" />,
 }));

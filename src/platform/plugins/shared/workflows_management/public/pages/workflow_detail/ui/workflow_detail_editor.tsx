@@ -50,6 +50,9 @@ import {
   selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
+  addTreeRun,
+  openTestModalInEditor,
+  openTestStepModalInEditor,
   setHighlightedStepId,
   setIsTestModalOpen,
   setTestStepModalOpenStepId,
@@ -124,7 +127,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
   const canTestStep = canExecuteWorkflow && workflow?.permissions?.edit !== false;
 
   const handleStepRun = useCallback(
-    async (params: { stepId: string; actionType: string }) => {
+    async (params: { stepId: string; actionType: string; stayInEditor?: boolean }) => {
       if (params.actionType !== 'run') {
         return;
       }
@@ -153,7 +156,13 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
             workflowYaml,
             contextOverride: {},
           });
-          setSelectedExecution(response.workflowExecutionId);
+          if (params.stayInEditor) {
+            dispatch(
+              addTreeRun({ executionId: response.workflowExecutionId, stepId: params.stepId })
+            );
+          } else {
+            setSelectedExecution(response.workflowExecutionId);
+          }
         } catch (error) {
           const errorMessage =
             (error as { body?: { message?: string }; message?: string })?.body?.message ||
@@ -168,7 +177,11 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
         return;
       }
 
-      dispatch(setTestStepModalOpenStepId(params.stepId));
+      dispatch(
+        params.stayInEditor
+          ? openTestStepModalInEditor(params.stepId)
+          : setTestStepModalOpenStepId(params.stepId)
+      );
     },
     [
       isExecutionsTab,
@@ -220,6 +233,17 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
   const openTestModal = useCallback(() => {
     dispatch(setIsTestModalOpen(true));
   }, [dispatch]);
+
+  // Reference-tree runs: the unsaved-changes confirmation is skipped on purpose, the user is
+  // mid-edit and the run uses their draft, like the step run does.
+  const handleRunWorkflowInEditor = useCallback(() => {
+    dispatch(openTestModalInEditor());
+  }, [dispatch]);
+
+  const canRunStepDirectly = useCallback(
+    (stepId: string) => Object.keys(getContextOverrideData(stepId)?.stepContext ?? {}).length === 0,
+    [getContextOverrideData]
+  );
 
   const { handleRunClick: handleRunClickWithUnsavedCheck, runConfirmationModal } =
     useRunWorkflowWithConfirmation(openTestModal);
@@ -411,6 +435,8 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
               <React.Suspense fallback={null}>
                 <WorkflowVisualEditor
                   onStepRun={handleStepRun}
+                  onRunWorkflow={handleRunWorkflowInEditor}
+                  canRunStepDirectly={canRunStepDirectly}
                   direction={graphDirection}
                   editorRef={editorRef}
                 />

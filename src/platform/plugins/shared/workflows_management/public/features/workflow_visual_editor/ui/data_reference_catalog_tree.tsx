@@ -9,10 +9,13 @@
 
 import {
   EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFieldSearch,
   EuiIcon,
   EuiIconTip,
   EuiLoadingSpinner,
+  EuiPopover,
   EuiText,
   EuiToolTip,
   useEuiTheme,
@@ -20,6 +23,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DataReferenceItemRowContent } from './data_reference_item_row';
+import type { TreeRun } from '../../../entities/workflows/store/workflow_detail/types';
 import type { DataReferenceCatalog, DataReferenceItem } from '../lib/build_data_reference_catalog';
 import {
   flattenDataReferenceLeaves,
@@ -28,70 +32,16 @@ import {
   isDataReferenceEntity,
   isDataReferenceExpandable,
   isDataReferenceInsertable,
+  overlayValueSample,
 } from '../lib/build_data_reference_catalog';
+import { useStepOutputSamples } from '../model/use_step_output_samples';
 
 const TREE_WIDTH = 340;
 /** Compact single-line row; grows when a subtitle/value is present. */
 const ROW_MIN_HEIGHT = 40;
 /** Vertical padding inside each tree row (top + bottom). */
 const ROW_PADDING_Y = 2;
-/** UI-shell mock latency for the catalog step Run control. */
-const SHELL_RUN_DELAY_MS = 1400;
-
-type StepRunStatus = 'running' | 'error';
-
-/** Fake output branch injected after a successful shell run. */
-const buildShellRunExtras = (stepItem: DataReferenceItem): readonly DataReferenceItem[] => {
-  const ranAt = new Date().toISOString();
-  const branchPath = `${stepItem.path}.__editor_run`;
-  return [
-    {
-      path: branchPath,
-      label: '__editor_run',
-      typeLabel: 'object',
-      drillable: true,
-      originLabel: stepItem.originLabel,
-      children: [
-        {
-          path: `${branchPath}.ran_at`,
-          label: 'ran_at',
-          typeLabel: 'string',
-          subtitle: ranAt,
-          drillable: false,
-          originLabel: stepItem.originLabel,
-        },
-        {
-          path: `${branchPath}.ok`,
-          label: 'ok',
-          typeLabel: 'boolean',
-          subtitle: 'true',
-          drillable: false,
-          originLabel: stepItem.originLabel,
-        },
-      ],
-    },
-  ];
-};
-
-const withShellRunChildren = (
-  item: DataReferenceItem,
-  extrasByPath: Readonly<Record<string, readonly DataReferenceItem[]>>
-): DataReferenceItem => {
-  const extras = extrasByPath[item.path];
-  if (!extras?.length) return item;
-  // Step entities share `steps.*.output` with their opaque output leaf. Prefer
-  // attaching run samples to that leaf so expand/collapse keys stay distinct.
-  if (
-    item.isEntity &&
-    (item.children ?? []).some((child) => child.path === item.path && !child.isEntity)
-  ) {
-    return item;
-  }
-  const existing = item.children ?? [];
-  const existingPaths = new Set(existing.map((child) => child.path));
-  const merged = [...existing, ...extras.filter((child) => !existingPaths.has(child.path))];
-  return { ...item, children: merged, drillable: true };
-};
+const NO_TREE_RUNS: readonly TreeRun[] = [];
 
 /**
  * Expand/collapse identity. Step entities reuse their output path as `path`, so
@@ -185,8 +135,23 @@ export interface DataReferenceCatalogTreeProps {
   readonly catalog: DataReferenceCatalog;
   /** Inserts `{{ path }}` at the consumer caret / drop target. */
   readonly onInsert: (token: string) => void;
+  /** Saved workflow id; enables the per-step run history lookup. */
+  readonly workflowId?: string;
+  /** Runs started from this tree, newest last. */
+  readonly treeRuns?: readonly TreeRun[];
+  /** False when the step needs upstream data, so the user has to choose how to run it. */
+  readonly canRunStepDirectly?: (stepName: string) => boolean;
+  /** Runs one step. Without it the tree shows no run controls. */
+  readonly onRunStep?: (stepName: string) => void;
+  /** Runs the whole workflow. */
+  readonly onRunWorkflow?: () => void;
   readonly 'data-test-subj'?: string;
 }
+
+export type DataReferenceRunControls = Pick<
+  DataReferenceCatalogTreeProps,
+  'workflowId' | 'treeRuns' | 'canRunStepDirectly' | 'onRunStep' | 'onRunWorkflow'
+>;
 
 interface FlatRow {
   readonly item: DataReferenceItem;
@@ -203,6 +168,11 @@ interface FlatRow {
 export function DataReferenceCatalogTree({
   catalog,
   onInsert,
+  workflowId,
+  treeRuns = NO_TREE_RUNS,
+  canRunStepDirectly,
+  onRunStep,
+  onRunWorkflow,
   'data-test-subj': dataTestSubj = 'workflowDataReferenceCatalogTree',
 }: DataReferenceCatalogTreeProps) {
   const { euiTheme } = useEuiTheme();
@@ -210,30 +180,58 @@ export function DataReferenceCatalogTree({
   const [expandedPaths, setExpandedPaths] = useState<ReadonlySet<string>>(() => new Set());
   const [activeExpandKey, setActiveExpandKey] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
-  /** UI-shell only — not wired to test-step execution. */
-  const [stepRunStatus, setStepRunStatus] = useState<Readonly<Record<string, StepRunStatus>>>({});
-  const [stepRunErrors, setStepRunErrors] = useState<Readonly<Record<string, string>>>({});
-  const [shellRunExtras, setShellRunExtras] = useState<
-    Readonly<Record<string, readonly DataReferenceItem[]>>
-  >({});
-  const shellRunTimersRef = useRef<Map<string, number>>(new Map());
+  const [runMenuStepName, setRunMenuStepName] = useState<string | null>(null);
 
   const query = search.trim().toLowerCase();
   const isSearching = query.length > 0;
 
-  useEffect(
-    () => () => {
-      for (const timer of shellRunTimersRef.current.values()) {
-        window.clearTimeout(timer);
-      }
-      shellRunTimersRef.current.clear();
-    },
-    []
+  const stepEntities = useMemo(
+    () =>
+      (catalog.groups.find((group) => group.id === 'steps')?.items ?? []).filter(
+        (item) => isDataReferenceEntity(item) && item.stepName !== undefined
+      ),
+    [catalog]
+  );
+
+  // Only expanded steps (and steps with a run started here) need their data.
+  const sampledStepNames = useMemo(
+    () =>
+      stepEntities.flatMap((item) =>
+        item.stepName !== undefined &&
+        (expandedPaths.has(getExpandKey(item)) ||
+          treeRuns.some((run) => run.stepId === item.stepName))
+          ? [item.stepName]
+          : []
+      ),
+    [stepEntities, expandedPaths, treeRuns]
+  );
+
+  const { byStep, isFullRunInProgress } = useStepOutputSamples({
+    workflowId,
+    stepNames: sampledStepNames,
+    treeRuns,
+  });
+
+  const sampledCatalog = useMemo(
+    (): DataReferenceCatalog => ({
+      groups: catalog.groups.map((group) =>
+        group.id !== 'steps'
+          ? group
+          : {
+              ...group,
+              items: group.items.map((item) => {
+                const sample = item.stepName !== undefined ? byStep[item.stepName] : undefined;
+                return sample?.status === 'done' ? overlayValueSample(item, sample.output) : item;
+              }),
+            }
+      ),
+    }),
+    [catalog, byStep]
   );
 
   const flatRows = useMemo((): readonly FlatRow[] => {
     if (isSearching) {
-      return flattenDataReferenceLeaves(catalog)
+      return flattenDataReferenceLeaves(sampledCatalog)
         .filter(
           (item) =>
             item.path.toLowerCase().includes(query) ||
@@ -246,19 +244,18 @@ export function DataReferenceCatalogTree({
 
     const rows: FlatRow[] = [];
     const walk = (items: readonly DataReferenceItem[], depth: number, groupId: string) => {
-      for (const raw of items) {
-        const item = withShellRunChildren(raw, shellRunExtras);
+      for (const item of items) {
         rows.push({ item, depth, showOrigin: false, groupId });
         if (isDataReferenceExpandable(item) && expandedPaths.has(getExpandKey(item))) {
           walk(item.children ?? [], depth + 1, groupId);
         }
       }
     };
-    for (const group of catalog.groups) {
+    for (const group of sampledCatalog.groups) {
       walk(group.items, 0, group.id);
     }
     return rows;
-  }, [catalog, expandedPaths, isSearching, query, shellRunExtras]);
+  }, [sampledCatalog, expandedPaths, isSearching, query]);
 
   const toggleExpanded = useCallback((path: string) => {
     setExpandedPaths((prev) => {
@@ -278,70 +275,39 @@ export function DataReferenceCatalogTree({
     });
   }, []);
 
-  const clearStepRunError = useCallback((path: string) => {
-    setStepRunStatus((prev) => {
-      if (prev[path] !== 'error') return prev;
-      const next = { ...prev };
-      delete next[path];
-      return next;
-    });
-    setStepRunErrors((prev) => {
-      if (!(path in prev)) return prev;
-      const next = { ...prev };
-      delete next[path];
-      return next;
-    });
-  }, []);
+  const runWorkflowLabel = i18n.translate('workflows.dataReferenceTree.runWorkflow', {
+    defaultMessage: 'Run full workflow',
+  });
 
-  const handleShellStepRun = useCallback(
-    (item: DataReferenceItem, forceError: boolean) => {
-      if (!isDataReferenceEntity(item) || stepRunStatus[item.path] === 'running') return;
+  const closeRunMenu = useCallback(() => setRunMenuStepName(null), []);
 
-      const existingTimer = shellRunTimersRef.current.get(item.path);
-      if (existingTimer != null) window.clearTimeout(existingTimer);
-
-      setStepRunStatus((prev) => ({ ...prev, [item.path]: 'running' }));
-      setStepRunErrors((prev) => {
-        if (!(item.path in prev)) return prev;
-        const next = { ...prev };
-        delete next[item.path];
-        return next;
-      });
-
-      const timer = window.setTimeout(() => {
-        shellRunTimersRef.current.delete(item.path);
-        if (forceError) {
-          setStepRunStatus((prev) => ({ ...prev, [item.path]: 'error' }));
-          setStepRunErrors((prev) => ({
-            ...prev,
-            [item.path]: i18n.translate('workflows.dataReferenceTree.shellRunError', {
-              defaultMessage: 'Shell run failed for {step}. (Alt/Option+click forces this state.)',
-              values: { step: item.label },
-            }),
-          }));
-          return;
-        }
-
-        setStepRunStatus((prev) => {
-          const next = { ...prev };
-          delete next[item.path];
-          return next;
-        });
-        setShellRunExtras((prev) => ({
-          ...prev,
-          [item.path]: buildShellRunExtras(item),
-        }));
-        expandPath(getExpandKey(item));
-        // Opaque output leaf shares the entity liquid path — expand it too so
-        // shell samples nested under `output` are visible after a run.
-        expandPath(item.path);
-        expandPath(`${item.path}.__editor_run`);
-      }, SHELL_RUN_DELAY_MS);
-
-      shellRunTimersRef.current.set(item.path, timer);
+  const handleRunClick = useCallback(
+    (stepName: string) => {
+      if (!onRunStep) return;
+      if (canRunStepDirectly && !canRunStepDirectly(stepName)) {
+        setRunMenuStepName(stepName);
+        return;
+      }
+      onRunStep(stepName);
     },
-    [expandPath, stepRunStatus]
+    [canRunStepDirectly, onRunStep]
   );
+
+  // A run started here finishing is the cue to reveal its output.
+  const previousRunStatusRef = useRef<Readonly<Record<string, string>>>({});
+  useEffect(() => {
+    for (const item of stepEntities) {
+      const status = item.stepName !== undefined ? byStep[item.stepName]?.status : undefined;
+      if (status === 'done' && previousRunStatusRef.current[item.stepName ?? ''] === 'running') {
+        expandPath(getExpandKey(item));
+        // The opaque output leaf shares the entity's liquid path — expand it too.
+        expandPath(item.path);
+      }
+    }
+    previousRunStatusRef.current = Object.fromEntries(
+      Object.entries(byStep).map(([stepName, sample]) => [stepName, sample.status])
+    );
+  }, [byStep, stepEntities, expandPath]);
 
   const handleActivate = useCallback(
     (item: DataReferenceItem) => {
@@ -469,9 +435,17 @@ export function DataReferenceCatalogTree({
     const draggable = isDataReferenceDraggable(item);
     const insertable = isDataReferenceInsertable(item);
     const isDragging = isDraggingPath === item.path;
-    const canShellRun = !isSearching && groupId === 'steps' && isDataReferenceEntity(item);
-    const runStatus = stepRunStatus[item.path];
-    const runError = stepRunErrors[item.path];
+    const { stepName } = item;
+    const canRun =
+      onRunStep !== undefined &&
+      !isSearching &&
+      groupId === 'steps' &&
+      isDataReferenceEntity(item) &&
+      stepName !== undefined;
+    const sample = stepName !== undefined ? byStep[stepName] : undefined;
+    const runStatus =
+      sample?.status === 'running' || sample?.status === 'error' ? sample.status : undefined;
+    const runError = sample?.errorMessage;
 
     const gripCss = {
       width: 16,
@@ -541,7 +515,7 @@ export function DataReferenceCatalogTree({
             height: 'auto',
             textAlign: 'left',
             padding: `${ROW_PADDING_Y}px ${euiTheme.size.s}`,
-            paddingInlineEnd: canShellRun ? euiTheme.size.xs : euiTheme.size.s,
+            paddingInlineEnd: canRun ? euiTheme.size.xs : euiTheme.size.s,
             border: 'none',
             background: 'transparent',
             cursor: draggable
@@ -601,7 +575,7 @@ export function DataReferenceCatalogTree({
             </span>
           ) : null}
         </button>
-        {canShellRun ? (
+        {canRun ? (
           <span
             data-run-control
             data-drag-preview-hide
@@ -629,27 +603,86 @@ export function DataReferenceCatalogTree({
                   aria-label={
                     runError ??
                     i18n.translate('workflows.dataReferenceTree.runStepError', {
-                      defaultMessage: 'Step run failed',
+                      defaultMessage: 'Step failed. Run again',
                     })
                   }
                   data-test-subj={`workflowDataReferenceTreeRunError-${item.path}`}
-                  onMouseLeave={() => clearStepRunError(item.path)}
-                />
-              </EuiToolTip>
-            ) : (
-              <EuiToolTip content={runLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="play"
-                  size="xs"
-                  color="success"
-                  aria-label={runLabel}
-                  data-test-subj={`workflowDataReferenceTreeRun-${item.path}`}
                   onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
-                    handleShellStepRun(item, e.altKey);
+                    handleRunClick(stepName);
                   }}
                 />
               </EuiToolTip>
+            ) : (
+              <EuiPopover
+                isOpen={runMenuStepName === stepName}
+                closePopover={closeRunMenu}
+                aria-label={i18n.translate('workflows.dataReferenceTree.runMenuLabel', {
+                  defaultMessage: 'Test options for {step}',
+                  values: { step: item.label },
+                })}
+                anchorPosition="downRight"
+                panelPaddingSize="none"
+                button={
+                  <EuiToolTip content={runLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="play"
+                      size="xs"
+                      color="success"
+                      aria-label={runLabel}
+                      data-test-subj={`workflowDataReferenceTreeRun-${item.path}`}
+                      onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        handleRunClick(stepName);
+                      }}
+                    />
+                  </EuiToolTip>
+                }
+              >
+                <EuiContextMenuPanel
+                  items={[
+                    <EuiContextMenuItem
+                      key="custom-inputs"
+                      icon="play"
+                      data-test-subj={`workflowDataReferenceTreeRunCustom-${item.path}`}
+                      onClick={() => {
+                        closeRunMenu();
+                        onRunStep(stepName);
+                      }}
+                    >
+                      {i18n.translate('workflows.dataReferenceTree.runStepCustomInputs', {
+                        defaultMessage: 'Test with custom inputs…',
+                      })}
+                    </EuiContextMenuItem>,
+                    ...(onRunWorkflow
+                      ? [
+                          <EuiContextMenuItem
+                            key="full-workflow"
+                            icon="playFilled"
+                            data-test-subj={`workflowDataReferenceTreeRunFull-${item.path}`}
+                            onClick={() => {
+                              closeRunMenu();
+                              onRunWorkflow();
+                            }}
+                          >
+                            <span css={{ display: 'block' }}>{runWorkflowLabel}</span>
+                            <EuiText
+                              component="span"
+                              size="xs"
+                              color="subdued"
+                              css={{ display: 'block' }}
+                            >
+                              {i18n.translate('workflows.dataReferenceTree.runWorkflowHelp', {
+                                defaultMessage:
+                                  'Runs every step, including the ones after this step.',
+                              })}
+                            </EuiText>
+                          </EuiContextMenuItem>,
+                        ]
+                      : []),
+                  ]}
+                />
+              </EuiPopover>
             )}
           </span>
         ) : null}
@@ -752,6 +785,27 @@ export function DataReferenceCatalogTree({
                       position="top"
                       content={group.description}
                     />
+                    {group.id === 'steps' && onRunWorkflow ? (
+                      <span css={{ marginInlineStart: 'auto', display: 'inline-flex' }}>
+                        {isFullRunInProgress ? (
+                          <EuiLoadingSpinner
+                            size="m"
+                            data-test-subj="workflowDataReferenceTreeRunWorkflowSpinner"
+                          />
+                        ) : (
+                          <EuiToolTip content={runWorkflowLabel} disableScreenReaderOutput>
+                            <EuiButtonIcon
+                              iconType="play"
+                              size="xs"
+                              color="success"
+                              aria-label={runWorkflowLabel}
+                              data-test-subj="workflowDataReferenceTreeRunWorkflow"
+                              onClick={onRunWorkflow}
+                            />
+                          </EuiToolTip>
+                        )}
+                      </span>
+                    ) : null}
                   </div>
                   {groupRows.map((row) => {
                     const isFirst = !firstAssigned;

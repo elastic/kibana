@@ -48,6 +48,7 @@ import {
   stepSupportsErrorHandling,
   WORKFLOWS_MONACO_EDITOR_THEME,
 } from '@kbn/workflows-ui';
+import type { DataReferenceRunControls } from './data_reference_catalog_tree';
 import { FieldEditorSubFlyout } from './field_editor_sub_flyout';
 import { FlyoutMonacoFrame, getFlyoutMonacoEditorOptions } from './flyout_monaco_frame';
 import { ReferenceCapableField } from './reference_capable_field';
@@ -119,6 +120,8 @@ export interface StepConfigPanelProps {
    * (see `useStepFragmentYamlSupport`).
    */
   readonly onYamlEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+  /** Run controls and data for the expanded field editor's reference tree. */
+  readonly runControls?: DataReferenceRunControls;
 }
 
 const CODE_EDITOR_HEIGHT = 160;
@@ -258,6 +261,7 @@ export function StepConfigPanel({
   onExpandedChange,
   onFragmentChange,
   onYamlEditorMount,
+  runControls,
 }: StepConfigPanelProps) {
   const { euiTheme } = useEuiTheme();
   const [parametersMode, setParametersMode] = useState<ParametersMode>('form');
@@ -1009,6 +1013,7 @@ export function StepConfigPanel({
             value={expandedFieldValue}
             onChange={handleExpandedFieldChange}
             catalog={referenceCatalog}
+            runControls={runControls}
             language={expandedField.kind === 'code' ? expandedField.language : undefined}
             onBack={handleFieldEditorBack}
             onCloseStack={attemptClose}

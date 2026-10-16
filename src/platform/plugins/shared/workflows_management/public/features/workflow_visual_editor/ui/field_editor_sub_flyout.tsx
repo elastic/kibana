@@ -22,6 +22,7 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { DataReferenceRunControls } from './data_reference_catalog_tree';
 import { DataReferenceCatalogTree } from './data_reference_catalog_tree';
 import { ReferenceCapableField } from './reference_capable_field';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
@@ -31,6 +32,8 @@ export interface FieldEditorSubFlyoutProps {
   readonly value: string;
   readonly onChange: (next: string) => void;
   readonly catalog: DataReferenceCatalog;
+  /** Run controls and data for the step rows of the reference tree; omit to hide them. */
+  readonly runControls?: DataReferenceRunControls;
   /** Monaco language when using the code editor; omit for plain text. */
   readonly language?: 'json' | 'esql' | 'kuery' | 'plaintext' | 'yaml';
   /** Close this panel only (Back / Escape / history pop). */
@@ -64,6 +67,7 @@ export function FieldEditorSubFlyout({
   value,
   onChange,
   catalog,
+  runControls,
   onBack,
   onCloseStack,
 }: FieldEditorSubFlyoutProps) {
@@ -338,7 +342,7 @@ export function FieldEditorSubFlyout({
             height: '100%',
           }}
         >
-          <DataReferenceCatalogTree catalog={catalog} onInsert={insertAtCaret} />
+          <DataReferenceCatalogTree catalog={catalog} onInsert={insertAtCaret} {...runControls} />
 
           <div
             data-test-subj="workflowFieldEditorSubFlyoutEditorPane"

@@ -8,6 +8,7 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows';
+import type { DataReferenceItem } from './build_data_reference_catalog';
 import {
   buildDataReferenceCatalog,
   flattenDataReferenceLeaves,
@@ -16,6 +17,7 @@ import {
   isDataReferenceEntity,
   isDataReferenceExpandable,
   isDataReferenceInsertable,
+  overlayValueSample,
 } from './build_data_reference_catalog';
 import { getDocumentOrderPredecessors } from './get_document_order_predecessors';
 
@@ -226,5 +228,97 @@ describe('buildDataReferenceCatalog', () => {
     expect(leaves.some((l) => l.path === 'steps.first.output')).toBe(true);
     expect(leaves.every((l) => l.originLabel)).toBe(true);
     expect(leaves.every(isDataReferenceInsertable)).toBe(true);
+  });
+});
+
+describe('overlayValueSample', () => {
+  const originLabel = 'Step · first';
+  const leaf = (path: string, typeLabel = 'string'): DataReferenceItem => ({
+    path,
+    label: path.slice(path.lastIndexOf('.') + 1),
+    typeLabel,
+    drillable: false,
+    originLabel,
+  });
+  const entity = (children: readonly DataReferenceItem[]): DataReferenceItem => ({
+    path: 'steps.first.output',
+    label: 'first',
+    typeLabel: 'object',
+    drillable: true,
+    isEntity: true,
+    stepName: 'first',
+    originLabel,
+    children,
+  });
+
+  it('records the step name on step entities', () => {
+    const catalog = buildDataReferenceCatalog({
+      definition: {
+        name: 'Demo',
+        triggers: [{ type: 'manual' }],
+        steps: [
+          { name: 'first', type: 'console', with: { message: 'hi' } },
+          { name: 'second', type: 'console', with: { message: 'yo' } },
+        ],
+      } as unknown as WorkflowYaml,
+      currentStepName: 'second',
+      connectors: [],
+    });
+    const stepItems = catalog.groups.find((group) => group.id === 'steps')?.items ?? [];
+    expect(stepItems.map((item) => item.stepName)).toEqual(['first']);
+  });
+
+  it('returns the item untouched when there is no sample', () => {
+    const item = entity([leaf('steps.first.output.status')]);
+    expect(overlayValueSample(item, undefined)).toBe(item);
+  });
+
+  it('shows the sample value on the matching schema row', () => {
+    const result = overlayValueSample(entity([leaf('steps.first.output.status')]), {
+      status: 'ok',
+    });
+    expect(result.children).toEqual([
+      expect.objectContaining({ path: 'steps.first.output.status', subtitle: 'ok' }),
+    ]);
+  });
+
+  it('appends sample keys the schema does not know, recursively', () => {
+    const result = overlayValueSample(entity([leaf('steps.first.output.status')]), {
+      status: 'ok',
+      extra: { count: 3, flag: false, nothing: null },
+    });
+    const extra = result.children?.find((child) => child.path === 'steps.first.output.extra');
+    expect(extra).toEqual(expect.objectContaining({ typeLabel: 'object', drillable: true }));
+    expect(extra?.children?.map((child) => [child.path, child.subtitle, child.typeLabel])).toEqual([
+      ['steps.first.output.extra.count', '3', 'number'],
+      ['steps.first.output.extra.flag', 'false', 'boolean'],
+      ['steps.first.output.extra.nothing', 'null', 'null'],
+    ]);
+  });
+
+  it('places the sample under the opaque output leaf of a schema-less step', () => {
+    const opaque = entity([leaf('steps.first.output', 'object')]);
+    const result = overlayValueSample(opaque, { a: 1 });
+    expect(result.children).toHaveLength(1);
+    expect(result.children?.[0].path).toBe('steps.first.output');
+    expect(result.children?.[0].children?.map((child) => [child.path, child.subtitle])).toEqual([
+      ['steps.first.output.a', '1'],
+    ]);
+  });
+
+  it('shows a primitive output on the opaque leaf, never on the entity', () => {
+    const opaque = entity([leaf('steps.first.output', 'object')]);
+    const result = overlayValueSample(opaque, 'done');
+    expect(result.subtitle).toBeUndefined();
+    expect(result.children?.[0].subtitle).toBe('done');
+  });
+
+  it('caps array samples at 10 elements', () => {
+    const result = overlayValueSample(entity([]), { items: Array.from({ length: 15 }, (_, i) => i) });
+    const items = result.children?.find((child) => child.path === 'steps.first.output.items');
+    expect(items?.children).toHaveLength(10);
+    expect(items?.children?.[0]).toEqual(
+      expect.objectContaining({ path: 'steps.first.output.items[0]', label: '[0]', subtitle: '0' })
+    );
   });
 });
