@@ -33,7 +33,7 @@ module.exports = {
     'kbn-ui-shared-deps-src': './src/entry.js',
   },
   context: __dirname,
-  devtool: 'cheap-source-map',
+  devtool: process.env.NODE_ENV === 'production' ? false : 'cheap-source-map',
   target: 'web',
   output: {
     path: UiSharedDepsSrcDistDir,
