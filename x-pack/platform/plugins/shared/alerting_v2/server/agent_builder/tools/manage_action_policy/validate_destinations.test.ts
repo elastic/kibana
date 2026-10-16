@@ -810,9 +810,7 @@ describe('validateDestinations', () => {
 
     it('returns a warning when blocking is false', async () => {
       const persistedWorkflowLookup = createMockPersistedWorkflowLookup(
-        new Map([
-          ['wf-dual', { id: 'wf-dual', yaml: YAML_DUAL_TRIGGERS_MANUAL_AND_ALERT }],
-        ])
+        new Map([['wf-dual', { id: 'wf-dual', yaml: YAML_DUAL_TRIGGERS_MANUAL_AND_ALERT }]])
       );
 
       const result = await validateDestinations([{ type: 'workflow', id: 'wf-dual' }], {
@@ -839,9 +837,7 @@ describe('validateDestinations', () => {
         {
           id: 'att-wf',
           type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-          versions: [
-            { data: { yaml: YAML_VALID_WITH_PAYLOAD_LIQUID, workflowId: 'wf-ok' } },
-          ],
+          versions: [{ data: { yaml: YAML_VALID_WITH_PAYLOAD_LIQUID, workflowId: 'wf-ok' } }],
         },
       ]);
 
@@ -883,9 +879,7 @@ describe('validateDestinations', () => {
         {
           id: 'att-wf',
           type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-          versions: [
-            { data: { yaml: YAML_ASSIGN_ALIAS_WITH_PAYLOAD, workflowId: 'wf-alias' } },
-          ],
+          versions: [{ data: { yaml: YAML_ASSIGN_ALIAS_WITH_PAYLOAD, workflowId: 'wf-alias' } }],
         },
       ]);
 
@@ -930,9 +924,7 @@ describe('validateDestinations', () => {
         {
           id: 'att-wf',
           type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-          versions: [
-            { data: { yaml: YAML_WRONG_PAYLOAD_FIELDS, workflowId: 'wf-wrong' } },
-          ],
+          versions: [{ data: { yaml: YAML_WRONG_PAYLOAD_FIELDS, workflowId: 'wf-wrong' } }],
         },
       ]);
 
@@ -951,9 +943,7 @@ describe('validateDestinations', () => {
         {
           id: 'att-wf',
           type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-          versions: [
-            { data: { yaml: YAML_WRONG_PAYLOAD_FIELDS, workflowId: 'wf-wrong' } },
-          ],
+          versions: [{ data: { yaml: YAML_WRONG_PAYLOAD_FIELDS, workflowId: 'wf-wrong' } }],
         },
       ]);
 
@@ -983,9 +973,7 @@ describe('validateDestinations', () => {
         {
           id: 'att-wf',
           type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-          versions: [
-            { data: { yaml: YAML_VALID_WITH_PAYLOAD_LIQUID, workflowId: 'wf-ok' } },
-          ],
+          versions: [{ data: { yaml: YAML_VALID_WITH_PAYLOAD_LIQUID, workflowId: 'wf-ok' } }],
         },
       ]);
 
@@ -1064,7 +1052,10 @@ steps:
           // Has manual trigger with wrong $ref
           ['wf-wrong-ref', { id: 'wf-wrong-ref', yaml: YAML_MANUAL_TRIGGER_WITH_WRONG_REF }],
           // Has manual trigger with plain type instead of $ref
-          ['wf-plain-payload', { id: 'wf-plain-payload', yaml: YAML_MANUAL_TRIGGER_WITH_UNRELATED_PAYLOAD }],
+          [
+            'wf-plain-payload',
+            { id: 'wf-plain-payload', yaml: YAML_MANUAL_TRIGGER_WITH_UNRELATED_PAYLOAD },
+          ],
           // Valid workflow — but validateWorkflow returns a variable-ref error
           ['wf-bad-liquid', { id: 'wf-bad-liquid', yaml: YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF }],
         ])
@@ -1091,15 +1082,15 @@ steps:
       try {
         await validateDestinations(
           [
-            { type: 'workflow', id: 'att-email-wf' },      // attachment-ID misuse (has workflowId)
-            { type: 'workflow', id: 'att-no-wfid' },        // attachment-ID misuse (no workflowId)
-            { type: 'workflow', id: 'conn-slack' },          // connector ID
+            { type: 'workflow', id: 'att-email-wf' }, // attachment-ID misuse (has workflowId)
+            { type: 'workflow', id: 'att-no-wfid' }, // attachment-ID misuse (no workflowId)
+            { type: 'workflow', id: 'conn-slack' }, // connector ID
             { type: 'workflow', id: 'totally-unknown-999' }, // unknown ID
-            { type: 'workflow', id: 'wf-alert-only' },       // missing manual trigger
-            { type: 'workflow', id: 'wf-no-ref' },           // missing inputs.payload $ref
-            { type: 'workflow', id: 'wf-wrong-ref' },        // wrong $ref target
-            { type: 'workflow', id: 'wf-plain-payload' },    // plain type, no $ref
-            { type: 'workflow', id: 'wf-bad-liquid' },       // valid structure, bad Liquid variable
+            { type: 'workflow', id: 'wf-alert-only' }, // missing manual trigger
+            { type: 'workflow', id: 'wf-no-ref' }, // missing inputs.payload $ref
+            { type: 'workflow', id: 'wf-wrong-ref' }, // wrong $ref target
+            { type: 'workflow', id: 'wf-plain-payload' }, // plain type, no $ref
+            { type: 'workflow', id: 'wf-bad-liquid' }, // valid structure, bad Liquid variable
           ],
           {
             attachments,
@@ -1126,7 +1117,9 @@ steps:
       // --- destination-resolution errors ---
 
       // [1] attachment-ID misuse with workflowId hint
-      expect(msg).toContain('[1] [error] Destination ID "att-email-wf" is a workflow attachment ID');
+      expect(msg).toContain(
+        '[1] [error] Destination ID "att-email-wf" is a workflow attachment ID'
+      );
       expect(msg).toContain('The correct workflow ID for this attachment is "wf-email-real"');
 
       // [2] attachment-ID misuse without workflowId
@@ -1134,15 +1127,21 @@ steps:
       expect(msg).toContain('has no workflowId');
 
       // [3] connector ID
-      expect(msg).toContain('[3] [error] Destination ID "conn-slack" is a connector ("SRE Slack On-Call")');
+      expect(msg).toContain(
+        '[3] [error] Destination ID "conn-slack" is a connector ("SRE Slack On-Call")'
+      );
 
       // [4] unknown ID
-      expect(msg).toContain('[4] [error] Destination ID "totally-unknown-999" is not a valid workflow');
+      expect(msg).toContain(
+        '[4] [error] Destination ID "totally-unknown-999" is not a valid workflow'
+      );
 
       // --- structural errors ---
 
       // [5] missing manual trigger entirely
-      expect(msg).toContain('[5] [error] Workflow "wf-alert-only" does not have a "manual" trigger');
+      expect(msg).toContain(
+        '[5] [error] Workflow "wf-alert-only" does not have a "manual" trigger'
+      );
 
       // [6] missing payload $ref — has manual trigger but no inputs.payload.$ref
       expect(msg).toContain('[6] [error] Workflow "wf-no-ref" does not declare `inputs.payload`');
@@ -1151,13 +1150,17 @@ steps:
       expect(msg).toContain('[7] [warning] [invalidVariablePath]');
 
       // [8] wrong $ref target
-      expect(msg).toContain('[8] [error] Workflow "wf-wrong-ref" does not declare `inputs.payload`');
+      expect(msg).toContain(
+        '[8] [error] Workflow "wf-wrong-ref" does not declare `inputs.payload`'
+      );
 
       // [9] workflow-validation warning follows wf-wrong-ref
       expect(msg).toContain('[9] [warning] [invalidVariablePath]');
 
       // [10] plain type payload, no $ref
-      expect(msg).toContain('[10] [error] Workflow "wf-plain-payload" does not declare `inputs.payload`');
+      expect(msg).toContain(
+        '[10] [error] Workflow "wf-plain-payload" does not declare `inputs.payload`'
+      );
 
       // [11] workflow-validation warning follows wf-plain-payload
       expect(msg).toContain('[11] [warning] [invalidVariablePath]');

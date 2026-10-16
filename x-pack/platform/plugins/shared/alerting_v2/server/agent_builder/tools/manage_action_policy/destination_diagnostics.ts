@@ -118,12 +118,7 @@ export class DestinationValidator {
     this.config = config;
   }
 
-  private push(
-    destinationId: string,
-    severity: Severity,
-    source: Source,
-    message: string
-  ): void {
+  private push(destinationId: string, severity: Severity, source: Source, message: string): void {
     this.diagnostics.push({ destinationId, severity, source, message });
   }
 
@@ -374,8 +369,14 @@ export class DestinationValidator {
     const invalid = collectInvalidPayloadSegments(yaml);
     if (invalid.size === 0) return;
 
-    const validFields = [...PAYLOAD_TOP_LEVEL_FIELDS].sort().map((f) => `\`${f}\``).join(', ');
-    const wrongFields = [...invalid].sort().map((f) => `\`inputs.payload.${f}\``).join(', ');
+    const validFields = [...PAYLOAD_TOP_LEVEL_FIELDS]
+      .sort()
+      .map((f) => `\`${f}\``)
+      .join(', ');
+    const wrongFields = [...invalid]
+      .sort()
+      .map((f) => `\`inputs.payload.${f}\``)
+      .join(', ');
 
     this.push(
       destinationId,
@@ -426,12 +427,8 @@ export class DestinationValidator {
           ? ', 1 warning'
           : `, ${warnings.length} warnings`;
       const header = `Destination validation failed (${errorCount}${warningCount}):`;
-      const formatted = this.diagnostics.map(
-        (d, i) => `[${i + 1}] [${d.severity}] ${d.message}`
-      );
-      throw new ActionPolicyOperationValidationError(
-        `${header}\n\n${formatted.join('\n\n')}`
-      );
+      const formatted = this.diagnostics.map((d, i) => `[${i + 1}] [${d.severity}] ${d.message}`);
+      throw new ActionPolicyOperationValidationError(`${header}\n\n${formatted.join('\n\n')}`);
     }
 
     return { diagnostics: this.diagnostics };
