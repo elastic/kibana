@@ -80,7 +80,9 @@ const fetchReportsMapping = async (
   try {
     return await esClient.indices.getMapping({ ...THREAT_REPORTS_GET_MAPPING_PARAMS });
   } catch (err) {
-    logger.debug(`Readiness reports mapping read failed: ${(err as Error).message}`);
+    logger.debug(
+      `Readiness reports mapping read failed: ${err instanceof Error ? err.message : String(err)}`
+    );
     return undefined;
   }
 };
