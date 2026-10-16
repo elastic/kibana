@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { configureStore, type Action, type Dispatch, type MiddlewareAPI } from '@reduxjs/toolkit';
+import { configureStore, type Middleware } from '@reduxjs/toolkit';
 import { useDispatch, useSelector } from 'react-redux';
 import type { LensState, LensStoreDeps } from '@kbn/lens-common';
 import { makeLensReducer, lensActions, getPreloadedState } from './lens_slice';
@@ -53,12 +53,10 @@ export const {
   changeIndexPattern,
 } = lensActions;
 
-type CustomMiddleware = (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => void;
-
 export const makeConfigureStore = (
   storeDeps: LensStoreDeps,
   preloadedState?: Partial<LensState>,
-  customMiddleware?: CustomMiddleware
+  customMiddleware?: Middleware<{}, LensState>
 ) => {
   return configureStore({
     reducer: {

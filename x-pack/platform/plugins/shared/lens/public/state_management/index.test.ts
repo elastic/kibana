@@ -5,25 +5,27 @@
  * 2.0.
  */
 
-import type { Action, Dispatch, MiddlewareAPI } from '@reduxjs/toolkit';
+import type { Middleware } from '@reduxjs/toolkit';
 import { makeConfigureStore, onActiveDataChange, setExecutionContext } from '.';
 import { mockStoreDeps } from '../mocks';
 import { makeLensReducer } from './lens_slice';
-import type { TableInspectorAdapter } from '@kbn/lens-common';
+import type { LensState, TableInspectorAdapter } from '@kbn/lens-common';
 import type { Filter } from '@kbn/es-query';
 
 describe('state management initialization and middlewares', () => {
   let store: ReturnType<typeof makeConfigureStore>;
   const updaterFn = jest.fn();
   const customMiddleware = jest.fn(
-    (updater) => (_store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
-      next(action);
-      updater(action);
-    }
+    (updater): Middleware<{}, LensState> =>
+      (_store) =>
+      (next) =>
+      (action) => {
+        next(action);
+        updater(action);
+      }
   );
   beforeEach(() => {
     store = makeConfigureStore(mockStoreDeps(), undefined, customMiddleware(updaterFn));
-    store.dispatch = jest.fn(store.dispatch);
   });
   afterEach(() => {
     jest.clearAllMocks();
