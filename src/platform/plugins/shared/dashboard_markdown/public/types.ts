@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type {
+  DefaultEmbeddableApi,
+  HasPanelSettingsInEditFlyout,
+} from '@kbn/embeddable-plugin/public';
 import type {
   HasEditCapabilities,
   CanOverrideHoverActions,
@@ -31,4 +34,5 @@ export type MarkdownEditorApi = HasType<typeof MARKDOWN_EMBEDDABLE_TYPE> &
   HasEditCapabilities &
   CanOverrideHoverActions &
   HasLibraryTransforms<MarkdownByReferenceState, MarkdownByValueState> &
+  HasPanelSettingsInEditFlyout &
   SupportsJsonExport;

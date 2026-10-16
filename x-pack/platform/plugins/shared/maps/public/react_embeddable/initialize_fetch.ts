@@ -14,6 +14,7 @@ import { getSearchService } from '../kibana_services';
 import type { MapStore } from '../reducers/store';
 import type { MapApi } from './types';
 import { setMapSettings, setQuery, setPauseSyncData } from '../actions';
+import { getMapSettings } from '../selectors/map_selectors';
 
 function getIsRestore(searchSessionId?: string) {
   if (!searchSessionId) {
@@ -37,6 +38,9 @@ export function initializeFetch({
   store: MapStore;
 }) {
   let prevIsRestore: boolean | undefined;
+  // Settings the map was configured with (e.g. by an embedder rendering a read-only map),
+  // which session restore should not turn back on
+  const { disableInteractive, hideToolbarOverlay } = getMapSettings(store.getState());
   const fetchSubscription = fetch$(api).subscribe((fetchContext: FetchContext) => {
     // New search session id causes all layers from elasticsearch to refetch data.
     // Dashboard provides a new search session id anytime filters change.
@@ -53,8 +57,8 @@ export function initializeFetch({
       prevIsRestore = isRestore;
       store.dispatch(
         setMapSettings({
-          disableInteractive: isRestore,
-          hideToolbarOverlay: isRestore,
+          disableInteractive: isRestore || disableInteractive,
+          hideToolbarOverlay: isRestore || hideToolbarOverlay,
         })
       );
     }

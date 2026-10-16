@@ -8,7 +8,7 @@
  */
 
 import classNames from 'classnames';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { EuiPortal, type UseEuiTheme } from '@elastic/eui';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
@@ -18,6 +18,11 @@ import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { DashboardGrid } from '../grid';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
+import { SelectedPanelsToolbar } from '../selected_panels_toolbar/selected_panels_toolbar';
+import { useSelectedPanelsToolbarPresence } from '../selected_panels_toolbar/use_selected_panels_toolbar_presence';
+import { DashboardHintBar } from '../hint_bar/dashboard_hint_bar';
+import { preloadFloatingToolbarIcons } from '../floating_toolbar/preload_icons';
+import { isMacPlatform } from '../grid/selection_modifier';
 
 export const DashboardViewport = () => {
   const dashboardApi = useDashboardApi();
@@ -30,6 +35,9 @@ export const DashboardViewport = () => {
     viewMode,
     useMargins,
     fullScreenMode,
+    selectedPanelIds,
+    showHintBar,
+    isSelectMode,
   ] = useBatchedPublishingSubjects(
     dashboardApi.title$,
     dashboardApi.description$,
@@ -37,11 +45,74 @@ export const DashboardViewport = () => {
     dashboardApi.layout$,
     dashboardApi.viewMode$,
     dashboardApi.settings.useMargins$,
-    dashboardApi.fullScreenMode$
+    dashboardApi.fullScreenMode$,
+    dashboardApi.selectedPanelIds$,
+    dashboardApi.settings.showHintBar$,
+    dashboardApi.isSelectMode$
   );
+  const toolbarPresence = useSelectedPanelsToolbarPresence(isSelectMode);
+
+  // cache the floating bars' icons up front, so they appear together with the bars' entrance
+  useEffect(() => {
+    preloadFloatingToolbarIcons();
+  }, []);
+
   const onExit = useCallback(() => {
     dashboardApi.setFullScreenMode(false);
   }, [dashboardApi]);
+
+  useEffect(() => {
+    if (viewMode !== 'edit') return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isInputFocused =
+        document.activeElement instanceof HTMLInputElement ||
+        document.activeElement instanceof HTMLTextAreaElement ||
+        (document.activeElement as HTMLElement)?.getAttribute?.('contenteditable') === 'true';
+      if (isInputFocused) return;
+
+      const isCopy = (e.metaKey || e.ctrlKey) && e.key === 'c';
+      const isPaste = (e.metaKey || e.ctrlKey) && e.key === 'v';
+      if (isCopy) {
+        e.preventDefault();
+        dashboardApi.copySelectedPanels();
+      } else if (isPaste) {
+        e.preventDefault();
+        dashboardApi.runPastePanels();
+      }
+    };
+
+    // Pressing and releasing the selection modifier (Cmd on macOS, Ctrl elsewhere) on its own
+    // enters select mode. Any other key or a click in between makes it part of a shortcut or a
+    // Cmd+click instead.
+    const selectionModifierKey = isMacPlatform() ? 'Meta' : 'Control';
+    let isModifierAlone = false;
+    const handleModifierKeyDown = (e: KeyboardEvent) => {
+      if (e.repeat) return;
+      isModifierAlone = e.key === selectionModifierKey && !e.shiftKey && !e.altKey;
+    };
+    const handleModifierKeyUp = (e: KeyboardEvent) => {
+      if (e.key !== selectionModifierKey || !isModifierAlone) return;
+      isModifierAlone = false;
+      const active = document.activeElement as HTMLElement | null;
+      if (active?.closest('input, textarea, [contenteditable="true"], [role="dialog"]')) return;
+      dashboardApi.enterSelectMode();
+    };
+    const cancelModifierAlone = () => (isModifierAlone = false);
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleModifierKeyDown, true);
+    document.addEventListener('keyup', handleModifierKeyUp, true);
+    document.addEventListener('pointerdown', cancelModifierAlone, true);
+    window.addEventListener('blur', cancelModifierAlone);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keydown', handleModifierKeyDown, true);
+      document.removeEventListener('keyup', handleModifierKeyUp, true);
+      document.removeEventListener('pointerdown', cancelModifierAlone, true);
+      window.removeEventListener('blur', cancelModifierAlone);
+    };
+  }, [viewMode, dashboardApi]);
 
   const { panelCount, visiblePanelCount, sectionCount } = useMemo(() => {
     const panels = Object.values(layout.panels);
@@ -74,6 +145,18 @@ export const DashboardViewport = () => {
       {fullScreenMode && (
         <EuiPortal>
           <ExitFullScreenButton onExit={onExit} toggleChrome={!dashboardApi.isEmbeddedExternally} />
+        </EuiPortal>
+      )}
+      {viewMode === 'edit' && (
+        <EuiPortal>
+          {toolbarPresence.showToolbar ? (
+            <SelectedPanelsToolbar
+              selectedPanelIds={selectedPanelIds}
+              skipEntrance={toolbarPresence.skipEntrance}
+            />
+          ) : (
+            showHintBar && <DashboardHintBar skipEntrance={!toolbarPresence.animateHintBarIn} />
+          )}
         </EuiPortal>
       )}
       <div

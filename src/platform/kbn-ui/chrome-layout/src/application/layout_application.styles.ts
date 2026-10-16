@@ -80,7 +80,8 @@ const scrollContainer: EmotionFn = (useEuiTheme) => css`
   // Keyboard focus only (e.g. skip link when the app has no <main> landmark). Kept outside the
   // box: Chrome clips inset outlines on scroll containers, and EUI's global :focus offsets it -1px.
   // The wrapper must therefore never clip (overflow: hidden), or this ring is cut off.
-  &:focus-visible {
+  // Skipped when focus came from a mouse click (see LayoutApplication).
+  &:focus-visible:not([data-pointer-focus]) {
     outline: ${useEuiTheme.euiTheme.focus.width} solid ${useEuiTheme.euiTheme.focus.color};
     outline-offset: 0;
 

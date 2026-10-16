@@ -140,52 +140,83 @@ const compactGridSection = (originalLayout: GridSectionData['panels']) => {
   return nextSectionData;
 };
 
+export interface ResolveGridSectionOptions {
+  /** When multiple panels are dragged as a group, they keep their positions; only non-fixed panels are pushed. */
+  fixedPanelIds?: Set<string>;
+}
+
+/**
+ * Resolve layout for a section: apply drag request(s) and resolve collisions.
+ * @param dragRequest - Single panel new position, or array of panel data for multi-drag (all applied; their ids become fixedPanelIds)
+ */
 export const resolveGridSection = (
   originalSectionData: GridSectionData['panels'],
-  dragRequest?: GridPanelData
+  dragRequest?: GridPanelData | GridPanelData[],
+  options?: ResolveGridSectionOptions
 ): GridSectionData['panels'] => {
   let nextSectionData = { ...originalSectionData };
-  // apply drag request
-  if (dragRequest) {
-    nextSectionData[dragRequest.id] = dragRequest;
-  }
-  // get keys in order from top to bottom, left to right, with priority on the dragged item if it exists
-  const sortedKeys = getPanelKeysInOrder(nextSectionData, dragRequest?.id);
+  let fixedPanelIds = options?.fixedPanelIds;
 
-  // while the layout has at least one collision, try to resolve them in order
+  if (dragRequest) {
+    const requests = Array.isArray(dragRequest) ? dragRequest : [dragRequest];
+    for (const req of requests) {
+      nextSectionData[req.id] = req;
+    }
+    if (Array.isArray(dragRequest)) {
+      fixedPanelIds = new Set(dragRequest.map((p) => p.id));
+    } else {
+      fixedPanelIds = fixedPanelIds ?? new Set([dragRequest.id]);
+    }
+  }
+
+  const firstDraggedId = Array.isArray(dragRequest)
+    ? dragRequest[0]?.id
+    : (dragRequest as GridPanelData | undefined)?.id;
+  const sortedKeys = getPanelKeysInOrder(nextSectionData, firstDraggedId);
+
   let collision = getFirstCollision(nextSectionData, sortedKeys);
   while (collision !== undefined) {
     nextSectionData = resolvePanelCollisions(
       nextSectionData,
       nextSectionData[collision],
-      sortedKeys
+      sortedKeys,
+      fixedPanelIds
     );
     collision = getFirstCollision(nextSectionData, sortedKeys);
   }
-  return compactGridSection(nextSectionData); // compact the grid to close any gaps
+  return compactGridSection(nextSectionData);
 };
 
 /**
- * for each panel that collides with `panelToResolve`, push the colliding panel down by a single row and
- * recursively handle any collisions that result from that move
+ * For each panel that collides with `panelToResolve`, push one of them down.
+ * Fixed panels (e.g. multi-drag group) are never pushed; the other panel is pushed.
  */
 function resolvePanelCollisions(
   rowData: GridSectionData['panels'],
   panelToResolve: GridPanelData,
-  keysInOrder: string[]
+  keysInOrder: string[],
+  fixedPanelIds?: Set<string>
 ): GridSectionData['panels'] {
   const collisions = getAllCollisionsWithPanel(panelToResolve, rowData, keysInOrder);
   for (const collision of collisions) {
     if (collision.id === panelToResolve.id) continue;
-    rowData[collision.id].row++;
+    const resolveIsFixed = fixedPanelIds?.has(panelToResolve.id);
+    const collisionIsFixed = fixedPanelIds?.has(collision.id);
+    let panelToPush: GridPanelData;
+    if (resolveIsFixed && collisionIsFixed) {
+      // Both in dragged group (should not happen if delta is clamped; safety: push the later one)
+      const resolveIdx = keysInOrder.indexOf(panelToResolve.id);
+      const collisionIdx = keysInOrder.indexOf(collision.id);
+      panelToPush = collisionIdx > resolveIdx ? collision : panelToResolve;
+    } else {
+      panelToPush = resolveIsFixed ? collision : collisionIsFixed ? panelToResolve : collision;
+    }
+    rowData[panelToPush.id].row++;
     rowData = resolvePanelCollisions(
       rowData,
-      rowData[collision.id],
-      /**
-       * when recursively resolving any collisions that result from moving this colliding panel down,
-       * ignore if `collision` is still colliding with `panelToResolve` to prevent an infinite loop
-       */
-      keysInOrder.filter((key) => key !== panelToResolve.id)
+      rowData[panelToPush.id],
+      keysInOrder.filter((key) => key !== panelToResolve.id),
+      fixedPanelIds
     );
   }
   return rowData;

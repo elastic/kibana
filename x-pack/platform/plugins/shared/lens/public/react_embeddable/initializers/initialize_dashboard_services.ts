@@ -17,6 +17,12 @@ import { titleComparators } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
+
+import { getBreakdownFieldNameFromAttributes } from '../breakdown_field_name';
+import {
+  getBreakdownFieldOptions as getBreakdownFieldOptionsImpl,
+  setBreakdownField as setBreakdownFieldImpl,
+} from '../breakdown_field_selector';
 import type {
   LensComponentProps,
   LensPanelProps,
@@ -62,7 +68,11 @@ export interface DashboardServicesConfig {
     PublishesWritableDescription &
     HasLibraryTransforms<LensWireAPIConfig, LensWireAPIConfig> &
     Pick<LensApi, 'parentApi'> &
-    Pick<IntegrationCallbacks, 'updateOverrides' | 'getTriggerCompatibleActions'>;
+    Pick<IntegrationCallbacks, 'updateOverrides' | 'getTriggerCompatibleActions'> & {
+      breakdownFieldName$: BehaviorSubject<string | undefined>;
+      getBreakdownFieldOptions: () => Promise<Array<{ value: string; label: string }>>;
+      setBreakdownField: (fieldName: string) => Promise<void>;
+    };
   anyStateChange$: Observable<void>;
   getLatestState: () => SerializedProps;
   reinitializeState: (runtimeState: LensRuntimeState) => void;
@@ -85,7 +95,7 @@ export function initializeDashboardServices(
   stateConfig: StateManagementConfig,
   parentApi: unknown,
   titleManager: ReturnType<typeof initializeTitleManager>,
-  { attributeService, uiActions }: LensEmbeddableStartServices
+  { attributeService, uiActions, dataViews }: LensEmbeddableStartServices
 ): DashboardServicesConfig {
   // For some legacy reason the title and description default value is picked differently
   // ( based on existing FTR tests ).
@@ -94,11 +104,16 @@ export function initializeDashboardServices(
     getDefaultDescription(initialState)
   );
 
+  const breakdownFieldName$ = new BehaviorSubject<string | undefined>(
+    getBreakdownFieldNameFromAttributes(initialState.attributes)
+  );
+
   return {
     api: {
       parentApi: apiIsPresentationContainer(parentApi) ? parentApi : undefined,
       defaultTitle$,
       defaultDescription$,
+      breakdownFieldName$,
       ...titleManager.api,
       updateOverrides: internalApi.updateOverrides,
       getTriggerCompatibleActions: uiActions.getTriggerCompatibleActions,
@@ -131,6 +146,17 @@ export function initializeDashboardServices(
       getSerializedStateByValue: () => {
         const { ref_id: refId, ...byValueRuntimeState } = stripInheritedContext(getLatestState());
         return transformToApiConfig(byValueRuntimeState);
+      },
+      getBreakdownFieldOptions: async () => {
+        const { attributes } = getLatestState();
+        return getBreakdownFieldOptionsImpl(attributes, dataViews);
+      },
+      setBreakdownField: async (fieldName: string) => {
+        const { attributes } = getLatestState();
+        const newAttributes = await setBreakdownFieldImpl(attributes, fieldName, dataViews);
+        if (newAttributes !== attributes) {
+          stateConfig.api.updateAttributes(newAttributes);
+        }
       },
     },
     anyStateChange$: merge(

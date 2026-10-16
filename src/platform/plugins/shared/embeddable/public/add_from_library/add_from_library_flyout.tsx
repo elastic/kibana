@@ -53,9 +53,15 @@ export interface AddFromLibraryFormProps {
 
 export interface AddFromLibraryContentProps {
   container: CanAddNewPanel;
+  finderId?: string;
+  initialPageSize?: SavedObjectFinderProps['initialPageSize'];
 }
 
-export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps) => {
+export const AddFromLibraryContent = ({
+  container,
+  finderId = 'embeddableAddPanel',
+  initialPageSize,
+}: AddFromLibraryContentProps) => {
   const libraryTypes = useAddFromLibraryTypes();
 
   const onChoose: SavedObjectFinderProps['onChoose'] = useCallback(
@@ -83,7 +89,8 @@ export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps)
 
   return (
     <SavedObjectFinder
-      id="embeddableAddPanel"
+      id={finderId}
+      initialPageSize={initialPageSize}
       services={{
         contentClient: {
           ...contentManagement.client,

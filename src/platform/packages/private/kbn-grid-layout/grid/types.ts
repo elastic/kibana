@@ -74,6 +74,9 @@ export interface GridLayoutStateManager {
   sectionRefs: React.MutableRefObject<{ [sectionId: string]: HTMLDivElement | null }>;
   headerRefs: React.MutableRefObject<{ [sectionId: string]: HTMLDivElement | null }>;
   panelRefs: React.MutableRefObject<{ [panelId: string]: HTMLDivElement | null }>;
+
+  /** Returns current selected panel ids when multi-drag is supported (e.g. dashboard). */
+  getSelectedPanelIds?: () => ReadonlySet<string> | undefined;
 }
 
 /**

@@ -554,6 +554,8 @@ export function XYChart({
       },
       axisTitle: {
         visible: axis.showTitle,
+        fill: '#516381',
+        fontWeight: 450,
         // if labels are not visible add the padding to the title
         padding:
           !tickVisible && linesPaddings[position] != null
@@ -789,6 +791,11 @@ export function XYChart({
       style.tickLine = {
         visible: Boolean(xAxisConfig?.showLabels),
       };
+      style.axisTitle = {
+        ...style.axisTitle,
+        fill: '#516381',
+        fontWeight: 450,
+      };
       return style;
     }
 
@@ -802,6 +809,7 @@ export function XYChart({
 
     style.axisTitle = {
       ...style.axisTitle,
+      fill: xAxisConfig?.labelColor,
       padding:
         !xAxisConfig?.showLabels && linesPaddings.bottom != null
           ? { inner: linesPaddings.bottom }

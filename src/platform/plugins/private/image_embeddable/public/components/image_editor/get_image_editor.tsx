@@ -11,6 +11,7 @@ import React from 'react';
 
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
+import type { PanelSettingsApi } from '@kbn/embeddable-plugin/public';
 import type { ImageConfig } from '../../types';
 import type { FileImageMetadata } from '../../imports';
 import { imageEmbeddableFileKind } from '../../imports';
@@ -24,11 +25,14 @@ export const getImageEditor = async ({
   onSave,
   closeFlyout,
   ariaLabelledBy,
+  panelSettingsApi,
 }: {
   initialImageConfig?: ImageConfig;
   onSave?: (imageConfig: ImageConfig) => void;
   closeFlyout: () => void;
   ariaLabelledBy: string;
+  /** Title, description and border of the panel being edited */
+  panelSettingsApi?: PanelSettingsApi;
 }) => {
   const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
   const user = await coreServices.security.authc.getCurrentUser();
@@ -55,6 +59,7 @@ export const getImageEditor = async ({
           onCancel={closeFlyout}
           initialImageConfig={initialImageConfig}
           ariaLabelledBy={ariaLabelledBy}
+          panelSettingsApi={panelSettingsApi}
         />
       </ImageViewerContext.Provider>
     </FilesContext>

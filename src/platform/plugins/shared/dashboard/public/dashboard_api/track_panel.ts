@@ -61,6 +61,14 @@ export function initializeTrackPanel(
   const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const focusedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const highlightPanelId$ = new BehaviorSubject<string | undefined>(undefined);
+  const selectedPanelIds$ = new BehaviorSubject<Set<string>>(new Set());
+  // Select mode outlives an empty selection (e.g. entered with the modifier key alone, or after
+  // toggling off the last panel) until the selection is explicitly cleared
+  const isSelectMode$ = new BehaviorSubject<boolean>(false);
+  const setSelectMode = (isSelectMode: boolean) => {
+    if (isSelectMode$.value !== isSelectMode) isSelectMode$.next(isSelectMode);
+  };
+  const copiedPanelIds$ = new BehaviorSubject<Set<string>>(new Set());
   const scrollToPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const scrollToBottom$ = new Subject<void>();
   const scrollPosition$ = new BehaviorSubject<number | undefined>(undefined);
@@ -73,6 +81,10 @@ export function initializeTrackPanel(
   function setExpandedPanelId(id: string | undefined) {
     if (expandedPanelId$.value !== id) expandedPanelId$.next(id);
   }
+
+  const exitSelectModeSubscription = viewMode$.subscribe((viewMode) => {
+    if (viewMode !== 'edit') setSelectMode(false);
+  });
 
   const blurredPanelIds$ = new BehaviorSubject<string[]>([]);
   const blurredPanelIdsSubscription = combineLatest([
@@ -135,13 +147,8 @@ export function initializeTrackPanel(
         const id = highlightPanelId$.value;
         if (!id) return;
 
-        untilLoaded(id).then(async () => {
-          // Adds the highlight class in the next event loop to allow the DOM to update
-          await new Promise((res) => setTimeout(res, 0));
-          panelRef.classList.add('dshDashboardGrid__item--highlighted');
-          // Removes the class after the highlight animation finishes
-          await new Promise((res) => setTimeout(res, highlightAnimationDuration));
-          panelRef.classList.remove('dshDashboardGrid__item--highlighted');
+        untilLoaded(id).then(() => {
+          // Panel creation highlight animation disabled; panel appears without animation
         });
 
         highlightPanelId$.next(undefined);
@@ -187,11 +194,33 @@ export function initializeTrackPanel(
       setHighlightPanelId: (id: string | undefined) => {
         if (highlightPanelId$.value !== id) highlightPanelId$.next(id);
       },
+      selectedPanelIds$,
+      setSelectedPanelIds: (ids: Set<string>) => {
+        selectedPanelIds$.next(ids);
+        setSelectMode(ids.size > 0);
+      },
+      togglePanelSelection: (id: string) => {
+        const next = new Set(selectedPanelIds$.value);
+        if (next.has(id)) {
+          next.delete(id);
+        } else {
+          next.add(id);
+        }
+        selectedPanelIds$.next(next);
+        setSelectMode(true);
+      },
+      isSelectMode$,
+      enterSelectMode: () => setSelectMode(true),
+      copiedPanelIds$,
+      copySelectedPanels: () => {
+        copiedPanelIds$.next(new Set(selectedPanelIds$.value));
+      },
       setScrollToPanelId,
       blurredPanelIds$,
     },
     cleanup: () => {
       blurredPanelIdsSubscription.unsubscribe();
+      exitSelectModeSubscription.unsubscribe();
     },
   };
 }

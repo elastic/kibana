@@ -8,19 +8,34 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiLoadingChart, transparentize, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import {
+  EuiIcon,
+  EuiLoadingChart,
+  EuiScreenReaderOnly,
+  euiCanAnimate,
+  transparentize,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css, keyframes } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { apiCanCancelRequests, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
-import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { printViewportVisStyles } from '../print_styles';
-import { DASHBOARD_MARGIN_SIZE } from './constants';
+import { DASHBOARD_MARGIN_SIZE, SELECTION_DRAG_THRESHOLD_PX } from './constants';
 import { getHighlightStyles } from './highlight_styles';
+import { PanelContextMenuContext, SelectionPreviewContext } from './panel_context_menu';
+import { SelectedPanelActions } from './selected_panel_actions';
+import { isSelectionModifierPressed } from './selection_modifier';
+
+const selectedLabel = i18n.translate('dashboard.panel.selectedLabel', {
+  defaultMessage: 'Selected',
+});
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
@@ -58,22 +73,26 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
       scrollToPanelId,
       expandedPanelId,
       focusedPanelId,
+      selectedPanelIds,
       useMargins,
       viewMode,
       dashboardContainerRef,
       relatedPanelsIndicatorId,
       blurredPanelIds,
+      isSelectMode,
     ] = useBatchedPublishingSubjects(
       dashboardApi.hideBorder$,
       dashboardApi.highlightPanelId$,
       dashboardApi.scrollToPanelId$,
       dashboardApi.expandedPanelId$,
       dashboardApi.focusedPanelId$,
+      dashboardApi.selectedPanelIds$,
       dashboardApi.settings.useMargins$,
       dashboardApi.viewMode$,
       dashboardInternalApi.dashboardContainerRef$,
       dashboardApi.relatedPanelsIndicatorId$,
-      dashboardApi.blurredPanelIds$
+      dashboardApi.blurredPanelIds$,
+      dashboardApi.isSelectMode$
     );
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
@@ -89,13 +108,21 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
     const blurPanel = blurredPanelIds.includes(id);
 
     const showBorder = useMargins && !hidePanelBorders; // we do not show panel borders when margins are disabled
+    const previewSelectedPanelIds = useContext(SelectionPreviewContext);
+    const isSelected = selectedPanelIds.has(id) || (previewSelectedPanelIds?.has(id) ?? false);
+    const showSelectedPanelActions = viewMode === 'edit' && selectedPanelIds.has(id);
+    const isInSelectMode =
+      viewMode === 'edit' && (isSelectMode || (previewSelectedPanelIds?.size ?? 0) > 0);
     const classes = classNames('dshDashboardGrid__item', {
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
       'dshDashboardGrid__item--focused': focusPanel,
       'dshDashboardGrid__item--blurred': blurPanel,
-      'dshDashboardGrid__item--selected': isIndicatingRelatedPanels,
-      'dshDashboardGrid__item--hideHoverActions': blurPanel || focusedForEdit,
+      'dshDashboardGrid__item--selected': isSelected,
+      'dshDashboardGrid__item--selectMode': isInSelectMode,
+      'dshDashboardGrid__item--indicatingRelatedPanels': isIndicatingRelatedPanels,
+      // in select mode a click selects, so the drag handle and panel actions would compete with it
+      'dshDashboardGrid__item--hideHoverActions': blurPanel || focusedForEdit || isInSelectMode,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       printViewport__vis: viewMode === 'print',
     });
@@ -121,6 +148,17 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
         });
       }
     }, [id, dashboardApi, scrollToPanelId, highlightPanelId, ref, blurPanel]);
+
+    // In select mode the panel's content is out of reach for the keyboard too, so Tab moves between
+    // panels instead of into charts and title editors
+    useEffect(() => {
+      if (!isInSelectMode || typeof ref === 'function' || !ref?.current) return;
+      const regions = Array.from(
+        ref.current.querySelectorAll<HTMLElement>('.embPanel__content, .embPanel__header')
+      );
+      regions.forEach((region) => region.setAttribute('inert', ''));
+      return () => regions.forEach((region) => region.removeAttribute('inert'));
+    }, [isInSelectMode, isRenderable, ref]);
 
     useEffect(() => {
       return () => {
@@ -172,6 +210,76 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
           }px`,
         });
 
+    const panelContextMenu = useContext(PanelContextMenuContext);
+
+    // In edit mode Cmd+click / Cmd+drag (Ctrl outside macOS) belong to the dashboard's panel
+    // selection. They are handled in the capture phase so panel content (e.g. Lens Metric, which
+    // stops click propagation, or maps and charts with their own modifier gestures) never receives them.
+    const isSelectionGesture = useCallback(
+      (e: React.MouseEvent) =>
+        viewMode === 'edit' &&
+        isSelectionModifierPressed(e) &&
+        !(e.target as HTMLElement).closest('input, textarea, [contenteditable="true"]'),
+      [viewMode]
+    );
+
+    const mouseDownPositionRef = useRef<{ x: number; y: number } | null>(null);
+
+    // In select mode (entered by selecting a panel or pressing Cmd alone) a plain click
+    // anywhere on a panel toggles it. The panel's own actions keep working, and clicks from
+    // portaled content (e.g. hover action popovers) or that end a panel drag are ignored.
+    const isSelectModeClick = useCallback(
+      (e: React.MouseEvent) => {
+        if (viewMode !== 'edit' || !isSelectMode) return false;
+        const target = e.target as HTMLElement;
+        if (!(e.currentTarget as HTMLElement).contains(target)) return false;
+        if (
+          target.closest(
+            'input, textarea, [contenteditable="true"], .embPanel__hoverActions, [data-test-subj^="dashboardSelectedPanelActions"]'
+          )
+        ) {
+          return false;
+        }
+        const start = mouseDownPositionRef.current;
+        return (
+          !start ||
+          (Math.abs(e.clientX - start.x) < SELECTION_DRAG_THRESHOLD_PX &&
+            Math.abs(e.clientY - start.y) < SELECTION_DRAG_THRESHOLD_PX)
+        );
+      },
+      [viewMode, isSelectMode]
+    );
+
+    const handlePanelMouseDownCapture = useCallback(
+      (e: React.MouseEvent) => {
+        mouseDownPositionRef.current = { x: e.clientX, y: e.clientY };
+        if (isSelectionGesture(e)) e.stopPropagation();
+      },
+      [isSelectionGesture]
+    );
+
+    const handlePanelClickCapture = useCallback(
+      (e: React.MouseEvent) => {
+        if (!isSelectionGesture(e) && !isSelectModeClick(e)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        dashboardApi.togglePanelSelection(id);
+      },
+      [isSelectionGesture, isSelectModeClick, dashboardApi, id]
+    );
+
+    const handleContextMenu = useCallback(
+      (e: React.MouseEvent) => {
+        // the bulk actions menu is only for selected panels; otherwise keep the browser's menu
+        if (viewMode === 'edit' && panelContextMenu && selectedPanelIds.has(id)) {
+          e.preventDefault();
+          e.stopPropagation();
+          panelContextMenu.openContextMenu(id, { x: e.clientX, y: e.clientY });
+        }
+      },
+      [viewMode, panelContextMenu, selectedPanelIds, id]
+    );
+
     return (
       <div
         css={[focusStyles, styles.item]}
@@ -179,11 +287,41 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
         data-test-subj="dashboardPanel"
         id={`panel-${id}`}
         ref={ref}
+        onMouseDownCapture={handlePanelMouseDownCapture}
+        onClickCapture={handlePanelClickCapture}
+        onContextMenu={handleContextMenu}
         {...rest}
       >
         {isRenderable ? (
           <>
             {renderedEmbeddable}
+            {isInSelectMode && (
+              <span
+                className={classNames('dshDashboardGrid__selectionIndicator', {
+                  'dshDashboardGrid__selectionIndicator--checked': isSelected,
+                })}
+                css={styles.selectionIndicator}
+                data-test-subj={`dashboardPanelSelectionIndicator-${id}`}
+              >
+                {isSelected && (
+                  <>
+                    <EuiIcon
+                      type="check"
+                      color="ghost"
+                      size="s"
+                      css={styles.selectionCheck}
+                      aria-hidden={true}
+                    />
+                    <EuiScreenReaderOnly>
+                      <span>{selectedLabel}</span>
+                    </EuiScreenReaderOnly>
+                  </>
+                )}
+              </span>
+            )}
+            {showSelectedPanelActions && (
+              <SelectedPanelActions panelId={id} selectedPanelIds={selectedPanelIds} />
+            )}
             {children}
           </>
         ) : (
@@ -208,12 +346,26 @@ const dashboardGridItemStyles = {
         '.kbnAppWrapper--hiddenChrome & .dshDashboardGrid__item--expanded': {
           padding: 0,
         },
+        // anchors the selection indicator and the selected panel actions to the panel's edges
+        '&.dshDashboardGrid__item--selectMode': {
+          position: 'relative',
+          // in select mode a click anywhere on a panel selects it, so its content (chart tooltips,
+          // brushing, title editing, ...) stops reacting to the pointer and clicks land on the panel
+          '.embPanel__content, .embPanel__header': {
+            pointerEvents: 'none',
+          },
+        },
+        '&:hover .dshDashboardGrid__selectionIndicator:not(.dshDashboardGrid__selectionIndicator--checked)':
+          {
+            borderColor: context.euiTheme.colors.borderStrongPrimary,
+          },
         // Call out focused panels with a simple border
         '&.dshDashboardGrid__item--focused .embPanel': {
           outline: `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.vis.euiColorVis0}`,
         },
-        // Call out panels that are selected to indicate their related panels with the same border plus a semitransparent overlay
-        '&.dshDashboardGrid__item--selected': {
+        // Call out panels that are indicating their related panels with the same border plus a semitransparent overlay
+        '&.dshDashboardGrid__item--indicatingRelatedPanels': {
+          position: 'relative',
           // Ensure the overall panel still has a plain background so we can apply the semitransparent overlay on top of it
           backgroundColor: context.euiTheme.colors.backgroundBasePlain,
           '& .embPanel': {
@@ -228,6 +380,43 @@ const dashboardGridItemStyles = {
       getHighlightStyles(context),
       printViewportVisStyles(context),
     ]),
+  // Inset in the bottom-left corner, clear of the drag handle and selected panel actions on the top edge
+  selectionIndicator: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      bottom: euiTheme.size.s,
+      left: euiTheme.size.s,
+      zIndex: euiTheme.levels.menu,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      boxSizing: 'border-box',
+      // checkbox-sized, so it reads as selectable without competing with the panel content
+      width: `calc(${euiTheme.size.base} + ${euiTheme.size.xxs})`,
+      height: `calc(${euiTheme.size.base} + ${euiTheme.size.xxs})`,
+      borderRadius: '50%',
+      border: `1.5px solid ${euiTheme.colors.borderBaseProminent}`,
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      pointerEvents: 'none',
+      [euiCanAnimate]: {
+        transition: `border-color ${euiTheme.animation.fast} ease-out, background-color ${euiTheme.animation.fast} ease-out`,
+      },
+      '&.dshDashboardGrid__selectionIndicator--checked': {
+        borderColor: euiTheme.colors.backgroundFilledPrimary,
+        backgroundColor: euiTheme.colors.backgroundFilledPrimary,
+      },
+    }),
+  selectionCheck: ({ euiTheme }: UseEuiTheme) => {
+    const checkIn = keyframes({
+      from: { transform: 'scale(0.6)', opacity: 0 },
+      to: { transform: 'scale(1)', opacity: 1 },
+    });
+    return css({
+      [euiCanAnimate]: {
+        animation: `${checkIn} ${euiTheme.animation.fast} ease-out`,
+      },
+    });
+  },
   focusPanelBlur: css({
     pointerEvents: 'none',
     opacity: '0.25',

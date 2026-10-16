@@ -8,7 +8,7 @@
  */
 
 import React, { useRef } from 'react';
-import { EuiProgress, useEuiTheme } from '@elastic/eui';
+import { EuiProgress } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
 import type { ExpressionRenderError } from '../types';
@@ -42,7 +42,6 @@ export function ReactExpressionRenderer({
   ...expressionRendererOptions
 }: ReactExpressionRendererProps) {
   const nodeRef = useRef<HTMLDivElement>(null);
-  const { euiTheme } = useEuiTheme();
   const { error, isEmpty, isLoading } = useExpressionRenderer(nodeRef, {
     ...expressionRendererOptions,
     abortController,
@@ -61,8 +60,7 @@ export function ReactExpressionRenderer({
         css={css({
           width: '100%',
           height: '100%',
-          ...(padding ? { padding: euiTheme.size[padding] } : {}),
-          ...(!paddingTop ? { paddingTop: 0 } : {}),
+          padding: '0px',
           ...(isEmpty || !!error ? { display: 'none' } : {}),
         })}
         ref={nodeRef}

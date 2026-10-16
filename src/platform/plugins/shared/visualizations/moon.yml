@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/data-view-editor-plugin'
   - '@kbn/presentation-util-plugin'
+  - '@kbn/presentation-util'
   - '@kbn/screenshot-mode-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/es-query'

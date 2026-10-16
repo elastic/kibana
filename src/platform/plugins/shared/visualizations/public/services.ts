@@ -12,6 +12,7 @@ import type {
   ApplicationStart,
   Capabilities,
   ChromeStart,
+  CoreStart,
   DocLinksStart,
   HttpStart,
   IUiSettingsClient,
@@ -74,6 +75,8 @@ export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('
 
 export const [getAggs, setAggs] =
   createGetterSetter<DataPublicPluginStart['search']['aggs']>('AggConfigs');
+
+export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
 export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Overlays');
 

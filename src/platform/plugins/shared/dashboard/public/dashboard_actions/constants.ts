@@ -19,3 +19,4 @@ export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
 export const ACTION_ADD_SECTION = 'addCollapsibleSection';
 export const ACTION_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 export const ACTION_ESQL_NOTIFICATION = 'ACTION_ESQL_NOTIFICATION';
+export const ACTION_SHARE_COLOR_MAPPING = 'shareColorMapping';

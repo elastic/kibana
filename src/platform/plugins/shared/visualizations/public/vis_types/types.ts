@@ -216,6 +216,12 @@ export interface VisTypeDefinition<TVisParams extends VisParams> {
 
   disableEdit?: boolean;
 
+  /**
+   * When true, editing a panel of this type from a dashboard opens a flyout with a preview of the
+   * panel and its settings, with a link to the full editor, instead of navigating to the editor.
+   */
+  editInFlyout?: boolean;
+
   readonly options?: Partial<VisTypeOptions>;
 
   /**

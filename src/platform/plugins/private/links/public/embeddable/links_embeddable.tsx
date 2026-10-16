@@ -158,6 +158,8 @@ export const getLinksEmbeddableFactory = () => {
         canLinkToLibrary: async () => !isByReference,
         canUnlinkFromLibrary: async () => isByReference,
         hasLibraryItemWithTitle,
+        // the panel settings are part of the links editor flyout
+        hasPanelSettingsInEditFlyout: () => true,
         onEdit: async () => {
           openLazyFlyout({
             core: coreServices,
@@ -174,6 +176,7 @@ export const getLinksEmbeddableFactory = () => {
                   refId,
                 },
                 parentDashboard: parentApi,
+                panelSettingsApi: { ...titleManager.api, defaultTitle$, defaultDescription$ },
                 onCompleteEdit: async (newState) => {
                   if (!newState) return;
 
@@ -196,8 +199,11 @@ export const getLinksEmbeddableFactory = () => {
                     return;
                   }
 
-                  defaultDescription$.next(newState.description);
-                  defaultTitle$.next(newState.title);
+                  // the defaults are the title and description of the library item
+                  if (isByReference) {
+                    defaultDescription$.next(newState.description);
+                    defaultTitle$.next(newState.title);
+                  }
                   layout$.next(newState.layout);
                   resolvedLinks$.next(newState.links ?? []);
                 },

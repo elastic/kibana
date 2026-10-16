@@ -16,6 +16,7 @@ export const serializedTitlesSchema = z
       .boolean()
       .optional()
       .meta({ description: 'When true, the panel title is hidden. Defaults to false.' }),
+    smart_title: z.boolean().optional(),
     title: z.string().optional().meta({ description: 'The panel title.' }),
     hide_border: z
       .boolean()

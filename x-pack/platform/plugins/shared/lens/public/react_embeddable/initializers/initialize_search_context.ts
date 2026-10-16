@@ -12,6 +12,7 @@ import type {
   PublishesEsql,
   PublishesProjectRoutingOverrides,
   PublishesUnifiedSearch,
+  PublishesWritableTimeRange,
   StateComparators,
 } from '@kbn/presentation-publishing';
 import { initializeTimeRangeManager, timeRangeComparators } from '@kbn/presentation-publishing';
@@ -38,6 +39,7 @@ export const searchContextComparators: StateComparators<LensUnifiedSearchContext
 
 export interface SearchContextConfig {
   api: PublishesUnifiedSearch &
+    Pick<PublishesWritableTimeRange, 'setTimeRange'> &
     PublishesSearchSession &
     PublishesProjectRoutingOverrides &
     PublishesEsql;

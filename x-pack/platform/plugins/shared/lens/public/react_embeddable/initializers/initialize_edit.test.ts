@@ -46,7 +46,7 @@ function createEditApi(
     internalApi,
     api,
     api,
-    api,
+    { ...api, setTimeRange: jest.fn() },
     () => false, // DSL based
     services,
     parentApi
