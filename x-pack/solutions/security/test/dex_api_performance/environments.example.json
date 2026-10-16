@@ -1,0 +1,49 @@
+{
+  "results_cluster": {
+    "es_url": "https://perf-results.es.us-west2.gcp.elastic-cloud.com:443",
+    "api_key": "env:PERF_RESULTS_API_KEY"
+  },
+  "defaults": {
+    "iterations": 5,
+    "memory_sample_interval_ms": 1000,
+    "change_history_enabled": true
+  },
+  "max_parallel_environments": 3,
+  "environments": [
+    {
+      "id": "cold-boot-1",
+      "role": "cold_boot",
+      "kibana_url": "https://cold1.kb.us-west2.gcp.elastic-cloud.com:9243",
+      "es_url": "https://cold1.es.us-west2.gcp.elastic-cloud.com:443",
+      "credentials": "env:COLD1_CREDENTIALS",
+      "kibana_memory_mb": 1024,
+      "es_heap_mb": 1024,
+      "stack_version": "9.5.0",
+      "notes": "Fresh deployment, never touched — consumed by cold boot"
+    },
+    {
+      "id": "cold-boot-2",
+      "role": "cold_boot",
+      "kibana_url": "https://cold2.kb.us-west2.gcp.elastic-cloud.com:9243",
+      "es_url": "https://cold2.es.us-west2.gcp.elastic-cloud.com:443",
+      "credentials": "env:COLD2_CREDENTIALS",
+      "kibana_memory_mb": 1024,
+      "es_heap_mb": 1024,
+      "stack_version": "9.5.0",
+      "notes": "Fresh deployment, never touched — consumed by cold boot"
+    },
+    {
+      "id": "warm-scenarios",
+      "role": "warm_boot",
+      "scenarios": ["warm_boot", "scalability", "contention", "double_click", "memory_stability"],
+      "kibana_url": "https://warm1.kb.us-west2.gcp.elastic-cloud.com:9243",
+      "es_url": "https://warm1.es.us-west2.gcp.elastic-cloud.com:443",
+      "credentials": "env:WARM1_CREDENTIALS",
+      "kibana_memory_mb": 1024,
+      "es_heap_mb": 1024,
+      "stack_version": "9.5.0",
+      "iterations": 5,
+      "notes": "Reusable environment for all warm scenarios"
+    }
+  ]
+}
