@@ -70,6 +70,7 @@ import {
 import {
   buildFollowUpMessage,
   recoverSubjectsFromInputs,
+  toSlackThreadKey,
   toStartSubjects,
   toSubjectKeys,
   withoutRecordedSubjects,
@@ -211,20 +212,6 @@ const toSlackThreadUpdate = (
     ...(seenEvents && { seen_events: seenEvents }),
   };
 };
-
-/**
- * The key Agent Builder identifies a Slack thread's conversation by (its conversation origin),
- * which is also the thread's subject id. Channel ids are only unique within a workspace.
- */
-export const toSlackThreadKey = ({
-  workspace,
-  channel,
-  threadTs,
-}: {
-  workspace: string;
-  channel: string;
-  threadTs: string;
-}): string => `team:${workspace}/channel:${channel}/thread:${threadTs}`;
 
 /** The message text with Slack mentions and markup collapsed away. */
 const collapseSlackText = (text: string | undefined): string =>
@@ -389,6 +376,7 @@ export class NightshiftInvestigationsClient {
     connector_id,
     context = {},
     notificationDestinations,
+    slack_thread: slackThread,
   }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
     if (!(await this.checkInfrastructureAvailability())) {
       throw new InvestigationUnavailableError('Investigations are not available');
@@ -439,6 +427,7 @@ export class NightshiftInvestigationsClient {
       alerts,
       triggerType: trigger_type,
       investigationId: newInvestigationId,
+      slackThread,
     });
 
     const conversations = await agentBuilder.conversations.getScopedClient({
@@ -845,9 +834,9 @@ export class NightshiftInvestigationsClient {
   }
 
   /**
-   * The investigation for a Slack thread, found by the thread's conversation origin (the
-   * `team:<T>/channel:<C>/thread:<ts>` key Agent Builder uses for Slack) and, when the origin
-   * names some other conversation, by the thread's `slack_thread` subject. Without `create`, a
+   * The investigation for a Slack thread, found by the thread's `slack_thread` subject (keyed by
+   * the `slack:<T>:<C>:<ts>` origin key the Relay and Agent Builder use for Slack). Without
+   * `create`, a
    * thread that has no investigation yet returns undefined. With `create`, the investigation is
    * created with that origin and the thread as its subject, as the identity that runs the Slack
    * workflow, which also runs the investigation workflow on it. `statusMessageTs` records the
@@ -974,6 +963,41 @@ export class NightshiftInvestigationsClient {
       question: threadSubject?.summary ?? text,
       duplicate: isDuplicate(recorded),
     });
+  }
+
+  /**
+   * Records `messageTs` as the status message of the investigation's `slack_thread` subject for
+   * `channel` and `threadTs`, so the Slack thread workflow edits that message instead of posting
+   * its own. A thread that already has a status message keeps it, and an investigation without
+   * that thread records nothing.
+   */
+  async recordSlackThreadStatusMessage({
+    investigationId,
+    channel,
+    threadTs,
+    messageTs,
+  }: {
+    investigationId: string;
+    channel: string;
+    threadTs: string;
+    messageTs: string;
+  }): Promise<void> {
+    const { agenticInvestigations } = this.requireWriteDeps();
+    const subjectsClient = agenticInvestigations.getSubjectsClient(this.request);
+    const thread = (await subjectsClient.listByConversationIds([investigationId])).find(
+      ({ subjectType, slack }) =>
+        subjectType === 'slack_thread' && slack?.channel === channel && slack.thread_ts === threadTs
+    );
+    if (!thread?.slack || thread.slack.status_message_ts) {
+      return;
+    }
+    await subjectsClient.upsertSubjects(investigationId, [
+      {
+        type: 'slack_thread',
+        id: thread.subjectId,
+        slack: { channel, thread_ts: threadTs, status_message_ts: messageTs },
+      },
+    ]);
   }
 
   /**

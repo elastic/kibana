@@ -46,6 +46,8 @@ export interface NotificationDeliveryContext {
   url: string;
   phase: NotificationPhase;
   reason?: string;
+  /** A message this run already posted, which the delivery edits instead of posting a new one. */
+  messageTs?: string;
 }
 
 export interface NotificationHandler {
