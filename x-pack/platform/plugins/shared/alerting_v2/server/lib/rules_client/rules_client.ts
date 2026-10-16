@@ -76,10 +76,7 @@ import type { PluginConfig } from '../../config';
 import { convertEveryToSchedulesPerMinute, parseDurationToMs } from '../duration';
 import { buildMatchingRulesFilter, buildRuleSoFilter } from './build_rule_filter';
 import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
-import {
-  resolveRuleTelemetryEventOrigin,
-  type CreateRulesClientOptions,
-} from './rule_ebt_origin';
+import { resolveRuleTelemetryEventOrigin, type CreateRulesClientOptions } from './rule_ebt_origin';
 import { RulesClientOptionsToken } from './tokens';
 import type {
   BulkByIdsParams,
