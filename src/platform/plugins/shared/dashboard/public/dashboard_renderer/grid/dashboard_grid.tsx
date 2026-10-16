@@ -30,6 +30,7 @@ import {
   DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
 } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
+import { PanelSelectHint } from './panel_select_hint';
 import { SelectionMarquee } from './selection_marquee';
 import { useLayoutStyles } from './use_layout_styles';
 import { MARQUEE_PREVIEW_CLASS, usePanelSelectionGestures } from './use_panel_selection_gestures';
@@ -79,7 +80,7 @@ export const DashboardGrid = () => {
   const appFixedViewport = useAppFixedViewport();
 
   const isSelectionEnabled = viewMode === 'edit' && expandedPanelId === undefined;
-  const marqueeRect = usePanelSelectionGestures({
+  const { marqueeRect, selectHintRect } = usePanelSelectionGestures({
     layoutRef,
     panelRefs,
     enabled: isSelectionEnabled,
@@ -245,6 +246,7 @@ export const DashboardGrid = () => {
     >
       {memoizedGridLayout}
       <SelectionMarquee rect={marqueeRect} />
+      <PanelSelectHint rect={selectHintRect} />
     </div>
   );
 };

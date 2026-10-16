@@ -57,6 +57,27 @@ const KEEP_SELECTION_SELECTOR = [
 ].join(', ');
 
 /**
+ * The parts of a panel used to drag it: everything the grid registered as a drag handle (the title and
+ * the move icon in the hover actions) plus the rest of the header strip around the title.
+ */
+const DRAG_AREA_SELECTOR = ['.kbnGridPanel--dragHandle', '.embPanel__header'].join(', ');
+
+/**
+ * Controls inside the drag area that do something on click (title link to the customize flyout,
+ * badges, menus in portals). The move icon is a button too but it is the drag handle itself.
+ */
+const DRAG_AREA_INTERACTIVE_SELECTOR = [
+  'a',
+  'button:not(.embPanel--dragHandle)',
+  'input',
+  '[role="button"]',
+  '[role="link"]',
+  '[data-euiportal]',
+].join(', ');
+
+const SELECT_HINT_DURATION_MS = 2000;
+
+/**
  * Applied directly to the grid items touched by the rectangle while it is being drawn, so they are
  * outlined like selected panels without re-rendering the grid on every mouse move (the grid layout
  * uses the same approach for its `kbnGridPanel--active` class).
@@ -92,7 +113,9 @@ const getPanelElement = (ref: React.Ref<HTMLDivElement>): HTMLDivElement | null 
  * - once at least one panel is selected (selection mode), plain clicks and drags inside the grid behave
  *   the same way, so panels act as selection items and their content does not react
  * - a plain click outside the selected panels, or pressing Escape, clears the selection
- * Returns the rectangle currently being drawn, if any, so the caller can render it.
+ * - a plain click on a panel's drag area (title bar or move icon) that does not become a drag briefly
+ *   shows a "how to select" hint on that panel
+ * Returns the rectangle currently being drawn and the panel rectangle to show the hint on, if any.
  */
 export const usePanelSelectionGestures = ({
   layoutRef,
@@ -102,9 +125,10 @@ export const usePanelSelectionGestures = ({
   layoutRef: React.RefObject<HTMLDivElement>;
   panelRefs: PanelRefs;
   enabled: boolean;
-}): SelectionRect | undefined => {
+}): { marqueeRect: SelectionRect | undefined; selectHintRect: SelectionRect | undefined } => {
   const dashboardApi = useDashboardApi();
   const [marqueeRect, setMarqueeRect] = useState<SelectionRect | undefined>();
+  const [selectHintRect, setSelectHintRect] = useState<SelectionRect | undefined>();
 
   useEffect(() => {
     const root = layoutRef.current;
@@ -137,8 +161,47 @@ export const usePanelSelectionGestures = ({
       });
     };
 
-    const onDocumentMouseDown = () => {
+    let hideHintTimeout: ReturnType<typeof setTimeout> | undefined;
+    const hideSelectHint = () => {
+      if (hideHintTimeout) clearTimeout(hideHintTimeout);
+      hideHintTimeout = undefined;
+      setSelectHintRect(undefined);
+    };
+    const showSelectHint = (panelId: string) => {
+      const element = getPanelElement(panelRefs.current[panelId]);
+      if (!element) return;
+      const { left, top, right, bottom } = element.getBoundingClientRect();
+      if (hideHintTimeout) clearTimeout(hideHintTimeout);
+      setSelectHintRect({ left, top, right, bottom });
+      hideHintTimeout = setTimeout(hideSelectHint, SELECT_HINT_DURATION_MS);
+    };
+
+    // Where the last mousedown happened, to tell a click on a drag handle apart from a (tiny) drag
+    let lastMouseDown: { x: number; y: number } | undefined;
+
+    const onDocumentMouseDown = (e: MouseEvent) => {
       suppressNextClick = false;
+      lastMouseDown = { x: e.clientX, y: e.clientY };
+      hideSelectHint();
+    };
+
+    // Bubble phase on the document: the click has already passed through the whole panel without
+    // being stopped. A click on the drag area that did not turn into a drag does nothing, so it is the
+    // moment to teach the selection gesture.
+    const onDocumentClickBubbled = (e: MouseEvent) => {
+      if (e.button !== 0 || e.defaultPrevented || isSelectionModifier(e)) return;
+      if (dashboardApi.selectedPanelIds$.value.length) return; // in selection mode clicks select
+      const target = e.target as HTMLElement;
+      const panelId = findPanelId(target);
+      if (!panelId) return;
+      if (!target.closest(DRAG_AREA_SELECTOR)) return;
+      if (target.closest(DRAG_AREA_INTERACTIVE_SELECTOR)) return;
+      const didDrag =
+        lastMouseDown &&
+        (Math.abs(e.clientX - lastMouseDown.x) > MARQUEE_THRESHOLD_PX ||
+          Math.abs(e.clientY - lastMouseDown.y) > MARQUEE_THRESHOLD_PX);
+      if (didDrag) return;
+      showSelectHint(panelId);
     };
 
     const onDocumentClick = (e: MouseEvent) => {
@@ -159,6 +222,7 @@ export const usePanelSelectionGestures = ({
     };
 
     const onDocumentKeyDown = (e: KeyboardEvent) => {
+      if (!isSelectionModifier(e)) hideSelectHint(); // pressing the modifier itself keeps the hint around
       if (e.key !== 'Escape' || e.defaultPrevented) return;
       if (!dashboardApi.selectedPanelIds$.value.length) return;
       // Let open menus, flyouts and text inputs consume their own Escape first
@@ -231,16 +295,21 @@ export const usePanelSelectionGestures = ({
     root.addEventListener('mousedown', onRootMouseDown, { capture: true });
     document.addEventListener('mousedown', onDocumentMouseDown, { capture: true });
     document.addEventListener('click', onDocumentClick, { capture: true });
+    document.addEventListener('click', onDocumentClickBubbled);
     document.addEventListener('keydown', onDocumentKeyDown);
+    document.addEventListener('scroll', hideSelectHint, { capture: true, passive: true }); // the hint is fixed-positioned
     return () => {
       root.removeEventListener('mousedown', onRootMouseDown, { capture: true });
       document.removeEventListener('mousedown', onDocumentMouseDown, { capture: true });
       document.removeEventListener('click', onDocumentClick, { capture: true });
+      document.removeEventListener('click', onDocumentClickBubbled);
       document.removeEventListener('keydown', onDocumentKeyDown);
+      document.removeEventListener('scroll', hideSelectHint, { capture: true });
+      hideSelectHint();
       setMarqueePreview([]);
       setMarqueeRect(undefined);
     };
   }, [layoutRef, panelRefs, enabled, dashboardApi]);
 
-  return marqueeRect;
+  return { marqueeRect, selectHintRect };
 };
