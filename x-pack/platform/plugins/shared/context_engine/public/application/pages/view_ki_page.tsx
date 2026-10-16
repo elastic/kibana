@@ -66,10 +66,7 @@ export const ViewKiPage = () => {
   const backPath = getAiIndexKnowledgeIndicatorsPath(aiIndexId);
   const backHref = createContextEngineUrl(backPath);
 
-  useContextEngineBreadcrumbs([
-    { text: aiIndexId, path: backPath },
-    { text: pageTitle },
-  ]);
+  useContextEngineBreadcrumbs([{ text: aiIndexId, path: backPath }, { text: pageTitle }]);
 
   const lifecycleStatus = ki ? readKiDocumentLifecycleStatus(ki.document) : undefined;
 
