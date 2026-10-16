@@ -22,8 +22,20 @@ import { SyntheticsTelemetry } from '../telemetry/synthetics_telemetry';
 import * as monitorUpgradeSender from '../routes/telemetry/monitor_upgrade_sender';
 import type { SyntheticsServerSetup } from '../types';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 
 jest.mock('axios', () => jest.fn());
+jest.mock('../routes/synthetics_service/install_index_templates', () => ({
+  installSyntheticsIndexTemplates: jest.fn(),
+}));
+// Run the p-retry wrapper without backoff delays so the failure paths resolve immediately in tests.
+jest.mock('p-retry', () => ({
+  __esModule: true,
+  default: (fn: () => Promise<unknown>) => fn(),
+}));
+
+const installSyntheticsIndexTemplatesMock =
+  installSyntheticsIndexTemplates as jest.MockedFunction<typeof installSyntheticsIndexTemplates>;
 
 const taskManagerSetup = taskManagerMock.createSetup();
 
@@ -1135,6 +1147,59 @@ describe('SyntheticsService', () => {
 
       expect(logger.error).not.toHaveBeenCalled();
       expect(logger.debug).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('setupIndexTemplates', () => {
+    const failureMessage = 'Failed to install synthetics index templates.';
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      installSyntheticsIndexTemplatesMock.mockReset();
+    });
+
+    it('logs the failure at ERROR only on the first occurrence, DEBUG thereafter', async () => {
+      const { service } = getMockedService();
+      installSyntheticsIndexTemplatesMock.mockRejectedValue(
+        new Error('invalid_index_template_exception')
+      );
+
+      await service.setupIndexTemplates();
+      await service.setupIndexTemplates();
+      await service.setupIndexTemplates();
+
+      const errorCalls = logger.error.mock.calls.filter(([message]) => message === failureMessage);
+      const debugCalls = logger.debug.mock.calls.filter(([message]) => message === failureMessage);
+
+      expect(errorCalls).toHaveLength(1);
+      expect(debugCalls).toHaveLength(2);
+      expect(service.indexTemplateExists).toBe(false);
+    });
+
+    it('logs at ERROR again after a recovery followed by a new failure', async () => {
+      const { service } = getMockedService();
+
+      installSyntheticsIndexTemplatesMock.mockRejectedValueOnce(
+        new Error('invalid_index_template_exception')
+      );
+      await service.setupIndexTemplates();
+
+      installSyntheticsIndexTemplatesMock.mockResolvedValueOnce({
+        name: 'synthetics',
+        install_status: 'installed',
+      } as Awaited<ReturnType<typeof installSyntheticsIndexTemplates>>);
+      await service.setupIndexTemplates();
+
+      // reset so the next install attempt runs again
+      service.indexTemplateExists = false;
+      installSyntheticsIndexTemplatesMock.mockRejectedValueOnce(
+        new Error('invalid_index_template_exception')
+      );
+      await service.setupIndexTemplates();
+
+      const errorCalls = logger.error.mock.calls.filter(([message]) => message === failureMessage);
+
+      expect(errorCalls).toHaveLength(2);
     });
   });
 });
