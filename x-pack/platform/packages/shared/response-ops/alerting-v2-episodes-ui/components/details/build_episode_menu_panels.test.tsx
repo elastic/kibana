@@ -42,8 +42,9 @@ type PlainItem = FlyoutFooterMenuItem & {
 };
 
 const getItems = (actions: EpisodeAction[], viewDetailsHref?: string | null) =>
-  buildEpisodeMenuPanels({ actions, episodes, viewDetailsHref, onSuccess: jest.fn() })[0]
-    ?.items as PlainItem[] | undefined;
+  buildEpisodeMenuPanels({ actions, episodes, viewDetailsHref, onSuccess: jest.fn() })[0]?.items as
+    | PlainItem[]
+    | undefined;
 
 const describeItems = (items: PlainItem[] = []) =>
   items.map((item) => {
