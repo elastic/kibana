@@ -110,13 +110,11 @@ const getRemovedGrids = (
  * The dashboard with short ids. Panels new to their container (added or moved) are sent without a
  * grid and new sections without a row, since their placeholder positions are for the call to set.
  * Moved panels keep their size. Each changed container lists the space its removed and moved-out
- * panels left. Without instructions, sections this call did not change are sent
- * without their panels, so they keep their layout.
+ * panels left.
  */
 const toLayoutRequest = (
   widgets: Widgets,
   originalWidgets: Widgets,
-  changedContainers: ReadonlySet<string>,
   aliasById: ReadonlyMap<string, string>,
   instructions: string | undefined
 ): LayoutRequest => {
@@ -154,12 +152,8 @@ const toLayoutRequest = (
         id: aliasById.get(id) ?? id,
         title,
         ...(placedKeys.has(id) ? { y: grid.y } : {}),
-        ...(instructions !== undefined || changedContainers.has(id)
-          ? {
-              panels: toLayoutPanels(panels, id),
-              ...getRemovedGrids(originalWidgets, currentKeys, id),
-            }
-          : {}),
+        panels: toLayoutPanels(panels, id),
+        ...getRemovedGrids(originalWidgets, currentKeys, id),
       })),
   };
 };
@@ -206,13 +200,7 @@ export const arrangeDashboardLayout = async ({
   if (instructions === undefined && changedContainers.size === 0) {
     return { dashboardData };
   }
-  const request = toLayoutRequest(
-    dashboardData.panels,
-    originalPanels,
-    changedContainers,
-    aliasById,
-    instructions
-  );
+  const request = toLayoutRequest(dashboardData.panels, originalPanels, aliasById, instructions);
 
   const idByAlias = new Map([...aliasById].map(([id, alias]) => [alias, id]));
   const toId = (alias: string): string => idByAlias.get(alias) ?? alias;
@@ -297,7 +285,7 @@ const getIncompleteArrangementIssue = (
     { requested: panels, arranged: arrangement.panels },
     ...sections.flatMap(({ id, panels: requested }) => {
       const arranged = arrangedSectionsById.get(id)?.panels ?? [];
-      return requested && arranged.length > 0 ? [{ requested, arranged }] : [];
+      return arranged.length > 0 ? [{ requested, arranged }] : [];
     }),
   ];
   for (const { requested, arranged } of containers) {
