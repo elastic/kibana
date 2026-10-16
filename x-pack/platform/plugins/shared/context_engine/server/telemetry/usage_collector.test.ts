@@ -74,7 +74,7 @@ describe('context_engine usage collector', () => {
     const usageCollection = createUsageCollectionSetupMock();
     usageCollection.makeUsageCollector.mockImplementation((config) => {
       collector = new Collector(loggerMock.create(), config);
-      return createUsageCollectionSetupMock().makeUsageCollector(config);
+      return collector;
     });
     registerContextEngineUsageCollector({
       usageCollection,
