@@ -195,13 +195,13 @@ describe('sandbox credentials', () => {
     expect(await getHeaders(config, testSecrets)).toEqual(expected);
   });
 
-  test('isSandboxCapable: false when secretQueryParams is set', () => {
+  test('isSandboxCapable: true when secretQueryParams is set', () => {
     expect(
       connectorType.isSandboxCapable?.({
         config: { hasAuth: true, authType: AuthType.Basic },
         secrets: { secretQueryParams: { key: 'abc' } },
       })
-    ).toBe(false);
+    ).toBe(true);
   });
 
   test.each([
@@ -253,15 +253,17 @@ describe('sandbox credentials', () => {
     ).toEqual({ Authorization: 'ApiKey abc' });
   });
 
-  test('getSandboxAuthHeaders: rejects secretQueryParams', async () => {
-    await expect(
-      getHeaders(
+  test('getSandboxAuthHeaders: ignores secretQueryParams and returns auth and secretHeaders', async () => {
+    expect(
+      await getHeaders(
         { hasAuth: true, authType: AuthType.Basic },
-        { ...secrets, secretQueryParams: { key: 'abc' } }
+        {
+          ...secrets,
+          secretQueryParams: { key: 'abc' },
+          secretHeaders: { 'X-Extra': 'value' },
+        }
       )
-    ).rejects.toThrow(
-      'HTTP connectors with secretQueryParams are not supported in the sandbox yet'
-    );
+    ).toEqual({ ...basicHeader, 'X-Extra': 'value' });
   });
 
   test('getSandboxAuthHeaders: oauth2 client credentials returns the token as the Authorization header', async () => {

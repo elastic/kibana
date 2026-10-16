@@ -173,15 +173,6 @@ function normalizeSecretHeaders(secretHeaders: unknown): Record<string, string> 
   return headers;
 }
 
-/** True when secretQueryParams holds entries. */
-function hasSecretQueryParams({ secretQueryParams }: Record<string, unknown>): boolean {
-  return (
-    secretQueryParams != null &&
-    typeof secretQueryParams === 'object' &&
-    Object.keys(secretQueryParams).length > 0
-  );
-}
-
 interface SandboxAuthHeadersOptions {
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
@@ -195,13 +186,10 @@ interface SandboxAuthHeadersOptions {
 // listing them. Secrets are only populated for preconfigured connectors.
 function isSandboxCapable({
   config,
-  secrets,
 }: {
   config: Record<string, unknown>;
   secrets?: Record<string, unknown>;
 }): boolean {
-  if (secrets && hasSecretQueryParams(secrets)) return false;
-
   const { hasAuth, authType } = config;
   // No auth is still sandbox capable: callers may supply Authorization through
   // secretHeaders, which getSandboxAuthHeaders merges.
@@ -219,10 +207,6 @@ async function getSandboxAuthHeaders(
   options: SandboxAuthHeadersOptions
 ): Promise<Record<string, string>> {
   const { secrets } = options;
-  if (hasSecretQueryParams(secrets)) {
-    throw new Error('HTTP connectors with secretQueryParams are not supported in the sandbox yet');
-  }
-
   const authHeaders = await getAuthTypeHeaders(options);
   // secretHeaders go last so a user supplied Authorization wins. The generic merge in
   // getSandboxCredentials collapses differing key case afterwards.
