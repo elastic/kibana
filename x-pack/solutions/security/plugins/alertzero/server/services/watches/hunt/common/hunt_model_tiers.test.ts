@@ -12,7 +12,7 @@ const model = {} as ScopedModel;
 
 describe('unavailableModelTiers', () => {
   it('lists the tiers with no model, in tier order', () => {
-    expect(unavailableModelTiers({ balanced: model })).toEqual(['efficient', 'frontier']);
+    expect(unavailableModelTiers({ frontier: model })).toEqual(['efficient']);
   });
 
   it('is empty when every tier resolved', () => {
@@ -22,7 +22,12 @@ describe('unavailableModelTiers', () => {
   });
 
   it('only considers the tiers it is asked about', () => {
-    expect(unavailableModelTiers({ balanced: model }, TIER2_MODEL_TIERS)).toEqual(['frontier']);
+    expect(unavailableModelTiers({ efficient: model }, TIER2_MODEL_TIERS)).toEqual(['frontier']);
+    expect(unavailableModelTiers({ frontier: model }, TIER2_MODEL_TIERS)).toEqual([]);
+  });
+
+  it('never asks about the balanced tier, which no hunt consumer runs on', () => {
+    expect(unavailableModelTiers({ efficient: model, frontier: model })).toEqual([]);
   });
 });
 

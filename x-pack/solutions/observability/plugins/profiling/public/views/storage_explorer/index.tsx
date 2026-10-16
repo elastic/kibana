@@ -30,6 +30,7 @@ import { DataBreakdown } from './data_breakdown';
 import { DistinctProbabilisticValuesWarning } from './distinct_probabilistic_values_warning';
 import { HostBreakdown } from './host_breakdown';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
+import { OtelNotSupportedCallout } from './otel_not_supported_callout';
 import { Summary } from './summary';
 import {
   getStorageExplorerAvailability,
@@ -134,6 +135,7 @@ function StorageExplorerContent() {
       showBetaBadge
     >
       <EuiFlexGroup direction="column">
+        <OtelNotSupportedCallout />
         <EuiFlexItem grow={false}>
           <EuiPanel hasShadow={false} color="subdued">
             <PrimaryProfilingSearchBar />
