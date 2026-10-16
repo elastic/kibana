@@ -29,10 +29,6 @@ export {
   SHOW_FIELD_STATISTICS,
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
-  VIEW_MODE,
-  DataGridDensity,
-  DiscoverTabType,
-  UnifiedHistogramSuggestionType,
   IgnoredReason,
   buildDataTableRecord,
   buildDataTableRecordList,
@@ -52,6 +48,8 @@ export {
   getFlattenedTraceDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
+  getFieldValueWithFallback,
+  getStacktraceFields,
   getChartHidden,
   getTableHidden,
   getSidebarHidden,
@@ -74,6 +72,7 @@ export {
   getFieldValue,
   getVisibleColumns,
   canPrependTimeFieldColumn,
+  getDataViewFieldFromDataSource,
   DiscoverFlyouts,
   AppMenuRegistry,
   dismissAllFlyoutsExceptFor,
@@ -120,6 +119,8 @@ export type {
   MetricsGridSortDirection,
   MetricsGridSortField,
   SimpleAggregation,
+  LogDocument,
+  ObservabilityIndexes,
 } from './src';
 
 export * from './src/types';

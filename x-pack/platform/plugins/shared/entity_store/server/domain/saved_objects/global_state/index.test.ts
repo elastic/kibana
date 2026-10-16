@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SavedObjectsFindResponse,
-  SavedObjectsUpdateResponse,
-} from '@kbn/core-saved-objects-api-server';
+import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -16,6 +13,7 @@ import { EntityStoreGlobalStateClient } from '.';
 import { EntityStoreGlobalStateTypeName } from './types';
 import {
   DEFAULT_HISTORY_SNAPSHOT_FREQUENCY,
+  DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
   LATEST_LOG_EXTRACTION_DEFAULTS,
   type EntityStoreGlobalStateOverrides,
 } from './constants';
@@ -29,12 +27,19 @@ describe('EntityStoreGlobalStateClient', () => {
   let client: EntityStoreGlobalStateClient;
 
   const mockStored = (attributes?: EntityStoreGlobalStateOverrides, version?: string) => {
-    soClient.find.mockResolvedValue({
-      total: attributes === undefined ? 0 : 1,
-      saved_objects: attributes === undefined ? [] : [{ id: soId, attributes, version }],
-      per_page: 1,
-      page: 1,
-    } as unknown as SavedObjectsFindResponse);
+    if (attributes === undefined) {
+      soClient.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(EntityStoreGlobalStateTypeName, soId)
+      );
+      return;
+    }
+    soClient.get.mockResolvedValue({
+      id: soId,
+      type: EntityStoreGlobalStateTypeName,
+      attributes,
+      version,
+      references: [],
+    } as SavedObject<EntityStoreGlobalStateOverrides>);
   };
 
   beforeEach(() => {
@@ -59,6 +64,7 @@ describe('EntityStoreGlobalStateClient', () => {
       mockStored(undefined);
 
       await expect(client.find()).resolves.toBeUndefined();
+      expect(soClient.get).toHaveBeenCalledWith(EntityStoreGlobalStateTypeName, soId);
     });
 
     it('strips legacy-era defaults and inflates with current defaults for legacy docs', async () => {
@@ -84,6 +90,7 @@ describe('EntityStoreGlobalStateClient', () => {
       expect(state?.historySnapshot).toEqual({
         status: 'started',
         frequency: DEFAULT_HISTORY_SNAPSHOT_FREQUENCY,
+        retentionDays: DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
       });
     });
   });
@@ -160,15 +167,20 @@ describe('EntityStoreGlobalStateClient', () => {
           frequency: '12h',
           lastExecutionTimestamp: '2026-01-01T00:00:00.000Z',
         },
-      });
+      } as EntityStoreGlobalStateOverrides);
 
       const state = await client.init({
-        historySnapshot: { status: 'started', frequency: DEFAULT_HISTORY_SNAPSHOT_FREQUENCY },
+        historySnapshot: {
+          status: 'started',
+          frequency: DEFAULT_HISTORY_SNAPSHOT_FREQUENCY,
+          retentionDays: DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
+        },
       });
 
       expect(state.historySnapshot).toEqual({
         status: 'started',
         frequency: DEFAULT_HISTORY_SNAPSHOT_FREQUENCY,
+        retentionDays: DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
         lastExecutionTimestamp: '2026-01-01T00:00:00.000Z',
       });
     });
@@ -215,6 +227,88 @@ describe('EntityStoreGlobalStateClient', () => {
         SavedObjectsErrorHelpers.createGenericNotFoundError().message
       );
       expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('updates history snapshot interval and retention without clearing status or timestamps', async () => {
+      mockStored({
+        historySnapshot: {
+          status: 'started',
+          frequency: '24h',
+          retentionDays: 30,
+          lastExecutionTimestamp: '2026-01-01T00:00:00.000Z',
+        },
+        logsExtraction: { delay: '9m' },
+      });
+
+      const state = await client.update({
+        historySnapshot: { frequency: '12h', retentionDays: 90 },
+      });
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        EntityStoreGlobalStateTypeName,
+        soId,
+        expect.objectContaining({
+          historySnapshot: expect.objectContaining({
+            status: 'started',
+            frequency: '12h',
+            retentionDays: 90,
+            lastExecutionTimestamp: '2026-01-01T00:00:00.000Z',
+          }),
+          logsExtraction: { delay: '9m' },
+        }),
+        expect.objectContaining({ mergeAttributes: false })
+      );
+      expect(state.historySnapshot.frequency).toBe('12h');
+      expect(state.historySnapshot.retentionDays).toBe(90);
+      expect(state.historySnapshot.status).toBe('started');
+      expect(state.historySnapshot.lastExecutionTimestamp).toBe('2026-01-01T00:00:00.000Z');
+    });
+
+    it('clears lastError when it is explicitly set to null', async () => {
+      mockStored({
+        historySnapshot: {
+          status: 'started',
+          frequency: '24h',
+          retentionDays: 30,
+          lastError: { message: 'previous failure', timestamp: '2026-01-01T00:00:00.000Z' },
+        },
+      });
+
+      const state = await client.update({
+        historySnapshot: { lastExecutionTimestamp: '2026-06-01T00:00:00.000Z', lastError: null },
+      });
+
+      expect(state.historySnapshot.lastError).toBeUndefined();
+      expect(state.historySnapshot.lastExecutionTimestamp).toBe('2026-06-01T00:00:00.000Z');
+      expect(state.historySnapshot.status).toBe('started');
+      expect(soClient.update).toHaveBeenCalledWith(
+        EntityStoreGlobalStateTypeName,
+        soId,
+        expect.objectContaining({
+          historySnapshot: expect.not.objectContaining({ lastError: expect.anything() }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('leaves history snapshot fields out of a partial update unchanged', async () => {
+      mockStored({
+        historySnapshot: {
+          status: 'stopped',
+          frequency: '12h',
+          retentionDays: 90,
+        },
+      });
+
+      const state = await client.update({ historySnapshot: { retentionDays: 15 } });
+
+      expect(state.historySnapshot).toEqual(
+        expect.objectContaining({
+          status: 'stopped',
+          frequency: '12h',
+          retentionDays: 15,
+        })
+      );
     });
 
     it('merges the partial over the existing state and persists only overrides', async () => {
@@ -290,7 +384,7 @@ describe('EntityStoreGlobalStateClient', () => {
 
       const state = await client.update({ logsExtraction: { frequency: '5m' } });
 
-      expect(soClient.find).toHaveBeenCalledTimes(2);
+      expect(soClient.get).toHaveBeenCalledTimes(2);
       expect(soClient.update).toHaveBeenCalledTimes(2);
       expect(state.logsExtraction.frequency).toBe('5m');
     });
@@ -304,6 +398,29 @@ describe('EntityStoreGlobalStateClient', () => {
       await expect(
         client.update({ logsExtraction: { frequency: '5m' } }, { retries: 2, minTimeout: 0 })
       ).rejects.toThrow('conflict');
+    });
+  });
+
+  describe('saved object id derivation', () => {
+    it('uses the namespace to derive the saved object id for get and create calls', async () => {
+      const space = 'team-a';
+      const spaceSoId = `${EntityStoreGlobalStateTypeName}-${space}`;
+      soClient.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          EntityStoreGlobalStateTypeName,
+          spaceSoId
+        )
+      );
+      client = new EntityStoreGlobalStateClient(soClient, space, loggerMock.create());
+
+      await client.init();
+
+      expect(soClient.get).toHaveBeenCalledWith(EntityStoreGlobalStateTypeName, spaceSoId);
+      expect(soClient.create).toHaveBeenCalledWith(
+        EntityStoreGlobalStateTypeName,
+        expect.anything(),
+        { id: spaceSoId }
+      );
     });
   });
 });

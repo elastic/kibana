@@ -97,10 +97,10 @@ export type {
 
 export type { CoreId } from '@kbn/core-base-common-internal';
 
-export { ElasticsearchConfig, pollEsNodesVersion } from '@kbn/core-elasticsearch-server-internal';
+export { ElasticsearchConfig, checkEsNodesVersion } from '@kbn/core-elasticsearch-server-internal';
 export type {
   NodesVersionCompatibility,
-  PollEsNodesVersionOptions,
+  CheckEsNodesVersionOptions,
 } from '@kbn/core-elasticsearch-server-internal';
 export type {
   ElasticsearchServicePreboot,
@@ -133,8 +133,6 @@ export type {
   CoreAuditService,
   CoreServiceAccountsService,
   ServiceAccount,
-  ServiceAccountAssumableBy,
-  ServiceAccountRoleAssignments,
   CreateServiceAccountParams,
   AuditEvent,
   AuditHttp,
@@ -249,6 +247,13 @@ export type {
   HttpSelfResponse,
   HttpSelfScopedClient,
   HttpSelfService,
+  HttpSelfUnauthorizedErrorHandler,
+  HttpSelfUnauthorizedErrorHandlerNotHandledResult,
+  HttpSelfUnauthorizedErrorHandlerOptions,
+  HttpSelfUnauthorizedErrorHandlerResult,
+  HttpSelfUnauthorizedErrorHandlerRetryParams,
+  HttpSelfUnauthorizedErrorHandlerRetryResult,
+  HttpSelfUnauthorizedErrorHandlerToolkit,
   RawRequest,
   FakeRawRequest,
   HttpProtocol,
@@ -274,8 +279,12 @@ export type {
   LoggerConfigType,
   AppenderConfigType,
   PluginAppenderConfigType,
+  FileAppenderPluginConfig,
+  LogFileWriteError,
+  LogFileWriteErrorHandler,
   OtelAppenderPluginConfig,
   OtelAttributesTransform,
+  RollingFileAppenderPluginConfig,
 } from '@kbn/core-logging-server';
 export type { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from '@kbn/logging';
 export type { Ecs, EcsEvent } from '@elastic/ecs';
@@ -371,6 +380,7 @@ export type {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
+  SavedObjectsFindSort,
   SavedObjectsPitParams,
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,

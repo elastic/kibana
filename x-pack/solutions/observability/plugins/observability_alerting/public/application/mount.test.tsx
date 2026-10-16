@@ -11,11 +11,11 @@ import { mountObservabilityAlertingApp } from './mount';
 
 const mockCreateAlertingV2HostApp: jest.Mock = jest.fn(
   (appId: string, paths: Record<string, string>) => ({
-    rules: { app: appId, basePath: paths.rules },
-    ruleLibrary: { app: appId, basePath: paths.ruleLibrary },
-    episodes: { app: appId, basePath: paths.episodes },
-    actionPolicies: { app: appId, basePath: paths.actionPolicies },
-    executionHistory: { app: appId, basePath: paths.executionHistory },
+    rules: { app: appId, pathPrefix: paths.rules },
+    ruleLibrary: { app: appId, pathPrefix: paths.ruleLibrary },
+    alerts: { app: appId, pathPrefix: paths.alerts },
+    actionPolicies: { app: appId, pathPrefix: paths.actionPolicies },
+    executionHistory: { app: appId, pathPrefix: paths.executionHistory },
   })
 );
 
@@ -23,7 +23,7 @@ describe('mountObservabilityAlertingApp', () => {
   it('renders into the mount element and unmounts', () => {
     const coreStart = coreMock.createStart();
     const params = coreMock.createAppMountParameters();
-    params.history.push('/inbox');
+    params.history.push('/alerts');
 
     const alertingVTwo = {
       RulesPage: () => null,

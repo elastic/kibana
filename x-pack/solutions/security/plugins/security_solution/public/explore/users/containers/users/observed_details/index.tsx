@@ -15,8 +15,17 @@ import { UsersQueries } from '../../../../../../common/search_strategy/security_
 import type { UserItem } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../../common/utils/execution_context';
 import { useUiSetting } from '../../../../../common/lib/kibana';
 import type { EntityStoreRecord } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+
+const OBSERVED_USER_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_USERS_PAGE,
+  'user_details_observed'
+);
 
 export const OBSERVED_USER_QUERY_ID = 'observedUsersDetailsQuery';
 
@@ -89,7 +98,10 @@ export const useObservedUserDetails = ({
     // For entity store v2, resolve the entity via an indexed-field identity filter built from the
     // entity-store record. This replaces the previous `entity_id` runtime field, which forced
     // Elasticsearch to run the EUID Painless script on every document in the time range.
-    const recordFilter = euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord('user', entityRecord);
+    const recordFilter = euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord(
+      euidApi.getBuiltInEntityDefinition('user'),
+      entityRecord
+    );
     if (recordFilter) {
       return recordFilter;
     }
@@ -97,7 +109,7 @@ export const useObservedUserDetails = ({
     if (userName) {
       return { term: { 'user.name': userName } };
     }
-  }, [entityStoreV2Enabled, shouldSkip, userName, entityRecord, euidApi?.euid]);
+  }, [entityStoreV2Enabled, shouldSkip, userName, entityRecord, euidApi]);
 
   const {
     loading,
@@ -112,6 +124,7 @@ export const useObservedUserDetails = ({
     },
     errorMessage: i18n.FAIL_USER_DETAILS,
     abort: shouldSkip,
+    executionContext: OBSERVED_USER_CONTEXT,
   });
 
   const userDetailsResponse = useMemo(

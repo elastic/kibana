@@ -50,7 +50,7 @@ The anonymization `replacements` map (which maps anonymized tokens back to real 
 
 In async mode, pipeline errors are logged but do not propagate to the workflow — the step always returns successfully with the `execution_uuid`.
 
-Sync mode also races the pipeline against a soft deadline (`ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS`). If the pipeline does not finish in time, the step returns early with just `execution_uuid` and `status: 'pending'` while the pipeline keeps running in the background (the Agent Builder run tool then resumes via the status tool).
+Sync mode awaits the pipeline to completion and always returns `status: 'completed'`. It applies no soft deadline of its own; the only bound is the step's `timeout`, which must stay above the pipeline's own 30m budget (see the example below). `ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS` applies to the Agent Builder run tool, not to this step.
 
 ### Alert retrieval modes
 
@@ -94,7 +94,10 @@ The `Attack discovery - Run example` workflow (`ATTACK_DISCOVERY_RUN_EXAMPLE_WOR
 steps:
   - name: run_attack_discovery
     type: security.attack-discovery.run
-    timeout: '10m'
+    # Must stay above the pipeline's own 30m budget so the pipeline fails with an
+    # attributed error rather than the engine killing the step. Keep it a literal:
+    # the engine hands `timeout` to the duration parser unrendered.
+    timeout: '35m'
     with:
       # Primary composability point: when non-empty, retrieval is skipped.
       alerts: ${{ inputs.alerts }}
@@ -126,8 +129,8 @@ The example exposes all inputs as workflow inputs so the same workflow can run s
   }> | null;
   discovery_count: number;         // 0 if validation failed
   alerts_context_count: number;    // 0 if validation failed
-  status: 'completed';             // 'pending' on the async / soft-deadline paths
+  status: 'completed';             // always 'completed' in sync mode
 }
 ```
 
-In async mode (and when the sync soft deadline is exceeded), only `execution_uuid` and `status: 'pending'` are returned.
+In async mode, only `execution_uuid` and `status: 'pending'` are returned.

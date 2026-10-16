@@ -6,6 +6,7 @@
  */
 
 import type {
+  ConnectorModelUsageStats,
   ConversationRound,
   ConversationRoundStep,
   RoundInput,
@@ -48,6 +49,8 @@ export const mergeRounds = (
     origin: previous.origin,
     author: previous.author,
     configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
+    // The folded round is interrupted iff its last execution is.
+    ...(next.interruption ? { interruption: next.interruption } : {}),
   };
 
   return mergedRound;
@@ -63,10 +66,48 @@ const mergeRoundInput = (previous: RoundInput, next: RoundInput): RoundInput => 
   };
 };
 
+const isMissingBreakdown = ({ connectors, llm_calls: llmCalls }: RoundModelUsageStats): boolean =>
+  connectors === undefined && llmCalls > 0;
+
+const mergeConnectorUsage = (
+  a: ConnectorModelUsageStats,
+  b: ConnectorModelUsageStats
+): ConnectorModelUsageStats => {
+  const model = a.model ?? b.model;
+  return {
+    connector_id: a.connector_id,
+    llm_calls: a.llm_calls + b.llm_calls,
+    input_tokens: a.input_tokens + b.input_tokens,
+    output_tokens: a.output_tokens + b.output_tokens,
+    ...(a.cached_input_tokens !== undefined || b.cached_input_tokens !== undefined
+      ? { cached_input_tokens: (a.cached_input_tokens ?? 0) + (b.cached_input_tokens ?? 0) }
+      : {}),
+    ...(model ? { model } : {}),
+  };
+};
+
+const mergeConnectorsUsage = (
+  a: RoundModelUsageStats,
+  b: RoundModelUsageStats
+): ConnectorModelUsageStats[] | undefined => {
+  if (isMissingBreakdown(a) || isMissingBreakdown(b)) {
+    return undefined;
+  }
+  const merged = new Map<string, ConnectorModelUsageStats>();
+  for (const usage of [...(a.connectors ?? []), ...(b.connectors ?? [])]) {
+    const existing = merged.get(usage.connector_id);
+    merged.set(usage.connector_id, existing ? mergeConnectorUsage(existing, usage) : usage);
+  }
+  return merged.size > 0 ? [...merged.values()] : undefined;
+};
+
 export const mergeModelUsage = (
   a: RoundModelUsageStats,
   b: RoundModelUsageStats
 ): RoundModelUsageStats => {
+  // the last call of the merged round is the later execution's
+  const lastCallInputTokens = b.last_call_input_tokens ?? a.last_call_input_tokens;
+  const connectors = mergeConnectorsUsage(a, b);
   return {
     connector_id: a.connector_id,
     llm_calls: a.llm_calls + b.llm_calls,
@@ -76,6 +117,8 @@ export const mergeModelUsage = (
       ? { cached_input_tokens: (a.cached_input_tokens ?? 0) + (b.cached_input_tokens ?? 0) }
       : {}),
     model: a.model ?? b.model,
+    ...(lastCallInputTokens !== undefined ? { last_call_input_tokens: lastCallInputTokens } : {}),
+    ...(connectors ? { connectors } : {}),
   };
 };
 
@@ -107,12 +150,16 @@ export const applyResumeResolution = (
     if (isToolCallStep(step) && step.results.length === 0) {
       const resolved = resolvedByToolCallId.get(step.tool_call_id);
       if (resolved) {
+        // The resolving copy owns the mark: an earlier interrupted resume may have marked the
+        // pending call, and a later successful retry clears it.
+        const { interrupted, ...unmarked } = step;
         return {
-          ...step,
+          ...unmarked,
           results: resolved.results,
           ...(resolved.progression !== undefined
             ? { progression: [...(step.progression ?? []), ...resolved.progression] }
             : {}),
+          ...(resolved.interrupted ? { interrupted: true as const } : {}),
         };
       }
     }

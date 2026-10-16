@@ -7,20 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  PageObjects,
-  ScoutParallelTestFixtures,
-  ScoutParallelWorkerFixtures,
-} from '@kbn/scout';
+import type { ScoutParallelTestFixtures, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
-import { Inspector } from '@kbn/inspector-plugin/test/scout/ui/fixtures/page_objects';
+import type { DiscoverPageObjects } from '../../../common/ui/fixtures';
+import { DiscoverPage } from '../../../common/ui/fixtures';
 import { MetricsExperiencePage } from './page_objects';
 import { METRICS_EXPERIENCE_VIEWER_ROLE, METRICS_EXPERIENCE_PRIVILEGED_ROLE } from './constants';
 
 export interface MetricsExperienceTestFixtures extends ScoutParallelTestFixtures {
-  pageObjects: PageObjects & {
+  pageObjects: DiscoverPageObjects & {
     metricsExperience: MetricsExperiencePage;
-    inspector: Inspector;
   };
 }
 
@@ -57,8 +53,8 @@ export const spaceTest = spaceBaseTest.extend<
   ) => {
     await use({
       ...pageObjects,
+      discover: createLazyPageObject(DiscoverPage, page),
       metricsExperience: createLazyPageObject(MetricsExperiencePage, page),
-      inspector: createLazyPageObject(Inspector, page),
     });
   },
 });

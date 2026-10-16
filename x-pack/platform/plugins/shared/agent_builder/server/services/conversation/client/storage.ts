@@ -13,13 +13,13 @@ import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type {
   ConversationAccessControl,
+  ConversationEvent,
   ConversationInternalState,
   ConversationRoundStatus,
   ConversationOrigin,
-  TimelineEvent,
   ActiveExecution,
 } from '@kbn/agent-builder-common/chat';
-import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
+import type { SerializedMetadataValue, UserPrincipalType } from '@kbn/agent-builder-common';
 import type {
   ConversationPinnedByEntry,
   ConversationReadByEntry,
@@ -34,9 +34,15 @@ const storageSettings = {
     properties: {
       user_id: types.keyword({}),
       user_name: types.keyword({}),
+      user_type: types.keyword({}),
       agent_id: types.keyword({}),
       space: types.keyword({}),
-      title: types.text({}),
+      title: types.text({
+        fields: {
+          keyword: types.keyword(),
+          caseless: types.keyword({ normalizer: 'lowercase' }),
+        },
+      }),
       created_at: types.date({}),
       updated_at: types.date({}),
       conversation_rounds: types.object({
@@ -81,7 +87,13 @@ const storageSettings = {
         },
       }),
       schema_version: types.long({}),
-      attachments: types.object({ dynamic: false, properties: {} }),
+      attachments: types.object({
+        dynamic: false,
+        properties: {
+          id: types.keyword({}),
+          type: types.keyword({}),
+        },
+      }),
       state: types.object({ dynamic: false, properties: {} }),
       status: types.keyword({}),
       // legacy field, superseded by read_by
@@ -147,13 +159,14 @@ export interface PersistentConversationParentLink {
 export interface ConversationProperties {
   user_id?: string;
   user_name: string;
+  user_type?: UserPrincipalType;
   agent_id: string;
   space: string;
   title: string;
   created_at: string;
   updated_at: string;
   conversation_rounds: PersistentConversationRound[];
-  events?: TimelineEvent[];
+  events?: ConversationEvent[];
   active_execution?: ActiveExecution;
   schema_version?: number;
   attachments?: VersionedAttachment[];

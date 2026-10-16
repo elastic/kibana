@@ -9,7 +9,28 @@ import type {
   FieldCapsResponse,
   FieldCapsFieldCapability,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { MappingField } from './mappings';
+import { excludeFrozenTierQuery } from './data_tiers';
+
+/**
+ * Calls `_field_caps` for the given index, alias, data stream or pattern.
+ */
+export const fetchFieldCaps = async ({
+  index,
+  esClient,
+  includeFrozen = false,
+}: {
+  index: string;
+  esClient: ElasticsearchClient;
+  includeFrozen?: boolean;
+}): Promise<FieldCapsResponse> => {
+  return esClient.fieldCaps({
+    index,
+    fields: ['*'],
+    ...(includeFrozen ? {} : { index_filter: excludeFrozenTierQuery() }),
+  });
+};
 
 /**
  * response for {@link processFieldCapsResponse}

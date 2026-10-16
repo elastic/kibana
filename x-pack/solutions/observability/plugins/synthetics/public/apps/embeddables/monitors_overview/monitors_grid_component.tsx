@@ -28,24 +28,31 @@ import { MaybeMonitorDetailsFlyout } from '../../synthetics/components/monitors_
 import { useOverviewStatus } from '../../synthetics/components/monitors_page/hooks/use_overview_status';
 import { OverviewLoader } from '../../synthetics/components/monitors_page/overview/overview/overview_loader';
 import type { MonitorFilters } from '../../../../common/types';
+import type { RequestCancellationManager } from '../../synthetics/state/request_cancellation_manager';
 
 export const StatusGridComponent = ({
   reload$,
   filters,
   view,
+  requestCancellationManager,
 }: {
   reload$: Subject<boolean>;
   filters: MonitorFilters;
   view: OverviewView;
+  requestCancellationManager: RequestCancellationManager;
 }) => {
-  const overviewStore = useRef(getOverviewStore());
+  const overviewStore = useRef(getOverviewStore(requestCancellationManager));
 
   const hasFilters = !areFiltersEmpty(filters);
   const singleMonitor =
     filters && filters.locations?.length === 1 && filters.monitor_ids?.length === 1;
 
   const monitorOverviewListComponent = (
-    <SyntheticsEmbeddableContext reload$={reload$} reduxStore={overviewStore.current}>
+    <SyntheticsEmbeddableContext
+      reload$={reload$}
+      reduxStore={overviewStore.current}
+      onAutoRefresh={() => requestCancellationManager.resumeAfterCancellation()}
+    >
       <MonitorsOverviewList filters={filters} singleMonitor={singleMonitor} view={view} />
     </SyntheticsEmbeddableContext>
   );

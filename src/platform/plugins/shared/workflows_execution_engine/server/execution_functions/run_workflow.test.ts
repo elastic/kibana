@@ -29,10 +29,20 @@ import { setupDependencies } from './setup_dependencies';
 import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued_workflow_run_at_task_start';
 import type { WorkflowsMeteringService } from '../metering';
 import { workflowsExecutionEngineMock } from '../mocks';
-import type { WorkflowsExecutionEnginePluginStart } from '../types';
+import { createMockWorkflowDataClient } from '../repositories/data_access_layer/mocks';
+import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type {
+  InternalResumeWorkflowExecution,
+  WorkflowsExecutionEnginePluginStart,
+} from '../types';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
+const mockGetCurrentWorkflow = jest.fn().mockResolvedValue(null);
+jest.mock('@kbn/workflows', () => ({
+  ...jest.requireActual('@kbn/workflows'),
+  WorkflowRepository: jest.fn().mockImplementation(() => ({ getWorkflow: mockGetCurrentWorkflow })),
+}));
 jest.mock('./setup_dependencies');
 jest.mock('../concurrency/handle_queued_workflow_run_at_task_start', () => ({
   handleQueuedWorkflowRunAtTaskStart: jest.fn().mockResolvedValue(false),
@@ -61,6 +71,98 @@ const mockHandleQueuedWorkflowRunAtTaskStart =
   >;
 
 describe('runWorkflow', () => {
+  it.each([false, true])('finalizes identity failure (inherited: %s)', async (inherited) => {
+    jest.clearAllMocks();
+    const dependencies = mockContextDependencies();
+    jest.spyOn(dependencies.coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
+    jest
+      .spyOn(dependencies.coreStart.security.serviceAccounts, 'withScopedRequestForWorkload')
+      .mockRejectedValue(
+        new Error('The workload binding does not match the expected service account.')
+      );
+    const workflowExecutionRepository = new WorkflowExecutionRepository(
+      createMockWorkflowDataClient()
+    );
+    jest.spyOn(workflowExecutionRepository, 'updateWorkflowExecution').mockResolvedValue(undefined);
+    jest.spyOn(workflowExecutionRepository, 'getWorkflowExecutionById').mockResolvedValue({
+      isTestRun: false,
+      context: {},
+      yaml: '',
+      scopeStack: [],
+      createdAt: '2026-09-22T00:00:00Z',
+      startedAt: '2026-09-22T00:00:00Z',
+      finishedAt: '',
+      error: null,
+      cancelRequested: false,
+      duration: 0,
+      id: 'run-identity-failure',
+      workflowId: 'workflow',
+      spaceId: 'default',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      effectiveIdentity: inherited
+        ? {
+            type: 'service_account',
+            id: 'account-a',
+            inheritedFrom: {
+              workloadId: 'root-parent',
+            },
+          }
+        : undefined,
+      workflowDefinition: {
+        version: '1',
+        name: 'Identity test',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [],
+        settings: inherited ? undefined : { run_as: 'account-a' },
+      },
+    });
+    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+      'run-identity-failure',
+      'default'
+    );
+    if (!execution) throw new Error('Missing test execution');
+    jest
+      .spyOn(workflowExecutionRepository, 'getWorkflowExecutionWithVersion')
+      .mockResolvedValue({ execution, seqNo: 1, primaryTerm: 1 });
+    jest
+      .spyOn(workflowExecutionRepository, 'tryUpdateWorkflowExecutionWithVersion')
+      .mockResolvedValue(true);
+    const stepExecutionRepository = createMockStepExecutionRepository();
+    stepExecutionRepository.markNonTerminalStepsFailed.mockImplementation(async () => {
+      expect(
+        workflowExecutionRepository.tryUpdateWorkflowExecutionWithVersion
+      ).not.toHaveBeenCalled();
+    });
+
+    await expect(
+      runWorkflow({
+        workflowRunId: 'run-identity-failure',
+        spaceId: 'default',
+        signal: new AbortController().signal,
+        dependencies,
+        logger: createMockLogger(),
+        config: createMockWorkflowExecutionEngineConfig(),
+        fakeRequest: createFakeKibanaRequest(),
+        workflowsExecutionEngine: mockWorkflowExecutionEngine,
+        workflowExecutionRepository,
+        stepExecutionRepository,
+      })
+    ).rejects.toThrow('expected service account');
+
+    expect(stepExecutionRepository.markNonTerminalStepsFailed).toHaveBeenCalledWith(
+      'run-identity-failure',
+      expect.objectContaining({ type: 'ServiceAccountExecutionError' }),
+      undefined
+    );
+    expect(workflowExecutionRepository.tryUpdateWorkflowExecutionWithVersion).toHaveBeenCalledWith(
+      expect.objectContaining({ status: ExecutionStatus.FAILED, finishedAt: expect.any(String) }),
+      { seqNo: 1, primaryTerm: 1 }
+    );
+    expect(mockSetupDependencies).not.toHaveBeenCalled();
+    expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+  });
+
   describe('wiring / spans / metering', () => {
     const workflowRunId = 'test-workflow-run-id';
     const spaceId = 'default';
@@ -90,6 +192,7 @@ describe('runWorkflow', () => {
     const runWorkflowWithDefaults = (overrides?: {
       meteringService?: WorkflowsMeteringService;
       workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
+      internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
     }) =>
       runWorkflow({
         workflowRunId,
@@ -102,6 +205,7 @@ describe('runWorkflow', () => {
         workflowsExecutionEngine:
           overrides?.workflowsExecutionEngine ?? mockWorkflowExecutionEngine,
         meteringService: overrides?.meteringService,
+        internalResumeWorkflowExecution: overrides?.internalResumeWorkflowExecution,
         workflowExecutionRepository: workflowExecutionRepository as any,
         stepExecutionRepository,
       });
@@ -137,6 +241,148 @@ describe('runWorkflow', () => {
       });
 
       mockWorkflowExecutionLoop.mockResolvedValue(undefined);
+    });
+
+    describe('current workflow access', () => {
+      it.each([null, '2026-09-14T00:00:00.000Z'])(
+        'stops a run after access is removed with deleted_at=%s',
+        async (deletedAt) => {
+          mockGetCurrentWorkflow.mockResolvedValueOnce({
+            owner_id: 'owner',
+            access_control: { access_mode: 'private', entries: [] },
+            deleted_at: deletedAt,
+          });
+          dependencies.coreStart.userProfile.getCurrentProfileId.mockResolvedValue(
+            'former-executor'
+          );
+          await runWorkflowWithDefaults();
+          expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+            expect.objectContaining({
+              status: ExecutionStatus.FAILED,
+              error: expect.objectContaining({ type: 'WorkflowAccessDeniedError' }),
+            })
+          );
+          expect(workflowRuntime.start).not.toHaveBeenCalled();
+          expect(mockGetCurrentWorkflow).toHaveBeenCalledWith('wf', spaceId, {
+            includeGlobal: true,
+            includeDeleted: true,
+          });
+        }
+      );
+
+      it('denies a private workflow when the execution identity has no profile', async () => {
+        mockGetCurrentWorkflow.mockResolvedValueOnce({
+          owner_id: 'owner',
+          access_control: { access_mode: 'private', entries: [] },
+        });
+        dependencies.coreStart.userProfile.getCurrentProfileId.mockResolvedValue(null);
+
+        await runWorkflowWithDefaults();
+
+        expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+          expect.objectContaining({
+            status: ExecutionStatus.FAILED,
+            error: expect.objectContaining({ type: 'WorkflowAccessDeniedError' }),
+          })
+        );
+        expect(workflowRuntime.start).not.toHaveBeenCalled();
+        expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+      });
+
+      it('resumes the waiting parent after child execution access is removed', async () => {
+        mockGetCurrentWorkflow.mockResolvedValueOnce({
+          owner_id: 'owner',
+          access_control: { access_mode: 'private', entries: [] },
+        });
+        dependencies.coreStart.userProfile.getCurrentProfileId.mockResolvedValue('former-executor');
+        const childExecution = {
+          ...defaultRunningExecution(),
+          context: {
+            parentWorkflowInvocation: 'sync',
+            parentWorkflowExecutionId: 'parent-execution',
+          },
+        };
+        mockGetWorkflowExecutionFromState.mockReturnValue(childExecution);
+        workflowExecutionRepository.getWorkflowExecutionById
+          .mockResolvedValueOnce(childExecution)
+          .mockResolvedValue({
+            ...childExecution,
+            status: ExecutionStatus.FAILED,
+          });
+        const internalResumeWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+
+        await runWorkflowWithDefaults({ internalResumeWorkflowExecution });
+
+        expect(internalResumeWorkflowExecution).toHaveBeenCalledWith(
+          'parent-execution',
+          spaceId,
+          undefined
+        );
+        expect(workflowRuntime.start).not.toHaveBeenCalled();
+      });
+
+      it.each([
+        { role: 'executor', isEphemeral: false, allowed: true },
+        { role: 'executor', isEphemeral: true, allowed: false },
+        { role: 'executor', isEphemeral: undefined, allowed: false },
+        { role: 'viewer', isEphemeral: false, allowed: false },
+        { role: 'editor', isEphemeral: true, allowed: true },
+      ])(
+        'checks $role access for a test with isEphemeral=$isEphemeral',
+        async ({ role, isEphemeral, allowed }) => {
+          mockGetCurrentWorkflow.mockResolvedValueOnce({
+            owner_id: 'owner',
+            enabled: false,
+            access_control: {
+              access_mode: 'private',
+              entries: [{ type: 'user', id: 'recipient', role }],
+            },
+          });
+          dependencies.coreStart.userProfile.getCurrentProfileId.mockResolvedValue('recipient');
+          mockGetWorkflowExecutionFromState.mockReturnValue({
+            ...defaultRunningExecution(),
+            isTestRun: true,
+            isEphemeral,
+          });
+
+          await runWorkflowWithDefaults();
+
+          if (allowed) {
+            expect(workflowRuntime.start).toHaveBeenCalled();
+          } else {
+            expect(workflowRuntime.start).not.toHaveBeenCalled();
+            expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+              expect.objectContaining({
+                status: ExecutionStatus.FAILED,
+                error: expect.objectContaining({ type: 'WorkflowAccessDeniedError' }),
+              })
+            );
+          }
+        }
+      );
+
+      it('runs a public workflow without requiring an ACL profile', async () => {
+        mockGetCurrentWorkflow.mockResolvedValueOnce({
+          owner_id: 'owner',
+          access_control: { access_mode: 'public', entries: [] },
+        });
+        await runWorkflowWithDefaults();
+        expect(dependencies.coreStart.userProfile.getCurrentProfileId).not.toHaveBeenCalled();
+        expect(workflowRuntime.start).toHaveBeenCalled();
+      });
+
+      it('resolves the execution profile before checking a private workflow', async () => {
+        mockGetCurrentWorkflow.mockResolvedValueOnce({
+          owner_id: 'owner',
+          access_control: { access_mode: 'private', entries: [] },
+        });
+        dependencies.coreStart.userProfile.getCurrentProfileId.mockResolvedValue('owner');
+        await runWorkflowWithDefaults();
+        expect(dependencies.coreStart.userProfile.getCurrentProfileId).toHaveBeenCalledWith({
+          request: fakeRequest,
+        });
+        expect(workflowRuntime.start).toHaveBeenCalled();
+      });
     });
 
     describe('happy path / wiring', () => {
@@ -418,7 +664,9 @@ describe('runWorkflow', () => {
         const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
         const meteringService = { reportWorkflowExecution } as unknown as WorkflowsMeteringService;
 
-        workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue(finalExecution);
+        workflowExecutionRepository.getWorkflowExecutionById
+          .mockResolvedValue(finalExecution)
+          .mockResolvedValueOnce({ ...finalExecution, status: ExecutionStatus.PENDING });
 
         await runWorkflowWithDefaults({ meteringService });
 
@@ -433,7 +681,9 @@ describe('runWorkflow', () => {
         const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
         const meteringService = { reportWorkflowExecution } as unknown as WorkflowsMeteringService;
 
-        workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue(null);
+        workflowExecutionRepository.getWorkflowExecutionById
+          .mockResolvedValueOnce({ workflowId: 'workflow', spaceId: 'default' })
+          .mockResolvedValue(null);
 
         await runWorkflowWithDefaults({ meteringService });
 
@@ -444,9 +694,9 @@ describe('runWorkflow', () => {
         const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
         const meteringService = { reportWorkflowExecution } as unknown as WorkflowsMeteringService;
 
-        workflowExecutionRepository.getWorkflowExecutionById.mockRejectedValue(
-          new Error('fetch failed')
-        );
+        workflowExecutionRepository.getWorkflowExecutionById
+          .mockResolvedValueOnce({ workflowId: 'workflow', spaceId: 'default' })
+          .mockRejectedValue(new Error('fetch failed'));
 
         await expect(runWorkflowWithDefaults({ meteringService })).resolves.toBeUndefined();
 
@@ -479,7 +729,9 @@ describe('runWorkflow', () => {
           spaceId,
           status: ExecutionStatus.FAILED,
         };
-        workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue(failedExecution);
+        workflowExecutionRepository.getWorkflowExecutionById
+          .mockResolvedValueOnce(defaultRunningExecution())
+          .mockResolvedValue(failedExecution);
 
         await runWorkflowWithDefaults({ meteringService });
 

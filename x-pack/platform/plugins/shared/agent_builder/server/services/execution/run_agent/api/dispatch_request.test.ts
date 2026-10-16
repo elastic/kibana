@@ -26,22 +26,8 @@ describe('dispatchApiRequest', () => {
     fetchMock.mockReset().mockResolvedValue({ ok: true });
   });
 
-  it('sends no clone header for a regular kibana call', async () => {
-    await dispatch({
-      method: 'POST',
-      path: '/api/saved_objects/_find',
-      body: { type: 'dashboard' },
-    });
-
-    expect(fetchMock).toHaveBeenCalledWith(
-      '/api/saved_objects/_find',
-      expect.objectContaining({ body: { type: 'dashboard' } })
-    );
-    expect(fetchMock.mock.calls[0][1].headers).toBeUndefined();
-  });
-
-  describe('alerting rule creation', () => {
-    it('sets the clone header so the rule does not keep the task-scoped credential', async () => {
+  describe('borrowed-key declaration', () => {
+    it('declares the borrowed task credential on every self-call', async () => {
       await dispatch({
         method: 'POST',
         path: '/api/alerting/rule',
@@ -57,47 +43,19 @@ describe('dispatchApiRequest', () => {
       );
     });
 
-    it('also covers creation with a caller-chosen rule id', async () => {
+    it('also declares it on calls that never consult it', async () => {
       await dispatch({
-        method: 'POST',
-        path: '/api/alerting/rule/some-rule-id',
-        body: { name: 'my rule' },
+        method: 'GET',
+        path: '/api/saved_objects/_find',
+        querystring: { type: 'dashboard' },
       });
 
       expect(fetchMock).toHaveBeenCalledWith(
-        '/api/alerting/rule/some-rule-id',
+        '/api/saved_objects/_find',
         expect.objectContaining({
-          body: { name: 'my rule' },
           headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
         })
       );
-    });
-
-    it('does not touch non-create methods on the rule endpoint', async () => {
-      await dispatch({
-        method: 'PUT',
-        path: '/api/alerting/rule/some-rule-id',
-        body: { name: 'renamed' },
-      });
-
-      expect(fetchMock).toHaveBeenCalledWith(
-        '/api/alerting/rule/some-rule-id',
-        expect.objectContaining({ body: { name: 'renamed' } })
-      );
-      expect(fetchMock.mock.calls[0][1].headers).toBeUndefined();
-    });
-
-    it('does not touch deeper alerting rule sub-paths', async () => {
-      await dispatch({
-        method: 'POST',
-        path: '/api/alerting/rule/some-rule-id/_update_api_key',
-      });
-
-      expect(fetchMock).toHaveBeenCalledWith(
-        '/api/alerting/rule/some-rule-id/_update_api_key',
-        expect.objectContaining({ body: undefined })
-      );
-      expect(fetchMock.mock.calls[0][1].headers).toBeUndefined();
     });
   });
 });

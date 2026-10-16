@@ -60,7 +60,7 @@ export { PipelineStepError } from './helpers/pipeline_step_error';
  * `on-failure: retry` (fail-closed): a retry would restart the long-running
  * conversation-stateful step from scratch and burn the remaining budget.
  */
-const DEFAULT_PIPELINE_TIMEOUT_MS = 30 * 60 * 1000;
+export const DEFAULT_PIPELINE_TIMEOUT_MS = 30 * 60 * 1000;
 
 export const runManualOrchestration = async ({
   alerts,

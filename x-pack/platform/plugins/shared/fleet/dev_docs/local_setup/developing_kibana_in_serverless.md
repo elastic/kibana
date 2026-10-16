@@ -8,20 +8,20 @@ For the observability project type:
 
 ```bash
 # Start Elasticsearch in serverless mode as an observability project
-yarn es serverless --projectType=oblt --kill
+pnpm es serverless --projectType=oblt --kill
 
 # Run Kibana as an observability project
-yarn serverless-oblt
+pnpm serverless-oblt
 ```
 
 and one of:
 
 ```bash
 # Start Elasticsearch in serverless mode as a security project
-yarn es serverless --projectType=security --kill
+pnpm es serverless --projectType=security --kill
 
 # Run Kibana as a security project
-yarn serverless-security
+pnpm serverless-security
 ```
 
 Once running, you can login at `http://localhost:5601` with the username `elastic_serverless` or `system_indices_superuser` and the password `changeme`.
@@ -131,10 +131,10 @@ Start ES with the `host` parameter:
 
 ```bash
 # Start Elasticsearch in serverless mode as a security|oblt projectType
-yarn es serverless --projectType=security --kill --host=<local_ip>
+pnpm es serverless --projectType=security --kill --host=<local_ip>
 
 # Run Kibana as a security|oblt projectType
-yarn serverless-security
+pnpm serverless-security
 ```
 
 Add to `kibana.dev.yml` config:

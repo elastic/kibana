@@ -39,6 +39,7 @@ import {
   DEFAULT_FIELDS,
   DEFAULT_NAMESPACE_STRING,
 } from '../../../../common/constants/monitor_defaults';
+import { mergeHttpAuthDefaults } from '../../../../common/utils/merge_http_auth_defaults';
 import { triggerTestNow } from '../../synthetics_service/test_now_monitor';
 import { DefaultRuleService } from '../../default_alerts/default_alert_service';
 import type { RouteContext } from '../../types';
@@ -215,7 +216,8 @@ export class AddEditMonitorAPI {
     requestPayload: CreateMonitorPayLoad,
     monitorPayload: CreateMonitorPayLoad,
     prevLocations?: MonitorFields['locations'],
-    maintenanceWindows: MaintenanceWindow[] = []
+    maintenanceWindows: MaintenanceWindow[] = [],
+    resolvedPrivateLocations?: PrivateLocationAttributes[]
   ) {
     const { syntheticsMonitorClient, request } = this.routeContext;
     const internal = Boolean((request.query as { internal?: boolean })?.internal);
@@ -253,31 +255,15 @@ export class AddEditMonitorAPI {
 
       const prevPrivateLocations = prevLocations.filter((loc) => !loc.isServiceManaged);
       if (prevPrivateLocations.length > 0) {
-        const monitorSpaces = monitor[ConfigKey.KIBANA_SPACES] ?? [];
-        const namespacesForLookup = [
-          ...new Set([this.routeContext.spaceId, ...monitorSpaces]),
-        ].filter(Boolean);
-        const internalClient =
-          this.routeContext.server.coreStart.savedObjects.createInternalRepository();
-        this.allPrivateLocations = await getPrivateLocationsForNamespaces(
-          internalClient,
-          namespacesForLookup
-        );
+        this.allPrivateLocations =
+          resolvedPrivateLocations ?? (await this.getPrivateLocationsForMonitorSpaces(monitor));
       }
     } else {
       const monitorLocations = parseMonitorLocations(monitorPayload, prevLocations, internal);
 
       if (monitorLocations.privateLocations.length > 0) {
-        const monitorSpaces = monitor[ConfigKey.KIBANA_SPACES] ?? [];
-        const namespacesForLookup = [
-          ...new Set([this.routeContext.spaceId, ...monitorSpaces]),
-        ].filter(Boolean);
-        const internalClient =
-          this.routeContext.server.coreStart.savedObjects.createInternalRepository();
-        this.allPrivateLocations = await getPrivateLocationsForNamespaces(
-          internalClient,
-          namespacesForLookup
-        );
+        this.allPrivateLocations =
+          resolvedPrivateLocations ?? (await this.getPrivateLocationsForMonitorSpaces(monitor));
       } else {
         this.allPrivateLocations = [];
       }
@@ -289,7 +275,7 @@ export class AddEditMonitorAPI {
       });
     }
 
-    return {
+    const normalized = {
       ...DEFAULT_FIELDS[monitorType],
       ...monitor,
       [ConfigKey.SCHEDULE]: getMonitorSchedule(schedule ?? defaultFields[ConfigKey.SCHEDULE]),
@@ -298,6 +284,18 @@ export class AddEditMonitorAPI {
       [ConfigKey.MAINTENANCE_WINDOWS]:
         resolvedMaintenanceWindows ?? defaultFields?.[ConfigKey.MAINTENANCE_WINDOWS] ?? [],
     } as MonitorFields;
+
+    return monitorType === MonitorTypeEnum.HTTP ? mergeHttpAuthDefaults(normalized) : normalized;
+  }
+
+  private async getPrivateLocationsForMonitorSpaces(monitor: MonitorFields) {
+    const monitorSpaces = monitor[ConfigKey.KIBANA_SPACES] ?? [];
+    const namespacesForLookup = [...new Set([this.routeContext.spaceId, ...monitorSpaces])].filter(
+      Boolean
+    );
+    const internalClient =
+      this.routeContext.server.coreStart.savedObjects.createInternalRepository();
+    return getPrivateLocationsForNamespaces(internalClient, namespacesForLookup);
   }
 
   async validateUniqueMonitorName(name: string, id?: string) {

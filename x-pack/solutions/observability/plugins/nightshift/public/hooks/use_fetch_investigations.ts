@@ -5,64 +5,162 @@
  * 2.0.
  */
 
-import { useQuery, type UseQueryResult } from '@kbn/react-query';
+import { useCallback, useMemo } from 'react';
+import { useInfiniteQuery } from '@kbn/react-query';
 import type {
+  InvestigationSeverityFilterValue,
+  InvestigationSummary,
   ListInvestigationsResponse,
-  Severity,
-} from '@kbn/nightshift-investigations-plugin/common';
+} from '@kbn/agentic-investigations-plugin/common';
 import { isHttpClientError } from '../common/http_error';
+import {
+  MAX_SHARED_INVESTIGATIONS,
+  SHARED_INVESTIGATIONS_API_VERSION,
+  SHARED_INVESTIGATIONS_URL,
+} from '../common/shared_investigations_api';
 import { useKibana } from './use_kibana';
 
 export const NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY = ['nightshift.investigations'] as const;
 
-const ACTIVE_INVESTIGATIONS_REFETCH_INTERVAL_MS = 5_000;
+const INVESTIGATIONS_PAGE_SIZE = 10;
+
+/** How long a section's pages stay fresh, which bounds how often a refocus can refetch it. */
+const SECTION_STALE_TIME_MS = 30_000;
 
 export interface FetchInvestigationsParams {
-  page?: number;
-  size: number;
+  /** True: only investigations an agent is working on; false: the rest. */
+  inProgress: boolean;
+  severities?: InvestigationSeverityFilterValue[];
   query?: string;
-  severities?: Severity[];
+  /**
+   * Poll interval in ms, or `false` to never poll. A refetch re-requests every page this
+   * section has loaded, so only sections that stay shallow should poll.
+   */
+  refetchInterval?: number | false;
 }
 
-export const useFetchInvestigations = ({
-  page = 1,
-  size,
-  query,
-  severities,
-}: FetchInvestigationsParams): UseQueryResult<ListInvestigationsResponse, Error> => {
-  const investigationsClient = useKibana().services.nightshiftInvestigations?.investigationsClient;
+export interface FetchInvestigationsResult {
+  investigations: InvestigationSummary[];
+  total: number;
+  hasMore: boolean;
+  isInitialLoading: boolean;
+  isFetchingNextPage: boolean;
+  isFetching: boolean;
+  isPreviousData: boolean;
+  error: Error | null;
+  fetchNextPage: () => void;
+  refetch: () => void;
+}
 
-  return useQuery<ListInvestigationsResponse, Error>({
-    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, page, size, query, severities],
-    // investigationsClient is undefined when the plugin is unavailable (optional dep)
-    enabled: investigationsClient != null,
-    queryFn: async ({ signal }) => {
-      if (!investigationsClient) {
-        // enabled guards this at runtime; TS cannot see that from inside the closure
-        throw new Error('Nightshift investigations plugin is unavailable');
+/** Offset pages over a live `created_at desc` window can repeat an id across boundaries. */
+const flattenInvestigationPages = (pages: ListInvestigationsResponse[]): InvestigationSummary[] => {
+  const seen = new Set<string>();
+  const items: InvestigationSummary[] = [];
+
+  for (const page of pages) {
+    for (const item of page.results) {
+      if (seen.has(item.id)) {
+        continue;
       }
-      return investigationsClient.fetch('GET /internal/nightshift/investigations', {
-        params: {
-          query: {
-            sort_field: 'created_at',
-            sort_order: 'desc',
-            page,
-            size,
-            ...(query ? { query } : {}),
-            ...(severities?.length ? { severities } : {}),
-          },
+      seen.add(item.id);
+      items.push(item);
+    }
+  }
+
+  return items;
+};
+
+export const getInvestigationsNextPageParam = ({
+  pagination: { page, per_page: perPage, total },
+}: ListInvestigationsResponse): number | undefined => {
+  const loaded = page * perPage;
+  return loaded < total && loaded + perPage <= MAX_SHARED_INVESTIGATIONS ? page + 1 : undefined;
+};
+
+/** One landing section's investigations from the shared investigations list API, page by page. */
+export const useFetchInvestigations = ({
+  inProgress,
+  severities,
+  query,
+  refetchInterval = false,
+}: FetchInvestigationsParams): FetchInvestigationsResult => {
+  const { http, agenticInvestigations } = useKibana().services;
+
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    isInitialLoading,
+    isPreviousData,
+    refetch,
+  } = useInfiniteQuery<ListInvestigationsResponse, Error>({
+    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'section', inProgress, severities, query],
+    // The list API belongs to agenticInvestigations, an optional dependency.
+    enabled: agenticInvestigations != null,
+    queryFn: async ({ pageParam, signal }) =>
+      http.get<ListInvestigationsResponse>(SHARED_INVESTIGATIONS_URL, {
+        version: SHARED_INVESTIGATIONS_API_VERSION,
+        query: {
+          sort_field: 'created_at',
+          sort_order: 'desc',
+          page: typeof pageParam === 'number' ? pageParam : 1,
+          per_page: INVESTIGATIONS_PAGE_SIZE,
+          in_progress: inProgress,
+          ...(severities?.length ? { severity: severities } : {}),
+          ...(query ? { query } : {}),
         },
-        signal: signal ?? null,
-      });
-    },
-    refetchInterval: (data) =>
-      data?.results.some(({ status }) => status === 'pending' || status === 'running')
-        ? ACTIVE_INVESTIGATIONS_REFETCH_INTERVAL_MS
-        : false,
+        signal,
+      }),
+    getNextPageParam: getInvestigationsNextPageParam,
+    refetchInterval,
+    staleTime: SECTION_STALE_TIME_MS,
+    refetchOnWindowFocus: true,
     keepPreviousData: true,
     // Deviates from the app's convention of not setting `retry`. Without this, an
     // unavailable-API 404 leaves the homepage spinning for ~7s (v4 default: 3 retries
     // with exponential backoff). 4xx errors are permanent; retry only on network/5xx.
-    retry: (failureCount, error) => !isHttpClientError(error) && failureCount < 3,
+    retry: (failureCount, err) => !isHttpClientError(err) && failureCount < 3,
   });
+
+  const investigations = useMemo(() => flattenInvestigationPages(data?.pages ?? []), [data?.pages]);
+
+  const total = data?.pages[data.pages.length - 1]?.pagination.total ?? 0;
+
+  const handleFetchNextPage = useCallback(() => {
+    void fetchNextPage();
+  }, [fetchNextPage]);
+
+  const handleRefetch = useCallback(() => {
+    void refetch();
+  }, [refetch]);
+
+  return useMemo(
+    () => ({
+      investigations,
+      total,
+      hasMore: hasNextPage ?? false,
+      isInitialLoading,
+      isFetchingNextPage,
+      isFetching,
+      isPreviousData,
+      error: error ?? null,
+      fetchNextPage: handleFetchNextPage,
+      refetch: handleRefetch,
+    }),
+    [
+      investigations,
+      total,
+      hasNextPage,
+      isInitialLoading,
+      isFetchingNextPage,
+      isFetching,
+      isPreviousData,
+      error,
+      handleFetchNextPage,
+      handleRefetch,
+    ]
+  );
 };

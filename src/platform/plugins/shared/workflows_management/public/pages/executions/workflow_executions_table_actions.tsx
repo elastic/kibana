@@ -33,6 +33,7 @@ export interface WorkflowExecutionActionContext {
   executionId?: string;
   workflowId?: string;
   context?: Record<string, unknown>;
+  isTestRun?: boolean;
 }
 
 export const getWorkflowExecutionActionContext = (
@@ -58,7 +59,7 @@ const menuAriaLabel = i18n.translate('workflowsManagement.executionsPage.actions
 });
 
 const useExecutionActionListItems = (
-  { executionId, workflowId, context }: WorkflowExecutionActionContext,
+  { executionId, workflowId, context, isTestRun }: WorkflowExecutionActionContext,
   onClosePopover: () => void,
   origin: 'table_actions' | 'flyout_actions',
   onViewAllExecutionsForWorkflow?: (workflowId: string) => void,
@@ -92,7 +93,7 @@ const useExecutionActionListItems = (
           }
 
           onClosePopover();
-          void onReRunExecution({ workflowId, executionId, context });
+          void onReRunExecution({ workflowId, executionId, context, isTestRun });
         },
         isDisabled: !workflowId || !onReRunExecution,
         'data-test-subj': 'workflowExecutionActionReRun',
@@ -149,6 +150,7 @@ const useExecutionActionListItems = (
     origin,
     telemetry,
     workflowId,
+    isTestRun,
   ]);
 };
 

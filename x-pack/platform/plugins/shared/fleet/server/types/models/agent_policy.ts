@@ -103,7 +103,17 @@ export const AgentPolicyBaseSchema = {
   ),
   data_output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   monitoring_output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  download_source_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  download_source_id: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.string({
+        meta: {
+          description: 'Use `download_source_ids` instead',
+          deprecated: true,
+        },
+      }),
+    ])
+  ),
   fleet_server_host_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   agent_features: schema.maybe(
     schema.arrayOf(
@@ -386,8 +396,27 @@ export const AgentPolicySchemaV7 = AgentPolicySchemaV6.extends(
   { meta: { id: 'agent_policy_v7' } }
 );
 
+const downloadSourceIdsSchema = schema.maybe(
+  schema.arrayOf(
+    schema.string({
+      maxLength: 500,
+      meta: {
+        description:
+          "A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.",
+      },
+    }),
+    { maxSize: 3 }
+  )
+);
+
+export const AgentPolicySchemaV8 = AgentPolicySchemaV7.extends(
+  { download_source_ids: downloadSourceIdsSchema },
+  { meta: { id: 'agent_policy_v8' } }
+);
+
 export const NewAgentPolicySchema = AgentPolicySchemaV6.extends(
   {
+    download_source_ids: downloadSourceIdsSchema,
     supports_agentless: schema.maybe(
       schema.oneOf([
         schema.literal(null),
@@ -421,7 +450,16 @@ export const NewAgentPolicySchema = AgentPolicySchemaV6.extends(
       schema.oneOf([schema.literal(null), schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })])
     ),
     download_source_id: schema.maybe(
-      schema.oneOf([schema.literal(null), schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })])
+      schema.oneOf([
+        schema.literal(null),
+        schema.string({
+          maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+          meta: {
+            description: 'Use `download_source_ids` instead',
+            deprecated: true,
+          },
+        }),
+      ])
     ),
     fleet_server_host_id: schema.maybe(
       schema.oneOf([schema.literal(null), schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })])
@@ -529,6 +567,7 @@ export const NewAgentPolicySchema = AgentPolicySchemaV6.extends(
 
 export const AgentPolicySchema = AgentPolicySchemaV6.extends(
   {
+    download_source_ids: downloadSourceIdsSchema,
     id: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
     is_managed: schema.maybe(schema.boolean()),
     status: schema.oneOf([
@@ -785,6 +824,7 @@ export const FullAgentPolicyResponseSchema = schema.object(
         }),
         download: schema.object({
           sourceURI: schema.string(),
+          sources: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 3 })),
           ssl: schema.maybe(BaseSSLSchema),
           auth: schema.maybe(
             schema.object({

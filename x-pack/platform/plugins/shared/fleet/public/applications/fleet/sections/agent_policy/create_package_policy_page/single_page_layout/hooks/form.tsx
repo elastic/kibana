@@ -18,6 +18,8 @@ import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-l
 import { toNewAgentlessPolicy } from '../../../../../../../../common/services';
 
 import { sendCreateAgentlessPolicy } from '../../../../../../../hooks/use_request/agentless_policy';
+import type { CloudConnectorIacPersistOptions } from '../../../../../../../hooks/use_request/pending_cloud_connector_iac';
+import { IAC_TEMPLATE_WRITE_FAILED_TOAST } from '../../../../../../../components/cloud_connector/constants';
 
 import {
   AgentlessAgentCreateFleetUnreachableError,
@@ -42,11 +44,7 @@ import {
   useFleetStatus,
   sendCreatePackagePolicyForRq,
 } from '../../../../../hooks';
-import {
-  isVerificationError,
-  packageToPackagePolicy,
-  ExperimentalFeaturesService,
-} from '../../../../../services';
+import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
@@ -152,7 +150,9 @@ export const createAgentPolicyIfNeeded = async ({
 async function savePackagePolicy(
   pkgPolicy: CreatePackagePolicyRequest['body'],
   varGroups?: RegistryVarGroup[],
-  packageInfo?: PackageInfo
+  packageInfo?: PackageInfo,
+  // Optional: surfaces a failed template-details write after the save; see CloudConnectorIacPersistOptions.
+  iacPersistOptions?: CloudConnectorIacPersistOptions
 ): Promise<SavedPolicyResult> {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
 
@@ -165,14 +165,17 @@ async function savePackagePolicy(
       varGroups,
       packageInfo
     );
-    const { item } = await sendCreateAgentlessPolicy(agentlessRequestBody);
+    const { item } = await sendCreateAgentlessPolicy(agentlessRequestBody, iacPersistOptions);
     return { type: 'agentless', policy: item };
   }
 
-  const { item } = await sendCreatePackagePolicyForRq({
-    ...policy,
-    ...(forceCreateNeeded && { force: true }),
-  });
+  const { item } = await sendCreatePackagePolicyForRq(
+    {
+      ...policy,
+      ...(forceCreateNeeded && { force: true }),
+    },
+    iacPersistOptions
+  );
 
   return { type: 'packagePolicy', policy: item };
 }
@@ -280,9 +283,7 @@ export function useOnSubmit({
   const confirmForceInstall = useConfirmForceInstall();
   const spaceSettings = useSpaceSettingsContext();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
-  const { enableVarGroups } = ExperimentalFeaturesService.get();
-  const varGroups =
-    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
+  const varGroups = packageInfo?.var_groups;
 
   // only used to store the resulting policy (package or agentless) once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<SavedPolicyResult>();
@@ -511,9 +512,11 @@ export function useOnSubmit({
         isAgentlessSelected ? 'agentless' : 'default',
         packageInfo
       );
-      const visibleForVarGroup =
-        !enableVarGroups ||
-        isInputVisibleForVarGroupSelections(input, packageInfo, varGroupSelections);
+      const visibleForVarGroup = isInputVisibleForVarGroupSelections(
+        input,
+        packageInfo,
+        varGroupSelections
+      );
       if (allowedForDeploymentMode && visibleForVarGroup) {
         if (isAgentlessSelected && !input.enabled && isSingleAgentlessInput) {
           return {
@@ -526,13 +529,7 @@ export function useOnSubmit({
       }
       return { ...input, enabled: false };
     });
-  }, [
-    packagePolicy.inputs,
-    packagePolicy.var_group_selections,
-    isAgentlessSelected,
-    packageInfo,
-    enableVarGroups,
-  ]);
+  }, [packagePolicy.inputs, packagePolicy.var_group_selections, isAgentlessSelected, packageInfo]);
 
   // Compare current vs desired input enabled states so the effect below only fires
   // when a var_group selection actually hides or reveals an input, preventing
@@ -731,7 +728,12 @@ export function useOnSubmit({
             create_dataset_templates: createDatasetTemplates,
           },
           varGroups,
-          packageInfo
+          packageInfo,
+          {
+            // The policy is saved either way; only the identity's template details is missing.
+            onIacPersistError: () =>
+              notifications.toasts.addWarning(IAC_TEMPLATE_WRITE_FAILED_TOAST),
+          }
         );
 
         if (savedPolicyResult.policy.package) {

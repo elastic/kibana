@@ -593,8 +593,11 @@ export const EntitiesDataTable = ({
                   {groupSelectorComponent}
                 </EuiFlexItem>
               )}
-              {gridProps.inTableSearchControl && (
-                <EuiFlexItem grow={false}>{gridProps.inTableSearchControl}</EuiFlexItem>
+              {gridProps.inTableSearchInput && (
+                <EuiFlexItem grow={false}>{gridProps.inTableSearchInput}</EuiFlexItem>
+              )}
+              {gridProps.inTableSearchButton && (
+                <EuiFlexItem grow={false}>{gridProps.inTableSearchButton}</EuiFlexItem>
               )}
               {hasRoomForGridControls && keyboardShortcutsControl && (
                 <EuiFlexItem grow={false}>{keyboardShortcutsControl}</EuiFlexItem>

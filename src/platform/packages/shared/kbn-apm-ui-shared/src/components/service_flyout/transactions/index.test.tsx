@@ -8,9 +8,11 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { DocLinksStart } from '@kbn/core/public';
 import { LatencyAggregationType } from '@kbn/apm-types';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { ServiceFlyoutTransactionsSection } from '.';
 import { useServiceFlyoutTransactionData } from './hooks/use_service_flyout_transaction_data';
@@ -44,6 +46,7 @@ const DEFAULT_HOOK_RESULT = {
   maxCountExceeded: false,
   hasActiveAlerts: true,
   error: undefined,
+  mainError: undefined,
 };
 
 const START = '2024-01-01T00:00:00.000Z';
@@ -58,7 +61,14 @@ const locators = {
   }),
 } as unknown as SharePluginStart['url']['locators'];
 
+const TROUBLESHOOTING_DOCS_HREF = 'https://docs.example/apm/common-problems#too-many-transactions';
+
+const docLinks = {
+  links: { apm: { troubleshootingTooManyTransactions: TROUBLESHOOTING_DOCS_HREF } },
+} as unknown as DocLinksStart;
+
 const BASE_PROPS = {
+  docLinks,
   http: {} as unknown as HttpStart,
   notifications: { toasts: { addDanger: jest.fn() } } as any,
   serviceName: 'frontend-node',
@@ -85,6 +95,147 @@ describe('ServiceFlyoutTransactionsSection', () => {
     expect(link.getAttribute('href')).toContain('TransactionDetailsByNameLocator');
     expect(link.getAttribute('href')).toContain('frontend-node');
     expect(link.getAttribute('href')).toContain('production');
+  });
+
+  it('calls onTransactionClick instead of navigating when provided', () => {
+    const onTransactionClick = jest.fn();
+    render(
+      <ServiceFlyoutTransactionsSection {...BASE_PROPS} onTransactionClick={onTransactionClick} />
+    );
+
+    const link = screen.getByRole('button', { name: 'GET /api/orders' });
+    expect(link).toBeInTheDocument();
+    expect(link.getAttribute('href')).toBeNull();
+
+    link.click();
+    expect(onTransactionClick).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'GET /api/orders' })
+    );
+  });
+
+  it('notifies onTransactionsChange when items settle', () => {
+    const onTransactionsChange = jest.fn();
+    render(
+      <ServiceFlyoutTransactionsSection
+        {...BASE_PROPS}
+        onTransactionsChange={onTransactionsChange}
+      />
+    );
+
+    expect(onTransactionsChange).toHaveBeenCalledWith(FIXTURE_ITEMS, {
+      isLoading: false,
+      error: undefined,
+      filters: {
+        environment: 'production',
+        start: START,
+        end: END,
+        transactionType: 'request',
+      },
+      isSearchFiltered: false,
+    });
+  });
+
+  it('notifies onTransactionsChange while loading', () => {
+    mockedUseServiceFlyoutTransactionData.mockReturnValue({
+      ...DEFAULT_HOOK_RESULT,
+      isLoading: true,
+      items: [],
+    });
+    const onTransactionsChange = jest.fn();
+    render(
+      <ServiceFlyoutTransactionsSection
+        {...BASE_PROPS}
+        onTransactionsChange={onTransactionsChange}
+      />
+    );
+
+    expect(onTransactionsChange).toHaveBeenCalledWith([], {
+      isLoading: true,
+      error: undefined,
+      filters: {
+        environment: 'production',
+        start: START,
+        end: END,
+        transactionType: 'request',
+      },
+      isSearchFiltered: false,
+    });
+  });
+
+  it('reports the main-statistics error so the host does not treat retained items as settled', () => {
+    const mainError = new Error('main stats failed');
+    mockedUseServiceFlyoutTransactionData.mockReturnValue({
+      ...DEFAULT_HOOK_RESULT,
+      mainError,
+    });
+    const onTransactionsChange = jest.fn();
+    render(
+      <ServiceFlyoutTransactionsSection
+        {...BASE_PROPS}
+        onTransactionsChange={onTransactionsChange}
+      />
+    );
+
+    expect(onTransactionsChange).toHaveBeenCalledWith(FIXTURE_ITEMS, {
+      isLoading: false,
+      error: mainError,
+      filters: {
+        environment: 'production',
+        start: START,
+        end: END,
+        transactionType: 'request',
+      },
+      isSearchFiltered: false,
+    });
+  });
+
+  it('reconciles against the unsearched list when search is client-side', () => {
+    mockedUseServiceFlyoutTransactionData.mockReturnValue({
+      ...DEFAULT_HOOK_RESULT,
+      items: [FIXTURE_ITEMS[0]],
+      presenceItems: FIXTURE_ITEMS,
+      isServerSearch: false,
+    });
+    const onTransactionsChange = jest.fn();
+    render(
+      <ServiceFlyoutTransactionsSection
+        {...BASE_PROPS}
+        onTransactionsChange={onTransactionsChange}
+      />
+    );
+
+    expect(onTransactionsChange).toHaveBeenCalledWith(
+      FIXTURE_ITEMS,
+      expect.objectContaining({ isSearchFiltered: false })
+    );
+  });
+
+  it('marks a server-side search result as unable to prove absence', () => {
+    mockedUseServiceFlyoutTransactionData.mockReturnValue({
+      ...DEFAULT_HOOK_RESULT,
+      items: [FIXTURE_ITEMS[0]],
+      presenceItems: [FIXTURE_ITEMS[0]],
+      isServerSearch: true,
+    });
+    const onTransactionsChange = jest.fn();
+    render(
+      <ServiceFlyoutTransactionsSection
+        {...BASE_PROPS}
+        onTransactionsChange={onTransactionsChange}
+      />
+    );
+
+    expect(onTransactionsChange).toHaveBeenCalledWith([FIXTURE_ITEMS[0]], {
+      isLoading: false,
+      error: undefined,
+      filters: {
+        environment: 'production',
+        start: START,
+        end: END,
+        transactionType: 'request',
+      },
+      isSearchFiltered: true,
+    });
   });
 
   it('renders the Open in APM header link when locators are provided', () => {
@@ -132,6 +283,39 @@ describe('ServiceFlyoutTransactionsSection', () => {
     expect(badge).toBeInTheDocument();
     expect(badge.getAttribute('href')).toContain('serviceAlertsLocator');
     expect(badge.getAttribute('href')).toContain('frontend-node');
+  });
+
+  it('resolves the max groups tooltip docs link through the doc links service', () => {
+    mockedUseServiceFlyoutTransactionData.mockReturnValue({
+      ...DEFAULT_HOOK_RESULT,
+      items: [
+        ...FIXTURE_ITEMS,
+        {
+          name: '_other',
+          transactionType: 'request',
+          latency: { value: null },
+          throughput: { value: 0 },
+          errorRate: { value: null },
+          alertsCount: 0,
+        },
+      ],
+      maxCountExceeded: true,
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutTransactionsSection {...BASE_PROPS} />
+      </IntlProvider>
+    );
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'More information about remaining transactions' })
+    );
+
+    expect(screen.getByTestId('apmMaxGroupsTooltipDocsLink')).toHaveAttribute(
+      'href',
+      TROUBLESHOOTING_DOCS_HREF
+    );
   });
 
   describe('sparkline loading state', () => {

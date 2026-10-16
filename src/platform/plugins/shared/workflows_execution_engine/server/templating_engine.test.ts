@@ -492,6 +492,32 @@ describe('WorkflowTemplatingEngine', () => {
       });
     });
 
+    describe('liquid literals', () => {
+      it('should evaluate nil to null rather than a Drop instance', () => {
+        expect(templatingEngine.evaluateExpression('{{ nil }}', {})).toBeNull();
+      });
+
+      it('should evaluate a default of nil to null when the value is an empty array', () => {
+        const actual = templatingEngine.evaluateExpression('{{ items | default: nil }}', {
+          items: [],
+        });
+        expect(actual).toBeNull();
+      });
+
+      it('should keep a non-empty value ahead of a default of nil', () => {
+        const actual = templatingEngine.evaluateExpression(
+          `{{ items | map: "id" | default: nil }}`,
+          { items: [{ id: 'a' }, { id: 'b' }] }
+        );
+        expect(actual).toEqual(['a', 'b']);
+      });
+
+      it('should evaluate empty and blank to empty strings', () => {
+        expect(templatingEngine.evaluateExpression('{{ empty }}', {})).toBe('');
+        expect(templatingEngine.evaluateExpression('{{ blank }}', {})).toBe('');
+      });
+    });
+
     describe('string manipulation', () => {
       it('should evaluate split filter over string', () => {
         const template = `{{ "foo,bar,dak" | split: "," }}`;

@@ -6,6 +6,7 @@
  */
 
 import type { ComponentType, RefAttributes } from 'react';
+import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import type {
   AttachmentInput,
   ConversationAttachment,
@@ -15,6 +16,8 @@ import type { BrowserApiToolDefinition } from './tools/browser_api_tool';
 import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
+  ConversationsServiceStartContract,
+  ConversationEventsServiceStartContract,
   RendererServiceStartContract,
   EventsServiceStartContract,
   ToolServiceStartContract,
@@ -26,6 +29,11 @@ import type { ConversationTemplateServiceStartContract } from './templates';
  * Configures conversation behavior when embedded in the sidebar or other host.
  */
 export interface EmbeddableConversationProps {
+  /**
+   * Called when the user submits a prompt, immediately before the conversation starts streaming.
+   */
+  onSubmit?: () => void;
+
   /**
    * Force starting a new conversation, ignoring any stored conversation IDs.
    * When true, a fresh conversation is always created.
@@ -143,6 +151,10 @@ export interface PublicEmbeddableConversationInputProps {
  */
 export interface OpenConversationSidebarOptions extends EmbeddableConversationProps {
   onClose?: () => void;
+  /**
+   * Conversation id to restore when the sidebar opens.
+   */
+  conversationId?: string;
 }
 
 /**
@@ -151,6 +163,8 @@ export interface OpenConversationSidebarOptions extends EmbeddableConversationPr
 export interface OpenConversationDetailsOptions {
   conversationId: string;
   onClose?: () => void;
+  /** Icon buttons rendered in the flyout menu bar, before the close button (e.g. copy link). */
+  trailingActions?: EuiFlyoutMenuAction[];
 }
 
 /**
@@ -208,6 +222,12 @@ export interface AgentBuilderPluginStart {
    * Events service contract, can be used to listen to chat events.
    */
   events: EventsServiceStartContract;
+  /** Browser-side UI registry for custom conversation events. */
+  conversationEvents: ConversationEventsServiceStartContract;
+  /**
+   * Conversations service contract, can be used to append events to conversations.
+   */
+  conversations: ConversationsServiceStartContract;
   /**
    * Resolves Agent Builder access (enterprise license, LLM connector). Callers must
    * also require `application.capabilities.agentBuilder.show === true` before
@@ -305,5 +325,9 @@ export interface AgentBuilderPluginStart {
   EmbeddableConversationInput: ComponentType<
     PublicEmbeddableConversationInputProps & RefAttributes<EmbeddableConversationInputRef>
   >;
+  /**
+   * Opens the conversation details flyout. Flyouts opened from its content stack on top of it with
+   * a Back button when opened with `session: 'start'` and `CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY`.
+   */
   openConversationDetails: (options: OpenConversationDetailsOptions) => Promise<() => void>;
 }

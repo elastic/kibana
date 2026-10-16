@@ -1089,6 +1089,7 @@ export const GetActionStatusResponseSchema = schema.object({
         schema.literal('PRIVILEGE_LEVEL_CHANGE'),
         schema.literal('ROLLBACK'),
         schema.literal('REMOVE_COLLECTOR'),
+        schema.literal('RESTART'),
       ]),
       nbAgentsActioned: schema.number({
         meta: {
@@ -1233,6 +1234,28 @@ export const PostBulkAgentRollbackRequestSchema = {
   }),
 };
 
+export const PostAgentRestartRequestSchema = {
+  params: schema.object({
+    agentId: schema.string({
+      maxLength: 512,
+      meta: { description: 'The agent ID to restart' },
+    }),
+  }),
+};
+
+export const PostAgentRestartResponseSchema = ActionIdOrMessageSchema;
+
+export const PostBulkAgentRestartRequestSchema = {
+  body: schema.object({
+    agents: schema.oneOf([
+      schema.arrayOf(schema.string({ maxLength: 512 }), { maxSize: 10000 }),
+      schema.string({ maxLength: 1_000_000 }),
+    ]),
+    batchSize: schema.maybe(schema.number({ min: 1 })),
+    includeInactive: schema.boolean({ defaultValue: false }),
+  }),
+};
+
 export const PostBulkAgentRollbackResponseSchema = schema.oneOf([
   schema.object({
     actionIds: schema.arrayOf(schema.string({ maxLength: 36 }), { maxSize: 10000 }),
@@ -1243,7 +1266,10 @@ export const PostBulkAgentRollbackResponseSchema = schema.oneOf([
 export const PostGenerateAgentsReportRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
-      schema.arrayOf(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }), { maxSize: 10000 }),
+      schema.arrayOf(schema.string({ minLength: 1, maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }), {
+        minSize: 1,
+        maxSize: 10000,
+      }),
       schema.string({
         maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH,
         validate: (value: string) => {

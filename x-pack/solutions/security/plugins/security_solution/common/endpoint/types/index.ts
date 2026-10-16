@@ -398,6 +398,12 @@ export type AlertEvent = Partial<{
   rule: Partial<{
     id: ECSField<string>;
     description: ECSField<string>;
+    name: ECSField<string>;
+    custom_yara_signature: Partial<{
+      entry_name: ECSField<string>;
+      rule_identifier: ECSField<string>;
+      entry_id: ECSField<string>;
+    }>;
   }>;
   file: Partial<{
     owner: ECSField<string>;
@@ -1011,7 +1017,7 @@ export interface PolicyConfig {
       security: boolean;
     };
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
-    memory_protection: ProtectionFields & SupportedFields;
+    memory_protection: ProtectionFields & SupportedFields & CustomYaraSignaturesFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
     device_control?: DeviceControlFields;
@@ -1062,7 +1068,7 @@ export interface PolicyConfig {
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     ransomware: ProtectionFields & SupportedFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
-    memory_protection: ProtectionFields & SupportedFields;
+    memory_protection: ProtectionFields & SupportedFields & CustomYaraSignaturesFields;
     device_control?: DeviceControlFields;
     popup: {
       malware: {
@@ -1102,7 +1108,12 @@ export interface PolicyConfig {
     };
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
-    memory_protection: ProtectionFields & SupportedFields;
+    memory_protection: ProtectionFields & SupportedFields & CustomYaraSignaturesFields;
+    /**
+     * Absent on policies created before Linux ransomware existed and wherever
+     * `linuxRansomwareProtection` is off; absent means off.
+     */
+    ransomware?: ProtectionFields & SupportedFields;
     popup: {
       malware: {
         message: string;
@@ -1113,6 +1124,11 @@ export interface PolicyConfig {
         enabled: boolean;
       };
       memory_protection: {
+        message: string;
+        enabled: boolean;
+      };
+      /** Present alongside `ransomware`; absent wherever that is absent. */
+      ransomware?: {
         message: string;
         enabled: boolean;
       };
@@ -1162,7 +1178,13 @@ export interface UIPolicyConfig {
    */
   linux: Pick<
     PolicyConfig['linux'],
-    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection' | 'memory_protection'
+    | 'malware'
+    | 'ransomware'
+    | 'events'
+    | 'popup'
+    | 'advanced'
+    | 'behavior_protection'
+    | 'memory_protection'
   >;
 }
 
@@ -1186,6 +1208,11 @@ export interface BlocklistFields {
 
 export interface OnWriteScanFields {
   on_write_scan: boolean;
+}
+
+export interface CustomYaraSignaturesFields {
+  /** Absent means never configured and is treated as disabled. */
+  custom_yara_signatures?: boolean;
 }
 
 /** Policy protection mode options */

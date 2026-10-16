@@ -17,10 +17,10 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
-import type { KueryNode } from '@kbn/es-query';
 import type { AxiosInstance } from 'axios';
 import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
@@ -97,7 +97,15 @@ import { isSystemAction } from '../lib/is_system_action';
 import type { ConnectorExecuteParams } from '../application/connector/methods/execute/types';
 import { connectorFromInMemoryConnector } from '../application/connector/lib/connector_from_in_memory_connector';
 import { getAxiosInstance } from '../application/connector/methods/get_axios_instance';
+import { getSandboxCredentials } from '../application/connector/methods/get_sandbox_credentials';
+import type {
+  GetSandboxCredentialsOptions,
+  ResolvedSandboxCredentials,
+} from '../application/connector/methods/get_sandbox_credentials';
 import type { GetAxiosInstanceWithAuthFnOpts } from '../lib/get_axios_instance';
+import { invalidateInboundConnectorEventIdentity } from '../inbound/event_identity';
+import { deleteIngressCredentialForConnector } from '../inbound/ingress_credential';
+import { deleteConnectorSigningKey } from '../lib/connector_signing_keys';
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -125,9 +133,12 @@ export interface ConstructorOptions {
   ) => Promise<AxiosInstance>;
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
+  publicBaseUrl?: string;
+  connectorSigningKeysEnabled?: boolean;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
   getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
   evictClientPool?: (connectorId: string) => Promise<void>;
+  securityService?: SecurityServiceStart;
 }
 
 export interface ActionsClientContext {
@@ -153,9 +164,12 @@ export interface ActionsClientContext {
   ) => Promise<AxiosInstance>;
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
+  publicBaseUrl?: string;
+  connectorSigningKeysEnabled?: boolean;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
   getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
   evictClientPool?: (connectorId: string) => Promise<void>;
+  securityService?: SecurityServiceStart;
 }
 
 const noop = async (_request: KibanaRequest): Promise<string | undefined> => undefined;
@@ -184,9 +198,12 @@ export class ActionsClient {
     getAxiosInstanceWithAuth,
     spaces,
     isESOCanEncrypt,
+    publicBaseUrl,
+    connectorSigningKeysEnabled,
     connectorLifecycleListeners,
     getCurrentUserProfileId,
     evictClientPool,
+    securityService,
   }: ConstructorOptions) {
     this.context = {
       logger,
@@ -209,9 +226,12 @@ export class ActionsClient {
       getAxiosInstanceWithAuth,
       spaces,
       isESOCanEncrypt,
+      publicBaseUrl,
+      connectorSigningKeysEnabled,
       connectorLifecycleListeners,
       getCurrentUserProfileId: getCurrentUserProfileId ?? noop,
       evictClientPool,
+      securityService,
     };
   }
 
@@ -259,10 +279,13 @@ export class ActionsClient {
   /**
    * Get all connectors with in-memory connectors
    */
-  public async getAll({ includeSystemActions = false } = {}): Promise<
+  public async getAll({
+    includeSystemActions = false,
+    sandboxCapableOnly = false,
+  }: { includeSystemActions?: boolean; sandboxCapableOnly?: boolean } = {}): Promise<
     ConnectorWithExtraFindData[]
   > {
-    return getAll({ context: this.context, includeSystemActions });
+    return getAll({ context: this.context, includeSystemActions, sandboxCapableOnly });
   }
 
   /**
@@ -606,7 +629,24 @@ export class ActionsClient {
     // OAuth grant.
     await this.deleteConnectorAuthTokens(id, authMode);
 
+    await invalidateInboundConnectorEventIdentity(this.context, id, actionTypeId);
+
+    await deleteIngressCredentialForConnector({
+      unsecuredSavedObjectsClient: this.context.unsecuredSavedObjectsClient,
+      connectorId: id,
+      logger: this.context.logger,
+    });
+
     const result = await this.context.unsecuredSavedObjectsClient.delete('action', id);
+
+    // After the connector delete, so a failed delete keeps a working connector. Not limited to
+    // types that publish keys: an import can change the stored actionTypeId.
+    if (this.context.connectorSigningKeysEnabled) {
+      await deleteConnectorSigningKey({
+        unsecuredSavedObjectsClient: this.context.unsecuredSavedObjectsClient,
+        connectorId: id,
+      });
+    }
 
     const hookServices: HookServices = {
       scopedClusterClient: this.context.scopedClusterClient,
@@ -668,6 +708,12 @@ export class ActionsClient {
     return getAxiosInstance(this.context, actionId);
   }
 
+  public async getSandboxCredentials(
+    options: GetSandboxCredentialsOptions
+  ): Promise<ResolvedSandboxCredentials> {
+    return getSandboxCredentials(this.context, options);
+  }
+
   public async bulkEnqueueExecution(
     options: EnqueueExecutionOptions[]
   ): Promise<ExecutionResponse> {
@@ -718,9 +764,11 @@ export class ActionsClient {
   }: GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
     this.context.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
-    const authorizationTuple = {} as KueryNode;
+    let authorizationTuple;
     try {
-      await this.context.authorization.ensureAuthorized({ operation: 'get' });
+      authorizationTuple = await this.context.authorization.getFindAuthorizationFilter({
+        namespaces,
+      });
     } catch (error) {
       this.context.auditLogger?.log(
         connectorAuditEvent({
@@ -746,7 +794,7 @@ export class ActionsClient {
     try {
       const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
         'action',
-        authorizationTuple,
+        authorizationTuple.filter,
         {
           start: parsedDateStart.toISOString(),
           end: parsedDateEnd.toISOString(),
@@ -778,9 +826,11 @@ export class ActionsClient {
   }: GetGlobalExecutionKPIParams) {
     this.context.logger.debug(`getGlobalExecutionKpiWithAuth(): getting global execution KPI`);
 
-    const authorizationTuple = {} as KueryNode;
+    let authorizationTuple;
     try {
-      await this.context.authorization.ensureAuthorized({ operation: 'get' });
+      authorizationTuple = await this.context.authorization.getFindAuthorizationFilter({
+        namespaces,
+      });
     } catch (error) {
       this.context.auditLogger?.log(
         connectorAuditEvent({
@@ -806,7 +856,7 @@ export class ActionsClient {
     try {
       const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
         'action',
-        authorizationTuple,
+        authorizationTuple.filter,
         {
           start: parsedDateStart.toISOString(),
           end: parsedDateEnd.toISOString(),
