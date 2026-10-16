@@ -251,11 +251,36 @@ describe('WorkflowGraphNode', () => {
     expect(node.getAttribute('aria-label')).toContain(ExecutionStatus.FAILED);
   });
 
+  it('reads the accessible name as "<type> step: <label>, status: <status>" with an execution', () => {
+    renderNode({
+      label: 'Fetch Data',
+      stepType: 'http',
+      stepExecution: {
+        id: 'e3',
+        stepId: 'node-1',
+        status: ExecutionStatus.COMPLETED,
+      } as any,
+    });
+    expect(
+      screen.getByRole('button', { name: 'http step: Fetch Data, status: completed' })
+    ).toBeInTheDocument();
+  });
+
+  it('reads the accessible name as "<type> step: <label>" without an execution', () => {
+    renderNode({ label: 'Fetch Data', stepType: 'http' });
+    expect(screen.getByRole('button', { name: 'http step: Fetch Data' })).toBeInTheDocument();
+  });
+
   it('renders a compact preview without the step label text', () => {
     const { queryByTitle } = renderNode({ label: 'hidden-label', preview: true });
     // In preview mode the outer div is an aria-label'd div, not a role=button,
     // and there is no label text rendered as a <span>.
     expect(queryByTitle('hidden-label')).toBeNull();
+  });
+
+  it('labels the compact preview card as "<type>: <label>"', () => {
+    const { container } = renderNode({ label: 'My Label', stepType: 'http', preview: true });
+    expect(container.querySelector('[aria-label="http: My Label"]')).not.toBeNull();
   });
 });
 
@@ -474,8 +499,8 @@ describe('WorkflowGraphNode — edit mode', () => {
     // handle until something calls `updateNodeInternals` for this node.
     mockUpdateNodeInternals.mockClear();
     const { rerender } = renderNode({});
-    expect(mockUpdateNodeInternals).toHaveBeenCalledWith('node-1');
-    mockUpdateNodeInternals.mockClear();
+    // React Flow measures a freshly mounted node itself — no redundant call.
+    expect(mockUpdateNodeInternals).not.toHaveBeenCalled();
 
     rerender(
       <WorkflowGraphActionsContext.Provider value={{}}>
@@ -486,6 +511,12 @@ describe('WorkflowGraphNode — edit mode', () => {
         />
       </WorkflowGraphActionsContext.Provider>
     );
+    expect(mockUpdateNodeInternals).toHaveBeenCalledWith('node-1');
+  });
+
+  it('re-measures on mount when the fallback handle is already present', () => {
+    mockUpdateNodeInternals.mockClear();
+    renderNode({ step: { 'on-failure': { fallback: [{ name: 'fb', type: 'console' }] } } });
     expect(mockUpdateNodeInternals).toHaveBeenCalledWith('node-1');
   });
 
@@ -515,9 +546,8 @@ describe('WorkflowGraphNode — edit mode', () => {
   });
 
   it('shows the incomplete warning at the top-right for flagged nodes and never tints the border', () => {
-    const { unmount } = renderNode({}, false, {
+    const { unmount } = renderNode({ configWarning: 'incomplete' }, false, {
       edit: makeEdit(),
-      nodeConfigWarnings: new Map([['node-1', 'incomplete']]),
     });
     const warning = screen.getByTestId('workflowGraphNodeIncomplete');
     expect(warning).toHaveAttribute('aria-label', 'Incomplete — required fields are missing');
@@ -528,21 +558,118 @@ describe('WorkflowGraphNode — edit mode', () => {
       'solid'
     );
     unmount();
-    renderNode({}, false, {
-      edit: makeEdit(),
-      nodeConfigWarnings: new Map([['other', 'incomplete']]),
-    });
+    renderNode({}, false, { edit: makeEdit() });
     expect(screen.queryByTestId('workflowGraphNodeIncomplete')).not.toBeInTheDocument();
   });
 
   it('uses misconfigured tooltip copy when the applied state is invalid', () => {
-    renderNode({}, false, {
-      edit: makeEdit(),
-      nodeConfigWarnings: new Map([['node-1', 'misconfigured']]),
-    });
+    renderNode({ configWarning: 'misconfigured' }, false, { edit: makeEdit() });
     expect(screen.getByTestId('workflowGraphNodeIncomplete')).toHaveAttribute(
       'aria-label',
       'Misconfigured — some fields have invalid values'
     );
+  });
+});
+
+describe('WorkflowGraphNode render stability', () => {
+  const edit = { onInsert: jest.fn(), onEditStep: jest.fn(), onDeleteNode: jest.fn() };
+
+  const keyframeRuleCount = (): number =>
+    Array.from(document.styleSheets)
+      .flatMap((sheet) => Array.from(sheet.cssRules))
+      .filter((rule) => rule.constructor.name === 'CSSKeyframesRule').length;
+
+  it('does not re-render the card on pointer hover or focus movement', () => {
+    const renderStepIcon = jest.fn(() => <span />);
+    render(
+      <WorkflowGraphActionsContext.Provider value={{ edit, renderStepIcon }}>
+        <WorkflowGraphNode {...makeNodeProps()} />
+      </WorkflowGraphActionsContext.Provider>
+    );
+    const card = screen.getByRole('button', { name: /Test Step/ });
+    const rendersAtRest = renderStepIcon.mock.calls.length;
+
+    fireEvent.mouseEnter(card);
+    fireEvent.focus(card);
+    fireEvent.blur(card);
+    fireEvent.mouseLeave(card);
+
+    expect(renderStepIcon).toHaveBeenCalledTimes(rendersAtRest);
+  });
+
+  it('keeps trailing actions mounted and reveals them from card hover / focus-within CSS', () => {
+    renderNode({}, false, { edit });
+    const trailing = screen.getByTestId('workflowGraphNodeTrailingActions');
+    expect(getComputedStyle(trailing).opacity).toBe('0');
+    expect(getComputedStyle(trailing).pointerEvents).toBe('none');
+
+    const selectors = Array.from(document.styleSheets)
+      .flatMap((sheet) => Array.from(sheet.cssRules))
+      .map((rule) => (rule instanceof CSSStyleRule ? rule.selectorText : ''));
+    expect(
+      selectors.some((selector) => /:hover\s*>\s*\.workflowGraphNodeTrailingActions/.test(selector))
+    ).toBe(true);
+    expect(
+      selectors.some((selector) =>
+        /:focus-within\s*>\s*\.workflowGraphNodeTrailingActions/.test(selector)
+      )
+    ).toBe(true);
+  });
+
+  it('reveals trailing actions when selected or while the menu is open', () => {
+    const { unmount } = renderNode({}, true, { edit });
+    expect(getComputedStyle(screen.getByTestId('workflowGraphNodeTrailingActions')).opacity).toBe(
+      '1'
+    );
+    unmount();
+
+    renderNode({}, false, { edit });
+    fireEvent.click(screen.getByTestId('workflowGraphNodeMenuButton'));
+    expect(getComputedStyle(screen.getByTestId('workflowGraphNodeTrailingActions')).opacity).toBe(
+      '1'
+    );
+  });
+
+  it('shares one insert-flash keyframes definition across renders and nodes', () => {
+    const { rerender } = renderNode({ flash: true });
+    const afterFirst = keyframeRuleCount();
+    expect(afterFirst).toBeGreaterThan(0);
+
+    rerender(
+      <WorkflowGraphActionsContext.Provider value={{ edit }}>
+        <WorkflowGraphNode {...makeNodeProps({ flash: true, label: 'Other' })} />
+      </WorkflowGraphActionsContext.Provider>
+    );
+    renderNode({ flash: true, label: 'Third' });
+
+    expect(keyframeRuleCount()).toBe(afterFirst);
+  });
+
+  it('skips re-rendering when only another node-level value changes elsewhere', () => {
+    const renderStepIcon = jest.fn(() => <span />);
+    const actions = { renderStepIcon };
+    const portTargets = { fallbackTarget: { stepName: 'a', nodeId: 'node-1' } };
+    const { rerender } = render(
+      <WorkflowGraphActionsContext.Provider value={actions}>
+        <WorkflowGraphNode {...makeNodeProps({ portTargets })} />
+      </WorkflowGraphActionsContext.Provider>
+    );
+    const rendersAtRest = renderStepIcon.mock.calls.length;
+
+    // Same own values, fresh data object: the memo comparator must hold.
+    rerender(
+      <WorkflowGraphActionsContext.Provider value={actions}>
+        <WorkflowGraphNode {...makeNodeProps({ portTargets })} />
+      </WorkflowGraphActionsContext.Provider>
+    );
+    expect(renderStepIcon).toHaveBeenCalledTimes(rendersAtRest);
+
+    // A changed own value does render.
+    rerender(
+      <WorkflowGraphActionsContext.Provider value={actions}>
+        <WorkflowGraphNode {...makeNodeProps({ portTargets, configWarning: 'incomplete' })} />
+      </WorkflowGraphActionsContext.Provider>
+    );
+    expect(renderStepIcon.mock.calls.length).toBeGreaterThan(rendersAtRest);
   });
 });

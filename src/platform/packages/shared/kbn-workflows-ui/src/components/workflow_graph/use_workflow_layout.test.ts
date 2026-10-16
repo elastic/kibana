@@ -9,7 +9,7 @@
 
 import { renderHook } from '@testing-library/react';
 import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, transformWorkflowToGraph } from '@kbn/workflows';
 import { useWorkflowLayout } from './use_workflow_layout';
 
 const minimal = (overrides: Partial<WorkflowYaml> = {}): WorkflowYaml =>
@@ -644,6 +644,61 @@ describe('useWorkflowLayout', () => {
 
       rerender({ current: switchWorkflow([filledCase('renamed_case')]) });
       expect(layoutRuns()).toBe(1);
+    });
+
+    it('does not re-run the layout or transform when only the callback identities change', () => {
+      const workflow = switchWorkflow([filledCase('a')]);
+      const marks: string[] = [];
+      const { rerender } = renderHook(
+        ({ onPerfMark, onLayoutFailed }) =>
+          useWorkflowLayout({ workflow, onPerfMark, onLayoutFailed }),
+        {
+          initialProps: {
+            onPerfMark: (name: string) => marks.push(name),
+            onLayoutFailed: (_reason: string) => {},
+          },
+        }
+      );
+      expect(marks.filter((name) => name === 'layout_ms')).toHaveLength(1);
+      expect(marks.filter((name) => name === 'transform_ms')).toHaveLength(1);
+
+      rerender({
+        onPerfMark: (name: string) => marks.push(name),
+        onLayoutFailed: (_reason: string) => {},
+      });
+      expect(marks.filter((name) => name === 'layout_ms')).toHaveLength(1);
+      expect(marks.filter((name) => name === 'transform_ms')).toHaveLength(1);
+    });
+
+    it('lays out a precomputed `transformed` passed without a workflow', () => {
+      const transformed = transformWorkflowToGraph(switchWorkflow([filledCase('a')]));
+      const { result } = renderHook(() => useWorkflowLayout({ workflow: undefined, transformed }));
+      const fromWorkflow = renderLayout(switchWorkflow([filledCase('a')])).result.current;
+
+      expect(result.current.nodes.length).toBeGreaterThan(0);
+      expect(result.current.nodes.map(({ id, position }) => ({ id, position }))).toEqual(
+        fromWorkflow.nodes.map(({ id, position }) => ({ id, position }))
+      );
+    });
+
+    it('re-runs the layout when a new `transformed` changes the structure', () => {
+      const onPerfMark = jest.fn();
+      const { rerender } = renderHook(
+        ({ transformed }) => useWorkflowLayout({ workflow: undefined, transformed, onPerfMark }),
+        {
+          initialProps: {
+            transformed: transformWorkflowToGraph(switchWorkflow([filledCase('a')])),
+          },
+        }
+      );
+      const layoutRuns = () =>
+        onPerfMark.mock.calls.filter(([name]) => name === 'layout_ms').length;
+      expect(layoutRuns()).toBe(1);
+
+      rerender({
+        transformed: transformWorkflowToGraph(switchWorkflow([filledCase('a'), emptyCase('b')])),
+      });
+      expect(layoutRuns()).toBe(2);
     });
   });
 });

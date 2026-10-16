@@ -28,8 +28,8 @@ export const SETTINGS_TO_FLOW_GAP = 100;
 export const SETTINGS_CARD_HEIGHT = 56;
 
 /** Compact card size for Option B "Compact" layout. */
-export const SETTINGS_COMPACT_WIDTH = 168;
-export const SETTINGS_COMPACT_HEIGHT = 40;
+const SETTINGS_COMPACT_WIDTH = 168;
+const SETTINGS_COMPACT_HEIGHT = 40;
 
 /** How Option B settings cards are arranged. */
 export type SettingsNodesCardLayout = 'row' | 'vertical' | 'compact';

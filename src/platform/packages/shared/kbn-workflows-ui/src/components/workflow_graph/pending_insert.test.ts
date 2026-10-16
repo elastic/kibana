@@ -90,9 +90,9 @@ describe('computePendingInsertOrigin', () => {
     });
   });
 
-  it('places an error-path card as undefined (known deviation #4 — stub)', () => {
-    // computePendingErrorBranchPlacement is stubbed to undefined until the
-    // reservedLanes-based placement is wired up (ADR-0012 + known deviation #4).
+  it('places an error-path card as undefined (known deviation #4)', () => {
+    // No ghost card for error-path inserts until the reservedLanes-based
+    // placement is wired up (ADR-0012 + known deviation #4).
     const workflow = wf([{ name: 'a', type: 'console' }]);
     const points = computeInsertionPoints(workflow, transformWorkflowToGraph(workflow));
     const nodes = layoutNodes([{ id: 'a', x: 20, y: 40 }]);
@@ -169,8 +169,8 @@ describe('computePendingInsertConnector', () => {
     });
   });
 
-  it('returns undefined for error-path connector (known deviation #4 — stub)', () => {
-    // computePendingErrorBranchPlacement is stubbed; origin is undefined; connector is undefined.
+  it('returns undefined for error-path connector (known deviation #4)', () => {
+    // Error-path origin is undefined; connector is undefined.
     const workflow = wf([{ name: 'a', type: 'console' }]);
     const points = computeInsertionPoints(workflow, transformWorkflowToGraph(workflow));
     const nodes = layoutNodes([{ id: 'a', x: 20, y: 40 }]);

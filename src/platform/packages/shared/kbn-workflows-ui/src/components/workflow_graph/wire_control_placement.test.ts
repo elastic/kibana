@@ -22,12 +22,9 @@
 import type { Edge, Node } from '@xyflow/react';
 import { transformWorkflowToGraph } from '@kbn/workflows';
 import type { LayoutDirection, WorkflowYaml } from '@kbn/workflows';
-import { MERGE_BUS_TRUNK } from './compute_edge_path';
 import { computeInsertionPoints } from './compute_insertion_points';
-import {
-  absoluteNodeBounds,
-  computeWireInsertionControls,
-} from './compute_wire_insertion_controls';
+import { computeWireInsertionControls } from './compute_wire_insertion_controls';
+import { absoluteNodeBounds, MERGE_BUS_TRUNK } from './workflow_graph_geometry';
 import { computeWorkflowLayout } from './workflow_layout_pipeline';
 
 // ── constants (stay in sync with the production values) ──────────────────────
@@ -97,7 +94,7 @@ const toReactFlowNodes = (
 /**
  * Build React Flow edges with `data.branchType` / `data.branchIndex` / `data.isMerge`
  * so that `isForkEdge` / `isMergeEdge` work inside computeWireInsertionControls.
- * The layout edges (DagPositionedEdge) only carry waypoints, not domain data.
+ * The layout result carries only node positions, not domain data.
  * Mirrors the edge-mapping logic in use_workflow_layout.ts.
  */
 const toReactFlowEdges = (transformed: ReturnType<typeof transformWorkflowToGraph>): Edge[] => {

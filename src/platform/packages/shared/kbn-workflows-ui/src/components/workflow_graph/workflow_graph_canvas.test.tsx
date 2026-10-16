@@ -9,7 +9,10 @@
 
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { ensureWorkflowGraphEuiIcons } from './ensure_eui_icons';
 import { WorkflowGraphCanvasWithoutProvider } from './workflow_graph_canvas';
+
+jest.mock('./ensure_eui_icons', () => ({ ensureWorkflowGraphEuiIcons: jest.fn() }));
 
 // Mutable state driving the mocked React Flow store. `let mock*` names are the
 // only identifiers a jest factory may close over; they're read at render time
@@ -754,5 +757,19 @@ describe('WorkflowGraphCanvas render error boundary', () => {
     expect(screen.queryByText('Workflow graph could not be displayed')).not.toBeInTheDocument();
     expect(screen.getByTestId('healthyToolbar')).toBeInTheDocument();
     consoleError.mockRestore();
+  });
+});
+
+describe('WorkflowGraphCanvas EUI icon seeding', () => {
+  beforeEach(() => {
+    jest.mocked(ensureWorkflowGraphEuiIcons).mockClear();
+  });
+
+  it('seeds EUI icons exactly once on first render, not again on re-render', () => {
+    const { rerender } = render(<WorkflowGraphCanvasWithoutProvider {...baseProps} />);
+    expect(ensureWorkflowGraphEuiIcons).toHaveBeenCalledTimes(1);
+
+    rerender(<WorkflowGraphCanvasWithoutProvider {...baseProps} />);
+    expect(ensureWorkflowGraphEuiIcons).toHaveBeenCalledTimes(1);
   });
 });

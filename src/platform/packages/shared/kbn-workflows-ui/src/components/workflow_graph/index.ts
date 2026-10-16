@@ -38,10 +38,6 @@ export { aiIconTileCss } from './ai_icon_tile';
 
 export { stepSupportsErrorHandling } from './step_supports_error_handling';
 export { WORKFLOWS_CANVAS_CHROME_INSET, WORKFLOWS_SURFACE_RADIUS } from './surface_radius';
-// Side-effect: sync-warm EUI icons used by accordion arrows / node menus.
+// Opt-in: sync-warm EUI icons (accordion arrows / node menus). Not run on import;
+// the canvas calls it on first render and workflows_management panels call it themselves.
 export { ensureWorkflowGraphEuiIcons } from './ensure_eui_icons';
-export {
-  WorkflowGraphPocTogglesProvider,
-  useWorkflowGraphPocToggles,
-  WorkflowSettingsPanel,
-} from './workflow_graph_poc_toggles';

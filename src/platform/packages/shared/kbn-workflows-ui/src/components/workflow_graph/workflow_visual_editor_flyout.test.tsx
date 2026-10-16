@@ -68,4 +68,40 @@ describe('WorkflowVisualEditorFlyout title', () => {
     });
     expect(screen.getByText('Manual')).toBeInTheDocument();
   });
+
+  it('renders the trigger subtitle as "trigger / <type>"', () => {
+    renderFlyout({
+      kind: 'trigger',
+      triggerType: 'manual',
+      triggerLabel: 'Manual',
+      yamlSnippet: '',
+    });
+    expect(screen.getByText('trigger / manual')).toBeInTheDocument();
+  });
+});
+
+describe('WorkflowVisualEditorFlyout icon', () => {
+  it('passes the trigger flag and chip tint to renderStepIcon', () => {
+    const renderStepIcon = jest.fn(() => null);
+    render(
+      <I18nProvider>
+        <WorkflowVisualEditorFlyout
+          target={{
+            kind: 'trigger',
+            triggerType: 'manual',
+            triggerLabel: 'Manual',
+            yamlSnippet: '',
+          }}
+          editorYaml=""
+          canExecuteWorkflow={true}
+          isYamlValid={true}
+          onClose={jest.fn()}
+          renderStepIcon={renderStepIcon}
+        />
+      </I18nProvider>
+    );
+    expect(renderStepIcon).toHaveBeenCalledWith(
+      expect.objectContaining({ stepType: 'manual', isTrigger: true, size: 'm' })
+    );
+  });
 });

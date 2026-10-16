@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { computeTopologyFingerprint } from './compute_topology_fingerprint';
 import { transformWorkflowToGraph } from './transform_workflow_to_graph';
 import type { StructureSequence } from './types';
 import type { WorkflowYaml } from '../spec/schema';
@@ -191,33 +190,6 @@ describe('transformWorkflowToGraph', () => {
     // The group node carries the real stepType so the UI can pick the right icon.
     const groupNode = r.nodes.find((n) => n.id === 'poll');
     expect(groupNode?.data.stepType).toBe('while');
-  });
-
-  it('topology fingerprint changes when a while inner step is added', () => {
-    const base = minimal({
-      steps: [
-        {
-          name: 'poll',
-          type: 'while',
-          condition: '{{ count < 10 }}',
-          steps: [{ name: 'inner-check', type: 'http' }],
-        },
-      ] as unknown as WorkflowYaml['steps'],
-    });
-    const withExtra = minimal({
-      steps: [
-        {
-          name: 'poll',
-          type: 'while',
-          condition: '{{ count < 10 }}',
-          steps: [
-            { name: 'inner-check', type: 'http' },
-            { name: 'inner-log', type: 'console' },
-          ],
-        },
-      ] as unknown as WorkflowYaml['steps'],
-    });
-    expect(computeTopologyFingerprint(base)).not.toBe(computeTopologyFingerprint(withExtra));
   });
 
   it('foreach with iteration-on-failure uses steps body, not fallback, as inner nodes', () => {
@@ -687,129 +659,6 @@ describe('transformWorkflowToGraph', () => {
     // Virtual par-join node consolidates both branch exits; par-join is the single source into 'after'.
     const sourcesIntoAfter = r.edges.filter((e) => e.target === 'after').map((e) => e.source);
     expect(sourcesIntoAfter).toEqual(['par-join']);
-  });
-});
-
-describe('computeTopologyFingerprint', () => {
-  const wfA = minimal({
-    steps: [{ name: 'a', type: 'http' }] as unknown as WorkflowYaml['steps'],
-  });
-
-  it('changes when a step is renamed', () => {
-    const wfB = minimal({
-      steps: [{ name: 'aa', type: 'http' }] as unknown as WorkflowYaml['steps'],
-    });
-    expect(computeTopologyFingerprint(wfA)).not.toEqual(computeTopologyFingerprint(wfB));
-  });
-
-  it('does not change when only step params change', () => {
-    const wfB = minimal({
-      steps: [{ name: 'a', type: 'http', with: { url: 'x' } }] as unknown as WorkflowYaml['steps'],
-    });
-    expect(computeTopologyFingerprint(wfA)).toEqual(computeTopologyFingerprint(wfB));
-  });
-
-  it('changes when a step is added', () => {
-    const wfB = minimal({
-      steps: [
-        { name: 'a', type: 'http' },
-        { name: 'b', type: 'http' },
-      ] as unknown as WorkflowYaml['steps'],
-    });
-    expect(computeTopologyFingerprint(wfA)).not.toEqual(computeTopologyFingerprint(wfB));
-  });
-
-  it('changes when step order changes', () => {
-    const wfBase = minimal({
-      steps: [
-        { name: 'a', type: 'http' },
-        { name: 'b', type: 'http' },
-      ] as unknown as WorkflowYaml['steps'],
-    });
-    const wfReordered = minimal({
-      steps: [
-        { name: 'b', type: 'http' },
-        { name: 'a', type: 'http' },
-      ] as unknown as WorkflowYaml['steps'],
-    });
-    expect(computeTopologyFingerprint(wfBase)).not.toEqual(computeTopologyFingerprint(wfReordered));
-  });
-
-  it('changes when a step inside a switch case is renamed', () => {
-    const wfBase = minimal({
-      steps: [
-        {
-          name: 'sw',
-          type: 'switch',
-          expression: '{{ x }}',
-          cases: [{ match: 'a', steps: [{ name: 'inner', type: 'http' }] }],
-        },
-      ] as unknown as WorkflowYaml['steps'],
-    });
-    const wfMutated = minimal({
-      steps: [
-        {
-          name: 'sw',
-          type: 'switch',
-          expression: '{{ x }}',
-          cases: [{ match: 'a', steps: [{ name: 'inner_renamed', type: 'http' }] }],
-        },
-      ] as unknown as WorkflowYaml['steps'],
-    });
-    expect(computeTopologyFingerprint(wfBase)).not.toEqual(computeTopologyFingerprint(wfMutated));
-  });
-
-  it('changes when a switch default step is renamed', () => {
-    const wfBase = minimal({
-      steps: [
-        {
-          name: 'sw',
-          type: 'switch',
-          expression: '{{ x }}',
-          cases: [{ match: 'a', steps: [{ name: 'on_a', type: 'http' }] }],
-          default: [{ name: 'fallback', type: 'http' }],
-        },
-      ] as unknown as WorkflowYaml['steps'],
-    });
-    const wfMutated = minimal({
-      steps: [
-        {
-          name: 'sw',
-          type: 'switch',
-          expression: '{{ x }}',
-          cases: [{ match: 'a', steps: [{ name: 'on_a', type: 'http' }] }],
-          default: [{ name: 'fallback_v2', type: 'http' }],
-        },
-      ] as unknown as WorkflowYaml['steps'],
-    });
-    expect(computeTopologyFingerprint(wfBase)).not.toEqual(computeTopologyFingerprint(wfMutated));
-  });
-
-  it('changes when a step is added inside on-failure.fallback', () => {
-    const wfBase = minimal({
-      steps: [
-        {
-          name: 'act',
-          type: 'http',
-          'on-failure': { fallback: [{ name: 'handler', type: 'http' }] },
-        },
-      ] as unknown as WorkflowYaml['steps'],
-    });
-    const wfWithExtra = minimal({
-      steps: [
-        {
-          name: 'act',
-          type: 'http',
-          'on-failure': {
-            fallback: [
-              { name: 'handler', type: 'http' },
-              { name: 'extra', type: 'http' },
-            ],
-          },
-        },
-      ] as unknown as WorkflowYaml['steps'],
-    });
-    expect(computeTopologyFingerprint(wfBase)).not.toEqual(computeTopologyFingerprint(wfWithExtra));
   });
 });
 

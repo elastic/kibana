@@ -8,37 +8,10 @@
  */
 
 import { getSmoothStepPath, Position } from '@xyflow/react';
-import { STRAIGHT_X_THRESHOLD } from '@kbn/dag-layout';
 import type { EdgeBranchType } from '@kbn/workflows';
+import { FORK_BUS_LABEL_OFFSET, FORK_BUS_TRUNK, MERGE_BUS_TRUNK } from './workflow_graph_geometry';
 
 const CORNER_RADIUS = 4;
-// Vertical (TB) / horizontal (LR) stub at each endpoint so multiple edges
-// leaving (or entering) the same node visually share a trunk before they
-// split. The source stub is shorter than the target stub so branching edges
-// (`if` / `parallel`) bend tight under the source instead of leaving a
-// large gap to the divergence point.
-const TRUNK_LENGTH_FROM_SOURCE = 9;
-export const TRUNK_LENGTH_TO_TARGET = 14;
-
-// Vertical offset from the source for branch labels (TB layout). Anchoring
-// labels at a fixed Y instead of the source/target midpoint keeps sibling
-// `true`/`false` labels on the same row even when the two branches lead to
-// targets at very different ranks.
-const TB_LABEL_Y_OFFSET = 30;
-
-// Fork single-bus routing: distance from the source handle to the shared
-// horizontal bus (TB) or vertical bus (LR). Used for all branching edges
-// (switch case/default, if-then, if-else). Labels are anchored at a further
-// fixed offset below/right of the bus so all branch labels sit on an aligned
-// row (TB) / column (LR) regardless of sibling node heights.
-export const FORK_BUS_TRUNK = 20;
-export const FORK_BUS_LABEL_OFFSET = 20;
-
-// Merge single-bus routing: distance from the shared horizontal bus (TB) or
-// vertical bus (LR) to the target handle. Mirrors FORK_BUS_TRUNK so the
-// fan-in and fan-out bus trunks are the same length.
-export const MERGE_BUS_TRUNK = 20;
-
 const EPS = 0.5;
 
 export interface ComputeEdgePathInput {
@@ -48,7 +21,6 @@ export interface ComputeEdgePathInput {
   readonly targetY: number;
   readonly sourcePosition: Position;
   readonly targetPosition: Position;
-  readonly points?: ReadonlyArray<{ readonly x: number; readonly y: number }>;
   readonly branchType?: EdgeBranchType;
   readonly isMerge?: boolean;
   /**
@@ -308,8 +280,8 @@ export function buildMergeBusPath(
 
 /**
  * Pure SVG-path computation for a workflow graph edge. Contains all routing
- * decisions (fork-bus, merge-bus, dagre-waypoint trunk-stub, smooth-step
- * fallback). Returns `{ path, labelX, labelY }` with no React/DOM dependency.
+ * decisions (failure lane, fork-bus, merge-bus, smooth-step fallback).
+ * Returns `{ path, labelX, labelY }` with no React/DOM dependency.
  */
 export const computeEdgePath = ({
   sourceX,
@@ -318,7 +290,6 @@ export const computeEdgePath = ({
   targetY,
   sourcePosition,
   targetPosition,
-  points: dagrePoints,
   branchType,
   isMerge,
   isFailure,
@@ -377,136 +348,7 @@ export const computeEdgePath = ({
     return buildMergeBusPath({ sourceX, sourceY, targetX, targetY }, isLR, MERGE_BUS_TRUNK);
   }
 
-  if (dagrePoints && dagrePoints.length >= 2) {
-    let middle = dagrePoints.slice(1, -1).map((p) => ({ x: p.x, y: p.y }));
-
-    if (isLR) {
-      // LR layout: trunks are horizontal stubs off the left/right handle.
-      const trunkSourceX = sourceX + TRUNK_LENGTH_FROM_SOURCE;
-      const trunkTargetX = targetX - TRUNK_LENGTH_TO_TARGET;
-      // Find the FIRST vertical segment in the dagre middle and replace
-      // everything before it with a horizontal stub at trunkSourceX.
-      for (let i = 0; i < middle.length - 1; i++) {
-        const dx = Math.abs(middle[i].x - middle[i + 1].x);
-        const dy = Math.abs(middle[i].y - middle[i + 1].y);
-        if (dx < EPS && dy > EPS) {
-          middle = [
-            { x: trunkSourceX, y: middle[i].y },
-            { x: trunkSourceX, y: middle[i + 1].y },
-            ...middle.slice(i + 2),
-          ];
-          break;
-        }
-      }
-      // Find the LAST vertical segment and replace everything after it
-      // with a horizontal stub at trunkTargetX.
-      for (let i = middle.length - 2; i >= 0; i--) {
-        const dx = Math.abs(middle[i].x - middle[i + 1].x);
-        const dy = Math.abs(middle[i].y - middle[i + 1].y);
-        if (dx < EPS && dy > EPS) {
-          middle = [
-            ...middle.slice(0, i),
-            { x: trunkTargetX, y: middle[i].y },
-            { x: trunkTargetX, y: middle[i + 1].y },
-          ];
-          break;
-        }
-      }
-      const adjusted: Array<{ x: number; y: number }> = [
-        // Source overshoot 2 px back into the node (hidden by opaque body),
-        // target ends exactly on the border (no bleed through translucent
-        // headers). Same reasoning as the TB branch below.
-        { x: sourceX - 2, y: sourceY },
-        { x: trunkSourceX, y: sourceY },
-        ...middle,
-        { x: trunkTargetX, y: targetY },
-        { x: targetX, y: targetY },
-      ];
-      const built = buildRoundedOrthogonalPath(adjusted, CORNER_RADIUS);
-      return { path: built.path, labelX: (sourceX + targetX) / 2, labelY: targetY };
-    } else {
-      // TB layout: trunks are vertical stubs off the top/bottom handle.
-      const trunkSourceY = sourceY + TRUNK_LENGTH_FROM_SOURCE;
-      const trunkTargetY = targetY - TRUNK_LENGTH_TO_TARGET;
-      // "Effectively straight" detection: source, target, and every dagre
-      // middle waypoint share an X within a generous tolerance. Without
-      // this, dagre's per-rank positioning drift (especially between a
-      // trigger node and the first regular step, or before/after a wide
-      // foreach group) gets materialised by the trunk-stub elbow logic
-      // as a small horizontal jog just below the source. A real branch
-      // diverges far more than this (a whole node width plus separation),
-      // so the threshold can safely sit well above any drift we observe.
-      const allXs = [sourceX, targetX, ...middle.map((p) => p.x)];
-      const xSpread = Math.max(...allXs) - Math.min(...allXs);
-      if (xSpread < STRAIGHT_X_THRESHOLD) {
-        const builtStraight = buildRoundedOrthogonalPath(
-          [
-            // Source: extend 2 px back into the node so the line meets the
-            // bottom border with no visible gap. (Hidden by the opaque
-            // source body.) Target: end exactly on the border so no
-            // overshoot can bleed through a translucent container header.
-            { x: sourceX, y: sourceY - 2 },
-            { x: sourceX, y: trunkSourceY },
-            { x: sourceX, y: trunkTargetY },
-            { x: sourceX, y: targetY },
-          ],
-          CORNER_RADIUS
-        );
-        return {
-          path: builtStraight.path,
-          labelX: sourceX,
-          labelY: sourceY + TB_LABEL_Y_OFFSET,
-        };
-      } else {
-        // Find the FIRST horizontal segment in the dagre middle. Replace any
-        // points before it with a single endpoint at trunk-Y so the bend
-        // happens right after the source instead of at the mid-edge (where
-        // labels sit). Works for any shape — single-bend or multi-bend.
-        for (let i = 0; i < middle.length - 1; i++) {
-          const dx = Math.abs(middle[i].x - middle[i + 1].x);
-          const dy = Math.abs(middle[i].y - middle[i + 1].y);
-          if (dy < EPS && dx > EPS) {
-            middle = [
-              { x: middle[i].x, y: trunkSourceY },
-              { x: middle[i + 1].x, y: trunkSourceY },
-              ...middle.slice(i + 2),
-            ];
-            break;
-          }
-        }
-        // Find the LAST horizontal segment and pull it down to trunk-Y of
-        // the target. Replace anything after it with a single endpoint so
-        // multiple incoming edges share their final approach.
-        for (let i = middle.length - 2; i >= 0; i--) {
-          const dx = Math.abs(middle[i].x - middle[i + 1].x);
-          const dy = Math.abs(middle[i].y - middle[i + 1].y);
-          if (dy < EPS && dx > EPS) {
-            middle = [
-              ...middle.slice(0, i),
-              { x: middle[i].x, y: trunkTargetY },
-              { x: middle[i + 1].x, y: trunkTargetY },
-            ];
-            break;
-          }
-        }
-        const adjusted: Array<{ x: number; y: number }> = [
-          // Source: extend 2 px back into the node (hidden by the opaque
-          // body) so the line meets the bottom border with no visible gap.
-          // Target: end exactly on the border so no overshoot can bleed
-          // through a translucent container header.
-          { x: sourceX, y: sourceY - 2 },
-          { x: sourceX, y: trunkSourceY },
-          ...middle,
-          { x: targetX, y: trunkTargetY },
-          { x: targetX, y: targetY },
-        ];
-        const built = buildRoundedOrthogonalPath(adjusted, CORNER_RADIUS);
-        return { path: built.path, labelX: targetX, labelY: sourceY + TB_LABEL_Y_OFFSET };
-      }
-    }
-  }
-
-  // Smooth-step fallback: no dagre waypoints, not fork/merge bus.
+  // Smooth-step fallback: not a failure, fork or merge bus edge.
   const [path, labelX, labelY] = getSmoothStepPath({
     sourceX,
     sourceY,

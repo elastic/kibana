@@ -212,7 +212,10 @@
     ],
     "visualizationUiComponents": "src/platform/packages/shared/kbn-visualization-ui-components",
     "visualizationUtils": "src/platform/packages/shared/kbn-visualization-utils",
-    "workflowsUi": "src/platform/packages/shared/kbn-workflows-ui/src/components/run_workflow_panel",
+    "workflowsUi": [
+      "src/platform/packages/shared/kbn-workflows-ui/src/components/run_workflow_panel",
+      "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_graph"
+    ],
     "unifiedDocViewer": [
       "src/platform/plugins/shared/unified_doc_viewer",
       "src/platform/packages/shared/kbn-unified-doc-viewer"
@@ -263,8 +266,12 @@
   },
   "exclude": [
     "packages/kbn-mock-idp-plugin",
-    "src/platform/packages/shared/kbn-workflows-ui",
     "src/platform/plugins/shared/workflows_management",
+    "src/platform/packages/shared/kbn-workflows-ui/src/components/resume_execution_modal",
+    "src/platform/packages/shared/kbn-workflows-ui/src/components/step_icons",
+    "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector",
+    "src/platform/packages/shared/kbn-workflows-ui/src/lib",
+    "src/platform/packages/shared/kbn-workflows-ui/src/library",
     "src/platform/packages/shared/kbn-palettes",
     "src/platform/packages/private/kbn-index-editor",
     "src/platform/packages/shared/esql/kbn-esql-language",

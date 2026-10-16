@@ -13,13 +13,15 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import {
   buildWorkflowSettingsNodes,
   SETTINGS_CARD_HEIGHT,
-  SETTINGS_COMPACT_HEIGHT,
-  SETTINGS_COMPACT_WIDTH,
   SETTINGS_GROUP_HEADER_HEIGHT,
   SETTINGS_GROUP_NODE_ID,
   SETTINGS_GROUP_PAD,
   SETTINGS_TO_FLOW_GAP,
 } from './build_settings_nodes';
+
+// Compact card footprint (module-private in build_settings_nodes.ts).
+const SETTINGS_COMPACT_WIDTH = 168;
+const SETTINGS_COMPACT_HEIGHT = 40;
 import { PENDING_NODE_HEIGHT, PENDING_NODE_WIDTH } from './pending_insert';
 
 const workflowYaml = {

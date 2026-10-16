@@ -33,7 +33,6 @@ import {
   ReactFlowProvider,
   useWorkflowsCapabilities,
   WorkflowDetailBottomBar,
-  WorkflowGraphPocTogglesProvider,
 } from '@kbn/workflows-ui';
 import { useContextOverrideData } from './use_context_override_data';
 import { useRunWorkflowWithConfirmation } from './use_run_workflow_with_confirmation';
@@ -375,87 +374,85 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
   }, [showGraph]);
 
   return (
-    <WorkflowGraphPocTogglesProvider>
-      <ReactFlowProvider>
-        <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
-          <EuiFlexItem css={styles.yamlEditor}>
-            {/*
-             * Two peer layers, both absolutely positioned inside the
-             * position:relative yamlEditor flex item:
-             *  - Layer 1 (YAML): always mounted so validation keeps running.
-             *  - Layer 2 (Graph): mounted after first visit; toggled via visibility.
-             * The bottom bar floats (position:absolute) and overlays both layers.
-             */}
-            <div css={[styles.editorLayer, styles.yamlLayer]} {...(showGraph ? { inert: '' } : {})}>
+    <ReactFlowProvider>
+      <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
+        <EuiFlexItem css={styles.yamlEditor}>
+          {/*
+           * Two peer layers, both absolutely positioned inside the
+           * position:relative yamlEditor flex item:
+           *  - Layer 1 (YAML): always mounted so validation keeps running.
+           *  - Layer 2 (Graph): mounted after first visit; toggled via visibility.
+           * The bottom bar floats (position:absolute) and overlays both layers.
+           */}
+          <div css={[styles.editorLayer, styles.yamlLayer]} {...(showGraph ? { inert: '' } : {})}>
+            <React.Suspense fallback={null}>
+              <WorkflowYAMLEditor
+                highlightDiff={highlightDiff}
+                onStepRun={handleStepRun}
+                editorRef={editorRef}
+                isActive={!showGraph}
+                hideEditorTools
+                onValidationPanelHeightChange={setValidationPanelHeight}
+                openActionsRef={openActionsRef}
+                onToggleEditorMode={() => handleEditorViewChange(showGraph ? 'yaml' : 'graph')}
+                onAgentProposalHeld={onAgentProposalHeld}
+              />
+            </React.Suspense>
+          </div>
+          {renderGraph && (
+            <div
+              css={[
+                styles.editorLayer,
+                styles.graphLayer,
+                showGraph ? styles.layerVisible : styles.layerHidden,
+              ]}
+              {...(showGraph ? {} : { inert: '' })}
+            >
               <React.Suspense fallback={null}>
-                <WorkflowYAMLEditor
-                  highlightDiff={highlightDiff}
+                <WorkflowVisualEditor
                   onStepRun={handleStepRun}
+                  direction={graphDirection}
                   editorRef={editorRef}
-                  isActive={!showGraph}
-                  hideEditorTools
-                  onValidationPanelHeightChange={setValidationPanelHeight}
-                  openActionsRef={openActionsRef}
-                  onToggleEditorMode={() => handleEditorViewChange(showGraph ? 'yaml' : 'graph')}
-                  onAgentProposalHeld={onAgentProposalHeld}
                 />
               </React.Suspense>
             </div>
-            {renderGraph && (
-              <div
-                css={[
-                  styles.editorLayer,
-                  styles.graphLayer,
-                  showGraph ? styles.layerVisible : styles.layerHidden,
-                ]}
-                {...(showGraph ? {} : { inert: '' })}
-              >
-                <React.Suspense fallback={null}>
-                  <WorkflowVisualEditor
-                    onStepRun={handleStepRun}
-                    direction={graphDirection}
-                    editorRef={editorRef}
-                  />
-                </React.Suspense>
-              </div>
-            )}
-            {isReadOnly && (
-              <EuiBadge
-                color="warning"
-                css={[styles.readOnlyBadge, css(readOnlyBadgeShadow)]}
-                data-test-subj="workflowEditorReadOnlyBadge"
-              >
-                {i18n.translate('workflows.workflowDetailEditor.readOnlyBadge', {
-                  defaultMessage: 'Read only',
-                })}
-              </EuiBadge>
-            )}
-            {showBottomBar && (
-              <WorkflowDetailBottomBar
-                editorView={editorView}
-                onEditorViewChange={handleEditorViewChange}
-                yamlActionsSlot={yamlActionsSlot}
-                toolsSlot={toolsSlot}
-                testWorkflowButton={testWorkflowButton}
-                testWorkflowButtonCompact={testWorkflowButtonCompact}
-                disableAutoCollapse={!hideControlsMenu}
-                bottomOffset={showGraph ? 0 : validationPanelHeight}
-              />
-            )}
-          </EuiFlexItem>
-          {isExecutionGraphEnabled && (
-            <EuiFlexItem css={styles.visualEditor}>
-              <React.Suspense fallback={null}>
-                <ExecutionGraph />
-              </React.Suspense>
-            </EuiFlexItem>
           )}
-        </EuiFlexGroup>
+          {isReadOnly && (
+            <EuiBadge
+              color="warning"
+              css={[styles.readOnlyBadge, css(readOnlyBadgeShadow)]}
+              data-test-subj="workflowEditorReadOnlyBadge"
+            >
+              {i18n.translate('workflows.workflowDetailEditor.readOnlyBadge', {
+                defaultMessage: 'Read only',
+              })}
+            </EuiBadge>
+          )}
+          {showBottomBar && (
+            <WorkflowDetailBottomBar
+              editorView={editorView}
+              onEditorViewChange={handleEditorViewChange}
+              yamlActionsSlot={yamlActionsSlot}
+              toolsSlot={toolsSlot}
+              testWorkflowButton={testWorkflowButton}
+              testWorkflowButtonCompact={testWorkflowButtonCompact}
+              disableAutoCollapse={!hideControlsMenu}
+              bottomOffset={showGraph ? 0 : validationPanelHeight}
+            />
+          )}
+        </EuiFlexItem>
+        {isExecutionGraphEnabled && (
+          <EuiFlexItem css={styles.visualEditor}>
+            <React.Suspense fallback={null}>
+              <ExecutionGraph />
+            </React.Suspense>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
 
-        <WorkflowDetailConnectorFlyout editorRef={editorRef} />
-        {runConfirmationModal}
-      </ReactFlowProvider>
-    </WorkflowGraphPocTogglesProvider>
+      <WorkflowDetailConnectorFlyout editorRef={editorRef} />
+      {runConfirmationModal}
+    </ReactFlowProvider>
   );
 });
 WorkflowDetailEditor.displayName = 'WorkflowDetailEditor';

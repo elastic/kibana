@@ -143,7 +143,7 @@ describe('WorkflowGraphPendingNode', () => {
   });
 
   it('does not render a connector edge for error-path pending inserts (known deviation #4)', () => {
-    // computePendingErrorBranchPlacement is stubbed to undefined until the
+    // Error-path origin is undefined until the
     // reservedLanes-based placement is wired up (ADR-0012 + known deviation #4).
     // The origin is undefined → no connector edge is rendered.
     renderPending({ phase: 'choosing', context: { mode: 'error', stepId: 'a' } });
@@ -189,6 +189,69 @@ describe('WorkflowGraphPendingNode', () => {
     expect(screen.getByTestId('workflowGraphPendingNodeLabel')).toHaveTextContent('Manual');
     expect(card.style.transform).toBe(
       `translate(${1000 / 2 - PENDING_NODE_WIDTH / 2}px, ${800 / 2 - PENDING_NODE_HEIGHT / 2}px)`
+    );
+  });
+});
+
+describe('WorkflowGraphPendingNode icon chip', () => {
+  const renderWithStepIcon = (
+    pending: React.ComponentProps<typeof WorkflowGraphPendingNode>['pending'],
+    renderStepIcon: jest.Mock
+  ) =>
+    render(
+      <I18nProvider>
+        <WorkflowGraphActionsContext.Provider value={{ renderStepIcon }}>
+          <WorkflowGraphPendingNode
+            pending={pending}
+            nodes={nodes}
+            insertionPoints={insertionPoints}
+            direction="TB"
+          />
+        </WorkflowGraphActionsContext.Provider>
+      </I18nProvider>
+    );
+
+  it('uses the same 4px icon tile radius as a committed node', () => {
+    renderPending({
+      phase: 'configuring',
+      context: { mode: 'step', sourceNodeId: 'a' },
+      stepType: 'console',
+      label: 'console_step',
+    });
+    expect(getComputedStyle(screen.getByTestId('workflowGraphPendingNodeChip')).borderRadius).toBe(
+      '4px'
+    );
+  });
+
+  it('flags a trigger draft as a trigger when rendering the step icon', () => {
+    const renderStepIcon = jest.fn(() => null);
+    renderWithStepIcon(
+      {
+        phase: 'configuring',
+        context: { mode: 'trigger' },
+        stepType: 'manual',
+        label: 'Manual',
+      },
+      renderStepIcon
+    );
+    expect(renderStepIcon).toHaveBeenCalledWith(
+      expect.objectContaining({ stepType: 'manual', isTrigger: true })
+    );
+  });
+
+  it('does not flag a step draft as a trigger when rendering the step icon', () => {
+    const renderStepIcon = jest.fn(() => null);
+    renderWithStepIcon(
+      {
+        phase: 'configuring',
+        context: { mode: 'step', sourceNodeId: 'a' },
+        stepType: 'console',
+        label: 'console_step',
+      },
+      renderStepIcon
+    );
+    expect(renderStepIcon).toHaveBeenCalledWith(
+      expect.objectContaining({ stepType: 'console', isTrigger: false })
     );
   });
 });

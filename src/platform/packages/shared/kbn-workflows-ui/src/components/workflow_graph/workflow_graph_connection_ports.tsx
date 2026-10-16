@@ -21,16 +21,15 @@ import {
   IF_PORT_TRUE,
   isHorizontalDirection,
   PORT_DOT_SIZE,
+  PORT_EDGE_OUTSET,
   PORT_EXPANDED_SIZE,
   PORT_HIT_SIZE,
-  PORT_STRADDLE_OUTSET,
   STEP_PORT,
 } from './port_geometry';
 import type {
   WorkflowGraphAnchorRect,
   WorkflowGraphEditActions,
 } from './workflow_graph_actions_context';
-import { useWorkflowGraphActions } from './workflow_graph_actions_context';
 import { toAnchorRect } from './workflow_graph_insert_control';
 
 export {
@@ -39,18 +38,11 @@ export {
   IF_PORT_FALSE,
   IF_PORT_TRUE,
   PORT_DOT_SIZE,
+  PORT_EDGE_OUTSET,
   PORT_EXPANDED_SIZE,
   PORT_HIT_SIZE,
-  PORT_STRADDLE_OUTSET,
   STEP_PORT,
 };
-/** @deprecated Prefer ERROR_PORT_FRACTION. */
-export {
-  ERROR_PORT_INSET,
-  ERROR_PORT_OFFSET,
-  IF_PORT_ERROR,
-  STEP_ERROR_PORT,
-} from './port_geometry';
 /** @deprecated Prefer IF_PORT_FALSE / IF_PORT_TRUE. */
 export const BRANCH_FALSE_LEFT = IF_PORT_FALSE;
 export const BRANCH_TRUE_LEFT = IF_PORT_TRUE;
@@ -64,14 +56,30 @@ export const PORT_SPRING_MS = '180ms';
 /** Hover dwell before the port explainer tooltip appears. */
 const PORT_TOOLTIP_DELAY_MS = 1000;
 
+const PORT_ANCHOR_CLASS = 'workflowGraphPortAnchor';
+
+/** Mirrors EuiToolTip's own keyboard-focus check (falls back to `:focus` when unsupported). */
+const isFocusVisible = (element: Element): boolean => {
+  try {
+    return element.matches(':focus-visible');
+  } catch {
+    return element.matches(':focus');
+  }
+};
+
 const SPRING = PORT_SPRING_EASE;
 const SPRING_MS = PORT_SPRING_MS;
 
 export interface WorkflowGraphConnectionPortsProps {
   readonly ports: NodePortTargets;
   readonly edit: WorkflowGraphEditActions;
-  /** Node surface hover / focus-within — reveals the failure port. */
+  /**
+   * Forces the failure port revealed. Ordinary hover / focus-within reveal is
+   * CSS-only (the owning node card is this component's parent element).
+   */
   readonly nodeHovered: boolean;
+  /** An error-path insert originating at this node is in progress. */
+  readonly creatingError?: boolean;
   /** Layout direction — failure port stays on the bottom edge in both axes. */
   readonly direction: LayoutDirection;
 }
@@ -85,16 +93,13 @@ export function WorkflowGraphConnectionPorts({
   ports,
   edit,
   nodeHovered,
+  creatingError = false,
   direction,
 }: WorkflowGraphConnectionPortsProps) {
-  const { euiTheme } = useEuiTheme();
   const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const isHorizontal = isHorizontalDirection(direction);
-  const { pendingInsert } = useWorkflowGraphActions();
   const fallbackStepName = ports.fallbackTarget?.stepName;
-  const fallbackNodeId = ports.fallbackTarget?.nodeId;
-  const creatingError =
-    pendingInsert?.context.mode === 'error' && pendingInsert.context.stepId === fallbackNodeId;
 
   const insertError = useCallback(
     (stepName: string, anchor: WorkflowGraphAnchorRect) => {
@@ -128,6 +133,13 @@ export function WorkflowGraphConnectionPorts({
         width: '100%',
         pointerEvents: 'none',
         overflow: 'visible',
+        // Reveal the failure port while the owning node card (this wrapper's
+        // parent) is hovered or holds focus — CSS-only so the card never
+        // re-renders on pointer movement.
+        [`*:hover > & .${PORT_ANCHOR_CLASS}, *:focus-within > & .${PORT_ANCHOR_CLASS}`]: {
+          opacity: 1,
+          pointerEvents: 'auto',
+        },
       }}
       // Keep direction attribute for tests / a11y even though the port is bottom-only.
       data-layout={isHorizontal ? 'LR' : 'TB'}
@@ -205,7 +217,6 @@ function PortButton({
   readonly forceActive?: boolean;
 }) {
   const revealed = nodeHovered || forceActive;
-  const expanded = forceActive || false;
   const tipRef = useRef<EuiToolTipRef>(null);
   const delayRef = useRef<number | undefined>(undefined);
   // EUI 119 removed tooltip delay — keep content empty until dwell elapses so
@@ -219,6 +230,12 @@ function PortButton({
     }
   }, []);
 
+  const dismissTip = useCallback(() => {
+    clearDelay();
+    setTipContent(undefined);
+    tipRef.current?.hideToolTip();
+  }, [clearDelay]);
+
   useEffect(() => () => clearDelay(), [clearDelay]);
 
   useEffect(() => {
@@ -227,6 +244,22 @@ function PortButton({
 
   // Hit box straddles the bottom border so the pin sits on the edge.
   const edgeStyle = errorPortEdgeStyle(PORT_HIT_SIZE / 2);
+
+  const restPin = {
+    width: PORT_DOT_SIZE,
+    height: PORT_DOT_SIZE,
+    background: restFill,
+    border: 'none',
+    boxShadow: `0 0 0 2px ${ring}`,
+    color: ring,
+  };
+  // Expanded pin: while an error-path insert is in progress, or on hover / focus.
+  const activePin = {
+    ...restPin,
+    width: PORT_EXPANDED_SIZE,
+    height: PORT_EXPANDED_SIZE,
+    background: fill,
+  };
 
   return (
     <EuiToolTip
@@ -237,6 +270,7 @@ function PortButton({
       display="block"
       repositionOnScroll
       anchorProps={{
+        className: PORT_ANCHOR_CLASS,
         css: [
           {
             position: 'absolute' as const,
@@ -255,11 +289,7 @@ function PortButton({
             setTipContent(tip);
           }, PORT_TOOLTIP_DELAY_MS);
         },
-        onMouseLeave: () => {
-          clearDelay();
-          setTipContent(undefined);
-          tipRef.current?.hideToolTip();
-        },
+        onMouseLeave: dismissTip,
       }}
     >
       <button
@@ -268,11 +298,17 @@ function PortButton({
         data-test-subj={dataTestSubj}
         data-port-kind="error"
         data-port-active={forceActive ? 'true' : undefined}
+        onFocus={(e) => {
+          // Keyboard focus only: a pointer click focuses the button too and must
+          // not flash the explainer before the click handler dismisses it.
+          if (!isFocusVisible(e.currentTarget)) return;
+          clearDelay();
+          setTipContent(tip);
+        }}
+        onBlur={dismissTip}
         onClick={(e) => {
           e.stopPropagation();
-          clearDelay();
-          setTipContent(undefined);
-          tipRef.current?.hideToolTip();
+          dismissTip();
           onActivate(toAnchorRect(e.currentTarget));
         }}
         onMouseDown={(e) => e.stopPropagation()}
@@ -288,51 +324,9 @@ function PortButton({
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            '& .workflowGraphPortPin': {
-              width: PORT_DOT_SIZE,
-              height: PORT_DOT_SIZE,
-              background: restFill,
-              border: 'none',
-              boxShadow: `0 0 0 2px ${ring}`,
-              color: ring,
-            },
-            '& .workflowGraphPortPin > span': { opacity: 0 },
-            ...(revealed
-              ? {
-                  '& .workflowGraphPortPin': {
-                    width: forceActive ? PORT_EXPANDED_SIZE : PORT_DOT_SIZE,
-                    height: forceActive ? PORT_EXPANDED_SIZE : PORT_DOT_SIZE,
-                    background: forceActive ? fill : restFill,
-                    border: 'none',
-                    boxShadow: `0 0 0 2px ${ring}`,
-                    color: ring,
-                  },
-                  '& .workflowGraphPortPin > span': {
-                    opacity: forceActive ? 1 : 0,
-                  },
-                }
-              : {}),
-            ...(expanded
-              ? {
-                  '& .workflowGraphPortPin': {
-                    width: PORT_EXPANDED_SIZE,
-                    height: PORT_EXPANDED_SIZE,
-                    background: fill,
-                    border: 'none',
-                    boxShadow: `0 0 0 2px ${ring}`,
-                    color: ring,
-                  },
-                  '& .workflowGraphPortPin > span': { opacity: 1 },
-                }
-              : {}),
-            '&:hover .workflowGraphPortPin, &:focus-visible .workflowGraphPortPin': {
-              width: PORT_EXPANDED_SIZE,
-              height: PORT_EXPANDED_SIZE,
-              background: fill,
-              border: 'none',
-              boxShadow: `0 0 0 2px ${ring}`,
-              color: ring,
-            },
+            '& .workflowGraphPortPin': forceActive ? activePin : restPin,
+            '& .workflowGraphPortPin > span': { opacity: forceActive ? 1 : 0 },
+            '&:hover .workflowGraphPortPin, &:focus-visible .workflowGraphPortPin': activePin,
             '&:hover .workflowGraphPortPin > span, &:focus-visible .workflowGraphPortPin > span': {
               opacity: 1,
             },

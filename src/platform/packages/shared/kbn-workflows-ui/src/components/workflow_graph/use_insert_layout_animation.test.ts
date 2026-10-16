@@ -92,17 +92,7 @@ describe('useInsertLayoutAnimation', () => {
       ({ nodes, flashNodeId }: { nodes: Node[]; flashNodeId?: string }) =>
         useInsertLayoutAnimation({
           nodes,
-          edges: [
-            {
-              ...edge('into', 'a', 'new'),
-              data: { points: [{ x: 0, y: 50 }] },
-            },
-            edge('out', 'new', 'b'),
-            {
-              ...edge('unrelated', 'a', 'b'),
-              data: { points: [{ x: 10, y: 60 }] },
-            },
-          ],
+          edges: [edge('into', 'a', 'new'), edge('out', 'new', 'b'), edge('unrelated', 'a', 'b')],
           flashNodeId,
         }),
       { initialProps: { nodes: initial, flashNodeId: undefined as string | undefined } }
@@ -120,19 +110,12 @@ describe('useInsertLayoutAnimation', () => {
     expect(
       sliding.filter((e) => (e.data as { drawIn?: boolean } | undefined)?.drawIn)
     ).toHaveLength(2);
-    // Absolute waypoints are cleared for non-bypass edges while nodes tween.
-    for (const e of sliding) {
-      expect((e.data as { points?: unknown } | undefined)?.points).toBeUndefined();
-    }
+    expect(sliding.find((e) => e.id === 'unrelated')?.data).not.toHaveProperty('drawIn');
   });
 
-  it('keeps dagre waypoints and skips drawIn for bypass-lane target edges during sliding', () => {
+  it('skips drawIn for bypass-lane target edges during sliding', () => {
     // Bypass-lane target edges (hideEndMarker=true) point to invisible 1×1
-    // placeholder nodes. Their fork-bus path must remain at the final-layout
-    // positions throughout the tween so the branch label never disappears
-    // (Bug 2a: default edge collapse) and the full fan-out is visible from the
-    // start of animation (Bug 2b: "only the final bit" on new case edges).
-    const bypassPoints = [{ x: 50, y: 80 }];
+    // placeholder nodes, so the progressive-reveal animation must not run on them.
     const initial = [node('sw', 0, 0), node('after', 0, 200)];
     const { result, rerender } = renderHook(
       ({ nodes, flashNodeId }: { nodes: Node[]; flashNodeId?: string }) =>
@@ -142,18 +125,15 @@ describe('useInsertLayoutAnimation', () => {
             // New bypass edge for the inserted case branch — targets a bypass node.
             {
               ...edge('sw-case0', 'sw', 'case0-bypass'),
-              data: { points: bypassPoints, hideEndMarker: true },
+              data: { hideEndMarker: true },
             },
             // Existing default bypass edge — also targets a bypass node.
             {
               ...edge('sw-default', 'sw', 'default-bypass'),
-              data: { points: bypassPoints, hideEndMarker: true },
+              data: { hideEndMarker: true },
             },
-            // Normal edge — must still have points stripped.
-            {
-              ...edge('merge', 'case0-bypass', 'after'),
-              data: { points: [{ x: 0, y: 150 }] },
-            },
+            // Normal edge leaving the inserted bypass node — still draws in.
+            edge('merge', 'case0-bypass', 'after'),
           ],
           flashNodeId,
         }),
@@ -176,38 +156,26 @@ describe('useInsertLayoutAnimation', () => {
 
     const sliding = result.current.edges;
 
-    // Bypass edges keep their dagre waypoints.
     const bypassEdges = sliding.filter(
       (e) => (e.data as { hideEndMarker?: boolean } | undefined)?.hideEndMarker
     );
     expect(bypassEdges).toHaveLength(2);
     for (const e of bypassEdges) {
-      expect((e.data as { points?: unknown } | undefined)?.points).toEqual(bypassPoints);
       // drawIn must not be set — bypass nodes are invisible placeholders.
       expect((e.data as { drawIn?: boolean } | undefined)?.drawIn).toBeUndefined();
     }
 
-    // Non-bypass edges still have their waypoints stripped.
     const mergeEdge = sliding.find((e) => e.id === 'merge');
-    expect((mergeEdge?.data as { points?: unknown } | undefined)?.points).toBeUndefined();
+    expect((mergeEdge?.data as { drawIn?: boolean } | undefined)?.drawIn).toBe(true);
   });
 
-  it('restores edge waypoints after the slide completes', () => {
+  it('clears draw-in after the slide completes', () => {
     const initial = [node('a', 0, 0), node('b', 0, 100)];
-    const edgeWithPoints = {
-      ...edge('into', 'a', 'new'),
-      data: {
-        points: [
-          { x: 0, y: 50 },
-          { x: 0, y: 80 },
-        ],
-      },
-    };
     const { result, rerender } = renderHook(
       ({ nodes, flashNodeId }: { nodes: Node[]; flashNodeId?: string }) =>
         useInsertLayoutAnimation({
           nodes,
-          edges: [edgeWithPoints, edge('out', 'new', 'b')],
+          edges: [edge('into', 'a', 'new'), edge('out', 'new', 'b')],
           flashNodeId,
         }),
       { initialProps: { nodes: initial, flashNodeId: undefined as string | undefined } }
@@ -228,13 +196,7 @@ describe('useInsertLayoutAnimation', () => {
     });
     expect(result.current.isSliding).toBe(false);
     const restored = result.current.edges.find((e) => e.id === 'into');
-    expect(
-      (restored?.data as { points?: unknown; drawIn?: boolean } | undefined)?.drawIn
-    ).toBeUndefined();
-    expect((restored?.data as { points?: unknown } | undefined)?.points).toEqual([
-      { x: 0, y: 50 },
-      { x: 0, y: 80 },
-    ]);
+    expect((restored?.data as { drawIn?: boolean } | undefined)?.drawIn).toBeUndefined();
   });
 
   it('marks the inserted node with flash after the slide', () => {
@@ -276,5 +238,96 @@ describe('useInsertLayoutAnimation', () => {
     const midY = result.current.nodes.find((n) => n.id === 'b')?.position.y ?? 0;
     expect(midY).toBeGreaterThan(100);
     expect(midY).toBeLessThan(230);
+  });
+
+  describe('render stability', () => {
+    it('returns the same node and edge identities when re-rendered with identical inputs', () => {
+      const nodes = [node('a', 0, 0), node('b', 0, 100)];
+      const edges = [edge('e1', 'a', 'b')];
+      const { result, rerender } = renderHook(
+        ({ flashNodeId }: { flashNodeId?: string }) =>
+          useInsertLayoutAnimation({ nodes, edges, flashNodeId }),
+        { initialProps: { flashNodeId: 'b' as string | undefined } }
+      );
+      act(() => {
+        jest.advanceTimersByTime(INSERT_LAYOUT_MS + 10);
+      });
+      const first = result.current;
+      expect(first.nodes.find((n) => n.id === 'b')?.data).toMatchObject({ flash: true });
+
+      rerender({ flashNodeId: 'b' });
+      expect(result.current.nodes).toBe(first.nodes);
+      expect(result.current.edges).toBe(first.edges);
+    });
+
+    it('keeps edge identity across re-renders while sliding', () => {
+      const edges = [edge('into', 'a', 'new'), edge('out', 'new', 'b')];
+      const next = [node('a', 0, 0), node('new', 0, 100), node('b', 0, 230)];
+      const { result, rerender } = renderHook(
+        ({ nodes }: { nodes: Node[] }) => useInsertLayoutAnimation({ nodes, edges }),
+        { initialProps: { nodes: [node('a', 0, 0), node('b', 0, 100)] } }
+      );
+      rerender({ nodes: next });
+      expect(result.current.isSliding).toBe(true);
+      const slidingEdges = result.current.edges;
+
+      // A tick re-renders with new displayNodes but identical edges/sliding state.
+      act(() => {
+        jest.advanceTimersByTime(16);
+      });
+      expect(result.current.isSliding).toBe(true);
+      expect(result.current.edges).toBe(slidingEdges);
+    });
+
+    it('does not re-render or slide when only the node identities change', () => {
+      let renders = 0;
+      const { result, rerender } = renderHook(
+        ({ nodes }: { nodes: Node[] }) => {
+          renders += 1;
+          return useInsertLayoutAnimation({ nodes, edges: [] });
+        },
+        { initialProps: { nodes: [node('a', 0, 0), node('b', 0, 100)] } }
+      );
+
+      const before = renders;
+      // Selection / status poll: new node objects at the same positions.
+      const selected = [node('a', 0, 0), { ...node('b', 0, 100), selected: true }];
+      rerender({ nodes: selected });
+
+      expect(renders - before).toBe(1);
+      expect(result.current.isSliding).toBe(false);
+      expect(result.current.nodes).toBe(selected);
+    });
+
+    it('does not slide when switching to a graph that only shares a node id', () => {
+      const { result, rerender } = renderHook(
+        ({ nodes }: { nodes: Node[] }) => useInsertLayoutAnimation({ nodes, edges: [] }),
+        { initialProps: { nodes: [node('trigger', 0, 0), node('old_step', 0, 100)] } }
+      );
+
+      rerender({ nodes: [node('trigger', 40, 0), node('other_step', 40, 120)] });
+      act(() => {
+        jest.advanceTimersByTime(16);
+      });
+      expect(result.current.isSliding).toBe(false);
+      expect(result.current.nodes.find((n) => n.id === 'other_step')?.position).toEqual({
+        x: 40,
+        y: 120,
+      });
+    });
+
+    it('still slides when a step is inserted into an empty branch (bypass lane replaced)', () => {
+      const bypass: Node = { ...node('lane', 0, 100), type: 'bypassLane' };
+      const { result, rerender } = renderHook(
+        ({ nodes }: { nodes: Node[] }) => useInsertLayoutAnimation({ nodes, edges: [] }),
+        { initialProps: { nodes: [node('a', 0, 0), bypass, node('b', 0, 200)] } }
+      );
+
+      rerender({ nodes: [node('a', 0, 0), node('new', 0, 100), node('b', 0, 330)] });
+      act(() => {
+        jest.advanceTimersByTime(16);
+      });
+      expect(result.current.isSliding).toBe(true);
+    });
   });
 });

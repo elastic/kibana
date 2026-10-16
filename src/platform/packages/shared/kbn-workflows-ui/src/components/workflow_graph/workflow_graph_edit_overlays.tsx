@@ -87,8 +87,8 @@ export function WorkflowGraphEditOverlays({
   edit,
   forkNodeToJoinId,
 }: WorkflowGraphEditOverlaysProps) {
-  const { euiTheme } = useEuiTheme();
   const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const isHorizontal = direction === 'LR';
   // Unique per mount: SVG `url(#id)` resolves document-wide, so a fixed id would
   // let a second canvas on the page pick up this canvas's marker.
@@ -244,8 +244,8 @@ export function WorkflowGraphEditOverlays({
 
 /** Centered dashed card shown when the workflow has no triggers and no steps. */
 export function WorkflowGraphEmptyAddTrigger({ edit }: { edit: WorkflowGraphEditActions }) {
-  const { euiTheme } = useEuiTheme();
   const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const welcomeFont = useEuiFontSize('xs');
   const label = i18n.translate('workflowsUi.graph.addTrigger', { defaultMessage: 'Add trigger' });
   return (
@@ -282,7 +282,7 @@ export function WorkflowGraphEmptyAddTrigger({ edit }: { edit: WorkflowGraphEdit
           fontSize: 12,
           fontWeight: 500,
           cursor: 'pointer',
-          transition: 'background 120ms ease, color 120ms ease',
+          [euiCanAnimate]: { transition: 'background 120ms ease, color 120ms ease' },
           '&:hover': {
             background: euiTheme.colors.backgroundBasePlain,
             color: euiTheme.colors.textParagraph,

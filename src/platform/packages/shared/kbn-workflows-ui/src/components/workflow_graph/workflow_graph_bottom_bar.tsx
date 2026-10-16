@@ -9,6 +9,7 @@
 
 import {
   EuiButtonIcon,
+  euiCanAnimate,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -24,11 +25,12 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
 import { i18n } from '@kbn/i18n';
-import { WORKFLOWS_CANVAS_CHROME_INSET, WORKFLOWS_SURFACE_RADIUS } from './surface_radius';
+import { WORKFLOWS_CANVAS_CHROME_INSET } from './surface_radius';
 
 export type WorkflowDetailBottomBarView = 'yaml' | 'graph';
 
@@ -88,7 +90,7 @@ export interface WorkflowDetailBottomBarProps {
   showViewToggle?: boolean;
 }
 
-// to the compact "…" pill. Chosen to give the full bar enough room before it
+// Container width (px) below which the bar collapses to the compact "…" pill. Chosen to give the full bar enough room before it
 // starts overlapping the zoom stack (bottom-left) or minimap (bottom-right).
 const COMPACT_THRESHOLD_PX = 800;
 
@@ -125,7 +127,7 @@ function ViewToggle({
       css={{
         background: euiTheme.colors.backgroundBaseSubdued,
         border: euiTheme.border.thin,
-        borderRadius: WORKFLOWS_SURFACE_RADIUS,
+        borderRadius: euiTheme.border.radius.panel,
         padding: euiTheme.size.xs,
         display: 'flex',
         alignItems: 'center',
@@ -155,7 +157,7 @@ function ViewToggle({
                 background: active ? euiTheme.colors.backgroundBasePlain : 'transparent',
                 boxShadow: active ? activeToggleShadow : 'none',
                 color: euiTheme.colors.text,
-                transition: 'background 120ms ease, box-shadow 120ms ease',
+                [euiCanAnimate]: { transition: 'background 120ms ease, box-shadow 120ms ease' },
                 '&:hover': {
                   background: active
                     ? euiTheme.colors.backgroundBasePlain
@@ -212,8 +214,8 @@ function CompactToolsMenu({
     alignItems: 'center',
     '&:hover': { background: euiTheme.colors.backgroundBaseInteractiveHover },
     '&:focus-visible': {
-      outline: `2px solid ${euiTheme.colors.primary}`,
-      outlineOffset: 2,
+      outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.primary}`,
+      outlineOffset: euiTheme.border.width.thick,
     },
   };
   // Anchors share the button look but must not pick up link colour / underline.
@@ -300,8 +302,12 @@ function VerticalDivider({
     <div
       aria-hidden
       css={{
-        width: 1,
-        height: fullBar ? `calc(100% + ${euiTheme.size.s} * 2)` : fullHeight ? '100%' : 32,
+        width: euiTheme.border.width.thin,
+        height: fullBar
+          ? `calc(100% + ${euiTheme.size.s} * 2)`
+          : fullHeight
+          ? '100%'
+          : euiTheme.size.xl,
         marginBlock: fullBar ? `-${euiTheme.size.s}` : 0,
         marginInline: fullBar ? 0 : euiTheme.size.s,
         background: euiTheme.colors.borderBaseSubdued,
@@ -372,9 +378,9 @@ export function WorkflowDetailBottomBar({
 
   const handleExpandedMouseLeave = useCallback(() => {
     if (disableAutoCollapse) return;
-    if (!isInitialPhaseRef.current) {
-      collapseTimerRef.current = setTimeout(() => setIsExpanded(false), 600);
-    }
+    if (isInitialPhaseRef.current) return;
+    if (collapseTimerRef.current) clearTimeout(collapseTimerRef.current);
+    collapseTimerRef.current = setTimeout(() => setIsExpanded(false), 600);
   }, [disableAutoCollapse]);
 
   // Focus moving between the pill, the bar and its popovers must not collapse
@@ -393,6 +399,11 @@ export function WorkflowDetailBottomBar({
     setIsExpanded(true);
   }, []);
 
+  const bottomBarState = useMemo<WorkflowBottomBarContextValue>(
+    () => ({ isExpanded }),
+    [isExpanded]
+  );
+
   const barCss: CSSObject = {
     position: 'absolute',
     left: -2,
@@ -409,7 +420,7 @@ export function WorkflowDetailBottomBar({
   });
 
   return (
-    <WorkflowBottomBarContext.Provider value={{ isExpanded }}>
+    <WorkflowBottomBarContext.Provider value={bottomBarState}>
       <div ref={containerRef} css={barCss} data-test-subj="workflowDetailBottomBar">
         {/* Collapsed pill — hover to expand. Precedes the bar in DOM order so Tab from
             the focused pill continues into the bar it just revealed. */}
@@ -425,9 +436,9 @@ export function WorkflowDetailBottomBar({
               transform: 'translateX(-50%)',
               pointerEvents: isExpanded ? 'none' : 'auto',
               opacity: isExpanded ? 0 : 1,
-              transition: 'opacity 200ms ease',
-              width: 64,
-              height: 24,
+              [euiCanAnimate]: { transition: 'opacity 200ms ease' },
+              width: euiTheme.size.xxxxl,
+              height: euiTheme.size.l,
               background: euiTheme.colors.primary,
               borderRadius: 30,
               display: 'flex',
@@ -464,13 +475,15 @@ export function WorkflowDetailBottomBar({
               // Hidden once faded out so the collapsed controls leave the tab
               // order and the accessibility tree.
               visibility: isExpanded ? 'visible' : 'hidden',
-              transition: isExpanded
-                ? 'opacity 200ms ease'
-                : 'opacity 200ms ease, visibility 0s linear 200ms',
+              [euiCanAnimate]: {
+                transition: isExpanded
+                  ? 'opacity 200ms ease'
+                  : 'opacity 200ms ease, visibility 0s linear 200ms',
+              },
               background: euiTheme.colors.backgroundBasePlain,
-              borderRadius: WORKFLOWS_SURFACE_RADIUS,
+              borderRadius: euiTheme.border.radius.panel,
               paddingBlock: euiTheme.size.s,
-              paddingLeft: 12,
+              paddingLeft: euiTheme.size.m,
               paddingRight: euiTheme.size.s,
               display: 'inline-flex',
               maxWidth: 'min(980px, 100%)',

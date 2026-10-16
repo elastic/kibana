@@ -9,10 +9,7 @@
 
 import {
   EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   euiFocusRing,
-  EuiIcon,
   EuiPopover,
   EuiToolTip,
   transparentize,
@@ -21,13 +18,17 @@ import {
 } from '@elastic/eui';
 import type { Node, NodeProps } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { deslugifyStepName } from './deslugify_step_name';
+import { StepContextMenuPanel } from './node_action_menu';
+import { NodeIconChip, NodeStepIcon } from './node_icon_chip';
+import { nodeLabelTypography } from './node_styles';
 import { errorHandleStyle } from './port_geometry';
 import { resolveNodeChipStyle } from './resolve_node_chip_style';
+import { useCloseOnOutsidePointerDown } from './use_close_on_outside_pointer_down';
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
 import { getStepIconType } from '../step_icons';
 
@@ -41,6 +42,8 @@ interface ForeachGroupNodeData extends Record<string, unknown> {
   readonly hasBodySteps?: boolean;
 }
 
+const FOREACH_MENU_INSIDE_TEST_SUBJS = ['workflowGraphForeachGroupMenuPanel'] as const;
+
 function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNodeData>>) {
   const { label, stepType, stepExecution, hasBodySteps } = node.data;
   const euiThemeContext = useEuiTheme();
@@ -51,23 +54,12 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
 
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
 
-  // Close the popover on any pointerdown outside — React Flow's event handling
-  // can swallow the outside-click that EuiPopover normally relies on.
-  useEffect(() => {
-    if (!isMenuOpen) return undefined;
-    const onPointerDown = (event: PointerEvent) => {
-      const target = event.target;
-      if (!(target instanceof Element)) {
-        closeMenu();
-        return;
-      }
-      if (menuClusterRef.current?.contains(target)) return;
-      if (target.closest('[data-test-subj="workflowGraphForeachGroupMenuPanel"]')) return;
-      closeMenu();
-    };
-    document.addEventListener('pointerdown', onPointerDown, true);
-    return () => document.removeEventListener('pointerdown', onPointerDown, true);
-  }, [isMenuOpen, closeMenu]);
+  useCloseOnOutsidePointerDown(
+    isMenuOpen,
+    closeMenu,
+    menuClusterRef,
+    FOREACH_MENU_INSIDE_TEST_SUBJS
+  );
 
   const handleAddFirstStep = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -179,30 +171,26 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
             alignItems: 'center',
             gap: euiTheme.size.s,
             padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
-            fontFamily: euiTheme.font.family,
-            fontSize: 12,
-            fontWeight: 500,
+            ...nodeLabelTypography(euiTheme, '24px'),
             color: colors.textHeading,
-            lineHeight: '24px',
           }}
         >
-          <div
+          {/* No renderStepIcon / AI gradient: group chips have always rendered the plain
+              glyph, so committed foreach / while frames stay unchanged. */}
+          <NodeIconChip
+            background={chip.background}
+            border={chip.border}
+            borderRadius={borderRadius}
+            size={28}
             data-test-subj="workflowGraphForeachGroupChip"
-            css={{
-              flex: '0 0 auto',
-              width: 28,
-              height: 28,
-              background: chip.background,
-              border: `1px solid ${chip.border}`,
-              borderRadius,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'background 120ms ease, border-color 120ms ease',
-            }}
           >
-            <EuiIcon type={iconType} size="m" color={chip.iconColor} aria-hidden />
-          </div>
+            <NodeStepIcon
+              iconType={iconType}
+              iconColor={chip.iconColor}
+              stepType={stepType}
+              isTrigger={false}
+            />
+          </NodeIconChip>
           <span
             css={{
               flex: '1 1 auto',
@@ -234,36 +222,23 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
                 panelProps={{ 'data-test-subj': 'workflowGraphForeachGroupMenuPanel' }}
                 button={menuButton}
               >
-                <EuiContextMenuPanel
-                  items={[
-                    <EuiContextMenuItem
-                      key="edit"
-                      icon="pencil"
-                      onClick={() => {
-                        closeMenu();
-                        actions.edit?.onEditStep(node.id);
-                      }}
-                      data-test-subj="workflowGraphForeachGroupMenuEdit"
-                    >
-                      {i18n.translate('workflowsUi.foreachGroupNode.editStep', {
-                        defaultMessage: 'Edit step',
-                      })}
-                    </EuiContextMenuItem>,
-                    <EuiContextMenuItem
-                      key="delete"
-                      icon="trash"
-                      css={{ color: euiTheme.colors.textDanger }}
-                      onClick={() => {
-                        closeMenu();
-                        actions.edit?.onDeleteNode(node.id);
-                      }}
-                      data-test-subj="workflowGraphForeachGroupMenuDelete"
-                    >
-                      {i18n.translate('workflowsUi.foreachGroupNode.deleteStep', {
-                        defaultMessage: 'Delete step',
-                      })}
-                    </EuiContextMenuItem>,
-                  ]}
+                <StepContextMenuPanel
+                  editLabel={i18n.translate('workflowsUi.foreachGroupNode.editStep', {
+                    defaultMessage: 'Edit step',
+                  })}
+                  deleteLabel={i18n.translate('workflowsUi.foreachGroupNode.deleteStep', {
+                    defaultMessage: 'Delete step',
+                  })}
+                  onEdit={() => {
+                    closeMenu();
+                    actions.edit?.onEditStep(node.id);
+                  }}
+                  onDelete={() => {
+                    closeMenu();
+                    actions.edit?.onDeleteNode(node.id);
+                  }}
+                  editTestSubj="workflowGraphForeachGroupMenuEdit"
+                  deleteTestSubj="workflowGraphForeachGroupMenuDelete"
                 />
               </EuiPopover>
             </div>

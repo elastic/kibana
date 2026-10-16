@@ -323,6 +323,18 @@ describe('packCrossAxis', () => {
     expect(centre('s')).toBe((centre('t1') + centre('t2')) / 2);
   });
 
+  it('packs a very long sequence without overflowing the call stack', () => {
+    // Spreading this many items into `Math.max(...)` exceeds V8's argument limit (~125k).
+    const count = 200_000;
+    const ids = Array.from({ length: count }, (_, index) => `s${index}`);
+    const { get, centre } = pack(
+      ids.map((id) => step(id)),
+      ids.map((id) => node(id))
+    );
+    expect(get('s0').x).toBe(0);
+    expect(centre(`s${count - 1}`)).toBe(centre('s0'));
+  });
+
   it('only changes the cross axis, never mutates its input and leaves unmentioned nodes alone', () => {
     const input = [node('a'), node('stray')];
     input[0] = { ...input[0], y: 123 };

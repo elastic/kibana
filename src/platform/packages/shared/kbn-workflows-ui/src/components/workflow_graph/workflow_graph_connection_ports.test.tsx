@@ -10,10 +10,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { NodePortTargets } from './compute_insertion_points';
-import {
-  WorkflowGraphActionsContext,
-  type WorkflowGraphEditActions,
-} from './workflow_graph_actions_context';
+import type { WorkflowGraphEditActions } from './workflow_graph_actions_context';
 import {
   ERROR_PORT_ALONG,
   PORT_HIT_SIZE,
@@ -93,6 +90,39 @@ describe('WorkflowGraphConnectionPorts', () => {
     expect(getComputedStyle(errorAnchor).pointerEvents).toBe('auto');
   });
 
+  it('reveals the failure port from parent hover / focus-within via CSS, not React state', () => {
+    const ports: NodePortTargets = {
+      step: { sourceNodeId: 'a', stepName: 'step_a' },
+      fallbackTarget: { stepName: 'step_a', nodeId: 'a' },
+    };
+    render(
+      <div style={{ position: 'relative', width: 300, height: 64 }}>
+        <WorkflowGraphConnectionPorts
+          ports={ports}
+          edit={edit}
+          nodeHovered={false}
+          direction="TB"
+        />
+      </div>
+    );
+    const selectors = Array.from(document.styleSheets)
+      .flatMap((sheet) => Array.from(sheet.cssRules))
+      .map((rule) => (rule instanceof CSSStyleRule ? rule.selectorText : ''));
+    // The pseudo-class must apply to the parent (`:hover > .wrapper …`), not to the
+    // wrapper itself (`.wrapper:hover > .wrapper …`), which could never match.
+    expect(
+      selectors.some((selector) =>
+        /(^|,\s*)\*?:hover\s*>.*\.workflowGraphPortAnchor/.test(selector)
+      )
+    ).toBe(true);
+    expect(
+      selectors.some((selector) =>
+        /(^|,\s*)\*?:focus-within\s*>.*\.workflowGraphPortAnchor/.test(selector)
+      )
+    ).toBe(true);
+    expect(portAnchor('workflowGraphPort-error')).toHaveClass('workflowGraphPortAnchor');
+  });
+
   it('keeps the failure port on the bottom edge in LR', () => {
     const ports: NodePortTargets = {
       step: { sourceNodeId: 'a', stepName: 'step_a' },
@@ -165,6 +195,92 @@ describe('WorkflowGraphConnectionPorts', () => {
     jest.useRealTimers();
   });
 
+  it('shows the explainer tooltip on keyboard focus and hides it on blur', () => {
+    const ports: NodePortTargets = {
+      step: { sourceNodeId: 'a', stepName: 'step_a' },
+      fallbackTarget: { stepName: 'step_a', nodeId: 'a' },
+    };
+    render(
+      <div style={{ position: 'relative', width: 300, height: 64 }}>
+        <WorkflowGraphConnectionPorts ports={ports} edit={edit} nodeHovered direction="TB" />
+      </div>
+    );
+    const button = screen.getByTestId('workflowGraphPort-error');
+    expect(screen.queryByText('Add failure step')).not.toBeInTheDocument();
+    act(() => {
+      button.focus();
+    });
+    expect(screen.getByText('Add failure step')).toBeInTheDocument();
+    act(() => {
+      button.blur();
+    });
+    expect(screen.queryByText('Add failure step')).not.toBeInTheDocument();
+  });
+
+  describe('pin styles', () => {
+    const renderPin = (props: { nodeHovered: boolean; creatingError?: boolean }) => {
+      render(
+        <div style={{ position: 'relative', width: 300, height: 64 }}>
+          <WorkflowGraphConnectionPorts
+            ports={{
+              step: { sourceNodeId: 'a', stepName: 'step_a' },
+              fallbackTarget: { stepName: 'step_a', nodeId: 'a' },
+            }}
+            edit={edit}
+            direction="TB"
+            {...props}
+          />
+        </div>
+      );
+      const pin = screen
+        .getByTestId('workflowGraphPort-error')
+        .querySelector('.workflowGraphPortPin');
+      if (!(pin instanceof HTMLElement)) throw new Error('Missing port pin');
+      const iconWrapper = pin.firstElementChild;
+      if (!(iconWrapper instanceof HTMLElement)) throw new Error('Missing pin icon wrapper');
+      const { width, height, backgroundColor, boxShadow } = getComputedStyle(pin);
+      return {
+        width,
+        height,
+        backgroundColor,
+        boxShadow,
+        iconOpacity: getComputedStyle(iconWrapper).opacity,
+      };
+    };
+
+    it('is a small dot with a hidden icon at rest', () => {
+      expect(renderPin({ nodeHovered: false })).toEqual(
+        expect.objectContaining({ width: '8px', height: '8px', iconOpacity: '0' })
+      );
+    });
+
+    it('keeps the same small dot when only the node is hovered', () => {
+      expect(renderPin({ nodeHovered: true })).toEqual(
+        expect.objectContaining({ width: '8px', height: '8px', iconOpacity: '0' })
+      );
+    });
+
+    it('expands the pin and shows its icon while an error-path insert is in progress', () => {
+      const active = renderPin({ nodeHovered: false, creatingError: true });
+      expect(active).toEqual(
+        expect.objectContaining({ width: '20px', height: '20px', iconOpacity: '1' })
+      );
+    });
+
+    it('expands the pin on hover / focus-visible', () => {
+      renderPin({ nodeHovered: false });
+      const hoverRule = Array.from(document.styleSheets)
+        .flatMap((sheet) => Array.from(sheet.cssRules))
+        .find(
+          (rule): rule is CSSStyleRule =>
+            rule instanceof CSSStyleRule &&
+            /:hover \.workflowGraphPortPin(,|$)/.test(rule.selectorText)
+        );
+      expect(hoverRule?.style.width).toBe('20px');
+      expect(hoverRule?.style.height).toBe('20px');
+    });
+  });
+
   it('renders a persistent connected error port when a fallback route exists', () => {
     const ports: NodePortTargets = {
       step: { sourceNodeId: 'a', stepName: 'step_a' },
@@ -192,20 +308,15 @@ describe('WorkflowGraphConnectionPorts', () => {
       fallbackTarget: { stepName: 'step_a', nodeId: 'a' },
     };
     render(
-      <WorkflowGraphActionsContext.Provider
-        value={{
-          pendingInsert: { phase: 'choosing', context: { mode: 'error', stepId: 'a' } },
-        }}
-      >
-        <div style={{ position: 'relative', width: 300, height: 64 }}>
-          <WorkflowGraphConnectionPorts
-            ports={ports}
-            edit={edit}
-            nodeHovered={false}
-            direction="TB"
-          />
-        </div>
-      </WorkflowGraphActionsContext.Provider>
+      <div style={{ position: 'relative', width: 300, height: 64 }}>
+        <WorkflowGraphConnectionPorts
+          ports={ports}
+          edit={edit}
+          nodeHovered={false}
+          creatingError
+          direction="TB"
+        />
+      </div>
     );
     const errorPort = screen.getByTestId('workflowGraphPort-error');
     expect(getComputedStyle(portAnchor('workflowGraphPort-error')).opacity).toBe('1');

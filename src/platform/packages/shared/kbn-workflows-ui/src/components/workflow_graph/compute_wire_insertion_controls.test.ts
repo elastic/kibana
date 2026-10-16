@@ -8,35 +8,14 @@
  */
 
 import type { Edge, Node } from '@xyflow/react';
-import { FORK_BUS_LABEL_OFFSET, FORK_BUS_TRUNK } from './compute_edge_path';
 import type { InsertionPoints } from './compute_insertion_points';
-import {
-  approachTrunkSegment,
-  computeWireInsertionControls,
-  segmentMidpoint,
-  TERMINAL_STUB_PX,
-} from './compute_wire_insertion_controls';
+import { computeWireInsertionControls, segmentMidpoint } from './compute_wire_insertion_controls';
+import { FORK_BUS_LABEL_OFFSET, FORK_BUS_TRUNK, TERMINAL_STUB_PX } from './workflow_graph_geometry';
 
 describe('segmentMidpoint', () => {
   it('returns the geometric midpoint on both axes', () => {
     expect(segmentMidpoint({ x: 0, y: 0 }, { x: 100, y: 40 })).toEqual({ x: 50, y: 20 });
     expect(segmentMidpoint({ x: 10, y: 10 }, { x: 10, y: 90 })).toEqual({ x: 10, y: 50 });
-  });
-});
-
-describe('approachTrunkSegment', () => {
-  it('returns the post-curve stub into the target (TB)', () => {
-    expect(approachTrunkSegment({ x: 100, y: 200 }, 'TB', 64)).toEqual({
-      start: { x: 100, y: 136 },
-      end: { x: 100, y: 200 },
-    });
-  });
-
-  it('returns the post-curve stub into the target (LR)', () => {
-    expect(approachTrunkSegment({ x: 300, y: 24 }, 'LR', 64)).toEqual({
-      start: { x: 236, y: 24 },
-      end: { x: 300, y: 24 },
-    });
   });
 });
 

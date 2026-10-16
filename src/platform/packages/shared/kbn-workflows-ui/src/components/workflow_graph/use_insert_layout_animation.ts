@@ -8,7 +8,7 @@
  */
 
 import type { Edge, Node } from '@xyflow/react';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 /** How long existing nodes slide to make room for an inserted step. */
 export const INSERT_LAYOUT_MS = 300;
@@ -34,6 +34,13 @@ interface Position {
   readonly y: number;
 }
 
+/** Invisible structural nodes (empty-branch lanes, joins) that an insert may replace. */
+const BYPASS_LANE_TYPE = 'bypassLane';
+
+interface TrackedNode extends Position {
+  readonly isBypassLane: boolean;
+}
+
 function sameNodeIds(a: readonly Node[], b: readonly Node[]): boolean {
   if (a.length !== b.length) return false;
   const ids = new Set(a.map((n) => n.id));
@@ -50,8 +57,9 @@ function sameNodeIds(a: readonly Node[], b: readonly Node[]): boolean {
  * Slide also starts when a new node appears and peers move before `flashNodeId`
  * arrives (Redux yaml update can paint one frame ahead of local flash state).
  *
- * While sliding, dagre waypoints are dropped so strokes follow live endpoints
- * (absolute final-layout points would render off-canvas mid-tween).
+ * A slide only runs for a genuine insert: a new node appeared, peers moved and no real
+ * step vanished. Swapping to an unrelated graph that merely shares a node id (e.g. the
+ * trigger) therefore snaps instead of sliding.
  */
 export function useInsertLayoutAnimation({
   nodes,
@@ -66,12 +74,15 @@ export function useInsertLayoutAnimation({
   readonly edges: Edge[];
   readonly isSliding: boolean;
 } {
-  const prevPositionsRef = useRef<Map<string, Position>>(new Map());
+  const prevPositionsRef = useRef<Map<string, TrackedNode>>(new Map());
   const [displayNodes, setDisplayNodes] = useState(nodes);
-  const [isSliding, setIsSliding] = useState(false);
+  // Ids of the nodes inserted by the running slide; `null` when not sliding.
+  const [insertedIds, setInsertedIds] = useState<ReadonlySet<string> | null>(null);
+  const isSliding = insertedIds !== null;
+  // Mirrors `isSliding` for effects so ending a slide that is not running sets no state.
+  const slidingRef = useRef(false);
   const [flashReady, setFlashReady] = useState(false);
   const rafRef = useRef<number | null>(null);
-  const insertedIdsRef = useRef<Set<string>>(new Set());
   /** Bumps on every effect run so a stale RAF cannot call finish after cleanup. */
   const slideGenRef = useRef(0);
 
@@ -88,19 +99,28 @@ export function useInsertLayoutAnimation({
 
   useLayoutEffect(() => {
     const prev = prevPositionsRef.current;
-    const nextPositions = new Map<string, Position>();
+    const nextPositions = new Map<string, TrackedNode>();
     for (const n of nodes) {
-      nextPositions.set(n.id, { x: n.position.x, y: n.position.y });
+      nextPositions.set(n.id, {
+        x: n.position.x,
+        y: n.position.y,
+        isBypassLane: n.type === BYPASS_LANE_TYPE,
+      });
     }
 
     const slideGen = ++slideGenRef.current;
 
+    const endSlide = () => {
+      if (!slidingRef.current) return;
+      slidingRef.current = false;
+      setInsertedIds(null);
+    };
+
+    // Not sliding → `nodes` render directly, so there is no display state to sync.
     const finish = () => {
       if (slideGen !== slideGenRef.current) return;
       prevPositionsRef.current = nextPositions;
-      setDisplayNodes(nodes);
-      setIsSliding(false);
-      insertedIdsRef.current = new Set();
+      endSlide();
     };
 
     if (rafRef.current != null) {
@@ -118,30 +138,36 @@ export function useInsertLayoutAnimation({
       if (!prev.has(n.id)) newIds.add(n.id);
     }
 
-    let anyMoved = false;
-    for (const n of nodes) {
+    const anyMoved = nodes.some((n) => {
       const old = prev.get(n.id);
-      if (!old) continue;
-      if (
-        Math.abs(old.x - n.position.x) > POSITION_EPSILON ||
-        Math.abs(old.y - n.position.y) > POSITION_EPSILON
-      ) {
-        anyMoved = true;
+      return (
+        old !== undefined &&
+        (Math.abs(old.x - n.position.x) > POSITION_EPSILON ||
+          Math.abs(old.y - n.position.y) > POSITION_EPSILON)
+      );
+    });
+
+    // A removed real step means a different graph (workflow switch), not an insert.
+    // Removed bypass lanes are fine: inserting into an empty branch replaces its lane.
+    let removedRealNode = false;
+    for (const [id, old] of prev) {
+      if (!nextPositions.has(id) && !old.isBypassLane) {
+        removedRealNode = true;
         break;
       }
     }
 
     // Mid-flow insert: a new node appeared and existing peers shifted.
     // Flash id is optional here so a Redux-first paint still slides.
-    const shouldSlide = newIds.size > 0 && anyMoved;
+    const shouldSlide = newIds.size > 0 && anyMoved && !removedRealNode;
 
     if (!shouldSlide) {
       finish();
       return;
     }
 
-    insertedIdsRef.current = newIds;
-    setIsSliding(true);
+    slidingRef.current = true;
+    setInsertedIds(newIds);
     const startNodes = nodes.map((n) => {
       const old = prev.get(n.id);
       if (!old) return n;
@@ -181,62 +207,58 @@ export function useInsertLayoutAnimation({
       if (rafRef.current != null) {
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
-        // Snap to this effect's target so a re-run never leaves nodes mid-tween
-        // while edges still carry final-layout dagre waypoints (invisible paths).
+        // Snap to this effect's target so a re-run never leaves nodes mid-tween.
         prevPositionsRef.current = nextPositions;
-        setDisplayNodes(nodes);
-        insertedIdsRef.current = new Set();
       }
-      // Always clear sliding — a completed RAF nulls rafRef before finish()'s
+      // Always end sliding — a completed RAF nulls rafRef before finish()'s
       // setState flushes, and a parent update can tear down this effect in that
-      // window, leaving edges on cleared waypoints / draw-in forever.
-      setIsSliding(false);
+      // window, leaving edges on draw-in forever.
+      endSlide();
     };
   }, [nodes]);
 
-  // If state is briefly behind the latest layout (new node id not in
-  // displayNodes yet), prefer `nodes` so React Flow can resolve edge
-  // endpoints — missing nodes make edges drop out of the graph entirely.
-  const nodesForRender = sameNodeIds(displayNodes, nodes) ? displayNodes : nodes;
+  // While sliding, render the tweened positions. If state is briefly behind the
+  // latest layout (new node id not in displayNodes yet), prefer `nodes` so React Flow
+  // can resolve edge endpoints — missing nodes make edges drop out of the graph.
+  // Otherwise render `nodes` directly so identity changes need no extra state sync.
+  const nodesForRender = useMemo(
+    () => (isSliding && sameNodeIds(displayNodes, nodes) ? displayNodes : nodes),
+    [isSliding, displayNodes, nodes]
+  );
 
-  const animatedNodes = nodesForRender.map((n) => {
-    if (!flashNodeId || n.id !== flashNodeId || !flashReady) return n;
-    return {
-      ...n,
-      data: { ...n.data, flash: true },
-    };
-  });
+  const animatedNodes = useMemo(() => {
+    if (!flashNodeId || !flashReady) return nodesForRender;
+    return nodesForRender.map((n) => {
+      if (n.id !== flashNodeId) return n;
+      return {
+        ...n,
+        data: { ...n.data, flash: true },
+      };
+    });
+  }, [nodesForRender, flashNodeId, flashReady]);
 
-  const animatedEdges = isSliding
-    ? edges.map((edge) => {
-        const edgeData = (edge.data ?? {}) as Record<string, unknown> & {
-          points?: unknown;
-          hideEndMarker?: boolean;
-        };
-        // Bypass-lane target edges (hideEndMarker=true) target invisible 1×1
-        // placeholder nodes. Keep their dagre waypoints so the fork-bus path
-        // and labels hold their *final* layout positions throughout the slide —
-        // the 1×1 node is invisible, so the endpoint mismatch during tween is
-        // never seen. Skipping drawIn avoids the progressive-reveal animation
-        // on structural placeholders.
-        if (edgeData.hideEndMarker) {
-          return edge;
-        }
-        const targets = insertedIdsRef.current;
-        const drawIn = targets.has(edge.source) || targets.has(edge.target);
-        const { points: _drop, ...restData } = edgeData;
-        return {
-          ...edge,
-          data: {
-            ...restData,
-            // Dagre waypoints are absolute coords for the *final* layout. While
-            // nodes interpolate, those points no longer match endpoints and the
-            // stroke can vanish off-canvas — fall back to smooth-step instead.
-            ...(drawIn ? { drawIn: true } : {}),
-          },
-        };
-      })
-    : edges;
+  const animatedEdges = useMemo(() => {
+    if (!insertedIds) return edges;
+    return edges.map((edge) => {
+      const edgeData = (edge.data ?? {}) as Record<string, unknown> & {
+        hideEndMarker?: boolean;
+      };
+      // Bypass-lane target edges (hideEndMarker=true) target invisible 1×1
+      // placeholder nodes. Skipping drawIn avoids the progressive-reveal
+      // animation on structural placeholders.
+      if (edgeData.hideEndMarker) {
+        return edge;
+      }
+      const drawIn = insertedIds.has(edge.source) || insertedIds.has(edge.target);
+      return {
+        ...edge,
+        data: {
+          ...edgeData,
+          ...(drawIn ? { drawIn: true } : {}),
+        },
+      };
+    });
+  }, [edges, insertedIds]);
 
   return { nodes: animatedNodes, edges: animatedEdges, isSliding };
 }

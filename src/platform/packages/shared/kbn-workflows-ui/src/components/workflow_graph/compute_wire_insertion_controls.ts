@@ -9,51 +9,31 @@
 
 import type { Edge, Node } from '@xyflow/react';
 import type { EdgeBranchType, LayoutDirection } from '@kbn/workflows';
-import { FORK_BUS_LABEL_OFFSET, FORK_BUS_TRUNK, MERGE_BUS_TRUNK } from './compute_edge_path';
 import type { InsertionPoints, NodePortTargets } from './compute_insertion_points';
 import { edgeLabelCrossSpan } from './edge_label_metrics';
 import { stepSupportsErrorHandling } from './step_supports_error_handling';
 import type { WorkflowGraphInsertionContext } from './workflow_graph_actions_context';
-/**
- * Stub length from the last node's exit edge to the terminal + tip.
- * Longer than inter-rank spacing so the terminal insert control is visually
- * distinct from mid-wire controls and the + tip doesn't crowd the node.
- */
-export const TERMINAL_STUB_PX = 75;
+import {
+  absoluteNodeBounds,
+  FORK_BUS_LABEL_OFFSET,
+  FORK_BUS_TRUNK,
+  FORK_CHIP_HALF_HEIGHT,
+  MERGE_BUS_TRUNK,
+  nodeEntryPoint,
+  nodeExitPoint,
+  TERMINAL_STUB_PX,
+  WIRE_CONTROL_CLEARANCE,
+  WIRE_CONTROL_SIZE,
+} from './workflow_graph_geometry';
+import type { GraphPoint } from './workflow_graph_geometry';
+import { nodeStepType } from './workflow_node_data';
 
-/** Diameter of the circular + button rendered by WorkflowGraphWireSplitControl. */
-export const WIRE_CONTROL_SIZE = 22;
-/** Minimum clearance (px) between the button edge and an adjacent element (chip, card, bus). */
-export const WIRE_CONTROL_CLEARANCE = 14;
-/** Half-height of the branch chip (including its 1px border). */
-const FORK_CHIP_HALF_HEIGHT = 11;
-/**
- * Distance from the fork node exit to the fork-head + button centre (TB direction).
- * Derived from: FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET + FORK_CHIP_HALF_HEIGHT
- *   + WIRE_CONTROL_CLEARANCE + WIRE_CONTROL_SIZE / 2
- *   = 20 + 20 + 11 + 14 + 11 = 76.
- */
-export const FORK_HEAD_PLUS_OFFSET =
-  FORK_BUS_TRUNK +
-  FORK_BUS_LABEL_OFFSET +
-  FORK_CHIP_HALF_HEIGHT +
-  WIRE_CONTROL_CLEARANCE +
-  WIRE_CONTROL_SIZE / 2;
-/**
- * Minimum main-axis gap the layout must reserve between a fork node's bottom
- * and its branch heads so the fork-head + button fits without overlapping.
- * = FORK_HEAD_PLUS_OFFSET + WIRE_CONTROL_SIZE / 2 + WIRE_CONTROL_CLEARANCE
- * = 76 + 11 + 14 = 101.
- */
-export const FORK_HEAD_MIN_GAP =
-  FORK_HEAD_PLUS_OFFSET + WIRE_CONTROL_SIZE / 2 + WIRE_CONTROL_CLEARANCE;
+// The wire control size is part of the overlay's public surface (the + button renders at it).
+export { WIRE_CONTROL_SIZE } from './workflow_graph_geometry';
 
 export type WireControlKind = 'wire' | 'terminal';
 
-export interface WireSegmentPoint {
-  readonly x: number;
-  readonly y: number;
-}
+export type WireSegmentPoint = GraphPoint;
 
 /**
  * One Add-step insertion control. `kind` drives visibility, not geometry:
@@ -85,27 +65,6 @@ export interface WireInsertionControl {
   readonly direction: LayoutDirection;
 }
 
-interface AbsBounds {
-  readonly x: number;
-  readonly y: number;
-  readonly width: number;
-  readonly height: number;
-}
-
-/** Absolute (flow-space) bounds; walks parentId chain for nested nodes. */
-export function absoluteNodeBounds(node: Node, byId: ReadonlyMap<string, Node>): AbsBounds {
-  let { x, y } = node.position;
-  let parent = node.parentId ? byId.get(node.parentId) : undefined;
-  while (parent) {
-    x += parent.position.x;
-    y += parent.position.y;
-    parent = parent.parentId ? byId.get(parent.parentId) : undefined;
-  }
-  const width = typeof node.width === 'number' ? node.width : 0;
-  const height = typeof node.height === 'number' ? node.height : 0;
-  return { x, y, width, height };
-}
-
 /** Midpoint of a segment — the rule every control position must use. */
 export function segmentMidpoint(start: WireSegmentPoint, end: WireSegmentPoint): WireSegmentPoint {
   return {
@@ -113,32 +72,6 @@ export function segmentMidpoint(start: WireSegmentPoint, end: WireSegmentPoint):
     y: (start.y + end.y) / 2,
   };
 }
-
-/**
- * Straight lead-in into the target handle — the post-curve stub used by fork
- * drops and the shared merge trunk. Controls sit on this segment so the +
- * lands on the drawn line rather than in empty space between nodes.
- */
-export function approachTrunkSegment(
-  entry: WireSegmentPoint,
-  direction: LayoutDirection,
-  length: number
-): { readonly start: WireSegmentPoint; readonly end: WireSegmentPoint } {
-  if (direction === 'LR') {
-    return { start: { x: entry.x - length, y: entry.y }, end: entry };
-  }
-  return { start: { x: entry.x, y: entry.y - length }, end: entry };
-}
-
-const exitPoint = (bounds: AbsBounds, direction: LayoutDirection): WireSegmentPoint =>
-  direction === 'LR'
-    ? { x: bounds.x + bounds.width, y: bounds.y + bounds.height / 2 }
-    : { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height };
-
-const entryPoint = (bounds: AbsBounds, direction: LayoutDirection): WireSegmentPoint =>
-  direction === 'LR'
-    ? { x: bounds.x, y: bounds.y + bounds.height / 2 }
-    : { x: bounds.x + bounds.width / 2, y: bounds.y };
 
 const terminalTip = (exit: WireSegmentPoint, direction: LayoutDirection): WireSegmentPoint =>
   direction === 'LR'
@@ -192,13 +125,6 @@ const isForkEdge = (edge: Edge): boolean => {
   );
 };
 
-const stepTypeOf = (node: Node | undefined): string | undefined => {
-  if (!node || typeof node.data !== 'object' || node.data === null) return undefined;
-  if (!('stepType' in node.data)) return undefined;
-  const value = (node.data as { stepType?: unknown }).stepType;
-  return typeof value === 'string' ? value : undefined;
-};
-
 const fallbackStepNameFor = (
   ports: NodePortTargets,
   sourceNode: Node | undefined
@@ -206,7 +132,7 @@ const fallbackStepNameFor = (
   // Eligible when the step supports error-handling and doesn't already have one.
   const eligible =
     sourceNode?.type !== 'trigger' &&
-    stepSupportsErrorHandling(stepTypeOf(sourceNode)) &&
+    stepSupportsErrorHandling(nodeStepType(sourceNode)) &&
     !ports.fallbackConnected;
   return eligible ? ports.fallbackTarget?.stepName : undefined;
 };
@@ -268,8 +194,8 @@ export function computeWireInsertionControls(args: {
     { busPos: number; entry: WireSegmentPoint; insertContext: WorkflowGraphInsertionContext }
   >();
 
-  for (const edge of edges) {
-    if (isFailureEdge(edge)) continue;
+  const emitEdgeControls = (edge: Edge): void => {
+    if (isFailureEdge(edge)) return;
 
     // Join-node sources: the edge join → next-step uses the fork node's "after" context.
     const joinedForkId = joinToForkId.get(edge.source);
@@ -286,8 +212,8 @@ export function computeWireInsertionControls(args: {
         if (srcNode && tgtNode) {
           const srcBounds = absoluteNodeBounds(srcNode, byId);
           const tgtBounds = absoluteNodeBounds(tgtNode, byId);
-          const s = exitPoint(srcBounds, direction);
-          const e = entryPoint(tgtBounds, direction);
+          const s = nodeExitPoint(srcBounds, direction);
+          const e = nodeEntryPoint(tgtBounds, direction);
           controls.push({
             id: `wire:${edge.id}`,
             kind: 'wire',
@@ -302,7 +228,7 @@ export function computeWireInsertionControls(args: {
       }
     } else {
       const ports = insertionPoints.byNodeId.get(edge.source);
-      if (!ports) continue;
+      if (!ports) return;
       // For switch/parallel branch edges the React Flow sourceHandle is not set
       // to the case/branch key (nodes don't mount a named handle per case/branch).
       // Derive the logical branch key from edge data so insertionPoints can be
@@ -317,7 +243,7 @@ export function computeWireInsertionControls(args: {
       const isMergeBodyEdge =
         !edgeData?.branchType &&
         edgeData?.branchIndex === undefined &&
-        stepTypeOf(byId.get(edge.source)) === 'merge';
+        nodeStepType(byId.get(edge.source)) === 'merge';
       const handleKey = isMergeBodyEdge
         ? 'then'
         : edgeData?.branchType === 'switch'
@@ -331,16 +257,16 @@ export function computeWireInsertionControls(args: {
         : edge.sourceHandle ?? 'step';
 
       const insertContext = resolveInsertContext(ports, handleKey);
-      if (!insertContext) continue;
+      if (!insertContext) return;
 
       const sourceNode = byId.get(edge.source);
       const targetNode = byId.get(edge.target);
-      if (!sourceNode || !targetNode) continue;
+      if (!sourceNode || !targetNode) return;
 
       const sourceBounds = absoluteNodeBounds(sourceNode, byId);
       const targetBounds = absoluteNodeBounds(targetNode, byId);
-      const start = exitPoint(sourceBounds, direction);
-      const end = entryPoint(targetBounds, direction);
+      const start = nodeExitPoint(sourceBounds, direction);
+      const end = nodeEntryPoint(targetBounds, direction);
 
       wiredExits.add(`${edge.source}:${handleKey}`);
 
@@ -448,7 +374,8 @@ export function computeWireInsertionControls(args: {
         });
       }
     }
-  }
+  };
+  for (const edge of edges) emitEdgeControls(edge);
 
   // Emit single wire controls for trigger fan-in targets (one per multi-trigger fan-in).
   // Positioned on the trunk segment from the bus (bottom of triggers) to the first step.
@@ -470,10 +397,11 @@ export function computeWireInsertionControls(args: {
   // Pre-compute the branch floor for each fork node (max exit of branch targets).
   // Used to position the "after block" terminal below all branch exits.
   const forkBranchFloor = new Map<string, number>();
-  for (const edge of edges) {
-    if (!isForkEdge(edge) || isMergeEdge(edge)) continue;
+  const forkBranchEdges = edges.flatMap((edge) => {
     const tgt = byId.get(edge.target);
-    if (!tgt) continue;
+    return isForkEdge(edge) && !isMergeEdge(edge) && tgt ? [{ edge, tgt }] : [];
+  });
+  for (const { edge, tgt } of forkBranchEdges) {
     const tgtBounds = absoluteNodeBounds(tgt, byId);
     const tgtFloor =
       direction === 'LR' ? tgtBounds.x + tgtBounds.width : tgtBounds.y + tgtBounds.height;
@@ -482,11 +410,13 @@ export function computeWireInsertionControls(args: {
   }
 
   // Terminals: step / branch exits that have no outgoing non-failure wire.
-  for (const [nodeId, ports] of insertionPoints.byNodeId) {
+  const terminalSources = [...insertionPoints.byNodeId].flatMap(([nodeId, ports]) => {
     const sourceNode = byId.get(nodeId);
-    if (!sourceNode) continue;
+    return sourceNode ? [{ nodeId, ports, sourceNode }] : [];
+  });
+  for (const { nodeId, ports, sourceNode } of terminalSources) {
     const sourceBounds = absoluteNodeBounds(sourceNode, byId);
-    const start = exitPoint(sourceBounds, direction);
+    const start = nodeExitPoint(sourceBounds, direction);
     const fallbackStepName = fallbackStepNameFor(ports, sourceNode);
 
     const maybeTerminal = (
@@ -524,7 +454,7 @@ export function computeWireInsertionControls(args: {
           const joinNode = byId.get(joinNodeId);
           if (joinNode) {
             const joinBounds = absoluteNodeBounds(joinNode, byId);
-            const joinExit = exitPoint(joinBounds, direction);
+            const joinExit = nodeExitPoint(joinBounds, direction);
             maybeTerminal('step', ctx, joinExit);
           }
         }

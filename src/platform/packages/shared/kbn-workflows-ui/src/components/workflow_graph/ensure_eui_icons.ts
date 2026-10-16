@@ -127,4 +127,3 @@ export const ensureWorkflowGraphEuiIcons = (): void => {
     });
   })();
 };
-ensureWorkflowGraphEuiIcons();

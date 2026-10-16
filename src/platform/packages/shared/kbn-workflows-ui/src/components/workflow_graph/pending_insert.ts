@@ -11,7 +11,14 @@ import type { Node } from '@xyflow/react';
 import type { LayoutDirection } from '@kbn/workflows';
 import type { InsertionPoints } from './compute_insertion_points';
 import { errorPortCenter } from './port_geometry';
-import { WORKFLOW_NODE_SEP, WORKFLOW_RANK_SEP } from './workflow_layout_pipeline';
+import {
+  absoluteNodeBounds,
+  nodeEntryPoint,
+  nodeExitPoint,
+  WORKFLOW_NODE_SEP,
+  WORKFLOW_RANK_SEP,
+} from './workflow_graph_geometry';
+import type { AbsoluteBounds } from './workflow_graph_geometry';
 
 /** Insertion sites that show an in-progress pending node on the canvas. */
 export type PendingInsertStepContext =
@@ -47,27 +54,29 @@ export const PENDING_NODE_HEIGHT = 52;
 /** Same edge-to-edge gap dagre uses between sequential ranks. */
 const PENDING_NODE_GAP = WORKFLOW_RANK_SEP;
 
-interface AbsoluteBounds {
+interface AbsoluteExtent {
   minX: number;
   minY: number;
   maxX: number;
   maxY: number;
 }
 
-const absoluteBoundsOf = (id: string, nodes: readonly Node[]): AbsoluteBounds | undefined => {
-  const byId = new Map(nodes.map((n) => [n.id, n]));
+const pendingNodeSize = { width: PENDING_NODE_WIDTH, height: PENDING_NODE_HEIGHT };
+
+const toExtent = ({ x, y, width, height }: AbsoluteBounds): AbsoluteExtent => ({
+  minX: x,
+  minY: y,
+  maxX: x + width,
+  maxY: y + height,
+});
+
+/** Absolute bounds of `id`; a node without a measured size is taken as a normal step card. */
+const pendingBoundsOf = (
+  id: string,
+  byId: ReadonlyMap<string, Node>
+): AbsoluteBounds | undefined => {
   const node = byId.get(id);
-  if (!node) return undefined;
-  let { x, y } = node.position;
-  let parent = node.parentId ? byId.get(node.parentId) : undefined;
-  while (parent) {
-    x += parent.position.x;
-    y += parent.position.y;
-    parent = parent.parentId ? byId.get(parent.parentId) : undefined;
-  }
-  const w = typeof node.width === 'number' ? node.width : PENDING_NODE_WIDTH;
-  const h = typeof node.height === 'number' ? node.height : PENDING_NODE_HEIGHT;
-  return { minX: x, minY: y, maxX: x + w, maxY: y + h };
+  return node ? absoluteNodeBounds(node, byId, pendingNodeSize) : undefined;
 };
 
 /** Node the pending card hangs after (previous top-level step, trigger, or error owner). */
@@ -86,27 +95,6 @@ const resolvePendingSourceId = (
 };
 
 /**
- * Error-path pending card origin + lane-insertion shifts (same algorithm as
- * committed on-failure layout). Canvas applies `shifts` so the placeholder
- * never overlaps and nothing jumps on confirm.
- */
-/**
- * POC stub — error-branch placement ghost uses the branch's reservedLanes
- * model (ADR-0012); the POC's error_branch_placement.ts geometry was removed.
- * The ghost card does not appear for fallback inserts for now (known deviation #4).
- */
-export const computePendingErrorBranchPlacement = (
-  _stepId: string,
-  _nodes: readonly Node[],
-  _direction: LayoutDirection
-):
-  | {
-      origin: { x: number; y: number };
-      shifts: ReadonlyMap<string, { dx: number; dy: number }>;
-    }
-  | undefined => undefined;
-
-/**
  * Flow-space top-left for the pending insert card, sized to a normal step node.
  */
 export const computePendingInsertOrigin = (
@@ -116,10 +104,10 @@ export const computePendingInsertOrigin = (
   direction: LayoutDirection
 ): { x: number; y: number } | undefined => {
   const isHorizontal = direction === 'LR';
+  const byId = new Map(nodes.map((n) => [n.id, n]));
 
-  if (context.mode === 'error') {
-    return computePendingErrorBranchPlacement(context.stepId, nodes, direction)?.origin;
-  }
+  // Error-path inserts have no ghost card yet (known deviation #4, ADR-0012: reservedLanes placement).
+  if (context.mode === 'error') return undefined;
 
   if (context.mode === 'trigger') {
     const triggers = nodes.filter((n) => n.type === 'trigger');
@@ -127,8 +115,9 @@ export const computePendingInsertOrigin = (
       // Empty canvas — pending node centers itself in the viewport.
       return undefined;
     }
-    const last = absoluteBoundsOf(triggers[triggers.length - 1].id, nodes);
-    if (!last) return undefined;
+    const lastBounds = pendingBoundsOf(triggers[triggers.length - 1].id, byId);
+    if (!lastBounds) return undefined;
+    const last = toExtent(lastBounds);
     // Match the ghost "+" placement: past the last trigger on the cross-axis.
     return isHorizontal
       ? {
@@ -142,8 +131,9 @@ export const computePendingInsertOrigin = (
   }
 
   if (context.sourceNodeId) {
-    const source = absoluteBoundsOf(context.sourceNodeId, nodes);
-    if (source) {
+    const sourceBounds = pendingBoundsOf(context.sourceNodeId, byId);
+    if (sourceBounds) {
+      const source = toExtent(sourceBounds);
       return isHorizontal
         ? {
             x: source.maxX + PENDING_NODE_GAP,
@@ -184,39 +174,16 @@ export const computePendingInsertConnector = (
   if (context.mode === 'trigger') return undefined;
   const sourceId = resolvePendingSourceId(context, nodes, insertionPoints);
   if (!sourceId) return undefined;
-  const source = absoluteBoundsOf(sourceId, nodes);
-  if (!source) return undefined;
+  const sourceBounds = pendingBoundsOf(sourceId, new Map(nodes.map((n) => [n.id, n])));
+  if (!sourceBounds) return undefined;
 
-  const isHorizontal = direction === 'LR';
   const isFailure = context.mode === 'error';
+  const target = nodeEntryPoint({ x: origin.x, y: origin.y, ...pendingNodeSize }, direction);
 
-  if (isFailure) {
-    const originPoint = errorPortCenter(source, direction);
-    // Drop from the bottom-right corner into the reserved below+right slot:
-    // TB enters the top center; LR enters the left-edge center.
-    return {
-      sourceX: originPoint.x,
-      sourceY: originPoint.y,
-      targetX: isHorizontal ? origin.x : origin.x + PENDING_NODE_WIDTH / 2,
-      targetY: isHorizontal ? origin.y + PENDING_NODE_HEIGHT / 2 : origin.y,
-      isFailure: true,
-    };
-  }
-
-  if (isHorizontal) {
-    return {
-      sourceX: source.maxX,
-      sourceY: (source.minY + source.maxY) / 2,
-      targetX: origin.x,
-      targetY: origin.y + PENDING_NODE_HEIGHT / 2,
-      isFailure: false,
-    };
-  }
-  return {
-    sourceX: (source.minX + source.maxX) / 2,
-    sourceY: source.maxY,
-    targetX: origin.x + PENDING_NODE_WIDTH / 2,
-    targetY: origin.y,
-    isFailure: false,
-  };
+  // Failure drops from the bottom-right corner into the reserved below+right slot;
+  // otherwise leave the source's flow exit. Both enter the card's entry edge.
+  const { x: sourceX, y: sourceY } = isFailure
+    ? errorPortCenter(toExtent(sourceBounds), direction)
+    : nodeExitPoint(sourceBounds, direction);
+  return { sourceX, sourceY, targetX: target.x, targetY: target.y, isFailure };
 };

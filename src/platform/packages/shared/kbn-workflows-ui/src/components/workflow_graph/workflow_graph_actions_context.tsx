@@ -9,8 +9,6 @@
 
 import { createContext, type ReactNode, useContext } from 'react';
 import type { BranchSlot } from '@kbn/workflows';
-import type { NodePortTargets } from './compute_insertion_points';
-import type { PendingInsertVisual } from './pending_insert';
 
 /**
  * Render-prop type for injecting a custom icon resolver into the graph canvas.
@@ -82,6 +80,11 @@ export type NodeConfigWarningReason = 'incomplete' | 'misconfigured' | 'both';
 /** Settings node kinds (Option B canvas row above triggers). */
 export type WorkflowSettingsNodeKind = 'info' | 'constants' | 'outputs';
 
+/**
+ * Stable, caller-supplied callbacks only. Per-node volatile values (port
+ * targets, config warnings, pending error-path flag) travel on each node's
+ * `data` so a change for one node never re-renders the others.
+ */
 export interface WorkflowGraphActions {
   /** Called when the user clicks the Play icon on a node hover. */
   onStepRun?: (stepName: string) => void;
@@ -103,21 +106,6 @@ export interface WorkflowGraphActions {
   renderStepIcon?: RenderStepIcon;
   /** Edit-mode callbacks; undefined renders the read-only canvas. */
   edit?: WorkflowGraphEditActions;
-  /**
-   * Applied-state config warnings per node id (edit mode). Drives the
-   * top-right warning badge and its tooltip copy.
-   */
-  nodeConfigWarnings?: ReadonlyMap<string, NodeConfigWarningReason>;
-  /**
-   * Connection-point targets per node id. Present only in edit mode when
-   * insertion controls are not suppressed; read-only omits ports entirely.
-   */
-  portTargetsByNodeId?: ReadonlyMap<string, NodePortTargets>;
-  /**
-   * In-progress insert (Actions menu / placeholder). Ports use this so an
-   * error-path definition keeps the origin port visibly active.
-   */
-  pendingInsert?: PendingInsertVisual | null;
 }
 
 export const WorkflowGraphActionsContext = createContext<WorkflowGraphActions>({});

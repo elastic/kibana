@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { euiFocusRing, EuiIcon, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { euiCanAnimate, euiFocusRing, EuiIcon, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import type { Node, NodeProps } from '@xyflow/react';
 import React, { memo } from 'react';
+import { nodeLabelTypography, selectionRingStyle } from './node_styles';
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
 import type { WorkflowSettingsNodeKind } from './workflow_graph_actions_context';
 
@@ -35,7 +36,7 @@ function WorkflowGraphSettingsNodeInner(node: NodeProps<Node<WorkflowGraphSettin
   const nodeShadow = useEuiShadow('xs', { border: 'none' });
   const { onSettingsNodeSelect } = useWorkflowGraphActions();
   const isActive = node.selected;
-  const borderRadius = euiTheme.border.radius.small ?? 4;
+  const borderRadius = euiTheme.border.radius.small;
   const chipSize = compact ? COMPACT_CHIP_SIZE : CHIP_SIZE;
 
   const select = () => {
@@ -70,21 +71,13 @@ function WorkflowGraphSettingsNodeInner(node: NodeProps<Node<WorkflowGraphSettin
           padding: compact ? euiTheme.size.s : euiTheme.size.m,
           // Match step/trigger nodes: visible so the selection ring is not clipped.
           overflow: 'visible',
-          transition: 'border-color 120ms ease, background 120ms ease, box-shadow 120ms ease',
+          [euiCanAnimate]: {
+            transition: 'border-color 120ms ease, background 120ms ease, box-shadow 120ms ease',
+          },
           cursor: 'pointer',
           '&:focus': { outline: 'none' },
           '&:focus-visible': euiFocusRing(euiThemeContext),
-          // Selection ring sits outside via ::after so it does not fight the
-          // drop shadow or inflate the layout box.
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            inset: 0,
-            borderRadius: 'inherit',
-            pointerEvents: 'none',
-            boxShadow: isActive ? `0 0 0 2px ${euiTheme.colors.primary}` : 'none',
-            transition: 'box-shadow 120ms ease',
-          },
+          '&::after': selectionRingStyle(euiTheme, isActive),
         },
         nodeShadow,
       ]}
@@ -121,11 +114,8 @@ function WorkflowGraphSettingsNodeInner(node: NodeProps<Node<WorkflowGraphSettin
       >
         <span
           css={{
-            fontFamily: euiTheme.font.family,
-            fontSize: 12,
+            ...nodeLabelTypography(euiTheme, '16px'),
             fontStyle: 'normal',
-            fontWeight: 500,
-            lineHeight: '16px',
             color: euiTheme.colors.textHeading,
             whiteSpace: 'nowrap',
             overflow: 'hidden',

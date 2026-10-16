@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, useEuiShadow, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import { useEuiShadow, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { Position, useReactFlow, useStore, ViewportPortal } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { AiIcon } from '@kbn/shared-ux-ai-components';
 import {
   CONTAINER_STEP_TYPES,
   FOREACH_GROUP_EMPTY_HEIGHT,
   type LayoutDirection,
 } from '@kbn/workflows';
-import { aiIconTileCss } from './ai_icon_tile';
 import { computeEdgePath } from './compute_edge_path';
 import type { InsertionPoints } from './compute_insertion_points';
 import { deslugifyStepName } from './deslugify_step_name';
+import { NodeIconChip, NodeStepIcon } from './node_icon_chip';
+import { CHIP_BORDER_RADIUS, NODE_BORDER_RADIUS, nodeLabelTypography } from './node_styles';
 import {
   computePendingInsertConnector,
   computePendingInsertOrigin,
@@ -30,8 +30,8 @@ import {
   type PendingInsertVisual,
 } from './pending_insert';
 import { errorPortEdgeStyle, PORT_DOT_SIZE, STEP_PORT } from './port_geometry';
+import { resolveNodeColors } from './resolve_node_colors';
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
-import { resolveNodeColors } from './workflow_graph_node';
 import { getStepIconType, getTriggerTypeIconType } from '../step_icons';
 
 export interface WorkflowGraphPendingNodeProps {
@@ -99,8 +99,7 @@ export function WorkflowGraphPendingNode({
   const isContainer = pending.phase === 'configuring' && CONTAINER_STEP_TYPES.has(pending.stepType);
   const isTriggerDraft = pending.context.mode === 'trigger';
   const isHorizontal = direction === 'LR';
-  const borderRadius = 8;
-  const chipBorderRadius = 4;
+  const borderRadius = NODE_BORDER_RADIUS;
   const ariaLabel = isConfiguring
     ? isTriggerDraft
       ? i18n.translate('workflowsUi.graph.pendingConfiguringTriggerAria', {
@@ -237,49 +236,27 @@ export function WorkflowGraphPendingNode({
                 alignItems: 'center',
                 gap: euiTheme.size.s,
                 padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
-                fontSize: 12,
-                fontWeight: 500,
-                fontFamily: euiTheme.font.family,
+                ...nodeLabelTypography(euiTheme, '24px'),
                 color: euiTheme.colors.textHeading,
-                lineHeight: '24px',
               }}
             >
-              <div
-                css={[
-                  {
-                    flex: '0 0 auto',
-                    width: 28,
-                    height: 28,
-                    borderRadius: chipBorderRadius,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    ...(colors.chipUseAiGradient
-                      ? {}
-                      : {
-                          background: colors.chipBackground,
-                          border: `1px solid ${colors.chipBorder}`,
-                        }),
-                  },
-                  colors.chipUseAiGradient ? aiIconTileCss({ euiTheme }) : {},
-                ]}
+              <NodeIconChip
+                background={colors.chipBackground}
+                border={colors.chipBorder}
+                borderRadius={CHIP_BORDER_RADIUS}
+                useAiGradient={colors.chipUseAiGradient}
+                size={28}
                 data-test-subj="workflowGraphPendingNodeChip"
               >
-                {colors.chipUseAiGradient && iconType === 'sparkles' ? (
-                  <AiIcon iconType="sparkles" size="m" aria-hidden />
-                ) : renderStepIcon ? (
-                  <div css={{ color: colors.chipIconColor, display: 'flex' }}>
-                    {renderStepIcon({
-                      stepType: pending.stepType,
-                      isTrigger: false,
-                      size: 'm',
-                      color: colors.chipIconColor,
-                    })}
-                  </div>
-                ) : (
-                  <EuiIcon type={iconType} size="m" color={colors.chipIconColor} aria-hidden />
-                )}
-              </div>
+                <NodeStepIcon
+                  iconType={iconType}
+                  iconColor={colors.chipIconColor}
+                  renderStepIcon={renderStepIcon}
+                  stepType={pending.stepType}
+                  isTrigger={isTriggerDraft}
+                  useAiGradient={colors.chipUseAiGradient}
+                />
+              </NodeIconChip>
               <span
                 css={{
                   flex: '1 1 auto',
@@ -313,58 +290,28 @@ export function WorkflowGraphPendingNode({
           <>
             {isConfiguring && colors && iconType && (
               <>
-                <div
-                  css={[
-                    {
-                      flex: '0 0 auto',
-                      alignSelf: 'stretch',
-                      aspectRatio: '1 / 1',
-                      width: 'auto',
-                      borderRadius,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      ...(colors.chipUseAiGradient
-                        ? {}
-                        : {
-                            background: colors.chipBackground,
-                            border: `1px solid ${colors.chipBorder}`,
-                          }),
-                    },
-                    colors.chipUseAiGradient ? aiIconTileCss({ euiTheme }) : {},
-                  ]}
+                <NodeIconChip
+                  background={colors.chipBackground}
+                  border={colors.chipBorder}
+                  borderRadius={CHIP_BORDER_RADIUS}
+                  useAiGradient={colors.chipUseAiGradient}
+                  fillRow
                   data-test-subj="workflowGraphPendingNodeChip"
                 >
-                  {colors.chipUseAiGradient && iconType === 'sparkles' ? (
-                    <AiIcon iconType="sparkles" size="m" aria-hidden />
-                  ) : renderStepIcon ? (
-                    <div
-                      css={[
-                        { color: colors.chipIconColor, display: 'flex' },
-                        colors.chipIconColor
-                          ? { '& svg, & svg *': { fill: colors.chipIconColor } }
-                          : undefined,
-                      ]}
-                    >
-                      {renderStepIcon({
-                        stepType: pending.stepType,
-                        isTrigger: false,
-                        size: 'm',
-                        color: colors.chipIconColor,
-                      })}
-                    </div>
-                  ) : (
-                    <EuiIcon type={iconType} size="m" color={colors.chipIconColor} aria-hidden />
-                  )}
-                </div>
+                  <NodeStepIcon
+                    iconType={iconType}
+                    iconColor={colors.chipIconColor}
+                    renderStepIcon={renderStepIcon}
+                    stepType={pending.stepType}
+                    isTrigger={isTriggerDraft}
+                    useAiGradient={colors.chipUseAiGradient}
+                  />
+                </NodeIconChip>
                 <span
                   css={{
                     flex: '1 1 auto',
                     minWidth: 0,
-                    fontFamily: euiTheme.font.family,
-                    fontSize: 12,
-                    fontWeight: 500,
-                    lineHeight: '24px',
+                    ...nodeLabelTypography(euiTheme, '24px'),
                     color: euiTheme.colors.textHeading,
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',

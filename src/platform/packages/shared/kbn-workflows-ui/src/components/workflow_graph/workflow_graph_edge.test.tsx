@@ -163,7 +163,7 @@ describe('WorkflowGraphEdge — fork bus routing gate', () => {
           id: 'e-caseA',
           ...sharedSource,
           targetX: 100,
-          // Gap must clear FORK_BUS_TRUNK + TRUNK_LENGTH_TO_TARGET so both
+          // Gap must clear FORK_BUS_TRUNK so both
           // branches keep the nominal bus (otherwise a nearer target pulls
           // busY up and misaligns labels).
           targetY: 280,
@@ -248,7 +248,7 @@ describe('WorkflowGraphEdge — merge bus routing (isMerge flag)', () => {
   // placeholder at centerX=200, centerY=300; switch top at y=402.
   // busY = targetY_top − MERGE_BUS_TRUNK.
   // Import the live constant so trunk-length changes stay in sync.
-  const { MERGE_BUS_TRUNK } = jest.requireActual('./compute_edge_path') as {
+  const { MERGE_BUS_TRUNK } = jest.requireActual('./workflow_graph_geometry') as {
     MERGE_BUS_TRUNK: number;
   };
 

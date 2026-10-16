@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transparentize, useEuiTheme } from '@elastic/eui';
+import { euiCanAnimate, transparentize, useEuiTheme } from '@elastic/eui';
 import type { Node, NodeProps } from '@xyflow/react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -27,7 +27,7 @@ function WorkflowGraphSettingsGroupNodeInner(
 ) {
   const { hasSelection } = node.data;
   const { euiTheme } = useEuiTheme();
-  const borderRadius = euiTheme.border.radius.small ?? 4;
+  const borderRadius = euiTheme.border.radius.small;
 
   return (
     <div
@@ -43,7 +43,7 @@ function WorkflowGraphSettingsGroupNodeInner(
         }`,
         borderRadius,
         pointerEvents: 'none',
-        transition: 'border-color 120ms ease',
+        [euiCanAnimate]: { transition: 'border-color 120ms ease' },
         paddingTop: SETTINGS_GROUP_PAD,
         paddingInline: SETTINGS_GROUP_PAD,
       }}

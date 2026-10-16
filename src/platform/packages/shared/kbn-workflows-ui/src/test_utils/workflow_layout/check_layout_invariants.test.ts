@@ -101,9 +101,9 @@ describe('checkLayoutInvariants', () => {
     expect(rulesOf(check(moved({ gate: { dx: 80 } })))).toContain('ownerCentred');
   });
 
-  it('joinAligned: the step after a fork is off the gate column', () => {
+  it('joinAligned: the fork join is off the gate column', () => {
     const { check, moved } = branching();
-    expect(rulesOf(check(moved({ after: { dx: 80 } })))).toContain('joinAligned');
+    expect(rulesOf(check(moved({ 'gate-join': { dx: 80 } })))).toContain('joinAligned');
   });
 
   it('chainStraight: a step in a branch jogs sideways from its predecessor', () => {

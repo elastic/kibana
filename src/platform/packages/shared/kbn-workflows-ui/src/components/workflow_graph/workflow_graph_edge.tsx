@@ -7,56 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1".
- */
-
 import { euiCanAnimate, EuiToolTip, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { keyframes } from '@emotion/react';
-import type { EdgeProps } from '@xyflow/react';
+import type { Edge, EdgeProps } from '@xyflow/react';
 import { EdgeLabelRenderer } from '@xyflow/react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EdgeBranchType } from '@kbn/workflows';
 import { computeEdgePath } from './compute_edge_path';
 import { EDGE_LABEL_MAX_CHARS } from './edge_label_metrics';
 import { INSERT_LAYOUT_MS } from './use_insert_layout_animation';
+import type { WorkflowEdgeData } from './workflow_node_data';
+
+type WorkflowEdgeProps = EdgeProps<Edge<WorkflowEdgeData>>;
 
 const drawInStroke = keyframes({
   from: { strokeDashoffset: 1 },
   to: { strokeDashoffset: 0 },
 });
-
-interface WorkflowEdgeData extends Record<string, unknown> {
-  readonly label?: string;
-  readonly traversed?: boolean;
-  readonly points?: ReadonlyArray<{ readonly x: number; readonly y: number }>;
-  /** Switch bus routing marker — present on all case/default edges of a switch node. */
-  readonly branchType?: EdgeBranchType;
-  /**
-   * True when this edge participates in any fan-in (multiple predecessors
-   * converging on the same target). Routes the edge on the merge bus
-   * (symmetric inverted-bus fan-in matching the fork-bus fan-out) so the
-   * lane change happens as late as possible — just above the target node.
-   */
-  readonly isMerge?: boolean;
-  /**
-   * True when the target node is a synthetic placeholder — suppresses the
-   * arrowhead so the in-edge and out-edge form one continuous line mid-lane.
-   */
-  readonly hideEndMarker?: boolean;
-  /**
-   * True on the edge from a step to its fallback lane head. Renders as always-
-   * dashed; stroke colour transitions from `borderBaseProminent` to `danger`
-   * once any node in the lane has a step-execution record (ADR-0010 decision 9).
-   */
-  readonly isFailure?: boolean;
-  /** Draw the stroke in when a step was just inserted (insert layout animation). */
-  readonly drawIn?: boolean;
-}
 
 function displayEdgeLabel(label: string): string {
   if (label === 'true') {
@@ -83,7 +50,7 @@ function displayEdgeLabel(label: string): string {
 // `elevateNodesOnSelect={false}` equals the container nesting depth.
 const EDGE_LABEL_Z_INDEX = 10;
 
-function WorkflowGraphEdgeInner(props: EdgeProps) {
+function WorkflowGraphEdgeInner(props: WorkflowEdgeProps) {
   const {
     id,
     sourceX,
@@ -92,10 +59,9 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
     targetY,
     sourcePosition,
     targetPosition,
-    data,
+    data: edgeData,
     style = {},
   } = props;
-  const edgeData = data as WorkflowEdgeData | undefined;
   const { euiTheme } = useEuiTheme();
   const pillShadow = useEuiShadow('xs', { border: 'none' });
 
@@ -110,7 +76,6 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
     targetY,
     sourcePosition,
     targetPosition,
-    points: edgeData?.points,
     branchType: edgeData?.branchType,
     isMerge: edgeData?.isMerge,
     isFailure: edgeData?.isFailure,
@@ -222,7 +187,7 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
   );
 }
 
-function edgePropsAreEqual(prev: EdgeProps, next: EdgeProps): boolean {
+function edgePropsAreEqual(prev: WorkflowEdgeProps, next: WorkflowEdgeProps): boolean {
   if (
     prev.sourceX !== next.sourceX ||
     prev.sourceY !== next.sourceY ||
@@ -232,12 +197,11 @@ function edgePropsAreEqual(prev: EdgeProps, next: EdgeProps): boolean {
     prev.targetPosition !== next.targetPosition
   )
     return false;
-  const pd = prev.data as WorkflowEdgeData | undefined;
-  const nd = next.data as WorkflowEdgeData | undefined;
+  const { data: pd } = prev;
+  const { data: nd } = next;
   return (
     pd?.traversed === nd?.traversed &&
     pd?.label === nd?.label &&
-    pd?.points === nd?.points &&
     pd?.branchType === nd?.branchType &&
     pd?.isMerge === nd?.isMerge &&
     pd?.hideEndMarker === nd?.hideEndMarker &&

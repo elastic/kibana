@@ -7,35 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DagPositionedEdge, DagPositionedNode } from '@kbn/dag-layout';
+import type { DagPositionedNode } from '@kbn/dag-layout';
 import { dagLayout } from '@kbn/dag-layout';
 import type { LayoutDirection, TransformResult } from '@kbn/workflows';
-import { FORK_HEAD_MIN_GAP } from './compute_wire_insertion_controls';
 import { packCrossAxis } from './pack_workflow_structure';
+import {
+  FORK_HEAD_MIN_GAP,
+  WORKFLOW_COMPOUND_PADDING,
+  WORKFLOW_NODE_SEP,
+  WORKFLOW_RANK_SEP,
+} from './workflow_graph_geometry';
 
-// Workflow-specific layout constants. These encode domain knowledge (foreach
-// header height, gutter widths) that does not belong in @kbn/dag-layout.
-// Exported so tests can import the real values instead of re-declaring them.
-// bottom = TERMINAL_STUB_PX (75) + PORT_DOT_SIZE/2 (4) + margin (17) = 96.
-// This keeps the terminal stub of the last inner step visible inside the container.
-export const WORKFLOW_COMPOUND_PADDING = { top: 70, right: 32, bottom: 96, left: 32 } as const;
-export const WORKFLOW_NODE_SEP = 50;
-export const WORKFLOW_RANK_SEP = 70;
+// Re-exported from the geometry module so tests keep importing the real values from here.
+export {
+  WORKFLOW_COMPOUND_PADDING,
+  WORKFLOW_NODE_SEP,
+  WORKFLOW_RANK_SEP,
+} from './workflow_graph_geometry';
 
 export interface LayoutSnapshot {
   nodes: DagPositionedNode[];
-  edges: DagPositionedEdge[];
 }
 
 /**
- * Pure data pipeline: TransformResult → dagLayout → packCrossAxis → positioned nodes + edges.
+ * Pure data pipeline: TransformResult → dagLayout → packCrossAxis → positioned nodes.
  *
  * Maps domain nodes/edges/groups to the @kbn/dag-layout format and runs the layout
  * engine, which decides the main axis (ranks, sizes, container heights). The cross
  * axis is then set from the workflow's block structure (see `packCrossAxis`), so forks,
- * containers and lanes are placed by rule instead of being repaired afterwards. The
- * engine's edge waypoints refer to its own cross positions, so they are dropped and
- * edges are routed by `computeEdgePath` from the final handle positions.
+ * containers and lanes are placed by rule instead of being repaired afterwards. Edges
+ * are not part of the result: they are routed by `computeEdgePath` from the final
+ * handle positions.
  * Throws on layout failure (e.g. a cyclic compound graph) — callers are responsible
  * for error handling and any perf instrumentation.
  */
@@ -144,6 +146,5 @@ export const computeWorkflowLayout = (
       nodeSep: WORKFLOW_NODE_SEP,
       compoundPadding: WORKFLOW_COMPOUND_PADDING,
     }),
-    edges: laid.edges.map((edge) => ({ ...edge, points: [] })),
   };
 };

@@ -14,8 +14,8 @@ The output of `graph_layout/transform_workflow_to_graph.ts`. A placement-indepen
 **execution graph**
 The output of `graph/build_execution_graph/build_execution_graph.ts`. A compiled step graph used by the execution engine. The `EnterTryBlock`/`ExitTryBlock` diamond pattern for `on-failure.fallback` lives here, not in the logical graph.
 
-**topology fingerprint**
-A stable hash of the logical graph's shape (node ids, edges, branch structure). Used as the memo key for `useWorkflowLayout`; recomputed by `compute_topology_fingerprint.ts`. Layout is recalculated only when the fingerprint changes.
+**layout key**
+A stable string of the logical graph's layout-relevant shape (node ids and sizes, edge endpoints, groups, lanes, branch structure), derived from the `TransformResult` by `computeLayoutKey` in `kbn-workflows-ui`'s `use_workflow_layout.ts`. It is the memo key for the layout: layout is recalculated only when the key changes, so edits that don't change the structure (descriptions, params, expressions) never re-run dagre.
 
 **node ref**
 An entry in `TransformResult.nodeRefs` mapping a graph node id to a workflow step name and position. The canonical bridge between the rendering layer (which knows node ids) and the mutation layer (which knows step names).

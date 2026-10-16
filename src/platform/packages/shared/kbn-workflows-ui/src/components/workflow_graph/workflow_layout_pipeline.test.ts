@@ -12,7 +12,7 @@
  *   transformWorkflowToGraph → computeWorkflowLayout → assert positions.
  */
 
-import { dagLayout, resolveShiftedEdgePoints } from '@kbn/dag-layout';
+import { dagLayout } from '@kbn/dag-layout';
 import { transformWorkflowToGraph } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows';
 import {
@@ -45,16 +45,6 @@ const findNode = (nodes: ReturnType<typeof computeWorkflowLayout>['nodes'], id: 
   const n = nodes.find((x) => x.id === id);
   if (!n) throw new Error(`Expected positioned node "${id}"`);
   return n;
-};
-
-const findEdge = (
-  edges: ReturnType<typeof computeWorkflowLayout>['edges'],
-  source: string,
-  target: string
-) => {
-  const e = edges.find((x) => x.source === source && x.target === target);
-  if (!e) throw new Error(`Expected edge ${source} → ${target}`);
-  return e;
 };
 
 const centerX = (n: ReturnType<typeof findNode>) => n.x + n.width / 2;
@@ -129,20 +119,6 @@ describe('workflow layout pipeline', () => {
     const lrXSpread = Math.max(...lrSteps.map((n) => n.x)) - Math.min(...lrSteps.map((n) => n.x));
     const lrYSpread = Math.max(...lrSteps.map((n) => n.y)) - Math.min(...lrSteps.map((n) => n.y));
     expect(lrXSpread).toBeGreaterThan(lrYSpread);
-  });
-
-  it('returns edges with points arrays', () => {
-    const { result } = runLayout(
-      minimal({
-        steps: [
-          { name: 'a', type: 'http' },
-          { name: 'b', type: 'http' },
-        ] as unknown as WorkflowYaml['steps'],
-      })
-    );
-    for (const e of result.edges) {
-      expect(Array.isArray(e.points)).toBe(true);
-    }
   });
 
   it('TB merge node is horizontally centered between parallel branch leaves', () => {
@@ -224,70 +200,7 @@ describe('workflow layout pipeline', () => {
     }
   });
 
-  it('TB linear chain edge waypoints share center X with nodes', () => {
-    const { result } = runLayout(
-      minimal({
-        steps: [
-          { name: 'a', type: 'http' },
-          { name: 'b', type: 'http' },
-        ] as unknown as WorkflowYaml['steps'],
-      }),
-      'TB'
-    );
-    const a = findNode(result.nodes, 'a');
-    const b = findNode(result.nodes, 'b');
-    const e = findEdge(result.edges, 'a', 'b');
-    for (const p of e.points) {
-      expect(Math.abs(p.x - centerX(a))).toBeLessThanOrEqual(CENTER_TOLERANCE);
-      expect(Math.abs(p.x - centerX(b))).toBeLessThanOrEqual(CENTER_TOLERANCE);
-    }
-  });
-
-  it('TB if branch fan-out omits dagre waypoints for smooth-step routing', () => {
-    const { result } = runLayout(
-      minimal({
-        steps: [
-          {
-            name: 'gate',
-            type: 'if',
-            condition: 'true',
-            steps: [{ name: 'left_step', type: 'http' }],
-            else: [
-              {
-                name: 'wide_loop',
-                type: 'foreach',
-                foreach: 'items',
-                steps: [
-                  { name: 'inner_a', type: 'http' },
-                  { name: 'inner_b', type: 'http' },
-                ],
-              },
-            ],
-          },
-        ] as unknown as WorkflowYaml['steps'],
-      }),
-      'TB'
-    );
-    const thenEdge = findEdge(result.edges, 'gate', 'left-step');
-    expect(thenEdge.points.length).toBeLessThan(2);
-  });
-
-  it('drops co-linear spine waypoints when middle bus is laterally stale', () => {
-    expect(
-      resolveShiftedEdgePoints({
-        shifted: [
-          { x: 175, y: 100 },
-          { x: 400, y: 150 },
-          { x: 175, y: 200 },
-        ],
-        sourceCenter: 175,
-        targetCenter: 175,
-        crossAxis: 'x',
-      })
-    ).toEqual([]);
-  });
-
-  it('shifts foreach inner edge points to absolute coordinates', () => {
+  it('positions foreach inner nodes absolutely within the container', () => {
     const { result } = runLayout(
       minimal({
         steps: [
@@ -308,11 +221,6 @@ describe('workflow layout pipeline', () => {
     // inner-a should be absolutely within the loop container bounds
     expect(innerA.x).toBeGreaterThanOrEqual(loop.x);
     expect(innerA.y).toBeGreaterThanOrEqual(loop.y);
-    const innerEdge = findEdge(result.edges, 'inner-a', 'inner-b');
-    for (const p of innerEdge.points) {
-      expect(p.x).toBeGreaterThanOrEqual(loop.x - 1);
-      expect(p.y).toBeGreaterThanOrEqual(loop.y - 1);
-    }
   });
 
   it('TB parallel fan-out keeps sibling steps separated', () => {
@@ -582,52 +490,6 @@ describe('workflow layout pipeline', () => {
     // was hard-coded in the original use_workflow_layout.ts.
     expect(WORKFLOW_NODE_SEP).toBe(50);
     expect(WORKFLOW_RANK_SEP).toBe(70);
-  });
-
-  it('applyDagre returns points.length < 2 for every fan-in edge (cross-package invariant)', () => {
-    // The merge-bus fix rests on this guarantee from @kbn/dag-layout: for any
-    // edge whose target has predecessorCount > 1, applyDagre unconditionally
-    // returns points: []. If that ever changes, isMerge-tagged edges would use
-    // stale dagre waypoints instead of the merge bus, silently regressing.
-    const { result, transformed } = runLayout(
-      minimal({
-        steps: [
-          {
-            name: 'route',
-            type: 'if',
-            condition: 'x',
-            steps: [{ name: 'branch_a', type: 'http' }],
-            else: [{ name: 'branch_b', type: 'http' }],
-          },
-          { name: 'summary', type: 'http' },
-        ] as unknown as WorkflowYaml['steps'],
-      })
-    );
-
-    // Collect all edges that genuinely have multiple predecessors.
-    const incomingByTarget = new Map<string, string[]>();
-    const allEdges = [
-      ...transformed.edges,
-      ...transformed.foreachGroups.flatMap((g) => g.innerEdges),
-    ];
-    for (const e of allEdges) {
-      const arr = incomingByTarget.get(e.target);
-      if (arr) arr.push(e.source);
-      else incomingByTarget.set(e.target, [e.source]);
-    }
-    const fanInTargets = new Set(
-      [...incomingByTarget.entries()]
-        .filter(([, sources]) => sources.length > 1)
-        .map(([target]) => target)
-    );
-    expect(fanInTargets.size).toBeGreaterThan(0);
-
-    for (const posEdge of result.edges) {
-      if (fanInTargets.has(posEdge.target)) {
-        // applyDagre must have blanked these waypoints.
-        expect(posEdge.points.length).toBeLessThan(2);
-      }
-    }
   });
 });
 
@@ -1180,7 +1042,7 @@ describe('spec 02 regression — named fixtures', () => {
     }
   );
 
-  it('drops the layout engine waypoints, so edges are routed from the final handle positions', () => {
+  it('lays out an on-failure fallback lane with finite positions', () => {
     const { result } = runLayout(
       minimal({
         steps: [
@@ -1199,8 +1061,6 @@ describe('spec 02 regression — named fixtures', () => {
       expect(isFinite(n.x)).toBe(true);
       expect(isFinite(n.y)).toBe(true);
     }
-    expect(result.edges.length).toBeGreaterThan(0);
-    expect(result.edges.every((e) => e.points.length === 0)).toBe(true);
   });
 });
 

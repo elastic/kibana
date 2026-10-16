@@ -8,7 +8,7 @@
  */
 
 import { euiCanAnimate, euiFocusRing, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { WIRE_CONTROL_SIZE } from './compute_wire_insertion_controls';
 import type { WireInsertionControl } from './compute_wire_insertion_controls';
@@ -38,8 +38,8 @@ export function WorkflowGraphWireSplitControl({
   control,
   edit,
 }: WorkflowGraphWireSplitControlProps) {
-  const { euiTheme } = useEuiTheme();
   const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const revealed = hovered || focused;
@@ -51,6 +51,12 @@ export function WorkflowGraphWireSplitControl({
       edit.onInsert(control.insertContext, anchor);
     },
     [control, edit]
+  );
+
+  // Serialised once per context (hover / focus re-render this component often).
+  const insertContextAttr = useMemo(
+    () => JSON.stringify(control.insertContext),
+    [control.insertContext]
   );
 
   const addStepLabel = i18n.translate('workflowsUi.graph.wire.addStep', {
@@ -76,7 +82,7 @@ export function WorkflowGraphWireSplitControl({
       data-test-subj={`workflowGraphWireControl-${control.kind}`}
       data-control-id={control.id}
       data-direction={control.direction}
-      data-insert-context={JSON.stringify(control.insertContext)}
+      data-insert-context={insertContextAttr}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocusCapture={() => setFocused(true)}

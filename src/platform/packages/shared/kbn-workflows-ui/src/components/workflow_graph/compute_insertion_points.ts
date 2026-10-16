@@ -53,9 +53,10 @@ export interface InsertionPoints {
 
 /** True when `on-failure.fallback` has at least one step (graph error route). */
 const hasFallbackSteps = (step: Step): boolean => {
-  const onFailure = (step as Record<string, unknown>)['on-failure'];
+  if (!('on-failure' in step)) return false;
+  const onFailure = step['on-failure'];
   if (typeof onFailure !== 'object' || onFailure === null) return false;
-  const fallback = (onFailure as Record<string, unknown>).fallback;
+  const { fallback } = onFailure;
   return Array.isArray(fallback) && fallback.length > 0;
 };
 
@@ -105,7 +106,7 @@ export function computeInsertionPoints(
   const byNodeId = new Map<string, NodePortTargets>();
   const topLevelStepNodeIds: string[] = [];
 
-  const steps = Array.isArray(workflow?.steps) ? (workflow?.steps as Step[]) : [];
+  const steps = Array.isArray(workflow?.steps) ? workflow.steps : [];
 
   // Collect top-level node ids in declaration order.
   for (const step of steps) {
@@ -128,10 +129,7 @@ export function computeInsertionPoints(
 
     // Resolve type up-front so it can gate both the container-branch fix and
     // the flow-port addition for container types inside the hasBranches path.
-    const type =
-      typeof (step as Record<string, unknown>).type === 'string'
-        ? String((step as Record<string, unknown>).type)
-        : undefined;
+    const type = typeof step.type === 'string' ? step.type : undefined;
     const isContainerType = type === 'foreach' || type === 'while';
 
     const branches = new Map<

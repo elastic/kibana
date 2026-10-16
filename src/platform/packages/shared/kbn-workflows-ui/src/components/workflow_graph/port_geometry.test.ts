@@ -13,21 +13,14 @@ import {
   ERROR_PORT_TRAIL_T,
   errorPortCenter,
   errorPortEdgeStyle,
-  expandedPortCenters,
-  expandedPortsClear,
   FLOW_BAND_END,
   FLOW_BAND_START,
-  FLOW_PORT_MIN_GAP,
-  FLOW_TO_ERROR_MIN_GAP,
   flowPortAlong,
   flowPortFraction,
   IF_PORT_FALSE,
   IF_PORT_TRUE,
-  minCrossSizeForPorts,
   PORT_EDGE_OUTSET,
   PORT_HIT_SIZE,
-  PORT_STRADDLE_OUTSET,
-  portCenterOnSourceEdge,
   STEP_PORT,
 } from './port_geometry';
 
@@ -60,38 +53,10 @@ describe('port_geometry', () => {
     });
   });
 
-  describe('minCrossSizeForPorts', () => {
-    it('requires enough span for the 28px flow-flow gap', () => {
-      const min = minCrossSizeForPorts(2, false);
-      expect(min * (FLOW_BAND_END - FLOW_BAND_START)).toBeGreaterThanOrEqual(FLOW_PORT_MIN_GAP);
-    });
-
-    it('requires enough span for the last-flow → error gap', () => {
-      const min = minCrossSizeForPorts(1, true);
-      const lastFlowX = flowPortFraction(0, 1) * min;
-      const errorX = ERROR_PORT_FRACTION * min;
-      expect(errorX - lastFlowX).toBeGreaterThanOrEqual(FLOW_TO_ERROR_MIN_GAP);
-    });
-
-    it('keeps gaps on a default 300px node for step+error and if (2 flow)', () => {
-      const width = 300;
-      expect(width).toBeGreaterThanOrEqual(minCrossSizeForPorts(1, true));
-      expect(width).toBeGreaterThanOrEqual(minCrossSizeForPorts(2, false));
-    });
-  });
-
   describe('edge-anchored control geometry', () => {
     it('places controls ≈15px outside the source edge with ≥44px hit targets', () => {
       expect(PORT_HIT_SIZE).toBeGreaterThanOrEqual(44);
       expect(PORT_EDGE_OUTSET).toBe(15);
-      expect(PORT_STRADDLE_OUTSET).toBe(PORT_EDGE_OUTSET);
-    });
-
-    it('TB: flow port center sits PORT_EDGE_OUTSET below the bottom border', () => {
-      const bounds = { minX: 10, minY: 20, maxX: 310, maxY: 84 };
-      const center = portCenterOnSourceEdge(bounds, 0.5, 'TB');
-      expect(center.y).toBe(bounds.maxY + PORT_EDGE_OUTSET);
-      expect(center.x).toBe(10 + 300 * 0.5);
     });
 
     it('TB: error port sits on the bottom border near the start of the trailing band', () => {
@@ -106,11 +71,8 @@ describe('port_geometry', () => {
       expect(ERROR_PORT_FRACTION).toBeLessThan(0.8);
     });
 
-    it('LR: flow PORT_EDGE_OUTSET past the right edge; error stays on the bottom edge', () => {
+    it('LR: error stays on the bottom edge, identical to TB', () => {
       const bounds = { minX: 10, minY: 20, maxX: 310, maxY: 84 };
-      const flow = portCenterOnSourceEdge(bounds, 0.32, 'LR');
-      expect(flow.x).toBe(bounds.maxX + PORT_EDGE_OUTSET);
-      expect(flow.y).toBeCloseTo(20 + 64 * 0.32);
       const errTb = errorPortCenter(bounds, 'TB');
       const errLr = errorPortCenter(bounds, 'LR');
       expect(errLr).toEqual(errTb);
@@ -123,41 +85,6 @@ describe('port_geometry', () => {
       expect(style.left).toBe(ERROR_PORT_ALONG);
       expect(style.bottom).toBe(-(PORT_HIT_SIZE / 2));
       expect(style.transform).toBe('translateX(-50%)');
-    });
-  });
-
-  describe('expandedPortsClear (no-overlap regression)', () => {
-    it('keeps expanded ports clear when the node meets minCrossSizeForPorts', () => {
-      const cases: Array<{
-        direction: 'TB' | 'LR';
-        flowCount: number;
-        hasError: boolean;
-      }> = [
-        { direction: 'TB', flowCount: 1, hasError: true },
-        { direction: 'LR', flowCount: 1, hasError: true },
-        { direction: 'TB', flowCount: 2, hasError: false },
-        { direction: 'LR', flowCount: 2, hasError: false },
-        // Hypothetical if+error once the engine allows it:
-        { direction: 'TB', flowCount: 2, hasError: true },
-        { direction: 'LR', flowCount: 2, hasError: true },
-      ];
-
-      for (const { direction, flowCount, hasError } of cases) {
-        // Width always carries the bottom-edge flow↔error (and TB flow↔flow) rule.
-        const width = Math.max(300, minCrossSizeForPorts(flowCount, hasError));
-        // Height carries LR flow↔flow; error is on a different edge.
-        const height = Math.max(64, minCrossSizeForPorts(flowCount, false));
-        expect(expandedPortsClear(width, height, flowCount, hasError, direction)).toBe(true);
-      }
-    });
-
-    it('LR step+error: flow on right and error on bottom never share an edge', () => {
-      const centers = expandedPortCenters(300, 64, 1, true, 'LR');
-      const flow = centers.find((c) => c.kind === 'flow')!;
-      const err = centers.find((c) => c.kind === 'error')!;
-      expect(flow.x).toBe(300 + PORT_EDGE_OUTSET);
-      expect(err.y).toBe(64);
-      expect(err.x).not.toBe(flow.x);
     });
   });
 });

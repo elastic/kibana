@@ -41,6 +41,17 @@ const TRIGGER_LABEL: Record<string, string> = {
   document: 'Document',
 };
 
+/** Height of every layout-only bypass and join node. */
+const BYPASS_LANE_HEIGHT = 1;
+/** Width of a bypass or join node that only needs to hold a lane open for dagre. */
+const BYPASS_LANE_THIN_WIDTH = 1;
+/**
+ * Width of a bypass or join node that React Flow must be able to measure.
+ * Width 80 keeps updateNodeInternals from measuring offsetWidth=0, which would
+ * leave the node without handle bounds.
+ */
+const BYPASS_LANE_MEASURABLE_WIDTH = 80;
+
 /** Keeps only well-formed steps, like `visitStepChildSlots` does for the fingerprint. */
 const toSteps = (value: unknown): Step[] => (Array.isArray(value) ? value.filter(isStep) : []);
 
@@ -94,6 +105,8 @@ export interface TransformResult {
 
 interface InternalTransformResult extends Omit<TransformResult, 'structure'> {
   leafIds: string[];
+  /** Id of the first step transformed at this level, or `undefined` when there are no steps. */
+  headId: string | undefined;
   /** The structure items of the steps transformed at this level, in order. */
   items: StructureSequence;
   /**
@@ -191,12 +204,11 @@ function transformInternal(
     gateId: string,
     bypassName: string,
     edgeSuffix: string,
-    edge: Pick<GraphEdge, 'branchType' | 'branchIndex' | 'label'>
+    edge: Pick<GraphEdge, 'branchType' | 'branchIndex' | 'label'>,
+    width: number = BYPASS_LANE_MEASURABLE_WIDTH
   ): string => {
     const bypassId = ids.allocate(bypassName);
-    // Width 80 keeps React Flow's updateNodeInternals from measuring offsetWidth=0,
-    // which would leave the bypass node without handle bounds.
-    bypassLaneNodes.push({ id: bypassId, style: { width: 80, height: 1 } });
+    bypassLaneNodes.push({ id: bypassId, style: { width, height: BYPASS_LANE_HEIGHT } });
     edges.push({
       id: `${gateId}:${bypassId}-${edgeSuffix}`,
       source: gateId,
@@ -209,12 +221,24 @@ function transformInternal(
   /** Adds the virtual join node every exit of a fork block connects to, and records it for `gateId`. */
   const emitJoin = (gateId: string, gateName: string, exits: string[], width: number): string => {
     const joinNodeId = ids.allocate(`${gateName}-join`);
-    bypassLaneNodes.push({ id: joinNodeId, style: { width, height: 1 } });
+    bypassLaneNodes.push({ id: joinNodeId, style: { width, height: BYPASS_LANE_HEIGHT } });
     for (const exitId of dedupeIds(exits)) {
       edges.push({ id: `${exitId}:${joinNodeId}`, source: exitId, target: joinNodeId });
     }
     forkNodeToJoinId.set(gateId, joinNodeId);
     return joinNodeId;
+  };
+
+  /** Folds the result of a nested `transformInternal` call into this level's accumulators. */
+  const mergeInner = (inner: InternalTransformResult): void => {
+    Object.assign(nodeRefs, inner.nodeRefs);
+    for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
+    nodes.push(...inner.nodes);
+    bypassLaneNodes.push(...inner.bypassLaneNodes);
+    edges.push(...inner.edges);
+    failureEdges.push(...inner.failureEdges);
+    foreachGroups.push(...inner.foreachGroups);
+    fallbackLanes.push(...inner.fallbackLanes);
   };
 
   const triggerIds: string[] = [];
@@ -289,9 +313,7 @@ function transformInternal(
     // at any nesting depth. The container is a self-contained "folder": one
     // edge in (from the previous outer step), one edge out (to the next outer
     // step), and inner steps only connect to each other.
-    // CONTAINER_STEP_TYPES is the single source of truth for this set — kept
-    // in sync with visitStepChildren so the topology fingerprint and the
-    // transform always agree on which steps have inner children.
+    // CONTAINER_STEP_TYPES is the single source of truth for this set.
     const isContainerGroup = CONTAINER_STEP_TYPES.has(step.type);
 
     if (isContainerGroup) {
@@ -365,15 +387,8 @@ function transformInternal(
 
       if (hasThen) {
         const inner = transformInternal([], thenSteps, ids, ctx);
-        Object.assign(nodeRefs, inner.nodeRefs);
-        for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
-        nodes.push(...inner.nodes);
-        bypassLaneNodes.push(...inner.bypassLaneNodes);
-        edges.push(...inner.edges);
-        failureEdges.push(...inner.failureEdges);
-        foreachGroups.push(...inner.foreachGroups);
-        fallbackLanes.push(...inner.fallbackLanes);
-        const firstId = inner.nodes[0]?.id;
+        mergeInner(inner);
+        const firstId = inner.headId;
         if (firstId) {
           edges.push({
             id: `${id}:${firstId}-then`,
@@ -388,15 +403,13 @@ function transformInternal(
       } else if (hasElse) {
         // No `then` body but `else` is present — synthesize a bypass lane node
         // for the true path so dagre allocates a balanced diamond lane.
-        const bypassId = ids.allocate(`${step.name}-then-bypass`);
-        bypassLaneNodes.push({ id: bypassId, style: { width: 1, height: 1 } });
-        edges.push({
-          id: `${id}:${bypassId}-then`,
-          source: id,
-          target: bypassId,
-          branchType: 'then',
-          label: 'true',
-        });
+        const bypassId = emitBypassBranch(
+          id,
+          `${step.name}-then-bypass`,
+          'then',
+          { branchType: 'then', label: 'true' },
+          BYPASS_LANE_THIN_WIDTH
+        );
         branches.push({ head: bypassId, items: [], label: 'true' });
         branchExits.push(bypassId);
       } else {
@@ -412,15 +425,8 @@ function transformInternal(
 
       if (hasElse) {
         const inner = transformInternal([], elseSteps, ids, ctx);
-        Object.assign(nodeRefs, inner.nodeRefs);
-        for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
-        nodes.push(...inner.nodes);
-        bypassLaneNodes.push(...inner.bypassLaneNodes);
-        edges.push(...inner.edges);
-        failureEdges.push(...inner.failureEdges);
-        foreachGroups.push(...inner.foreachGroups);
-        fallbackLanes.push(...inner.fallbackLanes);
-        const firstId = inner.nodes[0]?.id;
+        mergeInner(inner);
+        const firstId = inner.headId;
         if (firstId) {
           edges.push({
             id: `${id}:${firstId}-else`,
@@ -435,15 +441,13 @@ function transformInternal(
       } else if (hasThen) {
         // No `else` body but `then` is present — synthesize a bypass lane node
         // for the false path so dagre allocates a balanced diamond lane.
-        const bypassId = ids.allocate(`${step.name}-else-bypass`);
-        bypassLaneNodes.push({ id: bypassId, style: { width: 1, height: 1 } });
-        edges.push({
-          id: `${id}:${bypassId}-else`,
-          source: id,
-          target: bypassId,
-          branchType: 'else',
-          label: 'false',
-        });
+        const bypassId = emitBypassBranch(
+          id,
+          `${step.name}-else-bypass`,
+          'else',
+          { branchType: 'else', label: 'false' },
+          BYPASS_LANE_THIN_WIDTH
+        );
         branches.push({ head: bypassId, items: [], label: 'false' });
         branchExits.push(bypassId);
       } else {
@@ -457,7 +461,7 @@ function transformInternal(
       }
 
       forkBranches = branches;
-      joinId = emitJoin(id, step.name, branchExits, 1);
+      joinId = emitJoin(id, step.name, branchExits, BYPASS_LANE_THIN_WIDTH);
       exitIds = [joinId];
     } else if (step.type === 'parallel') {
       const parallelStep = step as ParallelStep;
@@ -487,15 +491,8 @@ function transformInternal(
           return;
         }
         const inner = transformInternal([], branchSteps, ids, ctx);
-        Object.assign(nodeRefs, inner.nodeRefs);
-        for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
-        nodes.push(...inner.nodes);
-        bypassLaneNodes.push(...inner.bypassLaneNodes);
-        edges.push(...inner.edges);
-        failureEdges.push(...inner.failureEdges);
-        foreachGroups.push(...inner.foreachGroups);
-        fallbackLanes.push(...inner.fallbackLanes);
-        const firstId = inner.nodes[0]?.id;
+        mergeInner(inner);
+        const firstId = inner.headId;
         if (firstId) {
           edges.push({
             id: `${id}:${firstId}-branch-${idx}`,
@@ -515,7 +512,7 @@ function transformInternal(
       });
       forkBranches = parallelBranches;
       if (branchExits.length > 0) {
-        joinId = emitJoin(id, step.name, branchExits, 1);
+        joinId = emitJoin(id, step.name, branchExits, BYPASS_LANE_THIN_WIDTH);
         exitIds = [joinId];
       }
     } else if (step.type === 'switch') {
@@ -544,15 +541,8 @@ function transformInternal(
           return;
         }
         const inner = transformInternal([], caseSteps, ids, ctx);
-        Object.assign(nodeRefs, inner.nodeRefs);
-        for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
-        nodes.push(...inner.nodes);
-        bypassLaneNodes.push(...inner.bypassLaneNodes);
-        edges.push(...inner.edges);
-        failureEdges.push(...inner.failureEdges);
-        foreachGroups.push(...inner.foreachGroups);
-        fallbackLanes.push(...inner.fallbackLanes);
-        const firstId = inner.nodes[0]?.id;
+        mergeInner(inner);
+        const firstId = inner.headId;
         if (firstId) {
           edges.push({
             id: `${id}:${firstId}-case-${idx}`,
@@ -570,15 +560,8 @@ function transformInternal(
       // Rule 2 — `default` branch, labeled 'default'.
       if (hasDefault) {
         const inner = transformInternal([], defaultSteps, ids, ctx);
-        Object.assign(nodeRefs, inner.nodeRefs);
-        for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
-        nodes.push(...inner.nodes);
-        bypassLaneNodes.push(...inner.bypassLaneNodes);
-        edges.push(...inner.edges);
-        failureEdges.push(...inner.failureEdges);
-        foreachGroups.push(...inner.foreachGroups);
-        fallbackLanes.push(...inner.fallbackLanes);
-        const firstId = inner.nodes[0]?.id;
+        mergeInner(inner);
+        const firstId = inner.headId;
         if (firstId) {
           edges.push({
             id: `${id}:${firstId}-default`,
@@ -594,12 +577,7 @@ function transformInternal(
         // Rule 3 — no explicit `default`: synthesize a bypass lane node labeled
         // 'default' so the implicit fall-through renders as a balanced, labeled
         // lane aside instead of an unlabeled edge from the gate.
-        const bypassId = ids.allocate(`${step.name}-default-bypass`);
-        bypassLaneNodes.push({ id: bypassId, style: { width: 80, height: 1 } });
-        edges.push({
-          id: `${id}:${bypassId}-default`,
-          source: id,
-          target: bypassId,
+        const bypassId = emitBypassBranch(id, `${step.name}-default-bypass`, 'default', {
           branchType: 'switch',
           label: 'default',
         });
@@ -609,7 +587,7 @@ function transformInternal(
 
       forkBranches = switchBranches;
       if (branchExits.length > 0) {
-        joinId = emitJoin(id, step.name, branchExits, 80);
+        joinId = emitJoin(id, step.name, branchExits, BYPASS_LANE_MEASURABLE_WIDTH);
         exitIds = [joinId];
       }
     } else if (step.type === 'merge') {
@@ -617,15 +595,8 @@ function transformInternal(
       const childSteps = toSteps(mergeStep.steps);
       const inner = transformInternal([], childSteps, ids, ctx);
       attached = inner.items;
-      Object.assign(nodeRefs, inner.nodeRefs);
-      for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
-      nodes.push(...inner.nodes);
-      bypassLaneNodes.push(...inner.bypassLaneNodes);
-      edges.push(...inner.edges);
-      failureEdges.push(...inner.failureEdges);
-      foreachGroups.push(...inner.foreachGroups);
-      fallbackLanes.push(...inner.fallbackLanes);
-      const firstId = inner.nodes[0]?.id;
+      mergeInner(inner);
+      const firstId = inner.headId;
       if (firstId) {
         edges.push({ id: `${id}:${firstId}`, source: id, target: firstId });
       }
@@ -647,9 +618,6 @@ function transformInternal(
         graphId: ctx.graphId,
         fallbackDepth: ctx.fallbackDepth + 1,
       });
-      Object.assign(nodeRefs, inner.nodeRefs);
-      for (const [k, v] of inner.forkNodeToJoinId) forkNodeToJoinId.set(k, v);
-
       // Stamp fallbackOf on every non-trigger node in the lane (step and
       // foreachGroup containers). Stamping foreachGroup containers lets the
       // layout engine place the container in the lane's gutter; its inner nodes
@@ -660,9 +628,8 @@ function transformInternal(
       const laneNodes: string[] = [];
       for (const n of inner.nodes) {
         if (n.type !== 'trigger') {
-          const d = n.data as { fallbackOf?: string };
-          if (d.fallbackOf === undefined) {
-            d.fallbackOf = id;
+          if (n.data.fallbackOf === undefined) {
+            n.data.fallbackOf = id;
             laneNodes.push(n.id);
           }
         }
@@ -685,20 +652,14 @@ function transformInternal(
       for (const g of inner.foreachGroups) {
         for (const n of g.innerNodes) {
           if (n.type === 'step') {
-            const d = n.data as { fallbackOf?: string };
-            if (d.fallbackOf === undefined) d.fallbackOf = id;
+            if (n.data.fallbackOf === undefined) n.data.fallbackOf = id;
           }
         }
       }
 
-      nodes.push(...inner.nodes);
-      bypassLaneNodes.push(...inner.bypassLaneNodes);
-      edges.push(...inner.edges);
-      failureEdges.push(...inner.failureEdges);
-      foreachGroups.push(...inner.foreachGroups);
-      fallbackLanes.push(...inner.fallbackLanes);
+      mergeInner(inner);
 
-      const headId = inner.nodes[0]?.id;
+      const headId = inner.headId;
       if (headId) {
         const laneLeaves = inner.leafIds;
         fallbackLanes.push({
@@ -765,6 +726,7 @@ function transformInternal(
     fallbackLanes,
     forkNodeToJoinId,
     leafIds: prevExitIds,
+    headId: stepIds[0],
     items,
   };
 }
