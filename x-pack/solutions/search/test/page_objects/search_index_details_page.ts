@@ -51,10 +51,13 @@ export function SearchIndexDetailPageProvider({ getService, getPageObjects }: Ft
     },
     async expectSizeDocCountToHaveDocumentCount(count: number) {
       await testSubjects.existOrFail('indexDetailsSizeDocCount', { timeout: 2000 });
-      const cardElem = await testSubjects.find('indexDetailsSizeDocCount');
-      const visibleText = await cardElem.getVisibleText();
       const label = count === 1 ? 'Document' : 'Documents';
-      expect(visibleText).to.contain(`${count}\n${label}`);
+      // The document count is fetched separately and renders a spinner until it resolves.
+      await retry.try(async () => {
+        const cardElem = await testSubjects.find('indexDetailsSizeDocCount');
+        const visibleText = await cardElem.getVisibleText();
+        expect(visibleText).to.contain(`${count}\n${label}`);
+      });
     },
 
     async expectQuickStatsToHaveIndexStatus() {
