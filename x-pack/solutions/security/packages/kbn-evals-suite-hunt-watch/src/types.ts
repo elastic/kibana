@@ -29,10 +29,13 @@ export interface HuntReportExpectation {
   pendingProposals: number | { min: number };
   /**
    * Whether report `evidence[]` and `last_hunted_at` are written. The hunt child writes evidence
-   * exactly when its coordinator completed (`hunt.output.status === 'success'`), independent of
-   * packaging. `iff_hunt_success` is for rows where the hunt may legitimately end partial.
+   * exactly when the coordinator result's `completed_successfully` is true (`write_evidence` in
+   * `hunt.yaml`): `complete` or `incomplete_final`, never `incomplete_retryable`. That is not the
+   * child's own `status`, which is `partial` for both incomplete kinds, so a hunt that retired a
+   * report with evidence marked incomplete still counts as written here.
+   * `iff_completed_successfully` is for rows where the hunt may legitimately end partial.
    */
-  evidenceWritten: boolean | 'iff_hunt_success';
+  evidenceWritten: boolean | 'iff_completed_successfully';
   /** Whether a schema-valid SSE attachment is expected on the Investigation. */
   sseAttachment: boolean;
   /**

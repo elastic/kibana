@@ -179,6 +179,34 @@ const bridgeSubjectModel = async ({
   log: ToolingLog;
   connectorId: string;
 }): Promise<Map<string, string | null>> => {
+  // Checked in every space before anything is written: a throw here must not leave the spaces
+  // already visited pointed at the subject connector with no cleanup to put them back.
+  // `/internal/search_inference_endpoints/settings` reports which inference endpoint (if any)
+  // is assigned per feature id; a non-empty `endpoints` array for a tier feature means that
+  // tier takes precedence over the genAiSettings bridge below.
+  for (const spaceId of EVAL_SPACE_IDS) {
+    const settingsResponse = await fetch<{
+      data: { features: Array<{ feature_id: string; endpoints: Array<{ id: string }> }> };
+    }>(spacePath(spaceId, '/internal/search_inference_endpoints/settings'), {
+      method: 'GET',
+      headers: apiVersion(SEARCH_INFERENCE_ENDPOINTS_API_VERSION),
+    });
+
+    const assignedTierFeatures = settingsResponse.data.features.filter(
+      (feature) =>
+        ALERTZERO_TIER_FEATURE_IDS.includes(feature.feature_id) && feature.endpoints.length > 0
+    );
+    if (assignedTierFeatures.length > 0) {
+      throw new Error(
+        `[hunt-watch] space "${spaceId}" has a tier inference endpoint assigned for ` +
+          `${assignedTierFeatures.map((f) => f.feature_id).join(', ')}. Tier endpoints take ` +
+          `precedence over "genAiSettings:defaultAIConnector" in scoped_model.ts, so the Worker ` +
+          `would silently ignore the subject connector this suite bridges. Unassign the tier ` +
+          `endpoint(s) in this deployment before running this suite. A per-tier bridge is a follow-up.`
+      );
+    }
+  }
+
   const previous = new Map<string, string | null>();
   for (const spaceId of EVAL_SPACE_IDS) {
     // Remembered so the cleanup can put the space back the way it was. The Worker stays enabled
@@ -197,30 +225,6 @@ const bridgeSubjectModel = async ({
       spaceId,
       changes: { [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: connectorId },
     });
-
-    // `/internal/search_inference_endpoints/settings` reports which inference endpoint (if any)
-    // is assigned per feature id; a non-empty `endpoints` array for a tier feature means that
-    // tier takes precedence over the genAiSettings bridge above.
-    const settingsResponse = await fetch<{
-      data: { features: Array<{ feature_id: string; endpoints: Array<{ id: string }> }> };
-    }>(spacePath(spaceId, '/internal/search_inference_endpoints/settings'), {
-      method: 'GET',
-      headers: apiVersion(SEARCH_INFERENCE_ENDPOINTS_API_VERSION),
-    });
-
-    const assignedTierFeatures = settingsResponse.data.features.filter(
-      (feature) =>
-        ALERTZERO_TIER_FEATURE_IDS.includes(feature.feature_id) && feature.endpoints.length > 0
-    );
-    if (assignedTierFeatures.length > 0) {
-      throw new Error(
-        `[hunt-watch] space "${spaceId}" has a tier inference endpoint assigned for ` +
-          `${assignedTierFeatures.map((f) => f.feature_id).join(', ')}. Tier endpoints take ` +
-          `precedence over "genAiSettings:defaultAIConnector" in scoped_model.ts, so the Worker ` +
-          `would silently ignore the subject connector set above. Unassign the tier endpoint(s) ` +
-          `in this deployment before running this suite. A per-tier bridge is a follow-up.`
-      );
-    }
   }
   return previous;
 };
@@ -447,17 +451,13 @@ export const runPreflight = async ({
   }
   await configureIndexScope({ fetch, log });
   const previousConnectors = await bridgeSubjectModel({ fetch, log, connectorId });
-  await enableWorkerInEvalSpaces({ fetch, log });
-  await assertThreatIntelSupplyReady({ fetch, log });
-  await ensureEntityStoreRunning({ fetch, log });
-  await ensureJudgeConnectorAccessible({ fetch, connector: evaluationConnector, log });
 
   // The eval spaces are left in place on purpose. Deleting them here and recreating them on the
   // next run races the per-space Worker install, its service-account binding and the managed
   // workflow reconcile (seen as a 404 on the TI supply route and a 403 "service account binding
   // does not match" on the next run against a long-lived stack). They are eval-only and
   // `ensureSpaceExists` is idempotent, so a CI stack discards them and a local one reuses them.
-  return async () => {
+  const restoreConnectors: PreflightCleanup = async () => {
     for (const spaceId of EVAL_SPACE_IDS) {
       try {
         await setUiSettings({
@@ -476,4 +476,18 @@ export const runPreflight = async ({
       }
     }
   };
+
+  // Every gate below can throw, and a worker fixture that throws before `use()` never runs the
+  // cleanup it would have returned, so the connectors are put back here before the error leaves.
+  try {
+    await enableWorkerInEvalSpaces({ fetch, log });
+    await assertThreatIntelSupplyReady({ fetch, log });
+    await ensureEntityStoreRunning({ fetch, log });
+    await ensureJudgeConnectorAccessible({ fetch, connector: evaluationConnector, log });
+  } catch (err) {
+    await restoreConnectors();
+    throw err;
+  }
+
+  return restoreConnectors;
 };

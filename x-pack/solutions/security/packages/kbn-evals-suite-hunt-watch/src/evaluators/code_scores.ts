@@ -113,7 +113,7 @@ export const scoreOutcome = (expected: HuntExpected, artifacts: HuntArtifacts): 
     artifacts,
     (_expected, actual) => {
       if (!actual.outcome) return missing('no resolve_run_outcome output for this report');
-      if (!outcome.includes(actual.outcome as never)) {
+      if (!outcome.some((accepted) => accepted === actual.outcome)) {
         return fail(`outcome "${actual.outcome}", expected one of [${outcome.join(', ')}]`, {
           reason: actual.packaging?.reason ?? actual.hunt?.reason,
         });
@@ -324,16 +324,23 @@ export const scoreEvidenceHonesty = (expected: HuntExpected, artifacts: HuntArti
     (report, actual) => {
       if (!actual.reportDoc) return missing('report doc not found');
       const written = hasEvidence(actual.reportDoc);
-      const huntStatus = actual.hunt?.status;
+      // The flag the hunt child's `write_evidence` step keys off: true for `complete` and
+      // `incomplete_final`, false for `incomplete_retryable`, absent when no coordinator read
+      // completed. The child's own `status` is `partial` for both incomplete kinds, so it cannot
+      // tell a retired-with-incomplete-evidence hunt from one that wrote nothing.
+      const completedSuccessfully = actual.coordinator?.completed_successfully === true;
+      const completeness =
+        typeof actual.coordinator?.completeness === 'string'
+          ? actual.coordinator.completeness
+          : 'absent';
       const want =
-        report.evidenceWritten === 'iff_hunt_success'
-          ? huntStatus === 'success'
+        report.evidenceWritten === 'iff_completed_successfully'
+          ? completedSuccessfully
           : report.evidenceWritten;
+      const context = `coordinator ${completeness}, hunt ${actual.hunt?.status}, outcome ${actual.outcome}`;
       return written === want
-        ? pass(`evidence written=${written} (hunt ${huntStatus})`)
-        : fail(
-            `evidence written=${written}, report ${want} (hunt ${huntStatus}, outcome ${actual.outcome})`
-          );
+        ? pass(`evidence written=${written} (${context})`)
+        : fail(`evidence written=${written}, report ${want} (${context})`);
     },
     'no reports'
   );

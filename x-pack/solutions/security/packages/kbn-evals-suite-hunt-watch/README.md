@@ -24,7 +24,7 @@ never part of that gate.
 | Tier 1 Status | CODE | SSE `hunt_result.tier1.status`, falling back to the hunt headline |
 | Tier 2 Execution | CODE | whether any behavior query executed |
 | SSE Attachment | CODE | a `security.significant_security_event` attachment with a `hunt_result` exists iff expected |
-| Evidence Honesty | CODE | report `evidence[]` written iff the hunt completed (`hunt.output.status === 'success'`) |
+| Evidence Honesty | CODE | report `evidence[]` written iff the coordinator result's `completed_successfully` is true (`complete` or `incomplete_final`, never `incomplete_retryable`), the same flag the hunt child's `write_evidence` step reads |
 | Proposal Presence | CODE | pending Proposals on the Investigation match the exact count or minimum |
 | Proposal Convergence | CODE | multi-candidate only: each actioned subject (target plus criticality level, the key packaging converges on) is pending under one Investigation, and a convergence note or `Also raised by [Investigation]` line is present |
 | Investigation Status | CODE | conversation `metadata.status`, or no conversation at all |
@@ -258,6 +258,6 @@ d=$(mktemp -d) && cp gate_checklist.yaml "$d/gate-checklist.yaml"
   holdout `historic-03` run grounded and hit all three techniques and ended `completed`, while
   `historic-01` still ended `incomplete_retryable`, this time on `quote_ungrounded` for a
   technique the report does not name (T1562.008). Rows on that scenario accept `completed` or
-  `partial`, check evidence with `iff_hunt_success`, and do not pin Tier 2 execution. The golden
+  `partial`, check evidence with `iff_completed_successfully`, and do not pin Tier 2 execution. The golden
   hit (`aws-iam-historic-01`) does not show this and keeps its exact pins. Tighten the holdout
   row to `completed` once a few more runs hold.

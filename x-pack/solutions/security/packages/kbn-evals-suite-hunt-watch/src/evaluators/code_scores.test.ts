@@ -132,25 +132,39 @@ describe('code scores', () => {
     expect(scoreProposalPresence(buildExpected({}), buildArtifacts()).score).toBe(1);
   });
 
-  it('scores evidence as written when the hunt succeeded, even if the run ended partial', () => {
+  it('scores evidence as written when the coordinator retired the report as incomplete_final, even though the hunt child reports partial', () => {
     expect(
       scoreEvidenceHonesty(
-        buildExpected({ evidenceWritten: 'iff_hunt_success' }),
+        buildExpected({ evidenceWritten: 'iff_completed_successfully' }),
         buildArtifacts({
           outcome: 'partial',
-          hunt: { status: 'success' },
+          hunt: { status: 'partial' },
+          coordinator: { completeness: 'incomplete_final', completed_successfully: true },
           reportDoc: { evidence: [{ space_id: 'default' }] },
         })
       ).score
     ).toBe(1);
   });
 
-  it('scores 0 when evidence was written by a hunt that did not complete', () => {
+  it('scores 0 when a retryable hunt, which must leave the report eligible, wrote evidence', () => {
     expect(
       scoreEvidenceHonesty(
-        buildExpected({ evidenceWritten: 'iff_hunt_success' }),
+        buildExpected({ evidenceWritten: 'iff_completed_successfully' }),
         buildArtifacts({
           hunt: { status: 'partial' },
+          coordinator: { completeness: 'incomplete_retryable', completed_successfully: false },
+          reportDoc: { evidence: [{ space_id: 'default' }] },
+        })
+      ).score
+    ).toBe(0);
+  });
+
+  it('scores 0 when no coordinator read completed but evidence was written', () => {
+    expect(
+      scoreEvidenceHonesty(
+        buildExpected({ evidenceWritten: 'iff_completed_successfully' }),
+        buildArtifacts({
+          hunt: { status: 'failed' },
           reportDoc: { evidence: [{ space_id: 'default' }] },
         })
       ).score

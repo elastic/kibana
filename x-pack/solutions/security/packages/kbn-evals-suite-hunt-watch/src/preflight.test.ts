@@ -194,6 +194,43 @@ describe('runPreflight', () => {
     ).rejects.toThrow(/alertzero_efficient/);
   });
 
+  it('writes no subject connector to any space when a tier endpoint is assigned', async () => {
+    const settingsWrites: MockOverrides['settingsWrites'] = [];
+    await expect(
+      run(buildMockFetch({ tierFeaturesWithEndpoint: ['alertzero_efficient'], settingsWrites }))
+    ).rejects.toThrow(/alertzero_efficient/);
+    expect(
+      settingsWrites.filter(({ changes }) => 'genAiSettings:defaultAIConnector' in changes)
+    ).toEqual([]);
+  });
+
+  it('restores the previous connector in every space when a gate after the bridge throws', async () => {
+    const settingsWrites: MockOverrides['settingsWrites'] = [];
+    await expect(
+      run(
+        buildMockFetch({
+          previousDefaultConnectorBySpace: { default: 'developer-connector' },
+          threatIntelSupplyBySpace: { [EVAL_SPACE_IDS[0]]: { hardGateOk: false } },
+          settingsWrites,
+        })
+      )
+    ).rejects.toThrow(/hardGate\.ok=false/);
+
+    // Last connector write per space wins: the bridge sets the subject connector, the failed
+    // preflight must put the previous value back.
+    const lastConnectorWrite = Object.fromEntries(
+      settingsWrites
+        .filter(({ changes }) => 'genAiSettings:defaultAIConnector' in changes)
+        .map(({ spaceId, changes }) => [spaceId, changes['genAiSettings:defaultAIConnector']])
+    );
+    expect(lastConnectorWrite).toEqual({
+      default: 'developer-connector',
+      'hunt-a': null,
+      'hunt-b': null,
+      'hunt-blocked': null,
+    });
+  });
+
   it('throws naming the built-in role when Elasticsearch does not ship it', async () => {
     await expect(run(buildMockFetch({ builtInRoleMissing: true }))).rejects.toThrow(
       /no built-in "alertzero_threat_hunt" role/

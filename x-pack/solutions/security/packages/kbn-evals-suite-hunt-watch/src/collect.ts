@@ -15,6 +15,8 @@ import type {
 } from '@kbn/workflows';
 import { huntResultSchema, type HuntResult } from '@kbn/alertzero-common';
 import {
+  MAX_PROPOSALS_PAGE_OFFSET,
+  MAX_PROPOSALS_PAGE_SIZE,
   PROPOSALS_API_VERSION,
   PROPOSALS_INTERNAL_URL,
   type ProposalWithMetadata,
@@ -195,8 +197,11 @@ const getCoordinatorOutput = async ({
   children: ChildWorkflowExecutionItem[];
   huntStep?: WorkflowStepExecutionDto;
 }): Promise<Record<string, unknown> | undefined> => {
+  // No hunt step on this branch means no child to read; without the guard a child item that
+  // carries no parent step id would match `undefined === undefined`.
+  if (!huntStep) return undefined;
   const child = children.find(
-    (c) => c.parentStepExecutionId === huntStep?.id && c.workflowId === HUNT_EXECUTE_WORKFLOW_ID
+    (c) => c.parentStepExecutionId === huntStep.id && c.workflowId === HUNT_EXECUTE_WORKFLOW_ID
   );
   if (!child) return undefined;
   const execution = await fetch<WorkflowExecutionDto>(executionPath(spaceId, child.executionId), {
@@ -232,15 +237,32 @@ const listPendingProposalsInSpace = async ({
   fetch: HttpHandler;
   spaceId: string;
 }): Promise<ProposalWithMetadata[]> => {
-  const response = await fetch<{ proposals: ProposalWithMetadata[] }>(
-    spacePath(spaceId, PROPOSALS_INTERNAL_URL),
-    {
-      method: 'GET',
-      headers: apiVersion(PROPOSALS_API_VERSION),
-      query: { status: 'pending', excludeSuperseded: true, size: 100 },
+  // Paged to exhaustion, the way the Worker's own open-Proposal gate reads this list
+  // (`routes/hunt/candidates.ts`): on a long-lived stack a single capped page would hide a
+  // duplicate actioned subject or the live Proposal a convergence note cites, and the
+  // convergence scorer would pass or report MISSING for a reason that is not the Worker's.
+  const proposals: ProposalWithMetadata[] = [];
+  let from = 0;
+  for (;;) {
+    if (from > MAX_PROPOSALS_PAGE_OFFSET) {
+      throw new Error(
+        `Cannot enumerate pending Proposals in space "${spaceId}": more than ` +
+          `${MAX_PROPOSALS_PAGE_OFFSET + MAX_PROPOSALS_PAGE_SIZE} exist and the list cannot page ` +
+          `past Elasticsearch's result window.`
+      );
     }
-  );
-  return response.proposals;
+    const page = await fetch<{ proposals: ProposalWithMetadata[]; total: number }>(
+      spacePath(spaceId, PROPOSALS_INTERNAL_URL),
+      {
+        method: 'GET',
+        headers: apiVersion(PROPOSALS_API_VERSION),
+        query: { status: 'pending', excludeSuperseded: true, size: MAX_PROPOSALS_PAGE_SIZE, from },
+      }
+    );
+    proposals.push(...page.proposals);
+    from += page.proposals.length;
+    if (page.proposals.length === 0 || from >= page.total) return proposals;
+  }
 };
 
 /** Reads an Investigation conversation in a space, or `undefined` when it does not exist there. */
