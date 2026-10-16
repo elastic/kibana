@@ -8,16 +8,15 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { BaseFlameGraph } from '@kbn/profiling-utils';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
+import type { ProfilingHostsCorrelation } from './hosts_scope';
 import {
   rangeSchema,
   kuerySchema,
   serviceTransactionDataSourceSchema,
 } from '../../default_api_types';
 
-export interface ProfilingHostsFlamegraphResponse {
+export interface ProfilingHostsFlamegraphResponse extends ProfilingHostsCorrelation {
   flamegraph: BaseFlameGraph;
-  hostNames: string[];
-  containerIds: string[];
 }
 
 export const profilingHostsFlamegraphRoute = defineRoute<ProfilingHostsFlamegraphResponse>()({

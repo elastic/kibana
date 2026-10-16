@@ -6,7 +6,7 @@
  */
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { FlamegraphChart } from '../../charts/flamegraph';
 import { ProfilingFlamegraphLink } from './flamegraph_link';
@@ -19,6 +19,8 @@ interface Props {
   transactionName?: string;
   transactionType?: string;
   environment: string;
+  /** Rendered instead of the flamegraph when the service's transactions link to no profiling samples. */
+  fallback?: React.ReactNode;
 }
 
 export function ProfilingFlamegraph({
@@ -29,6 +31,7 @@ export function ProfilingFlamegraph({
   transactionName,
   transactionType,
   environment,
+  fallback,
 }: Props) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -53,6 +56,10 @@ export function ProfilingFlamegraph({
     },
     [serviceName, start, end, kuery, transactionName, transactionType, environment]
   );
+
+  if (fallback && status === FETCH_STATUS.SUCCESS && (!data || data.TotalSamples === 0)) {
+    return <>{fallback}</>;
+  }
 
   return (
     <>

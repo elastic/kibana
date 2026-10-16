@@ -45,6 +45,35 @@ export function ProfilingOverview() {
   const isJavaAgent = getIsJavaAgentName(agentName);
 
   const tabs = useMemo((): EuiTabbedContentProps['tabs'] => {
+    // Host-scoped views are the default for non-Java agents and the fallback for Java agents
+    // whose transactions carry no profiler stack-trace ids (e.g. upstream OpenTelemetry Java).
+    const hostsFlamegraph = (
+      <ProfilingHostsFlamegraph
+        serviceName={serviceName}
+        start={start}
+        end={end}
+        environment={environment}
+        dataSource={preferred?.source}
+        kuery={kuery}
+        rangeFrom={rangeFrom}
+        rangeTo={rangeTo}
+      />
+    );
+    const hostsTopNFunctions = (
+      <ProfilingHostsTopNFunctions
+        serviceName={serviceName}
+        start={start}
+        end={end}
+        environment={environment}
+        startIndex={0}
+        endIndex={10}
+        dataSource={preferred?.source}
+        kuery={kuery}
+        rangeFrom={rangeFrom}
+        rangeTo={rangeTo}
+      />
+    );
+
     return [
       {
         id: 'flamegraph',
@@ -62,18 +91,10 @@ export function ProfilingOverview() {
                 rangeTo={rangeTo}
                 environment={environment}
                 transactionType={transactionType}
+                fallback={hostsFlamegraph}
               />
             ) : (
-              <ProfilingHostsFlamegraph
-                serviceName={serviceName}
-                start={start}
-                end={end}
-                environment={environment}
-                dataSource={preferred?.source}
-                kuery={kuery}
-                rangeFrom={rangeFrom}
-                rangeTo={rangeTo}
-              />
+              hostsFlamegraph
             )}
           </>
         ),
@@ -94,20 +115,10 @@ export function ProfilingOverview() {
                 rangeTo={rangeTo}
                 environment={environment}
                 transactionType={transactionType}
+                fallback={hostsTopNFunctions}
               />
             ) : (
-              <ProfilingHostsTopNFunctions
-                serviceName={serviceName}
-                start={start}
-                end={end}
-                environment={environment}
-                startIndex={0}
-                endIndex={10}
-                dataSource={preferred?.source}
-                kuery={kuery}
-                rangeFrom={rangeFrom}
-                rangeTo={rangeTo}
-              />
+              hostsTopNFunctions
             )}
           </>
         ),
