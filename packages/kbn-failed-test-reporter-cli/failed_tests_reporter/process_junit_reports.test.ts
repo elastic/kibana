@@ -254,11 +254,7 @@ describe('processJUnitReports same-error failures', () => {
 
     expect(createFailureIssue).toHaveBeenCalledTimes(1);
     expect(createFailureIssue.mock.calls[0][1]).toBe(failures[0]);
-    expect(failures.map(({ sameErrorAs }) => sameErrorAs)).toEqual([
-      undefined,
-      'test 0',
-      'test 0',
-    ]);
+    expect(failures.map(({ sameErrorAs }) => sameErrorAs)).toEqual([undefined, 'test 0', 'test 0']);
   });
 
   it('does not update tracked issues for the folded failures', async () => {
