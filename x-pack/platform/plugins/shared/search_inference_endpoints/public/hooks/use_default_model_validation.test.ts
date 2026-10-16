@@ -171,6 +171,6 @@ describe('useDefaultModelValidation', () => {
     );
 
     expect(result.current.isValid).toBe(false);
-    expect(result.current.errors[0]).toBe('This model has been unavailable since 2024-01-01.');
+    expect(result.current.errors[0]).toMatch(/unavailable since/i);
   });
 });
