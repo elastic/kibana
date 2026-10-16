@@ -42,6 +42,20 @@ import { createWorkflowClient, type WorkflowClient, type WorkflowSummary } from 
 /** The id of the Workflows application, which an execution is looked at in. */
 const WORKFLOWS_APPLICATION_ID = 'workflows';
 const MAX_SHOWN_VALUE_LENGTH = 200;
+const MAX_SHOWN_STEPS = 10;
+
+type Steps = NonNullable<NonNullable<WorkflowSummary['definition']>['steps']>;
+
+/** Whether a step holds steps of its own, as one that loops or branches does. */
+const hasNestedSteps = (steps: Steps): boolean =>
+  steps.some((step) =>
+    Object.values(step).some(
+      (value) =>
+        Array.isArray(value) &&
+        value.length > 0 &&
+        value.every((item) => typeof item === 'object' && item !== null && 'type' in item)
+    )
+  );
 
 export type WorkflowAvailability = { canRun: true } | { canRun: false; reason: string };
 
@@ -103,6 +117,50 @@ const toMessage = (error: unknown): string =>
 const show = (value: unknown): string => {
   const text = JSON.stringify(value);
   return text.length > MAX_SHOWN_VALUE_LENGTH ? `${text.slice(0, MAX_SHOWN_VALUE_LENGTH)}…` : text;
+};
+
+/**
+ * What the workflow does, as it is written: the steps a person agrees to when they press Run. The
+ * name and the description are the author's words, which can say one thing and do another; the
+ * steps are what will run.
+ */
+const WorkflowSteps = ({ steps }: { steps: Steps | undefined }) => {
+  if (!steps || steps.length === 0) return null;
+  const shown = steps.slice(0, MAX_SHOWN_STEPS);
+
+  return (
+    <>
+      <EuiSpacer size="s" />
+      <EuiText size="xs">
+        <strong>
+          {i18n.translate('xpack.customApp.workflows.steps', { defaultMessage: 'What it does' })}
+        </strong>
+      </EuiText>
+      <EuiDescriptionList
+        compressed
+        type="column"
+        data-test-subj="customAppRunWorkflowSteps"
+        listItems={shown.map((step, index) => ({
+          title: step.name ?? `${index + 1}`,
+          description: <EuiCode>{step.type ?? '?'}</EuiCode>,
+        }))}
+      />
+      {(steps.length > shown.length || hasNestedSteps(steps)) && (
+        <EuiText size="xs" color="subdued">
+          <p>
+            {steps.length > shown.length
+              ? i18n.translate('xpack.customApp.workflows.moreSteps', {
+                  defaultMessage: 'And {count, plural, one {# more step} other {# more steps}}.',
+                  values: { count: steps.length - shown.length },
+                })
+              : i18n.translate('xpack.customApp.workflows.nestedSteps', {
+                  defaultMessage: 'Some of these have steps of their own, which are not listed.',
+                })}
+          </p>
+        </EuiText>
+      )}
+    </>
+  );
 };
 
 interface ConfirmRunModalProps {
@@ -202,10 +260,13 @@ const ConfirmRunModal = ({
             <EuiPanel key={`${workflow}-${index}`} hasBorder hasShadow={false} paddingSize="m">
               {info.status === 'loading' && <EuiLoadingSpinner size="m" />}
               {info.status === 'ready' && (
-                <EuiText size="s">
-                  <strong>{info.workflow.name}</strong>
-                  {info.workflow.description ? <p>{info.workflow.description}</p> : null}
-                </EuiText>
+                <>
+                  <EuiText size="s">
+                    <strong>{info.workflow.name}</strong>
+                    {info.workflow.description ? <p>{info.workflow.description}</p> : null}
+                  </EuiText>
+                  <WorkflowSteps steps={info.workflow.definition?.steps} />
+                </>
               )}
               {info.status === 'error' && (
                 <EuiCallOut

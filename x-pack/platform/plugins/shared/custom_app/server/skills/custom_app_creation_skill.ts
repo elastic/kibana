@@ -31,11 +31,13 @@ Do **not** use it for a single chart (use the visualization skill) or to lay out
 1. Ground the index and its fields first. Every ES|QL query must use fields that exist.
 2. Try each query with ${platformCoreTools.executeEsql} before using it. Parameters (\`?name\`) cannot be tried without a value; give them a literal while testing.
 3. Call ${CREATE_CUSTOM_APP_TOOL_ID} with the complete app. Read the authoring guide in its description. If it reports problems, fix all of them and call it again.
-4. Render the result with \`<render_attachment id="{attachment_id}" version="{version}" />\`. Tell the user they can save it to a dashboard from the card.
-5. For changes, call ${UPDATE_CUSTOM_APP_TOOL_ID} with the \`attachment_id\` and the complete changed app, then render it again.`,
+4. Render the result with \`<render_attachment id="{attachment_id}" version="{version}" />\`. Tell the user they can save it as an app, or to a dashboard, from the card.
+5. If a button needs a workflow that does not exist, do not invent an id and do not add the button yet. Draft the workflow with ${platformCoreTools.generateWorkflow}, tell the person to review it and save it in the Workflows application, and wait. Once they say it is saved, find its id with the workflow tools and add the button.
+6. For changes, call ${UPDATE_CUSTOM_APP_TOOL_ID} with the \`attachment_id\` and the complete changed app, then render it again.`,
   getRegistryTools: () => [
     CREATE_CUSTOM_APP_TOOL_ID,
     UPDATE_CUSTOM_APP_TOOL_ID,
     platformCoreTools.executeEsql,
+    platformCoreTools.generateWorkflow,
   ],
 });

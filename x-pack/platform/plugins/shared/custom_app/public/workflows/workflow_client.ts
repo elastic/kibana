@@ -17,6 +17,10 @@ export interface WorkflowSummary {
   description?: string;
   enabled: boolean;
   valid: boolean;
+  /** What the workflow does. Only the part a person is shown of it is typed here. */
+  definition?: {
+    steps?: ReadonlyArray<{ name?: string; type?: string; [key: string]: unknown }>;
+  } | null;
 }
 
 export interface WorkflowList {

@@ -70,4 +70,28 @@ describe('the authoring guide', () => {
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('fromState');
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('found with the workflow tools');
   });
+
+  it('teaches how alerts are read and acted on, and that cases cannot be listed yet', () => {
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('.alerts-*');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('kibana.alert.uuid');
+    // The alerts of the newer kind are somewhere else, and are read per episode.
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('.rule-events');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('episode.id');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('Never write to an alert index');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('Cases cannot be read from a query yet');
+  });
+
+  it('says what to do when no workflow does what a button needs: draft one, and wait until it is saved', () => {
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('do not make up an id and do not add the button');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain(
+      'A draft is not a workflow until the person has reviewed and saved it'
+    );
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('You cannot save a workflow yourself');
+  });
+
+  it('says to look at the alert indices and fields first, since they differ', () => {
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain(
+      'look at the indices and fields with the tools before you write a query, and never assume'
+    );
+  });
 });

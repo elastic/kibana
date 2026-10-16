@@ -115,6 +115,64 @@ describe('running the workflows an action asks for', () => {
     expect(mockClient.run).not.toHaveBeenCalled();
   });
 
+  describe('what the workflow does', () => {
+    const withSteps = (steps: unknown[]) =>
+      mockClient.get.mockResolvedValue(workflow({ definition: { steps } }));
+
+    it('lists its steps, with their types, since the name and the description are only words', async () => {
+      withSteps([
+        { name: 'find_alert', type: 'elasticsearch.search' },
+        { name: 'create_case', type: 'cases.createCase' },
+      ]);
+      setup();
+
+      await ask();
+
+      const steps = await screen.findByTestId('customAppRunWorkflowSteps');
+      expect(steps).toHaveTextContent('find_alert');
+      expect(steps).toHaveTextContent('elasticsearch.search');
+      expect(steps).toHaveTextContent('create_case');
+      expect(steps).toHaveTextContent('cases.createCase');
+    });
+
+    it('says so when some of the steps have steps of their own, which are not listed', async () => {
+      withSteps([
+        {
+          name: 'each_host',
+          type: 'foreach',
+          steps: [{ name: 'isolate', type: 'kibana.request' }],
+        },
+      ]);
+      setup();
+
+      await ask();
+
+      expect(
+        await screen.findByText(/have steps of their own, which are not listed/)
+      ).toBeInTheDocument();
+    });
+
+    it('says how many more there are when there are too many to list', async () => {
+      withSteps(Array.from({ length: 13 }, (_u, i) => ({ name: `step_${i}`, type: 'console' })));
+      setup();
+
+      await ask();
+
+      expect(await screen.findByText('And 3 more steps.')).toBeInTheDocument();
+      expect(screen.queryByText('step_12')).not.toBeInTheDocument();
+    });
+
+    it('shows no steps when the workflow has none to show, and does not fail', async () => {
+      mockClient.get.mockResolvedValue(workflow({ definition: null }));
+      setup();
+
+      await ask();
+
+      expect(await screen.findByText('Isolate host')).toBeInTheDocument();
+      expect(screen.queryByTestId('customAppRunWorkflowSteps')).not.toBeInTheDocument();
+    });
+  });
+
   it('says that it runs with the privileges of the person who agrees', async () => {
     setup();
 
