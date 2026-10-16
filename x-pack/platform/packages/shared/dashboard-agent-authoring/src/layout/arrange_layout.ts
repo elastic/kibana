@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/as-code-dashboard-schema';
 import {
   isSection,
   type AttachmentPanel,
@@ -16,7 +17,6 @@ import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { getErrorMessage, type OperationFailure } from '../utils';
 import {
-  GRID_COLUMNS,
   type ArrangeDashboardLayout,
   type LayoutArrangement,
   type LayoutGrid,
@@ -292,9 +292,11 @@ const getIncompleteArrangementIssue = (
     }),
   ];
   for (const { requested, arranged } of containers) {
-    const overflowingPanel = arranged.find(({ x, w }) => x + w > GRID_COLUMNS);
+    const overflowingPanel = arranged.find(({ x, w }) => x + w > DASHBOARD_GRID_COLUMN_COUNT);
     if (overflowingPanel) {
-      return `panel "${toId(overflowingPanel.id)}" overflows the ${GRID_COLUMNS}-column grid`;
+      return `panel "${toId(
+        overflowingPanel.id
+      )}" overflows the ${DASHBOARD_GRID_COLUMN_COUNT}-column grid`;
     }
     const arrangedPanelIds = new Set(arranged.map(({ id }) => id));
     if (arrangedPanelIds.size < arranged.length) {

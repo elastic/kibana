@@ -6,8 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-
-export const GRID_COLUMNS = 48;
+import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/as-code-dashboard-schema';
 
 export interface LayoutGrid {
   x: number;
@@ -61,9 +60,9 @@ const arrangedPanelsSchema = z
         .number()
         .int()
         .min(0)
-        .max(GRID_COLUMNS - 1),
+        .max(DASHBOARD_GRID_COLUMN_COUNT - 1),
       y: z.number().int().min(0).max(1000),
-      w: z.number().int().min(1).max(GRID_COLUMNS),
+      w: z.number().int().min(1).max(DASHBOARD_GRID_COLUMN_COUNT),
       h: z.number().int().min(1).max(100),
     })
   )

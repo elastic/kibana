@@ -11,7 +11,7 @@ import type {
   DashboardSection,
 } from '@kbn/agent-builder-dashboards-common';
 import { isSection } from '@kbn/agent-builder-dashboards-common';
-import { GRID_COLUMNS } from './layout/types';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/as-code-dashboard-schema';
 
 type DashboardWidget = AttachmentPanel | DashboardSection;
 
@@ -58,7 +58,10 @@ const PLACEHOLDER_HEIGHT = 10;
  */
 export const getPlaceholderGrid = (
   widgets: DashboardWidget[],
-  { w, h }: Pick<AttachmentPanel['grid'], 'w' | 'h'> = { w: GRID_COLUMNS, h: PLACEHOLDER_HEIGHT }
+  { w, h }: Pick<AttachmentPanel['grid'], 'w' | 'h'> = {
+    w: DASHBOARD_GRID_COLUMN_COUNT,
+    h: PLACEHOLDER_HEIGHT,
+  }
 ): AttachmentPanel['grid'] => ({ x: 0, y: getWidgetsBottomY(widgets), w, h });
 
 export const findSectionIndex = (panels: DashboardWidget[], sectionId: string): number => {
