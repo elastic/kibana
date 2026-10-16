@@ -132,15 +132,15 @@ describe('formatBackingIndexWarning', () => {
 });
 
 describe('formatInheritedBackingIndexWarning', () => {
-  const matches = [
-    { index: '.ds-logs-a-default-2026.06.11-000001', baseName: 'logs-a-default' },
-  ];
+  const matches = [{ index: '.ds-logs-a-default-2026.06.11-000001', baseName: 'logs-a-default' }];
 
   it('tells the model to leave the existing source unchanged', () => {
     const warning = formatInheritedBackingIndexWarning(matches, 'The rule query');
 
     expect(warning).toMatch(/^The rule query still targets/);
-    expect(warning).toContain('`.ds-logs-a-default-2026.06.11-000001` (base name `logs-a-default`)');
+    expect(warning).toContain(
+      '`.ds-logs-a-default-2026.06.11-000001` (base name `logs-a-default`)'
+    );
     expect(warning).toContain('Leave it unchanged unless the user asks');
   });
 
