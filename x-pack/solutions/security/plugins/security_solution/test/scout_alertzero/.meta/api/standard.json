@@ -1,5 +1,5 @@
 {
-  "sha1": "6cf66a40bd9261292a233eb183ed8b378d2562b9",
+  "sha1": "4f761baf83ddeb95c9c3ce6fcf0276700d870a3b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,6 +16,34 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/attack_discovery_to_isolate.spec.ts",
         "line": 95,
         "column": 21
+      }
+    },
+    {
+      "id": "9b2010df3aa164c-5c327fd17599bea",
+      "title": "AlertZero e2e - endpoint analysis analyzes a seeded endpoint and cites ids that exist in the seed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/endpoint_analysis.spec.ts",
+        "line": 176,
+        "column": 25
+      }
+    },
+    {
+      "id": "9b2010df3aa164c-2b23dc46345d6e5",
+      "title": "AlertZero e2e - endpoint analysis keeps containment proposals for two hosts distinguishable (security-team#19991)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/endpoint_analysis.spec.ts",
+        "line": 270,
+        "column": 27
       }
     },
     {
@@ -58,34 +86,6 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
         "line": 86,
         "column": 74
-      }
-    },
-    {
-      "id": "c7af268757bd0dd-b64a3774585f9ee",
-      "title": "AlertZero e2e - rule coverage completes a coverage sweep and reports its counts",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_coverage.spec.ts",
-        "line": 26,
-        "column": 17
-      }
-    },
-    {
-      "id": "c7af268757bd0dd-3f040dddb1a4206",
-      "title": "AlertZero e2e - rule coverage treats an absent AI index as empty, not as an error (security-team#19988, elastic/kibana#296929)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_coverage.spec.ts",
-        "line": 42,
-        "column": 5
       }
     },
     {
