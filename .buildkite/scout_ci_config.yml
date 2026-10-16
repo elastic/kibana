@@ -5,6 +5,7 @@ plugins:
     - agent_builder
     - agent_builder_dashboards
     - agentic_investigations
+    - ai_anonymization_settings
     - alerting
     - alerting_v2
     - apm
@@ -38,6 +39,7 @@ plugins:
     - embeddable_alerts_table
     - entity_store
     - error_boundary_example
+    - esql_views
     - event_annotation_listing
     - exploratory_view
     - files_management
@@ -48,6 +50,7 @@ plugins:
     - graph
     - grokdebugger
     - home
+    - image_embeddable
     - index_lifecycle_management
     - index_management
     - infra
@@ -77,9 +80,9 @@ plugins:
     - osquery
     - painless_lab
     - profiling
-    - rollup
-    - remote_clusters
     - reindex_service
+    - remote_clusters
+    - rollup
     - saved_objects_management
     - saved_objects_tagging
     - searchExamples

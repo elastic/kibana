@@ -94,6 +94,9 @@ export type {
   HuntThreatIntelSupplyWorkflowKey,
   HuntThreatIntelSupplyWorkflowStatus,
   HuntThreatIntelSupplyHardGate,
+  HuntModelTierId,
+  HuntModelTierState,
+  HuntModelTierStatus,
   HuntThreatIntelSupplyStatus,
 } from './constants';
 
