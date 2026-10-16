@@ -55,9 +55,10 @@ export const FlyoutWrapper = ({
 }: FlyoutWrapperProps) => {
   const { euiTheme } = useEuiTheme();
   /**
-   * Chrome clips framed right flyouts with inset(0 0 0 -50%). That is only half
-   * the panel width, which cuts drag-drop extras. Keep the same rounded right
-   * corners and extend the left edge by the extra-target gutter.
+   * EUI clips right flyouts at -50% of their width, and project chrome replaces
+   * it with a rounded inset(0 0 0 -50%). On narrow flyouts that cuts the
+   * drag-drop extras, so extend the left edge by the extra-target gutter and
+   * keep chrome's rounded right corners.
    */
   const customizeLensClipPathFix = css`
     body
@@ -65,10 +66,9 @@ export const FlyoutWrapper = ({
         [data-managed-flyout-layout-mode='side-by-side'][data-managed-flyout-level='child']
       ) {
       clip-path: inset(
-          0 0 0 -${DRAG_DROP_EXTRA_TARGETS_PADDING}px round 0 ${euiTheme.border.radius.frame}
-            ${euiTheme.border.radius.frame} 0
-        )
-        !important;
+        0 0 0 -${DRAG_DROP_EXTRA_TARGETS_PADDING}px round 0 ${euiTheme.border.radius.frame} ${euiTheme
+            .border.radius.frame} 0
+      ) !important;
     }
   `;
   return (
