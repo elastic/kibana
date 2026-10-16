@@ -173,6 +173,7 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     { link: 'management:index_management' },
+                    { badgeType: 'new', link: 'management:boost' },
                     { link: 'management:data_federation' },
                     { link: 'management:esql_views' },
                     { link: 'management:index_lifecycle_management' },

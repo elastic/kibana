@@ -195,3 +195,8 @@
 # Maximum number of documents loaded by each shard to generate autocomplete suggestions.
 # This value must be a whole number greater than zero. Defaults to 100_000
 #unifiedSearch.autocomplete.valueSuggestions.terminateAfter: 100000
+
+## Search boost prototype (boost profiles and rules), turned on in stateful Kibana too, such as on
+## Kibana a-la-carte, which can't run serverless projects
+xpack.boost.enabled: true
+migrations.allowWipTypes: ['boost_prototype']
