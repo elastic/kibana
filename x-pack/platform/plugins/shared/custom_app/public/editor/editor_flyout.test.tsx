@@ -47,6 +47,42 @@ const setup = ({ withChat = false } = {}) => {
 const outline = (id: string) => screen.getByTestId(`customAppOutline-${id}`);
 const properties = () => within(screen.getByTestId('customAppProperties'));
 
+describe('EditorFlyout on a shared app', () => {
+  const setupShared = (isShared?: boolean) =>
+    render(
+      <EditorFlyout
+        initialDocument={appDocumentSchema.parse({
+          root: { type: 'stack', id: 'root', children: [] },
+        })}
+        onPreview={jest.fn()}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        ariaLabelledBy="editor-title"
+        isShared={isShared}
+      />
+    );
+
+  it('says that applying changes the app for every dashboard that uses it', () => {
+    setupShared(true);
+
+    const notice = screen.getByTestId('customAppEditorShared');
+    expect(notice).toHaveTextContent('This app is shared');
+    expect(notice).toHaveTextContent('every dashboard that uses this app');
+  });
+
+  it("says nothing of the kind for an app that is only the panel's own", () => {
+    setupShared(false);
+
+    expect(screen.queryByTestId('customAppEditorShared')).not.toBeInTheDocument();
+  });
+
+  it('says nothing of the kind unless it is told', () => {
+    setupShared();
+
+    expect(screen.queryByTestId('customAppEditorShared')).not.toBeInTheDocument();
+  });
+});
+
 describe('EditorFlyout on an empty app', () => {
   const setupEmpty = () => {
     const onSave = jest.fn();

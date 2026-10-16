@@ -23,6 +23,7 @@ import {
   ADD_CUSTOM_APP_ACTION_ID,
   CUSTOM_APP_APPLICATION_ID,
   CUSTOM_APP_SAVED_OBJECT_TYPE,
+  OPEN_CUSTOM_APP_ACTION_ID,
   VIEW_CUSTOM_APP_SOURCE_ACTION_ID,
 } from '../common/constants';
 import { customAppContextAttachmentUiDefinition } from './attachment_types/custom_app_context';
@@ -101,6 +102,12 @@ export class CustomAppPlugin implements Plugin<void, void, SetupDeps, StartDeps>
       }
     );
     uiActions.attachAction(ON_OPEN_PANEL_MENU, VIEW_CUSTOM_APP_SOURCE_ACTION_ID);
+
+    uiActions.registerActionAsync<EmbeddableApiContext>(OPEN_CUSTOM_APP_ACTION_ID, async () => {
+      const { getOpenAppAction } = await import('./actions/open_app_action');
+      return getOpenAppAction();
+    });
+    uiActions.attachAction(ON_OPEN_PANEL_MENU, OPEN_CUSTOM_APP_ACTION_ID);
 
     if (agentBuilder) {
       agentBuilder.attachments.addAttachmentType(

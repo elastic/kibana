@@ -13,6 +13,60 @@ import type { ScopedHistory } from '@kbn/core/public';
 import { App } from './app';
 import type { SavedApp, SavedAppsClient } from './saved_apps_client';
 
+jest.mock('@kbn/presentation-util-plugin/public', () => ({
+  SavedObjectSaveModalDashboard: ({
+    onSave,
+  }: {
+    onSave: (props: {
+      dashboardId: string | null;
+      newTitle: string;
+      newDescription: string;
+      addToLibrary: boolean;
+    }) => void;
+  }) => (
+    <div data-test-subj="dashboardModal">
+      <button
+        type="button"
+        onClick={() =>
+          onSave({
+            dashboardId: 'dash-1',
+            newTitle: 'Service explorer',
+            newDescription: 'Filters and a table',
+            addToLibrary: false,
+          })
+        }
+      >
+        {'confirm unchanged'}
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          onSave({
+            dashboardId: 'dash-1',
+            newTitle: 'Renamed here',
+            newDescription: 'Filters and a table',
+            addToLibrary: false,
+          })
+        }
+      >
+        {'confirm renamed'}
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          onSave({
+            dashboardId: null,
+            newTitle: 'Service explorer',
+            newDescription: 'Filters and a table',
+            addToLibrary: false,
+          })
+        }
+      >
+        {'confirm new dashboard'}
+      </button>
+    </div>
+  ),
+}));
 jest.mock('../components/live_app', () => ({
   LiveApp: ({ document }: { document: { root: { id: string } } }) => (
     <div data-test-subj="liveApp">{document.root.id}</div>
@@ -79,6 +133,7 @@ const makeClient = () =>
 
 const setup = ({
   canSave = true,
+  canWriteDashboards = true,
   path = '/',
   prepare,
   describeWithChat,
@@ -87,6 +142,7 @@ const setup = ({
   /** What the person answers when asked whether to leave with unsaved changes. */
   confirmLeave?: boolean;
   describeWithChat?: (message: string) => void;
+  canWriteDashboards?: boolean;
   canSave?: boolean;
   path?: string;
   /** Sets up what the client answers, before the page asks. */
@@ -94,6 +150,7 @@ const setup = ({
 } = {}) => {
   const client = makeClient();
   const onAppLeave = jest.fn();
+  const navigateToWithEmbeddablePackages = jest.fn().mockResolvedValue(undefined);
   prepare?.(client);
   const history = createMemoryHistory({
     initialEntries: [path],
@@ -110,9 +167,11 @@ const setup = ({
       canSave={canSave}
       describeWithChat={describeWithChat}
       onAppLeave={onAppLeave}
+      stateTransfer={{ navigateToWithEmbeddablePackages } as never}
+      canWriteDashboards={canWriteDashboards}
     />
   );
-  return { client, history, notifications, chrome, onAppLeave };
+  return { client, history, notifications, chrome, onAppLeave, navigateToWithEmbeddablePackages };
 };
 
 describe('the custom apps page', () => {
@@ -392,6 +451,141 @@ describe('the custom apps page', () => {
           'Unsaved changes'
         );
       });
+    });
+  });
+
+  describe('getting back to the list', () => {
+    it('is a link at the top of the page of an app, which goes to the list', async () => {
+      const { history } = setup({ path: '/view/app-1' });
+      await screen.findByTestId('liveApp');
+
+      await userEvent.click(screen.getByRole('link', { name: 'Custom apps' }));
+
+      expect(history.location.pathname).toBe('/');
+    });
+
+    it('is a link at the top of a new app too', async () => {
+      const { history } = setup({ path: '/create' });
+      await screen.findByText('Build your app');
+
+      await userEvent.click(screen.getByRole('link', { name: 'Custom apps' }));
+
+      expect(history.location.pathname).toBe('/');
+    });
+
+    it('is a real link, so that it can be opened in another tab', async () => {
+      setup({ path: '/view/app-1' });
+      await screen.findByTestId('liveApp');
+
+      expect(screen.getByRole('link', { name: 'Custom apps' })).toHaveAttribute('href', '/');
+    });
+
+    it('asks first when a new app has changes that are not saved, and stays if told not to leave', async () => {
+      const { history } = setup({ path: '/create', confirmLeave: false });
+      await userEvent.click(await screen.findByTestId('customAppEmptyBuild'));
+      await userEvent.click(await screen.findByRole('button', { name: 'save draft' }));
+
+      await userEvent.click(screen.getByRole('link', { name: 'Custom apps' }));
+
+      expect(history.location.pathname).toBe('/create');
+    });
+
+    it('puts the list and the app in the breadcrumbs of Kibana as well', async () => {
+      const { chrome } = setup({ path: '/view/app-1' });
+      await screen.findByTestId('liveApp');
+
+      const [breadcrumbs] = chrome.setBreadcrumbs.mock.calls.at(-1) as [Array<{ text: string }>];
+      expect(breadcrumbs.map(({ text }) => text)).toEqual(['Custom apps', 'Service explorer']);
+    });
+  });
+
+  describe('adding an app to a dashboard', () => {
+    const open = async (options: Parameters<typeof setup>[0] = {}) => {
+      const result = setup({ path: '/view/app-1', ...options });
+      await screen.findByTestId('liveApp');
+      return result;
+    };
+
+    it('is offered for an app that has something in it', async () => {
+      await open();
+
+      expect(screen.getByTestId('customAppAddToDashboard')).toBeEnabled();
+    });
+
+    it('is not offered for an app that is empty, which would add a blank panel', async () => {
+      setup({
+        path: '/view/app-1',
+        prepare: (client) =>
+          client.get.mockResolvedValue(
+            savedApp({
+              document: {
+                state: {},
+                root: { type: 'stack', id: 'root', direction: 'vertical', children: [] },
+              },
+            })
+          ),
+      });
+      await screen.findByText('Build your app');
+
+      expect(screen.queryByTestId('customAppAddToDashboard')).not.toBeInTheDocument();
+    });
+
+    it('is offered to someone who may only read apps, since it does not change the app', async () => {
+      await open({ canSave: false });
+
+      expect(screen.getByTestId('customAppAddToDashboard')).toBeEnabled();
+    });
+
+    it('is disabled for someone who may not change dashboards', async () => {
+      await open({ canWriteDashboards: false });
+
+      expect(screen.getByTestId('customAppAddToDashboard')).toBeDisabled();
+    });
+
+    it('is disabled while there are changes that are not saved, as the dashboard shows the saved app', async () => {
+      await open();
+      await userEvent.click(screen.getByTestId('customAppEdit'));
+      await userEvent.click(screen.getByRole('button', { name: 'save draft' }));
+
+      await waitFor(() => expect(screen.getByTestId('customAppAddToDashboard')).toBeDisabled());
+    });
+
+    it('adds a link to the app, not a copy, to the dashboard that is chosen', async () => {
+      const { navigateToWithEmbeddablePackages } = await open();
+
+      await userEvent.click(screen.getByTestId('customAppAddToDashboard'));
+      await userEvent.click(screen.getByRole('button', { name: 'confirm unchanged' }));
+
+      expect(navigateToWithEmbeddablePackages).toHaveBeenCalledWith('dashboards', {
+        state: [{ type: 'custom_app', serializedState: { ref_id: 'app-1' } }],
+        path: '#/view/dash-1',
+      });
+    });
+
+    it('gives the panel a title of its own only when it was changed in the dialog', async () => {
+      const { navigateToWithEmbeddablePackages } = await open();
+
+      await userEvent.click(screen.getByTestId('customAppAddToDashboard'));
+      await userEvent.click(screen.getByRole('button', { name: 'confirm renamed' }));
+
+      expect(navigateToWithEmbeddablePackages).toHaveBeenCalledWith('dashboards', {
+        state: [
+          { type: 'custom_app', serializedState: { ref_id: 'app-1', title: 'Renamed here' } },
+        ],
+        path: '#/view/dash-1',
+      });
+    });
+
+    it('opens a new dashboard with the panel when that is what was chosen', async () => {
+      const { navigateToWithEmbeddablePackages } = await open();
+
+      await userEvent.click(screen.getByTestId('customAppAddToDashboard'));
+      await userEvent.click(screen.getByRole('button', { name: 'confirm new dashboard' }));
+
+      expect(navigateToWithEmbeddablePackages).toHaveBeenCalledWith(
+        'dashboards',
+        expect.objectContaining({ path: '#/create' })
+      );
     });
   });
 

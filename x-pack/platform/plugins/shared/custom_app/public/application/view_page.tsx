@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useId, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import isEqual from 'lodash/isEqual';
 import {
@@ -16,15 +16,23 @@ import {
   EuiFlyout,
   EuiLoadingSpinner,
   EuiPageTemplate,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import { appDocumentSchema, isEmptyDocument, type AppDocument } from '@kbn/custom-app-common';
+import {
+  appDocumentSchema,
+  CUSTOM_APP_EMBEDDABLE_TYPE,
+  isEmptyDocument,
+  type AppDocument,
+} from '@kbn/custom-app-common';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { EmptyApp } from '../components/empty_app';
 import { LiveApp } from '../components/live_app';
 import { createDefaultDocument } from '../default_document';
 import { EditorFlyout } from '../editor/editor_flyout';
 import { DetailsModal } from './details_modal';
+import { useListBreadcrumb } from './list_breadcrumb';
 import { useUnsavedChangesGuard } from './use_unsaved_changes_guard';
 import type { AppServices } from './app';
 import type { SavedApp } from './saved_apps_client';
@@ -54,6 +62,8 @@ export const ViewPage = ({
   canSave,
   describeWithChat,
   onAppLeave,
+  stateTransfer,
+  canWriteDashboards,
 }: AppServices) => {
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
@@ -70,6 +80,7 @@ export const ViewPage = ({
   /** Where the editor starts when it is not from the app: the example. */
   const [seed, setSeed] = useState<AppDocument>();
   const [isDiscarding, setIsDiscarding] = useState(false);
+  const [isAddingToDashboard, setIsAddingToDashboard] = useState(false);
 
   useEffect(() => {
     let isCurrent = true;
@@ -92,21 +103,14 @@ export const ViewPage = ({
 
   const title =
     state.status === 'ready' || state.status === 'invalid' ? state.app.title : undefined;
+  const listBreadcrumb = useListBreadcrumb();
+  const breadcrumbs = useMemo(
+    () => [listBreadcrumb, ...(title ? [{ text: title }] : [])],
+    [listBreadcrumb, title]
+  );
   useEffect(() => {
-    chrome.setBreadcrumbs([
-      {
-        text: i18n.translate('xpack.customApp.standalone.breadcrumb', {
-          defaultMessage: 'Custom apps',
-        }),
-        onClick: (event) => {
-          event.preventDefault();
-          history.push('/');
-        },
-        href: history.createHref({ pathname: '/' }),
-      },
-      ...(title ? [{ text: title }] : []),
-    ]);
-  }, [chrome, history, title]);
+    chrome.setBreadcrumbs(breadcrumbs);
+  }, [chrome, breadcrumbs]);
 
   const closeEditor = useCallback(() => {
     setIsEditing(false);
@@ -214,6 +218,64 @@ export const ViewPage = ({
       </EuiButton>
     ) : undefined;
 
+  const addToDashboardButton =
+    state.status === 'ready' && !isEmptyDocument(state.document) ? (
+      <EuiToolTip
+        content={
+          !canWriteDashboards
+            ? i18n.translate('xpack.customApp.standalone.noDashboardAccess', {
+                defaultMessage:
+                  'You need dashboard write permissions to add an app to a dashboard.',
+              })
+            : hasDraft
+            ? i18n.translate('xpack.customApp.standalone.saveFirst', {
+                defaultMessage: 'Save your changes first: the dashboard shows the saved app.',
+              })
+            : undefined
+        }
+      >
+        <EuiButtonEmpty
+          iconType="dashboardApp"
+          isDisabled={!canWriteDashboards || hasDraft}
+          onClick={() => setIsAddingToDashboard(true)}
+          data-test-subj="customAppAddToDashboard"
+        >
+          {i18n.translate('xpack.customApp.standalone.addToDashboard', {
+            defaultMessage: 'Add to dashboard',
+          })}
+        </EuiButtonEmpty>
+      </EuiToolTip>
+    ) : undefined;
+
+  const addToDashboard = async ({
+    dashboardId,
+    newTitle,
+    newDescription,
+  }: {
+    dashboardId: string | null;
+    newTitle: string;
+    newDescription: string;
+  }) => {
+    setIsAddingToDashboard(false);
+    // A link to the saved app, so that the dashboard follows it. The panel is given a title only if
+    // it was changed in the modal, as an app that is called what it is called needs none.
+    await stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+      state: [
+        {
+          type: CUSTOM_APP_EMBEDDABLE_TYPE,
+          serializedState: {
+            ref_id: app.id,
+            ...(newTitle && newTitle !== app.title ? { title: newTitle } : {}),
+            ...(newDescription && newDescription !== app.description
+              ? { description: newDescription }
+              : {}),
+          },
+        },
+      ],
+      path: dashboardId && dashboardId !== 'new' ? `#/view/${dashboardId}` : '#/create',
+    });
+  };
+
   const detailsButton = canSave ? (
     <EuiButtonEmpty
       iconType="pencil"
@@ -227,6 +289,7 @@ export const ViewPage = ({
   return (
     <EuiPageTemplate offset={0} restrictWidth={false} data-test-subj="customAppViewPage">
       <EuiPageTemplate.Header
+        breadcrumbs={breadcrumbs}
         pageTitle={app.title}
         description={app.description}
         rightSideItems={[
@@ -254,6 +317,7 @@ export const ViewPage = ({
               ]
             : []),
           ...(editButton ? [editButton] : []),
+          ...(addToDashboardButton ? [addToDashboardButton] : []),
           ...(detailsButton ? [detailsButton] : []),
           ...(hasDraft
             ? [
@@ -338,6 +402,17 @@ export const ViewPage = ({
               setIsEditingDetails(false);
             }
           }}
+        />
+      )}
+      {isAddingToDashboard && (
+        <SavedObjectSaveModalDashboard
+          objectType={i18n.translate('xpack.customApp.standalone.objectType', {
+            defaultMessage: 'Custom app',
+          })}
+          documentInfo={{ title: app.title, description: app.description }}
+          canSaveByReference={false}
+          onClose={() => setIsAddingToDashboard(false)}
+          onSave={addToDashboard}
         />
       )}
       {isDiscarding && (

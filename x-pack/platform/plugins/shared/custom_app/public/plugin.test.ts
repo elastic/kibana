@@ -11,6 +11,7 @@ import { CUSTOM_APP_EMBEDDABLE_TYPE } from '@kbn/custom-app-common';
 import {
   ADD_CUSTOM_APP_ACTION_ID,
   CUSTOM_APP_APPLICATION_ID,
+  OPEN_CUSTOM_APP_ACTION_ID,
   VIEW_CUSTOM_APP_SOURCE_ACTION_ID,
 } from '../common/constants';
 import { CustomAppPlugin } from './plugin';
@@ -99,6 +100,19 @@ describe('CustomAppPlugin', () => {
     );
     expect(uiActions.registerActionAsync).toHaveBeenCalledWith(
       VIEW_CUSTOM_APP_SOURCE_ACTION_ID,
+      expect.any(Function)
+    );
+  });
+
+  it('puts Open app on the menu of every panel, where it offers itself only to panels that link to an app', () => {
+    const { uiActions } = setup();
+
+    expect(uiActions.attachAction).toHaveBeenCalledWith(
+      ON_OPEN_PANEL_MENU,
+      OPEN_CUSTOM_APP_ACTION_ID
+    );
+    expect(uiActions.registerActionAsync).toHaveBeenCalledWith(
+      OPEN_CUSTOM_APP_ACTION_ID,
       expect.any(Function)
     );
   });

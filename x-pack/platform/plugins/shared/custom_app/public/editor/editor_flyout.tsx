@@ -24,6 +24,7 @@ import {
 import { css } from '@emotion/react';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { AppDocument } from '@kbn/custom-app-common';
 import { IconButton } from './fields/fields';
 import { OutlinePane } from './outline_pane';
@@ -39,6 +40,11 @@ export interface EditorFlyoutProps {
   onSave: (document: AppDocument) => void;
   onCancel: () => void;
   ariaLabelledBy: string;
+  /**
+   * Whether applying saves to an app that other dashboards use too, which the author is told, since
+   * it is not what applying means for an app of the panel itself.
+   */
+  isShared?: boolean;
 }
 
 export const EditorFlyout = ({
@@ -48,6 +54,7 @@ export const EditorFlyout = ({
   onSave,
   onCancel,
   ariaLabelledBy,
+  isShared = false,
 }: EditorFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const editor = useDocumentEditor(initialDocument);
@@ -123,6 +130,30 @@ export const EditorFlyout = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
+      {isShared && (
+        <div
+          css={css({
+            padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
+            borderBlockEnd: euiTheme.border.thin,
+          })}
+        >
+          <KbnWarningCallout
+            size="s"
+            announceOnMount={false}
+            title={i18n.translate('xpack.customApp.editor.sharedTitle', {
+              defaultMessage: 'This app is shared',
+            })}
+            data-test-subj="customAppEditorShared"
+          >
+            <p>
+              {i18n.translate('xpack.customApp.editor.sharedBody', {
+                defaultMessage:
+                  'Applying your changes saves them to the library, for every dashboard that uses this app.',
+              })}
+            </p>
+          </KbnWarningCallout>
+        </div>
+      )}
 
       <div
         css={css({

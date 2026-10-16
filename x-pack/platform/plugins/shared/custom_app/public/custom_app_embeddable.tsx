@@ -64,6 +64,7 @@ import { createDataLayer } from './data/data_layer';
 import { DataLayerContext } from './data/data_layer_context';
 import { CUSTOM_APP_UPDATED_UI_EVENT, type CustomAppUpdatedUiEventData } from '../common/ui_events';
 import type { HasCustomAppDocument } from './has_custom_app_document';
+import type { HasCustomAppLibraryId } from './has_library_id';
 import { createAppRuntime } from './runtime/app_runtime';
 import { AppRuntimeContext } from './runtime/app_runtime_context';
 import { createRunEsqlQuery } from './data/run_esql_query';
@@ -80,6 +81,7 @@ export type CustomAppApi = DefaultEmbeddableApi<CustomAppEmbeddableState> &
   HasTypeDisplayName &
   HasEditCapabilities &
   HasCustomAppDocument &
+  HasCustomAppLibraryId &
   PublishesDataLoading &
   PublishesWritableTimeRange &
   HasLibraryTransforms<CustomAppByReferenceState, CustomAppByValueState>;
@@ -240,6 +242,7 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
       serializeState,
       isEditingEnabled: () => true,
       getDocument: () => document$.getValue(),
+      getLibraryId: () => libraryId,
       onEdit: async ({ returnFocus } = {}) => {
         const flyoutRef = openLazyFlyout({
           core,
@@ -252,6 +255,7 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
               <EditorFlyout
                 initialDocument={document$.getValue()}
                 ariaLabelledBy={ariaLabelledBy}
+                isShared={libraryId !== undefined}
                 onPreview={(document) => previewDocument$.next(document)}
                 onGenerateWithChat={
                   agentBuilder

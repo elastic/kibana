@@ -66,6 +66,7 @@ interface Api {
   anyStateChange$: { subscribe: (next: () => void) => { unsubscribe: () => void } };
   defaultTitle$: BehaviorSubject<string | undefined>;
   defaultDescription$: BehaviorSubject<string | undefined>;
+  getLibraryId: () => string | undefined;
   canLinkToLibrary: () => Promise<boolean>;
   canUnlinkFromLibrary: () => Promise<boolean>;
   saveToLibrary: (title: string) => Promise<string>;
@@ -128,6 +129,20 @@ describe('the custom app panel and the library', () => {
       expect(state).toMatchObject({ ref_id: 'lib-1', title: 'Panel title' });
       expect(state).not.toHaveProperty('document');
       expect(state).not.toHaveProperty('version');
+    });
+
+    it('says which app it links to, which is how a menu item can open it', async () => {
+      const api = await buildLinked();
+
+      expect(api.getLibraryId()).toBe('lib-1');
+    });
+
+    it('tells the editor that the app is shared, so that the author knows what applying does', async () => {
+      const api = await buildLinked();
+
+      const { editorProps } = await openEditor(api);
+
+      expect(editorProps.isShared).toBe(true);
     });
 
     it('can be unlinked and not linked again', async () => {
@@ -262,6 +277,14 @@ describe('the custom app panel and the library', () => {
 
       expect(api.serializeState()).toMatchObject({ version: 1, document: OWN_DOCUMENT });
       expect(api.serializeState()).not.toHaveProperty('ref_id');
+    });
+
+    it('links to nothing, and does not tell the editor that the app is shared', async () => {
+      const api = await buildOwn();
+      const { editorProps } = await openEditor(api);
+
+      expect(api.getLibraryId()).toBeUndefined();
+      expect(editorProps.isShared).toBe(false);
     });
 
     it('can be linked and not unlinked', async () => {

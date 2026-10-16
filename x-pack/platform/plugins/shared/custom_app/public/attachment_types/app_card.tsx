@@ -145,7 +145,7 @@ export const AppCard = ({ document, canSave, title, registerActionButtons }: App
             savedApp
               ? {
                   label: openAppLabel,
-                  icon: 'popout',
+                  icon: 'external',
                   type: ActionButtonType.SECONDARY,
                   handler: openSavedApp,
                 }

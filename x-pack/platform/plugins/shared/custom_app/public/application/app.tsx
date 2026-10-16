@@ -10,6 +10,7 @@ import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { AppMountParameters, ScopedHistory } from '@kbn/core/public';
 import type { ChromeStart, NotificationsStart } from '@kbn/core/public';
+import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { CreatePage } from './create_page';
 import { ListPage } from './list_page';
 import { ViewPage } from './view_page';
@@ -24,6 +25,10 @@ export interface AppServices {
   /** Opens chat with a start for the message. Absent when chat is not available. */
   describeWithChat?: (message: string) => void;
   onAppLeave: AppMountParameters['onAppLeave'];
+  /** Carries an app to a dashboard. */
+  stateTransfer: EmbeddableStateTransfer;
+  /** Whether the user may change dashboards, which adding an app to one does. */
+  canWriteDashboards: boolean;
 }
 
 export const App = ({ history, ...services }: AppServices & { history: ScopedHistory }) => (

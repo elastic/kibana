@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useId, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { EuiBadge, EuiButton, EuiButtonEmpty, EuiFlyout, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,6 +15,7 @@ import { LiveApp } from '../components/live_app';
 import { createDefaultDocument, createEmptyDocument } from '../default_document';
 import { EditorFlyout } from '../editor/editor_flyout';
 import { DetailsModal } from './details_modal';
+import { useListBreadcrumb } from './list_breadcrumb';
 import { useUnsavedChangesGuard } from './use_unsaved_changes_guard';
 import type { AppServices } from './app';
 
@@ -56,25 +57,22 @@ export const CreatePage = ({
     if (savedId) history.replace(`/view/${encodeURIComponent(savedId)}`);
   }, [history, savedId]);
 
-  useEffect(() => {
-    chrome.setBreadcrumbs([
-      {
-        text: i18n.translate('xpack.customApp.standalone.breadcrumb', {
-          defaultMessage: 'Custom apps',
-        }),
-        onClick: (event) => {
-          event.preventDefault();
-          history.push('/');
-        },
-        href: history.createHref({ pathname: '/' }),
-      },
+  const listBreadcrumb = useListBreadcrumb();
+  const breadcrumbs = useMemo(
+    () => [
+      listBreadcrumb,
       {
         text: i18n.translate('xpack.customApp.standalone.newBreadcrumb', {
           defaultMessage: 'New app',
         }),
       },
-    ]);
-  }, [chrome, history]);
+    ],
+    [listBreadcrumb]
+  );
+
+  useEffect(() => {
+    chrome.setBreadcrumbs(breadcrumbs);
+  }, [chrome, breadcrumbs]);
 
   const closeEditor = useCallback(() => {
     setIsEditing(false);
@@ -113,6 +111,7 @@ export const CreatePage = ({
   return (
     <EuiPageTemplate offset={0} restrictWidth={false} data-test-subj="customAppCreatePage">
       <EuiPageTemplate.Header
+        breadcrumbs={breadcrumbs}
         pageTitle={i18n.translate('xpack.customApp.standalone.newTitle', {
           defaultMessage: 'New app',
         })}
