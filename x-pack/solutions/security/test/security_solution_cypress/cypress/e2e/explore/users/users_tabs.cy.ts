@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RISK_ENGINE_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { HEADER_SUBTITLE, ALL_USERS_TABLE } from '../../../screens/users/all_users';
 import { ANOMALIES_TAB, ANOMALIES_TAB_CONTENT } from '../../../screens/users/user_anomalies';
 import {
@@ -42,6 +43,10 @@ describe(
     });
 
     beforeEach(() => {
+      cy.intercept('GET', `${RISK_ENGINE_STATUS_URL}*`, {
+        statusCode: 200,
+        body: { risk_engine_status: 'NOT_INSTALLED' },
+      }).as('riskEngineStatus');
       login();
       visitWithTimeRange(usersUrl('allUsers'));
     });

@@ -36,13 +36,13 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless @serverlessQA migrations', () => {
     beforeEach(async () => {
       await entityStoreUtils.cleanEngines();
-      await cleanUpRiskScoreMaintainer({ es, log });
+      await cleanUpRiskScoreMaintainer({ es, log, supertest });
       await es.indices.delete({ index: lookupIndex }, { ignore: [404] });
     });
 
     afterEach(async () => {
       await entityStoreUtils.cleanEngines();
-      await cleanUpRiskScoreMaintainer({ es, log });
+      await cleanUpRiskScoreMaintainer({ es, log, supertest });
       await es.indices.delete({ index: lookupIndex }, { ignore: [404] });
     });
 
