@@ -852,6 +852,76 @@ describe('Policy Config helpers', () => {
         policy.windows.attack_surface_reduction.credential_hardening
       );
     });
+
+    it('removes the advanced descendants setting while keeping sibling kernel and advanced settings', () => {
+      const policy = policyFactory();
+      policy.windows.advanced = {
+        kernel: {
+          connect: 'false',
+          registry_credential_hardening: { descendants: 'true', future_setting: 'true' },
+        },
+        alerts: {
+          rollback: { self_healing: { enabled: true } },
+        },
+      };
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(result.windows.advanced).toEqual({
+        kernel: {
+          connect: 'false',
+          registry_credential_hardening: { future_setting: 'true' },
+        },
+        alerts: {
+          rollback: { self_healing: { enabled: true } },
+        },
+      });
+    });
+
+    it('prunes registry_credential_hardening and then kernel once empty, keeping advanced as {}', () => {
+      const policy = policyFactory();
+      policy.windows.advanced = {
+        kernel: { registry_credential_hardening: { descendants: 'true' } },
+      };
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(result.windows.advanced).toEqual({});
+    });
+
+    it('leaves windows.advanced absent when it was not already present', () => {
+      const policy = policyFactory();
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(result.windows).not.toHaveProperty('advanced');
+    });
+
+    it('leaves a malformed windows.advanced untouched instead of throwing', () => {
+      const policy = policyFactory();
+      // `advanced` is free-form, so a policy written straight through the Fleet API can hold a
+      // primitive where a settings namespace is expected.
+      Reflect.set(policy.windows, 'advanced', 'legacy-value');
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(result.windows.advanced).toBe('legacy-value');
+    });
+
+    it('does not mutate the nested windows.advanced objects on the input policy', () => {
+      const policy = policyFactory();
+      policy.windows.advanced = {
+        kernel: {
+          connect: 'false',
+          registry_credential_hardening: { descendants: 'true' },
+        },
+      };
+      const originalPolicy = JSON.parse(JSON.stringify(policy));
+
+      removeRegistryCredentialHardening(policy);
+
+      expect(policy).toEqual(originalPolicy);
+    });
   });
 
   describe('policyFactoryWithoutPaidEnterpriseFeatures and policyFactoryWithoutPaidFeatures', () => {
