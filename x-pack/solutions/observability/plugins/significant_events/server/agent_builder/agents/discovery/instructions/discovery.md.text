@@ -32,8 +32,7 @@ the batch holds. Read each entry as a whole, and use any other field it returns 
   signals. It is built once for the whole batch, so attribute each node or edge to a detection through
   the confirming signal that activated it. Use it for topology matching and grouping.
 
-Keep entries separate per detection; one detection's description or verdict never applies to
-another.
+Keep entries separate per detection; one detection's description or verdict never applies to another.
 
 </grounding_evidence>
 
@@ -221,6 +220,7 @@ Compare one current detection against one active event using that event's compac
      `features[]` names topology nodes present on both sides, accept the pair even when their found
      rows name different services or mechanisms.
    - **Domain** or source name alone is not sufficient convergence.
+
 Example:
 - Detection A has `<grounding_evidence>` with verdict `confirms`: `dependency-x` is unavailable and
   dependent reads are blocked.
