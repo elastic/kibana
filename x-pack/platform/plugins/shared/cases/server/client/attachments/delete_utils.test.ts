@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { File } from '@kbn/files-plugin/common';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common/constants';
 import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors';
@@ -1139,6 +1140,155 @@ describe('deleteCaseAttachments', () => {
         expect(argsWithHook.authorization.ensureAuthorized).toHaveBeenCalledWith({
           entities: [{ id: 'shared-alerts-1', owner: 'securitySolution' }],
           operation: Operations.updateComment,
+        });
+      });
+
+      describe('when the attachment changes under the shrink', () => {
+        const versioned = { ...sharedAlerts, version: 'WzEsMV0=' };
+
+        // What another removal left behind: alert-1 is already gone and the attack that claimed
+        // it no longer appears in the provenance.
+        const afterConcurrentRemoval: AttachmentForDeletion = {
+          ...versioned,
+          version: 'WzIsMV0=',
+          attributes: {
+            ...versioned.attributes,
+            attachmentId: ['alert-2', 'alert-3'],
+            metadata: {
+              index: ['index-2', 'index-3'],
+              sourceAttachmentIds: ['attack-doc-2'],
+            },
+          } as unknown as AttachmentAttributesV2,
+        };
+
+        const conflict = () => Boom.conflict('version conflict');
+
+        /** Serves the copy another removal left behind, once our first write has been refused. */
+        const mockRefetchAfter = (hasConflicted: () => boolean) => {
+          argsWithHook.services.attachmentService.getter.bulkGetForDeletionByType.mockImplementation(
+            async (refs) =>
+              [
+                toAttachmentForDeletion(relatedComment),
+                toAttachmentForDeletion(relatedAlert),
+                hasConflicted() ? afterConcurrentRemoval : versioned,
+              ].filter(({ id }) => refs.some((ref) => ref.id === id))
+          );
+        };
+
+        beforeEach(() => {
+          mockCaseAttachments(versioned);
+        });
+
+        it('guards the write with the version it was computed from', async () => {
+          await deleteWithRelated([attackAttachment]);
+
+          expect(argsWithHook.services.attachmentService.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+              options: expect.objectContaining({ version: 'WzEsMV0=' }),
+            })
+          );
+        });
+
+        it('recomputes the write against the copy that won, rather than restoring its alerts', async () => {
+          let conflicted = false;
+          argsWithHook.services.attachmentService.update.mockImplementation(async () => {
+            if (conflicted) {
+              return {} as never;
+            }
+            conflicted = true;
+            throw conflict();
+          });
+          mockRefetchAfter(() => conflicted);
+
+          await deleteWithRelated([attackAttachment]);
+
+          expect(argsWithHook.services.attachmentService.update).toHaveBeenCalledTimes(2);
+
+          const [, retry] = argsWithHook.services.attachmentService.update.mock.calls;
+
+          // This removal drops alert-1 and alert-3; the other one already took alert-1 and the
+          // attack that claimed it, and neither comes back.
+          expect(retry[0]).toEqual({
+            savedObjectId: 'shared-alerts-1',
+            updatedAttributes: expect.objectContaining({
+              attachmentId: ['alert-2'],
+              metadata: expect.objectContaining({
+                index: ['index-2'],
+                sourceAttachmentIds: ['attack-doc-2'],
+              }),
+            }),
+            options: expect.objectContaining({ version: 'WzIsMV0=' }),
+          });
+        });
+
+        it('leaves the attachment as it stands when the conflicts do not settle', async () => {
+          argsWithHook.services.attachmentService.update.mockRejectedValue(conflict());
+          mockRefetchAfter(() => true);
+
+          await expect(deleteWithRelated([attackAttachment])).resolves.not.toThrow();
+
+          expect(argsWithHook.services.attachmentService.update).toHaveBeenCalledTimes(3);
+          expect(argsWithHook.logger.warn).toHaveBeenCalledWith(
+            expect.stringContaining('kept changing while being shrunk')
+          );
+        });
+
+        it('gives up the provenance it is dropping even when that empties it', async () => {
+          const onlyOurAttack: AttachmentForDeletion = {
+            ...afterConcurrentRemoval,
+            attributes: {
+              ...afterConcurrentRemoval.attributes,
+              metadata: {
+                index: ['index-2', 'index-3'],
+                sourceAttachmentIds: ['attack-doc-1'],
+              },
+            } as unknown as AttachmentAttributesV2,
+          };
+
+          onDelete.mockResolvedValue({
+            relatedAttachmentIds: [],
+            relatedAttachmentUpdates: [
+              {
+                id: sharedAlerts.id,
+                payload: {
+                  ...shrunkPayload,
+                  metadata: { index: ['index-2'], sourceAttachmentIds: [] },
+                },
+              },
+            ],
+          });
+
+          let conflicted = false;
+          argsWithHook.services.attachmentService.update.mockImplementation(async () => {
+            if (conflicted) {
+              return {} as never;
+            }
+            conflicted = true;
+            throw conflict();
+          });
+          argsWithHook.services.attachmentService.getter.bulkGetForDeletionByType.mockImplementation(
+            async (refs) =>
+              [
+                toAttachmentForDeletion(relatedComment),
+                toAttachmentForDeletion(relatedAlert),
+                conflicted ? onlyOurAttack : { ...versioned, attributes: onlyOurAttack.attributes },
+              ].filter(({ id }) => refs.some((ref) => ref.id === id))
+          );
+
+          await deleteWithRelated([attackAttachment]);
+
+          const [, retry] = argsWithHook.services.attachmentService.update.mock.calls;
+
+          expect(
+            (retry[0].updatedAttributes as { metadata?: Record<string, unknown> }).metadata
+          ).toEqual(expect.objectContaining({ sourceAttachmentIds: [] }));
+        });
+
+        it('surfaces a write failure that is not a conflict', async () => {
+          argsWithHook.services.attachmentService.update.mockRejectedValue(Boom.badRequest('nope'));
+
+          await expect(deleteWithRelated([attackAttachment])).rejects.toThrow('nope');
+          expect(argsWithHook.services.attachmentService.update).toHaveBeenCalledTimes(1);
         });
       });
     });

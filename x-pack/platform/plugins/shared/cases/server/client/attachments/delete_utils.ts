@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { difference } from 'lodash';
 
 import type { AttachmentAttributesV2 } from '../../../common/types/domain';
 import { UserActionTypes, UserActionActions } from '../../../common/types/domain';
@@ -19,6 +20,7 @@ import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { OperationDetails } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { AttachmentForDeletion } from '../../services/attachments/types';
+import type { AttachmentSavedObjectType } from '../../services/user_actions/types';
 import type { CasesClientArgs } from '../types';
 import { deleteFiles, getFileEntitiesForCase } from '../files';
 import { validateUnifiedAttachments } from './validators';
@@ -314,9 +316,10 @@ interface ApplyAttachmentUpdatesArgs {
  * no longer hold.
  *
  * Runs after the deletes and before the case stats are recomputed, so the counts are taken once
- * both halves of the removal are in the index. Unlike the PUT route there is no version check:
- * nothing here came from a caller holding a stale copy, and failing a delete because someone
- * else touched an unrelated attachment would be worse than the write it prevents.
+ * both halves of the removal are in the index. Each write is guarded by the version the hook
+ * computed against, so two removals that shrink the same attachment cannot put back what the
+ * other took out. Unlike the PUT route a conflict is not surfaced: the deletions are already in
+ * the index, so the write is recomputed against the copy that won and tried again.
  */
 const applyAttachmentUpdates = async (
   { caseId, updates, targets }: ApplyAttachmentUpdatesArgs,
@@ -325,7 +328,7 @@ const applyAttachmentUpdates = async (
   const {
     user,
     logger,
-    services: { attachmentService, userActionService, alertsService },
+    services: { userActionService, alertsService },
   } = clientArgs;
 
   const targetsById = new Map(targets.map((target) => [target.id, target]));
@@ -345,14 +348,8 @@ const applyAttachmentUpdates = async (
 
   const updatedAt = new Date().toISOString();
 
-  for (const { id, payload, stored } of appliableUpdates) {
-    // The stored references are written back because the attribute extraction that runs on update
-    // does not know about the case reference and would otherwise drop it.
-    await attachmentService.update({
-      savedObjectId: id,
-      updatedAttributes: { ...payload, updated_at: updatedAt, updated_by: user },
-      options: { references: stored.references, refresh: true },
-    });
+  for (const { id, type, payload, stored } of appliableUpdates) {
+    await writeAttachmentUpdate({ id, type, payload, stored, updatedAt }, clientArgs);
   }
 
   // An update that drops nothing only rewrites bookkeeping the attachment keeps about where it
@@ -411,6 +408,152 @@ const applyAttachmentUpdates = async (
   if (alerts.length > 0) {
     await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
   }
+};
+
+/** How many times a shrink is recomputed against a copy that changed under it before giving up. */
+const MAX_UPDATE_ATTEMPTS = 3;
+
+interface WriteAttachmentUpdateArgs {
+  id: string;
+  type: AttachmentSavedObjectType;
+  payload: RelatedAttachmentUpdate['payload'];
+  stored: DecodedAttachment;
+  updatedAt: string;
+}
+
+/**
+ * Writes one shrink or relabel, guarded by the version of the copy it was computed from.
+ *
+ * The hook decides what an attachment keeps by reading it, so two removals that touch the same
+ * attachment both compute a remainder from the copy they read. Writing those remainders blindly
+ * lets the later one put back the alerts the earlier one took out. The version turns that into a
+ * conflict, and the conflict is resolved by re-reading the attachment and taking the same alerts
+ * and the same provenance out of the copy that won, rather than by replacing it wholesale.
+ *
+ * A conflict that outlives the attempts is logged and dropped. The deletions it accompanies are
+ * already in the index, and a half-applied relabel is better than failing a delete that worked.
+ */
+const writeAttachmentUpdate = async (
+  { id, type, payload, stored, updatedAt }: WriteAttachmentUpdateArgs,
+  clientArgs: CasesClientArgs
+): Promise<void> => {
+  const {
+    user,
+    logger,
+    services: { attachmentService },
+  } = clientArgs;
+
+  let current = stored;
+  let currentPayload = payload;
+
+  for (let attempt = 1; attempt <= MAX_UPDATE_ATTEMPTS; attempt++) {
+    try {
+      // The stored references are written back because the attribute extraction that runs on
+      // update does not know about the case reference and would otherwise drop it.
+      await attachmentService.update({
+        savedObjectId: id,
+        updatedAttributes: { ...currentPayload, updated_at: updatedAt, updated_by: user },
+        options: { references: current.references, refresh: true, version: current.version },
+      });
+
+      return;
+    } catch (error) {
+      if (!isConflictError(error)) {
+        throw error;
+      }
+
+      if (attempt === MAX_UPDATE_ATTEMPTS) {
+        logger.warn(
+          `Attachment ${id} kept changing while being shrunk and was left as it stands: ${error}`
+        );
+        return;
+      }
+
+      const [refetched] = await attachmentService.getter.bulkGetForDeletionByType([{ id, type }]);
+      const [fresh] =
+        refetched != null && hasOwner(refetched) ? toDecodedAttachment(refetched, logger) : [];
+
+      // Gone or undecodable: there is nothing left to take the alerts out of.
+      if (fresh == null) {
+        logger.warn(`Attachment ${id} changed while being shrunk and can no longer be read`);
+        return;
+      }
+
+      currentPayload = rebaseOntoCurrent({
+        stored: current.requestAttributes,
+        payload: currentPayload,
+        current: fresh.requestAttributes,
+      });
+      current = fresh;
+    }
+  }
+};
+
+const isConflictError = (error: unknown): boolean =>
+  Boom.isBoom(error)
+    ? error.output.statusCode === 409
+    : (error as { statusCode?: number })?.statusCode === 409;
+
+/**
+ * Recomputes a shrink against the copy of the attachment that is actually stored.
+ *
+ * Only what this update took out is reapplied: the alerts it dropped, and the provenance it
+ * stopped claiming. Everything else is taken from the current copy, so whatever another removal
+ * did in the meantime survives.
+ */
+const rebaseOntoCurrent = ({
+  stored,
+  payload,
+  current,
+}: {
+  stored: AttachmentRequestV2;
+  payload: RelatedAttachmentUpdate['payload'];
+  current: AttachmentRequestV2;
+}): RelatedAttachmentUpdate['payload'] => {
+  const dropped = toDroppedPayload(stored, payload);
+  const droppedIds = new Set('attachmentId' in dropped ? toStringArray(dropped.attachmentId) : []);
+  const droppedSources = new Set(
+    difference(readSourceAttachmentIds(stored), readSourceAttachmentIds(payload))
+  );
+
+  const currentIds = 'attachmentId' in current ? toStringArray(current.attachmentId) : [];
+  const keptPositions = currentIds.flatMap((alertId, position) =>
+    droppedIds.has(alertId) ? [] : [position]
+  );
+
+  // `metadata.index` runs parallel to `attachmentId`, exactly as it does in `toDroppedPayload`.
+  const currentIndex = 'metadata' in current ? current.metadata?.index : undefined;
+  const index =
+    Array.isArray(currentIndex) && currentIndex.length === currentIds.length
+      ? keptPositions.map((position) => currentIndex[position])
+      : currentIndex;
+
+  const currentSources = readSourceAttachmentIds(current);
+  const sourceAttachmentIds = currentSources.filter((sourceId) => !droppedSources.has(sourceId));
+
+  return {
+    ...current,
+    attachmentId: keptPositions.map((position) => currentIds[position]),
+    metadata: {
+      ...('metadata' in current ? current.metadata : {}),
+      index,
+      // Written back even when it empties, so the spread above cannot restore the provenance
+      // this removal is giving up. Left alone on an attachment that never carried any.
+      ...(currentSources.length > 0 ? { sourceAttachmentIds } : {}),
+    },
+  } as RelatedAttachmentUpdate['payload'];
+};
+
+const readSourceAttachmentIds = (attachment: object): string[] => {
+  const metadata = 'metadata' in attachment ? attachment.metadata : undefined;
+  const sourceIds =
+    metadata != null && typeof metadata === 'object' && 'sourceAttachmentIds' in metadata
+      ? metadata.sourceAttachmentIds
+      : undefined;
+
+  return Array.isArray(sourceIds)
+    ? sourceIds.filter((id): id is string => typeof id === 'string')
+    : [];
 };
 
 /**
