@@ -77,7 +77,11 @@ export const createEditAssigneeAction = (deps: EditAssigneeActionDeps): EpisodeA
   iconType: 'user',
   isCompatible: ({ episodes }: EpisodeActionContext) =>
     episodes.filter(episodeSupportsActions).length > 0,
-  renderMenuItem: ({ episodes, onSuccess, closeMenu }: EpisodeActionMenuItemContext) => (
+  // Keyboard navigation is broken inside the context menu. The nested popover portals out of the
+  // menu's DOM, but its key events still bubble through the React tree to EuiContextMenu, which
+  // takes the arrow keys. Arrow keys in the user search field or user list move focus through the
+  // menu, or back a panel.
+  renderMenuItem:({ episodes, onSuccess, closeMenu }: EpisodeActionMenuItemContext) => (
     <EditEpisodeAssigneePopoverItem
       assigneeUid={getCurrentAssigneeUid(episodes)}
       episodeCount={episodes.length}

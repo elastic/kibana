@@ -38,7 +38,14 @@ export interface EpisodeFooterActionMenuProps {
 const isCustomItem = (item: FlyoutFooterMenuItem): item is FlyoutFooterMenuCustomItem =>
   typeof item.renderItem === 'function';
 
-/** Primary flyout footer control listing every action available for an episode. */
+/**
+ * Primary flyout footer control listing every action available for an episode, for flyouts not
+ * built on `FlyoutTemplate`. It repeats the item handling of `FlyoutTemplate.Footer.PrimaryActionMenu`
+ * without that component's custom item render boundary, custom item key prefix, or modified-click
+ * handling for `href` items. A flyout that migrates to `FlyoutTemplate` can render
+ * `buildEpisodeMenuPanels` output in `Footer.PrimaryActionMenu` directly, which would make this
+ * component removable.
+ */
 export const EpisodeFooterActionMenu = ({
   anchor,
   isOpen,
@@ -59,7 +66,10 @@ export const EpisodeFooterActionMenu = ({
       if (isCustomItem(item)) {
         return { key: item.key, renderItem: () => item.renderItem({ closeMenu: onClose }) };
       }
-      const { onClick } = item as { onClick?: (event: React.MouseEvent) => void };
+      if (item.isSeparator) {
+        return item;
+      }
+      const { onClick } = item;
       if (!onClick) {
         return item;
       }
