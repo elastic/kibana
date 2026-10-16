@@ -133,7 +133,10 @@ openssl req -new -key relay_signing.key -out relay.csr -config relay.cnf
 openssl x509 -req -in relay.csr -CA ca_signing.crt -CAkey ca_signing.key -CAcreateserial -out relay_signed.crt -days 18250 -sha256 -extfile relay.cnf -extensions v3_ext
 
 # Build the PKCS #12 keystore, including the CA so the chain is complete
-openssl pkcs12 -export -out relay.p12 -inkey relay_signing.key -in relay_signed.crt -certfile ca_signing.crt -name relay-service -passout pass:"storepass" -legacy
+openssl pkcs12 -export -out relay.p12 -inkey relay_signing.key -in relay_signed.crt -certfile ca_signing.crt -name relay-service -caname ca -passout pass:"storepass" -keypbe AES-256-CBC -certpbe AES-256-CBC -macalg sha256 -iter 10000
+
+# Mark the CA as a trusted certificate entry, matching the other key stores
+keytool -importcert -keystore relay.p12 -storetype PKCS12 -storepass storepass -alias ca -file ca_signing.crt -noprompt
 
 # Extract the PEM-formatted PKCS #1 private key for the Relay service
 openssl pkcs12 -in relay.p12 -nocerts -passin pass:"storepass" -passout pass:"keypass" | openssl rsa -passin pass:keypass -out relay.key -traditional
