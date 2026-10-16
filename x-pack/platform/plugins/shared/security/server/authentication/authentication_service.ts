@@ -21,6 +21,7 @@ import type {
   LoggerFactory,
 } from '@kbn/core/server';
 import type { APIKeysType, UiamOAuthType } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { i18n as i18nLib } from '@kbn/i18n';
@@ -119,6 +120,27 @@ export class AuthenticationService {
   private session?: PublicMethodsOf<Session>;
 
   constructor(private readonly logger: Logger) {}
+
+  private async reauthenticateSession(request: KibanaRequest, authenticator: Authenticator) {
+    const originalHeaders = request.headers;
+    try {
+      // Core adds the session credential to the request headers. Remove it temporarily so
+      // reauthentication uses the session, and force a full check instead of cached user data.
+      (request.headers as Record<string, unknown>) = Object.fromEntries(
+        Object.entries(originalHeaders)
+          .filter(([headerName]) => headerName.toLowerCase() !== 'authorization')
+          .concat([[KIBANA_AUTH_FULL_HEADER, 'true']])
+      );
+      return await authenticator.reauthenticate(request);
+    } catch (err) {
+      this.logger.error(
+        `Re-authentication failed due to unexpected error: ${getDetailedErrorMessage(err)}.`
+      );
+      throw err;
+    } finally {
+      (request.headers as Record<string, unknown>) = originalHeaders;
+    }
+  }
 
   setup({
     config,
@@ -358,28 +380,7 @@ export class AuthenticationService {
         return authHeaders ? toolkit.retry({ authHeaders }) : toolkit.notHandled();
       }
 
-      let authenticationResult;
-      const originalHeaders = request.headers;
-      try {
-        // WORKAROUND: Due to BWC reasons Core mutates headers of the original request with authentication
-        // headers returned during authentication stage. We should remove these headers before re-authentication to not
-        // conflict with the HTTP authentication logic. Performance impact is negligible since this is not a hot path.
-        // Additionally, we explicitly include KIBANA_AUTH_FULL_HEADER header to skip any authentication optimizations
-        // and make sure re-authentication is performed in full scope.
-        (request.headers as Record<string, unknown>) = Object.fromEntries(
-          Object.entries(originalHeaders)
-            .filter(([headerName]) => headerName.toLowerCase() !== 'authorization')
-            .concat([[KIBANA_AUTH_FULL_HEADER, 'true']])
-        );
-        authenticationResult = await this.authenticator.reauthenticate(request);
-      } catch (err) {
-        this.logger.error(
-          `Re-authentication failed due to unexpected error: ${getDetailedErrorMessage(err)}.`
-        );
-        throw err;
-      } finally {
-        (request.headers as Record<string, unknown>) = originalHeaders;
-      }
+      const authenticationResult = await this.reauthenticateSession(request, this.authenticator);
 
       if (authenticationResult.succeeded()) {
         if (authenticationResult.authHeaders) {
@@ -459,6 +460,33 @@ export class AuthenticationService {
       uiam,
       serviceAccountsEnabled: config.serviceAccounts.enabled,
       getCurrentUser,
+      refreshSessionAccessToken: async (request) => {
+        const user = getCurrentUser(request);
+        if (
+          request.isFakeRequest ||
+          !user ||
+          user.http_authentication_scheme !== null ||
+          !this.authenticator ||
+          !this.license.isLicenseAvailable() ||
+          !this.license.isEnabled()
+        ) {
+          return undefined;
+        }
+        const result = await this.reauthenticateSession(request, this.authenticator);
+        if (
+          !result.succeeded() ||
+          result.user?.username !== user.username ||
+          result.user?.profile_uid !== user.profile_uid
+        ) {
+          return undefined;
+        }
+        const credential = HTTPAuthorizationHeader.parseFromRequest({
+          headers: result.authHeaders ?? {},
+        });
+        return credential?.scheme.toLowerCase() === 'bearer' && !isUiamCredential(credential)
+          ? credential.credentials
+          : undefined;
+      },
     });
 
     const uiamAPIKeys = uiam

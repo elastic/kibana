@@ -38,6 +38,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
+import { AuthStatus } from '@kbn/core-http-server';
 import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import type { UnauthorizedError } from '@kbn/es-errors';
@@ -144,6 +145,173 @@ describe('AuthenticationService', () => {
   });
 
   afterEach(() => jest.clearAllMocks());
+
+  describe('API key grant session renewal', () => {
+    const expiredTokenError = (wrapped = true) =>
+      new errors.ResponseError(
+        elasticsearchServiceMock.createApiResponse({
+          statusCode: wrapped ? 403 : 401,
+          body: {
+            error: wrapped
+              ? {
+                  type: 'security_exception',
+                  reason: 'Failed to authenticate api key grant',
+                  caused_by: { type: 'security_exception', reason: 'token expired' },
+                }
+              : { type: 'security_exception', reason: 'token expired' },
+          },
+        })
+      );
+
+    it.each([true, false])('renews an expired session grant (wrapped: %s)', async (wrapped) => {
+      service.setup(mockSetupAuthenticationParams);
+      const authc = service.start(mockStartAuthenticationParams);
+      const user = mockAuthenticatedUser({ http_authentication_scheme: null });
+      jest.mocked(mockStartAuthenticationParams.http.auth.get).mockReturnValue({
+        status: AuthStatus.authenticated,
+        state: user,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Bearer expired-session-token', cookie: 'sid=session' },
+      });
+      const originalHeaders = request.headers;
+      const reauthenticate =
+        jest.requireMock('./authenticator').Authenticator.mock.instances[0].reauthenticate;
+      reauthenticate.mockImplementation(async (incoming: KibanaRequest) => {
+        expect(incoming).toBe(request);
+        expect(incoming.headers.authorization).toBeUndefined();
+        expect(incoming.headers[KIBANA_AUTH_FULL_HEADER]).toBe('true');
+        return AuthenticationResult.succeeded(user, {
+          authHeaders: { authorization: 'Bearer renewed-session-token' },
+        });
+      });
+      const grant = mockStartAuthenticationParams.clusterClient.asInternalUser.security.grantApiKey;
+      grant.mockRejectedValueOnce(expiredTokenError(wrapped));
+      grant.mockResponseOnce({
+        id: 'key-id',
+        api_key: 'key-secret',
+        name: 'resume-task',
+        encoded: 'encoded-key',
+      });
+
+      await expect(
+        authc.apiKeys.grantAsInternalUser(
+          request,
+          { name: 'resume-task', role_descriptors: {}, metadata: { managed: true } },
+          { refresh: false }
+        )
+      ).resolves.toMatchObject({ id: 'key-id' });
+      expect(grant).toHaveBeenCalledTimes(2);
+      expect(grant).toHaveBeenNthCalledWith(2, {
+        grant_type: 'access_token',
+        access_token: 'renewed-session-token',
+        api_key: {
+          name: 'resume-task',
+          role_descriptors: {},
+          metadata: { managed: true },
+          expiration: undefined,
+        },
+        refresh: false,
+      });
+      expect(reauthenticate).toHaveBeenCalledTimes(1);
+      expect(request.headers).toBe(originalHeaders);
+    });
+
+    it.each([
+      {
+        label: 'external bearer token',
+        scheme: 'bearer',
+        fake: false,
+        statusCode: 401,
+        reason: 'token expired',
+      },
+      { label: 'fake request', scheme: null, fake: true, statusCode: 401, reason: 'token expired' },
+      {
+        label: 'permission failure',
+        scheme: null,
+        fake: false,
+        statusCode: 403,
+        reason: 'forbidden',
+      },
+      {
+        label: 'invalid credential',
+        scheme: null,
+        fake: false,
+        statusCode: 401,
+        reason: 'invalid token',
+      },
+    ])('does not renew a $label', async ({ scheme, fake, statusCode, reason }) => {
+      service.setup(mockSetupAuthenticationParams);
+      const authc = service.start(mockStartAuthenticationParams);
+      jest.mocked(mockStartAuthenticationParams.http.auth.get).mockReturnValue({
+        status: AuthStatus.authenticated,
+        state: mockAuthenticatedUser({ http_authentication_scheme: scheme }),
+      });
+      const headers = { authorization: 'Bearer caller-token', cookie: 'sid=session' };
+      const request = fake
+        ? httpServerMock.createFakeKibanaRequest({ headers })
+        : httpServerMock.createKibanaRequest({ headers });
+      const error = new errors.ResponseError(
+        elasticsearchServiceMock.createApiResponse({
+          statusCode,
+          body: { error: { type: 'security_exception', reason } },
+        })
+      );
+      const grant = mockStartAuthenticationParams.clusterClient.asInternalUser.security.grantApiKey;
+      grant.mockRejectedValueOnce(error);
+      await expect(
+        authc.apiKeys.grantAsInternalUser(request, { name: 'resume-task', role_descriptors: {} })
+      ).rejects.toBe(error);
+      expect(grant).toHaveBeenCalledTimes(1);
+      expect(
+        jest.requireMock('./authenticator').Authenticator.mock.instances[0].reauthenticate
+      ).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      'no session',
+      'different user',
+      'different profile',
+      'retry expires',
+      'refresh throws',
+    ])('fails closed when %s', async (failure) => {
+      service.setup(mockSetupAuthenticationParams);
+      const authc = service.start(mockStartAuthenticationParams);
+      const user = mockAuthenticatedUser({ http_authentication_scheme: null });
+      jest.mocked(mockStartAuthenticationParams.http.auth.get).mockReturnValue({
+        status: AuthStatus.authenticated,
+        state: user,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Bearer expired-session-token', cookie: 'sid=session' },
+      });
+      const originalHeaders = request.headers;
+      const reauthenticate =
+        jest.requireMock('./authenticator').Authenticator.mock.instances[0].reauthenticate;
+      reauthenticate.mockResolvedValue(
+        failure === 'no session'
+          ? AuthenticationResult.notHandled()
+          : AuthenticationResult.succeeded(
+              {
+                ...user,
+                ...(failure === 'different user' ? { username: 'someone-else' } : {}),
+                ...(failure === 'different profile' ? { profile_uid: 'another-profile' } : {}),
+              },
+              { authHeaders: { authorization: 'Bearer renewed-session-token' } }
+            )
+      );
+      const error = expiredTokenError();
+      if (failure === 'refresh throws') reauthenticate.mockRejectedValue(error);
+      const grant = mockStartAuthenticationParams.clusterClient.asInternalUser.security.grantApiKey;
+      grant.mockRejectedValue(error);
+      await expect(
+        authc.apiKeys.grantAsInternalUser(request, { name: 'resume-task', role_descriptors: {} })
+      ).rejects.toBe(error);
+      expect(grant).toHaveBeenCalledTimes(failure === 'retry expires' ? 2 : 1);
+      expect(reauthenticate).toHaveBeenCalledTimes(1);
+      expect(request.headers).toBe(originalHeaders);
+    });
+  });
 
   describe('#setup()', () => {
     it('properly registers auth handler', () => {
