@@ -282,9 +282,6 @@ xpack.task_manager.metrics_reset_interval: 120000
 # Reporting feature
 xpack.screenshotting.enabled: false
 xpack.reporting.queue.pollInterval: 3m
-# One task run waits up to 60s for a page-render-service slot, then renders (180s target), then
-# streams the result. 5m leaves room for all three; at the 4m default the wait budget shrinks.
-xpack.reporting.queue.timeout: 5m
 xpack.reporting.statefulSettings.enabled: false
 xpack.reporting.csv.maxConcurrentShardRequests: 0
 xpack.reporting.csv.maxRows: 100000
