@@ -44,6 +44,11 @@ owning both the changed file and some tests produces no row entry unless rule 3 
 
 ## 3. Link types
 
+The names below (`import`, `colocated`, `feature-path`) are the technical ones used in the JSON
+output and in this document. The markdown report shows them in plain language instead:
+`imports it[, same name | , same folder]`, `same name, next to it`, `same folder only`, and
+`similar path (…)` for feature-path groups (mapping table in `report-template.md`).
+
 ### `import` (strong)
 
 A candidate test file (jest / ftr / scout / cypress, not support) contains an `import … from`,
@@ -99,7 +104,7 @@ up as a feature-path group; the printed anchor directory makes this visible and 
 Each spec is scored by how many tokens appear in its directory path. Only the groups with the top
 score (ties broken toward the most specific token) are kept; the **anchor directory** is the spec path
 up to the deepest matched segment. The matcher keeps up to 6 specs per group as links (PR-touched specs always
-kept); the report prints each group as a collapsible `feature-path (<tokens> → <anchor dir>, N specs,
+kept); the report prints each group as a collapsible `similar path (<tokens> → <anchor dir>, N specs,
 showing K)` block.
 
 No `describe` / `it` / block-name matching, ever.

@@ -116,8 +116,8 @@ candidate coverage.
   relative to their anchor dir). When you need a full path, take it from `--format json`.
 - Verdict names are exactly: `CANDIDATE COVERAGE — UPDATED`, `CANDIDATE COVERAGE — NOT UPDATED`,
   `NO EXISTING TEST`.
-- A `feature-path` link is the weakest link; its type is printed so readers can discount it. Do not
-  summarize feature-path-only rows as "covered".
+- A `feature-path` link (shown as `similar path`) is the weakest link; the label is printed so
+  readers can discount it. Do not summarize feature-path-only rows as "covered".
 - If a NO EXISTING TEST row looks wrong (you know a suite exists), do not add it by hand. Report the
   row as the script produced it and note the suspected miss separately, with the path, so the
   matcher rules can be improved via PR to this skill.
@@ -126,11 +126,13 @@ candidate coverage.
 
 Implemented in `scripts/lib/matcher.mjs`; details in [references/link-rules.md](references/link-rules.md).
 
-| Link type | Means | Strength |
-|---|---|---|
-| `import` | a Jest/FTR/Scout test file imports or requires the changed file (relative or `@kbn/*`) | strong |
-| `colocated` | a `*.test.ts(x)` sits next to the changed file (`same name` is stronger than `same directory`) | strong / medium |
-| `feature-path` | a Cypress / Scout / FTR spec lives under a directory that mirrors the changed feature path | weak |
+| Link type (JSON) | Shown in the report as | Means | Strength |
+|---|---|---|---|
+| `import` | `imports it` | a Jest/FTR/Scout test file imports or requires the changed file (relative or `@kbn/*`) | strong |
+| `colocated` | `same name, next to it` / `same folder only` (`imports it, same name` / `imports it, same folder` when it also imports) | a `*.test.ts(x)` sits next to the changed file (`same name` is stronger than `same directory`) | strong / medium |
+| `feature-path` | `similar path (…)` | a Cypress / Scout / FTR spec lives under a directory that mirrors the changed feature path | weak |
+
+The report's Legend repeats this in one line per label so readers do not need this file.
 
 CODEOWNERS is only the **search boundary** (owning teams' prefixes + the conventional Security test
 roots). Same-team ownership is never a link. No `describe`/`it` name matching.

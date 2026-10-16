@@ -29,8 +29,13 @@ import {
 } from './lib/matcher.mjs';
 import { parseCodeowners, resolveOwners, teamPrefixes, patternToRegex } from './lib/codeowners.mjs';
 import { classifyFile, changeType } from './lib/classify.mjs';
-import { COMMENT_MARKER, commonRoot, renderPrReport } from './lib/report.mjs';
-
+import {
+  COMMENT_MARKER,
+  LINK_LEGEND,
+  commonRoot,
+  linkLabel,
+  renderPrReport,
+} from './lib/report.mjs';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const CLI = path.join(HERE, 'pr_test_impact.mjs');
 
@@ -293,6 +298,29 @@ test('test-only PR: no production rows, test files listed, legend still present'
   assert.ok(!md.includes('## Checks'));
 });
 
+test('report: link labels are plain language; JSON keeps raw types/via', () => {
+  const label = (types, via) => linkLabel({ types, via });
+  assert.equal(label(['colocated', 'import'], ['same name']), 'imports it, same name');
+  assert.equal(label(['colocated', 'import'], ['same directory']), 'imports it, same folder');
+  assert.equal(label(['import'], []), 'imports it');
+  assert.equal(label(['colocated'], ['same name']), 'same name, next to it');
+  assert.equal(label(['colocated'], ['same directory']), 'same folder only');
+
+  const file = `${PLUGIN}/public/detection_engine/rule_management_ui/components/rules_table/rules_table.tsx`;
+  const analysis = analyze([modified(file)]);
+  const md = renderPrReport({ pr: { number: 1, title: 't', url: 'u', state: 'OPEN' }, analysis });
+  for (const line of LINK_LEGEND) assert.ok(md.includes(line), line);
+  assert.ok(md.includes('| Linked tests (how linked) |'));
+  // technical names stay out of the markdown cells…
+  assert.ok(!md.includes('colocated+import'));
+  assert.ok(!/\bfeature-path \(/.test(md));
+  assert.ok(md.includes('similar path (`'));
+  // …but the JSON keeps them
+  const row = rowFor(analysis, file);
+  assert.ok(row.links.some((l) => l.types.includes('colocated') && l.via.includes('same name')));
+  assert.ok(row.links.some((l) => l.types.includes('feature-path')));
+});
+
 test('report: legend present when every file is candidate coverage; Checks only for uncovered rows', () => {
   const covered = `${PLUGIN}/public/detection_engine/rule_management_ui/components/rules_table/rules_table.tsx`;
   const mdCovered = renderPrReport({
@@ -332,11 +360,11 @@ test('report: paths are shortened for display only; JSON keeps full paths', () =
   );
   assert.ok(
     md.includes(
-      'import: `plugins/security_solution/public/detection_engine/rule_management_ui/logic/use_rules.test.ts`'
+      'imports it: `plugins/security_solution/public/detection_engine/rule_management_ui/logic/use_rules.test.ts`'
     )
   );
   // colocated test: file name only
-  assert.ok(md.includes('colocated+import (same name): `rules_table.test.tsx`'));
+  assert.ok(md.includes('imports it, same name: `rules_table.test.tsx`'));
   // feature-path specs: relative to the (root-relative) anchor dir
   assert.ok(
     md.includes(
@@ -372,7 +400,7 @@ test('report: long lists are collapsible; the first direct links stay visible', 
   // feature-path groups are collapsed, with counts in the summary
   assert.match(
     md,
-    /<details><summary>feature-path \(`rule_management\+rules_table` → `test\/security_solution_cypress\/[^`]+`, 2 spec\(s\)\)<\/summary>&nbsp;&nbsp;`filtering\.cy\.ts`<br>&nbsp;&nbsp;`sorting\.cy\.ts`<\/details>/
+    /<details><summary>similar path \(`rule_management\+rules_table` → `test\/security_solution_cypress\/[^`]+`, 2 spec\(s\)\)<\/summary>&nbsp;&nbsp;`filtering\.cy\.ts`<br>&nbsp;&nbsp;`sorting\.cy\.ts`<\/details>/
   );
 
   // direct links beyond the first four are collapsed, PR-touched ones sorted first
@@ -407,10 +435,12 @@ test('report: long lists are collapsible; the first direct links stay visible', 
   });
   const cell = md2.split('\n').find((l) => l.startsWith('| `svc.ts`'));
   assert.ok(cell, 'row rendered');
-  assert.ok(cell.includes('import: `f.test.ts` _(in this PR: modified)_<br>import: `a.test.ts`'));
+  assert.ok(
+    cell.includes('imports it: `f.test.ts` _(in this PR: modified)_<br>imports it: `a.test.ts`')
+  );
   assert.ok(
     cell.includes(
-      '<details><summary>+2 more import/colocated tests</summary>import: `d.test.ts`<br>import: `e.test.ts`</details>'
+      '<details><summary>+2 more tests that import it or sit beside it</summary>imports it: `d.test.ts`<br>imports it: `e.test.ts`</details>'
     )
   );
 });

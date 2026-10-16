@@ -74,6 +74,33 @@ const blockDetails = (summary, lines) =>
 
 const prFlag = (l) => (l.inPr ? ` _(in this PR: ${l.prStatus})_` : '');
 
+// Plain-language label for a direct link. The JSON keeps the raw `types` / `via`.
+//   import + colocated(same name)      → "imports it, same name"   (the dedicated unit test)
+//   import + colocated(same directory) → "imports it, same folder"
+//   import only                        → "imports it"
+//   colocated(same name) only          → "same name, next to it"
+//   colocated(same directory) only     → "same folder only"        (does not import it)
+export const linkLabel = (l) => {
+  const imports = l.types.includes('import');
+  const sameName = l.via.includes('same name');
+  const sameDir = l.via.includes('same directory');
+  if (imports && sameName) return 'imports it, same name';
+  if (imports && sameDir) return 'imports it, same folder';
+  if (imports) return 'imports it';
+  if (sameName) return 'same name, next to it';
+  return 'same folder only';
+};
+
+export const LINK_LEGEND = [
+  'How tests are linked (strongest first):',
+  '- **imports it** — the test file imports the changed file, so it really loads that code. ' +
+    '"same name" = the dedicated unit test next to it; "same folder" = another test in the same directory.',
+  '- **same name, next to it** / **same folder only** — the test sits beside the changed file but ' +
+    'does not import it; it may not exercise the change at all.',
+  '- **similar path** — an e2e / API spec lives under a directory whose name mirrors the feature. ' +
+    'Weakest signal: a path match, nothing more.',
+];
+
 // PR-touched links first, then same-name colocated, then imports, then same-directory-only,
 // then by path.
 const isSameDirOnly = (l) => l.types.length === 1 && l.via.includes('same directory');
@@ -94,10 +121,7 @@ const formatLinks = (row, root, { featureSpecs = true } = {}) => {
   const directLinks = row.links.filter((l) => !l.types.includes('feature-path')).sort(byPriority);
 
   // The first few direct links are visible; the rest are kept but collapsed.
-  const directLine = (l) => {
-    const via = l.via.length ? ` (${l.via.join(', ')})` : '';
-    return `${l.types.join('+')}${via}: ${code(showDirect(l.path))}${prFlag(l)}`;
-  };
+  const directLine = (l) => `${linkLabel(l)}: ${code(showDirect(l.path))}${prFlag(l)}`;
   const visible = directLinks.slice(0, MAX_DIRECT_SHOWN);
   const collapsed = directLinks.slice(MAX_DIRECT_SHOWN);
   lines.push(...visible.map(directLine));
@@ -105,7 +129,7 @@ const formatLinks = (row, root, { featureSpecs = true } = {}) => {
     const touched = collapsed.filter((l) => l.inPr).length;
     const note = touched ? `, ${touched} touched by this PR` : '';
     lines.push(
-      inlineDetails(`+${collapsed.length} more import/colocated tests${note}`, [
+      inlineDetails(`+${collapsed.length} more tests that import it or sit beside it${note}`, [
         ...collapsed.map(directLine),
       ])
     );
@@ -118,7 +142,7 @@ const formatLinks = (row, root, { featureSpecs = true } = {}) => {
     const touched = specs.filter((l) => l.inPr).length;
     const count = g.total > g.shown ? `${g.total} specs, showing ${g.shown}` : `${g.total} spec(s)`;
     const note = touched ? `; ${touched} touched by this PR` : '';
-    const summary = `feature-path (${code(g.tokens.join('+'))} → ${code(
+    const summary = `similar path (${code(g.tokens.join('+'))} → ${code(
       relTo(root, g.anchorDir)
     )}, ${count}${note})`;
     // Spec lists are omitted for low-attention rows in compact mode; the JSON has them all.
@@ -157,8 +181,8 @@ export const COMMENT_MARKER = '<!-- security-pr-test-impact -->';
 
 const rowsTable = (rows, { withPr = false, root = '', featureSpecs = true } = {}) => {
   const head = withPr
-    ? '| PR | Production file | Change type | Verdict | Linked tests (link type) | Linked tests updated by this PR |'
-    : '| Production file | Change type | Verdict | Linked tests (link type) | Linked tests updated by this PR |';
+    ? '| PR | Production file | Change type | Verdict | Linked tests (how linked) | Linked tests updated by this PR |'
+    : '| Production file | Change type | Verdict | Linked tests (how linked) | Linked tests updated by this PR |';
   const sep = withPr ? '|---|---|---|---|---|---|' : '|---|---|---|---|---|';
   const lines = [head, sep];
   for (const r of rows) {
@@ -306,7 +330,7 @@ export const renderPrReport = ({ pr, analysis, compact = false }) => {
   }
   out.push('');
 
-  out.push('## Legend', '', legend, '');
+  out.push('## Legend', '', legend, '', ...LINK_LEGEND, '');
 
   out.push('## Summary', '', ...summaryTable(summary), '');
 
@@ -395,7 +419,7 @@ export const renderTeamReport = ({
   }
   out.push('');
 
-  out.push('## Legend', '', LEGEND, '');
+  out.push('## Legend', '', LEGEND, '', ...LINK_LEGEND, '');
   out.push('## Summary', '', ...summaryTable(summary), '');
 
   if (allRows.length > 0) {

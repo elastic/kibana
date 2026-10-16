@@ -36,6 +36,11 @@ Output: one markdown document on stdout. Optional copy only under `.agents/tmp/`
 A link means a test sits in the right area (import, colocated, or feature-path); it does not mean
 the test’s assertions cover the new behavior.
 
+How tests are linked (strongest first):
+- **imports it** — the test file imports the changed file, so it really loads that code. "same name" = the dedicated unit test next to it; "same folder" = another test in the same directory.
+- **same name, next to it** / **same folder only** — the test sits beside the changed file but does not import it; it may not exercise the change at all.
+- **similar path** — an e2e / API spec lives under a directory whose name mirrors the feature. Weakest signal: a path match, nothing more.
+
 ## Summary
 
 | Verdict | Files |
@@ -46,9 +51,9 @@ the test’s assertions cover the new behavior.
 
 ## Production files
 
-| Production file | Change type | Verdict | Linked tests (link type) | Linked tests updated by this PR |
+| Production file | Change type | Verdict | Linked tests (how linked) | Linked tests updated by this PR |
 |---|---|---|---|---|
-| `<path>` [_(added|removed|renamed)_] | **<type>** _(also: …)_<br><reason> | **<verdict>** | import: `<test>` _(in this PR: modified)_<br>colocated (same name): `<file name>`<br>…up to 4 visible…<br><details><summary>+N more import/colocated tests[, t touched by this PR]</summary>…</details><br><details><summary>feature-path (`<tokens>` → `<anchor dir>`, N specs, showing K[; t touched by this PR])</summary>&nbsp;&nbsp;`<spec relative to anchor dir>`…</details> | Yes (k of n) / No / — |
+| `<path>` [_(added|removed|renamed)_] | **<type>** _(also: …)_<br><reason> | **<verdict>** | imports it, same name: `<file name>` _(in this PR: modified)_<br>imports it: `<test>`<br>same folder only: `<file name>`<br>…up to 4 visible…<br><details><summary>+N more tests that import it or sit beside it[, t touched by this PR]</summary>…</details><br><details><summary>similar path (`<tokens>` → `<anchor dir>`, N specs, showing K[; t touched by this PR])</summary>&nbsp;&nbsp;`<spec relative to anchor dir>`…</details> | Yes (k of n) / No / — |
 
 ## Checks            ← only when there is at least one NO EXISTING TEST row
 
@@ -65,6 +70,17 @@ imports, then same-directory, then by path; the first four are visible and the r
 `<details>` block. Each feature-path group is its own collapsible block whose summary carries the
 counts and how many specs this PR touched. Nothing is dropped from the markdown; collapsing is
 presentation only.
+
+Link labels in the markdown are plain language; the JSON keeps the technical `types` / `via`:
+
+| JSON `types` + `via` | Markdown label |
+|---|---|
+| `import` + `colocated` (`same name`) | `imports it, same name` |
+| `import` + `colocated` (`same directory`) | `imports it, same folder` |
+| `import` | `imports it` |
+| `colocated` (`same name`) | `same name, next to it` |
+| `colocated` (`same directory`) | `same folder only` |
+| `feature-path` | `similar path (…)` group |
 
 ## Compact mode (`--compact`)
 
