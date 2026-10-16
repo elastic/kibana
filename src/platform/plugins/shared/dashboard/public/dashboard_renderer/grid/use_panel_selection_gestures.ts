@@ -56,6 +56,13 @@ const KEEP_SELECTION_SELECTOR = [
   '.embPanel__selectPanel',
 ].join(', ');
 
+/**
+ * Applied directly to the grid items touched by the rectangle while it is being drawn, so they are
+ * outlined like selected panels without re-rendering the grid on every mouse move (the grid layout
+ * uses the same approach for its `kbnGridPanel--active` class).
+ */
+export const MARQUEE_PREVIEW_CLASS = 'dshDashboardGrid__item--marqueePreview';
+
 /** Escape pressed while focus is here belongs to that element (close a menu / flyout, leave an input) */
 const ESCAPE_OWNED_BY_TARGET_SELECTOR = [
   '[data-euiportal]',
@@ -112,6 +119,23 @@ export const usePanelSelectionGestures = ({
 
     // The click that follows a modifier gesture must not reach the panel content (filters, drilldowns, links)
     let suppressNextClick = false;
+
+    const getPanelsIntersecting = (rect: SelectionRect): string[] =>
+      Object.entries(panelRefs.current)
+        .filter(([, ref]) => {
+          const element = getPanelElement(ref);
+          return element ? intersects(rect, element.getBoundingClientRect()) : false;
+        })
+        .map(([panelId]) => panelId);
+
+    const setMarqueePreview = (previewPanelIds: string[]) => {
+      Object.entries(panelRefs.current).forEach(([panelId, ref]) => {
+        getPanelElement(ref)?.classList.toggle(
+          MARQUEE_PREVIEW_CLASS,
+          previewPanelIds.includes(panelId)
+        );
+      });
+    };
 
     const onDocumentMouseDown = () => {
       suppressNextClick = false;
@@ -173,7 +197,11 @@ export const usePanelSelectionGestures = ({
         ) {
           isMarquee = true;
         }
-        if (isMarquee) setMarqueeRect(toRect(start, current));
+        if (isMarquee) {
+          const rect = toRect(start, current);
+          setMarqueeRect(rect);
+          setMarqueePreview(getPanelsIntersecting(rect)); // outline the panels that would be selected
+        }
       };
 
       const onMouseUp = (upEvent: MouseEvent) => {
@@ -191,13 +219,8 @@ export const usePanelSelectionGestures = ({
         }
 
         const rect = toRect(start, { x: upEvent.clientX, y: upEvent.clientY });
-        const intersectingPanelIds = Object.entries(panelRefs.current)
-          .filter(([, ref]) => {
-            const element = getPanelElement(ref);
-            return element ? intersects(rect, element.getBoundingClientRect()) : false;
-          })
-          .map(([panelId]) => panelId);
-        dashboardApi.addPanelsToSelection(intersectingPanelIds);
+        dashboardApi.addPanelsToSelection(getPanelsIntersecting(rect));
+        setMarqueePreview([]);
         setMarqueeRect(undefined);
       };
 
@@ -214,6 +237,7 @@ export const usePanelSelectionGestures = ({
       document.removeEventListener('mousedown', onDocumentMouseDown, { capture: true });
       document.removeEventListener('click', onDocumentClick, { capture: true });
       document.removeEventListener('keydown', onDocumentKeyDown);
+      setMarqueePreview([]);
       setMarqueeRect(undefined);
     };
   }, [layoutRef, panelRefs, enabled, dashboardApi]);

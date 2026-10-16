@@ -32,7 +32,7 @@ import {
 import { DashboardGridItem } from './dashboard_grid_item';
 import { SelectionMarquee } from './selection_marquee';
 import { useLayoutStyles } from './use_layout_styles';
-import { usePanelSelectionGestures } from './use_panel_selection_gestures';
+import { MARQUEE_PREVIEW_CLASS, usePanelSelectionGestures } from './use_panel_selection_gestures';
 import { useSelectionModifierHeld } from './use_selection_modifier_held';
 
 export const DashboardGrid = () => {
@@ -286,12 +286,14 @@ const dashboardGridStyles = {
       ].join(', ')]: {
         cursor: 'pointer',
       },
-      // ... and the hovered panel is called out as selectable (selected panels keep their solid outline)
+      // ... and the hovered panel, as well as every panel inside the rectangle being drawn, is outlined
+      // the same way a selected panel is
       [[
-        '&.dshLayout--selectionMode .dshDashboardGrid__item:hover:not(.dshDashboardGrid__item--panelSelected) .embPanel',
-        '&.dshLayout--selectionModifierHeld .dshDashboardGrid__item:hover:not(.dshDashboardGrid__item--panelSelected) .embPanel',
+        '&.dshLayout--selectionMode .dshDashboardGrid__item:hover .embPanel',
+        '&.dshLayout--selectionModifierHeld .dshDashboardGrid__item:hover .embPanel',
+        `.${MARQUEE_PREVIEW_CLASS} .embPanel`,
       ].join(', ')]: {
-        outline: `${euiTheme.border.width.thick} dashed ${euiTheme.colors.primary}`,
+        outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.primary}`,
       },
       // ... and cannot be resized (same approach the grid uses for `.kbnGrid--static`)
       '&.dshLayout--selectionMode .kbnGridPanel--resizeHandle': {
