@@ -16,6 +16,8 @@ import {
   MAX_EVALUATOR_NAME_LENGTH,
   buildSpaceFilter,
   getEvaluatorDefinitionId,
+  getEvaluatorSuccessorId,
+  getJudgeScoreDirection,
 } from '@kbn/evals-common';
 import type {
   EvaluatorDefinitionDocument,
@@ -25,6 +27,7 @@ import { validateJudgeConfig } from '../../evaluators/user_defined/validate_conf
 import { EvaluatorAlreadyExistsError } from './evaluator_already_exists_error';
 import { BuiltInEvaluatorNameError } from './built_in_evaluator_name_error';
 import { EvaluatorNotFoundError } from './evaluator_not_found_error';
+import { EvaluatorVersionConflictError } from './evaluator_version_conflict_error';
 import { InvalidEvaluatorNameError } from './invalid_evaluator_name_error';
 import type { EvaluatorStorageProperties, evaluatorsStorageSettings } from './evaluators_storage';
 
@@ -43,10 +46,12 @@ const isSameJudge = (a: LlmJudgeConfig, b: LlmJudgeConfig): boolean => {
     reference_data_keys: [...(judge.reference_data_keys ?? [])].sort(),
     output: {
       ...judge.output,
-      // Order is kept: it is the order a reader sees. Only a blank description is
-      // normalized, since the form omits one and the API accepts an empty string.
+      // Order is kept: it is the order a reader sees. A blank description is normalized,
+      // since the form omits one and the API accepts an empty string, and so is an absent
+      // direction, which a version written before scores declared one reads as `maximize`.
       scores: judge.output.scores.map(({ description, ...score }) => ({
         ...score,
+        direction: getJudgeScoreDirection(score),
         ...(description?.trim() ? { description: description.trim() } : {}),
       })),
     },
@@ -57,16 +62,17 @@ const isSameJudge = (a: LlmJudgeConfig, b: LlmJudgeConfig): boolean => {
 
 /**
  * The part of a judge that decides whether two runs can be compared: which scores come back,
- * on what scale, and which inputs an example has to supply. Compared as sets, so reordering
- * is a presentational change rather than a contract change.
+ * on what scale, which way each one improves, and which inputs an example has to supply.
+ * Compared as sets, so reordering is a presentational change rather than a contract change.
  */
 const comparabilityContract = (judge: LlmJudgeConfig) => ({
   evidence: [...judge.evidence].sort(),
   reference_data_keys: [...(judge.reference_data_keys ?? [])].sort(),
   scores: [...judge.output.scores]
-    .map(({ name, type, labels }) => ({
+    .map(({ name, type, labels, direction }) => ({
       name,
       type,
+      direction: getJudgeScoreDirection({ direction }),
       labels: [...(labels ?? [])].map(({ value, score }) => `${value}=${score}`).sort(),
     }))
     .sort((a, b) => a.name.localeCompare(b.name)),
@@ -77,7 +83,8 @@ const comparabilityContract = (judge: LlmJudgeConfig) => ({
  * claim the author has to make honestly — a distinction that matters for a judge, where a
  * one-word rubric change can move every score.
  *
- * - `major`: the scores or required inputs changed, so earlier runs no longer line up.
+ * - `major`: the scores, which way they improve, or the required inputs changed, so earlier
+ *   runs no longer line up.
  * - `minor`: the judge's instructions changed, so scores may shift but still compare.
  * - `patch`: only the catalog description changed, which the judge never sees.
  *
@@ -115,6 +122,8 @@ export interface UpdateEvaluatorDefinitionInput {
   description?: string;
   judge?: LlmJudgeConfig;
   createdBy?: string;
+  /** The version the edit started from. When set, the update is refused once it is not the latest. */
+  baseVersion?: string;
 }
 
 export interface EvaluatorDefinitionDeleteResult {
@@ -123,7 +132,7 @@ export interface EvaluatorDefinitionDeleteResult {
 
 const INITIAL_VERSION = '1.0.0';
 
-/** Maximum writes attempted when concurrent updates take the same version. */
+/** Maximum writes attempted when concurrent updates edit the same version. */
 const UPDATE_MAX_ATTEMPTS = 5;
 
 const EVALUATOR_DEFINITIONS_PAGE_SIZE = 500;
@@ -186,8 +195,8 @@ interface LatestByNameAggregation {
  * Versions are immutable: an update writes a new document rather than replacing
  * the one it read, so a score naming `name@version` always resolves to the
  * definition that produced it. That also removes the read-modify-write datasets
- * need optimistic concurrency for — a derived id and `op_type: 'create'` are
- * enough to make two writers competing for one version resolve to one winner.
+ * need optimistic concurrency for — an id derived from the version an edit read,
+ * written with `op_type: 'create'`, lets only one edit of a version win.
  */
 export class EvaluatorDefinitionClient {
   private readonly storage: InternalIStorageClient<EvaluatorStorageDocument>;
@@ -274,7 +283,7 @@ export class EvaluatorDefinitionClient {
    */
   async update(
     name: string,
-    { description, judge, createdBy }: UpdateEvaluatorDefinitionInput
+    { description, judge, createdBy, baseVersion }: UpdateEvaluatorDefinitionInput
   ): Promise<EvaluatorDefinitionDocument> {
     if (this.isBuiltIn(name)) {
       throw new BuiltInEvaluatorNameError(name);
@@ -287,6 +296,10 @@ export class EvaluatorDefinitionClient {
       const current = await this.getLatest(name);
       if (!current) {
         throw new EvaluatorNotFoundError(name);
+      }
+      // Checked on every attempt, so an edit that loses a race is refused, not reapplied.
+      if (baseVersion && current.version !== baseVersion) {
+        throw new EvaluatorVersionConflictError(name, baseVersion, current.version);
       }
 
       const nextDescription = description ?? current.description;
@@ -321,7 +334,9 @@ export class EvaluatorDefinitionClient {
         ...(createdBy ?? current.created_by ? { created_by: createdBy ?? current.created_by } : {}),
       };
 
-      const id = getEvaluatorDefinitionId(this.spaceId, name, nextVersion);
+      // Keyed by the version read, not `nextVersion`, so concurrent edits of it collide even
+      // when they derive different levels.
+      const id = getEvaluatorSuccessorId(this.spaceId, name, current.version);
 
       try {
         await this.storage.index({ id, op_type: 'create', document, refresh: true });
@@ -331,15 +346,13 @@ export class EvaluatorDefinitionClient {
         }
 
         this.logger.debug(
-          `Version ${nextVersion} of evaluator "${name}" was taken by a concurrent update; retrying (attempt ${attempt})`
+          `Version ${current.version} of evaluator "${name}" was superseded by a concurrent update; retrying (attempt ${attempt})`
         );
         continue;
       }
 
-      // The id only collides with a writer that derived the same level, so a concurrent edit
-      // bumping a different one lands beside this write rather than against it. Whoever ends
-      // up below the head has to reapply onto it, or their edit is missing from the version
-      // everything else reads.
+      // A node still keying versions by number (mid-upgrade) can land beside this write, so
+      // whoever ends up below the head reapplies onto it.
       const latest = await this.getLatest(name);
       if (latest?.version === nextVersion) {
         return toDefinition(id, document);

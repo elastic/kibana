@@ -48,6 +48,11 @@ import { SeverityBadge } from '../../../common/components/severity_badge';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
 import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
 import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import {
+  combineEntityGroupFilters,
+  getEntityGroupRecords,
+} from '../../../flyout/entity_details/shared/entity_store_group_utils';
+import type { EntityViewMode } from '../../../flyout/entity_details/shared/types';
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 enum KIBANA_ALERTS {
@@ -91,6 +96,7 @@ export const AlertsDetailsTable = memo(
     value,
     entityId,
     entityType,
+    mode,
     onShowAlert,
     scopeId,
   }: {
@@ -99,6 +105,8 @@ export const AlertsDetailsTable = memo(
     /** Canonical entity store id (`host.entity.id` / `user.entity.id`); when set with Entity Store v2, identity is loaded from the store for EUID DSL. */
     entityId?: string;
     entityType?: 'host' | 'user';
+    /** Entity-store lookup mode; in `resolved` mode alerts of the entities resolving to `entityId` are included. */
+    mode?: EntityViewMode;
     /** Callback executed after opening the alert details for a row. */
     onShowAlert: (eventId: string, indexName: string, ruleName?: string) => void;
     /**
@@ -163,19 +171,28 @@ export const AlertsDetailsTable = memo(
     const entityTypeResolved: 'host' | 'user' =
       entityType ?? (field === 'user.name' ? 'user' : 'host');
 
-    const { entityRecord, isLoading: entityFromStoreLoading } = useEntityFromStore({
+    const {
+      entityRecord,
+      aliasRecords,
+      isLoading: entityFromStoreLoading,
+    } = useEntityFromStore({
       entityId,
+      mode,
       entityType: entityTypeResolved,
       skip: !entityStoreV2Enabled || !entityId,
     });
 
     const euidApi = useEntityStoreEuidApi();
     const euidEntityFilter = useMemo((): QueryDslQueryContainer | undefined => {
-      if (!euidApi?.euid) {
+      if (!euidApi?.euid || entityRecord == null) {
         return undefined;
       }
-      return euidApi.euid.dsl.getEuidFilterBasedOnDocument(entityTypeResolved, entityRecord);
-    }, [euidApi?.euid, entityTypeResolved, entityRecord]);
+      const definition = euidApi.getBuiltInEntityDefinition(entityTypeResolved);
+      return combineEntityGroupFilters(
+        getEntityGroupRecords(entityRecord, aliasRecords),
+        (record) => euidApi.euid.dsl.getEuidFilterBasedOnDocument(definition, record)
+      );
+    }, [euidApi, entityTypeResolved, entityRecord, aliasRecords]);
 
     const filterAlertsByEuid = Boolean(euidApi?.euid && euidEntityFilter);
     /** Wait for entity-store lookup when `entityId` is set; after it finishes with no record, fall back to field/value filters. */

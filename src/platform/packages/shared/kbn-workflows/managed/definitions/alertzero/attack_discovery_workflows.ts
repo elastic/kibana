@@ -41,18 +41,22 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
 } as const satisfies ManagedWorkflowDefinition;
 
 /**
- * The version carries the `resolve_display_text` step, which reads the discovery from
+ * Version 7 carries the `resolve_display_text` step, which reads the discovery from
  * the Attack Discovery find API so the Investigation title, its summary, the journal
  * and the proposal's title and comment show its text with field tokens rendered and
  * original values restored. Bumped as a deliberate rollout signal for that step; the YAML
  * change alone already rolls out through `definitionHash`.
+ *
+ * Version 8 carries the impact steps, which record the hosts and users an attack
+ * touched on its Investigation, so the landing page's Impact pills match Attack
+ * Discovery proposals.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 7,
+  version: 8,
   yaml: ATTACK_DISCOVERY_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

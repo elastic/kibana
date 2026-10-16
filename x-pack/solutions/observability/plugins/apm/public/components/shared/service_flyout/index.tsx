@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import { EuiFlyoutBody, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { Global, css } from '@emotion/react';
+import { FlyoutTemplate } from '@kbn/flyout-template';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Environment } from '../../../../common/environment_rt';
 import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { useApmIndices } from '../../../hooks/use_apm_indices';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
-import { ResponsiveFlyout } from '../responsive_flyout';
-import { ServiceFlyoutFooter } from './footer';
-import { ServiceFlyoutHeader } from './header';
+import { SERVICE_FLYOUT_EBT_ACTIONS, SERVICE_FLYOUT_EBT_ELEMENTS } from './ebt_constants';
+import { useServiceBadges } from './header/service_badges';
+import { useServiceFlyoutTitle } from './header';
+import { useServiceFlyoutFooterMenu } from './footer';
 import { ServiceFlyoutOverview } from './overview';
 import {
   ServiceFlyoutContextProvider,
   type ServiceFlyoutContextValue,
 } from './service_flyout_context';
 import { useServiceFlyoutCapabilities } from './hooks/use_service_flyout_capabilities';
-import { useApmIndices } from './hooks/use_apm_indices';
 export type { ServiceFlyoutService } from './types';
 
 const SERVICE_OVERVIEW_CHART_TOOLTIP_SELECTORS = [
@@ -44,14 +47,7 @@ const SERVICE_FLYOUT_OWN_CHART_TOOLTIP_SELECTOR =
 
 export const SERVICE_FLYOUT_TAB_IDS = {
   overview: 'overview',
-  alerts: 'alerts',
-  slos: 'slos',
 } as const;
-
-export type ServiceFlyoutTabId =
-  (typeof SERVICE_FLYOUT_TAB_IDS)[keyof typeof SERVICE_FLYOUT_TAB_IDS];
-
-export const SERVICE_FLYOUT_DEFAULT_TAB_ID = SERVICE_FLYOUT_TAB_IDS.overview;
 
 export const SERVICE_FLYOUT_TABS = [
   {
@@ -61,6 +57,22 @@ export const SERVICE_FLYOUT_TABS = [
     }),
   },
 ] as const;
+
+/**
+ * Derived from the declared tabs so the selected-tab state cannot hold an id that has no tab to
+ * render it, which is also what the flyout reports to telemetry.
+ */
+export type ServiceFlyoutTabId = (typeof SERVICE_FLYOUT_TABS)[number]['id'];
+
+export const SERVICE_FLYOUT_DEFAULT_TAB_ID = SERVICE_FLYOUT_TAB_IDS.overview;
+
+/** `FlyoutTemplate` hands back an unconstrained `string`, so narrow it to a declared tab. */
+const isServiceFlyoutTabId = (id: string): id is ServiceFlyoutTabId =>
+  SERVICE_FLYOUT_TABS.some((tab) => tab.id === id);
+
+const ACTIONS_BUTTON_LABEL = i18n.translate('xpack.apm.serviceFlyout.actionsButtonLabel', {
+  defaultMessage: 'Actions',
+});
 
 export interface ServiceFlyoutTelemetry {
   client: { reportServiceFlyoutViewed: (params: { tabId: string; source: string }) => void };
@@ -90,6 +102,94 @@ interface ServiceFlyoutProps {
   preferDocumentBasedCharts?: boolean;
 }
 
+interface ServiceFlyoutContentProps {
+  title: string;
+  onClose: () => void;
+  flyoutHistoryKey: symbol;
+  selectedTabId: ServiceFlyoutTabId;
+  onSelectedTabIdChange: (tabId: ServiceFlyoutTabId) => void;
+}
+
+/**
+ * Authors the `FlyoutTemplate` tree. Rendered inside the flyout's context providers so the header,
+ * badge, and footer hooks have access; the template assembly requires the zones and their parts to
+ * be direct children of `<FlyoutTemplate>`, so they are composed here rather than in sub-components.
+ */
+function ServiceFlyoutContent({
+  title,
+  onClose,
+  flyoutHistoryKey,
+  selectedTabId,
+  onSelectedTabIdChange,
+}: ServiceFlyoutContentProps) {
+  const titleNode = useServiceFlyoutTitle(title);
+  const badges = useServiceBadges();
+  const { panels, isLoading, hasActions } = useServiceFlyoutFooterMenu();
+
+  const handleTabChange = useCallback(
+    (id: string) => {
+      if (isServiceFlyoutTabId(id)) {
+        onSelectedTabIdChange(id);
+      }
+    },
+    [onSelectedTabIdChange]
+  );
+
+  const tabs = useMemo(
+    () =>
+      SERVICE_FLYOUT_TABS.map(({ id, label }) => ({
+        id,
+        label,
+        'data-test-subj': `serviceFlyoutTab-${id}`,
+        ...getEbtProps({
+          action: SERVICE_FLYOUT_EBT_ACTIONS.VIEW_TAB,
+          element: SERVICE_FLYOUT_EBT_ELEMENTS.TABS,
+          detail: id,
+        }),
+      })),
+    []
+  );
+
+  return (
+    <FlyoutTemplate
+      data-test-subj="serviceFlyout"
+      onClose={onClose}
+      ownFocus={false}
+      size="m"
+      // No resizable — pixel-locked width re-clamps under a nested session="start".
+      minWidth={660}
+      session="start"
+      historyKey={flyoutHistoryKey}
+      tabs={tabs}
+      tabBarProps={{ 'data-test-subj': 'serviceFlyoutTabs' }}
+      selectedTabId={selectedTabId}
+      onTabChange={handleTabChange}
+    >
+      <FlyoutTemplate.Header title={titleNode} titleText={title}>
+        {badges}
+      </FlyoutTemplate.Header>
+      <FlyoutTemplate.Body>
+        <FlyoutTemplate.Body.TabPanel tabId={SERVICE_FLYOUT_TAB_IDS.overview}>
+          <ServiceFlyoutOverview />
+        </FlyoutTemplate.Body.TabPanel>
+      </FlyoutTemplate.Body>
+      <FlyoutTemplate.Footer>
+        <FlyoutTemplate.Footer.PrimaryActionMenu
+          label={ACTIONS_BUTTON_LABEL}
+          panels={panels}
+          data-test-subj="serviceFlyoutActionsButton"
+          isLoading={isLoading}
+          isDisabled={isLoading || !hasActions}
+          {...getEbtProps({
+            action: EBT_CLICK_ACTIONS.OPEN_ACTIONS,
+            element: SERVICE_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
+          })}
+        />
+      </FlyoutTemplate.Footer>
+    </FlyoutTemplate>
+  );
+}
+
 export function ServiceFlyout({
   deps,
   service,
@@ -104,7 +204,6 @@ export function ServiceFlyout({
   const { environment, rangeFrom, rangeTo, transactionType } = filters;
   const { latencyAggregationType } = filters;
   const title = service.name;
-  const titleId = useGeneratedHtmlId({ prefix: 'serviceFlyoutTitle' });
   const [flyoutEnvironment, setFlyoutEnvironment] = useState(environment);
   const [flyoutRange, setFlyoutRange] = useState({ rangeFrom, rangeTo });
   const { start, end } = useTimeRange({
@@ -143,15 +242,6 @@ export function ServiceFlyout({
   useEffect(() => {
     telemetryClient.reportServiceFlyoutViewed({ tabId: selectedTabId, source: telemetrySource });
   }, [telemetryClient, telemetrySource, selectedTabId]);
-
-  const renderTabContent = () => {
-    switch (selectedTabId) {
-      case SERVICE_FLYOUT_TAB_IDS.overview:
-        return <ServiceFlyoutOverview />;
-      default:
-        return null;
-    }
-  };
 
   return (
     <>
@@ -205,29 +295,13 @@ export function ServiceFlyout({
           kuery=""
           useSpanName={false}
         >
-          <ResponsiveFlyout
-            data-test-subj="serviceFlyout"
-            flyoutMenuDisplayMode="always"
+          <ServiceFlyoutContent
+            title={title}
             onClose={onClose}
-            ownFocus={false}
-            size="m"
-            paddingSize="m"
-            // No resizable — pixel-locked width re-clamps under a nested session="start".
-            minWidth={660}
-            session="start"
-            historyKey={flyoutHistoryKey}
-            flyoutMenuProps={{ title }}
-            aria-labelledby={titleId}
-          >
-            <ServiceFlyoutHeader
-              title={title}
-              titleId={titleId}
-              selectedTabId={selectedTabId}
-              onSelectedTabIdChange={setSelectedTabId}
-            />
-            <EuiFlyoutBody>{renderTabContent()}</EuiFlyoutBody>
-            <ServiceFlyoutFooter />
-          </ResponsiveFlyout>
+            flyoutHistoryKey={flyoutHistoryKey}
+            selectedTabId={selectedTabId}
+            onSelectedTabIdChange={setSelectedTabId}
+          />
         </TimeRangeMetadataContextProvider>
       </ServiceFlyoutContextProvider>
     </>

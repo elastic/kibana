@@ -26,6 +26,8 @@ describe('scout_ci_config helpers', () => {
       ],
       ['x-pack\\platform\\plugins\\shared\\maps', { kind: 'plugins', name: 'maps' }],
       ['src/core/test/scout', { kind: 'packages', name: 'core' }],
+      ['src/dev/build', { kind: 'packages', name: 'dev' }],
+      ['src/dev/build/test/scout_fips', { kind: 'packages', name: 'dev' }],
     ])('derives module from path: %s', (path, expected) => {
       expect(getScoutCiConfigModuleFromPath(path)).toEqual(expected);
     });

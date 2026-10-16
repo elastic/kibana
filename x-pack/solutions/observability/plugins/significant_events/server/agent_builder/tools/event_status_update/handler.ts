@@ -5,39 +5,28 @@
  * 2.0.
  */
 
-import type { SignificantEventStatus } from '@kbn/significant-events-schema';
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { Logger } from '@kbn/core/server';
-import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
-import type { EventClient } from '../../../lib/significant_events/events';
+import type { SignificantEventManualStatus } from '@kbn/significant-events-schema';
+import type {
+  RuleEventsClient,
+  UpdateEventStatusResult,
+} from '../../../lib/significant_events/events/rule_events_client';
+import { StatusChange } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
 
 export async function updateEventStatusToolHandler({
-  eventClient,
+  eventSearchClient,
   eventId,
   status,
   assessmentNote,
-  alertEventsClient,
-  logger,
 }: {
-  eventClient: EventClient;
+  eventSearchClient: RuleEventsClient;
   eventId: string;
-  status: SignificantEventStatus;
+  status: SignificantEventManualStatus;
   assessmentNote?: string;
-  alertEventsClient?: AlertEventsClientApi;
-  logger: Logger;
-}): Promise<{
-  event_id: string;
-  updated: number;
-  ignored: number;
-  status: SignificantEventStatus;
-}> {
-  const result = await updateSignificantEventStatus({
-    eventClient,
+}): Promise<{ event_id: string } & UpdateEventStatusResult> {
+  const result = await eventSearchClient.updateEventStatus({
     eventId,
-    status,
+    change: StatusChange.byOperator(status),
     assessmentNote,
-    alertEventsClient,
-    logger,
   });
 
   return { event_id: eventId, ...result };

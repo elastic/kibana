@@ -10,6 +10,7 @@
 import type { MongoClient } from 'mongodb';
 import type { ConnectionString as ConnectionStringType } from 'mongodb-connection-string-url';
 import type { BuildContext, ClientTypeSpec, HostTarget } from './client_type_spec';
+import { ensureNoProxyRequired } from './ensure_no_proxy_required';
 import { loadConnectionString } from './load_connection_string';
 import { parseBasicAuthHeader } from './parse_basic_auth_header';
 
@@ -103,25 +104,6 @@ const PROXY_NOT_SUPPORTED_MESSAGE =
   'the MongoDB driver only supports a SOCKS5 proxy (proxyHost/proxyPort), not an HTTP(S) forward ' +
   "proxy. Add the connector's host to xpack.actions.proxyBypassHosts to allow a direct connection.";
 
-/**
- * Rather than silently connecting without the platform's configured egress proxy (a silent
- * policy downgrade), fail loudly: the MongoDB wire protocol cannot be tunnelled through the
- * HTTP(S) CONNECT proxy that xpack.actions.proxyUrl configures for the Axios connector path.
- */
-const ensureNoProxyRequired = (ctx: BuildContext, targets: HostTarget[]): void => {
-  const proxySettings = ctx.networkSettings.getProxySettings();
-  if (!proxySettings) return;
-
-  const isProxied = targets.some(({ hostname }) => {
-    if (proxySettings.proxyBypassHosts?.has(hostname)) return false;
-    if (proxySettings.proxyOnlyHosts && !proxySettings.proxyOnlyHosts.has(hostname)) return false;
-    return true;
-  });
-  if (isProxied) {
-    throw new Error(PROXY_NOT_SUPPORTED_MESSAGE);
-  }
-};
-
 const URI_REQUIRED_MESSAGE = 'config.uri is required';
 const INVALID_URI_MESSAGE = 'config.uri is not a valid MongoDB connection string';
 const CREDENTIALS_REQUIRED_MESSAGE =
@@ -168,7 +150,7 @@ export const mongodbClientType: ClientTypeSpec<MongoClient> = {
     }
 
     const { targets, srvTargets } = await ensureHostsAllowed(ctx, connectionString);
-    ensureNoProxyRequired(ctx, targets);
+    ensureNoProxyRequired(ctx, targets, PROXY_NOT_SUPPORTED_MESSAGE);
 
     const authHeaders = await ctx.credential.getAuthHeaders();
     const credentials = parseBasicAuthHeader(authHeaders.Authorization ?? '');

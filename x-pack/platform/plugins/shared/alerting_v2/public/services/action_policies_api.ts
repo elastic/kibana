@@ -18,10 +18,7 @@ import type {
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
-import {
-  ALERTING_V2_ACTION_POLICY_API_PATH,
-  ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH,
-} from '../constants';
+import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
 /** Re-exported from the shared schemas package. */
 export type { FindActionPoliciesResponse };
@@ -48,7 +45,7 @@ export class ActionPoliciesApi {
   }
 
   public async listActionPolicies(params: FindActionPoliciesRequest = {}) {
-    return this.http.get<FindActionPoliciesResponse>(ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH, {
+    return this.http.get<FindActionPoliciesResponse>(ALERTING_V2_ACTION_POLICY_API_PATH, {
       query: {
         page: params.page,
         per_page: params.per_page,

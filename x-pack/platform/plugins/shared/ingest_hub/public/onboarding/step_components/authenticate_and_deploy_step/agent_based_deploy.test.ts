@@ -331,6 +331,32 @@ describe('deployNewAgentPolicy', () => {
     expect(body.package_policies).toHaveLength(1);
   });
 
+  it('sends the kept secret refs instead of keys when the credentials were not retyped', async () => {
+    mockSendGetPackageInfo.mockResolvedValue({
+      item: { version: '3.0.0', vars: [{ name: 'access_key_id' }, { name: 'secret_access_key' }] },
+    });
+    const svc = makeSimpleService();
+    const groups = buildAgentBasedTargets([], ['vpcflow'], new Map([['vpcflow', svc]]));
+
+    await deployNewAgentPolicy(groups, {
+      ...BASE_OPTS,
+      authenticateAndDeployStep: {
+        existingSecretRefs: new Map([
+          ['access_key_id', { isSecretRef: true as const, id: 'ref-akid' }],
+          ['secret_access_key', { isSecretRef: true as const, id: 'ref-secret' }],
+        ]),
+      },
+      agentCredentials: { method: 'static_keys', access_key_id: '', secret_access_key: '' },
+      agentPolicyName: 'AWS Agent Policy 1',
+    });
+
+    expect(mockSendCreateAgentPolicy.mock.calls[0][0].package_policies[0].vars).toEqual({
+      default_region: undefined,
+      access_key_id: { isSecretRef: true, id: 'ref-akid' },
+      secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+    });
+  });
+
   it('two services with same package → one package policy (bundled originals)', async () => {
     const s3Svc = makeSimpleService('s3');
     const vpcSvc = makeSimpleService('vpcflow');

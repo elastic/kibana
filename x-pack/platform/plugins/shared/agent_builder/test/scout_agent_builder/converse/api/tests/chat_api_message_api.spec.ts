@@ -11,6 +11,7 @@ import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import {
+  ConversationActivityEventType,
   NON_INTERACTIVE_DECLINED_REASON,
   TimelineEventType,
   ToolResultType,
@@ -165,9 +166,11 @@ apiTest.describe(
           );
           expect(stored.title).toBe('Message API title');
           expect(stored.events?.map(({ type }) => type)).toStrictEqual([
+            ConversationActivityEventType.conversationCreated,
             TimelineEventType.userMessage,
             TimelineEventType.executionStarted,
             TimelineEventType.executionTerminated,
+            ConversationActivityEventType.titleUpdated,
           ]);
         });
 
