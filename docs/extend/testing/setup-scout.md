@@ -161,7 +161,7 @@ A namespace holds the same layout you'd otherwise place at the Scout root, one l
 
 - **Scoped ownership**: assign each area to the team that owns it in `.github/CODEOWNERS`, so failures reach the smaller group that maintains that functionality.
 - **Run a focused subset**: point Scout at a single namespace's config to run (or re-run) only that area's tests, instead of the whole plugin's suite.
-- **Independently runnable in CI**: each namespace is discovered as its own config, so selective testing and CI reporting are scoped per area, while all namespaces still share the same [server configuration](./run-scout-tests.md#scout-run-tests-server-config-set).
+- **Separate configs in CI**: each namespace has its own configs and reporting. [Selective testing](./scout.md#scout-faq-selective-testing) can select individual configs for test-only changes; production-code or fixture changes can select configs across the affected module's namespaces. Namespaces under the same Scout root share the same [server configuration](./run-scout-tests.md#scout-run-tests-server-config-set).
 
 ### Generate a namespace [scout-namespaces-generate]
 
