@@ -72,7 +72,7 @@ describe('InvestigationCard', () => {
     expect(screen.queryByTestId('investigationCardPendingProposals')).not.toBeInTheDocument();
   });
 
-  it('shows the running indicator beside the age, and leaves out severity and what is missing', () => {
+  it('shows in-progress status beside the age, and leaves out severity and what is missing', () => {
     renderCard({
       investigation: investigation({
         in_progress: true,
@@ -83,7 +83,8 @@ describe('InvestigationCard', () => {
       }),
     });
 
-    expect(screen.getByTestId('investigationCardRunning')).toBeInTheDocument();
+    expect(screen.getByTestId('investigationCardRunning')).toHaveTextContent('In progress');
+    expect(screen.getByTestId('investigationCardRunningDots')).toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardSeverity')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardSummary')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardPendingProposals')).not.toBeInTheDocument();

@@ -12,6 +12,12 @@ export const RUNNING_LABEL = i18n.translate(
   { defaultMessage: 'Investigating…' }
 );
 
+/** List-card status next to the age while a worker is running. */
+export const IN_PROGRESS_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.investigations.inProgressLabel',
+  { defaultMessage: 'In progress' }
+);
+
 export const moreEntitiesLabel = (count: number): string =>
   i18n.translate('xpack.agenticInvestigations.investigations.moreEntities', {
     defaultMessage: '+{count}',

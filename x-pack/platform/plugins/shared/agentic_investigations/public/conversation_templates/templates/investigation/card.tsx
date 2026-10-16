@@ -12,14 +12,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiIconTip,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { ConversationMetaInfo } from '@kbn/agentic-investigations-common';
 import type { InvestigationSummary } from '../../../../common';
+import { InvestigatingTypingDots } from './investigating_typing_dots';
 import { getInvestigationDisplayTitle } from './to_view_model';
-import { moreEntitiesLabel, RUNNING_LABEL } from './translations';
+import { IN_PROGRESS_LABEL, moreEntitiesLabel } from './translations';
 
 const MAX_VISIBLE_ENTITIES = 3;
 
@@ -123,13 +123,29 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
                 createdAt={createdAt}
                 inFlightStatus={
                   inProgress ? (
-                    <EuiIconTip
-                      type="dot"
-                      color="primary"
-                      content={RUNNING_LABEL}
-                      aria-label={RUNNING_LABEL}
-                      iconProps={{ 'data-test-subj': 'investigationCardRunning' }}
-                    />
+                    <EuiText
+                      size="xs"
+                      color="subdued"
+                      component="span"
+                      data-test-subj="investigationCardRunning"
+                      css={css`
+                        display: inline-flex;
+                        align-items: center;
+                        gap: ${euiTheme.size.xs};
+                      `}
+                    >
+                      <span aria-hidden>•</span>
+                      <span
+                        css={css`
+                          display: inline-flex;
+                          align-items: center;
+                          gap: ${euiTheme.size.xs};
+                        `}
+                      >
+                        {IN_PROGRESS_LABEL}
+                        <InvestigatingTypingDots />
+                      </span>
+                    </EuiText>
                   ) : undefined
                 }
               />
