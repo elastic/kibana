@@ -6,23 +6,32 @@
  */
 
 import type { Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { createKibanaIsomerRuntime, type KibanaIsomerRuntime } from '@kbn/isomer';
-import { componentsPack } from '@kbn/isomer-components';
+import type { KibanaIsomerRuntime } from '@kbn/isomer';
 
 export type IsomerPluginSetup = Record<string, never>;
 
 export interface IsomerPluginStart {
-  /** Validates and renders compositions built from Kibana's primitive packs. */
-  runtime: KibanaIsomerRuntime;
+  /**
+   * Resolves the runtime that validates and renders compositions built from Kibana's primitive
+   * packs. The first call loads the packs and builds it; later calls share it.
+   */
+  getRuntime: () => Promise<KibanaIsomerRuntime>;
 }
+
+const createRuntime = async (): Promise<KibanaIsomerRuntime> => {
+  const [{ createKibanaIsomerRuntime }, { componentsPack }] = await Promise.all([
+    import('@kbn/isomer'),
+    import('@kbn/isomer-components'),
+  ]);
+  return createKibanaIsomerRuntime({ packs: [componentsPack] });
+};
 
 export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart> {
   private readonly logger: Logger;
-  private readonly runtime: KibanaIsomerRuntime;
+  private runtime?: Promise<KibanaIsomerRuntime>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.runtime = createKibanaIsomerRuntime({ packs: [componentsPack] });
   }
 
   setup(): IsomerPluginSetup {
@@ -30,9 +39,22 @@ export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart
   }
 
   start(): IsomerPluginStart {
-    this.logger.debug('Isomer runtime started with the components pack.');
-    return { runtime: this.runtime };
+    return { getRuntime: this.getRuntime };
   }
 
   stop() {}
+
+  private readonly getRuntime = (): Promise<KibanaIsomerRuntime> => {
+    this.runtime ??= createRuntime().then(
+      (runtime) => {
+        this.logger.debug('Built the Isomer runtime with the components pack.');
+        return runtime;
+      },
+      (error) => {
+        this.runtime = undefined;
+        throw error;
+      }
+    );
+    return this.runtime;
+  };
 }
