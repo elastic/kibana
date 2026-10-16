@@ -9,7 +9,9 @@
 
 import {
   Observable,
+  Subject,
   Subscription,
+  connectable,
   debounceTime,
   exhaustMap,
   map,
@@ -78,14 +80,18 @@ export const estimateReadingTimeMs = (messages: ResolvedMessage[]): number =>
     )
   );
 
+const resolveMessage = ({ message, politeness, key }: QueuedMessage): ResolvedMessage[] => {
+  try {
+    const text = (typeof message === 'function' ? message() : message).trim();
+    return text ? [{ text, politeness, key }] : [];
+  } catch {
+    // Skipped, so that one failing message doesn't stop all later announcements
+    return [];
+  }
+};
+
 const resolveMessages = (batch: QueuedMessage[]): ResolvedMessage[] =>
-  batch
-    .map(({ message, politeness, key }) => ({
-      text: (typeof message === 'function' ? message() : message).trim(),
-      politeness,
-      key,
-    }))
-    .filter(({ text }) => text);
+  batch.flatMap(resolveMessage);
 
 /**
  * Adds messages to the ones waiting to be announced. A message replaces a waiting message with the
@@ -112,12 +118,14 @@ const addMessages = (waiting: ResolvedMessage[], added: ResolvedMessage[]): Reso
  *   Batches that close meanwhile are merged into a single waiting announcement;
  * - a message with a key removes a waiting message with the same key as soon as it arrives, so the
  *   outdated one can't be announced while the new one's batch is still open.
- *
- * `messages$` must be hot (e.g. a `Subject`), because batching subscribes to it more than once.
  */
 export const toAnnouncements = (messages$: Observable<QueuedMessage>): Observable<Announcement> =>
   new Observable<Announcement>((subscriber) => {
+    // Shared by the subscriptions below, and only started once they're all subscribed
+    const shared$ = connectable(messages$, { connector: () => new Subject<QueuedMessage>() });
     const subscription = new Subscription();
+    // State of this subscriber's queue. It's plain state rather than part of a pipeline, because
+    // closed batches, keyed messages and the reading timer all change it.
     let waiting: ResolvedMessage[] = [];
     let isReading = false;
     let lastId = 0;
@@ -139,7 +147,7 @@ export const toAnnouncements = (messages$: Observable<QueuedMessage>): Observabl
     };
 
     subscription.add(
-      messages$.subscribe(({ key }) => {
+      shared$.subscribe(({ key }) => {
         if (key !== undefined) {
           waiting = waiting.filter((message) => message.key !== key);
         }
@@ -147,10 +155,10 @@ export const toAnnouncements = (messages$: Observable<QueuedMessage>): Observabl
     );
 
     subscription.add(
-      messages$
+      shared$
         .pipe(
           exhaustMap((firstMessage) => {
-            const batch$ = messages$.pipe(startWith(firstMessage));
+            const batch$ = shared$.pipe(startWith(firstMessage));
             const batchEnd$ = race(
               batch$.pipe(debounceTime(ANNOUNCEMENT_SETTLE_MS)),
               timer(ANNOUNCEMENT_MAX_BATCH_MS)
@@ -166,6 +174,7 @@ export const toAnnouncements = (messages$: Observable<QueuedMessage>): Observabl
           announceWaiting();
         })
     );
+    subscription.add(shared$.connect());
 
     return subscription;
   });

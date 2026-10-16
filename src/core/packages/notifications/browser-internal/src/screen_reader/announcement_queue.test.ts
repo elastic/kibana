@@ -144,6 +144,18 @@ describe('toAnnouncements', () => {
     expect(getAnnouncedTexts()).toEqual([[LONG_MESSAGE], ['Discover - Elastic']]);
   });
 
+  it('skips a message that fails to resolve and keeps announcing others', () => {
+    notify(() => {
+      throw new Error('Failed to read toast');
+    });
+    notify('Saved');
+    jest.runAllTimers();
+    notify('Deleted');
+    jest.runAllTimers();
+
+    expect(getAnnouncedTexts()).toEqual([['Saved'], ['Deleted']]);
+  });
+
   it('drops waiting messages when unsubscribed', () => {
     notify('Saved');
     subscription.unsubscribe();
