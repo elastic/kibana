@@ -31,6 +31,7 @@ import {
   LENS_ATTACHMENT_TYPE,
   LENS_SO_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
 import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
@@ -890,6 +891,52 @@ describe('AttachmentService', () => {
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid attributes: expected attributes.rule.name for alert attachments"`
         );
+      });
+
+      // A unified alert attachment may hold alerts raised by different rules, so `rule` is
+      // optional in its schema and `create` never asks for one. Asking for it back on update
+      // made every attachment written without a rule, including the ones attack discovery
+      // writes, impossible to patch at all.
+      it('does not require a rule name to update a unified alert attachment', async () => {
+        const unifiedService = new AttachmentService({
+          log: mockLogger,
+          unsecuredSavedObjectsClient,
+          config: createAttachmentServiceConfig(true),
+          analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
+        });
+        unsecuredSavedObjectsClient.bulkGet.mockImplementation((objects) => {
+          const requests = objects as Array<{ id: string; type: string }>;
+          return Promise.resolve({
+            saved_objects: requests.map(({ id, type }) =>
+              type === CASE_ATTACHMENT_SAVED_OBJECT
+                ? { ...createUserAttachment(), id, type }
+                : { ...createErrorSO(type), id }
+            ) as unknown as SavedObjectsBulkResponse['saved_objects'],
+          });
+        });
+
+        const attributes = {
+          type: SECURITY_ALERT_ATTACHMENT_TYPE,
+          owner: SECURITY_SOLUTION_OWNER,
+          attachmentId: ['alert1'],
+          metadata: { index: ['.alerts-security.alerts-default'] },
+        };
+
+        unsecuredSavedObjectsClient.update.mockResolvedValue({
+          id: '1',
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+          references: [],
+          version: 'v2',
+          attributes,
+        } as unknown as ReturnType<typeof createUserAttachment>);
+
+        await expect(
+          unifiedService.update({
+            // @ts-expect-error: a unified payload is not the legacy attributes shape
+            updatedAttributes: attributes,
+            savedObjectId: '1',
+          })
+        ).resolves.toEqual(expect.objectContaining({ id: '1' }));
       });
 
       it('strips excess fields from the request', async () => {
