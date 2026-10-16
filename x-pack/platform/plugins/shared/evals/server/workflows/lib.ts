@@ -9,6 +9,7 @@ import os from 'os';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import {
   EVALS_EVALUATE_URL,
+  EVALS_ONLINE_SCORES_URL,
   EVALS_SCORES_URL,
   EVALS_DATASET_URL,
   EVALS_EXPERIMENTS_COMPARE_URL,
@@ -18,6 +19,8 @@ import type {
   CompareExperimentsResponse,
   Direction,
   EvaluateResponse,
+  IngestOnlineScoresRequestBodyInput,
+  IngestOnlineScoresResponse,
   IngestScoresRequestBody,
   IngestScoresResponse,
   Model,
@@ -177,6 +180,51 @@ export const ingestScores = async (
     body: { ...body, space_ids: body.space_ids ?? [runtime.spaceId] },
   });
   return response;
+};
+
+export interface PersistOnlineScoresParams {
+  monitor: { id: string; name: string };
+  traceId: string;
+  connectorId?: string;
+  results: Array<
+    SnakeEvaluatorResult & {
+      evaluator: SnakeEvaluatorResult['evaluator'] & { version: string; kind: 'llm' | 'code' };
+    }
+  >;
+  errors?: string[];
+}
+
+/** Persists one trace's online scores via `POST /online_scores`, in the workflow's space. */
+export const persistOnlineScores = async (
+  runtime: StepRuntime,
+  params: PersistOnlineScoresParams
+): Promise<IngestOnlineScoresResponse> => {
+  const body: IngestOnlineScoresRequestBodyInput = {
+    monitor: params.monitor,
+    trace_id: params.traceId,
+    ...(params.connectorId ? { connector_id: params.connectorId } : {}),
+    results: params.results.map(({ evaluator, scores }) => ({
+      status: 'ok',
+      evaluator,
+      scores: scores.map(({ name, score, label, explanation, metadata, direction }) => ({
+        name,
+        score,
+        ...(label != null ? { label } : {}),
+        ...(explanation != null ? { explanation } : {}),
+        ...(metadata ? { metadata } : {}),
+        ...(direction ? { direction } : {}),
+      })),
+    })),
+  };
+
+  const { body: response } = await runtime.callKibanaApi<IngestOnlineScoresResponse>({
+    method: 'POST',
+    path: EVALS_ONLINE_SCORES_URL,
+    headers: INTERNAL_API_HEADERS,
+    body,
+  });
+
+  return { ...response, failed_evaluators: params.errors?.length ?? 0 };
 };
 
 /** The snake_case evaluator-result shape used by the workflow step schemas. */

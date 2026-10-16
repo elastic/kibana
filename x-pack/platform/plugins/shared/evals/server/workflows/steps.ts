@@ -18,6 +18,7 @@ import {
   executeTaskCommonDefinition,
   evaluateTraceCommonDefinition,
   ingestScoresCommonDefinition,
+  persistOnlineScoresCommonDefinition,
   evaluateExampleCommonDefinition,
   evaluateDatasetCommonDefinition,
   startExperimentCommonDefinition,
@@ -36,6 +37,7 @@ import {
   evaluateWorkBatch,
   flattenDatasetWork,
   ingestScores,
+  persistOnlineScores,
   resolveDatasets,
   resolveEvaluatorModel,
   resolveTaskModel,
@@ -150,6 +152,16 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
         evaluators,
       });
 
+      // A trace with no scores at all is a failed step, so `on-failure.retry` can try it again.
+      // Partial failures still return the successful results for persistence.
+      if (results.length === 0 && errors.length > 0) {
+        throw new Error(
+          `ai.evals.evaluateTrace: every evaluator failed for trace "${trace_id}": ${errors.join(
+            '; '
+          )}`
+        );
+      }
+
       if (errors.length > 0) {
         context.logger.warn(
           `ai.evals.evaluateTrace: ${
@@ -195,6 +207,21 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
           failed: response.failed.length,
         },
       };
+    },
+  });
+
+  const persistOnlineScoresStep = createServerStepDefinition({
+    ...persistOnlineScoresCommonDefinition,
+    handler: async (context) => {
+      const { monitor, trace_id, connector_id, results, errors } = context.input;
+      const response = await persistOnlineScores(makeRuntime(context), {
+        monitor,
+        traceId: trace_id,
+        connectorId: connector_id,
+        results,
+        errors,
+      });
+      return { output: response };
     },
   });
 
@@ -422,6 +449,7 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     executeTaskStep,
     evaluateTraceStep,
     ingestScoresStep,
+    persistOnlineScoresStep,
     evaluateExampleStep,
     evaluateDatasetStep,
     startExperimentStep,

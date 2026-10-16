@@ -6,7 +6,8 @@
  */
 
 import { WorkflowSchema } from '@kbn/workflows/spec/schema';
-import { parseWorkflowYamlToJSON } from '@kbn/workflows-yaml';
+import { parseWorkflowYamlToJSON, parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
+import { EvaluateTraceStepId, PersistOnlineScoresStepId } from '../workflows/steps';
 import {
   buildOnlineEvalWorkflowYaml,
   parseOnlineEvalWorkflowYaml,
@@ -70,6 +71,49 @@ describe('online eval workflow yaml', () => {
 
     expect(yaml).toContain(CURRENT_TRACE_FILTER_LINE);
     expect(yaml).not.toContain('attributes.evaluator.name IS NULL');
+  });
+
+  it('uses the typed evals steps instead of raw kibana.request calls', () => {
+    const yaml = buildOnlineEvalWorkflowYaml(getConfig());
+
+    expect(yaml).toContain(`type: ${EvaluateTraceStepId}`);
+    expect(yaml).toContain(`type: ${PersistOnlineScoresStepId}`);
+    expect(yaml).not.toContain('kibana.request');
+    expect(yaml).not.toContain('kbn-xsrf');
+    expect(yaml).not.toContain('elastic-api-version');
+    expect(yaml).not.toContain('x-elastic-internal-origin');
+    expect(yaml).not.toMatch(/[&*]a\d/);
+  });
+
+  it('retries both steps with backoff and skips a trace whose retries are exhausted', () => {
+    // The static `WorkflowSchema` doesn't know the evals step types, so inspect the raw YAML.
+    const parsed = parseYamlToJSONWithoutValidation(buildOnlineEvalWorkflowYaml(getConfig()));
+    if (!parsed.success) {
+      throw new Error('Expected the generated workflow to be valid YAML');
+    }
+
+    const [, evaluateEach] = (parsed.json as { steps: Array<Record<string, unknown>> }).steps;
+    expect(evaluateEach['iteration-on-failure']).toEqual({ continue: true });
+
+    const expectedRetry = {
+      'max-attempts': 3,
+      delay: '5s',
+      strategy: 'exponential',
+      'max-delay': '1m',
+      jitter: true,
+    };
+    for (const step of evaluateEach.steps as Array<Record<string, unknown>>) {
+      expect(step['on-failure']).toEqual({ retry: expectedRetry });
+    }
+  });
+
+  it('does not parse workflows that still use raw kibana.request steps', () => {
+    const yaml = buildOnlineEvalWorkflowYaml(getConfig()).replace(
+      `type: ${PersistOnlineScoresStepId}`,
+      'type: kibana.request'
+    );
+
+    expect(parseOnlineEvalWorkflowYaml(yaml)).toBeUndefined();
   });
 
   it('returns undefined for non-online-evals workflows', () => {
