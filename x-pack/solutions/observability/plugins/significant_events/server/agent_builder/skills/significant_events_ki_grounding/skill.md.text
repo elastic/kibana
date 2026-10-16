@@ -119,7 +119,9 @@ entries. Blast-radius `type` remains the row-shape label listed above.
 
 **Prefetched.** When the batch has a `## Prefetched context` whose `truncated` is false, skip the
 searches below: its `query_kis` are the Phase 1 results, its `feature_kis` the Phase 2 results, its `sources`
-the response `sources` (copy `view_name` from them as below), and `unmatched_rule_uuids` are the rules Step 2 would record as `NO_MATCH`. Make no `ki_search` call.
+the response `sources`, and `unmatched_rule_uuids` are the rules Step 2 would record as `NO_MATCH`. Make no `ki_search` call.
+Every query KI carries its `view_name`: it is the `FROM` target (see the `FROM target` rule below);
+the source slug is never one.
 
 Two sequential phases, at most three calls per batch. Phase 2 takes Phase 1's result as input, so
 send Phase 2 only after the Phase 1 response has returned.

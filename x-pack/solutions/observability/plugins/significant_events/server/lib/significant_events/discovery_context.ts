@@ -16,16 +16,19 @@ import type { SearchKnowledgeIndicatorsParams } from '../../agent_builder/tools/
 const PER_PAGE = 50;
 const FEATURE_TYPES = ['dependency', 'entity', 'infrastructure'] as const;
 
+/** A query KI with the `FROM` target its grounding queries must use. */
+export type DiscoveryContextQuery = CompactKnowledgeIndicatorQuery & { view_name?: string };
+
 /** What the grounding skill's Steps 1 and 2 retrieve for a batch, so the agent need not. */
 export interface DiscoveryContext {
-  query_kis: CompactKnowledgeIndicatorQuery[];
-  feature_kis: CompactKnowledgeIndicatorFeature[];
-  /** Each source's `slug` and `view_name`: the `FROM` target the grounding queries are built on. */
+  /** Each source's `slug` and `view_name`. */
   sources: KISearchOutput['sources'];
   /** Rules with no backed query KI: grounding records `not_checked` for them. */
   unmatched_rule_uuids: string[];
   /** The query search held more results than one page. */
   truncated: boolean;
+  query_kis: DiscoveryContextQuery[];
+  feature_kis: CompactKnowledgeIndicatorFeature[];
 }
 
 type KnowledgeIndicatorSearch = (
@@ -102,12 +105,16 @@ export const buildDiscoveryContext = async ({
   const sources = [...queryPage.sources, ...firstFeaturePage.sources].filter(
     ({ slug }, index, all) => all.findIndex((source) => source.slug === slug) === index
   );
+  const viewBySlug = new Map(sources.map(({ slug, view_name: view }) => [slug, view]));
   const matchedRules = new Set(queryKis.map(({ rule }) => rule.id));
   return {
-    query_kis: queryKis,
-    feature_kis: featureKis,
     sources,
     unmatched_rule_uuids: ruleUuids.filter((ruleUuid) => !matchedRules.has(ruleUuid)),
     truncated: queryPage.has_more,
+    query_kis: queryKis.map((ki) => {
+      const view = viewBySlug.get(ki.source_id);
+      return view ? { ...ki, view_name: view } : ki;
+    }),
+    feature_kis: featureKis,
   };
 };

@@ -144,6 +144,49 @@ describe('buildDiscoveryContext', () => {
     expect(context.sources).toEqual([source('logs'), source('traces')]);
   });
 
+  it('puts the view to query on each query KI, so the agent need not join it from the sources', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce(
+        page({
+          items: [
+            queryKi({ ruleId: 'rule-A', sourceId: 'logs' }),
+            queryKi({ ruleId: 'rule-B', sourceId: 'unknown' }),
+          ],
+          sources: [source('logs')],
+        })
+      )
+      .mockResolvedValueOnce(page({ items: [] }));
+
+    const context = await buildDiscoveryContext({
+      ruleUuids: ['rule-A', 'rule-B'],
+      sourceIds: [],
+      search,
+    });
+
+    expect(context.query_kis.map(({ view_name: view }) => view)).toEqual([
+      '$.nightshift.logs',
+      undefined,
+    ]);
+  });
+
+  it('lists the sources before the knowledge indicators, so the agent reads them first', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce(page({ items: [] }))
+      .mockResolvedValueOnce(page({ items: [] }));
+
+    const context = await buildDiscoveryContext({ ruleUuids: ['rule-A'], sourceIds: [], search });
+
+    expect(Object.keys(context)).toEqual([
+      'sources',
+      'unmatched_rule_uuids',
+      'truncated',
+      'query_kis',
+      'feature_kis',
+    ]);
+  });
+
   it('lists the rules no backed query KI matched, and drops KIs of other rules', async () => {
     const search = jest
       .fn()
