@@ -119,10 +119,16 @@ export function getNonFipsIntegrations(
 }
 
 /**
- * Packages that declare data streams or policy templates but are still treated as documentation-only
- * in the integrations catalog: the tile opens the Integration Details page instead of "Add integration".
+ * Packages that declare data streams or policy templates but have nothing to configure on the agent side
+ * (documentation-only, or assets-only), so the catalog tile opens the Integration Details page instead of
+ * "Add integration". Temporary: remove once these packages are re-typed and behavior is inferred from `type`.
  */
-const DOCUMENTATION_ONLY_PACKAGE_EXCEPTIONS = ['supabase'];
+const DOCUMENTATION_ONLY_PACKAGE_EXCEPTIONS = [
+  'supabase',
+  'awsfirehose',
+  'cribl',
+  'contrast_security',
+];
 
 type PackageClassificationFields = Partial<
   Pick<PackageInfo | PackageListItem, 'name' | 'type' | 'data_streams' | 'policy_templates'>
