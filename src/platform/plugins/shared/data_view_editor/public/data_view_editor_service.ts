@@ -250,32 +250,32 @@ export class DataViewEditorService {
 
     this.updateState({ loadingTimestampFields: true });
 
+    let matchedIndicesError: Error | undefined;
+    // failed requests resolve with no matches instead of rejecting so that `ensureMinimumTime`
+    // still applies, otherwise the validation data provider could resolve with the previous index
+    // pattern before the debounced `setIndexPattern` call starts loading the current one
     const exactMatchQuery = this.getIndicesCached({
       pattern: query,
       showAllIndices: allowHidden,
+    }).catch((error) => {
+      // only insufficient privileges are surfaced
+      if (isForbiddenError(error)) {
+        matchedIndicesError = new Error(getForbiddenErrorMessage(error));
+      }
+      return [];
     });
     // the partial match request is only needed when the query doesn't end with a wildcard
-    const partialMatchQuery: Promise<MatchedItem[]> = query?.endsWith('*')
+    const partialMatchQuery = query?.endsWith('*')
       ? Promise.resolve([])
       : this.getIndicesCached({
           pattern: `${query}*`,
           showAllIndices: allowHidden,
         }).catch(() => []);
 
-    let exactMatched: MatchedItem[] = [];
-    let partialMatched: MatchedItem[] = [];
-    let matchedIndicesError: Error | undefined;
-    try {
-      [exactMatched, partialMatched] = (await ensureMinimumTime([
-        exactMatchQuery,
-        partialMatchQuery,
-      ])) as MatchedItem[][];
-    } catch (error) {
-      // only insufficient privileges are surfaced, any other failure is treated as no matches
-      if (isForbiddenError(error)) {
-        matchedIndicesError = new Error(getForbiddenErrorMessage(error));
-      }
-    }
+    const [exactMatched, partialMatched] = (await ensureMinimumTime([
+      exactMatchQuery,
+      partialMatchQuery,
+    ])) as MatchedItem[][];
 
     const matchedIndices = getMatchedIndices(allSources, partialMatched, exactMatched, allowHidden);
 
