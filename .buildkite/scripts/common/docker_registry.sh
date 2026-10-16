@@ -84,8 +84,8 @@ docker_login_kibana_ci_pr() {
 docker_login_kibana_ci_read() {
   is_docker_available || return 0
   local username password
-  username="$(vault_get kibana-container-registry-ci-read username)"
-  password="$(vault_get kibana-container-registry-ci-read password)"
+  username="$(retry 5 5 vault read -field=username secret/ci/elastic-kibana/kibana-container-registry-ci-read)"
+  password="$(retry 5 5 vault read -field=password secret/ci/elastic-kibana/kibana-container-registry-ci-read)"
   echo "$password" | docker login -u "$username" --password-stdin docker.elastic.co
 }
 
@@ -93,8 +93,8 @@ docker_login_kibana_ci_read() {
 docker_login_kibanamachine() {
   is_docker_available || return 0
   local username password
-  username="$(vault_get container-registry username)"
-  password="$(vault_get container-registry password)"
+  username="$(retry 5 5 vault read -field=username secret/ci/elastic-kibana/container-registry)"
+  password="$(retry 5 5 vault read -field=password secret/ci/elastic-kibana/container-registry)"
   echo "$password" | docker login -u "$username" --password-stdin docker.elastic.co
 }
 
