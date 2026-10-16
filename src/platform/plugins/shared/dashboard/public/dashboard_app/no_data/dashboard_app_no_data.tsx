@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
 import {
@@ -56,9 +56,12 @@ export const DashboardAppNoDataPage = ({
     )
   );
 
-  const lensHelpersAsync = useAsync(() => {
-    return lensService?.stateHelperApi() ?? Promise.resolve(null);
-  }, [lensService]);
+  const lensHelpersPromise = useMemo(
+    () => lensService?.stateHelperApi() ?? Promise.resolve(null),
+    []
+  );
+
+  const lensHelpersAsync = useAsync(() => lensHelpersPromise, [lensHelpersPromise]);
 
   useEffect(() => {
     return () => {
@@ -68,7 +71,8 @@ export const DashboardAppNoDataPage = ({
 
   const onTryESQL = useCallback(async () => {
     abortController?.abort(AbortReason.REPLACED);
-    if (lensHelpersAsync.value) {
+    const lensHelpers = await lensHelpersPromise;
+    if (lensHelpers) {
       const abc = new AbortController();
       const indexName = (await getIndexForESQLQuery({ http: coreServices.http })) ?? '*';
       const dataView = await getESQLAdHocDataview({
@@ -96,7 +100,7 @@ export const DashboardAppNoDataPage = ({
 
         setAbortController(abc);
 
-        const chartSuggestions = lensHelpersAsync.value.suggestions(context, dataView);
+        const chartSuggestions = lensHelpers.suggestions(context, dataView);
         if (chartSuggestions?.length) {
           const [suggestion] = chartSuggestions;
 
@@ -132,7 +136,7 @@ export const DashboardAppNoDataPage = ({
         }
       }
     }
-  }, [abortController, lensHelpersAsync.value]);
+  }, [abortController, lensHelpersPromise]);
 
   const AnalyticsNoDataPage = withSuspense(
     React.lazy(() =>
