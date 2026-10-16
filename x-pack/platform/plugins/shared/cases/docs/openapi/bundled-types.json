@@ -3732,6 +3732,7 @@
               "alert",
               "assignees",
               "attachment",
+              "bulkAttachments",
               "comment",
               "connector",
               "create_case",
@@ -6858,6 +6859,34 @@
           }
         }
       },
+      "payload_bulk_attachments": {
+        "type": "object",
+        "description": "The payload for a bulk attachments user action, recorded when a user removes one or more attachments of the same type from a case in a single action.",
+        "required": [
+          "bulkAttachments"
+        ],
+        "properties": {
+          "bulkAttachments": {
+            "type": "object",
+            "required": [
+              "attachmentType",
+              "count"
+            ],
+            "properties": {
+              "attachmentType": {
+                "type": "string",
+                "description": "The attachment type, such as `security.alert` or `file`.",
+                "example": "security.alert"
+              },
+              "count": {
+                "type": "integer",
+                "description": "The number of attachments of this type.",
+                "example": 3
+              }
+            }
+          }
+        }
+      },
       "payload_connector": {
         "type": "object",
         "properties": {
@@ -7407,6 +7436,9 @@
                 "$ref": "#/components/schemas/payload_assignees"
               },
               {
+                "$ref": "#/components/schemas/payload_bulk_attachments"
+              },
+              {
                 "$ref": "#/components/schemas/payload_connector"
               },
               {
@@ -7453,6 +7485,7 @@
             "description": "The type of action.",
             "enum": [
               "assignees",
+              "bulkAttachments",
               "category",
               "comment",
               "connector",
