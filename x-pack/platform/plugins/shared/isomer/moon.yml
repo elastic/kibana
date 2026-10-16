@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/isomer-theme'
   - '@kbn/react-kibana-context-render'
   - '@kbn/repo-info'
+  - '@kbn/setup-node-env'
 tags:
   - plugin
   - prod
@@ -39,6 +40,7 @@ tags:
 fileGroups:
   src:
     - public/**/*
+    - scripts/**/*
     - server/**/*
     - '!target/**/*'
 tasks: {}
