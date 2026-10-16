@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { requestEarsRevoke } from './request_ears_revoke';
+import { EarsRequestError } from './ears_request_error';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 import type { OAuthPersonalCredentials } from '../../types';
 
@@ -18,7 +19,9 @@ const stripTokenTypePrefix = (accessToken: string): string => {
 
 /**
  * Revokes both the access token and refresh token for a set of stored OAuth credentials
- * via EARS. Throws on failure — callers are responsible for best-effort handling.
+ * via EARS. Both revokes are always attempted; the request ids of every attempt, successful or
+ * failed, are returned alongside any errors so a partial failure doesn't lose them. Callers handle
+ * failures best-effort.
  */
 export const revokeEarsCredentials = async ({
   provider,
@@ -30,15 +33,33 @@ export const revokeEarsCredentials = async ({
   credentials: OAuthPersonalCredentials;
   configurationUtilities: ActionsConfigurationUtilities;
   logger: Logger;
-}): Promise<void> => {
+}): Promise<{ earsRequestIds: string[]; errors: unknown[] }> => {
   const tokensToRevoke = [
     credentials.accessToken ? stripTokenTypePrefix(credentials.accessToken) : undefined,
     credentials.refreshToken,
   ].filter((token): token is string => Boolean(token));
 
-  await Promise.all(
+  const results = await Promise.allSettled(
     tokensToRevoke.map((token) =>
       requestEarsRevoke(provider, logger, { token }, configurationUtilities)
     )
   );
+
+  const earsRequestIds: string[] = [];
+  const errors: unknown[] = [];
+  for (const result of results) {
+    const earsRequestId =
+      result.status === 'fulfilled'
+        ? result.value.earsRequestId
+        : result.reason instanceof EarsRequestError
+        ? result.reason.earsRequestId
+        : undefined;
+    if (earsRequestId) {
+      earsRequestIds.push(earsRequestId);
+    }
+    if (result.status === 'rejected') {
+      errors.push(result.reason);
+    }
+  }
+  return { earsRequestIds, errors };
 };
