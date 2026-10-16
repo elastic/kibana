@@ -44,30 +44,27 @@ describe('mapEsqlResponseToDatatable', () => {
   });
 
   it('keeps meta.sourceParams.sourceField as the ES column name without RENAME', () => {
-    const result = mapEsqlResponseToDatatable(
-      makeResponse([{ name: 'host', type: 'keyword' }]),
-      { query: 'FROM index' }
-    );
+    const result = mapEsqlResponseToDatatable(makeResponse([{ name: 'host', type: 'keyword' }]), {
+      query: 'FROM index',
+    });
 
     expect(result.columns[0].meta.sourceParams?.sourceField).toBe('host');
     expect(result.columns[0].meta.sourceParams?.isSourceFieldFilterable).toBe(true);
   });
 
   it('treats an EVAL-computed field with no rename as not filterable', () => {
-    const result = mapEsqlResponseToDatatable(
-      makeResponse([{ name: 'doubled', type: 'long' }]),
-      { query: 'FROM index | EVAL doubled = bytes * 2' }
-    );
+    const result = mapEsqlResponseToDatatable(makeResponse([{ name: 'doubled', type: 'long' }]), {
+      query: 'FROM index | EVAL doubled = bytes * 2',
+    });
 
     expect(result.columns[0].meta.sourceParams?.sourceField).toBe('doubled');
     expect(result.columns[0].meta.sourceParams?.isSourceFieldFilterable).toBe(false);
   });
 
   it('treats a METADATA column as filterable, even though it was never renamed', () => {
-    const result = mapEsqlResponseToDatatable(
-      makeResponse([{ name: '_id', type: 'keyword' }]),
-      { query: 'FROM index METADATA _id' }
-    );
+    const result = mapEsqlResponseToDatatable(makeResponse([{ name: '_id', type: 'keyword' }]), {
+      query: 'FROM index METADATA _id',
+    });
 
     expect(result.columns[0].isComputedColumn).toBe(true);
     expect(result.columns[0].meta.sourceParams?.sourceField).toBe('_id');
@@ -75,10 +72,9 @@ describe('mapEsqlResponseToDatatable', () => {
   });
 
   it('resolves chained RENAME pipeline for meta.sourceParams.sourceField', () => {
-    const result = mapEsqlResponseToDatatable(
-      makeResponse([{ name: 'c', type: 'keyword' }]),
-      { query: 'FROM index | RENAME a AS b | RENAME b AS c' }
-    );
+    const result = mapEsqlResponseToDatatable(makeResponse([{ name: 'c', type: 'keyword' }]), {
+      query: 'FROM index | RENAME a AS b | RENAME b AS c',
+    });
 
     expect(result.columns[0].meta.sourceParams?.sourceField).toBe('a');
     expect(result.columns[0].name).toBe('c');
@@ -95,10 +91,9 @@ describe('mapEsqlResponseToDatatable', () => {
   });
 
   it('omits meta.esMeta when ES column has no _meta', () => {
-    const result = mapEsqlResponseToDatatable(
-      makeResponse([{ name: 'host', type: 'keyword' }]),
-      { query: 'FROM index' }
-    );
+    const result = mapEsqlResponseToDatatable(makeResponse([{ name: 'host', type: 'keyword' }]), {
+      query: 'FROM index',
+    });
 
     expect(result.columns[0].meta.esMeta).toBeUndefined();
   });
@@ -142,10 +137,10 @@ describe('mapEsqlResponseToDatatable', () => {
   });
 
   it('includes warning in the datatable', () => {
-    const result = mapEsqlResponseToDatatable(
-      makeResponse([{ name: 'host', type: 'keyword' }]),
-      { query: 'FROM index', warning: 'some-warning' }
-    );
+    const result = mapEsqlResponseToDatatable(makeResponse([{ name: 'host', type: 'keyword' }]), {
+      query: 'FROM index',
+      warning: 'some-warning',
+    });
 
     expect(result.warning).toBe('some-warning');
   });

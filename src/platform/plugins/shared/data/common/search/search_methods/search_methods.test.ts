@@ -499,6 +499,134 @@ describe('SearchMethodsService', () => {
       );
     });
 
+    describe('search context', () => {
+      const phraseFilter: Filter = {
+        meta: { alias: null, disabled: false, negate: false },
+        query: { match_phrase: { host: 'fromFilterPill' } },
+      };
+      const timeRange = { from: '2024-01-01T00:00:00.000Z', to: '2024-01-02T00:00:00.000Z' };
+
+      const getRequestBody = () => mockSearch.mock.calls[0][0].params.body;
+
+      beforeEach(() => {
+        mockSearch.mockReturnValue(createMockResponse({ hits: { hits: [], total: 0 } }));
+      });
+
+      it('leaves the query untouched when the context has nothing to apply', async () => {
+        const query = { term: { field: 'value' } };
+
+        await service.dsl({ index: 'logs-*', query, kibanaQueryContext: {} });
+
+        expect(getRequestBody().query).toEqual(query);
+      });
+
+      it('does not add a query when neither the context nor the caller provide one', async () => {
+        await service.dsl({ index: 'logs-*', kibanaQueryContext: {} });
+
+        expect(getRequestBody().query).toBeUndefined();
+      });
+
+      it('does not send kibanaQueryContext to Elasticsearch', async () => {
+        await service.dsl({
+          index: 'logs-*',
+          kibanaQueryContext: { kibanaFilters: [phraseFilter] },
+        });
+
+        expect(getRequestBody()).not.toHaveProperty('kibanaQueryContext');
+      });
+
+      it('applies kibanaFilters as bool filters', async () => {
+        await service.dsl({
+          index: 'logs-*',
+          kibanaQueryContext: { kibanaFilters: [phraseFilter] },
+        });
+
+        expect(getRequestBody().query.bool.filter).toEqual([
+          { match_phrase: { host: 'fromFilterPill' } },
+        ]);
+      });
+
+      it('applies a kuery kqlQuery as a bool filter', async () => {
+        await service.dsl({
+          index: 'logs-*',
+          kibanaQueryContext: { kqlQuery: { language: 'kuery', query: 'host: "a"' } },
+        });
+
+        expect(getRequestBody().query.bool.must).toEqual([]);
+        expect(getRequestBody().query.bool.filter).toEqual([
+          { bool: { should: [{ match_phrase: { host: 'a' } }], minimum_should_match: 1 } },
+        ]);
+      });
+
+      it('applies the timeRange to the timeField', async () => {
+        await service.dsl({
+          index: 'logs-*',
+          kibanaQueryContext: { timeRange, timeField: '@timestamp' },
+        });
+
+        expect(getRequestBody().query.bool.filter).toEqual([
+          {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: timeRange.from,
+                lte: timeRange.to,
+              },
+            },
+          },
+        ]);
+      });
+
+      it('appends the caller query to the must clause of the context query', async () => {
+        const query = { term: { field3: 'value3' } };
+
+        await service.dsl({
+          index: 'logs-*',
+          query,
+          kibanaQueryContext: { kibanaFilters: [phraseFilter] },
+        });
+
+        const { bool } = getRequestBody().query;
+        expect(bool.must).toContainEqual(query);
+        expect(bool.filter).toEqual([{ match_phrase: { host: 'fromFilterPill' } }]);
+      });
+
+      it('combines filters, kqlQuery, timeRange and the caller query', async () => {
+        const query = { term: { field3: 'value3' } };
+
+        await service.dsl({
+          index: 'logs-*',
+          query,
+          kibanaQueryContext: {
+            kibanaFilters: [phraseFilter],
+            kqlQuery: { language: 'lucene', query: 'message:error' },
+            timeRange,
+            timeField: '@timestamp',
+          },
+        });
+
+        const { bool } = getRequestBody().query;
+        expect(bool.must).toEqual([{ query_string: expect.any(Object) }, query]);
+        expect(bool.filter).toHaveLength(2);
+      });
+
+      it('reads the es query config from the deps', async () => {
+        await service.dsl({
+          index: 'logs-*',
+          kibanaQueryContext: { kqlQuery: { language: 'lucene', query: '*' } },
+        });
+
+        expect(getEsQueryConfig).toHaveBeenCalledTimes(1);
+        expect(getRequestBody().query.bool.must[0].query_string.time_zone).toBe('America/New_York');
+      });
+
+      it('does not read the es query config without a context', async () => {
+        await service.dsl({ index: 'logs-*', query: { match_all: {} } });
+
+        expect(getEsQueryConfig).not.toHaveBeenCalled();
+      });
+    });
+
     describe('inspector', () => {
       it('calls inspector.adapter.start with correct parameters', async () => {
         const mockResponse = { hits: { hits: [], total: 0 } };
