@@ -241,9 +241,9 @@ const renderTriageStarted = (alertCount: number): string =>
   });
 
 describe('floor_alert_triage_batch — post_comment_triage_started', () => {
-  it('includes the alertzero_balanced feature name for model routing', () => {
+  it('includes the alertzero_efficient feature name for model routing', () => {
     const comment = renderTriageStarted(3);
-    expect(comment).toContain('alertzero_balanced');
+    expect(comment).toContain('alertzero_efficient');
   });
 
   it('reports the alert count without listing individual IDs, since the chip attachment above already shows them', () => {
@@ -486,7 +486,7 @@ describe('floor_alert_triage_batch — guard_classification_nonempty', () => {
   it('does not tell the operator to enable Alert Analysis — that path aborted earlier', () => {
     const comment = stepByName('post_comment_classification_empty');
     const input = (comment?.with as { message?: string } | undefined)?.message ?? '';
-    expect(input).toContain('`alertzero_balanced` Model Management feature has no connector');
+    expect(input).toContain('`alertzero_efficient` Model Management feature has no connector');
     // The sub-workflow skips its dedupe on the Worker path, so tags cannot empty the batch.
     expect(input).not.toContain('already carry the analysis tag');
     expect(input).not.toContain('Verify the Alert Analysis workflow is enabled');

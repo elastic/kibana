@@ -287,7 +287,7 @@ export const getSyntheticsDiagnosticsRoute: SyntheticsRestApiRouteFactory = () =
       dynamicSettings,
       indices,
       syntheticsServiceSyncErrors: filterSyncErrorsToCurrentSpace(
-        syntheticsMonitorClient.syntheticsService.syncErrors,
+        syntheticsMonitorClient.serviceManagedLocations.syncErrors,
         monitorIdsInSpace
       ),
     };

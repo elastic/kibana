@@ -356,7 +356,11 @@ export class SourcesClient {
 
   async delete(id: string): Promise<void> {
     const { soClient, viewsClient } = this.deps;
-    const { attributes } = await this.getSavedObject(id);
+    const { attributes, version } = await this.getSavedObject(id);
+    // The view delete runs as kibana_system, so it cannot be what rejects a caller who may only read.
+    // The saved objects client has no authorization check, so an unchanged write stands in for one:
+    // it fails with 403 for a reader before anything is deleted.
+    await soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, attributes, { ...FULL_UPDATE, version });
     // View first so a failed ES delete leaves the catalog row and DELETE stays retryable.
     // `deleteView` already ignores 404; anything else must not acknowledge the source as gone.
     await viewsClient.deleteView(attributes.view_name);
