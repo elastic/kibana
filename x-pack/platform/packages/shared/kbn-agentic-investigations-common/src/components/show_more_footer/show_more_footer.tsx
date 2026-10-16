@@ -7,14 +7,11 @@
 
 import React, { memo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
-import type { IconType } from '@elastic/eui';
 
 interface ShowMoreFooterProps {
   label: string;
   onClick: () => void;
   ariaLabel?: string;
-  /** Defaults to a down chevron; pass an up chevron for a "Show fewer" footer. */
-  iconType?: IconType;
   isLoading?: boolean;
   /** A later page failed: shows `errorMessage` and turns the button into a retry. */
   hasError?: boolean;
@@ -33,7 +30,6 @@ export const ShowMoreFooter = memo<ShowMoreFooterProps>(
     label,
     onClick,
     ariaLabel,
-    iconType = 'chevronSingleDown',
     isLoading = false,
     hasError = false,
     errorMessage,
@@ -68,7 +64,7 @@ export const ShowMoreFooter = memo<ShowMoreFooterProps>(
           <EuiButtonEmpty
             size="xs"
             color={hasError ? 'danger' : 'text'}
-            iconType={hasError ? 'refresh' : iconType}
+            iconType={hasError ? 'refresh' : 'chevronSingleDown'}
             isLoading={isLoading}
             onClick={onClick}
             aria-label={ariaLabel}

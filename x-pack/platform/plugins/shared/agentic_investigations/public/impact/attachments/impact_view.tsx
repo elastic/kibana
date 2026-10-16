@@ -144,7 +144,6 @@ const EntityList = ({
 }) => {
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_ENTITIES);
   const hiddenCount = Math.max(0, entities.length - visibleCount);
-  const canCollapse = visibleCount > INITIAL_VISIBLE_ENTITIES;
 
   return (
     <GroupedAttachmentList data-test-subj="investigationImpactEntities">
@@ -152,38 +151,19 @@ const EntityList = ({
         <ImpactEntityRow key={entity.id} entity={entity} onOpenEntity={onOpenEntity} />
       ))}
       {/* A row of the same list, like the queue's footer, so it sits inside the box under a rule. */}
-      {(hiddenCount > 0 || canCollapse) && (
+      {hiddenCount > 0 && (
         <li>
-          <EuiFlexGroup gutterSize="none" justifyContent="center" responsive={false}>
-            {hiddenCount > 0 && (
-              <EuiFlexItem grow={false}>
-                <ShowMoreFooter
-                  label={i18n.translate(
-                    'xpack.agenticInvestigations.impact.attachments.showMoreEntities',
-                    {
-                      defaultMessage: 'Show more ({count})',
-                      values: { count: hiddenCount },
-                    }
-                  )}
-                  onClick={() => setVisibleCount((count) => count + ENTITIES_PER_SHOW_MORE)}
-                  data-test-subj="investigationImpactEntitiesShowMore"
-                />
-              </EuiFlexItem>
+          <ShowMoreFooter
+            label={i18n.translate(
+              'xpack.agenticInvestigations.impact.attachments.showMoreEntities',
+              {
+                defaultMessage: 'Show more ({count})',
+                values: { count: hiddenCount },
+              }
             )}
-            {canCollapse && (
-              <EuiFlexItem grow={false}>
-                <ShowMoreFooter
-                  label={i18n.translate(
-                    'xpack.agenticInvestigations.impact.attachments.showFewerEntities',
-                    { defaultMessage: 'Show fewer' }
-                  )}
-                  iconType="chevronSingleUp"
-                  onClick={() => setVisibleCount(INITIAL_VISIBLE_ENTITIES)}
-                  data-test-subj="investigationImpactEntitiesShowFewer"
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+            onClick={() => setVisibleCount((count) => count + ENTITIES_PER_SHOW_MORE)}
+            data-test-subj="investigationImpactEntitiesShowMore"
+          />
         </li>
       )}
     </GroupedAttachmentList>

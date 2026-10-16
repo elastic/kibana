@@ -69,11 +69,10 @@ describe('ImpactView', () => {
       Array.from({ length: count }, (_, index) => ({ id: `host-${index}`, type: 'host' }));
     const rowCount = () => screen.getAllByTestId('investigationImpactEntityRow').length;
 
-    it('shows five entities, then ten more per click, and collapses back to five', () => {
+    it('shows five entities, then ten more per click', () => {
       renderView({ ...base, entities: entities(40) });
 
       expect(rowCount()).toBe(5);
-      expect(screen.queryByTestId('investigationImpactEntitiesShowFewer')).not.toBeInTheDocument();
       expect(screen.getByTestId('investigationImpactEntitiesShowMore')).toHaveTextContent(
         'Show more (35)'
       );
@@ -90,9 +89,6 @@ describe('ImpactView', () => {
       fireEvent.click(screen.getByTestId('investigationImpactEntitiesShowMore'));
       expect(rowCount()).toBe(40);
       expect(screen.queryByTestId('investigationImpactEntitiesShowMore')).not.toBeInTheDocument();
-
-      fireEvent.click(screen.getByTestId('investigationImpactEntitiesShowFewer'));
-      expect(rowCount()).toBe(5);
     });
 
     it('has no controls when the list fits in five', () => {
@@ -100,7 +96,6 @@ describe('ImpactView', () => {
 
       expect(rowCount()).toBe(5);
       expect(screen.queryByTestId('investigationImpactEntitiesShowMore')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('investigationImpactEntitiesShowFewer')).not.toBeInTheDocument();
     });
   });
 
