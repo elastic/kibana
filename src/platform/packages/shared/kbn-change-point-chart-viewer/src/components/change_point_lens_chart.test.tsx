@@ -34,6 +34,7 @@ jest.mock('@elastic/eui', () => {
         colors: { danger: '#BD271E', lightShade: '#eee' },
         border: { width: { thin: '1px' }, radius: { medium: '6px' } },
         size: { xs: '4px', s: '8px' },
+        font: { weight: { semiBold: 600 } },
       },
     }),
   };
@@ -117,6 +118,18 @@ describe('ChangePointLensChart', () => {
     expect(screen.getByText('Failed to load chart.')).toBeInTheDocument();
   });
 
+  it('shows the entity title when panel actions are hidden', () => {
+    useChangePointLensProps.mockReturnValue({ lensProps: stubLensProps, buildError: undefined });
+    render(
+      <ChangePointLensChart
+        {...baseProps}
+        showPanelActions={false}
+        card={stubCard({ title: 'AO' })}
+      />
+    );
+    expect(screen.getByText('AO')).toBeInTheDocument();
+  });
+
   it('renders the embeddable when lensProps are available', () => {
     useChangePointLensProps.mockReturnValue({ lensProps: stubLensProps, buildError: undefined });
     render(<ChangePointLensChart {...baseProps} cardIndex={0} />);
@@ -126,8 +139,8 @@ describe('ChangePointLensChart', () => {
 
   it('produces a single area series layer (no annotation layer) when card has no annotations', () => {
     const capturedLayers: unknown[] = [];
-    useChangePointLensProps.mockImplementation(({ chartLayers }: { chartLayers: unknown }) => {
-      capturedLayers.push(...(chartLayers as unknown[]));
+    useChangePointLensProps.mockImplementation(({ chartLayers }: { chartLayers: unknown[] }) => {
+      capturedLayers.push(...chartLayers);
       return { lensProps: stubLensProps, buildError: undefined };
     });
 
@@ -136,6 +149,26 @@ describe('ChangePointLensChart', () => {
     expect(capturedLayers).toHaveLength(1);
     expect((capturedLayers[0] as { type?: string }).type).toBe('series');
     expect((capturedLayers[0] as { seriesType?: string }).seriesType).toBe('area');
+  });
+
+  it('omits the abort controller when fetch params do not provide one', () => {
+    let embeddableProps: { abortController?: AbortController } = {};
+    const EmbeddableSpy = (props: { abortController?: AbortController }) => {
+      embeddableProps = props;
+      return <div data-test-subj="lensEmbeddable" />;
+    };
+    useChangePointLensProps.mockReturnValue({ lensProps: stubLensProps, buildError: undefined });
+    const { abortController: _abortController, ...fetchParams } = baseProps.fetchParams;
+
+    render(
+      <ChangePointLensChart
+        {...baseProps}
+        fetchParams={fetchParams}
+        services={{ lens: { EmbeddableComponent: EmbeddableSpy } } as never}
+      />
+    );
+
+    expect(Object.hasOwn(embeddableProps, 'abortController')).toBe(false);
   });
 
   it('does not populate extraActions when there are no annotations', () => {

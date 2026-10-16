@@ -19,9 +19,10 @@ import type { Logger } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { registerRoutes } from './api/register_routes';
+import { changePointGridEmbeddableSchema } from './embeddable/change_point_grid_schema';
 import { getDiscoverSessionEmbeddableSchema } from './embeddable/schema';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
-import { DISCOVER_APP_LOCATOR } from '../common';
+import { CHANGE_POINT_GRID_EMBEDDABLE_TYPE, DISCOVER_APP_LOCATOR } from '../common';
 import { capabilitiesProvider } from './capabilities_provider';
 import { createSearchEmbeddableFactory } from './embeddable';
 import { initializeLocatorServices } from './locator';
@@ -93,6 +94,10 @@ export class DiscoverServerPlugin
     }
 
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
+    plugins.embeddable.registerEmbeddableServerDefinition(CHANGE_POINT_GRID_EMBEDDABLE_TYPE, {
+      title: 'Change point charts',
+      getSchema: () => changePointGridEmbeddableSchema,
+    });
     plugins.embeddable.registerEmbeddableServerDefinition(SEARCH_EMBEDDABLE_TYPE, {
       title: 'Discover session',
       getTransforms: (drilldownTransforms) => getSearchEmbeddableTransforms(drilldownTransforms),

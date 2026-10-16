@@ -17,6 +17,7 @@ export interface ChangePointChartSectionActions {
     timeRange?: TimeRange;
   }) => void;
   updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
+  addPageToDashboard?: (page: { esql: string }) => void;
 }
 
 /** Props for the Discover chart section (lazy bundle). Chart data comes from `fetchParams.query` and `fetchParams.table`. */

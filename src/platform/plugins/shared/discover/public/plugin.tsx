@@ -30,7 +30,12 @@ import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import type { TimeRange } from '@kbn/es-query';
-import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
+import {
+  CHANGE_POINT_GRID_EMBEDDABLE_TYPE,
+  DISCOVER_APP_LOCATOR,
+  PLUGIN_ID,
+  type DiscoverAppLocator,
+} from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
   type DiscoverContextAppLocator,
@@ -497,6 +502,18 @@ export class DiscoverPlugin
       }),
       getIconForSavedObject: () => 'discoverApp',
     });
+
+    plugins.embeddable.registerEmbeddablePublicDefinition(
+      CHANGE_POINT_GRID_EMBEDDABLE_TYPE,
+      async () => {
+        const [discoverServices, { getChangePointGridEmbeddableFactory }] = await Promise.all([
+          getDiscoverServicesForEmbeddable(),
+          getEmbeddableServices(),
+        ]);
+
+        return getChangePointGridEmbeddableFactory({ discoverServices });
+      }
+    );
 
     plugins.embeddable.registerEmbeddablePublicDefinition(SEARCH_EMBEDDABLE_TYPE, async () => {
       const [startServices, discoverServices, { getSearchEmbeddableFactory }] = await Promise.all([
