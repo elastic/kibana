@@ -89,15 +89,6 @@ docker_login_kibana_ci_read() {
   echo "$password" | docker login -u "$username" --password-stdin docker.elastic.co
 }
 
-# Temporary: shared read/write credential, only for the security solution quality gate image until it gets a tier
-docker_login_kibanamachine() {
-  is_docker_available || return 0
-  local username password
-  username="$(retry 5 5 vault read -field=username secret/ci/elastic-kibana/container-registry)"
-  password="$(retry 5 5 vault read -field=password secret/ci/elastic-kibana/container-registry)"
-  echo "$password" | docker login -u "$username" --password-stdin docker.elastic.co
-}
-
 is_docker_available() {
   (command -v docker && docker version) &> /dev/null
 }
