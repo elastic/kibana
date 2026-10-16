@@ -14,13 +14,29 @@ import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_fram
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 
-const getSectionLabel = (
+const getLabel = (
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
-  attachmentType: string
-): string =>
-  unifiedAttachmentTypeRegistry.has(attachmentType)
-    ? unifiedAttachmentTypeRegistry.get(attachmentType).getLabel()
-    : attachmentType;
+  attachmentType: string,
+  count: number
+): React.ReactNode => {
+  if (!unifiedAttachmentTypeRegistry.has(attachmentType)) {
+    return (
+      <FormattedMessage
+        id="xpack.cases.caseView.userActions.bulkAttachmentsRemovedUnknownTypeLabel"
+        defaultMessage="removed {count, plural, one {# attachment} other {# attachments}}"
+        values={{ count }}
+      />
+    );
+  }
+
+  return (
+    <FormattedMessage
+      id="xpack.cases.caseView.userActions.bulkAttachmentsRemovedLabel"
+      defaultMessage="removed {count, plural, one {# attachment} other {# attachments}} from {section}"
+      values={{ count, section: unifiedAttachmentTypeRegistry.get(attachmentType).getLabel() }}
+    />
+  );
+};
 
 export const createBulkAttachmentsUserActionBuilder: UserActionBuilder = ({
   userAction,
@@ -38,14 +54,7 @@ export const createBulkAttachmentsUserActionBuilder: UserActionBuilder = ({
 
     const label = (
       <EuiText size="s" data-test-subj="bulk-attachments-action">
-        <FormattedMessage
-          id="xpack.cases.caseView.userActions.bulkAttachmentsRemovedLabel"
-          defaultMessage="removed {count, plural, one {# attachment} other {# attachments}} from {section}"
-          values={{
-            count,
-            section: getSectionLabel(unifiedAttachmentTypeRegistry, attachmentType),
-          }}
-        />
+        {getLabel(unifiedAttachmentTypeRegistry, attachmentType, count)}
       </EuiText>
     );
 

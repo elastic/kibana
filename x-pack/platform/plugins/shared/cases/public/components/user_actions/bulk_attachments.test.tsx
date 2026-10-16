@@ -58,11 +58,11 @@ describe('createBulkAttachmentsUserActionBuilder', () => {
     );
   });
 
-  it('renders the type id when the type is not registered', () => {
+  it('leaves out the section when the type is not registered', () => {
     renderUserAction('unknown.type', 1);
 
     expect(screen.getByTestId('bulk-attachments-action')).toHaveTextContent(
-      'removed 1 attachment from unknown.type'
+      /^removed 1 attachment$/
     );
   });
 
