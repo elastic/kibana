@@ -19,7 +19,7 @@ export interface TransactionResultBadgeDescriptor {
   toolTipContent: string;
 }
 
-/** Resolves the result badge presentation so the summary row and the transaction flyout header agree. */
+/** Resolves the transaction result badge's label, color, and tooltip. */
 export function getTransactionResultBadgeDescriptor(
   transactionResult: string
 ): TransactionResultBadgeDescriptor {

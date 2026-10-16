@@ -98,7 +98,7 @@ const setFetch = (span: Span | undefined, status: FETCH_STATUS) =>
     refetch: jest.fn(),
   } as unknown as ReturnType<typeof useFetcher>);
 
-// A `wrapper` (rather than wrapping the element) survives `rerender`, so the flyout stays mounted.
+// Passed as `wrapper` so that `rerender` keeps the flyout mounted.
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <EuiThemeProvider>
     <I18nProvider>{children}</I18nProvider>

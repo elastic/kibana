@@ -59,11 +59,10 @@ const renderHeader = (
     { wrapper }
   ).result.current;
 
-/** Renders the title and the info block and badge contents, which the template would place. */
-const renderParts = ({ title, infoBlocks, badges }: TransactionFlyoutHeaderParts) =>
+/** Renders the info block and badge contents, which the template would place. */
+const renderParts = ({ infoBlocks, badges }: TransactionFlyoutHeaderParts) =>
   render(
     <>
-      <h3>{title}</h3>
       {[...infoBlocks, ...badges].map((part) => (
         <div key={part.key} data-test-subj={part.props['data-test-subj']}>
           {part.props.children}
@@ -80,8 +79,6 @@ describe('useTransactionFlyoutHeader', () => {
   it('renders null when transaction is undefined', () => {
     const parts = renderHeader(undefined);
 
-    expect(parts.title).toBe('Transaction details');
-    expect(parts.titleText).toBe('Transaction details');
     expect(parts.infoBlocks).toEqual([]);
     expect(parts.badges).toEqual([]);
   });
@@ -89,8 +86,6 @@ describe('useTransactionFlyoutHeader', () => {
   it('renders service and transaction links with complete data', () => {
     const parts = renderHeader(baseTransaction);
 
-    expect(parts.title).toBe('Transaction details');
-    expect(parts.titleText).toBe('Transaction details');
     expect(getTestSubjects(parts.infoBlocks)).toEqual([
       'transactionFlyoutInfo-service',
       'transactionFlyoutInfo-name',
@@ -106,7 +101,6 @@ describe('useTransactionFlyoutHeader', () => {
 
     renderParts(parts);
 
-    expect(screen.getByRole('heading', { name: 'Transaction details' })).toBeInTheDocument();
     expect(screen.getByTestId('transactionFlyoutInfo-name')).toHaveTextContent('GET /api');
     expect(screen.getByRole('link', { name: 'GET /api' })).toHaveAttribute('href', '/mock-link');
     expect(screen.getByTestId('transactionFlyoutInfo-service')).toHaveTextContent('my-service');
@@ -133,7 +127,6 @@ describe('useTransactionFlyoutHeader', () => {
     renderParts(renderHeader(txWithoutService));
 
     expect(screen.getByTestId('transactionFlyoutInfo-service')).toHaveTextContent('N/A');
-    expect(screen.getByRole('heading', { name: 'Transaction details' })).toBeInTheDocument();
     expect(screen.getByTestId('transactionFlyoutInfo-name')).toHaveTextContent('GET /api');
     expect(screen.queryByRole('link', { name: 'GET /api' })).not.toBeInTheDocument();
   });
@@ -144,11 +137,8 @@ describe('useTransactionFlyoutHeader', () => {
       transaction: undefined,
     } as unknown as Transaction;
 
-    const parts = renderHeader(txWithoutInner);
-    renderParts(parts);
+    renderParts(renderHeader(txWithoutInner));
 
-    expect(parts.titleText).toBe('Transaction details');
-    expect(screen.getByRole('heading', { name: 'Transaction details' })).toBeInTheDocument();
     expect(screen.getByTestId('transactionFlyoutInfo-name')).toHaveTextContent('N/A');
     expect(screen.getByTestId('transactionFlyoutInfo-service')).toHaveTextContent('my-service');
     expect(screen.queryByTestId('transactionFlyoutInfo-duration')).not.toBeInTheDocument();

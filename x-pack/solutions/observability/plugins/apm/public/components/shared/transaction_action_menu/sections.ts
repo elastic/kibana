@@ -134,7 +134,7 @@ export const getSections = ({
     metricsIndices,
   });
 
-  const podActions: Array<Action<string>> = [
+  const podActions: Action[] = [
     {
       key: 'podLogs',
       label: i18n.translate('xpack.apm.transactionActionMenu.showPodLogsLinkLabel', {
@@ -153,7 +153,7 @@ export const getSections = ({
     },
   ];
 
-  const containerActions: Array<Action<string>> = [
+  const containerActions: Action[] = [
     {
       key: 'containerLogs',
       label: i18n.translate('xpack.apm.transactionActionMenu.showContainerLogsLinkLabel', {
@@ -178,7 +178,7 @@ export const getSections = ({
     },
   ];
 
-  const hostActions: Array<Action<string>> = [
+  const hostActions: Action[] = [
     {
       key: 'hostLogs',
       label: i18n.translate('xpack.apm.transactionActionMenu.showHostLogsLinkLabel', {
@@ -238,7 +238,7 @@ export const getSections = ({
     },
   ];
 
-  const logActions: Array<Action<string>> = [
+  const logActions: Action[] = [
     {
       key: 'traceLogs',
       label: i18n.translate('xpack.apm.transactionActionMenu.showTraceLogsLinkLabel', {
@@ -249,7 +249,7 @@ export const getSections = ({
     },
   ];
 
-  const uptimeActions: Array<Action<string>> = [
+  const uptimeActions: Action[] = [
     {
       key: 'monitorStatus',
       label: i18n.translate('xpack.apm.transactionActionMenu.viewInUptime', {
@@ -270,7 +270,7 @@ export const getSections = ({
       comparisonEnabled: false,
     },
   });
-  const serviceMapActions: Array<Action<string>> = [
+  const serviceMapActions: Action[] = [
     {
       key: 'serviceMap',
       label: i18n.translate('xpack.apm.transactionActionMenu.showInServiceMapLinkLabel', {
@@ -281,7 +281,7 @@ export const getSections = ({
     },
   ];
 
-  const sectionRecord: SectionRecord<string> = {
+  const sectionRecord: SectionRecord = {
     observability: [
       {
         key: 'podDetails',

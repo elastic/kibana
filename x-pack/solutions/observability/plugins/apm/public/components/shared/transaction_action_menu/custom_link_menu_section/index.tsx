@@ -34,17 +34,15 @@ import { CustomLinkList } from './custom_link_list';
 
 const DEFAULT_LINKS_TO_SHOW = 3;
 
-/**
- * Fetches the custom links whose filters match the transaction. Pass `isEnabled: false` to skip the
- * fetch, e.g. without the license that custom links require.
- */
-export function useCustomLinks(
-  transaction?: Transaction,
-  { isEnabled = true }: { isEnabled?: boolean } = {}
-): {
-  customLinks: CustomLink[];
-  status: FETCH_STATUS;
-} {
+export function CustomLinkMenuSection({
+  transaction,
+  openCreateCustomLinkFlyout,
+}: {
+  transaction?: Transaction;
+  openCreateCustomLinkFlyout: () => void;
+}) {
+  const [showAllLinks, setShowAllLinks] = useState(false);
+
   const filters = useMemo(
     () =>
       [
@@ -57,32 +55,15 @@ export function useCustomLinks(
   );
 
   const { data, status } = useFetcher(
-    (callApmApi) => {
-      if (!isEnabled) {
-        return;
-      }
-      return callApmApi('GET /internal/apm/settings/custom_links', {
+    (callApmApi) =>
+      callApmApi('GET /internal/apm/settings/custom_links', {
         isCachable: false,
         params: { query: convertFiltersToQuery(filters) },
-      });
-    },
-    [filters, isEnabled]
+      }),
+    [filters]
   );
 
-  const customLinks = useMemo(() => data?.customLinks ?? [], [data]);
-
-  return { customLinks, status };
-}
-
-export function CustomLinkMenuSection({
-  transaction,
-  openCreateCustomLinkFlyout,
-}: {
-  transaction?: Transaction;
-  openCreateCustomLinkFlyout: () => void;
-}) {
-  const [showAllLinks, setShowAllLinks] = useState(false);
-  const { customLinks, status } = useCustomLinks(transaction);
+  const customLinks = data?.customLinks ?? [];
 
   return (
     <>

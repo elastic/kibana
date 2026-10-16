@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DATE_LABEL = i18n.translate('xpack.apm.transactionDetails.transFlyout.dateLabel', {
+export const DATE_LABEL = i18n.translate('xpack.apm.waterfallItemFlyout.dateLabel', {
   defaultMessage: 'Date',
 });
 

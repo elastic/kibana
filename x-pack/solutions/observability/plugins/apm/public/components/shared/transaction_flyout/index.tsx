@@ -15,7 +15,10 @@ import type { SpanLinksCount } from '../span_links';
 import { TRANSACTION_FLYOUT_EBT_ELEMENTS } from './ebt_constants';
 import { useTransactionFlyoutFooterMenu } from './footer/use_transaction_flyout_footer_menu';
 import { useDroppedSpansCallout } from './use_dropped_spans_callout';
-import { useTransactionFlyoutHeader } from './use_transaction_flyout_header';
+import {
+  TRANSACTION_DETAILS_LABEL,
+  useTransactionFlyoutHeader,
+} from './use_transaction_flyout_header';
 import { useTransactionFlyoutTabs } from './use_transaction_flyout_tabs';
 
 const INVESTIGATE_LABEL = i18n.translate('xpack.apm.transactionActionMenu.actionsButtonLabel', {
@@ -59,7 +62,7 @@ export function TransactionFlyout({
   const isTransactionLoading = isPending(status);
   const transaction = isTransactionLoading ? undefined : data;
 
-  const { title, titleText, infoBlocks, badges } = useTransactionFlyoutHeader({
+  const { infoBlocks, badges } = useTransactionFlyoutHeader({
     transaction,
     errorCount,
     rootTransactionDuration,
@@ -83,8 +86,7 @@ export function TransactionFlyout({
         tabBarProps={{ 'data-test-subj': 'transactionFlyoutTabs' }}
       >
         <FlyoutTemplate.Header
-          title={title}
-          titleText={titleText}
+          title={TRANSACTION_DETAILS_LABEL}
           data-test-subj="transactionFlyoutHeader"
         >
           {infoBlocks}

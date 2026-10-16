@@ -43,7 +43,7 @@ export interface OpenInDiscoverLink {
   ebtProps: ReturnType<typeof getEbtProps> | {};
 }
 
-/** Resolves the Discover link state shared by {@link OpenInDiscover} and flyout menu actions. */
+/** Resolves a Discover link's href, loading and disabled state, and EBT attributes. */
 export function useOpenInDiscoverLink({
   rangeFrom,
   rangeTo,

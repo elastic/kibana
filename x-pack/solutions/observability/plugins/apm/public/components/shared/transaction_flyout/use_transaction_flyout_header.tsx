@@ -54,15 +54,13 @@ const COLD_START_LABEL = i18n.translate('xpack.apm.transactionFlyout.coldStartBa
 });
 
 export interface TransactionFlyoutHeaderParts {
-  title: string;
-  titleText: string;
   infoBlocks: ReactElement[];
   badges: ReactElement[];
 }
 
 /**
- * Resolves the waterfall transaction flyout header for `FlyoutTemplate.Header`. The title stays
- * "Transaction details". The transaction name and the other summary fields are info blocks.
+ * Resolves the waterfall transaction flyout header parts for `FlyoutTemplate.Header`: the
+ * transaction name and other summary fields as info blocks, and the status badges.
  */
 export function useTransactionFlyoutHeader({
   transaction,
@@ -82,12 +80,7 @@ export function useTransactionFlyoutHeader({
   const { euiTheme } = useEuiTheme();
 
   if (!transaction) {
-    return {
-      title: TRANSACTION_DETAILS_LABEL,
-      titleText: TRANSACTION_DETAILS_LABEL,
-      infoBlocks: [],
-      badges: [],
-    };
+    return { infoBlocks: [], badges: [] };
   }
 
   const latencyAggregationType =
@@ -265,10 +258,5 @@ export function useTransactionFlyoutHeader({
     );
   }
 
-  return {
-    title: TRANSACTION_DETAILS_LABEL,
-    titleText: TRANSACTION_DETAILS_LABEL,
-    infoBlocks,
-    badges,
-  };
+  return { infoBlocks, badges };
 }

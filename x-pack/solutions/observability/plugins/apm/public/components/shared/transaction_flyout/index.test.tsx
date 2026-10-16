@@ -90,7 +90,7 @@ const setFetch = (data: Transaction | undefined, status: FETCH_STATUS) =>
     typeof useFetcher
   >);
 
-// A `wrapper` (rather than wrapping the element) survives `rerender`, so the flyout stays mounted.
+// Passed as `wrapper` so that `rerender` keeps the flyout mounted.
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <EuiThemeProvider>
     <I18nProvider>{children}</I18nProvider>

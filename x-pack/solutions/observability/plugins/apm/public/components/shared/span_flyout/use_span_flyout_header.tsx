@@ -74,15 +74,13 @@ function formatSubtype(subtype: string | undefined) {
 }
 
 export interface SpanFlyoutHeaderParts {
-  title: string;
-  titleText: string;
   infoBlocks: ReactElement[];
   badges: ReactElement[];
 }
 
 /**
- * Resolves the waterfall span flyout header for `FlyoutTemplate.Header`. The title stays
- * "Span details". The span name and the other summary fields are info blocks.
+ * Resolves the waterfall span flyout header parts for `FlyoutTemplate.Header`: the span name and
+ * other summary fields as info blocks, and the status badges.
  */
 export function useSpanFlyoutHeader({
   span,
@@ -103,12 +101,7 @@ export function useSpanFlyoutHeader({
   const { euiTheme } = useEuiTheme();
 
   if (!span) {
-    return {
-      title: SPAN_DETAILS_LABEL,
-      titleText: SPAN_DETAILS_LABEL,
-      infoBlocks: [],
-      badges: [],
-    };
+    return { infoBlocks: [], badges: [] };
   }
 
   const latencyAggregationType =
@@ -347,10 +340,5 @@ export function useSpanFlyoutHeader({
     );
   }
 
-  return {
-    title: SPAN_DETAILS_LABEL,
-    titleText: SPAN_DETAILS_LABEL,
-    infoBlocks,
-    badges,
-  };
+  return { infoBlocks, badges };
 }

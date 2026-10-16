@@ -69,13 +69,15 @@ export function useTransactionFlyoutFooterMenu({
     ];
   }, [transaction, profilingLocators, hasGoldLicense]);
 
-  const customLinkFlyout = hasGoldLicense ? (
-    <CustomLinkFlyout
-      transaction={transaction}
-      isOpen={isCustomLinkFlyoutOpen}
-      onClose={() => setIsCustomLinkFlyoutOpen(false)}
-    />
-  ) : null;
+  // `CustomLinkFlyout` fetches on mount, and without a transaction that request has no filters.
+  const customLinkFlyout =
+    hasGoldLicense && transaction ? (
+      <CustomLinkFlyout
+        transaction={transaction}
+        isOpen={isCustomLinkFlyoutOpen}
+        onClose={() => setIsCustomLinkFlyoutOpen(false)}
+      />
+    ) : null;
 
   return {
     panels,

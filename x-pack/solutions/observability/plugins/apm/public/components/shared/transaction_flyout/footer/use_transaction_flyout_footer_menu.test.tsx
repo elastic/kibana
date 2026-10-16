@@ -149,12 +149,14 @@ describe('useTransactionFlyoutFooterMenu', () => {
   });
 
   it('stops loading and stays disabled when the transaction fails to load', () => {
+    setLicense(true);
     mockUseSections.mockReturnValue([]);
 
-    const { isLoading, hasActions } = renderMenu(undefined, false).result.current;
+    const { isLoading, hasActions, customLinkFlyout } = renderMenu(undefined, false).result.current;
 
     expect(isLoading).toBe(false);
     expect(hasActions).toBe(false);
+    expect(customLinkFlyout).toBeNull();
   });
 
   it('stays loading while profiling locators load', () => {

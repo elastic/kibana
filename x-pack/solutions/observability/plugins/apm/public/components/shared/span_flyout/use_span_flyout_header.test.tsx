@@ -76,11 +76,10 @@ const renderHeader = (span: Span | undefined, parentTransaction?: Transaction) =
     wrapper,
   }).result.current;
 
-/** Renders the title and the info block and badge contents, which the template would place. */
-const renderParts = ({ title, infoBlocks, badges }: SpanFlyoutHeaderParts) =>
+/** Renders the info block and badge contents, which the template would place. */
+const renderParts = ({ infoBlocks, badges }: SpanFlyoutHeaderParts) =>
   render(
     <>
-      <h3>{title}</h3>
       {[...infoBlocks, ...badges].map((part) => (
         <div key={part.key} data-test-subj={part.props['data-test-subj']}>
           {part.props.children}
@@ -97,12 +96,9 @@ describe('useSpanFlyoutHeader', () => {
   it('renders span name from complete data', () => {
     const parts = renderHeader(baseSpan, baseTransaction);
 
-    expect(parts.title).toBe('Span details');
-    expect(parts.titleText).toBe('Span details');
     expect(getTestSubjects(parts.infoBlocks)[0]).toBe('spanFlyoutInfo-name');
 
     renderParts(parts);
-    expect(screen.getByRole('heading', { name: 'Span details' })).toBeInTheDocument();
     expect(screen.getByTestId('spanFlyoutInfo-name')).toHaveTextContent('SELECT *');
   });
 
@@ -114,7 +110,6 @@ describe('useSpanFlyoutHeader', () => {
 
     const parts = renderHeader(spanWithoutInner);
 
-    expect(parts.title).toBe('Span details');
     expect(getTestSubjects(parts.infoBlocks)).toEqual([
       'spanFlyoutInfo-name',
       'spanFlyoutInfo-timestamp',
@@ -130,7 +125,6 @@ describe('useSpanFlyoutHeader', () => {
 
     renderParts(renderHeader(baseSpan, txWithoutAgent));
 
-    expect(screen.getByRole('heading', { name: 'Span details' })).toBeInTheDocument();
     expect(screen.getByTestId('spanFlyoutInfo-name')).toHaveTextContent('SELECT *');
     expect(screen.getByTestId('spanFlyoutInfo-service')).toHaveTextContent('my-service');
   });
@@ -143,7 +137,6 @@ describe('useSpanFlyoutHeader', () => {
 
     renderParts(renderHeader(baseSpan, txWithoutService));
 
-    expect(screen.getByRole('heading', { name: 'Span details' })).toBeInTheDocument();
     expect(screen.getByTestId('spanFlyoutInfo-service')).toHaveTextContent('N/A');
     expect(screen.getByTestId('spanFlyoutInfo-transaction')).toHaveTextContent('GET /api');
     expect(screen.queryByRole('link', { name: 'GET /api' })).not.toBeInTheDocument();
@@ -157,7 +150,6 @@ describe('useSpanFlyoutHeader', () => {
 
     renderParts(renderHeader(baseSpan, txWithoutInner));
 
-    expect(screen.getByRole('heading', { name: 'Span details' })).toBeInTheDocument();
     expect(screen.getByTestId('spanFlyoutInfo-service')).toHaveTextContent('my-service');
     expect(screen.getByTestId('spanFlyoutInfo-transaction')).toHaveTextContent('N/A');
   });
@@ -175,14 +167,12 @@ describe('useSpanFlyoutHeader', () => {
     );
 
     renderParts(parts);
-    expect(screen.getByRole('heading', { name: 'Span details' })).toBeInTheDocument();
     expect(screen.getByTestId('spanFlyoutInfo-name')).toHaveTextContent('SELECT *');
   });
 
   it('renders the generic title while the span is loading', () => {
     const parts = renderHeader(undefined);
 
-    expect(parts.title).toBe('Span details');
     expect(parts.infoBlocks).toEqual([]);
     expect(parts.badges).toEqual([]);
   });

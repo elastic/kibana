@@ -19,7 +19,7 @@ export interface ErrorCountBadgeDescriptor {
   color: string;
 }
 
-/** Resolves the error count badge presentation so the summary row and the transaction flyout header agree. */
+/** Resolves the error count badge's label and color. */
 export function getErrorCountBadgeDescriptor(
   count: number,
   euiTheme: EuiThemeComputed

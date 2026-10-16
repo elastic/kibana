@@ -26,7 +26,6 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { CustomLinkMenuSection } from './custom_link_menu_section';
-import type { Section as MenuSection } from './sections_helper';
 import { CustomLinkFlyout } from './custom_link_flyout';
 import { useTransactionActionMenuSections } from './use_transaction_action_menu_sections';
 
@@ -101,7 +100,7 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
   );
 }
 
-/** Section list and custom links shared by the page popover and the transaction flyout footer. */
+/** The Investigate menu's sections and custom links, without a popover around them. */
 export function TransactionActionMenuContent({
   transaction,
   profilingLocators,
@@ -134,9 +133,8 @@ function ActionMenuSections({
   profilingLocators?: ProfilingLocators;
 }) {
   const { uiActions } = useApmPluginContext();
-  const sections: MenuSection[][] = [
-    ...useTransactionActionMenuSections(transaction, profilingLocators),
-  ];
+  // Copied because the hook's result is memoized and external items are pushed onto it.
+  const sections = [...useTransactionActionMenuSections(transaction, profilingLocators)];
 
   const externalMenuItems = useAsync(() => {
     return transaction

@@ -22,7 +22,7 @@ export interface FailureBadgeDescriptor {
   toolTipContent: string;
 }
 
-/** Resolves the failure badge presentation so the standalone badge and the span flyout header agree. */
+/** Resolves the failure badge's label, color, and tooltip, or `undefined` when the outcome is not a failure. */
 export function getFailureBadgeDescriptor(
   outcome: EventOutcome | undefined,
   euiTheme: EuiThemeComputed

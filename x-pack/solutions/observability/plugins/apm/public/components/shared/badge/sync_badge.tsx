@@ -65,7 +65,7 @@ export interface SyncBadgeDescriptor {
   toolTipContent: string;
 }
 
-/** Resolves the sync badge presentation so the standalone badge and the span flyout header agree. */
+/** Resolves the sync badge's label and tooltip, or `undefined` when the agent's default sync mode applies. */
 export function getSyncBadgeDescriptor({
   sync,
   agentName,

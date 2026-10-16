@@ -13,7 +13,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
 import type { SpanLinksCount } from '../span_links';
 import { useSpanDatabaseCallout } from './span_db';
-import { useSpanFlyoutHeader } from './use_span_flyout_header';
+import { SPAN_DETAILS_LABEL, useSpanFlyoutHeader } from './use_span_flyout_header';
 import { useSpanFlyoutMenuProps } from './use_span_flyout_menu_props';
 import { useSpanFlyoutTabs } from './use_span_flyout_tabs';
 
@@ -69,7 +69,7 @@ export function SpanFlyout({
   const span = isLoading ? undefined : data?.span;
   const parentTransaction = isLoading ? undefined : data?.parentTransaction;
 
-  const { title, titleText, infoBlocks, badges } = useSpanFlyoutHeader({
+  const { infoBlocks, badges } = useSpanFlyoutHeader({
     span,
     parentTransaction,
     totalDuration,
@@ -96,7 +96,7 @@ export function SpanFlyout({
       defaultSelectedTabId={flyoutDetailTab}
       tabBarProps={{ 'data-test-subj': 'spanFlyoutTabs' }}
     >
-      <FlyoutTemplate.Header title={title} titleText={titleText} data-test-subj="spanFlyoutHeader">
+      <FlyoutTemplate.Header title={SPAN_DETAILS_LABEL} data-test-subj="spanFlyoutHeader">
         {infoBlocks}
         {badges}
       </FlyoutTemplate.Header>

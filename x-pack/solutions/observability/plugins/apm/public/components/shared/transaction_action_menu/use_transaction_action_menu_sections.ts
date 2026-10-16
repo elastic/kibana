@@ -25,7 +25,7 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { getSections } from './sections';
 
-/** Resolves the built-in "Investigate" menu sections shared by the action popover and the transaction flyout footer. */
+/** Resolves the built-in "Investigate" menu sections for a transaction. The result is memoized; copy it before adding sections. */
 export function useTransactionActionMenuSections(
   transaction: Transaction | undefined,
   profilingLocators: ProfilingLocators | undefined
