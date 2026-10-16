@@ -60,6 +60,7 @@ describe('classifyBatch', () => {
     expect(output).toMatchObject({
       rows: [],
       row_count: 0,
+      batch: [],
       rule_uuids: [],
       detections: [],
       source_ids: [],
@@ -143,6 +144,79 @@ describe('classifyBatch', () => {
       { rule_uuid: 'rule-A', detected_at: '2026-10-16T09:56:07.779Z' },
       { rule_uuid: 'rule-B', detected_at: '2026-10-16T09:56:07.779Z' },
     ]);
+  });
+
+  describe('the batch the agent reads', () => {
+    const rowOf = (ruleUuid: string) => [
+      ruleUuid,
+      { detection_id: `${ruleUuid}-detection`, rule_uuid: ruleUuid, rule_name: `Rule ${ruleUuid}` },
+      70,
+      2,
+      false,
+    ];
+
+    it('lists the detections the agent receives by field name, in row order', async () => {
+      const rows = [rowOf('rule-A'), rowOf('rule-B'), rowOf('rule-C')];
+      const findLiveMembers = jest.fn(async () =>
+        membersOf({ 'rule-A': [membership('confirms')] })
+      );
+
+      const output = await classifyBatch(batchParams({ rows, findLiveMembers }));
+
+      expect(output.batch.map(({ rule_uuid: id }) => id)).toEqual(['rule-B', 'rule-C']);
+      expect(output.batch[0]).toMatchObject({
+        detection_id: 'rule-B-detection',
+        rule_name: 'Rule rule-B',
+        recent_detection_count: 2,
+        flaky_probe: false,
+      });
+    });
+
+    it('gives each one why it reached the agent, and the events its rule is in, when enforcing', async () => {
+      const rows = [rowOf('rule-A'), rowOf('rule-B')];
+      const findLiveMembers = jest.fn(async () =>
+        membersOf({
+          'rule-A': [{ ...membership('confirms'), eventId: 'event-1', status: 'active' }],
+        })
+      );
+      const probe = jest.fn(async () => probeResult('ok', false));
+
+      const output = await classifyBatch(
+        batchParams({ rows, findLiveMembers, probe, shadowMode: false })
+      );
+
+      expect(output.batch[0].classifier).toMatchObject({
+        reason: 'possible_recovery',
+        probe_status: 'ok',
+        live_events: [{ event_id: 'event-1', status: 'active', stored_verdict: 'confirms' }],
+      });
+      expect(output.batch[1].classifier).toEqual({
+        reason: 'not_live_member',
+        live_events: [],
+      });
+    });
+
+    it('gives the agent no hint while it only records, so its judgement stays unprompted', async () => {
+      const rows = [rowOf('rule-A')];
+      const findLiveMembers = jest.fn(async () =>
+        membersOf({ 'rule-A': [membership('confirms')] })
+      );
+
+      const output = await classifyBatch(batchParams({ rows, findLiveMembers, shadowMode: true }));
+
+      expect(output.batch).toHaveLength(1);
+      expect(output.batch[0]).not.toHaveProperty('classifier');
+    });
+
+    it('reads cells by the given column names', async () => {
+      const rows = [[{ detection_id: 'd-1', rule_uuid: 'rule-A' }, 'rule-A', 5]];
+
+      const output = await classifyBatch(
+        batchParams({ rows, columns: ['_source', 'rule_uuid', 'recent_detection_count'] })
+      );
+
+      expect(output.batch[0]).toMatchObject({ rule_uuid: 'rule-A', recent_detection_count: 5 });
+    });
   });
 
   it('keeps every row and skips nothing in shadow mode, but still records the decisions', async () => {

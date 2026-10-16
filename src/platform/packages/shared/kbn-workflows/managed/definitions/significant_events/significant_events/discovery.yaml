@@ -205,6 +205,7 @@ steps:
       # No `| default: []`: the engine evaluates that to undefined even for an empty array, and the
       # step already treats a missing `rows` as an empty batch.
       rows: '${{ steps.get_detections.output.values }}'
+      columns: "${{ steps.get_detections.output.columns | map: 'name' }}"
       space_id: '{{ variables.spaceId }}'
       shadow_mode: '${{ inputs.classifierShadowMode }}'
       probe_window_minutes: '${{ inputs.classifierProbeWindowMinutes }}'
@@ -393,8 +394,8 @@ steps:
       message: |
         ## Detection batch
 
-        Columns: {{ steps.get_detections.output.columns | map: 'name' | json }}
-        Rows: {% if steps.classify_detections.error == null and steps.classify_detections.output != null %}{{ steps.classify_detections.output.rows | json }}{% else %}{{ steps.get_detections.output.values | json }}{% endif %}
+        {% if steps.classify_detections.error == null and steps.classify_detections.output != null %}{{ steps.classify_detections.output.batch | json }}{% else %}Columns: {{ steps.get_detections.output.columns | map: 'name' | json }}
+        Rows: {{ steps.get_detections.output.values | json }}{% endif %}
         {% assign prefetched = steps.get_discovery_grounding.output | default: steps.get_discovery_context.output %}
         {% if prefetched != null %}
         ## Prefetched context

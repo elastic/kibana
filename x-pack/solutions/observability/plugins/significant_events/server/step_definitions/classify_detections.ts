@@ -20,6 +20,7 @@ import {
   type ProbeOutcome,
 } from './classify_detection';
 import { BASELINE_DECISIONS, observeMatchSeries, type BaselineObservation } from './baseline';
+import { batchEntrySchema, toBatchEntry, type BatchEntry } from './detection_batch';
 import { runProbe, runStoredQuery, type ProbeResult, type ProbeWindow } from './run_probe';
 import {
   RuleEventsClient,
@@ -39,6 +40,8 @@ const inputSchema = lazySchema(() =>
   z.object({
     /** The `get_detections` rows: `[rule_uuid, _source, ...]`. Absent when that query had none. */
     rows: rowsSchema.optional(),
+    /** The names of the row columns, in order, so each detection can be handed over by field name. */
+    columns: z.array(z.string().max(64)).max(MAX_ROW_COLUMNS).optional(),
     space_id: z.string().max(MAX_ID_LENGTH),
     shadow_mode: z.boolean(),
     probe_window_minutes: z.number().int().min(15).max(360),
@@ -74,6 +77,8 @@ const outputSchema = lazySchema(() =>
   z.object({
     /** Rows for the agent: every input row in shadow mode, only `needs_agent` rows otherwise. */
     rows: rowsSchema,
+    /** The same detections by field name, as the agent reads them. */
+    batch: z.array(batchEntrySchema).max(MAX_INPUT_ROWS),
     decisions: z.array(decisionSchema).max(MAX_INPUT_ROWS),
     /** Rules whose detections were skipped; always empty in shadow mode. */
     skipped_rule_uuids: z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_INPUT_ROWS),
@@ -137,6 +142,8 @@ const needsProbe = (series: readonly LiveRuleMembership[]): boolean =>
 
 export interface ClassifyBatchParams {
   rows: readonly DetectionRow[];
+  /** The names of the row columns; the `get_detections` ones when absent. */
+  columns?: readonly string[];
   shadowMode: boolean;
   probeConcurrency: number;
   findLiveMembers: (ruleUuids: string[]) => Promise<Map<string, LiveRuleMembership[]>>;
@@ -153,6 +160,7 @@ export interface ClassifyBatchParams {
  */
 export const classifyBatch = async ({
   rows,
+  columns,
   shadowMode,
   probeConcurrency,
   findLiveMembers,
@@ -192,6 +200,7 @@ export const classifyBatch = async ({
   );
 
   const decisions: Decision[] = [];
+  const entries: BatchEntry[] = rows.map((row) => toBatchEntry({ columns, row }));
   const skippedIndexes = new Set<number>();
   for (const { index, row, withinCap } of parsed) {
     if (!row) continue;
@@ -205,6 +214,23 @@ export const classifyBatch = async ({
         })
       : { decision: 'needs_agent', reason: 'over_cap' };
     if (classification.decision === 'skip') skippedIndexes.add(index);
+    // While the classifier only records, the agent judges unprompted; hints are for enforcement.
+    if (!shadowMode) {
+      entries[index] = toBatchEntry({
+        columns,
+        row: rows[index],
+        classifier: {
+          reason: classification.reason,
+          ...(probed ? { probe_status: probed.status } : {}),
+          ...(baseline ? { baseline } : {}),
+          live_events: (memberships.get(ruleUuid) ?? []).map((membership) => ({
+            ...(membership.eventId ? { event_id: membership.eventId } : {}),
+            status: membership.status,
+            stored_verdict: membership.verdict,
+          })),
+        },
+      });
+    }
     decisions.push({
       rule_uuid: ruleUuid,
       ...(detectionId !== undefined ? { detection_id: detectionId } : {}),
@@ -226,6 +252,7 @@ export const classifyBatch = async ({
 
   return {
     rows: agentRows,
+    batch: entries.filter((_, index) => shadowMode || !skippedIndexes.has(index)),
     rule_uuids: [...new Set(agentDetections.map(({ ruleUuid }) => ruleUuid))],
     detections: agentDetections.flatMap(({ ruleUuid, detectedAt }) =>
       detectedAt === undefined ? [] : [{ rule_uuid: ruleUuid, detected_at: detectedAt }]
@@ -254,6 +281,7 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
     handler: async (context) => {
       const {
         rows = [],
+        columns,
         space_id: spaceId,
         shadow_mode: shadowMode,
         probe_window_minutes: windowMinutes,
@@ -281,6 +309,7 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
 
       const output = await classifyBatch({
         rows,
+        columns,
         shadowMode,
         probeConcurrency,
         findLiveMembers: (ruleUuids) => ruleEventsClient.findLiveMembers({ ruleUuids }),

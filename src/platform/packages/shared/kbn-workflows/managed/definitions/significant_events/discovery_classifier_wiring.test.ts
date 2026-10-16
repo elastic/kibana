@@ -100,6 +100,7 @@ describe('discovery workflow detection classifier wiring', () => {
 
       expect(withBlock).toEqual({
         rows: '${{ steps.get_detections.output.values }}',
+        columns: "${{ steps.get_detections.output.columns | map: 'name' }}",
         space_id: '{{ variables.spaceId }}',
         shadow_mode: '${{ inputs.classifierShadowMode }}',
         probe_window_minutes: '${{ inputs.classifierProbeWindowMinutes }}',
@@ -188,37 +189,51 @@ describe('discovery workflow detection classifier wiring', () => {
     });
   });
 
-  describe('the rows the agent receives', () => {
+  describe('the detections the agent receives', () => {
     const renderMessage = (classify: unknown) => {
       const message = requireStep('run_discovery_agent').with?.message;
       if (typeof message !== 'string') throw new Error('Expected the agent message template');
       return createWorkflowLiquidEngine().parseAndRenderSync(message, withClassify(classify));
     };
+    const batch = [{ detection_id: 'detection-B', rule_uuid: 'rule-B', flaky_probe: false }];
 
-    it('lists only the classified rows when the classifier succeeded', () => {
-      const classified = [rawRows[1]];
+    it('lists the classified detections by field name when the classifier succeeded', () => {
+      const rendered = renderMessage({ output: { batch } });
 
-      expect(renderMessage({ output: { rows: classified } })).toContain(
-        `Rows: ${JSON.stringify(classified)}`
-      );
+      expect(rendered).toContain(JSON.stringify(batch));
+      expect(rendered).not.toContain('Columns:');
+      expect(rendered).not.toContain('Rows:');
     });
 
-    it('lists no rows, not the raw ones, when every detection was classified as a skip', () => {
-      const rendered = renderMessage({ output: { rows: [] } });
+    it('lists no detections, not the raw ones, when every detection was classified as a skip', () => {
+      const rendered = renderMessage({ output: { batch: [] } });
 
-      expect(rendered).toContain('Rows: []');
+      expect(rendered).toContain('## Detection batch\n\n[]');
       expect(rendered).not.toContain('detection-A');
     });
 
     it.each([
       ['has failed', { error: { message: 'boom' } }],
       ['produced no output', undefined],
-    ])('falls back to the raw detection rows when the classifier %s', (_name, classify) => {
-      expect(renderMessage(classify)).toContain(`Rows: ${JSON.stringify(rawRows)}`);
-    });
+    ])(
+      'falls back to the raw rows, with their columns, when the classifier %s',
+      (_name, classify) => {
+        const rendered = renderMessage(classify);
 
-    it('keeps the columns from the detections query', () => {
-      expect(renderMessage({ output: { rows: [] } })).toContain('Columns: ["rule_uuid"]');
+        expect(rendered).toContain(`Rows: ${JSON.stringify(rawRows)}`);
+        expect(rendered).toContain('Columns: ["rule_uuid"]');
+      }
+    );
+
+    it('passes the column names to the classifier so it can name each row cell', () => {
+      const { columns } = requireStep('classify_detections').with as { columns: string };
+      const context = {
+        steps: {
+          get_detections: { output: { columns: [{ name: 'rule_uuid' }, { name: '_source' }] } },
+        },
+      };
+
+      expect(evaluate(columns, context)).toEqual(['rule_uuid', '_source']);
     });
   });
 
