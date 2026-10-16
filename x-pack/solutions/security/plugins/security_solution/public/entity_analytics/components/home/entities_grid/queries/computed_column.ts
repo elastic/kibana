@@ -99,6 +99,14 @@ const fetchValuesInChunks = async (
   return new Map(values.flatMap((chunkValues) => [...chunkValues]));
 };
 
+/**
+ * Used when 1) sorting ascending, 2) the empty value is a number (e.g. 0 alerts), so empty rows
+ * come first (a null one would sort last, as ES|QL sorts nulls last), and 3) too many entities
+ * have a value to exclude with `NOT entity.id IN (…)`.
+ * E.g. sorting by alerts ascending with 50,000 entities with alerts: the with-value query stops at
+ * one page (1,001 ids), so we read entities 1,000 at a time, look up their alerts, and keep the
+ * ones with 0.
+ */
 const fetchEmptyRowsInBatches = async (
   column: ComputedColumn,
   args: QueryArgs,
