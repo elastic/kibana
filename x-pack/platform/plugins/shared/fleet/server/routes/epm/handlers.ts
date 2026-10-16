@@ -107,6 +107,8 @@ import {
   isNamespaceAllowedByPrefixes,
 } from '../../services/spaces/policy_namespaces';
 import { PolicyNamespaceValidationError } from '../../../common/errors';
+import { getLogsdbColumnarReadiness, isLogsdbColumnarReady } from '../../../common/services';
+import { isLogsdbColumnarActive } from '../../services/epm/elasticsearch/template/columnar_index_mode';
 import {
   bulkRollbackAvailableCheck,
   isIntegrationRollbackTTLExpired,
@@ -279,6 +281,21 @@ export const getInfoHandler: FleetRequestHandler<
     prerelease,
   });
   const flattenedRes = soToInstallationInfo(res) as PackageInfo;
+  const installationInfo =
+    'installationInfo' in flattenedRes ? flattenedRes.installationInfo : undefined;
+  if (
+    installationInfo &&
+    (flattenedRes.data_streams ?? []).some((dataStream) =>
+      isLogsdbColumnarReady(getLogsdbColumnarReadiness(flattenedRes, dataStream))
+    )
+  ) {
+    // The installation-level switch starts from this when the user has not chosen yet.
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    installationInfo.logsdb_columnar_active = await isLogsdbColumnarActive(
+      esClient,
+      installationInfo.installed_es
+    );
+  }
   let metadata: any;
   if (request.query.withMetadata) {
     const allSpaceSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
@@ -419,6 +436,9 @@ export const updatePackageHandler: FleetRequestHandler<
 
   const { packageInfo, namespaceCustomizationDiff, ilmPolicyChanges } = await updatePackage({
     savedObjectsClient,
+    // Needed to apply a `logsdb_columnar` change to the package's index templates.
+    esClient: (await context.core).elasticsearch.client.asInternalUser,
+    logger: appContextService.getLogger(),
     pkgName,
     ...request.body,
   });
@@ -908,6 +928,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       is_rollback_ttl_expired: isIntegrationRollbackTTLExpired(attributes.install_started_at),
       pending_upgrade_review: attributes.pending_upgrade_review,
       keep_policies_up_to_date: attributes.keep_policies_up_to_date,
+      logsdb_columnar_enabled: attributes.logsdb_columnar_enabled,
       namespace_customization_enabled_for: attributes.namespace_customization_enabled_for,
       namespace_customization_settings: attributes.namespace_customization_settings,
     };

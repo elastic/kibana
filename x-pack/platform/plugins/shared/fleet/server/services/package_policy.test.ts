@@ -98,6 +98,7 @@ import { outputService } from './output';
 import * as secretsModule from './secrets';
 import { recompileInputsWithAgentVersion } from './agent_policies/package_policies_to_agent_inputs';
 import { getAgentVersionsForVersionSpecificPolicies } from './utils/version_specific_policies';
+import { handleLogsdbColumnarChoice } from './package_policies/logsdb_columnar_choice';
 
 jest.mock('./spaces/helpers', () => {
   return {
@@ -107,6 +108,9 @@ jest.mock('./spaces/helpers', () => {
 });
 
 jest.mock('./license');
+jest.mock('./package_policies/logsdb_columnar_choice', () => ({
+  handleLogsdbColumnarChoice: jest.fn(),
+}));
 
 const mockedSendTelemetryEvents = sendTelemetryEvents as jest.MockedFunction<
   typeof sendTelemetryEvents
@@ -494,6 +498,47 @@ describe('Package policy service', () => {
         name: 'Test Package Policy',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
+    });
+
+    it('should apply the logsdb_columnar choice to the installation and not persist it on the policy', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+      const packagePolicySO = {
+        id: 'test-package-policy',
+        attributes: { inputs: [] },
+        references: [],
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      };
+
+      soClient.create.mockResolvedValueOnce(packagePolicySO);
+      soClient.get.mockResolvedValueOnce(packagePolicySO);
+
+      mockAgentPolicyGet();
+
+      await packagePolicyService.create(
+        soClient,
+        esClient,
+        {
+          name: 'Test Package Policy',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test',
+          policy_ids: ['test'],
+          inputs: [],
+          package: { name: 'test', title: 'Test', version: '0.0.1', logsdb_columnar: true },
+        },
+        { id: 'test-package-policy', skipUniqueNameVerification: true }
+      );
+
+      expect(handleLogsdbColumnarChoice).toHaveBeenCalledWith({
+        soClient,
+        esClient,
+        packagePolicy: expect.objectContaining({
+          package: expect.objectContaining({ name: 'test', logsdb_columnar: true }),
+        }),
+      });
+      const savedAttributes = soClient.create.mock.calls[0][1] as any;
+      expect(savedAttributes.package).toEqual({ name: 'test', title: 'Test', version: '0.0.1' });
     });
 
     it('should not allow to add a reusable integration policies to an agent policies belonging to multiple spaces', async () => {
@@ -4899,6 +4944,53 @@ describe('Package policy service', () => {
         id: 'test-package-policy',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
+    });
+
+    it('should apply the logsdb_columnar choice to the installation and not persist it on the policy', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const mockPackagePolicy = createPackagePolicyMock();
+      const attributes = { ...mockPackagePolicy, inputs: [] };
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test-package-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            attributes,
+          },
+        ],
+      });
+      soClient.update.mockResolvedValue({
+        id: 'test-package-policy',
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes,
+      });
+
+      await packagePolicyService.update(soClient, esClient, 'test-package-policy', {
+        ...mockPackagePolicy,
+        inputs: [],
+        package: { ...mockPackagePolicy.package!, logsdb_columnar: false },
+      });
+
+      expect(handleLogsdbColumnarChoice).toHaveBeenCalledWith({
+        soClient,
+        esClient,
+        packagePolicy: expect.objectContaining({
+          package: expect.objectContaining({
+            name: mockPackagePolicy.package!.name,
+            logsdb_columnar: false,
+          }),
+        }),
+      });
+      const savedAttributes = soClient.update.mock.calls[0][2] as any;
+      expect(savedAttributes.package).not.toHaveProperty('logsdb_columnar');
+      expect(savedAttributes.package).toEqual(
+        expect.objectContaining({ name: mockPackagePolicy.package!.name })
+      );
     });
 
     it('should run "packagePolicyPostUpdate" external callbacks', async () => {

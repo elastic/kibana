@@ -302,6 +302,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       });
       newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo, {
         experimental_data_stream_features: pkg.experimental_data_stream_features,
+        logsdb_columnar: pkg.logsdb_columnar,
       });
     } else {
       newPackagePolicy = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(soClient, {
@@ -489,7 +490,10 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       newData = simplifiedPackagePolicytoNewPackagePolicy(
         body as unknown as SimplifiedPackagePolicy,
         pkgInfo,
-        { experimental_data_stream_features: pkg.experimental_data_stream_features }
+        {
+          experimental_data_stream_features: pkg.experimental_data_stream_features,
+          logsdb_columnar: pkg.logsdb_columnar,
+        }
       );
     } else {
       // complete request

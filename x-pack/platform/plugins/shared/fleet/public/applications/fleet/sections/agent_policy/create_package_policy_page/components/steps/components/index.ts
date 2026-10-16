@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+export {
+  COLUMNAR_INDEX_MODE_SWITCH_TEST_SUBJ,
+  ColumnarIndexModeSwitch,
+} from './columnar_index_mode_switch';
 export { PackagePolicyConditionField } from './package_policy_condition_field';
 export { PackagePolicyInputPanel } from './package_policy_input_panel';
 export { PackagePolicyInputVarField } from './package_policy_input_var_field';

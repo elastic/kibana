@@ -304,6 +304,69 @@ describe('EPM index template install', () => {
       });
     });
 
+    describe('logsdb_columnar index mode', () => {
+      const logsDataStream = (elasticsearch: any = {}) =>
+        ({
+          type: 'logs',
+          dataset: 'package.dataset',
+          title: 'test data stream',
+          release: 'experimental',
+          package: 'package',
+          path: 'path',
+          ingest_pipeline: 'default',
+          elasticsearch,
+        } as RegistryDataStream);
+
+      const prepare = (dataStream: RegistryDataStream, indexMode?: string) => {
+        mockedLoadFieldsFromYaml.mockReturnValue([
+          {
+            name: 'event.original',
+            type: 'keyword',
+            doc_values: false,
+            store: true,
+          },
+        ]);
+
+        const { componentTemplates, indexTemplate } = prepareTemplate({
+          packageInstallContext,
+          fieldAssetsMap: new Map(),
+          dataStream,
+          ilmMigrationStatusMap: new Map(),
+          indexMode,
+        });
+
+        const packageTemplate = componentTemplates['logs-package.dataset@package'].template as any;
+        return {
+          settings: indexTemplate.indexTemplate.template.settings,
+          properties: packageTemplate.mappings.properties.event.properties.original,
+        };
+      };
+
+      it('writes the mode and strips doc_values/store when the target mode is columnar', () => {
+        const { settings, properties } = prepare(logsDataStream(), 'logsdb_columnar');
+
+        expect(settings).toEqual({ index: { mode: 'logsdb_columnar' } });
+        expect(properties).toEqual({ type: 'keyword' });
+      });
+
+      it('leaves mappings untouched when no columnar mode is requested', () => {
+        const { settings, properties } = prepare(logsDataStream());
+
+        expect(settings).toEqual({ index: {} });
+        expect(properties).toEqual({ type: 'keyword', doc_values: false, store: true });
+      });
+
+      it('ignores the columnar mode for a time_series data stream', () => {
+        const { settings, properties } = prepare(
+          logsDataStream({ index_mode: 'time_series' }),
+          'logsdb_columnar'
+        );
+
+        expect(settings).toEqual({ index: { mode: 'time_series' } });
+        expect(properties).toEqual({ type: 'keyword', doc_values: false, store: true });
+      });
+    });
+
     it('should default OTel metrics data streams to time_series index mode', () => {
       const otelIntegrationPackageInstallContext = {
         packageInfo: {

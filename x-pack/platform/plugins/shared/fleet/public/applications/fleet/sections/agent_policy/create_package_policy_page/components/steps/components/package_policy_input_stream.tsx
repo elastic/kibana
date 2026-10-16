@@ -23,6 +23,7 @@ import {
   EuiButtonEmpty,
   useIsWithinMinBreakpoint,
   EuiAccordion,
+  EuiIcon,
   EuiIconTip,
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
@@ -45,6 +46,7 @@ import {
   DATA_STREAM_USE_APM_VAR,
   shouldIncludeUseAPMVar,
   hasDynamicSignalTypes,
+  getLogsdbColumnarReadiness,
 } from '../../../../../../../../../common/services';
 
 import type {
@@ -307,6 +309,12 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
           }
         );
 
+    // The integration's columnar toggle doesn't apply to a data stream the package marks
+    // `unsupported`: say so in the stream's own section.
+    const isColumnarUnsupported =
+      packageInfo.type !== 'input' &&
+      getLogsdbColumnarReadiness(packageInfo, packageInputStream.data_stream) === 'unsupported';
+
     // Hide deprecated streams entirely on new installations
     if (!isEditPage && isDeprecatedStream) {
       return null;
@@ -387,6 +395,22 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                         </EuiText>
                       </>
                     ) : null}
+                  </>
+                )}
+                {isColumnarUnsupported && (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiText
+                      size="xs"
+                      color="subdued"
+                      data-test-subj="streamOptions.columnarUnsupported"
+                    >
+                      <EuiIcon type="info" aria-hidden={true} />{' '}
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.streamColumnarUnsupported"
+                        defaultMessage="This data stream doesn't support columnar storage. It stays on LogsDB, even when the integration's columnar index mode is on."
+                      />
+                    </EuiText>
                   </>
                 )}
                 {hasRequiredVarGroupErrors && (

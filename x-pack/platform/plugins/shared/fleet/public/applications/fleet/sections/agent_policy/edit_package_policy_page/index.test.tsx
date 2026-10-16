@@ -392,7 +392,7 @@ describe('edit package policy page', () => {
       expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
     });
 
-    fireEvent.click(renderResult.getByRole('switch'));
+    fireEvent.click(renderResult.getAllByTestId('PackagePolicy.InputStreamConfig.Switch')[0]);
 
     fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
 
@@ -434,7 +434,7 @@ describe('edit package policy page', () => {
     await waitFor(() => {
       expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
     });
-    fireEvent.click(renderResult.getByRole('switch'));
+    fireEvent.click(renderResult.getAllByTestId('PackagePolicy.InputStreamConfig.Switch')[0]);
 
     fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
 
@@ -460,7 +460,7 @@ describe('edit package policy page', () => {
       expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
     });
 
-    fireEvent.click(renderResult.getByRole('switch'));
+    fireEvent.click(renderResult.getAllByTestId('PackagePolicy.InputStreamConfig.Switch')[0]);
 
     fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
 
@@ -608,7 +608,7 @@ describe('edit package policy page', () => {
       expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
     });
 
-    fireEvent.click(renderResult.getByRole('switch'));
+    fireEvent.click(renderResult.getAllByTestId('PackagePolicy.InputStreamConfig.Switch')[0]);
 
     fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
 

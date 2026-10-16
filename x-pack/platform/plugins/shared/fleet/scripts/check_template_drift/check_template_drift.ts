@@ -227,6 +227,10 @@ function computeMappingsForPackage(files: Map<string, Buffer>): Record<string, u
 
     const processed = processFields(rawFields);
     const outputKey = dataset === '__input__' ? '__input__' : dataset;
+    // Known gap: the `logsdb_columnar` index mode strips `doc_values: false` / `store: true`
+    // from the *component templates* (see stripColumnarIncompatibleMappings), which happens
+    // after generateMappings. This script compares generateMappings output only, so a drift in
+    // that post-processing pass is not covered here.
     result[outputKey] = generateMappings(processed, isTSDB);
   }
 

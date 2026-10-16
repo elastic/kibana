@@ -212,6 +212,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
   packageInfo: PackageInfo,
   options?: {
     experimental_data_stream_features?: ExperimentalDataStreamFeature[];
+    logsdb_columnar?: boolean;
     policyTemplate?: string;
   }
 ): NewPackagePolicy {
@@ -260,6 +261,9 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
   if (packagePolicy.package && options?.experimental_data_stream_features) {
     packagePolicy.package.experimental_data_stream_features =
       options.experimental_data_stream_features;
+  }
+  if (packagePolicy.package && options?.logsdb_columnar !== undefined) {
+    packagePolicy.package.logsdb_columnar = options.logsdb_columnar;
   }
 
   // Disable agentless-only inputs for non-agentless policies; the reverse is unnecessary as the agentless API always passes an explicit policy_template.

@@ -189,7 +189,7 @@ describe('StepConfigurePackage', () => {
       ).toBeInTheDocument();
     });
     act(() => {
-      fireEvent.click(renderResult.getByRole('switch'));
+      fireEvent.click(renderResult.getAllByTestId('PackagePolicy.InputStreamConfig.Switch')[0]);
     });
     expect(mockUpdatePackagePolicy.mock.calls[0][0].inputs[0].enabled).toEqual(false);
   });
@@ -417,6 +417,164 @@ describe('StepConfigurePackage', () => {
       expect(
         await renderResult.findByText('Collect logs from Nginx instances')
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('columnar index mode switch', () => {
+    const SWITCH = 'columnarIndexModeSwitch';
+
+    // Package-level readiness plus one logs data stream that opts out of it.
+    const declareReadiness = (readiness: 'opt_in' | 'default' = 'opt_in') => {
+      packageInfo.elasticsearch = { logsdb_columnar: readiness };
+      packageInfo.data_streams = [
+        ...(packageInfo.data_streams ?? []),
+        {
+          ...packageInfo.data_streams![0],
+          dataset: 'nginx.error',
+          title: 'Nginx error logs',
+          path: 'error',
+          streams: packageInfo.data_streams![0].streams!.map((stream) => ({
+            ...stream,
+            title: 'Nginx error logs',
+          })),
+          elasticsearch: { logsdb_columnar: 'unsupported' },
+        },
+      ];
+    };
+
+    it('is shown off and greyed out, with an explanation, when no logs data stream declares readiness', () => {
+      render();
+
+      const switchEl = renderResult.getByTestId(SWITCH);
+      expect(switchEl).not.toBeChecked();
+      expect(switchEl).toBeDisabled();
+      expect(renderResult.getByTestId('columnarIndexModeNotReady')).toBeInTheDocument();
+    });
+
+    it('is hidden when the integration has no logs data stream', () => {
+      packageInfo.data_streams = packageInfo.data_streams!.map((dataStream) => ({
+        ...dataStream,
+        type: 'metrics',
+      }));
+      render();
+
+      expect(renderResult.queryByTestId(SWITCH)).not.toBeInTheDocument();
+    });
+
+    it('is hidden for input packages', () => {
+      declareReadiness();
+      packageInfo.type = 'input';
+      render();
+
+      expect(renderResult.queryByTestId(SWITCH)).not.toBeInTheDocument();
+    });
+
+    it('is shown above the inputs, off by default, with the unsupported data streams listed', async () => {
+      declareReadiness();
+      render();
+
+      const switchEl = renderResult.getByTestId(SWITCH);
+      expect(switchEl).not.toBeChecked();
+      expect(switchEl).not.toBeDisabled();
+      expect(renderResult.getByTestId('columnarIndexModeUnsupportedDataStreams')).toHaveTextContent(
+        'Nginx error logs'
+      );
+
+      await renderResult.findByText('Collect logs from Nginx instances');
+      const html = renderResult.container.innerHTML;
+      expect(html.indexOf(SWITCH)).toBeLessThan(html.indexOf('Collect logs from Nginx instances'));
+    });
+
+    it('notes in its own section that an unsupported data stream stays on LogsDB', async () => {
+      declareReadiness();
+      packagePolicy.inputs[0].streams.push({
+        ...packagePolicy.inputs[0].streams[0],
+        data_stream: { type: 'logs', dataset: 'nginx.error' },
+      });
+      render();
+
+      await waitFor(() => {
+        expect(renderResult.getByText('Change defaults')).toBeInTheDocument();
+      });
+      fireEvent.click(renderResult.getByText('Change defaults'));
+
+      await waitFor(() => {
+        expect(
+          renderResult.getByTestId('streamOptions.inputStreams.nginx.error')
+        ).toBeInTheDocument();
+      });
+      const unsupported = renderResult.getByTestId('streamOptions.inputStreams.nginx.error');
+      const ready = renderResult.getByTestId('streamOptions.inputStreams.nginx.access');
+      expect(
+        unsupported.querySelector('[data-test-subj="streamOptions.columnarUnsupported"]')
+      ).not.toBeNull();
+      expect(
+        ready.querySelector('[data-test-subj="streamOptions.columnarUnsupported"]')
+      ).toBeNull();
+    });
+
+    it('starts enabled when the package defaults to the columnar mode', () => {
+      declareReadiness('default');
+      render();
+
+      expect(renderResult.getByTestId(SWITCH)).toBeChecked();
+    });
+
+    it('starts from the choice stored on the installation over the package default', () => {
+      declareReadiness('default');
+      (packageInfo as any).installationInfo = { logsdb_columnar_enabled: false };
+      render();
+
+      expect(renderResult.getByTestId(SWITCH)).not.toBeChecked();
+    });
+
+    it('starts from the mode the installation uses when the user has not chosen', () => {
+      // An `opt_in` -> `default` upgrade leaves the existing data streams on LogsDB.
+      declareReadiness('default');
+      (packageInfo as any).installationInfo = { logsdb_columnar_active: false };
+      render();
+
+      expect(renderResult.getByTestId(SWITCH)).not.toBeChecked();
+    });
+
+    it('tells the user when the integration no longer supports the mode they opted in to', () => {
+      packageInfo.data_streams = [
+        ...(packageInfo.data_streams ?? []).map((dataStream) => ({
+          ...dataStream,
+          elasticsearch: { logsdb_columnar: 'unsupported' as const },
+        })),
+      ];
+      (packageInfo as any).installationInfo = { logsdb_columnar_enabled: true };
+      render();
+
+      const switchEl = renderResult.getByTestId(SWITCH);
+      expect(switchEl).not.toBeChecked();
+      expect(switchEl).toBeDisabled();
+      expect(renderResult.getByTestId('columnarIndexModeWithdrawn')).toBeInTheDocument();
+    });
+
+    it('reflects the pending choice carried by the policy', () => {
+      declareReadiness();
+      packagePolicy.package = {
+        name: 'nginx',
+        title: 'Nginx',
+        version: '1.3.0',
+        logsdb_columnar: true,
+      };
+      render();
+
+      expect(renderResult.getByTestId(SWITCH)).toBeChecked();
+    });
+
+    it('sets package.logsdb_columnar on the policy when toggled', () => {
+      declareReadiness();
+      render();
+
+      fireEvent.click(renderResult.getByTestId(SWITCH));
+
+      expect(mockUpdatePackagePolicy).toHaveBeenCalledWith({
+        package: { name: 'nginx', title: 'Nginx', version: '1.3.0', logsdb_columnar: true },
+      });
     });
   });
 });
