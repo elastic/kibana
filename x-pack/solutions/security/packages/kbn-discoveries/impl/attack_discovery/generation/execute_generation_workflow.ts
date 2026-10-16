@@ -14,7 +14,6 @@ import type {
 } from '@kbn/core/server';
 import dateMath from '@kbn/datemath';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import moment from 'moment';
 import { uniq } from 'lodash/fp';
 import { ERROR_CATEGORIES, type ErrorCategory } from '@kbn/discoveries-schemas';

@@ -6,7 +6,6 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { PluginStart } from '@kbn/core-di';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
@@ -29,7 +28,6 @@ import {
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 import { ALERTING_LOG_CODES, type AlertingV2LogCode } from '../errors/error_codes';
-import type { AlertingServerStartDependencies } from '../../types';
 import type { ResolvedSearchIds } from './build_execution_history_item';
 import {
   collectIdsFromEvents,
