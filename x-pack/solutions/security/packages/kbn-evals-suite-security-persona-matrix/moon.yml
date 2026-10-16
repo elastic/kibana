@@ -38,6 +38,7 @@ fileGroups:
   src:
     - '**/*.ts'
     - persona_matrix.config.json
+    - persona_matrix.production.config.json
     - '!target/**/*'
   jest-config:
     - jest.config.js
