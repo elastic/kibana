@@ -10,7 +10,7 @@
 import { once } from 'lodash';
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { logRequest, writeErrorHandler } from '@kbn/as-code-utils';
+import { logRequest, writeErrorHandler, validateAsCodeRequest } from '@kbn/as-code-utils';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -53,23 +53,24 @@ export function registerCreateRoute(
         oasOperationObject: async () =>
           (await import('../oas_examples')).createDashboardOASOperationObject,
       },
-      validate: () => ({
-        request: {
-          body: getDashboardStateSchema(isDashboardAppRequest),
-        },
-        response: {
-          201: {
-            body: () => getCreateResponseBodySchema(isDashboardAppRequest),
-            description: 'created',
+      validate: () =>
+        validateAsCodeRequest({
+          request: {
+            body: getDashboardStateSchema(isDashboardAppRequest),
           },
-          400: {
-            description: 'invalid request',
+          response: {
+            201: {
+              body: () => getCreateResponseBodySchema(isDashboardAppRequest),
+              description: 'created',
+            },
+            400: {
+              description: 'invalid request',
+            },
+            403: {
+              description: 'forbidden',
+            },
           },
-          403: {
-            description: 'forbidden',
-          },
-        },
-      }),
+        }),
     },
     async (ctx, req, res) =>
       telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {

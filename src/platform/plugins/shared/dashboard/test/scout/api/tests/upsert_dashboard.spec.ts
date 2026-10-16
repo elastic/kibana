@@ -178,7 +178,7 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body.message).toContain('"title"');
+      expect(response.body.message).toContain('→ at title');
     }
   );
 

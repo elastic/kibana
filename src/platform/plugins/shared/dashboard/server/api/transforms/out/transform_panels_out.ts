@@ -13,7 +13,7 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import { ZodError } from '@kbn/zod';
-import { stringifyZodError } from '@kbn/zod-helpers/v4';
+import { formatValidationError } from '@kbn/as-code-utils';
 import type {
   DashboardPanel,
   DashboardSection,
@@ -69,7 +69,7 @@ export function transformPanelsOut(
     } catch (err) {
       let message = err.message;
       if (err instanceof ZodError) {
-        message = stringifyZodError(err);
+        message = formatValidationError(err.issues);
       }
       warnings.push({
         type: 'dropped_panel',
