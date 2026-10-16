@@ -11,6 +11,8 @@ import { z, lazySchema } from '@kbn/zod';
 
 const rangeValueSchema = lazySchema(() => z.union([z.string(), z.number()]));
 
+const primitiveValueSchema = lazySchema(() => z.union([z.string(), z.number(), z.boolean()]));
+
 const rangeKeySchema = lazySchema(() =>
   z
     .object({
@@ -44,7 +46,15 @@ const multiFieldKeySchema = lazySchema(() =>
 );
 
 export const serializedValueSchema = lazySchema(() =>
-  z.union([z.string(), z.number(), rangeKeySchema, multiFieldKeySchema])
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.null(),
+    z.array(primitiveValueSchema).max(100),
+    rangeKeySchema,
+    multiFieldKeySchema,
+  ])
 );
 
 export type SerializableValueType = z.output<typeof serializedValueSchema>;
