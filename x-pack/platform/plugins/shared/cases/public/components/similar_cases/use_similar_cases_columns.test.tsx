@@ -13,16 +13,21 @@ import { FieldType } from '../../../common/types/domain/template/fields';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import type { CasesConfigurationUICustomField, SimilarCaseUI } from '../../../common/ui/types';
 import { TestProviders, renderWithTestingProviders } from '../../common/mock';
-import { mockCase, mockSimilarObservables } from '../../containers/mock';
+import { mockCase, mockSimilarObservables, connectorsMock } from '../../containers/mock';
 import { useCasesColumnsConfiguration } from '../all_cases/hooks/use_cases_columns_configuration';
 import { useCasesConfig } from '../../common/lib/kibana';
 import { getExtendedFieldColumnKey } from '../all_cases/components/extended_field_columns';
 import { useGlobalInlineFields } from '../all_cases/hooks/use_global_inline_fields';
+import { ExternalServiceColumn } from '../all_cases/hooks/use_cases_columns';
+import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import type { UseSimilarCasesColumnsReturnValue } from './use_similar_cases_columns';
 import { useSimilarCasesColumns } from './use_similar_cases_columns';
 
 jest.mock('../all_cases/hooks/use_cases_columns_configuration');
 jest.mock('../all_cases/hooks/use_global_inline_fields');
+jest.mock('../all_cases/hooks/use_cases_columns', () => ({
+  ExternalServiceColumn: jest.fn(() => null),
+}));
 jest.mock('../../common/lib/kibana', () => ({
   ...jest.requireActual('../../common/lib/kibana'),
   useCasesConfig: jest.fn(),
@@ -77,26 +82,14 @@ describe('useSimilarCasesColumns', () => {
     jest.clearAllMocks();
   });
 
-  describe('default fallback (catalog order)', () => {
-    const defaultFields = ['title', 'tags', 'category', 'createdAt', 'status', 'severity'];
-
-    it('uses the default column set when selectedColumns is undefined', () => {
-      const { result } = renderHook(() => useSimilarCasesColumns(), { wrapper });
-
-      expect(getFields(result.current.columns)).toEqual([...defaultFields, 'similarities']);
-    });
-
-    it('uses the default column set when selectedColumns is an empty array', () => {
-      const { result } = renderHook(() => useSimilarCasesColumns({ selectedColumns: [] }), {
-        wrapper,
-      });
-
-      expect(getFields(result.current.columns)).toEqual([...defaultFields, 'similarities']);
-    });
-  });
-
   it('returns the title field as the row header', () => {
-    const { result } = renderHook(() => useSimilarCasesColumns(), { wrapper });
+    const { result } = renderHook(
+      () =>
+        useSimilarCasesColumns({
+          selectedColumns: [{ field: 'title', name: 'Name', isChecked: true }],
+        }),
+      { wrapper }
+    );
 
     expect(result.current.rowHeader).toBe('title');
   });
@@ -330,22 +323,33 @@ describe('useSimilarCasesColumns', () => {
       expect(getFields(result.current.columns)).toEqual(['title', 'similarities']);
     });
 
-    it('renders stored user names as text for a user-picker field', () => {
+    it('renders a user-picker field as avatars of the fetched profiles', () => {
+      const [profile] = userProfiles;
       enableTemplates([userField]);
-      const { result } = renderColumns([{ field: userKey, name: 'Owner', isChecked: true }]);
+      const { result } = renderHook(
+        () =>
+          useSimilarCasesColumns({
+            selectedColumns: [{ field: userKey, name: 'Owner', isChecked: true }],
+            userProfiles: userProfilesMap,
+          }),
+        { wrapper }
+      );
       const column = result.current.columns[0] as unknown as ColumnWithRender;
 
       renderWithTestingProviders(
         <>
           {column.render({
             ...similarCase,
-            extendedFields: { ownerAsKeyword: JSON.stringify([{ uid: 'u1', name: 'Jane' }]) },
+            extendedFields: {
+              ownerAsKeyword: JSON.stringify([{ uid: profile.uid, name: 'Jane' }]),
+            },
           })}
         </>
       );
 
-      expect(screen.getByText('Jane')).toBeInTheDocument();
-      expect(screen.queryByTestId('case-user-profile-avatar-unknown-user')).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId(`case-table-column-extendedField-${userKey}-${profile.user.username}`)
+      ).toBeInTheDocument();
     });
 
     it('skips a checked key that is not a global field', () => {
@@ -356,6 +360,34 @@ describe('useSimilarCasesColumns', () => {
       ]);
 
       expect(getFields(result.current.columns)).toEqual(['title', 'similarities']);
+    });
+  });
+
+  describe('external incident column', () => {
+    const externalIncidentSelection = [
+      { field: 'externalIncident', name: 'External Incident', isChecked: true },
+    ];
+    const similarCase: SimilarCaseUI = {
+      ...mockCase,
+      similarities: { observables: mockSimilarObservables },
+    };
+
+    it('passes the given connectors to the external incident cell', () => {
+      const connectors = connectorsMock;
+      const { result } = renderHook(
+        () => useSimilarCasesColumns({ selectedColumns: externalIncidentSelection, connectors }),
+        { wrapper }
+      );
+      const column = result.current.columns[0] as unknown as {
+        render: (item: SimilarCaseUI) => React.ReactNode;
+      };
+
+      renderWithTestingProviders(<>{column.render(similarCase)}</>);
+
+      expect(ExternalServiceColumn).toHaveBeenCalledWith(
+        expect.objectContaining({ theCase: similarCase, connectors }),
+        expect.anything()
+      );
     });
   });
 });

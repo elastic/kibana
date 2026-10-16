@@ -33,20 +33,19 @@ const caseData: CaseUI = {
   comments: [...basicCase.comments, alertCommentWithIndices],
 };
 
-const defaultSelectedColumns = [
-  { field: 'title', name: 'Name', isChecked: true },
-  { field: 'createdAt', name: 'Created on', isChecked: true },
-];
+const pickerColumns = [{ field: 'createdAt', name: 'Created on', isChecked: true }];
+const tableColumns = [{ field: 'title', name: 'Name', isChecked: true }, ...pickerColumns];
 
-const setSelectedColumns = jest.fn();
+const setPickerColumns = jest.fn();
 
 // Failing: See https://github.com/elastic/kibana/issues/207056
 describe('Case View Page similar cases tab', () => {
   beforeEach(() => {
     useGetCaseConfigurationMock.mockReturnValue(useCaseConfigureResponse);
     useSimilarCasesColumnsSelectionMock.mockReturnValue({
-      selectedColumns: defaultSelectedColumns,
-      setSelectedColumns,
+      pickerColumns,
+      tableColumns,
+      setPickerColumns,
     });
     jest.clearAllMocks();
   });
@@ -78,29 +77,19 @@ describe('Case View Page similar cases tab', () => {
     expect(screen.queryByTestId('column-selection-switch-title')).not.toBeInTheDocument();
   });
 
-  it('keeps the name column checked and first when columns change', async () => {
+  it('passes the new picker selection to the selection hook when columns change', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
     renderWithTestingProviders(<CaseViewSimilarCases caseData={caseData} />);
 
-    await userEvent.click(await screen.findByTestId('column-selection-popover-button'));
-    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    await user.click(await screen.findByTestId('column-selection-popover-button'));
     await user.click(await screen.findByTestId('column-selection-popover-hide-all-button'));
 
-    await waitFor(() => expect(setSelectedColumns).toHaveBeenCalled());
-    const [newColumns] = setSelectedColumns.mock.calls[0];
-    expect(newColumns[0]).toEqual(expect.objectContaining({ field: 'title', isChecked: true }));
-    expect(newColumns.slice(1).every(({ isChecked }: { isChecked: boolean }) => !isChecked)).toBe(
-      true
-    );
+    await waitFor(() => expect(setPickerColumns).toHaveBeenCalled());
+    const [newColumns] = setPickerColumns.mock.calls[0];
+    expect(newColumns.every(({ isChecked }: { isChecked: boolean }) => !isChecked)).toBe(true);
   });
 
-  it('shows the name column even when the stored selection hides it', async () => {
-    useSimilarCasesColumnsSelectionMock.mockReturnValue({
-      selectedColumns: defaultSelectedColumns.map((column) =>
-        column.field === 'title' ? { ...column, isChecked: false } : column
-      ),
-      setSelectedColumns,
-    });
-
+  it('shows the name column from the table columns', async () => {
     renderWithTestingProviders(<CaseViewSimilarCases caseData={caseData} />);
 
     expect(await screen.findByTestId('similar-cases-table')).toBeInTheDocument();

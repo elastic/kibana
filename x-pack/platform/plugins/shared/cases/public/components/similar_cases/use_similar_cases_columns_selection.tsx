@@ -30,8 +30,11 @@ const isColumnSelection = (value: unknown): value is CasesColumnSelection =>
   typeof (value as CasesColumnSelection).isChecked === 'boolean';
 
 export interface UseSimilarCasesColumnsSelectionReturnValue {
-  selectedColumns: CasesColumnSelection[];
-  setSelectedColumns: (columns: CasesColumnSelection[]) => void;
+  /** The columns the user can toggle in the column picker. The name column is not listed. */
+  pickerColumns: CasesColumnSelection[];
+  /** The columns to render: the pinned name column first, then the picker columns. */
+  tableColumns: CasesColumnSelection[];
+  setPickerColumns: (columns: CasesColumnSelection[]) => void;
 }
 
 export const useSimilarCasesColumnsSelection = (): UseSimilarCasesColumnsSelectionReturnValue => {
@@ -56,7 +59,17 @@ export const useSimilarCasesColumnsSelection = (): UseSimilarCasesColumnsSelecti
     [casesColumnsConfig]
   );
 
-  const selectedColumns = useMemo(
+  // The name column is always visible and first, so it is pinned here and not offered in the picker.
+  const nameColumn: CasesColumnSelection = useMemo(
+    () => ({
+      field: casesColumnsConfig.title.field,
+      name: casesColumnsConfig.title.name,
+      isChecked: true,
+    }),
+    [casesColumnsConfig]
+  );
+
+  const pickerColumns = useMemo(
     () =>
       mergeSelectedColumnsWithConfiguration({
         // Stored JSON can have any shape; ignore anything that is not a valid selection list.
@@ -64,16 +77,18 @@ export const useSimilarCasesColumnsSelection = (): UseSimilarCasesColumnsSelecti
           ? storedTableColumns.filter(isColumnSelection)
           : [],
         casesColumnsConfig: similarCasesColumnsConfig,
-      }),
-    [storedTableColumns, similarCasesColumnsConfig]
+      }).filter(({ field }) => field !== nameColumn.field),
+    [storedTableColumns, similarCasesColumnsConfig, nameColumn]
   );
 
-  const setSelectedColumns = useCallback(
+  const tableColumns = useMemo(() => [nameColumn, ...pickerColumns], [nameColumn, pickerColumns]);
+
+  const setPickerColumns = useCallback(
     (newColumns: CasesColumnSelection[]) => {
-      setStoredTableColumns(newColumns);
+      setStoredTableColumns([nameColumn, ...newColumns]);
     },
-    [setStoredTableColumns]
+    [nameColumn, setStoredTableColumns]
   );
 
-  return { selectedColumns, setSelectedColumns };
+  return { pickerColumns, tableColumns, setPickerColumns };
 };

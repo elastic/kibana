@@ -14,12 +14,27 @@ import { useGetCaseConfiguration } from '../../containers/configure/use_get_case
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import { useGlobalInlineFields } from '../all_cases/hooks/use_global_inline_fields';
+import { getExtendedFieldColumnKey } from '../all_cases/components/extended_field_columns';
+import { useCasesConfig } from '../../common/lib/kibana';
+import { FieldType } from '../../../common/types/domain/template/fields';
+import type { InlineField } from '../../../common/types/domain/template/fields';
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
+jest.mock('../../containers/configure/use_get_supported_action_connectors');
+jest.mock('../all_cases/hooks/use_global_inline_fields');
+jest.mock('../../common/lib/kibana', () => ({
+  ...jest.requireActual('../../common/lib/kibana'),
+  useCasesConfig: jest.fn(),
+}));
 
 const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
+const useGetSupportedActionConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
+const useGlobalInlineFieldsMock = useGlobalInlineFields as jest.Mock;
+const useCasesConfigMock = useCasesConfig as jest.Mock;
 
 const defaultSelectedColumns = [
   { field: 'title', name: 'Name', isChecked: true },
@@ -48,6 +63,13 @@ describe('SimilarCasesTable', () => {
   beforeEach(() => {
     useGetCaseConfigurationMock.mockReturnValue(useCaseConfigureResponse);
     useBulkGetUserProfilesMock.mockReturnValue({ data: new Map() });
+    useGetSupportedActionConnectorsMock.mockReturnValue({ data: [] });
+    useCasesConfigMock.mockReturnValue({ templatesEnabled: false });
+    useGlobalInlineFieldsMock.mockReturnValue({
+      globalInlineFields: [],
+      isLoading: false,
+      isLoaded: true,
+    });
     jest.clearAllMocks();
   });
 
@@ -148,6 +170,94 @@ describe('SimilarCasesTable', () => {
       renderWithTestingProviders(<SimilarCasesTable {...props} cases={casesWithAssignees} />);
 
       expect(screen.queryByTestId('case-table-column-assignee')).not.toBeInTheDocument();
+    });
+
+    it('does not request profiles when no avatar column is selected', () => {
+      renderWithTestingProviders(<SimilarCasesTable {...props} cases={casesWithAssignees} />);
+
+      expect(useBulkGetUserProfilesMock).toHaveBeenLastCalledWith({ uids: [] });
+    });
+  });
+
+  describe('user-picker fields', () => {
+    const [firstProfile, secondProfile] = userProfiles;
+    const userField = {
+      name: 'owner',
+      type: 'keyword',
+      label: 'Owner',
+      control: FieldType.USER_PICKER,
+    } as InlineField;
+    const userKey = getExtendedFieldColumnKey(userField);
+    const casesWithUserPicker = [
+      {
+        ...props.cases[0],
+        extendedFields: {
+          ownerAsKeyword: JSON.stringify([{ uid: secondProfile.uid, name: 'Second' }]),
+        },
+      },
+    ];
+
+    beforeEach(() => {
+      useCasesConfigMock.mockReturnValue({ templatesEnabled: true });
+      useGlobalInlineFieldsMock.mockReturnValue({
+        globalInlineFields: [userField],
+        isLoading: false,
+        isLoaded: true,
+      });
+    });
+
+    it('requests the profiles of a selected user-picker field with the assignees', () => {
+      renderWithTestingProviders(
+        <SimilarCasesTable
+          {...props}
+          cases={[{ ...casesWithUserPicker[0], assignees: [{ uid: firstProfile.uid }] }]}
+          selectedColumns={[
+            ...defaultSelectedColumns,
+            { field: 'assignees', name: 'Assignees', isChecked: true },
+            { field: userKey, name: 'Owner', isChecked: true },
+          ]}
+        />
+      );
+
+      expect(useBulkGetUserProfilesMock).toHaveBeenLastCalledWith({
+        uids: [firstProfile.uid, secondProfile.uid],
+      });
+    });
+
+    it('does not request the profiles of a user-picker field that is not selected', () => {
+      renderWithTestingProviders(
+        <SimilarCasesTable
+          {...props}
+          cases={casesWithUserPicker}
+          selectedColumns={[
+            ...defaultSelectedColumns,
+            { field: userKey, name: 'Owner', isChecked: false },
+          ]}
+        />
+      );
+
+      expect(useBulkGetUserProfilesMock).toHaveBeenLastCalledWith({ uids: [] });
+    });
+
+    it('renders a selected user-picker field with the fetched profile', async () => {
+      useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
+
+      renderWithTestingProviders(
+        <SimilarCasesTable
+          {...props}
+          cases={casesWithUserPicker}
+          selectedColumns={[
+            ...defaultSelectedColumns,
+            { field: userKey, name: 'Owner', isChecked: true },
+          ]}
+        />
+      );
+
+      expect(
+        await screen.findByTestId(
+          `case-table-column-extendedField-${userKey}-${secondProfile.user.username}`
+        )
+      ).toBeInTheDocument();
     });
   });
 

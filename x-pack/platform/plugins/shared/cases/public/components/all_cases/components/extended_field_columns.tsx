@@ -85,7 +85,7 @@ export const parseUserPickerAssignees = (raw: string): Array<{ uid: string }> | 
  * matching the existing `assignees` pattern — instead of fetching per row.
  */
 export const getUserPickerUidsFromCase = (
-  theCase: CaseUI,
+  theCase: ExtendedFieldRow,
   userPickerFields: readonly InlineField[]
 ): string[] => {
   const uids: string[] = [];

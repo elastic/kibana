@@ -16,7 +16,6 @@ import { EuiBadgeGroup, EuiBadge, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/e
 import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
-import { FieldType } from '../../../common/types/domain/template/fields';
 import type { ActionConnector } from '../../../common/types/domain';
 
 import type {
@@ -34,13 +33,8 @@ import { ExternalServiceColumn } from '../all_cases/hooks/use_cases_columns';
 import { tableColumnPresetDateRelative } from '../../utils/table_column_presets';
 import { useCasesColumnsConfiguration } from '../all_cases/hooks/use_cases_columns_configuration';
 import { useGlobalInlineFields } from '../all_cases/hooks/use_global_inline_fields';
-import {
-  getExtendedFieldCellValue,
-  getExtendedFieldColumnKey,
-} from '../all_cases/components/extended_field_columns';
 import { getFieldColumns } from '../all_cases/utils/get_field_columns';
 import { useCasesConfig } from '../../common/lib/kibana';
-import { SIMILAR_CASES_CHECKED_DEFAULTS } from './use_similar_cases_columns_selection';
 import * as i18n from './translations';
 
 type SimilarCasesColumns =
@@ -63,7 +57,10 @@ const SIMILARITIES_FIELD = 'similarities' as const;
 // Stable empty map: used when the caller passes no user profiles.
 const EMPTY_PROFILES: Map<string, UserProfileWithAvatar> = new Map();
 
-// Stable empty list: connectors are not fetched for the Similar Cases table.
+// Stable empty list: used when the caller passes no custom fields.
+const NO_CUSTOM_FIELDS: CasesConfigurationUICustomField[] = [];
+
+// Stable empty list: used when the caller passes no connectors.
 const NO_CONNECTORS: ActionConnector[] = [];
 
 export interface UseSimilarCasesColumnsReturnValue {
@@ -73,13 +70,15 @@ export interface UseSimilarCasesColumnsReturnValue {
 
 export const useSimilarCasesColumns = ({
   selectedColumns,
-  customFields = [],
+  customFields = NO_CUSTOM_FIELDS,
   userProfiles = EMPTY_PROFILES,
+  connectors = NO_CONNECTORS,
 }: {
-  selectedColumns?: CasesColumnSelection[];
+  selectedColumns: CasesColumnSelection[];
   customFields?: CasesConfigurationUICustomField[];
   userProfiles?: Map<string, UserProfileWithAvatar>;
-} = {}): UseSimilarCasesColumnsReturnValue => {
+  connectors?: ActionConnector[];
+}): UseSimilarCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(false);
   const { templatesEnabled } = useCasesConfig();
   const { globalInlineFields } = useGlobalInlineFields({ enabled: templatesEnabled });
@@ -243,9 +242,7 @@ export const useSimilarCasesColumns = ({
         name: casesColumnsConfig.externalIncident.name,
         render: (theCase: SimilarCaseUI) => {
           if (theCase.id != null) {
-            // Connectors are not fetched for this table, so every pushed case shows the
-            // fallback connector icon. This is intentional.
-            return <ExternalServiceColumn theCase={theCase} connectors={NO_CONNECTORS} />;
+            return <ExternalServiceColumn theCase={theCase} connectors={connectors} />;
           }
           return getEmptyCellValue();
         },
@@ -280,35 +277,21 @@ export const useSimilarCasesColumns = ({
         minWidth: '6em',
       },
     }),
-    [casesColumnsConfig, userProfiles]
+    [casesColumnsConfig, connectors, userProfiles]
   );
 
-  const allColumnsDict = useMemo(() => {
-    const dict: Record<string, SimilarCasesColumns> = {
+  const allColumnsDict = useMemo(
+    (): Record<string, SimilarCasesColumns> => ({
       ...columnsDict,
       ...getFieldColumns<SimilarCaseUI>({
         templatesEnabled,
         globalInlineFields,
         customFields,
-        userProfiles: EMPTY_PROFILES,
+        userProfiles,
       }),
-    };
-
-    if (templatesEnabled) {
-      // User profiles are not fetched for these fields, so an avatar cell would show only
-      // anonymous avatars. Render the stored user names as text instead.
-      globalInlineFields
-        .filter(({ control }) => control === FieldType.USER_PICKER)
-        .forEach((field) => {
-          dict[getExtendedFieldColumnKey(field)] = {
-            ...dict[getExtendedFieldColumnKey(field)],
-            render: (theCase: SimilarCaseUI) => getExtendedFieldCellValue(field, theCase),
-          };
-        });
-    }
-
-    return dict;
-  }, [columnsDict, customFields, templatesEnabled, globalInlineFields]);
+    }),
+    [columnsDict, customFields, templatesEnabled, globalInlineFields, userProfiles]
+  );
 
   const similarityReasonColumn: SimilarCasesColumns = useMemo(
     () => ({
@@ -373,26 +356,16 @@ export const useSimilarCasesColumns = ({
     []
   );
 
-  // When no selection is provided, fall back to the default visible field set.
-  const effectiveSelection = useMemo((): CasesColumnSelection[] => {
-    if (selectedColumns && selectedColumns.length > 0) {
-      return selectedColumns;
-    }
-    return Object.values(casesColumnsConfig)
-      .filter(({ field }) => SIMILAR_CASES_CHECKED_DEFAULTS.has(field))
-      .map(({ field, name }) => ({ field, name, isChecked: true }));
-  }, [selectedColumns, casesColumnsConfig]);
-
   const columns: SimilarCasesColumns[] = useMemo(() => {
     const result: SimilarCasesColumns[] = [];
-    effectiveSelection.forEach(({ field, isChecked }) => {
+    selectedColumns.forEach(({ field, isChecked }) => {
       if (isChecked && field in allColumnsDict) {
         result.push(allColumnsDict[field]);
       }
     });
     result.push(similarityReasonColumn);
     return result;
-  }, [effectiveSelection, allColumnsDict, similarityReasonColumn]);
+  }, [selectedColumns, allColumnsDict, similarityReasonColumn]);
 
   return { columns, rowHeader: casesColumnsConfig.title.field };
 };

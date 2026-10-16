@@ -11,10 +11,18 @@ import { css } from '@emotion/react';
 import type { EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiSkeletonText, EuiBasicTable, useEuiTheme } from '@elastic/eui';
 
+import { FieldType } from '../../../common/types/domain/template/fields';
 import type { SimilarCaseUI } from '../../../common/ui/types';
 import type { CasesColumnSelection } from '../all_cases/types';
+import { useCasesConfig } from '../../common/lib/kibana';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import {
+  getExtendedFieldColumnKey,
+  getUserPickerUidsFromCase,
+} from '../all_cases/components/extended_field_columns';
+import { useGlobalInlineFields } from '../all_cases/hooks/use_global_inline_fields';
 
 import * as i18n from './translations';
 import { useSimilarCasesColumns } from './use_similar_cases_columns';
@@ -40,16 +48,44 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
     data: { customFields },
   } = useGetCaseConfiguration();
 
-  const assigneeUids = useMemo(
-    () => Array.from(new Set(cases.flatMap(({ assignees }) => assignees.map(({ uid }) => uid)))),
-    [cases]
+  const { templatesEnabled } = useCasesConfig();
+  const { globalInlineFields } = useGlobalInlineFields({ enabled: templatesEnabled });
+  const { data: connectors } = useGetSupportedActionConnectors();
+
+  // Only the checked columns show avatars, so only they need profiles.
+  const checkedFields = useMemo(
+    () => new Set(selectedColumns.filter(({ isChecked }) => isChecked).map(({ field }) => field)),
+    [selectedColumns]
   );
-  const { data: userProfiles } = useBulkGetUserProfiles({ uids: assigneeUids });
+  const userPickerFields = useMemo(
+    () =>
+      globalInlineFields.filter(
+        (field) =>
+          field.control === FieldType.USER_PICKER &&
+          checkedFields.has(getExtendedFieldColumnKey(field))
+      ),
+    [globalInlineFields, checkedFields]
+  );
+
+  const profileUids = useMemo(() => {
+    const uids = new Set<string>();
+
+    cases.forEach((theCase) => {
+      if (checkedFields.has('assignees')) {
+        theCase.assignees.forEach(({ uid }) => uids.add(uid));
+      }
+      getUserPickerUidsFromCase(theCase, userPickerFields).forEach((uid) => uids.add(uid));
+    });
+
+    return Array.from(uids);
+  }, [cases, checkedFields, userPickerFields]);
+  const { data: userProfiles } = useBulkGetUserProfiles({ uids: profileUids });
 
   const { columns } = useSimilarCasesColumns({
     selectedColumns,
     customFields,
     userProfiles,
+    connectors,
   });
 
   const tableRowProps = useCallback(
