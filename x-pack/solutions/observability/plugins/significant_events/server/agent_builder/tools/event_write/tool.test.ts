@@ -179,13 +179,20 @@ describe('events_write tool', () => {
       ['inconclusive evidence', [signalWith('inconclusive')]],
       ['refuting evidence', [signalWith('refutes')]],
       ['a quiet not_checked rule', [quiet]],
-      ['no signals at all', []],
-    ])('rejects a new event backed only by %s', (_label, signals) => {
-      const result = eventsWriteSchema.safeParse({ items: [{ ...newEventInput, signals }] });
+    ])('accepts a new event backed only by %s: discovery decides', (_label, signals) => {
+      expect(eventsWriteSchema.safeParse({ items: [{ ...newEventInput, signals }] }).success).toBe(
+        true
+      );
+    });
+
+    it('rejects a new event with no signals at all', () => {
+      const result = eventsWriteSchema.safeParse({
+        items: [{ ...newEventInput, signals: [] }],
+      });
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues.at(-1)?.message).toContain('at least one confirms signal');
+        expect(result.error.issues.at(-1)?.message).toContain('at least one signal');
       }
     });
 

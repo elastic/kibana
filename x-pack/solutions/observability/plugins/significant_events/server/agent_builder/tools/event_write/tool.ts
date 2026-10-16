@@ -24,7 +24,6 @@ import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
-import { isBreachMemberSignal } from '../../../lib/significant_events/events/event_members';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
   getBulkWriteToolErrorCode,
@@ -91,7 +90,6 @@ export const eventsWriteItemSchema = lazySchema(() =>
     .superRefine((item, ctx) => {
       const signals = item.signals ?? [];
       const hasConfirms = signals.some((s) => s.evidence != null && s.verdict === 'confirms');
-      const hasBreachMember = signals.some(isBreachMemberSignal);
 
       // One issue per offending signal, so a retry knows exactly which entries to remove.
       if (hasConfirms) {
@@ -116,14 +114,13 @@ export const eventsWriteItemSchema = lazySchema(() =>
           });
         }
       }
-      // Only a confirmed breach opens an event. A continuation (it names an event_id) may carry any
-      // verdict: a rule turning healthy (`refutes`) is evidence the status is derived from, so it
-      // must be written, never dropped.
-      if (item.event_id === undefined && !hasBreachMember) {
+      // Discovery decides which detections open an event, whatever their verdict: a healthy or
+      // unjudged one opens it recovering or active, and the lifecycle derives that status from the
+      // verdicts. An event with no signal says nothing, so it is the only thing refused.
+      if (item.event_id === undefined && signals.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message:
-            'A new event must carry at least one confirms signal, or an off_topic signal with an observed error. Events open on a confirmed breach: do not create an event for refutes, inconclusive, or not_checked detections alone. To record that a rule of an existing event is healthy, continue that event with its event_id and the refutes signal.',
+          message: 'A new event must carry at least one signal.',
         });
       }
       if (item.event_id !== undefined && signals.length === 0) {

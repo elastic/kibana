@@ -86,7 +86,7 @@ describe('statusCorrectnessEvaluator', () => {
     expect(result.score).toBe(1);
   });
 
-  it('fails an event written for an expected inactive event', async () => {
+  it('accepts an event written for an expected inactive event: discovery judges it', async () => {
     const result = await evaluate({
       inputRules: ['r1', 'benign'],
       expectedEvents: [
@@ -96,8 +96,21 @@ describe('statusCorrectnessEvaluator', () => {
       writtenEvents: [{ rules: ['r1'] }, { rules: ['benign'] }],
     });
 
-    expect(result.score).toBe(0.5);
-    expect(result.explanation).toContain('benign');
+    expect(result.score).toBe(1);
+  });
+
+  it('still fails an event written for a detection no expected event covers, inactive or not', async () => {
+    const result = await evaluate({
+      inputRules: ['r1', 'benign', 'stray'],
+      expectedEvents: [
+        { rules: ['r1'], status: 'active' },
+        { rules: ['benign'], status: 'inactive' },
+      ],
+      writtenEvents: [{ rules: ['r1'] }, { rules: ['stray'] }],
+    });
+
+    expect(result.score).toBeLessThan(1);
+    expect(result.explanation).toContain('stray');
   });
 
   it('scores 0 when nothing is written for an expected event', async () => {

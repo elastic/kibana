@@ -58,7 +58,7 @@ export interface LifecycleState {
 export type LifecycleSkipReason =
   /** The series is already in the state the change asks for. */
   | 'already_in_state'
-  /** Only a breach opens an event: a healthy or unjudged assessment of a closed or new series. */
+  /** A closed series is reopened only by a breach: a healthy or unjudged assessment leaves it closed. */
   | 'not_a_breach';
 
 export type LifecycleDecision =
@@ -78,10 +78,18 @@ const decideAssessment = ({
   const { status } = state;
 
   if (!isLive(status)) {
-    // Only a breach opens or reopens (a new episode on an inactive series).
-    return outcome === 'breached'
-      ? { write: true, status: ALERT_EPISODE_STATUS.ACTIVE }
-      : { write: false, reason: 'not_a_breach' };
+    // A breach opens a new series or reopens a closed one (a new episode).
+    if (outcome === 'breached') return { write: true, status: ALERT_EPISODE_STATUS.ACTIVE };
+    // A closed series stays closed: a healthy or unjudged assessment never reopens it.
+    if (status !== undefined) return { write: false, reason: 'not_a_breach' };
+    // A series with no version yet is one discovery chose to open. Healthy members start it
+    // recovering (visible, not alarming); evidence that cannot be judged leaves it active until it
+    // settles.
+    return {
+      write: true,
+      status:
+        outcome === 'recovered' ? ALERT_EPISODE_STATUS.RECOVERING : ALERT_EPISODE_STATUS.ACTIVE,
+    };
   }
 
   if (outcome === 'breached') {
