@@ -77,7 +77,7 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
     defaultMessage: 'Action failed',
   }),
   noActionBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.noActionTitle', {
-    defaultMessage: 'Approved — no action to run',
+    defaultMessage: 'Approved',
   }),
   actionErrorTitle: i18n.translate('xpack.proposals.approvalModal.outcome.actionError', {
     defaultMessage: 'Could not record the decision. Try again.',
