@@ -61,6 +61,11 @@ interface EscalationQueueProps {
    * stays accurate while `escalations` is narrowed. Defaults to `escalations.length`.
    */
   loadedCount?: number;
+  /**
+   * Explanatory content rendered at the bottom of the section body. When the bucket is empty
+   * and unfiltered it replaces the "No escalations" line.
+   */
+  note?: React.ReactNode;
 }
 
 const StyledAccordion = styled(EuiAccordion)`
@@ -96,6 +101,7 @@ export const EscalationQueue = memo<EscalationQueueProps>(
     getHref,
     isFiltered = false,
     loadedCount,
+    note,
   }) => {
     const { euiTheme } = useEuiTheme();
     const serverTotal = totalItemCount ?? escalations.length;
@@ -168,6 +174,9 @@ export const EscalationQueue = memo<EscalationQueueProps>(
           </>
         );
       }
+      if (note && !isFiltered) {
+        return loadMoreButton;
+      }
       return (
         <>
           <EuiPanel hasBorder={false} hasShadow={false}>
@@ -198,6 +207,18 @@ export const EscalationQueue = memo<EscalationQueueProps>(
           }}
         >
           {bodyContent}
+          {note && !error ? (
+            <div
+              css={css`
+                padding: ${euiTheme.size.base};
+              `}
+              data-test-subj={`escalationQueueNote-${status}`}
+            >
+              <EuiText size="xs" color="subdued">
+                {note}
+              </EuiText>
+            </div>
+          ) : null}
         </StyledAccordion>
       </EuiPanel>
     );
