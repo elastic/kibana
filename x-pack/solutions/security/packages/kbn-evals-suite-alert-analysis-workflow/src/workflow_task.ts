@@ -127,12 +127,19 @@ export const readVerdict = (
   return undefined;
 };
 
-/** Every verdict the classification steps returned, keyed by the alert id the model echoed. */
+/** The `data.set` step that keeps only a batch's own alert ids (alert_analysis_workflow.yaml). */
+const BATCH_FILTER_STEP_ID = 'filter_verdicts_to_batch';
+
+/**
+ * Every verdict the workflow accepted, keyed by alert id. Read from the batch filter's output
+ * rather than the classification replies: a reply can echo an id from another batch, which
+ * production drops, so grading the raw replies could credit an alert whose own batch returned
+ * nothing. A run with no filter step record yields no verdicts, which the evaluators score as a miss.
+ */
 export const readVerdicts = (stepExecutions: WorkflowStepExecutionDto[]): Map<string, Verdict> => {
   const byId = new Map<string, Verdict>();
-  for (const step of stepExecutions.filter(isClassificationStep)) {
-    const output = step.output as ClassificationStepOutput | null | undefined;
-    const verdicts = output?.structured_output?.verdicts ?? output?.content?.verdicts;
+  for (const step of stepExecutions.filter(({ stepId }) => stepId === BATCH_FILTER_STEP_ID)) {
+    const { batch_verdicts: verdicts } = (step.output ?? {}) as { batch_verdicts?: Verdict[] };
     for (const verdict of verdicts ?? []) {
       if (verdict.id && verdict.classification && !byId.has(verdict.id)) {
         byId.set(verdict.id, verdict);
