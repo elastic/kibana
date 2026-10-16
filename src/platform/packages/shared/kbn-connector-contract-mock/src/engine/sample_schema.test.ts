@@ -31,6 +31,11 @@ describe('sampleSchema', () => {
     [{ type: 'number', maximum: -2 }, -2],
     [{ type: 'boolean' }, true],
     [{ type: ['null', 'string'] }, 'string'],
+    [{ type: 'integer', minimum: 5, multipleOf: 4 }, 8],
+    [{ type: 'number', multipleOf: 0.25, minimum: 0.1 }, 0.25],
+    [{ type: 'string', pattern: '^[0-9a-fA-F]{24}$' }, 'a'.repeat(24)],
+    [{ type: 'string', pattern: '^[A-Z]{2}-\\d+$', minLength: 6 }, 'AA-000'],
+    [{ type: 'array', items: { type: 'string' }, maxItems: 0 }, []],
   ])('builds a placeholder for %j', (schema, expected) => {
     expect(sample(schema)).toEqual(expected);
   });
@@ -46,6 +51,52 @@ describe('sampleSchema', () => {
     };
 
     expect(sample(schema, schemas)).toEqual({ tags: [{ name: 'string' }], pair: [0, 0] });
+  });
+
+  it.each([
+    [{ type: 'string' }, 'string'.padEnd(1024, 'x')],
+    [{ type: 'string', maxLength: 8, examples: ['ex'] }, 'stringxx'],
+    [{ type: 'string', maxLength: 10_000_000 }, 'string'.padEnd(65_536, 'x')],
+    [{ type: 'string', pattern: '^[A-Z]{2}-\\d+$', maxLength: 6 }, 'AA-000'],
+    [{ type: 'string', format: 'uuid' }, '00000000-0000-4000-8000-000000000000'],
+    [{ type: 'string', enum: ['a', 'b'] }, 'b'],
+    [{ type: 'integer', format: 'int32' }, 2147483647],
+    [{ type: 'integer', format: 'int64' }, Number.MAX_SAFE_INTEGER],
+    [{ type: 'integer', exclusiveMaximum: 10, multipleOf: 4 }, 8],
+    [{ type: 'number', maximum: 2.5, default: 1 }, 2.5],
+    [{ type: 'number', exclusiveMaximum: 3 }, 2.5],
+    [{ type: 'array', items: { type: 'boolean' } }, [true, true, true]],
+    [{ type: 'array', items: { type: 'boolean' }, maxItems: 5 }, Array(5).fill(true)],
+    [{ type: 'array', items: { type: 'boolean' }, maxItems: 5, uniqueItems: true }, [true]],
+  ])('samples %j at its upper bounds in boundary mode', (schema, expected) => {
+    expect(sampleSchema(schema, {}, { boundary: true })).toEqual(expected);
+  });
+
+  it('skips the null that nullable enums end with in boundary mode', () => {
+    expect(
+      sampleSchema({ type: ['string', 'null'], enum: ['a', 'b', null] }, {}, { boundary: true })
+    ).toBe('b');
+  });
+
+  it('applies properties next to anyOf variants to every variant', () => {
+    const schema = {
+      allOf: [
+        { type: 'object', required: ['title'], properties: { title: { type: 'string' } } },
+        { anyOf: [{ type: 'object', properties: { url: { type: 'string', format: 'uri' } } }] },
+      ],
+    };
+
+    expect(sample(schema)).toEqual({ title: 'string', url: 'https://example.com/' });
+  });
+
+  it('fills required properties the schema never declares', () => {
+    const properties = { id: { type: 'integer' } };
+    const required = ['id', 'archived_at'];
+
+    expect(sample({ type: 'object', properties, required })).toEqual({ id: 0, archived_at: null });
+    expect(
+      sample({ type: 'object', properties, required, additionalProperties: { type: 'string' } })
+    ).toEqual({ id: 0, archived_at: 'string' });
   });
 
   it('takes the first non-null variant and merges allOf parts', () => {

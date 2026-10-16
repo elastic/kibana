@@ -149,6 +149,7 @@ export const withWorkflowExecutionIdentity = async <T>(
       workloadId: execution.effectiveIdentity?.inheritedFrom?.workloadId ?? execution.workflowId,
       spaceId: execution.spaceId,
       expectedServiceAccountId: serviceAccountId,
+      executionId: execution.id,
     },
     async (scopedRequest) => {
       executionContexts.set(scopedRequest, { originalRequest, execution });

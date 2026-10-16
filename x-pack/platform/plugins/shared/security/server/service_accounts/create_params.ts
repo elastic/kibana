@@ -7,17 +7,33 @@
 
 import Boom from '@hapi/boom';
 
-import type { CreateServiceAccountParams } from '@kbn/core-security-server';
+import type { CreateServiceAccountServerParams } from '@kbn/core-security-server';
+import { z } from '@kbn/zod';
 
+import { PLATFORM_ASSUMERS } from './platform_assumers';
 import type { ServiceAccountRoleLimits } from '../../common/service_accounts';
 import {
   getCreateServiceAccountParamsSchema,
   serviceAccountNameSchema,
 } from '../../common/service_accounts';
 
-/** Create parameters, once validated: the same shape the route accepts. */
+/**
+ * The route schema plus `platformAssumers`, which only server-side callers may pass. Duplicate
+ * names are dropped, keeping first occurrences in order.
+ */
+const getServerCreateServiceAccountParamsSchema = (limits: ServiceAccountRoleLimits) =>
+  getCreateServiceAccountParamsSchema(limits).extend({
+    platformAssumers: z
+      .preprocess(
+        (assumers) => (Array.isArray(assumers) ? Array.from(new Set(assumers)) : assumers),
+        z.array(z.enum(PLATFORM_ASSUMERS)).max(PLATFORM_ASSUMERS.length)
+      )
+      .optional(),
+  });
+
+/** Create parameters, once validated. */
 export type ParsedCreateServiceAccountParams = ReturnType<
-  ReturnType<typeof getCreateServiceAccountParamsSchema>['parse']
+  ReturnType<typeof getServerCreateServiceAccountParamsSchema>['parse']
 >;
 
 /**
@@ -31,10 +47,10 @@ export type ParsedCreateServiceAccountParams = ReturnType<
  * Rejects with a 400, so the failure looks the same whichever entry point the caller used.
  */
 export const parseCreateServiceAccountParams = (
-  params: CreateServiceAccountParams,
+  params: CreateServiceAccountServerParams,
   limits: ServiceAccountRoleLimits
 ): ParsedCreateServiceAccountParams => {
-  const parsed = getCreateServiceAccountParamsSchema(limits).safeParse(params);
+  const parsed = getServerCreateServiceAccountParamsSchema(limits).safeParse(params);
 
   if (!parsed.success) {
     throw Boom.badRequest(
@@ -53,7 +69,9 @@ export const parseCreateServiceAccountParams = (
  * {@link parseCreateServiceAccountParams} has vouched for anything, so the name is checked on its
  * own here rather than written to the log as received.
  */
-export const auditableName = (params: CreateServiceAccountParams): { name: string } | undefined => {
+export const auditableName = (
+  params: CreateServiceAccountServerParams
+): { name: string } | undefined => {
   const parsed = serviceAccountNameSchema.safeParse(params.name);
   return parsed.success ? { name: parsed.data } : undefined;
 };
