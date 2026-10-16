@@ -189,14 +189,8 @@ describe('huntCoordinator', () => {
       });
 
     it.each([
+      ['frontier', { efficient: model }, ['frontier'], 'the Frontier tier'],
       ['frontier', { efficient: model, balanced: model }, ['frontier'], 'the Frontier tier'],
-      ['balanced', { efficient: model, frontier: model }, ['balanced'], 'the Balanced tier'],
-      [
-        'both Tier 2 tiers',
-        { efficient: model },
-        ['balanced', 'frontier'],
-        'the Balanced and Frontier tiers',
-      ],
     ] as Array<[string, HuntModels, string[], string]>)(
       'skips Tier 2 as no_inference and names the tier when %s is unavailable',
       async (_label, models, missing, phrase) => {
@@ -217,7 +211,7 @@ describe('huntCoordinator', () => {
     it('still runs Tier 2 when only the efficient tier is unavailable, and reports it', async () => {
       tier1Hit();
 
-      const result = await run({ balanced: model, frontier: model }, 'run-no-efficient');
+      const result = await run({ frontier: model }, 'run-no-efficient');
 
       expect(result.tier2_skipped_reason).not.toBe('no_inference');
       expect(result.unavailable_model_tiers).toEqual(['efficient']);
@@ -300,14 +294,38 @@ describe('huntCoordinator', () => {
       expect(mockModelMatch.mock.calls[0][0].model).toBe(efficient);
     });
 
-    it('runs Tier 2 extraction on the frontier model and ES|QL generation on the balanced one', async () => {
+    it('runs both Tier 2 jobs, extraction and ES|QL generation, on the frontier model', async () => {
       mockT1.mockResolvedValueOnce(tier1(false));
 
       await run('run-tier-tier2');
 
       expect(mockT2).toHaveBeenCalledTimes(1);
       expect(mockT2.mock.calls[0][0].extraction).toBe(frontier);
-      expect(mockT2.mock.calls[0][0].esql).toBe(balanced);
+      expect(mockT2.mock.calls[0][0].esql).toBe(frontier);
+      expect(mockT2.mock.calls[0][0].esql).not.toBe(balanced);
+    });
+
+    it('still runs Tier 2 when only the balanced tier is unavailable, since no job runs on it', async () => {
+      mockT1.mockResolvedValueOnce(tier1(false));
+
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        { efficient, frontier },
+        logger,
+        {
+          spaceId: 'default',
+          indexPatterns: INDEX_PATTERNS,
+          trigger: 'scheduled',
+          run_id: 'run-tier-no-balanced',
+          tier2_when: 'always',
+          iocs: [{ type: 'ip', value: '192.0.2.30' }],
+          text: 'report text',
+        }
+      );
+
+      expect(mockT2).toHaveBeenCalledTimes(1);
+      expect(result.tier2_skipped_reason).not.toBe('no_inference');
+      expect(result).not.toHaveProperty('unavailable_model_tiers');
     });
 
     it('writes recommendations on the efficient model', async () => {
@@ -320,7 +338,7 @@ describe('huntCoordinator', () => {
     });
 
     describe('when the efficient tier is missing and Tier 2 is otherwise reachable', () => {
-      const withoutEfficient: HuntModels = { balanced, frontier };
+      const withoutEfficient: HuntModels = { frontier };
       const runWithoutEfficient = (runId: string) =>
         huntCoordinator({ esClient, reportsEsClient: esClient }, withoutEfficient, logger, {
           spaceId: 'default',
@@ -416,7 +434,7 @@ describe('huntCoordinator', () => {
 
       const result = await huntCoordinator(
         { esClient, reportsEsClient: esClient },
-        { balanced, frontier },
+        { frontier },
         logger,
         {
           spaceId: 'default',
@@ -569,7 +587,7 @@ describe('huntCoordinator', () => {
     ]);
     expect(result.tier2_target_sources).toEqual(['report_match', 'actionable']);
     expect(mockT2).toHaveBeenCalledWith(
-      { extraction: mockModels.frontier, esql: mockModels.balanced },
+      { extraction: mockModels.frontier, esql: mockModels.frontier },
       logger,
       expect.objectContaining({
         allowed_indices: ['logs-aws.cloudtrail-*', 'logs-endpoint.events.process-default*'],
@@ -1276,7 +1294,7 @@ describe('huntCoordinator', () => {
     // move whole log events across the wire to be thrown away.
     expect(search.mock.calls[0][0]._source).toEqual([...SUMMARIZE_HIT_SOURCE_FIELDS]);
     expect(mockT2).toHaveBeenCalledWith(
-      { extraction: mockModels.frontier, esql: mockModels.balanced },
+      { extraction: mockModels.frontier, esql: mockModels.frontier },
       logger,
       expect.objectContaining({
         window: { from: 'now-7d', to: 'now' },
@@ -1345,7 +1363,7 @@ describe('huntCoordinator', () => {
     });
 
     expect(mockT2).toHaveBeenCalledWith(
-      { extraction: mockModels.frontier, esql: mockModels.balanced },
+      { extraction: mockModels.frontier, esql: mockModels.frontier },
       logger,
       expect.objectContaining({
         article_context: expect.objectContaining({
@@ -1433,7 +1451,7 @@ describe('huntCoordinator', () => {
       ]);
       expect(result.tier2_target_sources).toEqual(['report_match', 'tier1_hits', 'actionable']);
       expect(mockT2).toHaveBeenCalledWith(
-        { extraction: mockModels.frontier, esql: mockModels.balanced },
+        { extraction: mockModels.frontier, esql: mockModels.frontier },
         logger,
         expect.objectContaining({
           allowed_indices: result.tier2_targets,
@@ -1561,7 +1579,7 @@ describe('huntCoordinator', () => {
 
       expect(result.status).toBe('tier1_and_tier2');
       expect(mockT2).toHaveBeenCalledWith(
-        { extraction: mockModels.frontier, esql: mockModels.balanced },
+        { extraction: mockModels.frontier, esql: mockModels.frontier },
         logger,
         expect.objectContaining({ allowed_indices: ['logs-aws.cloudtrail-*'] }),
         esClient,
