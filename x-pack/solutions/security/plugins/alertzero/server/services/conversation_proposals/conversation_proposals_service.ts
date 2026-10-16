@@ -40,11 +40,7 @@ const CLOSED_DECIDED_WITHIN_HOURS = 72;
 /**
  * Breaks every tie the timestamps leave, so a row cannot move between two offset
  * pages and be shown twice or skipped. Unique per live proposal: `create` roots a
- * chain at its own id, `revise` numbers it. An original and its clone share both,
- * and can now sit together in the closed queue (a failed original stays visible
- * after being replaced). A clone also inherits `createdAt`, so what separates them
- * is `decidedAt`, which leads the closed sort: the clone has none until it is
- * decided, and then its own.
+ * chain at its own id, `revise` numbers it.
  */
 const TIEBREAKER: SortCombinations[] = [
   { rootProposalId: { order: 'asc' } },
@@ -72,7 +68,6 @@ export class ConversationProposalsService {
         origin: ALERTZERO_PROPOSAL_ORIGIN,
         status: 'pending',
         excludeSuperseded: true,
-        excludeUndecidedSuperseded: false,
         excludeExpired: false,
         size,
         from,
@@ -97,12 +92,10 @@ export class ConversationProposalsService {
         // The index is shared with every other solution's proposals, and only
         // this filter keeps theirs out of an AlertZero queue.
         origin: ALERTZERO_PROPOSAL_ORIGIN,
-        // A failed action is replaced by a retry, and the failed attempt is the one that
-        // was decided, so superseded records stay if they carry a decision. Undecided ones
-        // (earlier revisions) go: settling one as `expired` stamps `decidedAt` without a
-        // decision, so the recency window alone would let it into Closed.
-        excludeSuperseded: false,
-        excludeUndecidedSuperseded: true,
+        // A failed attempt that a retry replaced is not shown: the retry carries its error
+        // as `previousExecutionError`. Earlier revisions go too, since settling one as
+        // `expired` stamps `decidedAt`, so the recency window alone would let it in.
+        excludeSuperseded: true,
         excludeExpired: false,
         size,
         from,
