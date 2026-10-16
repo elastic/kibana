@@ -73,18 +73,17 @@ const yamlString = (value: string): string => JSON.stringify(value);
 export const assertSafeIdentifier = (label: string, value: string): void => {
   if (/[`\r\n]/.test(value) || value.includes('{{') || value.includes('}}')) {
     throw new Error(
-      `${label} "${value}" contains a backtick, a line break or a Liquid brace pair, which an ES|QL identifier cannot carry. Pass the bare name without backticks; the workflow quotes it.`
+      `${label} "${value}" contains a backtick, a line break or a Liquid brace pair, which an ES|QL identifier cannot carry.`
     );
   }
 };
 
 /**
- * The templates add the backticks themselves, but a model often pre-quotes a name that has spaces
- * (`Currency Code`). One wrapping pair is dropped so that works; any other backtick still fails
- * the check.
+ * The templates add the backticks themselves, so any backtick in a name is dropped rather than
+ * rejected: a model often pre-quotes a name that has spaces (`Currency Code`).
  */
 export const toSafeIdentifier = (label: string, value: string): string => {
-  const unquoted = /^`[^`]+`$/.test(value) ? value.slice(1, -1) : value;
+  const unquoted = value.replaceAll('`', '');
   assertSafeIdentifier(label, unquoted);
   return unquoted;
 };
