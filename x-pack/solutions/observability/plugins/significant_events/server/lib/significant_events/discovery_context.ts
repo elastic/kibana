@@ -26,6 +26,7 @@ export type DiscoveryContextQuery = CompactKnowledgeIndicatorQuery & { view_name
 export const REMAINING_GROUNDING_STEPS = [
   'Step 3: run the confirmation query of every rule in query_kis, in parallel waves.',
   'Step 4: profile (spread and trend) every rule whose sample returned failure rows, before any routing or write.',
+  'Rules in unmatched_rule_uuids are not_checked and not event-eligible: put no signal for them in any events_write item (the write is rejected); only add their rule_uuid to written_rule_uuids.',
 ] as const;
 
 /** What the grounding skill's Steps 1 and 2 retrieve for a batch, so the agent need not. */

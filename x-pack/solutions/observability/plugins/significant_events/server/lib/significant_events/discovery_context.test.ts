@@ -188,7 +188,7 @@ describe('buildDiscoveryContext', () => {
     ]);
   });
 
-  it('names the confirmation and profile steps that still have to run', async () => {
+  it('names the steps that still have to run, including what to do with the unmatched rules', async () => {
     const search = jest
       .fn()
       .mockResolvedValueOnce(page({ items: [] }))
@@ -200,9 +200,11 @@ describe('buildDiscoveryContext', () => {
       search,
     });
 
-    expect(steps).toHaveLength(2);
+    expect(steps).toHaveLength(3);
     expect(steps[0]).toContain('Step 3');
     expect(steps[1]).toContain('Step 4');
+    expect(steps[2]).toContain('unmatched_rule_uuids');
+    expect(steps[2]).toContain('no signal');
   });
 
   it('lists the rules no backed query KI matched, and drops KIs of other rules', async () => {
