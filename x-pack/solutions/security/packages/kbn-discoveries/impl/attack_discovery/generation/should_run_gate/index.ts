@@ -18,10 +18,10 @@ export const AGENT_BUILDER_TRIGGER = 'agent_builder';
  * The gate runs for every trigger EXCEPT `agent_builder`, unless the caller
  * disabled it (`ground_truth_gate_enabled: false`, set by the run step for
  * callers that own the false-positive decision later, such as the AlertZero
- * Attack Discovery Worker). The conversational
- * Attack Discovery skill (the `agent_builder` entry point) has already
- * retrieved and ground-truthed its own data before delegating to the
- * generation pipeline, so re-running the gate would double-invoke the skill.
+ * Attack Discovery Worker). The conversational Attack Discovery skill (the
+ * `agent_builder` entry point) has already retrieved and ground-truthed its own
+ * data before delegating to the generation pipeline, so re-running the gate
+ * would double-invoke the skill.
  *
  * This explicit skip is also the structural recursion break: if the gate's
  * `ai.agent` ever invoked the skill's `security.attack-discovery.run` tool,
