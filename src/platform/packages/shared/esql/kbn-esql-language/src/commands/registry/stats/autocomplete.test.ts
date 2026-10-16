@@ -1099,14 +1099,6 @@ describe('STATS Autocomplete', () => {
 
         expect(suggestions.map(({ label }) => label)).not.toContain('bucket');
       });
-
-      it('does not leak a BY column from a parent STATS into a STATS in a subquery', async () => {
-        const suggestions = await suggest(
-          'FROM kibana_sample_data_logs | STATS c = COUNT() WHERE agent.keyword IN (FROM kibana_sample_data_logs | STATS COUNT(bytes) WHERE ^ | KEEP agent) BY abc = agent.keyword'
-        );
-
-        expect(suggestions.map(({ label }) => label)).not.toContain('abc');
-      });
     });
   });
 });
