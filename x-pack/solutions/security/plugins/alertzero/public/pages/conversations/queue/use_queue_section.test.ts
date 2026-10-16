@@ -14,7 +14,7 @@ import {
   useProposalsByCategory,
   useProposalsByCategoryCount,
 } from '../../../hooks/use_proposals_api';
-import { useCategoryQueueSection } from './use_queue_section';
+import { useCategoryQueueSection, useClosedQueueSection } from './use_queue_section';
 
 jest.mock('../../../hooks/use_proposals_api');
 
@@ -90,5 +90,54 @@ describe('useCategoryQueueSection load-more failures', () => {
     act(() => result.current.onToggle(false));
 
     expect(result.current.hasLoadMoreError).toBe(false);
+  });
+});
+
+describe('queue sections default open state', () => {
+  const pagesWithTotal = (total: number) =>
+    pagesQuery({
+      data: { pages: [{ proposals: [], total }], pageParams: [undefined] },
+      hasNextPage: false,
+    });
+
+  it('collapses a category with no proposals', () => {
+    mockPages.mockReturnValue(pagesWithTotal(0));
+
+    const { result } = renderHook(() => useCategoryQueueSection('respond'), { wrapper });
+
+    expect(result.current.isOpen).toBe(false);
+  });
+
+  it('keeps a category with proposals open', () => {
+    mockPages.mockReturnValue(pagesWithTotal(3));
+
+    const { result } = renderHook(() => useCategoryQueueSection('respond'), { wrapper });
+
+    expect(result.current.isOpen).toBe(true);
+  });
+
+  it('stays open while the total is unknown', () => {
+    mockPages.mockReturnValue(pagesQuery({ data: undefined, isInitialLoading: true }));
+
+    const { result } = renderHook(() => useCategoryQueueSection('respond'), { wrapper });
+
+    expect(result.current.isOpen).toBe(true);
+  });
+
+  it('does not collapse again once the analyst has toggled it', () => {
+    mockPages.mockReturnValue(pagesWithTotal(3));
+    const { result, rerender } = renderHook(() => useCategoryQueueSection('respond'), { wrapper });
+
+    act(() => result.current.onToggle(true));
+    mockPages.mockReturnValue(pagesWithTotal(0));
+    rerender();
+
+    expect(result.current.isOpen).toBe(true);
+  });
+
+  it('starts Closed collapsed', () => {
+    const { result } = renderHook(() => useClosedQueueSection(), { wrapper });
+
+    expect(result.current.isOpen).toBe(false);
   });
 });

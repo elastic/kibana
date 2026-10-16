@@ -1,0 +1,4 @@
+# The regex worker entry point (src/regex_worker_wrapper.js) requires @kbn/setup-node-env. It is a
+# plain .js file, so it is invisible to the tsconfig references this project is generated from.
+dependsOn:
+  - '@kbn/setup-node-env'

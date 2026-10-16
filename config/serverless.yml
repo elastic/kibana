@@ -137,6 +137,9 @@ xpack.snapshot_restore.enabled: false
 xpack.license_management.enabled: false
 xpack.cloud_connect.enabled: false
 
+# Shared Elasticsearch home page: re-enabled only by the project types that render it.
+xpack.elasticsearchHome.enabled: false
+
 xpack.reindex_service.rollupsEnabled: false
 
 # Management team UI configurations

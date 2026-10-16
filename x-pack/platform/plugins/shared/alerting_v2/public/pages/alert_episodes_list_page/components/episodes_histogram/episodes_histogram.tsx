@@ -19,7 +19,7 @@ import {
 import dateMath from '@kbn/datemath';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { DataViewField, type DataView } from '@kbn/data-views-plugin/common';
-import { DataViewSource } from '@kbn/data-source';
+import { EsqlSource } from '@kbn/data-source';
 import type { BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import type { UnifiedHistogramFetchParamsExternal } from '@kbn/unified-histogram';
 import {
@@ -170,20 +170,38 @@ export const EpisodesHistogram = ({
     if (interval && interval !== 'auto') setBucketInterval(interval);
   }, []);
 
-  const { isInitialized, api, chartProps } = useUnifiedHistogram({
-    services: unifiedHistogramServices,
-    isChartLoading: isDataLoading || !dataView,
-    onBrushEnd,
-    onTimeIntervalChange,
-    withLensActions: false,
-  });
-
   const esqlQuery = useMemo<AggregateQuery>(
     () => ({
       esql: buildEpisodesHistogramQuery(spaceId, filterState, breakdownField).print('basic'),
     }),
     [spaceId, filterState, breakdownField]
   );
+
+  const hasDataView = Boolean(dataView);
+  const timeFieldName = dataView?.timeFieldName;
+  const [esqlSource, setEsqlSource] = useState<EsqlSource>();
+  useEffect(() => {
+    if (!table || !hasDataView) return;
+    let isCancelled = false;
+    EsqlSource.create({
+      query: esqlQuery.esql,
+      timeFieldName,
+      resultColumns: table.columns,
+    }).then((source) => {
+      if (!isCancelled) setEsqlSource(source.withColumns(table.columns));
+    });
+    return () => {
+      isCancelled = true;
+    };
+  }, [esqlQuery, table, timeFieldName, hasDataView]);
+
+  const { isInitialized, api, chartProps } = useUnifiedHistogram({
+    services: unifiedHistogramServices,
+    isChartLoading: isDataLoading || !dataView || !esqlSource,
+    onBrushEnd,
+    onTimeIntervalChange,
+    withLensActions: false,
+  });
 
   const getModifiedVisAttributes = useCallback(
     (
@@ -195,15 +213,15 @@ export const EpisodesHistogram = ({
   );
 
   useEffect(() => {
-    if (!table || !dataView) return;
+    // the source is rebuilt asynchronously, so skip the render where it still has the previous columns
+    if (!table || !esqlSource || esqlSource.resultColumns !== table.columns) return;
     api.fetch({
       requestAdapter: undefined,
       abortController,
       searchSessionId: histogramSessionId,
-      dataSource: new DataViewSource(dataView),
+      dataSource: esqlSource,
       query: esqlQuery,
       table,
-      columns: table.columns,
       breakdownField,
       timeInterval: bucketInterval,
       timeRange,
@@ -213,7 +231,7 @@ export const EpisodesHistogram = ({
   }, [
     abortController,
     api,
-    dataView,
+    esqlSource,
     esqlQuery,
     histogramSessionId,
     table,
@@ -249,15 +267,15 @@ export const EpisodesHistogram = ({
 
   const renderBreakdownSelector = useCallback(
     () =>
-      dataView ? (
+      esqlSource ? (
         <UnifiedBreakdownFieldSelector
-          dataSource={new DataViewSource(dataView)}
+          dataSource={esqlSource}
           breakdown={{ field: breakdownDataViewField }}
           esqlColumns={HISTOGRAM_BREAKDOWN_COLUMNS}
           onBreakdownFieldChange={handleBreakdownFieldChange}
         />
       ) : undefined,
-    [dataView, breakdownDataViewField, handleBreakdownFieldChange]
+    [esqlSource, breakdownDataViewField, handleBreakdownFieldChange]
   );
 
   return (

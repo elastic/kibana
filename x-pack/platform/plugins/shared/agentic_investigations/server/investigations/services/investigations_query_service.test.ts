@@ -135,8 +135,11 @@ const setup = ({
     findByConversationId: jest.fn().mockResolvedValue(hypotheses),
   };
   const inProgress = {
-    findInProgressIds: jest.fn().mockResolvedValue(new Set(inProgressIds)),
-    isInProgress: jest.fn(async (_r: unknown, _s: string, id: string) =>
+    findInProgressIds: jest.fn(
+      async (_r: unknown, _s: string, conversations: Array<{ id: string }>) =>
+        new Set(conversations.map(({ id }) => id).filter((id) => inProgressIds.includes(id)))
+    ),
+    isInProgress: jest.fn(async (_r: unknown, _s: string, { id }: { id: string }) =>
       inProgressIds.includes(id)
     ),
   };
@@ -169,7 +172,7 @@ describe('InvestigationsQueryService', () => {
         hypotheses: [{ candidate: 'Bad deploy', confidence: 0.8, status: 'confirmed' }],
         createdAt: '2026-01-01T00:00:00.000Z',
       };
-      const { service, client } = setup({
+      const { service, client, inProgress } = setup({
         subjects: [
           subject('conv-1', 'alert-2', { createdAt: '2026-01-02T00:00:00.000Z' }),
           subject('conv-1', 'alert-1', { triggerType: 'automatic', summary: 'High latency' }),
@@ -185,13 +188,22 @@ describe('InvestigationsQueryService', () => {
             severity: 'high',
             summary: 'What happened',
             verdict: 'Root cause',
-            workflow_execution_id: 'x',
+            workflow_execution_ids: ['exec-1'],
           },
         }),
         attachments: [],
       });
 
       const investigation = await service.get(request, 'conv-1');
+
+      expect(inProgress.isInProgress).toHaveBeenCalledWith(
+        request,
+        SPACE_ID,
+        expect.objectContaining({
+          id: 'conv-1',
+          metadata: expect.objectContaining({ workflow_execution_ids: ['exec-1'] }),
+        })
+      );
 
       expect(investigation).toEqual({
         id: 'conv-1',
@@ -513,39 +525,27 @@ describe('InvestigationsQueryService', () => {
       expect(client.search).not.toHaveBeenCalled();
     });
 
-    it('reads past a full page of in-progress investigations for in_progress=false', async () => {
-      // The 1,000 newest investigations are all in progress; the idle ones are older.
-      const busy = Array.from({ length: 1000 }, (_, i) => conversation(`busy-${i}`));
-      const idle = Array.from({ length: 5 }, (_, i) => conversation(`idle-${i}`));
-      const { service, client } = setup({ inProgressIds: busy.map(({ id }) => id) });
-      const all = [...busy, ...idle];
-      client.search.mockImplementation(async ({ page = 1, perPage = 50 }) => {
-        const results = all.slice((page - 1) * perPage, page * perPage);
-        return { results, total: all.length };
+    it('resolves the in-progress state for the returned page only', async () => {
+      const { service, inProgress } = setup({
+        searchResults: [
+          conversation('newest', { created_at: '2026-01-03T00:00:00.000Z' }),
+          conversation('busy', { created_at: '2026-01-02T00:00:00.000Z' }),
+          conversation('oldest', { created_at: '2026-01-01T00:00:00.000Z' }),
+        ],
+        inProgressIds: ['busy', 'oldest'],
       });
 
-      const response = await service.list(request, parseQuery({ in_progress: 'false' }));
+      const response = await service.list(request, parseQuery({ per_page: 2 }));
 
-      expect(client.search).toHaveBeenCalledTimes(2);
-      expect(response.pagination.total).toBe(5);
-      expect(response.results.map(({ id }) => id).sort()).toEqual(idle.map(({ id }) => id).sort());
-    });
-
-    it('reads in-progress investigations by id and excludes them for in_progress=false', async () => {
-      const inProgress = setup({
-        bulkGetResults: [conversation('busy')],
-        inProgressIds: ['busy'],
-      });
-      const busy = await inProgress.service.list(request, parseQuery({ in_progress: 'true' }));
-      expect(inProgress.client.bulkGet).toHaveBeenCalledWith(['busy']);
-      expect(busy.results).toEqual([expect.objectContaining({ id: 'busy', in_progress: true })]);
-
-      const idle = setup({
-        searchResults: [conversation('busy'), conversation('idle')],
-        inProgressIds: ['busy'],
-      });
-      const notBusy = await idle.service.list(request, parseQuery({ in_progress: 'false' }));
-      expect(notBusy.results.map(({ id }) => id)).toEqual(['idle']);
+      expect(inProgress.findInProgressIds).toHaveBeenCalledTimes(1);
+      expect(inProgress.findInProgressIds).toHaveBeenCalledWith(request, SPACE_ID, [
+        expect.objectContaining({ id: 'newest' }),
+        expect.objectContaining({ id: 'busy' }),
+      ]);
+      expect(response.results.map(({ id, in_progress: busy }) => ({ id, busy }))).toEqual([
+        { id: 'newest', busy: false },
+        { id: 'busy', busy: true },
+      ]);
     });
 
     it('reads the requested ids as the caller', async () => {

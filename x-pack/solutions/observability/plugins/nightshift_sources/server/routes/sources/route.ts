@@ -39,8 +39,8 @@ const listSourcesRoute = createNightshiftSourcesServerRoute({
   }),
   handler: async ({ params, request, getSourcesClient }): Promise<ListSourcesResponse> => {
     const client = await getSourcesClient({ request });
-    const { page, per_page: perPage, search, enabled } = params.query;
-    return client.list({ page, perPage, search, enabled });
+    const { page, per_page: perPage, search, enabled, ids } = params.query;
+    return client.list({ page, perPage, search, enabled, ids });
   },
 });
 
@@ -50,7 +50,7 @@ const createSourceRoute = createNightshiftSourcesServerRoute({
     access: 'internal',
     summary: 'Create a Nightshift source',
     description:
-      'Validates the ES|QL query (FROM or TS, optionally narrowed by WHERE), stores the source and creates its ES|QL view.',
+      'Validates the ES|QL query (FROM or TS, optionally narrowed by WHERE, targeting one kind of data), stores the source and creates its ES|QL view.',
   },
   security: {
     authz: {
@@ -95,7 +95,7 @@ const updateSourceRoute = createNightshiftSourcesServerRoute({
     access: 'internal',
     summary: 'Update a Nightshift source',
     description:
-      'Replaces title, description, tags and ES|QL, re-validates the query and re-creates the ES|QL view. Sending the current values repairs a missing or drifted view.',
+      'Replaces title, description, tags and ES|QL, re-validates the query (including that it targets one kind of data) and re-creates the ES|QL view. Sending the current values repairs a missing or drifted view.',
   },
   security: {
     authz: {
