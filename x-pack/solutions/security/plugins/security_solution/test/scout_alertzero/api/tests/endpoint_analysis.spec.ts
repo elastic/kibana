@@ -401,7 +401,18 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
       // agent's telemetry lookback is not host-scoped, so with both chains indexed the second
       // analysis can legitimately see — and act on — the first host (observed live: both cards
       // reading "Isolate host wks-alice-01"). Removing the first chain pins this test to the
-      // contract under test: one visible host per handoff, so each card must name its own.
+      // contract under test: one visible host per handoff, so each card must name its own. Both
+      // seeds' identifiers are read first — the card targets resolve against documents that are
+      // gone by the time the assertions run.
+      const hostByAgentId = new Map<string, string>();
+      for (const seeded of [first.scenario, second.scenario]) {
+        const identifiers = await readSeedIdentifiers(
+          esClient,
+          seeded.runMarker,
+          AD2_SCENARIO_ALL_INDICES
+        );
+        identifiers.hostByAgentId.forEach((host, agentId) => hostByAgentId.set(agentId, host));
+      }
       await first.scenario.cleanup();
 
       // The worker's next scheduled sweep analyzes the second handoff; each investigation must
@@ -422,15 +433,6 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
         { timeoutMs: testData.GENERATION_TIMEOUT_MS }
       );
 
-      const hostByAgentId = new Map<string, string>();
-      for (const seeded of [first.scenario, second.scenario]) {
-        const identifiers = await readSeedIdentifiers(
-          esClient,
-          seeded.runMarker,
-          AD2_SCENARIO_ALL_INDICES
-        );
-        identifiers.hostByAgentId.forEach((host, agentId) => hostByAgentId.set(agentId, host));
-      }
       const targetsOf = (card: PendingProposal) => [
         ...new Set(endpointIdsOf(card).map((id) => hostByAgentId.get(id) ?? `not-in-seed:${id}`)),
       ];
