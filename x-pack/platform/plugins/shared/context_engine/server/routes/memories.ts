@@ -43,7 +43,7 @@ const WRITE_SECURITY: RouteSecurity = {
 };
 
 const DESCRIPTION_SUFFIX =
-  "The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; memories without explicit permissions are shared with every space that registers the same destination. Returns 404 when Context Engine is turned off in the space or Memory is disabled.";
+  "The request uses the current user's Elasticsearch privileges. The request space selects the AI Index registration; Memory documents are not space-stamped, so spaces that register the same destination share them. Returns 404 when Context Engine is turned off in the space or Memory is disabled.";
 const INTERNAL_ERROR_MESSAGE = 'An unexpected error occurred while processing the memory request.';
 
 const writer = {

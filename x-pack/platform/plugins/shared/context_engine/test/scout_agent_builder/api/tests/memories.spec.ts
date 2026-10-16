@@ -213,51 +213,10 @@ apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, 
   );
 
   apiTest(
-    'shares public memories but protects and preserves space-scoped memories',
-    async ({ apiClient, esClient }) => {
+    'shares memories across spaces that register the same destination',
+    async ({ apiClient }) => {
       const headers = { ...credentials.apiKeyHeader, ...testData.API_HEADERS };
-      const scopedId = 'space-scoped-memory';
-      await esClient.index({
-        index: DEST,
-        id: scopedId,
-        refresh: 'wait_for',
-        document: {
-          '@timestamp': '2026-10-14T00:00:00.000Z',
-          updated_at: '2026-10-14T00:00:00.000Z',
-          id: scopedId,
-          type: 'memory.session_fact',
-          title: 'Scoped memory',
-          description: 'Visible only in the default space.',
-          content: 'Scoped content.',
-          permissions: { kibana: { privileges: [{ space: 'default' }] } },
-        },
-      });
-      const revisionBody = memoryBody({
-        title: 'Revised scoped memory',
-        description: 'Still visible only in the default space.',
-        content: 'Revised scoped content.',
-        session_id: 'scoped-session',
-      });
-
-      const hiddenResponse = await apiClient.patch(inOtherSpace(`${MEMORIES_PATH}/${scopedId}`), {
-        headers,
-        responseType: 'json',
-        body: revisionBody,
-      });
-      expect(hiddenResponse).toHaveStatusCode(404);
-
-      const visibleResponse = await apiClient.patch(`${MEMORIES_PATH}/${scopedId}`, {
-        headers,
-        responseType: 'json',
-        body: revisionBody,
-      });
-      expect(visibleResponse).toHaveStatusCode(200);
-      const storedScoped = await esClient.get({ index: DEST, id: scopedId });
-      expect(storedScoped._source).toMatchObject({
-        permissions: { kibana: { privileges: [{ space: 'default' }] } },
-      });
-
-      const publicCreate = await apiClient.post(MEMORIES_PATH, {
+      const createResponse = await apiClient.post(MEMORIES_PATH, {
         headers,
         responseType: 'json',
         body: memoryBody({
@@ -266,9 +225,9 @@ apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, 
           content: 'Public content.',
         }),
       });
-      expect(publicCreate).toHaveStatusCode(201);
-      const publicRevise = await apiClient.patch(
-        inOtherSpace(`${MEMORIES_PATH}/${publicCreate.body.id}`),
+      expect(createResponse).toHaveStatusCode(201);
+      const reviseResponse = await apiClient.patch(
+        inOtherSpace(`${MEMORIES_PATH}/${createResponse.body.id}`),
         {
           headers,
           responseType: 'json',
@@ -276,11 +235,11 @@ apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, 
             title: 'Public memory revised elsewhere',
             description: 'Still visible through either registration.',
             content: 'Revised public content.',
-            session_id: publicCreate.body.session_id,
+            session_id: createResponse.body.session_id,
           }),
         }
       );
-      expect(publicRevise).toHaveStatusCode(200);
+      expect(reviseResponse).toHaveStatusCode(200);
     }
   );
 

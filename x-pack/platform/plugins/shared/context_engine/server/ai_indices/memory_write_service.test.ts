@@ -37,7 +37,6 @@ const existingDocument: StoredMemoryDocument = {
   updated_at: '2026-09-01T00:00:00.000Z',
   references: [{ uri: 'api://source', relation: 'derived_from' }],
   attributes: { existing: true },
-  permissions: { kibana: { privileges: [{ space: 'space-1' }] } },
   governance: {
     provenance: {
       created_by: {
@@ -290,7 +289,6 @@ describe('AiIndexMemoryWriteService', () => {
           '@timestamp': existingDocument['@timestamp'],
           tags: ['existing'],
           references: request.references,
-          permissions: existingDocument.permissions,
           custom_field: 'preserved',
           attributes: {
             existing: true,
