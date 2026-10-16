@@ -81,10 +81,6 @@ module.exports = {
         'no-unsanitized/method': 'error',
         'no-unsanitized/property': 'error',
         'no-unused-expressions': 'off',
-        // @babel/eslint-parser creates no scope references for JSX; these mark JSX identifiers as
-        // used so @kbn/imports/no_unused_imports does not report them.
-        'react/jsx-uses-react': 'error',
-        'react/jsx-uses-vars': 'error',
         'no-use-before-define': [ 'error', 'nofunc' ],
         'no-var': 'error',
         'one-var': [ 'error', 'never' ],
