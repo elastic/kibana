@@ -9,7 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, ESE_API_PATH, COMMON_HEADERS } from '../../fixtures';
+import { apiTest, ESE_API_PATH, COMMON_HEADERS, verifyErrorResponse } from '../../fixtures';
 
 apiTest.describe(
   'ese search - delete',
@@ -27,6 +27,7 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(404);
+      verifyErrorResponse(response.body, 404);
     });
 
     apiTest('should return 400 when trying to delete a bad id', async ({ apiClient }) => {
