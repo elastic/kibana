@@ -266,7 +266,8 @@ const requestArrangement = async (
  * Applying only part of an arrangement mixes the old and the new layout, so an arrangement that
  * misses or repeats a panel or section, places a panel in another container, overflows the grid,
  * or puts a section on a row shared with another section or a top-level panel, is rejected as a
- * whole. Both sides use aliases; `toId` reports the original ids.
+ * whole. A section returned without panels keeps its layout. Both sides use aliases; `toId` reports
+ * the original ids.
  */
 const getIncompleteArrangementIssue = (
   { panels, sections }: LayoutRequest,
@@ -295,9 +296,10 @@ const getIncompleteArrangementIssue = (
 
   const containers = [
     { requested: panels, arranged: arrangement.panels },
-    ...sections.flatMap(({ id, panels: requested }) =>
-      requested ? [{ requested, arranged: arrangedSectionsById.get(id)?.panels ?? [] }] : []
-    ),
+    ...sections.flatMap(({ id, panels: requested }) => {
+      const arranged = arrangedSectionsById.get(id)?.panels ?? [];
+      return requested && arranged.length > 0 ? [{ requested, arranged }] : [];
+    }),
   ];
   for (const { requested, arranged } of containers) {
     const overflowingPanel = arranged.find(({ x, w }) => x + w > GRID_COLUMNS);
