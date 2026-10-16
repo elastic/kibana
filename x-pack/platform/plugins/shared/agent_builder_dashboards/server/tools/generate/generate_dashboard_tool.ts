@@ -145,7 +145,7 @@ Use operations[] to:
 6. remove panels
 7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)
 
-Panel positions and sizes are set automatically after the operations run. Use \`layout\` to pass on the user's own arrangement or size request, and to say where new sections and moved panels belong, or when the enhance workflow says so.`,
+Panel positions and sizes are set automatically after the operations run; \`layout\` says where things go.`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations, layout },
