@@ -179,14 +179,11 @@ test.describe('Maps - MVT scaling', { tag: '@local-stateful-classic' }, () => {
 
       const getControlTileUrl = async () => (await getTileUrls())[CONTROL_LAYER_SOURCE_ID];
 
-      // Asserts the tile URL changes (or stays the same) after `action` runs.
-      const expectTileUrl = async (action: () => Promise<void>, shouldUpdate: boolean) => {
-        const prevTileUrl = await getTileUrl();
-        const prevControlTileUrl = await getControlTileUrl();
-        // Closing the inspector restores focus to its trigger twice, the second time ~40ms later.
-        // If that lands while the action is typing, the remaining keys go to the trigger button
-        // and a space re-opens the inspector. Wait for focus to be quiet before acting.
-        await page.evaluate(
+      // Closing the inspector restores focus to its trigger twice, the second time ~40ms later.
+      // If that lands while the action is typing, the remaining keys go to the trigger button
+      // and a space re-opens the inspector. Wait for focus to be quiet before acting.
+      const waitForFocusQuiet = () =>
+        page.evaluate(
           () =>
             new Promise<void>((resolve) => {
               const onFocus = () => {
@@ -201,18 +198,34 @@ test.describe('Maps - MVT scaling', { tag: '@local-stateful-classic' }, () => {
               document.addEventListener('focusin', onFocus, true);
             })
         );
+
+      // Captures the current tile URLs, runs `action`, and returns the captured URLs.
+      const runAction = async (action: () => Promise<void>) => {
+        const prevTileUrl = await getTileUrl();
+        const prevControlTileUrl = await getControlTileUrl();
+        await waitForFocusQuiet();
         await action();
-        if (shouldUpdate) {
-          await expect.poll(async () => (await getTileUrl()) !== prevTileUrl).toBe(true);
-        } else {
-          // The control layer responds to every change. Once its URL changes the map has
-          // processed the action, so an unchanged URL on the layer under test is meaningful.
-          await expect
-            .poll(async () => (await getControlTileUrl()) !== prevControlTileUrl)
-            .toBe(true);
-          expect(await getTileUrl()).toBe(prevTileUrl);
-        }
+        return { prevTileUrl, prevControlTileUrl };
       };
+
+      const expectTileUrlUpdated = async (action: () => Promise<void>) => {
+        const { prevTileUrl } = await runAction(action);
+        await expect.poll(async () => (await getTileUrl()) !== prevTileUrl).toBe(true);
+      };
+
+      const expectTileUrlUnchanged = async (action: () => Promise<void>) => {
+        const { prevTileUrl, prevControlTileUrl } = await runAction(action);
+        // The control layer responds to every change. Once its URL changes the map has
+        // processed the action, so an unchanged URL on the layer under test is meaningful.
+        await expect
+          .poll(async () => (await getControlTileUrl()) !== prevControlTileUrl)
+          .toBe(true);
+        expect(await getTileUrl()).toBe(prevTileUrl);
+      };
+
+      // Asserts the tile URL changes (or stays the same) after `action` runs.
+      const expectTileUrl = (action: () => Promise<void>, shouldUpdate: boolean) =>
+        shouldUpdate ? expectTileUrlUpdated(action) : expectTileUrlUnchanged(action);
 
       await maps.openMapWithId(MVT_DOCUMENTS_MAP_ID);
 
