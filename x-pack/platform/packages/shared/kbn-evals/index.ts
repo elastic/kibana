@@ -80,6 +80,11 @@ export type { EvaluationCriterion, EvaluationCriterionStructured } from './src/e
 // outside an eval run, where `DefaultEvaluators` is not constructed.
 export { createCriteriaEvaluator } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
+export {
+  REPETITION_TIERS,
+  resolveRepetitions,
+  type RepetitionTier,
+} from './src/config/repetition_tiers';
 export type {
   Example,
   TaskOutput,

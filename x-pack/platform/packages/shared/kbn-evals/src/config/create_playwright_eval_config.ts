@@ -18,6 +18,7 @@ import {
   type EvalConnector,
   type StackConnectorDefinition,
 } from '../utils/eval_connector';
+import { resolveRepetitions } from './repetition_tiers';
 
 export interface EvaluationTestOptions extends ScoutTestOptions {
   connectorParam: EvalConnector;
@@ -81,9 +82,7 @@ export function createPlaywrightEvalsConfig({
     );
   }
 
-  // Priority of determining repetition number: env variable, config parameter, default
-  const experimentRepetitions =
-    parseInt(process.env.EVAL_REPETITIONS || '', 10) || repetitions || 1;
+  const experimentRepetitions = resolveRepetitions(process.env, repetitions);
 
   // Pass through Scout's setup AND teardown hook projects unchanged. Scout's `setup-local`
   // references its teardown via Playwright's `teardown` field; dropping the `teardown-local`
