@@ -13,13 +13,13 @@
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
  * Registry groups: 145
- * Metric groups: 566
+ * Metric groups: 576
  * Hardcoded fields: 34
- * Total fields: 1237
+ * Total fields: 1250
  *
  * @internal
  *
- * WARNING: This object contains 1237+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1250+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -1210,7 +1210,8 @@ export const semconvFlat = {
   },
   'cpu.logical_number': {
     name: 'cpu.logical_number',
-    description: 'The logical CPU number [0..n-1]',
+    description:
+      'The identifier of a logical execution target (CPU) as seen by the operating system, in the range [0..n-1].',
     type: 'long',
     example: '1',
   },
@@ -1229,7 +1230,7 @@ export const semconvFlat = {
   'db.client.connection.pool.name': {
     name: 'db.client.connection.pool.name',
     description:
-      "The name of the connection pool; unique within the instrumented application. In case the connection pool implementation doesn't provide a name, instrumentation SHOULD use a combination of parameters that would make the name unique, for example, combining attributes `server.address`, `server.port`, and `db.namespace`, formatted as `server.address:server.port/db.namespace`. Instrumentations that generate connection pool name following different patterns SHOULD document it.",
+      'The name of the connection pool. If the connection pool does not have a name, instrumentation SHOULD use `db.namespace`; otherwise `server.address`, with `server.port` appended using `:` if set. When appending a port to an IPv6 address, instrumentation MUST enclose the address in square brackets. If `server.address` is not available, instrumentation SHOULD use `db.system.name`; otherwise the connection pool library name.',
     type: 'keyword',
     example: 'myDataSource',
   },
@@ -1340,9 +1341,9 @@ export const semconvFlat = {
   'destination.address': {
     name: 'destination.address',
     description:
-      'Destination address - domain name if available without reverse DNS lookup; otherwise, IP address or UNIX domain socket name.',
+      'Destination address as observed at the point of instrumentation - typically an IP address, or a UNIX domain socket name; a domain name only when the receiver was addressed by name (for example a peer-to-peer node dialed by hostname), never obtained via reverse DNS lookup.',
     type: 'keyword',
-    example: 'destination.example.com',
+    example: '10.1.2.80',
   },
   'destination.port': {
     name: 'destination.port',
@@ -2072,8 +2073,7 @@ export const semconvFlat = {
   },
   'host.id': {
     name: 'host.id',
-    description:
-      'Unique host ID. For Cloud, this must be the instance_id assigned by the cloud provider. For non-containerized systems, this should be the `machine-id`. See the table below for the sources to use to determine the `machine-id` based on operating system.',
+    description: 'Unique host ID, determined by the first matching source in the priority order.',
     type: 'keyword',
     example: 'fdbf79e8af94cb7f9e8df36789187052',
   },
@@ -4630,6 +4630,16 @@ export const semconvFlat = {
     description: 'Node memory paging faults.',
     type: 'double',
   },
+  'metrics.k8s.node.pid.limit': {
+    name: 'metrics.k8s.node.pid.limit',
+    description: 'Total number of processes/threads allowed by the operating system on the node.',
+    type: 'double',
+  },
+  'metrics.k8s.node.pid.usage': {
+    name: 'metrics.k8s.node.pid.usage',
+    description: 'Total number of existing processes and threads on the node.',
+    type: 'double',
+  },
   'metrics.k8s.node.pod.allocatable': {
     name: 'metrics.k8s.node.pod.allocatable',
     description: 'Amount of pods allocatable on the node.',
@@ -4683,6 +4693,36 @@ export const semconvFlat = {
   'metrics.k8s.persistentvolumeclaim.storage.request': {
     name: 'metrics.k8s.persistentvolumeclaim.storage.request',
     description: 'The storage requested by the PersistentVolumeClaim.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.cpu.limit.current': {
+    name: 'metrics.k8s.pod.cpu.limit.current',
+    description: 'Maximum CPU resource limit currently configured for a running Pod.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.cpu.limit.desired': {
+    name: 'metrics.k8s.pod.cpu.limit.desired',
+    description: 'Maximum CPU resource limit as defined by the Pod spec.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.cpu.limit.utilization': {
+    name: 'metrics.k8s.pod.cpu.limit.utilization',
+    description: 'The ratio of Pod CPU usage to its current CPU limit.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.cpu.request.current': {
+    name: 'metrics.k8s.pod.cpu.request.current',
+    description: 'CPU resource requested currently configured for a running Pod.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.cpu.request.desired': {
+    name: 'metrics.k8s.pod.cpu.request.desired',
+    description: 'CPU resource requested as defined by the Pod spec.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.cpu.request.utilization': {
+    name: 'metrics.k8s.pod.cpu.request.utilization',
+    description: 'The ratio of Pod CPU usage to its current CPU request.',
     type: 'double',
   },
   'metrics.k8s.pod.cpu.time': {
@@ -5447,6 +5487,16 @@ export const semconvFlat = {
   'metrics.rpc.client.call.duration': {
     name: 'metrics.rpc.client.call.duration',
     description: 'Measures the duration of an outgoing Remote Procedure Call (RPC).',
+    type: 'double',
+  },
+  'metrics.rpc.grpc.client.call.duration': {
+    name: 'metrics.rpc.grpc.client.call.duration',
+    description: 'Measures the duration of an outgoing gRPC call.',
+    type: 'double',
+  },
+  'metrics.rpc.grpc.server.call.duration': {
+    name: 'metrics.rpc.grpc.server.call.duration',
+    description: 'Measures the duration of an incoming gRPC call.',
     type: 'double',
   },
   'metrics.rpc.server.call.duration': {
@@ -6378,17 +6428,24 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'com.myservice.EchoService/catchAll',
   },
-  'rpc.request.metadata': {
-    name: 'rpc.request.metadata',
+  'rpc.request.header': {
+    name: 'rpc.request.header',
     description:
-      'RPC request metadata, `<key>` being the normalized RPC metadata key (lowercase), the value being the metadata values.',
+      'RPC request headers or metadata, `<key>` being the normalized header name (lowercase), the value being the header values.',
     type: 'keyword',
     example: '1.2.3.4,1.2.3.5',
   },
-  'rpc.response.metadata': {
-    name: 'rpc.response.metadata',
+  'rpc.response.header': {
+    name: 'rpc.response.header',
     description:
-      'RPC response metadata, `<key>` being the normalized RPC metadata key (lowercase), the value being the metadata values.',
+      'RPC response headers or metadata sent before the response payload, `<key>` being the normalized header name (lowercase), the value being the header values.',
+    type: 'keyword',
+    example: 'attribute_value',
+  },
+  'rpc.response.trailer': {
+    name: 'rpc.response.trailer',
+    description:
+      'RPC response trailers or metadata sent after the response payload, `<key>` being the normalized trailer name (lowercase), the value being the trailer values.',
     type: 'keyword',
     example: 'attribute_value',
   },
@@ -6494,6 +6551,18 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'critical',
   },
+  'service.instance.cost_center.id': {
+    name: 'service.instance.cost_center.id',
+    description: 'Identifier of the cost center associated with the service instance.',
+    type: 'keyword',
+    example: '94002',
+  },
+  'service.instance.cost_center.name': {
+    name: 'service.instance.cost_center.name',
+    description: 'Name of the cost center associated with the service instance.',
+    type: 'keyword',
+    example: 'engineering-platform',
+  },
   'service.instance.id': {
     name: 'service.instance.id',
     description: 'The string ID of the service instance.',
@@ -6571,9 +6640,9 @@ export const semconvFlat = {
   'source.address': {
     name: 'source.address',
     description:
-      'Source address - domain name if available without reverse DNS lookup; otherwise, IP address or UNIX domain socket name.',
+      'Source address as observed at the point of instrumentation - typically an IP address, or a UNIX domain socket name; a domain name only when the sender was addressed by name (for example a peer-to-peer node dialed by hostname), never obtained via reverse DNS lookup.',
     type: 'keyword',
-    example: 'source.example.com',
+    example: '10.1.2.80',
   },
   'source.port': {
     name: 'source.port',
@@ -6606,8 +6675,8 @@ export const semconvFlat = {
     description: 'A developer-facing human readable error message.',
     type: 'keyword',
   },
-  'system.device': {
-    name: 'system.device',
+  'system.device.name': {
+    name: 'system.device.name',
     description: 'Unique identifier for the device responsible for managing paging operations.',
     type: 'keyword',
     example: '/dev/dm-0',
