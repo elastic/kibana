@@ -35,9 +35,8 @@ interface RouteDependencies {
 
 export const registerBulkResolveRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
+  { coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
-  const { allowHttpApiAccess } = config;
   router.post(
     {
       path: '/_bulk_resolve',
@@ -82,9 +81,7 @@ Under certain circumstances, when Kibana is upgraded, saved object migrations ma
       usageStatsClient.incrementSavedObjectsBulkResolve({ request, types }).catch(() => {});
 
       const { savedObjects } = await context.core;
-      if (!allowHttpApiAccess) {
-        throwIfAnyTypeNotVisibleByAPI(types, savedObjects.typeRegistry);
-      }
+      throwIfAnyTypeNotVisibleByAPI(types, savedObjects.typeRegistry);
       const result = await savedObjects.client.bulkResolve(request.body, {
         migrationVersionCompatibility: 'compatible',
       });

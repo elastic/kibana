@@ -19,6 +19,7 @@
     "@kbn/std",
     "@kbn/logging-mocks",
     "@kbn/safer-lodash-set",
+    "@kbn/config",
   ],
   "exclude": [
     "target/**/*",

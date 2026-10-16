@@ -9,10 +9,8 @@
 
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 
-export function setupConfig(allowAccess: boolean = false) {
-  const config = {
-    allowHttpApiAccess: allowAccess,
-  } as SavedObjectConfig;
+export function setupConfig() {
+  const config = {} as SavedObjectConfig;
   return config;
 }
 
