@@ -268,11 +268,49 @@ describe('discovery workflow detection classifier wiring', () => {
       expect(backlog).not.toContain('written_rule_uuids');
     });
 
-    it('writes processed markers through the same internal route as the agent path', () => {
-      const skipped = requireStep('write_skipped_marker').with;
-      const written = requireStep('write_processed_marker').with;
+    it('writes processed markers through the same internal route as the agent path, plus why', () => {
+      const { body: skippedBody, ...skipped } = requireStep('write_skipped_marker').with ?? {};
+      const { body: writtenBody, ...written } = requireStep('write_processed_marker').with ?? {};
+      const { skip, ...markerBody } = skippedBody as Record<string, unknown>;
 
       expect(skipped).toEqual(written);
+      expect(markerBody).toEqual(writtenBody);
+      expect(typeof skip).toBe('string');
+    });
+
+    describe('the reason stored on a skipped marker', () => {
+      const skipExpression = () =>
+        (requireStep('write_skipped_marker').with?.body as Record<string, unknown>).skip;
+      const decisions = [
+        { rule_uuid: 'rule-A', decision: 'needs_agent', reason: 'not_live_member' },
+        {
+          rule_uuid: 'rule-B',
+          decision: 'skip',
+          reason: 'still_breaching',
+          probe_status: 'ok',
+          baseline: { decision: 'background', value: 150, samples: 60 },
+        },
+      ];
+      const forItem = (item: unknown[]) => ({
+        steps: { classify_detections: { output: { decisions } } },
+        foreach: { item },
+      });
+
+      it("is the classifier's decision for the detection's rule", () => {
+        expect(evaluate(skipExpression(), forItem(['detection-B', 'rule-B']))).toEqual(
+          decisions[1]
+        );
+      });
+
+      it('is absent when the classifier has no decision for the rule', () => {
+        expect(evaluate(skipExpression(), forItem(['detection-C', 'rule-C']))).toBeUndefined();
+      });
+
+      it('is read from the rule_uuid column of the backlog query', () => {
+        expect(requireStep('get_skipped_rules_backlog').with?.query).toContain(
+          'KEEP detection_id, rule_uuid'
+        );
+      });
     });
 
     it('lets a stamping failure pass without failing the run', () => {

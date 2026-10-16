@@ -26,12 +26,26 @@ export const detectionsMappings = {
   },
 } satisfies MappingsDefinition;
 
+/** Why the classifier skipped a detection; stored on the processed marker. */
+export interface DetectionSkip {
+  reason: string;
+  probe_status?: string;
+  baseline?: {
+    decision: string;
+    value: number;
+    samples: number;
+    median?: number;
+    threshold?: number;
+  };
+}
+
 /** `_source`-only fields the Detection and Discovery workflows also persist (mappings are `dynamic: false`). */
 interface UnmappedDetectionFields {
   source_id?: string;
   alert_index?: string;
   workflow_execution_id?: string;
   scanned_by?: string;
+  skip?: DetectionSkip;
 }
 
 export type StoredDetection = GetFieldsOf<typeof detectionsMappings> & UnmappedDetectionFields;
