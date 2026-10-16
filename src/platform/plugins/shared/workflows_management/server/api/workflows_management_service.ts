@@ -99,6 +99,7 @@ import type {
   ProcessedWaitForInputFacets,
   ProcessedWaitForInputFilters,
   WaitForInputListResult,
+  WorkflowExecutionStatusItem,
 } from '../services/workflow_execution_query_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
 import { WorkflowSearchService } from '../services/workflow_search_service';
@@ -286,6 +287,7 @@ export class WorkflowsService {
     await this.initializeChangeHistoryService(coreStart);
 
     this.crudService = new WorkflowCrudService({
+      authz: this.pluginsStart.security?.authz,
       getSpaceId: (request) => this.plugins.spaces.spacesService.getSpaceId(request),
       getServiceAccountBindings: () => this.workflowsExecutionEngine.serviceAccountBindings,
       logger: this.logger,
@@ -551,6 +553,14 @@ export class WorkflowsService {
   ): Promise<WorkflowExecutionDto | null> {
     await this.ensureInitialized();
     return this.executionQueryService.getWorkflowExecution(executionId, spaceId, options);
+  }
+
+  public async getWorkflowExecutionStatuses(
+    executionIds: string[],
+    spaceId: string
+  ): Promise<WorkflowExecutionStatusItem[]> {
+    await this.ensureInitialized();
+    return this.executionQueryService.getWorkflowExecutionStatuses(executionIds, spaceId);
   }
 
   public async getChildWorkflowExecutions(

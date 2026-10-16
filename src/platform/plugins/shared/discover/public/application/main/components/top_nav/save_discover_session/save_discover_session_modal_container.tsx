@@ -56,6 +56,7 @@ export const DiscoverSessionSaveModalContainer = ({
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
   const allTabs = useInternalStateSelector(selectAllTabs);
   const persistedDiscoverSession = useInternalStateSelector(selectPersistedDiscoverSession);
+  const draftSessionTitle = useInternalStateSelector((state) => state.draftSessionTitle);
   const savedDataViews = useInternalStateSelector(selectSavedDataViews);
 
   const isEmbeddedEditor = services.embeddableEditor.isEmbeddedEditor();
@@ -63,9 +64,9 @@ export const DiscoverSessionSaveModalContainer = ({
   const timeRestore = persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? false;
   const isTimeBased = allTabs.some((tab) => {
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
-    const tabDataView = tabRuntimeState.currentDataView$.getValue();
+    const tabDataSource = tabRuntimeState.currentDataSource$.getValue();
 
-    if (tabDataView) return tabDataView.isTimeBased();
+    if (tabDataSource) return tabDataSource.isTimeBased();
 
     const tabDataViewDetails = getSerializedSearchSourceDataViewDetails(
       tab.initialInternalState?.serializedSearchSource,
@@ -208,7 +209,7 @@ export const DiscoverSessionSaveModalContainer = ({
       onSave={onSave}
       savedObjectsTagging={services.savedObjectsTagging}
       sessionId={initialCopyOnSave ? undefined : persistedDiscoverSession?.id}
-      title={persistedDiscoverSession?.title ?? ''}
+      title={persistedDiscoverSession?.title ?? draftSessionTitle ?? ''}
     />
   );
 };

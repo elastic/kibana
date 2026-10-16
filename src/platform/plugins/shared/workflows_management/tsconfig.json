@@ -141,6 +141,7 @@
     "@kbn/es",
     "@kbn/test-es-server",
     "@kbn/core-security-common",
+    "@kbn/core-http-browser-mocks",
   ],
   "exclude": ["target/**/*"]
 }

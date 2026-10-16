@@ -11,14 +11,16 @@ import type {
   ChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
 import { ChatCompletionEventType } from '@kbn/inference-common';
+import type { OpenAIChatCompletionChunkDelta, OpenAIChatCompletionMessage } from './types';
 
 export function chunkFromOpenAI(chunk: OpenAI.ChatCompletionChunk): ChatCompletionChunkEvent {
-  const delta = chunk.choices[0].delta;
+  const delta: OpenAIChatCompletionChunkDelta = chunk.choices[0].delta;
 
   return {
     type: ChatCompletionEventType.ChatCompletionChunk,
     content: delta.content ?? '',
     refusal: delta.refusal ?? undefined,
+    reasoning: delta.reasoning ?? undefined,
     tool_calls:
       delta.tool_calls?.map((toolCall) => {
         return {
@@ -37,13 +39,15 @@ export function tokenCountFromOpenAI(
   completionUsage: OpenAI.CompletionUsage,
   model?: string
 ): ChatCompletionTokenCountEvent {
+  const thinking = completionUsage.completion_tokens_details?.reasoning_tokens;
   return {
     type: ChatCompletionEventType.ChatCompletionTokenCount,
     tokens: {
-      completion: completionUsage.completion_tokens,
+      completion: completionUsage.completion_tokens - (thinking ?? 0),
       prompt: completionUsage.prompt_tokens,
       total: completionUsage.total_tokens,
       cached: completionUsage.prompt_tokens_details?.cached_tokens,
+      thinking,
     },
     ...(model ? { model } : {}),
   };
@@ -52,11 +56,12 @@ export function tokenCountFromOpenAI(
 export function chunkFromCompletionResponse(
   completion: OpenAI.ChatCompletion
 ): ChatCompletionChunkEvent {
-  const message = completion.choices[0].message;
+  const message: OpenAIChatCompletionMessage = completion.choices[0].message;
   return {
     type: ChatCompletionEventType.ChatCompletionChunk,
     content: message.content ?? '',
     refusal: message.refusal ?? undefined,
+    reasoning: message.reasoning ?? undefined,
     tool_calls:
       message.tool_calls?.map((toolCall, i) => {
         return {

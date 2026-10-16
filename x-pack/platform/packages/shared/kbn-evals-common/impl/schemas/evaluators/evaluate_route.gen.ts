@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { EvaluationSubject, Model } from '../common_attributes.gen';
+import { EvaluationSubject, Model, Direction } from '../common_attributes.gen';
 
 export const EvaluateResultEvaluator = lazySchema(() =>
   z.object({
@@ -49,6 +49,12 @@ export const EvaluateResultScore = lazySchema(() =>
     label: z.string().max(1024).optional(),
     explanation: z.string().max(8192).optional(),
     metadata: z.object({}).catchall(z.unknown()).optional(),
+    /**
+     * This score's own direction, for evaluators whose scores do not all share one. Absent means the evaluator's `direction` applies.
+     */
+    direction: Direction.optional().describe(
+      "This score's own direction, for evaluators whose scores do not all share one. Absent means the evaluator's `direction` applies."
+    ),
   })
 );
 export type EvaluateResultScore = z.infer<typeof EvaluateResultScore>;

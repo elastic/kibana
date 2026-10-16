@@ -18,6 +18,8 @@ import {
   UpdateObservableRequestRt,
   type BulkAddObservablesRequest,
   BulkAddObservablesRequestRt,
+  type BulkDeleteObservablesRequest,
+  BulkDeleteObservablesRequestRt,
   type ObservablePost,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
@@ -437,4 +439,82 @@ export const bulkAddObservables = async (
 
   emitObservablesAddedEvent(clientArgs, caseForEmit, observablesForEmit);
   return decodedCase;
+};
+
+export const bulkDeleteObservables = async (
+  params: BulkDeleteObservablesRequest,
+  clientArgs: CasesClientArgs
+) => {
+  const {
+    services: { caseService, licensingService, userActionService },
+    authorization,
+    user,
+  } = clientArgs;
+
+  const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+  if (!hasPlatinumLicenseOrGreater) {
+    throw Boom.forbidden(
+      'In order to delete observables from cases, you must be subscribed to an Elastic Platinum license'
+    );
+  }
+
+  licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
+
+  const paramArgs = decodeWithExcessOrThrow(BulkDeleteObservablesRequestRt)(params);
+  const retrievedCase = await caseService.getCase({ id: paramArgs.caseId });
+  await ensureUpdateAuthorized(authorization, retrievedCase);
+
+  const idsToDelete = new Set(paramArgs.observableIds);
+  const currentObservables = retrievedCase.attributes.observables ?? [];
+  const currentIdSet = new Set(currentObservables.map(({ id }) => id));
+
+  const missingIds = [...idsToDelete].filter((id) => !currentIdSet.has(id));
+  if (missingIds.length > 0) {
+    throw Boom.notFound(
+      `Failed to bulk delete observables: observable ids not found: ${missingIds.join(', ')}`
+    );
+  }
+
+  const removedObservables = currentObservables.filter((observable) =>
+    idsToDelete.has(observable.id)
+  );
+  const updatedObservables = currentObservables.filter(
+    (observable) => !idsToDelete.has(observable.id)
+  );
+  const removedCount = removedObservables.length;
+
+  const updatedCase = await caseService.patchCase({
+    caseId: retrievedCase.id,
+    originalCase: retrievedCase,
+    version: retrievedCase.version,
+    updatedAttributes: {
+      observables: updatedObservables,
+      total_observables: updatedObservables.length,
+    },
+  });
+
+  await userActionService.creator.createUserAction({
+    userAction: {
+      type: UserActionTypes.observables,
+      caseId: retrievedCase.id,
+      owner: retrievedCase.attributes.owner,
+      user,
+      payload: {
+        observables: { count: removedCount, actionType: 'delete' },
+      },
+    },
+  });
+
+  const res = flattenCaseSavedObject({
+    savedObject: {
+      ...retrievedCase,
+      ...updatedCase,
+      attributes: { ...retrievedCase.attributes, ...updatedCase?.attributes },
+      references: retrievedCase.references,
+    },
+  });
+
+  const result = decodeOrThrow(CaseRt)(res);
+  return result;
 };

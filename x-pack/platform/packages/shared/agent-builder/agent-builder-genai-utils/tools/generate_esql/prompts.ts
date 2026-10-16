@@ -14,14 +14,20 @@ import { getEsqlInstructions } from './prompts/instructions_template';
 import type { EsqlLoadedDocumentation } from './documentation';
 import { EsqlDocEntry } from './documentation';
 
+// followed by a blank line, so that the prompt is unchanged when there is no additional context
+const formatAdditionalContext = (additionalContext?: string): string =>
+  additionalContext ? `<additional-context>\n${additionalContext}\n</additional-context>\n\n` : '';
+
 export const createRequestDocumentationPrompt = ({
   nlQuery,
   resource,
   documentation,
+  additionalContext,
 }: {
   nlQuery: string;
   resource: ResolvedResourceWithSampling;
   documentation: EsqlLoadedDocumentation;
+  additionalContext?: string;
 }): BaseMessageLike[] => {
   return [
     [
@@ -42,7 +48,7 @@ ${getDocumentationSection({ resource, documentation })}`,
 ${nlQuery}
 </user-query>
 
-${formatResourceWithSampledValues({ resource })}
+${formatAdditionalContext(additionalContext)}${formatResourceWithSampledValues({ resource })}
 
 Now, based on that information, request documentation from the ES|QL handbook to help you get the right information needed to generate a query.`,
     ],
@@ -54,9 +60,11 @@ Now, based on that information, request documentation from the ES|QL handbook to
 export const createRequestDocumentationPromptNoResource = ({
   nlQuery,
   documentation,
+  additionalContext,
 }: {
   nlQuery: string;
   documentation: EsqlLoadedDocumentation;
+  additionalContext?: string;
 }): BaseMessageLike[] => {
   return [
     [
@@ -76,7 +84,9 @@ ${getDocumentationSection({ documentation })}`,
 ${nlQuery}
 </user-query>
 
-Now, based on that information, request documentation from the ES|QL handbook to help you get the right information needed to generate a query.`,
+${formatAdditionalContext(
+  additionalContext
+)}Now, based on that information, request documentation from the ES|QL handbook to help you get the right information needed to generate a query.`,
     ],
   ];
 };
@@ -100,10 +110,13 @@ export const createGenerateEsqlPrompt = ({
   rowLimit?: number;
   disableNamedParams?: boolean;
 }): BaseMessageLike[] => {
-  // always add the TS extended documentation if the agent requested doc about the command
-  const tsDocRequested = previousActions.some(
-    (a) => isRequestDocumentationAction(a) && a.requestedKeywords.includes('TS')
-  );
+  // always add the extended documentation of a command if the agent requested doc about it
+  const isDocRequested = (command: string) =>
+    previousActions.some(
+      (a) => isRequestDocumentationAction(a) && a.requestedKeywords.includes(command)
+    );
+  const tsDocRequested = isDocRequested('TS');
+  const promqlDocRequested = isDocRequested('PROMQL');
 
   return [
     [
@@ -121,6 +134,7 @@ ${getDocumentationSection({
   resource,
   documentation,
   tsDocRequested,
+  promqlDocRequested,
 })}
 
 ## Instructions
@@ -167,10 +181,12 @@ const getDocumentationSection = ({
   resource,
   documentation,
   tsDocRequested = false,
+  promqlDocRequested = false,
 }: {
   resource?: ResolvedResourceWithSampling;
   documentation: EsqlLoadedDocumentation;
   tsDocRequested?: boolean;
+  promqlDocRequested?: boolean;
 }): string => {
   const isTsdb = resource?.isTsdb || tsDocRequested;
 
@@ -185,7 +201,13 @@ ${
 ${documentation.getDocContent(EsqlDocEntry.tsQueries)}
 </tsds-documentation>`
     : ''
-}
+}${
+    promqlDocRequested
+      ? `\n<promql-documentation>
+${documentation.getDocContent(EsqlDocEntry.promqlQueries)}
+</promql-documentation>`
+      : ''
+  }
 
 <esql-examples>
 ${documentation.getDocContent(EsqlDocEntry.examples)}

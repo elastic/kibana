@@ -179,14 +179,14 @@ const resourceManagerTags = () =>
     );
 
 const clusterRef = {
-  projectId: projectId(),
-  location: location(),
-  clusterId: clusterId(),
+  projectId: lazySchema(() => projectId()),
+  location: lazySchema(() => location()),
+  clusterId: lazySchema(() => clusterId()),
 };
 
 const nodePoolRef = {
   ...clusterRef,
-  nodePoolId: nodePoolId(),
+  nodePoolId: lazySchema(() => nodePoolId()),
 };
 
 /**
@@ -195,24 +195,34 @@ const nodePoolRef = {
  * (`totalMinNodeCount`/`totalMaxNodeCount`). The two families are mutually exclusive.
  */
 const autoscalingFields = {
-  minNodeCount: nodeCount(
-    'Minimum nodes PER ZONE. For a regional cluster the pool spans several zones, so the real floor is this number times the zone count. Mutually exclusive with totalMinNodeCount.'
-  ).optional(),
-  maxNodeCount: nodeCount(
-    'Maximum nodes PER ZONE. Must be >= minNodeCount. Mutually exclusive with totalMaxNodeCount.'
-  ).optional(),
-  totalMinNodeCount: nodeCount(
-    'Minimum nodes across ALL zones of the pool. Mutually exclusive with minNodeCount.'
-  ).optional(),
-  totalMaxNodeCount: nodeCount(
-    'Maximum nodes across ALL zones of the pool. Must be >= totalMinNodeCount. Mutually exclusive with maxNodeCount.'
-  ).optional(),
-  locationPolicy: z
-    .enum(['BALANCED', 'ANY'])
-    .optional()
-    .describe(
-      'How the autoscaler spreads new nodes across zones: "BALANCED" keeps zones even (default), "ANY" prefers whichever zone has capacity (recommended with Spot VMs).'
-    ),
+  minNodeCount: lazySchema(() =>
+    nodeCount(
+      'Minimum nodes PER ZONE. For a regional cluster the pool spans several zones, so the real floor is this number times the zone count. Mutually exclusive with totalMinNodeCount.'
+    ).optional()
+  ),
+  maxNodeCount: lazySchema(() =>
+    nodeCount(
+      'Maximum nodes PER ZONE. Must be >= minNodeCount. Mutually exclusive with totalMaxNodeCount.'
+    ).optional()
+  ),
+  totalMinNodeCount: lazySchema(() =>
+    nodeCount(
+      'Minimum nodes across ALL zones of the pool. Mutually exclusive with minNodeCount.'
+    ).optional()
+  ),
+  totalMaxNodeCount: lazySchema(() =>
+    nodeCount(
+      'Maximum nodes across ALL zones of the pool. Must be >= totalMinNodeCount. Mutually exclusive with maxNodeCount.'
+    ).optional()
+  ),
+  locationPolicy: lazySchema(() =>
+    z
+      .enum(['BALANCED', 'ANY'])
+      .optional()
+      .describe(
+        'How the autoscaler spreads new nodes across zones: "BALANCED" keeps zones even (default), "ANY" prefers whichever zone has capacity (recommended with Spot VMs).'
+      )
+  ),
 };
 
 const hasPerZoneBounds = (v: { minNodeCount?: number; maxNodeCount?: number }) =>

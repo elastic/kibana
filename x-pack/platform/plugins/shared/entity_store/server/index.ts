@@ -38,6 +38,12 @@ export type {
   EntityStoreCRUDClient,
 } from './types';
 export type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
+export type {
+  RegistrableEntityDefinition,
+  RegisteredEntityDefinition,
+  RegisterResult,
+  EntityDefinitionsClient,
+} from './domain/definitions/registry';
 export { EntityMaintainerTaskStatus } from './tasks/entity_maintainers/types';
 export type {
   EntityUpdateClient,
@@ -53,6 +59,11 @@ export { isEntityTypeCreatableFromSingleDocument } from '../common/domain/defini
 export type { EntityMetadataClient } from './domain/entity_metadata';
 export type { RelationshipsClient } from './domain/relationships';
 export type { ResolutionClient } from './domain/resolution';
+export {
+  NAMESPACE_PRIORITY,
+  selectTarget,
+  type TargetSelectionEntity,
+} from './domain/resolution/target_selection';
 export type { BulkDropTypeSummary } from './infra/elasticsearch/bulk_drop_aggregator';
 export { formatBulkDropSummary } from './infra/elasticsearch/bulk_drop_aggregator';
 export { getLatestEntitiesIndexName, getEntitiesAlias, ENTITY_LATEST } from '../common';

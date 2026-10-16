@@ -52,6 +52,20 @@ groups:
           ech: beta
           self: beta
 
+      - setting: i18n.detectBrowserLocale
+        description: |
+          When `true` (the default), {{kib}} uses the browser's `Accept-Language`
+          preferences to pick the display language for users who have not chosen
+          one and when `i18n.defaultLocale` is left at `en`. Set to `false` to
+          always fall back to `i18n.defaultLocale` instead. Per-user language
+          selection and the `KBN_LOCALE` cookie are not affected.
+        datatype: boolean
+        default: "true"
+        applies_to:
+          stack: beta 9.5+
+          ech: beta
+          self: beta
+
       - setting: i18n.locale
         description: |
           Set the {{kib}} interface language.

@@ -31,6 +31,7 @@ export interface ProposalsSetupDependencies {
   features: FeaturesPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
+  /** Registers the proposal attachment type and the `proposals.create` agent tool. */
   agentBuilder: AgentBuilderPluginSetup;
 }
 
