@@ -143,7 +143,7 @@ const DeltaCaption: React.FC<{ delta: number }> = ({ delta }) => {
 };
 
 const StatusCaption: React.FC<{
-  iconType: 'filterInclude' | 'checkInCircleFilled';
+  iconType: 'filterInclude' | 'checkCircleFill';
   label: string;
   color: string;
 }> = ({ iconType, label, color }) => (
@@ -432,7 +432,7 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
                 `}
               >
                 <StatusCaption
-                  iconType="checkInCircleFilled"
+                  iconType="checkCircleFill"
                   label={ALL_CLEAR}
                   color={euiTheme.colors.textSuccess}
                 />

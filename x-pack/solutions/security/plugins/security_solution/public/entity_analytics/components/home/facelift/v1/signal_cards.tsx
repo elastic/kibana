@@ -81,7 +81,7 @@ const AnomalyExplorerIcon: React.FC<{
           }
         `}
       >
-        <EuiIcon type="popout" size="m" color="primary" aria-hidden={true} />
+        <EuiIcon type="external" size="m" color="primary" aria-hidden={true} />
       </button>
     </EuiToolTip>
   );

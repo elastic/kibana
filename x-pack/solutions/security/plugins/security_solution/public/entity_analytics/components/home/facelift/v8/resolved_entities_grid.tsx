@@ -1275,7 +1275,7 @@ const FaceliftEntitiesDataGrid: React.FC<FaceliftEntitiesDataGridProps> = ({
             <EuiButtonIcon
               size="xs"
               color="text"
-              iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+              iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
               aria-label={expandLabel}
               aria-expanded={isExpanded}
               onClick={() => toggleExpanded(row.id)}
@@ -1395,7 +1395,7 @@ const FaceliftEntitiesDataGrid: React.FC<FaceliftEntitiesDataGridProps> = ({
                     button={
                       <EuiButtonEmpty
                         size="xs"
-                        iconType="arrowDown"
+                        iconType="chevronSingleDown"
                         iconSide="right"
                         flush="left"
                         onClick={() => setIsBulkActionsOpen((open) => !open)}

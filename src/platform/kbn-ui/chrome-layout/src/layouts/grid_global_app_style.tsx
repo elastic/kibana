@@ -131,7 +131,7 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: C
       ${logicalCSS('left', layoutVar('application.left', '0px'))};
       ${logicalCSS('right', layoutVar('application.right', '0px'))};
       ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
-      ${chromeStyle === 'project' && `border-radius: ${_euiTheme.border.radius.medium};`}
+      ${chromeStyle === 'project' && `border-radius: ${_euiTheme.border.radius.frame};`}
     }
 
     .euiFlyout[class*='right'] {
@@ -139,20 +139,31 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: C
       // but not for side-by-side child flyouts since they aren't positioned at the rightmost edge
       ${chromeStyle === 'project' &&
       `&:not([data-managed-flyout-layout-mode="side-by-side"][data-managed-flyout-level="child"]) {
-          border-top-right-radius: ${_euiTheme.border.radius.medium};
-          border-bottom-right-radius: ${_euiTheme.border.radius.medium};
+          border-top-right-radius: ${_euiTheme.border.radius.frame};
+          border-bottom-right-radius: ${_euiTheme.border.radius.frame};
+          // EUI clips overlay-right flyout shadows with a sharp polygon; round it to match
+          // the framed radius so the shadow doesn't square off at the top/bottom-right.
+          clip-path: inset(
+            0 0 0 -50% round 0 ${_euiTheme.border.radius.frame}
+              ${_euiTheme.border.radius.frame} 0
+          ) !important;
           .euiFlyoutFooter {
-            border-bottom-right-radius: ${_euiTheme.border.radius.medium};
+            border-bottom-right-radius: ${_euiTheme.border.radius.frame};
           }
+        }
+        // Preserve EUI's unclipped shadow when a child flyout is stacked on top.
+        &.euiFlyout--hasChild {
+          clip-path: none !important;
         }`}
     }
 
-    // When overlay is above the header (full-viewport modal style), only border-radius
-    // is overridden; positioning is left to the flyout's reference container.
+    // When overlay is above the header (full-viewport modal style), restore square corners
+    // and EUI's original shadow clip; positioning is left to the flyout's reference container.
     .euiOverlayMask[data-relative-to-header='above']
       + [data-euiportal='true']
       .euiFlyout[class*='right'] {
       border-radius: 0;
+      clip-path: polygon(-50% 0, 100% 0, 100% 100%, -50% 100%) !important;
     }
   }
 
@@ -180,8 +191,12 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: C
     left: ${layoutVar('application.left', '0px')} !important; /* override EUI inline style */
     right: ${layoutVar('application.right', '0px')} !important; /* override EUI inline style */
     bottom: ${layoutVar('application.bottom', '0px')} !important; /* override EUI inline style */
-    border-bottom-left-radius: ${_euiTheme.border.radius.medium} !important;
-    border-bottom-right-radius: ${_euiTheme.border.radius.medium} !important;
+    border-bottom-left-radius: ${chromeStyle === 'project'
+      ? _euiTheme.border.radius.frame
+      : _euiTheme.border.radius.medium} !important;
+    border-bottom-right-radius: ${chromeStyle === 'project'
+      ? _euiTheme.border.radius.frame
+      : _euiTheme.border.radius.medium} !important;
     box-shadow: ${_euiTheme.shadows.xs.down} !important;
     clip-path: inset(0 -10px -10px -10px) !important;
   }

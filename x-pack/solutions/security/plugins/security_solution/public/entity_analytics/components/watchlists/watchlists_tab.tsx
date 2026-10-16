@@ -164,7 +164,7 @@ export const WatchlistsTab: React.FC = () => {
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButton
-            iconType="plusInCircle"
+            iconType="plusCircle"
             fill
             onClick={handleCreateClick}
             isDisabled={isLoading || !!error || !hasAllRequired}

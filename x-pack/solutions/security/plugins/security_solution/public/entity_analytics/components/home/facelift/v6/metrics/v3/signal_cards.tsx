@@ -385,7 +385,7 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
         block-size: 100%;
         padding: ${CARD_PADDING}px;
         border: 1px solid ${borderColor};
-        border-radius: ${euiTheme.border.radius.medium};
+        border-radius: ${euiTheme.border.radius.panel};
         background: ${tileBackground};
         opacity: ${dimmed ? DIMMED_OPACITY : 1};
         cursor: ${interactive ? 'pointer' : 'default'};

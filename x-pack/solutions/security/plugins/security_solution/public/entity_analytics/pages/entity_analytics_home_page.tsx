@@ -103,14 +103,9 @@ const ADD_INTEGRATIONS_BUTTON_LABEL = i18n.translate(
   { defaultMessage: 'Add integrations' }
 );
 
-const HUNT_WITH_AI_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.homePage.huntWithAiButtonLabel',
-  { defaultMessage: 'Hunt with AI' }
-);
-
-const GENERATE_EXECUTIVE_BRIEF_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.homePage.generateExecutiveBriefButtonLabel',
-  { defaultMessage: 'Generate executive brief' }
+const GENERATE_AI_BRIEF_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.homePage.generateAiBriefButtonLabel',
+  { defaultMessage: 'Generate AI brief' }
 );
 
 const UEBA_INTEGRATIONS_PATH = '/app/integrations/browse/security/advanced_analytics_ueba';
@@ -167,7 +162,7 @@ const EntityAnalyticsHomePageContent = () => {
   const spaceId = useSpaceId();
   const { dataView, isLoading: dataViewLoading } = useEntityStoreDataView(spaceId);
   const [faceliftVersion] = useActiveFaceliftVersion();
-  const { chrome, http } = useKibana().services;
+  const { agentBuilder, chrome, http } = useKibana().services;
   const uebaIntegrationsHref = http.basePath.prepend(UEBA_INTEGRATIONS_PATH);
 
   /**
@@ -220,6 +215,10 @@ const EntityAnalyticsHomePageContent = () => {
     navigateTo({ url: watchlistsManagementHref });
   }, [navigateTo, watchlistsManagementHref]);
 
+  const openAgentBuilder = useCallback(() => {
+    agentBuilder?.openChat({ newConversation: true, sessionTag: 'security' });
+  }, [agentBuilder]);
+
   const selectedWatchlistId = useMemo(() => {
     const params = new URLSearchParams(search);
     return params.get('watchlistId') || undefined;
@@ -251,32 +250,19 @@ const EntityAnalyticsHomePageContent = () => {
     if (isFaceliftV8OrLater(faceliftVersion)) {
       const isV9 = faceliftVersion === 'v9';
       return {
-        // v.9: Hunt with AI is the primary action, Generate executive brief sits beside it.
+        // v.9: Generate AI brief is the primary action; Hunt with AI lives in the metrics header.
         ...(isV9
           ? {
               primaryActionItem: {
-                id: 'entityAnalyticsHuntWithAi',
-                label: HUNT_WITH_AI_BUTTON_LABEL,
-                iconType: 'productAgent',
-                // Prototype: no-op until the AI hunt flow is wired.
-                run: () => undefined,
-                testId: 'eaFaceliftHuntWithAiButton',
+                id: 'entityAnalyticsGenerateAiBrief',
+                label: GENERATE_AI_BRIEF_BUTTON_LABEL,
+                iconType: 'sparkles',
+                run: openAgentBuilder,
+                testId: 'eaFaceliftGenerateAiBriefButton',
               },
             }
           : {}),
         items: [
-          ...(isV9
-            ? [
-                {
-                  id: 'entityAnalyticsGenerateExecutiveBrief',
-                  label: GENERATE_EXECUTIVE_BRIEF_BUTTON_LABEL,
-                  iconType: 'sparkles' as const,
-                  // Prototype: no-op until the executive brief is wired.
-                  run: () => undefined,
-                  testId: 'eaFaceliftGenerateExecutiveBriefButton',
-                },
-              ]
-            : []),
           {
             id: 'addIntegrations',
             label: ADD_INTEGRATIONS_BUTTON_LABEL,
@@ -327,7 +313,7 @@ const EntityAnalyticsHomePageContent = () => {
         primaryActionItem: {
           id: 'entityAnalyticsCreateWatchlist',
           label: CREATE_WATCHLIST_BUTTON_LABEL,
-          iconType: 'plusInCircle',
+          iconType: 'plusCircle',
           href: watchlistsManagementHref,
           run: openCreateWatchlist,
           testId: 'eaFaceliftCreateWatchlistButton',
@@ -340,6 +326,7 @@ const EntityAnalyticsHomePageContent = () => {
   }, [
     faceliftVersion,
     managementHref,
+    openAgentBuilder,
     openCreateWatchlist,
     uebaIntegrationsHref,
     watchlistsManagementHref,

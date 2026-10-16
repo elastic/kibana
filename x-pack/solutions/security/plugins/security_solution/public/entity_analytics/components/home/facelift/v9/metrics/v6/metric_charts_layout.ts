@@ -17,7 +17,7 @@ export const METRIC_CARD_HEIGHT = 180;
 export const SIMPLIFIED_METRIC_CARD_HEIGHT = 156;
 
 /** Gap between separate metric cards. */
-export const METRIC_CARD_GAP = 8;
+export const METRIC_CARD_GAP = 12;
 
 /** Full metrics panel height (single row of cards). */
 export const METRIC_CHARTS_BODY_HEIGHT = METRIC_CARD_HEIGHT;

@@ -1286,7 +1286,7 @@ export const ResolvedEntitiesGrid: React.FC<ResolvedEntitiesGridProps> = ({
           <EuiButtonIcon
             size="xs"
             color="text"
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             aria-label={isExpanded ? `Collapse ${row.name} records` : `Expand ${row.name} records`}
             aria-expanded={isExpanded}
             onClick={() => toggleExpanded(row.id)}
@@ -1407,7 +1407,7 @@ export const ResolvedEntitiesGrid: React.FC<ResolvedEntitiesGridProps> = ({
                     button={
                       <EuiButtonEmpty
                         size="xs"
-                        iconType="arrowDown"
+                        iconType="chevronSingleDown"
                         iconSide="right"
                         flush="left"
                         onClick={() => setIsBulkActionsOpen((open) => !open)}

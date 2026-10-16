@@ -38,7 +38,7 @@ const getSidePanelWrapperStyles = (euiThemeContext: UseEuiTheme) => css`
   margin-top: ${layoutVar('application.marginTop', '0px')};
   margin-bottom: ${layoutVar('application.marginBottom', '0px')};
   background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
-  border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
+  border-radius: ${euiThemeContext.euiTheme.border.radius.frame};
 
   // use outline for consistency with the application layout style
   outline: ${getHighContrastBorder(euiThemeContext)};
@@ -122,6 +122,7 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
         css={wrapperStyles}
         data-test-subj={`${sidePanelClassName} ${sidePanelClassName}_${openerNode.id}`}
         hasShadow={false}
+        hasBorder={false}
         role="region"
         color="transparent"
       >

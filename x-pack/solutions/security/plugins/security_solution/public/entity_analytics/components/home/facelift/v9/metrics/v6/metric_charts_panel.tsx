@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiLink,
+  EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { AiButton } from '@kbn/shared-ux-ai-components';
+import { useKibana } from '../../../../../../../common/lib/kibana';
 
 import type {
   ActiveFilter,
@@ -36,10 +39,13 @@ const HOW_IT_WORKS_LABEL = i18n.translate(
   { defaultMessage: 'How it works?' }
 );
 
-const onHowItWorksClick = () => {
-  // Prototype-only control; no destination yet.
-};
+const HUNT_WITH_AI_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.overview.huntWithAi',
+  { defaultMessage: 'Hunt with AI' }
+);
 
+const HOW_IT_WORKS_HREF =
+  'https://www.elastic.co/docs/solutions/security/advanced-entity-analytics/entities-that-need-your-attention';
 export interface MetricChartsPanelV6Props {
   activeFilter: ActiveFilter | null;
   cards: SignalCardData[];
@@ -63,6 +69,10 @@ export const MetricChartsPanelV6: React.FC<MetricChartsPanelV6Props> = ({
   onAddCardToTimeline,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { agentBuilder } = useKibana().services;
+  const onHuntWithAiClick = useCallback(() => {
+    agentBuilder?.openChat({ newConversation: true, sessionTag: 'security' });
+  }, [agentBuilder]);
 
   return (
     <div
@@ -127,16 +137,36 @@ export const MetricChartsPanelV6: React.FC<MetricChartsPanelV6Props> = ({
                 justify-content: center;
               `}
             >
-              <EuiButtonEmpty
-                size="s"
-                iconType="popout"
-                iconSide="right"
-                flush="right"
-                onClick={onHowItWorksClick}
-                data-test-subj="eaFaceliftHowItWorksButton"
-              >
-                {HOW_IT_WORKS_LABEL}
-              </EuiButtonEmpty>
+              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <EuiLink
+                      href={HOW_IT_WORKS_HREF}
+                      target="_blank"
+                      external
+                      data-test-subj="eaFaceliftHowItWorksLink"
+                    >
+                      {HOW_IT_WORKS_LABEL}
+                    </EuiLink>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <AiButton
+                    variant="outlined"
+                    size="s"
+                    iconType="productAgent"
+                    css={css`
+                      /* AiButton still hard-codes the deprecated 4px radius; EUI buttons use
+                       * the control token. The gradient border inherits this radius. */
+                      border-radius: ${euiTheme.border.radius.control};
+                    `}
+                    onClick={onHuntWithAiClick}
+                    data-test-subj="eaFaceliftHuntWithAiButton"
+                  >
+                    {HUNT_WITH_AI_LABEL}
+                  </AiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

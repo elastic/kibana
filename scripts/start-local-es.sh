@@ -5,4 +5,4 @@
 export PATH="/Users/iryna/.local/share/fnm/node-versions/v24.18.0/installation/bin:/usr/bin:/bin:/opt/homebrew/bin:$PATH"
 cd "$(dirname "$0")/.."
 exec node scripts/es snapshot --license trial \
-  -E "path.data=$(pwd)/.es/persistent-data-ea-facelift-2026-09"
+  -E "path.data=$(pwd)/.es/persistent-data-ea-facelift-2026-10"

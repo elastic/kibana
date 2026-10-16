@@ -218,7 +218,7 @@ export const EntityRowActions: React.FC<EntityRowActionsProps> = ({ row, canUseT
           button={
             <EuiToolTip content={MORE_ACTIONS} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="boxesHorizontal"
+                iconType="ellipsis"
                 color="text"
                 aria-label={MORE_ACTIONS}
                 onClick={() => setIsMoreOpen((open) => !open)}

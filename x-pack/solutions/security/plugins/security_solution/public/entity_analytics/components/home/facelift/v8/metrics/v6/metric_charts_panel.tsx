@@ -129,7 +129,7 @@ export const MetricChartsPanelV6: React.FC<MetricChartsPanelV6Props> = ({
             >
               <EuiButtonEmpty
                 size="s"
-                iconType="popout"
+                iconType="external"
                 iconSide="right"
                 flush="right"
                 onClick={onHowItWorksClick}

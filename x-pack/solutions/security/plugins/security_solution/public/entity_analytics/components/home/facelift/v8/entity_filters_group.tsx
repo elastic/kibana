@@ -562,7 +562,7 @@ export const EntityFiltersGroup: React.FC<EntityFiltersGroupProps> = ({
               <EuiButton
                 size="s"
                 fullWidth
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
