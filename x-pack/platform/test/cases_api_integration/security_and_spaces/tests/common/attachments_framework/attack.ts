@@ -436,21 +436,15 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       describe('onDelete', () => {
-        // A dedicated index keeps the seeded attacks away from the alerts-as-data resources.
-        const READABLE_ATTACK_INDEX = 'cases-attack-on-delete-test';
-
-        before(async () => {
-          await es.bulk({
-            refresh: true,
-            operations: Object.entries(attackAlertIds).flatMap(([id, alertIds]) => [
-              { index: { _index: READABLE_ATTACK_INDEX, _id: id } },
-              { 'kibana.alert.attack_discovery.alert_ids': alertIds },
-            ]),
+        // The removal reads each attack's own alert ids, which the shared fixture omits. Seeding
+        // them on the real fixture index matters: an attack outside the attack discovery families
+        // is refused at attach time, so a bespoke index would never reach the removal at all.
+        beforeEach(async () => {
+          await indexAttackDocuments({
+            es,
+            attackIds: [ATTACK_A_ID, ATTACK_B_ID],
+            alertIdsByAttackId: attackAlertIds,
           });
-        });
-
-        after(async () => {
-          await es.indices.delete({ index: READABLE_ATTACK_INDEX, ignore_unavailable: true });
         });
 
         const attackIdsOf = (attachments: Attachment[]): Array<string | string[] | undefined> =>
@@ -459,9 +453,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .map(({ attachmentId }) => attachmentId);
 
         it('takes the alerts only the removed attack claims when it is bulk deleted', async () => {
-          const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks(
-            READABLE_ATTACK_INDEX
-          );
+          const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks();
 
           await bulkDeleteAttachments({
             supertest,
@@ -475,9 +467,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('takes the alerts with the attack when it is deleted through the public delete API', async () => {
-          const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks(
-            READABLE_ATTACK_INDEX
-          );
+          const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks();
 
           await deleteComment({ supertest, caseId, commentId: attackAttachmentId(ATTACK_A_ID) });
 
@@ -487,9 +477,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('keeps every alert when related attachments are excluded', async () => {
-          const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks(
-            READABLE_ATTACK_INDEX
-          );
+          const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks();
 
           await bulkDeleteAttachments({
             supertest,
