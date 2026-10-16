@@ -72,6 +72,22 @@ describe('dashboard rules', () => {
       ]);
     });
 
+    it('counts each section as a full-width row of the top level', () => {
+      const kpi = metric('a', { x: 0, y: 0, w: 24, h: 5 });
+      expect(findViolations(dashboard([kpi]), ['layout_gap'])).toEqual([]);
+      const violations = findViolations(
+        dashboard([
+          kpi,
+          section('s1', 'Traffic', 5, [xy('b', { x: 0, y: 0, w: 48, h: 10 })]),
+          xy('c', { x: 0, y: 6, w: 24, h: 10 }),
+        ]),
+        ['layout_gap']
+      );
+      expect(violations.map(({ detail }) => detail)).toEqual([
+        'empty cell at x=24 y=0 in the top level, above other panels',
+      ]);
+    });
+
     it('accepts full rows and a partly filled last row', () => {
       expect(
         findViolations(
