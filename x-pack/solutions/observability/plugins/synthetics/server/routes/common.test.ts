@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { getSavedObjectKqlFilter, parseArrayFilters, parseMappingKey, QuerySchema } from './common';
+import {
+  getSavedObjectKqlFilter,
+  getScheduleKqlFilter,
+  parseArrayFilters,
+  parseMappingKey,
+  QuerySchema,
+  scheduleBucketLabel,
+} from './common';
 
 describe('common utils', () => {
   it('tests parseArrayFilters', () => {
@@ -33,10 +40,10 @@ describe('common utils', () => {
       monitorTypes: ['type1', 'type2'],
       projects: ['project1', 'project2'],
       monitorQueryIds: ['query1', 'query2'],
-      schedules: ['schedule1', 'schedule2'],
+      schedules: ['10s', '5'],
     });
     expect(filters.filtersStr).toMatchInlineSnapshot(
-      `"synthetics-monitor-multi-space.attributes.tags:(\\"tag1\\" OR \\"tag2\\") AND synthetics-monitor-multi-space.attributes.project_id:(\\"project1\\" OR \\"project2\\") AND synthetics-monitor-multi-space.attributes.type:(\\"type1\\" OR \\"type2\\") AND synthetics-monitor-multi-space.attributes.locations.id:(\\"loc1\\" OR \\"loc2\\") AND synthetics-monitor-multi-space.attributes.schedule.number:(\\"schedule1\\" OR \\"schedule2\\") AND synthetics-monitor-multi-space.attributes.id:(\\"query1\\" OR \\"query2\\") AND synthetics-monitor-multi-space.attributes.config_id:(\\"1\\" OR \\"2\\")"`
+      `"synthetics-monitor-multi-space.attributes.tags:(\\"tag1\\" OR \\"tag2\\") AND synthetics-monitor-multi-space.attributes.project_id:(\\"project1\\" OR \\"project2\\") AND synthetics-monitor-multi-space.attributes.type:(\\"type1\\" OR \\"type2\\") AND synthetics-monitor-multi-space.attributes.locations.id:(\\"loc1\\" OR \\"loc2\\") AND ((synthetics-monitor-multi-space.attributes.schedule.number:\\"10\\" AND synthetics-monitor-multi-space.attributes.schedule.unit:\\"s\\") OR (synthetics-monitor-multi-space.attributes.schedule.number:\\"5\\" AND synthetics-monitor-multi-space.attributes.schedule.unit:\\"m\\")) AND synthetics-monitor-multi-space.attributes.id:(\\"query1\\" OR \\"query2\\") AND synthetics-monitor-multi-space.attributes.config_id:(\\"1\\" OR \\"2\\")"`
     );
   });
 });
@@ -107,6 +114,35 @@ describe('getSavedObjectKqlFilter', () => {
     expect(getSavedObjectKqlFilter({ field: 'tags', values: ['"apm', 'synthetics'] })).toBe(
       'synthetics-monitor-multi-space.attributes.tags:("\\"apm" OR "synthetics")'
     );
+  });
+});
+
+describe('getScheduleKqlFilter', () => {
+  it('treats a bare number as minutes', () => {
+    expect(getScheduleKqlFilter('10')).toBe(
+      '(synthetics-monitor-multi-space.attributes.schedule.number:"10" AND synthetics-monitor-multi-space.attributes.schedule.unit:"m")'
+    );
+  });
+
+  it('keeps seconds and minutes as separate clauses', () => {
+    expect(getScheduleKqlFilter(['10s', '10m'])).toBe(
+      '((synthetics-monitor-multi-space.attributes.schedule.number:"10" AND synthetics-monitor-multi-space.attributes.schedule.unit:"s") OR (synthetics-monitor-multi-space.attributes.schedule.number:"10" AND synthetics-monitor-multi-space.attributes.schedule.unit:"m"))'
+    );
+  });
+
+  it('drops a value that is not a schedule', () => {
+    expect(getScheduleKqlFilter('schedule1')).toBe('');
+  });
+});
+
+describe('scheduleBucketLabel', () => {
+  it('builds a filter key from a number and unit', () => {
+    expect(scheduleBucketLabel([10, 's'])).toBe('10s');
+    expect(scheduleBucketLabel([10, 'm'])).toBe('10m');
+  });
+
+  it('treats a missing unit as minutes', () => {
+    expect(scheduleBucketLabel([5])).toBe('5m');
   });
 });
 
