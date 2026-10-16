@@ -19,9 +19,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { context } from '@kbn/kibana-react-plugin/public';
 import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
+import { takeUntilAborted } from '../../util/take_until_aborted';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
 import { ForecastingModal } from '../components/forecasting_modal/forecasting_modal';
 import { TimeseriesexplorerNoChartData } from '../components/timeseriesexplorer_no_chart_data';
@@ -69,6 +71,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     lastRefresh: PropTypes.number.isRequired,
     onLoading: PropTypes.func,
     onRenderComplete: PropTypes.func,
+    requestCancellationManager: PropTypes.object,
     previousRefresh: PropTypes.number.isRequired,
     selectedJob: PropTypes.object.isRequired,
     selectedJobStats: PropTypes.object.isRequired,
@@ -106,6 +109,9 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
   static contextType = context;
 
   contextLoadAbortController;
+
+  /** Signal of the focus load currently in flight, used to tell cancellation apart from empty data. */
+  focusLoadSignal;
 
   getBoundsRoundedToInterval;
   mlTimeSeriesExplorer;
@@ -288,43 +294,65 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
 
     const functionToPlotByIfMetric = aggregationTypeTransform.toES(functionDescription);
 
-    this.contextLoadAbortController?.abort();
-    this.contextLoadAbortController = new AbortController();
+    // Hosts that can cancel requests (the embeddable) own the cancellation lifetime, so a child
+    // controller is aborted whenever the host cancels (or replaces) its current load.
+    const { requestCancellationManager } = this.props;
+    this.contextLoadAbortController?.abort(AbortReason.REPLACED);
+    this.contextLoadAbortController =
+      requestCancellationManager?.createChildController() ?? new AbortController();
     const contextLoadSignal = this.contextLoadAbortController.signal;
+    if (contextLoadSignal.aborted) {
+      // Cancelled before the load started: don't send requests until the next load.
+      this.setState({ loading: false });
+      return;
+    }
+    contextLoadSignal.addEventListener(
+      'abort',
+      () => {
+        // A replaced load is followed by a new one that manages the loading state.
+        if (!this.unmounted && contextLoadSignal.reason !== AbortReason.REPLACED) {
+          this.setState({ loading: false });
+        }
+      },
+      { once: true }
+    );
 
     this.contextChartSelectedInitCallDone = false;
 
     this.props.onLoading?.(true);
 
-    // Only when `fullRefresh` is true we'll reset all data
-    // and show the loading spinner within the page.
+    // Only when `fullRefresh` is true we show the loading spinner within the page and reset all
+    // data. The reset is deferred until the new data has loaded (or failed), so that cancelling the
+    // load keeps showing the previous data.
     const entityControls = this.getControlsForDetector();
+    const fullRefreshResetPatch = fullRefresh
+      ? {
+          chartDetails: undefined,
+          contextChartData: undefined,
+          contextForecastData: undefined,
+          focusChartData: undefined,
+          focusForecastData: undefined,
+          showForecastCheckbox: false,
+          modelPlotEnabled: getModelPlotEnabledForDetector(
+            selectedJob,
+            selectedDetectorIndex,
+            entityControls
+          ),
+          hasResults: false,
+          dataNotChartable: false,
+        }
+      : {};
     this.setState(
       {
         fullRefresh,
         loadCounter: currentLoadCounter + 1,
         loading: true,
         chartDataError: undefined,
-        ...(fullRefresh
-          ? {
-              chartDetails: undefined,
-              contextChartData: undefined,
-              contextForecastData: undefined,
-              focusChartData: undefined,
-              focusForecastData: undefined,
-              showForecastCheckbox: false,
-              modelPlotEnabled: getModelPlotEnabledForDetector(
-                selectedJob,
-                selectedDetectorIndex,
-                entityControls
-              ),
-              hasResults: false,
-              dataNotChartable: false,
-            }
-          : {}),
       },
       () => {
-        const { loadCounter, modelPlotEnabled } = this.state;
+        const { loadCounter } = this.state;
+        const modelPlotEnabled =
+          fullRefreshResetPatch.modelPlotEnabled ?? this.state.modelPlotEnabled;
         const detectorIndex = selectedDetectorIndex;
 
         loadSingleMetricContextData({
@@ -342,7 +370,13 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
           autoZoomDuration,
           arePartitioningFieldsProvided: this.arePartitioningFieldsProvided(),
           criteriaFields: this.getCriteriaFields(detectorIndex, entityControls),
-          displayError: (error, message) => this.displayErrorToastMessages(error, message),
+          displayError: (error, message) => {
+            // A failed load can't be cancelled, so the previous data is no longer relevant.
+            if (loadCounter === this.state.loadCounter) {
+              this.setState(fullRefreshResetPatch);
+            }
+            this.displayErrorToastMessages(error, message);
+          },
           errorMessages: getSmvContextLoadErrorMessages(this.props.selectedForecastId),
           deps: {
             mlTimeSeriesSearchService: this.context.services.mlServices.mlTimeSeriesSearchService,
@@ -361,7 +395,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
               this.previousSelectedForecastId = this.props.selectedForecastId;
             },
             applyZoomSelection: (range) => this.contextChartSelected(range),
-            applyStatePatch: (patch) => this.setState(patch),
+            applyStatePatch: (patch) => this.setState({ ...fullRefreshResetPatch, ...patch }),
             // If focus will load next, wait for applyFocusPipelinePatch before completing.
             // Otherwise complete now (empty / dataNotChartable / no zoom) so reporting cannot hang.
             afterStatePatch: (_statePatch, { hasPendingFocus }) => {
@@ -436,9 +470,17 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
         },
         getFocusAggregationInterval: (selection) => this.getFocusAggregationInterval(selection),
         getBoundsRoundedToInterval: this.getBoundsRoundedToInterval,
-        getFocusData$: (selection) => this.getFocusData(selection),
+        getFocusData$: (selection) => {
+          const { requestCancellationManager } = this.props;
+          // A new brush is a user action, so it lifts an earlier cancellation.
+          requestCancellationManager?.resumeAfterCancellation();
+          this.focusLoadSignal = requestCancellationManager?.signal;
+          return this.getFocusData(selection)?.pipe(takeUntilAborted(this.focusLoadSignal));
+        },
         getAnomaliesTableForRange$: (earliestMs, latestMs) =>
-          this.loadAnomaliesTableData(earliestMs, latestMs),
+          this.loadAnomaliesTableData(earliestMs, latestMs).pipe(
+            takeUntilAborted(this.focusLoadSignal)
+          ),
         readModelPlotEnabled: () => this.state.modelPlotEnabled,
         readSelectedForecastId: () => this.props.selectedForecastId,
         applyFocusPipelinePatch: (patch) => {
@@ -447,6 +489,16 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
           });
         },
         onFocusPipelineEmpty: (selection) => {
+          const focusLoadSignal = this.focusLoadSignal;
+          if (focusLoadSignal?.aborted) {
+            // The focus load was cancelled or replaced rather than empty: keep the current chart.
+            if (focusLoadSignal.reason !== AbortReason.REPLACED) {
+              this.setState({ loading: false }, () => {
+                this.props.onRenderComplete?.();
+              });
+            }
+            return;
+          }
           // Empty focus is terminal for reporting, not an error.
           this.setState(buildSmvEmptyFocusStatePatch(selection), () => {
             this.props.onRenderComplete?.();
@@ -503,9 +555,9 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
   }
 
   componentWillUnmount() {
+    this.unmounted = true;
     this.contextLoadAbortController?.abort();
     this.subscriptions.unsubscribe();
-    this.unmounted = true;
   }
 
   render() {

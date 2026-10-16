@@ -20,6 +20,7 @@ import type {
   EmbeddableApiContext,
   HasEditCapabilities,
   HasParentApi,
+  CanCancelRequests,
   HasType,
   PublishesUnifiedSearch,
   PublishingSubject,
@@ -104,6 +105,7 @@ export interface AnomalyChartsDataLoadingApi {
 export type AnomalyChartsApi = AnomalyChartsComponentApi & AnomalyChartsDataLoadingApi;
 
 export type AnomalyChartsEmbeddableApi = MlEmbeddableBaseApi<AnomalyChartsEmbeddableState> &
+  CanCancelRequests &
   PublishesDataViews &
   PublishesWritableTitle &
   HasEditCapabilities &
@@ -145,6 +147,7 @@ export interface AnomalyChartsAttachmentApi extends AnomalyChartsApi {
  */
 export type SingleMetricViewerEmbeddableApi =
   MlEmbeddableBaseApi<SingleMetricViewerEmbeddableState> &
+    CanCancelRequests &
     PublishesWritableTitle &
     HasEditCapabilities &
     SingleMetricViewerComponentApi;

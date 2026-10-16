@@ -12,7 +12,13 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
 import { Subscription, map, merge } from 'rxjs';
-import { fetch$, timeRangeComparators, titleComparators } from '@kbn/presentation-publishing';
+import {
+  fetch$,
+  RequestCancellationManager,
+  timeRangeComparators,
+  titleComparators,
+} from '@kbn/presentation-publishing';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import useUnmount from 'react-use/lib/useUnmount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
@@ -104,6 +110,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
         },
       });
 
+      const requestCancellationManager = new RequestCancellationManager();
+
       const api = finalizeApi({
         isEditingEnabled: () => true,
         getTypeDisplayName: () =>
@@ -139,6 +147,12 @@ export const getAnomalyChartsReactEmbeddableFactory = (
         ...chartsManager.api,
         ...chartsManager.dataLoadingApi,
         ...stateApi,
+        cancelRequests: (reason?: AbortReason) => {
+          requestCancellationManager.cancel(reason);
+          // Without this the dashboard keeps showing the panel as loading, which keeps the
+          // cancel button visible and blocks `waitForPanelsToLoad$`.
+          chartsManager.dataLoadingApi.onLoading(false);
+        },
         dataViews$: buildDataViewPublishingApi(
           {
             anomalyDetectorService: mlServices.anomalyDetectorService,
@@ -203,6 +217,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                     onRenderComplete={onRenderComplete}
                     onError={onError}
                     timeRange$={appliedTimeRange$}
+                    requestCancellationManager={requestCancellationManager}
                   />
                 </div>
               </KibanaContextProvider>

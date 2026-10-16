@@ -7,6 +7,7 @@
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type {
+  CanCancelRequests,
   HasEditCapabilities,
   PublishesDataViews,
   PublishesUnifiedSearch,
@@ -44,6 +45,7 @@ export interface AnomalySwimLaneComponentApi {
 }
 
 export type AnomalySwimLaneEmbeddableApi = MlEmbeddableBaseApi<AnomalySwimLaneEmbeddableState> &
+  CanCancelRequests &
   PublishesDataViews &
   PublishesUnifiedSearch &
   PublishesWritableTitle &
