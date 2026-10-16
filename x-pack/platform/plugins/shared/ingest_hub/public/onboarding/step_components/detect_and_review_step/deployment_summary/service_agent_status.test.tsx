@@ -227,6 +227,75 @@ describe('ServiceAgentStatus', () => {
     });
   });
 
+  describe('an agent that is unhealthy only because of other integrations', () => {
+    const elsewhere = (overrides: Partial<ServiceAgentInfo> = {}) =>
+      info({
+        health: 'healthy',
+        agent: { id: 'a1', status: 'error' } as never,
+        unhealthyElsewhere: true,
+        ...overrides,
+      });
+
+    it('shows Fleet badge with the real agent status', () => {
+      renderStatus(elsewhere());
+
+      expect(screen.getByTestId('agentHealth')).toHaveTextContent('error');
+    });
+
+    it('explains in the tooltip that this integration is running', async () => {
+      renderStatus(elsewhere());
+
+      fireEvent.mouseOver(screen.getByTestId('serviceTile-agentUnhealthyElsewhere'));
+
+      expect(
+        await screen.findByText(
+          'The agent reports problems with other integrations. This one is running.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('replaces the badge own tooltip so two do not stack', () => {
+      renderStatus(elsewhere());
+
+      expect(screen.getByTestId('agentHealth')).toHaveAttribute('data-hide-tooltip', 'true');
+    });
+
+    it('can be reached with the keyboard, so the explanation is not mouse only', () => {
+      renderStatus(elsewhere());
+
+      expect(screen.getByTestId('serviceTile-agentUnhealthyElsewhere')).toHaveAttribute(
+        'tabindex',
+        '0'
+      );
+    });
+
+    it('is not clickable, since the deployed integration has nothing to show', () => {
+      renderStatus(elsewhere());
+
+      expect(screen.queryByTestId('serviceTile-agentStatusButton')).not.toBeInTheDocument();
+    });
+
+    it('adds nothing for an agent that is simply healthy', () => {
+      renderStatus(info());
+
+      expect(screen.queryByTestId('serviceTile-agentUnhealthyElsewhere')).not.toBeInTheDocument();
+      expect(screen.getByTestId('agentHealth')).toHaveAttribute('data-hide-tooltip', 'false');
+    });
+
+    it('does not apply once the integration itself is unhealthy, which has its own tooltip', async () => {
+      renderStatus(
+        info({
+          health: 'unhealthy',
+          agent: { id: 'a1', status: 'error' } as never,
+          unhealthyElsewhere: true,
+        })
+      );
+
+      expect(screen.queryByTestId('serviceTile-agentUnhealthyElsewhere')).not.toBeInTheDocument();
+      expect(screen.getByTestId('serviceTile-agentStatusButton')).toBeInTheDocument();
+    });
+  });
+
   describe('an agent that does not exist yet', () => {
     const noAgent = (overrides: Partial<ServiceAgentInfo> = {}) =>
       info({ health: 'pending', agent: undefined, agentIds: [], ...overrides });
@@ -235,6 +304,10 @@ describe('ServiceAgentStatus', () => {
       renderStatus(noAgent());
 
       expect(screen.getByTestId('serviceTile-agentPendingBadge')).toHaveTextContent('Pending');
+      // Fleet's own Pending badge is the filled default colour, not the outlined (hollow) style.
+      const { className } = screen.getByTestId('serviceTile-agentPendingBadge');
+      expect(className).toMatch(/euiBadge-default/);
+      expect(className).not.toMatch(/euiBadge-hollow/);
       expect(screen.queryByTestId('agentHealth')).not.toBeInTheDocument();
     });
 

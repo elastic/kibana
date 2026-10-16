@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { useQuery } from '@kbn/react-query';
 import {
   AGENTS_PREFIX,
@@ -23,6 +23,7 @@ import {
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import {
+  applyNotRunningGrace,
   assessAgent,
   buildIncomingDataRequests,
   getAgentPolicyIdsByInstance,
@@ -32,6 +33,7 @@ import {
   type AssessmentByAgentId,
   type DataRequestInstance,
   type InstanceAgentSummary,
+  type NotRunningSince,
 } from './agent_detection';
 
 const POLL_INTERVAL_MS = 10_000;
@@ -128,11 +130,13 @@ export function useAgentDetection({
       ),
     [allPolicyIds]
   );
-  const { data: agentsData } = useGetAgentsQuery(
+  const { data: agentsData, dataUpdatedAt } = useGetAgentsQuery(
     { kuery: agentsKuery, perPage: MAX_AGENTS },
     { enabled: hasPolicies, refetchInterval: shouldPoll ? POLL_INTERVAL_MS : false }
   );
   const agents = useMemo(() => (agentsData?.data?.items ?? []) as Agent[], [agentsData]);
+  // Remembers when an agent was first seen not running the integration, across polls.
+  const notRunningSinceRef = useRef<NotRunningSince>({});
 
   const { summaryByInstanceId, packagePolicyByInstanceId, agentPolicyByInstanceId, dataInstances } =
     useMemo(() => {
@@ -140,6 +144,9 @@ export function useAgentDetection({
       const packagePolicies: Record<string, PackagePolicy | undefined> = {};
       const policiesByInstance: Record<string, AgentPolicy | undefined> = {};
       const requestInstances: Record<string, DataRequestInstance> = {};
+      // The moment the agents were last fetched is when this state was observed.
+      const now = dataUpdatedAt || Date.now();
+      const notRunningSince: NotRunningSince = {};
 
       for (const [instanceId, policyIds] of Object.entries(agentPolicyIdsByInstance)) {
         const applicable = getApplicableAgents(agents, policyIds);
@@ -152,7 +159,7 @@ export function useAgentDetection({
         policiesByInstance[instanceId] = agentPolicy;
 
         // Judge each agent by the package policy this instance deployed, not by the agent alone.
-        const assessments: AssessmentByAgentId = {};
+        let assessments: AssessmentByAgentId = {};
         if (packagePolicy && agentPolicy) {
           for (const agent of applicable) {
             assessments[agent.id] = assessAgent({
@@ -164,6 +171,14 @@ export function useAgentDetection({
             });
           }
         }
+        const graced = applyNotRunningGrace({
+          assessments,
+          keyPrefix: instanceId,
+          previousSince: notRunningSinceRef.current,
+          now,
+        });
+        assessments = graced.assessments;
+        Object.assign(notRunningSince, graced.since);
         const summary = summarizeInstanceAgents(applicable, assessments);
         summaries[instanceId] = summary;
 
@@ -179,6 +194,8 @@ export function useAgentDetection({
         }
       }
 
+      notRunningSinceRef.current = notRunningSince;
+
       return {
         summaryByInstanceId: summaries,
         packagePolicyByInstanceId: packagePolicies,
@@ -186,6 +203,7 @@ export function useAgentDetection({
         dataInstances: requestInstances,
       };
     }, [
+      dataUpdatedAt,
       agentPolicyIdsByInstance,
       agents,
       agentPolicies,

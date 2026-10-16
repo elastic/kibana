@@ -85,7 +85,8 @@ export function ServiceAgentStatus({
   agentInfo,
 }: ServiceAgentStatusProps) {
   const [openFlyout, setOpenFlyout] = useState<FlyoutKind | undefined>();
-  const { agent, agentPolicy, packagePolicy, policyId, health, issue } = agentInfo;
+  const { agent, agentPolicy, packagePolicy, policyId, health, issue, unhealthyElsewhere } =
+    agentInfo;
   const packageVersion = packagePolicy?.package?.version;
 
   const flyoutKind = getFlyoutKind({
@@ -95,6 +96,15 @@ export function ServiceAgentStatus({
     canShowEnrollment: deploymentMethod === 'managed_integration' && !!packageVersion,
   });
   const close = () => setOpenFlyout(undefined);
+  // The badge is Fleet's view of the whole agent. When it is unhealthy only because of other
+  // integrations, say so, so it does not read as a contradiction of this one running.
+  const elsewhereMessage =
+    unhealthyElsewhere && !flyoutKind
+      ? i18n.translate('xpack.ingestHub.detectAndReviewStep.agentStatus.unhealthyElsewhere', {
+          defaultMessage:
+            'The agent reports problems with other integrations. This one is running.',
+        })
+      : undefined;
 
   // Fleet reports an agent that cannot run the integration as Healthy. Show it as the Unhealthy
   // it is for this deployment, so the badge does not contradict the tile.
@@ -102,10 +112,10 @@ export function ServiceAgentStatus({
 
   const badge = badgeAgent ? (
     <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-      <LazyAgentHealth agent={badgeAgent} hideTooltip={!!flyoutKind} />
+      <LazyAgentHealth agent={badgeAgent} hideTooltip={!!flyoutKind || !!elsewhereMessage} />
     </Suspense>
   ) : (
-    <EuiBadge color="hollow" data-test-subj="serviceTile-agentPendingBadge">
+    <EuiBadge color="default" data-test-subj="serviceTile-agentPendingBadge">
       <FormattedMessage
         id="xpack.ingestHub.detectAndReviewStep.agentStatus.pending"
         defaultMessage="Pending"
@@ -137,6 +147,12 @@ export function ServiceAgentStatus({
           >
             {badge}
           </button>
+        </EuiToolTip>
+      ) : elsewhereMessage ? (
+        <EuiToolTip position="top" content={<p>{elsewhereMessage}</p>}>
+          <span tabIndex={0} data-test-subj="serviceTile-agentUnhealthyElsewhere">
+            {badge}
+          </span>
         </EuiToolTip>
       ) : (
         badge

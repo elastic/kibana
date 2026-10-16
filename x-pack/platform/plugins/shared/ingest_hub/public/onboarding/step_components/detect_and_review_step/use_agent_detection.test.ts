@@ -27,6 +27,7 @@ import {
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import { NOT_RUNNING_GRACE_MS } from './agent_detection';
 import { useAgentDetection } from './use_agent_detection';
 
 const mockUseQuery = useQuery as jest.Mock;
@@ -72,7 +73,11 @@ interface SetupOptions {
   instances?: Array<{ instanceId: string; serviceId: string }>;
   shouldPoll?: boolean;
   incomingData?: Record<string, string[]>;
+  /** When the agents were last fetched, in ms. Drives the not-running grace period. */
+  dataUpdatedAt?: number;
 }
+
+const T0 = 1_000_000;
 
 function setup({
   deploymentMethod = 'managed_integration',
@@ -84,6 +89,7 @@ function setup({
   instances = [{ instanceId: 's3', serviceId: 's3' }],
   shouldPoll = true,
   incomingData,
+  dataUpdatedAt = T0,
 }: SetupOptions = {}) {
   mockUseOnboardingFlow.mockReturnValue({
     detectAndReviewStep: { policyIdsByInstance },
@@ -92,9 +98,16 @@ function setup({
     agentBasedDeployment,
   });
   mockUseBulkPolicies.mockReturnValue({ data: { items: agentPolicies } });
-  mockUseGetAgents.mockReturnValue({ data: { data: { items: agents } } });
+  const agentsResponse = { data: { items: agents } };
+  mockUseGetAgents.mockReturnValue({ data: agentsResponse, dataUpdatedAt });
   mockUseQuery.mockReturnValue({ data: incomingData });
-  return renderHook(() => useAgentDetection({ instances, shouldPoll }));
+  const hook = renderHook(() => useAgentDetection({ instances, shouldPoll }));
+  /** Simulates the next poll finishing `ms` after the first one, with the same agents. */
+  const pollAfter = (ms: number) => {
+    mockUseGetAgents.mockReturnValue({ data: agentsResponse, dataUpdatedAt: T0 + ms });
+    hook.rerender();
+  };
+  return { ...hook, pollAfter };
 }
 
 describe('useAgentDetection', () => {
@@ -281,21 +294,107 @@ describe('useAgentDetection', () => {
       expect(result.current.summaryByInstanceId.s3.issue).toBeUndefined();
     });
 
-    it('is unhealthy when an up-to-date agent runs no unit of the deployed package policy', () => {
-      mockGetUnitSummary.mockReturnValue({ total: 0, stopped: 0 });
-      const { result } = setup({ agentPolicies: [policyNeeding94], agents: [versioned('9.6.0')] });
+    describe('integration not running', () => {
+      const NONE = { total: 0, stopped: 0 };
 
-      expect(result.current.summaryByInstanceId.s3).toMatchObject({
-        health: 'unhealthy',
-        issue: { type: 'not_running' },
+      it('gives a starting integration time before calling it not running', () => {
+        mockGetUnitSummary.mockReturnValue(NONE);
+        const { result } = setup({
+          agentPolicies: [policyNeeding94],
+          agents: [versioned('9.6.0')],
+        });
+
+        expect(result.current.summaryByInstanceId.s3.health).toBe('healthy');
+        expect(result.current.summaryByInstanceId.s3.issue).toBeUndefined();
+      });
+
+      it('still holds back when the grace period is almost over', () => {
+        mockGetUnitSummary.mockReturnValue(NONE);
+        const { result, pollAfter } = setup({
+          agentPolicies: [policyNeeding94],
+          agents: [versioned('9.6.0')],
+        });
+
+        pollAfter(NOT_RUNNING_GRACE_MS - 1);
+
+        expect(result.current.summaryByInstanceId.s3.issue).toBeUndefined();
+      });
+
+      it('is unhealthy once an up-to-date agent has run no unit of the package policy for the grace period', () => {
+        mockGetUnitSummary.mockReturnValue(NONE);
+        const { result, pollAfter } = setup({
+          agentPolicies: [policyNeeding94],
+          agents: [versioned('9.6.0')],
+        });
+
+        pollAfter(NOT_RUNNING_GRACE_MS);
+
+        expect(result.current.summaryByInstanceId.s3).toMatchObject({
+          health: 'unhealthy',
+          issue: { type: 'not_running' },
+        });
+      });
+
+      it('is unhealthy once every unit of the package policy has stayed stopped for the grace period', () => {
+        mockGetUnitSummary.mockReturnValue({ total: 4, stopped: 4 });
+        const { result, pollAfter } = setup({
+          agentPolicies: [policyNeeding94],
+          agents: [versioned('9.6.0')],
+        });
+
+        pollAfter(NOT_RUNNING_GRACE_MS);
+
+        expect(result.current.summaryByInstanceId.s3.issue).toEqual({ type: 'not_running' });
+      });
+
+      it('forgets a start-up that recovers, so a later dip gets a fresh grace period', () => {
+        mockGetUnitSummary.mockReturnValue(NONE);
+        const { result, pollAfter } = setup({
+          agentPolicies: [policyNeeding94],
+          agents: [versioned('9.6.0')],
+        });
+
+        mockGetUnitSummary.mockReturnValue({ total: 3, stopped: 0 });
+        pollAfter(30_000);
+        expect(result.current.summaryByInstanceId.s3.issue).toBeUndefined();
+
+        mockGetUnitSummary.mockReturnValue(NONE);
+        pollAfter(100_000);
+        expect(result.current.summaryByInstanceId.s3.issue).toBeUndefined();
+
+        pollAfter(100_000 + NOT_RUNNING_GRACE_MS);
+        expect(result.current.summaryByInstanceId.s3.issue).toEqual({ type: 'not_running' });
+      });
+
+      it('does not delay an agent that is too old, which cannot start up later', () => {
+        mockGetUnitSummary.mockReturnValue(NONE);
+        const { result } = setup({
+          agentPolicies: [policyNeeding94],
+          agents: [versioned('8.18.0')],
+        });
+
+        expect(result.current.summaryByInstanceId.s3.issue).toMatchObject({
+          type: 'incompatible_version',
+        });
       });
     });
 
-    it('is unhealthy when every unit of the deployed package policy has stopped', () => {
-      mockGetUnitSummary.mockReturnValue({ total: 4, stopped: 4 });
+    it('says the agent is unhealthy only because of other integrations when the deployed one is fine', () => {
+      const { result } = setup({
+        agentPolicies: [policyNeeding94],
+        agents: [versioned('9.6.0', { status: 'error' })],
+      });
+
+      expect(result.current.summaryByInstanceId.s3).toMatchObject({
+        health: 'healthy',
+        unhealthyElsewhere: true,
+      });
+    });
+
+    it('does not say that for an agent that is simply healthy', () => {
       const { result } = setup({ agentPolicies: [policyNeeding94], agents: [versioned('9.6.0')] });
 
-      expect(result.current.summaryByInstanceId.s3.issue).toEqual({ type: 'not_running' });
+      expect(result.current.summaryByInstanceId.s3.unhealthyElsewhere).toBeUndefined();
     });
 
     it('gives an agent that is still applying the latest policy time to catch up', () => {

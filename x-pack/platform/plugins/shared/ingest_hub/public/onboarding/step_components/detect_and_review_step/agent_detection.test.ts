@@ -8,6 +8,7 @@
 import type { Agent } from '@kbn/fleet-plugin/common';
 import {
   aggregateInstanceChipStates,
+  applyNotRunningGrace,
   assessAgent,
   buildIncomingDataRequests,
   deriveInstanceChipState,
@@ -15,6 +16,7 @@ import {
   getAgentHealthState,
   getAgentPolicyIdsByInstance,
   instanceHasData,
+  NOT_RUNNING_GRACE_MS,
   pickWorstAgentInstanceId,
   summarizeInstanceAgents,
 } from './agent_detection';
@@ -626,5 +628,134 @@ describe('agent issues and health', () => {
 
   it('reports no issue for an unhealthy agent without one', () => {
     expect(summarizeInstanceAgents([makeAgent('a1', 'offline')]).issue).toBeUndefined();
+  });
+});
+
+describe('applyNotRunningGrace', () => {
+  const NOT_RUNNING = { alertLevel: null, issue: { type: 'not_running' as const } };
+  const run = (
+    assessments: Parameters<typeof applyNotRunningGrace>[0]['assessments'],
+    previousSince: Record<string, number>,
+    now: number
+  ) => applyNotRunningGrace({ assessments, keyPrefix: 's3', previousSince, now });
+
+  it('holds back a not-running issue the first time it is seen, and starts the clock', () => {
+    const { assessments, since } = run({ a1: NOT_RUNNING }, {}, 1000);
+
+    expect(assessments.a1).toEqual({ alertLevel: null });
+    expect(since).toEqual({ 's3:a1': 1000 });
+  });
+
+  it('keeps holding back until the grace period has passed, without moving the start', () => {
+    const { assessments, since } = run(
+      { a1: NOT_RUNNING },
+      { 's3:a1': 1000 },
+      1000 + NOT_RUNNING_GRACE_MS - 1
+    );
+
+    expect(assessments.a1.issue).toBeUndefined();
+    expect(since).toEqual({ 's3:a1': 1000 });
+  });
+
+  it('reports the issue once the grace period has passed', () => {
+    const { assessments } = run(
+      { a1: NOT_RUNNING },
+      { 's3:a1': 1000 },
+      1000 + NOT_RUNNING_GRACE_MS
+    );
+
+    expect(assessments.a1).toEqual(NOT_RUNNING);
+  });
+
+  it('forgets an agent that is no longer not running', () => {
+    const { assessments, since } = run({ a1: { alertLevel: null } }, { 's3:a1': 1000 }, 5000);
+
+    expect(assessments.a1).toEqual({ alertLevel: null });
+    expect(since).toEqual({});
+  });
+
+  it('never delays other issues or failed units', () => {
+    const incompatible = {
+      alertLevel: null,
+      issue: {
+        type: 'incompatible_version' as const,
+        agentVersion: '8.18.0',
+        integrations: ['AWS'],
+      },
+    };
+    const { assessments, since } = run(
+      { a1: incompatible, a2: { alertLevel: 'failed' } },
+      {},
+      1000
+    );
+
+    expect(assessments).toEqual({ a1: incompatible, a2: { alertLevel: 'failed' } });
+    expect(since).toEqual({});
+  });
+
+  it('keeps the alert level when it holds back the issue', () => {
+    const { assessments } = run({ a1: { ...NOT_RUNNING, alertLevel: 'degraded' } }, {}, 1000);
+
+    expect(assessments.a1).toEqual({ alertLevel: 'degraded' });
+  });
+
+  it('tracks each agent on its own', () => {
+    const { assessments, since } = run(
+      { a1: NOT_RUNNING, a2: NOT_RUNNING },
+      { 's3:a1': 0 },
+      NOT_RUNNING_GRACE_MS
+    );
+
+    expect(assessments.a1.issue).toBeDefined();
+    expect(assessments.a2.issue).toBeUndefined();
+    expect(since).toEqual({ 's3:a1': 0, 's3:a2': NOT_RUNNING_GRACE_MS });
+  });
+
+  it('keys by instance so the same agent can be judged per integration', () => {
+    const first = applyNotRunningGrace({
+      assessments: { a1: NOT_RUNNING },
+      keyPrefix: 's3',
+      previousSince: {},
+      now: 1000,
+    });
+    const second = applyNotRunningGrace({
+      assessments: { a1: NOT_RUNNING },
+      keyPrefix: 'ec2',
+      previousSince: first.since,
+      now: 1000 + NOT_RUNNING_GRACE_MS,
+    });
+
+    expect(second.assessments.a1.issue).toBeUndefined();
+    expect(second.since).toEqual({ 'ec2:a1': 1000 + NOT_RUNNING_GRACE_MS });
+  });
+});
+
+describe('unhealthyElsewhere', () => {
+  it.each(['error', 'degraded'] as const)(
+    'is set when a %s agent is judged healthy for the deployed integration',
+    (status) => {
+      const agent = { ...makeAgent('a1', status), components: [{ id: 'c1' }] } as unknown as Agent;
+      const summary = summarizeInstanceAgents([agent], { a1: { alertLevel: null } });
+
+      expect(summary).toMatchObject({ health: 'healthy', unhealthyElsewhere: true });
+    }
+  );
+
+  it('is not set for an agent that is simply online', () => {
+    const summary = summarizeInstanceAgents([makeAgent('a1', 'online')], {
+      a1: { alertLevel: null },
+    });
+
+    expect(summary.health).toBe('healthy');
+    expect(summary.unhealthyElsewhere).toBeUndefined();
+  });
+
+  it('is not set when the agent is unhealthy for the deployed integration itself', () => {
+    const summary = summarizeInstanceAgents([makeAgent('a1', 'error')], {
+      a1: { alertLevel: 'failed' },
+    });
+
+    expect(summary.health).toBe('unhealthy');
+    expect(summary.unhealthyElsewhere).toBeUndefined();
   });
 });

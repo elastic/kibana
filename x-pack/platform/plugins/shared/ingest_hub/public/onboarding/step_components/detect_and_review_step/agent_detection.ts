@@ -34,6 +34,11 @@ export interface InstanceAgentSummary {
   agentIds: string[];
   /** Set when the representative agent is unhealthy because it cannot run the integration. */
   issue?: AgentIssue;
+  /**
+   * The agent reports itself unhealthy, but only because of other integrations; the one this
+   * instance deployed is running.
+   */
+  unhealthyElsewhere?: boolean;
 }
 
 export interface DataRequestInstance {
@@ -148,6 +153,49 @@ export const assessAgent = ({
 };
 
 /**
+ * An integration can take a while to start after the agent has applied its policy, an OTel
+ * collector especially, so "not running" only counts once it has held for this long.
+ */
+export const NOT_RUNNING_GRACE_MS = 60_000;
+
+/** When each `<instance>:<agent>` was first seen not running. */
+export type NotRunningSince = Record<string, number>;
+
+/**
+ * Holds back a `not_running` issue until it has lasted `graceMs`. Until then the agent is judged
+ * without it, so the tile keeps detecting instead of flashing an error while the integration
+ * starts. Returns the `since` entries observed in this call, so one that clears is forgotten.
+ */
+export const applyNotRunningGrace = ({
+  assessments,
+  keyPrefix,
+  previousSince,
+  now,
+  graceMs = NOT_RUNNING_GRACE_MS,
+}: {
+  assessments: AssessmentByAgentId;
+  keyPrefix: string;
+  previousSince: NotRunningSince;
+  now: number;
+  graceMs?: number;
+}): { assessments: AssessmentByAgentId; since: NotRunningSince } => {
+  const since: NotRunningSince = {};
+  const result: AssessmentByAgentId = {};
+  for (const [agentId, assessment] of Object.entries(assessments)) {
+    if (assessment.issue?.type !== 'not_running') {
+      result[agentId] = assessment;
+      continue;
+    }
+    const key = `${keyPrefix}:${agentId}`;
+    const firstSeen = previousSince[key] ?? now;
+    since[key] = firstSeen;
+    result[agentId] =
+      now - firstSeen >= graceMs ? assessment : { alertLevel: assessment.alertLevel };
+  }
+  return { assessments: result, since };
+};
+
+/**
  * An agent that cannot run the integration, or whose deployed integration failed or degraded, is
  * unhealthy whatever its own status says. An agent reported unhealthy for a reason outside the
  * deployed integration (for example another integration on a shared policy) still counts as
@@ -238,7 +286,15 @@ export const summarizeInstanceAgents = (
     };
   }
   const healthy = agents.find((agent) => healthOf(agent) === 'healthy');
-  if (healthy) return { health: 'healthy', agent: healthy, agentIds };
+  if (healthy) {
+    const unhealthyElsewhere = healthy.status === 'error' || healthy.status === 'degraded';
+    return {
+      health: 'healthy',
+      agent: healthy,
+      agentIds,
+      ...(unhealthyElsewhere && { unhealthyElsewhere }),
+    };
+  }
   return { health: 'pending', agent: agents[0], agentIds };
 };
 
