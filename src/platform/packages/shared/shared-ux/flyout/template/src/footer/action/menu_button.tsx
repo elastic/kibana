@@ -34,6 +34,15 @@ const isModifiedClick = (event: React.MouseEvent) =>
 const isCustomItem = (item: FlyoutFooterMenuItem): item is FlyoutFooterMenuCustomItem =>
   typeof item.renderItem === 'function';
 
+// EuiContextMenu calls `renderItem` outside of render, so a component boundary is what lets hooks run.
+const CustomMenuItem = ({
+  renderItem,
+  closeMenu,
+}: {
+  renderItem: FlyoutFooterMenuCustomItem['renderItem'];
+  closeMenu: () => void;
+}) => <>{renderItem({ closeMenu })}</>;
+
 const resolvePanels = (
   panels: FlyoutFooterMenuPanel[],
   closePopover: () => void,
@@ -74,25 +83,20 @@ const resolvePanels = (
       items: (items ?? []).map((item: FlyoutFooterMenuItem): EuiContextMenuPanelItemDescriptor => {
         if (isCustomItem(item)) {
           return {
-            key: item.key,
-            renderItem: () => item.renderItem({ closeMenu: closePopover }),
+            // EUI keys other items by `name`, so an unprefixed key could collide with a sibling's name.
+            key: `customItem:${item.key}`,
+            renderItem: () => (
+              <CustomMenuItem renderItem={item.renderItem} closeMenu={closePopover} />
+            ),
           };
         }
-        const asEntry = item as {
-          isSeparator?: boolean;
-          panel?: unknown;
-          href?: string;
-          onClick?: (e: React.MouseEvent) => void;
-        };
-        const { onClick, href } = asEntry;
+        if (item.isSeparator) {
+          return item;
+        }
+        const { onClick, href } = item;
         // Only wrap items that are actionable (have onClick or href).
         // Adding an onClick to static items causes EUI to incorrectly render them as interactive buttons.
-        if (
-          !closeOnItemClick ||
-          asEntry.isSeparator ||
-          asEntry.panel != null ||
-          (!onClick && !href)
-        ) {
+        if (!closeOnItemClick || item.panel != null || (!onClick && !href)) {
           return item;
         }
         return {

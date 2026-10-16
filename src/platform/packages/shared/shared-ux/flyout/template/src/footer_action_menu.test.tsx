@@ -610,5 +610,29 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
         ).toBeInTheDocument();
       });
     });
+
+    it('renderItem can use hooks directly', async () => {
+      const panels: FlyoutFooterMenuPanel[] = [
+        {
+          id: 0,
+          items: [
+            {
+              key: 'counter',
+              renderItem: () => {
+                // eslint-disable-next-line react-hooks/rules-of-hooks
+                const [count, setCount] = useState(0);
+                return <button onClick={() => setCount((c) => c + 1)}>Count {count}</button>;
+              },
+            },
+          ],
+        },
+      ];
+
+      renderMenu({ panels });
+      await user.click(screen.getByRole('button', { name: /take action/i }));
+      await user.click(await screen.findByRole('button', { name: 'Count 0' }));
+
+      expect(await screen.findByRole('button', { name: 'Count 1' })).toBeInTheDocument();
+    });
   });
 });
