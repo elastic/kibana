@@ -14,12 +14,13 @@ import { hasDigitalExperienceAccess } from './capabilities';
 import { DigitalExperiencePlugin } from './plugin';
 import type { DigitalExperienceSetupDeps, DigitalExperienceStartDeps } from './types';
 
-const createCapabilities = (show: boolean) =>
+const createCapabilities = (show: boolean, apmShow = true) =>
   ({
     navLinks: {},
     management: {},
     catalogue: {},
     digital_experience: { show },
+    apm: { show: apmShow },
   } as CoreStart['application']['capabilities']);
 
 const setup = ({ show, ux }: { show: boolean; ux?: { hideLegacyNavigation: jest.Mock } }) => {
@@ -48,6 +49,10 @@ describe('hasDigitalExperienceAccess', () => {
   it('reflects the digital_experience show capability', () => {
     expect(hasDigitalExperienceAccess(createCapabilities(true))).toBe(true);
     expect(hasDigitalExperienceAccess(createCapabilities(false))).toBe(false);
+  });
+
+  it('requires APM access, which the app reads its data through', () => {
+    expect(hasDigitalExperienceAccess(createCapabilities(true, false))).toBe(false);
   });
 });
 

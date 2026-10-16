@@ -26,6 +26,12 @@ describe('registerDigitalExperienceFeature', () => {
     });
   });
 
+  it('tells admins that the APM privilege is also required', () => {
+    expect(registerKibanaFeature.mock.calls[0][0].privilegesTooltip).toContain(
+      'APM and User Experience'
+    );
+  });
+
   it('grants show and save UI privileges and both API privileges to all', () => {
     expect(registerKibanaFeature.mock.calls[0][0].privileges.all).toEqual({
       app: ['digital_experience', 'kibana'],

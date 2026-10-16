@@ -29,5 +29,8 @@ export const DIGITAL_EXPERIENCE_READ_ROLE = createRole({
   apm: ['read'],
 });
 
+// Digital Experience without APM, whose routes the app reads its data through.
+export const DIGITAL_EXPERIENCE_ONLY_ROLE = createRole({ digital_experience: ['read'] });
+
 // An existing APM user that was never granted Digital Experience.
 export const APM_ONLY_ROLE = createRole({ apm: ['read'] });

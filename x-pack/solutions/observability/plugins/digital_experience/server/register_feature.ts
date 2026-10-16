@@ -20,6 +20,10 @@ export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup):
     name: i18n.translate('xpack.digitalExperience.featureRegistry.featureName', {
       defaultMessage: 'Digital Experience',
     }),
+    privilegesTooltip: i18n.translate('xpack.digitalExperience.featureRegistry.privilegesTooltip', {
+      defaultMessage:
+        'Digital Experience reads its data through APM, so users also need the APM and User Experience feature privilege.',
+    }),
     order: 8500,
     category: DEFAULT_APP_CATEGORIES.observability,
     app: [DIGITAL_EXPERIENCE_FEATURE_ID, 'kibana'],

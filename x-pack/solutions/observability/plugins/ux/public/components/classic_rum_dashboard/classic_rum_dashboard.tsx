@@ -56,7 +56,8 @@ export const createClassicRumDashboard = ({
     return (
       <KibanaContextProvider services={services}>
         <PluginContext.Provider value={pluginContext}>
-          <RouterProvider history={history} router={uxRouter}>
+          {/* React Router keeps its first history, so a new service remounts the router. */}
+          <RouterProvider key={serviceName} history={history} router={uxRouter}>
             <DatePickerContextProvider>
               <InspectorContextProvider>
                 <UrlParamsProvider>

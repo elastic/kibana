@@ -8,5 +8,9 @@
 import type { Capabilities } from '@kbn/core/public';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../common/feature';
 
+/**
+ * Also requires APM access because the Classic RUM data is read through APM routes; drop the APM
+ * check (and the feature's `privilegesTooltip`) once Digital Experience no longer reads Classic RUM.
+ */
 export const hasDigitalExperienceAccess = (capabilities: Capabilities): boolean =>
-  Boolean(capabilities[DIGITAL_EXPERIENCE_FEATURE_ID]?.show);
+  Boolean(capabilities[DIGITAL_EXPERIENCE_FEATURE_ID]?.show && capabilities.apm?.show);
