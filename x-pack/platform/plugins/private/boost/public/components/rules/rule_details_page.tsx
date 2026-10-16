@@ -353,8 +353,9 @@ export const RuleDetailsPage = () => {
       {isDeleting && (
         <DeleteRuleModal
           ruleName={name}
-          profileType={type}
-          appliesTo={applied.length}
+          rules={rules}
+          profiles={profiles}
+          dataSources={dataSources}
           onClose={() => setIsDeleting(false)}
           onDeleted={() => history.push('/rules')}
         />

@@ -295,8 +295,9 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       {ruleToDelete && (
         <DeleteRuleModal
           ruleName={ruleToDelete.name}
-          profileType={ruleToDelete.profileType}
-          appliesTo={ruleToDelete.appliesTo}
+          rules={rules}
+          profiles={profiles}
+          dataSources={dataSources}
           onClose={() => setRuleToDelete(undefined)}
         />
       )}
