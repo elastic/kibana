@@ -141,7 +141,8 @@ export const createCachedReactFieldValueFormatter = (
   dataView?: DataView | null,
   fields?: SanitizedFieldType[],
   fieldFormatService?: FieldFormatsRegistry,
-  excludedFieldFormatsIds: FIELD_FORMAT_IDS[] = []
+  excludedFieldFormatsIds: FIELD_FORMAT_IDS[] = [],
+  isInteractive: boolean = true
 ) => {
   const cache = new Map<string, FieldFormat>();
 
@@ -154,7 +155,7 @@ export const createCachedReactFieldValueFormatter = (
       fieldFormatService,
       excludedFieldFormatsIds
     );
-    return formatter?.convertToReact(value);
+    return formatter?.convertToReact(value, { isInteractive });
   };
 };
 
