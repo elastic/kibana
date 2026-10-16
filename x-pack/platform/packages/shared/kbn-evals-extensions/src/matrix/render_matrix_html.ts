@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import type { Matrix, MatrixRow, MatrixDisplayColumn, TokenCostModel } from './build_matrix';
+import type {
+  Matrix,
+  MatrixCell,
+  MatrixRow,
+  MatrixDisplayColumn,
+  TieAnalysis,
+  TokenCostModel,
+} from './build_matrix';
+import { OVERALL_COLUMN_ID } from './build_matrix';
 import type { MatrixColumnConfig, MatrixConfig } from './load_matrix_config';
 import type { MatrixProvenance } from './render_matrix';
 import type { MatrixTraceData, MatrixTraceEntry, TraceStep } from './trace_types';
@@ -37,6 +45,9 @@ const REPORT_CSS = `
   .model-id { color:var(--muted); font-weight:400; font-size:12px; font-family:ui-monospace,monospace; }
   .coverage { color:var(--muted); font-weight:400; font-size:12px; font-family:ui-monospace,monospace; }
   .coverage.partial { color:var(--warn); font-weight:600; }
+  td.tier { font-family:ui-monospace,monospace; font-weight:700; white-space:nowrap; }
+  .tied { display:block; color:var(--warn); font-weight:400; font-size:11px; }
+  td.sub-score { color:var(--muted); }
   td.cell { font-size:13px; }
   td.cell.ok { color:var(--text); }
   td.cell.err { color:var(--err); font-weight:600; }
@@ -285,18 +296,10 @@ const mdToHtml = (md: string): string => {
   return out.join('\n');
 };
 
-const cellHtml = (row: MatrixRow, column: MatrixDisplayColumn): string => {
-  const cell =
-    column.kind === 'overall' ? row.overall : row.cells[column.id] ?? { kind: 'missing' };
+const matrixCellHtml = (cell: MatrixCell): string => {
   switch (cell.kind) {
     case 'score':
-      // Publish the tie tier next to the Overall number. The tier is what the
-      // data supports; the two-decimal score is not -- adjacent rows inside a
-      // tier are separated by less than the measured run-to-run noise, so the
-      // ordering between them is an artifact of rounding, not a ranking.
-      return column.kind === 'overall' && row.tier !== undefined
-        ? `<span class="ok-dot">✓</span> ${cell.value} <span class="sub-num" title="Tie tier ${row.tier}: rows sharing a tier are not distinguishable at the measured run-to-run noise level, so their relative order is not meaningful">T${row.tier}</span>`
-        : `<span class="ok-dot">✓</span> ${cell.value}`;
+      return `<span class="ok-dot">✓</span> ${cell.value}`;
     case 'not-recommended':
       return `<span class="status err">⛔ fail</span>`;
     // Distinct from 'missing' (—): scores existed but judge policy rejected all
@@ -320,6 +323,11 @@ const cellHtml = (row: MatrixRow, column: MatrixDisplayColumn): string => {
       return '<span class="sub-num">—</span>';
   }
 };
+
+const cellHtml = (row: MatrixRow, column: MatrixDisplayColumn): string =>
+  matrixCellHtml(
+    column.kind === 'overall' ? row.overall : row.cells[column.id] ?? { kind: 'missing' }
+  );
 
 /**
  * Renders a skill entry as a human label.
@@ -404,23 +412,130 @@ const renderSummaryTable = (matrix: Matrix, config: MatrixConfig): string => {
       })()}</tr>`
     : '';
 
-  const header = `${groupHeader}<tr><th>Model</th>${matrix.displayColumns
+  const allRows = [...matrix.proprietary, ...matrix.openSource];
+  const showTier = allRows.some((row) => row.tier !== undefined);
+  const subScores = matrix.subScores;
+  const subScoreHeaders = subScores
+    ? `<th title="${esc(subScoreTitle(subScores.contract))}">${esc(
+        subScores.contractLabel
+      )}</th><th title="${esc(subScoreTitle(subScores.judged))}">${esc(subScores.judgedLabel)}</th>`
+    : '';
+  const groupHeaderRow = groupHeader
+    ? groupHeader
+        .replace(/^<tr>/, showTier ? '<tr><th></th>' : '<tr>')
+        .replace(/<\/tr>$/, subScores ? '<th></th><th></th></tr>' : '</tr>')
+    : '';
+
+  const header = `${groupHeaderRow}<tr>${
+    showTier ? '<th>Tier</th>' : ''
+  }<th>Model</th>${matrix.displayColumns
     .map((c) => `<th>${esc(c.label)}</th>`)
-    .join('')}</tr>`;
-  const rows = [...matrix.proprietary, ...matrix.openSource]
+    .join('')}${subScoreHeaders}</tr>`;
+  const rows = allRows
     .map((row) => {
       // Partial coverage means overall/composites average fewer examples and
       // are not directly comparable to full-coverage rows — warn on any gap.
       const { covered, total } = row.coverage;
       const coverageClass = covered < total ? 'coverage partial' : 'coverage';
-      return `<tr><td class="model">${esc(row.modelLabel)}<br><span class="model-id">${esc(
+      const subScoreCells = subScores
+        ? `<td class="cell sub-score">${matrixCellHtml(
+            row.capability ?? { kind: 'missing' }
+          )}</td><td class="cell sub-score">${matrixCellHtml(
+            row.judgedQuality ?? { kind: 'missing' }
+          )}</td>`
+        : '';
+      return `<tr>${showTier ? tierCellHtml(row, allRows) : ''}<td class="model">${esc(
+        row.modelLabel
+      )}<br><span class="model-id">${esc(
         row.modelId
       )}</span><br><span class="${coverageClass}" title="base columns with a scored run">${covered}/${total}</span></td>${matrix.displayColumns
         .map((col) => `<td class="cell ok">${cellHtml(row, col)}</td>`)
-        .join('')}</tr>`;
+        .join('')}${subScoreCells}</tr>`;
     })
     .join('');
   return `<table><thead>${header}</thead><tbody>${rows}</tbody></table>`;
+};
+
+const subScoreTitle = (evaluators: readonly string[]): string =>
+  evaluators.length > 0 ? `Mean of: ${evaluators.join(', ')}` : 'No evaluators classified';
+
+/**
+ * The tier is the unit of ranking the data supports. Rows sharing a tier are
+ * printed in alphabetical order and marked tied, so a two-decimal difference
+ * between them cannot read as a placing.
+ */
+const tierCellHtml = (row: MatrixRow, rows: readonly MatrixRow[]): string => {
+  if (row.tier === undefined) {
+    return '<td class="tier"><span class="sub-num" title="not ranked: no score to rank by">—</span></td>';
+  }
+  const tiedWith = rows.filter(
+    (other) => other.openSource === row.openSource && other.tier === row.tier
+  ).length;
+  const tied =
+    tiedWith > 1
+      ? `<span class="tied" title="${tiedWith} rows are statistically indistinguishable; their order is alphabetical, not a ranking">tied ×${tiedWith}</span>`
+      : '';
+  return `<td class="tier">T${row.tier}${tied}</td>`;
+};
+
+const formatNumber = (value: number): string =>
+  Math.abs(value) >= 0.01 || value === 0 ? value.toFixed(2) : value.toExponential(1);
+
+/**
+ * States how tiers were drawn and how many boundaries survived, headlining the
+ * robust count: a boundary whose interval edge sits next to 0 can flip with
+ * another seed, so it is reported separately rather than counted as a ranking.
+ */
+export const tieAnalysisNote = (analysis: TieAnalysis, rankedByLabel: string): string => {
+  const boundaries = [...analysis.proprietary, ...analysis.openSource];
+  const separated = boundaries.filter((b) => b.separated);
+  const borderline = separated.filter((b) => b.borderline).length;
+  const robust = separated.length - borderline;
+  const floorBasis =
+    analysis.basis === 'evaluator-score'
+      ? `${formatNumber(analysis.configuredFloor)} on the 0–1 evaluator scale = ${formatNumber(
+          analysis.floor
+        )} here`
+      : formatNumber(analysis.floor);
+  const withinFloor = boundaries.filter((b) => b.reason === 'within-noise-floor').length;
+  return (
+    `Tiers: rows are ranked by ${rankedByLabel}, and two adjacent rows are split into different tiers ` +
+    `only when a paired bootstrap over the columns both scored (paired by column, seed ${analysis.seed}, ` +
+    `${analysis.resamples} resamples) puts the 95% interval of their difference above 0 AND their gap is ` +
+    `at least the judge noise floor (${floorBasis}${
+      analysis.source ? `; measured: ${analysis.source}` : ''
+    }). ` +
+    `${robust} of ${boundaries.length} adjacent boundaries separate robustly` +
+    `${
+      borderline > 0
+        ? ` (+${borderline} borderline: interval edge within ${analysis.borderlineEpsilon} of 0)`
+        : ''
+    }; ` +
+    `${withinFloor} fall inside the noise floor. Rows within a tier are listed alphabetically.`
+  );
+};
+
+/** Says what each half of the Overall split contains and what fell in neither. */
+export const subScoreNote = (matrix: Matrix): string | undefined => {
+  const subScores = matrix.subScores;
+  if (!subScores) {
+    return undefined;
+  }
+  const list = (names: readonly string[]) => (names.length > 0 ? names.join(', ') : 'none');
+  return (
+    `${subScores.contractLabel} and ${subScores.judgedLabel} split ${matrix.overallLabel} by each ` +
+    `evaluator's declared kind (code vs llm, read from the score documents): ` +
+    `${subScores.contractLabel} = ${list(subScores.contract)}; ${subScores.judgedLabel} = ${list(
+      subScores.judged
+    )}. ` +
+    `Contract evaluators are deterministic; judged ones flip far more often on identical reruns, so ` +
+    `rank on ${subScores.contractLabel} and treat ${subScores.judgedLabel} as advisory.` +
+    (subScores.unclassified.length > 0
+      ? ` In ${matrix.overallLabel} but in neither half (no declared kind): ${list(
+          subScores.unclassified
+        )}.`
+      : '')
+  );
 };
 
 /**
@@ -639,7 +754,21 @@ export const renderMatrixHtml = (
         ]
       : [];
 
-  const allNotes = [...(provenance.methodologyNotes ?? []), ...saturationNote];
+  const rankedByLabel =
+    matrix.displayColumns.find((column) =>
+      matrix.tieAnalysis?.rankedBy === OVERALL_COLUMN_ID
+        ? column.kind === 'overall'
+        : column.id === matrix.tieAnalysis?.rankedBy
+    )?.label ?? matrix.overallLabel;
+  const tieNote = matrix.tieAnalysis ? [tieAnalysisNote(matrix.tieAnalysis, rankedByLabel)] : [];
+  const splitNote = subScoreNote(matrix);
+
+  const allNotes = [
+    ...tieNote,
+    ...(splitNote ? [splitNote] : []),
+    ...(provenance.methodologyNotes ?? []),
+    ...saturationNote,
+  ];
   const methodologyBlock = allNotes.length
     ? `<details class="methodology"><summary>Methodology &amp; scoring-semantics notes</summary><ul>${allNotes
         .map((note) => `<li>${esc(note)}</li>`)

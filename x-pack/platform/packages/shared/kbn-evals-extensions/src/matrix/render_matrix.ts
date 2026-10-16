@@ -6,7 +6,13 @@
  */
 
 import type { MatrixConfig } from './load_matrix_config';
-import type { Matrix, MatrixCell, MatrixDisplayColumn, MatrixRow } from './build_matrix';
+import type {
+  Matrix,
+  MatrixCell,
+  MatrixDisplayColumn,
+  MatrixRow,
+  SubScoreSummary,
+} from './build_matrix';
 import type { MatrixTraceData } from './trace_types';
 
 /**
@@ -120,13 +126,34 @@ const renderCsv = (
 const renderMarkdownTable = (
   displayColumns: MatrixDisplayColumn[],
   rows: MatrixRow[],
-  notRecommendedLabel: string
+  notRecommendedLabel: string,
+  subScores?: SubScoreSummary
 ): string => {
   const coverageOf = (row: MatrixRow): string => `${row.coverage.covered}/${row.coverage.total}`;
-  const header = [...buildHeader(displayColumns), 'Coverage'];
+  const showTier = rows.some((row) => row.tier !== undefined);
+  const tierOf = (row: MatrixRow): string => {
+    if (row.tier === undefined) {
+      return '';
+    }
+    const tied = rows.filter((other) => other.tier === row.tier).length;
+    return tied > 1 ? `T${row.tier} (tied)` : `T${row.tier}`;
+  };
+  const header = [
+    ...(showTier ? ['Tier'] : []),
+    ...buildHeader(displayColumns),
+    ...(subScores ? [subScores.contractLabel, subScores.judgedLabel] : []),
+    'Coverage',
+  ];
   const separator = header.map(() => ':---');
   const body = rows.map((row) => [
+    ...(showTier ? [tierOf(row)] : []),
     ...rowToValues(displayColumns, row, notRecommendedLabel),
+    ...(subScores
+      ? [
+          cellToString(row.capability ?? { kind: 'missing' }, notRecommendedLabel),
+          cellToString(row.judgedQuality ?? { kind: 'missing' }, notRecommendedLabel),
+        ]
+      : []),
     coverageOf(row),
   ]);
 
@@ -174,13 +201,23 @@ export const renderMatrix = (
     '## Proprietary models',
     '',
     matrix.proprietary.length > 0
-      ? renderMarkdownTable(displayColumns, matrix.proprietary, notRecommendedLabel)
+      ? renderMarkdownTable(
+          displayColumns,
+          matrix.proprietary,
+          notRecommendedLabel,
+          matrix.subScores
+        )
       : '_No proprietary models with results._',
     '',
     '## Open-source models',
     '',
     matrix.openSource.length > 0
-      ? renderMarkdownTable(displayColumns, matrix.openSource, notRecommendedLabel)
+      ? renderMarkdownTable(
+          displayColumns,
+          matrix.openSource,
+          notRecommendedLabel,
+          matrix.subScores
+        )
       : '_No open-source models with results._',
     '',
   ].join('\n');
@@ -200,6 +237,12 @@ export const renderMatrix = (
       // the artifact alone -- otherwise a reader cannot tell why a score
       // moved between two runs of the same data.
       evaluatorSaturation: matrix.evaluatorSaturation ?? [],
+      // Which evaluators each half of the Overall split averages (rows carry
+      // the values as `capability` / `judgedQuality`), and which fed neither.
+      ...(matrix.subScores ? { subScores: matrix.subScores } : {}),
+      // Every adjacent comparison behind the tiers: gap, shared columns, paired
+      // interval, and whether it separated -- so a tie can be audited.
+      ...(matrix.tieAnalysis ? { tieAnalysis: matrix.tieAnalysis } : {}),
       proprietary: matrix.proprietary,
       openSource: matrix.openSource,
       ...(matrix.tokenCost ? { tokenCost: matrix.tokenCost } : {}),

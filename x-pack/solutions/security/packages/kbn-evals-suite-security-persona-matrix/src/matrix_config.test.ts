@@ -5,8 +5,22 @@
  * 2.0.
  */
 
+import {
+  createQuantitativeCorrectnessEvaluators,
+  createQuantitativeGroundednessEvaluator,
+  type Evaluator,
+} from '@kbn/evals';
 import config from '../persona_matrix.config.json';
+import productionConfig from '../persona_matrix.production.config.json';
 import suitesMetadata from '../../../../../../.buildkite/pipelines/evals/evals.suites.json';
+import {
+  createPersonaMatrixExpectedToolCalledEvaluator,
+  createPersonaMatrixFinalAnswerPresentEvaluator,
+  createPersonaMatrixMinExpectedStepsEvaluator,
+  createPersonaMatrixSkillInvokedEvaluator,
+  createPersonaMatrixTrajectoryEvaluator,
+} from './evaluate_dataset';
+import { createConnectorInvokedEvaluator } from './evaluators/connector_invoked_evaluator';
 
 /**
  * The shipped persona matrix config, not a fixture.
@@ -117,5 +131,52 @@ describe('persona_matrix.config.json extra-suite branch pins', () => {
     // The pinned branches last exported 2026-07-30 and 2026-08-11; a 14-day
     // window silently drops them even with the branch pinned correctly.
     expect(config.lookbackDays).toBeGreaterThanOrEqual(45);
+  });
+});
+
+/**
+ * The matrix splits Overall into contract and judged halves by `evaluator.kind`.
+ * Score documents carry it, but the dataset-stats route (every column of the CI
+ * config) drops it, so the configs restate it. A restatement that drifts from
+ * the code would quietly move an evaluator into the wrong half; pin it to what
+ * each evaluator actually declares.
+ */
+describe('matrix configs: evaluatorKinds mirror the declared evaluator kinds', () => {
+  interface SplitConfig {
+    subScores: { evaluatorKinds: Record<string, string> };
+    overall: { noiseFloor?: unknown };
+  }
+
+  const personaEvaluators: Evaluator[] = [
+    createPersonaMatrixSkillInvokedEvaluator({ traceEsClient: {} as never, log: {} as never }),
+    createPersonaMatrixTrajectoryEvaluator(),
+    createPersonaMatrixExpectedToolCalledEvaluator(),
+    createPersonaMatrixFinalAnswerPresentEvaluator(),
+    createPersonaMatrixMinExpectedStepsEvaluator(),
+    createConnectorInvokedEvaluator(),
+    ...createQuantitativeCorrectnessEvaluators(),
+    createQuantitativeGroundednessEvaluator(),
+  ];
+
+  it.each([
+    ['persona_matrix.config.json', config],
+    ['persona_matrix.production.config.json', productionConfig],
+  ])('%s', (_name, matrixConfig: SplitConfig) => {
+    const declared = matrixConfig.subScores.evaluatorKinds;
+    for (const evaluator of personaEvaluators) {
+      expect([evaluator.name, declared[evaluator.name]]).toEqual([
+        evaluator.name,
+        evaluator.kind.toLowerCase(),
+      ]);
+    }
+  });
+
+  it('ties adjacent rows on the measured judge noise floor', () => {
+    for (const matrixConfig of [config, productionConfig]) {
+      expect(matrixConfig.overall.noiseFloor).toMatchObject({
+        value: 0.352,
+        basis: 'evaluator-score',
+      });
+    }
   });
 });

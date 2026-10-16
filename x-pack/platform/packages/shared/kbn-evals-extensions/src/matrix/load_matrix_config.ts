@@ -264,6 +264,43 @@ export const matrixConfigSchema = schema.object({
      */
     runStdev: schema.maybe(schema.number({ min: 0, max: 10 })),
     /**
+     * Ties adjacent rows whose ranking gap the measurement cannot support.
+     * Supersedes `runStdev` when set.
+     *
+     * Two adjacent rows stand in different tiers only when BOTH hold: a seeded
+     * paired bootstrap over the base columns they share (paired on column id,
+     * never position) puts the 95% interval of their difference clear of 0,
+     * AND the gap between their ranking scores is at least `value`. The
+     * bootstrap answers "is there a difference"; the floor answers "is it
+     * bigger than the instrument's own run-to-run noise".
+     */
+    noiseFloor: schema.maybe(
+      schema.object({
+        /** Measured judge noise, in the units named by `basis`. */
+        value: schema.number({ min: 0 }),
+        /**
+         * `evaluator-score`: raw 0-1 evaluator units, multiplied by
+         * `defaultScale` before comparing against matrix scores.
+         * `matrix-score`: already on the published scale.
+         */
+        basis: schema.oneOf([schema.literal('evaluator-score'), schema.literal('matrix-score')], {
+          defaultValue: 'evaluator-score',
+        }),
+        /** Where `value` was measured; rendered with the tie note. */
+        source: schema.maybe(schema.string({ maxLength: MAX_STRING_LENGTH })),
+        /** Bootstrap seed. Fixed so a re-render of the same data never reshuffles tiers. */
+        seed: schema.number({ defaultValue: 1337 }),
+        resamples: schema.number({ defaultValue: 2000, min: 100, max: 100000 }),
+        /**
+         * A boundary whose interval edge lies within this distance of 0 (on
+         * the published scale) is borderline: another seed could flip it.
+         */
+        borderlineEpsilon: schema.number({ defaultValue: 0.05, min: 0 }),
+        /** Fewer shared scored columns than this cannot separate two rows. */
+        minSharedColumns: schema.number({ defaultValue: 3, min: 2 }),
+      })
+    ),
+    /**
      * Drop evaluators that score every model almost identically from the
      * Overall aggregate. Such an evaluator carries no ranking information but
      * still takes an equal share of the mean, compressing the spread between
@@ -273,6 +310,25 @@ export const matrixConfigSchema = schema.object({
      */
     excludeSaturatedEvaluators: schema.boolean({ defaultValue: false }),
   }),
+  /**
+   * Contract vs judged split of Overall. Each evaluator is classified by the
+   * `evaluator.kind` its score documents carry (`code` -> contract, `llm` ->
+   * judged). `evaluatorKinds` covers evaluators whose documents are not read
+   * per example -- the dataset-stats route drops `kind` -- and should mirror
+   * the `kind` each evaluator declares in source. Evaluators with no kind, or
+   * conflicting kinds, are reported as unclassified and left out of both.
+   */
+  subScores: schema.maybe(
+    schema.object({
+      contractLabel: schema.string({ defaultValue: 'Contract', maxLength: MAX_STRING_LENGTH }),
+      judgedLabel: schema.string({ defaultValue: 'Judged', maxLength: MAX_STRING_LENGTH }),
+      evaluatorKinds: schema.recordOf(
+        schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }),
+        schema.oneOf([schema.literal('code'), schema.literal('llm')]),
+        { defaultValue: {} }
+      ),
+    })
+  ),
   /**
    * Renders the legacy single "Overall" column (weighted/mean over every base
    * column) at the far right. Set to `false` when the layout expresses its own

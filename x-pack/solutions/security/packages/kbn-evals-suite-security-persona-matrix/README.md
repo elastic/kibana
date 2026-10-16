@@ -25,6 +25,13 @@ designed for multi-model comparison and persona-driven reporting.
 - **Criteria** — generic rubric (Relevance, Clarity, Accuracy, Completeness)
 - **Trace-based** — input tokens, output tokens, cached tokens, tool calls, latency
 
+The matrix splits Overall into a **contract** sub-score (evaluators that declare
+`kind: 'CODE'`: SkillInvoked, Trajectory, ExpectedToolCalled, FinalAnswerPresent,
+MinExpectedSteps) and a **judged** sub-score (`kind: 'LLM'`: the correctness and
+groundedness analyses, Criteria). The split is read from `evaluator.kind` on each
+score document, so a new evaluator is classified by what it declares rather than by
+a name list.
+
 ## Repetition tiers
 
 A single LLM-graded run is not a measurement. On identical reruns (same model, judge,
@@ -53,6 +60,10 @@ EVAL_STEP_TIMEOUT_IN_MINUTES=180
 The Playwright timeout scales with the tier (30 minutes per repetition) unless
 `PERSONA_MATRIX_TIMEOUT_MINUTES` overrides it. Raise the Buildkite step timeout
 (`EVAL_STEP_TIMEOUT_IN_MINUTES`) to match for `publish` runs.
+
+Even at `publish`, the matrix renders adjacent models as tied when their Overall gap is
+inside the configured `overall.noiseFloor` or a seeded paired bootstrap over their shared
+prompts cannot separate them.
 
 ## Fixtures
 

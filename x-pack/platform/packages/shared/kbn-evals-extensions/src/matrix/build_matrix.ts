@@ -15,6 +15,10 @@ import type {
 import type { AggregatedEvaluatorScore, AggregatedModelScores } from './query_matrix_scores';
 import { detectSaturatedEvaluators, saturatedEvaluatorNames } from './evaluator_saturation';
 import type { EvaluatorSaturation } from './evaluator_saturation';
+import { axisOfKind, buildEvaluatorKindIndex } from './evaluator_kinds';
+import type { EvaluatorKindConflict, EvaluatorKindIndex, SubScoreAxis } from './evaluator_kinds';
+import { assignNoiseFloorTiers } from './noise_floor_tiers';
+import type { TieBoundary, TieCandidate } from './noise_floor_tiers';
 
 /** A single matrix cell: either a numeric 0-10 score or "Not recommended". */
 export type MatrixCell =
@@ -68,9 +72,12 @@ export interface MatrixRow {
   /** Column/composite id -> cell. */
   cells: Record<string, MatrixCell>;
   overall: MatrixCell;
-  /** Deterministic code/contract evaluator mean on the same 0–10 scale. */
+  /**
+   * Contract sub-score: Overall restricted to evaluators whose `evaluator.kind`
+   * is `code`, on the same scale and evaluator set as Overall.
+   */
   capability?: MatrixCell;
-  /** Judged evaluator mean on the same 0–10 scale. */
+  /** Judged sub-score: Overall restricted to evaluators whose kind is `llm`. */
   judgedQuality?: MatrixCell;
   /**
    * Base columns with a non-missing cell out of all base columns. Partial
@@ -134,6 +141,41 @@ export interface Matrix {
   openSource: MatrixRow[];
   /** Present only when the config opts into the token axis. */
   tokenCost?: { models: TokenCostModel[] };
+  /** Which evaluators fed each half of the Overall split, and which fed neither. */
+  subScores?: SubScoreSummary;
+  /** Present when `overall.noiseFloor` is configured. */
+  tieAnalysis?: TieAnalysis;
+}
+
+export interface SubScoreSummary {
+  contractLabel: string;
+  judgedLabel: string;
+  /** Evaluators counted in Overall whose kind is `code`. */
+  contract: string[];
+  /** Evaluators counted in Overall whose kind is `llm`. */
+  judged: string[];
+  /**
+   * Counted in Overall but in neither half: no kind on the score documents or
+   * in config. Overall and the two halves do not reconcile while this is non-empty.
+   */
+  unclassified: string[];
+  conflicts: EvaluatorKindConflict[];
+}
+
+export interface TieAnalysis {
+  /** Id of the column rows are ranked by. */
+  rankedBy: string;
+  /** Floor on the published scale, after applying `basis`. */
+  floor: number;
+  /** Floor as configured, in `basis` units. */
+  configuredFloor: number;
+  basis: 'evaluator-score' | 'matrix-score';
+  source?: string;
+  seed: number;
+  resamples: number;
+  borderlineEpsilon: number;
+  proprietary: TieBoundary[];
+  openSource: TieBoundary[];
 }
 
 const roundTo = (value: number, decimals: number): number => {
@@ -217,6 +259,19 @@ const columnErroredOutEvaluators = (
 };
 
 /**
+ * A column may opt into an explicit evaluator allowlist; otherwise the global
+ * exclusion list drops raw-magnitude evaluators that would blow out the 0-10 scale.
+ */
+const countsTowardColumn = (
+  evaluatorName: string,
+  column: MatrixColumnConfig,
+  excludeEvaluators: readonly string[]
+): boolean =>
+  column.evaluators
+    ? column.evaluators.includes(evaluatorName)
+    : !isExcludedEvaluator(evaluatorName, excludeEvaluators);
+
+/**
  * Weighted mean (by sample count) of the evaluator scores mapped to a column.
  * Returns `undefined` when no scores contribute.
  */
@@ -226,8 +281,6 @@ const computeColumnMean = (
   excludeEvaluators: readonly string[],
   includeEvaluator?: (evaluator: AggregatedEvaluatorScore) => boolean
 ): number | undefined => {
-  const evaluatorSet = column.evaluators ? new Set(column.evaluators) : undefined;
-
   let weightedSum = 0;
   let totalCount = 0;
 
@@ -235,12 +288,7 @@ const computeColumnMean = (
     if (includeEvaluator && !includeEvaluator(evaluator)) {
       continue;
     }
-    // A column may opt into an explicit evaluator allowlist; otherwise the global
-    // exclusion list drops raw-magnitude evaluators that would blow out the 0-10 scale.
-    const skip = evaluatorSet
-      ? !evaluatorSet.has(evaluator.evaluatorName)
-      : isExcludedEvaluator(evaluator.evaluatorName, excludeEvaluators);
-    if (skip) {
+    if (!countsTowardColumn(evaluator.evaluatorName, column, excludeEvaluators)) {
       continue;
     }
 
@@ -293,28 +341,68 @@ const buildCell = (
   return toCell(roundTo(mean * scale, config.decimals), config, { selfJudged });
 };
 
-const CONTRACT_EVALUATORS = new Set([
-  'ExpectedToolCalled',
-  'FinalAnswerPresent',
-  'MinExpectedSteps',
-  'SkillInvoked',
-]);
-
-const axisCell = (
+/**
+ * One half of the Overall split. Uses Overall's own evaluator set (including
+ * the saturated-evaluator exclusion) so the two halves partition what Overall
+ * averages instead of measuring something adjacent to it.
+ */
+const subScoreCell = (
   modelScores: AggregatedModelScores,
   config: MatrixConfig,
-  includeEvaluator: (evaluator: AggregatedEvaluatorScore) => boolean
+  excludeEvaluators: readonly string[],
+  kinds: EvaluatorKindIndex,
+  axis: SubScoreAxis
 ): MatrixCell => {
+  const axisOf = (name: string) => axisOfKind(kinds.kindOf(name));
   const cells = config.columns.map((column) => ({
     cell: buildCell(
-      computeColumnMean(modelScores, column, config.excludeEvaluators, includeEvaluator),
+      computeColumnMean(
+        modelScores,
+        column,
+        excludeEvaluators,
+        (evaluator) => axisOf(evaluator.evaluatorName) === axis
+      ),
       column,
       config,
-      { erroredOutEvaluators: columnErroredOutEvaluators(modelScores, column) }
+      {
+        // An errored-out evaluator of unknown kind may belong to this half, so
+        // the half refuses rather than publish a mean resting on the survivors.
+        erroredOutEvaluators: columnErroredOutEvaluators(modelScores, column).filter((name) => {
+          const owner = axisOf(name);
+          return owner === axis || owner === undefined;
+        }),
+      }
     ),
     weight: config.overall.mode === 'weighted' ? column.weight : 1,
   }));
   return aggregateCells(cells, config);
+};
+
+const summarizeSubScores = (
+  aggregated: readonly AggregatedModelScores[],
+  config: MatrixConfig,
+  excludeEvaluators: readonly string[],
+  kinds: EvaluatorKindIndex
+): SubScoreSummary => {
+  const counted = new Set<string>();
+  for (const modelScores of aggregated) {
+    for (const column of config.columns) {
+      for (const evaluator of columnEvaluators(modelScores, column)) {
+        if (countsTowardColumn(evaluator.evaluatorName, column, excludeEvaluators)) {
+          counted.add(evaluator.evaluatorName);
+        }
+      }
+    }
+  }
+  const sorted = [...counted].sort();
+  return {
+    contractLabel: config.subScores?.contractLabel ?? 'Contract',
+    judgedLabel: config.subScores?.judgedLabel ?? 'Judged',
+    contract: sorted.filter((name) => axisOfKind(kinds.kindOf(name)) === 'contract'),
+    judged: sorted.filter((name) => axisOfKind(kinds.kindOf(name)) === 'judged'),
+    unclassified: sorted.filter((name) => axisOfKind(kinds.kindOf(name)) === undefined),
+    conflicts: kinds.conflicts,
+  };
 };
 
 /**
@@ -542,6 +630,104 @@ const assignTiers = (rows: MatrixRow[], config: MatrixConfig): MatrixRow[] => {
   });
 };
 
+/** Effective weight of each base column in the ranking score, composites expanded. */
+const rankingWeights = (config: MatrixConfig, primaryId: string): Map<string, number> => {
+  const weights = new Map<string, number>();
+  if (primaryId === OVERALL_COLUMN_ID) {
+    for (const column of config.columns) {
+      weights.set(column.id, config.overall.mode === 'weighted' ? column.weight : 1);
+    }
+    return weights;
+  }
+  const baseIds = new Set(config.columns.map((column) => column.id));
+  const compositeById = new Map(config.composites.map((composite) => [composite.id, composite]));
+  const visit = (id: string, share: number, seen: ReadonlySet<string>) => {
+    if (baseIds.has(id)) {
+      weights.set(id, (weights.get(id) ?? 0) + share);
+      return;
+    }
+    const composite = compositeById.get(id);
+    if (!composite || seen.has(id)) {
+      return;
+    }
+    for (const ref of composite.from) {
+      visit(ref, share / composite.from.length, new Set([...seen, id]));
+    }
+  };
+  visit(primaryId, 1, new Set());
+  return weights;
+};
+
+/** Scored base cells as the ranking score sees them ("Not recommended" as 0 when configured). */
+const rankedColumnValues = (row: MatrixRow, config: MatrixConfig): Map<string, number> => {
+  const values = new Map<string, number>();
+  for (const column of config.columns) {
+    const cell = row.cells[column.id];
+    if (cell?.kind === 'score') {
+      values.set(column.id, cell.value);
+    } else if (cell?.kind === 'not-recommended' && config.notRecommendedCountsAsZeroInOverall) {
+      values.set(column.id, 0);
+    }
+  }
+  return values;
+};
+
+const noiseFloorOnMatrixScale = (config: MatrixConfig): number => {
+  const noiseFloor = config.overall.noiseFloor;
+  if (!noiseFloor) {
+    return 0;
+  }
+  return noiseFloor.basis === 'evaluator-score'
+    ? noiseFloor.value * config.defaultScale
+    : noiseFloor.value;
+};
+
+/**
+ * Tiers rows (already sorted by ranking score) with the noise-floor rule and
+ * orders each tier alphabetically: sorting tied rows by their score would
+ * re-assert the precision the tie denies.
+ */
+const assignTiersWithinNoiseFloor = (
+  rows: MatrixRow[],
+  config: MatrixConfig,
+  primaryId: string,
+  rankCell: (row: MatrixRow) => MatrixCell | undefined
+): { rows: MatrixRow[]; boundaries: TieBoundary[] } => {
+  const noiseFloor = config.overall.noiseFloor;
+  if (!noiseFloor) {
+    return { rows, boundaries: [] };
+  }
+  const candidates: TieCandidate[] = rows.map((row) => {
+    const cell = rankCell(row);
+    return {
+      modelId: row.modelId,
+      modelLabel: row.modelLabel,
+      rankValue: cell?.kind === 'score' ? cell.value : undefined,
+      columnValues: rankedColumnValues(row, config),
+    };
+  });
+  const { tiers, boundaries } = assignNoiseFloorTiers(
+    candidates,
+    rankingWeights(config, primaryId),
+    {
+      floor: noiseFloorOnMatrixScale(config),
+      seed: noiseFloor.seed,
+      resamples: noiseFloor.resamples,
+      borderlineEpsilon: noiseFloor.borderlineEpsilon,
+      minSharedColumns: noiseFloor.minSharedColumns,
+    }
+  );
+  const tiered = rows.map((row, index) => {
+    const tier = tiers[index];
+    return tier === undefined ? row : { ...row, tier };
+  });
+  const ranked = tiered
+    .filter((row) => row.tier !== undefined)
+    .sort((a, b) => (a.tier ?? 0) - (b.tier ?? 0) || a.modelLabel.localeCompare(b.modelLabel));
+  const unranked = tiered.filter((row) => row.tier === undefined);
+  return { rows: [...ranked, ...unranked], boundaries };
+};
+
 /**
  * Distinct commits behind one model's scores, newest experiment first. Suites
  * run on independent schedules, so more than one is normal and not an error.
@@ -582,6 +768,7 @@ export const buildMatrix = (
     saturatedNames.size > 0
       ? [...config.excludeEvaluators, ...saturatedNames]
       : config.excludeEvaluators;
+  const kinds = buildEvaluatorKindIndex(aggregated, config.subScores?.evaluatorKinds);
 
   const proprietary: MatrixRow[] = [];
   const openSource: MatrixRow[] = [];
@@ -637,19 +824,8 @@ export const buildMatrix = (
         config.minCoverage > 0 && scoredColumns < config.minCoverage
           ? { kind: 'insufficient-coverage', covered: scoredColumns, required: config.minCoverage }
           : overall,
-      capability: axisCell(modelScores, config, (evaluator) =>
-        CONTRACT_EVALUATORS.has(
-          evaluator.evaluatorName.replace(/^Skill Invoked \([^)]+\)$/, 'SkillInvoked')
-        )
-      ),
-      judgedQuality: axisCell(
-        modelScores,
-        config,
-        (evaluator) =>
-          !CONTRACT_EVALUATORS.has(
-            evaluator.evaluatorName.replace(/^Skill Invoked \([^)]+\)$/, 'SkillInvoked')
-          )
-      ),
+      capability: subScoreCell(modelScores, config, excludeEvaluators, kinds, 'contract'),
+      judgedQuality: subScoreCell(modelScores, config, excludeEvaluators, kinds, 'judged'),
       coverage: {
         covered: scoredColumns,
         total: config.columns.length,
@@ -667,8 +843,10 @@ export const buildMatrix = (
       ? config.composites[config.composites.length - 1].id
       : OVERALL_COLUMN_ID;
 
+  const rankCell = (row: MatrixRow): MatrixCell | undefined =>
+    primaryId === OVERALL_COLUMN_ID ? row.overall : row.cells[primaryId];
   const sortValue = (row: MatrixRow): number => {
-    const cell = primaryId === OVERALL_COLUMN_ID ? row.overall : row.cells[primaryId];
+    const cell = rankCell(row);
     return cell && cell.kind === 'score' ? cell.value : -1;
   };
 
@@ -728,6 +906,34 @@ export const buildMatrix = (
     }
   }
 
+  const subScores = summarizeSubScores(aggregated, config, excludeEvaluators, kinds);
+  if (log && subScores.unclassified.length > 0) {
+    log.warning(
+      `${subScores.unclassified.length} evaluator(s) count toward ${
+        config.overall.label
+      } but carry no evaluator.kind and are missing from subScores.evaluatorKinds, so they are in neither the ${
+        subScores.contractLabel
+      } nor the ${subScores.judgedLabel} sub-score: ${subScores.unclassified.join(', ')}.`
+    );
+  }
+  if (log && subScores.conflicts.length > 0) {
+    log.warning(
+      `Conflicting evaluator.kind left unclassified: ${subScores.conflicts
+        .map((conflict) => `${conflict.evaluatorName} (${conflict.kinds.join(' vs ')})`)
+        .join(', ')}.`
+    );
+  }
+
+  const sortedProprietary = proprietary.sort(sortByPrimaryDesc);
+  const sortedOpenSource = openSource.sort(sortByPrimaryDesc);
+  const noiseFloor = config.overall.noiseFloor;
+  const tieredProprietary = noiseFloor
+    ? assignTiersWithinNoiseFloor(sortedProprietary, config, primaryId, rankCell)
+    : { rows: assignTiers(sortedProprietary, config), boundaries: [] };
+  const tieredOpenSource = noiseFloor
+    ? assignTiersWithinNoiseFloor(sortedOpenSource, config, primaryId, rankCell)
+    : { rows: assignTiers(sortedOpenSource, config), boundaries: [] };
+
   return {
     columns: config.columns.map((column) => ({
       id: column.id,
@@ -742,8 +948,25 @@ export const buildMatrix = (
     displayColumns: buildDisplayColumns(config),
     overallLabel: config.overall.label,
     evaluatorSaturation: saturation,
-    proprietary: assignTiers(proprietary.sort(sortByPrimaryDesc), config),
-    openSource: assignTiers(openSource.sort(sortByPrimaryDesc), config),
+    proprietary: tieredProprietary.rows,
+    openSource: tieredOpenSource.rows,
+    subScores,
+    ...(noiseFloor
+      ? {
+          tieAnalysis: {
+            rankedBy: primaryId,
+            floor: noiseFloorOnMatrixScale(config),
+            configuredFloor: noiseFloor.value,
+            basis: noiseFloor.basis,
+            ...(noiseFloor.source ? { source: noiseFloor.source } : {}),
+            seed: noiseFloor.seed,
+            resamples: noiseFloor.resamples,
+            borderlineEpsilon: noiseFloor.borderlineEpsilon,
+            proprietary: tieredProprietary.boundaries,
+            openSource: tieredOpenSource.boundaries,
+          },
+        }
+      : {}),
     // Token magnitudes are meaningful only over base columns; composites are derived scores.
     ...(config.tokenCost
       ? { tokenCost: buildTokenCost(config, config.tokenCost, resolveScores) }

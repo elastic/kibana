@@ -2,6 +2,47 @@
   "title": "Security Persona Matrix (persona columns only)",
   "branch": "main",
   "lookbackDays": 120,
+  "overall": {
+    "noiseFloor": {
+      "value": 0.352,
+      "basis": "evaluator-score",
+      "source": "persona-matrix reliability findings, golden cluster 2026-08-23: mean judge score spread on identical reruns"
+    }
+  },
+  "subScores": {
+    "evaluatorKinds": {
+      "SkillInvoked": "code",
+      "Trajectory": "code",
+      "ExpectedToolCalled": "code",
+      "FinalAnswerPresent": "code",
+      "MinExpectedSteps": "code",
+      "ConnectorInvoked": "code",
+      "AttackDiscoveryBasic": "code",
+      "Translation Result": "code",
+      "Translated ESQL Validity": "code",
+      "Custom Query Accuracy": "code",
+      "Prebuilt Rule Match": "code",
+      "Integration Match": "code",
+      "Unsupported Pattern Detection": "code",
+      "LOOKUP JOIN Preservation": "code",
+      "Translation Completeness": "code",
+      "ES|QL Completeness": "code",
+      "Index Pattern Validity": "code",
+      "Panel Count Preservation": "code",
+      "Lookup Join Presence": "code",
+      "Markdown Error Detection": "code",
+      "Factuality": "llm",
+      "Relevance": "llm",
+      "Sequence Accuracy": "llm",
+      "Groundedness": "llm",
+      "criteria": "llm",
+      "Criteria": "llm",
+      "Rubric": "llm",
+      "Hallucination Detection": "llm",
+      "NL Description Faithfulness": "llm",
+      "translation_fidelity": "llm"
+    }
+  },
   "columns": [
     {
       "id": "alert-analysis-a",

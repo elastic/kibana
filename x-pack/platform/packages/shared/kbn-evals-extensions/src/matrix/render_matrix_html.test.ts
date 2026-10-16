@@ -546,25 +546,142 @@ describe('renderMatrixHtml', () => {
 });
 
 describe('renderMatrixHtml tie tiers', () => {
+  const row = mockMatrix.proprietary[0];
   const tiered = (tier?: number): Matrix => ({
     ...mockMatrix,
-    proprietary: [{ ...mockMatrix.proprietary[0], tier }],
+    proprietary: [{ ...row, tier }],
   });
 
-  it('labels the Overall score with its tie tier', () => {
+  it('renders the tier as its own column', () => {
     // The tier is the honest unit of ranking: rows in one tier differ by less
-    // than the measured run-to-run noise, so publishing the bare number invites
-    // a precision the data does not have.
+    // than the measured noise, so publishing the bare number invites a
+    // precision the data does not have.
     const html = renderMatrixHtml(tiered(2), mockConfig);
 
-    expect(html).toContain('T2');
-    expect(html).toContain('not distinguishable at the measured run-to-run noise level');
+    expect(html).toContain('<th>Tier</th>');
+    expect(html).toContain('<td class="tier">T2</td>');
   });
 
-  it('omits the tier marker when tiering is not configured', () => {
+  it('marks every member of a shared tier as tied', () => {
+    const html = renderMatrixHtml(
+      {
+        ...mockMatrix,
+        proprietary: [
+          { ...row, modelId: 'a', modelLabel: 'A', tier: 1 },
+          { ...row, modelId: 'b', modelLabel: 'B', tier: 1 },
+          { ...row, modelId: 'c', modelLabel: 'C', tier: 2 },
+        ],
+      },
+      mockConfig
+    );
+
+    expect(html.match(/tied ×2/g)).toHaveLength(2);
+    expect(html).toContain('<td class="tier">T2</td>');
+  });
+
+  it('omits the tier column when tiering is not configured', () => {
     const html = renderMatrixHtml(tiered(undefined), mockConfig);
 
-    expect(html).not.toContain('Tie tier');
+    expect(html).not.toContain('<th>Tier</th>');
+  });
+
+  it('states how tiers were drawn, headlining robust over borderline boundaries', () => {
+    const boundary = {
+      upperModelId: 'a',
+      lowerModelId: 'b',
+      gap: 4,
+      sharedColumns: 21,
+      ciLow: 0.03,
+      ciHigh: 5,
+      separated: true,
+      borderline: true,
+      reason: 'separated' as const,
+    };
+    const html = renderMatrixHtml(
+      {
+        ...tiered(1),
+        tieAnalysis: {
+          rankedBy: '__overall__',
+          floor: 3.52,
+          configuredFloor: 0.352,
+          basis: 'evaluator-score',
+          source: 'reliability findings',
+          seed: 1337,
+          resamples: 2000,
+          borderlineEpsilon: 0.05,
+          proprietary: [
+            boundary,
+            {
+              ...boundary,
+              gap: 0.0019,
+              separated: false,
+              borderline: false,
+              reason: 'within-noise-floor',
+            },
+          ],
+          openSource: [],
+        },
+      },
+      mockConfig
+    );
+
+    expect(html).toContain('ranked by Overall');
+    expect(html).toContain('0.35 on the 0–1 evaluator scale = 3.52 here');
+    expect(html).toContain('seed 1337');
+    expect(html).toContain('0 of 2 adjacent boundaries separate robustly (+1 borderline');
+    expect(html).toContain('1 fall inside the noise floor');
+  });
+});
+
+describe('renderMatrixHtml contract vs judged sub-scores', () => {
+  const withSplit: Matrix = {
+    ...mockMatrix,
+    proprietary: [
+      {
+        ...mockMatrix.proprietary[0],
+        capability: { kind: 'score', value: 9.1 },
+        judgedQuality: { kind: 'score', value: 6.4 },
+      },
+    ],
+    subScores: {
+      contractLabel: 'Contract',
+      judgedLabel: 'Judged',
+      contract: ['ExpectedToolCalled', 'Trajectory'],
+      judged: ['Groundedness'],
+      unclassified: ['Mystery'],
+      conflicts: [],
+    },
+  };
+
+  it('renders both halves beside Overall', () => {
+    const html = renderMatrixHtml(withSplit, mockConfig);
+    const header = html.slice(html.indexOf('<thead>'), html.indexOf('</thead>'));
+
+    expect(header.indexOf('>Overall<')).toBeLessThan(header.indexOf('>Contract<'));
+    expect(header.indexOf('>Contract<')).toBeLessThan(header.indexOf('>Judged<'));
+    expect(header).toContain('title="Mean of: ExpectedToolCalled, Trajectory"');
+    expect(html).toContain('9.1');
+    expect(html).toContain('6.4');
+  });
+
+  it('names what each half averages and what fell in neither', () => {
+    const html = renderMatrixHtml(withSplit, mockConfig);
+
+    expect(html).toContain('Contract = ExpectedToolCalled, Trajectory; Judged = Groundedness');
+    expect(html).toContain('in neither half (no declared kind): Mystery');
+  });
+
+  it('keeps grouped headers aligned when the extra columns are present', () => {
+    const html = renderMatrixHtml(
+      { ...withSplit, proprietary: [{ ...withSplit.proprietary[0], tier: 1 }] },
+      mockConfig
+    );
+    const groupRow = html.slice(html.indexOf('<thead><tr>') + 7, html.indexOf('</tr>'));
+
+    // Tier + Model, the Agent Builder span over 2 columns + Overall, then the two halves.
+    expect(groupRow).toBe(
+      '<tr><th></th><th></th><th colspan="2">Agent Builder</th><th colspan="1"></th><th></th><th></th>'
+    );
   });
 });
 

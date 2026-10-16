@@ -168,7 +168,7 @@ const rowHtml = (
     <td class="model">${esc(row.modelLabel)}<small>${esc(row.modelId)}</small></td>
     <td class="metric">${esc(
       cellValue(row.capability ?? { kind: 'missing' })
-    )}<small>deterministic contract evaluators</small></td>
+    )}<small>evaluators declaring kind=code</small></td>
     <td class="metric">${reliabilityHtml(agreement, tied)}</td>
     <td class="metric">${judgeHtml(judge)}</td>
     <td class="metric">${esc(cellValue(row.judgedQuality ?? { kind: 'missing' }))}<small>${esc(
@@ -270,6 +270,18 @@ export const renderReliabilityHtml = (
       )
     )
     .join('\n')}</tbody></table>
-<p class="legend"><b>Capability</b> is the mean of deterministic contract evaluators (<code>ExpectedToolCalled</code>, <code>FinalAnswerPresent</code>, <code>MinExpectedSteps</code>, and <code>SkillInvoked</code>). <b>Reliability</b> is pairwise exact agreement of ordered <code>tool_id</code> sequences; provider-generated <code>tool_call_id</code> is never compared. Rates carry a Wilson 95% interval and their pair count, and rows whose intervals overlap are marked tied rather than ordered. <b>Answer similarity</b> is reported separately because path stability barely predicts it (r=0.14 on the pilot corpus). <b>Judge agreement</b> is pass/fail concordance between two judge families on the identical example, repetition, and evaluator; cost and latency instruments are excluded because they are not verdicts. A model scored by one judge reads <i>Single judge</i>, never 100% — an absent second opinion is not consensus. Agreement measures reproducibility, not correctness. <b>Judged quality</b> is the mean of the remaining maximize-direction evaluators. The four axes are never averaged into a rank.</p>
+<p class="legend"><b>Capability</b> is the contract sub-score: Overall restricted to evaluators whose score documents declare <code>evaluator.kind = code</code>${
+    matrix.subScores?.contract.length
+      ? ` (${matrix.subScores.contract.map((name) => `<code>${esc(name)}</code>`).join(', ')})`
+      : ''
+  }. <b>Reliability</b> is pairwise exact agreement of ordered <code>tool_id</code> sequences; provider-generated <code>tool_call_id</code> is never compared. Rates carry a Wilson 95% interval and their pair count, and rows whose intervals overlap are marked tied rather than ordered. <b>Answer similarity</b> is reported separately because path stability barely predicts it (r=0.14 on the pilot corpus). <b>Judge agreement</b> is pass/fail concordance between two judge families on the identical example, repetition, and evaluator; cost and latency instruments are excluded because they are not verdicts. A model scored by one judge reads <i>Single judge</i>, never 100% — an absent second opinion is not consensus. Agreement measures reproducibility, not correctness. <b>Judged quality</b> is the judged sub-score: evaluators declaring <code>kind = llm</code>${
+    matrix.subScores?.judged.length
+      ? ` (${matrix.subScores.judged.map((name) => `<code>${esc(name)}</code>`).join(', ')})`
+      : ''
+  }${
+    matrix.subScores?.unclassified.length
+      ? `; ${matrix.subScores.unclassified.length} evaluator(s) declare no kind and are in neither`
+      : ''
+  }. The four axes are never averaged into a rank.</p>
 </div></body></html>`;
 };

@@ -119,7 +119,7 @@ export interface ComparisonReport {
  * arithmetic rather than the usual bit-mixing so it stays within the repo's
  * no-bitwise rule, and stays well inside float53 precision.
  */
-const createRng = (seed: number): (() => number) => {
+export const createRng = (seed: number): (() => number) => {
   const modulus = 2147483647;
   let state = Math.floor(Math.abs(seed)) % modulus;
   if (state === 0) state = 1;
@@ -132,7 +132,7 @@ const createRng = (seed: number): (() => number) => {
 const mean = (xs: readonly number[]): number =>
   xs.length === 0 ? 0 : xs.reduce((a, b) => a + b, 0) / xs.length;
 
-const quantile = (sorted: readonly number[], q: number): number => {
+export const quantile = (sorted: readonly number[], q: number): number => {
   if (sorted.length === 0) return 0;
   const idx = Math.min(sorted.length - 1, Math.max(0, Math.floor(q * sorted.length)));
   return sorted[idx];

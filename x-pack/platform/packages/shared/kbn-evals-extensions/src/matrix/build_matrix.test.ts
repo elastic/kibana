@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildMatrix, rowCommitShas } from './build_matrix';
+import { buildMatrix, OVERALL_COLUMN_ID, rowCommitShas } from './build_matrix';
 import { parseMatrixConfig, type MatrixConfig } from './load_matrix_config';
 import type { AggregatedModelScores } from './query_matrix_scores';
 
@@ -1050,5 +1050,220 @@ describe('errored-evaluator guard', () => {
     const overall = matrix.proprietary[0].overall;
 
     expect(overall.kind).not.toBe('score');
+  });
+});
+
+describe('buildMatrix contract vs judged sub-scores', () => {
+  const cfg = (extra: Record<string, unknown> = {}): MatrixConfig =>
+    parseMatrixConfig({
+      columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'], weight: 1 }],
+      models: [{ id: 'model-a', label: 'A' }],
+      ...extra,
+    });
+
+  const withEvaluators = (
+    evaluators: AggregatedModelScores['suites'][number]['datasets'][number]['evaluators']
+  ): AggregatedModelScores[] => [
+    {
+      modelId: 'model-a',
+      suites: [
+        {
+          suiteId: 'suite-a',
+          experimentId: 'e1',
+          datasets: [{ datasetId: 'd', datasetName: 'd', evaluators }],
+        },
+      ],
+    },
+  ];
+
+  it('splits Overall by the evaluator.kind each score document declares', () => {
+    const matrix = buildMatrix(
+      withEvaluators([
+        { evaluatorName: 'Trajectory', mean: 0.6, count: 1, kind: 'code' },
+        { evaluatorName: 'ExpectedToolCalled', mean: 1, count: 1, kind: 'code' },
+        { evaluatorName: 'Groundedness', mean: 0.4, count: 1, kind: 'llm' },
+        { evaluatorName: 'Factuality', mean: 0.2, count: 1, kind: 'llm' },
+      ]),
+      cfg()
+    );
+    const row = matrix.proprietary[0];
+
+    expect(row.capability).toEqual({ kind: 'score', value: 8 });
+    expect(row.judgedQuality).toEqual({ kind: 'score', value: 3 });
+    // Same evaluator set as Overall, so the halves reconcile with it.
+    expect(row.overall).toEqual({ kind: 'score', value: 5.5 });
+    // Trajectory declares kind=code; the old hardcoded contract list left it in judged.
+    expect(matrix.subScores).toEqual({
+      contractLabel: 'Contract',
+      judgedLabel: 'Judged',
+      contract: ['ExpectedToolCalled', 'Trajectory'],
+      judged: ['Factuality', 'Groundedness'],
+      unclassified: [],
+      conflicts: [],
+    });
+  });
+
+  it('classifies stats-route evaluators (no kind on the doc) from config', () => {
+    const matrix = buildMatrix(
+      withEvaluators([
+        { evaluatorName: 'AttackDiscoveryBasic', mean: 1, count: 1 },
+        { evaluatorName: 'Rubric', mean: 0.5, count: 1 },
+      ]),
+      cfg({
+        subScores: {
+          contractLabel: 'Deterministic',
+          evaluatorKinds: { AttackDiscoveryBasic: 'code', Rubric: 'llm' },
+        },
+      })
+    );
+
+    expect(matrix.proprietary[0].capability).toEqual({ kind: 'score', value: 10 });
+    expect(matrix.proprietary[0].judgedQuality).toEqual({ kind: 'score', value: 5 });
+    expect(matrix.subScores?.contractLabel).toBe('Deterministic');
+  });
+
+  it('reports an undeclared evaluator as unclassified instead of guessing its half', () => {
+    const log = { warning: jest.fn() };
+    const matrix = buildMatrix(
+      withEvaluators([
+        { evaluatorName: 'SkillInvoked', mean: 1, count: 1, kind: 'code' },
+        { evaluatorName: 'BrandNewCheck', mean: 0, count: 1 },
+      ]),
+      cfg(),
+      log
+    );
+
+    expect(matrix.subScores?.unclassified).toEqual(['BrandNewCheck']);
+    expect(matrix.proprietary[0].capability).toEqual({ kind: 'score', value: 10 });
+    expect(matrix.proprietary[0].judgedQuality).toEqual({ kind: 'missing' });
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('BrandNewCheck'));
+  });
+
+  it('refuses a half whose own evaluator errored out on every example', () => {
+    const [model] = withEvaluators([
+      { evaluatorName: 'ExpectedToolCalled', mean: 1, count: 1, kind: 'code' },
+      { evaluatorName: 'Groundedness', mean: 0.5, count: 1, kind: 'llm' },
+      { evaluatorName: 'Trajectory', mean: 0.5, count: 1, kind: 'code' },
+    ]);
+    // Trajectory scored for another model, errored out entirely for this one.
+    const broken: AggregatedModelScores = {
+      ...model,
+      modelId: 'model-b',
+      suites: [
+        {
+          ...model.suites[0],
+          datasets: [
+            {
+              datasetId: 'd',
+              datasetName: 'd',
+              evaluators: model.suites[0].datasets[0].evaluators.filter(
+                (e) => e.evaluatorName !== 'Trajectory'
+              ),
+              erroredOutEvaluators: ['Trajectory'],
+            },
+          ],
+        },
+      ],
+    };
+    const matrix = buildMatrix(
+      [model, broken],
+      cfg({
+        models: [
+          { id: 'model-a', label: 'A' },
+          { id: 'model-b', label: 'B' },
+        ],
+      })
+    );
+    const row = matrix.proprietary.find((r) => r.modelId === 'model-b')!;
+
+    // Without the guard the half would publish 10 from ExpectedToolCalled alone.
+    // Aggregation treats it like Overall does: an unmeasured cell yields no score.
+    expect(row.capability?.kind).not.toBe('score');
+    expect(row.judgedQuality).toEqual({ kind: 'score', value: 5 });
+  });
+});
+
+describe('buildMatrix noise-floor tiers', () => {
+  const columnIds = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'];
+  const cfg = (overall: Record<string, unknown>): MatrixConfig =>
+    parseMatrixConfig({
+      overall,
+      columns: columnIds.map((id) => ({ id, label: id, suites: [id], weight: 1 })),
+      models: [
+        { id: 'model-z', label: 'Zeta' },
+        { id: 'model-b', label: 'Beta' },
+        { id: 'model-m', label: 'Mu' },
+        { id: 'model-a', label: 'Alpha' },
+      ],
+    });
+
+  const uniformModel = (modelId: string, mean: number): AggregatedModelScores => ({
+    modelId,
+    suites: columnIds.map((id) => ({
+      suiteId: id,
+      experimentId: `${modelId}-${id}`,
+      datasets: [{ datasetId: id, datasetName: id, evaluators: [evaluator(mean)] }],
+    })),
+  });
+
+  const field = [
+    uniformModel('model-z', 0.9),
+    uniformModel('model-b', 0.88),
+    uniformModel('model-m', 0.6),
+    uniformModel('model-a', 0.58),
+  ];
+
+  it('ties adjacent rows inside the floor and lists each tier alphabetically', () => {
+    const matrix = buildMatrix(field, cfg({ noiseFloor: { value: 0.1 } }));
+
+    // Zeta (9.0) outscores Beta (8.8) by less than the 1.0 floor, so the
+    // board must not present Zeta as the winner: the tier is alphabetical.
+    expect(matrix.proprietary.map((r) => [r.modelLabel, r.tier])).toEqual([
+      ['Beta', 1],
+      ['Zeta', 1],
+      ['Alpha', 2],
+      ['Mu', 2],
+    ]);
+    expect(matrix.tieAnalysis).toMatchObject({
+      rankedBy: OVERALL_COLUMN_ID,
+      floor: 1,
+      configuredFloor: 0.1,
+      basis: 'evaluator-score',
+      seed: 1337,
+    });
+    expect(matrix.tieAnalysis?.proprietary.map((b) => b.reason)).toEqual([
+      'within-noise-floor',
+      'separated',
+      'within-noise-floor',
+    ]);
+  });
+
+  it('reads a matrix-score floor without rescaling it', () => {
+    const matrix = buildMatrix(field, cfg({ noiseFloor: { value: 0.1, basis: 'matrix-score' } }));
+
+    expect(matrix.tieAnalysis?.floor).toBe(0.1);
+    expect(new Set(matrix.proprietary.map((r) => r.tier)).size).toBe(4);
+  });
+
+  it('collapses the field into one tier when the floor exceeds every gap', () => {
+    // The reliability findings' 0.352 on the evaluator scale is 3.52 here --
+    // larger than this whole field's 3.2-point spread.
+    const matrix = buildMatrix(field, cfg({ noiseFloor: { value: 0.352 } }));
+
+    expect(matrix.proprietary.every((r) => r.tier === 1)).toBe(true);
+    expect(matrix.proprietary.map((r) => r.modelLabel)).toEqual(['Alpha', 'Beta', 'Mu', 'Zeta']);
+  });
+
+  it('supersedes runStdev when both are configured', () => {
+    const matrix = buildMatrix(field, cfg({ runStdev: 5, noiseFloor: { value: 0.1 } }));
+
+    expect(matrix.proprietary.map((r) => r.tier)).toEqual([1, 1, 2, 2]);
+  });
+
+  it('keeps the legacy ordering and omits the analysis when no floor is configured', () => {
+    const matrix = buildMatrix(field, cfg({}));
+
+    expect(matrix.tieAnalysis).toBeUndefined();
+    expect(matrix.proprietary.map((r) => r.modelLabel)).toEqual(['Zeta', 'Beta', 'Mu', 'Alpha']);
   });
 });
