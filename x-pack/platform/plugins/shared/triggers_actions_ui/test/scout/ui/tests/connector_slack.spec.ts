@@ -21,6 +21,7 @@ import {
 } from '../fixtures';
 
 const RULES_LIST_SUBJ = 'rulesList';
+const RULES_MANAGEMENT_PATH = 'management/insightsAndAlerting/triggersActions';
 
 const BLOCK_KIT_MESSAGE = JSON.stringify({
   blocks: [{ type: 'section', text: { type: 'mrkdwn', text: 'scout block kit message' } }],
@@ -226,7 +227,6 @@ test.describe('Slack connector', { tag: tags.stateful.classic }, () => {
 
   test('keeps a saved Block Kit action when the rule is edited and saved', async ({
     page,
-    pageObjects,
     apiServices,
     kbnUrl,
   }) => {
@@ -272,7 +272,7 @@ test.describe('Slack connector', { tag: tags.stateful.classic }, () => {
       ],
     });
 
-    await pageObjects.classicRulesPage.goto(kbnUrl, `/edit/${rule.id}`);
+    await page.goto(kbnUrl.get(`/app/${RULES_MANAGEMENT_PATH}/edit/${rule.id}`));
     await expect(page.testSubj.locator('ruleForm')).toBeVisible();
 
     await test.step('shows the saved Block Kit message', async () => {
