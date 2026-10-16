@@ -722,12 +722,7 @@ export const getSimilarCases = async ({
     getCaseSimilarCasesUrl(caseId),
     {
       method: 'POST',
-      body: JSON.stringify({
-        page,
-        perPage,
-        ...(sortField != null ? { sortField } : {}),
-        ...(sortOrder != null ? { sortOrder } : {}),
-      }),
+      body: JSON.stringify({ page, perPage, sortField, sortOrder }),
       signal,
     }
   );

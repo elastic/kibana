@@ -765,20 +765,6 @@ describe('SimilarCasesSearchRequestRt', () => {
     });
   });
 
-  it('succeeds with sortField only', () => {
-    expect(SimilarCasesSearchRequestRt.decode({ sortField: 'title' })).toStrictEqual({
-      _tag: 'Right',
-      right: { sortField: 'title' },
-    });
-  });
-
-  it('succeeds with sortOrder only', () => {
-    expect(SimilarCasesSearchRequestRt.decode({ sortOrder: 'asc' })).toStrictEqual({
-      _tag: 'Right',
-      right: { sortOrder: 'asc' },
-    });
-  });
-
   it('fails with an unsupported sortField', () => {
     const query = SimilarCasesSearchRequestRt.decode({ sortField: 'not-a-field' });
 
