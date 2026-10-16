@@ -128,19 +128,6 @@ export function validateVariable(
     };
   }
 
-  if (refSchema instanceof z.ZodAny && refSchema.description) {
-    return {
-      ...variableItem,
-      message: refSchema.description,
-      severity: 'warning',
-      owner: 'variable-validation',
-      ruleId: 'unknownVariableType',
-      hoverMessage: hoverMessageFor(parsedPath.propertyPath, refSchema),
-    };
-  }
-
-  // An unknown type (e.g. untyped step output) resolves at runtime and is not reported:
-  // the user cannot act on it
   if (!withDecorations) {
     return null;
   }

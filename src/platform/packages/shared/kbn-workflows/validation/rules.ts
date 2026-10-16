@@ -71,12 +71,6 @@ export interface WorkflowValidationRules {
     defaultSeverity: 'error';
     values: { propertyPath: string };
   };
-  /** Inference could not determine the variable's type. */
-  unknownVariableType: {
-    owner: 'variable-validation';
-    defaultSeverity: 'warning';
-    values: { propertyPath: string };
-  };
   /** A `{% for %}` collection path that does not resolve to something iterable. */
   invalidCollectionPath: {
     owner: 'variable-validation';
@@ -254,7 +248,6 @@ export const WORKFLOW_VALIDATION_RULES: {
   invalidVariablePath: { owner: 'variable-validation', defaultSeverity: 'error' },
   variablePathParseError: { owner: 'variable-validation', defaultSeverity: 'error' },
   invalidVariableReference: { owner: 'variable-validation', defaultSeverity: 'error' },
-  unknownVariableType: { owner: 'variable-validation', defaultSeverity: 'warning' },
   invalidCollectionPath: { owner: 'variable-validation', defaultSeverity: 'error' },
   invalidForeachParameter: { owner: 'variable-validation', defaultSeverity: 'warning' },
 

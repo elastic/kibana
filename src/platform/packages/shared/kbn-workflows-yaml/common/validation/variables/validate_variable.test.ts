@@ -171,34 +171,16 @@ describe('validateVariable', () => {
     });
   });
 
-  it('should return warning with description for any type', () => {
-    const schema = z.any().describe('This variable comes from external source');
-
-    const variableItem = createVariableItem({ key: 'externalVar' });
-    mockParseVariablePath.mockReturnValue({
-      errors: null,
-      propertyPath: 'externalVar',
-    } as any);
-    mockGetSchemaAtPath.mockReturnValue({ schema, scopedToPath: 'externalVar' });
-
-    const result = validateVariable(variableItem, mockContext);
-
-    expect(result).toMatchObject({
-      message: 'This variable comes from external source',
-      severity: 'warning',
-      owner: 'variable-validation',
-      ruleId: 'unknownVariableType',
-      hoverMessage: expect.stringContaining('(property)'),
-    });
-  });
-
-  it('should not report a diagnostic for unknown type, only the hover', () => {
+  it.each([
+    ['unknown', z.unknown()],
+    ['described any', z.any().describe('This variable comes from external source')],
+  ])('should not report a diagnostic for %s type, only the hover', (_name, schema) => {
     const variableItem = createVariableItem({ key: 'unknownVar' });
     mockParseVariablePath.mockReturnValue({
       errors: null,
       propertyPath: 'unknownVar',
     } as any);
-    mockGetSchemaAtPath.mockReturnValue({ schema: z.unknown(), scopedToPath: null });
+    mockGetSchemaAtPath.mockReturnValue({ schema, scopedToPath: null });
 
     const result = validateVariable(variableItem, mockContext);
 

@@ -531,8 +531,8 @@ describe('validateDestinations', () => {
         diagnostics: [
           {
             severity: 'warning',
-            ruleId: 'unknownVariableType',
-            message: 'Could not statically determine the type',
+            ruleId: 'invalidForeachParameter',
+            message: 'Unable to parse foreach parameter',
             source: 'variables',
           },
         ],
