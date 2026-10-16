@@ -8,7 +8,7 @@
  */
 
 import {
-  METRICS_GRID_HISTOGRAM_PERCENTILES,
+  METRICS_GRID_HISTOGRAM_VISUALIZATIONS,
   METRICS_GRID_SIMPLE_AGGREGATIONS,
 } from './metrics_grid_settings';
 
@@ -18,7 +18,7 @@ describe('metrics grid settings', () => {
   });
 
   it('exposes distribution and the histogram percentile options', () => {
-    expect(METRICS_GRID_HISTOGRAM_PERCENTILES).toEqual([
+    expect(METRICS_GRID_HISTOGRAM_VISUALIZATIONS).toEqual([
       'distribution',
       'p50',
       'p75',

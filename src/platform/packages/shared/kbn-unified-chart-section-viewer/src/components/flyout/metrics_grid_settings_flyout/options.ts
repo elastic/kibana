@@ -9,8 +9,8 @@
 
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { HistogramPercentile, SimpleAggregation } from '@kbn/discover-utils';
-import { SIMPLE_AGGREGATION_OPTIONS, HISTOGRAM_PERCENTILE_OPTIONS } from './constants';
+import type { HistogramVisualization, SimpleAggregation } from '@kbn/discover-utils';
+import { SIMPLE_AGGREGATION_OPTIONS, HISTOGRAM_VISUALIZATION_OPTIONS } from './constants';
 
 /**
  * Display labels for `SimpleAggregation` values. Spelled out in full (e.g.
@@ -33,8 +33,8 @@ export const SIMPLE_AGGREGATION_LABELS: Record<SimpleAggregation, string> = {
   }),
 };
 
-/** Display labels for `HistogramPercentile` values, e.g. "50th percentile". */
-export const HISTOGRAM_PERCENTILE_LABELS: Record<HistogramPercentile, string> = {
+/** Display labels for histogram visualizations, e.g. "Distribution" or "50th percentile". */
+export const HISTOGRAM_VISUALIZATION_LABELS: Record<HistogramVisualization, string> = {
   distribution: i18n.translate(
     'metricsExperience.gridSettingsFlyout.distributionDropDownOptionLabel',
     {
@@ -72,7 +72,7 @@ export const buildSimpleAggregationOptions = (
  * `EuiSuperSelect` forwards unknown option fields onto the row. `hasAriaDisabled`
  * keeps a disabled row hoverable so `tooltipProps` can explain why it is disabled.
  */
-type HistogramPercentileOption = EuiSuperSelectOption<HistogramPercentile> & {
+type HistogramVisualizationOption = EuiSuperSelectOption<HistogramVisualization> & {
   hasAriaDisabled?: boolean;
   tooltipProps?: { content: string };
 };
@@ -85,41 +85,31 @@ const DISTRIBUTION_UNAVAILABLE_WITH_DIMENSIONS_TOOLTIP = i18n.translate(
   }
 );
 
-const DISTRIBUTION_UNAVAILABLE_WITHOUT_HEATMAPS_TOOLTIP = i18n.translate(
-  'metricsExperience.gridSettingsFlyout.distributionUnavailableWithoutHeatmapsTooltip',
-  {
-    defaultMessage:
-      'Distribution is unavailable while heatmaps are disabled. Histograms use the 95th percentile instead.',
-  }
-);
-
-export const buildHistogramPercentileOptions = ({
+export const buildHistogramVisualizationOptions = ({
   hasDimensions = false,
   isHeatmapsEnabled = true,
 }: {
   hasDimensions?: boolean;
-  /** When false, distribution stays in the menu but the chart draws the 95th percentile. */
+  /** When false, Distribution is omitted. The chart draws the 95th percentile. */
   isHeatmapsEnabled?: boolean;
-} = {}): HistogramPercentileOption[] =>
-  HISTOGRAM_PERCENTILE_OPTIONS.map((option) => {
-    const label = HISTOGRAM_PERCENTILE_LABELS[option];
-    const isDistributionUnavailable =
-      option === 'distribution' && (!isHeatmapsEnabled || hasDimensions);
-    const distributionUnavailableTooltip = isHeatmapsEnabled
-      ? DISTRIBUTION_UNAVAILABLE_WITH_DIMENSIONS_TOOLTIP
-      : DISTRIBUTION_UNAVAILABLE_WITHOUT_HEATMAPS_TOOLTIP;
+} = {}): HistogramVisualizationOption[] =>
+  HISTOGRAM_VISUALIZATION_OPTIONS.filter(
+    (option) => isHeatmapsEnabled || option !== 'distribution'
+  ).map((option) => {
+    const label = HISTOGRAM_VISUALIZATION_LABELS[option];
+    const isDistributionUnavailable = option === 'distribution' && hasDimensions;
 
     return {
       value: option,
       // The closed control shows the series the chart actually draws. The menu
       // row stays "Distribution" so the stored value is unchanged.
-      inputDisplay: isDistributionUnavailable ? HISTOGRAM_PERCENTILE_LABELS.p95 : label,
+      inputDisplay: isDistributionUnavailable ? HISTOGRAM_VISUALIZATION_LABELS.p95 : label,
       dropdownDisplay: label,
       disabled: isDistributionUnavailable,
       ...(isDistributionUnavailable
         ? {
             hasAriaDisabled: true,
-            tooltipProps: { content: distributionUnavailableTooltip },
+            tooltipProps: { content: DISTRIBUTION_UNAVAILABLE_WITH_DIMENSIONS_TOOLTIP },
           }
         : {}),
       'data-test-subj': `metricsExperienceGridSettingsHistogramOption-${option}`,
@@ -134,4 +124,4 @@ export const GAUGE_OPTIONS = buildSimpleAggregationOptions(
   'metricsExperienceGridSettingsGaugeOption'
 );
 
-export const HISTOGRAM_OPTIONS = buildHistogramPercentileOptions();
+export const HISTOGRAM_OPTIONS = buildHistogramVisualizationOptions();

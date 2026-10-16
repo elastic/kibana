@@ -10,7 +10,7 @@
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type {
-  HistogramPercentile,
+  HistogramVisualization,
   MetricsGridSettings,
   SimpleAggregation,
 } from '@kbn/discover-utils';
@@ -26,7 +26,7 @@ const AGGREGATION_LABELS: Record<SimpleAggregation, string> = {
   max: i18n.translate('metricsExperience.aggregationLabel.max', { defaultMessage: 'max' }),
 };
 
-const PERCENTILE_LABELS: Record<Exclude<HistogramPercentile, 'distribution'>, string> = {
+const PERCENTILE_LABELS: Record<Exclude<HistogramVisualization, 'distribution'>, string> = {
   p50: i18n.translate('metricsExperience.aggregationLabel.p50', {
     defaultMessage: 'p50',
   }),

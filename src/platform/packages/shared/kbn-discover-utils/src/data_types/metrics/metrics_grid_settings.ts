@@ -23,7 +23,7 @@ export const METRICS_GRID_SIMPLE_AGGREGATIONS = [
 
 export type SimpleAggregation = (typeof METRICS_GRID_SIMPLE_AGGREGATIONS)[number];
 
-export enum HistogramPercentileValue {
+export enum HistogramVisualizationValue {
   Distribution = 'distribution',
   P50 = 'p50',
   P75 = 'p75',
@@ -32,13 +32,13 @@ export enum HistogramPercentileValue {
   P99 = 'p99',
 }
 
-export const METRICS_GRID_HISTOGRAM_PERCENTILES = [
-  `${HistogramPercentileValue.Distribution}`,
-  `${HistogramPercentileValue.P50}`,
-  `${HistogramPercentileValue.P75}`,
-  `${HistogramPercentileValue.P90}`,
-  `${HistogramPercentileValue.P95}`,
-  `${HistogramPercentileValue.P99}`,
+export const METRICS_GRID_HISTOGRAM_VISUALIZATIONS = [
+  `${HistogramVisualizationValue.Distribution}`,
+  `${HistogramVisualizationValue.P50}`,
+  `${HistogramVisualizationValue.P75}`,
+  `${HistogramVisualizationValue.P90}`,
+  `${HistogramVisualizationValue.P95}`,
+  `${HistogramVisualizationValue.P99}`,
 ] as const;
 
 /**
@@ -50,12 +50,12 @@ export const METRICS_GRID_HISTOGRAM_PERCENTILES = [
  * function name itself is sourced from `FunctionNames` wherever it's used
  * to build the aggregation expression.
  */
-export type HistogramPercentile = (typeof METRICS_GRID_HISTOGRAM_PERCENTILES)[number];
+export type HistogramVisualization = (typeof METRICS_GRID_HISTOGRAM_VISUALIZATIONS)[number];
 
 export interface MetricsGridSettings extends SerializableRecord {
   counterAggregation: SimpleAggregation;
   gaugeAggregation: SimpleAggregation;
-  histogramPercentile: HistogramPercentile;
+  histogramPercentile: HistogramVisualization;
   dimensions: string[];
   searchTerm: string;
 }

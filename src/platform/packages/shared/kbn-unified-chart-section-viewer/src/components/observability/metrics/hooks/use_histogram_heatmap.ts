@@ -8,7 +8,7 @@
  */
 
 import { useMemo } from 'react';
-import type { HistogramPercentile } from '@kbn/discover-utils';
+import type { HistogramVisualization } from '@kbn/discover-utils';
 import type { LensHeatmapConfig } from '@kbn/lens-embeddable-utils';
 import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../../common/constants';
 import {
@@ -29,7 +29,7 @@ export interface UseHistogramHeatmapParams {
   histogramBoundsLoading: boolean;
   whereStatements?: readonly string[];
   originalSource?: string;
-  histogramPercentile: HistogramPercentile;
+  histogramPercentile: HistogramVisualization;
 }
 
 export interface HistogramHeatmapState {

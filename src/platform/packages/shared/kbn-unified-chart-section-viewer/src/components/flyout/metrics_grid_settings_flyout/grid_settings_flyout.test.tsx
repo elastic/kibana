@@ -18,11 +18,11 @@ import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags
 import { GridSettingsFlyout } from './grid_settings_flyout';
 
 jest.mock('@kbn/discover-utils', () => {
-  const { METRICS_GRID_HISTOGRAM_PERCENTILES, METRICS_GRID_SIMPLE_AGGREGATIONS } =
+  const { METRICS_GRID_HISTOGRAM_VISUALIZATIONS, METRICS_GRID_SIMPLE_AGGREGATIONS } =
     jest.requireActual('@kbn/discover-utils/src/data_types/metrics');
 
   return {
-    METRICS_GRID_HISTOGRAM_PERCENTILES,
+    METRICS_GRID_HISTOGRAM_VISUALIZATIONS,
     METRICS_GRID_SIMPLE_AGGREGATIONS,
   };
 });
@@ -176,7 +176,7 @@ describe('GridSettingsFlyout', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('shows the 95th percentile and disables Distribution when heatmaps are disabled', async () => {
+  it('hides Distribution and shows the 95th percentile when heatmaps are disabled', async () => {
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
@@ -190,25 +190,15 @@ describe('GridSettingsFlyout', () => {
     expect(screen.getByTestId('metricsExperienceGridSettingsApplyButton')).toBeDisabled();
 
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsHistogramSelect'));
-    const distributionOption = await screen.findByTestId(
-      'metricsExperienceGridSettingsHistogramOption-distribution'
-    );
-    expect(distributionOption).toHaveAttribute('aria-disabled', 'true');
-    expect(distributionOption).toHaveTextContent('Distribution');
-
-    const tooltipAnchor = distributionOption.parentElement;
-    if (!tooltipAnchor) {
-      throw new Error('Expected the distribution option to be wrapped for its tooltip');
-    }
-    await userEvent.hover(tooltipAnchor);
     expect(
-      await screen.findByText(
-        'Distribution is unavailable while heatmaps are disabled. Histograms use the 95th percentile instead.'
-      )
+      screen.queryByTestId('metricsExperienceGridSettingsHistogramOption-distribution')
+    ).not.toBeInTheDocument();
+    expect(
+      await screen.findByTestId('metricsExperienceGridSettingsHistogramOption-p95')
     ).toBeInTheDocument();
   });
 
-  it('keeps a selected percentile when heatmaps disable Distribution', async () => {
+  it('keeps a selected percentile when heatmaps hide Distribution', async () => {
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={{ ...defaultSettings, histogramPercentile: 'p90' }}
@@ -222,8 +212,11 @@ describe('GridSettingsFlyout', () => {
 
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsHistogramSelect'));
     expect(
-      await screen.findByTestId('metricsExperienceGridSettingsHistogramOption-distribution')
-    ).toHaveAttribute('aria-disabled', 'true');
+      screen.queryByTestId('metricsExperienceGridSettingsHistogramOption-distribution')
+    ).not.toBeInTheDocument();
+    expect(
+      await screen.findByTestId('metricsExperienceGridSettingsHistogramOption-p90')
+    ).toBeInTheDocument();
   });
 
   it('shows the 95th percentile and disables Distribution when dimensions are selected', async () => {

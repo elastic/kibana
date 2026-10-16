@@ -30,7 +30,7 @@ import { type MetricsGridSettings } from '@kbn/discover-utils';
 import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../common/constants';
 import { useTelemetry } from '../../../context/ebt_telemetry_context';
 import { useFeatureFlag } from '../../../hooks/use_feature_flag';
-import { COUNTER_OPTIONS, GAUGE_OPTIONS, buildHistogramPercentileOptions } from './options';
+import { COUNTER_OPTIONS, GAUGE_OPTIONS, buildHistogramVisualizationOptions } from './options';
 import { getAggregationConfigChanges } from './get_aggregation_config_changes';
 import { getChangedSettings } from './get_changed_settings';
 
@@ -66,12 +66,18 @@ export const GridSettingsFlyout = ({
   const [draftSettings, setDraftSettings] = useState<MetricsGridSettings>(gridSettings);
   const histogramOptions = useMemo(
     () =>
-      buildHistogramPercentileOptions({
+      buildHistogramVisualizationOptions({
         hasDimensions: gridSettings.dimensions.length > 0,
         isHeatmapsEnabled,
       }),
     [gridSettings.dimensions.length, isHeatmapsEnabled]
   );
+  // Distribution is omitted while heatmaps are off. The series chart already
+  // draws the 95th percentile for that stored value.
+  const histogramValueOfSelected =
+    !isHeatmapsEnabled && draftSettings.histogramPercentile === 'distribution'
+      ? 'p95'
+      : draftSettings.histogramPercentile;
 
   const pendingUpdate = useMemo(
     () => getChangedSettings(draftSettings, gridSettings),
@@ -174,7 +180,7 @@ export const GridSettingsFlyout = ({
             <EuiSuperSelect
               data-test-subj="metricsExperienceGridSettingsHistogramSelect"
               options={histogramOptions}
-              valueOfSelected={draftSettings.histogramPercentile}
+              valueOfSelected={histogramValueOfSelected}
               onChange={(value) => onSettingChange('histogramPercentile', value)}
             />
           </EuiFormRow>
