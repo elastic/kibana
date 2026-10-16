@@ -6,6 +6,8 @@
  */
 
 import type React from 'react';
+import type { Conversation } from '@kbn/agent-builder-common';
+import type { FlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
 
 /**
  * Props passed to the `renderAssignees` render prop.
@@ -96,6 +98,54 @@ export interface LinkedInvestigationsSlotRenderProps {
 export type RenderLinkedInvestigations = (
   props: LinkedInvestigationsSlotRenderProps
 ) => React.ReactNode;
+
+/**
+ * Props passed to the `renderOverview` render prop: everything the default overview tab reads,
+ * plus the proposed actions content already rendered by `renderProposedActions`.
+ */
+export interface OverviewSlotRenderProps {
+  conversation: Conversation;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
+  proposedActionsContent?: React.ReactNode;
+  /** The count shown beside the "Proposed actions" heading, from `renderProposedActionsCount`. */
+  proposedActionsCount?: React.ReactNode;
+}
+
+/**
+ * A render prop that replaces the overview tab body, so a plugin can add sections from data it
+ * fetches (subjects, impact, conclusion, trace). It typically renders `OverviewTab` with
+ * `sections`. When absent the tab renders `OverviewTab` from the conversation alone.
+ */
+export type RenderOverview = (props: OverviewSlotRenderProps) => React.ReactNode;
+
+/** Props passed to the `renderLiveState` render prop. */
+export interface LiveStateSlotRenderProps {
+  conversationId: string;
+  /** The severity the conversation carries, for use until fresher data has been read. */
+  severity?: string;
+}
+
+/**
+ * A render prop for the investigation's live state in the header, next to its age: its severity
+ * and whether an agent is working on it now. Supplied by the consuming plugin, because the
+ * running state is not on the conversation and the severity changes while an agent runs. When
+ * supplied, the header leaves the severity badge to it.
+ */
+export type RenderLiveState = (props: LiveStateSlotRenderProps) => React.ReactNode;
+
+/** Props passed to the `renderTitle` render prop. */
+export interface TitleSlotRenderProps {
+  conversationId: string;
+  /** The conversation's title, which Agent Builder generates from the first round. */
+  title: string;
+}
+
+/**
+ * A render prop for the investigation's title in the header. Supplied by the consuming plugin so it
+ * can name an investigation Agent Builder has not titled yet, for example after its first
+ * subject. Renders inside the header's heading, so it should render text.
+ */
+export type RenderTitle = (props: TitleSlotRenderProps) => React.ReactNode;
 
 /** Props passed to the `renderSyncIndicator` render prop. */
 export interface SyncIndicatorSlotRenderProps {

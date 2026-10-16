@@ -80,6 +80,7 @@
     "@kbn/core-security-server-mocks",
     "@kbn/kql",
     "@kbn/scout",
+    "@kbn/mock-idp-utils",
     "@kbn/object-utils",
     "@kbn/alerting-v2-browser-shared",
     "@kbn/alerting-v2-constants",
@@ -160,7 +161,8 @@
     "@kbn/test",
     "@kbn/cloud-plugin",
     "@kbn/core-overlays-browser-mocks",
-    "@kbn/core-rendering-browser-mocks"
+    "@kbn/core-rendering-browser-mocks",
+    "@kbn/announcement-banner"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

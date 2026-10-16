@@ -13,10 +13,16 @@
  * where they mean "left untouched", not "failed".
  */
 
-/** `activate` / `deactivate` / `ack` / `unack` of an alert already in that state. */
+/**
+ * `activate` / `deactivate` / `ack` / `unack` of an alert already in that state,
+ * or `unsnooze` of a series with no snooze in effect.
+ */
 export const INVALID_ALERT_STATE_TRANSITION_CODE = 'INVALID_ALERT_STATE_TRANSITION';
 
-/** `assign` to the current assignee, or `tag` with the current set. */
+/**
+ * `assign` to the current assignee, `tag` with the current set, or `snooze`
+ * with the expiry already in effect.
+ */
 export const ALERT_ACTION_NO_OP_CODE = 'ALERT_ACTION_NO_OP';
 
 export const ALERT_ACTION_NO_OP_CODES = [

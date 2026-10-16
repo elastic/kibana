@@ -8,6 +8,7 @@
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
+  dataDiscoveryAgentGuidance,
   getChartTypeSelectionPromptContent,
   seriesStatisticsAgentGuidance,
 } from '@kbn/agent-builder-visualizations-server';
@@ -30,7 +31,12 @@ Use this skill when:
 - A user asks to update an existing visualization by attachment ID.
 
 Do **not** use this skill when:
-- The user only needs raw documents or table/query output without a visualization.
+- The user wants raw documents, events, search hits, or a Discover-style document table:
+  - If the discover-session skill is listed in the available or relevant skills, use that skill and \`${
+    platformCoreTools.createDiscoverSession
+  }\` instead. Do **not** use chartType \`"data_table"\` as a substitute for that Discover table.
+  - If discover-session is not available, do not use this skill for those requests.
+- The user only needs other table/query output without a visualization.
 - The user first needs broad data discovery and exploration across unknown sources.
 - The request is about persisted saved objects instead of in-memory attachment workflows.
 - The primary goal is to compose or update a dashboard. Use the dashboards skill for dashboard panel creation and layout.
@@ -56,9 +62,8 @@ Do **not** use this skill when:
      platformCoreTools.createVisualization
    } call, know the target index and confirm every field you reference exists in its mapping.
    - If the index and fields are already grounded in context, continue directly.
-   - If not, discover them first: list indices and inspect the index mapping (optionally probe with ${
-     platformCoreTools.executeEsql
-   }). Always use real field names from the index mapping — never invent index or field names, and never assume a domain schema (APM, metrics, etc.) is present; verify against the actual cluster.
+   - ${dataDiscoveryAgentGuidance}
+   - Always use real field names from the index mapping — never invent index or field names, and never assume a domain schema (APM, metrics, etc.) is present; verify against the actual cluster.
    - ${
      platformCoreTools.createVisualization
    } auto-discovers an index only when you omit \`index\`, and that discovery FAILS when the referenced fields do not exist in any index. Guessing fields and relying on auto-discovery is the most common cause of failures — ground first.

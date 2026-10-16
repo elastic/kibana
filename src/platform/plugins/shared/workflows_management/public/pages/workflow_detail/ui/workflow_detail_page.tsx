@@ -48,6 +48,7 @@ import { WorkflowExecutionDetail } from '../../../features/workflow_execution_de
 import { WorkflowExecutionListFlyout } from '../../../features/workflow_execution_list/ui/workflow_execution_list_flyout';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list_old';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
+import { useAutoCollapseSideNav } from '../../../hooks/use_auto_collapse_side_nav';
 import { useGlobalExecutionsViewEnabled } from '../../../hooks/use_global_executions_view_enabled';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
@@ -95,6 +96,8 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const workflowDefinition = useSelector(selectWorkflowDefinition);
 
   useWorkflowsBreadcrumbs(workflowName);
+
+  useAutoCollapseSideNav();
 
   const { canExecuteWorkflow, canReadWorkflowExecution } = useWorkflowsCapabilities();
   const isExecutionsViewEnabled = useGlobalExecutionsViewEnabled();
