@@ -6,8 +6,10 @@
  */
 
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
-import { getAiIndexDest } from '@kbn/context-engine-plugin/common/ai_index_dest';
-import { HUNT_COVERAGE_AI_INDEX_ID } from '../../common/step_types/package_report';
+import {
+  HUNT_COVERAGE_AI_INDEX_DEST,
+  HUNT_COVERAGE_AI_INDEX_ID,
+} from '../../common/step_types/package_report';
 
 /**
  * Registers the indicator AI index as managed, so Context Engine resolves it in every space.
@@ -26,7 +28,7 @@ export const registerInvestigationsAiIndex = ({
       'Security knowledge indicators that AlertZero Watches hand to each other, such as ' +
       'detection coverage gaps and forensics handoffs.',
     memory_enabled: false,
-    dest: getAiIndexDest('index', HUNT_COVERAGE_AI_INDEX_ID),
+    dest: HUNT_COVERAGE_AI_INDEX_DEST,
     automations: [],
     sources: [],
     traces: [],
