@@ -15,9 +15,9 @@ The AI Connector uses the [Inference API](docs-content://explore-analyze/elastic
 :applies_to: {"stack": "deprecated 9.5", "serverless": "deprecated"}
 This connector is deprecated. Existing connectors and their rule actions continue to work.
 
-In {{serverless-full}} and in {{stack}} 9.6 and later, {{kib}} no longer lists this connector type when you select **Create connector**. You can still create connectors of this type through the API.
+{applies_to}`serverless: ga` {applies_to}`stack: ga 9.6+` {{kib}} no longer lists this connector type when you select **Create connector**. You can still create connectors of this type through the API.
 
-For new AI integrations, create an {{es}} {{infer}} endpoint instead. To learn more, refer to [Elastic Inference](docs-content://explore-analyze/elastic-inference.md). Migrate existing LLM connectors and related rule actions before the future removal.
+For new AI integrations, create an {{es}} {{infer}} endpoint with the `chat_completion` task type instead. To learn more, refer to [Elastic Inference](docs-content://explore-analyze/elastic-inference.md). Migrate existing LLM connectors and related rule actions before the future removal.
 ::::
 
 ## Requirements
@@ -29,6 +29,8 @@ For new AI integrations, create an {{es}} {{infer}} endpoint instead. To learn m
 
 
 ## Set up an AI connector
+
+If {{kib}} lists this connector type, set up an AI connector with the following steps:
 
 1. Use the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md) to find the **Connectors** page.
 2. Click **+ Create connector**. Select **AI Connector**.

@@ -14,14 +14,14 @@ The {{bedrock}} connector uses [axios](https://github.com/axios/axios) to send a
 :applies_to: {"stack": "deprecated 9.5", "serverless": "deprecated"}
 This connector is deprecated. Existing connectors and their rule actions continue to work.
 
-In {{serverless-full}} and in {{stack}} 9.6 and later, {{kib}} no longer lists this connector type when you select **Create connector**. You can still create connectors of this type through the API.
+{applies_to}`serverless: ga` {applies_to}`stack: ga 9.6+` {{kib}} no longer lists this connector type when you select **Create connector**. You can still create connectors of this type through the API.
 
-For new AI integrations, create an {{es}} {{infer}} endpoint instead. To learn more, refer to [Elastic Inference](docs-content://explore-analyze/elastic-inference.md). Migrate existing LLM connectors and related rule actions before the future removal.
+For new AI integrations, create an {{es}} {{infer}} endpoint with the `chat_completion` task type instead. To learn more, refer to [Elastic Inference](docs-content://explore-analyze/elastic-inference.md). Migrate existing LLM connectors and related rule actions before the future removal.
 ::::
 
 ## Create connectors in {{kib}} [define-bedrock-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
+If {{kib}} lists this connector type, you can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
 
 :::{image} ../images/bedrock-connector.png
 :alt: {{bedrock}} connector
