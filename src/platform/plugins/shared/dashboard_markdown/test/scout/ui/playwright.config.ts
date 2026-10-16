@@ -7,16 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
-
-  return {
-    ...functionalConfig.getAll(),
-    testFiles: [require.resolve('./_markdown_vis')],
-    junit: {
-      reportName: 'Dashboard Elements - Markdown tests',
-    },
-  };
-}
+export default createPlaywrightConfig({
+  testDir: './tests',
+  runGlobalSetup: true,
+});
