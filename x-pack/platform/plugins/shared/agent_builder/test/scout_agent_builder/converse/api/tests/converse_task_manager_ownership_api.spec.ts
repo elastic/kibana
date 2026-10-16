@@ -9,6 +9,7 @@ import { randomUUID } from 'crypto';
 import { tags, type ApiClientFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
+import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import { AgentAccessControlMode, type Conversation } from '@kbn/agent-builder-common';
 import {
   createGenAiConnectorForProxy,
@@ -26,7 +27,12 @@ import {
   ELASTIC_API_VERSION,
 } from '../fixtures';
 
-const TEST_PREFIX = 'converse-task-manager-private-agent-test';
+const TEST_PREFIX = 'task-manager-ownership-test';
+
+interface WorkflowExecution {
+  status?: ExecutionStatus;
+  error?: unknown;
+}
 
 const readSessionCookie = (setCookie: string | string[] | undefined): string => {
   const cookies = Array.isArray(setCookie) ? setCookie : [setCookie ?? ''];
@@ -36,13 +42,33 @@ const readSessionCookie = (setCookie: string | string[] | undefined): string => 
   return sid as string;
 };
 
+const workflowYaml = ({
+  connectorId,
+  conversationId,
+}: {
+  connectorId: string;
+  conversationId: string;
+}) => `name: ${TEST_PREFIX}
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: follow_up
+    type: ai.agent
+    connector-id: "${connectorId}"
+    with:
+      conversation_id: "${conversationId}"
+      message: "Follow up from a workflow."
+`;
+
 apiTest.describe(
-  'Agent Builder — Task Manager runs of a private agent',
+  'Agent Builder — Task Manager runs act as the API key owner',
   { tag: [...tags.stateful.classic] },
   () => {
     const testRunId = randomUUID();
     const roleName = `${TEST_PREFIX}-role-${testRunId}`;
     const owner = { username: `${TEST_PREFIX}-owner-${testRunId}`, password: 'owner-password' };
+    const workflowId = `${TEST_PREFIX}-${testRunId.slice(0, 8)}`;
     const agentId = `${TEST_PREFIX}-agent-${testRunId.slice(0, 8)}`;
     const apiKeyIds: string[] = [];
 
@@ -66,7 +92,11 @@ apiTest.describe(
           kibana: [
             {
               base: [],
-              feature: { agentBuilder: ['minimal_read', 'manage_agents'], actions: ['read'] },
+              feature: {
+                agentBuilder: ['minimal_read', 'manage_agents'],
+                workflowsManagement: ['all'],
+                actions: ['read'],
+              },
               spaces: ['*'],
             },
           ],
@@ -80,7 +110,13 @@ apiTest.describe(
       });
     });
 
-    apiTest.afterAll(async ({ esClient, kbnClient }) => {
+    apiTest.afterAll(async ({ asAdmin, esClient, kbnClient }) => {
+      await asAdmin.delete('api/workflows?force=true', {
+        headers: { 'elastic-api-version': ELASTIC_API_VERSION },
+        body: { ids: [workflowId] },
+        responseType: 'json',
+      });
+
       await kbnClient.request({
         method: 'DELETE',
         path: `${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentId)}`,
@@ -255,6 +291,104 @@ apiTest.describe(
         expect(conversationResponse).toHaveStatusCode(200);
         expect((conversationResponse.body as Conversation).metadata).toMatchObject({
           severity: 'high',
+        });
+      }
+    );
+
+    apiTest(
+      'a workflow run by the owner continues their private conversation',
+      async ({ apiClient }) => {
+        apiTest.setTimeout(300_000);
+
+        const { sessionHeaders, apiKeyHeaders } = await loginAndCreateApiKey(apiClient);
+
+        await setupAgentDirectAnswer({
+          proxy: llmProxy,
+          title: 'Private conversation',
+          response: 'First answer',
+        });
+        const converseResponse = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
+          headers: sessionHeaders,
+          body: { input: 'Hello', connector_id: connectorId, _execution_mode: 'local' },
+          responseType: 'json',
+        });
+        expect(converseResponse).toHaveStatusCode(200);
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        const { conversation_id: conversationId } = converseResponse.body as {
+          conversation_id: string;
+        };
+
+        const createWorkflowResponse = await apiClient.post('api/workflows/workflow', {
+          headers: sessionHeaders,
+          body: { id: workflowId, yaml: workflowYaml({ connectorId, conversationId }) },
+          responseType: 'json',
+        });
+        expect(createWorkflowResponse).toHaveStatusCode(200);
+
+        const getRoundCount = async (): Promise<number> => {
+          const response = await apiClient.get(
+            `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`,
+            { headers: sessionHeaders, responseType: 'json' }
+          );
+          expect(response).toHaveStatusCode(200);
+
+          return (response.body as Conversation).rounds.length;
+        };
+
+        const runWorkflow = async (headers: Record<string, string>): Promise<WorkflowExecution> => {
+          await setupAgentDirectAnswer({
+            proxy: llmProxy,
+            continueConversation: true,
+            response: 'Workflow answer',
+          });
+
+          const runResponse = await apiClient.post(`api/workflows/workflow/${workflowId}/run`, {
+            headers,
+            body: { inputs: {} },
+            responseType: 'json',
+          });
+          expect(runResponse).toHaveStatusCode(200);
+
+          const { workflowExecutionId } = runResponse.body as { workflowExecutionId: string };
+          let execution: WorkflowExecution = {};
+
+          await expect
+            .poll(
+              async () => {
+                execution = (
+                  await apiClient.get(`api/workflows/executions/${workflowExecutionId}`, {
+                    headers: sessionHeaders,
+                    responseType: 'json',
+                  })
+                ).body as WorkflowExecution;
+
+                return (
+                  execution.status !== undefined &&
+                  TerminalExecutionStatuses.includes(execution.status)
+                );
+              },
+              { timeout: 120_000 }
+            )
+            .toBe(true);
+
+          return execution;
+        };
+
+        await apiTest.step('run from the owner session', async () => {
+          const execution = await runWorkflow(sessionHeaders);
+
+          expect(execution.status, JSON.stringify(execution.error)).toBe(ExecutionStatus.COMPLETED);
+          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+          expect(await getRoundCount()).toBe(2);
+        });
+
+        await apiTest.step('run with the owner API key', async () => {
+          const execution = await runWorkflow(apiKeyHeaders);
+
+          expect(execution.status, JSON.stringify(execution.error)).toBe(ExecutionStatus.COMPLETED);
+          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+          expect(await getRoundCount()).toBe(3);
         });
       }
     );
