@@ -6,6 +6,7 @@
  */
 
 import { MAX_ID_LENGTH, NightshiftModelNotFoundError } from '@kbn/significant-events-schema';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { internalDiscoveryRoutes } from './route';
 
 jest.mock('../../utils/assert_significant_events_access', () => ({
@@ -107,5 +108,34 @@ it('maps an unknown connector to a 400 response', async () => {
 
   await expect(route.handler(handlerParams)).rejects.toMatchObject({
     output: { statusCode: 400 },
+  });
+});
+
+describe('POST /internal/significant_events/discovery/_context', () => {
+  const contextRoute =
+    internalDiscoveryRoutes['POST /internal/significant_events/discovery/_context'];
+  const bodySchema = contextRoute.params.shape.body;
+
+  it('requires the Nightshift read privilege', () => {
+    expect(contextRoute.security.authz).toEqual({
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+    });
+  });
+
+  it('accepts a batch of rules and sources, and bounds both', () => {
+    expect(bodySchema.safeParse({ rule_uuids: ['rule-1'], source_ids: [] }).success).toBe(true);
+    expect(bodySchema.safeParse({ rule_uuids: [], source_ids: [] }).success).toBe(false);
+    expect(
+      bodySchema.safeParse({
+        rule_uuids: Array.from({ length: 101 }, (_, i) => `rule-${i}`),
+        source_ids: [],
+      }).success
+    ).toBe(false);
+    expect(
+      bodySchema.safeParse({
+        rule_uuids: ['rule-1'],
+        source_ids: Array.from({ length: 21 }, (_, i) => `source-${i}`),
+      }).success
+    ).toBe(false);
   });
 });

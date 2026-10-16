@@ -120,9 +120,7 @@ const searchKnowledgeIndicatorsSchema = lazySchema(() =>
   })
 );
 
-export type SearchKnowledgeIndicatorsParams = z.infer<
-  ReturnType<typeof searchKnowledgeIndicatorsSchema>
->;
+export type SearchKnowledgeIndicatorsParams = z.infer<typeof searchKnowledgeIndicatorsSchema>;
 
 export function createSearchKnowledgeIndicatorsTool({
   getScopedClients,

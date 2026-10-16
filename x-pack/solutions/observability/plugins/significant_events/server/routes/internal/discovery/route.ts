@@ -11,7 +11,12 @@ import {
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { searchKnowledgeIndicatorsForRequest } from '../../../agent_builder/tools/search_knowledge_indicators/search_for_request';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
+import {
+  buildDiscoveryContext,
+  type DiscoveryContext,
+} from '../../../lib/significant_events/discovery_context';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../utils/assert_not_paused';
@@ -131,7 +136,53 @@ const discoveryStatusRoute = createServerRoute({
   },
 });
 
+const MAX_CONTEXT_RULES = 100;
+const MAX_CONTEXT_SOURCES = 20;
+
+const discoveryContextRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/discovery/_context',
+  params: z.object({
+    body: z.object({
+      rule_uuids: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(MAX_CONTEXT_RULES),
+      source_ids: z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_CONTEXT_SOURCES),
+    }),
+  }),
+  options: {
+    access: 'internal',
+    summary: 'Get the knowledge indicator context of a detection batch',
+    description:
+      'Returns the query knowledge indicators of the given rules and the features they reference, as the grounding skill would retrieve them with `ki_search`.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<DiscoveryContext> => {
+    const { rule_uuids: ruleUuids, source_ids: sourceIds } = params.body;
+    return buildDiscoveryContext({
+      ruleUuids,
+      sourceIds,
+      search: (toolParams) =>
+        searchKnowledgeIndicatorsForRequest({
+          request,
+          getScopedClients,
+          server,
+          logger,
+          toolParams,
+        }),
+    });
+  },
+});
+
 export const internalDiscoveryRoutes = {
   ...discoveryExecuteRoute,
   ...discoveryStatusRoute,
+  ...discoveryContextRoute,
 };
