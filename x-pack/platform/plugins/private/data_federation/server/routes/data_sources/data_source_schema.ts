@@ -65,28 +65,19 @@ const azureSettingsWithSecretsSchema = schema.object(
  * top-level `id` (the path supplies the id).
  */
 export const putDataSourceBodySchema = schema.oneOf([
-  schema.object(
-    {
-      type: schema.literal('s3'),
-      description: schema.string({ maxLength: 1024 }),
-      settings: s3SettingsWithSecretsSchema,
-    },
-    { unknowns: 'allow' }
-  ),
-  schema.object(
-    {
-      type: schema.literal('gcs'),
-      description: schema.string({ maxLength: 1024 }),
-      settings: gcsSettingsWithSecretsSchema,
-    },
-    { unknowns: 'allow' }
-  ),
-  schema.object(
-    {
-      type: schema.literal('azure'),
-      description: schema.string({ maxLength: 1024 }),
-      settings: azureSettingsWithSecretsSchema,
-    },
-    { unknowns: 'allow' }
-  ),
+  schema.object({
+    type: schema.literal('s3'),
+    description: schema.string({ maxLength: 1024 }),
+    settings: s3SettingsWithSecretsSchema,
+  }),
+  schema.object({
+    type: schema.literal('gcs'),
+    description: schema.string({ maxLength: 1024 }),
+    settings: gcsSettingsWithSecretsSchema,
+  }),
+  schema.object({
+    type: schema.literal('azure'),
+    description: schema.string({ maxLength: 1024 }),
+    settings: azureSettingsWithSecretsSchema,
+  }),
 ]);
