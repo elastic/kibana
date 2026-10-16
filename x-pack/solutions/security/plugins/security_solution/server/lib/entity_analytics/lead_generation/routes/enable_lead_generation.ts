@@ -53,7 +53,7 @@ export const enableLeadGenerationRoute = (
           const { getSpaceId } = await context.securitySolution;
           const spaceId = getSpaceId();
           const coreCtx = await context.core;
-          const esClient = coreCtx.elasticsearch.client.asCurrentUser;
+          const internalEsClient = coreCtx.elasticsearch.client.asInternalUser;
           const soClient = coreCtx.savedObjects.client;
 
           const [, startPlugins] = await getStartServices();
@@ -68,7 +68,13 @@ export const enableLeadGenerationRoute = (
           const { connectorId } = request.body;
           await upsertLeadGenerationConfig(soClient, spaceId, { connectorId });
 
-          const indexService = createLeadIndexService({ esClient, logger, spaceId });
+          // The leads index is shared, per-space infrastructure rather than per-user data, so
+          // provisioning it shouldn't depend on the requesting user's own `create_index`/`manage` privileges
+          const indexService = createLeadIndexService({
+            esClient: internalEsClient,
+            logger,
+            spaceId,
+          });
           await indexService.createIndex();
 
           await startLeadGenerationTask({ taskManager, logger, namespace: spaceId, request });

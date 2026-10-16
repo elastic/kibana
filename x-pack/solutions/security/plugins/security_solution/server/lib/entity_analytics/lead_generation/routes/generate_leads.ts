@@ -57,6 +57,7 @@ export const generateLeadsRoute = (
           const spaceId = secSol.getSpaceId();
           const coreCtx = await context.core;
           const esClient = coreCtx.elasticsearch.client.asCurrentUser;
+          const internalEsClient = coreCtx.elasticsearch.client.asInternalUser;
           const soClient = coreCtx.savedObjects.client;
           const executionUuid = uuidv4();
           const riskScoreDataClient = secSol.getRiskScoreDataClient();
@@ -85,6 +86,7 @@ export const generateLeadsRoute = (
             pipelineArgs: {
               listEntities: () => fetchCandidateEntities(crudClient, logger),
               esClient,
+              internalEsClient,
               logger,
               spaceId,
               riskScoreDataClient,
