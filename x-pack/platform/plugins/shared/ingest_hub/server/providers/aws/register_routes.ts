@@ -7,9 +7,9 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 
-import { registerEcfVersionRoute } from './ecf_version';
+import { registerEcfVersionRoute } from './routes/ecf_version';
 
-/** Registers all ingest_hub server-side HTTP routes. */
-export const registerRoutes = (router: IRouter, logger: Logger): void => {
+/** Registers the AWS provider's server-side HTTP routes. */
+export const registerAwsRoutes = (router: IRouter, logger: Logger): void => {
   registerEcfVersionRoute(router, logger);
 };
