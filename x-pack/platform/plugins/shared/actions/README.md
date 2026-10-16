@@ -91,7 +91,7 @@ account with Relay's platform service account (`relay-service`) in `assumable_by
 `uiam_service_account_id`. Each connect creates a new account. The previous one is revoked after
 the new install is accepted, and a failed install revokes the account it just created. Disconnect
 revokes the stored account. The two credentials are mutually exclusive, and HTTP callers cannot
-name an assumer: the create-service-account route accepts `{ name }` only.
+name an assumer: the create-service-account route rejects unknown keys such as `assumable_by` and `platformAssumers`.
 
 ### Configuration Utilities
 
