@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-// placeholder, the real id is not known yet
-export const DOCUMENT_EXTRACTION_ENDPOINT_ID = '.jina-reader-document_extraction';
+// Placeholder on purpose: no such endpoint exists, so PDF reading stays unavailable.
+// Replace with the real id after the Jina OCR model is released and tested locally.
+export const DOCUMENT_EXTRACTION_ENDPOINT_ID = '.placeholder-document_extraction';
 
 export const DOCUMENT_EXTRACTION_TIMEOUT_MS = 90 * 1000;
