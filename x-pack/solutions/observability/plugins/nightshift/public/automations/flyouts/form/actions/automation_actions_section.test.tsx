@@ -31,17 +31,20 @@ const ActionsSection = () => {
 describe('AutomationActionsSection', () => {
   beforeEach(() => onSlackActionChange.mockClear());
 
-  it('prompts to add an action when there is none', () => {
+  it('prompts to add a notification when there is none', () => {
     render(<ActionsSection />);
 
-    expect(screen.getByText('Choose what happens when this automation runs.')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Notifications' })).toBeInTheDocument();
+    expect(
+      screen.getByText('Choose where to send investigation notifications.')
+    ).toBeInTheDocument();
     expect(screen.queryByText('Learnings')).not.toBeInTheDocument();
   });
 
-  it('adds, edits, and removes a Slack action', async () => {
+  it('adds, edits, and removes a Slack notification', async () => {
     render(<ActionsSection />);
 
-    fireEvent.click(screen.getByTestId('automationAddAction'));
+    fireEvent.click(screen.getByRole('button', { name: 'Add notification' }));
     fireEvent.click(await screen.findByTestId('automationAddSlackAction'));
     expect(onSlackActionChange).toHaveBeenLastCalledWith({ target: 'channel', destination: '' });
     expect(screen.getByText('Post in Slack')).toBeInTheDocument();
@@ -59,12 +62,12 @@ describe('AutomationActionsSection', () => {
     });
     expect(onSlackActionChange).toHaveBeenLastCalledWith({ target: 'self', destination: '@me' });
 
-    fireEvent.click(screen.getByTestId('automationRemoveSlackAction'));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove notification' }));
     expect(onSlackActionChange).toHaveBeenLastCalledWith(undefined);
     expect(screen.getByTestId('automationAddAction')).toBeInTheDocument();
   });
 
-  it('shows a locked reply-in-thread action without edit or remove controls', () => {
+  it('shows a locked reply-in-thread notification without edit or remove controls', () => {
     render(
       <I18nProvider>
         <AutomationActionsSection
