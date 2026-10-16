@@ -9,10 +9,7 @@ import { CaseStatuses } from '../../../common/types/domain';
 import { createCasesClientMockArgs } from '../../client/mocks';
 import { mockCaseComments, mockCases } from '../../mocks';
 import { CaseCommentModel } from './case_with_comments';
-import {
-  MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../common/constants';
+import { MAX_ATTACHMENTS_PER_CASE, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import {
   COMMENT_ATTACHMENT_TYPE,
   FILE_ATTACHMENT_TYPE,
@@ -329,48 +326,29 @@ describe('CaseCommentModel', () => {
     });
 
     describe('validation', () => {
-      clientArgs.services.attachmentService.countPersistableStateAndExternalReferenceAttachments.mockResolvedValue(
-        MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES
-      );
+      beforeAll(() => {
+        clientArgs.services.attachmentService.countAttachments.mockResolvedValue(
+          MAX_ATTACHMENTS_PER_CASE
+        );
+        clientArgs.fileService.find.mockResolvedValue({ total: 0, files: [] });
+      });
 
       afterAll(() => {
-        jest.clearAllMocks();
+        clientArgs.services.attachmentService.countAttachments.mockReset();
+        clientArgs.fileService.find.mockReset();
       });
 
-      it('throws if limit is reached when creating persistable state attachment', async () => {
+      it.each([
+        ['comment', unifiedComment],
+        ['persistable state', unifiedPersistableState],
+        ['external reference', unifiedExternalReference],
+        ['file', unifiedFileExternalReference],
+      ])('throws if the attachment limit is reached when creating a %s', async (_, commentReq) => {
         await expect(
-          model.createComment({
-            id: 'comment-1',
-            commentReq: unifiedPersistableState,
-            createdDate,
-          })
+          model.createComment({ id: 'comment-1', commentReq, createdDate })
         ).rejects.toThrow(
-          `Case has reached the maximum allowed number (${MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES}) of attached persistable state and external reference attachments.`
+          `Case has reached the maximum allowed number (${MAX_ATTACHMENTS_PER_CASE}) of attached items.`
         );
-      });
-
-      it('throws if limit is reached when creating external reference', async () => {
-        await expect(
-          model.createComment({
-            id: 'comment-1',
-            commentReq: unifiedExternalReference,
-            createdDate,
-          })
-        ).rejects.toThrow(
-          `Case has reached the maximum allowed number (${MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES}) of attached persistable state and external reference attachments.`
-        );
-      });
-
-      it('does not throw if creating a file external reference and the limit is reached', async () => {
-        clientArgs.fileService.find.mockResolvedValue({ total: 0, files: [] });
-
-        await expect(
-          model.createComment({
-            id: 'comment-1',
-            commentReq: unifiedFileExternalReference,
-            createdDate,
-          })
-        ).resolves.not.toThrow();
       });
 
       it('throws if trying to add an event or alert to a closed case', async () => {
@@ -973,40 +951,29 @@ describe('CaseCommentModel', () => {
     });
 
     describe('validation', () => {
-      clientArgs.services.attachmentService.countPersistableStateAndExternalReferenceAttachments.mockResolvedValue(
-        MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES
-      );
+      beforeAll(() => {
+        clientArgs.services.attachmentService.countAttachments.mockResolvedValue(
+          MAX_ATTACHMENTS_PER_CASE
+        );
+        clientArgs.fileService.find.mockResolvedValue({ total: 0, files: [] });
+      });
 
       afterAll(() => {
-        jest.clearAllMocks();
+        clientArgs.services.attachmentService.countAttachments.mockReset();
+        clientArgs.fileService.find.mockReset();
       });
 
-      it('throws if limit is reached when creating persistable state attachment', async () => {
+      it.each([
+        ['comment', unifiedComment],
+        ['persistable state', unifiedPersistableState],
+        ['external reference', unifiedExternalReference],
+        ['file', unifiedFileExternalReference],
+      ])('throws if the attachment limit is reached when creating a %s', async (_, attachment) => {
         await expect(
-          model.bulkCreate({
-            attachments: [{ id: 'comment-1', ...unifiedPersistableState }],
-          })
+          model.bulkCreate({ attachments: [{ id: 'comment-1', ...attachment }] })
         ).rejects.toThrow(
-          `Case has reached the maximum allowed number (${MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES}) of attached persistable state and external reference attachments.`
+          `Case has reached the maximum allowed number (${MAX_ATTACHMENTS_PER_CASE}) of attached items.`
         );
-      });
-
-      it('throws if limit is reached when creating external reference', async () => {
-        await expect(
-          model.bulkCreate({ attachments: [{ id: 'comment-1', ...unifiedExternalReference }] })
-        ).rejects.toThrow(
-          `Case has reached the maximum allowed number (${MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES}) of attached persistable state and external reference attachments.`
-        );
-      });
-
-      it('does not throw if creating a file external reference and the limit is reached', async () => {
-        clientArgs.fileService.find.mockResolvedValue({ total: 0, files: [] });
-
-        await expect(
-          model.bulkCreate({
-            attachments: [{ id: 'comment-1', ...unifiedFileExternalReference }],
-          })
-        ).resolves.not.toThrow();
       });
     });
   });

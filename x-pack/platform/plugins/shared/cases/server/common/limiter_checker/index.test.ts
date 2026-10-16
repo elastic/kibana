@@ -27,6 +27,7 @@ describe('AttachmentLimitChecker', () => {
     });
 
     mockAttachmentService.countAlertsWithinCase.mockResolvedValue(5);
+    mockAttachmentService.countAttachments.mockResolvedValue(5);
 
     mockFileService.find.mockImplementation(async () => {
       return {
@@ -146,6 +147,30 @@ describe('AttachmentLimitChecker', () => {
           checker.validate(createAlertRequests(1, alertIds))
         ).rejects.toMatchInlineSnapshot(
           `[Error: Case has reached the maximum allowed number (1000) of attached alerts.]`
+        );
+      });
+    });
+
+    describe('total attachments', () => {
+      it('throws when a single request has more than 5000 attachments', async () => {
+        expect.assertions(1);
+
+        await expect(checker.validate(createUserRequests(5001))).rejects.toMatchInlineSnapshot(
+          `[Error: Case has reached the maximum allowed number (5000) of attached items.]`
+        );
+      });
+
+      it('does not throw when the sum of the requests and attachments within the case are only 5000', async () => {
+        expect.assertions(1);
+
+        await expect(checker.validate(createUserRequests(4995))).resolves.not.toThrow();
+      });
+
+      it('throws when the sum of the requests and attachments within the case are 5001', async () => {
+        expect.assertions(1);
+
+        await expect(checker.validate(createUserRequests(4996))).rejects.toMatchInlineSnapshot(
+          `[Error: Case has reached the maximum allowed number (5000) of attached items.]`
         );
       });
     });

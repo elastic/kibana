@@ -29,11 +29,9 @@ import {
   postCommentAlertMultipleIdsReq,
   postCommentActionsReq,
   userActionSourceApi,
-  persistableStateAttachment,
-  postExternalReferenceESReq,
-  postUnifiedIndicatorReq,
   postUnifiedLensReq,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/mock';
+import { MAX_ATTACHMENTS_PER_CASE } from '@kbn/cases-plugin/common/constants';
 import {
   deleteAllCaseItems,
   deleteCasesByESQuery,
@@ -47,8 +45,8 @@ import {
   findCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
   getAllComments,
-  bulkCreateAttachments,
   getCaseSavedObjectsFromES,
+  seedUnifiedComments,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import {
   globalRead,
@@ -75,6 +73,8 @@ import {
   getSecuritySolutionAlerts,
   createSecuritySolutionAlerts,
 } from '../../../../common/lib/alerts';
+
+const attachmentsLimitMessage = `Case has reached the maximum allowed number (${MAX_ATTACHMENTS_PER_CASE}) of attached items.`;
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -475,48 +475,30 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('400s when attempting to add a persistable state to a case that already has 100', async () => {
+      it('400s when attempting to add an attachment to a case that has reached the attachment limit', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
-        await bulkCreateAttachments({
+        await seedUnifiedComments({
+          es,
+          caseId: postedCase.id,
+          count: MAX_ATTACHMENTS_PER_CASE - 1,
+        });
+
+        await createComment({
           supertest,
           caseId: postedCase.id,
-          params: Array(100).fill(postUnifiedIndicatorReq),
+          params: postCommentUserReq,
           expectedHttpCode: 200,
         });
 
         const response = (await createComment({
           supertest,
           caseId: postedCase.id,
-          params: persistableStateAttachment,
+          params: postUnifiedLensReq,
           expectedHttpCode: 400,
         })) as unknown as { message: string };
 
-        expect(response.message).to.contain(
-          'Case has reached the maximum allowed number (100) of attached persistable state and external reference attachments'
-        );
-      });
-
-      it('400s when attempting to add an external reference to a case that already has 100', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-
-        await bulkCreateAttachments({
-          supertest,
-          caseId: postedCase.id,
-          params: Array(100).fill(postUnifiedLensReq),
-          expectedHttpCode: 200,
-        });
-
-        const response = (await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postExternalReferenceESReq,
-          expectedHttpCode: 400,
-        })) as unknown as { message: string };
-
-        expect(response.message).to.contain(
-          'Case has reached the maximum allowed number (100) of attached persistable state and external reference attachments'
-        );
+        expect(response.message).to.contain(attachmentsLimitMessage);
       });
     });
 

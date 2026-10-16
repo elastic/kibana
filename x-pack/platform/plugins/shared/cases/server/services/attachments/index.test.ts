@@ -2096,120 +2096,20 @@ describe('AttachmentService', () => {
     });
   });
 
-  describe('countPersistableStateAndExternalReferenceAttachments', () => {
-    it('does not throw and calls unsecuredSavedObjectsClient.find with the right parameters', async () => {
+  describe('countAttachments', () => {
+    it('counts every legacy and unified attachment on the case in one find', async () => {
       unsecuredSavedObjectsClient.find.mockResolvedValue(
-        createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
+        createSOFindResponse(Array(3).fill({ ...createUserAttachment(), score: 0 }))
       );
 
-      await expect(
-        service.countPersistableStateAndExternalReferenceAttachments({ caseId: 'test-id' })
-      ).resolves.not.toThrow();
+      await expect(service.countAttachments({ caseId: 'test-id' })).resolves.toBe(3);
 
-      expect(unsecuredSavedObjectsClient.find.mock.calls[0][0]).toMatchInlineSnapshot(`
-        Object {
-          "filter": Object {
-            "arguments": Array [
-              Object {
-                "arguments": Array [
-                  Object {
-                    "arguments": Array [
-                      Object {
-                        "isQuoted": false,
-                        "type": "literal",
-                        "value": "cases-comments.attributes.type",
-                      },
-                      Object {
-                        "isQuoted": false,
-                        "type": "literal",
-                        "value": "persistableState",
-                      },
-                    ],
-                    "function": "is",
-                    "type": "function",
-                  },
-                  Object {
-                    "arguments": Array [
-                      Object {
-                        "isQuoted": false,
-                        "type": "literal",
-                        "value": "cases-comments.attributes.type",
-                      },
-                      Object {
-                        "isQuoted": false,
-                        "type": "literal",
-                        "value": "externalReference",
-                      },
-                    ],
-                    "function": "is",
-                    "type": "function",
-                  },
-                ],
-                "function": "or",
-                "type": "function",
-              },
-              Object {
-                "arguments": Array [
-                  Object {
-                    "arguments": Array [
-                      Object {
-                        "isQuoted": false,
-                        "type": "literal",
-                        "value": "cases-comments.attributes.externalReferenceAttachmentTypeId",
-                      },
-                      Object {
-                        "isQuoted": false,
-                        "type": "literal",
-                        "value": ".files",
-                      },
-                    ],
-                    "function": "is",
-                    "type": "function",
-                  },
-                ],
-                "function": "not",
-                "type": "function",
-              },
-            ],
-            "function": "and",
-            "type": "function",
-          },
-          "hasReference": Object {
-            "id": "test-id",
-            "type": "cases",
-          },
-          "page": 1,
-          "perPage": 1,
-          "sortField": "created_at",
-          "type": "cases-comments",
-        }
-      `);
-    });
-
-    it('always sums legacy + unified counts and excludes `file` from the unified type filter', async () => {
-      unsecuredSavedObjectsClient.find
-        .mockResolvedValueOnce(
-          createSOFindResponse(Array(2).fill({ ...createUserAttachment({ foo: 'bar' }), score: 0 }))
-        )
-        .mockResolvedValueOnce(
-          createSOFindResponse(Array(3).fill({ ...createUserAttachment({ foo: 'bar' }), score: 0 }))
-        );
-
-      const res = await service.countPersistableStateAndExternalReferenceAttachments({
-        caseId: 'test-id',
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.find.mock.calls[0][0]).toEqual({
+        type: ['cases-comments', 'cases-attachments'],
+        hasReference: { type: 'cases', id: 'test-id' },
+        perPage: 0,
       });
-
-      expect(res).toBe(5);
-      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(2);
-
-      const unifiedCallArgs = unsecuredSavedObjectsClient.find.mock.calls[1][0];
-      expect(unifiedCallArgs.type).toBe('cases-attachments');
-
-      const filterAsString = JSON.stringify(unifiedCallArgs.filter);
-      expect(filterAsString).toMatch(/"value":\s*"security.endpoint"/);
-      expect(filterAsString).toMatch(/"value":\s*"osquery"/);
-      expect(filterAsString).toMatch(/"value":\s*"security.indicator"/);
-      expect(filterAsString).not.toMatch(/"value":\s*"file"/);
     });
   });
 

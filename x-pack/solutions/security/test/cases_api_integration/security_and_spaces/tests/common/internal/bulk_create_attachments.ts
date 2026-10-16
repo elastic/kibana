@@ -17,7 +17,7 @@ import {
   isUnifiedAlertAttachment,
   isUnifiedCommentAttachment,
 } from '@kbn/cases-plugin/common';
-import { MAX_COMMENT_LENGTH } from '@kbn/cases-plugin/common/constants';
+import { MAX_COMMENT_LENGTH, MAX_ATTACHMENTS_PER_CASE } from '@kbn/cases-plugin/common/constants';
 import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import type { UnifiedAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
 import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
@@ -54,6 +54,7 @@ import {
   deleteAllFiles,
   getAllComments,
   getCaseSavedObjectsFromES,
+  seedUnifiedComments,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import {
   globalRead,
@@ -91,8 +92,7 @@ const unifiedOtherAttachmentReq = {
   owner: 'securitySolutionFixture',
 };
 
-const persistableStateAndExternalReferenceLimitMessage =
-  'Case has reached the maximum allowed number (100) of attached persistable state and external reference attachments.';
+const attachmentsLimitMessage = `Case has reached the maximum allowed number (${MAX_ATTACHMENTS_PER_CASE}) of attached items.`;
 
 // User actions persist the legacy shape, regardless of the unified shape sent on the wire.
 const toLegacyUserActionPayload = (attachment: UnifiedAttachmentPayload) => {
@@ -681,42 +681,23 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('400s when attempting to bulk create persistable state attachments reaching the 100 limit', async () => {
+        it('400s when attempting to bulk create attachments past the attachment limit', async () => {
           const postedCase = await createCase(supertest, postCaseReq);
 
-          await bulkCreateAttachments({
-            supertest,
+          await seedUnifiedComments({
+            es,
             caseId: postedCase.id,
-            params: [unifiedOtherAttachmentReq],
+            count: MAX_ATTACHMENTS_PER_CASE - 1,
           });
 
           const error = (await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: Array(100).fill(postUnifiedLensReq),
+            params: [postUnifiedCommentReq, postUnifiedLensReq],
             expectedHttpCode: 400,
           })) as unknown as Error;
 
-          expect(error.message).to.be(persistableStateAndExternalReferenceLimitMessage);
-        });
-
-        it('400s when attempting to bulk create >100 external reference attachments reaching the 100 limit', async () => {
-          const postedCase = await createCase(supertest, postCaseReq);
-
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: [postUnifiedLensReq],
-          });
-
-          const error = (await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: Array(100).fill(unifiedOtherAttachmentReq),
-            expectedHttpCode: 400,
-          })) as unknown as Error;
-
-          expect(error.message).to.be(persistableStateAndExternalReferenceLimitMessage);
+          expect(error.message).to.be(attachmentsLimitMessage);
         });
       });
     });

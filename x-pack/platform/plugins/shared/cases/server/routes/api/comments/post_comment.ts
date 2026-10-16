@@ -26,7 +26,7 @@ export const postCommentRoute = createCasesRoute({
     access: 'public',
     summary: `Add a case comment or alert`,
     tags: ['oas-tag:cases'],
-    description: 'Each case can have a maximum of 1,000 alerts.',
+    description: 'Each case can have a maximum of 5,000 attachments and 1,000 alerts.',
     // You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating.
   },
   handler: async ({ context, request, response }) => {
