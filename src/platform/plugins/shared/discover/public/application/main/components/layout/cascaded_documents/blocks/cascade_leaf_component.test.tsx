@@ -45,6 +45,7 @@ jest.mock('@kbn/unified-data-table', () => ({
   UnifiedDataTable: jest.fn(() => <div data-test-subj="unifiedDataTableMock" />),
 }));
 
+const mockGetOffsetForIndex = jest.fn(() => [1234, 'center']);
 const mockScrollToIndex = jest.fn();
 
 jest.mock('@kbn/shared-ux-document-data-cascade', () => {
@@ -53,7 +54,11 @@ jest.mock('@kbn/shared-ux-document-data-cascade', () => {
     ...actual,
     useConnectedChildVirtualizer: (...args: unknown[]) => {
       const result = actual.useConnectedChildVirtualizer(...args);
-      result.virtualizer.scrollToIndex = mockScrollToIndex;
+      result.virtualizer.getOffsetForIndex = mockGetOffsetForIndex;
+      Object.defineProperty(result.virtualizer, 'scrollToIndex', {
+        value: mockScrollToIndex,
+        configurable: true,
+      });
       return result;
     },
   };
@@ -100,10 +105,15 @@ type StickyHeaderExtensionPoint = Parameters<
   DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
 >[0]['stickyHeaderExtensionPoint'];
 
+const createInactiveStickyHeaderExtensionPoint = (): StickyHeaderExtensionPoint => ({
+  isDisplayed: false,
+  extensionPointElement: document.createElement('div'),
+});
+
 const renderLeafCellWithContext = ({
   contextValue,
   services,
-  stickyHeaderExtensionPoint = null,
+  stickyHeaderExtensionPoint = createInactiveStickyHeaderExtensionPoint(),
 }: {
   contextValue: CascadedDocumentsContext;
   services: DiscoverServices;
@@ -325,7 +335,7 @@ describe('ESQLDataCascadeLeafCell', () => {
     };
 
     it('renders the toolbar and header row in place when the row is not the active sticky row', () => {
-      renderLeafAndGridParts(null);
+      renderLeafAndGridParts(createInactiveStickyHeaderExtensionPoint());
 
       const gridRoot = screen.getByTestId('gridRoot');
       const gridBody = screen.getByTestId('gridBody');
@@ -342,7 +352,7 @@ describe('ESQLDataCascadeLeafCell', () => {
       document.body.appendChild(extensionPointElement);
 
       try {
-        renderLeafAndGridParts({ isActiveSticky: true, extensionPointElement });
+        renderLeafAndGridParts({ isDisplayed: true, extensionPointElement });
 
         const gridRoot = screen.getByTestId('gridRoot');
         const toolbar = screen.getByTestId('unifiedDataTableToolbar');
@@ -362,24 +372,28 @@ describe('ESQLDataCascadeLeafCell', () => {
     });
 
     it('scrolls the custom virtualized body to the active in-table search match', () => {
-      renderLeafAndGridParts(null);
+      renderLeafAndGridParts(createInactiveStickyHeaderExtensionPoint());
 
       const unifiedDataTableProps = unifiedDataTableMock.mock.lastCall?.[0]!;
       expect(unifiedDataTableProps.enableInTableSearch).toBe(true);
 
       unifiedDataTableProps.scrollToCell!({ rowIndex: 7, columnIndex: 1, align: 'center' });
 
-      expect(mockScrollToIndex).toHaveBeenCalledWith(7, { align: 'center', behavior: 'smooth' });
+      expect(mockScrollToIndex).toHaveBeenCalledWith(7, { align: 'center', behavior: 'auto' });
     });
 
-    it('keeps the toolbar and header row in place while the active sticky row has no extension point element yet', () => {
-      renderLeafAndGridParts({ isActiveSticky: true, extensionPointElement: null });
+    it('keeps the toolbar and header row in place while the sticky header is not displayed for the row', () => {
+      renderLeafAndGridParts({
+        isDisplayed: false,
+        extensionPointElement: document.createElement('div'),
+      });
 
       const gridRoot = screen.getByTestId('gridRoot');
       const gridBody = screen.getByTestId('gridBody');
 
       expect(gridRoot).toContainElement(screen.getByTestId('unifiedDataTableToolbar'));
       expect(gridBody).toContainElement(screen.getByTestId('gridHeaderRow'));
+      expect(screen.queryByTestId('discoverCascadeStickyHeaderSpacer')).toBeNull();
     });
   });
 });
