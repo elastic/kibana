@@ -122,8 +122,9 @@ searches below: its `query_kis` are the Phase 1 results, its `feature_kis` the P
 the response `sources`, and `unmatched_rule_uuids` are the rules Step 2 would record as `NO_MATCH`. Make no `ki_search` call. This replaces only the searches: Step 2 mapping, Step 3
 confirmation and Step 4 profiling still run in full for every matched rule, and a confirming rule is
 never left with unmeasured breadth or duration because the searches were skipped.
-Every query KI carries its `view_name`: it is the `FROM` target (see the `FROM target` rule below);
-the source slug is never one.
+Every query KI carries its `view_name` and, when it can be built, a `confirmation_query`: Step 3's
+executed query, ready to run. Run it exactly as given and never rebuild its `FROM`; the source slug is
+never a `FROM` target.
 
 Two sequential phases, at most three calls per batch. Phase 2 takes Phase 1's result as input, so
 send Phase 2 only after the Phase 1 response has returned.

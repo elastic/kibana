@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { buildConfirmationQuery } from './confirmation_query';
 import type {
   CompactKnowledgeIndicator,
   CompactKnowledgeIndicatorFeature,
@@ -16,15 +17,18 @@ import type { SearchKnowledgeIndicatorsParams } from '../../agent_builder/tools/
 const PER_PAGE = 50;
 const FEATURE_TYPES = ['dependency', 'entity', 'infrastructure'] as const;
 
-/** A query KI with the `FROM` target its grounding queries must use. */
-export type DiscoveryContextQuery = CompactKnowledgeIndicatorQuery & { view_name?: string };
+/** A query KI with the view its grounding queries use and its ready-to-run confirmation query. */
+export type DiscoveryContextQuery = CompactKnowledgeIndicatorQuery & {
+  view_name?: string;
+  confirmation_query?: string;
+};
 
 /**
  * What is left to do once the searches are done. Without it the agent has stopped after the
  * confirmation queries in the eval and left the profile queries out.
  */
 export const REMAINING_GROUNDING_STEPS = [
-  'Step 3: run the confirmation query of every rule in query_kis, in parallel waves.',
+  "Step 3: run every query KI's confirmation_query exactly as given (never rebuild its FROM), with time_range from the detection @timestamp minus 15m to now, in parallel waves; a KI without one is built per the skill.",
   'Step 4: profile (spread and trend) every rule whose sample returned failure rows, before any routing or write.',
   'Rules in unmatched_rule_uuids are not_checked and not event-eligible: put no signal for them in any events_write item (the write is rejected); only add their rule_uuid to written_rule_uuids.',
 ] as const;
@@ -124,8 +128,16 @@ export const buildDiscoveryContext = async ({
     unmatched_rule_uuids: ruleUuids.filter((ruleUuid) => !matchedRules.has(ruleUuid)),
     truncated: queryPage.has_more,
     query_kis: queryKis.map((ki) => {
-      const view = viewBySlug.get(ki.source_id);
-      return view ? { ...ki, view_name: view } : ki;
+      const viewName = viewBySlug.get(ki.source_id);
+      const confirmationQuery = buildConfirmationQuery({
+        esqlQuery: ki.query.esql.query,
+        viewName,
+      });
+      return {
+        ...ki,
+        ...(viewName ? { view_name: viewName } : {}),
+        ...(confirmationQuery ? { confirmation_query: confirmationQuery } : {}),
+      };
     }),
     feature_kis: featureKis,
   };

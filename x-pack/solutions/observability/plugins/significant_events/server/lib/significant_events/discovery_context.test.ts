@@ -29,7 +29,7 @@ const queryKi = ({
     title: 'title',
     description: 'description',
     type: 'match',
-    esql: { query: 'FROM $.logs | WHERE x' },
+    esql: { query: 'FROM logs | WHERE x' },
     features: featureIds.map((id) => ({ id })),
   },
   rule: { backed: true, id: ruleId },
@@ -170,6 +170,32 @@ describe('buildDiscoveryContext', () => {
     ]);
   });
 
+  it('gives each query KI its confirmation query, and none when it cannot be built', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce(
+        page({
+          items: [
+            queryKi({ ruleId: 'rule-A', sourceId: 'logs' }),
+            queryKi({ ruleId: 'rule-B', sourceId: 'unknown' }),
+          ],
+          sources: [source('logs')],
+        })
+      )
+      .mockResolvedValueOnce(page({ items: [] }));
+
+    const context = await buildDiscoveryContext({
+      ruleUuids: ['rule-A', 'rule-B'],
+      sourceIds: [],
+      search,
+    });
+
+    expect(context.query_kis[0].confirmation_query).toBe(
+      'FROM $.nightshift.logs | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE x | SORT @timestamp DESC | LIMIT 5'
+    );
+    expect(context.query_kis[1]).not.toHaveProperty('confirmation_query');
+  });
+
   it('leads with the remaining steps and the sources, so the agent reads them first', async () => {
     const search = jest
       .fn()
@@ -202,6 +228,7 @@ describe('buildDiscoveryContext', () => {
 
     expect(steps).toHaveLength(3);
     expect(steps[0]).toContain('Step 3');
+    expect(steps[0]).toContain('confirmation_query');
     expect(steps[1]).toContain('Step 4');
     expect(steps[2]).toContain('unmatched_rule_uuids');
     expect(steps[2]).toContain('no signal');
