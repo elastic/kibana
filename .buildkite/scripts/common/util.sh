@@ -3,6 +3,7 @@
 SCRIPTS_COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPTS_COMMON_DIR}/vault_fns.sh"
 source "${SCRIPTS_COMMON_DIR}/gcs_tmp_artifacts.sh"
+source "${SCRIPTS_COMMON_DIR}/docker_registry.sh"
 
 is_pr() {
   [[ "${GITHUB_PR_NUMBER-}" ]] && return
@@ -371,107 +372,6 @@ print_if_dry_run() {
   if [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
     echo "DRY_RUN is enabled."
   fi
-}
-
-# Call before the build in image steps: the job's Vault token can expire before a long build gets to push
-prefetch_docker_push_credential() {
-  if is_publish_pipeline; then
-    return 0
-  else
-    fetch_kibana_ci_pr_credential
-  fi
-}
-
-# Push login for image steps. Publish pipelines already logged in with the publish credential in setup_job_env.sh
-docker_login_push() {
-  is_publish_pipeline || docker_login_kibana_ci_pr
-}
-
-# Tags a locally built image as $target_image and pushes it with the push login
-retag_and_push_image() {
-  local built_image="$1"
-  local target_image="$2"
-  docker tag "$built_image" "$target_image"
-  docker_login_push
-  docker_with_retry push "$target_image"
-}
-
-# Trusted docker.elastic.co/kibana-ci repository on publish pipelines, its -pr counterpart elsewhere
-kibana_ci_image_repository() {
-  local name="$1"
-  if is_publish_pipeline; then
-    echo "docker.elastic.co/kibana-ci/$name"
-  else
-    echo "docker.elastic.co/kibana-ci/$name-pr"
-  fi
-}
-
-# Must match the pipelines granted kv/ci-shared/kibana/publish/* in elastic/terrazzo
-is_publish_pipeline() {
-  case "${BUILDKITE_PIPELINE_SLUG:-}" in
-    kibana-artifacts-container-image | \
-    kibana-artifacts-snapshot | \
-    kibana-artifacts-staging | \
-    kibana-elasticsearch-serverless-promote | \
-    kibana-elasticsearch-snapshot-build | \
-    kibana-elasticsearch-snapshot-promote | \
-    kibana-package-registry-verify-and-promote | \
-    kibana-uiam-cosmos-db-emulator-verify-and-promote | \
-    kibana-uiam-verify-and-promote)
-      return 0
-      ;;
-    *)
-      return 1
-      ;;
-  esac
-}
-
-# Push access to trusted docker.elastic.co/kibana-ci/* repositories, readable only by publish pipelines
-docker_login_kibana_ci_publish() {
-  is_docker_available || return 0
-  local username password
-  username="$(retry 5 5 vault kv get -field=username kv/ci-shared/kibana/publish/container-registry)"
-  password="$(retry 5 5 vault kv get -field=password kv/ci-shared/kibana/publish/container-registry)"
-  echo "$password" | docker login -u "$username" --password-stdin docker.elastic.co
-}
-
-# Push access to docker.elastic.co/kibana-ci/*-pr repositories only, readable only by PR image pipelines
-docker_login_kibana_ci_pr() {
-  is_docker_available || return 0
-  if [[ -z "${KIBANA_CI_PR_REGISTRY_PASSWORD:-}" ]]; then
-    echo "kibana-ci-pr credential missing, call prefetch_docker_push_credential before the build" >&2
-    return 1
-  else
-    echo "$KIBANA_CI_PR_REGISTRY_PASSWORD" | docker login -u "$KIBANA_CI_PR_REGISTRY_USERNAME" --password-stdin docker.elastic.co
-  fi
-}
-
-# Kept in unexported shell variables so the build's child processes don't inherit them
-fetch_kibana_ci_pr_credential() {
-  KIBANA_CI_PR_REGISTRY_USERNAME="$(retry 5 5 vault kv get -field=username kv/ci-shared/kibana/pr/container-registry)"
-  KIBANA_CI_PR_REGISTRY_PASSWORD="$(retry 5 5 vault kv get -field=password kv/ci-shared/kibana/pr/container-registry)"
-}
-
-# Pull-only access to the docker.elastic.co repositories Kibana CI consumes
-docker_login_kibana_ci_read() {
-  is_docker_available || return 0
-  local username password
-  username="$(vault_get kibana-container-registry-ci-read username)"
-  password="$(vault_get kibana-container-registry-ci-read password)"
-  echo "$password" | docker login -u "$username" --password-stdin docker.elastic.co
-}
-
-# Shared read/write kibanamachine credential, left only for the quality gate image until it gets its own tier
-docker_login_kibanamachine() {
-  is_docker_available || return 0
-  local username password
-  username="$(vault_get container-registry username)"
-  password="$(vault_get container-registry password)"
-  echo "$password" | docker login -u "$username" --password-stdin docker.elastic.co
-}
-
-is_docker_available() {
-  (command -v docker && docker version) &> /dev/null
 }
 
 docker_with_retry () {

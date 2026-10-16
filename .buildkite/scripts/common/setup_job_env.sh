@@ -34,11 +34,7 @@ source .buildkite/scripts/common/util.sh
   esac
   export GITHUB_TOKEN
 
-  if is_publish_pipeline; then
-    retry 5 15 docker_login_kibana_ci_publish
-  else
-    retry 5 15 docker_login_kibana_ci_read
-  fi
+  retry 5 15 docker_login_for_pipeline
 }
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build

@@ -2,15 +2,13 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
-prefetch_docker_push_credential
-
 # node scripts/build rebuilds the shared webpack bundles without the remote cache
 export KBN_BOOTSTRAP_NO_PREBUILT=true
 
 .buildkite/scripts/bootstrap.sh
 
 source .buildkite/scripts/steps/artifacts/env.sh
+source .buildkite/scripts/common/util.sh
 
 GIT_ABBREV_COMMIT=${BUILDKITE_COMMIT:0:12}
 if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
@@ -106,7 +104,6 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   retag_image_with_architecture "$KIBANA_BUILT_IMAGE" "$KIBANA_IMAGE" "kibana-serverless-$BASE_VERSION-docker-image"
 
   echo "--- Push images"
-  docker_login_push
   docker_with_retry push "$KIBANA_IMAGE-arm64"
   docker_with_retry push "$KIBANA_IMAGE-amd64"
 

@@ -3,7 +3,6 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
-prefetch_docker_push_credential
 
 .buildkite/scripts/bootstrap.sh
 
