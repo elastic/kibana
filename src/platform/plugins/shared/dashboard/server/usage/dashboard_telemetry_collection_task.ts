@@ -106,10 +106,12 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
               ) as unknown as SavedDashboardPanel[];
               collectPanelsByType(panels, dashboardData, embeddable);
 
-              const controls = JSON.parse(
-                dashboard.attributes.controlGroupInput?.panelsJSON as string
-              ) as unknown as LegacyStoredPinnedControlState;
-              collectPinnedControls(controls, dashboardData, embeddable);
+              if (dashboard.attributes.controlGroupInput?.panelsJSON) {
+                const controls = JSON.parse(
+                  dashboard.attributes.controlGroupInput.panelsJSON
+                ) as unknown as LegacyStoredPinnedControlState;
+                collectPinnedControls(controls, dashboardData, embeddable);
+              }
             } catch (e) {
               logger.warn('Unable to parse panelsJSON for telemetry collection');
             }

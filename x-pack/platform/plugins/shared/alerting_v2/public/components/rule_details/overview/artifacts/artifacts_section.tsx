@@ -12,8 +12,9 @@ import { useService } from '@kbn/core-di-browser';
 import { UserCapabilities } from '../../../../services/user_capabilities';
 import { ActionPoliciesArtifactsSubsection } from './action_policies_artifacts_subsection';
 import { DashboardArtifactsSubsection } from './dashboard_artifacts_subsection';
+import type { RuleSummarySectionProps } from '../../../rule/types';
 
-export const ArtifactsSection: React.FC = () => {
+export const ArtifactsSection: React.FC<RuleSummarySectionProps> = ({ rule }) => {
   const artifactsAccordionId = useGeneratedHtmlId({ prefix: 'ruleArtifactsSection' });
 
   const canReadActionPolicies = useService(UserCapabilities).canRead('actionPolicies');
@@ -35,11 +36,11 @@ export const ArtifactsSection: React.FC = () => {
     >
       <EuiFlexGroup gutterSize="l" responsive={true} data-test-subj="ruleArtifactsSubsectionsRow">
         <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-          <DashboardArtifactsSubsection />
+          <DashboardArtifactsSubsection rule={rule} />
         </EuiFlexItem>
         {canReadActionPolicies ? (
           <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-            <ActionPoliciesArtifactsSubsection />
+            <ActionPoliciesArtifactsSubsection rule={rule} />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>

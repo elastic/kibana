@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerResult, ToolHandlerContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -31,20 +31,22 @@ const DEFAULT_LIMIT = 10;
  * analysis investigation workflow as outine in the skill description.
  */
 
-export const assetCriticalityStaticSchema = z.object({
-  entityType: IdentifierType.describe('The type of entity: host, user, service, or generic'),
-  entityId: z
-    .string()
-    .describe('The identifier of the entity to retrieve the asset criticality for')
-    .optional(),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .optional()
-    .describe('Maximum number of results to return when entityId is not provided (default: 10)'),
-});
+export const assetCriticalityStaticSchema = lazySchema(() =>
+  z.object({
+    entityType: IdentifierType.describe('The type of entity: host, user, service, or generic'),
+    entityId: z
+      .string()
+      .describe('The identifier of the entity to retrieve the asset criticality for')
+      .optional(),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe('Maximum number of results to return when entityId is not provided (default: 10)'),
+  })
+);
 
 export type AssetCriticalityType = Omit<
   z.infer<typeof assetCriticalityStaticSchema>,

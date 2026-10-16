@@ -22,19 +22,21 @@ describe('mergeAppMenuConfigs', () => {
       id: 'addData',
       label: 'Add data',
       href: '/add-data',
-      iconType: 'plusInCircle' as const,
+      iconType: 'plusCircle' as const,
       testId: 'apmAddDataHeaderLink',
     },
   };
 
   const pageMenu = {
-    primaryActionItem: {
-      id: 'editServiceGroup',
-      label: 'Edit group',
-      iconType: 'pencil' as const,
-      testId: 'apmEditButtonEditGroupButton',
-      run: () => {},
-    },
+    items: [
+      {
+        id: 'exploreData',
+        label: 'Explore data',
+        href: '/explore',
+        iconType: 'chartBarVerticalStack' as const,
+        testId: 'apmAnalyzeDataButtonExploreDataButton',
+      },
+    ],
   };
 
   it('returns the global menu when page menu is omitted', () => {
@@ -45,10 +47,28 @@ describe('mergeAppMenuConfigs', () => {
     expect(mergeAppMenuConfigs(undefined, pageMenu)).toBe(pageMenu);
   });
 
-  it('lets the page primary win and demotes the global primary into overflow', () => {
+  it('prepends page items and keeps the global primary', () => {
     expect(mergeAppMenuConfigs(globalMenu, pageMenu)).toEqual({
       switch: undefined,
-      primaryActionItem: pageMenu.primaryActionItem,
+      primaryActionItem: globalMenu.primaryActionItem,
+      items: [...pageMenu.items, ...globalMenu.items],
+    });
+  });
+
+  it('lets the page primary win and demotes the global primary into overflow', () => {
+    const pageWithPrimary = {
+      primaryActionItem: {
+        id: 'editServiceGroup',
+        label: 'Edit group',
+        iconType: 'pencil' as const,
+        testId: 'apmEditButtonEditGroupButton',
+        run: () => {},
+      },
+    };
+
+    expect(mergeAppMenuConfigs(globalMenu, pageWithPrimary)).toEqual({
+      switch: undefined,
+      primaryActionItem: pageWithPrimary.primaryActionItem,
       items: [
         {
           ...globalMenu.primaryActionItem,

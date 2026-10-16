@@ -13,8 +13,6 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
-  FILE_ATTACHMENT_TYPE,
-  LEGACY_FILE_ATTACHMENT_TYPE,
   MAX_OBSERVABLES_PER_CASE,
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
   OWNERS,
@@ -30,20 +28,15 @@ import type {
   Buckets,
   MaxBucketOnCaseAggregation,
   SolutionTelemetry,
-  AttachmentFramework,
-  AttachmentAggregationResult,
-  BucketsWithMaxOnCase,
-  AttachmentStats,
-  FileAttachmentStats,
   FileAttachmentAggregationResults,
-  FileAttachmentAggsResult,
-  AttachmentFrameworkAggsResult,
   CustomFieldsTelemetry,
   AlertBuckets,
   ObservablesAggregationResult,
   ObservablesTelemetry,
   TotalWithMaxObservablesAggregationResult,
 } from '../types';
+import type { AttachmentsByTypeRaw } from './attachments_by_type';
+import { buildAttachmentFramework } from './attachments_by_type';
 import { buildFilter } from '../../client/utils';
 import type { Owner } from '../../../common/constants/types';
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
@@ -370,13 +363,13 @@ export const getBucketFromAggregation = ({
 
 export const getSolutionValues = ({
   caseAggregations,
-  attachmentAggregations,
+  attachmentsByType,
   filesAggregations,
   totalWithAlertsByOwner,
   owner,
 }: {
   caseAggregations?: CaseAggregationResult;
-  attachmentAggregations?: AttachmentAggregationResult;
+  attachmentsByType?: AttachmentsByTypeRaw;
   filesAggregations?: FileAttachmentAggregationResults;
   totalWithAlertsByOwner?: Record<Owner, number>;
   owner: Owner;
@@ -392,7 +385,6 @@ export const getSolutionValues = ({
     ],
   });
   const totalCasesForOwner = findValueInBuckets(aggregationsBuckets.totalsByOwner, owner);
-  const attachmentsAggsForOwner = attachmentAggregations?.[owner];
   const fileAttachmentsForOwner = filesAggregations?.[owner];
   return {
     total: totalCasesForOwner,
@@ -408,8 +400,8 @@ export const getSolutionValues = ({
         CasePersistedStatus.CLOSED
       ),
     },
-    ...getAttachmentsFrameworkStats({
-      attachmentAggregations: attachmentsAggsForOwner,
+    ...buildAttachmentFramework({
+      rawScope: attachmentsByType?.[owner],
       filesAggregations: fileAttachmentsForOwner,
       totalCasesForOwner,
     }),
@@ -464,120 +456,6 @@ export const getAggregationsBuckets = ({
     return acc;
   }, {});
 
-export const getAttachmentsFrameworkStats = ({
-  attachmentAggregations,
-  filesAggregations,
-  totalCasesForOwner,
-}: {
-  attachmentAggregations?: AttachmentFrameworkAggsResult;
-  filesAggregations?: FileAttachmentAggsResult;
-  totalCasesForOwner: number;
-}): AttachmentFramework => {
-  if (!attachmentAggregations) {
-    return emptyAttachmentFramework();
-  }
-
-  const averageFileSize = getAverageFileSize(filesAggregations);
-  const topMimeTypes = filesAggregations?.topMimeTypes;
-
-  return {
-    attachmentFramework: {
-      externalAttachments: getAttachmentRegistryStats(
-        attachmentAggregations.externalReferenceTypes,
-        totalCasesForOwner
-      ),
-      persistableAttachments: getAttachmentRegistryStats(
-        attachmentAggregations.persistableReferenceTypes,
-        totalCasesForOwner
-      ),
-      files: getFileAttachmentStats({
-        registryResults: attachmentAggregations.externalReferenceTypes,
-        averageFileSize,
-        totalCasesForOwner,
-        topMimeTypes,
-      }),
-    },
-  };
-};
-
-const getAverageFileSize = (filesAggregations?: FileAttachmentAggsResult) => {
-  if (filesAggregations?.averageSize?.value == null) {
-    return 0;
-  }
-
-  return Math.round(filesAggregations.averageSize.value);
-};
-
-const getAttachmentRegistryStats = (
-  registryResults: BucketsWithMaxOnCase,
-  totalCasesForOwner: number
-): AttachmentStats[] => {
-  const stats: AttachmentStats[] = [];
-
-  for (const bucket of registryResults.buckets) {
-    const commonFields = {
-      average: calculateTypePerCaseAverage(bucket.doc_count, totalCasesForOwner),
-      maxOnACase: bucket.references.cases.max.value,
-      total: bucket.doc_count,
-    };
-
-    stats.push({
-      type: bucket.key,
-      ...commonFields,
-    });
-  }
-
-  return stats;
-};
-
-const calculateTypePerCaseAverage = (typeDocCount: number | undefined, totalCases: number) => {
-  if (typeDocCount == null || totalCases === 0) {
-    return 0;
-  }
-
-  return Math.round(typeDocCount / totalCases);
-};
-
-const getFileAttachmentStats = ({
-  registryResults,
-  averageFileSize,
-  totalCasesForOwner,
-  topMimeTypes,
-}: {
-  registryResults: BucketsWithMaxOnCase;
-  averageFileSize?: number;
-  totalCasesForOwner: number;
-  topMimeTypes?: Buckets<string>;
-}): FileAttachmentStats => {
-  const fileBuckets = registryResults.buckets.filter(
-    (bucket) => bucket.key === FILE_ATTACHMENT_TYPE || bucket.key === LEGACY_FILE_ATTACHMENT_TYPE
-  );
-
-  const totalDocCount = fileBuckets.reduce((sum, bucket) => sum + bucket.doc_count, 0);
-  // TODO(post-migration): once `.files` rows are gone, drop the legacy bucket.
-  // While both keys coexist, `maxOnACase` reports `max(legacyMax, unifiedMax)`
-  // — a case with mixed legacy + unified files under-reports the true max-on-a-case;
-  // the underlying agg is per-bucket so cross-bucket max can't be reconstructed here.
-  const maxOnACase = fileBuckets.reduce(
-    (max, bucket) => Math.max(max, bucket.references.cases.max.value ?? 0),
-    0
-  );
-
-  const mimeTypes =
-    topMimeTypes?.buckets.map((mimeType) => ({
-      count: mimeType.doc_count,
-      name: mimeType.key,
-    })) ?? [];
-
-  return {
-    averageSize: averageFileSize ?? 0,
-    average: calculateTypePerCaseAverage(totalDocCount, totalCasesForOwner),
-    maxOnACase,
-    total: totalDocCount,
-    topMimeTypes: mimeTypes,
-  };
-};
-
 export const getOnlyAlertsCommentsFilter = () =>
   buildFilter({
     filters: ['alert'],
@@ -605,19 +483,3 @@ export const getOnlyConnectorsFilter = () =>
     operator: 'or',
     type: CASE_USER_ACTION_SAVED_OBJECT,
   });
-
-const emptyAttachmentFramework = (): AttachmentFramework => ({
-  attachmentFramework: {
-    persistableAttachments: [],
-    externalAttachments: [],
-    files: emptyFileAttachment(),
-  },
-});
-
-const emptyFileAttachment = (): FileAttachmentStats => ({
-  average: 0,
-  averageSize: 0,
-  maxOnACase: 0,
-  total: 0,
-  topMimeTypes: [],
-});

@@ -32,7 +32,7 @@ export const command = {
   `,
   async run({ log }) {
     log.warning(dedent`
-      In most cases, 'yarn kbn clean' is all that should be needed to recover a consistent state when
+      In most cases, 'pnpm kbn clean' is all that should be needed to recover a consistent state when
       problems arise. However for the rare cases where something get corrupt on node_modules you might need this command.
       If you think you need to use this command very often (which is not normal), please let us know.
     `);
@@ -40,6 +40,12 @@ export const command = {
     await cleanPaths(log, [
       Path.resolve(REPO_ROOT, 'node_modules'),
       Path.resolve(REPO_ROOT, 'x-pack/node_modules'),
+      // pnpm store + virtual store
+      Path.resolve(REPO_ROOT, '.pnpm-store'),
+      Path.resolve(REPO_ROOT, '.pnpm'),
+      // yarn-era caches, left over when swapping between yarn and pnpm branches
+      Path.resolve(REPO_ROOT, '.yarn'),
+      Path.resolve(REPO_ROOT, '.yarn-local-mirror'),
       Path.resolve(REPO_ROOT, 'data'),
       Path.resolve(REPO_ROOT, '.es'),
       Path.resolve(REPO_ROOT, 'target'),

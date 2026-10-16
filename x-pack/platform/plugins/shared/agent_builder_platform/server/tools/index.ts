@@ -29,13 +29,15 @@ export const registerTools = ({
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
   setupDeps: PluginSetupDependencies;
 }) => {
-  const { agentBuilder } = setupDeps;
+  const { agentBuilder, cloud } = setupDeps;
 
   const tools: Array<BuiltinToolDefinition<any>> = [
     searchTool({ coreSetup, topSnippetsDefaults: agentBuilder.topSnippets }),
     getDocumentByIdTool(),
     executeEsqlTool(),
-    generateEsqlTool(),
+    generateEsqlTool({
+      organizationId: cloud?.organizationId,
+    }),
     getIndexMappingsTool(),
     listIndicesTool(),
     indexExplorerTool(),

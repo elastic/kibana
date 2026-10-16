@@ -14,10 +14,10 @@ import type {
 
 export interface InferenceWorkflowsSetupDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface InferenceWorkflowsStartDeps {
   inference: InferenceServerStart;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }

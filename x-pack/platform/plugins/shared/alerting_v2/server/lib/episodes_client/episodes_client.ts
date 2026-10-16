@@ -6,7 +6,15 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { buildEpisodeQuery, type AlertEpisodeEsqlRow } from '@kbn/alerting-v2-common-queries';
+import {
+  buildEpisodeEventsQuery,
+  buildEpisodeGroupHashQuery,
+  buildEpisodeQuery,
+  type AlertEpisodeEsqlRow,
+  type BuildEpisodeEventsQueryOptions,
+  type EpisodeEventRow,
+  type EpisodeGroupHashEsqlRow,
+} from '@kbn/alerting-v2-common-queries';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { normalizeTags } from '@kbn/alerting-v2-utils';
 import type { QueryServiceContract } from '../services/query_service/query_service';
@@ -25,8 +33,17 @@ export class EpisodesClient {
    * `undefined` when no such episode exists.
    */
   public async get(episodeId: string): Promise<AlertEpisode | undefined> {
+    // Resolving the group hash first lets the main query narrow to the
+    // episode's series instead of aggregating the whole space
+    const [lookupRow] = await this.queryService.executeQueryRows<EpisodeGroupHashEsqlRow>({
+      query: buildEpisodeGroupHashQuery(this.spaceId, episodeId).print('basic'),
+    });
+    if (lookupRow?.group_hash == null) {
+      return undefined;
+    }
+
     const rows = await this.queryService.executeQueryRows<AlertEpisodeEsqlRow>({
-      query: buildEpisodeQuery(this.spaceId, episodeId).print('basic'),
+      query: buildEpisodeQuery(this.spaceId, episodeId, lookupRow.group_hash).print('basic'),
     });
 
     const [row] = rows;
@@ -35,5 +52,15 @@ export class EpisodesClient {
     }
 
     return { ...row, last_tags: normalizeTags(row.last_tags) };
+  }
+
+  /** `.rule-events` rows for one episode, same query as the details timeline. */
+  public async getEvents(
+    episodeId: string,
+    options?: BuildEpisodeEventsQueryOptions
+  ): Promise<EpisodeEventRow[]> {
+    return this.queryService.executeQueryRows<EpisodeEventRow>({
+      query: buildEpisodeEventsQuery(this.spaceId, episodeId, options).print('basic'),
+    });
   }
 }

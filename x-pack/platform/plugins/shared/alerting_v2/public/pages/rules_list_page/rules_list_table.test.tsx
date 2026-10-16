@@ -19,7 +19,7 @@ const mockRules = [
     enabled: true,
     metadata: { name: 'Rule One', tags: ['prod'] },
     schedule: { every: '1m' },
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    query: { base: 'FROM logs-* | LIMIT 1' },
   },
   {
     id: 'rule-2',
@@ -27,7 +27,7 @@ const mockRules = [
     enabled: false,
     metadata: { name: 'Rule Two', tags: [] },
     schedule: { every: '5m' },
-    query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
+    query: { base: 'FROM metrics-*' },
   },
 ];
 
@@ -41,7 +41,7 @@ const mockRulesWithManyTags = [
       tags: ['new', 'rna', 'production', 'fix', 'this', 'tags', 'more', 'than', 'enough'],
     },
     schedule: { every: '1m' },
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    query: { base: 'FROM logs-* | LIMIT 1' },
   },
 ];
 
@@ -55,7 +55,7 @@ const mockRulesWithLongTags = [
       tags: ['this-is-a-very-long-tag-name-that-should-be-truncated'],
     },
     schedule: { every: '1m' },
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    query: { base: 'FROM logs-* | LIMIT 1' },
   },
 ];
 
@@ -82,8 +82,7 @@ const defaultProps: RulesListTableProps = {
   onBulkDisable: jest.fn(),
   onBulkDelete: jest.fn(),
   onBulkUpdateApiKey: jest.fn(),
-  onNavigateToDetails: jest.fn(),
-  onExpand: jest.fn(),
+  onOpenSummary: jest.fn(),
   onQuickEdit: jest.fn(),
   onEdit: jest.fn(),
   onClone: jest.fn(),
@@ -133,19 +132,23 @@ describe('RulesListTable', () => {
     it('renders a generic empty state when there are no rules', () => {
       renderTable({ items: [], totalItemCount: 0, search: '', hasActiveFilters: false });
 
-      expect(screen.getByText('No rules found.')).toBeInTheDocument();
+      expect(screen.getByText('No Universal rules found.')).toBeInTheDocument();
     });
 
     it('renders a search-specific empty state when no rules match', () => {
       renderTable({ items: [], totalItemCount: 0, search: 'prod' });
 
-      expect(screen.getByText('No rules match your search or filters.')).toBeInTheDocument();
+      expect(
+        screen.getByText('No Universal rules match your search or filters.')
+      ).toBeInTheDocument();
     });
 
     it('renders a filter-specific empty state when no rules match', () => {
       renderTable({ items: [], totalItemCount: 0, search: '', hasActiveFilters: true });
 
-      expect(screen.getByText('No rules match your search or filters.')).toBeInTheDocument();
+      expect(
+        screen.getByText('No Universal rules match your search or filters.')
+      ).toBeInTheDocument();
     });
 
     it('renders the Source column with extracted index pattern', () => {
@@ -168,17 +171,17 @@ describe('RulesListTable', () => {
       );
     });
 
-    it('renders Mode column with Alert and Signal', () => {
+    it('renders Outcome column with Alerts and Events', () => {
       renderTable();
 
-      expect(screen.getByText('Alert')).toBeInTheDocument();
-      expect(screen.getByText('Signal')).toBeInTheDocument();
+      expect(screen.getByText('Alerts')).toBeInTheDocument();
+      expect(screen.getByText('Events')).toBeInTheDocument();
     });
 
-    it('renders kind-specific tooltip for Alert mode badge', async () => {
+    it('renders kind-specific tooltip for Alerts kind badge', async () => {
       renderTable();
 
-      fireEvent.mouseOver(screen.getByText('Alert'));
+      fireEvent.mouseOver(screen.getByText('Alerts'));
 
       expect(await screen.findByText(RULE_KIND_TOOLTIPS.alert)).toBeInTheDocument();
       expect(
@@ -186,10 +189,10 @@ describe('RulesListTable', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('renders kind-specific tooltip for Signal mode badge', async () => {
+    it('renders kind-specific tooltip for Events kind badge', async () => {
       renderTable();
 
-      fireEvent.mouseOver(screen.getByText('Signal'));
+      fireEvent.mouseOver(screen.getByText('Events'));
 
       expect(await screen.findByText(RULE_KIND_TOOLTIPS.signal)).toBeInTheDocument();
     });
@@ -465,6 +468,27 @@ describe('RulesListTable', () => {
       expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
 
+    it('calls onViewChangeHistory when view change history action is clicked', async () => {
+      const onViewChangeHistory = jest.fn();
+      renderTable({ onViewChangeHistory });
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      expect(await screen.findByTestId('viewChangeHistoryRule-rule-1')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('viewChangeHistoryRule-rule-1'));
+
+      expect(onViewChangeHistory).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+
+    it('hides view change history when onViewChangeHistory is omitted', () => {
+      renderTable();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      expect(screen.queryByTestId('viewChangeHistoryRule-rule-1')).not.toBeInTheDocument();
+    });
+
     it('does not render a toggle enabled action, since that is handled by the Enabled switch', () => {
       renderTable();
 
@@ -548,13 +572,20 @@ describe('RulesListTable', () => {
       expect(screen.getByTestId('ruleNameLink-rule-1')).toBeInTheDocument();
     });
 
-    it('calls onNavigateToDetails when rule name link is clicked', () => {
-      const onNavigateToDetails = jest.fn();
-      renderTable({ onNavigateToDetails });
+    it('calls onOpenSummary when rule name link is clicked', () => {
+      const onOpenSummary = jest.fn();
+      renderTable({ onOpenSummary });
 
       fireEvent.click(screen.getByTestId('ruleNameLink-rule-1'));
 
-      expect(onNavigateToDetails).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+      expect(onOpenSummary).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+
+    it('does not render an expand button', () => {
+      renderTable();
+
+      expect(screen.queryByTestId('expandRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('expandRule-rule-2')).not.toBeInTheDocument();
     });
   });
 
@@ -573,6 +604,20 @@ describe('RulesListTable', () => {
       expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
     });
 
+    it('still shows View change history (a read action) without write actions', async () => {
+      const onViewChangeHistory = jest.fn();
+      renderTable({ canWrite: false, onViewChangeHistory });
+
+      // No quick edit shortcut for read-only, but the actions menu is available.
+      expect(screen.queryByTestId('quickEditRule-rule-1')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      expect(await screen.findByTestId('viewChangeHistoryRule-rule-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('editRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cloneRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('deleteRule-rule-1')).not.toBeInTheDocument();
+    });
+
     it('does not show the bulk action toolbar even when selectedCount > 0', () => {
       renderTable({ canWrite: false, selectedCount: 1 });
 
@@ -589,29 +634,11 @@ describe('RulesListTable', () => {
       expect(screen.getByTestId('ruleEnabledBadge-rule-2')).toHaveTextContent('Disabled');
     });
 
-    it('keeps read-only affordances (name link, expand) available', () => {
+    it('keeps the rule name link available', () => {
       renderTable({ canWrite: false });
 
       expect(screen.getByTestId('ruleNameLink-rule-1')).toBeInTheDocument();
-      expect(screen.getByTestId('expandRule-rule-1')).toBeInTheDocument();
-    });
-  });
-
-  describe('expand button', () => {
-    it('renders an expand button for each row', () => {
-      renderTable();
-
-      expect(screen.getByTestId('expandRule-rule-1')).toBeInTheDocument();
-      expect(screen.getByTestId('expandRule-rule-2')).toBeInTheDocument();
-    });
-
-    it('calls onExpand with the row rule when the expand button is clicked', () => {
-      const onExpand = jest.fn();
-      renderTable({ onExpand });
-
-      fireEvent.click(screen.getByTestId('expandRule-rule-1'));
-
-      expect(onExpand).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+      expect(screen.queryByTestId('expandRule-rule-1')).not.toBeInTheDocument();
     });
   });
 });

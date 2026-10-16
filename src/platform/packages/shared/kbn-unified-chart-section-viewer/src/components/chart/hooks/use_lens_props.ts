@@ -12,6 +12,7 @@ import {
   type LensAttributes,
   type LensConfig,
   type LensESQLDataset,
+  type LensHeatmapConfig,
   type LensLegendConfig,
   type LensSeriesLayer,
   type LensYBoundsConfig,
@@ -70,6 +71,8 @@ export const useLensProps = ({
   chartLayers,
   yBounds,
   legend,
+  yAxisTitle,
+  heatmapConfig,
   error,
   userMessages,
   profileId,
@@ -83,6 +86,9 @@ export const useLensProps = ({
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
   legend?: LensLegendConfig;
+  yAxisTitle?: string;
+  /** When set, builds a heatmap with the same config builder as the XY chart. */
+  heatmapConfig?: LensHeatmapConfig;
   error?: Error;
   userMessages?: EmbeddableComponentProps['userMessages'];
   profileId: string;
@@ -110,6 +116,8 @@ export const useLensProps = ({
     chartLayers,
     yBounds,
     legend,
+    yAxisTitle,
+    heatmapConfig,
     effectiveError,
     userMessages,
     profileId,
@@ -117,6 +125,16 @@ export const useLensProps = ({
 
   // creates a stable function that builds the Lens attributes
   const buildAttributesFn = useLatest(async () => {
+    const builder = new LensConfigBuilder(services.dataViews);
+
+    if (heatmapConfig) {
+      return (await builder.build(heatmapConfig, {
+        query: {
+          esql: (heatmapConfig.dataset as LensESQLDataset).esql,
+        },
+      })) as LensAttributes;
+    }
+
     // keep Lens from building if there are no chart layers and no error
     // force Lens to build with no datasource on error to show the error message
     if (!chartLayers.length && !effectiveError) return null;
@@ -128,8 +146,8 @@ export const useLensProps = ({
       chartLayers,
       yBounds,
       legend,
+      yAxisTitle,
     });
-    const builder = new LensConfigBuilder(services.dataViews);
 
     const result = (await builder.build(lensParams, {
       query: {
@@ -271,6 +289,7 @@ const buildLensParams = ({
   chartLayers,
   yBounds,
   legend,
+  yAxisTitle,
 }: {
   query: string;
   title: string;
@@ -278,6 +297,7 @@ const buildLensParams = ({
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
   legend?: LensLegendConfig;
+  yAxisTitle?: string;
 }): LensConfig => {
   return {
     chartType: 'xy',
@@ -289,9 +309,10 @@ const buildLensParams = ({
     legend: legend ?? { show: false },
     axisTitleVisibility: {
       showXAxisTitle: false,
-      showYAxisTitle: false,
+      showYAxisTitle: yAxisTitle !== undefined,
       showYRightAxisTitle: false,
     },
+    yTitle: yAxisTitle,
     layers: chartLayers,
     fittingFunction: 'Linear',
     yBounds,

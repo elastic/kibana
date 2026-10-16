@@ -6,11 +6,13 @@
  */
 
 import moment from 'moment';
+import { withTimeout } from '@kbn/std';
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import type { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
+import { isExternalUiamCredential, markExternalUiamCredential } from '@kbn/core-security-server';
 import type { ReportingError } from '@kbn/reporting-common';
 import {
   CancellationToken,
@@ -134,6 +136,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
   // Abstract methods
   public abstract exportType: string;
+  protected abstract readonly scheduleType: ScheduleType;
   public abstract get TYPE(): string;
 
   public abstract getTaskDefinition(): TaskRegisterDefinition;
@@ -381,7 +384,18 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
       headersToUse = decryptedHeaders || {};
     }
 
-    return this.getFakeRequest(headersToUse, spaceId, this.logger);
+    const requestToUse = this.getFakeRequest(headersToUse, spaceId, this.logger);
+
+    // The external-credential verdict Task Manager marked on `requestFromTask` is bound to that
+    // request object, so rebuilding the request drops it. Re-mark the rebuilt request: its
+    // `authorization` header is the task request's one (decrypted `authorization` is excluded from
+    // the merge above), and UIAM rejects user-created (external) Cloud API keys presented with the
+    // UIAM shared secret.
+    if (requestFromTask && isExternalUiamCredential(requestFromTask)) {
+      markExternalUiamCredential(requestToUse);
+    }
+
+    return requestToUse;
   }
 
   protected getFakeRequest(
@@ -409,6 +423,9 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     const exportType = this.exportTypesRegistry.getByJobType(task.jobtype);
     if (!exportType) {
       throw new Error(`No export type from ${task.jobtype} found to execute report`);
+    }
+    if (!(await this.opts.reporting.isExportTypeEnabled(exportType.id, this.scheduleType))) {
+      throw new Error(`Export type ${exportType.id} is disabled`);
     }
     // notify usage
     exportType.notifyUsage(this.exportType);
@@ -446,20 +463,19 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
     // Hard timeout fallback: the cooperative timer above only cancels the token, so a runTask that
     // ignores it would hang this run forever. Force-fail a grace period after the cancel.
-    let forceTimerId: ReturnType<typeof setTimeout> | undefined;
-    const forceTimeoutPromise = new Promise<never>((_, reject) => {
-      forceTimerId = setTimeout(() => {
+    try {
+      const outcome = await withTimeout({
+        promise: runTaskPromise,
+        timeoutMs: this.queueTimeout + FORCE_TIMEOUT_GRACE_PERIOD,
+      });
+      if (outcome.timedout) {
         errorLogger(
           this.logger,
           `Report ${task.id} did not honor the cancellation token within the grace period; force-failing the run.`
         );
-        reject(new QueueTimeoutError());
-      }, this.queueTimeout + FORCE_TIMEOUT_GRACE_PERIOD);
-    });
-
-    try {
-      const result = await Promise.race([runTaskPromise, forceTimeoutPromise]);
-      return { result, timedOut: jobTimedOut };
+        throw new QueueTimeoutError();
+      }
+      return { result: outcome.value, timedOut: jobTimedOut };
     } catch (err) {
       // Surface the timeout even when runTask rejects on cancel instead of resolving with partial data like CSV does.
       if (jobTimedOut) {
@@ -468,7 +484,6 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
       throw err;
     } finally {
       clearTimeout(timerId);
-      clearTimeout(forceTimerId);
       // If the force timeout won the race, runTask may still reject later; catch to prevent unhandled rejection.
       runTaskPromise.catch(() => {});
     }

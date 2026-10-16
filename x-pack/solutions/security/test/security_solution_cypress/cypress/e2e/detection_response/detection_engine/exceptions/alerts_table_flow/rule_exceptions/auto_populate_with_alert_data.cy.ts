@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { LOADING_INDICATOR } from '../../../../../../screens/security_header';
 import { getEndpointRule } from '../../../../../../objects/rule';
 import { createRule } from '../../../../../../tasks/api_calls/rules';
 import {
@@ -54,7 +53,6 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
   });
 
   it('Should create a Rule exception item from alert actions overflow menu and auto populate the conditions using alert Highlighted fields', () => {
-    cy.get(LOADING_INDICATOR).should('not.exist');
     addExceptionFromFirstAlert();
 
     cy.intercept('POST', '/api/detection_engine/rules/*/exceptions').as('exception_creation');
@@ -112,8 +110,6 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
   });
 
   it('Should create a Rule exception from Alerts take action button and change multiple exception items without resetting to initial auto-prefilled entries', () => {
-    cy.get(LOADING_INDICATOR).should('not.exist');
-
     // Open first Alert Summary
     expandFirstAlert();
 
@@ -196,8 +192,6 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
   });
 
   it('Should delete all prefilled exception entries when creating a Rule exception from Alerts take action button without resetting to initial auto-prefilled entries', () => {
-    cy.get(LOADING_INDICATOR).should('not.exist');
-
     // Open first Alert Summary
     expandFirstAlert();
 

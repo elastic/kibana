@@ -24,19 +24,14 @@ const baseRuleData: RuleAttachmentData = {
     name: 'High CPU',
     description: 'CPU breach detection',
     tags: ['ops', 'cpu'],
-    owner: 'observability',
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
-  },
-  state_transition: null,
-  createdBy: 'elastic',
-  createdAt: '2026-04-01T00:00:00.000Z',
-  updatedBy: 'elastic',
-  updatedAt: '2026-04-10T00:00:00.000Z',
+  query: { base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
+  recovery: { strategy: 'no_breach' },
+  no_data: { strategy: 'ignore' },
+  created_at: '2026-04-01T00:00:00.000Z',
+  updated_at: '2026-04-10T00:00:00.000Z',
 };
 
 describe('getRuleTool', () => {
@@ -61,7 +56,7 @@ describe('getRuleTool', () => {
   const createTool = (canReadResult: boolean = true) =>
     getRuleTool({
       attachmentId: 'attach-1',
-      episodeId: 'ep-1',
+      alertId: 'ep-1',
       ruleId: 'rule-1',
       logger: loggerService,
       getRulesClient: () => ({ getRule } as unknown as RulesClient),
@@ -118,7 +113,7 @@ describe('getRuleTool', () => {
           {
             type: ToolResultType.error,
             data: {
-              message: 'Failed to fetch rule "rule-1" for episode "ep-1": Rule not found',
+              message: 'Failed to fetch rule "rule-1" for alert "ep-1": Rule not found',
             },
           },
         ],
@@ -136,7 +131,7 @@ describe('getRuleTool', () => {
           {
             type: ToolResultType.error,
             data: {
-              message: 'Failed to fetch rule "rule-1" for episode "ep-1": boom',
+              message: 'Failed to fetch rule "rule-1" for alert "ep-1": boom',
             },
           },
         ],
@@ -146,7 +141,7 @@ describe('getRuleTool', () => {
         expect.objectContaining({
           labels: {
             rule_id: 'rule-1',
-            episode_id: 'ep-1',
+            alert_id: 'ep-1',
             space_id: 'default',
             code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_GET_RULE_FAILED,
           },

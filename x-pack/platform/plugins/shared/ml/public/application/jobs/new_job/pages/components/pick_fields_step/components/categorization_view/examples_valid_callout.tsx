@@ -7,10 +7,11 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import type { EuiCallOutProps, EuiListGroupItemProps } from '@elastic/eui';
-import { EuiCallOut, EuiSpacer, EuiAccordion, EuiListGroup } from '@elastic/eui';
+import type { EuiListGroupItemProps } from '@elastic/eui';
+import { EuiSpacer, EuiAccordion, EuiListGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnSuccessCallout, KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { VALIDATION_RESULT } from '@kbn/ml-category-validator';
 import {
@@ -42,7 +43,13 @@ export const ExamplesValidCallout: FC<Props> = ({
 }) => {
   const analyzerUsed = <AnalyzerUsed categorizationAnalyzer={categorizationAnalyzer} />;
 
-  let color: EuiCallOutProps['color'] = 'success';
+  const statusToCallout = {
+    [CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID]: KbnSuccessCallout,
+    [CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID]: KbnDangerCallout,
+    [CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID]: KbnWarningCallout,
+  } as const;
+  const KbnCalloutComponent = statusToCallout[overallValidStatus] ?? KbnSuccessCallout;
+
   let title = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldCalloutTitle.valid',
     {
@@ -51,7 +58,6 @@ export const ExamplesValidCallout: FC<Props> = ({
   );
 
   if (overallValidStatus === CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID) {
-    color = 'danger';
     title = i18n.translate(
       'xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldCalloutTitle.invalid',
       {
@@ -59,7 +65,6 @@ export const ExamplesValidCallout: FC<Props> = ({
       }
     );
   } else if (overallValidStatus === CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID) {
-    color = 'warning';
     title = i18n.translate(
       'xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldCalloutTitle.possiblyInvalid',
       {
@@ -69,8 +74,7 @@ export const ExamplesValidCallout: FC<Props> = ({
   }
 
   return (
-    <EuiCallOut
-      color={color}
+    <KbnCalloutComponent
       title={title}
       data-test-subj={`mlJobWizardCategorizationExamplesCallout ${overallValidStatus}`}
     >
@@ -83,7 +87,7 @@ export const ExamplesValidCallout: FC<Props> = ({
       <EuiAccordion id="all-checks" buttonContent={allChecksButtonContent}>
         <AllValidationChecks validationChecks={validationChecks} />
       </EuiAccordion>
-    </EuiCallOut>
+    </KbnCalloutComponent>
   );
 };
 

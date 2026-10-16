@@ -16,6 +16,7 @@ import type {
   UXHasDataResponse,
 } from '@kbn/observability-plugin/public';
 import type { UXMetrics } from '@kbn/observability-shared-plugin/public';
+import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { inpQuery, transformINPResponse } from '../../../services/data/inp_query';
 import {
   coreWebVitalsQuery,
@@ -23,7 +24,11 @@ import {
   DEFAULT_RANKS,
 } from '../../../services/data/core_web_vitals_query';
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
-import { formatHasRumResult, hasRumDataQuery } from '../../../services/data/has_rum_data_query';
+import {
+  formatHasRumResult,
+  hasRumDataWithServiceNameQuery,
+  HAS_RUM_DATA_TIERS,
+} from '../../../services/data/has_rum_data_query';
 
 export { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 
@@ -91,20 +96,30 @@ export async function hasRumData(
     signal: null,
   });
 
-  const esQueryResponse = await esQuery<ReturnType<typeof hasRumDataQuery>>(
-    params.dataStartPlugin,
-    {
-      params: {
-        index: dataViewResponse.apmDataViewIndexPattern,
-        ...hasRumDataQuery({
-          start: params?.absoluteTime?.start,
-          end: params?.absoluteTime?.end,
-        }),
-      },
-    }
-  );
+  const runHasRumDataQuery = async (dataTiers?: DataTier[]): Promise<UXHasDataResponse> =>
+    formatHasRumResult(
+      await esQuery<ReturnType<typeof hasRumDataWithServiceNameQuery>>(params.dataStartPlugin, {
+        params: {
+          index: dataViewResponse.apmDataViewIndexPattern,
+          ...hasRumDataWithServiceNameQuery({
+            start: params?.absoluteTime?.start,
+            end: params?.absoluteTime?.end,
+            dataTiers,
+          }),
+        },
+      }),
+      dataViewResponse.apmDataViewIndexPattern
+    );
 
-  return formatHasRumResult(esQueryResponse, dataViewResponse.apmDataViewIndexPattern);
+  // Return early only with both a hit and a service name. The service name comes from an
+  // aggregation scoped to the requested range, so hot/warm can hold matching documents while that
+  // range has none — the unrestricted query is what fills the name in for the overview card.
+  const tieredResult = await runHasRumDataQuery(HAS_RUM_DATA_TIERS);
+  if (tieredResult.hasData && tieredResult.serviceName !== undefined) {
+    return tieredResult;
+  }
+
+  return runHasRumDataQuery();
 }
 
 async function esQuery<T>(

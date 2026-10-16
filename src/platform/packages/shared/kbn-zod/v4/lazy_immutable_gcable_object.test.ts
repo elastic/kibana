@@ -146,7 +146,7 @@ describe('lazyImmutableGCableObject', () => {
 
     expect(() => {
       obj.value = 42;
-    }).toThrowError();
+    }).toThrow();
   });
 
   it('throws an error upon defining a prop', () => {
@@ -157,7 +157,7 @@ describe('lazyImmutableGCableObject', () => {
         value: 42,
         writable: false,
       });
-    }).toThrowError();
+    }).toThrow();
   });
 
   it('throws an error upon deleting a prop', () => {
@@ -165,6 +165,6 @@ describe('lazyImmutableGCableObject', () => {
 
     expect(() => {
       delete obj.value;
-    }).toThrowError();
+    }).toThrow();
   });
 });

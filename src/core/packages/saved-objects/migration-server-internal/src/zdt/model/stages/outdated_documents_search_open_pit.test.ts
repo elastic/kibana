@@ -52,6 +52,7 @@ describe('Stage: outdatedDocumentsSearchOpenPit', () => {
         total: undefined,
       },
       hasTransformedDocs: false,
+      batchSize: context.batchSize,
     });
   });
 });

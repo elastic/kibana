@@ -109,6 +109,7 @@ describe('snoozeAlertInstance()', () => {
         ],
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       { version: '123' }
     );
@@ -158,6 +159,7 @@ describe('snoozeAlertInstance()', () => {
         ],
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       { version: '123' }
     );

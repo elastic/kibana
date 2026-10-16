@@ -32,5 +32,7 @@
     "@kbn/deeplinks-workflows",
     "@kbn/shared-ux-ai-components",
     "@kbn/ui-callout",
+    "@kbn/react-kibana-mount",
+    "@kbn/agent-builder-common",
   ]
 }

@@ -8,8 +8,6 @@
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import { omit } from 'lodash';
-import { apm, timerange } from '@kbn/synthtrace-client';
-import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { generateUniqueKey } from '../../lib/get_test_data';
 
@@ -23,10 +21,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const rules = getService('rules');
   const toasts = getService('toasts');
-  const synthtraceClient = getService('synthtrace');
   const filterBar = getService('filterBar');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
+  const monacoEditor = getService('monacoEditor');
 
   async function getAlertsByName(name: string) {
     const {
@@ -48,26 +46,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   async function createWebhookConnector(connectorName: string) {
-    await pageObjects.common.navigateToApp('triggersActionsConnectors');
-    await testSubjects.click('connectorsTab');
-
-    await testSubjects.click('createConnectorButton');
-    await testSubjects.scrollIntoView('.webhook-card');
-    await testSubjects.click('.webhook-card');
-
-    await testSubjects.setValue('nameInput', connectorName);
-    await testSubjects.setValue('webhookUrlText', 'https://test.test');
-    await testSubjects.setValue('webhookUserInput', 'fakeuser');
-    await testSubjects.setValue('webhookPasswordInput', 'fakepassword');
-
-    await retry.try(async () => {
-      await find.clickByCssSelector(
-        '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
-      );
-    });
-
-    const toastTitle = await toasts.getTitleAndDismiss();
-    expect(toastTitle).to.eql(`Created '${connectorName}'`);
+    await supertest
+      .post('/api/actions/connector')
+      .set('kbn-xsrf', 'foo')
+      .send({
+        name: connectorName,
+        connector_type_id: '.webhook',
+        config: {
+          url: 'https://test.test',
+          method: 'post',
+          hasAuth: true,
+        },
+        secrets: {
+          user: 'fakeuser',
+          password: 'fakepassword',
+        },
+      })
+      .expect(200);
   }
 
   async function deleteConnectorByName(connectorName: string) {
@@ -149,7 +144,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('create alert', function () {
-    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     const webhookConnectorName = 'webhook-test';
     let esQueryRuleId: string;
     const generatedRuleNames: string[] = [];
@@ -181,44 +175,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         .expect(200);
 
       esQueryRuleId = createdESRule.id;
-
-      const clients = await synthtraceClient.getClients(['apmEsClient']);
-      apmSynthtraceEsClient = clients.apmEsClient;
-
-      await apmSynthtraceEsClient.initializePackage({ skipInstallation: false });
-
-      const opbeansJava = apm
-        .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
-        .instance('instance');
-
-      const opbeansNode = apm
-        .service({ name: 'opbeans-node', environment: 'production', agentName: 'node' })
-        .instance('instance');
-
-      const events = timerange('now-15m', 'now')
-        .ratePerMinute(1)
-        .generator((timestamp) => {
-          return [
-            opbeansJava
-              .transaction({ transactionName: 'tx-java' })
-              .timestamp(timestamp)
-              .duration(100)
-              .failure()
-              .errors(opbeansJava.error({ message: 'a java error' }).timestamp(timestamp + 50)),
-
-            opbeansNode
-              .transaction({ transactionName: 'tx-node' })
-              .timestamp(timestamp)
-              .duration(100)
-              .success(),
-          ];
-        });
-
-      return Promise.all([apmSynthtraceEsClient.index(events)]);
     });
 
     after(async () => {
-      await apmSynthtraceEsClient?.clean();
       await esArchiver.unload(
         'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
       );
@@ -603,19 +562,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertName = generateUniqueKey();
       await defineEsQueryAlert(alertName);
 
-      await testSubjects.setValue('queryJsonEditor', '', {
-        clearWithKeyboard: true,
-      });
-      const queryJsonEditor = await testSubjects.find('queryJsonEditor');
-      await queryJsonEditor.clearValue();
-      // Invalid query
-      await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":""}}', {
-        clearWithKeyboard: true,
-      });
+      await monacoEditor.clearCodeEditorValue('queryJsonEditor');
+      await monacoEditor.simulateTyping('queryJsonEditor', '{"query":{"foo":""}}');
+
       await testSubjects.click('testQuery');
       await testSubjects.missingOrFail('testQuerySuccess');
       await testSubjects.existOrFail('testQueryError');
-      await testSubjects.setValue('queryJsonEditor', '');
 
       await testSubjects.click('rulePageFooterCancelButton');
 
@@ -639,13 +591,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.waitForWithTimeout(
         'ES|QL KEEP warning footer button to appear',
         testSubjects.TRY_TIME,
-        async () =>
-          await testSubjects.exists('ESQLEditor-footerPopoverButton-warning', { timeout: 1000 })
+        async () => await testSubjects.exists('ESQLEditor-footerPopoverButton-warning')
       );
 
       await testSubjects.click('ESQLEditor-footerPopoverButton-warning');
-      const warningContent = await testSubjects.find('ESQLEditor-errors-warnings-content');
-      const warningContentText = await warningContent.getVisibleText();
+      await testSubjects.existOrFail('ESQLEditor-errors-warnings-content');
+      const warningContentText = await testSubjects.getVisibleText(
+        'ESQLEditor-errors-warnings-content'
+      );
 
       expect(warningContentText).contain('KEEP processing command is recommended');
 
@@ -703,15 +656,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertName = generateUniqueKey();
       await defineEsQueryAlert(alertName);
 
-      await testSubjects.setValue('queryJsonEditor', '', {
-        clearWithKeyboard: true,
-      });
-      const queryJsonEditor = await testSubjects.find('queryJsonEditor');
-      await queryJsonEditor.clearValue();
-      // Valid query
-      await testSubjects.setValue('queryJsonEditor', '{"query":{"match_all":{}}}', {
-        clearWithKeyboard: true,
-      });
+      await monacoEditor.setCodeEditorValue('{"query":{"match_all":{}}}');
+
       await testSubjects.click('testQuery');
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');

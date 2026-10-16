@@ -44,6 +44,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
     | 'excludeFromOAS'
     | 'excludeFromRateLimiter'
     | 'httpResource'
+    | 'httpResponseLogLevel'
     | 'availability'
   >;
   /** See {@link RouteConfigOptions<RouteMethod>['access']} */
@@ -105,6 +106,12 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
    * @default undefined
    */
   discontinued?: string;
+
+  /**
+   * @public
+   * {@inheritdoc RouteConfigOptions['operationId']}
+   */
+  operationId?: RouteConfigOptions<RouteMethod>['operationId'];
 };
 
 /**

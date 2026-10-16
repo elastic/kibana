@@ -9,7 +9,7 @@ import React, { type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiCallOut } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { useDocumentationLinks } from '../../../hooks/use_documentation_links';
 
@@ -17,7 +17,7 @@ export const EditTransformFlyoutCallout: FC = () => {
   const { esTransformUpdate } = useDocumentationLinks();
 
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       title={i18n.translate('xpack.transform.transformList.editFlyoutCalloutTitle', {
         defaultMessage: 'This form allows you to update a transform.',
       })}
