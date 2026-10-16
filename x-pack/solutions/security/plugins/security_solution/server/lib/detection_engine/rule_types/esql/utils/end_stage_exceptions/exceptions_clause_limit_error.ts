@@ -7,11 +7,7 @@
 
 const CLAUSE_LIMIT_REASON = 'too many nested clauses';
 
-/**
- * Thrown when Elasticsearch rejects a query that has exceptions at the end because it has too many clauses.
- * Elasticsearch counts the conditions of the rule query together with the comparisons of the exceptions on columns that
- * rename or copy a source field, so the user needs to know that the exceptions are part of the reason.
- */
+/** Thrown when Elasticsearch rejects a query that has exceptions at the end for too many clauses, so that the message says that the exceptions share the limit with the rule query. */
 export class ExceptionsClauseLimitError extends Error {
   constructor(elasticsearchReason: string) {
     super(

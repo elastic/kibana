@@ -8,7 +8,6 @@
 import { isIP } from 'net';
 import type { EntriesArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { isValueRejectedByDsl } from './is_value_rejected_by_dsl';
 import { toIpRange } from './ip_range';
 import type { EndStageItem, OutputColumns, SkipReason } from './types';
 
@@ -17,11 +16,7 @@ type Compiled = { clause: string; terms: number } | SkipReason;
 /** `predicate` is true for the rows the entry matches. `excluded` entries (is not, does not exist, ...) negate it. */
 type CompiledEntry = { predicate: string; terms: number; negated?: boolean } | SkipReason;
 
-/**
- * ES|QL column types on which an exception can be tested after the query pipeline has run. A `text` column is
- * compared as a `keyword` column is, on the whole value and respecting case, as the exceptions documentation
- * describes. The DSL filter compares a `text` source field after analysis, and that does not apply to a column.
- */
+/** ES|QL column types on which an exception can be tested after the query pipeline has run. */
 export const END_STAGE_COLUMN_TYPES: ReadonlySet<string> = new Set([
   'keyword',
   'text',
@@ -46,17 +41,13 @@ const INTEGER_RANGES: Readonly<Record<string, readonly [bigint, bigint]>> = {
 
 // a number with more digits fails the whole query in ES|QL, instead of the cast returning null
 const VERSION_PATTERN = /^\d{1,9}(\.\d{1,9}){0,2}([-+][0-9A-Za-z.-]+)?$/;
-const DOUBLE_PATTERN = /^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/;
 const DATE_PATTERN =
   /^(\d{4})(?:-(\d{2})(?:-(\d{2})(?:T(\d{2})(?::(\d{2})(?::(\d{2})(?:\.(\d{1,9}))?)?)?)?)?)?(Z|[+-]\d{2}(?::?\d{2})?)?$/;
 const OFFSET_PATTERN = /^([+-])(\d{2}):?(\d{2})?$/;
 /** The largest offset that the DSL accepts is 18:00, as a Java zone offset is. */
 const MAX_OFFSET_MINUTES = 18 * 60;
 const SAFE_SEGMENT = /^[@a-zA-Z_][a-zA-Z0-9_]*$/;
-/**
- * Words that ES|QL does not accept as an unquoted column name (a parse error), or reads as a literal (`null`). A
- * column with one of these names, for example `STATS first = MIN(...)`, is quoted.
- */
+/** Words that ES|QL does not accept as an unquoted column name, or reads as a literal. */
 const RESERVED_WORDS: ReadonlySet<string> = new Set([
   'and',
   'asc',
@@ -90,16 +81,20 @@ const STRING_ESCAPES: Readonly<Record<string, string>> = {
 const escapeEsqlString = (value: string): string =>
   value.replace(/[\\"\n\r\t]/g, (char) => STRING_ESCAPES[char] ?? char);
 
-/** Quotes each dotted segment of a column name that is not a plain identifier or is a reserved word. */
-export const quoteColumn = (column: string): string =>
-  column
-    .split('.')
+/** Quotes each dotted segment of a column name that is not a plain identifier or is a reserved word, or the whole name when a segment is empty. */
+export const quoteColumn = (column: string): string => {
+  const segments = column.split('.');
+  if (segments.some((segment) => segment === '')) {
+    return `\`${column.replace(/`/g, '``')}\``;
+  }
+  return segments
     .map((segment) =>
       SAFE_SEGMENT.test(segment) && !RESERVED_WORDS.has(segment.toLowerCase())
         ? segment
         : `\`${segment.replace(/`/g, '``')}\``
     )
     .join('.');
+};
 
 const toIntegerLiteral = (value: string, type: string): string | undefined => {
   const range = INTEGER_RANGES[type];
@@ -111,19 +106,7 @@ const toIntegerLiteral = (value: string, type: string): string | undefined => {
   return parsed >= min && parsed <= max ? `${parsed.toString()}::${type}` : undefined;
 };
 
-const toDoubleLiteral = (value: string): string | undefined => {
-  if (!DOUBLE_PATTERN.test(value)) {
-    return undefined;
-  }
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? `${String(parsed)}::double` : undefined;
-};
-
-/**
- * A literal for the column type, or `undefined` when the value does not parse as that type. A literal that
- * fails to cast becomes `null` in ES|QL, which would make the exception exclude every row, so values are
- * validated here instead.
- */
+/** A literal for the column type, or `undefined` when the value does not parse as that type (a failed cast would become `null` and exclude every row). */
 const toLiteral = (value: string, type: string): string | undefined => {
   switch (type) {
     case 'keyword':
@@ -135,8 +118,6 @@ const toLiteral = (value: string, type: string): string | undefined => {
     case 'long':
     case 'unsigned_long':
       return toIntegerLiteral(value, type);
-    case 'double':
-      return toDoubleLiteral(value);
     case 'ip':
       return isIP(value) !== 0 ? `"${value}"::ip` : undefined;
     case 'version':
@@ -151,7 +132,6 @@ const LIST_CONVERSIONS: Readonly<Record<string, string>> = {
   integer: 'TO_INTEGER',
   long: 'TO_LONG',
   unsigned_long: 'TO_UNSIGNED_LONG',
-  double: 'TO_DOUBLE',
   ip: 'TO_IP',
   version: 'TO_VERSION',
 };
@@ -178,10 +158,7 @@ const MS_PER_DAY = 24 * MS_PER_HOUR;
 
 const hasOffset = (zone: string | undefined): boolean => zone !== undefined && zone !== 'Z';
 
-/**
- * The offset of a date value in milliseconds: 0 without one or for `Z`, and `undefined` for an offset that the DSL
- * does not accept (more than 18:00, or minutes above 59).
- */
+/** The offset of a date value in milliseconds, or `undefined` for an offset that the DSL does not accept. */
 const toOffsetMs = (zone: string | undefined): number | undefined => {
   if (zone === undefined || zone === 'Z') {
     return 0;
@@ -198,10 +175,7 @@ const toOffsetMs = (zone: string | undefined): number | undefined => {
   return (sign === '-' ? -1 : 1) * total * MS_PER_MINUTE;
 };
 
-/**
- * The DSL rounds a date value to its unit: a day, hour, minute or second value covers that whole unit, a
- * month or year value covers only its first day, and a value with a fraction is an exact instant.
- */
+/** The predicate that matches a date value the way the DSL does, rounded to the unit that the value writes. */
 const toDatePredicate = (column: string, value: string, type: string): CompiledEntry => {
   const match = DATE_PATTERN.exec(value);
   const invalid: SkipReason = {
@@ -289,22 +263,12 @@ const toLikePattern = (value: string): string | undefined => {
   return pattern;
 };
 
-/**
- * The value cannot be compiled for the column. It is `value_not_valid` when the DSL would fail on it too, which
- * fails the rule, and `value_not_supported` when the DSL accepts it and the item is only not applied.
- */
-const toInvalidValueReason = (value: string, type: string, field: string): SkipReason =>
-  isValueRejectedByDsl(value, type)
-    ? {
-        code: 'value_not_valid',
-        reason: `value "${value}" is not a valid ${type}`,
-        fields: [field],
-      }
-    : {
-        code: 'value_not_supported',
-        reason: `value "${value}" cannot be compared as a ${type} at the end of the query`,
-        fields: [field],
-      };
+/** The value cannot be written for the column. The rule fails, because an item that is not applied lets alerts through. */
+const toInvalidValueReason = (value: string, type: string, field: string): SkipReason => ({
+  code: 'value_not_supported',
+  reason: `value "${value}" cannot be written for a column of type ${type} at the end of the query`,
+  fields: [field],
+});
 
 const isExcluded = (entry: Entry): boolean => 'operator' in entry && entry.operator === 'excluded';
 
@@ -338,14 +302,16 @@ const compileEntry = (entry: Entry, columns: OutputColumns): CompiledEntry => {
   }
 
   if (entry.type === 'wildcard') {
-    const isString = columnType === 'keyword' || columnType === 'text';
-    const pattern = isString ? toLikePattern(entry.value) : undefined;
-    if (pattern == null) {
+    if (columnType !== 'keyword' && columnType !== 'text') {
       return {
         code: 'operator_not_supported_on_type',
         reason: `"matches" with value "${entry.value}" is not supported on a ${columnType} column`,
         fields: [entry.field],
       };
+    }
+    const pattern = toLikePattern(entry.value);
+    if (pattern == null) {
+      return toInvalidValueReason(entry.value, columnType, entry.field);
     }
     return {
       predicate: `COALESCE(MV_LIKE(${column}, "${escapeEsqlString(pattern)}"), false)`,
@@ -355,17 +321,11 @@ const compileEntry = (entry: Entry, columns: OutputColumns): CompiledEntry => {
   }
 
   if (columnType === 'double') {
-    const invalidValue = (entry.type === 'match_any' ? entry.value : [entry.value]).find((value) =>
-      isValueRejectedByDsl(value, 'double')
-    );
-    if (invalidValue !== undefined) {
-      return toInvalidValueReason(invalidValue, columnType, entry.field);
-    }
     return {
       code: 'operator_not_supported_on_type',
       reason: `"${
         entry.type === 'match' ? 'is' : 'is one of'
-      }" is not supported on a double column: ES|QL reports float, half_float and scaled_float fields as double with the precision of the original type, so an equality can miss the value`,
+      }" is not supported on a double column: ES|QL reports float and half_float fields as double with the precision of the original type, so an equality can miss the value`,
       fields: [entry.field],
     };
   }
@@ -440,10 +400,10 @@ export const compileEndStageItem = (
   for (const entry of item.entries) {
     const compiled = compileEntry(entry, columns);
     if ('reason' in compiled) {
-      // A value that is not valid fails the rule, so it is reported even when another entry is skipped first.
+      // A value that cannot be written fails the rule, so it is reported even when another entry is skipped first.
       if (
         skip == null ||
-        (compiled.code === 'value_not_valid' && skip.code !== 'value_not_valid')
+        (compiled.code === 'value_not_supported' && skip.code !== 'value_not_supported')
       ) {
         skip = compiled;
       }
@@ -468,15 +428,7 @@ export const compileEndStageItem = (
   return { clause: `NOT (${excluded})`, terms };
 };
 
-/**
- * The most comparisons that the exceptions at the end of the query hold, written in one `WHERE` stage. A comparison is
- * one test on a column: an entry, or one CIDR value or date of an "is one of" entry. Two limits of Elasticsearch
- * bound it. ES|QL fails a condition that nests 300 levels deep, and every comparison adds at most one level, plus about
- * ten levels around them, so 200 comparisons stay under 300. Elasticsearch also limits the clauses of the query that
- * it builds from the `WHERE` stages (the documented minimum is 1024, and a test cluster allowed 4468), and an item
- * adds about two clauses for each comparison, so 200 stay under the minimum, so that a rule behaves the same on any
- * cluster.
- */
+/** The most comparisons in the one `WHERE` stage, which keeps its depth and its clauses under the limits of Elasticsearch (see the proposal). */
 export const MAX_COMPARISONS = 200;
 
 /** ES|QL rejects a statement of more than 1,000,000 characters (`ESQL statement is too large`). The rule query counts. */
@@ -500,12 +452,7 @@ export interface EndStageLimit {
 const describeItem = ({ item }: EndStageItem): string =>
   `the item "${item.name}" (list "${item.list_id}", item "${item.item_id}")`;
 
-/**
- * Writes the items as one `WHERE` stage, joined with AND, or reports the limit that they reach: at most
- * `MAX_COMPARISONS` comparisons in total, and a query of at most `MAX_QUERY_LENGTH` characters. The stage starts on a
- * new line, so that a comment at the end of the line of the rule query does not swallow it. `NOT A AND NOT B` excludes
- * what `A OR B` would.
- */
+/** Writes the items as one `WHERE` stage on a new line, or reports the comparison or query length limit that they reach. */
 export const toEndStageQuerySuffix = (
   items: readonly EndStageItem[],
   queryLength: number = 0

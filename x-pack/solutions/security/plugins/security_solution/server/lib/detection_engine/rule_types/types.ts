@@ -109,6 +109,11 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
    * is enabled.
    */
   allExceptionItems?: ExceptionListItemSchema[];
+  /**
+   * When the execution started. The ES|QL executor decides with it which exception items have expired, as the
+   * common wrapper does when it builds `exceptionFilter`, whatever the end of the time range of the tuple is.
+   */
+  startedAt?: Date;
   alertTimestampOverride: Date | undefined;
   refreshOnIndexingAlerts: RefreshTypes;
   publicBaseUrl: string | undefined;

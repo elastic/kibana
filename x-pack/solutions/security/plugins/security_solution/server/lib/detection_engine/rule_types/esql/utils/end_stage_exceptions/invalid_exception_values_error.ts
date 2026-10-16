@@ -15,11 +15,7 @@ const describeItem = ({ item, reason, fields }: SkippedItem): string =>
     fields?.length ? `, in the field "${fields.join('", "')}"` : ''
   }`;
 
-/**
- * Thrown before the query runs when an exception item compares a column with a value that is not valid for its
- * type. The DSL filter fails the request for the same values, and a rule that failed is better than a rule that
- * runs with only some of its exceptions and creates alerts that the exceptions were meant to exclude.
- */
+/** Thrown before the query runs when an item has a value that cannot be written at the end of the query for the type of its column. */
 export class InvalidExceptionValuesError extends Error {
   public readonly invalidItems: readonly SkippedItem[];
 
@@ -30,7 +26,7 @@ export class InvalidExceptionValuesError extends Error {
         ? ` and ${invalidItems.length - MAX_NAMED_ITEMS} more`
         : '';
     super(
-      `The rule did not run because exception items have a value that is not valid for the type of the field: ${named}${others}. Fix or delete these exception items.`
+      `The rule did not run because exception items have a value that cannot be used for the type of the field: ${named}${others}. Fix or delete these exception items.`
     );
     this.name = 'InvalidExceptionValuesError';
     this.invalidItems = invalidItems;

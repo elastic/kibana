@@ -285,6 +285,80 @@ describe('esqlExecutor', () => {
       );
     });
 
+    describe('expiry', () => {
+      // The execution started at 10:03 and its time range ends at 09:58 (a rule with `to: now-5m`, or a manual run)
+      const startedAt = new Date('2026-10-14T10:03:00.000Z');
+      const itemExpiringAt = (id: string, field: string, expireTime: string) => ({
+        ...exceptionItem(id, field, 'low'),
+        expire_time: expireTime,
+      });
+
+      beforeEach(() => {
+        setSetting(true);
+        (buildExceptionFilter as jest.Mock).mockResolvedValue({
+          filter: undefined,
+          unprocessedExceptions: [],
+        });
+      });
+
+      const run = (items: ReturnType<typeof itemExpiringAt>[]) => {
+        mockedArguments.sharedParams = {
+          ...sharedParams,
+          tuple: { ...sharedParams.tuple, to: moment('2026-10-14T09:58:00.000Z') },
+          startedAt,
+          allExceptionItems: [sourceItem, ...items],
+        };
+        return esqlExecutor(mockedArguments);
+      };
+
+      it('drops an item that expired before the execution started, although it expires after the end of the time range', async () => {
+        await run([itemExpiringAt('computed', 'risk', '2026-10-14T10:00:00.000Z')]);
+
+        expect(asyncQueryMock().mock.calls[0][0].query).not.toContain('WHERE NOT');
+      });
+
+      it('applies an item that expires after the execution started', async () => {
+        await run([itemExpiringAt('computed', 'risk', '2026-10-14T10:05:00.000Z')]);
+
+        expect(asyncQueryMock().mock.calls[0][0].query).toContain('WHERE NOT');
+      });
+
+      it('builds the DSL filter with the start of the execution, as the common wrapper does', async () => {
+        await run([itemExpiringAt('computed', 'risk', '2026-10-14T10:05:00.000Z')]);
+
+        expect(buildExceptionFilter).toHaveBeenCalledWith(expect.objectContaining({ startedAt }));
+      });
+    });
+
+    it('asks _field_caps with the time range and without the exceptions, and the probe with the exceptions', async () => {
+      setSetting(true);
+      mockedArguments.sharedParams = {
+        ...sharedParams,
+        allExceptionItems: [sourceItem, computedItem],
+        exceptionFilter: {
+          meta: { alias: null, negate: true, disabled: false },
+          query: { match_phrase: { 'host.name': 'dc-01' } },
+        },
+      };
+      (buildExceptionFilter as jest.Mock).mockResolvedValue({
+        filter: undefined,
+        unprocessedExceptions: [],
+      });
+
+      await esqlExecutor(mockedArguments);
+
+      const client = ruleServices.scopedClusterClient.asCurrentUser;
+      const fieldCapsFilter = JSON.stringify(
+        (client.fieldCaps as unknown as jest.Mock).mock.calls[0][0].index_filter
+      );
+      const probeFilter = JSON.stringify(
+        (client.esql.query as unknown as jest.Mock).mock.calls[0][0].filter
+      );
+      expect(fieldCapsFilter).toContain('@timestamp');
+      expect(fieldCapsFilter).not.toContain('dc-01');
+      expect(probeFilter).toContain('dc-01');
+    });
+
     it('builds the DSL filter only from the exceptions that stay in the DSL', async () => {
       withExceptions(true);
       (buildExceptionFilter as jest.Mock).mockResolvedValue({
@@ -348,7 +422,17 @@ describe('esqlExecutor', () => {
       setSetting(true);
       mockedArguments.sharedParams = {
         ...sharedParams,
-        allExceptionItems: [sourceItem, exceptionItem('ghost', 'ghost.field', 'x')],
+        allExceptionItems: [
+          sourceItem,
+          getExceptionListItemSchemaMock({
+            item_id: 'ghost',
+            name: 'ghost',
+            entries: [
+              { field: 'risk', operator: 'included', type: 'match', value: 'low' },
+              { field: 'ghost.field', operator: 'included', type: 'match', value: 'x' },
+            ] as EntriesArray,
+          }),
+        ],
       };
       (buildExceptionFilter as jest.Mock).mockResolvedValue({
         filter: undefined,
@@ -478,7 +562,7 @@ describe('esqlExecutor', () => {
       expect(ruleServices.scopedClusterClient.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
     });
 
-    it('fails the rule as a user error, without running the query, when an exception has a value that is not valid for its column', async () => {
+    it('fails the rule as a user error, without running the query, when an exception has a value that cannot be written for its column', async () => {
       const client = ruleServices.scopedClusterClient.asCurrentUser;
       (client.esql.query as unknown as jest.Mock).mockResolvedValue({
         columns: [{ name: 'src_ip', type: 'ip' }],
@@ -496,7 +580,7 @@ describe('esqlExecutor', () => {
       expect(result.userError).toBe(true);
       expect(result.errors).toEqual([
         expect.stringContaining(
-          'The rule did not run because exception items have a value that is not valid for the type of the field: "bogus-ip"'
+          'The rule did not run because exception items have a value that cannot be used for the type of the field: "bogus-ip"'
         ),
       ]);
       expect(result.createdSignalsCount).toBe(0);

@@ -147,7 +147,8 @@ const IN_DSL_KINDS = ['source', 'redefined'];
 // What Elasticsearch and the executor do with a value or an operator that the type does not support.
 const WILDCARD_TYPES = ['keyword', 'text', 'version'];
 const DSL_FAILS_ON_INVALID = (type) => type !== 'version';
-const END_FAILS_ON_INVALID = (type) => !['version', 'date', 'date_nanos'].includes(type);
+// At the end of the query a value that the stage cannot write fails the rule, for every type except double, where "is" and "is one of" are not applied whatever the value.
+const END_FAILS_ON_INVALID = (type) => type !== 'double';
 
 const args = Object.fromEntries(
   process.argv
@@ -330,11 +331,12 @@ const docs = [
 ];
 
 // An exception is placed whole, in one place: the DSL filter when every field is a source field (also a source field that the query
-// redefines, which the DSL filter compares on the source value), and the end of the query otherwise, when it can take it.
+// redefines, which the DSL filter compares on the source value) or exists nowhere, and the end of the query otherwise, when it can take it.
 const planFor = (on) => {
   const failures = [];
   const plans = exceptions.map((ex) => {
-    const inDsl = ex.items.every((it) => IN_DSL_KINDS.includes(it.kind));
+    // A field that exists nowhere stays in the DSL filter too, where a negative operator on it matches every document, as it does today.
+    const inDsl = ex.items.every((it) => IN_DSL_KINDS.includes(it.kind) || it.kind === 'missing');
     const dslFailures = () =>
       ex.items.flatMap((it) => {
         if (!IN_DSL_KINDS.includes(it.kind)) return [];
@@ -352,29 +354,14 @@ const planFor = (on) => {
       failures.push(...dslFailures());
       return { status: 'dsl', text: 'stays in the DSL filter' };
     }
-    if (ex.items.some((it) => it.kind === 'missing'))
-      return {
-        status: 'skipped',
-        text: 'not applied (field_not_found): it names a field that is in neither the source nor the query output',
-      };
+    // A negative entry on a field that exists nowhere is true for every row, so it is left out of the stage; any other entry on it never matches.
+    if (ex.items.some((it) => it.kind === 'missing' && it.included)) return { status: 'skipped', text: 'not applied (field_not_found): it has a computed column and an entry that is not negative on a field that is in neither the source nor the query output' };
     let skip;
     for (const it of ex.items) {
-      if (it.invalid && END_FAILS_ON_INVALID(it.type))
-        failures.push(
-          `Kibana fails the rule before the query runs: ${JSON.stringify(
-            INVALID_VALUES[it.type]
-          )} is not a valid ${it.type}`
-        );
-      else if (it.base === 'matches' && !['keyword', 'text'].includes(it.type))
-        skip ??=
-          'not applied (operator_not_supported_on_type): "matches" is only supported on keyword and text columns at the end of the query';
-      else if (it.type === 'double' && it.base !== 'exists')
-        skip ??=
-          'not applied (operator_not_supported_on_type): "is" and "is one of" are not supported on double columns, because a float is widened to double';
-      else if (it.invalid)
-        skip ??= `not applied (value_not_supported): ${JSON.stringify(
-          INVALID_VALUES[it.type]
-        )} cannot be compared as a ${it.type}`;
+      if (it.kind === 'missing') continue;
+      if (it.invalid && END_FAILS_ON_INVALID(it.type)) failures.push(`Kibana fails the rule before the query runs (value_not_supported): ${JSON.stringify(INVALID_VALUES[it.type])} cannot be written for a column of type ${it.type}`);
+      else if (it.base === 'matches' && !['keyword', 'text'].includes(it.type)) skip ??= 'not applied (operator_not_supported_on_type): "matches" is only supported on keyword and text columns at the end of the query';
+      else if (it.type === 'double' && it.base !== 'exists') skip ??= 'not applied (operator_not_supported_on_type): "is" and "is one of" are not supported on double columns, because a float is widened to double';
     }
     return skip
       ? { status: 'skipped', text: skip }

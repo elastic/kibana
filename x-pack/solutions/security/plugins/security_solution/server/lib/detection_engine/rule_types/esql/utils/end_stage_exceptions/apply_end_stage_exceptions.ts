@@ -44,17 +44,7 @@ const inspect = async <T>(request: () => Promise<T>): Promise<T> => {
   }
 };
 
-/**
- * Applies the exception items that reference columns computed by the rule query at the end of the query, and
- * leaves the others in the DSL filter. It runs only when the advanced setting `securitySolution:enableEsqlRuleComputedFieldExceptions` is enabled.
- *
- * It throws, before the query runs, because a failed run is better than one with only some of the exceptions:
- * `InvalidExceptionValuesError` when an item on a column has a value that the DSL filter would also fail on, and
- * `ExceptionsInspectionFailedError` when the fields of the items cannot be inspected.
- *
- * What was applied and what was not is written to the rule execution log as one JSON message and never as a
- * warning of the rule: an exception that cannot be applied leaves the rule as it behaves without this feature.
- */
+/** Applies the exception items on columns that the rule query computes at the end of the query, leaves the others in the DSL filter, and logs what was not applied. */
 export const applyEndStageExceptions = async ({
   esClient,
   ruleExecutionLogger,
@@ -65,6 +55,7 @@ export const applyEndStageExceptions = async ({
   unprocessedExceptions,
   buildDslFilter,
   probeFilter,
+  fieldCapsFilter,
 }: {
   esClient: ElasticsearchClient;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
@@ -78,6 +69,8 @@ export const applyEndStageExceptions = async ({
   buildDslFilter: (dslItems: ExceptionListItemSchema[]) => Promise<ExceptionsFilterResult>;
   /** The `filter` of the request that the rule sends, which the request for the output columns carries too. */
   probeFilter?: estypes.QueryDslQueryContainer;
+  /** The filter of the real request without the exceptions, so that `_field_caps` reads the indices that the query reads. */
+  fieldCapsFilter?: estypes.QueryDslQueryContainer;
 }): Promise<EndStageExceptionsResult> => {
   const unchanged = { query, exceptionFilter, unprocessedExceptions };
   if (items.length === 0 || indices.length === 0) {
@@ -85,7 +78,12 @@ export const applyEndStageExceptions = async ({
   }
 
   const sourceFieldTypes = await inspect(() =>
-    fetchSourceFieldTypes({ esClient, indices, fields: getFieldsToInspect(items) })
+    fetchSourceFieldTypes({
+      esClient,
+      indices,
+      fields: getFieldsToInspect(items),
+      indexFilter: fieldCapsFilter,
+    })
   );
 
   if (!needsOutputColumns(items, sourceFieldTypes)) {
@@ -96,7 +94,7 @@ export const applyEndStageExceptions = async ({
     fetchOutputColumns({ esClient, query, filter: probeFilter })
   );
   const split = splitExceptionItems({ items, sourceFieldTypes, outputColumns });
-  const invalidItems = split.skippedItems.filter(({ code }) => code === 'value_not_valid');
+  const invalidItems = split.skippedItems.filter(({ code }) => code === 'value_not_supported');
   if (invalidItems.length > 0) {
     throw new InvalidExceptionValuesError(invalidItems);
   }

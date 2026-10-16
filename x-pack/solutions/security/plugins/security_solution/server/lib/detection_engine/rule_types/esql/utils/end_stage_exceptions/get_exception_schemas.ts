@@ -37,10 +37,13 @@ export const fetchSourceFieldTypes = async ({
   esClient,
   indices,
   fields,
+  indexFilter,
 }: {
   esClient: ElasticsearchClient;
   indices: string[];
   fields: readonly string[];
+  /** Limits the indices that `_field_caps` reads, as the filter of the real request does. */
+  indexFilter?: estypes.QueryDslQueryContainer;
 }): Promise<SourceFieldTypes> => {
   const responses = await Promise.all(
     toBatches(fields).map((batch) =>
@@ -49,6 +52,7 @@ export const fetchSourceFieldTypes = async ({
         fields: batch,
         ignore_unavailable: true,
         allow_no_indices: true,
+        ...(indexFilter ? { index_filter: indexFilter } : {}),
       })
     )
   );
@@ -61,12 +65,7 @@ export const fetchSourceFieldTypes = async ({
   return types;
 };
 
-/** The columns, and their types, that the query produces. */
-/**
- * The columns that the rule query outputs, read with a request that returns no rows. The request carries the filter
- * of the real request, so that Elasticsearch resolves the same indices: an index outside the time range can map a
- * field with a type that conflicts with the indices inside it, and a request without the filter would fail on it.
- */
+/** The columns, and their types, that the rule query outputs, read with a request that returns no rows and carries the filter of the real request. */
 export const fetchOutputColumns = async ({
   esClient,
   query,

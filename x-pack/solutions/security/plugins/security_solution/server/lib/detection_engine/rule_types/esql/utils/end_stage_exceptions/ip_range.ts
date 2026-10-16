@@ -45,11 +45,7 @@ const formatIPv6 = (value: bigint): string =>
     ':'
   );
 
-/**
- * The first and the last address of an IP value in CIDR notation, or `undefined` when the value is not a valid
- * CIDR. The address bits after the prefix are ignored, as Elasticsearch does (`10.0.0.77/24` is `10.0.0.0/24`).
- * `/0` of IPv6 and the IPv4-mapped IPv6 addresses are not accepted, because Elasticsearch handles them as IPv4.
- */
+/** The first and the last address of an IP value in CIDR notation, or `undefined` when it is not a CIDR that the compiler writes. */
 export const toIpRange = (value: string): { first: string; last: string } | undefined => {
   const parts = value.split('/');
   // an IPv6 address with a zone (`fe80::1%eth0`) has no range that ES|QL can compare

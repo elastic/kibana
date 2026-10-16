@@ -24,12 +24,12 @@ ES_USER=elastic ES_PASS=changeme node <script>.mjs
 | # | Limitation | How the implementation handles it |
 |---|---|---|
 | 1 | [Comparing a multi-valued column returns `null`](#1-comparing-a-multi-valued-column-returns-null) | `MV_CONTAINS`, `MV_LIKE` and `MV_IN_RANGE`, which return a real boolean and match on any element |
-| 2 | [A literal must be cast to the column type, and a failed cast excludes every row](#2-a-literal-must-be-cast-to-the-column-type) | The value is validated and cast before the clause is written; an invalid value is not applied |
+| 2 | [A literal must be cast to the column type, and a failed cast excludes every row](#2-a-literal-must-be-cast-to-the-column-type) | The value is validated and cast before the clause is written; an invalid value fails the rule |
 | 3 | [No term-level rounding for dates](#3-no-term-level-rounding-for-dates) | A range with `MV_IN_RANGE` that covers the unit of the value |
 | 4 | [Expression depth and comparison limits](#4-expression-depth-and-comparison-limits) | At most 200 comparisons in one `WHERE` stage, 1,000,000 characters; a rule that reaches a limit fails |
 | 5 | [A `WHERE` on a column that does not exist is an error](#5-a-where-on-a-column-that-does-not-exist-is-an-error) | `_field_caps` and the output columns of the query classify every item before it is placed |
 | 6 | [Column types that cannot be compared](#6-column-types-that-cannot-be-compared) | The item is not applied and the reason is reported |
-| 7 | [`float` and `half_float` widen to `double`](#7-float-and-half_float-widen-to-double) | Listed as unsupported for computed columns |
+| 7 | [`float` and `half_float` widen to `double`](#7-float-and-half_float-widen-to-double) | `is` and `is one of` are not applied on `double` columns, and `exists` is supported |
 
 ## 1. Comparing a multi-valued column returns `null`
 
@@ -49,7 +49,7 @@ The stage uses `MV_CONTAINS` for equality, `COALESCE(MV_LIKE(...), false)` for w
 ```
 ROW n = 5 | EVAL bad = "abc"::integer, m = MV_CONTAINS(n, "abc"::integer)
 ```
-returns `bad = null` and `m = true`. The implementation validates each value against the type first (integer range, finite double, `true` or `false`, an IP address or a CIDR range, a version, the date formats in the next entry) and does not apply an item with a value that does not parse. The DSL has the opposite behavior for the same input: it fails the search, and the rule with it.
+returns `bad = null` and `m = true`. The implementation validates each value against the type first (integer range, finite double, `true` or `false`, an IP address or a CIDR range, a version, the date formats in the next entry) and fails the rule, before it sends the query, for an item with a value that does not parse. For the same input the DSL fails the search as well, and the rule with it, for every type except `version`.
 
 ## 3. No term-level rounding for dates
 
@@ -60,7 +60,7 @@ ROW ts = "2026-09-30T14:00:00.000Z"::date | EVAL m = ts == "2026-09-30"::date
 ```
 returns `m = false`.
 
-The stage writes the range explicitly: `COALESCE(MV_IN_RANGE(col, "2026-09-30T00:00:00.000Z"::date, "2026-09-30T23:59:59.999Z"::date), false)`. The bounds of `MV_IN_RANGE` are inclusive, so the upper bound is the last instant of the unit (`.999999999Z` for `date_nanos`), and the function matches on any element of a multi-valued column. A year or month value covers its first day only, a value with a fraction is an exact `MV_CONTAINS`, and an offset (`+02:00`, `+0200`, `+02`) is applied to the value first, so the range is written in UTC. Epoch milliseconds, other formats and offsets that the DSL does not accept are not applied.
+The stage writes the range explicitly: `COALESCE(MV_IN_RANGE(col, "2026-09-30T00:00:00.000Z"::date, "2026-09-30T23:59:59.999Z"::date), false)`. The bounds of `MV_IN_RANGE` are inclusive, so the upper bound is the last instant of the unit (`.999999999Z` for `date_nanos`), and the function matches on any element of a multi-valued column. A year or month value covers its first day only, a value with a fraction is an exact `MV_CONTAINS`, and an offset (`+02:00`, `+0200`, `+02`) is applied to the value first, so the range is written in UTC. Epoch milliseconds, other formats and offsets that the compiler does not write fail the rule.
 
 The script below reproduces the baseline on a rule: a day-granularity exception excludes every event of that day and only that day.
 
@@ -105,9 +105,9 @@ main().catch((e) => { console.error(e); process.exit(1); });
 
 ## 4. Expression depth and comparison limits
 
-A flat chain of `OR` comparisons fails at 294 terms (`exceeded the maximum expression depth of 300`; 293 works), and a pipeline is limited to 500 stages. The DSL has only the Lucene clause limit (4468 on the tested cluster) and works with hundreds of values. The same clause limit applies to the whole query that Elasticsearch builds from consecutive `WHERE` stages, not to each stage: 22 stages of 100 `is` items ran, and 23 failed with `Query contains too many nested clauses`. The range tests (`MV_IN_RANGE`), `IS NOT NULL` and `MV_LIKE` did not reach it in 10,000 items. Comparisons on a column that the query computes (`EVAL c = TO_UPPER(host)`, `CONCAT`, a `STATS` output) did not reach it in 5,000, while those on a renamed or copied source field (`RENAME host AS c`, `EVAL c = host`) did.
+A flat chain of `OR` comparisons fails at 294 terms (`exceeded the maximum expression depth of 300`; 293 works), and a pipeline is limited to 500 stages. The DSL has only the Lucene clause limit (4468 on the tested cluster) and works with hundreds of values. The same clause limit applies to the whole query that Elasticsearch builds from consecutive `WHERE` stages, not to each stage: 22 stages of 100 `is` items ran, and 23 failed with `Query contains too many nested clauses`. Only the comparisons that Elasticsearch pushes down to the source index count: `is` (`MV_CONTAINS`), `is one of` with plain values (`MV_INTERSECTS`) and `exists` (`IS NOT NULL`) on a column that resolves to a source field cost at most one clause for each comparison plus one more for each item (2 clauses for an item with one comparison), and 2,300 of them on distinct fields failed. `matches`, CIDR and date entries are wrapped in `COALESCE`, which is not pushed, and cost none: 10,000 of them ran. A comparison on a column that the query computes (`EVAL c = TO_UPPER(host)`, `CONCAT`, a `STATS` output) cost none, a comparison after a `LIMIT` cost none, and a copy or a rename of a source field (`EVAL c = host`, `RENAME host AS c`) costs the same as the source field.
 
-The implementation writes the items at the end of the query in one `WHERE` stage of at most 200 comparisons in total, and in a query of at most 1,000,000 characters. Every comparison adds at most one level to the condition and about ten levels surround them, so 200 comparisons stay far under the 300 levels of ES|QL, and an `is` item adds about two clauses, so 200 stay under the documented minimum of 1024 clauses. A limit that the items reach fails the rule before the query runs, and the message names the limit and the items with the most comparisons. `MV_INTERSECTS(field, ["a", "b", ...])` matched 5000 `keyword` values in one call, so an "is one of" list of plain values counts as one comparison and the length of the query limits it; it was verified for `keyword` only.
+The implementation writes the items at the end of the query in one `WHERE` stage of at most 200 comparisons in total, and in a query of at most 1,000,000 characters. Every comparison adds at most one level to the condition and at most 14 levels surround them, so 200 comparisons stay far under the 300 levels of ES|QL, and an item adds at most one clause for each comparison plus one more for each item, so 200 comparisons use at most 400 clauses, against a limit that was 4468 on one cluster and 65,536 on another. A limit that the items reach fails the rule before the query runs, and the message names the limit and the items with the most comparisons. `MV_INTERSECTS(field, ["a", "b", ...])` matched 5000 `keyword` values in one call, so an "is one of" list of plain values counts as one comparison and the length of the query limits it; it was verified for `keyword` only.
 
 ## 5. A `WHERE` on a column that does not exist is an error
 
@@ -125,7 +125,7 @@ Eleven output column types can be compared at the end of the query: `keyword`, `
 
 ## 7. `float` and `half_float` widen to `double`
 
-A `float` or `half_float` column reaches ES|QL as a `double` that keeps the precision of the original type, so equality with a typed decimal such as `0.1` fails. They are listed as unsupported for computed columns. A source field of these types stays in the DSL filter, where the comparison works.
+A `float` or `half_float` field reaches ES|QL as a `double` column, and the column type does not say which field it comes from. A `float` holding 0.1 is read as `0.10000000149011612` and a `half_float` as `0.0999755859375`, which are different numbers from the `double` 0.1, so an equality comparison with `0.1` is false. They are listed as unsupported for computed columns. A source field of these types stays in the DSL filter, where the comparison works.
 
 ---
 

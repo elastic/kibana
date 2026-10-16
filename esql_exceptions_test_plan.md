@@ -2,11 +2,11 @@
 
 ## Overview
 
-This test plan has two goals for the ES|QL rule type (`siem.esqlRule`). First, confirm that every exception that works today keeps working: exceptions on source fields, applied as a DSL filter on the `_query` request. Second, validate the new capability behind the advanced setting `securitySolution:enableEsqlRuleComputedFieldExceptions`: exceptions on computed (transient) columns of the ES|QL query, applied as `WHERE` stages at the end of the query, together with the rules for items that cannot be applied.
+This test plan has two goals for the ES|QL rule type (`siem.esqlRule`). First, confirm that every exception that works today keeps working: exceptions on source fields, applied as a DSL filter on the `_query` request. Second, validate the new capability behind the advanced setting `securitySolution:enableEsqlRuleComputedFieldExceptions`: exceptions on computed (transient) columns of the ES|QL query, applied as one `WHERE` stage at the end of the query, together with the rules for items that cannot be applied.
 
 ## Feature Background
 
-An ES|QL rule applies exceptions as a DSL filter that Elasticsearch runs on the source documents before the rule's ES|QL pipeline. An exception cannot reference a column that the pipeline computes with `STATS`, `EVAL` or `RENAME`, because the column does not exist when the filter runs. The proposal keeps the DSL filter for source fields and adds `WHERE` stages at the end of the query for items whose fields are all computed output columns of a supported type. Items that can be evaluated in neither place are not applied and are recorded in the rule execution log, never as a rule warning. A value that does not belong to the type of its column fails the rule, as the DSL filter does. The design and the supported types are in `esql_exceptions_proposal.md`.
+An ES|QL rule applies exceptions as a DSL filter that Elasticsearch runs on the source documents before the rule's ES|QL pipeline. An exception cannot reference a column that the pipeline computes with `STATS`, `EVAL` or `RENAME`, because the column does not exist when the filter runs. The proposal keeps the DSL filter for source fields, and for fields that exist nowhere, and adds one `WHERE` stage at the end of the query for items whose fields are all computed output columns of a supported type. An item with a computed column that the end of the query cannot evaluate is not applied and is recorded in the rule execution log, never as a rule warning. A value that the stage cannot write for the type of its column fails the rule. The design and the supported types are in `esql_exceptions_proposal.md`.
 
 ## Scope
 
@@ -14,7 +14,7 @@ An ES|QL rule applies exceptions as a DSL filter that Elasticsearch runs on the 
 - Regression of every exception entry type and operator on source fields for the ES|QL rule type: "is", "is not", "is one of", "is not one of", "matches", "does not match", "exists", "does not exist", "is in list", "is not in list", and nested entries.
 - Regression of rule-level behavior: multi-valued fields, date rounding, AND of entries and OR of items, aggregating rules, expired items, default and shared lists, rule preview, alert suppression.
 - Exceptions on computed columns for the 11 supported column types and the four entry types (`match`, `match_any`, `wildcard`, `exists`) and their negative operators, including `text` columns that alias a source field, which are compared as `keyword` columns, on the whole value and respecting case.
-- Items that are not applied (unsupported types, values that do not cast, list and nested entries, fields that exist nowhere, source fields the query drops) and how they are logged and reported.
+- Items that are not applied (unsupported types, list and nested entries, an item with a computed column and an entry on a field that exists nowhere, source fields the query drops) and how they are logged and reported.
 - The limits of the end of the query (200 comparisons in one `WHERE` stage, 1,000,000 characters) and the failure that names them, the single `MV_INTERSECTS` call of an "is one of" list, the advanced setting, and the failure path when the fields cannot be inspected.
 - Dependency data lifecycle: exception items deleted or edited between runs, mappings that change, rule queries that are edited.
 
@@ -34,7 +34,7 @@ An ES|QL rule applies exceptions as a DSL filter that Elasticsearch runs on the 
 | Source field | A field that exists in the mappings of the indices in the rule's `FROM`, including keys below a `flattened` field. |
 | Computed column (transient column) | A column that exists only in the output of the ES|QL query, created or renamed by `EVAL`, `STATS` or `RENAME`. |
 | DSL filter | The Query DSL filter built from the exception items and sent with the `_query` request; it runs on the source documents before the query. |
-| End of the query | The `| WHERE` stages that the executor appends after the rule query for items on computed columns. |
+| End of the query | The one `| WHERE` stage that the executor appends after the rule query for items on computed columns. |
 | Item and entry | An exception item holds one or more entries joined with AND; the items of a list are joined with OR. |
 
 ## Assumptions
@@ -54,22 +54,22 @@ No GitHub issue exists for this work. The criteria below are inferred from `esql
 
 1. Every exception on a source field behaves as it does today: the DSL filter is built from the same items and excludes the same documents, with the setting enabled or disabled.
 2. With the setting disabled, the executor makes no field lookup request and builds the same request as today.
-3. With the setting enabled, an item whose fields are all source fields (or keys below a `flattened` field) stays in the DSL filter.
+3. With the setting enabled, an item whose fields are all source fields (or keys below a `flattened` field), or exist nowhere (they are neither source fields nor columns of the output), stays in the DSL filter. A negative operator such as "is not" on a field that exists nowhere keeps matching every document, as it does today. In an item that also has a computed column, such an entry is true for every row and is left out of the stage, and an entry that is not negative makes the item not applied.
 4. With the setting enabled, an item whose fields are all output columns of a supported type, and not source fields, is appended at the end of the query as a `| WHERE` stage placed before the final limit.
 5. The supported column types are `keyword`, `integer`, `long`, `unsigned_long`, `boolean`, `ip`, `version`, `date` and `date_nanos` for "is", "is one of" and "exists" (and their negatives), `double` for "exists" only (a `float` is widened to `double`, so an equality can miss the value), and `keyword` and `text` for "matches" (and its negative). A `text` column is compared as a `keyword` column, on the whole value and respecting case, as the exceptions documentation describes. No full-text function is used, so the commands of the rule query do not matter.
-6. Values are cast to the column type, and a value that does not cast never excludes every row. A value that the DSL filter would also fail on (`bogus` for an `ip` column, `maybe` for a `boolean`) fails the rule before the query runs, as a user error, with a message that names the item, its list, the value and the field. A value that the DSL filter accepts and the end of the query cannot compare is not applied and the rule runs. Date values follow the rounding of the DSL and never fail the rule.
+6. Values are cast to the column type, and a value that does not cast never excludes every row. A value that the stage cannot write fails the rule before the query runs, as a user error, with a message that names the item, its list, the value and the field. That covers a value that is not valid for the type (`bogus` for an `ip` column, `maybe` for a `boolean`) and a value that is valid but that the compiler does not write (`1e3` on a `long` column, a date in an unsupported format).
 7. An item that cannot be applied is removed from the DSL filter. It never adds a warning to the rule. The rule execution log has one JSON message for the run (type `esql_exceptions`) with the final query, the items applied at the end of the query, and for each item that is not applied a stable code, a reason and its fields.
 8. The items at the end of the query are written in one `WHERE` stage of at most 200 comparisons, in a query of at most 1,000,000 characters. A limit that the items reach fails the rule as a user error, before the query runs, and the message names the limit and the items with the most comparisons, and tells the user to remove values or items. An "is one of" list is written as one `MV_INTERSECTS` call and has no limit on its number of values besides the length of the query.
 9. A `text` column is compared the same after any command of the rule query, `LIMIT`, `STATS` and `MV_EXPAND` included, because the comparison is a plain `MV_CONTAINS`, `MV_INTERSECTS` or `MV_LIKE` and not a full-text function. No request is made for this.
 10. If the field lookup or the output probe fails, the rule fails before the query runs, with a message that says the fields of the exceptions could not be inspected and includes the reason, and no alerts are created. It is a user error when the failed request is one. Nothing of this runs with the setting disabled.
 11. Expired items are not applied in either position.
-12. An item with `os_types` is not applied at the end of the query and keeps its `os_types` in the DSL filter. The executor does not read the rule query: an item whose fields are all source fields stays in the DSL filter and nowhere else, even when the query redefines or outputs a field with that name, so the exception compares the source value as it always did. A column named with a word that ES|QL reserves (`first`, `by`) is quoted, and a comment at the end of the rule query does not swallow the appended stages.
+12. An item with `os_types` is not applied at the end of the query and keeps its `os_types` in the DSL filter. The executor does not read the rule query: an item whose fields are all source fields, or exist nowhere, stays in the DSL filter and nowhere else, even when the query redefines or outputs a field with that name, so the exception compares the source value as it always did. A column named with a word that ES|QL reserves (`first`, `by`) is quoted, and a comment at the end of the rule query does not swallow the appended stages.
 
 ## Known Limitations
 
 - ⚠️ No GitHub issue is linked, so the Issue Clarity Assessment at the end of the plan is not applicable and the acceptance criteria are inferred from the proposal.
 - ⚠️ The implementation was verified with unit tests, with a script against a live Elasticsearch (27 operator and type cases) and with an interactive script that creates a rule through Kibana (single and mixed exceptions, `is one of` on several types, invalid values, a missing field, the setting enabled and disabled). The scenarios in this plan are the first complete end-to-end check: they cover the operator and type matrix, several rule queries, spaces and cross-cluster search, which those runs did not.
-- ⚠️ Behavior change to confirm with product: an item whose fields exist nowhere is removed from the DSL filter, so a negative operator such as "is not" on such a field no longer excludes every document. Scenarios "With the setting disabled, \"is not\" on a field that is not in the source indices excludes every document" and "An item whose fields are in neither the source nor the output is not applied and creates no warning" record both sides.
+- An item whose fields exist nowhere stays in the DSL filter, so a negative operator such as "is not" on such a field keeps excluding every document, as it does today. The Elastic documentation does not describe this result: it only warns that an exception on an unmapped field can prevent the exception from working as expected. Scenario "\"is not\" on a field that exists nowhere excludes every document, with the setting disabled or enabled" records it, and the scenarios of an item with a computed column and an entry on a field that exists nowhere record the one case that is not left to the DSL: a negative entry is left out of the stage, and any other entry makes the item not applied.
 - ⚠️ Exceptions on computed columns run at the end of the rule query, after any `LIMIT` the rule has, so a rule with `LIMIT n` can return fewer than `n` alerts. This was decided on purpose (see the proposal, "Rule queries with a LIMIT") and the two scenarios about `LIMIT` record the expected result.
 - ⚠️ ES|QL rejects a query of more than 1,000,000 characters, which is not documented. The executor fails the rule before the query runs when the final query would pass that length (a few characters are kept for the page size), and the message names the limit.
 - ⚠️ The exception items are joined with `AND` in one `WHERE` stage of at most 200 comparisons in total. A rule whose exceptions on computed columns need more fails, and splitting an item into several items does not help, because all the comparisons are counted together.
@@ -86,7 +86,7 @@ No GitHub issue exists for this work. The criteria below are inferred from `esql
 ## Test Scenarios
 
 <details>
-<summary><strong>Exceptions on source fields keep working</strong>: 25 scenarios (P0: 10, P1: 13, P2: 2)</summary>
+<summary><strong>Exceptions on source fields keep working</strong>: 25 scenarios (P0: 11, P1: 12, P2: 2)</summary>
 
 #### Scenario: "is" excludes the documents that hold the value, for each supported field type
 
@@ -297,7 +297,7 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 
 **Priority:** P0
 
-**Automation coverage**: 3 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/split_exception_items.test.ts`: "keeps an item on source fields in the DSL", "keeps items on a flattened key and on a nested field in the DSL", "keeps an item on a source field in the DSL even when the query outputs a column with that name"), partial: the unit tests cover the split decision, not the alerts.
+**Automation coverage**: 3 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/split_exception_items.test.ts`: "needsOutputColumns › is false when every field is a source field", "keeps items on a flattened key and on a nested field in the DSL", "a source field that the query also outputs › stays in the DSL filter only, with %s" (parameterized)), partial: the unit tests cover the split decision, not the alerts.
 ```gherkin
 Given an ES|QL rule and a list of exception items that are all on source fields
 And the rule ran once with the setting disabled
@@ -462,17 +462,43 @@ And no alert is created for the web-01 documents
 
 _If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
 
-#### Scenario: With the setting disabled, "is not" on a field that is not in the source indices excludes every document
+#### Scenario: "is not" on a field that exists nowhere excludes every document, with the setting disabled or enabled
 
-**Priority:** P1
+**Priority:** P0
 
-**Automation coverage**: No existing tests found covering this scenario.
+**Automation coverage**: 7 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/split_exception_items.test.ts`: "keeps in the DSL an item with \"%s\" on a field that exists nowhere, so that it keeps matching every document" (4 tests: is not, is not one of, does not exist, does not match), "keeps in the DSL an item whose fields exist nowhere, so that the DSL decides as it always did", "keeps in the DSL an item that has only a nested entry on a path that exists nowhere, so that the DSL decides", "keeps in the DSL an item that has a field that exists nowhere and a source field, even one that the query drops"; `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "keeps in the DSL filter an item whose field is not part of the rule, and changes nothing"), partial: the unit tests cover the placement, not the alerts of a running rule.
 ```gherkin
-Given the advanced setting is disabled
-And an ES|QL rule whose query returns every document of the reference index
-And an exception item with the entry missing.field is not x
-When the rule runs
-Then no alert is created for any document
+Scenario Outline: A negative operator on a field that no document has
+  Given the advanced setting is <setting>
+  And an ES|QL rule whose query returns every document of the reference index
+  And an exception item with the entry missing.field is not x
+  When the rule runs
+  Then no alert is created for any document
+  And the rule execution log has no esql_exceptions message for the item
+
+  Examples:
+    | setting  |
+    | disabled |
+    | enabled  |
+
+Scenario: The same negative operator in an item with a source field
+  Given the advanced setting is enabled
+  And an exception item with the entries missing.field is not x and host.name is web-01
+  When the rule runs
+  Then no alert is created for the web-01 documents
+  And the alerts for the other documents are created
+
+Scenario: A positive operator on a field that no document has
+  Given the advanced setting is enabled
+  And an exception item with the entry missing.field is x
+  When the rule runs
+  Then alerts are created for every document
+
+Scenario: A nested entry on a path that is not mapped
+  Given the advanced setting is disabled or enabled
+  And an exception item with a nested entry on ghost_nested, with the inner entry name is svc
+  When the rule runs
+  Then the rule fails with the Elasticsearch error "failed to find nested object under path [ghost_nested]", as it does today
 ```
 
 **Execution:**
@@ -533,12 +559,20 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 
 **Priority:** P1
 
-**Automation coverage**: 2 unit tests (`x-pack/solutions/security/plugins/lists/server/services/exception_lists/build_exception_filter.test.ts`: "it should remove all exception items that are expired", "it should filter out expired exceptions") (buildExceptionFilter, removeExpiredExceptions), partial: they cover the filter builder, not the rule result.
+**Automation coverage**: 5 unit tests (`x-pack/solutions/security/plugins/lists/server/services/exception_lists/build_exception_filter.test.ts`: "it should remove all exception items that are expired", "it should filter out expired exceptions" (buildExceptionFilter, removeExpiredExceptions); `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/esql.test.ts`: "expiry › drops an item that expired before the execution started, although it expires after the end of the time range", "expiry › applies an item that expires after the execution started", "expiry › builds the DSL filter with the start of the execution, as the common wrapper does"), partial: they cover the filter builder and the executor with mocked clients, not the rule result.
 ```gherkin
 Given an ES|QL rule whose query returns every document of the reference index
 And an exception item with the entry host.name is web-01 whose expiration date is in the past
 When the rule runs
 Then an alert is created for the web-01 documents
+
+Scenario: The expiry is decided at the start of the execution, with the setting enabled or disabled
+  Given an ES|QL rule with to: now-5m
+  And an exception item on a computed column that expired 3 minutes before the execution started
+  And a second item on a source field that expires 1 minute after the execution started
+  When the rule runs with the advanced setting enabled
+  Then the first item is not applied, as it is not with the setting disabled
+  And the second item is applied
 ```
 
 **Execution:**
@@ -630,7 +664,7 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 ---
 
 <details>
-<summary><strong>Exceptions on computed columns</strong>: 39 scenarios (P0: 7, P1: 22, P2: 10)</summary>
+<summary><strong>Exceptions on computed columns</strong>: 42 scenarios (P0: 7, P1: 25, P2: 10)</summary>
 
 #### Scenario: An exception on a STATS output column excludes only the matching alert rows
 
@@ -1286,6 +1320,90 @@ Then the item is applied in the DSL filter, before the aggregation, and only the
 
 _If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
 
+#### Scenario: A nested exception stays in the DSL filter, even when the query creates a column named like its path
+
+**Priority:** P1
+
+**Automation coverage**: 4 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/split_exception_items.test.ts`: "getFieldsToInspect › also lists the paths below a nested entry, so that the nested path is listed by _field_caps", "a column named like a nested path › stays in the DSL filter, because the nested path is a field of the source indices that the DSL searches", "a column named like a nested path › is not applied at the end of the query when the item also has a computed column"; `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "keeps a nested item in the DSL filter when the query outputs a column named like the nested path"), partial: the unit tests mock the answers of `_field_caps`, which lists a nested path only when a field below it is requested too.
+```gherkin
+Given an index where nested_user is a nested field with the keyword field name
+And one document holds nested_user with the objects [{"name": "svc"}, {"name": "bob"}] and another holds [{"name": "alice"}]
+And an exception item with a nested entry on nested_user whose inner entry is name is svc
+When the rule runs with the query FROM logs | EVAL nested_user = "x" | STATS c = COUNT(*) BY nested_user
+Then the item stays in the DSL filter and the document with the svc object is excluded before the STATS
+And the final query has no WHERE stage for the item
+And the rule execution log does not list the item as not applied
+
+Given the same rule without a column named nested_user
+When the rule runs
+Then the result is the same
+
+Given an exception item with a nested entry on nested_user and the entry risk is low, where risk is a computed column
+When the rule runs
+Then the item is not applied, with the code entry_type_not_supported, and the rule execution log lists it
+```
+
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
+
+#### Scenario: A field that is mapped only in an index outside the time range does not make its name a source field
+
+**Priority:** P1
+
+**Automation coverage**: 3 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "asks _field_caps with the filter of the real request, so that it reads the indices that the query reads", "sends no filter to _field_caps when it has none"; `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/esql.test.ts`: "asks _field_caps with the time range and without the exceptions, and the probe with the exceptions"), partial: the unit tests mock the requests, not the indices that Elasticsearch reads.
+```gherkin
+Given an index logs-old with the keyword field tier and a document from outside the time range of the rule
+And an index logs-new without the field tier and a document inside the time range
+And an ES|QL rule over logs-* with the query FROM logs-* | EVAL tier = "gold" | KEEP _id, doc, tier
+And an exception item with the entry tier is gold
+When the rule runs with the advanced setting enabled
+Then the item is applied at the end of the query and the final query ends with a WHERE stage for tier
+And the alert for the document that holds gold is excluded
+
+Given the same rule when the time range of the rule includes logs-old
+When the rule runs
+Then tier is a source field, so the item stays in the DSL filter and the final query has no WHERE stage
+```
+
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
+
+#### Scenario: A column named like an object parent is applied at the end of the query
+
+**Priority:** P1
+
+**Automation coverage**: 5 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/split_exception_items.test.ts`: "a column named like an object parent" (5 tests: placed at the end of the query, placed the same way with and without an item on `host.name`, needs the output columns, skipped when the query has no such column, kept in the DSL filter when another index maps the name with values)), partial: the unit tests mock the answer of `_field_caps`, not a running rule.
+```gherkin
+Given an index where host.name (keyword) holds "web-1" in two documents and "db-1" in one
+And an ES|QL rule with the query FROM logs | STATS c = COUNT(*) BY host = host.name
+And an exception list with one item: host is web-1
+When the rule runs
+Then no alert is created for "web-1"
+And an alert is created for "db-1"
+And the final query ends with NOT (MV_CONTAINS(host, "web-1"))
+
+Given the same list also has an item with host.name is db-9
+When the rule runs
+Then the alerts are the same: none for "web-1" and one for "db-1"
+And the item on host.name stays in the DSL filter
+And the item on host is still applied at the end of the query
+```
+
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
+
 #### Scenario: A column named with a reserved word is quoted
 
 **Priority:** P2
@@ -1371,7 +1489,7 @@ Then the row is not excluded, because x holds abc
 
 _If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
 
-#### Scenario: A date format that the DSL filter rejects is not applied at the end of the query
+#### Scenario: A date format that the compiler does not write fails the rule
 
 **Priority:** P2
 
@@ -1381,9 +1499,9 @@ Scenario Outline: Format that Elasticsearch rejects for the default date format
   Given an ES|QL rule whose query adds a column of type <type> with EVAL
   And an exception item with that column is <value>
   When the rule runs
-  Then the rule succeeds
-  And the log records the item as not applied with the code value_not_supported
-  And alerts are still created for every row
+  Then the rule fails as a user error before the query runs
+  And the message names the item, the value and the field
+  And no alerts are created
 
   Examples:
     | type       | value            |
@@ -1512,13 +1630,13 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 ---
 
 <details>
-<summary><strong>Items that are not applied and how they are reported</strong>: 13 scenarios (P0: 2, P1: 7, P2: 4)</summary>
+<summary><strong>Items that are not applied and how they are reported</strong>: 14 scenarios (P0: 1, P1: 9, P2: 4)</summary>
 
 #### Scenario: A value that the DSL filter would also fail on fails the rule
 
 **Priority:** P0
 
-**Automation coverage**: 5 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/build_end_stage_clause.test.ts`: "rejects the value of a %s column that the DSL also fails on: %s" (parameterized), "reports an invalid value even when an earlier entry is skipped for another reason"; `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/is_value_rejected_by_dsl.test.ts`: "is true for a value that the DSL fails on: %s %j" (parameterized); `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "throws before the query runs, as the DSL filter fails the request for such a value"; `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/esql.test.ts`: "fails the rule as a user error, without running the query, when an exception has a value that is not valid for its column"), partial: the unit tests use mocked clients, not a running rule.
+**Automation coverage**: 6 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/build_end_stage_clause.test.ts`: "reports the value of a %s column that cannot be written: %s" (parameterized), "reports a value that cannot be written even when an earlier entry is skipped for another reason"; `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "throws before the query runs", "names every item with an invalid value", "throws for a value that the DSL accepts and the compiler does not write"; `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/esql.test.ts`: "fails the rule as a user error, without running the query, when an exception has a value that cannot be written for its column"), partial: the unit tests use mocked clients, not a running rule.
 ```gherkin
 Scenario Outline: Value that does not belong to the column type
   Given an ES|QL rule whose query adds a column of type <type> with EVAL
@@ -1552,7 +1670,7 @@ Scenario: The same value on a source field
 
 _If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
 
-#### Scenario: A value that the DSL filter accepts and the end of the query cannot compare is not applied
+#### Scenario: A value that the DSL filter accepts and the compiler does not write fails the rule
 
 **Priority:** P1
 
@@ -1562,10 +1680,9 @@ Scenario Outline: Value that is accepted by the DSL filter
   Given an ES|QL rule whose query adds a column of type <type> with EVAL
   And an exception item with the entry that column is <value>
   When the rule runs
-  Then the rule status is succeeded
-  And no warning is shown on the rule
-  And the rule execution log records the item as not applied with the code value_not_supported
-  And alerts are still created for every row
+  Then the rule fails as a user error before the query runs
+  And the message names the item, the value and the field
+  And no alerts are created
 
   Examples:
     | type    | value                     |
@@ -1586,19 +1703,55 @@ Scenario Outline: Value that is accepted by the DSL filter
 
 _If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
 
-#### Scenario: An item whose fields are in neither the source nor the output is not applied and creates no warning
+#### Scenario: An item that has a computed column and a positive entry on a field that exists nowhere is not applied and creates no warning
 
-**Priority:** P0
+**Priority:** P1
 
-**Automation coverage**: 2 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/split_exception_items.test.ts` and `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "skips an item whose field is nowhere", "does not change the query for an item whose field is not part of the rule, and logs the reason"), partial: the unit tests do not check the alerts.
+**Automation coverage**: 4 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/split_exception_items.test.ts`: "skips an item that has a computed column and an entry on a field that exists nowhere that is not negative, because the entry never matches", "skips an item that has a computed column and a nested entry on a path that exists nowhere", "names both reasons when an item has a computed column, a field that is nowhere and one that the query drops"; `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "does not apply an item that has a computed column and a field that is not part of the rule, and logs the reason"; `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/esql.test.ts`: "does not add a warning to the rule for an exception that cannot be applied"), partial: the unit tests mock the answers of Elasticsearch.
 ```gherkin
 Given the advanced setting is enabled
-And an ES|QL rule whose query returns every document of the reference index
-And an exception item with the entry missing.field is not x
+And an ES|QL rule with STATS failures = COUNT(*) BY user.name
+And an exception item with the entries failures is 3 and missing.field is x
 When the rule runs
-Then alerts are created for every document
-And no warning is shown on the rule
-And the rule execution log records the item as not applied with the code field_not_found
+Then no warning is shown on the rule
+And the rule execution log records the item as not applied with the code field_not_found for missing.field
+And no alert is excluded by that item
+```
+
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
+
+#### Scenario: A negative entry on a field that exists nowhere is left out of an item with a computed column
+
+**Priority:** P1
+
+**Automation coverage**: 6 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/split_exception_items.test.ts`: "applies at the end of the query an item with a computed column and \"%s\" on a field that exists nowhere, without that entry" (4 tests: is not, is not one of, does not exist, does not match), "skips an item with a negative entry on a field that exists nowhere when another entry on a field that exists nowhere is not negative"; `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "applies an item with a computed column and a negative entry on a field that is not part of the rule, without that entry"), partial: the unit tests mock the answers of Elasticsearch.
+```gherkin
+Scenario Outline: The negative entry is true for every row
+  Given the advanced setting is enabled
+  And an ES|QL rule with STATS failures = COUNT(*) BY user.name
+  And an exception item with the entries failures is 3 and missing.field <operator> x
+  When the rule runs
+  Then the final query ends with a stage that tests only failures
+  And the alert row with failures 3 is excluded
+  And the rows with another number of failures create alerts
+  And the rule execution log lists the item as applied at the end of the query
+
+  Examples:
+    | operator   |
+    | is not     |
+    | is not one of |
+    | does not match |
+
+Scenario: The negative entry does not hide a positive entry on another field that exists nowhere
+  Given an exception item with the entries failures is 3, missing.field is not x and other.missing is y
+  When the rule runs
+  Then no alert is excluded by that item
+  And the rule execution log records the item as not applied with the code field_not_found for other.missing
 ```
 
 **Execution:**
@@ -1999,16 +2152,17 @@ And the rows with silver create no alert
 
 _If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
 
-#### Scenario: A field that is mapped later moves its item from skipped to the source filter
+#### Scenario: A field that is mapped later changes what its item matches, and the item stays in the DSL filter
 
 **Priority:** P2
 
 **Automation coverage**: No existing tests found covering this scenario.
 ```gherkin
-Given an ES|QL rule with an exception item on a field that is not in the source indices
-And the item was skipped in the previous run
+Given an ES|QL rule with an exception item new.field is x, on a field that is not in the source indices
+And the item stays in the DSL filter and excludes nothing
 When the field is mapped in the source index, receives data, and the rule runs again
-Then the item excludes the documents that hold the value
+Then the item is still in the DSL filter
+And it excludes the documents that hold the value
 ```
 
 **Execution:**
@@ -2088,24 +2242,24 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 
 ## Test Coverage Summary
 
-**Total scenarios:** 88
+**Total scenarios:** 92
 
 | Feature area | Scenarios | P0 | P1 | P2 | Automated | Manual only |
 |---|---|---|---|---|---|---|
-| Exceptions on source fields keep working | 25 | 10 | 13 | 2 | 17 | 8 |
-| Exceptions on computed columns | 39 | 7 | 22 | 10 | 31 | 8 |
-| Items that are not applied and how they are reported | 13 | 2 | 7 | 4 | 13 | 0 |
+| Exceptions on source fields keep working | 25 | 11 | 12 | 2 | 18 | 7 |
+| Exceptions on computed columns | 42 | 7 | 25 | 10 | 34 | 8 |
+| Items that are not applied and how they are reported | 14 | 1 | 9 | 4 | 14 | 0 |
 | Advanced setting and failure handling | 5 | 2 | 2 | 1 | 3 | 2 |
 | Dependency data lifecycle | 4 | 0 | 2 | 2 | 0 | 4 |
 | Spaces and cross-cluster search (to confirm) | 2 | 0 | 0 | 2 | 0 | 2 |
-| **Total** | **88** | **21** | **46** | **21** | **64** | **24** |
+| **Total** | **92** | **21** | **50** | **21** | **69** | **23** |
 
 **Automated coverage notes:**
 - The Automated column counts scenarios with at least one matching unit or API integration test. Almost all of them are partial: the tests check the generated clause, the compiler or the split decision with mocked clients, not the alerts of a running rule. Only the "is" operator on one field has an API integration test.
 - Unit tests (Jest) for the DSL filter builder in `x-pack/solutions/security/plugins/lists/server/services/exception_lists/build_exception_filter.test.ts`: they cover the DSL clause per entry type, not the result of an ES|QL rule.
-- Unit tests (Jest) for the new code in `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/` (`build_end_stage_clause.test.ts`, `split_exception_items.test.ts`, `apply_end_stage_exceptions.test.ts`, `is_value_rejected_by_dsl.test.ts`, `invalid_exception_values_error.test.ts`) and in `esql.test.ts` ("exceptions at the end of the query"): they cover the compiler, the split decision, the orchestration and the wiring with mocked Elasticsearch clients.
+- Unit tests (Jest) for the new code in `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/` (`build_end_stage_clause.test.ts`, `split_exception_items.test.ts`, `apply_end_stage_exceptions.test.ts`, `invalid_exception_values_error.test.ts`) and in `esql.test.ts` ("exceptions at the end of the query"): they cover the compiler, the split decision, the orchestration and the wiring with mocked Elasticsearch clients.
 - API integration tests in `x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/esql/trial_license_complete_tier/`: `esql.ts` and `esql_suppression.ts` each have one "with exceptions › should apply exceptions" test with an "is" entry on `client.ip`.
-- Three scripts against a live stack (not in the repository). The third creates a list with several exceptions, each with several items, one target document per exception and one document that no exception excludes. It runs the rule through Kibana with the advanced setting enabled or disabled, and compares the alerts with what it expects. The other two against Elasticsearch: one excluded the expected rows for 27 operator and type cases; one compared `is`, `matches` and their negatives on a computed `text` column with the same exceptions on a `keyword` field, through real rules in Kibana.
+- Two scripts at the root of the repository run against a live stack. `esql_exceptions_smoke.mjs` creates lists with several exceptions, each with several items, one target document per exception and one document that no exception excludes, runs the rule through Kibana with the advanced setting enabled or disabled, and compares the alerts with what it expects. `esql_exceptions_try.mjs` is interactive: you describe an exception (where its field lives, its type, its operator, and whether its value is invalid), and it creates the rule, runs it and compares the alerts and the rule execution log with the expected placement. Two earlier runs, which are not in the repository, excluded the expected rows for 27 operator and type cases against Elasticsearch, and compared `is`, `matches` and their negatives on a computed `text` column with the same exceptions on a `keyword` field, through real rules in Kibana.
 - Not covered: no Scout, Cypress or API integration test exercises exceptions on computed columns, the log message of skipped items, the advanced setting, or the regression matrix of operators and field types for ES|QL rules. Every scenario marked "No existing tests found" needs manual execution or a new automated test.
 
 ## Test Execution Notes
@@ -2131,16 +2285,19 @@ Run the scenarios of "Exceptions on source fields keep working" twice: with the 
 - "is" on a text computed column excludes the rows by the whole value and respecting case, as on a keyword column
 - A shared list with source-field items and computed-column items applies each item in the right place
 - A value that the DSL filter would also fail on fails the rule
-- An item whose fields are in neither the source nor the output is not applied and creates no warning
+- "is not" on a field that exists nowhere excludes every document, with the setting disabled or enabled
 - With the setting disabled, an exception on a computed column is not applied and no field lookup happens
 - If the fields cannot be inspected, the rule fails
 
 **P1: run before release, high-impact regressions:**
 - "is not one of" excludes the documents that hold none of the values
-- A value that the DSL filter accepts and the end of the query cannot compare is not applied
+- A value that the DSL filter accepts and the compiler does not write fails the rule
 - The setting applies to the rules of its own space only
 - An exception on a double column applies for "exists" only
 - A source field that the query redefines or outputs stays in the DSL filter only
+- A field that is mapped only in an index outside the time range does not make its name a source field
+- A column named like an object parent is applied at the end of the query
+- A nested exception stays in the DSL filter, even when the query creates a column named like its path
 - An item with os_types is not applied at the end of the query
 - The probe of the output columns sends the filter of the real request
 - "does not match" excludes the documents whose value does not fit the pattern
@@ -2149,7 +2306,8 @@ Run the scenarios of "Exceptions on source fields keep working" twice: with the 
 - A date value excludes the unit that it names, and only the first day for a month or year value
 - A nested entry excludes a document only when one nested object satisfies every inner entry
 - A value list that cannot be processed is reported on the rule and the other exceptions still apply
-- With the setting disabled, "is not" on a field that is not in the source indices excludes every document
+- An item that has a computed column and a positive entry on a field that exists nowhere is not applied and creates no warning
+- A negative entry on a field that exists nowhere is left out of an item with a computed column
 - A field type that Elasticsearch rejects fails the rule and creates no alert
 - The rule keeps creating alerts from the documents that the exceptions do not exclude when many documents are excluded
 - An expired exception item is not applied
@@ -2195,7 +2353,7 @@ Run the scenarios of "Exceptions on source fields keep working" twice: with the 
 - A rule query with many WHERE conditions of its own shares the clause budget with the exceptions
 - An "is one of" list is written as one call, whatever its length
 - A rule created before the setting was enabled uses it on its next run
-- A field that is mapped later moves its item from skipped to the source filter
+- A field that is mapped later changes what its item matches, and the item stays in the DSL filter
 - Editing the rule query to rename a column changes where its exception applies
 - Exceptions on a computed column apply for a rule in a non-default space
 - Exceptions apply for a rule that reads a remote cluster
@@ -2204,7 +2362,7 @@ Run the scenarios of "Exceptions on source fields keep working" twice: with the 
 - A comment at the end of the rule query does not swallow the exception stages
 - After MV_EXPAND, an exception on a computed column excludes the row and an exception on the source field excludes the document
 - A keyword field with a normalizer differs between the DSL filter and a computed column
-- A date format that the DSL filter rejects is not applied at the end of the query
+- A date format that the compiler does not write fails the rule
 
 ---
 

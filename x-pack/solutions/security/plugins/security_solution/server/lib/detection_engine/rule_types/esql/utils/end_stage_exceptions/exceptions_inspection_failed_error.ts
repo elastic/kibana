@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-/**
- * Thrown before the query runs when the fields of the exceptions cannot be inspected. Without the inspection the
- * executor cannot tell which exceptions are on computed columns, and a rule that runs without them creates
- * alerts that the exceptions were meant to exclude. The message includes the reason of the failed request, so
- * the classification of user errors, which reads the text, still applies.
- */
+/** Thrown before the query runs when the fields of the exceptions cannot be inspected, with the reason of the failed request in the message. */
 export class ExceptionsInspectionFailedError extends Error {
   constructor(reason: string) {
     super(

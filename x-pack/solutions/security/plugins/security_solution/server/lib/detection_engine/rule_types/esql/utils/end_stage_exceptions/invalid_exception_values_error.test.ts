@@ -12,8 +12,8 @@ import type { SkippedItem } from './types';
 
 const invalidItem = (id: string): SkippedItem => ({
   item: getExceptionListItemSchemaMock({ item_id: id, name: `Name of ${id}`, list_id: 'list-1' }),
-  code: 'value_not_valid',
-  reason: 'value "bogus" is not a valid ip',
+  code: 'value_not_supported',
+  reason: 'value "bogus" cannot be written for a column of type ip at the end of the query',
   fields: ['source.ip'],
 });
 
@@ -23,7 +23,7 @@ describe('InvalidExceptionValuesError', () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(error.message).toBe(
-      'The rule did not run because exception items have a value that is not valid for the type of the field: "Name of a" (list "list-1", item "a"): value "bogus" is not a valid ip, in the field "source.ip". Fix or delete these exception items.'
+      'The rule did not run because exception items have a value that cannot be used for the type of the field: "Name of a" (list "list-1", item "a"): value "bogus" cannot be written for a column of type ip at the end of the query, in the field "source.ip". Fix or delete these exception items.'
     );
   });
 

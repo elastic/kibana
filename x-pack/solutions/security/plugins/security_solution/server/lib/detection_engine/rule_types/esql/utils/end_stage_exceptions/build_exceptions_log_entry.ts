@@ -18,10 +18,7 @@ interface ItemReference {
   item_id: string;
 }
 
-/**
- * Written to the rule execution log as the JSON text of the message, once per run, so that a UI can show which
- * exceptions of the rule were applied at the end of the query and which were not applied, and why.
- */
+/** The JSON text of the rule execution log message that lists the items applied at the end of the query and the items that were not applied. */
 export interface ExceptionsLogEntry {
   type: 'esql_exceptions';
   version: 1;

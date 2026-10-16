@@ -23,13 +23,13 @@ export interface EndStageItem {
 
 /** Stable codes for the items that are not applied, so that a UI can group and translate them. */
 export type SkipReasonCode =
+  /** An item with a computed column and an entry that is not negative on a field that is in neither the source nor the output, which never matches. An item with no computed column stays in the DSL filter. */
   | 'field_not_found'
   | 'source_field_not_output'
   | 'entry_type_not_supported'
   | 'column_type_not_supported'
   | 'operator_not_supported_on_type'
   | 'os_types_not_supported'
-  | 'value_not_valid'
   | 'value_not_supported'
   | 'list_size_not_supported'
   | 'item_has_no_entries';

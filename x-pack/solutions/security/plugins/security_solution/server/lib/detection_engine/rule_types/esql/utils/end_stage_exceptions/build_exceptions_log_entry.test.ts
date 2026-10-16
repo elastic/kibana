@@ -18,8 +18,8 @@ const item = (id: string) => getExceptionListItemSchemaMock({ item_id: id, name:
 
 const skipped = (id: string): SkippedItem => ({
   item: item(id),
-  code: 'value_not_valid',
-  reason: 'value "x" is not a valid long',
+  code: 'value_not_supported',
+  reason: 'value "x" cannot be written for a column of type long at the end of the query',
   fields: ['count'],
 });
 
@@ -44,8 +44,8 @@ describe('buildExceptionsLogEntry', () => {
           list_id: 'endpoint_list_id',
           item_id: 'skipped',
           name: 'name skipped',
-          code: 'value_not_valid',
-          reason: 'value "x" is not a valid long',
+          code: 'value_not_supported',
+          reason: 'value "x" cannot be written for a column of type long at the end of the query',
           fields: ['count'],
         },
       ],

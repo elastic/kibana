@@ -2325,7 +2325,7 @@ groups:
       - setting: "securitySolution:enableEsqlRuleComputedFieldExceptions"
         id: security-solution-enable-esql-rule-computed-field-exceptions
         description: |
-          Applies exceptions to the fields that an {{esql}} rule query computes, such as columns created with `EVAL` or `STATS`, by adding them to the end of the query. Exceptions on fields of the source indices are not affected, unless the query defines a column with the same name, for example with EVAL, STATS or RENAME. This setting applies to all {{esql}} rules in the {{kib}} space, from their next run.
+          Applies exceptions to the fields that an {{esql}} rule query computes, such as columns created with `EVAL` or `STATS`, by adding them to the end of the query. Exceptions on fields of the source indices keep working as before. This setting applies to all {{esql}} rules in the {{kib}} space, from their next run.
         datatype: bool
         default: false
         applies_to:
@@ -2336,7 +2336,7 @@ groups:
           self: preview 9.7+
           serverless: preview
         note: |
-          When this setting is on, a rule fails instead of running with only some of its exceptions in two cases: an exception has a value that does not match the type of its field (for example `bogus` for an `ip` field), or the fields of its exceptions cannot be inspected. The rule status shows the reason. Exceptions that cannot be applied at the end of the query, such as exceptions on fields that exist in neither the source indices nor the query output, are not applied and are recorded in the rule execution log.
+          When this setting is on, a rule fails instead of running with only some of its exceptions in these cases: an exception has a value that cannot be compared with the type of its field (for example `bogus` for an `ip` field), the exceptions on computed fields need more than 200 comparisons or make the query longer than 1,000,000 characters, Elasticsearch rejects the query for having too many clauses, or the fields of its exceptions cannot be inspected. The rule status shows the reason. Some exceptions cannot be applied at the end of the query, such as an exception on a computed field that also has a positive entry on a field that exists in neither the source indices nor the query output. They are not applied and are recorded in the rule execution log.
 
       - setting: "securitySolution:enablePrivilegedUserMonitoring"
         id: security-solution-enable-privileged-user-monitoring

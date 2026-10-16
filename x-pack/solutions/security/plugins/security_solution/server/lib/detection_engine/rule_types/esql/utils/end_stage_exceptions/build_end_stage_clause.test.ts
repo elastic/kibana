@@ -117,16 +117,15 @@ describe('compileEndStageItem', () => {
       ['integer', '0x10'],
       ['long', 'many'],
       ['unsigned_long', 'many'],
-      ['double', 'many'],
       ['boolean', 'maybe'],
       ['boolean', 'TRUE'],
       ['ip', '10.0.0.0/33'],
       ['ip', 'not-an-ip'],
-    ])('rejects the value of a %s column that the DSL also fails on: %s', (type, value) => {
+    ])('reports the value of a %s column that cannot be written: %s', (type, value) => {
       // an uncastable literal becomes null, which would make the exception exclude every row
       expect(compile([match('col', value)], { col: type })).toEqual({
-        code: 'value_not_valid',
-        reason: `value "${value}" is not a valid ${type}`,
+        code: 'value_not_supported',
+        reason: `value "${value}" cannot be written for a column of type ${type} at the end of the query`,
         fields: ['col'],
       });
     });
@@ -146,7 +145,7 @@ describe('compileEndStageItem', () => {
     ])('does not apply the value of a %s column that the DSL accepts: %s', (type, value) => {
       expect(compile([match('col', value)], { col: type })).toEqual({
         code: 'value_not_supported',
-        reason: `value "${value}" cannot be compared as a ${type} at the end of the query`,
+        reason: `value "${value}" cannot be written for a column of type ${type} at the end of the query`,
         fields: ['col'],
       });
     });
@@ -336,8 +335,8 @@ describe('compileEndStageItem', () => {
 
     it('does not compile a list with an invalid value', () => {
       expect(compile([matchAny('n', ['1', 'x'])], { n: 'long' })).toEqual({
-        code: 'value_not_valid',
-        reason: 'value "x" is not a valid long',
+        code: 'value_not_supported',
+        reason: 'value "x" cannot be written for a column of type long at the end of the query',
         fields: ['n'],
       });
     });
@@ -414,8 +413,9 @@ describe('compileEndStageItem', () => {
 
     it('does not compile a pattern that ends with a lone backslash', () => {
       expect(compile([wildcard('user', 'a\\')], { user: 'keyword' })).toEqual({
-        code: 'operator_not_supported_on_type',
-        reason: '"matches" with value "a\\" is not supported on a keyword column',
+        code: 'value_not_supported',
+        reason:
+          'value "a\\" cannot be written for a column of type keyword at the end of the query',
         fields: ['user'],
       });
     });
@@ -430,7 +430,7 @@ describe('compileEndStageItem', () => {
   });
 
   describe('double columns', () => {
-    // ES|QL reports float, half_float and scaled_float fields as double with the precision of the original type
+    // ES|QL reports float and half_float fields as double with the precision of the original type
     it.each([
       ['is', () => match('d', '0.1')],
       ['is not', () => match('d', '0.1', 'excluded')],
@@ -451,18 +451,11 @@ describe('compileEndStageItem', () => {
       expect(compile([exists('d')], { d: 'double' })).toEqual({ clause: 'NOT (d IS NOT NULL)' });
     });
 
-    it('reports a value that is not a number as invalid, as for any other numeric column', () => {
-      expect(compile([match('d', 'many')], { d: 'double' })).toEqual({
-        code: 'value_not_valid',
-        reason: 'value "many" is not a valid double',
-        fields: ['d'],
-      });
+    it('does not apply "is" on a double column, whatever the value', () => {
+      expect(compile([match('d', 'many')], { d: 'double' })).toEqual(
+        expect.objectContaining({ code: 'operator_not_supported_on_type', fields: ['d'] })
+      );
     });
-  });
-
-  describe('an item with too many OR-ed comparisons', () => {
-    const cidrs = (count: number) =>
-      Array.from({ length: count }, (_, i) => `10.${Math.floor(i / 256)}.${i % 256}.0/24`);
   });
 
   describe('items with os_types', () => {
@@ -481,6 +474,24 @@ describe('compileEndStageItem', () => {
     it('applies an item with an empty os_types', () => {
       const item = getExceptionListItemSchemaMock({ entries, os_types: [] });
       expect(compileEndStageItem(item, new Map([['risk', 'keyword']]))).toHaveProperty('clause');
+    });
+  });
+
+  describe('column names with an empty segment', () => {
+    // ES|QL rejects an empty quoted segment (`a`.``.`b`), so the whole name is one quoted identifier, which is the same column
+    it.each([
+      ['a..b', '`a..b`'],
+      ['.a', '`.a`'],
+      ['a.', '`a.`'],
+      ['a..`b', '`a..``b`'],
+    ])('quotes %s as one identifier', (name, quoted) => {
+      expect(quoteColumn(name)).toBe(quoted);
+    });
+
+    it('compares the column with the whole name quoted', () => {
+      expect(compile([match('a..b', 'x')], { 'a..b': 'keyword' })).toEqual({
+        clause: 'NOT (MV_CONTAINS(`a..b`, "x"))',
+      });
     });
   });
 
@@ -537,12 +548,12 @@ describe('compileEndStageItem', () => {
       });
     });
 
-    it('reports an invalid value even when an earlier entry is skipped for another reason', () => {
+    it('reports a value that cannot be written even when an earlier entry is skipped for another reason', () => {
       expect(
         compile([match('geo', 'a'), match('ip', 'bogus')], { geo: 'geo_point', ip: 'ip' })
       ).toEqual({
-        code: 'value_not_valid',
-        reason: 'value "bogus" is not a valid ip',
+        code: 'value_not_supported',
+        reason: 'value "bogus" cannot be written for a column of type ip at the end of the query',
         fields: ['ip'],
       });
     });

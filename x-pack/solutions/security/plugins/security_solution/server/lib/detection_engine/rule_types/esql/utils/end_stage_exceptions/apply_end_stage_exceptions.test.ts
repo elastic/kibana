@@ -27,6 +27,22 @@ const sourceItem = item('source', 'host.name', 'dc-01');
 const computedItem = item('computed', 'risk', 'low');
 const textItem = item('text', 'msg', 'to good.com');
 const sharedItem = item('shared', 'process.name', 'ping');
+const ghostItem = getExceptionListItemSchemaMock({
+  item_id: 'ghost',
+  name: 'ghost',
+  entries: [
+    { field: 'risk', operator: 'included', type: 'match', value: 'low' },
+    { field: 'process.name', operator: 'included', type: 'match', value: 'ping' },
+  ] as EntriesArray,
+});
+const reducedItem = getExceptionListItemSchemaMock({
+  item_id: 'reduced',
+  name: 'reduced',
+  entries: [
+    { field: 'risk', operator: 'included', type: 'match', value: 'low' },
+    { field: 'process.name', operator: 'excluded', type: 'match', value: 'ping' },
+  ] as EntriesArray,
+});
 const droppedItem = getExceptionListItemSchemaMock({
   item_id: 'dropped',
   name: 'dropped',
@@ -97,6 +113,49 @@ describe('applyEndStageExceptions', () => {
     });
   });
 
+  it('keeps a nested item in the DSL filter when the query outputs a column named like the nested path', async () => {
+    // _field_caps lists a nested path only when a field below it is requested too, as it does for an object parent
+    (esClient.fieldCaps as unknown as jest.Mock).mockImplementation(
+      async ({ fields }: { fields: string[] }) => ({
+        indices: ['logs-1'],
+        fields: fields.includes('nested_user.name')
+          ? { nested_user: { nested: {} }, 'nested_user.name': { keyword: {} } }
+          : {},
+      })
+    );
+    (esClient.esql.query as unknown as jest.Mock).mockResolvedValue({
+      columns: [{ name: 'nested_user', type: 'keyword' }],
+      values: [],
+    });
+    const nestedItem = getExceptionListItemSchemaMock({
+      item_id: 'nested',
+      name: 'nested',
+      entries: [
+        {
+          field: 'nested_user',
+          type: 'nested',
+          entries: [{ field: 'name', operator: 'included', type: 'match', value: 'svc' }],
+        },
+      ] as EntriesArray,
+    });
+
+    const result = await apply(
+      [nestedItem],
+      'FROM logs-* | EVAL nested_user = "x" | STATS c = COUNT(*) BY nested_user'
+    );
+
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fields: expect.arrayContaining(['nested_user', 'nested_user.name']),
+      })
+    );
+    expect(result.query).toBe(
+      'FROM logs-* | EVAL nested_user = "x" | STATS c = COUNT(*) BY nested_user'
+    );
+    expect(result.exceptionFilter).toBe(originalFilter);
+    expect(ruleExecutionLogger.info).not.toHaveBeenCalled();
+  });
+
   it('does not run the query when every item is on a source field', async () => {
     const result = await apply([sourceItem]);
 
@@ -150,6 +209,34 @@ describe('applyEndStageExceptions', () => {
     });
   });
 
+  it('asks _field_caps with the filter of the real request, so that it reads the indices that the query reads', async () => {
+    const fieldCapsFilter = { bool: { filter: [{ range: { '@timestamp': { gte: 'now-1h' } } }] } };
+
+    await applyEndStageExceptions({
+      esClient,
+      ruleExecutionLogger,
+      query,
+      indices: ['logs-*'],
+      items: [sourceItem, computedItem],
+      exceptionFilter: originalFilter,
+      unprocessedExceptions: [],
+      buildDslFilter,
+      fieldCapsFilter,
+    });
+
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(
+      expect.objectContaining({ index_filter: fieldCapsFilter })
+    );
+  });
+
+  it('sends no filter to _field_caps when it has none', async () => {
+    await apply([sourceItem, computedItem]);
+
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(
+      expect.not.objectContaining({ index_filter: expect.anything() })
+    );
+  });
+
   it('appends the computed items to the query and rebuilds the DSL filter from the other items', async () => {
     const result = await apply([sourceItem, computedItem]);
 
@@ -159,7 +246,7 @@ describe('applyEndStageExceptions', () => {
   });
 
   it('writes one JSON message to the rule execution log with the final query and what was applied', async () => {
-    await apply([sourceItem, computedItem, sharedItem]);
+    await apply([sourceItem, computedItem, ghostItem]);
 
     expect(ruleExecutionLogger.info).toHaveBeenCalledTimes(1);
     expect(JSON.parse(ruleExecutionLogger.info.mock.calls[0][0])).toEqual({
@@ -171,9 +258,9 @@ describe('applyEndStageExceptions', () => {
       appliedAtEndOfQuery: [{ list_id: computedItem.list_id, item_id: 'computed' }],
       notApplied: [
         {
-          list_id: sharedItem.list_id,
-          item_id: 'shared',
-          name: 'shared',
+          list_id: ghostItem.list_id,
+          item_id: 'ghost',
+          name: 'ghost',
           code: 'field_not_found',
           reason: '"process.name" is not in the source indices or in the output of the query',
           fields: ['process.name'],
@@ -191,16 +278,16 @@ describe('applyEndStageExceptions', () => {
     expect(ruleExecutionLogger.info).not.toHaveBeenCalled();
   });
 
-  describe('values that are not valid for the type of the column', () => {
+  describe('values that cannot be written for the type of the column', () => {
     const invalidItem = item('invalid', 'event_count', 'many');
 
-    it('throws before the query runs, as the DSL filter fails the request for such a value', async () => {
+    it('throws before the query runs', async () => {
       const error = await apply([computedItem, invalidItem]).catch((e) => e);
 
       expect(error).toBeInstanceOf(InvalidExceptionValuesError);
       expect(error.message).toContain('"invalid" (list');
       expect(error.message).toContain(
-        'value "many" is not a valid long, in the field "event_count"'
+        'value "many" cannot be written for a column of type long at the end of the query, in the field "event_count"'
       );
       expect(error.invalidItems).toHaveLength(1);
       expect(buildDslFilter).not.toHaveBeenCalled();
@@ -222,22 +309,21 @@ describe('applyEndStageExceptions', () => {
       ).toEqual(['invalid', 'other']);
     });
 
-    it('does not throw for a value that the DSL accepts and the end of the query cannot compare', async () => {
-      const result = await apply([item('exponent', 'event_count', '1e3')]);
+    it('throws for a value that the DSL accepts and the compiler does not write', async () => {
+      const error = await apply([item('exponent', 'event_count', '1e3')]).catch((e) => e);
 
-      expect(result.query).toBe(query);
-      expect(JSON.parse(ruleExecutionLogger.info.mock.calls[0][0]).notApplied).toEqual([
-        expect.objectContaining({ item_id: 'exponent', code: 'value_not_supported' }),
-      ]);
+      expect(error).toBeInstanceOf(InvalidExceptionValuesError);
+      expect(error.message).toContain(
+        'value "1e3" cannot be written for a column of type long at the end of the query'
+      );
     });
 
     it('does not throw for an item whose field is nowhere, as the DSL does not check the value of an unmapped field', async () => {
       const result = await apply([item('unmapped', 'no.such.field', 'many')]);
 
       expect(result.query).toBe(query);
-      expect(JSON.parse(ruleExecutionLogger.info.mock.calls[0][0]).notApplied).toEqual([
-        expect.objectContaining({ item_id: 'unmapped', code: 'field_not_found' }),
-      ]);
+      expect(result.exceptionFilter).toBe(originalFilter);
+      expect(ruleExecutionLogger.info).not.toHaveBeenCalled();
     });
   });
 
@@ -307,8 +393,30 @@ describe('applyEndStageExceptions', () => {
     expect(result.unprocessedExceptions).toEqual([]);
   });
 
-  it('does not change the query for an item whose field is not part of the rule, and logs the reason', async () => {
+  it('keeps in the DSL filter an item whose field is not part of the rule, and changes nothing', async () => {
     const result = await apply([sourceItem, sharedItem]);
+
+    expect(result.query).toBe(query);
+    expect(result.exceptionFilter).toBe(originalFilter);
+    expect(ruleExecutionLogger.warn).not.toHaveBeenCalled();
+    expect(ruleExecutionLogger.info).not.toHaveBeenCalled();
+    expect(buildDslFilter).not.toHaveBeenCalled();
+  });
+
+  it('applies an item with a computed column and a negative entry on a field that is not part of the rule, without that entry', async () => {
+    const result = await apply([reducedItem]);
+
+    expect(result.query).toBe(`${query}\n| WHERE NOT (MV_CONTAINS(risk, "low"))`);
+    expect(JSON.parse(ruleExecutionLogger.info.mock.calls[0][0])).toEqual(
+      expect.objectContaining({
+        appliedAtEndOfQuery: [{ list_id: reducedItem.list_id, item_id: 'reduced' }],
+        notApplied: [],
+      })
+    );
+  });
+
+  it('does not apply an item that has a computed column and a field that is not part of the rule, and logs the reason', async () => {
+    const result = await apply([sourceItem, ghostItem]);
 
     expect(result.query).toBe(query);
     expect(ruleExecutionLogger.warn).not.toHaveBeenCalled();

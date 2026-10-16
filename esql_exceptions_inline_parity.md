@@ -141,7 +141,7 @@ A string that cannot be cast becomes `null` with a warning, and `MV_CONTAINS(col
 - Exception: `integer` field `f` is `2147483648`.
 - DSL filter keeps 8 of 8 documents, so it excludes no document.
 - Null-safe direct (`MV_CONTAINS`, `MV_LIKE`, typed casts): `WHERE NOT (MV_CONTAINS(f, "2147483648"::integer))` drops `x1`=42, `x2`=-7, `x3`=0, `x4`=2147483647, `x5`=[42,7], `x6`=(no field), `x7`=null, `x8`=43 that the DSL keeps.
-- Production compiler: no form (value_not_supported: value "2147483648" cannot be compared as a integer at the end of the query).
+- Production compiler: no form (value_not_supported: value "2147483648" cannot be written for a column of type integer at the end of the query).
 
 ### 5. Queries that fail
 

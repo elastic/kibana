@@ -140,7 +140,7 @@ export const esqlExecutor = async ({
     try {
       // With the advanced setting enabled, exceptions on columns that the query computes are inlined at the
       // end of the query, and the DSL filter only keeps the other exceptions. Without it nothing changes.
-      const { allExceptionItems } = sharedParams;
+      const { allExceptionItems, startedAt = new Date() } = sharedParams;
       const endStageExceptionsEnabled = allExceptionItems?.length
         ? await services.uiSettingsClient.get<boolean>(
             ENABLE_ESQL_RULE_COMPUTED_FIELD_EXCEPTIONS_SETTING
@@ -165,13 +165,26 @@ export const esqlExecutor = async ({
                 excludedDocuments,
                 ruleExecutionTimeout,
               }).filter,
+              // the time range, tiers and namespaces of the real request, without the exceptions: the source fields are those of the indices that the query reads
+              fieldCapsFilter: buildEsqlSearchRequest({
+                query: transformedQuery,
+                from: tuple.from.toISOString(),
+                to: tuple.to.toISOString(),
+                size,
+                filters: [...dataTiersFilters, ...dataStreamNamespaceFilters],
+                primaryTimestamp,
+                secondaryTimestamp,
+                exceptionFilter: undefined,
+                excludedDocuments: {},
+                ruleExecutionTimeout,
+              }).filter,
               indices: getIndexListFromEsqlQuery(ruleParams.query),
-              items: removeExpiredExceptions(allExceptionItems, tuple.to.toDate()),
+              items: removeExpiredExceptions(allExceptionItems, startedAt),
               exceptionFilter,
               unprocessedExceptions,
               buildDslFilter: (dslItems) =>
                 buildExceptionFilter({
-                  startedAt: tuple.to.toDate(),
+                  startedAt,
                   alias: null,
                   excludeExceptions: true,
                   chunkSize: 10,
