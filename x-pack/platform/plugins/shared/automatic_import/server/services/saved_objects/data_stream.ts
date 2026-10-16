@@ -59,7 +59,7 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
     },
   },
   management: {
-    icon: 'data_stream',
+    icon: 'productStreamsClassic',
     defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle(obj) {
