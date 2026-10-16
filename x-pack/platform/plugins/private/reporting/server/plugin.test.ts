@@ -24,6 +24,7 @@ import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { PLUGIN_ID } from '@kbn/reporting-server';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
@@ -165,6 +166,40 @@ describe('Reporting Plugin', () => {
         taskType: 'reporting_telemetry',
       })
     );
+  });
+
+  describe('screenshotting provider', () => {
+    const startWith = async (startDeps: Partial<ReportingStartDeps>) => {
+      plugin.setup(coreSetup, pluginSetup);
+      await new Promise(setImmediate);
+      const reportingCore = (plugin as unknown as { reportingCore: ReportingCore }).reportingCore;
+      const pluginStartSpy = jest.spyOn(reportingCore, 'pluginStart');
+
+      plugin.start(coreStart, { ...pluginStart, ...startDeps });
+      await new Promise(setImmediate);
+
+      return pluginStartSpy.mock.calls[0][0];
+    };
+
+    it('uses pageRenderScreenshotting in place of screenshotting when it is enabled', async () => {
+      const pageRenderScreenshotting = createMockScreenshottingStart();
+
+      const startDeps = await startWith({ pageRenderScreenshotting });
+
+      expect(startDeps.screenshotting).toBe(pageRenderScreenshotting);
+    });
+
+    it('uses screenshotting when pageRenderScreenshotting is disabled', async () => {
+      const startDeps = await startWith({});
+
+      expect(startDeps.screenshotting).toBe(pluginStart.screenshotting);
+    });
+
+    it('passes core feature flags through', async () => {
+      const startDeps = await startWith({});
+
+      expect(startDeps.featureFlags).toBe(coreStart.featureFlags);
+    });
   });
 
   it('logs start issues', async () => {

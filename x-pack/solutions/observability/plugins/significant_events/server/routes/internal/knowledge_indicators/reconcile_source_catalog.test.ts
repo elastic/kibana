@@ -496,6 +496,18 @@ describe('resetSourceKnowledge', () => {
     expect(kiClient.deleteIndicators).toHaveBeenCalledWith('source-1');
   });
 
+  it('keeps knowledge available for retry when rule cleanup fails', async () => {
+    const kiClient = makeKiClient();
+    kiClient.deleteOwnedRules.mockRejectedValue(new Error('Rule cleanup failed'));
+
+    await expect(
+      resetSourceKnowledge({ source: { id: 'source-1', slug: 'nginx-errors' }, kiClient, request })
+    ).rejects.toThrow('Rule cleanup failed');
+
+    expect(kiClient.deleteAllQueries).not.toHaveBeenCalled();
+    expect(kiClient.deleteIndicators).not.toHaveBeenCalled();
+  });
+
   it('drops the knowledge even when cancelling the run fails, then reports the failure', async () => {
     const kiClient = makeKiClient();
     const cancelBySource = jest.fn().mockRejectedValue(new Error('no workflows privilege'));

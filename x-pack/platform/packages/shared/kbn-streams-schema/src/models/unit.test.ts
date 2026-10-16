@@ -86,9 +86,10 @@ describe('streams unit schema', () => {
         ui_metadata: {},
       }).secrets
     ).toBeUndefined();
-    expect(streamsUnitSecretsSchema.parse({ es_api_key: 's3cret' })).toEqual({
-      es_api_key: 's3cret',
+    expect(streamsUnitSecretsSchema.parse({ 'es-prod': 's3cret' })).toEqual({
+      'es-prod': 's3cret',
     });
+    expect(() => streamsUnitSecretsSchema.parse({ es_api_key: 's3cret' })).toThrow();
     expect(() =>
       streamsUnitSecretsSchema.parse(
         Object.fromEntries(Array.from({ length: 501 }, (_, i) => [`k${i}`, 'v']))
