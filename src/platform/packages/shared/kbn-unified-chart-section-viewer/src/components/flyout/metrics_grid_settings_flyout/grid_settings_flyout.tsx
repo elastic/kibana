@@ -49,11 +49,11 @@ export const GridSettingsFlyout = ({
     prefix: 'metricsGridSettingsAggregationAccordion',
   });
 
-  const valuesGroupDescription = i18n.translate(
-    'metricsExperience.gridSettingsFlyout.valuesGroupTooltip',
+  const dataDisplayGroupDescription = i18n.translate(
+    'metricsExperience.gridSettingsFlyout.dataDisplayGroupTooltip',
     {
       defaultMessage:
-        'Choose an aggregation for counters and gauges. For histograms, choose a distribution or a percentile. Changes apply to every metric of that type in this Discover tab.',
+        'Set how data is displayed for each metric type. Changes apply to every metric of that type in this Discover tab.',
     }
   );
 
@@ -112,8 +112,8 @@ export const GridSettingsFlyout = ({
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
                   <h5>
-                    {i18n.translate('metricsExperience.gridSettingsFlyout.valuesGroupTitle', {
-                      defaultMessage: 'Metric values',
+                    {i18n.translate('metricsExperience.gridSettingsFlyout.dataDisplayGroupTitle', {
+                      defaultMessage: 'Data display',
                     })}
                   </h5>
                 </EuiTitle>
@@ -122,8 +122,8 @@ export const GridSettingsFlyout = ({
                 <EuiIconTip
                   type="info"
                   color="subdued"
-                  aria-label={valuesGroupDescription}
-                  content={valuesGroupDescription}
+                  aria-label={dataDisplayGroupDescription}
+                  content={dataDisplayGroupDescription}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
