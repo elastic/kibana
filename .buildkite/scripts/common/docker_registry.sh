@@ -31,11 +31,11 @@ kibana_ci_image_repository() {
   fi
 }
 
-# Tags a locally built image as $target_image and pushes it
+# node scripts/build always names images kibana-ci/<name>; this retags one for the pipeline's push repository and pushes it
 retag_and_push_image() {
-  local built_image="$1"
+  local build_output_image="$1"
   local target_image="$2"
-  docker tag "$built_image" "$target_image"
+  docker tag "$build_output_image" "$target_image"
   docker_with_retry push "$target_image"
 }
 

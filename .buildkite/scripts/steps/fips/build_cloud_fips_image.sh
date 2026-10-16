@@ -34,9 +34,9 @@ node scripts/build \
   --skip-docker-serverless \
   --skip-docker-contexts
 
-BUILT_CLOUD_FIPS_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud-fips:$VERSION-$GIT_COMMIT"
+BUILD_OUTPUT_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud-fips:$VERSION-$GIT_COMMIT"
 CLOUD_FIPS_IMAGE="$(kibana_ci_image_repository kibana-cloud-fips):$VERSION-$GIT_COMMIT"
-retag_and_push_image "$BUILT_CLOUD_FIPS_IMAGE" "$CLOUD_FIPS_IMAGE"
+retag_and_push_image "$BUILD_OUTPUT_IMAGE" "$CLOUD_FIPS_IMAGE"
 cat <<EOF | buildkite-agent annotate --style "info" --context kibana-cloud-fips-image
 
   Kibana cloud FIPS image: \`$CLOUD_FIPS_IMAGE\`
