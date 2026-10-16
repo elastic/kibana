@@ -6,12 +6,7 @@
  */
 
 import pLimit from 'p-limit';
-import type {
-  CoreStart,
-  ISavedObjectsRepository,
-  KibanaRequest,
-  Logger,
-} from '@kbn/core/server';
+import type { CoreStart, ISavedObjectsRepository, KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   RunContext,
@@ -151,7 +146,9 @@ export class IncrementalIdAssignedTriggerTask {
         this.logger.debug(`Trigger task for case ${caseId} already exists`);
         return;
       }
-      this.logger.warn(`Failed to schedule the incremental ID trigger task for case ${caseId}: ${error}`);
+      this.logger.warn(
+        `Failed to schedule the incremental ID trigger task for case ${caseId}: ${error}`
+      );
     }
   }
 
@@ -196,7 +193,10 @@ export class IncrementalIdAssignedTriggerTask {
     }
   }
 
-  private async run(taskInstance: ConcreteTaskInstance, fakeRequest?: KibanaRequest): Promise<RunResult> {
+  private async run(
+    taskInstance: ConcreteTaskInstance,
+    fakeRequest?: KibanaRequest
+  ): Promise<RunResult> {
     const { caseId, owner, spaceId, expiresAt } = taskInstance.params as TaskParams;
     const checks = (taskInstance.state as TaskState).checks ?? 0;
     const done: RunResult = { state: {}, shouldDeleteTask: true };
@@ -213,7 +213,7 @@ export class IncrementalIdAssignedTriggerTask {
         return done;
       }
 
-      const caseSo = await this.getCase(caseId, spaceId);
+      const caseSo = await this.getCase(this.internalRepo, caseId, spaceId);
       if (caseSo === null) {
         return done;
       }
@@ -243,9 +243,9 @@ export class IncrementalIdAssignedTriggerTask {
   }
 
   /** `null` when the case doesn't exist (anymore) */
-  private async getCase(caseId: string, spaceId: string) {
+  private async getCase(repo: ISavedObjectsRepository, caseId: string, spaceId: string) {
     try {
-      return await this.internalRepo!.get<CasePersistedAttributes>(CASE_SAVED_OBJECT, caseId, {
+      return await repo.get<CasePersistedAttributes>(CASE_SAVED_OBJECT, caseId, {
         namespace: spaceId,
       });
     } catch (error) {

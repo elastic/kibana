@@ -385,7 +385,9 @@ describe('CasesIncrementalIdService', () => {
     });
 
     it('only reports cases created within the trigger TTL, but still assigns IDs to all', async () => {
-      const old = new Date(Date.now() - INCREMENTAL_ID_ASSIGNED_TRIGGER_TTL_MS - HOUR).toISOString();
+      const old = new Date(
+        Date.now() - INCREMENTAL_ID_ASSIGNED_TRIGGER_TTL_MS - HOUR
+      ).toISOString();
 
       // @ts-expect-error: case SO types are not correct
       await eventService.incrementCaseIds([caseSo('old', 'default', old), caseSo('recent')]);
@@ -397,7 +399,9 @@ describe('CasesIncrementalIdService', () => {
     });
 
     it('does not emit when only old cases were assigned', async () => {
-      const old = new Date(Date.now() - INCREMENTAL_ID_ASSIGNED_TRIGGER_TTL_MS - HOUR).toISOString();
+      const old = new Date(
+        Date.now() - INCREMENTAL_ID_ASSIGNED_TRIGGER_TTL_MS - HOUR
+      ).toISOString();
 
       // @ts-expect-error: case SO types are not correct
       await eventService.incrementCaseIds([caseSo('old', 'default', old)]);

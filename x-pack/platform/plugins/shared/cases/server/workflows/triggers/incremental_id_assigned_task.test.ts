@@ -12,6 +12,7 @@ import {
   savedObjectsRepositoryMock,
 } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import {
@@ -48,7 +49,11 @@ describe('IncrementalIdAssignedTriggerTask', () => {
     ...overrides,
   });
 
-  const run = (taskParams = params(), state = {}, requestForRun: KibanaRequest | null = fakeRequest) => {
+  const run = (
+    taskParams = params(),
+    state = {},
+    requestForRun: KibanaRequest | null = fakeRequest
+  ) => {
     const { createTaskRunner } =
       taskManagerSetup.registerTaskDefinitions.mock.calls[0][0][
         INCREMENTAL_ID_ASSIGNED_TRIGGER_TASK_TYPE
@@ -77,8 +82,10 @@ describe('IncrementalIdAssignedTriggerTask', () => {
 
   describe('schedule', () => {
     it('schedules a one-off task with the request and a deadline', async () => {
-      // @ts-expect-error: only the space is relevant
-      await task.schedule({ ...request, spaceId: 'my-space' }, { caseId: 'case-1', owner: 'cases' });
+      await task.schedule(
+        { ...request, spaceId: brandSpaceId('my-space') },
+        { caseId: 'case-1', owner: 'cases' }
+      );
 
       expect(taskManager.schedule).toHaveBeenCalledWith(
         {
@@ -168,15 +175,11 @@ describe('IncrementalIdAssignedTriggerTask', () => {
       taskManager.bulkGet.mockResolvedValueOnce([found('a'), found('b')] as never);
       taskManager.runSoon.mockRejectedValue(new Error('already running'));
 
-      await expect(
-        task.runSoon({ caseIds: ['a', 'b'] })
-      ).resolves.toBeUndefined();
+      await expect(task.runSoon({ caseIds: ['a', 'b'] })).resolves.toBeUndefined();
       expect(taskManager.runSoon).toHaveBeenCalledTimes(2);
 
       taskManager.bulkGet.mockRejectedValueOnce(new Error('es down'));
-      await expect(
-        task.runSoon({ caseIds: ['a'] })
-      ).resolves.toBeUndefined();
+      await expect(task.runSoon({ caseIds: ['a'] })).resolves.toBeUndefined();
     });
   });
 
