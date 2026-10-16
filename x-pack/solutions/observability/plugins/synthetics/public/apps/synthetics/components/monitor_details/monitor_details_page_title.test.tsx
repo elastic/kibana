@@ -14,10 +14,6 @@ jest.mock('./hooks/use_selected_monitor', () => ({
   useSelectedMonitor: jest.fn(),
 }));
 
-jest.mock('./monitor_selector/monitor_selector', () => ({
-  MonitorSelector: () => <div data-test-subj="monitorSelectorStub" />,
-}));
-
 const mockUseSelectedMonitor = useSelectedMonitor as jest.MockedFunction<typeof useSelectedMonitor>;
 
 describe('MonitorDetailsPageTitle', () => {
