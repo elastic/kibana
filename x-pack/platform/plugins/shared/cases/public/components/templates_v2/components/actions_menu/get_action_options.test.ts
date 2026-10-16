@@ -59,6 +59,18 @@ describe('getActionOptions', () => {
     }
   });
 
+  it.each(['template', 'fieldDefinition'] as const)(
+    'leaves enabled rule categories without a disabled reason in %s mode',
+    (mode) => {
+      const options = getActionOptions({ ...baseParams, mode });
+      const validation = getCategory(options, CATEGORY_IDS.validation);
+
+      expect(validation.disabled).toBe(false);
+      expect(validation.disabledReason).toBeUndefined();
+      expect(validation.description).toBe('Add a validation rule to the selected field');
+    }
+  );
+
   it('marks a library field as linked case-insensitively', () => {
     const options = getActionOptions({ ...baseParams, alreadyLinked: new Set(['root_cause']) });
     const [libraryLeaf] = getCategory(options, CATEGORY_IDS.fieldLibrary).options;
