@@ -146,6 +146,7 @@ export function getServiceColumns({
                       path: { serviceName },
                       query: {
                         ...query,
+                        rangeTo: 'now',
                         alertStatus: ALERT_STATUS_ACTIVE,
                       },
                     })}

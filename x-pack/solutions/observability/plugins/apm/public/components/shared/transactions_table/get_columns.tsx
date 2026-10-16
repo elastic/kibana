@@ -85,7 +85,8 @@ export function getColumns({
                   content={i18n.translate(
                     'xpack.apm.home.transactionsTableColumnName.tooltip.activeAlertsExplanation',
                     {
-                      defaultMessage: 'Active alerts',
+                      defaultMessage:
+                        'Active alerts for this transaction. These do not add up to the service alert badge.',
                     }
                   )}
                 >
@@ -96,6 +97,7 @@ export function getColumns({
                       path: { serviceName },
                       query: {
                         ...query,
+                        rangeTo: 'now',
                         kuery: [
                           query.kuery,
                           ...fieldValuePairToKql(TRANSACTION_NAME, name),

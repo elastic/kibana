@@ -9,6 +9,7 @@ import {
   ALERT_RULE_TYPE_ID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_TIME_RANGE,
   ALERT_UUID,
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -59,7 +60,7 @@ function hasSloEnvFilter(filters: QueryFilter[]): boolean {
 }
 
 describe('getServicesAlerts', () => {
-  it('filters by active status and time range', async () => {
+  it('filters by active status and alert lifetime time range', async () => {
     const client = createMockAlertsClient();
     const start = Date.now() - 3600000;
     const end = Date.now();
@@ -75,7 +76,14 @@ describe('getServicesAlerts', () => {
     expect(filters).toEqual(
       expect.arrayContaining([{ term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } }])
     );
-    expect(filters.find((f) => f.range)).toBeDefined();
+    expect(filters.find((f) => f.range?.[ALERT_TIME_RANGE])).toEqual({
+      range: {
+        [ALERT_TIME_RANGE]: expect.objectContaining({
+          gte: start,
+          lte: end,
+        }),
+      },
+    });
   });
 
   it('extends a past end to now so currently-active alerts are not missed', async () => {
@@ -97,7 +105,7 @@ describe('getServicesAlerts', () => {
     }
 
     const rangeFilter = getFilters(client).find((f) => f.range);
-    expect(rangeFilter?.range?.['@timestamp']).toEqual(
+    expect(rangeFilter?.range?.[ALERT_TIME_RANGE]).toEqual(
       expect.objectContaining({
         gte: start,
         lte: nowMs,

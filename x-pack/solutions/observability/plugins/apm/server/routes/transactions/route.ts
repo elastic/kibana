@@ -77,7 +77,14 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
       }),
       getServiceTransactionGroupsAlerts({
         apmAlertsClient,
-        ...commonProps,
+        serviceName,
+        transactionType,
+        start,
+        end,
+        environment,
+        searchQuery,
+        // Page kuery and latency aggregation mode are intentionally omitted —
+        // badge counts are scoped by service/env/transaction type only.
       }),
     ]);
 
