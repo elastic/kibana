@@ -63,6 +63,7 @@ const getEmptyAutoFollowPattern = (remoteClusterName = ''): AutoFollowPatternFor
   name: '',
   remoteCluster: remoteClusterName,
   leaderIndexPatterns: [],
+  leaderIndexExclusionPatterns: [],
   followIndexPattern: '',
   followIndexPatternPrefix: '',
   followIndexPatternSuffix: '',
@@ -147,6 +148,7 @@ export class AutoFollowPatternForm extends PureComponent<Props, State> {
       fieldsErrors: validateAutoFollowPattern({
         name: autoFollowPattern.name,
         leaderIndexPatterns: autoFollowPattern.leaderIndexPatterns,
+        leaderIndexExclusionPatterns: autoFollowPattern.leaderIndexExclusionPatterns,
         followIndexPatternPrefix: autoFollowPattern.followIndexPatternPrefix,
         followIndexPatternSuffix: autoFollowPattern.followIndexPatternSuffix,
         remoteCluster: autoFollowPattern.remoteCluster,
@@ -174,6 +176,7 @@ export class AutoFollowPatternForm extends PureComponent<Props, State> {
     const errors = validateAutoFollowPattern({
       name: fields.name,
       leaderIndexPatterns: fields.leaderIndexPatterns,
+      leaderIndexExclusionPatterns: fields.leaderIndexExclusionPatterns,
       followIndexPatternPrefix: fields.followIndexPatternPrefix,
       followIndexPatternSuffix: fields.followIndexPatternSuffix,
       remoteCluster: fields.remoteCluster,
@@ -217,6 +220,31 @@ export class AutoFollowPatternForm extends PureComponent<Props, State> {
   onLeaderIndexPatternChange = (indexPatterns: Array<EuiComboBoxOptionOption<string>>) => {
     this.onFieldsChange({
       leaderIndexPatterns: indexPatterns.map(({ label }) => label),
+    });
+  };
+
+  onCreateLeaderIndexExclusionPattern = (indexPattern: string) => {
+    const error = validateLeaderIndexPattern(indexPattern);
+
+    if (error) {
+      this.onFieldsErrorChange({
+        leaderIndexExclusionPatterns: { ...error, alwaysVisible: true },
+      });
+      return false;
+    }
+
+    const { leaderIndexExclusionPatterns } = this.state.autoFollowPattern;
+    this.onFieldsErrorChange({ leaderIndexExclusionPatterns: null });
+    this.onFieldsChange({
+      leaderIndexExclusionPatterns: [...leaderIndexExclusionPatterns, indexPattern],
+    });
+  };
+
+  onLeaderIndexExclusionPatternChange = (
+    indexPatterns: Array<EuiComboBoxOptionOption<string>>
+  ) => {
+    this.onFieldsChange({
+      leaderIndexExclusionPatterns: indexPatterns.map(({ label }) => label),
     });
   };
 
@@ -328,6 +356,7 @@ export class AutoFollowPatternForm extends PureComponent<Props, State> {
         name,
         remoteCluster,
         leaderIndexPatterns,
+        leaderIndexExclusionPatterns,
         followIndexPatternPrefix = '',
         followIndexPatternSuffix = '',
       },
@@ -470,6 +499,8 @@ export class AutoFollowPatternForm extends PureComponent<Props, State> {
       const formattedLeaderIndexPatterns = leaderIndexPatterns.map((pattern) => ({
         label: pattern,
       }));
+      const leaderIndexExclusionPatternsError = fieldsErrors.leaderIndexExclusionPatterns;
+      const isExclusionPatternsInvalid = Boolean(leaderIndexExclusionPatternsError?.message);
 
       return (
         <EuiDescribedFormGroup
@@ -547,6 +578,39 @@ export class AutoFollowPatternForm extends PureComponent<Props, State> {
               onSearchChange={this.onLeaderIndexPatternInputChange}
               fullWidth
               data-test-subj="indexPatternInput"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.crossClusterReplication.autoFollowPatternForm.fieldLeaderIndexExclusionPatternsLabel"
+                defaultMessage="Exclude index patterns (optional)"
+              />
+            }
+            helpText={
+              <FormattedMessage
+                id="xpack.crossClusterReplication.autoFollowPatternForm.fieldLeaderIndexExclusionPatternsHelpLabel"
+                defaultMessage="Indices matching these patterns are not replicated. Spaces and the characters {characterList} are not allowed."
+                values={{ characterList: <strong>{indexPatternIllegalCharacters}</strong> }}
+              />
+            }
+            isInvalid={isExclusionPatternsInvalid}
+            error={leaderIndexExclusionPatternsError?.message}
+            fullWidth
+          >
+            <EuiComboBox
+              isInvalid={isExclusionPatternsInvalid}
+              noSuggestions
+              placeholder={i18n.translate(
+                'xpack.crossClusterReplication.autoFollowPatternForm.fieldLeaderIndexExclusionPatternsPlaceholder',
+                { defaultMessage: 'Type and then hit ENTER' }
+              )}
+              selectedOptions={leaderIndexExclusionPatterns.map((pattern) => ({ label: pattern }))}
+              onCreateOption={this.onCreateLeaderIndexExclusionPattern}
+              onChange={this.onLeaderIndexExclusionPatternChange}
+              fullWidth
+              data-test-subj="leaderIndexExclusionPatternInput"
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
