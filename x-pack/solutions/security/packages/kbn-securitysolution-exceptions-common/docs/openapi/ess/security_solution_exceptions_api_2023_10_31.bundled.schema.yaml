@@ -2851,7 +2851,7 @@ components:
             - included
           type: string
         type:
-          description: Must be `wildcard` ("Match", supports `*` and `?` wildcards)
+          description: Must be `wildcard` ("Matches", supports `*` and `?` wildcards)
           enum:
             - wildcard
           type: string
