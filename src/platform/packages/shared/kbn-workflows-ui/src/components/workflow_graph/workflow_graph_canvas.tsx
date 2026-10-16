@@ -7,29 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiCallOut, EuiToolTip, transparentize, useEuiTheme } from '@elastic/eui';
+import { EuiCallOut, euiCanAnimate, EuiText, transparentize, useEuiTheme } from '@elastic/eui';
 import {
   Background,
   type ColorMode,
   type EdgeTypes,
-  MiniMap,
   type NodeTypes,
   Panel,
   ReactFlow,
-  type ReactFlowInstance,
-  useReactFlow,
-  useStore,
   type Viewport,
 } from '@xyflow/react';
-import React, {
-  Component,
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
   LayoutDirection,
@@ -37,185 +25,59 @@ import type {
   WorkflowStepExecutionDto,
   WorkflowYaml,
 } from '@kbn/workflows';
-import { TRIGGER_STEP_TYPES } from '@kbn/workflows';
 import '@xyflow/react/dist/style.css';
+import {
+  buildWorkflowSettingsNodes,
+  type WorkflowSettingsNodesInput,
+} from './build_settings_nodes';
+import { CanvasMinimap, CanvasZoomControls, chromeAppearCss } from './canvas_chrome';
+import { computeInsertionPoints } from './compute_insertion_points';
+import { ensureWorkflowGraphEuiIcons } from './ensure_eui_icons';
+import { GraphErrorBoundary } from './graph_error_boundary';
+import { getMinimapNodeColor } from './minimap_node_color';
+import type { PendingInsertVisual } from './pending_insert';
+import { WORKFLOWS_CANVAS_CHROME_INSET } from './surface_radius';
+import { useAppendStepShortcut } from './use_append_step_shortcut';
+import { useCanvasViewport } from './use_canvas_viewport';
+import { useDecoratedNodes } from './use_decorated_nodes';
+import { useInsertLayoutAnimation } from './use_insert_layout_animation';
 import { useWorkflowLayout } from './use_workflow_layout';
-import { type RenderStepIcon, WorkflowGraphActionsContext } from './workflow_graph_actions_context';
+import {
+  type NodeConfigWarningReason,
+  type RenderStepIcon,
+  type WorkflowGraphActions,
+  WorkflowGraphActionsContext,
+  type WorkflowGraphEditActions,
+  type WorkflowSettingsNodeKind,
+} from './workflow_graph_actions_context';
 import { WorkflowGraphBypassLaneNode } from './workflow_graph_bypass_lane_node';
 import { WorkflowGraphEdge } from './workflow_graph_edge';
+import {
+  WorkflowGraphEditOverlays,
+  WorkflowGraphEmptyAddTrigger,
+} from './workflow_graph_edit_overlays';
 import { WorkflowGraphForeachGroupNode } from './workflow_graph_foreach_group_node';
 import { WorkflowGraphNode } from './workflow_graph_node';
-
-interface GraphErrorBoundaryState {
-  error: Error | null;
-}
-
-class GraphErrorBoundary extends Component<
-  { children: ReactNode; onError?: (msg: string) => void },
-  GraphErrorBoundaryState
-> {
-  state: GraphErrorBoundaryState = { error: null };
-
-  static getDerivedStateFromError(error: Error): GraphErrorBoundaryState {
-    return { error };
-  }
-
-  componentDidCatch(error: Error) {
-    this.props.onError?.(error.message);
-  }
-
-  render() {
-    if (this.state.error) {
-      return (
-        <EuiCallOut
-          announceOnMount
-          title={i18n.translate('workflowsUi.graph.renderErrorTitle', {
-            defaultMessage: 'Workflow graph could not be displayed',
-          })}
-          color="danger"
-          iconType="error"
-        >
-          <p>{this.state.error.message}</p>
-        </EuiCallOut>
-      );
-    }
-    return this.props.children;
-  }
-}
+import { WorkflowGraphPendingNode } from './workflow_graph_pending_node';
+import { WorkflowGraphSettingsGroupNode } from './workflow_graph_settings_group_node';
+import { WorkflowGraphSettingsNode } from './workflow_graph_settings_node';
 
 const NODE_TYPES: NodeTypes = {
   step: WorkflowGraphNode,
   trigger: WorkflowGraphNode,
+  settings: WorkflowGraphSettingsNode,
+  settingsGroup: WorkflowGraphSettingsGroupNode,
   foreachGroup: WorkflowGraphForeachGroupNode,
   bypassLane: WorkflowGraphBypassLaneNode,
 };
 
+// Resolved once: the platform never changes during a session.
+const CMD_K_SHORTCUT_LABEL =
+  typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘K' : 'Ctrl+K';
+
 const EDGE_TYPES: EdgeTypes = {
   workflowEdge: WorkflowGraphEdge,
 };
-
-// Predefined zoom for the initial graph view; user can zoom in/out from
-// the bar afterwards. Picked to match the readability shown in the design.
-const INITIAL_ZOOM = 1;
-const TOP_PADDING = 80;
-
-const CANVAS_CONTROLS_SHADOW =
-  '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 1px 4px 0 rgba(43, 57, 79, 0.06), 0 2px 8px 0 rgba(43, 57, 79, 0.05)';
-
-/**
- * Returns the React Flow viewport for the initial / reset view.
- *
- * Using `setViewport` (rather than `setCenter`) avoids the store-vs-DOM
- * dimension mismatch: `setCenter(x, y)` internally computes
- * `{x: store.w/2 − x*z, y: store.h/2 − y*z}`, so it divides by the store's
- * measured width/height. When React Flow's ResizeObserver has not yet fired
- * (or wrote the `|| 500` fallback), the two sources disagree and the anchor
- * lands at `(store.dim − dom.dim) / 2` away from the intended position.
- * Returning a full `Viewport` and calling `instance.setViewport` sidesteps
- * this: the anchored axis `(TOP_PADDING − min * zoom)` needs no dimension at
- * all, so it is exact regardless of measurement state.
- */
-const getHomeViewport = (
-  direction: LayoutDirection,
-  bounds: { minX: number; minY: number; centerX: number; centerY: number },
-  containerWidth: number,
-  containerHeight: number
-): Viewport =>
-  direction === 'LR'
-    ? {
-        x: TOP_PADDING - bounds.minX * INITIAL_ZOOM,
-        y: containerHeight / 2 - bounds.centerY * INITIAL_ZOOM,
-        zoom: INITIAL_ZOOM,
-      }
-    : {
-        x: containerWidth / 2 - bounds.centerX * INITIAL_ZOOM,
-        y: TOP_PADDING - bounds.minY * INITIAL_ZOOM,
-        zoom: INITIAL_ZOOM,
-      };
-
-function CanvasZoomControls({
-  onResetView,
-  onFitView,
-}: {
-  onResetView: () => void;
-  onFitView: () => void;
-}) {
-  const { euiTheme } = useEuiTheme();
-  const { zoomIn, zoomOut } = useReactFlow();
-
-  const zoomOutLabel = i18n.translate('workflowsUi.graph.zoomOut', {
-    defaultMessage: 'Zoom out',
-  });
-  const zoomInLabel = i18n.translate('workflowsUi.graph.zoomIn', {
-    defaultMessage: 'Zoom in',
-  });
-  const resetZoomLabel = i18n.translate('workflowsUi.graph.resetZoom', {
-    defaultMessage: 'Reset zoom',
-  });
-  const fitViewLabel = i18n.translate('workflowsUi.graph.fitView', {
-    defaultMessage: 'Fit to view',
-  });
-
-  const handleZoomOut = useCallback(() => zoomOut({ duration: 200 }), [zoomOut]);
-  const handleZoomIn = useCallback(() => zoomIn({ duration: 200 }), [zoomIn]);
-
-  return (
-    <Panel position="bottom-left" style={{ margin: 12 }}>
-      <div
-        css={{
-          background: euiTheme.colors.backgroundBasePlain,
-          borderRadius: 8,
-          boxShadow: CANVAS_CONTROLS_SHADOW,
-          display: 'flex',
-          flexDirection: 'column',
-          padding: 4,
-          gap: 2,
-        }}
-      >
-        <EuiToolTip content={zoomInLabel} position="left" disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="plusCircle"
-            aria-label={zoomInLabel}
-            color="text"
-            size="s"
-            onClick={handleZoomIn}
-            data-test-subj="workflowCanvas-zoom-in"
-          />
-        </EuiToolTip>
-        <EuiToolTip content={zoomOutLabel} position="left" disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="minusCircle"
-            aria-label={zoomOutLabel}
-            color="text"
-            size="s"
-            onClick={handleZoomOut}
-            data-test-subj="workflowCanvas-zoom-out"
-          />
-        </EuiToolTip>
-        <EuiToolTip content={resetZoomLabel} position="left" disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="bullseye"
-            aria-label={resetZoomLabel}
-            color="text"
-            size="s"
-            onClick={onResetView}
-            data-test-subj="workflowCanvas-reset-zoom"
-          />
-        </EuiToolTip>
-        <EuiToolTip content={fitViewLabel} position="left" disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="fullScreen"
-            aria-label={fitViewLabel}
-            color="text"
-            size="s"
-            onClick={onFitView}
-            data-test-subj="workflowCanvas-fit-view"
-          />
-        </EuiToolTip>
-      </div>
-    </Panel>
-  );
-}
 
 export interface WorkflowGraphCanvasProps {
   readonly workflow: WorkflowYaml | undefined;
@@ -226,6 +88,11 @@ export interface WorkflowGraphCanvasProps {
   /** Optional UI rendered inside the ReactFlow canvas (e.g. top-left toolbar). */
   readonly toolbar?: React.ReactNode;
   readonly selectedStepId?: string;
+  /**
+   * When set, keep the selected node visible in the unobstructed canvas
+   * (left of a floating config panel). Width in CSS px of that panel inset.
+   */
+  readonly selectedNodePanelInset?: number;
   readonly onStepSelect: (stepId: string | undefined) => void;
   readonly onNodeClick?: (stepId: string, stepType: string) => void;
   readonly onLayoutFailed?: (reason: string) => void;
@@ -264,6 +131,13 @@ export interface WorkflowGraphCanvasProps {
    */
   readonly showBackground?: boolean;
   /**
+   * Optional z-index applied to every edge. When omitted, React Flow stacks
+   * edges with their connected nodes — including above foreach/while group
+   * backgrounds for edges between child steps. Pass an explicit value (e.g. 0)
+   * for off-screen export canvases that need a stable stacking context.
+   */
+  readonly edgeZIndex?: number;
+  /**
    * Called once after ReactFlow has initialised and positioned the viewport
    * (including any fitView). Useful for off-screen export canvases that need
    * to know when the graph is ready to capture.
@@ -281,15 +155,43 @@ export interface WorkflowGraphCanvasProps {
    * `defaultViewport` on the next mount.
    */
   readonly onViewportChange?: (viewport: Viewport) => void;
+  /**
+   * Edit-mode callbacks. When provided the canvas renders insertion controls,
+   * node action clusters and the add-trigger affordances. Omit for read-only.
+   */
+  readonly edit?: WorkflowGraphEditActions;
+  /**
+   * Applied-state config warnings per node id (edit mode). Drives the
+   * top-right warning badge and its tooltip copy.
+   */
+  readonly nodeConfigWarnings?: ReadonlyMap<string, NodeConfigWarningReason>;
+  /** Node id to briefly highlight (just inserted); cleared by the caller. */
+  readonly flashNodeId?: string;
+  /** Ephemeral insert placeholder (empty while choosing, filled while configuring). */
+  readonly pendingInsert?: PendingInsertVisual;
+  /** Hide empty-state / trigger overlay insert controls (config panel is open). */
+  readonly suppressInsertionControls?: boolean;
+  /**
+   * Optional empty-state overlay when the workflow has no triggers and no steps
+   * in edit mode. When omitted, the default "Add trigger" card is shown.
+   */
+  readonly emptyState?: React.ReactNode;
+  /**
+   * When set, injects info / constants / outputs settings nodes one rank above
+   * the triggers (same footprint and spacing as step/trigger nodes).
+   */
+  readonly settingsNodes?: WorkflowSettingsNodesInput;
+  /** Opens / closes the settings panel when a settings node is activated. */
+  readonly onSettingsNodeSelect?: (kind: WorkflowSettingsNodeKind | undefined) => void;
 }
 
-// `zIndex` is deliberately unset: getElevatedEdgeZIndex (in @xyflow/system) defaults it to 0,
-// which keeps edges under nodes (they tie at 0 and nodes win on DOM order) while still adding
-// +1 for edges whose endpoints have a parentId — i.e. edges inside a container — so those paint
-// above the container body instead of under its 50%-opaque veil.
-const DEFAULT_EDGE_OPTIONS = { type: 'workflowEdge' } as const;
-
 function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
+  // Seed EUI icons before the first render of children (EuiIcon would otherwise
+  // flash its loading placeholder). Idempotent; a lazy initializer runs once.
+  useState(() => {
+    ensureWorkflowGraphEuiIcons();
+    return null;
+  });
   const {
     workflow,
     transformed,
@@ -297,6 +199,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     isYamlValid,
     toolbar,
     selectedStepId,
+    selectedNodePanelInset,
     onStepSelect,
     onNodeClick,
     onLayoutFailed,
@@ -311,29 +214,38 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     showMinimap = true,
     showZoomControls = false,
     showBackground = true,
+    edgeZIndex,
     onReady,
     defaultViewport,
     onViewportChange,
+    edit,
+    nodeConfigWarnings,
+    flashNodeId,
+    pendingInsert,
+    suppressInsertionControls,
+    emptyState,
+    settingsNodes,
+    onSettingsNodeSelect,
   } = props;
 
-  const actions = useMemo(
+  const defaultEdgeOptions = useMemo(
     () => ({
-      onStepRun,
-      canRunSteps,
-      renderStepIcon,
-      onStepSelect,
+      type: 'workflowEdge' as const,
+      ...(edgeZIndex !== undefined ? { zIndex: edgeZIndex } : {}),
     }),
-    [onStepRun, canRunSteps, renderStepIcon, onStepSelect]
+    [edgeZIndex]
   );
-  const { euiTheme, colorMode: euiColorMode } = useEuiTheme();
-  // Background dots: `borderBasePlain` in light; softened to 50% opacity in dark
-  // so the grid reads as subtle texture rather than active dots on the dark canvas.
-  const backgroundDotColor =
-    euiColorMode === 'DARK'
-      ? transparentize(euiTheme.colors.borderBasePlain, 0.5)
-      : euiTheme.colors.borderBasePlain;
+  const { euiTheme } = useEuiTheme();
+  // Readable grid texture so nodes lift off the canvas — keep dots soft so
+  // they don't compete with graph chrome. `borderBaseProminent` at 40% alpha
+  // holds in both color modes without a mode-specific branch.
+  const backgroundDotColor = transparentize(euiTheme.colors.borderBaseProminent, 0.4);
 
-  const { nodes, edges } = useWorkflowLayout({
+  const {
+    nodes: layoutNodes,
+    edges: layoutEdges,
+    transformed: graphTransform,
+  } = useWorkflowLayout({
     workflow,
     transformed,
     stepExecutions,
@@ -341,6 +253,32 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     onPerfMark,
     onLayoutFailed,
   });
+
+  const nodes = useMemo(() => {
+    if (!settingsNodes) return layoutNodes;
+    const settingsRfNodes = buildWorkflowSettingsNodes(layoutNodes, direction, settingsNodes);
+    return settingsRfNodes.length > 0 ? [...settingsRfNodes, ...layoutNodes] : layoutNodes;
+  }, [layoutNodes, direction, settingsNodes]);
+
+  // Node-anchored connection-point targets (edit mode mounts ports from these).
+  const insertionPoints = useMemo(
+    () => computeInsertionPoints(workflow, graphTransform),
+    [workflow, graphTransform]
+  );
+
+  // Only stable, caller-supplied callbacks live in the context. Volatile
+  // per-node values are written onto node `data` (see `nodesWithEditData`).
+  const actions = useMemo<WorkflowGraphActions>(
+    () => ({
+      onStepRun,
+      canRunSteps,
+      renderStepIcon,
+      onStepSelect,
+      onSettingsNodeSelect,
+      edit,
+    }),
+    [onStepRun, canRunSteps, renderStepIcon, onStepSelect, onSettingsNodeSelect, edit]
+  );
 
   // First-paint mark: time from component mount, not from navigation start.
   const mountTimeRef = useRef(performance.now());
@@ -354,254 +292,84 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     });
   }, [nodes.length, onPerfMark]);
 
-  // Decorate nodes with selection state — without rebuilding identity for non-changed ones
-  const decoratedNodes = useMemo(() => {
-    if (!selectedStepId) return nodes;
-    return nodes.map((n) => (n.id === selectedStepId ? { ...n, selected: true } : n));
-  }, [nodes, selectedStepId]);
+  const nodesWithEditData = useDecoratedNodes({
+    nodes,
+    insertionPoints,
+    isEditMode: edit !== undefined,
+    selectedStepId,
+    selectedSettingsKind: settingsNodes?.selectedKind,
+    nodeConfigWarnings,
+    pendingInsert,
+  });
+
+  const { nodes: animatedNodes, edges: animatedEdges } = useInsertLayoutAnimation({
+    nodes: nodesWithEditData,
+    edges: layoutEdges,
+    flashNodeId,
+  });
 
   const handleNodeClick = useCallback(
-    (_evt: React.MouseEvent, node: { id: string; data: Record<string, unknown> }) => {
+    (
+      _evt: React.MouseEvent,
+      node: { id: string; type?: string; data: Record<string, unknown> }
+    ) => {
+      if (node.type === 'settings') {
+        const kind = node.data?.kind;
+        if (kind === 'info' || kind === 'constants' || kind === 'outputs') {
+          onSettingsNodeSelect?.(kind);
+        }
+        return;
+      }
       const stepType = typeof node.data?.stepType === 'string' ? node.data.stepType : '';
       onStepSelect(node.id);
       onNodeClick?.(node.id, stepType);
     },
-    [onStepSelect, onNodeClick]
+    [onStepSelect, onNodeClick, onSettingsNodeSelect]
   );
 
   const handlePaneClick = useCallback(() => {
     if (selectedStepId) onStepSelect(undefined);
-  }, [selectedStepId, onStepSelect]);
+    if (settingsNodes?.selectedKind) onSettingsNodeSelect?.(undefined);
+  }, [selectedStepId, onStepSelect, settingsNodes?.selectedKind, onSettingsNodeSelect]);
 
   const handleMoveEnd = useCallback(
-    (event: MouseEvent | TouchEvent | null, viewport: Viewport) => {
-      // React Flow passes null for programmatic viewport changes (initial framing,
-      // setCenter, setViewport). Only persist viewports the user initiated.
-      if (event) onViewportChange?.(viewport);
-    },
+    (_event: MouseEvent | TouchEvent | null, viewport: Viewport) => onViewportChange?.(viewport),
     [onViewportChange]
   );
 
-  // Single-pass bounding-box over the stable layout output (`nodes`, not
-  // `decoratedNodes`) so that selection changes never invalidate the extent
-  // or reset-viewport callbacks.  `Math.min/max(...arr.map(...))` is avoided:
-  // spreading large arrays as call args can raise RangeError on very big graphs.
-  const graphBounds = useMemo(() => {
-    if (nodes.length === 0) {
-      return { minX: -1000, minY: -1000, maxX: 1000, maxY: 1000, centerX: 0, centerY: 0 };
-    }
-    let minX = Infinity;
-    let minY = Infinity;
-    let maxX = -Infinity;
-    let maxY = -Infinity;
-    for (const n of nodes) {
-      const w = typeof n.width === 'number' ? n.width : 300;
-      const h = typeof n.height === 'number' ? n.height : 64;
-      if (n.position.x < minX) minX = n.position.x;
-      if (n.position.y < minY) minY = n.position.y;
-      if (n.position.x + w > maxX) maxX = n.position.x + w;
-      if (n.position.y + h > maxY) maxY = n.position.y + h;
-    }
-    return { minX, minY, maxX, maxY, centerX: (minX + maxX) / 2, centerY: (minY + maxY) / 2 };
-  }, [nodes]);
+  const hasWorkflowStructure =
+    (workflow?.triggers?.length ?? 0) > 0 || (workflow?.steps?.length ?? 0) > 0;
 
-  // Restrict panning to the graph's bounding box plus a comfortable margin
-  // so the user can't scroll far off into empty space.
-  const translateExtent = useMemo<[[number, number], [number, number]]>(() => {
-    const PAD = 400;
-    return [
-      [graphBounds.minX - PAD, graphBounds.minY - PAD],
-      [graphBounds.maxX + PAD, graphBounds.maxY + PAD],
-    ];
-  }, [graphBounds]);
+  const panelFocusNodeId =
+    selectedStepId ??
+    (settingsNodes?.selectedKind ? `settings:${settingsNodes.selectedKind}` : undefined);
+  const { wrapperRef, handleInit, handleResetView, handleFitView } = useCanvasViewport({
+    nodes,
+    direction,
+    hasWorkflowStructure,
+    fitView: fitViewProp,
+    fitViewOptions: fitViewOptionsProp,
+    defaultViewport,
+    selectedNodePanelInset,
+    panelFocusNodeId,
+    onReady,
+  });
 
-  const wrapperRef = useRef<HTMLDivElement | null>(null);
-  const flowInstanceRef = useRef<ReactFlowInstance | null>(null);
-
-  // React Flow's `setCenter` derives the viewport from the store's container
-  // `width`/`height`, which are 0 until its ResizeObserver measures the canvas
-  // (usually *after* `onInit` fires). Subscribe to those measured dimensions so
-  // the initial centering can wait until they are known.
-  const measuredWidth = useStore((s) => s.width);
-  const measuredHeight = useStore((s) => s.height);
-  const hasCenteredInitialViewRef = useRef(false);
-  const [instanceReady, setInstanceReady] = useState(false);
-  // Starts true when the initial viewport is already known (saved pan/zoom or
-  // fitView). Otherwise false until applyHomeViewport runs, so the canvas fades
-  // in after the initial centering rather than flashing at the wrong position.
-  const [isPositioned, setIsPositioned] = useState(fitViewProp || !!defaultViewport);
-
-  // Single home-viewport implementation shared by initial centering, direction
-  // changes, and the Reset zoom button. The leading-edge anchor is direction-
-  // aware: trigger node near top for TB, near left for LR (see getResetViewTarget).
-  const applyHomeViewport = useCallback(
-    (instance: ReactFlowInstance, duration: number) => {
-      const container = wrapperRef.current;
-      if (nodes.length === 0 || !container) return;
-      const vp = getHomeViewport(
-        direction,
-        graphBounds,
-        container.clientWidth,
-        container.clientHeight
-      );
-      void instance.setViewport(vp, { duration });
-    },
-    [nodes.length, graphBounds, direction]
-  );
-
-  const handleResetView = useCallback(() => {
-    const instance = flowInstanceRef.current;
-    if (!instance) return;
-    applyHomeViewport(instance, 200);
-  }, [applyHomeViewport]);
-
-  // Scales and pans the viewport to show every node. Uses fitBounds (direct
-  // panZoom.setViewport call) rather than fitView (queued through BatchProvider +
-  // React re-render cycle) so the viewport updates synchronously without any
-  // interference from the outer ReactFlowProvider context.
-  const handleFitView = useCallback(() => {
-    const instance = flowInstanceRef.current;
-    if (!instance || nodes.length === 0) return;
-
-    instance.fitBounds(
-      {
-        x: graphBounds.minX,
-        y: graphBounds.minY,
-        width: graphBounds.maxX - graphBounds.minX,
-        height: graphBounds.maxY - graphBounds.minY,
-      },
-      { duration: 200, padding: 0.08 }
-    );
-  }, [nodes.length, graphBounds]);
-
-  // Record the instance and decide who owns the initial viewport. The default
-  // centering is deferred to the measurement-gated effect below, because
-  // `setCenter` needs the container dimensions React Flow has not measured yet
-  // when `onInit` fires.
-  const handleInit = useCallback(
-    (instance: ReactFlowInstance) => {
-      flowInstanceRef.current = instance;
-
-      // When fitView is declarative (fitViewProp=true), ReactFlow handles the
-      // viewport positioning internally before firing onInit. Just signal ready.
-      if (fitViewProp) {
-        hasCenteredInitialViewRef.current = true;
-        onReady?.();
-        return;
-      }
-
-      // If the caller supplied a `defaultViewport`, React Flow has already
-      // restored the user's previous zoom/pan — don't re-center over it.
-      // (The store doesn't survive a remount of <ReactFlow>, so we can't
-      // detect this from `instance.getViewport()`; the explicit prop is the
-      // only reliable signal.)
-      if (defaultViewport) {
-        hasCenteredInitialViewRef.current = true;
-        onReady?.();
-        return;
-      }
-
-      setInstanceReady(true);
-    },
-    [defaultViewport, fitViewProp, onReady]
-  );
-
-  // Perform the one-time initial centering, but only once React Flow has
-  // measured the canvas. Centering during the 0-dimension window computes a
-  // wrong transform that pins a small graph to the top of the view until the
-  // first pan re-clamps it against `translateExtent`. The ref keeps this to a
-  // single centering for the component's lifetime, so later resizes never yank
-  // the viewport away from the user.
-  useEffect(() => {
-    if (hasCenteredInitialViewRef.current || !instanceReady) {
-      return;
-    }
-    const instance = flowInstanceRef.current;
-    if (!instance || nodes.length === 0) {
-      return;
-    }
-    if (measuredWidth <= 0 || measuredHeight <= 0) {
-      return;
-    }
-    // React Flow writes `offsetWidth || 500`, so a non-zero store dimension only
-    // proves its ResizeObserver ran — not that the container is laid out. Gate on
-    // the container's own box, the same element `applyHomeViewport` measures.
-    const container = wrapperRef.current;
-    if (!container || container.clientWidth <= 0 || container.clientHeight <= 0) {
-      return;
-    }
-    hasCenteredInitialViewRef.current = true;
-    applyHomeViewport(instance, 0);
-    setIsPositioned(true);
-    onReady?.();
-  }, [instanceReady, measuredWidth, measuredHeight, nodes.length, applyHomeViewport, onReady]);
-
-  const previousDirectionRef = useRef(direction);
-  useEffect(() => {
-    if (previousDirectionRef.current === direction) {
-      return;
-    }
-    previousDirectionRef.current = direction;
-
-    const instance = flowInstanceRef.current;
-    if (!instance || nodes.length === 0) {
-      return;
-    }
-
-    // Wait for dagre positions to commit in React Flow before re-centering.
-    let raf2: number | undefined;
-    const raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(() => {
-        if (fitViewProp) {
-          void instance.fitView({
-            padding: fitViewOptionsProp?.padding ?? 0.08,
-            minZoom: fitViewOptionsProp?.minZoom ?? 0.2,
-            maxZoom: fitViewOptionsProp?.maxZoom ?? 2,
-            duration: 200,
-          });
-        } else {
-          applyHomeViewport(instance, 200);
-        }
-      });
-    });
-
-    return () => {
-      cancelAnimationFrame(raf1);
-      if (raf2 !== undefined) {
-        cancelAnimationFrame(raf2);
-      }
-    };
-  }, [direction, nodes.length, fitViewProp, fitViewOptionsProp, applyHomeViewport]);
+  // ⌘K / Ctrl+K appends to the selected sequence (trunk when nothing selected).
+  useAppendStepShortcut({ edit, suppressInsertionControls, insertionPoints, selectedStepId });
 
   const minimapNodeColor = useCallback(
-    (n: { type?: string; data?: unknown }) => {
-      // Placeholder nodes for empty `if` branches are invisible — hide them in
-      // the minimap too so they don't appear as spurious coloured dots.
-      if (n.type === 'bypassLane') return 'transparent';
-      const data = n.data as
-        | {
-            stepExecution?: { status?: string };
-            isTrigger?: boolean;
-            stepType?: string;
-            fallbackOf?: string;
-          }
-        | undefined;
-      const status = data?.stepExecution?.status;
-      if (status === 'failed') return euiTheme.colors.danger;
-      // Fallback-lane nodes that have not yet failed render in a lighter-danger
-      // tint so they read as "the error path" without impersonating a failed step.
-      // The `status === 'failed'` arm above takes priority, so a fallback step
-      // that really failed still reads as full danger.
-      if (data?.fallbackOf !== undefined) return euiTheme.colors.dangerText;
-      // Figma (node 10808:19179): the trigger node reads as pink (accent) in the
-      // minimap, matching its icon accent; all other steps are blue (primary).
-      // Tokens keep the light look (#0b64dd / #ee72a6) and adapt in dark mode.
-      const isTriggerNode =
-        data?.isTrigger || (data?.stepType ? TRIGGER_STEP_TYPES.has(data.stepType) : false);
-      return isTriggerNode ? euiTheme.colors.accent : euiTheme.colors.primary;
-    },
+    (n: { type?: string; data?: unknown }) =>
+      getMinimapNodeColor(n, {
+        danger: euiTheme.colors.danger,
+        success: euiTheme.colors.success,
+        dangerText: euiTheme.colors.dangerText,
+        accent: euiTheme.colors.accent,
+        primary: euiTheme.colors.primary,
+      }),
     [
       euiTheme.colors.danger,
+      euiTheme.colors.success,
       euiTheme.colors.dangerText,
       euiTheme.colors.accent,
       euiTheme.colors.primary,
@@ -609,6 +377,14 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   );
 
   const dimmed = !isYamlValid;
+  // Zoom / minimap chrome stays available on the default empty canvas; pan waits
+  // until the workflow has structure (no `panOnDrag`, so React Flow shows no grab cursor). Hide chrome entirely for the prototype
+  // creation empty-state overlay, which owns the full viewport.
+  const isEmptyWorkflow = edit !== undefined && !hasWorkflowStructure;
+  const showNavChrome = hasWorkflowStructure || emptyState == null;
+  const canPan = hasWorkflowStructure;
+  const showZoomCluster = showNavChrome && showZoomControls;
+  const showMinimapPanel = showNavChrome && showMinimap;
 
   return (
     <WorkflowGraphActionsContext.Provider value={actions}>
@@ -619,16 +395,6 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
           width: '100%',
           height: '100%',
           background: showBackground ? euiTheme.colors.backgroundBaseSubdued : 'transparent',
-          // Inset the MiniMap's inner SVG so the container's white background
-          // shows through as a 4px frame on all sides. React Flow sizes the
-          // SVG via attributes to match the container's outer dimensions, so
-          // CSS padding alone only takes effect on top/left — shrinking the
-          // SVG dimensions in CSS is what works uniformly.
-          '& .react-flow__minimap-svg': {
-            margin: 4,
-            width: 'calc(100% - 8px)',
-            height: 'calc(100% - 8px)',
-          },
         }}
         data-test-subj="workflowGraphCanvas"
       >
@@ -636,9 +402,9 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
           <div
             css={{
               position: 'absolute',
-              top: 8,
-              left: 8,
-              right: 8,
+              top: euiTheme.size.s,
+              left: euiTheme.size.s,
+              right: euiTheme.size.s,
               zIndex: euiTheme.levels.header,
             }}
           >
@@ -658,18 +424,18 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
           css={{
             width: '100%',
             height: '100%',
-            opacity: dimmed ? 0.5 : isPositioned ? 1 : 0,
+            opacity: dimmed ? 0.5 : 1,
             pointerEvents: dimmed ? 'none' : 'auto',
-            transition: 'opacity 200ms ease',
+            [euiCanAnimate]: { transition: 'opacity 200ms ease' },
           }}
         >
-          <GraphErrorBoundary onError={onLayoutFailed}>
+          <GraphErrorBoundary resetKeys={[workflow, transformed]} onError={onLayoutFailed}>
             <ReactFlow
-              nodes={decoratedNodes}
-              edges={edges}
+              nodes={animatedNodes}
+              edges={animatedEdges}
               nodeTypes={NODE_TYPES}
               edgeTypes={EDGE_TYPES}
-              defaultEdgeOptions={DEFAULT_EDGE_OPTIONS}
+              defaultEdgeOptions={defaultEdgeOptions}
               colorMode={colorMode}
               onInit={handleInit}
               fitView={fitViewProp}
@@ -688,48 +454,75 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
               elevateNodesOnSelect={false}
               elevateEdgesOnSelect={false}
               elementsSelectable
-              panOnScroll
-              panOnDrag
+              panOnScroll={canPan}
+              panOnDrag={canPan}
               zoomOnScroll={false}
-              zoomOnPinch={true}
+              zoomOnPinch={showNavChrome}
               zoomOnDoubleClick={false}
-              translateExtent={translateExtent}
               minZoom={0.1}
             >
               {showBackground && (
                 <Background
                   bgColor={euiTheme.colors.backgroundBaseSubdued}
                   color={backgroundDotColor}
+                  gap={16}
+                  size={1.25}
                 />
               )}
               {toolbar}
-              {showZoomControls && (
-                <CanvasZoomControls onResetView={handleResetView} onFitView={handleFitView} />
+              {showZoomCluster && (
+                <Panel position="bottom-left" style={{ margin: WORKFLOWS_CANVAS_CHROME_INSET }}>
+                  <div css={chromeAppearCss} data-test-subj="workflowCanvas-navChrome-zoom">
+                    <CanvasZoomControls onResetView={handleResetView} onFitView={handleFitView} />
+                  </div>
+                </Panel>
               )}
-              {showMinimap && (
-                <MiniMap
-                  pannable
-                  zoomable
-                  position="bottom-right"
-                  bgColor={euiTheme.colors.backgroundBaseSubdued}
-                  maskColor={transparentize(euiTheme.colors.backgroundBaseSubdued, 0.7)}
-                  nodeColor={minimapNodeColor}
-                  nodeStrokeWidth={0}
-                  nodeBorderRadius={2}
-                  style={{
-                    width: 160,
-                    height: 126,
-                    boxSizing: 'border-box',
-                    background: euiTheme.colors.emptyShade,
-                    borderRadius: 4,
-                    overflow: 'hidden',
-                    boxShadow:
-                      '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 1px 4px 0 rgba(43, 57, 79, 0.06), 0 2px 8px 0 rgba(43, 57, 79, 0.05)',
-                  }}
+              {showMinimapPanel && (
+                <Panel position="bottom-right" style={{ margin: WORKFLOWS_CANVAS_CHROME_INSET }}>
+                  <div css={chromeAppearCss} data-test-subj="workflowCanvas-navChrome-minimap">
+                    <CanvasMinimap nodeColor={minimapNodeColor} />
+                  </div>
+                </Panel>
+              )}
+              {!isEmptyWorkflow && edit && !suppressInsertionControls && (
+                <WorkflowGraphEditOverlays
+                  nodes={animatedNodes}
+                  edges={animatedEdges}
+                  insertionPoints={insertionPoints}
+                  direction={direction}
+                  edit={edit}
+                  forkNodeToJoinId={graphTransform.forkNodeToJoinId}
+                />
+              )}
+              {edit && !suppressInsertionControls && !isEmptyWorkflow && (
+                <Panel position="bottom-center" style={{ marginBottom: euiTheme.size.s }}>
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    data-test-subj="workflowGraphCmdKCaption"
+                    css={{ userSelect: 'none', pointerEvents: 'none' }}
+                  >
+                    {i18n.translate('workflowsUi.graph.cmdKCaption', {
+                      defaultMessage: '{shortcut} to add a step',
+                      values: { shortcut: CMD_K_SHORTCUT_LABEL },
+                    })}
+                  </EuiText>
+                </Panel>
+              )}
+              {edit && pendingInsert && (
+                <WorkflowGraphPendingNode
+                  pending={pendingInsert}
+                  nodes={nodes}
+                  insertionPoints={insertionPoints}
+                  direction={direction}
                 />
               )}
             </ReactFlow>
           </GraphErrorBoundary>
+          {edit &&
+            isEmptyWorkflow &&
+            !pendingInsert &&
+            (emptyState ?? <WorkflowGraphEmptyAddTrigger edit={edit} />)}
         </div>
       </div>
     </WorkflowGraphActionsContext.Provider>

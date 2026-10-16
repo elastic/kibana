@@ -52,7 +52,23 @@ const mockFlowControlOption: ActionOption = {
   iconColor: '#54B399',
 };
 
-const mockOptions: ActionOptionData[] = [mockGroup, mockFlowControlOption];
+const mockHttpOption: ActionOption = {
+  id: 'http',
+  label: 'HTTP Request',
+  description: 'Make an HTTP request',
+  iconType: 'globe',
+};
+
+const mockFlowControlGroup: ActionGroup = {
+  id: 'flowControl',
+  label: 'Flow control',
+  description: 'Branch and loop steps',
+  iconType: 'branch',
+  iconColor: '#54B399',
+  options: [mockFlowControlOption],
+};
+
+const mockOptions: ActionOptionData[] = [mockGroup, mockHttpOption, mockFlowControlGroup];
 
 jest.mock('../lib/get_action_options', () => ({
   getActionOptions: jest.fn(() => mockOptions),
@@ -92,44 +108,40 @@ describe('ActionsMenu', () => {
   it('renders top-level options', () => {
     renderComponent();
     expect(screen.getByText('Triggers')).toBeInTheDocument();
-    expect(screen.getByText('If Condition')).toBeInTheDocument();
+    expect(screen.getByText('HTTP Request')).toBeInTheDocument();
+    expect(screen.getByText('Flow control')).toBeInTheDocument();
   });
 
   it('renders option descriptions', () => {
     renderComponent();
     expect(screen.getByText('Choose which event starts a workflow')).toBeInTheDocument();
-    expect(screen.getByText('Define condition with KQL to execute the action')).toBeInTheDocument();
+    expect(screen.getByText('Make an HTTP request')).toBeInTheDocument();
   });
 
   it('calls onActionSelected when a leaf option is clicked', () => {
     const onActionSelected = jest.fn();
     renderComponent({ onActionSelected });
 
-    // EuiSelectable renders options with role="option"
     const options = screen.getAllByRole('option');
-    // Click the "If Condition" option (second in the list)
-    const ifOption = options.find((opt) => opt.textContent?.includes('If Condition'));
-    expect(ifOption).toBeDefined();
-    fireEvent.click(ifOption!);
+    const httpOption = options.find((opt) => opt.textContent?.includes('HTTP Request'));
+    expect(httpOption).toBeDefined();
+    fireEvent.click(httpOption!);
 
     expect(onActionSelected).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'if', label: 'If Condition' })
+      expect.objectContaining({ id: 'http', label: 'HTTP Request' })
     );
   });
 
   it('navigates into a group when a group option is clicked', () => {
     renderComponent();
 
-    // EuiSelectable renders options with role="option"
     const options = screen.getAllByRole('option');
     const triggersOption = options.find((opt) => opt.textContent?.includes('Triggers'));
     expect(triggersOption).toBeDefined();
     fireEvent.click(triggersOption!);
 
-    // Should now show the child options
     expect(screen.getByText('Manual')).toBeInTheDocument();
     expect(screen.getByText('Alert')).toBeInTheDocument();
-    // Should show breadcrumbs
     expect(screen.getByText('All actions')).toBeInTheDocument();
     expect(screen.getByText('Triggers')).toBeInTheDocument();
   });
@@ -137,31 +149,26 @@ describe('ActionsMenu', () => {
   it('navigates back from a group when All actions breadcrumb is clicked', () => {
     renderComponent();
 
-    // Navigate into the group
     const options = screen.getAllByRole('option');
     const triggersOption = options.find((opt) => opt.textContent?.includes('Triggers'));
     fireEvent.click(triggersOption!);
     expect(screen.getByText('All actions')).toBeInTheDocument();
 
-    // Click All actions breadcrumb
     fireEvent.click(screen.getByText('All actions'));
 
-    // Should show top-level options again
     expect(screen.getByText('Actions menu')).toBeInTheDocument();
     expect(screen.getByText('Triggers')).toBeInTheDocument();
-    expect(screen.getByText('If Condition')).toBeInTheDocument();
+    expect(screen.getByText('HTTP Request')).toBeInTheDocument();
   });
 
   it('calls onActionSelected when a child leaf option is selected within a group', () => {
     const onActionSelected = jest.fn();
     renderComponent({ onActionSelected });
 
-    // Navigate into "Triggers"
     const options = screen.getAllByRole('option');
     const triggersOption = options.find((opt) => opt.textContent?.includes('Triggers'));
     fireEvent.click(triggersOption!);
 
-    // Select "Manual" from the sub-options
     const childOptions = screen.getAllByRole('option');
     const manualOption = childOptions.find((opt) => opt.textContent?.includes('Manual'));
     expect(manualOption).toBeDefined();
@@ -212,7 +219,7 @@ describe('ActionsMenu', () => {
 
       fireEvent.keyDown(searchInput, { key: 'ArrowUp' });
       // Wrap: from first Up goes to last actionable root item
-      expect(getKeyboardActiveLabel()).toContain('If Condition');
+      expect(getKeyboardActiveLabel()).toContain('Flow control');
     });
 
     it('scrolls each newly active option into view', () => {
@@ -245,7 +252,7 @@ describe('ActionsMenu', () => {
       searchInput.focus();
 
       fireEvent.keyDown(searchInput, { key: 'ArrowUp' });
-      expect(getKeyboardActiveLabel()).toContain('If Condition');
+      expect(getKeyboardActiveLabel()).toContain('Flow control');
 
       fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
       expect(getKeyboardActiveLabel()).toContain('Triggers');
@@ -289,7 +296,7 @@ describe('ActionsMenu', () => {
 
       fireEvent.keyDown(searchInput, { key: 'ArrowLeft' });
 
-      expect(screen.getByText('If Condition')).toBeInTheDocument();
+      expect(screen.getByText('HTTP Request')).toBeInTheDocument();
       expect(getKeyboardActiveLabel()).toContain('Triggers');
     });
 
@@ -301,11 +308,11 @@ describe('ActionsMenu', () => {
 
       fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
       fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
-      expect(getKeyboardActiveLabel()).toContain('If Condition');
+      expect(getKeyboardActiveLabel()).toContain('HTTP Request');
 
       fireEvent.keyDown(searchInput, { key: 'ArrowRight' });
 
-      expect(getKeyboardActiveLabel()).toContain('If Condition');
+      expect(getKeyboardActiveLabel()).toContain('HTTP Request');
       expect(screen.queryByText('Manual')).not.toBeInTheDocument();
       expect(onActionSelected).not.toHaveBeenCalled();
     });
@@ -321,7 +328,7 @@ describe('ActionsMenu', () => {
       fireEvent.keyDown(searchInput, { key: 'Enter' });
 
       expect(onActionSelected).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'if', label: 'If Condition' })
+        expect.objectContaining({ id: 'http', label: 'HTTP Request' })
       );
     });
 
@@ -332,11 +339,11 @@ describe('ActionsMenu', () => {
       searchInput.focus();
 
       fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
-      fireEvent.mouseMove(screen.getByText('If Condition'));
+      fireEvent.mouseMove(screen.getByText('HTTP Request'));
       fireEvent.keyDown(searchInput, { key: 'Enter' });
 
       expect(onActionSelected).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'if', label: 'If Condition' })
+        expect.objectContaining({ id: 'http', label: 'HTTP Request' })
       );
     });
 
@@ -375,5 +382,71 @@ describe('ActionsMenu', () => {
       expect(searchInput.value).toBe('tr');
       expect(searchInput.selectionStart).toBe(1);
     });
+  });
+});
+
+describe('ActionsMenu — insertion context', () => {
+  const clickOption = (text: string) => {
+    const option = screen.getAllByRole('option').find((opt) => opt.textContent?.includes(text));
+    expect(option).toBeDefined();
+    fireEvent.click(option!);
+  };
+
+  it('step mode hides the Triggers group and shows the context label', () => {
+    renderComponent({ insertionContext: { mode: 'step' } });
+    expect(screen.getByTestId('actionsMenuContextLabel')).toHaveTextContent('Inserting a step');
+    expect(screen.queryByText('Triggers')).not.toBeInTheDocument();
+    expect(screen.getByText('HTTP Request')).toBeInTheDocument();
+  });
+
+  it('error mode hides Triggers and Flow control', () => {
+    renderComponent({ insertionContext: { mode: 'error' } });
+    expect(screen.getByTestId('actionsMenuContextLabel')).toHaveTextContent(
+      'Adding an error-handling route'
+    );
+    expect(screen.queryByText('Triggers')).not.toBeInTheDocument();
+    expect(screen.queryByText('Flow control')).not.toBeInTheDocument();
+    expect(screen.queryByText('If Condition')).not.toBeInTheDocument();
+    expect(screen.getByText('HTTP Request')).toBeInTheDocument();
+  });
+
+  it('compact presentation shows a single-column menu with the root title', () => {
+    renderComponent({
+      presentation: 'compact',
+      insertionContext: { mode: 'error' },
+      rootTitle: 'Add fallback step',
+      onClose: jest.fn(),
+    });
+    expect(screen.getByTestId('actionsMenuCompact')).toBeInTheDocument();
+    expect(screen.getByText('Add fallback step')).toBeInTheDocument();
+    expect(screen.queryByTestId('actionsMenuContextLabel')).not.toBeInTheDocument();
+  });
+
+  it('trigger mode lists trigger leaves at the root', () => {
+    renderComponent({ insertionContext: { mode: 'trigger' } });
+    expect(screen.getByTestId('actionsMenuContextLabel')).toHaveTextContent('Adding a trigger');
+    expect(screen.getByText('Manual')).toBeInTheDocument();
+    expect(screen.getByText('Alert')).toBeInTheDocument();
+    expect(screen.queryByText('HTTP Request')).not.toBeInTheDocument();
+    expect(screen.queryByText('Triggers')).not.toBeInTheDocument();
+  });
+
+  it('selecting a step fires onActionSelected immediately', () => {
+    const onActionSelected = jest.fn();
+    renderComponent({
+      insertionContext: { mode: 'step' },
+      onActionSelected,
+    });
+    clickOption('HTTP Request');
+    expect(onActionSelected).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'http', label: 'HTTP Request' })
+    );
+  });
+
+  it('selecting a trigger fires onActionSelected immediately', () => {
+    const onActionSelected = jest.fn();
+    renderComponent({ insertionContext: { mode: 'trigger' }, onActionSelected });
+    clickOption('Manual');
+    expect(onActionSelected).toHaveBeenCalledWith(expect.objectContaining({ id: 'manual' }));
   });
 });

@@ -113,9 +113,26 @@ jest.mock('../../../widgets/workflow_yaml_editor', () => ({
 }));
 
 jest.mock('../../../features/workflow_visual_editor', () => ({
-  WorkflowVisualEditor: () => (
+  WorkflowVisualEditor: ({ onStepRun, onRunWorkflow, canRunStepDirectly }: any) => (
     <div data-test-subj="workflow-visual-editor">
       <div data-test-subj="visual-editor-content">{'Visual Editor'}</div>
+      <div data-test-subj="visual-editor-can-run-directly">
+        {String(canRunStepDirectly?.('test-step'))}
+      </div>
+      <button
+        type="button"
+        data-test-subj="visual-editor-run-step-in-editor"
+        onClick={() => onStepRun?.({ stepId: 'test-step', actionType: 'run', stayInEditor: true })}
+      >
+        {'Run step in editor'}
+      </button>
+      <button
+        type="button"
+        data-test-subj="visual-editor-run-workflow-in-editor"
+        onClick={() => onRunWorkflow?.()}
+      >
+        {'Run workflow in editor'}
+      </button>
     </div>
   ),
 }));
@@ -291,6 +308,7 @@ describe('WorkflowDetailEditor', () => {
     });
 
     it('hides the bottom-bar actions menu on the executions tab', () => {
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
       mockUseWorkflowUrlState.mockReturnValue({
         ...mockUseWorkflowUrlState(),
         activeTab: 'executions',
@@ -351,6 +369,11 @@ describe('WorkflowDetailEditor', () => {
     it('highlights trigger sentinel when focusedTriggerId is set in Redux state', async () => {
       const store = mockStore();
 
+      // Enable the visual editor so handleEditorViewChange runs the graph-focus logic.
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockImplementation(
+        (settingId: string) => settingId === 'workflows:experimentalFeatures'
+      );
+
       // Simulate cursor being inside the triggers block via Redux-derived focusedTriggerId
       mockUseSelector.mockImplementation((selector: any) => {
         if (selector === selectFocusedTriggerId) return HIGHLIGHTED_STEP_TRIGGER;
@@ -376,6 +399,10 @@ describe('WorkflowDetailEditor', () => {
     it('highlights step when focusedStepId is set in Redux state', async () => {
       const store = mockStore();
 
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockImplementation(
+        (settingId: string) => settingId === 'workflows:experimentalFeatures'
+      );
+
       mockUseSelector.mockImplementation((selector: any) => {
         if (selector === selectFocusedTriggerId) return undefined;
         if (selector === selectFocusedStepId) return 'test-step';
@@ -400,6 +427,8 @@ describe('WorkflowDetailEditor', () => {
 
   describe('peer rendering — item 6 (bodyOverride decoupling)', () => {
     it('renders WorkflowYAMLEditor without bodyOverride or hideEditorBody props', async () => {
+      // Enable the visual editor so graph-related props could theoretically be passed
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'workflow',
         editorView: 'yaml', // YAML view
@@ -426,6 +455,7 @@ describe('WorkflowDetailEditor', () => {
     });
 
     it('renders the visual editor and read-only badge in graph view', async () => {
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'workflow',
         editorView: 'graph', // Graph view
@@ -499,6 +529,67 @@ describe('WorkflowDetailEditor', () => {
       );
     });
 
+    describe('from the graph reference tree (stayInEditor)', () => {
+      const renderGraphEditor = () => {
+        (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
+        mockUseWorkflowUrlState.mockReturnValue({
+          ...mockUseWorkflowUrlState(),
+          editorView: 'graph',
+          setSelectedExecution: mockSetSelectedExecution,
+        });
+        return renderEditor();
+      };
+      const mockSetSelectedExecution = jest.fn();
+
+      it('records a direct run instead of selecting the execution', async () => {
+        mockUseContextOverrideData.mockReturnValue({ stepContext: {}, schema: {} } as any);
+        const { findByTestId, store } = renderGraphEditor();
+
+        await act(async () => {
+          (await findByTestId('visual-editor-run-step-in-editor')).click();
+        });
+
+        await waitFor(() => {
+          expect(store.getState().detail.treeRuns).toEqual([
+            { executionId: 'exec-123', stepId: 'test-step' },
+          ]);
+        });
+        expect(mockSetSelectedExecution).not.toHaveBeenCalled();
+      });
+
+      it('opens the step modal in stay-in-editor mode when the step needs inputs', async () => {
+        mockUseContextOverrideData.mockReturnValue({
+          stepContext: { steps: { a: { output: 'x' } } },
+          schema: {},
+        } as any);
+        const { findByTestId, store } = renderGraphEditor();
+
+        await act(async () => {
+          (await findByTestId('visual-editor-run-step-in-editor')).click();
+        });
+
+        expect(store.getState().detail.testStepModalOpenStepId).toBe('test-step');
+        expect(store.getState().detail.testStepModalStayInEditor).toBe(true);
+      });
+
+      it('opens the workflow test modal in stay-in-editor mode, skipping the unsaved-changes prompt', async () => {
+        const { findByTestId, store } = renderGraphEditor();
+
+        await act(async () => {
+          (await findByTestId('visual-editor-run-workflow-in-editor')).click();
+        });
+
+        expect(store.getState().detail.isTestModalOpen).toBe(true);
+        expect(store.getState().detail.testModalStayInEditor).toBe(true);
+      });
+
+      it('tells the tree whether a step can run without inputs', async () => {
+        mockUseContextOverrideData.mockReturnValue({ stepContext: {}, schema: {} } as any);
+        const { findByTestId } = renderGraphEditor();
+        expect(await findByTestId('visual-editor-can-run-directly')).toHaveTextContent('true');
+      });
+    });
+
     it('does not run step or open modal when on the executions tab', async () => {
       // Regression: "Run step" must be a no-op on the Executions tab because
       // handleStepRun uses the editable (draft) YAML/context, which differs from
@@ -554,13 +645,18 @@ describe('WorkflowDetailEditor', () => {
     const getBottomBarOffset = (getByTestId: (id: string) => HTMLElement) =>
       getComputedStyle(getByTestId('workflowDetailBottomBar')).bottom;
 
+    beforeEach(() => {
+      // The bottom bar only mounts when the visual editor is enabled.
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
+    });
+
     it('floats above the validation panel docked under the YAML editor', () => {
       const { getByTestId } = renderEditor();
-      expect(getBottomBarOffset(getByTestId)).toBe('12px');
+      expect(getBottomBarOffset(getByTestId)).toBe('16px');
 
       fireEvent.click(getByTestId('report-validation-panel-height'));
 
-      expect(getBottomBarOffset(getByTestId)).toBe('60px');
+      expect(getBottomBarOffset(getByTestId)).toBe('64px');
     });
 
     it('ignores the validation panel height in graph view', () => {
@@ -572,7 +668,7 @@ describe('WorkflowDetailEditor', () => {
 
       fireEvent.click(getByTestId('report-validation-panel-height'));
 
-      expect(getBottomBarOffset(getByTestId)).toBe('12px');
+      expect(getBottomBarOffset(getByTestId)).toBe('16px');
     });
   });
 
@@ -597,6 +693,8 @@ describe('WorkflowDetailEditor', () => {
     };
 
     beforeEach(() => {
+      // The bottom bar only mounts when the visual editor is enabled.
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
       localStorage.removeItem(SkipUnsavedRunConfirmationStorageKey);
     });
 

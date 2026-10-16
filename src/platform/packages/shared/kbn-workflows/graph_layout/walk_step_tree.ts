@@ -150,10 +150,3 @@ export const STEP_CHILD_CONTAINER_KEYS = [
 ] as const;
 
 export type StepChildContainerKey = (typeof STEP_CHILD_CONTAINER_KEYS)[number];
-
-/** @deprecated Use `visitStepChildSlots` instead. Kept for callers not yet migrated. */
-export const visitStepChildren = (step: Step, callback: (children: Step[]) => void): void => {
-  visitStepChildSlots(step, (_slot, children) => {
-    if (children.length > 0) callback(children);
-  });
-};

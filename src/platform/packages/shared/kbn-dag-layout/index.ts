@@ -12,13 +12,9 @@ export type {
   DagEdge,
   DagCompoundGroup,
   DagPositionedNode,
-  DagPositionedEdge,
   DagLayoutDirection,
   DagLayoutOptions,
   DagReservedLane,
   DagReservedLanePlacement,
 } from './src/types';
 export { dagLayout } from './src/dag_layout';
-export { resolveShiftedEdgePoints } from './src/apply_dagre';
-export { STRAIGHT_X_THRESHOLD } from './src/constants';
-export { separatePositionedOverlapsInPlace } from './src/align_cross_axis';

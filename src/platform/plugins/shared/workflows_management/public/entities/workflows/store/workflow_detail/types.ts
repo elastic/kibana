@@ -27,9 +27,21 @@ export type ConnectorsLoadState =
   | { status: 'ready' }
   | { status: 'failed'; error: string };
 
+export interface TreeRun {
+  readonly executionId: string;
+  /** Set for a single-step run; unset for a full-workflow run. */
+  readonly stepId?: string;
+}
+
 export interface WorkflowDetailState {
   /** The yaml string used by the workflow yaml editor */
   yamlString: string;
+  /**
+   * Baseline YAML for never-saved workflows (create seed / remix scaffold).
+   * Dirtiness compares `yamlString` to `workflow.yaml` when persisted, otherwise
+   * to this baseline — so empty create and unedited remix start clean.
+   */
+  baselineYaml: string;
   /**
    * Whether the YAML editor's internal value is synced with the Redux store.
    * When false, there are pending debounced changes that haven't been dispatched yet.
@@ -70,6 +82,12 @@ export interface WorkflowDetailState {
   isTestModalOpen: boolean;
   /** When set, Test Step modal is open for this step id (undefined = closed) */
   testStepModalOpenStepId?: string;
+  /** The open Test Step modal was started from the field-editor reference tree: stay in the editor after submit */
+  testStepModalStayInEditor: boolean;
+  /** The open Test Workflow modal was started from the field-editor reference tree: stay in the editor after submit */
+  testModalStayInEditor: boolean;
+  /** Runs started from the field-editor reference tree, newest last. `stepId` is unset for a full run. */
+  treeRuns: TreeRun[];
   /** Replay context: workflow-level (executionId) or step-level (stepExecutionId) for pre-selection in modals */
   replay?: {
     executionId?: string;

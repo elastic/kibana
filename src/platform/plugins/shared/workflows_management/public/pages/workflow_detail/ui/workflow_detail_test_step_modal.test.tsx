@@ -11,6 +11,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
+import { addTreeRun } from '../../../entities/workflows/store/workflow_detail/slice';
 import { initialLoadingState } from '../../../entities/workflows/store/workflow_detail/utils/loading_states';
 import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { TestWrapper } from '../../../shared/test_utils';
@@ -208,6 +209,30 @@ describe('WorkflowDetailTestStepModal', () => {
     await waitFor(() => {
       expect(mockSetSelectedExecution).toHaveBeenCalledWith('exec-1');
     });
+  });
+
+  it('records the run instead of selecting the execution when started from the reference tree', async () => {
+    mockMutateAsync.mockResolvedValueOnce({ workflowExecutionId: 'exec-1' });
+
+    mockSelectorState = buildMockState({
+      testStepModalOpenStepId: 'step1',
+      testStepModalStayInEditor: true,
+    });
+
+    render(
+      <TestWrapper>
+        <WorkflowDetailTestStepModal />
+      </TestWrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('submit-step'));
+
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith(
+        addTreeRun({ executionId: 'exec-1', stepId: 'step1' })
+      );
+    });
+    expect(mockSetSelectedExecution).not.toHaveBeenCalled();
   });
 
   it('should show an error toast when submit fails', async () => {
