@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EnrichedEntity } from '../enriched_entity';
 import { RESOLVED_MODE_MAX_RECORDS } from '../../../../common/entity_analytics/entity_store/resolution_group';
+import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { entityDetailsHighlightsServiceFactory } from './entity_details_highlights_service';
 
 const mockGetEnrichedEntities = jest.fn();
@@ -188,7 +189,7 @@ describe('entityDetailsHighlightsServiceFactory.getV2Data', () => {
       } as unknown as Parameters<typeof entityDetailsHighlightsServiceFactory>[0]);
 
       const result = await service.getV2Data({ ...getDataOpts, mode: 'resolved' });
-      const replacements = service.getLocalReplacements('user.name', 'carol');
+      const replacements = service.getLocalReplacements(EntityIdentifierFields.userName, 'carol');
 
       const members = result.resolutionGroup?.members ?? [];
       expect(members).toHaveLength(2);

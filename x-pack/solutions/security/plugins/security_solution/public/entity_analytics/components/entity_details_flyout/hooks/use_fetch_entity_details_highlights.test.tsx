@@ -493,9 +493,9 @@ describe('useFetchEntityDetailsHighlights', () => {
         {
           initialProps: {
             ...mockProps,
-            mode: 'single' as const,
+            mode: 'single',
             entitySnapshot: mockEntitySnapshot,
-          },
+          } as Parameters<typeof useFetchEntityDetailsHighlights>[0],
         }
       );
 

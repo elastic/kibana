@@ -165,7 +165,7 @@ apiTest.describe(
             staleness: { snapshot: { risk_score: 20 } },
           },
         });
-        expect(read.body.summary).not.toHaveProperty('variant_id');
+        expect('variant_id' in read.body.summary).toBe(false);
       }
     );
 
