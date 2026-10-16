@@ -133,9 +133,10 @@ export const InvestigationCardActions = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPopover
+          aria-label={openMenuLabel}
           anchorPosition="downRight"
           panelPaddingSize="none"
-          panelMinWidth={220}
+          panelStyle={{ minWidth: 220 }}
           isOpen={isMenuOpen}
           closePopover={() => setIsMenuOpen(false)}
           button={
@@ -143,9 +144,9 @@ export const InvestigationCardActions = ({
               <EuiButtonIcon
                 size="s"
                 color="text"
-                iconType="boxesVertical"
+                iconType="ellipsis"
                 aria-label={openMenuLabel}
-                onClick={(event) => {
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
                   event.stopPropagation();
                   setIsMenuOpen((open) => !open);
                 }}
