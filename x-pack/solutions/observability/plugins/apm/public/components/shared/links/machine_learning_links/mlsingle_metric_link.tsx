@@ -11,7 +11,7 @@ import { EuiLink } from '@elastic/eui';
 import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { DEFAULT_REFRESH_INTERVAL } from '../../date_picker/apm_date_picker';
+import { DEFAULT_REFRESH_INTERVAL } from '../../unified_search_bar';
 
 interface Props {
   children?: ReactNode;
