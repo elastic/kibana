@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
+import { useHttp } from '../../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import type { ContextMenuItemNavByRouterProps } from '../../../../components/context_menu_with_router_support';
 import type { EndpointScript } from '../../../../../../common/endpoint/types';
@@ -31,11 +32,12 @@ export const useScriptActionItems = ({
   showDetailsAction = true,
 }: UseScriptActionItemsProps): ContextMenuItemNavByRouterProps[] => {
   const { canReadScriptsLibrary, canWriteScriptsLibrary } = useUserPrivileges().endpointPrivileges;
+  const { basePath } = useHttp();
 
-  const renderActionItem = (text: string) => <EuiText size="s">{text}</EuiText>;
+  return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
+    const renderActionItem = (text: string) => <EuiText size="s">{text}</EuiText>;
 
-  return useMemo<ContextMenuItemNavByRouterProps[]>(
-    () => [
+    return [
       ...(canReadScriptsLibrary && showDetailsAction
         ? [
             {
@@ -67,7 +69,7 @@ export const useScriptActionItems = ({
               icon: 'download',
               key: 'download',
               name: tableActionLabels.table.actions.download,
-              href: script.downloadUri,
+              href: basePath.get() + script.downloadUri,
               children: renderActionItem(tableActionLabels.table.actions.download),
             },
           ]
@@ -84,7 +86,13 @@ export const useScriptActionItems = ({
             },
           ]
         : []),
-    ],
-    [canReadScriptsLibrary, showDetailsAction, canWriteScriptsLibrary, script, onClickAction]
-  );
+    ];
+  }, [
+    canReadScriptsLibrary,
+    showDetailsAction,
+    canWriteScriptsLibrary,
+    basePath,
+    script,
+    onClickAction,
+  ]);
 };
