@@ -40,7 +40,7 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { QuerySource, type ESQLQueryStats } from '@kbn/esql-types';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
-import type { DataSource, FilterableSource } from '@kbn/data-source';
+import type { FilterableSource } from '@kbn/data-source';
 import type { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import type { SavedQueryMeta } from '../saved_query_form';
@@ -68,15 +68,9 @@ export interface SearchBarInjectedDeps {
 
 export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   /**
-   * @deprecated To be combined into `dataSources`. A data view is passed there as
-   * `new DataViewSource(dataView)`. An ES|QL source cannot be passed here: it has no data view.
+   * What to filter on: a `DataView`, or for an ES|QL source the value of `source.toFilterableSource()`.
    */
   indexPatterns?: FilterableSource[];
-  /**
-   * The data sources to filter on. Until `indexPatterns` is removed, both are used, the index
-   * patterns first.
-   */
-  dataSources?: DataSource[];
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   dataViewPickerOverride?: React.ReactNode;

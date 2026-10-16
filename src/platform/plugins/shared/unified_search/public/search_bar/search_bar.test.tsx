@@ -37,10 +37,6 @@ import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mo
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { cpsPluginMock } from '@kbn/cps/public/mocks';
 import { createSearchBar } from './create_search_bar';
-import type { DataSource } from '@kbn/data-source';
-import { DataViewSource } from '@kbn/data-source';
-import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
-import { DataView } from '@kbn/data-views-plugin/common';
 import { QuerySource } from '@kbn/esql-types';
 
 const startMock = coreMock.createStart();
@@ -155,54 +151,6 @@ function wrapSearchBarInContext(
   );
 }
 
-const renderStatefulSearchBar = (props: Record<string, unknown>) => {
-  const data = dataPluginMock.createStartContract();
-  data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => ({
-    value: 0,
-    pause: true,
-  }));
-  data.query.timefilter.timefilter.getRefreshIntervalDefaults = jest.fn(() => ({
-    value: 0,
-    pause: true,
-  }));
-  data.query.timefilter.timefilter.getTime = jest.fn(() => ({ from: 'now-15m', to: 'now' }));
-  data.query.timefilter.timefilter.getTimeDefaults = jest.fn(() => ({
-    from: 'now-15m',
-    to: 'now',
-  }));
-  data.query.timefilter.timefilter.getMinRefreshInterval = jest.fn(() => 1000);
-  data.query.timefilter.history = createMockTimeHistory();
-
-  const StatefulSearchBar = createSearchBar({
-    core: startMock,
-    data,
-    storage: createMockStorage(),
-    kql: kqlPluginMock.createStartContract(),
-    cps: cpsPluginMock.createStartContract(),
-  });
-
-  return render(
-    <EuiThemeProvider>
-      <I18nProvider>
-        <StatefulSearchBar
-          appName="test"
-          useDefaultBehaviors={false}
-          disableSubscribingToGlobalDataServices
-          showFilterBar={false}
-          showQueryInput={false}
-          showTimeWindowButtons={false}
-          dateRangeFrom="now-15m"
-          dateRangeTo="now"
-          query={kqlQuery}
-          filters={[]}
-          indexPatterns={[]}
-          {...props}
-        />
-      </I18nProvider>
-    </EuiThemeProvider>
-  );
-};
-
 describe('SearchBar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -238,56 +186,55 @@ describe('SearchBar', () => {
   });
 
   it('forwards showTimeWindowButtons through the stateful SearchBar', async () => {
-    renderStatefulSearchBar({});
+    const data = dataPluginMock.createStartContract();
+    data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => ({
+      value: 0,
+      pause: true,
+    }));
+    data.query.timefilter.timefilter.getRefreshIntervalDefaults = jest.fn(() => ({
+      value: 0,
+      pause: true,
+    }));
+    data.query.timefilter.timefilter.getTime = jest.fn(() => ({ from: 'now-15m', to: 'now' }));
+    data.query.timefilter.timefilter.getTimeDefaults = jest.fn(() => ({
+      from: 'now-15m',
+      to: 'now',
+    }));
+    data.query.timefilter.timefilter.getMinRefreshInterval = jest.fn(() => 1000);
+    data.query.timefilter.history = createMockTimeHistory();
+
+    const StatefulSearchBar = createSearchBar({
+      core: startMock,
+      data,
+      storage: createMockStorage(),
+      kql: kqlPluginMock.createStartContract(),
+      cps: cpsPluginMock.createStartContract(),
+    });
+
+    render(
+      <EuiThemeProvider>
+        <I18nProvider>
+          <StatefulSearchBar
+            appName="test"
+            useDefaultBehaviors={false}
+            disableSubscribingToGlobalDataServices
+            showFilterBar={false}
+            showQueryInput={false}
+            showTimeWindowButtons={false}
+            dateRangeFrom="now-15m"
+            dateRangeTo="now"
+            query={kqlQuery}
+            filters={[]}
+            indexPatterns={[]}
+          />
+        </I18nProvider>
+      </EuiThemeProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
     });
     expect(screen.queryByRole('group', { name: 'Time window actions' })).not.toBeInTheDocument();
-  });
-
-  describe('data sources of the stateful SearchBar', () => {
-    const createDataViewSource = (timeFieldName?: string) =>
-      new DataViewSource(
-        new DataView({
-          spec: { id: 'dsl-id', title: 'logs-*', timeFieldName, fields: {} },
-          fieldFormats: {} as DataView['fieldFormats'],
-        })
-      );
-
-    // An ES|QL query disables the date picker when the first source has no time field.
-    const renderWithEsqlQuery = (dataSources: DataSource[]) =>
-      renderStatefulSearchBar({ query: esqlQuery, dataSources, useDefaultBehaviors: true });
-
-    it('disables the date picker for a DSL source without a time field', async () => {
-      renderWithEsqlQuery([createDataViewSource()]);
-
-      expect(await screen.findByTestId('kbnQueryBar-datePicker-disabled')).toBeInTheDocument();
-    });
-
-    it('disables the date picker for an ES|QL source without a time field', async () => {
-      renderWithEsqlQuery([createMockEsqlSource([], [], undefined)]);
-
-      expect(await screen.findByTestId('kbnQueryBar-datePicker-disabled')).toBeInTheDocument();
-    });
-
-    it('keeps the date picker enabled for an ES|QL source with a time field', async () => {
-      renderWithEsqlQuery([createMockEsqlSource([], [], '@timestamp')]);
-
-      await waitFor(() =>
-        expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument()
-      );
-      expect(screen.queryByTestId('kbnQueryBar-datePicker-disabled')).not.toBeInTheDocument();
-    });
-
-    it('keeps the date picker enabled for a DSL source with a time field', async () => {
-      renderWithEsqlQuery([createDataViewSource('@timestamp')]);
-
-      await waitFor(() =>
-        expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument()
-      );
-      expect(screen.queryByTestId('kbnQueryBar-datePicker-disabled')).not.toBeInTheDocument();
-    });
   });
 
   it('Should render filter bar, when required fields are provided', async () => {

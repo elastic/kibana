@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { IUnifiedSearchPluginServices } from '../types';
 import type { SearchBarProps } from './search_bar';
-import { useFilterableSources } from './use_filterable_sources';
 
 type FallbackProps = Pick<SearchBarProps<AggregateQuery>, 'displayStyle'>;
 
@@ -39,17 +36,7 @@ const LazySearchBar = React.lazy(async () => {
 const WrappedSearchBar = <QT extends AggregateQuery | Query = Query>(
   props: Omit<SearchBarProps<QT>, 'intl' | 'kibana'>
 ) => {
-  const { dataSources, ...searchBarProps } = props;
-  const { services } = useKibana<IUnifiedSearchPluginServices>();
-  const filterableSources = useFilterableSources(dataSources, services.http!);
-  const indexPatterns = useMemo(
-    () =>
-      filterableSources
-        ? [...(searchBarProps.indexPatterns ?? []), ...filterableSources]
-        : searchBarProps.indexPatterns,
-    [searchBarProps.indexPatterns, filterableSources]
-  );
-  const typeCastedProps = { ...searchBarProps, indexPatterns } as SearchBarProps<AggregateQuery>;
+  const typeCastedProps = props as SearchBarProps<AggregateQuery>;
   const { displayStyle } = typeCastedProps;
   return (
     <React.Suspense fallback={<Fallback {...{ displayStyle }} />}>
