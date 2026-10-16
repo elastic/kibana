@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/presentation-util'
   - '@kbn/content-management-utils'
   - '@kbn/zod'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -49,6 +50,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout*/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

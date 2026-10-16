@@ -691,6 +691,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'discover:enableSolutionProfilesInClassic': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether Discover loads Observability and Security contextual profiles in Classic navigation.',
+    },
+  },
   'discover:showFieldStatistics': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -1029,6 +1036,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Whether the AI agent creates a new conversation per alert analysis',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowUsePrompt': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the alert analysis workflow classifies with a single prompt instead of an AI agent',
     },
   },
   'securitySolution:alertAnalysisWorkflowTagPrefix': {

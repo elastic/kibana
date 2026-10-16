@@ -6,7 +6,6 @@
  */
 import {
   getIndexPatternFromESQLQuery,
-  getESQLAdHocDataview,
   getESQLResults,
   formatESQLColumns,
   mapVariableToColumn,
@@ -24,6 +23,7 @@ import { getTime } from '@kbn/data-plugin/common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TypedLensSerializedState, DatasourceMap, VisualizationMap } from '@kbn/lens-common';
 
+import { createEsqlAdHocDataView } from '../../../data_views_service/create_esql_ad_hoc_data_view';
 import { suggestionsApi } from '../../../lens_suggestions_api';
 import { readUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
 import { hydrateEsqlMetricTrendlineAfterSuggestion } from '../../../visualizations/metric/state_hydration/esql_trendline';
@@ -96,15 +96,15 @@ export const getGridAttrs = async (
     return adHoc.title === indexPattern;
   });
 
-  // Fall back to getESQLAdHocDataview when the spec has no timeFieldName,
-  // which detects the time field via HTTP (with a promise cache to avoid
-  // redundant requests).
+  // Resolve the dataset when the spec has no timeFieldName, which detects the time
+  // field via HTTP (with a promise cache to avoid redundant requests).
   const dataView = dataViewSpec?.timeFieldName
-    ? await data.dataViews.create(dataViewSpec)
-    : await getESQLAdHocDataview({
-        dataViewsService: data.dataViews,
+    ? await data.dataViews.create(dataViewSpec, true)
+    : await createEsqlAdHocDataView({
+        dataViews: data.dataViews,
         query: query.esql,
-        options: { skipFetchFields: true, id: dataViewSpec?.id },
+        id: dataViewSpec?.id,
+        skipFetchFields: true,
         http,
       });
 

@@ -64,6 +64,7 @@ it('does not request any tab availability when globally disabled', () => {
   });
 
   expect(result.current).toEqual({
+    knowledge_indicators: { isEnabled: true, isLoading: false },
     cortex: { isEnabled: false, isLoading: false },
     memory: { isEnabled: false, isLoading: false },
     decision_trees: { isEnabled: false, isLoading: false },

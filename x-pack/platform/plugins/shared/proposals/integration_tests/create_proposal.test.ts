@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { ProposalGateFixture } from './proposal_gate_fixture';
 import { createProposalGateFixture } from './proposal_gate_fixture';
@@ -471,6 +472,59 @@ describe('create-investigation-proposal workflow execution', () => {
       await fixture.timeOutGate();
 
       expect(fixture.onlyProposal().executionError).toContain('timeout');
+    });
+  });
+
+  // A cancelled gate runs no handler, so the workflow never settles its record;
+  // the service has to, the next time the proposal is read or decided.
+  describe('a cancelled gate', () => {
+    const SPACE_ID = 'fake_space_id';
+
+    it('should settle the proposal as expired on the next read', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+      fixture.cancelGate();
+
+      const proposal = await fixture.service.get(
+        fixture.onlyProposal().id,
+        SPACE_ID,
+        httpServerMock.createKibanaRequest()
+      );
+
+      expect(proposal.status).toBe('expired');
+      expect(fixture.onlyProposal()).toMatchObject({
+        status: 'expired',
+        executionError: expect.stringContaining('cancelled'),
+      });
+      expect(fixture.onlyProposal().decision).toBeUndefined();
+    });
+
+    it('should refuse a decision on it and settle the proposal instead', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+      fixture.cancelGate();
+
+      await expect(
+        fixture.service.releaseGate(fixture.onlyProposal().id, {
+          approved: true,
+          spaceId: SPACE_ID,
+          request: httpServerMock.createKibanaRequest(),
+        })
+      ).rejects.toThrow(/can no longer be decided/);
+
+      expect(fixture.onlyProposal().status).toBe('expired');
+      expect(fixture.stepExecutions('execute_action', 'workflow.execute')).toHaveLength(0);
+    });
+
+    it('should leave a proposal whose gate is still parked to the gate', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+
+      await fixture.service.get(
+        fixture.onlyProposal().id,
+        SPACE_ID,
+        httpServerMock.createKibanaRequest()
+      );
+
+      expect(fixture.onlyProposal().status).toBe('pending');
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
     });
   });
 
