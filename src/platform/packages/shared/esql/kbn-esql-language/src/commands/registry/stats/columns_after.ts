@@ -132,8 +132,14 @@ export const columnsAfter = (
 
   // Aggregation expressions can reference columns defined in the BY clause, while
   // the BY expressions themselves are typed using the input columns only.
+  // Only aggregation expressions apply the TS implicit aggregate conversion.
   const typeOf = (thing: ESQLAstItem) =>
-    getExpressionType(thing, aggregatingColumns, unmappedFieldsStrategy);
+    getExpressionType(
+      thing,
+      aggregatingColumns,
+      unmappedFieldsStrategy,
+      additionalFields.isTimeseriesSource === true
+    );
   const byTypeOf = (thing: ESQLAstItem) =>
     getExpressionType(thing, inputColumns, unmappedFieldsStrategy);
 

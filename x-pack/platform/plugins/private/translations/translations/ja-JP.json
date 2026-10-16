@@ -39116,7 +39116,6 @@
     "xpack.searchInferenceEndpoints.endpoints.soReadError": "推論設定を読み取れませんでした: {message}",
     "xpack.searchInferenceEndpoints.endpointStats.endpointsLabel": "エンドポイント：",
     "xpack.searchInferenceEndpoints.endpointStats.modelsLabel": "モデル：",
-    "xpack.searchInferenceEndpoints.externalInference.emptyDescription": "お気に入りのモデルプロバイダーからモデルエンドポイントを追加して、AIを活用した検索に利用しましょう。",
     "xpack.searchInferenceEndpoints.externalInference.emptyTitle": "外部モデルプロバイダーに接続する",
     "xpack.searchInferenceEndpoints.externalInferenceTitle": "外部推論",
     "xpack.searchInferenceEndpoints.filter.emptyMessage": "オプションなし",
