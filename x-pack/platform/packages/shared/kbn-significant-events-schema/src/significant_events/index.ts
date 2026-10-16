@@ -7,8 +7,10 @@
 
 export {
   detectionSchema,
+  detectionSkipSchema,
   CHANGE_POINT_TYPES,
   type Detection,
+  type DetectionSkip,
   type ChangePointType,
 } from './detections';
 export {

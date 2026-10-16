@@ -37,11 +37,25 @@ const countResponse = (total: number): ESQLSearchResponse =>
     values: [[total]],
   } as unknown as ESQLSearchResponse);
 
-// One row per detection_id that has a processed marker.
-const markerResponse = (ids: string[]): ESQLSearchResponse =>
+interface MarkerRow {
+  id: string;
+  at?: string;
+  skip?: Record<string, unknown>;
+}
+
+// One row per processed marker, newest first, with the marker's `_source`.
+const markerResponse = (markers: MarkerRow[]): ESQLSearchResponse =>
   ({
-    columns: [{ name: 'detection_id', type: 'keyword' }],
-    values: ids.map((id) => [id]),
+    columns: [
+      { name: 'detection_id', type: 'keyword' },
+      { name: '@timestamp', type: 'date' },
+      { name: '_source', type: 'object' },
+    ],
+    values: markers.map(({ id, at = '2026-01-02T01:00:00.000Z', skip }) => [
+      id,
+      at,
+      skip ? { processed_by: 'exec-1', skip } : { processed_by: 'exec-1' },
+    ]),
   } as unknown as ESQLSearchResponse);
 
 interface MockResponses {
@@ -49,6 +63,8 @@ interface MockResponses {
   detections: Array<Record<string, unknown>>;
   // detection_ids the processed-marker membership reports as processed.
   processedIds: string[];
+  // Extra markers, e.g. ones carrying why the classifier closed the detection.
+  markers?: MarkerRow[];
 }
 
 const createClient = (responses: MockResponses) => {
@@ -59,7 +75,10 @@ const createClient = (responses: MockResponses) => {
     }
     // Membership semijoin filters on `processed_by`.
     if (q.includes('processed_by')) {
-      return markerResponse(responses.processedIds);
+      return markerResponse([
+        ...responses.processedIds.map((id) => ({ id })),
+        ...(responses.markers ?? []),
+      ]);
     }
     return sourceResponse(responses.detections);
   });
@@ -136,6 +155,93 @@ describe('DetectionClient', () => {
       const byId = new Map(result.hits.map((h) => [h.detection_id, h.processed]));
       expect(byId.get('f-1')).toBe(true);
       expect(byId.get('f-2')).toBe(false);
+    });
+
+    it('derives why the classifier skipped a detection from its marker, with the marker time', async () => {
+      const { client } = createClient({
+        detections: [
+          createDetection({
+            '@timestamp': '2026-01-02T00:00:00.000Z',
+            detection_id: 'f-1',
+            rule_uuid: 'rule-1',
+          }),
+          createDetection({
+            '@timestamp': '2026-01-02T00:00:00.000Z',
+            detection_id: 'f-2',
+            rule_uuid: 'rule-2',
+          }),
+        ],
+        processedIds: ['f-2'],
+        markers: [
+          {
+            id: 'f-1',
+            at: '2026-01-02T03:04:05.000Z',
+            skip: {
+              reason: 'still_breaching',
+              probe_status: 'ok',
+              baseline: { decision: 'background', value: 150, samples: 60 },
+            },
+          },
+        ],
+      });
+
+      const { hits } = await client.findLatest();
+
+      const byId = new Map(hits.map((h) => [h.detection_id, h]));
+      expect(byId.get('f-1')).toMatchObject({
+        processed: true,
+        skip: {
+          reason: 'still_breaching',
+          probe_status: 'ok',
+          baseline: { decision: 'background', value: 150, samples: 60 },
+          checked_at: '2026-01-02T03:04:05.000Z',
+        },
+      });
+      expect(byId.get('f-2')?.processed).toBe(true);
+      expect(byId.get('f-2')).not.toHaveProperty('skip');
+    });
+
+    it('prefers the marker that carries a skip over a newer one that does not', async () => {
+      const { client } = createClient({
+        detections: [
+          createDetection({
+            '@timestamp': '2026-01-02T00:00:00.000Z',
+            detection_id: 'f-1',
+            rule_uuid: 'rule-1',
+          }),
+        ],
+        processedIds: [],
+        markers: [
+          { id: 'f-1', at: '2026-01-02T05:00:00.000Z' },
+          { id: 'f-1', at: '2026-01-02T03:00:00.000Z', skip: { reason: 'still_breaching' } },
+        ],
+      });
+
+      const { hits } = await client.findLatest();
+
+      expect(hits[0].skip).toMatchObject({
+        reason: 'still_breaching',
+        checked_at: '2026-01-02T03:00:00.000Z',
+      });
+    });
+
+    it('ignores a skip that does not match the schema', async () => {
+      const { client } = createClient({
+        detections: [
+          createDetection({
+            '@timestamp': '2026-01-02T00:00:00.000Z',
+            detection_id: 'f-1',
+            rule_uuid: 'rule-1',
+          }),
+        ],
+        processedIds: [],
+        markers: [{ id: 'f-1', skip: { reason: 42 } }],
+      });
+
+      const { hits } = await client.findLatest();
+
+      expect(hits[0].processed).toBe(true);
+      expect(hits[0]).not.toHaveProperty('skip');
     });
 
     it('returns a rule whose latest detection is a stationary (settlement) detection', async () => {
@@ -253,7 +359,7 @@ describe('DetectionClient.markSourceDetectionsProcessed', () => {
         return countResponse(detections.length);
       }
       if (request.query.includes('processed_by')) {
-        return markerResponse(processedIds);
+        return markerResponse(processedIds.map((id) => ({ id })));
       }
       if (request.query.includes('rule_uuid IN')) {
         const lowerBound = /TO_DATETIME\("([^"]+)"\)/.exec(request.query)?.[1];
