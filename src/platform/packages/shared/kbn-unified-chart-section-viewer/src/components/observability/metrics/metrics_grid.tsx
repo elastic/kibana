@@ -416,6 +416,7 @@ const ChartItem = React.memo(
         whereStatements,
         originalSource: userSource,
         histogramPercentile: gridSettings.histogramPercentile,
+        description,
       });
 
     const esqlQuery = useMemo(() => {
@@ -459,7 +460,7 @@ const ChartItem = React.memo(
 
     const lensConfig = useMemo(() => {
       if (heatmapConfig) {
-        return heatmapConfig;
+        return { ...heatmapConfig, description };
       }
 
       // Bounds are loading or failed. No series yet; the empty XY config keeps the

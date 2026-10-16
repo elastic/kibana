@@ -30,6 +30,7 @@ export interface UseHistogramHeatmapParams {
   whereStatements?: readonly string[];
   originalSource?: string;
   histogramPercentile: HistogramVisualization;
+  description?: string;
 }
 
 export interface HistogramHeatmapState {
@@ -48,6 +49,7 @@ export const useHistogramHeatmap = ({
   whereStatements,
   originalSource,
   histogramPercentile,
+  description,
 }: UseHistogramHeatmapParams): HistogramHeatmapState => {
   const isHeatmapsEnabled = useFeatureFlag(
     FEATURE_FLAGS.IS_HEATMAPS_ENABLED,
@@ -88,9 +90,13 @@ export const useHistogramHeatmap = ({
   const heatmapConfig = useMemo(
     () =>
       distributionQuery
-        ? buildHistogramHeatmapConfig({ query: distributionQuery, title: metricItem.metricName })
+        ? buildHistogramHeatmapConfig({
+            query: distributionQuery,
+            title: metricItem.metricName,
+            description,
+          })
         : undefined,
-    [distributionQuery, metricItem.metricName]
+    [distributionQuery, metricItem.metricName, description]
   );
 
   return { shouldRenderHistogram, boundsError, distributionQuery, heatmapConfig };

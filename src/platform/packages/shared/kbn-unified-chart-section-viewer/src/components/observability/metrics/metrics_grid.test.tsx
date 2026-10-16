@@ -1344,6 +1344,26 @@ describe('MetricsGrid', () => {
       );
     });
 
+    it('keeps the data stream description on the heatmap', () => {
+      enableHeatmaps();
+      const description = 'Data stream: metrics-a';
+      renderMetricsGrid({
+        metricItems: [histogramItem],
+        histogramBounds: bounds,
+        getDescription: () => description,
+      });
+
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          lensConfig: expect.objectContaining({
+            chartType: 'heatmap',
+            description,
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
     it('draws a heatmap from the distribution query when bounds exist', () => {
       enableHeatmaps();
       renderMetricsGrid({
