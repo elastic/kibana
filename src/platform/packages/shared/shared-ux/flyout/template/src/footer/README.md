@@ -84,7 +84,12 @@ The template sets these trigger props itself, so passing them is a type error ra
 
 ### Deprecated: custom items
 
-Custom items are a temporary allowance for existing menus with interactive items, such as an item that opens its own popover. This is primarily for migrating existing flyouts to use the template. Those menus should be redesigned with plain items and nested panels so custom items can be removed.
+Custom items are a temporary allowance for existing menus with interactive items, such as an item that opens its own popover. Do not use them in new menus. Redesign existing ones with plain items and nested panels so custom items can be removed.
+
+Interactive content inside a context menu conflicts with the menu's keyboard navigation, and the template does not work around it:
+
+- **The menu claims the arrow keys.** Arrow keys pressed in a custom item's controls, including a text field or a field in a nested popover, move focus to other menu items or go back a panel.
+- **ArrowRight can open the wrong sub-panel.** EUI picks the sub-panel by the focused element's position among the panel's items, and a custom item throws that count off.
 
 A custom item (`FlyoutFooterMenuCustomItem`) takes a required `key` and a `renderItem` function. `renderItem` receives `{ closeMenu }` and returns the item's content.
 
@@ -94,3 +99,4 @@ A custom item (`FlyoutFooterMenuCustomItem`) takes a required `key` and a `rende
 
 - A custom item owns its clicks. Clicking it never closes the menu, whatever `closeOnItemClick` is set to. Call `closeMenu` when the item is done.
 - The template does not add a `menuitem` role, an icon, or keyboard handling to a custom item. Its content provides those itself.
+- `renderItem` runs again only when `panels` changes. Content that depends on other state should be a component that reads that state itself.
