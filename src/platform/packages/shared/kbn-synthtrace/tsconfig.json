@@ -14,7 +14,8 @@
     "@kbn/tooling-log",
     "@kbn/streams-schema",
     "@kbn/streamlang",
-    "@kbn/repo-info"
+    "@kbn/repo-info",
+    "@kbn/profiling-utils"
   ],
   "exclude": ["target/**/*"]
 }
