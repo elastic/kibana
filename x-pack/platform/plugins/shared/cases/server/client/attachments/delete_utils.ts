@@ -236,11 +236,14 @@ const toDecodedAttachment = (
   attachment: OwnedAttachment,
   logger: CasesClientArgs['logger']
 ): DecodedAttachment[] => {
-  const { attributes } = attachment;
+  const { attributes: storedAttributes, owner } = attachment;
 
-  if (attributes == null) {
+  if (storedAttributes == null) {
     return [];
   }
+
+  // The resolved owner, so the user action and event agree with the authorized owner.
+  const attributes = { ...storedAttributes, owner };
 
   // Strips the fields not part of the original request (created_at etc.); the stored fields vary
   // by attachment type.

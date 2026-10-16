@@ -137,10 +137,8 @@ export class AttachmentGetter {
       savedObjects: Array<SavedObject<AttachmentAttributesV2> | { id: string; error: unknown }>
     ) => Array<MixSavedObjectResponse>
   ): Promise<AttachmentForDeletion[]> {
-    const ids = objects.map(({ id }) => id).join();
-
     try {
-      this.context.log.debug(`Attempting to retrieve attachments for deletion with ids: ${ids}`);
+      this.context.log.debug(`Attempting to retrieve ${objects.length} attachments for deletion`);
 
       const attachments: AttachmentForDeletion[] = [];
       // The chunk size is even, so an id looked up in both types never has its pair split.
@@ -168,7 +166,9 @@ export class AttachmentGetter {
 
       return attachments;
     } catch (error) {
-      this.context.log.error(`Error retrieving attachments for deletion with ids ${ids}: ${error}`);
+      this.context.log.error(
+        `Error retrieving ${objects.length} attachments for deletion: ${error}`
+      );
       throw error;
     }
   }

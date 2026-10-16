@@ -175,6 +175,32 @@ describe('deleteCaseAttachments', () => {
       });
     });
 
+    it('records the user action and event on the case owner when the stored owner is empty', async () => {
+      clientArgs.services.caseService.getCase.mockResolvedValue({
+        ...mockCases[0],
+        attributes: { ...mockCases[0].attributes, owner: 'observability' },
+      });
+      const emptyOwnerComment: AttachmentForDeletion = {
+        ...withoutOwner(userComment),
+        attributes: {
+          ...mockCaseComments[0].attributes,
+          owner: '',
+        } as AttachmentAttributesV2,
+      };
+
+      await deleteAttachments([emptyOwnerComment]);
+
+      const [{ attachments }] =
+        clientArgs.services.userActionService.creator.bulkCreateAttachmentDeletion.mock.calls[0];
+
+      expect(attachments[0].owner).toBe('observability');
+      expect(attachments[0].attachment.owner).toBe('observability');
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+        clientArgs.request,
+        expect.objectContaining({ owner: 'observability' })
+      );
+    });
+
     it('does not delete anything when the user is not authorized', async () => {
       clientArgs.authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
