@@ -8,7 +8,8 @@
 import React from 'react';
 import * as t from 'io-ts';
 import type { RouteMap } from '@kbn/typed-react-router-config';
-import { Outlet, createRouter } from '@kbn/typed-react-router-config';
+import { createRouter } from '@kbn/typed-react-router-config';
+import { DigitalExperienceLayout } from './application/digital_experience_layout';
 import { useDigitalExperienceParams } from './hooks/use_digital_experience_params';
 import { ApplicationPage } from './pages/application_page';
 import { ApplicationsListPage } from './pages/applications_list_page';
@@ -22,7 +23,7 @@ function ApplicationRoute() {
 
 export const digitalExperienceRoutes = {
   '/': {
-    element: <Outlet />,
+    element: <DigitalExperienceLayout />,
     children: {
       '/{serviceName}': {
         element: <ApplicationRoute />,

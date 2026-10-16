@@ -9,11 +9,9 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { ApplicationsListPage } from './applications_list_page';
 import { useKibanaServices } from '../hooks/use_kibana_services';
-import { useDigitalExperienceBreadcrumbs } from '../hooks/use_digital_experience_breadcrumbs';
 import { useTimeRange } from '../hooks/use_time_range';
 
 jest.mock('../hooks/use_kibana_services');
-jest.mock('../hooks/use_digital_experience_breadcrumbs');
 jest.mock('../hooks/use_time_range', () => ({
   ...jest.requireActual('../hooks/use_time_range'),
   useTimeRange: jest.fn(),
@@ -46,7 +44,6 @@ describe('ApplicationsListPage', () => {
       '/app/digital_experience/app-a?rangeFrom=now-15m&rangeTo=now',
       '/app/digital_experience/app-b?rangeFrom=now-15m&rangeTo=now',
     ]);
-    expect(useDigitalExperienceBreadcrumbs).toHaveBeenCalledWith({ timeRange });
     expect(ux.fetchClassicRumApplications).toHaveBeenCalledWith({
       start: expect.any(Number),
       end: expect.any(Number),

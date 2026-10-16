@@ -7,6 +7,7 @@
 
 import { test, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
+import { DX_NAV_ENTRY, LEGACY_UX_NAV_ENTRY } from '../fixtures/constants';
 
 const SERVICE_NAME = 'my-application';
 
@@ -41,6 +42,22 @@ test.describe('Digital Experience', { tag: tags.stateful.classic }, () => {
     await page.goto(kbnUrl.get('/app/digital_experience'));
 
     await expect(page.testSubj.locator('digitalExperienceMainContainer')).toBeVisible();
-    await expect(page.getByText('User Experience', { exact: true })).toBeHidden();
+    await expect(page.testSubj.locator(DX_NAV_ENTRY)).toBeVisible();
+    await expect(page.testSubj.locator(LEGACY_UX_NAV_ENTRY)).toBeHidden();
+  });
+
+  test('keeps the time range in the URL and in the Applications breadcrumb', async ({
+    page,
+    kbnUrl,
+  }) => {
+    await page.goto(
+      kbnUrl.get(`/app/digital_experience/${SERVICE_NAME}?rangeFrom=now-7d&rangeTo=now`)
+    );
+
+    await expect(page.testSubj.locator('digitalExperienceTab-overview')).toBeVisible();
+    await expect(page).toHaveURL(/rangeFrom=now-7d&rangeTo=now/);
+    await expect(
+      page.testSubj.locator('breadcrumbs').getByRole('link', { name: 'Applications' })
+    ).toHaveAttribute('href', /\/app\/digital_experience\?rangeFrom=now-7d&rangeTo=now$/);
   });
 });

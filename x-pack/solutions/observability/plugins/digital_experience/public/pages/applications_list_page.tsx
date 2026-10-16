@@ -18,7 +18,6 @@ import type { EuiBasicTableColumn, OnTimeChangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import dateMath from '@kbn/datemath';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../common/feature';
-import { useDigitalExperienceBreadcrumbs } from '../hooks/use_digital_experience_breadcrumbs';
 import { useKibanaServices } from '../hooks/use_kibana_services';
 import { toTimeRangeSearch, useTimeRange } from '../hooks/use_time_range';
 
@@ -37,7 +36,6 @@ const NAME_COLUMN = i18n.translate('xpack.digitalExperience.applications.nameCol
 export function ApplicationsListPage() {
   const { application, ux } = useKibanaServices();
   const { timeRange, setTimeRange } = useTimeRange();
-  useDigitalExperienceBreadcrumbs({ timeRange });
 
   const [refreshId, setRefreshId] = useState(0);
   const [applications, setApplications] = useState<string[]>([]);

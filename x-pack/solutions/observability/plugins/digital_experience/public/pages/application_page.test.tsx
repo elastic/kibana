@@ -9,11 +9,11 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ApplicationPage } from './application_page';
 import { useKibanaServices } from '../hooks/use_kibana_services';
-import { useDigitalExperienceBreadcrumbs } from '../hooks/use_digital_experience_breadcrumbs';
+import { useRouteBreadcrumb } from '../breadcrumbs/use_route_breadcrumb';
 import { useTimeRange } from '../hooks/use_time_range';
 
 jest.mock('../hooks/use_kibana_services');
-jest.mock('../hooks/use_digital_experience_breadcrumbs');
+jest.mock('../breadcrumbs/use_route_breadcrumb');
 jest.mock('../hooks/use_time_range');
 
 const useKibanaServicesMock = jest.mocked(useKibanaServices);
@@ -35,10 +35,7 @@ describe('ApplicationPage', () => {
 
     render(<ApplicationPage serviceName="my-app" />);
 
-    expect(useDigitalExperienceBreadcrumbs).toHaveBeenCalledWith({
-      serviceName: 'my-app',
-      timeRange,
-    });
+    expect(useRouteBreadcrumb).toHaveBeenCalledWith([{ title: 'my-app' }, { title: 'Overview' }]);
     expect(ClassicRumDashboard.mock.calls[0][0]).toEqual({
       serviceName: 'my-app',
       timeRange,
