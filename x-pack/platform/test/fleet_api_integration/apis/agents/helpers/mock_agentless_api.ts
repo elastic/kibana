@@ -6,7 +6,7 @@
  */
 
 import type { AgentlessApiListDeploymentResponse } from '@kbn/fleet-plugin/common/types';
-import { createServer } from '@mswjs/http-middleware';
+import { createServer } from '@msw/serve';
 
 import { http, HttpResponse } from 'msw';
 

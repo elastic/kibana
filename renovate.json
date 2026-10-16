@@ -548,7 +548,7 @@
     {
       "groupName": "@elastic/contextual-security-apps dependencies",
       "matchDepNames": [
-        "@mswjs/http-middleware",
+        "@msw/serve",
         "@types/byte-size",
         "byte-size",
         "msw",

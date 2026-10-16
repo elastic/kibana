@@ -20,3 +20,12 @@ class BroadcastChannelMock {
   }
 }
 global.BroadcastChannel = BroadcastChannelMock;
+
+// msw 3 reads `Headers.getSetCookie()` on every mocked response; the whatwg-fetch polyfill
+// Kibana uses in JSDOM doesn't implement it.
+if (typeof Headers.prototype.getSetCookie !== 'function') {
+  Headers.prototype.getSetCookie = function getSetCookie() {
+    const value = this.get('set-cookie');
+    return value ? [value] : [];
+  };
+}
