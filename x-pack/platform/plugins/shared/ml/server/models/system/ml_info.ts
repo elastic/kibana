@@ -11,6 +11,7 @@ import type { MlInfoResponse } from '@kbn/ml-common-types/ml_server_info';
 import type { MlClient } from '../../lib/ml_client';
 import { getLazyMlNodeCount } from '../../lib/node_utils';
 import { getIsMlCpsEnabled } from '../../lib/cps_utils';
+import { getIsMlEsqlDatafeedEnabled } from '../../lib/esql_datafeed_utils';
 import type { ServerlessInfo } from '../../types';
 
 export async function getMlInfo({
@@ -42,6 +43,7 @@ export async function getMlInfo({
   }
 
   const isMlCpsEnabled = serverless.cpsEnabled && (await getIsMlCpsEnabled(client));
+  const isMlEsqlDatafeedEnabled = await getIsMlEsqlDatafeedEnabled(client);
 
   return {
     ...body,
@@ -50,6 +52,7 @@ export async function getMlInfo({
     cloudUrl: cloud?.baseUrl,
     isMlAutoscalingEnabled,
     isMlCpsEnabled,
+    isMlEsqlDatafeedEnabled,
     showNodeInfo: !serverless.isServerless,
     showLicenseInfo: !serverless.isServerless,
   } as MlInfoResponse;

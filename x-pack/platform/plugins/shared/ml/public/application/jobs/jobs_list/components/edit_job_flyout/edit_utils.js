@@ -161,15 +161,23 @@ function extractCustomSettings(job, newJobData) {
   return settingsData;
 }
 
-function extractDatafeed(job, newDatafeedData) {
+export function extractDatafeed(job, newDatafeedData) {
   const datafeedData = {};
   if (job.datafeed_config !== undefined) {
-    const origQueryString = JSON.stringify(job.datafeed_config.query);
-    const newQuery = JSON.parse(newDatafeedData.datafeedQuery);
-    const newQueryString = JSON.stringify(newQuery);
+    const isEsqlDatafeed = typeof job.datafeed_config.esql_query === 'string';
 
-    if (origQueryString !== newQueryString) {
-      datafeedData.query = newQuery;
+    if (isEsqlDatafeed === false) {
+      const origQueryString = JSON.stringify(job.datafeed_config.query);
+      const newQuery = JSON.parse(newDatafeedData.datafeedQuery);
+      const newQueryString = JSON.stringify(newQuery);
+
+      if (origQueryString !== newQueryString) {
+        datafeedData.query = newQuery;
+      }
+
+      if (job.datafeed_config.scroll_size !== newDatafeedData.datafeedScrollSize) {
+        datafeedData.scroll_size = newDatafeedData.datafeedScrollSize;
+      }
     }
 
     if (job.datafeed_config.query_delay !== newDatafeedData.datafeedQueryDelay) {
@@ -181,10 +189,6 @@ function extractDatafeed(job, newDatafeedData) {
       newDatafeedData.datafeedFrequency !== ''
     ) {
       datafeedData.frequency = newDatafeedData.datafeedFrequency;
-    }
-
-    if (job.datafeed_config.scroll_size !== newDatafeedData.datafeedScrollSize) {
-      datafeedData.scroll_size = newDatafeedData.datafeedScrollSize;
     }
 
     if (job.datafeed_config.project_routing !== newDatafeedData.datafeedProjectRouting) {

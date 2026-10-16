@@ -6,6 +6,7 @@
  */
 
 export const mlApiServicesMock = {
+  getEsqlQueryColumns: jest.fn(),
   jobs: {
     jobForCloning: jest.fn(),
   },

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
@@ -33,6 +32,7 @@ import {
 } from './schemas/job_service_schema';
 
 import { jobForCloningSchema, jobIdSchema } from './schemas/anomaly_detectors_schema';
+import { createDatafeedPreviewRequest } from './datafeed_preview_request';
 
 import { jobServiceProvider } from '../models/job_service';
 
@@ -986,19 +986,9 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
-          const { datafeedId, job, datafeed } = request.body;
+          const { datafeedId, job, datafeed, start, end } = request.body;
 
-          const payload =
-            datafeedId !== undefined
-              ? {
-                  datafeed_id: datafeedId,
-                }
-              : ({
-                  body: {
-                    job_config: job,
-                    datafeed_config: datafeed,
-                  },
-                } as estypes.MlPreviewDatafeedRequest);
+          const payload = createDatafeedPreviewRequest({ datafeedId, job, datafeed, start, end });
 
           const body = await mlClient.previewDatafeed(payload, {
             maxRetries: 0,

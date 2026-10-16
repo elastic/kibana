@@ -15,6 +15,7 @@ export interface CloudInfo {
   cloudUrl: string | null;
   isMlAutoscalingEnabled: boolean;
   isMlCpsEnabled: boolean;
+  isMlEsqlDatafeedEnabled: boolean;
 }
 
 export interface MlServerDefaults {
@@ -47,6 +48,7 @@ export interface MlInfoResponse {
   cloudUrl?: string;
   isMlAutoscalingEnabled: boolean;
   isMlCpsEnabled: boolean;
+  isMlEsqlDatafeedEnabled: boolean;
   showNodeInfo: boolean;
   showLicenseInfo: boolean;
 }

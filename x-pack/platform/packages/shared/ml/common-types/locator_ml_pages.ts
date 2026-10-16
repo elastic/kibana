@@ -41,6 +41,7 @@ export const ML_PAGES = {
   ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER: 'jobs/new_job/recognize',
   ANOMALY_DETECTION_CREATE_JOB_SINGLE_METRIC: 'jobs/new_job/single_metric',
   ANOMALY_DETECTION_CREATE_JOB_MULTI_METRIC: 'jobs/new_job/multi_metric',
+  ANOMALY_DETECTION_CREATE_JOB_ESQL: 'jobs/new_job/esql',
   ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC: 'jobs/new_job/convert_to_multi_metric',
   ANOMALY_DETECTION_CREATE_JOB_ADVANCED: 'jobs/new_job/advanced',
   ANOMALY_DETECTION_CREATE_JOB_POPULATION: 'jobs/new_job/population',

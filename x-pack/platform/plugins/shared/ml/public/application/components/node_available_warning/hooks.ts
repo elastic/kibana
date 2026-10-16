@@ -74,6 +74,7 @@ const defaultCloudInfo: CloudInfo = {
   cloudUrl: null,
   isMlAutoscalingEnabled: false,
   isMlCpsEnabled: false,
+  isMlEsqlDatafeedEnabled: false,
 };
 
 export function useCloudCheck() {
@@ -92,6 +93,7 @@ export function useCloudCheck() {
         cloudUrl: resp.cloudUrl ?? null,
         isMlAutoscalingEnabled: resp.isMlAutoscalingEnabled,
         isMlCpsEnabled: resp.isMlCpsEnabled,
+        isMlEsqlDatafeedEnabled: resp.isMlEsqlDatafeedEnabled ?? false,
       });
     } catch (error) {
       if (error.statusCode === 403) {

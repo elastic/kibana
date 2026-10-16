@@ -10,6 +10,7 @@ import React, { createContext, useContext, useMemo } from 'react';
 import type { ExperimentalFeatures, MlFeatures } from '../../../../common/constants/app';
 
 export interface EnabledFeatures {
+  isServerless: boolean;
   showLogsSuppliedConfigurationsInfo: boolean;
   showContextualInsights: boolean;
   showNodeInfo: boolean;
@@ -22,6 +23,7 @@ export interface EnabledFeatures {
   isCPSEnabled: boolean;
 }
 export const EnabledFeaturesContext = createContext<EnabledFeatures>({
+  isServerless: false,
   showLogsSuppliedConfigurationsInfo: true,
   showContextualInsights: true,
   showNodeInfo: true,
@@ -51,6 +53,7 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
   isCPSEnabled,
 }) => {
   const features: EnabledFeatures = {
+    isServerless,
     showLogsSuppliedConfigurationsInfo: !isServerless,
     showContextualInsights: isServerless,
     showNodeInfo: !isServerless,

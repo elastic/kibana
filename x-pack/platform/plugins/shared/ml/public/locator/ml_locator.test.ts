@@ -157,6 +157,18 @@ describe('ML locator', () => {
     });
 
     describe('DataVisualizer', () => {
+      it('should generate a generic URL for the ES|QL anomaly detection job page', async () => {
+        const location = await definition.getLocation({
+          page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ESQL,
+        });
+
+        expect(location).toMatchObject({
+          app: 'ml',
+          path: '/jobs/new_job/esql',
+          state: {},
+        });
+      });
+
       it('should generate valid URL for the Data Visualizer page', async () => {
         const location = await definition.getLocation({
           page: ML_PAGES.DATA_VISUALIZER,

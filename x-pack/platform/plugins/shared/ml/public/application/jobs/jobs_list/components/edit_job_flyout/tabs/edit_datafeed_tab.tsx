@@ -26,6 +26,7 @@ interface EditDatafeedTabProps {
   datafeedFrequency: string;
   datafeedScrollSize: number;
   datafeedProjectRouting: string | undefined;
+  isEsqlDatafeed: boolean;
   jobBucketSpan: string;
   setDatafeed: (datafeed: Record<string, string | number | undefined>) => void;
 }
@@ -37,6 +38,7 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
   datafeedFrequency,
   datafeedScrollSize,
   datafeedProjectRouting,
+  isEsqlDatafeed,
   jobBucketSpan,
   setDatafeed,
 }) => {
@@ -104,6 +106,20 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
           <EuiSpacer size="l" />
         </>
       )}
+      {isEsqlDatafeed && !datafeedRunning && (
+        <>
+          <KbnWarningCallout
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.datafeed.esqlQueryReadOnlyCalloutText"
+                defaultMessage="To change this ES|QL query or its output shape, create a new job and datafeed. The learned model state will not carry over."
+              />
+            }
+          />
+          <EuiSpacer size="l" />
+        </>
+      )}
       <EuiForm>
         {isMlCpsEnabled && totalProjectCount > 1 ? (
           <EuiFormRow
@@ -135,11 +151,11 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
           style={{ maxWidth: 'inherit' }}
         >
           <MLJobEditor
-            mode={ML_EDITOR_MODE.XJSON}
+            mode={isEsqlDatafeed ? ML_EDITOR_MODE.TEXT : ML_EDITOR_MODE.XJSON}
             value={datafeedQuery}
             onChange={onQueryChange}
             height="200px"
-            readOnly={datafeedRunning}
+            readOnly={datafeedRunning || isEsqlDatafeed}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -172,21 +188,23 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
             disabled={datafeedRunning}
           />
         </EuiFormRow>
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.ml.jobsList.editJobFlyout.datafeed.scrollSizeLabel"
-              defaultMessage="Scroll size"
+        {!isEsqlDatafeed && (
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.datafeed.scrollSizeLabel"
+                defaultMessage="Scroll size"
+              />
+            }
+          >
+            <EuiFieldNumber
+              value={datafeedScrollSize}
+              placeholder={String(defaults.scrollSize)}
+              onChange={onScrollSizeChange}
+              disabled={datafeedRunning}
             />
-          }
-        >
-          <EuiFieldNumber
-            value={datafeedScrollSize}
-            placeholder={String(defaults.scrollSize)}
-            onChange={onScrollSizeChange}
-            disabled={datafeedRunning}
-          />
-        </EuiFormRow>
+          </EuiFormRow>
+        )}
       </EuiForm>
     </>
   );

@@ -77,6 +77,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
         isMlAutoscalingEnabled: resp.isMlAutoscalingEnabled,
         cloudUrl: resp.cloudUrl ?? null,
         isMlCpsEnabled: resp.isMlCpsEnabled,
+        isMlEsqlDatafeedEnabled: resp.isMlEsqlDatafeedEnabled ?? false,
       });
     } catch (error) {
       setCloudInfo(null);

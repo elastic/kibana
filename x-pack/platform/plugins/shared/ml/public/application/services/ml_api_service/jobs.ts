@@ -17,9 +17,10 @@ import type {
   MlSummaryJobs,
 } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
-import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { EsqlJobConfig, Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type {
   Datafeed,
+  EsqlDatafeedConfig,
   IndicesOptions,
 } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { JobMessage } from '@kbn/ml-common-types/audit_message';
@@ -408,9 +409,15 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  datafeedPreview(datafeedId?: string, job?: Job, datafeed?: Datafeed) {
-    const body = JSON.stringify({ datafeedId, job, datafeed });
-    return httpService.http<unknown[]>({
+  datafeedPreview(
+    datafeedId?: string,
+    job?: Job | EsqlJobConfig,
+    datafeed?: Datafeed | EsqlDatafeedConfig,
+    start?: string | number,
+    end?: string | number
+  ) {
+    const body = JSON.stringify({ datafeedId, job, datafeed, start, end });
+    return httpService.http<Array<Record<string, unknown>>>({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/datafeed_preview`,
       method: 'POST',
       body,

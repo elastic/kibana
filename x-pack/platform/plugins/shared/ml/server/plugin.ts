@@ -75,6 +75,7 @@ import { registerSampleDataSetLinks } from './lib/register_sample_data_set_links
 import { inferenceModelRoutes } from './routes/inference_models';
 import { registerAnomalyDetectionAgentBuilder } from './agent_builder/register_anomaly_detection';
 import { registerEmbeddables } from './lib/register_embeddables';
+import { esqlRoutes } from './routes/esql';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -273,6 +274,7 @@ export class MlServerPlugin
     }
 
     // Register Miscellaneous routes
+    esqlRoutes(routeInit);
     inferenceModelRoutes(routeInit, plugins.cloud);
     modelManagementRoutes(routeInit);
     dataVisualizerRoutes(routeInit);
