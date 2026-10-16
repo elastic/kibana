@@ -162,7 +162,7 @@ describe('useContextEngineBreadcrumbs', () => {
       { initialProps: { breadcrumbs: [{ text: 'my-ai-index' }] } }
     );
 
-    appChrome.breadcrumbs.setAppBreadcrumbs.mockClear();
+    jest.mocked(appChrome.breadcrumbs.setAppBreadcrumbs).mockClear();
 
     rerender({ breadcrumbs: [{ text: 'my-ai-index' }] });
 
