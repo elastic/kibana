@@ -10,12 +10,12 @@
 import React, { useCallback } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -67,13 +67,13 @@ export const SelectedPanelsToolbar = () => {
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
+          <EuiBadge color="primary" data-test-subj="dashboardSelectedPanelsCount">
             <FormattedMessage
               id="dashboard.selectedPanelsToolbar.selectedCount"
               defaultMessage="{count} selected"
               values={{ count: selectedPanelIds.length }}
             />
-          </EuiText>
+          </EuiBadge>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
