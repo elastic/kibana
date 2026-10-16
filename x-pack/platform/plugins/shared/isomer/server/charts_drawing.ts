@@ -40,6 +40,16 @@ export interface DrawnRender {
 
 export interface ChartsDrawing {
   runtime: KibanaIsomerRuntime;
+  /** One node's `html`, its charts drawn at `size`, with the stylesheets the surface inlined split out. */
+  renderNode(
+    node: Composition['body'][number],
+    size: { width: number; height: number }
+  ): Promise<{ html: string; css: string }>;
+  /** A page of markup as a PNG, through the same rasterizer and fonts as `snapshot`. */
+  rasterize(
+    page: { html: string; css: string; width: number; height: number },
+    scale: number
+  ): Promise<Buffer>;
   /** Stops the drawing thread. */
   close(): Promise<void>;
   render(
@@ -81,6 +91,29 @@ export const createChartsDrawing = async ({
   });
   return {
     runtime,
+    renderNode: async (node, { width, height }) => {
+      const composition = { type: 'view', body: [node] } as Composition;
+      const { release } = await prepareCharts(engine, composition, {
+        walk,
+        mode: 'light',
+        width,
+        height,
+      });
+      try {
+        const { html } = runtime.surfaces.html.render(composition);
+        const css: string[] = [];
+        return {
+          html: html.replace(/<style>([\s\S]*?)<\/style>/g, (_, sheet: string) => {
+            css.push(sheet);
+            return '';
+          }),
+          css: css.join('\n'),
+        };
+      } finally {
+        release();
+      }
+    },
+    rasterize: (page, scale) => takumi.png(page, { scale }),
     close: () => engine.close(),
     render: async (composition, surface, { width, height } = DEFAULT_CHART_SIZE) => {
       const started = performance.now();
