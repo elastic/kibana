@@ -146,7 +146,7 @@ export const RuleSummaryFlyout = ({
         <Header title={rule.metadata.name} description={updatedAtFormatted}>
           <Badge color="hollow" data-test-subj="universalRulesBadge">
             {i18n.translate('xpack.alertingV2.ruleSummaryFlyout.universalRulesBadge', {
-              defaultMessage: 'Universal rules',
+              defaultMessage: 'Universal',
             })}
           </Badge>
           <Badge

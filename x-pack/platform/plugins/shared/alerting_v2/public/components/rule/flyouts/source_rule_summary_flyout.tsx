@@ -234,7 +234,7 @@ export const SourceRuleSummaryFlyout = ({
                       <EuiBadge color="hollow" data-test-subj="classicRulesBadge">
                         {i18n.translate(
                           'xpack.alertingV2.sourceRuleSummaryFlyout.classicRulesBadge',
-                          { defaultMessage: 'Classic rules' }
+                          { defaultMessage: 'Classic' }
                         )}
                       </EuiBadge>
                     </EuiFlexItem>

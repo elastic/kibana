@@ -355,7 +355,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const badges: AppHeaderBadge[] = [
     {
       label: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.classicRulesBadge', {
-        defaultMessage: 'Classic rules',
+        defaultMessage: 'Classic',
       }),
       color: 'hollow',
       'data-test-subj': 'classicRulesBadge',

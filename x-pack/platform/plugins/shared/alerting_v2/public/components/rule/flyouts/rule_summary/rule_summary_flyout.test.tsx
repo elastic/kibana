@@ -185,10 +185,10 @@ describe('RuleSummaryFlyout', () => {
     expect(screen.getByTestId('ruleSummaryArtifacts')).toBeInTheDocument();
   });
 
-  it('renders the Universal rules badge', () => {
+  it('renders the Universal badge', () => {
     renderFlyout();
 
-    expect(screen.getByTestId('universalRulesBadge')).toHaveTextContent('Universal rules');
+    expect(screen.getByTestId('universalRulesBadge')).toHaveTextContent('Universal');
   });
 
   it('shows last-update timestamp and audit info blocks in the header', () => {
