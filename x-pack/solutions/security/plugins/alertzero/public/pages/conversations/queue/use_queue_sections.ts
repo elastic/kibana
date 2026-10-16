@@ -53,7 +53,12 @@ export const useQueueSections = (): QueueSections => {
         ...closed.investigations,
       ].toSorted((a, b) => {
         const priorityDiff = (b.priorityScore ?? 0) - (a.priorityScore ?? 0);
-        return priorityDiff !== 0 ? priorityDiff : b.updatedAt.localeCompare(a.updatedAt);
+        if (priorityDiff !== 0) {
+          return priorityDiff;
+        }
+        return (b.proposalCreatedAt ?? b.createdAt).localeCompare(
+          a.proposalCreatedAt ?? a.createdAt
+        );
       }),
     [
       respond.investigations,

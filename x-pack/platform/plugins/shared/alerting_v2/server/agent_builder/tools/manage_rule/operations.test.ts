@@ -328,6 +328,206 @@ describe('executeRuleOperations', () => {
     });
   });
 
+  describe('set_query with a data stream backing index', () => {
+    const backingIndexQuery =
+      'FROM .ds-logs-nginx.access-default-2026.06.11-000001 | STATS COUNT(*)';
+
+    it.each([
+      ['a new rule', { isNew: true }],
+      ['an existing rule', { isNew: false }],
+    ])('warns without throwing for %s', async (_description, options) => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_metadata', name: 'Test' },
+        { operation: 'set_query', query: { base: backingIndexQuery } },
+      ];
+
+      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), options);
+
+      expect(result.data.query).toEqual({ base: backingIndexQuery });
+      expect(result.warnings).toEqual([
+        expect.stringContaining('base name `logs-nginx.access-default`'),
+      ]);
+    });
+
+    it('keeps the query and the warning when ES validation also runs', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'count', type: 'long' }],
+        values: [],
+      } as never);
+
+      const result = await executeRuleOperations(
+        {},
+        [{ operation: 'set_query', query: { base: backingIndexQuery } }],
+        esClient
+      );
+
+      expect(result.queryColumns).toEqual([{ name: 'count', type: 'long' }]);
+      expect(result.warnings).toEqual([expect.stringContaining('generation index')]);
+    });
+
+    it('does not warn for wildcard patterns or data stream names', async () => {
+      const queries = [
+        'FROM logs-nginx.access-* | STATS COUNT(*)',
+        'FROM logs-nginx.access-default | STATS COUNT(*)',
+        'FROM orders-000123 | STATS COUNT(*)',
+      ];
+
+      for (const base of queries) {
+        const result = await executeRuleOperations({}, [
+          { operation: 'set_query', query: { base } },
+        ]);
+        expect(result.warnings).toBeUndefined();
+      }
+    });
+  });
+
+  describe('backing indices in recovery and no-data queries', () => {
+    const backingIndexQuery =
+      'FROM .ds-logs-nginx.access-default-2026.06.11-000001 | STATS COUNT(*)';
+
+    it('warns for a recovery query that targets a backing index', async () => {
+      const result = await executeRuleOperations({}, [
+        {
+          operation: 'set_recovery',
+          recovery: { strategy: 'query', query: backingIndexQuery },
+        },
+      ]);
+
+      expect(result.data.recovery).toEqual({ strategy: 'query', query: backingIndexQuery });
+      expect(result.warnings).toEqual([expect.stringMatching(/^The recovery query targets/)]);
+    });
+
+    it('warns for a no-data query that targets a backing index', async () => {
+      const result = await executeRuleOperations({}, [
+        { operation: 'set_no_data', no_data: { strategy: 'keep_last', query: backingIndexQuery } },
+      ]);
+
+      expect(result.data.no_data).toEqual({ strategy: 'keep_last', query: backingIndexQuery });
+      expect(result.warnings).toEqual([expect.stringMatching(/^The no-data query targets/)]);
+    });
+
+    it('reports each affected query separately', async () => {
+      const result = await executeRuleOperations({}, [
+        { operation: 'set_query', query: { base: backingIndexQuery } },
+        { operation: 'set_recovery', recovery: { strategy: 'query', query: backingIndexQuery } },
+        { operation: 'set_no_data', no_data: { strategy: 'resolve', query: backingIndexQuery } },
+      ]);
+
+      expect(result.warnings).toEqual([
+        expect.stringMatching(/^The rule query targets/),
+        expect.stringMatching(/^The recovery query targets/),
+        expect.stringMatching(/^The no-data query targets/),
+      ]);
+    });
+
+    it('does not warn for wildcard queries or strategies without their own query', async () => {
+      const result = await executeRuleOperations({}, [
+        {
+          operation: 'set_recovery',
+          recovery: { strategy: 'query', query: 'FROM logs-* | LIMIT 1' },
+        },
+        {
+          operation: 'set_no_data',
+          no_data: { strategy: 'keep_last', query: 'FROM logs-* | LIMIT 1' },
+        },
+      ]);
+      expect(result.warnings).toBeUndefined();
+
+      const withoutOwnQuery = await executeRuleOperations({}, [
+        { operation: 'set_recovery', recovery: { strategy: 'no_breach' } },
+        { operation: 'set_no_data', no_data: { strategy: 'ignore' } },
+      ]);
+      expect(withoutOwnQuery.warnings).toBeUndefined();
+    });
+  });
+
+  describe('backing index already used by the rule', () => {
+    const backingIndex = '.ds-logs-nginx.access-default-2026.06.11-000001';
+    const otherBackingIndex = '.ds-logs-nginx.access-default-2026.07.01-000002';
+    const queryOn = (index: string) => `FROM ${index} | STATS COUNT(*)`;
+
+    it('only mentions the existing source, without a retarget instruction, when it is unchanged', async () => {
+      const result = await executeRuleOperations({ query: { base: queryOn(backingIndex) } }, [
+        { operation: 'set_query', query: { base: queryOn(backingIndex) } },
+      ]);
+
+      expect(result.warnings).toHaveLength(1);
+      expect(result.warnings?.[0]).toContain('already used');
+      expect(result.warnings?.[0]).toContain('Leave it unchanged');
+      expect(result.warnings?.[0]).not.toContain('call the operation again');
+    });
+
+    it('uses the retarget warning when the edit switches to a different backing index', async () => {
+      const result = await executeRuleOperations({ query: { base: queryOn(backingIndex) } }, [
+        { operation: 'set_query', query: { base: queryOn(otherBackingIndex) } },
+      ]);
+
+      expect(result.warnings).toHaveLength(1);
+      expect(result.warnings?.[0]).toContain('call the operation again');
+      expect(result.warnings?.[0]).not.toContain('already used');
+    });
+
+    it('splits sources into inherited and new when the edit adds one', async () => {
+      const result = await executeRuleOperations({ query: { base: queryOn(backingIndex) } }, [
+        {
+          operation: 'set_query',
+          query: { base: `FROM ${backingIndex}, ${otherBackingIndex} | STATS COUNT(*)` },
+        },
+      ]);
+
+      expect(result.warnings).toHaveLength(2);
+      expect(result.warnings?.[0]).toContain(otherBackingIndex);
+      expect(result.warnings?.[0]).toContain('call the operation again');
+      expect(result.warnings?.[1]).toContain(backingIndex);
+      expect(result.warnings?.[1]).toContain('already used');
+    });
+
+    it('treats the source as new when the rule had a different query before', async () => {
+      const result = await executeRuleOperations({ query: { base: 'FROM logs-* | LIMIT 1' } }, [
+        { operation: 'set_query', query: { base: queryOn(backingIndex) } },
+      ]);
+
+      expect(result.warnings?.[0]).toContain('call the operation again');
+    });
+
+    it('applies the same rule to an unchanged recovery query', async () => {
+      const recovery = { strategy: 'query' as const, query: queryOn(backingIndex) };
+
+      const unchanged = await executeRuleOperations({ recovery }, [
+        { operation: 'set_recovery', recovery },
+      ]);
+      expect(unchanged.warnings?.[0]).toMatch(/^The recovery query still targets/);
+      expect(unchanged.warnings?.[0]).not.toContain('call the operation again');
+
+      const changed = await executeRuleOperations({ recovery }, [
+        {
+          operation: 'set_recovery',
+          recovery: { strategy: 'query', query: queryOn(otherBackingIndex) },
+        },
+      ]);
+      expect(changed.warnings?.[0]).toContain('call the operation again');
+    });
+
+    it('applies the same rule to an unchanged no-data query', async () => {
+      const noData = { strategy: 'keep_last' as const, query: queryOn(backingIndex) };
+
+      const unchanged = await executeRuleOperations({ no_data: noData }, [
+        { operation: 'set_no_data', no_data: noData },
+      ]);
+      expect(unchanged.warnings?.[0]).toMatch(/^The no-data query still targets/);
+      expect(unchanged.warnings?.[0]).not.toContain('call the operation again');
+
+      const changed = await executeRuleOperations({ no_data: noData }, [
+        {
+          operation: 'set_no_data',
+          no_data: { strategy: 'resolve', query: queryOn(otherBackingIndex) },
+        },
+      ]);
+      expect(changed.warnings?.[0]).toContain('call the operation again');
+    });
+  });
+
   describe('set_query with a breach segment', () => {
     it('validates the base query alone in the LIMIT 0 call', async () => {
       const esClient = createMockEsClient();
