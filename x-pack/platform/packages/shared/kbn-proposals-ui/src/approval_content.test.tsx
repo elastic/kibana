@@ -474,7 +474,8 @@ describe('ApprovalContent', () => {
         },
       });
 
-      expect(screen.getByText('Approved')).toBeInTheDocument();
+      // The badge's short label and the banner's title read the same.
+      expect(screen.getAllByText('Approved')).toHaveLength(2);
       expect(screen.queryByText('Applied')).not.toBeInTheDocument();
     });
 
