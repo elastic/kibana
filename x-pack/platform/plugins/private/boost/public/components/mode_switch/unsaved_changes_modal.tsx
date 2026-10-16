@@ -20,76 +20,43 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SimpleModeDefaults } from '../../../common/types';
-import { DATA_STREAMS_WINDOW_OPTIONS, INDICES_PRESET_OPTIONS } from '../preset_options';
 
 interface UnsavedChangesModalProps {
-  savedDefaults: SimpleModeDefaults;
-  draft: SimpleModeDefaults;
+  /** How many settings have unsaved changes. */
+  changeCount: number;
   isSaving: boolean;
-  onCancel: () => void;
+  /** Closes the modal, keeping the changes and staying in simple mode. */
+  onClose: () => void;
   /** Discards the changes, then turns on advanced mode. */
   onDiscard: () => void;
   /** Saves the changes, then turns on advanced mode. */
   onSave: () => void;
 }
 
-const getLabel = <TId extends string>(
-  options: ReadonlyArray<{ id: TId; label: string }>,
-  id: TId
-): string => options.find((option) => option.id === id)?.label ?? id;
-
 /**
  * Asks whether to save or discard unsaved simple-mode changes before turning on advanced mode,
- * which would otherwise lose them.
+ * which would otherwise lose them. Closing it stays in simple mode.
  */
 export const UnsavedChangesModal = ({
-  savedDefaults,
-  draft,
+  changeCount,
   isSaving,
-  onCancel,
+  onClose,
   onDiscard,
   onSave,
 }: UnsavedChangesModalProps) => {
   const titleId = useGeneratedHtmlId();
 
-  // Each changed setting, from what's saved to what's chosen.
-  const changes = [
-    ...(draft.indices !== savedDefaults.indices
-      ? [
-          i18n.translate('xpack.boost.unsavedChangesModal.indicesChange', {
-            defaultMessage: 'Indices: {from} to {to}',
-            values: {
-              from: getLabel(INDICES_PRESET_OPTIONS, savedDefaults.indices),
-              to: getLabel(INDICES_PRESET_OPTIONS, draft.indices),
-            },
-          }),
-        ]
-      : []),
-    ...(draft.data_streams.window !== savedDefaults.data_streams.window
-      ? [
-          i18n.translate('xpack.boost.unsavedChangesModal.dataStreamsChange', {
-            defaultMessage: 'Data streams: {from} to {to}',
-            values: {
-              from: getLabel(DATA_STREAMS_WINDOW_OPTIONS, savedDefaults.data_streams.window),
-              to: getLabel(DATA_STREAMS_WINDOW_OPTIONS, draft.data_streams.window),
-            },
-          }),
-        ]
-      : []),
-  ];
-
   return (
     <EuiModal
       aria-labelledby={titleId}
-      onClose={onCancel}
+      onClose={onClose}
       maxWidth={576}
       data-test-subj="boostUnsavedChangesModal"
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={titleId}>
           {i18n.translate('xpack.boost.unsavedChangesModal.title', {
-            defaultMessage: 'Save changes before turning on advanced mode?',
+            defaultMessage: 'Unsaved changes detected',
           })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -99,29 +66,18 @@ export const UnsavedChangesModal = ({
           <p>
             {i18n.translate('xpack.boost.unsavedChangesModal.body', {
               defaultMessage:
-                "These changes to your simple mode settings haven't been saved. Save them to keep them, or discard them.",
+                '{count, plural, one {# unsaved setting change has been detected. Would you like to save or discard this change before switching to advanced mode?} other {# unsaved setting changes have been detected. Would you like to save or discard these changes before switching to advanced mode?}}',
+              values: { count: changeCount },
             })}
           </p>
-          <ul>
-            {changes.map((change) => (
-              <li key={change}>{change}</li>
-            ))}
-          </ul>
         </EuiText>
       </EuiModalBody>
 
       <EuiModalFooter>
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel} data-test-subj="boostUnsavedChangesCancel">
-              {i18n.translate('xpack.boost.unsavedChangesModal.cancelButton', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+            {/* Like the page's own discard button: picking the settings again undoes it. */}
             <EuiButtonEmpty
-              color="danger"
               onClick={onDiscard}
               isDisabled={isSaving}
               data-test-subj="boostUnsavedChangesDiscard"

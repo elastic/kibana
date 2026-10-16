@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
@@ -108,7 +108,7 @@ describe('BoostPage turning on advanced mode', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Advanced mode' }));
 
     expect(screen.getByTestId('boostUnsavedChangesModal')).toHaveTextContent(
-      'Indices: Performant to On-demand'
+      '1 unsaved setting change has been detected.'
     );
     expect(mockUpdateMode).not.toHaveBeenCalled();
 
@@ -132,12 +132,28 @@ describe('BoostPage turning on advanced mode', () => {
     expect(mockUpdateMode).toHaveBeenCalledWith('advanced', expect.anything());
   });
 
-  it('keeps the changes and stays in simple mode when cancelled', async () => {
+  it('counts every changed setting', async () => {
+    renderPage();
+
+    await userEvent.click(screen.getByTestId('indicesPreset-on_demand'));
+    await userEvent.click(screen.getByTestId('dataStreamsPreset-last_1_day'));
+    await userEvent.click(screen.getByTestId('enableAdvancedModeLink'));
+
+    expect(screen.getByTestId('boostUnsavedChangesModal')).toHaveTextContent(
+      '2 unsaved setting changes have been detected.'
+    );
+  });
+
+  it('keeps the changes and stays in simple mode when closed', async () => {
     renderPage();
 
     await userEvent.click(screen.getByTestId('indicesPreset-on_demand'));
     await userEvent.click(screen.getByTestId('enableAdvancedModeLink'));
-    await userEvent.click(screen.getByTestId('boostUnsavedChangesCancel'));
+    await userEvent.click(
+      within(screen.getByTestId('boostUnsavedChangesModal')).getByRole('button', {
+        name: /close/i,
+      })
+    );
 
     expect(mockUpdateMode).not.toHaveBeenCalled();
     expect(screen.queryByTestId('boostUnsavedChangesModal')).not.toBeInTheDocument();

@@ -30,16 +30,18 @@ export const useSimpleModeDraft = (savedDefaults: SimpleModeDefaults | undefined
   useEffect(() => setEdits(undefined), [savedDefaults]);
 
   const draft = edits ?? savedDefaults;
-  const isDirty =
-    edits !== undefined &&
-    savedDefaults !== undefined &&
-    (edits.indices !== savedDefaults.indices ||
-      edits.data_streams.window !== savedDefaults.data_streams.window);
+  // How many of the settings differ from what's saved.
+  const changeCount =
+    edits && savedDefaults
+      ? Number(edits.indices !== savedDefaults.indices) +
+        Number(edits.data_streams.window !== savedDefaults.data_streams.window)
+      : 0;
 
   return {
     /** The defaults as edited, or as saved when nothing has changed. */
     draft,
-    isDirty,
+    changeCount,
+    isDirty: changeCount > 0,
     isSaving,
     setIndices: (indices: IndicesPresetId) => {
       if (draft) {

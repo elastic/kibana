@@ -211,12 +211,11 @@ export const BoostPage = () => {
         )}
       </EuiPageSection>
 
-      {isConfirmingUnsavedChanges && simpleDraft.draft && (
+      {isConfirmingUnsavedChanges && (
         <UnsavedChangesModal
-          savedDefaults={state.settings.simple}
-          draft={simpleDraft.draft}
+          changeCount={simpleDraft.changeCount}
           isSaving={simpleDraft.isSaving}
-          onCancel={() => setIsConfirmingUnsavedChanges(false)}
+          onClose={() => setIsConfirmingUnsavedChanges(false)}
           onDiscard={() => {
             simpleDraft.discard();
             setIsConfirmingUnsavedChanges(false);
