@@ -223,6 +223,26 @@ describe('arrangeDashboardLayout', () => {
     });
   });
 
+  it('keeps the grids of a section returned without panels and moves its row', async () => {
+    const arrangeLayout = jest.fn(async () => ({
+      ...completeArrangement,
+      sections: [{ id: 's1', y: 18, panels: [] }],
+    }));
+
+    const result = await arrange(arrangeLayout);
+
+    const [[{ sections }]] = arrangeLayout.mock.calls as unknown as [[LayoutRequest]];
+    expect(sections[0].panels).toEqual([expect.objectContaining({ id: 'p2' })]);
+    expect(result.failure).toBeUndefined();
+    expect(result.dashboardData.panels[1]).toEqual(
+      expect.objectContaining({
+        id: 'section-a',
+        grid: { y: 18 },
+        panels: [expect.objectContaining({ id: 'inner', grid: { x: 0, y: 0, w: 24, h: 9 } })],
+      })
+    );
+  });
+
   it('sends the content of markdown panels', async () => {
     const arrangeLayout = jest.fn(async () => ({
       plan: '',
