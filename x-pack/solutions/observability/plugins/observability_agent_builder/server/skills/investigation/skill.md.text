@@ -69,6 +69,10 @@ Based on what Steps 2-3 revealed, choose the most relevant deep-dive:
 - `get_traces` — examine slow traces span-by-span to find the bottleneck.
 - `get_runtime_metrics` — check if JVM/runtime resource exhaustion (GC pauses, heap pressure) is causing slowness.
 
+**If a messaging dependency appears (Kafka, RabbitMQ, etc.):**
+- `get_service_topology` with `direction: "both"` on the affected service — the response lists other producers and consumers on the same topic or queue; compare their latency, throughput, and error rates
+- `get_log_groups` on the affected service and on other producer or consumer services connected to the same messaging resource in topology — messaging problems often involve both sides of the pipeline
+
 **If the issue is infrastructure/resource related:**
 - `get_hosts` — host-level CPU, memory, disk, network metrics.
 - `get_metric_change_points` — detect when a metric shifted.
