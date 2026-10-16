@@ -65,6 +65,16 @@ export interface AttachmentDeleteContext {
   attachments: readonly AttachmentDeleteTarget[];
   /** The case's attachments that are not being deleted. */
   remainingAttachments: readonly AttachmentDeleteTarget[];
+  /**
+   * Whether the caller accepts losing further attachments along with the requested ones.
+   *
+   * False means the analyst declined the deletions, not that the hook is unwanted: the hook
+   * still runs, and `relatedAttachmentIds` is ignored rather than acted on. A type that keeps
+   * bookkeeping about where an attachment came from still has to correct it here, because the
+   * attachment that recorded it is leaving either way. Returning updates that drop content in
+   * this mode would delete exactly what the caller refused.
+   */
+  includeRelated: boolean;
 }
 
 export interface AttachmentUpdate {
@@ -78,7 +88,8 @@ export interface AttachmentUpdate {
 }
 
 export interface AttachmentDeleteResult {
-  /** Ids from `remainingAttachments` to delete in the same operation. */
+  /** Ids from `remainingAttachments` to delete in the same operation. Ignored when the delete
+   * context has `includeRelated: false`. */
   relatedAttachmentIds: readonly string[];
   /**
    * Attachments from `remainingAttachments` to shrink rather than delete, for when the deleted

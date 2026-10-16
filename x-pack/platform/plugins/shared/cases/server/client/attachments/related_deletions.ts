@@ -38,14 +38,21 @@ const EMPTY_RELATED: RelatedAttachments = { refs: [], updates: [] };
 /**
  * Returns the attachments of this case that the `onDelete` hooks of the deleted attachment types
  * ask to take along, and those they ask to shrink instead.
+ *
+ * The hooks run whether or not the caller accepts the deletions. `includeRelated: false` drops
+ * the deletions from the result and keeps the updates: a hook whose attachment is leaving still
+ * has to correct the bookkeeping the surviving attachments keep about it, and that bookkeeping
+ * is not something the caller declined.
  */
 export const getRelatedAttachmentsToDelete = async ({
   caseId,
   attachments,
+  includeRelated,
   clientArgs,
 }: {
   caseId: string;
   attachments: ReadonlyArray<{ id: string; attributes?: AttachmentAttributesV2 }>;
+  includeRelated: boolean;
   clientArgs: CasesClientArgs;
 }): Promise<RelatedAttachments> => {
   const {
@@ -88,8 +95,12 @@ export const getRelatedAttachmentsToDelete = async ({
       request,
       attachments: targets,
       remainingAttachments: remainingTargets,
+      includeRelated,
     });
-    relatedAttachmentIds.forEach((id) => relatedIds.add(id));
+    // The caller refused the deletions, so they are dropped here rather than trusted to the hook.
+    if (includeRelated) {
+      relatedAttachmentIds.forEach((id) => relatedIds.add(id));
+    }
     // Two hooks shrinking the same attachment would each have written over the other's result, so
     // the last one wins either way; keeping one update per id at least makes that a single write.
     relatedAttachmentUpdates.forEach((update) => updatesById.set(update.id, update));

@@ -717,10 +717,12 @@ describe('deleteCaseAttachments', () => {
       expect(onDelete).not.toHaveBeenCalled();
     });
 
-    it('skips the onDelete hook when includeRelated is false', async () => {
+    // The hook still runs: an attachment leaving the case may oblige a surviving one to correct
+    // what it records about it, which is not part of what the caller declined.
+    it('runs the onDelete hook but takes nothing along when includeRelated is false', async () => {
       await deleteWithRelated([attackAttachment], false);
 
-      expect(onDelete).not.toHaveBeenCalled();
+      expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ includeRelated: false }));
       expect(argsWithHook.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
         savedObjectIds: ['attack-attachment-1'],
         refresh: true,
@@ -1084,16 +1086,28 @@ describe('deleteCaseAttachments', () => {
         expect(argsWithHook.services.alertsService.removeCaseIdFromAlerts).not.toHaveBeenCalled();
       });
 
-      it('shrinks nothing when includeRelated is false', async () => {
+      // Declining the deletions does not decline the relabel: a well behaved hook returns an
+      // update that drops nothing, and it is applied so the surviving attachment stops pointing
+      // at the attachment that just left.
+      it('applies a relabel-only update when includeRelated is false', async () => {
+        onDelete.mockResolvedValue({
+          relatedAttachmentIds: [relatedComment.id, relatedAlert.id],
+          relatedAttachmentUpdates: [{ id: sharedAlerts.id, payload: reprovenancedPayload }],
+        });
+
         await deleteWithRelated([attackAttachment], false);
 
-        expect(
-          argsWithHook.services.attachmentService.getter.bulkGetForDeletionByType
-        ).not.toHaveBeenCalled();
-        expect(argsWithHook.services.attachmentService.update).not.toHaveBeenCalled();
+        expect(argsWithHook.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
+          savedObjectIds: ['attack-attachment-1'],
+          refresh: true,
+        });
+        expect(argsWithHook.services.attachmentService.update).toHaveBeenCalledWith(
+          expect.objectContaining({ savedObjectId: 'shared-alerts-1' })
+        );
         expect(
           argsWithHook.services.userActionService.creator.createUserAction
         ).not.toHaveBeenCalled();
+        expect(argsWithHook.services.alertsService.removeCaseIdFromAlerts).not.toHaveBeenCalled();
       });
     });
   });

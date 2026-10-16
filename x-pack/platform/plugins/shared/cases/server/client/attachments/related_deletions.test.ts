@@ -41,10 +41,17 @@ describe('getRelatedAttachmentsToDelete', () => {
     return clientArgs;
   };
 
+  type RelatedArgs = Parameters<typeof getRelatedAttachmentsToDelete>[0];
+
+  /** Defaults `includeRelated`, which all but the declining tests leave on. */
+  const resolveRelated = (
+    args: Omit<RelatedArgs, 'includeRelated'> & { includeRelated?: boolean }
+  ) => getRelatedAttachmentsToDelete({ includeRelated: true, ...args });
+
   it('does not read the case attachments when no deleted type has an onDelete hook', async () => {
     const clientArgs = setup();
 
-    const related = await getRelatedAttachmentsToDelete({
+    const related = await resolveRelated({
       caseId: 'mock-id-1',
       attachments: [parent],
       clientArgs,
@@ -58,7 +65,7 @@ describe('getRelatedAttachmentsToDelete', () => {
     const onDelete = jest.fn().mockResolvedValue({ relatedAttachmentIds: [] });
     const clientArgs = setup(onDelete);
 
-    await getRelatedAttachmentsToDelete({
+    await resolveRelated({
       caseId: 'mock-id-1',
       attachments: [parent, unrelated],
       clientArgs,
@@ -69,6 +76,7 @@ describe('getRelatedAttachmentsToDelete', () => {
       request: clientArgs.request,
       attachments: [{ id: parent.id, attributes: parent.attributes }],
       remainingAttachments: [{ id: child.id, attributes: child.attributes }],
+      includeRelated: true,
     });
   });
 
@@ -78,7 +86,7 @@ describe('getRelatedAttachmentsToDelete', () => {
     });
     const clientArgs = setup(onDelete);
 
-    const related = await getRelatedAttachmentsToDelete({
+    const related = await resolveRelated({
       caseId: 'mock-id-1',
       attachments: [parent],
       clientArgs,
@@ -91,7 +99,7 @@ describe('getRelatedAttachmentsToDelete', () => {
     const onDelete = jest.fn().mockResolvedValue({ relatedAttachmentIds: [] });
     const clientArgs = setup(onDelete);
 
-    const related = await getRelatedAttachmentsToDelete({
+    const related = await resolveRelated({
       caseId: 'mock-id-1',
       attachments: [{ id: 'undecodable-1' }, parent],
       clientArgs,
@@ -101,6 +109,67 @@ describe('getRelatedAttachmentsToDelete', () => {
     expect(onDelete).toHaveBeenCalledWith(
       expect.objectContaining({ attachments: [{ id: parent.id, attributes: parent.attributes }] })
     );
+  });
+
+  describe('when the caller declines the related deletions', () => {
+    const relabelledChild = {
+      id: child.id,
+      payload: {
+        type: child.attributes.type,
+        owner: child.attributes.owner,
+        data: { content: 'relabelled' },
+      },
+    };
+
+    it('still runs the hook, and tells it the deletions were declined', async () => {
+      const onDelete = jest.fn().mockResolvedValue({ relatedAttachmentIds: [] });
+      const clientArgs = setup(onDelete);
+
+      await resolveRelated({
+        caseId: 'mock-id-1',
+        attachments: [parent],
+        clientArgs,
+        includeRelated: false,
+      });
+
+      expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ includeRelated: false }));
+    });
+
+    it('ignores the ids the hook asks to delete', async () => {
+      const onDelete = jest.fn().mockResolvedValue({ relatedAttachmentIds: [child.id] });
+      const clientArgs = setup(onDelete);
+
+      const related = await resolveRelated({
+        caseId: 'mock-id-1',
+        attachments: [parent],
+        clientArgs,
+        includeRelated: false,
+      });
+
+      expect(related).toEqual({ refs: [], updates: [] });
+    });
+
+    // The bookkeeping a surviving attachment keeps about the one being deleted is not part of
+    // what the caller declined, and the attachment that recorded it is leaving either way.
+    it('keeps the updates the hook asks for', async () => {
+      const onDelete = jest.fn().mockResolvedValue({
+        relatedAttachmentIds: [child.id],
+        relatedAttachmentUpdates: [relabelledChild],
+      });
+      const clientArgs = setup(onDelete);
+
+      const related = await resolveRelated({
+        caseId: 'mock-id-1',
+        attachments: [parent],
+        clientArgs,
+        includeRelated: false,
+      });
+
+      expect(related).toEqual({
+        refs: [],
+        updates: [{ id: child.id, type: child.type, payload: relabelledChild.payload }],
+      });
+    });
   });
 
   describe('updates', () => {
@@ -120,7 +189,7 @@ describe('getRelatedAttachmentsToDelete', () => {
       });
       const clientArgs = setup(onDelete);
 
-      const related = await getRelatedAttachmentsToDelete({
+      const related = await resolveRelated({
         caseId: 'mock-id-1',
         attachments: [parent],
         clientArgs,
@@ -139,7 +208,7 @@ describe('getRelatedAttachmentsToDelete', () => {
       });
       const clientArgs = setup(onDelete);
 
-      const related = await getRelatedAttachmentsToDelete({
+      const related = await resolveRelated({
         caseId: 'mock-id-1',
         attachments: [parent],
         clientArgs,
@@ -158,7 +227,7 @@ describe('getRelatedAttachmentsToDelete', () => {
       });
       const clientArgs = setup(onDelete);
 
-      const related = await getRelatedAttachmentsToDelete({
+      const related = await resolveRelated({
         caseId: 'mock-id-1',
         attachments: [parent],
         clientArgs,
@@ -176,7 +245,7 @@ describe('getRelatedAttachmentsToDelete', () => {
       });
       const clientArgs = setup(onDelete);
 
-      const related = await getRelatedAttachmentsToDelete({
+      const related = await resolveRelated({
         caseId: 'mock-id-1',
         attachments: [parent],
         clientArgs,
@@ -194,7 +263,7 @@ describe('getRelatedAttachmentsToDelete', () => {
       });
       const clientArgs = setup(onDelete);
 
-      const related = await getRelatedAttachmentsToDelete({
+      const related = await resolveRelated({
         caseId: 'mock-id-1',
         attachments: [parent],
         clientArgs,
@@ -224,7 +293,7 @@ describe('getRelatedAttachmentsToDelete', () => {
         onDelete: otherOnDelete,
       });
 
-      const related = await getRelatedAttachmentsToDelete({
+      const related = await resolveRelated({
         caseId: 'mock-id-1',
         attachments: [parent, asType(unrelated, unrelated.id, otherType)],
         clientArgs,

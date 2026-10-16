@@ -932,7 +932,6 @@ describe('AttachmentService', () => {
 
         await expect(
           unifiedService.update({
-            // @ts-expect-error: a unified payload is not the legacy attributes shape
             updatedAttributes: attributes,
             savedObjectId: '1',
           })

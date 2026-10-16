@@ -47,7 +47,10 @@ interface DeleteCaseAttachmentsArgs {
   operation: OperationDetails;
   /** Message of the not found error thrown for attachments of another case. */
   notInCaseMessage?: (ids: string[]) => string;
-  /** Whether the `onDelete` hooks of the deleted types may take further attachments along. */
+  /**
+   * Whether the `onDelete` hooks of the deleted types may take further attachments along. The
+   * hooks run either way; false only drops the deletions they ask for.
+   */
   includeRelated?: boolean;
 }
 
@@ -94,10 +97,14 @@ export const deleteCaseAttachments = async (
   }
 
   // Resolved once the requested attachments are known to be valid and authorized, so a hook never
-  // runs for a request that is about to be rejected.
-  const { refs: relatedRefs, updates: relatedUpdates } = includeRelated
-    ? await getRelatedAttachmentsToDelete({ caseId, attachments: ownedAttachments, clientArgs })
-    : { refs: [], updates: [] };
+  // runs for a request that is about to be rejected. The hooks run even when the caller declined
+  // the related deletions: see `getRelatedAttachmentsToDelete`.
+  const { refs: relatedRefs, updates: relatedUpdates } = await getRelatedAttachmentsToDelete({
+    caseId,
+    attachments: ownedAttachments,
+    includeRelated,
+    clientArgs,
+  });
 
   // Read for deletion like the requested attachments, so they carry the same file id and the same
   // owner fallback. A file is never taken along: it is deleted through the file attachments

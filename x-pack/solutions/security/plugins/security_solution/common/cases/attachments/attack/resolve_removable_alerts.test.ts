@@ -689,6 +689,87 @@ describe('resolveRemovableAlertAttachments', () => {
       });
     });
   });
+
+  describe('when removal is declined', () => {
+    // The alerts stay, but the attack that vouched for them is leaving: an attachment left
+    // naming it would match no attack still on the case, so nothing would ever reconsider it.
+    it('removes nothing and relabels every attachment the attack created', () => {
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: [REMOVED_ATTACK_ID],
+          attackAlertIds: ['alert-1', 'alert-2'],
+          alertAttachments: [
+            alertAttachment('attachment-1', ['alert-1', 'alert-2']),
+            alertAttachment('attachment-2', ['alert-3'], ['attack-2']),
+          ],
+          otherAttacks: [{ id: 'attack-2', alertIds: ['alert-2', 'alert-3'] }],
+          allowRemoval: false,
+        })
+      ).toEqual({
+        attachmentIds: [],
+        updates: [
+          {
+            id: 'attachment-1',
+            keptAlertIds: ['alert-1', 'alert-2'],
+            removedAlertIds: [],
+            sourceAttackIds: ['attack-2'],
+          },
+        ],
+        alertIds: [],
+        isResolvable: true,
+      });
+    });
+
+    // Otherwise identical to an attachment the analyst made themselves, which is what keeping
+    // the alerts amounts to.
+    it('relabels onto no attack when nothing else claims the alerts', () => {
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: [REMOVED_ATTACK_ID],
+          attackAlertIds: ['alert-1'],
+          alertAttachments: [alertAttachment('attachment-1', ['alert-1'])],
+          otherAttacks: [],
+          allowRemoval: false,
+        })
+      ).toEqual({
+        attachmentIds: [],
+        updates: [
+          {
+            id: 'attachment-1',
+            keptAlertIds: ['alert-1'],
+            removedAlertIds: [],
+            sourceAttackIds: [],
+          },
+        ],
+        alertIds: [],
+        isResolvable: true,
+      });
+    });
+
+    it('still touches nothing the removed attack did not create', () => {
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: [REMOVED_ATTACK_ID],
+          attackAlertIds: ['alert-1'],
+          alertAttachments: [alertAttachment('attachment-1', ['alert-1'], [])],
+          otherAttacks: [],
+          allowRemoval: false,
+        })
+      ).toEqual({ attachmentIds: [], updates: [], alertIds: [], isResolvable: true });
+    });
+
+    it('is still unresolvable when an alert set is missing', () => {
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: [REMOVED_ATTACK_ID],
+          attackAlertIds: undefined,
+          alertAttachments: [alertAttachment('attachment-1', ['alert-1'])],
+          otherAttacks: [],
+          allowRemoval: false,
+        })
+      ).toEqual({ attachmentIds: [], updates: [], alertIds: [], isResolvable: false });
+    });
+  });
 });
 
 describe('resolveRemovableAlertAttachmentsForAttacks', () => {

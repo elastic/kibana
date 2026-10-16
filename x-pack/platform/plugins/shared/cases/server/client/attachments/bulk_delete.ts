@@ -108,6 +108,8 @@ export const bulkDeleteFileAttachments = async (
       await deleteCaseAttachments(
         // A file attachment takes nothing along with it: the hooks exist to keep an attachment in
         // step with the one that introduced it, and a file is never introduced by another type.
+        // The hooks still run, so a type that records where an attachment came from can correct
+        // that record; only the deletions they ask for are refused.
         { caseId, attachments, operation: Operations.deleteComment, includeRelated: false },
         clientArgs
       );

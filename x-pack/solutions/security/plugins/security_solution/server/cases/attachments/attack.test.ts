@@ -7,7 +7,7 @@
 
 import { coreMock, elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { AttachmentDeleteTarget } from '@kbn/cases-plugin/server';
+import type { AttachmentDeleteContext, AttachmentDeleteTarget } from '@kbn/cases-plugin/server';
 import {
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
@@ -103,8 +103,13 @@ describe('getAttackOnDelete', () => {
     });
   });
 
+  /** Defaults `includeRelated`, which every test but the declining ones leaves on. */
+  const runOnDelete = (
+    args: Omit<AttachmentDeleteContext, 'includeRelated'> & { includeRelated?: boolean }
+  ) => onDelete({ includeRelated: true, ...args });
+
   it('does not read the attacks when no alert attachment remains on the case', async () => {
-    const result = await onDelete({
+    const result = await runOnDelete({
       caseId: 'case-1',
       request,
       attachments: [attackTarget('attack-att-1', 'attack-1')],
@@ -127,7 +132,7 @@ describe('getAttackOnDelete', () => {
       ),
     ]);
 
-    const result = await onDelete({
+    const result = await runOnDelete({
       caseId: 'case-1',
       request,
       attachments: [attackTarget('attack-att-1', 'attack-1')],
@@ -170,7 +175,7 @@ describe('getAttackOnDelete', () => {
       // snapshotted backing index would be refused and silently strand the attack's alerts.
       mockAttacks([attackHit('attack-1', ['alert-1'])]);
 
-      const result = await onDelete({
+      const result = await runOnDelete({
         caseId: 'case-1',
         request,
         attachments: [attackTarget('attack-att-1', 'attack-1', backingIndex)],
@@ -191,7 +196,7 @@ describe('getAttackOnDelete', () => {
       attackHit('attack-2', ['alert-2']),
     ]);
 
-    const result = await onDelete({
+    const result = await runOnDelete({
       caseId: 'case-1',
       request,
       attachments: [attackTarget('attack-att-1', 'attack-1')],
@@ -224,7 +229,7 @@ describe('getAttackOnDelete', () => {
     // recorded at attach time is the only thing keeping the analyst's evidence on the case.
     mockAttacks([attackHit('attack-1', ['alert-1', 'alert-2'])]);
 
-    const result = await onDelete({
+    const result = await runOnDelete({
       caseId: 'case-1',
       request,
       attachments: [attackTarget('attack-att-1', 'attack-1')],
@@ -240,7 +245,7 @@ describe('getAttackOnDelete', () => {
   it('keeps every alert attachment when the attacks cannot be read', async () => {
     esClient.search.mockRejectedValue(new Error('security_exception'));
 
-    const result = await onDelete({
+    const result = await runOnDelete({
       caseId: 'case-1',
       request,
       attachments: [attackTarget('attack-att-1', 'attack-1')],
@@ -258,7 +263,7 @@ describe('getAttackOnDelete', () => {
         attackHit('attack-2', ['alert-shared', 'alert-2']),
       ]);
 
-      const result = await onDelete({
+      const result = await runOnDelete({
         caseId: 'case-1',
         request,
         attachments: [attackTarget('attack-att-1', 'attack-1')],
@@ -291,7 +296,7 @@ describe('getAttackOnDelete', () => {
         attackHit('attack-2', ['alert-1', 'alert-3']),
       ]);
 
-      const result = await onDelete({
+      const result = await runOnDelete({
         caseId: 'case-1',
         request,
         attachments: [attackTarget('attack-att-1', 'attack-1')],
@@ -322,7 +327,7 @@ describe('getAttackOnDelete', () => {
         attackHit('attack-2', ['alert-3']),
       ]);
 
-      const result = await onDelete({
+      const result = await runOnDelete({
         caseId: 'case-1',
         request,
         attachments: [attackTarget('attack-att-1', 'attack-1')],
@@ -349,7 +354,7 @@ describe('getAttackOnDelete', () => {
       ]);
       const rule = { id: 'rule-1', name: 'Suspicious process' };
 
-      const result = await onDelete({
+      const result = await runOnDelete({
         caseId: 'case-1',
         request,
         attachments: [attackTarget('attack-att-1', 'attack-1')],
@@ -377,7 +382,7 @@ describe('getAttackOnDelete', () => {
       // `alert-orphan` left `attack-1` after it was attached, and no other attack lists it.
       mockAttacks([attackHit('attack-1', ['alert-1'])]);
 
-      const result = await onDelete({
+      const result = await runOnDelete({
         caseId: 'case-1',
         request,
         attachments: [attackTarget('attack-att-1', 'attack-1')],
@@ -408,7 +413,7 @@ describe('getAttackOnDelete', () => {
     ]);
     const rule = { id: 'rule-1', name: 'Suspicious process' };
 
-    const result = await onDelete({
+    const result = await runOnDelete({
       caseId: 'case-1',
       request,
       attachments: [attackTarget('attack-att-1', 'attack-1')],
@@ -434,6 +439,92 @@ describe('getAttackOnDelete', () => {
           },
         },
       ],
+    });
+  });
+
+  describe('when the caller declines the removals', () => {
+    // The analyst keeps the alerts, but the attack that vouched for them is still going. Left
+    // naming it, the attachment would match no attack on the case and no later removal would
+    // ever reconsider its alerts.
+    it('removes nothing and relabels every attachment the attack created', async () => {
+      mockAttacks([
+        attackHit('attack-1', ['alert-shared', 'alert-1']),
+        attackHit('attack-2', ['alert-shared']),
+      ]);
+
+      const result = await runOnDelete({
+        caseId: 'case-1',
+        request,
+        attachments: [attackTarget('attack-att-1', 'attack-1')],
+        remainingAttachments: [
+          attackTarget('attack-att-2', 'attack-2'),
+          alertTarget('alert-att-1', ['alert-shared', 'alert-1'], ['attack-1'], {
+            index: ['index-shared', 'index-1'],
+          }),
+        ],
+        includeRelated: false,
+      });
+
+      expect(result).toEqual({
+        relatedAttachmentIds: [],
+        relatedAttachmentUpdates: [
+          {
+            id: 'alert-att-1',
+            payload: {
+              type: SECURITY_ALERT_ATTACHMENT_TYPE,
+              owner: 'securitySolution',
+              attachmentId: ['alert-shared', 'alert-1'],
+              metadata: {
+                index: ['index-shared', 'index-1'],
+                sourceAttachmentIds: ['attack-2'],
+              },
+            },
+          },
+        ],
+      });
+    });
+
+    // Nobody else claims them, so the attachment becomes the analyst's own evidence: that is
+    // what they asked for by keeping the alerts.
+    it('relabels onto no attack when no remaining attack claims the alerts', async () => {
+      mockAttacks([attackHit('attack-1', ['alert-1'])]);
+
+      const result = await runOnDelete({
+        caseId: 'case-1',
+        request,
+        attachments: [attackTarget('attack-att-1', 'attack-1')],
+        remainingAttachments: [alertTarget('alert-att-1', ['alert-1'], ['attack-1'])],
+        includeRelated: false,
+      });
+
+      expect(result).toEqual({
+        relatedAttachmentIds: [],
+        relatedAttachmentUpdates: [
+          {
+            id: 'alert-att-1',
+            payload: {
+              type: SECURITY_ALERT_ATTACHMENT_TYPE,
+              owner: 'securitySolution',
+              attachmentId: ['alert-1'],
+              metadata: { index: ALERT_INDEX, sourceAttachmentIds: [] },
+            },
+          },
+        ],
+      });
+    });
+
+    it('leaves an attachment the attack did not create alone', async () => {
+      mockAttacks([attackHit('attack-1', ['alert-1'])]);
+
+      const result = await runOnDelete({
+        caseId: 'case-1',
+        request,
+        attachments: [attackTarget('attack-att-1', 'attack-1')],
+        remainingAttachments: [alertTarget('alert-att-1', ['alert-1'], [])],
+        includeRelated: false,
+      });
+
+      expect(result).toEqual({ relatedAttachmentIds: [], relatedAttachmentUpdates: [] });
     });
   });
 });

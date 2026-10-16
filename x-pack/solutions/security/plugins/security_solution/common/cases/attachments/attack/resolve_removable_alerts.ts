@@ -141,6 +141,11 @@ export const getCaseAlertAttachments = (
  * A shrunk attachment is relabelled to the attacks still claiming what it kept, so the alerts it
  * holds on their behalf remain removable when those attacks are themselves removed.
  *
+ * With `allowRemoval` false the caller has declined the removals, so nothing leaves the case and
+ * every candidate is relabelled only. The relabel is not part of what was declined: the attack
+ * that vouched for those alerts is going regardless, and an attachment left naming it would be
+ * invisible to every later removal.
+ *
  * Returns an empty, non-resolvable result rather than throwing when an alert set is missing —
  * a deleted attack, one aged into a frozen tier, or one outside the user's access all arrive
  * as `undefined`. An unresolved *other* attack blocks the whole result because there is no way
@@ -150,17 +155,20 @@ export const getCaseAlertAttachments = (
  * @param attackAlertIds de-anonymised alert ids of the attacks being removed, or `undefined`/`null` when they could not be resolved.
  * @param alertAttachments the case's `security.alert` attachments, from {@link getCaseAlertAttachments}.
  * @param otherAttacks every *other* attack attachment on the case, with its de-anonymised alert ids, `undefined`/`null` where unresolved.
+ * @param allowRemoval when false, nothing is removed and every candidate is relabelled only: the alerts stay on the case, but the provenance naming the departing attack does not.
  */
 export const resolveRemovableAlertAttachments = ({
   removedAttackIds,
   attackAlertIds,
   alertAttachments,
   otherAttacks,
+  allowRemoval = true,
 }: {
   removedAttackIds: readonly string[];
   attackAlertIds: readonly string[] | undefined | null;
   alertAttachments: readonly CaseAlertAttachment[];
   otherAttacks: ReadonlyArray<{ id: string; alertIds: readonly string[] | undefined | null }>;
+  allowRemoval?: boolean;
 }): RemovableAlertAttachments => {
   if (attackAlertIds == null || otherAttacks.some(({ alertIds }) => alertIds == null)) {
     return EMPTY_UNRESOLVABLE;
@@ -191,9 +199,11 @@ export const resolveRemovableAlertAttachments = ({
   const alertIds = new Set<string>();
 
   for (const { id, alertIds: attachmentAlertIds } of candidates) {
-    const removedAlertIds = attachmentAlertIds.filter(
-      (alertId) => attackAlertIdSet.has(alertId) && !claimedByOtherAttacks.has(alertId)
-    );
+    const removedAlertIds = allowRemoval
+      ? attachmentAlertIds.filter(
+          (alertId) => attackAlertIdSet.has(alertId) && !claimedByOtherAttacks.has(alertId)
+        )
+      : [];
 
     if (removedAlertIds.length === attachmentAlertIds.length) {
       attachmentIds.push(id);
@@ -208,10 +218,11 @@ export const resolveRemovableAlertAttachments = ({
         sourceAttackIds: claimantsOf(keptAlertIds),
       });
     } else {
-      // Nothing here may go, but the attack that put it there is leaving. Left naming that attack
-      // the attachment would match no attack still on the case, so removing the attacks that do
-      // claim its alerts would never reconsider it and they would stay forever. Only the label
-      // changes; what the analyst sees is untouched.
+      // Nothing here may go, but the attack that put it there is leaving. Either no alert is
+      // free, or the caller declined the removals. Left naming that attack the attachment would
+      // match no attack still on the case, so removing the attacks that do claim its alerts
+      // would never reconsider it and they would stay forever. Only the label changes; what the
+      // analyst sees is untouched.
       updates.push({
         id,
         keptAlertIds: [...attachmentAlertIds],
@@ -236,17 +247,20 @@ export const resolveRemovableAlertAttachments = ({
  * @param otherAttackIds attack document ids of every other attack attachment on the case.
  * @param alertIdsByAttackId de-anonymised alert ids per resolved attack; unresolved attacks are absent.
  * @param alertAttachments the case's `security.alert` attachments, from {@link getCaseAlertAttachments}.
+ * @param allowRemoval when false, nothing is removed and every candidate is relabelled only.
  */
 export const resolveRemovableAlertAttachmentsForAttacks = ({
   removedAttackIds,
   otherAttackIds,
   alertIdsByAttackId,
   alertAttachments,
+  allowRemoval = true,
 }: {
   removedAttackIds: readonly string[];
   otherAttackIds: readonly string[];
   alertIdsByAttackId: ReadonlyMap<string, readonly string[]>;
   alertAttachments: readonly CaseAlertAttachment[];
+  allowRemoval?: boolean;
 }): RemovableAlertAttachments => {
   const removedAlertIds = removedAttackIds.map((id) => alertIdsByAttackId.get(id));
 
@@ -257,5 +271,6 @@ export const resolveRemovableAlertAttachmentsForAttacks = ({
       : [...new Set(removedAlertIds.flatMap((ids) => ids ?? []))],
     alertAttachments,
     otherAttacks: otherAttackIds.map((id) => ({ id, alertIds: alertIdsByAttackId.get(id) })),
+    allowRemoval,
   });
 };

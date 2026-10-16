@@ -197,7 +197,7 @@ export const getAttackOnDelete =
     getStartServices,
     logger,
   }: Omit<AttackAttachmentTypeDeps, 'isAttachEnabled'>): AttachmentOnDelete =>
-  async ({ request, attachments, remainingAttachments }) => {
+  async ({ request, attachments, remainingAttachments, includeRelated }) => {
     const removedAttacks = toAttackReferences(attachments);
     const alertAttachments = getCaseAlertAttachments(
       remainingAttachments.map(({ id, attributes }) => ({ ...attributes, id }))
@@ -220,6 +220,11 @@ export const getAttackOnDelete =
       otherAttackIds: otherAttacks.map(({ attackId }) => attackId),
       alertIdsByAttackId,
       alertAttachments,
+      // The analyst may keep the alerts and still be removing the attack that vouched for them,
+      // so the attachments are relabelled onto whoever still claims them. Without this the
+      // provenance would name an attack no longer on the case, and no later removal would ever
+      // look at those alerts again.
+      allowRemoval: includeRelated,
     });
 
     const attributesById = new Map(

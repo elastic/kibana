@@ -142,7 +142,7 @@ describe('bulk_delete', () => {
         });
       });
 
-      it('skips the onDelete hook when includeRelated is false', async () => {
+      it('runs the onDelete hook but takes nothing along when includeRelated is false', async () => {
         await bulkDeleteAttachments(
           {
             caseId: 'mock-id-1',
@@ -152,7 +152,7 @@ describe('bulk_delete', () => {
           argsWithHook
         );
 
-        expect(onDelete).not.toHaveBeenCalled();
+        expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ includeRelated: false }));
         expect(argsWithHook.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
           savedObjectIds: ['attack-attachment-1'],
           refresh: true,
@@ -325,7 +325,7 @@ describe('bulk_delete', () => {
       expect(clientArgs.fileService.delete).not.toHaveBeenCalled();
     });
 
-    it('does not run the onDelete hooks of the deleted file attachments', async () => {
+    it('does not take attachments along with the deleted file attachments', async () => {
       const onDelete = jest.fn().mockResolvedValue({ relatedAttachmentIds: ['mock-comment-1'] });
       const argsWithHook = createCasesClientMockArgs();
       argsWithHook.unifiedAttachmentTypeRegistry.register({
@@ -343,10 +343,16 @@ describe('bulk_delete', () => {
       argsWithHook.services.attachmentService.bulkDelete.mockImplementation(
         async ({ savedObjectIds }) => savedObjectIds
       );
+      argsWithHook.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 100,
+        page: 1,
+      });
 
       await bulkDeleteFileAttachments({ caseId, fileIds: [fileId] }, argsWithHook, casesClient);
 
-      expect(onDelete).not.toHaveBeenCalled();
+      expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ includeRelated: false }));
       expect(argsWithHook.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
         savedObjectIds: ['file-attachment-1'],
         refresh: true,
