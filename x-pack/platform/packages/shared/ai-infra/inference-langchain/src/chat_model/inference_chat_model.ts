@@ -284,7 +284,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
           ? {
               tokenUsage: {
                 promptTokens: response.tokens.prompt,
-                completionTokens: response.tokens.completion,
+                completionTokens: response.tokens.completion + (response.tokens.thinking ?? 0),
                 totalTokens: response.tokens.total,
               },
             }
