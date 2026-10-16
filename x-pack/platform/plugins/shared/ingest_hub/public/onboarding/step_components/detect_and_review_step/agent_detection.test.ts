@@ -595,7 +595,44 @@ describe('assessAgent', () => {
   });
 
   it('carries the alert level through so failed units still count', () => {
-    expect(assess(agentAt('9.6.0'), { alertLevel: 'failed' })).toEqual({ alertLevel: 'failed' });
+    expect(assess(agentAt('9.6.0'), { alertLevel: 'failed' })).toEqual({
+      alertLevel: 'failed',
+      hasLiveUnits: true,
+    });
+  });
+
+  describe('live units', () => {
+    it('reports live units when the agent runs some of the package policy', () => {
+      expect(assess(agentAt('9.6.0'), { units: { total: 3, stopped: 1 } }).hasLiveUnits).toBe(true);
+    });
+
+    it('reports none when the agent runs no unit of the package policy', () => {
+      expect(assess(agentAt('9.6.0'), { units: { total: 0, stopped: 0 } }).hasLiveUnits).toBe(
+        false
+      );
+    });
+
+    it('reports none when every unit has stopped', () => {
+      expect(assess(agentAt('9.6.0'), { units: { total: 2, stopped: 2 } }).hasLiveUnits).toBe(
+        false
+      );
+    });
+
+    it('reports it for an agent that is too old as well', () => {
+      const old = assess(agentAt('8.18.0'), { units: { total: 0, stopped: 0 } });
+
+      expect(old.issue?.type).toBe('incompatible_version');
+      expect(old.hasLiveUnits).toBe(false);
+    });
+
+    it('reports none while the agent is still catching up, even though no issue is raised yet', () => {
+      const behind = assess(agentAt('9.6.0', { policy_revision: 2 }), {
+        units: { total: 0, stopped: 0 },
+      });
+
+      expect(behind.issue).toBeUndefined();
+      expect(behind.hasLiveUnits).toBe(false);
+    });
   });
 });
 
@@ -693,6 +730,12 @@ describe('applyNotRunningGrace', () => {
     expect(since).toEqual({});
   });
 
+  it('still knows the integration has no live units while it holds back the issue', () => {
+    const { assessments } = run({ a1: { ...NOT_RUNNING, hasLiveUnits: false } }, {}, 1000);
+
+    expect(assessments.a1).toEqual({ alertLevel: null, hasLiveUnits: false });
+  });
+
   it('keeps the alert level when it holds back the issue', () => {
     const { assessments } = run({ a1: { ...NOT_RUNNING, alertLevel: 'degraded' } }, {}, 1000);
 
@@ -757,5 +800,47 @@ describe('unhealthyElsewhere', () => {
 
     expect(summary.health).toBe('unhealthy');
     expect(summary.unhealthyElsewhere).toBeUndefined();
+  });
+});
+
+describe('noLiveUnits', () => {
+  const online = (id: string) => makeAgent(id, 'online');
+
+  it('is set when every applicable agent runs no live unit of the deployed integration', () => {
+    const summary = summarizeInstanceAgents([online('a1'), online('a2')], {
+      a1: { alertLevel: null, hasLiveUnits: false },
+      a2: { alertLevel: null, hasLiveUnits: false },
+    });
+
+    expect(summary).toMatchObject({ health: 'healthy', noLiveUnits: true });
+  });
+
+  it('is not set when any agent runs it', () => {
+    const summary = summarizeInstanceAgents([online('a1'), online('a2')], {
+      a1: { alertLevel: null, hasLiveUnits: false },
+      a2: { alertLevel: null, hasLiveUnits: true },
+    });
+
+    expect(summary.noLiveUnits).toBeUndefined();
+  });
+
+  it('is not set when it is not known, for example without the package policy', () => {
+    expect(summarizeInstanceAgents([online('a1')]).noLiveUnits).toBeUndefined();
+    expect(
+      summarizeInstanceAgents([online('a1')], { a1: { alertLevel: null } }).noLiveUnits
+    ).toBeUndefined();
+  });
+
+  it('is not set when there are no agents', () => {
+    expect(summarizeInstanceAgents([]).noLiveUnits).toBeUndefined();
+  });
+
+  it('is set alongside an issue, so the reason and the missing units both show', () => {
+    const issue = { type: 'not_running' } as const;
+    const summary = summarizeInstanceAgents([online('a1')], {
+      a1: { alertLevel: null, issue, hasLiveUnits: false },
+    });
+
+    expect(summary).toMatchObject({ health: 'unhealthy', issue, noLiveUnits: true });
   });
 });

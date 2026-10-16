@@ -24,6 +24,8 @@ import {
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import {
   applyNotRunningGrace,
+  NOT_RUNNING_GRACE_MS,
+  OTEL_NOT_RUNNING_GRACE_MS,
   assessAgent,
   buildIncomingDataRequests,
   getAgentPolicyIdsByInstance,
@@ -171,18 +173,19 @@ export function useAgentDetection({
             });
           }
         }
+        const entry = awsServicesMap?.get(serviceIdByInstanceId[instanceId]);
         const graced = applyNotRunningGrace({
           assessments,
           keyPrefix: instanceId,
           previousSince: notRunningSinceRef.current,
           now,
+          graceMs: entry?.dataFormat === 'otel' ? OTEL_NOT_RUNNING_GRACE_MS : NOT_RUNNING_GRACE_MS,
         });
         assessments = graced.assessments;
         Object.assign(notRunningSince, graced.since);
         const summary = summarizeInstanceAgents(applicable, assessments);
         summaries[instanceId] = summary;
 
-        const entry = awsServicesMap?.get(serviceIdByInstanceId[instanceId]);
         const packageVersion = packagePolicy?.package?.version;
         if (entry && packageVersion && summary.agentIds.length > 0) {
           requestInstances[instanceId] = {
@@ -243,10 +246,13 @@ export function useAgentDetection({
   const hasDataByInstanceId = useMemo(() => {
     const result: Record<string, boolean> = {};
     for (const [instanceId, instance] of Object.entries(dataInstances)) {
-      result[instanceId] = instanceHasData(instance, agentIdsWithDataByKey ?? {});
+      // Data in the package's streams is only this integration's if it is running. Otherwise it
+      // comes from another integration of the same package, such as one already on the policy.
+      const isRunning = !summaryByInstanceId[instanceId]?.noLiveUnits;
+      result[instanceId] = isRunning && instanceHasData(instance, agentIdsWithDataByKey ?? {});
     }
     return result;
-  }, [dataInstances, agentIdsWithDataByKey]);
+  }, [dataInstances, agentIdsWithDataByKey, summaryByInstanceId]);
 
   return {
     summaryByInstanceId,

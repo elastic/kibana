@@ -27,7 +27,7 @@ import {
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import { NOT_RUNNING_GRACE_MS } from './agent_detection';
+import { NOT_RUNNING_GRACE_MS, OTEL_NOT_RUNNING_GRACE_MS } from './agent_detection';
 import { useAgentDetection } from './use_agent_detection';
 
 const mockUseQuery = useQuery as jest.Mock;
@@ -366,6 +366,99 @@ describe('useAgentDetection', () => {
         expect(result.current.summaryByInstanceId.s3.issue).toEqual({ type: 'not_running' });
       });
 
+      it('switches to receiving as soon as the units appear, without waiting out the grace period', () => {
+        mockGetUnitSummary.mockReturnValue(NONE);
+        const { result, pollAfter } = setup({
+          agentPolicies: [policyNeeding94],
+          agents: [versioned('9.6.0')],
+          awsServicesMap: new Map([['s3', entry('s3', { dataFormat: 'otel' })]]),
+          incomingData: { 'aws@4.0.0:a1': ['a1'] },
+        });
+
+        // Starting up: no live units, so the data in the streams is not this integration's yet.
+        pollAfter(60_000);
+        expect(result.current.summaryByInstanceId.s3.issue).toBeUndefined();
+        expect(result.current.hasDataByInstanceId.s3).toBe(false);
+
+        // The units come up well before the grace period ends.
+        mockGetUnitSummary.mockReturnValue({ total: 3, stopped: 0 });
+        pollAfter(70_000);
+
+        expect(OTEL_NOT_RUNNING_GRACE_MS).toBeGreaterThan(70_000);
+        expect(result.current.hasDataByInstanceId.s3).toBe(true);
+        expect(result.current.summaryByInstanceId.s3.noLiveUnits).toBeUndefined();
+        expect(result.current.summaryByInstanceId.s3.issue).toBeUndefined();
+      });
+
+      it('also recovers after the grace period has run out and the issue was shown', () => {
+        mockGetUnitSummary.mockReturnValue(NONE);
+        const { result, pollAfter } = setup({
+          agentPolicies: [policyNeeding94],
+          agents: [versioned('9.6.0')],
+          incomingData: { 'aws@4.0.0': ['a1'] },
+        });
+
+        pollAfter(NOT_RUNNING_GRACE_MS);
+        expect(result.current.summaryByInstanceId.s3.issue).toEqual({ type: 'not_running' });
+
+        mockGetUnitSummary.mockReturnValue({ total: 3, stopped: 0 });
+        pollAfter(NOT_RUNNING_GRACE_MS + 10_000);
+
+        expect(result.current.summaryByInstanceId.s3.issue).toBeUndefined();
+        expect(result.current.summaryByInstanceId.s3.health).toBe('healthy');
+        expect(result.current.hasDataByInstanceId.s3).toBe(true);
+      });
+
+      describe('OTel services', () => {
+        const otelMap = new Map([['s3', entry('s3', { dataFormat: 'otel' })]]);
+
+        it('gets longer than a normal service, since the collector restarts to pick the integration up', () => {
+          mockGetUnitSummary.mockReturnValue(NONE);
+          const { result, pollAfter } = setup({
+            agentPolicies: [policyNeeding94],
+            agents: [versioned('9.6.0')],
+            awsServicesMap: otelMap,
+          });
+
+          pollAfter(NOT_RUNNING_GRACE_MS);
+          expect(result.current.summaryByInstanceId.s3.issue).toBeUndefined();
+
+          pollAfter(OTEL_NOT_RUNNING_GRACE_MS - 1);
+          expect(result.current.summaryByInstanceId.s3.issue).toBeUndefined();
+        });
+
+        it('is flagged once that longer period has passed', () => {
+          mockGetUnitSummary.mockReturnValue(NONE);
+          const { result, pollAfter } = setup({
+            agentPolicies: [policyNeeding94],
+            agents: [versioned('9.6.0')],
+            awsServicesMap: otelMap,
+          });
+
+          pollAfter(OTEL_NOT_RUNNING_GRACE_MS);
+
+          expect(result.current.summaryByInstanceId.s3.issue).toEqual({ type: 'not_running' });
+        });
+
+        it('stays below the detection timeout, so a real failure shows before it gives up', () => {
+          const DETECTION_TIMEOUT_MS = 10 * 60 * 1000;
+
+          expect(OTEL_NOT_RUNNING_GRACE_MS).toBeLessThan(DETECTION_TIMEOUT_MS);
+        });
+
+        it('does not stretch the wait for a normal service', () => {
+          mockGetUnitSummary.mockReturnValue(NONE);
+          const { result, pollAfter } = setup({
+            agentPolicies: [policyNeeding94],
+            agents: [versioned('9.6.0')],
+          });
+
+          pollAfter(NOT_RUNNING_GRACE_MS);
+
+          expect(result.current.summaryByInstanceId.s3.issue).toEqual({ type: 'not_running' });
+        });
+      });
+
       it('does not delay an agent that is too old, which cannot start up later', () => {
         mockGetUnitSummary.mockReturnValue(NONE);
         const { result } = setup({
@@ -533,6 +626,29 @@ describe('useAgentDetection', () => {
       setup({ agentPolicies: [] });
 
       expect(mockUseQuery.mock.calls[0][0].enabled).toBe(false);
+    });
+
+    it('ignores data in the package streams while the integration runs no unit of its own', () => {
+      // Another integration of the same package on the agent can be what produces the data.
+      mockGetUnitSummary.mockReturnValue({ total: 0, stopped: 0 });
+      const { result } = setup({ incomingData: { 'aws@4.0.0': ['a1'] } });
+
+      expect(result.current.hasDataByInstanceId).toEqual({ s3: false });
+      expect(result.current.summaryByInstanceId.s3.noLiveUnits).toBe(true);
+    });
+
+    it('ignores that data while every unit of the integration is stopped', () => {
+      mockGetUnitSummary.mockReturnValue({ total: 3, stopped: 3 });
+      const { result } = setup({ incomingData: { 'aws@4.0.0': ['a1'] } });
+
+      expect(result.current.hasDataByInstanceId).toEqual({ s3: false });
+    });
+
+    it('counts the data once the integration has a live unit', () => {
+      mockGetUnitSummary.mockReturnValue({ total: 3, stopped: 1 });
+      const { result } = setup({ incomingData: { 'aws@4.0.0': ['a1'] } });
+
+      expect(result.current.hasDataByInstanceId).toEqual({ s3: true });
     });
 
     it('reports data per instance from the answer', () => {

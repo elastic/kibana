@@ -39,6 +39,11 @@ export interface InstanceAgentSummary {
    * instance deployed is running.
    */
   unhealthyElsewhere?: boolean;
+  /**
+   * Agents are there, but none runs a live unit of the deployed integration. Data in its streams
+   * cannot be its own yet; it comes from another integration of the same package.
+   */
+  noLiveUnits?: boolean;
 }
 
 export interface DataRequestInstance {
@@ -70,6 +75,11 @@ export interface AgentAssessment {
   /** Worst unit status of the deployed package policy on the agent. */
   alertLevel: ComponentAlertLevel;
   issue?: AgentIssue;
+  /**
+   * The agent reports at least one live unit of the deployed package policy. Unknown (undefined)
+   * when the package policy could not be looked at.
+   */
+  hasLiveUnits?: boolean;
 }
 
 export type AssessmentByAgentId = Record<string, AgentAssessment>;
@@ -118,6 +128,7 @@ export const assessAgent = ({
   alertLevel,
   units,
 }: AssessAgentParams): AgentAssessment => {
+  const hasLiveUnits = units.total > units.stopped;
   const agentVersion = agent.local_metadata?.elastic?.agent?.version;
   const integrations = getIncompatibleIntegrations(
     agentVersion,
@@ -127,6 +138,7 @@ export const assessAgent = ({
   if (agentVersion && integrations.length > 0) {
     return {
       alertLevel,
+      hasLiveUnits,
       issue: {
         type: 'incompatible_version',
         agentVersion,
@@ -146,10 +158,10 @@ export const assessAgent = ({
   const hasReportedComponents = !!agent.components?.length;
   const runsNoLiveUnit = units.total === 0 || units.stopped === units.total;
   if (isRunningUnits && hasAppliedPolicy && hasReportedComponents && runsNoLiveUnit) {
-    return { alertLevel, issue: { type: 'not_running' } };
+    return { alertLevel, hasLiveUnits, issue: { type: 'not_running' } };
   }
 
-  return { alertLevel };
+  return { alertLevel, hasLiveUnits };
 };
 
 /**
@@ -157,6 +169,13 @@ export const assessAgent = ({
  * collector especially, so "not running" only counts once it has held for this long.
  */
 export const NOT_RUNNING_GRACE_MS = 60_000;
+
+/**
+ * Longer for OTel integrations: adding one to a policy restarts the agent's OTel collector, and a
+ * local run took about 5 minutes to bring its units up. Still below the 10 minute detection
+ * timeout, so a real failure shows before the tile gives up waiting for data.
+ */
+export const OTEL_NOT_RUNNING_GRACE_MS = 6 * 60_000;
 
 /** When each `<instance>:<agent>` was first seen not running. */
 export type NotRunningSince = Record<string, number>;
@@ -190,7 +209,9 @@ export const applyNotRunningGrace = ({
     const firstSeen = previousSince[key] ?? now;
     since[key] = firstSeen;
     result[agentId] =
-      now - firstSeen >= graceMs ? assessment : { alertLevel: assessment.alertLevel };
+      now - firstSeen >= graceMs
+        ? assessment
+        : { alertLevel: assessment.alertLevel, hasLiveUnits: assessment.hasLiveUnits };
   }
   return { assessments: result, since };
 };
@@ -272,6 +293,9 @@ export const summarizeInstanceAgents = (
   assessmentByAgentId: AssessmentByAgentId = {}
 ): InstanceAgentSummary => {
   const agentIds = agents.map(({ id }) => id);
+  const noLiveUnits =
+    agents.length > 0 && agents.every(({ id }) => assessmentByAgentId[id]?.hasLiveUnits === false);
+  const flags = noLiveUnits ? { noLiveUnits } : {};
   const healthOf = (agent: Agent) => getAgentHealthState(agent, assessmentByAgentId[agent.id]);
   // Prefer an agent with a known issue so the reason can be shown.
   const unhealthyAgents = agents.filter((agent) => healthOf(agent) === 'unhealthy');
@@ -283,6 +307,7 @@ export const summarizeInstanceAgents = (
       agent: unhealthy,
       agentIds,
       issue: assessmentByAgentId[unhealthy.id]?.issue,
+      ...flags,
     };
   }
   const healthy = agents.find((agent) => healthOf(agent) === 'healthy');
@@ -293,9 +318,10 @@ export const summarizeInstanceAgents = (
       agent: healthy,
       agentIds,
       ...(unhealthyElsewhere && { unhealthyElsewhere }),
+      ...flags,
     };
   }
-  return { health: 'pending', agent: agents[0], agentIds };
+  return { health: 'pending', agent: agents[0], agentIds, ...flags };
 };
 
 const AGENT_HEALTH_SEVERITY: Record<AgentHealthState, number> = {
