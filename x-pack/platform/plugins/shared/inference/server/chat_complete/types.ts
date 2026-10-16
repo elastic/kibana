@@ -63,6 +63,7 @@ export type InferenceAdapterChatCompleteOptions = {
    */
   template?: {
     id: string;
+    version: number;
     variables: Record<string, unknown>;
   };
 } & ToolOptions;

@@ -168,7 +168,7 @@ describe('validateReasoningEffort', () => {
 });
 
 describe('isTemplateRequiredConnector', () => {
-  it('is true only when the endpoint policy is required', () => {
+  it('is true only when templates.policy is required', () => {
     expect(
       isTemplateRequiredConnector({
         metadata: { capabilities: { templates: { policy: 'required' } } },
@@ -176,7 +176,7 @@ describe('isTemplateRequiredConnector', () => {
     ).toBe(true);
     expect(
       isTemplateRequiredConnector({
-        metadata: { capabilities: { templates: { policy: 'none' } } },
+        metadata: { capabilities: { reasoning: { supported_effort_levels: ['low'] } } },
       })
     ).toBe(false);
     expect(isTemplateRequiredConnector({})).toBe(false);

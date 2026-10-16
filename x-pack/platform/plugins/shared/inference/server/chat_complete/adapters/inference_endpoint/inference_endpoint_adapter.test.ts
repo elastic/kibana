@@ -86,8 +86,9 @@ describe('inferenceEndpointAdapter', () => {
         ...defaultArgs,
         messages: [{ role: MessageRole.User, content: 'should not be sent' }],
         template: {
-          id: 'attack-discovery',
-          variables: { phase: 'generate', alerts: ['alert text'] },
+          id: '.attack-discovery',
+          version: 1,
+          variables: { phase: 'generate', alerts: ['alert text'], partial: '' },
         },
       });
 
@@ -95,8 +96,9 @@ describe('inferenceEndpointAdapter', () => {
 
       const body = executorMock.invoke.mock.calls[0][0].body as Record<string, unknown>;
       expect(body.template).toEqual({
-        id: 'attack-discovery',
-        variables: { phase: 'generate', alerts: ['alert text'] },
+        id: '.attack-discovery',
+        version: 1,
+        variables: { phase: 'generate', alerts: ['alert text'], partial: '' },
       });
       expect(body).not.toHaveProperty('messages');
       expect(body).not.toHaveProperty('tools');

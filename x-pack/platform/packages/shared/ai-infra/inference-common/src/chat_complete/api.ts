@@ -107,10 +107,12 @@ export type ChatCompleteOptions = {
   /**
    * EIS prompt template. Mutually exclusive with `messages` on the wire:
    * when this is set, the inference endpoint adapter sends `template` and
-   * omits `messages` and `tools`.
+   * omits `messages` and `tools`. Elasticsearch forwards `id`, `version`,
+   * and `variables` unchanged. The id starts with a dot.
    */
   template?: {
     id: string;
+    version: number;
     variables: Record<string, unknown>;
   };
   /**

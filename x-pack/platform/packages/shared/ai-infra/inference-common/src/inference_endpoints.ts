@@ -88,11 +88,11 @@ export interface EisInferenceEndpointCapabilities {
     max_output_tokens?: number;
   };
   /**
-   * Present when EIS requires this endpoint to be called with a prompt template
-   * instead of caller-authored messages.
+   * Present only when this endpoint rejects caller-authored messages.
+   * The only value is `required`. An omitted block means templates are optional.
    */
   templates?: {
-    policy?: 'none' | 'required';
+    policy: 'required';
   };
 }
 

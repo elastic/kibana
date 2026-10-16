@@ -55,6 +55,7 @@ const completeWithPromptTemplate = async ({
   request,
   connectorId,
   templateId,
+  templateVersion,
   templateVariables,
   schema,
   abortSignal,
@@ -63,6 +64,7 @@ const completeWithPromptTemplate = async ({
   request: KibanaRequest;
   connectorId: string | undefined;
   templateId: string | undefined;
+  templateVersion: number | undefined;
   templateVariables: Record<string, unknown>;
   schema: unknown;
   abortSignal?: AbortSignal;
@@ -103,7 +105,7 @@ const completeWithPromptTemplate = async ({
     return undefined;
   }
 
-  if (!templateId) {
+  if (!templateId || templateVersion == null) {
     throw new Error(
       `Connector "${connectorId}" requires a prompt template and cannot be called with messages`
     );
@@ -113,7 +115,7 @@ const completeWithPromptTemplate = async ({
     connectorId,
     stream: false,
     messages: [{ role: MessageRole.User, content: '' }],
-    template: { id: templateId, variables: templateVariables },
+    template: { id: templateId, version: templateVersion, variables: templateVariables },
     abortSignal,
   });
 
@@ -179,6 +181,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           configuration_overrides: configurationOverrides,
           approvals,
           template_id: templateIdRaw,
+          template_version: templateVersionRaw,
           template_variables: templateVariables,
         } = context.input;
 
@@ -239,6 +242,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           request,
           connectorId: effectiveConnectorId,
           templateId: normalizeOptionalStringParam(templateIdRaw),
+          templateVersion: templateVersionRaw,
           templateVariables: templateVariables ?? {},
           schema,
           abortSignal: context.abortSignal,

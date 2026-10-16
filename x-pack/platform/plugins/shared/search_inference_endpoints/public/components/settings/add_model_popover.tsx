@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiIcon, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiSelectableOption } from '@elastic/eui';
-import { InferenceConnectorType } from '@kbn/inference-common';
+import { InferenceConnectorType, isTemplateRequiredConnector } from '@kbn/inference-common';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { useConnectors } from '../../hooks/use_connectors';
 import { getConnectorIcon } from '../../utils/connector_display';
@@ -56,6 +56,9 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
     const existingSet = new Set(existingEndpointIds);
     const available = connectors.filter((connector) => {
       if (existingSet.has(connector.connectorId)) {
+        return false;
+      }
+      if (isTemplateRequiredConnector(connector)) {
         return false;
       }
       if (!taskType) {

@@ -1609,7 +1609,8 @@ steps:
               message: "{{ steps.build_agent_message.output.message }}"
               # Used only when the connector requires an EIS prompt template.
               # Other connectors ignore these fields and send `message`.
-              template_id: alert-triage
+              template_id: ".alert-triage"
+              template_version: 1
               template_variables:
                 alerts_text: "{{ steps.build_agent_message.output.message }}"
 

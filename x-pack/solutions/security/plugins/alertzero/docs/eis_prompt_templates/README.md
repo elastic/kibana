@@ -1,15 +1,19 @@
-# EIS prompt templates (draft)
+# EIS prompt templates
 
-Proposed prompt templates for OpenAI cyber models on the Elastic Inference Service. EIS owns and renders these files. Kibana pins the filename stem as `template.id` and does not load this directory at runtime.
+EIS owns these templates. They are compiled into the eis-gateway binary from
+`prompt-templates/<name>/<version>.yaml`. Kibana does not load the files. It pins
+the id and version and sends `template.variables`.
 
-When the selected connector advertises `capabilities.templates.policy: required`, Kibana sends `{ template: { id, variables } }` and omits `messages`. Any other connector keeps today's messages path, and the template fields are ignored. A template-only connector with no pinned id for that call is not sent messages.
+A template id is `.` plus the directory name. Elasticsearch rejects an id that
+does not start with a dot, and it requires `version`.
 
-These three cover the current messages-only calls:
+| Id | Version | Call |
+| --- | --- | --- |
+| `.attack-discovery` | 1 | Classic Attack Discovery and the AlertZero generation worker. `phase` is `generate`, `continue`, or `refine`. `partial` is an empty string on generate. `field_syntax` is the const string the template schema requires. |
+| `.alert-triage` | 1 | Alert analysis, including floor triage. One verdict per alert. |
+| `.attack-discovery-fp-tp` | 1 | The FP/TP judge for one persisted discovery. |
 
-| File | Call |
-| --- | --- |
-| `attack-discovery.yaml` | Classic Attack Discovery and the AlertZero generation worker. `phase` is `generate`, `continue`, or `refine`. |
-| `alert-triage.yaml` | Alert analysis, including floor triage. One verdict per alert. |
-| `attack-discovery-fp-tp.yaml` | The FP/TP judge for one persisted discovery. |
-
-A saved Attack Discovery prompt override is not a variable. The prompt text stays in the template.
+When endpoint metadata includes `capabilities.templates.policy: required`, Kibana
+sends `{ template: { id, version, variables } }` and omits `messages`. If that
+block is absent, the connector keeps the messages path. Endpoints with
+`templates.policy: required` are hidden from the inference management page.

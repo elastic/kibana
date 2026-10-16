@@ -64,6 +64,7 @@ export interface InferenceEndpointAdapterChatCompleteOptions {
    */
   template?: {
     id: string;
+    version: number;
     variables: Record<string, unknown>;
   };
 }

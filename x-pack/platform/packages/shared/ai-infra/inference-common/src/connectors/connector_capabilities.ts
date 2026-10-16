@@ -33,17 +33,18 @@ export const getContextWindowSize = (connector: InferenceConnector): number | un
 };
 
 /**
- * Retrieve the reasoning effort levels the connector's model supports, as advertised by EIS.
- *
- * @returns The advertised levels, or `undefined` when support is unknown.
- */
-/**
- * True when EIS will reject raw messages for this endpoint and requires `template`.
+ * True when this endpoint rejects raw messages and accepts only a prompt template.
+ * An omitted `templates` capability means either request shape is accepted.
  */
 export const isTemplateRequiredConnector = (
   connector: Pick<InferenceConnector, 'metadata'> | { metadata?: EisInferenceEndpointMetadata }
 ): boolean => connector.metadata?.capabilities?.templates?.policy === 'required';
 
+/**
+ * Retrieve the reasoning effort levels the connector's model supports, as advertised by EIS.
+ *
+ * @returns The advertised levels, or `undefined` when support is unknown.
+ */
 export const getSupportedReasoningEffortLevels = (
   connector: InferenceConnector
 ): string[] | undefined => {

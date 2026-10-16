@@ -8,8 +8,19 @@
 import { isTemplateRequiredConnector, MessageRole } from '@kbn/inference-common';
 import type { InferenceClient } from '@kbn/inference-common';
 
-/** EIS template id. Matches `docs/eis_prompt_templates/attack-discovery.yaml`. */
-export const ATTACK_DISCOVERY_TEMPLATE_ID = 'attack-discovery';
+/** EIS template id. The file is `prompt-templates/attack-discovery/1.yaml` in eis-gateway. */
+export const ATTACK_DISCOVERY_TEMPLATE_ID = '.attack-discovery';
+
+/** Pinned version of {@link ATTACK_DISCOVERY_TEMPLATE_ID}. */
+export const ATTACK_DISCOVERY_TEMPLATE_VERSION = 1;
+
+/**
+ * The only value the template accepts for `field_syntax`.
+ * The gateway schema marks it `const`, so the braces the model must emit are not
+ * written in the template source, which only allows `{{ .name }}` placeholders.
+ */
+const ATTACK_DISCOVERY_FIELD_SYNTAX =
+  'Use {{ field.name fieldValue }} for every source field. Correct: {{ host.name host-a }}. Incorrect: {{ host-a }}.';
 
 export type AttackDiscoveryTemplatePhase = 'generate' | 'continue' | 'refine';
 
@@ -42,10 +53,12 @@ export const createAttackDiscoveryTemplateCompletion = ({
       messages: [{ role: MessageRole.User, content: '' }],
       template: {
         id: ATTACK_DISCOVERY_TEMPLATE_ID,
+        version: ATTACK_DISCOVERY_TEMPLATE_VERSION,
         variables: {
           alerts,
           phase,
-          ...(partial ? { partial } : {}),
+          partial: partial ?? '',
+          field_syntax: ATTACK_DISCOVERY_FIELD_SYNTAX,
         },
       },
     });

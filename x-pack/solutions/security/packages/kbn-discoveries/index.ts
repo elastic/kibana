@@ -96,6 +96,7 @@ export type {
 } from './impl/attack_discovery/graphs';
 export {
   ATTACK_DISCOVERY_TEMPLATE_ID,
+  ATTACK_DISCOVERY_TEMPLATE_VERSION,
   createAttackDiscoveryTemplateCompletion,
   resolveAttackDiscoveryTemplateCompletion,
 } from './impl/attack_discovery/graphs';

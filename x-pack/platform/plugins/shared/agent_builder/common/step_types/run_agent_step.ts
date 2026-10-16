@@ -60,19 +60,30 @@ export const InputSchema = z.object({
   /**
    * EIS prompt template id. Used only when the resolved connector's
    * `capabilities.templates.policy` is `required`. Otherwise the step ignores
-   * these fields and runs the agent with `message`.
+   * these fields and runs the agent with `message`. The id starts with a dot.
    */
   template_id: z
     .string()
     .max(128)
     .optional()
     .describe(
-      'Pinned EIS prompt template id. Sent instead of the message when the connector requires templates.'
+      'Pinned EIS prompt template id, including the leading dot. Sent instead of the message when the connector requires templates.'
+    ),
+  template_version: z
+    .number()
+    .int()
+    .positive()
+    .max(1_000_000)
+    .optional()
+    .describe(
+      'Pinned EIS prompt template version. Required with template_id when the connector requires templates.'
     ),
   template_variables: z
     .record(z.string(), z.unknown())
     .optional()
-    .describe('Variables for template_id. Ignored when the connector does not require a template.'),
+    .describe(
+      'Variables for template_id. Ignored when the connector does not require a template.'
+    ),
   /**
    * Optional attachments to provide to the agent.
    */

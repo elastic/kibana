@@ -265,7 +265,8 @@ steps:
         tools: []
         skill_ids: []
       # Used only when the connector requires an EIS prompt template.
-      template_id: attack-discovery-fp-tp
+      template_id: ".attack-discovery-fp-tp"
+      template_version: 1
       template_variables:
         discovery: "{{ steps.load_attack_discovery.output.hits.hits[0] | json }}"
         cited_alerts: "{{ steps.load_alerts.output.hits.hits | json }}"
