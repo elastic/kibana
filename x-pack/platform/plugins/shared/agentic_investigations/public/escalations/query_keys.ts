@@ -12,6 +12,8 @@ export const escalationQueryKeys = {
    * them changes. Omitting page or perPage would cause a page flip to return
    * stale data from the previous page's cache entry.
    */
+  /** Prefix of every list variant, for refreshing all that are on screen. */
+  lists: () => [...escalationQueryKeys.all, 'list'] as const,
   list: (
     status?: string,
     page?: number,
@@ -20,8 +22,7 @@ export const escalationQueryKeys = {
     entity?: string | null
   ) =>
     [
-      ...escalationQueryKeys.all,
-      'list',
+      ...escalationQueryKeys.lists(),
       status ?? 'open',
       page ?? 1,
       perPage ?? null,

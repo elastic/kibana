@@ -17,8 +17,9 @@ export const queryKeys = {
    * on approve/dismiss sweeps these up without AlertZero needing its own mutations.
    */
   proposals: {
+    chartsSummaryAll: () => [...platformQueryKeys.proposals.all, 'charts-summary'] as const,
     chartsSummary: (windowHours: number, bucketMinutes: number) =>
-      [...platformQueryKeys.proposals.all, 'charts-summary', windowHours, bucketMinutes] as const,
+      [...queryKeys.proposals.chartsSummaryAll(), windowHours, bucketMinutes] as const,
     /**
      * No offset in the key: one entry holds every page Show more has appended. The Impact
      * entity filter is a trailing segment, so the key without it is a prefix of every variant.

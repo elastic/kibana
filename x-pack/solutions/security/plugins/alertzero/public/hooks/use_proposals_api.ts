@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
 import type { UseInfiniteQueryResult, UseQueryResult } from '@kbn/react-query';
 import { useInfiniteQuery, useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -18,12 +17,6 @@ import { retryOnTransientError } from './retry_on_transient_error';
 import type { ProposalsPageResponse } from '../../common/proposals/list';
 import { MAX_QUEUE_REACH } from '../../common/proposals/list';
 import { queryKeys } from '../query_keys';
-
-/**
- * Workers add proposals on their own cadence, so the queue polls. React Query does
- * not poll a disabled query, so a collapsed section refreshes only its count.
- */
-export const PROPOSALS_POLL_INTERVAL_MS = 60_000;
 
 const categoryPath = (category: string) =>
   ALERTZERO_PROPOSALS_CATEGORY_URL.replace('{category}', encodeURIComponent(category));
@@ -65,13 +58,9 @@ const useProposalsCount = (
         query: { size: 0, from: 0, ...(entity ? { entity } : {}) },
       }),
     enabled,
-    refetchInterval: PROPOSALS_POLL_INTERVAL_MS,
     retry: retryOnTransientError,
   });
 };
-
-/** Only the newest window moves on its own; the rest is history the analyst paged into. */
-const isLeadingPage = (_page: ProposalsPageResponse, index: number) => index === 0;
 
 const useProposalsPages = (
   queryKey: readonly unknown[],
@@ -80,7 +69,7 @@ const useProposalsPages = (
 ): UseInfiniteQueryResult<ProposalsPageResponse> => {
   const { services } = useKibana();
 
-  const query = useInfiniteQuery({
+  return useInfiniteQuery({
     queryKey,
     // React Query v4 calls the first page with `pageParam: undefined`.
     queryFn: async ({ pageParam }: { pageParam?: number }): Promise<ProposalsPageResponse> => {
@@ -97,29 +86,6 @@ const useProposalsPages = (
     enabled,
     retry: retryOnTransientError,
   });
-
-  // Not `refetchInterval`, which replays every page the analyst has opened and grows
-  // the steady-state request count with each Show more.
-  //
-  // Deliberately only this one, slow heartbeat — no faster poll while a row is settling. A
-  // faster poll here would refetch the very row `useDropDecidedProposal` just removed
-  // optimistically: search consistency for a just-written decision can lag behind the plain
-  // document GET `waitForDecision` confirms it with, so a refetch too soon after deciding reads
-  // the row as still pending and restores it (see that hook's own comment). The slow cadence
-  // gives that lag time to resolve before the next look; a faster one does not.
-  const { refetch } = query;
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-    const poll = setInterval(
-      () => void refetch({ refetchPage: isLeadingPage }),
-      PROPOSALS_POLL_INTERVAL_MS
-    );
-    return () => clearInterval(poll);
-  }, [enabled, refetch]);
-
-  return query;
 };
 
 export const useProposalsByCategoryCount = (

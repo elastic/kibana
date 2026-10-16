@@ -25,12 +25,14 @@ import {
   useEscalationImpactPills,
   useListEscalations,
   escalationQueryKeys,
+  impactPillsQueryKeys,
   useOpenInChat,
 } from '@kbn/agentic-investigations-plugin/public';
 
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { EscalationsPageHeader } from '../../components/escalations_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
+import { useQueuePolling } from '../../hooks/use_queue_polling';
 import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import { escalationToQueueItem } from './escalation_to_queue_item';
 import { ESCALATIONS_PAGE_INFO } from './translations';
@@ -38,9 +40,13 @@ import { EscalationsOpenNote } from './escalations_open_note';
 import { EscalationsEmptyBanner } from './escalations_empty_banner';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
 
+/** The lists on screen and the pills, refreshed together by one heartbeat. */
+const POLLED_QUERY_KEYS = [escalationQueryKeys.lists(), impactPillsQueryKeys.escalations()];
+
 export const EscalationsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   useAlertZeroDocTitle(ESCALATIONS_PAGE_INFO.pageTitle);
+  useQueuePolling(POLLED_QUERY_KEYS);
 
   // Capability check: only render the assignee picker when the user can manage escalations.
   const { manageEscalations: canManage } = useAlertZeroInvestigationsCapabilities();

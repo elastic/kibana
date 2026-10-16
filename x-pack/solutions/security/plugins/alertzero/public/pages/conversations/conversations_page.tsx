@@ -35,6 +35,7 @@ import {
 import {
   useAssignInvestigation,
   useProposalImpactPills,
+  impactPillsQueryKeys,
   useCurrentUserProfile,
   useStatusSignal,
   useOpenInChat,
@@ -57,6 +58,8 @@ import {
   type ProposalItem,
 } from '../../../common/proposals/list';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
+import { useQueuePolling } from '../../hooks/use_queue_polling';
+import { queryKeys } from '../../query_keys';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
@@ -111,9 +114,22 @@ export const ConversationsPage: React.FC = () => {
   return <ConversationsPageContent />;
 };
 
+/** Everything the page shows from the proposals queues, refreshed together by one heartbeat. */
+const POLLED_QUERY_KEYS = [
+  ...OPEN_PROPOSAL_CATEGORIES.flatMap((category) => [
+    queryKeys.proposals.byCategory(category),
+    queryKeys.proposals.byCategoryCount(category),
+  ]),
+  queryKeys.proposals.closed(),
+  queryKeys.proposals.closedCount(),
+  queryKeys.proposals.chartsSummaryAll(),
+  impactPillsQueryKeys.proposals(),
+];
+
 const ConversationsPageContent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const queryClient = useQueryClient();
+  useQueuePolling(POLLED_QUERY_KEYS);
   const { data: impactPills = [] } = useProposalImpactPills({
     origin: ALERTZERO_PROPOSAL_ORIGIN,
     categories: OPEN_PROPOSAL_CATEGORIES,
