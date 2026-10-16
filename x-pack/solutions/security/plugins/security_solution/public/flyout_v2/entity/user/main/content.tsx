@@ -62,6 +62,11 @@ export interface ContentProps {
   isPreviewMode: boolean;
   /** When using Entity Store v2: entity record for asset criticality upsert. */
   entityRecord?: Entity;
+  /**
+   * Resolution-group aliases of `entityRecord` (empty outside the group view). Insights (alerts,
+   * misconfigurations, vulnerabilities) are then counted across the whole group.
+   */
+  aliasRecords?: readonly EntityStoreRecord[];
   refetchEntityRecord?: () => void;
   /** When true (i.e. entity store v2 enabled but no entity found), hide entity highlights and risk score. */
   noEntityInStore?: boolean;
@@ -116,6 +121,7 @@ export const Content = ({
   onAssetCriticalityChange,
   isPreviewMode,
   entityRecord,
+  aliasRecords,
   refetchEntityRecord,
   noEntityInStore = false,
   entityStoreV2Enabled,
@@ -225,6 +231,7 @@ export const Content = ({
       )}
       <EntityInsight
         entityRecord={entityRecord}
+        aliasRecords={aliasRecords}
         identityFields={identityFields}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
