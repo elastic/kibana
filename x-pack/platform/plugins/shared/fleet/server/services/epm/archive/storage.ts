@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { isUtf8 } from 'buffer';
 import { extname } from 'path';
 
-import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
 import { v5 as uuidv5 } from 'uuid';
 import type {
@@ -66,9 +66,10 @@ export async function archiveEntryToESDocument(opts: {
   const mediaType = mime.contentType(contentType || fileExt);
   // can use to create a data URL like `data:${mediaType};base64,${base64Data}`
 
-  const bufferIsBinary = await isBinaryFile(buffer);
-  const dataUtf8 = bufferIsBinary ? '' : buffer.toString('utf8');
-  const dataBase64 = bufferIsBinary ? buffer.toString('base64') : '';
+  // Only valid UTF-8 survives the toString('utf8') round trip, so everything else is stored as base64.
+  const bufferIsUtf8 = isUtf8(buffer);
+  const dataUtf8 = bufferIsUtf8 ? buffer.toString('utf8') : '';
+  const dataBase64 = bufferIsUtf8 ? '' : buffer.toString('base64');
   const currentMaxAssetBytes = path.includes('ml_model')
     ? ML_MAX_ES_ASSET_BYTES
     : MAX_ES_ASSET_BYTES;

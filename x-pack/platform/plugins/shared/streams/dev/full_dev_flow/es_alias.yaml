@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: es
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev
+  namespace: es
+spec:
+  type: ExternalName
+  externalName: host.docker.internal

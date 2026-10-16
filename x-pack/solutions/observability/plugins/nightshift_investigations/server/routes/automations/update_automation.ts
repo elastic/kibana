@@ -10,10 +10,7 @@ import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
-import {
-  automationCompletionUpdateSchema,
-  automationCompletionSchema,
-} from '../../lib/automations/schemas';
+import { automationCompletionSchema, promptTemplateSchema } from '../../lib/automations/schemas';
 import { generateWorkflowYaml } from '../../lib/automations/generate_workflow_yaml';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 import { triggerRowSchema } from './trigger_row_schema';
@@ -49,13 +46,13 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       trigger: z.object({ rows: z.array(triggerRowSchema).min(1) }).optional(),
       execution: z
         .object({
-          promptTemplate: z.string().max(50000).nullable().optional(),
+          promptTemplate: promptTemplateSchema.nullable().optional(),
           reasoningMode: z.enum(['investigate', 'observe']).optional(),
           agentId: z.string().max(512).optional(),
           connectorId: z.string().max(512).optional(),
         })
         .optional(),
-      completion: automationCompletionUpdateSchema.optional(),
+      completions: z.array(automationCompletionSchema).max(10).optional(),
       runtime: z
         .object({
           dailyDispatchLimit: z.number().int().min(0).nullable().optional(),
@@ -88,16 +85,16 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
         tags: body.tags,
         isEnabled: body.isEnabled,
         trigger: body.trigger,
+        completions: body.completions,
       }),
       execution: applyChanges(existing.attributes.execution, body.execution ?? {}),
-      completion: applyChanges(existing.attributes.completion, body.completion ?? {}),
       runtime: applyChanges(existing.attributes.runtime, body.runtime ?? {}),
       updatedAt: new Date().toISOString(),
     };
 
-    const completion = automationCompletionSchema.safeParse(merged.completion);
-    if (!completion.success) throw badRequest(completion.error.message);
-    merged.completion = completion.data;
+    const completions = z.array(automationCompletionSchema).max(10).safeParse(merged.completions);
+    if (!completions.success) throw badRequest(completions.error.message);
+    merged.completions = completions.data;
 
     // Update the workflow first — if it fails, the SO is left unchanged so reads stay consistent.
     if (existing.attributes.workflowId) {

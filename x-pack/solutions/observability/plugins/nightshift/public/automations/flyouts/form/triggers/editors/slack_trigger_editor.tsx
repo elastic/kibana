@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFieldText, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiPanel, EuiText, EuiTextArea } from '@elastic/eui';
 import { actionLabels } from '../../actions/automation_actions_section';
 import type { SlackTriggerFormValues, TriggerFormValues } from '../../automation_form_values';
 import { ListPill } from '../pills/list_pill';
@@ -46,15 +46,25 @@ export const SlackTriggerEditor = ({
         label={trigger.messageFilter.trim() || triggerLabels.anyMessage}
         testSubject="automationSlackTriggerMessage"
       >
-        {() => (
-          <EuiPanel paddingSize="s" hasShadow={false} color="transparent" css={{ width: 300 }}>
-            <EuiFieldText
+        {(close) => (
+          <EuiPanel paddingSize="s" hasShadow={false} color="transparent" css={{ width: 340 }}>
+            <EuiTextArea
               compressed
+              fullWidth
+              rows={2}
+              resize="none"
               autoFocus
               aria-label={triggerLabels.anyMessage}
               placeholder={triggerLabels.messageContains}
               value={trigger.messageFilter}
-              onChange={(event) => onChange({ ...trigger, messageFilter: event.target.value })}
+              onChange={(event) =>
+                onChange({ ...trigger, messageFilter: event.target.value.replace(/[\r\n]/g, '') })
+              }
+              onKeyDown={(event) => {
+                if (event.key !== 'Enter' || event.nativeEvent.isComposing) return;
+                event.preventDefault();
+                close();
+              }}
               data-test-subj="automationSlackTriggerMessageInput"
             />
           </EuiPanel>
