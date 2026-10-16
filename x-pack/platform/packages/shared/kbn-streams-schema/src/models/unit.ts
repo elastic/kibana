@@ -208,7 +208,7 @@ export const streamsUnitStatsFilterSchema = z.strictObject({
 export const streamsUnitStatsRequestSchema = z.strictObject({
   filter: streamsUnitStatsFilterSchema.optional(),
   /** Lists the unit components to receive stats on. Omit or leave empty to query every destination and processor in the unit. */
-  components: z.array(streamsUnitStatsComponentRefSchema).optional(),
+  components: z.array(streamsUnitStatsComponentRefSchema).max(2000).optional(),
 });
 
 export const streamsUnitStatsErrorSchema = z.object({
