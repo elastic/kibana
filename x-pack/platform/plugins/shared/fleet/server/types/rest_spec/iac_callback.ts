@@ -19,12 +19,20 @@ const CallbackIdParamsSchema = schema.object({
   }),
 });
 
-const IacCallbackStatusSchema = schema.oneOf([
-  schema.literal('pending'),
-  schema.literal('receiving'),
-  schema.literal('received'),
-  schema.literal('cancelled'),
-]);
+const IacCallbackStatusSchema = schema.oneOf(
+  [
+    schema.literal('pending'),
+    schema.literal('receiving'),
+    schema.literal('received'),
+    schema.literal('cancelled'),
+  ],
+  {
+    meta: {
+      description:
+        'State of the callback record. `pending`: waiting for the stack. `receiving`: a report is being applied. `received`: values stored and the identity exists. `cancelled`: the form stopped waiting and the key was invalidated.',
+    },
+  }
+);
 
 export const IacCallbackItemSchema = schema.object({
   id: schema.string(),

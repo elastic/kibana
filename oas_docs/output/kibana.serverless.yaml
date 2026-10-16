@@ -149,6 +149,9 @@ tags:
       Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking API keys used for agent enrollment.
     x-displayName: Fleet enrollment API keys
   - name: Fleet IaC provisioner
+    description: |
+      Fleet infrastructure-as-code (IaC) provisioner APIs, including the CloudFormation callback that reports a created IAM role back to Kibana.
+    x-displayName: Fleet IaC provisioner
   - name: Fleet internals
     description: |
       Fleet internals APIs enable you to manage Fleet internal operations, including checking permissions, monitoring Fleet Server health, managing settings, and initiating Fleet setup.
@@ -52955,8 +52958,8 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. Authenticated with the API key issued for this callback.
-      operationId: post-fleet-iac-provisioner-callbacks-callbackid
+        Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. Authenticate with the one-time API key issued when the callback was created, sent as `Authorization: ApiKey <encoded-key>`. The key has no other privileges and is invalidated after the first successful report. `role_arn` and `stack_arn` must be in the same AWS account. A repeat report with the same values succeeds; different values return 409.
+      operationId: receive-iac-callback
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -52979,6 +52982,7 @@ paths:
             examples:
               receiveIacCallbackRequestExample:
                 description: The report the launched CloudFormation stack sends once its IAM role exists
+                summary: Report a created IAM role
                 value:
                   role_arn: arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc123
                   stack_arn: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-identity/11111111-2222-3333-4444-555555555555
@@ -53006,6 +53010,7 @@ paths:
               examples:
                 receiveIacCallbackExample:
                   description: The report was applied and the federated identity exists
+                  summary: Identity created
                   value:
                     status: received
               schema:
@@ -53013,6 +53018,7 @@ paths:
                 type: object
                 properties:
                   status:
+                    description: 'State of the callback record. `pending`: waiting for the stack. `receiving`: a report is being applied. `received`: values stored and the identity exists. `cancelled`: the form stopped waiting and the key was invalidated.'
                     enum:
                       - pending
                       - receiving
@@ -53028,6 +53034,7 @@ paths:
               examples:
                 genericErrorResponseExample:
                   description: The role and the stack are in different AWS accounts
+                  summary: Role and stack accounts differ
                   value:
                     error: Bad Request
                     message: role_arn and stack_arn must be in the same AWS account
@@ -53057,6 +53064,7 @@ paths:
               examples:
                 notFoundExample:
                   description: No record has this ID, or the API key is not the one issued for it
+                  summary: Unknown callback or API key
                   value:
                     error: Not Found
                     message: Callback not found
@@ -53076,6 +53084,7 @@ paths:
               examples:
                 conflictExample:
                   description: A report with different values was already received
+                  summary: Different values already received
                   value:
                     error: Conflict
                     message: Callback already received with different values
@@ -53105,6 +53114,7 @@ paths:
               examples:
                 goneExample:
                   description: The record expired or was cancelled before the report arrived
+                  summary: Callback expired or cancelled
                   value:
                     error: Gone
                     message: Callback is no longer accepting values

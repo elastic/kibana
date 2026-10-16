@@ -309,7 +309,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
                     <p>
                       <FormattedMessage
                         id="xpack.fleet.cloudConnector.iacCallback.unavailableHint"
-                        defaultMessage="The stack creates the federated identity by reporting its Role ARN back to Kibana over HTTPS. Kibana's public URL (server.publicBaseUrl) must be an HTTPS URL that AWS can reach with a publicly trusted certificate. Fix it, then reload this page."
+                        defaultMessage="The stack reports the created role ARN to Kibana over HTTPS. Set Kibana's public URL (server.publicBaseUrl) to an HTTPS URL that AWS can reach with a publicly trusted certificate. Fix it, then reload this page."
                       />
                     </p>
                   </>

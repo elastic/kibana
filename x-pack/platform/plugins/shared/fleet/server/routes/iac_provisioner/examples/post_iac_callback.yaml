@@ -3,6 +3,7 @@ requestBody:
     application/json:
       examples:
         receiveIacCallbackRequestExample:
+          summary: Report a created IAM role
           description: 'The report the launched CloudFormation stack sends once its IAM role exists'
           value:
             role_arn: 'arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc123'
@@ -14,6 +15,7 @@ responses:
       application/json:
         examples:
           receiveIacCallbackExample:
+            summary: Identity created
             description: 'The report was applied and the federated identity exists'
             value:
               status: 'received'
@@ -23,6 +25,7 @@ responses:
       application/json:
         examples:
           genericErrorResponseExample:
+            summary: Role and stack accounts differ
             description: 'The role and the stack are in different AWS accounts'
             value:
               statusCode: 400
@@ -34,6 +37,7 @@ responses:
       application/json:
         examples:
           notFoundExample:
+            summary: Unknown callback or API key
             description: 'No record has this ID, or the API key is not the one issued for it'
             value:
               statusCode: 404
@@ -45,6 +49,7 @@ responses:
       application/json:
         examples:
           conflictExample:
+            summary: Different values already received
             description: 'A report with different values was already received'
             value:
               statusCode: 409
@@ -56,6 +61,7 @@ responses:
       application/json:
         examples:
           goneExample:
+            summary: Callback expired or cancelled
             description: 'The record expired or was cancelled before the report arrived'
             value:
               statusCode: 410
