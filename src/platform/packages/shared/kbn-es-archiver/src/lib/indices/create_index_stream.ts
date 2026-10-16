@@ -39,6 +39,11 @@ interface DocRecord {
   };
 }
 
+/** An index or data stream created by a load, recorded so that a failed load can delete it again. */
+export type CreatedTarget =
+  | { type: 'index'; name: string }
+  | { type: 'data_stream'; name: string; template: string };
+
 export function createCreateIndexStream({
   client,
   stats,
@@ -47,6 +52,7 @@ export function createCreateIndexStream({
   isArchiveInExceptionList = false,
   log,
   targetsWithoutIdGeneration = [],
+  createdTargets = [],
 }: {
   client: Client;
   stats: Stats;
@@ -55,6 +61,7 @@ export function createCreateIndexStream({
   isArchiveInExceptionList?: boolean;
   log: ToolingLog;
   targetsWithoutIdGeneration?: string[];
+  createdTargets?: CreatedTarget[];
 }) {
   const skipDocsFromIndices = new Set();
 
@@ -119,6 +126,7 @@ export function createCreateIndexStream({
         }
       );
       stats.createdDataStream(dataStream, template.name, { template });
+      createdTargets.push({ type: 'data_stream', name: dataStream, template: template.name });
       targetsWithoutIdGeneration.push(dataStream);
     } catch (err) {
       if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception' || attempts >= 3) {
@@ -196,6 +204,7 @@ export function createCreateIndexStream({
         }
 
         stats.createdIndex(index, { settings });
+        createdTargets.push({ type: 'index', name: index });
         if (settings?.index?.mode === 'time_series') {
           targetsWithoutIdGeneration.push(index);
         }
