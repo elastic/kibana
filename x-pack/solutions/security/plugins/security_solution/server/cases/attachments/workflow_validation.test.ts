@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { validateAlertWorkflowTargets, validateEventWorkflowTargets } from './workflow_validation';
+import {
+  validateAlertWorkflowTargets,
+  validateAttackWorkflowTargets,
+  validateEventWorkflowTargets,
+} from './workflow_validation';
 
 describe('attachment workflow validation', () => {
   it('accepts alert targets that match the selected alert inputs', () => {
@@ -28,6 +32,37 @@ describe('attachment workflow validation', () => {
         inputs: { event: { alertIds: [{ _id: 'alert-2' }] } },
       })
     ).toThrow('Alert workflow origin targets must match the selected alerts.');
+  });
+
+  it('accepts attack targets that match the selected attack inputs', () => {
+    expect(() =>
+      validateAttackWorkflowTargets({
+        targets: [{ id: 'attack-1' }, { id: 'attack-2' }],
+        inputs: {
+          event: {
+            alertIds: [{ _id: 'attack-2' }, { _id: 'attack-1' }],
+          },
+        },
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects attack targets that do not match the selected attacks', () => {
+    expect(() =>
+      validateAttackWorkflowTargets({
+        targets: [{ id: 'attack-1' }],
+        inputs: { event: { alertIds: [{ _id: 'attack-2' }] } },
+      })
+    ).toThrow('Attack workflow origin targets must match the selected attacks.');
+  });
+
+  it('rejects attack targets without attack inputs', () => {
+    expect(() =>
+      validateAttackWorkflowTargets({
+        targets: [{ id: 'attack-1' }],
+        inputs: {},
+      })
+    ).toThrow('Attack attachment workflow origins require selected attack inputs.');
   });
 
   it('rejects event targets without document inputs', () => {

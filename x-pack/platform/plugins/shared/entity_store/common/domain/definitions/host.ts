@@ -22,7 +22,9 @@ export const hostEntityDefinition: ManagedEntityDefinitionWithoutId & {
 } = {
   type: 'host',
   managedBy: { kind: 'plugin', id: PLUGIN_ID },
-  name: `Security 'host' Entity Store Definition`,
+  name: 'Host',
+  description:
+    'A physical or virtual machine that runs workloads. Identified by host.id, falling back to host.name, then host.hostname.',
   identityField: {
     euidRanking: {
       branches: [
