@@ -27,7 +27,10 @@ export interface EdotBrowserClientOptions {
   sessionId?: string;
 }
 
-/** Timings relative to the time origin, in milliseconds, plus byte sizes. */
+/**
+ * Timings relative to the time origin, in milliseconds, plus byte sizes. A timing of 0 means the
+ * phase didn't happen (e.g. `secureConnectionStart` on a reused connection) and is omitted.
+ */
 export interface ResourceTimingValues {
   duration: number;
   fetchStart: number;
@@ -74,10 +77,14 @@ const toTimingAttributes = (
   values: ResourceTimingValues | NavigationTimingValues
 ): Record<string, number> =>
   Object.fromEntries(
-    Object.entries(values).map(([key, value]) => [
-      `${prefix}.${toSnakeCase(key)}`,
-      INTEGER_TIMING_KEYS.has(key) ? Math.round(value) : asFloat(value),
-    ])
+    Object.entries(values).flatMap(([key, value]) => {
+      const attributeKey = `${prefix}.${toSnakeCase(key)}`;
+      if (INTEGER_TIMING_KEYS.has(key)) {
+        return [[attributeKey, Math.round(value)]];
+      }
+      // A nudged 0 would read as a real timestamp, and a plain 0 would map the field as `long`
+      return value === 0 ? [] : [[attributeKey, asFloat(value)]];
+    })
   );
 
 /** A single browser running an EDOT Browser-instrumented app; one builder per signal. */

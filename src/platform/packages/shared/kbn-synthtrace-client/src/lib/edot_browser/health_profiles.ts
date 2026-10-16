@@ -24,7 +24,7 @@ export interface HealthProfile {
   lcp: Distribution;
   inp: Distribution;
   cls: Distribution;
-  /** Share of page loads without any layout shift (CLS of exactly 0). */
+  /** Share of page loads without any layout shift (CLS of effectively 0, see `asFloat`). */
   clsZeroRate: number;
   resourceDuration: Distribution;
   httpLatency: Distribution;

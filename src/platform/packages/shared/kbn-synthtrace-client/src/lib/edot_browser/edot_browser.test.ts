@@ -242,13 +242,14 @@ describe('edotBrowser', () => {
       expect(attributes['browser.navigation_timing.type']).toBe('navigate');
       [
         'browser.navigation_timing.dom_complete',
-        'browser.navigation_timing.unload_event_start',
         'browser.resource_timing.duration',
         'browser.resource_timing.fetch_start',
       ].forEach((key) => {
         expect(raw).toMatch(new RegExp(`"${key}":\\d+\\.\\d+`));
       });
       expect(attributes['browser.navigation_timing.redirect_count']).toBe(0);
+      expect(attributes).not.toHaveProperty('browser.navigation_timing.unload_event_start');
+      expect(attributes).not.toHaveProperty('browser.navigation_timing.unload_event_end');
       expect(raw).toContain('"browser.resource_timing.transfer_size":5120,');
     });
 
@@ -446,16 +447,18 @@ describe('edotBrowser', () => {
       pageViews = 4,
       health = HEALTH_PROFILES.healthy,
       sessionId,
+      site = SITE,
     }: {
       seed?: number;
       pageViews?: number;
       health?: (typeof HEALTH_PROFILES)[keyof typeof HEALTH_PROFILES];
       sessionId?: string;
+      site?: EdotBrowserSite;
     } = {}) =>
       edotBrowser
         .session({
           client: createClient(sessionId),
-          site: SITE,
+          site,
           health,
           start: TIMESTAMP,
           pageViews,
@@ -578,6 +581,63 @@ describe('edotBrowser', () => {
         }
       });
       expect(matches).toBeGreaterThan(100);
+    });
+
+    it('writes resource timing phases in order', () => {
+      const phases = [
+        'fetch_start',
+        'domain_lookup_start',
+        'domain_lookup_end',
+        'connect_start',
+        'connect_end',
+        'request_start',
+        'response_start',
+        'response_end',
+      ];
+      // Third-party resources open a new connection, so DNS and connect time count towards them
+      const site: EdotBrowserSite = {
+        ...SITE,
+        resources: [
+          ...(SITE.resources ?? []),
+          { path: 'https://cdn.example.net/widget.js', initiatorType: 'script', sizeBytes: 9_000 },
+        ],
+      };
+      const docs = Array.from({ length: 30 }, (_, seed) => createSession({ seed, site })).flat();
+      const resourceDocs = docs.filter(
+        (doc) => 'event_name' in doc && doc.event_name === 'browser.resource_timing'
+      );
+
+      expect(resourceDocs.length).toBeGreaterThan(100);
+      resourceDocs.forEach(({ attributes = {} }) => {
+        const timing = (name: string) => Number(attributes[`browser.resource_timing.${name}`]);
+        const values = phases.map(timing);
+        values.slice(1).forEach((value, index) => {
+          expect(value).toBeGreaterThanOrEqual(values[index]);
+        });
+        expect(timing('response_end') - timing('fetch_start')).toBeCloseTo(timing('duration'), 0);
+        if ('browser.resource_timing.secure_connection_start' in attributes) {
+          expect(timing('secure_connection_start')).toBeGreaterThanOrEqual(timing('connect_start'));
+          expect(timing('secure_connection_start')).toBeLessThanOrEqual(timing('connect_end'));
+        }
+      });
+    });
+
+    it('omits timings of phases that did not happen', () => {
+      const docs = Array.from({ length: 10 }, (_, seed) => createSession({ seed })).flat();
+      const resourceDocs = docs.filter(
+        (doc) => 'event_name' in doc && doc.event_name === 'browser.resource_timing'
+      );
+
+      expect(
+        resourceDocs.some(
+          ({ attributes }) => !attributes?.['browser.resource_timing.secure_connection_start']
+        )
+      ).toBe(true);
+      docs.forEach(({ attributes = {} }) => {
+        Object.entries(attributes)
+          .filter(([key]) => /_(start|end)$/.test(key))
+          .forEach(([, value]) => expect(value).toBeGreaterThan(0.01));
+      });
     });
 
     it('omits session.id by default', () => {

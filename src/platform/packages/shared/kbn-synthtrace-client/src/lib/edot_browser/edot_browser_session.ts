@@ -88,6 +88,7 @@ export type EdotBrowserEvent = Serializable<EdotBrowserDocument>;
 const MIN_RESOURCES = 3;
 const MAX_RESOURCES = 8;
 const MOBILE_SLOWDOWN = 1.4;
+const MIN_EXCHANGE_MS = 10;
 const DEFAULT_FAILURE_STATUS_CODES = [500, 502, 503, 504] as const;
 
 const FILLER_RESOURCES: readonly EdotBrowserResource[] = [
@@ -267,13 +268,16 @@ export const session = ({
   ): ResourceTimingValues => {
     const dns = newConnection ? between(5, 40) : 0;
     const connect = newConnection ? between(20, 80) : 0;
+    // Connection setup is part of the fetch, so it can't take longer than the whole request
+    const total = Math.max(duration, dns + connect + MIN_EXCHANGE_MS);
+    const exchange = total - dns - connect;
     const domainLookupEnd = fetchStart + dns;
     const connectEnd = domainLookupEnd + connect;
-    const requestStart = connectEnd + (duration - dns - connect) * 0.05;
-    const responseStart = requestStart + Math.max(duration - dns - connect, 0) * 0.6;
+    const requestStart = connectEnd + exchange * 0.05;
+    const responseStart = requestStart + exchange * 0.6;
     const encodedBodySize = Math.round(sizeBytes * between(0.9, 1.1));
     return {
-      duration,
+      duration: total,
       fetchStart,
       domainLookupStart: fetchStart,
       domainLookupEnd,
@@ -282,7 +286,7 @@ export const session = ({
       secureConnectionStart: newConnection ? domainLookupEnd + connect * 0.4 : 0,
       requestStart,
       responseStart,
-      responseEnd: fetchStart + duration,
+      responseEnd: fetchStart + total,
       transferSize: cached ? 0 : encodedBodySize + 300,
       encodedBodySize,
       decodedBodySize: Math.round(encodedBodySize * between(2, 4)),
