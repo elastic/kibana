@@ -142,13 +142,17 @@ export function AnimatedEdge({
     [centerX, centerY]
   );
 
-  const openEdgeRoutingFlyout = useCallback(() => {
+  const openEdgeRoutingFlyout = useCallback((e: React.MouseEvent<SVGGElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     openRoutingFlyout(id, 'routing');
     menu.off();
     hover.off();
   }, [id, openRoutingFlyout, menu, hover]);
 
-  const openEdgeProcessingFlyout = useCallback(() => {
+  const openEdgeProcessingFlyout = useCallback((e: React.MouseEvent<SVGGElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     openRoutingFlyout(id, 'processing');
     menu.off();
     hover.off();
@@ -215,12 +219,11 @@ export function AnimatedEdge({
               aria-labelledby={edgeMenuId}
               button={MenuButton}
               isOpen={showMenu}
-              closePopover={menu.off}
               panelPaddingSize="none"
               anchorPosition="upCenter"
               attachToAnchor
             >
-              <EuiContextMenuPanel>
+              <EuiContextMenuPanel onClose={menu.off}>
                 <EuiContextMenuItem
                   data-test-subj="streamsCanvasEdgeMenu-addProcessing"
                   onClick={openEdgeProcessingFlyout}
