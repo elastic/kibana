@@ -46,6 +46,8 @@ import {
   ESCALATION_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
   MAX_ESCALATION_LINKED_INVESTIGATIONS,
+  MAX_ESCALATIONS_PAGE_SIZE,
+  MAX_ESCALATIONS_SCAN,
 } from '../../../common/escalations/constants';
 import {
   InvalidLinkedInvestigationError,
@@ -628,6 +630,10 @@ export class EscalationsService {
   ): Promise<ListEscalationsResponse> {
     const client = await this.getConversationClient(request);
 
+    if (query.entity !== undefined) {
+      return this.listByEntity(request, { ...query, entity: query.entity });
+    }
+
     const { results, total } = await client.search({
       filter: buildEscalationsFilter(query),
       sort: ESCALATIONS_LIST_SORT,
@@ -639,6 +645,50 @@ export class EscalationsService {
     return {
       pagination: { total, page: query.page, per_page: query.per_page },
       results: await this.withEntityIds(request, results),
+    };
+  }
+
+  /**
+   * Pages through the escalations of a status, newest first, hydrated with their entity ids and
+   * stopping at {@link MAX_ESCALATIONS_SCAN}. Filtering by entity and summarising Impact pills both
+   * start here, because an escalation's entities come from its linked investigations and cannot be
+   * pushed into the conversation search.
+   */
+  async scanWithEntityIds(
+    request: KibanaRequest,
+    query: Pick<ListEscalationsQuery, 'status' | 'linked_investigation_id'>
+  ): Promise<ListEscalationsResponse['results']> {
+    const client = await this.getConversationClient(request);
+    const filter = buildEscalationsFilter(query);
+    const scanned: ListEscalationsResponse['results'] = [];
+
+    for (let page = 1; scanned.length < MAX_ESCALATIONS_SCAN; page++) {
+      const { results, total } = await client.search({
+        filter,
+        sort: ESCALATIONS_LIST_SORT,
+        page,
+        perPage: MAX_ESCALATIONS_PAGE_SIZE,
+      });
+      scanned.push(...(await this.withEntityIds(request, results)));
+      if (results.length === 0 || page * MAX_ESCALATIONS_PAGE_SIZE >= total) {
+        break;
+      }
+    }
+
+    return scanned.slice(0, MAX_ESCALATIONS_SCAN);
+  }
+
+  private async listByEntity(
+    request: KibanaRequest,
+    query: ListEscalationsQuery & { entity: string }
+  ): Promise<ListEscalationsResponse> {
+    const { entity, page, per_page: perPage } = query;
+    const scanned = await this.scanWithEntityIds(request, query);
+    const matching = scanned.filter((escalation) => escalation.entity_ids?.includes(entity));
+
+    return {
+      pagination: { total: matching.length, page, per_page: perPage },
+      results: matching.slice((page - 1) * perPage, page * perPage),
     };
   }
 

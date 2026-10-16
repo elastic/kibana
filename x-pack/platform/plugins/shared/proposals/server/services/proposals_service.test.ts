@@ -2121,6 +2121,55 @@ describe('ProposalsService', () => {
     });
   });
 
+  describe('countByConversation', () => {
+    it('counts the matching proposals per conversation in one aggregation', async () => {
+      const storage = createStorage();
+      storage.search.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: {
+          by_conversation: {
+            buckets: [
+              { key: 'conv-1', doc_count: 3 },
+              { key: 'conv-2', doc_count: 1 },
+            ],
+          },
+        },
+      });
+      const { service } = createService(storage);
+
+      const counts = await service.countByConversation(
+        {
+          status: 'pending',
+          origin: 'alertzero',
+          categories: ['respond', 'investigate'],
+          excludeSuperseded: true,
+          excludeUndecidedSuperseded: false,
+          excludeExpired: false,
+        },
+        SPACE_ID,
+        500
+      );
+
+      expect([...counts.entries()]).toEqual([
+        ['conv-1', 3],
+        ['conv-2', 1],
+      ]);
+      const [searchRequest] = storage.search.mock.calls[0];
+      expect(searchRequest).toMatchObject({
+        size: 0,
+        aggs: { by_conversation: { terms: { field: 'conversationId', size: 500 } } },
+      });
+      expect(searchRequest.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { spaceId: SPACE_ID } },
+          { term: { status: 'pending' } },
+          { term: { origin: 'alertzero' } },
+          { terms: { category: ['respond', 'investigate'] } },
+        ])
+      );
+    });
+  });
+
   describe('getLatestRevision', () => {
     it('rejects an id nothing is under with ProposalNotFoundError, which a caller reads as "free"', async () => {
       // Hunt picks the id a proposal is created under by asking each generation of a subject
@@ -2322,6 +2371,22 @@ describe('ProposalsService', () => {
       const [[searchArgs]] = storage.search.mock.calls;
       expect(searchArgs.query.bool.filter).toEqual(
         expect.arrayContaining([{ term: { origin: 'alertzero' } }])
+      );
+    });
+
+    it('should restrict to a set of conversations for in-process callers', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(
+        { ...listQuery(), conversationIds: ['conv-1', 'conv-2'] },
+        SPACE_ID,
+        request
+      );
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.query.bool.filter).toEqual(
+        expect.arrayContaining([{ terms: { conversationId: ['conv-1', 'conv-2'] } }])
       );
     });
 

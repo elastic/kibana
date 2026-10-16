@@ -41,6 +41,11 @@ export {
 export { escalationQueryKeys } from './escalations/query_keys';
 
 export {
+  useEscalationImpactPills,
+  useProposalImpactPills,
+} from './impact/hooks/use_impact_pills_api';
+
+export {
   useCurrentUserProfile,
   useSuggestUserProfiles,
   useUserProfiles,

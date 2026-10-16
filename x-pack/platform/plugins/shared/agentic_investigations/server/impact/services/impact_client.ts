@@ -11,6 +11,7 @@ import type { Impact, ImpactEntity } from '../../../common/impact/impact';
 import { MAX_IMPACT_CONVERSATION_IDS } from '../../../common/impact/constants';
 import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
 import { filterReadableConversationIds } from '../../investigations/services/readable_conversation_ids';
+import { MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS } from '../../investigation_attachments/attachment_doc_service';
 import type { ImpactService } from './impact_service';
 
 /**
@@ -34,6 +35,12 @@ export interface ImpactReadClient {
   getEntitiesByConversationId: (
     conversationIds: string[]
   ) => Promise<Map<string, Array<Pick<ImpactEntity, 'id' | 'type'>>>>;
+  /**
+   * Conversations whose impact lists the entity, for filtering a list by an Impact pill. Bounded
+   * by {@link MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS}; conversations the caller cannot read
+   * are left out.
+   */
+  searchConversationIdsByEntityId: (entityId: string) => Promise<string[]>;
 }
 
 export interface ImpactClientDeps {
@@ -89,6 +96,21 @@ export const createImpactClient =
       getEntityIdsByConversationId: async (conversationIds) => {
         const entities = await getEntitiesByConversationId(conversationIds);
         return new Map([...entities].map(([id, list]) => [id, list.map((entity) => entity.id)]));
+      },
+      searchConversationIdsByEntityId: async (entityId) => {
+        await privileges.assertCanRead(request);
+        const conversationIds = await getImpactService()
+          .getDocumentService()
+          .searchConversationIds({
+            spaceId: getSpaceId(request),
+            size: MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS,
+            filter: [
+              {
+                nested: { path: 'entities', query: { term: { 'entities.id': entityId } } },
+              },
+            ],
+          });
+        return filterReadableConversationIds(await getConversationClient(request), conversationIds);
       },
     };
   };

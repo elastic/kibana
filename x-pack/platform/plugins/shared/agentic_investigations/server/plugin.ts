@@ -21,6 +21,7 @@ import { registerImpactAttachment } from './impact/attachments';
 import { registerImpactRoutes } from './impact/routes/register_routes';
 import { createInvestigationsPrivilegesChecker } from './investigations/services/check_investigations_privileges';
 import { createImpactClient } from './impact/services/impact_client';
+import { ImpactPillsService } from './impact/services/impact_pills_service';
 import { ImpactService } from './impact/services/impact_service';
 import { registerImpactStepDefinitions } from './impact/step_types';
 import { registerInvestigationStepDefinitions } from './investigations/step_types';
@@ -71,6 +72,7 @@ export class AgenticInvestigationsPlugin
   private readonly logger: Logger;
   private readonly escalationsEnabled: boolean;
   private impactService?: ImpactService;
+  private impactPillsService?: ImpactPillsService;
   private subjectsService?: SubjectsService;
   private hypothesesService?: HypothesesService;
   private escalationsService?: EscalationsService;
@@ -166,6 +168,8 @@ export class AgenticInvestigationsPlugin
       router,
       logger: this.logger,
       getImpactService: () => this.requireImpactService(),
+      getImpactPillsService: () => this.requireImpactPillsService(),
+      escalationsEnabled: this.escalationsEnabled,
       getSpaceId: (request) => this.getSpaceId(request),
       resolveUser: (request) => this.requireUserResolver()(request),
       getAttachmentClient: (request) => this.getAttachmentClient(request),
@@ -295,6 +299,14 @@ export class AgenticInvestigationsPlugin
       });
     }
 
+    this.impactPillsService = new ImpactPillsService({
+      logger: this.logger,
+      getImpactClient,
+      getSpaceId: (request) => this.getSpaceId(request),
+      getProposals: () => plugins.proposals,
+      getEscalationsService: () => this.escalationsService,
+    });
+
     this.assignmentsService = new AssignmentsService({
       getConversationClient: (request) =>
         plugins.agentBuilder.conversations.getScopedClient({ request }),
@@ -341,6 +353,15 @@ export class AgenticInvestigationsPlugin
       },
       getEscalationsService: () => this.requireEscalationsService(),
     };
+  }
+
+  private requireImpactPillsService(): ImpactPillsService {
+    if (!this.impactPillsService) {
+      throw new Error(
+        'Impact pills service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.impactPillsService;
   }
 
   private requireImpactService(): ImpactService {

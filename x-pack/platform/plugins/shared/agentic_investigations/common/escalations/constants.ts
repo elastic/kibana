@@ -61,6 +61,12 @@ export const ESCALATIONS_UI_CAPABILITY_MANAGE = 'manageEscalations' as const;
  */
 export const MAX_ESCALATIONS_PAGE_SIZE = 50;
 export const MAX_ESCALATIONS_RESULT_WINDOW = 10_000;
+/**
+ * Escalations read per status when a list is filtered by entity or summarised as Impact pills.
+ * Both are computed in process, because an escalation's entities come from its linked
+ * investigations and cannot be pushed into the conversation search.
+ */
+export const MAX_ESCALATIONS_SCAN = 1_000;
 
 export const ESCALATION_STATUS_URL = `${ESCALATIONS_INTERNAL_URL}/{id}/status` as const;
 export const ESCALATION_CLOSE_PREVIEW_URL =

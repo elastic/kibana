@@ -20,6 +20,8 @@ import {
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
   ESCALATION_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
+  MAX_ESCALATIONS_PAGE_SIZE,
+  MAX_ESCALATIONS_SCAN,
 } from '../../../common/escalations/constants';
 
 const logger = loggingSystemMock.createLogger();
@@ -653,6 +655,64 @@ describe('EscalationsService.list', () => {
     expect(result).toEqual({
       pagination: { total: 42, page: 2, per_page: 10 },
       results: [MOCK_SUMMARY],
+    });
+  });
+
+  describe('entity filter', () => {
+    const withLinked = (id: string, linked: string[]) => ({
+      ...MOCK_SUMMARY,
+      id,
+      metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: linked },
+    });
+
+    it('lists only escalations impacting the entity and counts only those', async () => {
+      const { service, impactClient, client } = makeService({
+        search: jest.fn().mockResolvedValue({
+          results: [
+            withLinked('e1', ['inv-1']),
+            withLinked('e2', ['inv-2']),
+            withLinked('e3', ['inv-3']),
+          ],
+          total: 3,
+        }),
+      });
+      impactClient.getEntitiesByConversationId.mockResolvedValue(
+        new Map([
+          ['inv-1', [{ id: 'host-1' }]],
+          ['inv-2', [{ id: 'user-1' }]],
+          ['inv-3', [{ id: 'host-1' }]],
+        ])
+      );
+
+      const result = await service.list(request, {
+        page: 2,
+        per_page: 1,
+        status: 'open',
+        entity: 'host-1',
+      });
+
+      expect(result.pagination).toEqual({ total: 2, page: 2, per_page: 1 });
+      expect(result.results.map(({ id }) => id)).toEqual(['e3']);
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({ page: 1, perPage: MAX_ESCALATIONS_PAGE_SIZE })
+      );
+    });
+
+    it('stops scanning at the scan cap', async () => {
+      const { service, client } = makeService({
+        search: jest.fn().mockResolvedValue({
+          results: Array.from({ length: MAX_ESCALATIONS_PAGE_SIZE }, (_, i) => ({
+            ...MOCK_SUMMARY,
+            id: `e${i}`,
+          })),
+          total: 100_000,
+        }),
+      });
+
+      const scanned = await service.scanWithEntityIds(request, { status: 'open' });
+
+      expect(scanned).toHaveLength(MAX_ESCALATIONS_SCAN);
+      expect(client.search).toHaveBeenCalledTimes(MAX_ESCALATIONS_SCAN / MAX_ESCALATIONS_PAGE_SIZE);
     });
   });
 

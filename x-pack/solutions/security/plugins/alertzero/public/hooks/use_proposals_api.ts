@@ -32,6 +32,8 @@ interface PagesOptions {
   firstPageSize: number;
   step: number;
   enabled: boolean;
+  /** Only proposals whose impact lists this entity id; the server applies it. */
+  entity?: string | null;
 }
 
 /**
@@ -50,7 +52,8 @@ const nextOffset = (lastPage: ProposalsPageResponse, pages: ProposalsPageRespons
 const useProposalsCount = (
   queryKey: readonly unknown[],
   path: string,
-  enabled: boolean
+  enabled: boolean,
+  entity?: string | null
 ): UseQueryResult<ProposalsPageResponse> => {
   const { services } = useKibana();
 
@@ -59,7 +62,7 @@ const useProposalsCount = (
     queryFn: async (): Promise<ProposalsPageResponse> =>
       services.http!.get<ProposalsPageResponse>(path, {
         version: API_VERSIONS.internal.v1,
-        query: { size: 0, from: 0 },
+        query: { size: 0, from: 0, ...(entity ? { entity } : {}) },
       }),
     enabled,
     refetchInterval: PROPOSALS_POLL_INTERVAL_MS,
@@ -73,7 +76,7 @@ const isLeadingPage = (_page: ProposalsPageResponse, index: number) => index ===
 const useProposalsPages = (
   queryKey: readonly unknown[],
   path: string,
-  { firstPageSize, step, enabled }: PagesOptions
+  { firstPageSize, step, enabled, entity }: PagesOptions
 ): UseInfiniteQueryResult<ProposalsPageResponse> => {
   const { services } = useKibana();
 
@@ -87,7 +90,7 @@ const useProposalsPages = (
       const size = Math.min(from === 0 ? firstPageSize : step, MAX_QUEUE_REACH - from);
       return services.http!.get<ProposalsPageResponse>(path, {
         version: API_VERSIONS.internal.v1,
-        query: { from, size },
+        query: { from, size, ...(entity ? { entity } : {}) },
       });
     },
     getNextPageParam: nextOffset,
@@ -119,14 +122,36 @@ const useProposalsPages = (
   return query;
 };
 
-export const useProposalsByCategoryCount = (category: string, enabled: boolean) =>
-  useProposalsCount(queryKeys.proposals.byCategoryCount(category), categoryPath(category), enabled);
+export const useProposalsByCategoryCount = (
+  category: string,
+  enabled: boolean,
+  entity?: string | null
+) =>
+  useProposalsCount(
+    queryKeys.proposals.byCategoryCount(category, entity),
+    categoryPath(category),
+    enabled,
+    entity
+  );
 
-export const useClosedProposalsCount = (enabled: boolean) =>
-  useProposalsCount(queryKeys.proposals.closedCount(), ALERTZERO_PROPOSALS_CLOSED_URL, enabled);
+export const useClosedProposalsCount = (enabled: boolean, entity?: string | null) =>
+  useProposalsCount(
+    queryKeys.proposals.closedCount(entity),
+    ALERTZERO_PROPOSALS_CLOSED_URL,
+    enabled,
+    entity
+  );
 
 export const useProposalsByCategory = (category: string, options: PagesOptions) =>
-  useProposalsPages(queryKeys.proposals.byCategory(category), categoryPath(category), options);
+  useProposalsPages(
+    queryKeys.proposals.byCategory(category, options.entity),
+    categoryPath(category),
+    options
+  );
 
 export const useClosedProposals = (options: PagesOptions) =>
-  useProposalsPages(queryKeys.proposals.closed(), ALERTZERO_PROPOSALS_CLOSED_URL, options);
+  useProposalsPages(
+    queryKeys.proposals.closed(options.entity),
+    ALERTZERO_PROPOSALS_CLOSED_URL,
+    options
+  );

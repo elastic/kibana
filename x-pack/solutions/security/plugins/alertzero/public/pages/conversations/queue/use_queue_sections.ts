@@ -15,15 +15,15 @@ export interface QueueSections {
   sections: QueueSection[];
   /** Every loaded proposal, for the modals and the chat links. */
   proposalsById: Map<string, ProposalItem>;
-  /** Unfiltered: Impact derives its chips from the whole set. */
   investigations: Investigation[];
 }
 
-export const useQueueSections = (): QueueSections => {
-  const respond = useCategoryQueueSection('respond');
-  const investigate = useCategoryQueueSection('investigate');
-  const configure = useCategoryQueueSection('configure');
-  const closed = useClosedQueueSection();
+/** `entity` narrows every section on the server, so counts and pages stay consistent. */
+export const useQueueSections = (entity?: string | null): QueueSections => {
+  const respond = useCategoryQueueSection('respond', entity);
+  const investigate = useCategoryQueueSection('investigate', entity);
+  const configure = useCategoryQueueSection('configure', entity);
+  const closed = useClosedQueueSection(entity);
 
   const sections = [respond, investigate, configure, closed];
 

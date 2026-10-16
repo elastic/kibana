@@ -8,8 +8,10 @@
 export { IMPACT_ATTACHMENT_TYPE } from './attachment';
 
 export {
+  IMPACT_ESCALATION_PILLS_URL,
   IMPACT_INDEX_NAME,
   IMPACT_INTERNAL_URL,
+  IMPACT_PROPOSAL_PILLS_URL,
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_IDS,
   MAX_ENTITY_NAME_LENGTH,
@@ -29,3 +31,6 @@ export {
 } from './impact';
 
 export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from './impact';
+
+export { proposalImpactPillsQuerySchema } from './impact_pills';
+export type { ImpactPillsResponse, ProposalImpactPillsQuery } from './impact_pills';

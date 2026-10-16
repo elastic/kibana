@@ -34,6 +34,7 @@ import {
 } from '@kbn/proposals-plugin/public';
 import {
   useAssignInvestigation,
+  useProposalImpactPills,
   useCurrentUserProfile,
   useStatusSignal,
   useOpenInChat,
@@ -48,7 +49,13 @@ import type { CoreStart } from '@kbn/core/public';
 import type { DeclineParams } from '@kbn/proposals-ui';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
 import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
-import { CLOSED_GROUP_KEY, type ProposalItem } from '../../../common/proposals/list';
+import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../common/proposals/origin';
+import {
+  CLOSED_DECIDED_WITHIN_HOURS,
+  CLOSED_GROUP_KEY,
+  OPEN_PROPOSAL_CATEGORIES,
+  type ProposalItem,
+} from '../../../common/proposals/list';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
@@ -107,7 +114,17 @@ export const ConversationsPage: React.FC = () => {
 const ConversationsPageContent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const queryClient = useQueryClient();
-  const { sections, proposalsById, investigations: conversations } = useQueueSections();
+  const { data: impactPills = [] } = useProposalImpactPills({
+    origin: ALERTZERO_PROPOSAL_ORIGIN,
+    categories: OPEN_PROPOSAL_CATEGORIES,
+    decidedWithinHours: CLOSED_DECIDED_WITHIN_HOURS,
+  });
+  const { entityFilter: effectiveEntityFilter, setEntityFilter } = useEntityFilter(impactPills);
+  const {
+    sections,
+    proposalsById,
+    investigations: conversations,
+  } = useQueueSections(effectiveEntityFilter);
 
   // When the flyout's status toggle changes status (isolated QueryClient), bump the signal
   // so this page's QueryClient invalidates its proposal queries and the queue refreshes.
@@ -118,12 +135,11 @@ const ConversationsPageContent: React.FC = () => {
   // FIXME: use hook methods to keep in-flight states
   const { mutateAsync: approveDecision } = useApproveProposal();
   const { mutateAsync: dismissDecision } = useDismissProposal();
-  const dropDecided = useDropDecidedProposal();
+  const dropDecided = useDropDecidedProposal(effectiveEntityFilter);
   const { data: currentUserProfile } = useCurrentUserProfile();
   const currentActorName = currentUserProfile
     ? getUserDisplayName(currentUserProfile.user)
     : undefined;
-  const { entityFilter: effectiveEntityFilter, setEntityFilter } = useEntityFilter(conversations);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
   const [selectedIdForRecommendedAction, setSelectedIdForRecommendedAction] = useState<
@@ -471,7 +487,7 @@ const ConversationsPageContent: React.FC = () => {
         )}
         <EuiFlexItem>
           <Impact
-            items={conversations}
+            pills={impactPills}
             entityFilter={effectiveEntityFilter}
             onEntityFilterChange={setEntityFilter}
           />

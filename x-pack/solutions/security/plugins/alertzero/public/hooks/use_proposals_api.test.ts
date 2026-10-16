@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 import { MAX_QUEUE_REACH } from '../../common/proposals/list';
+import { queryKeys } from '../query_keys';
 import {
   PROPOSALS_POLL_INTERVAL_MS,
   useClosedProposals,
@@ -57,6 +58,29 @@ describe('useProposalsByCategory', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(queryOf(0)).toEqual({ from: 0, size: 10 });
+  });
+
+  it('sends the entity filter, and keys the cache by it', async () => {
+    http.get.mockResolvedValue(page(10, 10));
+    const { Wrapper, queryClient } = createWrapper();
+
+    const { result } = renderHook(
+      () =>
+        useProposalsByCategory('respond', {
+          firstPageSize: 10,
+          step: 10,
+          enabled: true,
+          entity: 'host-1',
+        }),
+      { wrapper: Wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(queryOf(0)).toEqual({ from: 0, size: 10, entity: 'host-1' });
+    expect(
+      queryClient.getQueryData(queryKeys.proposals.byCategory('respond', 'host-1'))
+    ).toBeDefined();
+    expect(queryClient.getQueryData(queryKeys.proposals.byCategory('respond'))).toBeUndefined();
   });
 
   it('steps later pages by the step size, from the rows already loaded', async () => {
@@ -278,5 +302,16 @@ describe('useClosedProposalsCount', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(queryOf(0)).toEqual({ from: 0, size: 0 });
     expect(result.current.data?.total).toBe(42);
+  });
+
+  it('narrows the total to the entity filter', async () => {
+    http.get.mockResolvedValue(page(0, 3));
+
+    const { result } = renderHook(() => useClosedProposalsCount(true, 'host-1'), {
+      wrapper: createWrapper().Wrapper,
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(queryOf(0)).toEqual({ from: 0, size: 0, entity: 'host-1' });
   });
 });
