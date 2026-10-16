@@ -6,6 +6,7 @@
  */
 
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 
 import type {
   IngestEventsRequestBodyV1,
@@ -34,7 +35,7 @@ export interface InboundEventsRouteParams {
   router: IRouter<ActionsRequestHandlerContext>;
   maxBodyBytes: number;
   inboundEventsClient: InboundEventsClient;
-  getSpaceId: (request: KibanaRequest) => string;
+  getSpaceId: (request: KibanaRequest) => SpaceId;
 }
 
 type InboundEventsHttpRequest = KibanaRequest<
