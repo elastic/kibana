@@ -7,11 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
-import {
-  checkEntityExists,
-  EntityStoreAccessError,
-  getEntityRecords,
-} from './check_entity_exists';
+import { checkEntityExists, EntityStoreAccessError, getEntityRecords } from './check_entity_exists';
 import {
   RESOLVED_MODE_MAX_RECORDS,
   RESOLVED_TO_FIELD,
