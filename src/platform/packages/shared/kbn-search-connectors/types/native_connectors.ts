@@ -3915,7 +3915,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 1,
         required: true,
         sensitive: false,
-        tooltip: null,
+        tooltip: translate('searchConnectors.nativeConnectors.outlook.data_source.tooltip', {
+          defaultMessage:
+            'The Outlook Server option is deprecated. For on-premises Exchange, use the Exchange Server connector instead.',
+        }),
         type: STRING,
         ui_restrictions: [],
         validations: [],
