@@ -243,6 +243,40 @@ describe('automation template rendering', () => {
       ).toThrow(/sourceIndex/);
     });
 
+    it('drops one wrapping pair of backticks from a pre-quoted name', () => {
+      const { consts } = parse(
+        renderIndexMetadataTemplate({
+          ...twoSources,
+          sources: [{ index: 'sales', categoryField: '`Currency Code`' }],
+        })
+      );
+
+      expect(consts.sources).toEqual([{ index: 'sales', category_field: 'Currency Code' }]);
+    });
+
+    it('still rejects backticks that are not a single wrapping pair', () => {
+      for (const categoryField of ['``tier``', '`tier', 'ti`er', '`a` | DROP `b`', '``']) {
+        expect(() =>
+          renderIndexMetadataTemplate({
+            ...twoSources,
+            sources: [{ index: 'flights', categoryField }],
+          })
+        ).toThrow(/categoryField/);
+      }
+    });
+
+    it('treats a pre-quoted index as the same index when checking for duplicates', () => {
+      expect(() =>
+        renderIndexMetadataTemplate({
+          ...twoSources,
+          sources: [
+            { index: 'loyalty-docs', categoryField: 'tier' },
+            { index: '`loyalty-docs`', categoryField: 'status' },
+          ],
+        })
+      ).toThrow(/listed twice/);
+    });
+
     it('rejects the same index twice, whose KIs would overwrite each other', () => {
       expect(() =>
         renderIndexMetadataTemplate({
@@ -558,6 +592,21 @@ describe('automation template rendering', () => {
       expect(() => convertToWorkflowGraph(parsed.data)).not.toThrow();
     }
   );
+
+  it('drops wrapping backticks from pre-quoted unit profile fields', () => {
+    const { consts } = parse(
+      renderUnitProfileTemplate({
+        ...unitValues,
+        unitKey: '`Province`',
+        activityField: '`Enrollment Date`',
+        metricFields: ['`Points Accumulated`'],
+      })
+    );
+
+    expect(consts.unit_key).toBe('Province');
+    expect(consts.activity_field).toBe('Enrollment Date');
+    expect(consts.metric_fields).toEqual(['Points Accumulated']);
+  });
 
   it('rejects an identifier that would break out of its backticks', () => {
     expect(() =>
