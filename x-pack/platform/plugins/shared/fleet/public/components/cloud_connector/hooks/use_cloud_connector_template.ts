@@ -53,6 +53,14 @@ const CONSOLE_OPEN_FAILED_ERROR = i18n.translate(
   }
 );
 
+const LAUNCH_PARAMS_ERROR = i18n.translate(
+  'xpack.fleet.cloudConnector.iacProvisioner.launchParamsError',
+  {
+    defaultMessage:
+      'Kibana could not prepare this launch, so the stack would not be able to report back. Try again.',
+  }
+);
+
 const TEMPLATE_ALREADY_CURRENT = i18n.translate(
   'xpack.fleet.cloudConnector.iacProvisioner.templateAlreadyCurrent',
   {
@@ -122,12 +130,16 @@ export interface UseCloudConnectorTemplateParams {
    * opens. Receives the template details of the launch: the rendered key and blueprint, nulls for
    * the static template with the IaC Provisioner on, or undefined with it off. Not used for a stack
    * update, which keeps the stack's own parameters, or for a static URL that is not a quick-create
-   * link. A rejection or an undefined result launches without them.
+   * link. An undefined result launches without them. A rejection aborts the launch: the console
+   * is closed and an error asks the user to try again.
    */
   getLaunchStackParams?: (
     iac: CloudConnectorIacState | undefined
   ) => Promise<Record<string, string> | undefined>;
 }
+
+/** The extra stack parameters could not be resolved; the launch must not go ahead without them. */
+class LaunchStackParamsError extends Error {}
 
 interface ConsoleTab {
   /** Loads the URL; false when no console page could be opened. */
@@ -220,7 +232,7 @@ export const useCloudConnectorTemplate = ({
     [provider, cloud, accountType, iacTemplateUrl, stackParams]
   );
 
-  /** Never throws, so a failure here never blocks the launch. */
+  /** Throws LaunchStackParamsError when the caller's parameters cannot be resolved. */
   const resolveLaunchStackParams = useCallback(
     async (iac: CloudConnectorIacState | undefined) => {
       if (!getLaunchStackParams) {
@@ -229,7 +241,7 @@ export const useCloudConnectorTemplate = ({
       try {
         return await getLaunchStackParams(iac);
       } catch (e) {
-        return undefined;
+        throw new LaunchStackParamsError(e instanceof Error ? e.message : String(e));
       }
     },
     [getLaunchStackParams]
@@ -266,6 +278,9 @@ export const useCloudConnectorTemplate = ({
       } else {
         setTemplateGenerationError(CONSOLE_OPEN_FAILED_ERROR);
       }
+    } catch (e) {
+      consoleTab.close();
+      setTemplateGenerationError(LAUNCH_PARAMS_ERROR);
     } finally {
       setIsGeneratingTemplate(false);
     }
@@ -298,7 +313,15 @@ export const useCloudConnectorTemplate = ({
       let opened: boolean;
       if (consoleTab || (getLaunchStackParams && isQuickCreateLaunchUrl(url))) {
         const tab = consoleTab ?? openConsoleTab();
-        opened = tab.navigate(await resolveStaticLaunchUrl(url, STATIC_FALLBACK_IAC));
+        let launchUrl: string;
+        try {
+          launchUrl = await resolveStaticLaunchUrl(url, STATIC_FALLBACK_IAC);
+        } catch (e) {
+          tab.close();
+          setTemplateGenerationError(LAUNCH_PARAMS_ERROR);
+          return true;
+        }
+        opened = tab.navigate(launchUrl);
       } else {
         opened = window.open(url, '_blank') !== null;
       }
@@ -392,7 +415,9 @@ export const useCloudConnectorTemplate = ({
       consoleTab.close();
       setIacConfirm(undefined);
       setHasLaunched(false);
-      setTemplateGenerationError(TEMPLATE_GENERATION_ERROR);
+      setTemplateGenerationError(
+        e instanceof LaunchStackParamsError ? LAUNCH_PARAMS_ERROR : TEMPLATE_GENERATION_ERROR
+      );
     } finally {
       setIsGeneratingTemplate(false);
     }

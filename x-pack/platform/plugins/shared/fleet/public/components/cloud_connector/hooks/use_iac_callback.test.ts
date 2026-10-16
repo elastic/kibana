@@ -403,19 +403,17 @@ describe('useIacCallback', () => {
     expect(result.current.status).toBe('idle');
   });
 
-  it('asks the server again when it refuses the record because its URL became unreachable', async () => {
+  it('rejects and asks the server again when it refuses the record because its URL became unreachable', async () => {
     mockedCreate.mockResolvedValue({
       data: null,
       error: { statusCode: 412, message: UNTRUSTED_REASON },
     } as any);
     const { result } = renderHook(() => useIacCallback({ enabled: true }));
 
-    let params: Record<string, string> | undefined;
     await act(async () => {
-      params = await result.current.start({});
+      await expect(result.current.start({})).rejects.toThrow(UNTRUSTED_REASON);
     });
 
-    expect(params).toBeUndefined();
     expect(mockedRecheck).toHaveBeenCalled();
     expect(result.current.status).toBe('idle');
   });
@@ -430,15 +428,14 @@ describe('useIacCallback', () => {
     expect(mockedCreate).not.toHaveBeenCalled();
   });
 
-  it('returns undefined and stays idle when the record cannot be created', async () => {
+  it('rejects and stays idle when the record cannot be created, so no console opens', async () => {
     mockedCreate.mockResolvedValue({ data: null, error: { message: 'boom' } } as any);
     const { result } = renderHook(() => useIacCallback({ enabled: true }));
-    let params: Record<string, string> | undefined;
     await act(async () => {
-      params = await result.current.start({});
+      await expect(result.current.start({})).rejects.toThrow('boom');
     });
-    expect(params).toBeUndefined();
     expect(result.current.status).toBe('idle');
+    expect(mockedGet).not.toHaveBeenCalled();
   });
 
   it('a new start() leaves a previous received status behind even when no record is created', async () => {
@@ -461,7 +458,7 @@ describe('useIacCallback', () => {
 
     mockedCreate.mockResolvedValue({ data: null, error: { message: 'boom' } } as any);
     await act(async () => {
-      await result.current.start({});
+      await result.current.start({}).catch(() => {});
     });
 
     expect(result.current.status).toBe('idle');

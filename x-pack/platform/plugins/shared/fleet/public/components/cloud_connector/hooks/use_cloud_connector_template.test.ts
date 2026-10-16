@@ -206,16 +206,19 @@ describe('useCloudConnectorTemplate', () => {
         expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
       });
 
-      it('launches without the callback params when getLaunchStackParams throws', async () => {
+      it('closes the console and asks to try again when getLaunchStackParams throws', async () => {
         const getLaunchStackParams = jest.fn().mockRejectedValue(new Error('callback down'));
         const { result } = renderHook(() =>
           useCloudConnectorTemplate({ ...HOOK_PARAMS, getLaunchStackParams })
         );
         await launch(result);
 
-        expect(cloudFormationTab.location.href).toContain('static.example');
-        expect(cloudFormationTab.location.href).not.toContain('param_ElasticCallbackUrl');
-        expect(result.current.hasLaunched).toBe(true);
+        // A stack launched without the callback could never create the identity.
+        expect(cloudFormationTab.location.href).toBe('');
+        expect(cloudFormationTab.close).toHaveBeenCalled();
+        expect(result.current.hasLaunched).toBe(false);
+        expect(result.current.templateGenerationError).toContain('Try again');
+        expect(result.current.isGeneratingTemplate).toBe(false);
       });
 
       it('opens a static URL that is not a quick-create link without asking for callback params', async () => {
@@ -1023,17 +1026,40 @@ describe('useCloudConnectorTemplate', () => {
         expect(openedUrl).not.toContain('param_ElasticCallbackUrl');
       });
 
-      it('still renders and opens the console when getLaunchStackParams throws', async () => {
+      it('closes the pre-opened tab and asks to try again when getLaunchStackParams throws after the render', async () => {
+        const getLaunchStackParams = jest.fn().mockRejectedValue(new Error('callback down'));
+        const onTemplateRendered = jest.fn();
+        const { result } = renderHook(() =>
+          useCloudConnectorTemplate({ ...HOOK_PARAMS, getLaunchStackParams, onTemplateRendered })
+        );
+        await launch(result);
+
+        expect(mockedSendRenderIacTemplate).toHaveBeenCalledTimes(1);
+        expect(cloudFormationTab.location.href).toBe('');
+        expect(cloudFormationTab.close).toHaveBeenCalled();
+        expect(result.current.templateGenerationError).toContain('Try again');
+        expect(result.current.iacConfirm).toBeUndefined();
+        expect(result.current.hasLaunched).toBe(false);
+        expect(onTemplateRendered).not.toHaveBeenCalled();
+      });
+
+      it('closes the pre-opened tab and asks to try again when getLaunchStackParams throws on the static fallback', async () => {
+        mockedSendRenderIacTemplate.mockResolvedValue({
+          data: null,
+          error: { message: 'unrenderable', statusCode: 422 },
+        } as any);
         const getLaunchStackParams = jest.fn().mockRejectedValue(new Error('callback down'));
         const { result } = renderHook(() =>
           useCloudConnectorTemplate({ ...HOOK_PARAMS, getLaunchStackParams })
         );
         await launch(result);
 
-        const openedUrl = cloudFormationTab.location.href;
-        expect(openedUrl).toContain(`templateURL=${encodeURIComponent(ARTIFACT_URL)}`);
-        expect(openedUrl).not.toContain('param_ElasticCallbackUrl');
-        expect(result.current.templateGenerationError).toBeUndefined();
+        expect(getLaunchStackParams).toHaveBeenCalledWith(STATIC_FALLBACK_CONFIRM);
+        expect(cloudFormationTab.location.href).toBe('');
+        expect(cloudFormationTab.close).toHaveBeenCalled();
+        expect(result.current.templateGenerationError).toContain('Try again');
+        expect(result.current.iacConfirm).toBeUndefined();
+        expect(result.current.hasLaunched).toBe(false);
       });
 
       it('does not add callback params to a stack-update link', async () => {

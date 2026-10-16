@@ -65,8 +65,9 @@ export interface UseIacCallbackResult {
   created?: IacCallbackCreated;
   /**
    * Creates a callback record and returns the stack parameters for the quick-create link.
-   * Returns undefined when the callback is not available or the record could not be created.
-   * The launch then goes ahead without it.
+   * Rejects when the record could not be created: the stack's report is the only way the identity
+   * gets created, so the caller must not open the console. Returns undefined when the callback is
+   * not available.
    */
   start: (identity: IacCallbackStartInput) => Promise<Record<string, string> | undefined>;
   /**
@@ -283,7 +284,10 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
         // The server found its public URL unreachable since the last check; show its reason.
         recheckAvailability();
       }
-      if (error || !data || !mountedRef.current) {
+      if (error || !data) {
+        throw new Error(error?.message ?? 'The IaC callback record could not be created');
+      }
+      if (!mountedRef.current) {
         return undefined;
       }
       activeIdRef.current = data.item.id;
