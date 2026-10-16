@@ -225,6 +225,33 @@ describe('EscalationsPage', () => {
     expect(screen.getByTestId('escalationQueue-closed')).toBeInTheDocument();
   });
 
+  it('explains in the Open section that escalations are created from the Alert Zero page', () => {
+    mockBothQueues([openEscalation], [closedEscalation]);
+    renderPage();
+
+    expect(screen.getByTestId('escalationQueueNote-open')).toHaveTextContent(
+      'Escalations start in Alert Zero'
+    );
+  });
+
+  it('says there are no open escalations when the Open list is empty', () => {
+    mockBothQueues([], [closedEscalation]);
+    renderPage();
+
+    expect(screen.getByTestId('alertZeroEscalationsOpenNote')).toHaveTextContent(
+      'No open escalations'
+    );
+  });
+
+  it('links to the Alert Zero page from the Open section note', () => {
+    mockBothQueues([], [closedEscalation]);
+    renderPage();
+
+    expect(screen.getByTestId('alertZeroEscalationsOpenNoteLink')).toHaveTextContent(
+      'Alert Zero page'
+    );
+  });
+
   it('shows the open escalation title', () => {
     mockBothQueues([openEscalation], []);
     renderPage();
