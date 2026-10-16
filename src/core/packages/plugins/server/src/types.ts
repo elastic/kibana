@@ -298,6 +298,15 @@ export interface Plugin<
 
   start(core: CoreStart, plugins: TPluginsStart): TStart;
 
+  /**
+   * Optional hook for expensive, Elasticsearch-bound work that does not belong in `start()`.
+   *
+   * Core calls it with the same arguments as `start()` once every plugin has started, one plugin
+   * at a time in start order. Boot waits for it: a thrown error, or a run longer than 10 seconds,
+   * fails boot the same way an asynchronous `start()` does.
+   */
+  initialize?(core: CoreStart, plugins: TPluginsStart): Promise<void>;
+
   stop?(): MaybePromise<void>;
 }
 
