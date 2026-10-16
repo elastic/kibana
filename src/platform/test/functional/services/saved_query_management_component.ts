@@ -221,9 +221,13 @@ export class SavedQueryManagementComponentService extends FtrService {
   async openSavedQueryManagementComponent() {
     await this.retry.try(async () => {
       if (!(await this.testSubjects.exists('queryBarMenuPanel'))) {
+        // The menu button is disabled while a search that can be cancelled is loading, e.g. right
+        // after "Clear all", and a click on a disabled button is silently ignored
+        await this.testSubjects.waitForEnabled('showQueryBarMenu');
         await this.testSubjects.click('showQueryBarMenu');
       }
-      await this.testSubjects.existOrFail('queryBarMenuPanel');
+      // Short timeout so a click that was still ignored is retried instead of waiting it out
+      await this.testSubjects.existOrFail('queryBarMenuPanel', { timeout: 10_000 });
     });
   }
 
