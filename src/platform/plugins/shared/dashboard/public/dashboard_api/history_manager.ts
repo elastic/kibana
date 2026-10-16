@@ -66,12 +66,19 @@ export function initializeHistoryManager({
       onStateChange$: merge(initialState$, onStateChange$).pipe(
         // A snapshot that differs only in its latest change numbers is not an undo step. Re-emit the
         // previous snapshot instead of filtering it out, because rxjs-history skips the first
-        // emission after an undo or redo.
-        scan<DashboardHistoryState>((previous, current) =>
-          isEqual({ ...current, latestChangeBySource: previous.latestChangeBySource }, previous)
+        // emission after an undo or redo. Unchanged change numbers keep the same object, so the deep
+        // comparison is needed only when they change.
+        scan<DashboardHistoryState>((previous, current) => {
+          if (current.latestChangeBySource === previous.latestChangeBySource) {
+            return current;
+          }
+          return isEqual(
+            { ...current, latestChangeBySource: previous.latestChangeBySource },
+            previous
+          )
             ? previous
-            : current
-        )
+            : current;
+        })
       ),
       setState,
       maxSize: 100,
