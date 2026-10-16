@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { resolveRuleEventOrigin } from './rule_event_origin';
+import { resolveRuleTelemetryEventOrigin } from './rule_event_origin';
 
 const UI_HEADERS = {
   'kbn-version': '9.0.0',
@@ -25,10 +25,10 @@ const createRequest = (
   isFakeRequest,
 });
 
-describe('resolveRuleEventOrigin', () => {
+describe('resolveRuleTelemetryEventOrigin', () => {
   describe('channel', () => {
     it('is `system` for a fake request', () => {
-      expect(resolveRuleEventOrigin(createRequest({}, { isFakeRequest: true }))).toEqual({
+      expect(resolveRuleTelemetryEventOrigin(createRequest({}, { isFakeRequest: true }))).toEqual({
         channel: 'system',
       });
     });
@@ -36,21 +36,21 @@ describe('resolveRuleEventOrigin', () => {
     it('is `system` for a fake request even when it carries the UI headers', () => {
       const request = createRequest(UI_HEADERS, { isFakeRequest: true });
 
-      expect(resolveRuleEventOrigin(request).channel).toBe('system');
+      expect(resolveRuleTelemetryEventOrigin(request).channel).toBe('system');
     });
 
     it('is `ui` when kbn-version, referer, and x-elastic-internal-origin are all present', () => {
-      expect(resolveRuleEventOrigin(createRequest(UI_HEADERS)).channel).toBe('ui');
+      expect(resolveRuleTelemetryEventOrigin(createRequest(UI_HEADERS)).channel).toBe('ui');
     });
 
     it.each(Object.keys(UI_HEADERS))('is `api` when %s is missing', (missingHeader) => {
       const { [missingHeader]: _omitted, ...headers } = UI_HEADERS as Record<string, string>;
 
-      expect(resolveRuleEventOrigin(createRequest(headers)).channel).toBe('api');
+      expect(resolveRuleTelemetryEventOrigin(createRequest(headers)).channel).toBe('api');
     });
 
     it('is `api` for a request with no UI headers', () => {
-      expect(resolveRuleEventOrigin(createRequest({ authorization: 'ApiKey abc' }))).toEqual({
+      expect(resolveRuleTelemetryEventOrigin(createRequest({ authorization: 'ApiKey abc' }))).toEqual({
         channel: 'api',
       });
     });
@@ -58,7 +58,7 @@ describe('resolveRuleEventOrigin', () => {
 
   describe('app', () => {
     it('is the configured app when options.app is set', () => {
-      expect(resolveRuleEventOrigin(createRequest(), { app: 'nightshift' })).toEqual({
+      expect(resolveRuleTelemetryEventOrigin(createRequest(), { app: 'nightshift' })).toEqual({
         channel: 'api',
         app: 'nightshift',
       });
@@ -70,7 +70,7 @@ describe('resolveRuleEventOrigin', () => {
         'x-kbn-context': executionContextHeader({ type: 'application', name: 'discover' }),
       });
 
-      expect(resolveRuleEventOrigin(request, { app: 'nightshift' })).toEqual({
+      expect(resolveRuleTelemetryEventOrigin(request, { app: 'nightshift' })).toEqual({
         channel: 'ui',
         app: 'nightshift',
       });
@@ -86,11 +86,11 @@ describe('resolveRuleEventOrigin', () => {
         }),
       });
 
-      expect(resolveRuleEventOrigin(request)).toEqual({ channel: 'ui', app: 'discover' });
+      expect(resolveRuleTelemetryEventOrigin(request)).toEqual({ channel: 'ui', app: 'discover' });
     });
 
     it('is undefined on `ui` requests without an x-kbn-context header', () => {
-      expect(resolveRuleEventOrigin(createRequest(UI_HEADERS))).toEqual({ channel: 'ui' });
+      expect(resolveRuleTelemetryEventOrigin(createRequest(UI_HEADERS))).toEqual({ channel: 'ui' });
     });
 
     it.each([
@@ -102,13 +102,13 @@ describe('resolveRuleEventOrigin', () => {
     ])('is undefined on `ui` requests when x-kbn-context %s', (_description, header) => {
       const request = createRequest({ ...UI_HEADERS, 'x-kbn-context': header });
 
-      expect(resolveRuleEventOrigin(request)).toEqual({ channel: 'ui' });
+      expect(resolveRuleTelemetryEventOrigin(request)).toEqual({ channel: 'ui' });
     });
 
     it.each(['observabilityAlerting', 'agent_builder', 'app.name:id'])(
       'keeps a configured app id of %s',
       (app) => {
-        expect(resolveRuleEventOrigin(createRequest(), { app })).toEqual({
+        expect(resolveRuleTelemetryEventOrigin(createRequest(), { app })).toEqual({
           channel: 'api',
           app,
         });
@@ -120,7 +120,7 @@ describe('resolveRuleEventOrigin', () => {
       ['contains a slash', 'discover/app'],
       ['is longer than 64 characters', 'a'.repeat(65)],
     ])('omits a configured app that %s', (_description, app) => {
-      expect(resolveRuleEventOrigin(createRequest(), { app })).toEqual({ channel: 'api' });
+      expect(resolveRuleTelemetryEventOrigin(createRequest(), { app })).toEqual({ channel: 'api' });
     });
 
     it('uses the execution context when the configured app is outside the allowed set', () => {
@@ -129,7 +129,7 @@ describe('resolveRuleEventOrigin', () => {
         'x-kbn-context': executionContextHeader({ name: 'discover' }),
       });
 
-      expect(resolveRuleEventOrigin(request, { app: 'not an app' })).toEqual({
+      expect(resolveRuleTelemetryEventOrigin(request, { app: 'not an app' })).toEqual({
         channel: 'ui',
         app: 'discover',
       });
@@ -141,7 +141,7 @@ describe('resolveRuleEventOrigin', () => {
         'x-kbn-context': executionContextHeader({ name: 'discover/app' }),
       });
 
-      expect(resolveRuleEventOrigin(request)).toEqual({ channel: 'ui' });
+      expect(resolveRuleTelemetryEventOrigin(request)).toEqual({ channel: 'ui' });
     });
 
     it('ignores the execution context on `api` requests', () => {
@@ -149,7 +149,7 @@ describe('resolveRuleEventOrigin', () => {
         'x-kbn-context': executionContextHeader({ type: 'application', name: 'discover' }),
       });
 
-      expect(resolveRuleEventOrigin(request)).toEqual({ channel: 'api' });
+      expect(resolveRuleTelemetryEventOrigin(request)).toEqual({ channel: 'api' });
     });
 
     it('ignores the execution context on `system` requests', () => {
@@ -158,7 +158,7 @@ describe('resolveRuleEventOrigin', () => {
         { isFakeRequest: true }
       );
 
-      expect(resolveRuleEventOrigin(request)).toEqual({ channel: 'system' });
+      expect(resolveRuleTelemetryEventOrigin(request)).toEqual({ channel: 'system' });
     });
   });
 });

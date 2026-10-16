@@ -72,7 +72,7 @@ const getAppFromExecutionContext = (request: KibanaRequest): string | undefined 
  * the execution context. The app is omitted when it fails {@link ruleEventAppTelemetrySchema}, and
  * undefined in every other case.
  */
-export const resolveRuleEventOrigin = (
+export const resolveRuleTelemetryEventOrigin = (
   request: KibanaRequest,
   options?: CreateRulesClientOptions
 ): RuleEventOrigin => {
