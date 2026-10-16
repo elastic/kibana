@@ -26,10 +26,12 @@ import {
   createParseArchiveStreams,
   createCreateIndexStream,
   createIndexDocRecordsStream,
+  deleteCreatedTargets,
   migrateSavedObjectIndices,
   isSavedObjectIndex,
   Progress,
   createDefaultSpace,
+  type CreatedTarget,
   type LoadActionPerfOptions,
 } from '../lib';
 
@@ -83,6 +85,7 @@ export async function loadAction({
   const files = prioritizeMappings(await readDirectory(inputDir));
   const kibanaPluginIds = dataOnly ? [] : await kbnClient!.plugins.getEnabledIds();
   const targetsWithoutIdGeneration: string[] = [];
+  const createdTargets: CreatedTarget[] = [];
 
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
@@ -102,28 +105,36 @@ export async function loadAction({
   const progress = new Progress();
   progress.activate(log);
 
-  await createPromiseFromStreams([
-    recordStream,
-    createCreateIndexStream({
-      client,
-      stats,
-      skipExisting,
-      docsOnly,
-      isArchiveInExceptionList,
-      log,
-      targetsWithoutIdGeneration,
-    }),
-    createIndexDocRecordsStream(
-      client,
-      stats,
-      progress,
-      useCreate,
-      performance,
-      targetsWithoutIdGeneration
-    ),
-  ]);
+  try {
+    await createPromiseFromStreams([
+      recordStream,
+      createCreateIndexStream({
+        client,
+        stats,
+        skipExisting,
+        docsOnly,
+        isArchiveInExceptionList,
+        log,
+        targetsWithoutIdGeneration,
+        createdTargets,
+      }),
+      createIndexDocRecordsStream(
+        client,
+        stats,
+        progress,
+        useCreate,
+        performance,
+        targetsWithoutIdGeneration
+      ),
+    ]);
+  } catch (error) {
+    // every later `loadIfNeeded` would adopt a half-indexed target instead of restoring the archive
+    await deleteCreatedTargets({ client, stats, log, targets: createdTargets });
+    throw error;
+  } finally {
+    progress.deactivate();
+  }
 
-  progress.deactivate();
   const result = stats.toJSON();
 
   if (dataOnly) {

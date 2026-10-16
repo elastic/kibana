@@ -28,6 +28,7 @@ import {
 } from './kibana_index';
 import { deleteIndex } from './delete_index';
 import { deleteDataStream } from './delete_data_stream';
+import type { CreatedTarget } from './delete_created_targets';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 interface DocRecord {
@@ -47,6 +48,7 @@ export function createCreateIndexStream({
   isArchiveInExceptionList = false,
   log,
   targetsWithoutIdGeneration = [],
+  createdTargets = [],
 }: {
   client: Client;
   stats: Stats;
@@ -55,6 +57,7 @@ export function createCreateIndexStream({
   isArchiveInExceptionList?: boolean;
   log: ToolingLog;
   targetsWithoutIdGeneration?: string[];
+  createdTargets?: CreatedTarget[];
 }) {
   const skipDocsFromIndices = new Set();
 
@@ -120,6 +123,7 @@ export function createCreateIndexStream({
       );
       stats.createdDataStream(dataStream, template.name, { template });
       targetsWithoutIdGeneration.push(dataStream);
+      createdTargets.push({ type: 'data_stream', name: dataStream, template: template.name });
     } catch (err) {
       if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception' || attempts >= 3) {
         throw err;
@@ -196,6 +200,7 @@ export function createCreateIndexStream({
         }
 
         stats.createdIndex(index, { settings });
+        createdTargets.push({ type: 'index', name: index });
         if (settings?.index?.mode === 'time_series') {
           targetsWithoutIdGeneration.push(index);
         }

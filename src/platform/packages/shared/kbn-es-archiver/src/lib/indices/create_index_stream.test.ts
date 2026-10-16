@@ -18,6 +18,7 @@ import Chance from 'chance';
 import { createPromiseFromStreams, createConcatStream, createListStream } from '@kbn/utils';
 
 import { createCreateIndexStream } from './create_index_stream';
+import type { CreatedTarget } from './delete_created_targets';
 
 import {
   createStubStats,
@@ -193,6 +194,25 @@ describe('esArchiver: createCreateIndexStream()', () => {
 
       sinon.assert.calledOnce(client.indices.putIndexTemplate as sinon.SinonSpy);
       sinon.assert.calledOnce(client.indices.createDataStream as sinon.SinonSpy);
+    });
+
+    it('reports the targets it created, so a failed load can undo them', async () => {
+      const client = createStubClient(['existing-index']);
+      const stats = createStubStats();
+      const createdTargets: CreatedTarget[] = [];
+
+      await createPromiseFromStreams([
+        createListStream([
+          createStubIndexRecord('new-index'),
+          createStubDataStreamRecord('foo-datastream', 'foo-template'),
+        ]),
+        createCreateIndexStream({ client, stats, log, createdTargets }),
+      ]);
+
+      expect(createdTargets).toEqual([
+        { type: 'index', name: 'new-index' },
+        { type: 'data_stream', name: 'foo-datastream', template: 'foo-template' },
+      ]);
     });
   });
 
