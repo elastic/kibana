@@ -164330,6 +164330,10 @@ components:
                   enum:
                     - number
                   type: string
+                pattern:
+                  description: Numeral.js format pattern. See https://www.elastic.co/docs/explore-analyze/numeral-formatting to learn more.
+                  title: Numeral pattern
+                  type: string
               required:
                 - field_type
                 - colors
