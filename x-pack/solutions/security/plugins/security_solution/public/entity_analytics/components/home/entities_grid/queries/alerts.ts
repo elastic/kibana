@@ -13,6 +13,7 @@ import {
   getEntityAlias,
   buildLookback,
   buildJoinedPageSteps,
+  SET_UNMAPPED_NULLIFY,
   toList,
 } from './esql';
 import {
@@ -21,6 +22,7 @@ import {
   ALLOWED_ENTITY_TYPES,
   ENTITY_TYPE_FIELD,
   SEVERITY_COUNT_FIELDS,
+  isOneOf,
 } from '../common';
 import { buildAlertEuidPipeline } from './euid_pipeline';
 import { buildEntitiesInViewConditions, IN_VIEW_FIELD } from './entities_in_view';
@@ -62,7 +64,7 @@ const buildAlertAggregations = (rowCondition?: string): string[] =>
   });
 
 const isAllowedEntityType = (type: unknown): type is (typeof ALLOWED_ENTITY_TYPES)[number] =>
-  typeof type === 'string' && (ALLOWED_ENTITY_TYPES as readonly string[]).includes(type);
+  isOneOf(ALLOWED_ENTITY_TYPES, type);
 
 // ── unstamped alert filters ───────────────────────────────────────────────────
 
@@ -112,6 +114,7 @@ const buildAlertSortQuery = (args: QueryArgs, sortField: string): string => {
   const isEntityDoc = `_index == "${concreteEntityIndexName}"`;
   const entityConditions = buildEntitiesInViewConditions(args).map((c) => `(${c})`);
   return [
+    SET_UNMAPPED_NULLIFY,
     `FROM ${getAlertsIndex(namespace)}, ${getEntityAlias(namespace)} METADATA _index`,
     `| WHERE (NOT ${isEntityDoc} AND \`@timestamp\` >= ${buildLookback(
       timeRange
@@ -137,6 +140,7 @@ const buildAlertSortQuery = (args: QueryArgs, sortField: string): string => {
 
 /** Open alerts in the time range, mapped to `entity.id`, without entity docs. */
 const buildOpenAlertEntityRows = ({ namespace, timeRange }: QueryArgs): string[] => [
+  SET_UNMAPPED_NULLIFY,
   `FROM ${getAlertsIndex(namespace)}`,
   `| WHERE \`@timestamp\` >= ${buildLookback(timeRange)} AND (${ALERT_OPEN_STATUS_FILTER})`,
   ...buildAlertEuidPipeline(),
@@ -168,6 +172,7 @@ const buildAlertsEnrichQuery = (
 ): string => {
   const { namespace, timeRange } = args;
   return [
+    SET_UNMAPPED_NULLIFY,
     `FROM ${getAlertsIndex(namespace)}`,
     `| WHERE \`@timestamp\` >= ${buildLookback(timeRange)}`,
     `| WHERE ${ALERT_OPEN_STATUS_FILTER}`,

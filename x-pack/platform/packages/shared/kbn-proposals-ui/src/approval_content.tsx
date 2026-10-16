@@ -234,7 +234,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const isReplacedFailure = isReplaced && decision?.status === 'failed';
     const badge = getApprovalOutcomeBadge(isReplacedFailure ? 'failed' : approvalPhase);
     const banner = isReplaced ? undefined : getApprovalOutcomeBanner(approvalPhase);
-    const bannerSuffix = decision?.reason ?? banner?.hint;
+    const bannerSuffix = decision?.reason;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
     const replacedCaption = isReplaced ? getProposalCaption(proposal) : undefined;

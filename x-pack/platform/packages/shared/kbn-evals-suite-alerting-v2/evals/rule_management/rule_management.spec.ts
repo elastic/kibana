@@ -12,6 +12,7 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { expect } from '@playwright/test';
 import { tags } from '@kbn/scout';
+import { assertNoGenerationIndex } from '../../src/assert_no_generation_index';
 import { evaluate } from '../../src/evaluate';
 import { noDataExample } from '../../src/no_data';
 import { recoveryExample } from '../../src/recovery';
@@ -128,6 +129,7 @@ evaluate.describe(
                     const esql = attachment!.query ? getBreachEsqlQuery(attachment!.query) : '';
                     expect(esql).toContain(hostMetricsIndex);
                     expect(esql).toContain('system.cpu.total.norm.pct');
+                    assertNoGenerationIndex(esql);
                   },
                 },
               },
@@ -167,6 +169,7 @@ evaluate.describe(
                     const esql = attachment!.query ? getBreachEsqlQuery(attachment!.query) : '';
                     expect(esql).toContain(hostMetricsIndex);
                     expect(esql).toContain('system.cpu.total.norm.pct');
+                    assertNoGenerationIndex(esql);
                   },
                 },
               },
@@ -201,6 +204,7 @@ evaluate.describe(
                     const esql = attachment!.query ? getBreachEsqlQuery(attachment!.query) : '';
                     expect(esql).toContain(hostMetricsIndex);
                     expect(esql).toContain('system.cpu.total.norm.pct');
+                    assertNoGenerationIndex(esql);
                     expect(esql.toLowerCase()).toContain('severity');
                     expect(esql.toLowerCase()).toContain('critical');
                   },
@@ -235,6 +239,7 @@ evaluate.describe(
                     expect(attachment!.schedule?.lookback).toEqual('5m');
                     const esql = attachment!.query ? getBreachEsqlQuery(attachment!.query) : '';
                     expect(esql.toLowerCase()).toContain('admin-console');
+                    assertNoGenerationIndex(esql);
                   },
                 },
               },
@@ -243,6 +248,89 @@ evaluate.describe(
         });
       }
     );
+  }
+);
+
+evaluate.describe(
+  'Alerting V2 rule-management skill - concrete index handling',
+  { tag: tags.serverless.observability.complete },
+  () => {
+    evaluate('concrete index handling', async ({ evaluateDataset, hostMetricsDataStream }) => {
+      const { name: dataStream, backingIndex } = hostMetricsDataStream;
+      const dataStreamBase = dataStream.replace(/-default$/, '');
+
+      await evaluateDataset({
+        dataset: {
+          name: 'alerting-v2: concrete index handling',
+          description:
+            'Seeds a real data stream and hands its backing index to the agent. Without an ' +
+            'explicit request the rule must target the data stream or a wildcard; when the user ' +
+            'explicitly asks for the backing index the agent must respect it and warn about rollovers.',
+          examples: [
+            {
+              input: {
+                turns: [
+                  `My host CPU metrics are in ${backingIndex}. Create an alert rule that fires when ` +
+                    'average system.cpu.total.norm.pct stays above 0.9 for 5 minutes, grouped by host.name.',
+                ],
+              },
+              output: {
+                criteria: [
+                  'The rule query does not target the concrete backing index the user mentioned; it uses the data stream name or a wildcard pattern so the rule survives rollovers.',
+                  'The set_query operation validates successfully against Elasticsearch, and the final manage_rule call ends with a validate operation.',
+                  'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
+                ],
+                expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+                notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
+                expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
+                expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
+                expectAttachmentData: (attachments) => {
+                  const attachment = getLatestAttachmentData<RuleAttachmentData>(
+                    attachments,
+                    RULE_ATTACHMENT_TYPE
+                  );
+                  expect(attachment).toBeDefined();
+                  const esql = attachment!.query ? getBreachEsqlQuery(attachment!.query) : '';
+                  expect(esql).toContain(dataStreamBase);
+                  assertNoGenerationIndex(esql);
+                },
+              },
+            },
+            {
+              input: {
+                turns: [
+                  `Create an alert rule on exactly ${backingIndex}. I know it is a concrete backing ` +
+                    'index and I want the rule pinned to it, so do not change the index. It should ' +
+                    'fire when average system.cpu.total.norm.pct stays above 0.9 for 5 minutes, ' +
+                    'grouped by host.name.',
+                ],
+              },
+              output: {
+                criteria: [
+                  'The rule query targets the exact backing index the user asked for and the assistant does not silently replace it with a wildcard or the data stream name.',
+                  'The assistant tells the user that a concrete backing index changes on rollover and the rule may stop matching new data.',
+                  'The set_query operation validates successfully against Elasticsearch, and the final manage_rule call ends with a validate operation.',
+                  'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
+                ],
+                expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+                notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
+                expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
+                expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
+                expectAttachmentData: (attachments) => {
+                  const attachment = getLatestAttachmentData<RuleAttachmentData>(
+                    attachments,
+                    RULE_ATTACHMENT_TYPE
+                  );
+                  expect(attachment).toBeDefined();
+                  const esql = attachment!.query ? getBreachEsqlQuery(attachment!.query) : '';
+                  expect(esql).toContain(backingIndex);
+                },
+              },
+            },
+          ],
+        },
+      });
+    });
   }
 );
 
