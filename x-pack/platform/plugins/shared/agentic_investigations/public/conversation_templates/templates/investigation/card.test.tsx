@@ -72,21 +72,21 @@ describe('InvestigationCard', () => {
     expect(screen.getByTestId('investigationCardPendingProposals')).toHaveTextContent(
       '2 proposals to review'
     );
-    expect(screen.queryByTestId('investigationCardRunning')).not.toBeInTheDocument();
   });
 
-  it('shows the running dot while an agent works on it and leaves out what is missing', () => {
+  it('does not show status or severity dots, and leaves out what is missing', () => {
     renderCard({
       investigation: investigation({
         in_progress: true,
-        metadata: { status: 'open' },
+        metadata: { status: 'open', severity: 'critical' },
         subjects: [],
         impact: undefined,
         pending_proposal_count: undefined,
       }),
     });
 
-    expect(screen.getByTestId('investigationCardRunning')).toBeInTheDocument();
+    expect(screen.queryByTestId('investigationCardRunning')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('investigationCardSeverity')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardSummary')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardPendingProposals')).not.toBeInTheDocument();
   });
@@ -135,5 +135,33 @@ describe('InvestigationCard', () => {
 
     expect(onClick).toHaveBeenCalledTimes(2);
     expect(onClick).toHaveBeenCalledWith(item);
+  });
+
+  it('hides the pending-proposals badge when asked', () => {
+    renderCard({
+      investigation: investigation(),
+      showPendingProposals: false,
+    });
+
+    expect(screen.queryByTestId('investigationCardPendingProposals')).not.toBeInTheDocument();
+    expect(screen.getAllByTestId('investigationCardEntity')).toHaveLength(3);
+  });
+
+  it('renders trailing actions on the age row without opening the card when they are clicked', () => {
+    const onClick = jest.fn();
+    renderCard({
+      investigation: investigation(),
+      onClick,
+      actions: (
+        <button type="button" data-test-subj="cardAction">
+          Action
+        </button>
+      ),
+    });
+
+    fireEvent.click(screen.getByTestId('cardAction'));
+
+    expect(screen.getByTestId('cardAction')).toBeInTheDocument();
+    expect(onClick).not.toHaveBeenCalled();
   });
 });

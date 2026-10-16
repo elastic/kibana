@@ -32,6 +32,7 @@ import type {
   InvestigationSectionState,
 } from '../hooks/use_investigation_sections';
 import { useKibana } from '../hooks/use_kibana';
+import { InvestigationCardActions } from './investigation_card_actions';
 
 export interface InvestigationSectionProps {
   id: InvestigationSectionId;
@@ -274,6 +275,8 @@ const SectionRows = ({
                 investigation={investigation}
                 isSelected={investigation.id === selectedInvestigationId}
                 onClick={onInvestigationClick}
+                showPendingProposals={false}
+                actions={<InvestigationCardActions investigation={investigation} />}
               />
             )}
           </EuiFlexItem>

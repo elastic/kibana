@@ -7,25 +7,11 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n-react';
-import { SEVERITY_COLORS, SEVERITY_LABELS } from '@kbn/agentic-investigations-common';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { ConversationMetaInfo } from '@kbn/agentic-investigations-common';
 import type { InvestigationSummary } from '../../../../common';
 import { getInvestigationDisplayTitle } from './to_view_model';
-import {
-  CLOSED_LABEL,
-  NO_SEVERITY_LABEL,
-  RUNNING_LABEL,
-  moreEntitiesLabel,
-  pendingProposalsLabel,
-} from './translations';
+import { CLOSED_LABEL, moreEntitiesLabel, pendingProposalsLabel } from './translations';
 
 const MAX_VISIBLE_ENTITIES = 3;
 
@@ -34,6 +20,13 @@ export interface InvestigationCardProps {
   /** Makes the card a button; for example to open the conversation details flyout. */
   onClick?: (investigation: InvestigationSummary) => void;
   isSelected?: boolean;
+  /** Pending-proposals badge under the summary. Defaults to true. */
+  showPendingProposals?: boolean;
+  /**
+   * Trailing controls on the age row (open in chat, overflow menu, …). The host owns the actions
+   * and must stop click propagation so they do not open the card.
+   */
+  actions?: React.ReactNode;
 }
 
 const EntityChips = ({ investigation }: { investigation: InvestigationSummary }) => {
@@ -64,21 +57,26 @@ const EntityChips = ({ investigation }: { investigation: InvestigationSummary })
 };
 
 /**
- * A compact investigation card: severity, title, running state, a two-line summary, the impacted
- * entities, and how many proposed actions wait for a decision. Its subjects only name it while
- * Agent Builder has not titled it; the overview lists them. Presentational; the host supplies the
- * investigation (from the list API) and decides what a click does.
+ * A compact investigation card: age on top (with optional trailing actions), title, a two-line
+ * summary, impacted entities, and optional pending-proposals badge. Presentational; the host
+ * supplies the investigation and decides what a click does.
  */
 export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   investigation,
   onClick,
   isSelected = false,
+  showPendingProposals = true,
+  actions,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { metadata, in_progress: inProgress, created_at: createdAt } = investigation;
+  const { metadata, created_at: createdAt } = investigation;
   const title = getInvestigationDisplayTitle(investigation);
-  const { severity, summary, status } = metadata;
+  const { summary, status } = metadata;
   const pending = investigation.pending_proposal_count ?? 0;
+  const hasEntities = (investigation.impact?.entities?.length ?? 0) > 0;
+  const showPendingBadge = showPendingProposals && pending > 0;
+  const showFooter = hasEntities || showPendingBadge;
+  const showTrailing = status === 'closed' || actions != null;
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
@@ -96,7 +94,8 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
       onClick={onClick ? () => onClick(investigation) : undefined}
       onKeyDown={onClick ? handleKeyDown : undefined}
       css={css`
-        padding: ${euiTheme.size.base};
+        /* 16px on the right only: 32px icon buttons carry 8px inset, so glyphs land at 24px. */
+        padding: ${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l};
         background: ${isSelected
           ? euiTheme.colors.backgroundBaseInteractiveSelect
           : euiTheme.colors.backgroundBasePlain};
@@ -108,53 +107,52 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
     >
       <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+            justifyContent="spaceBetween"
+          >
             <EuiFlexItem grow={false}>
-              <EuiIconTip
-                type="dot"
-                color={severity ? SEVERITY_COLORS[severity] : 'subdued'}
-                content={severity ? SEVERITY_LABELS[severity] : NO_SEVERITY_LABEL}
-                aria-label={severity ? SEVERITY_LABELS[severity] : NO_SEVERITY_LABEL}
-                iconProps={{ 'data-test-subj': 'investigationCardSeverity' }}
-              />
+              <ConversationMetaInfo createdAt={createdAt} />
             </EuiFlexItem>
-            <EuiFlexItem css={{ minWidth: 0 }}>
-              <EuiText size="s">
-                <p
-                  className="eui-textTruncate"
-                  title={title}
-                  css={css`
-                    margin: 0;
-                    font-weight: ${euiTheme.font.weight.semiBold};
-                  `}
-                  data-test-subj="investigationCardTitle"
-                >
-                  {title}
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-            {inProgress && (
+            {showTrailing && (
               <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  type="dot"
-                  color="primary"
-                  content={RUNNING_LABEL}
-                  aria-label={RUNNING_LABEL}
-                  iconProps={{ 'data-test-subj': 'investigationCardRunning' }}
-                />
+                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                  {status === 'closed' && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="hollow">{CLOSED_LABEL}</EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                  {actions != null && (
+                    <EuiFlexItem
+                      grow={false}
+                      onClick={(event: React.MouseEvent) => event.stopPropagation()}
+                      onKeyDown={(event: React.KeyboardEvent) => event.stopPropagation()}
+                    >
+                      {actions}
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
               </EuiFlexItem>
             )}
-            {status === 'closed' && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{CLOSED_LABEL}</EuiBadge>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                <FormattedRelative value={createdAt} />
-              </EuiText>
-            </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+          <EuiText size="s">
+            <p
+              className="eui-textTruncate"
+              title={title}
+              css={css`
+                margin: 0;
+                font-weight: ${euiTheme.font.weight.semiBold};
+              `}
+              data-test-subj="investigationCardTitle"
+            >
+              {title}
+            </p>
+          </EuiText>
         </EuiFlexItem>
 
         {summary && (
@@ -176,18 +174,20 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
           </EuiFlexItem>
         )}
 
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-            <EntityChips investigation={investigation} />
-            {pending > 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="accent" data-test-subj="investigationCardPendingProposals">
-                  {pendingProposalsLabel(pending)}
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        {showFooter && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+              <EntityChips investigation={investigation} />
+              {showPendingBadge && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="accent" data-test-subj="investigationCardPendingProposals">
+                    {pendingProposalsLabel(pending)}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </div>
   );

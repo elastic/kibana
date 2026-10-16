@@ -74,7 +74,7 @@ describe('InvestigationBriefCard', () => {
     await waitFor(() =>
       expect(screen.getByTestId('investigationCardPendingProposals')).toBeInTheDocument()
     );
-    expect(screen.getByTestId('investigationCardRunning')).toBeInTheDocument();
+    expect(screen.queryByTestId('investigationCardRunning')).not.toBeInTheDocument();
     expect(loader.load).toHaveBeenCalledWith('conv-1');
   });
 });

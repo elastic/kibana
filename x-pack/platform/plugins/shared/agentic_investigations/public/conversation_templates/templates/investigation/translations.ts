@@ -12,11 +12,6 @@ export const RUNNING_LABEL = i18n.translate(
   { defaultMessage: 'Investigating…' }
 );
 
-export const NO_SEVERITY_LABEL = i18n.translate(
-  'xpack.agenticInvestigations.investigations.noSeverityLabel',
-  { defaultMessage: 'Not rated' }
-);
-
 export const CLOSED_LABEL = i18n.translate(
   'xpack.agenticInvestigations.investigations.closedLabel',
   { defaultMessage: 'Closed' }
