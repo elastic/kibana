@@ -9,6 +9,13 @@ import { z } from '@kbn/zod/v4';
 
 export const GRID_COLUMNS = 48;
 
+export interface LayoutGrid {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
 /** A panel as the layout call sees it. */
 export interface LayoutPanel {
   id: string;
@@ -20,7 +27,7 @@ export interface LayoutPanel {
   /** The text of a markdown panel, or the config of a custom content panel, to size it by. */
   content?: string;
   /** Omitted for a panel added to its container in this call, which the layout call places. */
-  grid?: { x: number; y: number; w: number; h: number };
+  grid?: LayoutGrid;
   /** Set instead of `grid` for a panel moved here from another container: the size it had there. */
   size?: { w: number; h: number };
 }
@@ -35,6 +42,8 @@ export interface LayoutSection {
    * layout.
    */
   panels?: LayoutPanel[];
+  /** The space that panels removed from the section, or moved out of it, left there. */
+  removed?: LayoutGrid[];
 }
 
 /** The dashboard as it is after the operations, with the grids of the panels already placed. */
@@ -42,6 +51,8 @@ export interface LayoutRequest {
   /** Where panels and sections go, from the user or the authoring agent. */
   instructions?: string;
   panels: LayoutPanel[];
+  /** The space that top-level panels removed, or moved out of it, left in the top level. */
+  removed?: LayoutGrid[];
   sections: LayoutSection[];
 }
 

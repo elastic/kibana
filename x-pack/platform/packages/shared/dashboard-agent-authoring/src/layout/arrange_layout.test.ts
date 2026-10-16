@@ -165,7 +165,7 @@ describe('arrangeDashboardLayout', () => {
     expect(sections[0].y).toBeUndefined();
   });
 
-  it('sends panels moved to another container with their size only, and new sections without a row', async () => {
+  it('sends panels moved to another container with their size only and the space they left, and new sections without a row', async () => {
     const arrangeLayout = jest.fn(async () => completeArrangement);
     const dashboardWithMovedPanels: DashboardAttachmentData = {
       ...originalDashboardData,
@@ -182,7 +182,12 @@ describe('arrangeDashboardLayout', () => {
     expect(panels[0]).toEqual(expect.objectContaining({ id: 'p1', size: { w: 24, h: 9 } }));
     expect(panels[0].grid).toBeUndefined();
     expect(sections).toEqual([
-      expect.objectContaining({ id: 's1', y: 9, panels: [] }),
+      expect.objectContaining({
+        id: 's1',
+        y: 9,
+        panels: [],
+        removed: [{ x: 0, y: 0, w: 24, h: 9 }],
+      }),
       {
         id: 's2',
         title: 'Section section-b',
@@ -191,7 +196,7 @@ describe('arrangeDashboardLayout', () => {
     ]);
   });
 
-  it('calls the layout when a panel was removed', async () => {
+  it('calls the layout when a panel was removed, with the space it left', async () => {
     const arrangeLayout = jest.fn(async () => ({
       plan: '',
       panels: [],
@@ -204,6 +209,7 @@ describe('arrangeDashboardLayout', () => {
 
     expect(arrangeLayout).toHaveBeenCalledWith({
       panels: [],
+      removed: [{ x: 0, y: 0, w: 24, h: 9 }],
       sections: [expect.objectContaining({ id: 's1', y: 9 })],
     });
   });

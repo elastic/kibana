@@ -19,6 +19,7 @@ import {
   GRID_COLUMNS,
   type ArrangeDashboardLayout,
   type LayoutArrangement,
+  type LayoutGrid,
   type LayoutPanel,
   type LayoutRequest,
 } from './types';
@@ -87,10 +88,29 @@ const getPanelIds = (widgets: Widgets): Set<string> =>
 const byReadingOrder = (a: AttachmentPanel, b: AttachmentPanel): number =>
   a.grid.y - b.grid.y || a.grid.x - b.grid.x;
 
+const getContainerPanels = (widgets: Widgets, sectionId: string | null): AttachmentPanel[] =>
+  sectionId === null
+    ? widgets.filter((widget): widget is AttachmentPanel => !isSection(widget))
+    : widgets.filter(isSection).find(({ id }) => id === sectionId)?.panels ?? [];
+
+/** The grids that panels removed from a container, or moved out of it, had there. */
+const getRemovedGrids = (
+  originalWidgets: Widgets,
+  currentKeys: ReadonlySet<string>,
+  sectionId: string | null
+): { removed?: LayoutGrid[] } => {
+  const removed = getContainerPanels(originalWidgets, sectionId)
+    .filter(({ id }) => !currentKeys.has(toPanelKey(sectionId, id)))
+    .sort(byReadingOrder)
+    .map(({ grid }) => grid);
+  return removed.length > 0 ? { removed } : {};
+};
+
 /**
  * The dashboard with short ids. Panels new to their container (added or moved) are sent without a
  * grid and new sections without a row, since their placeholder positions are for the call to set.
- * Moved panels keep their size. Without instructions, sections this call did not change are sent
+ * Moved panels keep their size. Each changed container lists the space its removed and moved-out
+ * panels left. Without instructions, sections this call did not change are sent
  * without their panels, so they keep their layout.
  */
 const toLayoutRequest = (
@@ -101,6 +121,7 @@ const toLayoutRequest = (
   instructions: string | undefined
 ): LayoutRequest => {
   const placedKeys = getPlacedKeys(originalWidgets);
+  const currentKeys = getPlacedKeys(widgets);
   const originalPanelIds = getPanelIds(originalWidgets);
   const toLayoutPanels = (panels: AttachmentPanel[], sectionId: string | null): LayoutPanel[] =>
     [...panels].sort(byReadingOrder).map((panel) => {
@@ -125,6 +146,7 @@ const toLayoutRequest = (
       widgets.filter((widget): widget is AttachmentPanel => !isSection(widget)),
       null
     ),
+    ...getRemovedGrids(originalWidgets, currentKeys, null),
     sections: widgets
       .filter(isSection)
       .sort((a, b) => a.grid.y - b.grid.y)
@@ -133,7 +155,10 @@ const toLayoutRequest = (
         title,
         ...(placedKeys.has(id) ? { y: grid.y } : {}),
         ...(instructions !== undefined || changedContainers.has(id)
-          ? { panels: toLayoutPanels(panels, id) }
+          ? {
+              panels: toLayoutPanels(panels, id),
+              ...getRemovedGrids(originalWidgets, currentKeys, id),
+            }
           : {}),
       })),
   };
