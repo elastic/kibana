@@ -74,6 +74,23 @@ const SUPPORT_RE =
 const MOCK_FILE_RE =
   /\.(mock|mocks|stories|fixtures?)\.(ts|tsx|js)$|(^|\/)(mocks?|__mocks__)\.(ts|tsx)$|(^|\/)__mocks__\//;
 
+const DOC_EXT = new Set(['.md', '.mdx']);
+const IMAGE_EXT = new Set(['.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.webp']);
+
+// Plain-language reason a diff file is left out of the analysis, or null when it is analyzed.
+const ignoreReason = (filePath, ext, base) => {
+  if (GENERATED_RE.test(filePath))
+    return 'generated code (OpenAPI codegen); the *.schema.yaml is analyzed instead';
+  if (DOC_EXT.has(ext) || /^(README|LICENSE|CHANGELOG)/.test(base)) return 'documentation';
+  if (IMAGE_EXT.has(ext)) return 'image';
+  if (ext === '.snap') return 'Jest snapshot (test artifact)';
+  if (ext === '.lock' || /lock\.(json|yaml)$/.test(base) || base === 'yarn.lock') return 'lockfile';
+  if (IGNORED_BASENAMES.has(base) || IGNORED_BASENAME_RE.test(base)) return 'config / tooling file';
+  if (IGNORED_EXT.has(ext)) return 'non-code file';
+  if (IGNORED_PREFIXES.some((p) => filePath.startsWith(p))) return 'docs / CI / tooling path';
+  return null;
+};
+
 /**
  * @typedef {'production' | 'test' | 'ignored'} FileKind
  * @typedef {'jest' | 'cypress' | 'scout' | 'ftr' | 'support'} TestFramework
@@ -85,15 +102,8 @@ export const classifyFile = (filePath) => {
   const ext = path.posix.extname(filePath);
   const base = path.posix.basename(filePath);
 
-  if (IGNORED_BASENAMES.has(base) || IGNORED_BASENAME_RE.test(base) || IGNORED_EXT.has(ext)) {
-    return { kind: 'ignored', reason: `ignored extension/basename (${base})` };
-  }
-  if (IGNORED_PREFIXES.some((p) => filePath.startsWith(p))) {
-    return { kind: 'ignored', reason: 'docs/CI/tooling path' };
-  }
-  if (GENERATED_RE.test(filePath)) {
-    return { kind: 'ignored', reason: 'generated OpenAPI/codegen artifact' };
-  }
+  const ignoredReason = ignoreReason(filePath, ext, base);
+  if (ignoredReason) return { kind: 'ignored', reason: ignoredReason };
 
   if (JEST_RE.test(filePath)) return { kind: 'test', framework: 'jest', reason: '*.test.*' };
   if (TEST_SUPPORT_RE.test(filePath)) {

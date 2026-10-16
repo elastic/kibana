@@ -227,6 +227,39 @@ const testFilesList = (testFiles) =>
     ? ['_No test files in the diff._']
     : testFiles.map((t) => `- ${code(t.file)} (${t.framework}, ${t.status})`);
 
+// Test files changed by the PR that no production row links to. They are not wrong — a test can
+// be refactored on its own — but they contribute to no verdict, so they are listed for visibility.
+export const unlinkedTestFiles = ({ rows, testFiles }) => {
+  const linked = new Set(rows.flatMap((r) => r.links.filter((l) => l.inPr).map((l) => l.path)));
+  return testFiles.filter((t) => !linked.has(t.file));
+};
+
+// Collapsed Scope blocks for the two file buckets that get no table row.
+const diffBucketsBlocks = (analysis, root) => {
+  const { rows, testFiles, ignoredFiles, counts } = analysis;
+  const out = [];
+  if (counts.productionFiles > 0) {
+    const unlinked = unlinkedTestFiles({ rows, testFiles });
+    if (unlinked.length > 0) {
+      out.push(
+        ...blockDetails(
+          `Test files in this PR not linked to any production file (${unlinked.length} of ${testFiles.length})`,
+          unlinked.map((t) => `- ${code(relTo(root, t.file))} (${t.framework}, ${t.status})`)
+        )
+      );
+    }
+  }
+  if (ignoredFiles.length > 0) {
+    out.push(
+      ...blockDetails(
+        `Files not analyzed (${ignoredFiles.length})`,
+        ignoredFiles.map((i) => `- ${code(relTo(root, i.file))} — ${i.reason}`)
+      )
+    );
+  }
+  return out;
+};
+
 const sortRows = (rows) =>
   [...rows].sort((a, b) => {
     const d = VERDICT_ORDER.indexOf(a.verdict) - VERDICT_ORDER.indexOf(b.verdict);
@@ -301,7 +334,7 @@ export const renderPrReport = ({ pr, analysis, compact = false }) => {
     }`
   );
   out.push(
-    `- Files in diff: ${counts.productionFiles} production, ${counts.testFiles} test, ${counts.ignoredFiles} ignored (docs/images/lockfiles/CI)`
+    `- Files in diff: ${counts.productionFiles} production (one table row each), ${counts.testFiles} test (used to decide UPDATED), ${counts.ignoredFiles} not analyzed (generated / config / docs; listed below)`
   );
   const withTests = searchBoundary.filter((b) => b.candidateTests > 0);
   const withoutTests = searchBoundary.length - withTests.length;
@@ -324,6 +357,7 @@ export const renderPrReport = ({ pr, analysis, compact = false }) => {
       )
     );
   }
+  out.push(...diffBucketsBlocks(analysis, root));
   if (counts.productionFiles === 0) {
     out.push('', '**No production files in this diff.** Test files changed:', '');
     out.push(...testFilesList(testFiles));

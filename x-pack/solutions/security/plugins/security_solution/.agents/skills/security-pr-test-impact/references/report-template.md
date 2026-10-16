@@ -15,7 +15,7 @@ Output: one markdown document on stdout. Optional copy only under `.agents/tmp/`
 
 - PR: [#<n>](<url>) (<state>, merged <date>)
 - Owning team(s): `@elastic/<team>`[, …]            ← resolved from CODEOWNERS for the production files
-- Files in diff: <p> production, <t> test, <i> ignored (docs/images/lockfiles/CI)
+- Files in diff: <p> production (one table row each), <t> test (used to decide UPDATED), <i> not analyzed (generated / config / docs; listed below)
 - Existing tests read from: `working tree` | `<git ref>`
 - Search boundary: CODEOWNERS prefixes of the owning team(s) + conventional Security test roots
   (<n> candidate test files scanned; <m> owned prefixes without test files omitted). Prefixes are listed below.
@@ -28,6 +28,19 @@ Output: one markdown document on stdout. Optional copy only under `.agents/tmp/`
 - `<prefix>` (<candidate count>)
 - …
 
+</details>
+
+<details>                                              ← only when some PR test file links to no row
+<summary>Test files in this PR not linked to any production file (<u> of <t>)</summary>
+
+- `<test path>` (<framework>, <status>)              ← typically mocks / fixtures / index files
+</details>
+
+<details>                                              ← only when <i> > 0; also in --compact
+<summary>Files not analyzed (<i>)</summary>
+
+- `<path>` — <reason>                                 ← generated code / documentation / image /
+                                                        config / tooling file / lockfile / Jest snapshot
 </details>
 [- **No production files in this diff.** Test files changed: (list)]   ← test-only PRs
 

@@ -24,6 +24,13 @@ Every file in the PR diff is one of:
 
 A PR with only test/ignored files yields zero production rows; the report lists the test files instead.
 
+Only **production** files get a table row and a verdict. **Test** files in the PR take part
+indirectly: when one of them is a link of a production row, that row becomes UPDATED and the test is
+flagged `(in this PR: …)`. Test files that link to no row (typically mocks, fixtures, `index.ts`)
+are listed in a collapsed Scope block. **Ignored** files are listed in a collapsed Scope block
+("Files not analyzed") with a plain reason: generated code, documentation, image, config / tooling
+file, lockfile, Jest snapshot, docs / CI / tooling path.
+
 ## 2. Search boundary (CODEOWNERS)
 
 CODEOWNERS is parsed with GitHub semantics (last matching rule wins; `docs/*` matches direct children

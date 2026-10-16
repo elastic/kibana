@@ -35,6 +35,7 @@ import {
   commonRoot,
   linkLabel,
   renderPrReport,
+  unlinkedTestFiles,
 } from './lib/report.mjs';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const CLI = path.join(HERE, 'pr_test_impact.mjs');
@@ -319,6 +320,60 @@ test('report: link labels are plain language; JSON keeps raw types/via', () => {
   const row = rowFor(analysis, file);
   assert.ok(row.links.some((l) => l.types.includes('colocated') && l.via.includes('same name')));
   assert.ok(row.links.some((l) => l.types.includes('feature-path')));
+});
+
+test('report: Scope lists not-analyzed files with a plain reason and PR test files linked to nothing', () => {
+  const file = `${PLUGIN}/public/detection_engine/rule_management_ui/components/rules_table/rules_table.tsx`;
+  const linkedTest = `${file.replace(/\.tsx$/, '')}.test.tsx`;
+  const strayTest = `${PLUGIN}/public/unrelated_area/stray.test.ts`;
+  const analysis = analyze([
+    modified(file),
+    modified(linkedTest),
+    { filename: strayTest, status: 'added', patch: '+it("x", () => {})' },
+    modified(`${PLUGIN}/common/api/foo.gen.ts`),
+    modified(`${PLUGIN}/tsconfig.json`),
+    modified('docs/guide.md'),
+    modified(`${PLUGIN}/public/img/logo.png`),
+  ]);
+  assert.deepEqual(
+    unlinkedTestFiles(analysis).map((t) => t.file),
+    [strayTest]
+  );
+  assert.deepEqual(
+    analysis.ignoredFiles.map((i) => i.reason),
+    [
+      'generated code (OpenAPI codegen); the *.schema.yaml is analyzed instead',
+      'config / tooling file',
+      'documentation',
+      'image',
+    ]
+  );
+
+  const md = renderPrReport({ pr: { number: 1, title: 't', url: 'u', state: 'OPEN' }, analysis });
+  assert.ok(
+    md.includes(
+      '1 production (one table row each), 2 test (used to decide UPDATED), 4 not analyzed'
+    )
+  );
+  assert.ok(
+    md.includes(
+      '<summary>Test files in this PR not linked to any production file (1 of 2)</summary>'
+    )
+  );
+  assert.ok(
+    md.includes('`plugins/security_solution/public/unrelated_area/stray.test.ts` (jest, added)')
+  );
+  assert.ok(md.includes('<summary>Files not analyzed (4)</summary>'));
+  assert.ok(md.includes('`plugins/security_solution/tsconfig.json` — config / tooling file'));
+  assert.ok(md.includes('`docs/guide.md` — documentation'));
+  // the stray test is not a link anywhere and the blocks also appear in --compact
+  assert.ok(!md.includes('stray.test.ts`<br>'));
+  const compact = renderPrReport({
+    pr: { number: 1, title: 't', url: 'u', state: 'OPEN' },
+    analysis,
+    compact: true,
+  });
+  assert.ok(compact.includes('<summary>Files not analyzed (4)</summary>'));
 });
 
 test('report: legend present when every file is candidate coverage; Checks only for uncovered rows', () => {
