@@ -7,34 +7,42 @@
 
 import { isEqual } from 'lodash';
 import type { Logger } from '@kbn/core/server';
-import type { SignificantEventInvestigation } from '@kbn/significant-events-schema';
+import type {
+  SignificantEventInvestigation,
+  SignificantEventResponse,
+} from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { RuleEventsClient } from './rule_events_client';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
 import { toRuleEvent } from './to_rule_event';
 
-export const attachInvestigationToEvent = async ({
+const MAX_ATTACH_ATTEMPTS = 3;
+
+interface AttachResult {
+  updated: number;
+  ignored: number;
+}
+
+/**
+ * Appends the investigation onto `latest`, or reports that the head moved since `latest` was read.
+ */
+const appendInvestigation = async ({
   eventSearchClient,
-  eventId,
+  latest,
   investigation,
   alertEventsClient,
   emitTrigger,
   logger,
 }: {
   eventSearchClient: RuleEventsClient;
-  eventId: string;
+  latest: SignificantEventResponse;
   investigation: SignificantEventInvestigation;
   alertEventsClient: AlertEventsClientApi;
   emitTrigger?: TriggerEmitter;
   logger?: Logger;
-}): Promise<{ updated: number; ignored: number }> => {
-  const latest = await eventSearchClient.findLatestByEventId(eventId);
-
-  if (!latest) {
-    return { updated: 0, ignored: 1 };
-  }
-
+}): Promise<AttachResult | 'head_moved'> => {
+  const { event_id: eventId } = latest;
   const existing = latest.investigations ?? [];
 
   // Replace-by-workflow_execution_id: completion events are safe to redeliver.
@@ -59,6 +67,11 @@ export const attachInvestigationToEvent = async ({
     return { updated: 0, ignored: 1 };
   }
 
+  const head = await eventSearchClient.findLatestByEventId(eventId);
+  if (head !== undefined && head['@timestamp'] !== latest['@timestamp']) {
+    return 'head_moved';
+  }
+
   const now = new Date().toISOString();
   const updatedEvent = {
     ...latest,
@@ -76,4 +89,49 @@ export const attachInvestigationToEvent = async ({
   });
 
   return { updated: 1, ignored: 0 };
+};
+
+/**
+ * The new version copies the status and evaluation count of the version it was built from, so it
+ * must be appended onto that same head: otherwise it would overwrite a transition an evaluation or
+ * an operator wrote in between. A moved head is re-read; one that keeps moving fails loudly.
+ */
+export const attachInvestigationToEvent = async ({
+  eventSearchClient,
+  eventId,
+  investigation,
+  alertEventsClient,
+  emitTrigger,
+  logger,
+}: {
+  eventSearchClient: RuleEventsClient;
+  eventId: string;
+  investigation: SignificantEventInvestigation;
+  alertEventsClient: AlertEventsClientApi;
+  emitTrigger?: TriggerEmitter;
+  logger?: Logger;
+}): Promise<AttachResult> => {
+  for (let attempt = 0; attempt < MAX_ATTACH_ATTEMPTS; attempt++) {
+    const latest = await eventSearchClient.findLatestByEventId(eventId);
+
+    if (!latest) {
+      return { updated: 0, ignored: 1 };
+    }
+
+    const result = await appendInvestigation({
+      eventSearchClient,
+      latest,
+      investigation,
+      alertEventsClient,
+      emitTrigger,
+      logger,
+    });
+    if (result !== 'head_moved') {
+      return result;
+    }
+  }
+
+  throw new Error(
+    `attach_investigation: event_id "${eventId}" kept changing while the investigation was attached`
+  );
 };
