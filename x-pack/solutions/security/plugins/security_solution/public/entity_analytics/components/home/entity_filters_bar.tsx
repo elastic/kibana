@@ -18,7 +18,9 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { FormattedCount } from '../../../common/components/formatted_number';
 import { MultiselectFilter } from '../../../common/components/multiselect_filter';
+import { EntityFiltersBarWatchlist } from './entity_filters_bar_watchlist';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import { SEVERITY_UI_SORT_ORDER } from '../../common/utils';
 import type { EntityRiskLevels } from '../../../../common/api/entity_analytics/common';
@@ -90,8 +92,8 @@ const ItemWithCount = ({ count, children }: { count: number; children: React.Rea
         flex-shrink: 0;
       `}
     >
-      <EuiText size="s" color="subdued">
-        {count}
+      <EuiText size="s" color="subdued" title={count.toLocaleString()}>
+        <FormattedCount count={count} />
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -156,7 +158,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
     ...filters.watchlists
       .filter((id) => !watchlistNames.has(id))
       .map((id) => ({ id, name: id, count: counts.watchlists[id] ?? 0 })),
-  ];
+  ].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -252,7 +254,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
       </FilterEntry>
 
       <FilterEntry>
-        <MultiselectFilter<string>
+        <EntityFiltersBarWatchlist
           title={FILTER_TITLES.watchlist}
           items={watchlistOptions.map((o) => o.id)}
           selectedItems={filters.watchlists}
@@ -262,7 +264,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
             return <ItemWithCount count={opt?.count ?? 0}>{opt?.name ?? id}</ItemWithCount>;
           }}
           disabled={isFiltersCountLoading}
-          width={220}
+          spaceId={spaceId}
         />
       </FilterEntry>
     </EuiFlexGroup>

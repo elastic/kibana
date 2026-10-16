@@ -344,6 +344,53 @@ steps:
     with:
       fp_candidate_count: "${{ variables.fp_candidate_ids | size }}"
 
+  # Distinct hosts and users behind the candidates, for the proposal title. Same predicate as
+  # `compute_fp_candidates`, so the title never names an entity whose alerts are not being closed.
+  # `__missing__` marks an alert with no host or user field and is not a name.
+  - name: compute_fp_entities
+    type: data.set
+    with:
+      fp_hosts: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'false_positive'
+            | where_exp: 'v', variables.fp_threshold_expr
+            | reject: 'host_name', '__missing__'
+            | map: 'host_name' | uniq }}
+      fp_users: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'false_positive'
+            | where_exp: 'v', variables.fp_threshold_expr
+            | reject: 'user_name', '__missing__'
+            | map: 'user_name' | uniq }}
+
+  # Title suffix, empty when no candidate carries a host or user. Per list: up to 5 names show as
+  # the first 2 plus `+N`, more than 5 collapse to a count. Hosts lead and users follow in
+  # parentheses; a list that is empty drops out (`for` users when there are no hosts).
+  - name: build_fp_entity_summary
+    type: data.set
+    with:
+      fp_entity_summary: >-
+        {%- assign host_count = variables.fp_hosts | size -%}
+        {%- assign user_count = variables.fp_users | size -%}
+        {%- capture host_text -%}
+        {%- if host_count > 5 -%}{{ host_count }} hosts
+        {%- else -%}
+        {%- for name in variables.fp_hosts limit: 2 -%}{%- unless forloop.first -%}, {% endunless -%}{{ name | truncate: 40 }}{%- endfor -%}
+        {%- if host_count > 2 %} +{{ host_count | minus: 2 }}{% endif -%}
+        {%- endif -%}
+        {%- endcapture -%}
+        {%- capture user_text -%}
+        {%- if user_count > 5 -%}{{ user_count }} users
+        {%- else -%}
+        {%- for name in variables.fp_users limit: 2 -%}{%- unless forloop.first -%}, {% endunless -%}{{ name | truncate: 40 }}{%- endfor -%}
+        {%- if user_count > 2 %} +{{ user_count | minus: 2 }}{% endif -%}
+        {%- endif -%}
+        {%- endcapture -%}
+        {%- if host_count > 0 and user_count > 0 -%}on {{ host_text }} ({{ user_text }})
+        {%- elsif host_count > 0 -%}on {{ host_text }}
+        {%- elsif user_count > 0 -%}for {{ user_text }}
+        {%- endif -%}
+
   # Guard: analysis is on (or this run would have aborted at step 1) but the
   # sub-workflow returned 0 verdicts for a non-empty batch — a missing Model
   # Management connector, or the sub-workflow skipped.
@@ -762,6 +809,7 @@ steps:
             rule_id: "{{ inputs.rule_id }}"
             rule_name: "{{ inputs.rule_name }}"
             fp_candidate_ids: "${{ variables.fp_candidate_ids }}"
+            entity_summary: "{{ variables.fp_entity_summary }}"
             confidence_floor: "${{ inputs.confidence_floor }}"
             autonomy: "{{ inputs.autonomy }}"
 

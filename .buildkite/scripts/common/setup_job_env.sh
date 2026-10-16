@@ -202,6 +202,19 @@ EOF
   export GCS_SA_CDN_AUDIENCE
 }
 
+# Set up the workflow step-schema CDN publisher key.
+{
+  if [[ "$BUILDKITE_PIPELINE_SLUG" == "kibana-artifacts-container-image" && "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
+    WORKFLOWS_SCHEMA_GCS_SA_KEY="$(retry 5 5 vault kv get -field=credentials kv/ci-shared/workflows-library/gcs-publish || true)"
+    if [[ -n "$WORKFLOWS_SCHEMA_GCS_SA_KEY" ]]; then
+      buildkite-agent redactor add <<<"$WORKFLOWS_SCHEMA_GCS_SA_KEY" 2>/dev/null || true
+      export WORKFLOWS_SCHEMA_GCS_SA_KEY
+    else
+      echo "Could not read the workflow step schema publisher key from Vault; the schema CDN publish will fail" >&2
+    fi
+  fi
+}
+
 # Setup Failed Test Reporter Elasticsearch credentials
 {
   TEST_FAILURES_ES_CLOUD_ID=$(vault_get failed_tests_reporter_es cloud_id)

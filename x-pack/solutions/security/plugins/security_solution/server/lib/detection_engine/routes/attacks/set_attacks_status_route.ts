@@ -38,6 +38,7 @@ import {
   getSessionIDfromKibanaRequest,
 } from '../../../telemetry/insights';
 import { updateAlertsWorkflowStatus } from '../common/operations/update_alerts_workflow_status';
+import { auditAlertUpdatePreOperationFailure } from '../common/operations/audit_alert_updates';
 import { searchAlerts } from '../common/operations/search_alerts';
 import { validateClosingReason } from '../common/validators/validate_closing_reason';
 import { getAttackAlertsIndex } from '../common/index_patterns/get_attack_alerts_index';
@@ -87,6 +88,10 @@ export const setAttacksStatusRoute = (
 
         const closingReason = await validateClosingReason({ core, status, reason });
         if (!closingReason.valid) {
+          auditAlertUpdatePreOperationFailure(
+            (await context.securitySolution)?.getAuditLogger(),
+            'Invalid alert update request'
+          );
           reportAttacksApiCallError(
             telemetrySender,
             telemetryFields,
@@ -173,17 +178,30 @@ export const setAttacksStatusRoute = (
           async () => {
             // Pre-fetch the verified attack docs to read their related detection
             // alert ids; the attack index scope filters out unknown attack ids.
-            const attackDocs = await searchAlerts({
-              context,
-              index: attackIndex,
-              params: {
-                query: { bool: { filter: { terms: { _id: ids } } } },
-                _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS, ALERT_WORKFLOW_STATUS, 'signal.status'],
-                // `attackIndex` spans the scheduled and adhoc families and an _id can exist
-                // in both, so reserve a slot per family rather than one per requested ID.
-                size: Math.min(ids.length * attackIndex.length, MAX_ALERTS_PER_TRIGGER),
-              },
-            });
+            let attackDocs: Awaited<ReturnType<typeof searchAlerts>>;
+            try {
+              attackDocs = await searchAlerts({
+                context,
+                index: attackIndex,
+                params: {
+                  query: { bool: { filter: { terms: { _id: ids } } } },
+                  _source: [
+                    ALERT_ATTACK_DISCOVERY_ALERT_IDS,
+                    ALERT_WORKFLOW_STATUS,
+                    'signal.status',
+                  ],
+                  // `attackIndex` spans the scheduled and adhoc families and an _id can exist
+                  // in both, so reserve a slot per family rather than one per requested ID.
+                  size: Math.min(ids.length * attackIndex.length, MAX_ALERTS_PER_TRIGGER),
+                },
+              });
+            } catch (error) {
+              auditAlertUpdatePreOperationFailure(
+                (await context.securitySolution)?.getAuditLogger(),
+                error instanceof Error ? error : new Error(String(error))
+              );
+              throw error;
+            }
 
             // Map to FoundHit so status-less attacks — which the update script never
             // mutates — are distinguishable from attacks with an unrecognized status.
