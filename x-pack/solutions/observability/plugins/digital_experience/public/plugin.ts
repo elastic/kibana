@@ -6,7 +6,6 @@
  */
 
 import { BehaviorSubject, from, map } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import type {
   AppMountParameters,
   AppUpdater,
@@ -17,6 +16,7 @@ import type {
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../common/feature';
 import { hasDigitalExperienceAccess } from './capabilities';
+import { APPLICATIONS_LABEL, DIGITAL_EXPERIENCE_LABEL } from './labels';
 import type { DigitalExperienceSetupDeps, DigitalExperienceStartDeps } from './types';
 
 export class DigitalExperiencePlugin
@@ -34,20 +34,11 @@ export class DigitalExperiencePlugin
           hasDigitalExperienceAccess(coreStart.application.capabilities)
             ? [
                 {
-                  label: i18n.translate('xpack.digitalExperience.nav.label', {
-                    defaultMessage: 'Digital Experience',
-                  }),
+                  label: DIGITAL_EXPERIENCE_LABEL,
                   sortKey: 600,
+                  // Prefix match on the app root, so Applications stays selected in the Application view.
                   entries: [
-                    {
-                      label: i18n.translate('xpack.digitalExperience.nav.applications', {
-                        defaultMessage: 'Applications',
-                      }),
-                      app: DIGITAL_EXPERIENCE_FEATURE_ID,
-                      path: '/',
-                      matchFullPath: true,
-                      ignoreTrailingSlash: true,
-                    },
+                    { label: APPLICATIONS_LABEL, app: DIGITAL_EXPERIENCE_FEATURE_ID, path: '/' },
                   ],
                 },
               ]
@@ -58,9 +49,7 @@ export class DigitalExperiencePlugin
 
     core.application.register({
       id: DIGITAL_EXPERIENCE_FEATURE_ID,
-      title: i18n.translate('xpack.digitalExperience.appTitle', {
-        defaultMessage: 'Digital Experience',
-      }),
+      title: DIGITAL_EXPERIENCE_LABEL,
       order: 8500,
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,

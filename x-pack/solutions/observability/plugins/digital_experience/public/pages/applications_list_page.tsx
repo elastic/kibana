@@ -15,14 +15,11 @@ import { TimeRangePicker } from '../components/time_range_picker';
 import { useDigitalExperienceRouter } from '../hooks/use_digital_experience_router';
 import { useKibanaServices } from '../hooks/use_kibana_services';
 import { useTimeRange } from '../hooks/use_time_range';
+import { APPLICATIONS_LABEL } from '../labels';
 
 interface ApplicationRow {
   serviceName: string;
 }
-
-const TITLE = i18n.translate('xpack.digitalExperience.applications.title', {
-  defaultMessage: 'Applications',
-});
 
 const NAME_COLUMN = i18n.translate('xpack.digitalExperience.applications.nameColumn', {
   defaultMessage: 'Name',
@@ -104,7 +101,7 @@ export function ApplicationsListPage() {
 
   return (
     <>
-      <EuiPageHeader pageTitle={TITLE} bottomBorder />
+      <EuiPageHeader pageTitle={APPLICATIONS_LABEL} bottomBorder />
       <EuiSpacer size="m" />
       {ux && (
         <>
@@ -118,7 +115,7 @@ export function ApplicationsListPage() {
           items={applications.map((serviceName) => ({ serviceName }))}
           columns={columns}
           loading={isLoading}
-          tableCaption={TITLE}
+          tableCaption={APPLICATIONS_LABEL}
         />
       ) : (
         emptyPrompt
