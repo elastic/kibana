@@ -26,15 +26,17 @@ export interface UseScriptActionItemsProps {
   showDetailsAction?: boolean;
 }
 
+type UseScriptActionItemsResponse = (ContextMenuItemNavByRouterProps & { name: string })[];
+
 export const useScriptActionItems = ({
   onClickAction,
   script,
   showDetailsAction = true,
-}: UseScriptActionItemsProps): ContextMenuItemNavByRouterProps[] => {
+}: UseScriptActionItemsProps): UseScriptActionItemsResponse => {
   const { canReadScriptsLibrary, canWriteScriptsLibrary } = useUserPrivileges().endpointPrivileges;
   const { basePath } = useHttp();
 
-  return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
+  return useMemo<UseScriptActionItemsResponse>(() => {
     const renderActionItem = (text: string) => <EuiText size="s">{text}</EuiText>;
 
     return [
