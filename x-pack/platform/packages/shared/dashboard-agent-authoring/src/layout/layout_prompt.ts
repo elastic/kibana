@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { getErrorMessage } from '../utils';
 import { layoutArrangementSchema, type LayoutArrangement, type LayoutRequest } from './types';
 
-const JSON_BLOCK_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/;
+const JSON_BLOCK_REGEX = /```(?:json)?([\s\S]*?)```/;
 
 const LAYOUT_SYSTEM_PROMPT = `You lay out the panels of a Kibana dashboard. Return the grid \`{ x, y, w, h }\` of every panel and the \`y\` of every section. Every panel stays in its container: return the top-level panels in \`panels\`, and the panels of each section in that section's \`panels\`. Order panels by purpose only within their container.
 
@@ -85,7 +85,7 @@ const parseJson = (text: string): unknown => {
 /** Reads the arrangement from the text answer of the layout call, or throws why it cannot. */
 export const parseLayoutAnswer = (text: string): LayoutArrangement => {
   const result = layoutArrangementSchema.safeParse(
-    parseJson(text.match(JSON_BLOCK_REGEX)?.[1] ?? text.trim())
+    parseJson((text.match(JSON_BLOCK_REGEX)?.[1] ?? text).trim())
   );
   if (!result.success) {
     throw new Error(`the answer does not match the format: ${z.prettifyError(result.error)}`);
