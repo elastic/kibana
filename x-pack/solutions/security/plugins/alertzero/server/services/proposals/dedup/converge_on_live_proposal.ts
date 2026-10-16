@@ -123,7 +123,7 @@ export const createAlsoRaisedByAppender = ({
     }
     if (!(await privileges.canManage(request))) {
       logger?.warn(
-        `package_report: not adding this Investigation to proposal ${live.proposalId}: the request lacks the privilege to manage proposals`
+        `proposal_dedup: not adding this Investigation to proposal ${live.proposalId}: the request lacks the privilege to manage proposals`
       );
       return 'failed';
     }
@@ -137,7 +137,7 @@ export const createAlsoRaisedByAppender = ({
     } catch (error) {
       if (!(error instanceof ProposalConflictError)) {
         logger?.warn(
-          `package_report: could not add this Investigation to proposal ${live.proposalId}: ${
+          `proposal_dedup: could not add this Investigation to proposal ${live.proposalId}: ${
             (error as Error).message
           }`
         );
@@ -162,7 +162,7 @@ export const createAlsoRaisedByAppender = ({
       );
     } catch (error) {
       logger?.warn(
-        `package_report: could not add this Investigation to proposal ${
+        `proposal_dedup: could not add this Investigation to proposal ${
           live.proposalId
         } after a conflict: ${(error as Error).message}`
       );

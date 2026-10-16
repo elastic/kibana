@@ -51,7 +51,7 @@ export const createInvestigationOpenChecker = ({
     } catch (error) {
       if (!isConversationNotFoundError(error)) {
         logger?.warn(
-          `package_report: could not tell whether Investigation ${conversationId} is open: ${
+          `proposal_dedup: could not tell whether Investigation ${conversationId} is open: ${
             (error as Error).message
           }`
         );
