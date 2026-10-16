@@ -9,6 +9,8 @@
 
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { getScrollContainer, getScrollPosition } from '@kbn/core-chrome-layout-utils';
+import { handleAutoscroll, startAutoScroll, stopAutoScroll } from '@kbn/grid-layout';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { isSelectionModifier } from './selection_modifier';
 
@@ -248,28 +250,46 @@ export const usePanelSelectionGestures = ({
       e.preventDefault(); // no text selection or native drag
       e.stopPropagation(); // charts, maps and the grid drag/resize handles never see this mousedown
 
+      // The page may scroll while the rectangle is being drawn (auto-scroll near the viewport edges),
+      // so the start corner is anchored to the document and converted back to viewport coordinates
+      const scrollContainer = getScrollContainer();
+      const startScrollTop = getScrollPosition(scrollContainer);
       const start = { x: e.clientX, y: e.clientY };
+      const getStart = () => ({
+        x: start.x,
+        y: start.y + startScrollTop - getScrollPosition(scrollContainer),
+      });
+      let current = { ...start };
       const startPanelId = findPanelId(target);
       let isMarquee = false;
 
+      const updateMarquee = () => {
+        const rect = toRect(getStart(), current);
+        setMarqueeRect(rect);
+        setMarqueePreview(getPanelsIntersecting(rect)); // outline the panels that would be selected
+      };
+
       const onMouseMove = (moveEvent: MouseEvent) => {
-        const current = { x: moveEvent.clientX, y: moveEvent.clientY };
+        current = { x: moveEvent.clientX, y: moveEvent.clientY };
         if (
           !isMarquee &&
           (Math.abs(current.x - start.x) > MARQUEE_THRESHOLD_PX ||
             Math.abs(current.y - start.y) > MARQUEE_THRESHOLD_PX)
         ) {
           isMarquee = true;
+          startAutoScroll(scrollContainer); // same auto-scroll the grid uses while dragging a panel
+          document.addEventListener('scroll', updateMarquee, { capture: true, passive: true });
         }
         if (isMarquee) {
-          const rect = toRect(start, current);
-          setMarqueeRect(rect);
-          setMarqueePreview(getPanelsIntersecting(rect)); // outline the panels that would be selected
+          handleAutoscroll(moveEvent);
+          updateMarquee();
         }
       };
 
       const onMouseUp = (upEvent: MouseEvent) => {
         document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('scroll', updateMarquee, { capture: true });
+        stopAutoScroll();
         suppressNextClick = true;
 
         if (!isMarquee) {
@@ -282,7 +302,7 @@ export const usePanelSelectionGestures = ({
           return;
         }
 
-        const rect = toRect(start, { x: upEvent.clientX, y: upEvent.clientY });
+        const rect = toRect(getStart(), { x: upEvent.clientX, y: upEvent.clientY });
         dashboardApi.addPanelsToSelection(getPanelsIntersecting(rect));
         setMarqueePreview([]);
         setMarqueeRect(undefined);
@@ -306,6 +326,7 @@ export const usePanelSelectionGestures = ({
       document.removeEventListener('keydown', onDocumentKeyDown);
       document.removeEventListener('scroll', hideSelectHint, { capture: true });
       hideSelectHint();
+      stopAutoScroll();
       setMarqueePreview([]);
       setMarqueeRect(undefined);
     };
