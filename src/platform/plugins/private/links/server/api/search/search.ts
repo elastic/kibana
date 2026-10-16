@@ -8,7 +8,7 @@
  */
 
 import { getMeta } from '@kbn/as-code-shared-schemas';
-import { findWithTagFilter } from '@kbn/as-code-utils';
+import { findWithTagFilter, getAsCodeListSort } from '@kbn/as-code-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { LINKS_LIBRARY_TYPE } from '../../../common/constants';
 import type { StoredLinksState } from '../../links_saved_object';
@@ -30,6 +30,7 @@ export async function search(
       perPage: searchParams.per_page,
       page: searchParams.page ? +searchParams.page : undefined,
       defaultSearchOperator: 'AND',
+      ...getAsCodeListSort({ query: searchParams.query, sort: searchParams.sort }),
     },
     searchParams
   );

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getAsCodeListSort } from '@kbn/as-code-utils';
 import type { TagAttributes } from '../../../../common/types';
 import { tagSavedObjectTypeName } from '../../../../common/constants';
 import type { TagsHandlerContext } from '../../../types';
@@ -17,7 +18,7 @@ export const search = async (
 ): Promise<TagsSearchResponseBody> => {
   const { client } = (await requestContext.core).savedObjects;
 
-  const { query, page, per_page: perPage } = requestQuery;
+  const { query, page, per_page: perPage, sort } = requestQuery;
   const soResponse = await client.find<TagAttributes>({
     type: [tagSavedObjectTypeName],
     search: query,
@@ -25,6 +26,7 @@ export const search = async (
     defaultSearchOperator: 'AND',
     page,
     perPage,
+    ...getAsCodeListSort({ query, sort }),
   });
 
   return {

@@ -9,6 +9,7 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { getMeta } from '@kbn/as-code-shared-schemas';
+import { getAsCodeListSort } from '@kbn/as-code-utils';
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { MarkdownSearchRequestQuery, MarkdownSearchResponseBody } from './types';
 import type { StoredMarkdownState } from '../../markdown_saved_object';
@@ -26,6 +27,7 @@ export async function search(
     perPage: searchQuery.per_page,
     page: searchQuery.page ? +searchQuery.page : undefined,
     defaultSearchOperator: 'AND',
+    ...getAsCodeListSort({ query: searchQuery.query, sort: searchQuery.sort }),
   });
 
   return {
