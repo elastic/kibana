@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
-import type { Impact } from '../../../common/impact/impact';
+import type { Impact, ImpactEntity } from '../../../common/impact/impact';
 import { MAX_IMPACT_CONVERSATION_IDS } from '../../../common/impact/constants';
 import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
 import { filterReadableConversationIds } from '../../investigations/services/readable_conversation_ids';
@@ -27,6 +27,13 @@ export interface ImpactReadClient {
    * document are absent from the map.
    */
   getEntityIdsByConversationId: (conversationIds: string[]) => Promise<Map<string, string[]>>;
+  /**
+   * Same read as `getEntityIdsByConversationId`, keeping each entity's `id` and `type` so the
+   * landing page can show what kind of entity a pill stands for.
+   */
+  getEntitiesByConversationId: (
+    conversationIds: string[]
+  ) => Promise<Map<string, Array<Pick<ImpactEntity, 'id' | 'type'>>>>;
 }
 
 export interface ImpactClientDeps {
@@ -57,23 +64,31 @@ export const createImpactClient =
       return getImpactService().listByConversationIds(readableIds, getSpaceId(request));
     };
 
+    const getEntitiesByConversationId: ImpactReadClient['getEntitiesByConversationId'] = async (
+      conversationIds
+    ) => {
+      const uniqueIds = [...new Set(conversationIds)];
+      const entities = new Map<string, Array<Pick<ImpactEntity, 'id' | 'type'>>>();
+      for (let i = 0; i < uniqueIds.length; i += MAX_IMPACT_CONVERSATION_IDS) {
+        const impacts = await listByConversationIds(
+          uniqueIds.slice(i, i + MAX_IMPACT_CONVERSATION_IDS)
+        );
+        for (const impact of impacts) {
+          entities.set(
+            impact.conversationId,
+            (impact.entities ?? []).map(({ id, type }) => ({ id, type }))
+          );
+        }
+      }
+      return entities;
+    };
+
     return {
       listByConversationIds,
+      getEntitiesByConversationId,
       getEntityIdsByConversationId: async (conversationIds) => {
-        const uniqueIds = [...new Set(conversationIds)];
-        const entityIds = new Map<string, string[]>();
-        for (let i = 0; i < uniqueIds.length; i += MAX_IMPACT_CONVERSATION_IDS) {
-          const impacts = await listByConversationIds(
-            uniqueIds.slice(i, i + MAX_IMPACT_CONVERSATION_IDS)
-          );
-          for (const impact of impacts) {
-            entityIds.set(
-              impact.conversationId,
-              (impact.entities ?? []).map((entity) => entity.id)
-            );
-          }
-        }
-        return entityIds;
+        const entities = await getEntitiesByConversationId(conversationIds);
+        return new Map([...entities].map(([id, list]) => [id, list.map((entity) => entity.id)]));
       },
     };
   };

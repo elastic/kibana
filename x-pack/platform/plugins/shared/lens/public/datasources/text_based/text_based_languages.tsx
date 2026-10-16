@@ -20,7 +20,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Reference } from '@kbn/content-management-utils';
 import type { ExpressionsStart, Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
-import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import memoizeOne from 'memoize-one';
 import { flatten, isEqual } from 'lodash';
@@ -45,7 +45,6 @@ import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
 import { LayerSettingsPanel } from './layer_settings';
 import { toExpression } from './to_expression';
-import { createEsqlAdHocDataView } from '../../data_views_service/create_esql_ad_hoc_data_view';
 import { generateId } from '../../id_generator';
 import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 import { onDrop, getDropProps } from './dnd';
@@ -925,27 +924,11 @@ export function getTextBasedDatasource({
           ...persistableState2,
         }
       ),
-    getDatasourceInfo: async (state, references, dataViewsService) => {
-      if (!dataViewsService) {
-        return [];
-      }
-      const indexPatterns: DataView[] = [];
-
-      for (const { query } of Object.values(state.layers)) {
-        if (query) {
-          const esqlAdhocDataview = await createEsqlAdHocDataView({
-            dataViews: dataViewsService,
-            query: query.esql,
-            skipFetchFields: true,
-          });
-          indexPatterns.push(esqlAdhocDataview);
-        }
-      }
-
+    getDatasourceInfo: async (state) => {
       return Object.entries(state.layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
-        const columns = Object.entries(layer.columns).map(([colId, col]) => {
+        const columns = layer.columns.map((col) => {
           return {
-            id: colId,
+            id: col.columnId,
             role: isNotNumeric(col) ? ('split' as const) : ('metric' as const),
             operation: {
               dataType: col?.meta?.type as DataType,
@@ -960,11 +943,7 @@ export function getTextBasedDatasource({
           };
         });
 
-        acc.push({
-          layerId: key,
-          columns,
-          dataView: indexPatterns?.find((dataView) => dataView.id === layer.index),
-        });
+        acc.push({ layerId: key, columns });
 
         return acc;
       }, []);

@@ -54,6 +54,15 @@ describe('buildEntitiesFilter', () => {
     });
   });
 
+  it('keeps the query name when only an alias of a multi-record request has identity fields', () => {
+    expect(buildEntitiesFilter('user', [record(), record('alias')])).toEqual({
+      bool: {
+        should: [namedFilter('alias')],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
   it('leaves a record without entity id unnamed inside the OR', () => {
     expect(
       buildEntitiesFilter('user', [record('alice'), record('bob', { withId: false })])

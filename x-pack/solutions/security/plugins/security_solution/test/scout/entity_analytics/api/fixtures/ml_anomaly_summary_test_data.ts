@@ -763,6 +763,56 @@ export const sourceTestData = () => [
   },
 ];
 
+// David's geo events resolve into Carol's group in `mode: 'resolved'`. Four 'Texas' events outrank
+// Carol's three 'New York' events, and the 'Crimea' event adds to the anomalous value count, so
+// the combined baseline differs from Carol's single-entity baseline.
+const DAVID_GEO_EVENTS = [
+  { id: 'f1a2b3c4d5e60718293a4b5c6d7e8f01', hours: 3, region: 'Texas', city: 'Austin' },
+  { id: 'f1a2b3c4d5e60718293a4b5c6d7e8f02', hours: 4, region: 'Texas', city: 'Austin' },
+  { id: 'f1a2b3c4d5e60718293a4b5c6d7e8f03', hours: 5, region: 'Texas', city: 'Dallas' },
+  { id: 'f1a2b3c4d5e60718293a4b5c6d7e8f04', hours: 7, region: 'Texas', city: 'Dallas' },
+  { id: 'f1a2b3c4d5e60718293a4b5c6d7e8f05', hours: 8, region: 'Crimea', city: 'Sevastopol' },
+] as const;
+
+export const DAVID_GEO_EVENT_IDS = DAVID_GEO_EVENTS.map(({ id }) => id);
+
+export const davidGeoSourceTestData = () =>
+  DAVID_GEO_EVENTS.map(({ id, hours, region, city }) => ({
+    '@timestamp': hoursAgo(hours),
+    data_stream: { dataset: 'windows.forwarded', namespace: 'default', type: 'logs' },
+    event: {
+      action: 'logged-in-special',
+      category: ['iam'],
+      code: '4672',
+      dataset: 'windows.forwarded',
+      id,
+      kind: 'event',
+      module: 'security',
+      outcome: 'success',
+      provider: 'Microsoft-Windows-Security-Auditing',
+      type: ['admin'],
+    },
+    host: {
+      id: 'd4e5f6789012345678901234abcdef01',
+      name: 'WIN-APP01',
+      os: { family: 'windows', platform: 'windows', type: 'windows' },
+    },
+    process: { name: 'lsass.exe' },
+    source: { geo: { city_name: city, country_name: 'United States', region_name: region } },
+    user: { domain: 'CORP', id: 'dffc432dcedd35657c7f310037179a27', name: 'david.martinez' },
+    winlog: {
+      channel: 'Security',
+      event_data: {
+        PrivilegeList: 'SeSecurityPrivilege',
+        SubjectDomainName: 'CORP',
+        SubjectUserName: 'david.martinez',
+        TargetUserName: 'david.martinez',
+      },
+      event_id: '4672',
+      provider_name: 'Microsoft-Windows-Security-Auditing',
+    },
+  }));
+
 export const anomalyTestData = () => [
   {
     _id: 'pad_windows_rare_region_name_by_user_ea_record_1779192000000_3600_0_-103491946261268334286430206369177126287_17',

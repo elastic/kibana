@@ -357,7 +357,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       );
 
       expect(registerAgentType).toHaveBeenCalledWith(agentBuilder);
-      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(2);
+      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(3);
     });
 
     describe('ai.conversation.updated opt-in', () => {
