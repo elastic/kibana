@@ -12,7 +12,7 @@ import { useQuery } from '@kbn/react-query';
 import {
   agentRouteService,
   API_VERSIONS,
-  buildPolicyIdsOrVariantsKuery,
+  buildPolicyBaseIdsWithFallbackKuery,
 } from '@kbn/fleet-plugin/common';
 import { useHttp } from '../../../common/lib/kibana';
 
@@ -38,7 +38,7 @@ export const useFetchAgentByAgentPolicySummary = (
               ? { policyId: agentPolicyIds[0] }
               : {
                   // also the agents on a version specific or the sentinel policy of the policies
-                  kuery: buildPolicyIdsOrVariantsKuery(agentPolicyIds),
+                  kuery: buildPolicyBaseIdsWithFallbackKuery(agentPolicyIds),
                 },
           version: API_VERSIONS.public.v1,
         })

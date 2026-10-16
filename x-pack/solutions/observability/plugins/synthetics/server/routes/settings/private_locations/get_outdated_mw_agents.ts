@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildPolicyIdOrVariantsKuery } from '@kbn/fleet-plugin/common';
+import { buildPolicyBaseIdWithFallbackKuery } from '@kbn/fleet-plugin/common';
 import pMap from 'p-map';
 import type { SyntheticsServerSetup } from '../../../types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -42,7 +42,7 @@ const locationHasOutdatedMwAgent = async (
         showInactive: false,
         perPage: PER_PAGE,
         page,
-        kuery: buildPolicyIdOrVariantsKuery(agentPolicyId),
+        kuery: buildPolicyBaseIdWithFallbackKuery(agentPolicyId),
       });
     total = totalAgents ?? agents.length;
     fetched += agents.length;

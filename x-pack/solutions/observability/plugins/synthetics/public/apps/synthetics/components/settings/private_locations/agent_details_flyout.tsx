@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildPolicyIdOrVariantsKuery } from '@kbn/fleet-plugin/common';
+import { buildPolicyBaseIdWithFallbackKuery } from '@kbn/fleet-plugin/common';
 import React from 'react';
 import {
   EuiBadge,
@@ -69,7 +69,7 @@ export const AgentDetailsFlyout = ({
   const fleetAgentHref = agent.agentId
     ? `${basePath}/app/fleet/agents/${encodeURIComponent(agent.agentId)}`
     : `${basePath}/app/fleet/agents?kuery=${encodeURIComponent(
-        buildPolicyIdOrVariantsKuery(agentPolicyId)
+        buildPolicyBaseIdWithFallbackKuery(agentPolicyId)
       )}`;
 
   const capacityItems: EuiDescriptionListProps['listItems'] = [

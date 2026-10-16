@@ -1198,7 +1198,7 @@ describe('SyntheticsPrivateLocation', () => {
 
       expect(listAgents).toHaveBeenCalledWith(
         expect.objectContaining({
-          kuery: `(policy_id:"agent-policy\\" or true or \\"" or policy_id:agent-policy\\" \\or true \\or \\"#*)`,
+          kuery: `(policy_base_id:"agent-policy\\" or true or \\"" or (policy_id:"agent-policy\\" or true or \\"" and not policy_base_id:*))`,
         })
       );
     });
@@ -1229,7 +1229,9 @@ describe('SyntheticsPrivateLocation', () => {
 
       expect(listAgents).toHaveBeenCalledTimes(1);
       expect(listAgents).toHaveBeenCalledWith(
-        expect.objectContaining({ kuery: '(policy_id:"policyId" or policy_id:policyId#*)' })
+        expect.objectContaining({
+          kuery: '(policy_base_id:"policyId" or (policy_id:"policyId" and not policy_base_id:*))',
+        })
       );
     });
 
@@ -1266,7 +1268,9 @@ describe('SyntheticsPrivateLocation', () => {
 
       expect(listAgents).toHaveBeenCalledTimes(1);
       expect(listAgents).toHaveBeenCalledWith(
-        expect.objectContaining({ kuery: '(policy_id:"policyId" or policy_id:policyId#*)' })
+        expect.objectContaining({
+          kuery: '(policy_base_id:"policyId" or (policy_id:"policyId" and not policy_base_id:*))',
+        })
       );
     });
 

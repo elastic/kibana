@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { buildPolicyIdOrVariantsKuery } from '@kbn/fleet-plugin/common';
+import { buildPolicyBaseIdWithFallbackKuery } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
@@ -350,7 +350,7 @@ export class SyntheticsPrivateLocation {
         showInactive: false,
         perPage,
         page,
-        kuery: buildPolicyIdOrVariantsKuery(agentPolicyId),
+        kuery: buildPolicyBaseIdWithFallbackKuery(agentPolicyId),
       });
 
       for (const agent of agents) {

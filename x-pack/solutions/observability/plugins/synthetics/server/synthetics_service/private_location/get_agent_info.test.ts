@@ -203,7 +203,7 @@ describe('getAgentInfo', () => {
         perPage: 1000,
         page: 2,
         // also the agents on a version specific or the sentinel policy of the policy
-        kuery: '(policy_id:"policy-1" or policy_id:policy-1#*)',
+        kuery: '(policy_base_id:"policy-1" or (policy_id:"policy-1" and not policy_base_id:*))',
         includeStatusRuntimeField: false,
       })
     );

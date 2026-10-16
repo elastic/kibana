@@ -43,9 +43,10 @@ describe('useAgentPolicyAgentIds', () => {
     await waitFor(() => expect(httpGet).toHaveBeenCalled());
 
     const [, { query }] = httpGet.mock.calls[0];
-    // `policy-1#*` matches `policy-1#9.4` and `policy-1#sentinel`
+    // by the base policy id, which the agents on `policy-1#9.4` and `policy-1#sentinel` have, with the
+    // exact policy id for the agents that do not have it. No wildcard: it would also match `policy-1#123`.
     expect(query.kuery).toEqual(
-      '(fleet-agents.policy_id:"policy-1" or fleet-agents.policy_id:policy-1#*)'
+      '(fleet-agents.policy_base_id:"policy-1" or (fleet-agents.policy_id:"policy-1" and not fleet-agents.policy_base_id:*))'
     );
   });
 });

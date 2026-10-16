@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildPolicyIdOrVariantsKuery } from '@kbn/fleet-plugin/common';
+import { buildPolicyBaseIdWithFallbackKuery } from '@kbn/fleet-plugin/common';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import type { SyntheticsServerSetup } from '../../types';
@@ -105,7 +105,7 @@ export const getAgentInfo = async (
         showInactive: false,
         perPage,
         page,
-        kuery: buildPolicyIdOrVariantsKuery(agentPolicyId),
+        kuery: buildPolicyBaseIdWithFallbackKuery(agentPolicyId),
         includeStatusRuntimeField: false,
       });
 
