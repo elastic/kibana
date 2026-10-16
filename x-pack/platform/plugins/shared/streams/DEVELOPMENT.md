@@ -234,6 +234,14 @@ The distributor (via `transpiler.Compile()`) is the authority on whether a unit 
 
 ## End-to-end testing
 
+The full UI-engineer runbook (kind, two Tilts, serverless ES, Kibana, then one script) is [dev/full_dev_flow/README.md](./dev/full_dev_flow/README.md). Short version once the four long-lived processes are up:
+
+```sh
+./x-pack/platform/plugins/shared/streams/dev/full_dev_flow/streams_full_dev.sh status
+./x-pack/platform/plugins/shared/streams/dev/full_dev_flow/streams_full_dev.sh
+```
+
+Login is `elastic_serverless` / `changeme`.
 
 [These instructions](https://github.com/elastic/ingest-dev/issues/9168#issuecomment-5427844503) can be used for testing source ingestion by running the `hosted-otel-collector` locally.
 

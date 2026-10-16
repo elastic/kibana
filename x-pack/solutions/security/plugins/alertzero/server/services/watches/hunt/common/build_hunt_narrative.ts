@@ -10,7 +10,9 @@ import type {
   HuntCoordinatorCoreResult,
   HuntCoordinatorTier2SkipReason,
 } from '../hunt_coordinator';
+import type { HuntModelTier } from '../types';
 import type { ValidatedBehavior } from '../tier2/types';
+import { TIER2_MODEL_TIERS, describeModelTiers } from './hunt_model_tiers';
 import type { Tier2TargetSource } from './resolve_tier2_targets';
 
 /**
@@ -67,14 +69,27 @@ const TIER2_TARGET_SOURCE_LABELS: Record<Tier2TargetSource, string> = {
   actionable: 'process telemetry',
 };
 
-const describeTier2Skip = (reason: HuntCoordinatorTier2SkipReason): string => {
+const describeTier2Skip = (
+  reason: HuntCoordinatorTier2SkipReason,
+  unavailableTiers: readonly HuntModelTier[] = []
+): string => {
+  const missingTier2Tiers = unavailableTiers.filter((tier) => TIER2_MODEL_TIERS.includes(tier));
   switch (reason) {
     case 'configured_never':
       return 'Tier 2 behavior hunting was turned off for this run.';
     case 'no_environment_hits':
       return 'Tier 2 behavior hunting was skipped because Tier 1 found no environment hits and this run only escalates to Tier 2 on a hit.';
     case 'no_inference':
-      return 'Tier 2 behavior hunting was skipped because no GenAI connector was available.';
+      if (missingTier2Tiers.length > 0) {
+        return `Tier 2 behavior hunting was skipped because no model was available for the ${describeModelTiers(
+          missingTier2Tiers
+        )}.`;
+      }
+      // Both Tier 2 tiers resolved, so the Efficient tier is what was missing: it chooses the
+      // dataset to hunt when nothing else points at one.
+      return unavailableTiers.includes('efficient')
+        ? 'Tier 2 behavior hunting was skipped because the Efficient tier had no model to choose where to hunt.'
+        : 'Tier 2 behavior hunting was skipped because no GenAI connector was available.';
     case 'no_tier2_targets':
       return 'Tier 2 behavior hunting was skipped because no index could be chosen for it: the report matched no dataset, Tier 1 hit no index, and no index in the default data view carries process telemetry.';
     case 'no_report_text':
@@ -123,7 +138,7 @@ const describeTier2 = (result: HuntCoordinatorCoreResult): string[] => {
   const { tier2 } = result;
   if (!tier2) {
     if (result.tier2_skipped_reason) {
-      const skip = describeTier2Skip(result.tier2_skipped_reason);
+      const skip = describeTier2Skip(result.tier2_skipped_reason, result.unavailable_model_tiers);
       lines.push(
         result.tier2_skipped_reason === 'tier2_failed' ? `${skip} ${result.message}` : skip
       );
@@ -321,7 +336,7 @@ const describeOutcome = (
         ? 'Tier 2 derived behaviors from the report text but none matched live activity.'
         : 'Tier 2 derived no executable behaviors from the report text.'
       : result.tier2_skipped_reason
-      ? describeTier2Skip(result.tier2_skipped_reason)
+      ? describeTier2Skip(result.tier2_skipped_reason, result.unavailable_model_tiers)
       : '';
     return {
       heading: 'Hunt Watch confirmed a hit',
