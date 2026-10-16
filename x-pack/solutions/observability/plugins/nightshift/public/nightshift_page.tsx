@@ -192,19 +192,31 @@ export function NightshiftPage(): React.ReactElement | null {
     return null;
   }
 
+  const isHomePage =
+    !isSettingsPage &&
+    !isKnowledgePage &&
+    !isSourcesPage &&
+    !canUseAutomationsPage &&
+    !isOnboarding &&
+    !onboarding.isLoading;
+
   return (
     <ObservabilityPageTemplate
       data-test-subj="nightshiftPage"
       restrictWidth={false}
       pageSectionProps={{
         paddingSize: 'none',
-        css: css`
-          background: linear-gradient(
-            ${euiTheme.colors.backgroundBasePlain},
-            ${euiTheme.colors.backgroundBaseSubdued},
-            ${euiTheme.colors.backgroundBasePlain}
-          );
-        `,
+        ...(isHomePage
+          ? {
+              css: css`
+                background: linear-gradient(
+                  ${euiTheme.colors.backgroundBasePlain},
+                  ${euiTheme.colors.backgroundBaseSubdued},
+                  ${euiTheme.colors.backgroundBasePlain}
+                );
+              `,
+            }
+          : {}),
       }}
     >
       {isSettingsPage ? (
@@ -231,7 +243,7 @@ export function NightshiftPage(): React.ReactElement | null {
       ) : isSourcesPage ? (
         <React.Suspense
           fallback={
-            <EuiPageTemplate.Section component="div" color="transparent" restrictWidth={false}>
+            <EuiPageTemplate.Section component="div" restrictWidth={false}>
               <EuiLoadingSpinner size="xl" data-test-subj="nightshiftSourcesPageLazyLoading" />
             </EuiPageTemplate.Section>
           }
@@ -259,7 +271,7 @@ export function NightshiftPage(): React.ReactElement | null {
       ) : isKnowledgePage ? (
         <React.Suspense
           fallback={
-            <EuiPageTemplate.Section component="div" color="transparent" restrictWidth={false}>
+            <EuiPageTemplate.Section component="div" restrictWidth={false}>
               <EuiLoadingSpinner size="xl" data-test-subj="nightshiftKnowledgePageLazyLoading" />
             </EuiPageTemplate.Section>
           }
@@ -312,7 +324,7 @@ export function NightshiftPage(): React.ReactElement | null {
           />
           <EuiPageTemplate.Section
             component="div"
-            color="transparent"
+            color={isHomePage ? 'transparent' : undefined}
             restrictWidth={
               canUseAutomationsPage
                 ? false

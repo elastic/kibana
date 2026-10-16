@@ -73,7 +73,7 @@ export function SourcesPage({
           }),
         }}
       />
-      <EuiPageTemplate.Section component="div" color="transparent" restrictWidth={false}>
+      <EuiPageTemplate.Section component="div" restrictWidth={false}>
         {isMaintenanceStatusLoading && (
           <>
             <KbnInfoCallout
