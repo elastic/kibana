@@ -287,7 +287,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
             }
             paddingSize="l"
           >
-            <CloudFormationCloudCredentialsGuide accountType={accountType} />
+            <CloudFormationCloudCredentialsGuide accountType={accountType} completion="callback" />
           </EuiAccordion>
           <EuiSpacer size="l" />
           {!isCallbackAvailable && !isCallbackChecking && (
