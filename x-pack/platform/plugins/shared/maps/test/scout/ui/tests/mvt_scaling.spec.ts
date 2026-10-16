@@ -16,6 +16,7 @@ const GEO_SHAPE_MVT_MAP_ID = 'bff99716-e3dc-11ea-87d0-0242ac130003';
 const GEO_SHAPE_MVT_SOURCE_ID = 'caffa63a-ebfb-466d-8ff6-d797975b88ab';
 const MVT_DOCUMENTS_MAP_ID = '2aff3160-3d78-11ec-9b35-f52e723e8a71';
 const MVT_DOCUMENTS_SOURCE_ID = 'a7ab2e06-145b-48c5-bd86-b633849017ad';
+const CONTROL_LAYER_SOURCE_ID = '3c1f6a52-7b0e-4d0b-9c55-5d2a1e9f8b11';
 
 const QUERY = 'machine.os.raw : "win 8"';
 const TIME_FROM = 'Sep 20, 2015 @ 00:00:00.000';
@@ -165,14 +166,23 @@ test.describe('Maps - MVT scaling', { tag: '@local-stateful-classic' }, () => {
       .join(', ')}`, async ({ page, pageObjects }) => {
       const { maps } = pageObjects;
 
-      const getTileUrl = async () => {
-        const mapboxStyle = await maps.getMapboxStyle();
-        return mapboxStyle.sources[MVT_DOCUMENTS_SOURCE_ID].tiles[0] as string;
+      // Tile URL of every MVT source, keyed by source id.
+      const getTileUrls = async () => {
+        const { sources } = await maps.getMapboxStyle();
+        return Object.fromEntries(
+          Object.entries<any>(sources)
+            .filter(([, source]) => Array.isArray(source.tiles))
+            .map(([id, source]) => [id, source.tiles[0] as string])
+        );
       };
+      const getTileUrl = async () => (await getTileUrls())[MVT_DOCUMENTS_SOURCE_ID];
+
+      const getControlTileUrl = async () => (await getTileUrls())[CONTROL_LAYER_SOURCE_ID];
 
       // Asserts the tile URL changes (or stays the same) after `action` runs.
       const expectTileUrl = async (action: () => Promise<void>, shouldUpdate: boolean) => {
         const prevTileUrl = await getTileUrl();
+        const prevControlTileUrl = await getControlTileUrl();
         // Closing the inspector restores focus to its trigger twice, the second time ~40ms later.
         // If that lands while the action is typing, the remaining keys go to the trigger button
         // and a space re-opens the inspector. Wait for focus to be quiet before acting.
@@ -192,8 +202,16 @@ test.describe('Maps - MVT scaling', { tag: '@local-stateful-classic' }, () => {
             })
         );
         await action();
-        // Polls until the URL changes when an update is expected; passes right away when it should not.
-        await expect.poll(async () => (await getTileUrl()) !== prevTileUrl).toBe(shouldUpdate);
+        if (shouldUpdate) {
+          await expect.poll(async () => (await getTileUrl()) !== prevTileUrl).toBe(true);
+        } else {
+          // The control layer responds to every change. Once its URL changes the map has
+          // processed the action, so an unchanged URL on the layer under test is meaningful.
+          await expect
+            .poll(async () => (await getControlTileUrl()) !== prevControlTileUrl)
+            .toBe(true);
+          expect(await getTileUrl()).toBe(prevTileUrl);
+        }
       };
 
       await maps.openMapWithId(MVT_DOCUMENTS_MAP_ID);
