@@ -40,8 +40,11 @@ export interface PageRenderServiceConfig {
 export interface RenderContext {
   /** When Task Manager times this run out. */
   retryAt?: Date | null;
-  /** Its age drives the retry ladder; its ID goes to the service. */
-  report?: { id: string; createdAt: Date };
+  /**
+   * Its age drives the retry ladder; its ID goes to the service. Capacity wait is measured from
+   * `waitingSince` when a failed render has restarted the wait.
+   */
+  report?: { id: string; createdAt: Date; waitingSince?: Date };
   /** Without it, waiting for capacity runs to the deadline instead of a minute per run. */
   canHandBack?: boolean;
 }
@@ -142,6 +145,7 @@ async function postWithRetry(
   const deadline = retryAt ? retryAt.getTime() - DEADLINE_SAFETY_MARGIN_MS : undefined;
   const waitUntil = stopWaitingAt(runStartedAt, deadline, canHandBack);
   const createdAt = report?.createdAt.getTime() ?? runStartedAt;
+  const waitStartedAt = report?.waitingSince?.getTime() ?? createdAt;
   const tags = report ? [report.id] : [];
   // One token for every capacity retry: the service checks it on arrival only, and caches that
   // check, so a fresh token per retry would double the UIAM calls while the service is saturated.
@@ -177,7 +181,7 @@ async function postWithRetry(
     }
 
     if (response.ok) {
-      pageRenderTelemetry.recordCapacityWait((sentAt - createdAt) / 1000);
+      pageRenderTelemetry.recordCapacityWait((sentAt - waitStartedAt) / 1000);
       return await readResult(payload, response);
     }
 
@@ -189,9 +193,9 @@ async function postWithRetry(
     );
 
     if (retryClass !== 'capacity') {
-      if (body?.phase) {
-        // The service took the slot and tried.
-        pageRenderTelemetry.recordCapacityWait((sentAt - createdAt) / 1000);
+      // The service took a slot and tried. A 4xx with a phase is refused before taking one.
+      if (response.status >= 500 && body?.phase) {
+        pageRenderTelemetry.recordCapacityWait((sentAt - waitStartedAt) / 1000);
       }
       throw new ERRORS_BY_CLASS[retryClass](describeFailure(response, body));
     }

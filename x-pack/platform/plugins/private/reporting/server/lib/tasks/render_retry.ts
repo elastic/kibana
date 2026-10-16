@@ -10,8 +10,7 @@ import type { RenderRetryAction, RenderRetryReason } from './reporting_telemetry
 
 /**
  * The between-runs half of the page-render-service retry ladder. The in-run half is
- * `retry_ladder.ts` in the page-render-screenshotting plugin. Delete both when the service gets a
- * queue.
+ * `retry_ladder.ts` in the page-render-screenshotting plugin.
  *
  * Reschedules return `{ runAt, state }` as a successful run rather than throwing: a thrown error
  * spends one of the task's attempts, and waiting for capacity can take ten runs. Waiting for
@@ -27,6 +26,8 @@ export interface RenderRetryState {
   unavailableRuns?: number;
   /** Set on every reschedule; true when the last run was queuing, so the next is no new attempt. */
   queued?: boolean;
+  /** Epoch ms when the wait for a render slot restarted after a failed render. */
+  waitingSince?: number;
 }
 
 export type RenderRetryDecision =
@@ -53,7 +54,8 @@ export function decideRenderRetry(
 
   // ±50%, so reports that failed together do not return together.
   const later = () => new Date(now + Math.round(RESCHEDULE_DELAY_MS * (0.5 + random())));
-  const { unavailableRuns = 0 } = state ?? {};
+  const { unavailableRuns = 0, waitingSince } = state ?? {};
+  const waiting = waitingSince === undefined ? {} : { waitingSince };
   switch (error.retryClass) {
     case 'capacity':
       // Task Manager picks it straight back up, and the next run waits again.
@@ -61,7 +63,7 @@ export function decideRenderRetry(
         action: 'hand_back',
         reason: 'saturated',
         runAt: new Date(now),
-        state: { unavailableRuns, queued: true },
+        state: { unavailableRuns, queued: true, ...waiting },
       };
     case 'unavailable':
       if (unavailableRuns + 1 >= MAX_UNAVAILABLE_RUNS) {
@@ -71,18 +73,21 @@ export function decideRenderRetry(
         action: 'reschedule',
         reason: 'unavailable',
         runAt: later(),
-        state: { unavailableRuns: unavailableRuns + 1, queued: true },
+        state: { unavailableRuns: unavailableRuns + 1, queued: true, ...waiting },
       };
-    case 'render_failure':
+    case 'render_failure': {
       if (attempts >= maxAttempts) {
         return { action: 'fail', reason: 'render_failure' };
       }
+      const runAt = later();
       return {
         action: 'reschedule',
         reason: 'render_failure',
-        runAt: later(),
-        state: { unavailableRuns, queued: false },
+        runAt,
+        // The next render's wait starts here, not at the report's creation.
+        state: { unavailableRuns, queued: false, waitingSince: runAt.getTime() },
       };
+    }
     case 'unrecoverable':
       return {
         action: 'fail',

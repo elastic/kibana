@@ -11,7 +11,7 @@ import type { RenderPageErrorBody } from './types';
 /**
  * The in-run half of the retry ladder: page-render-service has no queue, so a saturated pod
  * answers 429 at once and the caller paces retries. The between-runs half is `render_retry.ts` in
- * the reporting plugin. Delete both when the service gets a queue.
+ * the reporting plugin.
  */
 
 export const FAST_RETRY_INTERVAL_MS = 2_000;

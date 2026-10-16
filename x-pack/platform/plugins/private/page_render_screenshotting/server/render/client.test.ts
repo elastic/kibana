@@ -373,30 +373,49 @@ describe('renderPage', () => {
       expect(pageRenderTelemetry.recordCapacityWait).toHaveBeenCalledWith(32);
     });
 
+    it('measures the wait from when a failed render restarted it', async () => {
+      fetchMock.mockImplementation(async () => pdfResponse());
+
+      await start({
+        report: {
+          id: 'report-1',
+          createdAt: new Date(NOW - 5 * MINUTE),
+          waitingSince: new Date(NOW - 10_000),
+        },
+        canHandBack: true,
+      });
+
+      expect(pageRenderTelemetry.recordCapacityWait).toHaveBeenCalledWith(10);
+    });
+
     it.each([
-      ['a proxy 503', 503, undefined, RenderServiceUnavailableError],
-      ['a render failure', 500, { error: 'boom', phase: 'pdf' }, RenderFailedError],
+      ['a proxy 503', 503, undefined, RenderServiceUnavailableError, false],
+      ['a render failure', 500, { error: 'boom', phase: 'pdf' }, RenderFailedError, true],
       [
         'an invalid request',
         400,
         { error: 'bad', phase: 'navigation' },
         RenderRequestRejectedError,
+        false,
       ],
       [
         'Kibana refusing the page',
         502,
         { error: 'Navigation failed', phase: 'navigation', documentStatus: 403 },
         RenderRequestRejectedError,
+        true,
       ],
     ])(
       'fails at once on %s, with an error that says how to retry',
-      async (_n, status, body, type) => {
+      async (_n, status, body, type, tookSlot) => {
         fetchMock.mockImplementation(async () =>
           body ? Response.json(body, { status }) : new Response('', { status })
         );
 
         expect(await start(reportAged(0))).toBeInstanceOf(type);
         expect(fetchMock).toHaveBeenCalledTimes(1);
+        // Only a request that took a render slot ended a wait for one.
+        expect(pageRenderTelemetry.recordCapacityWait).toHaveBeenCalledTimes(tookSlot ? 1 : 0);
       }
     );
 

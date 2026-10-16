@@ -20,7 +20,7 @@ class PageRenderTelemetry {
       'kibana.reporting.render.capacity_wait.duration',
       {
         description:
-          'Time from a report being created to page-render-service accepting its render, across every retry and task run.',
+          'Time a render waited for page-render-service to accept it, across every retry and task run: from the report being created, or from the last failed render.',
         unit: 's',
         valueType: ValueType.DOUBLE,
         advice: { explicitBucketBoundaries: CAPACITY_WAIT_SECONDS_BUCKETS },

@@ -599,6 +599,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
             throw new Error(`Kibana instance name is undefined!`);
           }
           const { attempts: taskAttempts } = taskInstance;
+          const { waitingSince } = (taskInstance.state ?? {}) as RenderRetryState;
 
           let report: SavedReport | undefined;
           const {
@@ -687,7 +688,15 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                     retryAt: taskRetryAt,
                     startedAt: taskStartedAt,
                     ...(task.created_at
-                      ? { report: { id: task.id, createdAt: new Date(task.created_at) } }
+                      ? {
+                          report: {
+                            id: task.id,
+                            createdAt: new Date(task.created_at),
+                            ...(waitingSince === undefined
+                              ? {}
+                              : { waitingSince: new Date(waitingSince) }),
+                          },
+                        }
                       : {}),
                     canHandBack: this.reschedulesRenderRetries,
                   },

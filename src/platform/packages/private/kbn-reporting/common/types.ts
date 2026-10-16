@@ -91,7 +91,7 @@ export interface BasePayload extends BaseParams {
  */
 export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'startedAt' | 'retryAt'> & {
   /** page-render-service retries are timed from the report's creation, not the run's start. */
-  report?: { id: string; createdAt: Date };
+  report?: { id: string; createdAt: Date; waitingSince?: Date };
   /** Whether the run can hand its worker back while waiting for page-render-service capacity. */
   canHandBack?: boolean;
 };

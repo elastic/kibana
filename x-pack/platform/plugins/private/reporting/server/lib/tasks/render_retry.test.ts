@@ -60,13 +60,20 @@ describe('decideRenderRetry', () => {
     });
   });
 
-  it('reschedules a failed render as another attempt', () => {
+  it('reschedules a failed render as another attempt, whose wait for a slot starts then', () => {
     expect(decide(new RenderFailedError(), { unavailableRuns: 2, queued: true }, 2)).toEqual({
       action: 'reschedule',
       reason: 'render_failure',
       runAt: new Date(NOW + RESCHEDULE_DELAY_MS),
-      state: { unavailableRuns: 2, queued: false },
+      state: { unavailableRuns: 2, queued: false, waitingSince: NOW + RESCHEDULE_DELAY_MS },
     });
+  });
+
+  it('keeps the start of the wait across queuing runs', () => {
+    const state = { waitingSince: NOW - 30_000 };
+
+    expect(decide(new RenderServiceSaturatedError(), state)).toMatchObject({ state });
+    expect(decide(new RenderServiceUnavailableError(), state)).toMatchObject({ state });
   });
 
   it('fails a failed render once the report has used its attempts', () => {

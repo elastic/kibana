@@ -1235,6 +1235,18 @@ describe('Run Single Report Task', () => {
       });
     });
 
+    it('tells the render when its wait restarted after a failed render', async () => {
+      const waitingSince = Date.parse('2026-10-14T12:05:00.000Z');
+      const { result, runTaskFn } = await runFailingWith(new RenderServiceSaturatedError(), {
+        state: { queued: false, waitingSince },
+      });
+      await result;
+
+      expect(runTaskFn.mock.calls[0][0].taskInstanceFields.report.waitingSince).toEqual(
+        new Date(waitingSince)
+      );
+    });
+
     it('hands a report waiting for capacity back to Task Manager without recording an error', async () => {
       const { result, store, logRetry } = await runFailingWith(new RenderServiceSaturatedError(), {
         state: { unavailableRuns: 1 },
@@ -1264,7 +1276,7 @@ describe('Run Single Report Task', () => {
 
       await expect(result).resolves.toEqual({
         runAt: expect.any(Date),
-        state: { unavailableRuns: 0, queued: false },
+        state: { unavailableRuns: 0, queued: false, waitingSince: expect.any(Number) },
       });
       expect(store.setReportError).toHaveBeenCalled();
       expect(store.setReportFailed).not.toHaveBeenCalled();
