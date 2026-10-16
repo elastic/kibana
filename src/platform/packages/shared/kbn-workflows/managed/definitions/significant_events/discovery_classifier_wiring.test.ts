@@ -15,6 +15,7 @@ interface WorkflowStep {
   name: string;
   type?: string;
   condition?: string;
+  if?: string;
   'on-failure'?: { continue?: boolean };
   'iteration-on-failure'?: { continue?: boolean };
   foreach?: string;
@@ -145,6 +146,7 @@ describe('discovery workflow detection classifier wiring', () => {
 
     it.each([
       ['classifierShadowMode', 'boolean', true, undefined, undefined],
+      ['prefetchGroundingContext', 'boolean', false, undefined, undefined],
       ['classifierProbeWindowMinutes', 'number', 20, 15, 360],
       ['classifierProbeTimeoutMs', 'number', 8000, 1000, 30000],
       ['classifierProbeConcurrency', 'number', 5, 1, 10],
@@ -216,6 +218,66 @@ describe('discovery workflow detection classifier wiring', () => {
 
     it('keeps the columns from the detections query', () => {
       expect(renderMessage({ output: { rows: [] } })).toContain('Columns: ["rule_uuid"]');
+    });
+  });
+
+  describe('prefetching the grounding context', () => {
+    const step = () => requireStep('get_discovery_context');
+    const context = (inputs: Record<string, unknown>, classify: unknown) => ({
+      inputs,
+      steps: { classify_detections: classify },
+    });
+    const renderMessage = (contextStep: unknown) => {
+      const message = requireStep('run_discovery_agent').with?.message;
+      if (typeof message !== 'string') throw new Error('Expected the agent message template');
+      return createWorkflowLiquidEngine().parseAndRenderSync(message, {
+        ...withClassify({ output: { rows: rawRows } }),
+        steps: {
+          ...withClassify({ output: { rows: rawRows } }).steps,
+          get_discovery_context: contextStep,
+        },
+      });
+    };
+
+    it('runs after classification and before the agent', () => {
+      expect(topLevelIndex('get_discovery_context')).toBeGreaterThan(
+        topLevelIndex('classify_detections')
+      );
+      expect(topLevelIndex('get_discovery_context')).toBeLessThan(
+        topLevelIndex('run_discovery_agent')
+      );
+    });
+
+    it.each([
+      ['is off', { prefetchGroundingContext: false }, 2, false],
+      ['is on and the agent has rows', { prefetchGroundingContext: true }, 2, true],
+      ['is on but every detection was skipped', { prefetchGroundingContext: true }, 0, false],
+    ])('runs only when the input %s', (_name, inputs, rowCount, expected) => {
+      expect(evaluate(step().if, context(inputs, { output: { row_count: rowCount } }))).toBe(
+        expected
+      );
+    });
+
+    it('asks for the rules and sources of the rows the agent receives', () => {
+      const classify = { output: { rule_uuids: ['rule-A'], source_ids: ['source-1'] } };
+      const { body } = step().with as { body: Record<string, unknown> };
+
+      expect(evaluate(body.rule_uuids, context({}, classify))).toEqual(['rule-A']);
+      expect(evaluate(body.source_ids, context({}, classify))).toEqual(['source-1']);
+    });
+
+    it('never fails the run', () => {
+      expect(step()['on-failure']).toEqual({ continue: true });
+    });
+
+    it('adds the context to the agent message only when the step returned one', () => {
+      const fetched = { query_kis: [], unmatched_rule_uuids: ['rule-A'] };
+
+      expect(renderMessage({ output: fetched })).toContain(
+        `## Prefetched context\n\n${JSON.stringify(fetched)}`
+      );
+      expect(renderMessage(undefined)).not.toContain('Prefetched context');
+      expect(renderMessage({ error: { message: 'boom' } })).not.toContain('Prefetched context');
     });
   });
 

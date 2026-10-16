@@ -41,6 +41,10 @@ triggers:
           type: boolean
           default: true
           description: 'When true, the detection classifier only records which detections it would skip and every detection still goes to the agent. Set to false to enforce the skips.'
+        prefetchGroundingContext:
+          type: boolean
+          default: false
+          description: 'When true, the knowledge indicators of the batch (the grounding skill''s Step 1 searches) are fetched before the agent runs and sent in its message, so it makes no ki_search call. Off until the discovery evaluation shows no loss in verdicts or events.'
         classifierProbeWindowMinutes:
           type: number
           default: 20
@@ -337,6 +341,22 @@ steps:
       step: discovery
       connector_id: '{{ inputs.connector_id }}'
 
+  # The grounding skill's Step 1 searches, run here when enabled. A failure only leaves the agent to
+  # run them itself: the message carries the section only when this step has an output.
+  - name: get_discovery_context
+    type: kibana.request
+    if: '${{ inputs.prefetchGroundingContext and steps.classify_detections.output.row_count > 0 }}'
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/discovery/_context'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        rule_uuids: '${{ steps.classify_detections.output.rule_uuids }}'
+        source_ids: '${{ steps.classify_detections.output.source_ids }}'
+    on-failure:
+      continue: true
+
   - name: run_discovery_agent
     type: ai.agent
     agent-id: 'significant-events.discovery'
@@ -354,6 +374,11 @@ steps:
 
         Columns: {{ steps.get_detections.output.columns | map: 'name' | json }}
         Rows: {% if steps.classify_detections.error == null and steps.classify_detections.output != null %}{{ steps.classify_detections.output.rows | json }}{% else %}{{ steps.get_detections.output.values | json }}{% endif %}
+        {% if steps.get_discovery_context.output != null %}
+        ## Prefetched context
+
+        {{ steps.get_discovery_context.output | json }}
+        {% endif %}
       schema:
         type: object
         properties:

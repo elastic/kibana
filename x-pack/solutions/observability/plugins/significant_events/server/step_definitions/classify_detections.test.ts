@@ -60,6 +60,8 @@ describe('classifyBatch', () => {
     expect(output).toMatchObject({
       rows: [],
       row_count: 0,
+      rule_uuids: [],
+      source_ids: [],
       decisions: [],
       skipped_rule_uuids: [],
       skipped_count: 0,
@@ -106,6 +108,7 @@ describe('classifyBatch', () => {
     ]);
     expect(output.rows).toEqual([rows[1], rows[2]]);
     expect(output.row_count).toBe(2);
+    expect(output.rule_uuids).toEqual(['rule-B', 'rule-C']);
     expect(output.skipped_rule_uuids).toEqual(['rule-A']);
     expect(output.skipped_count).toBe(1);
     expect(output.needs_agent_count).toBe(2);
@@ -115,6 +118,22 @@ describe('classifyBatch', () => {
       not_live_member: 1,
     });
     expect(output.probe_status_counts).toEqual({ ok: 2 });
+  });
+
+  it('lists the distinct rules and sources of the rows it keeps for the agent', async () => {
+    const withSource = (ruleUuid: string, sourceId: string) => [
+      ruleUuid,
+      { detection_id: `${ruleUuid}-detection`, source_id: sourceId },
+      70,
+      1,
+      false,
+    ];
+    const rows = [withSource('rule-A', 'source-1'), withSource('rule-B', 'source-1'), ['', {}]];
+
+    const output = await classifyBatch(batchParams({ rows }));
+
+    expect(output.rule_uuids).toEqual(['rule-A', 'rule-B']);
+    expect(output.source_ids).toEqual(['source-1']);
   });
 
   it('keeps every row and skips nothing in shadow mode, but still records the decisions', async () => {
