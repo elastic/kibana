@@ -6,8 +6,8 @@
  */
 
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { getConsoleTestSetup } from './mocks';
-import userEvent from '@testing-library/user-event';
 import type { ConsoleProps } from './types';
 
 describe('When using Console component', () => {
@@ -34,8 +34,11 @@ describe('When using Console component', () => {
 
   it('should focus on input area when it gains focus', async () => {
     render();
-    await userEvent.click(renderResult.getByTestId('test-mainPanel-inputArea'));
+    // Focus is applied asynchronously (deferred to a microtask in InputCapture), so wait for it.
+    fireEvent.click(renderResult.getByTestId('test-mainPanel-inputArea'));
 
-    expect(document.activeElement!.classList.contains('invisible-input')).toBe(true);
+    await waitFor(() =>
+      expect(document.activeElement!.classList.contains('invisible-input')).toBe(true)
+    );
   });
 });
