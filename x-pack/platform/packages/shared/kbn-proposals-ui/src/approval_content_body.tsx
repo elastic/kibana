@@ -11,6 +11,7 @@ import {
   EuiCallOut,
   EuiLoadingSpinner,
   EuiMarkdownFormat,
+  getDefaultEuiMarkdownProcessingPlugins,
   useEuiTheme,
   type IconType,
 } from '@elastic/eui';
@@ -29,6 +30,10 @@ interface ApprovalContentBodyProps {
   actionError?: string;
   'data-test-subj'?: string;
 }
+
+const processingPluginList = getDefaultEuiMarkdownProcessingPlugins({
+  linkProps: { target: '_blank' },
+});
 
 const bannerIconFor = (color: 'success' | 'primary' | 'danger'): IconType =>
   color === 'success' ? 'check' : color === 'danger' ? 'warning' : 'clock';
@@ -58,6 +63,7 @@ export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
           <div css={css({ marginBottom: euiTheme.size.m })}>
             <EuiMarkdownFormat
               textSize="s"
+              processingPluginList={processingPluginList}
               data-test-subj={dataTestSubj ? `${dataTestSubj}-comment` : undefined}
             >
               {comment}
