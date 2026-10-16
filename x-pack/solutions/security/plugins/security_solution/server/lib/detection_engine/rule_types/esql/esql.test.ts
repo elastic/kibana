@@ -237,7 +237,7 @@ describe('esqlExecutor', () => {
     beforeEach(() => {
       const client = ruleServices.scopedClusterClient.asCurrentUser;
       (client.fieldCaps as unknown as jest.Mock).mockResolvedValue({
-        indices: [],
+        indices: ['logs-1'],
         fields: { 'host.name': { keyword: {} }, host: { object: {} } },
       });
       (client.esql.query as unknown as jest.Mock).mockResolvedValue({
@@ -605,7 +605,7 @@ describe('esqlExecutor', () => {
       expect(result.userError).toBe(true);
       expect(result.errors).toEqual([
         expect.stringContaining(
-          'Elasticsearch rejected the query for having too many clauses (failed to create query: Query contains too many nested clauses; maxClauseCount is set to 4468). The conditions of the rule query and the exceptions on columns that rename or copy a source field are counted together.'
+          'Elasticsearch rejected the query for having too many clauses (failed to create query: Query contains too many nested clauses; maxClauseCount is set to 4468). The WHERE expressions of the rule query and the exceptions on columns that rename or copy a source field are counted together.'
         ),
       ]);
     });

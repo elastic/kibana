@@ -130,7 +130,7 @@ describe('compileEndStageItem', () => {
       });
     });
 
-    // the DSL accepts these values, so the item is not applied and the rule does not fail
+    // the DSL accepts these values and the compiler does not write them, so the rule fails
     it.each([
       ['integer', '2147483648'],
       ['integer', '4.5'],
@@ -142,13 +142,16 @@ describe('compileEndStageItem', () => {
       ['ip', '1.2.3.4/+8'],
       ['version', 'x.y'],
       ['version', '99999999999999999999.1.1'],
-    ])('does not apply the value of a %s column that the DSL accepts: %s', (type, value) => {
-      expect(compile([match('col', value)], { col: type })).toEqual({
-        code: 'value_not_supported',
-        reason: `value "${value}" cannot be written for a column of type ${type} at the end of the query`,
-        fields: ['col'],
-      });
-    });
+    ])(
+      'reports the value of a %s column that the DSL accepts and the compiler does not write: %s',
+      (type, value) => {
+        expect(compile([match('col', value)], { col: type })).toEqual({
+          code: 'value_not_supported',
+          reason: `value "${value}" cannot be written for a column of type ${type} at the end of the query`,
+          fields: ['col'],
+        });
+      }
+    );
   });
 
   describe('match on ip ranges', () => {
@@ -266,14 +269,17 @@ describe('compileEndStageItem', () => {
       ['2026-09-30T14', 'date_nanos'],
       ['2026-09-30T14:05', 'date_nanos'],
       ['2026-09-30T14:05Z', 'date_nanos'],
-    ])('does not apply the unsupported date value %s on a %s column', (value, type) => {
-      // the formats of a date field depend on its mapping, so a date value never fails the rule
-      expect(compile([match('d', value)], { d: type })).toEqual({
-        code: 'value_not_supported',
-        reason: `value "${value}" is not a supported ${type} format`,
-        fields: ['d'],
-      });
-    });
+    ])(
+      'reports the date value %s on a %s column that the compiler does not write',
+      (value, type) => {
+        // the rule fails for a date value that the compiler does not write
+        expect(compile([match('d', value)], { d: type })).toEqual({
+          code: 'value_not_supported',
+          reason: `value "${value}" cannot be written for a column of type ${type} because it is not in a supported format`,
+          fields: ['d'],
+        });
+      }
+    );
 
     it('keeps the rows in the rounded range for "is not"', () => {
       expect(compile([match('d', '2026-09-30', 'excluded')], { d: 'date' })).toEqual({

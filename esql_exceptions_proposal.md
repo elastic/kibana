@@ -9,7 +9,7 @@ An ES|QL rule applies exceptions today as a DSL filter attached to the `_query` 
 This proposal keeps the DSL filter for source fields and adds exceptions on computed output columns, which are compiled into one ES|QL `WHERE` stage appended at the end of the rule query, where those columns exist.
 
 - Exceptions on source fields remain unchanged. They stay in the DSL filter, with the behavior analysts already know.
-- Exceptions on fields that exist nowhere (neither in the source indices nor in the output of the query) **continue** stay in the DSL filter too. An exception such as `process.name is not ping` on an index without `process.name` therefore keeps matching every document, as it does today (see [Fields that exist nowhere](#fields-that-exist-nowhere)).
+- Exceptions on fields that exist nowhere (neither in the source indices nor in the output of the query) **continue** to stay in the DSL filter too. An exception such as `process.name is not ping` on an index without `process.name` therefore keeps matching every document, as it does today (see [Fields that exist nowhere](#fields-that-exist-nowhere)).
 - Exceptions on computed columns are appended as one `| WHERE ...` stage at the end of the query. The entry types `match`, `match_any`, `wildcard` and `exists` are supported there. Value lists (`list`) and `nested` entries are not.
 - An item that has a computed column and cannot be evaluated at the end of the query is not applied. It is recorded in the rule execution log (see [Items that are not applied](#items-that-are-not-applied)). It never adds a warning to the rule, because today an exception whose field or type cannot be matched does not warn either. The existing warning for value lists that are too large stays as it is.
 - An exception value that the stage cannot write for the type of its column (e.g `bogus` for an `ip`, or `1e3` on a `long`) fails the rule before the query runs (see [Values that the stage cannot write](#values-that-the-stage-cannot-write)).
@@ -51,11 +51,13 @@ flowchart TD
 
     subgraph inspect ["Inspect"]
         expired --> fieldcaps["2. Ask _field_caps for the type of the fields of the items<br/>and of their parent paths (a.b.c also asks for a and a.b),<br/>to recognize the keys below a flattened field,<br/>in the indices that the real request reads"]
-        fieldcaps --> needs{"Does at least one exception item have an entry for a field<br/>that is not a source field?"}
+        fieldcaps --> found{"Does any index have documents<br/>in the time range?"}
+        found -- "Yes" --> needs{"Does at least one exception item have an entry for a field<br/>that is not a source field?"}
         needs -- "Yes" --> probe["3. Run the rule query followed by LIMIT 0 to get the output columns,<br/>with the filter of the real request<br/>(it includes the exception filter of all the items)"]
     end
 
-    needs -- "No" --> allDsl["Keep every item in the DSL filter"]
+    found -- "No" --> allDsl["Keep every item in the DSL filter"]
+    needs -- "No" --> allDsl
 
     subgraph place ["4. Place each item, one at a time"]
         probe --> sourceField{"Is every field of this item a source field<br/>or in neither the source nor the output?"}
@@ -96,7 +98,7 @@ The stages below run only when the advanced setting is enabled and the rule has 
 
 **1. Drop the expired items.** We remove every item whose `expire_time` is before the start of the run, which is the time that the DSL filter uses today, whatever the end of the time range of the rule is.
 
-**2. Ask `_field_caps` for the source fields.** We call `_field_caps` on the source indices of the rule for the fields of the exception items and for the parent paths of dotted names (`a.b.c` also asks for `a` and `a.b`). The request carries the time range, the data tiers and the namespaces of the real request as an `index_filter`, without the exception filter and the excluded documents, to read the same indices as the rule query. A field that is mapped only in an index outside that filter is not a source field of the rule. A field is in the source indices when `_field_caps` lists it with a type that holds values, or when it sits under a `flattened` field that it lists.
+**2. Ask `_field_caps` for the source fields.** We call `_field_caps` on the source indices of the rule for the fields of the exception items and for the parent paths of dotted names (`a.b.c` also asks for `a` and `a.b`). The request carries the time range, the data tiers and the namespaces of the real request as an `index_filter`, without the exception filter and the excluded documents, to read the same indices as the rule query. A field that is mapped only in an index outside that filter is not a source field of the rule. When no index has documents in that time range, we do not apply the exceptions at the end of the query and the rule runs as it does today: an ungrouped aggregation still returns a row for an empty range, and an exception on a column of that row is not applied in that run. A field is in the source indices when `_field_caps` lists it with a type that holds values, or when it sits under a `flattened` field that it lists.
 
 `_field_caps` also lists an `object` when we ask for the parent path of a dotted name (`host` for `host.name`), but an object holds no value and the DSL filter cannot match anything on it. An exception on that name can only mean a column that the query creates with the same name (`BY host = host.name`), given this we do not treat the name `host` as a source field if its type is `object`.
 
@@ -228,7 +230,7 @@ Replacing `a`, `b` and `c` gives the stage that we append (the compiler writes i
 
 The stage has 5 comparisons: one for `a`, one for each entry of `b`, and one for each CIDR value of `c`.
 
-Two limits apply to the exceptions at the end of the query. ES|QL rejects a query of more than 1,000,000 characters, and we limit the stage to 200 comparisons for all the items together, which keeps its depth and its number of clauses within what Elasticsearch accepts (see [Limits](#limits)). The conditions of the rule query count against the same clause limit, and we cannot bound them. When a limit is reached, the rule fails and the message names the limit and the items to reduce.
+Two limits apply to the exceptions at the end of the query. ES|QL rejects a query of more than 1,000,000 characters, and we limit the stage to 200 comparisons for all the items together, which keeps its depth and its number of clauses within what Elasticsearch accepts (see [Limits](#limits)). The `WHERE` expressions of the rule query count against the same clause limit, and we cannot bound them. When a limit is reached, the rule fails and the message names the limit and the items to reduce.
 
 ## Types supported at the end of the query
 
@@ -277,7 +279,7 @@ A value in an exception that cannot be cast to the column type is not included i
 | `double` | Only `exists` is supported. `is` and `is one of` are not applied, whatever the value (see [Types not supported at the end of the query](#types-not-supported-at-the-end-of-the-query)). |
 | `boolean` | `true` or `false`, in lowercase, as the DSL filter accepts. Any other value (`TRUE`, `1`, `yes`) fails the rule. |
 | `ip` | An address (IPv4 or IPv6), or a range in CIDR notation (`10.0.0.0/24`, `2001:db8::/32`). A CIDR value is written as `COALESCE(MV_IN_RANGE(col, first, last), false)`, which matches on any value of a multi-valued column, as the DSL does (`CIDR_MATCH` returns `null` on those). The address bits after the prefix are ignored, as in Elasticsearch. `/0` of IPv6, IPv4-mapped IPv6 prefixes and an address with a zone (`fe80::1%eth0/64`) fail the rule, because the compiler does not write them (see [Values that the stage cannot write](#values-that-the-stage-cannot-write)). |
-| `version` | A semantic version, for example `1.2.3` or `1.2.3-beta`, with at most 9 digits in each number: a larger number fails the whole query in ES\|QL instead of casting to `null`. |
+| `version` | A semantic version, for example `1.2.3` or `1.2.3-beta`, with at most 9 digits in each number. A number above 2147483647 fails the whole query in ES\|QL instead of casting to `null`, and the compiler stops at 9 digits. |
 | `date`, `date_nanos` | See [Date values](#date-values). |
 | `matches` (any type) | Only `keyword` and `text` columns. The pattern keeps `*` and `?` as wildcards, keeps `\*`, `\?` and `\\` as literals, and drops other backslashes. A pattern that ends with a lone backslash fails the rule (see [Values that the stage cannot write](#values-that-the-stage-cannot-write)). |
 
@@ -289,11 +291,11 @@ A date value covers the unit that it names, a day, an hour, a minute or a second
 
 | Value | Compiled as |
 |---|---|
-| Day, hour, minute or second (`2026-09-30`, `2026-09-30T14`, `2026-09-30T14:05`, `2026-09-30T14:05:09`) | `COALESCE(MV_IN_RANGE(col, "first instant"::date, "last instant"::date), false)` covering the whole unit, in UTC. For `date_nanos` the last instant ends in `.999999999Z`. |
+| Day, hour, minute or second (`2026-09-30`, `2026-09-30T14`, `2026-09-30T14:05`, `2026-09-30T14:05:09`; on `date_nanos` an hour or a minute without seconds fails the rule, see the last row) | `COALESCE(MV_IN_RANGE(col, "first instant"::date, "last instant"::date), false)` covering the whole unit, in UTC. For `date_nanos` the last instant ends in `.999999999Z`. |
 | A value with a time that ends in `Z` or in an offset (`2026-09-30T14:05:09Z`, `2026-09-30T16:05:09+02:00`, `+0200`, `+02`) | The offset is applied to the value first, and the unit is written in UTC: `2026-09-30T16:05:09+02:00` covers the second `14:05:09` UTC. |
 | Year or month (`2026`, `2026-09`) | The first day only, which is what the DSL filter matches. |
 | Value with a fraction (`2026-09-30T14:00:00.123Z`) | An exact instant: `MV_CONTAINS(col, "2026-09-30T14:00:00.123Z"::date)`, written in UTC when the value has an offset. Up to 3 fraction digits on `date`, up to 9 on `date_nanos`. |
-| An offset that the DSL does not accept (outside `-18:00` to `+18:00`, minutes above 59, or an hour with one digit such as `+2:00`), an offset on a value with no time (`2026-09-30+02:00`), epoch milliseconds, other formats, years before 1000, impossible dates | The rule fails, because the compiler does not write the value. |
+| An offset that the DSL does not accept (outside `-18:00` to `+18:00`, minutes above 59, or an hour with one digit such as `+2:00`), an offset on a value with no time (`2026-09-30+02:00`), epoch milliseconds, a fraction with more digits than the type takes (above 3 on `date`, above 9 on `date_nanos`), other formats, years before 1000, impossible dates | The rule fails, because the compiler does not write the value. |
 | A zone with no time (`2026-10-01Z`, `2026Z`), and on `date_nanos` an hour or a minute with no seconds (`2026-10-01T08`, `2026-10-01T08:00`) | The rule fails. The DSL filter also fails on these values for the default date format. |
 
 A multi-valued date column matches when any of its values is in the range, as in the DSL filter.
@@ -319,15 +321,16 @@ The exceptions documentation describes the behavior of the computed column and s
 
 **Why the support is limited to some types.** A type is supported only when ES|QL has a predicate that keeps the same rows as the DSL filter for every operator, including null and multi-valued columns and the negative forms. For the other types the comparison is impossible (the column is `unsupported` or accepts no comparison) or it has different semantics (a `float` widens to `double`, and equality with `0.1` then fails). An approximation would raise no error and would silently exclude or keep the wrong alerts, so such an item is not applied and the reason is logged. A type can be added once its comparison is shown to match the DSL.
 
-An item with a field of one of these types is not applied, and the skip reason is logged.
+An item that has a computed column of one of these types is not applied, and the skip reason is logged. The last three rows are names that have no column.
 
 | Type | Why |
 |---|---|
 | `search_as_you_type`, `completion`, `join`, `binary`, `long_range`, `integer_range`, `float_range`, `ip_range`, `sparse_vector`, `rank_*`, `percolator` | They surface in ES\|QL as `unsupported`, so no predicate can reference the column. |
 | `geo_*`, `cartesian_*`, `dense_vector`, `double_range`, `date_range`, `flattened` root, histogram family, `aggregate_metric_double` | The column exists but accepts no value comparison. The `exists` operator could be supported on these in a later iteration. |
 | `double` for `is` and `is one of` | A `double` column can come from a `float` or `half_float` field, and the column type does not say which. ES\|QL reads a `float` holding 0.1 as `0.10000000149011612` and a `half_float` holding 0.1 as `0.0999755859375`, and the stage compares them with the `double` 0.1, which is a different number. "is 0.1" then does not exclude the row that holds 0.1, and "is not 0.1" excludes it. `exists` is supported. |
-| `nested` sub-fields, object parents, `flattened` sub-keys, `passthrough` parents | ES\|QL has no column for them. The DSL filter handles them when they are source fields. |
-| Fields that are not mapped anywhere | No column exists. |
+| `nested` sub-fields, `flattened` sub-keys, `passthrough` parents | ES\|QL has no column for them. The DSL filter handles them when they are source fields. |
+| Object parents (`host` for `host.name`) | An object holds no value, so it is not a source field and has no column. An exception on that name can only mean a column that the query creates with the same name. |
+| Fields that exist nowhere | No column exists. The item stays in the DSL filter (see [Fields that exist nowhere](#fields-that-exist-nowhere)). |
 
 ### Values that the stage cannot write
 
@@ -357,7 +360,7 @@ The message names up to 5 items and counts the others. The rule creates no alert
 
 An item whose fields are all source fields or exist nowhere never fails the rule for a value: it stays in the DSL filter, which is sent to Elasticsearch as today, and Elasticsearch decides. An item that has a computed column and an entry that is not negative on a field that exists nowhere is recorded as `field_not_found` and never fails the rule for a value either.
 
-A value that cannot be written fails the rule only when the item gets as far as having its values checked. An item that is skipped earlier is not checked and does not fail the rule: an item skipped because of its fields (an entry that is not negative on a field that exists nowhere, or a source field that the query does not output), or because it is restricted to some operating systems (`os_types`). In an item that is checked, an invalid value fails the rule even when another entry would be skipped, because the value is reported first.
+A value that cannot be written fails the rule only when the compiler checks the values of the item. An item that is skipped earlier is not checked and does not fail the rule: an item skipped because of its fields (an entry that is not negative on a field that exists nowhere, or a source field that the query does not output), or because it is restricted to some operating systems (`os_types`). In an item that is checked, an invalid value fails the rule even when another entry would be skipped, because the value is reported first.
 
 ### Differences from the DSL filter
 
@@ -369,7 +372,7 @@ An exception on a computed column is compared with the values that the query hol
 
 ## Items that are not applied
 
-An item that is not applied excludes no alert. It is not written at the end of the query, and it is also removed from the DSL filter, because the source documents do not have the column that it refers to. This is never shown as a warning of the rule: today an exception that cannot be applied (an unsupported type) does not warn, and a warning on every run would be noise for rules with shared lists. The warning for value lists that are too large to process is unchanged and keeps working for the items that stay in the DSL filter. The reason is written to the rule execution log instead, as one JSON message per run, for a UI to use later. An item with a value that the stage cannot write is not in this section, because the rule fails (see [Values that the stage cannot write](#values-that-the-stage-cannot-write)).
+An item that is not applied excludes no alert. It is not written at the end of the query, and it is also removed from the DSL filter, because the source documents do not have the column that it refers to. This is never shown as a warning of the rule: today an exception that cannot be applied (an unsupported type) does not warn, and a warning on every run would be noise for rules with shared lists. The warning for value lists that are too large to process is unchanged and still applies to the items that stay in the DSL filter. The reason is written to the rule execution log instead, as one JSON message per run, for a UI to use later. An item with a value that the stage cannot write is not in this section, because the rule fails (see [Values that the stage cannot write](#values-that-the-stage-cannot-write)).
 
 The message is written when at least one item is applied at the end of the query or not applied. Because it is written with `ruleExecutionLogger.info`, it reaches the event log (`.kibana-event-log-*`, provider `securitySolution.ruleExecution`, action `message`) only when the experimental feature `extendedRuleExecutionLoggingEnabled` is on and the minimum level in the advanced settings is Info or lower. Without it, which is the default, the message is written only to the Kibana server log, at `debug` level. Rule preview does not store `info` messages at all, and that is unchanged. The text of the `message` field is this JSON object:
 
@@ -420,7 +423,7 @@ The items that are applied at the end of the query are written as one `WHERE` st
 
 | Limit | Value | Reason |
 |---|---|---|
-| Comparisons in the stage | 200 | Our own limit. A comparison is one test on a column (see [How the items become a WHERE stage](#how-the-items-become-a-where-stage)). The conditions of the rule query count against the clause limit of Elasticsearch together with ours, and we cannot bound them (see [Clauses of the query](#clauses-of-the-query)). The comparisons stay under the depth limit of ES\|QL, which is 300 levels (see [Why 200 comparisons stay under the depth limit](#why-200-comparisons-stay-under-the-depth-limit)). All the items are counted together, which means that splitting an item into several items does not change the count. |
+| Comparisons in the stage | 200 | Our own limit. A comparison is one test on a column (see [How the items become a WHERE stage](#how-the-items-become-a-where-stage)). The `WHERE` expressions of the rule query count against the clause limit of Elasticsearch together with ours, and we cannot bound them (see [Clauses of the query](#clauses-of-the-query)). The comparisons stay under the depth limit of ES\|QL, which is 300 levels (see [Why 200 comparisons stay under the depth limit](#why-200-comparisons-stay-under-the-depth-limit)). All the items are counted together, which means that splitting an item into several items does not change the count. |
 | Length of the final query | 1,000,000 characters | ES\|QL rejects a statement of more than 1,000,000 characters (`ESQL statement is too large [N characters > 1000000]`; added in [#117898](https://github.com/elastic/elasticsearch/pull/117898), not on the limitations page). The rule query counts, and a few characters are kept for the page size that the executor adds. A long `is one of` list counts as one comparison, and the length of the query is what limits it. |
 
 The message of the comparison limit looks like this:
@@ -500,15 +503,15 @@ The `is` shape gave the same breakpoint on Elasticsearch 9.5.5 and on current ma
 
 ### Clauses of the query
 
-**The limit.** Elasticsearch fails a query that has too many clauses (a clause is one condition inside the search that Elasticsearch builds for the query). The limit depends on the node: it is 4468 on one test node and 65,536 on a cloud node with a 4 GB heap, and never below 1024. The conditions of the `WHERE` stages of the rule query and our stage count together. The DSL filter is a separate search with its own count.
+**The limit.** Elasticsearch fails a query that has too many clauses (a clause is one test inside the search that Elasticsearch builds for the query). The limit depends on the node: it is 4468 on one test node and 65,536 on a cloud node with a 4 GB heap, and never below 1024. The `WHERE` expressions of the rule query and our stage count together. The DSL filter is a separate search with its own count.
 
 **What counts.** Only the comparisons that Elasticsearch can run against the source index cost clauses: `is`, `is one of` with plain values and `exists`, on a column that is a source field, a copy of one (`EVAL c = host`) or a rename (`RENAME host AS c`). Every other comparison costs none: `matches`, CIDR values, dates, and columns that the query computes (`EVAL c = TO_UPPER(host)`, the output of a `STATS`). An item that has one such entry costs none, even if its other entries are of the first kind.
 
-**The most that our stage costs.** An item costs one clause for each of its comparisons and one more for the item, because the item is negated. Because every item has at least one comparison, 200 comparisons are spread over at most 200 items. The comparisons cost at most 200 clauses and the extra clause of each item at most 200 more, which gives at most 400 clauses for the stage. That is below the smallest limit. As a result, the stage never exhausts the clauses on its own.
+**The most that our stage costs.** An item costs one clause for each of its comparisons and one more for the item, because the item is negated. Because every item has at least one comparison, 200 comparisons are divided among at most 200 items. The comparisons cost at most 200 clauses and the extra clause of each item at most 200 more, which gives at most 400 clauses for the stage. That is below the smallest limit. As a result, the stage never exhausts the clauses on its own.
 
-**What we cannot bound.** The conditions of the rule query count against the same limit and we do not control them. A rule whose own `WHERE` clauses already use most of the clauses can fail once our stage is added, although it respects the 200 comparisons. In that case Elasticsearch rejects the query with `too many nested clauses`, and the rule fails with a message that says that the conditions of the rule query and the exceptions on columns that rename or copy a source field are counted together, and what to reduce, with the Elasticsearch reason included.
+**What we cannot bound.** The conditions of the rule query count against the same limit and we do not control them. A rule whose own `WHERE` clauses already use most of the clauses can fail once our stage is added, although it respects the 200 comparisons. In that case Elasticsearch rejects the query with `too many nested clauses`, and the rule fails with a message that says that the `WHERE` expressions of the rule query and the exceptions on columns that rename or copy a source field are counted together, and what to reduce, with the Elasticsearch reason included.
 
-**What we checked on Elasticsearch.** 2,200 items on distinct fields ran and 2,300 failed with `too many nested clauses; maxClauseCount is set to 4468`, for `is`, `is one of` and `exists` alike. `matches` items ran at 2,600 and more. A rule query with 2,100 conditions ran alone and failed once a stage of 200 `is` comparisons on a source field followed it.
+**What we checked on Elasticsearch.** In stages of 200 items on distinct fields, 2,200 items in total ran and 2,400 failed with `too many nested clauses; maxClauseCount is set to 4468`, for `is`, `is one of` and `exists` alike. `matches` items ran at 2,600 and more. A rule query with 2,100 comparisons ran alone and failed once a stage of 200 `is` comparisons on a source field followed it.
 
 If Elasticsearch rejects the final query for another reason (for example a function that an older cluster or a remote cluster does not have), the rule run fails with that error, as it does for any invalid ES|QL query. None of these limits exists today in the schema, the UI or the API. The DSL filter has only the Lucene clause limit at runtime.
 
@@ -520,7 +523,7 @@ With the setting enabled, the rule fails before the query runs, instead of runni
 
 - **A value cannot be written for its column**, as described in [Values that the stage cannot write](#values-that-the-stage-cannot-write).
 - **The exceptions do not fit in the query.** The items at the end of the query need more than 200 comparisons in total, or a query longer than 1,000,000 characters (see [Limits](#limits)). The message names the limit, and the items with the most comparisons. It is a user error and no alerts are created.
-- **Elasticsearch runs out of clauses.** When Elasticsearch rejects the final query with `too many nested clauses` and exceptions were added at the end, the message explains that the conditions of the rule query and the exceptions on columns that rename or copy a source field are counted together (see [Limits](#limits)). It is a user error. Without exceptions at the end, the error of Elasticsearch is shown as it is.
+- **Elasticsearch runs out of clauses.** When Elasticsearch rejects the final query with `too many nested clauses` and exceptions were added at the end, the message explains that the `WHERE` expressions of the rule query and the exceptions on columns that rename or copy a source field are counted together (see [Limits](#limits)). It is a user error. Without exceptions at the end, the error of Elasticsearch is shown as it is.
 - **The fields cannot be inspected.** If the `_field_caps` call or the `LIMIT 0` request fails, the executor cannot tell which exceptions are on computed columns. Running the rule anyway would leave the computed-column exceptions out silently and create alerts that they were meant to exclude. The rule status is `failed` with `The rule did not run because the fields of its exceptions could not be inspected to apply them: <reason of the failed request>`, and no alerts are created. The message keeps the text of the failed request. A failure that is a user error today (for example a missing privilege) therefore stays one.
 
 A rule whose query is invalid fails the `LIMIT 0` request. It now fails with this message and the Elasticsearch reason, instead of with the bare Elasticsearch error of the main query.
@@ -545,7 +548,7 @@ Each problem below gives the exception, what the DSL filter does today and what 
 
 ## Out of scope
 
-- **Value lists.** `list` entries are not compiled at the end of the query. They keep working through the DSL filter on source fields, with today's limits and the existing unprocessed-exceptions warning for lists that are too large. A list exception on a computed column is not applied and is recorded in the rule execution log. A later iteration stores each list in a lookup index and applies it with `LOOKUP JOIN`, which covers computed columns as well.
+- **Value lists.** `list` entries are not compiled at the end of the query. They are still applied through the DSL filter on source fields, with today's limits and the existing unprocessed-exceptions warning for lists that are too large. A list exception on a computed column is not applied and is recorded in the rule execution log. A later iteration stores each list in a lookup index and applies it with `LOOKUP JOIN`, which covers computed columns as well.
 - **In-memory filtering of large value lists.** The ES|QL executor does not do it today, and it would interact with the paging that uses `excludedDocuments`.
 - **Source-field exceptions in the query.** They stay in the DSL filter (see [Why source-field exceptions stay in the DSL filter](#why-source-field-exceptions-stay-in-the-dsl-filter)).
 - **`nested` entries at the end of the query.** They have no ES|QL representation.

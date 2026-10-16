@@ -180,7 +180,7 @@ const toDatePredicate = (column: string, value: string, type: string): CompiledE
   const match = DATE_PATTERN.exec(value);
   const invalid: SkipReason = {
     code: 'value_not_supported',
-    reason: `value "${value}" is not a supported ${type} format`,
+    reason: `value "${value}" cannot be written for a column of type ${type} because it is not in a supported format`,
   };
   if (match == null) {
     return invalid;

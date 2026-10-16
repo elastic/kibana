@@ -32,7 +32,10 @@ const toBatches = (fields: readonly string[]): string[][] => {
   return batches;
 };
 
-/** The types the given fields have in the source indices. Fields that are not mapped are left out. */
+/**
+ * The types the given fields have in the source indices, and whether any index was read: with an `indexFilter`, none is
+ * when no index has documents in the time range. Fields that are not mapped are left out.
+ */
 export const fetchSourceFieldTypes = async ({
   esClient,
   indices,
@@ -44,7 +47,7 @@ export const fetchSourceFieldTypes = async ({
   fields: readonly string[];
   /** Limits the indices that `_field_caps` reads, as the filter of the real request does. */
   indexFilter?: estypes.QueryDslQueryContainer;
-}): Promise<SourceFieldTypes> => {
+}): Promise<{ sourceFieldTypes: SourceFieldTypes; hasIndices: boolean }> => {
   const responses = await Promise.all(
     toBatches(fields).map((batch) =>
       esClient.fieldCaps({
@@ -62,7 +65,8 @@ export const fetchSourceFieldTypes = async ({
       types.set(field, Object.keys(capabilities));
     }
   }
-  return types;
+  const hasIndices = responses.some(({ indices: found }) => [found].flat().length > 0);
+  return { sourceFieldTypes: types, hasIndices };
 };
 
 /** The columns, and their types, that the rule query outputs, read with a request that returns no rows and carries the filter of the real request. */

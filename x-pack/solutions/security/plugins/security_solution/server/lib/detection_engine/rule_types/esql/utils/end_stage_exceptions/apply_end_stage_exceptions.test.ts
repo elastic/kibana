@@ -229,6 +229,23 @@ describe('applyEndStageExceptions', () => {
     );
   });
 
+  it('does nothing when no index has documents in the time range, and the rule runs as it does without the feature', async () => {
+    (esClient.fieldCaps as unknown as jest.Mock).mockResolvedValue({ indices: [], fields: {} });
+
+    const result = await apply([sourceItem, computedItem]);
+
+    expect(result).toEqual({ query, exceptionFilter: originalFilter, unprocessedExceptions: [] });
+    expect(esClient.esql.query).not.toHaveBeenCalled();
+    expect(buildDslFilter).not.toHaveBeenCalled();
+    expect(ruleExecutionLogger.info).not.toHaveBeenCalled();
+  });
+
+  it('applies the exceptions when at least one index has documents in the time range', async () => {
+    const result = await apply([sourceItem, computedItem]);
+
+    expect(result.query).toBe(`${query}\n| WHERE NOT (MV_CONTAINS(risk, "low"))`);
+  });
+
   it('sends no filter to _field_caps when it has none', async () => {
     await apply([sourceItem, computedItem]);
 

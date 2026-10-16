@@ -632,7 +632,7 @@ export const initUiSettings = (
         'xpack.securitySolution.uiSettings.enableEsqlRuleComputedFieldExceptionsDescription',
         {
           defaultMessage:
-            'Applies exceptions to the fields that an ES|QL rule query computes, such as columns created with EVAL or STATS, by adding them to the end of the query. Exceptions on fields of the source indices keep working as before. When enabled, a rule fails instead of running with only some of its exceptions if an exception has a value that cannot be compared with the type of its field, if the exceptions on computed fields need more than 200 comparisons or make the query longer than 1,000,000 characters, if Elasticsearch rejects the query for having too many clauses, or if the fields of its exceptions cannot be inspected. The setting applies to all ES|QL rules in this space, from their next run.',
+            'Applies exceptions to the fields that an ES|QL rule query computes, such as columns created with EVAL or STATS, by adding them to the end of the query. Exceptions on fields of the source indices keep working as before. When enabled, a rule fails instead of running with only some of its exceptions if an exception has a value that cannot be written for the type of its column, if the exceptions on computed fields need more than 200 comparisons or make the query longer than 1,000,000 characters, if Elasticsearch rejects the query for having too many clauses, or if the fields of its exceptions cannot be inspected. The setting applies to all ES|QL rules in this space, from their next run.',
         }
       ),
       type: 'boolean',

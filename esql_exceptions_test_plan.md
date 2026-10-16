@@ -31,7 +31,7 @@ An ES|QL rule applies exceptions as a DSL filter that Elasticsearch runs on the 
 
 | Term | Definition |
 |---|---|
-| Source field | A field that exists in the mappings of the indices in the rule's `FROM`, including keys below a `flattened` field. |
+| Source field | A field that `_field_caps` lists with a type that holds values for the indices in the rule's `FROM`, including `nested` paths and keys below a `flattened` field. An `object` is not a source field. |
 | Computed column (transient column) | A column that exists only in the output of the ES|QL query, created or renamed by `EVAL`, `STATS` or `RENAME`. |
 | DSL filter | The Query DSL filter built from the exception items and sent with the `_query` request; it runs on the source documents before the query. |
 | End of the query | The one `| WHERE` stage that the executor appends after the rule query for items on computed columns. |
@@ -70,7 +70,7 @@ No GitHub issue exists for this work. The criteria below are inferred from `esql
 - ⚠️ No GitHub issue is linked, so the Issue Clarity Assessment at the end of the plan is not applicable and the acceptance criteria are inferred from the proposal.
 - ⚠️ The implementation was verified with unit tests, with a script against a live Elasticsearch (27 operator and type cases) and with an interactive script that creates a rule through Kibana (single and mixed exceptions, `is one of` on several types, invalid values, a missing field, the setting enabled and disabled). The scenarios in this plan are the first complete end-to-end check: they cover the operator and type matrix, several rule queries, spaces and cross-cluster search, which those runs did not.
 - An item whose fields exist nowhere stays in the DSL filter, so a negative operator such as "is not" on such a field keeps excluding every document, as it does today. The Elastic documentation does not describe this result: it only warns that an exception on an unmapped field can prevent the exception from working as expected. Scenario "\"is not\" on a field that exists nowhere excludes every document, with the setting disabled or enabled" records it, and the scenarios of an item with a computed column and an entry on a field that exists nowhere record the one case that is not left to the DSL: a negative entry is left out of the stage, and any other entry makes the item not applied.
-- ⚠️ Exceptions on computed columns run at the end of the rule query, after any `LIMIT` the rule has, so a rule with `LIMIT n` can return fewer than `n` alerts. This was decided on purpose (see the proposal, "Rule queries with a LIMIT") and the two scenarios about `LIMIT` record the expected result.
+- ⚠️ Exceptions on computed columns run at the end of the rule query, after any `LIMIT` the rule has, so a rule with `LIMIT n` can return fewer than `n` alerts. This was decided on purpose (see the proposal, "The stage goes after any LIMIT") and the two scenarios about `LIMIT` record the expected result.
 - ⚠️ ES|QL rejects a query of more than 1,000,000 characters, which is not documented. The executor fails the rule before the query runs when the final query would pass that length (a few characters are kept for the page size), and the message names the limit.
 - ⚠️ The exception items are joined with `AND` in one `WHERE` stage of at most 200 comparisons in total. A rule whose exceptions on computed columns need more fails, and splitting an item into several items does not help, because all the comparisons are counted together.
 - ⚠️ The limits of the end of the query are a new restriction that applies only there, and a rule that reaches one fails; the DSL filter has no such limits today.
@@ -664,7 +664,7 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 ---
 
 <details>
-<summary><strong>Exceptions on computed columns</strong>: 42 scenarios (P0: 7, P1: 25, P2: 10)</summary>
+<summary><strong>Exceptions on computed columns</strong>: 43 scenarios (P0: 7, P1: 26, P2: 10)</summary>
 
 #### Scenario: An exception on a STATS output column excludes only the matching alert rows
 
@@ -1256,7 +1256,7 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 
 **Priority:** P1
 
-**Automation coverage**: 3 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/build_end_stage_clause.test.ts`: "double columns › does not apply \"%s\", because a float is widened and an equality can miss the value" (parameterized), "double columns › still applies \"exists\"", "double columns › reports a value that is not a number as invalid, as for any other numeric column"), partial: the unit tests cover the compiler, not a float field in a running rule.
+**Automation coverage**: 3 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/build_end_stage_clause.test.ts`: "double columns › does not apply \"%s\", because a float is widened and an equality can miss the value" (parameterized), "double columns › still applies \"exists\"", "double columns › does not apply \"is\" on a double column, whatever the value"), partial: the unit tests cover the compiler, not a float field in a running rule.
 ```gherkin
 Scenario Outline: Operators on a double column
   Given an ES|QL rule whose query groups a float field with STATS ... BY g = f
@@ -1338,9 +1338,37 @@ Given the same rule without a column named nested_user
 When the rule runs
 Then the result is the same
 
-Given an exception item with a nested entry on nested_user and the entry risk is low, where risk is a computed column
+Given the query FROM logs | EVAL nested_user = "x", risk = "low" | STATS c = COUNT(*) BY nested_user, risk
+And an exception item with a nested entry on nested_user and the entry risk is low
 When the rule runs
 Then the item is not applied, with the code entry_type_not_supported, and the rule execution log lists it
+```
+
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
+
+#### Scenario: A time range with no documents leaves the rule as it is without the feature
+
+**Priority:** P1
+
+**Automation coverage**: 2 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "does nothing when no index has documents in the time range, and the rule runs as it does without the feature", "applies the exceptions when at least one index has documents in the time range"), partial: the unit tests mock `_field_caps`.
+```gherkin
+Given an index logs-1 with the keyword field host.name, the long field n, and only a document from outside the time range of the rule
+And an ES|QL rule with the query FROM logs-* METADATA _id
+And an exception item with the entries host.name is a and n is 1.0
+When the rule runs with the advanced setting enabled
+Then the rule succeeds and creates no alerts
+And the item stays in the DSL filter, so the value 1.0 is not checked and does not fail the rule
+And the rule execution log has no esql_exceptions message
+And no request for the output columns is sent
+
+Given a document inside the time range is added
+When the rule runs again
+Then the rule still succeeds, and the item stays in the DSL filter
 ```
 
 **Execution:**
@@ -1429,7 +1457,7 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 
 **Priority:** P2
 
-**Automation coverage**: 2 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/build_end_stage_clause.test.ts`: "joins the items of a bucket with AND and parentheses" (the stages start on a new line); `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "starts the stages on a new line, so a comment at the end of the rule query does not swallow them"), partial: the unit tests cover how the query is written.
+**Automation coverage**: 2 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/build_end_stage_clause.test.ts`: "toEndStageQuerySuffix › joins the items with AND and parentheses in one WHERE stage" (the stage starts on a new line); `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "starts the stages on a new line, so a comment at the end of the rule query does not swallow them"), partial: the unit tests cover how the query is written.
 ```gherkin
 Given an ES|QL rule whose query ends with a // comment on its last line
 And an exception item on a computed column
@@ -1674,7 +1702,7 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 
 **Priority:** P1
 
-**Automation coverage**: 3 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/build_end_stage_clause.test.ts`: "does not apply the value of a %s column that the DSL accepts: %s" (parameterized), "does not apply the unsupported date value %s on a %s column" (parameterized); `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "does not throw for a value that the DSL accepts and the end of the query cannot compare"), partial: the unit tests use mocked clients, not a running rule.
+**Automation coverage**: 3 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/build_end_stage_clause.test.ts`: "reports the value of a %s column that the DSL accepts and the compiler does not write: %s" (parameterized), "reports the date value %s on a %s column that the compiler does not write" (parameterized); `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "throws for a value that the DSL accepts and the compiler does not write"), partial: the unit tests use mocked clients, not a running rule.
 ```gherkin
 Scenario Outline: Value that is accepted by the DSL filter
   Given an ES|QL rule whose query adds a column of type <type> with EVAL
@@ -1734,7 +1762,7 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 Scenario Outline: The negative entry is true for every row
   Given the advanced setting is enabled
   And an ES|QL rule with STATS failures = COUNT(*) BY user.name
-  And an exception item with the entries failures is 3 and missing.field <operator> x
+  And an exception item with the entries failures is 3 and missing.field <operator> (with the value x when the operator takes one)
   When the rule runs
   Then the final query ends with a stage that tests only failures
   And the alert row with failures 3 is excluded
@@ -1745,6 +1773,7 @@ Scenario Outline: The negative entry is true for every row
     | operator   |
     | is not     |
     | is not one of |
+    | does not exist |
     | does not match |
 
 Scenario: The negative entry does not hide a positive entry on another field that exists nowhere
@@ -1834,7 +1863,7 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 
 **Priority:** P1
 
-**Automation coverage**: 3 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/split_exception_items.test.ts` and `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "skips an item that needs a source field the query does not output", "names both reasons when an item has a field that is nowhere and one that the query drops", "logs an item that needs a source field the query does not output"), partial: the unit tests do not check the alerts.
+**Automation coverage**: 3 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/split_exception_items.test.ts` and `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "skips an item that needs a source field the query does not output", "names both reasons when an item has a computed column, a field that is nowhere and one that the query drops", "logs an item that needs a source field the query does not output"), partial: the unit tests do not check the alerts.
 ```gherkin
 Given an ES|QL rule with STATS failures = COUNT(*) BY user.name
 And an exception item with the entries host.name is web-01 and failures is 3
@@ -1953,7 +1982,7 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 
 **Priority:** P2
 
-**Automation coverage**: 3 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/build_end_stage_clause.test.ts`: "reports the item that makes the query longer than the maximum length", "counts the query that the stages are appended to", "reports the first limit that an item reaches"; `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "fails the rule, and names the limit, when the items would make the query longer than ES|QL accepts"), partial: the unit tests use mocked clients.
+**Automation coverage**: 3 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/build_end_stage_clause.test.ts`: "reports the item that makes the query longer than the maximum length", "counts the query that the stage is appended to", "reports the comparisons before the length"; `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "fails the rule, and names the limit, when the items would make the query longer than ES|QL accepts"), partial: the unit tests use mocked clients.
 ```gherkin
 Given an ES|QL rule with several exception items on a computed column, each an "is one of" with thousands of long values
 And the items together would make the query longer than 1,000,000 characters
@@ -2242,17 +2271,17 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 
 ## Test Coverage Summary
 
-**Total scenarios:** 92
+**Total scenarios:** 93
 
 | Feature area | Scenarios | P0 | P1 | P2 | Automated | Manual only |
 |---|---|---|---|---|---|---|
 | Exceptions on source fields keep working | 25 | 11 | 12 | 2 | 18 | 7 |
-| Exceptions on computed columns | 42 | 7 | 25 | 10 | 34 | 8 |
+| Exceptions on computed columns | 43 | 7 | 26 | 10 | 35 | 8 |
 | Items that are not applied and how they are reported | 14 | 1 | 9 | 4 | 14 | 0 |
 | Advanced setting and failure handling | 5 | 2 | 2 | 1 | 3 | 2 |
 | Dependency data lifecycle | 4 | 0 | 2 | 2 | 0 | 4 |
 | Spaces and cross-cluster search (to confirm) | 2 | 0 | 0 | 2 | 0 | 2 |
-| **Total** | **92** | **21** | **50** | **21** | **69** | **23** |
+| **Total** | **93** | **21** | **51** | **21** | **70** | **23** |
 
 **Automated coverage notes:**
 - The Automated column counts scenarios with at least one matching unit or API integration test. Almost all of them are partial: the tests check the generated clause, the compiler or the split decision with mocked clients, not the alerts of a running rule. Only the "is" operator on one field has an API integration test.
@@ -2295,6 +2324,7 @@ Run the scenarios of "Exceptions on source fields keep working" twice: with the 
 - The setting applies to the rules of its own space only
 - An exception on a double column applies for "exists" only
 - A source field that the query redefines or outputs stays in the DSL filter only
+- A time range with no documents leaves the rule as it is without the feature
 - A field that is mapped only in an index outside the time range does not make its name a source field
 - A column named like an object parent is applied at the end of the query
 - A nested exception stays in the DSL filter, even when the query creates a column named like its path

@@ -77,7 +77,7 @@ export const applyEndStageExceptions = async ({
     return unchanged;
   }
 
-  const sourceFieldTypes = await inspect(() =>
+  const { sourceFieldTypes, hasIndices } = await inspect(() =>
     fetchSourceFieldTypes({
       esClient,
       indices,
@@ -86,7 +86,8 @@ export const applyEndStageExceptions = async ({
     })
   );
 
-  if (!needsOutputColumns(items, sourceFieldTypes)) {
+  // No index has documents in the time range, so the rule has nothing to exclude: it runs as it does without the feature
+  if (!hasIndices || !needsOutputColumns(items, sourceFieldTypes)) {
     return unchanged;
   }
 

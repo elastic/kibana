@@ -11,7 +11,7 @@ const CLAUSE_LIMIT_REASON = 'too many nested clauses';
 export class ExceptionsClauseLimitError extends Error {
   constructor(elasticsearchReason: string) {
     super(
-      `The rule did not run because Elasticsearch rejected the query for having too many clauses (${elasticsearchReason}). The conditions of the rule query and the exceptions on columns that rename or copy a source field are counted together. Remove conditions from the rule query, or remove values or items from those exceptions.`
+      `The rule did not run because Elasticsearch rejected the query for having too many clauses (${elasticsearchReason}). The WHERE expressions of the rule query and the exceptions on columns that rename or copy a source field are counted together. Remove comparisons from the rule query, or remove values or items from those exceptions.`
     );
     this.name = 'ExceptionsClauseLimitError';
   }
