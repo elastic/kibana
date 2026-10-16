@@ -19,7 +19,7 @@ export const getStreamsUnitStatsRoute = createServerRoute({
     access: 'internal',
     summary: 'Get stats for components of a Streams unit',
     description:
-      'Returns stats for the destinations and processors of a unit, keyed by kind and id. A null value means no data.',
+      'Returns stats for the components of a unit, keyed by kind and id. A null value means no data.',
   },
   security: {
     authz: {
