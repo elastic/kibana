@@ -8,12 +8,18 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
+import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { findEndpointArtifactsStepDefinition } from './artifacts/find';
 import { createSearchIntegrationKnowledgeStepDefinition } from './integration_knowledge';
+import { createResolveEndpointHostsStepDefinition } from './hosts/resolve';
+import { getEndpointHostDiagnosticsStepDefinition } from './hosts/diagnostics';
+import { createGetEndpointInventoryCountsStepDefinition } from './hosts/inventory_counts';
+import { createGetEndpointPackageStatusStepDefinition } from './package/status';
 
 export interface RegisterEndpointWorkflowStepsDeps {
   experimentalFeatures: Pick<ExperimentalFeatures, 'automaticTroubleshootingUniversalSkill'>;
   getInternalEsClient: () => Promise<ElasticsearchClient> | ElasticsearchClient;
+  endpointAppContextService: EndpointAppContextService;
 }
 
 export const registerEndpointWorkflowSteps = (
@@ -29,5 +35,18 @@ export const registerEndpointWorkflowSteps = (
     createSearchIntegrationKnowledgeStepDefinition({
       getInternalEsClient: deps.getInternalEsClient,
     })
+  );
+
+  workflowsExtensions.registerStepDefinition(
+    createResolveEndpointHostsStepDefinition({
+      endpointAppContextService: deps.endpointAppContextService,
+    })
+  );
+  workflowsExtensions.registerStepDefinition(getEndpointHostDiagnosticsStepDefinition);
+  workflowsExtensions.registerStepDefinition(
+    createGetEndpointPackageStatusStepDefinition(deps.endpointAppContextService.isServerless())
+  );
+  workflowsExtensions.registerStepDefinition(
+    createGetEndpointInventoryCountsStepDefinition(deps.endpointAppContextService)
   );
 };

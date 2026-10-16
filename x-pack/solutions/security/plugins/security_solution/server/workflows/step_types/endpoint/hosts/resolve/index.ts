@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { resolveEndpointHostsStepDefinition } from './resolve_endpoint_hosts_step';
+export { createResolveEndpointHostsStepDefinition } from './resolve_endpoint_hosts_step';
