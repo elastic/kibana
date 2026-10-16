@@ -15,9 +15,13 @@ import type {
   PackageReportOutput,
 } from '../../../../../common/step_types/package_report';
 import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollment';
+import {
+  buildConvergenceNote,
+  type AppendAlsoRaisedBy,
+  type CountExistingProposals,
+  type ResolveProposalSlot,
+} from '../../../proposals/dedup';
 import { buildHuntInvestigationConversationId } from '../common/hunt_investigation_id';
-import type { AppendAlsoRaisedBy } from './converge_on_live_proposal';
-import { buildConvergenceNote } from './converge_on_live_proposal';
 import { buildProposalSummaryBullets, decidePackageReport } from './decide_package_report';
 import {
   buildCleanInvestigationSummary,
@@ -29,7 +33,6 @@ import type { EsReportContextClient } from './load_report_hunt_context';
 import { loadReportHuntContext } from './load_report_hunt_context';
 import { readCurrentRunState } from './read_current_run_state';
 import type { RehydrateProcessSelectors } from './rehydrate_process_selectors';
-import type { ResolveProposalSlot } from './resolve_proposal_slot';
 import type {
   CoordinatorInputs,
   CoverageSubject,
@@ -51,17 +54,6 @@ export type ListRespondActions = (
 export type WriteCoverageKis = (subjects: CoverageSubject[]) => Promise<CoverageWriteResult>;
 
 type MintSuppression = Extract<PackageReportOutput, { status: 'packaged' }>['mintSuppression'];
-
-/**
- * Count of Proposals the Investigation already carries (any status, including settled), before
- * this run's own proposals are minted. It is the baseline `expectedProposalCount` is built on (see
- * below), so the settlement barrier each gate checks accounts for proposals that already existed
- * before this run, not just the ones this run mints. Not a guard: whether a finding gets a
- * Proposal is decided per subject by {@link ResolveProposalSlot}, not by whether the Investigation
- * has any. See the implementation (`check_existing_proposals.ts`) for which statuses count as
- * "existing" and why.
- */
-export type CountExistingProposals = (investigationConversationId: string) => Promise<number>;
 
 /**
  * Whether the Investigation has a Proposal still open (`pending` or `executing`), i.e. one an

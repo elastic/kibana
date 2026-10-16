@@ -9,8 +9,8 @@ import { get, isEqual } from 'lodash';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { ProposalNotFoundError } from '@kbn/proposals-plugin/server';
-import { ASSET_CRITICALITY_LEVELS } from '../../../../../common/proposals/asset_criticality';
-import { buildHuntProposalId } from '../common/hunt_proposal_id';
+import { ASSET_CRITICALITY_LEVELS } from '../../../../common/proposals/asset_criticality';
+import { buildProposalId } from './proposal_id';
 import { isTransientError, retryTransient } from './retry_transient';
 
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
@@ -191,7 +191,7 @@ export const createProposalSlotResolver = ({
       await ensureCanRead();
 
       for (let generation = 0; generation < MAX_GENERATIONS; generation++) {
-        const rootId = buildHuntProposalId({ spaceId, subjectKey, generation });
+        const rootId = buildProposalId({ spaceId, subjectKey, generation });
 
         let head;
         try {
@@ -247,7 +247,7 @@ export const createProposalSlotResolver = ({
       throw new Error(`more than ${MAX_GENERATIONS} settled proposals under one subject`);
     } catch (err) {
       logger?.warn(
-        `package_report: could not resolve a proposal slot for subject ${subjectKey}: ${
+        `proposal_dedup: could not resolve a proposal slot for subject ${subjectKey}: ${
           (err as Error).message
         }`
       );

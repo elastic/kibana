@@ -180,7 +180,7 @@ export const packageReportMintPayloadSchema = z.object({
    */
   subjectKey: z.string(),
   /**
-   * The id the gate creates the Proposal under: `buildHuntProposalId` over the subject key, at the
+   * The id the gate creates the Proposal under: `buildProposalId` over the subject key, at the
    * first generation no live Proposal holds. Resolved by packaging, which has the Proposals
    * service; `decidePackageReport` stays pure and never sees it. The service refuses an id that
    * already exists, which is what makes two runs that race over one subject create one Proposal.

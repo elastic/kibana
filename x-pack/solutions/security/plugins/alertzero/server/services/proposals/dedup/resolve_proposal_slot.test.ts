@@ -8,7 +8,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ProposalNotFoundError } from '@kbn/proposals-plugin/server';
-import { buildHuntProposalId } from '../common/hunt_proposal_id';
+import { buildProposalId } from './proposal_id';
 import { createProposalSlotResolver } from './resolve_proposal_slot';
 
 const SPACE = 'default';
@@ -17,7 +17,7 @@ const NOW = Date.parse('2026-10-09T12:00:00.000Z');
 const request = httpServerMock.createKibanaRequest();
 
 const idAt = (generation: number, spaceId = SPACE) =>
-  buildHuntProposalId({ spaceId, subjectKey: SUBJECT, generation });
+  buildProposalId({ spaceId, subjectKey: SUBJECT, generation });
 
 interface Chain {
   status: 'pending' | 'executing' | 'succeeded' | 'failed' | 'no_action' | 'expired';
