@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toReadableAttackIndexPattern } from './constants';
+import { isAttackDiscoveryIndex, toReadableAttackIndexPattern } from '.';
 
 describe('toReadableAttackIndexPattern', () => {
   it.each([
@@ -28,5 +28,27 @@ describe('toReadableAttackIndexPattern', () => {
     expect(toReadableAttackIndexPattern('.alerts-security.alerts-default')).toBe(
       '.alerts-security.alerts-default'
     );
+  });
+});
+
+describe('isAttackDiscoveryIndex', () => {
+  it.each([
+    ['.internal.alerts-security.attack.discovery.alerts-default-000001'],
+    ['.alerts-security.attack.discovery.alerts-default'],
+    ['.alerts-security.attack.discovery.alerts-*'],
+    ['.internal.adhoc.alerts-security.attack.discovery.alerts-default-000001'],
+    ['.adhoc.alerts-security.attack.discovery.alerts-default'],
+  ])('accepts the attack discovery index %s', (index) => {
+    expect(isAttackDiscoveryIndex(index)).toBe(true);
+  });
+
+  it.each([
+    ['.alerts-security.alerts-default'],
+    ['.internal.alerts-security.alerts-default-000001'],
+    ['.kibana'],
+    ['logs-*'],
+    [''],
+  ])('rejects the index %s', (index) => {
+    expect(isAttackDiscoveryIndex(index)).toBe(false);
   });
 });
