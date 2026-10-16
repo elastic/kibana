@@ -109,4 +109,44 @@ describe('DatasetQualityPrivileges', () => {
       expect(esClientMock.security.hasPrivileges).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('getDatasetPrivileges', () => {
+    it('reports monitor independently from view_index_metadata', async () => {
+      const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+      esClientMock.security.hasPrivileges
+        .mockResolvedValueOnce({
+          has_all_requested: false,
+          cluster: {},
+          index: {
+            'logs-*-*': {
+              read: true,
+              monitor: false,
+              view_index_metadata: true,
+              read_failure_store: false,
+              manage_failure_store: false,
+            },
+          },
+          application: {},
+          username: 'test',
+        })
+        .mockResolvedValueOnce({
+          has_all_requested: false,
+          cluster: {},
+          index: {},
+          application: {},
+          username: 'test',
+        });
+
+      const result = await datasetQualityPrivileges.getDatasetPrivileges(
+        esClientMock,
+        ['logs-*-*'],
+        true
+      );
+
+      expect(result.datasetsPrivilages['logs-*-*']).toMatchObject({
+        canRead: true,
+        canMonitor: false,
+      });
+    });
+  });
 });

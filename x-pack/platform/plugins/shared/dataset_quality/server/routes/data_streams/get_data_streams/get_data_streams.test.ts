@@ -8,7 +8,7 @@
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { dataStreamService, datasetQualityPrivileges } from '../../../services';
 
-import { getDataStreams } from '.';
+import { getDataStreams, getDatasetTypesPrivileges } from '.';
 
 const mockGetMockMatchingDataStreams = jest.fn().mockImplementation(() => MATCHING_DATA_STREAMS);
 const mockGetDatasetPrivileges = jest.fn().mockImplementation(() => ({
@@ -98,6 +98,55 @@ describe('getDataStreams', () => {
         isSecurityEnabled: true,
       });
       expect(results.dataStreams.length).toBe(5);
+    });
+  });
+
+  it('returns accessible concrete data streams when broad wildcard privileges are false', async () => {
+    mockGetDatasetPrivileges.mockReturnValueOnce({
+      datasetsPrivilages: {
+        'logs-*-*': {
+          canRead: false,
+          canMonitor: false,
+          canReadFailureStore: false,
+          canManageFailureStore: false,
+        },
+      },
+    });
+
+    const results = await getDataStreams({
+      esClient: elasticsearchServiceMock.createElasticsearchClient(),
+      types: ['logs'],
+      uncategorisedOnly: false,
+      isSecurityEnabled: true,
+    });
+
+    expect(results.dataStreams).toHaveLength(MATCHING_DATA_STREAMS.length);
+    expect(results.dataStreams[0].userPrivileges.canMonitor).toBe(true);
+  });
+  describe('getDatasetTypesPrivileges', () => {
+    it('reports types discovered as the current user independently of broad privileges', async () => {
+      mockGetDatasetPrivileges.mockReturnValueOnce({
+        datasetsPrivilages: {
+          'logs-*-*': {
+            canRead: false,
+            canMonitor: false,
+            canReadFailureStore: false,
+            canManageFailureStore: false,
+          },
+        },
+      });
+
+      const result = await getDatasetTypesPrivileges({
+        esClient: elasticsearchServiceMock.createElasticsearchClient(),
+        types: ['logs', 'metrics'],
+        isSecurityEnabled: true,
+      });
+
+      expect(result.accessibleDatasetTypes).toEqual(['logs']);
+      expect(dataStreamService.getMatchingDataStreams).toHaveBeenCalledWith(expect.anything(), [
+        'logs-*-*',
+        'metrics-*-*',
+      ]);
     });
   });
 });
@@ -192,7 +241,11 @@ const MATCHING_DATA_STREAMS = [
 ];
 
 const DATA_STREAMS_PRIVILEGES = Object.values(MATCHING_DATA_STREAMS).reduce((acc, stream) => {
-  acc[stream.name] = true;
+  acc[stream.name] = {
+    monitor: true,
+    read_failure_store: true,
+    manage_failure_store: true,
+  };
 
   return acc;
-}, {} as Record<string, boolean>);
+}, {} as Record<string, Record<string, boolean>>);
