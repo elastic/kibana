@@ -97,6 +97,18 @@ export interface AlertStatusChangedEventPayload {
   readonly indices: readonly string[];
 }
 
+/**
+ * Event: incremental IDs assigned (emitted once per batch by the incremental ID service)
+ *
+ * Unlike the other events this is not tied to a user request: the service runs in a background
+ * task. It is a dedicated event outside of `CasesEventPayload` so that listeners of the other
+ * events keep a non-optional `request`. Consumers re-read whatever else they need.
+ */
+export interface IncrementalIdsAssignedEventPayload {
+  /** Only the cases that can have a trigger task, i.e. that were created recently. */
+  readonly caseIds: readonly string[];
+}
+
 interface CasesDomainEventPayloadByType {
   readonly caseCreated: CaseCreatedEventPayload;
   readonly caseUpdated: CaseUpdatedEventPayload;
