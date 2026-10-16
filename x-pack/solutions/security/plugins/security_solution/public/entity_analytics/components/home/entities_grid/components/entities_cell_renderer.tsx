@@ -8,6 +8,7 @@
 import React, { createContext, useContext } from 'react';
 import { assertNever } from '@kbn/std';
 import type { EuiThemeComputed, RenderCellValue } from '@elastic/eui';
+import { css, keyframes } from '@emotion/react';
 import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
 import type { Row } from '../common';
 import { ENRICHED_FIELDS, isGridColumnId, type GridColumnId } from '../grid_columns';
@@ -47,6 +48,25 @@ export const EntityGridRowsContext = createContext<EntityGridRows>({
   rows: [],
   isEnriching: false,
 });
+
+/** Pulses opacity only, which the compositor animates without repainting the cells. */
+const loadingPulse = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+`;
+
+const loadingPlaceholderCss = css`
+  display: inline-block;
+  vertical-align: middle;
+  inline-size: 1em;
+  block-size: 2px;
+  border-radius: 1px;
+  animation: ${loadingPulse} 1.2s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+`;
 
 /** Hours before a date shows as absolute: never, so the columns read as how long ago. */
 const ALWAYS_RELATIVE_HOURS = 24 * 365 * 100;
@@ -122,9 +142,9 @@ export const renderEntityCell = (
 ): JSX.Element => {
   const value = row[columnId];
   // Enrichers set every field they own (null or 0 when empty), so `undefined` here
-  // means "not loaded yet", not "no value". Show nothing rather than "—".
+  // means "not loaded yet", not "no value". Show a placeholder rather than "—".
   if (isEnriching && value === undefined && ENRICHED_FIELDS.has(columnId)) {
-    return <></>;
+    return <span css={loadingPlaceholderCss} style={{ background: euiTheme.colors.lightShade }} />;
   }
   if (!isGridColumnId(columnId)) {
     return <DefaultCell value={value} />;
