@@ -293,7 +293,53 @@ describe('investigation notification lifecycle', () => {
     await expect(send('completed')).rejects.toThrow('not initialized');
     await send('started');
     await send('completed');
-    await expect(send('failed')).rejects.toThrow('different terminal phase');
+    expect(await send('failed')).toEqual({ sent: 0, failed: 0, unconfirmed: 0 });
     expect(execute).toHaveBeenCalledTimes(2);
+  });
+
+  it('creates a failure root before started and reuses it for the next execution', async () => {
+    const { send, execute, client } = setup();
+    expect(await send('failed')).toEqual({ sent: 1, failed: 0, unconfirmed: 0 });
+    expect(execute.mock.calls[0][0].params.subActionParams).not.toHaveProperty('threadTs');
+    expect((await client.get())?.attempts[0].creates_root).toBe(true);
+    await send('started', 'exec-2', []);
+    expect(execute.mock.calls[1][0].params.subActionParams).toMatchObject({
+      channel: 'C123',
+      threadTs: '1.000001',
+    });
+  });
+
+  it('uses an explicit parent for early failure and freezes the execution snapshot', async () => {
+    const { send, execute, client } = setup();
+    const input = { ...destination, params: { channel: '#alerts', thread_ts: '0.1' } };
+    await send('failed', 'exec-1', [input]);
+    await send('failed', 'exec-1', [{ ...destination, params: { channel: '#another' } }]);
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(execute.mock.calls[0][0].params.subActionParams).toMatchObject({ threadTs: '0.1' });
+    expect((await client.get())?.destinations).toHaveLength(1);
+  });
+
+  it('fans out an early failure once even with concurrent handlers', async () => {
+    const { send, execute, client } = setup('ops');
+    const inputs = [destination, { ...destination, params: { channel: '#oncall' } }];
+    await Promise.all([send('failed', 'exec-1', inputs), send('failed', 'exec-1', inputs)]);
+    expect(execute).toHaveBeenCalledTimes(2);
+    expect((await client.get())?.attempts).toHaveLength(2);
+  });
+
+  it('does not recreate an uncertain early failure root', async () => {
+    const { send, execute, client } = setup();
+    execute.mockRejectedValueOnce(new Error('Connection lost'));
+    expect(await send('failed')).toEqual({ sent: 0, failed: 0, unconfirmed: 1 });
+    expect(await send('failed', 'exec-2', [])).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect((await client.get())?.attempts[1].error).toContain('unconfirmed');
+  });
+
+  it('can report a failure after a definitely rejected started root', async () => {
+    const { send, execute } = setup();
+    execute.mockResolvedValueOnce({ status: 'error', message: 'not_in_channel' } as never);
+    await send('started');
+    expect(await send('failed')).toEqual({ sent: 1, failed: 0, unconfirmed: 0 });
   });
 });
