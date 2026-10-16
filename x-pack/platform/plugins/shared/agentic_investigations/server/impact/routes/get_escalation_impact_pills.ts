@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IMPACT_ESCALATION_PILLS_URL } from '../../../common/impact/constants';
+import { IMPACT_ESCALATION_SUMMARY_URL } from '../../../common/impact/constants';
 import type { ImpactPillsResponse } from '../../../common/impact/impact_pills';
 import { AGENTIC_INVESTIGATIONS_API_VERSION } from '../../../common/constants';
 import { ESCALATIONS_API_PRIVILEGE_READ } from '../../escalations/constants';
@@ -20,7 +20,7 @@ export const registerGetEscalationImpactPillsRoute = ({
 }: ImpactRouteDependencies) => {
   router.versioned
     .get({
-      path: IMPACT_ESCALATION_PILLS_URL,
+      path: IMPACT_ESCALATION_SUMMARY_URL,
       access: INTERNAL_ACCESS,
       security: { authz: { requiredPrivileges: [ESCALATIONS_API_PRIVILEGE_READ] } },
       summary: 'Get the impact entities across all escalations',

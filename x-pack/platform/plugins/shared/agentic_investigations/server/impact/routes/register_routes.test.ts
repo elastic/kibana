@@ -9,9 +9,9 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { createConversationNotFoundError } from '@kbn/agent-builder-common';
 import {
-  IMPACT_ESCALATION_PILLS_URL,
+  IMPACT_ESCALATION_SUMMARY_URL,
   IMPACT_INTERNAL_URL,
-  IMPACT_PROPOSAL_PILLS_URL,
+  IMPACT_PROPOSAL_SUMMARY_URL,
 } from '../../../common/impact/constants';
 import { ESCALATIONS_API_PRIVILEGE_READ } from '../../escalations/constants';
 import type { ImpactPillsService } from '../services/impact_pills_service';
@@ -134,11 +134,11 @@ describe('investigation impact routes', () => {
       gets.find(({ config }) => config.path === path);
 
     it('registers the escalation pills route only when escalations are enabled', () => {
-      expect(findGet(registerAndCollect({}).gets, IMPACT_ESCALATION_PILLS_URL)).toBeUndefined();
+      expect(findGet(registerAndCollect({}).gets, IMPACT_ESCALATION_SUMMARY_URL)).toBeUndefined();
 
       const route = findGet(
         registerAndCollect({}, undefined, undefined, { escalationsEnabled: true }).gets,
-        IMPACT_ESCALATION_PILLS_URL
+        IMPACT_ESCALATION_SUMMARY_URL
       );
 
       expect(route?.config.security?.authz?.requiredPrivileges).toEqual([
@@ -155,7 +155,7 @@ describe('investigation impact routes', () => {
         query: { origin: 'alertzero', categories: ['respond'], decidedWithinHours: 72 },
       });
 
-      await findGet(gets, IMPACT_PROPOSAL_PILLS_URL)?.handler({}, request, response);
+      await findGet(gets, IMPACT_PROPOSAL_SUMMARY_URL)?.handler({}, request, response);
 
       expect(forProposals).toHaveBeenCalledWith(request, request.query);
       expect(response.ok).toHaveBeenCalledWith({ body: { pills } });
@@ -171,7 +171,7 @@ describe('investigation impact routes', () => {
       const response = httpServerMock.createResponseFactory();
       const request = httpServerMock.createKibanaRequest();
 
-      await findGet(gets, IMPACT_ESCALATION_PILLS_URL)?.handler({}, request, response);
+      await findGet(gets, IMPACT_ESCALATION_SUMMARY_URL)?.handler({}, request, response);
 
       expect(response.ok).toHaveBeenCalledWith({ body: { pills } });
     });

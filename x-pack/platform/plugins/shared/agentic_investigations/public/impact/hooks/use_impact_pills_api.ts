@@ -12,8 +12,8 @@ import type { ProposalOrigin } from '@kbn/proposals-common';
 import type { ImpactPill } from '@kbn/agentic-investigations-common';
 import {
   AGENTIC_INVESTIGATIONS_API_VERSION,
-  IMPACT_ESCALATION_PILLS_URL,
-  IMPACT_PROPOSAL_PILLS_URL,
+  IMPACT_ESCALATION_SUMMARY_URL,
+  IMPACT_PROPOSAL_SUMMARY_URL,
 } from '../../../common';
 import type { ImpactPillsResponse } from '../../../common';
 import { impactPillsQueryKeys } from '../query_keys';
@@ -34,7 +34,7 @@ export const useProposalImpactPills = ({
   return useQuery({
     queryKey: [...impactPillsQueryKeys.proposals(), origin, categories, decidedWithinHours ?? null],
     queryFn: async (): Promise<ImpactPill[]> => {
-      const { pills } = await services.http.get<ImpactPillsResponse>(IMPACT_PROPOSAL_PILLS_URL, {
+      const { pills } = await services.http.get<ImpactPillsResponse>(IMPACT_PROPOSAL_SUMMARY_URL, {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
         query: {
           origin,
@@ -56,9 +56,12 @@ export const useEscalationImpactPills = ({ enabled = true }: { enabled?: boolean
   return useQuery({
     queryKey: impactPillsQueryKeys.escalations(),
     queryFn: async (): Promise<ImpactPill[]> => {
-      const { pills } = await services.http.get<ImpactPillsResponse>(IMPACT_ESCALATION_PILLS_URL, {
-        version: AGENTIC_INVESTIGATIONS_API_VERSION,
-      });
+      const { pills } = await services.http.get<ImpactPillsResponse>(
+        IMPACT_ESCALATION_SUMMARY_URL,
+        {
+          version: AGENTIC_INVESTIGATIONS_API_VERSION,
+        }
+      );
       return pills;
     },
     enabled,

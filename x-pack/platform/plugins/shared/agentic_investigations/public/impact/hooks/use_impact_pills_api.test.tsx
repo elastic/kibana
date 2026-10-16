@@ -12,8 +12,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { queryKeys as proposalsQueryKeys } from '@kbn/proposals-plugin/public';
 import {
   AGENTIC_INVESTIGATIONS_API_VERSION,
-  IMPACT_ESCALATION_PILLS_URL,
-  IMPACT_PROPOSAL_PILLS_URL,
+  IMPACT_ESCALATION_SUMMARY_URL,
+  IMPACT_PROPOSAL_SUMMARY_URL,
 } from '../../../common';
 import { escalationQueryKeys } from '../../escalations/query_keys';
 import { impactPillsQueryKeys } from '../query_keys';
@@ -56,7 +56,7 @@ describe('useProposalImpactPills', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(pills);
-    expect(http.get).toHaveBeenCalledWith(IMPACT_PROPOSAL_PILLS_URL, {
+    expect(http.get).toHaveBeenCalledWith(IMPACT_PROPOSAL_SUMMARY_URL, {
       version: AGENTIC_INVESTIGATIONS_API_VERSION,
       query: {
         origin: 'alertzero',
@@ -117,7 +117,7 @@ describe('useEscalationImpactPills', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(pills);
-    expect(http.get).toHaveBeenCalledWith(IMPACT_ESCALATION_PILLS_URL, {
+    expect(http.get).toHaveBeenCalledWith(IMPACT_ESCALATION_SUMMARY_URL, {
       version: AGENTIC_INVESTIGATIONS_API_VERSION,
     });
   });

@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { ApiPrivileges } from '@kbn/core-security-server';
-import { IMPACT_PROPOSAL_PILLS_URL } from '../../../common/impact/constants';
+import { IMPACT_PROPOSAL_SUMMARY_URL } from '../../../common/impact/constants';
 import type { ImpactRouteDependencies } from '../types';
 import { registerGetProposalImpactPillsRoute } from './get_proposal_impact_pills';
 
@@ -42,7 +42,7 @@ describe('registerGetProposalImpactPillsRoute', () => {
   it('requires the proposals read privilege', () => {
     const { config } = register();
 
-    expect(config.path).toBe(IMPACT_PROPOSAL_PILLS_URL);
+    expect(config.path).toBe(IMPACT_PROPOSAL_SUMMARY_URL);
     expect(config.security?.authz?.requiredPrivileges).toEqual([ApiPrivileges.read('proposals')]);
   });
 
