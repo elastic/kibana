@@ -585,15 +585,31 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
     return () => clearTimeout(id);
   }, [isStable]);
 
-  // Suppress tanstack's built-in scroll adjustments until both root AND
-  // children have stabilized. When the root yields corrections to a child
-  // (skipCorrections), hasStabilizedRef flips immediately but children
-  // haven't mounted yet — allowing adjustments at this point would cause
-  // root row resizes to shift the scroll position while the child's
-  // correction loop is still converging.
   virtualizerImpl.shouldAdjustScrollPositionOnItemSizeChange = (item) => {
+    // Suppress tanstack's built-in scroll adjustments until both root AND
+    // children have stabilized.
     if (!hasStabilizedRef.current) return false;
-    if (childController && !childController.haveAllRestoringChildrenStabilized()) return false;
+
+    if (
+      childController &&
+      /**
+       * When the root yields corrections to a child (i.e. skipCorrections),
+       * hasStabilizedRef flips immediately but it's children haven't mounted
+       * yet — allowing adjustments at this point would cause root row resizes to shift the scroll position
+       * while the child's correction loop is still converging.
+       */
+      (!childController.haveAllRestoringChildrenStabilized() ||
+        /**
+         * A row whose content is virtualized by an attached child resizes every time that child
+         * measures its own rows. The child already corrects the shared scroll offset for rows it
+         * measured above the viewport, and rows it measured below the viewport must not move the
+         * scroll at all, so we ensure the root does not compensate for these rows a second time.
+         */
+        childController.hasAttachedChildForRow(item.index))
+    ) {
+      return false;
+    }
+
     return item.start < (virtualizerImpl.scrollOffset ?? 0);
   };
 

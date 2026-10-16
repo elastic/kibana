@@ -450,6 +450,41 @@ describe('ChildVirtualizerController', () => {
     });
   });
 
+  describe('hasAttachedChildForRow', () => {
+    it('is true for a connected child sharing the root scroll element', () => {
+      controller.markRootStable();
+      flushRaf();
+      controller.connect('cell-a', 2);
+      flushRaf();
+
+      expect(controller.hasAttachedChildForRow(2)).toBe(true);
+      expect(controller.hasAttachedChildForRow(3)).toBe(false);
+    });
+
+    it('is false while the child is detached and true again once reattached', () => {
+      controller.markRootStable();
+      flushRaf();
+      const handle = controller.connect('cell-a', 2);
+      flushRaf();
+
+      handle.detachScrollElement();
+      expect(controller.hasAttachedChildForRow(2)).toBe(false);
+
+      handle.reattachScrollElement();
+      expect(controller.hasAttachedChildForRow(2)).toBe(true);
+    });
+
+    it('is false after the child disconnects', () => {
+      controller.markRootStable();
+      flushRaf();
+      const handle = controller.connect('cell-a', 2);
+      flushRaf();
+
+      handle.disconnect();
+      expect(controller.hasAttachedChildForRow(2)).toBe(false);
+    });
+  });
+
   describe('detach / reattach', () => {
     it('marks child as detached on detachScrollElement', () => {
       controller.markRootStable();
