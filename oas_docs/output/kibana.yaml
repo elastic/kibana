@@ -26313,6 +26313,40 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getDataViewsResponse:
+                  summary: Paginated data views response
+                  value:
+                    data:
+                      - data:
+                          index_pattern: logs-*
+                          name: Web logs
+                          time_field: '@timestamp'
+                        id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
+                        meta:
+                          created_at: '2026-01-15T10:00:00.000Z'
+                          created_by: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+                          managed: false
+                          namespaces:
+                            - default
+                          updated_at: '2026-01-16T08:30:00.000Z'
+                          updated_by: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+                          version: WzIsMV0=
+                      - data:
+                          index_pattern: metrics-*
+                          name: Metrics
+                        id: a1b2c3d4-d57a-11ef-9a52-4f3c2a8d0e1b
+                        meta:
+                          created_at: '2026-01-15T11:00:00.000Z'
+                          managed: false
+                          namespaces:
+                            - default
+                          updated_at: '2026-01-15T11:00:00.000Z'
+                          version: WzMsMV0=
+                    meta:
+                      page: 1
+                      per_page: 20
+                      total: 2
               schema:
                 additionalProperties: false
                 type: object
@@ -26431,6 +26465,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createDataViewRequest:
+                summary: Create a data view
+                value:
+                  index_pattern: logs-*
+                  name: Web logs
+                  time_field: '@timestamp'
             schema:
               additionalProperties: false
               type: object
@@ -26461,6 +26502,20 @@ paths:
         '201':
           content:
             application/json:
+              examples:
+                dataViewResponse:
+                  summary: Data view response
+                  value:
+                    data:
+                      index_pattern: logs-*
+                      name: Web logs
+                      time_field: '@timestamp'
+                    id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
+                    meta:
+                      managed: false
+                      namespaces:
+                        - default
+                      version: WzEsMV0=
               schema:
                 additionalProperties: false
                 type: object
@@ -26540,7 +26595,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The id of the data view.
+          in: path
           name: id
           required: true
           schema:
@@ -26572,7 +26628,8 @@ paths:
         Get a data view by id
       operationId: get-data-views-v2-id
       parameters:
-        - in: path
+        - description: The id of the data view.
+          in: path
           name: id
           required: true
           schema:
@@ -26583,6 +26640,20 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                dataViewResponse:
+                  summary: Data view response
+                  value:
+                    data:
+                      index_pattern: logs-*
+                      name: Web logs
+                      time_field: '@timestamp'
+                    id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
+                    meta:
+                      managed: false
+                      namespaces:
+                        - default
+                      version: WzEsMV0=
               schema:
                 additionalProperties: false
                 type: object
@@ -26666,6 +26737,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              updateDataViewRequest:
+                summary: Create or update a data view
+                value:
+                  index_pattern: logs-*
+                  name: Web logs
+                  time_field: '@timestamp'
             schema:
               additionalProperties: false
               type: object
@@ -26696,6 +26774,20 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                dataViewResponse:
+                  summary: Data view response
+                  value:
+                    data:
+                      index_pattern: logs-*
+                      name: Web logs
+                      time_field: '@timestamp'
+                    id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
+                    meta:
+                      managed: false
+                      namespaces:
+                        - default
+                      version: WzEsMV0=
               schema:
                 additionalProperties: false
                 type: object
@@ -26744,6 +26836,20 @@ paths:
         '201':
           content:
             application/json:
+              examples:
+                dataViewResponse:
+                  summary: Data view response
+                  value:
+                    data:
+                      index_pattern: logs-*
+                      name: Web logs
+                      time_field: '@timestamp'
+                    id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
+                    meta:
+                      managed: false
+                      namespaces:
+                        - default
+                      version: WzEsMV0=
               schema:
                 additionalProperties: false
                 type: object
