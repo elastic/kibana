@@ -33,9 +33,15 @@ export class DigitalExperiencePlugin
                 {
                   label: DIGITAL_EXPERIENCE_LABEL,
                   sortKey: 600,
-                  // Prefix match, so Applications stays selected in the Application view.
                   entries: [
-                    { label: APPLICATIONS_LABEL, app: DIGITAL_EXPERIENCE_FEATURE_ID, path: '/' },
+                    {
+                      label: APPLICATIONS_LABEL,
+                      app: DIGITAL_EXPERIENCE_FEATURE_ID,
+                      path: '/',
+                      // Every page belongs to Applications; `path: '/'` alone misses the app root,
+                      // whose router path is '' when the URL has no trailing slash.
+                      matchPath: () => true,
+                    },
                   ],
                 },
               ]

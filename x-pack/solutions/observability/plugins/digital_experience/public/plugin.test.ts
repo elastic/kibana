@@ -111,4 +111,14 @@ describe('DigitalExperiencePlugin', () => {
       });
     }
   });
+
+  it('keeps Applications selected on every page, including the app root', async () => {
+    const { sections$ } = setup({ show: true });
+
+    const [{ entries }] = (await firstValueFrom(sections$)) as Array<{
+      entries: Array<{ matchPath: (path: string) => boolean }>;
+    }>;
+
+    expect(['', '/', '/my-app'].map(entries[0].matchPath)).toStrictEqual([true, true, true]);
+  });
 });

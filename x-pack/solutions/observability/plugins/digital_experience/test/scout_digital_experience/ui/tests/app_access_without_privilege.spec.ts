@@ -20,7 +20,7 @@ test.describe(
     test('does not open the app by URL', async ({ pageObjects: { digitalExperience } }) => {
       await digitalExperience.gotoApplications();
 
-      await expect(digitalExperience.appNotFound).toBeVisible();
+      await expect(digitalExperience.permissionDenied).toBeVisible();
     });
   }
 );
