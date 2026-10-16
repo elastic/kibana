@@ -324,7 +324,7 @@ describe('applyYamlUpdate', () => {
     );
   });
 
-  it('does not log kibana.request fetcher on YAML updates when the self-client path is off', () => {
+  it('does not log kibana.request fetcher on YAML updates when the self-client path is off', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
     const yaml = [
@@ -343,7 +343,7 @@ describe('applyYamlUpdate', () => {
       '        skip_ssl_verification: true',
     ].join('\n');
 
-    applyYamlUpdate({
+    await applyYamlUpdate({
       workflowYaml: yaml,
       zodSchema,
       triggerDefinitions: [],
@@ -515,7 +515,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     );
   });
 
-  it('does not log kibana fetcher when the self-client path is off', () => {
+  it('does not log kibana fetcher when the self-client path is off', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
     const yaml = [
@@ -534,7 +534,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
       '        skip_ssl_verification: true',
     ].join('\n');
 
-    prepareWorkflowDocumentFromYaml({
+    await prepareWorkflowDocumentFromYaml({
       yaml,
       zodSchema,
       authenticatedUser: 'user1',
@@ -546,7 +546,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('does not log generated kibana.* fetcher when the self-client flag is off', () => {
+  it('does not log generated kibana.* fetcher when the self-client flag is off', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
     const yaml = [
@@ -564,7 +564,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
       '        skip_ssl_verification: true',
     ].join('\n');
 
-    prepareWorkflowDocumentFromYaml({
+    await prepareWorkflowDocumentFromYaml({
       yaml,
       zodSchema,
       authenticatedUser: 'user1',

@@ -210,6 +210,54 @@ describe('collectEsqlDiagnostics', () => {
     });
   });
 
+  describe('quoted scalars with escapes', () => {
+    const quotedStep = (query: string): string => `  - name: quoted
+    type: elasticsearch.esql.query
+    with:
+      query: ${query}
+`;
+
+    it.each([
+      ['a double-quoted query with \\"', String.raw`"FROM logs-app | WHERE host.name == \"web\""`],
+      ["a single-quoted query with ''", "'FROM logs-app | WHERE host.name == \"it''s\"'"],
+    ])('accepts %s', async (_name, query) => {
+      expect(await collectEsqlDiagnostics(workflow(quotedStep(query)), schemaCallbacks)).toEqual({
+        diagnostics: [],
+        notChecked: [],
+      });
+    });
+
+    it('reports an error in a decoded query at the start of the query', async () => {
+      const { diagnostics } = await collectEsqlDiagnostics(
+        workflow(quotedStep(String.raw`"FROM logs-app | WHERE host.name == \"web\" |"`)),
+        schemaCallbacks
+      );
+      expect(diagnostics).toEqual([
+        expect.objectContaining({ message: expect.stringMatching(/\(line 8, column 15\)$/) }),
+      ]);
+    });
+  });
+
+  it('ignores step-shaped data outside step lists', async () => {
+    const decoy = `{ name: decoy, type: elasticsearch.esql.query, with: { query: 'FROM logs-app | WHERE' } }`;
+    const yaml = `name: esql
+consts:
+  template: ${decoy}
+triggers:
+  - type: manual
+steps:
+  - name: post
+    type: http
+    with:
+      url: https://example.com
+      body: ${decoy}
+`;
+    expect(await collectEsqlDiagnostics(yaml, schemaCallbacks)).toEqual({
+      diagnostics: [],
+      notChecked: [],
+    });
+  });
+
   it('finds ES|QL steps nested in flow-control steps', async () => {
     const yaml = workflow(`  - name: loop
     type: foreach

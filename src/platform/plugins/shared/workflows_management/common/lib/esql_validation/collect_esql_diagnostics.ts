@@ -10,11 +10,14 @@
 import type { Node } from 'yaml';
 import { isMap, isScalar, isSeq, LineCounter, parseDocument } from 'yaml';
 import type { ESQLCallbacks } from '@kbn/esql-types';
+import { STEP_CHILD_CONTAINER_KEYS } from '@kbn/workflows';
 import type { WorkflowDiagnostic } from '@kbn/workflows/types/v1';
 import {
   ESQL_QUERY_STEP_TYPE,
   type EsqlStepRegion,
   extractEsqlRegionFromScalar,
+  getEsqlToValidate,
+  toFileRange,
 } from './extract_esql_region';
 import { type EsqlQueryDiagnostic, validateEsqlQuery } from './validate_esql_query';
 
@@ -54,10 +57,13 @@ export async function collectEsqlStepDiagnostics(
 
   const lineCounter = new LineCounter();
   const document = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
-  const locations = findEsqlSteps(document.contents, [], yaml);
+  const steps = isMap(document.contents) ? document.contents.get('steps', true) : null;
+  const locations = findEsqlSteps(steps as Node | null, ['steps'], yaml);
   const results = await Promise.all(
     locations.map((location) =>
-      validateEsqlQuery(location.region.esql, callbacks, { invalidateColumnsCache: true })
+      validateEsqlQuery(getEsqlToValidate(location.region), callbacks, {
+        invalidateColumnsCache: true,
+      })
     )
   );
 
@@ -87,7 +93,8 @@ export async function collectEsqlStepDiagnostics(
       );
     }
     for (const diagnostic of result.diagnostics) {
-      const { line, col } = lineCounter.linePos(region.contentStartInFile + diagnostic.start);
+      const { start } = toFileRange(region, diagnostic.start, diagnostic.end);
+      const { line, col } = lineCounter.linePos(start);
       diagnostics.push({ ...diagnostic, stepName, path, line, column: col });
     }
   });
@@ -116,7 +123,12 @@ export async function collectEsqlDiagnostics(
   };
 }
 
-/** Walks every map in the document and returns the ES|QL query steps, in document order. */
+const STEP_CONTAINER_KEYS: ReadonlySet<string> = new Set(STEP_CHILD_CONTAINER_KEYS);
+
+/**
+ * Walks step lists and returns the ES|QL query steps, in document order. Only
+ * step-list keys are followed, so step-shaped data under `with` is ignored.
+ */
 function findEsqlSteps(
   node: Node | null,
   path: Array<string | number>,
@@ -144,7 +156,7 @@ function findEsqlSteps(
   }
   for (const pair of node.items) {
     const key = isScalar(pair.key) ? pair.key.value : undefined;
-    if (typeof key === 'string' || typeof key === 'number') {
+    if (typeof key === 'string' && STEP_CONTAINER_KEYS.has(key)) {
       found.push(...findEsqlSteps(pair.value as Node, [...path, key], yaml));
     }
   }

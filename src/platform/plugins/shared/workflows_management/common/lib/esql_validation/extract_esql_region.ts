@@ -28,7 +28,29 @@ export interface EsqlStepRegion {
   contentEndInFile: number;
   /** YAML scalar style used by the author. */
   scalarStyle: EsqlScalarStyle;
+  /**
+   * The query YAML hands to the step, set only when the quoted source has
+   * escapes (`\"` or `''`) that ES|QL would reject.
+   */
+  decodedEsql?: string;
 }
+
+/** The query text to validate: the decoded value when the source has escapes. */
+export const getEsqlToValidate = ({ esql, decodedEsql }: EsqlStepRegion): string =>
+  decodedEsql ?? esql;
+
+/**
+ * Maps a diagnostic range in the validated query to file offsets. Offsets in a
+ * decoded query do not match the source, so the range covers the whole query.
+ */
+export const toFileRange = (
+  { contentStartInFile, contentEndInFile, decodedEsql }: EsqlStepRegion,
+  start: number,
+  end: number
+): { start: number; end: number } =>
+  decodedEsql === undefined
+    ? { start: contentStartInFile + start, end: contentStartInFile + end }
+    : { start: contentStartInFile, end: contentEndInFile };
 
 /**
  * Maps a `with.query` YAML scalar to the ES|QL substring and file offsets used
@@ -73,11 +95,15 @@ export function extractEsqlRegionFromScalar(
     }
     const contentStart = r0 + firstQuote + 1;
     const contentEnd = r0 + lastQuote;
+    const esql = modelText.slice(contentStart, contentEnd);
+    const hasEscapes = esql.includes(style === 'QUOTE_DOUBLE' ? '\\' : "''");
+    const decoded = valueNode.value;
     return {
-      esql: modelText.slice(contentStart, contentEnd),
+      esql,
       contentStartInFile: contentStart,
       contentEndInFile: contentEnd,
       scalarStyle: style,
+      ...(hasEscapes && typeof decoded === 'string' ? { decodedEsql: decoded } : {}),
     };
   }
 

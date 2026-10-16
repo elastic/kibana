@@ -72,6 +72,12 @@ const FIXTURES: Record<string, string> = {
     '    with:',
     '      query: "FROM logs-app | KEEP nope"',
   ].join('\n'),
+  'escaped quotes in a quoted scalar': [
+    '  - name: escaped',
+    '    type: elasticsearch.esql.query',
+    '    with:',
+    String.raw`      query: "FROM logs-app | WHERE host.name == \"web\" | KEEP nope"`,
+  ].join('\n'),
   'several steps': [
     step('first', ['FROM logs-app | KEEP a']),
     step('second', ['FROM other | LIMIT 1']),
@@ -124,6 +130,7 @@ describe('ES|QL validation parity: editor vs server', () => {
       'unknown index',
       'unknown field',
       'quoted scalar',
+      'escaped quotes in a quoted scalar',
       'several steps',
     ]);
   });

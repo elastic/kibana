@@ -12,7 +12,11 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { collectEsqlRegionsFromLookup } from './extract_esql_region';
-import type { EsqlStepRegion } from '../../../../../common/lib/esql_validation/extract_esql_region';
+import {
+  type EsqlStepRegion,
+  getEsqlToValidate,
+  toFileRange,
+} from '../../../../../common/lib/esql_validation/extract_esql_region';
 import {
   type EsqlQueryDiagnostic,
   validateEsqlQuery,
@@ -47,7 +51,7 @@ export async function validateEsqlSteps(
       return [];
     }
     const region = regions[regionIdx];
-    const result = await validateEsqlQuery(region.esql, callbacks);
+    const result = await validateEsqlQuery(getEsqlToValidate(region), callbacks);
     if (signal?.aborted) {
       return [];
     }
@@ -70,8 +74,11 @@ function toValidationResult(
   regionIdx: number,
   diagnosticIdx: number
 ): YamlValidationResult | null {
-  const startOffset = region.contentStartInFile + diagnostic.start;
-  const endOffset = region.contentStartInFile + diagnostic.end;
+  const { start: startOffset, end: endOffset } = toFileRange(
+    region,
+    diagnostic.start,
+    diagnostic.end
+  );
 
   const maxOffset = model.getValueLength();
   const safeStart = Math.min(startOffset, maxOffset);
