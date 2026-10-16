@@ -122,7 +122,6 @@ export const useFetchEntityDetailsHighlights = ({
   anonymizationFields: AnonymizationFieldResponse[];
   entityType: string;
   entityIdentifier: string;
-  /** `resolved` generates and persists a resolution-group summary, kept separate from the single-entity one. */
   mode?: EntityViewMode;
   storedSummary?: PersistedEntityAiSummary | null;
   /** Current entity signal values — snapshotted into the summary at generation time for staleness detection. */

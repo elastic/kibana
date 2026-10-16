@@ -40,7 +40,10 @@ import type {
   EntityDetailsHighlightsResponse,
 } from '../../../../common/api/entity_analytics/entity_details/highlights.gen';
 import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
-import { RESOLVED_TO_FIELD } from '../../../../common/entity_analytics/entity_store/resolution_group';
+import {
+  RESOLVED_MODE_MAX_RECORDS,
+  RESOLVED_TO_FIELD,
+} from '../../../../common/entity_analytics/entity_store/resolution_group';
 import { getThreshold } from '../../../../common/utils/ml';
 import { isSecurityJob } from '../../../../common/machine_learning/is_security_job';
 import {
@@ -160,12 +163,6 @@ const getEmptyVulnerabilitiesTotal = (): Record<string, number> => ({
   [VULNERABILITIES_RESULT_EVALUATION.LOW]: 0,
 });
 
-/**
- * Maximum number of resolution-group members (target included) whose signals are folded into a
- * `mode: resolved` summary. Keeps the LLM payload bounded; larger groups are cut to the highest-risk aliases.
- */
-export const HIGHLIGHTS_MAX_GROUP_MEMBERS = 50;
-
 type ResolutionGroupSummary = NonNullable<
   EntityDetailsHighlightsResponse['summary']['resolutionGroup']
 >;
@@ -196,7 +193,10 @@ const collectAnomalies = (enrichedEntities: EnrichedEntity[]): AnomalyRecord[] =
   );
 };
 
-const getMemberIdentityValues = (enrichedEntities: EnrichedEntity[], entityField: string): string[] =>
+const getMemberIdentityValues = (
+  enrichedEntities: EnrichedEntity[],
+  entityField: string
+): string[] =>
   enrichedEntities.flatMap(({ entity }) => {
     const value: unknown = get(entity, entityField);
     if (typeof value === 'string') {
@@ -494,7 +494,7 @@ export const entityDetailsHighlightsServiceFactory = ({
             })),
             asset_criticality_contribution_score:
               enrichedEntity.riskScore.category_2_score != null
-                ? formatScoreForSummary(target.riskScore.category_2_score)
+                ? formatScoreForSummary(enrichedEntity.riskScore.category_2_score)
                 : '0',
           },
         ]
@@ -695,7 +695,7 @@ export const entityDetailsHighlightsServiceFactory = ({
             ...sharedOpts,
             filter: { term: { [RESOLVED_TO_FIELD]: entityIdentifier } },
             // The target takes one of the member slots.
-            size: HIGHLIGHTS_MAX_GROUP_MEMBERS - 1,
+            size: RESOLVED_MODE_MAX_RECORDS - 1,
             // Highest-risk aliases first, so truncation drops the least risky ones.
             sort: [{ 'entity.risk.calculated_score_norm': 'desc' }],
           })

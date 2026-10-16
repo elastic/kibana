@@ -116,7 +116,6 @@ export class EntityMetadataClient {
   }: {
     entityId: string;
     eventAction: string;
-    /** Extra clauses AND-ed with the entity id / event action, e.g. a doc-type variant. */
     filter?: QueryDslQueryContainer[];
   }): Promise<TDoc | null> {
     return runWithSpan({

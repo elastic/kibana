@@ -50,7 +50,6 @@ export const useFetchPersistedAiSummary = ({
 }: {
   entityType: string;
   entityIdentifier: string;
-  /** Which persisted variant to read; single-entity and resolution-group summaries are stored separately. */
   mode?: EntityViewMode;
   skip?: boolean;
 }): UseFetchPersistedAiSummaryResult => {

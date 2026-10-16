@@ -7,10 +7,8 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EnrichedEntity } from '../enriched_entity';
-import {
-  entityDetailsHighlightsServiceFactory,
-  HIGHLIGHTS_MAX_GROUP_MEMBERS,
-} from './entity_details_highlights_service';
+import { RESOLVED_MODE_MAX_RECORDS } from '../../../../common/entity_analytics/entity_store/resolution_group';
+import { entityDetailsHighlightsServiceFactory } from './entity_details_highlights_service';
 
 const mockGetEnrichedEntities = jest.fn();
 
@@ -151,7 +149,7 @@ describe('entityDetailsHighlightsServiceFactory.getV2Data', () => {
         expect.objectContaining({
           filter: { term: { 'entity.relationships.resolution.resolved_to': 'user:carol' } },
           // The target takes one of the member slots.
-          size: HIGHLIGHTS_MAX_GROUP_MEMBERS - 1,
+          size: RESOLVED_MODE_MAX_RECORDS - 1,
           sort: [{ 'entity.risk.calculated_score_norm': 'desc' }],
         })
       );

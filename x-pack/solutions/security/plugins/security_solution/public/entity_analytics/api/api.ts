@@ -768,7 +768,6 @@ export const useEntityAnalyticsRoutes = () => {
         from: number;
         to: number;
         connectorId: string;
-        /** `resolved` summarizes the entity's whole resolution group; defaults to `single` server-side. */
         mode?: EntityViewMode;
       };
       signal?: AbortSignal;

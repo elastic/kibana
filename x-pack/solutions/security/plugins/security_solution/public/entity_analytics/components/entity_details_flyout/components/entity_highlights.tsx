@@ -58,10 +58,6 @@ export const EntityHighlightsAccordion: React.FC<{
   entityType: EntityType;
   entityRecord?: Entity | null;
   refetchEntityRecord?: () => void;
-  /**
-   * `resolved` summarizes the entity's whole resolution group (v2 flyout group view) and
-   * reads/writes a persisted summary separate from the single-entity one. Defaults to `single`.
-   */
   mode?: EntityViewMode;
 }> = ({ entityType, entityIdentifier, entityRecord, refetchEntityRecord, mode = 'single' }) => {
   // Degrade gracefully on surfaces that render outside `AssistantProvider` (e.g. the Agent

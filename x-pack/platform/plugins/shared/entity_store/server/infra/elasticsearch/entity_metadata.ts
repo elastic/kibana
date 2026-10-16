@@ -91,7 +91,6 @@ export const getLatestEntityMetadataDoc = async <TDoc>(
     index: string;
     entityId: string;
     eventAction: string;
-    /** Extra clauses AND-ed with the entity id / event action, e.g. a doc-type variant. */
     filter?: QueryDslQueryContainer[];
   }
 ): Promise<TDoc | null> => {

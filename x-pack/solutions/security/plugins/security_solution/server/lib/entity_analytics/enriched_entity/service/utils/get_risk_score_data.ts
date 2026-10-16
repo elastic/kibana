@@ -18,7 +18,6 @@ interface GetRiskScoreDataOptions {
   getAlerts?: boolean;
   logger: Logger;
   spaceId: string;
-  /** Restrict to one `score_type` (e.g. `resolution` for a group's score); any type when omitted. */
   scoreType?: RiskScoreType;
 }
 
