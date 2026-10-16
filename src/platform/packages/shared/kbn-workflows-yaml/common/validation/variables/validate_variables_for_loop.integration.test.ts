@@ -27,7 +27,6 @@ import { validateLiquidForLoopCollections } from './validate_liquid_for_loop_col
 import { validateVariables } from './validate_variables';
 import { positionAt } from './__fixtures__/text_position';
 import { extendContextWithTemplateLocals } from '../context/extend_context_with_template_locals';
-import { FOREACH_ITEM_SCHEMA_DESC } from '../context/get_foreach_state_schema';
 import { createMockWorkflowContextRegistry } from '../context/registry.mock';
 import { createStepContextResolver } from '../context/step_context_resolver';
 
@@ -309,7 +308,7 @@ steps:
     expect(innerResults.find((r) => r.id === 'inner-var')?.severity).toBeNull();
   });
 
-  it('warns instead of erroring for a foreach step iterating an ES|QL result cell', () => {
+  it('does not report a foreach step iterating an ES|QL result cell', () => {
     const esqlGraph = WorkflowGraph.fromWorkflowDefinition(foreachStepEsqlCellWorkflowDefinition);
     const esqlLineCounter = new LineCounter();
     const esqlDoc = parseDocument(FOREACH_STEP_ESQL_CELL_YAML, { lineCounter: esqlLineCounter });
@@ -336,9 +335,6 @@ steps:
       FOREACH_STEP_ESQL_CELL_YAML
     );
 
-    expect(results.filter((r) => r.severity === 'error')).toHaveLength(0);
-    const collectionResult = results.find((r) => r.id === collectionItem?.id);
-    expect(collectionResult?.severity).toBe('warning');
-    expect(collectionResult?.message).toBe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE);
+    expect(results.filter(({ severity }) => severity !== null)).toEqual([]);
   });
 });

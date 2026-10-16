@@ -192,7 +192,7 @@ describe('validateVariable', () => {
     });
   });
 
-  it('should return warning for unknown type', () => {
+  it('should not report a diagnostic for unknown type, only the hover', () => {
     const variableItem = createVariableItem({ key: 'unknownVar' });
     mockParseVariablePath.mockReturnValue({
       errors: null,
@@ -203,12 +203,14 @@ describe('validateVariable', () => {
     const result = validateVariable(variableItem, mockContext);
 
     expect(result).toMatchObject({
-      message: "Variable unknownVar cannot be validated, because it's type is unknown",
-      severity: 'warning',
+      message: null,
+      severity: null,
       owner: 'variable-validation',
-      ruleId: 'unknownVariableType',
       hoverMessage: expect.stringContaining('(property) unknownVar:'),
     });
+    expect(
+      validateVariable(variableItem, mockContext, { includeEditorDecorations: false })
+    ).toBeNull();
   });
 
   it('should return valid result with hover message for valid variable', () => {

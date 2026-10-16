@@ -217,7 +217,7 @@ describe('getForeachCollectionDiagnostic', () => {
     expect(unresolved.description).toBe(FOREACH_ITEM_SCHEMA_DESC.UNRESOLVED_PATH);
   });
 
-  it('returns warning when the collection type cannot be narrowed to an array', () => {
+  it('returns no diagnostic when the collection type cannot be narrowed to an array', () => {
     // Mirrors `types_field_value` from the generated Elasticsearch schemas: every
     // ES|QL/ES result cell is typed by this union, with no array branch.
     const stepContext = DynamicStepContextSchema.extend({
@@ -234,16 +234,13 @@ describe('getForeachCollectionDiagnostic', () => {
     expect(itemSchema.description).toBe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE);
     expect(
       getForeachCollectionDiagnostic(itemSchema, 'steps.run_query.output.values[0][0]')
-    ).toEqual({
-      message: FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE,
-      severity: 'warning',
-    });
+    ).toBeNull();
   });
 
   it.each([
     ['unknown', z.unknown()],
     ['any', z.any()],
-  ])('returns warning when the collection type is %s', (_name, outputSchema) => {
+  ])('returns no diagnostic when the collection type is %s', (_name, outputSchema) => {
     const stepContext = DynamicStepContextSchema.extend({
       steps: z.object({
         set_exception_list_id: z.object({
@@ -254,10 +251,7 @@ describe('getForeachCollectionDiagnostic', () => {
     const path = 'steps.set_exception_list_id.output.exception_list_id';
     const itemSchema = getForeachItemSchema(stepContext, path);
     expect(itemSchema.description).toBe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE);
-    expect(getForeachCollectionDiagnostic(itemSchema, path)).toEqual({
-      message: FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE,
-      severity: 'warning',
-    });
+    expect(getForeachCollectionDiagnostic(itemSchema, path)).toBeNull();
   });
 
   it.each([
@@ -273,16 +267,14 @@ describe('getForeachCollectionDiagnostic', () => {
     );
   });
 
-  it('returns warning for runtime JSON string collections', () => {
+  it('returns no diagnostic for runtime JSON string collections', () => {
     const stepContext = DynamicStepContextSchema.extend({
       steps: z.object({
         previous: z.object({ output: z.string() }),
       }),
     });
     const runtimeJson = getForeachItemSchema(stepContext, 'steps.previous.output');
-    expect(getForeachCollectionDiagnostic(runtimeJson, 'steps.previous.output')).toEqual({
-      message: FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON,
-      severity: 'warning',
-    });
+    expect(runtimeJson.description).toBe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON);
+    expect(getForeachCollectionDiagnostic(runtimeJson, 'steps.previous.output')).toBeNull();
   });
 });

@@ -17,6 +17,7 @@ import { InvalidForeachParameterError } from '../context/errors';
 import {
   FOREACH_ITEM_SCHEMA_DESC,
   getForeachItemSchema,
+  isRuntimeResolvedItemSchema,
 } from '../context/get_foreach_state_schema';
 
 export interface VariableValidationOptions {
@@ -46,7 +47,7 @@ export function validateVariable(
   if (type === 'foreach') {
     try {
       const itemSchema = getForeachItemSchema(context, key);
-      if (itemSchema instanceof z.ZodUnknown) {
+      if (itemSchema instanceof z.ZodUnknown && !isRuntimeResolvedItemSchema(itemSchema)) {
         return {
           ...variableItem,
           message: itemSchema.description ?? FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON,
@@ -138,17 +139,8 @@ export function validateVariable(
     };
   }
 
-  if (refSchema instanceof z.ZodUnknown) {
-    return {
-      ...variableItem,
-      message: `Variable ${parsedPath.propertyPath} cannot be validated, because it's type is unknown`,
-      severity: 'warning',
-      owner: 'variable-validation',
-      ruleId: 'unknownVariableType',
-      hoverMessage: hoverMessageFor(parsedPath.propertyPath, refSchema),
-    };
-  }
-
+  // An unknown type (e.g. untyped step output) resolves at runtime and is not reported:
+  // the user cannot act on it
   if (!withDecorations) {
     return null;
   }
