@@ -497,6 +497,17 @@ describe('xyChart time buckets and bins', () => {
     expect(valid(days({ interval: { value: 1, unit: 'd' } }))).toBe(false);
   });
 
+  it('needs every bucket to end at a real moment', () => {
+    const rule =
+      'every bucket `interval` starts, at each time on the axis or at `domain.from`, ends at a real moment';
+    for (const [value, unit] of [
+      [1_000_000_000, 'day'],
+      [3_000_000_000, 'hour'],
+    ] as const) {
+      expect(messages(days({ interval: { value, unit } }))).toEqual([rule]);
+    }
+  });
+
   it('takes a positive bin width on a number axis', () => {
     const bins = (interval: number) => ({
       ...base,

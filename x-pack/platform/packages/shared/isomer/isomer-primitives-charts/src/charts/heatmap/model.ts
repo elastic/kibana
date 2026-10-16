@@ -12,6 +12,7 @@ import {
   defaultGranularity,
   formatTime,
   type Granularity,
+  shortestBucket,
   timeValue,
 } from '../../model/time';
 import type { Tone } from '../../model/tone';
@@ -57,7 +58,14 @@ export interface ResolvedHeatmap {
   /** Columns, left to right. */
   x: readonly HeatmapPosition[];
   /** Present for a `time` x: where its times are read and how finely they print. */
-  time?: { timeZone: string; granularity: Granularity };
+  time?: {
+    timeZone: string;
+    granularity: Granularity;
+    /** The shortest bucket in milliseconds, present with an `interval`. */
+    interval?: number;
+    /** The queried window in milliseconds since the epoch. */
+    window?: { from: number; to: number };
+  };
   /** Rows, top to bottom; `undefined` for a one-row heatmap. */
   y: readonly HeatmapPosition[] | undefined;
   /** `values[row][column]`, one row when `y` is `undefined`: a number, `null` for a measured gap, `undefined` for a cell left out. */
@@ -120,13 +128,27 @@ const categoryPositions = (
   return all.map(({ key }, index) => ({ key, label: labels[index]! }));
 };
 
-const timeOf = ({ x, cells }: HeatmapNode): ResolvedHeatmap['time'] =>
-  x.type === 'time'
-    ? {
-        timeZone: x.timeZone ?? DEFAULT_TIME_ZONE,
-        granularity: x.granularity ?? defaultGranularity(cells.map((cell) => cell.x)),
-      }
-    : undefined;
+const timeOf = ({ x, cells }: HeatmapNode): ResolvedHeatmap['time'] => {
+  if (x.type !== 'time') {
+    return undefined;
+  }
+  const timeZone = x.timeZone ?? DEFAULT_TIME_ZONE;
+  const window = x.domain && {
+    from: timeValue(x.domain.from),
+    to: timeValue(x.domain.to),
+  };
+  const starts = [...new Set(cells.map((cell) => timeValue(cell.x)))].sort((a, b) => a - b);
+  return {
+    timeZone,
+    granularity: x.granularity ?? defaultGranularity(cells.map((cell) => cell.x)),
+    ...(x.interval === undefined
+      ? {}
+      : {
+          interval: shortestBucket(starts, x.interval, timeZone, window?.from ?? 0),
+        }),
+    ...(window === undefined ? {} : { window }),
+  };
+};
 
 const xPositions = (
   { x, cells }: HeatmapNode,

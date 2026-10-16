@@ -13,6 +13,7 @@ import {
   defaultGranularity,
   formatTime,
   type Granularity,
+  shortestBucket,
   timeValue,
 } from '../../model/time';
 import type { Tone } from '../../model/tone';
@@ -104,13 +105,7 @@ const timeOf = (node: XyChartNode): ResolvedXy['time'] => {
     ...(interval === undefined
       ? {}
       : {
-          // The shortest bucket, or the closest two starts if nearer.
-          interval: Math.min(
-            ...(starts.length === 0 ? [window?.from ?? 0] : starts).map(
-              (start) => bucketEnd(start, interval, timeZone) - start
-            ),
-            ...starts.slice(1).map((start, index) => start - starts[index]!)
-          ),
+          interval: shortestBucket(starts, interval, timeZone, window?.from ?? 0),
         }),
     ...(window === undefined ? {} : { window }),
   };

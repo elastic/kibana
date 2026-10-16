@@ -7,7 +7,7 @@
 
 import { z } from '@elastic/isomer-sdk';
 
-import { statedRefine } from './cross_field';
+import { crossRefine, statedRefine } from './cross_field';
 import { labelText } from './text';
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -159,6 +159,9 @@ export const INTERVAL_UNITS = [
   'year',
 ] as const;
 
+export const intervalRule =
+  'every bucket `interval` starts, at each time on the axis or at `domain.from`, ends at a real moment';
+
 export const timeIntervalSchema = () =>
   z
     .object({
@@ -167,7 +170,7 @@ export const timeIntervalSchema = () =>
     })
     .strict()
     .describe(
-      'The bucket each time starts, e.g. `{ "value": 1, "unit": "day" }`. Calendar units follow the axis time zone.'
+      `The bucket each time starts, e.g. \`{ "value": 1, "unit": "day" }\`. Calendar units follow the axis time zone; ${intervalRule}.`
     );
 
 export type TimeInterval = z.infer<ReturnType<typeof timeIntervalSchema>>;
@@ -201,7 +204,15 @@ const wallClock = (instant: number, timeZone: string): number => {
   );
 };
 
-/** Where a bucket starting at `start` ends, stepping calendar units on the wall clock in `timeZone`. */
+/** The ECMAScript `Date` range, in milliseconds either side of the epoch. */
+const MAX_INSTANT = 8.64e15;
+
+const isInstant = (value: number): boolean => Math.abs(value) <= MAX_INSTANT;
+
+/**
+ * Where a bucket starting at `start` ends, stepping calendar units on the wall clock in `timeZone`;
+ * `NaN` when the end falls outside the `Date` range.
+ */
 export const bucketEnd = (
   start: number,
   { value, unit }: TimeInterval,
@@ -209,7 +220,8 @@ export const bucketEnd = (
 ): number => {
   const fixed = FIXED_MS[unit];
   if (fixed !== undefined) {
-    return start + value * fixed;
+    const end = start + value * fixed;
+    return isInstant(end) ? end : Number.NaN;
   }
   const wall = new Date(wallClock(start, timeZone));
   if (unit === 'year') {
@@ -221,5 +233,52 @@ export const bucketEnd = (
   }
   const target = wall.getTime();
   const guess = target - (wallClock(start, timeZone) - start);
-  return target - (wallClock(guess, timeZone) - guess);
+  if (!isInstant(target) || !isInstant(guess)) {
+    return Number.NaN;
+  }
+  const end = target - (wallClock(guess, timeZone) - guess);
+  return isInstant(end) ? end : Number.NaN;
 };
+
+export const windowRule = '`domain.from` is before `domain.to`';
+
+export const timeWindowSchema = () =>
+  z
+    .object({ from: isoTime(), to: isoTime() })
+    .strict()
+    .check(
+      crossRefine(({ from, to }) => timeValue(from) < timeValue(to), {
+        error: windowRule,
+        rule: windowRule,
+      })
+    );
+
+/** The shortest bucket at any of `starts`, or the closest two starts if nearer; at `fallback` when there are none. */
+export const shortestBucket = (
+  starts: readonly number[],
+  interval: TimeInterval,
+  timeZone: string,
+  fallback: number
+): number =>
+  Math.min(
+    ...(starts.length === 0 ? [fallback] : starts).map(
+      (start) => bucketEnd(start, interval, timeZone) - start
+    ),
+    ...starts.slice(1).map((start, index) => start - starts[index]!)
+  );
+
+/** Whether every bucket {@link shortestBucket} measures over `times` ends at a real moment, per {@link intervalRule}. */
+export const bucketsResolve = (
+  times: readonly string[],
+  interval: TimeInterval,
+  timeZone: string,
+  domainFrom: string | undefined
+): boolean =>
+  Number.isFinite(
+    shortestBucket(
+      [...new Set(times.map(timeValue))].sort((a, b) => a - b),
+      interval,
+      timeZone,
+      domainFrom === undefined ? 0 : timeValue(domainFrom)
+    )
+  );

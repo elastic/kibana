@@ -625,6 +625,69 @@ describe('heatmap selection', () => {
   });
 });
 
+describe('heatmap time buckets', () => {
+  const timed = (x: Record<string, unknown>) => ({
+    type: 'heatmap',
+    x: { type: 'time', ...x },
+    cells: [
+      { x: '2026-10-14T00:00:00Z', value: 1 },
+      { x: '2026-10-14T06:00:00Z', value: 2 },
+    ],
+  });
+
+  it('needs a queried window to run forward, in the cells’ kind of time', () => {
+    expect(
+      valid(
+        timed({
+          domain: { from: '2026-10-13T22:00:00Z', to: '2026-10-15T00:00:00Z' },
+        })
+      )
+    ).toBe(true);
+    expect(
+      messages(
+        timed({
+          domain: { from: '2026-10-15T00:00:00Z', to: '2026-10-13T22:00:00Z' },
+        })
+      )
+    ).toEqual(['`domain.from` is before `domain.to`']);
+    expect(messages(timed({ domain: { from: '2026-10-13', to: '2026-10-15' } }))).toEqual([
+      'the times on one axis are all dates or all date-times',
+      'the times on one axis are all dates or all date-times',
+    ]);
+  });
+
+  it('resolves the bucket and the window in milliseconds', () => {
+    const { time } = resolveHeatmap(
+      timed({
+        interval: { value: 6, unit: 'hour' },
+        domain: { from: '2026-10-13T22:00:00Z', to: '2026-10-15T00:00:00Z' },
+      }) as HeatmapNode
+    );
+    expect(time).toMatchObject({
+      interval: 6 * 3_600_000,
+      window: {
+        from: Date.parse('2026-10-13T22:00:00Z'),
+        to: Date.parse('2026-10-15T00:00:00Z'),
+      },
+    });
+    expect(valid(timed({ interval: { value: 0, unit: 'hour' } }))).toBe(false);
+  });
+
+  it('needs every bucket to end at a real moment', () => {
+    const rule =
+      'every bucket `interval` starts, at each time on the axis or at `domain.from`, ends at a real moment';
+    for (const [value, unit] of [
+      [1_000_000_000, 'day'],
+      [3_000_000_000, 'hour'],
+    ] as const) {
+      expect(messages(timed({ interval: { value, unit } }))).toEqual([rule]);
+    }
+    expect(
+      messages({ ...timed({ interval: { value: 1_000_000_000, unit: 'month' } }), cells: [] })
+    ).toEqual([rule]);
+  });
+});
+
 describe('heatmap grid', () => {
   const rule = `its columns times its rows, declared categories included, are at most ${MAX_GRID_CELLS}`;
   const side = Math.ceil(Math.sqrt(MAX_GRID_CELLS)) + 1;

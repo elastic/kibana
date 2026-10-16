@@ -97,10 +97,10 @@ describe('stated rules', () => {
     expect(Object.fromEntries(rows.map(({ type, checks }) => [type, checks.length]))).toEqual({
       donut: 8,
       gauge: 11,
-      heatmap: 17,
+      heatmap: 21,
       metricTrend: 12,
       treemap: 6,
-      xyChart: 27,
+      xyChart: 28,
     });
   });
 
