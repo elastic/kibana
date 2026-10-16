@@ -7,15 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { FLEET_SCHEMA_ID_MAX_LENGTH } from '../../constants';
-
 import { NewOutputSchema, OutputResponseItemSchema, UpdateOutputSchema } from '../models';
 import { ListResponseSchema } from '../../routes/schema/utils';
 
 export const GetOneOutputRequestSchema = {
   params: schema.object({
-    outputId: schema.string({
-      maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+    outputId: schema.savedObjectId({
+      minLength: 0,
       meta: { description: 'The ID of the output' },
     }),
   }),
@@ -23,15 +21,15 @@ export const GetOneOutputRequestSchema = {
 
 export const DeleteOutputRequestSchema = {
   params: schema.object({
-    outputId: schema.string({
-      maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+    outputId: schema.savedObjectId({
+      minLength: 0,
       meta: { description: 'The ID of the output' },
     }),
   }),
 };
 
 export const DeleteOutputResponseSchema = schema.object({
-  id: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
+  id: schema.savedObjectId({ minLength: 0 }),
 });
 
 export const GenerateLogstashApiKeyResponseSchema = schema.object({
@@ -48,8 +46,8 @@ export const PostOutputRequestSchema = {
 
 export const PutOutputRequestSchema = {
   params: schema.object({
-    outputId: schema.string({
-      maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+    outputId: schema.savedObjectId({
+      minLength: 0,
       meta: { description: 'The ID of the output' },
     }),
   }),
@@ -58,8 +56,8 @@ export const PutOutputRequestSchema = {
 
 export const GetLatestOutputHealthRequestSchema = {
   params: schema.object({
-    outputId: schema.string({
-      maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+    outputId: schema.savedObjectId({
+      minLength: 0,
       meta: { description: 'The ID of the output' },
     }),
   }),

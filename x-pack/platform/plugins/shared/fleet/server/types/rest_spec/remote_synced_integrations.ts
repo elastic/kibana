@@ -6,12 +6,10 @@
  */
 import { schema } from '@kbn/config-schema';
 
-import { FLEET_SCHEMA_ID_MAX_LENGTH } from '../../constants';
-
 export const GetRemoteSyncedIntegrationsInfoRequestSchema = {
   params: schema.object({
-    outputId: schema.string({
-      maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+    outputId: schema.savedObjectId({
+      minLength: 0,
       meta: { description: 'The ID of the output' },
     }),
   }),

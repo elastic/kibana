@@ -204,6 +204,25 @@ describe('schema field length limits', () => {
       NewAgentPolicySchema.validate({ ...minValid, data_output_id: 'a'.repeat(513) })
     ).toThrow();
   });
+
+  // The platform string helpers default to minLength: 1. These fields are adopted with an
+  // explicit minLength: 0 so that empty strings keep validating as they did before — Fleet's
+  // own package policy form seeds id/output fields with ''.
+  it.each([
+    ['id', { id: '' }],
+    ['data_output_id', { data_output_id: '' }],
+    ['monitoring_output_id', { monitoring_output_id: '' }],
+    ['download_source_id', { download_source_id: '' }],
+    ['fleet_server_host_id', { fleet_server_host_id: '' }],
+    ['space_ids', { space_ids: [''] }],
+    ['description', { description: '' }],
+  ])('still accepts an empty %s', (_name, field) => {
+    expect(() => NewAgentPolicySchema.validate({ ...minValid, ...field })).not.toThrow();
+  });
+
+  it('still requires a non-empty policy name', () => {
+    expect(() => NewAgentPolicySchema.validate({ ...minValid, name: '' })).toThrow();
+  });
 });
 
 describe('FullAgentPolicySchema', () => {

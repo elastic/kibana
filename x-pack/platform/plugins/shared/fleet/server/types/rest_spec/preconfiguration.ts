@@ -7,8 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { FLEET_SCHEMA_ID_MAX_LENGTH } from '../../constants';
-
 import { PreconfiguredAgentPoliciesSchema, PreconfiguredPackagesSchema } from '../models';
 
 export const PutPreconfigurationSchema = {
@@ -20,6 +18,6 @@ export const PutPreconfigurationSchema = {
 
 export const PostResetOnePreconfiguredAgentPoliciesSchema = {
   params: schema.object({
-    agentPolicyId: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
+    agentPolicyId: schema.savedObjectId({ minLength: 0 }),
   }),
 };

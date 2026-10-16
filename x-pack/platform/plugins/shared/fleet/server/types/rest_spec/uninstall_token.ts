@@ -17,8 +17,8 @@ import { ListResponseSchema } from '../../routes/schema/utils';
 export const GetUninstallTokensMetadataRequestSchema = {
   query: schema.object({
     policyId: schema.maybe(
-      schema.string({
-        maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+      schema.savedObjectId({
+        minLength: 0,
         meta: { description: 'Partial match filtering for policy IDs' },
       })
     ),
@@ -42,8 +42,8 @@ export const GetUninstallTokensMetadataRequestSchema = {
 };
 
 const UninstallTokenMetadataSchema = schema.object({
-  id: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
-  policy_id: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
+  id: schema.savedObjectId({ minLength: 0 }),
+  policy_id: schema.savedObjectId({ minLength: 0 }),
   policy_name: schema.maybe(
     schema.oneOf([schema.literal(null), schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH })])
   ),
@@ -57,8 +57,8 @@ export const GetUninstallTokensMetadataResponseSchema = ListResponseSchema(
 
 export const GetUninstallTokenRequestSchema = {
   params: schema.object({
-    uninstallTokenId: schema.string({
-      maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+    uninstallTokenId: schema.savedObjectId({
+      minLength: 0,
       meta: { description: 'The ID of the uninstall token' },
     }),
   }),
@@ -72,8 +72,8 @@ export const GetUninstallTokenResponseSchema = schema.object({
 
 export const RotateUninstallTokenRequestSchema = {
   params: schema.object({
-    agentPolicyId: schema.string({
-      maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+    agentPolicyId: schema.savedObjectId({
+      minLength: 0,
       meta: { description: 'The ID of the agent policy whose uninstall token should be rotated' },
     }),
   }),
