@@ -440,6 +440,12 @@ describe('useAgentDetection', () => {
           expect(result.current.summaryByInstanceId.s3.issue).toEqual({ type: 'not_running' });
         });
 
+        it('allows more than the roughly 5 minutes an OTel integration took to start locally', () => {
+          const OBSERVED_START_MS = 5 * 60 * 1000;
+
+          expect(OTEL_NOT_RUNNING_GRACE_MS).toBeGreaterThan(OBSERVED_START_MS);
+        });
+
         it('stays below the detection timeout, so a real failure shows before it gives up', () => {
           const DETECTION_TIMEOUT_MS = 10 * 60 * 1000;
 

@@ -171,11 +171,12 @@ export const assessAgent = ({
 export const NOT_RUNNING_GRACE_MS = 60_000;
 
 /**
- * Longer for OTel integrations: adding one to a policy restarts the agent's OTel collector, and a
- * local run took about 5 minutes to bring its units up. Still below the 10 minute detection
- * timeout, so a real failure shows before the tile gives up waiting for data.
+ * Longer for OTel integrations: adding one to a policy restarts the agent's OTel collector, and
+ * two local runs each took about 5 minutes to bring its units up, so this leaves headroom for a
+ * slower machine. Still below the 10 minute detection timeout, so a real failure shows before the
+ * tile gives up waiting for data.
  */
-export const OTEL_NOT_RUNNING_GRACE_MS = 6 * 60_000;
+export const OTEL_NOT_RUNNING_GRACE_MS = 8 * 60_000;
 
 /** When each `<instance>:<agent>` was first seen not running. */
 export type NotRunningSince = Record<string, number>;
