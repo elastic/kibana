@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import pMap from 'p-map';
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { ServiceAccountBoundWorkload } from '@kbn/core-security-common';
 import type {
   CoreSecurityDelegateServiceAccounts,
   DeleteServiceAccountResult,
@@ -25,7 +26,6 @@ import type { EnsureClusterPrivilegeParams } from './cluster_privilege';
 import { ensureClusterPrivilege } from './cluster_privilege';
 import type { ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
-import type { ServiceAccountBoundWorkload } from '../../common/service_accounts';
 import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../audit';
 import { getDetailedErrorMessage } from '../errors';
 

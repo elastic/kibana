@@ -10,8 +10,6 @@ import type {
   ServiceAccountWorkloadBinder,
 } from '@kbn/core-security-common';
 
-export type { ServiceAccountBoundWorkload } from '@kbn/core-security-common';
-
 /**
  * The principal that created an account.
  */
