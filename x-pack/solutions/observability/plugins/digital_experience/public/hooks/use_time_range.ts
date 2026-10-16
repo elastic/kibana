@@ -21,7 +21,10 @@ export interface TimeRange {
 const withTimeRange = (search: string, timeRange: TimeRange): string =>
   qs.stringify({ ...qs.parse(search), ...timeRange }, { sort: false });
 
-/** Time range from the `rangeFrom` / `rangeTo` URL params, falling back to the global timefilter. */
+/**
+ * Time range from the `rangeFrom` / `rangeTo` URL params, falling back to the global timefilter;
+ * `setTimeRange` updates the URL, and `useSyncTimeRange` mirrors it into the timefilter.
+ */
 export const useTimeRange = (): {
   timeRange: TimeRange;
   isTimeRangeInUrl: boolean;
@@ -31,7 +34,7 @@ export const useTimeRange = (): {
   const { timefilter } = data.query.timefilter;
   const { query } = useDigitalExperienceParams('/');
   const history = useHistory();
-  const { pathname, search } = useLocation();
+  const location = useLocation();
 
   const { from, to } = timefilter.getTime();
   const rangeFrom = query.rangeFrom ?? from;
@@ -41,10 +44,10 @@ export const useTimeRange = (): {
 
   const setTimeRange = useCallback(
     (nextTimeRange: TimeRange) => {
-      timefilter.setTime({ from: nextTimeRange.rangeFrom, to: nextTimeRange.rangeTo });
-      history.push({ pathname, search: withTimeRange(search, nextTimeRange) });
+      // Only `search` changes; the path, hash and history state are kept.
+      history.push({ ...location, search: withTimeRange(location.search, nextTimeRange) });
     },
-    [timefilter, history, pathname, search]
+    [history, location]
   );
 
   return { timeRange, isTimeRangeInUrl, setTimeRange };
@@ -55,14 +58,14 @@ export const useSyncTimeRange = (): void => {
   const { data } = useKibanaServices();
   const { timefilter } = data.query.timefilter;
   const history = useHistory();
-  const { pathname, search } = useLocation();
+  const location = useLocation();
   const { timeRange, isTimeRangeInUrl } = useTimeRange();
 
   useEffect(() => {
     if (!isTimeRangeInUrl) {
-      history.replace({ pathname, search: withTimeRange(search, timeRange) });
+      history.replace({ ...location, search: withTimeRange(location.search, timeRange) });
     }
-  }, [history, pathname, search, timeRange, isTimeRangeInUrl]);
+  }, [history, location, timeRange, isTimeRangeInUrl]);
 
   useEffect(() => {
     timefilter.setTime({ from: timeRange.rangeFrom, to: timeRange.rangeTo });

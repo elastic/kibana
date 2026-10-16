@@ -14,7 +14,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { RouteBreadcrumbsContextProvider } from '../breadcrumbs/route_breadcrumbs_context';
 import { digitalExperienceRouter } from '../routes';
-import type { DigitalExperienceStartDeps } from '../types';
+import type { DigitalExperienceAppDeps } from '../types';
 
 const router = digitalExperienceRouter as unknown as ComponentProps<
   typeof RouterProvider
@@ -26,7 +26,7 @@ export const renderApp = ({
   appMountParameters,
 }: {
   core: CoreStart;
-  pluginsStart: DigitalExperienceStartDeps;
+  pluginsStart: DigitalExperienceAppDeps;
   appMountParameters: AppMountParameters;
 }) => {
   const { element, history } = appMountParameters;

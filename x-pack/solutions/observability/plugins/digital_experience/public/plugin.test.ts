@@ -42,7 +42,7 @@ const setup = ({
   const registerSections = jest.fn();
   const plugin = new DigitalExperiencePlugin();
   plugin.setup(
-    coreSetup as unknown as CoreSetup,
+    coreSetup as unknown as CoreSetup<DigitalExperienceStartDeps>,
     {
       observabilityShared: { navigation: { registerSections } },
     } as unknown as DigitalExperienceSetupDeps

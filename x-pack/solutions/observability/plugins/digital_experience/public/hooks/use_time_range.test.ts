@@ -37,7 +37,9 @@ const mockRoute = (query: Record<string, string>, search = '') => {
     .mockReturnValue({ push, replace } as unknown as ReturnType<typeof useHistory>);
   jest
     .mocked(useLocation)
-    .mockReturnValue({ pathname: '/my-app', search } as ReturnType<typeof useLocation>);
+    .mockReturnValue({ pathname: '/my-app', search, hash: '#panel' } as ReturnType<
+      typeof useLocation
+    >);
 };
 
 beforeEach(() => jest.clearAllMocks());
@@ -60,7 +62,8 @@ describe('useTimeRange', () => {
     expect(result.current.timeRange).toEqual({ rangeFrom: 'now-15m', rangeTo: 'now' });
     expect(result.current.isTimeRangeInUrl).toBe(false);
   });
-  it('sets the time range in the timefilter and the URL, keeping other params', () => {
+
+  it('sets the time range in the URL, keeping the other params and the hash', () => {
     mockRoute(
       { rangeFrom: 'now-15m', rangeTo: 'now' },
       '?percentile=75&rangeFrom=now-15m&rangeTo=now'
@@ -69,10 +72,10 @@ describe('useTimeRange', () => {
 
     act(() => result.current.setTimeRange({ rangeFrom: 'now-7d', rangeTo: 'now' }));
 
-    expect(setTime).toHaveBeenCalledWith({ from: 'now-7d', to: 'now' });
     expect(push).toHaveBeenCalledWith({
       pathname: '/my-app',
       search: 'percentile=75&rangeFrom=now-7d&rangeTo=now',
+      hash: '#panel',
     });
   });
 });
@@ -86,6 +89,7 @@ describe('useSyncTimeRange', () => {
     expect(replace).toHaveBeenCalledWith({
       pathname: '/my-app',
       search: 'percentile=75&rangeFrom=now-15m&rangeTo=now',
+      hash: '#panel',
     });
   });
 

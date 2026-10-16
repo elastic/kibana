@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
@@ -15,7 +15,6 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UxPluginStart } from '@kbn/ux-plugin/public';
 
 export interface DigitalExperienceSetupDeps {
-  data: DataPublicPluginSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
 }
 
@@ -26,4 +25,7 @@ export interface DigitalExperienceStartDeps {
   ux?: UxPluginStart;
 }
 
-export type DigitalExperienceServices = CoreStart & DigitalExperienceStartDeps;
+/** The app only mounts when ux is available (see `capabilities.ts`), so its services include it. */
+export type DigitalExperienceAppDeps = DigitalExperienceStartDeps & { ux: UxPluginStart };
+
+export type DigitalExperienceServices = CoreStart & DigitalExperienceAppDeps;

@@ -27,17 +27,17 @@ const createRole = (feature: KibanaRole['kibana'][number]['feature']): KibanaRol
 
 const CAPABILITY_CASES = [
   {
-    privilege: 'all',
+    title: 'resolves show and save for the all privilege',
     role: createRole({ digital_experience: ['all'] }),
     expected: { navLink: true, show: true, save: true },
   },
   {
-    privilege: 'read',
+    title: 'resolves show only for the read privilege',
     role: createRole({ digital_experience: ['read'] }),
     expected: { navLink: true, show: true, save: false },
   },
   {
-    privilege: 'no',
+    title: 'resolves no access without the digital_experience privilege',
     role: createRole({ apm: ['read'] }),
     expected: { navLink: false, show: false, save: false },
   },
@@ -71,24 +71,20 @@ apiTest.describe('Digital Experience feature privileges', { tag: DIGITAL_EXPERIE
     });
   });
 
-  for (const { privilege, role, expected } of CAPABILITY_CASES) {
-    apiTest(
-      `resolves the capabilities of a user with ${privilege} digital_experience privilege`,
-      async ({ apiClient, requestAuth }) => {
-        const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(role);
+  for (const { title, role, expected } of CAPABILITY_CASES) {
+    apiTest(title, async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(role);
 
-        const response = await apiClient.post('api/core/capabilities', {
-          headers: { ...COMMON_HEADERS, ...apiKeyHeader },
-          body: { applications: ['digital_experience'] },
-          responseType: 'json',
-        });
+      const response = await apiClient.post('api/core/capabilities', {
+        headers: { ...COMMON_HEADERS, ...apiKeyHeader },
+        body: { applications: ['digital_experience'] },
+        responseType: 'json',
+      });
 
-        expect(response).toHaveStatusCode(200);
-        const { navLinks, digital_experience: capabilities } =
-          response.body as CapabilitiesResponse;
-        expect(navLinks.digital_experience).toBe(expected.navLink);
-        expect(capabilities).toStrictEqual({ show: expected.show, save: expected.save });
-      }
-    );
+      expect(response).toHaveStatusCode(200);
+      const { navLinks, digital_experience: capabilities } = response.body as CapabilitiesResponse;
+      expect(navLinks.digital_experience).toBe(expected.navLink);
+      expect(capabilities).toStrictEqual({ show: expected.show, save: expected.save });
+    });
   }
 });

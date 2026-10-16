@@ -7,14 +7,11 @@
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import type { UxPluginSetup, UxPluginStart } from './plugin';
-import type {
-  ClassicRumDashboardProps,
-  ClassicRumTimeRange,
-} from './components/classic_rum_dashboard/types';
+import type { ClassicRumDashboardProps } from './components/classic_rum_dashboard/types';
 import { UxPlugin } from './plugin';
 
 export const plugin: PluginInitializer<UxPluginSetup, UxPluginStart> = (
   initializerContext: PluginInitializerContext
 ) => new UxPlugin(initializerContext);
 
-export type { ClassicRumDashboardProps, ClassicRumTimeRange, UxPluginSetup, UxPluginStart };
+export type { ClassicRumDashboardProps, UxPluginSetup, UxPluginStart };

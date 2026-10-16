@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ApplicationsListPage } from './applications_list_page';
 import { useKibanaServices } from '../hooks/use_kibana_services';
 import { useTimeRange } from '../hooks/use_time_range';
@@ -20,7 +20,6 @@ jest.mock('../hooks/use_digital_experience_router');
 jest.mock('../components/time_range_picker', () => ({ TimeRangePicker: jest.fn(() => null) }));
 
 const timeRange = { rangeFrom: 'now-15m', rangeTo: 'now' };
-const addError = jest.fn();
 
 const mockTimeRange = (range: ReturnType<typeof useTimeRange>['timeRange']) =>
   jest.mocked(useTimeRange).mockReturnValue({
@@ -34,7 +33,6 @@ const renderPage = (fetchClassicRumApplications: jest.Mock) => {
     application: {
       getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
     },
-    notifications: { toasts: { addError } },
     ux: { fetchClassicRumApplications },
   } as unknown as ReturnType<typeof useKibanaServices>);
   return render(<ApplicationsListPage />);
@@ -76,12 +74,19 @@ describe('ApplicationsListPage', () => {
     expect(await screen.findByTestId('digitalExperienceApplicationsEmpty')).toBeInTheDocument();
   });
 
-  it('shows an error toast and the empty prompt when the request fails', async () => {
-    const error = new Error('boom');
-    renderPage(jest.fn().mockRejectedValue(error));
+  it('shows the error with a retry, not the empty prompt, when the request fails', async () => {
+    const fetchApplications = jest.fn().mockRejectedValue(new Error('boom'));
+    renderPage(fetchApplications);
 
-    expect(await screen.findByTestId('digitalExperienceApplicationsEmpty')).toBeInTheDocument();
-    expect(addError).toHaveBeenCalledWith(error, { title: 'Could not load the applications' });
+    expect(await screen.findByTestId('digitalExperienceApplicationsError')).toHaveTextContent(
+      'boom'
+    );
+    expect(screen.queryByTestId('digitalExperienceApplicationsEmpty')).not.toBeInTheDocument();
+
+    fetchApplications.mockResolvedValue(['app-a']);
+    fireEvent.click(screen.getByTestId('digitalExperienceApplicationsRetry'));
+
+    expect(await screen.findByTestId('digitalExperienceApplicationLink')).toBeInTheDocument();
   });
 
   it('drops the previous results and reports an invalid range without fetching', async () => {
@@ -92,11 +97,10 @@ describe('ApplicationsListPage', () => {
     mockTimeRange({ rangeFrom: 'not-a-date', rangeTo: 'now' });
     rerender(<ApplicationsListPage />);
 
-    expect(await screen.findByTestId('digitalExperienceApplicationsEmpty')).toBeInTheDocument();
+    expect(await screen.findByTestId('digitalExperienceApplicationsError')).toHaveTextContent(
+      'Invalid Dates'
+    );
     expect(screen.queryByTestId('digitalExperienceApplicationLink')).not.toBeInTheDocument();
-    expect(addError).toHaveBeenCalledWith(expect.any(Error), {
-      title: 'Could not load the applications',
-    });
     expect(fetchApplications).toHaveBeenCalledTimes(1);
   });
 

@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiBasicTable, EuiEmptyPrompt, EuiLink, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiLink,
+  EuiPageHeader,
+  EuiSpacer,
+} from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
@@ -32,10 +39,6 @@ const LOADING_MESSAGE = i18n.translate('xpack.digitalExperience.applications.loa
   defaultMessage: 'Loading applications…',
 });
 
-const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.applications.fetchError', {
-  defaultMessage: 'Could not load the applications',
-});
-
 const noApplicationsPrompt = (
   <EuiEmptyPrompt
     data-test-subj="digitalExperienceApplicationsEmpty"
@@ -58,8 +61,31 @@ const noApplicationsPrompt = (
   />
 );
 
+const LoadErrorPrompt = ({ error, onRetry }: { error: Error; onRetry: () => void }) => (
+  <EuiEmptyPrompt
+    data-test-subj="digitalExperienceApplicationsError"
+    iconType="warning"
+    color="danger"
+    title={
+      <h2>
+        {i18n.translate('xpack.digitalExperience.applications.fetchError', {
+          defaultMessage: 'Could not load the applications',
+        })}
+      </h2>
+    }
+    body={<p>{error.message}</p>}
+    actions={
+      <EuiButton data-test-subj="digitalExperienceApplicationsRetry" onClick={onRetry}>
+        {i18n.translate('xpack.digitalExperience.applications.retry', {
+          defaultMessage: 'Try again',
+        })}
+      </EuiButton>
+    }
+  />
+);
+
 export function ApplicationsListPage() {
-  const { application, notifications, ux } = useKibanaServices();
+  const { application, ux } = useKibanaServices();
   const router = useDigitalExperienceRouter();
   const { timeRange } = useTimeRange();
 
@@ -70,10 +96,7 @@ export function ApplicationsListPage() {
     refresh,
   } = useAbortableAsync(
     async ({ signal }) => {
-      if (!ux) {
-        return [];
-      }
-      // Throws on an invalid range (e.g. `rangeFrom=foo`), which surfaces as the error toast.
+      // Throws on an invalid range (e.g. `rangeFrom=foo`), which surfaces as the load error.
       const { startDate, endDate } = getDateRange({
         from: timeRange.rangeFrom,
         to: timeRange.rangeTo,
@@ -81,14 +104,20 @@ export function ApplicationsListPage() {
       return ux.fetchClassicRumApplications({ start: startDate, end: endDate, signal });
     },
     [ux, timeRange],
-    {
-      unsetValueOnError: true,
-      onError: (fetchError) =>
-        notifications.toasts.addError(fetchError, { title: FETCH_ERROR_TITLE }),
-    }
+    { unsetValueOnError: true }
   );
   // Nothing has been fetched before the first request starts.
   const isLoading = loading || (!applications && !error);
+
+  const getNoItemsMessage = () => {
+    if (isLoading) {
+      return LOADING_MESSAGE;
+    }
+    if (error) {
+      return <LoadErrorPrompt error={error} onRetry={refresh} />;
+    }
+    return noApplicationsPrompt;
+  };
 
   const columns: Array<EuiBasicTableColumn<ApplicationRow>> = [
     {
@@ -123,7 +152,7 @@ export function ApplicationsListPage() {
         items={(applications ?? []).map((serviceName) => ({ serviceName }))}
         columns={columns}
         loading={isLoading}
-        noItemsMessage={isLoading ? LOADING_MESSAGE : noApplicationsPrompt}
+        noItemsMessage={getNoItemsMessage()}
       />
     </>
   );

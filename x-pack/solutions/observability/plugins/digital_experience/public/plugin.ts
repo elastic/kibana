@@ -24,14 +24,11 @@ export class DigitalExperiencePlugin
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
-  public setup(core: CoreSetup, plugins: DigitalExperienceSetupDeps) {
+  public setup(core: CoreSetup<DigitalExperienceStartDeps>, plugins: DigitalExperienceSetupDeps) {
     plugins.observabilityShared.navigation.registerSections(
       from(core.getStartServices()).pipe(
         map(([coreStart, pluginsStart]) =>
-          hasDigitalExperienceAccess(
-            coreStart.application.capabilities,
-            (pluginsStart as DigitalExperienceStartDeps).ux
-          )
+          hasDigitalExperienceAccess(coreStart.application.capabilities, pluginsStart.ux)
             ? [
                 {
                   label: DIGITAL_EXPERIENCE_LABEL,
@@ -67,9 +64,15 @@ export class DigitalExperiencePlugin
           core.getStartServices(),
         ]);
 
+        const { ux } = pluginsStart;
+        // Unreachable: the app is inaccessible without ux, so core never mounts it.
+        if (!ux) {
+          throw new Error('Digital Experience requires the ux plugin');
+        }
+
         return renderApp({
           core: coreStart,
-          pluginsStart: pluginsStart as DigitalExperienceStartDeps,
+          pluginsStart: { ...pluginsStart, ux },
           appMountParameters,
         });
       },
@@ -77,15 +80,14 @@ export class DigitalExperiencePlugin
   }
 
   public start(core: CoreStart, { ux }: DigitalExperienceStartDeps) {
-    const hasAccess = hasDigitalExperienceAccess(core.application.capabilities, ux);
-    this.appUpdater$.next(() => ({
-      status: hasAccess ? AppStatus.accessible : AppStatus.inaccessible,
-    }));
-
-    // Only users who can see Digital Experience lose the legacy User Experience entry.
-    if (hasAccess) {
-      ux?.hideLegacyNavigation();
+    if (!hasDigitalExperienceAccess(core.application.capabilities, ux)) {
+      this.appUpdater$.next(() => ({ status: AppStatus.inaccessible }));
+      return;
     }
+
+    this.appUpdater$.next(() => ({ status: AppStatus.accessible }));
+    // Only users who can use Digital Experience lose the legacy User Experience entry.
+    ux.hideLegacyNavigation();
   }
 
   public stop() {}

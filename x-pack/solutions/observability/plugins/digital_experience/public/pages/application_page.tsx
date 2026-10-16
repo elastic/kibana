@@ -16,7 +16,7 @@ import { useTimeRange } from '../hooks/use_time_range';
 /** Tabs of the Application view, in display order. */
 const APPLICATION_TAB_IDS = ['overview'] as const;
 
-export type ApplicationTabId = (typeof APPLICATION_TAB_IDS)[number];
+type ApplicationTabId = (typeof APPLICATION_TAB_IDS)[number];
 
 const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
   overview: i18n.translate('xpack.digitalExperience.application.tabs.overview', {
@@ -53,23 +53,23 @@ export function ApplicationPage({ serviceName }: { serviceName: string }) {
 
   useRouteBreadcrumb([{ title: serviceName }, { title: APPLICATION_TAB_LABELS[selectedTab] }]);
 
-  // The dashboard code is downloaded on first use; ux caches it for later visits.
-  const { value: ClassicRumDashboard, error } = useAbortableAsync(
-    async () => ux?.getClassicRumDashboard(),
+  // Wrapped in an object: a component is a function, which React state would call as an updater.
+  const { value: dashboard, error } = useAbortableAsync(
+    async () => ({ Component: await ux.getClassicRumDashboard() }),
     [ux]
   );
 
   const renderOverview = () => {
-    if (ClassicRumDashboard) {
+    if (dashboard) {
       return (
-        <ClassicRumDashboard
+        <dashboard.Component
           serviceName={serviceName}
           timeRange={timeRange}
           onTimeRangeChange={setTimeRange}
         />
       );
     }
-    return !ux || error ? overviewUnavailablePrompt : <EuiLoadingSpinner size="xl" />;
+    return error ? overviewUnavailablePrompt : <EuiLoadingSpinner size="xl" />;
   };
 
   return (

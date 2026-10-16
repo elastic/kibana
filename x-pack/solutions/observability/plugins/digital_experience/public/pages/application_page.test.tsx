@@ -49,7 +49,6 @@ describe('ApplicationPage', () => {
     });
     expect(getClassicRumDashboard).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('digitalExperienceTab-overview')).toBeInTheDocument();
-    expect(screen.queryByText('Sessions')).not.toBeInTheDocument();
   });
 
   it('renders an empty prompt when the dashboard cannot be loaded', async () => {

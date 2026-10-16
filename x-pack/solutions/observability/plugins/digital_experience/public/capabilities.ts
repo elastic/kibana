@@ -17,5 +17,5 @@ import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../common/feature';
 export const hasDigitalExperienceAccess = (
   capabilities: Capabilities,
   ux: UxPluginStart | undefined
-): boolean =>
+): ux is UxPluginStart =>
   Boolean(ux && capabilities[DIGITAL_EXPERIENCE_FEATURE_ID]?.show && capabilities.apm?.show);
