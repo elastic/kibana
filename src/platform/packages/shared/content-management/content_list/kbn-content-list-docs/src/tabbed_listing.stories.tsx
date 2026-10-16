@@ -49,17 +49,12 @@ const MockContentList = ({ id, title, labels, dataSource }: MockContentListProps
   </ContentListProvider>
 );
 
-const HEADER_TABS = [
-  { id: 'dashboards', label: 'Dashboards' },
-  { id: 'visualizations', label: 'Visualizations' },
-  { id: 'failing', label: 'Failing tab' },
-] as const;
+type TabDefinition = KibanaContentListPageTab & Pick<AppHeaderTab, 'label'>;
 
-type TabId = (typeof HEADER_TABS)[number]['id'];
-
-const CONTENT_TABS: readonly KibanaContentListPageTab[] = [
+const TABS = [
   {
     id: 'dashboards',
+    label: 'Dashboards',
     render: () => (
       <MockContentList
         id="tabbed-listing-dashboards"
@@ -74,6 +69,7 @@ const CONTENT_TABS: readonly KibanaContentListPageTab[] = [
   },
   {
     id: 'visualizations',
+    label: 'Visualizations',
     load: async () => {
       await wait(ASYNC_TAB_DELAY_MS);
       return (
@@ -91,19 +87,22 @@ const CONTENT_TABS: readonly KibanaContentListPageTab[] = [
   },
   {
     id: 'failing',
+    label: 'Failing tab',
     load: async () => {
       await wait(ASYNC_TAB_DELAY_MS);
       throw new Error('The tab content failed to load.');
     },
   },
-];
+] as const satisfies readonly TabDefinition[];
+
+type TabId = (typeof TABS)[number]['id'];
 
 const TabbedListingStory = () => {
   const [activeTabId, setActiveTabId] = useState<TabId>('dashboards');
 
   const headerTabs = useMemo<AppHeaderTab[]>(
     () =>
-      HEADER_TABS.map(({ id, label }) => ({
+      TABS.map(({ id, label }) => ({
         id,
         label,
         isSelected: id === activeTabId,
@@ -118,7 +117,7 @@ const TabbedListingStory = () => {
       <KibanaContentListPage>
         <KibanaContentListPage.Section aria-label="Dashboards">
           <EuiErrorBoundary key={activeTabId}>
-            <KibanaContentListPage.ActiveTab tabs={CONTENT_TABS} activeTabId={activeTabId} />
+            <KibanaContentListPage.ActiveTab tabs={TABS} activeTabId={activeTabId} />
           </EuiErrorBoundary>
         </KibanaContentListPage.Section>
       </KibanaContentListPage>
