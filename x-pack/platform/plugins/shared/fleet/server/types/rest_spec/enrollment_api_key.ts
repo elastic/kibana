@@ -23,8 +23,8 @@ export const GetEnrollmentAPIKeysRequestSchema = {
       meta: { description: 'Number of results per page' },
     }),
     kuery: schema.maybe(
-      schema.string({
-        maxLength: 10000,
+      schema.searchFilter.warn({
+        label: 'fleet.enrollment_api_keys.kuery',
         meta: { description: 'A KQL query string to filter results' },
         validate: (value: string) => {
           const validationObj = validateKuery(
@@ -120,8 +120,8 @@ export const BulkDeleteEnrollmentAPIKeysRequestSchema = {
         })
       ),
       kuery: schema.maybe(
-        schema.string({
-          maxLength: 10000,
+        schema.searchFilter.warn({
+          label: 'fleet.enrollment_api_keys.bulk_delete.kuery',
           meta: { description: 'KQL query to select enrollment tokens to delete.' },
           validate: (value: string) => {
             const validationObj = validateKuery(

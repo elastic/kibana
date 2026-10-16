@@ -75,15 +75,10 @@ describe('PostEnrollmentAPIKeyRequestSchema', () => {
 });
 
 describe('schema field length limits', () => {
-  it('rejects a KQL kuery over 10 000 characters', () => {
+  // kuery uses searchFilter.warn(): overlong input is reported, not rejected.
+  it.each([10_000, 10_001, 50_000])('accepts a kuery of %i characters', (length) => {
     expect(() =>
-      GetEnrollmentAPIKeysRequestSchema.query.validate({ kuery: 'a'.repeat(10_001) })
-    ).toThrow();
-  });
-
-  it('accepts a KQL kuery at exactly 10 000 characters', () => {
-    expect(() =>
-      GetEnrollmentAPIKeysRequestSchema.query.validate({ kuery: 'a'.repeat(10_000) })
+      GetEnrollmentAPIKeysRequestSchema.query.validate({ kuery: 'a'.repeat(length) })
     ).not.toThrow();
   });
 

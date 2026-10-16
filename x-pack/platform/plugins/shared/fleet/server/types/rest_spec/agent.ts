@@ -55,8 +55,8 @@ export const GetAgentsRequestSchema = {
         meta: { description: 'Number of results per page' },
       }),
       kuery: schema.maybe(
-        schema.string({
-          maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH,
+        schema.searchFilter.warn({
+          label: 'fleet.agents.kuery',
           meta: { description: 'A KQL query string to filter results' },
           validate: (value: string) => {
             const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
@@ -588,8 +588,8 @@ export const PostBulkAgentUnenrollRequestSchema = {
         }),
         { maxSize: 10000 }
       ),
-      schema.string({
-        maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH,
+      schema.searchFilter.warn({
+        label: 'fleet.agents.bulk_unenroll.agents',
         meta: {
           description: 'KQL query string, leave empty to action all agents',
         },
@@ -640,8 +640,8 @@ export const PostBulkRemoveCollectorsRequestSchema = {
         }),
         { maxSize: 10000 }
       ),
-      schema.string({
-        maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH,
+      schema.searchFilter.warn({
+        label: 'fleet.agents.bulk_remove_collectors.agents',
         meta: { description: 'KQL query string. Leave empty to target all collectors' },
       }),
     ]),
@@ -684,7 +684,7 @@ export const PostBulkAgentUpgradeRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
       schema.arrayOf(schema.savedObjectId({ minLength: 0 }), { maxSize: 10000 }),
-      schema.string({ maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH }),
+      schema.searchFilter.warn({ label: 'fleet.agents.bulk_upgrade.agents' }),
     ]),
     source_uri: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_URL_MAX_LENGTH })),
     version: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH, validate: validateVersion }),
@@ -741,7 +741,7 @@ export const PostBulkRequestDiagnosticsActionRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
       schema.arrayOf(schema.savedObjectId({ minLength: 0 }), { maxSize: 10000 }),
-      schema.string({ maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH }),
+      schema.searchFilter.warn({ label: 'fleet.agents.bulk_request_diagnostics.agents' }),
     ]),
     batchSize: schema.maybe(schema.number()),
     additional_metrics: schema.maybe(
@@ -817,7 +817,7 @@ export const PostBulkAgentReassignRequestSchema = {
     policy_id: schema.savedObjectId({ minLength: 0 }),
     agents: schema.oneOf([
       schema.arrayOf(schema.savedObjectId({ minLength: 0 }), { maxSize: 10000 }),
-      schema.string({ maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH }),
+      schema.searchFilter.warn({ label: 'fleet.agents.bulk_reassign.agents' }),
     ]),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
@@ -878,7 +878,7 @@ export const BulkMigrateAgentsRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
       schema.arrayOf(schema.savedObjectId({ minLength: 0 }), { maxSize: 10000 }),
-      schema.string({ maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH }),
+      schema.searchFilter.warn({ label: 'fleet.agents.bulk_migrate.agents' }),
     ]),
     uri: schema.uri(),
     enrollment_token: schema.string({ maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH }),
@@ -896,7 +896,7 @@ export const PostBulkUpdateAgentTagsRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
       schema.arrayOf(schema.savedObjectId({ minLength: 0 }), { maxSize: 10000 }),
-      schema.string({ maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH }),
+      schema.searchFilter.warn({ label: 'fleet.agents.bulk_update_agent_tags.agents' }),
     ]),
     tagsToAdd: schema.maybe(
       schema.arrayOf(
@@ -940,8 +940,8 @@ export const GetAgentStatusRequestSchema = {
       )
     ),
     kuery: schema.maybe(
-      schema.string({
-        maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH,
+      schema.searchFilter.warn({
+        label: 'fleet.agent_status.kuery',
         meta: { description: 'A KQL query string to filter results' },
         validate: (value: string) => {
           const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
@@ -1206,7 +1206,7 @@ export const BulkChangeAgentsPrivilegeLevelRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
       schema.arrayOf(schema.savedObjectId({ minLength: 0 }), { maxSize: 10000 }),
-      schema.string({ maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH }),
+      schema.searchFilter.warn({ label: 'fleet.agents.bulk_privilege_level_change.agents' }),
     ]),
     batchSize: schema.maybe(schema.number()),
     user_info: schema.maybe(
@@ -1240,7 +1240,7 @@ export const PostBulkAgentRollbackRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
       schema.arrayOf(schema.savedObjectId({ minLength: 0 }), { maxSize: 10000 }),
-      schema.string({ maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH }),
+      schema.searchFilter.warn({ label: 'fleet.agents.bulk_rollback.agents' }),
     ]),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
@@ -1284,8 +1284,8 @@ export const PostGenerateAgentsReportRequestSchema = {
         minSize: 1,
         maxSize: 10000,
       }),
-      schema.string({
-        maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH,
+      schema.searchFilter.warn({
+        label: 'fleet.agents.generate_report.agents',
         validate: (value: string) => {
           const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
           if (validationObj?.error) {
