@@ -133,30 +133,28 @@ function transformPanel(
     transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences, undefined) ??
     defaultTransform(embeddableConfig);
 
+  let panelType = type;
+  let schema = transforms?.schema;
+
   const migrated = migratePanelTypes
     ? embeddableService?.getPanelTypeMigration(type)?.migrateOut(transformedPanelConfig)
     : undefined;
   if (migrated) {
-    const migratedSchema = embeddableService?.getTransforms(migrated.type)?.schema;
-    if (!migratedSchema) {
-      throw new Error(`Panel type "${migrated.type}" has no schema`);
+    ({ type: panelType, config: transformedPanelConfig } = migrated);
+    schema = embeddableService?.getTransforms(panelType)?.schema;
+    if (!schema) {
+      throw new Error(`Panel type "${panelType}" has no schema`);
     }
-    return {
-      grid: restOfGrid,
-      config: migratedSchema.parse(migrated.config),
-      id: panelIndex,
-      type: migrated.type,
-    };
   }
 
-  if (transforms?.schema) {
-    transformedPanelConfig = transforms.schema.parse(transformedPanelConfig);
+  if (schema) {
+    transformedPanelConfig = schema.parse(transformedPanelConfig);
   }
 
   return {
     grid: restOfGrid,
     config: transformedPanelConfig,
     id: panelIndex,
-    type,
+    type: panelType,
   };
 }
