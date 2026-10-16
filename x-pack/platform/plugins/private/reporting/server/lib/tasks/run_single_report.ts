@@ -63,7 +63,7 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
         `[_index: ${report._index}] ` +
         `[_seq_no: ${report._seq_no}] ` +
         `[_primary_term: ${report._primary_term}] ` +
-        `[attempts: ${report.attempts + 1}] ` +
+        `[attempts: ${doc.attempts}] ` +
         `[process_expiration: ${expirationTime}]`,
       { tags: [report._id] }
     );

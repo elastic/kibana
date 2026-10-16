@@ -10,6 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { Agent } from 'undici';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import { RenderRequestRejectedError } from '@kbn/reporting-common';
 import type { PdfScreenshotOptions, PngScreenshotOptions } from '@kbn/screenshotting-plugin/server';
 import { createGetScreenshots, diagnose } from './get_screenshots';
 import { renderPage } from './render/client';
@@ -263,9 +264,9 @@ describe('createGetScreenshots', () => {
       await firstValueFrom(getScreenshots(pdfOptions()));
       const { createToken } = mockRenderPage.mock.calls[0][1];
 
-      await expect(createToken(new AbortController().signal)).rejects.toThrow(
-        /xpack.security.uiam is not configured/
-      );
+      const error = await createToken(new AbortController().signal).catch((e: Error) => e);
+      expect(error).toBeInstanceOf(RenderRequestRejectedError);
+      expect((error as Error).message).toMatch(/xpack.security.uiam is not configured/);
     });
   });
 });

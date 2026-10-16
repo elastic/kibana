@@ -774,6 +774,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
             if (renderRetry?.action === 'hand_back') {
               // Not a failure: the report stays processing, and the next run waits again.
+              eventLog.logRetry();
               cancellationToken?.cancel();
               this.logger.info(
                 `Job ${jobId} is waiting for render capacity and will run again: ${failedToExecuteErr.message}`,

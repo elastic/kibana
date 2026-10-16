@@ -13,6 +13,7 @@ import {
   RenderCapacityTimeoutError,
   RenderFailedError,
   RenderRequestRejectedError,
+  RenderServiceError,
   RenderServiceSaturatedError,
   RenderServiceUnavailableError,
 } from '@kbn/reporting-common';
@@ -116,6 +117,20 @@ function describeNetworkError(err: unknown): string {
   return code ? `${message} (${code})` : message;
 }
 
+/** A UIAM failure while minting is queuing like an unreachable service, not a failed attempt. */
+async function mintToken(config: PageRenderServiceConfig, signal: AbortSignal): Promise<string> {
+  try {
+    return await config.createToken(signal);
+  } catch (err) {
+    if (signal.aborted || err instanceof RenderServiceError) {
+      throw err;
+    }
+    throw new RenderServiceUnavailableError(
+      `could not get a token for page-render-service: ${describeNetworkError(err)}`
+    );
+  }
+}
+
 async function postWithRetry(
   payload: RenderPageRequest,
   config: PageRenderServiceConfig,
@@ -128,12 +143,14 @@ async function postWithRetry(
   const waitUntil = stopWaitingAt(runStartedAt, deadline, canHandBack);
   const createdAt = report?.createdAt.getTime() ?? runStartedAt;
   const tags = report ? [report.id] : [];
+  // One token for every capacity retry: the service checks it on arrival only, and caches that
+  // check, so a fresh token per retry would double the UIAM calls while the service is saturated.
+  let token: string | undefined;
 
   for (;;) {
     const sentAt = Date.now();
     const intervalMs = retryIntervalMs(sentAt - createdAt);
-    // Minted per attempt: a retry can outlive the previous token.
-    const token = await config.createToken(signal);
+    token ??= await mintToken(config, signal);
     const requestInit: RequestInit & { dispatcher?: Dispatcher } = {
       method: 'POST',
       headers: {

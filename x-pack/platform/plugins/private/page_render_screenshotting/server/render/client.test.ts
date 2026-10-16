@@ -149,15 +149,28 @@ describe('renderPage', () => {
     );
   });
 
-  it('fails without calling the service when a token cannot be minted', async () => {
+  it('treats a token UIAM could not mint as an unavailable service, without calling it', async () => {
     const createToken = jest.fn(async () => {
       throw new Error('UIAM unavailable');
     });
 
+    const error = await firstValueFrom(
+      renderPage(payload, { ...config, createToken }, {}, logger)
+    ).catch((e: Error) => e);
+
+    expect(error).toBeInstanceOf(RenderServiceUnavailableError);
+    expect((error as Error).message).toContain('UIAM unavailable');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('keeps the class of a token failure that already has one', async () => {
+    const createToken = jest.fn(async () => {
+      throw new RenderRequestRejectedError('not configured');
+    });
+
     await expect(
       firstValueFrom(renderPage(payload, { ...config, createToken }, {}, logger))
-    ).rejects.toThrow('UIAM unavailable');
-    expect(fetchMock).not.toHaveBeenCalled();
+    ).rejects.toBeInstanceOf(RenderRequestRejectedError);
   });
 
   it('aborts the request when unsubscribed', async () => {
@@ -222,6 +235,23 @@ describe('renderPage', () => {
 
       await expect(result).resolves.toEqual({ data: Buffer.from('bytes'), renderErrors: [] });
       expect(fetchMock).toHaveBeenCalledTimes(3);
+    });
+
+    it('sends one token with every capacity retry in a run', async () => {
+      const createToken = jest.fn(async () => 'token');
+      fetchMock
+        .mockImplementationOnce(async () => saturated())
+        .mockImplementationOnce(async () => saturated())
+        .mockImplementation(async () => pdfResponse());
+
+      const result = firstValueFrom(
+        renderPage(payload, { ...config, createToken }, reportAged(0), logger)
+      );
+      await jest.advanceTimersByTimeAsync(4_000);
+
+      await expect(result).resolves.toMatchObject({ data: Buffer.from('bytes') });
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+      expect(createToken).toHaveBeenCalledTimes(1);
     });
 
     it('sends the retry interval and the report ID on every request', async () => {

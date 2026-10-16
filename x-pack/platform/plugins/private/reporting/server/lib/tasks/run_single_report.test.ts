@@ -587,6 +587,10 @@ describe('Run Single Report Task', () => {
       expect.objectContaining({ attempts: claimedAttempts })
     );
     expect(mockEventTracker.claimJob).toHaveBeenCalledTimes(claimTracked ? 1 : 0);
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringContaining(`[attempts: ${claimedAttempts}]`),
+      expect.anything()
+    );
   });
 
   it('throws during reporting if Kibana starts shutting down', async () => {
@@ -1176,6 +1180,11 @@ describe('Run Single Report Task', () => {
       const store = await mockReporting.getStore();
       store.setReportError = jest.fn().mockResolvedValue({});
       store.setReportFailed = jest.fn().mockResolvedValue({});
+      const getEventLogger = mockReporting.getEventLogger.bind(mockReporting);
+      const logRetry = jest.fn();
+      jest
+        .spyOn(mockReporting, 'getEventLogger')
+        .mockImplementation((...args) => Object.assign(getEventLogger(...args), { logRetry }));
 
       const task = new RunSingleReportTask({
         reporting: mockReporting,
@@ -1213,7 +1222,7 @@ describe('Run Single Report Task', () => {
         fakeRequest: fakeRawRequest,
       } as unknown as RunContext);
 
-      return { result: taskRunner.run(), store, runTaskFn };
+      return { result: taskRunner.run(), store, runTaskFn, logRetry };
     }
 
     it('tells the render which report it is for, and how old it is', async () => {
@@ -1227,7 +1236,7 @@ describe('Run Single Report Task', () => {
     });
 
     it('hands a report waiting for capacity back to Task Manager without recording an error', async () => {
-      const { result, store } = await runFailingWith(new RenderServiceSaturatedError(), {
+      const { result, store, logRetry } = await runFailingWith(new RenderServiceSaturatedError(), {
         state: { unavailableRuns: 1 },
       });
 
@@ -1235,6 +1244,8 @@ describe('Run Single Report Task', () => {
         runAt: expect.any(Date),
         state: { unavailableRuns: 1, queued: true },
       });
+      // Closes the execution the run started, without calling it an error.
+      expect(logRetry).toHaveBeenCalledTimes(1);
       expect(store.setReportError).not.toHaveBeenCalled();
       expect(store.setReportFailed).not.toHaveBeenCalled();
     });
