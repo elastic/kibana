@@ -143,7 +143,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Open snapshot info flyout
         await pageObjects.snapshotRestore.navToSnapshots(false);
         await pageObjects.header.waitUntilLoadingHasFinished();
-        expect(await testSubjects.exists('snapshotList')).to.be(true);
+        expect(await testSubjects.waitForExists('snapshotList')).to.be(true);
 
         await pageObjects.snapshotRestore.refreshWhileSnapshotIsInProgress();
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -259,7 +259,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Open snapshot info flyout
         await pageObjects.snapshotRestore.navToSnapshots(false);
         await pageObjects.header.waitUntilLoadingHasFinished();
-        expect(await testSubjects.exists('snapshotList')).to.be(true);
+        expect(await testSubjects.waitForExists('snapshotList')).to.be(true);
 
         await pageObjects.snapshotRestore.refreshWhileSnapshotIsInProgress();
         await pageObjects.header.waitUntilLoadingHasFinished();
