@@ -42,13 +42,11 @@ export type KibanaContentListPageTab =
 
 type LoadState =
   | {
-      readonly tabId: string;
       readonly status: 'resolved';
       readonly source: () => Promise<ReactNode>;
       readonly content: ReactNode;
     }
   | {
-      readonly tabId: string;
       readonly status: 'rejected';
       readonly source: () => Promise<ReactNode>;
       readonly error: Error;
@@ -66,8 +64,7 @@ export interface KibanaContentListPageActiveTabProps {
 const normalizeError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
-/** Resolves and renders the content associated with the active application tab. */
-export const KibanaContentListPageActiveTab = ({
+const ActiveTab = ({
   tabs,
   activeTabId,
   loadingFallback = DEFAULT_LOADING_FALLBACK,
@@ -91,13 +88,16 @@ export const KibanaContentListPageActiveTab = ({
     load().then(
       (content) => {
         if (!cancelled) {
-          setLoadState({ tabId: activeTabId, status: 'resolved', source: load, content });
+          setLoadState({
+            status: 'resolved',
+            source: load,
+            content,
+          });
         }
       },
       (error) => {
         if (!cancelled) {
           setLoadState({
-            tabId: activeTabId,
             status: 'rejected',
             source: load,
             error: normalizeError(error),
@@ -109,13 +109,13 @@ export const KibanaContentListPageActiveTab = ({
     return () => {
       cancelled = true;
     };
-  }, [load, activeTabId]);
+  }, [load]);
 
   if (activeTab.render) {
     return activeTab.render();
   }
 
-  if (loadState?.tabId !== activeTabId || loadState.source !== activeTab.load) {
+  if (loadState?.source !== activeTab.load) {
     return loadingFallback;
   }
 
@@ -125,3 +125,9 @@ export const KibanaContentListPageActiveTab = ({
 
   return loadState.content;
 };
+
+/** Resolves and renders the content associated with the active application tab. */
+export const KibanaContentListPageActiveTab = (props: KibanaContentListPageActiveTabProps) => (
+  // Remount when tabs change so their component state is not shared.
+  <ActiveTab key={props.activeTabId} {...props} />
+);
