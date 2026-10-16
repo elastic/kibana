@@ -18,6 +18,7 @@ interface CommonParams {
   /** In seconds */
   end: number;
   kuery: string;
+  abortSignal?: AbortSignal;
 }
 
 /**
@@ -36,6 +37,7 @@ export function getProfilingSchemas({
   transactionType,
   indices,
   stacktraceIdsField,
+  abortSignal,
 }: CommonParams & {
   serviceName: string;
   transactionName?: string;
@@ -57,6 +59,7 @@ export function getProfilingSchemas({
       environment,
       transactionType,
     }),
+    abortSignal,
   });
 }
 
@@ -72,6 +75,7 @@ export async function getProfilingHostsSchemas({
   kuery,
   hostNames,
   containerIds,
+  abortSignal,
 }: CommonParams & {
   hostNames: string[];
   containerIds: string[];
@@ -83,5 +87,6 @@ export async function getProfilingHostsSchemas({
   return profilingDataAccessStart.services.getAvailableSchemas({
     esClient,
     query: getHostsProfilingEventsQuery({ start, end, kuery, hostNames, containerIds }),
+    abortSignal,
   });
 }

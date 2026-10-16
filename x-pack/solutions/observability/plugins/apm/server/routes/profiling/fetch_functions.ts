@@ -22,6 +22,7 @@ interface Params {
   stacktraceIdsField?: string;
   /** Universal Profiling (ECS) when undefined */
   schema: ProfilingSchema | undefined;
+  abortSignal?: AbortSignal;
 }
 
 export function fetchFunctions({
@@ -35,6 +36,7 @@ export function fetchFunctions({
   indices,
   stacktraceIdsField,
   schema,
+  abortSignal,
 }: Params) {
   return profilingDataAccessStart.services.fetchFunctions({
     core,
@@ -46,5 +48,6 @@ export function fetchFunctions({
     indices,
     stacktraceIdsField,
     schema,
+    abortSignal,
   });
 }

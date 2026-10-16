@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   routeDefinitions,
@@ -68,6 +69,7 @@ const servicesFlamegraphRoute = createApmServerRoute({
         indices,
         stacktraceIdsField,
         schema,
+        abortSignal: getRequestAbortedSignal(resources.request.events.aborted$),
       });
     }
 
@@ -133,6 +135,7 @@ const servicesFunctionsRoute = createApmServerRoute({
         indices,
         stacktraceIdsField,
         schema,
+        abortSignal: getRequestAbortedSignal(resources.request.events.aborted$),
       });
     }
 
@@ -150,18 +153,23 @@ const profilingStatusRoute = createApmServerRoute({
       await plugins.profilingDataAccess?.start(),
     ]);
     if (profilingDataAccessStart) {
+      const abortSignal = getRequestAbortedSignal(resources.request.events.aborted$);
       try {
         const initialized = await getProfilingInitialized({
           profilingDataAccessStart,
           esClient,
           soClient: (await context.core).savedObjects.client,
           spaceId: (await plugins.spaces?.start())?.spacesService.getSpaceId(resources.request),
+          abortSignal,
         });
 
         return { initialized };
       } catch (e) {
-        // If any error happens just return as if profiling has not been initialized
-        logger.warn('Could not check the profiling status');
+        // If any error happens just return as if profiling has not been initialized. An aborted
+        // request is no error: nobody gets its response.
+        if (!abortSignal.aborted) {
+          logger.warn('Could not check the profiling status');
+        }
       }
     }
 
@@ -213,6 +221,7 @@ const servicesProfilingSchemasRoute = createApmServerRoute({
       transactionType,
       indices,
       stacktraceIdsField,
+      abortSignal: getRequestAbortedSignal(resources.request.events.aborted$),
     });
   },
 });

@@ -20,6 +20,7 @@ interface Params {
   stacktraceIdsField?: string;
   /** Universal Profiling (ECS) when undefined */
   schema: ProfilingSchema | undefined;
+  abortSignal?: AbortSignal;
 }
 
 export function fetchFlamegraph({
@@ -31,6 +32,7 @@ export function fetchFlamegraph({
   indices,
   stacktraceIdsField,
   schema,
+  abortSignal,
 }: Params) {
   return profilingDataAccessStart.services.fetchFlamechartData({
     core,
@@ -40,5 +42,6 @@ export function fetchFlamegraph({
     indices,
     stacktraceIdsField,
     schema,
+    abortSignal,
   });
 }

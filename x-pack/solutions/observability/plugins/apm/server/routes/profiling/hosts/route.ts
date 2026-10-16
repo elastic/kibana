@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import {
   routeDefinitions,
   type ProfilingHostsFlamegraphResponse,
@@ -64,6 +65,7 @@ const profilingHostsFlamegraphRoute = createApmServerRoute({
           containerIds,
         }),
         schema,
+        abortSignal: getRequestAbortedSignal(resources.request.events.aborted$),
       });
 
       return { flamegraph, hostNames, containerIds };
@@ -131,6 +133,7 @@ const profilingHostsFunctionsRoute = createApmServerRoute({
           containerIds,
         }),
         schema,
+        abortSignal: getRequestAbortedSignal(resources.request.events.aborted$),
       });
 
       return { functions, hostNames, containerIds };
@@ -178,6 +181,7 @@ const profilingHostsSchemasRoute = createApmServerRoute({
       hostNames,
       containerIds,
       kuery,
+      abortSignal: getRequestAbortedSignal(resources.request.events.aborted$),
     });
   },
 });

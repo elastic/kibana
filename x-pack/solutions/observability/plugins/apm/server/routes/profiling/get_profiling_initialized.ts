@@ -14,6 +14,7 @@ interface Params {
   esClient: IScopedClusterClient;
   soClient: SavedObjectsClientContract;
   spaceId?: string;
+  abortSignal?: AbortSignal;
 }
 
 /** Whether there is profiling data to show in either profiling schema. */
