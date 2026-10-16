@@ -160,8 +160,14 @@ describe('ActionPoliciesListHeader', () => {
       mockIsLicenseValid = false;
       renderHeader();
 
-      expect(screen.getByTestId('createActionPolicyButton')).toBeDisabled();
-      expect(screen.getByTestId('createActionPolicyButton-secondary-button')).toBeDisabled();
+      expect(screen.getByTestId('createActionPolicyButton')).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+      expect(screen.getByTestId('createActionPolicyButton-secondary-button')).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
       expect(screen.getByTestId('actionPoliciesLicenseCallout')).toBeInTheDocument();
     });
 

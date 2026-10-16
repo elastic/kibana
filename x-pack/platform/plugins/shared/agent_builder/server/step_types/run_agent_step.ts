@@ -168,6 +168,9 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             },
             ...(maxContentLength !== undefined ? { maxContentLength } : {}),
             ...(reasoningLevel !== undefined ? { reasoningLevel } : {}),
+            // The single source of the workflow run: the execution reports it on its round events
+            // and sends it to EIS as `interactionId`, with or without a `plugin-id`.
+            workflowExecutionId: context.contextManager.getContext().execution.id,
             ...(pluginId
               ? {
                   telemetryMetadata: {
@@ -175,7 +178,6 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
                     aggregateBy,
                     productSolution,
                     productFeature,
-                    interactionId: context.contextManager.getContext().execution.id,
                   },
                 }
               : {}),
