@@ -49,6 +49,7 @@ describe('getESQLSourceInfo', () => {
         timeFieldName: '@timestamp',
         esqlVariables: undefined,
       }),
+      signal: expect.any(AbortSignal),
     });
     expect(result.columns).toEqual([{ name: 'message', esType: 'keyword' }]);
   });
@@ -110,6 +111,18 @@ describe('getESQLSourceInfo', () => {
     expect(http.post).toHaveBeenCalledTimes(1);
   });
 
+  it('rejects a query error answered with 200 and does not cache it', async () => {
+    const http = createHttp(() => ({
+      columns: [],
+      error: { statusCode: 400, message: 'Unknown index [lo]' },
+    }));
+    const query = 'FROM lo';
+
+    await expect(getESQLSourceInfo({ query, http })).rejects.toThrow('Unknown index [lo]');
+    await expect(getESQLSourceInfo({ query, http })).rejects.toThrow('Unknown index [lo]');
+    expect(http.post).toHaveBeenCalledTimes(2);
+  });
+
   it('evicts the cache entry when the request fails', async () => {
     const http = createHttp(() => {
       throw new Error('network');
@@ -119,5 +132,79 @@ describe('getESQLSourceInfo', () => {
     await expect(getESQLSourceInfo({ query, http })).rejects.toThrow('network');
     await expect(getESQLSourceInfo({ query, http })).rejects.toThrow('network');
     expect(http.post).toHaveBeenCalledTimes(2);
+  });
+
+  describe('cancellation', () => {
+    /** An http mock whose requests stay pending until resolved, and reject when aborted. */
+    const createPendingHttp = () => {
+      const requests: Array<{ signal: AbortSignal; resolve: (value: unknown) => void }> = [];
+      const http = {
+        post: jest.fn(
+          (_path: string, { signal }: { signal: AbortSignal }) =>
+            new Promise((resolve, reject) => {
+              requests.push({ signal, resolve });
+              signal.addEventListener('abort', () => reject(new Error('aborted')));
+            })
+        ),
+      } as unknown as HttpStart;
+      return { http, requests };
+    };
+    const info = { columns: [{ name: 'message', esType: 'keyword' }] };
+
+    it('aborts the request when its only caller aborts, and fetches again next time', async () => {
+      const { http, requests } = createPendingHttp();
+      const controller = new AbortController();
+
+      const pending = getESQLSourceInfo({ query: 'FROM a', http, signal: controller.signal });
+      controller.abort();
+
+      await expect(pending).rejects.toThrow('aborted');
+      expect(requests[0].signal.aborted).toBe(true);
+
+      void getESQLSourceInfo({ query: 'FROM a', http });
+      expect(http.post).toHaveBeenCalledTimes(2);
+    });
+
+    it('keeps the request for the callers that did not abort', async () => {
+      const { http, requests } = createPendingHttp();
+      const first = new AbortController();
+      const second = new AbortController();
+
+      const aborted = getESQLSourceInfo({ query: 'FROM b', http, signal: first.signal });
+      const kept = getESQLSourceInfo({ query: 'FROM b', http, signal: second.signal });
+      first.abort();
+      requests[0].resolve(info);
+
+      await expect(aborted).rejects.toThrow('aborted');
+      expect(await kept).toEqual(info);
+      expect(requests[0].signal.aborted).toBe(false);
+      expect(http.post).toHaveBeenCalledTimes(1);
+    });
+
+    it('never aborts a request that a caller without a signal waits for', async () => {
+      const { http, requests } = createPendingHttp();
+      const controller = new AbortController();
+
+      const kept = getESQLSourceInfo({ query: 'FROM c', http });
+      void getESQLSourceInfo({ query: 'FROM c', http, signal: controller.signal }).catch(() => {});
+      controller.abort();
+      requests[0].resolve(info);
+
+      expect(await kept).toEqual(info);
+      expect(requests[0].signal.aborted).toBe(false);
+    });
+
+    it('serves a completed request from the cache even after its caller aborts', async () => {
+      const { http, requests } = createPendingHttp();
+      const controller = new AbortController();
+
+      const done = getESQLSourceInfo({ query: 'FROM d', http, signal: controller.signal });
+      requests[0].resolve(info);
+      await done;
+      controller.abort();
+
+      expect(await getESQLSourceInfo({ query: 'FROM d', http })).toEqual(info);
+      expect(http.post).toHaveBeenCalledTimes(1);
+    });
   });
 });

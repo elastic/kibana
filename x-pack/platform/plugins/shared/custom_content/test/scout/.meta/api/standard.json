@@ -1,5 +1,5 @@
 {
-  "sha1": "de520d8f8b22f75c8f8deeef5636931bccac0eb0",
+  "sha1": "be9252d9986059c739ae5027c825d01ea638aec4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -10,14 +10,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/custom_content/test/scout/api/tests/custom_content_tool_ui_events.spec.ts",
-        "line": 122,
-        "column": 11
+        "line": 127,
+        "column": 74
       }
     }
   ]

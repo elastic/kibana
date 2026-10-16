@@ -18,8 +18,15 @@ import {
   LogExtractionConfig as LogExtractionConfigSchema,
 } from '../saved_objects';
 
-/** Built-in per entity-type defaults. Empty for now: raising frequency also cuts throughput, so values need measurement (#269261). */
-export const DEFAULT_CONFIG_BY_TYPE: Partial<Record<EntityType, Partial<LogExtractionConfig>>> = {};
+/**
+ * Built-in per entity-type defaults. Raising frequency here also lowers the effective per-run
+ * volume cap for that type, since maxLogsPerWindow is a fixed per-execution budget, not a
+ * per-time-unit rate.
+ */
+export const DEFAULT_CONFIG_BY_TYPE: Partial<Record<EntityType, Partial<LogExtractionConfig>>> = {
+  service: { frequency: '10m' },
+  generic: { frequency: '30m' },
+};
 
 /**
  * Built-in per-process defaults.
@@ -29,17 +36,17 @@ export const DEFAULT_CONFIG_BY_TYPE: Partial<Record<EntityType, Partial<LogExtra
  * Non-priority is best-effort over much higher volume, so it drops past the remaining logs to stay
  * current.
  *
+ * No `frequency` here: it would be identical to the code default and would only serve to clobber
+ * DEFAULT_CONFIG_BY_TYPE for gated types, since this layer is merged after it.
  *
  * `single` is empty: with the feature flag off, behaviour must stay exactly as it is today.
  */
 export const DEFAULT_CONFIG_BY_MODE: Record<ExtractionMode, Partial<LogExtractionConfig>> = {
   single: {},
   priority: {
-    frequency: '1m',
     maxLogsPerWindowCapBehavior: 'defer',
   },
   nonPriority: {
-    frequency: '1m',
     maxLogsPerWindowCapBehavior: 'drop',
   },
 };
@@ -53,30 +60,8 @@ const setFields = (
   ) as Partial<LogExtractionConfig>;
 
 /**
- * Fields from `logExtractionConfig` that are shared across all extraction modes. For the
- * non-priority process only these fields are read from `logExtractionConfig`; all other
- * extraction parameters come from the mode defaults and global overrides.
- */
-const SHARED_LOG_EXTRACTION_FIELDS = new Set<keyof LogExtractionTypeOverride>([
-  'additionalIndexPatterns',
-  'excludedIndexPatterns',
-]);
-
-const setSharedFields = (
-  layer: LogExtractionTypeOverride | undefined
-): Partial<LogExtractionConfig> =>
-  Object.fromEntries(
-    Object.entries(layer ?? {}).filter(
-      ([key, value]) =>
-        value !== null &&
-        value !== undefined &&
-        SHARED_LOG_EXTRACTION_FIELDS.has(key as keyof LogExtractionTypeOverride)
-    )
-  ) as Partial<LogExtractionConfig>;
-
-/**
  * Fields that control log extraction volume and throughput behaviour. These are exclusive to the
- * non-priority process — global overrides must not reach them, so the process-mode defaults
+ * non-priority process — the shared layers must not reach them, so the process-mode defaults
  * (e.g. maxLogsPerWindowCapBehavior: 'drop') and the nonPriorityLogExtractionConfig layer are
  * the only way to set them for non-priority.
  */
@@ -86,14 +71,14 @@ export const NON_PRIORITY_EXCLUSIVE_FIELDS = new Set<keyof LogExtractionConfig>(
   'maxLogsPerWindow',
   'maxLogsPerWindowCapBehavior',
   'docsLimit',
-  'timeout',
 ]);
 
-const setGlobalOverridesForNonPriority = (
-  overrides: Partial<LogExtractionConfig>
+/** A shared layer's set fields, minus the ones only the non-priority layer may set. */
+const setNonExclusiveFields = (
+  layer: Partial<LogExtractionTypeOverride> | Partial<LogExtractionConfig> | undefined
 ): Partial<LogExtractionConfig> =>
   Object.fromEntries(
-    Object.entries(overrides).filter(
+    Object.entries(layer ?? {}).filter(
       ([key, value]) =>
         value !== null &&
         value !== undefined &&
@@ -128,17 +113,16 @@ export type MergedLogExtractionConfig = LogExtractionConfig & { samplingRate?: n
  * Shared base (all modes):
  *   code defaults → per-type code defaults → per-process defaults → globalOverrides
  *
- * For non-priority, globalOverrides are filtered: NON_PRIORITY_EXCLUSIVE_FIELDS are stripped
+ * For non-priority, both shared layers are filtered: NON_PRIORITY_EXCLUSIVE_FIELDS are stripped
  * so that volume/throughput fields (maxLogsPerPage, maxTimeWindowSize, maxLogsPerWindow,
- * maxLogsPerWindowCapBehavior, docsLimit, timeout) cannot be overridden by the shared API.
- * The non-priority mode default is the floor; nonPriorityLogExtractionConfig is the ceiling.
+ * maxLogsPerWindowCapBehavior, docsLimit) cannot be set by the shared API. The non-priority mode
+ * default is the floor; nonPriorityLogExtractionConfig is the ceiling.
  *
  * Final layer for single / priority:
  *   all fields from typeOverride
  *
  * Final layer for non-priority:
- *   shared fields only from typeOverride (additionalIndexPatterns, excludedIndexPatterns),
- *   then nonPriorityOverride (when populated - not wired to any API yet)
+ *   non-exclusive fields from typeOverride, then nonPriorityOverride
  */
 export const getMergedConfig = (
   type: EntityType,
@@ -152,13 +136,13 @@ export const getMergedConfig = (
     ...DEFAULT_CONFIG_BY_TYPE[type],
     ...DEFAULT_CONFIG_BY_MODE[extractionMode],
     ...(extractionMode === EXTRACTION_MODE.nonPriority
-      ? setGlobalOverridesForNonPriority(globalOverrides)
+      ? setNonExclusiveFields(globalOverrides)
       : setFields(globalOverrides)),
   };
 
   const typeFields =
     extractionMode === EXTRACTION_MODE.nonPriority
-      ? { ...setSharedFields(typeOverride), ...setNonPriorityFields(nonPriorityOverride) }
+      ? { ...setNonExclusiveFields(typeOverride), ...setNonPriorityFields(nonPriorityOverride) }
       : setFields(typeOverride);
 
   const config = LogExtractionConfigSchema.parse({ ...base, ...typeFields });

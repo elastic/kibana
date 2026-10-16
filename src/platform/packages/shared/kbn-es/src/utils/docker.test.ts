@@ -59,6 +59,9 @@ import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
  */
 process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'false';
 
+// Pin the published loopback addresses, which otherwise follow the host's IPv6 support.
+jest.mock('./has_ipv6_loopback', () => ({ hasIpv6Loopback: () => true }));
+
 jest.mock('execa');
 const execa = jest.requireMock('execa');
 execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
@@ -273,6 +276,8 @@ describe('resolvePort()', () => {
       Array [
         "-p",
         "127.0.0.1:9200:9200",
+        "-p",
+        "[::1]:9200:9200",
       ]
     `);
   });
@@ -284,6 +289,8 @@ describe('resolvePort()', () => {
       Array [
         "-p",
         "127.0.0.1:9200:9200",
+        "-p",
+        "[::1]:9200:9200",
         "-p",
         "192.168.25.1:9200:9200",
       ]
@@ -297,6 +304,8 @@ describe('resolvePort()', () => {
       Array [
         "-p",
         "127.0.0.1:9220:9220",
+        "-p",
+        "[::1]:9220:9220",
         "--env",
         "http.port=9220",
       ]
@@ -310,6 +319,8 @@ describe('resolvePort()', () => {
       Array [
         "-p",
         "127.0.0.1:9220:9220",
+        "-p",
+        "[::1]:9220:9220",
         "-p",
         "192.168.25.1:9220:9220",
         "--env",
@@ -1184,6 +1195,21 @@ describe('runServerlessCluster()', () => {
     const onReady = jest.fn().mockResolvedValue(undefined);
     await runServerlessCluster(log, { projectType, basePath: baseEsPath, onReady });
     expect(onReady).not.toHaveBeenCalled();
+  });
+
+  test('should tear down already started containers when startup fails', async () => {
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+    execa.commandSync.mockImplementation(() => ({ stdout: 'es01\nes02\n' }));
+    runUiamContainerMock.mockRejectedValue(new Error('uiam-cosmosdb failed to start'));
+
+    await expect(
+      runServerlessCluster(log, { projectType, basePath: baseEsPath, uiam: true })
+    ).rejects.toThrow('uiam-cosmosdb failed to start');
+
+    expect(execa.commandSync.mock.calls[1][0]).toEqual('docker kill es01 es02');
   });
 });
 

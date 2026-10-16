@@ -8,6 +8,7 @@
 import moment from 'moment';
 import {
   classifyGlobalManifestVersion,
+  getGlobalManifestVersionAgeDays,
   isPinnedGlobalManifestVersion,
 } from './global_manifest_version';
 
@@ -32,5 +33,19 @@ describe('classifyGlobalManifestVersion', () => {
 
     expect(result).toBe(status);
     expect(isPinnedGlobalManifestVersion(result)).toBe(pinned);
+  });
+});
+
+describe('getGlobalManifestVersionAgeDays', () => {
+  it('counts whole UTC days from the start of the UTC day of now', () => {
+    expect(
+      getGlobalManifestVersionAgeDays('2024-01-01', moment.utc('2024-01-31T23:59:59.999Z'))
+    ).toBe(30);
+    expect(
+      getGlobalManifestVersionAgeDays('2024-01-01', moment.utc('2024-01-30T00:00:00.000Z'))
+    ).toBe(29);
+    expect(
+      getGlobalManifestVersionAgeDays('2024-01-01', moment.utc('2024-01-01T00:00:00.000Z'))
+    ).toBe(0);
   });
 });

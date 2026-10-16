@@ -14,20 +14,27 @@ import {
   EuiLoadingSpinner,
   useEuiTheme,
 } from '@elastic/eui';
-import { EscalationQueue, type EscalationQueueItem } from '@kbn/agentic-investigations-common';
+import {
+  EscalationQueue,
+  Impact,
+  matchesEntityFilter,
+  useEntityFilter,
+  type EscalationQueueItem,
+} from '@kbn/agentic-investigations-common';
 import {
   useAssignEscalation,
   useListEscalations,
   escalationQueryKeys,
+  useOpenInChat,
 } from '@kbn/agentic-investigations-plugin/public';
-import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
 
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { EscalationsPageHeader } from '../../components/escalations_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
-import { useOpenInChat } from '../../hooks/use_open_in_chat';
+import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import { escalationToQueueItem } from './escalation_to_queue_item';
 import { ESCALATIONS_PAGE_INFO } from './translations';
+import { EscalationsEmptyBanner } from './escalations_empty_banner';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
 
 export const EscalationsPage: React.FC = () => {
@@ -35,7 +42,7 @@ export const EscalationsPage: React.FC = () => {
   useAlertZeroDocTitle(ESCALATIONS_PAGE_INFO.pageTitle);
 
   // Capability check: only render the assignee picker when the user can manage escalations.
-  const { manageEscalations: canManage } = useAgenticInvestigationsCapabilities();
+  const { manageEscalations: canManage } = useAlertZeroInvestigationsCapabilities();
 
   // Clicking a row navigates to Agent Builder with the conversation details flyout open.
   // getChatHref is also forwarded so cards render as real links (Cmd-click, URL on hover).
@@ -99,6 +106,27 @@ export const EscalationsPage: React.FC = () => {
 
   const allItems = useMemo(() => [...openItems, ...closedItems], [openItems, closedItems]);
 
+  // One selection filters both queues. Pills come from every loaded row, open and closed.
+  const { entityFilter, setEntityFilter } = useEntityFilter(allItems);
+  const visibleOpenItems = useMemo(
+    () =>
+      entityFilter
+        ? openItems.filter((item) => matchesEntityFilter(item, entityFilter))
+        : openItems,
+    [openItems, entityFilter]
+  );
+  const visibleClosedItems = useMemo(
+    () =>
+      entityFilter
+        ? closedItems.filter((item) => matchesEntityFilter(item, entityFilter))
+        : closedItems,
+    [closedItems, entityFilter]
+  );
+
+  // Both queues loaded and neither has any rows (ignores the entity filter, which only narrows loaded rows).
+  const hasNoEscalations =
+    openQuery.data?.pagination.total === 0 && closedQuery.data?.pagination.total === 0;
+
   const renderAssignees = useQueueAssignees({
     items: allItems,
     getRowKey: (e) => e.id,
@@ -114,6 +142,28 @@ export const EscalationsPage: React.FC = () => {
     },
   });
 
+  // Nothing to show yet: the page is just the explainer banner, centered, with no header or queues.
+  if (hasNoEscalations) {
+    return (
+      <AlertZeroPageSection
+        contentProps={{
+          css: css`
+            padding-block: ${euiTheme.size.xxl};
+            align-self: center;
+            max-width: 1000px;
+            inline-size: 100%;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          `,
+        }}
+      >
+        <EscalationsEmptyBanner />
+      </AlertZeroPageSection>
+    );
+  }
+
   return (
     <AlertZeroPageSection
       contentProps={{
@@ -124,7 +174,9 @@ export const EscalationsPage: React.FC = () => {
         `,
       }}
     >
-      <EuiFlexGroup gutterSize="l" direction="column" wrap>
+      {/* No `wrap`: a wrapping column sizes each line to its widest content and lets a
+          wide row push the page past the viewport. Same fix as the conversations page. */}
+      <EuiFlexGroup gutterSize="l" direction="column">
         <EuiFlexItem grow={false}>
           <EscalationsPageHeader
             isLoading={isLoading}
@@ -152,9 +204,18 @@ export const EscalationsPage: React.FC = () => {
         {!isLoading && !pageError ? (
           <>
             <EuiFlexItem grow={false}>
+              <Impact
+                items={allItems}
+                entityFilter={entityFilter}
+                onEntityFilterChange={setEntityFilter}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EscalationQueue
                 status="open"
-                escalations={openItems}
+                escalations={visibleOpenItems}
+                loadedCount={openItems.length}
+                isFiltered={Boolean(entityFilter)}
                 totalItemCount={openQuery.data?.pagination.total}
                 onLoadMore={() => setOpenPage((p) => p + 1)}
                 error={openQuery.error as Error | null}
@@ -166,7 +227,9 @@ export const EscalationsPage: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EscalationQueue
                 status="closed"
-                escalations={closedItems}
+                escalations={visibleClosedItems}
+                loadedCount={closedItems.length}
+                isFiltered={Boolean(entityFilter)}
                 totalItemCount={closedQuery.data?.pagination.total}
                 onLoadMore={() => setClosedPage((p) => p + 1)}
                 error={closedQuery.error as Error | null}

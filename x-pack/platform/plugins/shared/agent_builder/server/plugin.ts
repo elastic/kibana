@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  CoreStart,
-  KibanaRequest,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { ConversationUpdatedOptIn } from '@kbn/agent-builder-server';
 import {
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
   SUPPORTED_IMAGE_MIME_TYPES,
@@ -84,7 +78,7 @@ export class AgentBuilderPlugin
   private teardownTracing?: () => Promise<void>;
   private startDeps?: AgentBuilderStartDependencies;
   private readonly conversationEventBus = createConversationEventBus();
-  private isExperimentalEnabled?: (request: KibanaRequest) => Promise<boolean>;
+  private readonly conversationUpdatedOptIns: ConversationUpdatedOptIn[] = [];
   private recommendedEndpointsPoller?: RecommendedEndpointsPoller;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
@@ -181,14 +175,6 @@ export class AgentBuilderPlugin
       agents: serviceSetups.agents,
       register: this.config.deductive?.register ?? false,
     });
-
-    this.isExperimentalEnabled = async (request: KibanaRequest): Promise<boolean> => {
-      const [coreStart] = await coreSetup.getStartServices();
-      const soClient = coreStart.savedObjects.getScopedClient(request);
-      return coreStart.uiSettings
-        .asScopedToClient(soClient)
-        .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
-    };
 
     setupDeps.workflowsExtensions.registerStepDefinition(
       getRunAgentStepDefinition(this.serviceManager)
@@ -323,6 +309,7 @@ export class AgentBuilderPlugin
       },
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
+        registerCycleHook: serviceSetups.hooks.registerCycleHook.bind(serviceSetups.hooks),
       },
       skills: {
         register: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
@@ -334,6 +321,11 @@ export class AgentBuilderPlugin
         register: serviceSetups.conversationTemplates.register.bind(
           serviceSetups.conversationTemplates
         ),
+      },
+      conversations: {
+        enableUpdatedTrigger: (optIn) => {
+          this.conversationUpdatedOptIns.push(optIn);
+        },
       },
       topSnippets: this.config.topSnippets,
     };
@@ -398,7 +390,7 @@ export class AgentBuilderPlugin
       this.conversationEventBus,
       startDeps.workflowsExtensions,
       this.logger,
-      this.isExperimentalEnabled!
+      this.conversationUpdatedOptIns
     );
 
     const {
@@ -423,6 +415,9 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       searchInferenceEndpoints,
       logger: this.logger.get('model-provider'),
+      spaces,
+      security,
+      elasticsearch,
     });
 
     this.recommendedEndpointsPoller = new RecommendedEndpointsPoller({
@@ -461,7 +456,7 @@ export class AgentBuilderPlugin
         getScopedClient: async ({ request }) => {
           const client = await conversations.getScopedClient({ request });
           const agentRegistry = await agents.getRegistry({ request });
-          return createConversationPublicClient({ client, agentRegistry });
+          return createConversationPublicClient({ client, agentRegistry, source: 'server_api' });
         },
       },
       attachments: {

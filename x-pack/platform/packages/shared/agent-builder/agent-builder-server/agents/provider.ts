@@ -17,6 +17,8 @@ import type {
   AgentExecutionMode,
   AutoApprovedApi,
   ChatEvent,
+  EventActor,
+  ConversationWriteSource,
   ExecutionStatus,
   InteractivityConfig,
   SerializedExecutionError,
@@ -58,10 +60,17 @@ import type { AgentRegistry } from './registry';
 export interface ConversationClient {
   /** True if a conversation with the given id exists in the current scope. */
   exists(conversationId: string): Promise<boolean>;
-  /** Validates, serializes, and merges `updates` into the conversation metadata. */
+  /**
+   * Validates, serializes, and merges `updates` into the conversation metadata. Recorded as a
+   * `metadata_updated` activity event attributed via `options.activity` (default: current user).
+   */
   patchMetadata(
     conversationId: string,
-    updates: Record<string, unknown>
+    updates: Record<string, unknown>,
+    options: {
+      source: ConversationWriteSource;
+      activity?: { actor?: EventActor; execution_id?: string };
+    }
   ): Promise<{ changedFields: string[] }>;
 }
 
@@ -119,6 +128,7 @@ export interface CreateSubAgentParams {
 
 /** Parameters for sending a message to an existing persistent sub-agent. */
 export interface SendToSubAgentParams {
+  agentId: string;
   parentExecutionId: string;
   /** Existing child conversation id */
   conversationId: string;
@@ -163,8 +173,6 @@ export interface ExperimentalFeatures {
   relevantSkills: boolean;
   /** Whether the todo list tool and task-management prompt are enabled */
   todos: boolean;
-  /** Whether external ES|QL datasets are surfaced to data-source tools */
-  datasets: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
   /** Whether the `discover_apis` tool is enabled. */
@@ -204,6 +212,19 @@ export interface DeploymentContext {
     status?: string;
   };
 }
+
+/**
+ * How a run relates to its conversation:
+ * - `readWrite`: the run persists what belongs to its conversation (round, metadata, workspace,
+ *   child conversations).
+ * - `readOnly`: the run loaded an existing conversation as context and stores nothing to it
+ *   (ephemeral run). Unrelated to the presentational `read_only` conversation flag.
+ * - `none`: the run stores nothing and its conversation, if any, is a placeholder that is never
+ *   persisted (one-shot run).
+ *
+ * Unrelated to conversation access control: the caller's permissions are checked separately.
+ */
+export type ExecutionConversationAccess = 'readWrite' | 'readOnly' | 'none';
 
 export interface AgentHandlerContext {
   /**
@@ -352,6 +373,10 @@ export interface AgentHandlerContext {
    * Id of the parent execution that spawned this one, when applicable.
    */
   parentExecutionId?: string;
+  /**
+   * How this run relates to its conversation, see {@link ExecutionConversationAccess}.
+   */
+  conversationAccess: ExecutionConversationAccess;
   /**
    * Sub-agent executor for spawning child agent executions.
    */

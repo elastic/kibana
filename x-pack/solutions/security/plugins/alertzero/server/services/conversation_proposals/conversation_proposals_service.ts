@@ -40,9 +40,7 @@ const CLOSED_DECIDED_WITHIN_HOURS = 72;
 /**
  * Breaks every tie the timestamps leave, so a row cannot move between two offset
  * pages and be shown twice or skipped. Unique per live proposal: `create` roots a
- * chain at its own id, `revise` numbers it, and the one other pair that shares both
- * — an original and its clone — never appear together, since both queues exclude
- * superseded records.
+ * chain at its own id, `revise` numbers it.
  */
 const TIEBREAKER: SortCombinations[] = [
   { rootProposalId: { order: 'asc' } },
@@ -94,6 +92,9 @@ export class ConversationProposalsService {
         // The index is shared with every other solution's proposals, and only
         // this filter keeps theirs out of an AlertZero queue.
         origin: ALERTZERO_PROPOSAL_ORIGIN,
+        // A failed attempt that a retry replaced is not shown: the retry carries its error
+        // as `previousExecutionError`. Earlier revisions go too, since settling one as
+        // `expired` stamps `decidedAt`, so the recency window alone would let it in.
         excludeSuperseded: true,
         excludeExpired: false,
         size,
@@ -145,18 +146,14 @@ export class ConversationProposalsService {
    * from the request. Failure here omits the field the same way a missing
    * title does — the queue is still usable without pills.
    */
-  private async getEntityIds(
+  private async getEntities(
     conversationIds: string[],
     request: KibanaRequest
-  ): Promise<Map<string, string[]>> {
-    const uniqueIds = [...new Set(conversationIds)];
-    if (uniqueIds.length === 0) return new Map();
+  ): Promise<Map<string, Array<{ id: string; type?: string }>>> {
+    if (conversationIds.length === 0) return new Map();
 
     try {
-      const impacts = await this.getImpactClient(request).listByConversationIds(uniqueIds);
-      return new Map(
-        impacts.map((impact) => [impact.conversationId, impact.entities.map((entity) => entity.id)])
-      );
+      return await this.getImpactClient(request).getEntitiesByConversationId(conversationIds);
     } catch (err) {
       this.logger.debug(`Could not resolve investigation impact: ${err}`);
       return new Map();
@@ -168,26 +165,32 @@ export class ConversationProposalsService {
     request: KibanaRequest
   ): Promise<ProposalItem[]> {
     const conversationIds = proposals.map((proposal) => proposal.conversationId);
-    const [conversations, entityIds] = await Promise.all([
+    const [conversations, entities] = await Promise.all([
       this.fetchConversations(conversationIds, request),
-      this.getEntityIds(conversationIds, request),
+      this.getEntities(conversationIds, request),
     ]);
-    return this.enrichProposals(proposals, conversations, entityIds);
+    return this.enrichProposals(proposals, conversations, entities);
   }
 
   private enrichProposals(
     proposals: ProposalWithMetadata[],
     conversations: Map<string, ConversationDecoration>,
-    entityIds: Map<string, string[]>
+    entities: Map<string, Array<{ id: string; type?: string }>>
   ): ProposalItem[] {
     return proposals.map((proposal) => {
       const conversation = conversations.get(proposal.conversationId);
-      const ids = entityIds.get(proposal.conversationId);
+      const list = entities.get(proposal.conversationId) ?? [];
+      const ids = list.map((entity) => entity.id);
+      const entityTypes: Record<string, string> = {};
+      for (const { id, type } of list) {
+        if (type) entityTypes[id] = type;
+      }
       return {
         ...proposal,
         ...conversation,
         conversationAssignees: conversation?.conversationAssignees ?? [],
-        ...(ids && ids.length > 0 ? { entityIds: ids } : {}),
+        ...(ids.length > 0 ? { entityIds: ids } : {}),
+        ...(Object.keys(entityTypes).length > 0 ? { entityTypes } : {}),
       };
     });
   }

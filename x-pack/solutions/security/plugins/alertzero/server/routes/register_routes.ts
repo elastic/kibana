@@ -14,6 +14,7 @@ import type { ConversationProposalsService } from '../services/conversation_prop
 import type { ActionsService } from '../services/actions/actions_service';
 import type { HuntServices } from '../services/watches/hunt';
 import type { ScanFailuresService } from '../services/scan_failures/scan_failures_service';
+import type { ThreatIntelSupplyService } from '../services/threat_intel_supply';
 import { registerListWatchesRoute } from './watches/list_watches';
 import { registerGetWatchRoute } from './watches/get_watch';
 import { registerListWorkersRoute } from './workers/list_workers';
@@ -36,6 +37,7 @@ export interface RouteDependencies {
   getAgentBuilderConversations: () => ConversationsStart;
   getHuntServices: () => HuntServices;
   getScanFailuresService: () => ScanFailuresService;
+  getThreatIntelSupplyService: () => ThreatIntelSupplyService | undefined;
 }
 
 export const registerRoutes = (deps: RouteDependencies): void => {

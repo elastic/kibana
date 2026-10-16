@@ -13,7 +13,7 @@ import type { ResolveUser } from '../../services/resolve_user';
 import { attachImpactToInvestigation } from '../attachments/attach_impact_to_investigation';
 import { parseStepInput } from './parse_step_input';
 import type { ImpactService } from '../services/impact_service';
-import type { ImpactPrivilegesChecker } from '../services/check_impact_privileges';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
 import { toStepError } from './to_step_error';
 
 /** Upserts the conversation's impact document and attaches it to Agent Builder chat. */
@@ -26,7 +26,7 @@ export const getAttachImpactStepDefinition = ({
 }: {
   getImpactService: () => ImpactService;
   resolveUser: ResolveUser;
-  privileges: ImpactPrivilegesChecker;
+  privileges: InvestigationsPrivilegesChecker;
   getAttachmentClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
   getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
 }) =>
@@ -66,7 +66,7 @@ export const getAttachImpactStepDefinition = ({
         return {
           output: {
             id: impact.id,
-            entities: impact.entities,
+            entities: impact.entities ?? [],
           },
         };
       } catch (error) {

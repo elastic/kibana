@@ -135,6 +135,7 @@ xpack.securitySolution.enableExperimental:
     disable:enableRiskScorePrivmonModifier,
     disable:kubernetesEnabled,
     trialCompanionEnabled,
+    disable:linuxRansomwareProtection,
 
     # Alerts and Attacks alignment feature is disabled in EASE
     disable:enableAlertsAndAttacksAlignment,

@@ -212,6 +212,13 @@ describe('DiscoverEBTManager', () => {
               optional: true,
             },
           },
+          approximation: {
+            type: 'boolean',
+            _meta: {
+              description: 'Whether the response contains approximate results',
+              optional: true,
+            },
+          },
         },
       });
 
@@ -1301,6 +1308,90 @@ describe('DiscoverEBTManager', () => {
       expect(analyzeSpy).toHaveBeenCalledTimes(1);
 
       analyzeSpy.mockRestore();
+    });
+
+    it('should track approximation as true when the response has approximate results', () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
+
+      const tracker = scopedManager.trackQueryPerformanceEvent({
+        eventName: 'testQueryEvent',
+        query: { esql: 'FROM logs-* | LIMIT 10' },
+        timeRange: {
+          from: '2024-01-01T00:00:00.000Z',
+          to: '2024-01-01T00:05:00.000Z',
+        },
+      });
+
+      tracker.reportEvent({ requestAdapter: undefined, approximation: true });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+        'discover_query_performance',
+        expect.objectContaining({ approximation: true })
+      );
+    });
+
+    it('should track approximation as false when the response does not have approximate results', () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
+
+      const tracker = scopedManager.trackQueryPerformanceEvent({
+        eventName: 'testQueryEvent',
+        query: { esql: 'FROM logs-* | LIMIT 10' },
+        timeRange: {
+          from: '2024-01-01T00:00:00.000Z',
+          to: '2024-01-01T00:05:00.000Z',
+        },
+      });
+
+      tracker.reportEvent({ requestAdapter: undefined, approximation: false });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+        'discover_query_performance',
+        expect.objectContaining({ approximation: false })
+      );
+    });
+
+    it('should omit approximation from the event when not provided', () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
+
+      const tracker = scopedManager.trackQueryPerformanceEvent({
+        eventName: 'testQueryEvent',
+        query: { esql: 'FROM logs-* | LIMIT 10' },
+        timeRange: {
+          from: '2024-01-01T00:00:00.000Z',
+          to: '2024-01-01T00:05:00.000Z',
+        },
+      });
+
+      tracker.reportEvent({ requestAdapter: undefined });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+        'discover_query_performance',
+        expect.not.objectContaining({ approximation: true })
+      );
     });
   });
 

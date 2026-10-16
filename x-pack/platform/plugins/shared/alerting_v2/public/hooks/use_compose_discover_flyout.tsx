@@ -25,6 +25,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import { getMinimumScheduleInterval } from '../kibana_services';
 import type { RuleApiResponse } from '../services/rules_api';
+import { useAlertingLocators } from '../application/locator_context';
 import { CreateActionPolicyFormFlyout } from '../components/action_policy/form_flyout/create_action_policy_form_flyout';
 import { useBuilderToEsqlTransition } from './use_builder_to_esql_transition';
 import { useCreateActionPolicyDisabledReason } from './use_create_action_policy_disabled_reason';
@@ -43,6 +44,13 @@ const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiRespons
   updated_by: null,
   updated_at: new Date().toISOString(),
 });
+
+type FlyoutSource =
+  | { kind: 'new' }
+  | { kind: 'rule'; rule: RuleApiResponse }
+  | { kind: 'template'; template: RuleTemplateResponse; rule: RuleApiResponse };
+
+const NEW_SOURCE: FlyoutSource = { kind: 'new' };
 
 interface UseComposeDiscoverFlyoutOptions {
   createSuccessRedirectPath?: string;
@@ -67,21 +75,38 @@ export const useComposeDiscoverFlyout = ({
     | undefined;
   const cps = useService(PluginStart('cps'), { optional: true }) as CPSPluginStart | undefined;
   const createActionPolicyDisabledReason = useCreateActionPolicyDisabledReason();
+  const { actionPolicyLocators } = useAlertingLocators();
+  const getActionPolicyEditHref = useCallback(
+    (actionPolicyId: string) =>
+      actionPolicyLocators.getRedirectUrl({ page: 'edit', actionPolicyId }),
+    [actionPolicyLocators]
+  );
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
-  const [targetRule, setTargetRule] = useState<RuleApiResponse | null>(null);
+  // What the flyout authors from; replacing it on open means no stale rule/template can leak over.
+  const [source, setSource] = useState<FlyoutSource>(NEW_SOURCE);
   const [builderType, setBuilderType] = useState<string | null>(null);
   const [initialBuilderState, setInitialBuilderState] = useState<BuilderState>(undefined);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
 
-  const openInEsql = useCallback((rule: RuleApiResponse, mode: ComposeDiscoverMode) => {
-    setTargetRule(rule);
+  const targetRule = source.kind === 'new' ? null : source.rule;
+  // Saving installs from the template while the flyout authors a rule from one.
+  const templateId = source.kind === 'template' ? source.template.id : undefined;
+
+  const openSourceInEsql = useCallback((nextSource: FlyoutSource, mode: ComposeDiscoverMode) => {
+    setSource(nextSource);
     setFlyoutMode(mode);
     setBuilderType(null);
     setInitialBuilderState(undefined);
     setFlyoutOpen(true);
   }, []);
+
+  const openInEsql = useCallback(
+    (rule: RuleApiResponse, mode: ComposeDiscoverMode) =>
+      openSourceInEsql({ kind: 'rule', rule }, mode),
+    [openSourceInEsql]
+  );
 
   const handleConfirmSwitch = useCallback(() => {
     setBuilderType(null);
@@ -115,6 +140,7 @@ export const useComposeDiscoverFlyout = ({
       esqlEditorActionsRegister: EsqlEditorActionsRegister,
       createActionPolicyFormFlyout: CreateActionPolicyFormFlyout,
       createActionPolicyDisabledReason,
+      getActionPolicyEditHref,
     }),
     [
       http,
@@ -129,25 +155,27 @@ export const useComposeDiscoverFlyout = ({
       dashboard,
       cps,
       createActionPolicyDisabledReason,
+      getActionPolicyEditHref,
     ]
   );
 
   const closeFlyout = useCallback(() => {
     setFlyoutOpen(false);
-    setTargetRule(null);
+    setSource(NEW_SOURCE);
     setBuilderType(null);
     setInitialBuilderState(undefined);
   }, []);
 
   const closeAndRedirect = useCallback(() => {
     setFlyoutOpen(false);
+    setSource(NEW_SOURCE);
     if (createSuccessRedirectPath) {
       application.navigateToUrl(http.basePath.prepend(createSuccessRedirectPath));
     }
   }, [application, createSuccessRedirectPath, http]);
 
   const openCreateFlyout = useCallback(() => {
-    setTargetRule(null);
+    setSource(NEW_SOURCE);
     setFlyoutMode('create');
     setBuilderType(null);
     setFlyoutOpen(true);
@@ -165,13 +193,13 @@ export const useComposeDiscoverFlyout = ({
             values: { type },
           }),
         });
-        setTargetRule(null);
+        setSource(NEW_SOURCE);
         setFlyoutMode('create');
         setBuilderType(null);
         setFlyoutOpen(true);
         return;
       }
-      setTargetRule(null);
+      setSource(NEW_SOURCE);
       setFlyoutMode('create');
       setBuilderType(type);
       setInitialBuilderState(undefined);
@@ -188,7 +216,7 @@ export const useComposeDiscoverFlyout = ({
       } else if (result === 'esql-fallback') {
         requestEsqlFallback(rule, mode);
       } else {
-        setTargetRule(rule);
+        setSource({ kind: 'rule', rule });
         setFlyoutMode(mode);
         setBuilderType(result.builderType);
         setInitialBuilderState(result.initialBuilderState);
@@ -211,18 +239,19 @@ export const useComposeDiscoverFlyout = ({
   const openCreateFromTemplateFlyout = useCallback(
     (template: RuleTemplateResponse) => {
       const syntheticRule = templateToSyntheticRule(template);
+      const templateSource: FlyoutSource = { kind: 'template', template, rule: syntheticRule };
       const result = resolveBuilderMode(syntheticRule);
       if (result !== 'esql' && result !== 'esql-fallback') {
-        setTargetRule(syntheticRule);
+        setSource(templateSource);
         setFlyoutMode('create');
         setBuilderType(result.builderType);
         setInitialBuilderState(result.initialBuilderState);
         setFlyoutOpen(true);
       } else {
-        openInEsql(syntheticRule, 'create');
+        openSourceInEsql(templateSource, 'create');
       }
     },
-    [resolveBuilderMode, openInEsql]
+    [resolveBuilderMode, openSourceInEsql]
   );
 
   const flyout = flyoutOpen ? (
@@ -237,7 +266,7 @@ export const useComposeDiscoverFlyout = ({
       initialBuilderState={initialBuilderState}
       onSwitchToEsql={builderType ? requestSwitchToEsql : undefined}
       onCreateRule={(payload) =>
-        createRuleMutation.mutate({ payload }, { onSuccess: closeAndRedirect })
+        createRuleMutation.mutate({ payload, templateId }, { onSuccess: closeAndRedirect })
       }
       onUpdateRule={(id, payload) =>
         updateRuleMutation.mutate({ id, payload }, { onSuccess: closeFlyout })

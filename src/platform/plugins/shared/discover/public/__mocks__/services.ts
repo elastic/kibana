@@ -15,6 +15,7 @@ import { DataSourceService } from '@kbn/data-source';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { searchSessionsManagementMock } from '@kbn/search-sessions-management-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
 import {
@@ -30,6 +31,7 @@ import {
   CONTEXT_STEP_SETTING,
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
+  ENABLE_SOLUTION_PROFILES_IN_CLASSIC_SETTING,
   MAX_DOC_FIELDS_DISPLAYED,
   SAMPLE_SIZE_SETTING,
   SAMPLE_ROWS_PER_PAGE_SETTING,
@@ -175,6 +177,8 @@ export function createDiscoverServicesMock(): DiscoverServices {
         return false;
       } else if (key === SEARCH_ON_PAGE_LOAD_SETTING) {
         return true;
+      } else if (key === ENABLE_SOLUTION_PROFILES_IN_CLASSIC_SETTING) {
+        return true;
       }
     }),
     isDefault: jest.fn((key: string) => {
@@ -310,6 +314,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     savedSearch,
     discoverSessionService,
+    searchSessionsManagement: searchSessionsManagementMock.createStartContract(),
     dataViews: dataPlugin.dataViews,
     dataSourceService: new DataSourceService(dataPlugin.dataViews),
     timefilter: dataPlugin.query.timefilter.timefilter,

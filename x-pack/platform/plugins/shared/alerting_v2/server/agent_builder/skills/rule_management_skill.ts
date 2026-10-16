@@ -6,6 +6,7 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import type { AvailabilityConfig } from '@kbn/agent-builder-server/availability';
 import {
   ACTION_POLICY_MANAGEMENT_SKILL_ID,
   ALERTING_TOOL_IDS,
@@ -14,7 +15,6 @@ import {
 } from '@kbn/alerting-v2-constants';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
-import { alertingV2ExperimentalAvailability } from './alerting_v2_experimental_availability';
 import {
   generateRuleOperationsDoc,
   generateRuleKindDoc,
@@ -25,7 +25,9 @@ import {
   generateNotificationsOverviewDoc,
 } from './schema_to_skill_docs';
 
-export const createRuleManagementSkill = (deps: ManageRuleToolDeps) =>
+type RuleManagementSkillDeps = ManageRuleToolDeps & { availability: AvailabilityConfig };
+
+export const createRuleManagementSkill = (deps: RuleManagementSkillDeps) =>
   defineSkillType({
     id: RULE_MANAGEMENT_SKILL_ID,
     name: RULE_MANAGEMENT_SKILL_ID,
@@ -34,7 +36,7 @@ export const createRuleManagementSkill = (deps: ManageRuleToolDeps) =>
       'Compose, discover, and modify alerting V2 rules within a conversation. Use when the user wants to be alerted about conditions in their data — metrics, logs, or any index ("create an alert rule that fires when...", "alert me when CPU goes above...", "set up alerting on my data"). Covers threshold, aggregation, and grouped conditions over any Elasticsearch index. For notification / action policy setup, load the action-policy-management skill. Not for Security/SIEM detection rules (threat detection, MITRE ATT&CK) — use the detection-rule-edit skill for those.',
     experimental: true,
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
-    availability: alertingV2ExperimentalAvailability,
+    availability: deps.availability,
     referencedContent: [
       {
         name: 'rule-kind',
@@ -121,10 +123,14 @@ ${generateRuleOperationsDoc()}
 - The query must return rows for an alert to fire. Use \`| WHERE ...\` to filter for breach conditions.
 - Prefer \`FROM <index-pattern> | STATS ... BY <group-field> | WHERE <condition>\` for threshold-based alerting.
 - **Never** use backtick quoting around index names or field names in ES|QL. Standard index patterns (letters, digits, dashes, dots, underscores, wildcards, and colons for CCS) do not require backticks. Backticks break cross-cluster search and are almost never needed in practice. Write \`FROM remote_cluster:metrics-system.cpu-default\`, not \`FROM \\\`remote_cluster:metrics-system.cpu-default\\\`\`.
+- Target a wildcard index pattern (e.g. \`logs-*\`, \`metrics-system.cpu-*\`) or a data stream name in \`FROM\`, so the rule survives rollovers. **Never** use a concrete backing index (e.g. \`.ds-logs-nginx.access-default-2026.06.11-000001\`) or an index name with a date or generation suffix. When deriving a pattern from an index name the user gives you, strip the data stream generation suffix (\`logs-nginx.access-default-2026.06.11-000001\` → \`logs-nginx.access-default\`).
+- If the user explicitly asks for a specific concrete index, respect the request and tell them the rule may stop matching data after a rollover.
+- When editing an existing rule that already uses a concrete index, warn the user that it may break on rollover, but do not change it unless they ask.
 - The \`set_schedule\` lookback should be >= the execution interval (\`every\`).
 - The \`set_query\` operation validates the query against Elasticsearch automatically.
   If the query references an unknown index or field, the tool will return an error
   with the Elasticsearch error message. Inspect the error, fix the query, and retry.
+- If \`set_query\` fails with a time-field error (e.g. federated data, views, or indices without a visible date field), use \`set_time_field\` to specify the timestamp column explicitly, then retry \`set_query\`. Do not guess the field name — ask the user which column to use.
 - If grouping fields are set after a query, they are validated against the query's
   output columns. Use fields that appear in the query results.
 

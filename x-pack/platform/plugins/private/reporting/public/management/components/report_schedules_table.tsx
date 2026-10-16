@@ -72,6 +72,7 @@ export const ReportSchedulesTable = () => {
     return capabilities.manageReporting.show === true;
   }, [capabilities]);
 
+  // Cosmetic: the server already filters non-admins to reports they own.
   const canManageSchedule = useCallback(
     (item: ScheduledReportApiJSON) => {
       if (hasManageReportingPrivilege) return true;

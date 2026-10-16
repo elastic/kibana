@@ -99,6 +99,7 @@ paths:
                   - index_patterns
                   - tier2_targets
                   - tier2_target_sources
+                  - report_intent_targets
                   - actionable_indices
                   - tier1
                   - message
@@ -142,6 +143,18 @@ paths:
                     items:
                       type: string
                       enum: [report_match, tier1_hits, model, actionable]
+                  report_intent_targets:
+                    type: array
+                    maxItems: 200
+                    description: >-
+                      The datasets the report itself points at: the ones its vendor
+                      or product matched, or the model's match, without the indices
+                      Tier 1 hit or the process-bearing streams in `tier2_targets`.
+                      Hunt packaging names these as the data a detection would query
+                      when a run has no hit events to name. Empty when neither signal
+                      matched.
+                    items:
+                      type: string
                   actionable_indices:
                     type: array
                     maxItems: 64
@@ -333,6 +346,18 @@ paths:
                         enum: [2]
                   tier2_skipped_reason:
                     type: string
+                  unavailable_model_tiers:
+                    type: array
+                    description: >-
+                      Model tiers that had no usable model on this run, in tier
+                      order. Absent when every tier resolved. A missing
+                      balanced or frontier model is what makes Tier 2 report
+                      no_inference; a missing efficient model quietly degrades
+                      dataset matching and recommendations without skipping
+                      anything.
+                    items:
+                      type: string
+                      enum: [efficient, balanced, frontier]
                   message:
                     type: string
                   next_step:
@@ -429,6 +454,32 @@ paths:
                         data:
                           type: object
                           additionalProperties: true
+                  impacted_entities:
+                    type: array
+                    maxItems: 50
+                    description: >-
+                      Present alongside `sse`: the hosts and users the SSE
+                      entries name, deduplicated across entries, ready for the
+                      investigations impact route. Ids are
+                      `host:<host.name>` or `user:<user.name>`. Capped at 50,
+                      half of what one Investigation's impact may hold, because
+                      every sweep of a report merges onto the same
+                      Investigation.
+                    items:
+                      type: object
+                      required: [id, name, type]
+                      properties:
+                        id:
+                          type: string
+                          minLength: 1
+                          maxLength: 256
+                        name:
+                          type: string
+                          minLength: 1
+                          maxLength: 512
+                        type:
+                          type: string
+                          enum: [host, user]
 components:
   schemas:
     HuntCoordinatorStatus:
