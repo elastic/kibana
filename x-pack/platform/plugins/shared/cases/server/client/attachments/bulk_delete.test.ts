@@ -176,7 +176,7 @@ describe('bulk_delete', () => {
         clientArgs.request,
         {
           caseId: 'mock-id-1',
-          attachmentIds: ['mock-comment-1', 'mock-comment-2'],
+          ids: ['mock-comment-1', 'mock-comment-2'],
           attachmentType: 'user',
           owner: 'securitySolution',
         }
@@ -527,7 +527,7 @@ describe('bulk_delete', () => {
         clientArgs.request,
         {
           caseId: 'mock-id-1',
-          attachmentIds: ['file-attachment-1'],
+          ids: ['file-attachment-1'],
           attachmentType: 'externalReference',
           owner: 'securitySolution',
         }
@@ -552,7 +552,7 @@ describe('bulk_delete', () => {
         clientArgs.request,
         {
           caseId: 'mock-id-1',
-          attachmentIds: ['file-attachment-2'],
+          ids: ['file-attachment-2'],
           attachmentType: 'externalReference',
           owner: 'securitySolution',
         }

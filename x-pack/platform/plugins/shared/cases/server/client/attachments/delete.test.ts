@@ -46,7 +46,7 @@ describe('delete', () => {
           clientArgs.request,
           {
             caseId: 'mock-id-4',
-            attachmentIds: ['mock-comment-4'],
+            ids: ['mock-comment-4'],
             attachmentType: 'alert',
             owner: 'securitySolution',
             alertIds: ['test-id'],
@@ -62,7 +62,7 @@ describe('delete', () => {
           clientArgs.request,
           {
             caseId: 'mock-id-1',
-            attachmentIds: ['mock-comment-1'],
+            ids: ['mock-comment-1'],
             attachmentType: 'user',
             owner: 'securitySolution',
           }
@@ -205,13 +205,13 @@ describe('delete', () => {
         expect(emitAttachmentsDeleted).toHaveBeenCalledTimes(3);
         expect(emitAttachmentsDeleted).toHaveBeenCalledWith(clientArgs.request, {
           caseId: 'mock-id-1',
-          attachmentIds: ['mock-comment-1', 'mock-comment-2', 'mock-comment-3'],
+          ids: ['mock-comment-1', 'mock-comment-2', 'mock-comment-3'],
           attachmentType: 'user',
           owner: 'securitySolution',
         });
         expect(emitAttachmentsDeleted).toHaveBeenCalledWith(clientArgs.request, {
           caseId: 'mock-id-1',
-          attachmentIds: ['mock-comment-4', 'mock-comment-5', 'mock-comment-6'],
+          ids: ['mock-comment-4', 'mock-comment-5', 'mock-comment-6'],
           attachmentType: 'alert',
           owner: 'securitySolution',
           alertIds: ['test-id', 'test-id-2', 'test-id-3'],
@@ -219,7 +219,7 @@ describe('delete', () => {
         });
         expect(emitAttachmentsDeleted).toHaveBeenCalledWith(clientArgs.request, {
           caseId: 'mock-id-1',
-          attachmentIds: ['mock-comment-7'],
+          ids: ['mock-comment-7'],
           attachmentType: 'persistableState',
           owner: 'cases',
         });
@@ -245,13 +245,13 @@ describe('delete', () => {
         expect(emitAttachmentsDeleted).toHaveBeenCalledTimes(2);
         expect(emitAttachmentsDeleted).toHaveBeenCalledWith(clientArgs.request, {
           caseId: 'mock-id-1',
-          attachmentIds: ['mock-comment-1'],
+          ids: ['mock-comment-1'],
           attachmentType: 'user',
           owner: 'securitySolution',
         });
         expect(emitAttachmentsDeleted).toHaveBeenCalledWith(clientArgs.request, {
           caseId: 'mock-id-1',
-          attachmentIds: ['mock-comment-4'],
+          ids: ['mock-comment-4'],
           attachmentType: 'alert',
           owner: 'securitySolution',
           alertIds: ['test-id'],
