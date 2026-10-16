@@ -924,6 +924,11 @@ describe('AiIndexDetailPage', () => {
     });
     expect(screen.getByTestId('contextListKiDiscoverLink')).toBeInTheDocument();
     expect(screen.queryByTestId('contextListKiPanelSummary')).not.toBeInTheDocument();
+
+    expect(screen.getByTestId('contextListKiDiscoverLink')).toHaveAttribute(
+      'href',
+      '/app/discover'
+    );
   });
 
   it('hides the Knowledge Indicators tab when there are no KIs', async () => {

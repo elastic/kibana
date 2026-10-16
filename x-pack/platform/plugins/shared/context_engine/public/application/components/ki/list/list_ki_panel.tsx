@@ -8,7 +8,6 @@
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
-import { useAiIndexDestLinks } from '../../../hooks/use_ai_index_dest_links';
 import { ListKiBody } from './list_ki_body';
 import { ListKiFooter } from './list_ki_footer';
 import { ListKiHeader } from './list_ki_header';
@@ -16,10 +15,10 @@ import { useListKiPanel } from './use_list_ki_panel';
 
 interface ListKiPanelProps {
   aiIndex: GetAiIndexResponse;
+  discoverHref?: string;
 }
 
-export const ListKiPanel = ({ aiIndex }: ListKiPanelProps) => {
-  const { discoverHref } = useAiIndexDestLinks(aiIndex.dest);
+export const ListKiPanel = ({ aiIndex, discoverHref }: ListKiPanelProps) => {
   const {
     aiIndexId,
     typeFilter,
@@ -27,8 +26,10 @@ export const ListKiPanel = ({ aiIndex }: ListKiPanelProps) => {
     onTypeFilterChange,
     statusFilter,
     onStatusFilterChange,
-    searchQuery,
-    onSearch,
+    searchText,
+    submittedQuery,
+    onSearchTextChange,
+    onSearchSubmit,
     kis,
     total,
     size,
@@ -36,7 +37,7 @@ export const ListKiPanel = ({ aiIndex }: ListKiPanelProps) => {
     isFetching,
     error,
     loadMore,
-    refreshList,
+    onSearchSubmitClick,
   } = useListKiPanel(aiIndex);
 
   const isRefetching = isFetching && !isLoading;
@@ -44,16 +45,17 @@ export const ListKiPanel = ({ aiIndex }: ListKiPanelProps) => {
   return (
     <div data-test-subj="contextListKiPanel">
       <ListKiHeader
-        searchQuery={searchQuery}
+        searchText={searchText}
+        submittedQuery={submittedQuery}
         isSearchLoading={isRefetching}
-        onSearch={onSearch}
+        onSearchTextChange={onSearchTextChange}
+        onSearchSubmit={onSearchSubmit}
         typeFilter={typeFilter}
         summary={summary}
         onTypeFilterChange={onTypeFilterChange}
         statusFilter={statusFilter}
         onStatusFilterChange={onStatusFilterChange}
-        isRefreshing={isFetching}
-        onRefresh={refreshList}
+        onSearchSubmitClick={onSearchSubmitClick}
       />
 
       <EuiSpacer size="l" />

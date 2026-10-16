@@ -51,13 +51,13 @@ describe('ListKiHeader', () => {
     jest.clearAllMocks();
   });
 
-  it('renders search, status and type filters, and refresh', () => {
+  it('renders search, status and type filters', () => {
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
 
     expect(screen.getByTestId('contextListKiSearchBox')).toBeInTheDocument();
     expect(screen.getByTestId('contextListKiStatusFilters')).toHaveTextContent('Status');
     expect(screen.getByTestId('contextListKiTypeFilters')).toHaveTextContent('Type');
-    expect(screen.getByTestId('contextListKiRefreshButton')).toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiSearchSubmitButton')).toBeDisabled();
     fireEvent.click(screen.getByTestId('contextListKiTypeFilters'));
     expect(screen.getByTestId('contextListKiFilter-playbook')).toBeInTheDocument();
   });
@@ -99,7 +99,13 @@ describe('ListKiHeader', () => {
     expect(mockUseListKi).toHaveBeenLastCalledWith(expect.objectContaining({ query: 'refund' }));
   });
 
-  it('commits search and refetches when refresh is clicked', () => {
+  it('shows the submit button when the search box has text', () => {
+    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
+    fireEvent.change(screen.getByTestId('contextListKiSearchBox'), { target: { value: 'refund' } });
+    expect(screen.getByTestId('contextListKiSearchSubmitButton')).toBeInTheDocument();
+  });
+
+  it('commits search when submit is clicked', () => {
     const refetch = jest.fn();
     mockUseListKi.mockImplementation(() => ({
       kis: [],
@@ -114,25 +120,17 @@ describe('ListKiHeader', () => {
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
     const searchBox = screen.getByTestId('contextListKiSearchBox');
     fireEvent.change(searchBox, { target: { value: 'refund' } });
-    fireEvent.click(screen.getByTestId('contextListKiRefreshButton'));
+    fireEvent.click(screen.getByTestId('contextListKiSearchSubmitButton'));
     expect(mockUseListKi).toHaveBeenLastCalledWith(expect.objectContaining({ query: 'refund' }));
     expect(refetch).not.toHaveBeenCalled();
   });
 
-  it('refetches when refresh is clicked without changing the query', () => {
-    const refetch = jest.fn();
-    mockUseListKi.mockImplementation(() => ({
-      kis: [],
-      total: 0,
-      summary: { total: 0, countsByType: [] },
-      isLoading: false,
-      isFetching: false,
-      error: undefined,
-      refetch,
-    }));
-
+  it('disables submit after the current text is committed', () => {
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
-    fireEvent.click(screen.getByTestId('contextListKiRefreshButton'));
-    expect(refetch).toHaveBeenCalled();
+    const searchBox = screen.getByTestId('contextListKiSearchBox');
+    fireEvent.change(searchBox, { target: { value: 'refund' } });
+    expect(screen.getByTestId('contextListKiSearchSubmitButton')).toBeEnabled();
+    fireEvent.keyDown(searchBox, { key: 'Enter', code: 'Enter' });
+    expect(screen.getByTestId('contextListKiSearchSubmitButton')).toBeDisabled();
   });
 });

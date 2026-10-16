@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
 import type { KiLifecycleStatus } from '../../../../../common/step_types/ki';
 import { getListKiStatusFilterLabel } from './list_ki_helpers';
+import { ListKiFilterButton, type ListKiFilterOption } from './list_ki_filter_button';
 
 const STATUS_FILTER_MIN_WIDTH = '12rem';
 const STATUS_FILTER_BUTTON_MIN_WIDTH = '7.25rem';
 
 const LIST_KI_STATUS_FILTER_OPTIONS: KiLifecycleStatus[] = ['active', 'deleted'];
-
-type SelectableStatusOption = EuiSelectableOption & { value: KiLifecycleStatus };
 
 interface ListKiStatusFilterProps {
   statusFilter: KiLifecycleStatus;
@@ -29,8 +27,6 @@ export const ListKiStatusFilter = ({
   statusFilter,
   onStatusFilterChange,
 }: ListKiStatusFilterProps) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   const buttonLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.statusFilterLabel', {
     defaultMessage: 'Status',
   });
@@ -40,60 +36,32 @@ export const ListKiStatusFilter = ({
     { defaultMessage: 'Filter Knowledge Indicators by lifecycle status' }
   );
 
-  const options = useMemo(
-    (): SelectableStatusOption[] =>
-      LIST_KI_STATUS_FILTER_OPTIONS.map((value) => ({
-        value,
-        label: getListKiStatusFilterLabel(value),
-        checked: value === statusFilter ? 'on' : undefined,
-        'data-test-subj': `contextListKiStatusFilter-${value}`,
-      })),
-    [statusFilter]
-  );
+  const options = useMemo((): Array<ListKiFilterOption<KiLifecycleStatus>> => {
+    const ebtProps = getEbtProps({
+      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
+      action: CONTEXT_ENGINE_UI_EBT.action.listKi.FILTER_STATUS,
+    });
 
-  const handleChange = (updatedOptions: SelectableStatusOption[]) => {
-    const selected = updatedOptions.find(({ checked }) => checked === 'on');
-    if (!selected) {
-      return;
-    }
-    onStatusFilterChange(selected.value);
-    setIsPopoverOpen(false);
-  };
-
-  const button = (
-    <EuiFilterButton
-      iconType="chevronSingleDown"
-      isSelected={isPopoverOpen}
-      hasActiveFilters
-      numActiveFilters={1}
-      css={css({ minWidth: STATUS_FILTER_BUTTON_MIN_WIDTH })}
-      onClick={() => setIsPopoverOpen((open) => !open)}
-      data-test-subj="contextListKiStatusFilters"
-    >
-      {buttonLabel}
-    </EuiFilterButton>
-  );
+    return LIST_KI_STATUS_FILTER_OPTIONS.map((value) => ({
+      value,
+      label: getListKiStatusFilterLabel(value),
+      checked: value === statusFilter ? 'on' : undefined,
+      'data-test-subj': `contextListKiStatusFilter-${value}`,
+      ...ebtProps,
+    }));
+  }, [statusFilter]);
 
   return (
-    <EuiPopover
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-      aria-label={statusFilterLegend}
-    >
-      <div style={{ minWidth: STATUS_FILTER_MIN_WIDTH }}>
-        <EuiSelectable<SelectableStatusOption>
-          singleSelection="always"
-          aria-label={statusFilterLegend}
-          options={options}
-          onChange={handleChange}
-          listProps={{ paddingSize: 's' }}
-        >
-          {(list) => list}
-        </EuiSelectable>
-      </div>
-    </EuiPopover>
+    <ListKiFilterButton
+      buttonLabel={buttonLabel}
+      legend={statusFilterLegend}
+      panelMinWidth={STATUS_FILTER_MIN_WIDTH}
+      buttonMinWidth={STATUS_FILTER_BUTTON_MIN_WIDTH}
+      options={options}
+      hasActiveFilters
+      numActiveFilters={1}
+      onChange={onStatusFilterChange}
+      buttonTestSubj="contextListKiStatusFilters"
+    />
   );
 };

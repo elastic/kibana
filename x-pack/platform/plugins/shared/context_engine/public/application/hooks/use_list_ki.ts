@@ -22,7 +22,7 @@ interface UseListKiArgs {
   size?: number;
   type?: string;
   query?: string;
-  lifecycleStatus?: readonly KiLifecycleStatus[];
+  lifecycleStatus?: KiLifecycleStatus[];
   enabled?: boolean;
   notifyOnError?: boolean;
 }

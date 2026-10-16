@@ -549,8 +549,13 @@ describe('ki_list', () => {
     expect(queryText(1)).toContain(
       'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
     );
-    expect(queryText(2)).not.toContain('?searchQuery');
-    expect(queryText(2)).not.toContain('MATCH(');
+    expect(queryText(2)).toContain(
+      'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
+    );
+    expect(query.mock.calls[3][0]).toEqual({
+      query: expect.stringContaining('| STATS count = COUNT(*) BY type'),
+      params: [{ searchQuery: 'refund' }],
+    });
   });
 
   it('binds type and search params together on rows and totals', async () => {
@@ -576,6 +581,11 @@ describe('ki_list', () => {
       { type: 'playbook' },
       { searchQuery: 'refund' },
     ]);
+    expect(query.mock.calls[3][0]).toEqual({
+      query: expect.stringContaining('| STATS count = COUNT(*) BY type'),
+      params: [{ searchQuery: 'refund' }],
+    });
+    expect(queryText(2)).not.toContain('?type');
   });
 
   it('returns no rows when search is set but title and description are absent', async () => {

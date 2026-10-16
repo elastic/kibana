@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
-import { css } from '@emotion/react';
+import React, { useMemo } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
 import type { KiListSummary } from '../../../hooks/use_list_ki';
 import {
@@ -18,12 +15,11 @@ import {
   getListKiTypeFilterLabel,
   type ListKiTypeFilter as ListKiTypeFilterValue,
 } from './list_ki_helpers';
+import { ListKiFilterButton, type ListKiFilterOption } from './list_ki_filter_button';
 
 const TYPE_FILTER_MIN_WIDTH = '16rem';
 /** Fits label + chevron + active-filter badge so the control does not grow when a type is selected. */
 const TYPE_FILTER_BUTTON_MIN_WIDTH = '7.75rem';
-
-type SelectableTypeOption = EuiSelectableOption & { value: string };
 
 interface ListKiTypeFilterProps {
   typeFilter: ListKiTypeFilterValue;
@@ -36,8 +32,6 @@ export const ListKiTypeFilter = ({
   summary,
   onTypeFilterChange,
 }: ListKiTypeFilterProps) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   const buttonLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.typeFilterLabel', {
     defaultMessage: 'Type',
   });
@@ -47,7 +41,7 @@ export const ListKiTypeFilter = ({
     { defaultMessage: 'Filter Knowledge Indicators by type' }
   );
 
-  const options = useMemo((): SelectableTypeOption[] => {
+  const options = useMemo((): Array<ListKiFilterOption<string>> => {
     const ebtProps = getEbtProps({
       element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
       action: CONTEXT_ENGINE_UI_EBT.action.listKi.FILTER_TYPE,
@@ -67,53 +61,21 @@ export const ListKiTypeFilter = ({
     );
   }, [summary.total, summary.countsByType, typeFilter.value]);
 
-  const handleChange = (updatedOptions: SelectableTypeOption[]) => {
-    const selected = updatedOptions.find(({ checked }) => checked === 'on');
-    if (!selected) {
-      return;
-    }
-    onTypeFilterChange(
-      selected.value === ALL_TYPE_FILTER.value
-        ? ALL_TYPE_FILTER
-        : { kind: 'type', value: selected.value }
-    );
-    setIsPopoverOpen(false);
+  const handleTypeChange = (value: string) => {
+    onTypeFilterChange(value === ALL_TYPE_FILTER.value ? ALL_TYPE_FILTER : { kind: 'type', value });
   };
 
-  const button = (
-    <EuiFilterButton
-      iconType="chevronSingleDown"
-      isSelected={isPopoverOpen}
+  return (
+    <ListKiFilterButton
+      buttonLabel={buttonLabel}
+      legend={typeFilterLegend}
+      panelMinWidth={TYPE_FILTER_MIN_WIDTH}
+      buttonMinWidth={TYPE_FILTER_BUTTON_MIN_WIDTH}
+      options={options}
       hasActiveFilters={typeFilter.kind === 'type'}
       numActiveFilters={typeFilter.kind === 'type' ? 1 : 0}
-      css={css({ minWidth: TYPE_FILTER_BUTTON_MIN_WIDTH })}
-      onClick={() => setIsPopoverOpen((open) => !open)}
-      data-test-subj="contextListKiTypeFilters"
-    >
-      {buttonLabel}
-    </EuiFilterButton>
-  );
-
-  return (
-    <EuiPopover
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-      aria-label={typeFilterLegend}
-    >
-      <div style={{ minWidth: TYPE_FILTER_MIN_WIDTH }}>
-        <EuiSelectable<SelectableTypeOption>
-          singleSelection="always"
-          aria-label={typeFilterLegend}
-          options={options}
-          onChange={handleChange}
-          listProps={{ paddingSize: 's' }}
-        >
-          {(list) => list}
-        </EuiSelectable>
-      </div>
-    </EuiPopover>
+      onChange={handleTypeChange}
+      buttonTestSubj="contextListKiTypeFilters"
+    />
   );
 };

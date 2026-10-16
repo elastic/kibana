@@ -15,7 +15,10 @@ import { ALL_TYPE_FILTER, type ListKiTypeFilter } from './list_ki_helpers';
 export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
   const [typeFilter, setTypeFilter] = useState<ListKiTypeFilter>(ALL_TYPE_FILTER);
   const [statusFilter, setStatusFilter] = useState<KiLifecycleStatus>('active');
-  const [searchQuery, setSearchQuery] = useState('');
+  // What the search box currently displays, updated on every keystroke.
+  const [searchText, setSearchText] = useState('');
+  // The last string that was actually fetched; only changes via submitSearch.
+  const [submittedQuery, setSubmittedQuery] = useState('');
   const [size, setSize] = useState(DEFAULT_KI_PAGE_SIZE);
 
   const onTypeFilterChange = (filter: ListKiTypeFilter) => {
@@ -28,33 +31,29 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
     setSize(DEFAULT_KI_PAGE_SIZE);
   };
 
-  const onSearch = (value: string) => {
-    setSearchQuery(value);
-    setSize(DEFAULT_KI_PAGE_SIZE);
-  };
+  const submitSearch = useCallback(
+    (value: string) => {
+      const trimmed = value.trim();
+      setSearchText(trimmed);
+      if (trimmed === submittedQuery) {
+        return;
+      }
+      setSubmittedQuery(trimmed);
+      setSize(DEFAULT_KI_PAGE_SIZE);
+    },
+    [submittedQuery]
+  );
 
-  const { kis, total, summary, isLoading, isFetching, error, refetch } = useListKi({
+  const { kis, total, summary, isLoading, isFetching, error } = useListKi({
     aiIndexId,
     size,
     type: typeFilter.kind === 'type' ? typeFilter.value : undefined,
-    query: searchQuery.length > 0 ? searchQuery : undefined,
+    query: submittedQuery.length > 0 ? submittedQuery : undefined,
     lifecycleStatus: [statusFilter],
   });
 
   const loadMore = () =>
     setSize((current) => Math.min(current + DEFAULT_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE));
-
-  const refreshList = useCallback(
-    (committedSearchQuery: string) => {
-      const trimmed = committedSearchQuery.trim();
-      if (trimmed !== searchQuery) {
-        onSearch(trimmed);
-        return;
-      }
-      void refetch();
-    },
-    [onSearch, refetch, searchQuery]
-  );
 
   return {
     aiIndexId,
@@ -63,8 +62,10 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
     onTypeFilterChange,
     statusFilter,
     onStatusFilterChange,
-    searchQuery,
-    onSearch,
+    searchText,
+    submittedQuery,
+    onSearchTextChange: setSearchText,
+    onSearchSubmit: submitSearch,
     kis,
     total,
     size,
@@ -72,6 +73,6 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
     isFetching,
     error,
     loadMore,
-    refreshList,
+    onSearchSubmitClick: submitSearch,
   };
 };

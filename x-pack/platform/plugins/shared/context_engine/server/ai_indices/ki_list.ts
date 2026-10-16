@@ -140,6 +140,15 @@ const probeColumns = async (
   }
 };
 
+const getRowsSort = (query: string | undefined, hasTimestampColumn: boolean): string => {
+  if (query !== undefined) {
+    return hasTimestampColumn
+      ? 'SORT _score DESC, revision_time DESC, id ASC'
+      : 'SORT _score DESC, id ASC';
+  }
+  return hasTimestampColumn ? 'SORT revision_time DESC, id ASC' : 'SORT id ASC';
+};
+
 /**
  * One row per KI: the latest revision by `@timestamp` for each logical id.
  * On an index dest the same id may exist in several backing indices, so those are distinct KIs.
@@ -213,14 +222,7 @@ export const getKis = async (
     KI_LIFECYCLE_STATUS_ALIAS,
   ].join(', ');
 
-  const rowsSort =
-    query !== undefined
-      ? has('@timestamp')
-        ? 'SORT _score DESC, revision_time DESC, id ASC'
-        : 'SORT _score DESC, id ASC'
-      : has('@timestamp')
-      ? 'SORT revision_time DESC, id ASC'
-      : 'SORT id ASC';
+  const rowsSort = getRowsSort(query, has('@timestamp'));
 
   const rowsQuery = [
     base,
@@ -237,22 +239,18 @@ export const getKis = async (
       : 'STATS total = COUNT(*)',
   ].join('\n| ');
   const bucketsQuery = [
-    currentKisQuery(
-      dest,
-      sources.map(({ expression }) => expression),
-      has,
-      lifecycleStatuses
-    ),
+    base,
     'WHERE type IS NOT NULL',
     'STATS count = COUNT(*) BY type',
     'SORT count DESC, type ASC',
     `LIMIT ${MAX_KI_TYPE_FILTER_COUNT}`,
   ].join('\n| ');
+  const bucketsParams = listQueryParams(undefined, query);
 
   const [rows, totals, buckets] = await Promise.all([
     size > 0 ? esClient.esql.query({ query: rowsQuery, ...filterParams }) : undefined,
     esClient.esql.query({ query: totalsQuery, ...filterParams }),
-    esClient.esql.query({ query: bucketsQuery }),
+    esClient.esql.query({ query: bucketsQuery, ...bucketsParams }),
   ]);
 
   const [totalRow] = toRecords(totals as unknown as ESQLSearchResponse);

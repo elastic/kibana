@@ -14,6 +14,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import {
   AiIndexCreatedCallout,
   AutomationsPanel,
@@ -70,13 +71,6 @@ const editBackingIndexMenuLabel = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.listKi.editBackingIndexMenuLabel',
   {
     defaultMessage: 'Edit backing index',
-  }
-);
-
-const backingIndexMenuLabel = i18n.translate(
-  'xpack.contextEngine.aiIndexDetail.listKi.backingIndexMenuLabel',
-  {
-    defaultMessage: 'Backing index',
   }
 );
 
@@ -171,6 +165,7 @@ export const AiIndexDetailPage = () => {
         href: indexManagementHref,
         overflow: true,
         testId: 'contextListKiPanelDestLink',
+        ebt: { action: CONTEXT_ENGINE_UI_EBT.action.listKi.DEST_LINK },
       });
     }
 
@@ -181,10 +176,9 @@ export const AiIndexDetailPage = () => {
             id: 'contextListKiDiscover',
             label: discoverLinkLabel,
             iconType: 'discoverApp',
-            run: () => {
-              window.open(discoverHref, '_blank', 'noopener,noreferrer');
-            },
+            href: discoverHref,
             testId: 'contextListKiDiscoverLink',
+            ebt: { action: CONTEXT_ENGINE_UI_EBT.action.listKi.DISCOVER_LINK },
           };
 
     if (primaryActionItem === undefined && items.length === 0) {
@@ -336,7 +330,7 @@ export const AiIndexDetailPage = () => {
       )}
 
       {selectedTab === 'knowledge_indicators' && showKnowledgeIndicatorsTab && aiIndex && (
-        <ListKiPanel aiIndex={aiIndex} />
+        <ListKiPanel aiIndex={aiIndex} discoverHref={discoverHref} />
       )}
     </>
   );

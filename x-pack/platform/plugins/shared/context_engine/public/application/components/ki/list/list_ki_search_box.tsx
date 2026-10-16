@@ -5,90 +5,96 @@
  * 2.0.
  */
 
-import { EuiFieldSearch } from '@elastic/eui';
+import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import type { KeyboardEvent } from 'react';
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
+import React, { useCallback } from 'react';
 import { MAX_KI_SEARCH_QUERY_LENGTH } from '../../../../../common/constants';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
-
-export interface ListKiSearchBoxHandle {
-  commitSearch: () => string;
-}
+import { ListKiSearchSubmitButton } from './list_ki_search_submit_button';
 
 interface ListKiSearchBoxProps {
   value: string;
+  submittedQuery: string;
   isLoading?: boolean;
-  onSearch: (value: string) => void;
+  onChange: (value: string) => void;
+  onCommit: (value: string) => void;
+  onSubmitClick: () => void;
 }
 
-export const ListKiSearchBox = forwardRef<ListKiSearchBoxHandle, ListKiSearchBoxProps>(
-  ({ value, isLoading = false, onSearch }, ref) => {
-    const [queryText, setQueryText] = useState(value);
+export const ListKiSearchBox = ({
+  value,
+  submittedQuery,
+  isLoading = false,
+  onChange,
+  onCommit,
+  onSubmitClick,
+}: ListKiSearchBoxProps) => {
+  const searchPlaceholder = i18n.translate(
+    'xpack.contextEngine.aiIndexDetail.listKi.searchPlaceholder',
+    {
+      defaultMessage: 'Search',
+    }
+  );
 
-    useEffect(() => {
-      setQueryText(value);
-    }, [value]);
+  const submitLabel = i18n.translate(
+    'xpack.contextEngine.aiIndexDetail.listKi.searchSubmitButton',
+    {
+      defaultMessage: 'Search',
+    }
+  );
 
-    const commitSearch = useCallback(() => {
-      const trimmed = queryText.trim();
-      onSearch(trimmed);
-      return trimmed;
-    }, [onSearch, queryText]);
+  const searchEbtProps = getEbtProps({
+    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
+    action: CONTEXT_ENGINE_UI_EBT.action.listKi.SEARCH,
+  });
 
-    useImperativeHandle(ref, () => ({ commitSearch }), [commitSearch]);
+  const handleChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => onChange(event.target.value),
+    [onChange]
+  );
 
-    const searchPlaceholder = i18n.translate(
-      'xpack.contextEngine.aiIndexDetail.listKi.searchPlaceholder',
-      {
-        defaultMessage: 'Search by title',
+  // Read the DOM value directly rather than closing over `value`, so this fires correctly
+  // even if the parent hasn't re-rendered with the latest `value` prop yet.
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        onCommit(event.currentTarget.value);
       }
-    );
+    },
+    [onCommit]
+  );
 
-    const searchEbtProps = getEbtProps({
-      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
-      action: CONTEXT_ENGINE_UI_EBT.action.listKi.SEARCH,
-    });
+  return (
+    <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+      <EuiFlexItem>
+        <EuiFieldSearch
+          compressed
+          fullWidth
+          incremental={false}
+          isClearable
+          isLoading={isLoading}
+          maxLength={MAX_KI_SEARCH_QUERY_LENGTH}
+          placeholder={searchPlaceholder}
+          value={value}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          data-test-subj="contextListKiSearchBox"
+          {...searchEbtProps}
+        />
+      </EuiFlexItem>
 
-    const handleChange = useCallback(
-      (event: React.ChangeEvent<HTMLInputElement>) => {
-        const text = event.target.value;
-        setQueryText(text);
-        if (text === '') {
-          onSearch('');
-        }
-      },
-      [onSearch]
-    );
-
-    const handleKeyDown = useCallback(
-      (event: KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') {
-          event.preventDefault();
-          commitSearch();
-        }
-      },
-      [commitSearch]
-    );
-
-    return (
-      <EuiFieldSearch
-        compressed
-        fullWidth
-        incremental={false}
-        isClearable
+      <ListKiSearchSubmitButton
+        tooltip={submitLabel}
+        disabled={value.trim() === submittedQuery}
         isLoading={isLoading}
-        maxLength={MAX_KI_SEARCH_QUERY_LENGTH}
-        placeholder={searchPlaceholder}
-        value={queryText}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-        data-test-subj="contextListKiSearchBox"
-        {...searchEbtProps}
+        onClick={onSubmitClick}
+        data-test-subj="contextListKiSearchSubmitButton"
+        ebtProps={searchEbtProps}
       />
-    );
-  }
-);
-
-ListKiSearchBox.displayName = 'ListKiSearchBox';
+    </EuiFlexGroup>
+  );
+};
