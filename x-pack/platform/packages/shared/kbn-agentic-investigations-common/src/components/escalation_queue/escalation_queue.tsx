@@ -138,7 +138,7 @@ export const EscalationQueue = memo<EscalationQueueProps>(
     const bodyContent = (() => {
       if (error) {
         return (
-          <EuiPanel>
+          <EuiPanel hasBorder={false} hasShadow={false}>
             <EuiEmptyPrompt
               iconType="warning"
               iconColor="danger"
@@ -170,7 +170,7 @@ export const EscalationQueue = memo<EscalationQueueProps>(
       }
       return (
         <>
-          <EuiPanel>
+          <EuiPanel hasBorder={false} hasShadow={false}>
             <EuiText size="xs" color="subdued">
               {isFiltered
                 ? ESCALATION_QUEUE_LABELS.emptyQueueWithFilter

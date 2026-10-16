@@ -25,6 +25,7 @@ interface SwimLanePaginationProps {
   perPage: number;
   cardinality: number;
   onPaginationChange: (arg: { perPage?: number; fromPage?: number }) => void;
+  isInteractive?: boolean;
 }
 
 export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
@@ -32,6 +33,7 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
   fromPage,
   perPage,
   onPaginationChange,
+  isInteractive = true,
 }) => {
   const componentFromPage = fromPage - 1;
 
@@ -75,36 +77,38 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          aria-label={i18n.translate('xpack.ml.explorer.swimLane.rowsPerPagePopoverAriaLabel', {
-            defaultMessage: 'Rows per page',
-          })}
-          button={
-            <EuiButtonEmpty
-              size="xs"
-              color="text"
-              iconType="chevronSingleDown"
-              iconSide="right"
-              onClick={onButtonClick}
-              data-test-subj="mlSwimLanePageSizeControl"
-            >
-              <span data-test-subj={perPage}>
-                <FormattedMessage
-                  id="xpack.ml.explorer.swimLaneRowsPerPage"
-                  defaultMessage="Rows per page: {rowsCount}"
-                  values={{ rowsCount: perPage }}
-                />
-              </span>
-            </EuiButtonEmpty>
-          }
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          panelPaddingSize="none"
-        >
-          <EuiContextMenuPanel items={menuItems} data-test-subj="mlSwimLanePageSizePanel" />
-        </EuiPopover>
-      </EuiFlexItem>
+      {isInteractive && (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            aria-label={i18n.translate('xpack.ml.explorer.swimLane.rowsPerPagePopoverAriaLabel', {
+              defaultMessage: 'Rows per page',
+            })}
+            button={
+              <EuiButtonEmpty
+                size="xs"
+                color="text"
+                iconType="chevronSingleDown"
+                iconSide="right"
+                onClick={onButtonClick}
+                data-test-subj="mlSwimLanePageSizeControl"
+              >
+                <span data-test-subj={perPage}>
+                  <FormattedMessage
+                    id="xpack.ml.explorer.swimLaneRowsPerPage"
+                    defaultMessage="Rows per page: {rowsCount}"
+                    values={{ rowsCount: perPage }}
+                  />
+                </span>
+              </EuiButtonEmpty>
+            }
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+          >
+            <EuiContextMenuPanel items={menuItems} data-test-subj="mlSwimLanePageSizePanel" />
+          </EuiPopover>
+        </EuiFlexItem>
+      )}
 
       <EuiFlexItem grow={false}>
         <EuiPagination
