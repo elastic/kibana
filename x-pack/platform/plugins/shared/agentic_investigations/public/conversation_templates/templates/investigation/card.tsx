@@ -135,9 +135,6 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
                         gap: ${euiTheme.size.xs};
                       `}
                     >
-                      <EuiText size="xs" color="subdued" component="span" aria-hidden>
-                        •
-                      </EuiText>
                       <EuiText
                         size="xs"
                         component="span"

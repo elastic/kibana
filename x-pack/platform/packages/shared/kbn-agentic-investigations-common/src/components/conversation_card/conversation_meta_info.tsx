@@ -29,9 +29,10 @@ export const ConversationMetaInfo = memo<{
   inFlightStatus?: React.ReactNode;
 }>(({ createdAt, inFlightStatus }) => {
   const { unit } = selectUnit(new Date(createdAt));
+  const hasTrailing = inFlightStatus != null;
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} direction="row">
+    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} direction="row">
       <EuiFlexItem grow={false}>
         <EuiToolTip content={<FormattedDate value={createdAt} dateStyle="full" timeStyle="long" />}>
           {/* Focusable so the exact time is reachable without a pointer. */}
@@ -45,7 +46,16 @@ export const ConversationMetaInfo = memo<{
           </EuiText>
         </EuiToolTip>
       </EuiFlexItem>
-      {inFlightStatus ? <EuiFlexItem grow={false}>{inFlightStatus}</EuiFlexItem> : null}
+      {hasTrailing ? (
+        <>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued" component="span" aria-hidden>
+              •
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{inFlightStatus}</EuiFlexItem>
+        </>
+      ) : null}
     </EuiFlexGroup>
   );
 });

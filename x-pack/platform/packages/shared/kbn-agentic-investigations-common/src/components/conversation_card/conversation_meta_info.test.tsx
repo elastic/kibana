@@ -34,18 +34,20 @@ describe('ConversationMetaInfo', () => {
     expect(screen.getByText('2 days ago')).toBeInTheDocument();
   });
 
-  it('shows the in-flight status beside the age', () => {
+  it('shows a middot separator and the in-flight status beside the age', () => {
     renderWithKibanaRenderContext(
       <ConversationMetaInfo createdAt={agedBy(90 * 1000)} inFlightStatus={<span>Applying</span>} />
     );
 
-    expect(screen.getByText('Applying')).toBeInTheDocument();
     expect(screen.getByText('1 minute ago')).toBeInTheDocument();
+    expect(screen.getByText('•')).toBeInTheDocument();
+    expect(screen.getByText('Applying')).toBeInTheDocument();
   });
 
-  it('shows no status when none is in flight', () => {
+  it('shows no middot or status when nothing follows the age', () => {
     renderWithKibanaRenderContext(<ConversationMetaInfo createdAt={agedBy(90 * 1000)} />);
 
+    expect(screen.queryByText('•')).not.toBeInTheDocument();
     expect(screen.queryByText('Applying')).not.toBeInTheDocument();
   });
 });
