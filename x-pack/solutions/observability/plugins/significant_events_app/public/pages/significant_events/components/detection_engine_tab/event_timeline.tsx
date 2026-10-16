@@ -52,24 +52,32 @@ export function EventTimeline({ activity, episode }: IEventTimelineProps) {
             </h3>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            compressed
-            data-test-subj="detectionEngineTimelineRoutine"
-            label={
-              showRoutine
-                ? i18n.translate('xpack.significantEventsApp.detectionEngine.timeline.routineOn', {
-                    defaultMessage: 'Every-minute entries shown',
-                  })
-                : i18n.translate('xpack.significantEventsApp.detectionEngine.timeline.routineOff', {
-                    defaultMessage: 'Show {count} every-minute entries',
-                    values: { count: hidden },
-                  })
-            }
-            checked={showRoutine}
-            onChange={(event) => setShowRoutine(event.target.checked)}
-          />
-        </EuiFlexItem>
+        {(hidden > 0 || showRoutine) && (
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              compressed
+              data-test-subj="detectionEngineTimelineRoutine"
+              label={
+                showRoutine
+                  ? i18n.translate(
+                      'xpack.significantEventsApp.detectionEngine.timeline.routineOn',
+                      {
+                        defaultMessage: 'Every-minute entries shown',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.significantEventsApp.detectionEngine.timeline.routineOff',
+                      {
+                        defaultMessage: 'Show {count} every-minute entries',
+                        values: { count: hidden },
+                      }
+                    )
+              }
+              checked={showRoutine}
+              onChange={(event) => setShowRoutine(event.target.checked)}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiText size="xs">
         {shown.map((entry, index) => {
