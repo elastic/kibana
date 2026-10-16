@@ -13,6 +13,7 @@ import type { NotificationPhase } from './notification_routing';
 import type { NotificationRoutingClient } from './notification_routing_client';
 import type { InvestigationLocator } from '../../../common/locators';
 import type { GetInvestigationsClient } from '../../routes/types';
+import { ELASTIC_APPS_SLACK_CONNECTOR_ID } from '../automations/generate_workflow_yaml';
 import {
   deliverInvestigationNotifications,
   getStartedMessageTs,
@@ -125,7 +126,12 @@ const recordSlackThreadStatusMessages = async ({
     const routing = await routingClient.get();
     for (const destination of routing?.destinations ?? []) {
       const messageTs = routing && getStartedMessageTs(routing, executionId, destination);
-      if (destination.type === 'slack' && destination.thread && messageTs) {
+      if (
+        destination.type === 'slack' &&
+        destination.connector_id === ELASTIC_APPS_SLACK_CONNECTOR_ID &&
+        destination.thread &&
+        messageTs
+      ) {
         await client.recordSlackThreadStatusMessage({
           investigationId,
           channel: destination.thread.channel,

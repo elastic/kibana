@@ -81,6 +81,21 @@ export interface SlackThreadReference {
   thread_ts: string;
 }
 
+/**
+ * The key the Relay and Agent Builder identify a Slack thread's conversation by
+ * (`origin.external_conversation_id`), which is also the thread's subject id.
+ * Channel ids are only unique within a workspace.
+ */
+export const toSlackThreadKey = ({
+  workspace,
+  channel,
+  threadTs,
+}: {
+  workspace: string;
+  channel: string;
+  threadTs: string;
+}): string => ['slack', workspace, channel, threadTs].map(encodeURIComponent).join(':');
+
 export interface StartInvestigationResponse {
   /**
    * The investigation, which is an Agent Builder conversation with this id. A start whose

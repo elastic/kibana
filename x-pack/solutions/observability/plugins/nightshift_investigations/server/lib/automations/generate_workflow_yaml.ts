@@ -17,7 +17,7 @@ const ALERT_STATUS_TO_KQL: Record<string, string> = {
 
 // Defaults to the Elastic Slack app when no connector is selected; the channel remains user-selected.
 // Mirrors significant_events/server/lib/slack_app/service.ts, which depends on this plugin.
-const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
+export const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
 
 const ALERT_TRIGGER_TYPE = 'alerting.alertStatusChanged';
 const SLACK_MESSAGE_TRIGGER_TYPE = 'slack2.message';

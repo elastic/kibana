@@ -175,6 +175,16 @@ describe('nightshift.sendNotifications step', () => {
       expect(recordSlackThreadStatusMessage).not.toHaveBeenCalled();
     });
 
+    it('records nothing for a custom Slack connector', async () => {
+      const { definition, context, recordSlackThreadStatusMessage } = setup(
+        'default',
+        'saved-slack',
+        threadParams
+      );
+      await definition.handler(context('started'));
+      expect(recordSlackThreadStatusMessage).not.toHaveBeenCalled();
+    });
+
     it('records nothing when the started reply was not confirmed', async () => {
       const { definition, context, execute, recordSlackThreadStatusMessage } = setup(
         'default',

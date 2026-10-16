@@ -28,8 +28,11 @@ import {
   alertSnapshotSchema,
   DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
   INVESTIGATION_TRIGGER_TYPES,
+  toSlackThreadKey,
 } from '../../common';
 import { buildInvestigationMessage } from './build_investigation_message';
+
+export { toSlackThreadKey };
 
 const MAX_SLACK_FIELD_LENGTH = 256;
 const MAX_SLACK_PERMALINK_LENGTH = 2048;
@@ -68,21 +71,6 @@ const truncateSummary = (summary: string | undefined): string | undefined =>
 /** True for the placeholder a manual investigation carries when the caller names no subject id. */
 const isPlaceholderManualSubject = ({ type, id }: Pick<InvestigationSubject, 'type' | 'id'>) =>
   type === 'manual' && id === DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID;
-
-/**
- * The key the Relay and Agent Builder identify a Slack thread's conversation by (its conversation
- * origin), which is also the thread's subject id. Matches the Relay's `slackConversationKey`.
- * Channel ids are only unique within a workspace.
- */
-export const toSlackThreadKey = ({
-  workspace,
-  channel,
-  threadTs,
-}: {
-  workspace: string;
-  channel: string;
-  threadTs: string;
-}): string => ['slack', workspace, channel, threadTs].map(encodeURIComponent).join(':');
 
 /**
  * The subjects one start records: the named subject and, for an alert investigation, one subject
