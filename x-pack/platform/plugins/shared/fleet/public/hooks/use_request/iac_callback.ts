@@ -20,7 +20,7 @@ import { sendRequest, sendRequestForRq } from './use_request';
 
 export const IAC_CALLBACK_AVAILABILITY_QUERY_KEY = ['iac-callback-availability'];
 
-/** Whether a launched stack could report back to this Kibana. The server caches its probe briefly. */
+/** Whether a launched stack could report back to this Kibana: its public URL must be set and https. */
 export function useGetIacCallbackAvailabilityQuery({ enabled }: { enabled: boolean }) {
   return useQuery(
     IAC_CALLBACK_AVAILABILITY_QUERY_KEY,

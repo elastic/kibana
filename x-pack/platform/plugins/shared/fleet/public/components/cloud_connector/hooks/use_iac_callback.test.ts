@@ -54,8 +54,8 @@ const setAvailability = (data: GetIacCallbackAvailabilityResponse | undefined) =
     isLoading: data === undefined,
     refetch: mockedRecheck,
   } as any);
-const UNTRUSTED_REASON =
-  'The public Kibana URL https://kb.example.com presents a TLS certificate that is not publicly trusted (self-signed certificate).';
+const NOT_HTTPS_REASON =
+  'The public Kibana URL http://kb.example.com is not https. CloudFormation only accepts an https callback URL.';
 
 const poll = async () => {
   await act(async () => {
@@ -112,12 +112,12 @@ describe('useIacCallback', () => {
     setAvailability({
       available: false,
       kibana_url: 'https://kb.example.com',
-      reason: UNTRUSTED_REASON,
+      reason: NOT_HTTPS_REASON,
     });
     const { result } = renderHook(() => useIacCallback({ enabled: true }));
 
     expect(result.current.available).toBe(false);
-    expect(result.current.unavailableReason).toBe(UNTRUSTED_REASON);
+    expect(result.current.unavailableReason).toBe(NOT_HTTPS_REASON);
   });
 
   it('start() creates a record with the identity details and returns the stack params', async () => {
@@ -406,12 +406,12 @@ describe('useIacCallback', () => {
   it('rejects and asks the server again when it refuses the record because its URL became unreachable', async () => {
     mockedCreate.mockResolvedValue({
       data: null,
-      error: { statusCode: 412, message: UNTRUSTED_REASON },
+      error: { statusCode: 412, message: NOT_HTTPS_REASON },
     } as any);
     const { result } = renderHook(() => useIacCallback({ enabled: true }));
 
     await act(async () => {
-      await expect(result.current.start({})).rejects.toThrow(UNTRUSTED_REASON);
+      await expect(result.current.start({})).rejects.toThrow(NOT_HTTPS_REASON);
     });
 
     expect(mockedRecheck).toHaveBeenCalled();

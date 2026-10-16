@@ -102,7 +102,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: IAC_PROVISIONER_API_ROUTES.CALLBACK_AVAILABILITY_PATTERN,
       summary: 'Check IaC callback availability',
       description:
-        'Whether a launched CloudFormation stack could report back to this Kibana: server.publicBaseUrl must be an https URL that answers with a publicly trusted certificate. Returns the URL the stack is given, or the reason the callback cannot be used.',
+        'Whether a launched CloudFormation stack could report back to this Kibana: server.publicBaseUrl must be set and be an https URL. Returns the URL the stack is given, or the reason the callback cannot be used.',
       access: 'internal',
       security: IAC_PROVISIONER_ROUTE_SECURITY,
     })
@@ -145,8 +145,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             400: { description: 'A bad request.', body: genericErrorResponse },
             404: { description: 'AWS identity federation is not enabled.', body: notFoundResponse },
             412: {
-              description:
-                'The public Kibana URL cannot be reached with a publicly trusted certificate.',
+              description: 'The public Kibana URL is not https.',
               body: genericErrorResponse,
             },
           },

@@ -507,7 +507,7 @@ describe('IaC callback handlers', () => {
     mockedAppContext.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(soClient as any);
     mockedAppContext.getInternalUserESClient.mockReturnValue(esClient as any);
     mockedIsAwsIdentityFederationEnabled.mockResolvedValue(true);
-    mockedGetAvailability.mockResolvedValue({
+    mockedGetAvailability.mockReturnValue({
       available: true,
       kibanaUrl: 'https://kb.example.com',
     });
@@ -542,11 +542,11 @@ describe('IaC callback handlers', () => {
     });
 
     it('returns the reason when the callback is not available', async () => {
-      mockedGetAvailability.mockResolvedValue({
+      mockedGetAvailability.mockReturnValue({
         available: false,
-        kibanaUrl: 'https://kb.example.com',
+        kibanaUrl: 'http://kb.example.com',
         reason:
-          'The public Kibana URL https://kb.example.com presents a TLS certificate that is not publicly trusted (self-signed certificate).',
+          'The public Kibana URL http://kb.example.com is not https. CloudFormation only accepts an https callback URL.',
       });
 
       await getIacCallbackAvailabilityHandler(
@@ -558,21 +558,21 @@ describe('IaC callback handlers', () => {
       expect(response.ok).toHaveBeenCalledWith({
         body: {
           available: false,
-          kibana_url: 'https://kb.example.com',
+          kibana_url: 'http://kb.example.com',
           reason:
-            'The public Kibana URL https://kb.example.com presents a TLS certificate that is not publicly trusted (self-signed certificate).',
+            'The public Kibana URL http://kb.example.com is not https. CloudFormation only accepts an https callback URL.',
         },
       });
     });
   });
 
   describe('createIacCallbackHandler', () => {
-    it('returns 412 and mints nothing when the public URL cannot be called back', async () => {
-      mockedGetAvailability.mockResolvedValue({
+    it('returns 412 and mints nothing when the public URL is not https', async () => {
+      mockedGetAvailability.mockReturnValue({
         available: false,
-        kibanaUrl: 'https://kb.example.com',
+        kibanaUrl: 'http://kb.example.com',
         reason:
-          'The public Kibana URL https://kb.example.com could not be reached (connect ECONNREFUSED).',
+          'The public Kibana URL http://kb.example.com is not https. CloudFormation only accepts an https callback URL.',
       });
       const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
 
@@ -582,14 +582,14 @@ describe('IaC callback handlers', () => {
         statusCode: 412,
         body: {
           message:
-            'The public Kibana URL https://kb.example.com could not be reached (connect ECONNREFUSED).',
+            'The public Kibana URL http://kb.example.com is not https. CloudFormation only accepts an https callback URL.',
         },
       });
       expect(mockedService.create).not.toHaveBeenCalled();
     });
 
     it('creates the record when no public URL is configured, since there is nothing to check', async () => {
-      mockedGetAvailability.mockResolvedValue({
+      mockedGetAvailability.mockReturnValue({
         available: false,
         reason: 'Kibana has no public URL: server.publicBaseUrl is not set.',
       });

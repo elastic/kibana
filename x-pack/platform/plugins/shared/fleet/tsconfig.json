@@ -77,7 +77,6 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/repo-info",
     "@kbn/logging-mocks",
-    "@kbn/dev-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/test",
     "@kbn/stdio-dev-helpers",

@@ -221,7 +221,7 @@ export const getIacCallbackAvailabilityHandler: FleetRequestHandler = async (
   if (!(await isAwsIdentityFederationEnabled())) {
     return response.notFound(AWS_IDENTITY_FEDERATION_DISABLED);
   }
-  const { available, kibanaUrl, reason } = await getIacCallbackAvailability();
+  const { available, kibanaUrl, reason } = getIacCallbackAvailability();
   return response.ok({
     body: {
       available,
@@ -239,10 +239,10 @@ export const createIacCallbackHandler: FleetRequestHandler<
   if (!(await isAwsIdentityFederationEnabled())) {
     return response.notFound(AWS_IDENTITY_FEDERATION_DISABLED);
   }
-  // A public URL that the stack could not call back is refused, so no key is minted for a report
-  // that cannot arrive. Without a configured public URL there is nothing to check; the caller
-  // supplies the URL to the stack and is responsible for it.
-  const availability = await getIacCallbackAvailability();
+  // A public URL the stack cannot be given (not https) is refused, so no key is minted for a
+  // report that cannot arrive. Without a configured public URL there is nothing to check; the
+  // caller supplies the URL to the stack and is responsible for it.
+  const availability = getIacCallbackAvailability();
   if (!availability.available && availability.kibanaUrl) {
     return response.customError({
       statusCode: 412,

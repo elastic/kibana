@@ -426,7 +426,7 @@ describe('AwsIdentityFederationSetup', () => {
 
     it('shows the server reason when the callback is not available because of the public URL', async () => {
       const reason =
-        'The public Kibana URL https://kb.example.com presents a TLS certificate that is not publicly trusted (self-signed certificate).';
+        'The public Kibana URL http://kb.example.com is not https. CloudFormation only accepts an https callback URL.';
       mockUseIacCallback.mockReturnValue(
         callbackState({ available: false, unavailableReason: reason })
       );

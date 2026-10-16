@@ -105,8 +105,8 @@ const toIdentityBody = (identity: IacCallbackStartInput): IacCallbackIdentity =>
 };
 
 export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbackResult => {
-  // The server decides whether the stack could call back: `server.publicBaseUrl` must be an https
-  // URL that answers with a publicly trusted certificate. It is also the URL the stack is given.
+  // The server decides whether the stack could call back: `server.publicBaseUrl` must be set and
+  // be https. It is also the URL the stack is given.
   const {
     data: availability,
     isLoading: isChecking,
@@ -281,7 +281,7 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
         ...toIdentityBody(identity),
       });
       if (error?.statusCode === 412) {
-        // The server found its public URL unreachable since the last check; show its reason.
+        // The server's public URL stopped being one a stack can report to; show its reason.
         recheckAvailability();
       }
       if (error || !data) {
