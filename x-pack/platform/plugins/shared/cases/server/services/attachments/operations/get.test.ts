@@ -7,7 +7,7 @@
 
 import { unset } from 'lodash';
 
-import { fromKueryExpression } from '@kbn/es-query';
+import { fromKueryExpression, toKqlExpression } from '@kbn/es-query';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SavedObjectsBulkResponse, SavedObjectsFindResponse } from '@kbn/core/server';
@@ -19,10 +19,12 @@ import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
+  CASE_SAVED_OBJECT,
 } from '../../../../common/constants';
 import {
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
   STACK_ALERT_ATTACHMENT_TYPE,
 } from '../../../../common/constants/attachments';
@@ -1057,6 +1059,54 @@ describe('AttachmentService getter', () => {
 
       const res = await attachmentGetter.getAllAlertIds({ caseId });
       expect(Array.from(res.values())).toEqual(['alert-id-1']);
+    });
+  });
+
+  describe('getAttachedAttackIds', () => {
+    const caseId = 'test-case';
+
+    it('only asks for the requested attack ids and sizes the aggregation to them', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        aggregations: { attackIds: { buckets: [{ key: 'attack-id-2' }] } },
+        saved_objects: [],
+        page: 1,
+        per_page: 0,
+        total: 0,
+      });
+
+      const res = await attachmentGetter.getAttachedAttackIds({
+        caseId,
+        attackIds: ['attack-id-1', 'attack-id-2', 'attack-id-1'],
+      });
+
+      expect(Array.from(res.values())).toEqual(['attack-id-2']);
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+
+      const findArgs = unsecuredSavedObjectsClient.find.mock.calls[0][0];
+      expect(findArgs).toEqual(
+        expect.objectContaining({
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+          perPage: 0,
+          aggs: {
+            attackIds: {
+              terms: { field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId`, size: 2 },
+            },
+          },
+        })
+      );
+      expect(toKqlExpression(findArgs.filter)).toBe(
+        `(${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.type: ${SECURITY_ATTACK_ATTACHMENT_TYPE} AND ` +
+          `(${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId: attack-id-1 OR ` +
+          `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId: attack-id-2))`
+      );
+    });
+
+    it('returns an empty set without querying when no attack ids are requested', async () => {
+      const res = await attachmentGetter.getAttachedAttackIds({ caseId, attackIds: [] });
+
+      expect(res.size).toBe(0);
+      expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
     });
   });
 

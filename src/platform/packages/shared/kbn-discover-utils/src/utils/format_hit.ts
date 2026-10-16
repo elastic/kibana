@@ -32,11 +32,17 @@ type PartialHitReactPair = [
 
 interface FormatHitReactOptions {
   skipNullishValues?: boolean;
+  isInteractive?: boolean;
 }
 
 const formattedHitCache = new WeakMap<
   EsHitRecord,
-  { formattedHit: FormattedHit; maxEntries: number; skipNullishValues: boolean }
+  {
+    formattedHit: FormattedHit;
+    maxEntries: number;
+    skipNullishValues: boolean;
+    isInteractive: boolean;
+  }
 >();
 
 /**
@@ -59,12 +65,14 @@ export function formatHitReact(
   options?: FormatHitReactOptions
 ): FormattedHit {
   const skipNullishValues = Boolean(options?.skipNullishValues);
+  const isInteractive = options?.isInteractive ?? true;
   const cached = formattedHitCache.get(hit.raw);
 
   if (
     cached &&
     cached.maxEntries === maxEntries &&
-    cached.skipNullishValues === skipNullishValues
+    cached.skipNullishValues === skipNullishValues &&
+    cached.isInteractive === isInteractive
   ) {
     return cached.formattedHit;
   }
@@ -127,6 +135,7 @@ export function formatHitReact(
       fieldFormats,
       dataView,
       field,
+      options: { isInteractive },
     });
   }
 
@@ -145,7 +154,7 @@ export function formatHitReact(
 
   const formattedHit = renderedPairs as FormattedHit;
 
-  formattedHitCache.set(hit.raw, { formattedHit, maxEntries, skipNullishValues });
+  formattedHitCache.set(hit.raw, { formattedHit, maxEntries, skipNullishValues, isInteractive });
 
   return formattedHit;
 }
