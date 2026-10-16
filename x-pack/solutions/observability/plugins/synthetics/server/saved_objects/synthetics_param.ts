@@ -23,6 +23,6 @@ export const syntheticsParamSavedObjectType: SavedObjectsType = {
   },
   management: {
     importableAndExportable: false,
-    icon: 'uptimeApp',
+    icon: 'heart',
   },
 };
