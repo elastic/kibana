@@ -16,6 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { ConversationMetaInfo } from '@kbn/agentic-investigations-common';
+import { useAiButtonGradientStyles } from '@kbn/shared-ux-ai-components';
 import type { InvestigationSummary } from '../../../../common';
 import { InvestigatingTypingDots } from './investigating_typing_dots';
 import { getInvestigationDisplayTitle } from './to_view_model';
@@ -78,6 +79,9 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   actions,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { labelCss: aiLabelCss } = useAiButtonGradientStyles({ variant: 'outlined' });
+  // Same primary→assistance stop colors the AI label gradient uses (dots can't use background-clip).
+  const aiDotsFill = `linear-gradient(135deg, ${euiTheme.colors.textPrimary} 2.98%, ${euiTheme.colors.textAssistance} 66.24%)`;
   const { metadata, in_progress: inProgress, created_at: createdAt } = investigation;
   const title = getInvestigationDisplayTitle(investigation);
   const { summary } = metadata;
@@ -123,10 +127,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
                 createdAt={createdAt}
                 inFlightStatus={
                   inProgress ? (
-                    <EuiText
-                      size="xs"
-                      color="subdued"
-                      component="span"
+                    <span
                       data-test-subj="investigationCardRunning"
                       css={css`
                         display: inline-flex;
@@ -134,18 +135,24 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
                         gap: ${euiTheme.size.xs};
                       `}
                     >
-                      <span aria-hidden>•</span>
-                      <span
-                        css={css`
-                          display: inline-flex;
-                          align-items: center;
-                          gap: ${euiTheme.size.xs};
-                        `}
+                      <EuiText size="xs" color="subdued" component="span" aria-hidden>
+                        •
+                      </EuiText>
+                      <EuiText
+                        size="xs"
+                        component="span"
+                        css={[
+                          aiLabelCss,
+                          css`
+                            padding: 0;
+                            line-height: 1;
+                          `,
+                        ]}
                       >
                         {IN_PROGRESS_LABEL}
-                        <InvestigatingTypingDots />
-                      </span>
-                    </EuiText>
+                      </EuiText>
+                      <InvestigatingTypingDots color={aiDotsFill} />
+                    </span>
                   ) : undefined
                 }
               />

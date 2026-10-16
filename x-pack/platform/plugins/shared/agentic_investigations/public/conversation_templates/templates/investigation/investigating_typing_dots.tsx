@@ -24,8 +24,15 @@ const typingDotPulse = keyframes`
   }
 `;
 
+export interface InvestigatingTypingDotsProps {
+  /** CSS color or gradient fill for the dots. Defaults to currentColor. */
+  color?: string;
+}
+
 /** Staggered typing-style dots used next to in-progress investigation status. */
-export const InvestigatingTypingDots = (): React.ReactElement => {
+export const InvestigatingTypingDots = ({
+  color = 'currentColor',
+}: InvestigatingTypingDotsProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -56,7 +63,7 @@ export const InvestigatingTypingDots = (): React.ReactElement => {
             width: ${DOT_SIZE_PX}px;
             height: ${DOT_SIZE_PX}px;
             border-radius: 50%;
-            background: currentColor;
+            background: ${color};
             animation: ${typingDotPulse} 1.2s ${euiTheme.animation.resistance} infinite;
             animation-delay: ${delayMs}ms;
           `}
