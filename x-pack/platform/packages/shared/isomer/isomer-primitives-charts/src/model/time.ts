@@ -147,3 +147,79 @@ export const formatTime = (
     hourCycle: 'h23',
     timeZone: ISO_DATE.test(value) ? 'UTC' : timeZone,
   }).format(instantOf(value));
+
+export const INTERVAL_UNITS = [
+  'millisecond',
+  'second',
+  'minute',
+  'hour',
+  'day',
+  'week',
+  'month',
+  'year',
+] as const;
+
+export const timeIntervalSchema = () =>
+  z
+    .object({
+      value: z.number().int().positive(),
+      unit: z.enum(INTERVAL_UNITS),
+    })
+    .strict()
+    .describe(
+      'The bucket each time starts, e.g. `{ "value": 1, "unit": "day" }`. Calendar units follow the axis time zone.'
+    );
+
+export type TimeInterval = z.infer<ReturnType<typeof timeIntervalSchema>>;
+
+const FIXED_MS: Partial<Record<TimeInterval['unit'], number>> = {
+  millisecond: 1,
+  second: 1000,
+  minute: 60_000,
+  hour: 3_600_000,
+};
+
+/** The wall clock in `timeZone` at `instant`, as if it were UTC. */
+const wallClock = (instant: number, timeZone: string): number => {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      hourCycle: 'h23',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+    })
+      .formatToParts(instant)
+      .map(({ type, value }) => [type, Number(value)])
+  );
+  return (
+    Date.UTC(parts.year!, parts.month! - 1, parts.day, parts.hour, parts.minute, parts.second) +
+    (((instant % 1000) + 1000) % 1000)
+  );
+};
+
+/** Where a bucket starting at `start` ends, stepping calendar units on the wall clock in `timeZone`. */
+export const bucketEnd = (
+  start: number,
+  { value, unit }: TimeInterval,
+  timeZone: string
+): number => {
+  const fixed = FIXED_MS[unit];
+  if (fixed !== undefined) {
+    return start + value * fixed;
+  }
+  const wall = new Date(wallClock(start, timeZone));
+  if (unit === 'year') {
+    wall.setUTCFullYear(wall.getUTCFullYear() + value);
+  } else if (unit === 'month') {
+    wall.setUTCMonth(wall.getUTCMonth() + value);
+  } else {
+    wall.setUTCDate(wall.getUTCDate() + value * (unit === 'week' ? 7 : 1));
+  }
+  const target = wall.getTime();
+  const guess = target - (wallClock(start, timeZone) - start);
+  return target - (wallClock(guess, timeZone) - guess);
+};

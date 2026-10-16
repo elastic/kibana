@@ -38,7 +38,10 @@ const byTitle = (title: string) => examples.find((node) => node.title === title)
 describe('donut schema', () => {
   it('accepts every example', () => {
     for (const node of examples) {
-      expect(messages(node)).toEqual([]);
+      expect({ title: node.title, errors: messages(node) }).toEqual({
+        title: node.title,
+        errors: [],
+      });
     }
   });
 
@@ -157,7 +160,10 @@ describe('resolveDonut', () => {
       const tenths = resolveDonut(withValues(...values)).parts.map(({ share }) =>
         Math.round(share! * 10)
       );
-      expect(tenths.reduce((sum, tenth) => sum + tenth, 0)).toBe(1000);
+      expect({
+        values,
+        total: tenths.reduce((sum, tenth) => sum + tenth, 0),
+      }).toEqual({ values, total: 1000 });
     }
   });
 

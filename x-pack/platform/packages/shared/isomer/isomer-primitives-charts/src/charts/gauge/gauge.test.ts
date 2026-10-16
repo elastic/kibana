@@ -39,7 +39,10 @@ const byTitle = (title: string) => examples.find((node) => node.title === title)
 describe('gauge schema', () => {
   it('accepts every example', () => {
     for (const node of examples) {
-      expect(messages(node)).toEqual([]);
+      expect({ title: node.title, errors: messages(node) }).toEqual({
+        title: node.title,
+        errors: [],
+      });
     }
   });
 

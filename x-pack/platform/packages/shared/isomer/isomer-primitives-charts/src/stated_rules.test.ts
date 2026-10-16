@@ -13,6 +13,7 @@ import {
   unresolvedBodyNodeSchema,
   z,
 } from '@elastic/isomer-sdk';
+
 import { crossSuperRefine, rulesOf } from './model/cross_field';
 import { chartsPack } from './pack';
 
@@ -94,12 +95,12 @@ const rows = [...members].map(([type, schema]) => ({
 describe('stated rules', () => {
   it('finds the checks it guards', () => {
     expect(Object.fromEntries(rows.map(({ type, checks }) => [type, checks.length]))).toEqual({
-      donut: 7,
-      gauge: 10,
-      heatmap: 16,
-      metricTrend: 8,
-      treemap: 5,
-      xyChart: 20,
+      donut: 8,
+      gauge: 11,
+      heatmap: 17,
+      metricTrend: 9,
+      treemap: 6,
+      xyChart: 27,
     });
   });
 
@@ -107,9 +108,16 @@ describe('stated rules', () => {
     const stated = descriptions(authoringSchemaSubset(authoring, [type]));
     for (const check of checks) {
       const rules = rulesOf(check);
-      expect(rules).toBeDefined();
+      expect({ type, madeWithCrossField: rules !== undefined }).toEqual({
+        type,
+        madeWithCrossField: true,
+      });
       for (const rule of rules ?? []) {
-        expect(stated.some((description) => description.includes(rule))).toBe(true);
+        expect({
+          type,
+          rule,
+          stated: stated.some((description) => description.includes(rule)),
+        }).toEqual({ type, rule, stated: true });
       }
     }
   });

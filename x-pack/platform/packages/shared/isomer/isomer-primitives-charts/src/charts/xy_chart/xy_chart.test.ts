@@ -35,7 +35,10 @@ const valid = (node: unknown) => messages(node).length === 0;
 describe('xyChart schema', () => {
   it('accepts every example', () => {
     for (const node of examples) {
-      expect(messages(node)).toEqual([]);
+      expect({ title: node.title, errors: messages(node) }).toEqual({
+        title: node.title,
+        errors: [],
+      });
     }
   });
 
@@ -231,7 +234,7 @@ describe('xyChart schema', () => {
     });
     expect(valid(sized(MAX_DATA_POINTS))).toBe(true);
     expect(messages(sized(MAX_DATA_POINTS + 1))).toContain(
-      `the chart holds at most ${MAX_DATA_POINTS} points`
+      `the chart holds at most ${MAX_DATA_POINTS} points and annotations`
     );
   });
 
@@ -435,6 +438,282 @@ describe('xyChart selection', () => {
       selection: { name: 's', on: { x: { q: [{ field: 'f', value: 'q' }] } } },
     };
     expect(valid(sparse)).toBe(true);
+  });
+});
+
+describe('xyChart time buckets and bins', () => {
+  const days = (
+    x: Record<string, unknown>,
+    points: readonly string[] = ['2026-10-14T00:00:00Z']
+  ) => ({
+    ...base,
+    x: { type: 'time', ...x },
+    series: [{ label: 'a', points: points.map((at) => ({ x: at, y: 1 })) }],
+  });
+
+  it('needs a queried window to run forward', () => {
+    expect(
+      valid(
+        days({
+          domain: { from: '2026-10-14T00:00:00Z', to: '2026-10-15T00:00:00Z' },
+        })
+      )
+    ).toBe(true);
+    expect(
+      messages(
+        days({
+          domain: { from: '2026-10-14T00:00:00Z', to: '2026-10-14T00:00:00Z' },
+        })
+      )
+    ).toEqual(['`domain.from` is before `domain.to`']);
+  });
+
+  it('keeps the window to the same kind of time as the points', () => {
+    expect(
+      messages(days({ domain: { from: '2026-10-13', to: '2026-10-15' } }, ['2026-10-14']))
+    ).toEqual([]);
+    expect(
+      messages(
+        days(
+          {
+            domain: {
+              from: '2026-10-13T00:00:00Z',
+              to: '2026-10-15T00:00:00Z',
+            },
+          },
+          ['2026-10-14']
+        )
+      )
+    ).toEqual([
+      'the times on one axis are all dates or all date-times',
+      'the times on one axis are all dates or all date-times',
+    ]);
+  });
+
+  it('takes a whole, positive interval in a spelled-out unit', () => {
+    expect(valid(days({ interval: { value: 1, unit: 'day' } }))).toBe(true);
+    expect(valid(days({ interval: { value: 0, unit: 'day' } }))).toBe(false);
+    expect(valid(days({ interval: { value: 1.5, unit: 'hour' } }))).toBe(false);
+    expect(valid(days({ interval: { value: 1, unit: 'd' } }))).toBe(false);
+  });
+
+  it('takes a positive bin width on a number axis', () => {
+    const bins = (interval: number) => ({
+      ...base,
+      x: { type: 'number', interval },
+      series: [{ label: 'a', points: [{ x: 0, y: 1 }] }],
+    });
+    expect(valid(bins(0.5))).toBe(true);
+    expect(valid(bins(0))).toBe(false);
+  });
+
+  it('marks the buckets the window cuts, stepping days on the zone’s wall clock', () => {
+    // New York leaves daylight saving on Nov 1, 2026, so that day runs 25 hours.
+    const { positions, time } = resolveXy(
+      days(
+        {
+          timeZone: 'America/New_York',
+          interval: { value: 1, unit: 'day' },
+          domain: { from: '2026-11-01T10:00:00Z', to: '2026-11-04T10:00:00Z' },
+        },
+        [
+          '2026-11-01T04:00:00Z',
+          '2026-11-02T05:00:00Z',
+          '2026-11-03T05:00:00Z',
+          '2026-11-04T05:00:00Z',
+        ]
+      ) as XyChartNode
+    );
+    expect(positions.map(({ partial }) => partial ?? false)).toEqual([true, false, false, true]);
+    expect(time).toMatchObject({
+      interval: 24 * 3_600_000,
+      window: {
+        from: Date.parse('2026-11-01T10:00:00Z'),
+        to: Date.parse('2026-11-04T10:00:00Z'),
+      },
+    });
+  });
+
+  it('ends a whole bucket exactly at the window without marking it', () => {
+    const { positions } = resolveXy(
+      days(
+        {
+          interval: { value: 1, unit: 'month' },
+          domain: { from: '2026-01-01T00:00:00Z', to: '2026-03-01T00:00:00Z' },
+        },
+        ['2026-01-01T00:00:00Z', '2026-02-01T00:00:00Z']
+      ) as XyChartNode
+    );
+    expect(positions.some(({ partial }) => partial)).toBe(false);
+  });
+
+  it('leaves buckets unmarked without both an interval and a window', () => {
+    const { positions } = resolveXy(
+      days({
+        domain: { from: '2026-10-14T06:00:00Z', to: '2026-10-15T00:00:00Z' },
+      }) as XyChartNode
+    );
+    expect(positions[0]!.partial).toBeUndefined();
+  });
+
+  it('prints a bin as its range and a partial bucket as partial', () => {
+    const binned = resolveXy({
+      ...base,
+      x: { type: 'number', interval: 60 },
+      series: [
+        {
+          label: 'a',
+          points: [
+            { x: 0, y: 1 },
+            { x: 60, y: 2 },
+          ],
+        },
+      ],
+    });
+    expect(binned.bin).toBe(60);
+    expect(binned.positions.map(({ label }) => label)).toEqual(['0 – 60', '60 – 120']);
+    const { summary, table } = read(
+      days(
+        {
+          granularity: 'day',
+          interval: { value: 1, unit: 'day' },
+          domain: { from: '2026-10-14T06:00:00Z', to: '2026-10-16T00:00:00Z' },
+        },
+        ['2026-10-14T00:00:00Z', '2026-10-15T00:00:00Z']
+      ) as XyChartNode
+    );
+    expect(table.rows.map(([label]) => label)).toEqual(['Oct 14, 2026 (partial)', 'Oct 15, 2026']);
+    expect(summary).toContain('The bucket at Oct 14, 2026 is partial: the queried window cuts it.');
+  });
+});
+
+describe('xyChart annotations', () => {
+  const annotated = (
+    annotations: readonly Record<string, unknown>[],
+    x: Record<string, unknown> = { type: 'category' }
+  ) => ({ ...base, x, annotations });
+
+  it('places annotations on the axis, as its points are', () => {
+    expect(valid(annotated([{ label: 'Deploy', at: 'q' }]))).toBe(true);
+    expect(messages(annotated([{ label: 'Deploy', at: 'r' }]))).toEqual([
+      'an annotation’s `at` and `until` are on the x axis: a category of the chart, a time, or a number, as its points are',
+    ]);
+    expect(
+      valid(
+        annotated([{ label: 'Deploy', at: 1 }], {
+          type: 'category',
+        })
+      )
+    ).toBe(false);
+    const timed = (at: unknown) => ({
+      ...base,
+      x: { type: 'time' },
+      series: [{ label: 'a', points: [{ x: '2026-10-14T09:00:00Z', y: 1 }] }],
+      annotations: [{ label: 'Deploy', at }],
+    });
+    expect(valid(timed('2026-10-14T09:30:00Z'))).toBe(true);
+    expect(valid(timed('yesterday'))).toBe(false);
+    expect(valid(timed('2026-10-14'))).toBe(false);
+  });
+
+  it('needs a range to end after it starts, in axis order', () => {
+    expect(valid(annotated([{ label: 'Incident', at: 'p', until: 'q' }]))).toBe(true);
+    expect(messages(annotated([{ label: 'Incident', at: 'q', until: 'p' }]))).toEqual([
+      'an annotation’s `until` comes after its `at`',
+    ]);
+    expect(valid(annotated([{ label: 'Incident', at: 'p', until: 'p' }]))).toBe(false);
+  });
+
+  it('needs unique annotation keys, defaulting to labels', () => {
+    expect(
+      messages(
+        annotated([
+          { label: 'Deploy', at: 'p' },
+          { label: 'Deploy', at: 'q' },
+        ])
+      )
+    ).toEqual(['annotation keys are unique']);
+    expect(
+      valid(
+        annotated([
+          { key: 'd1', label: 'Deploy', at: 'p' },
+          { key: 'd2', label: 'Deploy', at: 'q' },
+        ])
+      )
+    ).toBe(true);
+  });
+
+  it('counts annotations toward the pack-wide cap', () => {
+    const points = Array.from({ length: MAX_DATA_POINTS }, (_, x) => ({
+      x,
+      y: 1,
+    }));
+    const capped = {
+      ...base,
+      x: { type: 'number' },
+      series: [{ label: 'a', points }],
+    };
+    expect(valid(capped)).toBe(true);
+    expect(valid({ ...capped, annotations: [{ label: 'Deploy', at: 1 }] })).toBe(false);
+  });
+
+  it('resolves annotations to axis positions and printed spans', () => {
+    const { annotations } = resolveXy({
+      ...base,
+      x: { type: 'time', granularity: 'hour' },
+      series: [{ label: 'a', points: [{ x: '2026-10-14T09:00:00Z', y: 1 }] }],
+      annotations: [
+        { label: 'Deploy', at: '2026-10-14T09:00:00Z' },
+        {
+          label: 'Incident',
+          at: '2026-10-14T10:00:00Z',
+          until: '2026-10-14T11:00:00Z',
+          tone: 'danger',
+        },
+      ],
+    });
+    expect(annotations).toEqual([
+      {
+        key: 'Deploy',
+        label: 'Deploy',
+        at: Date.parse('2026-10-14T09:00:00Z'),
+        span: 'Oct 14, 09:00',
+      },
+      {
+        key: 'Incident',
+        label: 'Incident',
+        at: Date.parse('2026-10-14T10:00:00Z'),
+        until: Date.parse('2026-10-14T11:00:00Z'),
+        span: 'Oct 14, 10:00 – Oct 14, 11:00',
+        tone: 'danger',
+      },
+    ]);
+  });
+
+  it('lists a few annotations in the summary and counts many', () => {
+    expect(
+      read(
+        annotated([
+          { label: 'Deploy', at: 'p' },
+          { label: 'Incident', at: 'p', until: 'q', tone: 'danger' },
+        ]) as XyChartNode
+      ).summary
+    ).toContain('Marked: Deploy (p); Incident (p – q, danger).');
+    const many = Array.from({ length: 40 }, (_, index) => ({
+      x: index,
+      y: 1,
+    }));
+    const { summary } = read({
+      ...base,
+      x: { type: 'number' },
+      series: [{ label: 'a', points: many }],
+      annotations: many.map(({ x }) => ({
+        key: `e${x}`,
+        label: 'Event',
+        at: 39 - x,
+      })),
+    });
+    expect(summary).toContain('40 events are marked, from 0 to 39.');
   });
 });
 

@@ -269,6 +269,68 @@ const selectable: XyChartNode = {
   },
 };
 
+/** Daily revenue over a window that starts mid-day, with a deploy and an incident marked. */
+const annotated: XyChartNode = {
+  type: 'xyChart',
+  title: 'Revenue per day',
+  x: {
+    type: 'time',
+    granularity: 'day',
+    interval: { value: 1, unit: 'day' },
+    domain: { from: '2026-10-11T14:00:00Z', to: '2026-10-14T14:00:00Z' },
+  },
+  y: {
+    title: 'Revenue',
+    format: { style: 'number', prefix: '$', compact: true },
+  },
+  series: [
+    {
+      label: 'Revenue',
+      kind: 'bar',
+      points: [
+        { x: '2026-10-11T00:00:00Z', y: 4210 },
+        { x: '2026-10-12T00:00:00Z', y: 11840 },
+        { x: '2026-10-13T00:00:00Z', y: 12390 },
+        { x: '2026-10-14T00:00:00Z', y: 7020 },
+      ],
+    },
+  ],
+  annotations: [
+    { label: 'Deploy 4.2', at: '2026-10-12T09:30:00Z' },
+    {
+      label: 'Payment outage',
+      at: '2026-10-13T16:00:00Z',
+      until: '2026-10-13T19:00:00Z',
+      tone: 'danger',
+    },
+  ],
+};
+
+/** Request delays binned by the minute: a histogram on a number axis. */
+const histogram: XyChartNode = {
+  type: 'xyChart',
+  title: 'Request delay distribution',
+  x: {
+    type: 'number',
+    title: 'Delay (minutes)',
+    interval: 1,
+  },
+  y: { title: 'Requests' },
+  series: [
+    {
+      label: 'Requests',
+      kind: 'bar',
+      points: [
+        { x: 0, y: 912 },
+        { x: 1, y: 344 },
+        { x: 2, y: 120 },
+        { x: 3, y: 41 },
+        { x: 5, y: 9 },
+      ],
+    },
+  ],
+};
+
 export const examples: readonly XyChartNode[] = [
   example,
   latency,
@@ -277,4 +339,6 @@ export const examples: readonly XyChartNode[] = [
   shares,
   repeatedLabels,
   selectable,
+  annotated,
+  histogram,
 ];

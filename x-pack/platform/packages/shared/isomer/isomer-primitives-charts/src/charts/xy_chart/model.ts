@@ -8,6 +8,7 @@
 import { formatValue } from '../../model/format';
 import { keyOf, printedLabels } from '../../model/identity';
 import {
+  bucketEnd,
   DEFAULT_TIME_ZONE,
   defaultGranularity,
   formatTime,
@@ -15,14 +16,17 @@ import {
   timeValue,
 } from '../../model/time';
 import type { Tone } from '../../model/tone';
+import { glyph } from '../../theme/glyph';
 
 import type { XyChartNode } from './schema';
 
 export interface XyPosition {
   /** The point `x` as authored: the selection key on `x`. */
   key: string;
-  /** As every surface prints it. */
+  /** As every surface prints it: a bin as its range. */
   label: string;
+  /** A time bucket that runs past the queried window, so it may hold part of its data. */
+  partial?: true;
 }
 
 export interface XySeries {
@@ -43,13 +47,35 @@ export interface ResolvedXy {
   missing: 'gap' | 'zero' | 'carry' | 'linear';
   orientation: 'vertical' | 'horizontal';
   /** Present for a `time` x: where its times are read and how finely they print. */
-  time?: { timeZone: string; granularity: Granularity };
+  time?: {
+    timeZone: string;
+    granularity: Granularity;
+    /** The shortest bucket in milliseconds, present with an `interval`. */
+    interval?: number;
+    /** The queried window in milliseconds since the epoch. */
+    window?: { from: number; to: number };
+  };
+  /** The bin width of a binned `number` x. */
+  bin?: number;
   thresholds: readonly {
     value: number;
     label?: string | undefined;
     tone?: Tone | undefined;
     axis: 'y' | 'y2';
   }[];
+  annotations: readonly XyAnnotation[];
+}
+
+export interface XyAnnotation {
+  key: string;
+  /** As every surface prints it: followed by the key where another annotation shares the label. */
+  label: string;
+  /** Where it sits on the axis: milliseconds on a time x, the number on a number x, the key on a category x. */
+  at: number | string;
+  until?: number | string;
+  /** Where it sits as every surface prints it: a moment, or a range. */
+  span: string;
+  tone?: Tone | undefined;
 }
 
 const timeOf = (node: XyChartNode): ResolvedXy['time'] => {
@@ -57,13 +83,36 @@ const timeOf = (node: XyChartNode): ResolvedXy['time'] => {
   if (x.type !== 'time') {
     return undefined;
   }
+  const timeZone = x.timeZone ?? DEFAULT_TIME_ZONE;
+  const starts = [
+    ...new Set(
+      node.series.flatMap(({ points }) => points.map(({ x: at }) => timeValue(String(at))))
+    ),
+  ].sort((a, b) => a - b);
+  const window = x.domain && {
+    from: timeValue(x.domain.from),
+    to: timeValue(x.domain.to),
+  };
+  const { interval } = x;
   return {
-    timeZone: x.timeZone ?? DEFAULT_TIME_ZONE,
+    timeZone,
     granularity:
       x.granularity ??
       defaultGranularity(
         node.series.flatMap(({ points }) => points.map(({ x: at }) => String(at)))
       ),
+    ...(interval === undefined
+      ? {}
+      : {
+          // The shortest bucket, or the closest two starts if nearer.
+          interval: Math.min(
+            ...(starts.length === 0 ? [window?.from ?? 0] : starts).map(
+              (start) => bucketEnd(start, interval, timeZone) - start
+            ),
+            ...starts.slice(1).map((start, index) => start - starts[index]!)
+          ),
+        }),
+    ...(window === undefined ? {} : { window }),
   };
 };
 
@@ -99,20 +148,59 @@ const ordered = (node: XyChartNode, time: ResolvedXy['time']): XyPosition[] => {
   }
   const values = [...seen.values()];
   if (x.type === 'time') {
+    const { interval, domain } = x;
     return values
       .map(String)
       .sort((a, b) => timeValue(a) - timeValue(b))
-      .map((key) => ({
-        key,
-        label: formatTime(key, time!),
-      }));
+      .map((key) => {
+        const start = timeValue(key);
+        const partial =
+          interval !== undefined &&
+          domain !== undefined &&
+          (start < time!.window!.from ||
+            bucketEnd(start, interval, time!.timeZone) > time!.window!.to);
+        return {
+          key,
+          label: formatTime(key, time!),
+          ...(partial ? { partial: true as const } : {}),
+        };
+      });
   }
+  const { interval, format } = x;
   return (values as number[])
     .sort((a, b) => a - b)
     .map((value) => ({
       key: String(value),
-      label: formatValue(value, x.format),
+      label:
+        interval === undefined
+          ? formatValue(value, format)
+          : `${formatValue(value, format)}${glyph.range}${formatValue(value + interval, format)}`,
     }));
+};
+
+const annotationsOf = (
+  node: XyChartNode,
+  positions: readonly XyPosition[],
+  time: ResolvedXy['time']
+): XyAnnotation[] => {
+  const { x, annotations = [] } = node;
+  const printed = printedLabels(annotations);
+  const place = (value: string | number): number | string =>
+    x.type === 'time' ? timeValue(String(value)) : value;
+  const print = (value: string | number): string =>
+    x.type === 'time'
+      ? formatTime(String(value), time!)
+      : x.type === 'number'
+      ? formatValue(Number(value), x.format)
+      : positions.find(({ key }) => key === value)?.label ?? String(value);
+  return annotations.map(({ at, until, tone }, index) => ({
+    key: keyOf(annotations[index]!),
+    label: printed[index]!,
+    at: place(at),
+    ...(until === undefined ? {} : { until: place(until) }),
+    span: until === undefined ? print(at) : `${print(at)}${glyph.range}${print(until)}`,
+    ...(tone === undefined ? {} : { tone }),
+  }));
 };
 
 export const resolveXy = (node: XyChartNode): ResolvedXy => {
@@ -141,6 +229,8 @@ export const resolveXy = (node: XyChartNode): ResolvedXy => {
     missing: node.missing ?? 'gap',
     orientation: node.orientation ?? 'vertical',
     ...(time === undefined ? {} : { time }),
+    ...(node.x.type === 'number' && node.x.interval !== undefined ? { bin: node.x.interval } : {}),
+    annotations: annotationsOf(node, positions, time),
     thresholds: (node.thresholds ?? []).map(({ axis = 'y', ...threshold }) => ({
       ...threshold,
       axis,

@@ -28,7 +28,22 @@ const copy = {
   largestTotal: (count: number, value: string, at: string) =>
     `Across ${count} stacked series, the largest total is ${value} at ${at}.`,
   shares: (count: number) => `Each position shows how ${count} series share its total.`,
+  partialRow: (label: string) => `${label} (partial)`,
+  partial: (labels: readonly string[]) =>
+    labels.length === 1
+      ? `The bucket at ${labels[0]} is partial: the queried window cuts it.`
+      : labels.length === 2
+      ? `The buckets at ${labels[0]} and ${labels[1]} are partial: the queried window cuts them.`
+      : `${labels.length} buckets are partial: the queried window cuts them.`,
+  marked: (items: readonly string[]) => `Marked: ${items.join('; ')}.`,
+  markedItem: (label: string, span: string, tone: string | undefined) =>
+    `${label} (${tone === undefined ? span : `${span}, ${tone}`})`,
+  markedCount: (count: number, first: string, last: string) =>
+    `${count} events are marked, from ${first} to ${last}.`,
 };
+
+/** Beyond this many, the summary counts annotations instead of listing them, so it stays a sentence. */
+const LISTED_ANNOTATIONS = 5;
 
 const present = (values: readonly (number | null | undefined)[]) =>
   values.flatMap((value, index) => (typeof value === 'number' ? [{ value, index }] : []));
@@ -58,6 +73,26 @@ const thresholdClauses = (node: XyChartNode, { series, thresholds }: ResolvedXy)
           ),
         ];
   });
+
+const partialClauses = ({ positions }: ResolvedXy): string[] => {
+  const labels = positions.flatMap(({ label, partial }) => (partial ? [label] : []));
+  return labels.length === 0 ? [] : [copy.partial(labels)];
+};
+
+const annotationClauses = ({ annotations, positions }: ResolvedXy): string[] => {
+  if (annotations.length === 0) {
+    return [];
+  }
+  if (annotations.length > LISTED_ANNOTATIONS) {
+    const rank = ({ at }: (typeof annotations)[number]) =>
+      typeof at === 'number' ? at : positions.findIndex(({ key }) => key === at);
+    const sorted = [...annotations].sort((a, b) => rank(a) - rank(b));
+    return [copy.markedCount(sorted.length, sorted[0]!.span, sorted[sorted.length - 1]!.span)];
+  }
+  return [
+    copy.marked(annotations.map(({ label, span, tone }) => copy.markedItem(label, span, tone))),
+  ];
+};
 
 /** The first sentence: about the left axis when series read against two, since their units differ. */
 const lead = (node: XyChartNode): string => {
@@ -125,11 +160,16 @@ export const read = (node: XyChartNode): ChartReading => {
   const resolved = resolveXy(node);
   const { positions, series } = resolved;
   return {
-    summary: [lead(node), ...thresholdClauses(node, resolved)].join(' '),
+    summary: [
+      lead(node),
+      ...thresholdClauses(node, resolved),
+      ...partialClauses(resolved),
+      ...annotationClauses(resolved),
+    ].join(' '),
     table: {
       columns: [xColumn(node, resolved), ...series.map(({ label }) => label)],
-      rows: positions.map(({ label }, index) => [
-        label,
+      rows: positions.map(({ label, partial }, index) => [
+        partial ? copy.partialRow(label) : label,
         ...series.map(({ values, axis }) =>
           formatValue(values[index] ?? null, formatOf(node, axis))
         ),
