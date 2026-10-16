@@ -16,7 +16,6 @@ const makeInvestigation = (overrides: Partial<Investigation> = {}): Investigatio
   template_id: 'investigation',
   title: 'Impossible travel — exec account',
   createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
   worker_execution_ids: ['exec-1'],
   recordId: 'inv-1',
   pendingProposalCount: 1,
