@@ -86,6 +86,7 @@ export class ObservabilityAlertingPlugin
             service: depsStart.cases,
             kibanaServices: { ...coreStart, ...depsStart, storage: new Storage(localStorage) },
           },
+          observabilityShared: depsStart.observabilityShared,
           params,
         });
       },

@@ -152,6 +152,18 @@ const mixedRulesCapabilities = {
   alerting_v2_rules: { read: true },
 } as unknown as Capabilities;
 
+const MockPageTemplate = ({
+  children,
+  pageSectionProps,
+}: {
+  children?: React.ReactNode;
+  pageSectionProps?: { paddingSize?: string };
+}) => (
+  <div data-test-subj="mockPageTemplate" data-padding={pageSectionProps?.paddingSize}>
+    {children}
+  </div>
+);
+
 const renderAt = (
   pathname: string,
   capabilities?: Capabilities,
@@ -170,6 +182,7 @@ const renderAt = (
         alertingVTwo={mockAlertingVTwo}
         triggersActionsUi={mockTriggersActionsUi}
         cases={cases}
+        ObservabilityPageTemplate={MockPageTemplate}
         history={history}
         setBreadcrumbs={jest.fn()}
       />
@@ -188,6 +201,16 @@ describe('ObservabilityAlertingApp', () => {
     const { history } = renderAt('/');
 
     expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_ALERTS_PATH);
+  });
+
+  it('renders every route inside the Observability page template without extra padding', async () => {
+    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH);
+
+    await waitFor(() => {
+      const template = getByTestId('mockPageTemplate');
+      expect(template).toHaveAttribute('data-padding', 'none');
+      expect(template).toContainElement(getByTestId('actionPoliciesPage:observabilityAlerting'));
+    });
   });
 
   it('renders EpisodesPage at /alerts with observability host', async () => {

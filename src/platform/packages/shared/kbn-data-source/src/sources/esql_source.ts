@@ -30,6 +30,8 @@ import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { Column, DataSourceBase, SerializedDataSource } from '../types';
 import { columnFromDatatableColumn, columnToFieldBase } from '../to_column';
 import { sha256 } from '../sha256';
+import { buildFilterableFieldSpecs } from '../filterable_fields';
+import type { FilterableSource } from '../filterable_source';
 
 export interface EsqlSourceArgs {
   query: string;
@@ -358,6 +360,18 @@ export class EsqlSource implements DataSourceBase {
       http,
     });
     return datasetSource.getColumns();
+  }
+
+  /** The dataset identity that filtering needs: see {@link FilterableSource}. */
+  public async toFilterableSource(http?: HttpStart): Promise<FilterableSource> {
+    const filterableFields = await this.getFilterableFields(http);
+    return {
+      id: this.datasetId,
+      title: this.title,
+      timeFieldName: this.timeFieldName,
+      fields: Object.values(buildFilterableFieldSpecs(filterableFields, this.timeFieldName)),
+      isTimeBased: () => this.isTimeBased(),
+    };
   }
 
   public isRollup(): boolean {
