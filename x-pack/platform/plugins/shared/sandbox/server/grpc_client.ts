@@ -109,11 +109,28 @@ function collectNestedBuffers(buf: Buffer, fieldNumber: number): Buffer[] {
   return results;
 }
 
+/**
+ * gRPC metadata keys a caller may add to a single `runCommand`. sandbox-api acts on them for that
+ * call only; any other key is rejected so callers cannot override `authorization` or
+ * `x-conversation-id`.
+ */
+export const RUN_COMMAND_METADATA_KEYS = [
+  'x-uiam-service-account-id',
+  'x-elasticsearch-url',
+] as const;
+
+export type RunCommandMetadataKey = (typeof RUN_COMMAND_METADATA_KEYS)[number];
+
+const isRunCommandMetadataKey = (key: string): key is RunCommandMetadataKey =>
+  (RUN_COMMAND_METADATA_KEYS as readonly string[]).includes(key);
+
 export interface RunCommandParams {
   command: string;
   directory?: string;
   env?: Record<string, string>;
   timeout_seconds?: number;
+  /** Extra gRPC metadata sent with this call only. Keys outside `RUN_COMMAND_METADATA_KEYS` throw. */
+  metadata?: Partial<Record<RunCommandMetadataKey, string>>;
 }
 
 export interface RunCommandResult {
@@ -477,10 +494,21 @@ export class SandboxApiClient {
     this.apiKey = apiKey;
   }
 
-  private metadata(conversationId: string): grpc.Metadata {
+  private metadata(
+    conversationId: string,
+    extraMetadata: RunCommandParams['metadata'] = {}
+  ): grpc.Metadata {
     const md = new grpc.Metadata();
     md.set('authorization', `ApiKey ${this.apiKey}`);
     md.set('x-conversation-id', conversationId);
+    for (const [key, value] of Object.entries(extraMetadata)) {
+      if (!isRunCommandMetadataKey(key)) {
+        throw new Error(`Unsupported sandbox command metadata key: ${key}`);
+      }
+      if (value !== undefined) {
+        md.set(key, value);
+      }
+    }
     return md;
   }
 
@@ -509,7 +537,7 @@ export class SandboxApiClient {
         timeout_seconds: params.timeout_seconds ?? 0,
         task_group_id: '',
       },
-      this.metadata(conversationId),
+      this.metadata(conversationId, params.metadata),
       this.callOptions(timeoutSeconds * 1_000 + COMMAND_DEADLINE_MARGIN_MS)
     );
   }

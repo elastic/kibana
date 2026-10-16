@@ -6,33 +6,34 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { SandboxSecretsClient } from '../../sandbox_secrets';
 import type { SandboxCallContext } from './tool_utils';
-import { authorizeConnector } from './connector_authorization';
+import type { ConnectorCredentialDeps } from './connector_credentials';
 import { writeConnectorManifest } from './connector_manifest';
 import { writeElasticManifest } from './elastic_manifest';
+import {
+  REQUEST_SCOPED_CONNECTOR,
+  REQUEST_SCOPED_CONNECTOR_ID,
+  checkRequestScopedConnector,
+} from './request_scoped_connector';
 
 /**
  * Tracks per-conversation workspace state (connector IDs and sandbox secret keys) and writes the
- * connector manifest (and, when configured, the Elasticsearch telemetry manifest) to the sandbox
- * whenever the session is reset or the allowed connector list or available secret keys change.
+ * connector manifest (and, when the request-scoped Elasticsearch connector is usable, the
+ * Elasticsearch telemetry manifest) to the sandbox whenever the session is reset or the allowed
+ * connector list or available secret keys change.
  *
  * Create one instance per plugin lifecycle and share it across all sandbox tools.
  */
 export const createSandboxWorkspaceManager = ({
   getDeps,
-  telemetryConnectorId,
   telemetryReadableIndices,
   logger,
 }: {
-  getDeps: () => {
-    actions?: ActionsPluginStart;
+  getDeps: () => ConnectorCredentialDeps & {
     sandboxSecretsClient?: Pick<SandboxSecretsClient, 'listKeysForSandbox'>;
   };
-  /** When set, `/workspace/elastic.md` is (re-)seeded alongside the connector manifest. */
-  telemetryConnectorId?: string;
   telemetryReadableIndices?: string;
   logger: Logger;
 }) => {
@@ -59,17 +60,24 @@ export const createSandboxWorkspaceManager = ({
       session: SandboxSession;
       callContext: SandboxCallContext;
     }): Promise<void> {
-      const { actions, sandboxSecretsClient } = getDeps();
+      const { actions, elasticsearchUrl, getSandboxServiceAccountId, sandboxSecretsClient } =
+        getDeps();
       const secretKeys = await listSecretKeys(sandboxSecretsClient, callContext);
       const getActionsClient = actions
         ? (req: KibanaRequest) => actions.getActionsClientWithRequest(req)
         : undefined;
-      const telemetryAuthorization = telemetryConnectorId
-        ? await authorizeConnector(telemetryConnectorId, callContext, actions)
-        : undefined;
-      const canUseTelemetry = Boolean(
-        telemetryAuthorization && !('errorMessage' in telemetryAuthorization)
+      const telemetryCheck = await checkRequestScopedConnector(
+        callContext,
+        elasticsearchUrl,
+        getSandboxServiceAccountId
       );
+      const canUseTelemetry = !('errorMessage' in telemetryCheck);
+      if (
+        !canUseTelemetry &&
+        callContext.allowedConnectorIds.includes(REQUEST_SCOPED_CONNECTOR_ID)
+      ) {
+        logger.debug(`Elasticsearch connector unavailable: ${telemetryCheck.errorMessage}`);
+      }
       const currentKey = JSON.stringify({
         connectorIds: [...callContext.allowedConnectorIds].sort(),
         secretKeys: [...secretKeys].sort(),
@@ -110,12 +118,13 @@ export const createSandboxWorkspaceManager = ({
           callContext,
           getActionsClient,
           secretKeys,
+          virtualConnectors: canUseTelemetry ? [REQUEST_SCOPED_CONNECTOR] : [],
           logger,
         });
-        if (telemetryConnectorId && canUseTelemetry) {
+        if (canUseTelemetry) {
           await writeElasticManifest({
             session,
-            connectorId: telemetryConnectorId,
+            connectorId: REQUEST_SCOPED_CONNECTOR_ID,
             readableIndices: telemetryReadableIndices,
             logger,
           });

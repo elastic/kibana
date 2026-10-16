@@ -300,7 +300,7 @@ export const createNightshiftWorkflowFixture = ({
       telemetry,
     }),
     decisionTreePrepareStepDefinition({
-      getTelemetryConnectorId: () => undefined,
+      connectorNames: [],
       logger,
       isEnabled: () => decisionTreesEnabled,
     }),

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   actionsMock,
@@ -17,6 +18,7 @@ import {
   createConnectorCredentialResolver,
   redactSecrets,
 } from './connector_credentials';
+import { REQUEST_SCOPED_CONNECTOR_ID } from './request_scoped_connector';
 
 const CONNECTOR_ID = 'github-1';
 const TOKEN = 'ghp_topsecrettokenvalue';
@@ -253,6 +255,77 @@ describe('createConnectorCredentialResolver', () => {
 
     expect(await resolve(CONNECTOR_ID, createCallContext())).toEqual({
       errorMessage: 'Connectors are not available in this deployment',
+    });
+  });
+
+  describe('request-scoped Elasticsearch connector', () => {
+    const secret = 'task-manager-cloned-secret';
+    const encoded = Buffer.from(`key-id:${secret}`).toString('base64');
+    const esUrl = 'https://es.example.com';
+
+    const resolveRequestScoped = (
+      elasticsearchUrl: string | undefined = esUrl,
+      getSandboxServiceAccountId?: (request: KibanaRequest) => Promise<string | undefined>
+    ) => {
+      const actions = actionsMock.createStart();
+      const resolve = createConnectorCredentialResolver({
+        getDeps: () => ({ actions, elasticsearchUrl, getSandboxServiceAccountId }),
+        logger: loggingSystemMock.createLogger(),
+      });
+      const callContext: SandboxCallContext = {
+        request: httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: `ApiKey ${encoded}` },
+        }),
+        allowedConnectorIds: [REQUEST_SCOPED_CONNECTOR_ID],
+      };
+      return { result: resolve(REQUEST_SCOPED_CONNECTOR_ID, callContext), actions, callContext };
+    };
+
+    it("injects the run's API key as ELASTICSEARCH_AUTHORIZATION next to ELASTICSEARCH_URL", async () => {
+      const { result, actions } = resolveRequestScoped();
+
+      expect(await result).toEqual({
+        env: {
+          CONNECTOR_ID: REQUEST_SCOPED_CONNECTOR_ID,
+          CONNECTOR_TYPE: '.nightshift-elasticsearch',
+          ELASTICSEARCH_URL: esUrl,
+          ELASTICSEARCH_AUTHORIZATION: `ApiKey ${encoded}`,
+        },
+        secretValues: [encoded, secret],
+      });
+      expect(actions.getActionsClientWithRequest).not.toHaveBeenCalled();
+    });
+
+    it('sends only the UIAM service account id and URL as metadata in UIAM mode', async () => {
+      const getSandboxServiceAccountId = jest.fn().mockResolvedValue('sa-id');
+      const { result, callContext } = resolveRequestScoped(esUrl, getSandboxServiceAccountId);
+
+      expect(await result).toEqual({
+        env: {
+          CONNECTOR_ID: REQUEST_SCOPED_CONNECTOR_ID,
+          CONNECTOR_TYPE: '.nightshift-elasticsearch',
+        },
+        secretValues: [],
+        metadata: { 'x-uiam-service-account-id': 'sa-id', 'x-elasticsearch-url': esUrl },
+      });
+      // The account is looked up for the space the run's request belongs to.
+      expect(getSandboxServiceAccountId).toHaveBeenCalledWith(callContext.request);
+    });
+
+    it('falls back to the API key while no UIAM service account is bound', async () => {
+      const { result } = resolveRequestScoped(esUrl, async () => undefined);
+
+      expect(await result).toMatchObject({
+        env: { ELASTICSEARCH_AUTHORIZATION: `ApiKey ${encoded}` },
+      });
+    });
+
+    it('fails without a sandbox-reachable Elasticsearch URL', async () => {
+      const { result } = resolveRequestScoped('');
+
+      expect(await result).toEqual({
+        errorMessage: expect.stringContaining('sandbox.elasticsearch.url'),
+      });
     });
   });
 });

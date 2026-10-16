@@ -75,6 +75,7 @@ import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_to
 import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool';
 import { createConnectorCredentialResolver } from './tools/sandbox_bash/connector_credentials';
 import { createSandboxWorkspaceManager } from './tools/sandbox_bash/sandbox_workspace_manager';
+import { REQUEST_SCOPED_CONNECTOR_ID } from './tools/sandbox_bash/request_scoped_connector';
 import {
   createSandboxOutputRedactorProvider,
   withSandboxOutputRedaction,
@@ -90,6 +91,10 @@ import {
 import { createOnboardingClient } from './onboarding/onboarding_client';
 import { createSandboxSecretsClient } from './sandbox_secrets';
 import { createCustomContextClient } from './custom_context';
+import {
+  createSandboxElasticsearchAccessClient,
+  sandboxElasticsearchWorkloadType,
+} from './sandbox_elasticsearch_access';
 import type {
   InvestigationQuotaCallback,
   NightshiftInvestigationsServerSetup,
@@ -195,6 +200,30 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger.get('sandbox_secrets'),
     });
 
+    core.security.serviceAccounts.registerWorkloadType(sandboxElasticsearchWorkloadType);
+    const sandboxEsAccessLogger = this.logger.get('sandbox_elasticsearch_access');
+    const uiamConfig = this.ctx.config.get().sandbox?.elasticsearch.uiam;
+    const sandboxElasticsearchAccessClient = createSandboxElasticsearchAccessClient({
+      getDeps: () => ({ security: this.security }),
+      getSpaceId: (request) => this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+      config: {
+        enabled: uiamConfig?.enabled ?? false,
+        serviceAccountName: uiamConfig?.service_account_name ?? 'nightshift-sandbox',
+        roles: uiamConfig?.roles ?? ['nightshift'],
+      },
+      logger: sandboxEsAccessLogger,
+    });
+    // A lookup failure leaves the connector on the API key path, which fails closed for UIAM keys.
+    const getSandboxServiceAccountId = sandboxElasticsearchAccessClient.isEnabled()
+      ? (request: KibanaRequest) =>
+          sandboxElasticsearchAccessClient.getServiceAccountId(request).catch((error) => {
+            sandboxEsAccessLogger.warn(
+              `Failed to read the sandbox Elasticsearch service account: ${error.message}`
+            );
+            return undefined;
+          })
+      : undefined;
+
     const onboardingClient = createOnboardingClient({
       getDeps: () => ({
         workflowsManagement: this.workflowsManagement,
@@ -229,7 +258,6 @@ export class NightshiftInvestigationsPlugin
         logger: this.logger,
       });
       const config = this.ctx.config.get();
-      const telemetryConnectorId = config.sandbox?.telemetry_connector_id;
       registerInvestigationAgentType(plugins.agentBuilder, {
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
         cortexEnabled: this.cortexEnabled,
@@ -237,7 +265,7 @@ export class NightshiftInvestigationsPlugin
         decisionTreesEnabled: this.decisionTreesEnabled,
         investigationToolsEnabled: Boolean(plugins.agenticInvestigations),
         proposalsEnabled: Boolean(plugins.proposals),
-        telemetryConnectorId,
+        elasticsearchConnectorEnabled: this.isElasticsearchConnectorEnabled(plugins),
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
         logger: this.logger.get('custom_context'),
@@ -251,14 +279,22 @@ export class NightshiftInvestigationsPlugin
 
         // Tools are registered in setup() but only run after start(), so read start deps lazily.
         const getSandboxStart = () => this.sandboxStart;
+        // The sandbox runs outside Kibana, so it needs an Elasticsearch URL it can reach.
+        const elasticsearchUrl = this.isElasticsearchConnectorEnabled(plugins)
+          ? config.sandbox?.elasticsearch.url ?? core.elasticsearch.publicBaseUrl
+          : undefined;
+        const getConnectorDeps = () => ({
+          actions: this.actionsStart,
+          elasticsearchUrl,
+          getSandboxServiceAccountId,
+        });
         const sandboxWorkspaceManager = createSandboxWorkspaceManager({
-          getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
-          telemetryConnectorId,
+          getDeps: () => ({ ...getConnectorDeps(), sandboxSecretsClient }),
           telemetryReadableIndices: config.sandbox?.telemetry_readable_indices,
           logger: sandboxLogger,
         });
         const resolveConnectorCredentials = createConnectorCredentialResolver({
-          getDeps: () => ({ actions: this.actionsStart }),
+          getDeps: getConnectorDeps,
           logger: sandboxLogger.get('connector_credentials'),
         });
         const redaction = {
@@ -316,7 +352,7 @@ export class NightshiftInvestigationsPlugin
             this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
           for (const tool of createDecisionTreeTools({
             getSandboxStart,
-            connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
+            connectorNames: this.getSandboxConnectorNames(plugins),
             getSpaceId,
             getUsername: (req: KibanaRequest) => this.security?.authc.getCurrentUser(req)?.username,
             logger: decisionTreeLogger,
@@ -428,7 +464,7 @@ export class NightshiftInvestigationsPlugin
         // reinforcement phase too. The handler no-ops on the flag.
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreePrepareStepDefinition({
-            getTelemetryConnectorId: () => this.ctx.config.get().sandbox?.telemetry_connector_id,
+            connectorNames: this.getSandboxConnectorNames(plugins),
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
           })
@@ -454,6 +490,7 @@ export class NightshiftInvestigationsPlugin
           sandboxSecretsClient,
           customContextClient,
           onboardingClient,
+          sandboxElasticsearchAccessClient,
           getCortexPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
               throw new Error(
@@ -575,6 +612,14 @@ export class NightshiftInvestigationsPlugin
         }),
     };
   }
+
+  /** Whether the sandbox may query this cluster through the request-scoped connector. */
+  private isElasticsearchConnectorEnabled = (plugins: NightshiftInvestigationsSetupDeps): boolean =>
+    Boolean(plugins.sandbox?.isAvailable) &&
+    (this.ctx.config.get().sandbox?.elasticsearch.enabled ?? true);
+
+  private getSandboxConnectorNames = (plugins: NightshiftInvestigationsSetupDeps): string[] =>
+    this.isElasticsearchConnectorEnabled(plugins) ? [REQUEST_SCOPED_CONNECTOR_ID] : [];
 
   /** Created once so every `agents.ensure` call registers the same gate; deps read lazily. */
   private getInvestigationAvailability = (): AvailabilityConfig => {

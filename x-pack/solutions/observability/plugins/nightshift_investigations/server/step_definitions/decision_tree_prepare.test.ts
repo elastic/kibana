@@ -40,7 +40,7 @@ describe('decisionTreePrepareStepDefinition', () => {
 
   const run = (input: Record<string, unknown>) =>
     decisionTreePrepareStepDefinition({
-      getTelemetryConnectorId: () => undefined,
+      connectorNames: [],
       logger,
     }).handler(createContext(input));
 
