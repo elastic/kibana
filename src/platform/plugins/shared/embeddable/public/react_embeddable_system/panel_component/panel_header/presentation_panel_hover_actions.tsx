@@ -371,6 +371,13 @@ export const PresentationPanelHoverActions = ({
           <EuiCheckbox
             id={`embeddablePanelSelect-${api.uuid}`}
             className="embPanel--selectPanel"
+            // round variant of the EUI checkbox: only the shape changes, colors, check icon and focus
+            // ring stay EUI's. EUI exposes no shape prop, so the faux control is targeted directly.
+            css={css`
+              .euiCheckboxControl {
+                border-radius: 50%;
+              }
+            `}
             checked={isSelected}
             aria-label={selectPanelLabel}
             data-test-subj="embeddablePanelSelectToggle"
