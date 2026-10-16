@@ -128,7 +128,7 @@ export const EscalationsPage: React.FC = () => {
       .filter((item) => (seen.has(item.id) ? false : seen.add(item.id)));
   }, [closedPages]);
 
-  const openIsEmpty = openQuery.data?.pagination.total === 0;
+  const openIsEmpty = !entityFilter && openQuery.data?.pagination.total === 0;
   // Stable element so the memoized queue is not re-rendered by unrelated page updates.
   const openNote = useMemo(() => <EscalationsOpenNote isEmpty={openIsEmpty} />, [openIsEmpty]);
 
