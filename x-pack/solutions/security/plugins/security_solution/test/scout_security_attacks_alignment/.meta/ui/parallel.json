@@ -1,5 +1,5 @@
 {
-  "sha1": "53de60be7708ac38cc25663953c63167df21e20a",
+  "sha1": "e14db92dd7cb67872990c88dd8a0f6deac6afc16",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -27,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
-        "line": 42,
-        "column": 13
+        "line": 38,
+        "column": 20
       }
     },
     {
@@ -43,7 +43,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
-        "line": 51,
+        "line": 47,
         "column": 33
       }
     },
@@ -59,8 +59,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_execution_ui.spec.ts",
-        "line": 31,
-        "column": 15
+        "line": 22,
+        "column": 25
       }
     },
     {
@@ -75,8 +75,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_filters.spec.ts",
-        "line": 26,
-        "column": 25
+        "line": 19,
+        "column": 35
       }
     },
     {
@@ -91,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_filters.spec.ts",
-        "line": 40,
-        "column": 20
+        "line": 34,
+        "column": 13
       }
     },
     {
@@ -107,8 +107,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_page_smoke.spec.ts",
-        "line": 30,
-        "column": 15
+        "line": 21,
+        "column": 25
       }
     },
     {
@@ -123,8 +123,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_schedule.spec.ts",
-        "line": 31,
-        "column": 15
+        "line": 22,
+        "column": 25
       }
     },
     {
@@ -139,24 +139,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_schedule.spec.ts",
-        "line": 36,
-        "column": 36
-      }
-    },
-    {
-      "id": "cf8d4b3ea94cc93-6838d4ba4b2f1e3",
-      "title": "Attacks navigation updates side nav based on attacks alignment advanced setting",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/navigation.spec.ts",
-        "line": 23,
-        "column": 15
+        "line": 29,
+        "column": 71
       }
     }
   ]

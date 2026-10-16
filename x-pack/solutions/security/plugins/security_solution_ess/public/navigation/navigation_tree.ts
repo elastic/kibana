@@ -7,10 +7,7 @@
 
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import {
-  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-  SecurityPageName,
-} from '@kbn/security-solution-navigation';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
@@ -60,10 +57,7 @@ export const createNavigationTree = (
       defaultNavigationTree.dashboards(),
       ...defaultNavigationTree.alertZeroSecondary(),
       defaultNavigationTree.rules(),
-      services.uiSettings.get(
-        ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-        services.experimentalFeatures?.enableAlertsAndAttacksAlignment
-      )
+      services.experimentalFeatures?.enableAlertsAndAttacksAlignment
         ? defaultNavigationTree.alertDetections()
         : {
             id: SecurityPageName.alerts,
