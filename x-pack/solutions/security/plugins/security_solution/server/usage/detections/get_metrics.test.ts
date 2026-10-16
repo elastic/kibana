@@ -236,12 +236,6 @@ describe('Detections Usage and Metrics', () => {
             threshold: 0,
             timeline_id: 0,
           },
-          elastic_detection_rule_base_version_status: {
-            customized_with_base_version: 0,
-            customized_without_base_version: 0,
-            noncustomized_with_base_version: 1,
-            noncustomized_without_base_version: 0,
-          },
           ai_created_rules: { total: 0, enabled: 0, disabled: 0 },
         },
       });
@@ -393,12 +387,6 @@ describe('Detections Usage and Metrics', () => {
             threshold: 0,
             timeline_id: 0,
           },
-          elastic_detection_rule_base_version_status: {
-            customized_with_base_version: 0,
-            customized_without_base_version: 0,
-            noncustomized_with_base_version: 1,
-            noncustomized_without_base_version: 0,
-          },
         },
       });
     });
@@ -549,12 +537,6 @@ describe('Detections Usage and Metrics', () => {
             threshold: 0,
             timeline_id: 0,
           },
-          elastic_detection_rule_base_version_status: {
-            customized_with_base_version: 1,
-            customized_without_base_version: 0,
-            noncustomized_with_base_version: 0,
-            noncustomized_without_base_version: 0,
-          },
         },
       });
     });
@@ -704,12 +686,6 @@ describe('Detections Usage and Metrics', () => {
             threat_query: 0,
             threshold: 0,
             timeline_id: 0,
-          },
-          elastic_detection_rule_base_version_status: {
-            customized_with_base_version: 1,
-            customized_without_base_version: 0,
-            noncustomized_with_base_version: 0,
-            noncustomized_without_base_version: 0,
           },
         },
       });
@@ -875,12 +851,6 @@ describe('Detections Usage and Metrics', () => {
             threshold: 0,
             timeline_id: 0,
           },
-          elastic_detection_rule_base_version_status: {
-            customized_with_base_version: 0,
-            customized_without_base_version: 0,
-            noncustomized_with_base_version: 1,
-            noncustomized_without_base_version: 0,
-          },
         },
       });
     });
@@ -1030,12 +1000,6 @@ describe('Detections Usage and Metrics', () => {
             threat_query: 0,
             threshold: 0,
             timeline_id: 0,
-          },
-          elastic_detection_rule_base_version_status: {
-            customized_with_base_version: 0,
-            customized_without_base_version: 0,
-            noncustomized_with_base_version: 1,
-            noncustomized_without_base_version: 0,
           },
         },
       });
@@ -1187,12 +1151,6 @@ describe('Detections Usage and Metrics', () => {
             threshold: 0,
             timeline_id: 0,
           },
-          elastic_detection_rule_base_version_status: {
-            customized_with_base_version: 1,
-            customized_without_base_version: 0,
-            noncustomized_with_base_version: 0,
-            noncustomized_without_base_version: 0,
-          },
         },
       });
     });
@@ -1343,12 +1301,6 @@ describe('Detections Usage and Metrics', () => {
             threshold: 0,
             timeline_id: 0,
           },
-          elastic_detection_rule_base_version_status: {
-            customized_with_base_version: 1,
-            customized_without_base_version: 0,
-            noncustomized_with_base_version: 0,
-            noncustomized_without_base_version: 0,
-          },
         },
       });
     });
@@ -1455,12 +1407,6 @@ describe('Detections Usage and Metrics', () => {
             threat_query: 0,
             anomaly_threshold: 0,
             new_terms_fields: 0,
-          },
-          elastic_detection_rule_base_version_status: {
-            customized_with_base_version: 0,
-            customized_without_base_version: 0,
-            noncustomized_with_base_version: 0,
-            noncustomized_without_base_version: 0,
           },
           ai_created_rules: { total: 0, enabled: 0, disabled: 0 },
         },
@@ -1610,12 +1556,6 @@ describe('Detections Usage and Metrics', () => {
             threat_query: 0,
             anomaly_threshold: 0,
             new_terms_fields: 0,
-          },
-          elastic_detection_rule_base_version_status: {
-            customized_with_base_version: 0,
-            customized_without_base_version: 0,
-            noncustomized_with_base_version: 1,
-            noncustomized_without_base_version: 0,
           },
           ai_created_rules: { total: 0, enabled: 0, disabled: 0 },
         },
@@ -1791,15 +1731,6 @@ describe('Detections Usage and Metrics', () => {
               },
             },
           })
-        );
-        expect(result).toHaveProperty(
-          'detection_rules.elastic_detection_rule_base_version_status',
-          {
-            customized_with_base_version: 1,
-            customized_without_base_version: 1,
-            noncustomized_with_base_version: 3,
-            noncustomized_without_base_version: 2,
-          }
         );
         // customized mock rules have `tags`, `name` and `description` customized
         expect(result).toHaveProperty(

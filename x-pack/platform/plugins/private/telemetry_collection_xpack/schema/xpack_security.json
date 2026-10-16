@@ -8123,34 +8123,6 @@
                     }
                   }
                 },
-                "elastic_detection_rule_base_version_status": {
-                  "properties": {
-                    "customized_with_base_version": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of customized prebuilt rules that still have a base version"
-                      }
-                    },
-                    "customized_without_base_version": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of customized prebuilt rules that no longer have a base version"
-                      }
-                    },
-                    "noncustomized_with_base_version": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of non-customized prebuilt rules that still have a base version"
-                      }
-                    },
-                    "noncustomized_without_base_version": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The number of non-customized prebuilt rules that no longer have a base version"
-                      }
-                    }
-                  }
-                },
                 "elastic_detection_rule_deprecated_status": {
                   "properties": {
                     "total": {

@@ -20,7 +20,6 @@ import {
   getInitialAiCreatedRulesUsage,
   getInitialChangesHistoryUsage,
   getInitialEventLogUsage,
-  getInitialRuleBaseVersionStatus,
   getInitialRuleCustomizationStatus,
   getInitialRuleDeprecatedStatus,
   getInitialRuleUpgradeStatus,
@@ -43,7 +42,6 @@ import {
   getRuleCustomizationStatus,
   getRuleCustomizationMissingBaseVersionStatus,
 } from './get_rule_customization_status';
-import { getRuleBaseVersionStatus } from './get_rule_base_version_status';
 import { getRuleVersionKey } from './transform_utils/get_rule_version_key';
 
 export interface GetRuleMetricsOptions {
@@ -83,7 +81,6 @@ export const getRuleMetrics = async ({
         elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
         elastic_detection_rule_customization_status_missing_base_version:
           getInitialRuleCustomizationStatus(),
-        elastic_detection_rule_base_version_status: getInitialRuleBaseVersionStatus(),
         elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
         ai_created_rules: getInitialAiCreatedRulesUsage(),
         spaces_usage: getInitialSpacesUsage(),
@@ -216,7 +213,6 @@ export const getRuleMetrics = async ({
       elastic_detection_rule_customization_status: getRuleCustomizationStatus(externalRuleSources),
       elastic_detection_rule_customization_status_missing_base_version:
         getRuleCustomizationMissingBaseVersionStatus(externalRuleSources),
-      elastic_detection_rule_base_version_status: getRuleBaseVersionStatus(elasticRuleObjects),
       elastic_detection_rule_deprecated_status: { total: numDeprecated },
       ai_created_rules: aiCreatedRulesUsage,
       spaces_usage: getSpacesUsage(ruleResults),
@@ -235,7 +231,6 @@ export const getRuleMetrics = async ({
       elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
       elastic_detection_rule_customization_status_missing_base_version:
         getInitialRuleCustomizationStatus(),
-      elastic_detection_rule_base_version_status: getInitialRuleBaseVersionStatus(),
       elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
       ai_created_rules: getInitialAiCreatedRulesUsage(),
       spaces_usage: getInitialSpacesUsage(),

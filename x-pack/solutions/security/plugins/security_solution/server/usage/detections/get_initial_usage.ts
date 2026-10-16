@@ -12,7 +12,6 @@ import {
   getInitialAiCreatedRulesUsage,
   getInitialChangesHistoryUsage,
   getInitialEventLogUsage,
-  getInitialRuleBaseVersionStatus,
   getInitialRuleCustomizationStatus,
   getInitialRuleDeprecatedStatus,
   getInitialRuleUpgradeStatus,
@@ -38,7 +37,6 @@ export const getInitialDetectionMetrics = (): DetectionMetrics => ({
     elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
     elastic_detection_rule_customization_status_missing_base_version:
       getInitialRuleCustomizationStatus(),
-    elastic_detection_rule_base_version_status: getInitialRuleBaseVersionStatus(),
     elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
     ai_created_rules: getInitialAiCreatedRulesUsage(),
     spaces_usage: getInitialSpacesUsage(),

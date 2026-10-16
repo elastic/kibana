@@ -11,6 +11,10 @@ import type {
   SavedObjectsRawDocSource,
 } from '@kbn/core/server';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_type';
+import {
+  getPrebuiltRuleAssetSoId,
+  getPrebuiltRuleAssetsSearchNamespace,
+} from '../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client/utils';
 import type { RuleVersionSpecifier } from '../../lib/detection_engine/prebuilt_rules/logic/rule_versions/rule_version_specifier';
 
 export interface GetInstalledPrebuiltRuleAssetsOptions {
@@ -39,11 +43,15 @@ export const getInstalledPrebuiltRuleAssets = async ({
     return [];
   }
 
-  const soIds = versions.map(getPrebuiltRuleAssetSoId);
+  const soIds = [
+    ...new Set(
+      versions.map(({ rule_id: ruleId, version }) => getPrebuiltRuleAssetSoId(ruleId, version))
+    ),
+  ];
 
   const response = await savedObjectsClient.search<PrebuiltRuleAssetIdentityDoc>({
     type: PREBUILT_RULE_ASSETS_SO_TYPE,
-    namespaces: [savedObjectsClient.getCurrentNamespace() ?? 'default'],
+    namespaces: getPrebuiltRuleAssetsSearchNamespace(savedObjectsClient),
     size: soIds.length,
     _source: {
       includes: [
@@ -70,9 +78,3 @@ export const getInstalledPrebuiltRuleAssets = async ({
     return [{ rule_id: attributes.rule_id, version: attributes.version }];
   });
 };
-
-/**
- * Mirrors the id format produced by `getPrebuiltRuleAssetSoId` in the prebuilt rule assets client.
- */
-const getPrebuiltRuleAssetSoId = ({ rule_id: ruleId, version }: RuleVersionSpecifier): string =>
-  `${PREBUILT_RULE_ASSETS_SO_TYPE}:${ruleId}_${version}`;
