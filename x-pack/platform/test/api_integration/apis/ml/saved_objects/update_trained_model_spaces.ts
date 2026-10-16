@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     afterEach(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.cleanMLSavedObjects([idSpace1, idSpace2]);
+      await ml.testResources.cleanMLSavedObjects();
     });
 
     after(async () => {
