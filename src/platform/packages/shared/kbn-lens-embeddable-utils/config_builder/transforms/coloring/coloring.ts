@@ -31,7 +31,7 @@ import type {
   UnassignedColorType,
 } from '../../schema/color';
 export { NO_COLOR, AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
-import type { SerializableValueType } from '../../schema/serializedValue';
+import type { RangeKeyType, SerializableValueType } from '../../schema/serializedValue';
 import type { PaletteId } from '../../schema/constants';
 import { PALETTE_IDS } from '../../schema/constants';
 import { getReversibleMappings } from '../charts/utils';
@@ -361,6 +361,31 @@ function fromColorLensStateToAPI(
   };
 }
 
+// Mirrors `SerializedRangeKey` from `@kbn/data-plugin/common`.
+interface SerializedRangeKey {
+  type: 'rangeKey';
+  from: string | number | null;
+  to: string | number | null;
+  ranges: Array<Partial<Pick<SerializedRangeKey, 'from' | 'to'> & { label: string }>>;
+}
+
+// The SO stores an open-ended range bound as `null`. The API omits it.
+const toAPIRangeBounds = ({
+  from,
+  to,
+}: Partial<Pick<SerializedRangeKey, 'from' | 'to'>>): Pick<RangeKeyType, 'from' | 'to'> => ({
+  ...(from != null && { from }),
+  ...(to != null && { to }),
+});
+
+const toStateRangeBounds = ({
+  from,
+  to,
+}: Pick<RangeKeyType, 'from' | 'to'>): Pick<SerializedRangeKey, 'from' | 'to'> => ({
+  from: from ?? null,
+  to: to ?? null,
+});
+
 function mapSerializedValueToAPI(value: unknown): SerializableValueType {
   if (value !== null && typeof value === 'object' && 'type' in value) {
     const typed = value as { type: string };
@@ -368,7 +393,12 @@ function mapSerializedValueToAPI(value: unknown): SerializableValueType {
       return { ...typed, type: 'multi_field_key' } as SerializableValueType;
     }
     if (typed.type === 'rangeKey') {
-      return { ...typed, type: 'range_key' } as SerializableValueType;
+      const { from, to, ranges } = typed as SerializedRangeKey;
+      return {
+        type: 'range_key',
+        ...toAPIRangeBounds({ from, to }),
+        ranges: ranges?.map(({ label, ...bounds }) => ({ ...toAPIRangeBounds(bounds), label })),
+      } as SerializableValueType;
     }
   }
   return value as SerializableValueType;
@@ -381,7 +411,13 @@ function mapSerializedValueFromAPI(value: SerializableValueType): unknown {
       return { ...typed, type: 'multiFieldKey' };
     }
     if (typed.type === 'range_key') {
-      return { ...typed, type: 'rangeKey' };
+      const { from, to, ranges } = typed as RangeKeyType;
+      const stateValue: SerializedRangeKey = {
+        type: 'rangeKey',
+        ...toStateRangeBounds({ from, to }),
+        ranges: ranges.map(({ label, ...bounds }) => ({ ...toStateRangeBounds(bounds), label })),
+      };
+      return stateValue;
     }
   }
   return value;

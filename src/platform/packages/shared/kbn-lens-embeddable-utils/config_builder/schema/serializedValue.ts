@@ -17,14 +17,14 @@ const rangeKeySchema = lazySchema(() =>
   z
     .object({
       type: z.literal('range_key'),
-      from: rangeValueSchema,
-      to: rangeValueSchema,
+      from: rangeValueSchema.optional(),
+      to: rangeValueSchema.optional(),
       ranges: z
         .array(
           z
             .object({
-              from: rangeValueSchema,
-              to: rangeValueSchema,
+              from: rangeValueSchema.optional(),
+              to: rangeValueSchema.optional(),
               label: z.string(),
             })
             .strict()
@@ -58,3 +58,4 @@ export const serializedValueSchema = lazySchema(() =>
 );
 
 export type SerializableValueType = z.output<typeof serializedValueSchema>;
+export type RangeKeyType = z.output<typeof rangeKeySchema>;
