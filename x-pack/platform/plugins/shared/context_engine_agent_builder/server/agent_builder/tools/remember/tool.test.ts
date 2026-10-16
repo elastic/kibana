@@ -247,6 +247,46 @@ describe('remember tool', () => {
     });
   });
 
+  it('does not revise a memory with an empty scope', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _index: '.ai-memory-elastic',
+            _seq_no: 7,
+            _primary_term: 2,
+            _source: {
+              '@timestamp': '2026-09-01T00:00:00.000Z',
+              id: 'memory-1',
+              type: 'memory.session_fact',
+              title: 'Old title',
+              description: 'Old description',
+              content: 'Old content',
+              updated_at: '2026-09-01T00:00:00.000Z',
+              attributes: {},
+              scope_id: [],
+            },
+          },
+        ],
+      },
+    });
+
+    const result = await run({ ...params, id: 'memory-1' }, 'conversation-1');
+
+    expect(index).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: {
+            message:
+              "Failed to store memory: Memory 'memory-1' belongs to another user and cannot be revised.",
+          },
+        },
+      ],
+    });
+  });
+
   it('rejects an AI index that does not have memory enabled', async () => {
     get.mockResolvedValue({
       id: 'support',

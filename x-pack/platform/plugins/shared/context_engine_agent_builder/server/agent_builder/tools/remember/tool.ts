@@ -271,7 +271,7 @@ export const createRememberTool = ({
           writer,
           existingDocument === undefined
         ),
-        scope_id: existingDocument?.scope_id ?? [userScopeId],
+        scope_id: existingDocument?.scope_id?.length ? existingDocument.scope_id : [userScopeId],
         permissions: existingDocument?.permissions ?? createMemoryPermissions(spaceId),
       };
 

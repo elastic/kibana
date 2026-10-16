@@ -15,10 +15,8 @@ import { isResponseError } from '@kbn/es-errors';
 const PROFILE_SUGGESTIONS = 10;
 
 /**
- * The profile uid Elasticsearch matches against `scope_id`. Sessions and enriched Task Manager
- * requests carry it. A request authenticated with an API key, including a Task Manager request
- * running under the caller's key, resolves to the key owner's profile. A basic-auth realm user is
- * looked up by username and realm as the internal user.
+ * The profile uid Elasticsearch matches against `scope_id`: from the request when present, else the
+ * API key owner (as the key), else a realm user looked up by username and realm (as kibana_system).
  */
 export const resolveUserProfileUid = async ({
   request,
