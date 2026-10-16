@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Action, AppNode } from './document_schema';
+import type { Action, AppNode, DataSource } from './document_schema';
 
 /** Returns the direct children of a node, empty for leaf nodes. */
 export const getNodeChildren = (node: AppNode): readonly AppNode[] =>
@@ -50,6 +50,32 @@ export const getNodeQuery = (node: AppNode): string | undefined =>
   node.type === 'key_value'
     ? node.query
     : undefined;
+
+/** Where a node gets what it shows, if it shows data: a query, or a source of cases. */
+export const getNodeSource = (node: AppNode): DataSource | undefined => {
+  if (node.type === 'stat' || node.type === 'table' || node.type === 'key_value') {
+    if (node.source) return node.source;
+  }
+  const query = getNodeQuery(node);
+  return query === undefined ? undefined : { type: 'esql', query };
+};
+
+/** Every source in the tree, by the id of the node that shows it. */
+export const collectSources = (root: AppNode): Record<string, DataSource> => {
+  const source = getNodeSource(root);
+  return {
+    ...(source === undefined ? {} : { [root.id]: source }),
+    ...Object.assign({}, ...getNodeChildren(root).map(collectSources)),
+  };
+};
+
+/** The values of the app that a source is driven by, which are the ones that make it run again. */
+export const getSourceStateKeys = (source: DataSource): string[] => {
+  if (source.type !== 'cases') return [];
+  return [source.status, source.severity, source.search, source.tag].flatMap((filter) =>
+    typeof filter === 'object' ? [filter.fromState] : []
+  );
+};
 
 /** The state key an input node reads and writes, if it is one. */
 export const getNodeBinding = (node: AppNode): string | undefined =>

@@ -8,8 +8,8 @@
 import React, { type ReactElement } from 'react';
 import { act, render, type RenderResult } from '@testing-library/react';
 import type { FetchContext } from '@kbn/presentation-publishing';
-import { appDocumentSchema, collectQueries, type AppDocument } from '@kbn/custom-app-common';
-import { createDataLayer, type DataLayer, type RunQuery } from '../data/data_layer';
+import { appDocumentSchema, collectSources, type AppDocument } from '@kbn/custom-app-common';
+import { createDataLayer, type DataLayer, type RunCases, type RunQuery } from '../data/data_layer';
 import { DataLayerContext } from '../data/data_layer_context';
 import { createAppRuntime, type AppRuntime } from '../runtime/app_runtime';
 import { AppRuntimeContext } from '../runtime/app_runtime_context';
@@ -43,11 +43,12 @@ const getParameterNames = (query: string) =>
  */
 export const renderApp = async (
   document: AppDocument,
-  runQuery: RunQuery
+  runQuery: RunQuery,
+  runCases?: RunCases
 ): Promise<{ runtime: AppRuntime; layer: DataLayer } & RenderResult> => {
   const runtime = createAppRuntime(document);
-  const layer = createDataLayer({ runQuery, getParameterNames });
-  layer.setQueries(collectQueries(document.root));
+  const layer = createDataLayer({ runQuery, runCases, getParameterNames });
+  layer.setSources(collectSources(document.root));
   runtime.state$.subscribe(layer.setState);
 
   const view = render(

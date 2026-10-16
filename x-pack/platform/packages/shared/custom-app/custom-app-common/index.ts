@@ -8,6 +8,13 @@
 export {
   CUSTOM_APP_EMBEDDABLE_TYPE,
   CUSTOM_APP_STATE_VERSION,
+  CASES_FILTERS,
+  CASES_SEVERITIES,
+  CASES_SORT_FIELDS,
+  CASES_STATUSES,
+  DEFAULT_CASES_LIMIT,
+  MAX_CASES_FILTER_LENGTH,
+  MAX_CASES_LIMIT,
   MAX_HEADING_LENGTH,
   MAX_QUERY_LENGTH,
   MAX_STATE_STRING_LENGTH,
@@ -27,6 +34,8 @@ export {
   type AppDocument,
   type AppNode,
   type AppNodeOfType,
+  type CasesSource,
+  type DataSource,
   type AppNodeType,
   type StateDeclaration,
   type CustomAppState,
@@ -39,6 +48,9 @@ export {
 } from './interpolation';
 export {
   collectQueries,
+  collectSources,
+  getNodeSource,
+  getSourceStateKeys,
   getInterpolatedText,
   getNodeActions,
   getNodeBinding,

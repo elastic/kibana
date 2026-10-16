@@ -501,6 +501,15 @@ describe('pruneUnusedValues', () => {
     expect(Object.keys(pruneUnusedValues(document).state)).toEqual(['find', 'service']);
   });
 
+  it('keeps a value that filters the cases of a component, though no query uses it', () => {
+    const document = withValues(
+      { status: text('open'), orphan: text('c') },
+      { type: 'table', id: 'cases', source: { type: 'cases', status: { fromState: 'status' } } }
+    );
+
+    expect(Object.keys(pruneUnusedValues(document).state)).toEqual(['status']);
+  });
+
   it('keeps a value that a workflow is handed, so it is not pruned from under the button', () => {
     const document = withValues(
       { host: text('web-1'), orphan: text('c') },

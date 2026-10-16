@@ -33,6 +33,7 @@ import { getCatalogEntry } from './node_catalog';
 import { InterpolatedTextField, SelectField, TextField } from './fields/fields';
 import { DEFAULT_QUERY } from './node_defaults';
 import { ColumnsEditor, OptionsEditor } from './fields/list_editors';
+import { DataSourceField } from './fields/data_source_field';
 import { QueryField } from './fields/query_field';
 import { RowClickEditor } from './fields/row_click_editor';
 import { ButtonActionsEditor } from './fields/workflow_action_editor';
@@ -267,10 +268,12 @@ export const PropertiesPanel = ({
               />
             </Section>
             <Section title={sections.data}>
-              <QueryField
+              <DataSourceField
                 query={node.query}
+                source={node.source}
                 state={document.state}
-                onChange={(query) => onChange<'stat'>({ query })}
+                canCount
+                onChange={(data) => onChange<'stat'>(data)}
               />
             </Section>
           </Sections>
@@ -378,10 +381,11 @@ export const PropertiesPanel = ({
         return (
           <Sections>
             <Section title={sections.data}>
-              <QueryField
+              <DataSourceField
                 query={node.query}
+                source={node.source}
                 state={document.state}
-                onChange={(query) => onChange<'table'>({ query })}
+                onChange={(data) => onChange<'table'>(data)}
               />
             </Section>
             <Section title={sections.columns}>
@@ -405,10 +409,11 @@ export const PropertiesPanel = ({
         return (
           <Sections>
             <Section title={sections.data}>
-              <QueryField
+              <DataSourceField
                 query={node.query}
+                source={node.source}
                 state={document.state}
-                onChange={(query) => onChange<'key_value'>({ query })}
+                onChange={(data) => onChange<'key_value'>(data)}
               />
               <EuiSpacer size="s" />
               <TextField

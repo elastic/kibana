@@ -13,7 +13,13 @@ import type {
   AppNodeType,
   StateDeclaration,
 } from './document_schema';
-import { getNodeActions, getNodeBinding, getNodeChildren } from './node_tree';
+import {
+  getNodeActions,
+  getNodeBinding,
+  getNodeChildren,
+  getNodeSource,
+  getSourceStateKeys,
+} from './node_tree';
 
 /**
  * Edits to a document, as pure functions. Each returns a new document and leaves its input alone.
@@ -272,6 +278,9 @@ export const pruneUnusedValues = (document: AppDocument): AppDocument => {
   for (let node = pending.pop(); node; node = pending.pop()) {
     const binding = getNodeBinding(node);
     if (binding !== undefined) used.add(binding);
+    // A value that filters the cases of a component is used, though nothing may query with it.
+    const source = getNodeSource(node);
+    if (source) getSourceStateKeys(source).forEach((key) => used.add(key));
     getNodeActions(node).forEach(({ actions }) =>
       actions.forEach((action) => {
         if (action.type === 'setState') used.add(action.key);

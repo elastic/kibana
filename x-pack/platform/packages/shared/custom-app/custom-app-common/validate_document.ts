@@ -7,10 +7,24 @@
 
 import type { z } from '@kbn/zod/v4';
 import { CUSTOM_CONTENT_SCRIPT_PATTERN } from '@kbn/custom-content-common';
-import { MAX_NODE_COUNT, MAX_NODE_DEPTH, MAX_STATE_KEYS } from './constants';
+import {
+  CASES_FILTERS,
+  CASES_SEVERITIES,
+  CASES_STATUSES,
+  MAX_NODE_COUNT,
+  MAX_NODE_DEPTH,
+  MAX_STATE_KEYS,
+} from './constants';
 import type { AppNode, StateDeclaration } from './document_schema';
 import { findStateReferences, hasMalformedReference } from './interpolation';
-import { getInterpolatedText, getNodeActions, getNodeBinding, getNodeChildren } from './node_tree';
+import {
+  getInterpolatedText,
+  getNodeActions,
+  getNodeBinding,
+  getNodeChildren,
+  getNodeSource,
+  getSourceStateKeys,
+} from './node_tree';
 
 interface DocumentToValidate {
   state: Record<string, StateDeclaration>;
@@ -112,6 +126,40 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
           node.id
         );
       }
+    }
+
+    if (node.type === 'stat' || node.type === 'table' || node.type === 'key_value') {
+      if ((node.query === undefined) === (node.source === undefined)) {
+        issue(
+          `Node "${node.id}" shows data and needs a query or a source, and one of them only`,
+          node.id
+        );
+      }
+    }
+
+    const source = getNodeSource(node);
+    if (source?.type === 'cases') {
+      getSourceStateKeys(source)
+        .filter((key) => !(key in state))
+        .forEach((key) =>
+          issue(`Node "${node.id}" filters cases by the unknown state key "${key}"`, node.id)
+        );
+
+      const allowed = { status: CASES_STATUSES, severity: CASES_SEVERITIES } as const;
+      CASES_FILTERS.forEach((filter) => {
+        const value = source[filter];
+        const known: readonly string[] | undefined =
+          filter in allowed ? allowed[filter as keyof typeof allowed] : undefined;
+        // An empty value filters nothing, which an "All" option of a select says.
+        if (known && typeof value === 'string' && value !== '' && !known.includes(value)) {
+          issue(
+            `Node "${node.id}" filters cases by the ${filter} "${value}"; it is one of ${known.join(
+              ', '
+            )}`,
+            node.id
+          );
+        }
+      });
     }
 
     if (node.type === 'time_range' && node.id !== firstTimeRangeId) {

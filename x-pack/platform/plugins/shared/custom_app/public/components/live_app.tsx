@@ -8,11 +8,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { collectQueries, type AppDocument } from '@kbn/custom-app-common';
+import { collectSources, type AppDocument } from '@kbn/custom-app-common';
 import { AppFrame } from './app_frame';
 import { NodeRenderer } from './node_renderer';
 import { createDataLayer } from '../data/data_layer';
 import { DataLayerContext } from '../data/data_layer_context';
+import { createRunCases } from '../data/run_cases';
 import { createRunEsqlQuery } from '../data/run_esql_query';
 import { createAppRuntime } from '../runtime/app_runtime';
 import { AppRuntimeContext } from '../runtime/app_runtime_context';
@@ -51,9 +52,10 @@ export const LiveApp = ({ document, appId }: LiveAppProps) => {
   const { runtime, dataLayer } = useMemo(() => {
     const layer = createDataLayer({
       runQuery: createRunEsqlQuery({ search, http: core.http }),
+      runCases: createRunCases({ http: core.http }),
       getParameterNames: (query) => getESQLQueryVariables(query),
     });
-    layer.setQueries(collectQueries(document.root));
+    layer.setSources(collectSources(document.root));
     const appRuntime = createAppRuntime(document);
     // Emits the defaults straight away, then every change made in the card.
     appRuntime.state$.subscribe(layer.setState);

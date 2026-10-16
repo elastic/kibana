@@ -6,7 +6,14 @@
  */
 
 import type { FetchContext } from '@kbn/presentation-publishing';
-import { createDataLayer, type RunQuery, type SourceData, type SourceRequest } from './data_layer';
+import type { CasesSource } from '@kbn/custom-app-common';
+import {
+  createDataLayer,
+  type RunCases,
+  type RunQuery,
+  type SourceData,
+  type SourceRequest,
+} from './data_layer';
 
 const context = { timeRange: { from: 'now-15m', to: 'now' } } as FetchContext;
 const result = (value: number): SourceData => ({
@@ -368,5 +375,143 @@ describe('createDataLayer', () => {
     layer.destroy();
 
     expect(calls.every(({ signal }) => signal.aborted)).toBe(true);
+  });
+});
+
+describe('createDataLayer with a source of cases', () => {
+  interface CasesCall {
+    source: CasesSource;
+    request: SourceRequest;
+    resolve: (data: SourceData) => void;
+  }
+
+  const setupCases = () => {
+    const queryRunner = createControlledRunner();
+    const casesCalls: CasesCall[] = [];
+    const runCases: RunCases = (source, request) =>
+      new Promise<SourceData>((resolve) => {
+        casesCalls.push({ source, request, resolve });
+      });
+    const layer = createDataLayer({ runQuery: queryRunner.runQuery, runCases, getParameterNames });
+    return { layer, casesCalls, queryCalls: queryRunner.calls };
+  };
+
+  const open: CasesSource = { type: 'cases', status: { fromState: 'status' } };
+
+  it('runs the source of cases, and not a query, for a component that shows cases', () => {
+    const { layer, casesCalls, queryCalls } = setupCases();
+    layer.setSources({ list: open, users: { type: 'esql', query: queries.users } });
+    layer.refresh(context);
+
+    layer.acquire('list');
+
+    expect(casesCalls.map(({ source }) => source)).toEqual([open]);
+    expect(queryCalls).toHaveLength(0);
+  });
+
+  it('gives the cases to the component, and says it is loading until then', async () => {
+    const { layer, casesCalls } = setupCases();
+    layer.setSources({ list: open });
+    layer.refresh(context);
+    layer.acquire('list');
+    expect(layer.getSource$('list').getValue()).toEqual({ status: 'loading' });
+
+    casesCalls[0].resolve(result(3));
+    await flush();
+
+    expect(layer.getSource$('list').getValue()).toEqual({ status: 'success', data: result(3) });
+  });
+
+  it('hands the source the values of the app, as they are when it runs', () => {
+    const { layer, casesCalls } = setupCases();
+    layer.setSources({ list: open });
+    layer.setState({ status: 'closed' });
+    layer.refresh(context);
+
+    layer.acquire('list');
+
+    expect(casesCalls[0].request.state).toEqual({ status: 'closed' });
+  });
+
+  it('runs again when a value it is filtered by changes, and not for one it is not', () => {
+    const { layer, casesCalls } = setupCases();
+    layer.setSources({ list: open });
+    layer.setState({ status: 'open', other: 'a' });
+    layer.refresh(context);
+    layer.acquire('list');
+    expect(casesCalls).toHaveLength(1);
+
+    layer.setState({ status: 'open', other: 'b' });
+    expect(casesCalls).toHaveLength(1);
+
+    layer.setState({ status: 'closed', other: 'b' });
+    expect(casesCalls).toHaveLength(2);
+  });
+
+  it('runs again when the source itself is replaced by another, and not when it is by an equal one', () => {
+    const { layer, casesCalls } = setupCases();
+    layer.setSources({ list: open });
+    layer.refresh(context);
+    layer.acquire('list');
+    expect(casesCalls).toHaveLength(1);
+
+    layer.setSources({ list: { type: 'cases', status: { fromState: 'status' } } });
+    expect(casesCalls).toHaveLength(1);
+
+    layer.setSources({ list: { type: 'cases', status: 'open' } });
+    expect(casesCalls).toHaveLength(2);
+  });
+
+  it('runs again, for the same source, when it changes between a query and cases', () => {
+    const { layer, casesCalls, queryCalls } = setupCases();
+    layer.setSources({ list: { type: 'esql', query: queries.users } });
+    layer.refresh(context);
+    layer.acquire('list');
+    expect(queryCalls).toHaveLength(1);
+
+    layer.setSources({ list: open });
+
+    expect(casesCalls).toHaveLength(1);
+  });
+
+  it('says that cases cannot be shown when nothing can fetch them, instead of waiting for ever', async () => {
+    const { runQuery } = createControlledRunner();
+    const layer = createDataLayer({ runQuery, getParameterNames });
+    layer.setSources({ list: open });
+    layer.refresh(context);
+
+    layer.acquire('list');
+    await flush();
+
+    expect(layer.getSource$('list').getValue()).toEqual({
+      status: 'error',
+      message: 'Cases cannot be shown here',
+    });
+  });
+
+  it('says why when the cases could not be had, and does not affect the others', async () => {
+    const queryRunner = createControlledRunner();
+    const runCases: RunCases = () => Promise.reject(new Error('Forbidden'));
+    const layer = createDataLayer({ runQuery: queryRunner.runQuery, runCases, getParameterNames });
+    layer.setSources({ list: open, users: { type: 'esql', query: queries.users } });
+    layer.refresh(context);
+
+    layer.acquire('list');
+    layer.acquire('users');
+    queryRunner.calls[0].resolve(result(1));
+    await flush();
+
+    expect(layer.getSource$('list').getValue()).toEqual({ status: 'error', message: 'Forbidden' });
+    expect(layer.getSource$('users').getValue()).toMatchObject({ status: 'success' });
+  });
+
+  it('keeps setQueries as a way to give only queries, as it has always been', () => {
+    const { layer, queryCalls } = setupCases();
+    layer.setQueries({ users: queries.users });
+    layer.refresh(context);
+
+    layer.acquire('users');
+
+    expect(queryCalls.map(({ query }) => query)).toEqual([queries.users]);
   });
 });

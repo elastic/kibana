@@ -6,7 +6,14 @@
  */
 
 import { appDocumentSchema, appDocumentShapeSchema, customAppStateSchema } from './document_schema';
-import { collectQueries, getInterpolatedText, getNodeChildren } from './node_tree';
+import {
+  collectQueries,
+  collectSources,
+  getInterpolatedText,
+  getNodeChildren,
+  getNodeSource,
+  getSourceStateKeys,
+} from './node_tree';
 import { MAX_NODE_COUNT, MAX_NODE_DEPTH, MAX_QUERY_LENGTH, MAX_TEMPLATE_LENGTH } from './constants';
 
 const stackOf = (id: string, children: unknown[] = []) => ({ type: 'stack', id, children });
@@ -87,6 +94,154 @@ describe('appDocumentSchema', () => {
     expect(result.success ? [] : result.error.issues.map(({ message }) => message)).toEqual([
       `A document may hold at most ${MAX_NODE_COUNT} nodes`,
     ]);
+  });
+});
+
+describe('a cases source', () => {
+  const casesDocument = (
+    source: unknown,
+    extra: Record<string, unknown> = {},
+    state: object = {}
+  ) => ({
+    state,
+    root: { type: 'table', id: 'cases', source, ...extra },
+  });
+  const cases = (more: Record<string, unknown> = {}) => ({ type: 'cases', ...more });
+  const issuesOf = (document: unknown) =>
+    JSON.stringify(appDocumentSchema.safeParse(document).error?.issues ?? []);
+
+  it('is what a table shows instead of a query, with nothing to set', () => {
+    const result = appDocumentSchema.parse(casesDocument(cases()));
+
+    expect(result.root).toEqual({
+      type: 'table',
+      id: 'cases',
+      source: { type: 'cases' },
+      onRowClick: [],
+    });
+  });
+
+  it('is also what a stat and a key-value list can show', () => {
+    expect(
+      appDocumentSchema.safeParse({
+        root: {
+          type: 'stat',
+          id: 's',
+          title: 'Open',
+          source: cases({ status: 'open', count: true }),
+        },
+      }).success
+    ).toBe(true);
+    expect(
+      appDocumentSchema.safeParse({ root: { type: 'key_value', id: 'k', source: cases() } }).success
+    ).toBe(true);
+  });
+
+  it('takes filters, a sort, a limit, the time range, and a count', () => {
+    const source = cases({
+      status: 'in-progress',
+      severity: 'high',
+      search: 'login',
+      tag: 'custom-app',
+      sort: { field: 'updated_at', order: 'desc' },
+      limit: 20,
+      followTimeRange: true,
+      count: false,
+    });
+
+    expect(appDocumentSchema.safeParse(casesDocument(source)).success).toBe(true);
+  });
+
+  it('takes a filter from a value of the app, which is how an input drives it', () => {
+    const result = appDocumentSchema.safeParse(
+      casesDocument(
+        cases({ status: { fromState: 'status' } }),
+        {},
+        {
+          status: { type: 'string', default: '' },
+        }
+      )
+    );
+
+    expect(result.success).toBe(true);
+  });
+
+  it('needs a query or a source, and not both, and not neither', () => {
+    expect(issuesOf(casesDocument(undefined))).toContain('needs a query or a source');
+    expect(issuesOf(casesDocument(cases(), { query: 'FROM cases' }))).toContain(
+      'needs a query or a source'
+    );
+    expect(
+      appDocumentSchema.safeParse({ root: { type: 'table', id: 't', query: 'FROM logs' } }).success
+    ).toBe(true);
+  });
+
+  it('is for stat, table and key-value only: a chart needs a query', () => {
+    expect(
+      appDocumentSchema.safeParse({ root: { type: 'chart', id: 'c', source: cases() } }).success
+    ).toBe(false);
+  });
+
+  it('refuses a kind of source it does not know', () => {
+    expect(appDocumentSchema.safeParse(casesDocument({ type: 'alerts' })).success).toBe(false);
+  });
+
+  it('refuses a status or a severity that cases do not have, saying which there are', () => {
+    expect(issuesOf(casesDocument(cases({ status: 'done' })))).toContain(
+      'open, in-progress, closed'
+    );
+    expect(issuesOf(casesDocument(cases({ severity: 'huge' })))).toContain(
+      'low, medium, high, critical'
+    );
+  });
+
+  it('takes an empty status or severity as no filter, as the "All" of a select does', () => {
+    expect(
+      appDocumentSchema.safeParse(casesDocument(cases({ status: '', severity: '' }))).success
+    ).toBe(true);
+  });
+
+  it('refuses a filter from a value of the app that does not exist, naming it', () => {
+    expect(issuesOf(casesDocument(cases({ tag: { fromState: 'nope' } })))).toContain(
+      'unknown state key \\"nope\\"'
+    );
+  });
+
+  it('keeps its limit within what the cases API gives, and a sort to what it can sort by', () => {
+    expect(appDocumentSchema.safeParse(casesDocument(cases({ limit: 0 }))).success).toBe(false);
+    expect(appDocumentSchema.safeParse(casesDocument(cases({ limit: 101 }))).success).toBe(false);
+    expect(appDocumentSchema.safeParse(casesDocument(cases({ limit: 100 }))).success).toBe(true);
+    expect(
+      appDocumentSchema.safeParse(casesDocument(cases({ sort: { field: 'owner', order: 'asc' } })))
+        .success
+    ).toBe(false);
+  });
+
+  it('is found by the tree helpers as a source, and is not a query', () => {
+    const parsed = appDocumentSchema.parse(
+      casesDocument(
+        cases({ status: { fromState: 'status' } }),
+        {},
+        {
+          status: { type: 'string', default: '' },
+        }
+      )
+    );
+
+    expect(collectSources(parsed.root)).toEqual({
+      cases: { type: 'cases', status: { fromState: 'status' } },
+    });
+    expect(collectQueries(parsed.root)).toEqual({});
+    expect(getSourceStateKeys(collectSources(parsed.root).cases)).toEqual(['status']);
+  });
+
+  it('gives a query as an ES|QL source, so every component that shows data has a source', () => {
+    const parsed = appDocumentSchema.parse({
+      root: { type: 'table', id: 't', query: 'FROM logs' },
+    });
+
+    expect(getNodeSource(parsed.root)).toEqual({ type: 'esql', query: 'FROM logs' });
+    expect(getSourceStateKeys({ type: 'esql', query: 'FROM logs' })).toEqual([]);
   });
 });
 

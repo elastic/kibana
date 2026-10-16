@@ -8,9 +8,12 @@
 import { z } from '@kbn/zod/v4';
 import { CUSTOM_CONTENT_MAX_HEIGHT, CUSTOM_CONTENT_MIN_HEIGHT } from '@kbn/custom-content-common';
 import {
+  CASES_SORT_FIELDS,
   CUSTOM_APP_STATE_VERSION,
   MAX_ACTIONS_PER_EVENT,
   MAX_BUTTON_GROUP_OPTIONS,
+  MAX_CASES_FILTER_LENGTH,
+  MAX_CASES_LIMIT,
   MAX_INPUT_OPTIONS,
   MAX_CHILDREN_PER_NODE,
   MAX_HEADING_LENGTH,
@@ -128,11 +131,44 @@ const calloutNodeSchema = z.object({
   color: z.enum(['primary', 'success', 'warning', 'danger']).default('primary'),
 });
 
+/** A filter of the cases: a fixed value, or one of the app, so that an input can drive it. */
+const casesFilterSchema = z.union([
+  z.string().max(MAX_CASES_FILTER_LENGTH),
+  z.object({ fromState: stateKeySchema }),
+]);
+
+/**
+ * The cases the user can see, as an alternative to a query for what a component shows. An empty
+ * filter filters nothing, so a select that has an "All" with no value works as it reads.
+ */
+const casesSourceSchema = z.object({
+  type: z.literal('cases'),
+  status: casesFilterSchema.optional(),
+  severity: casesFilterSchema.optional(),
+  search: casesFilterSchema.optional(),
+  tag: casesFilterSchema.optional(),
+  sort: z.object({ field: z.enum(CASES_SORT_FIELDS), order: z.enum(['asc', 'desc']) }).optional(),
+  limit: z.number().int().min(1).max(MAX_CASES_LIMIT).optional(),
+  /** Only the cases created in the period of the app. Without it, they are all of them. */
+  followTimeRange: z.boolean().optional(),
+  /** Only how many cases there are, as one value, for a stat. */
+  count: z.boolean().optional(),
+});
+
+/**
+ * What a component that shows data gets it from: a query, or a source. One of the two, which
+ * validation checks, since the schema alone cannot say that.
+ */
+const dataFields = {
+  query: querySchema.optional(),
+  source: casesSourceSchema.optional(),
+};
+
 const statNodeSchema = z.object({
   type: z.literal('stat'),
   id: nodeIdSchema,
   title: z.string().max(MAX_HEADING_LENGTH),
-  query: querySchema,
+  ...dataFields,
 });
 
 /** What the chart looks like is picked from the shape of the result unless the author chooses. */
@@ -168,7 +204,7 @@ const customContentNodeSchema = z.object({
 const tableNodeSchema = z.object({
   type: z.literal('table'),
   id: nodeIdSchema,
-  query: querySchema,
+  ...dataFields,
   /** Names the table for screen readers. */
   caption: z.string().max(MAX_HEADING_LENGTH).optional(),
   /** Defaults to every column of the result, shown as text. */
@@ -239,7 +275,7 @@ const searchNodeSchema = z.object({
 const keyValueNodeSchema = z.object({
   type: z.literal('key_value'),
   id: nodeIdSchema,
-  query: querySchema,
+  ...dataFields,
   /** Defaults to every column of the first row. */
   fields: z.array(z.string().min(1).max(MAX_HEADING_LENGTH)).max(MAX_KEY_VALUE_FIELDS).optional(),
 });
@@ -282,6 +318,9 @@ export type AppNode = LeafNode | StackNode | FlyoutNode;
 export type AppNodeType = AppNode['type'];
 export type AppNodeOfType<T extends AppNodeType> = Extract<AppNode, { type: T }>;
 export type Action = z.output<typeof actionSchema>;
+export type CasesSource = z.output<typeof casesSourceSchema>;
+/** Where a component gets what it shows. */
+export type DataSource = { type: 'esql'; query: string } | CasesSource;
 
 const stackNodeSchema = z.object({
   ...stackFields,

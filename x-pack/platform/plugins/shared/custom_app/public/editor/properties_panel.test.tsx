@@ -75,6 +75,13 @@ const initial = (): AppDocument =>
         { type: 'search', id: 'find', label: 'Find', bind: 'filter', placeholder: 'Look' },
         { type: 'button', id: 'isolate', label: 'Isolate host', onClick: [] },
         { type: 'time_range', id: 'period' },
+        { type: 'table', id: 'case-list', source: { type: 'cases', status: 'open' } },
+        {
+          type: 'stat',
+          id: 'case-count',
+          title: 'Open cases',
+          source: { type: 'cases', count: true },
+        },
         { type: 'stack', id: 'row', direction: 'horizontal', children: [] },
         { type: 'flyout', id: 'detail-flyout', title: 'Details', children: [] },
       ],
@@ -161,6 +168,36 @@ describe('PropertiesPanel', () => {
 
       await userEvent.selectOptions(screen.getByLabelText('Kind'), 'danger');
       expect(onChange).toHaveBeenLastCalledWith({ color: 'danger' });
+    });
+  });
+
+  describe('a component that shows cases', () => {
+    it('says where its data comes from, and has no query to edit', () => {
+      setup('case-list');
+
+      expect(screen.getByLabelText('Data from')).toHaveValue('cases');
+      expect(screen.queryByLabelText('ES|QL query editor')).not.toBeInTheDocument();
+      expect(screen.getByLabelText('Status')).toHaveValue('value');
+      expect(screen.getByLabelText('Status is')).toHaveValue('open');
+    });
+
+    it('is a source that replaces the query when the data is changed to cases, and back', async () => {
+      const { onChange } = setup('table');
+
+      await userEvent.selectOptions(screen.getByLabelText('Data from'), 'cases');
+      expect(onChange).toHaveBeenLastCalledWith({ query: undefined, source: { type: 'cases' } });
+    });
+
+    it('is offered to count the cases only for a stat', () => {
+      setup('case-count');
+
+      expect(screen.getByText('Show how many there are')).toBeInTheDocument();
+    });
+
+    it('is not offered to count them for a table, which shows them', () => {
+      setup('case-list');
+
+      expect(screen.queryByText('Show how many there are')).not.toBeInTheDocument();
     });
   });
 

@@ -7,7 +7,13 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { FetchContext } from '@kbn/presentation-publishing';
-import type { StateValue } from '@kbn/custom-app-common';
+import isEqual from 'lodash/isEqual';
+import {
+  getSourceStateKeys,
+  type CasesSource,
+  type DataSource,
+  type StateValue,
+} from '@kbn/custom-app-common';
 
 export interface SourceData {
   columns: ReadonlyArray<{ name: string; type: string }>;
@@ -33,6 +39,13 @@ export type RunQuery = (
   signal: AbortSignal
 ) => Promise<SourceData>;
 
+/** Fetches the cases a component shows, as the user, who sees the cases they may. */
+export type RunCases = (
+  source: CasesSource,
+  request: SourceRequest,
+  signal: AbortSignal
+) => Promise<SourceData>;
+
 export interface DataLayer {
   /** The live state of one component's data. The same subject is returned for the same id. */
   getSource$: (id: string) => BehaviorSubject<SourceState>;
@@ -48,7 +61,9 @@ export interface DataLayer {
   context$: BehaviorSubject<FetchContext | undefined>;
   /** True until the first fetch has settled, and while any source is running. */
   loading$: BehaviorSubject<boolean | undefined>;
-  /** The query of each component that shows data, by the id of the component. */
+  /** Where each component that shows data gets it from, by the id of the component. */
+  setSources: (sources: Record<string, DataSource>) => void;
+  /** The same, for components that only run queries. */
   setQueries: (queries: Record<string, string>) => void;
   /** Replaces the state. Only the queries that use a changed value run again. */
   setState: (state: StateValues) => void;
@@ -76,9 +91,12 @@ const toMessage = (error: unknown): string =>
  */
 export const createDataLayer = ({
   runQuery,
+  runCases,
   getParameterNames,
 }: {
   runQuery: RunQuery;
+  /** Absent where cases cannot be had, and then a component that shows them says so. */
+  runCases?: RunCases;
   /** The names of the `?param` and `??param` parameters a query uses. */
   getParameterNames: (query: string) => string[];
 }): DataLayer => {
@@ -89,7 +107,7 @@ export const createDataLayer = ({
   const loading$ = new BehaviorSubject<boolean | undefined>(true);
   const context$ = new BehaviorSubject<FetchContext | undefined>(undefined);
 
-  let queries: Record<string, string> = {};
+  let sources: Record<string, DataSource> = {};
   let state: StateValues = {};
   let context: FetchContext | undefined;
 
@@ -105,12 +123,24 @@ export const createDataLayer = ({
   // Starts true so the panel is not reported as rendered before its first fetch has settled.
   const publishLoading = () => loading$.next(context === undefined || running.size > 0);
 
-  const namesUsedBy = (id: string, query: string): string[] => {
+  /** The values of the app a source is driven by: the `?names` of a query, the filters of cases. */
+  const namesUsedBy = (id: string, source: DataSource): string[] => {
+    if (source.type === 'cases') return getSourceStateKeys(source);
     const cached = parameterNames.get(id);
-    if (cached?.query === query) return cached.names;
-    const names = getParameterNames(query);
-    parameterNames.set(id, { query, names });
+    if (cached?.query === source.query) return cached.names;
+    const names = getParameterNames(source.query);
+    parameterNames.set(id, { query: source.query, names });
     return names;
+  };
+
+  const fetchSource = (
+    source: DataSource,
+    request: SourceRequest,
+    signal: AbortSignal
+  ): Promise<SourceData> => {
+    if (source.type === 'esql') return runQuery(source.query, request, signal);
+    if (!runCases) return Promise.reject(new Error('Cases cannot be shown here'));
+    return runCases(source, request, signal);
   };
 
   const stop = (id: string, entry: SourceEntry) => {
@@ -125,8 +155,8 @@ export const createDataLayer = ({
 
     stop(id, entry);
     const state$ = getSource$(id);
-    const query = queries[id];
-    if (query === undefined) {
+    const source = sources[id];
+    if (source === undefined) {
       state$.next({ status: 'error', message: `There is no query for "${id}"` });
       publishLoading();
       return;
@@ -135,13 +165,13 @@ export const createDataLayer = ({
     const controller = new AbortController();
     entry.controller = controller;
     entry.appliedValues = Object.fromEntries(
-      namesUsedBy(id, query).map((name) => [name, state[name]])
+      namesUsedBy(id, source).map((name) => [name, state[name]])
     );
     running.add(id);
     state$.next({ status: 'loading' });
     publishLoading();
 
-    runQuery(query, { context, state }, controller.signal)
+    fetchSource(source, { context, state }, controller.signal)
       .then((data) => {
         if (!controller.signal.aborted) state$.next({ status: 'success', data });
       })
@@ -179,19 +209,28 @@ export const createDataLayer = ({
         publishLoading();
       };
     },
-    setQueries: (next) => {
-      const previous = queries;
-      queries = next;
+    setSources: (next) => {
+      const previous = sources;
+      sources = next;
       entries.forEach((_entry, id) => {
-        if (previous[id] !== next[id]) start(id);
+        if (!isEqual(previous[id], next[id])) start(id);
+      });
+    },
+    setQueries: (next) => {
+      const previous = sources;
+      sources = Object.fromEntries(
+        Object.entries(next).map(([id, query]) => [id, { type: 'esql' as const, query }])
+      );
+      entries.forEach((_entry, id) => {
+        if (!isEqual(previous[id], sources[id])) start(id);
       });
     },
     setState: (next) => {
       state = next;
       entries.forEach((entry, id) => {
-        const query = queries[id];
-        if (query === undefined || entry.readers === 0) return;
-        const changed = namesUsedBy(id, query).some(
+        const source = sources[id];
+        if (source === undefined || entry.readers === 0) return;
+        const changed = namesUsedBy(id, source).some(
           (name) => state[name] !== entry.appliedValues[name]
         );
         if (changed) start(id);

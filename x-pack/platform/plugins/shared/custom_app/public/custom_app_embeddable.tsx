@@ -46,7 +46,7 @@ import {
   CUSTOM_APP_EMBEDDABLE_TYPE,
   CUSTOM_APP_STATE_VERSION,
   appDocumentSchema,
-  collectQueries,
+  collectSources,
   isEmptyDocument,
   type AppDocument,
 } from '@kbn/custom-app-common';
@@ -69,6 +69,7 @@ import { createAppRuntime } from './runtime/app_runtime';
 import { AppRuntimeContext } from './runtime/app_runtime_context';
 import { TimeRangeControlContext } from './runtime/time_range_context';
 import { WorkflowRunnerProvider } from './workflows/workflow_runner';
+import { createRunCases } from './data/run_cases';
 import { createRunEsqlQuery } from './data/run_esql_query';
 import { createDefaultDocument } from './default_document';
 import { getServices } from './services';
@@ -153,9 +154,10 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
 
     const dataLayer = createDataLayer({
       runQuery: createRunEsqlQuery({ search, http: core.http }),
+      runCases: createRunCases({ http: core.http }),
       getParameterNames: (query) => getESQLQueryVariables(query),
     });
-    dataLayer.setQueries(collectQueries(initialDocument.root));
+    dataLayer.setSources(collectSources(initialDocument.root));
     const runtime = createAppRuntime(initialDocument);
     // Emits the defaults straight away, then every change a user makes.
     const stateSubscription = runtime.state$.subscribe(dataLayer.setState);
@@ -316,7 +318,7 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
       .pipe(distinctUntilChanged(), skip(1))
       .subscribe((document) => {
         runtime.setDocument(document);
-        dataLayer.setQueries(collectQueries(document.root));
+        dataLayer.setSources(collectSources(document.root));
       });
 
     return {

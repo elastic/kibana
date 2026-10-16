@@ -78,7 +78,9 @@ describe('the authoring guide', () => {
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('.rule-events');
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('episode.id');
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('Never write to an alert index');
-    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('Cases cannot be read from a query yet');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain(
+      'Cases are not read with a query but with a source'
+    );
   });
 
   it('says what to do when no workflow does what a button needs: draft one, and wait until it is saved', () => {
@@ -93,5 +95,18 @@ describe('the authoring guide', () => {
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain(
       'look at the indices and fields with the tools before you write a query, and never assume'
     );
+  });
+
+  it('teaches the cases source: its filters, the values of the app that can drive them, and its columns', () => {
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('"type": "cases"');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('"in-progress"');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('fromState');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('assignee_count');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('"count": true');
+  });
+
+  it('says that a component has a query or a source, not both, and that a chart cannot show cases', () => {
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('either a "query" or a "source", never both');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('A chart cannot show cases');
   });
 });

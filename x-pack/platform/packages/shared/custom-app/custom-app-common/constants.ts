@@ -36,4 +36,21 @@ export const MAX_KEY_VALUE_FIELDS = 50;
 /** ES|QL reserves these parameter names for the query's time range. */
 export const RESERVED_STATE_KEYS: readonly string[] = ['_tstart', '_tend'];
 export const MAX_INPUT_OPTIONS = 50;
+
+/** What a filter of the cases a component shows can hold: a search text, a tag. */
+export const MAX_CASES_FILTER_LENGTH = 256;
+/** The most cases of a page, as many as the cases API gives at once. */
+export const MAX_CASES_LIMIT = 100;
+export const DEFAULT_CASES_LIMIT = 50;
+export const CASES_STATUSES = ['open', 'in-progress', 'closed'] as const;
+export const CASES_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
+export const CASES_SORT_FIELDS = [
+  'created_at',
+  'updated_at',
+  'title',
+  'severity',
+  'status',
+] as const;
+/** The filters of a cases source that can be set from a value of the app, in the order they are shown. */
+export const CASES_FILTERS = ['status', 'severity', 'search', 'tag'] as const;
 export const MAX_BUTTON_GROUP_OPTIONS = 10;
