@@ -834,16 +834,15 @@ describe('WatchDetailPage', () => {
     });
   });
 
-  it('enables Save once the analysis window is committed on blur and saves that value', async () => {
+  it('enables Save as soon as a valid analysis window is typed and saves the final value', async () => {
     const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
     const field = screen.getByTestId('alertZeroAnalysisWindowDays');
     const save = screen.getByTestId('alertZeroWatchSettingsSave');
 
-    // Keystrokes stay local: "2" on the way to "21" must not reach the draft.
+    // "2" is valid and differs from the saved 14, so the draft is dirty while still typing.
     fireEvent.change(field, { target: { value: '2' } });
-    expect(save).toBeDisabled();
+    expect(save).toBeEnabled();
     fireEvent.change(field, { target: { value: '21' } });
-    expect(save).toBeDisabled();
     fireEvent.blur(field);
     expect(save).toBeEnabled();
     expect(mutateAsync).not.toHaveBeenCalled();
@@ -858,6 +857,23 @@ describe('WatchDetailPage', () => {
         settingsRevision: null,
       },
     });
+  });
+
+  it('returns to a clean draft when an out-of-range analysis window is abandoned', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+    const field = screen.getByTestId('alertZeroAnalysisWindowDays');
+    const save = screen.getByTestId('alertZeroWatchSettingsSave');
+
+    fireEvent.focus(field);
+    fireEvent.change(field, { target: { value: '3' } });
+    fireEvent.change(field, { target: { value: '31' } });
+    // The valid prefix "3" already reached the draft.
+    expect(save).toBeEnabled();
+
+    fireEvent.blur(field);
+
+    expect(field).toHaveValue(14);
+    expect(save).toBeDisabled();
   });
 
   it('renders the Rule Coverage controls from the registry and saves an edited lookback', async () => {

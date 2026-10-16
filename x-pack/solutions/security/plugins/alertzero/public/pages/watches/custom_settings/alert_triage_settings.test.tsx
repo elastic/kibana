@@ -77,19 +77,22 @@ describe('AlertTriageSettings', () => {
   });
 
   it.each(FIELDS)(
-    'hands back the complete extras, including the confidence floor, when a valid $fieldName is committed',
+    'hands back the complete extras, including the confidence floor, as soon as a valid $fieldName is typed',
     ({ testSubj, valid, key }) => {
       const onExtrasChange = jest.fn();
       renderSettings(onExtrasChange);
       const field = screen.getByTestId(testSubj);
 
       fireEvent.change(field, { target: { value: String(valid) } });
-      fireEvent.blur(field);
 
       // The server replaces extras whole and rejects a replacement missing a field, so a change to
       // one setting must carry the others.
-      expect(onExtrasChange).toHaveBeenCalledTimes(1);
-      expect(onExtrasChange).toHaveBeenCalledWith({ ...SAVED_EXTRAS, [key]: valid });
+      expect(onExtrasChange).toHaveBeenLastCalledWith({ ...SAVED_EXTRAS, [key]: valid });
+
+      // Blurring afterwards still leaves the complete object as the last thing handed back.
+      fireEvent.blur(field);
+
+      expect(onExtrasChange).toHaveBeenLastCalledWith({ ...SAVED_EXTRAS, [key]: valid });
     }
   );
 
