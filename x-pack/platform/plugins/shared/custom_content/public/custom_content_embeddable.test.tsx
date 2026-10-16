@@ -154,6 +154,10 @@ describe('customContentEmbeddableFactory', () => {
     mockApiIsPresentationContainer.mockReturnValue(false);
   });
 
+  it('uses a transparent presentation panel', () => {
+    expect(customContentEmbeddableFactory.panelColor).toBe('transparent');
+  });
+
   const renderFlyoutContent = async () => {
     const content = await capturedOpenLazyFlyoutArgs!.loadContent({
       closeFlyout: mockFlyoutClose,
