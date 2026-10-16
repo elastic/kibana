@@ -14,6 +14,8 @@ import type { InfraSynthtraceEsClient } from '../../lib/infra/infra_synthtrace_e
 import { InfraSynthtraceEsClientImpl } from '../../lib/infra/infra_synthtrace_es_client';
 import type { LogsSynthtraceEsClient } from '../../lib/logs/logs_synthtrace_es_client';
 import { LogsSynthtraceEsClientImpl } from '../../lib/logs/logs_synthtrace_es_client';
+import type { OtelSynthtraceEsClient } from '../../lib/otel/otel_synthtrace_es_client';
+import { OtelSynthtraceEsClientImpl } from '../../lib/otel/otel_synthtrace_es_client';
 import type { SynthtraceEsClientOptions } from '../../lib/shared/base_client';
 import type { SyntheticsSynthtraceEsClient } from '../../lib/synthetics/synthetics_synthtrace_es_client';
 import { SyntheticsSynthtraceEsClientImpl } from '../../lib/synthetics/synthetics_synthtrace_es_client';
@@ -29,6 +31,7 @@ type DefaultSynthtraceClients = [
   'apmEsClient',
   'infraEsClient',
   'logsEsClient',
+  'otelEsClient',
   'syntheticsEsClient',
   'streamsClient'
 ];
@@ -37,6 +40,7 @@ export interface SynthtraceClients {
   apmEsClient: ApmSynthtraceEsClient;
   infraEsClient: InfraSynthtraceEsClient;
   logsEsClient: LogsSynthtraceEsClient;
+  otelEsClient: OtelSynthtraceEsClient;
   syntheticsEsClient: SyntheticsSynthtraceEsClient;
   streamsClient: StreamsSynthtraceClient;
 }
@@ -77,6 +81,7 @@ export class SynthtraceClientsManager {
           }),
         infraEsClient: () => new InfraSynthtraceEsClientImpl({ ...this.options, kibana }),
         logsEsClient: () => new LogsSynthtraceEsClientImpl({ ...this.options, kibana }),
+        otelEsClient: () => new OtelSynthtraceEsClientImpl({ ...this.options, kibana }),
         syntheticsEsClient: () => new SyntheticsSynthtraceEsClientImpl({ ...this.options, kibana }),
         streamsClient: () => {
           if (!kibana) {
