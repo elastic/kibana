@@ -94,7 +94,7 @@ describe('fetchSampleDocuments', () => {
     ).rejects.toThrow('must be <= 1');
   });
 
-  it('rejects with a 400 that explains the missing index when the source has no index yet', async () => {
+  it('rejects with a 400 that explains the missing index when nothing exists to sample', async () => {
     getSampleDocumentsEsqlMock.mockRejectedValueOnce(
       new Error(
         'verification_exception\n\tRoot causes:\n\t\tverification_exception: Unknown index [test]'
@@ -118,7 +118,8 @@ describe('fetchSampleDocuments', () => {
       })
     ).rejects.toMatchObject({
       statusCode: 400,
-      message: expect.stringContaining('reads an index that does not exist yet'),
+      message:
+        'There are no documents to sample: an index behind [logs.test-default] does not exist yet.',
     });
   });
 

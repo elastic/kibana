@@ -33,15 +33,15 @@ type SamplingStrategy = 'entity-filtered' | 'diverse' | 'random';
  */
 const withRandomSamplingErrorContext = async <T>(
   promise: Promise<T>,
-  samplingTimeoutMs: number
+  { index, samplingTimeoutMs }: { index: string; samplingTimeoutMs: number }
 ): Promise<T> => {
   try {
     return await promise;
   } catch (err) {
-    // A source can be created before its index exists; that is not a sampling failure.
+    // Missing data is the caller's input, not a sampling failure.
     if (isIndexNotFoundError(err)) {
       throw new StatusError(
-        'The source reads an index that does not exist yet. Onboard the source again once the index has data.',
+        `There are no documents to sample: an index behind [${index}] does not exist yet.`,
         400
       );
     }
@@ -140,7 +140,7 @@ export async function fetchSampleDocuments({
               abortSignal: samplingSignal,
             })
         ),
-        samplingTimeoutMs
+        { index, samplingTimeoutMs }
       ),
     ]);
 
@@ -238,7 +238,7 @@ export async function fetchSampleDocuments({
               abortSignal: samplingSignal,
             })
         ),
-        samplingTimeoutMs
+        { index, samplingTimeoutMs }
       ),
     ]);
 
