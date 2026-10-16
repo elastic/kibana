@@ -17,14 +17,12 @@ import {
 import { ok, pollUntil } from './kbn';
 import type { AlertZeroApi } from './kbn';
 
-export interface PendingProposal {
+export interface InvestigationProposal {
   readonly id: string;
   readonly conversationId: string;
   readonly title: string;
-  readonly comment: string;
   readonly actionWorkflowId?: string;
   readonly actionInput?: Record<string, unknown>;
-  readonly workflowExecutionId?: string;
   readonly createdAt: string;
 }
 
@@ -32,10 +30,10 @@ export interface PendingProposal {
  * Pending containment cards, optionally scoped to one investigation. `conversationId` is what
  * keeps a run's assertions on its own cards: the queue is shared across the space.
  */
-export const listPendingProposals = async (
+export const listInvestigationProposals = async (
   api: AlertZeroApi,
   conversationId?: string
-): Promise<PendingProposal[]> =>
+): Promise<InvestigationProposal[]> =>
   ok(
     await api.internal<ListProposalsResponse>('GET', PROPOSALS_URL, {
       query: {
@@ -47,7 +45,7 @@ export const listPendingProposals = async (
       },
     }),
     'list pending proposals'
-  ).proposals as PendingProposal[];
+  ).proposals as InvestigationProposal[];
 
 /**
  * Waits for a pending proposal whose action workflow matches and that was created after `since`.
@@ -58,11 +56,11 @@ export const waitForProposal = async (
   actionWorkflowId: string,
   since: string,
   { timeoutMs }: { timeoutMs: number }
-): Promise<PendingProposal> =>
+): Promise<InvestigationProposal> =>
   pollUntil(
     `a pending ${actionWorkflowId} proposal`,
     async () =>
-      (await listPendingProposals(api)).find(
+      (await listInvestigationProposals(api)).find(
         (proposal) => proposal.actionWorkflowId === actionWorkflowId && proposal.createdAt >= since
       ),
     { timeoutMs }
@@ -217,13 +215,13 @@ export const citedHostNames = (
     .filter((host): host is string => !!host),
 ];
 
-export const endpointIdsOf = (proposal: PendingProposal): string[] => {
+export const endpointIdsOf = (proposal: InvestigationProposal): string[] => {
   const ids = (proposal.actionInput?.endpoint_ids ?? []) as unknown;
   return Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : [];
 };
 
 export const processSelectorOf = (
-  proposal: PendingProposal
+  proposal: InvestigationProposal
 ): { pid?: number; entityId?: string } => {
   const parameters = (proposal.actionInput?.parameters ?? {}) as Record<string, unknown>;
   return {

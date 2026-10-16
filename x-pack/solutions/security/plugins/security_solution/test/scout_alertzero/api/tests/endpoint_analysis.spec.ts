@@ -27,7 +27,7 @@ import {
   hasAttachment,
   listAttachments,
   listExecutionIds,
-  listPendingProposals,
+  listInvestigationProposals,
   pollUntil,
   processSelectorOf,
   readKnowledgeIndicator,
@@ -41,7 +41,7 @@ import {
   waitForExecution,
   waitForNewExecution,
 } from '../fixtures';
-import type { AlertZeroApi, PendingProposal, SeededScenario } from '../fixtures';
+import type { AlertZeroApi, InvestigationProposal, SeededScenario } from '../fixtures';
 
 const WORKER_ID = testData.FORENSICS_ENDPOINT_ANALYSIS_WORKER_ID;
 const RUN_WORKFLOW_ID = testData.FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID;
@@ -324,7 +324,7 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
 
       // The containment cards are the only structured place a process target appears, so read the
       // selectors back off the cards this run raised and hold them to the same seed.
-      const cards = (await listPendingProposals(adminApi, context.investigationId)).filter(
+      const cards = (await listInvestigationProposals(adminApi, context.investigationId)).filter(
         (proposal) => proposal.createdAt >= startedAt
       );
       const citedEndpointIds = [...new Set(cards.flatMap(endpointIdsOf))];
@@ -418,7 +418,7 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
       // The worker's next scheduled sweep analyzes the second handoff; each investigation must
       // end up with its own pending isolate card.
       const isolateCardOf = async (investigationId: string) =>
-        (await listPendingProposals(adminApi, investigationId)).find(
+        (await listInvestigationProposals(adminApi, investigationId)).find(
           (proposal) => proposal.actionWorkflowId === testData.ISOLATE_HOST_ACTION_ID
         );
       const cards = await pollUntil(
@@ -433,7 +433,7 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
         { timeoutMs: testData.GENERATION_TIMEOUT_MS }
       );
 
-      const targetsOf = (card: PendingProposal) => [
+      const targetsOf = (card: InvestigationProposal) => [
         ...new Set(endpointIdsOf(card).map((id) => hostByAgentId.get(id) ?? `not-in-seed:${id}`)),
       ];
       const summary = JSON.stringify(
