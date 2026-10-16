@@ -6,7 +6,6 @@
  */
 
 import type { DatasourceStates, MetricVisualizationState } from '@kbn/lens-common';
-import { LENS_METRIC_ID } from '@kbn/lens-common';
 
 interface FormBasedLikeLayer {
   columns: Record<string, { label?: string; customLabel?: boolean }>;
@@ -20,23 +19,27 @@ interface LayersState {
   layers: Record<string, unknown>;
 }
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
 
-const isLayersState = (state: unknown): state is LayersState =>
-  isRecord(state) && isRecord(state.layers);
+function isLayersState(state: unknown): state is LayersState {
+  return isRecord(state) && isRecord(state.layers);
+}
 
-const isFormBasedLikeLayer = (layer: unknown): layer is FormBasedLikeLayer =>
-  isRecord(layer) && isRecord(layer.columns) && !Array.isArray(layer.columns);
+function isFormBasedLikeLayer(layer: unknown): layer is FormBasedLikeLayer {
+  return isRecord(layer) && isRecord(layer.columns) && !Array.isArray(layer.columns);
+}
 
-const isTextBasedLikeLayer = (layer: unknown): layer is TextBasedLikeLayer =>
-  isRecord(layer) && Array.isArray(layer.columns);
+function isTextBasedLikeLayer(layer: unknown): layer is TextBasedLikeLayer {
+  return isRecord(layer) && Array.isArray(layer.columns);
+}
 
-const applyLabelToFormBasedLayer = (
+function applyLabelToFormBasedLayer(
   layer: FormBasedLikeLayer,
   columnId: string,
   label: string
-): FormBasedLikeLayer | undefined => {
+): FormBasedLikeLayer | undefined {
   const column = layer.columns[columnId];
   if (!column) {
     return;
@@ -53,13 +56,13 @@ const applyLabelToFormBasedLayer = (
       },
     },
   };
-};
+}
 
-const applyLabelToTextBasedLayer = (
+function applyLabelToTextBasedLayer(
   layer: TextBasedLikeLayer,
   columnId: string,
   label: string
-): TextBasedLikeLayer | undefined => {
+): TextBasedLikeLayer | undefined {
   const columnIndex = layer.columns.findIndex((column) => column.columnId === columnId);
   if (columnIndex === -1) {
     return;
@@ -77,9 +80,9 @@ const applyLabelToTextBasedLayer = (
         : column
     ),
   };
-};
+}
 
-const applyLabelToLayer = (layer: unknown, columnId: string, label: string): unknown => {
+function applyLabelToLayer(layer: unknown, columnId: string, label: string): unknown {
   if (isFormBasedLikeLayer(layer)) {
     return applyLabelToFormBasedLayer(layer, columnId, label);
   }
@@ -87,18 +90,19 @@ const applyLabelToLayer = (layer: unknown, columnId: string, label: string): unk
     return applyLabelToTextBasedLayer(layer, columnId, label);
   }
   return undefined;
-};
+}
 
-const applyLabelToDatasourceState = (
+function applyLabelToDatasourceState(
   state: unknown,
   layerId: string,
   columnId: string,
   label: string
-): unknown => {
+): unknown {
   if (!isLayersState(state)) {
     return;
   }
 
+  // Prefer the visualization's metric layer, then scan remaining layers.
   const preferredLayer = applyLabelToLayer(state.layers[layerId], columnId, label);
   if (preferredLayer) {
     return {
@@ -124,23 +128,23 @@ const applyLabelToDatasourceState = (
   }
 
   return undefined;
-};
+}
 
 /**
- * Copies a leftover visualization `secondaryLabel` onto the secondary column Name.
+ * Editor migration: writes visualization `secondaryLabel` onto the secondary
+ * metric column in datasource state, then removes it from visualization state.
  *
- * The chart already paints that vis text, so the dimension Name has to match it
- * even when the column already has a different custom label. The vis field is
- * dropped only after the column write succeeds, so dashboard view (which never
- * calls this) keeps the render fallback.
+ * Dashboard panel rendering must not call this. `toExpression` still passes
+ * visualization `secondaryLabel` to the chart; dropping it would show the
+ * existing column name instead, which can differ from the legacy vis text.
  */
-export const applyLegacySecondaryLabelToColumn = (
+export function hydrateLegacySecondaryLabel(
   visualizationState: MetricVisualizationState,
   datasourceStates: DatasourceStates
 ): {
   visualizationState: MetricVisualizationState;
   datasourceStates: DatasourceStates;
-} => {
+} {
   const { secondaryLabel, secondaryMetricAccessor, layerId } = visualizationState;
 
   if (!secondaryLabel || !secondaryMetricAccessor) {
@@ -169,6 +173,7 @@ export const applyLegacySecondaryLabelToColumn = (
     }
   }
 
+  // Keep visualization `secondaryLabel` if the datasource column could not be updated.
   if (!didUpdateColumn) {
     return { visualizationState, datasourceStates };
   }
@@ -179,22 +184,4 @@ export const applyLegacySecondaryLabelToColumn = (
     visualizationState: visualizationWithoutLabel,
     datasourceStates: nextDatasourceStates,
   };
-};
-
-export const applyLegacySecondaryLabelIfMetric = <T>(
-  visualizationId: string | null | undefined,
-  visualizationState: T,
-  datasourceStates: DatasourceStates
-): {
-  visualizationState: T;
-  datasourceStates: DatasourceStates;
-} => {
-  if (visualizationId !== LENS_METRIC_ID) {
-    return { visualizationState, datasourceStates };
-  }
-
-  return applyLegacySecondaryLabelToColumn(
-    visualizationState as MetricVisualizationState,
-    datasourceStates
-  ) as { visualizationState: T; datasourceStates: DatasourceStates };
-};
+}

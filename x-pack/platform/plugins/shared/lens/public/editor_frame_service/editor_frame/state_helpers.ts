@@ -47,7 +47,7 @@ import {
   ensureESQLTimeFieldOnAdHocDataViews,
 } from '../../data_views_service/loader';
 import { getDatasourceLayers } from '../../state_management/utils';
-import { applyLegacySecondaryLabelIfMetric } from '../../visualizations/metric/runtime_state/apply_legacy_secondary_label';
+import { applyStateHydration } from '../../state_hydration';
 
 // there are 2 ways of coloring, the color mapping where the user can map specific colors to
 // specific terms, and the palette assignment where the colors are assinged automatically
@@ -301,28 +301,28 @@ export async function initializeSources(
     references,
   });
 
-  const {
-    visualizationState: runtimeVisualizationState,
-    datasourceStates: syncedDatasourceStates,
-  } = applyLegacySecondaryLabelIfMetric(
-    visualizationState.activeId,
-    initializeVisualization({
-      visualizationMap,
-      visualizationState,
-      datasourceStates,
-      references,
-      initialContext,
-      annotationGroups,
-    }),
-    initializedDatasourceStates
-  );
+  const initializedVisualizationState = initializeVisualization({
+    visualizationMap,
+    visualizationState,
+    datasourceStates,
+    references,
+    initialContext,
+    annotationGroups,
+  });
+
+  const hydratedState = applyStateHydration({
+    visualizationId: visualizationState.activeId,
+    visualizationState: initializedVisualizationState,
+    datasourceStates: initializedDatasourceStates,
+    context: 'editor',
+  });
 
   return {
     indexPatterns,
     indexPatternRefs,
     annotationGroups,
-    datasourceStates: syncedDatasourceStates,
-    visualizationState: runtimeVisualizationState,
+    datasourceStates: hydratedState.datasourceStates,
+    visualizationState: hydratedState.visualizationState,
   };
 }
 

@@ -6,10 +6,7 @@
  */
 
 import type { DatasourceStates, MetricVisualizationState } from '@kbn/lens-common';
-import {
-  applyLegacySecondaryLabelIfMetric,
-  applyLegacySecondaryLabelToColumn,
-} from './apply_legacy_secondary_label';
+import { hydrateLegacySecondaryLabel } from './legacy_secondary_label';
 
 const visualizationState: MetricVisualizationState = {
   layerId: 'layer-1',
@@ -68,9 +65,9 @@ const textBasedDatasourceStates = (column: {
   },
 });
 
-describe('applyLegacySecondaryLabelToColumn', () => {
+describe('hydrateLegacySecondaryLabel', () => {
   it('overwrites an existing form-based custom Name with the vis label and drops the vis field', () => {
-    const result = applyLegacySecondaryLabelToColumn(
+    const result = hydrateLegacySecondaryLabel(
       visualizationState,
       formBasedDatasourceStates({ label: 'Custom Name', customLabel: true })
     );
@@ -94,7 +91,7 @@ describe('applyLegacySecondaryLabelToColumn', () => {
   });
 
   it('overwrites an existing text-based custom Name with the vis label and drops the vis field', () => {
-    const result = applyLegacySecondaryLabelToColumn(
+    const result = hydrateLegacySecondaryLabel(
       visualizationState,
       textBasedDatasourceStates({ label: 'Custom Name', customLabel: true })
     );
@@ -121,7 +118,7 @@ describe('applyLegacySecondaryLabelToColumn', () => {
     });
 
     expect(
-      applyLegacySecondaryLabelToColumn(
+      hydrateLegacySecondaryLabel(
         { ...visualizationState, secondaryLabel: '' },
         datasourceStates
       )
@@ -148,23 +145,7 @@ describe('applyLegacySecondaryLabelToColumn', () => {
       },
     };
 
-    expect(applyLegacySecondaryLabelToColumn(visualizationState, datasourceStates)).toEqual({
-      visualizationState,
-      datasourceStates,
-    });
-  });
-});
-
-describe('applyLegacySecondaryLabelIfMetric', () => {
-  it('is a no-op for non-metric visualizations', () => {
-    const datasourceStates = formBasedDatasourceStates({
-      label: 'Custom Name',
-      customLabel: true,
-    });
-
-    expect(
-      applyLegacySecondaryLabelIfMetric('lnsXY', visualizationState, datasourceStates)
-    ).toEqual({
+    expect(hydrateLegacySecondaryLabel(visualizationState, datasourceStates)).toEqual({
       visualizationState,
       datasourceStates,
     });
