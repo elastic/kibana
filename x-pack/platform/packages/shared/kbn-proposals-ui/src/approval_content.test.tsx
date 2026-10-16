@@ -212,6 +212,15 @@ describe('ApprovalContent', () => {
     expect(screen.getByText('all').tagName).toBe('STRONG');
   });
 
+  it('opens links in the comment in a new tab', () => {
+    renderContent({
+      proposal: { ...baseProposal, comment: 'See [the runbook](https://example.com/runbook).' },
+    });
+    const link = screen.getByRole('link', { name: /the runbook/ });
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
+  });
+
   it('renders a GFM table in the comment, which is how a proposal lists what it touches', () => {
     const { container } = renderContent({
       proposal: {
