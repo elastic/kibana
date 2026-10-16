@@ -24,6 +24,7 @@ components:
         - generation_failed
         - execute_failed
         - generation_budget
+        - collapsed
         - query_out_of_scope
         - query_ungrounded
         - quote_ungrounded
@@ -44,9 +45,11 @@ components:
         are transient because generation and extraction vary between runs, so a
         technique refused once is still unsearched and a later run may produce a
         usable query or quote. The rest are deterministic: repeating the run
-        produces the same gap, so retrying only re-spends it. `input_truncated`
-        means the report carried more IOCs, techniques or text than a hunt
-        accepts, so only a prefix of it was hunted.
+        produces the same gap, so retrying only re-spends it. `collapsed` means
+        the same report and quotes reproduce the skip: another behavior's query
+        already hunts the same artifacts, so this one was never generated.
+        `input_truncated` means the report carried more IOCs, techniques or text
+        than a hunt accepts, so only a prefix of it was hunted.
 
     HuntIncompleteness:
       type: object
