@@ -45,7 +45,9 @@ describe('observeMatchSeries', () => {
   // 12:07 UTC: the latest complete five-minute bucket starts at 12:00 and ends at 12:05.
   const now = Date.parse('2026-10-15T12:07:00.000Z');
   const okRun = (values: StoredQueryResult['values']) =>
-    jest.fn(async (): Promise<StoredQueryResult> => ({ status: 'ok', values, durationMs: 1 }));
+    jest.fn(
+      async (): Promise<StoredQueryResult> => ({ status: 'ok', columns: [], values, durationMs: 1 })
+    );
 
   it('queries the last hour of complete buckets with a bucketed count', async () => {
     const run = okRun([]);
@@ -83,7 +85,12 @@ describe('observeMatchSeries', () => {
 
   it('observes nothing when the query fails', async () => {
     const run = jest.fn(
-      async (): Promise<StoredQueryResult> => ({ status: 'timeout', values: [], durationMs: 1 })
+      async (): Promise<StoredQueryResult> => ({
+        status: 'timeout',
+        columns: [],
+        values: [],
+        durationMs: 1,
+      })
     );
 
     expect(await observeMatchSeries({ query: FILTER_QUERY, now, run })).toBeUndefined();

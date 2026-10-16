@@ -23,6 +23,7 @@ export interface ProbeResult extends ProbeOutcome {
 
 export interface StoredQueryResult {
   status: ProbeStatus;
+  columns: Array<{ name: string }>;
   values: FieldValue[][];
   durationMs: number;
 }
@@ -42,10 +43,18 @@ export const isProbeableQuery = (query: string | undefined): query is string =>
 
 // The ES client types `params` as positional values; named parameters (`?_tstart`) are accepted by
 // the API, the same known typing gap `toEsqlRequest` bridges for composed queries.
-const toRequest = ({ query, tail, window }: { query: string; tail: string; window: ProbeWindow }) =>
+const toRequest = ({
+  query,
+  tail,
+  window,
+}: {
+  query: string;
+  tail?: string;
+  window: ProbeWindow;
+}) =>
   ({
     // A new line before the pipe, so a stored query ending in a `//` comment cannot swallow it.
-    query: `${query.trimEnd()}\n| ${tail}`,
+    query: tail === undefined ? query : `${query.trimEnd()}\n| ${tail}`,
     params: [{ _tstart: window.from }, { _tend: window.to }],
   } as unknown as EsqlQueryRequest);
 
@@ -68,8 +77,8 @@ export const runStoredQuery = async ({
 }: {
   esClient: ElasticsearchClient;
   query: string | undefined;
-  /** The command appended to the stored query, for example `LIMIT 1`. */
-  tail: string;
+  /** The command appended to the stored query, for example `LIMIT 1`; none for a complete query. */
+  tail?: string;
   window: ProbeWindow;
   /** Per-probe timeout; also capped by the time left until `deadlineAt`. */
   timeoutMs: number;
@@ -79,8 +88,13 @@ export const runStoredQuery = async ({
   abortSignal: AbortSignal;
 }): Promise<StoredQueryResult> => {
   const startedAt = Date.now();
-  const finish = (status: ProbeStatus, values: FieldValue[][] = []): StoredQueryResult => ({
+  const finish = (
+    status: ProbeStatus,
+    values: FieldValue[][] = [],
+    columns: Array<{ name: string }> = []
+  ): StoredQueryResult => ({
     status,
+    columns,
     values,
     durationMs: Date.now() - startedAt,
   });
@@ -95,7 +109,7 @@ export const runStoredQuery = async ({
     const response = await esClient.esql.query(toRequest({ query, tail, window }), {
       signal: AbortSignal.any([abortSignal, timeoutSignal]),
     });
-    return finish('ok', response.values);
+    return finish('ok', response.values, response.columns);
   } catch {
     if (abortSignal.aborted) return finish('aborted');
     if (timeoutSignal.aborted) return finish('timeout');
