@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, type MouseEvent } from 'react';
+import React, { useMemo, type MouseEvent } from 'react';
 import {
   EuiBadge,
   EuiEmptyPrompt,
@@ -79,28 +79,25 @@ export const RuleLibraryList = () => {
     [canWrite, installTemplate]
   );
 
-  const renderRuleCount = useCallback(
-    (item: ContentListItem) => {
-      const { id: templateId, rule_count: ruleCount } = toTemplate(item);
-      if (ruleCount === undefined) return null;
-      if (ruleCount === 0) return ruleCount;
+  const renderRuleCount = (item: ContentListItem) => {
+    const { id: templateId, rule_count: ruleCount } = toTemplate(item);
+    if (ruleCount === undefined) return null;
+    if (ruleCount === 0) return ruleCount;
 
-      const params = { derivedFromTemplateId: templateId };
-      return (
-        <EuiLink
-          href={rulesLocators.getRedirectUrl(params)}
-          onClick={(event: MouseEvent) => {
-            event.preventDefault();
-            rulesLocators.navigateSync(params);
-          }}
-          data-test-subj="ruleLibraryRuleCountLink"
-        >
-          {ruleCount}
-        </EuiLink>
-      );
-    },
-    [rulesLocators]
-  );
+    const params = { derivedFromTemplateId: templateId };
+    return (
+      <EuiLink
+        href={rulesLocators.getRedirectUrl(params)}
+        onClick={(event: MouseEvent) => {
+          event.preventDefault();
+          rulesLocators.navigateSync(params);
+        }}
+        data-test-subj="ruleLibraryRuleCountLink"
+      >
+        {ruleCount}
+      </EuiLink>
+    );
+  };
 
   const emptyState = (
     <EuiEmptyPrompt

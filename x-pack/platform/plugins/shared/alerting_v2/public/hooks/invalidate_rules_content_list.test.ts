@@ -44,14 +44,17 @@ describe('invalidateRulesContentList helpers', () => {
     expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ruleKeys.allTags() });
   });
 
-  it('invalidateRulesContentList invalidates both the list and the tags facet', async () => {
+  it('invalidateRulesContentList invalidates the list, the tags facet and the rule library', async () => {
     await invalidateRulesContentList();
 
-    expect(mockInvalidateQueries).toHaveBeenCalledTimes(2);
+    expect(mockInvalidateQueries).toHaveBeenCalledTimes(3);
     expect(mockInvalidateQueries).toHaveBeenCalledWith({
       queryKey: ['contentList', RULES_CONTENT_LIST_ID],
     });
     expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ruleKeys.allTags() });
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['contentList', RULE_TEMPLATES_CONTENT_LIST_ID],
+    });
   });
 
   it('invalidateRuleTemplatesListView invalidates the Content List scope for the rule library', async () => {

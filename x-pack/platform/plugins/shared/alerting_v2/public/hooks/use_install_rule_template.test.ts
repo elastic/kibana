@@ -11,7 +11,6 @@ import type { CreateRuleData, RuleResponse, RuleTemplateResponse } from '@kbn/al
 import { RulesApi } from '../services/rules_api';
 import { RuleTemplatesApi } from '../services/rule_templates_api';
 import { createHookTestProviders } from '../test_utils/test_providers';
-import { invalidateRuleTemplatesListView } from './invalidate_rules_content_list';
 import { useInstallRuleTemplate } from './use_install_rule_template';
 
 jest.mock('@kbn/core-di-browser');
@@ -19,7 +18,6 @@ jest.mock('../services/rules_api');
 jest.mock('../services/rule_templates_api');
 jest.mock('./invalidate_rules_content_list', () => ({
   invalidateRulesContentList: jest.fn(() => Promise.resolve()),
-  invalidateRuleTemplatesListView: jest.fn(() => Promise.resolve()),
 }));
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
@@ -126,9 +124,6 @@ describe('useInstallRuleTemplate', () => {
     expect(mockDisableRule.mock.invocationCallOrder[0]).toBeLessThan(
       mockAddSuccess.mock.invocationCallOrder[0]
     );
-    await waitFor(() => {
-      expect(invalidateRuleTemplatesListView).toHaveBeenCalledTimes(1);
-    });
   });
 
   it('shows an error toast when install fails', async () => {
@@ -145,9 +140,6 @@ describe('useInstallRuleTemplate', () => {
       });
       expect(mockAddSuccess).not.toHaveBeenCalled();
       expect(mockAddDanger).not.toHaveBeenCalled();
-    });
-    await waitFor(() => {
-      expect(invalidateRuleTemplatesListView).toHaveBeenCalledTimes(1);
     });
   });
 

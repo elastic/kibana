@@ -7,7 +7,6 @@
 
 import { useMutation } from '@kbn/react-query';
 import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
-import { invalidateRuleTemplatesListView } from './invalidate_rules_content_list';
 import { useCreateRule } from './use_create_rule';
 
 export const useInstallRuleTemplate = () => {
@@ -16,9 +15,5 @@ export const useInstallRuleTemplate = () => {
   return useMutation({
     mutationFn: (template: RuleTemplateResponse) =>
       mutateAsync({ payload: template.rule, enabled: false, templateId: template.id }),
-    // Also on failure: the rule may exist even if disabling it failed, which changes the rule count.
-    onSettled: () => {
-      void invalidateRuleTemplatesListView();
-    },
   });
 };
