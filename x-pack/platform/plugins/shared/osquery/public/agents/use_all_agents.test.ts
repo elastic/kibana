@@ -101,8 +101,13 @@ describe('useAllAgents', () => {
 
       const kueryUpper = buildAgentSearchKuery('UPPERNAME');
       expect(kueryUpper).toContain('local_metadata.host.hostname.keyword:*UPPERNAME*');
-      expect(kueryUpper).toContain('local_metadata.host.hostname.keyword:*UPPERNAME*');
       expect(kueryUpper).toContain('local_metadata.host.name.keyword:*uppername*');
+    });
+
+    it('deduplicates hostname keyword clauses when input has no lowercase characters', () => {
+      const kueryUpper = buildAgentSearchKuery('WIN-HOST');
+      const matches = kueryUpper.match(/local_metadata\.host\.hostname\.keyword:\*WIN-HOST\*/g);
+      expect(matches).toHaveLength(1);
     });
 
     it('escapes special characters across all generated search clauses structurally', () => {
@@ -126,7 +131,7 @@ describe('useAllAgents', () => {
 
     it('generates a valid kuery within the 4096 limit for a 253-character FQDN', () => {
       const fqdn =
-        'a'.repeat(63) + '.' + 'b'.repeat(63) + '.' + 'c'.repeat(63) + '.' + 'd'.repeat(58) + '.com';
+        'a'.repeat(63) + '.' + 'b'.repeat(63) + '.' + 'c'.repeat(63) + '.' + 'd'.repeat(57) + '.com';
       expect(fqdn).toHaveLength(253);
       const kuery = buildAgentSearchKuery(fqdn);
       expect(kuery.length).toBeLessThanOrEqual(4096);

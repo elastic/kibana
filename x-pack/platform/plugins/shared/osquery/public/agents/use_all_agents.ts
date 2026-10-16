@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
-import { escapeKuery } from '@kbn/es-query';
 
 import type { Agent } from '@kbn/fleet-plugin/common';
 import type { processAggregations } from '../../common/utils/aggregations';
@@ -15,41 +14,15 @@ import { API_VERSIONS } from '../../common/constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 import { useOsqueryPolicies } from './use_osquery_policies';
+import { buildAgentSearchKuery } from '../../common/utils/build_agent_search_kuery';
+
+export { buildAgentSearchKuery };
 
 interface RequestOptions {
   perPage?: number;
   page?: number;
   agentIds?: string[];
 }
-
-/**
- * Builds the Kuery string for searching agents.
- * Searches across host.name (as displayed in Security alerts) and host.hostname
- * (as displayed on Fleet agents), along with agent id, policy id, platform, and policy name.
- * Generates targeted case variations and phrase matching to ensure case-insensitive matching
- * across keyword and analyzed fields without redundant scans.
- */
-export const buildAgentSearchKuery = (searchValue: string): string => {
-  if (!searchValue) {
-    return '';
-  }
-
-  const escapedSearch = escapeKuery(searchValue);
-
-  const queryParts = [
-    `local_metadata.host.hostname.keyword:*${escapedSearch}*`,
-    `local_metadata.host.hostname.keyword:*${escapeKuery(searchValue.toUpperCase())}*`,
-    `local_metadata.host.name.keyword:*${escapeKuery(searchValue.toLowerCase())}*`,
-    `local_metadata.host.hostname:*${escapedSearch}*`,
-    `local_metadata.host.hostname:"${searchValue.replace(/[\\"]/g, '\\$&')}"`,
-    `local_metadata.elastic.agent.id:*${escapedSearch}*`,
-    `policy_id: *${escapedSearch}*`,
-    `local_metadata.os.platform: *${escapedSearch}*`,
-    `policy_name:${escapedSearch}`,
-  ];
-
-  return queryParts.join(' or ');
-};
 
 // TODO: break out the paginated vs all cases into separate hooks
 export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage: 9000 }) => {

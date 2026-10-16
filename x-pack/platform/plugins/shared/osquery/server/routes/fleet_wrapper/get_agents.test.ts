@@ -9,8 +9,11 @@ import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { isRight } from 'fp-ts/Either';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getAgentsRoute } from './get_agents';
+import { buildAgentSearchKuery } from '../../../common/utils/build_agent_search_kuery';
+import { getAgentsRequestQuerySchema } from '../../../common/api/fleet_wrapper/get_agents_route';
 
 jest.mock('../../utils/get_internal_saved_object_client', () => ({
   createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({}),
@@ -216,9 +219,7 @@ describe('getAgentsRoute', () => {
     const mockResponse = httpServerMock.createResponseFactory();
     await routeHandler(
       {} as never,
-      createMockRequest(
-        'local_metadata.host.hostname.keyword:*uppername* or local_metadata.host.hostname.keyword:*UPPERNAME* or local_metadata.host.name.keyword:*uppername* or local_metadata.host.hostname:*uppername* or local_metadata.host.hostname:"uppername"'
-      ) as never,
+      createMockRequest(buildAgentSearchKuery('uppername')) as never,
       mockResponse
     );
 
@@ -234,21 +235,13 @@ describe('getAgentsRoute', () => {
 
   it('applies policy scope correctly for a 253-character FQDN search query without exceeding bounds', async () => {
     const fqdn253 =
-      'a'.repeat(63) + '.' + 'b'.repeat(63) + '.' + 'c'.repeat(63) + '.' + 'd'.repeat(58) + '.com';
+      'a'.repeat(63) + '.' + 'b'.repeat(63) + '.' + 'c'.repeat(63) + '.' + 'd'.repeat(57) + '.com';
     expect(fqdn253).toHaveLength(253);
 
-    const searchKuery = [
-      `local_metadata.host.hostname.keyword:*${fqdn253}*`,
-      `local_metadata.host.hostname.keyword:*${fqdn253.toUpperCase()}*`,
-      `local_metadata.host.name.keyword:*${fqdn253.toLowerCase()}*`,
-      `local_metadata.host.hostname:*${fqdn253}*`,
-      `local_metadata.host.hostname:"${fqdn253}"`,
-      `local_metadata.elastic.agent.id:*${fqdn253}*`,
-      `policy_id: *${fqdn253}*`,
-      `local_metadata.os.platform: *${fqdn253}*`,
-      `policy_name:${fqdn253}`,
-    ].join(' or ');
+    const searchKuery = buildAgentSearchKuery(fqdn253);
 
+    // Verifies the 4096 schema bound against the real generated search kuery
+    expect(isRight(getAgentsRequestQuerySchema.decode({ kuery: searchKuery }))).toBe(true);
     expect(searchKuery.length).toBeLessThanOrEqual(4096);
 
     const mockResponse = httpServerMock.createResponseFactory();
