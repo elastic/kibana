@@ -6,7 +6,7 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -61,9 +61,9 @@ describe('ServiceAccountWorkloadsModal', () => {
     expect(within(modal).getByTestId('serviceAccountWorkloadsLoading')).toBeVisible();
     expect(listWorkloads).toHaveBeenCalledWith(serviceAccount.id);
 
-    resolve({ workloads: [workload('w-1')] });
+    await act(async () => resolve({ workloads: [workload('w-1')] }));
 
-    const table = await within(modal).findByTestId('serviceAccountBoundWorkloadsTable');
+    const table = within(modal).getByTestId('serviceAccountBoundWorkloadsTable');
     expect(within(table).getByTestId('serviceAccountBoundWorkloadLink')).toHaveAttribute(
       'href',
       '/app/workflows/w-1'

@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import dotEnv from 'dotenv';
+import { existsSync, readFileSync } from 'fs';
+import { parseEnv } from 'util';
 
-const envObj = (path) => dotEnv.config({ path });
-
-export default (path) => envObj(path).parsed;
+export default function consumeState(path) {
+  if (!existsSync(path)) {
+    return undefined;
+  } else {
+    process.loadEnvFile(path);
+    return parseEnv(readFileSync(path, 'utf8'));
+  }
+}
