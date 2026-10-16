@@ -146,7 +146,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]packages[\/\\]data-table[\/\\]components[\/\\]data_table[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]packages[\/\\]data-table[\/\\]components[\/\\]toolbar[\/\\]unit[\/\\]styles.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]packages[\/\\]data-table[\/\\]mock[\/\\]test_providers.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]app[\/\\]home[\/\\]template_wrapper[\/\\]global_kql_header[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]app[\/\\]home[\/\\]template_wrapper[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]and_or_badge[\/\\]__examples__[\/\\]index.stories.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]and_or_badge[\/\\]index.test.tsx/,
