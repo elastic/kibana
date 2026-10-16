@@ -57,7 +57,7 @@ describe('Task priority checks', () => {
         )
         .filter((tt: { taskType: string; priority: TaskPriority } | null) => null != tt);
 
-      expect(taskTypesWithPriority.length).toEqual(6);
+      expect(taskTypesWithPriority.length).toEqual(5);
       expect(taskTypesWithPriority).toMatchSnapshot();
     });
   });

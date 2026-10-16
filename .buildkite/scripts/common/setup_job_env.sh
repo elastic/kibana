@@ -22,7 +22,10 @@ source .buildkite/scripts/common/util.sh
     kibana-console-definitions-sync | \
     kibana-es-ql-grammar-sync | \
     kibana-opentelemetry-semantic-conventions-sync | \
-    kibana-scout-update-metadata)
+    kibana-purge-cloud-deployments | \
+    kibana-renovate-helper | \
+    kibana-scout-update-metadata | \
+    kibana-serverless-release-readiness)
       GITHUB_TOKEN="$VAULT_GITHUB_TOKEN"
       ;;
     *)
@@ -197,6 +200,19 @@ EOF
 
   GCS_SA_CDN_AUDIENCE="$(vault_get gcs-sa-cdn-prod audience)"
   export GCS_SA_CDN_AUDIENCE
+}
+
+# Set up the workflow step-schema CDN publisher key.
+{
+  if [[ "$BUILDKITE_PIPELINE_SLUG" == "kibana-artifacts-container-image" && "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
+    WORKFLOWS_SCHEMA_GCS_SA_KEY="$(retry 5 5 vault kv get -field=credentials kv/ci-shared/workflows-library/gcs-publish || true)"
+    if [[ -n "$WORKFLOWS_SCHEMA_GCS_SA_KEY" ]]; then
+      buildkite-agent redactor add <<<"$WORKFLOWS_SCHEMA_GCS_SA_KEY" 2>/dev/null || true
+      export WORKFLOWS_SCHEMA_GCS_SA_KEY
+    else
+      echo "Could not read the workflow step schema publisher key from Vault; the schema CDN publish will fail" >&2
+    fi
+  fi
 }
 
 # Setup Failed Test Reporter Elasticsearch credentials

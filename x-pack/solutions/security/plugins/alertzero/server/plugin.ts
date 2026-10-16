@@ -51,6 +51,7 @@ import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
+import { registerInvestigationsAiIndex } from './context_engine/register_investigations_ai_index';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { installRegisteredWorkerForRequest } from './managed_workflows/worker_registry';
 import { WatchesService } from './services/watches/watches_service';
@@ -105,6 +106,9 @@ export class AlertZeroPlugin
   private agentBuilderExecution?: NonNullable<
     AlertZeroStartDependencies['agentBuilder']
   >['execution'];
+  private agentBuilderAttachments?: NonNullable<
+    AlertZeroStartDependencies['agentBuilder']
+  >['attachments'];
   private searchInferenceEndpoints?: AlertZeroStartDependencies['searchInferenceEndpoints'];
   private huntServices?: HuntServices;
   private fleetAgentService?: AgentService;
@@ -143,6 +147,7 @@ export class AlertZeroPlugin
       agentBuilder,
       proposals,
       agenticInvestigations,
+      contextEngine,
       features,
       searchInferenceEndpoints,
       workflowsExtensions,
@@ -164,6 +169,9 @@ export class AlertZeroPlugin
 
     // Missing runtime dependencies must not make installed workflows eligible for orphan cleanup.
     registerOwner({ workflowsExtensions });
+    if (contextEngine) {
+      registerInvestigationsAiIndex({ contextEngine });
+    }
     if (agentBuilder && proposals && agenticInvestigations) {
       const assertAlertZeroAccess = createAssertAlertZeroAccess(async () => {
         const [core, { security }] = await coreSetup.getStartServices();
@@ -269,6 +277,7 @@ export class AlertZeroPlugin
       getConversationProposalsService: () => this.requireConversationProposalsService(),
       getActionsService: () => this.requireActionsService(),
       getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
+      getAgentBuilderAttachments: () => this.requireAgentBuilderAttachments(),
       getHuntServices: () => this.requireHuntServices(),
       getScanFailuresService: () => this.requireScanFailuresService(),
       getThreatIntelSupplyService: () => this.threatIntelSupplyService,
@@ -285,6 +294,7 @@ export class AlertZeroPlugin
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
     this.agentBuilderExecution = plugins.agentBuilder?.execution;
+    this.agentBuilderAttachments = plugins.agentBuilder?.attachments;
     this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
 
     if (!this.config.enabled) {
@@ -346,6 +356,10 @@ export class AlertZeroPlugin
               enumerateSpaceIds(core.savedObjects.createInternalRepository(['space'])),
             // security_solution registers after this plugin starts; read lazily.
             getWorkflowInstaller: () => this.threatIntelSupplyWorkflowInstaller,
+            getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+            getInference: () => plugins.inference,
+            getUiSettingsClient: (request) =>
+              core.uiSettings.asScopedToClient(core.savedObjects.getScopedClient(request)),
           })
         : undefined;
 
@@ -369,11 +383,14 @@ export class AlertZeroPlugin
 
     this.scanFailuresService = new ScanFailuresService(management, this.logger);
 
+    const mitreDataClient = plugins.mitreAttack?.getMitreDataClient?.();
+
     this.huntServices = {
       getProposalsService: () => this.requireProposals().getProposalsService(),
       getProposalPrivileges: () => this.requireProposals().getProposalPrivileges(),
       getInference: () => plugins.inference,
       getSearchInferenceEndpoints: () => plugins.searchInferenceEndpoints,
+      mitreDataClient,
     };
 
     return this.alertZeroStartContract();
@@ -416,6 +433,12 @@ export class AlertZeroPlugin
     AlertZeroStartDependencies['agentBuilder']
   >['execution'] {
     return this.requireStarted(this.agentBuilderExecution, 'agentBuilder.execution');
+  }
+
+  private requireAgentBuilderAttachments(): NonNullable<
+    AlertZeroStartDependencies['agentBuilder']
+  >['attachments'] {
+    return this.requireStarted(this.agentBuilderAttachments, 'agentBuilder.attachments');
   }
 
   private async resolveSummaryConnectorId(request: KibanaRequest): Promise<string | undefined> {

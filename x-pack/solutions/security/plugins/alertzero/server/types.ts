@@ -13,6 +13,7 @@ import type {
 } from '@kbn/agentic-investigations-plugin/server';
 import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
@@ -21,6 +22,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
+import type { MitreAttackServerStart } from '@kbn/mitre-attack-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -80,6 +82,7 @@ export interface AlertZeroSetupDependencies {
   agenticInvestigations?: AgenticInvestigationsPluginSetup;
   proposals?: ProposalsPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
+  contextEngine?: ContextEnginePluginSetup;
 }
 
 export interface AlertZeroStartDependencies {
@@ -110,6 +113,11 @@ export interface AlertZeroStartDependencies {
    * Absence degrades every host to unenrolled, same as no agent found.
    */
   fleet?: FleetStartContract;
+  /**
+   * Optional, matching the plugin manifest. Supplies the MITRE data client behind the Tier 2
+   * technique catalog. Absence (or its managed source being off) leaves the catalog empty.
+   */
+  mitreAttack?: MitreAttackServerStart;
 }
 
 export type AlertZeroRouter = IRouter<AlertZeroRequestHandlerContext>;

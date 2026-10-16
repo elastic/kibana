@@ -41,6 +41,8 @@ function setupSpaces() {
       }),
     };
   });
+  fixture.spaceDocuments.set('a', new Map([['.significant_events-knowledge_indicators', 1]]));
+  fixture.spaceDocuments.set('b', new Map([['.significant_events-knowledge_indicators', 1]]));
   return { ...fixture, rules };
 }
 
@@ -80,14 +82,23 @@ describe('maintenance across spaces', () => {
     await expect(service.getState({ request: requestB })).resolves.toBe('enabled');
   });
 
-  it('deletes owned rules in every space before resetting shared data', async () => {
-    const { service, rules, esClient } = setupSpaces();
+  it('resets only the requested space, preserving another space and its paused inventory', async () => {
+    const { service, rules, esClient, soClient, spaceDocuments } = setupSpaces();
+    await service.pause({ request: requestA });
+    const previousA = soClient.readDocument('a');
     await service.reset({ request: requestB });
-    for (const client of Object.values(rules)) {
-      expect(client.bulkDeleteRules).toHaveBeenCalledWith({ ids: ['same-id'] });
-      expect(client.bulkDeleteRules.mock.invocationCallOrder[0]).toBeLessThan(
-        esClient.indices.deleteDataStream.mock.invocationCallOrder[0]
-      );
+    expect(rules.a.bulkDeleteRules).not.toHaveBeenCalled();
+    expect(rules.b.bulkDeleteRules).toHaveBeenCalledWith({ ids: ['same-id'] });
+    expect(rules.b.bulkDeleteRules.mock.invocationCallOrder[0]).toBeLessThan(
+      esClient.deleteByQuery.mock.invocationCallOrder[0]
+    );
+    for (const [params] of esClient.deleteByQuery.mock.calls) {
+      expect(params.query).toEqual({ term: { 'kibana.space_ids': 'b' } });
     }
+    expect(spaceDocuments.get('a')?.get('.significant_events-knowledge_indicators')).toBe(1);
+    expect(spaceDocuments.get('b')?.get('.significant_events-knowledge_indicators')).toBe(0);
+    expect(soClient.readDocument('a')).toEqual(previousA);
+    expect(soClient.readDocument('default')).toBeUndefined();
+    await expect(service.getState({ request: requestB })).resolves.toBe('enabled');
   });
 });
