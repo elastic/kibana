@@ -609,7 +609,7 @@ describe('Hunt Watch worker chain', () => {
     const reason = (readOutput: unknown) => render(variables.result_reason, readOutput);
 
     const LIMIT_REASON =
-      'Hunt coordinator did not finish within 10 minutes; see hunt execution exec-1.';
+      'Hunt coordinator did not finish before the hunt child stopped polling (60 reads, 10s apart); see hunt execution exec-1.';
 
     it('is success with no reason for a completed, complete run', () => {
       const completed = { data: { state: 'completed', result: { completeness: 'complete' } } };
@@ -674,7 +674,7 @@ describe('Hunt Watch worker chain', () => {
   describe('hunt — poll loop as the engine compiles it', () => {
     const graph = WorkflowGraph.fromWorkflowDefinition(hunt as unknown as WorkflowYaml);
 
-    it('exits the poll by continue at 60 reads and sits inside a 10 minute timeout zone', () => {
+    it('exits the poll by continue at 60 reads, backstopped by a 12 minute timeout zone', () => {
       expect(graph.getNode('exitWhile_poll_hunt_coordinator')).toMatchObject({
         type: 'exit-while',
         maxIterations: 60,
@@ -682,7 +682,7 @@ describe('Hunt Watch worker chain', () => {
       });
       expect(graph.getNode('enterTimeoutZone_poll_hunt_coordinator')).toMatchObject({
         type: 'enter-timeout-zone',
-        timeout: '10m',
+        timeout: '12m',
         stepType: 'step_level_timeout',
       });
     });

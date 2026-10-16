@@ -104,12 +104,43 @@ const runHuntCoordinatorJob = async ({
       );
       return;
     }
-    // Child will poll until its limit and report the run unfinished.
+    if (envelope.state === 'failed') {
+      // Nothing smaller to fall back to; the child polls out its window and reports the run
+      // unfinished.
+      logger.error(
+        `hunt_coordinator: could not write the failed envelope to ${attachmentId} (${logMeta(
+          'failed'
+        )}): ${(err as Error).message}`
+      );
+      return;
+    }
+    // The attachment type validates the whole result on every update, so a result outside the
+    // HuntCoordinatorResult schema (a bound, an enum) is the likely cause.
     logger.error(
-      `hunt_coordinator: could not write the result attachment ${attachmentId} (${logMeta(
-        envelope.state
-      )}): ${(err as Error).message}`
+      `hunt_coordinator: could not write the completed result to ${attachmentId} (${logMeta(
+        'completed'
+      )}), likely a HuntCoordinatorResult validation failure: ${(err as Error).message}`
     );
+    // Best effort: a failed envelope lets the child stop on its next read instead of polling out
+    // its window for a result that will never arrive.
+    try {
+      await writeTerminal({
+        client: attachmentsClient,
+        conversationId,
+        attachmentId,
+        envelope: {
+          ...envelopeBase(runId, reportId),
+          state: 'failed',
+          error: { message: FAILED_MESSAGE },
+        },
+      });
+    } catch (fallbackErr) {
+      logger.error(
+        `hunt_coordinator: could not write the failed envelope to ${attachmentId} either (${logMeta(
+          'failed'
+        )}): ${(fallbackErr as Error).message}`
+      );
+    }
   }
 };
 
@@ -218,6 +249,7 @@ export const registerHuntCoordinatorRoute = ({
             attachmentId,
             runId,
             reportId: report_id,
+            logger,
           });
 
           void runHuntCoordinatorJob({

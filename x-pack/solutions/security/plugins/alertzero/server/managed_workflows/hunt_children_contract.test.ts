@@ -138,14 +138,14 @@ describe('system-security-hunt-execute', () => {
     const TERMINAL_CHECK =
       "${{ steps.read_hunt_result.output.data.state != 'completed' and steps.read_hunt_result.output.data.state != 'failed' }}";
 
-    it('loops for at most 60 reads and 10 minutes, and never fails the child when it gives up', () => {
+    it('loops for at most 60 reads, backstopped by a 12 minute timeout, and never fails the child when it gives up', () => {
       const poll = stepNamed(workflow, 'poll_hunt_coordinator');
 
       expect(poll.type).toBe('while');
       expect(poll.if).toBe('${{ steps.run_hunt_coordinator.output.result_attachment_id != nil }}');
       expect(poll.condition).toBe(TERMINAL_CHECK);
       expect(poll['max-iterations']).toEqual({ limit: 60, 'on-limit': 'continue' });
-      expect(poll.timeout).toBe('10m');
+      expect(poll.timeout).toBe('12m');
       expect(poll['on-failure']).toEqual({ continue: true });
     });
 

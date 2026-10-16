@@ -18,7 +18,10 @@ import {
   ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
 } from '@kbn/alertzero-common';
-import type { HuntCoordinatorResponse } from '@kbn/alertzero-common';
+import type {
+  HuntCoordinatorResponse,
+  HuntCoordinatorResult as StoredHuntCoordinatorResult,
+} from '@kbn/alertzero-common';
 import { SECURITY_SOLUTION_DEFAULT_INDEX_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from '../register_routes';
 import type { HuntCoordinatorResultAttachment } from '../../../common/hunt_coordinator_result_attachment_schema';
@@ -145,6 +148,33 @@ const envelopeOf = (
 
 /** The detached job finishes on its own microtasks, after the handler has already answered. */
 const flushJob = () => new Promise((resolve) => setImmediate(resolve));
+
+/** `Schema[K]` across every member of a `Schema` union that has `K`; `never` when none does. */
+type PropOf<Schema, K extends PropertyKey> = Schema extends object
+  ? K extends keyof Schema
+    ? Schema[K]
+    : never
+  : never;
+
+/**
+ * Every key the service result has that the stored schema lacks, at any depth. The attachment
+ * type stores what `validate` parsed and the result schema is not strict, so such a key would be
+ * stripped before the hunt child reads it, and `const body: Stored = service` in the route would
+ * not notice: excess-property checks do not apply when assigning from a variable.
+ */
+type FieldsMissingFromSchema<Service, Schema> = Service extends readonly (infer ServiceItem)[]
+  ? Schema extends readonly (infer SchemaItem)[]
+    ? FieldsMissingFromSchema<ServiceItem, SchemaItem>
+    : never
+  : Service extends object
+  ? {
+      [K in keyof Service]-?: [PropOf<Schema, K>] extends [never]
+        ? K
+        : FieldsMissingFromSchema<NonNullable<Service[K]>, NonNullable<PropOf<Schema, K>>>;
+    }[keyof Service]
+  : never;
+
+type AssertNever<T extends never> = T;
 
 const deferred = <T>() => {
   let resolve!: (value: T) => void;
@@ -476,7 +506,37 @@ describe('registerHuntCoordinatorRoute', () => {
       });
     });
 
-    it('logs at error and does not throw when the terminal write itself fails', async () => {
+    it('falls back to a failed envelope when the completed result is rejected, naming validation as the likely cause', async () => {
+      const { handler, context, logger, attachmentsClient } = makeDeps();
+      attachmentsClient.update.mockRejectedValueOnce(
+        new Error('Invalid attachment data for type "security.hunt_coordinator_result": too big')
+      );
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor({ run_id: 'run-1' }), response);
+      await flushJob();
+
+      expect(response.ok).toHaveBeenCalledTimes(1);
+      expect(attachmentsClient.update).toHaveBeenCalledTimes(2);
+      expect(envelopeOf(attachmentsClient, 0).state).toBe('completed');
+      expect(envelopeOf(attachmentsClient, 1)).toEqual({
+        run_id: 'run-1',
+        report_id: 'report-1',
+        state: 'failed',
+        error: { message: 'Hunt coordinator failed' },
+      });
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'could not write the completed result to hunt-coordinator-result-run-1'
+        )
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('likely a HuntCoordinatorResult validation failure: Invalid')
+      );
+    });
+
+    it('logs at error and does not throw when the failed fallback is rejected too', async () => {
       const { handler, context, logger, attachmentsClient } = makeDeps();
       attachmentsClient.update.mockRejectedValue(new Error('conversation vanished'));
       const response = httpServerMock.createResponseFactory();
@@ -485,12 +545,31 @@ describe('registerHuntCoordinatorRoute', () => {
       await flushJob();
 
       expect(response.ok).toHaveBeenCalledTimes(1);
+      expect(attachmentsClient.update).toHaveBeenCalledTimes(2);
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining(
-          'could not write the result attachment hunt-coordinator-result-run-1'
+          'could not write the failed envelope to hunt-coordinator-result-run-1 either'
         )
       );
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('conversation vanished'));
+    });
+
+    it('does not retry a rejected failed envelope, since there is nothing smaller to write', async () => {
+      const { handler, context, logger, attachmentsClient } = makeDeps();
+      huntCoordinatorMock.mockRejectedValue(new Error('tier1 search failed'));
+      attachmentsClient.update.mockRejectedValue(new Error('conversation vanished'));
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor({ run_id: 'run-1' }), response);
+      await flushJob();
+
+      expect(attachmentsClient.update).toHaveBeenCalledTimes(1);
+      expect(envelopeOf(attachmentsClient).state).toBe('failed');
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'could not write the failed envelope to hunt-coordinator-result-run-1 (run_id=run-1'
+        )
+      );
     });
 
     it('logs at warn, not error, when the child already deleted the attachment', async () => {
@@ -510,6 +589,18 @@ describe('registerHuntCoordinatorRoute', () => {
         )
       );
       expect(logger.error).not.toHaveBeenCalled();
+      expect(attachmentsClient.update).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('the stored result schema covers the service result', () => {
+    // Compile-time: `type_check` fails here when the service's HuntCoordinatorResult gains a
+    // field the OpenAPI schema lacks, which `validate` would otherwise strip silently.
+    it('has no service field that validate would strip', () => {
+      const missing: AssertNever<
+        FieldsMissingFromSchema<HuntCoordinatorResult, StoredHuntCoordinatorResult>
+      > = undefined as never;
+      expect(missing).toBeUndefined();
     });
   });
 

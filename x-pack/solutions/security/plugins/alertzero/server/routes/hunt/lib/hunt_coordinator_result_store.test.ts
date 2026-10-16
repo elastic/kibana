@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
 import {
   createAttachmentAlreadyExistsError,
@@ -29,6 +30,11 @@ const target = (client: ReturnType<typeof makeClient>) => ({
   attachmentId: 'hunt-coordinator-result-run-1',
 });
 
+const running = (client: ReturnType<typeof makeClient>) => ({
+  ...target(client),
+  logger: loggingSystemMock.createLogger(),
+});
+
 const failedEnvelope = {
   run_id: 'run-1',
   report_id: 'report-1',
@@ -40,7 +46,7 @@ describe('writeRunning', () => {
   it('creates a hidden, readonly placeholder in the running state under the given id', async () => {
     const client = makeClient();
 
-    await writeRunning({ ...target(client), runId: 'run-1', reportId: 'report-1' });
+    await writeRunning({ ...running(client), runId: 'run-1', reportId: 'report-1' });
 
     expect(client.create).toHaveBeenCalledWith({
       conversationId: 'conv-1',
@@ -57,31 +63,46 @@ describe('writeRunning', () => {
   it('leaves report_id off the placeholder for an ad hoc run', async () => {
     const client = makeClient();
 
-    await writeRunning({ ...target(client), runId: 'run-1' });
+    await writeRunning({ ...running(client), runId: 'run-1' });
 
     expect(client.create.mock.calls[0][0].data).toEqual({ run_id: 'run-1', state: 'running' });
   });
 
-  it('refreshes an existing attachment to running instead of surfacing the conflict', async () => {
+  it('refreshes an existing attachment to running, and warns that a start is being repeated', async () => {
     const client = makeClient();
+    const logger = loggingSystemMock.createLogger();
     client.create.mockRejectedValue(
       createAttachmentAlreadyExistsError({ attachmentId: 'hunt-coordinator-result-run-1' })
     );
 
-    await writeRunning({ ...target(client), runId: 'run-1', reportId: 'report-1' });
+    await writeRunning({ ...target(client), logger, runId: 'run-1', reportId: 'report-1' });
 
     expect(client.update).toHaveBeenCalledWith({
       conversationId: 'conv-1',
       attachmentId: 'hunt-coordinator-result-run-1',
       data: { run_id: 'run-1', report_id: 'report-1', state: 'running' },
     });
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'hunt-coordinator-result-run-1 already existed and was reset to running'
+      )
+    );
+  });
+
+  it('does not warn when the placeholder is created fresh', async () => {
+    const client = makeClient();
+    const logger = loggingSystemMock.createLogger();
+
+    await writeRunning({ ...target(client), logger, runId: 'run-1' });
+
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('rethrows any other create failure for the route to map', async () => {
     const client = makeClient();
     client.create.mockRejectedValue(new Error('conversation unavailable'));
 
-    await expect(writeRunning({ ...target(client), runId: 'run-1' })).rejects.toThrow(
+    await expect(writeRunning({ ...running(client), runId: 'run-1' })).rejects.toThrow(
       'conversation unavailable'
     );
     expect(client.update).not.toHaveBeenCalled();
@@ -94,7 +115,7 @@ describe('writeRunning', () => {
     );
     client.update.mockRejectedValue(new Error('Cannot update deleted attachment'));
 
-    await expect(writeRunning({ ...target(client), runId: 'run-1' })).rejects.toThrow(
+    await expect(writeRunning({ ...running(client), runId: 'run-1' })).rejects.toThrow(
       'Cannot update deleted attachment'
     );
   });

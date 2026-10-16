@@ -113,9 +113,10 @@ steps:
             stage: hunt_coordinator
             reason: "{{ steps.run_hunt_coordinator.error.message }}"
 
-  # Do-while poll (60 × 10s / 10m). Never fails the child: Worker packaging needs
-  # `completed`. Prefer `on-limit: continue` over `fail` (engine skips the
-  # condition on the last iteration). Read by the start response id, not list.
+  # Do-while poll: 60 reads 10s apart, so `on-limit: continue` is the exit that
+  # runs; the 12m timeout only backstops slow reads. Never fails the child: Worker
+  # packaging needs `completed`. Prefer `on-limit: continue` over `fail` (engine
+  # skips the condition on the last iteration). Read by the start response id, not list.
   - name: poll_hunt_coordinator
     type: while
     if: "${{ steps.run_hunt_coordinator.output.result_attachment_id != nil }}"
@@ -123,7 +124,7 @@ steps:
     max-iterations:
       limit: 60
       on-limit: continue
-    timeout: 10m
+    timeout: 12m
     on-failure:
       continue: true
     steps:
@@ -335,7 +336,7 @@ steps:
         {%- elsif steps.read_hunt_result.output.data.state == 'failed' -%}
         {{ steps.read_hunt_result.output.data.error.message }}
         {%- elsif steps.read_hunt_result.output.data.state != 'completed' -%}
-        Hunt coordinator did not finish within 10 minutes; see hunt execution {{ execution.id }}.
+        Hunt coordinator did not finish before the hunt child stopped polling (60 reads, 10s apart); see hunt execution {{ execution.id }}.
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "complete" -%}
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_retryable" -%}
         The hunt was incomplete but retryable ({{ steps.read_hunt_result.output.data.result.message }}), so no hunt evidence was recorded and the report stays eligible for a later sweep.

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
 import {
   isAttachmentAlreadyExistsError,
@@ -37,7 +38,8 @@ export const writeRunning = async ({
   attachmentId,
   runId,
   reportId,
-}: StoreTarget & { runId: string; reportId?: string }): Promise<void> => {
+  logger,
+}: StoreTarget & { runId: string; reportId?: string; logger: Logger }): Promise<void> => {
   const data: HuntCoordinatorResultAttachment = {
     ...envelopeBase(runId, reportId),
     state: 'running',
@@ -56,6 +58,12 @@ export const writeRunning = async ({
     if (!isAttachmentAlreadyExistsError(error)) {
       throw error;
     }
+    // Only a repeated start for the same run and Investigation gets here: the Worker starts one
+    // child per report per execution, and the id is derived from the run id alone. If the
+    // earlier run is still going, both pipelines write this attachment and the last writer wins.
+    logger.warn(
+      `hunt_coordinator: result attachment ${attachmentId} already existed and was reset to running; a start for the same run and Investigation is being repeated`
+    );
     await client.update({ conversationId, attachmentId, data });
   }
 };
