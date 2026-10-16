@@ -5549,9 +5549,7 @@ describe('ConversationClient', () => {
           execution_id: 'round-1::execution',
         });
       });
-
     });
-
 
     describe('metadata_updated on update', () => {
       it('lists added, changed and removed keys', async () => {

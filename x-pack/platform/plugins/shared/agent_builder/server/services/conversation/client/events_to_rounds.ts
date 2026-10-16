@@ -323,4 +323,3 @@ const interruptedRoundFields = (
     interruption: interruptionOfTerminal(terminal),
   };
 };
-
