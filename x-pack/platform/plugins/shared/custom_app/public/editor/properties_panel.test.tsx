@@ -73,6 +73,8 @@ const initial = (): AppDocument =>
           options: [{ value: 'x' }],
         },
         { type: 'search', id: 'find', label: 'Find', bind: 'filter', placeholder: 'Look' },
+        { type: 'button', id: 'isolate', label: 'Isolate host', onClick: [] },
+        { type: 'time_range', id: 'period' },
         { type: 'stack', id: 'row', direction: 'horizontal', children: [] },
         { type: 'flyout', id: 'detail-flyout', title: 'Details', children: [] },
       ],
@@ -159,6 +161,53 @@ describe('PropertiesPanel', () => {
 
       await userEvent.selectOptions(screen.getByLabelText('Kind'), 'danger');
       expect(onChange).toHaveBeenLastCalledWith({ color: 'danger' });
+    });
+  });
+
+  describe('a time range', () => {
+    it('is a component of its own, named as one', () => {
+      setup('period');
+
+      expect(screen.getByRole('heading', { name: 'Time range' })).toBeInTheDocument();
+    });
+
+    it('says what it does and where to put it, and has nothing to set', () => {
+      setup('period');
+
+      expect(
+        screen.getByText(/Lets people change the period the whole app shows/)
+      ).toBeInTheDocument();
+      expect(screen.getByText(/An app has one/)).toBeInTheDocument();
+      expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+      expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('a button', () => {
+    it('edits what is written on it', async () => {
+      const { onChange } = setup('isolate');
+
+      await userEvent.type(screen.getByRole('textbox', { name: 'Label' }), '!');
+
+      expect(onChange).toHaveBeenLastCalledWith({ label: 'Isolate host!' });
+    });
+
+    it('says what it does when it is pressed, which is nothing until a workflow is added', async () => {
+      const { onChange } = setup('isolate');
+
+      expect(screen.getByRole('heading', { name: 'When it is pressed' })).toBeInTheDocument();
+      expect(screen.getByText('This button does nothing yet.')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('customAppAddWorkflowAction'));
+      expect(onChange).toHaveBeenLastCalledWith({
+        onClick: [{ type: 'runWorkflow', workflow: '', inputs: {} }],
+      });
+    });
+
+    it('is a component of its own, named as one', () => {
+      setup('isolate');
+
+      expect(screen.getByRole('heading', { name: 'Button' })).toBeInTheDocument();
     });
   });
 

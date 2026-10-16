@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { interpolate, type AppNode } from '@kbn/custom-app-common';
 import {
@@ -19,15 +20,20 @@ import { useStateValues } from '../runtime/app_runtime_context';
 import { ChartNode } from './chart_node';
 import { CustomContentNode } from './custom_content_node';
 import { ButtonGroupNode } from './button_group_node';
+import { ButtonNode } from './button_node';
 import { FlyoutNode } from './flyout_node';
 import { KeyValueNode } from './key_value_node';
 import { SearchNode } from './search_node';
 import { SelectNode } from './select_node';
 import { StatNode } from './stat_node';
 import { TableNode } from './table_node';
+import { TimeRangeNode } from './time_range_node';
 
 const isInput = (node: AppNode): boolean =>
-  node.type === 'search' || node.type === 'select' || node.type === 'button_group';
+  node.type === 'search' ||
+  node.type === 'select' ||
+  node.type === 'button_group' ||
+  node.type === 'time_range';
 
 const CALLOUTS = {
   primary: KbnInfoCallout,
@@ -86,6 +92,10 @@ export const NodeRenderer = ({ node }: NodeRendererProps) => {
       return <ButtonGroupNode node={node} />;
     case 'search':
       return <SearchNode node={node} />;
+    case 'button':
+      return <ButtonNode node={node} />;
+    case 'time_range':
+      return <TimeRangeNode node={node} />;
     case 'flyout':
       return (
         <FlyoutNode node={node}>
@@ -116,6 +126,17 @@ export const NodeRenderer = ({ node }: NodeRendererProps) => {
             // A flyout draws nothing in place, so it gets no item, which would only add a gap.
             child.type === 'flyout' ? (
               <NodeRenderer key={child.id} node={child} />
+            ) : child.type === 'time_range' ? (
+              // The period belongs at the right, in a row of filters as on a line of its own, and
+              // takes only the room it needs: it is not a filter that fills the row with the rest.
+              <EuiFlexItem
+                key={child.id}
+                grow={false}
+                css={css({ marginInlineStart: 'auto' })}
+                data-test-subj="customAppTimeRangeItem"
+              >
+                <NodeRenderer node={child} />
+              </EuiFlexItem>
             ) : (
               <EuiFlexItem key={child.id} grow={isRow}>
                 <NodeRenderer node={child} />

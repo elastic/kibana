@@ -18,7 +18,16 @@ import { customAppEmbeddableFactory } from './custom_app_embeddable';
 // Set by the tests that need chat; without it the panel behaves as when Agent Builder is absent.
 let mockAgentBuilder: unknown;
 jest.mock('./services', () => ({
-  getServices: () => ({ core: { http: {} }, search: jest.fn(), agentBuilder: mockAgentBuilder }),
+  getServices: () => ({
+    core: {
+      http: {},
+      application: { capabilities: {} },
+      notifications: { toasts: {} },
+      rendering: {},
+    },
+    search: jest.fn(),
+    agentBuilder: mockAgentBuilder,
+  }),
 }));
 jest.mock('./data/run_esql_query', () => ({
   createRunEsqlQuery: () => async () => ({ columns: [], rows: [] }),

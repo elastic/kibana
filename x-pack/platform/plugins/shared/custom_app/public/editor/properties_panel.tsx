@@ -35,6 +35,7 @@ import { DEFAULT_QUERY } from './node_defaults';
 import { ColumnsEditor, OptionsEditor } from './fields/list_editors';
 import { QueryField } from './fields/query_field';
 import { RowClickEditor } from './fields/row_click_editor';
+import { ButtonActionsEditor } from './fields/workflow_action_editor';
 import { TemplateField } from './fields/template_field';
 import { Section } from './fields/section';
 
@@ -95,6 +96,12 @@ const sections = {
   content: i18n.translate('xpack.customApp.editor.sectionContent', { defaultMessage: 'Content' }),
   data: i18n.translate('xpack.customApp.editor.sectionData', { defaultMessage: 'Data' }),
   columns: i18n.translate('xpack.customApp.editor.sectionColumns', { defaultMessage: 'Columns' }),
+  timeRange: i18n.translate('xpack.customApp.editor.sectionTimeRange', {
+    defaultMessage: 'Period',
+  }),
+  whenPressed: i18n.translate('xpack.customApp.editor.sectionWhenPressed', {
+    defaultMessage: 'When it is pressed',
+  }),
   rowClick: i18n.translate('xpack.customApp.editor.sectionRowClick', {
     defaultMessage: 'When a row is clicked',
   }),
@@ -329,6 +336,41 @@ export const PropertiesPanel = ({
                   />
                 </>
               )}
+            </Section>
+          </Sections>
+        );
+      case 'time_range':
+        return (
+          <Sections>
+            <Section title={sections.timeRange}>
+              <EuiText size="s" color="subdued">
+                <p>
+                  {i18n.translate('xpack.customApp.editor.timeRangeHelp', {
+                    defaultMessage:
+                      "Lets people change the period the whole app shows. Put it where you want it, among the filters for instance. An app has one. In a dashboard it sets the period of this panel, in place of the dashboard's.",
+                  })}
+                </p>
+              </EuiText>
+            </Section>
+          </Sections>
+        );
+      case 'button':
+        return (
+          <Sections>
+            <Section title={sections.content}>
+              <TextField
+                label={labels.label}
+                value={node.label}
+                maxLength={MAX_HEADING_LENGTH}
+                onChange={(label) => onChange<'button'>({ label })}
+              />
+            </Section>
+            <Section title={sections.whenPressed}>
+              <ButtonActionsEditor
+                actions={node.onClick}
+                stateKeys={stateKeys}
+                onChange={(onClick) => onChange<'button'>({ onClick })}
+              />
             </Section>
           </Sections>
         );

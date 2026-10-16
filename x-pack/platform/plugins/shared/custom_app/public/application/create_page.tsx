@@ -9,12 +9,14 @@ import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { EuiBadge, EuiButton, EuiButtonEmpty, EuiFlyout, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { isEmptyDocument, type AppDocument } from '@kbn/custom-app-common';
 import { EmptyApp } from '../components/empty_app';
 import { LiveApp } from '../components/live_app';
 import { createDefaultDocument, createEmptyDocument } from '../default_document';
 import { EditorFlyout } from '../editor/editor_flyout';
 import { DetailsModal } from './details_modal';
+import { useChatWithPage } from './use_chat_with_page';
 import { useListBreadcrumb } from './list_breadcrumb';
 import { useUnsavedChangesGuard } from './use_unsaved_changes_guard';
 import type { AppServices } from './app';
@@ -32,7 +34,7 @@ export const CreatePage = ({
   client,
   chrome,
   notifications,
-  describeWithChat,
+  agentBuilder,
   onAppLeave,
 }: AppServices) => {
   const history = useHistory();
@@ -80,6 +82,19 @@ export const CreatePage = ({
     setSeed(undefined);
   }, []);
 
+  // What the agent makes comes back here, as a draft, and not only into the chat.
+  const describe = useChatWithPage({
+    agentBuilder,
+    getDocument: useCallback(() => draft, [draft]),
+    onDocument: useCallback(
+      (document: AppDocument) => {
+        setDraft(document);
+        closeEditor();
+      },
+      [closeEditor]
+    ),
+  });
+
   const create = useCallback(
     async ({ title, description }: { title: string; description?: string }) => {
       setIsSaving(true);
@@ -98,15 +113,6 @@ export const CreatePage = ({
     },
     [client, draft, notifications]
   );
-
-  const describe = describeWithChat
-    ? () =>
-        describeWithChat(
-          i18n.translate('xpack.customApp.standalone.describePrompt', {
-            defaultMessage: 'Create a custom app that ',
-          })
-        )
-    : undefined;
 
   return (
     <EuiPageTemplate offset={0} restrictWidth={false} data-test-subj="customAppCreatePage">
@@ -128,6 +134,25 @@ export const CreatePage = ({
           ...(isEmpty
             ? []
             : [
+                ...(describe
+                  ? [
+                      <AiButton
+                        iconType="sparkles"
+                        onClick={() =>
+                          describe(
+                            i18n.translate('xpack.customApp.standalone.refinePrompt', {
+                              defaultMessage: 'Change this app so that ',
+                            })
+                          )
+                        }
+                        data-test-subj="customAppRefineWithAi"
+                      >
+                        {i18n.translate('xpack.customApp.standalone.refine', {
+                          defaultMessage: 'Refine with AI',
+                        })}
+                      </AiButton>,
+                    ]
+                  : []),
                 <EuiButtonEmpty
                   iconType="pencil"
                   isDisabled={isEditing}
@@ -149,7 +174,16 @@ export const CreatePage = ({
           <EmptyApp
             canEdit
             onBuild={() => setIsEditing(true)}
-            onDescribe={describe}
+            onDescribe={
+              describe
+                ? () =>
+                    describe(
+                      i18n.translate('xpack.customApp.standalone.describePrompt', {
+                        defaultMessage: 'Create a custom app that ',
+                      })
+                    )
+                : undefined
+            }
             onUseExample={() => {
               setSeed(createDefaultDocument());
               setIsEditing(true);

@@ -64,6 +64,8 @@ export const getNodeActions = (
   switch (node.type) {
     case 'table':
       return [{ event: 'onRowClick', actions: node.onRowClick }];
+    case 'button':
+      return [{ event: 'onClick', actions: node.onClick }];
     case 'select':
     case 'button_group':
     case 'search':

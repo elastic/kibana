@@ -85,6 +85,15 @@ export const createDefaultNode = (
       return { type, id, query: DEFAULT_QUERY };
     case 'custom_content':
       return { type, id, query: DEFAULT_QUERY, template: STARTER_TEMPLATE };
+    case 'time_range':
+      return { type, id };
+    case 'button':
+      return {
+        type,
+        id,
+        label: i18n.translate('xpack.customApp.defaults.button', { defaultMessage: 'Run' }),
+        onClick: [],
+      };
     case 'table':
       return { type, id, query: DEFAULT_QUERY, onRowClick: [] };
     case 'key_value':

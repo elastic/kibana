@@ -13,7 +13,7 @@ import type { AppNodeOfType } from '@kbn/custom-app-common';
 import type { SourceData } from '../data/data_layer';
 import { useDataLayer } from '../data/data_layer_context';
 import { useSource } from '../data/use_source';
-import { useAppRuntime } from '../runtime/app_runtime_context';
+import { useActionRunner } from '../workflows/use_action_runner';
 import { DataState } from './data_state';
 import { formatValue, toSortValue, type CellFormat } from './format_value';
 import { MissingColumn } from './missing_column';
@@ -59,7 +59,7 @@ const toItems = ({ columns, rows }: SourceData): Item[] =>
   }));
 
 const TableContent = ({ node, data }: { node: AppNodeOfType<'table'>; data: SourceData }) => {
-  const runtime = useAppRuntime();
+  const runActions = useActionRunner(node.id);
   const [dropped, setDropped] = useState<string[]>([]);
 
   const columns: ColumnConfig[] = node.columns ?? data.columns.map(({ name }) => ({ field: name }));
@@ -69,7 +69,7 @@ const TableContent = ({ node, data }: { node: AppNodeOfType<'table'>; data: Sour
   if (missing.length > 0) return <MissingColumn columns={missing} />;
 
   const isClickable = node.onRowClick.length > 0;
-  const handleRowClick = (row: Row) => setDropped(runtime.run(node.onRowClick, { row }).dropped);
+  const handleRowClick = (row: Row) => setDropped(runActions(node.onRowClick, { row }));
 
   const tableColumns: Array<EuiBasicTableColumn<Item>> = columns.map(
     ({ field, label }, position) => {

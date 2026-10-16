@@ -67,6 +67,8 @@ import type { HasCustomAppDocument } from './has_custom_app_document';
 import type { HasCustomAppLibraryId } from './has_library_id';
 import { createAppRuntime } from './runtime/app_runtime';
 import { AppRuntimeContext } from './runtime/app_runtime_context';
+import { TimeRangeControlContext } from './runtime/time_range_context';
+import { WorkflowRunnerProvider } from './workflows/workflow_runner';
 import { createRunEsqlQuery } from './data/run_esql_query';
 import { createDefaultDocument } from './default_document';
 import { getServices } from './services';
@@ -157,6 +159,10 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
     const runtime = createAppRuntime(initialDocument);
     // Emits the defaults straight away, then every change a user makes.
     const stateSubscription = runtime.state$.subscribe(dataLayer.setState);
+
+    // In a dashboard, a time range component sets the period of this panel, as the panel menu's own
+    // time range does, and no longer follows the dashboard's. It is saved with the panel.
+    const timeRangeControl = { setTimeRange: timeRangeManager.api.setTimeRange };
 
     const serializeByValue = (): CustomAppByValueState => ({
       ...titleManager.getLatestState(),
@@ -371,20 +377,24 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
 
         return (
           <AppRuntimeContext.Provider value={runtime}>
-            <DataLayerContext.Provider value={dataLayer}>
-              {isEmptyDocument(document) ? (
-                <EmptyApp
-                  canEdit={viewMode === 'edit'}
-                  onBuild={() => api.onEdit()}
-                  onDescribe={agentBuilder ? () => generateWithChat(document) : undefined}
-                  onUseExample={() => document$.next(createDefaultDocument())}
-                />
-              ) : (
-                <AppFrame>
-                  <NodeRenderer node={document.root} />
-                </AppFrame>
-              )}
-            </DataLayerContext.Provider>
+            <TimeRangeControlContext.Provider value={timeRangeControl}>
+              <WorkflowRunnerProvider appId={libraryId}>
+                <DataLayerContext.Provider value={dataLayer}>
+                  {isEmptyDocument(document) ? (
+                    <EmptyApp
+                      canEdit={viewMode === 'edit'}
+                      onBuild={() => api.onEdit()}
+                      onDescribe={agentBuilder ? () => generateWithChat(document) : undefined}
+                      onUseExample={() => document$.next(createDefaultDocument())}
+                    />
+                  ) : (
+                    <AppFrame>
+                      <NodeRenderer node={document.root} />
+                    </AppFrame>
+                  )}
+                </DataLayerContext.Provider>
+              </WorkflowRunnerProvider>
+            </TimeRangeControlContext.Provider>
           </AppRuntimeContext.Provider>
         );
       },

@@ -501,6 +501,22 @@ describe('pruneUnusedValues', () => {
     expect(Object.keys(pruneUnusedValues(document).state)).toEqual(['find', 'service']);
   });
 
+  it('keeps a value that a workflow is handed, so it is not pruned from under the button', () => {
+    const document = withValues(
+      { host: text('web-1'), orphan: text('c') },
+      {
+        type: 'button',
+        id: 'go',
+        label: 'Isolate',
+        onClick: [
+          { type: 'runWorkflow', workflow: 'isolate', inputs: { host: { fromState: 'host' } } },
+        ],
+      }
+    );
+
+    expect(Object.keys(pruneUnusedValues(document).state)).toEqual(['host']);
+  });
+
   it('keeps a value set only by an action of an input, and one nested in a flyout', () => {
     const document = withValues(
       { a: text('x'), b: text('y'), c: text('z') },

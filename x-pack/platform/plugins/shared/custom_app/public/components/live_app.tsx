@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSuperDatePicker,
-  type OnTimeChangeProps,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { collectQueries, type AppDocument } from '@kbn/custom-app-common';
@@ -23,7 +16,9 @@ import { DataLayerContext } from '../data/data_layer_context';
 import { createRunEsqlQuery } from '../data/run_esql_query';
 import { createAppRuntime } from '../runtime/app_runtime';
 import { AppRuntimeContext } from '../runtime/app_runtime_context';
+import { TimeRangeControlContext } from '../runtime/time_range_context';
 import { getServices } from '../services';
+import { WorkflowRunnerProvider } from '../workflows/workflow_runner';
 
 const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' };
 
@@ -39,11 +34,17 @@ const toFetchContext = (timeRange: { from: string; to: string }): FetchContext =
   isApproximate: false,
 });
 
+interface LiveAppProps {
+  document: AppDocument;
+  appId?: string;
+}
+
 /**
- * The app, live, inside the conversation. It has its own time range, since there is no dashboard
- * around it, and its own state: what is picked here stays here.
+ * The app, live, outside a dashboard: on its own page, or in a chat card. With no dashboard around
+ * it, it has its own period, the last day to begin with, which a Time range component in the app
+ * changes; an app without one keeps it. It has its own state too: what is picked here stays here.
  */
-export const LiveApp = ({ document }: { document: AppDocument }) => {
+export const LiveApp = ({ document, appId }: LiveAppProps) => {
   const { core, search } = getServices();
   const [timeRange, setTimeRange] = useState(DEFAULT_TIME_RANGE);
 
@@ -66,33 +67,20 @@ export const LiveApp = ({ document }: { document: AppDocument }) => {
 
   useEffect(() => () => dataLayer.destroy(), [dataLayer]);
 
-  const onTimeChange = useCallback(
-    ({ start, end }: OnTimeChangeProps) => setTimeRange({ from: start, to: end }),
-    []
-  );
+  const timeRangeControl = useMemo(() => ({ setTimeRange }), []);
 
   return (
     <div data-test-subj="customAppChatCard">
-      <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiSuperDatePicker
-            start={timeRange.from}
-            end={timeRange.to}
-            onTimeChange={onTimeChange}
-            showUpdateButton={false}
-            compressed
-            aria-label={i18n.translate('xpack.customApp.attachment.timeRangeLabel', {
-              defaultMessage: 'Time range of the app',
-            })}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <AppRuntimeContext.Provider value={runtime}>
-        <DataLayerContext.Provider value={dataLayer}>
-          <AppFrame>
-            <NodeRenderer node={document.root} />
-          </AppFrame>
-        </DataLayerContext.Provider>
+        <TimeRangeControlContext.Provider value={timeRangeControl}>
+          <WorkflowRunnerProvider appId={appId}>
+            <DataLayerContext.Provider value={dataLayer}>
+              <AppFrame>
+                <NodeRenderer node={document.root} />
+              </AppFrame>
+            </DataLayerContext.Provider>
+          </WorkflowRunnerProvider>
+        </TimeRangeControlContext.Provider>
       </AppRuntimeContext.Provider>
     </div>
   );

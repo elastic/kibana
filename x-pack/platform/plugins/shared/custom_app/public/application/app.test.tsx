@@ -9,6 +9,8 @@ import React from 'react';
 import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { ChatEventType } from '@kbn/agent-builder-common';
 import type { ScopedHistory } from '@kbn/core/public';
 import { App } from './app';
 import type { SavedApp, SavedAppsClient } from './saved_apps_client';
@@ -68,8 +70,10 @@ jest.mock('@kbn/presentation-util-plugin/public', () => ({
   ),
 }));
 jest.mock('../components/live_app', () => ({
-  LiveApp: ({ document }: { document: { root: { id: string } } }) => (
-    <div data-test-subj="liveApp">{document.root.id}</div>
+  LiveApp: ({ document, appId }: { document: { root: { id: string } }; appId?: string }) => (
+    <div data-test-subj="liveApp" data-app-id={appId}>
+      {document.root.id}
+    </div>
   ),
 }));
 jest.mock('../editor/editor_flyout', () => ({
@@ -117,6 +121,37 @@ const savedApp = (overrides: Partial<SavedApp> = {}): SavedApp => ({
   ...overrides,
 });
 
+/** An assistant that can be asked to open, and can be made to answer. */
+const makeAgentBuilder = () => {
+  const activeConversation$ = new BehaviorSubject<{ id: string } | undefined>(undefined);
+  const chatEvents$ = new Subject<unknown>();
+  return {
+    openChat: jest.fn(),
+    events: {
+      ui: { activeConversation$ },
+      getChatEvents$: jest.fn(() => chatEvents$),
+    },
+    /** The agent has changed the app of the attachment with this id. */
+    answer: (attachmentId: string, document: unknown) => {
+      activeConversation$.next({ id: 'conversation-1' });
+      chatEvents$.next({
+        type: ChatEventType.toolUi,
+        data: {
+          tool_id: 'custom_app_update_app',
+          tool_call_id: 'call-1',
+          custom_event: 'custom_app:updated',
+          data: { attachmentId, data: { document } },
+        },
+      });
+    },
+  };
+};
+
+const madeByTheAgent = {
+  state: {},
+  root: { type: 'text', id: 'agent-made', text: 'From the agent' },
+};
+
 const makeClient = () =>
   ({
     find: jest.fn().mockResolvedValue({
@@ -136,12 +171,12 @@ const setup = ({
   canWriteDashboards = true,
   path = '/',
   prepare,
-  describeWithChat,
+  agentBuilder,
   confirmLeave = true,
 }: {
   /** What the person answers when asked whether to leave with unsaved changes. */
   confirmLeave?: boolean;
-  describeWithChat?: (message: string) => void;
+  agentBuilder?: ReturnType<typeof makeAgentBuilder>;
   canWriteDashboards?: boolean;
   canSave?: boolean;
   path?: string;
@@ -165,7 +200,7 @@ const setup = ({
       chrome={chrome as never}
       notifications={notifications as never}
       canSave={canSave}
-      describeWithChat={describeWithChat}
+      agentBuilder={agentBuilder as never}
       onAppLeave={onAppLeave}
       stateTransfer={{ navigateToWithEmbeddablePackages } as never}
       canWriteDashboards={canWriteDashboards}
@@ -290,13 +325,124 @@ describe('the custom apps page', () => {
       expect(screen.getByText('Build your app')).toBeInTheDocument();
     });
 
-    it('opens chat with the start of a request when asked to describe it', async () => {
-      const describeWithChat = jest.fn();
-      setup({ path: '/create', describeWithChat });
+    describe('with the assistant', () => {
+      const attachedTo = (agent: ReturnType<typeof makeAgentBuilder>) =>
+        agent.openChat.mock.calls[0][0].attachments[0];
 
-      await userEvent.click(await screen.findByTestId('customAppEmptyDescribe'));
+      it('opens a conversation with the start of a request, and the app as it is, attached', async () => {
+        const agent = makeAgentBuilder();
+        setup({ path: '/create', agentBuilder: agent });
 
-      expect(describeWithChat).toHaveBeenCalledWith('Create a custom app that ');
+        await userEvent.click(await screen.findByTestId('customAppEmptyDescribe'));
+
+        expect(agent.openChat).toHaveBeenCalledWith(
+          expect.objectContaining({
+            newConversation: true,
+            initialMessage: 'Create a custom app that ',
+          })
+        );
+        const attachment = attachedTo(agent);
+        expect(attachment.type).toBe('platform.custom_app.app_context');
+        expect(attachment.data).toMatchObject({
+          document: { root: { type: 'stack', children: [] } },
+        });
+        // A page has no panel: it is told apart by the id of its attachment.
+        expect(attachment.data).not.toHaveProperty('embeddable_id');
+        expect(attachment.id).toMatch(/^platform\.custom_app\.app_context-page-/);
+      });
+
+      it('shows what the agent makes on the page, as a draft that is not saved', async () => {
+        const agent = makeAgentBuilder();
+        const { client } = setup({ path: '/create', agentBuilder: agent });
+        await userEvent.click(await screen.findByTestId('customAppEmptyDescribe'));
+
+        await act(async () => agent.answer(attachedTo(agent).id, madeByTheAgent));
+
+        expect(await screen.findByTestId('liveApp')).toHaveTextContent('agent-made');
+        expect(screen.queryByTestId('customAppEmpty')).not.toBeInTheDocument();
+        expect(screen.getByText('Unsaved')).toBeInTheDocument();
+        expect(screen.getByTestId('customAppSave')).toBeEnabled();
+        expect(client.create).not.toHaveBeenCalled();
+      });
+
+      it('can then be saved with a name, as anything put together on the page', async () => {
+        const agent = makeAgentBuilder();
+        const { client, history } = setup({ path: '/create', agentBuilder: agent });
+        client.create.mockResolvedValue(savedApp({ id: 'new-1', title: 'Fresh' }));
+        await userEvent.click(await screen.findByTestId('customAppEmptyDescribe'));
+        await act(async () => agent.answer(attachedTo(agent).id, madeByTheAgent));
+
+        await userEvent.click(await screen.findByTestId('customAppSave'));
+        await userEvent.type(screen.getByTestId('customAppDetailsTitle'), 'Fresh');
+        await userEvent.click(screen.getByTestId('customAppDetailsConfirm'));
+
+        await waitFor(() => expect(history.location.pathname).toBe('/view/new-1'));
+        expect(client.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            document: expect.objectContaining({
+              root: expect.objectContaining({ id: 'agent-made' }),
+            }),
+          })
+        );
+      });
+
+      it('takes only what is about its own attachment, not what is about something else', async () => {
+        const agent = makeAgentBuilder();
+        setup({ path: '/create', agentBuilder: agent });
+        await userEvent.click(await screen.findByTestId('customAppEmptyDescribe'));
+
+        await act(async () => agent.answer('some-other-attachment', madeByTheAgent));
+
+        expect(screen.queryByTestId('liveApp')).not.toBeInTheDocument();
+        expect(screen.getByText('Build your app')).toBeInTheDocument();
+      });
+
+      it('ignores an app that is not valid, rather than break the page', async () => {
+        const agent = makeAgentBuilder();
+        setup({ path: '/create', agentBuilder: agent });
+        await userEvent.click(await screen.findByTestId('customAppEmptyDescribe'));
+
+        await act(async () =>
+          agent.answer(attachedTo(agent).id, { state: {}, root: { type: 'carousel', id: 'x' } })
+        );
+
+        expect(screen.getByText('Build your app')).toBeInTheDocument();
+      });
+
+      it('closes the editor when the agent answers, which would show an old draft', async () => {
+        const agent = makeAgentBuilder();
+        setup({ path: '/create', agentBuilder: agent });
+        await userEvent.click(await screen.findByTestId('customAppEmptyDescribe'));
+        const { id } = attachedTo(agent);
+        await userEvent.click(await screen.findByTestId('customAppEmptyBuild'));
+        expect(await screen.findByTestId('editor')).toBeInTheDocument();
+
+        await act(async () => agent.answer(id, madeByTheAgent));
+
+        await waitFor(() => expect(screen.queryByTestId('editor')).not.toBeInTheDocument());
+        expect(screen.getByTestId('liveApp')).toHaveTextContent('agent-made');
+      });
+
+      it('offers to refine an app that has something in it, and sends it as it is', async () => {
+        const agent = makeAgentBuilder();
+        setup({ path: '/create', agentBuilder: agent });
+        await userEvent.click(await screen.findByTestId('customAppEmptyBuild'));
+        await userEvent.click(await screen.findByRole('button', { name: 'save draft' }));
+
+        await userEvent.click(await screen.findByTestId('customAppRefineWithAi'));
+
+        expect(agent.openChat).toHaveBeenCalledWith(
+          expect.objectContaining({ initialMessage: 'Change this app so that ' })
+        );
+        expect(attachedTo(agent).data.document.root).toMatchObject({ id: 'edited' });
+      });
+
+      it('does not offer to refine an app that is empty, which is what describing it is for', async () => {
+        setup({ path: '/create', agentBuilder: makeAgentBuilder() });
+        await screen.findByText('Build your app');
+
+        expect(screen.queryByTestId('customAppRefineWithAi')).not.toBeInTheDocument();
+      });
     });
 
     it('does not offer to describe it when chat is not available', async () => {
@@ -454,6 +600,106 @@ describe('the custom apps page', () => {
     });
   });
 
+  describe('refining a saved app with the assistant', () => {
+    const attachedTo = (agent: ReturnType<typeof makeAgentBuilder>) =>
+      agent.openChat.mock.calls[0][0].attachments[0];
+
+    it('is offered for an app that has something in it, to someone who may change it', async () => {
+      setup({ path: '/view/app-1', agentBuilder: makeAgentBuilder() });
+      await screen.findByTestId('liveApp');
+
+      expect(screen.getByTestId('customAppRefineWithAi')).toBeInTheDocument();
+    });
+
+    it('is not offered when the assistant is not available', async () => {
+      setup({ path: '/view/app-1' });
+      await screen.findByTestId('liveApp');
+
+      expect(screen.queryByTestId('customAppRefineWithAi')).not.toBeInTheDocument();
+    });
+
+    it('is not offered to someone who may only read, who could not save what it makes', async () => {
+      setup({ path: '/view/app-1', canSave: false, agentBuilder: makeAgentBuilder() });
+      await screen.findByTestId('liveApp');
+
+      expect(screen.queryByTestId('customAppRefineWithAi')).not.toBeInTheDocument();
+    });
+
+    it('sends the app as it is saved, to be changed, with the start of a request', async () => {
+      const agent = makeAgentBuilder();
+      setup({ path: '/view/app-1', agentBuilder: agent });
+      await screen.findByTestId('liveApp');
+
+      await userEvent.click(screen.getByTestId('customAppRefineWithAi'));
+
+      expect(agent.openChat).toHaveBeenCalledWith(
+        expect.objectContaining({
+          newConversation: true,
+          initialMessage: 'Change this app so that ',
+        })
+      );
+      expect(attachedTo(agent).data.document.root).toMatchObject({ id: 'title' });
+    });
+
+    it('shows what the agent makes as a change that is not saved, which Save then saves', async () => {
+      const agent = makeAgentBuilder();
+      const { client } = setup({ path: '/view/app-1', agentBuilder: agent });
+      await screen.findByTestId('liveApp');
+      await userEvent.click(screen.getByTestId('customAppRefineWithAi'));
+
+      await act(async () => agent.answer(attachedTo(agent).id, madeByTheAgent));
+
+      await waitFor(() => expect(screen.getByTestId('liveApp')).toHaveTextContent('agent-made'));
+      expect(screen.getByText('Unsaved')).toBeInTheDocument();
+      expect(client.update).not.toHaveBeenCalled();
+
+      await userEvent.click(screen.getByTestId('customAppSave'));
+      await waitFor(() =>
+        expect(client.update).toHaveBeenCalledWith(
+          'app-1',
+          expect.objectContaining({
+            document: expect.objectContaining({
+              root: expect.objectContaining({ id: 'agent-made' }),
+            }),
+          })
+        )
+      );
+    });
+
+    it('does not count an answer that changed nothing as a change', async () => {
+      const agent = makeAgentBuilder();
+      setup({ path: '/view/app-1', agentBuilder: agent });
+      await screen.findByTestId('liveApp');
+      await userEvent.click(screen.getByTestId('customAppRefineWithAi'));
+
+      await act(async () => agent.answer(attachedTo(agent).id, savedApp().document));
+
+      expect(screen.queryByText('Unsaved')).not.toBeInTheDocument();
+    });
+
+    it('can be asked from the empty state of an empty app, and the answer fills it', async () => {
+      const agent = makeAgentBuilder();
+      setup({
+        path: '/view/app-1',
+        agentBuilder: agent,
+        prepare: (client) =>
+          client.get.mockResolvedValue(
+            savedApp({
+              document: {
+                state: {},
+                root: { type: 'stack', id: 'root', direction: 'vertical', children: [] },
+              },
+            })
+          ),
+      });
+      await userEvent.click(await screen.findByTestId('customAppEmptyDescribe'));
+
+      await act(async () => agent.answer(attachedTo(agent).id, madeByTheAgent));
+
+      await waitFor(() => expect(screen.getByTestId('liveApp')).toHaveTextContent('agent-made'));
+    });
+  });
+
   describe('getting back to the list', () => {
     it('is a link at the top of the page of an app, which goes to the list', async () => {
       const { history } = setup({ path: '/view/app-1' });
@@ -590,6 +836,12 @@ describe('the custom apps page', () => {
   });
 
   describe('an app', () => {
+    it('tells what shows the app which saved app it is, so that what it runs can be traced to it', async () => {
+      setup({ path: '/view/app-1' });
+
+      expect(await screen.findByTestId('liveApp')).toHaveAttribute('data-app-id', 'app-1');
+    });
+
     it('shows the app with its name', async () => {
       setup({ path: '/view/app-1' });
 

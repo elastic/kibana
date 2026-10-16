@@ -25,6 +25,11 @@ export const MAX_STATE_KEYS = 20;
 export const MAX_STATE_KEY_LENGTH = 64;
 export const MAX_STATE_STRING_LENGTH = 1_000;
 export const MAX_ACTIONS_PER_EVENT = 5;
+/** A workflow is named by its id, which is a text of this length at most. */
+export const MAX_WORKFLOW_ID_LENGTH = 256;
+/** What an action can hand to a workflow: a few named inputs, as a workflow declares few. */
+export const MAX_WORKFLOW_INPUTS = 20;
+export const MAX_WORKFLOW_INPUT_NAME_LENGTH = 64;
 export const MAX_TABLE_COLUMNS = 50;
 export const MAX_KEY_VALUE_FIELDS = 50;
 

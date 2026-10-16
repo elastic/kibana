@@ -90,6 +90,182 @@ describe('appDocumentSchema', () => {
   });
 });
 
+describe('the time range', () => {
+  it('has nothing to set: where it is placed is all there is to it', () => {
+    const result = appDocumentSchema.parse({ root: { type: 'time_range', id: 'when' } });
+
+    expect(result.root).toEqual({ type: 'time_range', id: 'when' });
+  });
+
+  it('can sit among the filters, or anywhere else in the layout', () => {
+    const result = appDocumentSchema.safeParse({
+      root: stackOf('root', [
+        {
+          type: 'stack',
+          id: 'filters',
+          direction: 'horizontal',
+          children: [{ type: 'time_range', id: 'when' }],
+        },
+        { type: 'flyout', id: 'detail', title: 'Detail', children: [] },
+      ]),
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('is only one for the whole app, since it sets the period of all of it', () => {
+    const result = appDocumentSchema.safeParse({
+      root: stackOf('root', [
+        { type: 'time_range', id: 'when' },
+        { type: 'time_range', id: 'again' },
+      ]),
+    });
+
+    expect(result.success).toBe(false);
+    expect(JSON.stringify(result.error?.issues)).toContain('is a second time range');
+    expect(JSON.stringify(result.error?.issues)).toContain('again');
+  });
+
+  it('is only one when the second is inside a flyout, too', () => {
+    const result = appDocumentSchema.safeParse({
+      root: stackOf('root', [
+        { type: 'time_range', id: 'when' },
+        {
+          type: 'flyout',
+          id: 'detail',
+          title: 'D',
+          children: [{ type: 'time_range', id: 'in-flyout' }],
+        },
+      ]),
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('is not a query, so it has nothing to run, and an app can do without it', () => {
+    const parsed = appDocumentSchema.parse({ root: { type: 'time_range', id: 'when' } });
+
+    expect(collectQueries(parsed.root)).toEqual({});
+    expect(
+      appDocumentSchema.safeParse({ root: { type: 'text', id: 't', text: 'x' } }).success
+    ).toBe(true);
+  });
+});
+
+describe('buttons and the workflows they run', () => {
+  const buttonDocument = (actions: unknown[], state: Record<string, unknown> = {}) => ({
+    state,
+    root: { type: 'button', id: 'go', label: 'Isolate host', onClick: actions },
+  });
+  const run = (inputs: Record<string, unknown> = {}) => ({
+    type: 'runWorkflow',
+    workflow: 'isolate-host',
+    inputs,
+  });
+  const issuesOf = (document: unknown) =>
+    JSON.stringify(appDocumentSchema.safeParse(document).error?.issues ?? []);
+
+  it('is a label and what happens when it is pressed, which is nothing until it is told', () => {
+    const result = appDocumentSchema.parse({
+      root: { type: 'button', id: 'go', label: 'Go' },
+    });
+
+    expect(result.root).toEqual({ type: 'button', id: 'go', label: 'Go', onClick: [] });
+  });
+
+  it('needs something written on it', () => {
+    expect(
+      appDocumentSchema.safeParse({ root: { type: 'button', id: 'go', label: '' } }).success
+    ).toBe(false);
+    expect(appDocumentSchema.safeParse({ root: { type: 'button', id: 'go' } }).success).toBe(false);
+  });
+
+  it('runs a workflow by its id, handing it fixed values and values of the app', () => {
+    const result = appDocumentSchema.safeParse(
+      buttonDocument(
+        [run({ reason: 'Suspicious', severity: 3, force: true, host: { fromState: 'host' } })],
+        {
+          host: { type: 'string', default: 'web-1' },
+        }
+      )
+    );
+
+    expect(result.success).toBe(true);
+  });
+
+  it('hands nothing when it is given nothing', () => {
+    const parsed = appDocumentSchema.parse(
+      buttonDocument([{ type: 'runWorkflow', workflow: 'isolate-host' }])
+    );
+
+    expect((parsed.root as { onClick: Array<{ inputs: object }> }).onClick[0].inputs).toEqual({});
+  });
+
+  it('can be run by a row click, with a column of the row that was clicked', () => {
+    const result = appDocumentSchema.safeParse({
+      root: {
+        type: 'table',
+        id: 'hosts',
+        query: 'FROM hosts',
+        onRowClick: [run({ host: { fromColumn: 'host.name' } })],
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('is refused with a column when a button runs it, as no row was clicked', () => {
+    const text = issuesOf(buttonDocument([run({ host: { fromColumn: 'host.name' } })]));
+
+    expect(text).toContain('takes a column, which only a row click has');
+  });
+
+  it('is refused with a value of the app that does not exist, naming it', () => {
+    const text = issuesOf(buttonDocument([run({ host: { fromState: 'nope' } })]));
+
+    expect(text).toContain('unknown state key \\"nope\\"');
+  });
+
+  it('is refused when an input would start it, which is every key that is typed', () => {
+    const text = issuesOf({
+      state: { q: { type: 'string', default: '' } },
+      root: { type: 'search', id: 'find', label: 'Find', bind: 'q', onChange: [run()] },
+    });
+
+    expect(text).toContain('a workflow can only be run by a button or a row click');
+  });
+
+  it('names where the workflow of an action can be found, within a limit', () => {
+    expect(
+      appDocumentSchema.safeParse(buttonDocument([{ type: 'runWorkflow', workflow: '' }])).success
+    ).toBe(false);
+    expect(
+      appDocumentSchema.safeParse(
+        buttonDocument([{ type: 'runWorkflow', workflow: 'x'.repeat(257) }])
+      ).success
+    ).toBe(false);
+  });
+
+  it('hands over at most a few inputs, and each is named', () => {
+    const tooMany = Object.fromEntries(Array.from({ length: 21 }, (_u, i) => [`input${i}`, 'x']));
+
+    expect(appDocumentSchema.safeParse(buttonDocument([run(tooMany)])).success).toBe(false);
+    expect(appDocumentSchema.safeParse(buttonDocument([run({ '': 'x' })])).success).toBe(false);
+  });
+
+  it('refuses something that is not a value: an object of another kind is not an input', () => {
+    expect(
+      appDocumentSchema.safeParse(buttonDocument([run({ host: { fromEverything: true } })])).success
+    ).toBe(false);
+  });
+
+  it('is not a query, so it has nothing to run when the app loads', () => {
+    const parsed = appDocumentSchema.parse(buttonDocument([run()]));
+
+    expect(collectQueries(parsed.root)).toEqual({});
+  });
+});
+
 describe('chart nodes', () => {
   const chartDocument = (overrides: Record<string, unknown> = {}) => ({
     root: { type: 'chart', id: 'trend', query: 'ROW a = 1', ...overrides },

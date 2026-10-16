@@ -12,6 +12,8 @@ export {
   MAX_QUERY_LENGTH,
   MAX_STATE_STRING_LENGTH,
   MAX_TEXT_LENGTH,
+  MAX_WORKFLOW_ID_LENGTH,
+  MAX_WORKFLOW_INPUTS,
 } from './constants';
 export {
   actionSchema,

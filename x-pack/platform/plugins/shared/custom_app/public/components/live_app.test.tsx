@@ -18,7 +18,15 @@ const runQuery = jest.fn<ReturnType<RunQuery>, Parameters<RunQuery>>(async () =>
 
 jest.mock('../data/run_esql_query', () => ({ createRunEsqlQuery: () => runQuery }));
 jest.mock('../services', () => ({
-  getServices: () => ({ core: { http: {} }, search: jest.fn() }),
+  getServices: () => ({
+    core: {
+      http: {},
+      application: { capabilities: {} },
+      notifications: { toasts: {} },
+      rendering: {},
+    },
+    search: jest.fn(),
+  }),
 }));
 
 const document = appDocumentSchema.parse({
@@ -43,10 +51,29 @@ describe('the app in the conversation', () => {
     expect(runQuery.mock.calls[0][1].context.timeRange).toEqual({ from: 'now-24h', to: 'now' });
   });
 
-  it('has its own time range, since no dashboard is around it', async () => {
+  it('has no time picker of its own: an app has one only if it has a time range in it', async () => {
     render(<LiveApp document={document} />);
+    await screen.findByText('42');
 
-    expect(await screen.findByTestId('superDatePickerToggleQuickMenuButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('superDatePickerToggleQuickMenuButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('customAppTimeRange')).not.toBeInTheDocument();
+  });
+
+  it('shows the time picker where the app has its time range, and the picker is usable', async () => {
+    const withPicker = appDocumentSchema.parse({
+      root: {
+        type: 'stack',
+        id: 'root',
+        children: [
+          { type: 'time_range', id: 'when' },
+          { type: 'stat', id: 'total', title: 'Total', query: 'ROW value = 42' },
+        ],
+      },
+    });
+    render(<LiveApp document={withPicker} />);
+
+    expect(await screen.findByTestId('customAppTimeRange')).toBeInTheDocument();
+    expect(await screen.findByTestId('superDatePickerToggleQuickMenuButton')).toBeEnabled();
   });
 
   it('shows the data of the new app when the app changes under it, not a table that never finishes', async () => {

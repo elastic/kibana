@@ -6,7 +6,7 @@
  */
 
 import { appDocumentSchema } from './document_schema';
-import { collectQueries, getNodeQuery, isEmptyDocument } from './node_tree';
+import { collectQueries, getNodeActions, getNodeQuery, isEmptyDocument } from './node_tree';
 
 const { root } = appDocumentSchema.parse({
   root: {
@@ -99,5 +99,16 @@ describe('isEmptyDocument', () => {
     expect(isEmptyDocument(parse({ type: 'flyout', id: 'f', title: 'x', children: [] }))).toBe(
       false
     );
+  });
+});
+
+describe('getNodeActions of a button', () => {
+  it('is what happens when it is pressed', () => {
+    const action = { type: 'runWorkflow' as const, workflow: 'isolate', inputs: {} };
+    const parsed = appDocumentSchema.parse({
+      root: { type: 'button', id: 'go', label: 'Go', onClick: [action] },
+    });
+
+    expect(getNodeActions(parsed.root)).toEqual([{ event: 'onClick', actions: [action] }]);
   });
 });

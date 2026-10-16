@@ -19,6 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   appDocumentSchema,
@@ -29,9 +30,10 @@ import {
 import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { EmptyApp } from '../components/empty_app';
 import { LiveApp } from '../components/live_app';
-import { createDefaultDocument } from '../default_document';
+import { createDefaultDocument, createEmptyDocument } from '../default_document';
 import { EditorFlyout } from '../editor/editor_flyout';
 import { DetailsModal } from './details_modal';
+import { useChatWithPage } from './use_chat_with_page';
 import { useListBreadcrumb } from './list_breadcrumb';
 import { useUnsavedChangesGuard } from './use_unsaved_changes_guard';
 import type { AppServices } from './app';
@@ -60,7 +62,7 @@ export const ViewPage = ({
   chrome,
   notifications,
   canSave,
-  describeWithChat,
+  agentBuilder,
   onAppLeave,
   stateTransfer,
   canWriteDashboards,
@@ -119,6 +121,23 @@ export const ViewPage = ({
   }, []);
 
   useUnsavedChangesGuard(draft !== undefined, onAppLeave);
+
+  const savedDocument = state.status === 'ready' ? state.document : undefined;
+  // What the agent makes comes back here, as a change that is not saved yet.
+  const describe = useChatWithPage({
+    agentBuilder,
+    getDocument: useCallback(
+      () => draft ?? savedDocument ?? createEmptyDocument(),
+      [draft, savedDocument]
+    ),
+    onDocument: useCallback(
+      (document: AppDocument) => {
+        setDraft(isEqual(document, savedDocument) ? undefined : document);
+        closeEditor();
+      },
+      [closeEditor, savedDocument]
+    ),
+  });
 
   const save = useCallback(
     async (details: { title: string; description?: string }, document: AppDocument) => {
@@ -195,15 +214,6 @@ export const ViewPage = ({
     }
   };
 
-  const describe = describeWithChat
-    ? () =>
-        describeWithChat(
-          i18n.translate('xpack.customApp.standalone.describePrompt', {
-            defaultMessage: 'Create a custom app that ',
-          })
-        )
-    : undefined;
-
   const editButton =
     canSave && state.status === 'ready' ? (
       <EuiButton
@@ -276,6 +286,23 @@ export const ViewPage = ({
     });
   };
 
+  const refineButton =
+    canSave && describe && state.status === 'ready' && !isEmptyDocument(draft ?? state.document) ? (
+      <AiButton
+        iconType="sparkles"
+        onClick={() =>
+          describe(
+            i18n.translate('xpack.customApp.standalone.refinePrompt', {
+              defaultMessage: 'Change this app so that ',
+            })
+          )
+        }
+        data-test-subj="customAppRefineWithAi"
+      >
+        {i18n.translate('xpack.customApp.standalone.refine', { defaultMessage: 'Refine with AI' })}
+      </AiButton>
+    ) : undefined;
+
   const detailsButton = canSave ? (
     <EuiButtonEmpty
       iconType="pencil"
@@ -317,6 +344,7 @@ export const ViewPage = ({
               ]
             : []),
           ...(editButton ? [editButton] : []),
+          ...(refineButton ? [refineButton] : []),
           ...(addToDashboardButton ? [addToDashboardButton] : []),
           ...(detailsButton ? [detailsButton] : []),
           ...(hasDraft
@@ -349,14 +377,23 @@ export const ViewPage = ({
           <EmptyApp
             canEdit={canSave}
             onBuild={() => setIsEditing(true)}
-            onDescribe={describe}
+            onDescribe={
+              describe
+                ? () =>
+                    describe(
+                      i18n.translate('xpack.customApp.standalone.describePrompt', {
+                        defaultMessage: 'Create a custom app that ',
+                      })
+                    )
+                : undefined
+            }
             onUseExample={() => {
               setSeed(createDefaultDocument());
               setIsEditing(true);
             }}
           />
         ) : (
-          <LiveApp document={preview ?? draft ?? state.document} />
+          <LiveApp document={preview ?? draft ?? state.document} appId={app.id} />
         )}
       </EuiPageTemplate.Section>
 

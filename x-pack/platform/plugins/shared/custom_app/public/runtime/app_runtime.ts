@@ -24,9 +24,28 @@ export interface ActionInput {
   input?: unknown;
 }
 
+/** What a workflow is handed: plain values, as a workflow takes them. */
+export type WorkflowInputValue =
+  | string
+  | number
+  | boolean
+  | null
+  | ReadonlyArray<string | number | boolean | null>;
+
+/** A workflow that an action asks to be run, with every input already resolved. */
+export interface WorkflowRunRequest {
+  workflow: string;
+  inputs: Readonly<Record<string, WorkflowInputValue>>;
+}
+
 export interface RunActionsResult {
   /** The actions, or parts of them, that were not applied, each with the reason. */
   dropped: string[];
+  /**
+   * The workflows to run. The runtime does not run them: that takes the user's say, and the network.
+   * What is handed over is as the app was when the action reached it, so a value set before it counts.
+   */
+  workflows: WorkflowRunRequest[];
 }
 
 export interface AppRuntime {
@@ -56,6 +75,19 @@ const rejectValue = (
   if (typeof value === 'string' && value.length > MAX_STATE_STRING_LENGTH) {
     return `"${key}" expects at most ${MAX_STATE_STRING_LENGTH} characters`;
   }
+};
+
+const isPlainValue = (value: unknown): value is string | number | boolean | null =>
+  value === null ||
+  typeof value === 'string' ||
+  typeof value === 'boolean' ||
+  (typeof value === 'number' && Number.isFinite(value));
+
+/** A column holds a value, or several, as ES|QL does; anything else is not something to hand over. */
+const toWorkflowInput = (value: unknown): WorkflowInputValue | undefined => {
+  if (isPlainValue(value)) return value;
+  if (Array.isArray(value) && value.every(isPlainValue)) return value;
+  return undefined;
 };
 
 const collectFlyoutIds = (root: AppDocument['root']): Set<string> => {
@@ -121,6 +153,7 @@ export const createAppRuntime = (document: Pick<AppDocument, 'state' | 'root'>):
     openFlyoutId$,
     run: (actions, input = {}) => {
       const dropped: string[] = [];
+      const workflows: WorkflowRunRequest[] = [];
 
       actions.forEach((action) => {
         switch (action.type) {
@@ -137,10 +170,39 @@ export const createAppRuntime = (document: Pick<AppDocument, 'state' | 'root'>):
           case 'closeFlyout':
             openFlyoutId$.next(undefined);
             break;
+          case 'runWorkflow': {
+            const inputs: Record<string, WorkflowInputValue> = {};
+            // One input that cannot be had is reason enough not to run the workflow at all: it would
+            // be handed less than it was written to be given.
+            const missing = Object.entries(action.inputs).find(([name, source]) => {
+              let resolved: unknown;
+              if (typeof source !== 'object') {
+                resolved = source;
+              } else if ('fromColumn' in source) {
+                if (!input.row || !(source.fromColumn in input.row)) {
+                  dropped.push(`Column "${source.fromColumn}" is not in the row`);
+                  return true;
+                }
+                resolved = input.row[source.fromColumn];
+              } else {
+                resolved = state$.getValue()[source.fromState];
+              }
+
+              const value = toWorkflowInput(resolved);
+              if (value === undefined) {
+                dropped.push(`The input "${name}" of "${action.workflow}" is not a plain value`);
+                return true;
+              }
+              inputs[name] = value;
+              return false;
+            });
+            if (!missing) workflows.push({ workflow: action.workflow, inputs });
+            break;
+          }
         }
       });
 
-      return { dropped };
+      return { dropped, workflows };
     },
     setDocument: (next) => {
       declarations = next.state;

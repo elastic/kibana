@@ -7,7 +7,11 @@
 
 import { appDocumentSchema } from '@kbn/custom-app-common';
 import { customAppContextAttachmentDataSchema } from '../../common/app_context_attachment';
-import { buildCustomAppContextAttachment, getCustomAppAttachmentId } from './chat_integration';
+import {
+  buildCustomAppContextAttachment,
+  createPageAttachmentId,
+  getCustomAppAttachmentId,
+} from './chat_integration';
 
 const document = appDocumentSchema.parse({
   root: { type: 'heading', id: 'title', text: 'Service health' },
@@ -66,5 +70,39 @@ describe('buildCustomAppContextAttachment', () => {
     });
 
     expect(customAppContextAttachmentDataSchema.safeParse(data).success).toBe(true);
+  });
+});
+
+describe('the attachment of an app on a page, which has no panel', () => {
+  it('has the id it was given, and no panel in its data, so the agent changes it by that id', () => {
+    const attachment = buildCustomAppContextAttachment({ document, attachmentId: 'page-1' });
+
+    expect(attachment.id).toBe('page-1');
+    expect(attachment.data).toEqual({ document });
+    expect(attachment.data).not.toHaveProperty('embeddable_id');
+  });
+
+  it('is accepted by what receives it, as an app of a panel is', () => {
+    const { data } = buildCustomAppContextAttachment({ document, attachmentId: 'page-1' });
+
+    expect(customAppContextAttachmentDataSchema.safeParse(data).success).toBe(true);
+  });
+
+  it('is known by its panel when it has one, whatever id it is also given', () => {
+    const attachment = buildCustomAppContextAttachment({
+      document,
+      embeddableId: 'panel-1',
+      attachmentId: 'ignored',
+    });
+
+    expect(attachment.id).toBe(getCustomAppAttachmentId('panel-1'));
+  });
+
+  it('is given an id of its own for each page, which is of its kind', () => {
+    const first = createPageAttachmentId();
+    const second = createPageAttachmentId();
+
+    expect(first).toMatch(/^platform\.custom_app\.app_context-page-/);
+    expect(first).not.toBe(second);
   });
 });

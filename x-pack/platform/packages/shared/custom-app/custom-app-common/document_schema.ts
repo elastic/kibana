@@ -22,6 +22,9 @@ import {
   MAX_STATE_STRING_LENGTH,
   MAX_TABLE_COLUMNS,
   MAX_TEMPLATE_LENGTH,
+  MAX_WORKFLOW_ID_LENGTH,
+  MAX_WORKFLOW_INPUT_NAME_LENGTH,
+  MAX_WORKFLOW_INPUTS,
   MAX_TEXT_LENGTH,
   RESERVED_STATE_KEYS,
 } from './constants';
@@ -69,6 +72,30 @@ const setStateActionSchema = z.object({
   ]),
 });
 
+/**
+ * Runs a Workflow, as the person who triggered it, so it needs no more privilege than they have.
+ * What it hands over is a closed set: a fixed value, a column of the row that was clicked, or a
+ * value of the app. They travel as typed values and are never put together into text.
+ */
+const runWorkflowActionSchema = z.object({
+  type: z.literal('runWorkflow'),
+  /** The id of the workflow, as the Workflows application knows it. */
+  workflow: z.string().min(1).max(MAX_WORKFLOW_ID_LENGTH),
+  inputs: z
+    .record(
+      z.string().min(1).max(MAX_WORKFLOW_INPUT_NAME_LENGTH),
+      z.union([
+        stateValueSchema,
+        z.object({ fromColumn: z.string().min(1).max(MAX_HEADING_LENGTH) }),
+        z.object({ fromState: stateKeySchema }),
+      ])
+    )
+    .refine((inputs) => Object.keys(inputs).length <= MAX_WORKFLOW_INPUTS, {
+      message: `An action may hand at most ${MAX_WORKFLOW_INPUTS} inputs to a workflow`,
+    })
+    .default({}),
+});
+
 const openFlyoutActionSchema = z.object({ type: z.literal('openFlyout'), flyout: nodeIdSchema });
 const closeFlyoutActionSchema = z.object({ type: z.literal('closeFlyout') });
 
@@ -76,6 +103,7 @@ export const actionSchema = z.discriminatedUnion('type', [
   setStateActionSchema,
   openFlyoutActionSchema,
   closeFlyoutActionSchema,
+  runWorkflowActionSchema,
 ]);
 
 const actionsSchema = z.array(actionSchema).max(MAX_ACTIONS_PER_EVENT);
@@ -156,6 +184,24 @@ const tableNodeSchema = z.object({
   onRowClick: actionsSchema.default([]),
 });
 
+/** What a person presses to make something happen: the actions it lists, in order. */
+/**
+ * Lets people change the period the app shows. It has nothing to set: where it is, in the layout, is
+ * the author's say, and what it does follows from where the app is shown. An app without one keeps
+ * the period it is shown with.
+ */
+const timeRangeNodeSchema = z.object({
+  type: z.literal('time_range'),
+  id: nodeIdSchema,
+});
+
+const buttonNodeSchema = z.object({
+  type: z.literal('button'),
+  id: nodeIdSchema,
+  label: z.string().min(1).max(MAX_HEADING_LENGTH),
+  onClick: actionsSchema.default([]),
+});
+
 const inputOptionSchema = z.object({
   value: z.string().max(MAX_STATE_STRING_LENGTH),
   label: z.string().max(MAX_HEADING_LENGTH).optional(),
@@ -221,7 +267,9 @@ type LeafNode =
   | z.output<typeof keyValueNodeSchema>
   | z.output<typeof selectNodeSchema>
   | z.output<typeof buttonGroupNodeSchema>
-  | z.output<typeof searchNodeSchema>;
+  | z.output<typeof searchNodeSchema>
+  | z.output<typeof buttonNodeSchema>
+  | z.output<typeof timeRangeNodeSchema>;
 
 type StackNode = z.output<z.ZodObject<typeof stackFields>> & { children: AppNode[] };
 type FlyoutNode = z.output<z.ZodObject<typeof flyoutFields>> & { children: AppNode[] };
@@ -261,6 +309,8 @@ export const nodeSchema = z.discriminatedUnion('type', [
   selectNodeSchema,
   buttonGroupNodeSchema,
   searchNodeSchema,
+  buttonNodeSchema,
+  timeRangeNodeSchema,
   stackNodeSchema,
   flyoutNodeSchema,
 ]) satisfies z.ZodType<AppNode>;

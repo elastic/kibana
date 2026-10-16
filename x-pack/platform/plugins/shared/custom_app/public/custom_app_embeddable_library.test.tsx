@@ -28,7 +28,12 @@ jest.mock('./application/saved_apps_client', () => ({
 }));
 jest.mock('./services', () => ({
   getServices: () => ({
-    core: { http: {}, notifications: { toasts: mockToasts } },
+    core: {
+      http: {},
+      application: { capabilities: {} },
+      notifications: { toasts: mockToasts },
+      rendering: {},
+    },
     search: jest.fn(),
     agentBuilder: mockAgentBuilder,
   }),

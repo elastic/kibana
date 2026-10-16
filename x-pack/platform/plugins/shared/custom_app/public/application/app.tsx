@@ -10,6 +10,7 @@ import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { AppMountParameters, ScopedHistory } from '@kbn/core/public';
 import type { ChromeStart, NotificationsStart } from '@kbn/core/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { CreatePage } from './create_page';
 import { ListPage } from './list_page';
@@ -22,8 +23,8 @@ export interface AppServices {
   notifications: NotificationsStart;
   /** Whether the user may create, change and delete apps. */
   canSave: boolean;
-  /** Opens chat with a start for the message. Absent when chat is not available. */
-  describeWithChat?: (message: string) => void;
+  /** Chat with the assistant. Absent when it is not available, and then nothing offers it. */
+  agentBuilder?: AgentBuilderPluginStart;
   onAppLeave: AppMountParameters['onAppLeave'];
   /** Carries an app to a dashboard. */
   stateTransfer: EmbeddableStateTransfer;

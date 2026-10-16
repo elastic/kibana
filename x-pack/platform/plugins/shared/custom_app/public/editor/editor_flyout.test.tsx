@@ -157,6 +157,16 @@ describe('EditorFlyout', () => {
     expect(properties().getByRole('heading', { name: 'Callout' })).toBeInTheDocument();
   });
 
+  it("adds a time range, which can be placed with the filters, and is the app's only one", async () => {
+    setup();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Time range' }));
+
+    expect(outline('time_range-1')).toHaveAttribute('aria-current', 'true');
+    expect(properties().getByRole('heading', { name: 'Time range' })).toBeInTheDocument();
+  });
+
   it('deletes the selected component, and selects what held it', async () => {
     setup();
     await userEvent.click(outline('title'));

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AppDocument } from '@kbn/custom-app-common';
 import {
@@ -21,19 +22,30 @@ const MAX_TITLE_LENGTH = 256;
 export const getCustomAppAttachmentId = (embeddableId: string) =>
   `${CUSTOM_APP_CONTEXT_ATTACHMENT_TYPE}-${embeddableId}`;
 
+/**
+ * The id of the attachment of a page that shows an app. It has no panel, so the agent changes it by
+ * this id, and the page knows which answers are its own by it.
+ */
+export const createPageAttachmentId = () =>
+  `${CUSTOM_APP_CONTEXT_ATTACHMENT_TYPE}-page-${uuidv4()}`;
+
 export const buildCustomAppContextAttachment = ({
   document,
   embeddableId,
+  attachmentId,
   panelTitle,
 }: {
   document: AppDocument;
-  embeddableId: string;
+  /** For an app in a panel of a dashboard. */
+  embeddableId?: string;
+  /** For an app on its own page, which has no panel. */
+  attachmentId?: string;
   panelTitle?: string;
 }): AttachmentInput<typeof CUSTOM_APP_CONTEXT_ATTACHMENT_TYPE, CustomAppContextAttachmentData> => ({
-  id: getCustomAppAttachmentId(embeddableId),
+  id: embeddableId ? getCustomAppAttachmentId(embeddableId) : attachmentId,
   type: CUSTOM_APP_CONTEXT_ATTACHMENT_TYPE,
   data: {
-    embeddable_id: embeddableId,
+    ...(embeddableId ? { embeddable_id: embeddableId } : {}),
     // Cut short rather than left to fail validation, which would stop the panel being sent at all.
     ...(panelTitle ? { panel_title: panelTitle.slice(0, MAX_TITLE_LENGTH) } : {}),
     document,

@@ -136,6 +136,26 @@ const ENTRIES: Record<AppNodeType, Omit<NodeCatalogEntry, 'type'>> = {
     group: 'input',
     isContainer: false,
   },
+  time_range: {
+    label: i18n.translate('xpack.customApp.catalog.timeRange.label', {
+      defaultMessage: 'Time range',
+    }),
+    description: i18n.translate('xpack.customApp.catalog.timeRange.description', {
+      defaultMessage: 'Lets people change the period the app shows.',
+    }),
+    iconType: 'calendar',
+    group: 'input',
+    isContainer: false,
+  },
+  button: {
+    label: i18n.translate('xpack.customApp.catalog.button.label', { defaultMessage: 'Button' }),
+    description: i18n.translate('xpack.customApp.catalog.button.description', {
+      defaultMessage: 'Runs a workflow when it is pressed.',
+    }),
+    iconType: 'play',
+    group: 'input',
+    isContainer: false,
+  },
   search: {
     label: i18n.translate('xpack.customApp.catalog.search.label', { defaultMessage: 'Search' }),
     description: i18n.translate('xpack.customApp.catalog.search.description', {

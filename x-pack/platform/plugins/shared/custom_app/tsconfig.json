@@ -27,6 +27,7 @@
     "@kbn/shared-ux-ai-components",
     "@kbn/presentation-util",
     "@kbn/presentation-util-plugin",
+    "@kbn/react-kibana-mount",
     "@kbn/shared-ux-router",
     "@kbn/custom-content-server",
     "@kbn/es-types",

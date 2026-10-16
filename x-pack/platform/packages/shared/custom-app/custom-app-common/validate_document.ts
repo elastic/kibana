@@ -21,7 +21,14 @@ interface DocumentToValidate {
 const ACTION_VALUE_SOURCES: Record<string, { fromColumn: boolean; fromInput: boolean }> = {
   onRowClick: { fromColumn: true, fromInput: false },
   onChange: { fromColumn: false, fromInput: true },
+  onClick: { fromColumn: false, fromInput: false },
 };
+
+/**
+ * Where an action may run a workflow: when something is pressed or a row is clicked, never when an
+ * input changes, which is every key that is typed and would start a workflow for each.
+ */
+const WORKFLOW_EVENTS: readonly string[] = ['onClick', 'onRowClick'];
 
 const collectNodes = (
   root: AppNode,
@@ -88,6 +95,7 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
   const { nodes, withinLimits } = collectNodes(document.root, ctx);
   if (!withinLimits) return;
 
+  const firstTimeRangeId = nodes.find(({ type }) => type === 'time_range')?.id;
   const flyoutIds = new Set(nodes.filter(({ type }) => type === 'flyout').map(({ id }) => id));
 
   nodes.forEach((node) => {
@@ -104,6 +112,13 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
           node.id
         );
       }
+    }
+
+    if (node.type === 'time_range' && node.id !== firstTimeRangeId) {
+      issue(
+        `Node "${node.id}" is a second time range; an app has one, which sets the period of all of it`,
+        node.id
+      );
     }
 
     if (node.type === 'custom_content') {
@@ -146,6 +161,30 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
       const allowed = ACTION_VALUE_SOURCES[event] ?? { fromColumn: false, fromInput: false };
 
       actions.forEach((action) => {
+        if (action.type === 'runWorkflow') {
+          if (!WORKFLOW_EVENTS.includes(event)) {
+            issue(
+              `Node "${node.id}" runs a workflow on ${event}; a workflow can only be run by a button or a row click`,
+              node.id
+            );
+          }
+          Object.entries(action.inputs).forEach(([name, value]) => {
+            if (typeof value !== 'object') return;
+            if ('fromColumn' in value && !allowed.fromColumn) {
+              issue(
+                `Node "${node.id}": the input "${name}" of the workflow takes a column, which only a row click has`,
+                node.id
+              );
+            }
+            if ('fromState' in value && !(value.fromState in state)) {
+              issue(
+                `Node "${node.id}": the input "${name}" of the workflow takes the unknown state key "${value.fromState}"`,
+                node.id
+              );
+            }
+          });
+          return;
+        }
         if (action.type === 'openFlyout' && !flyoutIds.has(action.flyout)) {
           issue(`Node "${node.id}" opens "${action.flyout}", which is not a flyout`, node.id);
         }

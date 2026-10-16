@@ -57,11 +57,16 @@ const summarize = (node: AppNode): string => {
     case 'select':
     case 'button_group':
     case 'search':
+    case 'button':
       return node.label;
     case 'table':
     case 'key_value':
       // The first line of the query, as the text that tells two tables apart.
       return node.query.split('\n')[0];
+    case 'time_range':
+      return i18n.translate('xpack.customApp.editor.timeRangeSummary', {
+        defaultMessage: 'Period of the app',
+      });
     case 'stack':
       return node.direction;
   }

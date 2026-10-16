@@ -29,11 +29,7 @@ export const renderApp = (
         stateTransfer={embeddable.getStateTransfer()}
         canWriteDashboards={core.application.capabilities.dashboard_v2?.showWriteControls === true}
         canSave={core.application.capabilities.customApp?.save === true}
-        describeWithChat={
-          agentBuilder
-            ? (message) => agentBuilder.openChat({ newConversation: true, initialMessage: message })
-            : undefined
-        }
+        agentBuilder={agentBuilder}
       />
     )
   );

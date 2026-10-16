@@ -33,6 +33,117 @@ const document = parse({
 const setState = (key: string, value: unknown): Action =>
   ({ type: 'setState', key, value } as Action);
 
+describe('running a workflow', () => {
+  const run = (inputs: Record<string, unknown>, extra: Action[] = []) =>
+    ({
+      type: 'runWorkflow',
+      workflow: 'isolate-host',
+      inputs,
+    } as Action);
+
+  it('asks for a workflow to be run, and runs nothing itself', () => {
+    const runtime = createAppRuntime(document);
+
+    const result = runtime.run([run({ reason: 'Suspicious' })]);
+
+    expect(result.workflows).toEqual([
+      { workflow: 'isolate-host', inputs: { reason: 'Suspicious' } },
+    ]);
+    expect(result.dropped).toEqual([]);
+  });
+
+  it('hands over a column of the clicked row, and the current value of the app', () => {
+    const runtime = createAppRuntime(document);
+
+    const { workflows } = runtime.run(
+      [
+        run({
+          host: { fromColumn: 'host.name' },
+          service: { fromState: 'service' },
+          limit: { fromState: 'limit' },
+        }),
+      ],
+      { row: { 'host.name': 'web-1' } }
+    );
+
+    expect(workflows).toEqual([
+      { workflow: 'isolate-host', inputs: { host: 'web-1', service: 'all', limit: 10 } },
+    ]);
+  });
+
+  it('hands over the value an earlier action set, as the actions run in order', () => {
+    const runtime = createAppRuntime(document);
+
+    const { workflows } = runtime.run([
+      setState('service', 'checkout'),
+      run({ service: { fromState: 'service' } }),
+    ]);
+
+    expect(workflows[0].inputs).toEqual({ service: 'checkout' });
+  });
+
+  it('hands over what it was given at that point, not what an action after it sets', () => {
+    const runtime = createAppRuntime(document);
+
+    const { workflows } = runtime.run([
+      run({ service: { fromState: 'service' } }),
+      setState('service', 'checkout'),
+    ]);
+
+    expect(workflows[0].inputs).toEqual({ service: 'all' });
+  });
+
+  it('hands over several values of a column, and nothing of a kind a workflow cannot take', () => {
+    const runtime = createAppRuntime(document);
+
+    const several = runtime.run([run({ tags: { fromColumn: 'tags' } })], {
+      row: { tags: ['a', 'b'] },
+    });
+    expect(several.workflows[0].inputs).toEqual({ tags: ['a', 'b'] });
+
+    const object = runtime.run([run({ nested: { fromColumn: 'nested' } })], {
+      row: { nested: { a: 1 } },
+    });
+    expect(object.workflows).toEqual([]);
+    expect(object.dropped.join()).toContain('not a plain value');
+  });
+
+  it('does not run it at all, and says why, when a column is not in the row', () => {
+    const runtime = createAppRuntime(document);
+
+    const { workflows, dropped } = runtime.run(
+      [run({ reason: 'x', host: { fromColumn: 'host.name' } })],
+      { row: { other: 1 } }
+    );
+
+    expect(workflows).toEqual([]);
+    expect(dropped).toEqual(['Column "host.name" is not in the row']);
+  });
+
+  it('does not run it for a button pressed with no row, when it needs a column', () => {
+    const runtime = createAppRuntime(document);
+
+    expect(runtime.run([run({ host: { fromColumn: 'host.name' } })]).workflows).toEqual([]);
+  });
+
+  it('asks for each workflow, in order, and does the other actions as well', () => {
+    const runtime = createAppRuntime(document);
+
+    const { workflows } = runtime.run([
+      { type: 'openFlyout', flyout: 'detail' },
+      { type: 'runWorkflow', workflow: 'first', inputs: {} } as Action,
+      { type: 'runWorkflow', workflow: 'second', inputs: {} } as Action,
+    ]);
+
+    expect(workflows.map(({ workflow }) => workflow)).toEqual(['first', 'second']);
+    expect(runtime.openFlyoutId$.getValue()).toBe('detail');
+  });
+
+  it('asks for nothing when there is nothing to run', () => {
+    expect(createAppRuntime(document).run([setState('service', 'x')]).workflows).toEqual([]);
+  });
+});
+
 describe('createAppRuntime', () => {
   it('starts from the declared defaults with no flyout open', () => {
     const runtime = createAppRuntime(document);
