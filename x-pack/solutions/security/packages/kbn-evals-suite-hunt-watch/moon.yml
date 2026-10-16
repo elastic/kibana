@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/repo-info'
   - '@kbn/proposals-common'
+  - '@kbn/utility-types'
 tags:
   - functional-tests
   - package
