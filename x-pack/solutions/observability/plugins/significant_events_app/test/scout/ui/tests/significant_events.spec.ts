@@ -54,9 +54,9 @@ test.describe(
       });
     });
 
-    test('loads and redirects / to /sources tab by default', async ({ page }) => {
+    test('loads and redirects / to /queries tab by default', async ({ page }) => {
       await page.gotoApp('significant_events');
-      await expect(page).toHaveURL(/\/app\/significant_events\/sources/, { timeout: 60_000 });
+      await expect(page).toHaveURL(/\/app\/significant_events\/queries/, { timeout: 60_000 });
 
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.root)).toBeVisible({
         timeout: 60_000,
@@ -70,11 +70,11 @@ test.describe(
       page,
       pageObjects,
     }) => {
-      await page.gotoApp('significant_events/sources');
+      await page.gotoApp('significant_events/queries');
       const tabBar = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.tabs);
       await expect(tabBar).toBeVisible({ timeout: 60_000 });
 
-      for (const label of ['Sources', 'Knowledge Indicators', 'Rules', 'Significant events']) {
+      for (const label of ['Rules', 'Significant events']) {
         await expect(tabBar.getByRole('tab', { name: label })).toBeVisible();
       }
       await expect(tabBar.getByRole('tab', { name: 'Detections' })).toHaveCount(0);
@@ -94,7 +94,7 @@ test.describe(
           [NIGHTSHIFT_ENABLED_FLAG]: false,
         },
       });
-      await page.gotoApp('significant_events/sources');
+      await page.gotoApp('significant_events/queries');
       await expect(page).toHaveURL(/\/app\/significant_events/, { timeout: 60_000 });
       await expect(page.testSubj.locator('significantEventsNotEnabledPrompt')).toBeVisible({
         timeout: 60_000,

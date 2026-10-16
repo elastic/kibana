@@ -33,6 +33,7 @@ export interface UsageStats {
   'search:timeout': number;
   'visualization:visualize:legacyHeatmapChartsLibrary': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
+  'discover:enableSolutionProfilesInClassic': boolean;
   'discover:showFieldStatistics': boolean;
   'discover:showMultiFields': boolean;
   enableESQL: boolean;

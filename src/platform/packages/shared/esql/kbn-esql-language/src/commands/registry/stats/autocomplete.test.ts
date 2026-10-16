@@ -215,6 +215,69 @@ describe('STATS Autocomplete', () => {
         ]);
       });
 
+      test('suggests counter fields for an aggregate only in a TS pipeline', async () => {
+        const callbacks = getMockCallbacks();
+        const tsFieldTypes = [
+          ...AVG_TYPES,
+          'counter_double',
+          'counter_integer',
+          'counter_long',
+        ] as const;
+
+        await statsExpectSuggestions(
+          'TS a | stats avg(',
+          [
+            ...getFieldNamesByType(tsFieldTypes),
+            ...getFunctionSignaturesByReturnType(
+              [Location.STATS, Location.STATS_TIMESERIES],
+              AVG_TYPES,
+              {
+                scalar: true,
+                timeseriesAgg: true,
+              }
+            ),
+          ],
+          callbacks,
+          timeseriesContext
+        );
+
+        await statsExpectSuggestions(
+          'from a | stats avg(',
+          [
+            ...getFieldNamesByType(AVG_TYPES),
+            ...getFunctionSignaturesByReturnType(Location.STATS_BY, AVG_TYPES, {
+              scalar: true,
+              grouping: true,
+            }),
+          ],
+          callbacks
+        );
+      });
+
+      test('treats a bare counter aggregate as complete in a TS pipeline', async () => {
+        const completeSuggestions = [
+          '\n',
+          'WHERE ',
+          'BY ',
+          ', ',
+          '| ',
+          ...getFunctionSignaturesByReturnType(
+            Location.STATS,
+            'any',
+            { operators: true, skipAssign: true },
+            ['double']
+          ),
+        ];
+
+        await statsExpectSuggestions(
+          'TS a | stats avg(counterIntegerField) ',
+          completeSuggestions,
+          undefined,
+          timeseriesContext
+        );
+        await statsExpectSuggestions('from a | stats avg(counterIntegerField) ', []);
+      });
+
       test('on function left paren', async () => {
         // set the test functions to include a time series agg function
         // to ensure it is suggested in the stats command
