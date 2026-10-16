@@ -6,6 +6,7 @@
  */
 
 import type { InferenceConnector } from './connectors/connectors';
+import type { InferenceModelParameters } from './chat_complete/model_parameters';
 
 /**
  * Internal HTTP path for the inference connectors list API (search_inference_endpoints plugin).
@@ -21,6 +22,7 @@ export const INFERENCE_CONNECTORS_INTERNAL_API_PATH =
  */
 export interface ApiInferenceConnector extends InferenceConnector {
   isRecommended?: boolean;
+  parameters?: InferenceModelParameters;
 }
 
 /**

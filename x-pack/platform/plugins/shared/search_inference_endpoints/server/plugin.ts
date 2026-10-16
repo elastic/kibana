@@ -20,7 +20,7 @@ import { ApiPrivileges } from '@kbn/core-security-server';
 
 import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
-import { getForFeature as getForFeatureFn } from './inference_endpoints';
+import { getDeclaredParameters, getForFeature as getForFeatureFn } from './inference_endpoints';
 import { resolveModelsForFeature } from './lib/resolve_models_for_feature';
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
@@ -203,6 +203,8 @@ export class SearchInferenceEndpointsPlugin
             getForFeature: resolveFeatureEndpoints,
             getConnectorList,
             getConnectorById,
+            getDeclaredParameters: (endpointId) =>
+              getDeclaredParameters(featureRegistry, featureId, endpointId),
             uiSettingsClient,
             featureId,
             ignoreGlobalDefault: feature?.ignoreGlobalDefault ?? false,
