@@ -8,6 +8,10 @@
  */
 
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../../context_awareness/toolkit';
+import { waitFor } from '@testing-library/react';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { FilterStateStore, type Filter, type TimeRange } from '@kbn/es-query';
+import { map } from 'rxjs';
 import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
 import {
   ProfileStateType,
@@ -17,19 +21,29 @@ import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import { createTabItem } from '../utils';
 import {
   createRuntimeStateManager,
   selectAllTabs,
+  selectRecentlyClosedTabs,
   selectTab,
   internalStateActions,
   DEFAULT_TAB_STATE,
+  selectHasUnsavedChanges,
 } from '..';
 import * as runtimeStateModule from '../runtime_state';
 import * as contextAwarenessToolkitModule from '../context_awareness_toolkit';
-import { PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import {
+  APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
+  PROFILE_STATE_URL_KEY,
+} from '../../../../../../common/constants';
+import { TABS_LOCAL_STORAGE_KEY } from '../../tabs_storage_manager';
+import type { DiscoverAppState, TabState } from '../types';
 import type { UISession } from '@kbn/data-plugin/public';
+import { FilterManager } from '@kbn/data-plugin/public';
 import { SearchSessionStatus } from '@kbn/data-plugin/common';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -93,6 +107,138 @@ const setup = async () => {
 describe('tabs actions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('restoring a clean draft with URL state', () => {
+    afterEach(() => {
+      new Storage(window.sessionStorage).remove(TABS_LOCAL_STORAGE_KEY);
+    });
+
+    it.each([
+      { name: 'reload', sharedQuery: undefined },
+      { name: 'shared link', sharedQuery: { query: 'extension: png', language: 'kuery' } },
+    ])('keeps the view and URL consistent across $name and reload', async ({ sharedQuery }) => {
+      const services = createDiscoverServicesMock();
+      services.storage = new Storage(window.sessionStorage);
+      let currentTime = services.timefilter.getTime();
+      jest.spyOn(services.timefilter, 'getTime').mockImplementation(() => currentTime);
+      jest.spyOn(services.timefilter, 'setTime').mockImplementation((time) => {
+        currentTime = { ...currentTime, ...(time as Partial<TimeRange>) };
+      });
+      const pinnedFilters: Filter[] = [
+        {
+          meta: { disabled: false, negate: false, alias: null },
+          query: { match_all: {} },
+          $state: { store: FilterStateStore.GLOBAL_STATE },
+        },
+      ];
+      const savedTab = getPersistedTabMock({
+        dataView: dataViewMockWithTimeField,
+        services,
+        appStateOverrides: { query: { query: 'extension: css', language: 'kuery' } },
+        overridenTimeRestore: true,
+        globalStateOverrides: { filters: pinnedFilters, timeRange: { from: 'now-15m', to: 'now' } },
+      });
+      const updatedTab = {
+        ...savedTab,
+        serializedSearchSource: {
+          ...savedTab.serializedSearchSource,
+          query: { query: 'extension: jpg', language: 'kuery' },
+        },
+        timeRange: { from: 'now-1h', to: 'now' },
+      };
+
+      const createToolkit = () => {
+        // A fresh filter manager per load, as after a page reload, so pinned filters come from the URL
+        const filterManager = new FilterManager(services.uiSettings);
+        services.filterManager = filterManager;
+        services.data.query.filterManager = filterManager;
+        services.data.query.state$ = filterManager.getUpdates$().pipe(
+          map(() => ({
+            state: { filters: filterManager.getFilters() },
+            changes: { filters: true, appFilters: true, globalFilters: true },
+          }))
+        );
+        return getDiscoverInternalStateMock({
+          services,
+          tabsStorageEnabled: true,
+          persistedDataViews: [dataViewMockWithTimeField],
+        });
+      };
+      const openSessionAndExpect = async (
+        toolkit: ReturnType<typeof createToolkit>,
+        tab: DiscoverSessionTab,
+        {
+          query,
+          time,
+          hasUnsavedChanges,
+        }: { query: DiscoverAppState['query']; time?: TimeRange; hasUnsavedChanges: boolean }
+      ) => {
+        await toolkit.initializeTabs({
+          persistedDiscoverSession: createDiscoverSessionMock({ id: 'session', tabs: [tab] }),
+        });
+        expect(toolkit.stateStorageContainer.get(APP_STATE_URL_KEY)).toMatchObject({
+          hideSidebar: false,
+          savedQuery: 'saved-query-id',
+        });
+        await toolkit.initializeSingleTab({ tabId: tab.id });
+        const changes = selectHasUnsavedChanges(toolkit.internalState.getState(), {
+          runtimeStateManager: toolkit.runtimeStateManager,
+          services,
+        });
+        toolkit.internalState.dispatch(internalStateActions.setUnsavedChanges(changes));
+
+        expect(changes.hasUnsavedChanges).toBe(hasUnsavedChanges);
+        expect(toolkit.getCurrentTab()).toMatchObject({
+          appState: { query, hideSidebar: false, savedQuery: 'saved-query-id' },
+          globalState: { timeRange: time },
+        });
+        await waitFor(() => {
+          expect(toolkit.stateStorageContainer.get(APP_STATE_URL_KEY)).toMatchObject({
+            query,
+            hideSidebar: false,
+            savedQuery: 'saved-query-id',
+          });
+          expect(toolkit.stateStorageContainer.get(GLOBAL_STATE_URL_KEY)).toMatchObject({
+            time,
+            filters: JSON.parse(JSON.stringify(pinnedFilters)),
+          });
+          expect(services.storage.get(TABS_LOCAL_STORAGE_KEY).openTabs[0]).toMatchObject({
+            hasUnsavedChanges,
+            appState: { query },
+          });
+        });
+        toolkit.internalState.dispatch(internalStateActions.disconnectTab({ tabId: tab.id }));
+      };
+
+      const firstLoad = createToolkit();
+      await firstLoad.stateStorageContainer.set(APP_STATE_URL_KEY, {
+        hideSidebar: false,
+        savedQuery: 'saved-query-id',
+      });
+      await firstLoad.stateStorageContainer.set(GLOBAL_STATE_URL_KEY, { filters: pinnedFilters });
+      await openSessionAndExpect(firstLoad, savedTab, {
+        query: savedTab.serializedSearchSource.query,
+        time: savedTab.timeRange,
+        hasUnsavedChanges: false,
+      });
+
+      if (sharedQuery) {
+        await firstLoad.stateStorageContainer.set(APP_STATE_URL_KEY, {
+          ...firstLoad.stateStorageContainer.get<DiscoverAppState>(APP_STATE_URL_KEY),
+          query: sharedQuery,
+        });
+      }
+
+      // After the session is updated elsewhere, and again on the following reload
+      const expectedAfterUpdate = {
+        query: sharedQuery ?? updatedTab.serializedSearchSource.query,
+        time: sharedQuery ? savedTab.timeRange : updatedTab.timeRange,
+        hasUnsavedChanges: Boolean(sharedQuery),
+      };
+      await openSessionAndExpect(createToolkit(), updatedTab, expectedAfterUpdate);
+      await openSessionAndExpect(createToolkit(), updatedTab, expectedAfterUpdate);
+    });
   });
 
   describe('openInNewTabExtPointAction', () => {
@@ -196,6 +342,35 @@ describe('tabs actions', () => {
       );
 
       expect(runtimeStateManager.tabs.byId[newTab.id]).toBeDefined();
+    });
+
+    it('does not carry the restored unsaved changes flag into a closed and reopened tab', async () => {
+      const { internalState, getCurrentTab } = await setup();
+      const allTabs = selectAllTabs(internalState.getState());
+      const cleanTab = {
+        ...DEFAULT_TAB_STATE,
+        ...createTabItem(allTabs),
+        hasUnsavedChanges: false,
+      };
+      const setTabs = (tabs: TabState[]) =>
+        internalState.dispatch(
+          internalStateActions.setTabs({
+            allTabs: tabs,
+            selectedTabId: getCurrentTab().id,
+            recentlyClosedTabs: [],
+          })
+        );
+
+      setTabs([...allTabs, cleanTab]);
+      setTabs(allTabs);
+
+      const [closedTab] = selectRecentlyClosedTabs(internalState.getState());
+      expect(closedTab.id).toBe(cleanTab.id);
+      expect(closedTab.hasUnsavedChanges).toBeUndefined();
+
+      await internalState.dispatch(internalStateActions.restoreTab({ restoreTabId: cleanTab.id }));
+
+      expect(selectTab(internalState.getState(), cleanTab.id).hasUnsavedChanges).toBeUndefined();
     });
   });
 

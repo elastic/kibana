@@ -25,11 +25,14 @@ import { createSearchSource } from '../utils/create_search_source';
 
 export const fromSavedObjectTabToAppState = ({
   tab,
+  localAppState,
 }: {
   tab: DiscoverSessionTab;
+  localAppState?: DiscoverAppState;
 }): DiscoverAppState => {
   return omitBy<DiscoverAppState>(
     {
+      ...localAppState,
       columns: tab.columns,
       filters: tab.serializedSearchSource.filter,
       grid: tab.grid,
