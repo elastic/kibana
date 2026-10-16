@@ -426,7 +426,7 @@ export function parseMappingKey(key: string | undefined) {
   switch (key) {
     case 'schedule':
     case 'schedule.keyword':
-      return 'schedule.number';
+      return 'schedule_interval_seconds';
     case 'project_id.keyword':
       return 'project_id';
     case 'tags.keyword':
