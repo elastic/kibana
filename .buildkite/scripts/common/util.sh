@@ -373,6 +373,15 @@ print_if_dry_run() {
   fi
 }
 
+# Call before the build in image steps: the job's Vault token can expire before a long build gets to push
+prefetch_docker_push_credential() {
+  if is_publish_pipeline; then
+    return 0
+  else
+    fetch_kibana_ci_pr_credential
+  fi
+}
+
 # Push login for image steps. Publish pipelines already logged in with the publish credential in setup_job_env.sh
 docker_login_push() {
   is_publish_pipeline || docker_login_kibana_ci_pr
@@ -429,10 +438,18 @@ docker_login_kibana_ci_publish() {
 # Push access to docker.elastic.co/kibana-ci/*-pr repositories only, readable only by PR image pipelines
 docker_login_kibana_ci_pr() {
   is_docker_available || return 0
-  local username password
-  username="$(retry 5 5 vault kv get -field=username kv/ci-shared/kibana/pr/container-registry)"
-  password="$(retry 5 5 vault kv get -field=password kv/ci-shared/kibana/pr/container-registry)"
-  echo "$password" | docker login -u "$username" --password-stdin docker.elastic.co
+  if [[ -z "${KIBANA_CI_PR_REGISTRY_PASSWORD:-}" ]]; then
+    echo "kibana-ci-pr credential missing, call prefetch_docker_push_credential before the build" >&2
+    return 1
+  else
+    echo "$KIBANA_CI_PR_REGISTRY_PASSWORD" | docker login -u "$KIBANA_CI_PR_REGISTRY_USERNAME" --password-stdin docker.elastic.co
+  fi
+}
+
+# Kept in unexported shell variables so the build's child processes don't inherit them
+fetch_kibana_ci_pr_credential() {
+  KIBANA_CI_PR_REGISTRY_USERNAME="$(retry 5 5 vault kv get -field=username kv/ci-shared/kibana/pr/container-registry)"
+  KIBANA_CI_PR_REGISTRY_PASSWORD="$(retry 5 5 vault kv get -field=password kv/ci-shared/kibana/pr/container-registry)"
 }
 
 # Pull-only access to the docker.elastic.co repositories Kibana CI consumes

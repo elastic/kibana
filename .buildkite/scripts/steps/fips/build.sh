@@ -2,9 +2,11 @@
 
 set -euo pipefail
 
+source .buildkite/scripts/common/util.sh
+prefetch_docker_push_credential
+
 .buildkite/scripts/bootstrap.sh
 
-source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/steps/artifacts/env.sh
 
 mkdir -p target

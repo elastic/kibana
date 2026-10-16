@@ -3,6 +3,7 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
+prefetch_docker_push_credential
 
 # Skip building shared webpack bundles during bootstrap because
 # node scripts/build rebuilds them in production mode with --dist

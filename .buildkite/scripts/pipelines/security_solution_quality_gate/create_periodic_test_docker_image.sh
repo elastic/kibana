@@ -4,11 +4,12 @@ if [ -z "${KIBANA_MKI_USE_LATEST_COMMIT+x}" ] || [ "$KIBANA_MKI_USE_LATEST_COMMI
     exit 0
 fi
 
+source .buildkite/scripts/common/util.sh
+docker_login_kibanamachine
 
 .buildkite/scripts/bootstrap.sh
 
 source .buildkite/scripts/steps/artifacts/env.sh
-source .buildkite/scripts/common/util.sh
 
 GIT_ABBREV_COMMIT=${BUILDKITE_COMMIT:0:12}
 KIBANA_IMAGE_TAG="sec-sol-qg-$GIT_ABBREV_COMMIT"
@@ -52,7 +53,6 @@ docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-arm64.tar.gz"
 docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-arm64"
 
 echo "--- Push images"
-docker_login_kibanamachine
 docker_with_retry push "$KIBANA_IMAGE-arm64"
 docker_with_retry push "$KIBANA_IMAGE-amd64"
 
