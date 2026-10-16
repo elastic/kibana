@@ -30,7 +30,7 @@ export const renderBoundSlackThreadYaml = ({
 export const NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 2,
+  version: 3,
   billable: false,
   yamlTemplate: renderBoundSlackThreadYaml,
   management: {

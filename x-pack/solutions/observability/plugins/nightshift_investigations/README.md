@@ -119,6 +119,7 @@ The status reports, per bound workflow, whether it is installed, enabled, valid,
 - The investigation, its Agent Builder conversation, its hooks, and every `kibana.request` step run as the agent account. `executed_by` still records the user who started it.
 - `_ensure` rejects any run that does not execute as the space's agent account. Anyone allowed to run workflows can start the global investigation directly, but such a run executes as them and fails before it touches an investigation.
 - The investigation entry point only runs when Nightshift's investigations client starts it (`triggeredBy: nightshift-investigations`, `NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE`). The start route, automations and significant-event investigations all go through the client, which checks the caller's privileges and claims the subjects. A direct run through the workflow run API fails at its first step, so it cannot start an investigation as the agent account.
+- The Slack thread workflow only runs when a `slack2.message` event starts it. The workflow run API accepts workflows without a manual trigger and takes the trigger event from the caller's inputs, so a direct run could otherwise continue any investigation thread with made-up text and post to Slack as the agent account. An event run's `triggeredBy` is its trigger id, which only server code sets.
 
 ### Known gaps
 
