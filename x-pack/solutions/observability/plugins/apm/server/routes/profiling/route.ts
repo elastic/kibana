@@ -32,7 +32,7 @@ const servicesFlamegraphRoute = createApmServerRoute({
     const core = await context.core;
     const [esClient, profilingDataAccessStart, apmEventClient] = await Promise.all([
       core.elasticsearch.client,
-      await plugins.profilingDataAccess?.start(),
+      plugins.profilingDataAccess?.start(),
       getApmEventClient(resources),
     ]);
     if (profilingDataAccessStart) {
@@ -87,7 +87,7 @@ const servicesFunctionsRoute = createApmServerRoute({
 
     const [esClient, profilingDataAccessStart, apmEventClient] = await Promise.all([
       core.elasticsearch.client,
-      await plugins.profilingDataAccess?.start(),
+      plugins.profilingDataAccess?.start(),
       getApmEventClient(resources),
     ]);
     if (profilingDataAccessStart) {
@@ -148,18 +148,19 @@ const profilingStatusRoute = createApmServerRoute({
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ProfilingStatusResponse> => {
     const { context, plugins, logger } = resources;
-    const [esClient, profilingDataAccessStart] = await Promise.all([
-      (await context.core).elasticsearch.client,
-      await plugins.profilingDataAccess?.start(),
+    const [core, profilingDataAccessStart, spacesStart] = await Promise.all([
+      context.core,
+      plugins.profilingDataAccess?.start(),
+      plugins.spaces?.start(),
     ]);
     if (profilingDataAccessStart) {
       const abortSignal = getRequestAbortedSignal(resources.request.events.aborted$);
       try {
         const initialized = await getProfilingInitialized({
           profilingDataAccessStart,
-          esClient,
-          soClient: (await context.core).savedObjects.client,
-          spaceId: (await plugins.spaces?.start())?.spacesService.getSpaceId(resources.request),
+          esClient: core.elasticsearch.client,
+          soClient: core.savedObjects.client,
+          spaceId: spacesStart?.spacesService.getSpaceId(resources.request),
           abortSignal,
         });
 
@@ -186,7 +187,7 @@ const servicesProfilingSchemasRoute = createApmServerRoute({
     const core = await context.core;
     const [esClient, profilingDataAccessStart, apmEventClient] = await Promise.all([
       core.elasticsearch.client,
-      await plugins.profilingDataAccess?.start(),
+      plugins.profilingDataAccess?.start(),
       getApmEventClient(resources),
     ]);
 

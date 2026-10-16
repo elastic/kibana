@@ -29,8 +29,8 @@ const profilingHostsFlamegraphRoute = createApmServerRoute({
     const core = await context.core;
     const [esClient, apmEventClient, profilingDataAccessStart] = await Promise.all([
       core.elasticsearch.client,
-      await getApmEventClient(resources),
-      await plugins.profilingDataAccess?.start(),
+      getApmEventClient(resources),
+      plugins.profilingDataAccess?.start(),
     ]);
     if (profilingDataAccessStart) {
       const { start, end, environment, documentType, rollupInterval, kuery, schema } = params.query;
@@ -84,8 +84,8 @@ const profilingHostsFunctionsRoute = createApmServerRoute({
     const core = await context.core;
     const [esClient, apmEventClient, profilingDataAccessStart] = await Promise.all([
       core.elasticsearch.client,
-      await getApmEventClient(resources),
-      await plugins.profilingDataAccess?.start(),
+      getApmEventClient(resources),
+      plugins.profilingDataAccess?.start(),
     ]);
     if (profilingDataAccessStart) {
       const {
@@ -152,8 +152,8 @@ const profilingHostsSchemasRoute = createApmServerRoute({
     const core = await context.core;
     const [esClient, apmEventClient, profilingDataAccessStart] = await Promise.all([
       core.elasticsearch.client,
-      await getApmEventClient(resources),
-      await plugins.profilingDataAccess?.start(),
+      getApmEventClient(resources),
+      plugins.profilingDataAccess?.start(),
     ]);
 
     if (!profilingDataAccessStart) {
