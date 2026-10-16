@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout-security/api';
-import type { ListProposalsResponse } from '@kbn/proposals-common';
 import { getAd2Scenario } from '@kbn/evals-suite-attack-discovery-agent-builder';
 import { seedEndpointHosts } from '../../../scout/edr_response_actions/common/seed_endpoint_hosts';
 import {
@@ -20,10 +19,12 @@ import {
   testData,
   createServiceAccount,
   deleteServiceAccount,
+  dismissRunProposals,
   getAdminApi,
   getWorker,
   listExecutionIds,
   ok,
+  pollForRunProposal,
   pollUntil,
   resetWorker,
   seedAttackScenario,
@@ -33,7 +34,7 @@ import {
   waitForExecutionStatus,
   waitForNewExecution,
 } from '../fixtures';
-import type { SeededScenario, WorkflowExecution } from '../fixtures';
+import type { RunReferences, SeededScenario } from '../fixtures';
 
 const WORKER_ID = testData.FLOOR_ATTACK_DISCOVERY_WORKER_ID;
 const FORENSICS_WORKER_ID = testData.FORENSICS_ENDPOINT_ANALYSIS_WORKER_ID;
@@ -61,6 +62,9 @@ apiTest.describe(
     let scenario: SeededScenario | undefined;
     let serviceAccountId: string | undefined;
     let cleanupHosts: (() => Promise<void>) | undefined;
+    // Identifiers that tie this run's proposals to its seeded data; set as soon as they exist so
+    // teardown can dismiss this run's proposals even when the test fails early (see afterAll).
+    let runReferences: RunReferences | undefined;
     // Isolate actions submitted during the test; `cleanupHosts` only knows the seed-time ids.
     const submittedActionIds: string[] = [];
 
@@ -89,6 +93,13 @@ apiTest.describe(
         deleteSubmittedHostActions({ esClient, config, actionIds: submittedActionIds })
       );
       await attempt(async () => cleanupHosts?.());
+      // Dismiss this run's leftover pending proposals before the resources they point at are
+      // deleted: a spec that fails between a proposal's creation and its approval otherwise
+      // leaves it actionable in the shared space, and dismissal releases the parked run behind
+      // it, which then ends on its declined branch while the service account still exists.
+      await attempt(async () => {
+        if (api && runReferences) await dismissRunProposals(api, runReferences);
+      });
       await attempt(async () => {
         if (api && serviceAccountId) await deleteServiceAccount(api, serviceAccountId);
       });
@@ -149,6 +160,11 @@ apiTest.describe(
         scenario = await seedAttackScenario(esClient, api, {
           agentIdByHost: { [scenarioHost]: hosts.hosts[0].agentId },
         });
+        runReferences = {
+          agentId: hosts.hosts[0].agentId,
+          host: scenarioHost,
+          alertIds: scenario?.alertIds,
+        };
 
         serviceAccountId = await createServiceAccount(api);
         // Save settings BEFORE reading the workflow id: the settings write is what installs the
@@ -218,57 +234,17 @@ apiTest.describe(
         );
         await assertExecutionCompleted(api, 'The attack discovery worker execution', execution);
 
-        const findPending = async (actionWorkflowId: string) =>
-          ok(
-            await api.internal<ListProposalsResponse>('GET', '/internal/proposals', {
-              query: { origin: 'alertzero', status: 'pending', size: 100 },
-            }),
-            'list pending proposals'
-          ).proposals.find(
-            (proposal) =>
-              proposal.actionWorkflowId === actionWorkflowId && proposal.createdAt >= startedAt
-          );
-
-        // Correlates a proposal with THIS run's seeded attack: the proposal that drives the
-        // isolate must reference the seeded host (agent id or host name) or one of this run's
-        // alert ids, otherwise an unrelated AlertZero run could satisfy the test. The Investigate
-        // proposal's input holds only opaque ids, so it is resolved through the review execution
-        // that raised it, whose inputs list the alerts the attack correlated.
-        const expectProposalReferencesSeededRun = async (
-          label: string,
-          proposal: { actionInput?: unknown }
-        ) => {
-          const reviewExecutionId = (proposal.actionInput as { workflow_execution_id?: unknown })
-            ?.workflow_execution_id;
-          const reviewInputs =
-            typeof reviewExecutionId === 'string'
-              ? ok(
-                  await api.public<WorkflowExecution>(
-                    'GET',
-                    `/api/workflows/executions/${reviewExecutionId}`
-                  ),
-                  `read the review execution behind the ${label} proposal`
-                ).context?.inputs
-              : undefined;
-          const encoded = JSON.stringify({ input: proposal.actionInput ?? {}, reviewInputs });
-          const referencesSeededRun =
-            encoded.includes(hosts.hosts[0].agentId) ||
-            encoded.includes(scenarioHost) ||
-            (scenario?.alertIds ?? []).some((alertId) => encoded.includes(alertId));
-          expect(
-            referencesSeededRun,
-            `${label} proposal must reference the seeded attack run; context: ${encoded}`
-          ).toBe(true);
-        };
-
-        // 2. The review of the discovered attack proposes handing off to forensics.
-        const investigate = await pollUntil(
-          'an Investigate (handoff to forensics) proposal',
-          () => findPending(testData.HANDOFF_TO_FORENSICS_ACTION_ID),
+        // 2. The review of the discovered attack proposes handing off to forensics. The poll
+        // correlates each candidate with this run's seeded data (see `proposalReferencesRun`),
+        // because the default space is shared and `actionWorkflowId` plus a timestamp also match
+        // proposals of other AlertZero runs: an unrelated one must be skipped, not returned.
+        const investigate = await pollForRunProposal(
+          api,
+          testData.HANDOFF_TO_FORENSICS_ACTION_ID,
+          runReferences,
           { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
         );
         expect(investigate.actionInput).toBeDefined();
-        await expectProposalReferencesSeededRun('Investigate', investigate);
 
         // Approve exactly as the approval modal does — but only once the execution backing the
         // proposal has parked in `waiting_for_input`. Approving earlier answers 409; retrying
@@ -299,13 +275,15 @@ apiTest.describe(
         // 3. Approve it exactly as the approval modal does; forensics now runs.
         await approveProposal('Investigate', investigate);
 
-        // 4. Forensics ends in an Isolate proposal for the compromised host.
-        const isolate = await pollUntil(
-          'an Isolate host proposal',
-          () => findPending(testData.ISOLATE_HOST_ACTION_ID),
+        // 4. Forensics ends in an Isolate proposal for the compromised host. Same run
+        // correlation as the Investigate poll: an isolate proposal of another run must be
+        // skipped, so only this run's proposal can satisfy the approve below.
+        const isolate = await pollForRunProposal(
+          api,
+          testData.ISOLATE_HOST_ACTION_ID,
+          runReferences,
           { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
         );
-        await expectProposalReferencesSeededRun('Isolate', isolate);
         await approveProposal('Isolate', isolate);
 
         // 5. The approval creates a Defend isolate action. Complete it as the agent would.

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ListProposalsResponse } from '@kbn/proposals-common';
 import type { EsClient } from '@kbn/scout-security';
 import {
   AD2_ALERTS_INDEX,
@@ -334,15 +335,65 @@ export const waitForExecution = async (
 // past ~100 matching docs. Without a sort the query emits no sort and the order is arbitrary,
 // which makes waitForNewExecution time out. The per-workflow route only accepts createdAt /
 // finishedAt as sort fields, so "newest" means the latest createdAt here.
-export const listExecutionIds = async (api: AlertZeroApi, workflowId: string): Promise<string[]> =>
+export const listExecutions = async (
+  api: AlertZeroApi,
+  workflowId: string
+): Promise<Array<{ id: string; status: string }>> =>
   ok(
-    await api.public<{ results: Array<{ id: string }> }>(
+    await api.public<{ results: Array<{ id: string; status: string }> }>(
       'GET',
       `/api/workflows/workflow/${encodeURIComponent(workflowId)}/executions` +
         `?size=100&sortField=createdAt&sortOrder=desc&omitStepRuns=true`
     ),
     `list executions of ${workflowId}`
-  ).results.map((run) => run.id);
+  ).results.map((run) => ({ id: run.id, status: run.status }));
+
+export const listExecutionIds = async (api: AlertZeroApi, workflowId: string): Promise<string[]> =>
+  (await listExecutions(api, workflowId)).map((run) => run.id);
+
+export const isTerminalExecutionStatus = (status: string): boolean =>
+  TERMINAL_EXECUTION_STATUSES.includes(status);
+
+/**
+ * Ends the executions of `workflowId` that are still in flight and that are not in `knownIds`
+ * (i.e. the ones started after the caller snapshotted the workflow's executions), then waits
+ * until every one of them has left the in-flight states. Used by teardown: disabling a Worker
+ * does not stop the run its enable started, and a run left behind can outlive the suite and
+ * fail after the fact on the service account teardown deletes next.
+ */
+export const cancelNewExecutions = async (
+  api: AlertZeroApi,
+  workflowId: string,
+  knownIds: readonly string[],
+  { timeoutMs = 60_000 }: { timeoutMs?: number } = {}
+): Promise<void> => {
+  const inFlightNew = async () =>
+    (await listExecutions(api, workflowId)).filter(
+      (run) => !knownIds.includes(run.id) && !isTerminalExecutionStatus(run.status)
+    );
+  for (const run of await inFlightNew()) {
+    const response = await api.public(
+      'POST',
+      `${EXECUTIONS_URL}/${encodeURIComponent(run.id)}/cancel`
+    );
+    // A 4xx means the execution left the in-flight states between the list and the cancel (it
+    // finished, or Task Manager already cancelled it); the drain poll below is the judge.
+    if (!(response.statusCode >= 400 && response.statusCode < 500)) {
+      ok(response, `cancel execution ${run.id} of ${workflowId}`);
+    }
+  }
+  try {
+    await pollUntil(
+      `every in-flight execution of ${workflowId} that this run started to stop`,
+      async () => ((await inFlightNew()).length === 0 ? true : undefined),
+      { timeoutMs }
+    );
+  } catch (error) {
+    throw new Error(
+      `${(error as Error).message}; still in flight: ${JSON.stringify(await inFlightNew())}`
+    );
+  }
+};
 
 /**
  * Waits for an execution of `workflowId` that is not in `knownIds`, i.e. one that started after the
@@ -377,5 +428,122 @@ export const assertExecutionCompleted = async (
         execution.id
       )}`
     );
+  }
+};
+
+export interface PendingProposal {
+  id: string;
+  createdAt: string;
+  actionWorkflowId?: string;
+  workflowExecutionId?: string;
+  actionInput?: unknown;
+}
+
+/** Identifiers that tie a proposal to one e2e run's seeded data. */
+export interface RunReferences {
+  readonly agentId?: string;
+  readonly host?: string;
+  readonly alertIds?: readonly string[];
+}
+
+export const listPendingProposals = async (api: AlertZeroApi): Promise<PendingProposal[]> =>
+  ok(
+    await api.internal<ListProposalsResponse>('GET', '/internal/proposals', {
+      query: { origin: 'alertzero', status: 'pending', size: 100 },
+    }),
+    'list pending proposals'
+  ).proposals;
+
+/**
+ * Whether this run raised the proposal. The default space is shared, so `actionWorkflowId` and
+ * `createdAt` match the proposals of every AlertZero run in it; a candidate is only accepted when
+ * it references one of this run's seeded identifiers — in its own input, or in the inputs of the
+ * review execution that raised it (those name the alerts the attack correlated; the proposal's
+ * own input holds only opaque ids).
+ */
+export const proposalReferencesRun = async (
+  api: AlertZeroApi,
+  proposal: PendingProposal,
+  references: RunReferences
+): Promise<boolean> => {
+  const reviewExecutionId = (
+    proposal.actionInput as { workflow_execution_id?: unknown } | undefined
+  )?.workflow_execution_id;
+  const reviewInputs =
+    typeof reviewExecutionId === 'string'
+      ? ok(
+          await api.public<WorkflowExecution>(
+            'GET',
+            `${EXECUTIONS_URL}/${encodeURIComponent(reviewExecutionId)}`
+          ),
+          `read the review execution behind proposal ${proposal.id}`
+        ).context?.inputs
+      : undefined;
+  const encoded = JSON.stringify({
+    actionInput: proposal.actionInput ?? {},
+    reviewInputs,
+    workflowExecutionId: proposal.workflowExecutionId,
+  });
+  return (
+    (references.agentId !== undefined && encoded.includes(references.agentId)) ||
+    (references.host !== undefined && encoded.includes(references.host)) ||
+    (references.alertIds ?? []).some((alertId) => encoded.includes(alertId))
+  );
+};
+
+/**
+ * Polls for the pending proposal of `actionWorkflowId` that this run raised. Candidates from
+ * other runs are skipped rather than returned: returning one would end the poll on the wrong
+ * proposal and fail the seeded-run assertion immediately instead of waiting for this run's.
+ */
+export const pollForRunProposal = async (
+  api: AlertZeroApi,
+  actionWorkflowId: string,
+  references: RunReferences,
+  { timeoutMs }: { timeoutMs: number }
+): Promise<PendingProposal> =>
+  pollUntil(
+    `a pending proposal of ${actionWorkflowId} raised by this run`,
+    async () => {
+      for (const candidate of (await listPendingProposals(api)).filter(
+        (proposal) => proposal.actionWorkflowId === actionWorkflowId
+      )) {
+        if (await proposalReferencesRun(api, candidate, references)) {
+          return candidate;
+        }
+      }
+      return undefined;
+    },
+    { timeoutMs }
+  );
+
+/**
+ * Dismisses every pending proposal this run left behind. A spec that fails between a proposal's
+ * creation and its approval otherwise leaks it into the shared space, where later suites and
+ * retries inherit an actionable proposal pointing at deleted test resources. Dismissal (not
+ * approval) releases the parked run behind it, which then ends on its declined branch — so it
+ * must run while the resources it may touch (the service account) still exist.
+ */
+export const dismissRunProposals = async (
+  api: AlertZeroApi,
+  references: RunReferences
+): Promise<void> => {
+  for (const proposal of await listPendingProposals(api)) {
+    if (await proposalReferencesRun(api, proposal, references)) {
+      const response = await api.internal(
+        'POST',
+        `/internal/proposals/${encodeURIComponent(proposal.id)}/dismiss`,
+        { body: { dismissReason: 'handled_elsewhere', rationale: 'AlertZero e2e teardown' } }
+      );
+      // `api.internal` resolves non-2xx responses as values; a 409 means the proposal was decided
+      // concurrently (its spec approved or dismissed it), which teardown can accept.
+      if (response.statusCode >= 300 && response.statusCode !== 409) {
+        throw new Error(
+          `dismiss proposal ${proposal.id} failed: ${response.statusCode} ${JSON.stringify(
+            response.body
+          )}`
+        );
+      }
+    }
   }
 };

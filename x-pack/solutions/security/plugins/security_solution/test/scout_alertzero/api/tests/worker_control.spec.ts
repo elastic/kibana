@@ -10,11 +10,13 @@ import {
   apiTest,
   tags,
   testData,
+  cancelNewExecutions,
   createServiceAccount,
   deleteServiceAccount,
   getAdminApi,
   getWorker,
   listChatCompletionConnectors,
+  listExecutionIds,
   listWorkers,
   patchWorker,
   resetWorker,
@@ -32,18 +34,27 @@ const WORKER_ID = testData.FLOOR_ATTACK_DISCOVERY_WORKER_ID;
  * attack-discovery flow: they skip with an explicit reason when the stack was booted
  * without a preconfigured inference connector. One of them enables a worker, which Task
  * Manager immediately runs for real as its service account — a model-calling run. That run
- * may still be in flight when cleanup disables the worker and deletes its account, which
- * can fail it after the fact; the run is accepted and left to finish on its own rather
- * than waited on, because its outcome is not what this spec asserts.
+ * outlives the disable (Task Manager keeps it going), so before the accounts are deleted
+ * teardown cancels exactly the runs this suite started and waits for them to stop, per the
+ * cleanup contract: a run left in flight can mutate shared-space state after the suite, or
+ * collide with the next use of the worker's `cancel-in-progress` concurrency key.
  */
 apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.classic] }, () => {
   const serviceAccountIds: string[] = [];
+  // The worker's workflow and the executions that existed before this suite enabled it, so
+  // teardown can cancel only the runs this suite started — never another suite's.
+  let enabledRuns: { workflowId: string; knownExecutionIds: string[] } | undefined;
 
   apiTest.afterAll(async ({ apiClient, samlAuth }) => {
     const api = await getAdminApi(apiClient, samlAuth);
     // Unbind before deleting the accounts: a worker left pointing at a deleted account leaks into
     // whatever spec runs next.
     await resetWorker(api, WORKER_ID);
+    // End the runs this suite's enables started; run before the accounts go away below so a
+    // drained run cannot fail after the fact on its deleted service account.
+    if (enabledRuns) {
+      await cancelNewExecutions(api, enabledRuns.workflowId, enabledRuns.knownExecutionIds);
+    }
     for (const id of serviceAccountIds) {
       await deleteServiceAccount(api, id);
     }
@@ -65,14 +76,23 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
     'refuses to enable a worker that has no service account',
     async ({ apiClient, samlAuth }) => {
       const api = await getAdminApi(apiClient, samlAuth);
+      // The model gate runs before the service-account check, so on a stack without a model the
+      // enable is refused as `noModel` and this spec cannot reach the guard it exists for. Skip
+      // with that reason instead of asserting whatever 4xx comes back first.
+      apiTest.skip(
+        (await listChatCompletionConnectors(api)).length === 0,
+        'no preconfigured chat-completion inference connector on this stack; the model gate refuses the enable before the service-account check, so this guard is unreachable'
+      );
       // Do not trust spec order: another spec may have left an account bound to this worker.
       await resetWorker(api, WORKER_ID);
       const before = await getWorker(api, WORKER_ID);
       expect(before.settings.serviceAccountId).toBeUndefined();
 
       const response = await patchWorker(api, WORKER_ID, { enabled: true });
-      expect(response.statusCode).toBeGreaterThanOrEqual(400);
-      expect(response.statusCode).toBeLessThan(500);
+      expect(response.statusCode).toBe(400);
+      expect((response.body as { message?: string }).message).toBe(
+        `Cannot apply a worker that is enabled without a service account to worker "${WORKER_ID}"`
+      );
       expect((await getWorker(api, WORKER_ID)).enabled).toBe(false);
     }
   );
@@ -90,6 +110,15 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       const serviceAccountId = await createServiceAccount(api);
       serviceAccountIds.push(serviceAccountId);
       const before = await getWorker(api, WORKER_ID);
+      // Snapshot the workflow's executions before enabling: the enable below makes Task Manager
+      // run the worker at once as its service account, and teardown must be able to cancel
+      // exactly that run (see afterAll), not whatever else shares the workflow.
+      if (before.workflowId) {
+        enabledRuns = {
+          workflowId: before.workflowId,
+          knownExecutionIds: await listExecutionIds(api, before.workflowId),
+        };
+      }
       await updateWorker(api, WORKER_ID, {
         settingsRevision: before.settingsRevision ?? null,
         settings: { serviceAccountId },
@@ -117,6 +146,14 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       const serviceAccountId = await createServiceAccount(api);
       serviceAccountIds.push(serviceAccountId);
       const before = await getWorker(api, WORKER_ID);
+      // Same snapshot as the reset spec above: the enable starts a real run that teardown must
+      // be able to end (see afterAll).
+      if (before.workflowId) {
+        enabledRuns = {
+          workflowId: before.workflowId,
+          knownExecutionIds: await listExecutionIds(api, before.workflowId),
+        };
+      }
 
       const configured = await updateWorker(api, WORKER_ID, {
         settingsRevision: before.settingsRevision ?? null,
