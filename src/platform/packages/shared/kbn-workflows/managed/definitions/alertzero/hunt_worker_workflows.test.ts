@@ -17,6 +17,8 @@ import {
 } from '.';
 import { ALERTZERO_JOURNAL_NOTE_WORKFLOW } from './journal_note';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { WorkflowGraph } from '../../../graph';
+import type { WorkflowYaml } from '../../../spec/schema';
 
 // Route-path and cross-package id checks (including the SYSTEM_SECURITY_HUNT_*
 // cross-check) live in the alertzero PLUGIN's own hunt_children_contract.test.ts, not
@@ -663,6 +665,36 @@ describe('Hunt Watch worker chain', () => {
         })
         .trim();
       expect(rendered).toBe('HTTP 500: {"message":"x"}');
+    });
+  });
+
+  // The contract test compares YAML fields. This builds the engine's execution graph, so the
+  // poll loop's constructs (while + max-iterations + timeout around a nested if) are known to
+  // compile, and the loop is wired to exit by `continue` rather than fail when it hits the limit.
+  describe('hunt — poll loop as the engine compiles it', () => {
+    const graph = WorkflowGraph.fromWorkflowDefinition(hunt as unknown as WorkflowYaml);
+
+    it('exits the poll by continue at 60 reads and sits inside a 10 minute timeout zone', () => {
+      expect(graph.getNode('exitWhile_poll_hunt_coordinator')).toMatchObject({
+        type: 'exit-while',
+        maxIterations: 60,
+        onLimit: 'continue',
+      });
+      expect(graph.getNode('enterTimeoutZone_poll_hunt_coordinator')).toMatchObject({
+        type: 'enter-timeout-zone',
+        timeout: '10m',
+        stepType: 'step_level_timeout',
+      });
+    });
+
+    // `if_poll_hunt_coordinator` is the guard the step's own `if:` compiles to.
+    it('keeps the read, the running check, and the delay inside the loop body', () => {
+      expect([...graph.getInnerStepIds('poll_hunt_coordinator')].sort()).toEqual([
+        'if_poll_hunt_coordinator',
+        'poll_delay',
+        'read_hunt_result',
+        'wait_if_running',
+      ]);
     });
   });
 
