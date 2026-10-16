@@ -8,16 +8,15 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { TopNFunctions } from '@kbn/profiling-utils';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
+import type { ProfilingHostsCorrelation } from './hosts_scope';
 import {
   rangeSchema,
   kuerySchema,
   serviceTransactionDataSourceSchema,
 } from '../../default_api_types';
 
-export interface ProfilingHostsFunctionsResponse {
+export interface ProfilingHostsFunctionsResponse extends ProfilingHostsCorrelation {
   functions: TopNFunctions;
-  hostNames: string[];
-  containerIds: string[];
 }
 
 export const profilingHostsFunctionsRoute = defineRoute<ProfilingHostsFunctionsResponse>()({

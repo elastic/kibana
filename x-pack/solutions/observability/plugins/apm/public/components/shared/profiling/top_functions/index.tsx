@@ -7,7 +7,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import { EmbeddableFunctions } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
-import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { ProfilingTopNFunctionsLink } from './top_functions_link';
 
@@ -19,6 +19,8 @@ interface Props {
   transactionName?: string;
   transactionType?: string;
   environment: string;
+  /** Rendered instead of the functions table when the service's transactions link to no profiling samples. */
+  fallback?: React.ReactNode;
 }
 
 export function ProfilingTopNFunctions({
@@ -29,6 +31,7 @@ export function ProfilingTopNFunctions({
   transactionName,
   transactionType,
   environment,
+  fallback,
 }: Props) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -54,6 +57,10 @@ export function ProfilingTopNFunctions({
     },
     [serviceName, start, end, kuery, transactionName, transactionType, environment]
   );
+
+  if (fallback && status === FETCH_STATUS.SUCCESS && (!data || data.TotalCount === 0)) {
+    return <>{fallback}</>;
+  }
 
   return (
     <>
