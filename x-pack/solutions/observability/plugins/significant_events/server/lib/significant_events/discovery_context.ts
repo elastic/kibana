@@ -19,8 +19,18 @@ const FEATURE_TYPES = ['dependency', 'entity', 'infrastructure'] as const;
 /** A query KI with the `FROM` target its grounding queries must use. */
 export type DiscoveryContextQuery = CompactKnowledgeIndicatorQuery & { view_name?: string };
 
+/**
+ * What is left to do once the searches are done. Without it the agent has stopped after the
+ * confirmation queries in the eval and left the profile queries out.
+ */
+export const REMAINING_GROUNDING_STEPS = [
+  'Step 3: run the confirmation query of every rule in query_kis, in parallel waves.',
+  'Step 4: profile (spread and trend) every rule whose sample returned failure rows, before any routing or write.',
+] as const;
+
 /** What the grounding skill's Steps 1 and 2 retrieve for a batch, so the agent need not. */
 export interface DiscoveryContext {
+  remaining_steps: readonly string[];
   /** Each source's `slug` and `view_name`. */
   sources: KISearchOutput['sources'];
   /** Rules with no backed query KI: grounding records `not_checked` for them. */
@@ -108,6 +118,7 @@ export const buildDiscoveryContext = async ({
   const viewBySlug = new Map(sources.map(({ slug, view_name: view }) => [slug, view]));
   const matchedRules = new Set(queryKis.map(({ rule }) => rule.id));
   return {
+    remaining_steps: REMAINING_GROUNDING_STEPS,
     sources,
     unmatched_rule_uuids: ruleUuids.filter((ruleUuid) => !matchedRules.has(ruleUuid)),
     truncated: queryPage.has_more,

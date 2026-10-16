@@ -170,7 +170,7 @@ describe('buildDiscoveryContext', () => {
     ]);
   });
 
-  it('lists the sources before the knowledge indicators, so the agent reads them first', async () => {
+  it('leads with the remaining steps and the sources, so the agent reads them first', async () => {
     const search = jest
       .fn()
       .mockResolvedValueOnce(page({ items: [] }))
@@ -179,12 +179,30 @@ describe('buildDiscoveryContext', () => {
     const context = await buildDiscoveryContext({ ruleUuids: ['rule-A'], sourceIds: [], search });
 
     expect(Object.keys(context)).toEqual([
+      'remaining_steps',
       'sources',
       'unmatched_rule_uuids',
       'truncated',
       'query_kis',
       'feature_kis',
     ]);
+  });
+
+  it('names the confirmation and profile steps that still have to run', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce(page({ items: [] }))
+      .mockResolvedValueOnce(page({ items: [] }));
+
+    const { remaining_steps: steps } = await buildDiscoveryContext({
+      ruleUuids: ['rule-A'],
+      sourceIds: [],
+      search,
+    });
+
+    expect(steps).toHaveLength(2);
+    expect(steps[0]).toContain('Step 3');
+    expect(steps[1]).toContain('Step 4');
   });
 
   it('lists the rules no backed query KI matched, and drops KIs of other rules', async () => {
