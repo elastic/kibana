@@ -38,7 +38,6 @@ const CustomEventRow = ({ item, conversationId, isStreaming }: CustomEventRowPro
   const { euiTheme } = useEuiTheme();
   const { definition, event } = item;
   const { actor } = event;
-  // Only Kibana users have a profile to look up. Agent and system actors keep their stored name.
   const { name: userName } = useUserMessageAuthor({
     author:
       actor.type === EventActorType.user
