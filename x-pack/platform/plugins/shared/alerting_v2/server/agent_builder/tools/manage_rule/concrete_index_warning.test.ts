@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { findBackingIndices, formatBackingIndexWarning } from './concrete_index_warning';
+import {
+  findBackingIndices,
+  formatBackingIndexWarning,
+  formatInheritedBackingIndexWarning,
+} from './concrete_index_warning';
 
 describe('findBackingIndices', () => {
   it('detects a data stream backing index and derives its base name', () => {
@@ -122,5 +126,26 @@ describe('formatBackingIndexWarning', () => {
       /^The recovery query targets/
     );
     expect(formatBackingIndexWarning(matches)).toMatch(/^The query targets/);
+  });
+});
+
+describe('formatInheritedBackingIndexWarning', () => {
+  const matches = [
+    { index: '.ds-logs-a-default-2026.06.11-000001', baseName: 'logs-a-default' },
+  ];
+
+  it('tells the model to leave the existing source unchanged', () => {
+    const warning = formatInheritedBackingIndexWarning(matches, 'The rule query');
+
+    expect(warning).toMatch(/^The rule query still targets/);
+    expect(warning).toContain('`.ds-logs-a-default-2026.06.11-000001` (base name `logs-a-default`)');
+    expect(warning).toContain('Leave it unchanged unless the user asks');
+  });
+
+  it('does not instruct the model to retarget the query', () => {
+    const warning = formatInheritedBackingIndexWarning(matches);
+
+    expect(warning).not.toContain('call the operation again');
+    expect(warning).not.toContain('wildcard');
   });
 });

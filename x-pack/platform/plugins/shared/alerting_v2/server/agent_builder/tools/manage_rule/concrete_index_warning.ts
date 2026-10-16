@@ -74,3 +74,21 @@ export const formatBackingIndexWarning = (
     `\`<base name>-*\` instead.`
   );
 };
+
+/**
+ * For sources the rule already had: the user did not choose them in this edit, so
+ * the model must not be steered into changing the rule's data scope.
+ */
+export const formatInheritedBackingIndexWarning = (
+  matches: ConcreteIndexMatch[],
+  queryName: string = 'The query'
+): string => {
+  const details = matches
+    .map(({ index, baseName }) => `\`${index}\` (base name \`${baseName}\`)`)
+    .join(', ');
+  return (
+    `${queryName} still targets a rollover generation index the rule already used: ${details}. ` +
+    `Leave it unchanged unless the user asks to change it. If it is relevant to the request, ` +
+    `mention that the rule may stop matching new data after a rollover.`
+  );
+};

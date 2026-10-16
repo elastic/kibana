@@ -44,7 +44,11 @@ import { resolveArtifactId } from '@kbn/alerting-v2-utils';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
 import { dashboardIdSchema } from '../../../lib/artifact_types';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
-import { findBackingIndices, formatBackingIndexWarning } from './concrete_index_warning';
+import {
+  findBackingIndices,
+  formatBackingIndexWarning,
+  formatInheritedBackingIndexWarning,
+} from './concrete_index_warning';
 import { getDateFieldsForQuery, resolveTimeFieldForQuery } from './resolve_time_field';
 
 type RuleArtifact = NonNullable<RuleAttachmentData['artifacts']>[number];
@@ -365,10 +369,23 @@ const setArtifacts = (
 
 // ─── Execution ────────────────────────────────────────────────────────────────
 
-const warnOnBackingIndices = (warnings: string[], esqlQuery: string, queryName: string): void => {
+const warnOnBackingIndices = (
+  warnings: string[],
+  esqlQuery: string,
+  queryName: string,
+  previousQuery?: string
+): void => {
+  const previousIndices = new Set(
+    previousQuery ? findBackingIndices(previousQuery).map(({ index }) => index) : []
+  );
   const backingIndices = findBackingIndices(esqlQuery);
-  if (backingIndices.length > 0) {
-    warnings.push(formatBackingIndexWarning(backingIndices, queryName));
+  const added = backingIndices.filter(({ index }) => !previousIndices.has(index));
+  const inherited = backingIndices.filter(({ index }) => previousIndices.has(index));
+  if (added.length > 0) {
+    warnings.push(formatBackingIndexWarning(added, queryName));
+  }
+  if (inherited.length > 0) {
+    warnings.push(formatInheritedBackingIndexWarning(inherited, queryName));
   }
 };
 
@@ -432,7 +449,12 @@ export const executeRuleOperations = async (
       case 'set_query': {
         const rootQuery = getRootEsqlQuery(op.query);
 
-        warnOnBackingIndices(warnings, rootQuery, 'The rule query');
+        warnOnBackingIndices(
+          warnings,
+          rootQuery,
+          'The rule query',
+          next.query ? getRootEsqlQuery(next.query) : undefined
+        );
 
         let resolvedTimeField: string | null | undefined;
         if (esClient) {
@@ -492,7 +514,12 @@ export const executeRuleOperations = async (
 
       case 'set_recovery': {
         if (op.recovery.strategy === recoveryStrategy.query) {
-          warnOnBackingIndices(warnings, op.recovery.query, 'The recovery query');
+          warnOnBackingIndices(
+            warnings,
+            op.recovery.query,
+            'The recovery query',
+            next.recovery?.strategy === recoveryStrategy.query ? next.recovery.query : undefined
+          );
         }
         next = { ...next, recovery: op.recovery };
 
@@ -532,7 +559,12 @@ export const executeRuleOperations = async (
       }
       case 'set_no_data':
         if ('query' in op.no_data && op.no_data.query) {
-          warnOnBackingIndices(warnings, op.no_data.query, 'The no-data query');
+          warnOnBackingIndices(
+            warnings,
+            op.no_data.query,
+            'The no-data query',
+            next.no_data && 'query' in next.no_data ? next.no_data.query : undefined
+          );
         }
         next = { ...next, no_data: op.no_data };
         break;
