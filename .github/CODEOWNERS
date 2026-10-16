@@ -1219,7 +1219,6 @@ x-pack/platform/plugins/private/monitoring @elastic/stack-monitoring
 x-pack/platform/plugins/private/monitoring_collection @elastic/stack-monitoring
 x-pack/platform/plugins/private/observability_ai_assistant_management @elastic/nightshift-context-and-research-team
 x-pack/platform/plugins/private/otel_telemetry_collection @elastic/observability-bi
-x-pack/platform/plugins/private/page_render_screenshotting @elastic/response-ops
 x-pack/platform/plugins/private/painless_lab @elastic/kibana-management
 x-pack/platform/plugins/private/product_intercept @elastic/appex-sharedux
 x-pack/platform/plugins/private/reindex_service @elastic/kibana-management
@@ -1451,7 +1450,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance @elastic/secur
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
-x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-detection-platform
+x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment @elastic/security-investigations
