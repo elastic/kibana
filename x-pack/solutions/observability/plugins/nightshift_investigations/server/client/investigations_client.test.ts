@@ -10,6 +10,7 @@ import { createInferenceRequestError } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
+  createAgentNotFoundError,
   createConversationAlreadyExistsError,
   createConversationNotFoundError,
   DEFAULT_CONVERSATION_TITLE,
@@ -1332,6 +1333,57 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       workflow_execution_ids: ['exec-1'],
     });
   });
+
+  it.each(['open', 'closed'] as const)(
+    'preserves %s status when recording a failed run',
+    async (status) => {
+      withExecution();
+      withConversations(makeConversation({ id: 'inv-1', status }));
+      installInvestigationAgentMock.mockRejectedValue(new Error('Agent setup unavailable'));
+      await makeClient().ensureForFailure('inv-1', 'exec-1');
+      expect(installInvestigationAgentMock).not.toHaveBeenCalled();
+      expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
+        workflow_execution_ids: ['exec-1'],
+      });
+    }
+  );
+
+  it('materializes an early failure and allows failed-run replay', async () => {
+    withExecution({ status: ExecutionStatus.FAILED });
+    await makeClient().ensureForFailure('inv-1', 'exec-1');
+    expect(installInvestigationAgentMock).toHaveBeenCalledWith({
+      agentBuilder: mockAgentBuilder,
+      spaceId: SPACE_ID,
+      availability: mockAgentAvailability,
+    });
+    expect(installInvestigationAgentMock.mock.invocationCallOrder[0]).toBeLessThan(
+      conversations.create.mock.invocationCallOrder[0]
+    );
+    expect(conversations.create).toHaveBeenCalled();
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
+  });
+
+  it('waits for a newly installed agent to become visible when recording an early failure', async () => {
+    withExecution();
+    conversations.create.mockRejectedValueOnce(
+      createAgentNotFoundError({ agentId: 'nightshift.investigation' })
+    );
+    await makeClient().ensureForFailure('inv-1', 'exec-1');
+    expect(installInvestigationAgentMock).toHaveBeenCalledTimes(1);
+    expect(conversations.create).toHaveBeenCalledTimes(2);
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
+  });
+
+  it.each([ExecutionStatus.COMPLETED, ExecutionStatus.CANCELLED, ExecutionStatus.TIMED_OUT])(
+    'does not materialize failure for an execution already %s',
+    async (status) => {
+      withExecution({ status });
+      await expect(makeClient().ensureForFailure('inv-1', 'exec-1')).rejects.toThrow(
+        InvestigationNotFoundError
+      );
+      expect(conversations.create).not.toHaveBeenCalled();
+    }
+  );
 
   it('reopens an investigation another identity owns', async () => {
     withExecution();
