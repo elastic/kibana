@@ -715,6 +715,15 @@ export const inlineCastsMapping = ${castsMap} as const;
 `
   );
 
+  const { timeSeriesAggregates } = await import('@elastic/esql-definitions/time-series-aggregates');
+  const timeSeriesAggregatesMap = JSON.stringify(timeSeriesAggregates, null, 2);
+  await writeFile(
+    join(GENERATED_DIR, 'time_series_aggregates.ts'),
+    `${FILE_HEADER}
+export const timeSeriesAggregates: Record<string, { function: string; returnType: string }> = ${timeSeriesAggregatesMap};
+`
+  );
+
   const scalarFunctionDefinitions: FunctionDefinition[] = [];
   const aggFunctionDefinitions: FunctionDefinition[] = [];
   const timeSeriesFunctionDefinitions: FunctionDefinition[] = [];

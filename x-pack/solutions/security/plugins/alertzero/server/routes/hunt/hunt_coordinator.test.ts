@@ -9,7 +9,6 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import {
-  ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
   ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
 } from '@kbn/alertzero-common';
@@ -161,10 +160,9 @@ describe('registerHuntCoordinatorRoute', () => {
       httpServerMock.createResponseFactory()
     );
 
-    expect(resolveScopedModelMock).toHaveBeenCalledTimes(3);
+    expect(resolveScopedModelMock).toHaveBeenCalledTimes(2);
     expect(huntCoordinatorMock.mock.calls[0][1]).toEqual({
       efficient: model,
-      balanced: model,
       frontier: model,
     });
     expect(paramsOf().tier2_when).toBe('never');
@@ -178,7 +176,6 @@ describe('registerHuntCoordinatorRoute', () => {
     const featureIds = resolveScopedModelMock.mock.calls.map(([{ featureId }]) => featureId);
     expect(featureIds).toEqual([
       ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
-      ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
       ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
     ]);
   });
@@ -194,7 +191,7 @@ describe('registerHuntCoordinatorRoute', () => {
 
     await handler(context, requestFor(), response);
 
-    expect(huntCoordinatorMock.mock.calls[0][1]).toEqual({ balanced: model, frontier: model });
+    expect(huntCoordinatorMock.mock.calls[0][1]).toEqual({ frontier: model });
     expect(huntCoordinatorMock.mock.calls[0][1]).not.toHaveProperty('efficient');
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining('efficient model unavailable')
@@ -217,7 +214,6 @@ describe('registerHuntCoordinatorRoute', () => {
 
     expect(huntCoordinatorMock.mock.calls[0][1]).toEqual({
       efficient: undefined,
-      balanced: undefined,
       frontier: undefined,
     });
     expect(response.ok).toHaveBeenCalled();
@@ -232,7 +228,6 @@ describe('registerHuntCoordinatorRoute', () => {
 
     expect(huntCoordinatorMock.mock.calls[0][1]).toEqual({
       efficient: undefined,
-      balanced: undefined,
       frontier: undefined,
     });
     // A resolution that threw is a fault, so it must be visible in production.
@@ -256,7 +251,6 @@ describe('registerHuntCoordinatorRoute', () => {
 
     expect(huntCoordinatorMock.mock.calls[0][1]).toEqual({
       efficient: undefined,
-      balanced: undefined,
       frontier: undefined,
     });
     expect(response.ok).toHaveBeenCalled();

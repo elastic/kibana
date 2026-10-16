@@ -137,7 +137,7 @@ export interface HuntCoordinatorCoreResult {
    * The model tiers that had no usable model on this run, in tier order; absent when every
    * tier resolved. Reported whether or not the run needed them: a missing Efficient model
    * quietly degrades dataset matching and recommendations without skipping anything, and a
-   * missing Balanced or Frontier model is what makes Tier 2 report `no_inference`.
+   * missing Frontier model is what makes Tier 2 report `no_inference`.
    */
   unavailable_model_tiers?: HuntModelTier[];
   message: string;
@@ -725,11 +725,10 @@ const huntCoordinatorCore = async (
   // The model is a fallback inside it and spends tokens, so a run that Tier 2 will not
   // reach gets the deterministic targets only; they still describe the run.
   // The one place a hunt workload is mapped to a tier (see `HuntModels` for the reasoning).
-  // Tier 2 needs both its tiers, so it is unreachable when either has no usable endpoint.
-  const tier2Models: HuntBehaviorModels | undefined =
-    models.frontier && models.balanced
-      ? { extraction: models.frontier, esql: models.balanced }
-      : undefined;
+  // Both Tier 2 jobs run on Frontier, so Tier 2 is unreachable without it.
+  const tier2Models: HuntBehaviorModels | undefined = models.frontier
+    ? { extraction: models.frontier, esql: models.frontier }
+    : undefined;
   const tier2Reachable = gatedSkipReason === null && tier2Models !== undefined && Boolean(text);
   const targets = await resolveTier2Targets({
     scope,

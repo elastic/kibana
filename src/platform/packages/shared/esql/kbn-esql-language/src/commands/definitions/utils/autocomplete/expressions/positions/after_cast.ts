@@ -44,7 +44,8 @@ export async function suggestAfterCast(ctx: ExpressionContext): Promise<ISuggest
     ? getExpressionType(
         inlineCastNode.value,
         ctx.context?.columns,
-        ctx.context?.unmappedFieldsStrategy
+        ctx.context?.unmappedFieldsStrategy,
+        ctx.context?.isTimeseriesSource === true
       )
     : undefined;
 

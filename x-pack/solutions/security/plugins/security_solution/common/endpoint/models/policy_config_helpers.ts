@@ -9,7 +9,11 @@ import { get, isObject } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import type { ExperimentalFeatures } from '../../experimental_features';
 import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../service/policy/custom_yara_signatures';
-import { DefaultPolicyNotificationMessage } from './policy_config';
+import {
+  DefaultPolicyNotificationMessage,
+  DefaultPolicyRuleNotificationMessage,
+  DefaultPolicyDeviceNotificationMessage,
+} from './policy_config';
 import type { PolicyConfig, UIPolicyConfig } from '../types';
 import {
   PolicyOperatingSystem,
@@ -34,41 +38,37 @@ const allOsValues = [
 ];
 
 const getPolicyPopupReference = (): Array<{
-  keyPath: string;
+  branchPath: string;
   osList: PolicyOperatingSystem[];
-  /** Operating systems where the popup is optional in the policy: absent there has no message. */
-  optionalOsList?: PolicyOperatingSystem[];
+  defaultMessage: string;
 }> => [
   {
-    keyPath: 'popup.malware.message',
+    branchPath: 'popup.malware',
     osList: [...allOsValues],
+    defaultMessage: DefaultPolicyNotificationMessage,
   },
   {
-    keyPath: 'popup.memory_protection.message',
+    branchPath: 'popup.memory_protection',
     osList: [...allOsValues],
+    defaultMessage: DefaultPolicyRuleNotificationMessage,
   },
   {
-    keyPath: 'popup.behavior_protection.message',
+    branchPath: 'popup.behavior_protection',
     osList: [...allOsValues],
+    defaultMessage: DefaultPolicyRuleNotificationMessage,
   },
   {
-    keyPath: 'popup.ransomware.message',
+    // Optional on Linux: an absent branch is skipped like any other stripped popup.
+    branchPath: 'popup.ransomware',
     osList: [...allOsValues],
-    optionalOsList: [PolicyOperatingSystem.linux],
+    defaultMessage: DefaultPolicyNotificationMessage,
   },
   {
-    keyPath: 'popup.device_control.message',
+    branchPath: 'popup.device_control',
     osList: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac],
+    defaultMessage: DefaultPolicyDeviceNotificationMessage,
   },
 ];
-
-/** Popup message paths `policy` carries; an optional popup that is absent carries none. */
-const getPolicyPopupMessagePaths = (policy: PolicyConfig): string[] =>
-  getPolicyPopupReference().flatMap(({ keyPath, osList, optionalOsList = [] }) =>
-    osList
-      .filter((os) => !optionalOsList.includes(os) || get(policy, `${os}.${keyPath}`) !== undefined)
-      .map((os) => `${os}.${keyPath}`)
-  );
 
 export const getPolicyProtectionsReference = (): PolicyProtectionReference[] => [
   {
@@ -341,11 +341,22 @@ export function isBillablePolicy(policy: PolicyConfig) {
   return !isPolicySetToEventCollectionOnly(policy).isOnlyCollectingEvents;
 }
 
-export const checkIfPopupMessagesContainCustomNotifications = (policy: PolicyConfig): boolean =>
-  getPolicyPopupMessagePaths(policy).some((path) => {
-    const currentValue = get(policy, path);
-    return currentValue !== '' && currentValue !== DefaultPolicyNotificationMessage;
+export const checkIfPopupMessagesContainCustomNotifications = (policy: PolicyConfig): boolean => {
+  const popupRefs = getPolicyPopupReference();
+
+  return popupRefs.some(({ branchPath, osList, defaultMessage }) => {
+    return osList.some((osValue) => {
+      const currentValue = get(policy, `${osValue}.${branchPath}.message`);
+      // Legacy {filename} default: the startup migration wrote it into every key of migrated policies.
+      return (
+        currentValue != null &&
+        currentValue !== '' &&
+        currentValue !== defaultMessage &&
+        currentValue !== DefaultPolicyNotificationMessage
+      );
+    });
   });
+};
 
 export interface DeviceControlNotificationConflict {
   readonly os: PolicyOperatingSystem.windows | PolicyOperatingSystem.mac;
@@ -372,12 +383,20 @@ export const getDeviceControlNotificationConflicts = (
 
 export const resetCustomNotifications = (
   policy: PolicyConfig,
-  customNotification = DefaultPolicyNotificationMessage
-): Partial<PolicyConfig> =>
-  getPolicyPopupMessagePaths(policy).reduce((acc, path) => {
-    set(acc, path, customNotification);
+  customNotification = ''
+): Partial<PolicyConfig> => {
+  const popupRefs = getPolicyPopupReference();
+
+  return popupRefs.reduce((acc, { branchPath, osList }) => {
+    osList.forEach((osValue) => {
+      // A stripped branch (e.g. device_control on Essentials) must not be recreated as a partial stub.
+      if (get(policy, `${osValue}.${branchPath}`) !== undefined) {
+        set(acc, `${osValue}.${branchPath}.message`, customNotification);
+      }
+    });
     return acc;
   }, {});
+};
 
 /**
  * Returns a copy of the passed `PolicyConfig` with device_control fields completely removed
