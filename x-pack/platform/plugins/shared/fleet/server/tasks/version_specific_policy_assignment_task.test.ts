@@ -1182,12 +1182,16 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
-        expect.objectContaining({ kuery })
+        // OpAMP collectors are left alone, like in the assignment
+        expect.objectContaining({ kuery: `(${kuery}) and not type:OPAMP` })
       );
       expect(mockedGetAgentsByKuery).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
-        expect.objectContaining({ kuery, includeStatusRuntimeField: false })
+        expect.objectContaining({
+          kuery: `(${kuery}) and not type:OPAMP`,
+          includeStatusRuntimeField: false,
+        })
       );
     });
 
@@ -1756,7 +1760,8 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
           expect.anything(),
           expect.anything(),
           expect.objectContaining({
-            kuery: '(policy_base_id:"policy-1") and not policy_id:"policy-1#sentinel"',
+            kuery:
+              '((policy_base_id:"policy-1") and not policy_id:"policy-1#sentinel") and not type:OPAMP',
           })
         );
         expect(mockedReassignAgents).toHaveBeenCalledWith(

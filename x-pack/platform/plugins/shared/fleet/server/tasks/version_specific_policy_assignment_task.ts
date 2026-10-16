@@ -1274,9 +1274,12 @@ export class VersionSpecificPolicyAssignmentTask {
         parentPolicyId,
         agentOnlyVariantPolicyIds
       );
-      const variantAgentsKuery = sentinelVersionEnabled
-        ? `(${allVariantAgentsKuery}) and not policy_id:"${escapeQuotes(sentinelPolicyId)}"`
-        : allVariantAgentsKuery;
+      // OpAMP collectors are left alone, like in the assignment: they have no policy to move between
+      const variantAgentsKuery = `(${
+        sentinelVersionEnabled
+          ? `(${allVariantAgentsKuery}) and not policy_id:"${escapeQuotes(sentinelPolicyId)}"`
+          : allVariantAgentsKuery
+      }) and ${NOT_OPAMP_AGENT_KUERY}`;
 
       const agentIds: string[] = [];
       // Include inactive agents: reassignment is a metadata update on `.fleet-agents` that is valid
