@@ -28,6 +28,13 @@ All errors in `server/domain/errors/`. Exported from `errors/index.ts`.
 |-------------|------|-----------|
 | `EntityNotFoundError` | 404 | Entity not found by ID |
 | `EntityStoreNotRunningError` | 400 | Operation requires entity store to be running |
+| `EntityStoreNotInstalledError` | 400 | CRUD or relationships call before the store is installed |
+
+## Extraction Errors
+
+| Error Class | HTTP | Condition |
+|-------------|------|-----------|
+| `NonPriorityExtractionDisabledError` | n/a | Non-priority extraction run while `nonPriorityStatus` is `stopped` (dual-process flag off, or the process stopped through internal `stop`). Soft failure: `extractLogs` returns `{ success: false, error }`, and the task writes no engine error and counts no task error |
 
 ## Important: Unlink Behavior
 

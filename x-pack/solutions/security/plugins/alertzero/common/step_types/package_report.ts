@@ -137,9 +137,50 @@ const coverageSkippedSchema = z.object({
   reason: z.enum(['disabled', 'denied', 'storage_failure', 'already_processed']),
 });
 
+/**
+ * A proposal this run did not mint because a live one already holds the subject, raised by an
+ * Investigation that may or may not be this one's. Only another Investigation's is reported: a
+ * rerun landing on its own Proposal is not news.
+ */
+export const convergedProposalSchema = z.object({
+  title: z.string().optional(),
+  /** The live revision of the Proposal this run converged onto. */
+  proposalId: z.string(),
+  /** The Investigation that raised it. */
+  ownerConversationId: z.string(),
+  /**
+   * What happened to that Proposal's comment: `revised` when this Investigation was added to it,
+   * otherwise why it was not (already named, already decided, too long, already revised as
+   * often as packaging will, refused).
+   */
+  outcome: z.enum([
+    'revised',
+    'already_mentioned',
+    'not_revisable',
+    'too_long',
+    'revision_limit',
+    'failed',
+  ]),
+  /** The journal line for this Investigation, saying where its finding went. */
+  note: z.string().max(2000),
+});
+
+export type ConvergedProposal = z.infer<typeof convergedProposalSchema>;
+
 export const packageReportMintPayloadSchema = z.object({
-  /** Idempotency key: uuidv5(conversationId, subjectId, actionWorkflowId[, processKey]). */
+  /**
+   * What is being proposed: uuidv5(subjectId, actionWorkflowId[, processKey]). No Investigation in
+   * it, so two Investigations that reach the same host share it; the recommendation, which has no
+   * host or action, is the one key that is per Investigation.
+   */
   subjectKey: z.string(),
+  /**
+   * The id the gate creates the Proposal under: `buildHuntProposalId` over the subject key, at the
+   * first generation no live Proposal holds. Resolved by packaging, which has the Proposals
+   * service; `decidePackageReport` stays pure and never sees it. The service refuses an id that
+   * already exists, which is what makes two runs that race over one subject create one Proposal.
+   */
+  proposalId: z.uuid(),
   conversationId: z.string(),
   /** Short plain-text label naming what is proposed; omitting it falls back to the action's own name. */
   title: z.string().max(256).optional(),
@@ -174,6 +215,19 @@ export const packageReportOutputSchema = z.discriminatedUnion('status', [
     }),
     proposals: z.array(packageReportMintPayloadSchema),
     /**
+     * What this run found that a live Proposal already covers, so it minted nothing for it. Each
+     * entry carries the journal line `hunt_package_report.yaml` writes on this Investigation.
+     */
+    converged: z.array(convergedProposalSchema),
+    /**
+     * Findings this run minted nothing for because a live Proposal this Investigation already
+     * holds covers them: a rerun landing on its own pending or executing Proposal. Not in
+     * `converged`, which is for what another Investigation holds and is what the journal reports,
+     * but it still means "this run created nothing", and the Investigation stays open for it, so
+     * the run's summary has to be able to say so.
+     */
+    alreadyOpenCount: z.number().int().min(0),
+    /**
      * Bounded markdown bullets, one per proposal up to `MAX_SUMMARY_PROPOSAL_BULLETS`, for the run
      * conclusion's prose. `proposals` itself stays complete because it drives the gate fan-out; this
      * is only what gets embedded in the journal note, whose `message` is capped at 8,000 characters.
@@ -187,20 +241,12 @@ export const packageReportOutputSchema = z.discriminatedUnion('status', [
     closureSummary: z.string(),
     expectedProposalCount: z.number().int().min(0),
     /**
-     * `none` unless this run found something mint-worthy and `proposals` was forced empty rather
-     * than minting a second, unrelated chain for what may be the same finding -- a conservative
-     * guard until the Proposals service owns real dedup keyed on `subjectKey` (see that field's own
-     * comment on `packageReportMintPayloadSchema` above). The two non-`none` values both fail
-     * closed (never risk a duplicate mint), but for different reasons the run conclusion has to
-     * tell apart: `existing_proposals` means the lookup found one and the analyst should go review
-     * it; `check_failed` means the lookup itself failed, so there may be nothing to review at all.
-     * A single enum rather than two booleans so a reader (and the Liquid prose branching on it)
-     * cannot see the unrepresentable "check failed but nothing was skipped" combination.
-     *
-     * Temporary contract surface: removed once `deduplicationKey` lands and the mint path dedupes
-     * for real instead of suppressing wholesale.
+     * `none` unless packaging could not tell what already exists for this run's subjects, or what
+     * the Investigation already carries (the baseline the settlement barrier is counted from), so
+     * it minted nothing rather than risk a duplicate: `check_failed`. A Proposal that already
+     * holds a subject is not a suppression, it is `converged`.
      */
-    mintSuppression: z.enum(['none', 'existing_proposals', 'check_failed']),
+    mintSuppression: z.enum(['none', 'check_failed']),
     /**
      * `none` unless this run was a clean one (no confirmed hit) whose dismissal was withheld
      * because the Investigation still carries an open (`pending`/`executing`) Proposal from an
@@ -212,8 +258,9 @@ export const packageReportOutputSchema = z.discriminatedUnion('status', [
      *
      * Not airtight: a gate's Proposal is created asynchronously, after the packaging workflow has
      * released its concurrency slot, so a clean run that lands in that create window sees no open
-     * Proposal and still dismisses. Same gap, and same Proposals-side fix, as `mintSuppression`
-     * (see `hunt_package_report.yaml`'s concurrency comment).
+     * Proposal and still dismisses. The per-subject ids that keep two runs from creating one
+     * Proposal twice do not apply: this asks whether anything is open on the Investigation, of a
+     * search that lags a write.
      */
     dismissHold: z.enum(['none', 'open_proposal', 'check_failed']),
   }),

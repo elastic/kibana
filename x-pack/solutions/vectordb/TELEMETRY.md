@@ -11,16 +11,16 @@ IDs are dash-separated and follow the pattern `<prefix>-<surface>-<element>`. Tw
 
 ## Home page
 
-Rendered by `plugins/serverless_vectordb/public/home/`. All IDs use the `serverlessVectordb-home-` prefix except the connection-details controls, which come from the onboarding package with `telemetryPage="homePage"`.
+Rendered by the shared `elasticsearchHome` plugin, which vectordb configures in `plugins/serverless_vectordb/public/home_config.ts`. All IDs use the `serverlessVectordb-home-` prefix, which that config supplies as `telemetryPrefix` so the shared page keeps emitting vectordb's own namespace.
 
 ### Header and footer
 
 | Telemetry ID                                        | Attached to                                              | Description                                         |
 | --------------------------------------------------- | -------------------------------------------------------- | --------------------------------------------------- |
 | `serverlessVectordb-home-documentationLink`         | `EuiLink` "Learn more about Elasticsearch Vector Database" | Opens the vector database docs.                     |
-| `vectordbOnboarding-homePage-copyEndpointUrl`       | `EuiButtonIcon` (copy) beside the endpoint URL           | Copies the Elasticsearch URL.                       |
-| `vectordbOnboarding-homePage-apiKeys-btn`           | `EuiButton` "Generate API key" (`xl` breakpoint only)    | Opens the connection-details flyout, API keys tab.  |
-| `vectordbOnboarding-homePage-connectionDetails-btn` | `EuiButtonIcon` (plugs) "Connection details"             | Opens the connection-details flyout.                |
+| `serverlessVectordb-home-copyEndpointUrl`           | `EuiButtonIcon` (copy) beside the endpoint URL           | Copies the Elasticsearch URL.                       |
+| `serverlessVectordb-home-connectionDetails-apiKeys` | `EuiButton` "Generate API key" (`xl` breakpoint only)    | Opens the connection-details flyout, API keys tab.  |
+| `serverlessVectordb-home-connectionDetails`         | `EuiButtonIcon` (plugs) "Connection details"             | Opens the connection-details flyout.                |
 
 ### Getting-started banner
 
@@ -94,7 +94,7 @@ Each row is a clickable `EuiPanel`.
 
 ## Onboarding: path selection
 
-Rendered by `onboarding_landing_page.tsx` in the onboarding package with `telemetryPage="pathSelection"`. All IDs use the `vectordbOnboarding-pathSelection-` prefix.
+Rendered by `onboarding_landing_page.tsx` in the onboarding package. All IDs use the `vectordbOnboarding-pathSelection-` prefix, which the connection details elements share via `PATH_SELECTION_TELEMETRY_PREFIX`.
 
 ### Path cards
 
@@ -112,7 +112,7 @@ Rendered by `onboarding_landing_page.tsx` in the onboarding package with `teleme
 
 ### Connect to your project
 
-`ConnectToProject` is rendered here with `showConnectionTypeSelector` and the full API key split button.
+`ConnectToProject` is rendered here with the connection type selector and the full API key split button.
 
 | Telemetry ID                                                        | Attached to                                                       | Description                                            |
 | ------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------ |
