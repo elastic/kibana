@@ -183,6 +183,7 @@ describe('renderPage', () => {
       );
     const reportAged = (ageMs: number) => ({
       report: { id: 'report-1', createdAt: new Date(NOW - ageMs) },
+      canHandBack: true,
     });
     const sentHeader = (call: number, name: string) =>
       (fetchMock.mock.calls[call][1] as RequestInit & { headers: Record<string, string> }).headers[
@@ -278,6 +279,22 @@ describe('renderPage', () => {
 
       expect(await result).toBeInstanceOf(RenderServiceSaturatedError);
       expect(fetchMock).toHaveBeenCalledTimes(31);
+    });
+
+    it('keeps waiting past a minute when the task cannot hand back', async () => {
+      fetchMock.mockImplementation(async () =>
+        Date.now() < NOW + 90_000 ? saturated() : pdfResponse()
+      );
+
+      const result = start({
+        ...reportAged(0),
+        canHandBack: false,
+        retryAt: new Date(NOW + 15 * MINUTE),
+      });
+      await jest.advanceTimersByTimeAsync(90_000);
+
+      await expect(result).resolves.toMatchObject({ data: Buffer.from('bytes') });
+      expect(fetchMock).toHaveBeenCalledTimes(46);
     });
 
     it('waits less when the task deadline would not leave room for the render', async () => {

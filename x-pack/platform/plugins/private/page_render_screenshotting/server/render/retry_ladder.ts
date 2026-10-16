@@ -42,10 +42,17 @@ export function jitter(ms: number, random: () => number = Math.random): number {
   return Math.round(ms * (0.5 + random()));
 }
 
-/** Capped so the run's deadline still leaves room for the render. */
-export function stopWaitingAt(runStartedAt: number, deadline: number | undefined): number {
-  const budgetEnd = runStartedAt + MAX_WAIT_PER_RUN_MS;
-  return deadline === undefined ? budgetEnd : Math.min(budgetEnd, deadline - RENDER_RESERVE_MS);
+/**
+ * Capped so the run's deadline still leaves room for the render. A run that can't hand back keeps
+ * waiting until then: stopping early would spend one of the report's attempts.
+ */
+export function stopWaitingAt(
+  runStartedAt: number,
+  deadline: number | undefined,
+  canHandBack: boolean
+): number {
+  const renderBy = deadline === undefined ? Infinity : deadline - RENDER_RESERVE_MS;
+  return canHandBack ? Math.min(runStartedAt + MAX_WAIT_PER_RUN_MS, renderBy) : renderBy;
 }
 
 /** How the reporting task should respond to a failed render request. */

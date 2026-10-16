@@ -860,13 +860,14 @@ describe('Run Scheduled Report Task', () => {
   });
 
   it('fails a run that found page-render-service busy instead of rescheduling it', async () => {
+    const busyRunTask = jest.fn().mockRejectedValue(new RenderServiceSaturatedError('busy'));
     mockReporting.getExportTypesRegistry().register({
       id: 'test2',
       name: 'Test2',
       setup: jest.fn(),
       start: jest.fn(),
       createJob: () => new Promise(() => {}),
-      runTask: jest.fn().mockRejectedValue(new RenderServiceSaturatedError('busy')),
+      runTask: busyRunTask,
       shouldNotifyUsage: () => true,
       getFeatureUsageName: () => 'Reporting: test2 scheduled export',
       notifyUsage: jest.fn(),
@@ -900,6 +901,8 @@ describe('Run Scheduled Report Task', () => {
     } as unknown as RunContext);
 
     await expect(taskRunner.run()).rejects.toBeInstanceOf(RenderServiceSaturatedError);
+    // So the render waits out the whole run rather than a minute of it.
+    expect(busyRunTask.mock.calls[0][0].taskInstanceFields.canHandBack).toBe(false);
     expect(store.setReportFailed).toHaveBeenCalledWith(
       thisSavedReport,
       expect.objectContaining({

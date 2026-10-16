@@ -41,6 +41,8 @@ export interface RenderContext {
   retryAt?: Date | null;
   /** Its age drives the retry ladder; its ID goes to the service. */
   report?: { id: string; createdAt: Date };
+  /** Without it, waiting for capacity runs to the deadline instead of a minute per run. */
+  canHandBack?: boolean;
 }
 
 const RENDER_PATH = '/v1/render-page';
@@ -117,13 +119,13 @@ function describeNetworkError(err: unknown): string {
 async function postWithRetry(
   payload: RenderPageRequest,
   config: PageRenderServiceConfig,
-  { retryAt, report }: RenderContext,
+  { retryAt, report, canHandBack = false }: RenderContext,
   signal: AbortSignal,
   logger: Logger
 ): Promise<RenderPageResult> {
   const runStartedAt = Date.now();
   const deadline = retryAt ? retryAt.getTime() - DEADLINE_SAFETY_MARGIN_MS : undefined;
-  const waitUntil = stopWaitingAt(runStartedAt, deadline);
+  const waitUntil = stopWaitingAt(runStartedAt, deadline, canHandBack);
   const createdAt = report?.createdAt.getTime() ?? runStartedAt;
   const tags = report ? [report.id] : [];
 
@@ -186,8 +188,8 @@ async function postWithRetry(
       );
     }
     if (now + waitMs > waitUntil) {
-      // Hand the worker back rather than hold it for the whole ladder. Scheduled reports cannot be
-      // handed back, so the message doesn't promise a reschedule.
+      // Out of waiting time for this run. Only some tasks can hand back and run again, so the
+      // message doesn't promise a reschedule.
       throw new RenderServiceSaturatedError(
         `page-render-service is still at capacity after waiting ${Math.round(
           (now - runStartedAt) / 1000

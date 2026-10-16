@@ -67,12 +67,17 @@ describe('stopWaitingAt', () => {
   const start = 1_000_000;
 
   it('waits at most a minute per run', () => {
-    expect(stopWaitingAt(start, undefined)).toBe(start + MAX_WAIT_PER_RUN_MS);
-    expect(stopWaitingAt(start, start + 285_000)).toBe(start + MAX_WAIT_PER_RUN_MS);
+    expect(stopWaitingAt(start, undefined, true)).toBe(start + MAX_WAIT_PER_RUN_MS);
+    expect(stopWaitingAt(start, start + 285_000, true)).toBe(start + MAX_WAIT_PER_RUN_MS);
+  });
+
+  it('waits until the deadline when the run cannot hand back', () => {
+    expect(stopWaitingAt(start, start + 900_000, false)).toBe(start + 900_000 - RENDER_RESERVE_MS);
+    expect(stopWaitingAt(start, undefined, false)).toBe(Infinity);
   });
 
   it('keeps room for the render before the deadline', () => {
     // A 4m queue timeout, less the client's 15s margin.
-    expect(stopWaitingAt(start, start + 225_000)).toBe(start + 225_000 - RENDER_RESERVE_MS);
+    expect(stopWaitingAt(start, start + 225_000, true)).toBe(start + 225_000 - RENDER_RESERVE_MS);
   });
 });

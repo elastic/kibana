@@ -191,13 +191,15 @@ describe('createGetScreenshots', () => {
       getDispatcher: () => dispatcher,
     });
     await firstValueFrom(
-      getScreenshots(pdfOptions({ taskInstanceFields: { retryAt, startedAt: null, report } }))
+      getScreenshots(
+        pdfOptions({ taskInstanceFields: { retryAt, startedAt: null, report, canHandBack: true } })
+      )
     );
 
     const [payload, serviceConfig, context] = mockRenderPage.mock.calls[0];
     expect(payload.url).toBe('https://kibana.example.com/app/reportingRedirect');
     expect(serviceConfig).toMatchObject({ url: 'http://localhost:3001', dispatcher });
-    expect(context).toEqual({ retryAt, report });
+    expect(context).toEqual({ retryAt, report, canHandBack: true });
   });
 
   it('emits a dispatcher failure as an observable error', async () => {

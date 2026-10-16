@@ -1220,9 +1220,9 @@ describe('Run Single Report Task', () => {
       const { result, runTaskFn } = await runFailingWith(new RenderServiceSaturatedError());
       await result;
 
-      expect(runTaskFn.mock.calls[0][0].taskInstanceFields.report).toEqual({
-        id: 'test1',
-        createdAt: new Date(CREATED_AT),
+      expect(runTaskFn.mock.calls[0][0].taskInstanceFields).toMatchObject({
+        report: { id: 'test1', createdAt: new Date(CREATED_AT) },
+        canHandBack: true,
       });
     });
 

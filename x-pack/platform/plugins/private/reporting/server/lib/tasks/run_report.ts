@@ -689,6 +689,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                     ...(task.created_at
                       ? { report: { id: task.id, createdAt: new Date(task.created_at) } }
                       : {}),
+                    canHandBack: this.reschedulesRenderRetries,
                   },
                   cancellationToken,
                   stream,

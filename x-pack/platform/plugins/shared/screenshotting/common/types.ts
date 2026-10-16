@@ -39,4 +39,6 @@ export interface PerformanceMetrics {
 export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'retryAt' | 'startedAt'> & {
   /** page-render-service retries are timed from the report's creation, not the run's start. */
   report?: { id: string; createdAt: Date };
+  /** Whether the run can hand its worker back while waiting for page-render-service capacity. */
+  canHandBack?: boolean;
 };

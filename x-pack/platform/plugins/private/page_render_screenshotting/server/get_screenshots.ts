@@ -102,6 +102,7 @@ export function createGetScreenshots({
         {
           retryAt: options.taskInstanceFields.retryAt,
           report: options.taskInstanceFields.report,
+          canHandBack: options.taskInstanceFields.canHandBack,
         },
         logger
       );
