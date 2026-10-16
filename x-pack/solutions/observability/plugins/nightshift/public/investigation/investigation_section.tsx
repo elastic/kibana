@@ -275,7 +275,6 @@ const SectionRows = ({
                 investigation={investigation}
                 isSelected={investigation.id === selectedInvestigationId}
                 onClick={onInvestigationClick}
-                showPendingProposals={false}
                 actions={<InvestigationCardActions investigation={investigation} />}
               />
             )}

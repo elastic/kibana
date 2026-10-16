@@ -71,10 +71,8 @@ describe('InvestigationBriefCard', () => {
     expect(screen.getByTestId('investigationCardTitle')).toHaveTextContent(
       'Checkout latency spike'
     );
-    await waitFor(() =>
-      expect(screen.getByTestId('investigationCardPendingProposals')).toBeInTheDocument()
-    );
+    await waitFor(() => expect(loader.load).toHaveBeenCalledWith('conv-1'));
+    expect(screen.queryByTestId('investigationCardPendingProposals')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardRunning')).not.toBeInTheDocument();
-    expect(loader.load).toHaveBeenCalledWith('conv-1');
   });
 });

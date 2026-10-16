@@ -53,7 +53,7 @@ const renderCard = (props: React.ComponentProps<typeof InvestigationCard>) =>
   );
 
 describe('InvestigationCard', () => {
-  it('shows the title, summary, impacted entities, and pending proposals, but not the subjects', () => {
+  it('shows the title, summary, and impacted entities, but not subjects or proposals', () => {
     renderCard({ investigation: investigation() });
 
     expect(screen.getByTestId('investigationCardTitle')).toHaveTextContent(
@@ -69,9 +69,7 @@ describe('InvestigationCard', () => {
       'payments',
     ]);
     expect(screen.getByText('+1')).toBeInTheDocument();
-    expect(screen.getByTestId('investigationCardPendingProposals')).toHaveTextContent(
-      '2 proposals to review'
-    );
+    expect(screen.queryByTestId('investigationCardPendingProposals')).not.toBeInTheDocument();
   });
 
   it('does not show status or severity dots, and leaves out what is missing', () => {
@@ -135,16 +133,6 @@ describe('InvestigationCard', () => {
 
     expect(onClick).toHaveBeenCalledTimes(2);
     expect(onClick).toHaveBeenCalledWith(item);
-  });
-
-  it('hides the pending-proposals badge when asked', () => {
-    renderCard({
-      investigation: investigation(),
-      showPendingProposals: false,
-    });
-
-    expect(screen.queryByTestId('investigationCardPendingProposals')).not.toBeInTheDocument();
-    expect(screen.getAllByTestId('investigationCardEntity')).toHaveLength(3);
   });
 
   it('renders trailing actions on the age row without opening the card when they are clicked', () => {

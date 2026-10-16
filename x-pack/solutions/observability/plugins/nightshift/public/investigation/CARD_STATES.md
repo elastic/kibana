@@ -1,31 +1,46 @@
 # Investigation card states gallery
 
-Isolated worktree / branch: `ekso-investigation-card-states`  
-Path: `/Users/katesosedova/dev/elastic/kibana-investigation-card-states`
+Worktree: `/Users/katesosedova/dev/elastic/kibana-investigation-card-states`  
+Branch: `ekso-investigation-card-states`
 
-## Run
+## One-time worktree setup
 
-From this worktree (or any kibana checkout on this branch):
+This worktree reuses the bootstrapped Kibana checkout (no second `kbn bootstrap`):
 
 ```bash
-source ~/.nvm/nvm.sh && nvm use
-yarn storybook nightshift
+cd /Users/katesosedova/dev/elastic/kibana-investigation-card-states
+ln -sfn /Users/katesosedova/dev/elastic/kibana/node_modules node_modules
+ln -sfn /Users/katesosedova/dev/elastic/kibana/target target
+# Storybook expects target/kibana/...; assets live under target/build/...
+test -e /Users/katesosedova/dev/elastic/kibana/target/kibana || \
+  ln -sfn build /Users/katesosedova/dev/elastic/kibana/target/kibana
 ```
 
-Open **app → Nightshift → InvestigationCard → AllStates**.
+## Run Storybook
+
+```bash
+cd /Users/katesosedova/dev/elastic/kibana-investigation-card-states
+source ~/.nvm/nvm.sh && nvm use
+node scripts/storybook nightshift
+```
+
+Open **app → Nightshift → InvestigationCard → AllStates**
+
+Direct URL:
+
+http://localhost:9001/?path=/story/app-nightshift-investigationcard--all-states
 
 ## What’s covered
 
 | State | Notes |
 | --- | --- |
-| Nightshift default | Summary, entities, actions; proposals hidden |
+| Nightshift default | Summary, entities, actions |
 | Selected | Interactive select highlight |
 | In progress | Data flag only — no running dot |
-| Closed | Hollow Closed badge |
+| Closed | `status: closed` data only — no badge on the card |
 | Title pending (alert / Slack / none) | Fallback titles |
 | No summary / no entities | Sparse content |
 | Entity overflow | First 3 + `+N` |
-| Pending proposals | Plugin default (Nightshift turns off) |
 | Long title / long summary | Truncate + 2-line clamp |
 | Without actions / minimal | Brief-card style |
 

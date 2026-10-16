@@ -110,7 +110,6 @@ interface CardState {
   label: string;
   note?: string;
   investigation: InvestigationSummary;
-  showPendingProposals?: boolean;
   withActions?: boolean;
   isSelected?: boolean;
 }
@@ -118,15 +117,13 @@ interface CardState {
 const CARD_STATES: CardState[] = [
   {
     label: 'Nightshift default',
-    note: 'Home list: no proposals badge, with actions',
+    note: 'Home list with actions',
     investigation: baseInvestigation(),
-    showPendingProposals: false,
     withActions: true,
   },
   {
     label: 'Selected',
     investigation: baseInvestigation({ id: 'inv-selected' }),
-    showPendingProposals: false,
     withActions: true,
     isSelected: true,
   },
@@ -139,11 +136,11 @@ const CARD_STATES: CardState[] = [
       created_at: ago(45 * SECOND),
       title: 'Checkout latency spike after deploy',
     }),
-    showPendingProposals: false,
     withActions: true,
   },
   {
     label: 'Closed',
+    note: 'status=closed — no Closed badge on the card',
     investigation: baseInvestigation({
       id: 'inv-closed',
       metadata: {
@@ -153,7 +150,6 @@ const CARD_STATES: CardState[] = [
       },
       created_at: ago(2 * DAY),
     }),
-    showPendingProposals: false,
     withActions: true,
   },
   {
@@ -166,7 +162,6 @@ const CARD_STATES: CardState[] = [
       impact: undefined,
       pending_proposal_count: undefined,
     }),
-    showPendingProposals: false,
     withActions: true,
   },
   {
@@ -187,7 +182,6 @@ const CARD_STATES: CardState[] = [
       metadata: { status: 'open', severity: 'high' },
       impact: undefined,
     }),
-    showPendingProposals: false,
     withActions: true,
   },
   {
@@ -200,7 +194,6 @@ const CARD_STATES: CardState[] = [
       metadata: { status: 'open' },
       impact: undefined,
     }),
-    showPendingProposals: false,
     withActions: true,
   },
   {
@@ -213,7 +206,6 @@ const CARD_STATES: CardState[] = [
         created_at: ago(3 * HOUR),
       },
     }),
-    showPendingProposals: false,
     withActions: true,
   },
   {
@@ -223,7 +215,6 @@ const CARD_STATES: CardState[] = [
       impact: undefined,
       created_at: ago(5 * MINUTE),
     }),
-    showPendingProposals: false,
     withActions: true,
   },
   {
@@ -241,17 +232,6 @@ const CARD_STATES: CardState[] = [
         created_at: ago(MINUTE),
       },
     }),
-    showPendingProposals: false,
-    withActions: true,
-  },
-  {
-    label: 'Pending proposals (plugin default)',
-    note: 'showPendingProposals left on — Nightshift turns this off',
-    investigation: baseInvestigation({
-      id: 'inv-proposals',
-      pending_proposal_count: 2,
-    }),
-    showPendingProposals: true,
     withActions: true,
   },
   {
@@ -262,7 +242,6 @@ const CARD_STATES: CardState[] = [
         'Multi-region CDN invalidation cascaded into origin pressure, elevated 5xx on the storefront, and a secondary payment-auth retry storm across checkout and wallet services',
       created_at: ago(8 * HOUR),
     }),
-    showPendingProposals: false,
     withActions: true,
   },
   {
@@ -276,7 +255,6 @@ const CARD_STATES: CardState[] = [
           'First confirm the purge window and whether edge POPs finished rewarming. Then check origin TTFB and asset path changes on the last deploy. Finally decide whether to raise TTL, narrow purge scope, or roll back the frontend asset rename that may be bypassing cache keys.',
       },
     }),
-    showPendingProposals: false,
     withActions: true,
   },
   {
@@ -286,7 +264,6 @@ const CARD_STATES: CardState[] = [
       id: 'inv-no-actions',
       created_at: ago(30 * MINUTE),
     }),
-    showPendingProposals: false,
     withActions: false,
   },
   {
@@ -301,7 +278,6 @@ const CARD_STATES: CardState[] = [
       pending_proposal_count: undefined,
       created_at: ago(10 * SECOND),
     }),
-    showPendingProposals: false,
     withActions: false,
   },
 ];
@@ -324,10 +300,18 @@ const StateCard = ({
           {state.note ? ` — ${state.note}` : null}
         </p>
       </EuiText>
-      <EuiPanel paddingSize="none" hasBorder hasShadow={false}>
+      <EuiPanel
+        paddingSize="none"
+        hasBorder
+        hasShadow={false}
+        css={css`
+          box-sizing: border-box;
+          overflow: hidden;
+          border-radius: ${euiTheme.size.s};
+        `}
+      >
         <InvestigationCard
           investigation={state.investigation}
-          showPendingProposals={state.showPendingProposals}
           isSelected={state.isSelected ?? selectedId === state.investigation.id}
           onClick={() => onSelect(state.investigation.id)}
           actions={state.withActions ? <MockCardActions /> : undefined}
@@ -369,7 +353,17 @@ const InvestigationCardStatesGallery = (): React.ReactElement => {
           <h2>Stacked list (like a severity section)</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiPanel paddingSize="none" hasBorder hasShadow={false} css={{ maxWidth: 720 }}>
+        <EuiPanel
+          paddingSize="none"
+          hasBorder
+          hasShadow={false}
+          css={css`
+            box-sizing: border-box;
+            max-width: 720px;
+            overflow: hidden;
+            border-radius: ${euiTheme.size.s};
+          `}
+        >
           <EuiFlexGroup
             direction="column"
             gutterSize="none"
@@ -380,13 +374,12 @@ const InvestigationCardStatesGallery = (): React.ReactElement => {
               }
             `}
           >
-            {CARD_STATES.filter((state) => state.withActions && state.showPendingProposals === false)
+            {CARD_STATES.filter((state) => state.withActions)
               .slice(0, 4)
               .map((state) => (
                 <EuiFlexItem key={state.investigation.id} grow={false}>
                   <InvestigationCard
                     investigation={state.investigation}
-                    showPendingProposals={false}
                     isSelected={selectedId === state.investigation.id}
                     onClick={() => setSelectedId(state.investigation.id)}
                     actions={<MockCardActions />}

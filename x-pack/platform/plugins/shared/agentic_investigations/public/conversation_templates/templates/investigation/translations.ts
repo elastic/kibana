@@ -12,17 +12,6 @@ export const RUNNING_LABEL = i18n.translate(
   { defaultMessage: 'Investigating…' }
 );
 
-export const CLOSED_LABEL = i18n.translate(
-  'xpack.agenticInvestigations.investigations.closedLabel',
-  { defaultMessage: 'Closed' }
-);
-
-export const pendingProposalsLabel = (count: number): string =>
-  i18n.translate('xpack.agenticInvestigations.investigations.pendingProposals', {
-    defaultMessage: '{count, plural, one {# proposal to review} other {# proposals to review}}',
-    values: { count },
-  });
-
 export const moreEntitiesLabel = (count: number): string =>
   i18n.translate('xpack.agenticInvestigations.investigations.moreEntities', {
     defaultMessage: '+{count}',
