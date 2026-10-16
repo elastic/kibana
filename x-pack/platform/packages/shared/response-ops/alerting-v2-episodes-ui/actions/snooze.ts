@@ -44,26 +44,23 @@ export const createSnoozeAction = (
     const snoozedUntil = await openSnoozeExpiryModal(deps.overlays, deps.rendering);
     if (snoozedUntil === undefined) return;
 
-    try {
-      await executeCompositeAction<{ snoozedUntil: string | null }>({
-        episodes,
-        nativeExecute: (eps, http) =>
-          bulkSnoozeSeriesActions(
-            http,
-            uniqueByGroup(eps).map(
-              (ep): BulkSnoozeSeriesActionItem => ({
-                group_hash: ep.group_hash,
-                ...(snoozedUntil === null ? {} : { snoozed_until: snoozedUntil }),
-              })
-            )
-          ),
-        extension,
-        extensionContext: { snoozedUntil },
-        deps,
-      });
-      onSuccess?.();
-    } catch {
-      deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);
-    }
+    await executeCompositeAction<{ snoozedUntil: string | null }>({
+      episodes,
+      nativeExecute: (eps, http) =>
+        bulkSnoozeSeriesActions(
+          http,
+          uniqueByGroup(eps).map(
+            (ep): BulkSnoozeSeriesActionItem => ({
+              group_hash: ep.group_hash,
+              ...(snoozedUntil === null ? {} : { snoozed_until: snoozedUntil }),
+            })
+          )
+        ),
+      extension,
+      extensionContext: { snoozedUntil },
+      actionName: i18n.SNOOZE,
+      onSuccess,
+      deps,
+    });
   },
 });

@@ -126,6 +126,29 @@ describe('createImpactClient', () => {
       expect(await client.getEntityIdsByConversationId(['c1'])).toEqual(new Map([['c1', []]]));
     });
 
+    it('should keep each entity type in getEntitiesByConversationId', async () => {
+      const { client } = createClient({
+        listByConversationIds: jest.fn().mockResolvedValue([
+          {
+            conversationId: 'c1',
+            entities: [{ id: 'host-1', type: 'host', name: 'Host 1' }, { id: 'thing' }],
+          },
+        ]),
+      });
+
+      expect(await client.getEntitiesByConversationId(['c1'])).toEqual(
+        new Map([
+          [
+            'c1',
+            [
+              { id: 'host-1', type: 'host' },
+              { id: 'thing', type: undefined },
+            ],
+          ],
+        ])
+      );
+    });
+
     it('should dedupe the ids and read in chunks of the per-read cap', async () => {
       const ids = Array.from({ length: MAX_IMPACT_CONVERSATION_IDS + 5 }, (_, i) => `c${i}`);
       const { client, listByConversationIds } = createClient();

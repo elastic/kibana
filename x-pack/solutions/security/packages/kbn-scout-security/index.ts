@@ -13,6 +13,7 @@ export { getEndpointArtifactsApiService } from './src/playwright/fixtures/worker
 export {
   CUSTOM_QUERY_RULE,
   DEFAULT_SECURITY_SOLUTION_INDEXES,
+  EQL_RULE,
 } from './src/playwright/constants/detection_rules';
 export type {
   CustomQueryRuleResponseAction,

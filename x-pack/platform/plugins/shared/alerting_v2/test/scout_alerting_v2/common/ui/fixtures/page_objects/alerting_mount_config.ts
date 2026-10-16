@@ -22,15 +22,15 @@ export interface AlertingMountConfig {
 export const OBSERVABILITY_MOUNT_CONFIG: AlertingMountConfig = {
   appRoute: 'observability/alerting',
   paths: {
-    rules: '/rules/v2',
+    rules: '/rules/universal',
     ruleLibrary: '/rule-library',
     alerts: '/alerts',
     actionPolicies: '/action-policies',
     executionHistory: '/execution-history',
   },
   subPaths: {
-    rulesCreate: '/rules/v2/create',
-    rulesDetail: (ruleId: string) => `/rules/v2/${ruleId}`,
+    rulesCreate: '/rules/universal/create',
+    rulesDetail: (ruleId: string) => `/rules/universal/${ruleId}`,
     episodeDetail: (episodeId: string) => `/alerts/${encodeURIComponent(episodeId)}`,
     actionPoliciesCreate: '/action-policies/create',
     actionPoliciesEdit: (policyId: string) => `/action-policies/edit/${policyId}`,

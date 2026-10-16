@@ -41,8 +41,7 @@ interface EsqlViewPreviewState {
 }
 
 export interface UseEsqlViewPreviewResult extends EsqlViewPreviewState {
-  resetPreview: () => void;
-  resetPreviewIfQueryChanged: (query: string) => void;
+  clearPreviewErrorIfQueryChanged: (query: string) => void;
   runPreview: (query?: AggregateQuery, editorAbortController?: AbortController) => Promise<void>;
 }
 
@@ -89,29 +88,27 @@ export const useEsqlViewPreview = ({
     []
   );
 
-  const resetPreview = useCallback(() => {
+  const clearPreviewErrorIfQueryChanged = useCallback((query: string) => {
+    const submittedQuery = submittedQueryRef.current;
+    if (
+      submittedQuery === undefined ||
+      query === submittedQuery ||
+      normalizeQuery(query) === normalizeQuery(submittedQuery)
+    ) {
+      return;
+    }
+
     nextRequestIdRef.current += 1;
     const activeRequest = activeRequestRef.current;
     activeRequestRef.current = undefined;
     activeRequest?.abortController.abort();
     submittedQueryRef.current = undefined;
-    setState(initialState);
+    setState((currentState) => ({
+      ...currentState,
+      error: undefined,
+      isLoading: false,
+    }));
   }, []);
-
-  const resetPreviewIfQueryChanged = useCallback(
-    (query: string) => {
-      const submittedQuery = submittedQueryRef.current;
-      if (
-        submittedQuery !== undefined &&
-        (query === submittedQuery || normalizeQuery(query) === normalizeQuery(submittedQuery))
-      ) {
-        return;
-      }
-
-      resetPreview();
-    },
-    [resetPreview]
-  );
 
   const runPreview = useCallback(
     async (query?: AggregateQuery, editorAbortController?: AbortController): Promise<void> => {
@@ -132,15 +129,20 @@ export const useEsqlViewPreview = ({
         !abortController.signal.aborted &&
         activeRequestRef.current?.id === requestId;
 
-      setState({
-        hasRun: true,
+      setState((currentState) => ({
+        ...currentState,
+        error: undefined,
         isLoading: true,
-      });
+      }));
 
       const handleAbort = () => {
         if (isMountedRef.current && activeRequestRef.current?.id === requestId) {
           activeRequestRef.current = undefined;
-          setState(initialState);
+          setState((currentState) => ({
+            ...currentState,
+            error: undefined,
+            isLoading: false,
+          }));
         }
       };
       abortController.signal.addEventListener('abort', handleAbort, { once: true });
@@ -181,11 +183,11 @@ export const useEsqlViewPreview = ({
         });
       } catch (error) {
         if (isCurrentRequest()) {
-          setState({
+          setState((currentState) => ({
+            ...currentState,
             error: toError(error),
-            hasRun: true,
             isLoading: false,
-          });
+          }));
         }
       } finally {
         abortController.signal.removeEventListener('abort', handleAbort);
@@ -202,8 +204,7 @@ export const useEsqlViewPreview = ({
 
   return {
     ...state,
-    resetPreview,
-    resetPreviewIfQueryChanged,
+    clearPreviewErrorIfQueryChanged,
     runPreview,
   };
 };

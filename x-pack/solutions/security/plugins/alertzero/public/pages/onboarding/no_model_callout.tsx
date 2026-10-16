@@ -24,7 +24,7 @@ export const NoModelCallout: React.FC = () => {
           children: i18n.NO_MODEL_CALLOUT_ACTION,
           href: featureSettingsUrl,
           target: '_blank',
-          iconType: 'popout',
+          iconType: 'external',
           iconSide: 'right',
           'data-test-subj': 'alertZeroOnboardingNoModelFeatureSettingsButton',
         },
