@@ -20,6 +20,8 @@ const FEATURE_TYPES = ['dependency', 'entity', 'infrastructure'] as const;
 export interface DiscoveryContext {
   query_kis: CompactKnowledgeIndicatorQuery[];
   feature_kis: CompactKnowledgeIndicatorFeature[];
+  /** Each source's `slug` and `view_name`: the `FROM` target the grounding queries are built on. */
+  sources: KISearchOutput['sources'];
   /** Rules with no backed query KI: grounding records `not_checked` for them. */
   unmatched_rule_uuids: string[];
   /** The query search held more results than one page. */
@@ -97,10 +99,14 @@ export const buildDiscoveryContext = async ({
     );
   }
 
+  const sources = [...queryPage.sources, ...firstFeaturePage.sources].filter(
+    ({ slug }, index, all) => all.findIndex((source) => source.slug === slug) === index
+  );
   const matchedRules = new Set(queryKis.map(({ rule }) => rule.id));
   return {
     query_kis: queryKis,
     feature_kis: featureKis,
+    sources,
     unmatched_rule_uuids: ruleUuids.filter((ruleUuid) => !matchedRules.has(ruleUuid)),
     truncated: queryPage.has_more,
   };

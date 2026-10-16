@@ -48,14 +48,18 @@ const featureKi = (id: string): CompactKnowledgeIndicatorFeature => ({
   } as CompactFeature,
 });
 
+const source = (slug: string) => ({ slug, title: slug, view_name: `$.nightshift.${slug}` });
+
 const page = ({
   items,
   hasMore = false,
   nextPage = null,
+  sources = [],
 }: {
   items: CompactKnowledgeIndicator[];
   hasMore?: boolean;
   nextPage?: number | null;
+  sources?: KISearchOutput['sources'];
 }): KISearchOutput => ({
   view: 'compact',
   page: 1,
@@ -64,7 +68,7 @@ const page = ({
   total: items.length,
   has_more: hasMore,
   next_page: nextPage,
-  sources: [],
+  sources,
   knowledge_indicators: items,
 });
 
@@ -123,6 +127,21 @@ describe('buildDiscoveryContext', () => {
     const featureSearch = search.mock.calls[1][0];
     expect(featureSearch.slugs).toEqual(['s1', 's2']);
     expect(featureSearch).not.toHaveProperty('feature_ids');
+  });
+
+  it('returns the sources of both searches once each, as they carry the view to query', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce(
+        page({ items: [queryKi({ ruleId: 'rule-A' })], sources: [source('logs')] })
+      )
+      .mockResolvedValueOnce(
+        page({ items: [featureKi('f1')], sources: [source('logs'), source('traces')] })
+      );
+
+    const context = await buildDiscoveryContext({ ruleUuids: ['rule-A'], sourceIds: [], search });
+
+    expect(context.sources).toEqual([source('logs'), source('traces')]);
   });
 
   it('lists the rules no backed query KI matched, and drops KIs of other rules', async () => {
