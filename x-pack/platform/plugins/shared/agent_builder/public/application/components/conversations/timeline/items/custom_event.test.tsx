@@ -44,7 +44,7 @@ describe('CustomEvent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useConversationId).mockReturnValue('conv-1');
-    jest.mocked(useCurrentUser).mockReturnValue({ currentUser: undefined, isLoading: false });
+    jest.mocked(useCurrentUser).mockReturnValue({ currentUser: null, isLoading: false });
     mockUseUserProfiles.mockReturnValue({ data: [] } as unknown as ReturnType<
       typeof useUserProfiles
     >);
