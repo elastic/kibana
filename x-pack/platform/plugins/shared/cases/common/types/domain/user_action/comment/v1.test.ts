@@ -135,3 +135,17 @@ describe('Attachment', () => {
     });
   });
 });
+
+describe('stored comment user action payloads are shape-only', () => {
+  it('accepts persistable state above the request serialized-size limit', () => {
+    const result = CommentUserActionPayloadSchema.safeParse({
+      comment: {
+        type: 'persistableState',
+        owner: 'securitySolution',
+        persistableStateAttachmentTypeId: '.test',
+        persistableStateAttachmentState: { a: 'x'.repeat(20000), b: 'y'.repeat(20000) },
+      },
+    });
+    expect(result.success).toBe(true);
+  });
+});

@@ -295,6 +295,16 @@ export const AttachmentPayloadSchema = z.union([
   PersistableStateAttachmentPayloadSchema,
 ]);
 
+export const AttachmentPayloadWithoutRefsSchema = z.union([
+  UserCommentAttachmentPayloadSchema,
+  AlertAttachmentPayloadSchema,
+  EventAttachmentPayloadSchema,
+  ActionsAttachmentPayloadSchema,
+  ExternalReferenceNoSOAttachmentPayloadSchema,
+  ExternalReferenceSOWithoutRefsAttachmentPayloadSchema,
+  PersistableStateAttachmentPayloadSchema,
+]);
+
 export const AttachmentAttributesSchema = z.union([
   UserCommentAttachmentAttributesSchema,
   AlertAttachmentAttributesSchema,

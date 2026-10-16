@@ -7,15 +7,19 @@
 
 import { z } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
-import {
-  AttachmentRequestSchemaV2,
-  AttachmentRequestWithoutRefsSchemaV2,
-} from '../../../api/attachment/v2_union';
+import { AttachmentPayloadSchema, AttachmentPayloadWithoutRefsSchema } from '../../attachment/v1';
+import { UnifiedAttachmentPayloadSchema } from '../../attachment/v2';
 
-export const CommentUserActionPayloadSchema = z.object({ comment: AttachmentRequestSchemaV2 });
+/**
+ * Stored user actions are decoded on read, so they use the shape-only payload schemas.
+ * Request bounds are enforced at ingress by the api schemas.
+ */
+export const CommentUserActionPayloadSchema = z.object({
+  comment: z.union([AttachmentPayloadSchema, UnifiedAttachmentPayloadSchema]),
+});
 
 export const CommentUserActionPayloadWithoutIdsSchema = z.object({
-  comment: AttachmentRequestWithoutRefsSchemaV2,
+  comment: z.union([AttachmentPayloadWithoutRefsSchema, UnifiedAttachmentPayloadSchema]),
 });
 
 export const CommentUserActionSchema = z.object({
