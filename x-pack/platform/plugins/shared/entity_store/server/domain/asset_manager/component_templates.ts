@@ -7,8 +7,8 @@
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type {
-  EntityDefinition,
   EntityType,
+  ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
 import { ENTITY_BASE_PREFIX, ENTITY_SCHEMA_VERSION_V2 } from '../../../common/domain/entity_index';
 
@@ -35,7 +35,7 @@ export const getLegacySecurityComponentTemplateName = (type: EntityType, namespa
   `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V2}-security_${type}_${namespace}-latest@platform`;
 
 export const getEntityDefinitionComponentTemplate = (
-  definition: EntityDefinition,
+  definition: ManagedEntityDefinition,
   namespace: string
 ) => {
   return {
@@ -44,11 +44,11 @@ export const getEntityDefinitionComponentTemplate = (
   };
 };
 
-const getIndexMappings = (definition: EntityDefinition): MappingTypeMapping => ({
+const getIndexMappings = (definition: ManagedEntityDefinition): MappingTypeMapping => ({
   properties: {
     ...BASE_ENTITY_INDEX_MAPPING,
     ...Object.fromEntries(
-      definition.fields
+      definition.extraction.fields
         .filter(({ mapping }) => mapping)
         .map(({ source, destination, mapping }) => [destination || source, mapping])
     ),
@@ -66,7 +66,7 @@ export const getLegacySecurityUpdatesComponentTemplateName = (
   `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V2}-security_${type}_${namespace}-updates@platform`;
 
 export const getUpdatesEntityDefinitionComponentTemplate = (
-  definition: EntityDefinition,
+  definition: ManagedEntityDefinition,
   namespace: string
 ) => {
   return {
@@ -75,11 +75,11 @@ export const getUpdatesEntityDefinitionComponentTemplate = (
   };
 };
 
-const getUpdatesIndexMappings = (definition: EntityDefinition): MappingTypeMapping => ({
+const getUpdatesIndexMappings = (definition: ManagedEntityDefinition): MappingTypeMapping => ({
   properties: {
     ...BASE_ENTITY_INDEX_MAPPING,
     ...Object.fromEntries(
-      definition.fields
+      definition.extraction.fields
         .filter(({ mapping }) => mapping)
         .filter(({ source }) => source[0] !== '_')
         .map(({ source, mapping }) => [source, mapping])

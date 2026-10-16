@@ -59,7 +59,6 @@ export {
 export {
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
-  splitIndexPatternSources,
   getSourceCommandFromESQLQuery,
   getSourceCommandQueryFromESQLQuery,
   getAnySourceCommandFromESQLQuery,
@@ -117,7 +116,6 @@ export {
   MAX_ESQL_VIEW_DESCRIPTION_LENGTH,
   MAX_ESQL_VIEW_NAME_LENGTH,
   MAX_ESQL_VIEW_QUERY_LENGTH,
-  resolveViewColumnToIndexField,
   validateEsqlViewName,
   type EsqlViewNameValidationError,
   type EsqlViewsClient,
