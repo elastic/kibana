@@ -698,7 +698,9 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
       const alerts = await readControlAlerts(esClient, rule, marker);
       const fromFpUser = alerts.filter((alert) => alertUserName(alert) === FP_USER);
       if (fromFpUser.length > 0) {
-        const persisted = (await readRuleExceptionItems(adminApi, rule)).map((item) => item.entries);
+        const persisted = (await readRuleExceptionItems(adminApi, rule)).map(
+          (item) => item.entries
+        );
         throw new Error(
           `the exception did not exclude the ${FP_USER} false positive on ${FP_HOST}: ${JSON.stringify(
             fromFpUser.slice(0, 3)
