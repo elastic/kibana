@@ -115,6 +115,19 @@ const selectable: MetricTrendNode = {
   },
 };
 
+/** Unique visitors, its status set by where the count falls. */
+const banded: MetricTrendNode = {
+  type: 'metricTrend',
+  title: 'Unique visitors',
+  value: 1342,
+  format: { style: 'number', compact: true },
+  bands: [
+    { tone: 'danger', label: 'Low' },
+    { from: 1000, tone: 'warning', label: 'Typical' },
+    { from: 2500, tone: 'success', label: 'High' },
+  ],
+};
+
 export const examples: readonly MetricTrendNode[] = [
   example,
   errorRate,
@@ -123,4 +136,5 @@ export const examples: readonly MetricTrendNode[] = [
   trendOnly,
   bare,
   selectable,
+  banded,
 ];

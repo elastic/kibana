@@ -98,7 +98,7 @@ describe('stated rules', () => {
       donut: 8,
       gauge: 11,
       heatmap: 17,
-      metricTrend: 9,
+      metricTrend: 12,
       treemap: 6,
       xyChart: 27,
     });

@@ -69,9 +69,28 @@ export interface ResolvedMetricTrend {
   trend: readonly MetricTrendPoint[];
   /** Present with a trend: where its times are read and how finely they print. */
   time?: { timeZone: string; granularity: Granularity };
-  /** The author's status; absent when none was given. */
+  /** The author's status, or the status of the band the value is in; absent when neither applies. */
   tone?: Tone;
+  /** The index and label of the band the value is in. */
+  band?: { index: number; label?: string | undefined };
 }
+
+/** The band `value` falls in: the last whose `from` it reaches, a first open band catching anything below. */
+export const bandOf = (
+  value: number | null,
+  bands: MetricTrendNode['bands']
+): number | undefined => {
+  if (value === null || bands === undefined) {
+    return undefined;
+  }
+  for (let index = bands.length - 1; index >= 0; index -= 1) {
+    const { from } = bands[index]!;
+    if (from === undefined || value >= from) {
+      return index;
+    }
+  }
+  return undefined;
+};
 
 /** A change's magnitude as it prints: percentage points for a `percent` value. */
 const magnitude = (amount: number, format: ValueFormat | undefined): string => {
@@ -124,7 +143,10 @@ const changeOf = (
 };
 
 export const resolveMetricTrend = (node: MetricTrendNode): ResolvedMetricTrend => {
-  const { value, format, previous, trend, tone } = node;
+  const { value, format, previous, trend, bands } = node;
+  const bandIndex = bandOf(value, bands);
+  const band = bandIndex === undefined ? undefined : bands![bandIndex]!;
+  const tone = node.tone ?? band?.tone;
   const time =
     trend === undefined
       ? undefined
@@ -160,5 +182,6 @@ export const resolveMetricTrend = (node: MetricTrendNode): ResolvedMetricTrend =
             .sort((a, b) => a.time - b.time),
     ...(time === undefined ? {} : { time }),
     ...(tone === undefined ? {} : { tone }),
+    ...(band === undefined ? {} : { band: { index: bandIndex!, label: band.label } }),
   };
 };

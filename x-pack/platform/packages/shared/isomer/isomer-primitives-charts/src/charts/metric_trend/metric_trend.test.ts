@@ -492,3 +492,73 @@ describe('metricTrend selection', () => {
     expect(valid(bound({ name: 's', on: { x: {} } }))).toBe(false);
   });
 });
+
+describe('metricTrend bands', () => {
+  const banded = (value: number | null, extra: Record<string, unknown> = {}) => ({
+    ...base,
+    value,
+    bands: [
+      { tone: 'danger' },
+      { from: 100, tone: 'warning' },
+      { from: 200, tone: 'success', label: 'Healthy' },
+    ],
+    ...extra,
+  });
+
+  it('lets only the first band leave out `from`', () => {
+    expect(valid(banded(110))).toBe(true);
+    expect(
+      messages({
+        ...base,
+        bands: [{ from: 1, tone: 'danger' }, { tone: 'success' }],
+      })
+    ).toEqual(['only the first band may leave out `from`']);
+  });
+
+  it('needs bands in ascending order', () => {
+    expect(
+      messages({
+        ...base,
+        bands: [
+          { from: 100, tone: 'danger' },
+          { from: 100, tone: 'success' },
+        ],
+      })
+    ).toEqual(['each band’s `from` is above the previous band’s']);
+  });
+
+  it('takes a status from the author or the bands, not both', () => {
+    expect(messages(banded(110, { tone: 'danger' }))).toEqual([
+      '`tone` and `bands` are not both set',
+    ]);
+  });
+
+  it('derives the status from the band the value reaches', () => {
+    expect(resolveMetricTrend(banded(50) as MetricTrendNode)).toMatchObject({
+      tone: 'danger',
+      band: { index: 0 },
+    });
+    expect(resolveMetricTrend(banded(100) as MetricTrendNode)).toMatchObject({
+      tone: 'warning',
+      band: { index: 1 },
+    });
+    expect(resolveMetricTrend(banded(5000) as MetricTrendNode)).toMatchObject({
+      tone: 'success',
+      band: { index: 2, label: 'Healthy' },
+    });
+    const closed = resolveMetricTrend({
+      ...base,
+      value: 5,
+      bands: [{ from: 10, tone: 'success' }],
+    });
+    expect(closed.tone).toBeUndefined();
+    expect(closed.band).toBeUndefined();
+    expect(resolveMetricTrend(banded(null) as MetricTrendNode).band).toBeUndefined();
+  });
+
+  it('prints the band’s status and label', () => {
+    const { summary, table } = read(banded(250) as MetricTrendNode);
+    expect(summary).toBe('Requests is 250 with success status (Healthy).');
+    expect(table.rows).toContainEqual(['Status', 'Healthy']);
+  });
+});

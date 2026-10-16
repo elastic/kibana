@@ -25,6 +25,21 @@ import { toneSchema } from '../../model/tone';
 
 import { MAX_RELATIVE_CHANGE } from './model';
 
+const openBandRule = 'only the first band may leave out `from`';
+const bandOrderRule = 'each band’s `from` is above the previous band’s';
+const statusRule = '`tone` and `bands` are not both set';
+
+const bandSchema = z
+  .object({
+    from: z
+      .number()
+      .describe('Where the band starts; it runs to the next band’s `from`, the last without end.')
+      .optional(),
+    tone: toneSchema(),
+    label: labelText().describe('The status the band names, e.g. `Healthy`.').optional(),
+  })
+  .strict();
+
 export const distinctTimesRule = 'no two trend points are at the same instant';
 export const finiteChangeRule =
   'the change from the previous value to `value` is a finite number, in percentage points too for a `percent` value';
@@ -125,7 +140,15 @@ export const schema = z
     trend: trendSchema.optional(),
     tone: toneSchema()
       .describe(
-        'The status of the current value, set by the author, e.g. `danger` for an error rate past its SLO, printed with the value as "with danger status". Direction alone never sets it: up is not good and down is not bad. Leave out when there is no status.'
+        `The status of the current value, set by the author, e.g. \`danger\` for an error rate past its SLO, printed with the value as "with danger status". Direction alone never sets it: up is not good and down is not bad. Leave out when there is no status; ${statusRule}.`
+      )
+      .optional(),
+    bands: z
+      .array(bandSchema)
+      .min(1)
+      .max(MAX_DATA_POINTS)
+      .describe(
+        `Status ranges in ascending order, so the value’s band sets its status, e.g. \`[{ "tone": "danger" }, { "from": 100, "tone": "success" }]\`; ${openBandRule}; ${bandOrderRule}. A first band without \`from\` is open below; a value below a first \`from\` has no status. The band is derived; never author \`tone\` with it.`
       )
       .optional(),
     selection: wholeChartSelectionSchema().optional(),
@@ -146,6 +169,32 @@ export const schema = z
         rule: finiteChangeRule,
       }
     )
+  )
+  .check(
+    crossRefine(
+      ({ bands }) =>
+        bands === undefined || bands.every(({ from }, index) => index === 0 || from !== undefined),
+      { error: openBandRule, path: ['bands'], rule: openBandRule }
+    )
+  )
+  .check(
+    crossRefine(
+      ({ bands }) =>
+        bands === undefined ||
+        bands.length > MAX_DATA_POINTS ||
+        bands.every(({ from }, index) => {
+          const before = index === 0 ? undefined : bands[index - 1]!.from;
+          return before === undefined || from === undefined || from > before;
+        }),
+      { error: bandOrderRule, path: ['bands'], rule: bandOrderRule }
+    )
+  )
+  .check(
+    crossRefine(({ tone, bands }) => tone === undefined || bands === undefined, {
+      error: statusRule,
+      path: ['bands'],
+      rule: statusRule,
+    })
   )
   .describe('One headline value with its recent direction.');
 

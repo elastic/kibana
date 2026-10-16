@@ -18,8 +18,10 @@ const copy = {
   readingColumn: 'Reading',
   current: 'Current',
   status: 'Status',
-  statusCell: (tone: Tone) => `${tone[0]!.toUpperCase()}${tone.slice(1)}`,
-  withStatus: (tone: Tone) => `with ${tone} status`,
+  statusCell: (tone: Tone, label: string | undefined) =>
+    label ?? `${tone[0]!.toUpperCase()}${tone.slice(1)}`,
+  withStatus: (tone: Tone, label: string | undefined) =>
+    label === undefined ? `with ${tone} status` : `with ${tone} status (${label})`,
   change: 'Change',
   is: (title: string, value: string) => `${title} is ${value}`,
   noReading: (title: string) => `${title} has no current reading`,
@@ -52,8 +54,8 @@ const rangeClause = (
 
 const summaryOf = (node: MetricTrendNode): string => {
   const { title } = node;
-  const { value, formatted, previous, change, trend, tone } = resolveMetricTrend(node);
-  const status = tone === undefined ? '' : ` ${copy.withStatus(tone)}`;
+  const { value, formatted, previous, change, trend, tone, band } = resolveMetricTrend(node);
+  const status = tone === undefined ? '' : ` ${copy.withStatus(tone, band?.label)}`;
   if (value === null) {
     return [
       `${copy.noReading(title)}${tone === undefined ? '' : `,${status}`}.`,
@@ -71,7 +73,7 @@ const summaryOf = (node: MetricTrendNode): string => {
 
 /** The current value, its status, the previous value and change when given, then the trend by time. */
 export const read = (node: MetricTrendNode): ChartReading => {
-  const { formatted, previous, change, trend, time, tone } = resolveMetricTrend(node);
+  const { formatted, previous, change, trend, time, tone, band } = resolveMetricTrend(node);
   return {
     summary: summaryOf(node),
     table: {
@@ -81,7 +83,7 @@ export const read = (node: MetricTrendNode): ChartReading => {
       ],
       rows: [
         [copy.current, formatted],
-        ...(tone === undefined ? [] : [[copy.status, copy.statusCell(tone)]]),
+        ...(tone === undefined ? [] : [[copy.status, copy.statusCell(tone, band?.label)]]),
         ...(previous === undefined ? [] : [[previous.label, previous.formatted]]),
         ...(change === undefined ? [] : [[copy.change, change.detail]]),
         ...trend.map(({ label, formatted: cell }) => [label, cell]),
