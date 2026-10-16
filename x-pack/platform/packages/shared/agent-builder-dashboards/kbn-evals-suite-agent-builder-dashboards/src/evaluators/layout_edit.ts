@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { compact } from 'lodash';
 import {
   isSection,
   type AttachmentPanel,
   type DashboardAttachmentData,
   type DashboardSection,
 } from '@kbn/agent-builder-dashboards-common';
-import { byReadingOrder, getPanelContainers, getPanelKind } from '../dashboard_panels';
+import { byReadingOrder, formatGrid, getPanelContainers, getPanelKind } from '../dashboard_panels';
 import { noDashboardResult, scoreChecks, skippedResult, type Check } from '../evaluator_utils';
 import {
   TOP_LEVEL,
@@ -53,8 +54,6 @@ const indexLayout = (dashboard: DashboardAttachmentData): LayoutIndex => {
   return { containers, panels, sections, outerOrder };
 };
 
-const formatGrid = ({ x, y, w, h }: AttachmentPanel['grid']): string => `${x},${y} ${w}x${h}`;
-
 const describeItem = (item: LayoutItem): string =>
   typeof item === 'string' ? item : `added ${item.added}`;
 
@@ -80,12 +79,10 @@ const checkPanelsKept = (gold: LayoutEditGold, seed: LayoutIndex, result: Layout
     assertion: 'panels',
     passed: missing.length === 0 && notRemoved.length === 0,
     detail:
-      [
-        missing.length > 0 ? `missing [${missing.join(', ')}]` : undefined,
-        notRemoved.length > 0 ? `not removed [${notRemoved.join(', ')}]` : undefined,
-      ]
-        .filter((problem): problem is string => problem !== undefined)
-        .join('; ') || 'kept and removed as asked',
+      compact([
+        missing.length > 0 && `missing [${missing.join(', ')}]`,
+        notRemoved.length > 0 && `not removed [${notRemoved.join(', ')}]`,
+      ]).join('; ') || 'kept and removed as asked',
   };
 };
 
@@ -161,9 +158,8 @@ const getSiblingOrder = (id: string, result: LayoutIndex): string[] => {
     return result.outerOrder;
   }
   const container = result.panels.get(id)?.container;
-  return [...(result.containers.get(container ?? '') ?? [])]
-    .sort(byReadingOrder)
-    .map((panel) => panel.id);
+  const panels = container === undefined ? [] : result.containers.get(container) ?? [];
+  return [...panels].sort(byReadingOrder).map((panel) => panel.id);
 };
 
 const checkPlacement = (
@@ -189,7 +185,7 @@ const checkPlacement = (
   const besideGrid = beside === undefined ? undefined : neighbour(beside);
   const belowGrid = below === undefined ? undefined : neighbour(below);
 
-  const problems = [
+  const problems = compact([
     container !== undefined && (located?.container ?? TOP_LEVEL) !== container
       ? `in ${located?.container ?? TOP_LEVEL}, not ${container}`
       : undefined,
@@ -207,7 +203,7 @@ const checkPlacement = (
     before !== undefined && !(position(before) !== -1 && position(id) < position(before))
       ? `not before ${before}`
       : undefined,
-  ].filter((problem): problem is string => problem !== undefined);
+  ]);
 
   return {
     assertion,

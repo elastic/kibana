@@ -5,12 +5,19 @@
  * 2.0.
  */
 
+import { compact } from 'lodash';
 import {
   isSection,
   type AttachmentPanel,
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
-import { GRID_COLUMNS, getLeafPanels, getPanelContainers, getPanelKind } from '../dashboard_panels';
+import {
+  GRID_COLUMNS,
+  formatGrid,
+  getLeafPanels,
+  getPanelContainers,
+  getPanelKind,
+} from '../dashboard_panels';
 import type { DashboardAgentEvaluator, DashboardStructureGold } from '../types';
 import { noDashboardResult, scoreChecks, skippedResult, type Check } from '../evaluator_utils';
 
@@ -34,9 +41,9 @@ const checkRows = (rows: readonly RowGold[], dashboard: DashboardAttachmentData)
       panels.some((panel) => getPanelKind(panel) === kind)
     );
     const rowPanels = getLeafPanels(dashboard).filter((panel) => getPanelKind(panel) === kind);
-    const placed = rowPanels.map(({ id, grid }) => `${id} ${grid.x},${grid.y} ${grid.w}x${grid.h}`);
+    const placed = rowPanels.map(({ id, grid }) => `${id} ${formatGrid(grid)}`);
     const [first] = rowPanels;
-    const problems = [
+    const problems = compact([
       first === undefined ? `no ${kind} panel` : undefined,
       rowPanels.some(
         (panel) =>
@@ -55,7 +62,7 @@ const checkRows = (rows: readonly RowGold[], dashboard: DashboardAttachmentData)
         first.grid.y !== Math.max(...previous.panels.map(({ grid }) => grid.y + grid.h)))
         ? `${kind} row is not directly below rows[${index - 1}]`
         : undefined,
-    ].filter((problem): problem is string => problem !== undefined);
+    ]);
     previous = first === undefined ? undefined : { panels: rowPanels, container };
 
     return {

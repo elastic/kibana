@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { SECTIONED_LOGS_DASHBOARD_VISITORS_COLLAPSED } from '../../../src/fixtures/sectioned_logs_dashboard';
+import { isSection } from '@kbn/agent-builder-dashboards-common';
+import {
+  SECTIONED_LOGS_DASHBOARD,
+  SECTIONED_LOGS_DASHBOARD_VISITORS_COLLAPSED,
+} from '../../../src/fixtures/sectioned_logs_dashboard';
 import { TOP_LEVEL, type DashboardDatasetExample } from '../../../src/types';
 import { layoutEditExample } from './factories';
 
-const TRAFFIC_PANELS = [
-  'requests-over-time',
-  'bytes-over-time',
-  'requests-by-os',
-  'requests-by-country',
-  'response-codes',
-  'top-urls',
-];
-const VISITORS_PANELS = ['unique-visitors', 'visitors-over-time', 'top-referrers'];
+const getSectionPanelIds = (sectionId: string): string[] =>
+  SECTIONED_LOGS_DASHBOARD.panels
+    .filter(isSection)
+    .filter(({ id }) => id === sectionId)
+    .flatMap(({ panels }) => panels.map(({ id }) => id));
+
+const TRAFFIC_PANELS = getSectionPanelIds('traffic');
+const VISITORS_PANELS = getSectionPanelIds('visitors');
 
 /**
  * Edits of a sectioned logs dashboard that add, remove, move or restyle

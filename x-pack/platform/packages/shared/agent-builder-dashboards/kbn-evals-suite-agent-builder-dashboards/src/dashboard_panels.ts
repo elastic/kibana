@@ -106,6 +106,10 @@ export const getControlFields = (control: Record<string, unknown>): string[] => 
 export const byReadingOrder = (a: AttachmentPanel, b: AttachmentPanel): number =>
   a.grid.y - b.grid.y || a.grid.x - b.grid.x;
 
+/** `x,y wxh`, the grid as the evaluators print it. */
+export const formatGrid = ({ x, y, w, h }: AttachmentPanel['grid']): string =>
+  `${x},${y} ${w}x${h}`;
+
 const formatPanel = (panel: AttachmentPanel, indent: string): string => {
   const { id, config, grid } = panel;
   const title = typeof config.title === 'string' ? ` "${config.title}"` : '';
