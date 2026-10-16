@@ -51,7 +51,7 @@ export const ASSESSMENT_NOTE_ROLE_RULE = dedent`
   Reader: the operator deciding whether to trust the severity and confidence. This is judgement, not a recap. At most three short sentences.
   Sentence 1: the severity rung that decided the tier and the measured figures that put it there, reading every signal rather than the strongest one (a share of log lines is not a share of attempts). For medium, say what the evidence left unsettled or unmeasured; for low, whether it recovered or was never an issue. For an inactive or recovering event, give the recovery, false-alarm, or benign-change rationale instead. Prefer "<confirmed failure>; <measured breadth> meets the <tier> condition" over restating the log row.
   Sentence 2: what was ruled out or left unverified. A figure that could not be measured is a caveat recorded here, never the reason for a lower tier.
-  Sentence 3: why this confidence, with confidence displayed as percentage P% rounded to one decimal place.
+  Sentence 3: why this confidence, stating the confidence field as a percentage with one decimal (a confidence of 0.62 is written 62.0%), never as the decimal.
   Not here: the observed failure or impact (summary), the mechanism (symptom_hypothesis), signal descriptions, investigation steps, or detection metadata.
 `;
 

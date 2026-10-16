@@ -105,6 +105,17 @@ export const eventsWriteItemSchema = lazySchema(() =>
           });
         });
       }
+      // The note states the confidence field as a percentage with one decimal, so it can be checked.
+      if (item.assessment_note && item.confidence !== undefined) {
+        const percentage = `${(Math.round(item.confidence * 1000) / 10).toFixed(1)}%`;
+        if (!item.assessment_note.includes(percentage)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['assessment_note'],
+            message: `assessment_note must state the confidence of ${item.confidence} as ${percentage} (a percentage with one decimal), not as a decimal.`,
+          });
+        }
+      }
       // Only a confirmed breach opens an event. A continuation (it names an event_id) may carry any
       // verdict: a rule turning healthy (`refutes`) is evidence the status is derived from, so it
       // must be written, never dropped.

@@ -707,7 +707,8 @@ describe('eventsWriteItemSchema', () => {
     summary: 'P99 latency breached SLO',
     severity: 'medium',
     confidence: 0.82,
-    assessment_note: 'Verified via execute_esql',
+    assessment_note:
+      'Verified via execute_esql. Confidence is 82.0% because one source corroborates it.',
     causal_features: [],
     blast_radius: [],
     signals: [
@@ -729,6 +730,49 @@ describe('eventsWriteItemSchema', () => {
 
   it('accepts a valid item at the field length boundaries', () => {
     expect(eventsWriteItemSchema.safeParse(validItem).success).toBe(true);
+  });
+
+  describe('the confidence in the assessment note', () => {
+    it.each([
+      ['a decimal', 'Confidence is 0.82 because one source corroborates it.'],
+      ['a percentage without the decimal', 'Confidence is 82% because one source corroborates it.'],
+      ['a different percentage', 'Confidence is 70.0% because one source corroborates it.'],
+      ['no figure at all', 'Verified via execute_esql.'],
+    ])('rejects %s, and names the percentage to write', (_name, assessment_note) => {
+      const result = eventsWriteItemSchema.safeParse({ ...validItem, assessment_note });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const issue = result.error.issues.find(({ path }) => path.includes('assessment_note'));
+        expect(issue?.message).toContain('82.0%');
+      }
+    });
+
+    it('accepts the confidence written as a percentage with one decimal, in any sentence', () => {
+      const result = eventsWriteItemSchema.safeParse({
+        ...validItem,
+        assessment_note:
+          'High: the path is blocked. Nothing was ruled out. Confidence is 82.0% here.',
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('rounds the way the percentage is written, 0.575 as 57.5%', () => {
+      const result = eventsWriteItemSchema.safeParse({
+        ...validItem,
+        confidence: 0.575,
+        assessment_note: 'Confidence is 57.5% because one source corroborates it.',
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('does not ask for a figure when there is no note', () => {
+      const { assessment_note: _omitted, ...withoutNote } = validItem;
+
+      expect(eventsWriteItemSchema.safeParse(withoutNote).success).toBe(true);
+    });
   });
 
   it('accepts no status: the server derives it from the verdicts', () => {
