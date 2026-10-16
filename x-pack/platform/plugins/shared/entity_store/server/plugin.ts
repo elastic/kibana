@@ -194,7 +194,12 @@ export class EntityStorePlugin
       createRelationshipsClient: (esClient, namespace) =>
         new RelationshipsClient({ logger, esClient, namespace }),
       createResolutionClient: (esClient, namespace) =>
-        new ResolutionClient({ logger, esClient, namespace }),
+        new ResolutionClient({
+          logger,
+          esClient,
+          namespace,
+          analytics: createReportEvent(core.analytics),
+        }),
       createResolutionRulesClient: (savedObjectsClient, namespace) =>
         new ResolutionRulesClient(savedObjectsClient, namespace, logger),
       getMaintainerStatus: (namespace, ids) =>

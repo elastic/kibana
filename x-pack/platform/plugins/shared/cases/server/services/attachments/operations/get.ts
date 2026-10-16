@@ -28,6 +28,7 @@ import {
 } from '../../../../common/constants';
 import {
   COMMENT_ATTACHMENT_TYPE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
 } from '../../../../common/constants/attachments';
 import { NodeBuilderOperators, buildFilter, combineFilters } from '../../../client/utils';
@@ -42,6 +43,7 @@ import {
 } from '../../../../common/types/domain';
 import type {
   AlertIdsAggsResult,
+  AttackIdsAggsResult,
   BulkOptionalAttributes,
   EventIdsAggsResult,
   GetAllAlertsAttachToCaseArgs as GetAllDocumentsAttachedToCaseArgs,
@@ -461,6 +463,66 @@ export class AttachmentGetter {
       return new Set([...legacyAlertIds, ...unifiedAlertIds]);
     } catch (error) {
       this.context.log.error(`Error on GET all alerts ids for case id ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Returns the subset of `attackIds` that is already attached to a case.
+   */
+  public async getAttachedAttackIds({
+    caseId,
+    attackIds,
+  }: {
+    caseId: string;
+    attackIds: string[];
+  }): Promise<Set<string>> {
+    const requestedIds = [...new Set(attackIds)];
+    if (requestedIds.length === 0) {
+      return new Set();
+    }
+
+    try {
+      this.context.log.debug(`Attempting to GET attached attack ids for case id ${caseId}`);
+
+      // Attacks have no legacy `cases-comments` shape to union in, and filtering on the requested
+      // ids bounds the aggregation by the request rather than by the attacks on the case.
+      const res = await this.context.unsecuredSavedObjectsClient.find<unknown, AttackIdsAggsResult>(
+        {
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+          filter: combineFilters(
+            [
+              buildFilter({
+                filters: [SECURITY_ATTACK_ATTACHMENT_TYPE],
+                field: 'type',
+                operator: 'or',
+                type: CASE_ATTACHMENT_SAVED_OBJECT,
+              }),
+              buildFilter({
+                filters: requestedIds,
+                field: 'attachmentId',
+                operator: 'or',
+                type: CASE_ATTACHMENT_SAVED_OBJECT,
+              }),
+            ],
+            NodeBuilderOperators.and
+          ),
+          perPage: 0,
+          aggs: {
+            attackIds: {
+              terms: {
+                field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId`,
+                size: requestedIds.length,
+              },
+            },
+          },
+        }
+      );
+
+      return new Set(res.aggregations?.attackIds.buckets.map((bucket) => bucket.key) ?? []);
+    } catch (error) {
+      this.context.log.error(`Error on GET attached attack ids for case id ${caseId}: ${error}`);
       throw error;
     }
   }

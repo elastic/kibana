@@ -157,6 +157,7 @@ export const createAlertServiceMock = (): AlertServiceMock => {
     executeAggregations: jest.fn(),
     bulkUpdateCases: jest.fn(),
     ensureAlertsAuthorized: jest.fn(),
+    ensureAttacksAuthorized: jest.fn(),
     ensureDocumentsExist: jest.fn(),
     removeCaseIdFromAlerts: jest.fn(),
     removeCaseIdsFromAllAlerts: jest.fn(),
@@ -176,6 +177,7 @@ const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
     getAttachmentIdsForCases: jest.fn(),
     getFileAttachments: jest.fn(),
     getAllAlertIds: jest.fn(),
+    getAttachedAttackIds: jest.fn().mockResolvedValue(new Set()),
     getAllEventIds: jest.fn(),
   });
 

@@ -10,6 +10,11 @@ export { createTracedLogger } from './impl/lib/create_traced_logger';
 export { AttackDiscoveryError, InvalidDefendInsightTypeError } from './impl/lib/errors';
 export { getLlmType } from './impl/lib/helpers/get_llm_type';
 export {
+  extractJson,
+  getFormatInstructionsFromZodV4Schema,
+  getStructuredGenerationPrompt,
+} from './impl/lib/langchain';
+export {
   getGenerateNode,
   getGenerateOrEndEdge,
   getGenerateOrRefineOrEndEdge,
@@ -75,6 +80,8 @@ export {
   ATTACK_DISCOVERY_GRAPH_RUN_NAME,
   ATTACK_DISCOVERY_TAG,
   getAnonymizedAlerts,
+  getAttackDiscoveriesGenerationSchema,
+  getCombinedAttackDiscoveryPrompt,
   getDefaultAttackDiscoveryGraph,
 } from './impl/attack_discovery/graphs';
 export type {
