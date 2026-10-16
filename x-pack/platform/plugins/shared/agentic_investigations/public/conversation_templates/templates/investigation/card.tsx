@@ -88,6 +88,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
     }
   };
 
+  // Card-local middot/status. Negative start margin cancels Meta's gutterSize="s" down to xs.
   const inProgressStatus = inProgress ? (
     <span
       data-test-subj="investigationCardRunning"
@@ -95,8 +96,12 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
         display: inline-flex;
         align-items: center;
         gap: ${euiTheme.size.xs};
+        margin-inline-start: calc(${euiTheme.size.xs} - ${euiTheme.size.s});
       `}
     >
+      <EuiText size="xs" color="subdued" component="span" aria-hidden>
+        •
+      </EuiText>
       <EuiText
         size="xs"
         component="span"
@@ -114,69 +119,20 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
     </span>
   ) : undefined;
 
-  const cardBody = (
-    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <ConversationMetaInfo timestamp={createdAt} inFlightStatus={inProgressStatus} />
-      </EuiFlexItem>
+  const hasActions = actions != null;
 
-      <EuiFlexItem grow={false} css={{ minWidth: 0, paddingBlockStart: euiTheme.size.xs }}>
-        <EuiText size="s">
-          <p
-            className="eui-textTruncate"
-            title={title}
-            css={css`
-              margin: 0;
-              font-weight: ${euiTheme.font.weight.semiBold};
-            `}
-            data-test-subj="investigationCardTitle"
-          >
-            {title}
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-
-      {summary && (
-        <EuiFlexItem grow={false} css={{ paddingBlockStart: euiTheme.size.xs }}>
-          <EuiText size="xs" color="subdued">
-            <p
-              data-test-subj="investigationCardSummary"
-              css={css`
-                margin: 0;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
-              `}
-            >
-              {summary}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      )}
-
-      {hasEntities && (
-        <EuiFlexItem
-          grow={false}
-          css={{
-            // 8px under the summary; 4px when the badges follow the title directly.
-            paddingBlockStart: summary ? euiTheme.size.s : euiTheme.size.xs,
-          }}
-        >
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-            <EntityChips investigation={investigation} />
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  );
+  // Spacer matching ConversationsActionsGroup / Nightshift card actions: divider margins +
+  // two size="s" (32px) icon buttons + gutters — keeps age text from running under the icons.
+  const actionsSpacerWidth = `calc(${euiTheme.size.xl} * 2 + ${euiTheme.size.l} + ${euiTheme.size.s})`;
 
   return (
     <div
       data-test-subj="investigationCard"
       css={css`
-        /* Top matches the right (16px); bottom/left stay 24px so content aligns with ConversationCard. */
-        padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l};
+        position: relative;
+        /* Same as ConversationCard: 24px on three sides; 16px on the right so 32px icon
+           buttons' glyphs land at 24px from the edge. */
+        padding: ${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l};
         background: ${isSelected
           ? euiTheme.colors.backgroundBaseInteractiveSelect
           : euiTheme.colors.backgroundBasePlain};
@@ -187,42 +143,115 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
           : ''}
       `}
     >
+      {/*
+        ConversationCard layout: age | actions share the top row (actions overhang by 8px so the
+        age stays on the padding line); title/summary use the full width below. Actions stay a
+        sibling of the card button so interactive controls are not nested.
+      */}
       <div
+        role={isInteractive ? 'button' : undefined}
+        tabIndex={isInteractive ? 0 : undefined}
+        aria-label={isInteractive ? title : undefined}
+        aria-pressed={isInteractive ? isSelected : undefined}
+        data-test-subj={isInteractive ? 'investigationCardButton' : undefined}
+        onClick={isInteractive ? () => onClick(investigation) : undefined}
+        onKeyDown={isInteractive ? handleKeyDown : undefined}
         css={css`
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) auto;
-          column-gap: ${euiTheme.size.s};
-          align-items: start;
+          ${isInteractive ? 'cursor: pointer;' : ''}
         `}
       >
+        <EuiFlexGroup gutterSize="xs" responsive={false} direction="column">
+          <EuiFlexItem
+            grow={false}
+            // Actions overhang by 8px; give that back under the row so age-to-title stays put.
+            css={hasActions ? { paddingBlockEnd: euiTheme.size.s } : undefined}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="l"
+              responsive={false}
+              justifyContent="spaceBetween"
+              direction="row"
+            >
+              <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+                <ConversationMetaInfo timestamp={createdAt} inFlightStatus={inProgressStatus} />
+              </EuiFlexItem>
+              {hasActions && (
+                <EuiFlexItem
+                  grow={false}
+                  aria-hidden
+                  css={{
+                    marginBlock: `-${euiTheme.size.s}`,
+                    inlineSize: actionsSpacerWidth,
+                    blockSize: euiTheme.size.xl,
+                    flexShrink: 0,
+                  }}
+                />
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+            <EuiText size="s">
+              <p
+                className="eui-textTruncate"
+                title={title}
+                css={css`
+                  margin: 0;
+                  font-weight: ${euiTheme.font.weight.semiBold};
+                `}
+                data-test-subj="investigationCardTitle"
+              >
+                {title}
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+
+          {summary && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <p
+                  data-test-subj="investigationCardSummary"
+                  css={css`
+                    margin: 0;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                  `}
+                >
+                  {summary}
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+          )}
+
+          {hasEntities && (
+            <EuiFlexItem
+              grow={false}
+              // Column gutter is xs; add xs more under a summary so badges stay at s (8px).
+              css={summary ? { marginBlockStart: euiTheme.size.xs } : undefined}
+            >
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+                <EntityChips investigation={investigation} />
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </div>
+      {hasActions && (
         <div
-          role={isInteractive ? 'button' : undefined}
-          tabIndex={isInteractive ? 0 : undefined}
-          aria-label={isInteractive ? title : undefined}
-          aria-pressed={isInteractive ? isSelected : undefined}
-          data-test-subj={isInteractive ? 'investigationCardButton' : undefined}
-          onClick={isInteractive ? () => onClick(investigation) : undefined}
-          onKeyDown={isInteractive ? handleKeyDown : undefined}
           css={css`
-            grid-column: 1;
-            grid-row: 1 / -1;
-            min-width: 0;
-            ${isInteractive ? 'cursor: pointer;' : ''}
+            position: absolute;
+            inset-block-start: ${euiTheme.size.l};
+            inset-inline-end: ${euiTheme.size.base};
+            /* 32px icon buttons overhang so age text stays on the padding line. */
+            margin-block: -${euiTheme.size.s};
           `}
         >
-          {cardBody}
+          {actions}
         </div>
-        {actions != null && (
-          <div
-            css={css`
-              grid-column: 2;
-              grid-row: 1;
-            `}
-          >
-            {actions}
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 };

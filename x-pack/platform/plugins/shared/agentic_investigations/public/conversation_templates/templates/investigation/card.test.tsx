@@ -83,6 +83,7 @@ describe('InvestigationCard', () => {
       }),
     });
 
+    expect(screen.getByText('•')).toBeInTheDocument();
     expect(screen.getByTestId('investigationCardRunning')).toHaveTextContent('In progress');
     expect(screen.getByTestId('investigationCardRunningDots')).toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardSeverity')).not.toBeInTheDocument();
