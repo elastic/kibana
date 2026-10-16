@@ -65,6 +65,9 @@ describe('DeleteRuleModal', () => {
     expect(screen.getByTestId('deleteBoostRuleModal')).toHaveTextContent(
       'Deleting this rule will cause the 2 indices below to fall back to the next matching rule and its boost profile.'
     );
+    expect(screen.getByTestId('deleteBoostRuleModal')).toHaveTextContent(
+      "The boost profile this rule uses won't be deleted."
+    );
     const [header, ...rows] = within(screen.getByRole('table')).getAllByRole('row');
     expect(header).toHaveTextContent('Affected indexNew ruleNew profile');
     expect(
@@ -87,7 +90,7 @@ describe('DeleteRuleModal', () => {
     renderModal('unused');
 
     expect(screen.getByTestId('deleteBoostRuleModal')).toHaveTextContent(
-      "This permanently deletes the rule. You can't undo this action."
+      "This permanently deletes the rule. The boost profile it uses won't be deleted."
     );
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
