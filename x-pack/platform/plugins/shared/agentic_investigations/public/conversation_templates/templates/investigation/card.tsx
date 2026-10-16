@@ -124,7 +124,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
           >
             <EuiFlexItem grow={false}>
               <ConversationMetaInfo
-                createdAt={createdAt}
+                timestamp={createdAt}
                 inFlightStatus={
                   inProgress ? (
                     <span

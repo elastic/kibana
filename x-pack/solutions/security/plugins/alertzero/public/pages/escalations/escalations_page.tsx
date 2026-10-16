@@ -34,6 +34,7 @@ import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import { escalationToQueueItem } from './escalation_to_queue_item';
 import { ESCALATIONS_PAGE_INFO } from './translations';
+import { EscalationsOpenNote } from './escalations_open_note';
 import { EscalationsEmptyBanner } from './escalations_empty_banner';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
 
@@ -94,6 +95,10 @@ export const EscalationsPage: React.FC = () => {
       .flatMap((p) => closedPages[Number(p)])
       .filter((item) => (seen.has(item.id) ? false : seen.add(item.id)));
   }, [closedPages]);
+
+  const openIsEmpty = openQuery.data?.pagination.total === 0;
+  // Stable element so the memoized queue is not re-rendered by unrelated page updates.
+  const openNote = useMemo(() => <EscalationsOpenNote isEmpty={openIsEmpty} />, [openIsEmpty]);
 
   const isLoading = openQuery.isLoading || closedQuery.isLoading;
   const hasAnyData = openQuery.data ?? closedQuery.data;
@@ -213,6 +218,7 @@ export const EscalationsPage: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EscalationQueue
                 status="open"
+                note={openNote}
                 escalations={visibleOpenItems}
                 loadedCount={openItems.length}
                 isFiltered={Boolean(entityFilter)}
