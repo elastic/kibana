@@ -104,8 +104,17 @@ export const deleteCaseAttachments = async (
     await authorization.ensureAuthorized({ entities: fileEntities, operation });
   }
 
+  // Several attachments can reference the same file, including ones outside this request.
+  const fileReferences =
+    fileEntities.length > 0
+      ? await attachmentService.getter.getFileAttachmentsForDeletion({
+          caseId,
+          fileIds: fileEntities.map(({ id }) => id),
+        })
+      : [];
+
   // Read before deleting, so a missing case fails the request with nothing deleted.
-  const originalCase = await getCase();
+  await getCase();
 
   const savedObjectIds = ownedAttachments.map(({ id }) => id);
   const deletedIds = new Set(await attachmentService.bulkDelete({ savedObjectIds, refresh: true }));
@@ -115,8 +124,9 @@ export const deleteCaseAttachments = async (
   const notDeletedIds = savedObjectIds.filter((id) => !deletedIds.has(id));
 
   if (deletedIds.size > 0) {
+    // A file is kept while any attachment that was not deleted still references it.
     const keptFileIds = new Set(
-      ownedAttachments.flatMap(({ id, fileId }) =>
+      [...ownedAttachments, ...fileReferences].flatMap(({ id, fileId }) =>
         !deletedIds.has(id) && fileId != null ? [fileId] : []
       )
     );
@@ -124,7 +134,6 @@ export const deleteCaseAttachments = async (
     await recordDeletion(
       {
         caseId,
-        originalCase,
         attachments: decodedAttachments.filter(({ id }) => deletedIds.has(id)),
         fileIds: fileEntities.filter(({ id }) => !keptFileIds.has(id)).map(({ id }) => id),
       },
@@ -143,13 +152,12 @@ export const deleteCaseAttachments = async (
 
 interface RecordDeletionArgs {
   caseId: string;
-  originalCase: CaseSavedObjectTransformed;
   attachments: DecodedAttachment[];
   fileIds: string[];
 }
 
 const recordDeletion = async (
-  { caseId, originalCase, attachments, fileIds }: RecordDeletionArgs,
+  { caseId, attachments, fileIds }: RecordDeletionArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
   const {
@@ -174,7 +182,6 @@ const recordDeletion = async (
     caseService,
     attachmentService,
     caseId,
-    originalCase,
     user,
   });
 
@@ -271,7 +278,6 @@ interface UpdateCaseAttachmentStats {
   caseService: CasesClientArgs['services']['caseService'];
   attachmentService: CasesClientArgs['services']['attachmentService'];
   caseId: string;
-  originalCase: CaseSavedObjectTransformed;
   user: CasesClientArgs['user'];
 }
 
@@ -279,9 +285,10 @@ const updateCaseAttachmentStats = async ({
   caseService,
   attachmentService,
   caseId,
-  originalCase,
   user,
 }: UpdateCaseAttachmentStats) => {
+  // Read right before the patch, which writes the case references back without a version check.
+  const originalCase = await caseService.getCase({ id: caseId });
   const date = new Date().toISOString();
 
   const attachmentStats = await attachmentService.getter.getCaseAttatchmentStats({

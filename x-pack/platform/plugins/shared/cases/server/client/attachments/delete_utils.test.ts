@@ -90,6 +90,9 @@ describe('deleteCaseAttachments', () => {
     clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
       new Map()
     );
+    clientArgs.services.attachmentService.getter.getFileAttachmentsForDeletion.mockResolvedValue(
+      []
+    );
     // Mirrors the real service, which answers with the ids it confirmed deleted.
     clientArgs.services.attachmentService.bulkDelete.mockImplementation(
       async ({ savedObjectIds }) => savedObjectIds
@@ -156,7 +159,8 @@ describe('deleteCaseAttachments', () => {
 
       await deleteAttachments([userComment, withoutOwner(withoutAttributes(alertAttachment))]);
 
-      expect(clientArgs.services.caseService.getCase).toHaveBeenCalledTimes(1);
+      // Once before the deletion, shared with the existence check, and once for the stats patch.
+      expect(clientArgs.services.caseService.getCase).toHaveBeenCalledTimes(2);
       expect(clientArgs.services.caseService.getCase).toHaveBeenCalledWith({ id: caseId });
       expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
         entities: [
@@ -283,6 +287,24 @@ describe('deleteCaseAttachments', () => {
       expect(
         clientArgs.services.attachmentService.bulkDelete.mock.invocationCallOrder[0]
       ).toBeLessThan(clientArgs.fileService.delete.mock.invocationCallOrder[0]);
+    });
+
+    it('keeps a file that another attachment of the case still references', async () => {
+      clientArgs.services.attachmentService.getter.getFileAttachmentsForDeletion.mockResolvedValue([
+        fileAttachment,
+        { ...fileAttachment, id: 'file-attachment-2' },
+      ]);
+
+      await deleteAttachments([fileAttachment]);
+
+      expect(
+        clientArgs.services.attachmentService.getter.getFileAttachmentsForDeletion
+      ).toHaveBeenCalledWith({ caseId, fileIds: [fileId] });
+      expect(clientArgs.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
+        savedObjectIds: ['file-attachment-1'],
+        refresh: true,
+      });
+      expect(clientArgs.fileService.delete).not.toHaveBeenCalled();
     });
 
     it('deletes the file of a file attachment that fails to decode', async () => {
@@ -445,6 +467,16 @@ describe('deleteCaseAttachments', () => {
         })
       );
       expect(updatedAttributes.updated_at).toBeDefined();
+    });
+
+    it('patches the case from a read made after the deletion', async () => {
+      await deleteAttachments([userComment]);
+
+      const { invocationCallOrder } = clientArgs.services.caseService.getCase.mock;
+
+      expect(invocationCallOrder[invocationCallOrder.length - 1]).toBeGreaterThan(
+        clientArgs.services.attachmentService.bulkDelete.mock.invocationCallOrder[0]
+      );
     });
 
     it('records the deletion user action without the non request fields', async () => {

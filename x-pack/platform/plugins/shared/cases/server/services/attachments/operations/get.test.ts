@@ -1432,5 +1432,27 @@ describe('AttachmentService getter', () => {
         })
       );
     });
+
+    it('returns the attachments of every page', async () => {
+      const firstPage = createSOFindResponse([{ ...createUserAttachment(), score: 0 }]);
+      const secondPage = createSOFindResponse([
+        { ...asUnifiedUserAttachment(), id: '2', type: CASE_ATTACHMENT_SAVED_OBJECT, score: 0 },
+      ]);
+
+      unsecuredSavedObjectsClient.createPointInTimeFinder.mockReturnValue({
+        close: async () => {},
+        async *find() {
+          yield firstPage;
+          yield secondPage;
+        },
+      });
+
+      await expect(
+        attachmentGetter.getAttachmentIdsForCases({ caseIds: ['case-1'] })
+      ).resolves.toEqual([
+        { id: '1', type: CASE_COMMENT_SAVED_OBJECT },
+        { id: '2', type: CASE_ATTACHMENT_SAVED_OBJECT },
+      ]);
+    });
   });
 });
