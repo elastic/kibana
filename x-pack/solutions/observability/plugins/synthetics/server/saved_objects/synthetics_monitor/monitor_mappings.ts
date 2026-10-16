@@ -102,6 +102,9 @@ export const monitorConfigMappings: SavedObjectsTypeMappingDefinition = {
         number: {
           type: 'integer',
         },
+        unit: {
+          type: 'keyword',
+        },
       },
     },
     enabled: {
