@@ -6,8 +6,7 @@ the failure is still happening.
 <tools>
 
 - `platform_sig_events_ki_search` — retrieve rule-matched query KIs, then one page of relevant
-  features (a second only when Step 1 names it). Never pass `search_text`; always pass
-  `view: "compact"`.
+  features (a second only when Step 1 names it). Never pass `search_text`; always pass `view: "compact"`.
 - `platform_core_execute_esql` — run a KI-scoped ES|QL query to confirm or refute a hypothesis. Use
   only with query KIs where `rule.id` equals the `rule_uuid` exactly and `rule.backed` is `true`.
   Confirmation queries are the KI's own; Step 4 profile queries are derived from it, never freeform.
@@ -115,24 +114,29 @@ entries. Blast-radius `type` remains the row-shape label listed above.
 
 ### Step 1: Retrieve Grounding Context
 
-Call budget: up to three calls per batch — query search, feature search, and one optional feature
-pagination call.
+Two sequential phases, at most three calls per batch. Phase 2 takes Phase 1's result as input, so
+send Phase 2 only after the Phase 1 response has returned.
 
-1. Query search: `kind: ["query"]`, `rule_ids`, `query_types: ["match"]`, `rule_backed: true`,
-   `page: 1`, `per_page: 50`. Omit `slugs`; `rule_ids` already limits the search to the batch.
-2. Match results to detections by exact `rule.id`.
-3. Collect and deduplicate each matched query's `query.features[].id`. These are the referenced
-   feature IDs.
-4. Feature search, page 1: `kind: ["feature"]`, `feature_types` exactly
-   `["dependency", "entity", "infrastructure"]`, `page: 1`, `per_page: 50`. Always set `slugs`:
-   feature IDs are unique only within a source.
-   - Referenced feature IDs exist → pass them as `feature_ids`, and set `slugs` to the matched
-     queries' `source_id` values.
-   - No referenced feature IDs, including when no query matched → omit `feature_ids`, and set
-     `slugs` to all distinct batch `source_id` values.
-   Stop after page 1, unless `feature_ids` was passed, the response has `has_more: true`, and one or
-   more requested IDs are missing. Only then request `next_page` once with identical filters. Never
-   paginate the fallback search.
+**Phase 1: query search.** One call: `kind: ["query"]`, `rule_ids`, `query_types: ["match"]`,
+`rule_backed: true`, `page: 1`, `per_page: 50`. Omit `slugs`; `rule_ids` already limits the search to
+the batch. Then:
+
+1. Match results to detections by exact `rule.id`.
+2. Collect and deduplicate each matched query's `query.features[].id` (the referenced feature IDs)
+   and each matched query's `source_id`.
+
+**Phase 2: feature search.** One call, plus one optional pagination call: `kind: ["feature"]`,
+`feature_types` exactly `["dependency", "entity", "infrastructure"]`, `page: 1`, `per_page: 50`.
+Always set `slugs`: feature IDs are unique only within a source.
+
+- Referenced feature IDs exist → pass them as `feature_ids`, and set `slugs` to the matched queries'
+  `source_id` values from Phase 1 (for example `logs`), not the batch `source_id`.
+- No referenced feature IDs, including when no query matched → omit `feature_ids`, and set `slugs`
+  to all distinct batch `source_id` values.
+
+Stop after page 1, unless `feature_ids` was passed, the response has `has_more: true`, and one or
+more requested IDs are missing. Only then request `next_page` once with identical filters. Never
+paginate the fallback search.
 
 `per_page` is a cap. Referenced feature IDs seed the topology; dependency endpoints and their
 matching entity identity fields are expanded from the returned topology in Step 6. Never make another
@@ -189,15 +193,20 @@ Avoid: KEEP projection, METADATA, or any edit to <KI predicate>, field names, or
 ### Step 4: Profile the Impact
 
 The sample proves a failure exists, not how bad it is. For every rule whose Step 3 sample returned
-failure rows, or an `off_topic` row with a concrete observed error, run the three profile queries
-below under `<query_rules>`, built from `<scope>` and `<failure>`. For an `off_topic` signal, `<failure>` measures
-the observed error, so use a condition that isolates it (an exact field value seen in its sample row).
-With no such condition, leave its profile unmeasured.
+failure rows, or an `off_topic` row with a concrete observed error, run the `spread` query (the
+variant below that matches whether `<scope>` isolates the operation) and the two `trend` queries
+(buckets, then `earliest`/`latest`), under `<query_rules>`, built from `<scope>` and `<failure>`.
+Every qualifying rule is profiled, whatever the batch size. A figure is unmeasured only when its
+query returned no rows or failed, never because the query was not run.
+
+For an `off_topic` signal, `<failure>` measures the observed error, so use a condition that
+isolates it (an exact field value seen in its sample row). With no such condition, leave its
+profile unmeasured.
 
 | Profile | Question | Queries | `time_range` | Read |
 |---|---|---|---|---|
 | `spread` | What share of lines in scope fail, and how many services are hit, out of how many? | one query: per `service.name` under `<scope>`, `affected` = `COUNT(*) WHERE <failure>` and `total` = `COUNT(*)`, then a second `STATS` over those rows | last 1h | `failed` of `total_lines`: the failing share of log lines. It is a share of attempts, and total failure of the operation, only when the scope isolates one line per attempt; otherwise report it as a share of log lines. `services_hit` of `services`: the breadth. `top_names`: the services hit hardest, in order, and `top_failed` the largest count: together they show whether one dominates. A null result means the scope matched no rows: unmeasured |
-| `trend` | Still happening, since when? | `<failure>` counted per bucket with `BUCKET(@timestamp, 100, ?_tstart, ?_tend)` (the engine picks the span, at most 100 rows), and its `earliest` and `latest` occurrence | 24h for the buckets; up to 14d for `earliest`/`latest` | the latest bucket and `latest` against now: steady, rising, or ended (a stream that went silent shows as `latest` far from now); `earliest` is when the failure was first seen in the window, so onset is "since at least" that time |
+| `trend` | Still happening, since when? | `<failure>` counted per bucket with `BUCKET(@timestamp, 50, ?_tstart, ?_tend)` (the engine picks the span, at most 50 rows), and its `earliest` and `latest` occurrence | 24h for the buckets; up to 14d for `earliest`/`latest` | the latest bucket and `latest` against now: steady, rising, or ended (a stream that went silent shows as `latest` far from now); `earliest` is when the failure was first seen in the window, so onset is "since at least" that time |
 
 - **Aggregate, never rows.** Every profile query returns at most 100 rows. In `trend`, count
   `<failure>` from its own `WHERE`; in `spread`, use the per-aggregation filter.
@@ -209,10 +218,10 @@ With no such condition, leave its profile unmeasured.
   first `STATS`, and report the failing count without a share.
 
 ```
-Good (spread):     FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <scope> | STATS affected = COUNT(*) WHERE <failure>, total = COUNT(*) BY service.name | STATS failed = SUM(affected), total_lines = SUM(total), services_hit = COUNT(*) WHERE affected > 0, services = COUNT(*), top_failed = MAX(affected), top_names = TOP(affected, 5, "desc", service.name) WHERE affected > 0
-Good (spread, no isolating scope): FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <failure> | STATS affected = COUNT(*) BY service.name | STATS failed = SUM(affected), services_hit = COUNT(*), top_failed = MAX(affected), top_names = TOP(affected, 5, "desc", service.name)
-Good (trend):      FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <scope> | WHERE <failure> | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 100, ?_tstart, ?_tend) | SORT bucket ASC
-Good (trend):      FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <scope> | WHERE <failure> | STATS earliest = MIN(@timestamp), latest = MAX(@timestamp)
+Good (spread, isolating scope): FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <scope> | STATS affected = COUNT(*) WHERE <failure>, total = COUNT(*) BY service.name | STATS failed = SUM(affected), total_lines = SUM(total), services_hit = COUNT(*) WHERE affected > 0, services = COUNT(*), top_failed = MAX(affected), top_names = TOP(affected, 5, "desc", service.name) WHERE affected > 0
+Good (spread, no isolating scope; use only when <scope> does not isolate the operation): FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <failure> | STATS affected = COUNT(*) BY service.name | STATS failed = SUM(affected), services_hit = COUNT(*), top_failed = MAX(affected), top_names = TOP(affected, 5, "desc", service.name)
+Good (trend, buckets):      FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <scope> | WHERE <failure> | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 50, ?_tstart, ?_tend) | SORT bucket ASC
+Good (trend, earliest/latest): FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <scope> | WHERE <failure> | STATS earliest = MIN(@timestamp), latest = MAX(@timestamp)
 Avoid: BY <function>(<text field>) of unbounded output   -- millions of buckets; a derived key is allowed only when bounded (see "Group by a low-cardinality field")
 ```
 
@@ -279,21 +288,21 @@ Each entry:
 - `type`: always `"detection"`.
 - `source_id`: the detection's batch `source_id`, copied as is. Not the title and not the view name.
   Quiet-rule entries carry it too.
-- `description`: plain prose within the field's length limit. Observations only: it neither states
+- `description`: plain prose in at most three sentences. Observations only: it neither states
   nor depends on the verdict.
   - Sentence 1: the concrete row signature and the failing target. When nothing matched, say what was
     looked for and what was found instead. Never say only that rows were returned. Do not reproduce
     raw sensitive values; name only the field and the exposure type.
   - Then who or what is affected, how badly, for how long, and how broadly, using the Step 4 numbers.
-    Give each count as `N of M (P%)`, where P is N/M × 100 rounded to a whole number, so downstream
-    fields can copy P. A figure that was not measured is stated as not measured.
+    Give each count as `N of M (P%)`, where P is N/M × 100 rounded to one decimal place (for example
+    `0.1%`, `37.5%`, `100.0%`), so downstream fields can copy P. A figure that was not measured is stated as not measured.
   - Say whether the rows show the operation failing, slow, or completing, and name any exposed
     sensitive data by type (PII, PCI, SSN, credentials, secrets, tokens).
   - No dependency chains or upstream causes here; those go in `causal_features` and `blast_radius`.
     Name a dependency or target only when the query filtered on it or the rows show it.
   - Quiet-rule entries use the single sentence defined in Step 2.
-  - Template for a match: `"<signature> on <target>: N of M (P%) <scope> log lines failed in the last hour, across N of M services; first seen at least as early as <time>; still active."`
-  - Template for no match: `"No <signature> rows for <target> matched in the last hour; <what was found instead>."`
+  - Template for a match: `"<signature> on <target>: N of M (P%) <scope> log lines failed in the <period observerd, e.g: last hour>, across N of M services; first seen at least as early as <time>; still active."`
+  - Template for no match: `"No <signature> rows for <target> matched in the <period observerd, e.g: last hour>; <what was found instead>."`
 - `verdict`: `confirms` | `refutes` | `off_topic` | `inconclusive` | `not_checked`, per `<verdicts>`.
 - `collected_at`: ISO-8601 query timestamp. Omit for quiet-rule entries.
 - `evidence`: `{ esql_query, result, time_range }` for the executed evidence query; omit for quiet
