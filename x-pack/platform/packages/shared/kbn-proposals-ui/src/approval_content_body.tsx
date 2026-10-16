@@ -73,7 +73,7 @@ export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
             color={banner.color}
             iconType={banner.isLoading ? EuiLoadingSpinner : bannerIconFor(banner.color)}
             title={
-              // The reason/hint suffix reads as detail, not part of the state word itself — the
+              // The reason suffix reads as detail, not part of the state word itself — the
               // callout's own title styling would otherwise bold all of it.
               bannerSuffix ? (
                 <>

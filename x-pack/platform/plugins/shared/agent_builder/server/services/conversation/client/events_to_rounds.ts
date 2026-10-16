@@ -26,6 +26,7 @@ import {
   answeredPromptRequestIds,
   interruptionOfTerminal,
   isExecutionTerminalEvent,
+  isTimelineEvent,
   isToolCallStep,
   parseExecutionId,
 } from '@kbn/agent-builder-common';
@@ -55,8 +56,12 @@ interface ExecutionPartial {
  * Reconstructs rounds from a timeline. Every terminated execution — with an outcome, failed or
  * aborted — forms a partial; a round is its executions folded in order. A pause is consumed as
  * soon as a `prompt_response` answers it, however the resume ended.
+ *
+ * Only timeline events take part in the fold; activity and custom events are excluded by class,
+ * whatever their `execution_id`.
  */
-export const eventsToRounds = (events: ConversationEvent[]): ConversationRound[] => {
+export const eventsToRounds = (allEvents: ConversationEvent[]): ConversationRound[] => {
+  const events: ConversationEvent[] = allEvents.filter(isTimelineEvent);
   const byId = new Map(events.map((event) => [event.id, event]));
   // `prompt_response` events carry no execution_id, so the join is computed once over everything.
   const answered = answeredPromptRequestIds(events);
@@ -235,6 +240,7 @@ export const authorAndOrigin = (
     id: actor.id,
     ...(actor.username ? { username: actor.username } : {}),
     ...(actor.full_name ? { full_name: actor.full_name } : {}),
+    ...(actor.principal_type ? { type: actor.principal_type } : {}),
   };
   return { author, ...(actor.origin ? { origin: actor.origin } : {}) };
 };
@@ -316,4 +322,28 @@ const interruptedRoundFields = (
     response: { message: '' },
     interruption: interruptionOfTerminal(terminal),
   };
+};
+
+/**
+ * Events carry no round feedback, so rounds rebuilt from events take it from the stored rounds by
+ * round id. `exceptRoundId` names a round whose events were rewritten: its feedback was about the
+ * previous answer and is dropped.
+ */
+export const withStoredRoundFeedback = (
+  rounds: ConversationRound[],
+  storedRounds: ConversationRound[],
+  { exceptRoundId }: { exceptRoundId?: string } = {}
+): ConversationRound[] => {
+  const feedbackById = new Map(
+    storedRounds
+      .filter((round) => round.feedback !== undefined && round.id !== exceptRoundId)
+      .map((round) => [round.id, round.feedback!])
+  );
+  if (feedbackById.size === 0) {
+    return rounds;
+  }
+  return rounds.map((round) => {
+    const feedback = feedbackById.get(round.id);
+    return feedback ? { ...round, feedback } : round;
+  });
 };
