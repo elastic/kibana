@@ -145,7 +145,7 @@ export function AnimatedEdge({
   );
 
   const openEdgeRoutingFlyout = useCallback(
-    (e: React.MouseEvent<SVGGElement>) => {
+    (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       openRoutingFlyout(id, 'routing');
@@ -156,7 +156,7 @@ export function AnimatedEdge({
   );
 
   const openEdgeProcessingFlyout = useCallback(
-    (e: React.MouseEvent<SVGGElement>) => {
+    (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       openRoutingFlyout(id, 'processing');
@@ -164,6 +164,17 @@ export function AnimatedEdge({
       hover.off();
     },
     [id, openRoutingFlyout, menu, hover]
+  );
+
+  const closeOnEscape = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.code === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        closeAll();
+      }
+    },
+    [closeAll]
   );
 
   const isActive = isHovered || Boolean(selected);
@@ -231,6 +242,7 @@ export function AnimatedEdge({
               panelPaddingSize="none"
               anchorPosition="upCenter"
               attachToAnchor
+              onKeyDown={closeOnEscape}
             >
               <EuiContextMenuPanel onClose={menu.off}>
                 <EuiContextMenuItem
