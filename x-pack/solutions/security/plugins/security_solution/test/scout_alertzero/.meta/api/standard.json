@@ -1,5 +1,5 @@
 {
-  "sha1": "6bb1d7658f337fb771771679c3f2f89ff1e4f710",
+  "sha1": "80865eb253f5e23b8118813c298373503a05adf7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -19,8 +19,8 @@
       }
     },
     {
-      "id": "9b2010df3aa164c-5c327fd17599bea",
-      "title": "AlertZero e2e - endpoint analysis analyzes a seeded endpoint and cites ids that exist in the seed",
+      "id": "9b2010df3aa164c-1188c6b53ff2712",
+      "title": "AlertZero e2e - endpoint analysis analyzes a seeded endpoint, cites ids that exist in the seed, and keeps two hosts distinguishable (security-team#19991)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -28,22 +28,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/endpoint_analysis.spec.ts",
-        "line": 176,
-        "column": 25
-      }
-    },
-    {
-      "id": "9b2010df3aa164c-2b23dc46345d6e5",
-      "title": "AlertZero e2e - endpoint analysis keeps containment proposals for two hosts distinguishable (security-team#19991)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/endpoint_analysis.spec.ts",
-        "line": 270,
-        "column": 27
+        "line": 257,
+        "column": 5
       }
     },
     {
@@ -182,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 56,
-        "column": 13
+        "line": 71,
+        "column": 28
       }
     },
     {
@@ -196,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 65,
-        "column": 24
+        "line": 79,
+        "column": 69
       }
     },
     {
@@ -210,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 89,
-        "column": 14
+        "line": 102,
+        "column": 7
       }
     },
     {
@@ -224,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 124,
-        "column": 21
+        "line": 136,
+        "column": 7
       }
     }
   ]

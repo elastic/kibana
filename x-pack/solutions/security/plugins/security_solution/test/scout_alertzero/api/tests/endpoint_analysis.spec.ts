@@ -15,17 +15,21 @@ import {
   apiTest,
   assertExecutionCompleted,
   attachmentData,
+  cancelNewExecutions,
   citedHostNames,
   cleanupKnowledgeIndicators,
   createInvestigation,
   createServiceAccount,
+  deleteInvestigation,
   deleteServiceAccount,
+  dismissRunProposals,
   endpointIdsOf,
   ensureInvestigationsAiIndex,
   getAdminApi,
   getWorker,
   hasAttachment,
   listAttachments,
+  listChatCompletionConnectors,
   listExecutionIds,
   listInvestigationProposals,
   pollUntil,
@@ -51,12 +55,33 @@ const SECOND_SCENARIO_KEY = 'bits-mshta';
 /** The Attack Discovery alert index the run workflow resolves the handoff target from. */
 const ATTACK_DISCOVERY_ALERTS_INDEX = '.alerts-security.attack.discovery.alerts-default';
 
-interface EndpointAnalysisContext {
+/**
+ * The seeded chain a `security.analyze_endpoint` handoff resolves from: the attack chain's
+ * alerts, an Attack Discovery alert that correlates them, and the Investigation to attach
+ * findings to. The knowledge indicator — the handoff itself — is published separately.
+ */
+interface AnalysisChainContext {
   readonly scenario: SeededScenario;
-  readonly kiId: string;
   readonly attackDiscoveryAlertId: string;
   readonly investigationId: string;
   readonly hostName: string;
+}
+
+interface EndpointAnalysisContext extends AnalysisChainContext {
+  readonly kiId: string;
+}
+
+/**
+ * Registers a seeded resource for teardown the moment it exists. `afterAll` runs even when a
+ * test body throws, so a resource is only cleanable if it was registered before the next
+ * seeding step could fail — pushing these after a multi-step helper returns would leave an
+ * early failure's already-indexed documents untracked.
+ */
+interface TeardownLedger {
+  scenario(seeded: SeededScenario): void;
+  attackDiscoveryAlert(id: string): void;
+  investigation(id: string): void;
+  knowledgeIndicator(id: string): void;
 }
 
 const scenarioHost = (scenarioKey: string): string => {
@@ -95,17 +120,20 @@ const indexAttackDiscoveryAlert = async (
 };
 
 /**
- * Seeds everything one `security.analyze_endpoint` handoff needs — the attack chain's alerts, an
- * Attack Discovery alert that correlates them, and an Investigation to attach findings to — then
- * enables the forensics worker and lets its scheduled sweep run as the worker's service account.
+ * Seeds everything one `security.analyze_endpoint` handoff needs except the handoff itself — the
+ * attack chain's alerts, an Attack Discovery alert that correlates them, and an Investigation to
+ * attach findings to. Every resource is registered with `ledger` as soon as its creation
+ * succeeds, so a failure in a later step cannot orphan the earlier ones.
  */
-const runEndpointAnalysis = async (
+const seedAnalysisChain = async (
   adminApi: AlertZeroApi,
   esClient: EsClient,
   scenarioKey: string,
-  label: string
-): Promise<EndpointAnalysisContext> => {
+  label: string,
+  ledger: TeardownLedger
+): Promise<AnalysisChainContext> => {
   const seeded = await seedAttackScenario(esClient, adminApi, { scenarioKey });
+  ledger.scenario(seeded);
   const hostName = scenarioHost(scenarioKey);
   const attackDiscoveryAlertId = `e2e-${label}-${seeded.runMarker}`;
 
@@ -115,41 +143,79 @@ const runEndpointAnalysis = async (
     alertIds: seeded.alertIds,
     runMarker: seeded.runMarker,
   });
+  ledger.attackDiscoveryAlert(attackDiscoveryAlertId);
 
   const investigationId = await createInvestigation(
     adminApi,
     `Endpoint analysis e2e ${seeded.runMarker}`,
     `Seeded investigation for run ${seeded.runMarker}`
   );
+  ledger.investigation(investigationId);
+
+  return { scenario: seeded, attackDiscoveryAlertId, investigationId, hostName };
+};
+
+/**
+ * Publishes the pending `security.analyze_endpoint` handoff for a seeded chain. Kept separate
+ * from `seedAnalysisChain` because the distinguishability flow must be able to seed (and clean
+ * up) a second chain before its handoff exists.
+ */
+const publishHandoff = async (
+  adminApi: AlertZeroApi,
+  esClient: EsClient,
+  chain: AnalysisChainContext,
+  ledger: TeardownLedger
+): Promise<string> => {
   await ensureInvestigationsAiIndex(adminApi);
   const kiId = await seedKnowledgeIndicator(esClient, {
-    kiId: `e2e-analyze-endpoint-${seeded.runMarker}`,
+    kiId: `e2e-analyze-endpoint-${chain.scenario.runMarker}`,
     type: 'security.analyze_endpoint',
-    title: `Forensics handoff for Attack Discovery ${attackDiscoveryAlertId}`,
-    description: `Seeded handoff for run ${seeded.runMarker}`,
+    title: `Forensics handoff for Attack Discovery ${chain.attackDiscoveryAlertId}`,
+    description: `Seeded handoff for run ${chain.scenario.runMarker}`,
     attributes: {
-      attack_discovery_alert_id: attackDiscoveryAlertId,
-      investigation_id: investigationId,
+      attack_discovery_alert_id: chain.attackDiscoveryAlertId,
+      investigation_id: chain.investigationId,
     },
   });
+  ledger.knowledgeIndicator(kiId);
+  return kiId;
+};
 
-  return { scenario: seeded, kiId, attackDiscoveryAlertId, investigationId, hostName };
+/** Seeds a full chain and immediately publishes its handoff: the positive flow's setup. */
+const runEndpointAnalysis = async (
+  adminApi: AlertZeroApi,
+  esClient: EsClient,
+  scenarioKey: string,
+  label: string,
+  ledger: TeardownLedger
+): Promise<EndpointAnalysisContext> => {
+  const chain = await seedAnalysisChain(adminApi, esClient, scenarioKey, label, ledger);
+  const kiId = await publishHandoff(adminApi, esClient, chain, ledger);
+  return { ...chain, kiId };
 };
 
 // afterAll runs even when the body throws, so the seeded state escapes through here.
 const scenarios: SeededScenario[] = [];
 const kiIds: string[] = [];
 const attackDiscoveryAlertIds: string[] = [];
+const investigationIds: string[] = [];
+const ledger: TeardownLedger = {
+  scenario: (seeded) => scenarios.push(seeded),
+  attackDiscoveryAlert: (id) => attackDiscoveryAlertIds.push(id),
+  investigation: (id) => investigationIds.push(id),
+  knowledgeIndicator: (id) => kiIds.push(id),
+};
+/** Executions of a workflow that predate this run; teardown cancels and drains the rest. */
+const executionSnapshots: Array<{ workflowId: string; knownIds: string[] }> = [];
 let api: AlertZeroApi | undefined;
 let esClientRef: EsClient | undefined;
 let serviceAccountId: string | undefined;
-let workerWorkflowId: string | undefined;
-let firstAnalysis: EndpointAnalysisContext | undefined;
 
 apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.classic] }, () => {
   apiTest.afterAll(async ({ apiClient, samlAuth }) => {
     // Every step runs even when an earlier one throws, so one failure cannot leak the seeded
-    // scenarios, the Attack Discovery alerts, the indicators, the service account or the worker.
+    // scenarios, the Attack Discovery alerts, the indicators, the investigations and their
+    // pending cards, the service account or the worker.
     const errors: unknown[] = [];
     const attempt = async (step: () => Promise<unknown>) => {
       try {
@@ -161,12 +227,34 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
     await attempt(async () => {
       api = await getAdminApi(apiClient, samlAuth);
     });
+    // Drain before touching the account or the worker's settings: `resetWorker` only
+    // disables/unbinds, it does not stop an active sweep or its detached endpoint-analysis
+    // runs, and those runs execute as the service account deleted below.
+    for (const { workflowId, knownIds } of executionSnapshots) {
+      await attempt(async () => {
+        if (api) await cancelNewExecutions(api, workflowId, knownIds);
+      });
+    }
+    // Dismissal releases the parked run behind each pending card, and that run may still need
+    // the service account — so this, too, belongs before the account teardown.
+    await attempt(async () => {
+      if (api && scenarios.length > 0) {
+        await dismissRunProposals(api, {
+          alertIds: scenarios.flatMap((scenario) => scenario.alertIds),
+        });
+      }
+    });
     await attempt(async () => {
       if (api) await resetWorker(api, WORKER_ID);
     });
     await attempt(async () => {
       if (api && serviceAccountId) await deleteServiceAccount(api, serviceAccountId);
     });
+    for (const investigationId of investigationIds) {
+      await attempt(async () => {
+        if (api) await deleteInvestigation(api, investigationId);
+      });
+    }
     await attempt(async () => {
       if (esClientRef && attackDiscoveryAlertIds.length > 0) {
         await esClientRef.deleteByQuery({
@@ -192,25 +280,43 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
     }
   });
 
+  // One flow, not two tests: the distinguishability stage below runs on the positive flow's
+  // seeded chain and enabled worker, so a second test would depend on this body having run
+  // (running it by title, or retrying it in a fresh worker, would throw instead of exercising
+  // the regression). Playwright runs a file's tests serially in one worker, so folding the
+  // stage in here keeps it deterministic.
   apiTest(
-    'analyzes a seeded endpoint and cites ids that exist in the seed',
+    'analyzes a seeded endpoint, cites ids that exist in the seed, and keeps two hosts distinguishable (security-team#19991)',
     async ({ apiClient, samlAuth, esClient }) => {
-      apiTest.setTimeout(testData.GENERATION_TIMEOUT_MS * 2);
+      apiTest.setTimeout(testData.GENERATION_TIMEOUT_MS * 3 + testData.ACTION_TIMEOUT_MS * 2);
       const adminApi = await getAdminApi(apiClient, samlAuth);
       api = adminApi;
       esClientRef = esClient;
       const startedAt = new Date().toISOString();
 
+      // Guard: this flow is LLM-dependent end to end. When the stack was booted without a
+      // chat-completion inference connector (the `alertzero` config set only wires connectors
+      // when a connector source exists, which plain CI does not have), every workflow run
+      // would fail on its first model call — and this suite enables the worker and seeds real
+      // telemetry before that. Skip with an explicit reason instead of failing.
+      const chatConnectors = await listChatCompletionConnectors(adminApi);
+      apiTest.skip(
+        chatConnectors.length === 0,
+        'no preconfigured chat-completion inference connector on this stack; the LLM-dependent AlertZero endpoint-analysis flow requires one (agent_builder_smoke-style EIS connector source)'
+      );
+
+      // Snapshot the run workflow's executions before the worker can start any: the poll below
+      // correlates on this snapshot, and teardown drains whatever appeared after it.
+      const knownRunExecutionIds = await listExecutionIds(adminApi, RUN_WORKFLOW_ID);
+      executionSnapshots.push({ workflowId: RUN_WORKFLOW_ID, knownIds: knownRunExecutionIds });
+
       const context = await runEndpointAnalysis(
         adminApi,
         esClient,
         testData.ATTACK_SCENARIO_KEY,
-        'ad'
+        'ad',
+        ledger
       );
-      firstAnalysis = context;
-      scenarios.push(context.scenario);
-      kiIds.push(context.kiId);
-      attackDiscoveryAlertIds.push(context.attackDiscoveryAlertId);
 
       // Same shape as P1: bind a service account, wait for the settings write to install the
       // workflow, then enable — the immediate scheduled run is the sweep under test, executing as
@@ -230,16 +336,17 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
         },
         { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
       );
-      workerWorkflowId = worker.workflowId;
+      const workerWorkflowId = worker.workflowId;
       if (!workerWorkflowId) {
         throw new Error(`Worker ${WORKER_ID} has no workflow installed`);
       }
-      const knownExecutionIds = await listExecutionIds(adminApi, workerWorkflowId);
+      const knownWorkerExecutionIds = await listExecutionIds(adminApi, workerWorkflowId);
+      executionSnapshots.push({ workflowId: workerWorkflowId, knownIds: knownWorkerExecutionIds });
       expect((await updateWorker(adminApi, WORKER_ID, { enabled: true })).enabled).toBe(true);
       const sweepExecutionId = await waitForNewExecution(
         adminApi,
         workerWorkflowId,
-        knownExecutionIds,
+        knownWorkerExecutionIds,
         { timeoutMs: testData.ACTION_TIMEOUT_MS }
       );
       const sweep = await waitForExecution(
@@ -250,14 +357,16 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
       );
       await assertExecutionCompleted(adminApi, 'The forensics sweep execution', sweep);
 
-      // The sweep dispatches one run per pending indicator, so poll for a run of THIS workflow the
-      // sweep started rather than assuming the sweep's only dispatch is ours.
+      // The sweep dispatches one run per pending indicator, so poll for a run of THIS workflow
+      // the sweep started — correlated against the run workflow's own pre-enable snapshot, not
+      // the sweep workflow's (that one says nothing about which run executions predate this
+      // test, so an old or unrelated run could be selected instead).
       const runExecutionId = await pollUntil(
         `an execution of ${RUN_WORKFLOW_ID} started after the sweep`,
         async () =>
           (
             await listExecutionIds(adminApi, RUN_WORKFLOW_ID)
-          ).find((id) => !knownExecutionIds.includes(id)),
+          ).find((id) => !knownRunExecutionIds.includes(id)),
         { timeoutMs: testData.ACTION_TIMEOUT_MS }
       );
       const run = await waitForExecution(
@@ -374,38 +483,28 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
         { timeoutMs: testData.ACTION_TIMEOUT_MS }
       );
       expect(indicator.found).toBe(true);
-    }
-  );
 
-  // Regression guard for security-team#19991: containment proposals raised for two different
-  // hosts must stay distinguishable — each investigation's card must target its own seeded host,
-  // and the two cards must not share one title. (The marker on the P2 branch was apiTest.fail;
-  // at this head the per-action title pass-through and per-action endpoint ids make the
-  // distinguishable behaviour hold, verified live, so this is now a green guard.)
-  apiTest(
-    'keeps containment proposals for two hosts distinguishable (security-team#19991)',
-    async ({ apiClient, samlAuth, esClient }) => {
-      apiTest.setTimeout(testData.GENERATION_TIMEOUT_MS + 2 * testData.ACTION_TIMEOUT_MS);
-      esClientRef = esClient;
-      const adminApi = api ?? (await getAdminApi(apiClient, samlAuth));
-      const first = firstAnalysis;
-      if (!first || !workerWorkflowId) {
-        throw new Error('the green endpoint analysis test must run first');
-      }
-
-      const second = await runEndpointAnalysis(adminApi, esClient, SECOND_SCENARIO_KEY, 'ad2');
-      scenarios.push(second.scenario);
-      kiIds.push(second.kiId);
-      attackDiscoveryAlertIds.push(second.attackDiscoveryAlertId);
-      // The first chain's documents come out before the second handoff runs: the forensic
-      // agent's telemetry lookback is not host-scoped, so with both chains indexed the second
-      // analysis can legitimately see — and act on — the first host (observed live: both cards
-      // reading "Isolate host wks-alice-01"). Removing the first chain pins this test to the
-      // contract under test: one visible host per handoff, so each card must name its own. Both
-      // seeds' identifiers are read first — the card targets resolve against documents that are
-      // gone by the time the assertions run.
+      // Regression guard for security-team#19991: containment proposals raised for two different
+      // hosts must stay distinguishable — each investigation's card must target its own seeded
+      // host, and the two cards must not share one title. (The marker on the P2 branch was
+      // apiTest.fail; at this head the per-action title pass-through and per-action endpoint ids
+      // make the distinguishable behaviour hold, verified live, so this is now a green guard.)
+      const second = await seedAnalysisChain(
+        adminApi,
+        esClient,
+        SECOND_SCENARIO_KEY,
+        'ad2',
+        ledger
+      );
+      // The first chain's documents come out before the second handoff exists: the forensic
+      // agent's telemetry lookback is not host-scoped, so with both chains indexed a scheduled
+      // sweep could analyze both hosts from either handoff and raise the wrong isolate card.
+      // Removing the first chain before publishing the second pins this flow to the contract
+      // under test: one visible host per handoff, so each card must name its own. Both seeds'
+      // identifiers are read first — the card targets resolve against documents that are gone by
+      // the time the assertions run.
       const hostByAgentId = new Map<string, string>();
-      for (const seeded of [first.scenario, second.scenario]) {
+      for (const seeded of [context.scenario, second.scenario]) {
         const identifiers = await readSeedIdentifiers(
           esClient,
           seeded.runMarker,
@@ -413,7 +512,8 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
         );
         identifiers.hostByAgentId.forEach((host, agentId) => hostByAgentId.set(agentId, host));
       }
-      await first.scenario.cleanup();
+      await context.scenario.cleanup();
+      await publishHandoff(adminApi, esClient, second, ledger);
 
       // The worker's next scheduled sweep analyzes the second handoff; each investigation must
       // end up with its own pending isolate card.
@@ -421,11 +521,11 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
         (await listInvestigationProposals(adminApi, investigationId)).find(
           (proposal) => proposal.actionWorkflowId === testData.ISOLATE_HOST_ACTION_ID
         );
-      const cards = await pollUntil(
+      const distinguishableCards = await pollUntil(
         'an isolate proposal on each of the two investigations',
         async () => {
           const [firstCard, secondCard] = await Promise.all([
-            isolateCardOf(first.investigationId),
+            isolateCardOf(context.investigationId),
             isolateCardOf(second.investigationId),
           ]);
           return firstCard && secondCard ? { firstCard, secondCard } : undefined;
@@ -438,10 +538,13 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
       ];
       const summary = JSON.stringify(
         {
-          [first.hostName]: { title: cards.firstCard.title, targets: targetsOf(cards.firstCard) },
+          [context.hostName]: {
+            title: distinguishableCards.firstCard.title,
+            targets: targetsOf(distinguishableCards.firstCard),
+          },
           [second.hostName]: {
-            title: cards.secondCard.title,
-            targets: targetsOf(cards.secondCard),
+            title: distinguishableCards.secondCard.title,
+            targets: targetsOf(distinguishableCards.secondCard),
           },
         },
         null,
@@ -449,16 +552,17 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
       );
 
       expect(
-        targetsOf(cards.firstCard),
-        `the card for ${first.hostName} must target ${first.hostName}: ${summary}`
-      ).toStrictEqual([first.hostName]);
+        targetsOf(distinguishableCards.firstCard),
+        `the card for ${context.hostName} must target ${context.hostName}: ${summary}`
+      ).toStrictEqual([context.hostName]);
       expect(
-        targetsOf(cards.secondCard),
+        targetsOf(distinguishableCards.secondCard),
         `the card for ${second.hostName} must target ${second.hostName}: ${summary}`
       ).toStrictEqual([second.hostName]);
-      expect(cards.firstCard.title, `the two cards must not share one title: ${summary}`).not.toBe(
-        cards.secondCard.title
-      );
+      expect(
+        distinguishableCards.firstCard.title,
+        `the two cards must not share one title: ${summary}`
+      ).not.toBe(distinguishableCards.secondCard.title);
       apiTest.info().annotations.push({
         type: 'containment-cards',
         description: summary,

@@ -88,6 +88,21 @@ export const createInvestigation = async (
     `create investigation ${title}`
   ).id;
 
+/**
+ * Deletes an Investigation conversation; its attachments are deleted with it. A 404 means an
+ * earlier teardown already removed it, anything else non-2xx fails loudly — `api.public`
+ * resolves non-2xx responses as values, so discarding the result would make teardown look
+ * successful while the conversation (and its pending containment cards) survived.
+ */
+export const deleteInvestigation = async (api: AlertZeroApi, id: string): Promise<void> => {
+  const response = await api.public('DELETE', `${CONVERSATIONS_URL}/${encodeURIComponent(id)}`);
+  if (response.statusCode >= 300 && response.statusCode !== 404) {
+    throw new Error(
+      `Delete investigation ${id} failed: ${response.statusCode} ${JSON.stringify(response.body)}`
+    );
+  }
+};
+
 export interface AttachmentVersion<DataType = unknown> {
   readonly version: number;
   readonly data?: DataType;
@@ -125,14 +140,14 @@ export const listAttachments = async <T = unknown>(
 
 /** The data of the attachment's current version; undefined when it is absent or carries none. */
 export const attachmentData = <T>(
-  attachments: ReadonlyArray<ConversationAttachment<T>>,
+  attachments: ReadonlyArray<ConversationAttachment>,
   id: string
 ): T | undefined => {
   const attachment = attachments.find((candidate) => isAttachment(candidate, id));
   const current =
     attachment?.versions?.find((version) => version.version === attachment.current_version) ??
     attachment?.versions?.[attachment.versions.length - 1];
-  return current?.data;
+  return current?.data as T | undefined;
 };
 
 export interface SeedIdentifiers {
