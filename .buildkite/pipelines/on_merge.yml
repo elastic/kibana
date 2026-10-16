@@ -1,6 +1,8 @@
 env:
   GITHUB_COMMIT_STATUS_ENABLED: 'true'
   GITHUB_COMMIT_STATUS_CONTEXT: 'buildkite/on-merge'
+  # off | shadow; shadow records what selective testing would run while every suite still runs in full.
+  ON_MERGE_SELECTIVE_MODE: 'shadow'
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
@@ -18,6 +20,7 @@ steps:
 
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
+    depends_on: pre_build
     agents:
       provider: k8s
       image: docker.elastic.co/ci-agent-images/kibana/ci-minimal
@@ -38,6 +41,8 @@ steps:
             - '/package.json'
             - '/tsconfig.base.json'
             - '/versions.json'
+            - '**/kibana.jsonc'
+            - '**/tsconfig.json'
             - '**/jest.config.js'
             - '**/jest.integration.config.js'
             - '**/*.test.js'
