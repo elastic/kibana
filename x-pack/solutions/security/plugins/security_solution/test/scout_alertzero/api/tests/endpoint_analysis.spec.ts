@@ -377,12 +377,12 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
     }
   );
 
-  // Known gap, expected to fail until security-team#19991 lands: containment proposals raised for
-  // two different hosts must stay distinguishable — each investigation's card must target its own
-  // seeded host, and the two cards must not collapse onto one endpoint. The first host's handoff
-  // was analyzed by the test above while the worker stays enabled, so this test hands off a second
-  // chain on a second host and reads both hosts' cards back.
-  apiTest.fail(
+  // Regression guard for security-team#19991: containment proposals raised for two different
+  // hosts must stay distinguishable — each investigation's card must target its own seeded host,
+  // and the two cards must not share one title. (The marker on the P2 branch was apiTest.fail;
+  // at this head the per-action title pass-through and per-action endpoint ids make the
+  // distinguishable behaviour hold, verified live, so this is now a green guard.)
+  apiTest(
     'keeps containment proposals for two hosts distinguishable (security-team#19991)',
     async ({ apiClient, samlAuth, esClient }) => {
       apiTest.setTimeout(testData.GENERATION_TIMEOUT_MS + 2 * testData.ACTION_TIMEOUT_MS);
@@ -451,6 +451,10 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
       expect(cards.firstCard.title, `the two cards must not share one title: ${summary}`).not.toBe(
         cards.secondCard.title
       );
+      apiTest.info().annotations.push({
+        type: 'containment-cards',
+        description: summary,
+      });
     }
   );
 });
