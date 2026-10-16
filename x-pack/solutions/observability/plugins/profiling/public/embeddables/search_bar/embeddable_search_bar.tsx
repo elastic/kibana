@@ -23,6 +23,7 @@ export function EmbeddableSearchBar({
   onRefresh,
   rangeFrom,
   rangeTo,
+  schema,
   ...deps
 }: EmbeddableSearchBarProps) {
   return (
@@ -47,6 +48,7 @@ export function EmbeddableSearchBar({
           showQueryMenu={false}
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}
+          schema={schema}
         />
       </div>
     </ProfilingEmbeddableProvider>

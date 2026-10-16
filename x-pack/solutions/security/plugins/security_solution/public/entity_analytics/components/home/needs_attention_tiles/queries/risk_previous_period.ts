@@ -23,7 +23,10 @@ import { buildPreviousPeriodStart } from './tile_period';
  * name, the entity filters and alias resolution.
  */
 
-const buildJoinTail = (entitiesIndexName: string, entityFilterClauses: string[]): string[] => [
+export const buildJoinTail = (
+  entitiesIndexName: string,
+  entityFilterClauses: string[]
+): string[] => [
   `| LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
   `| WHERE entity.name IS NOT NULL`,
   ...entityFilterClauses,
