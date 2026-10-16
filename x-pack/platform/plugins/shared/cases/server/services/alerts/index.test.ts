@@ -1104,6 +1104,35 @@ describe('updateAlertsStatus', () => {
       expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
     });
 
+    it('reports the attack as not found when the caller may not read the pattern', async () => {
+      // A caller with no index privileges at all is refused the search instead of reading nothing.
+      esClient.search.mockRejectedValueOnce({
+        statusCode: 403,
+        body: { error: { type: 'security_exception' } },
+      } as never);
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).rejects.toThrow(/Referenced attack\(s\) not found: attack-1/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('rethrows a read failure that is not an authorization refusal', async () => {
+      esClient.search.mockRejectedValueOnce(
+        Object.assign(new Error('unavailable_shards_exception'), {
+          statusCode: 503,
+          body: { error: { type: 'unavailable_shards_exception' } },
+        }) as never
+      );
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).rejects.toThrow(/unavailable_shards_exception/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
     it('throws when the referenced document is not an alert', async () => {
       esClient.search.mockResolvedValueOnce(attackDoc({ message: 'just a document' }) as never);
 
