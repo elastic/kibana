@@ -32,6 +32,13 @@ const NO_DESTINATION_WRITE_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
   kibana: [{ base: [], feature: { contextEngine: ['all'] }, spaces: ['*'] }],
 };
+const memoryBody = (overrides: Record<string, unknown> = {}) => ({
+  type: 'memory.session_fact',
+  title: 'Scout memory',
+  description: 'A memory created during the Scout run.',
+  content: 'Scout memory content.',
+  ...overrides,
+});
 
 apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, () => {
   let credentials: RoleApiCredentials;
@@ -120,12 +127,11 @@ apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, 
     const createResponse = await apiClient.post(MEMORIES_PATH, {
       headers,
       responseType: 'json',
-      body: {
-        type: 'memory.session_fact',
+      body: memoryBody({
         title: 'Initial title',
         description: 'A fact found during the Scout run.',
         content: 'Initial content.',
-      },
+      }),
     });
     expect(createResponse).toHaveStatusCode(201);
     expect(Object.keys(createResponse.body).sort()).toStrictEqual(['id', 'session_id']);
@@ -161,13 +167,12 @@ apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, 
     const reviseDeletedResponse = await apiClient.patch(itemPath, {
       headers,
       responseType: 'json',
-      body: {
-        type: 'memory.session_fact',
+      body: memoryBody({
         title: 'Cannot revise deleted memory',
         description: 'The tombstone must remain current.',
         content: 'This revision must be rejected.',
         session_id: sessionId,
-      },
+      }),
     });
     expect(reviseDeletedResponse).toHaveStatusCode(409);
 
@@ -194,12 +199,11 @@ apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, 
           ...testData.API_HEADERS,
         },
         responseType: 'json',
-        body: {
-          type: 'memory.session_fact',
+        body: memoryBody({
           title: 'Unauthorized memory',
           description: 'The caller cannot write to the destination.',
           content: 'This content must not be stored.',
-        },
+        }),
       });
 
       expect(response).toHaveStatusCode(403);
@@ -228,13 +232,12 @@ apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, 
           permissions: { kibana: { privileges: [{ space: 'default' }] } },
         },
       });
-      const revisionBody = {
-        type: 'memory.session_fact',
+      const revisionBody = memoryBody({
         title: 'Revised scoped memory',
         description: 'Still visible only in the default space.',
         content: 'Revised scoped content.',
         session_id: 'scoped-session',
-      };
+      });
 
       const hiddenResponse = await apiClient.patch(inOtherSpace(`${MEMORIES_PATH}/${scopedId}`), {
         headers,
@@ -257,12 +260,11 @@ apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, 
       const publicCreate = await apiClient.post(MEMORIES_PATH, {
         headers,
         responseType: 'json',
-        body: {
-          type: 'memory.session_fact',
+        body: memoryBody({
           title: 'Public memory',
           description: 'Visible through either registration.',
           content: 'Public content.',
-        },
+        }),
       });
       expect(publicCreate).toHaveStatusCode(201);
       const publicRevise = await apiClient.patch(
@@ -270,13 +272,12 @@ apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, 
         {
           headers,
           responseType: 'json',
-          body: {
-            type: 'memory.session_fact',
+          body: memoryBody({
             title: 'Public memory revised elsewhere',
             description: 'Still visible through either registration.',
             content: 'Revised public content.',
             session_id: publicCreate.body.session_id,
-          },
+          }),
         }
       );
       expect(publicRevise).toHaveStatusCode(200);
@@ -290,12 +291,11 @@ apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, 
       const createResponse = await apiClient.post(DATA_STREAM_MEMORIES_PATH, {
         headers,
         responseType: 'json',
-        body: {
-          type: 'memory.session_fact',
+        body: memoryBody({
           title: 'Data-stream memory',
           description: 'Initial data-stream revision.',
           content: 'Initial content.',
-        },
+        }),
       });
       expect(createResponse).toHaveStatusCode(201);
       const { id, session_id: sessionId } = createResponse.body;
@@ -304,13 +304,12 @@ apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, 
       const reviseResponse = await apiClient.patch(itemPath, {
         headers,
         responseType: 'json',
-        body: {
-          type: 'memory.session_fact',
+        body: memoryBody({
           title: 'Revised data-stream memory',
           description: 'Second data-stream revision.',
           content: 'Revised content.',
           session_id: sessionId,
-        },
+        }),
       });
       expect(reviseResponse).toHaveStatusCode(200);
       const deleteResponse = await apiClient.delete(itemPath, {

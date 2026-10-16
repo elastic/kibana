@@ -234,118 +234,105 @@ describe('memory routes', () => {
     expect(response.ok).toHaveBeenCalledWith({ body: { id: 'memory-1' } });
   });
 
-  it('maps typed memory errors', async () => {
-    reviseMemory.mockRejectedValue(
-      new MemoryWriteError('memory_deleted', "Memory 'memory-1' was deleted.")
-    );
-
-    await call(
-      'PATCH',
-      AI_INDEX_MEMORY_BY_ID_PATH,
-      { aiIndexId: 'support', memoryId: 'memory-1' },
-      body
-    );
-
-    expect(response.conflict).toHaveBeenCalledWith({
-      body: { message: "Memory 'memory-1' was deleted." },
-    });
-  });
-
-  it('returns 404 when Memory is disabled', async () => {
-    createMemory.mockRejectedValue(
-      new MemoryWriteError('memory_disabled', 'Context Engine memory is not enabled.')
-    );
-
-    await call('POST', AI_INDEX_MEMORIES_PATH, { aiIndexId: 'support' }, body);
-
-    expect(response.notFound).toHaveBeenCalledWith({
-      body: { message: 'Context Engine memory is not enabled.' },
-    });
-  });
-
-  it('sanitizes an Elasticsearch version conflict and preserves HTTP 409', async () => {
-    reviseMemory.mockRejectedValue(
-      createEsError(409, 'version_conflict_engine_exception', 'conflict on hidden-index-name')
-    );
-
-    await call(
-      'PATCH',
-      AI_INDEX_MEMORY_BY_ID_PATH,
-      { aiIndexId: 'support', memoryId: 'memory-1' },
-      body
-    );
-
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 409,
-      body: { message: 'The memory write conflicted with another operation.' },
-    });
-  });
-
-  it('does not expose Elasticsearch authorization details', async () => {
-    createMemory.mockRejectedValue(
-      createEsError(403, 'security_exception', 'missing privilege for secret-index-name')
-    );
-
-    await call('POST', AI_INDEX_MEMORIES_PATH, { aiIndexId: 'support' }, body);
-
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 403,
-      body: { message: 'Elasticsearch denied the memory write.' },
-    });
-  });
-
-  it('returns a generic 500 for invalid stored Memory state', async () => {
-    reviseMemory.mockRejectedValue(
-      new MemoryWriteError(
+  it.each([
+    {
+      name: 'maps typed memory errors',
+      operation: 'revise',
+      error: new MemoryWriteError('memory_deleted', "Memory 'memory-1' was deleted."),
+      responseMethod: 'conflict',
+      expected: { body: { message: "Memory 'memory-1' was deleted." } },
+    },
+    {
+      name: 'returns 404 when Memory is disabled',
+      operation: 'create',
+      error: new MemoryWriteError('memory_disabled', 'Context Engine memory is not enabled.'),
+      responseMethod: 'notFound',
+      expected: { body: { message: 'Context Engine memory is not enabled.' } },
+    },
+    {
+      name: 'sanitizes an Elasticsearch version conflict and preserves HTTP 409',
+      operation: 'revise',
+      error: createEsError(
+        409,
+        'version_conflict_engine_exception',
+        'conflict on hidden-index-name'
+      ),
+      responseMethod: 'customError',
+      expected: {
+        statusCode: 409,
+        body: { message: 'The memory write conflicted with another operation.' },
+      },
+    },
+    {
+      name: 'does not expose Elasticsearch authorization details',
+      operation: 'create',
+      error: createEsError(403, 'security_exception', 'missing privilege for secret-index-name'),
+      responseMethod: 'customError',
+      expected: {
+        statusCode: 403,
+        body: { message: 'Elasticsearch denied the memory write.' },
+      },
+    },
+    {
+      name: 'returns a generic 500 for invalid stored Memory state',
+      operation: 'revise',
+      error: new MemoryWriteError(
         'invalid_memory_timestamp',
         "Memory 'memory-1' contains secret-index-name."
-      )
-    );
+      ),
+      responseMethod: 'customError',
+      expected: {
+        statusCode: 500,
+        body: { message: 'An unexpected error occurred while processing the memory request.' },
+      },
+    },
+    {
+      name: 'preserves a retryable Elasticsearch 503 without exposing details',
+      operation: 'create',
+      error: createEsError(503, 'unavailable_shards_exception', 'secret-index-name is unavailable'),
+      responseMethod: 'customError',
+      expected: {
+        statusCode: 503,
+        body: { message: 'Elasticsearch is temporarily unavailable.' },
+      },
+    },
+    {
+      name: 'maps Elasticsearch 401 to HTTP 403 without exposing details',
+      operation: 'create',
+      error: createEsError(401, 'security_exception', 'secret-index-name'),
+      responseMethod: 'customError',
+      expected: {
+        statusCode: 403,
+        body: { message: 'Elasticsearch denied the memory write.' },
+      },
+    },
+    {
+      name: 'maps Elasticsearch 429 to HTTP 429 without exposing details',
+      operation: 'create',
+      error: createEsError(429, 'security_exception', 'secret-index-name'),
+      responseMethod: 'customError',
+      expected: {
+        statusCode: 429,
+        body: { message: 'Elasticsearch is temporarily unable to process the memory write.' },
+      },
+    },
+  ] as const)('$name', async ({ operation, error, responseMethod, expected }) => {
+    const serviceOperation = operation === 'create' ? createMemory : reviseMemory;
+    serviceOperation.mockRejectedValue(error);
 
-    await call(
-      'PATCH',
-      AI_INDEX_MEMORY_BY_ID_PATH,
-      { aiIndexId: 'support', memoryId: 'memory-1' },
-      body
-    );
-
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 500,
-      body: { message: 'An unexpected error occurred while processing the memory request.' },
-    });
-  });
-
-  it('preserves a retryable Elasticsearch 503 without exposing details', async () => {
-    createMemory.mockRejectedValue(
-      createEsError(503, 'unavailable_shards_exception', 'secret-index-name is unavailable')
-    );
-
-    await call('POST', AI_INDEX_MEMORIES_PATH, { aiIndexId: 'support' }, body);
-
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 503,
-      body: { message: 'Elasticsearch is temporarily unavailable.' },
-    });
-  });
-
-  it.each([
-    [401, 403, 'Elasticsearch denied the memory write.'],
-    [429, 429, 'Elasticsearch is temporarily unable to process the memory write.'],
-  ])(
-    'maps Elasticsearch %i to HTTP %i without exposing details',
-    async (esStatus, status, message) => {
-      createMemory.mockRejectedValue(
-        createEsError(esStatus, 'security_exception', 'secret-index-name')
-      );
-
+    if (operation === 'create') {
       await call('POST', AI_INDEX_MEMORIES_PATH, { aiIndexId: 'support' }, body);
-
-      expect(response.customError).toHaveBeenCalledWith({
-        statusCode: status,
-        body: { message },
-      });
+    } else {
+      await call(
+        'PATCH',
+        AI_INDEX_MEMORY_BY_ID_PATH,
+        { aiIndexId: 'support', memoryId: 'memory-1' },
+        body
+      );
     }
-  );
+
+    expect(response[responseMethod]).toHaveBeenCalledWith(expected);
+  });
 
   it('returns 404 before calling the service when Context Engine is disabled', async () => {
     contextEngineEnabled.mockResolvedValue(false);

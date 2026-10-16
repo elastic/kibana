@@ -9,8 +9,8 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/core-security-server';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
-import type { StoredMemoryDocument } from './memory_document';
-import { AiIndexMemoryWriteService } from './memory_write_service';
+import type { MemoryWriter, StoredMemoryDocument } from './memory_document';
+import { AiIndexMemoryWriteService, type ReviseMemoryRequest } from './memory_write_service';
 import { MemoryWriteError } from './memory_write_errors';
 import { kiIdQuery } from './ki_get';
 
@@ -55,7 +55,7 @@ describe('AiIndexMemoryWriteService', () => {
   const aiIndexService = { get: jest.fn() };
   const isMemoryEnabled = jest.fn();
   const auditLogger = { log: jest.fn() } as unknown as jest.Mocked<AuditLogger>;
-  const writer = {
+  const writer: MemoryWriter = {
     uri: 'tool://platform.context_engine.remember',
     metadata: { run_id: 'run-1', agent_id: 'agent-1' },
   };
@@ -86,6 +86,45 @@ describe('AiIndexMemoryWriteService', () => {
     generateRevisionId: () => 'revision-id',
     getCurrentDate: () => new Date('2026-09-24T12:00:00.000Z'),
   });
+
+  const useDataStreamDestination = () =>
+    aiIndexService.get.mockResolvedValue({
+      ...indexAiIndex,
+      dest: { type: 'data_stream', value: 'ai-index-ds-support' },
+    });
+
+  const mockCurrentMemory = ({
+    id = 'physical-memory-id',
+    indexName = 'ai-index-idx-support',
+    source = existingDocument,
+    sort,
+    includeConcurrency = true,
+  }: {
+    id?: string;
+    indexName?: string;
+    source?: StoredMemoryDocument & { custom_field?: string };
+    sort?: string[];
+    includeConcurrency?: boolean;
+  } = {}) =>
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: id,
+            _index: indexName,
+            ...(includeConcurrency ? { _seq_no: 7, _primary_term: 2 } : {}),
+            _source: source,
+            ...(sort ? { sort } : {}),
+          },
+        ],
+      },
+    });
+
+  const reviseMemory = (overrides: Partial<ReviseMemoryRequest> = {}) =>
+    service.reviseMemory({ ...request, id: 'memory-1', ...overrides });
+  const forgetMemory = (memoryWriter = writer) =>
+    service.forgetMemory({ aiIndexId: 'support', id: 'memory-1', writer: memoryWriter });
+  const getIndexedDocument = (call = 0) => index.mock.calls[call][0].document;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -153,10 +192,7 @@ describe('AiIndexMemoryWriteService', () => {
   });
 
   it('creates a data-stream Memory with a unique physical revision ID', async () => {
-    aiIndexService.get.mockResolvedValue({
-      ...indexAiIndex,
-      dest: { type: 'data_stream', value: 'ai-index-ds-support' },
-    });
+    useDataStreamDestination();
 
     await service.createMemory(request);
 
@@ -222,21 +258,12 @@ describe('AiIndexMemoryWriteService', () => {
   });
 
   it('revises an index-backed Memory in place with OCC and preserved fields', async () => {
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'physical-memory-id',
-            _index: 'ai-index-idx-support-000001',
-            _seq_no: 7,
-            _primary_term: 2,
-            _source: { ...existingDocument, custom_field: 'preserved' },
-          },
-        ],
-      },
+    mockCurrentMemory({
+      indexName: 'ai-index-idx-support-000001',
+      source: { ...existingDocument, custom_field: 'preserved' },
     });
 
-    await expect(service.reviseMemory({ ...request, id: 'memory-1' })).resolves.toEqual({
+    await expect(reviseMemory()).resolves.toEqual({
       id: 'memory-1',
       sessionId: 'conversation-1',
     });
@@ -281,44 +308,16 @@ describe('AiIndexMemoryWriteService', () => {
   });
 
   it('preserves references when a revision does not supply replacements', async () => {
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'physical-memory-id',
-            _index: 'ai-index-idx-support-000001',
-            _seq_no: 7,
-            _primary_term: 2,
-            _source: existingDocument,
-          },
-        ],
-      },
-    });
+    mockCurrentMemory({ indexName: 'ai-index-idx-support-000001' });
 
     const { references: _, ...requestWithoutReferences } = request;
     await service.reviseMemory({ ...requestWithoutReferences, id: 'memory-1' });
 
-    expect(index).toHaveBeenCalledWith(
-      expect.objectContaining({
-        document: expect.objectContaining({ references: existingDocument.references }),
-      })
-    );
+    expect(getIndexedDocument()).toMatchObject({ references: existingDocument.references });
   });
 
   it('preserves omitted content fields during a partial revision', async () => {
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'physical-memory-id',
-            _index: 'ai-index-idx-support',
-            _seq_no: 7,
-            _primary_term: 2,
-            _source: existingDocument,
-          },
-        ],
-      },
-    });
+    mockCurrentMemory();
 
     await service.reviseMemory({
       aiIndexId: 'support',
@@ -327,37 +326,23 @@ describe('AiIndexMemoryWriteService', () => {
       writer,
     });
 
-    expect(index).toHaveBeenCalledWith(
-      expect.objectContaining({
-        document: expect.objectContaining({
-          type: existingDocument.type,
-          title: 'Updated title',
-          description: existingDocument.description,
-          content: existingDocument.content,
-        }),
-      })
-    );
+    expect(getIndexedDocument()).toMatchObject({
+      type: existingDocument.type,
+      title: 'Updated title',
+      description: existingDocument.description,
+      content: existingDocument.content,
+    });
   });
 
   it('preserves expiry and session when a revision omits them', async () => {
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'physical-memory-id',
-            _index: 'ai-index-idx-support',
-            _seq_no: 7,
-            _primary_term: 2,
-            _source: {
-              ...existingDocument,
-              expires_at: '2027-01-01T00:00:00.000Z',
-              attributes: {
-                ...existingDocument.attributes,
-                'memory.session_id': 'existing-session',
-              },
-            },
-          },
-        ],
+    mockCurrentMemory({
+      source: {
+        ...existingDocument,
+        expires_at: '2027-01-01T00:00:00.000Z',
+        attributes: {
+          ...existingDocument.attributes,
+          'memory.session_id': 'existing-session',
+        },
       },
     });
     const { sessionId: _, ...requestWithoutSession } = request;
@@ -368,86 +353,42 @@ describe('AiIndexMemoryWriteService', () => {
       id: 'memory-1',
       sessionId: 'existing-session',
     });
-    expect(index).toHaveBeenCalledWith(
-      expect.objectContaining({
-        document: expect.objectContaining({
-          expires_at: '2027-01-01T00:00:00.000Z',
-          attributes: expect.objectContaining({
-            'memory.session_id': 'existing-session',
-          }),
-        }),
-      })
-    );
+    expect(getIndexedDocument()).toMatchObject({
+      expires_at: '2027-01-01T00:00:00.000Z',
+      attributes: { 'memory.session_id': 'existing-session' },
+    });
   });
 
   it('preserves non-expiring state when a revision omits expiry', async () => {
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'physical-memory-id',
-            _index: 'ai-index-idx-support',
-            _seq_no: 7,
-            _primary_term: 2,
-            _source: existingDocument,
-          },
-        ],
-      },
-    });
+    mockCurrentMemory();
 
-    await service.reviseMemory({ ...request, id: 'memory-1' });
+    await reviseMemory();
 
-    expect(index.mock.calls[0][0].document).not.toHaveProperty('expires_at');
+    expect(getIndexedDocument()).not.toHaveProperty('expires_at');
   });
 
   it('allows expired memories to be revised or forgotten', async () => {
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'physical-memory-id',
-            _index: 'ai-index-idx-support',
-            _seq_no: 7,
-            _primary_term: 2,
-            _source: {
-              ...existingDocument,
-              expires_at: '2020-01-01T00:00:00.000Z',
-            },
-          },
-        ],
+    mockCurrentMemory({
+      source: {
+        ...existingDocument,
+        expires_at: '2020-01-01T00:00:00.000Z',
       },
     });
 
-    await service.reviseMemory({ ...request, id: 'memory-1' });
-    await service.forgetMemory({
-      aiIndexId: 'support',
-      id: 'memory-1',
-      writer,
-    });
+    await reviseMemory();
+    await forgetMemory();
 
     expect(index).toHaveBeenCalledTimes(2);
-    expect(index.mock.calls[0][0].document).toMatchObject({
+    expect(getIndexedDocument()).toMatchObject({
       expires_at: '2020-01-01T00:00:00.000Z',
     });
-    expect(index.mock.calls[1][0].document).toMatchObject({
+    expect(getIndexedDocument(1)).toMatchObject({
       governance: { lifecycle: { status: 'deleted' } },
     });
   });
 
   it('generates a session when a revision omits it and the memory has none', async () => {
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'physical-memory-id',
-            _index: 'ai-index-idx-support',
-            _seq_no: 7,
-            _primary_term: 2,
-            _source: existingDocument,
-          },
-        ],
-      },
-    });
+    mockCurrentMemory();
     const { sessionId: _, ...requestWithoutSession } = request;
 
     await expect(
@@ -459,23 +400,13 @@ describe('AiIndexMemoryWriteService', () => {
   });
 
   it('uses the current time for a data-stream revision when it is newer than the parent', async () => {
-    aiIndexService.get.mockResolvedValue({
-      ...indexAiIndex,
-      dest: { type: 'data_stream', value: 'ai-index-ds-support' },
-    });
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'parent',
-            _index: '.ds-ai-index-ds-support-000001',
-            _source: existingDocument,
-          },
-        ],
-      },
+    useDataStreamDestination();
+    mockCurrentMemory({
+      id: 'parent',
+      indexName: '.ds-ai-index-ds-support-000001',
     });
 
-    await service.reviseMemory({ ...request, id: 'memory-1', tags: [] });
+    await reviseMemory({ tags: [] });
 
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -503,10 +434,7 @@ describe('AiIndexMemoryWriteService', () => {
   });
 
   it('uses the greatest document ID when data-stream revisions share a timestamp', async () => {
-    aiIndexService.get.mockResolvedValue({
-      ...indexAiIndex,
-      dest: { type: 'data_stream', value: 'ai-index-ds-support' },
-    });
+    useDataStreamDestination();
     search.mockResolvedValue({
       hits: {
         hits: [
@@ -529,17 +457,14 @@ describe('AiIndexMemoryWriteService', () => {
       },
     });
 
-    await expect(service.reviseMemory({ ...request, id: 'memory-1' })).rejects.toMatchObject({
+    await expect(reviseMemory()).rejects.toMatchObject({
       code: 'memory_deleted',
     });
     expect(index).not.toHaveBeenCalled();
   });
 
   it('fails closed when the data-stream revision tie window is exhausted', async () => {
-    aiIndexService.get.mockResolvedValue({
-      ...indexAiIndex,
-      dest: { type: 'data_stream', value: 'ai-index-ds-support' },
-    });
+    useDataStreamDestination();
     search.mockResolvedValue({
       hits: {
         hits: Array.from({ length: 11 }, (_, revision) => ({
@@ -551,98 +476,46 @@ describe('AiIndexMemoryWriteService', () => {
       },
     });
 
-    await expect(service.reviseMemory({ ...request, id: 'memory-1' })).rejects.toMatchObject({
+    await expect(reviseMemory()).rejects.toMatchObject({
       code: 'revision_tie_window_exceeded',
     });
     expect(index).not.toHaveBeenCalled();
   });
 
-  it('advances a data-stream revision timestamp beyond the current revision', async () => {
-    aiIndexService.get.mockResolvedValue({
-      ...indexAiIndex,
-      dest: { type: 'data_stream', value: 'ai-index-ds-support' },
-    });
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: '~1-a',
-            _index: '.ds-ai-index-ds-support-000001',
-            _source: {
-              ...existingDocument,
-              '@timestamp': '2026-09-24T12:00:00.000Z',
-            },
-            sort: ['2026-09-24T12:00:00.000Z'],
-          },
-        ],
-      },
-    });
+  it.each([
+    ['matches the current clock', '~1-a', '2026-09-24T12:00:00.000Z', '2026-09-24T12:00:00.001Z'],
+    ['is ahead of the clock', 'parent', '2026-09-25T12:00:00.000Z', '2026-09-25T12:00:00.001Z'],
+  ])(
+    'keeps data-stream revision timestamps monotonic when the parent %s',
+    async (_, id, parentTimestamp, expectedTimestamp) => {
+      useDataStreamDestination();
+      mockCurrentMemory({
+        id,
+        indexName: '.ds-ai-index-ds-support-000001',
+        source: { ...existingDocument, '@timestamp': parentTimestamp },
+        sort: [parentTimestamp],
+      });
 
-    await service.reviseMemory({ ...request, id: 'memory-1' });
+      await reviseMemory();
 
-    expect(index).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'memory-revision-revision-id',
-        document: expect.objectContaining({
-          '@timestamp': '2026-09-24T12:00:00.001Z',
-          updated_at: '2026-09-24T12:00:00.000Z',
-        }),
-      })
-    );
-  });
-
-  it('keeps data-stream revision timestamps monotonic when the parent clock is ahead', async () => {
-    aiIndexService.get.mockResolvedValue({
-      ...indexAiIndex,
-      dest: { type: 'data_stream', value: 'ai-index-ds-support' },
-    });
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'parent',
-            _index: '.ds-ai-index-ds-support-000001',
-            _source: {
-              ...existingDocument,
-              '@timestamp': '2026-09-25T12:00:00.000Z',
-            },
-            sort: ['2026-09-25T12:00:00.000Z'],
-          },
-        ],
-      },
-    });
-
-    await service.reviseMemory({ ...request, id: 'memory-1' });
-
-    expect(index).toHaveBeenCalledWith(
-      expect.objectContaining({
-        document: expect.objectContaining({
-          '@timestamp': '2026-09-25T12:00:00.001Z',
-          updated_at: '2026-09-24T12:00:00.000Z',
-        }),
-      })
-    );
-  });
+      expect(index.mock.calls[0][0].id).toBe('memory-revision-revision-id');
+      expect(getIndexedDocument()).toMatchObject({
+        '@timestamp': expectedTimestamp,
+        updated_at: '2026-09-24T12:00:00.000Z',
+      });
+    }
+  );
 
   it('rejects a data-stream revision whose parent has an invalid timestamp', async () => {
-    aiIndexService.get.mockResolvedValue({
-      ...indexAiIndex,
-      dest: { type: 'data_stream', value: 'ai-index-ds-support' },
-    });
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'parent',
-            _index: '.ds-ai-index-ds-support-000001',
-            _source: { ...existingDocument, '@timestamp': 'not-a-date' },
-            sort: ['not-a-date'],
-          },
-        ],
-      },
+    useDataStreamDestination();
+    mockCurrentMemory({
+      id: 'parent',
+      indexName: '.ds-ai-index-ds-support-000001',
+      source: { ...existingDocument, '@timestamp': 'not-a-date' },
+      sort: ['not-a-date'],
     });
 
-    await expect(service.reviseMemory({ ...request, id: 'memory-1' })).rejects.toMatchObject({
+    await expect(reviseMemory()).rejects.toMatchObject({
       code: 'invalid_memory_timestamp',
     });
     expect(index).not.toHaveBeenCalled();
@@ -687,7 +560,7 @@ describe('AiIndexMemoryWriteService', () => {
   ])('returns a typed error for %s', async (_, response, code, message) => {
     search.mockResolvedValue(response);
 
-    await expect(service.reviseMemory({ ...request, id: 'memory-1' })).rejects.toMatchObject({
+    await expect(reviseMemory()).rejects.toMatchObject({
       code,
       message,
     });
@@ -705,7 +578,7 @@ describe('AiIndexMemoryWriteService', () => {
         ],
       },
     });
-    await expect(service.reviseMemory({ ...request, id: 'memory-1' })).rejects.toThrow(
+    await expect(reviseMemory()).rejects.toThrow(
       "Memory 'memory-1' has type 'memory.session' and cannot be revised as 'memory.session_fact'."
     );
 
@@ -723,33 +596,19 @@ describe('AiIndexMemoryWriteService', () => {
         ],
       },
     });
-    await expect(service.reviseMemory({ ...request, id: 'memory-1' })).rejects.toThrow(
+    await expect(reviseMemory()).rejects.toThrow(
       "Memory 'memory-1' was deleted and cannot be revised."
     );
   });
 
   it('tombstones an index-backed Memory with provenance and OCC', async () => {
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'physical-memory-id',
-            _index: 'ai-index-idx-support',
-            _seq_no: 7,
-            _primary_term: 2,
-            _source: existingDocument,
-          },
-        ],
-      },
-    });
+    mockCurrentMemory();
     const forgetWriter = {
       uri: 'tool://platform.context_engine.forget',
       metadata: { run_id: 'run-2' },
     };
 
-    await expect(
-      service.forgetMemory({ aiIndexId: 'support', id: 'memory-1', writer: forgetWriter })
-    ).resolves.toEqual({ id: 'memory-1' });
+    await expect(forgetMemory(forgetWriter)).resolves.toEqual({ id: 'memory-1' });
 
     expect(index).toHaveBeenCalledWith({
       index: 'ai-index-idx-support',
@@ -772,31 +631,17 @@ describe('AiIndexMemoryWriteService', () => {
   });
 
   it('appends a tombstone for a data-stream-backed Memory', async () => {
-    aiIndexService.get.mockResolvedValue({
-      ...indexAiIndex,
-      dest: { type: 'data_stream', value: 'ai-index-ds-support' },
-    });
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'parent',
-            _index: '.ds-ai-index-ds-support-000001',
-            _source: existingDocument,
-          },
-        ],
-      },
+    useDataStreamDestination();
+    mockCurrentMemory({
+      id: 'parent',
+      indexName: '.ds-ai-index-ds-support-000001',
     });
     const forgetWriter = {
       uri: 'tool://platform.context_engine.forget',
       metadata: { run_id: 'run-2' },
     };
 
-    await service.forgetMemory({
-      aiIndexId: 'support',
-      id: 'memory-1',
-      writer: forgetWriter,
-    });
+    await forgetMemory(forgetWriter);
 
     expect(index).toHaveBeenCalledWith({
       index: 'ai-index-ds-support',
@@ -819,24 +664,14 @@ describe('AiIndexMemoryWriteService', () => {
   });
 
   it('is idempotent when forgetting an already tombstoned Memory', async () => {
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'physical-memory-id',
-            _index: 'ai-index-idx-support',
-            _source: {
-              ...existingDocument,
-              governance: { lifecycle: { status: 'deleted' } },
-            },
-          },
-        ],
+    mockCurrentMemory({
+      source: {
+        ...existingDocument,
+        governance: { lifecycle: { status: 'deleted' } },
       },
     });
 
-    await expect(
-      service.forgetMemory({ aiIndexId: 'support', id: 'memory-1', writer })
-    ).resolves.toEqual({ id: 'memory-1' });
+    await expect(forgetMemory()).resolves.toEqual({ id: 'memory-1' });
     expect(index).not.toHaveBeenCalled();
   });
 
@@ -844,7 +679,7 @@ describe('AiIndexMemoryWriteService', () => {
     const searchError = new Error('partial search results are not allowed');
     search.mockRejectedValue(searchError);
 
-    await expect(service.reviseMemory({ ...request, id: 'memory-1' })).rejects.toBe(searchError);
+    await expect(reviseMemory()).rejects.toBe(searchError);
     expect(index).not.toHaveBeenCalled();
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -857,19 +692,9 @@ describe('AiIndexMemoryWriteService', () => {
   });
 
   it('uses a typed error for missing index concurrency metadata', async () => {
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'physical-memory-id',
-            _index: 'ai-index-idx-support',
-            _source: existingDocument,
-          },
-        ],
-      },
-    });
+    mockCurrentMemory({ includeConcurrency: false });
 
-    await expect(service.reviseMemory({ ...request, id: 'memory-1' })).rejects.toEqual(
+    await expect(reviseMemory()).rejects.toEqual(
       new MemoryWriteError(
         'missing_concurrency_metadata',
         "Memory 'memory-1' is missing concurrency metadata."
