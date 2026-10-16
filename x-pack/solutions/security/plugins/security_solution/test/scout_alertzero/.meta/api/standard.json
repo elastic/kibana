@@ -1,5 +1,5 @@
 {
-  "sha1": "6e7d3fe2d6ba1dff6fa38ce96b374689f6f33ee7",
+  "sha1": "6cf66a40bd9261292a233eb183ed8b378d2562b9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -58,6 +58,34 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
         "line": 86,
         "column": 74
+      }
+    },
+    {
+      "id": "c7af268757bd0dd-b64a3774585f9ee",
+      "title": "AlertZero e2e - rule coverage completes a coverage sweep and reports its counts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_coverage.spec.ts",
+        "line": 26,
+        "column": 17
+      }
+    },
+    {
+      "id": "c7af268757bd0dd-3f040dddb1a4206",
+      "title": "AlertZero e2e - rule coverage treats an absent AI index as empty, not as an error (security-team#19988, elastic/kibana#296929)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_coverage.spec.ts",
+        "line": 42,
+        "column": 5
       }
     },
     {
