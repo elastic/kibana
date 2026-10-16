@@ -151,6 +151,32 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
     expect(renderResult.getByTestId('blocklists-fleetCard')).toBeInTheDocument();
   });
 
+  it('should show no privileges when endpoint exceptions is the only artifact privilege and the feature flag is disabled', () => {
+    mockedTestContext.setExperimentalFlag({
+      endpointExceptionsMovedUnderManagement: false,
+      customYaraSignaturesEnabled: true,
+    });
+    useUserPrivilegesMock.mockReturnValue({
+      ...getUserPrivilegesMockDefaultValue(),
+      endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+        canReadBlocklist: false,
+        canReadEventFilters: false,
+        canReadHostIsolationExceptions: false,
+        canDeleteHostIsolationExceptions: false,
+        canReadTrustedApplications: false,
+        canReadEndpointExceptions: true,
+        canReadTrustedDevices: false,
+        canReadCustomYaraSignatures: false,
+      }),
+    });
+
+    render();
+
+    expect(renderResult.queryByTestId('fleetEndpointPackageCustomContent')).not.toBeInTheDocument();
+    expect(renderResult.queryByTestId('endpointExceptions-fleetCard')).not.toBeInTheDocument();
+    expect(renderResult.queryByTestId('noPrivilegesPage')).toBeTruthy();
+  });
+
   it('should hide yara signatures card when feature flag is disabled', () => {
     mockedTestContext.setExperimentalFlag({
       customYaraSignaturesEnabled: false,

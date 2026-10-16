@@ -24,6 +24,9 @@ export const useCanAccessSomeArtifacts = (): boolean => {
     canReadCustomYaraSignatures,
   } = useUserPrivileges().endpointPrivileges;
   const trustedDevicesEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
+  const endpointExceptionsMovedUnderManagement = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
   const customYaraSignaturesEnabled = useIsExperimentalFeatureEnabled(
     'customYaraSignaturesEnabled'
   );
@@ -33,7 +36,7 @@ export const useCanAccessSomeArtifacts = (): boolean => {
       canReadBlocklist ||
       canReadEventFilters ||
       canReadTrustedApplications ||
-      canReadEndpointExceptions ||
+      (endpointExceptionsMovedUnderManagement && canReadEndpointExceptions) ||
       canReadHostIsolationExceptions ||
       (trustedDevicesEnabled && canReadTrustedDevices) ||
       (customYaraSignaturesEnabled && canReadCustomYaraSignatures)
@@ -45,6 +48,7 @@ export const useCanAccessSomeArtifacts = (): boolean => {
     canReadEndpointExceptions,
     canReadHostIsolationExceptions,
     trustedDevicesEnabled,
+    endpointExceptionsMovedUnderManagement,
     canReadTrustedDevices,
     customYaraSignaturesEnabled,
     canReadCustomYaraSignatures,
