@@ -307,5 +307,4 @@ describe('RuleLibraryList', () => {
     const createAction = await screen.findByTestId('ruleLibraryCreateAction');
     expect(createAction).toHaveAttribute('aria-disabled', 'true');
   });
-
 });

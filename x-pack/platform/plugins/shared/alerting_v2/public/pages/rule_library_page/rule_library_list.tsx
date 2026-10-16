@@ -6,12 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiBadge,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiBadge, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   ContentList,
   ContentListFooter,
