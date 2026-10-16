@@ -334,9 +334,45 @@ const KIND_CATEGORY_ICON: Record<EntityKind, string> = {
   namespace: 'logoKubernetes',
   service: 'apmApp',
   database: 'database',
-  cloud: 'storage',
+  cloud: 'cloud',
   middleware: 'logstashIf',
   llm: 'sparkles',
+};
+
+/**
+ * Resolve the flyout header icon from the entity type string. Cloud entities
+ * map to their functional category (Functions → `function`, Storage →
+ * `folderOpen`, Networking → `globe`) instead of the generic cloud icon.
+ */
+const resolveEntityIcon = (kind: EntityKind | undefined, entityType?: string): string => {
+  // Cloud sub-categories override the generic cloud icon.
+  if (kind === 'cloud' && entityType) {
+    const t = entityType.toLowerCase();
+    if (t.includes('lambda') || t.includes('function') || t.includes('cloud function'))
+      return 'function';
+    if (t.includes('s3') || t.includes('blob') || t.includes('storage') || t.includes('bucket'))
+      return 'folderOpen';
+    if (
+      t.includes('vpc') || t.includes('load balancer') || t.includes('elb') ||
+      t.includes('nat') || t.includes('network') || t.includes('cdn') || t.includes('cloudfront')
+    )
+      return 'globe';
+  }
+  if (kind) return KIND_CATEGORY_ICON[kind] ?? 'package';
+
+  // No EntityKind resolved — try matching the entity type string against
+  // known networking patterns so they get the category icon (`globe`)
+  // instead of the generic fallback.
+  if (entityType) {
+    const t = entityType.toLowerCase();
+    if (
+      t.includes('nginx') || t.includes('haproxy') || t.includes('envoy') ||
+      t.includes('proxy') || t.includes('load balancer') || t.includes('gateway') ||
+      t.includes('traefik') || t.includes('caddy')
+    )
+      return 'globe';
+  }
+  return 'package';
 };
 
 const DASHBOARD_PREVIEW_KEY = 'entityCentricLab_dashboardPreviewId';
@@ -1208,11 +1244,9 @@ export const EntityFlyout = ({
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" css={css`margin-left: -24px; margin-right: -24px; width: auto;`} />
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          {kind ? (
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={KIND_CATEGORY_ICON[kind] ?? 'package'} size="l" />
-            </EuiFlexItem>
-          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={resolveEntityIcon(kind, entityType)} size="l" />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle size="s">
               <h4 id={titleId} data-test-subj="entityCentricLabFlyoutTitle">

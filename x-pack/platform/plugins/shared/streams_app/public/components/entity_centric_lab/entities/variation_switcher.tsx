@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.05';
+export const PROTOTYPE_VERSION = '1.06';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-10-16',
+    summary:
+      'Flyout title icons match category icons for all entity types.',
+    details:
+      'Flyout header icon now resolves cloud sub-categories (Lambda → function, S3 → folderOpen, VPC/CDN → globe), networking types (Nginx, HAProxy, Envoy → globe), and Other (→ package). Icon always renders even when no EntityKind is resolved. Bump to v1.06.',
+  },
   {
     date: '2026-10-16',
     summary:
