@@ -40,6 +40,9 @@ const DashboardChangeHistoryBadge = ({
     </EuiBadge>
   ) : null;
 
+  const isDeleted = item.action === 'dashboard_delete';
+  if (!item.isCurrent && !isDeleted && !versionBadge) return null;
+
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
       {item.isCurrent && (
@@ -51,7 +54,7 @@ const DashboardChangeHistoryBadge = ({
           </EuiBadge>
         </EuiFlexItem>
       )}
-      {item.action === 'dashboard_delete' && (
+      {isDeleted && (
         <EuiFlexItem grow={false}>
           <EuiBadge color="danger">
             {i18n.translate('dashboard.changeHistory.deletedBadge', {
