@@ -9,6 +9,7 @@ import type { Observable, Subscription } from 'rxjs';
 import { Subject, withLatestFrom, BehaviorSubject, combineLatest } from 'rxjs';
 import {
   distinctUntilChanged,
+  filter,
   startWith,
   pairwise,
   map as rxMap,
@@ -41,13 +42,16 @@ import type {
   TaskManagerStat,
   TaskManagerMetric,
   TaskManagerBackpressure,
+  TaskEventLoopBlock,
 } from './task_events';
 import {
   asTaskRunRequestEvent,
   asTaskPollingCycleEvent,
   asTaskManagerStatEvent,
   asTaskManagerBackpressureEvent,
+  asTaskEventLoopBlockEvent,
 } from './task_events';
+import type { EventLoopBlockReport, EventLoopRunObserver } from './event_loop_watchdog';
 import type { TimedFillPoolResult } from './lib/fill_pool';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
 import type { Middleware } from './lib/middleware';
@@ -103,6 +107,10 @@ export interface TaskPollingLifecycleOpts {
   enrichFakeRequest?: FakeRequestEnricher;
   /** Requests extra claim cycles; ignored during Elasticsearch backpressure and its recovery. */
   claimNudgeService?: TaskManagerClaimNudgeService;
+  /** Event loop block reports from the watchdog, re-emitted as lifecycle events. */
+  eventLoopBlocks$?: Observable<EventLoopBlockReport>;
+  /** Per-run event loop block attribution, handed to each task runner. */
+  eventLoopWatchdog?: EventLoopRunObserver;
 }
 
 export type TaskLifecycleEvent =
@@ -113,7 +121,8 @@ export type TaskLifecycleEvent =
   | TaskPollingCycle
   | TaskManagerStat
   | TaskManagerMetric
-  | TaskManagerBackpressure;
+  | TaskManagerBackpressure
+  | TaskEventLoopBlock;
 
 /**
  * The public interface into the task manager system.
@@ -133,6 +142,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private readonly executionControlService: TaskExecutionControlService;
   private executionControlSubscription?: Subscription;
   private backpressureSubscription?: Subscription;
+  private eventLoopBlockSubscription?: Subscription;
+  private eventLoopWatchdog?: EventLoopRunObserver;
 
   public pool: TaskPool;
 
@@ -175,8 +186,11 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     eventLogger,
     enrichFakeRequest,
     claimNudgeService,
+    eventLoopBlocks$,
+    eventLoopWatchdog,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
+    this.eventLoopWatchdog = eventLoopWatchdog;
     this.middleware = middleware;
     this.definitions = definitions;
     this.store = taskStore;
@@ -288,6 +302,13 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       definitions: this.definitions,
     });
     this.pool.load.subscribe(emitEvent);
+    this.eventLoopBlockSubscription = eventLoopBlocks$
+      ?.pipe(
+        // The same gate as the log line: unattributed, rate limited blocks stay out of the stream.
+        filter((report) => report.flag.flagged || report.reportable),
+        rxMap((report) => asTaskEventLoopBlockEvent(asOk(report)))
+      )
+      .subscribe(emitEvent);
 
     this.taskClaiming = new TaskClaiming({
       taskStore,
@@ -413,6 +434,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.stopped = true;
     this.executionControlSubscription?.unsubscribe();
     this.backpressureSubscription?.unsubscribe();
+    this.eventLoopBlockSubscription?.unsubscribe();
     this.poller.stop();
   }
 
@@ -441,6 +463,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       apiKeyStrategy: this.apiKeyStrategy,
       eventLogger: this.eventLogger,
       enrichFakeRequest: this.enrichFakeRequest,
+      eventLoopWatchdog: this.eventLoopWatchdog,
     });
   };
 
