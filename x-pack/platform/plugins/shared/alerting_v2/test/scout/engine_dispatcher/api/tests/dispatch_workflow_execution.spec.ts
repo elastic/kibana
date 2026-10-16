@@ -37,9 +37,15 @@ const SOURCE_INDEX = 'test-alerting-v2-dispatch-workflow-source';
 const ACTION_POLICY_ID = 'dispatch-workflow-policy';
 const ACTION_POLICY_TRIGGER = 'action_policy';
 
+// Stateful only: actually running the workflow needs the dispatcher to mint a
+// UIAM API key, which requires `xpack.task_manager.grant_uiam_api_keys=true`.
+// The default Scout serverless config does not set it, and this suite has no
+// custom server config to add it, so the serverless run would never schedule
+// an execution. The other dispatcher specs stay deployment-agnostic because
+// they only assert the `fire`/`notified` actions, which are written regardless.
 apiTest.describe(
   'Dispatcher runs the workflow of an action policy',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: tags.stateful.classic },
   () => {
     let workflowId: string;
 
