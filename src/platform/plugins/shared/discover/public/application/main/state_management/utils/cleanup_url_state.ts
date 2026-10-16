@@ -165,11 +165,9 @@ export const clearOutdatedTabUrlState = async ({
   urlStateStorage: IKbnUrlStateStorage;
   profileStateRegistry: ProfileStateRegistry;
 }): Promise<void> => {
-  const globalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
   const isDraftUrl = doesUrlMatchTab({
     tab,
     appState: urlStateStorage.get<DiscoverAppState>(APP_STATE_URL_KEY),
-    globalState,
     profileState: urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY),
     profileStateRegistry,
   });
@@ -183,6 +181,8 @@ export const clearOutdatedTabUrlState = async ({
     urlStateStorage.set(PROFILE_STATE_URL_KEY, undefined, { replace: true }),
   ];
 
+  const globalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
+
   if (timeRestore && globalState) {
     updates.push(
       urlStateStorage.set(GLOBAL_STATE_URL_KEY, omit(globalState, 'time', 'refreshInterval'), {
@@ -195,21 +195,18 @@ export const clearOutdatedTabUrlState = async ({
 };
 
 // Checks whether the URL state matches the stored draft; it cannot tell a reload from an identical shared link.
+// The global state is not compared because other apps update it in the tracked Discover URL.
 const doesUrlMatchTab = ({
   tab,
   appState,
-  globalState,
   profileState,
   profileStateRegistry,
 }: {
   tab: TabState;
   appState: DiscoverAppState | null;
-  globalState: GlobalQueryStateFromUrl | null;
   profileState: ProfileStateMap | null;
   profileStateRegistry: ProfileStateRegistry;
 }): boolean => {
-  const { timeRange: time, refreshInterval, filters } = tab.globalState;
-  const tabGlobalState = { time, refreshInterval, filters };
   const profileUrlState = (profileStateMap: ProfileStateMap | undefined) =>
     profileStateRegistry.pickStateByType({
       profileStateMap,
@@ -220,9 +217,6 @@ const doesUrlMatchTab = ({
   // A URL part that is absent carries nothing of its own, so it matches the draft.
   const isSameAppState =
     !appState || isEqualState(omitBy(appState, isUndefined), omitBy(tab.appState, isUndefined));
-  const isSameGlobalState =
-    !globalState ||
-    isEqualState(omitBy(globalState, isUndefined), omitBy(tabGlobalState, isUndefined));
   // Only active profiles are written to the URL; inactive profiles can remain in the draft.
   const activeProfileIds = Object.keys(profileState ?? {});
   const isSameProfileState = isEqual(
@@ -230,5 +224,5 @@ const doesUrlMatchTab = ({
     profileUrlState(pick(tab.profileState, activeProfileIds))
   );
 
-  return isSameAppState && isSameGlobalState && isSameProfileState;
+  return isSameAppState && isSameProfileState;
 };

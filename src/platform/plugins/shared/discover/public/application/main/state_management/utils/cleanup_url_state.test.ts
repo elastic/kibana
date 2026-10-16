@@ -238,4 +238,24 @@ describe('clearOutdatedTabUrlState', () => {
       expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual(expectedGlobalState);
     }
   );
+
+  it('clears the draft URL when another app changed its global time', async () => {
+    const otherAppTime = { from: 'now-1y', to: 'now' };
+    const urlStateStorage = createKbnUrlStateStorage({
+      history: createMemoryHistory(),
+      useHash: false,
+    });
+    await urlStateStorage.set(APP_STATE_URL_KEY, tab.appState);
+    await urlStateStorage.set(GLOBAL_STATE_URL_KEY, { time: otherAppTime });
+
+    await clearOutdatedTabUrlState({
+      tab,
+      timeRestore: false,
+      urlStateStorage,
+      profileStateRegistry: createProfileStateRegistry(),
+    });
+
+    expect(urlStateStorage.get(APP_STATE_URL_KEY)).toBeNull();
+    expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({ time: otherAppTime });
+  });
 });

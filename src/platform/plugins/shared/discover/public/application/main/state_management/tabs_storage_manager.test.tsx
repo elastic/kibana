@@ -741,6 +741,7 @@ describe('TabsStorageManager', () => {
     storage.set(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,
       spaceId: mockSpaceId,
+      discoverSessionId: 'session',
       discoverSessionVersion: 'saved-elsewhere-version',
       openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
@@ -765,12 +766,14 @@ describe('TabsStorageManager', () => {
     };
 
     tabsStorageManager.updateTabStateLocally(mockTab1.id, updatedTabState, {
+      id: 'session',
       version: 'current-version',
     });
 
     expect(storage.set).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,
       spaceId: mockSpaceId,
+      discoverSessionId: 'session',
       discoverSessionVersion: 'current-version',
       openTabs: [
         {
@@ -781,6 +784,36 @@ describe('TabsStorageManager', () => {
       ],
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
     });
+  });
+
+  it('should not update tabs stored for another session', () => {
+    const { tabsStorageManager, services } = create();
+    const storage = services.storage;
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      discoverSessionId: 'other-session',
+      discoverSessionVersion: 'other-version',
+      openTabs: [toStoredTab(mockTab1)],
+      closedTabs: [],
+    });
+
+    jest.spyOn(storage, 'set');
+
+    tabsStorageManager.updateTabStateLocally(
+      mockTab1.id,
+      {
+        internalState: mockTab1.initialInternalState,
+        attributes: mockTab1.attributes,
+        appState: { columns: ['changed'] },
+        globalState: mockTab1.globalState,
+        profileState: undefined,
+      },
+      { id: 'session', version: 'current-version' }
+    );
+
+    expect(storage.set).not.toHaveBeenCalled();
   });
 
   it('should update persistent and url profile state in local storage', () => {
