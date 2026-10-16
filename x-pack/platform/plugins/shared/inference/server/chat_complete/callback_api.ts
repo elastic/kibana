@@ -50,7 +50,6 @@ import {
 import type { InferenceCallbackManager } from '../inference_client/callback_manager';
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
-import { shouldStreamInferenceEndpoint } from '../util/should_stream_inference_endpoint';
 import { prepareAnonymization } from './prepare_anonymization';
 import type { TokenUsageLogger } from '../token_usage';
 import { handleTokenUsageLogging, buildTokenUsageContext } from '../token_usage';
@@ -71,7 +70,8 @@ interface CreateChatCompleteApiOptions {
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
   resolveConnectorId?: (connectorId: string) => Promise<string>;
-  isInferenceStreamingEnabled?: () => Promise<boolean>;
+  /** Decides whether an inference endpoint of the given service is called with `_stream`. */
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -130,7 +130,7 @@ export function createChatCompleteCallbackApi({
   isDefaultConnectorOnly,
   getDefaultConnectorId,
   resolveConnectorId,
-  isInferenceStreamingEnabled,
+  shouldStreamInferenceEndpoint,
 }: CreateChatCompleteApiOptions) {
   return (
     {
@@ -162,7 +162,7 @@ export function createChatCompleteCallbackApi({
         isDefaultConnectorOnly,
         getDefaultConnectorId,
         resolveConnectorId,
-        isInferenceStreamingEnabled,
+        shouldStreamInferenceEndpoint,
       })
     ).pipe(
       retryHoldingTokenCountEvents({
@@ -340,7 +340,7 @@ function resolveAndCreatePipeline({
   isDefaultConnectorOnly,
   getDefaultConnectorId,
   resolveConnectorId,
-  isInferenceStreamingEnabled,
+  shouldStreamInferenceEndpoint,
 }: {
   connectorId: string;
   endpointIdCache: InferenceEndpointIdCache;
@@ -360,7 +360,7 @@ function resolveAndCreatePipeline({
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
   resolveConnectorId?: (connectorId: string) => Promise<string>;
-  isInferenceStreamingEnabled?: () => Promise<boolean>;
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
 }) {
   return from(
     throwIfConnectorNotAllowed({
@@ -379,8 +379,7 @@ function resolveAndCreatePipeline({
             resolveInferenceEndpointContext({
               inferenceId: connectorId,
               esClient,
-              logger,
-              isInferenceStreamingEnabled,
+              shouldStreamInferenceEndpoint,
             })
         : async () => {
             const executor = await getInferenceExecutor({
@@ -397,8 +396,7 @@ function resolveAndCreatePipeline({
               return resolveInferenceEndpointContext({
                 inferenceId: connector.connectorId,
                 esClient,
-                logger,
-                isInferenceStreamingEnabled,
+                shouldStreamInferenceEndpoint,
               });
             }
 
@@ -470,21 +468,16 @@ function resolveAndCreatePipeline({
 async function resolveInferenceEndpointContext({
   inferenceId,
   esClient,
-  logger,
-  isInferenceStreamingEnabled,
+  shouldStreamInferenceEndpoint,
 }: {
   inferenceId: string;
   esClient: ElasticsearchClient;
-  logger: Logger;
-  isInferenceStreamingEnabled?: () => Promise<boolean>;
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
 }): Promise<ResolvedPipelineContext> {
   const endpointMeta = await resolveInferenceEndpoint({ inferenceId, esClient });
-  const stream = await shouldStreamInferenceEndpoint({
-    service: endpointMeta.provider,
-    esClient,
-    isStreamingEnabled: isInferenceStreamingEnabled,
-    logger,
-  });
+  const stream = shouldStreamInferenceEndpoint
+    ? await shouldStreamInferenceEndpoint(endpointMeta.provider)
+    : true;
   const executor = createInferenceEndpointExecutor({ inferenceId, esClient, stream });
 
   return {

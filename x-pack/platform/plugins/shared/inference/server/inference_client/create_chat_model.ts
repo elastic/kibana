@@ -39,7 +39,7 @@ export interface CreateChatModelOptions {
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
   resolveConnectorId?: (connectorId: string) => Promise<string>;
-  isInferenceStreamingEnabled?: () => Promise<boolean>;
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
 }
 
 export const createChatModel = async ({
@@ -60,7 +60,7 @@ export const createChatModel = async ({
   isDefaultConnectorOnly,
   getDefaultConnectorId,
   resolveConnectorId,
-  isInferenceStreamingEnabled,
+  shouldStreamInferenceEndpoint,
 }: CreateChatModelOptions): Promise<InferenceChatModel> => {
   const client = createClient({
     actions,
@@ -78,7 +78,7 @@ export const createChatModel = async ({
     isDefaultConnectorOnly,
     getDefaultConnectorId,
     resolveConnectorId,
-    isInferenceStreamingEnabled,
+    shouldStreamInferenceEndpoint,
   });
   const connector = await getConnectorById({ connectorId, actions, request, esClient, logger });
   return new InferenceChatModel({

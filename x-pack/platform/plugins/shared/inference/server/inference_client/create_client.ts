@@ -44,7 +44,7 @@ interface CreateClientOptions {
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
   resolveConnectorId?: (connectorId: string) => Promise<string>;
-  isInferenceStreamingEnabled?: () => Promise<boolean>;
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
 }
 
 interface BoundCreateClientOptions extends CreateClientOptions {
@@ -73,7 +73,7 @@ export function createClient(
     isDefaultConnectorOnly,
     getDefaultConnectorId,
     resolveConnectorId,
-    isInferenceStreamingEnabled,
+    shouldStreamInferenceEndpoint,
   } = options;
   const client = createInferenceClient({
     request,
@@ -92,7 +92,7 @@ export function createClient(
     isDefaultConnectorOnly,
     getDefaultConnectorId,
     resolveConnectorId,
-    isInferenceStreamingEnabled,
+    shouldStreamInferenceEndpoint,
   });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);

@@ -1076,7 +1076,7 @@ describe('createChatCompleteApi', () => {
 
     describe('streaming preference', () => {
       const createChatCompleteWithStreamingPreference = (
-        isInferenceStreamingEnabled: jest.Mock
+        shouldStreamInferenceEndpoint: jest.Mock
       ) => {
         const callbackApi = createChatCompleteCallbackApi({
           request,
@@ -1087,35 +1087,27 @@ describe('createChatCompleteApi', () => {
           regexWorker,
           esClient: mockEsClient,
           endpointIdCache,
-          isInferenceStreamingEnabled,
+          shouldStreamInferenceEndpoint,
         });
         return createChatCompleteApi({ callbackApi });
       };
 
-      beforeEach(() => {
-        mockEsClient.transport.request.mockReset();
-        mockEsClient.transport.request.mockResolvedValue([
-          { service: 'openai', features: { non_streaming_chat: { supported: true } } },
-        ]);
-      });
-
-      it('streams without consulting the services API when no setting reader is provided', async () => {
+      it('streams when no resolver is provided', async () => {
         await chatComplete({
           connectorId: 'my-endpoint',
           messages: [{ role: MessageRole.User, content: 'question' }],
           maxRetries: 0,
         });
 
-        expect(mockEsClient.transport.request).not.toHaveBeenCalled();
         expect(createInferenceEndpointExecutorMock).toHaveBeenCalledWith(
           expect.objectContaining({ stream: true })
         );
       });
 
-      it('does not stream when the setting is off and the endpoint service supports it', async () => {
-        const isInferenceStreamingEnabled = jest.fn().mockResolvedValue(false);
+      it('does not stream when the resolver says so for the endpoint service', async () => {
+        const shouldStreamInferenceEndpoint = jest.fn().mockResolvedValue(false);
         const chatCompleteWithPreference = createChatCompleteWithStreamingPreference(
-          isInferenceStreamingEnabled
+          shouldStreamInferenceEndpoint
         );
 
         await chatCompleteWithPreference({
@@ -1124,11 +1116,8 @@ describe('createChatCompleteApi', () => {
           maxRetries: 0,
         });
 
-        expect(isInferenceStreamingEnabled).toHaveBeenCalledTimes(1);
-        expect(mockEsClient.transport.request).toHaveBeenCalledWith({
-          method: 'GET',
-          path: '/_inference/_services',
-        });
+        expect(shouldStreamInferenceEndpoint).toHaveBeenCalledTimes(1);
+        expect(shouldStreamInferenceEndpoint).toHaveBeenCalledWith('openai');
         expect(createInferenceEndpointExecutorMock).toHaveBeenCalledWith({
           inferenceId: 'my-endpoint',
           esClient: mockEsClient,

@@ -44,6 +44,7 @@ import { getConnectorById, getConnectorByIdWithoutClientRequest } from './util/g
 import { getInferenceEndpoints } from './util/get_inference_endpoints';
 import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
 import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
+import { shouldStreamInferenceEndpoint } from './util/should_stream_inference_endpoint';
 import { TokenUsageLogger } from './token_usage';
 import { installTokenUsageDashboard } from './dashboard';
 
@@ -301,12 +302,20 @@ export class InferencePlugin
       };
     };
 
-    // the setting is read per request so that it reflects the request's space
-    const isInferenceStreamingEnabledForRequest = (request: KibanaRequest) => async () => {
-      const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
-      const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
-      return await uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_INFERENCE_STREAMING);
-    };
+    // the setting is read per request so that it reflects the request's space, while the
+    // service capability lookup (GET _inference/_services) uses the internal ES client because
+    // the user calling chat completion is not expected to hold inference management privileges
+    const createInferenceStreamingResolver = (request: KibanaRequest) => (service?: string) =>
+      shouldStreamInferenceEndpoint({
+        service,
+        esClient: core.elasticsearch.client.asInternalUser,
+        isStreamingEnabled: async () => {
+          const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
+          const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
+          return await uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_INFERENCE_STREAMING);
+        },
+        logger: this.logger,
+      });
 
     return {
       getClient: <T extends InferenceClientCreateOptions>(options: T) => {
@@ -322,7 +331,7 @@ export class InferencePlugin
           isDefaultConnectorOnly: createDefaultConnectorOnlyCheck(options.request),
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
           resolveConnectorId: createConnectorIdResolver(options.request),
-          isInferenceStreamingEnabled: isInferenceStreamingEnabledForRequest(options.request),
+          shouldStreamInferenceEndpoint: createInferenceStreamingResolver(options.request),
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 
@@ -343,7 +352,7 @@ export class InferencePlugin
           isDefaultConnectorOnly: createDefaultConnectorOnlyCheck(options.request),
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
           resolveConnectorId: createConnectorIdResolver(options.request),
-          isInferenceStreamingEnabled: isInferenceStreamingEnabledForRequest(options.request),
+          shouldStreamInferenceEndpoint: createInferenceStreamingResolver(options.request),
         });
       },
 
