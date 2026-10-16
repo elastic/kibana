@@ -114,9 +114,10 @@ export const WatchDetailPage: React.FC = () => {
   const hasUnsavedChanges = isDirty || hasInvalidDraft;
 
   // The browser's native prompt covers closing the tab; this also guards in-app navigation, which
-  // includes switching Watch in the sidebar. Not while a save is in flight.
+  // includes switching Watch in the sidebar. It stays on during Save: Workers save one by one and
+  // a draft clears only once its request succeeds.
   useUnsavedChangesPrompt({
-    hasUnsavedChanges: hasUnsavedChanges && !isSaving,
+    hasUnsavedChanges,
     http,
     history: scopedHistory,
     navigateToUrl,
@@ -214,8 +215,11 @@ export const WatchDetailPage: React.FC = () => {
 
   const hiddenChangedWorkers = useMemo(() => {
     const changedIds = new Set([...dirtyWorkers.map(({ id }) => id), ...invalidTriggerWorkerIds]);
-    return members.filter(({ id }) => changedIds.has(id) && collapsedWorkerIds.has(id));
-  }, [dirtyWorkers, invalidTriggerWorkerIds, members, collapsedWorkerIds]);
+    // A failed reload keeps the drafts but replaces every Worker panel with the error.
+    return members.filter(
+      ({ id }) => changedIds.has(id) && (Boolean(workersError) || collapsedWorkerIds.has(id))
+    );
+  }, [dirtyWorkers, invalidTriggerWorkerIds, members, collapsedWorkerIds, workersError]);
 
   // Changes inside a collapsed Worker are out of sight, so name them before throwing them away.
   const onDiscardClick = useCallback(() => {

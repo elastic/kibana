@@ -42,21 +42,21 @@ export const useMinimumConfidenceScoreDraft = ({
 }: UseMinimumConfidenceScoreDraftParams): UseMinimumConfidenceScoreDraftResult => {
   const [draft, setDraft] = useState<number | ''>(() => toDisplay(current));
   const draftRef = useRef<number | ''>(toDisplay(current));
-  const lastPersistedRef = useRef(toDecimal(toDisplay(current)));
-  const editStartRef = useRef(lastPersistedRef.current);
+  const lastEmittedRef = useRef(toDecimal(toDisplay(current)));
+  const editStartRef = useRef(lastEmittedRef.current);
   const onChangeRef = useRef(onChange);
 
   onChangeRef.current = onChange;
 
   useEffect(() => {
-    lastPersistedRef.current = toDecimal(toDisplay(current));
+    lastEmittedRef.current = toDecimal(toDisplay(current));
     const next = toDisplay(current);
     draftRef.current = next;
     setDraft(next);
   }, [current]);
 
   const onFocus = useCallback(() => {
-    editStartRef.current = lastPersistedRef.current;
+    editStartRef.current = lastEmittedRef.current;
   }, []);
 
   const onBlur = useCallback(() => {
@@ -66,18 +66,11 @@ export const useMinimumConfidenceScoreDraft = ({
       const restored = editStartRef.current;
       draftRef.current = toDisplay(restored);
       setDraft(toDisplay(restored));
-      if (restored !== lastPersistedRef.current) {
-        lastPersistedRef.current = restored;
+      if (restored !== lastEmittedRef.current) {
+        lastEmittedRef.current = restored;
         onChangeRef.current(restored);
       }
-      return;
     }
-    const decimal = toDecimal(draftRef.current);
-    if (decimal === lastPersistedRef.current) {
-      return;
-    }
-    lastPersistedRef.current = decimal;
-    onChangeRef.current(decimal);
   }, []);
 
   const onValueChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,8 +91,8 @@ export const useMinimumConfidenceScoreDraft = ({
     setDraft(raw);
     // Publish valid values right away so the page's unsaved-changes state stays current.
     const decimal = toDecimal(raw);
-    if (decimal !== lastPersistedRef.current) {
-      lastPersistedRef.current = decimal;
+    if (decimal !== lastEmittedRef.current) {
+      lastEmittedRef.current = decimal;
       onChangeRef.current(decimal);
     }
   }, []);

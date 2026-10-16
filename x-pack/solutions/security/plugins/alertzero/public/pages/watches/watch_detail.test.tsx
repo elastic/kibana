@@ -780,7 +780,7 @@ describe('WatchDetailPage', () => {
     expect(screen.queryByText(settingsI18n.WORKER_SETTINGS_UNAVAILABLE)).not.toBeInTheDocument();
   });
 
-  it('blocks Save while the Worker reload has failed and allows the retry with the original revision', async () => {
+  it('blocks Save while the Worker reload has failed, asks before Discard, and allows the retry with the original revision', async () => {
     const installed = detectionWorkers.map((worker) => ({ ...worker, settingsRevision: 1 }));
     const workersQuery = (error: Error | null) =>
       ({ data: { workers: installed }, isLoading: false, error, refetch: jest.fn() } as never);
@@ -817,6 +817,16 @@ describe('WatchDetailPage', () => {
     expect(screen.getByTestId('alertZeroWatchSettingsDiscard')).toBeEnabled();
     fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
     expect(mutateAsync).not.toHaveBeenCalled();
+
+    // The error replaces every Worker panel, so the draft is out of sight: Discard asks first.
+    fireEvent.click(screen.getByTestId('alertZeroWatchSettingsDiscard'));
+    const discardModal = screen.getByTestId('alertZeroWatchDiscardConfirmModal');
+    expect(
+      within(discardModal)
+        .getAllByRole('listitem')
+        .map((item) => item.textContent)
+    ).toEqual([workerName(SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID, 'Rule Tuning')]);
+    fireEvent.click(within(discardModal).getByText(settingsI18n.KEEP_EDITING_BUTTON_LABEL));
 
     // Retry succeeded: the draft and its original revision are still there to retry with.
     mockUseWorkers.mockReturnValue(workersQuery(null));
@@ -1611,13 +1621,13 @@ describe('WatchDetailPage', () => {
       expect(lastPromptProps()).toMatchObject({ hasUnsavedChanges: false });
     });
 
-    it('stops prompting while a save is in flight and once it has succeeded', async () => {
+    it('keeps prompting while a save is in flight and stops once it has succeeded', async () => {
       const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
-      let resolveSave: ((value: { worker: Worker }) => void) | undefined;
+      const pendingSave: { resolve?: (value: { worker: Worker }) => void } = {};
       mutateAsync.mockImplementation(
         () =>
           new Promise<{ worker: Worker }>((resolve) => {
-            resolveSave = resolve;
+            pendingSave.resolve = resolve;
           })
       );
 
@@ -1626,10 +1636,10 @@ describe('WatchDetailPage', () => {
 
       fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
       await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
-      expect(lastPromptProps()).toMatchObject({ hasUnsavedChanges: false });
+      expect(lastPromptProps()).toMatchObject({ hasUnsavedChanges: true });
 
       await act(async () => {
-        resolveSave!({ worker: { ...detectionWorkers[0], enabled: true } });
+        pendingSave.resolve?.({ worker: { ...detectionWorkers[0], enabled: true } });
       });
       expect(lastPromptProps()).toMatchObject({ hasUnsavedChanges: false });
       expect(screen.queryByTestId(BADGE)).not.toBeInTheDocument();
