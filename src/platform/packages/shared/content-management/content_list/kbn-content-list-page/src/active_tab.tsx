@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState, type ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 
 const DEFAULT_LOADING_FALLBACK = (
@@ -15,6 +16,8 @@ const DEFAULT_LOADING_FALLBACK = (
     <EuiLoadingSpinner />
   </EuiFlexGroup>
 );
+
+type TabLoad = () => Promise<ReactNode>;
 
 export type KibanaContentListPageTab =
   | {
@@ -36,20 +39,8 @@ export type KibanaContentListPageTab =
        * Called after mount each time the tab becomes active; the loading fallback shows
        * until it settles, and a rejection is rethrown to the nearest error boundary.
        */
-      readonly load: () => Promise<ReactNode>;
+      readonly load: TabLoad;
       readonly render?: never;
-    };
-
-type LoadState =
-  | {
-      readonly status: 'resolved';
-      readonly source: () => Promise<ReactNode>;
-      readonly content: ReactNode;
-    }
-  | {
-      readonly status: 'rejected';
-      readonly source: () => Promise<ReactNode>;
-      readonly error: Error;
     };
 
 export interface KibanaContentListPageActiveTabProps {
@@ -61,8 +52,53 @@ export interface KibanaContentListPageActiveTabProps {
   readonly loadingFallback?: ReactNode;
 }
 
+type LoadResult =
+  | {
+      readonly status: 'resolved';
+      readonly source: TabLoad;
+      readonly content: ReactNode;
+    }
+  | {
+      readonly status: 'rejected';
+      readonly source: TabLoad;
+      readonly error: Error;
+    };
+
 const normalizeError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
+
+interface AsyncTabProps {
+  load: TabLoad;
+  loadingFallback: ReactNode;
+}
+
+const AsyncTab = ({ load, loadingFallback }: AsyncTabProps) => {
+  const { loading, value: result } = useAsync(async (): Promise<LoadResult> => {
+    try {
+      return {
+        status: 'resolved',
+        source: load,
+        content: await load(),
+      };
+    } catch (error) {
+      return {
+        status: 'rejected',
+        source: load,
+        error: normalizeError(error),
+      };
+    }
+  }, [load]);
+
+  if (loading || !result || result.source !== load) {
+    return loadingFallback;
+  }
+
+  if (result.status === 'rejected') {
+    throw result.error;
+  }
+
+  return result.content;
+};
 
 const ActiveTab = ({
   tabs,
@@ -75,55 +111,11 @@ const ActiveTab = ({
     throw new Error(`No content-list page tab matches the active tab identifier "${activeTabId}".`);
   }
 
-  const { load } = activeTab;
-  const [loadState, setLoadState] = useState<LoadState>();
-
-  useEffect(() => {
-    if (!load) {
-      return;
-    }
-
-    let cancelled = false;
-
-    load().then(
-      (content) => {
-        if (!cancelled) {
-          setLoadState({
-            status: 'resolved',
-            source: load,
-            content,
-          });
-        }
-      },
-      (error) => {
-        if (!cancelled) {
-          setLoadState({
-            status: 'rejected',
-            source: load,
-            error: normalizeError(error),
-          });
-        }
-      }
-    );
-
-    return () => {
-      cancelled = true;
-    };
-  }, [load]);
-
   if (activeTab.render) {
     return activeTab.render();
   }
 
-  if (loadState?.source !== activeTab.load) {
-    return loadingFallback;
-  }
-
-  if (loadState.status === 'rejected') {
-    throw loadState.error;
-  }
-
-  return loadState.content;
+  return <AsyncTab load={activeTab.load} loadingFallback={loadingFallback} />;
 };
 
 /** Resolves and renders the content associated with the active application tab. */
