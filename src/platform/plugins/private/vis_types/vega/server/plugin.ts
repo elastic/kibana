@@ -20,7 +20,11 @@ import type {
   VisTypeVegaPluginSetup,
   VisTypeVegaPluginStart,
 } from './types';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
+import {
+  VEGA_EMBEDDABLE_TYPE,
+  VEGA_STANDALONE_EMBEDDABLE_FLAG,
+  VEGA_VIS_NAME,
+} from '../common/constants';
 import { getVegaEmbeddableSchema } from './embeddable/schema';
 import { getTransforms } from './embeddable/transforms';
 import {
@@ -59,8 +63,7 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
       })
       .catch(() => {});
 
-    // The vega vis type and the standalone panel type are both named 'vega'.
-    visualizations.registerLegacyPanelMigration(VEGA_EMBEDDABLE_TYPE, {
+    visualizations.registerLegacyPanelMigration(VEGA_VIS_NAME, {
       to: VEGA_EMBEDDABLE_TYPE,
       migrate: (args) =>
         this.standaloneEmbeddableEnabled && this.legacyVegaPanelMigrationEnabled

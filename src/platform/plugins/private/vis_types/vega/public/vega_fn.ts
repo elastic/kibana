@@ -16,6 +16,7 @@ import type {
 } from '@kbn/expressions-plugin/public';
 import type { TimeRange, Query } from '@kbn/es-query';
 import type { KibanaContext } from '@kbn/data-plugin/public';
+import { VEGA_VIS_NAME } from '../common/constants';
 import type { VegaVisualizationDependencies } from './plugin';
 import type { VegaInspectorAdapters } from './vega_inspector';
 import type { VegaParser } from './data_model/vega_parser';
@@ -31,7 +32,7 @@ export type VisParams = Required<Arguments>;
 
 export interface RenderValue {
   visData: VegaParser;
-  visType: 'vega';
+  visType: typeof VEGA_VIS_NAME;
   visConfig: VisParams;
 }
 
@@ -80,7 +81,7 @@ export const createVegaFn = (
       as: 'vega_vis',
       value: {
         visData: response,
-        visType: 'vega',
+        visType: VEGA_VIS_NAME,
         visConfig: {
           spec: args.spec,
         },
