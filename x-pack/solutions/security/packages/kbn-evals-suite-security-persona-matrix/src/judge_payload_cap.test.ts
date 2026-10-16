@@ -142,6 +142,78 @@ describe('capJudgePayload', () => {
     expect(report.charsAfter).toBeLessThanOrEqual(3_000);
   });
 
+  it('keeps the payload within the budget when one large result is the only thing to trim', () => {
+    const output = buildOutput([toolStep('only', 'q'.repeat(50_000))]);
+    const { output: capped, report } = capJudgePayload(output, {
+      resultCharCap: 0,
+      payloadCharBudget: 600,
+    });
+
+    expect(report.charsAfter).toBeLessThanOrEqual(600);
+    expect(JSON.stringify(capped).length).toBe(report.charsAfter);
+    expect(report.overBudget).toBe(false);
+    expect(report.trimmed).toEqual([expect.objectContaining({ toolId: 'only', pass: 'budget' })]);
+  });
+
+  it('keeps as much evidence as the budget allows rather than a fixed prefix', () => {
+    const output = buildOutput([toolStep('only', 'q'.repeat(50_000))]);
+    const budget = 5_000;
+    const { report } = capJudgePayload(output, { resultCharCap: 0, payloadCharBudget: budget });
+
+    expect(report.charsAfter).toBeLessThanOrEqual(budget);
+    // One more kept char would have pushed it over: the prefix is maximal, not a fixed 500.
+    expect(report.trimmed[0].keptChars).toBeGreaterThan(500);
+    expect(report.charsAfter).toBeGreaterThan(budget - 5);
+  });
+
+  it('accounts for JSON escaping of the kept prefix', () => {
+    const output = buildOutput([toolStep('quotes', '"'.repeat(20_000))]);
+    const { report } = capJudgePayload(output, { resultCharCap: 0, payloadCharBudget: 2_000 });
+
+    expect(report.charsAfter).toBeLessThanOrEqual(2_000);
+    expect(report.overBudget).toBe(false);
+  });
+
+  it('trims across several large results when the budget forces it', () => {
+    const output = buildOutput([
+      toolStep('a', 'a'.repeat(20_000)),
+      toolStep('b', 'b'.repeat(20_000)),
+      toolStep('c', 'c'.repeat(20_000)),
+    ]);
+    const { report } = capJudgePayload(output, { resultCharCap: 0, payloadCharBudget: 1_500 });
+
+    expect(report.charsAfter).toBeLessThanOrEqual(1_500);
+    expect(report.overBudget).toBe(false);
+  });
+
+  it('flags overBudget when the untouched fields alone exceed the budget', () => {
+    const output = {
+      ...buildOutput([toolStep('a', 'a'.repeat(5_000))]),
+      messages: [{ message: 'm'.repeat(3_000) }],
+    };
+    const { report } = capJudgePayload(output, { resultCharCap: 0, payloadCharBudget: 1_000 });
+
+    expect(report.overBudget).toBe(true);
+    expect(report.charsAfter).toBeGreaterThan(1_000);
+    expect(report.trimmed.length).toBeGreaterThan(0);
+  });
+
+  it('flags overBudget even when there is nothing trimmable', () => {
+    const output = { ...buildOutput([]), messages: [{ message: 'm'.repeat(3_000) }] };
+    const withSteps = { ...output, steps: [{ type: 'reasoning', reasoning: 'r' }] };
+    const { report } = capJudgePayload(withSteps, { resultCharCap: 0, payloadCharBudget: 1_000 });
+
+    expect(report.trimmed).toEqual([]);
+    expect(report.overBudget).toBe(true);
+  });
+
+  it('does not flag overBudget when the budget holds', () => {
+    const output = buildOutput([toolStep('a', 'x'.repeat(5_000))]);
+    expect(
+      capJudgePayload(output, { resultCharCap: 0, payloadCharBudget: 100_000 }).report.overBudget
+    ).toBe(false);
+  });
+
   it('leaves steps without results alone', () => {
     const output = buildOutput([{ type: 'reasoning', reasoning: 'r'.repeat(5_000) }]);
     const { output: capped, report } = capJudgePayload(output, {
