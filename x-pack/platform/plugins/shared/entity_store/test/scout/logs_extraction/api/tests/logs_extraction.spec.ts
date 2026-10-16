@@ -38,6 +38,7 @@ import {
   updateLogExtractionConfig,
 } from '../../../common/fixtures/helpers';
 
+// Every request states `process` so the suite can't inherit the deployment's dual-process flag.
 apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
@@ -98,6 +99,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         body: {
           fromDateISO: '2026-01-20T11:00:00Z',
           toDateISO: '2026-01-20T13:00:00Z',
+          process: 'single',
         },
       }
     );
@@ -130,6 +132,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         body: {
           fromDateISO: '2026-01-20T11:00:00Z',
           toDateISO: '2026-01-20T13:00:00Z',
+          process: 'single',
         },
       }
     );
@@ -170,6 +173,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         body: {
           fromDateISO: '2026-01-20T11:00:00Z',
           toDateISO: '2026-01-20T13:00:00Z',
+          process: 'single',
         },
       }
     );
@@ -202,6 +206,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         body: {
           fromDateISO: '2026-01-20T11:00:00Z',
           toDateISO: '2026-01-20T13:00:00Z',
+          process: 'single',
         },
       }
     );
@@ -241,7 +246,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       internalHeaders,
       'user',
       '2026-02-13T10:59:00Z',
-      '2026-02-13T11:01:00Z'
+      '2026-02-13T11:01:00Z',
+      'single'
     );
     expect(firstExtractionResponse.statusCode).toBe(200);
     expect(firstExtractionResponse.body).toMatchObject({ count: 1 });
@@ -279,7 +285,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       internalHeaders,
       'user',
       '2026-02-13T11:00:00Z',
-      '2026-02-13T11:02:00Z'
+      '2026-02-13T11:02:00Z',
+      'single'
     );
     expect(secondExtractionResponse.statusCode).toBe(200);
     expect(secondExtractionResponse.body).toMatchObject({ count: 1 });
@@ -353,7 +360,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       internalHeaders,
       'user',
       '2026-02-13T11:01:00Z',
-      '2026-02-13T11:03:00Z'
+      '2026-02-13T11:03:00Z',
+      'single'
     );
     expect(thirdExtractionResponse.statusCode).toBe(200);
     expect(thirdExtractionResponse.body).toMatchObject({ count: 1 });
@@ -390,7 +398,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       internalHeaders,
       'user',
       '2026-02-13T11:02:00Z',
-      '2026-02-13T11:04:00Z'
+      '2026-02-13T11:04:00Z',
+      'single'
     );
     expect(fourthExtractionResponse.statusCode).toBe(200);
     expect(fourthExtractionResponse.body).toMatchObject({ count: 1 });
@@ -447,7 +456,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           name: 'IDP NoLatest',
         },
       });
-      const ext1 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      const ext1 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
       expect(ext1.statusCode).toBe(200);
       const hit1 = await searchDocById(esClient, 'user:postagg-idp-nolatest@okta');
       expect(hit1.hits.hits).toHaveLength(1);
@@ -470,7 +479,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           name: 'IDP InLatest',
         },
       });
-      await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:03:00Z',
         event: { kind: 'asset', module: 'okta' },
@@ -479,7 +488,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           name: 'IDP InLatest Updated',
         },
       });
-      const ext2 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      const ext2 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
       expect(ext2.statusCode).toBe(200);
       const hit2 = await searchDocById(esClient, 'user:postagg-idp-inlatest@okta');
       expect(hit2.hits.hits).toHaveLength(1);
@@ -503,7 +512,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           name: 'NoPostAggKeep NoLatest',
         },
       });
-      const ext3 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      const ext3 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
       expect(ext3.statusCode).toBe(200);
       const hit3 = await searchDocById(esClient, 'user:postagg-nopostaggkeep-nolatest@okta');
       expect(hit3.hits.hits).toHaveLength(0);
@@ -518,7 +527,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           name: 'IDP IAM AD NoLatest',
         },
       });
-      const ext4 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      const ext4 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
       expect(ext4.statusCode).toBe(200);
       const hit4 = await searchDocById(
         esClient,
@@ -536,7 +545,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           name: 'IDP AD InLatest',
         },
       });
-      const ext5 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      const ext5 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
       expect(ext5.statusCode).toBe(200);
       const hit5 = await searchDocById(
         esClient,
@@ -571,7 +580,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         internalHeaders,
         'user',
         iamOnlyFrom,
-        iamOnlyTo
+        iamOnlyTo,
+        'single'
       );
       expect(ext6.statusCode).toBe(200);
       const hit6 = await searchDocById(
@@ -661,7 +671,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         event: { kind: 'asset', module: 'okta' },
         user: { id: 'enrich-idp-user', name: 'Enrich IDP' },
       });
-      const ext1 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      const ext1 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
       expect(ext1.statusCode).toBe(200);
       expect(ext1.body).toMatchObject({ count: 1 });
 
@@ -672,7 +682,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         user: { name: 'enrich-local-user' },
         host: { id: 'enrich-host-1', name: 'enrich-ws' },
       });
-      const ext2 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      const ext2 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
       expect(ext2.statusCode).toBe(200);
       expect(ext2.body).toMatchObject({ count: 2 });
 
@@ -696,7 +706,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       });
 
       // 4. Run extraction - should only enrich (update) existing entities, no new creation
-      const ext3 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      const ext3 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to, 'single');
       expect(ext3.statusCode).toBe(200);
       expect(ext3.body).toMatchObject({ count: 2 });
 
@@ -745,7 +755,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         internalHeaders,
         'user',
         '2026-03-18T09:59:00Z',
-        '2026-03-18T10:01:00Z'
+        '2026-03-18T10:01:00Z',
+        'single'
       );
       expect(extractionResponse.statusCode).toBe(200);
       expect(extractionResponse.body).toMatchObject({ count: 1 });
@@ -779,7 +790,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         internalHeaders,
         'user',
         '2026-03-18T10:59:00Z',
-        '2026-03-18T11:01:00Z'
+        '2026-03-18T11:01:00Z',
+        'single'
       );
       expect(extractionResponse.statusCode).toBe(200);
       expect(extractionResponse.body).toMatchObject({ count: 1 });
@@ -845,7 +857,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         {
           headers: internalHeaders,
           responseType: 'json',
-          body: { fromDateISO: from, toDateISO: to },
+          body: { fromDateISO: from, toDateISO: to, process: 'single' },
         }
       );
 
@@ -922,7 +934,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         {
           headers: internalHeaders,
           responseType: 'json',
-          body: { fromDateISO: from, toDateISO: to },
+          body: { fromDateISO: from, toDateISO: to, process: 'single' },
         }
       );
 
@@ -1011,7 +1023,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           {
             headers: internalHeaders,
             responseType: 'json',
-            body: { fromDateISO: from, toDateISO: to },
+            body: { fromDateISO: from, toDateISO: to, process: 'single' },
           }
         );
         expect(extractionResponse.statusCode).toBe(200);
@@ -1119,7 +1131,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         internalHeaders,
         'user',
         from,
-        to
+        to,
+        'single'
       );
       expect(extractionResponse.statusCode).toBe(200);
       expect(extractionResponse.body).toMatchObject({ count: 0 });
@@ -1148,6 +1161,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           body: {
             fromDateISO: '2026-01-20T11:00:00Z',
             toDateISO: '2026-01-20T13:00:00Z',
+            process: 'single',
           },
         }
       );
@@ -1215,7 +1229,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           internalHeaders,
           'host',
           from,
-          to
+          to,
+          'single'
         );
         expect(extractionResponse.statusCode).toBe(200);
         expect(extractionResponse.body).toMatchObject({ success: true, count: TOTAL_DOCS });
@@ -1271,7 +1286,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         internalHeaders,
         'host',
         fromIso,
-        toIso
+        toIso,
+        'single'
       );
       expect(extractionResponse.statusCode).toBe(200);
       expect(extractionResponse.body).toMatchObject({
@@ -1373,7 +1389,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         internalHeaders,
         'user',
         from,
-        to
+        to,
+        'single'
       );
       expect(extractionResponse.statusCode).toBe(200);
       expect(extractionResponse.body).toMatchObject({ success: true, count: 6 });
@@ -1518,7 +1535,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           internalHeaders,
           'host',
           FROM,
-          TO
+          TO,
+          'single'
         );
         expect(extractionResponse.statusCode).toBe(200);
         expect(extractionResponse.body).toMatchObject({ success: true });
