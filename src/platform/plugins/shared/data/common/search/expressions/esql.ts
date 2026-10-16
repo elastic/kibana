@@ -162,6 +162,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             esqlVariables: input?.esqlVariables,
           },
           approximation: input?.isApproximate,
+          projectRouting: input?.projectRouting,
           dropNullColumns: true,
           includeExecutionMetadata: true,
           columnMetadata: true,
@@ -170,7 +171,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           abortSignal,
           sessionId: getSearchSessionId(),
           executionContext: getExecutionContext(),
-          projectRouting: input?.projectRouting,
           inspector: {
             adapter: inspectorAdapters.requests ?? new RequestAdapter(),
             title:

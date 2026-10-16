@@ -36,11 +36,6 @@ export interface IBaseSearchOptions {
   executionContext?: KibanaExecutionContext;
 
   /**
-   * Project routing configuration for cross-project search (CPS).
-   */
-  projectRouting?: ProjectRouting;
-
-  /**
    * Inspector integration options for tracking requests
    */
   inspector?: {
@@ -51,6 +46,16 @@ export interface IBaseSearchOptions {
   };
 }
 
+/**
+ * Params shared by the DSL and ES|QL search methods
+ */
+export interface BaseSearchParams {
+  /**
+   * Project routing configuration for cross-project search (CPS).
+   */
+  projectRouting?: ProjectRouting;
+}
+
 // ============================================================================
 // DSL Search Types
 // ============================================================================
@@ -58,7 +63,7 @@ export interface IBaseSearchOptions {
 /**
  * Parameters for DSL (Elasticsearch Query DSL) search
  */
-export interface IDslSearchParams {
+export interface IDslSearchParams extends BaseSearchParams {
   /**
    * Index pattern to search
    */
@@ -215,7 +220,7 @@ export interface EsqlKibanaQueryContext extends KibanaQueryContext {
 /**
  * Parameters for ES|QL search
  */
-export interface IEsqlSearchParams {
+export interface IEsqlSearchParams extends BaseSearchParams {
   /**
    * ES|QL query string
    */

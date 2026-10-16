@@ -322,6 +322,7 @@ export class SearchMethodsService implements ISearchMethods {
       runtimeMappings,
       highlight,
       kibanaQueryContext: _kibanaQueryContext,
+      projectRouting: _projectRouting,
       trackTotalHits,
       ...rest
     } = params;
@@ -354,6 +355,7 @@ export class SearchMethodsService implements ISearchMethods {
       ...this.mapBaseOptions(options),
       strategy: 'ese' as typeof ENHANCED_ES_SEARCH_STRATEGY,
       indexPattern: typeof params?.index === 'object' ? params.index : undefined,
+      projectRouting: params?.projectRouting,
     };
   }
 
@@ -388,7 +390,10 @@ export class SearchMethodsService implements ISearchMethods {
           (request.params as any).body.search_after = lastHit.sort;
         }
 
-        const nextResponse = await self.executeSearch(request, self.mapDslOptions(options));
+        const nextResponse = await self.executeSearch(
+          request,
+          self.mapDslOptions(options, nextParams)
+        );
 
         return {
           rawResponse: nextResponse.rawResponse,
@@ -482,6 +487,7 @@ export class SearchMethodsService implements ISearchMethods {
     return {
       ...this.mapBaseOptions(options),
       approximation: params.approximation,
+      projectRouting: params.projectRouting,
       strategy,
     };
   }
@@ -559,7 +565,6 @@ export class SearchMethodsService implements ISearchMethods {
       abortSignal: options.abortSignal,
       sessionId: options.sessionId,
       executionContext: options.executionContext,
-      projectRouting: options.projectRouting,
     };
   }
 }

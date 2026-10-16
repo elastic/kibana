@@ -114,10 +114,9 @@ describe('SearchMethodsService', () => {
         abortSignal: abortController.signal,
         sessionId: 'test-session',
         executionContext: { type: 'test' as const, name: 'test' },
-        projectRouting: 'test-project',
       };
 
-      await service.esql({ query: 'FROM logs' }, options);
+      await service.esql({ query: 'FROM logs', projectRouting: 'test-project' }, options);
 
       expect(mockSearch).toHaveBeenCalledWith(
         expect.anything(),
@@ -125,7 +124,7 @@ describe('SearchMethodsService', () => {
           abortSignal: options.abortSignal,
           sessionId: options.sessionId,
           executionContext: options.executionContext,
-          projectRouting: options.projectRouting,
+          projectRouting: 'test-project',
         })
       );
     });
@@ -471,6 +470,16 @@ describe('SearchMethodsService', () => {
         },
         expect.anything()
       );
+    });
+
+    it('maps projectRouting from params to search options and not into the body', async () => {
+      mockSearch.mockReturnValue(createMockResponse({ hits: { hits: [], total: 0 } }));
+
+      await service.dsl({ index: 'logs-*', projectRouting: 'test-project' });
+
+      const [request, searchOptions] = mockSearch.mock.calls[0];
+      expect(searchOptions).toEqual(expect.objectContaining({ projectRouting: 'test-project' }));
+      expect(request.params.body).not.toHaveProperty('projectRouting');
     });
 
     it('accepts data view as index', async () => {
@@ -903,6 +912,28 @@ describe('SearchMethodsService', () => {
           }),
         }),
         expect.anything()
+      );
+    });
+
+    it('nextPage() keeps projectRouting from the params', async () => {
+      const page = (id: string, sort: number) => ({
+        hits: { hits: [{ _id: id, _source: {}, sort: [sort] }], total: { value: 100 } },
+      });
+      mockSearch
+        .mockReturnValueOnce(createMockResponse(page('1', 1000)))
+        .mockReturnValueOnce(createMockResponse(page('2', 2000)));
+
+      const result = await service.dslPaginated({
+        index: 'logs-*',
+        sort: [{ timestamp: 'desc' }],
+        projectRouting: 'test-project',
+      });
+      await result.pagination.nextPage();
+
+      expect(mockSearch).toHaveBeenNthCalledWith(
+        2,
+        expect.anything(),
+        expect.objectContaining({ projectRouting: 'test-project' })
       );
     });
 
