@@ -27,8 +27,11 @@ export class DigitalExperiencePlugin
   public setup(core: CoreSetup, plugins: DigitalExperienceSetupDeps) {
     plugins.observabilityShared.navigation.registerSections(
       from(core.getStartServices()).pipe(
-        map(([coreStart]) =>
-          hasDigitalExperienceAccess(coreStart.application.capabilities)
+        map(([coreStart, pluginsStart]) =>
+          hasDigitalExperienceAccess(
+            coreStart.application.capabilities,
+            (pluginsStart as DigitalExperienceStartDeps).ux
+          )
             ? [
                 {
                   label: DIGITAL_EXPERIENCE_LABEL,
@@ -74,7 +77,7 @@ export class DigitalExperiencePlugin
   }
 
   public start(core: CoreStart, { ux }: DigitalExperienceStartDeps) {
-    const hasAccess = hasDigitalExperienceAccess(core.application.capabilities);
+    const hasAccess = hasDigitalExperienceAccess(core.application.capabilities, ux);
     this.appUpdater$.next(() => ({
       status: hasAccess ? AppStatus.accessible : AppStatus.inaccessible,
     }));

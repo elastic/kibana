@@ -7,9 +7,9 @@
 
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../fixtures';
-import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
+import { DIGITAL_EXPERIENCE_WITH_UX_TAGS } from '../../tags';
 
-test.describe('Digital Experience access', { tag: DIGITAL_EXPERIENCE_TAGS }, () => {
+test.describe('Digital Experience access', { tag: DIGITAL_EXPERIENCE_WITH_UX_TAGS }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole(testData.DIGITAL_EXPERIENCE_READ_ROLE);
   });

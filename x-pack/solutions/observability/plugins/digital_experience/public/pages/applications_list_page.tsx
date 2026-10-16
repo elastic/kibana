@@ -39,7 +39,8 @@ export function ApplicationsListPage() {
   // Bumped by the picker's Refresh button to fetch again with the same range.
   const [refreshCount, refresh] = useReducer((count: number) => count + 1, 0);
   const [applications, setApplications] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // Starts loading so the first render shows the loading table, not the empty prompt.
+  const [isLoading, setIsLoading] = useState(Boolean(ux));
 
   const { rangeFrom: from, rangeTo: to } = timeRange;
 
@@ -51,6 +52,7 @@ export function ApplicationsListPage() {
     const start = dateMath.parse(from)?.valueOf();
     const end = dateMath.parse(to, { roundUp: true })?.valueOf();
     if (start === undefined || end === undefined) {
+      setIsLoading(false);
       return;
     }
 
@@ -124,7 +126,7 @@ export function ApplicationsListPage() {
           <EuiSpacer size="m" />
         </>
       )}
-      {ux && applications.length > 0 ? (
+      {ux && (isLoading || applications.length > 0) ? (
         <EuiBasicTable<ApplicationRow>
           data-test-subj="digitalExperienceApplicationsTable"
           items={applications.map((serviceName) => ({ serviceName }))}

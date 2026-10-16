@@ -70,7 +70,17 @@ describe('ApplicationsListPage', () => {
     await waitFor(() =>
       expect(addError).toHaveBeenCalledWith(error, { title: 'Could not load the applications' })
     );
-    expect(screen.getByTestId('digitalExperienceApplicationsEmpty')).toBeInTheDocument();
+    expect(await screen.findByTestId('digitalExperienceApplicationsEmpty')).toBeInTheDocument();
+  });
+
+  it('shows the loading table, not the empty prompt, while the fetch is pending', () => {
+    const ux = { fetchClassicRumApplications: jest.fn(() => new Promise<string[]>(() => {})) };
+    useKibanaServicesMock.mockReturnValue(createServices(ux));
+
+    render(<ApplicationsListPage />);
+
+    expect(screen.getByTestId('digitalExperienceApplicationsTable')).toBeInTheDocument();
+    expect(screen.queryByTestId('digitalExperienceApplicationsEmpty')).not.toBeInTheDocument();
   });
 
   it('aborts the pending fetch on unmount', () => {
@@ -92,8 +102,8 @@ describe('ApplicationsListPage', () => {
 
     render(<ApplicationsListPage />);
 
-    await waitFor(() => expect(ux.fetchClassicRumApplications).toHaveBeenCalled());
-    expect(screen.getByTestId('digitalExperienceApplicationsEmpty')).toBeInTheDocument();
+    expect(await screen.findByTestId('digitalExperienceApplicationsEmpty')).toBeInTheDocument();
+    expect(ux.fetchClassicRumApplications).toHaveBeenCalled();
   });
 
   it('fetches again when the time range picker refreshes', async () => {

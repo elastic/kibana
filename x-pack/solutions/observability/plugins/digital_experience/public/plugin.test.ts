@@ -10,6 +10,7 @@ import { firstValueFrom, take, toArray } from 'rxjs';
 import type { App, AppUpdater, CoreSetup, CoreStart } from '@kbn/core/public';
 import { AppStatus } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { UxPluginStart } from '@kbn/ux-plugin/public';
 import { hasDigitalExperienceAccess } from './capabilities';
 import { DigitalExperiencePlugin } from './plugin';
 import type { DigitalExperienceSetupDeps, DigitalExperienceStartDeps } from './types';
@@ -23,11 +24,20 @@ const createCapabilities = (show: boolean, apmShow = true) =>
     apm: { show: apmShow },
   } as CoreStart['application']['capabilities']);
 
-const setup = ({ show, ux }: { show: boolean; ux?: { hideLegacyNavigation: jest.Mock } }) => {
+const createUx = () => ({ hideLegacyNavigation: jest.fn() });
+
+const setup = ({
+  show,
+  ux = createUx(),
+}: {
+  show: boolean;
+  ux?: { hideLegacyNavigation: jest.Mock } | null;
+}) => {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
   coreStart.application.capabilities = createCapabilities(show);
-  coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
+  const pluginsStart = { ux: ux ?? undefined } as unknown as DigitalExperienceStartDeps;
+  coreSetup.getStartServices.mockResolvedValue([coreStart, pluginsStart, {}]);
 
   const registerSections = jest.fn();
   const plugin = new DigitalExperiencePlugin();
@@ -41,18 +51,21 @@ const setup = ({ show, ux }: { show: boolean; ux?: { hideLegacyNavigation: jest.
   const [app] = coreSetup.application.register.mock.calls[0] as [App];
   const sections$: Observable<Array<{ label: string; entries: unknown[] }>> =
     registerSections.mock.calls[0][0];
-  const start = () => plugin.start(coreStart, { ux } as unknown as DigitalExperienceStartDeps);
+  const start = () => plugin.start(coreStart, pluginsStart);
   return { app, start, sections$ };
 };
 
 describe('hasDigitalExperienceAccess', () => {
+  const ux = createUx() as unknown as UxPluginStart;
+
   it('reflects the digital_experience show capability', () => {
-    expect(hasDigitalExperienceAccess(createCapabilities(true))).toBe(true);
-    expect(hasDigitalExperienceAccess(createCapabilities(false))).toBe(false);
+    expect(hasDigitalExperienceAccess(createCapabilities(true), ux)).toBe(true);
+    expect(hasDigitalExperienceAccess(createCapabilities(false), ux)).toBe(false);
   });
 
-  it('requires APM access, which the app reads its data through', () => {
-    expect(hasDigitalExperienceAccess(createCapabilities(true, false))).toBe(false);
+  it('requires APM access and the ux plugin, which the app reads its data through', () => {
+    expect(hasDigitalExperienceAccess(createCapabilities(true, false), ux)).toBe(false);
+    expect(hasDigitalExperienceAccess(createCapabilities(true), undefined)).toBe(false);
   });
 });
 
@@ -68,18 +81,12 @@ describe('DigitalExperiencePlugin', () => {
     [true, 1],
     [false, 0],
   ])('hides the legacy ux navigation on start only when show is %s', (show, expectedCalls) => {
-    const ux = { hideLegacyNavigation: jest.fn() };
+    const ux = createUx();
     const { start } = setup({ show, ux });
 
     start();
 
     expect(ux.hideLegacyNavigation).toHaveBeenCalledTimes(expectedCalls);
-  });
-
-  it('works without the ux plugin', () => {
-    const { start } = setup({ show: true });
-
-    expect(start).not.toThrow();
   });
 
   it.each([
@@ -93,6 +100,17 @@ describe('DigitalExperiencePlugin', () => {
 
     const [, afterStart] = await updates;
     expect((afterStart as AppUpdater)(app)).toEqual({ status });
+  });
+
+  it('makes the app inaccessible and registers no nav section without the ux plugin', async () => {
+    const { app, start, sections$ } = setup({ show: true, ux: null });
+    const updates = firstValueFrom(app.updater$!.pipe(take(2), toArray()));
+
+    start();
+
+    const [, afterStart] = await updates;
+    expect((afterStart as AppUpdater)(app)).toEqual({ status: AppStatus.inaccessible });
+    expect(await firstValueFrom(sections$)).toEqual([]);
   });
 
   it.each([

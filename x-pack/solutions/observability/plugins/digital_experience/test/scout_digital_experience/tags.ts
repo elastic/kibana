@@ -11,5 +11,5 @@ export const DIGITAL_EXPERIENCE_TAGS = [
   '@local-serverless-observability_complete',
 ];
 
-// Stateful only: the ux plugin (Classic RUM dashboard, legacy navigation) is disabled on serverless.
+// Stateful only: serverless disables the ux plugin, which the app and the legacy navigation need.
 export const DIGITAL_EXPERIENCE_WITH_UX_TAGS = ['@local-stateful-classic'];
