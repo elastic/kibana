@@ -27,6 +27,17 @@ import { buildAlertBasedTilesQuery } from '../entities_with_alerts_query';
  * | host:f      | 2d         |             | low 1                              | current, low alert       |
  * | host:g      | 100d       |             | critical 5                         | current severe only          |
  * | host:ghost  | no entity doc | -        | high 3                             | dropped: unknown entity      |
+ *
+ * Groups are judged by the group: it counts as watchlisted when ANY member, the main entity or an
+ * alias, is watchlisted (that member need not be the one that alerted) and the group has an alert.
+ *
+ * | main entity | watchlisted | alerts                    | alias               | counted as                          |
+ * |-------------|-------------|---------------------------|---------------------|-------------------------------------|
+ * | host:w2     |             | high 2                    | host:w2a: yes, no alerts | current severe and watchlisted |
+ * | host:w3     | yes         | none                      | host:w3a: low 1     | current watchlisted only            |
+ * | host:w4     | yes         | none (no alert anywhere)  | -                   | dropped: no alert                   |
+ * | host:w5     |             | none                      | host:w5a: critical 3 | current severe only                |
+ * | host:w6     | yes         | none                      | host:w6a: high 10   | previous severe and watchlisted     |
  */
 
 const NAMESPACE = 'default';
@@ -52,6 +63,15 @@ const ENTITIES: readonly EntitySeed[] = [
   { id: 'host:e', firstSeenDaysAgo: 10, watchlisted: true },
   { id: 'host:f', firstSeenDaysAgo: 2 },
   { id: 'host:g', firstSeenDaysAgo: 100 },
+  { id: 'host:w2', firstSeenDaysAgo: 100 },
+  { id: 'host:w2a', firstSeenDaysAgo: 100, watchlisted: true, resolvedTo: 'host:w2' },
+  { id: 'host:w3', firstSeenDaysAgo: 100, watchlisted: true },
+  { id: 'host:w3a', firstSeenDaysAgo: 100, resolvedTo: 'host:w3' },
+  { id: 'host:w4', firstSeenDaysAgo: 100, watchlisted: true },
+  { id: 'host:w5', firstSeenDaysAgo: 100 },
+  { id: 'host:w5a', firstSeenDaysAgo: 100, resolvedTo: 'host:w5' },
+  { id: 'host:w6', firstSeenDaysAgo: 100, watchlisted: true },
+  { id: 'host:w6a', firstSeenDaysAgo: 100, resolvedTo: 'host:w6' },
 ];
 
 const ALERTS: ReadonlyArray<[entityId: string, severity: string, daysAgo: number]> = [
@@ -65,6 +85,10 @@ const ALERTS: ReadonlyArray<[entityId: string, severity: string, daysAgo: number
   ['host:f', 'low', 1],
   ['host:g', 'critical', 5],
   ['host:ghost', 'high', 3],
+  ['host:w2', 'high', 2],
+  ['host:w3a', 'low', 1],
+  ['host:w5a', 'critical', 3],
+  ['host:w6a', 'high', 10],
 ];
 
 const isoDaysAgo = (now: number, days: number) => new Date(now - days * DAY_MS).toISOString();
@@ -157,23 +181,24 @@ describe('alert based tiles on Elasticsearch', () => {
         'watchlisted_count',
         'watchlisted_entity_ids',
       ],
-      severe: { count: 3, ids: ['host:a', 'host:g', 'user:c'] },
-      watchlisted: { count: 1, ids: ['user:d'] },
+      severe: { count: 5, ids: ['host:a', 'host:g', 'host:w2', 'host:w5', 'user:c'] },
+      watchlisted: { count: 3, ids: ['host:w2', 'host:w3', 'user:d'] },
     });
   });
 
   it('counts the previous period as the 7 days before that, by alert time, and only returns the counts', async () => {
     expect(await runTiles('previous')).toEqual({
       columnNames: ['severe_alerts_count', 'watchlisted_count'],
-      severe: { count: 2, ids: [] },
-      watchlisted: { count: 1, ids: [] },
+      severe: { count: 3, ids: [] },
+      watchlisted: { count: 2, ids: [] },
     });
   });
 
   it('gives the delta as the current count minus the previous count', async () => {
     const [current, previous] = [await runTiles('current'), await runTiles('previous')];
-    // Severe: host:a, host:g and user:c now, host:b and user:c before. Watchlisted is level.
-    expect(current.severe.count - previous.severe.count).toBe(1);
-    expect(current.watchlisted.count - previous.watchlisted.count).toBe(0);
+    // Severe: five now (host:a, host:g, host:w2, host:w5, user:c), three before (host:b, user:c,
+    // host:w6). Watchlisted: three now (user:d, host:w2, host:w3), two before (host:e, host:w6).
+    expect(current.severe.count - previous.severe.count).toBe(2);
+    expect(current.watchlisted.count - previous.watchlisted.count).toBe(1);
   });
 });

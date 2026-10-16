@@ -14,7 +14,8 @@ import type { TilePeriod } from './tile_period';
 /**
  * Builds a single ES|QL query that computes two tiles in one pass over the alerts index:
  * - severely alerting: entities with at least one high- or critical-severity alert,
- * - watchlisted & alerting: watchlisted entities with an alert of any severity.
+ * - watchlisted & alerting: groups with an alert of any severity and any member, the main
+ *   entity or an alias, on a watchlist (the member that is watchlisted need not be the one that alerted).
  *
  * This avoids running the EUID pipeline once per tile. Each tile reads its own columns
  * from the single STATS result.
@@ -23,10 +24,10 @@ import type { TilePeriod } from './tile_period';
  * reducing join cardinality from O(alerts) to O(distinct entities). The @timestamp
  * rename dance is not needed because @timestamp is dropped by the deduplication STATS.
  *
- * Watchlist filtering uses entity.attributes.watchlists IS NOT NULL evaluated after
- * the LOOKUP JOIN, replacing the old entity-latest last_seen approach. An entity
- * qualifies for the watchlist tile when it is watchlisted AND has an alert in the
- * selected time window (based on alert @timestamp, per Marios call 2025-09-18).
+ * The group's watchlist comes from the entity index, read in its own part of the query and merged
+ * with the alerts by the group id; see {@link buildAlertTilesHead}. A group qualifies for the watchlist
+ * tile when it is watchlisted AND has an alert in the selected time window (based on alert
+ * @timestamp, per Marios call 2025-09-18).
  *
  * COUNT and VALUES ignore null values, so nulling out non-watchlisted rows
  * is all that is needed to produce the watchlist-only aggregation.
@@ -34,6 +35,8 @@ import type { TilePeriod } from './tile_period';
  * `period` shifts the whole window back by one range ('previous'), for the period-over-period
  * delta. The previous period only needs the counts, so it leaves out the entity id lists.
  */
+const indentLines = (text: string): string => `  ${text.replace(/\n/g, '\n  ')}`;
+
 interface AlertTilesHeadOptions {
   entitiesIndexName: string;
   spaceId: string;
@@ -45,9 +48,17 @@ interface AlertTilesHeadOptions {
 }
 
 /**
- * The stages the alert based tile queries share, up to the resolved entity and its watchlist flag:
- * the alerts of the window, their entity ids, the join to the entities, the entity filters.
- * The count and the sparkline series both start here, so they cannot drift apart.
+ * The stages the alert based tile queries share. They end with one row per resolved group and
+ * bucket, from two parts merged by the group id (`effective_id`):
+ *
+ * - the alerts of the window, their entity ids, the join to the entities and the entity filters,
+ *   with `has_alert` and `has_severe_alert` per group;
+ * - `group_watchlisted`: the groups with any member, the main entity or an alias, on a watchlist.
+ *   That member does not have to be one that alerted.
+ *
+ * A group is on the Watchlisted tile when it has an alert in the window and is watchlisted, and
+ * the row stands for the main entity of the group. The count and the sparkline series both start
+ * here, so they cannot drift apart.
  */
 export const buildAlertTilesHead = ({
   entitiesIndexName,
@@ -55,26 +66,25 @@ export const buildAlertTilesHead = ({
   windowCondition,
   entityFilterClauses,
   bucketExpression,
-}: AlertTilesHeadOptions): string[] => {
-  const parts: string[] = [];
-
-  parts.push(`SET unmapped_fields="nullify";`);
-  parts.push(`FROM ${getAlertsIndex(spaceId)}`);
-  parts.push(`| WHERE ${windowCondition}`);
-  parts.push(...buildAlertEuidPipeline(bucketExpression));
-
-  parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);
+}: AlertTilesHeadOptions): string[] => [
+  `SET unmapped_fields="nullify";`,
+  'FROM (',
+  `  FROM ${getAlertsIndex(spaceId)}`,
+  `  | WHERE ${windowCondition}`,
+  ...buildAlertEuidPipeline(bucketExpression).map(indentLines),
+  `  | LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
   // Discard entity IDs that have no entity-latest record (unrecognised identifiers).
-  parts.push(`| WHERE entity.name IS NOT NULL`);
-  parts.push(...entityFilterClauses);
-
-  parts.push(
-    `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`
-  );
-  parts.push(`| EVAL is_watchlisted = entity.attributes.watchlists IS NOT NULL`);
-
-  return parts;
-};
+  '  | WHERE entity.name IS NOT NULL',
+  ...entityFilterClauses.map(indentLines),
+  `  | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id), has_alert = true`,
+  `  | KEEP effective_id, has_alert, has_severe_alert${bucketExpression ? ', bucket' : ''}`,
+  '), (',
+  `  FROM ${entitiesIndexName}`,
+  '  | WHERE entity.attributes.watchlists IS NOT NULL',
+  `  | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id), group_watchlisted = true`,
+  '  | STATS group_watchlisted = MAX(group_watchlisted) BY effective_id',
+  ')',
+];
 
 export const buildAlertBasedTilesQuery = (
   entitiesIndexName: string,
@@ -90,15 +100,15 @@ export const buildAlertBasedTilesQuery = (
     entityFilterClauses,
   });
 
-  // One row per resolved entity: whether any of its alerting records has a severe alert or
-  // is watchlisted.
+  // One row per resolved group: whether any of its alerting records has a severe alert, whether it
+  // has any alert, and whether any of its members is watchlisted.
   parts.push(
-    `| STATS has_severe_alert = MAX(has_severe_alert), is_watchlisted = MAX(is_watchlisted) BY effective_id`
+    `| STATS has_severe_alert = MAX(has_severe_alert), has_alert = MAX(has_alert), group_watchlisted = MAX(group_watchlisted) BY effective_id`
   );
 
   // Per-tile ids: null for entities outside the tile so COUNT/VALUES ignore them.
   parts.push(`| EVAL severe_id = CASE(has_severe_alert, effective_id, null)`);
-  parts.push(`| EVAL watchlisted_id = CASE(is_watchlisted, effective_id, null)`);
+  parts.push(`| EVAL watchlisted_id = CASE(has_alert AND group_watchlisted, effective_id, null)`);
 
   // Each row is one resolved entity (the STATS BY effective_id above), so counting the non-null ids
   // is exact. COUNT_DISTINCT would only estimate: it is approximate above about 3,000 values.

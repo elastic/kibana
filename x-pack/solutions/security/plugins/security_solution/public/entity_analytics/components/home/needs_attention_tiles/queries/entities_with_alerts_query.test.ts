@@ -50,16 +50,24 @@ describe('buildAlertBasedTilesQuery', () => {
 
   it('keeps counting watchlisted entities with an alert of any severity', () => {
     const query = buildAlertBasedTilesQuery('.entities-v1', 'default');
-    expect(query).toContain('watchlisted_id = CASE(is_watchlisted, effective_id, null)');
-    expect(query).not.toContain('CASE(is_watchlisted AND has_severe_alert');
+    expect(query).toContain(
+      'watchlisted_id = CASE(has_alert AND group_watchlisted, effective_id, null)'
+    );
+    expect(query).not.toContain('has_severe_alert AND group_watchlisted');
   });
 
   it('aggregates the alerting records per resolved entity before the tile counts', () => {
     const query = buildAlertBasedTilesQuery('.entities-v1', 'default');
     expect(query).toContain(
-      '| STATS has_severe_alert = MAX(has_severe_alert), is_watchlisted = MAX(is_watchlisted) BY effective_id'
+      '| STATS has_severe_alert = MAX(has_severe_alert), has_alert = MAX(has_alert), group_watchlisted = MAX(group_watchlisted) BY effective_id'
     );
     expect(query).not.toContain('| RENAME effective_id AS `entity.id`');
+  });
+
+  it('marks a group watchlisted when any member is, from the entity index, not just the alerting ones', () => {
+    const query = buildAlertBasedTilesQuery('.entities-v1', 'default');
+    expect(query).toContain('  | WHERE entity.attributes.watchlists IS NOT NULL');
+    expect(query).toContain('| STATS group_watchlisted = MAX(group_watchlisted) BY effective_id');
   });
 
   it('applies entity filter clauses after the LOOKUP JOIN', () => {
