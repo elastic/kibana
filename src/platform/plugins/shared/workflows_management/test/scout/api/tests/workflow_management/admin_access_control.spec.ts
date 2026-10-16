@@ -20,6 +20,7 @@ const recoveryTags = [
 
 apiTest.describe('Workflow administrator recovery', { tag: recoveryTags }, () => {
   const spaceId = `workflow-admin-${randomUUID()}`;
+  const workflowName = `Admin recovery ${randomUUID()}`;
   const adminUsername = `workflow-administrator-${randomUUID()}`;
   const adminPassword = randomUUID();
   let workflowId: string | undefined;
@@ -71,7 +72,7 @@ apiTest.describe('Workflow administrator recovery', { tag: recoveryTags }, () =>
     const created = await apiClient.post(`s/${spaceId}/api/workflows/workflow`, {
       headers: ownerHeaders,
       body: {
-        yaml: `name: Admin recovery
+        yaml: `name: ${workflowName}
 enabled: false
 triggers:
 - type: manual
@@ -102,12 +103,21 @@ steps:
     } finally {
       if (workflowId) {
         const owner = await samlAuth.asInteractiveUser(role);
-        expect(
-          await apiClient.delete(
-            `s/${spaceId}/api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
-            { headers: { ...headers, ...owner.cookieHeader } }
+        const ownerHeaders = { ...headers, ...owner.cookieHeader };
+        await expect
+          .poll(
+            async () => {
+              const deleted = await apiClient.delete(
+                `s/${spaceId}/api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
+                { headers: ownerHeaders }
+              );
+              return deleted.statusCode === 200
+                ? 200
+                : `${deleted.statusCode}: ${deleted.body?.message ?? '<no message>'}`;
+            },
+            { timeout: 30_000 }
           )
-        ).toHaveStatusCode(200);
+          .toBe(200);
       }
     }
   });
