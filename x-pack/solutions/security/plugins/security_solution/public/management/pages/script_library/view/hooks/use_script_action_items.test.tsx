@@ -121,11 +121,15 @@ describe('useScriptActionItems()', () => {
     expect(props.onClickAction).toHaveBeenCalledWith({ show, script: props.script });
   });
 
-  it('should build the download item with an href using the base path and script download URI', () => {
-    const item = render().find((action) => action.key === 'download');
-    const basePath = mockedContext.coreStart.http.basePath.get();
+  it('should build the download item with an href prefixed by the server base path', () => {
+    const prependSpy = jest
+      .spyOn(mockedContext.coreStart.http.basePath, 'prepend')
+      .mockImplementation((path) => `/mybase${path}`);
 
-    expect(item?.href).toBe(basePath + props.script.downloadUri);
+    const item = render().find((action) => action.key === 'download');
+
+    expect(prependSpy).toHaveBeenCalledWith(props.script.downloadUri);
+    expect(item?.href).toBe(`/mybase${props.script.downloadUri}`);
     expect(item?.onClick).toBeUndefined();
   });
 
