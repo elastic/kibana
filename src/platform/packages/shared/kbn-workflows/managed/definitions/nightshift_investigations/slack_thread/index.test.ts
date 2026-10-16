@@ -202,7 +202,7 @@ describe('Nightshift Slack thread workflow', () => {
       variables: { investigation_url: 'https://kibana/app/nightshift' },
     });
 
-    expect(rendered.trim()).toBe('Rendered');
+    expect(rendered).toBe('Rendered');
   });
 
   it('edits the status message with the result, and posts a new one when it cannot', () => {

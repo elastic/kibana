@@ -659,7 +659,15 @@ const SLACK_MAX_MESSAGE_BLOCKS = 50;
 
 const slackMessageBlocksSchema = () =>
   z
-    .array(z.looseObject({ type: z.string().min(1) }))
+    .array(
+      z.looseObject({
+        type: z
+          .string()
+          .min(1)
+          .max(50)
+          .describe('Block type, for example section, divider, or actions'),
+      })
+    )
     .max(SLACK_MAX_MESSAGE_BLOCKS)
     .optional()
     .describe(

@@ -166,7 +166,7 @@ steps:
           # This run's own message on the first run, the recorded one on every later run.
           status_message_ts: '${{ steps.post_started.output.ts | default: steps.find_investigation.output.status_message_ts }}'
           # The renderer keeps the text within the 4,000 characters Slack edits take.
-          result_text: |
+          result_text: |-
             {% if steps.render_result.output.text %}{{ steps.render_result.output.text }}{% else %}{% if steps.investigate.error == null %}The investigation finished.{% else %}Investigation failed.{% endif %} <{{ variables.investigation_url }}|View the investigation>{% endif %}
           result_blocks: '${{ steps.render_result.output.blocks | default: [] }}'
 

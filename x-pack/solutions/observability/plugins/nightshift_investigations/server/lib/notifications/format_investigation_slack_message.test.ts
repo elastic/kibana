@@ -296,4 +296,14 @@ describe('buildInvestigationSlackBlocks', () => {
     expect(JSON.stringify(blocks[1])).toContain(':warning: Investigation failed');
     expect(sectionTexts(blocks)).toEqual(['*What went wrong*', 'Agent timed out']);
   });
+
+  it('falls back to a generic failure when the reason is blank', () => {
+    const blocks = buildInvestigationSlackBlocks({
+      investigation: completed({ error: '  ' }),
+      phase: 'failed',
+      reason: ' \n ',
+      url: URL,
+    });
+    expect(sectionTexts(blocks)).toEqual(['*What went wrong*', 'Investigation failed']);
+  });
 });

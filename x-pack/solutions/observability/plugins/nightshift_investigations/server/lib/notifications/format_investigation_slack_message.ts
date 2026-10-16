@@ -177,14 +177,11 @@ export const buildInvestigationSlackBlocks = ({
   }
 
   if (phase === 'failed') {
-    const failureReason = reason || investigation.error || 'Investigation failed';
+    const failureReason = reason?.trim() || investigation.error?.trim() || 'Investigation failed';
     return [
       header(title),
       context([':warning: Investigation failed', automation]),
-      ...section(
-        'What went wrong',
-        escapeMrkdwn(truncate(failureReason.trim(), MAX_SUMMARY_LENGTH))
-      ),
+      ...section('What went wrong', escapeMrkdwn(truncate(failureReason, MAX_SUMMARY_LENGTH))),
       linkButton(url),
     ];
   }
