@@ -18,7 +18,7 @@ import {
   batchVerdictCoverage,
   batchVerdictCorrespondence,
   batchVerdictIntegrity,
-  type BatchTaskOutput,
+  type BatchIntegrityTaskOutput,
 } from './evaluators';
 
 const ALERTS: BatchAlertRef[] = [
@@ -40,7 +40,7 @@ const CLEAN: RawVerdictLike[] = [
   verdict('a-3', 'true_positive', 'Unsigned badbin3.exe on ws-eng-03 spawned from Office.'),
 ];
 
-const outputOf = (rawVerdicts: RawVerdictLike[]): BatchTaskOutput => ({
+const outputOf = (rawVerdicts: RawVerdictLike[]): BatchIntegrityTaskOutput => ({
   alerts: ALERTS,
   rawVerdicts,
   executionId: 'exec-1',

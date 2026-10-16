@@ -22,6 +22,11 @@
  *   - BatchClassificationAccuracy: fraction of batch alerts whose paired verdict has the golden label.
  *   - trajectory (agent only): zero-tool guardrail, as in the single-alert spec.
  *
+ * Runs in the opt-in batch suite (`batch.playwright.config.ts`, `security-alert-analysis-workflow-batch`)
+ * next to `alert_analysis_batch.spec.ts`: that spec grades reliability (accuracy, coverage, consistency)
+ * on large realistic batches from the post-filter verdicts; this one grades the integrity of the raw
+ * verdict array. It is excluded from the weekly suite in `playwright.config.ts`.
+ *
  * Experiment names carry the `alertzero-` prefix so these results are identifiable in the golden
  * index; the agent and prompt paths get distinct names. The single-alert spec's names are unchanged.
  */
@@ -33,10 +38,16 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { selectEvaluators, type EvaluationDataset, type Example } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
-import { runAlertAnalysisBatchIntegrityWorkflow, type ClassificationMethod } from '../src/workflow_task';
-import { configureAlertAnalysisWorkflow } from '../src/space_config';
-import { BATCH_EVALUATORS, createAlertAnalysisTrajectoryEvaluator } from '../src/evaluators';
-import type { BatchTaskOutput } from '../src/evaluators';
+import {
+  runAlertAnalysisBatchIntegrityWorkflow,
+  type ClassificationMethod,
+} from '../src/workflow_task';
+import { configureAlertAnalysisWorkflow, ensureAlertsIndex } from '../src/space_config';
+import {
+  BATCH_INTEGRITY_EVALUATORS,
+  createAlertAnalysisTrajectoryEvaluator,
+} from '../src/evaluators';
+import type { BatchIntegrityTaskOutput } from '../src/evaluators';
 import { ALERT_ANALYSIS_EVAL_BATCHES, buildBatchAlerts } from '../src/batch_alerts';
 import { ALERTS_INDEX } from '../src/constants';
 
@@ -53,6 +64,10 @@ evaluate.describe(
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
     const createdAlertIds = new Set<string>();
+
+    evaluate.beforeAll(async ({ esClient }: { esClient: EsClient }) => {
+      await ensureAlertsIndex(esClient);
+    });
 
     evaluate.afterAll(async ({ esClient, log }: { esClient: EsClient; log: ToolingLog }) => {
       if (createdAlertIds.size === 0) {
@@ -133,7 +148,7 @@ evaluate.describe(
                 examples,
               } satisfies EvaluationDataset,
             ],
-            task: async ({ metadata }): Promise<BatchTaskOutput> => {
+            task: async ({ metadata }): Promise<BatchIntegrityTaskOutput> => {
               const { batchId, alertIndex } = metadata as {
                 batchId: string;
                 alertIndex: string;
@@ -200,7 +215,7 @@ evaluate.describe(
               }
             },
           },
-          selectEvaluators([...BATCH_EVALUATORS, ...trajectory])
+          selectEvaluators([...BATCH_INTEGRITY_EVALUATORS, ...trajectory])
         );
       });
     });

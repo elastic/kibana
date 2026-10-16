@@ -53,7 +53,7 @@ import { buildDoc, type LabeledAlert } from './synthetic_alerts';
 /** Placeholder in an alert id template that is replaced with the per-run hex tag. */
 export const RUN_TAG_PLACEHOLDER = '<run>';
 
-export interface BatchRule {
+export interface BatchIntegrityRule {
   name: string;
   description: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
@@ -75,7 +75,7 @@ export interface BatchAlertSpec {
 export interface LabeledAlertBatch {
   id: string;
   description: string;
-  rule: BatchRule;
+  rule: BatchIntegrityRule;
   alerts: BatchAlertSpec[];
   /**
    * Alert id pairs (resolved ids) whose ids differ by only one or two hex characters. Declared so
@@ -85,7 +85,7 @@ export interface LabeledAlertBatch {
 }
 
 /** The rule every batch in this file shares the shape of: a behavioral injection rule. */
-const INJECTION_RULE: BatchRule = {
+const INJECTION_RULE: BatchIntegrityRule = {
   name: 'Malicious Behavior Detection Alert: Suspicious Process Injection',
   description:
     'Elastic Defend behavioral engine detected a process writing into another process’ memory, consistent with process injection.',
@@ -95,7 +95,7 @@ const INJECTION_RULE: BatchRule = {
   technique: { id: 'T1055', name: 'Process Injection' },
 };
 
-const WMIC_RULE: BatchRule = {
+const WMIC_RULE: BatchIntegrityRule = {
   name: 'Malicious Behavior Detection Alert: Suspicious WMI Execution',
   description:
     'Elastic Defend behavioral engine detected WMI process execution, which can be used for remote execution.',

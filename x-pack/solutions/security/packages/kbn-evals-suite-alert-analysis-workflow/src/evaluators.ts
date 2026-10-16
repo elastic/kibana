@@ -121,7 +121,7 @@ export const createAlertAnalysisTrajectoryEvaluator = (): Evaluator => {
 // (which grade a single-alert run) or into each other.
 
 /** What the batch task hands the evaluators: the alerts it seeded plus the raw verdict array. */
-export interface BatchTaskOutput {
+export interface BatchIntegrityTaskOutput {
   /** The alerts of the batch in the order they were given to the workflow. */
   alerts: BatchAlertRef[];
   rawVerdicts: RawVerdictLike[];
@@ -130,7 +130,7 @@ export interface BatchTaskOutput {
   classificationMethod: ClassificationMethod;
 }
 
-const asBatch = (output: unknown): BatchTaskOutput => output as BatchTaskOutput;
+const asBatch = (output: unknown): BatchIntegrityTaskOutput => output as BatchIntegrityTaskOutput;
 
 const diagnose = (output: unknown): BatchVerdictDiagnostics => {
   const batch = asBatch(output);
@@ -259,7 +259,7 @@ export const batchClassificationAccuracy: Evaluator = {
   },
 };
 
-export const BATCH_EVALUATORS: Evaluator[] = [
+export const BATCH_INTEGRITY_EVALUATORS: Evaluator[] = [
   batchVerdictIntegrity,
   batchVerdictCoverage,
   batchVerdictCorrespondence,
