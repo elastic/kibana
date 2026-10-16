@@ -243,7 +243,7 @@ export type AttackAttachmentWithoutOwner = Omit<AttackAttachmentPayload, 'owner'
 export interface AlertAttachmentWithoutOwner {
   type: typeof SECURITY_ALERT_ATTACHMENT_TYPE;
   attachmentId: string[];
-  metadata: { index: string };
+  metadata: { index: string; sourceAttachmentIds: string[] };
 }
 
 /** How many attacks one add-to-case may carry; each attack takes two bulk-create attachments. */
@@ -376,7 +376,11 @@ export const buildAttacksAttachments = (
       attachments.push({
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
         attachmentId: attachedAlertIds,
-        metadata: { index: attack.alertsIndex },
+        // Records which attack put these alerts on the case. Cases drops the ids already
+        // attached before persisting this, so what survives is the set this attack actually
+        // introduced rather than the set it claims — which is the only way to tell an alert the
+        // attack brought from one the analyst attached themselves.
+        metadata: { index: attack.alertsIndex, sourceAttachmentIds: [attack.id] },
       });
     }
   }

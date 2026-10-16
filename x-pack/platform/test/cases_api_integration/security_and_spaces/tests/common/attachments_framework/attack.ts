@@ -262,12 +262,27 @@ export default ({ getService }: FtrProviderContext): void => {
         metadata: { ...attackMetadata, alertCount: alertIds.length, index },
       });
 
-      const buildAlertAttachment = (alertId: string) => ({
+      const buildAlertAttachment = (alertId: string, sourceAttackId: string) => ({
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
         owner: OWNER,
         attachmentId: alertId,
-        metadata: { index: ALERT_INDEX, rule: { id: 'attack-rule-id', name: 'attack rule' } },
+        metadata: {
+          index: ALERT_INDEX,
+          rule: { id: 'attack-rule-id', name: 'attack rule' },
+          sourceAttachmentIds: [sourceAttackId],
+        },
       });
+
+      /**
+       * Which attack put each alert on the case. The shared alert is credited to A because A is
+       * posted first and the dedupe drops it from B's attachment, which is what the client
+       * builder produces in the UI.
+       */
+      const alertSourceAttackId = {
+        [SHARED_ALERT_ID]: ATTACK_A_ID,
+        [ATTACK_A_ONLY_ALERT_ID]: ATTACK_A_ID,
+        [ATTACK_B_ONLY_ALERT_ID]: ATTACK_B_ID,
+      };
 
       interface Attachment {
         id: string;
@@ -286,10 +301,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       /**
        * The rule the removal prompt applies, restated here so the assertions below are driven by
-       * it rather than by hand-picked ids: an alert attachment goes with the attack only when
-       * every alert it references is currently in that attack *and* is not claimed by another
-       * attack attached to the same case. The rule itself is unit tested in
-       * `resolve_removable_alerts.test.ts`; this exercises the endpoint that carries it out.
+       * it rather than by hand-picked ids: an alert attachment goes with the attack only when the
+       * attack is recorded as having put it on the case *and* every alert it references is
+       * currently in that attack *and* is not claimed by another attack attached to the same
+       * case. The rule itself is unit tested in `resolve_removable_alerts.test.ts`; this
+       * exercises the endpoint that carries it out.
        */
       const resolveRemovableAlertAttachmentIds = (
         attachments: Attachment[],
@@ -307,7 +323,13 @@ export default ({ getService }: FtrProviderContext): void => {
           .filter(({ attachmentId, alertId }) => {
             const ids = toArray(alertId ?? attachmentId);
             return (
-              ids.length > 0 && ids.every((id) => attackSet.has(id) && !claimedByOthers.has(id))
+              ids.length > 0 &&
+              ids.every(
+                (id) =>
+                  alertSourceAttackId[id as keyof typeof alertSourceAttackId] === attackId &&
+                  attackSet.has(id) &&
+                  !claimedByOthers.has(id)
+              )
             );
           })
           .map(({ id }) => id);
@@ -322,9 +344,15 @@ export default ({ getService }: FtrProviderContext): void => {
           params: [
             buildAttackAttachment(ATTACK_A_ID, attackAlertIds[ATTACK_A_ID], attackIndex),
             buildAttackAttachment(ATTACK_B_ID, attackAlertIds[ATTACK_B_ID], attackIndex),
-            buildAlertAttachment(SHARED_ALERT_ID),
-            buildAlertAttachment(ATTACK_A_ONLY_ALERT_ID),
-            buildAlertAttachment(ATTACK_B_ONLY_ALERT_ID),
+            buildAlertAttachment(SHARED_ALERT_ID, alertSourceAttackId[SHARED_ALERT_ID]),
+            buildAlertAttachment(
+              ATTACK_A_ONLY_ALERT_ID,
+              alertSourceAttackId[ATTACK_A_ONLY_ALERT_ID]
+            ),
+            buildAlertAttachment(
+              ATTACK_B_ONLY_ALERT_ID,
+              alertSourceAttackId[ATTACK_B_ONLY_ALERT_ID]
+            ),
           ] as unknown as BulkCreateUnifiedAttachmentsRequest,
         });
 
@@ -489,6 +517,40 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(alertIdsOf(await readAttachments(caseId))).to.eql(
             [SHARED_ALERT_ID, ATTACK_A_ONLY_ALERT_ID, ATTACK_B_ONLY_ALERT_ID].sort()
           );
+        });
+
+        it('keeps an alert the analyst attached, even though the removed attack lists it', async () => {
+          // The public delete API has no prompt, so `metadata.sourceAttachmentIds` is the only
+          // thing separating an alert the attack contributed from an identical one the analyst
+          // attached themselves. This attachment carries none, so it is not the attack's to take.
+          const postedCase = await createCase(supertest, getPostCaseRequest({ owner: OWNER }));
+
+          const updatedCase = await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: [
+              buildAttackAttachment(ATTACK_A_ID, attackAlertIds[ATTACK_A_ID], ATTACK_INDEX),
+              {
+                type: SECURITY_ALERT_ATTACHMENT_TYPE,
+                owner: OWNER,
+                attachmentId: ATTACK_A_ONLY_ALERT_ID,
+                metadata: {
+                  index: ALERT_INDEX,
+                  rule: { id: 'attack-rule-id', name: 'attack rule' },
+                },
+              },
+            ] as unknown as BulkCreateUnifiedAttachmentsRequest,
+          });
+
+          const seededAttack = (updatedCase.comments as unknown as Attachment[]).find(
+            ({ type }) => type === SECURITY_ATTACK_ATTACHMENT_TYPE
+          )!;
+
+          await deleteComment({ supertest, caseId: postedCase.id, commentId: seededAttack.id });
+
+          const remaining = await readAttachments(postedCase.id);
+          expect(attackIdsOf(remaining)).to.eql([]);
+          expect(alertIdsOf(remaining)).to.eql([ATTACK_A_ONLY_ALERT_ID]);
         });
       });
     });

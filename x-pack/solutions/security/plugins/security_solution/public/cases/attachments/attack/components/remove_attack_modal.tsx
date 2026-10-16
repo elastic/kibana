@@ -115,6 +115,9 @@ export const RemoveAttackModal = ({
       buttonColor="danger"
       cancelButtonText={CANCEL}
       confirmButtonText={CONFIRM}
+      // Nothing is resolvable yet, so confirming now would quietly keep the alerts the default
+      // tick promises to remove. An unresolvable result still confirms, removing the attack alone.
+      confirmButtonDisabled={isLoading}
       data-test-subj={REMOVE_ATTACK_MODAL_TEST_ID}
       onCancel={onCancel}
       onConfirm={onConfirmClick}

@@ -66,6 +66,21 @@ describe('bulkDeleteCaseAttachments', () => {
     expect(http.post).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ signal }));
   });
 
+  it('encodes the case id as a single path segment', async () => {
+    const http = buildHttp();
+
+    await bulkDeleteCaseAttachments({
+      http,
+      caseId: '../../api/cases',
+      attachmentIds: ['so-attack-1'],
+    });
+
+    expect(http.post).toHaveBeenCalledWith(
+      '/internal/cases/..%2F..%2Fapi%2Fcases/attachments/_bulk_delete',
+      expect.anything()
+    );
+  });
+
   it('makes no request when there is nothing to delete', async () => {
     const http = buildHttp();
 
@@ -206,6 +221,17 @@ describe('fetchCaseAttachments', () => {
     await fetchCaseAttachments({ http, caseId: 'case-1', signal });
 
     expect(http.get).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ signal }));
+  });
+
+  it('encodes the case id as a single path segment', async () => {
+    const http = buildHttp();
+
+    await fetchCaseAttachments({ http, caseId: '../../internal/cases' });
+
+    expect(http.get).toHaveBeenCalledWith(
+      '/api/cases/..%2F..%2Finternal%2Fcases/resolve',
+      expect.anything()
+    );
   });
 
   it('propagates a failed request', async () => {

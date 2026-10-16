@@ -6,9 +6,13 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
+import { buildPath } from '@kbn/core-http-browser';
 import type { JsonValue } from '@kbn/utility-types';
-import { getCaseBulkDeleteAttachmentsUrl, getCaseDetailsUrl } from '@kbn/cases-plugin/common/api';
-import { MAX_BULK_DELETE_ATTACHMENTS } from '@kbn/cases-plugin/common/constants';
+import {
+  CASE_DETAILS_URL,
+  INTERNAL_BULK_DELETE_ATTACHMENTS_URL,
+  MAX_BULK_DELETE_ATTACHMENTS,
+} from '@kbn/cases-plugin/common/constants';
 import type { CaseAttachment } from './utils';
 
 export interface BulkDeleteCaseAttachmentsParams {
@@ -43,7 +47,7 @@ export const bulkDeleteCaseAttachments = async ({
     return;
   }
 
-  const url = getCaseBulkDeleteAttachmentsUrl(encodeURIComponent(caseId));
+  const url = buildPath(INTERNAL_BULK_DELETE_ATTACHMENTS_URL, { case_id: caseId });
 
   for (let start = 0; start < attachmentIds.length; start += MAX_BULK_DELETE_ATTACHMENTS) {
     const ids = attachmentIds.slice(start, start + MAX_BULK_DELETE_ATTACHMENTS);
@@ -158,7 +162,7 @@ export const fetchCaseAttachments = async ({
   signal,
 }: FetchCaseAttachmentsParams): Promise<CaseAttachment[]> => {
   const response = await http.get<ResolveCaseResponse>(
-    `${getCaseDetailsUrl(encodeURIComponent(caseId))}/resolve`,
+    buildPath(`${CASE_DETAILS_URL}/resolve`, { case_id: caseId }),
     {
       query: { includeComments: true },
       signal,

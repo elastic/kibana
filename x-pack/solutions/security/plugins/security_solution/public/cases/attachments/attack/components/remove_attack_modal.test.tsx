@@ -158,4 +158,32 @@ describe('RemoveAttackModal', () => {
       'Checking which alerts can be removed'
     );
   });
+
+  it('cannot be confirmed while the resolution is still running', async () => {
+    renderModal({ isLoading: true, isResolvable: false, alertCount: 0 });
+
+    expect(screen.getByTestId('confirmModalConfirmButton')).toBeDisabled();
+    await userEvent.click(screen.getByText('Remove'));
+
+    expect(onConfirm).not.toHaveBeenCalled();
+  });
+
+  it('confirms with the related alerts once the resolution settles', async () => {
+    const { rerender } = renderModal({ isLoading: true, isResolvable: false, alertCount: 0 });
+
+    rerender(
+      <TestProviders>
+        <RemoveAttackModal {...defaultProps} />
+      </TestProviders>
+    );
+    await userEvent.click(screen.getByText('Remove'));
+
+    expect(onConfirm).toHaveBeenCalledWith({ removeRelatedAlerts: true });
+  });
+
+  it('can still be confirmed, for the attack alone, when the attack cannot be resolved', () => {
+    renderModal({ isResolvable: false, alertCount: 0 });
+
+    expect(screen.getByTestId('confirmModalConfirmButton')).toBeEnabled();
+  });
 });

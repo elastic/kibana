@@ -92,13 +92,13 @@ const caseAttachments = [
     id: 'so-alert-1',
     type: SECURITY_ALERT_ATTACHMENT_TYPE,
     attachmentId: ['alert-only-mine'],
-    metadata: { index: '.alerts-detections' },
+    metadata: { index: '.alerts-detections', sourceAttachmentIds: ['attack-1'] },
   }),
   foundAttachment({
     id: 'so-alert-2',
     type: SECURITY_ALERT_ATTACHMENT_TYPE,
     attachmentId: ['alert-shared'],
-    metadata: { index: '.alerts-detections' },
+    metadata: { index: '.alerts-detections', sourceAttachmentIds: ['attack-1'] },
   }),
 ];
 

@@ -303,7 +303,7 @@ describe('buildAttackAttachments', () => {
     expect(attachments[1]).toEqual({
       type: SECURITY_ALERT_ATTACHMENT_TYPE,
       attachmentId: ['alert-1', 'alert-2'],
-      metadata: { index: ALERTS_INDEX },
+      metadata: { index: ALERTS_INDEX, sourceAttachmentIds: ['attack-id-1'] },
     });
   });
 
@@ -710,7 +710,7 @@ describe('buildAttacksAttachments', () => {
       {
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
         attachmentId: ['alert-1', 'alert-2'],
-        metadata: { index: ALERTS_INDEX },
+        metadata: { index: ALERTS_INDEX, sourceAttachmentIds: ['attack-id-1'] },
       },
       expect.objectContaining({
         type: SECURITY_ATTACK_ATTACHMENT_TYPE,
@@ -719,7 +719,7 @@ describe('buildAttacksAttachments', () => {
       {
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
         attachmentId: ['alert-3'],
-        metadata: { index: ALERTS_INDEX },
+        metadata: { index: ALERTS_INDEX, sourceAttachmentIds: ['attack-id-2'] },
       },
     ]);
     expect(attackCount).toBe(2);

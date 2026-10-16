@@ -27,8 +27,13 @@ export const registerCaseAttachments = (
   if (experimentalFeatures.entityAttachmentsEnabled) {
     attachmentFramework.registerAttachment(getEntityAttachmentType());
   }
-  if (experimentalFeatures.attackAttachmentsEnabled) {
-    attachmentFramework.registerAttachment(getAttackAttachmentType(deps));
-  }
+  // Registered unconditionally so attacks attached while the flag was on keep rendering and keep
+  // taking their alerts with them when removed; the flag gates the attach path inside the type.
+  attachmentFramework.registerAttachment(
+    getAttackAttachmentType({
+      ...deps,
+      isAttachEnabled: experimentalFeatures.attackAttachmentsEnabled,
+    })
+  );
   attachmentFramework.registerAttachment(getTimelineAttachmentType());
 };

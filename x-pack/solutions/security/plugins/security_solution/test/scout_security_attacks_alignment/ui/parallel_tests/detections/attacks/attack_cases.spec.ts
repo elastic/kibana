@@ -39,7 +39,7 @@
  */
 
 import { expect } from '@kbn/scout-security/ui';
-import type { EsClient, KbnClient } from '@kbn/scout-security';
+import type { EsClient, KbnClient, Locator } from '@kbn/scout-security';
 import {
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
@@ -391,7 +391,7 @@ spaceTest.describe(
 
     spaceTest(
       'removes an attack from its activity card, keeping the alerts another attack claims',
-      async ({ esClient, kbnClient, pageObjects, scoutSpace }) => {
+      async ({ esClient, kbnClient, page, pageObjects, scoutSpace }) => {
         const { detectionsAttackDiscoveryPage, attackCases } = pageObjects;
         const caseName = 'Scout attack attachment case – removal';
         let caseId = '';
@@ -418,9 +418,30 @@ spaceTest.describe(
         });
 
         await spaceTest.step('attach both attacks to one case', async () => {
-          await detectionsAttackDiscoveryPage.navigateToAttacksPage();
-          await detectionsAttackDiscoveryPage.collapseKpisSection();
-          await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeVisible();
+          // Attach order decides the outcome, so neither attach may go through a table row index.
+          // Cases drops the ids already on the case, so the shared alert lands in whichever
+          // attack is attached first and the second attack's attachment holds only its own. This
+          // test removes the manual attack and expects its exclusive alert to go with it, which
+          // only holds while the manual attack is attached second. Filtering by type pins each
+          // attach to a known attack instead of to whatever the table happens to sort first.
+          const showOnlyAttacksOfType = async (select: Locator, unselect?: Locator) => {
+            await detectionsAttackDiscoveryPage.navigateToAttacksPage();
+            await detectionsAttackDiscoveryPage.collapseKpisSection();
+            await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeVisible();
+
+            await detectionsAttackDiscoveryPage.typeFilterButton.click();
+            // The filter is persisted per user and survives the navigation, so the previous
+            // type has to come off or both would be back in the table.
+            await unselect?.click();
+            await select.click();
+            await page.keyboard.press('Escape');
+
+            await expect(detectionsAttackDiscoveryPage.tableExpandAttackDetailsButtons).toHaveCount(
+              1
+            );
+          };
+
+          await showOnlyAttacksOfType(detectionsAttackDiscoveryPage.typeFilterOptionScheduled);
 
           await attackCases.openFirstAttackTakeActionMenu();
           await attackCases.clickAddToNewCase();
@@ -429,13 +450,15 @@ spaceTest.describe(
 
           caseId = await attackCases.getOpenCaseId();
 
-          // The space is seeded with two attacks, one group per attack, and the case created
-          // above is the only one in it — so "Add to existing case" has a single candidate.
-          await detectionsAttackDiscoveryPage.navigateToAttacksPage();
-          await detectionsAttackDiscoveryPage.collapseKpisSection();
-          await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeVisible();
+          await showOnlyAttacksOfType(
+            detectionsAttackDiscoveryPage.typeFilterOptionManuallyGenerated,
+            detectionsAttackDiscoveryPage.typeFilterOptionScheduled
+          );
+          await expect(detectionsAttackDiscoveryPage.manualAttackSubtitle).toBeVisible();
 
-          await attackCases.openAttackTakeActionMenu(1);
+          // The case created above is the only one in the space, so "Add to existing case" has a
+          // single candidate.
+          await attackCases.openFirstAttackTakeActionMenu();
           await attackCases.addToOnlyExistingCase();
         });
 
@@ -446,8 +469,8 @@ spaceTest.describe(
             const attackAttachments = getAttackAttachments(attachments);
 
             expect(attackAttachments).toHaveLength(2);
-            // The alert both attacks claim is attached once, by whichever was attached first —
-            // which is what makes it a single attachment two attacks claim.
+            // The scheduled attack is attached first, so it is the one that brings the shared
+            // alert in; the manual attack's own attachment holds only its exclusive alert.
             expect(getAttachedAlertIds(attachments)).toStrictEqual(
               [SCHEDULED_ONLY_ALERT_ID, SHARED_ALERT_ID, MANUAL_ONLY_ALERT_ID].sort()
             );

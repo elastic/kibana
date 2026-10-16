@@ -30,6 +30,13 @@ const LOADING: UseRemovableAlertAttachmentsResult = {
   isResolvable: false,
 };
 
+const UNRESOLVABLE: UseRemovableAlertAttachmentsResult = {
+  isLoading: false,
+  attachmentIds: [],
+  alertIds: [],
+  isResolvable: false,
+};
+
 /**
  * Resolves which of the case's alert attachments may be removed alongside the attack attachments
  * identified by `attackIds` — one for a row action, several for a bulk selection.
@@ -62,7 +69,7 @@ export const useRemovableAlertAttachments = ({
     [comments]
   );
 
-  const { data, isLoading, status } = useFindAttackDiscoveries({
+  const { data, isLoading } = useFindAttackDiscoveries({
     http,
     ids: caseAttackIds,
     // Attacks attached by a teammate belong to the case regardless of who generated them.
@@ -90,10 +97,18 @@ export const useRemovableAlertAttachments = ({
 
   const alertAttachments = useMemo(() => getCaseAlertAttachments(comments), [comments]);
 
-  const hasSettled = !isLoading && status !== 'idle';
+  // react-query v4 reports a disabled query as loading forever, so the assistant flag decides
+  // whether a fetch is really in flight.
+  const isFetchingAttacks = isAssistantEnabled && isLoading;
 
   return useMemo(() => {
-    if (!hasSettled) {
+    // Without the assistant the attacks cannot be read, so their alert sets are unknown. Waiting
+    // would never end, and a prompt stuck loading cannot explain why the alerts stay.
+    if (!isAssistantEnabled) {
+      return UNRESOLVABLE;
+    }
+
+    if (isFetchingAttacks) {
       return LOADING;
     }
 
@@ -108,5 +123,12 @@ export const useRemovableAlertAttachments = ({
         alertAttachments,
       }),
     };
-  }, [alertAttachments, alertIdsByAttackId, attackIds, caseAttackIds, hasSettled]);
+  }, [
+    alertAttachments,
+    alertIdsByAttackId,
+    attackIds,
+    caseAttackIds,
+    isAssistantEnabled,
+    isFetchingAttacks,
+  ]);
 };

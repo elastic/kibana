@@ -41,14 +41,24 @@ const attackTarget = (
     },
   } as unknown as AttachmentDeleteTarget);
 
-const alertTarget = (id: string, alertIds: string[]): AttachmentDeleteTarget =>
+// `sourceAttachmentIds` is the provenance written when an attack attaches its alerts. Pass
+// `null` for an attachment the analyst created themselves, which carries no provenance at all
+// and must survive the attack's deletion.
+const alertTarget = (
+  id: string,
+  alertIds: string[],
+  sourceAttachmentIds: string[] | null = ['attack-1']
+): AttachmentDeleteTarget =>
   ({
     id,
     attributes: {
       type: SECURITY_ALERT_ATTACHMENT_TYPE,
       attachmentId: alertIds,
       owner: 'securitySolution',
-      metadata: { index: '.alerts-security.alerts-default' },
+      metadata: {
+        index: '.alerts-security.alerts-default',
+        ...(sourceAttachmentIds === null ? {} : { sourceAttachmentIds }),
+      },
     },
   } as unknown as AttachmentDeleteTarget);
 
@@ -168,6 +178,25 @@ describe('getAttackOnDelete', () => {
         attackTarget('attack-att-2', 'attack-2'),
         alertTarget('alert-att-1', ['alert-1']),
         alertTarget('alert-att-2', ['alert-2']),
+      ],
+    });
+
+    expect(result).toEqual({ relatedAttachmentIds: ['alert-att-1'] });
+  });
+
+  it('keeps an alert attachment the analyst created, even when the attack lists that alert', async () => {
+    // The analyst attached `alert-1` on its own, so the attack's own attachment only ever held
+    // `alert-2`. Deleting the attack over the public API skips the UI prompt, so the provenance
+    // recorded at attach time is the only thing keeping the analyst's evidence on the case.
+    mockAttacks([attackHit('attack-1', ['alert-1', 'alert-2'])]);
+
+    const result = await onDelete({
+      caseId: 'case-1',
+      request,
+      attachments: [attackTarget('attack-att-1', 'attack-1')],
+      remainingAttachments: [
+        alertTarget('alert-att-analyst', ['alert-1'], null),
+        alertTarget('alert-att-1', ['alert-2']),
       ],
     });
 

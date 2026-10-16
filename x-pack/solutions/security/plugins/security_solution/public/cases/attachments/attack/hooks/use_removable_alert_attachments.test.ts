@@ -30,12 +30,14 @@ const attackAttachment = (attachmentId: string, id = `so-${attachmentId}`) =>
     metadata: { title: attachmentId, alertCount: 0, index: '.alerts-attack' },
   } as unknown as CaseAttachment);
 
-const alertAttachment = (id: string, alertIds: string[]) =>
+// `sourceAttachmentIds` is the provenance the attack writes at attach time; an attachment
+// without it was put on the case by the analyst and is never removable.
+const alertAttachment = (id: string, alertIds: string[], sourceAttachmentIds = ['attack-1']) =>
   ({
     id,
     type: SECURITY_ALERT_ATTACHMENT_TYPE,
     attachmentId: alertIds,
-    metadata: { index: '.alerts-detections' },
+    metadata: { index: '.alerts-detections', sourceAttachmentIds },
   } as unknown as CaseAttachment);
 
 const findResult = (
@@ -91,6 +93,33 @@ describe('useRemovableAlertAttachments', () => {
 
     expect(result.current).toEqual({
       isLoading: true,
+      attachmentIds: [],
+      alertIds: [],
+      isResolvable: false,
+    });
+  });
+
+  it('is not resolvable, rather than loading forever, when the assistant is unavailable', () => {
+    useAssistantAvailabilityMock.mockReturnValue({ isAssistantEnabled: false });
+    // react-query v4 reports a disabled query as loading, never idle.
+    useFindAttackDiscoveriesMock.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      status: 'loading',
+    });
+
+    const { result } = renderHook(() =>
+      useRemovableAlertAttachments({
+        comments: [attackAttachment('attack-1'), alertAttachment('so-alert-1', ['alert-1'])],
+        attackIds: ['attack-1'],
+      })
+    );
+
+    expect(useFindAttackDiscoveriesMock).toHaveBeenCalledWith(
+      expect.objectContaining({ isAssistantEnabled: false })
+    );
+    expect(result.current).toEqual({
+      isLoading: false,
       attachmentIds: [],
       alertIds: [],
       isResolvable: false,

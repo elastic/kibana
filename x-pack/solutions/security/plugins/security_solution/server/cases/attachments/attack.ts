@@ -30,6 +30,12 @@ import {
 interface AttackAttachmentTypeDeps {
   getStartServices: CoreSetup['getStartServices'];
   logger: Logger;
+  /**
+   * Whether `attackAttachmentsEnabled` is on. The type is registered either way so that attacks
+   * attached while the flag was on keep rendering, and keep taking their alerts with them when
+   * removed. Only the attach path is gated.
+   */
+  isAttachEnabled: boolean;
 }
 
 interface AttackReference {
@@ -47,6 +53,14 @@ const StoredAttackAttachmentSchema = z.object({
   type: z.literal(SECURITY_ATTACK_ATTACHMENT_TYPE),
   attachmentId: z.string(),
   metadata: z.object({ index: z.string() }),
+});
+
+/**
+ * Stands in for the payload schema while `attackAttachmentsEnabled` is off, refusing every
+ * attach with an explanation rather than the framework's "type is not registered".
+ */
+const AttachDisabledSchema = z.never({
+  error: `Attaching ${SECURITY_ATTACK_ATTACHMENT_TYPE} attachments requires the attackAttachmentsEnabled feature flag`,
 });
 
 const toAttackReferences = (targets: readonly AttachmentDeleteTarget[]): AttackReference[] =>
@@ -122,7 +136,10 @@ const getAlertIdsByAttackId = async ({
  * keeping any alert another attached attack still claims.
  */
 export const getAttackOnDelete =
-  ({ getStartServices, logger }: AttackAttachmentTypeDeps): AttachmentOnDelete =>
+  ({
+    getStartServices,
+    logger,
+  }: Omit<AttackAttachmentTypeDeps, 'isAttachEnabled'>): AttachmentOnDelete =>
   async ({ request, attachments, remainingAttachments }) => {
     const removedAttacks = toAttackReferences(attachments);
     const alertAttachments = getCaseAlertAttachments(
@@ -154,12 +171,18 @@ export const getAttackOnDelete =
 /**
  * Server-side attack attachment type registration.
  * Uses a zod schema (shared with the client) to validate the full payload.
+ *
+ * Registered whether or not `attackAttachmentsEnabled` is on. The renderer and its remove action
+ * are registered unconditionally on the client so that attacks attached while the flag was on
+ * still display, and `onDelete` has to stay reachable for the same reason: otherwise the remove
+ * prompt would offer to take the alerts along and the server would quietly keep them. With the
+ * flag off the schema refuses new payloads, so the gate sits on the attach path alone.
  */
 export const getAttackAttachmentType = (
   deps: AttackAttachmentTypeDeps
 ): UnifiedAttachmentTypeSetup => ({
   id: SECURITY_ATTACK_ATTACHMENT_TYPE,
-  schema: AttackAttachmentPayloadSchema,
+  schema: deps.isAttachEnabled ? AttackAttachmentPayloadSchema : AttachDisabledSchema,
   onDelete: getAttackOnDelete(deps),
   workflow: { validateTargets: validateAttackWorkflowTargets },
 });
