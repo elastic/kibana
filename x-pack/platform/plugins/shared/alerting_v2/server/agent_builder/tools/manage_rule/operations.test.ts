@@ -423,8 +423,14 @@ describe('executeRuleOperations', () => {
 
     it('does not warn for wildcard queries or strategies without their own query', async () => {
       const result = await executeRuleOperations({}, [
-        { operation: 'set_recovery', recovery: { strategy: 'query', query: 'FROM logs-* | LIMIT 1' } },
-        { operation: 'set_no_data', no_data: { strategy: 'keep_last', query: 'FROM logs-* | LIMIT 1' } },
+        {
+          operation: 'set_recovery',
+          recovery: { strategy: 'query', query: 'FROM logs-* | LIMIT 1' },
+        },
+        {
+          operation: 'set_no_data',
+          no_data: { strategy: 'keep_last', query: 'FROM logs-* | LIMIT 1' },
+        },
       ]);
       expect(result.warnings).toBeUndefined();
 
