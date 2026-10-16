@@ -1172,7 +1172,7 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     '## Full JSON Schema (`alertingV2NotificationGroup`)',
     '',
     "This is the schema resolved by `$ref: '#/kibana/definitions/alertingV2NotificationGroup'`.",
-    'Including this `$ref` on the manual trigger is **required**.',
+    'Including this `$ref` on the manual trigger is **required**. It enables the',
     'validation service to statically check every `inputs.payload.*` Liquid reference against',
     'the dispatch payload schema. Without it, invalid field paths are only caught at runtime.',
     'Use the schema below to determine valid Liquid paths under `inputs.payload`.',
