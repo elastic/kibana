@@ -5,13 +5,10 @@
  * 2.0.
  */
 
+import type { RuleChangedEbtData, RuleEbtEventType } from '@kbn/alerting-v2-schemas';
 import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { COMMON_HEADERS } from '../constants';
-import type {
-  RuleChangedEventData,
-  RuleEbtEventType,
-} from '../../../../server/lib/telemetry/rule_changed_event';
 
 const EBT_HELPERS_PATH = '/internal/analytics_ftr_helpers';
 const DEFAULT_EVENT_TIMEOUT_MS = 10_000;
@@ -20,7 +17,7 @@ const DEFAULT_EVENT_TIMEOUT_MS = 10_000;
 export interface RuleChangedEbtEvent {
   event_type: string;
   timestamp: string;
-  properties: RuleChangedEventData;
+  properties: RuleChangedEbtData;
 }
 
 export interface WaitForRuleChangedEventsParams {

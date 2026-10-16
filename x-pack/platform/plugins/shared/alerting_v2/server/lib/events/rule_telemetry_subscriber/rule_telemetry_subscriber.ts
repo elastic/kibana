@@ -17,7 +17,7 @@ import {
   RULE_EBT_EVENT_TYPE_BY_OPERATION,
   RULE_OPERATIONS,
   type RuleOperation,
-} from '../../telemetry/rule_changed_event';
+} from '../../telemetry/rule_ebt_event';
 import {
   AlertingDomainEventBusToken,
   type AlertingDomainEvent,

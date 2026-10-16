@@ -16,7 +16,7 @@ import {
   isStateTransitionAllowed,
   updateRuleDataSchema,
   type RuleKind,
-  type RuleTelemetryOrigin,
+  type RuleEbtOrigin,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { Request, PluginInitializer } from '@kbn/core-di-server';
@@ -79,7 +79,7 @@ import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
 import {
   resolveRuleTelemetryEventOrigin,
   type CreateRulesClientOptions,
-} from './rule_telemetry_origin';
+} from './rule_ebt_origin';
 import { RulesClientOptionsToken } from './tokens';
 import type {
   BulkByIdsParams,
@@ -240,7 +240,7 @@ export class RulesClient {
   }
 
   /** Channel and app for a rule-change telemetry event. */
-  private resolveRuleTelemetryEventOrigin(): RuleTelemetryOrigin {
+  private resolveRuleTelemetryEventOrigin(): RuleEbtOrigin {
     return resolveRuleTelemetryEventOrigin(this.request, this.rulesClientOptions);
   }
 

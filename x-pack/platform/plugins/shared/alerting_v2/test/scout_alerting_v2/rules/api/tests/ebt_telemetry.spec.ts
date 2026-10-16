@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout/api';
 import {
   RULE_CREATED_EBT_EVENT_TYPE,
   RULE_DELETED_EBT_EVENT_TYPE,
   RULE_DISABLED_EBT_EVENT_TYPE,
   RULE_ENABLED_EBT_EVENT_TYPE,
   RULE_UPDATED_EBT_EVENT_TYPE,
-} from '../../../../../server/lib/telemetry/rule_changed_event';
+} from '@kbn/alerting-v2-schemas';
+import { expect } from '@kbn/scout/api';
 import {
   ALERTING_V2_RULES_ALL_ROLE,
   apiTest,

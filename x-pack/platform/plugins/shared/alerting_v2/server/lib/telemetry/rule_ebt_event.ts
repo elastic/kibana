@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import type { RuleKind, RuleResponse, RuleTelemetryChannel } from '@kbn/alerting-v2-schemas';
+import {
+  RULE_CREATED_EBT_EVENT_TYPE,
+  RULE_DELETED_EBT_EVENT_TYPE,
+  RULE_DISABLED_EBT_EVENT_TYPE,
+  RULE_ENABLED_EBT_EVENT_TYPE,
+  RULE_UPDATED_EBT_EVENT_TYPE,
+  type RuleChangedEventOrigin,
+  type RuleChangedEbtData,
+  type RuleEbtEventType,
+  type RuleResponse,
+} from '@kbn/alerting-v2-schemas';
 import type { EventTypeOpts } from '@kbn/core/server';
 import {
   RULE_CREATED_EVENT_TYPE,
@@ -14,7 +24,6 @@ import {
   RULE_ENABLED_EVENT_TYPE,
   RULE_UPDATED_EVENT_TYPE,
 } from '../events/rule_event_publisher/events';
-import type { EventOrigin } from '../event_origin/token';
 
 /** Domain operations reported as telemetry. Each one is its own EBT event type. */
 export const RULE_OPERATIONS = [
@@ -27,12 +36,6 @@ export const RULE_OPERATIONS = [
 
 export type RuleOperation = (typeof RULE_OPERATIONS)[number];
 
-export const RULE_CREATED_EBT_EVENT_TYPE = 'alerting_v2_rule_created' as const;
-export const RULE_UPDATED_EBT_EVENT_TYPE = 'alerting_v2_rule_updated' as const;
-export const RULE_DELETED_EBT_EVENT_TYPE = 'alerting_v2_rule_deleted' as const;
-export const RULE_ENABLED_EBT_EVENT_TYPE = 'alerting_v2_rule_enabled' as const;
-export const RULE_DISABLED_EBT_EVENT_TYPE = 'alerting_v2_rule_disabled' as const;
-
 /** Maps each domain operation to the EBT event type registered for it. */
 export const RULE_EBT_EVENT_TYPE_BY_OPERATION = {
   [RULE_CREATED_EVENT_TYPE]: RULE_CREATED_EBT_EVENT_TYPE,
@@ -40,27 +43,9 @@ export const RULE_EBT_EVENT_TYPE_BY_OPERATION = {
   [RULE_DELETED_EVENT_TYPE]: RULE_DELETED_EBT_EVENT_TYPE,
   [RULE_ENABLED_EVENT_TYPE]: RULE_ENABLED_EBT_EVENT_TYPE,
   [RULE_DISABLED_EVENT_TYPE]: RULE_DISABLED_EBT_EVENT_TYPE,
-} as const satisfies Record<RuleOperation, string>;
+} as const satisfies Record<RuleOperation, RuleEbtEventType>;
 
-export type RuleEbtEventType = (typeof RULE_EBT_EVENT_TYPE_BY_OPERATION)[RuleOperation];
-
-export interface RuleChangedEventOrigin {
-  actor: EventOrigin;
-  channel: RuleTelemetryChannel;
-  app?: string;
-}
-
-export interface RuleChangedEventData {
-  rule_id: string;
-  template_id?: string;
-  created_at?: string;
-  kind?: RuleKind;
-  builder_type?: string;
-  enabled?: boolean;
-  origin: RuleChangedEventOrigin;
-}
-
-const ruleChangedEventSchema: EventTypeOpts<RuleChangedEventData>['schema'] = {
+const ruleChangedEventSchema: EventTypeOpts<RuleChangedEbtData>['schema'] = {
   rule_id: {
     type: 'keyword',
     _meta: {
@@ -140,8 +125,8 @@ const ruleChangedEventSchema: EventTypeOpts<RuleChangedEventData>['schema'] = {
   },
 };
 
-/** One registered event per operation. Every event uses {@link RuleChangedEventData}. */
-export const ruleChangeTelemetryEvents: Array<EventTypeOpts<RuleChangedEventData>> =
+/** One registered event per operation. Every event uses {@link RuleChangedEbtData}. */
+export const ruleChangeTelemetryEvents: Array<EventTypeOpts<RuleChangedEbtData>> =
   RULE_OPERATIONS.map((operation) => ({
     eventType: RULE_EBT_EVENT_TYPE_BY_OPERATION[operation],
     schema: ruleChangedEventSchema,
@@ -162,7 +147,7 @@ export const buildRuleChangedEventData = (
   rule: RuleResponse | undefined,
   origin: RuleChangedEventOrigin,
   ruleId: string
-): RuleChangedEventData => {
+): RuleChangedEbtData => {
   const eventOrigin = toEventOrigin(origin);
 
   if (!rule) {

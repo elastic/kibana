@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RULE_CREATED_EBT_EVENT_TYPE, RULE_DELETED_EBT_EVENT_TYPE } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { EbtServiceContract } from '../../services/ebt_service/ebt_service';
@@ -12,11 +13,9 @@ import { createMockEbtService } from '../../services/ebt_service/ebt_service.moc
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createRuleResponse } from '../../test_utils';
 import {
-  RULE_CREATED_EBT_EVENT_TYPE,
-  RULE_DELETED_EBT_EVENT_TYPE,
   RULE_EBT_EVENT_TYPE_BY_OPERATION,
   RULE_OPERATIONS,
-} from '../../telemetry/rule_changed_event';
+} from '../../telemetry/rule_ebt_event';
 import {
   RULE_CREATED_EVENT_TYPE,
   RULE_DELETED_EVENT_TYPE,

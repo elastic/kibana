@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import {
+  RULE_CREATED_EBT_EVENT_TYPE,
+  type RuleChangedEbtData,
+} from '@kbn/alerting-v2-schemas';
 import type { AnalyticsServiceStart, Logger } from '@kbn/core/server';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { createLoggerService } from '../logger_service/logger_service.mock';
-import {
-  RULE_CREATED_EBT_EVENT_TYPE,
-  type RuleChangedEventData,
-} from '../../telemetry/rule_changed_event';
 import { EbtService } from './ebt_service';
 
-const data: RuleChangedEventData = {
+const data: RuleChangedEbtData = {
   rule_id: 'rule-1',
   created_at: '2026-10-12T22:05:11.352Z',
   kind: 'alert',

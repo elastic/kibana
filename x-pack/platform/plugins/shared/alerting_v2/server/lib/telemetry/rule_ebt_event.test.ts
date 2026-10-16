@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { RuleChangedEventOrigin } from '@kbn/alerting-v2-schemas';
 import { createRuleResponse } from '../test_utils';
 import {
   buildRuleChangedEventData,
   RULE_EBT_EVENT_TYPE_BY_OPERATION,
   RULE_OPERATIONS,
   ruleChangeTelemetryEvents,
-  type RuleChangedEventOrigin,
-} from './rule_changed_event';
+} from './rule_ebt_event';
 
 const apiUserOrigin: RuleChangedEventOrigin = { actor: 'user', channel: 'api' };
 

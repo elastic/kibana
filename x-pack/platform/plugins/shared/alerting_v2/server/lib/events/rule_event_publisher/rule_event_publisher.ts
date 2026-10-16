@@ -7,7 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import { v4 as uuidv4 } from 'uuid';
-import type { RuleResponse, RuleTelemetryChannel } from '@kbn/alerting-v2-schemas';
+import type { RuleResponse, RuleEbtChannel } from '@kbn/alerting-v2-schemas';
 import {
   AlertingDomainEventBusToken,
   type AlertingDomainEvent,
@@ -34,7 +34,7 @@ export interface EventRule {
   spaceId: string;
   rule?: RuleResponse;
   /** Channel the change was made through. */
-  channel: RuleTelemetryChannel;
+  channel: RuleEbtChannel;
   /** App the change was made from, when known. */
   app?: string;
 }
