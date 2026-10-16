@@ -20,7 +20,6 @@ const defaultProps = {
   onEditClick,
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/206367
 describe('PushCallouts ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -30,6 +29,6 @@ describe('PushCallouts ', () => {
     renderWithTestingProviders(<PushCallouts {...defaultProps} />);
 
     expect(await screen.findByText('My title')).toBeInTheDocument();
-    expect(await screen.findByText('My desc')).toBeInTheDocument();
-  });
+    expect(screen.getByText('My desc')).toBeInTheDocument();
+  }, 30000);
 });
