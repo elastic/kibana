@@ -116,18 +116,50 @@ describe('buildComposition', () => {
     expect(build('<render_attachment field-id="x" id="a1" />')).toEqual(['[a1 v2]']);
   });
 
-  it('keeps the indentation of an indented code block after a tag', () => {
+  it('keeps an indented code block after a tag as a code block', () => {
     expect(build('<render_attachment id="a1" />\n\n    const a = 1;\n    const b = 2;')).toEqual([
       '[a1 v2]',
-      '    const a = 1;\n    const b = 2;',
+      '```\nconst a = 1;\nconst b = 2;\n```',
     ]);
   });
 
-  it('keeps the indentation of an indented code block that starts the message', () => {
+  it('keeps an indented code block that starts the message as a code block', () => {
     expect(build('    const a = 1;\n\n<render_attachment id="a1" />')).toEqual([
-      '    const a = 1;',
+      '```\nconst a = 1;\n```',
       '[a1 v2]',
     ]);
+  });
+
+  it('keeps a list whole and places the attachment after it', () => {
+    expect(build('1. a <render_attachment id="a1" />\n2. b')).toEqual(['1. a\n2. b', '[a1 v2]']);
+  });
+
+  it('keeps emphasis around a tag intact', () => {
+    expect(build('**see <render_attachment id="a1" /> here**')).toEqual([
+      '**see here**',
+      '[a1 v2]',
+    ]);
+  });
+
+  it('keeps a table whole and places the attachment after it', () => {
+    expect(build('| a | b |\n| - | - |\n| <render_attachment id="a1" /> | c |')).toEqual([
+      '| a | b |\n| - | - |\n| | c |',
+      '[a1 v2]',
+    ]);
+  });
+
+  it('leaves tags in code as text', () => {
+    const fenced = '```\n<render_attachment id="a1" />\n```';
+    const inline = 'Use `<render_attachment id="a1" />` to embed.';
+
+    expect(build(fenced)).toEqual([fenced]);
+    expect(build(inline)).toEqual([inline]);
+  });
+
+  it('renders adjacent tags in order', () => {
+    expect(
+      build('<render_attachment id="a1" version="1" /> <render_attachment id="a1" />')
+    ).toEqual(['[a1 v1]', '[a1 v2]']);
   });
 
   it('drops tags without an id', () => {
