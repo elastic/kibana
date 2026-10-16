@@ -6,32 +6,41 @@
  */
 
 import { lastValueFrom } from 'rxjs';
+import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { serviceNameQuery } from '../services/data/service_name_query';
-import { callApmApi } from '../services/rest/create_call_apm_api';
+import { serviceNameQuery } from '../data/service_name_query';
+import { callApmApi, createCallApmApi } from './create_call_apm_api';
 
 interface ServicesAggregation {
   services?: { buckets?: Array<{ key: string }> };
 }
 
+/** Names of the services with RUM page loads between `start` and `end`. */
 export const fetchClassicRumApplications = async ({
+  core,
   data,
   start,
   end,
+  signal,
 }: {
+  core: CoreStart;
   data: DataPublicPluginStart;
   start: number;
   end: number;
+  signal?: AbortSignal;
 }): Promise<string[]> => {
+  // The APM client is otherwise only initialized when the ux app mounts.
+  createCallApmApi(core);
   const { apmDataViewIndexPattern } = await callApmApi(
     'GET /internal/apm/data_view/index_pattern',
-    { signal: null }
+    { signal: signal ?? null }
   );
 
   const { rawResponse } = await lastValueFrom(
-    data.search.search({
-      params: { index: apmDataViewIndexPattern, ...serviceNameQuery(start, end) },
-    })
+    data.search.search(
+      { params: { index: apmDataViewIndexPattern, ...serviceNameQuery(start, end) } },
+      { abortSignal: signal }
+    )
   );
 
   const { services } = (rawResponse.aggregations ?? {}) as ServicesAggregation;

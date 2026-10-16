@@ -12,7 +12,7 @@ import { AppStatus } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { hasDigitalExperienceAccess } from './capabilities';
 import { DigitalExperiencePlugin } from './plugin';
-import type { DigitalExperienceSetupDeps } from './types';
+import type { DigitalExperienceSetupDeps, DigitalExperienceStartDeps } from './types';
 
 const createCapabilities = (show: boolean) =>
   ({
@@ -33,7 +33,6 @@ const setup = ({ show, ux }: { show: boolean; ux?: { hideLegacyNavigation: jest.
   plugin.setup(
     coreSetup as unknown as CoreSetup,
     {
-      ux,
       observabilityShared: { navigation: { registerSections } },
     } as unknown as DigitalExperienceSetupDeps
   );
@@ -41,7 +40,8 @@ const setup = ({ show, ux }: { show: boolean; ux?: { hideLegacyNavigation: jest.
   const [app] = coreSetup.application.register.mock.calls[0] as [App];
   const sections$: Observable<Array<{ label: string; entries: unknown[] }>> =
     registerSections.mock.calls[0][0];
-  return { plugin, app, coreStart, sections$ };
+  const start = () => plugin.start(coreStart, { ux } as unknown as DigitalExperienceStartDeps);
+  return { app, start, sections$ };
 };
 
 describe('hasDigitalExperienceAccess', () => {
@@ -52,13 +52,11 @@ describe('hasDigitalExperienceAccess', () => {
 });
 
 describe('DigitalExperiencePlugin', () => {
-  it('registers the digital_experience app without touching the legacy ux navigation in setup', () => {
-    const ux = { hideLegacyNavigation: jest.fn() };
-    const { app } = setup({ show: true, ux });
+  it('registers the digital_experience app', () => {
+    const { app } = setup({ show: true });
 
     expect(app.id).toBe('digital_experience');
     expect(app.title).toBe('Digital Experience');
-    expect(ux.hideLegacyNavigation).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -66,27 +64,27 @@ describe('DigitalExperiencePlugin', () => {
     [false, 0],
   ])('hides the legacy ux navigation on start only when show is %s', (show, expectedCalls) => {
     const ux = { hideLegacyNavigation: jest.fn() };
-    const { plugin, coreStart } = setup({ show, ux });
+    const { start } = setup({ show, ux });
 
-    plugin.start(coreStart);
+    start();
 
     expect(ux.hideLegacyNavigation).toHaveBeenCalledTimes(expectedCalls);
   });
 
   it('works without the ux plugin', () => {
-    const { plugin, coreStart } = setup({ show: true });
+    const { start } = setup({ show: true });
 
-    expect(() => plugin.start(coreStart)).not.toThrow();
+    expect(start).not.toThrow();
   });
 
   it.each([
     [true, AppStatus.accessible],
     [false, AppStatus.inaccessible],
   ])('sets the app status when show is %s', async (show, status) => {
-    const { plugin, app, coreStart } = setup({ show });
+    const { app, start } = setup({ show });
     const updates = firstValueFrom(app.updater$!.pipe(take(2), toArray()));
 
-    plugin.start(coreStart);
+    start();
 
     const [, afterStart] = await updates;
     expect((afterStart as AppUpdater)(app)).toEqual({ status });

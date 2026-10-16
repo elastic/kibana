@@ -6,55 +6,57 @@
  */
 
 import React from 'react';
-import useAsync from 'react-use/lib/useAsync';
 import { EuiPageSection } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DatePickerContextProvider } from '@kbn/observability-plugin/public';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
-import { CsmSharedContextProvider } from '../components/app/rum_dashboard/csm_shared_context';
-import { DashboardToolbar } from '../components/app/rum_dashboard/rum_home';
-import { RumOverview } from '../components/app/rum_dashboard';
-import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
-import { PluginContext } from '../context/plugin_context';
-import { createCallApmApi } from '../services/rest/create_call_apm_api';
-import { uxRouter } from '../application/ux_app';
-import type { ApmPluginSetupDeps, ApmPluginStartDeps, ClassicRumDashboardProps } from '../plugin';
+import { CsmSharedContextProvider } from '../app/rum_dashboard/csm_shared_context';
+import { DashboardToolbar } from '../app/rum_dashboard/rum_home';
+import { RumOverview } from '../app/rum_dashboard';
+import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';
+import type { PluginContextValue } from '../../context/plugin_context';
+import { PluginContext } from '../../context/plugin_context';
+import { createCallApmApi } from '../../services/rest/create_call_apm_api';
+import { uxRouter } from '../../application/ux_app';
+import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../../plugin';
+import type { ClassicRumDashboardProps } from './types';
 import { useEmbeddedHistory } from './use_embedded_history';
 
-export const createClassicRumDashboard =
-  ({
-    core,
-    setupDeps,
-    startDeps,
+/** Builds the dashboard with the same providers as the ux app, minus the ones its host provides. */
+export const createClassicRumDashboard = ({
+  core,
+  setupDeps,
+  startDeps,
+  isDev,
+  spaceId,
+}: {
+  core: CoreStart;
+  setupDeps: ApmPluginSetupDeps;
+  startDeps: ApmPluginStartDeps;
+  isDev: boolean;
+  spaceId: string;
+}): React.ComponentType<ClassicRumDashboardProps> => {
+  // The ux app does this on mount; the dashboard can render without the app ever being mounted.
+  createCallApmApi(core);
+
+  const services = { ...core, ...setupDeps, ...startDeps };
+  const pluginContext: PluginContextValue = {
+    exploratoryView: startDeps.exploratoryView,
+    observabilityShared: startDeps.observabilityShared,
+    spaceId,
     isDev,
-  }: {
-    core: CoreStart;
-    setupDeps: ApmPluginSetupDeps;
-    startDeps: ApmPluginStartDeps;
-    isDev: boolean;
-  }): React.ComponentType<ClassicRumDashboardProps> =>
-  ({ serviceName, timeRange, onTimeRangeChange }) => {
-    createCallApmApi(core);
+  };
 
-    const { observabilityShared, exploratoryView } = startDeps;
-    const { value: activeSpace } = useAsync(async () => startDeps.spaces?.getActiveSpace(), []);
-
+  return ({ serviceName, timeRange, onTimeRangeChange }) => {
     // The dashboard keeps its own in-memory URL state, so the pinned service name never leaks
     // into, or gets overwritten by, the URL of the host app.
     const history = useEmbeddedHistory({ serviceName, timeRange, onTimeRangeChange });
 
     return (
-      <KibanaContextProvider services={{ ...core, ...setupDeps, ...startDeps }}>
-        <PluginContext.Provider
-          value={{
-            exploratoryView,
-            observabilityShared,
-            spaceId: activeSpace?.id ?? 'default',
-            isDev,
-          }}
-        >
+      <KibanaContextProvider services={services}>
+        <PluginContext.Provider value={pluginContext}>
           <RouterProvider history={history} router={uxRouter}>
             <DatePickerContextProvider>
               <InspectorContextProvider>
@@ -73,3 +75,4 @@ export const createClassicRumDashboard =
       </KibanaContextProvider>
     );
   };
+};

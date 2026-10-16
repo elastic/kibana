@@ -47,30 +47,19 @@ import type {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { OBLT_UX_APP_ID } from '@kbn/deeplinks-observability';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { createLazyClassicRumDashboard } from './embeddable/lazy_classic_rum_dashboard';
-import { fetchClassicRumApplications } from './embeddable/fetch_classic_rum_applications';
-import { createCallApmApi as initCallApmApi } from './services/rest/create_call_apm_api';
+import { createLazyClassicRumDashboard } from './components/classic_rum_dashboard/lazy_classic_rum_dashboard';
+import type { ClassicRumDashboardProps } from './components/classic_rum_dashboard/types';
 
-export interface UxPluginSetup {
-  hideLegacyNavigation(): void;
-}
-
-export interface ClassicRumTimeRange {
-  rangeFrom: string;
-  rangeTo: string;
-}
-
-export interface ClassicRumDashboardProps {
-  serviceName: string;
-  /** Time range owned by the host app; the dashboard falls back to the global timefilter. */
-  timeRange?: ClassicRumTimeRange;
-  /** Called when the user changes the time range from the dashboard's own date picker. */
-  onTimeRangeChange?: (timeRange: ClassicRumTimeRange) => void;
-}
+export type UxPluginSetup = void;
 
 export interface UxPluginStart {
   ClassicRumDashboard: ComponentType<ClassicRumDashboardProps>;
-  fetchClassicRumApplications(params: { start: number; end: number }): Promise<string[]>;
+  fetchClassicRumApplications(params: {
+    start: number;
+    end: number;
+    signal?: AbortSignal;
+  }): Promise<string[]>;
+  hideLegacyNavigation(): void;
 }
 
 export interface ApmPluginSetupDeps {
@@ -107,12 +96,13 @@ async function getDataStartPlugin(core: CoreSetup) {
 
 export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
   private legacyNavigationHidden = false;
-  private pluginSetupDeps?: ApmPluginSetupDeps;
+  // Assigned in setup, which core always runs before start.
+  private pluginSetupDeps!: ApmPluginSetupDeps;
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(private readonly initContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, plugins: ApmPluginSetupDeps): UxPluginSetup {
+  public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
     const pluginSetupDeps = plugins;
     this.pluginSetupDeps = plugins;
     if (plugins.observability) {
@@ -243,31 +233,26 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
         });
       },
     });
-
-    return {
-      hideLegacyNavigation: () => {
-        this.legacyNavigationHidden = true;
-        this.appUpdater$.next(() => ({ visibleIn: [] }));
-      },
-    };
   }
 
   public start(core: CoreStart, plugins: ApmPluginStartDeps): UxPluginStart {
-    const { pluginSetupDeps } = this;
-    if (!pluginSetupDeps) {
-      throw new Error('UxPlugin.start was called before setup');
-    }
-
     return {
       ClassicRumDashboard: createLazyClassicRumDashboard({
         core,
-        setupDeps: pluginSetupDeps,
+        setupDeps: this.pluginSetupDeps,
         startDeps: plugins,
         isDev: this.initContext.env.mode.dev,
       }),
-      fetchClassicRumApplications: ({ start, end }) => {
-        initCallApmApi(core);
-        return fetchClassicRumApplications({ data: plugins.data, start, end });
+      fetchClassicRumApplications: async (params) => {
+        const { fetchClassicRumApplications } = await import(
+          './services/rest/fetch_classic_rum_applications'
+        );
+        return fetchClassicRumApplications({ ...params, core, data: plugins.data });
+      },
+      // The nav sections are read once all plugins have started, so hiding during start is in time.
+      hideLegacyNavigation: () => {
+        this.legacyNavigationHidden = true;
+        this.appUpdater$.next(() => ({ visibleIn: [] }));
       },
     };
   }

@@ -8,13 +8,14 @@
 import { useEffect, useMemo, useRef } from 'react';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
-import type { ClassicRumTimeRange } from '../plugin';
+import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
+import type { ClassicRumTimeRange } from './types';
 
 const getTimeRange = (search: string): ClassicRumTimeRange | undefined => {
-  const params = new URLSearchParams(search);
-  const rangeFrom = params.get('rangeFrom');
-  const rangeTo = params.get('rangeTo');
-  return rangeFrom && rangeTo ? { rangeFrom, rangeTo } : undefined;
+  const { rangeFrom, rangeTo } = toQuery(search);
+  return typeof rangeFrom === 'string' && typeof rangeTo === 'string'
+    ? { rangeFrom, rangeTo }
+    : undefined;
 };
 
 const isSameTimeRange = (a?: ClassicRumTimeRange, b?: ClassicRumTimeRange): boolean =>
@@ -42,9 +43,7 @@ export const useEmbeddedHistory = ({
   const history = useMemo(
     () =>
       createMemoryHistory({
-        initialEntries: [
-          `/?${new URLSearchParams({ serviceName, ...timeRangeRef.current }).toString()}`,
-        ],
+        initialEntries: [`/?${fromQuery({ serviceName, ...timeRangeRef.current })}`],
       }),
     [serviceName]
   );
@@ -53,10 +52,10 @@ export const useEmbeddedHistory = ({
     if (!timeRange || isSameTimeRange(timeRange, getTimeRange(history.location.search))) {
       return;
     }
-    const params = new URLSearchParams(history.location.search);
-    params.set('rangeFrom', timeRange.rangeFrom);
-    params.set('rangeTo', timeRange.rangeTo);
-    history.replace({ ...history.location, search: `?${params.toString()}` });
+    history.replace({
+      ...history.location,
+      search: fromQuery({ ...toQuery(history.location.search), ...timeRange }),
+    });
   }, [history, timeRange]);
 
   useEffect(

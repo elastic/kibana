@@ -23,11 +23,8 @@ export class DigitalExperiencePlugin
   implements Plugin<void, void, DigitalExperienceSetupDeps, DigitalExperienceStartDeps>
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private ux?: DigitalExperienceSetupDeps['ux'];
 
   public setup(core: CoreSetup, plugins: DigitalExperienceSetupDeps) {
-    this.ux = plugins.ux;
-
     plugins.observabilityShared.navigation.registerSections(
       from(core.getStartServices()).pipe(
         map(([coreStart]) =>
@@ -70,16 +67,15 @@ export class DigitalExperiencePlugin
     });
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, { ux }: DigitalExperienceStartDeps) {
     const hasAccess = hasDigitalExperienceAccess(core.application.capabilities);
     this.appUpdater$.next(() => ({
       status: hasAccess ? AppStatus.accessible : AppStatus.inaccessible,
     }));
 
-    // Only users who can see Digital Experience lose the legacy User Experience entry; ux reads
-    // this flag once all plugins have started, so calling it here is early enough.
+    // Only users who can see Digital Experience lose the legacy User Experience entry.
     if (hasAccess) {
-      this.ux?.hideLegacyNavigation();
+      ux?.hideLegacyNavigation();
     }
   }
 

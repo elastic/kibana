@@ -25,8 +25,12 @@ const NAME_COLUMN = i18n.translate('xpack.digitalExperience.applications.nameCol
   defaultMessage: 'Name',
 });
 
+const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.applications.fetchError', {
+  defaultMessage: 'Could not load the applications',
+});
+
 export function ApplicationsListPage() {
-  const { application, ux } = useKibanaServices();
+  const { application, notifications, ux } = useKibanaServices();
   const router = useDigitalExperienceRouter();
   const { timeRange } = useTimeRange();
 
@@ -48,17 +52,22 @@ export function ApplicationsListPage() {
       return;
     }
 
-    let isCancelled = false;
+    const controller = new AbortController();
+    const { signal } = controller;
     setIsLoading(true);
-    ux.fetchClassicRumApplications({ start, end })
-      .then((names) => !isCancelled && setApplications(names))
-      .catch(() => !isCancelled && setApplications([]))
-      .finally(() => !isCancelled && setIsLoading(false));
+    ux.fetchClassicRumApplications({ start, end, signal })
+      .then((names) => !signal.aborted && setApplications(names))
+      .catch((error: Error) => {
+        if (signal.aborted) {
+          return;
+        }
+        setApplications([]);
+        notifications.toasts.addError(error, { title: FETCH_ERROR_TITLE });
+      })
+      .finally(() => !signal.aborted && setIsLoading(false));
 
-    return () => {
-      isCancelled = true;
-    };
-  }, [ux, from, to, refreshCount]);
+    return () => controller.abort();
+  }, [ux, notifications, from, to, refreshCount]);
 
   const columns: Array<EuiBasicTableColumn<ApplicationRow>> = [
     {

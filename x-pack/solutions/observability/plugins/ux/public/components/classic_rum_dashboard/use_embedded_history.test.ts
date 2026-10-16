@@ -6,7 +6,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import type { ClassicRumTimeRange } from '../plugin';
+import type { ClassicRumTimeRange } from './types';
 import { useEmbeddedHistory } from './use_embedded_history';
 
 const getParams = (search: string) => Object.fromEntries(new URLSearchParams(search));

@@ -10,7 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import type { App, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { UxPlugin } from './plugin';
-import type { ApmPluginSetupDeps } from './plugin';
+import type { ApmPluginSetupDeps, ApmPluginStartDeps } from './plugin';
 
 const setup = () => {
   const coreSetup = coreMock.createSetup();
@@ -25,12 +25,13 @@ const setup = () => {
 
   const registerSections = jest.fn();
   const plugin = new UxPlugin({ env: { mode: { dev: false } } } as PluginInitializerContext);
-  const contract = plugin.setup(
+  plugin.setup(
     coreSetup as unknown as CoreSetup,
     {
       observabilityShared: { navigation: { registerSections } },
     } as unknown as ApmPluginSetupDeps
   );
+  const contract = plugin.start(coreStart, {} as ApmPluginStartDeps);
 
   const [app] = coreSetup.application.register.mock.calls[0] as [App];
   const sections$: Observable<Array<{ label: string }>> = registerSections.mock.calls[0][0];

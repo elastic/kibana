@@ -30,11 +30,14 @@ beforeEach(() => {
   jest.mocked(useDigitalExperienceRouter).mockReturnValue(digitalExperienceRouter);
 });
 
+const addError = jest.fn();
+
 const createServices = (ux?: { fetchClassicRumApplications: jest.Mock }) =>
   ({
     application: {
       getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
     },
+    notifications: { toasts: { addError } },
     ux,
   } as unknown as ReturnType<typeof useKibanaServices>);
 
@@ -53,7 +56,34 @@ describe('ApplicationsListPage', () => {
     expect(ux.fetchClassicRumApplications).toHaveBeenCalledWith({
       start: expect.any(Number),
       end: expect.any(Number),
+      signal: expect.any(AbortSignal),
     });
+  });
+
+  it('shows an error toast and the empty prompt when the fetch fails', async () => {
+    const error = new Error('boom');
+    const ux = { fetchClassicRumApplications: jest.fn().mockRejectedValue(error) };
+    useKibanaServicesMock.mockReturnValue(createServices(ux));
+
+    render(<ApplicationsListPage />);
+
+    await waitFor(() =>
+      expect(addError).toHaveBeenCalledWith(error, { title: 'Could not load the applications' })
+    );
+    expect(screen.getByTestId('digitalExperienceApplicationsEmpty')).toBeInTheDocument();
+  });
+
+  it('aborts the pending fetch on unmount', () => {
+    const fetchClassicRumApplications = jest.fn(
+      (_params: { signal: AbortSignal }) => new Promise<string[]>(() => {})
+    );
+    useKibanaServicesMock.mockReturnValue(createServices({ fetchClassicRumApplications }));
+
+    const { unmount } = render(<ApplicationsListPage />);
+    const [[{ signal }]] = fetchClassicRumApplications.mock.calls;
+    unmount();
+
+    expect(signal.aborted).toBe(true);
   });
 
   it('shows an empty prompt when there are no results', async () => {
