@@ -915,6 +915,155 @@ describe('SearchMethodsService', () => {
       );
     });
 
+    describe('search context', () => {
+      const phraseFilter: Filter = {
+        meta: { alias: null, disabled: false, negate: false },
+        query: { match_phrase: { host: 'fromFilterPill' } },
+      };
+      const timeRange = { from: '2024-01-01T00:00:00.000Z', to: '2024-01-02T00:00:00.000Z' };
+      const sort = [{ timestamp: 'desc' as const }];
+
+      const page = (id: string, sortValue: number) => ({
+        hits: { hits: [{ _id: id, _source: {}, sort: [sortValue] }], total: { value: 100 } },
+      });
+      const getBody = (call: number) => mockSearch.mock.calls[call][0].params.body;
+
+      beforeEach(() => {
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(page('1', 1000)))
+          .mockReturnValueOnce(createMockResponse(page('2', 2000)));
+      });
+
+      it('leaves the query untouched without a context', async () => {
+        const query = { term: { field: 'value' } };
+
+        await service.dslPaginated({ index: 'logs-*', query, sort });
+
+        expect(getBody(0).query).toEqual(query);
+        expect(getEsQueryConfig).not.toHaveBeenCalled();
+      });
+
+      it('leaves the query untouched when the context has nothing to apply', async () => {
+        const query = { term: { field: 'value' } };
+
+        await service.dslPaginated({ index: 'logs-*', query, sort, kibanaQueryContext: {} });
+
+        expect(getBody(0).query).toEqual(query);
+      });
+
+      it('applies kibanaFilters', async () => {
+        await service.dslPaginated({
+          index: 'logs-*',
+          sort,
+          kibanaQueryContext: { kibanaFilters: [phraseFilter] },
+        });
+
+        expect(getBody(0).query.bool.filter).toEqual([
+          { match_phrase: { host: 'fromFilterPill' } },
+        ]);
+      });
+
+      it('applies kqlQuery', async () => {
+        await service.dslPaginated({
+          index: 'logs-*',
+          sort,
+          kibanaQueryContext: { kqlQuery: { language: 'lucene', query: 'message:error' } },
+        });
+
+        expect(getBody(0).query.bool.must).toEqual([{ query_string: expect.any(Object) }]);
+      });
+
+      it('applies the timeRange to the timeField', async () => {
+        await service.dslPaginated({
+          index: 'logs-*',
+          sort,
+          kibanaQueryContext: { timeRange, timeField: '@timestamp' },
+        });
+
+        expect(getBody(0).query.bool.filter).toEqual([
+          {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: timeRange.from,
+                lte: timeRange.to,
+              },
+            },
+          },
+        ]);
+      });
+
+      it('does not send kibanaQueryContext to Elasticsearch', async () => {
+        const result = await service.dslPaginated({
+          index: 'logs-*',
+          sort,
+          kibanaQueryContext: { kibanaFilters: [phraseFilter] },
+        });
+        await result.pagination.nextPage();
+
+        expect(getBody(0)).not.toHaveProperty('kibanaQueryContext');
+        expect(getBody(1)).not.toHaveProperty('kibanaQueryContext');
+      });
+
+      it('still requests track_total_hits with a context', async () => {
+        await service.dslPaginated({
+          index: 'logs-*',
+          sort,
+          kibanaQueryContext: { kibanaFilters: [phraseFilter] },
+        });
+
+        expect(getBody(0).track_total_hits).toBe(true);
+      });
+
+      it('reuses the same merged query on nextPage() without re-reading the config', async () => {
+        const result = await service.dslPaginated({
+          index: 'logs-*',
+          query: { term: { field3: 'value3' } },
+          sort,
+          kibanaQueryContext: { kibanaFilters: [phraseFilter], timeRange, timeField: '@timestamp' },
+        });
+        await result.pagination.nextPage();
+
+        expect(getEsQueryConfig).toHaveBeenCalledTimes(1);
+        expect(getBody(1).query).toEqual(getBody(0).query);
+        expect(getBody(1).search_after).toEqual([1000]);
+      });
+    });
+
+    it('applies kibanaQueryContext to the first page and keeps it on nextPage()', async () => {
+      const page = (id: string, sort: number) => ({
+        hits: { hits: [{ _id: id, _source: {}, sort: [sort] }], total: { value: 100 } },
+      });
+      mockSearch
+        .mockReturnValueOnce(createMockResponse(page('1', 1000)))
+        .mockReturnValueOnce(createMockResponse(page('2', 2000)));
+      const query = { term: { field3: 'value3' } };
+
+      const result = await service.dslPaginated({
+        index: 'logs-*',
+        query,
+        sort: [{ timestamp: 'desc' }],
+        kibanaQueryContext: {
+          kibanaFilters: [
+            {
+              meta: { alias: null, disabled: false, negate: false },
+              query: { match_phrase: { host: 'fromFilterPill' } },
+            },
+          ],
+        },
+      });
+      await result.pagination.nextPage();
+
+      expect(getEsQueryConfig).toHaveBeenCalledTimes(1);
+      [0, 1].forEach((call) => {
+        const body = mockSearch.mock.calls[call][0].params.body;
+        expect(body).not.toHaveProperty('kibanaQueryContext');
+        expect(body.query.bool.filter).toEqual([{ match_phrase: { host: 'fromFilterPill' } }]);
+        expect(body.query.bool.must).toContainEqual(query);
+      });
+      expect(mockSearch.mock.calls[1][0].params.body.search_after).toEqual([1000]);
+    });
+
     it('nextPage() keeps projectRouting from the params', async () => {
       const page = (id: string, sort: number) => ({
         hits: { hits: [{ _id: id, _source: {}, sort: [sort] }], total: { value: 100 } },

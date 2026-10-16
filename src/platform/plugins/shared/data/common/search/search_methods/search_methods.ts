@@ -178,8 +178,12 @@ export class SearchMethodsService implements ISearchMethods {
     params: IDslPaginatedSearchParams,
     options?: IDslPaginatedSearchOptions
   ): Promise<IDslPaginatedSearchResult> {
+    // Apply the context once so every page reuses the merged query
+    const contextParams = params.kibanaQueryContext
+      ? await this.applyDslKibanaQueryContext(params)
+      : params;
     // trackTotalHits is required for pagination to determine if there are more pages
-    const paginatedParams = { ...params, trackTotalHits: true as const };
+    const paginatedParams = { ...contextParams, trackTotalHits: true as const };
     const request = this.buildDslRequest(paginatedParams, options);
     const response = await this.executeSearch(
       request,
@@ -188,7 +192,7 @@ export class SearchMethodsService implements ISearchMethods {
 
     return {
       rawResponse: response.rawResponse,
-      pagination: this.buildDslPagination(response.rawResponse, params, options),
+      pagination: this.buildDslPagination(response.rawResponse, contextParams, options),
     };
   }
 
