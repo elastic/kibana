@@ -328,15 +328,11 @@ export async function validateDestinations(
       warnings.length === 0
         ? ''
         : warnings.length === 1
-          ? ', 1 warning'
-          : `, ${warnings.length} warnings`;
+        ? ', 1 warning'
+        : `, ${warnings.length} warnings`;
     const header = `Destination validation failed (${errorCount}${warningCount}):`;
-    const formatted = diagnostics.map(
-      (d, i) => `[${i + 1}] [${d.severity}] ${d.message}`
-    );
-    throw new ActionPolicyOperationValidationError(
-      `${header}\n\n${formatted.join('\n\n')}`
-    );
+    const formatted = diagnostics.map((d, i) => `[${i + 1}] [${d.severity}] ${d.message}`);
+    throw new ActionPolicyOperationValidationError(`${header}\n\n${formatted.join('\n\n')}`);
   }
 
   return { diagnostics };
