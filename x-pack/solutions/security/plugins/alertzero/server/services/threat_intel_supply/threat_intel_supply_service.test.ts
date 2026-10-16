@@ -432,7 +432,6 @@ describe('ThreatIntelSupplyService', () => {
 
     expect(status.modelTiers).toEqual([
       { tier: 'efficient', state: 'recommended' },
-      { tier: 'balanced', state: 'recommended' },
       { tier: 'frontier', state: 'recommended' },
     ]);
   });
@@ -456,7 +455,7 @@ describe('ThreatIntelSupplyService', () => {
     // No registry and no default connector: nothing for Hunt to run on, so every tier says so.
     expect(
       (await createService().getSupplyStatus(SPACE_A, request)).modelTiers.map(({ state }) => state)
-    ).toEqual(['unavailable', 'unavailable', 'unavailable']);
+    ).toEqual(['unavailable', 'unavailable']);
   });
 
   it('reports drift when Hunt is on and a required TI workflow is off', async () => {
