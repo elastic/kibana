@@ -117,6 +117,10 @@ entries. Blast-radius `type` remains the row-shape label listed above.
 
 ### Step 1: Retrieve Grounding Context
 
+**Prefetched.** When the batch has a `## Prefetched context` whose `truncated` is false, skip the
+searches below: its `query_kis` are the Phase 1 results, its `feature_kis` the Phase 2 results, and
+`unmatched_rule_uuids` are the rules Step 2 would record as `NO_MATCH`. Make no `ki_search` call.
+
 Two sequential phases, at most three calls per batch. Phase 2 takes Phase 1's result as input, so
 send Phase 2 only after the Phase 1 response has returned.
 

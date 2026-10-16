@@ -12,14 +12,20 @@ import discoveryUserPrompt from './user_prompt.text';
 export interface DiscoveryInputParams {
   /** The unhandled detection batch (one latest doc per rule). */
   detections: Array<Partial<Detection>>;
+  /** The grounding skill's Step 1 results, prefetched; the agent then makes no `ki_search` call. */
+  prefetchedContext?: Record<string, unknown>;
 }
 
 /**
  * Build the investigator agent's user message — the same shape the production batch workflow sends.
  * The agent fetches active events itself via event_search at the start of each batch.
  */
-export function buildDiscoveryInput({ detections }: DiscoveryInputParams): string {
+export function buildDiscoveryInput({
+  detections,
+  prefetchedContext,
+}: DiscoveryInputParams): string {
   return Mustache.render(discoveryUserPrompt, {
     activeBatch: JSON.stringify(detections),
+    prefetchedContext: prefetchedContext ? JSON.stringify(prefetchedContext) : undefined,
   }).trim();
 }

@@ -9,6 +9,10 @@ tool result, or a KI; with no source, make no claim.
 - **`## Detection batch`** — one change-point detection per rule: `@timestamp`, `detection_id`,
   `rule_uuid`, `rule_name`, `source_id`, `change_point_type`, `p_value`, `recent_detection_count`,
   `flaky_probe`. Copy `source_id` as is into `slugs` and signal `source_id`.
+- **`## Prefetched context`** (optional) — the grounding skill's Step 1 search results for this
+  batch: `query_kis`, `feature_kis`, `unmatched_rule_uuids`, `truncated`. When present and
+  `truncated` is false, make no `platform_sig_events_ki_search` call and use it as those results;
+  otherwise run Step 1 as written.
 - `p_value`, `change_point_type`, and `recent_detection_count` adjust `confidence` only; the
   grounding verdict decides whether a signal is real.
 - `flaky_probe: true` → apply `<chronic_and_recurring>` rule 1. Otherwise ignore
