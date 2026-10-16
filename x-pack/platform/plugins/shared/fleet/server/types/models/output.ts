@@ -333,21 +333,21 @@ const KafkaKerberosSchema = schema.object({
     {
       meta: {
         description:
-          'How the agent authenticates to Kerberos: with a keytab file or with a username and a password.',
+          'How the agent authenticates with Kerberos: a keytab file, or a username and password.',
       },
     }
   ),
   config_path: schema.string({
     minLength: 1,
     meta: {
-      description: 'Path of the Kerberos configuration file (`krb5.conf`) on the agent host.',
+      description: 'Path to the Kerberos configuration file (`krb5.conf`) on the agent host.',
     },
   }),
   keytab: schema.maybe(
     schema.string({
       meta: {
         description:
-          'Path of the keytab file on the agent host. Required when `auth_type` is `keytab`.',
+          'Path to the keytab file on the agent host. Required when `auth_type` is `keytab`.',
       },
     })
   ),
@@ -360,11 +360,11 @@ const KafkaKerberosSchema = schema.object({
     })
   ),
   service_name: schema.maybe(
-    schema.string({ meta: { description: 'Name of the Kerberos service of the Kafka brokers.' } })
+    schema.string({ meta: { description: 'Kerberos service name of the Kafka brokers.' } })
   ),
   realm: schema.string({
     minLength: 1,
-    meta: { description: 'Kerberos realm.' },
+    meta: { description: 'Kerberos realm. This is usually the domain name in uppercase.' },
   }),
   enable_krb5_fast: schema.maybe(
     schema.boolean({

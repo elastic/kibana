@@ -71,13 +71,13 @@ export const OutputFormKafkaKerberos: React.FunctionComponent<{ inputs: OutputFo
         title={
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.kafkaKerberosHostFilesCalloutTitle"
-            defaultMessage="The files are read on the host of the agent"
+            defaultMessage="Kerberos files must exist on the Elastic Agent host"
           />
         }
         text={
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.kafkaKerberosHostFilesCalloutText"
-            defaultMessage="The paths of the Kerberos configuration and of the keytab are paths on every host where an agent uses this output."
+            defaultMessage="Use paths that point to the Kerberos files on each Elastic Agent host that sends data to this output."
           />
         }
         data-test-subj="settingsOutputsFlyout.kafkaKerberosHostFilesCallout"
@@ -90,13 +90,13 @@ export const OutputFormKafkaKerberos: React.FunctionComponent<{ inputs: OutputFo
             title={
               <FormattedMessage
                 id="xpack.fleet.settings.editOutputFlyout.kafkaKerberosFipsCalloutTitle"
-                defaultMessage="Not supported on FIPS agents"
+                defaultMessage="Not supported on agents in FIPS mode"
               />
             }
             text={
               <FormattedMessage
                 id="xpack.fleet.settings.editOutputFlyout.kafkaKerberosFipsCalloutText"
-                defaultMessage="FIPS agents cannot use Kerberos, and fail to send data to an output that uses it."
+                defaultMessage="Agents in FIPS mode can't use Kerberos. They fail to send data if this output uses it."
               />
             }
             data-test-subj="settingsOutputsFlyout.kafkaKerberosFipsCallout"
@@ -131,7 +131,7 @@ export const OutputFormKafkaKerberos: React.FunctionComponent<{ inputs: OutputFo
         )}
         helpText={i18n.translate(
           'xpack.fleet.settings.editOutputFlyout.kafkaKerberosConfigPathHelpText',
-          { defaultMessage: 'Path of the krb5.conf file on the host of the agent.' }
+          { defaultMessage: 'Path to the krb5.conf file on the Elastic Agent host.' }
         )}
         input={inputs.kafkaKerberosConfigPathInput}
         testSubj="kafkaKerberosConfigPathInput"
@@ -178,7 +178,7 @@ export const OutputFormKafkaKerberos: React.FunctionComponent<{ inputs: OutputFo
           })}
           helpText={i18n.translate(
             'xpack.fleet.settings.editOutputFlyout.kafkaKerberosKeytabHelpText',
-            { defaultMessage: 'Path of the keytab file on the host of the agent.' }
+            { defaultMessage: 'Path to the keytab file on the Elastic Agent host.' }
           )}
           input={inputs.kafkaKerberosKeytabInput}
           testSubj="kafkaKerberosKeytabInput"
@@ -191,7 +191,7 @@ export const OutputFormKafkaKerberos: React.FunctionComponent<{ inputs: OutputFo
         )}
         helpText={i18n.translate(
           'xpack.fleet.settings.editOutputFlyout.kafkaKerberosServiceNameHelpText',
-          { defaultMessage: 'Name of the Kerberos service of the Kafka brokers.' }
+          { defaultMessage: 'Kerberos service name of the Kafka brokers.' }
         )}
         input={inputs.kafkaKerberosServiceNameInput}
         testSubj="kafkaKerberosServiceNameInput"
