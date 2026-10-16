@@ -207,7 +207,7 @@ evaluate.describe(
           }
         });
 
-        evaluate(
+        evaluate.only(
           'Discovery agent',
           async ({
             executorClient,

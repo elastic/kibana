@@ -12,7 +12,8 @@ tool result, or a KI; with no source, make no claim.
 - **`## Prefetched context`** (optional) — the grounding skill's Step 1 search results for this
   batch: `query_kis`, `feature_kis`, `sources`, `unmatched_rule_uuids`, `truncated`. When present and
   `truncated` is false, make no `platform_sig_events_ki_search` call and use it as those results;
-  otherwise run Step 1 as written.
+  otherwise run Step 1 as written. It replaces the searches only: grounding still confirms and
+  profiles every matched rule.
 - `p_value`, `change_point_type`, and `recent_detection_count` adjust `confidence` only; the
   grounding verdict decides whether a signal is real.
 - `flaky_probe: true` → apply `<chronic_and_recurring>` rule 1. Otherwise ignore
