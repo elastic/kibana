@@ -118,10 +118,10 @@ The status reports, per bound workflow, whether it is installed, enabled, valid,
 - `POST /internal/nightshift/investigations`, automatic significant-event investigations, and the investigation agent's Agent Builder availability all require the bound entry point and `xpack.security.serviceAccounts.enabled`.
 - The investigation, its Agent Builder conversation, its hooks, and every `kibana.request` step run as the agent account. `executed_by` still records the user who started it.
 - `_ensure` rejects any run that does not execute as the space's agent account. Anyone allowed to run workflows can start the global investigation directly, but such a run executes as them and fails before it touches an investigation.
+- The investigation entry point only runs when Nightshift's investigations client starts it (`triggeredBy: nightshift-investigations`, `NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE`). The start route, automations and significant-event investigations all go through the client, which checks the caller's privileges and claims the subjects. A direct run through the workflow run API fails at its first step, so it cannot start an investigation as the agent account.
 
 ### Known gaps
 
-- **Direct runs of the investigation entry point.** Unlike the hook entry points, it is not guarded: anyone with workflow execute in the space can start an investigation as the agent account by running it. Start-route runs carry `triggeredBy: nightshift-investigations`, so the hook guard can be extended to it once automations and Slack set their own value.
 - **Chat-started investigations.** The `streams-investigation-management` skill starts `system-nightshift-investigation` by id through `execute_workflow`. That run executes as the chat user, so `_ensure` rejects it.
 - **Deleted account.** If an account is force-deleted, every run fails with a token exchange error. Recovery: delete the leftover token, then run `_disable` and `_enable` again.
 - **The detection account is not bound to anything yet.** Nightshift's own detection workflows still run as their callers.

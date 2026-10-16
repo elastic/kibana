@@ -12,6 +12,7 @@ import { NIGHTSHIFT_INVESTIGATION_WORKFLOW, NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID
 import {
   NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW,
   NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE,
 } from './bound_investigation';
 import { WorkflowSchema } from '../../../../spec/schema';
 
@@ -32,6 +33,7 @@ describe('Nightshift bound investigation workflow', () => {
 
     expect(rendered.settings.run_as).toBe('kibana/nightshift_investigator');
     expect(rendered.steps).toEqual([
+      expect.objectContaining({ name: 'refuse_direct_runs' }),
       {
         name: 'investigate',
         type: 'workflow.execute',
@@ -43,6 +45,17 @@ describe('Nightshift bound investigation workflow', () => {
       },
     ]);
     expect(WorkflowSchema.safeParse(rendered).success).toBe(true);
+  });
+
+  it('fails every run the investigations client did not start', () => {
+    const [guard] = parse(render('kibana/nightshift_investigator')).steps;
+
+    expect(guard).toEqual({
+      name: 'refuse_direct_runs',
+      type: 'if',
+      condition: `not execution.triggeredBy : "${NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE}"`,
+      steps: [expect.objectContaining({ name: 'refuse', type: 'workflow.fail' })],
+    });
   });
 
   it('names the investigation after its own run unless the caller names one', () => {

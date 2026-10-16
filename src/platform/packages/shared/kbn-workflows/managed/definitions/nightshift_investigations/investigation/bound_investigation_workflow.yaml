@@ -26,6 +26,21 @@ triggers:
       additionalProperties: true
 
 steps:
+  # Only Nightshift's investigations client may start this workflow (it checks the caller's
+  # privileges and claims the subjects). Anyone allowed to run workflows could otherwise start an
+  # investigation as the service account. Only server code sets `triggeredBy`.
+  - name: refuse_direct_runs
+    type: if
+    condition: 'not execution.triggeredBy : "nightshift-investigations"'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            This workflow runs Nightshift investigations as the Nightshift service account. Start
+            investigations from Nightshift instead. This run was started by
+            {{ execution.triggeredBy }}.
+
   - name: investigate
     type: workflow.execute
     with:

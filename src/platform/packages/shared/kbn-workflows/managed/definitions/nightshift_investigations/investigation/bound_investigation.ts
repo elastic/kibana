@@ -13,6 +13,14 @@ import { renderRunAs } from '../render_bound_yaml';
 
 export const NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID = 'system-nightshift-investigation-bound';
 
+/**
+ * `triggeredBy` of every run of the entry point that Nightshift's investigations client starts.
+ * The entry point fails any other run, so starting an investigation as the service account goes
+ * through the client and its checks rather than the generic workflow run API. Only server code
+ * sets `triggeredBy`.
+ */
+export const NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE = 'nightshift-investigations';
+
 /** Document id of the bound investigation installed in a space (installed with `workflowIdSuffix`). */
 export const getNightshiftBoundInvestigationWorkflowId = (spaceId: string): string =>
   `${NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID}-${spaceId}`;
@@ -33,11 +41,15 @@ export const renderBoundInvestigationYaml = ({
  * service account. It calls the global investigation workflow, which inherits its identity, so a
  * change to the investigation only updates the one global copy. A space without this entry point
  * cannot run investigations.
+ *
+ * It refuses runs the investigations client did not start (`NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE`):
+ * the client checks the caller's privileges, claims the subjects and creates the investigation,
+ * none of which a direct run of the workflow would do.
  */
 export const NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 2,
+  version: 3,
   billable: false,
   yamlTemplate: renderBoundInvestigationYaml,
   management: {

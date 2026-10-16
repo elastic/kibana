@@ -10,7 +10,10 @@ import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { TerminalExecutionStatuses } from '@kbn/workflows';
-import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE,
+} from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart, ConversationPublicClient } from '@kbn/agent-builder-server';
@@ -534,7 +537,8 @@ export class NightshiftInvestigationsClient {
       spaceId,
       inputs,
       this.request,
-      'nightshift-investigations'
+      // The entry point refuses runs without it.
+      NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE
     );
 
     if (!isFollowUp) {

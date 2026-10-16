@@ -148,6 +148,7 @@ export { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigation
 export {
   getNightshiftBoundInvestigationWorkflowId,
   NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE,
   type NightshiftBoundInvestigationTemplateValues,
 } from './nightshift_investigations/investigation/bound_investigation';
 export {
