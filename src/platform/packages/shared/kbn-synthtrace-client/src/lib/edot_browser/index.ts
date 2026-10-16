@@ -8,6 +8,7 @@
  */
 
 import { EdotBrowserApp, type EdotBrowserAppOptions } from './edot_browser_app';
+import { session } from './edot_browser_session';
 
 export { asFloat } from './as_float';
 export {
@@ -28,7 +29,6 @@ export {
 export { EdotBrowserApp, type EdotBrowserAppOptions } from './edot_browser_app';
 export {
   EdotBrowserClient,
-  EdotBrowserLog,
   type EdotBrowserClientOptions,
   type HttpInstrumentation,
   type NavigationTimingType,
@@ -36,8 +36,21 @@ export {
   type ResourceTimingValues,
   type SoftNavigationType,
 } from './edot_browser_client';
+export { EdotBrowserLog } from './edot_browser_log';
 export { EdotBrowserSpan, type EdotBrowserSpanDocument } from './edot_browser_span';
+export type {
+  EdotBrowserClickTarget,
+  EdotBrowserDocument,
+  EdotBrowserEvent,
+  EdotBrowserExceptionTemplate,
+  EdotBrowserPage,
+  EdotBrowserRequest,
+  EdotBrowserResource,
+  EdotBrowserSessionOptions,
+  EdotBrowserSite,
+} from './edot_browser_session';
 
 export const edotBrowser = {
   app: (options: EdotBrowserAppOptions): EdotBrowserApp => new EdotBrowserApp(options),
+  session,
 };

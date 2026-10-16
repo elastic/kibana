@@ -10,7 +10,7 @@
 import { asFloat } from './as_float';
 import { BROWSER_PROFILES, pickBrowserProfile } from './browser_profiles';
 import { HEALTH_PROFILES, getWebVitalRating } from './health_profiles';
-import { edotBrowser } from '.';
+import { edotBrowser, type EdotBrowserSite } from '.';
 
 const LOGS_INDEX = 'logs-generic.otel-default';
 const TRACES_INDEX = 'traces-generic.otel-default';
@@ -36,6 +36,54 @@ const createClient = (sessionId?: string) =>
   edotBrowser
     .app({ serviceName: 'storefront-web', serviceVersion: '1.2.3', environment: 'production' })
     .client(BROWSER_PROFILES.chromeMacos, { sessionId });
+
+const SITE: EdotBrowserSite = {
+  origin: 'https://shop.example.com',
+  resources: [
+    {
+      path: '/static/js/main.js',
+      initiatorType: 'script',
+      sizeBytes: 250_000,
+      renderBlocking: true,
+    },
+    {
+      path: '/static/css/main.css',
+      initiatorType: 'link',
+      sizeBytes: 40_000,
+      renderBlocking: true,
+    },
+  ],
+  pages: [
+    {
+      path: '/',
+      resources: [{ path: '/img/hero.webp', initiatorType: 'img', sizeBytes: 300_000 }],
+      requests: [{ method: 'GET', url: 'https://shop.example.com/api/products' }],
+    },
+    {
+      path: '/checkout',
+      requests: [
+        { method: 'GET', url: 'https://shop.example.com/api/cart', instrumentation: 'xhr' },
+      ],
+      clickTargets: [
+        {
+          tagName: 'BUTTON',
+          cssSelector: '#pay-now',
+          elementAttributes: { id: 'pay-now' },
+          request: { method: 'POST', url: 'https://shop.example.com/api/payment' },
+        },
+      ],
+    },
+  ],
+};
+
+// Deterministic Park-Miller PRNG so session tests are reproducible
+const seededRandom = (seed: number) => {
+  let state = (seed % 2147483646) + 1;
+  return () => {
+    state = (state * 16807) % 2147483647;
+    return (state - 1) / 2147483646;
+  };
+};
 
 const hasFractionalPart = (value: number) => JSON.stringify(value).includes('.');
 
@@ -80,9 +128,7 @@ describe('edotBrowser', () => {
 
     it('only sets browser.brands for Chromium-based browsers', () => {
       expect(BROWSER_PROFILES.chromeMacos.resourceAttributes['browser.brands']).toBeDefined();
-      expect(BROWSER_PROFILES.firefoxLinux.resourceAttributes).not.toHaveProperty(
-        'browser.brands'
-      );
+      expect(BROWSER_PROFILES.firefoxLinux.resourceAttributes).not.toHaveProperty('browser.brands');
       expect(BROWSER_PROFILES.safariIos.resourceAttributes).not.toHaveProperty('browser.brands');
     });
 
@@ -305,7 +351,11 @@ describe('edotBrowser', () => {
 
     it('writes successful fetch requests as OTel-native CLIENT spans', () => {
       const [doc] = client
-        .httpRequest({ method: 'GET', url: 'https://api.example.com/products?page=2', statusCode: 200 })
+        .httpRequest({
+          method: 'GET',
+          url: 'https://api.example.com/products?page=2',
+          statusCode: 200,
+        })
         .timestamp(TIMESTAMP)
         .duration(150.5)
         .serialize();
@@ -371,6 +421,182 @@ describe('edotBrowser', () => {
 
       expect(log.attributes?.['session.id']).toBe('session-1');
       expect(span.attributes['session.id']).toBe('session-1');
+    });
+  });
+
+  describe('session', () => {
+    const SESSION_DURATION = 60_000;
+
+    const createSession = ({
+      seed = 1,
+      pageViews = 4,
+      health = HEALTH_PROFILES.healthy,
+      sessionId,
+    }: {
+      seed?: number;
+      pageViews?: number;
+      health?: (typeof HEALTH_PROFILES)[keyof typeof HEALTH_PROFILES];
+      sessionId?: string;
+    } = {}) =>
+      edotBrowser
+        .session({
+          client: createClient(sessionId),
+          site: SITE,
+          health,
+          start: TIMESTAMP,
+          pageViews,
+          sessionDurationMs: SESSION_DURATION,
+          random: seededRandom(seed),
+        })
+        .flatMap((event) => event.serialize());
+
+    const eventNames = (docs: ReturnType<typeof createSession>) =>
+      docs.map((doc) => ('event_name' in doc ? doc.event_name : undefined));
+
+    it('starts with a full page load', () => {
+      const docs = createSession({ pageViews: 1 });
+      const names = eventNames(docs);
+      const vitals = docs
+        .filter((doc) => 'event_name' in doc && doc.event_name === 'browser.web_vital')
+        .map((doc) => doc.attributes?.['browser.web_vital.name']);
+      const resourceCount = docs.filter(
+        (doc) =>
+          'event_name' in doc &&
+          doc.event_name === 'browser.resource_timing' &&
+          !['fetch', 'xmlhttprequest'].includes(
+            String(doc.attributes?.['browser.resource_timing.initiator_type'])
+          )
+      ).length;
+
+      expect(docs[0]).toMatchObject({
+        event_name: 'browser.navigation',
+        '@timestamp': TIMESTAMP,
+        attributes: { 'url.full': expect.stringMatching(/^https:\/\/shop\.example\.com\//) },
+      });
+      expect(names.filter((name) => name === 'browser.navigation_timing')).toHaveLength(1);
+      expect(resourceCount).toBeGreaterThanOrEqual(3);
+      expect(resourceCount).toBeLessThanOrEqual(8);
+      expect(vitals).toEqual(expect.arrayContaining(['ttfb', 'fcp', 'lcp', 'cls']));
+    });
+
+    it('keeps all events inside the session window', () => {
+      for (let seed = 1; seed <= 20; seed++) {
+        createSession({ seed }).forEach((doc) => {
+          expect(doc['@timestamp']).toBeGreaterThanOrEqual(TIMESTAMP);
+          expect(doc['@timestamp']).toBeLessThanOrEqual(TIMESTAMP + SESSION_DURATION);
+        });
+      }
+    });
+
+    it('emits soft navigations without navigation timing', () => {
+      const docs = Array.from({ length: 20 }, (_, seed) =>
+        createSession({ seed, pageViews: 5 })
+      ).flat();
+      const navigations = docs.filter(
+        (doc) => 'event_name' in doc && doc.event_name === 'browser.navigation'
+      );
+      const softNavigations = navigations.filter(
+        (doc) => doc.attributes?.['browser.navigation.same_document'] === true
+      );
+      const hardNavigations = navigations.length - softNavigations.length;
+
+      expect(softNavigations.length).toBeGreaterThan(0);
+      softNavigations.forEach((doc) => {
+        expect(doc.attributes?.['browser.navigation.type']).toBe('push');
+      });
+      expect(eventNames(docs).filter((name) => name === 'browser.navigation_timing')).toHaveLength(
+        hardNavigations
+      );
+    });
+
+    it('emits every EDOT Browser signal across sessions', () => {
+      const docs = Array.from({ length: 30 }, (_, seed) =>
+        createSession({ seed, health: HEALTH_PROFILES.erroring })
+      ).flat();
+      const names = new Set(eventNames(docs));
+      const spans = docs.filter((doc) => !('event_name' in doc));
+      const vitals = new Set(
+        docs
+          .filter((doc) => 'event_name' in doc && doc.event_name === 'browser.web_vital')
+          .map((doc) => doc.attributes?.['browser.web_vital.name'])
+      );
+
+      expect([...names]).toEqual(
+        expect.arrayContaining([
+          'browser.navigation',
+          'browser.navigation_timing',
+          'browser.resource_timing',
+          'browser.web_vital',
+          'browser.user_action.click',
+          'exception',
+        ])
+      );
+      expect([...vitals].sort()).toEqual(['cls', 'fcp', 'inp', 'lcp', 'ttfb']);
+      expect(spans.length).toBeGreaterThan(0);
+      expect(spans.map((span) => span._index)).toEqual(
+        spans.map(() => 'traces-generic.otel-default')
+      );
+    });
+
+    it('only reports INP for documents with interactions', () => {
+      for (let seed = 1; seed <= 30; seed++) {
+        const docs = createSession({ seed, pageViews: 1 });
+        const names = eventNames(docs);
+        const hasClicks = names.includes('browser.user_action.click');
+        const vitals = docs
+          .filter((doc) => 'event_name' in doc && doc.event_name === 'browser.web_vital')
+          .map((doc) => doc.attributes?.['browser.web_vital.name']);
+
+        expect(vitals.includes('inp')).toBe(hasClicks);
+      }
+    });
+
+    it('writes all timings and web vital values with a fractional part', () => {
+      const docs = Array.from({ length: 10 }, (_, seed) => createSession({ seed })).flat();
+      const timingPattern =
+        /"browser\.(resource_timing\.(duration|[a-z_]+_(start|end))|navigation_timing\.([a-z_]+_(start|end)|dom_[a-z_]+)|web_vital\.(value|delta))":(-?[\d.e-]+)/g;
+      let matches = 0;
+
+      docs.forEach((doc) => {
+        for (const [, , , , , , , value] of JSON.stringify(doc).matchAll(timingPattern)) {
+          matches++;
+          expect(value).toContain('.');
+        }
+      });
+      expect(matches).toBeGreaterThan(100);
+    });
+
+    it('omits session.id by default', () => {
+      createSession().forEach((doc) => {
+        expect(doc.attributes).not.toHaveProperty('session.id');
+      });
+    });
+
+    it('stamps the same session.id on all logs and spans of a session', () => {
+      const docs = createSession({ sessionId: 'abc', health: HEALTH_PROFILES.critical });
+
+      expect(docs.some((doc) => !('event_name' in doc))).toBe(true);
+      docs.forEach((doc) => {
+        expect(doc.attributes?.['session.id']).toBe('abc');
+      });
+    });
+
+    it('produces more failures and exceptions for unhealthy apps', () => {
+      const countErrors = (health: (typeof HEALTH_PROFILES)[keyof typeof HEALTH_PROFILES]) => {
+        const docs = Array.from({ length: 100 }, (_, seed) =>
+          createSession({ seed, health })
+        ).flat();
+        return {
+          failedRequests: docs.filter((doc) => 'status' in doc && doc.status.code === 'Error')
+            .length,
+          exceptions: eventNames(docs).filter((name) => name === 'exception').length,
+        };
+      };
+      const healthy = countErrors(HEALTH_PROFILES.healthy);
+      const erroring = countErrors(HEALTH_PROFILES.erroring);
+
+      expect(erroring.failedRequests).toBeGreaterThan(healthy.failedRequests * 3);
+      expect(erroring.exceptions).toBeGreaterThan(healthy.exceptions * 3);
     });
   });
 });

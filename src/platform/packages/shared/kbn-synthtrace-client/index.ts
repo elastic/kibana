@@ -52,5 +52,36 @@ export {
   ApmSynthtracePipelineSchema,
 } from './src/types';
 export { log, type LogDocument, LONG_FIELD_NAME } from './src/lib/logs';
-export { otelLog, type OtelLogDocument } from './src/lib/otel_logs';
+export { otelLog, type OtelLogDocument, type OtelScope } from './src/lib/otel_logs';
+export {
+  edotBrowser,
+  asFloat,
+  BROWSER_PROFILES,
+  HEALTH_PROFILES,
+  pickBrowserProfile,
+  getWebVitalRating,
+  EdotBrowserApp,
+  EdotBrowserClient,
+  EdotBrowserLog,
+  EdotBrowserSpan,
+  type BrowserProfile,
+  type BrowserProfileId,
+  type EdotBrowserAppOptions,
+  type EdotBrowserClickTarget,
+  type EdotBrowserDocument,
+  type EdotBrowserClientOptions,
+  type EdotBrowserEvent,
+  type EdotBrowserExceptionTemplate,
+  type EdotBrowserPage,
+  type EdotBrowserRequest,
+  type EdotBrowserResource,
+  type EdotBrowserResourceAttributes,
+  type EdotBrowserSessionOptions,
+  type EdotBrowserSite,
+  type EdotBrowserSpanDocument,
+  type HealthProfile,
+  type HealthProfileName,
+  type WebVitalName,
+  type WebVitalRating,
+} from './src/lib/edot_browser';
 export { syntheticsMonitor, type SyntheticsMonitorDocument } from './src/lib/synthetics';

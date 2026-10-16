@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OtelLog } from '../otel_logs';
 import { generateLongId, generateShortId } from '../utils/generate_id';
 import { asFloat } from './as_float';
+import { EdotBrowserLog } from './edot_browser_log';
 import { EdotBrowserSpan } from './edot_browser_span';
 import { getWebVitalRating, type WebVitalName } from './health_profiles';
 
@@ -80,21 +80,16 @@ const toTimingAttributes = (
     ])
   );
 
-/** An EDOT Browser log record; the SDK observes it at the time it is emitted. */
-export class EdotBrowserLog extends OtelLog {
-  timestamp(time: number) {
-    super.timestamp(time);
-    this.fields.observed_timestamp = time;
-    return this;
-  }
-}
-
 /** A single browser running an EDOT Browser-instrumented app; one builder per signal. */
 export class EdotBrowserClient {
   constructor(
     private readonly resourceAttributes: Readonly<Record<string, unknown>>,
     private readonly options: EdotBrowserClientOptions = {}
   ) {}
+
+  public get isMobile(): boolean {
+    return this.resourceAttributes['browser.mobile'] === true;
+  }
 
   private get sessionAttributes(): Record<string, string> {
     const { sessionId } = this.options;
@@ -203,7 +198,15 @@ export class EdotBrowserClient {
       'browser.web_vital.id': id,
       'browser.web_vital.navigation_type': navigationType,
     });
-    return attribution ? log.message(JSON.stringify(attribution)) : log;
+    return attribution
+      ? log.message(
+          JSON.stringify(attribution, (_key, attributionValue) =>
+            typeof attributionValue === 'number'
+              ? Math.round(attributionValue * 10) / 10
+              : attributionValue
+          )
+        )
+      : log;
   }
 
   click({
@@ -270,7 +273,8 @@ export class EdotBrowserClient {
     const parsedUrl = new URL(url);
     const serverPort = Number(parsedUrl.port) || HTTP_PORT_FROM_PROTOCOL[parsedUrl.protocol];
     const isError = statusCode === undefined || statusCode >= 400 || errorType !== undefined;
-    const resolvedErrorType = errorType ?? (statusCode !== undefined ? String(statusCode) : undefined);
+    const resolvedErrorType =
+      errorType ?? (statusCode !== undefined ? String(statusCode) : undefined);
 
     return new EdotBrowserSpan({
       _index: TRACES_INDEX,
