@@ -29,7 +29,7 @@ the batch holds. Read each entry as a whole, and use any other field it returns 
 - `verdict`: the skill's gating result. `confirms` lets the detection open or continue an event;
   `refutes` only records recovery on an event that already holds the rule (`<eligibility>`);
   `off_topic` may carry an observed error of its own, which is a separate candidate; `inconclusive`
-  and `not_checked` establish nothing and are not event-eligible on their own.
+  and `not_checked` establish nothing: they are never event-eligible, and never a signal in an event item.
 - `description`: the observed failure, its target, what it affects, and its measured size and
   duration. Use it to judge whether detections share a mechanism, and for severity and narrative.
 - `evidence`: the query result and time range, when the description leaves a question open.
@@ -494,8 +494,10 @@ rules were written.
 
 1. **Build the items.** Follow the `platform_sig_events_events_write` field descriptions and apply
    `<field_rules>`. One item per new event and one continuation item per distinct accepted `event_id`, holding every
-   rule bound to it; no two items share an `event_id`. Each `rule_uuid`
-   appears in exactly one item's signals, exactly once. Only new-event items omit `event_id`;
+   rule bound to it; no two items share an `event_id`. Each event-eligible `rule_uuid`
+   appears in exactly one item's signals, exactly once. A detection excluded by `<eligibility>` or
+   `<incident_matching>` pre-check rule 2 (`not_checked`, `inconclusive`, non-error `off_topic`) appears
+   in no item: its `rule_uuid` goes only into `written_rule_uuids`. Only new-event items omit `event_id`;
    continuations carry the accepted `event_id` and this cycle's grounded signals only.
 2. **Copy the topology.** Write the finalized `causal_features` and `blast_radius` on every item; do
    not re-derive them at emit time.
