@@ -1,5 +1,5 @@
 {
-  "sha1": "f92533d4940b7550feb556172f29ed3e41405f28",
+  "sha1": "f64627d6f78317d26c689530378034f7a279fcf8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -50,8 +50,8 @@
       }
     },
     {
-      "id": "eb4d2d37a709979-478713641ea0271",
-      "title": "Agent Builder — alerting V2 skill gating does not list either Alerting V2 skill when its experimental gate is disabled",
+      "id": "eb4d2d37a709979-a9489f5ac68c3e7",
+      "title": "Agent Builder — alerting V2 skill gating does not list the alerting V2 skills when both experimental gates are on but alerting:v2:enabled is off",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -64,6 +64,20 @@
       }
     },
     {
+      "id": "eb4d2d37a709979-478713641ea0271",
+      "title": "Agent Builder — alerting V2 skill gating does not list either Alerting V2 skill when its experimental gate is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/agent_builder_skills/api/tests/rule_management_skill_gating.spec.ts",
+        "line": 134,
+        "column": 23
+      }
+    },
+    {
       "id": "eb4d2d37a709979-67620187bcbf6e3",
       "title": "Agent Builder — alerting V2 skill gating lists both Alerting V2 skills when all applicable gates are enabled",
       "expectedStatus": "passed",
@@ -73,8 +87,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/agent_builder_skills/api/tests/rule_management_skill_gating.spec.ts",
-        "line": 135,
-        "column": 23
+        "line": 160,
+        "column": 17
       }
     },
     {
@@ -87,8 +101,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/agent_builder_skills/api/tests/rule_management_skill_gating.spec.ts",
-        "line": 164,
-        "column": 10
+        "line": 188,
+        "column": 23
       }
     },
     {
@@ -101,8 +115,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/agent_builder_skills/api/tests/rule_management_skill_gating.spec.ts",
-        "line": 203,
-        "column": 17
+        "line": 226,
+        "column": 7
       }
     }
   ]
