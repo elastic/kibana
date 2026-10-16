@@ -7,11 +7,11 @@
 
 import { escapeQuotes } from '@kbn/es-query';
 import type { Agent, AgentStatus } from '@kbn/fleet-plugin/common';
-import { createServerStepDefinition, KibanaApiCallError } from '@kbn/workflows-extensions/server';
+import { removeVersionSuffixFromPolicyId } from '@kbn/fleet-plugin/common/services/version_specific_policies_utils';
+import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 import {
-  ELASTIC_DEFEND_COMPONENT_TYPE,
   MAX_AGENT_ID_LENGTH,
   MAX_HOST_IPS,
   MAX_HOST_RECORDS,
@@ -23,22 +23,25 @@ import {
 } from '../../../../../../common/workflows/step_types/endpoint/hosts';
 import { MAX_INPUT_STRING_CHARS } from '../../../../../../common/workflows/step_types/common/budget';
 import {
+  collectPages,
+  getMetadataAgentId,
   isLiveFleetStatus,
   isLiveHostStatus,
   selectEndpointHost,
   toHostStatus,
 } from '../../../../../endpoint/services/endpoint_host_selection';
 import type { EndpointHostCandidate } from '../../../../../endpoint/services/endpoint_host_selection';
+import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
+import { parseFiniteNumber } from '../../common/number';
+import { isUnauthorized, isNotFound, readErrorOutcome } from '../../common/read_error';
 
 type HostTarget = z.infer<typeof hostTargetSchema>;
 type HostRecordOutput = z.infer<typeof hostRecordSchema>;
 type ResolveResultOutput = z.infer<typeof resolveEndpointHostsResultSchema>;
 
-/** Metadata list page size for a lookup by id (one host, a handful of records). */
 const RESOLVE_BY_ID_PAGE_SIZE = 10;
-/** Metadata list and Fleet page size for a lookup by name; a full page means the read is incomplete. */
 const RESOLVE_BY_NAME_PAGE_SIZE = 100;
-/** A pass-2 expansion only applies to a simple hostname, never a value with a wildcard or space. */
+const MAX_RESOLVE_FLEET_PAGES = 10;
 const EXPANDABLE_HOSTNAME = /^[A-Za-z0-9._-]+$/;
 
 interface MetadataRouteHost {
@@ -83,6 +86,7 @@ interface MetadataRouteResponse {
 
 interface FleetAgentsRouteResponse {
   items?: Agent[];
+  total?: number;
 }
 
 interface FleetAgentRouteResponse {
@@ -100,33 +104,13 @@ interface PartErrors {
 
 type ReadPart = 'host_state' | 'host_enrollments';
 
-const boundString = (value: unknown, max: number): string => {
-  if (typeof value !== 'string') {
-    return '';
-  }
-  return value.length > max ? value.slice(0, max) : value;
-};
+const boundInputString = (value: unknown): string =>
+  typeof value === 'string' ? value.slice(0, MAX_INPUT_STRING_CHARS) : '';
 
-const boundInputString = (value: unknown): string => boundString(value, MAX_INPUT_STRING_CHARS);
+const boundId = (value: unknown): string =>
+  typeof value === 'string' ? value.slice(0, MAX_AGENT_ID_LENGTH) : '';
 
-const boundId = (value: unknown): string => boundString(value, MAX_AGENT_ID_LENGTH);
-
-const toNumber = (value: unknown): number => {
-  if (typeof value === 'number') {
-    return Number.isFinite(value) ? value : 0;
-  }
-  if (typeof value === 'string' && value.trim() !== '') {
-    const number = Number(value);
-    return Number.isFinite(number) ? number : 0;
-  }
-  return 0;
-};
-
-const isForbidden = (error: unknown): boolean =>
-  error instanceof KibanaApiCallError && error.status === 403;
-
-const isNotFound = (error: unknown): boolean =>
-  error instanceof KibanaApiCallError && error.status === 404;
+const toNumber = (value: unknown): number => parseFiniteNumber(value) ?? 0;
 
 const addPart = (parts: PartErrors, kind: 'unauthorized' | 'unavailable', part: ReadPart): void => {
   if (!parts[kind].includes(part)) {
@@ -135,7 +119,8 @@ const addPart = (parts: PartErrors, kind: 'unauthorized' | 'unavailable', part: 
 };
 
 const classifyReadError = (parts: PartErrors, part: ReadPart, error: unknown): void => {
-  addPart(parts, isForbidden(error) ? 'unauthorized' : 'unavailable', part);
+  const outcome = readErrorOutcome(error, part);
+  addPart(parts, 'unauthorized' in outcome ? 'unauthorized' : 'unavailable', part);
 };
 
 const attempt = async <T>(
@@ -162,9 +147,7 @@ const byNameMetadataExpansionKuery = (hostname: string): string =>
   `united.endpoint.host.hostname:${hostname}.*`;
 
 const byNameFleetKuery = (hostname: string): string =>
-  `status:* and local_metadata.host.name.keyword:"${escapeQuotes(
-    hostname
-  )}" and packages:"${ELASTIC_DEFEND_COMPONENT_TYPE}"`;
+  `status:* and local_metadata.host.name.keyword:"${escapeQuotes(hostname)}"`;
 
 const fetchMetadataList = async (
   context: StepHandlerContext,
@@ -181,19 +164,29 @@ const fetchMetadataList = async (
 
 const fetchFleetAgentsByName = async (
   context: StepHandlerContext,
-  kuery: string
-): Promise<Agent[]> => {
-  const query = new URLSearchParams({
-    showInactive: 'true',
-    perPage: String(RESOLVE_BY_NAME_PAGE_SIZE),
-    kuery,
-  });
-  const { body } = await context.contextManager.callKibanaApi<FleetAgentsRouteResponse>({
-    method: 'GET',
-    path: `/api/fleet/agents?${query.toString()}`,
-  });
-  return body.items ?? [];
-};
+  kuery: string,
+  endpointAgentPolicyIds: ReadonlySet<string>
+): Promise<{ items: Agent[]; truncated: boolean }> =>
+  collectPages<Agent>(
+    async (page) => {
+      const query = new URLSearchParams({
+        showInactive: 'true',
+        perPage: String(RESOLVE_BY_NAME_PAGE_SIZE),
+        page: String(page),
+        kuery,
+      });
+      const { body } = await context.contextManager.callKibanaApi<FleetAgentsRouteResponse>({
+        method: 'GET',
+        path: `/api/fleet/agents?${query.toString()}`,
+      });
+      const agents = body.items ?? [];
+      const items = agents.filter((agent) =>
+        isInElasticDefendAgentPolicy(agent, endpointAgentPolicyIds)
+      );
+      return { items, total: body.total, rawItemCount: agents.length };
+    },
+    { pageSize: RESOLVE_BY_NAME_PAGE_SIZE, maxPages: MAX_RESOLVE_FLEET_PAGES }
+  );
 
 const fetchFleetAgentById = async (
   context: StepHandlerContext,
@@ -329,7 +322,7 @@ const buildFleetHostRecord = (agent: Agent): HostRecordOutput => {
 
 const toMetadataCandidates = (records: MetadataRouteHost[]): ResolveCandidate[] =>
   records.flatMap((record) => {
-    const agentId = record.metadata?.elastic?.agent?.id || record.metadata?.agent?.id;
+    const agentId = getMetadataAgentId(record);
     if (!agentId) {
       return [];
     }
@@ -363,8 +356,22 @@ const toFleetOnlyCandidates = (
   return agents.filter((agent) => !knownAgentIds.has(agent.id)).map(toFleetCandidate);
 };
 
-const hasEndpointPackage = (agent: Agent): boolean =>
-  (agent.packages ?? []).includes(ELASTIC_DEFEND_COMPONENT_TYPE);
+const fetchElasticDefendAgentPolicyIds = async (
+  endpointAppContextService: EndpointAppContextService,
+  spaceId: string
+): Promise<Set<string>> => {
+  const packagePolicies = await endpointAppContextService
+    .getEndpointMetadataService(spaceId)
+    .getAllEndpointPackagePolicies();
+  return new Set(packagePolicies.flatMap((policy) => policy.policy_ids));
+};
+
+const isInElasticDefendAgentPolicy = (
+  agent: Agent,
+  endpointAgentPolicyIds: ReadonlySet<string>
+): boolean =>
+  agent.policy_id !== undefined &&
+  endpointAgentPolicyIds.has(removeVersionSuffixFromPolicyId(agent.policy_id));
 
 const buildEmptyResult = (
   target: HostTarget,
@@ -416,6 +423,7 @@ const buildSelectionResult = (
 };
 
 const resolveById = async (
+  endpointAppContextService: EndpointAppContextService,
   context: StepHandlerContext,
   target: HostTarget,
   agentId: string,
@@ -429,7 +437,7 @@ const resolveById = async (
     classifyReadError(parts, 'host_state', metadataAttempt.error);
     return buildEmptyResult(
       target,
-      isForbidden(metadataAttempt.error) ? 'unauthorized' : 'unavailable',
+      isUnauthorized(metadataAttempt.error) ? 'unauthorized' : 'unavailable',
       parts
     );
   }
@@ -439,8 +447,21 @@ const resolveById = async (
   if (candidates.length === 0) {
     const fleetAttempt = await attempt(fetchFleetAgentById(context, agentId));
     if (fleetAttempt.ok) {
-      if (fleetAttempt.value && hasEndpointPackage(fleetAttempt.value)) {
-        candidates.push(toFleetCandidate(fleetAttempt.value));
+      const agent = fleetAttempt.value;
+      if (agent) {
+        const policyIdsAttempt = await attempt(
+          fetchElasticDefendAgentPolicyIds(
+            endpointAppContextService,
+            context.contextManager.getContext().workflow.spaceId
+          )
+        );
+        if (policyIdsAttempt.ok) {
+          if (isInElasticDefendAgentPolicy(agent, policyIdsAttempt.value)) {
+            candidates.push(toFleetCandidate(agent));
+          }
+        } else {
+          addPart(parts, 'unavailable', 'host_enrollments');
+        }
       }
     } else if (!isNotFound(fleetAttempt.error)) {
       classifyReadError(parts, 'host_enrollments', fleetAttempt.error);
@@ -452,6 +473,7 @@ const resolveById = async (
 };
 
 const resolveByName = async (
+  endpointAppContextService: EndpointAppContextService,
   context: StepHandlerContext,
   target: HostTarget,
   hostname: string,
@@ -460,7 +482,21 @@ const resolveByName = async (
 ): Promise<ResolveResultOutput> => {
   const [metadataAttempt, fleetAttempt] = await Promise.all([
     attempt(fetchMetadataList(context, RESOLVE_BY_NAME_PAGE_SIZE, byNameMetadataKuery(hostname))),
-    attempt(fetchFleetAgentsByName(context, byNameFleetKuery(hostname))),
+    attempt(
+      (async () => {
+        const policyIdsAttempt = await attempt(
+          fetchElasticDefendAgentPolicyIds(
+            endpointAppContextService,
+            context.contextManager.getContext().workflow.spaceId
+          )
+        );
+        if (!policyIdsAttempt.ok) {
+          addPart(parts, 'unavailable', 'host_enrollments');
+          return { items: [], truncated: false };
+        }
+        return fetchFleetAgentsByName(context, byNameFleetKuery(hostname), policyIdsAttempt.value);
+      })()
+    ),
   ]);
 
   if (!fleetAttempt.ok && !isNotFound(fleetAttempt.error)) {
@@ -471,19 +507,18 @@ const resolveByName = async (
     classifyReadError(parts, 'host_state', metadataAttempt.error);
     return buildEmptyResult(
       target,
-      isForbidden(metadataAttempt.error) ? 'unauthorized' : 'unavailable',
+      isUnauthorized(metadataAttempt.error) ? 'unauthorized' : 'unavailable',
       parts
     );
   }
 
-  const fleetItems = fleetAttempt.ok ? fleetAttempt.value : [];
+  const defendFleetItems = fleetAttempt.ok ? fleetAttempt.value.items : [];
+  const fleetIncomplete = fleetAttempt.ok && fleetAttempt.value.truncated;
   let metadataRecords = metadataAttempt.value;
-  let incomplete =
-    metadataRecords.length >= RESOLVE_BY_NAME_PAGE_SIZE ||
-    fleetItems.length >= RESOLVE_BY_NAME_PAGE_SIZE;
+  let incomplete = metadataRecords.length >= RESOLVE_BY_NAME_PAGE_SIZE || fleetIncomplete;
 
   let metadataCandidates = toMetadataCandidates(metadataRecords);
-  let fleetCandidates = toFleetOnlyCandidates(fleetItems, metadataCandidates);
+  let fleetCandidates = toFleetOnlyCandidates(defendFleetItems, metadataCandidates);
 
   if (
     expandShortHostname &&
@@ -498,14 +533,14 @@ const resolveByName = async (
       classifyReadError(parts, 'host_state', expansionAttempt.error);
       return buildEmptyResult(
         target,
-        isForbidden(expansionAttempt.error) ? 'unauthorized' : 'unavailable',
+        isUnauthorized(expansionAttempt.error) ? 'unauthorized' : 'unavailable',
         parts
       );
     }
     metadataRecords = expansionAttempt.value;
-    incomplete = incomplete || metadataRecords.length >= RESOLVE_BY_NAME_PAGE_SIZE;
+    incomplete = fleetIncomplete || metadataRecords.length >= RESOLVE_BY_NAME_PAGE_SIZE;
     metadataCandidates = toMetadataCandidates(metadataRecords);
-    fleetCandidates = toFleetOnlyCandidates(fleetItems, metadataCandidates);
+    fleetCandidates = toFleetOnlyCandidates(defendFleetItems, metadataCandidates);
   }
 
   const candidates = [...metadataCandidates, ...fleetCandidates];
@@ -514,29 +549,46 @@ const resolveByName = async (
 };
 
 const resolveTarget = (
+  endpointAppContextService: EndpointAppContextService,
   context: StepHandlerContext,
   target: HostTarget,
   expandShortHostname: boolean
 ): Promise<ResolveResultOutput> => {
   const parts: PartErrors = { unauthorized: [], unavailable: [] };
 
-  if (target.agent_id !== undefined) {
-    return resolveById(context, target, target.agent_id, parts);
+  if (target.agent_id?.trim()) {
+    return resolveById(endpointAppContextService, context, target, target.agent_id, parts);
   }
 
-  return resolveByName(context, target, target.hostname ?? '', expandShortHostname, parts);
+  return resolveByName(
+    endpointAppContextService,
+    context,
+    target,
+    target.hostname ?? '',
+    expandShortHostname,
+    parts
+  );
 };
 
-export const resolveEndpointHostsStepDefinition = createServerStepDefinition({
-  ...resolveEndpointHostsStepCommonDefinition,
-  handler: async (context) => {
-    const { targets, expand_short_hostname: expandShortHostname } =
-      resolveEndpointHostsInputSchema.parse(context.input);
+export interface ResolveEndpointHostsDependencies {
+  endpointAppContextService: EndpointAppContextService;
+}
 
-    const results = await Promise.all(
-      targets.map((target) => resolveTarget(context, target, expandShortHostname))
-    );
+export const createResolveEndpointHostsStepDefinition = ({
+  endpointAppContextService,
+}: ResolveEndpointHostsDependencies) =>
+  createServerStepDefinition({
+    ...resolveEndpointHostsStepCommonDefinition,
+    handler: async (context) => {
+      const { targets, expand_short_hostname: expandShortHostname } =
+        resolveEndpointHostsInputSchema.parse(context.input);
 
-    return { output: { results } };
-  },
-});
+      const results = await Promise.all(
+        targets.map((target) =>
+          resolveTarget(endpointAppContextService, context, target, expandShortHostname)
+        )
+      );
+
+      return { output: { results } };
+    },
+  });

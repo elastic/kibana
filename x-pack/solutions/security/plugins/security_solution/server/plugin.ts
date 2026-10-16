@@ -904,6 +904,7 @@ export class Plugin implements ISecuritySolutionPlugin {
           const [coreStart] = await core.getStartServices();
           return coreStart.elasticsearch.client.asInternalUser;
         },
+        endpointAppContextService: this.endpointAppContextService,
       });
       registerSecurityWorkflowTriggers(plugins.workflowsExtensions);
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);

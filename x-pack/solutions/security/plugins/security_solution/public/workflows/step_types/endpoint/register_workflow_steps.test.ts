@@ -13,6 +13,10 @@ import {
 } from './register_workflow_steps';
 import {
   findEndpointArtifactsPublicStepDefinition,
+  getEndpointHostDiagnosticsPublicStepDefinition,
+  getEndpointInventoryCountsPublicStepDefinition,
+  getEndpointPackageStatusPublicStepDefinition,
+  resolveEndpointHostsPublicStepDefinition,
   searchIntegrationKnowledgePublicStepDefinition,
 } from './steps';
 
@@ -37,17 +41,20 @@ describe('registerEndpointWorkflowSteps (public)', () => {
     expect(workflowsExtensions.registerStepDefinition).not.toHaveBeenCalled();
   });
 
-  it('registers the shared steps with async loaders when the universal flag is on', async () => {
+  it('registers the shared and defend steps with async loaders when the universal flag is on', async () => {
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
     registerEndpointWorkflowSteps(workflowsExtensions, createDeps(true));
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(2);
-    const [loader1, loader2] = workflowsExtensions.registerStepDefinition.mock.calls.map(
-      ([arg]) => arg as StepLoader
-    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(6);
+    const [loader1, loader2, loader3, loader4, loader5, loader6] =
+      workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => arg as StepLoader);
 
     await expect(loader1()).resolves.toBe(findEndpointArtifactsPublicStepDefinition);
     await expect(loader2()).resolves.toBe(searchIntegrationKnowledgePublicStepDefinition);
+    await expect(loader3()).resolves.toBe(resolveEndpointHostsPublicStepDefinition);
+    await expect(loader4()).resolves.toBe(getEndpointHostDiagnosticsPublicStepDefinition);
+    await expect(loader5()).resolves.toBe(getEndpointPackageStatusPublicStepDefinition);
+    await expect(loader6()).resolves.toBe(getEndpointInventoryCountsPublicStepDefinition);
   });
 });
