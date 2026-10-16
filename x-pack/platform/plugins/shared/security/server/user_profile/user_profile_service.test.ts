@@ -1287,6 +1287,10 @@ describe('UserProfileService', () => {
         });
       });
 
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
       it('fails if api key retrieval fails (e.g. forbidden)', async () => {
         const failureReason = new errors.ResponseError(
           securityMock.createApiResponse({ statusCode: 500, body: 'some message' })
@@ -1314,6 +1318,65 @@ describe('UserProfileService', () => {
           mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
         ).not.toHaveBeenCalled();
         expect(mockStartParams.session.get).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileIdInvocation).toHaveBeenLastCalledWith({
+          outcome: 'failure',
+          apiKeyRetrievalRequired: true,
+        });
+      });
+
+      it('retries api key retrieval while the api key is not searchable yet', async () => {
+        jest.useFakeTimers({ legacyFakeTimers: true });
+
+        const notFoundReason = new errors.ResponseError(
+          securityMock.createApiResponse({ statusCode: 404, body: { api_keys: [] } })
+        );
+        mockStartParams.clusterClient
+          .asScoped()
+          .asCurrentUser.security.getApiKey.mockRejectedValueOnce(notFoundReason)
+          .mockResolvedValueOnce({ api_keys: [{ profile_uid: 'UID' }] } as any);
+
+        const startContract = userProfileService.start(mockStartParams);
+        const profileIdPromise = startContract.getCurrentProfileId({ request: mockApiKeyRequest });
+        await nextTick();
+        jest.runAllTimers();
+
+        await expect(profileIdPromise).resolves.toBe('UID');
+
+        expect(
+          mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
+        ).toHaveBeenCalledTimes(2);
+
+        expect(securityTelemetry.recordGetCurrentProfileIdInvocation).toHaveBeenLastCalledWith({
+          outcome: 'success',
+          apiKeyRetrievalRequired: true,
+        });
+      });
+
+      it('fails if the api key stays unsearchable until max retries are exceeded', async () => {
+        jest.useFakeTimers({ legacyFakeTimers: true });
+
+        const notFoundReason = new errors.ResponseError(
+          securityMock.createApiResponse({ statusCode: 404, body: { api_keys: [] } })
+        );
+        mockStartParams.clusterClient
+          .asScoped()
+          .asCurrentUser.security.getApiKey.mockRejectedValue(notFoundReason);
+
+        const startContract = userProfileService.start(mockStartParams);
+        const profileIdPromise = startContract.getCurrentProfileId({ request: mockApiKeyRequest });
+
+        // Re-try 4 more times.
+        for (const _ of Array.from({ length: 4 })) {
+          await nextTick();
+          jest.runAllTimers();
+        }
+
+        await expect(profileIdPromise).rejects.toBe(notFoundReason);
+
+        expect(
+          mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
+        ).toHaveBeenCalledTimes(5);
 
         expect(securityTelemetry.recordGetCurrentProfileIdInvocation).toHaveBeenLastCalledWith({
           outcome: 'failure',
