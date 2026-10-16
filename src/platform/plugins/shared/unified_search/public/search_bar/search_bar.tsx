@@ -68,15 +68,13 @@ export interface SearchBarInjectedDeps {
 
 export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   /**
-   * @deprecated Use `dataSources`. A DSL data view is passed as `new DataViewSource(dataView)`. An
-   * ES|QL source cannot be passed here: it has no data view, and its own `id` and `fields` are
-   * those of the query, not of the dataset that filters apply to.
+   * @deprecated To be combined into `dataSources`. A data view is passed there as
+   * `new DataViewSource(dataView)`. An ES|QL source cannot be passed here: it has no data view.
    */
   indexPatterns?: FilterableSource[];
   /**
-   * The data sources to filter on: a DSL source is used as its data view, and an ES|QL source
-   * brings the fields of the dataset it queries, without a data view. Can be combined with the
-   * deprecated `indexPatterns`, in which case those come first.
+   * The data sources to filter on. Until `indexPatterns` is removed, both are used, the index
+   * patterns first.
    */
   dataSources?: DataSource[];
   isLoading?: boolean;

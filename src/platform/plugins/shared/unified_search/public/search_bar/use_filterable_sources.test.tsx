@@ -47,6 +47,52 @@ describe('useFilterableSources', () => {
     expect(result.current).toEqual([source.getDataView()]);
   });
 
+  it('does not render again after mounting when there are only DSL sources', async () => {
+    const source = createDataViewSource('dsl');
+    let renders = 0;
+
+    renderHook(() => {
+      renders++;
+      return useFilterableSources([source], http);
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(renders).toBe(1);
+  });
+
+  it('returns the same array while the DSL sources are the same, even if passed in a new array', () => {
+    const source = createDataViewSource('dsl');
+
+    const { result, rerender } = renderHook(() => useFilterableSources([source], http));
+    const first = result.current;
+    rerender();
+
+    expect(result.current).toBe(first);
+  });
+
+  it('returns the current DataView of a DSL source that was replaced by another instance', async () => {
+    const { result, rerender } = renderHook(
+      ({ sources }: { sources: DataSource[] }) => useFilterableSources(sources, http),
+      { initialProps: { sources: [createDataViewSource('dsl')] as DataSource[] } }
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const replacement = createDataViewSource('dsl');
+    rerender({ sources: [replacement] });
+
+    expect(result.current).toEqual([replacement.getDataView()]);
+    expect(result.current![0]).toBe(replacement.getDataView());
+  });
+
+  it('keeps the order of mixed sources once the ES|QL one resolves', async () => {
+    const dsl = createDataViewSource('dsl');
+    const esql = createEsqlSource('@timestamp');
+
+    const { result } = renderHook(() => useFilterableSources([dsl, esql], http));
+
+    await waitFor(() => expect(result.current).toHaveLength(2));
+    expect(result.current!.map(({ id }) => id)).toEqual(['dsl', esql.datasetId]);
+  });
+
   it('resolves an ES|QL source to its dataset identity', async () => {
     const source = createEsqlSource('@timestamp');
 

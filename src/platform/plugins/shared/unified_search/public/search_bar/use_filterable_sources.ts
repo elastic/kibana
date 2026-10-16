@@ -9,12 +9,18 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { HttpStart } from '@kbn/core/public';
-import type { DataSource, FilterableSource } from '@kbn/data-source';
+import type { DataSource, EsqlSource, FilterableSource } from '@kbn/data-source';
+
+const isEsqlSource = (source: DataSource): source is EsqlSource => source.kind === 'esql';
+
+const isSameList = (a: FilterableSource[], b: FilterableSource[]) =>
+  a.length === b.length && a.every((item, index) => item === b[index]);
 
 /**
- * What the filtering UI needs from the data sources an app passes. A DSL source is its `DataView`
- * right away. An ES|QL source needs its schema, so it is resolved asynchronously and missing from
- * the result until then. Returns `undefined` when no sources are given.
+ * What the filtering UI needs from the data sources an app passes. A DSL source is its `DataView`,
+ * read as it is, so nothing is asynchronous or stored for it. An ES|QL source needs its schema, so
+ * it is resolved asynchronously and missing from the result until then. Returns `undefined` when
+ * no sources are given. The same array is returned for as long as its items are the same.
  */
 export const useFilterableSources = (
   dataSources: DataSource[] | undefined,
@@ -22,20 +28,24 @@ export const useFilterableSources = (
 ): FilterableSource[] | undefined => {
   const dataSourcesRef = useRef(dataSources);
   dataSourcesRef.current = dataSources;
-  const [resolved, setResolved] = useState<{ key: string; filterable: FilterableSource[] }>();
+  const previousRef = useRef<FilterableSource[]>();
+  const [resolved, setResolved] = useState<{ key: string; byId: Map<string, FilterableSource> }>();
 
   // Callers pass a new array on every render, so a change is a change of the sources themselves.
-  const key = dataSources?.map(({ id }) => id).join('|');
+  const key = dataSources
+    ?.filter(isEsqlSource)
+    .map(({ id }) => id)
+    .join('|');
 
   useEffect(() => {
-    const sources = dataSourcesRef.current;
-    if (key === undefined || !sources) {
+    const esqlSources = dataSourcesRef.current?.filter(isEsqlSource) ?? [];
+    if (key === undefined || esqlSources.length === 0) {
       return;
     }
     let cancelled = false;
-    Promise.all(sources.map((source) => source.toFilterableSource(http))).then((filterable) => {
+    Promise.all(esqlSources.map((source) => source.toFilterableSource(http))).then((filterable) => {
       if (!cancelled) {
-        setResolved({ key, filterable });
+        setResolved({ key, byId: new Map(esqlSources.map(({ id }, i) => [id, filterable[i]])) });
       }
     });
     return () => {
@@ -46,10 +56,18 @@ export const useFilterableSources = (
   if (!dataSources) {
     return undefined;
   }
-  if (resolved && resolved.key === key) {
-    return resolved.filterable;
+
+  const current = dataSources.flatMap((source) => {
+    if (!isEsqlSource(source)) {
+      return [source.getDataView()];
+    }
+    const filterable = resolved && resolved.key === key ? resolved.byId.get(source.id) : undefined;
+    return filterable ? [filterable] : [];
+  });
+
+  if (previousRef.current && isSameList(previousRef.current, current)) {
+    return previousRef.current;
   }
-  return dataSources.flatMap((source) =>
-    source.kind === 'index-pattern' ? [source.getDataView()] : []
-  );
+  previousRef.current = current;
+  return current;
 };
