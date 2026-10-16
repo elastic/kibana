@@ -309,7 +309,7 @@ export const DashboardsTab = ({
     <div data-test-subj="entityCentricLabDashboardsTab">
       {dashboards.length > 1 ? (
         <>
-          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiText size="s">
                 <strong>
@@ -333,7 +333,7 @@ export const DashboardsTab = ({
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
         </>
       ) : null}
 

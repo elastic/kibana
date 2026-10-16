@@ -1127,7 +1127,7 @@ export const EntityFlyout = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="xs" css={css`margin-left: -24px; margin-right: -24px; width: auto;`} />
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
                   <h2>{dashboardPreview.title}</h2>
@@ -1270,7 +1270,7 @@ export const EntityFlyout = ({
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
         <EuiTabs bottomBorder>
           {visibleTabs.map((tab) => (
             <EuiTab
@@ -1341,7 +1341,7 @@ export const EntityFlyout = ({
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="m" responsive={false}>
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s" responsive={false}>
           {agentBuilder?.openChat ? (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
@@ -1551,7 +1551,7 @@ const CustomLinksTab = ({ links }: { readonly links: readonly FlyoutCustomLink[]
   const visible = links.filter((link) => link.url.trim().length > 0);
   if (visible.length === 0) return null;
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+    <EuiPanel hasBorder hasShadow={false} paddingSize="s">
       <EuiTitle size="xs">
         <h3>
           {i18n.translate('entityCentricLabFlyout.flyout.customLinksTitle', {

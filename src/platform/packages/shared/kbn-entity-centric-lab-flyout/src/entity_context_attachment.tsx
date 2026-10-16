@@ -142,7 +142,7 @@ const EntityContextInlineContent: React.FC<AttachmentRenderProps<EntityCentricLa
   const kindLabel = entityKind ?? entityType;
 
   return (
-    <EuiPanel hasShadow={false} hasBorder paddingSize="m" color="subdued">
+    <EuiPanel hasShadow={false} hasBorder paddingSize="s" color="subdued">
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiIcon type="inspect" size="l" aria-hidden={true} />

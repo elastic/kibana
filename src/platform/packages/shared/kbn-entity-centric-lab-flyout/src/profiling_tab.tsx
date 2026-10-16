@@ -45,7 +45,7 @@ export const ProfilingTab = () => (
             })}
           </h2>
         </EuiTitle>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
           <p>
             {i18n.translate('entityCentricLabFlyout.flyout.profiling.body', {

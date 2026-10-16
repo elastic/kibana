@@ -387,7 +387,7 @@ const CategorySummaryRow = ({
       initialIsOpen
     >
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+      <EuiFlexGroup gutterSize="s" responsive={false} wrap>
         {TILE_SPECS.map((spec) => (
           <EuiFlexItem key={spec.key} grow>
             <SummaryTile

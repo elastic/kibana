@@ -35,6 +35,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { LogRow, LogSeverity } from './fake_entity_tabs';
 import { LogDocumentFlyout } from './log_document_flyout';
+import { useEntityFlyoutServices } from './services_context';
 
 interface LogsTabProps {
   readonly entityName: string;
@@ -67,6 +68,7 @@ const serviceColor = (name: string): string => {
 
 export const LogsTab = ({ entityName, logs }: LogsTabProps) => {
   const { euiTheme } = useEuiTheme();
+  const { density: serviceDensity } = useEntityFlyoutServices();
   const [{ pageIndex, pageSize }, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const [searchText, setSearchText] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -288,7 +290,7 @@ export const LogsTab = ({ entityName, logs }: LogsTabProps) => {
   return (
     <>
       {/* Search + Open in Discover */}
-      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem>
           <EuiFieldSearch
             fullWidth
@@ -314,7 +316,7 @@ export const LogsTab = ({ entityName, logs }: LogsTabProps) => {
       {/* Toolbar row: doc count + selected + column/sort controls */}
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
                 {i18n.translate('entityCentricLabFlyout.flyout.logs.documentCount', {
@@ -946,6 +948,7 @@ export const LogsTab = ({ entityName, logs }: LogsTabProps) => {
         <EuiBasicTable<LogRow>
           items={pageOfItems as LogRow[]}
           columns={columns}
+          compressed={serviceDensity === 'compact'}
           tableCaption={i18n.translate('entityCentricLabFlyout.flyout.logs.tableCaption', {
             defaultMessage: 'Logs emitted by {entityName}',
             values: { entityName },

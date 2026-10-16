@@ -50,7 +50,7 @@ export const StreamsElasticOnAlertsTab = ({
   onOpenRuleRow,
 }: StreamsElasticOnAlertsTabProps) => {
   const { euiTheme } = useEuiTheme();
-  const { charts } = useEntityFlyoutServices();
+  const { charts, density } = useEntityFlyoutServices();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
   const [{ pageIndex, pageSize }, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
@@ -116,7 +116,7 @@ export const StreamsElasticOnAlertsTab = ({
           defaultMessage: 'Triggered',
         }),
         sortable: true,
-        render: (triggeredAt: string) => <EuiText size="s">{triggeredAt}</EuiText>,
+        render: (triggeredAt: string) => <EuiText size={density === 'compact' ? 'xs' : 's'}>{triggeredAt}</EuiText>,
       },
       {
         field: 'ruleName',
@@ -143,7 +143,7 @@ export const StreamsElasticOnAlertsTab = ({
         render: (reason: string, row: AlertRow) => (
           <EuiButtonEmpty flush="left" size="s" color="primary" onClick={() => openAlertRow(row)}>
             <EuiText
-              size="s"
+              size={density === 'compact' ? 'xs' : 's'}
               css={css`
                 white-space: nowrap;
                 overflow: hidden;
@@ -156,7 +156,7 @@ export const StreamsElasticOnAlertsTab = ({
         ),
       },
     ],
-    [openAlertRow, openRuleRow]
+    [openAlertRow, openRuleRow, density]
   );
 
   const activePercent =
@@ -168,10 +168,10 @@ export const StreamsElasticOnAlertsTab = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+      <EuiFlexGroup gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false} style={{ minWidth: 220 }}>
-          <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-            <EuiFlexGroup gutterSize="m" responsive={false} alignItems="stretch">
+          <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="stretch">
               <EuiFlexItem grow={false}>
                 <div
                   aria-hidden
@@ -184,12 +184,12 @@ export const StreamsElasticOnAlertsTab = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h3>
+                <EuiTitle size="xxs">
+                  <h4>
                     {i18n.translate('entityCentricLabFlyout.flyout.alerts.activeAlertsTitle', {
                       defaultMessage: 'Active alerts',
                     })}
-                  </h3>
+                  </h4>
                 </EuiTitle>
                 <EuiText size="s" color="subdued">
                   {i18n.translate('entityCentricLabFlyout.flyout.alerts.activePercent', {
@@ -197,7 +197,7 @@ export const StreamsElasticOnAlertsTab = ({
                     values: { percent: activePercent, total: alerts.totalCount },
                   })}
                 </EuiText>
-                <EuiSpacer size="m" />
+                <EuiSpacer size="s" />
                 <EuiText
                   textAlign="right"
                   css={css`
@@ -214,16 +214,16 @@ export const StreamsElasticOnAlertsTab = ({
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 260 }}>
-          <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+          <EuiPanel hasBorder hasShadow={false} paddingSize="s">
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h3>
+                <EuiTitle size="xxs">
+                  <h4>
                     {i18n.translate(
                       'entityCentricLabFlyout.flyout.alerts.activeAlertsOverTimeTitle',
                       { defaultMessage: 'Active alerts over time' }
                     )}
-                  </h3>
+                  </h4>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -273,31 +273,31 @@ export const StreamsElasticOnAlertsTab = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
-      <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-        <EuiTitle size="xs">
-          <h3>
-            {i18n.translate('entityCentricLabFlyout.flyout.alerts.detailsTitle', {
-              defaultMessage: 'Active alerts details',
-            })}
-          </h3>
-        </EuiTitle>
-        <EuiText size="s" color="subdued">
-          {i18n.translate('entityCentricLabFlyout.flyout.alerts.showingCount', {
-            defaultMessage:
-              'Showing {start}-{end} of {total} {total, plural, one {Alert} other {Alerts}}',
-            values: {
-              start: pageIndex * pageSize + 1,
-              end: Math.min((pageIndex + 1) * pageSize, alerts.details.length),
-              total: alerts.details.length,
-            },
+      <EuiTitle size="xxs">
+        <h4>
+          {i18n.translate('entityCentricLabFlyout.flyout.alerts.detailsTitle', {
+            defaultMessage: 'Active alerts details',
           })}
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiBasicTable<AlertRow>
+        </h4>
+      </EuiTitle>
+      <EuiText size="s" color="subdued">
+        {i18n.translate('entityCentricLabFlyout.flyout.alerts.showingCount', {
+          defaultMessage:
+            'Showing {start}-{end} of {total} {total, plural, one {Alert} other {Alerts}}',
+          values: {
+            start: pageIndex * pageSize + 1,
+            end: Math.min((pageIndex + 1) * pageSize, alerts.details.length),
+            total: alerts.details.length,
+          },
+        })}
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiBasicTable<AlertRow>
           items={pageOfItems}
           columns={columns}
+          compressed={density === 'compact'}
           tableCaption={i18n.translate('entityCentricLabFlyout.flyout.alerts.detailsTableCaption', {
             defaultMessage: 'Active alerts details',
           })}
@@ -314,7 +314,6 @@ export const StreamsElasticOnAlertsTab = ({
           }}
           data-test-subj="streamsElasticOnAlertsDetailsTable"
         />
-      </EuiPanel>
     </>
   );
 };

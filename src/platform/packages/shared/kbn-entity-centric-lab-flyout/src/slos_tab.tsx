@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -16,15 +16,18 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
   EuiPanel,
+  EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
   type EuiBasicTableColumn,
+  type Criteria,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { SloRow, SloStatus, SlosTabData } from './fake_entity_tabs';
+import { useEntityFlyoutServices } from './services_context';
 
 interface SlosTabProps {
   readonly slos: SlosTabData;
@@ -45,6 +48,11 @@ const kibanaAppHref = (appPath: string): string => {
 };
 
 export const SlosTab = ({ slos }: SlosTabProps) => {
+  const { euiTheme } = useEuiTheme();
+  const { density } = useEntityFlyoutServices();
+  const [{ pageIndex, pageSize }, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const isCompact = density === 'compact';
+  const cellSize = isCompact ? 'xs' : 's';
   const columns = useMemo<Array<EuiBasicTableColumn<SloRow>>>(
     () => [
       {
@@ -53,9 +61,20 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
           defaultMessage: 'SLO',
         }),
         render: (name: string) => (
-          <EuiLink data-test-subj="entityCentricLabSloLink" onClick={() => {}}>
+          <a
+            role="button"
+            tabIndex={0}
+            data-test-subj="entityCentricLabSloLink"
+            css={css`
+              color: ${euiTheme.colors.primaryText};
+              cursor: pointer;
+              font-size: inherit;
+              &:hover { text-decoration: underline; }
+            `}
+            onClick={() => {}}
+          >
             {name} <EuiIcon type="popout" size="s" aria-hidden={true} />
-          </EuiLink>
+          </a>
         ),
       },
       {
@@ -64,6 +83,7 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
           defaultMessage: 'Target',
         }),
         width: '80px',
+        render: (target: string) => <EuiText size={cellSize}>{target}</EuiText>,
       },
       {
         field: 'current',
@@ -73,7 +93,7 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
         width: '80px',
         render: (current: string, row: SloRow) => (
           <EuiText
-            size="s"
+            size={cellSize}
             css={css`
               font-weight: 600;
               color: ${row.status === 'Met'
@@ -98,7 +118,7 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
         ),
       },
     ],
-    []
+    [cellSize]
   );
 
   if (slos.slos.length === 0) {
@@ -145,9 +165,9 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
 
   return (
     <>
-      <EuiFlexGroup gutterSize="m" responsive={false}>
+      <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem>
-          <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+          <EuiPanel hasBorder hasShadow={false} paddingSize="s">
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiIcon type="visGauge" size="l" color="subdued" />
@@ -158,7 +178,7 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
                     defaultMessage: 'Total SLOs',
                   })}
                 </EuiText>
-                <EuiTitle size="s">
+                <EuiTitle size="xxs">
                   <span>{slos.slos.length}</span>
                 </EuiTitle>
               </EuiFlexItem>
@@ -166,7 +186,7 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+          <EuiPanel hasBorder hasShadow={false} paddingSize="s">
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiIcon type="error" size="l" color={breachingCount > 0 ? 'danger' : 'subdued'} />
@@ -177,7 +197,7 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
                     defaultMessage: 'Breaching',
                   })}
                 </EuiText>
-                <EuiTitle size="s">
+                <EuiTitle size="xxs">
                   <span>{breachingCount}</span>
                 </EuiTitle>
               </EuiFlexItem>
@@ -185,7 +205,7 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+          <EuiPanel hasBorder hasShadow={false} paddingSize="s">
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiIcon
@@ -200,7 +220,7 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
                     defaultMessage: 'Degrading',
                   })}
                 </EuiText>
-                <EuiTitle size="s">
+                <EuiTitle size="xxs">
                   <span>{degradingCount}</span>
                 </EuiTitle>
               </EuiFlexItem>
@@ -209,18 +229,46 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <div style={{ marginTop: 16 }}>
-        <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-          <EuiBasicTable<SloRow>
-            items={[...slos.slos]}
-            columns={columns}
-            tableCaption={i18n.translate('entityCentricLabFlyout.flyout.slos.tableCaption', {
-              defaultMessage: 'Service Level Objectives',
-            })}
-            data-test-subj="entityCentricLabSlosTable"
-          />
-        </EuiPanel>
-      </div>
+      <EuiSpacer size="s" />
+      <EuiTitle size="xxs">
+        <h4>
+          {i18n.translate('entityCentricLabFlyout.flyout.slos.detailsTitle', {
+            defaultMessage: 'SLO details',
+          })}
+        </h4>
+      </EuiTitle>
+      <EuiText size="s" color="subdued">
+        {i18n.translate('entityCentricLabFlyout.flyout.slos.showingCount', {
+          defaultMessage:
+            'Showing {start}-{end} of {total} {total, plural, one {SLO} other {SLOs}}',
+          values: {
+            start: pageIndex * pageSize + 1,
+            end: Math.min((pageIndex + 1) * pageSize, slos.slos.length),
+            total: slos.slos.length,
+          },
+        })}
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiBasicTable<SloRow>
+        items={slos.slos.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize) as SloRow[]}
+        columns={columns}
+        compressed={density === 'compact'}
+        tableCaption={i18n.translate('entityCentricLabFlyout.flyout.slos.tableCaption', {
+          defaultMessage: 'Service Level Objectives',
+        })}
+        pagination={{
+          pageIndex,
+          pageSize,
+          totalItemCount: slos.slos.length,
+          pageSizeOptions: [10, 25, 50],
+        }}
+        onChange={({ page }: Criteria<SloRow>) => {
+          if (page) {
+            setPagination({ pageIndex: page.index, pageSize: page.size });
+          }
+        }}
+        data-test-subj="entityCentricLabSlosTable"
+      />
     </>
   );
 };

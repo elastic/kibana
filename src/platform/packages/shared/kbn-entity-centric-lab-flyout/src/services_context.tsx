@@ -108,6 +108,11 @@ export interface EntityFlyoutServices {
     readonly entityName: string;
     readonly alertRow?: AlertRow;
   }) => void;
+  /**
+   * Page-level display density from the inventory Display options popover.
+   * When `'compact'`, tables render with `compressed` and tighter spacing.
+   */
+  readonly density?: 'compact' | 'normal' | 'expanded';
 }
 
 const EntityFlyoutServicesContext = createContext<EntityFlyoutServices | null>(null);

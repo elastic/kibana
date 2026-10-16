@@ -59,6 +59,7 @@ const KNOWN_FIELDS = new Set([
   'os',
   'cloudprovider',
   'servicename',
+  'alerts',
 ]);
 
 const ATTR_FIELD_KEYS: Record<string, string> = {
@@ -89,6 +90,11 @@ const fieldValues = (entity: Entity, rawField: string): string[] => {
       return entity.provider ? [entity.provider] : [];
     case 'health':
       return [entity.health];
+    case 'alerts': {
+      if (!entity.alerts) return ['no_setup'];
+      if (entity.alerts.active > 0) return ['active'];
+      return ['no_active'];
+    }
     case 'application':
     case 'environment':
     case 'team':

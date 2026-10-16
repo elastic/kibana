@@ -26,9 +26,11 @@ import {
   EuiTitle,
   useEuiTheme,
   type EuiBasicTableColumn,
+  type Criteria,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useEntityFlyoutServices } from './services_context';
 
 type ProcessState = 'running' | 'sleeping' | 'stopped' | 'idle' | 'dead' | 'zombie' | 'unknown';
 
@@ -166,10 +168,10 @@ const ProcessSummary = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+    <EuiFlexGroup gutterSize="s" responsive={false} wrap>
       {items.map((item) => (
         <EuiFlexItem key={item.key}>
-          <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+          <EuiPanel hasBorder hasShadow={false} paddingSize="s">
             <EuiText size="xs" color="subdued">
               {item.label}
             </EuiText>
@@ -193,10 +195,12 @@ const ProcessSummary = ({
 
 export const ProcessesTab = ({ entityName }: ProcessesTabProps) => {
   const { euiTheme } = useEuiTheme();
+  const { density } = useEntityFlyoutServices();
   const allProcesses = useMemo(() => generateProcesses(entityName), [entityName]);
   const now = useMemo(() => Date.now(), []);
   const [searchText, setSearchText] = useState('');
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [{ pageIndex, pageSize }, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -231,7 +235,7 @@ export const ProcessesTab = ({ entityName }: ProcessesTabProps) => {
   const columns = useMemo<Array<EuiBasicTableColumn<FakeProcess>>>(
     () => [
       {
-        width: '40px',
+        width: '28px',
         isExpander: true,
         name: '',
         render: (item: FakeProcess) => (
@@ -248,7 +252,7 @@ export const ProcessesTab = ({ entityName }: ProcessesTabProps) => {
         name: i18n.translate('entityCentricLabFlyout.flyout.processes.colState', {
           defaultMessage: 'State',
         }),
-        width: '84px',
+        width: '76px',
         render: (state: ProcessState) => (
           <EuiBadge color={STATE_BADGE_COLOR[state]}>
             {STATE_LABELS[state]}
@@ -260,10 +264,9 @@ export const ProcessesTab = ({ entityName }: ProcessesTabProps) => {
         name: i18n.translate('entityCentricLabFlyout.flyout.processes.colCommand', {
           defaultMessage: 'Command',
         }),
-        width: '40%',
         truncateText: true,
         render: (command: string) => (
-          <EuiText size="s">
+          <EuiText size={density === 'compact' ? 'xs' : 's'}>
             <code>{command}</code>
           </EuiText>
         ),
@@ -273,9 +276,10 @@ export const ProcessesTab = ({ entityName }: ProcessesTabProps) => {
         name: i18n.translate('entityCentricLabFlyout.flyout.processes.colTime', {
           defaultMessage: 'Time',
         }),
+        width: '70px',
         align: 'right' as const,
         render: (startTime: number) => (
-          <EuiText size="s">{formatRuntime(startTime, now)}</EuiText>
+          <EuiText size="xs" css={css`white-space: nowrap;`}>{formatRuntime(startTime, now)}</EuiText>
         ),
       },
       {
@@ -283,9 +287,10 @@ export const ProcessesTab = ({ entityName }: ProcessesTabProps) => {
         name: i18n.translate('entityCentricLabFlyout.flyout.processes.colCpu', {
           defaultMessage: 'CPU',
         }),
+        width: '50px',
         align: 'right' as const,
         render: (cpu: number) => (
-          <EuiText size="s">{`${cpu.toFixed(1)}%`}</EuiText>
+          <EuiText size="xs" css={css`white-space: nowrap;`}>{`${cpu.toFixed(1)}%`}</EuiText>
         ),
       },
       {
@@ -293,13 +298,14 @@ export const ProcessesTab = ({ entityName }: ProcessesTabProps) => {
         name: i18n.translate('entityCentricLabFlyout.flyout.processes.colMemory', {
           defaultMessage: 'Mem.',
         }),
+        width: '50px',
         align: 'right' as const,
         render: (mem: number) => (
-          <EuiText size="s">{`${mem.toFixed(1)}%`}</EuiText>
+          <EuiText size="xs" css={css`white-space: nowrap;`}>{`${mem.toFixed(1)}%`}</EuiText>
         ),
       },
     ],
-    [now, expandedIds, toggleExpand]
+    [now, expandedIds, toggleExpand, density]
   );
 
   const expandedRowMap = useMemo(() => {
@@ -359,7 +365,7 @@ export const ProcessesTab = ({ entityName }: ProcessesTabProps) => {
   return (
     <>
       <ProcessSummary processes={allProcesses} />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
       <EuiTitle size="xxs">
         <span>
           {i18n.translate('entityCentricLabFlyout.flyout.processes.topTitle', {
@@ -378,18 +384,31 @@ export const ProcessesTab = ({ entityName }: ProcessesTabProps) => {
         isClearable
         onChange={handleSearchChange}
       />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
       <EuiBasicTable
-        items={filteredProcesses as FakeProcess[]}
+        items={filteredProcesses.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize) as FakeProcess[]}
+        compressed={density === 'compact'}
         itemId="id"
         columns={columns}
         isExpandable
         itemIdToExpandedRowMap={expandedRowMap}
         tableLayout="auto"
+        scrollableInline
+        pagination={{
+          pageIndex,
+          pageSize,
+          totalItemCount: filteredProcesses.length,
+          pageSizeOptions: [10, 25, 50],
+        }}
+        onChange={({ page }: Criteria<FakeProcess>) => {
+          if (page) {
+            setPagination({ pageIndex: page.index, pageSize: page.size });
+          }
+        }}
       />
       {filteredProcesses.length === 0 && (
         <>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
           <EuiText size="s" color="subdued" textAlign="center">
             {i18n.translate('entityCentricLabFlyout.flyout.processes.noResults', {
               defaultMessage: 'No processes found',

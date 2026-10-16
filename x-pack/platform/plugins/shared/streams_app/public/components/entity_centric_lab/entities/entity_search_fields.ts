@@ -22,7 +22,7 @@ export const isCloudInventoryScope = (categoryScope?: EntityCategoryId): boolean
  * dedicated dropdowns; they still appear in KQL autocomplete and "+ Add
  * filter". `health` is appended only outside Phase 1 (no health concept).
  */
-const BASE_SEARCH_FIELDS = ['name', 'type', 'team', 'environment', 'region'] as const;
+const BASE_SEARCH_FIELDS = ['name', 'type', 'team', 'environment', 'region', 'alerts'] as const;
 
 /** Cross-category "All resources" also offers category as a field. */
 const CROSS_CATEGORY_SEARCH_FIELDS = ['category'] as const;
@@ -52,6 +52,7 @@ export const ENTITY_SEARCH_FIELD_LABELS: Readonly<Record<string, string>> = {
   team: 'Team',
   environment: 'Environment',
   region: 'Region',
+  alerts: 'Alerts',
   provider: 'Cloud provider',
   'cloud.provider': 'Cloud provider',
   cluster: 'Cluster',

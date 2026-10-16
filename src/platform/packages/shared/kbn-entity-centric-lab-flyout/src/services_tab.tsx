@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useId, useMemo } from 'react';
+import React, { useId, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -18,10 +18,13 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
   type EuiBasicTableColumn,
+  type Criteria,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useEntityFlyoutServices } from './services_context';
 
 type SloStatus = 'Met' | 'Breaching' | 'Degrading' | 'No SLO';
 
@@ -252,14 +255,16 @@ const MetricCell = ({
   label,
   series,
   color,
+  compact,
 }: {
   readonly label: string;
   readonly series: readonly number[];
   readonly color: string;
+  readonly compact?: boolean;
 }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} justifyContent="flexEnd">
     <EuiFlexItem grow={false}>
-      <EuiText size="s">{label}</EuiText>
+      <EuiText size={compact ? 'xs' : 's'}>{label}</EuiText>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <MetricSparkline values={series} color={color} />
@@ -268,8 +273,12 @@ const MetricCell = ({
 );
 
 export const ServicesTab = ({ entityName }: ServicesTabProps) => {
+  const { euiTheme } = useEuiTheme();
+  const { density } = useEntityFlyoutServices();
   const services = useMemo(() => generateHostedServices(entityName), [entityName]);
+  const [{ pageIndex, pageSize }, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
+  const isCompact = density === 'compact';
   const columns = useMemo<Array<EuiBasicTableColumn<HostedService>>>(
     () => [
       {
@@ -278,9 +287,19 @@ export const ServicesTab = ({ entityName }: ServicesTabProps) => {
           defaultMessage: 'Service',
         }),
         render: (name: string) => (
-          <EuiLink onClick={() => {}}>
+          <a
+            role="button"
+            tabIndex={0}
+            css={css`
+              color: ${euiTheme.colors.primaryText};
+              cursor: pointer;
+              font-size: inherit;
+              &:hover { text-decoration: underline; }
+            `}
+            onClick={() => {}}
+          >
             {name} <EuiIcon type="popout" size="s" />
-          </EuiLink>
+          </a>
         ),
       },
       {
@@ -296,6 +315,7 @@ export const ServicesTab = ({ entityName }: ServicesTabProps) => {
             })}
             series={item.latencySeries}
             color={SPARKLINE_COLOR.latency}
+            compact={isCompact}
           />
         ),
         align: 'right' as const,
@@ -313,6 +333,7 @@ export const ServicesTab = ({ entityName }: ServicesTabProps) => {
             })}
             series={item.errorSeries}
             color={SPARKLINE_COLOR.errors}
+            compact={isCompact}
           />
         ),
         align: 'right' as const,
@@ -330,12 +351,13 @@ export const ServicesTab = ({ entityName }: ServicesTabProps) => {
             })}
             series={item.throughputSeries}
             color={SPARKLINE_COLOR.throughput}
+            compact={isCompact}
           />
         ),
         align: 'right' as const,
       },
     ],
-    []
+    [isCompact]
   );
 
   return (
@@ -343,12 +365,12 @@ export const ServicesTab = ({ entityName }: ServicesTabProps) => {
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
-            <h3>
+            <h4>
               {i18n.translate('entityCentricLabFlyout.flyout.services.title', {
                 defaultMessage: 'Services running on {hostName}',
                 values: { hostName: entityName },
               })}
-            </h3>
+            </h4>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -360,9 +382,25 @@ export const ServicesTab = ({ entityName }: ServicesTabProps) => {
           </EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiBasicTable items={services as HostedService[]} columns={columns} tableLayout="auto" />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
+      <EuiBasicTable
+        items={services.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize) as HostedService[]}
+        columns={columns}
+        tableLayout="auto"
+        compressed={density === 'compact'}
+        pagination={{
+          pageIndex,
+          pageSize,
+          totalItemCount: services.length,
+          pageSizeOptions: [10, 25, 50],
+        }}
+        onChange={({ page }: Criteria<HostedService>) => {
+          if (page) {
+            setPagination({ pageIndex: page.index, pageSize: page.size });
+          }
+        }}
+      />
+      <EuiSpacer size="s" />
       <EuiLink onClick={() => {}} data-test-subj="entityCentricLabServicesViewAllInApm">
         {i18n.translate('entityCentricLabFlyout.flyout.services.viewAllInApm', {
           defaultMessage: 'View all services in APM',

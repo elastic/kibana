@@ -111,7 +111,7 @@ export const OverviewTab = ({
             <EntitySummaryCard overview={overview} />
           </EuiAccordion>
 
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
         </>
       )}
 
@@ -149,7 +149,7 @@ export const OverviewTab = ({
         />
       </EuiAccordion>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
       {/* Golden signals: high-level cards followed by time-series charts (relocated from the Metrics tab) */}
       <EuiAccordion
@@ -169,8 +169,8 @@ export const OverviewTab = ({
 
         {metrics && (primaryA || primaryB || primaryC) ? (
           <>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup gutterSize="s" responsive={false} wrap>
               {primaryA ? (
                 <EuiFlexItem style={{ minWidth: 220 }}>
                   <MetricChartCard series={primaryA} events={events} />
@@ -184,7 +184,7 @@ export const OverviewTab = ({
             </EuiFlexGroup>
             {primaryC ? (
               <>
-                <EuiSpacer size="m" />
+                <EuiSpacer size="s" />
                 <MetricChartCard series={primaryC} events={events} />
               </>
             ) : null}
@@ -193,8 +193,8 @@ export const OverviewTab = ({
 
         {metrics && (otherA || otherB) ? (
           <>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup gutterSize="s" responsive={false} wrap>
               {otherA ? (
                 <EuiFlexItem style={{ minWidth: 220 }}>
                   <MetricChartCard series={otherA} events={events} />
@@ -212,7 +212,7 @@ export const OverviewTab = ({
 
       {!hideOwnership && (
         <>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
 
           <EuiAccordion
             id={ownershipAccordionId}
@@ -267,7 +267,7 @@ const EntitySummaryCard = ({ overview }: { overview: EntityOverview }) => {
     <EuiPanel
       hasBorder
       hasShadow={false}
-      paddingSize="m"
+      paddingSize="s"
       css={css`
         position: relative;
         padding-left: ${euiTheme.size.l};
@@ -376,7 +376,7 @@ const SummarySubheader = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const GOLDEN_SIGNAL_TILE_HEIGHT = 132;
+const GOLDEN_SIGNAL_TILE_HEIGHT = 100;
 
 // Muted severity colours from the EUI primitive *40/*30 palette scale.
 const goldenSignalTileBackground = (
@@ -394,7 +394,7 @@ const goldenSignalTileBackground = (
 };
 
 const GoldenSignalsRow = ({ signals }: { signals: readonly GoldenSignal[] }) => (
-  <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+  <EuiFlexGroup gutterSize="s" responsive={false} wrap>
     {signals.map((signal) => (
       <EuiFlexItem key={signal.id} style={{ minWidth: 180 }}>
         <GoldenSignalCard signal={signal} />
@@ -473,8 +473,8 @@ const KeyValueGrid = ({
   rows: readonly { id: string; label: string; value: string }[];
   ariaLabel: string;
 }) => (
-  <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-    <EuiFlexGrid columns={3} gutterSize="m" aria-label={ariaLabel}>
+  <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+    <EuiFlexGrid columns={3} gutterSize="s" aria-label={ariaLabel}>
       {rows.map((row) => (
         <EuiFlexItem key={row.id}>
           <EuiText size="xs" color="subdued">

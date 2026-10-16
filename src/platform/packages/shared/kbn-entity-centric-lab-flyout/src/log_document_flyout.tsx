@@ -258,7 +258,7 @@ export const LogDocumentFlyout = ({
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
 
         {/* Tabs */}
         <EuiTabs bottomBorder={false}>
@@ -321,14 +321,14 @@ export const LogDocumentFlyout = ({
               <EuiCodeBlock
                 language="text"
                 fontSize="s"
-                paddingSize="m"
+                paddingSize="s"
                 isCopyable
               >
                 {row.summary}
               </EuiCodeBlock>
             </EuiAccordion>
 
-            <EuiSpacer size="m" />
+            <EuiSpacer size="s" />
 
             {/* Field table */}
             <EuiBasicTable<FieldRow>
@@ -341,7 +341,7 @@ export const LogDocumentFlyout = ({
               `}
             />
 
-            <EuiSpacer size="m" />
+            <EuiSpacer size="s" />
 
             {/* Stream */}
             <EuiAccordion
@@ -357,13 +357,13 @@ export const LogDocumentFlyout = ({
               <EuiLink>logs-generic.otel-default</EuiLink>
             </EuiAccordion>
 
-            <EuiSpacer size="m" />
+            <EuiSpacer size="s" />
 
             {/* Explain this log entry */}
             <EuiPanel
               hasBorder
               hasShadow={false}
-              paddingSize="m"
+              paddingSize="s"
               css={css`
                 cursor: pointer;
                 &:hover {
@@ -521,7 +521,7 @@ export const LogDocumentFlyout = ({
           <EuiCodeBlock
             language="json"
             fontSize="s"
-            paddingSize="m"
+            paddingSize="s"
             isCopyable
             overflowHeight={600}
           >

@@ -2528,6 +2528,38 @@ const BucketMetricControlsFlyout = ({
 };
 
 // ---------------------------------------------------------------------------
+// Alert count badge (red pill shown next to the resource count)
+// ---------------------------------------------------------------------------
+
+const ALERT_BADGE_COLOR = '#FFB5AD'; // red40 — matches the danger hex tile tone
+
+const AlertCountBadge = ({ entities }: { readonly entities: readonly Entity[] }) => {
+  const alertCount = useMemo(
+    () => entities.filter((e) => (e.alerts?.active ?? 0) > 0).length,
+    [entities]
+  );
+  if (alertCount === 0) return null;
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiToolTip
+        content={i18n.translate(
+          'xpack.streams.entityCentricLab.hexMap.alertCountTooltip',
+          {
+            defaultMessage:
+              '{count} {count, plural, one {resource} other {resources}} with active alerts',
+            values: { count: alertCount },
+          }
+        )}
+      >
+        <EuiBadge color="danger">
+          {alertCount.toLocaleString()}
+        </EuiBadge>
+      </EuiToolTip>
+    </EuiFlexItem>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // Headers
 // ---------------------------------------------------------------------------
 
@@ -2535,6 +2567,7 @@ const CategoryHeader = ({
   category,
   total,
   label,
+  entities,
 }: {
   category: EntityCategoryId;
   total: number;
@@ -2544,6 +2577,8 @@ const CategoryHeader = ({
    * "AWS EC2 instance" instead of the generic "Cloud".
    */
   label?: string;
+  /** Entities in this group, used to compute alert count. */
+  entities?: readonly Entity[];
 }) => {
   const descriptor = getCategoryDescriptor(category);
   return (
@@ -2561,6 +2596,7 @@ const CategoryHeader = ({
       <EuiFlexItem grow={false}>
         <EuiBadge color="hollow">{total.toLocaleString()}</EuiBadge>
       </EuiFlexItem>
+      {entities ? <AlertCountBadge entities={entities} /> : null}
     </EuiFlexGroup>
   );
 };
@@ -2619,6 +2655,7 @@ interface SubTypeRowProps {
  */
 const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowProps) => {
   const paletteEnabled = useContext(PaletteColoringEnabledContext);
+  const [isOpen, setIsOpen] = useState(true);
   const { selection, setSelection } = useBucketMetricSelection(bucketKey);
   const [customMetricsVersion, setCustomMetricsVersion] = useState(0);
   const bumpCustomMetrics = useCallback(() => setCustomMetricsVersion((v) => v + 1), []);
@@ -2660,10 +2697,16 @@ const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowPr
       : null;
   return (
     <div data-test-subj={`entityCentricLabBucket-${bucketKey}`}>
-      {/* Row 1: sub-type label + count on the left, dropdowns on the
-          right. No leading column pushing tiles to the right — the
-          tiles span the full card width below. */}
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+            onClick={() => setIsOpen((v) => !v)}
+            aria-label={isOpen ? 'Collapse group' : 'Expand group'}
+            size="xs"
+            color="text"
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -2674,6 +2717,7 @@ const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowPr
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow">{entities.length.toLocaleString()}</EuiBadge>
             </EuiFlexItem>
+            <AlertCountBadge entities={entities} />
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem />
@@ -2692,27 +2736,28 @@ const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowPr
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="xs" />
-      {/* Row 2: legend swatches so users can decode the tone palette
-          without having to hover every tile. */}
-      <BucketMetricLegend
-        metric={metric}
-        coloring={coloringForRender}
-        paletteRange={paletteRange}
-        entities={entities}
-        statId={selection.statId}
-      />
-      <EuiSpacer size="s" />
-      {/* Row 3: tiles span the full card width — no indentation. */}
-      <BucketTileRow
-        entities={entities}
-        metric={metric}
-        statId={selection.statId}
-        onSelectEntity={onSelectEntity}
-        coloring={coloringForRender}
-        paletteRange={paletteRange}
-        sortReverse={selection.coloring.sortReverse}
-      />
+      {isOpen && (
+        <>
+          <EuiSpacer size="xs" />
+          <BucketMetricLegend
+            metric={metric}
+            coloring={coloringForRender}
+            paletteRange={paletteRange}
+            entities={entities}
+            statId={selection.statId}
+          />
+          <EuiSpacer size="s" />
+          <BucketTileRow
+            entities={entities}
+            metric={metric}
+            statId={selection.statId}
+            onSelectEntity={onSelectEntity}
+            coloring={coloringForRender}
+            paletteRange={paletteRange}
+            sortReverse={selection.coloring.sortReverse}
+          />
+        </>
+      )}
     </div>
   );
 };
@@ -2790,6 +2835,7 @@ const KubernetesCard = ({
   const [resourceType, setResourceType] = useState<KubernetesResourceType>(KUBERNETES_RESOURCE_TYPE_ALL);
   const [clusterFilter, setClusterFilter] = useState<string>(KUBERNETES_FILTER_ALL);
   const [groupBy, setGroupBy] = useState<KubernetesGroupBy>('subType');
+  const [isOpen, setIsOpen] = useState(true);
 
   const clusterNames = useMemo(() => getKubernetesClusterNames(entities), [entities]);
 
@@ -2882,13 +2928,26 @@ const KubernetesCard = ({
 
   return (
     <HexPanel>
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false}>
-          <CategoryHeader category="kubernetes" total={visibleEntities.length} />
+          <EuiButtonIcon
+            iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+            onClick={() => setIsOpen((v) => !v)}
+            aria-label={isOpen ? 'Collapse group' : 'Expand group'}
+            size="xs"
+            color="text"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CategoryHeader category="kubernetes" total={visibleEntities.length} entities={visibleEntities} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <div className={nestedContentClass}>{groupContent}</div>
+      {isOpen && (
+        <>
+          <EuiSpacer size="m" />
+          <div className={nestedContentClass}>{groupContent}</div>
+        </>
+      )}
     </HexPanel>
   );
 };
@@ -2927,6 +2986,7 @@ const MultiTypeCategoryCard = ({
   `;
 
   const [typeFilter, setTypeFilter] = useState<string>(CATEGORY_RESOURCE_TYPE_ALL);
+  const [isOpen, setIsOpen] = useState(true);
   const typeLabels = useMemo(() => getEntityTypeLabels(entities), [entities]);
   const visibleEntities = useMemo(
     () => filterEntitiesByCategoryType(entities, typeFilter),
@@ -2956,25 +3016,38 @@ const MultiTypeCategoryCard = ({
 
   return (
     <HexPanel>
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false}>
-          <CategoryHeader category={category} total={visibleEntities.length} />
+          <EuiButtonIcon
+            iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+            onClick={() => setIsOpen((v) => !v)}
+            aria-label={isOpen ? 'Collapse group' : 'Expand group'}
+            size="xs"
+            color="text"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CategoryHeader category={category} total={visibleEntities.length} entities={visibleEntities} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <div className={nestedContentClass}>
-        {orderedTypes.map((group, index) => (
-          <div key={group.label} className={index === 0 ? undefined : subRowClass}>
-            <SubTypeRow
-              bucketKey={bucketKeyFor(category, group.label)}
-              label={group.label}
-              entities={group.rows}
-              onSelectEntity={onSelectEntity}
-            />
-            {index === 0 ? <EuiSpacer size="s" /> : null}
+      {isOpen && (
+        <>
+          <EuiSpacer size="m" />
+          <div className={nestedContentClass}>
+            {orderedTypes.map((group, index) => (
+              <div key={group.label} className={index === 0 ? undefined : subRowClass}>
+                <SubTypeRow
+                  bucketKey={bucketKeyFor(category, group.label)}
+                  label={group.label}
+                  entities={group.rows}
+                  onSelectEntity={onSelectEntity}
+                />
+                {index === 0 ? <EuiSpacer size="s" /> : null}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
     </HexPanel>
   );
 };
@@ -2986,9 +3059,11 @@ const MultiTypeCategoryCard = ({
 const CloudProviderHeader = ({
   provider,
   total,
+  entities,
 }: {
   provider: CloudProviderDescriptor;
   total: number;
+  entities?: readonly Entity[];
 }) => (
   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
@@ -3002,6 +3077,7 @@ const CloudProviderHeader = ({
     <EuiFlexItem grow={false}>
       <EuiBadge color="hollow">{total.toLocaleString()}</EuiBadge>
     </EuiFlexItem>
+    {entities ? <AlertCountBadge entities={entities} /> : null}
   </EuiFlexGroup>
 );
 
@@ -3030,6 +3106,7 @@ const CloudProviderCard = ({
     padding-left: ${euiTheme.size.l};
   `;
 
+  const [isOpen, setIsOpen] = useState(true);
   const serviceGroups = useMemo(
     () =>
       provider.services
@@ -3047,21 +3124,38 @@ const CloudProviderCard = ({
 
   return (
     <HexPanel>
-      <CloudProviderHeader provider={provider} total={entities.length} />
-      <EuiSpacer size="m" />
-      <div className={nestedContentClass}>
-        {serviceGroups.map((group, index) => (
-          <div key={group.service.id} className={index === 0 ? undefined : subRowClass}>
-            <SubTypeRow
-              bucketKey={bucketKeyFor('cloud', group.service.entityType)}
-              label={group.service.label}
-              entities={group.rows}
-              onSelectEntity={onSelectEntity}
-            />
-            {index === 0 ? <EuiSpacer size="s" /> : null}
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+            onClick={() => setIsOpen((v) => !v)}
+            aria-label={isOpen ? 'Collapse group' : 'Expand group'}
+            size="xs"
+            color="text"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CloudProviderHeader provider={provider} total={entities.length} entities={entities} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {isOpen && (
+        <>
+          <EuiSpacer size="m" />
+          <div className={nestedContentClass}>
+            {serviceGroups.map((group, index) => (
+              <div key={group.service.id} className={index === 0 ? undefined : subRowClass}>
+                <SubTypeRow
+                  bucketKey={bucketKeyFor('cloud', group.service.entityType)}
+                  label={group.service.label}
+                  entities={group.rows}
+                  onSelectEntity={onSelectEntity}
+                />
+                {index === 0 ? <EuiSpacer size="s" /> : null}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
     </HexPanel>
   );
 };
@@ -3082,6 +3176,7 @@ const CloudGroupedCards = ({
   const hideHeader = useContext(HideCategoryHeaderContext);
 
   const [providerFilter, setProviderFilter] = useState<string>(CLOUD_PROVIDER_FILTER_ALL);
+  const [isOpen, setIsOpen] = useState(true);
 
   const visibleEntities = useMemo(
     () => filterEntitiesByProvider(entities, providerFilter),
@@ -3174,11 +3269,22 @@ const CloudGroupedCards = ({
   return (
     <EuiFlexItem grow={false}>
       <HexPanel>
-        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
           <EuiFlexItem grow={false}>
-            <CategoryHeader category="cloud" total={visibleEntities.length} />
+            <EuiButtonIcon
+              iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+              onClick={() => setIsOpen((v) => !v)}
+              aria-label={isOpen ? 'Collapse group' : 'Expand group'}
+              size="xs"
+              color="text"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <CategoryHeader category="cloud" total={visibleEntities.length} entities={visibleEntities} />
           </EuiFlexItem>
         </EuiFlexGroup>
+        {isOpen && (
+        <>
         <EuiSpacer size="m" />
         <div className={nestedContentClass}>
           {providerGroups.map((group, index) => (
@@ -3230,6 +3336,8 @@ const CloudGroupedCards = ({
             </React.Fragment>
           ))}
         </div>
+        </>
+        )}
       </HexPanel>
     </EuiFlexItem>
   );
@@ -3324,6 +3432,7 @@ const CategoryCardInner = ({
 }: CategoryCardInnerProps) => {
   const paletteEnabled = useContext(PaletteColoringEnabledContext);
   const hideHeader = useContext(HideCategoryHeaderContext);
+  const [isOpen, setIsOpen] = useState(true);
   const { selection, setSelection } = useBucketMetricSelection(bucketKey);
   const [customMetricsVersion, setCustomMetricsVersion] = useState(0);
   const bumpCustomMetrics = useCallback(() => setCustomMetricsVersion((v) => v + 1), []);
@@ -3367,7 +3476,16 @@ const CategoryCardInner = ({
   const typeLabel = hideHeader ? (entities[0]?.type ?? categoryLabel) : undefined;
 
   const headerRow = (
-    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+          onClick={() => setIsOpen((v) => !v)}
+          aria-label={isOpen ? 'Collapse group' : 'Expand group'}
+          size="xs"
+          color="text"
+        />
+      </EuiFlexItem>
       {hideHeader ? (
         <>
           <EuiFlexItem grow={false}>
@@ -3381,7 +3499,7 @@ const CategoryCardInner = ({
         </>
       ) : (
         <EuiFlexItem grow={false}>
-          <CategoryHeader category={category} total={entities.length} label={labelOverride} />
+          <CategoryHeader category={category} total={entities.length} label={labelOverride} entities={entities} />
         </EuiFlexItem>
       )}
       <EuiFlexItem />
@@ -3429,8 +3547,12 @@ const CategoryCardInner = ({
       <HexPanel
         data-test-subj={`entityCentricLabBucket-${bucketKey}`}>
         {headerRow}
-        <EuiSpacer size="xs" />
-        {legendAndTiles}
+        {isOpen && (
+          <>
+            <EuiSpacer size="xs" />
+            {legendAndTiles}
+          </>
+        )}
       </HexPanel>
     );
   }
@@ -3439,8 +3561,12 @@ const CategoryCardInner = ({
     <HexPanel
       data-test-subj={`entityCentricLabBucket-${bucketKey}`}>
       {headerRow}
-      <EuiSpacer size="xs" />
-      {legendAndTiles}
+      {isOpen && (
+        <>
+          <EuiSpacer size="xs" />
+          {legendAndTiles}
+        </>
+      )}
     </HexPanel>
   );
 };
@@ -3488,11 +3614,14 @@ const GroupBucketHeader = ({
   label,
   total,
   size = 'xs',
+  entities,
 }: {
   label: string;
   total: number;
   /** EuiTitle size — `xs` for parent groups, `xxs` for children. */
   size?: 'xs' | 'xxs';
+  /** Entities in this group, used to compute alert count. */
+  entities?: readonly Entity[];
 }) => (
   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
@@ -3503,6 +3632,7 @@ const GroupBucketHeader = ({
     <EuiFlexItem grow={false}>
       <EuiBadge color="hollow">{total.toLocaleString()}</EuiBadge>
     </EuiFlexItem>
+    {entities ? <AlertCountBadge entities={entities} /> : null}
   </EuiFlexGroup>
 );
 
@@ -3547,12 +3677,15 @@ const CustomGroupBucketContent = ({
   label,
   onSelectEntity,
   isTopLevel = false,
+  hideHeader = false,
 }: {
   entities: readonly Entity[];
   label: string;
   onSelectEntity: (entityName: string) => void;
   /** When true, use parent-level font size (xs) matching CategoryHeader. */
   isTopLevel?: boolean;
+  /** When true, skip rendering the header (caller renders it separately). */
+  hideHeader?: boolean;
 }) => {
   const key = useMemo(() => inferBucketKey(entities), [entities]);
 
@@ -3572,8 +3705,12 @@ const CustomGroupBucketContent = ({
   if (!key) {
     return (
       <>
-        <GroupBucketHeader label={label} total={entities.length} size={isTopLevel ? 'xs' : 'xxs'} />
-        <EuiSpacer size="xs" />
+        {!hideHeader && (
+          <>
+            <GroupBucketHeader label={label} total={entities.length} size={isTopLevel ? 'xs' : 'xxs'} entities={entities} />
+            <EuiSpacer size="xs" />
+          </>
+        )}
         <BucketMetricLegend metric={fallbackMetric} entities={entities} />
         <EuiSpacer size="s" />
         <CustomGroupTiles entities={entities} onSelectEntity={onSelectEntity} />
@@ -3588,6 +3725,7 @@ const CustomGroupBucketContent = ({
       entities={entities}
       onSelectEntity={onSelectEntity}
       isTopLevel={isTopLevel}
+      hideHeader={hideHeader}
     />
   );
 };
@@ -3602,12 +3740,14 @@ const CustomGroupBucketWithControls = ({
   entities,
   onSelectEntity,
   isTopLevel = false,
+  hideHeader = false,
 }: {
   bucketKey: BucketKey;
   label: string;
   entities: readonly Entity[];
   onSelectEntity: (entityName: string) => void;
   isTopLevel?: boolean;
+  hideHeader?: boolean;
 }) => {
   const paletteEnabled = useContext(PaletteColoringEnabledContext);
   const { selection, setSelection } = useBucketMetricSelection(bucketKey);
@@ -3647,18 +3787,20 @@ const CustomGroupBucketWithControls = ({
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size={isTopLevel ? 'xs' : 'xxs'}>
-                <h4>{label}</h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{entities.length.toLocaleString()}</EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        {!hideHeader && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size={isTopLevel ? 'xs' : 'xxs'}>
+                  <h4>{label}</h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">{entities.length.toLocaleString()}</EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
           <BucketMetricControls
@@ -3724,7 +3866,7 @@ const CustomGroupLevel2 = ({
   if (child.children.length > 0) {
     return (
       <>
-        <GroupBucketHeader label={child.label} total={child.entities.length} size="xxs" />
+        <GroupBucketHeader label={child.label} total={child.entities.length} size="xxs" entities={child.entities} />
         <EuiSpacer size="s" />
         <div className={grandchildClass}>
           {child.children.map((grandchild, gcIndex) => (
@@ -3762,6 +3904,7 @@ const CustomGroupCard = ({
   onSelectEntity: (entityName: string) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const [isOpen, setIsOpen] = useState(true);
   const nestedChildClass = css`
     margin-left: ${euiTheme.size.xl};
     padding-left: ${euiTheme.size.l};
@@ -3775,24 +3918,41 @@ const CustomGroupCard = ({
     <HexPanel>
       {hasSubLevel && node.children.length > 0 ? (
         <>
-          <GroupBucketHeader label={node.label} total={node.entities.length} />
-          <EuiSpacer size="m" />
-          <div className={nestedChildClass}>
-            {node.children.map((child, index) => (
-              <div
-                key={child.key}
-                className={index === 0 ? undefined : childDividerClass}
-              >
-                <CustomGroupLevel2
-                  child={child}
-                  onSelectEntity={onSelectEntity}
-                />
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+                onClick={() => setIsOpen((v) => !v)}
+                aria-label={isOpen ? 'Collapse group' : 'Expand group'}
+                size="xs"
+                color="text"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <GroupBucketHeader label={node.label} total={node.entities.length} entities={node.entities} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {isOpen && (
+            <>
+              <EuiSpacer size="m" />
+              <div className={nestedChildClass}>
+                {node.children.map((child, index) => (
+                  <div
+                    key={child.key}
+                    className={index === 0 ? undefined : childDividerClass}
+                  >
+                    <CustomGroupLevel2
+                      child={child}
+                      onSelectEntity={onSelectEntity}
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
         </>
       ) : (
-        <CustomGroupBucketContent
+        <CollapsibleBucketContent
           entities={node.entities}
           label={node.label}
           onSelectEntity={onSelectEntity}
@@ -3800,6 +3960,55 @@ const CustomGroupCard = ({
         />
       )}
     </HexPanel>
+  );
+};
+
+/** Wraps CustomGroupBucketContent with a collapse toggle. */
+const CollapsibleBucketContent = ({
+  entities,
+  label,
+  onSelectEntity,
+  isTopLevel = false,
+}: {
+  entities: readonly Entity[];
+  label: string;
+  onSelectEntity: (entityName: string) => void;
+  isTopLevel?: boolean;
+}) => {
+  const [isOpen, setIsOpen] = useState(true);
+  const key = useMemo(() => inferBucketKey(entities), [entities]);
+
+  return (
+    <>
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+            onClick={() => setIsOpen((v) => !v)}
+            aria-label={isOpen ? 'Collapse group' : 'Expand group'}
+            size="xs"
+            color="text"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <GroupBucketHeader
+            label={label}
+            total={entities.length}
+            size={isTopLevel ? 'xs' : 'xxs'}
+            entities={entities}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {isOpen && (
+        <CustomGroupBucketContent
+          entities={entities}
+          label={label}
+          onSelectEntity={onSelectEntity}
+          isTopLevel={isTopLevel}
+          hideHeader
+        />
+      )}
+    </>
   );
 };
 
@@ -3916,7 +4125,7 @@ export const GroupedGridView = ({
         <InventoryDensityContext.Provider value={density}>
         <ColorByTourContext.Provider value={colorByTourStep}>
         <ColorByTourClaimedContext.Provider value={tourClaimedRef}>
-          <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexGroup direction="column" gutterSize="s">
             {useCustomGrouping
               ? customGroups.map((node) => (
                   <EuiFlexItem key={node.key} grow={false}>

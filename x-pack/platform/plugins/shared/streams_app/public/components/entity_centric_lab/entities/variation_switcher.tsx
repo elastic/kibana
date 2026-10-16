@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.04';
+export const PROTOTYPE_VERSION = '1.05';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-10-16',
+    summary:
+      'Compact density font sizes, KQL alerts field, hex-map alert badges, collapsible groups, and UI polish.',
+    details:
+      'Flyout tables use smaller font in compact density (all tabs). Add "alerts" as a KQL search field (active / no_setup / no_active). Red alert-count badges on hex-map group headers (SubTypeRow, CategoryHeader, CloudProviderHeader, custom groups). Collapsible hex-map groups across all group types. Replace EuiLink buttons with plain anchors in flyout table cells for correct font-size inheritance. Remove left-nav notification dots (temporarily). Bump to v1.05.',
+  },
   {
     date: '2026-10-15',
     summary:

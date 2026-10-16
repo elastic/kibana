@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiBadge, EuiButton, EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -155,28 +155,7 @@ export const SecondaryMenuItemComponent = ({
         </span>
         {getBadge()}
       </div>
-      {showNotification ? (
-        <EuiToolTip
-          content={formatNotificationTooltip(notificationCount!)}
-          position="right"
-          disableScreenReaderOutput
-        >
-          <EuiBadge
-            color="danger"
-            // Override EuiBadge's default `title={innerText}` so the native
-            // browser tooltip doesn't stack on top of our EuiToolTip.
-            title=""
-            css={css`
-              border-radius: 9999px;
-              flex-shrink: 0;
-            `}
-            aria-label={formatNotificationTooltip(notificationCount!)}
-            data-test-subj={`${resolvedTestSubjPrefix}-${id}-notification`}
-          >
-            {formatNotificationCount(notificationCount!)}
-          </EuiBadge>
-        </EuiToolTip>
-      ) : null}
+      {/* Notification dot disabled for now */}
     </div>
   );
 

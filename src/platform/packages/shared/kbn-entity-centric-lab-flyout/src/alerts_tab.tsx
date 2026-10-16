@@ -16,7 +16,6 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -94,6 +93,7 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
     onOpenAlertDetail,
     renderRuleDetailFlyout,
     onOpenRuleDetail,
+    density,
   } = useEntityFlyoutServices();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
   const [{ pageIndex, pageSize }, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
@@ -195,7 +195,7 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
           defaultMessage: 'Triggered',
         }),
         sortable: true,
-        render: (triggeredAt: string) => <EuiText size="s">{triggeredAt}</EuiText>,
+        render: (triggeredAt: string) => <EuiText size={density === 'compact' ? 'xs' : 's'}>{triggeredAt}</EuiText>,
       },
       {
         field: 'ruleName',
@@ -203,16 +203,25 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
           defaultMessage: 'Rule name',
         }),
         render: (ruleName: string, row: AlertRow) => (
-          <EuiLink
-            color="primary"
-            data-test-subj="entityCentricLabAlertsRuleLink"
-            onClick={(event) => {
-              event.preventDefault();
-              openRuleRow(row);
-            }}
-          >
-            {ruleName}
-          </EuiLink>
+          <EuiText size={density === 'compact' ? 'xs' : 's'}>
+            <a
+              role="button"
+              tabIndex={0}
+              data-test-subj="entityCentricLabAlertsRuleLink"
+              css={css`
+                color: ${euiTheme.colors.primaryText};
+                cursor: pointer;
+                &:hover { text-decoration: underline; }
+              `}
+              onClick={(event) => {
+                event.preventDefault();
+                openRuleRow(row);
+              }}
+              onKeyDown={(event) => { if (event.key === 'Enter') openRuleRow(row); }}
+            >
+              {ruleName}
+            </a>
+          </EuiText>
         ),
       },
       {
@@ -221,28 +230,35 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
           defaultMessage: 'Reason',
         }),
         render: (reason: string, row: AlertRow) => (
-          <EuiLink
-            color="primary"
-            onClick={(event) => {
-              event.preventDefault();
-              openAlertRow(row);
-            }}
+          <EuiText
+            size={density === 'compact' ? 'xs' : 's'}
+            css={css`
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            `}
           >
-            <EuiText
-              size="s"
+            <a
+              role="button"
+              tabIndex={0}
               css={css`
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                color: ${euiTheme.colors.primaryText};
+                cursor: pointer;
+                &:hover { text-decoration: underline; }
               `}
+              onClick={(event) => {
+                event.preventDefault();
+                openAlertRow(row);
+              }}
+              onKeyDown={(event) => { if (event.key === 'Enter') openAlertRow(row); }}
             >
               {reason}
-            </EuiText>
-          </EuiLink>
+            </a>
+          </EuiText>
         ),
       },
     ],
-    [openAlertRow, openRuleRow]
+    [openAlertRow, openRuleRow, density]
   );
 
   const activePercent =
@@ -254,10 +270,10 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
 
   return (
     <>
-      <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+      <EuiFlexGroup gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false} style={{ minWidth: 220 }}>
-          <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-            <EuiFlexGroup gutterSize="m" responsive={false} alignItems="stretch">
+          <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="stretch">
               <EuiFlexItem grow={false}>
                 <div
                   aria-hidden
@@ -270,12 +286,12 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h3>
+                <EuiTitle size="xxs">
+                  <h4>
                     {i18n.translate('entityCentricLabFlyout.flyout.alerts.activeAlertsTitle', {
                       defaultMessage: 'Active alerts',
                     })}
-                  </h3>
+                  </h4>
                 </EuiTitle>
                 <EuiText size="s" color="subdued">
                   {i18n.translate('entityCentricLabFlyout.flyout.alerts.activePercent', {
@@ -283,7 +299,7 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
                     values: { percent: activePercent, total: alerts.totalCount },
                   })}
                 </EuiText>
-                <EuiSpacer size="m" />
+                <EuiSpacer size="s" />
                 <EuiText
                   textAlign="right"
                   css={css`
@@ -300,16 +316,16 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 260 }}>
-          <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+          <EuiPanel hasBorder hasShadow={false} paddingSize="s">
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h3>
+                <EuiTitle size="xxs">
+                  <h4>
                     {i18n.translate(
                       'entityCentricLabFlyout.flyout.alerts.activeAlertsOverTimeTitle',
                       { defaultMessage: 'Active alerts over time' }
                     )}
-                  </h3>
+                  </h4>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -382,31 +398,31 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
-      <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-        <EuiTitle size="xs">
-          <h3>
-            {i18n.translate('entityCentricLabFlyout.flyout.alerts.detailsTitle', {
-              defaultMessage: 'Active alerts details',
-            })}
-          </h3>
-        </EuiTitle>
-        <EuiText size="s" color="subdued">
-          {i18n.translate('entityCentricLabFlyout.flyout.alerts.showingCount', {
-            defaultMessage:
-              'Showing {start}-{end} of {total} {total, plural, one {Alert} other {Alerts}}',
-            values: {
-              start: pageIndex * pageSize + 1,
-              end: Math.min((pageIndex + 1) * pageSize, alerts.details.length),
-              total: alerts.details.length,
-            },
+      <EuiTitle size="xxs">
+        <h4>
+          {i18n.translate('entityCentricLabFlyout.flyout.alerts.detailsTitle', {
+            defaultMessage: 'Active alerts details',
           })}
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiBasicTable<AlertRow>
+        </h4>
+      </EuiTitle>
+      <EuiText size="s" color="subdued">
+        {i18n.translate('entityCentricLabFlyout.flyout.alerts.showingCount', {
+          defaultMessage:
+            'Showing {start}-{end} of {total} {total, plural, one {Alert} other {Alerts}}',
+          values: {
+            start: pageIndex * pageSize + 1,
+            end: Math.min((pageIndex + 1) * pageSize, alerts.details.length),
+            total: alerts.details.length,
+          },
+        })}
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiBasicTable<AlertRow>
           items={pageOfItems as AlertRow[]}
           columns={columns}
+          compressed={density === 'compact'}
           tableCaption={i18n.translate('entityCentricLabFlyout.flyout.alerts.detailsTableCaption', {
             defaultMessage: 'Active alerts details',
           })}
@@ -423,7 +439,6 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
           }}
           data-test-subj="entityCentricLabAlertsDetailsTable"
         />
-      </EuiPanel>
 
       {!onOpenAlertDetail && selectedAlertRow && renderAlertDetailFlyout
         ? renderAlertDetailFlyout({

@@ -14,7 +14,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
   EuiPortal,
   EuiSpacer,
@@ -68,11 +67,11 @@ export const RelationshipsTab = ({ relationships, onSelectEntity }: Relationship
         related={relationships.related}
         onSelectEntity={onSelectEntity}
       />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
       {groups.map(({ group, items }) => (
         <React.Fragment key={group}>
           <DependencyGroupPanel group={group} items={items} onSelectEntity={onSelectEntity} />
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
         </React.Fragment>
       ))}
     </>
@@ -104,7 +103,7 @@ const DependencyGroupPanel = ({
   readonly items: readonly RelatedEntity[];
   readonly onSelectEntity?: OnSelectEntity;
 }) => {
-  const { resourceCopy = false } = useEntityFlyoutServices();
+  const { resourceCopy = false, density } = useEntityFlyoutServices();
   const columns = useMemo<Array<EuiBasicTableColumn<RelatedEntity>>>(
     () => [
       {
@@ -139,7 +138,7 @@ const DependencyGroupPanel = ({
           values: { thing: labThingLabel(resourceCopy) },
         }),
         width: '180px',
-        render: (type: string) => <EuiText size="s">{type}</EuiText>,
+        render: (type: string) => <EuiText size={density === 'compact' ? 'xs' : 's'}>{type}</EuiText>,
       },
       {
         field: 'relation',
@@ -149,24 +148,24 @@ const DependencyGroupPanel = ({
         render: (relation: string) => {
           const { detail } = splitRelation(relation);
           return detail ? (
-            <EuiText size="s" color="subdued">
+            <EuiText size={density === 'compact' ? 'xs' : 's'} color="subdued">
               {detail}
             </EuiText>
           ) : (
-            <EuiText size="s" color="subdued">
+            <EuiText size={density === 'compact' ? 'xs' : 's'} color="subdued">
               —
             </EuiText>
           );
         },
       },
     ],
-    [onSelectEntity, resourceCopy]
+    [onSelectEntity, resourceCopy, density]
   );
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-      <EuiTitle size="xs">
-        <h3>{group}</h3>
+    <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+      <EuiTitle size="xxs">
+        <h4>{group}</h4>
       </EuiTitle>
       <EuiText size="xs" color="subdued">
         {i18n.translate('entityCentricLabFlyout.flyout.dependencies.groupCount', {
@@ -182,6 +181,7 @@ const DependencyGroupPanel = ({
       <EuiBasicTable<RelatedEntity>
         items={items as RelatedEntity[]}
         columns={columns}
+        compressed={density === 'compact'}
         tableCaption={i18n.translate('entityCentricLabFlyout.flyout.dependencies.tableCaption', {
           defaultMessage: '{group} dependencies',
           values: { group },
@@ -213,23 +213,33 @@ const DependencyEntityCell = ({
   health,
   onSelectEntity,
 }: DependencyEntityCellProps) => {
+  const { euiTheme } = useEuiTheme();
   // Pass the row's `entityType` so the resolver picks the right entity
   // type id for kinds that share a name pattern with another kind.
   const displayName = useEntityDisplayName(name, entityType);
   const navigable = Boolean(onSelectEntity);
   return (
-    <EuiLink
+    <a
+      role="button"
+      tabIndex={0}
       data-test-subj={
         navigable
           ? 'entityCentricLabDependencyEntityLink'
           : 'entityCentricLabDependencyEntityLinkInert'
       }
+      css={css`
+        color: ${euiTheme.colors.primaryText};
+        cursor: pointer;
+        font-size: inherit;
+        &:hover { text-decoration: underline; }
+      `}
       // Forward the row's health + type so the opened flyout matches what the
       // Dependencies table showed for this entity.
       onClick={navigable ? () => onSelectEntity!(name, { entityType, health }) : () => undefined}
+      onKeyDown={navigable ? (e) => { if (e.key === 'Enter') onSelectEntity!(name, { entityType, health }); } : undefined}
     >
       {displayName}
-    </EuiLink>
+    </a>
   );
 };
 
@@ -588,7 +598,7 @@ const TopologyHealthLegend = () => {
       `}
     >
       <EuiPanel hasBorder hasShadow={false} paddingSize="xs">
-        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           {items.map((item) => (
             <EuiFlexItem grow={false} key={item.key}>
               <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>

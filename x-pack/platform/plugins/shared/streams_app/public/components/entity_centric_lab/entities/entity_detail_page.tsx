@@ -88,6 +88,8 @@ import {
   type EntityLabRuleDetailFlyoutRequest,
 } from './entity_lab_rule_summary_flyout';
 import { StreamsElasticOnAlertsTab } from './streams_elastic_on_alerts_tab';
+import { DEFAULT_LIST_DENSITY, isListDensity } from './list_density';
+import { LIST_DENSITY_STORAGE_KEY } from './storage_keys';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../../hooks/use_time_range_update';
 import { FAKE_ENTITY_TYPES } from '../fake_entity_types';
@@ -321,6 +323,17 @@ const EntityDetailPageInner = () => {
   const dashboardStyleVariation = useVariation('dashboardStyle') as 'embedded' | 'list' | 'listWithPreview';
   const showDashboardThumbnails = useVariation('dashboardThumbnails') === 'show';
   const isPhase1 = phaseVariation === 'phase1';
+
+  const listDensity = useMemo(() => {
+    if (typeof window === 'undefined') return DEFAULT_LIST_DENSITY;
+    try {
+      const raw = window.localStorage.getItem(LIST_DENSITY_STORAGE_KEY);
+      return isListDensity(raw) ? raw : DEFAULT_LIST_DENSITY;
+    } catch {
+      return DEFAULT_LIST_DENSITY;
+    }
+  }, []);
+
   const [dashboardPreview, setDashboardPreview] = useState<DashboardPreviewRequest | null>(null);
   const [alertDetailRequest, setAlertDetailRequest] =
     useState<EntityLabAlertDetailFlyoutRequest | null>(null);
@@ -680,6 +693,7 @@ const EntityDetailPageInner = () => {
       charts,
       renderTabDashboard,
       resourceCopy: true,
+      density: listDensity,
       renderAlertDetailFlyout,
       onOpenAlertDetail,
       onOpenRuleDetail,
@@ -712,6 +726,7 @@ const EntityDetailPageInner = () => {
       notifications,
       charts,
       renderTabDashboard,
+      listDensity,
       renderAlertDetailFlyout,
       onOpenAlertDetail,
       onOpenRuleDetail,
@@ -1004,7 +1019,7 @@ const EntityDetailPageInner = () => {
       <StreamsAppPageTemplate>
         <StreamsAppPageTemplate.Header
           pageTitle={
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   iconType="arrowLeft"
@@ -1245,7 +1260,7 @@ const EntityDetailPageInner = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="xs" css={css`margin-left: -24px; margin-right: -24px; width: auto;`} />
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
                   <h2>{dashboardPreview.title}</h2>

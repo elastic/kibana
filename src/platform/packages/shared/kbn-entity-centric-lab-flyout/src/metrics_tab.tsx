@@ -77,7 +77,7 @@ export const MetricsTab = ({ metrics, hideEvents = false }: MetricsTabProps) => 
           data-test-subj="entityCentricLabMetricsSurfaceEventsToggle"
         />
       )}
-      {hideEvents ? null : <EuiSpacer size="m" />}
+      {hideEvents ? null : <EuiSpacer size="s" />}
 
       <EuiAccordion
         id={goldenAccordionId}
@@ -94,7 +94,7 @@ export const MetricsTab = ({ metrics, hideEvents = false }: MetricsTabProps) => 
         paddingSize="s"
         data-test-subj="entityCentricLabMetricsGoldenSignals"
       >
-        <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+        <EuiFlexGroup gutterSize="s" responsive={false} wrap>
           {primaryA ? (
             <EuiFlexItem style={{ minWidth: 220 }}>
               <MetricChartCard series={primaryA} events={events} />
@@ -106,11 +106,11 @@ export const MetricsTab = ({ metrics, hideEvents = false }: MetricsTabProps) => 
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
         {primaryC ? <MetricChartCard series={primaryC} events={events} /> : null}
       </EuiAccordion>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
       <EuiAccordion
         id={otherAccordionId}
@@ -127,7 +127,7 @@ export const MetricsTab = ({ metrics, hideEvents = false }: MetricsTabProps) => 
         paddingSize="s"
         data-test-subj="entityCentricLabMetricsOtherSection"
       >
-        <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+        <EuiFlexGroup gutterSize="s" responsive={false} wrap>
           {otherA ? (
             <EuiFlexItem style={{ minWidth: 220 }}>
               <MetricChartCard series={otherA} events={events} />
@@ -167,7 +167,7 @@ export const MetricChartCard = ({
     isDateHistogram: true,
   });
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+    <EuiPanel hasBorder hasShadow={false} paddingSize="s">
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="xxs">
@@ -265,7 +265,7 @@ export const MetricChartCard = ({
         </Chart>
       </div>
       {series.series.length > 0 ? (
-        <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+        <EuiFlexGroup gutterSize="s" responsive={false} wrap>
           {series.series.map((line, idx) => (
             <EuiFlexItem grow={false} key={line.id}>
               <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>

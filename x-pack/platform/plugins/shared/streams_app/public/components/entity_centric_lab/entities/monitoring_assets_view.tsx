@@ -238,7 +238,7 @@ export const CollapsibleSection = ({
 
   if (variant === 'plain') {
     return (
-      <EuiPanel hasBorder hasShadow={false} paddingSize="m" data-test-subj={dataTestSubj}>
+      <EuiPanel hasBorder hasShadow={false} paddingSize="s" data-test-subj={dataTestSubj}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
           <EuiFlexItem>{buttonContent}</EuiFlexItem>
           {extraAction ? <EuiFlexItem grow={false}>{extraAction}</EuiFlexItem> : null}
@@ -249,7 +249,7 @@ export const CollapsibleSection = ({
   }
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m" data-test-subj={dataTestSubj}>
+    <EuiPanel hasBorder hasShadow={false} paddingSize="s" data-test-subj={dataTestSubj}>
       <EuiAccordion
         id={id}
         initialIsOpen={initialIsOpen}
@@ -890,7 +890,7 @@ const RecommendedAssetsSection = ({
       }
     )}
   >
-    <EuiSpacer size="m" />
+    <EuiSpacer size="s" />
     {assets.length === 0 ? (
       <EuiEmptyPrompt
         iconType="checkInCircleFilled"
@@ -916,7 +916,7 @@ const RecommendedAssetsSection = ({
         )}
       />
     ) : (
-      <EuiFlexGrid columns={3} gutterSize="m">
+      <EuiFlexGrid columns={3} gutterSize="s">
         {assets.map((asset) => (
           <EuiFlexItem key={asset.id}>
             <EuiCard

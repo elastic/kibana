@@ -156,8 +156,8 @@ export const TracesTab = ({ traces }: TracesTabProps) => {
   return (
     <div data-test-subj="entityCentricLabFlyoutTracesTab">
       <ServicesLegend services={traces.services} />
-      <EuiSpacer size="m" />
-      <EuiPanel hasBorder paddingSize="m">
+      <EuiSpacer size="s" />
+      <EuiPanel hasBorder paddingSize="s">
         <div
           // Horizontal scroll wrapper: the flyout is narrower than the
           // typical APM waterfall so we let the panel body scroll rather
@@ -227,7 +227,7 @@ interface ServicesLegendProps {
 const ServicesLegend = ({ services }: ServicesLegendProps) => (
   <EuiFlexGroup
     alignItems="center"
-    gutterSize="m"
+    gutterSize="s"
     responsive={false}
     data-test-subj="entityCentricLabFlyoutTracesLegend"
   >
