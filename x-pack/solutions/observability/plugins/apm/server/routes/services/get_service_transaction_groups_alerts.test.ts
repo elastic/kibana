@@ -37,14 +37,21 @@ function getFilters(client: ReturnType<typeof createMockAlertsClient>): QueryFil
 describe('getServiceTransactionGroupsAlerts', () => {
   it('filters by active status and alert lifetime time range', async () => {
     const client = createMockAlertsClient();
-    const start = Date.now() - 3600000;
-    const end = Date.now();
+    const nowMs = Date.parse('2026-05-12T13:00:00.000Z');
+    const start = nowMs - 3600000;
+    const end = nowMs;
+    const realDateNow = Date.now;
+    Date.now = jest.fn(() => nowMs);
 
-    await getServiceTransactionGroupsAlerts({
-      apmAlertsClient: client as unknown as ApmAlertsClient,
-      start,
-      end,
-    });
+    try {
+      await getServiceTransactionGroupsAlerts({
+        apmAlertsClient: client as unknown as ApmAlertsClient,
+        start,
+        end,
+      });
+    } finally {
+      Date.now = realDateNow;
+    }
 
     const filters = getFilters(client);
 

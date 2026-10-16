@@ -98,8 +98,9 @@ export function getColumns({
                       query: {
                         ...query,
                         rangeTo: 'now',
+                        // Badge counts ignore page kuery; scope click-through to
+                        // this transaction only so the Alerts list matches the badge.
                         kuery: [
-                          query.kuery,
                           ...fieldValuePairToKql(TRANSACTION_NAME, name),
                           ...fieldValuePairToKql(TRANSACTION_TYPE, transactionType),
                         ]

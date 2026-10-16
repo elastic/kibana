@@ -111,7 +111,9 @@ function TemplateWithContext({
     path: { serviceName },
     query: {
       ...query,
-      // Badge click-through: match currently-active badge counts (rangeTo=now + active).
+      // Badge counts ignore page kuery; clear it so click-through matches the count.
+      kuery: '',
+      // Match currently-active badge counts (rangeTo=now + active).
       rangeTo: 'now',
       alertStatus: ALERT_STATUS_ACTIVE,
     },

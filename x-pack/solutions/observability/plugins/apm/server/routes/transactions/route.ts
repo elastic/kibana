@@ -91,16 +91,20 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
     const { transactionGroups, maxCountExceeded, transactionOverflowCount } =
       serviceTransactionGroups;
 
-    const transactionGroupsWithAlerts = joinByKey(
-      [...transactionGroups, ...serviceTransactionGroupsAlerts],
-      'name'
+    // Alerts ignore page kuery; only decorate rows from the kuery-filtered stats
+    // query so joinByKey does not reintroduce filtered-out transaction groups.
+    const transactionGroupNames = new Set(transactionGroups.map(({ name }): string => name));
+    const matchedAlerts = serviceTransactionGroupsAlerts.filter(({ name }): boolean =>
+      transactionGroupNames.has(name)
     );
+
+    const transactionGroupsWithAlerts = joinByKey([...transactionGroups, ...matchedAlerts], 'name');
 
     return {
       transactionGroups: transactionGroupsWithAlerts,
       maxCountExceeded,
       transactionOverflowCount,
-      hasActiveAlerts: !!serviceTransactionGroupsAlerts.length,
+      hasActiveAlerts: matchedAlerts.length > 0,
     };
   },
 });
