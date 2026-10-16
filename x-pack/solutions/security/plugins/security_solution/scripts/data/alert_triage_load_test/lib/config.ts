@@ -15,8 +15,13 @@ export const COMMANDS: readonly Command[] = ['run', 'report', 'clean'];
 /** Managed id of the Alert Triage Worker; its per-space workflow id comes from the workers API. */
 export const ALERT_TRIAGE_WORKER_ID = 'system-security-floor-alert-triage';
 
+/** The workflow the Worker's sweep starts for each rule it picks up. */
+export const ALERT_TRIAGE_BATCH_WORKFLOW_ID = 'system-security-floor-alert-triage-batch';
+
+/** Child workflows of the batches the Worker starts. */
 export const DEFAULT_CHILD_WORKFLOW_IDS = [
   'system-security-alert-analysis',
+  'system-security-floor-alert-triage-review',
   'system-create-alertzero-proposal',
 ] as const;
 

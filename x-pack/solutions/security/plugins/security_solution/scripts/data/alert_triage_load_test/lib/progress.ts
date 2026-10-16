@@ -5,16 +5,13 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/test';
-import { formatError, getStatusCode } from '../../lib/type_guards';
-import type { WorkflowExecutionSummary, WorkflowStepExecutionSummary } from './kibana_api';
-import {
-  listChildExecutions,
-  listExecutionsByIds,
-  listExecutionsStartedAfter,
-  listStepExecutions,
-} from './kibana_api';
+import { formatError } from '../../lib/type_guards';
+import type { WorkflowExecutionSummary } from './kibana_api';
+import { listExecutionsStartedAfter } from './kibana_api';
 import type { DispatchRecord } from './types';
+import { fetchVerdicts } from './verdicts';
 
 export const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
   'completed',
@@ -24,43 +21,33 @@ export const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
   'timed_out',
 ]);
 
-/**
- * The single step that runs once, after the Worker has tagged and noted every alert, and before it
- * can park on a human decision. Once it is done the batch is triaged; whatever follows is the
- * proposal gate. It must not be a per-alert step such as `add_verdict_notes`: a foreach records one
- * step execution per alert, so the first one finishing would mark the batch triaged while the rest
- * of the notes are still being written.
- */
-export const WORK_DONE_STEP_ID = 'post_comment_alert_updates';
-
-/**
- * Statuses of the work-done step that prove the alerts were triaged. The step only posts a chat
- * message and is declared `on-failure: continue`, so a `failed` one still means the tagging and
- * notes before it finished and the run goes on to the proposal gate. `cancelled`, `skipped` and
- * `timed_out` say nothing about that work, so they must not count.
- */
-const WORK_DONE_STATUSES: ReadonlySet<string> = new Set(['completed', 'failed']);
-
 /** Steps whose durations the report breaks out. `classify_alerts` is the LLM-bound one. */
 export const REPORTED_STEP_IDS = [
   'create_investigation',
   'attach_alerts',
   'classify_alerts',
   'attach_impact',
-  'set_az_tags',
+  'set_az_true_positive_tags',
+  'set_az_false_positive_tags',
+  'set_az_inconclusive_tags',
   'add_verdict_notes',
   'gate_fp_close',
 ] as const;
 
-export type DispatchPhase = 'dispatch_failed' | 'not_visible' | 'running' | 'parked' | 'finished';
+export type DispatchPhase = 'dispatch_failed' | 'running' | 'triaged';
 
 /** What the report needs of a child execution; a listing by parent cannot return more. */
 export type ChildExecution = Pick<WorkflowExecutionSummary, 'id' | 'status' | 'usage'>;
 
 export interface ProgressSnapshot {
   takenAt: string;
+  /** The batch workflow's runs since the start of the test, started by the Worker's sweeps. */
   workerExecutions: WorkflowExecutionSummary[];
-  workDoneSteps: WorkflowStepExecutionSummary[];
+  /**
+   * When each batch was first seen with a verdict tag on every alert, by batch id. A sweep can pick up alerts of several dispatched batches into one run, so a
+   * dispatched batch is triaged when its alerts are, not when a run it owns ends.
+   */
+  triagedBatches: Record<string, string>;
   childExecutions: Record<string, ChildExecution[]>;
   /**
    * Child workflows whose executions could not be listed, by workflow id. Their entry in
@@ -72,8 +59,8 @@ export interface ProgressSnapshot {
 export interface DispatchProgress {
   dispatch: DispatchRecord;
   phase: DispatchPhase;
-  execution?: WorkflowExecutionSummary;
-  workDoneStep?: WorkflowStepExecutionSummary;
+  /** When every alert of the batch was first seen carrying a verdict. */
+  triagedAt?: string;
 }
 
 export const countBy = <T>(items: T[], key: (item: T) => string): Record<string, number> => {
@@ -86,8 +73,9 @@ export const countBy = <T>(items: T[], key: (item: T) => string): Record<string,
 };
 
 /**
- * Places every dispatched batch in a phase. `parked` means the batch is fully triaged and its Worker
- * run is waiting on a human, which is the expected resting state at Manual autonomy.
+ * Places every dispatched batch in a phase. `triaged` means every alert of the batch carries a
+ * verdict; the batch's own run may still be waiting on a human, which is the resting state at
+ * Manual autonomy.
  */
 export const classifyDispatches = ({
   dispatches,
@@ -95,57 +83,20 @@ export const classifyDispatches = ({
 }: {
   dispatches: DispatchRecord[];
   snapshot: ProgressSnapshot;
-}): DispatchProgress[] => {
-  const executionsById = new Map(
-    snapshot.workerExecutions.map((execution) => [execution.id, execution])
-  );
-  const workDoneByRun = new Map(
-    snapshot.workDoneSteps
-      .filter(({ status }) => WORK_DONE_STATUSES.has(status))
-      .map((step) => [step.workflowRunId, step])
-  );
-
-  return dispatches.map((dispatch): DispatchProgress => {
-    if (!dispatch.executionId) return { dispatch, phase: 'dispatch_failed' };
-
-    const execution = executionsById.get(dispatch.executionId);
-    if (!execution) return { dispatch, phase: 'not_visible' };
-
-    const workDoneStep = workDoneByRun.get(dispatch.executionId);
-    if (TERMINAL_STATUSES.has(execution.status)) {
-      return { dispatch, phase: 'finished', execution, workDoneStep };
-    }
-    return { dispatch, phase: workDoneStep ? 'parked' : 'running', execution, workDoneStep };
+}): DispatchProgress[] =>
+  dispatches.map((dispatch): DispatchProgress => {
+    if (dispatch.error) return { dispatch, phase: 'dispatch_failed' };
+    const triagedAt = snapshot.triagedBatches[dispatch.batchId];
+    return { dispatch, phase: triagedAt ? 'triaged' : 'running', triagedAt };
   });
-};
 
 export const isSettled = (phase: DispatchPhase): boolean =>
-  phase === 'dispatch_failed' || phase === 'parked' || phase === 'finished';
+  phase === 'dispatch_failed' || phase === 'triaged';
 
 interface ChildListings {
   executions: Record<string, ChildExecution[]>;
   errors: Record<string, string>;
 }
-
-/** Runs `task` over `items`, at most `limit` at a time, keeping the order of `items`. */
-const mapWithConcurrency = async <T, R>(
-  items: T[],
-  limit: number,
-  task: (item: T) => Promise<R>
-): Promise<R[]> => {
-  const results: R[] = [];
-  let next = 0;
-  const worker = async (): Promise<void> => {
-    while (next < items.length) {
-      const index = next++;
-      results[index] = await task(items[index]);
-    }
-  };
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
-  return results;
-};
-
-const CHILD_LOOKUP_CONCURRENCY = 10;
 
 /**
  * Every execution of the child workflows started since `startedAfter`, whoever started it. Cheap, so
@@ -178,120 +129,87 @@ const listChildExecutionsInWindow = async ({
   };
 };
 
+export interface ScheduledProgressOptions {
+  esClient: Client;
+  alertsIndex: string;
+  /** The workflow the Worker's sweeps start per rule. */
+  batchWorkflowId: string;
+  /** Batches already seen as triaged, with the time they were first seen. */
+  triagedBatches: Record<string, string>;
+  /** Look for batches that became triaged since; false when rebuilding a report after the run. */
+  lookForNewlyTriaged: boolean;
+}
+
 /**
- * The child executions the dispatched Worker runs started themselves. One request per Worker run,
- * so this is meant for the final report, not for every poll. A run the API does not know (404) has
- * no children; any other failure is reported for every child workflow, because a failed lookup
- * cannot say which workflow's executions are missing.
+ * The dispatched batches whose alerts all carry a verdict tag, with the time of this look. Batches
+ * already known keep their time. A batch whose alerts the Worker tagged as failed is never triaged.
  */
-const listChildExecutionsOfRuns = async ({
-  kbnClient,
-  childWorkflowIds,
-  executionIds,
+const findTriagedBatches = async ({
+  esClient,
+  alertsIndex,
+  dispatches,
+  known,
+  lookedAt,
 }: {
-  kbnClient: KbnClient;
-  childWorkflowIds: string[];
-  executionIds: string[];
-}): Promise<ChildListings> => {
-  const lookups = await mapWithConcurrency(executionIds, CHILD_LOOKUP_CONCURRENCY, (executionId) =>
-    listChildExecutions({ kbnClient, executionId }).then(
-      (children) => ({ children, error: undefined }),
-      (error) =>
-        getStatusCode(error) === 404
-          ? { children: [], error: undefined }
-          : { children: [], error: formatError(error) }
+  esClient: Client;
+  alertsIndex: string;
+  dispatches: DispatchRecord[];
+  known: Record<string, string>;
+  lookedAt: string;
+}): Promise<Record<string, string>> => {
+  const open = dispatches.filter(({ error, batchId }) => !error && !known[batchId]);
+  if (open.length === 0) return known;
+
+  const verdicts = await fetchVerdicts({
+    esClient,
+    alertsIndex,
+    alertIds: open.flatMap(({ alerts }) => alerts.map(({ id }) => id)),
+  });
+  const newlyTriaged = open
+    .filter(
+      ({ alerts }) => alerts.length > 0 && alerts.every(({ id }) => verdicts[id] !== undefined)
     )
-  );
-
-  const failures = lookups.flatMap(({ error }) => (error ? [error] : []));
-  const message =
-    failures.length > 0
-      ? `${failures.length} of ${executionIds.length} child lookups failed: ${failures[0]}`
-      : undefined;
-  const children = lookups.flatMap((lookup) => lookup.children);
-
-  // The children listing carries no `usage`, so read the summaries of the discovered ids.
-  const summaries = await Promise.all(
-    childWorkflowIds.map(async (workflowId) => {
-      const listed = children
-        .filter((child) => child.workflowId === workflowId)
-        .map(({ executionId, status }): ChildExecution => ({ id: executionId, status }));
-      if (listed.length === 0) return { workflowId, executions: listed, error: undefined };
-      try {
-        const found = await listExecutionsByIds({
-          kbnClient,
-          workflowId,
-          wantedIds: new Set(listed.map(({ id }) => id)),
-        });
-        const foundById = new Map(found.map((execution) => [execution.id, execution]));
-        const executions = listed.map(({ id, status }): ChildExecution => {
-          const execution = foundById.get(id);
-          return execution
-            ? { id, status: execution.status, usage: execution.usage }
-            : { id, status };
-        });
-        return { workflowId, executions, error: undefined };
-      } catch (error) {
-        return { workflowId, executions: listed, error: formatError(error) };
-      }
-    })
-  );
-
-  return {
-    executions: Object.fromEntries(
-      summaries.map(({ workflowId, executions }) => [workflowId, executions])
-    ),
-    errors: Object.fromEntries(
-      summaries.flatMap(({ workflowId, error }) => {
-        const reason = message ?? error;
-        return reason ? [[workflowId, reason]] : [];
-      })
-    ),
-  };
+    .map(({ batchId }) => [batchId, lookedAt] as const);
+  return { ...known, ...Object.fromEntries(newlyTriaged) };
 };
 
 export const fetchProgress = async ({
   kbnClient,
-  workerWorkflowId,
   childWorkflowIds,
   dispatches,
   runStartedAt,
-  scopeChildrenToRun = false,
+  scheduled,
 }: {
   kbnClient: KbnClient;
-  workerWorkflowId: string;
   childWorkflowIds: string[];
   dispatches: DispatchRecord[];
   runStartedAt: string;
-  /**
-   * Count only the child executions the dispatched Worker runs started, instead of every one since
-   * `runStartedAt`. Costs a request per Worker run, so leave it off for polling.
-   */
-  scopeChildrenToRun?: boolean;
+  scheduled: ScheduledProgressOptions;
 }): Promise<ProgressSnapshot> => {
-  const wantedIds = new Set(
-    dispatches.flatMap(({ executionId }) => (executionId ? [executionId] : []))
-  );
+  const takenAt = new Date().toISOString();
 
-  const [workerExecutions, workDoneSteps, children] = await Promise.all([
-    wantedIds.size > 0
-      ? listExecutionsByIds({ kbnClient, workflowId: workerWorkflowId, wantedIds })
-      : Promise.resolve([]),
-    listStepExecutions({
+  const [workerExecutions, children, triagedBatches] = await Promise.all([
+    listExecutionsStartedAfter({
       kbnClient,
-      workflowId: workerWorkflowId,
-      stepId: WORK_DONE_STEP_ID,
+      workflowId: scheduled.batchWorkflowId,
       startedAfter: runStartedAt,
     }),
-    scopeChildrenToRun
-      ? listChildExecutionsOfRuns({ kbnClient, childWorkflowIds, executionIds: [...wantedIds] })
-      : listChildExecutionsInWindow({ kbnClient, childWorkflowIds, startedAfter: runStartedAt }),
+    listChildExecutionsInWindow({ kbnClient, childWorkflowIds, startedAfter: runStartedAt }),
+    scheduled.lookForNewlyTriaged
+      ? findTriagedBatches({
+          esClient: scheduled.esClient,
+          alertsIndex: scheduled.alertsIndex,
+          dispatches,
+          known: scheduled.triagedBatches,
+          lookedAt: takenAt,
+        })
+      : Promise.resolve(scheduled.triagedBatches),
   ]);
 
   return {
-    takenAt: new Date().toISOString(),
+    takenAt,
     workerExecutions,
-    workDoneSteps,
+    triagedBatches,
     childExecutions: children.executions,
     childExecutionErrors: children.errors,
   };

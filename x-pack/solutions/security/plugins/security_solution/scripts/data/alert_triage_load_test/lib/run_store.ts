@@ -23,6 +23,8 @@ export interface RunManifest {
   spaceId: string;
   alertsIndex: string;
   workerWorkflowId: string;
+  /** The workflow the Worker's sweeps start per rule; its runs are the ones the report counts. */
+  batchWorkflowId: string;
   childWorkflowIds: string[];
   /** Flags that shape the load; credentials are never stored. */
   parameters: Record<string, unknown>;
@@ -43,6 +45,8 @@ export interface RunPaths {
   dispatches: string;
   samples: string;
   taskManagerRaw: string;
+  /** When each dispatched batch was first seen with verdicts on all alerts. */
+  triaged: string;
   report: string;
   summary: string;
 }
@@ -56,6 +60,7 @@ export const buildRunPaths = (outDir: string, runId: string): RunPaths => {
     dispatches: path.join(dir, 'dispatches.ndjson'),
     samples: path.join(dir, 'samples.ndjson'),
     taskManagerRaw: path.join(dir, 'task_manager_raw.ndjson'),
+    triaged: path.join(dir, 'triaged.ndjson'),
     report: path.join(dir, 'report.json'),
     summary: path.join(dir, 'summary.md'),
   };
@@ -108,6 +113,14 @@ export const appendNdjson = (file: string, value: unknown): void => {
 
 export const readDispatches = (paths: RunPaths): DispatchRecord[] =>
   readNdjson<DispatchRecord>(paths.dispatches);
+
+/** When each dispatched batch was first seen triaged, by batch id. */
+export const readTriagedBatches = (paths: RunPaths): Record<string, string> =>
+  Object.fromEntries(
+    readNdjson<{ batchId: string; triagedAt: string }>(paths.triaged).map(
+      ({ batchId, triagedAt }) => [batchId, triagedAt]
+    )
+  );
 
 export const readSamples = (paths: RunPaths): MetricsSample[] =>
   readNdjson<MetricsSample>(paths.samples);

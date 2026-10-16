@@ -8,12 +8,7 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import { createKbnClient } from '../../lib/clients';
 import type { WorkflowExecutionSummary, WorkflowStepExecutionSummary } from './kibana_api';
-import {
-  EXECUTIONS_PAGE_SIZE,
-  listExecutionsByIds,
-  listExecutionsStartedAfter,
-  listStepExecutions,
-} from './kibana_api';
+import { EXECUTIONS_PAGE_SIZE, listExecutionsStartedAfter, listStepExecutions } from './kibana_api';
 
 const buildExecution = (id: string): WorkflowExecutionSummary => ({
   id,
@@ -67,88 +62,6 @@ describe('paginated listings', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
-  });
-
-  describe('listExecutionsByIds', () => {
-    it('finds a wanted execution that is only on the second page', async () => {
-      const firstPage = executions('other', EXECUTIONS_PAGE_SIZE);
-      const wanted = buildExecution('wanted');
-      serve([firstPage, [wanted]]);
-
-      const result = await listExecutionsByIds({
-        kbnClient,
-        workflowId: 'worker',
-        wantedIds: new Set(['wanted']),
-      });
-
-      expect(requestedPages).toEqual([1, 2]);
-      expect(result).toEqual([wanted]);
-    });
-
-    it('stops paging once every wanted execution has been seen', async () => {
-      const firstPage = [
-        ...executions('other', EXECUTIONS_PAGE_SIZE - 1),
-        buildExecution('wanted'),
-      ];
-      serve([firstPage, executions('older', EXECUTIONS_PAGE_SIZE)], 2 * EXECUTIONS_PAGE_SIZE);
-
-      await listExecutionsByIds({
-        kbnClient,
-        workflowId: 'worker',
-        wantedIds: new Set(['wanted']),
-      });
-
-      expect(requestedPages).toEqual([1]);
-    });
-
-    it('reads every page when a wanted execution does not exist, and returns the ones that do', async () => {
-      const wanted = buildExecution('wanted');
-      serve([executions('other', EXECUTIONS_PAGE_SIZE), [wanted, buildExecution('other-last')]]);
-
-      const result = await listExecutionsByIds({
-        kbnClient,
-        workflowId: 'worker',
-        wantedIds: new Set(['wanted', 'missing']),
-      });
-
-      expect(requestedPages).toEqual([1, 2]);
-      expect(result).toEqual([wanted]);
-    });
-
-    it('leaves out executions it was not asked for', async () => {
-      serve([[buildExecution('a'), buildExecution('b'), buildExecution('c')]]);
-
-      const result = await listExecutionsByIds({
-        kbnClient,
-        workflowId: 'worker',
-        wantedIds: new Set(['a', 'c']),
-      });
-
-      expect(result.map(({ id }) => id)).toEqual(['a', 'c']);
-    });
-
-    it('stops on an empty page even if the reported total is larger', async () => {
-      serve([[buildExecution('a')]], 500);
-
-      const result = await listExecutionsByIds({
-        kbnClient,
-        workflowId: 'worker',
-        wantedIds: new Set(['a', 'missing']),
-      });
-
-      expect(requestedPages).toEqual([1, 2]);
-      expect(result.map(({ id }) => id)).toEqual(['a']);
-    });
-
-    it('asks for the newest executions first, in pages of the largest size', async () => {
-      serve([[buildExecution('a')]]);
-
-      await listExecutionsByIds({ kbnClient, workflowId: 'worker', wantedIds: new Set(['a']) });
-
-      expect(requestedQueries[0].get('sortOrder')).toBe('desc');
-      expect(requestedQueries[0].get('size')).toBe(String(EXECUTIONS_PAGE_SIZE));
-      expect(requestedQueries[0].get('omitStepRuns')).toBe('true');
-    });
   });
 
   describe('listExecutionsStartedAfter', () => {

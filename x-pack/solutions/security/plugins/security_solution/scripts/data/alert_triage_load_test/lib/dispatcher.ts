@@ -8,11 +8,9 @@
 import { randomUUID } from 'crypto';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { KbnClient } from '@kbn/test';
 import { assertNoBulkErrors } from '../../lib/bulk';
 import { formatError } from '../../lib/type_guards';
 import { buildAlertId, buildRuleUuid, cloneAlert } from './alert_clone';
-import { runWorkflow } from './kibana_api';
 import type { TemplatePool } from './templates';
 import type { DispatchRecord, LoadPlan, PlannedBatch } from './types';
 
@@ -42,17 +40,15 @@ const createLimiter = (limit: number) => {
 
 interface DispatchContext {
   esClient: Client;
-  kbnClient: KbnClient;
   log: ToolingLog;
   pool: TemplatePool;
   runId: string;
   alertsIndex: string;
-  workerWorkflowId: string;
 }
 
 const dispatchBatch = async (
   batch: PlannedBatch,
-  { esClient, kbnClient, log, pool, runId, alertsIndex, workerWorkflowId }: DispatchContext
+  { esClient, log, pool, runId, alertsIndex }: DispatchContext
 ): Promise<DispatchRecord> => {
   const ruleUuid = buildRuleUuid(runId, batch.ruleIndex);
   const executionUuid = randomUUID();
@@ -82,7 +78,6 @@ const dispatchBatch = async (
     dispatchedAt: nowIso,
     alerts: alerts.map(({ id, label }) => ({ id, label })),
     indexMs: 0,
-    runApiMs: 0,
   };
 
   try {
@@ -96,20 +91,7 @@ const dispatchBatch = async (
     });
     assertNoBulkErrors(alertsIndex, response, log);
     record.indexMs = Date.now() - indexStart;
-
-    const runStart = Date.now();
-    record.dispatchedAt = new Date(runStart).toISOString();
-    record.executionId = await runWorkflow({
-      kbnClient,
-      workflowId: workerWorkflowId,
-      inputs: {
-        event: {
-          triggerType: 'alert',
-          alertIds: alerts.map(({ id }) => ({ _id: id, _index: alertsIndex })),
-        },
-      },
-    });
-    record.runApiMs = Date.now() - runStart;
+    record.dispatchedAt = new Date().toISOString();
   } catch (error) {
     record.error = formatError(error);
     log.warning(`${batch.batchId}: dispatch failed: ${record.error}`);
@@ -119,9 +101,9 @@ const dispatchBatch = async (
 };
 
 /**
- * Walks the plan in real time: waits for each batch's offset, indexes its alerts, then starts the
- * Worker on them. Dispatches overlap up to `dispatchConcurrency`, so a slow run API call cannot hold
- * back the schedule.
+ * Walks the plan in real time: waits for each batch's offset and indexes its alerts. The Worker's
+ * own sweeps pick them up. Dispatches overlap up to `dispatchConcurrency`, so a slow bulk request
+ * cannot hold back the schedule.
  */
 export const executePlan = async ({
   plan,

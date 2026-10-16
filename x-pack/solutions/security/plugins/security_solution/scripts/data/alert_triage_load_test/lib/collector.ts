@@ -10,7 +10,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import { formatError } from '../../lib/type_guards';
 import { getTaskManagerHealth, getTaskManagerMetrics } from './kibana_api';
-import type { DispatchPhase, ProgressSnapshot } from './progress';
+import type { DispatchPhase, ProgressSnapshot, ScheduledProgressOptions } from './progress';
 import { classifyDispatches, countBy, fetchProgress, isSettled } from './progress';
 import type { TaskManagerSample } from './task_manager';
 import { extractTaskManagerSample } from './task_manager';
@@ -20,10 +20,9 @@ export interface MetricsSample {
   at: string;
   elapsedMs: number;
   dispatchedBatches: number;
-  /** Batches per phase; `parked` and `finished` are the settled ones. */
+  /** Batches per phase; `triaged` and `dispatch_failed` are the settled ones. */
   batchesByPhase: Partial<Record<DispatchPhase, number>>;
   workerExecutionsByStatus: Record<string, number>;
-  /** Every execution of the child workflows since the run started, including other Workers'. */
   /** Every execution of the child workflows since the run started, including other Workers'. */
   childExecutionsByStatus: Record<string, Record<string, number>>;
   /** Child workflows whose executions could not be listed in this sample, by workflow id. */
@@ -44,13 +43,17 @@ export interface Collector {
 interface CollectorOptions {
   kbnClient: KbnClient;
   log: ToolingLog;
-  workerWorkflowId: string;
   childWorkflowIds: string[];
   getDispatches: () => DispatchRecord[];
   runStartedAt: string;
   intervalMs: number;
   samplesFile: string;
   taskManagerRawFile: string;
+  /** Where the batches are looked for and where their verdicts are read; see `fetchProgress`. */
+  scheduled: Pick<ScheduledProgressOptions, 'esClient' | 'alertsIndex' | 'batchWorkflowId'> & {
+    /** Where each newly triaged batch is appended, so `report` can rebuild the timings. */
+    triagedFile: string;
+  };
 }
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
@@ -62,18 +65,19 @@ const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout
 export const startCollector = ({
   kbnClient,
   log,
-  workerWorkflowId,
   childWorkflowIds,
   getDispatches,
   runStartedAt,
   intervalMs,
   samplesFile,
   taskManagerRawFile,
+  scheduled,
 }: CollectorOptions): Collector => {
   const startedMs = Date.parse(runStartedAt);
   let latest: MetricsSample | undefined;
   let latestSnapshot: ProgressSnapshot | undefined;
   let stopped = false;
+  const triagedBatches = new Map<string, string>();
   const warnedChildErrors = new Map<string, string>();
 
   const warnAboutChildErrors = (errors: Record<string, string>): void => {
@@ -119,14 +123,24 @@ export const startCollector = ({
       const [snapshot, taskManager] = await Promise.all([
         fetchProgress({
           kbnClient,
-          workerWorkflowId,
           childWorkflowIds,
           dispatches,
           runStartedAt,
+          scheduled: {
+            ...scheduled,
+            triagedBatches: Object.fromEntries(triagedBatches),
+            lookForNewlyTriaged: true,
+          },
         }),
         sampleTaskManager(),
       ]);
       latestSnapshot = snapshot;
+      for (const [batchId, triagedAt] of Object.entries(snapshot.triagedBatches)) {
+        if (!triagedBatches.has(batchId)) {
+          triagedBatches.set(batchId, triagedAt);
+          fs.appendFileSync(scheduled.triagedFile, `${JSON.stringify({ batchId, triagedAt })}\n`);
+        }
+      }
       sample.taskManager = taskManager;
       sample.workerExecutionsByStatus = countBy(snapshot.workerExecutions, ({ status }) => status);
       sample.batchesByPhase = countBy(

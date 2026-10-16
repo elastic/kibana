@@ -71,11 +71,9 @@ export interface DispatchRecord {
   ruleIndex: number;
   ruleUuid: string;
   plannedOffsetMs: number;
-  /** Client clock, taken right before the run API call. */
+  /** Client clock, taken when the alerts were indexed and visible to a sweep. */
   dispatchedAt: string;
   alerts: DispatchedAlert[];
   indexMs: number;
-  runApiMs: number;
-  executionId?: string;
   error?: string;
 }

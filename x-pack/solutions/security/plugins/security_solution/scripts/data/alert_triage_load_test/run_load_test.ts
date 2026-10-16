@@ -16,7 +16,13 @@ import { formatError, getStatusCode } from '../lib/type_guards';
 import { LOAD_TEST_TAG, loadTestRunTag } from './lib/alert_clone';
 import { startCollector } from './lib/collector';
 import type { LoadTestConfig } from './lib/config';
-import { ALERT_TRIAGE_WORKER_ID, alertsIndexFor, buildConfig, withRunTarget } from './lib/config';
+import {
+  ALERT_TRIAGE_BATCH_WORKFLOW_ID,
+  ALERT_TRIAGE_WORKER_ID,
+  alertsIndexFor,
+  buildConfig,
+  withRunTarget,
+} from './lib/config';
 import { executePlan } from './lib/dispatcher';
 import {
   cancelExecution,
@@ -43,6 +49,7 @@ import {
   readDispatches,
   readJson,
   readSamples,
+  readTriagedBatches,
   writeJson,
 } from './lib/run_store';
 import { loadTemplatePool } from './lib/templates';
@@ -122,7 +129,7 @@ const preflight = async (
   if (!worker.enabled) {
     throw new Error(
       'The Alert Triage Worker is installed but disabled. Turn it on in AlertZero first; ' +
-        'this tool does not change Worker settings, because turning it on attaches it to every detection rule.'
+        'this tool does not change Worker settings.'
     );
   }
 
@@ -132,6 +139,17 @@ const preflight = async (
       `Workflow ${worker.workflowId} is ${workflow.enabled ? 'invalid' : 'disabled'}.`
     );
   }
+
+  const batch = await getWorkflow({ kbnClient, workflowId: ALERT_TRIAGE_BATCH_WORKFLOW_ID });
+  if (!batch.enabled || !batch.valid) {
+    throw new Error(
+      `Workflow ${ALERT_TRIAGE_BATCH_WORKFLOW_ID} is ${batch.enabled ? 'invalid' : 'disabled'}.`
+    );
+  }
+  log.info(
+    "No Worker run is started. The alerts are indexed and picked up by the Worker's next sweep, " +
+      'so wait for it to run on schedule or start a sweep by hand.'
+  );
 
   const analysisRuntimeConfig = await getAnalysisRuntimeConfig({ kbnClient });
   if (analysisRuntimeConfig.workflowEnabled === false) {
@@ -228,14 +246,20 @@ const finalizeReport = async ({
   log: ToolingLog;
 }): Promise<void> => {
   const dispatches = readDispatches(paths);
+  const { batchWorkflowId } = manifest;
   const snapshot = await fetchProgress({
     kbnClient,
-    workerWorkflowId: manifest.workerWorkflowId,
     childWorkflowIds: manifest.childWorkflowIds,
     dispatches,
     runStartedAt: manifest.startedAt,
-    // The report counts what this run's Worker executions started, not other Workers' or runs'.
-    scopeChildrenToRun: true,
+    scheduled: {
+      esClient,
+      alertsIndex: manifest.alertsIndex,
+      batchWorkflowId,
+      // The timings were taken while the run was polling; a look now would only date them late.
+      triagedBatches: readTriagedBatches(paths),
+      lookForNewlyTriaged: false,
+    },
   });
 
   const stepExecutions = Object.fromEntries(
@@ -244,7 +268,7 @@ const finalizeReport = async ({
         stepId,
         await listStepExecutions({
           kbnClient,
-          workflowId: manifest.workerWorkflowId,
+          workflowId: batchWorkflowId,
           stepId,
           startedAfter: manifest.startedAt,
         }),
@@ -253,7 +277,7 @@ const finalizeReport = async ({
   );
 
   const triagedAlertIds = classifyDispatches({ dispatches, snapshot })
-    .filter(({ workDoneStep }) => workDoneStep?.finishedAt)
+    .filter(({ triagedAt }) => triagedAt)
     .flatMap(({ dispatch }) => dispatch.alerts.map(({ id }) => id));
   const verdictsByAlertId = await fetchVerdicts({
     esClient,
@@ -330,6 +354,7 @@ const runCommand = async (config: LoadTestConfig, log: ToolingLog): Promise<void
     spaceId: config.spaceId,
     alertsIndex,
     workerWorkflowId,
+    batchWorkflowId: ALERT_TRIAGE_BATCH_WORKFLOW_ID,
     childWorkflowIds: config.childWorkflowIds,
     parameters: parametersOf(config),
     worker,
@@ -349,13 +374,18 @@ const runCommand = async (config: LoadTestConfig, log: ToolingLog): Promise<void
   const collector = startCollector({
     kbnClient,
     log,
-    workerWorkflowId,
     childWorkflowIds: config.childWorkflowIds,
     getDispatches: () => dispatches,
     runStartedAt: manifest.startedAt,
     intervalMs: config.pollIntervalMs,
     samplesFile: paths.samples,
     taskManagerRawFile: paths.taskManagerRaw,
+    scheduled: {
+      esClient,
+      alertsIndex,
+      batchWorkflowId: ALERT_TRIAGE_BATCH_WORKFLOW_ID,
+      triagedFile: paths.triaged,
+    },
   });
 
   try {
@@ -363,12 +393,10 @@ const runCommand = async (config: LoadTestConfig, log: ToolingLog): Promise<void
       plan,
       dispatchConcurrency: config.dispatchConcurrency,
       esClient,
-      kbnClient,
       log,
       pool,
       runId,
       alertsIndex,
-      workerWorkflowId,
       onDispatched: (record) => {
         dispatches.push(record);
         appendNdjson(paths.dispatches, record);
@@ -379,7 +407,7 @@ const runCommand = async (config: LoadTestConfig, log: ToolingLog): Promise<void
       log.info(
         `All batches dispatched. Waiting up to ${Math.round(
           config.settleTimeoutMs / 60000
-        )}m for them to be triaged (Worker runs parked on a proposal count as triaged)...`
+        )}m for them to be triaged (every alert carries a verdict tag)...`
       );
       const { settled } = await collector.waitUntilSettled(config.settleTimeoutMs);
       if (!settled) log.warning('Timed out before every batch settled; the report is partial.');
@@ -430,13 +458,19 @@ const cleanCommand = async (config: LoadTestConfig, log: ToolingLog): Promise<vo
     const dispatches = readDispatches(paths);
     const snapshot = await fetchProgress({
       kbnClient,
-      workerWorkflowId: manifest.workerWorkflowId,
       childWorkflowIds: [],
       dispatches,
       runStartedAt: manifest.startedAt,
+      scheduled: {
+        esClient,
+        alertsIndex,
+        batchWorkflowId: manifest.batchWorkflowId,
+        triagedBatches: {},
+        lookForNewlyTriaged: false,
+      },
     });
     const open = snapshot.workerExecutions.filter(({ status }) => !TERMINAL_STATUSES.has(status));
-    log.info(`Cancelling ${open.length} open Worker execution(s) of run ${config.runId}`);
+    log.info(`Cancelling ${open.length} open batch execution(s) started since run ${config.runId}`);
     for (const { id } of open) {
       await cancelExecution({ kbnClient, executionId: id }).catch((error) =>
         log.warning(`Could not cancel ${id}: ${formatError(error)}`)
@@ -467,7 +501,7 @@ run(
   },
   {
     description:
-      'Load test the Alert Triage Worker: index synthetic alerts, start the Worker on them at a chosen rate, and measure how it copes.',
+      'Load test the Alert Triage Worker: index synthetic alerts at a chosen rate, let its scheduled sweeps pick them up, and measure how it copes.',
     usage: 'node scripts/data/alert_triage_load_test/cli.js <run|report|clean> [options]',
     flags: {
       string: [
@@ -506,7 +540,7 @@ run(
       allowUnexpected: false,
       help: `
         Commands
-          run      Index synthetic alerts, start the Worker on them, sample, then write the report.
+          run      Index synthetic alerts, wait for the Worker's sweeps to triage them, sample, then write the report.
           report   Rebuild the report of an earlier run from Kibana (needs --run-id).
           clean    Delete the alerts of a run (--run-id) or of every run (no --run-id).
 
@@ -532,12 +566,12 @@ run(
         Measuring
           --poll-interval          How often to sample (Default: 30s)
           --settle-timeout         How long to wait for every batch to be triaged (Default: 30m)
-          --child-workflow-ids     Comma-separated workflows to count besides the Worker
+          --child-workflow-ids     Comma-separated workflows to count besides the batch workflow
           --no-wait                Dispatch, then report immediately
           --dry-run                Build the plan and write it; change nothing
           --out-dir                Where run folders go (Default: target/triage-load-test)
           --run-id                 Name of the run folder (run) or the run to report on / clean
-          --cancel-executions      With clean: also cancel the run's open Worker executions
+          --cancel-executions      With clean: also cancel the open batch executions started since the run began
 
         Connection (same as generate.ts)
           --kibanaUrl, --elasticsearchUrl, --spaceId

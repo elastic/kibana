@@ -93,15 +93,16 @@ describe('buildConfig', () => {
     expect(buildConfig({ wait: false }, []).wait).toBe(false);
   });
 
-  it('splits the child workflow ids', () => {
-    expect(buildConfig({ 'child-workflow-ids': 'a, b' }, []).childWorkflowIds).toEqual(['a', 'b']);
-  });
-
-  it('counts the analysis and proposal workflows by default', () => {
+  it('counts Alert Analysis, the review and the proposal workflows by default', () => {
     expect(buildConfig({}, []).childWorkflowIds).toEqual([
       'system-security-alert-analysis',
+      'system-security-floor-alert-triage-review',
       'system-create-alertzero-proposal',
     ]);
+  });
+
+  it('splits the child workflow ids', () => {
+    expect(buildConfig({ 'child-workflow-ids': 'a, b' }, []).childWorkflowIds).toEqual(['a', 'b']);
   });
 });
 

@@ -7,19 +7,15 @@
 
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ToolingLog } from '@kbn/tooling-log';
-import { createEsClient, createKbnClient } from '../../lib/clients';
+import { createEsClient } from '../../lib/clients';
 import type { AlertSource } from './alert_clone';
 import { buildAlertId } from './alert_clone';
 import { executePlan } from './dispatcher';
-import { runWorkflow } from './kibana_api';
 import type { TemplatePool } from './templates';
 import type { DispatchRecord, LoadPlan, PlannedBatch } from './types';
 
-jest.mock('./kibana_api', () => ({ runWorkflow: jest.fn() }));
-
 const RUN_ID = 'run-1';
 const ALERTS_INDEX = '.alerts-security.alerts-default';
-const WORKER_WORKFLOW_ID = 'system-security-floor-alert-triage';
 
 const buildTemplate = (name: string): AlertSource => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
@@ -79,8 +75,6 @@ describe('executePlan', () => {
     auth: { type: 'basic' as const, username: 'elastic', password: 'changeme' },
   };
   const esClient = createEsClient(stack);
-  const kbnClient = createKbnClient({ ...stack, log });
-  const runWorkflowMock = jest.mocked(runWorkflow);
 
   let bulkSpy: jest.SpyInstance;
   let dispatched: DispatchRecord[];
@@ -91,17 +85,14 @@ describe('executePlan', () => {
       dispatchConcurrency: 2,
       onDispatched: (record) => dispatched.push(record),
       esClient,
-      kbnClient,
       log,
       pool,
       runId: RUN_ID,
       alertsIndex: ALERTS_INDEX,
-      workerWorkflowId: WORKER_WORKFLOW_ID,
     });
 
   beforeEach(() => {
     dispatched = [];
-    runWorkflowMock.mockReset().mockResolvedValue('execution-1');
     bulkSpy = jest.spyOn(esClient, 'bulk').mockResolvedValue(bulkSucceeded);
   });
 
@@ -109,7 +100,7 @@ describe('executePlan', () => {
     bulkSpy.mockRestore();
   });
 
-  it('indexes the alerts of a batch and starts the Worker on exactly those alerts', async () => {
+  it('indexes the alerts of a batch and leaves them for the Worker to pick up', async () => {
     const [record] = await execute([buildBatch('batch-0')]);
 
     const alertIds = [0, 1].map((position) => buildAlertId(RUN_ID, 'batch-0', position));
@@ -123,19 +114,8 @@ describe('executePlan', () => {
         expect.objectContaining({ 'kibana.alert.uuid': alertIds[1] }),
       ],
     });
-    expect(runWorkflowMock).toHaveBeenCalledWith({
-      kbnClient,
-      workflowId: WORKER_WORKFLOW_ID,
-      inputs: {
-        event: {
-          triggerType: 'alert',
-          alertIds: alertIds.map((id) => ({ _id: id, _index: ALERTS_INDEX })),
-        },
-      },
-    });
     expect(record).toMatchObject({
       batchId: 'batch-0',
-      executionId: 'execution-1',
       alerts: [
         { id: alertIds[0], label: 'true_positive' },
         { id: alertIds[1], label: 'false_positive' },
@@ -157,33 +137,22 @@ describe('executePlan', () => {
     expect(JSON.stringify(bulkSpy.mock.calls[0][0])).not.toContain('data-generator');
   });
 
-  it('does not start the Worker when indexing the alerts failed', async () => {
+  it('records the error on the batch when indexing the alerts failed', async () => {
     bulkSpy.mockResolvedValue(bulkRejected);
 
     const [record] = await execute([buildBatch('batch-0')]);
 
-    expect(runWorkflowMock).not.toHaveBeenCalled();
     expect(record.error).toContain('Bulk indexing errors');
-    expect(record.executionId).toBeUndefined();
     expect(record.alerts).toHaveLength(2);
   });
 
-  it('records a failed run request on the batch', async () => {
-    runWorkflowMock.mockRejectedValue(new Error('workflow not found'));
-
-    const [record] = await execute([buildBatch('batch-0')]);
-
-    expect(record.error).toContain('workflow not found');
-    expect(record.executionId).toBeUndefined();
-  });
-
   it('keeps dispatching the remaining batches after one fails', async () => {
-    runWorkflowMock.mockRejectedValueOnce(new Error('boom')).mockResolvedValue('execution-2');
+    bulkSpy.mockRejectedValueOnce(new Error('boom')).mockResolvedValue(bulkSucceeded);
 
     const records = await execute([buildBatch('batch-0'), buildBatch('batch-1')]);
 
     expect(records[0].error).toContain('boom');
-    expect(records[1]).toMatchObject({ batchId: 'batch-1', executionId: 'execution-2' });
+    expect(records[1].batchId).toBe('batch-1');
     expect(records[1].error).toBeUndefined();
   });
 

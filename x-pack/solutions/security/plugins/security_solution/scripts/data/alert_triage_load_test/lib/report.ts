@@ -41,19 +41,14 @@ export interface Report {
     batches: number;
     alerts: number;
     failedBatches: number;
-    apiMs: Distribution | undefined;
     indexMs: Distribution | undefined;
   };
   batchesByPhase: Partial<Record<DispatchPhase, number>>;
   workerExecutionsByStatus: Record<string, number>;
   failures: Array<{ message: string; count: number }>;
   latencyMs: {
-    /** Client dispatch clock to the execution's `startedAt` (server clock, so skew shows up here). */
-    dispatchToStart: Distribution | undefined;
-    /** Dispatch until the batch is classified, tagged and noted, i.e. triaged. */
+    /** Alerts indexed until every alert of the batch carries a verdict (seen at the poll interval). */
     dispatchToTriaged: Distribution | undefined;
-    /** Execution start until triaged; the Worker's own working time. */
-    startToTriaged: Distribution | undefined;
     steps: Record<string, Distribution | undefined>;
   };
   throughput: {
@@ -158,13 +153,13 @@ export const buildReport = ({
 }: ReportInput): Report => {
   const progress = classifyDispatches({ dispatches, snapshot });
   const runIds = new Set(snapshot.workerExecutions.map(({ id }) => id));
-  const triagedProgress = progress.filter(({ workDoneStep }) => workDoneStep?.finishedAt);
+  const triagedProgress = progress.filter(({ triagedAt }) => triagedAt);
 
   // A report made after the run ended (`--no-wait`, a settle timeout, `report --run-id`) can score
   // batches that were triaged later. The window then reaches the last of them, so their count is
   // not divided by a window that ended before they finished.
   const lastTriagedMs = Math.max(
-    ...triagedProgress.map(({ workDoneStep }) => Date.parse(workDoneStep?.finishedAt ?? '')),
+    ...triagedProgress.map(({ triagedAt }) => Date.parse(triagedAt ?? '')),
     Date.parse(runEndedAt)
   );
   const windowEndedAt = new Date(lastTriagedMs).toISOString();
@@ -222,37 +217,16 @@ export const buildReport = ({
     dispatch: {
       batches: dispatches.length,
       alerts: dispatches.reduce((sum, { alerts }) => sum + alerts.length, 0),
-      failedBatches: dispatches.filter(({ executionId }) => !executionId).length,
-      apiMs: distribution(
-        dispatches.filter(({ executionId }) => executionId).map(({ runApiMs }) => runApiMs)
-      ),
-      indexMs: distribution(
-        dispatches.filter(({ executionId }) => executionId).map(({ indexMs }) => indexMs)
-      ),
+      failedBatches: dispatches.filter(({ error }) => error).length,
+      indexMs: distribution(dispatches.filter(({ error }) => !error).map(({ indexMs }) => indexMs)),
     },
     batchesByPhase: countBy(progress, ({ phase }) => phase),
     workerExecutionsByStatus: countBy(snapshot.workerExecutions, ({ status }) => status),
     failures,
     latencyMs: {
-      dispatchToStart: distribution(
-        defined(
-          progress.map(({ dispatch, execution }) =>
-            diff(execution?.startedAt, dispatch.dispatchedAt)
-          )
-        )
-      ),
       dispatchToTriaged: distribution(
         defined(
-          triagedProgress.map(({ dispatch, workDoneStep }) =>
-            diff(workDoneStep?.finishedAt, dispatch.dispatchedAt)
-          )
-        )
-      ),
-      startToTriaged: distribution(
-        defined(
-          triagedProgress.map(({ execution, workDoneStep }) =>
-            diff(workDoneStep?.finishedAt, execution?.startedAt)
-          )
+          triagedProgress.map(({ dispatch, triagedAt }) => diff(triagedAt, dispatch.dispatchedAt))
         )
       ),
       steps: stepDistributions,
@@ -322,15 +296,12 @@ export const renderReportMarkdown = (report: Report): string => {
     '',
     '## Dispatch',
     `- Batches: ${dispatch.batches} (${dispatch.failedBatches} failed to dispatch), alerts: ${dispatch.alerts}`,
-    `- Run API latency (ms): ${formatDistribution(dispatch.apiMs)}`,
     `- Alert indexing latency (ms): ${formatDistribution(dispatch.indexMs)}`,
     `- Batches by phase: ${formatCounts(report.batchesByPhase)}`,
-    `- Worker executions by status: ${formatCounts(report.workerExecutionsByStatus)}`,
+    `- Batch workflow executions by status: ${formatCounts(report.workerExecutionsByStatus)}`,
     '',
     '## Latency (ms)',
-    `- Dispatch to execution start: ${formatDistribution(latencyMs.dispatchToStart)}`,
     `- Dispatch to triaged: ${formatDistribution(latencyMs.dispatchToTriaged)}`,
-    `- Start to triaged: ${formatDistribution(latencyMs.startToTriaged)}`,
     ...Object.entries(latencyMs.steps).map(
       ([stepId, stat]) => `- Step \`${stepId}\`: ${formatDistribution(stat)}`
     ),
@@ -339,7 +310,7 @@ export const renderReportMarkdown = (report: Report): string => {
     `- Alerts triaged: ${throughput.alertsTriaged} (${
       throughput.alertsPerHourTriaged ?? 'n/a'
     } per hour over the window)`,
-    `- Peak in-flight Worker executions: ${peaks.inFlightWorkerExecutions}`,
+    `- Peak in-flight batch executions: ${peaks.inFlightWorkerExecutions}`,
     `- Peak Task Manager drift p99 (ms): ${peaks.taskManagerDriftP99Ms ?? 'n/a'}`,
     `- Peak overdue tasks: ${peaks.taskManagerOverdueTasks ?? 'n/a'}`,
     `- Peak Task Manager load p50: ${peaks.taskManagerLoadP50 ?? 'n/a'}`,
@@ -358,7 +329,7 @@ export const renderReportMarkdown = (report: Report): string => {
     `- Ground truth false_positive -> ${formatCounts(accuracy.byLabel.false_positive)}`,
     `- Ground truth true_positive -> ${formatCounts(accuracy.byLabel.true_positive)}`,
     '',
-    '## Token usage (sum over Worker and child executions)',
+    '## Token usage (sum over batch and child executions)',
     `- ${formatCounts(report.tokenUsage)}`,
     '',
     '## Failures',

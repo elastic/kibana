@@ -19,6 +19,7 @@ const buildManifest = (overrides: Partial<RunManifest> = {}): RunManifest => ({
   spaceId: 'default',
   alertsIndex: '.alerts-security.alerts-default',
   workerWorkflowId: 'worker',
+  batchWorkflowId: 'batch',
   childWorkflowIds: [],
   parameters: {},
   worker: undefined,

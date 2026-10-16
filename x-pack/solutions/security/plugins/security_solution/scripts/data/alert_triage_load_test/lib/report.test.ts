@@ -7,7 +7,6 @@
 
 import type { WorkflowExecutionSummary, WorkflowStepExecutionSummary } from './kibana_api';
 import type { MetricsSample } from './collector';
-import { WORK_DONE_STEP_ID } from './progress';
 import type { ReportInput } from './report';
 import { buildReport, distribution, renderReportMarkdown } from './report';
 import type { DispatchRecord } from './types';
@@ -29,8 +28,6 @@ const buildDispatch = (overrides: Partial<DispatchRecord> = {}): DispatchRecord 
     { id: 'alert-tp', label: 'true_positive' },
   ],
   indexMs: 20,
-  runApiMs: 100,
-  executionId: 'execution-1',
   ...overrides,
 });
 
@@ -47,7 +44,7 @@ const buildStep = (
   overrides: Partial<WorkflowStepExecutionSummary> = {}
 ): WorkflowStepExecutionSummary => ({
   id: 'step-1',
-  stepId: WORK_DONE_STEP_ID,
+  stepId: 'classify_alerts',
   workflowRunId: 'execution-1',
   status: 'completed',
   startedAt: at(40),
@@ -71,7 +68,7 @@ const buildInput = (overrides: Partial<ReportInput> = {}): ReportInput => ({
   snapshot: {
     takenAt: RUN_END,
     workerExecutions: [buildExecution()],
-    workDoneSteps: [buildStep()],
+    triagedBatches: { 'batch-0001': at(45) },
     childExecutionErrors: {},
     childExecutions: {},
   },
@@ -109,18 +106,23 @@ describe('distribution', () => {
 });
 
 describe('buildReport', () => {
-  it('measures how long a batch waited to start and to be triaged', () => {
+  it('measures how long a batch took to be triaged', () => {
     const { latencyMs } = buildReport(buildInput());
 
-    expect(latencyMs.dispatchToStart?.p50).toBe(5000);
     expect(latencyMs.dispatchToTriaged?.p50).toBe(45000);
-    expect(latencyMs.startToTriaged?.p50).toBe(40000);
   });
 
-  it('counts a Worker run parked on a proposal as triaged', () => {
+  it('times a batch by when its alerts were seen with verdicts and does not count it as failed', () => {
     const report = buildReport(buildInput());
 
-    expect(report.batchesByPhase).toEqual({ parked: 1 });
+    expect(report.dispatch.failedBatches).toBe(0);
+    expect(report.dispatch.indexMs?.count).toBe(1);
+  });
+
+  it('counts a batch whose alerts all carry a verdict as triaged', () => {
+    const report = buildReport(buildInput());
+
+    expect(report.batchesByPhase).toEqual({ triaged: 1 });
     expect(report.throughput.alertsTriaged).toBe(2);
     expect(report.throughput.alertsPerHourTriaged).toBe(2);
   });
@@ -138,7 +140,7 @@ describe('buildReport', () => {
         snapshot: {
           takenAt: RUN_END,
           workerExecutions: [buildExecution()],
-          workDoneSteps: [buildStep({ finishedAt: at(1800) })],
+          triagedBatches: { 'batch-0001': at(1800) },
           childExecutionErrors: {},
           childExecutions: {},
         },
@@ -161,7 +163,7 @@ describe('buildReport', () => {
         snapshot: {
           takenAt: RUN_END,
           workerExecutions: [buildExecution({ status: 'running' })],
-          workDoneSteps: [],
+          triagedBatches: {},
           childExecutionErrors: {},
           childExecutions: {},
         },
@@ -177,7 +179,7 @@ describe('buildReport', () => {
         snapshot: {
           takenAt: RUN_END,
           workerExecutions: [buildExecution({ status: 'running' })],
-          workDoneSteps: [],
+          triagedBatches: {},
           childExecutionErrors: {},
           childExecutions: {},
         },
@@ -192,11 +194,11 @@ describe('buildReport', () => {
   it('reports batches that failed to dispatch', () => {
     const report = buildReport(
       buildInput({
-        dispatches: [buildDispatch({ executionId: undefined, error: 'boom' })],
+        dispatches: [buildDispatch({ error: 'boom' })],
         snapshot: {
           takenAt: RUN_END,
           workerExecutions: [],
-          workDoneSteps: [],
+          triagedBatches: {},
           childExecutionErrors: {},
           childExecutions: {},
         },
@@ -205,17 +207,12 @@ describe('buildReport', () => {
 
     expect(report.dispatch.failedBatches).toBe(1);
     expect(report.batchesByPhase).toEqual({ dispatch_failed: 1 });
-    expect(report.dispatch.apiMs).toBeUndefined();
+    expect(report.dispatch.indexMs).toBeUndefined();
   });
 
   it('groups failed executions by reason', () => {
     const report = buildReport(
       buildInput({
-        dispatches: [
-          buildDispatch({ executionId: 'a' }),
-          buildDispatch({ executionId: 'b' }),
-          buildDispatch({ executionId: 'c' }),
-        ],
         snapshot: {
           takenAt: RUN_END,
           workerExecutions: [
@@ -223,7 +220,7 @@ describe('buildReport', () => {
             buildExecution({ id: 'b', status: 'failed', error: { message: 'rate limited' } }),
             buildExecution({ id: 'c', status: 'completed' }),
           ],
-          workDoneSteps: [],
+          triagedBatches: {},
           childExecutionErrors: {},
           childExecutions: {},
         },
@@ -293,7 +290,7 @@ describe('buildReport', () => {
         snapshot: {
           takenAt: RUN_END,
           workerExecutions: [buildExecution({ status: 'running' })],
-          workDoneSteps: [],
+          triagedBatches: {},
           childExecutionErrors: {},
           childExecutions: {},
         },
@@ -340,7 +337,7 @@ describe('buildReport', () => {
         snapshot: {
           takenAt: RUN_END,
           workerExecutions: [buildExecution()],
-          workDoneSteps: [buildStep()],
+          triagedBatches: {},
           childExecutionErrors: {},
           childExecutions: {
             'system-create-alertzero-proposal': [
@@ -362,7 +359,7 @@ describe('buildReport', () => {
         snapshot: {
           takenAt: RUN_END,
           workerExecutions: [buildExecution()],
-          workDoneSteps: [buildStep()],
+          triagedBatches: {},
           childExecutions: { 'system-create-alertzero-proposal': [] },
           childExecutionErrors: { 'system-create-alertzero-proposal': '403 Forbidden' },
         },
@@ -381,7 +378,7 @@ describe('buildReport', () => {
         snapshot: {
           takenAt: RUN_END,
           workerExecutions: [buildExecution()],
-          workDoneSteps: [buildStep()],
+          triagedBatches: {},
           childExecutions: { 'system-create-alertzero-proposal': [] },
           childExecutionErrors: {},
         },
@@ -397,7 +394,7 @@ describe('buildReport', () => {
         snapshot: {
           takenAt: RUN_END,
           workerExecutions: [buildExecution({ usage: { inputTokens: 100, outputTokens: 10 } })],
-          workDoneSteps: [buildStep()],
+          triagedBatches: {},
           childExecutionErrors: {},
           childExecutions: {
             'system-security-alert-analysis': [
