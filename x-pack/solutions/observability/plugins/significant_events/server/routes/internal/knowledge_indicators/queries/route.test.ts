@@ -323,7 +323,6 @@ describe('bulkDeleteQueriesRoute', () => {
   it('triggers stale event cleanup only for deleted backing rules', async () => {
     const eventClient = {};
     const rulesClient = {};
-    const alertEventsClient = {};
     const sigEventsLogger = { error: jest.fn() };
     const deleteQueries = jest.fn().mockResolvedValue(undefined);
     const handlerParams = {
@@ -343,7 +342,6 @@ describe('bulkDeleteQueriesRoute', () => {
           deleteQueries,
         }),
         getEventSearchClient: () => eventClient,
-        getAlertEventsClient: jest.fn().mockResolvedValue(alertEventsClient),
         getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
       }),
       server: makeServer(),
@@ -363,14 +361,12 @@ describe('bulkDeleteQueriesRoute', () => {
       eventSearchClient: eventClient,
       rulesClient,
       candidateRuleIds: ['rule-q1'],
-      alertEventsClient,
     });
   });
 
   it('excludes backing rules from streams whose deletion failed', async () => {
     const eventClient = {};
     const rulesClient = {};
-    const alertEventsClient = {};
     const sigEventsLogger = { error: jest.fn() };
     const deleteQueries = jest
       .fn()
@@ -393,7 +389,6 @@ describe('bulkDeleteQueriesRoute', () => {
           deleteQueries,
         }),
         getEventSearchClient: () => eventClient,
-        getAlertEventsClient: jest.fn().mockResolvedValue(alertEventsClient),
         getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
       }),
       server: makeServer(),
@@ -412,7 +407,6 @@ describe('bulkDeleteQueriesRoute', () => {
       eventSearchClient: eventClient,
       rulesClient,
       candidateRuleIds: ['rule-q1'],
-      alertEventsClient,
     });
   });
 });
@@ -758,11 +752,44 @@ describe('generateQueriesRoute', () => {
     ).toBe(false);
   });
 
+  it('accepts bounded existing-query context limits and defaults omission to 50', () => {
+    for (const value of [0, 10, 50]) {
+      expect(
+        strictGenerateParams.safeParse({
+          path: { sourceId: 'logs.test' },
+          body: { maxExistingQueriesForContext: value },
+        }).success
+      ).toBe(true);
+    }
+
+    const omitted = strictGenerateParams.safeParse({
+      path: { sourceId: 'logs.test' },
+      body: {},
+    });
+    expect(omitted.success).toBe(true);
+    if (omitted.success) {
+      expect(omitted.data.body?.maxExistingQueriesForContext).toBe(50);
+    }
+
+    for (const value of [-1, 51, 1.5]) {
+      expect(
+        strictGenerateParams.safeParse({
+          path: { sourceId: 'logs.test' },
+          body: { maxExistingQueriesForContext: value },
+        }).success
+      ).toBe(false);
+    }
+  });
+
   it('delegates to query generation and returns its result', async () => {
     const result = await generateRoute.handler(
       makeHandlerParams({
         agentBuilder: makeAgentBuilder(),
-        body: { connectorId: 'test-connector', runId: 'run-1' },
+        body: {
+          connectorId: 'test-connector',
+          runId: 'run-1',
+          maxExistingQueriesForContext: 10,
+        },
       })
     );
 
@@ -771,6 +798,7 @@ describe('generateQueriesRoute', () => {
         source: { id: 'logs.test', view_name: '$.nightshift.sources.default.logs' },
         connectorId: 'test-connector',
         runId: 'run-1',
+        maxExistingQueriesForContext: 10,
       }),
       expect.any(Object)
     );
@@ -800,9 +828,10 @@ describe('generateQueriesRoute', () => {
   it('generates a run id when one is not provided', async () => {
     await generateRoute.handler(makeHandlerParams({ agentBuilder: makeAgentBuilder() }));
 
-    const { runId } = mockGenerateKIQueries.mock.calls[0][0];
+    const { runId, maxExistingQueriesForContext } = mockGenerateKIQueries.mock.calls[0][0];
     expect(runId).toEqual(expect.any(String));
     expect(runId).not.toBe('');
+    expect(maxExistingQueriesForContext).toBe(50);
   });
 
   it('fails when agent builder is unavailable', async () => {

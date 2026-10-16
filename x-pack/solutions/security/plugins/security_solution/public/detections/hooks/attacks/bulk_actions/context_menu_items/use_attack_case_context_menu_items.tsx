@@ -18,12 +18,15 @@ import type {
   BaseAttackContextMenuItemsProps,
   BulkAttackContextMenuItems,
 } from '../types';
+import type { AttackToAttach } from '../../../../../cases/attachments/attack';
 
 export interface UseAttackCaseContextMenuItemsProps extends BaseAttackContextMenuItemsProps {
   /** Array of attacks with alert ids and markdown comments */
   attacksWithCase: AttackWithCase[];
   /** Title used to initialize the create-case flyout */
   title: string;
+  /** The single attack being attached; omit it to keep the markdown-comment payload. */
+  attackToAttach?: Omit<AttackToAttach, 'alertsIndex'>;
 }
 
 export const useAttackCaseContextMenuItems = ({
@@ -34,11 +37,13 @@ export const useAttackCaseContextMenuItems = ({
   setIsLoading,
   refresh,
   telemetrySource,
+  attackToAttach,
 }: UseAttackCaseContextMenuItemsProps): BulkAttackContextMenuItems => {
   const bulkActionItems = useBulkAttackCaseItems({
     closePopover,
     telemetrySource,
     title,
+    attackToAttach,
   });
 
   const alertItems = useMemo(

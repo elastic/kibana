@@ -7,8 +7,12 @@
 
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { conditionToQueryDsl } from '@kbn/streamlang';
-import type { EntityDefinitionOfAnyType, FieldEvaluation } from '../definitions/entity_schema';
-import { isSingleFieldIdentity } from '../definitions/entity_schema';
+import type { EntityDefinitionWithoutId, FieldEvaluation } from '../definitions/entity_schema';
+import {
+  getPostStatsFieldOverrides,
+  getPreAggFieldOverrides,
+  isSingleFieldIdentity,
+} from '../definitions/entity_schema';
 import { isNotEmptyCondition } from '../definitions/common_fields';
 import {
   applyWhenConditionTrueSetFields,
@@ -41,7 +45,7 @@ import {
  * ```
  */
 export function getEuidDslDocumentsContainsIdFilter(
-  entityDefinition: EntityDefinitionOfAnyType
+  entityDefinition: EntityDefinitionWithoutId
 ): QueryDslQueryContainer {
   const { identityField } = entityDefinition;
   if (isSingleFieldIdentity(identityField)) {
@@ -92,7 +96,7 @@ export function getEuidDslDocumentsContainsIdFilter(
  *   and `whenConditionTrueSetFieldsPreAgg`.
  */
 export function getEuidDslFilterBasedOnDocument(
-  entityDefinition: EntityDefinitionOfAnyType,
+  entityDefinition: EntityDefinitionWithoutId,
   doc: any,
   { excludeHigherRankedFields = true }: { excludeHigherRankedFields?: boolean } = {}
 ): QueryDslQueryContainer | undefined {
@@ -120,11 +124,13 @@ export function getEuidDslFilterBasedOnDocument(
     const evaluated = applyFieldEvaluations(doc, fieldEvaluations);
     doc = { ...doc, ...evaluated };
   }
-  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
-    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
+  const preAggFieldOverrides = getPreAggFieldOverrides(entityDefinition);
+  if (preAggFieldOverrides?.length) {
+    applyWhenConditionTrueSetFields(doc, preAggFieldOverrides);
   }
-  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
-    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsAfterStats);
+  const postStatsFieldOverrides = getPostStatsFieldOverrides(entityDefinition);
+  if (postStatsFieldOverrides?.length) {
+    applyWhenConditionTrueSetFields(doc, postStatsFieldOverrides);
   }
   if (!documentPassesCalculatedIdentityPipelineGate(doc, entityDefinition)) {
     return undefined;
@@ -202,7 +208,8 @@ export function getEuidDslFilterBasedOnDocument(
  * collapse it to the fallback and the resulting IdP source clause would match no documents.
  * Instead, this function trusts the record's already-resolved evaluated fields (e.g.
  * `entity.namespace`) and reverse-maps them back to the raw source-field conditions that produce
- * them (see {@link buildResolvedEvaluationSourceClause}).
+ * them (see {@link buildResolvedEvaluationSourceClause}). Higher-ranked identity fields that the
+ * definition does not store on the record are not required to be missing.
  *
  * Single-field identities (service, generic) and calculated identities without field evaluations
  * (host) carry their raw identity fields directly on the record, so this delegates to
@@ -214,7 +221,7 @@ export function getEuidDslFilterBasedOnDocument(
  *   enough identifying information.
  */
 export function getEuidDslFilterBasedOnEntityRecord(
-  entityDefinition: EntityDefinitionOfAnyType,
+  entityDefinition: EntityDefinitionWithoutId,
   record: any
 ): QueryDslQueryContainer | undefined {
   if (!record) {
@@ -256,8 +263,13 @@ export function getEuidDslFilterBasedOnEntityRecord(
 
   const dsl: QueryDslQueryContainer = { bool: { filter } };
 
+  // A record only holds the fields the definition stores. Requiring an unstored identity field
+  // to be missing would match no document, since that field is on the source documents.
+  const storedFields = new Set(
+    (entityDefinition.extraction?.fields ?? []).map(({ destination }) => destination)
+  );
   const toBeFilteredOut = getFieldsToBeFilteredOut(effectiveRanking, fieldsToBeFilteredOn).filter(
-    (field) => !evaluatedDestinations.has(field)
+    (field) => !evaluatedDestinations.has(field) && storedFields.has(field)
   );
   if (toBeFilteredOut.length > 0) {
     dsl.bool!.must = toBeFilteredOut.map(fieldMissingOrEmptyDsl);

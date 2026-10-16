@@ -388,6 +388,8 @@ export interface AuthTypeDef {
   /** When true, excluded from the UI picker but kept in the validation schema for backwards compatibility with existing connectors. */
   isLegacy?: boolean;
   isExperimental?: boolean;
+  /** When true, this auth type may be used with sandbox credential injection. */
+  supportsSandbox?: boolean;
   defaults: Record<string, unknown>;
   overrides?: {
     /** Display name shown in the auth type picker. Defaults to the auth type's built-in label when omitted. */

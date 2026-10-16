@@ -785,6 +785,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^src\/platform\/plugins\/shared\/workflows_management\/server\/.*internal_actions/,
         /^src\/platform\/packages\/shared\/workflows\//,
         /^\.buildkite\/pipelines\/pull_request\/workflows_oom_testing\.yml/,
+        /^\.buildkite\/scripts\/steps\/test\/scout\/workflows_oom_testing\.sh/,
       ]))
     ) {
       pipeline.push(
