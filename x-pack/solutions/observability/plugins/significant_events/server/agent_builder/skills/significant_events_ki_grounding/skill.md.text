@@ -81,10 +81,13 @@ One verdict per signal, set from the row content and the result of its single co
   confirmation of the dependency path. Unmeasured breadth or share never changes the verdict; Step 4
   states it as not measured. A row with no failure signature (a metric, a generic log, a healthy
   result) is not `confirms`.
-- `refutes`: found rows show successful, healthy, positive, or no-failure results.
+- `refutes`: found rows show successful, healthy, positive, or no-failure results. Also an
+  executed exact query with `result: "empty"` (never `"error"`) for a rule whose stored verdict is
+  `confirms`: its failure rows are gone, so the rule has recovered.
 - `off_topic`: a found row that does not address the authored rule hypothesis. Never assign it
   without a returned row.
-- `inconclusive`: empty or errored evidence when a query ran. It cannot establish a mechanism,
+- `inconclusive`: empty or errored evidence when a query ran, except the empty-recovery case under
+  `refutes`. It cannot establish a mechanism,
   impact, or severity tier.
 - `not_checked`: no backed query KI exists.
 - An off-topic row with a concrete error the system does not demonstrably tolerate keeps the
