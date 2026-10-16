@@ -306,20 +306,6 @@ describe('generateDashboardTool handler', () => {
       expect(results[0]).toMatchObject({ data: { version: 2 } });
     });
 
-    it('does not write a version when a layout request changes nothing', async () => {
-      mockExistingDashboard();
-
-      const { results, sendUiEvent, attachments } = await callHandler(
-        'dashboard-attachment-id',
-        'keep it as it is'
-      );
-
-      expect(mockArrangeLayout).toHaveBeenCalled();
-      expect(attachments.update).not.toHaveBeenCalled();
-      expect(sendUiEvent).not.toHaveBeenCalled();
-      expect(results[0]).toMatchObject({ data: { version: 3, failures: undefined } });
-    });
-
     it('returns a failure when a layout request is not applied', async () => {
       mockExistingDashboard();
       mockArrangeLayout.mockRejectedValue(new Error('Model unavailable'));

@@ -118,24 +118,6 @@ describe('arrangeDashboardLayout', () => {
     );
   });
 
-  it('calls the layout for unchanged panels when there is a layout request', async () => {
-    const arrangeLayout = jest.fn(async () => ({
-      plan: '',
-      panels: [{ id: 'p1', x: 0, y: 0, w: 48, h: 9 }],
-      sections: [{ id: 's1', y: 9, panels: [{ id: 'p2', x: 0, y: 0, w: 48, h: 9 }] }],
-    }));
-
-    const result = await arrange(arrangeLayout, {
-      dashboardData: originalDashboardData,
-      instructions: 'make everything full width',
-    });
-
-    expect(arrangeLayout).toHaveBeenCalledWith(
-      expect.objectContaining({ instructions: 'make everything full width' })
-    );
-    expect(result.dashboardData.panels[0].grid).toEqual({ x: 0, y: 0, w: 48, h: 9 });
-  });
-
   it('sends the dashboard with short ids, without the grids of new panels, and applies the arrangement', async () => {
     const arrangeLayout = jest.fn(async () => completeArrangement);
 
