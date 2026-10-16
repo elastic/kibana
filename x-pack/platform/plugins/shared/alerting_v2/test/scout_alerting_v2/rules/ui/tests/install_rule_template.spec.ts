@@ -67,7 +67,7 @@ test.describe(
         await expect(ruleForm.flyout).toBeVisible({ timeout: 30_000 });
       });
 
-      await test.step('step through the flyout and submit', async () => {
+      await test.step('through the flyout and submit', async () => {
         // Template pre-fills all fields; advance through each step and submit.
         await ruleForm.clickFlyoutSave(); // Alert condition → Outcome
         await ruleForm.clickFlyoutSave(); // Outcome → Details
