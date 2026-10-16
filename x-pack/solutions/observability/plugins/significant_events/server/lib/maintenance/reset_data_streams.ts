@@ -83,33 +83,42 @@ export const resetDataStreams = async ({
 }): Promise<{ affected: Set<string>; completed: Set<string> }> => {
   const affected = new Set<string>();
   const completed = new Set<string>();
-  for (const name of preparedStreams) {
-    try {
-      const result = await esClient.deleteByQuery({
+  const streamNames = [...preparedStreams];
+  const results = await Promise.allSettled(
+    streamNames.map(async (name) =>
+      esClient.deleteByQuery({
         index: name,
         query: { term: { 'kibana.space_ids': spaceId } },
         conflicts: 'proceed',
         refresh: true,
         ignore_unavailable: true,
         wait_for_completion: true,
-      });
-      if ((result.deleted ?? 0) > 0) {
-        affected.add(name);
-      }
-      const errors = (result.failures ?? []).map((failure) => JSON.stringify(failure));
-      if (result.timed_out) {
-        errors.push('Document deletion timed out');
-      }
-      if (result.version_conflicts) {
-        errors.push(`${result.version_conflicts} document deletion version conflict(s)`);
-      }
-      if (errors.length > 0) {
-        failures.push({ target: `data-stream:${name}:delete`, error: errors.join('; ') });
-      } else {
-        completed.add(name);
-      }
-    } catch (error) {
-      failures.push({ target: `data-stream:${name}:delete`, error: toMessage(error) });
+      })
+    )
+  );
+  // Aggregate in stream order, independently of request completion order.
+  for (const [index, result] of results.entries()) {
+    const name = streamNames[index];
+    if (result.status === 'rejected') {
+      failures.push({ target: `data-stream:${name}:delete`, error: toMessage(result.reason) });
+      continue;
+    }
+
+    const response = result.value;
+    if ((response.deleted ?? 0) > 0) {
+      affected.add(name);
+    }
+    const errors = (response.failures ?? []).map((failure) => JSON.stringify(failure));
+    if (response.timed_out) {
+      errors.push('Document deletion timed out');
+    }
+    if (response.version_conflicts) {
+      errors.push(`${response.version_conflicts} document deletion version conflict(s)`);
+    }
+    if (errors.length > 0) {
+      failures.push({ target: `data-stream:${name}:delete`, error: errors.join('; ') });
+    } else {
+      completed.add(name);
     }
   }
   return { affected, completed };
