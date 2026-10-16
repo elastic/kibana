@@ -11,6 +11,13 @@ import type { Action, AppNode } from './document_schema';
 export const getNodeChildren = (node: AppNode): readonly AppNode[] =>
   node.type === 'stack' || node.type === 'flyout' ? node.children : [];
 
+/**
+ * Whether an app has nothing in it yet: a root that is a stack with no components. A new app starts
+ * like this, and is shown an empty state, not a blank panel, until something is added.
+ */
+export const isEmptyDocument = (document: { root: AppNode }): boolean =>
+  document.root.type === 'stack' && document.root.children.length === 0;
+
 /** The props of a node whose text may contain `{{state.key}}` references. */
 export const getInterpolatedText = (
   node: AppNode

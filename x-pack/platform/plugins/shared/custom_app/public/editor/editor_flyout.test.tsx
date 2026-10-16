@@ -47,6 +47,48 @@ const setup = ({ withChat = false } = {}) => {
 const outline = (id: string) => screen.getByTestId(`customAppOutline-${id}`);
 const properties = () => within(screen.getByTestId('customAppProperties'));
 
+describe('EditorFlyout on an empty app', () => {
+  const setupEmpty = () => {
+    const onSave = jest.fn();
+    render(
+      <EditorFlyout
+        initialDocument={appDocumentSchema.parse({
+          root: { type: 'stack', id: 'root', children: [] },
+        })}
+        onPreview={jest.fn()}
+        onSave={onSave}
+        onCancel={jest.fn()}
+        ariaLabelledBy="editor-title"
+      />
+    );
+    return { onSave };
+  };
+
+  it('opens on the root alone, ready for the first component', () => {
+    setupEmpty();
+
+    expect(
+      within(screen.getByRole('list', { name: 'Components' })).getAllByRole('button')
+    ).toHaveLength(1);
+    expect(screen.getByTestId('customAppOutline-root')).toHaveAttribute('aria-current', 'true');
+  });
+
+  it('cannot be saved while nothing has changed, and can once a component is added', async () => {
+    const { onSave } = setupEmpty();
+    expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Text' }));
+    await userEvent.click(screen.getByRole('button', { name: /apply and close/i }));
+
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        root: expect.objectContaining({ children: [expect.objectContaining({ type: 'text' })] }),
+      })
+    );
+  });
+});
+
 describe('EditorFlyout', () => {
   it('opens with the outline of the app and the properties of its root', () => {
     setup();

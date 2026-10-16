@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useSubjectValue } from '../utils/use_subject_value';
 import type { SourceState } from './data_layer';
 import { useDataLayer } from './data_layer_context';
 
@@ -14,5 +14,5 @@ import { useDataLayer } from './data_layer_context';
 export const useSource = (id: string): SourceState => {
   const layer = useDataLayer();
   useEffect(() => layer.acquire(id), [layer, id]);
-  return useStateFromPublishingSubject(layer.getSource$(id));
+  return useSubjectValue(layer.getSource$(id));
 };

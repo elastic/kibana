@@ -6,7 +6,7 @@
  */
 
 import { appDocumentSchema } from './document_schema';
-import { collectQueries, getNodeQuery } from './node_tree';
+import { collectQueries, getNodeQuery, isEmptyDocument } from './node_tree';
 
 const { root } = appDocumentSchema.parse({
   root: {
@@ -73,5 +73,31 @@ describe('getNodeQuery', () => {
     expect(getNodeQuery(stat)).toBe('FROM users | STATS COUNT(*)');
     expect(getNodeQuery(table)).toBe('FROM orders');
     expect(getNodeQuery(heading)).toBeUndefined();
+  });
+});
+
+describe('isEmptyDocument', () => {
+  const parse = (node: unknown) => appDocumentSchema.parse({ root: node });
+
+  it('is true for a stack with nothing in it, which is how a new app starts', () => {
+    expect(isEmptyDocument(parse({ type: 'stack', id: 'root', children: [] }))).toBe(true);
+  });
+
+  it('is false once there is a component, whatever it is', () => {
+    expect(
+      isEmptyDocument(
+        parse({ type: 'stack', id: 'root', children: [{ type: 'text', id: 't', text: '' }] })
+      )
+    ).toBe(false);
+  });
+
+  it('is false for a root that is a component itself, even a very small one', () => {
+    expect(isEmptyDocument(parse({ type: 'text', id: 't', text: '' }))).toBe(false);
+  });
+
+  it('is false for a flyout with nothing in it, which is a component and not a blank app', () => {
+    expect(isEmptyDocument(parse({ type: 'flyout', id: 'f', title: 'x', children: [] }))).toBe(
+      false
+    );
   });
 });

@@ -42,6 +42,7 @@ export {
   getNodeBinding,
   getNodeChildren,
   getNodeQuery,
+  isEmptyDocument,
 } from './node_tree';
 export { getStateDefaults } from './state_defaults';
 export {

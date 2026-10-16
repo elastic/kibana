@@ -11,13 +11,13 @@ import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { interpolate, type AppNodeOfType } from '@kbn/custom-app-common';
 import { useDataLayer } from '../data/data_layer_context';
 import { toEsqlVariables } from '../data/esql_variables';
 import { useSource } from '../data/use_source';
 import { useStateValues } from '../runtime/app_runtime_context';
 import { getServices } from '../services';
+import { useSubjectValue } from '../utils/use_subject_value';
 import { DataState } from './data_state';
 import { useChartAttributes } from './use_chart_attributes';
 import type { SourceData } from '../data/data_layer';
@@ -29,7 +29,7 @@ const Chart = ({ node, data }: { node: AppNodeOfType<'chart'>; data: SourceData 
   const { lens } = getServices();
   const layer = useDataLayer();
   const state = useStateValues();
-  const context = useStateFromPublishingSubject(layer.context$);
+  const context = useSubjectValue(layer.context$);
   const { attributes, error } = useChartAttributes(node, data.columns);
   // One id for as long as the chart is shown, so Lens keeps its own state between refreshes.
   const id = useMemo(() => uuidv4(), []);

@@ -16,8 +16,8 @@ import { i18n } from '@kbn/i18n';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { collectQueries, type AppDocument } from '@kbn/custom-app-common';
-import { AppFrame } from '../components/app_frame';
-import { NodeRenderer } from '../components/node_renderer';
+import { AppFrame } from './app_frame';
+import { NodeRenderer } from './node_renderer';
 import { createDataLayer } from '../data/data_layer';
 import { DataLayerContext } from '../data/data_layer_context';
 import { createRunEsqlQuery } from '../data/run_esql_query';
@@ -43,7 +43,7 @@ const toFetchContext = (timeRange: { from: string; to: string }): FetchContext =
  * The app, live, inside the conversation. It has its own time range, since there is no dashboard
  * around it, and its own state: what is picked here stays here.
  */
-export const RenderApp = ({ document }: { document: AppDocument }) => {
+export const LiveApp = ({ document }: { document: AppDocument }) => {
   const { core, search } = getServices();
   const [timeRange, setTimeRange] = useState(DEFAULT_TIME_RANGE);
 

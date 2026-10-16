@@ -25,7 +25,13 @@ export const SERVICE_DETAIL_QUERY = `${SERVICES}
 | EVAL owner = CONCAT(service, "-team")
 | KEEP service, errors, owner`;
 
-/** The starter content of a newly added panel. */
+/** A new app: nothing in it yet, so that it is shown an empty state and not an example. */
+export const createEmptyDocument = (): AppDocument => ({
+  state: {},
+  root: { type: 'stack', id: 'root', direction: 'vertical', children: [] },
+});
+
+/** An example to start from, which works on any cluster. */
 export const createDefaultDocument = (): AppDocument => ({
   state: {
     service: { type: 'string', default: '' },

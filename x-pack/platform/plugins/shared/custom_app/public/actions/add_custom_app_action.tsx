@@ -15,7 +15,7 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { CUSTOM_APP_EMBEDDABLE_TYPE, CUSTOM_APP_STATE_VERSION } from '@kbn/custom-app-common';
 import { ADD_CUSTOM_APP_ACTION_ID } from '../../common/constants';
-import { createDefaultDocument } from '../default_document';
+import { createEmptyDocument } from '../default_document';
 
 const displayName = i18n.translate('xpack.customApp.addPanel.displayName', {
   defaultMessage: 'Custom app',
@@ -31,7 +31,7 @@ export const getAddCustomAppAction = (): ActionDefinition<EmbeddableApiContext> 
 
     await embeddable.addNewPanel({
       panelType: CUSTOM_APP_EMBEDDABLE_TYPE,
-      serializedState: { version: CUSTOM_APP_STATE_VERSION, document: createDefaultDocument() },
+      serializedState: { version: CUSTOM_APP_STATE_VERSION, document: createEmptyDocument() },
     });
   },
   getDisplayName: () => displayName,

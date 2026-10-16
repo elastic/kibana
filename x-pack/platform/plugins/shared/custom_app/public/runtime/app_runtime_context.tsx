@@ -6,7 +6,7 @@
  */
 
 import { createContext, useContext } from 'react';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useSubjectValue } from '../utils/use_subject_value';
 import type { AppRuntime, StateValues } from './app_runtime';
 
 export const AppRuntimeContext = createContext<AppRuntime | undefined>(undefined);
@@ -17,8 +17,7 @@ export const useAppRuntime = (): AppRuntime => {
   return runtime;
 };
 
-export const useStateValues = (): StateValues =>
-  useStateFromPublishingSubject(useAppRuntime().state$);
+export const useStateValues = (): StateValues => useSubjectValue(useAppRuntime().state$);
 
 export const useOpenFlyoutId = (): string | undefined =>
-  useStateFromPublishingSubject(useAppRuntime().openFlyoutId$);
+  useSubjectValue(useAppRuntime().openFlyoutId$);

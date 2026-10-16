@@ -7,10 +7,11 @@
 
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { appDocumentSchema, type AppDocument } from '@kbn/custom-app-common';
+import { appDocumentSchema, isEmptyDocument, type AppDocument } from '@kbn/custom-app-common';
 import type { CustomAppEmbeddableState } from '../server';
 import { customAppEmbeddableFactory } from './custom_app_embeddable';
 
@@ -35,12 +36,15 @@ const documentWith = (heading: string): AppDocument =>
 
 const SAVED = documentWith('Saved heading');
 
-const build = async () => {
-  const initialState: CustomAppEmbeddableState = { version: 1, document: SAVED };
+const build = async ({
+  document = SAVED,
+  viewMode,
+}: { document?: AppDocument; viewMode?: 'view' | 'edit' } = {}) => {
+  const initialState: CustomAppEmbeddableState = { version: 1, document };
   const { api, Component } = await customAppEmbeddableFactory.buildEmbeddable({
     initialState,
     finalizeApi: (registration: unknown) => registration,
-    parentApi: {},
+    parentApi: viewMode ? { viewMode$: new BehaviorSubject(viewMode) } : {},
     uuid: 'panel-1',
   } as never);
   render(<Component />);
@@ -75,8 +79,83 @@ const openEditor = async (api: Awaited<ReturnType<typeof build>>) => {
   };
 };
 
+const EMPTY: AppDocument = appDocumentSchema.parse({
+  root: { type: 'stack', id: 'root', children: [] },
+});
+
 describe('the custom app panel', () => {
   beforeEach(() => (openLazyFlyout as jest.Mock).mockReset());
+
+  describe('when there is nothing in it yet', () => {
+    afterEach(() => {
+      mockAgentBuilder = undefined;
+    });
+
+    it('invites whoever is laying out the dashboard to begin, not a blank panel', async () => {
+      await build({ document: EMPTY, viewMode: 'edit' });
+
+      expect(screen.getByText('Build your app')).toBeInTheDocument();
+      expect(screen.getByTestId('customAppEmptyBuild')).toBeInTheDocument();
+      expect(screen.getByTestId('customAppEmptyExample')).toBeInTheDocument();
+    });
+
+    it('only says it is empty to whoever is looking at the dashboard', async () => {
+      await build({ document: EMPTY, viewMode: 'view' });
+
+      expect(screen.getByText('This app is empty')).toBeInTheDocument();
+      expect(screen.queryByTestId('customAppEmptyBuild')).not.toBeInTheDocument();
+    });
+
+    it('is not editable when its dashboard says nothing about a view mode', async () => {
+      await build({ document: EMPTY });
+
+      expect(screen.queryByTestId('customAppEmptyBuild')).not.toBeInTheDocument();
+    });
+
+    it('opens the editor when asked to build it', async () => {
+      (openLazyFlyout as jest.Mock).mockReturnValue({ onClose: new Promise<void>(() => {}) });
+      await build({ document: EMPTY, viewMode: 'edit' });
+
+      await userEvent.click(screen.getByTestId('customAppEmptyBuild'));
+
+      expect(openLazyFlyout).toHaveBeenCalledTimes(1);
+    });
+
+    it('becomes the example when asked to start from it, which can then be saved', async () => {
+      const api = await build({ document: EMPTY, viewMode: 'edit' });
+
+      await userEvent.click(screen.getByTestId('customAppEmptyExample'));
+
+      expect(screen.queryByText('Build your app')).not.toBeInTheDocument();
+      expect(screen.getByTestId('customAppFrame')).toBeInTheDocument();
+      expect(api.getDocument().root).toMatchObject({ type: 'stack' });
+      expect(isEmptyDocument(api.getDocument())).toBe(false);
+    });
+
+    it('does not offer to describe it when chat is not available', async () => {
+      await build({ document: EMPTY, viewMode: 'edit' });
+      expect(screen.queryByTestId('customAppEmptyDescribe')).not.toBeInTheDocument();
+    });
+
+    it('opens chat with the empty app attached when asked to describe it', async () => {
+      const openChat = jest.fn();
+      mockAgentBuilder = { openChat, events: { ui: { activeConversation$: new Subject() } } };
+      await build({ document: EMPTY, viewMode: 'edit' });
+
+      await userEvent.click(screen.getByTestId('customAppEmptyDescribe'));
+
+      expect(openChat).toHaveBeenCalledWith(
+        expect.objectContaining({
+          newConversation: true,
+          attachments: [
+            expect.objectContaining({
+              data: expect.objectContaining({ embeddable_id: 'panel-1', document: EMPTY }),
+            }),
+          ],
+        })
+      );
+    });
+  });
 
   it('shows its saved document', async () => {
     await build();

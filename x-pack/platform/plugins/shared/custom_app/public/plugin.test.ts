@@ -6,8 +6,13 @@
  */
 
 import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { coreMock } from '@kbn/core/public/mocks';
 import { CUSTOM_APP_EMBEDDABLE_TYPE } from '@kbn/custom-app-common';
-import { ADD_CUSTOM_APP_ACTION_ID, VIEW_CUSTOM_APP_SOURCE_ACTION_ID } from '../common/constants';
+import {
+  ADD_CUSTOM_APP_ACTION_ID,
+  CUSTOM_APP_APPLICATION_ID,
+  VIEW_CUSTOM_APP_SOURCE_ACTION_ID,
+} from '../common/constants';
 import { CustomAppPlugin } from './plugin';
 
 jest.mock('./services', () => ({ setServices: jest.fn() }));
@@ -16,11 +21,12 @@ const setup = () => {
   const embeddable = { registerEmbeddablePublicDefinition: jest.fn() };
   const uiActions = { registerActionAsync: jest.fn(), attachAction: jest.fn() };
   const plugin = new CustomAppPlugin();
+  const core = coreMock.createSetup();
 
-  plugin.setup({} as never, { embeddable } as never);
+  plugin.setup(core as never, { embeddable } as never);
   plugin.start({} as never, { data: { search: { search: jest.fn() } }, uiActions } as never);
 
-  return { embeddable, uiActions };
+  return { core, embeddable, uiActions };
 };
 
 describe('CustomAppPlugin', () => {
@@ -31,6 +37,18 @@ describe('CustomAppPlugin', () => {
       CUSTOM_APP_EMBEDDABLE_TYPE,
       expect.any(Function)
     );
+  });
+
+  it('registers the standalone application, loaded only when it is opened', () => {
+    const { core } = setup();
+
+    expect(core.application.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: CUSTOM_APP_APPLICATION_ID,
+        mount: expect.any(Function),
+      })
+    );
+    expect(CUSTOM_APP_APPLICATION_ID).toBe('customApp');
   });
 
   it('offers a custom app in the add panel menu', () => {

@@ -28,12 +28,14 @@ import type {
 } from '@kbn/embeddable-plugin/public';
 import {
   fetch$,
+  getViewModeSubject,
   initializeStateApi,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
+  useStateFromPublishingSubject,
   type HasEditCapabilities,
   type HasTypeDisplayName,
   type PublishesDataLoading,
@@ -44,10 +46,12 @@ import {
   CUSTOM_APP_STATE_VERSION,
   appDocumentSchema,
   collectQueries,
+  isEmptyDocument,
   type AppDocument,
 } from '@kbn/custom-app-common';
 import type { CustomAppEmbeddableState } from '../server';
 import { AppFrame } from './components/app_frame';
+import { EmptyApp } from './components/empty_app';
 import { NodeRenderer } from './components/node_renderer';
 import { createDataLayer } from './data/data_layer';
 import { DataLayerContext } from './data/data_layer_context';
@@ -56,6 +60,7 @@ import type { HasCustomAppDocument } from './has_custom_app_document';
 import { createAppRuntime } from './runtime/app_runtime';
 import { AppRuntimeContext } from './runtime/app_runtime_context';
 import { createRunEsqlQuery } from './data/run_esql_query';
+import { createDefaultDocument } from './default_document';
 import { getServices } from './services';
 import { buildCustomAppContextAttachment } from './utils/chat_integration';
 
@@ -85,6 +90,8 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
     // What the editor's Preview button shows on the panel instead of the saved document. It is
     // not part of the panel's state, so previewing never marks the dashboard as changed.
     const previewDocument$ = new BehaviorSubject<AppDocument | undefined>(undefined);
+    // Whether the panel is being laid out or looked at, which decides what an empty app offers.
+    const viewMode$ = getViewModeSubject(parentApi) ?? new BehaviorSubject('view');
     const renderedDocument$ = new BehaviorSubject<AppDocument>(initialState.document);
 
     /** Opens chat with the app as it stands attached, for the agent to build or change. */
@@ -206,6 +213,7 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
       api,
       Component: function CustomAppEmbeddableComponent() {
         const [document] = useBatchedPublishingSubjects(renderedDocument$);
+        const viewMode = useStateFromPublishingSubject(viewMode$);
 
         // Subscribed here rather than when the panel is built so that the nodes below, whose
         // effects run first, have already declared the sources they read when the first fetch
@@ -260,9 +268,18 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
         return (
           <AppRuntimeContext.Provider value={runtime}>
             <DataLayerContext.Provider value={dataLayer}>
-              <AppFrame>
-                <NodeRenderer node={document.root} />
-              </AppFrame>
+              {isEmptyDocument(document) ? (
+                <EmptyApp
+                  canEdit={viewMode === 'edit'}
+                  onBuild={() => api.onEdit()}
+                  onDescribe={agentBuilder ? () => generateWithChat(document) : undefined}
+                  onUseExample={() => document$.next(createDefaultDocument())}
+                />
+              ) : (
+                <AppFrame>
+                  <NodeRenderer node={document.root} />
+                </AppFrame>
+              )}
             </DataLayerContext.Provider>
           </AppRuntimeContext.Provider>
         );

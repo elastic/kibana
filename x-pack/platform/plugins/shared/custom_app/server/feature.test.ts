@@ -13,6 +13,12 @@ describe('the custom apps feature', () => {
     expect(customAppFeature.id).toBe(CUSTOM_APP_FEATURE_ID);
   });
 
+  it('gives both levels the standalone application, so that it can be opened', () => {
+    expect(customAppFeature.app).toEqual(['customApp']);
+    expect(customAppFeature.privileges?.all.app).toEqual(['customApp']);
+    expect(customAppFeature.privileges?.read.app).toEqual(['customApp']);
+  });
+
   it('lets All write saved apps and Read only read them', () => {
     expect(customAppFeature.privileges?.all.savedObject).toEqual({
       all: [CUSTOM_APP_SAVED_OBJECT_TYPE],

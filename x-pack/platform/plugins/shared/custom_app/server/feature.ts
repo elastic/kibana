@@ -8,7 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
-import { CUSTOM_APP_FEATURE_ID, CUSTOM_APP_SAVED_OBJECT_TYPE } from '../common/constants';
+import {
+  CUSTOM_APP_APPLICATION_ID,
+  CUSTOM_APP_FEATURE_ID,
+  CUSTOM_APP_SAVED_OBJECT_TYPE,
+} from '../common/constants';
 
 /**
  * The privileges of saved apps. Reading one is not a privilege to run what it does: a button in an
@@ -19,15 +23,15 @@ export const customAppFeature: KibanaFeatureConfig = {
   name: i18n.translate('xpack.customApp.feature.name', { defaultMessage: 'Custom apps' }),
   order: 750,
   category: DEFAULT_APP_CATEGORIES.kibana,
-  app: [],
+  app: [CUSTOM_APP_APPLICATION_ID],
   privileges: {
     all: {
-      app: [],
+      app: [CUSTOM_APP_APPLICATION_ID],
       savedObject: { all: [CUSTOM_APP_SAVED_OBJECT_TYPE], read: [] },
       ui: ['save', 'show'],
     },
     read: {
-      app: [],
+      app: [CUSTOM_APP_APPLICATION_ID],
       savedObject: { all: [], read: [CUSTOM_APP_SAVED_OBJECT_TYPE] },
       ui: ['show'],
     },

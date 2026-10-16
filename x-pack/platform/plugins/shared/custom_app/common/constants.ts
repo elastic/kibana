@@ -14,3 +14,8 @@ export const CUSTOM_APP_SAVED_OBJECT_TYPE = 'custom_app';
 export const CUSTOM_APP_FEATURE_ID = 'customApp';
 export const MAX_APP_TITLE_LENGTH = 256;
 export const MAX_APP_DESCRIPTION_LENGTH = 2_000;
+
+/** The id of the standalone application, which is also its route: `/app/customApp`. */
+export const CUSTOM_APP_APPLICATION_ID = 'customApp';
+export const SAVED_APPS_API_PATH = '/internal/custom_app/apps';
+export const SAVED_APPS_API_VERSION = '1';
