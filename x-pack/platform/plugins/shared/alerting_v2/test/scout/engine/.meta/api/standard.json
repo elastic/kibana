@@ -1,5 +1,5 @@
 {
-  "sha1": "ea224b22293a3f875769a3ce1ce54ffa70601187",
+  "sha1": "71e02116b66ee14d36f9a2627bad00bbdd0fd1d0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -607,7 +607,7 @@
     {
       "id": "628e398f81b8b3d-14af16ecf5b4c6e",
       "title": "Agent Builder — alerting V2 SML type access limited privilege user can search alerting v2 rule and action policy SML types",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -616,14 +616,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/sml_types_access.spec.ts",
-        "line": 262,
-        "column": 6
+        "line": 240,
+        "column": 21
       }
     },
     {
       "id": "628e398f81b8b3d-1f9e47bf5893431",
       "title": "Agent Builder — alerting V2 SML type access limited privilege user can filter SML search to the rule type",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -632,14 +632,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/sml_types_access.spec.ts",
-        "line": 281,
+        "line": 257,
         "column": 16
       }
     },
     {
       "id": "628e398f81b8b3d-8d801d629dbe51a",
       "title": "Agent Builder — alerting V2 SML type access limited privilege user can filter SML search to the action policy type",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -648,14 +648,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/sml_types_access.spec.ts",
-        "line": 296,
+        "line": 272,
         "column": 16
       }
     },
     {
       "id": "628e398f81b8b3d-c9f7c69fdc70c1b",
       "title": "Agent Builder — alerting V2 SML type access user with agent builder read but without alerting v2 read cannot see rule or action policy SML hits",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -664,14 +664,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/sml_types_access.spec.ts",
-        "line": 307,
-        "column": 1
+        "line": 285,
+        "column": 16
       }
     },
     {
       "id": "628e398f81b8b3d-d86c1bdd1fc4b98",
       "title": "Agent Builder — alerting V2 SML type access user without alerting v2 read cannot see rule or action policy SML hits on a wildcard search",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -680,14 +680,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/sml_types_access.spec.ts",
-        "line": 322,
-        "column": 16
+        "line": 300,
+        "column": 23
       }
     },
     {
       "id": "628e398f81b8b3d-ee202b11d867308",
       "title": "Agent Builder — alerting V2 SML type access limited privilege user still sees both types on a wildcard search",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -696,8 +696,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/sml_types_access.spec.ts",
-        "line": 332,
-        "column": 10
+        "line": 312,
+        "column": 32
       }
     },
     {

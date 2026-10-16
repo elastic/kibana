@@ -1,5 +1,5 @@
 {
-  "sha1": "448c8fd8b9d681300e29b4bb367385c94c8ae9c2",
+  "sha1": "84adc3dcc7c55051fba7a65cc2c0f25d515a9b5a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1014,6 +1014,71 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/bulk_update_api_key_action_policies.spec.ts",
         "line": 171,
         "column": 47
+      }
+    },
+    {
+      "id": "e61cb2a1e317b51-cd97a74bd0bc846",
+      "title": "[NON-MKI] Action policies written with a Cloud API key create: rejects a Cloud API key and creates nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/cloud_api_key_action_policy.spec.ts",
+        "line": 48,
+        "column": 71
+      }
+    },
+    {
+      "id": "e61cb2a1e317b51-0d8ad06b25e0421",
+      "title": "[NON-MKI] Action policies written with a Cloud API key upsert: rejects a Cloud API key when the policy does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/cloud_api_key_action_policy.spec.ts",
+        "line": 60,
+        "column": 24
+      }
+    },
+    {
+      "id": "e61cb2a1e317b51-ddf37aab61b2ae7",
+      "title": "[NON-MKI] Action policies written with a Cloud API key upsert: rejects a Cloud API key when replacing a policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/cloud_api_key_action_policy.spec.ts",
+        "line": 76,
+        "column": 7
+      }
+    },
+    {
+      "id": "e61cb2a1e317b51-3023fb5c539249a",
+      "title": "[NON-MKI] Action policies written with a Cloud API key update: rejects a Cloud API key and leaves the policy unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/cloud_api_key_action_policy.spec.ts",
+        "line": 93,
+        "column": 13
+      }
+    },
+    {
+      "id": "e61cb2a1e317b51-0ead92107fe62d7",
+      "title": "[NON-MKI] Action policies written with a Cloud API key update API key: rejects a Cloud API key and leaves the policy unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/cloud_api_key_action_policy.spec.ts",
+        "line": 108,
+        "column": 18
       }
     },
     {

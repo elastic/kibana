@@ -1,5 +1,5 @@
 {
-  "sha1": "a6c236f18da8f576efc5e5b367d75d85555cb6a7",
+  "sha1": "5dd684485825447571013b2e81bb317540976959",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -22,6 +22,22 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/global.setup.ts",
         "line": 5,
         "column": 1
+      }
+    },
+    {
+      "id": "99c74a111068925-4e8d7b869f4b346",
+      "title": "Dispatcher runs the workflow of an action policy a breaching rule fires the policy and its workflow runs to completion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatch_workflow_execution.spec.ts",
+        "line": 72,
+        "column": 25
       }
     },
     {
