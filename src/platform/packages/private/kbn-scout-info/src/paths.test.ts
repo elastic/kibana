@@ -34,6 +34,8 @@ describe('Scout path globs', () => {
       'src/core/packages/my_package/test/scout',
       'src/core/test/scout',
       'src/core/test/scout_custom',
+      'src/dev/build/test/scout',
+      'src/dev/build/test/scout_fips',
       'x-pack/platform/plugins/shared/my_plugin/test/scout',
       'x-pack/solutions/security/plugins/my_plugin/test/scout',
       'x-pack/solutions/observability/plugins/my_plugin/test/scout',
@@ -49,6 +51,7 @@ describe('Scout path globs', () => {
       'random/path/test/scout',
       'src/platform/plugins/shared/my_plugin/src/scout',
       'not_examples/hello_world/test/scout',
+      'src/dev/other/test/scout',
     ];
 
     it.each(shouldMatch)('matches: %s', (testPath) => {
@@ -70,6 +73,7 @@ describe('Scout path globs', () => {
       'src/core/packages/my_package/test/scout/api/playwright.config.ts',
       'src/core/test/scout/api/playwright.config.ts',
       'src/core/test/scout_custom/api/playwright.config.ts',
+      'src/dev/build/test/scout_fips/api/playwright.config.ts',
       'examples/hello_world/test/scout_examples/api/playwright.config.ts',
       'examples/hello_world/test/scout_examples/ui/playwright.config.ts',
       'x-pack/examples/hello_world/test/scout_examples/api/playwright.config.ts',
@@ -102,6 +106,7 @@ describe('Scout path globs', () => {
       'x-pack/solutions/security/plugins/my_plugin/test/scout/.meta/api/standard.json',
       'examples/hello_world/test/scout_examples/.meta/api/standard.json',
       'x-pack/examples/hello_world/test/scout_examples/.meta/ui/standard.json',
+      'src/dev/build/test/scout_fips/.meta/api/standard.json',
       // namespace variants
       'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/.meta/ui/parallel.json',
       'src/platform/plugins/shared/my_plugin/test/scout/my_area/.meta/api/standard.json',
@@ -295,6 +300,21 @@ describe('Scout path regexes', () => {
   });
 
   describe('SCOUT_UNIFIED_CONFIG_PATH_REGEX', () => {
+    it('matches build tooling with a custom server config set', () => {
+      const match = 'src/dev/build/test/scout_fips/api/playwright.config.ts'.match(
+        SCOUT_UNIFIED_CONFIG_PATH_REGEX
+      );
+      expect(match?.groups).toEqual(
+        expect.objectContaining({
+          devBuildRoot: 'src/dev/build',
+          serverConfigSet: 'fips',
+          namespace: undefined,
+          testCategory: 'api',
+          testConfigType: '',
+        })
+      );
+    });
+
     it('matches platform plugin path with correct named groups', () => {
       const match =
         'src/platform/plugins/shared/my_plugin/test/scout/api/playwright.config.ts'.match(

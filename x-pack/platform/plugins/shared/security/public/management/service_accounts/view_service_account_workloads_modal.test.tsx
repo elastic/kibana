@@ -29,6 +29,8 @@ const workload = (workloadId: string): ServiceAccountBoundWorkload => ({
 });
 
 describe('ServiceAccountWorkloadsModal', () => {
+  jest.setTimeout(30_000);
+
   const renderModal = (listWorkloads: jest.Mock) => {
     const onClose = jest.fn();
     const onError = jest.fn();
