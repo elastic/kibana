@@ -9,9 +9,11 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { CREATE_CASE_TITLE, PAGE_TITLE } from '../../../common/translations';
 import { useAllCasesNavigation } from '../../../common/navigation/hooks';
+import { useKibana } from '../../../common/lib/kibana';
 import { CasesAppHeader } from '../../app/cases_app_header';
 
 export const CreateCaseAppHeader: FC = () => {
+  const { docLinks } = useKibana().services;
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
 
   const back = useMemo(
@@ -28,7 +30,14 @@ export const CreateCaseAppHeader: FC = () => {
     [getAllCasesUrl, navigateToAllCases]
   );
 
-  return <CasesAppHeader title={CREATE_CASE_TITLE} back={back} />;
+  return (
+    <CasesAppHeader
+      title={CREATE_CASE_TITLE}
+      back={back}
+      docLink={docLinks.links.cases.createCases}
+      showAddIntegrations
+    />
+  );
 };
 
 CreateCaseAppHeader.displayName = 'CreateCaseAppHeader';
