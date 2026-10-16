@@ -69,28 +69,25 @@ const arrangedPanelsSchema = z
   )
   .max(500);
 
-/** Grid positions returned by the layout call, in the containers of the request. */
+/** The answer of the layout call: grid positions in the containers of the request. */
 export const layoutArrangementSchema = z.object({
   plan: z.string(),
-  panels: arrangedPanelsSchema.describe('Every top-level panel.'),
+  panels: arrangedPanelsSchema,
   sections: z
     .array(
       z.object({
         id: z.string().max(256),
         y: z.number().int().min(0).max(1000),
-        panels: arrangedPanelsSchema.describe(
-          'Every panel of this section, with section-relative coordinates.'
-        ),
+        panels: arrangedPanelsSchema,
       })
     )
-    .max(100)
-    .describe('Every section, with its row in the top-level grid.'),
+    .max(100),
 });
 
 export type LayoutArrangement = z.infer<typeof layoutArrangementSchema>;
 
 /**
- * Arranges the dashboard with a separate model call. Injected by the host, which parses the answer
- * with `layoutArrangementSchema`.
+ * Arranges the dashboard with a separate model call. Injected by the host, which reads the answer
+ * with `parseLayoutAnswer`.
  */
 export type ArrangeDashboardLayout = (request: LayoutRequest) => Promise<LayoutArrangement>;

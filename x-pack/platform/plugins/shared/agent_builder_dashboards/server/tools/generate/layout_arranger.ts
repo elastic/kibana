@@ -8,46 +8,51 @@
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import {
   buildLayoutPrompt,
-  layoutArrangementSchema,
+  getErrorMessage,
+  parseLayoutAnswer,
   type ArrangeDashboardLayout,
 } from '@kbn/dashboard-agent-authoring';
 
-const LAYOUT_TOOL_NAME = 'arrange_dashboard_layout';
+const MAX_ATTEMPTS = 2;
+
+type LayoutMessage = ['system' | 'human' | 'ai', string];
 
 /**
- * Arranges dashboard containers with a dedicated model call. Errors propagate to the layout step,
- * which keeps the current layout.
+ * Arranges dashboard containers with a dedicated model call, answered in text like the Lens config
+ * call: a failed tool call would be retried by the inference plugin, whose streamed retry appends
+ * the failed attempt's arguments to the new ones. An unreadable answer is asked for again once.
+ * Errors propagate to the layout step, which keeps the current layout.
  */
 export const createLayoutArranger =
   ({ modelProvider }: { modelProvider: ModelProvider }): ArrangeDashboardLayout =>
   async (request) => {
     const { chatModel } = await modelProvider.getDefaultModel();
     const { system, user } = buildLayoutPrompt(request);
+    const messages: LayoutMessage[] = [
+      ['system', system],
+      ['human', user],
+    ];
 
-    const response = await chatModel
-      .bindTools(
-        [
-          {
-            name: LAYOUT_TOOL_NAME,
-            description: 'Returns the grid of every panel and the row of every section.',
-            schema: layoutArrangementSchema,
-          },
-        ],
-        { tool_choice: 'auto' }
-      )
-      .invoke([
-        ['system', system],
-        ['human', `${user}\n\nAnswer by calling \`${LAYOUT_TOOL_NAME}\`.`],
-      ]);
-
-    const toolCall = response.tool_calls?.find(({ name }) => name === LAYOUT_TOOL_NAME);
-    if (!toolCall) {
-      const outputTokens = response.usage_metadata?.output_tokens ?? 'unknown';
-      throw new Error(
-        `The model did not call ${LAYOUT_TOOL_NAME} (output tokens: ${outputTokens}, text: ${JSON.stringify(
-          response.text.slice(0, 500)
-        )})`
-      );
+    let lastError = '';
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      const response = await chatModel.invoke(messages);
+      try {
+        return parseLayoutAnswer(response.text);
+      } catch (error) {
+        const outputTokens = response.usage_metadata?.output_tokens ?? 'unknown';
+        lastError = `${getErrorMessage(
+          error
+        )} (output tokens: ${outputTokens}, text: ${JSON.stringify(response.text.slice(0, 500))})`;
+        messages.push(
+          ['ai', response.text],
+          [
+            'human',
+            `Your answer could not be read: ${getErrorMessage(
+              error
+            )}. Answer again with the complete JSON object in a \`json\` code block.`,
+          ]
+        );
+      }
     }
-    return layoutArrangementSchema.parse(toolCall.args);
+    throw new Error(lastError);
   };

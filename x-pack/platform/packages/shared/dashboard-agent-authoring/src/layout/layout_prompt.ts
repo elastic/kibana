@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { LayoutRequest } from './types';
+import { z } from '@kbn/zod/v4';
+import { getErrorMessage } from '../utils';
+import { layoutArrangementSchema, type LayoutArrangement, type LayoutRequest } from './types';
+
+const JSON_BLOCK_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/;
 
 const LAYOUT_SYSTEM_PROMPT = `You lay out the panels of a Kibana dashboard. Return the grid \`{ x, y, w, h }\` of every panel and the \`y\` of every section. Every panel stays in its container: return the top-level panels in \`panels\`, and the panels of each section in that section's \`panels\`. Order panels by purpose only within their container.
 
@@ -17,7 +21,14 @@ The dashboard as it is now: \`panels\` are the top-level panels, and \`sections\
 
 ## Answer
 
-Write \`plan\` before the grids: per container, the rows you change and why, then each changed row as \`w×h\` per panel. Check that the widths of every row add up to 48 and that panels side by side end on the same row.
+Answer with one JSON object in a \`json\` code block, and nothing else:
+
+\`\`\`json
+{"plan":"…","panels":[{"id":"p1","x":0,"y":0,"w":24,"h":10}],"sections":[{"id":"s1","y":10,"panels":[{"id":"p2","x":0,"y":0,"w":12,"h":6}]}]}
+\`\`\`
+
+- \`plan\` comes first: per container, the rows you change and why, then each changed row as \`w×h\` per panel. Check that the widths of every row add up to 48 and that panels side by side end on the same row.
+- \`panels\` has every top-level panel, and \`sections\` has every section, with its row \`y\` in the top-level grid and the section-relative grids of its panels.
 
 ## How to lay out
 
@@ -61,3 +72,22 @@ export const buildLayoutPrompt = (request: LayoutRequest): { system: string; use
   system: LAYOUT_SYSTEM_PROMPT,
   user: `Lay out this dashboard:\n\n${JSON.stringify(request)}`,
 });
+
+const parseJson = (text: string): unknown => {
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error(`the answer is not valid JSON: ${getErrorMessage(error)}`);
+  }
+};
+
+/** Reads the arrangement from the text answer of the layout call, or throws why it cannot. */
+export const parseLayoutAnswer = (text: string): LayoutArrangement => {
+  const result = layoutArrangementSchema.safeParse(
+    parseJson(text.match(JSON_BLOCK_REGEX)?.[1] ?? text.trim())
+  );
+  if (!result.success) {
+    throw new Error(`the answer does not match the format: ${z.prettifyError(result.error)}`);
+  }
+  return result.data;
+};

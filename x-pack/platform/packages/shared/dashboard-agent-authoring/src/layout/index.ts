@@ -6,6 +6,6 @@
  */
 
 export { arrangeDashboardLayout } from './arrange_layout';
-export { buildLayoutPrompt } from './layout_prompt';
-export { GRID_COLUMNS, layoutArrangementSchema } from './types';
+export { buildLayoutPrompt, parseLayoutAnswer } from './layout_prompt';
+export { GRID_COLUMNS } from './types';
 export type { ArrangeDashboardLayout, LayoutArrangement, LayoutRequest } from './types';
