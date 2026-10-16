@@ -153,14 +153,14 @@ export class ConversationProposalsService {
    * from the request. Failure here omits the field the same way a missing
    * title does — the queue is still usable without pills.
    */
-  private async getEntityIds(
+  private async getEntities(
     conversationIds: string[],
     request: KibanaRequest
-  ): Promise<Map<string, string[]>> {
+  ): Promise<Map<string, Array<{ id: string; type?: string }>>> {
     if (conversationIds.length === 0) return new Map();
 
     try {
-      return await this.getImpactClient(request).getEntityIdsByConversationId(conversationIds);
+      return await this.getImpactClient(request).getEntitiesByConversationId(conversationIds);
     } catch (err) {
       this.logger.debug(`Could not resolve investigation impact: ${err}`);
       return new Map();
@@ -172,26 +172,32 @@ export class ConversationProposalsService {
     request: KibanaRequest
   ): Promise<ProposalItem[]> {
     const conversationIds = proposals.map((proposal) => proposal.conversationId);
-    const [conversations, entityIds] = await Promise.all([
+    const [conversations, entities] = await Promise.all([
       this.fetchConversations(conversationIds, request),
-      this.getEntityIds(conversationIds, request),
+      this.getEntities(conversationIds, request),
     ]);
-    return this.enrichProposals(proposals, conversations, entityIds);
+    return this.enrichProposals(proposals, conversations, entities);
   }
 
   private enrichProposals(
     proposals: ProposalWithMetadata[],
     conversations: Map<string, ConversationDecoration>,
-    entityIds: Map<string, string[]>
+    entities: Map<string, Array<{ id: string; type?: string }>>
   ): ProposalItem[] {
     return proposals.map((proposal) => {
       const conversation = conversations.get(proposal.conversationId);
-      const ids = entityIds.get(proposal.conversationId);
+      const list = entities.get(proposal.conversationId) ?? [];
+      const ids = list.map((entity) => entity.id);
+      const entityTypes: Record<string, string> = {};
+      for (const { id, type } of list) {
+        if (type) entityTypes[id] = type;
+      }
       return {
         ...proposal,
         ...conversation,
         conversationAssignees: conversation?.conversationAssignees ?? [],
-        ...(ids && ids.length > 0 ? { entityIds: ids } : {}),
+        ...(ids.length > 0 ? { entityIds: ids } : {}),
+        ...(Object.keys(entityTypes).length > 0 ? { entityTypes } : {}),
       };
     });
   }

@@ -47,6 +47,8 @@ export interface Investigation {
    * fallback for sample data that has not been hydrated.
    */
   entityIds?: string[];
+  /** Entity type (`host`, `user`, …) by entity id, for the ids that have one. */
+  entityTypes?: Record<string, string>;
   summary?: string;
   /** Brief priority score (0-100) for queue ranking */
   priorityScore?: number;

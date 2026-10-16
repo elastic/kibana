@@ -25,7 +25,6 @@ import { UserCapabilities } from '../../../../services/user_capabilities';
 import { EMPTY_VALUE } from '../../../../utils/rule_display';
 import {
   RuleSummaryAboutSection,
-  RuleSummaryActionPoliciesSection,
   RuleSummaryArtifactsSection,
   RuleSummaryBody,
   RuleSummaryInvestigationSection,
@@ -209,7 +208,6 @@ export const RuleSummaryFlyout = ({
           <RuleSummaryBody rule={rule}>
             <RuleSummaryAboutSection />
             <RuleSummaryInvestigationSection />
-            <RuleSummaryActionPoliciesSection />
             <RuleSummaryArtifactsSection />
           </RuleSummaryBody>
         </Body>
