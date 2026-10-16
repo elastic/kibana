@@ -40,17 +40,26 @@ const DashboardChangeHistoryBadge = ({
     </EuiBadge>
   ) : null;
 
-  if (!item.isCurrent) return versionBadge;
-
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow">
-          {i18n.translate('dashboard.changeHistory.currentVersionOnlyBadge', {
-            defaultMessage: 'Current version',
-          })}
-        </EuiBadge>
-      </EuiFlexItem>
+      {item.isCurrent && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">
+            {i18n.translate('dashboard.changeHistory.currentVersionBadge', {
+              defaultMessage: 'Current version',
+            })}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
+      {item.action === 'dashboard_delete' && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="danger">
+            {i18n.translate('dashboard.changeHistory.deletedBadge', {
+              defaultMessage: 'Deleted',
+            })}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
       {versionBadge ? <EuiFlexItem grow={false}>{versionBadge}</EuiFlexItem> : null}
     </EuiFlexGroup>
   );

@@ -13,18 +13,49 @@ import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_objec
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { transformDashboardOut } from '../transforms';
 import type { DashboardDeleteResponseBody } from './types';
+import {
+  addToHistory,
+  getHistorySnapshot,
+  getNextHistorySequenceFromHistory,
+} from '../../change_history/util';
 
 export async function deleteDashboard(
   requestCtx: RequestHandlerContext,
   id: string,
-  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
+  spaceId?: string
 ): Promise<DashboardDeleteResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
-  const { attributes: soAttributes, references: soReferences } =
-    await core.savedObjects.client.get<DashboardSavedObjectAttributes>('dashboard', id);
+  const savedObject = await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
+    'dashboard',
+    id
+  );
   const {
     dashboardState: { title, tags },
-  } = transformDashboardOut(soAttributes, soReferences, undefined, strictValidationSchema);
+  } = transformDashboardOut(
+    savedObject.attributes,
+    savedObject.references,
+    undefined,
+    strictValidationSchema
+  );
   await core.savedObjects.client.delete(DASHBOARD_SAVED_OBJECT_TYPE, id);
+  const snapshot = getHistorySnapshot({
+    attributes: savedObject.attributes,
+    references: savedObject.references,
+    strictValidationSchema,
+  });
+  if (snapshot) {
+    const sequence = await getNextHistorySequenceFromHistory({ spaceId, dashboardId: id });
+    await addToHistory({
+      ctx: requestCtx,
+      dashboardId: id,
+      snapshot,
+      spaceId,
+      sequence,
+      timestamp: savedObject.updated_at ?? new Date(Date.now()).toISOString(),
+      type: 'delete',
+    });
+  }
+
   return { id, data: { title: title ?? '', tags: tags ?? [] } };
 }

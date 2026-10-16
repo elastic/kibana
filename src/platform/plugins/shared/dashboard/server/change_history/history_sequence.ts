@@ -11,25 +11,15 @@ import equal from 'fast-deep-equal';
 
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 
-import { omit } from 'lodash';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 
 export const INITIAL_HISTORY_SEQUENCE = 1;
 
 /**
- * Next history sequence for an update: bumped only when the stored content (attributes or
- * references) changes, otherwise the existing sequence is preserved. Legacy dashboards without
- * a sequence start at the initial value.
+ * Whether the stored content (attributes or references) differs between two versions of a dashboard.
  */
-export const getNextHistorySequence = (
+export const hasContentChanged = (
   existing: Pick<SavedObject<DashboardSavedObjectAttributes>, 'attributes' | 'references'>,
   next: Pick<SavedObject<DashboardSavedObjectAttributes>, 'attributes' | 'references'>
-): number => {
-  const { historySequence: existingSequence, ...existingAttributes } = existing.attributes;
-  const hasChanged =
-    !equal(existingAttributes, omit(next.attributes, 'historySequence')) ||
-    !equal(existing.references, next.references);
-
-  if (existingSequence == null) return INITIAL_HISTORY_SEQUENCE;
-  return hasChanged ? existingSequence + 1 : existingSequence;
-};
+): boolean =>
+  !equal(existing.attributes, next.attributes) || !equal(existing.references, next.references);

@@ -18,7 +18,7 @@ import { transformDashboardIn } from '../transforms';
 import type { DashboardCreateResponseBody } from './types';
 import {
   addToHistory,
-  getCreateHistorySequence,
+  getNextHistorySequenceFromHistory,
   getHistorySnapshot,
 } from '../../change_history/util';
 
@@ -50,11 +50,11 @@ export async function create(
   // a recreated ID may still have history from a deleted dashboard
   const historySequence =
     id !== undefined
-      ? await getCreateHistorySequence({ spaceId, dashboardId: id })
+      ? await getNextHistorySequenceFromHistory({ spaceId, dashboardId: id })
       : INITIAL_HISTORY_SEQUENCE;
   const savedObject = await core.savedObjects.client.create(
     DASHBOARD_SAVED_OBJECT_TYPE,
-    { ...soAttributes, historySequence },
+    soAttributes,
     {
       ...(id !== undefined && { id }),
       references: soReferences,
@@ -78,10 +78,9 @@ export async function create(
       dashboardId: savedObject.id,
       snapshot,
       spaceId,
-      sequence: {
-        current: historySequence,
-      },
+      sequence: historySequence,
       timestamp: savedObject.updated_at ?? new Date(Date.now()).toISOString(),
+      type: 'create',
     });
   }
 

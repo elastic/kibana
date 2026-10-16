@@ -52,18 +52,19 @@ describe('getChangeHistoryContext', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     mockUseRbacForRequest.mockReturnValue(true);
-    getSavedObject.mockResolvedValue({ attributes: { historySequence: 3 } });
+    getSavedObject.mockResolvedValue({ attributes: {} });
   });
 
   it('skips the privileges check when security is disabled', async () => {
     mockUseRbacForRequest.mockReturnValue(false);
     getSavedObject.mockResolvedValue({ attributes: {} });
-    mockedGetClient.mockReturnValue({} as never);
+    const client = { getHistory: jest.fn().mockResolvedValue({ items: [] }) };
+    mockedGetClient.mockReturnValue(client as never);
     const res = httpServerMock.createResponseFactory();
     const result = await getChangeHistoryContext(getContext(false), req, res, 'dash-1');
 
     expect(hasPrivileges).not.toHaveBeenCalled();
-    expect(result).toEqual({ client: {}, spaceId: 'space-for-req-1' });
+    expect(result).toEqual({ client, spaceId: 'space-for-req-1', currentSequence: undefined });
   });
 
   it('returns a forbidden response without dashboard edit privileges', async () => {
@@ -134,8 +135,10 @@ describe('getChangeHistoryContext', () => {
     expect(result).toEqual({ error: unavailable });
   });
 
-  it('returns the client and the space of the request', async () => {
-    const client = {};
+  it('returns the client, the space of the request and the latest history sequence', async () => {
+    const client = {
+      getHistory: jest.fn().mockResolvedValue({ items: [{ object: { sequence: 3 } }] }),
+    };
     mockedGetClient.mockReturnValue(client as never);
     const res = httpServerMock.createResponseFactory();
     const result = await getChangeHistoryContext(getContext(true), req, res, 'dash-1');

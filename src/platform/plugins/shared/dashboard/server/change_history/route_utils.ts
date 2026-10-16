@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 
 import { getChangeHistoryClient } from './change_history_service';
+import { getLatestHistorySequence } from './util';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { securityService, spacesService } from '../kibana_services';
@@ -56,13 +57,11 @@ export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
   }
 
   // history is read with an internally privileged client, so access to the dashboard must be verified
-  let currentSequence: number | undefined;
   try {
-    const dashboard = await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
+    await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
       DASHBOARD_SAVED_OBJECT_TYPE,
       dashboardId
     );
-    currentSequence = dashboard.attributes?.historySequence;
   } catch (e) {
     if (SavedObjectsErrorHelpers.isNotFoundError(e)) return { error: res.notFound() };
     if (SavedObjectsErrorHelpers.isForbiddenError(e)) return { error: res.forbidden() };
@@ -77,5 +76,7 @@ export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
       error: res.customError({ statusCode: 503, body: 'Change history service is not ready' }),
     };
   }
+  // the dashboard exists, so its latest version is the current one
+  const currentSequence = await getLatestHistorySequence({ spaceId, dashboardId });
   return { client, spaceId, currentSequence };
 };

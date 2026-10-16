@@ -50,27 +50,38 @@ export const getHistorySnapshot = ({
 };
 
 /**
- * Sequence for a newly created dashboard. Deleting a dashboard does not delete its history, so a
- * dashboard recreated with the same ID continues after the latest existing version, keeping the
- * new versions ordered above the deleted dashboard's. Falls back to the initial sequence when there
- * is no history or it cannot be read.
+ * Sequence of the latest version in the dashboard's change history, which is the only source of
+ * version numbers: nothing is stored on the saved object, and history outlives it (deleting a
+ * dashboard does not delete its history). Undefined when there is no history or it cannot be read.
  */
-export const getCreateHistorySequence = async ({
+export const getLatestHistorySequence = async ({
   spaceId = 'default',
   dashboardId,
 }: {
   spaceId: string | undefined;
   dashboardId: string;
-}): Promise<number> => {
+}): Promise<number | undefined> => {
   try {
     const {
       items: [latest],
     } = await getChangeHistoryClient().getHistory(spaceId, 'dashboard', dashboardId, { size: 1 });
     const latestSequence = latest?.object.sequence;
-    return typeof latestSequence === 'number' ? latestSequence + 1 : INITIAL_HISTORY_SEQUENCE;
+    return typeof latestSequence === 'number' ? latestSequence : undefined;
   } catch {
-    return INITIAL_HISTORY_SEQUENCE;
+    return undefined;
   }
+};
+
+/**
+ * Sequence for the next version of a dashboard. Continuing after the latest version keeps new
+ * versions ordered above existing ones, including those of a deleted dashboard with the same ID.
+ */
+export const getNextHistorySequenceFromHistory = async (args: {
+  spaceId: string | undefined;
+  dashboardId: string;
+}): Promise<number> => {
+  const latest = await getLatestHistorySequence(args);
+  return latest === undefined ? INITIAL_HISTORY_SEQUENCE : latest + 1;
 };
 
 export const addToHistory = async ({
@@ -81,14 +92,16 @@ export const addToHistory = async ({
   timestamp,
   sequence,
   restoredFrom,
+  type = 'update',
 }: {
   ctx: RequestHandlerContext;
   spaceId: string | undefined;
   dashboardId: string;
   snapshot: DashboardState;
   timestamp: string;
-  sequence: { previous?: number; current: number };
+  sequence: number;
   restoredFrom?: number;
+  type?: 'update' | 'create' | 'delete';
 }) => {
   const core = await ctx.core;
   // getCurrentUser() returns null when security is disabled; attribute those changes to the system actor
@@ -100,12 +113,10 @@ export const addToHistory = async ({
     return;
   }
 
-  if (sequence.previous === sequence.current) return; // content is unchanged: no new version
-
   const change: ObjectChange = {
     objectType: 'dashboard',
     objectId: dashboardId,
-    sequence: sequence.current,
+    sequence,
     snapshot, // post-change state
   };
 
@@ -121,7 +132,7 @@ export const addToHistory = async ({
       : undefined;
 
     await client.log(change, {
-      action: 'dashboard_update',
+      action: `dashboard_${type}`,
       username: user?.username ?? '', // if no user, record without actor
       userProfileId: user?.profile_uid,
       spaceId,

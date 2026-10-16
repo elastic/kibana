@@ -23,11 +23,12 @@ import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
 import type { Operation } from '../types';
 import type { DashboardUpdateResponseBody } from './types';
+import { hasContentChanged } from '../../change_history/history_sequence';
 import {
-  getNextHistorySequence,
-  INITIAL_HISTORY_SEQUENCE,
-} from '../../change_history/history_sequence';
-import { addToHistory, getHistorySnapshot } from '../../change_history/util';
+  addToHistory,
+  getHistorySnapshot,
+  getNextHistorySequenceFromHistory,
+} from '../../change_history/util';
 
 export interface UpdateOptions extends Omit<CreateOptions, 'id'> {
   /** Sequence number of the history version this update restores */
@@ -129,18 +130,21 @@ export async function update(
     expectedVersion = existing.version;
   }
 
+  // Unchanged content creates no new version; otherwise continue from the history, which outlives the saved object
+  const hasChanged = hasContentChanged(existing, {
+    attributes: soAttributes,
+    references: soReferences,
+  });
+  const newSequence = hasChanged
+    ? await getNextHistorySequenceFromHistory({ spaceId, dashboardId: id })
+    : undefined;
+
   let savedObject: SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>;
   try {
     savedObject = await core.savedObjects.client.update<DashboardSavedObjectAttributes>(
       DASHBOARD_SAVED_OBJECT_TYPE,
       id,
-      {
-        ...soAttributes,
-        historySequence: getNextHistorySequence(existing, {
-          attributes: soAttributes,
-          references: soReferences,
-        }),
-      },
+      soAttributes,
       {
         references: soReferences,
         /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
@@ -154,16 +158,13 @@ export async function update(
       references: soReferences,
       strictValidationSchema,
     });
-    if (snapshot) {
+    if (snapshot && newSequence !== undefined) {
       await addToHistory({
         ctx: requestCtx,
         dashboardId: id,
         snapshot,
         spaceId,
-        sequence: {
-          previous: existing.attributes.historySequence,
-          current: savedObject.attributes.historySequence ?? INITIAL_HISTORY_SEQUENCE,
-        },
+        sequence: newSequence,
         timestamp: savedObject.updated_at ?? new Date(Date.now()).toISOString(),
         restoredFrom,
       });

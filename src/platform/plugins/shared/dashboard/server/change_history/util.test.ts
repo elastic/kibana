@@ -12,7 +12,7 @@ import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 import { getChangeHistoryClient } from './change_history_service';
 import { transformDashboardOut } from '../api/transforms';
-import { addToHistory, getCreateHistorySequence, getHistorySnapshot } from './util';
+import { addToHistory, getNextHistorySequenceFromHistory, getHistorySnapshot } from './util';
 
 jest.mock('./change_history_service');
 jest.mock('../api/transforms');
@@ -40,7 +40,7 @@ const baseArgs = {
   snapshot: { title: 'New' } as DashboardState,
 };
 
-describe('getCreateHistorySequence', () => {
+describe('getNextHistorySequenceFromHistory', () => {
   beforeEach(() => jest.resetAllMocks());
 
   it('continues after the latest existing sequence', async () => {
@@ -48,20 +48,26 @@ describe('getCreateHistorySequence', () => {
       getHistory: jest.fn().mockResolvedValue({ items: [{ object: { sequence: 2 } }] }),
     };
     mockedGetClient.mockReturnValue(client as never);
-    expect(await getCreateHistorySequence({ spaceId: 'default', dashboardId: 'dash-1' })).toBe(3);
+    expect(
+      await getNextHistorySequenceFromHistory({ spaceId: 'default', dashboardId: 'dash-1' })
+    ).toBe(3);
   });
 
   it('starts at the initial sequence when there is no history', async () => {
     const client = { getHistory: jest.fn().mockResolvedValue({ items: [] }) };
     mockedGetClient.mockReturnValue(client as never);
-    expect(await getCreateHistorySequence({ spaceId: 'default', dashboardId: 'dash-1' })).toBe(1);
+    expect(
+      await getNextHistorySequenceFromHistory({ spaceId: 'default', dashboardId: 'dash-1' })
+    ).toBe(1);
   });
 
   it('starts at the initial sequence when the client is unavailable', async () => {
     mockedGetClient.mockImplementation(() => {
       throw new Error('not ready');
     });
-    expect(await getCreateHistorySequence({ spaceId: 'default', dashboardId: 'dash-1' })).toBe(1);
+    expect(
+      await getNextHistorySequenceFromHistory({ spaceId: 'default', dashboardId: 'dash-1' })
+    ).toBe(1);
   });
 });
 
@@ -71,7 +77,7 @@ describe('addToHistory', () => {
   it('logs without an actor when there is no authenticated user (security disabled)', async () => {
     const client = getClient();
     mockedGetClient.mockReturnValue(client as never);
-    await addToHistory({ ...baseArgs, ctx: getContext(null), sequence: { current: 1 } });
+    await addToHistory({ ...baseArgs, ctx: getContext(null), sequence: 1 });
     expect(client.log).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ username: '', userProfileId: undefined })
@@ -83,21 +89,14 @@ describe('addToHistory', () => {
       throw new Error('not ready');
     });
     await expect(
-      addToHistory({ ...baseArgs, ctx: getContext(), sequence: { current: 1 } })
+      addToHistory({ ...baseArgs, ctx: getContext(), sequence: 1 })
     ).resolves.toBeUndefined();
-  });
-
-  it('does not log when the sequence did not change', async () => {
-    const client = getClient();
-    mockedGetClient.mockReturnValue(client as never);
-    await addToHistory({ ...baseArgs, ctx: getContext(), sequence: { previous: 3, current: 3 } });
-    expect(client.log).not.toHaveBeenCalled();
   });
 
   it('logs the first version without a change count', async () => {
     const client = getClient();
     mockedGetClient.mockReturnValue(client as never);
-    await addToHistory({ ...baseArgs, ctx: getContext(), sequence: { current: 1 } });
+    await addToHistory({ ...baseArgs, ctx: getContext(), sequence: 1 });
 
     expect(client.log).toHaveBeenCalledWith(
       {
@@ -116,10 +115,21 @@ describe('addToHistory', () => {
     );
   });
 
+  it('logs deletes with their sequence', async () => {
+    const client = getClient();
+    mockedGetClient.mockReturnValue(client as never);
+    await addToHistory({ ...baseArgs, ctx: getContext(), sequence: 4, type: 'delete' });
+
+    expect(client.log).toHaveBeenCalledWith(
+      expect.objectContaining({ objectId: 'dash-1', sequence: 4 }),
+      expect.objectContaining({ action: 'dashboard_delete' })
+    );
+  });
+
   it('stores the change count compared with the previous snapshot', async () => {
     const client = getClient({ title: 'Old' } as DashboardState);
     mockedGetClient.mockReturnValue(client as never);
-    await addToHistory({ ...baseArgs, ctx: getContext(), sequence: { previous: 1, current: 2 } });
+    await addToHistory({ ...baseArgs, ctx: getContext(), sequence: 2 });
 
     expect(client.log.mock.calls[0][1].data.metadata).toEqual({ changeCount: 1 });
     expect(client.log.mock.calls[0][1].refresh).toBeUndefined();
@@ -131,7 +141,7 @@ describe('addToHistory', () => {
     await addToHistory({
       ...baseArgs,
       ctx: getContext(),
-      sequence: { previous: 4, current: 5 },
+      sequence: 5,
       restoredFrom: 2,
     });
 
@@ -145,7 +155,7 @@ describe('addToHistory', () => {
     client.log.mockRejectedValue(new Error('boom'));
     mockedGetClient.mockReturnValue(client as never);
     await expect(
-      addToHistory({ ...baseArgs, ctx: getContext(), sequence: { current: 1 } })
+      addToHistory({ ...baseArgs, ctx: getContext(), sequence: 1 })
     ).resolves.toBeUndefined();
   });
 });
