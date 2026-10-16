@@ -228,7 +228,8 @@ describe('useBulkAttackCaseItems', () => {
       {
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
         attachmentId: ['alert-1', 'alert-2'],
-        metadata: { index: ALERTS_INDEX },
+        // The attack that brought these alerts, so removing it later can take them back out.
+        metadata: { index: ALERTS_INDEX, sourceAttachmentIds: ['attack-1'] },
       },
     ];
 
