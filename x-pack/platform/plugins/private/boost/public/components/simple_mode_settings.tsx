@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -20,16 +20,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataStreamsWindowId, IndicesPresetId, SimpleModeDefaults } from '../../common/types';
-import { useBoostServices } from '../hooks/use_boost_services';
-import { useUpdateSimpleDefaults } from '../hooks/use_boost_state';
-import { PROVISIONING_NOTE } from '../translations';
+import type { SimpleModeDraft } from './simple_mode_draft';
 import { PresetCards } from './preset_cards';
 import { TitleWithIcon } from './title_with_icon';
 import { DATA_STREAMS_WINDOW_OPTIONS, INDICES_PRESET_OPTIONS } from './preset_options';
 
 interface SimpleModeSettingsProps {
-  savedDefaults: SimpleModeDefaults;
+  /** The defaults as edited, which the page keeps so it can offer to save them. */
+  simpleDraft: SimpleModeDraft;
   canEdit: boolean;
   onEnableAdvancedMode: () => void;
   isUpdatingMode: boolean;
@@ -43,48 +41,17 @@ const NO_UNSAVED_CHANGES = i18n.translate('xpack.boost.simpleMode.noUnsavedChang
 const stretchColumnsCss = css({ alignItems: 'stretch' });
 
 export const SimpleModeSettings = ({
-  savedDefaults,
+  simpleDraft: { draft, isDirty, isSaving, setIndices, setDataStreamsWindow, discard, save },
   canEdit,
   onEnableAdvancedMode,
   isUpdatingMode,
 }: SimpleModeSettingsProps) => {
-  const { notifications } = useBoostServices();
-  const { mutate: saveDefaults, isLoading: isSaving } = useUpdateSimpleDefaults();
-
-  const [indicesPreset, setIndicesPreset] = useState<IndicesPresetId>(savedDefaults.indices);
-  const [dataStreamsWindow, setDataStreamsWindow] = useState<DataStreamsWindowId>(
-    savedDefaults.data_streams.window
-  );
-
-  const resetDraft = useCallback(() => {
-    setIndicesPreset(savedDefaults.indices);
-    setDataStreamsWindow(savedDefaults.data_streams.window);
-  }, [savedDefaults]);
-
-  // Saved defaults change after a save or a reset, so the draft follows them.
-  useEffect(() => resetDraft(), [resetDraft]);
-
-  const draft: SimpleModeDefaults = {
-    indices: indicesPreset,
-    data_streams: { window: dataStreamsWindow },
-  };
-  const isDirty =
-    draft.indices !== savedDefaults.indices ||
-    draft.data_streams.window !== savedDefaults.data_streams.window;
-
   // Shown on the aria-disabled footer buttons; the wrapper stays mounted so saving keeps focus.
   const noChangesTooltip = isDirty ? undefined : NO_UNSAVED_CHANGES;
 
-  const onSave = () =>
-    saveDefaults(draft, {
-      onSuccess: () =>
-        notifications.toasts.addSuccess({
-          title: i18n.translate('xpack.boost.simpleMode.savedToast', {
-            defaultMessage: 'Boost defaults saved',
-          }),
-          text: PROVISIONING_NOTE,
-        }),
-    });
+  if (!draft) {
+    return null;
+  }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -118,8 +85,8 @@ export const SimpleModeSettings = ({
               defaultMessage: 'Default boost for indices',
             })}
             options={INDICES_PRESET_OPTIONS}
-            selectedId={indicesPreset}
-            onChange={setIndicesPreset}
+            selectedId={draft.indices}
+            onChange={setIndices}
             disabled={!canEdit || isSaving}
           />
         </EuiDescribedFormGroup>
@@ -159,7 +126,7 @@ export const SimpleModeSettings = ({
               defaultMessage: 'Default boosted window for data streams',
             })}
             options={DATA_STREAMS_WINDOW_OPTIONS}
-            selectedId={dataStreamsWindow}
+            selectedId={draft.data_streams.window}
             onChange={setDataStreamsWindow}
             disabled={!canEdit || isSaving}
           />
@@ -204,7 +171,7 @@ export const SimpleModeSettings = ({
                   <EuiToolTip content={noChangesTooltip}>
                     <EuiButtonEmpty
                       size="s"
-                      onClick={resetDraft}
+                      onClick={discard}
                       isDisabled={!isDirty || isSaving}
                       hasAriaDisabled
                       data-test-subj="discardSimpleDefaults"
@@ -220,7 +187,7 @@ export const SimpleModeSettings = ({
                     <EuiButton
                       fill
                       size="s"
-                      onClick={onSave}
+                      onClick={() => save()}
                       isLoading={isSaving}
                       isDisabled={!isDirty}
                       hasAriaDisabled

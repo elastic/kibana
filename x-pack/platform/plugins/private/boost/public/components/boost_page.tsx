@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../../common/constants';
 import type { ModeSwitchChange } from '../../common/mode_switch';
 import { getModeSwitchChanges } from '../../common/mode_switch';
-import type { BoostMode } from '../../common/types';
+import type { BoostMode, BoostState } from '../../common/types';
 import { useBoostServices } from '../hooks/use_boost_services';
 import { useBoostState, useUpdateMode } from '../hooks/use_boost_state';
 import { BOOST_DOCS_URL } from '../doc_links';
@@ -28,6 +28,8 @@ import {
 import { ProfilesTab } from './profiles/profiles_tab';
 import { RulesTab } from './rules/rules_tab';
 import { SimpleModeSettings } from './simple_mode_settings';
+import { useSimpleModeDraft } from './simple_mode_draft';
+import { UnsavedChangesModal } from './mode_switch/unsaved_changes_modal';
 
 type AdvancedTab = 'profiles' | 'rules';
 
@@ -65,6 +67,8 @@ export const BoostPage = () => {
   const { data: state, error, refetch } = useBoostState();
   const { mutate: updateMode, isLoading: isUpdatingMode } = useUpdateMode();
   const [pendingModeSwitch, setPendingModeSwitch] = useState<PendingModeSwitch>();
+  const simpleDraft = useSimpleModeDraft(state?.settings.simple);
+  const [isConfirmingUnsavedChanges, setIsConfirmingUnsavedChanges] = useState(false);
 
   useEffect(() => {
     appParams.setBreadcrumbs([{ text: BOOST_APP_TITLE }]);
@@ -117,10 +121,10 @@ export const BoostPage = () => {
     });
 
   // A switch that changes any index or data stream's profile is confirmed first, unless the user
-  // chose to skip that, in which case a toast says what changed.
-  const onModeChange = (checked: boolean) => {
-    const mode: BoostMode = checked ? 'advanced' : 'simple';
-    const changes = getModeSwitchChanges(state, mode);
+  // chose to skip that, in which case a toast says what changed. The changes are worked out from
+  // the state given, which is the newly saved one after saving simple-mode changes.
+  const requestModeSwitch = (mode: BoostMode, currentState: BoostState) => {
+    const changes = getModeSwitchChanges(currentState, mode);
     if (changes.length === 0) {
       switchMode(mode);
       return;
@@ -143,6 +147,15 @@ export const BoostPage = () => {
           text: getChangedTargetsMessage(changes),
         }),
     });
+  };
+
+  // Turning on advanced mode would lose unsaved simple-mode changes, so it asks about them first.
+  const onModeChange = (checked: boolean) => {
+    if (checked && simpleDraft.isDirty) {
+      setIsConfirmingUnsavedChanges(true);
+      return;
+    }
+    requestModeSwitch(checked ? 'advanced' : 'simple', state);
   };
 
   return (
@@ -174,7 +187,7 @@ export const BoostPage = () => {
       <EuiPageSection paddingSize="none" color="transparent" restrictWidth>
         {!isAdvanced && (
           <SimpleModeSettings
-            savedDefaults={state.settings.simple}
+            simpleDraft={simpleDraft}
             canEdit={canEdit}
             onEnableAdvancedMode={() => onModeChange(true)}
             isUpdatingMode={isUpdatingMode}
@@ -197,6 +210,26 @@ export const BoostPage = () => {
           />
         )}
       </EuiPageSection>
+
+      {isConfirmingUnsavedChanges && simpleDraft.draft && (
+        <UnsavedChangesModal
+          savedDefaults={state.settings.simple}
+          draft={simpleDraft.draft}
+          isSaving={simpleDraft.isSaving}
+          onCancel={() => setIsConfirmingUnsavedChanges(false)}
+          onDiscard={() => {
+            simpleDraft.discard();
+            setIsConfirmingUnsavedChanges(false);
+            requestModeSwitch('advanced', state);
+          }}
+          onSave={() =>
+            simpleDraft.save((savedState) => {
+              setIsConfirmingUnsavedChanges(false);
+              requestModeSwitch('advanced', savedState);
+            })
+          }
+        />
+      )}
 
       {pendingModeSwitch && (
         <ModeSwitchModal
