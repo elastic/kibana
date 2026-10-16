@@ -1,5 +1,5 @@
 {
-  "sha1": "80865eb253f5e23b8118813c298373503a05adf7",
+  "sha1": "6b10770779b1491cdae03f8b7171807530d3b61e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/endpoint_analysis.spec.ts",
-        "line": 257,
-        "column": 5
+        "line": 272,
+        "column": 26
       }
     },
     {
@@ -100,6 +100,48 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_coverage.spec.ts",
         "line": 74,
         "column": 14
+      }
+    },
+    {
+      "id": "3ec923da60545bd-d9a9d259fe3fb56",
+      "title": "AlertZero e2e - rule tuning tunes a noisy rule with an exception scoped to the FP pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
+        "line": 638,
+        "column": 11
+      }
+    },
+    {
+      "id": "3ec923da60545bd-5e966f521a25c6b",
+      "title": "AlertZero e2e - rule tuning renders the false-positive rate rounded (security-team#19992)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
+        "line": 545,
+        "column": 27
+      }
+    },
+    {
+      "id": "3ec923da60545bd-cce3f511e6a2f92",
+      "title": "AlertZero e2e - rule tuning keeps alerting on a true positive from another user after the tuning",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
+        "line": 687,
+        "column": 29
       }
     },
     {
