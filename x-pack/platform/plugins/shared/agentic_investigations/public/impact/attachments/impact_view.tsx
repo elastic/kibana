@@ -23,6 +23,7 @@ import {
   GroupedAttachmentList,
   GroupedAttachmentRow,
   impactEntityFlyoutType,
+  ShowMoreFooter,
   type GroupedAttachmentRowAction,
   type ImpactEntityTarget,
 } from '@kbn/agentic-investigations-common';
@@ -144,52 +145,48 @@ const EntityList = ({
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_ENTITIES);
   const hiddenCount = Math.max(0, entities.length - visibleCount);
   const canCollapse = visibleCount > INITIAL_VISIBLE_ENTITIES;
-  const nextBatch = Math.min(ENTITIES_PER_SHOW_MORE, hiddenCount);
 
   return (
-    <>
-      <GroupedAttachmentList data-test-subj="investigationImpactEntities">
-        {entities.slice(0, visibleCount).map((entity) => (
-          <ImpactEntityRow key={entity.id} entity={entity} onOpenEntity={onOpenEntity} />
-        ))}
-      </GroupedAttachmentList>
+    <GroupedAttachmentList data-test-subj="investigationImpactEntities">
+      {entities.slice(0, visibleCount).map((entity) => (
+        <ImpactEntityRow key={entity.id} entity={entity} onOpenEntity={onOpenEntity} />
+      ))}
+      {/* A row of the same list, like the queue's footer, so it sits inside the box under a rule. */}
       {(hiddenCount > 0 || canCollapse) && (
-        <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
-          {hiddenCount > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                flush="left"
-                onClick={() => setVisibleCount((count) => count + ENTITIES_PER_SHOW_MORE)}
-                data-test-subj="investigationImpactEntitiesShowMore"
-              >
-                {i18n.translate('xpack.agenticInvestigations.impact.attachments.showMoreEntities', {
-                  defaultMessage: 'Show {count} more ({hidden} hidden)',
-                  values: { count: nextBatch, hidden: hiddenCount },
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-          {canCollapse && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                flush="left"
-                onClick={() => setVisibleCount(INITIAL_VISIBLE_ENTITIES)}
-                data-test-subj="investigationImpactEntitiesShowFewer"
-              >
-                {i18n.translate(
-                  'xpack.agenticInvestigations.impact.attachments.showFewerEntities',
-                  {
-                    defaultMessage: 'Show fewer',
-                  }
-                )}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        <li>
+          <EuiFlexGroup gutterSize="none" justifyContent="center" responsive={false}>
+            {hiddenCount > 0 && (
+              <EuiFlexItem grow={false}>
+                <ShowMoreFooter
+                  label={i18n.translate(
+                    'xpack.agenticInvestigations.impact.attachments.showMoreEntities',
+                    {
+                      defaultMessage: 'Show more ({count})',
+                      values: { count: hiddenCount },
+                    }
+                  )}
+                  onClick={() => setVisibleCount((count) => count + ENTITIES_PER_SHOW_MORE)}
+                  data-test-subj="investigationImpactEntitiesShowMore"
+                />
+              </EuiFlexItem>
+            )}
+            {canCollapse && (
+              <EuiFlexItem grow={false}>
+                <ShowMoreFooter
+                  label={i18n.translate(
+                    'xpack.agenticInvestigations.impact.attachments.showFewerEntities',
+                    { defaultMessage: 'Show fewer' }
+                  )}
+                  iconType="chevronSingleUp"
+                  onClick={() => setVisibleCount(INITIAL_VISIBLE_ENTITIES)}
+                  data-test-subj="investigationImpactEntitiesShowFewer"
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </li>
       )}
-    </>
+    </GroupedAttachmentList>
   );
 };
 

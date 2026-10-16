@@ -75,7 +75,7 @@ describe('ImpactView', () => {
       expect(rowCount()).toBe(5);
       expect(screen.queryByTestId('investigationImpactEntitiesShowFewer')).not.toBeInTheDocument();
       expect(screen.getByTestId('investigationImpactEntitiesShowMore')).toHaveTextContent(
-        'Show 10 more (35 hidden)'
+        'Show more (35)'
       );
 
       fireEvent.click(screen.getByTestId('investigationImpactEntitiesShowMore'));
@@ -85,7 +85,7 @@ describe('ImpactView', () => {
       expect(rowCount()).toBe(35);
       // Only five left: the button offers exactly what remains.
       expect(screen.getByTestId('investigationImpactEntitiesShowMore')).toHaveTextContent(
-        'Show 5 more (5 hidden)'
+        'Show more (5)'
       );
       fireEvent.click(screen.getByTestId('investigationImpactEntitiesShowMore'));
       expect(rowCount()).toBe(40);

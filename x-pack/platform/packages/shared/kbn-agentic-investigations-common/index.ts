@@ -69,6 +69,8 @@ export {
   type ProposedActionsListProps,
 } from './src/components/details/proposed_actions_list';
 
+export { ShowMoreFooter } from './src/components/show_more_footer';
+
 export {
   FlyoutGroupedAttachments,
   createFlyoutGroupedAttachmentsRegistry,
