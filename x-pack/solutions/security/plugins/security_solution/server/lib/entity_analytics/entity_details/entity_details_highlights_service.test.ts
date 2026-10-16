@@ -150,7 +150,9 @@ describe('entityDetailsHighlightsServiceFactory.getV2Data', () => {
         2,
         expect.objectContaining({
           filter: { term: { 'entity.relationships.resolution.resolved_to': 'user:carol' } },
-          size: HIGHLIGHTS_MAX_GROUP_MEMBERS,
+          // The target takes one of the member slots.
+          size: HIGHLIGHTS_MAX_GROUP_MEMBERS - 1,
+          sort: [{ 'entity.risk.calculated_score_norm': 'desc' }],
         })
       );
     });
@@ -164,13 +166,12 @@ describe('entityDetailsHighlightsServiceFactory.getV2Data', () => {
 
       // Only the target's (resolution) score, never the alias' own score.
       expect(result.riskScore).toEqual([expect.objectContaining({ score: ['71.25'] })]);
-      // Identical criticality records collapse to one.
+      // A single criticality record is returned for the group.
       expect(result.assetCriticality).toEqual([{ 'asset.criticality': ['High Impact'] }]);
       // Anomalies are merged and the record both members matched appears once.
       expect(result.anomalies?.map((anomaly) => anomaly.id)).toEqual(['job-a-1', 'job-a-2']);
       expect(result.resolutionGroup).toEqual({
         member_count: 2,
-        truncated: false,
         members: ['carol', 'carol.alias'],
       });
       // Users have no vulnerabilities section.
@@ -197,21 +198,20 @@ describe('entityDetailsHighlightsServiceFactory.getV2Data', () => {
       expect(members.map((member) => replacements[member])).toEqual(['carol', 'carol.alias']);
     });
 
-    it('keeps at most HIGHLIGHTS_MAX_GROUP_MEMBERS members and flags truncation', async () => {
-      const aliases = Array.from({ length: HIGHLIGHTS_MAX_GROUP_MEMBERS }, (_, index) =>
-        makeEnrichedEntity({ id: `user:alias-${index}`, name: `alias-${index}` })
-      );
+    it('returns only the highest criticality in the group', async () => {
+      const lowerAlias = makeEnrichedEntity({ id: 'user:a', name: 'a', criticality: 'low_impact' });
+      const higherAlias = makeEnrichedEntity({
+        id: 'user:b',
+        name: 'b',
+        criticality: 'extreme_impact',
+      });
       mockGetEnrichedEntities
         .mockResolvedValueOnce({ entities: [target] })
-        .mockResolvedValueOnce({ entities: aliases });
+        .mockResolvedValueOnce({ entities: [lowerAlias, higherAlias] });
 
       const result = await buildService().getV2Data({ ...getDataOpts, mode: 'resolved' });
 
-      expect(result.resolutionGroup).toEqual(
-        expect.objectContaining({ member_count: HIGHLIGHTS_MAX_GROUP_MEMBERS, truncated: true })
-      );
-      expect(result.resolutionGroup?.members).toHaveLength(HIGHLIGHTS_MAX_GROUP_MEMBERS);
-      expect(result.resolutionGroup?.members[0]).toBe('carol');
+      expect(result.assetCriticality).toEqual([{ 'asset.criticality': ['Extreme Impact'] }]);
     });
 
     it('sums host vulnerability totals across members', async () => {

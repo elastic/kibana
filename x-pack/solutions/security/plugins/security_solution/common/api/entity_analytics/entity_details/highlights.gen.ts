@@ -95,12 +95,6 @@ export const EntityDetailsHighlightsResponse = lazySchema(() =>
                 'Number of group members (target included) whose signals are in the summary.'
               ),
             /**
-             * True when the group has more members than were included.
-             */
-            truncated: z
-              .boolean()
-              .describe('True when the group has more members than were included.'),
-            /**
              * Anonymized identifiers of the included members, target first.
              */
             members: z

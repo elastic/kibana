@@ -16,6 +16,7 @@ import type {
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
   SearchHit,
+  SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { Entity } from '@kbn/entity-store/common';
@@ -33,9 +34,9 @@ interface GetEnrichedEntitiesParams {
   filter?: QueryDslQueryContainer | QueryDslQueryContainer[];
   fields?: QueryDslFieldAndFormat[];
   size?: number;
+  sort?: SortCombinations[];
   searchAfter?: Array<string | number>;
   getAlertInputsForRiskScore?: boolean;
-  /** Restrict each entity's risk score to one `score_type`; any type (latest first) when omitted. */
   riskScoreType?: RiskScoreType;
 }
 
@@ -73,6 +74,7 @@ export class EnrichEntityService {
     filter,
     fields,
     size,
+    sort,
     searchAfter,
     getAlertInputsForRiskScore = true,
     riskScoreType,
@@ -81,6 +83,7 @@ export class EnrichEntityService {
     const { entities, fields: entityFields } = await this.opts.entityStoreClient.listEntities({
       filter,
       size,
+      ...(sort ? { sort } : {}),
       searchAfter,
       ...(fields ? { fields } : {}),
     });

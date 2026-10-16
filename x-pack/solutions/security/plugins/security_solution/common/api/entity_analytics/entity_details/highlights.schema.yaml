@@ -94,9 +94,6 @@ paths:
                           member_count:
                             type: integer
                             description: Number of group members (target included) whose signals are in the summary.
-                          truncated:
-                            type: boolean
-                            description: True when the group has more members than were included.
                           members:
                             type: array
                             description: Anonymized identifiers of the included members, target first.
@@ -104,7 +101,6 @@ paths:
                               type: string
                         required:
                           - member_count
-                          - truncated
                           - members
                     description: The highlights of the entity.
                   replacements:
