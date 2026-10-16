@@ -50,7 +50,7 @@ class WorkspaceServiceImpl implements WorkspaceService {
         logger,
         esClient: elasticsearch.client.asScoped(request).asInternalUser,
       }),
-      space: getCurrentSpaceId({ request, spaces }),
+      space: getCurrentSpaceId({ request }),
     });
 
     return {

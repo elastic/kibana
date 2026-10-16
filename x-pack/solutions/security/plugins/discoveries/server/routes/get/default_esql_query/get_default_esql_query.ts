@@ -36,10 +36,7 @@ export const handleGetDefaultEsqlQuery = async ({
   const { coreStart, pluginsStart } = await getStartServices();
   const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
 
-  const spaceId = getSpaceId({
-    request,
-    spaces: pluginsStart.spaces?.spacesService,
-  });
+  const spaceId = getSpaceId({ request });
 
   const query = await buildDefaultEsqlQuery({
     esClient,

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { EXECUTION_HISTORY_DEFAULT_PER_PAGE } from '@kbn/alerting-v2-schemas';
 import type { ActionPolicyClient } from '../action_policy_client/action_policy_client';
 import type { RulesClient } from '../rules_client';
@@ -177,19 +179,18 @@ describe('ActionPolicyExecutionHistoryClient', () => {
     });
 
     it('passes the request-scoped spaceId to event log + workflows lookup', async () => {
-      const { client, eventLogService, workflowsManagement, spaces } = createMocks();
-      (spaces.spacesService.getSpaceId as jest.Mock).mockReturnValue('my-space');
+      const { client, eventLogService, workflowsManagement } = createMocks();
       eventLogService.findActionPolicyExecutionEvents.mockResolvedValue({
         events: [buildEvent({ policyId: 'p-1', ruleIds: ['r-1'], workflowIds: ['w-1'] })],
         page: 1,
         perPage: 100,
         total: 1,
       } as any);
-      const request = httpServerMock.createKibanaRequest();
+      const request = kibanaRequestFactory(
+        httpServerMock.createRawRequest({ spaceId: asSpaceId('my-space') })
+      );
 
       await client.listExecutionHistory({ request });
-
-      expect(spaces.spacesService.getSpaceId).toHaveBeenCalledWith(request);
       expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
         expect.objectContaining({ spaceId: 'my-space' })
       );

@@ -18,7 +18,7 @@ import { idParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerDeleteWorkflowRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit } = deps;
+  const { router, api, audit } = deps;
   router.versioned
     .delete({
       path: '/api/workflows/workflow/{id}',
@@ -62,7 +62,7 @@ export function registerDeleteWorkflowRoute(deps: RouteDependencies) {
         const { force, acknowledgeAclLoss } = request.query;
         try {
           const { id } = request.params;
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const result = await api.deleteWorkflows([id], spaceId, request, {
             force,
             acknowledgeAclLoss,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -148,12 +149,12 @@ describe('EntityStorePlugin entity definition registry', () => {
 
   it('derives the namespace from the request space', () => {
     const startContract = startPlugin();
-    const request = httpServerMock.createKibanaRequest();
-    jest.mocked(startPlugins.spaces.spacesService.getSpaceId).mockReturnValue(asSpaceId('space-a'));
+    const request = kibanaRequestFactory(
+      httpServerMock.createRawRequest({ spaceId: asSpaceId('space-a') })
+    );
 
     const client = startContract.getEntityDefinitionsClient(request);
 
     expect(client.namespace).toBe('space-a');
-    expect(startPlugins.spaces.spacesService.getSpaceId).toHaveBeenCalledWith(request);
   });
 });

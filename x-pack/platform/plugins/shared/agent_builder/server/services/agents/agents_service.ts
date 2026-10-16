@@ -133,7 +133,7 @@ export class AgentsService {
     });
 
     const getAgentClient = async ({ request }: { request: KibanaRequest }) => {
-      const space = getCurrentSpaceId({ request, spaces });
+      const space = getCurrentSpaceId({ request });
       return createClient({
         elasticsearch,
         logger,
@@ -145,7 +145,7 @@ export class AgentsService {
     };
 
     const getRegistry = async ({ request }: { request: KibanaRequest }) => {
-      const space = getCurrentSpaceId({ request, spaces });
+      const space = getCurrentSpaceId({ request });
       return createAgentRegistry({
         request,
         spaceId: space,
@@ -179,7 +179,7 @@ export class AgentsService {
       agent,
       request,
     }) => {
-      const spaceId = getCurrentSpaceId({ request, spaces });
+      const spaceId = getCurrentSpaceId({ request });
       return configurationResolver.resolveConfig({
         agentType: agent.type,
         configuration: agent.configuration,
@@ -191,7 +191,7 @@ export class AgentsService {
       agentType,
       request,
     }) => {
-      const spaceId = getCurrentSpaceId({ request, spaces });
+      const spaceId = getCurrentSpaceId({ request });
       return configurationResolver.resolveBase(agentType, { request, spaceId });
     };
 

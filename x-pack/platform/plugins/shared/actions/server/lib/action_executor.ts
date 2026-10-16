@@ -170,7 +170,7 @@ export class ActionExecutor {
     } = this.actionExecutorContext!;
 
     const services = getServices(request);
-    const spaceId = spaceIdOverride ?? (spaces && spaces.getSpaceId(request));
+    const spaceId = spaceIdOverride ?? (spaces && request.spaceId);
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
     const authorization = getActionsAuthorizationWithRequest(request);
     const currentUser = security?.authc.getCurrentUser(request);
@@ -280,7 +280,7 @@ export class ActionExecutor {
   }) {
     const { spaces, eventLogger } = this.actionExecutorContext!;
 
-    const spaceId = spaceIdOverride ?? (spaces && spaces.getSpaceId(request));
+    const spaceId = spaceIdOverride ?? (spaces && request.spaceId);
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
     if (!this.actionInfo || this.actionInfo.actionId !== actionId) {

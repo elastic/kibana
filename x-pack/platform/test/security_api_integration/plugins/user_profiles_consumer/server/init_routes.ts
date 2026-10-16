@@ -61,7 +61,7 @@ export function initRoutes(core: CoreSetup<PluginStartDependencies>) {
         size: request.body.size,
         requiredPrivileges: request.body.requiredAppPrivileges
           ? {
-              spaceId: pluginDeps.spaces.spacesService.getSpaceId(request),
+              spaceId: request.spaceId,
               privileges: {
                 kibana: request.body.requiredAppPrivileges.map((appPrivilege) =>
                   pluginDeps.security.authz.actions.app.get(appPrivilege)

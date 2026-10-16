@@ -15,7 +15,7 @@ import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerGetSchemaRoute({ router, api, spaces }: RouteDependencies) {
+export function registerGetSchemaRoute({ router, api }: RouteDependencies) {
   router.versioned
     .get({
       path: '/api/workflows/schema',
@@ -51,7 +51,7 @@ export function registerGetSchemaRoute({ router, api, spaces }: RouteDependencie
       withAvailabilityCheck(async (context, request, response) => {
         try {
           const { loose } = request.query;
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const jsonSchema = await api.getWorkflowJsonSchema({ loose }, spaceId, request);
           if (!jsonSchema) {
             return response.customError({

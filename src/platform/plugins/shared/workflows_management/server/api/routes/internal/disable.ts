@@ -12,7 +12,7 @@ import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { WORKFLOW_UPDATE_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerDisableAllWorkflowsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerDisableAllWorkflowsRoute({ router, api }: RouteDependencies) {
   router.versioned
     .post({
       path: '/internal/workflows/disable',
@@ -25,7 +25,7 @@ export function registerDisableAllWorkflowsRoute({ router, api, spaces }: RouteD
         validate: false,
       },
       withAvailabilityCheck(async (_context, request, response) => {
-        const spaceId = spaces.getSpaceId(request);
+        const spaceId = request.spaceId;
         const result = await api.disableAllWorkflows(spaceId, request);
         return response.ok({
           body: result,

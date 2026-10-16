@@ -23,7 +23,6 @@
     "@kbn/inference-plugin",
     "@kbn/spaces-plugin",
     "@kbn/security-plugin",
-    "@kbn/core-saved-objects-utils-server",
     "@kbn/config-schema",
     "@kbn/zod",
     "@kbn/zod-helpers",

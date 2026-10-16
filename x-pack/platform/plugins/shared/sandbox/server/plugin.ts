@@ -13,18 +13,12 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SandboxPluginConfig } from './config';
 import { SandboxApiClient } from './grpc_client';
 import { SandboxSessionImpl } from './sandbox_session';
 import type { SandboxSession } from './sandbox_session';
 import { readTlsCredentials } from './tls_credentials';
 import type { SandboxTlsCredentials } from './tls_credentials';
-
-interface SandboxPluginStartDeps {
-  spaces?: SpacesPluginStart;
-}
 
 /**
  * Setup contract for the Sandbox plugin.
@@ -94,13 +88,10 @@ export interface SandboxPluginStart {
   getSessionForSpace(spaceId: string, sessionId: string): SandboxSession;
 }
 
-export class SandboxPlugin
-  implements Plugin<SandboxPluginSetup, SandboxPluginStart, {}, SandboxPluginStartDeps>
-{
+export class SandboxPlugin implements Plugin<SandboxPluginSetup, SandboxPluginStart, {}, {}> {
   private readonly logger: Logger;
   private apiClient?: SandboxApiClient;
   private readonly sessions = new Map<string, SandboxSession>();
-  private spaces?: SpacesPluginStart;
   private tlsCredentials?: SandboxTlsCredentials;
 
   constructor(private readonly ctx: PluginInitializerContext<SandboxPluginConfig>) {
@@ -122,8 +113,7 @@ export class SandboxPlugin
     };
   }
 
-  start(_core: CoreStart, { spaces }: SandboxPluginStartDeps): SandboxPluginStart {
-    this.spaces = spaces;
+  start(_core: CoreStart): SandboxPluginStart {
     const pluginConfig = this.ctx.config.get();
     const { tlsCredentials } = this;
 
@@ -169,7 +159,7 @@ export class SandboxPlugin
 
     return {
       getSession: (request, sessionId) => {
-        const spaceId = this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+        const spaceId = request.spaceId;
         return getOrCreateSession(spaceId, sessionId);
       },
       getSessionForSpace: (spaceId, sessionId) => getOrCreateSession(spaceId, sessionId),

@@ -6,7 +6,6 @@
  */
 
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type {
   AutomaticImportPluginApiRequestHandlerContext,
   AutomaticImportPluginCoreSetupDependencies,
@@ -49,8 +48,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     const [coreStart, startPlugins] = await core.getStartServices();
     const coreContext = await context.core;
 
-    const getSpaceId = (): string =>
-      startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_NAMESPACE_STRING;
+    const getSpaceId = (): string => request.spaceId;
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
     const esClient = coreContext.elasticsearch.client.asCurrentUser;

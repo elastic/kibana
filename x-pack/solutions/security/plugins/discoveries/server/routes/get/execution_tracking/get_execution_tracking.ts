@@ -99,10 +99,7 @@ export const registerGetExecutionTrackingRoute = (
             });
           }
 
-          const spaceId = getSpaceId({
-            request,
-            spaces: pluginsStart.spaces?.spacesService,
-          });
+          const spaceId = getSpaceId({ request });
 
           const tracking = await getWorkflowExecutionsTracking({
             esClient,

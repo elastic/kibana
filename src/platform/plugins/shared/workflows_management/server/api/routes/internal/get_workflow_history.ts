@@ -34,7 +34,7 @@ export const workflowHistoryQuerySchema = schema.object({
 });
 
 export function registerGetWorkflowHistoryRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit } = deps;
+  const { router, api, audit } = deps;
   router.versioned
     .get({
       path: '/internal/workflows/workflow/{id}/history',
@@ -56,7 +56,7 @@ export function registerGetWorkflowHistoryRoute(deps: RouteDependencies) {
       withAvailabilityCheck(async (context, request, response) => {
         try {
           const { id } = request.params;
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const page = request.query.page ?? 1;
           const perPage = request.query.per_page ?? 20;
           const history = await api.getHistoryForWorkflow(id, spaceId, { page, perPage, request });

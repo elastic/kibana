@@ -42,7 +42,7 @@ const executionTypeSchema = schema.oneOf(
 
 const EXECUTION_QUERY_PARAM_AVAILABILITY = { stability: 'stable', since: '9.5.0' } as const;
 
-export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerGetWorkflowExecutionsRoute({ router, api }: RouteDependencies) {
   router.versioned
     .get({
       path: '/api/workflows/workflow/{workflowId}/executions',
@@ -205,7 +205,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const { workflowId } = request.params;
           const workflow = await api.getWorkflow(workflowId, spaceId, request);
           assertCanReadManagedWorkflowExecution(request, workflow);

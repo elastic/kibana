@@ -11,7 +11,6 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SuggestUserProfilesRequest } from '../../../common/types/api';
 import { SuggestUserProfilesRequestRt } from '../../../common/types/api';
@@ -109,7 +108,7 @@ export class UserProfileService {
         size,
         owners,
         securityPluginStart: this.options.securityPluginStart,
-        spaceId: spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+        spaceId: request.spaceId,
       });
     } catch (error) {
       throw createCaseError({
