@@ -1020,6 +1020,121 @@ describe('huntBehavior', () => {
     });
   });
 
+  describe('collapsing same-artifact behaviors', () => {
+    const sharedIoc = { type: 'domain', value: 'evil.example.com' };
+    const COLLAPSE_TEXT = `${REPORT_TEXT} Attackers used evil.example.com for both lateral movement and persistence.`;
+
+    it('generates once for two behaviors whose evidence names the same artifact, and marks the loser collapsed', async () => {
+      generateByTechnique({ 'T1078.004': GROUNDED_ESQL });
+
+      const result = await huntBehavior(
+        buildMockModel([
+          {
+            technique_id: 'T1078.004',
+            evidence_quote: 'evil.example.com for both lateral movement',
+            llm_confidence: 0.9,
+          },
+          {
+            technique_id: 'T1566',
+            evidence_quote: 'evil.example.com for both lateral movement and persistence',
+            llm_confidence: 0.5,
+          },
+        ]),
+        logger,
+        { ...executeParams, text: COLLAPSE_TEXT, iocs: [sharedIoc] },
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(1);
+
+      const winner = result.behaviors.find((b) => b.technique_id === 'T1078.004');
+      const loser = result.behaviors.find((b) => b.technique_id === 'T1566');
+      expect(winner?.validated_esql).toContain(GROUNDED_ESQL);
+      expect(loser?.execution).toEqual({
+        executed: false,
+        row_count: 0,
+        hit: false,
+        inconclusive_reason: 'collapsed',
+      });
+
+      // The loser stays in both output arrays, exactly as a generation_budget behavior does.
+      expect(result.behaviors.map((b) => b.technique_id)).toEqual(
+        expect.arrayContaining(['T1078.004', 'T1566'])
+      );
+      expect(result.indexed_behaviors.some((b) => b.technique_id === 'T1566')).toBe(true);
+
+      expect(result.incomplete).toContainEqual(
+        expect.objectContaining({
+          reason: 'collapsed',
+          technique_id: 'T1566',
+          detail: expect.stringContaining('T1078.004'),
+        })
+      );
+    });
+
+    it('does not collapse behaviors whose quotes name no shared artifact', async () => {
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate, t1566Candidate]),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
+    });
+
+    it('does not collapse anything when no esClient is given', async () => {
+      const result = await huntBehavior(
+        buildMockModel([
+          {
+            technique_id: 'T1078.004',
+            evidence_quote: 'evil.example.com for both lateral movement',
+            llm_confidence: 0.9,
+          },
+          {
+            technique_id: 'T1566',
+            evidence_quote: 'evil.example.com for both lateral movement and persistence',
+            llm_confidence: 0.5,
+          },
+        ]),
+        logger,
+        { text: COLLAPSE_TEXT, iocs: [sharedIoc] }
+      );
+
+      expect(generateEsqlMock).not.toHaveBeenCalled();
+      expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
+    });
+
+    it('collapses before the budget, so 22 behaviors sharing one artifact across 3 of them fit inside it', async () => {
+      const ids = [...enterpriseCatalog.techniqueById.keys()].slice(0, 22);
+      const sharedQuote = 'evidence mentioning evil.example.com directly';
+      generateEsqlMock.mockResolvedValue({ query: GROUNDED_ESQL });
+
+      const candidates = ids.map((technique_id, index) => ({
+        technique_id,
+        // The first 3 ids share the artifact set and collapse to one survivor; the rest
+        // are distinct behaviors with no shared artifact, so none of them merge.
+        evidence_quote: index < 3 ? sharedQuote : 'evidence',
+        llm_confidence: 0.5 + index * 0.01,
+      }));
+
+      const result = await huntBehavior(
+        buildMockModel(candidates),
+        logger,
+        { ...executeParams, text: `${REPORT_TEXT} ${sharedQuote}`, iocs: [sharedIoc] },
+        esClient
+      );
+
+      expect(result.behaviors).toHaveLength(22);
+      expect(result.incomplete?.filter((i) => i.reason === 'collapsed')).toHaveLength(2);
+      expect(result.incomplete?.some((i) => i.reason === 'generation_budget')).not.toBe(true);
+      // 22 behaviors minus the 2 collapsed siblings leaves exactly 20 survivors, which fits
+      // the budget with no slot wasted on a duplicate.
+      expect(generateEsqlMock).toHaveBeenCalledTimes(20);
+    });
+  });
+
   describe('the generation budget', () => {
     const GENERATION_BUDGET = 20;
     const OVER_BUDGET = GENERATION_BUDGET + 5;

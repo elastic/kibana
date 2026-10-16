@@ -26,6 +26,7 @@ import {
   CONTEXT_PREAMBLE,
   ESQL_GENERATION_INSTRUCTIONS,
 } from './extraction_contract';
+import { collapseByArtifactSet } from './behavior_artifact_set';
 import { toIndexedBehaviors } from './indexed_behaviors';
 import { getMitreCatalog } from './mitre_catalog';
 import { assertEsqlSourcesAllowed } from './assert_esql_sources_allowed';
@@ -856,14 +857,35 @@ export const huntBehavior = async (
   }
 
   if (validated.length > 0 && esClient) {
+    // Behaviors whose evidence names the same report artifacts are hunting the same thing
+    // under different technique ids, so pay for one query per shared artifact set rather than
+    // one per technique — and do it before the budget slice below, so a duplicate never spends
+    // a slot a distinct behavior could have used.
+    const { survivors, collapsed: collapsedSiblings } = collapseByArtifactSet(validated, iocs);
+    if (collapsedSiblings.length > 0) {
+      const survivorCount = new Set(collapsedSiblings.map((c) => c.survivor.technique_id)).size;
+      logger.info(
+        `[hunt:esql] collapsed ${collapsedSiblings.length} behavior(s) into ${survivorCount} ` +
+          `survivor(s) that already hunt the same report artifacts.`
+      );
+      for (const { behavior, survivor, key } of collapsedSiblings) {
+        behavior.execution = notExecuted('collapsed');
+        const sharedValues = key.split('\u0000').join(', ');
+        const detail =
+          `${behavior.technique_id} shares the same report artifacts (${sharedValues}) as ` +
+          `${survivor.technique_id}, whose query already hunts them, so it was never generated.`;
+        gap(behavior.technique_id, 'collapsed', detail.slice(0, 500));
+      }
+    }
+
     // Highest confidence first, so a report that overruns the budget spends it on
     // its best-supported behaviors rather than whichever the model emitted first.
-    const generationTargets = [...validated]
+    const generationTargets = [...survivors]
       .sort((a, b) => b.confidence - a.confidence)
       .slice(0, MAX_GENERATED_BEHAVIORS);
     const targeted = new Set(generationTargets.map((b) => b.technique_id));
-    if (generationTargets.length < validated.length) {
-      const skipped = validated.filter((b) => !targeted.has(b.technique_id));
+    if (generationTargets.length < survivors.length) {
+      const skipped = survivors.filter((b) => !targeted.has(b.technique_id));
       for (const behavior of skipped) {
         behavior.execution = notExecuted('generation_budget');
         gap(
@@ -874,7 +896,7 @@ export const huntBehavior = async (
         );
       }
       logger.warn(
-        `[hunt:esql] ${validated.length} validated behaviors exceed the generation budget of ` +
+        `[hunt:esql] ${survivors.length} surviving behaviors exceed the generation budget of ` +
           `${MAX_GENERATED_BEHAVIORS}; ${skipped.length} techniques are left ` +
           `uncorroborated and keep a non-executable placeholder: ` +
           `${skipped.map((b) => b.technique_id).join(', ')}.`
