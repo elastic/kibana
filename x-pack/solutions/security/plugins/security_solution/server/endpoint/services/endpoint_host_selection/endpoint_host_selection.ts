@@ -7,9 +7,17 @@
 
 import type { AgentStatus } from '@kbn/fleet-plugin/common';
 import { HostStatus } from '../../../../common/endpoint/types';
+import { MAX_HOST_RECORDS } from '../../../../common/workflows/step_types/endpoint/hosts/hosts_contracts';
 import { fleetAgentStatusToEndpointHostStatus } from '../../utils/fleet_agent_status_to_endpoint_host_status';
 
-export const MAX_AMBIGUOUS_CANDIDATES = 10;
+export const MAX_AMBIGUOUS_CANDIDATES = MAX_HOST_RECORDS;
+
+export const getMetadataAgentId = (entry: {
+  metadata?: {
+    elastic?: { agent?: { id?: string } };
+    agent?: { id?: string };
+  };
+}): string | undefined => entry.metadata?.elastic?.agent?.id || entry.metadata?.agent?.id;
 
 export interface EndpointHostCandidate {
   agentId: string;
@@ -41,12 +49,6 @@ const NOT_LIVE_HOST_STATUSES: ReadonlySet<string> = new Set<string>([
 
 export const isLiveHostStatus = (status: string): boolean => !NOT_LIVE_HOST_STATUSES.has(status);
 
-/**
- * Fleet statuses the shared `fleetAgentStatusToEndpointHostStatus` mapper has
- * no entry for (it falls back to `unhealthy`) although the record is gone.
- * The shared mapper is left alone because its other caller would change
- * behavior.
- */
 const GONE_FLEET_STATUSES: ReadonlySet<string> = new Set(['unenrolled', 'uninstalled']);
 
 export const toHostStatus = (status: AgentStatus): HostStatus =>

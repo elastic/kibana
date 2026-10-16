@@ -9,12 +9,10 @@ export { collectPages } from './collect_pages';
 export type { CandidatePage } from './collect_pages';
 export {
   MAX_AMBIGUOUS_CANDIDATES,
+  getMetadataAgentId,
   isLiveFleetStatus,
   isLiveHostStatus,
   selectEndpointHost,
   toHostStatus,
 } from './endpoint_host_selection';
-export type {
-  EndpointHostSelection,
-  EndpointHostCandidate,
-} from './endpoint_host_selection';
+export type { EndpointHostSelection, EndpointHostCandidate } from './endpoint_host_selection';
