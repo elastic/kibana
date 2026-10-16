@@ -18,7 +18,6 @@ import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { ViewKiContentLayout } from '../components/ki/view/view_ki_content_layout';
 import { ViewKiRawJsonPanel } from '../components/ki/view/content/view_ki_raw_json_panel';
 import { getViewKiHeaderBadges } from '../components/ki/view/metadata/view_ki_header_badges';
-import { useAiIndex } from '../hooks/use_ai_index';
 import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
 import { useKi } from '../hooks/use_ki';
 import { useNavigation } from '../hooks/use_navigation';
@@ -52,7 +51,6 @@ export const ViewKiPage = () => {
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const index = searchParams.get('index') ?? '';
 
-  const { aiIndex } = useAiIndex(aiIndexId);
   const { ki, isLoading, error } = useKi({
     aiIndexId,
     kiId,
@@ -69,7 +67,7 @@ export const ViewKiPage = () => {
   const backHref = createContextEngineUrl(backPath);
 
   useContextEngineBreadcrumbs([
-    { text: aiIndex?.id ?? aiIndexId, path: backPath },
+    { text: aiIndexId, path: backPath },
     { text: pageTitle },
   ]);
 

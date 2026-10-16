@@ -21,13 +21,8 @@ import { createAppChromeMock } from '../test_utils/app_chrome_mock';
 import { ViewKiPage } from './view_ki_page';
 
 const mockUseKi = jest.fn();
-const mockUseAiIndex = jest.fn();
 const mockNavigateToContextEngine = jest.fn();
 const mockCreateContextEngineUrl = jest.fn((path: string) => path);
-
-jest.mock('../hooks/use_ai_index', () => ({
-  useAiIndex: (aiIndexId: string) => mockUseAiIndex(aiIndexId),
-}));
 
 jest.mock('../hooks/use_ki', () => ({
   useKi: (args: { aiIndexId: string; kiId: string; index: string; enabled?: boolean }) =>
@@ -81,12 +76,6 @@ const renderViewKiPage = (initialEntry: string) => {
 
 describe('ViewKiPage', () => {
   beforeEach(() => {
-    mockUseAiIndex.mockReturnValue({
-      aiIndex: { id: 'sample-ki' },
-      isLoading: false,
-      error: undefined,
-      refetch: jest.fn(),
-    });
     mockUseKi.mockReturnValue({
       ki: defaultKi,
       isLoading: false,
