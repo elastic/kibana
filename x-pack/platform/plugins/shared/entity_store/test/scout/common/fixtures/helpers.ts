@@ -809,11 +809,11 @@ export const waitForStoreNotInstalled = async (
  *
  * A 200 from the config overrides API only means the instance that served it applied the value
  * in memory; the others pick it up from the persisted override on core's 10s poll. The status
- * API reports the `user` engine's `nonPriority` block only when the flag evaluates true on the
- * instance that served the read, so this polls that read and requires the expected shape to hold
- * continuously for longer than one poll period: by then every instance has polled at least once
- * since the write, whichever ones happened to serve the reads. A response without the `user`
- * engine (a non-200, or a store that is not installed) resets the window.
+ * API populates the `user` engine's `nonPriority` block — `null` otherwise — only when the flag
+ * evaluates true on the instance that served the read, so this polls that read and requires the
+ * expected shape to hold continuously for longer than one poll period: by then every instance has
+ * polled at least once since the write, whichever ones happened to serve the reads. A response
+ * without the `user` engine (a non-200, or a store that is not installed) resets the window.
  */
 export const waitForDualProcessFlag = async (
   apiClient: ApiClientFixture,
@@ -834,7 +834,7 @@ export const waitForDualProcessFlag = async (
     const engine =
       statusCode === 200 ? body.engines.find(({ type }) => type === 'user') : undefined;
 
-    if (engine && (engine.nonPriority !== undefined) === enabled) {
+    if (engine && (engine.nonPriority !== null) === enabled) {
       stableSince ??= Date.now();
       if (Date.now() - stableSince >= stableForMs) return;
     } else {
