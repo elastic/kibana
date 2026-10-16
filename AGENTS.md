@@ -77,6 +77,7 @@ Follow existing patterns in the target area first; below are common defaults.
 - Prefer early returns and positive conditions.
 - Handle errors explicitly; return typed errors from APIs when possible.
 - Keep async logic linear; avoid nested `try` blocks when possible.
+- `AbortSignal.timeout()` cannot clear its timer, so the signal and its abort listeners stay alive until the deadline. Prefer `timeoutSignal()` from `@kbn/std` and call `dispose()` in a `finally` when the work settles. `@kbn/eslint/no_abort_signal_timeout` flags `AbortSignal.timeout()` and a `timeoutSignal()` that is never disposed.
 
 ### UI Component Selection and Styling
 - Reuse existing components from the target module and shared packages it can depend on. Prefer `@kbn/ui-*` packages under `src/platform/kbn-ui` over equivalent `@elastic/eui` components — they encode Kibana-specific behavior and conventions.

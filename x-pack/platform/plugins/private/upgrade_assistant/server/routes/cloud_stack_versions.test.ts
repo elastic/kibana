@@ -6,59 +6,56 @@
  */
 
 import { kibanaResponseFactory } from '@kbn/core/server';
+import { timeoutSignal } from '@kbn/std';
 
 import { createMockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 import { registerCloudStackVersionsRoute } from './cloud_stack_versions';
 
-const createOkResponse = (body: unknown): Response => {
+jest.mock('@kbn/std', () => {
+  const actual = jest.requireActual('@kbn/std');
   return {
-    ok: true,
-    status: 200,
-    json: async () => body,
+    ...actual,
+    timeoutSignal: jest.fn((...args: unknown[]) => actual.timeoutSignal(...args)),
+  };
+});
+
+const asArrayBuffer = (body: unknown): ArrayBuffer => {
+  const bytes = Buffer.from(JSON.stringify(body));
+  return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+};
+
+const createFetchResponse = (status: number, body: unknown): Response => {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    statusText: '',
+    headers: new Headers(),
+    arrayBuffer: async () => asArrayBuffer(body),
   } as unknown as Response;
 };
 
-const createErrorResponse = (status: number): Response => {
-  return {
-    ok: false,
-    status,
-    json: async () => ({}),
-  } as unknown as Response;
-};
+const createOkResponse = (body: unknown): Response => createFetchResponse(200, body);
 
-const createErrorResponseWithBody = (status: number, body: unknown): Response => {
-  return {
-    ok: false,
-    status,
-    json: async () => body,
-  } as unknown as Response;
-};
+const createErrorResponse = (status: number): Response => createFetchResponse(status, {});
+
+const createErrorResponseWithBody = (status: number, body: unknown): Response =>
+  createFetchResponse(status, body);
 
 describe('Cloud stack versions API', () => {
   const log = { error: jest.fn() };
   const cloudStackVersionsApiBaseUrl = 'https://cloud.example.test/api/stack/versions';
   let originalFetchDescriptor: PropertyDescriptor | undefined;
-  let originalAbortSignalTimeout: ((timeoutMs: number) => AbortSignal) | undefined;
-  let abortSignalHadOwnTimeout: boolean;
 
   beforeAll(() => {
     originalFetchDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'fetch');
-    abortSignalHadOwnTimeout = Object.prototype.hasOwnProperty.call(AbortSignal, 'timeout');
-    originalAbortSignalTimeout = abortSignalHadOwnTimeout
-      ? (AbortSignal as unknown as { timeout: (timeoutMs: number) => AbortSignal }).timeout
-      : undefined;
   });
 
   beforeEach(() => {
     Object.defineProperty(globalThis, 'fetch', { value: jest.fn(), writable: true });
-
-    (AbortSignal as unknown as { timeout: (timeoutMs: number) => AbortSignal }).timeout = jest.fn(
-      (timeoutMs: number) => {
-        const signal = new AbortController().signal as AbortSignal & { __timeoutMs?: number };
-        signal.__timeoutMs = timeoutMs;
-        return signal;
-      }
+    // resetAllMocks() drops the factory implementation between tests.
+    (timeoutSignal as jest.Mock).mockImplementation((timeoutMs: number) =>
+      jest.requireActual<typeof import('@kbn/std')>('@kbn/std').timeoutSignal(timeoutMs)
     );
   });
 
@@ -67,13 +64,6 @@ describe('Cloud stack versions API', () => {
       Object.defineProperty(globalThis, 'fetch', originalFetchDescriptor);
     } else {
       delete (globalThis as unknown as { fetch?: unknown }).fetch;
-    }
-
-    if (abortSignalHadOwnTimeout) {
-      (AbortSignal as unknown as { timeout: (timeoutMs: number) => AbortSignal }).timeout =
-        originalAbortSignalTimeout!;
-    } else {
-      delete (AbortSignal as unknown as { timeout?: unknown }).timeout;
     }
 
     jest.resetAllMocks();
@@ -130,8 +120,7 @@ describe('Cloud stack versions API', () => {
       signal: expect.any(Object),
     });
 
-    const abortSignalTimeoutMock = AbortSignal.timeout as unknown as jest.Mock;
-    const timeoutMsCalls = abortSignalTimeoutMock.mock.calls.map(([ms]) => ms);
+    const timeoutMsCalls = (timeoutSignal as jest.Mock).mock.calls.map(([ms]) => ms);
     expect(timeoutMsCalls.filter((ms) => ms === 30_000)).toHaveLength(1);
     expect(timeoutMsCalls.filter((ms) => ms === 5_000)).toHaveLength(fetchMock.mock.calls.length);
   });

@@ -10,6 +10,7 @@ import { Agent, fetch } from 'undici';
 import { createUiamOAuthAccessToken, MOCK_IDP_UIAM_SERVICE_URL } from '@kbn/mock-idp-utils';
 import { apiTest as baseApiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { timeoutSignal } from '@kbn/std';
 
 export const TEST_USERNAME = '1234567891';
 
@@ -43,16 +44,21 @@ export const apiTest = baseApiTest.extend<{ ephemeralToken: string }, { oauthAcc
       let token: string;
       try {
         // Act as the gateway: exchange OAuth directly with UIAM before calling Kibana.
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${oauthAccessToken}`, 'User-Agent': 'Kibana-Scout' },
-          dispatcher,
-          signal: AbortSignal.timeout(30_000),
-        });
-        expect(response.status).toBe(200);
-        const body = (await response.json()) as { token: string };
-        expect(body.token).toMatch(/^essu_/);
-        token = body.token;
+        const deadline = timeoutSignal(30_000);
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${oauthAccessToken}`, 'User-Agent': 'Kibana-Scout' },
+            dispatcher,
+            signal: deadline,
+          });
+          expect(response.status).toBe(200);
+          const body = (await response.json()) as { token: string };
+          expect(body.token).toMatch(/^essu_/);
+          token = body.token;
+        } finally {
+          deadline.dispose();
+        }
       } finally {
         await dispatcher.close();
       }

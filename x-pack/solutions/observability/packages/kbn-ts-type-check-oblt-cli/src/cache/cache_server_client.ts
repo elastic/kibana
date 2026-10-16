@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import Fs from 'fs';
 import Path from 'path';
 import { Readable, Writable } from 'stream';
@@ -44,8 +45,13 @@ export async function isCacheServerAvailable(): Promise<boolean> {
   const baseUrl = getCacheServerUrl();
   if (!baseUrl) return false;
   try {
-    await fetch(baseUrl.replace(/\/$/, ''), { signal: AbortSignal.timeout(1000) });
-    return true;
+    const deadline = timeoutSignal(1000);
+    try {
+      await fetch(baseUrl.replace(/\/$/, ''), { signal: deadline });
+      return true;
+    } finally {
+      deadline.dispose();
+    }
   } catch {
     return false;
   }
