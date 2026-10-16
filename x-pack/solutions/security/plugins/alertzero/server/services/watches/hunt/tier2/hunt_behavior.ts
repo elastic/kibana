@@ -485,7 +485,7 @@ const generateGroundedEsql = async ({
   const entries = await pMap(
     behaviors,
     async (behavior): Promise<GeneratedEsqlEntry | undefined> => {
-      // Shared across both calls (D15): only `additionalInstructions` differs on the retry.
+      // Shared across both calls: only `additionalInstructions` differs on the retry.
       const baseArgs = {
         model: esqlModel,
         esClient: probeClient,
@@ -520,7 +520,7 @@ const generateGroundedEsql = async ({
         }
         const esql = query.trim();
         // Out of scope → hand it on unchanged, no retry: the outer source gate labels it
-        // `query_out_of_scope` exactly as today. (D7)
+        // `query_out_of_scope` exactly as today.
         const sourcesAllowed = assertEsqlSourcesAllowed(
           prepareEsqlForExecute(esql),
           allowedIndices
@@ -528,14 +528,14 @@ const generateGroundedEsql = async ({
         if (!sourcesAllowed.ok) {
           return { outcome: 'generated', techniqueId: behavior.technique_id, esql };
         }
-        // Raw `query.trim()`, the same input the outer grounding gate uses today. (D16)
+        // Raw `query.trim()`, the same input the outer grounding gate uses today.
         const grounded = assertEsqlGroundedInReport(esql, { reportText: text, iocValues });
         if (grounded.ok) {
           return { outcome: 'generated', techniqueId: behavior.technique_id, esql };
         }
         const firstReason = grounded.reason;
         // Debug-level, exact shape, so a future local run can be harvested into fixtures by
-        // grepping `[hunt:esql] ungrounded query`. (D14)
+        // grepping `[hunt:esql] ungrounded query`.
         logger.debug(
           `[hunt:esql] ungrounded query technique=${behavior.technique_id} attempt=1 ` +
             `reason=${firstReason}\n${esql.slice(0, 2000)}`
@@ -565,8 +565,8 @@ const generateGroundedEsql = async ({
               reason: firstReason,
             };
           }
-          // No source pre-check of its own (D7): an out-of-scope retry still grounds here and
-          // lands in `generated`, where the outer source gate labels it as today.
+          // No source pre-check of its own: an out-of-scope retry still grounds here and lands
+          // in `generated`, where the outer source gate labels it as today.
           const retryEsql = retryQuery.trim();
           const retryGrounded = assertEsqlGroundedInReport(retryEsql, {
             reportText: text,
