@@ -32,10 +32,13 @@ export interface DiscoverGridFlyoutProps
     | 'initialDocViewerState'
     | 'onInitialDocViewerStateChange'
     | 'onUpdateSelectedTabId'
+    | 'initialShareableState'
+    | 'onShareableStateChange'
     | 'requestState'
     | 'requestStateMeta'
     | 'notice'
     | 'flyoutMenuTrailingActions'
+    | 'flyoutType'
   > {
   savedSearchId?: string;
   filters?: Filter[];
@@ -83,11 +86,14 @@ export function DiscoverGridFlyout({
   initialDocViewerState,
   onInitialDocViewerStateChange,
   onUpdateSelectedTabId,
+  initialShareableState,
+  onShareableStateChange,
   hideFilteringOnComputedColumns,
   requestState,
   requestStateMeta,
   notice,
   flyoutMenuTrailingActions,
+  flyoutType,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   const isEsqlQuery = isOfAggregateQueryType(query);
@@ -133,6 +139,7 @@ export function DiscoverGridFlyout({
       }
       flyoutMenuTrailingActions={flyoutMenuTrailingActions}
       flyoutWidthLocalStorageKey={FLYOUT_WIDTH_KEY}
+      flyoutType={flyoutType}
       services={services}
       docViewsRegistry={docViewer?.docViewsRegistry}
       renderCustomHeader={docViewer?.renderHeader}
@@ -156,6 +163,8 @@ export function DiscoverGridFlyout({
       initialDocViewerState={initialDocViewerState}
       onInitialDocViewerStateChange={onInitialDocViewerStateChange}
       onUpdateSelectedTabId={onUpdateSelectedTabId}
+      initialShareableState={initialShareableState}
+      onShareableStateChange={onShareableStateChange}
       hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
     />
   );

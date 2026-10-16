@@ -125,7 +125,7 @@ const makeService = (
   const getAttachmentsClient = jest.fn().mockResolvedValue(attachmentsClient);
 
   const impactClient = {
-    getEntityIdsByConversationId: jest.fn().mockResolvedValue(new Map<string, string[]>()),
+    getEntitiesByConversationId: jest.fn().mockResolvedValue(new Map()),
   };
   const getImpactClient = jest.fn().mockReturnValue(impactClient);
 
@@ -670,23 +670,30 @@ describe('EscalationsService.list', () => {
           total: 2,
         }),
       });
-      impactClient.getEntityIdsByConversationId.mockResolvedValue(
+      impactClient.getEntitiesByConversationId.mockResolvedValue(
         new Map([
-          ['inv-1', ['host-1', 'user-1']],
-          ['inv-2', ['host-1', 'svc-1']],
+          [
+            'inv-1',
+            [
+              { id: 'host-1', type: 'host' },
+              { id: 'user-1', type: 'user' },
+            ],
+          ],
+          ['inv-2', [{ id: 'host-1', type: 'host' }, { id: 'svc-1' }]],
         ])
       );
 
       const result = await service.list(request, { page: 1, per_page: 50, status: 'open' });
 
       expect(getImpactClient).toHaveBeenCalledWith(request);
-      expect(impactClient.getEntityIdsByConversationId).toHaveBeenCalledTimes(1);
-      expect(impactClient.getEntityIdsByConversationId).toHaveBeenCalledWith([
+      expect(impactClient.getEntitiesByConversationId).toHaveBeenCalledTimes(1);
+      expect(impactClient.getEntitiesByConversationId).toHaveBeenCalledWith([
         'inv-1',
         'inv-2',
         'inv-3',
       ]);
       expect(result.results[0].entity_ids).toEqual(['host-1', 'user-1', 'svc-1']);
+      expect(result.results[0].entity_types).toEqual({ 'host-1': 'host', 'user-1': 'user' });
       expect(result.results[1]).not.toHaveProperty('entity_ids');
     });
 
@@ -705,7 +712,7 @@ describe('EscalationsService.list', () => {
       const { service, impactClient } = makeService({
         search: jest.fn().mockResolvedValue({ results: [row], total: 1 }),
       });
-      impactClient.getEntityIdsByConversationId.mockRejectedValue(new Error('forbidden'));
+      impactClient.getEntitiesByConversationId.mockRejectedValue(new Error('forbidden'));
 
       const result = await service.list(request, { page: 1, per_page: 50, status: 'open' });
 

@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IUiSettingsClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID } from '@kbn/alertzero-common';
 import {
   THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
   THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
   THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import { ThreatIntelSupplyService } from './threat_intel_supply_service';
@@ -98,7 +105,10 @@ describe('ThreatIntelSupplyService', () => {
 
   const createService = (
     spaceIds: string[] = [SPACE_A, SPACE_B],
-    opts?: { withInstaller?: boolean }
+    opts?: {
+      withInstaller?: boolean;
+      searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+    }
   ) =>
     new ThreatIntelSupplyService({
       management,
@@ -107,6 +117,9 @@ describe('ThreatIntelSupplyService', () => {
       getEsClient: async () => esClient,
       enumerateSpaceIds: async () => spaceIds,
       getWorkflowInstaller: opts?.withInstaller === false ? undefined : () => ensureInstaller,
+      getSearchInferenceEndpoints: () => opts?.searchInferenceEndpoints,
+      getInference: () => ({ getDefaultConnector: jest.fn() } as unknown as InferenceServerStart),
+      getUiSettingsClient: () => ({ get: jest.fn() } as unknown as IUiSettingsClient),
     });
 
   const seedAllTiWorkflows = (enabled: boolean) => {
@@ -214,7 +227,7 @@ describe('ThreatIntelSupplyService', () => {
       expect(await ensureWithMissingAttribute()).toBeInstanceOf(ThreatIntelSupplyNotInstalledError);
     });
 
-    it('keeps globals on when this call flipped them but another space has Hunt on', async () => {
+    it('keeps supply on when this call flipped it but another space has Hunt on', async () => {
       huntEnabledBySpace.set(SPACE_B, true);
       await ensureWithMissingAttribute();
       expect(workflows.get(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID)?.enabled).toBe(true);
@@ -235,6 +248,35 @@ describe('ThreatIntelSupplyService', () => {
       } finally {
         updateWorkflow.mockImplementation(defaultUpdate);
       }
+    });
+
+    // The Hunt space is `default`, so attribute shares a space with ingest and enrich. The undo
+    // must key on each target's scope, not on its space id.
+    describe('when the Hunt space is the default space and another space has Hunt on', () => {
+      const ensureInDefaultSpaceWithMissingAttribute = async () => {
+        workflows.set(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID, { enabled: false });
+        workflows.set(THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID, { enabled: false });
+        huntEnabledBySpace.set(SPACE_B, true);
+        return createService([DEFAULT_SPACE_ID, SPACE_B], { withInstaller: false })
+          .ensureSupplyForSpace(DEFAULT_SPACE_ID, request)
+          .catch((error) => error);
+      };
+
+      it('rethrows the original error', async () => {
+        expect(await ensureInDefaultSpaceWithMissingAttribute()).toBeInstanceOf(
+          ThreatIntelSupplyNotInstalledError
+        );
+      });
+
+      it('leaves ingest on', async () => {
+        await ensureInDefaultSpaceWithMissingAttribute();
+        expect(workflows.get(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID)?.enabled).toBe(true);
+      });
+
+      it('leaves enrich on', async () => {
+        await ensureInDefaultSpaceWithMissingAttribute();
+        expect(workflows.get(THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID)?.enabled).toBe(true);
+      });
     });
 
     describe('when an undo step fails', () => {
@@ -264,24 +306,24 @@ describe('ThreatIntelSupplyService', () => {
     });
   });
 
-  it('enables ingest in the global space when ensuring supply', async () => {
+  it('enables ingest in the default space when ensuring supply', async () => {
     seedAllTiWorkflows(false);
     await createService().ensureSupplyForSpace(SPACE_A, request);
     expect(updateWorkflow).toHaveBeenCalledWith(
       THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
       { enabled: true },
-      GLOBAL_WORKFLOW_SPACE_ID,
+      DEFAULT_SPACE_ID,
       request
     );
   });
 
-  it('enables enrich in the global space when ensuring supply', async () => {
+  it('enables enrich in the default space when ensuring supply', async () => {
     seedAllTiWorkflows(false);
     await createService().ensureSupplyForSpace(SPACE_A, request);
     expect(updateWorkflow).toHaveBeenCalledWith(
       THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
       { enabled: true },
-      GLOBAL_WORKFLOW_SPACE_ID,
+      DEFAULT_SPACE_ID,
       request
     );
   });
@@ -323,7 +365,7 @@ describe('ThreatIntelSupplyService', () => {
     expect(updateWorkflow).toHaveBeenCalledWith(ATTR_A, { enabled: false }, SPACE_A, request);
   });
 
-  it('disables globals when tearing down the last Hunt space', async () => {
+  it('disables ingest in the default space when tearing down the last Hunt space', async () => {
     seedAllTiWorkflows(true);
     huntEnabledBySpace.set(SPACE_A, false);
     huntEnabledBySpace.set(SPACE_B, false);
@@ -331,12 +373,12 @@ describe('ThreatIntelSupplyService', () => {
     expect(updateWorkflow).toHaveBeenCalledWith(
       THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
       { enabled: false },
-      GLOBAL_WORKFLOW_SPACE_ID,
+      DEFAULT_SPACE_ID,
       request
     );
   });
 
-  it('keeps globals on when another space still has Hunt enabled', async () => {
+  it('keeps ingest and enrich on when another space still has Hunt enabled', async () => {
     seedAllTiWorkflows(true);
     huntEnabledBySpace.set(SPACE_A, false);
     huntEnabledBySpace.set(SPACE_B, true);
@@ -358,12 +400,12 @@ describe('ThreatIntelSupplyService', () => {
     expect(updateWorkflow).toHaveBeenCalledWith(
       THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
       { enabled: false },
-      GLOBAL_WORKFLOW_SPACE_ID,
+      DEFAULT_SPACE_ID,
       request
     );
   });
 
-  it('re-checks other spaces before disabling globals during teardown', async () => {
+  it('re-checks other spaces before disabling ingest and enrich during teardown', async () => {
     seedAllTiWorkflows(true);
     huntEnabledBySpace.set(SPACE_A, false);
     huntEnabledBySpace.set(SPACE_B, false);
@@ -373,7 +415,7 @@ describe('ThreatIntelSupplyService', () => {
       const result = await defaultUpdate(id, patch);
       if (id === ATTR_A && patch.enabled === false) {
         attributeDisabled = true;
-        // Concurrent enable in SPACE_B between attribute teardown and globals.
+        // Concurrent enable in SPACE_B between attribute teardown and ingest/enrich.
         huntEnabledBySpace.set(SPACE_B, true);
       }
       return result;
@@ -399,6 +441,80 @@ describe('ThreatIntelSupplyService', () => {
     huntEnabledBySpace.set(SPACE_B, true);
     const status = await createService().getSupplyStatus(SPACE_A, request);
     expect(status.workflows.find((w) => w.key === 'ingest')?.inUseElsewhere).toBe(true);
+  });
+
+  it('reads ingest from the default space when Hunt is off here but on elsewhere', async () => {
+    seedAllTiWorkflows(true);
+    huntEnabledBySpace.set(SPACE_B, true);
+    await createService().getSupplyStatus(SPACE_A, request);
+    expect(getWorkflow).toHaveBeenCalledWith(
+      THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
+      DEFAULT_SPACE_ID,
+      request
+    );
+  });
+
+  it('reads enrich from the default space when Hunt is off here but on elsewhere', async () => {
+    seedAllTiWorkflows(true);
+    huntEnabledBySpace.set(SPACE_B, true);
+    await createService().getSupplyStatus(SPACE_A, request);
+    expect(getWorkflow).toHaveBeenCalledWith(
+      THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
+      DEFAULT_SPACE_ID,
+      request
+    );
+  });
+
+  it('marks enrich inUseElsewhere when Hunt is off here but on elsewhere', async () => {
+    seedAllTiWorkflows(true);
+    huntEnabledBySpace.set(SPACE_A, false);
+    huntEnabledBySpace.set(SPACE_B, true);
+    const status = await createService().getSupplyStatus(SPACE_A, request);
+    expect(status.workflows.find((w) => w.key === 'enrich')?.inUseElsewhere).toBe(true);
+  });
+
+  it('reports where each Hunt model tier gets its model alongside the workflows', async () => {
+    seedAllTiWorkflows(true);
+    huntEnabledBySpace.set(SPACE_A, true);
+    const searchInferenceEndpoints = {
+      endpoints: {
+        getForFeature: jest.fn().mockResolvedValue({
+          endpoints: [{ connectorId: 'opus', isRecommended: true }],
+          soEntryFound: false,
+        }),
+      },
+    } as unknown as SearchInferenceEndpointsPluginStart;
+
+    const status = await createService([SPACE_A, SPACE_B], {
+      searchInferenceEndpoints,
+    }).getSupplyStatus(SPACE_A, request);
+
+    expect(status.modelTiers).toEqual([
+      { tier: 'efficient', state: 'recommended' },
+      { tier: 'frontier', state: 'recommended' },
+    ]);
+  });
+
+  it('keeps the hard gate open when a model tier is unavailable', async () => {
+    const searchInferenceEndpoints = {
+      endpoints: {
+        getForFeature: jest.fn().mockResolvedValue({ endpoints: [], soEntryFound: false }),
+      },
+    } as unknown as SearchInferenceEndpointsPluginStart;
+
+    const status = await createService([SPACE_A, SPACE_B], {
+      searchInferenceEndpoints,
+    }).getSupplyStatus(SPACE_A, request);
+
+    expect(status.modelTiers.every(({ state }) => state === 'unavailable')).toBe(true);
+    expect(status.hardGate).toEqual({ ok: true, reasonCodes: [] });
+  });
+
+  it('still reports every tier when the model-tier registry is not installed', async () => {
+    // No registry and no default connector: nothing for Hunt to run on, so every tier says so.
+    expect(
+      (await createService().getSupplyStatus(SPACE_A, request)).modelTiers.map(({ state }) => state)
+    ).toEqual(['unavailable', 'unavailable']);
   });
 
   it('reports drift when Hunt is on and a required TI workflow is off', async () => {
@@ -431,7 +547,7 @@ describe('ThreatIntelSupplyService', () => {
     expect(updateWorkflow).toHaveBeenCalledWith(
       THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
       { enabled: true },
-      GLOBAL_WORKFLOW_SPACE_ID,
+      DEFAULT_SPACE_ID,
       request
     );
   });

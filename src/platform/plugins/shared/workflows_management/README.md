@@ -365,7 +365,7 @@ Workflows are space-aware and respect Kibana Spaces boundaries.
 
 ### Queryable execution data
 
-The managed data views for `.workflows-executions*` and `.workflows-step-executions*` use the Workflows feature privileges to provide space-scoped access with DLS and FLS.
+The managed data views for `.workflows-executions*` and `.workflows-step-executions*` (plain indexes and the `.workflows-executions-data-stream` / `.workflows-step-executions-data-stream` hidden data streams) use the Workflows feature privileges to provide space-scoped access with DLS and FLS.
 
 Elasticsearch index privileges are additive. A role or API key with unrestricted `read` or `all` on `*` or either execution index pattern is not limited by the Workflows DLS and FLS grant:
 
@@ -395,7 +395,9 @@ in a future release and is not covered by the support SLA.
 Workflow ACLs apply to the Workflows UI and APIs. They do not restrict direct
 Elasticsearch queries of `.workflows-executions*` or `.workflows-step-executions*`
 when those indices are available as queryable hidden indices. This includes
-queries from Discover, Lens, ES|QL, and the Elasticsearch API.
+the plain indexes, the `.workflows-executions-data-stream` /
+`.workflows-step-executions-data-stream` hidden data streams, and queries
+from Discover, Lens, ES|QL, and the Elasticsearch API.
 
 The Read Workflow Execution privilege, included in Workflows Read, can grant
 access to this data within a space. Those Elasticsearch grants filter by space,
