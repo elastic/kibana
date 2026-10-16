@@ -277,6 +277,7 @@ export interface RelayActionClient {
     /** Slack conversation id or a connected channel name (`#general`). */
     channel: string;
     message: string;
+    blocks?: Array<Record<string, unknown>>;
     threadTs?: string;
     /** Edits this previously posted message instead of posting a new one. */
     messageTs?: string;

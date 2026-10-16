@@ -114,6 +114,7 @@ export async function relaySendMessage(
       tenantKey: connection.tenantKey,
       channel,
       message: input.text,
+      ...(input.blocks?.length ? { blocks: input.blocks } : {}),
       ...(input.threadTs ? { threadTs: input.threadTs } : {}),
     });
 
@@ -147,6 +148,7 @@ export async function relayUpdateMessage(
       tenantKey: connection.tenantKey,
       channel,
       message: input.text,
+      ...(input.blocks?.length ? { blocks: input.blocks } : {}),
       messageTs: input.messageTs,
     });
 

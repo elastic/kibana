@@ -104,11 +104,16 @@ describe('investigation notification lifecycle', () => {
         await send(terminalPhase, 'exec-1', [input]);
         expect(execute.mock.calls[0][0].params).toMatchObject({
           subAction: 'sendMessage',
-          subActionParams: { threadTs: '0.000001' },
+          subActionParams: { threadTs: '0.000001', blocks: expect.any(Array) },
         });
         expect(execute.mock.calls[1][0].params).toEqual({
           subAction: 'updateMessage',
-          subActionParams: { channel: 'C123', messageTs: '1.000001', text: expect.any(String) },
+          subActionParams: {
+            channel: 'C123',
+            messageTs: '1.000001',
+            text: expect.any(String),
+            blocks: expect.any(Array),
+          },
         });
         expect((await client.get())?.destinations[0].thread?.thread_ts).toBe('0.000001');
       }

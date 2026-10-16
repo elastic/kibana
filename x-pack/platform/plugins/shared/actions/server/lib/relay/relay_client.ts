@@ -204,6 +204,7 @@ export class RelayClient implements RelayClientContract {
     tenantKey,
     channel,
     message,
+    blocks,
     threadTs,
     messageTs,
   }: RelayTriggerInput): Promise<RelayTriggerResponse> {
@@ -211,6 +212,7 @@ export class RelayClient implements RelayClientContract {
       tenant_key: tenantKey,
       channel,
       message,
+      ...(blocks && blocks.length > 0 ? { blocks } : {}),
       ...(messageTs ? { message_ts: messageTs } : threadTs ? { thread_ts: threadTs } : {}),
     });
 
