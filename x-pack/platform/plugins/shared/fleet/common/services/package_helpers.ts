@@ -123,12 +123,7 @@ export function getNonFipsIntegrations(
  * (documentation-only, or assets-only), so the catalog tile opens the Integration Details page instead of
  * "Add integration". Temporary: remove once these packages are re-typed and behavior is inferred from `type`.
  */
-const DOCUMENTATION_ONLY_PACKAGE_EXCEPTIONS = [
-  'supabase',
-  'awsfirehose',
-  'cribl',
-  'contrast_security',
-];
+const ADD_INTEGRATION_EXCLUDED_PACKAGES = ['supabase', 'awsfirehose', 'cribl', 'contrast_security'];
 
 type PackageClassificationFields = Partial<
   Pick<PackageInfo | PackageListItem, 'name' | 'type' | 'data_streams' | 'policy_templates'>
@@ -151,7 +146,7 @@ export function shouldAddIntegrationFromCatalog(pkg: PackageClassificationFields
   if (pkg.type === 'content') {
     return false;
   }
-  if (pkg.name && DOCUMENTATION_ONLY_PACKAGE_EXCEPTIONS.includes(pkg.name)) {
+  if (pkg.name && ADD_INTEGRATION_EXCLUDED_PACKAGES.includes(pkg.name)) {
     return false;
   }
   // Uploaded packages beyond the catalog's package info limit only carry saved object attributes
