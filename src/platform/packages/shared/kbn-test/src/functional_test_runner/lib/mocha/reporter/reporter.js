@@ -21,6 +21,7 @@ import { ms } from './ms';
 import { writeEpilogue } from './write_epilogue';
 import { setupCiStatsFtrTestGroupReporter } from './ci_stats_ftr_reporter';
 import { ScoutFTRReporter } from './scout_ftr_reporter';
+import { getScoutTestTarget } from './scout_test_target';
 
 export function MochaReporterProvider({ getService }) {
   const log = getService('log');
@@ -47,9 +48,12 @@ export function MochaReporterProvider({ getService }) {
       runner.on('end', this.onEnd);
 
       if (config.get('junit.enabled') && config.get('junit.reportName')) {
+        const { type, mode } = getScoutTestTarget(config);
         setupJUnitReportGeneration(runner, {
           reportName: config.get('junit.reportName'),
           metadata: config.get('junit.metadata'),
+          // lets the failed test reporter tell Cloud runs apart, e.g. `cloud-serverless-search`
+          target: `${type}-${mode}`,
           log,
         });
       }

@@ -12,6 +12,8 @@ import { getCodeOwnersEntries, getOwningTeamsForPath } from '@kbn/code-owners';
 import type { CodeOwnersEntry } from '@kbn/code-owners';
 
 import { toRepoRelativePaths } from './failure_text';
+import type { InfraFailureReason } from './infra_failure_rules';
+import { getInfraReason } from './infra_failure_rules';
 import type { FailedTestCase, TestReport } from './test_report';
 import { makeFailedTestCaseWithSuiteIter } from './test_report';
 
@@ -32,6 +34,8 @@ export type TestFailure = FailedTestCase['$'] & {
    * kept for the record but never reported to GitHub and get no artifacts of their own.
    */
   cascading?: boolean;
+  /** Set when the failure is attributed to infrastructure; no GitHub issue is filed for these. */
+  infraReason?: InfraFailureReason;
 };
 
 const getText = (node?: Array<string | { _: string }>) => {
@@ -89,6 +93,10 @@ function getTestType(rootName: string | undefined, classname: string): JUnitTest
 
 function getRootSuiteName(report: TestReport): string | undefined {
   return 'testsuites' in report ? report.testsuites?.$?.name : undefined;
+}
+
+function getRootTarget(report: TestReport): string | undefined {
+  return 'testsuites' in report ? report.testsuites?.$?.target : undefined;
 }
 
 /**
@@ -156,6 +164,7 @@ export function getFailures(report: TestReport) {
 
   const commandLine = getCommandLineFromReport(report);
   const rootName = getRootSuiteName(report);
+  const target = getRootTarget(report);
 
   // Cache code owner entries once per report for the owners fallback lookup.
   let codeOwnersEntries: CodeOwnersEntry[] = [];
@@ -167,8 +176,10 @@ export function getFailures(report: TestReport) {
 
   for (const { testCase, testSuite } of makeFailedTestCaseWithSuiteIter(report)) {
     const failure = getText(testCase.failure);
-    const likelyIrrelevant = isLikelyIrrelevant(testCase.$.name, failure);
     const testType = getTestType(rootName, testCase.$.classname);
+    const infraReason =
+      testType === 'ftr' ? getInfraReason({ runner: 'ftr', target, failure }) : undefined;
+    const likelyIrrelevant = !!infraReason || isLikelyIrrelevant(testCase.$.name, failure);
     // Jest classnames contain only the test directory, while the enclosing suite
     // name contains the repository-relative test file path.
     const location =
@@ -194,6 +205,10 @@ export function getFailures(report: TestReport) {
 
     if (testCase.$['cascading-failure'] === 'true') {
       failureObj.cascading = true;
+    }
+
+    if (infraReason) {
+      failureObj.infraReason = infraReason;
     }
 
     // cleaning up duplicates
