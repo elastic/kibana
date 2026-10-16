@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/core-plugins-server'
   - '@kbn/core-spaces-common'
   - '@kbn/logging-mocks'
+  - '@kbn/sandbox-proto'
   - '@kbn/spaces-plugin'
 tags:
   - plugin
