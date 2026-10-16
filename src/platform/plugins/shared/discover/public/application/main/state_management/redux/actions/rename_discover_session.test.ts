@@ -32,6 +32,7 @@ const setup = async ({
   });
   const persistedDiscoverSession = createDiscoverSessionMock({
     id: 'test-session',
+    version: 'opened-version',
     title: 'Test Session',
     description: 'Test Description',
     tags: ['tag1'],
@@ -47,6 +48,7 @@ const setup = async ({
   const latestDiscoverSession: DiscoverSession = isSavedElsewhere
     ? {
         ...persistedDiscoverSession,
+        version: 'version-saved-elsewhere',
         description: 'Description saved elsewhere',
         tags: ['tag2'],
         tabs: [
@@ -112,6 +114,52 @@ describe('renameDiscoverSession', () => {
     expect(selectHasUnsavedChanges(toolkit.internalState.getState(), comparisonContext)).toEqual({
       hasUnsavedChanges: true,
       unsavedTabIds: [tabId],
+    });
+  });
+
+  it('should store the version saved by the rename, so a reload keeps the local tabs', async () => {
+    const { toolkit, services } = await setup({ tabsStorageEnabled: true });
+    jest.mocked(services.discoverSessionService.save).mockImplementationOnce(async (session) => ({
+      ...session,
+      id: 'test-session',
+      managed: false,
+      version: 'renamed-version',
+    }));
+
+    await toolkit.internalState
+      .dispatch(internalStateActions.renameDiscoverSession({ newTitle: 'Renamed Session' }))
+      .unwrap();
+
+    expect(toolkit.internalState.getState().persistedDiscoverSession?.version).toBe(
+      'renamed-version'
+    );
+    await waitFor(() => {
+      expect(services.storage.get(TABS_LOCAL_STORAGE_KEY).discoverSessionVersion).toBe(
+        'renamed-version'
+      );
+    });
+  });
+
+  it('should keep the opened version when the session was saved elsewhere, so a reload restores the newer saved tabs', async () => {
+    const { toolkit, services } = await setup({ isSavedElsewhere: true, tabsStorageEnabled: true });
+    jest.mocked(services.discoverSessionService.save).mockImplementationOnce(async (session) => ({
+      ...session,
+      id: 'test-session',
+      managed: false,
+      version: 'renamed-version',
+    }));
+
+    await toolkit.internalState
+      .dispatch(internalStateActions.renameDiscoverSession({ newTitle: 'Renamed Session' }))
+      .unwrap();
+
+    expect(toolkit.internalState.getState().persistedDiscoverSession?.version).toBe(
+      'opened-version'
+    );
+    await waitFor(() => {
+      expect(services.storage.get(TABS_LOCAL_STORAGE_KEY).discoverSessionVersion).toBe(
+        'opened-version'
+      );
     });
   });
 
