@@ -1,0 +1,71 @@
+version: '1'
+name: 'Automatic Troubleshooting: diagnose endpoint configuration'
+description: >
+  Collects the fixed evidence for one Elastic Defend host, or for the environment
+  when no host is given: resolves the target, reads its Fleet agent and endpoint
+  policy response, checks the Elastic Defend integration version and configuration,
+  and counts the hosts the Endpoint list and Fleet can see. The finalize step
+  classifies the health and shapes the diagnosis. Internal: reached only by id
+  through execute_workflow.
+enabled: true
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        hostname:
+          type: string
+          maxLength: 256
+          description: >-
+            Hostname of the Elastic Defend host to diagnose. Omit, together with
+            agent_id, to diagnose the environment without a target.
+        agent_id:
+          type: string
+          maxLength: 64
+          description: >-
+            Fleet agent id or Endpoint id of the host to diagnose. Used when given;
+            when both agent_id and hostname are given, agent_id wins.
+        include_configurations:
+          type: boolean
+          default: false
+          description: >-
+            Read the current transform, index and pipeline configuration. Always on
+            when no host is given.
+      additionalProperties: false
+steps:
+  - name: resolve
+    type: security.resolveEndpointHosts
+    if: "${{ inputs.hostname != blank or inputs.agent_id != blank }}"
+    with:
+      targets:
+        - hostname: "${{ inputs.hostname }}"
+          agent_id: "${{ inputs.agent_id }}"
+      expand_short_hostname: true
+    on-failure: { continue: true }
+  - name: host_diagnostics
+    type: security.getEndpointHostDiagnostics
+    if: "${{ steps.resolve.output.results[0].status == 'resolved' }}"
+    with:
+      hosts:
+        - agent_id: "${{ steps.resolve.output.results[0].hosts[0].agent_id }}"
+          endpoint_id: "${{ steps.resolve.output.results[0].hosts[0].endpoint_id }}"
+      include_healthy: false
+    on-failure: { continue: true }
+  - name: package_status
+    type: security.getEndpointPackageStatus
+    with:
+      include_configurations: "${{ inputs.include_configurations == true or inputs.hostname == blank and inputs.agent_id == blank }}"
+    on-failure: { continue: true }
+  - name: inventory_counts
+    type: security.getEndpointInventoryCounts
+    if: "${{ inputs.hostname == blank and inputs.agent_id == blank }}"
+    on-failure: { continue: true }
+  - name: finalize
+    type: security.finalizeTroubleshootingDiagnosis
+    with:
+      resolve: "${{ steps.resolve }}"
+      host_diagnostics: "${{ steps.host_diagnostics }}"
+      package_status: "${{ steps.package_status }}"
+      inventory_counts: "${{ steps.inventory_counts }}"
+      target_requested: "${{ inputs.hostname != blank or inputs.agent_id != blank }}"
+      include_configurations: "${{ inputs.include_configurations == true or inputs.hostname == blank and inputs.agent_id == blank }}"
+      started_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S' }}"

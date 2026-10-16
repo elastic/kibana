@@ -1,0 +1,31 @@
+version: '1'
+name: 'Automatic Troubleshooting: search endpoint knowledge'
+description: >
+  Searches the integration knowledge base for short excerpts that ground an
+  Elastic Defend diagnosis, filtered to the endpoint package. Internal: reached
+  only by id through execute_workflow.
+enabled: true
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        query:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          description: The question or evidence terms to search for.
+        max:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 5
+          description: Maximum number of knowledge excerpts to return.
+      required:
+        - query
+      additionalProperties: false
+steps:
+  - name: knowledge_search
+    type: security.searchIntegrationKnowledge
+    with:
+      query: "{{ inputs.query }}"
+      max: "${{ inputs.max }}"
