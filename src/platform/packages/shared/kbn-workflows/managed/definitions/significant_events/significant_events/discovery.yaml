@@ -45,6 +45,10 @@ triggers:
           type: boolean
           default: false
           description: 'When true, the knowledge indicators of the batch (the grounding skill''s Step 1 searches) are fetched before the agent runs and sent in its message, so it makes no ki_search call. Off until the discovery evaluation shows no loss in verdicts or events.'
+        prefetchGroundingResults:
+          type: boolean
+          default: false
+          description: 'When true, the grounding samples and no-scope profiles of the batch''s rules are also run before the agent and sent with its knowledge indicators, so the agent reads them instead of running those queries. Implies the knowledge indicators are fetched; off until the discovery evaluation shows no loss.'
         classifierProbeWindowMinutes:
           type: number
           default: 20
@@ -345,7 +349,7 @@ steps:
   # run them itself: the message carries the section only when this step has an output.
   - name: get_discovery_context
     type: kibana.request
-    if: '${{ inputs.prefetchGroundingContext and steps.classify_detections.output.row_count > 0 }}'
+    if: '${{ inputs.prefetchGroundingContext and not inputs.prefetchGroundingResults and steps.classify_detections.output.row_count > 0 }}'
     with:
       method: POST
       path: '/s/{{ workflow.spaceId }}/internal/significant_events/discovery/_context'
@@ -354,6 +358,23 @@ steps:
       body:
         rule_uuids: '${{ steps.classify_detections.output.rule_uuids }}'
         source_ids: '${{ steps.classify_detections.output.source_ids }}'
+    on-failure:
+      continue: true
+
+  # The same route with the detection times: it also runs the rules' grounding queries as the caller.
+  - name: get_discovery_grounding
+    type: kibana.request
+    if: '${{ inputs.prefetchGroundingResults and steps.classify_detections.output.row_count > 0 }}'
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/discovery/_context'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        rule_uuids: '${{ steps.classify_detections.output.rule_uuids }}'
+        source_ids: '${{ steps.classify_detections.output.source_ids }}'
+        detections: '${{ steps.classify_detections.output.detections }}'
+    timeout: '120s'
     on-failure:
       continue: true
 
@@ -374,10 +395,11 @@ steps:
 
         Columns: {{ steps.get_detections.output.columns | map: 'name' | json }}
         Rows: {% if steps.classify_detections.error == null and steps.classify_detections.output != null %}{{ steps.classify_detections.output.rows | json }}{% else %}{{ steps.get_detections.output.values | json }}{% endif %}
-        {% if steps.get_discovery_context.output != null %}
+        {% assign prefetched = steps.get_discovery_grounding.output | default: steps.get_discovery_context.output %}
+        {% if prefetched != null %}
         ## Prefetched context
 
-        {{ steps.get_discovery_context.output | json }}
+        {{ prefetched | json }}
         {% endif %}
       schema:
         type: object

@@ -147,6 +147,7 @@ describe('discovery workflow detection classifier wiring', () => {
     it.each([
       ['classifierShadowMode', 'boolean', true, undefined, undefined],
       ['prefetchGroundingContext', 'boolean', false, undefined, undefined],
+      ['prefetchGroundingResults', 'boolean', false, undefined, undefined],
       ['classifierProbeWindowMinutes', 'number', 20, 15, 360],
       ['classifierProbeTimeoutMs', 'number', 8000, 1000, 30000],
       ['classifierProbeConcurrency', 'number', 5, 1, 10],
@@ -252,6 +253,12 @@ describe('discovery workflow detection classifier wiring', () => {
       ['is off', { prefetchGroundingContext: false }, 2, false],
       ['is on and the agent has rows', { prefetchGroundingContext: true }, 2, true],
       ['is on but every detection was skipped', { prefetchGroundingContext: true }, 0, false],
+      [
+        'is on but the grounding results are fetched instead',
+        { prefetchGroundingContext: true, prefetchGroundingResults: true },
+        2,
+        false,
+      ],
     ])('runs only when the input %s', (_name, inputs, rowCount, expected) => {
       expect(evaluate(step().if, context(inputs, { output: { row_count: rowCount } }))).toBe(
         expected
@@ -268,6 +275,55 @@ describe('discovery workflow detection classifier wiring', () => {
 
     it('never fails the run', () => {
       expect(step()['on-failure']).toEqual({ continue: true });
+    });
+
+    describe('with the grounding results', () => {
+      const groundingStep = () => requireStep('get_discovery_grounding');
+
+      it.each([
+        ['is off', { prefetchGroundingResults: false }, 2, false],
+        ['is on and the agent has rows', { prefetchGroundingResults: true }, 2, true],
+        ['is on but every detection was skipped', { prefetchGroundingResults: true }, 0, false],
+      ])('runs only when its input %s', (_name, inputs, rowCount, expected) => {
+        expect(
+          evaluate(groundingStep().if, context(inputs, { output: { row_count: rowCount } }))
+        ).toBe(expected);
+      });
+
+      it('sends the detection times with the rules and sources, and never fails the run', () => {
+        const { body } = groundingStep().with as { body: Record<string, unknown> };
+        const classify = {
+          output: {
+            rule_uuids: ['rule-A'],
+            source_ids: ['source-1'],
+            detections: [{ rule_uuid: 'rule-A', detected_at: '2026-10-16T09:56:07.779Z' }],
+          },
+        };
+
+        expect(evaluate(body.detections, context({}, classify))).toEqual(
+          classify.output.detections
+        );
+        expect(evaluate(body.rule_uuids, context({}, classify))).toEqual(['rule-A']);
+        expect(groundingStep()['on-failure']).toEqual({ continue: true });
+      });
+
+      it('sends the grounding results to the agent in place of the plain context', () => {
+        const message = (steps: Record<string, unknown>) => {
+          const template = requireStep('run_discovery_agent').with?.message;
+          if (typeof template !== 'string') throw new Error('Expected the agent message template');
+          return createWorkflowLiquidEngine().parseAndRenderSync(template, {
+            steps: { ...withClassify({ output: { rows: rawRows } }).steps, ...steps },
+          });
+        };
+        const plain = { output: { query_kis: [] } };
+        const grounded = { output: { query_kis: [], grounding: [{ rule_uuid: 'rule-A' }] } };
+
+        expect(
+          message({ get_discovery_grounding: grounded, get_discovery_context: plain })
+        ).toContain(JSON.stringify(grounded.output));
+        expect(message({ get_discovery_context: plain })).toContain(JSON.stringify(plain.output));
+        expect(message({})).not.toContain('Prefetched context');
+      });
     });
 
     it('adds the context to the agent message only when the step returned one', () => {
