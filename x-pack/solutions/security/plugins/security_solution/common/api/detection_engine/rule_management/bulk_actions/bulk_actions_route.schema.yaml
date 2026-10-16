@@ -1065,6 +1065,11 @@ components:
       enum:
         - NO_GAPS_TO_FILL
 
+    BulkDeleteSkipReason:
+      type: string
+      enum:
+        - RULE_NOT_FOUND
+
     BulkActionSkipResult:
       type: object
       properties:
@@ -1076,6 +1081,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/BulkEditSkipReason'
             - $ref: '#/components/schemas/BulkGapsFillingSkipReason'
+            - $ref: '#/components/schemas/BulkDeleteSkipReason'
       required:
         - id
         - skip_reason

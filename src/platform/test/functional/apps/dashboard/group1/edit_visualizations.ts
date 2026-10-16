@@ -69,7 +69,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await visChart.waitForVisualizationRenderingStabilized();
   };
 
-  describe('edit visualizations from dashboard', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/280844
+  describe.skip('edit visualizations from dashboard', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
