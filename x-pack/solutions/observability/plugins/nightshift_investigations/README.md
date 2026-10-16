@@ -83,6 +83,8 @@ Roles carry `metadata.managed_by: nightshift`. `_enable` brings them to the curr
 
 The investigation and hook workflows themselves are installed once, globally and unbound, at startup. A change to their YAML updates that one copy on the next boot. The bound entry points only change when their own template does. A hook entry point declares its hook's inputs, so a change to a hook's trigger inputs needs a version bump of its entry point (a snapshot test pins them together).
 
+A hook entry point only runs when Agent Builder starts it as a hook. Its inputs are the round's content (prompt, response, tool calls and results), and the hook writes what it learns from them to Cortex, Semantic Memory and the decision trees as the agent account. Anyone allowed to run workflows in the space could otherwise run it directly with made-up content and plant knowledge that later investigations trust. Agent Builder starts hooks with `triggeredBy: agent-builder-hook` (`AGENT_BUILDER_HOOK_TRIGGER_SOURCE` in `@kbn/workflows`), which only server code can set, and the entry point's first step fails any other run.
+
 A workflow can only be bound to an account from an authenticated request with `manage_security`, so setup cannot happen at startup. On later boots, the dynamic-workflow upgrade reuses the existing bindings without a request.
 
 ### Agent Builder hooks
@@ -119,6 +121,7 @@ The status reports, per bound workflow, whether it is installed, enabled, valid,
 
 ### Known gaps
 
+- **Direct runs of the investigation entry point.** Unlike the hook entry points, it is not guarded: anyone with workflow execute in the space can start an investigation as the agent account by running it. Start-route runs carry `triggeredBy: nightshift-investigations`, so the hook guard can be extended to it once automations and Slack set their own value.
 - **Chat-started investigations.** The `streams-investigation-management` skill starts `system-nightshift-investigation` by id through `execute_workflow`. That run executes as the chat user, so `_ensure` rejects it.
 - **Deleted account.** If an account is force-deleted, every run fails with a token exchange error. Recovery: delete the leftover token, then run `_disable` and `_enable` again.
 - **The detection account is not bound to anything yet.** Nightshift's own detection workflows still run as their callers.

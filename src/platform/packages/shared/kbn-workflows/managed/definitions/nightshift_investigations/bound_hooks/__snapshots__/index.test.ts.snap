@@ -30,7 +30,7 @@ Object {
       "type": "manual",
     },
   ],
-  "version": 1,
+  "version": 2,
 }
 `;
 
@@ -119,7 +119,7 @@ Object {
       "type": "manual",
     },
   ],
-  "version": 1,
+  "version": 2,
 }
 `;
 
@@ -153,6 +153,6 @@ Object {
       "type": "manual",
     },
   ],
-  "version": 1,
+  "version": 2,
 }
 `;

@@ -16,6 +16,7 @@ import {
   NIGHTSHIFT_BOUND_HOOK_TARGETS,
   NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW,
 } from '.';
+import { AGENT_BUILDER_HOOK_TRIGGER_SOURCE } from '../../../../common/well_known_trigger_sources';
 import { WorkflowSchema } from '../../../../spec/schema';
 import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW } from '../agent_optimize';
 import { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW } from '../decision_tree_hydrate';
@@ -45,12 +46,24 @@ describe.each(cases)('Nightshift bound hook %#', (bound, hook) => {
   it('runs as the service account and calls the hook with its identity', () => {
     expect(rendered.settings.run_as).toBe(ACCOUNT);
     expect(rendered.steps).toEqual([
+      expect.objectContaining({ name: 'refuse_direct_runs' }),
       {
         name: 'run_hook',
         type: 'workflow.execute',
         with: { 'workflow-id': hook.id, 'run-as-mode': 'inherit', inputs: '${{ inputs }}' },
       },
     ]);
+  });
+
+  // Its inputs are the round's content, which the hook learns from as the account.
+  it('fails every run Agent Builder did not start as a hook', () => {
+    const [guard] = rendered.steps;
+    expect(guard).toEqual({
+      name: 'refuse_direct_runs',
+      type: 'if',
+      condition: `not execution.triggeredBy : "${AGENT_BUILDER_HOOK_TRIGGER_SOURCE}"`,
+      steps: [expect.objectContaining({ name: 'refuse', type: 'workflow.fail' })],
+    });
   });
 
   it("declares exactly the hook's inputs, so Agent Builder passes it the same ones", () => {

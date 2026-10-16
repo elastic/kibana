@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AGENT_BUILDER_HOOK_TRIGGER_SOURCE } from '../../../../common/well_known_trigger_sources';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../../types';
 import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from '../agent_optimize';
 import AGENT_OPTIMIZE_WORKFLOW_YAML from '../agent_optimize/agent_optimize_workflow.yaml';
@@ -37,7 +38,12 @@ const getTriggersBlock = (yaml: string): string => {
  * user who started it. This entry point is bound to the service account instead and calls the
  * hook with `run-as-mode: inherit`, so the hook runs as the account. It declares the hook's own
  * inputs, because Agent Builder passes optional hook inputs only to workflows that declare them,
- * and its only step's output is the hook's output, which Agent Builder reads.
+ * and its last step's output is the hook's output, which Agent Builder reads.
+ *
+ * It refuses every run Agent Builder did not start as a hook. The hook inputs carry the round's
+ * content (prompt, response, tool calls and results), and the hook writes what it learns from
+ * them to Nightshift's knowledge as the account. Anyone allowed to run workflows could otherwise
+ * start it directly with made-up content. Only server code sets `triggeredBy`.
  */
 const renderBoundHookYaml = ({
   hookWorkflowId,
@@ -68,6 +74,17 @@ tags:
 ${getTriggersBlock(hookYaml)}
 
 steps:
+  - name: refuse_direct_runs
+    type: if
+    condition: 'not execution.triggeredBy : "${AGENT_BUILDER_HOOK_TRIGGER_SOURCE}"'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            ${hookWorkflowId} runs as the Nightshift service account and only Agent Builder may
+            start it, as an agent hook. This run was started by {{ execution.triggeredBy }}.
+
   - name: run_hook
     type: workflow.execute
     with:
@@ -109,7 +126,7 @@ const management = {
 export const NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 1,
+  version: 2,
   billable: false,
   yamlTemplate: ({ serviceAccountId }: NightshiftBoundHookTemplateValues) =>
     renderBoundHookYaml({
@@ -124,7 +141,7 @@ export const NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW = {
 export const NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 1,
+  version: 2,
   billable: false,
   yamlTemplate: ({ serviceAccountId }: NightshiftBoundHookTemplateValues) =>
     renderBoundHookYaml({
@@ -139,7 +156,7 @@ export const NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW = {
 export const NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 1,
+  version: 2,
   billable: false,
   yamlTemplate: ({ serviceAccountId }: NightshiftBoundHookTemplateValues) =>
     renderBoundHookYaml({
