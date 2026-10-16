@@ -15,7 +15,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/observability-shared-plugin",
     "@kbn/scout-oblt",
-    "@kbn/shared-ux-router",
     "@kbn/typed-react-router-config",
     "@kbn/unified-search-plugin",
     "@kbn/ux-plugin"
