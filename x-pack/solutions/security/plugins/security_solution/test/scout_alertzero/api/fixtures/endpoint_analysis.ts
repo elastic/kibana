@@ -97,10 +97,21 @@ export interface AttachmentVersion<DataType = unknown> {
 
 export interface ConversationAttachment<DataType = unknown> {
   readonly id?: string;
+  /** Set when the attachment was created with a caller-supplied id. */
+  readonly client_id?: string;
   readonly type?: string;
   readonly current_version?: number;
   readonly versions?: readonly AttachmentVersion<DataType>[];
 }
+
+const isAttachment = (attachment: ConversationAttachment, id: string): boolean =>
+  [attachment.id, attachment.client_id].some((candidate) => candidate?.includes(id));
+
+/** True when the investigation holds an attachment created under (or named) `id`. */
+export const hasAttachment = (
+  attachments: ReadonlyArray<ConversationAttachment>,
+  id: string
+): boolean => attachments.some((attachment) => isAttachment(attachment, id));
 
 export const listAttachments = async <T = unknown>(
   api: AlertZeroApi,
@@ -119,7 +130,7 @@ export const attachmentData = <T>(
   attachments: ReadonlyArray<ConversationAttachment<T>>,
   id: string
 ): T | undefined => {
-  const attachment = attachments.find((candidate) => candidate.id === id);
+  const attachment = attachments.find((candidate) => isAttachment(candidate, id));
   const current =
     attachment?.versions?.find((version) => version.version === attachment.current_version) ??
     attachment?.versions?.[attachment.versions.length - 1];

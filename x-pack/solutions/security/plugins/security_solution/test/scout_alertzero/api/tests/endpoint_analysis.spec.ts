@@ -24,6 +24,7 @@ import {
   ensureInvestigationsAiIndex,
   getAdminApi,
   getWorker,
+  hasAttachment,
   listAttachments,
   listExecutionIds,
   listPendingProposals,
@@ -275,13 +276,20 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
         'the forensic timeline and IoC attachments',
         async () => {
           const found = await listAttachments(adminApi, context.investigationId);
-          const ids = found.map((attachment) => attachment.id);
-          return ids.includes(timelineAttachmentId) && ids.includes(iocsAttachmentId)
+          return hasAttachment(found, timelineAttachmentId) &&
+            hasAttachment(found, iocsAttachmentId)
             ? found
             : undefined;
         },
         { timeoutMs: testData.ACTION_TIMEOUT_MS }
-      );
+      ).catch(async (error: Error) => {
+        const seen = await listAttachments(adminApi, context.investigationId).catch(() => []);
+        throw new Error(
+          `${error.message}; attachments on the investigation: ${JSON.stringify(
+            seen.map(({ id, client_id: clientId, type }) => ({ id, clientId, type }))
+          )}`
+        );
+      });
 
       const timeline = attachmentData<{ events?: Array<{ host?: string }> }>(
         attachments,
