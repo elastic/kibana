@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-automatic-import",
+  "owner": "@elastic/siem-conduit",
+  "group": "platform",
+  "visibility": "shared"
+}
