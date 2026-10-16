@@ -1,0 +1,62 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/**
+ * Generates EDOT Browser data (the `main` data shape of `@opentelemetry/browser-instrumentation`)
+ * for several apps in different states of health, for Digital Experience development.
+ *
+ * Data shape (OTel-native, no APM enrichment):
+ * - `logs-generic.otel-default`: `browser.navigation`, `browser.navigation_timing`,
+ *   `browser.resource_timing`, `browser.web_vital`, `browser.user_action.click` and
+ *   `exception` events
+ * - `traces-generic.otel-default`: fetch/XHR CLIENT spans
+ * - timings and web vital values always carry a fractional part, so they map as `float`
+ *
+ * Apps (`service.name`):
+ * - storefront-web: healthy, high traffic
+ * - checkout-web: failing `POST /api/payment` and frequent JS errors
+ * - media-portal-web: slow, poor LCP from large images and render-blocking CSS
+ * - support-center-web: critical, poor INP/CLS and high error rate
+ * - docs-web: healthy, low traffic, desktop-heavy
+ *
+ * Scenario options:
+ * - withSessionId (boolean, default: false): write `attributes.session.id`. EDOT Browser `main`
+ *   does not emit it yet (elastic/opentelemetry-dev#1410).
+ * - scale (number, default: 1): multiplies the number of sessions per minute of every app
+ *
+ * Run:
+ *   node scripts/synthtrace digital_experience_browser --from=now-30m --to=now
+ *   node scripts/synthtrace digital_experience_browser --live --scenarioOpts withSessionId=true
+ */
+
+import type { Scenario } from '../cli/scenario';
+import type { OtelDocument } from '../lib/otel/otel_synthtrace_es_client';
+import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { withClient } from '../lib/utils/with_client';
+import {
+  generateEdotBrowserSessions,
+  parseDigitalExperienceScenarioOpts,
+} from './helpers/digital_experience_apps';
+
+const ENVIRONMENT = getSynthtraceEnvironment(__filename);
+
+const scenario: Scenario<OtelDocument> = async ({ scenarioOpts, logger }) => {
+  const opts = parseDigitalExperienceScenarioOpts(scenarioOpts);
+  logger.info(`Generating EDOT Browser data with ${JSON.stringify(opts)}`);
+
+  return {
+    generate: ({ range, clients: { otelEsClient } }) =>
+      withClient(
+        otelEsClient,
+        generateEdotBrowserSessions(range, { ...opts, environment: ENVIRONMENT })
+      ),
+  };
+};
+
+export default scenario;

@@ -102,7 +102,7 @@ export const HEALTH_PROFILES: Readonly<Record<HealthProfileName, HealthProfile>>
     clsZeroRate: 0.25,
     resourceDuration: { median: 120, sigma: 0.6 },
     httpLatency: { median: 250, sigma: 0.6 },
-    httpFailureRate: 0.15,
+    httpFailureRate: 0.05,
     networkErrorRate: 0.02,
     jsErrorRate: 0.12,
   },
