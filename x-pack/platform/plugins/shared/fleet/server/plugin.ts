@@ -226,6 +226,7 @@ export interface FleetAppContext {
   data: DataPluginStart;
   encryptedSavedObjectsStart?: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
+  isFipsEnabled: boolean;
   securityCoreStart: SecurityServiceStart;
   securitySetup: SecurityPluginSetup;
   securityStart: SecurityPluginStart;
@@ -373,6 +374,7 @@ export class FleetPlugin
   private fleetPolicyRevisionsCleanupTask?: FleetPolicyRevisionsCleanupTask;
   private versionSpecificPolicyAssignmentTask?: VersionSpecificPolicyAssignmentTask;
 
+  private isFipsEnabled: boolean = false;
   private agentService?: AgentService;
   private packageService?: PackageService;
   private packagePolicyService?: PackagePolicyService;
@@ -401,6 +403,7 @@ export class FleetPlugin
     this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
     this.securitySetup = deps.security;
+    this.isFipsEnabled = core.security.fips.isEnabled();
     const config = this.configInitialValue;
 
     core.status.set(this.fleetStatus$.asObservable());
@@ -812,6 +815,7 @@ export class FleetPlugin
       logFactory: this.initializerContext.logger,
       config: {
         taskInterval: config.versionSpecificPolicyAssignment?.taskInterval,
+        orphanSweepIntervalMs: config.versionSpecificPolicyAssignment?.orphanSweepIntervalMs,
       },
     });
     this.lockManagerService = new LockManagerService(core, this.initializerContext.logger.get());
@@ -841,6 +845,7 @@ export class FleetPlugin
       data: plugins.data,
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
+      isFipsEnabled: this.isFipsEnabled,
       securityCoreStart: core.security,
       securitySetup: this.securitySetup,
       securityStart: plugins.security,

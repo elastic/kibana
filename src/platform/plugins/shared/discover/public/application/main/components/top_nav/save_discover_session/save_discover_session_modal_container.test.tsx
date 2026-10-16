@@ -70,6 +70,7 @@ const getOnSaveProps = (
 const setup = async ({
   additionalPersistedTabs,
   dataViewsList,
+  draftSessionTitle,
   initialCopyOnSave,
   initialTabDataView,
   isEmbedded = false,
@@ -86,6 +87,7 @@ const setup = async ({
 }: {
   additionalPersistedTabs?: DiscoverSessionTab[];
   dataViewsList?: DataView[];
+  draftSessionTitle?: string;
   initialCopyOnSave?: boolean;
   initialTabDataView?: DataView;
   isEmbedded?: boolean;
@@ -128,6 +130,12 @@ const setup = async ({
 
   await toolkit.initializeTabs({ persistedDiscoverSession: finalPersistedSession });
   await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
+  if (draftSessionTitle) {
+    await toolkit.internalState
+      .dispatch(internalStateActions.renameDiscoverSession({ newTitle: draftSessionTitle }))
+      .unwrap();
+  }
 
   if (initialTabDataView) {
     toolkit.internalState.dispatch(
@@ -325,6 +333,15 @@ describe('DiscoverSessionSaveModalContainer', () => {
         sessionId: undefined,
         title: '',
       });
+    });
+
+    it('should prefill the title with the draft name of a new session', async () => {
+      const { modalProps } = await setup({
+        persistedDiscoverSession: false,
+        draftSessionTitle: 'My draft',
+      });
+
+      expect(modalProps?.title).toBe('My draft');
     });
 
     it('should set sessionId to undefined for Save As and new sessions', async () => {

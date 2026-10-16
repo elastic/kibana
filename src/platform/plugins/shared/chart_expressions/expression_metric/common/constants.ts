@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { VisIconType } from '@kbn/chart-icons';
+
 export const EXPRESSION_METRIC_NAME = 'metricVis';
 export const EXPRESSION_METRIC_TRENDLINE_NAME = 'metricTrendline';
 
@@ -36,4 +38,4 @@ export const AvailableMetricIcons = {
   TAG: 'tag',
   GLOBE: 'globe',
   TEMPERATURE: 'temperature',
-} as const;
+} as const satisfies Record<string, VisIconType>;

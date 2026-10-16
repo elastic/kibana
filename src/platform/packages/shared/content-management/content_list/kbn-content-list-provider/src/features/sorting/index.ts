@@ -7,7 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { SortField, SortOption, SortingConfig } from './types';
-export { DEFAULT_SORT_FIELDS, DEFAULT_INITIAL_SORT, getSortFieldDirections } from './types';
+export type { SortField, SortOption, SortingConfig, SortDirection, SortState } from './types';
+export {
+  DEFAULT_SORT_FIELDS,
+  DEFAULT_INITIAL_SORT,
+  getSortFieldDirections,
+  isSortDirection,
+} from './types';
 export { useContentListSort } from './use_content_list_sort';
 export type { UseContentListSortReturn } from './use_content_list_sort';
+export type { SortDirectionsByField } from './allowed_sorts';
+export {
+  getAllowedSorts,
+  getInitialSort,
+  getSortKey,
+  isAllowedSort,
+  parseSortKey,
+  toSortDirectionsByField,
+} from './allowed_sorts';
+export { getPersistedSort } from './persist';
