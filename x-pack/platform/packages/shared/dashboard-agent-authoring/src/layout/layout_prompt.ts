@@ -43,7 +43,7 @@ Use these sizes — **do not make metric or gauge panels full-width**:
 
 - **Metric** (\`chartType: metric\` or \`legacy_metric\`) → \`w: 6, 8, or 12, h: 5–6\`. These are single-number panels — keep them **small**. Fit 4–8 per row: 8 metrics → each \`w: 6\`, 6 → \`w: 8\`, 4 → \`w: 12\`.
 - **Gauge** (\`gauge\`) → \`w: 12, h: 8\`. Fit up to 4 per row.
-- **XY (line / area / bar)** (\`xy\`) → \`w: 24, h: 10\`. Use full-width (\`w: 48\`) for the primary time series.
+- **XY (line / area / bar)** (\`xy\`) → \`w: 24, h: 10\`, two side by side. At most one XY panel on the dashboard is full width, and none is fine: only the first time series of the dashboard, when it leads its container. Every other XY panel shares its row.
 - **Heatmap, tag cloud, treemap, waffle, mosaic** (\`heatmap\`, \`tag_cloud\`, \`treemap\`, \`waffle\`, \`mosaic\`) → \`w: 24, h: 10\`.
 - **Pie** (\`pie\`) → \`w: 12, h: 10\`.
 - **Markdown** (\`type: markdown\`) → \`w: 24–48, h: 4–9\`, from the length of its \`content\`.
@@ -57,8 +57,9 @@ Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 ## Grid packing rules
 
 - **Fill rows left to right:** start at \`x: 0\`; the next panel's \`x\` is the previous panel's \`x + w\`, and \`x + w\` never exceeds 48. A new row starts at the previous row's \`y + max(h)\`. Kibana moves every panel up until another panel blocks it, so \`y\` only sets the order: use sections, not blank rows, to separate groups.
-- **Fill row widths:** the widths of every row add up to 48. The sizes by chart type are starting points: when they leave columns unused, widen the panels of that row. For example, 5 metrics → \`w: 8, 8, 8, 12, 12\`; a pie (\`w: 12\`) and a bar chart (\`w: 24\`) → \`w: 24\` each; a panel alone in its row → \`w: 48\`.
-- **Never leave a metric or gauge alone in a row:** group it with other metrics, or put it beside a neighbouring panel of its container at that panel's height, narrowing the neighbour. For example, a \`12×6\` metric beside a \`36×6\` markdown, or a \`12×10\` metric beside a \`36×10\` chart.
+- **Fill row widths:** the widths of every row add up to 48. The sizes by chart type are starting points: when they leave columns unused, widen the panels of that row. For example, 5 metrics → \`w: 8, 8, 8, 12, 12\`; a pie (\`w: 12\`) and a bar chart (\`w: 24\`) → \`w: 24\` each.
+- **Avoid a chart alone in its row:** pair it with the next panel of its container instead, or make three charts \`w: 16\` each. For example, 3 XY panels → \`24, 24\` then \`24\` beside the next pie or table, not \`24, 24, 48\`. Only a datatable, a markdown panel, or the one full-width XY panel may be alone in its row (\`w: 48\`).
+- **Never leave a metric or gauge alone in a row:** group it with other metrics, or put it beside the panel just above or below it in its container, at that panel's height, narrowing the neighbour. A top-level panel never crosses a section to fill the row. For example, a \`12×6\` metric beside a \`36×6\` markdown, or a \`12×10\` metric beside a \`36×10\` chart.
 - **Align row heights:** panels side by side have the same \`h\`. When panels stack in side-by-side columns, the columns end on the same row: stretch the last panel of the shorter column. For example, a left column of \`h: 18\` + \`h: 13\` next to a right column of \`h: 15\` + \`h: 13\` → make the last right panel \`h: 16\`. Small panels beside a taller one stack into a column of its height: two metrics beside a \`24×10\` chart become two \`24×5\` metrics at \`y: 0\` and \`y: 5\`, not two \`12×5\` metrics over an empty \`24×5\` gap.
 
 ## Section grid rules
