@@ -215,7 +215,7 @@ describe('renderPage', () => {
       jest.spyOn(Math, 'random').mockRestore();
     });
 
-    /** Starts a render and returns its eventual result or error, so neither goes unhandled. */
+    /** Resolves to the result or the error, so neither goes unhandled. */
     function start(context: Parameters<typeof renderPage>[2]) {
       return firstValueFrom(renderPage(payload, config, context, logger)).catch(
         (error: Error) => error

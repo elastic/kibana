@@ -40,12 +40,9 @@ export interface PageRenderServiceConfig {
 export interface RenderContext {
   /** When Task Manager times this run out. */
   retryAt?: Date | null;
-  /**
-   * Its age drives the retry ladder; its ID goes to the service. Capacity wait is measured from
-   * `waitingSince` when a failed render has restarted the wait.
-   */
+  /** Its age drives the retry ladder; `waitingSince` starts the capacity-wait metric. */
   report?: { id: string; createdAt: Date; waitingSince?: Date };
-  /** Without it, waiting for capacity runs to the deadline instead of a minute per run. */
+  /** Caps the wait for capacity at a minute per run, then hands the worker back. */
   canHandBack?: boolean;
 }
 
@@ -120,7 +117,7 @@ function describeNetworkError(err: unknown): string {
   return code ? `${message} (${code})` : message;
 }
 
-/** A UIAM failure while minting is queuing like an unreachable service, not a failed attempt. */
+/** A failed mint counts as `unavailable`, which queues the report. */
 async function mintToken(config: PageRenderServiceConfig, signal: AbortSignal): Promise<string> {
   try {
     return await config.createToken(signal);
@@ -147,8 +144,7 @@ async function postWithRetry(
   const createdAt = report?.createdAt.getTime() ?? runStartedAt;
   const waitStartedAt = report?.waitingSince?.getTime() ?? createdAt;
   const tags = report ? [report.id] : [];
-  // One token for every capacity retry: the service checks it on arrival only, and caches that
-  // check, so a fresh token per retry would double the UIAM calls while the service is saturated.
+  // One token for all capacity retries: the service checks it only on arrival, and caches that.
   let token: string | undefined;
 
   for (;;) {
@@ -193,7 +189,7 @@ async function postWithRetry(
     );
 
     if (retryClass !== 'capacity') {
-      // The service took a slot and tried. A 4xx with a phase is refused before taking one.
+      // Only a 5xx with a phase means the service took a slot.
       if (response.status >= 500 && body?.phase) {
         pageRenderTelemetry.recordCapacityWait((sentAt - waitStartedAt) / 1000);
       }
@@ -209,8 +205,6 @@ async function postWithRetry(
       );
     }
     if (now + waitMs > waitUntil) {
-      // Out of waiting time for this run. Only some tasks can hand back and run again, so the
-      // message doesn't promise a reschedule.
       throw new RenderServiceSaturatedError(
         `page-render-service is still at capacity after waiting ${Math.round(
           (now - runStartedAt) / 1000
@@ -251,9 +245,8 @@ async function readResult(
 }
 
 /**
- * POSTs a render request, waiting out the service's capacity rejections within this run's budget
- * (see `retry_ladder.ts`). Failures are `RenderServiceError`s, which tell the reporting task how
- * to retry. Unsubscribing aborts the request.
+ * POSTs a render request, waiting out capacity rejections within the run's budget. Failures are
+ * `RenderServiceError`s. Unsubscribing aborts the request.
  */
 export function renderPage(
   payload: RenderPageRequest,

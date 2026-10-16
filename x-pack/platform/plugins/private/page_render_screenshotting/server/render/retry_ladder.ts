@@ -42,10 +42,7 @@ export function jitter(ms: number, random: () => number = Math.random): number {
   return Math.round(ms * (0.5 + random()));
 }
 
-/**
- * Capped so the run's deadline still leaves room for the render. A run that can't hand back keeps
- * waiting until then: stopping early would spend one of the report's attempts.
- */
+/** Leaves room for the render before the deadline, and stops after a minute if it can hand back. */
 export function stopWaitingAt(
   runStartedAt: number,
   deadline: number | undefined,

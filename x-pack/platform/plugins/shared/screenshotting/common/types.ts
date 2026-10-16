@@ -37,7 +37,7 @@ export interface PerformanceMetrics {
  * which determine the maximum timeouts possible
  */
 export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'retryAt' | 'startedAt'> & {
-  /** page-render-service retries are timed from the report's creation, not the run's start. */
+  /** page-render-service times its retries from the report, across task runs. */
   report?: { id: string; createdAt: Date; waitingSince?: Date };
   /** Whether the run can hand its worker back while waiting for page-render-service capacity. */
   canHandBack?: boolean;

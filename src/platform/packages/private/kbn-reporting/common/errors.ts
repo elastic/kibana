@@ -168,11 +168,10 @@ export class ReportingSavedObjectNotFoundError extends ReportingError {
 }
 
 /**
- * How the reporting task responds to a page-render-service failure. The service has no queue, so
- * the caller retries (`render_retry.ts` in the reporting plugin).
+ * How the reporting task responds to a page-render-service failure (`render_retry.ts`).
  *
- * - `capacity`: no render slot came free within this run's wait budget; hand the worker back.
- * - `unavailable`: the service could not be reached, or something in front of it failed.
+ * - `capacity`: no render slot within this run's wait budget; hand the worker back.
+ * - `unavailable`: the service, or something in front of it, could not be reached.
  * - `render_failure`: the service tried and failed to render the page.
  * - `unrecoverable`: retrying cannot help.
  */

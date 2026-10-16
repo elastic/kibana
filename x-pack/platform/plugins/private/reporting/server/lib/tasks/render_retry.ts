@@ -9,12 +9,11 @@ import { RenderCapacityTimeoutError, RenderServiceError } from '@kbn/reporting-c
 import type { RenderRetryAction, RenderRetryReason } from './reporting_telemetry';
 
 /**
- * The between-runs half of the page-render-service retry ladder. The in-run half is
- * `retry_ladder.ts` in the page-render-screenshotting plugin.
+ * The between-runs half of the page-render-service retry ladder; `retry_ladder.ts` in the
+ * page-render-screenshotting plugin is the in-run half.
  *
- * Reschedules return `{ runAt, state }` as a successful run rather than throwing: a thrown error
- * spends one of the task's attempts, and waiting for capacity can take ten runs. Waiting for
- * capacity or for an unreachable service is queuing, not an attempt; a failed render is an attempt.
+ * Reschedules return `{ runAt, state }` as a successful run, because a thrown error spends a task
+ * attempt. Waiting on capacity or an unreachable service is queuing; a failed render is an attempt.
  */
 
 /** Runs allowed while the service cannot be reached, counting the first. */
@@ -84,7 +83,7 @@ export function decideRenderRetry(
         action: 'reschedule',
         reason: 'render_failure',
         runAt,
-        // The next render's wait starts here, not at the report's creation.
+        // The next render's wait for a slot starts here.
         state: { unavailableRuns, queued: false, waitingSince: runAt.getTime() },
       };
     }
@@ -97,17 +96,14 @@ export function decideRenderRetry(
 }
 
 /**
- * Whether this run is a new attempt on the report. Returning `{ runAt }` resets Task Manager's
- * attempts, so a run after queuing is claimed as attempt 1; a later one followed a thrown failure.
+ * Task Manager's attempts restart at 1 after a `{ runAt }` result, so a higher count means the run
+ * after queuing failed.
  */
 export function isNewAttempt(state: RenderRetryState | undefined, taskAttempts: number): boolean {
   return !state?.queued || taskAttempts > 1;
 }
 
-/**
- * Attempts made on the report so far. After a reschedule Task Manager's count restarts, so the
- * report's own count, which skips queuing runs, is the one to trust.
- */
+/** After a reschedule Task Manager's count restarts, so the report's own count wins. */
 export function attemptsMade(
   state: RenderRetryState | undefined,
   taskAttempts: number,

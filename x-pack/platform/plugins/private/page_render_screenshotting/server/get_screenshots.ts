@@ -92,7 +92,7 @@ export function createGetScreenshots({
           createToken: async (signal) => {
             const systemIdentity = getSystemIdentity();
             if (!systemIdentity) {
-              // Configuration, not an outage: retrying cannot help.
+              // A configuration error: retrying cannot help.
               throw new RenderRequestRejectedError(
                 'Cannot authenticate to page-render-service: xpack.security.uiam is not configured'
               );

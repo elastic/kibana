@@ -840,8 +840,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               renderRetry?.action === 'fail' ||
               (isLastAttempt && attemptCount > (taskAttempts ?? 0))
             ) {
-              // Ends the task now. Task Manager's own count may have restarted at a reschedule, and
-              // would otherwise run a report that has used its attempts.
+              // A reschedule may have restarted Task Manager's count: don't rerun a spent report.
               throwUnrecoverableError(failedToExecuteErr);
             }
 
