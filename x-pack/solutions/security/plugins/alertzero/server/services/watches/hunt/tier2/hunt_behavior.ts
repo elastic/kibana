@@ -430,10 +430,28 @@ const buildGenerationContext = ({
 };
 
 /**
- * One `generateEsql` call per validated behavior, keyed by technique id. The
- * shared generator grounds the query in ES|QL docs and the target's mappings,
- * autocorrects, validates the AST, and retries; anything that still fails
- * falls back to a non-executable placeholder (no FROM clause).
+ * One behavior's outcome from {@link generateGroundedEsql}: either a query ready to hand to
+ * the outer source/grounding gates (grounded in-scope, or out-of-scope and passed through
+ * untouched so the outer source gate labels it `query_out_of_scope` as today), or a query that
+ * stayed ungrounded through the retry, carrying the first gate's rejection reason.
+ */
+type GeneratedEsqlEntry =
+  | { outcome: 'generated'; techniqueId: string; esql: string }
+  | { outcome: 'ungrounded'; techniqueId: string; reason: string };
+
+/**
+ * One `generateEsql` call per validated behavior, keyed by technique id, followed by this
+ * module's own grounding check and — on the first failure — exactly one corrective retry that
+ * hands the model its own rejected query and the gate's reason. The shared generator still
+ * grounds the query in ES|QL docs and the target's mappings, autocorrects, validates the AST,
+ * and retries on its own schedule; that loop is unchanged and separate from this one.
+ *
+ * Returns two maps rather than one: `generated` holds every query this function hands on to
+ * the publish loop's own source/grounding gates (grounded in-scope queries, plus out-of-scope
+ * queries passed through so the outer source gate labels them, exactly as before this function
+ * existed); `ungrounded` holds the first gate's rejection reason for a behavior that stayed
+ * ungrounded through the retry. A technique id in neither map means generation itself failed
+ * (an `error`, no query, or a throw), unchanged from before.
  */
 const generateGroundedEsql = async ({
   esqlModel,
@@ -455,35 +473,40 @@ const generateGroundedEsql = async ({
   articleContext?: HuntBehaviorArticleContext;
   allowedIndices: string[];
   rowLimit: number;
-}): Promise<Map<string, string>> => {
+}): Promise<{ generated: Map<string, string>; ungrounded: Map<string, string> }> => {
   const index = resolveGenerationIndex(allowedIndices);
   const additionalContext = buildGenerationContext({ text, iocs, articleContext });
   // The schema probe runs the model's FROM before the publish/execute scope gate, so gate the
   // client it runs on with the same allowlist — an out-of-scope probe is refused before it
   // reaches Elasticsearch, and generation falls back to the non-executable placeholder.
   const probeClient = scopedEsqlProbeClient(esClient, allowedIndices);
+  const iocValues = (iocs ?? []).map((ioc) => ioc.value);
 
   const entries = await pMap(
     behaviors,
-    async (behavior): Promise<[string, string] | undefined> => {
+    async (behavior): Promise<GeneratedEsqlEntry | undefined> => {
+      // Shared across both calls (D15): only `additionalInstructions` differs on the retry.
+      const baseArgs = {
+        model: esqlModel,
+        esClient: probeClient,
+        logger,
+        nlQuery:
+          `Hunt for MITRE ATT&CK ${behavior.technique_id} (${behavior.technique_name}) ` +
+          `as described by this report evidence: "${behavior.evidence_quote}"`,
+        index,
+        additionalContext,
+        // The hunt window is bound as an execute-time filter, not ?_tstart/?_tend params.
+        disableNamedParams: true,
+        // AST-validate against mappings, then probe-execute (LIMIT 1) so environment
+        // errors feed the generator's retry loop. The real execute runs below with
+        // METADATA columns and the hunt window.
+        execute: 'schema' as const,
+        rowLimit,
+      };
       try {
         const { query, error } = await generateEsql({
-          model: esqlModel,
-          esClient: probeClient,
-          logger,
-          nlQuery:
-            `Hunt for MITRE ATT&CK ${behavior.technique_id} (${behavior.technique_name}) ` +
-            `as described by this report evidence: "${behavior.evidence_quote}"`,
-          index,
+          ...baseArgs,
           additionalInstructions: ESQL_GENERATION_INSTRUCTIONS,
-          additionalContext,
-          // The hunt window is bound as an execute-time filter, not ?_tstart/?_tend params.
-          disableNamedParams: true,
-          // AST-validate against mappings, then probe-execute (LIMIT 1) so environment
-          // errors feed the generator's retry loop. The real execute runs below with
-          // METADATA columns and the hunt window.
-          execute: 'schema',
-          rowLimit,
         });
         if (error || !query) {
           logger.warn(
@@ -495,7 +518,81 @@ const generateGroundedEsql = async ({
           );
           return undefined;
         }
-        return [behavior.technique_id, query.trim()];
+        const esql = query.trim();
+        // Out of scope → hand it on unchanged, no retry: the outer source gate labels it
+        // `query_out_of_scope` exactly as today. (D7)
+        const sourcesAllowed = assertEsqlSourcesAllowed(
+          prepareEsqlForExecute(esql),
+          allowedIndices
+        );
+        if (!sourcesAllowed.ok) {
+          return { outcome: 'generated', techniqueId: behavior.technique_id, esql };
+        }
+        // Raw `query.trim()`, the same input the outer grounding gate uses today. (D16)
+        const grounded = assertEsqlGroundedInReport(esql, { reportText: text, iocValues });
+        if (grounded.ok) {
+          return { outcome: 'generated', techniqueId: behavior.technique_id, esql };
+        }
+        const firstReason = grounded.reason;
+        // Debug-level, exact shape, so a future local run can be harvested into fixtures by
+        // grepping `[hunt:esql] ungrounded query`. (D14)
+        logger.debug(
+          `[hunt:esql] ungrounded query technique=${behavior.technique_id} attempt=1 ` +
+            `reason=${firstReason}\n${esql.slice(0, 2000)}`
+        );
+        const retryInstructions =
+          `${ESQL_GENERATION_INSTRUCTIONS}\n\n` +
+          `Your previous query was rejected because it is not grounded in the report:\n\n` +
+          `${esql.slice(0, 4000)}\n\n` +
+          `Rejection reason: ${firstReason}\n\n` +
+          `Rewrite the query so every OR branch, IN member and FORK branch filters on a ` +
+          `verbatim report artifact; remove any branch that does not. Do not add new generic ` +
+          `branches.`;
+        try {
+          const { query: retryQuery, error: retryError } = await generateEsql({
+            ...baseArgs,
+            additionalInstructions: retryInstructions,
+          });
+          if (retryError || !retryQuery) {
+            logger.warn(
+              `[hunt:esql] grounded ES|QL retry for ${behavior.technique_id} failed — ` +
+                `keeping the non-executable placeholder. first reason: ${firstReason}; ` +
+                `second-call error: ${(retryError ?? 'no query returned').slice(0, 300)}`
+            );
+            return {
+              outcome: 'ungrounded',
+              techniqueId: behavior.technique_id,
+              reason: firstReason,
+            };
+          }
+          // No source pre-check of its own (D7): an out-of-scope retry still grounds here and
+          // lands in `generated`, where the outer source gate labels it as today.
+          const retryEsql = retryQuery.trim();
+          const retryGrounded = assertEsqlGroundedInReport(retryEsql, {
+            reportText: text,
+            iocValues,
+          });
+          if (retryGrounded.ok) {
+            return { outcome: 'generated', techniqueId: behavior.technique_id, esql: retryEsql };
+          }
+          logger.debug(
+            `[hunt:esql] ungrounded query technique=${behavior.technique_id} attempt=2 ` +
+              `reason=${retryGrounded.reason}\n${retryEsql.slice(0, 2000)}`
+          );
+          logger.warn(
+            `[hunt:esql] discarding the retried query for ${behavior.technique_id} — ` +
+              `first reason: ${firstReason}; second reason: ${retryGrounded.reason}. ` +
+              `Keeping the non-executable placeholder.`
+          );
+          return { outcome: 'ungrounded', techniqueId: behavior.technique_id, reason: firstReason };
+        } catch (retryErr) {
+          logger.warn(
+            `[hunt:esql] grounded ES|QL retry for ${behavior.technique_id} threw — ` +
+              `keeping the non-executable placeholder. first reason: ${firstReason}; ` +
+              `second-call error: ${((retryErr as Error).message ?? '').slice(0, 300)}`
+          );
+          return { outcome: 'ungrounded', techniqueId: behavior.technique_id, reason: firstReason };
+        }
       } catch (err) {
         logger.warn(
           `[hunt:esql] grounded ES|QL generation for ${behavior.technique_id} threw — ` +
@@ -510,16 +607,23 @@ const generateGroundedEsql = async ({
     { concurrency: ESQL_GENERATION_CONCURRENCY }
   );
 
-  const generated = new Map<string, string>(
-    entries.filter((entry): entry is [string, string] => entry !== undefined)
-  );
+  const generated = new Map<string, string>();
+  const ungrounded = new Map<string, string>();
+  for (const entry of entries) {
+    if (!entry) continue;
+    if (entry.outcome === 'generated') {
+      generated.set(entry.techniqueId, entry.esql);
+    } else {
+      ungrounded.set(entry.techniqueId, entry.reason);
+    }
+  }
   if (generated.size < behaviors.length) {
     logger.warn(
       `[hunt:esql] grounded ES|QL generation covered ${generated.size}/${behaviors.length} ` +
         `behaviors — uncovered behaviors fall back to a non-executable placeholder.`
     );
   }
-  return generated;
+  return { generated, ungrounded };
 };
 
 const renderArticleContext = (context: HuntBehaviorArticleContext | undefined): string => {
@@ -791,15 +895,26 @@ export const huntBehavior = async (
       // Budget-skipped behaviors are already recorded above; re-reporting them here
       // as generation failures would name the same technique twice for two causes.
       if (!targeted.has(behavior.technique_id)) continue;
-      const esql = groundedEsql.get(behavior.technique_id);
+      const esql = groundedEsql.generated.get(behavior.technique_id);
       if (!esql) {
-        behavior.execution = notExecuted('generation_failed');
-        gap(
-          behavior.technique_id,
-          'generation_failed',
-          `No query could be generated for ${behavior.technique_id}, so it was never searched. ` +
-            `A later run may succeed.`
-        );
+        const firstReason = groundedEsql.ungrounded.get(behavior.technique_id);
+        if (firstReason) {
+          behavior.execution = notExecuted('query_ungrounded');
+          gap(
+            behavior.technique_id,
+            'query_ungrounded',
+            `The query generated for ${behavior.technique_id} was discarded ` +
+              `(${firstReason}), so the technique was never searched.`
+          );
+        } else {
+          behavior.execution = notExecuted('generation_failed');
+          gap(
+            behavior.technique_id,
+            'generation_failed',
+            `No query could be generated for ${behavior.technique_id}, so it was never searched. ` +
+              `A later run may succeed.`
+          );
+        }
         continue;
       }
       // Publication clears a source gate of its own. A staged rule reads as

@@ -883,6 +883,143 @@ describe('huntBehavior', () => {
     });
   });
 
+  describe('the grounding retry', () => {
+    const UNGROUNDED_ESQL = 'FROM logs-aws.*\n| LIMIT 1';
+
+    // `generateByTechnique` keys on `nlQuery`, which is identical across the first call and
+    // the retry, so these use `mockResolvedValueOnce`/`mockRejectedValueOnce` chains instead.
+
+    it('rescues a behavior whose first query is ungrounded but whose retry grounds', async () => {
+      generateEsqlMock
+        .mockResolvedValueOnce({ query: UNGROUNDED_ESQL })
+        .mockResolvedValueOnce({ query: GROUNDED_ESQL });
+
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      expect(result.behaviors[0].validated_esql).toContain(GROUNDED_ESQL);
+      expect(executeEsqlMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the placeholder as query_ungrounded when the retry is also ungrounded', async () => {
+      generateEsqlMock
+        .mockResolvedValueOnce({ query: UNGROUNDED_ESQL })
+        .mockResolvedValueOnce({ query: 'FROM logs-aws.*\n| LIMIT 2' });
+
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      expect(result.behaviors[0].execution).toEqual({
+        executed: false,
+        row_count: 0,
+        hit: false,
+        inconclusive_reason: 'query_ungrounded',
+      });
+      expect(result.incomplete).toContainEqual(
+        expect.objectContaining({
+          reason: 'query_ungrounded',
+          technique_id: 'T1078.004',
+          detail: expect.stringContaining('no filtering predicate'),
+        })
+      );
+      expect(executeEsqlMock).not.toHaveBeenCalled();
+    });
+
+    it('keeps the placeholder as query_ungrounded, not generation_failed, when the retry call errors', async () => {
+      generateEsqlMock
+        .mockResolvedValueOnce({ query: UNGROUNDED_ESQL })
+        .mockResolvedValueOnce({ error: 'Unknown column [nope]' });
+
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      expect(result.behaviors[0].execution?.inconclusive_reason).toBe('query_ungrounded');
+    });
+
+    it('keeps the placeholder as query_ungrounded, not generation_failed, when the retry call throws', async () => {
+      generateEsqlMock
+        .mockResolvedValueOnce({ query: UNGROUNDED_ESQL })
+        .mockRejectedValueOnce(new Error('Could not discover a suitable index'));
+
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      expect(result.behaviors[0].execution?.inconclusive_reason).toBe('query_ungrounded');
+    });
+
+    it('retries with the rejected query and gate reason, every other argument unchanged', async () => {
+      generateEsqlMock
+        .mockResolvedValueOnce({ query: UNGROUNDED_ESQL })
+        .mockResolvedValueOnce({ query: GROUNDED_ESQL });
+
+      await huntBehavior(buildMockModel([t1078Candidate]), logger, executeParams, esClient);
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      const [firstCall, secondCall] = generateEsqlMock.mock.calls.map(([args]) => args);
+      expect(secondCall.additionalInstructions?.startsWith(ESQL_GENERATION_INSTRUCTIONS)).toBe(
+        true
+      );
+      expect(secondCall.additionalInstructions).toContain(UNGROUNDED_ESQL);
+      expect(secondCall.additionalInstructions).toContain('no filtering predicate');
+      expect(secondCall.nlQuery).toBe(firstCall.nlQuery);
+      expect(secondCall.index).toBe(firstCall.index);
+      expect(secondCall.additionalContext).toBe(firstCall.additionalContext);
+      expect(secondCall.execute).toBe(firstCall.execute);
+      expect(secondCall.rowLimit).toBe(firstCall.rowLimit);
+      expect(secondCall.disableNamedParams).toBe(firstCall.disableNamedParams);
+    });
+
+    it('does not retry a first-call generation error', async () => {
+      generateEsqlMock.mockResolvedValueOnce({ error: 'Unknown column [nope]' });
+
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(1);
+      expect(result.behaviors[0].execution?.inconclusive_reason).toBe('generation_failed');
+    });
+
+    it('does not retry an out-of-scope first query, and logs no ungrounded-query debug line', async () => {
+      generateByTechnique({ 'T1078.004': 'FROM .kibana-*\n| WHERE true\n| LIMIT 10' });
+      const debugSpy = jest.spyOn(logger, 'debug');
+
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(1);
+      expect(result.behaviors[0].execution?.inconclusive_reason).toBe('query_out_of_scope');
+      expect(debugSpy).not.toHaveBeenCalledWith(expect.stringContaining('ungrounded query'));
+    });
+  });
+
   describe('the generation budget', () => {
     const GENERATION_BUDGET = 20;
     const OVER_BUDGET = GENERATION_BUDGET + 5;
