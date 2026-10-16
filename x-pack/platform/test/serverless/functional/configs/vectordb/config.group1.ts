@@ -10,6 +10,7 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseTestConfig = await readConfigFile(require.resolve('../../config.vectordb.base.ts'));
 
+  // Keep this focused group in the distribution-download bypass experiment.
   return {
     ...baseTestConfig.getAll(),
     testFiles: [require.resolve('../../test_suites/home_page')],
