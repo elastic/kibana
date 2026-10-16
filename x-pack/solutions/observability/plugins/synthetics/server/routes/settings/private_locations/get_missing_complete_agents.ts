@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { buildPolicyIdOrVariantsKuery } from '@kbn/fleet-plugin/common';
 import pMap from 'p-map';
-import { escapeQuotes } from '@kbn/es-query';
 import type { SyntheticsServerSetup } from '../../../types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
@@ -33,7 +33,7 @@ const locationHasCompleteAgent = async (
         showInactive: false,
         perPage: PER_PAGE,
         page,
-        kuery: `policy_id:"${escapeQuotes(agentPolicyId)}"`,
+        kuery: buildPolicyIdOrVariantsKuery(agentPolicyId),
       });
     total = totalAgents ?? agents.length;
     fetched += agents.length;

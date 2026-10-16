@@ -13,7 +13,11 @@ import { allFleetHttpMocks } from '../../mocks';
 import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { useFetchAgentByAgentPolicySummary } from './use_fetch_endpoint_policy_agent_summary';
 import type { GetAgentStatusResponse } from '@kbn/fleet-plugin/common';
-import { agentRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
+import {
+  agentRouteService,
+  API_VERSIONS,
+  buildPolicyIdsOrVariantsKuery,
+} from '@kbn/fleet-plugin/common';
 
 const useQueryMock = _useQuery as jest.Mock;
 
@@ -88,9 +92,13 @@ describe('When using the `useFetchEndpointPolicyAgentSummary()` hook', () => {
     policy.policy_ids = ['1', '2', '3'];
     await renderHook();
 
+    // the agents on a version specific or the sentinel policy (`<id>#*`) of each policy are included
+    expect(buildPolicyIdsOrVariantsKuery(['1', '2', '3'])).toEqual(
+      expect.stringMatching(/1#\*.*2#\*.*3#\*/)
+    );
     expect(apiMocks.responseProvider.agentStatus).toHaveBeenCalledWith({
       path: agentRouteService.getStatusPath(),
-      query: { kuery: 'policy_id:1 OR policy_id:2 OR policy_id:3' },
+      query: { kuery: buildPolicyIdsOrVariantsKuery(['1', '2', '3']) },
       version: API_VERSIONS.public.v1,
     });
   });

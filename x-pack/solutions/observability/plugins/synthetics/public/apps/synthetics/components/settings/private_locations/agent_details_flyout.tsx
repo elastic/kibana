@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { buildPolicyIdOrVariantsKuery } from '@kbn/fleet-plugin/common';
 import React from 'react';
 import {
   EuiBadge,
@@ -67,7 +68,9 @@ export const AgentDetailsFlyout = ({
   // Prefer agent id for Fleet deep-links (exact match).
   const fleetAgentHref = agent.agentId
     ? `${basePath}/app/fleet/agents/${encodeURIComponent(agent.agentId)}`
-    : `${basePath}/app/fleet/agents?kuery=${encodeURIComponent(`policy_id:"${agentPolicyId}"`)}`;
+    : `${basePath}/app/fleet/agents?kuery=${encodeURIComponent(
+        buildPolicyIdOrVariantsKuery(agentPolicyId)
+      )}`;
 
   const capacityItems: EuiDescriptionListProps['listItems'] = [
     {
