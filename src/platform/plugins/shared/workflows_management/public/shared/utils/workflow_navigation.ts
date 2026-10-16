@@ -7,16 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core/public';
 import { PLUGIN_ID } from '../../../common';
 
 export interface WorkflowDetailRouteState {
   workflowsListSearch?: string;
-  /** Prompt from the empty-list landing, handed to the chat on `/create`. */
-  initialAgentMessage?: string;
-  /** Attachments of that prompt (e.g. pasted images). */
-  initialAgentAttachments?: ConversationAttachment[];
 }
 
 export const getWorkflowDetailRouteState = (

@@ -76,7 +76,7 @@ import {
 /**
  * `location.state` the page can arrive with: list-navigation state (back
  * link) and, on `/create`, the cross-app initial-content contract
- * (`WorkflowsCreateRouteState`, e.g. the Template Library's "Remix with AI").
+ * (`WorkflowsCreateRouteState`, e.g. "Remix with AI" or the landing prompt).
  */
 type WorkflowDetailLocationState = WorkflowDetailRouteState & WorkflowsCreateRouteState;
 
@@ -382,7 +382,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
             defaultMessage: 'New workflow',
           })}
           back={{
-            href: `/app/${PLUGIN_ID}`,
+            href: application.getUrlForApp(PLUGIN_ID),
             label: i18n.translate('workflows.newWorkflow.backLinkLabel', {
               defaultMessage: 'Workflows',
             }),

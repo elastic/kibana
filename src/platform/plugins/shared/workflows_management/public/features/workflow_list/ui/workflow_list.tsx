@@ -23,7 +23,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { isTriggerType } from '@kbn/workflows';
-import { useWorkflows, useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import {
+  useWorkflows,
+  useWorkflowsCapabilities,
+  type WorkflowsCreateRouteState,
+} from '@kbn/workflows-ui';
 import { ExportReferencesModal } from './export_references_modal';
 import { useEventDrivenExecutionStatus } from './use_event_driven_execution_status';
 import { useExportWithReferences } from './use_export_with_references';
@@ -331,7 +335,10 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
         onSubmitPrompt={(message, attachments) =>
           application.navigateToApp(PLUGIN_ID, {
             path: '/create',
-            state: { initialAgentMessage: message, initialAgentAttachments: attachments },
+            state: {
+              initialAgentMessage: message,
+              initialAgentAttachments: attachments,
+            } satisfies WorkflowsCreateRouteState,
           })
         }
         onStartManually={() =>
