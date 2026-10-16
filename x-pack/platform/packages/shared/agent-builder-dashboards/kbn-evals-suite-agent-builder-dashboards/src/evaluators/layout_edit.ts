@@ -13,6 +13,7 @@ import {
   type DashboardSection,
 } from '@kbn/agent-builder-dashboards-common';
 import { byReadingOrder, formatGrid, getPanelContainers, getPanelKind } from '../dashboard_panels';
+import { getLastWrittenDashboardId } from '../extract_dashboard';
 import { noDashboardResult, scoreChecks, skippedResult, type Check } from '../evaluator_utils';
 import {
   TOP_LEVEL,
@@ -112,10 +113,14 @@ const checkStableContainers = (
             ? []
             : [`${id} ${formatGrid(grid)} -> ${formatGrid(now.panel.grid)}`];
         });
+      const joined = (result.containers.get(container) ?? [])
+        .filter(({ id }) => seed.panels.get(id)?.container !== container)
+        .map(({ id }) => `${id} joined the container`);
+      const changed = [...moved, ...joined];
       return {
         assertion: `stable.${container}`,
-        passed: moved.length === 0,
-        detail: moved.length === 0 ? 'unchanged' : moved.join('; '),
+        passed: changed.length === 0,
+        detail: changed.length === 0 ? 'unchanged' : changed.join('; '),
       };
     });
 };
@@ -230,8 +235,9 @@ export const dashboardLayoutEditEvaluator: DashboardAgentEvaluator = {
     if (!gold) {
       return skippedResult('No layout edit gold.');
     }
-    const { before, dashboard } = output;
-    if (!dashboard) {
+    const { before, dashboard, steps = [] } = output;
+    // Without a write the result is the seed itself, which would pass every preservation check.
+    if (!dashboard || getLastWrittenDashboardId(steps) === undefined) {
       return noDashboardResult;
     }
     if (!before) {
