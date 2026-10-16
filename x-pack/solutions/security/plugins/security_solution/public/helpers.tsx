@@ -24,6 +24,7 @@ import {
   CASES_PATH,
   DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
+  RULES_ADD_PATH,
   RULES_CHANGES_HISTORY_PATH,
   RULES_PATH,
   THREAT_INTELLIGENCE_PATH,
@@ -182,6 +183,16 @@ export const isDashboardViewPath = (pathname: string): boolean =>
     exact: false,
     strict: false,
   }) != null;
+
+/**
+ * Matches the Add Elastic rules page, whose app header owns the page actions.
+ */
+export const isRulesAddPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: RULES_ADD_PATH,
+    exact: true,
+    strict: false,
+  });
 
 export const isRuleChangesHistoryPath = (pathname: string): boolean =>
   !!matchPath(pathname, {

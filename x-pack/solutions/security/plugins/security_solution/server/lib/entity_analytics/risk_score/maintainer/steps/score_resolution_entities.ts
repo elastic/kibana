@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { WatchlistObject } from '../../../../../../common/api/entity_analytics/watchlists/management/common.gen';
@@ -38,6 +39,8 @@ interface ScoreResolutionEntitiesParams {
   watchlistConfigs: Map<string, WatchlistObject>;
   abortSignal?: AbortSignal;
   targetEntityIds?: string[];
+  /** Same time range, status and custom filters base scoring applies to alerts. */
+  alertFilters: QueryDslQueryContainer[];
 }
 
 interface ResolutionPageResult {
@@ -62,6 +65,7 @@ export const calculateResolutionEntityScores = async function* ({
   watchlistConfigs,
   abortSignal,
   targetEntityIds,
+  alertFilters,
 }: ScoreResolutionEntitiesParams): AsyncGenerator<EntityRiskScoreRecord[], number> {
   let afterKey: Record<string, string> | undefined;
   let pagesProcessed = 0;
@@ -99,6 +103,7 @@ export const calculateResolutionEntityScores = async function* ({
       pageSize,
       alertsIndex,
       lookupIndex,
+      alertFilters,
     });
     logger.debug(
       `[resolution][page:${pagesProcessed}] parsed_scores=${parsedScores.length}, esql_rows=${esqlRows}`
@@ -266,6 +271,7 @@ const scoreResolutionPage = async ({
   pageSize,
   alertsIndex,
   lookupIndex,
+  alertFilters,
 }: {
   esClient: ElasticsearchClient;
   entityType: EntityType;
@@ -274,6 +280,7 @@ const scoreResolutionPage = async ({
   pageSize: number;
   alertsIndex: string;
   lookupIndex: string;
+  alertFilters: QueryDslQueryContainer[];
 }): Promise<{ parsedScores: ParsedResolutionScore[]; esqlRows: number }> => {
   const query = getResolutionScoreESQLByIds(
     entityType,
@@ -284,7 +291,7 @@ const scoreResolutionPage = async ({
     lookupIndex
   );
   const esqlResponse = await esClient.esql.query(
-    { query },
+    { query, filter: { bool: { filter: alertFilters } } },
     { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
   );
   return {

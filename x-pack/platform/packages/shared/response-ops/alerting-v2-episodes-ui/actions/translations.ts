@@ -71,9 +71,35 @@ export const RESOLVE_ACTION_REASON = i18n.translate(
   }
 );
 
-export const BULK_ERROR_TOAST = i18n.translate('xpack.alertingV2Episodes.actions.bulkErrorToast', {
-  defaultMessage: 'An error occurred while performing the bulk action.',
-});
+export const getBulkErrorDetailsHeading = (failed: number): string =>
+  i18n.translate('xpack.alertingV2Episodes.actions.bulkErrorDetailsHeadingErrorMessage', {
+    defaultMessage: 'The action failed for {failed, plural, one {# alert} other {# alerts}}.',
+    values: { failed },
+  });
+
+export const getBulkTotalFailureToast = (actionName: string, failed: number): string =>
+  i18n.translate('xpack.alertingV2Episodes.actions.bulkTotalFailureToastErrorMessage', {
+    defaultMessage: '{actionName} failed for {failed, plural, one {# alert} other {# alerts}}.',
+    values: { actionName, failed },
+  });
+
+export const getBulkPartialFailureToast = (actionName: string, failed: number): string =>
+  i18n.translate('xpack.alertingV2Episodes.actions.bulkPartialFailureToastErrorMessage', {
+    defaultMessage: '{actionName} completed with {failed, plural, one {# error} other {# errors}}.',
+    values: { actionName, failed },
+  });
+
+export const getBulkFailureReason = (reason: string, additionalReasons: number): string =>
+  i18n.translate('xpack.alertingV2Episodes.actions.bulkFailureReasonErrorMessage', {
+    defaultMessage:
+      '{reason}{additionalReasons, plural, =0 {} one { (+# more reason)} other { (+# more reasons)}}',
+    values: { reason, additionalReasons },
+  });
+
+export const UNKNOWN_ERROR = i18n.translate(
+  'xpack.alertingV2Episodes.actions.unknownBulkErrorMessage',
+  { defaultMessage: 'Unknown error' }
+);
 
 export const getBulkSuccessToast = (processed: number): string =>
   i18n.translate('xpack.alertingV2Episodes.actions.bulkSuccessToast', {
@@ -87,13 +113,6 @@ export const BULK_NO_CHANGES_TOAST = i18n.translate(
     defaultMessage: 'No changes were needed.',
   }
 );
-
-export const getBulkPartialSuccessToast = (processed: number, total: number): string =>
-  i18n.translate('xpack.alertingV2Episodes.actions.bulkPartialSuccessToast', {
-    defaultMessage:
-      '{processed} of {total} {total, plural, one {alert} other {alerts}} updated successfully.',
-    values: { processed, total },
-  });
 
 export const UNRESOLVE_NOT_AVAILABLE = i18n.translate(
   'xpack.alertingV2Episodes.actions.unresolveNotAvailable',
