@@ -49,7 +49,7 @@ describe('Blocklists API validations', () => {
       } as unknown as CreateExceptionListItemOptions);
 
     const filePathEntry = (value: string[]): CreateExceptionListItemOptions['entries'] => [
-      { field: 'file.path', type: 'match_any', operator: 'included', value },
+      { field: 'file.path.caseless', type: 'match_any', operator: 'included', value },
     ];
 
     const hashEntry = (value: string[]): CreateExceptionListItemOptions['entries'] => [
@@ -189,7 +189,7 @@ describe('Blocklists API validations', () => {
       } as unknown as CreateExceptionListItemOptions);
 
     const fileNameMatchAnyEntry = (value: string[]): CreateExceptionListItemOptions['entries'] => [
-      { field: 'file.name', type: 'match_any', operator: 'included', value },
+      { field: 'file.name.caseless', type: 'match_any', operator: 'included', value },
     ];
 
     const wildcardEntry = (
@@ -208,20 +208,40 @@ describe('Blocklists API validations', () => {
       }
     );
 
+    it.each([['file.path.caseless'], ['file.name.caseless']] as const)(
+      'accepts a wildcard (Match) entry for field %s',
+      async (field) => {
+        await expect(
+          validator.validatePreCreateItem(buildItem(wildcardEntry(field, 'C:\\foo\\*.exe')))
+        ).resolves.toBeDefined();
+      }
+    );
+
     it.each([
-      ['file.path'],
-      ['file.path.caseless'],
-      ['file.name'],
-      ['file.name.caseless'],
-    ] as const)('accepts a wildcard (Match) entry for field %s', async (field) => {
+      ['windows', 'file.path'],
+      ['windows', 'file.name'],
+      ['macos', 'file.path'],
+      ['macos', 'file.name'],
+    ] as const)('rejects a non-caseless field on %s: %s', async (os, field) => {
       await expect(
-        validator.validatePreCreateItem(buildItem(wildcardEntry(field, 'C:\\foo\\*.exe')))
-      ).resolves.toBeDefined();
+        validator.validatePreCreateItem(buildItem(wildcardEntry(field, 'C:\\foo\\*.exe'), [os]))
+      ).rejects.toThrow(EndpointArtifactExceptionValidationError);
     });
+
+    it.each([['file.path'], ['file.name']] as const)(
+      'accepts a non-caseless %s field on linux',
+      async (field) => {
+        await expect(
+          validator.validatePreCreateItem(buildItem(wildcardEntry(field, '/usr/*/foo'), ['linux']))
+        ).resolves.toBeDefined();
+      }
+    );
 
     it('rejects a wildcard entry over the 4096 character limit', async () => {
       await expect(
-        validator.validatePreCreateItem(buildItem(wildcardEntry('file.name', 'a'.repeat(4097))))
+        validator.validatePreCreateItem(
+          buildItem(wildcardEntry('file.name.caseless', 'a'.repeat(4097)))
+        )
       ).rejects.toThrow(EndpointArtifactExceptionValidationError);
     });
 
@@ -240,7 +260,7 @@ describe('Blocklists API validations', () => {
         validator.validatePreCreateItem(
           buildItem([
             {
-              field: 'file.name',
+              field: 'file.name.caseless',
               type: 'wildcard',
               operator: 'included',
               value: ['a.exe', 'b.exe'],

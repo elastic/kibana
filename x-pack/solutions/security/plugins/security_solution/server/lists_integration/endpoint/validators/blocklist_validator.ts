@@ -33,8 +33,13 @@ const FilePath = schema.oneOf(
   allowedFilePaths.map((path) => schema.literal(path)) as [Type<string>]
 );
 
+const FilePathCaseless = schema.literal('file.path.caseless');
+
 const FileName = schema.literal('file.name');
 const FileNameCaseless = schema.literal('file.name.caseless');
+
+// Windows and macOS are case-insensitive, so path and file name entries must use the `.caseless` fields
+const CaselessEntryField = schema.oneOf([FileHashField, FilePathCaseless, FileNameCaseless]);
 
 const FileCodeSigner = schema.literal('file.Ext.code_signature');
 
@@ -145,7 +150,7 @@ const WindowsEntrySchema = schema.oneOf([
   WindowsSignerEntrySchema,
   schema.object({
     ...CommonEntrySchema,
-    field: schema.oneOf([FileHashField, FilePath, FileName, FileNameCaseless]),
+    field: CaselessEntryField,
   }),
 ]);
 
@@ -155,6 +160,7 @@ const LinuxEntrySchema = schema.object({
 
 const MacEntrySchema = schema.object({
   ...CommonEntrySchema,
+  field: CaselessEntryField,
 });
 
 // Hash entries validator method.
