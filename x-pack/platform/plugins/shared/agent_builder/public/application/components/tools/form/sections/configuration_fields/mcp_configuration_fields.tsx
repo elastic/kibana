@@ -20,6 +20,7 @@ import { i18nMessages } from '../../i18n';
 import { ToolFormMode } from '../../tool_form';
 import { McpEditableFields } from '../../components/mcp/mcp_editable_fields';
 import { McpReadOnlyFields } from '../../components/mcp/mcp_readonly_fields';
+import { ConfirmationPolicySelect } from '../../components/confirmation_policy_select';
 
 export interface McpConfigurationProps {
   mode: ToolFormMode;
@@ -69,6 +70,8 @@ export const McpConfiguration = ({ mode }: McpConfigurationProps) => {
           />
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
+      <EuiSpacer />
+      <ConfirmationPolicySelect />
     </>
   );
 };

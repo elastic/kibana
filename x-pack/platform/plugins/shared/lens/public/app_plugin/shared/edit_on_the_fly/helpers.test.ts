@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { getESQLResults, formatESQLColumns, getESQLAdHocDataview } from '@kbn/esql-utils';
+import { getESQLResults, formatESQLColumns } from '@kbn/esql-utils';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { ChartType } from '@kbn/visualization-utils';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import {
@@ -16,6 +17,7 @@ import {
   mockDataViewWithTimefield,
   mockAllSuggestions,
 } from '../../../mocks';
+import { readUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
 import type {
   TypedLensSerializedState,
   TextBasedPrivateState,
@@ -30,15 +32,21 @@ const getTextBasedLayers = (
   return dsState?.layers ?? {};
 };
 import { suggestionsApi } from '../../../lens_suggestions_api';
+import { createEsqlAdHocDataView } from '../../../data_views_service/create_esql_ad_hoc_data_view';
 import { buildDisplayRowsFromEsqlValues, getGridAttrs, getSuggestions } from './helpers';
 
 const mockSuggestionApi = suggestionsApi as jest.Mock;
 const mockFetchData = getESQLResults as jest.Mock;
 const mockformatESQLColumns = formatESQLColumns as jest.Mock;
-const mockGetESQLAdHocDataview = getESQLAdHocDataview as jest.Mock;
+const mockCreateEsqlAdHocDataView = createEsqlAdHocDataView as jest.Mock;
+const mockReadUserChartTypeFromSessionStorage = readUserChartTypeFromSessionStorage as jest.Mock;
 
 jest.mock('../../../lens_suggestions_api', () => ({
   suggestionsApi: jest.fn(() => mockAllSuggestions),
+}));
+
+jest.mock('../../../chart_type_session_storage', () => ({
+  readUserChartTypeFromSessionStorage: jest.fn(),
 }));
 
 const queryResponseColumns = [
@@ -74,10 +82,13 @@ jest.mock('@kbn/esql-utils', () => {
       },
     }),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
-    getESQLAdHocDataview: jest.fn().mockResolvedValue({}),
     formatESQLColumns: jest.fn().mockReturnValue(queryResponseColumns),
   };
 });
+
+jest.mock('../../../data_views_service/create_esql_ad_hoc_data_view', () => ({
+  createEsqlAdHocDataView: jest.fn().mockResolvedValue({}),
+}));
 
 describe('Lens inline editing helpers', () => {
   describe('buildDisplayRowsFromEsqlValues', () => {
@@ -167,6 +178,46 @@ describe('Lens inline editing helpers', () => {
       );
     });
 
+    it('passes a session-stored table preference and existing table attributes to suggestionsApi', async () => {
+      const previousAttributes = {
+        title: '',
+        references: [],
+        visualizationType: 'lnsDatatable',
+        state: {
+          visualization: { columns: [] },
+          datasourceStates: { textBased: { layers: {} } },
+          query: { esql: 'FROM index1 | KEEP bytes' },
+        },
+      } as unknown as TypedLensSerializedState['attributes'];
+      const aggregationQuery = {
+        esql: 'FROM index1 | STATS COUNT(*) BY geo.dest',
+      };
+      mockReadUserChartTypeFromSessionStorage.mockReturnValueOnce('lnsDatatable');
+
+      await getSuggestions(
+        aggregationQuery,
+        startDependencies.data,
+        httpMock,
+        uiSettingsMock,
+        mockDatasourceMap(),
+        mockVisualizationMap(),
+        dataviewSpecArr,
+        jest.fn(),
+        undefined,
+        undefined,
+        [],
+        true,
+        previousAttributes
+      );
+
+      expect(mockSuggestionApi).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          preferredChartType: ChartType.Table,
+          preferredVisAttributes: previousAttributes,
+        })
+      );
+    });
+
     it('does not populate the title from the suggestion', async () => {
       const suggestionsAttributes = await getSuggestions(
         query,
@@ -214,6 +265,28 @@ describe('Lens inline editing helpers', () => {
       );
       expect(suggestionsAttributes).toBeUndefined();
       expect(setErrorsSpy).toHaveBeenCalled();
+    });
+
+    it('does not call setErrors when the request is aborted', async () => {
+      mockFetchData.mockImplementation(() => {
+        throw new Error('aborted');
+      });
+      const setErrorsSpy = jest.fn();
+      const abortController = new AbortController();
+      abortController.abort();
+      const suggestionsAttributes = await getSuggestions(
+        query,
+        startDependencies.data,
+        httpMock,
+        uiSettingsMock,
+        mockDatasourceMap(),
+        mockVisualizationMap(),
+        dataviewSpecArr,
+        setErrorsSpy,
+        abortController
+      );
+      expect(suggestionsAttributes).toBeUndefined();
+      expect(setErrorsSpy).not.toHaveBeenCalled();
     });
 
     describe('trendline layer preservation', () => {
@@ -270,7 +343,6 @@ describe('Lens inline editing helpers', () => {
             },
           },
           filters: [],
-          query: { esql: 'FROM index1 | STATS COUNT(*)' },
         },
       };
 
@@ -495,7 +567,7 @@ describe('Lens inline editing helpers', () => {
         const visualization = result?.state.visualization as Partial<MetricVisualizationState>;
 
         expect(trendlineLayer.query?.esql).toBe(
-          'FROM index1 | KEEP bytes | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+          'FROM index1 | KEEP bytes, @timestamp | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
         );
         expect(
           trendlineLayer.columns.some((column) => column.columnId === trendlineBreakdownAccessor)
@@ -651,12 +723,12 @@ describe('Lens inline editing helpers', () => {
       expect(gridAttributes.columns).toStrictEqual(formattedColumns);
     });
 
-    it('falls back to getESQLAdHocDataview when spec has no timeFieldName', async () => {
+    it('falls back to createEsqlAdHocDataView when spec has no timeFieldName', async () => {
       dataViews.create.mockClear();
       mockFetchData.mockImplementation(() => ({
         response: { columns: queryResponseColumns, values: [] },
       }));
-      mockGetESQLAdHocDataview.mockResolvedValue({
+      mockCreateEsqlAdHocDataView.mockResolvedValue({
         timeFieldName: '@timestamp',
       });
 
@@ -681,28 +753,30 @@ describe('Lens inline editing helpers', () => {
         uiSettingsMock
       );
 
-      expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith(
+      expect(mockCreateEsqlAdHocDataView).toHaveBeenCalledWith(
         expect.objectContaining({
           query: query.esql,
-          options: { skipFetchFields: true, id: 'spec-id-123' },
+          skipFetchFields: true,
+          id: 'spec-id-123',
         })
       );
       expect(dataViews.create).not.toHaveBeenCalled();
     });
 
-    it('falls back to getESQLAdHocDataview with id undefined when no spec matches', async () => {
+    it('falls back to createEsqlAdHocDataView with id undefined when no spec matches', async () => {
       mockFetchData.mockImplementation(() => ({
         response: { columns: queryResponseColumns, values: [] },
       }));
-      mockGetESQLAdHocDataview.mockResolvedValue({
+      mockCreateEsqlAdHocDataView.mockResolvedValue({
         timeFieldName: '@timestamp',
       });
 
       await getGridAttrs(query, [], startDependencies.data, startDependencies.http, uiSettingsMock);
 
-      expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith(
+      expect(mockCreateEsqlAdHocDataView).toHaveBeenCalledWith(
         expect.objectContaining({
-          options: { skipFetchFields: true, id: undefined },
+          skipFetchFields: true,
+          id: undefined,
         })
       );
     });
@@ -711,7 +785,7 @@ describe('Lens inline editing helpers', () => {
       mockFetchData.mockImplementation(() => ({
         response: { columns: queryResponseColumns, values: [] },
       }));
-      mockGetESQLAdHocDataview.mockClear();
+      mockCreateEsqlAdHocDataView.mockClear();
 
       await getGridAttrs(
         query,
@@ -724,7 +798,7 @@ describe('Lens inline editing helpers', () => {
       expect(dataViews.create).toHaveBeenCalledWith(
         expect.objectContaining({ timeFieldName: '@timestamp' })
       );
-      expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
+      expect(mockCreateEsqlAdHocDataView).not.toHaveBeenCalled();
     });
   });
 });

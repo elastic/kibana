@@ -39,20 +39,20 @@ async function persistPatchedComposedOf({
   nsTemplateName,
   nsIndexTemplate,
   patchedComposedOf,
-  abortController,
+  signal,
 }: {
   esClient: ElasticsearchClient;
   nsTemplateName: string;
   nsIndexTemplate: IndexTemplate;
   patchedComposedOf: string[];
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }): Promise<void> {
   const logger = appContextService.getLogger();
   await retryTransientEsErrors(
     () =>
       esClient.indices.putIndexTemplate(
         { name: nsTemplateName, ...nsIndexTemplate, composed_of: patchedComposedOf },
-        { signal: abortController?.signal }
+        { signal }
       ),
     { logger }
   );
@@ -112,7 +112,7 @@ async function applySetIlmPolicyForDataStreamNamespace({
   dataStream,
   namespace,
   ilmPolicy,
-  abortController,
+  signal,
 }: {
   esClient: ElasticsearchClient;
   packageName: string;
@@ -120,7 +120,7 @@ async function applySetIlmPolicyForDataStreamNamespace({
   dataStream: RegistryDataStream;
   namespace: string;
   ilmPolicy: string;
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }): Promise<{ nsTemplateName: string; indexTemplateEntry?: IndexTemplateEntry }> {
   const logger = appContextService.getLogger();
   const isOtelInputType = isOtelDataStream(dataStream, packageInfo);
@@ -141,7 +141,7 @@ async function applySetIlmPolicyForDataStreamNamespace({
             },
           },
         },
-        { signal: abortController?.signal }
+        { signal }
       ),
     { logger }
   );
@@ -152,7 +152,7 @@ async function applySetIlmPolicyForDataStreamNamespace({
     esClient,
     nsTemplateName,
     'syncIlmPolicy',
-    abortController
+    signal
   );
   if (!nsIndexTemplate) {
     logger.debug(
@@ -173,7 +173,7 @@ async function applySetIlmPolicyForDataStreamNamespace({
       nsTemplateName,
       nsIndexTemplate,
       patchedComposedOf,
-      abortController,
+      signal,
     });
   }
 
@@ -199,20 +199,20 @@ async function trackAndRolloverIlmComponentTemplates({
   packageName,
   createdComponentTemplates,
   updatedIndexTemplates,
-  abortController,
+  signal,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   packageName: string;
   createdComponentTemplates: string[];
   updatedIndexTemplates: IndexTemplateEntry[];
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }): Promise<string[]> {
   if (createdComponentTemplates.length === 0) {
     return [];
   }
 
-  if (abortController) throwIfAborted(abortController);
+  if (signal) throwIfAborted(signal);
   const logger = appContextService.getLogger();
 
   // Track the new component templates in installed_es BEFORE rollover so a rollover
@@ -260,7 +260,7 @@ export async function syncSetIlmPolicy({
   namespace,
   ilmPolicy,
   summary,
-  abortController,
+  signal,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -270,7 +270,7 @@ export async function syncSetIlmPolicy({
   namespace: string;
   ilmPolicy: string;
   summary: SyncIlmPolicySummary;
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }): Promise<void> {
   const updatedIndexTemplates: IndexTemplateEntry[] = [];
   const createdComponentTemplates: string[] = [];
@@ -278,7 +278,7 @@ export async function syncSetIlmPolicy({
   await pMap(
     dataStreams,
     async (dataStream) => {
-      if (abortController) throwIfAborted(abortController);
+      if (signal) throwIfAborted(signal);
 
       const { nsTemplateName, indexTemplateEntry } = await applySetIlmPolicyForDataStreamNamespace({
         esClient,
@@ -287,7 +287,7 @@ export async function syncSetIlmPolicy({
         dataStream,
         namespace,
         ilmPolicy,
-        abortController,
+        signal,
       });
       // Track here (before the index-template check) so templates created when the namespace
       // index template is absent are still recorded in installed_es (r3518659890).
@@ -305,7 +305,7 @@ export async function syncSetIlmPolicy({
     packageName,
     createdComponentTemplates,
     updatedIndexTemplates,
-    abortController,
+    signal,
   });
 }
 
@@ -327,7 +327,7 @@ export async function syncSetIlmPolicyForNamespaces({
   packageInfo,
   dataStreams,
   namespaceIlmPolicies,
-  abortController,
+  signal,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -335,7 +335,7 @@ export async function syncSetIlmPolicyForNamespaces({
   packageInfo: Pick<PackageInfo, 'policy_templates' | 'data_streams'>;
   dataStreams: RegistryDataStream[];
   namespaceIlmPolicies: Array<{ namespace: string; ilmPolicy: string }>;
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }): Promise<void> {
   if (namespaceIlmPolicies.length === 0) {
     return;
@@ -347,7 +347,7 @@ export async function syncSetIlmPolicyForNamespaces({
   await pMap(
     dataStreams,
     async (dataStream) => {
-      if (abortController) throwIfAborted(abortController);
+      if (signal) throwIfAborted(signal);
 
       // Sequential per data stream so overall ES concurrency stays bounded by
       // MAX_CONCURRENT_COMPONENT_TEMPLATES regardless of namespace count.
@@ -360,7 +360,7 @@ export async function syncSetIlmPolicyForNamespaces({
             dataStream,
             namespace,
             ilmPolicy,
-            abortController,
+            signal,
           });
         createdComponentTemplates.push(nsTemplateName);
         if (indexTemplateEntry) {
@@ -377,7 +377,7 @@ export async function syncSetIlmPolicyForNamespaces({
     packageName,
     createdComponentTemplates,
     updatedIndexTemplates,
-    abortController,
+    signal,
   });
 }
 
@@ -394,7 +394,7 @@ export async function syncClearIlmPolicy({
   dataStreams,
   namespace,
   summary,
-  abortController,
+  signal,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -403,7 +403,7 @@ export async function syncClearIlmPolicy({
   dataStreams: RegistryDataStream[];
   namespace: string;
   summary: SyncIlmPolicySummary;
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }): Promise<void> {
   const logger = appContextService.getLogger();
   const deletedTemplateNames: string[] = [];
@@ -425,7 +425,7 @@ export async function syncClearIlmPolicy({
   await pMap(
     dataStreams,
     async (dataStream) => {
-      if (abortController) throwIfAborted(abortController);
+      if (signal) throwIfAborted(signal);
 
       const isOtelInputType = isOtelDataStream(dataStream, packageInfo);
       const templateName = getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType);
@@ -436,7 +436,7 @@ export async function syncClearIlmPolicy({
         esClient,
         nsTemplateName,
         'syncIlmPolicy',
-        abortController
+        signal
       );
       if (nsIndexTemplate) {
         const patchedComposedOf = removeIlmComponentTemplate(
@@ -452,7 +452,7 @@ export async function syncClearIlmPolicy({
             nsTemplateName,
             nsIndexTemplate,
             patchedComposedOf,
-            abortController,
+            signal,
           });
           patchedIndexTemplates.push({
             templateName: nsTemplateName,
@@ -485,7 +485,7 @@ export async function syncClearIlmPolicy({
 
   summary.removedTemplates = deletedTemplateNames;
 
-  if (abortController) throwIfAborted(abortController);
+  if (signal) throwIfAborted(signal);
 
   // Rollover so the ILM policy no longer applies to new backing indices
   if (patchedIndexTemplates.length > 0) {

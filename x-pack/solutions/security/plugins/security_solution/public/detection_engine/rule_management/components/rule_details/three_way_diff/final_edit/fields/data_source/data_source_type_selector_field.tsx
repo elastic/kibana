@@ -55,7 +55,6 @@ export function DataSourceTypeSelectorField({
       idSelected={field.value}
       onChange={handleDataSourceChange}
       options={dataViewIndexPatternToggleButtonOptions}
-      color="primary"
     />
   );
 }

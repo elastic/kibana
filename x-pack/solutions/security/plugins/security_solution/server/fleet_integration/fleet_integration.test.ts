@@ -50,7 +50,11 @@ import { Subject } from 'rxjs';
 import type { ILicense } from '@kbn/licensing-types';
 import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import type { PolicyConfig, PolicyData } from '../../common/endpoint/types';
-import { AntivirusRegistrationModes, ProtectionModes } from '../../common/endpoint/types';
+import {
+  AntivirusRegistrationModes,
+  DeviceControlAccessLevel,
+  ProtectionModes,
+} from '../../common/endpoint/types';
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
@@ -67,6 +71,10 @@ import type { ManifestSchema } from '../../common/endpoint/schema/manifest';
 import type {
   GetAgentPoliciesResponseItem,
   PostDeletePackagePoliciesResponse,
+} from '@kbn/fleet-plugin/common';
+import {
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
@@ -161,6 +169,9 @@ describe('Fleet integrations', () => {
     experimentalFeatures = {
       trustedDevices: true,
       linuxDnsEvents: true,
+      customYaraSignaturesEnabled: true,
+      linuxRansomwareProtection: true,
+      perOsPolicySettings: true,
     } as ExperimentalFeatures;
     productFeaturesService = endpointAppContextStartContract.productFeaturesService;
 
@@ -1246,6 +1257,467 @@ describe('Fleet integrations', () => {
       });
     });
 
+    describe('when custom YARA signatures features are disabled', () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const osList = ['windows', 'mac', 'linux'] as const;
+
+      const setCustomYaraSignaturesOnPolicy = (policy: PolicyConfig, value: boolean) => {
+        for (const os of osList) {
+          policy[os].memory_protection.custom_yara_signatures = value;
+        }
+      };
+
+      const expectCustomYaraSignaturesAbsent = (policy: PolicyConfig) => {
+        for (const os of osList) {
+          expect(policy[os].memory_protection).not.toHaveProperty('custom_yara_signatures');
+        }
+      };
+
+      beforeEach(() => {
+        licenseEmitter.next(Enterprise);
+      });
+
+      it('should omit custom YARA signatures when the product feature is disabled', async () => {
+        productFeaturesService = createProductFeaturesServiceMock(
+          ALL_PRODUCT_FEATURE_KEYS.filter(
+            (key) => key !== ProductFeatureSecurityKey.endpointCustomYaraSignatures
+          )
+        );
+
+        const mockPolicy = policyFactory();
+        setCustomYaraSignaturesOnPolicy(mockPolicy, true);
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expectCustomYaraSignaturesAbsent(updatedPolicyConfig.inputs[0]!.config!.policy.value);
+      });
+
+      it('should omit custom YARA signatures when the experimental flag is off', async () => {
+        // @ts-expect-error write to readonly property for testing
+        experimentalFeatures.customYaraSignaturesEnabled = false;
+
+        const mockPolicy = policyFactory();
+        setCustomYaraSignaturesOnPolicy(mockPolicy, true);
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expectCustomYaraSignaturesAbsent(updatedPolicyConfig.inputs[0]!.config!.policy.value);
+      });
+
+      it('should preserve custom YARA signatures when both the product feature and experimental flag are enabled', async () => {
+        const mockPolicy = policyFactory();
+        mockPolicy.windows.memory_protection.custom_yara_signatures = false;
+        mockPolicy.mac.memory_protection.custom_yara_signatures = true;
+        mockPolicy.linux.memory_protection.custom_yara_signatures = false;
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        const updatedPolicy = updatedPolicyConfig.inputs[0]!.config!.policy.value;
+        expect(updatedPolicy.windows.memory_protection.custom_yara_signatures).toBe(false);
+        expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(true);
+        expect(updatedPolicy.linux.memory_protection.custom_yara_signatures).toBe(false);
+      });
+
+      describe('when the license is below Enterprise so the callback throws', () => {
+        beforeEach(() => {
+          licenseEmitter.next(Platinum);
+        });
+
+        it('should strip custom YARA signatures from the shared inbound payload before throwing a license 403 when the experimental flag is off', async () => {
+          experimentalFeatures = {
+            ...experimentalFeatures,
+            customYaraSignaturesEnabled: false,
+          };
+
+          const mockPolicy = policyFactory();
+          setCustomYaraSignaturesOnPolicy(mockPolicy, true);
+
+          const callback = getPackagePolicyUpdateCallback(
+            endpointAppContextServiceMock,
+            cloudService,
+            productFeaturesService,
+            experimentalFeatures
+          );
+
+          const policyConfig = generator.generatePolicyPackagePolicy();
+          policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+          await expect(() =>
+            callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+          ).rejects.toThrow(
+            'Platinum license does not support this action. Please upgrade your license.'
+          );
+
+          expectCustomYaraSignaturesAbsent(policyConfig.inputs[0]!.config!.policy.value);
+        });
+
+        it('should strip custom YARA signatures from the shared inbound payload before throwing a license 403 when the product feature is disabled', async () => {
+          productFeaturesService = createProductFeaturesServiceMock(
+            ALL_PRODUCT_FEATURE_KEYS.filter(
+              (key) => key !== ProductFeatureSecurityKey.endpointCustomYaraSignatures
+            )
+          );
+
+          const mockPolicy = policyFactory();
+          setCustomYaraSignaturesOnPolicy(mockPolicy, true);
+
+          const callback = getPackagePolicyUpdateCallback(
+            endpointAppContextServiceMock,
+            cloudService,
+            productFeaturesService,
+            experimentalFeatures
+          );
+
+          const policyConfig = generator.generatePolicyPackagePolicy();
+          policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+          await expect(() =>
+            callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+          ).rejects.toThrow(
+            'Platinum license does not support this action. Please upgrade your license.'
+          );
+
+          expectCustomYaraSignaturesAbsent(policyConfig.inputs[0]!.config!.policy.value);
+        });
+      });
+    });
+
+    describe('Linux ransomware protection', () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      beforeEach(() => {
+        licenseEmitter.next(Enterprise);
+      });
+
+      it.each([
+        ['linuxRansomwareProtection', { linuxRansomwareProtection: false }],
+        ['perOsPolicySettings', { perOsPolicySettings: false }],
+      ])('should strip linux.ransomware from the policy when %s is off', async (_flag, flags) => {
+        experimentalFeatures = {
+          ...experimentalFeatures,
+          linuxRansomwareProtection: true,
+          perOsPolicySettings: true,
+          ...flags,
+        };
+
+        const mockPolicy = policyFactory();
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        const { linux } = updatedPolicyConfig.inputs[0]!.config!.policy.value;
+        expect(linux).not.toHaveProperty('ransomware');
+        expect(linux.popup).not.toHaveProperty('ransomware');
+      });
+
+      it('should keep linux.ransomware on the policy when both experimental flags are on', async () => {
+        const mockPolicy = policyFactory();
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expect(updatedPolicyConfig.inputs[0]!.config!.policy.value.linux.ransomware).toEqual(
+          mockPolicy.linux.ransomware
+        );
+      });
+
+      it('should reject an update with linux.ransomware prevent under a Gold license when the flag is on', async () => {
+        licenseEmitter.next(Gold);
+
+        // Otherwise Gold-compliant policy, so the rejection below is attributable to
+        // `linux.ransomware` alone rather than to windows/mac ransomware support.
+        const mockPolicy = policyFactoryWithoutPaidFeatures();
+        mockPolicy.linux.ransomware = { mode: ProtectionModes.prevent, supported: true };
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        await expect(() =>
+          callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+        ).rejects.toThrow(
+          'Gold license does not support this action. Please upgrade your license.'
+        );
+      });
+
+      describe('when endpointCustomNotification product feature is disabled and linux.popup.ransomware has a custom message', () => {
+        const buildPolicyConfig = () => {
+          const mockPolicy = policyFactory();
+          mockPolicy.linux.popup.ransomware = { message: 'Custom message', enabled: true };
+          const policyConfig = generator.generatePolicyPackagePolicy();
+          policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+          return policyConfig;
+        };
+
+        beforeEach(() => {
+          productFeaturesService = createProductFeaturesServiceMock(
+            ALL_PRODUCT_FEATURE_KEYS.filter(
+              (key) => key !== ProductFeatureSecurityKey.endpointCustomNotification
+            )
+          );
+        });
+
+        it('should strip linux ransomware before product-feature validation when the flags are off', async () => {
+          experimentalFeatures = {
+            ...experimentalFeatures,
+            linuxRansomwareProtection: false,
+            perOsPolicySettings: false,
+          };
+          const callback = getPackagePolicyUpdateCallback(
+            endpointAppContextServiceMock,
+            cloudService,
+            productFeaturesService,
+            experimentalFeatures
+          );
+
+          const updatedPolicyConfig = await callback(
+            buildPolicyConfig(),
+            soClient,
+            esClient,
+            requestContextMock.convertContext(ctx),
+            req
+          );
+
+          const { linux } = updatedPolicyConfig.inputs[0]!.config!.policy.value;
+          expect(linux).not.toHaveProperty('ransomware');
+          expect(linux.popup).not.toHaveProperty('ransomware');
+        });
+
+        it('should reject the custom linux ransomware message when the flags are on', async () => {
+          experimentalFeatures = {
+            ...experimentalFeatures,
+            linuxRansomwareProtection: true,
+            perOsPolicySettings: true,
+          };
+          const callback = getPackagePolicyUpdateCallback(
+            endpointAppContextServiceMock,
+            cloudService,
+            productFeaturesService,
+            experimentalFeatures
+          );
+
+          const result = callback(
+            buildPolicyConfig(),
+            soClient,
+            esClient,
+            requestContextMock.convertContext(ctx),
+            req
+          );
+
+          await expect(result).rejects.toMatchObject({ apiPassThrough: true, statusCode: 403 });
+          await expect(result).rejects.toThrow('To customize the user notification');
+        });
+      });
+
+      describe('with malformed linux payloads', () => {
+        const runCallback = (policy: PolicyConfig) => {
+          const callback = getPackagePolicyUpdateCallback(
+            endpointAppContextServiceMock,
+            cloudService,
+            productFeaturesService,
+            experimentalFeatures
+          );
+          const policyConfig = generator.generatePolicyPackagePolicy();
+          policyConfig.inputs[0]!.config!.policy.value = policy;
+          return callback(
+            policyConfig,
+            soClient,
+            esClient,
+            requestContextMock.convertContext(ctx),
+            req
+          );
+        };
+        const setFlags = (enabled: boolean) => {
+          experimentalFeatures = {
+            ...experimentalFeatures,
+            linuxRansomwareProtection: enabled,
+            perOsPolicySettings: enabled,
+          };
+        };
+        const deleteLinuxPopup = (policy: PolicyConfig) => {
+          delete (policy.linux as Partial<PolicyConfig['linux']>).popup;
+        };
+
+        it('should reject with a license 403 under Gold when flags are off and linux.popup is missing', async () => {
+          setFlags(false);
+          licenseEmitter.next(Gold);
+          const mockPolicy = policyFactoryWithoutPaidFeatures(policyFactory());
+          mockPolicy.windows.memory_protection = {
+            ...mockPolicy.windows.memory_protection,
+            mode: ProtectionModes.prevent,
+            supported: true,
+          };
+          deleteLinuxPopup(mockPolicy);
+
+          await expect(runCallback(mockPolicy)).rejects.toMatchObject({
+            apiPassThrough: true,
+            statusCode: 403,
+          });
+        });
+
+        it('should reject with a license 403 under Platinum when flags are on and linux.popup is missing', async () => {
+          setFlags(true);
+          licenseEmitter.next(Platinum);
+          const mockPolicy = policyFactoryWithoutPaidEnterpriseFeatures();
+          mockPolicy.windows.device_control = {
+            enabled: true,
+            usb_storage: DeviceControlAccessLevel.deny_all,
+          };
+          deleteLinuxPopup(mockPolicy);
+
+          await expect(runCallback(mockPolicy)).rejects.toMatchObject({
+            apiPassThrough: true,
+            statusCode: 403,
+          });
+        });
+
+        it('should reject with a license 403 under Platinum when flags are on and linux.ransomware is null', async () => {
+          setFlags(true);
+          licenseEmitter.next(Platinum);
+          const mockPolicy = policyFactoryWithoutPaidEnterpriseFeatures();
+          mockPolicy.linux.ransomware = null as unknown as PolicyConfig['linux']['ransomware'];
+
+          await expect(runCallback(mockPolicy)).rejects.toMatchObject({
+            apiPassThrough: true,
+            statusCode: 403,
+          });
+        });
+
+        it('should strip a null linux.ransomware under Platinum when flags are off', async () => {
+          setFlags(false);
+          licenseEmitter.next(Platinum);
+          const mockPolicy = policyFactoryWithoutPaidEnterpriseFeatures();
+          mockPolicy.linux.ransomware = null as unknown as PolicyConfig['linux']['ransomware'];
+
+          const updatedPolicyConfig = await runCallback(mockPolicy);
+
+          expect(updatedPolicyConfig.inputs[0]!.config!.policy.value.linux).not.toHaveProperty(
+            'ransomware'
+          );
+        });
+
+        it.each([
+          ['on', true],
+          ['off', false],
+        ])(
+          'should reject with a 400 under Gold when flags are %s, behavior protection is Platinum-only and linux.popup is missing',
+          async (_label, enabled) => {
+            setFlags(enabled);
+            licenseEmitter.next(Gold);
+            const mockPolicy = policyFactoryWithoutPaidFeatures(policyFactory());
+            mockPolicy.windows.behavior_protection = {
+              ...mockPolicy.windows.behavior_protection,
+              mode: ProtectionModes.prevent,
+              supported: true,
+            };
+            deleteLinuxPopup(mockPolicy);
+
+            await expect(runCallback(mockPolicy)).rejects.toMatchObject({
+              apiPassThrough: true,
+              statusCode: 400,
+              message: expect.stringContaining('Invalid Elastic Defend policy configuration'),
+            });
+          }
+        );
+
+        it('should reject with a 400 under Gold when an otherwise compliant policy is missing linux.popup', async () => {
+          setFlags(false);
+          licenseEmitter.next(Gold);
+          const mockPolicy = policyFactoryWithoutPaidFeatures(policyFactory());
+          deleteLinuxPopup(mockPolicy);
+
+          await expect(runCallback(mockPolicy)).rejects.toMatchObject({
+            apiPassThrough: true,
+            statusCode: 400,
+            message: expect.stringContaining('Invalid Elastic Defend policy configuration'),
+          });
+        });
+      });
+    });
+
     describe('when `antivirus_registration.mode` is changed', () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1588,7 +2060,70 @@ describe('Fleet integrations', () => {
 
       expect(
         endpointServicesMock.savedObjects.createInternalScopedSoClient().delete
-      ).toBeCalledWith('policy-settings-protection-updates-note', 'id', { force: true });
+      ).toHaveBeenCalledWith('policy-settings-protection-updates-note', 'id', { force: true });
+    });
+
+    it('searches for notes across all spaces and both package policy reference types', async () => {
+      const soClientMock = endpointServicesMock.savedObjects.createInternalScopedSoClient();
+
+      (soClientMock.find as jest.Mock).mockResolvedValueOnce({
+        total: 0,
+        saved_objects: [],
+        page: 1,
+        per_page: 10,
+      });
+
+      await invokeDeleteCallback();
+
+      expect(soClientMock.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'policy-settings-protection-updates-note',
+          hasReference: [
+            { type: PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: policyId },
+            { type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: policyId },
+          ],
+          hasReferenceOperator: 'OR',
+          namespaces: ['*'],
+        })
+      );
+    });
+
+    it('deletes a legacy note using a client scoped to the note namespace', async () => {
+      const soClientMock = endpointServicesMock.savedObjects.createInternalScopedSoClient();
+
+      (soClientMock.find as jest.Mock).mockResolvedValueOnce({
+        total: 1,
+        saved_objects: [
+          {
+            id: 'legacy-note-id',
+            type: 'type',
+            namespaces: ['legacy-space'],
+            references: [
+              {
+                id: 'id_package_policy',
+                name: 'package_policy',
+                type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              },
+            ],
+            attributes: { note: 'legacy note' },
+            score: 1,
+          },
+        ],
+        page: 1,
+        per_page: 10,
+      });
+
+      await invokeDeleteCallback();
+
+      expect(endpointServicesMock.savedObjects.createInternalScopedSoClient).toHaveBeenCalledWith({
+        spaceId: 'legacy-space',
+        readonly: false,
+      });
+      expect(soClientMock.delete).toHaveBeenCalledWith(
+        'policy-settings-protection-updates-note',
+        'legacy-note-id',
+        { force: true }
+      );
     });
 
     describe('and with space awareness feature enabled', () => {

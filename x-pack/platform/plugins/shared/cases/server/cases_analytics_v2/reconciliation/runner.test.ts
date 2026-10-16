@@ -216,6 +216,33 @@ describe('runReconciliation', () => {
     expect(cursorMs).toBeLessThanOrEqual(after);
   });
 
+  it('throws before fetching a page when the abort signal is already tripped, leaving the cursor to be pinned by the caller', async () => {
+    const { client, writer } = setup([
+      makeCase('case-A', {
+        createdAt: '2026-05-01T00:00:00.000Z',
+        updatedAt: '2026-05-02T00:00:00.000Z',
+      }),
+    ]);
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(
+      runReconciliation({
+        savedObjectsClient: client,
+        writer,
+        logger,
+        lastRunAt: undefined,
+        signal: controller.signal,
+      })
+    ).rejects.toThrow(/aborted/);
+
+    // Bailed before the page read + bulk dispatch — no docs mirrored.
+    expect(client.find).not.toHaveBeenCalled();
+    expect(writer.bulkUpsertCasesAwait).not.toHaveBeenCalled();
+    // PIT is opened before the loop; the finally-close must still run.
+    expect(client.closePointInTime).toHaveBeenCalledTimes(1);
+  });
+
   it('closes the PIT even if find throws', async () => {
     const client = savedObjectsClientMock.create();
     const writer = makeWriterMock();

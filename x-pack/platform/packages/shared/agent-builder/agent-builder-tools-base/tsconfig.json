@@ -15,10 +15,12 @@
   ],
   "kbn_references": [
     "@kbn/core-http-server",
+    "@kbn/security-plugin-types-server",
     "@kbn/inference-tracing",
     "@kbn/utility-types",
     "@kbn/workflows",
     "@kbn/workflows-management-plugin",
-    "@kbn/core-http-server-mocks"
+    "@kbn/core-http-server-mocks",
+    "@kbn/core"
   ]
 }

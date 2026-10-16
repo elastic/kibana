@@ -6,8 +6,8 @@
  */
 
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { EpisodeEventRow } from '../../../queries/episode_events_query';
-import type { EpisodeActionHistoryEntry } from '../../../queries/episode_actions_history_query';
+import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
+import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
 import {
   deriveSeverityChangeEntries,
   deriveStateChangeEntries,
@@ -26,10 +26,10 @@ const makeAction = (ts: string): EpisodeActionHistoryEntry => ({
   _id: `action-${ts}`,
   '@timestamp': ts,
   action_type: 'ack',
-  actor: 'user-uid-1',
-  episode_id: 'ep-1',
+  actor: { type: 'user', profile_uid: 'user-uid-1' },
+  alert_id: 'ep-1',
   group_hash: 'hash-1',
-  tags: null,
+  tags: [],
   assignee_uid: null,
   expiry: null,
   reason: null,

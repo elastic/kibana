@@ -5,21 +5,31 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { MaintenanceWindow } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/types';
+import type { SyntheticsMaintenanceWindow } from '../../../hooks';
 import { MaintenanceWindowsLink } from '../../monitor_add_edit/fields/maintenance_windows/create_maintenance_windows_btn';
-import { useSyncInterval } from './use_sync_interval';
 import { SyncNowLink } from './sync_now_link';
+import { MwsSyncOverdueNote } from './mws_sync_overdue_note';
+import { MwsAgentVersionWarningLine } from './mws_agent_version_warning_line';
 
-export const MwsCalloutContent = ({ activeMWs }: { activeMWs: MaintenanceWindow[] }) => {
-  const syncInterval = useSyncInterval();
-
+export const MwsCalloutContent = ({
+  activeMWs,
+  hasOutdatedAgent = false,
+  isSyncOverdue = false,
+}: {
+  activeMWs: SyntheticsMaintenanceWindow[];
+  /** Adds a line noting that an outdated agent may keep running through this monitor's active window, instead of a separate callout — keeps this surface to one box. */
+  hasOutdatedAgent?: boolean;
+  /** Swaps the "will update shortly" note for a warning that the private location sync is late. */
+  isSyncOverdue?: boolean;
+}) => {
   if (activeMWs.length) {
     return (
       <>
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount
           title={i18n.translate(
             'xpack.synthetics.maintenanceWindowCallout.maintenanceWindowActive.monitors',
@@ -27,8 +37,6 @@ export const MwsCalloutContent = ({ activeMWs }: { activeMWs: MaintenanceWindow[
               defaultMessage: 'Maintenance windows are active',
             }
           )}
-          color="warning"
-          iconType="info"
           data-test-subj="maintenanceWindowCallout"
         >
           {i18n.translate(
@@ -45,14 +53,19 @@ export const MwsCalloutContent = ({ activeMWs }: { activeMWs: MaintenanceWindow[
             </span>
           ))}
           <EuiSpacer size="s" />
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.synthetics.maintenanceWindowCallout.nextSyncNote"
-              defaultMessage="It may take up to {syncInterval} {syncInterval, plural, one {minute} other {minutes}} for maintenance window changes to be applied to private location monitors. {syncNowLink}"
-              values={{ syncInterval, syncNowLink: <SyncNowLink /> }}
-            />
-          </EuiText>
-        </EuiCallOut>
+          {isSyncOverdue ? (
+            <MwsSyncOverdueNote />
+          ) : (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.synthetics.maintenanceWindowCallout.nextSyncNote"
+                defaultMessage="Private location monitors will update shortly. {syncNowLink}"
+                values={{ syncNowLink: <SyncNowLink /> }}
+              />
+            </EuiText>
+          )}
+          {hasOutdatedAgent && <MwsAgentVersionWarningLine />}
+        </KbnWarningCallout>
         <EuiSpacer size="s" />
       </>
     );

@@ -129,7 +129,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                 button={
                   <EuiButton
                     size="s"
-                    iconType="arrowDown"
+                    iconType="chevronSingleDown"
                     iconSide="right"
                     fullWidth
                     onClick={togglePopover}

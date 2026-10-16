@@ -55,6 +55,7 @@ import { isValidAgentAvatarColor } from '../../../utils/color';
 import { labels } from '../../../utils/i18n';
 import { zodResolver } from '../../../utils/zod_resolver';
 import { AgentAvatar } from '../../common/agent_avatar';
+import { AgentTypeBadge, isPreconfiguredAgentType } from '../list/agent_type_badge';
 import { agentFormSchema } from './agent_form_validation';
 import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
@@ -146,6 +147,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   };
   const {
     state: agentState,
+    agentType,
     isLoading,
     isSubmitting,
     submit,
@@ -271,6 +273,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             canChangeAccessControl={
               isCreateMode ? manageAgents : permissions?.update_access_control ?? false
             }
+            canChangeApprovals={
+              isCreateMode ? manageAgents : permissions?.update_approvals ?? false
+            }
             owner={agentState?.created_by}
             agentId={editingAgentId}
           />
@@ -380,6 +385,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       activePluginsCount,
       manageAgents,
       permissions?.update_access_control,
+      permissions?.update_approvals,
       isExperimentalFeaturesEnabled,
       enableElasticCapabilities,
     ]
@@ -557,6 +563,11 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             <EuiFlexItem data-test-subj="agentFormPageTitle">
               {isCreateMode ? labels.agents.newAgent : agentName}
             </EuiFlexItem>
+            {!isCreateMode && isPreconfiguredAgentType(agentType) && (
+              <EuiFlexItem grow={false}>
+                <AgentTypeBadge agentType={agentType} />
+              </EuiFlexItem>
+            )}
             {!isCreateMode && agentState?.created_by?.username && (
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued" data-test-subj="agentFormOwnerLabel">
@@ -619,6 +630,12 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                 <EuiFlexGroup gutterSize="xs">
                   {renderSaveButton({ size: 'm' })}
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.agentBuilder.agents.form.saveActionsMenuAriaLabel',
+                      {
+                        defaultMessage: 'Save actions',
+                      }
+                    )}
                     panelPaddingSize="xs"
                     isOpen={isAdditionalActionsMenuOpen}
                     closePopover={() => setAdditionalActionsMenuOpen(false)}
@@ -679,6 +696,12 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             : !isCreateMode
             ? [
                 <EuiPopover
+                  aria-label={i18n.translate(
+                    'xpack.agentBuilder.agents.form.agentActionsMenuAriaLabel',
+                    {
+                      defaultMessage: 'Agent actions',
+                    }
+                  )}
                   button={
                     <EuiToolTip
                       content={i18n.translate('xpack.agentBuilder.agents.form.openMenuLabel', {

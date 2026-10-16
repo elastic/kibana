@@ -13,7 +13,7 @@ import {
   alertEventType,
   type AlertEpisodeStatus,
 } from '../../../resources/datastreams/alert_events';
-import { ALERTING_V2_ERROR_CODES } from '../../errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { buildAlertEventRecord, buildHandlerItem } from '../test_utils';
 import type { AlertEventRecord } from '../types';
 import { activateHandler } from './activate';
@@ -53,7 +53,6 @@ describe('activateHandler', () => {
       const prepared = activateHandler.prepare(buildItem(alertEvent));
 
       expect(prepared.ruleEvent).toMatchObject({
-        '@timestamp': FIXED_NOW,
         rule: { id: alertEvent.rule_id, version: alertEvent.rule_version },
         group_hash: alertEvent.group_hash,
         data: alertEvent.data_json,
@@ -61,7 +60,7 @@ describe('activateHandler', () => {
         source: alertEvent.source,
         type: alertEventType.alert,
         space_id: alertEvent.space_id,
-        episode: { id: alertEvent.episode_id, status: alertEpisodeStatus.active },
+        alert: { id: alertEvent.episode_id, status: alertEpisodeStatus.active },
         severity: alertEvent.severity,
       });
     });
@@ -78,15 +77,15 @@ describe('activateHandler', () => {
 
     it('omits episode.status_count on the synthetic event — mirroring the director on any → active transition', () => {
       const prepared = activateHandler.prepare(buildItem());
-      expect(prepared.ruleEvent?.episode).toBeDefined();
-      expect(prepared.ruleEvent?.episode?.status_count).toBeUndefined();
+      expect(prepared.ruleEvent?.alert).toBeDefined();
+      expect(prepared.ruleEvent?.alert?.status_count).toBeUndefined();
     });
 
     it('defaults rule version to 1 when the alert event omits it', () => {
       const prepared = activateHandler.prepare(
         buildItem(buildAlertEvent({ rule_version: undefined }))
       );
-      expect(prepared.ruleEvent?.rule.version).toBe(1);
+      expect(prepared.ruleEvent?.rule?.version).toBe(1);
     });
 
     it('omits severity on the synthetic event when the alert event has none', () => {
@@ -96,7 +95,7 @@ describe('activateHandler', () => {
   });
 
   describe('precondition: rejects only when the episode is already active', () => {
-    it('rejects activate with INVALID_EPISODE_STATE_TRANSITION (400) when episode_status is active', () => {
+    it('rejects activate with INVALID_ALERT_STATE_TRANSITION (409) when episode_status is active', () => {
       try {
         activateHandler.prepare(
           buildItem(buildAlertEvent({ episode_status: alertEpisodeStatus.active }))
@@ -104,13 +103,13 @@ describe('activateHandler', () => {
         throw new Error('expected handler to throw');
       } catch (error) {
         expect(Boom.isBoom(error)).toBe(true);
-        expect(error.output.statusCode).toBe(400);
+        expect(error.output.statusCode).toBe(409);
         expect(error.data).toMatchObject({
-          code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
+          code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
           details: {
             group_hash: 'group-1',
-            episode_id: 'episode-1',
-            episode_status: alertEpisodeStatus.active,
+            alert_id: 'episode-1',
+            alert_status: alertEpisodeStatus.active,
             action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
           },
         });

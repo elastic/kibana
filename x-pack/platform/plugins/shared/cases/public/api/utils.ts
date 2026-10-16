@@ -10,7 +10,7 @@ import { isArray, camelCase, isObject, omit, get } from 'lodash';
 import type {
   AttachmentRequestV2,
   CaseResolveResponse,
-  CasesFindResponse,
+  CasesSearchResponse,
   CasesSimilarResponse,
 } from '../../common/types/api';
 import type {
@@ -143,7 +143,7 @@ const convertAttachmentToCamelExceptProperty = (
   } as AttachmentUI;
 };
 
-export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): CasesFindResponseUI => ({
+export const convertAllCasesToCamel = (snakeCases: CasesSearchResponse): CasesFindResponseUI => ({
   cases: convertCasesToCamelCase(snakeCases.cases),
   countOpenCases: snakeCases.count_open_cases,
   countInProgressCases: snakeCases.count_in_progress_cases,
@@ -151,6 +151,7 @@ export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): CasesFind
   page: snakeCases.page,
   perPage: snakeCases.per_page,
   total: snakeCases.total,
+  mttr: snakeCases.mttr,
 });
 
 export const convertSimilarCasesToCamel = (

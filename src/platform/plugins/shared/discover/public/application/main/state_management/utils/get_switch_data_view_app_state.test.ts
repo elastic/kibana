@@ -144,5 +144,40 @@ describe('Discover getDataViewAppState', () => {
     expect(result.columns).toEqual([]);
     expect(result.sort).toEqual([['timefield2', 'desc']]);
   });
-  // TODO: add tests
+  test('re-adding default columns that were removed by user when switching data views', async () => {
+    const current = getDataView('curr', '', ['extension', 'message', 'bytes']);
+    const next = getDataView('next', '', ['extension', 'message', 'bytes']);
+
+    const result = getDataViewAppState(
+      current,
+      next,
+      ['message', 'extension'],
+      ['extension', 'bytes'],
+      []
+    );
+    // 'message' should be re-added from defaults since it exists in next data view
+    expect(result.columns).toEqual(['extension', 'bytes', 'message']);
+  });
+  test('not re-adding default columns that do not exist in next data view', async () => {
+    const current = getDataView('curr', '', ['extension', 'message', 'DestCountry']);
+    const next = getDataView('next', '', ['extension', 'message']);
+
+    const result = getDataViewAppState(
+      current,
+      next,
+      ['message', 'extension', 'DestCountry'],
+      ['extension'],
+      []
+    );
+    // 'message' re-added (exists in next), 'DestCountry' not added (doesn't exist)
+    expect(result.columns).toEqual(['extension', 'message']);
+  });
+  test('preserving column order with user columns before re-added defaults', async () => {
+    const current = getDataView('curr', '', ['a', 'b', 'c', 'd']);
+    const next = getDataView('next', '', ['a', 'b', 'c', 'd']);
+
+    const result = getDataViewAppState(current, next, ['c', 'd'], ['b', 'a'], []);
+    // User's columns first (b, a), then re-added defaults (c, d)
+    expect(result.columns).toEqual(['b', 'a', 'c', 'd']);
+  });
 });

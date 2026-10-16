@@ -9,9 +9,15 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { parse as yamlParse } from 'yaml';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import type { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { CreateTemplatePage } from './page';
-import { TestProviders } from '../../../../common/mock';
-import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
+import { mockedTestProvidersOwner, TestProviders } from '../../../../common/mock';
+import {
+  CASES_TEMPLATE_CREATED_EVENT_TYPE,
+  LOCAL_STORAGE_KEYS,
+} from '../../../../../common/constants';
 import { exampleTemplateDefinition } from '../../field_types/constants';
 import * as i18n from '../../translations';
 
@@ -47,6 +53,7 @@ jest.mock('../../components/template_preview', () => ({
 
 const mockMutateAsync = jest.fn();
 const mockNavigateToCasesTemplates = jest.fn();
+const mockNavigateToEditTemplate = jest.fn();
 
 jest.mock('../../hooks/use_create_template', () => ({
   useCreateTemplate: () => ({ mutateAsync: mockMutateAsync, isLoading: false }),
@@ -57,17 +64,34 @@ jest.mock('../../../../common/navigation', () => ({
     navigateToCasesTemplates: mockNavigateToCasesTemplates,
     getCasesTemplatesUrl: jest.fn().mockReturnValue('/app/security/cases/configure/templates'),
   }),
+  useCasesEditTemplateNavigation: () => ({
+    navigateToCasesEditTemplate: mockNavigateToEditTemplate,
+  }),
 }));
 
 jest.mock('../../../use_breadcrumbs', () => ({
   useCasesTemplatesBreadcrumbs: jest.fn(),
 }));
 
+/**
+ * The template name is the editable page title, so naming a template is a header interaction rather
+ * than a trip to the Configuration tab.
+ */
+const nameTemplateFromPageTitle = async (name: string) => {
+  await userEvent.click(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleButton));
+  await userEvent.type(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleInput), name);
+  await userEvent.keyboard('{enter}');
+};
+
 describe('CreateTemplatePage', () => {
+  let coreStart: CoreStart;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    coreStart = coreMock.createStart() as unknown as CoreStart;
     localStorage.clear();
-    mockMutateAsync.mockResolvedValue(undefined);
+    // Create resolves to the new template; the page then switches to edit mode for that id.
+    mockMutateAsync.mockResolvedValue({ templateId: 'new-tpl-id' });
   });
 
   it('renders the layout with header and sections', async () => {
@@ -77,7 +101,8 @@ describe('CreateTemplatePage', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent(i18n.ADD_TEMPLATE_TITLE);
+    // A new template opens unnamed, with the placeholder standing in for the name.
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent(i18n.UNTITLED_TEMPLATE);
     expect(screen.getByTestId('appHeaderBack')).toHaveAttribute(
       'aria-label',
       `Back to ${i18n.TEMPLATE_TITLE}`
@@ -105,10 +130,7 @@ describe('CreateTemplatePage', () => {
     expect(localStorage.getItem(storageKey)).toBe(JSON.stringify(modifiedTemplate));
 
     // Click the save button
-    // The template name is panel-owned and lives on the Configuration tab under the Fields/
-    // Configuration split, so switch to it before setting the name.
-    await userEvent.click(screen.getByRole('tab', { name: /Configuration/ }));
-    await userEvent.type(screen.getByTestId('templateMetadataNameInput'), 'My template');
+    await nameTemplateFromPageTitle('My template');
     const saveButton = screen.getByTestId('saveTemplateHeaderButton');
     await userEvent.click(saveButton);
 
@@ -122,8 +144,9 @@ describe('CreateTemplatePage', () => {
       expect(localStorage.getItem(storageKey)).toBe(JSON.stringify(createPageInitialEditorYaml));
     });
 
-    // Verify navigation was called
-    expect(mockNavigateToCasesTemplates).toHaveBeenCalledTimes(1);
+    // After the first save the editor stays open in edit mode for the newly created template.
+    expect(mockNavigateToEditTemplate).toHaveBeenCalledWith({ templateId: 'new-tpl-id' });
+    expect(mockNavigateToCasesTemplates).not.toHaveBeenCalled();
   });
 
   it('does not clear localStorage if template creation fails', async () => {
@@ -140,10 +163,7 @@ describe('CreateTemplatePage', () => {
       </TestProviders>
     );
 
-    // The template name is panel-owned and lives on the Configuration tab under the Fields/
-    // Configuration split, so switch to it before setting the name.
-    await userEvent.click(screen.getByRole('tab', { name: /Configuration/ }));
-    await userEvent.type(screen.getByTestId('templateMetadataNameInput'), 'My template');
+    await nameTemplateFromPageTitle('My template');
     const saveButton = screen.getByTestId('saveTemplateHeaderButton');
     await userEvent.click(saveButton);
 
@@ -163,6 +183,7 @@ describe('CreateTemplatePage', () => {
     expect(localStorage.getItem(storageKey)).not.toBe(JSON.stringify(createPageInitialEditorYaml));
 
     // Verify navigation was NOT called
+    expect(mockNavigateToEditTemplate).not.toHaveBeenCalled();
     expect(mockNavigateToCasesTemplates).not.toHaveBeenCalled();
   });
 
@@ -174,10 +195,7 @@ describe('CreateTemplatePage', () => {
       </TestProviders>
     );
 
-    // The template name is panel-owned and lives on the Configuration tab under the Fields/
-    // Configuration split, so switch to it before setting the name.
-    await userEvent.click(screen.getByRole('tab', { name: /Configuration/ }));
-    await userEvent.type(screen.getByTestId('templateMetadataNameInput'), 'My template');
+    await nameTemplateFromPageTitle('My template');
     const saveButton = screen.getByTestId('saveTemplateHeaderButton');
     await userEvent.click(saveButton);
 
@@ -198,8 +216,7 @@ describe('CreateTemplatePage', () => {
     );
 
     // Save without touching the settings toggles — the solution defaults must still be persisted.
-    await userEvent.click(screen.getByRole('tab', { name: /Configuration/ }));
-    await userEvent.type(screen.getByTestId('templateMetadataNameInput'), 'My template');
+    await nameTemplateFromPageTitle('My template');
     await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
 
     await waitFor(() => {
@@ -211,6 +228,27 @@ describe('CreateTemplatePage', () => {
     ).template;
     const parsed = yamlParse(definition) as { settings?: Record<string, boolean> };
     expect(parsed.settings).toEqual({ syncAlerts: true, extractObservables: true });
+  });
+
+  it('defaults extract observables off where the feature is unavailable (e.g. Observability/Stack)', async () => {
+    render(
+      <TestProviders owner={['observability']}>
+        <CreateTemplatePage />
+      </TestProviders>
+    );
+
+    await nameTemplateFromPageTitle('My template');
+    await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+    });
+
+    const { definition } = (
+      mockMutateAsync.mock.calls[0][0] as { template: { definition: string } }
+    ).template;
+    const parsed = yamlParse(definition) as { settings?: Record<string, boolean> };
+    expect(parsed.settings).toEqual({ syncAlerts: false, extractObservables: false });
   });
 
   it('resets the panel config (settings/connector) draft to the defaults on successful creation', async () => {
@@ -229,18 +267,64 @@ describe('CreateTemplatePage', () => {
       </TestProviders>
     );
 
-    await userEvent.click(screen.getByRole('tab', { name: /Configuration/ }));
-    await userEvent.type(screen.getByTestId('templateMetadataNameInput'), 'My template');
+    await nameTemplateFromPageTitle('My template');
     await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
 
     await waitFor(() => {
       expect(mockMutateAsync).toHaveBeenCalledTimes(1);
     });
 
-    // The config draft is reset to the create defaults (Security test context → both on), not the
+    // The config draft is reset to the create defaults (Security context → both on), not the
     // stale in-progress `{ false, false }`.
     const storedConfig = localStorage.getItem(configKey);
     const parsedConfig = storedConfig ? JSON.parse(storedConfig) : {};
     expect(parsedConfig.settings).toEqual({ syncAlerts: true, extractObservables: true });
+  });
+
+  describe('telemetry', () => {
+    it('reports one created event with the blank mode when the save succeeds', async () => {
+      render(
+        <TestProviders coreStart={coreStart}>
+          <CreateTemplatePage />
+        </TestProviders>
+      );
+
+      // Opening the editor is not a confirmed action.
+      expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+
+      await nameTemplateFromPageTitle('My template');
+      await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
+
+      await waitFor(() => {
+        expect(coreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      });
+      expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        CASES_TEMPLATE_CREATED_EVENT_TYPE,
+        {
+          owner: mockedTestProvidersOwner[0],
+          entry_point: 'template_editor',
+          creation_mode: 'blank',
+        }
+      );
+    });
+
+    it('reports nothing when the save fails', async () => {
+      mockMutateAsync.mockRejectedValueOnce(new Error('Creation failed'));
+
+      render(
+        <TestProviders coreStart={coreStart}>
+          <CreateTemplatePage />
+        </TestProviders>
+      );
+
+      await nameTemplateFromPageTitle('My template');
+      await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
+
+      await waitFor(() => {
+        expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+      });
+
+      expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+    });
   });
 });

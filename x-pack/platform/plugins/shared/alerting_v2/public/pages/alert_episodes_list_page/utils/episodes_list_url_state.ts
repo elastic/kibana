@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import type { TimeRange } from '@kbn/es-query';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { isArray, isNil, isPlainObject, isString } from 'lodash';
+import { isArray, isEqual, isNil, isPlainObject, isString, sortBy } from 'lodash';
 
-/** Namespace for episodes list state inside the `_a` app-state blob */
-export const EPISODES_LIST_APP_STATE_KEY = 'episodesList' as const;
+/** Namespace for alerts list state inside the `_a` app-state blob */
+export const ALERTS_LIST_APP_STATE_KEY = 'alertsList' as const;
 
 /** Serialized in `_a` so “all statuses” survives reload (distinct from default Active) */
 export const EPISODES_LIST_STATUS_URL_ALL = 'all' as const;
 
 /** Default list filters (Active episodes, no rule/tags/search/assignee). */
-export const DEFAULT_EPISODES_LIST_FILTER: EpisodesFilterState = { status: 'active' };
+export const DEFAULT_EPISODES_LIST_FILTER: EpisodesFilterState = { status: ['active'] };
 
 /** Matches {@link useEpisodesTimeRange} fallback when timefilter has no prior state */
 export const DEFAULT_EPISODES_LIST_TIME_RANGE: TimeRange = {
@@ -26,13 +26,16 @@ export const DEFAULT_EPISODES_LIST_TIME_RANGE: TimeRange = {
 };
 
 type AppStateRecord = Record<string, unknown> & {
-  [EPISODES_LIST_APP_STATE_KEY]?: unknown;
+  [ALERTS_LIST_APP_STATE_KEY]?: unknown;
 };
 
 const isNonEmptyString = (v: unknown): v is string => isString(v) && v.trim().length > 0;
 
 const isStringArray = (v: unknown): v is string[] =>
   isArray(v) && v.length > 0 && v.every(isString);
+
+/** Order-independent comparison used to detect the default status selection. */
+const isSameStatusSet = (a: string[], b: string[]): boolean => isEqual(sortBy(a), sortBy(b));
 
 const isGroupingValues = (v: unknown): v is Record<string, string | null> =>
   isPlainObject(v) &&
@@ -42,8 +45,11 @@ function decodeFilterFields(o: Record<string, unknown>): EpisodesFilterState {
   const result: EpisodesFilterState = {};
   if (o.status === EPISODES_LIST_STATUS_URL_ALL) {
     result.status = undefined;
+  } else if (isStringArray(o.status)) {
+    result.status = [...o.status];
   } else if (isNonEmptyString(o.status)) {
-    result.status = o.status;
+    // Back-compat with bookmarks/deep-links created before status became multi-select.
+    result.status = [o.status];
   }
   if (isNonEmptyString(o.ruleId)) {
     result.ruleId = o.ruleId;
@@ -93,10 +99,10 @@ function splitEpisodesListRaw(raw: unknown): {
 function encodeFilterFields(state: EpisodesFilterState): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   const st = state.status;
-  if (isNil(st)) {
+  if (isNil(st) || st.length === 0) {
     result.status = EPISODES_LIST_STATUS_URL_ALL;
-  } else if (isNonEmptyString(st) && st !== DEFAULT_EPISODES_LIST_FILTER.status) {
-    result.status = st;
+  } else if (!isSameStatusSet(st, DEFAULT_EPISODES_LIST_FILTER.status ?? [])) {
+    result.status = [...st];
   }
   if (isNonEmptyString(state.ruleId)) {
     result.ruleId = state.ruleId;
@@ -146,7 +152,7 @@ export function readEpisodesListAppStateFromUrlStorage(storage: IKbnUrlStateStor
   timeRange?: TimeRange;
   histogramBreakdownField?: string;
 } {
-  const raw = storage.get<AppStateRecord>('_a')?.[EPISODES_LIST_APP_STATE_KEY];
+  const raw = storage.get<AppStateRecord>('_a')?.[ALERTS_LIST_APP_STATE_KEY];
   const { filter, timeRange, histogramBreakdownField } = splitEpisodesListRaw(raw);
   return {
     filterState: { ...DEFAULT_EPISODES_LIST_FILTER, ...filter },
@@ -163,15 +169,13 @@ export async function writeEpisodesListAppStateToUrlStorage(
 ): Promise<void> {
   const serialized = encodeEpisodesListRecord(filter, timeRange, histogramBreakdownField);
   const appState = storage.get<AppStateRecord>('_a') ?? {};
-  const {
-    [EPISODES_LIST_APP_STATE_KEY]: _ignoredEpisodesListState,
-    ...appStateWithoutEpisodesList
-  } = appState;
+  const { [ALERTS_LIST_APP_STATE_KEY]: _ignoredAlertsListState, ...appStateWithoutAlertsList } =
+    appState;
 
   const nextAppState: AppStateRecord =
     Object.keys(serialized).length === 0
-      ? appStateWithoutEpisodesList
-      : { ...appStateWithoutEpisodesList, [EPISODES_LIST_APP_STATE_KEY]: serialized };
+      ? appStateWithoutAlertsList
+      : { ...appStateWithoutAlertsList, [ALERTS_LIST_APP_STATE_KEY]: serialized };
 
   await storage.set('_a', nextAppState, { replace: false });
 }

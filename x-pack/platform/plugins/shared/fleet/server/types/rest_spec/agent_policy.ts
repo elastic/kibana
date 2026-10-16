@@ -54,6 +54,13 @@ export const GetAgentPoliciesRequestSchema = {
           },
         })
       ),
+      showAgentless: schema.boolean({
+        defaultValue: true,
+        meta: {
+          description:
+            'When false, exclude managed integration policies from the results. To manage these policies, use the managed integrations APIs.',
+        },
+      }),
       noAgentCount: schema.maybe(
         schema.boolean({
           meta: { description: 'use withAgentCount instead', deprecated: true },
@@ -114,6 +121,29 @@ export const BulkGetAgentPoliciesResponseSchema = schema.object(
   { meta: { id: 'bulk_get_agent_policies_response' } }
 );
 
+export const GetAgentPoliciesPackagePoliciesSummaryRequestSchema = {
+  body: schema.object({
+    ids: schema.arrayOf(schema.string({ maxLength: 1000 }), {
+      minSize: 1,
+      maxSize: 100,
+      meta: { description: 'list of agent policy ids' },
+    }),
+  }),
+};
+
+export const GetAgentPoliciesPackagePoliciesSummaryResponseSchema = schema.object({
+  items: schema.recordOf(
+    schema.string(),
+    schema.object({
+      count: schema.number(),
+      has_fleet_server: schema.boolean(),
+      has_managed: schema.boolean(),
+      has_root_integrations: schema.boolean(),
+      has_shared: schema.boolean(),
+    })
+  ),
+});
+
 export const GetOneAgentPolicyRequestSchema = {
   params: schema.object({
     agentPolicyId: schema.string({ meta: { description: 'The ID of the agent policy' } }),
@@ -145,9 +175,12 @@ export const CreateAgentPolicyRequestSchema = {
 };
 
 export const CreateAgentAndPackagePolicyRequestSchema = {
-  body: CreateAgentPolicyRequestSchema.body.extends({
-    package_policies: schema.arrayOf(CreatePackagePolicyRequestSchema.body, { maxSize: 1000 }),
-  }),
+  body: CreateAgentPolicyRequestSchema.body.extends(
+    {
+      package_policies: schema.arrayOf(CreatePackagePolicyRequestSchema.body, { maxSize: 1000 }),
+    },
+    { meta: { id: 'create_agent_and_package_policy_request_body' } }
+  ),
   query: schema.intersection([
     CreateAgentPolicyRequestSchema.query,
     CreatePackagePolicyRequestSchema.query,
@@ -156,10 +189,13 @@ export const CreateAgentAndPackagePolicyRequestSchema = {
 
 export const UpdateAgentPolicyRequestSchema = {
   ...GetOneAgentPolicyRequestSchema,
-  body: NewAgentPolicySchema.extends({
-    force: schema.maybe(schema.boolean()),
-    bumpRevision: schema.maybe(schema.boolean()),
-  }),
+  body: NewAgentPolicySchema.extends(
+    {
+      force: schema.maybe(schema.boolean()),
+      bumpRevision: schema.maybe(schema.boolean()),
+    },
+    { meta: { id: 'update_agent_policy_request_body' } }
+  ),
 };
 
 export const CopyAgentPolicyRequestSchema = {

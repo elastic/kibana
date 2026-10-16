@@ -35,7 +35,7 @@ export interface DashboardPluginStart {
   /**
    * Scans dashboards with pagination.
    *
-   * @deprecated Contact #kibana-presentation about requirements for a proper panel search interface.
+   * @deprecated Contact #kibana-dashboards about requirements for a proper panel search interface.
    * @param ctx - The request handler context.
    * @param page - The page number.
    * @param perPage - The number of items per page.

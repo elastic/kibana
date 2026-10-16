@@ -32,6 +32,7 @@ export const HEATMAP_NAME = 'heatmap';
 export const HEATMAP_LEGEND_NAME = 'heatmap_legend';
 export const HEATMAP_GRID_NAME = 'heatmap_grid';
 
+export const LENS_HEATMAP_DEFAULT_COLOR_STEPS = 5;
 export const LENS_HEATMAP_DEFAULT_PALETTE_NAME = 'temperature';
 export const LENS_HEATMAP_DEFAULT_PALETTE_PARAMS: RequiredPaletteParamTypes = {
   name: 'temperature',

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiModal, EuiModalBody, useEuiTheme } from '@elastic/eui';
+import { EuiModal, EuiModalBody, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ChangeHistoryEmptyPrompt } from '../timeline/change_history_empty_prompt';
 import { ChangeHistoryListErrorPrompt } from '../timeline/change_history_list_error_prompt';
@@ -42,6 +42,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
   const { euiTheme } = useEuiTheme();
   const { adapter, objectId, labels, supports, telemetry } = useChangeHistoryConfig();
   const { isOpen, closeModal } = useChangeHistoryModal();
+  const modalTitleId = useGeneratedHtmlId();
 
   const [selectedChangeId, setSelectedChangeId] = useState<string | undefined>();
   const [compareOverride, setCompareOverride] = useState<
@@ -281,11 +282,13 @@ export function ChangeHistoryModal(): JSX.Element | null {
         maxWidth={false}
         css={styles.modal}
         data-test-subj="changeHistoryModal"
+        aria-labelledby={modalTitleId}
       >
         <EuiModalBody css={styles.modalBody}>
           <ChangeHistoryPreviewShell
             backLabel={labels.previewBackLabel}
             title={labels.previewTitle}
+            titleId={modalTitleId}
             onBack={closeModal}
           >
             <div css={styles.fullPageEmptyState} data-test-subj="changeHistoryModalEmpty">
@@ -304,12 +307,14 @@ export function ChangeHistoryModal(): JSX.Element | null {
         maxWidth={false}
         css={styles.modal}
         data-test-subj="changeHistoryModal"
+        aria-labelledby={modalTitleId}
       >
         <EuiModalBody css={styles.modalBody}>
           <div css={styles.splitLayout}>
             <ChangeHistoryPreviewShell
               backLabel={labels.previewBackLabel}
               title={labels.previewTitle}
+              titleId={modalTitleId}
               onBack={closeModal}
               headerActions={previewHeaderActions}
             >

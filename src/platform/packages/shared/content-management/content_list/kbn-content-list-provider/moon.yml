@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/user-profile-components'
   - '@kbn/content-management-user-profiles'
   - '@kbn/shared-ux-router'
+  - '@kbn/ui-callout'
   - '@kbn/i18n'
 tags:
   - shared-browser

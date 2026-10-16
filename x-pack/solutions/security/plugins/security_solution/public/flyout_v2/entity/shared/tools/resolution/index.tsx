@@ -7,16 +7,14 @@
 
 import React, { memo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { EntityType } from '@kbn/entity-store/public';
 import type { EntityType as SecurityEntityType } from '../../../../../../common/entity_analytics/types';
 import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
 import { ResolutionGroupTab } from '../../../../../entity_analytics/components/entity_resolution/resolution_group_tab';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
+import { RESOLUTION_TITLE } from '../../../../shared/constants/flyout_titles';
 
-const TITLE = i18n.translate('xpack.securitySolution.flyout.entityDetails.resolution.title', {
-  defaultMessage: 'Entity resolution',
-});
+const TITLE = RESOLUTION_TITLE;
 
 export interface ResolutionProps {
   /** Canonical Entity Store v2 id (`entity.id`) of the entity to resolve. */

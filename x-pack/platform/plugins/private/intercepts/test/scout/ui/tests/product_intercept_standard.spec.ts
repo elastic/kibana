@@ -32,27 +32,14 @@ test.describe('Standard Product intercept', { tag: '@local-stateful-classic' }, 
 
     await pageObjects.intercepts.waitForInterceptDisplayed(TRIGGER_DEF_ID);
 
-    // Navigate to the intercept steps
     await pageObjects.intercepts.clickProgressionButton();
-
-    let progressionButtonVisible = false;
-
-    // Loop through survey responses
-    do {
-      // Randomly select one of the NPS buttons (1-5)
-      await pageObjects.intercepts.clickRandomNpsButton();
-      // The progression button is only visible at the start and completion of the survey
-      progressionButtonVisible = await pageObjects.intercepts.isProgressionButtonVisible();
-    } while (!progressionButtonVisible);
-
-    const buttonText = await pageObjects.intercepts.getProgressionButtonText();
-    expect(buttonText).toBe('Close');
+    await pageObjects.intercepts.completeNpsQuestionsUntilCompletion();
 
     const interceptText = await pageObjects.intercepts.getInterceptText(TRIGGER_DEF_ID);
     expect(interceptText).toMatch(/Thanks for the feedback!/);
   });
 
-  test('survey link on the completion step includes CSAT responses as URL params', async ({
+  test('participate button on the completion step links to the User Interviews opt-in form', async ({
     page,
     pageObjects,
     browserAuth,
@@ -80,12 +67,14 @@ test.describe('Standard Product intercept', { tag: '@local-stateful-classic' }, 
       await pageObjects.intercepts.clickNpsButton(4);
     });
 
-    await test.step('verify CSAT values are embedded in survey link', async () => {
+    await test.step('verify participate button links to User Interviews opt-in form', async () => {
+      await pageObjects.intercepts.waitForCompletionStep();
       const href = await pageObjects.intercepts.getSurveyLinkHref();
-      const surveyParams = new URL(href).searchParams;
+      const surveyUrl = new URL(href);
 
-      expect(surveyParams.get('satisfaction')).toBe('3');
-      expect(surveyParams.get('ease')).toBe('4');
+      expect(surveyUrl.origin + surveyUrl.pathname).toBe('https://ela.st/user-interviews-opt-in');
+      expect(surveyUrl.searchParams.get('satisfaction')).toBe('3');
+      expect(surveyUrl.searchParams.get('ease')).toBe('4');
     });
   });
 

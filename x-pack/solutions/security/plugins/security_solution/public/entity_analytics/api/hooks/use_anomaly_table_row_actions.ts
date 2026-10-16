@@ -10,7 +10,7 @@ import type { IconType } from '@elastic/eui';
 import { FilterStateStore, escapeQuotes, type Filter } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { useInvestigateInTimeline } from '../../../common/hooks/timeline/use_investigate_in_timeline';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { useKibana } from '../../../common/lib/kibana';
 import type { TableRow } from '../../components/anomalies/table/types';
 import {
@@ -23,8 +23,14 @@ import {
   ENTITY_ANOMALY_TABLE_ROW_ACTION_VIEW_IN_SMV,
 } from '../../components/anomalies/translations';
 
+const ANOMALY_ACTION_IDS = {
+  addToTimeline: 'add-to-timeline',
+  viewInDiscover: 'view-in-discover',
+  viewInSingleMetricViewer: 'view-in-single-metric-viewer',
+} as const;
+
 export interface AnomalyTableRowAction {
-  key: string;
+  key: (typeof ANOMALY_ACTION_IDS)[keyof typeof ANOMALY_ACTION_IDS];
   label: string;
   icon: IconType;
   onClick: () => void;
@@ -113,9 +119,7 @@ export const useAnomalyTableRowActions = ({
 }: UseAnomalyTableRowActionsArgs): AnomalyTableRowActionsResult => {
   const { services } = useKibana();
   const { ml, share, data } = services;
-  const {
-    timelinePrivileges: { read: canReadTimeline },
-  } = useUserPrivileges();
+  const [canReadTimeline] = useShowTimeline();
   const { investigateInTimeline } = useInvestigateInTimeline();
 
   const cachedRecordRef = useRef<CachedRecord | null>(null);
@@ -244,7 +248,7 @@ export const useAnomalyTableRowActions = ({
 
     if (canReadTimeline) {
       items.push({
-        key: 'add-to-timeline',
+        key: ANOMALY_ACTION_IDS.addToTimeline,
         label: ENTITY_ANOMALY_TABLE_ROW_ACTION_ADD_TO_TIMELINE,
         icon: 'timeline',
         onClick: handleAddToTimeline,
@@ -252,7 +256,7 @@ export const useAnomalyTableRowActions = ({
     }
 
     items.push({
-      key: 'view-in-discover',
+      key: ANOMALY_ACTION_IDS.viewInDiscover,
       label: ENTITY_ANOMALY_TABLE_ROW_ACTION_VIEW_IN_DISCOVER,
       icon: 'productDiscover',
       onClick: handleViewInDiscover,
@@ -260,7 +264,7 @@ export const useAnomalyTableRowActions = ({
 
     if (getUrl) {
       items.push({
-        key: 'view-in-single-metric-viewer',
+        key: ANOMALY_ACTION_IDS.viewInSingleMetricViewer,
         label: ENTITY_ANOMALY_TABLE_ROW_ACTION_VIEW_IN_SMV,
         icon: 'singleMetricViewer',
         onClick: handleViewInSingleMetricViewer,

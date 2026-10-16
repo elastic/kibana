@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { indexLifecyclePhaseSchema, environmentSchema } from '@kbn/apm-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { defineRoute } from '../types';
@@ -24,11 +24,13 @@ export interface StorageExplorerRouteResponse {
 
 export const storageExplorerRoute = defineRoute<StorageExplorerRouteResponse>()({
   endpoint: 'GET /internal/apm/storage_explorer',
-  params: z.object({
-    query: indexLifecyclePhaseSchema
-      .merge(probabilitySchema)
-      .merge(environmentSchema)
-      .merge(kuerySchema)
-      .merge(rangeSchema),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: indexLifecyclePhaseSchema
+        .merge(probabilitySchema)
+        .merge(environmentSchema)
+        .merge(kuerySchema)
+        .merge(rangeSchema),
+    })
+  ),
 });

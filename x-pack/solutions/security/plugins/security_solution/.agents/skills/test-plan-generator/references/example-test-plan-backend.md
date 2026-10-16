@@ -1,19 +1,19 @@
 # Example Test Plan — backend / parser feature
 
-This file is a worked example of a correctly-formed test plan for a **pure-backend feature with no UI, no PR linked yet, and no `TARGET_VERSION` available**. Use it as a reference alongside [`example-test-plan.md`](example-test-plan.md), which covers the UI-feature case.
+This file is a worked example of a correctly-formed test plan for a **pure-backend / pure-parser feature with no UI, no PR linked yet, and no upgrade surface**. Use it as a reference alongside [`example-test-plan.md`](example-test-plan.md), which covers the UI-feature case.
 
-The example is **abbreviated** (6 scenarios, 1 feature area) but **complete** — every required section is present, optional sections are omitted because the feature has no upgrade / RBAC / space / tenant / CCS surface, and all self-review checks pass.
+The example is **abbreviated** (6 scenarios, 1 feature area) but **complete** — every required section is present, upgrade is recorded under *Out of scope* (per the always-evaluated rule, with reason "no upgrade surface"), the other optional sections are omitted because the feature has no RBAC / space / tenant / CCS surface, and all self-review checks pass.
 
 ---
 
 ## What this example demonstrates (differently from the UI example)
 
 - A target that has **no linked PR and no orphan PR** — the plan is generated from issue text plus existing parser code only. The Coverage Ratio computation honours the *Boundary case: no PR linked* rule from [`issue-clarity-assessment.md`](issue-clarity-assessment.md#boundary-case-no-pr-linked) — existing-code facts are classified as `pr` for the ratio
-- A `TARGET_VERSION` that **cannot be resolved** from milestone, labels, or project fields, and a user who is unavailable to answer — applies the *User-unavailable fallback* table from `SKILL.md` Step 2 (mark `⚠️`, omit upgrade scenarios)
+- A **pure-parser feature with no upgrade surface** — applies the *User-unavailable fallback* table from `SKILL.md` Step 2 (second row: "pure parser / pure compute"): upgrade is recorded under *Out of scope* with a one-clause reason, and `TARGET_VERSION` is irrelevant to this plan (no need to resolve it)
 - Two dimensions marked **N/A** in the Issue Clarity Assessment — `UX/UI` (no UI surface) and `Data & Roles` (purely backend with the data shape fully described in the issue body, per the B3 reword)
 - A parent epic that scores **2/5** while the target scores **4/5** — the combined readability stays at 4/5 (target carries the corpus) and *Actionable feedback* bullets are included because at least one issue scored ≤ 3
 - One scenario flagged in *Known Limitations* and the Coverage Ratio breakdown as **code-derived** (an implementation detail not in any issue body)
-- Optional sections (RBAC, Multi-space, Multi-tenant, Upgrade, CCS) **explicitly omitted** with a brief justification in *Known Limitations* — never include them speculatively
+- Optional sections (RBAC, Multi-space, Multi-tenant, CCS) **explicitly omitted** with a brief justification in *Known Limitations* — never include them speculatively. Upgrade is not an optional-omit here — it is recorded under *Out of scope* per the always-evaluated rule
 - `Automation coverage` lines that name the **existing test file for the function being extended**, marked `partial` because the existing tests cover the prior behaviour but not the new variants
 
 ---
@@ -48,6 +48,7 @@ The migration intake pipeline parses vendor rule sources to identify dependencie
 - Verify non-regression of the existing `_FooBar(...)` extraction.
 
 **Out of scope:**
+- Upgrade / migration scenarios — no upgrade surface (pure parser: no persisted state, no schema, no config or navigation changes).
 - Runtime evaluation of alias variables not expressed as string literals.
 - Retrieval of watchlist content (this issue is dependency identification only).
 
@@ -57,7 +58,7 @@ The migration intake pipeline parses vendor rule sources to identify dependencie
 - **User role:** Not user-facing — the parser runs server-side during migration intake; no end-user role applies.
 - **Data setup:** Input is a single KQL query string; no fixtures or persisted state are required.
 - **Deployment type:** Applies equally to self-managed, serverless, and ECH — the parser is a pure function with no deployment-specific behaviour.
-- **Target version:** ⚠️ Not specified — no milestone, labels, or project fields on the target issue. Please confirm `TARGET_VERSION` before publishing.
+- **Target version:** N/A — pure parser has no upgrade surface (see *Out of scope*); `TARGET_VERSION` is irrelevant to this plan.
 
 ## Acceptance Criteria
 
@@ -69,10 +70,9 @@ The migration intake pipeline parses vendor rule sources to identify dependencie
 
 ## Known Limitations
 
-- ⚠️ `TARGET_VERSION` is unknown — no milestone or version label on the target issue. Upgrade scenarios are intentionally omitted per the *User-unavailable fallback* table in `SKILL.md` Step 2. Re-evaluate once the version is confirmed.
 - ⚠️ No PR is linked to the target issue at the time of writing. The plan is derived from the issue body and the existing parser code at `<path>/foobar_identifier.ts`. When the implementation PR is opened, re-run the skill in `update` mode to capture exact symbol names, error strings, and any unanticipated artifacts.
 - One scenario in this plan (*"Parser regex state does not leak across repeated invocations"*) is sourced from the existing parser implementation, not from the issue text. It is included because regex state leakage is a real-world failure mode for the existing global-regex pattern that will be extended by this work. Flagged accordingly in the Coverage Ratio breakdown below.
-- Optional sections (RBAC, Multi-space, Multi-tenant, Upgrade, CCS) do not apply: the feature is a pure server-side parser with no user-facing surface, no persisted state, no space / tenant scoping, and no Elasticsearch cluster interactions.
+- Optional sections (RBAC, Multi-space, Multi-tenant, CCS) do not apply: the feature is a pure server-side parser with no user-facing surface, no persisted state, no space / tenant scoping, and no Elasticsearch cluster interactions. Upgrade is recorded under *Out of scope* above per the always-evaluated rule — no upgrade surface.
 
 ## Test Scenarios
 

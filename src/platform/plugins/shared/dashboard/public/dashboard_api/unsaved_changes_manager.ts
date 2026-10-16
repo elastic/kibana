@@ -7,25 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, debounceTime, map } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  filter,
+  map,
+  of,
+  type Observable,
+} from 'rxjs';
 
-import type { HasLastSavedChildState } from '@kbn/presentation-publishing';
 import type {
+  HasLastSavedChildState,
   PublishesSavedObjectId,
   PublishingSubject,
   ViewMode,
 } from '@kbn/presentation-publishing';
 
-import { of } from 'rxjs';
-import type { DashboardState } from '../../common';
-import { type DashboardBackupState } from '../services/dashboard_backup_service';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { getDashboardBackupService } from '../services/dashboard_api_services';
+import { type DashboardBackupState } from '../services/dashboard_backup_service';
+import type { initializeApproximationManager } from './approximation_manager';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
-import type { initializeApproximationManager } from './approximation_manager';
 import type { initializeSettingsManager } from './settings_manager';
-import type { initializeUnifiedSearchManager } from './unified_search_manager';
 import type { PublishesOnSave } from './types';
+import type { initializeUnifiedSearchManager } from './unified_search_manager';
 
 const DEBOUNCE_TIME = 100;
 
@@ -51,7 +58,7 @@ export function initializeUnsavedChangesManager({
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
   projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
   approximationManager: ReturnType<typeof initializeApproximationManager>;
-  setState: (state: DashboardState) => void;
+  setState: (state: DashboardState) => Promise<void>;
   onSave$: PublishesOnSave['onSave$'];
 }): {
   api: {
@@ -61,6 +68,7 @@ export function initializeUnsavedChangesManager({
   cleanup: () => void;
   internalApi: {
     getLastSavedState: () => DashboardState;
+    unsavedChanges$: Observable<Partial<DashboardState>>;
   };
 } {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
@@ -82,7 +90,10 @@ export function initializeUnsavedChangesManager({
   );
 
   const unsavedChangesSubscription = combineLatest([viewMode$, dashboardStateChanges$])
-    .pipe(debounceTime(DEBOUNCE_TIME))
+    .pipe(
+      debounceTime(DEBOUNCE_TIME),
+      filter(([viewMode]) => viewMode !== 'non-interactive') // don't track unsaved changes in non-interactive mode
+    )
     .subscribe(([viewMode, dashboardChanges]) => {
       const hasUnsavedChanges = Object.keys(dashboardChanges ?? {}).length > 0;
 
@@ -107,7 +118,7 @@ export function initializeUnsavedChangesManager({
   return {
     api: {
       asyncResetToLastSavedState: async () => {
-        setState(lastSavedState$.value);
+        await setState(lastSavedState$.value);
       },
       hasUnsavedChanges$,
       lastSavedStateForChild$: (panelId: string) =>
@@ -120,6 +131,7 @@ export function initializeUnsavedChangesManager({
     },
     internalApi: {
       getLastSavedState: () => lastSavedState$.value,
+      unsavedChanges$: dashboardStateChanges$,
     },
   };
 }

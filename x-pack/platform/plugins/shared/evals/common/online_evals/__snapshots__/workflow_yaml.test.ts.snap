@@ -1,0 +1,72 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[
+  `online eval workflow yaml builds a workflow yaml snapshot and validates against WorkflowSchema 1`
+] = `
+"version: \\"1\\"
+name: \\"[online-eval] My online monitor\\"
+description: Online evaluation created by the Evals UI
+enabled: true
+tags:
+  - evals-online
+consts:
+  connector_id: connector-123
+triggers:
+  - type: scheduled
+    with:
+      every: 1h
+steps:
+  - name: sample_traces
+    type: elasticsearch.esql.query
+    with:
+      query: |-
+        FROM traces-agent_builder.otel-default
+        | WHERE @timestamp >= NOW() - 60m AND @timestamp < NOW() - 15m
+        | WHERE parent_span_id IS NULL AND KQL(\\"attributes.gen_ai.operation.name:*\\") AND NOT KQL(\\"attributes.evaluator.name:*\\")
+        | WHERE attributes.agent_id == 'agent-1'
+        | STATS latest = MAX(@timestamp) BY trace_id
+        | KEEP latest, trace_id
+        | SORT latest DESC
+        | LIMIT 25
+  - name: evaluate_each
+    type: foreach
+    foreach: \\"{{ steps.sample_traces.output.values }}\\"
+    steps:
+      - name: evaluate
+        type: kibana.request
+        with:
+          method: POST
+          path: /internal/evals/_evaluate
+          headers:
+            kbn-xsrf: \\"true\\"
+            elastic-api-version: \\"1\\"
+            x-elastic-internal-origin: kibana
+          body:
+            subject:
+              mode: single-turn
+              traces:
+                - trace_id: \\"{{ foreach.item[1] }}\\"
+            evaluators:
+              - name: correctness
+                version: v1
+                connector_id: \\"{{ consts.connector_id }}\\"
+              - name: trace_readiness
+                connector_id: \\"{{ consts.connector_id }}\\"
+      - name: persist
+        type: kibana.request
+        with:
+          method: POST
+          path: /internal/evals/online_scores
+          headers:
+            kbn-xsrf: \\"true\\"
+            elastic-api-version: \\"1\\"
+            x-elastic-internal-origin: kibana
+          body:
+            monitor:
+              id: \\"{{ workflow.id }}\\"
+              name: \\"{{ workflow.name }}\\"
+            trace_id: \\"{{ foreach.item[1] }}\\"
+            connector_id: \\"{{ consts.connector_id }}\\"
+            results: \${{ steps.evaluate.output.results }}
+"
+`;

@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiIcon,
-  EuiScreenReaderOnly,
-  EuiToolTip,
-  RIGHT_ALIGNMENT,
-  useEuiFontSize,
-} from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiToolTip, RIGHT_ALIGNMENT, useEuiFontSize } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import styled from '@emotion/styled';
 import type { APIReturnType } from '@kbn/apm-api-shared';
+import { truncate } from '@kbn/apm-common';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import type { ApmRoutes } from '../../routing/apm_route_config';
 import {
@@ -28,7 +23,6 @@ import {
 import { useApmParams } from '../../../hooks/use_apm_params';
 import type { FetcherResult } from '../../../hooks/use_fetcher';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { truncate } from '../../../utils/style';
 import { EmptyMessage } from '../../shared/empty_message';
 import { ImpactBar } from '../../shared/impact_bar';
 import { TransactionDetailLink } from '../../shared/links/apm/transaction_detail_link';
@@ -142,27 +136,19 @@ export function getTraceListColumns({
     },
     {
       field: 'impact',
-      name: (
-        <EuiToolTip
-          content={i18n.translate('xpack.apm.tracesTable.impactColumnDescription', {
-            defaultMessage:
-              'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
-          })}
-        >
-          <>
-            {i18n.translate('xpack.apm.tracesTable.impactColumnLabel', {
-              defaultMessage: 'Impact',
-            })}{' '}
-            <EuiIcon
-              size="s"
-              color="subdued"
-              type="question"
-              className="eui-alignTop"
-              aria-hidden={true}
-            />
-          </>
-        </EuiToolTip>
-      ),
+      name: i18n.translate('xpack.apm.tracesTable.impactColumnLabel', {
+        defaultMessage: 'Impact',
+      }),
+      nameTooltip: {
+        content: i18n.translate('xpack.apm.tracesTable.impactColumnDescription', {
+          defaultMessage:
+            'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
+        }),
+        icon: 'question',
+        iconProps: {
+          color: 'subdued',
+        },
+      },
       align: RIGHT_ALIGNMENT,
       sortable: true,
       render: (_, { impact }) => <ImpactBar value={impact} />,

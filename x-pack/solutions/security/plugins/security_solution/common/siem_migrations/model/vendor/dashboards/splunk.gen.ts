@@ -24,43 +24,46 @@ export const SplunkOriginalDashboardExportProperties = lazySchema(() =>
     /**
      * The unique identifier for the dashboard
      */
-    id: z.string(),
+    id: z.string().describe('The unique identifier for the dashboard'),
     /**
      * The label of the dashboard
      */
-    label: z.string().optional(),
+    label: z.string().optional().describe('The label of the dashboard'),
     /**
      * The title of the dashboard
      */
-    title: z.string(),
+    title: z.string().describe('The title of the dashboard'),
     /**
      * The description of the dashboard
      */
-    description: z.string().optional(),
+    description: z.string().optional().describe('The description of the dashboard'),
     /**
      * The EAI data of the dashboard, typically in XML format
      */
-    'eai:data': z.string(),
+    'eai:data': z.string().describe('The EAI data of the dashboard, typically in XML format'),
     /**
      * The application associated with the EAI ACL
      */
-    'eai:acl.app': z.string().optional(),
+    'eai:acl.app': z.string().optional().describe('The application associated with the EAI ACL'),
     /**
      * The sharing model of the EAI ACL (e.g., app, global)
      */
-    'eai:acl.sharing': z.string().optional(),
+    'eai:acl.sharing': z
+      .string()
+      .optional()
+      .describe('The sharing model of the EAI ACL (e.g., app, global)'),
     /**
      * The owner of the EAI ACL
      */
-    'eai:acl.owner': z.string().optional(),
+    'eai:acl.owner': z.string().optional().describe('The owner of the EAI ACL'),
     /**
      * The last updated timestamp of the dashboard
      */
-    updated: z.string().optional(),
+    updated: z.string().optional().describe('The last updated timestamp of the dashboard'),
     /**
      * The version of the dashboard
      */
-    version: z.string().optional(),
+    version: z.string().optional().describe('The version of the dashboard'),
   })
 );
 export type SplunkOriginalDashboardExportProperties = z.infer<
@@ -75,7 +78,9 @@ export const SplunkOriginalDashboardExport = lazySchema(() =>
     /**
      * The result object in Splunk file containing the dashboard's properties
      */
-    result: SplunkOriginalDashboardExportProperties,
+    result: SplunkOriginalDashboardExportProperties.describe(
+      "The result object in Splunk file containing the dashboard's properties"
+    ),
   })
 );
 export type SplunkOriginalDashboardExport = z.infer<typeof SplunkOriginalDashboardExport>;
@@ -88,15 +93,15 @@ export const SplunkOriginalDashboardProperties = lazySchema(() =>
     /**
      * The application associated with the EAI ACL
      */
-    app: z.string().optional(),
+    app: z.string().optional().describe('The application associated with the EAI ACL'),
     /**
      * The sharing model of the EAI ACL (e.g., app, global)
      */
-    sharing: z.string().optional(),
+    sharing: z.string().optional().describe('The sharing model of the EAI ACL (e.g., app, global)'),
     /**
      * The owner of the EAI ACL
      */
-    owner: z.string().optional(),
+    owner: z.string().optional().describe('The owner of the EAI ACL'),
   })
 );
 export type SplunkOriginalDashboardProperties = z.infer<typeof SplunkOriginalDashboardProperties>;

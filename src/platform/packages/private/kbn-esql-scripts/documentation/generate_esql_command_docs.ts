@@ -12,12 +12,12 @@
 import * as fs from 'fs';
 import { getLicenseInfoForCommand } from '@kbn/language-documentation';
 import type { CommandDefinition, MultipleLicenseInfo } from '@kbn/language-documentation';
+import { commandDefinitions as pkgCommandDefs } from '@elastic/esql-definitions/commands';
 import {
   processingCommandsIntro,
   processingCommandsItems,
 } from './resources/commands/processing_data';
 import { sourceCommandsIntro, sourceCommandsItems } from './resources/commands/source_data';
-import { readElasticsearchDefinitions } from '../lib/elasticsearch_definitions';
 import { OUTPUT_DIR } from './constants';
 
 interface CommandItemMetadata {
@@ -55,6 +55,11 @@ const commandsData: CommandSectionMetadata[] = [
   },
 ];
 
+const BACKSLASH_REGEX = /\\/g;
+const SINGLE_QUOTE_REGEX = /'/g;
+const BACKTICK_REGEX = /`/g;
+const TEMPLATE_EXPRESSION_REGEX = /\$\{/g;
+
 /**
  * This script generates the ESQL inline command documentation files by merging
  * the source and processing commands with Elasticsearch definitions.
@@ -68,18 +73,10 @@ const commandsData: CommandSectionMetadata[] = [
   try {
     console.log(`Start generating commands documentation`);
 
-    const pathToElasticsearch = process.argv[2];
-    if (!pathToElasticsearch) {
-      throw new Error(
-        'No Elasticsearch path provided, generating without license info for testing...'
-      );
-    }
-
-    const cmdDefinitions = readElasticsearchDefinitions<CommandDefinition>({
-      pathToElasticsearch,
-      keywordType: 'commands',
-      language: 'esql',
-    });
+    const cmdDefinitions: CommandDefinition[] = pkgCommandDefs.map((cmd) => ({
+      name: cmd.name,
+      license: cmd.license as CommandDefinition['license'],
+    }));
     const cmdDefinitionsMap = new Map(cmdDefinitions.map((cmd) => [cmd.name, cmd]));
     const commands = commandsData.map((cmd) => addDefinitionsToCommands(cmd, cmdDefinitionsMap));
     const docContents = commands.map((cmd) => generateDoc(cmd));
@@ -136,6 +133,25 @@ export const commands = ${generateCommandSectionDoc(data)};
 }
 
 /**
+ * Escapes a string for safe interpolation inside a single-quoted JS string literal.
+ */
+function escapeSingleQuoted(value: string): string {
+  return value.replace(BACKSLASH_REGEX, '\\\\').replace(SINGLE_QUOTE_REGEX, "\\'");
+}
+
+/**
+ * Escapes a string for safe interpolation inside a nested template literal,
+ * so backslashes, backticks and `${` sequences in the source data can't break
+ * out of the generated template literal or inject expressions into it.
+ */
+function escapeTemplateLiteral(value: string): string {
+  return value
+    .replace(BACKSLASH_REGEX, '\\\\')
+    .replace(BACKTICK_REGEX, '\\`')
+    .replace(TEMPLATE_EXPRESSION_REGEX, '\\${');
+}
+
+/**
  * Generates a documentation for a specific group of commands.
  */
 function generateCommandSectionDoc({
@@ -149,10 +165,10 @@ function generateCommandSectionDoc({
 
   return `{
   label: i18n.translate('${labelKey}', {
-    defaultMessage: '${labelDefaultMessage}',
+    defaultMessage: '${escapeSingleQuoted(labelDefaultMessage)}',
   }),
   description: i18n.translate('${descriptionKey}', {
-    defaultMessage: \`${descriptionDefaultMessage}\`,
+    defaultMessage: \`${escapeTemplateLiteral(descriptionDefaultMessage)}\`,
   }),
   items: [
     ${commandsContentDoc}
@@ -181,7 +197,7 @@ function generateCommandItemDoc({
     const formattedDescriptionOptions = Object.entries(options || {}).map(([key, value]) =>
       typeof value === 'boolean'
         ? `${key}: ${value},`
-        : `${key}: '${String(value).replace(/'/g, "\\'")}',`
+        : `${key}: '${escapeSingleQuoted(String(value))}',`
     );
 
     return formattedDescriptionOptions.length > 0
@@ -196,12 +212,11 @@ function generateCommandItemDoc({
   const descriptionKey = `${labelKey}.markdown`;
   const previewProp = preview !== undefined ? `\n preview: ${preview},` : '';
   const licenseProp = license ? `\n license: ${JSON.stringify(license)},` : '';
-  // replace(/`/g, '\\`') escape backticks for nested template literals in the generated file
-  const description = descriptionDefaultMessage.replace(/`/g, '\\`');
+  const description = escapeTemplateLiteral(descriptionDefaultMessage);
 
   return `{
       label: i18n.translate('${labelKey}', {
-        defaultMessage: '${labelDefaultMessage}',
+        defaultMessage: '${escapeSingleQuoted(labelDefaultMessage)}',
       }),${previewProp}
       description: {
         markdownContent: i18n.translate('${descriptionKey}', {

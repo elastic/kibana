@@ -32,9 +32,10 @@ export FTR_EIS_CCM="${FTR_EIS_CCM:-1}"
 
 .buildkite/scripts/steps/test/ftr_configs.sh
 
+# Mirror security labs: upload zips immediately after FTR so GCS gets artifacts
+# even if the ES|QL docs PR step fails or exits early.
+echo "--- Upload GenAI product docs artifacts to GCS"
+bash .buildkite/scripts/steps/gen_ai/upload_kb_artifacts.sh
+
 echo "--- Make PR for GenAI ES|QL docs sync update"
 .buildkite/scripts/steps/gen_ai/esql_docs_sync.sh
-
-
-echo "--- Upload GenAI product docs artifacts to GCS"
-.buildkite/scripts/steps/gen_ai/upload_kb_artifacts.sh

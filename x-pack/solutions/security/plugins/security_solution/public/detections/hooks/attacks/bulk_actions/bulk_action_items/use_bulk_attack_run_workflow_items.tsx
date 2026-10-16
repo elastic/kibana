@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
 import type { RenderContentPanelProps } from '@kbn/response-ops-alerts-table/types';
+import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 
 import * as alertsTableI18n from '../../../../components/alerts_table/translations';
 import {
@@ -20,10 +21,18 @@ import type { AttackContentPanelConfig, BulkAttackActionItems } from '../types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
+import { RUN_ATTACK_WORKFLOW_ACTION_ID } from '../../../../../common/constants/action_ids';
 
 export interface UseBulkAttackRunWorkflowItemsProps {
   /** Source of the action for telemetry */
   telemetrySource?: AttacksActionTelemetrySource;
+  /**
+   * When set, the menu was opened from a single attack's row or flyout rather than from a bulk
+   * selection. It routes the run through the Cases API with a singular `cases.attachment`
+   * origin, which is what makes the case activity entry name the attack and offer the button
+   * that reopens its flyout. Left unset for genuine bulk selections.
+   */
+  originAttackId?: string;
 }
 
 /**
@@ -31,6 +40,7 @@ export interface UseBulkAttackRunWorkflowItemsProps {
  */
 export const useBulkAttackRunWorkflowItems = ({
   telemetrySource,
+  originAttackId,
 }: UseBulkAttackRunWorkflowItemsProps = {}): BulkAttackActionItems => {
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
@@ -59,12 +69,14 @@ export const useBulkAttackRunWorkflowItems = ({
       return (
         <AlertWorkflowsPanel
           alertIds={alertIds}
+          attachmentType={SECURITY_ATTACK_ATTACHMENT_TYPE}
           onClose={closePopoverMenu}
           onExecute={handleExecute}
+          originAlertId={originAttackId}
         />
       );
     },
-    [handleExecute]
+    [handleExecute, originAttackId]
   );
 
   const items = useMemo(
@@ -72,7 +84,7 @@ export const useBulkAttackRunWorkflowItems = ({
       canRunWorkflow
         ? [
             {
-              key: 'run-attack-workflow-action',
+              key: RUN_ATTACK_WORKFLOW_ACTION_ID,
               name: alertsTableI18n.CONTEXT_MENU_RUN_WORKFLOW,
               label: alertsTableI18n.CONTEXT_MENU_RUN_WORKFLOW,
               panel: RUN_WORKFLOW_BULK_PANEL_ID,

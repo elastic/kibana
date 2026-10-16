@@ -50,7 +50,7 @@ describe('CustomExtentsOptions component', () => {
       defaultProps.axisScale.boundsMargin = 5;
       mount(<CustomExtentsOptions {...defaultProps} />);
 
-      expect(setMultipleValidity).toBeCalledWith(BOUNDS_MARGIN, true);
+      expect(setMultipleValidity).toHaveBeenCalledWith(BOUNDS_MARGIN, true);
     });
 
     it('should set validity as true when value is empty', () => {
@@ -59,7 +59,7 @@ describe('CustomExtentsOptions component', () => {
         axisScale: { ...valueAxis.scale, boundsMargin: undefined },
       });
 
-      expect(setMultipleValidity).toBeCalledWith(BOUNDS_MARGIN, true);
+      expect(setMultipleValidity).toHaveBeenCalledWith(BOUNDS_MARGIN, true);
     });
 
     it('should set validity as false when value is negative', () => {
@@ -69,7 +69,7 @@ describe('CustomExtentsOptions component', () => {
         axisScale: { ...valueAxis.scale, boundsMargin: -1 },
       });
 
-      expect(setMultipleValidity).toBeCalledWith(BOUNDS_MARGIN, false);
+      expect(setMultipleValidity).toHaveBeenCalledWith(BOUNDS_MARGIN, false);
     });
   });
 
@@ -91,8 +91,8 @@ describe('CustomExtentsOptions component', () => {
       const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
       comp.find({ paramName: DEFAULT_Y_EXTENTS }).prop('setValue')(DEFAULT_Y_EXTENTS, true);
 
-      expect(setMultipleValidity).not.toBeCalled();
-      expect(setValueAxis).toBeCalledWith(SCALE, defaultProps.axisScale);
+      expect(setMultipleValidity).not.toHaveBeenCalled();
+      expect(setValueAxis).toHaveBeenCalledWith(SCALE, defaultProps.axisScale);
     });
 
     it('should reset boundsMargin when value is false', () => {
@@ -104,7 +104,7 @@ describe('CustomExtentsOptions component', () => {
         boundsMargin: undefined,
         defaultYExtents: false,
       };
-      expect(setValueAxis).toBeCalledWith(SCALE, newScale);
+      expect(setValueAxis).toHaveBeenCalledWith(SCALE, newScale);
     });
   });
 
@@ -132,7 +132,7 @@ describe('CustomExtentsOptions component', () => {
       const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
       comp.find({ paramName: SET_Y_EXTENTS }).prop('setValue')(SET_Y_EXTENTS, true);
 
-      expect(setValueAxis).toBeCalledWith(SCALE, defaultProps.axisScale);
+      expect(setValueAxis).toHaveBeenCalledWith(SCALE, defaultProps.axisScale);
     });
 
     it('should reset min and max when value is false', () => {
@@ -145,7 +145,7 @@ describe('CustomExtentsOptions component', () => {
         max: undefined,
         setYExtents: false,
       };
-      expect(setValueAxis).toBeCalledWith(SCALE, newScale);
+      expect(setValueAxis).toHaveBeenCalledWith(SCALE, newScale);
     });
   });
 });

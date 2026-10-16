@@ -205,6 +205,50 @@ describe('rule helpers', () => {
 
       expect(result.investigationFields).toEqual([]);
     });
+
+    test('does not throw when severity_mapping is absent (fallback rule from alert data)', () => {
+      const mockedRule = mockRuleWithEverything('test-id');
+      // @ts-expect-error — intentionally simulating a rule reconstructed from alert data that
+      // omits severity_mapping, which is what useRuleWithFallback returns for deleted rules
+      delete mockedRule.severity_mapping;
+      expect(() => getAboutStepsData(mockedRule, false)).not.toThrow();
+    });
+
+    test('does not throw when risk_score_mapping is absent (fallback rule from alert data)', () => {
+      const mockedRule = mockRuleWithEverything('test-id');
+      // @ts-expect-error — same scenario: risk_score_mapping missing from alert-reconstructed rule
+      delete mockedRule.risk_score_mapping;
+      expect(() => getAboutStepsData(mockedRule, false)).not.toThrow();
+    });
+  });
+
+  describe('fillEmptySeverityMappings', () => {
+    test('returns all four severity levels when passed an empty array', () => {
+      const result = fillEmptySeverityMappings([]);
+      expect(result.map((m) => m.severity).sort()).toEqual(['critical', 'high', 'low', 'medium']);
+    });
+
+    test('does not throw and returns all four levels when passed undefined', () => {
+      expect(() => fillEmptySeverityMappings(undefined)).not.toThrow();
+      const result = fillEmptySeverityMappings(undefined);
+      expect(result.map((m) => m.severity).sort()).toEqual(['critical', 'high', 'low', 'medium']);
+    });
+
+    test('preserves existing mappings and fills only missing severity levels', () => {
+      const existing = [
+        {
+          field: 'host.risk',
+          value: '90',
+          operator: 'equals' as const,
+          severity: 'critical' as const,
+        },
+      ];
+      const result = fillEmptySeverityMappings(existing);
+      expect(result.find((m) => m.severity === 'critical')).toEqual(existing[0]);
+      expect(result.filter((m) => m.severity !== 'critical').every((m) => m.field === '')).toBe(
+        true
+      );
+    });
   });
 
   describe('determineDetailsValue', () => {

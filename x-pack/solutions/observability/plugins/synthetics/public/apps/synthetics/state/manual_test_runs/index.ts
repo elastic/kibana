@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { createReducer } from '@reduxjs/toolkit';
+import type { PayloadAction } from 'redux-toolkit-v1';
+import { createReducer } from 'redux-toolkit-v1';
 
-import type { Draft } from 'immer';
+import type { Draft } from 'immer-v9';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 import type { ActionPayload } from '../utils/actions';

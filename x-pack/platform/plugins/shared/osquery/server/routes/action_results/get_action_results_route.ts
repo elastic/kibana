@@ -29,6 +29,11 @@ import type {
 } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { getScopedSearch } from '../../utils/get_scoped_search';
+import { getReadEsClient } from '../../utils/get_read_es_client';
+import { findOsqueryActionMetadata } from '../../utils/find_osquery_action_metadata';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
+import { ACTIONS_INDEX } from '../../../common/constants';
 import { actionResultsResponseSchema } from './response_schemas';
 
 export const getActionResultsRoute = (
@@ -70,6 +75,7 @@ export const getActionResultsRoute = (
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const cpsActive = await osqueryContext.isCpsActive(request);
           let integrationNamespaces: Record<string, string[]> = {};
 
           const logger = osqueryContext.logFactory.get('get_action_results');
@@ -94,7 +100,36 @@ export const getActionResultsRoute = (
             ? (await osqueryContext.service.getActiveSpace(request))?.id ?? DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
 
-          const search = await context.search;
+          const search = await getScopedSearch(
+            context,
+            request,
+            cpsActive,
+            osqueryContext.getStartServices
+          );
+
+          const [coreStartServices] = await osqueryContext.getStartServices();
+          const clusterClient = coreStartServices.elasticsearch.client;
+          const actionsIndexExists = await clusterClient.asInternalUser.indices.exists({
+            index: `${ACTIONS_INDEX}*`,
+          });
+
+          // Mirrors the search strategy's gate: without an osquery actions index and
+          // without CPS fan-out, live actions live only on `.fleet-actions`, and the
+          // strategy keeps the data-document space filter for that read. Passing the
+          // request lets the strategy's own check reuse this lookup.
+          if (actionsIndexExists || cpsActive) {
+            const hasMetadata = await findOsqueryActionMetadata({
+              esClient: getReadEsClient(clusterClient, request, cpsActive),
+              spaceId,
+              actionId: request.params.actionId,
+              actionsIndexExists,
+              request,
+            });
+
+            if (!hasMetadata) {
+              return response.notFound({ body: { message: 'Action not found' } });
+            }
+          }
 
           // Parse agentIds from query parameter
           const agentIds = request.query.agentIds
@@ -128,7 +163,7 @@ export const getActionResultsRoute = (
                   : undefined,
                 spaceId,
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 
@@ -162,10 +197,10 @@ export const getActionResultsRoute = (
             },
           });
         } catch (err) {
-          const error = err as Error;
+          const error = err as Error & { statusCode?: number };
 
           return response.customError({
-            statusCode: 500,
+            statusCode: error.statusCode ?? 500,
             body: { message: error.message },
           });
         }

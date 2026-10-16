@@ -24,6 +24,7 @@ export class DocLinksService {
   public readonly a2aServer: string;
   public readonly limitationsKnownIssues: string;
   public readonly limitationsKnownIssuesConversationLengthExceeded: string;
+  public readonly applicationConnections: string;
 
   constructor(docLinks: DocLinks) {
     this.agentBuilder = docLinks.agentBuilder.agentBuilder;
@@ -42,5 +43,6 @@ export class DocLinksService {
     this.a2aServer = docLinks.agentBuilder.a2aServer;
     this.limitationsKnownIssues = docLinks.agentBuilder.limitationsKnownIssues;
     this.limitationsKnownIssuesConversationLengthExceeded = `${docLinks.agentBuilder.limitationsKnownIssues}#conversation-length-exceeded`;
+    this.applicationConnections = docLinks.applicationConnections.oauthClients;
   }
 }

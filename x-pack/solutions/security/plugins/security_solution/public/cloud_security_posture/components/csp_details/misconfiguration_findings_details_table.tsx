@@ -183,7 +183,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     entityId?: string;
     entityType?: string;
     /** Callback executed after expanding a misconfiguration finding. */
-    onShowFinding: (resourceId: string, ruleId: string) => void;
+    onShowFinding: (resourceId: string, ruleId: string, ruleName?: string) => void;
   }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
@@ -215,8 +215,11 @@ export const MisconfigurationFindingsDetailsTable = memo(
       if (!euidApi?.euid || entityRecord == null || entityType == null) {
         return undefined;
       }
-      return euidApi.euid.dsl.getEuidFilterBasedOnDocument(entityType as EntityType, entityRecord);
-    }, [euidApi?.euid, entityType, entityRecord]);
+      return euidApi.euid.dsl.getEuidFilterBasedOnDocument(
+        euidApi.getBuiltInEntityDefinition(entityType as EntityType),
+        entityRecord
+      );
+    }, [euidApi, entityType, entityRecord]);
 
     const cspQueriesEnabled =
       entityRecord !== null && Boolean(euidEntityFilter) && Boolean(euidApi?.euid);
@@ -351,7 +354,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
                   NAV_TO_FINDINGS_BY_RULE_NAME_FROM_ENTITY_FLYOUT
                 );
 
-                onShowFinding(finding.resource.id, finding.rule.id);
+                onShowFinding(finding.resource.id, finding.rule.id, finding.rule.name);
               }}
             />
           </EuiToolTip>

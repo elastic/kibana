@@ -7,18 +7,15 @@
 
 import React, { memo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { ManagedUserHit } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import { UserAssetTableType } from '../../../../../explore/users/store/model';
 import { DocumentDetailsProvider } from '../../../../../flyout/document_details/shared/context';
 import { AssetDocumentTab } from '../../../../../flyout/entity_details/user_details_left/tabs/asset_document';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
+import { ENTRA_INSIGHTS_TITLE } from '../../../../shared/constants/flyout_titles';
 import { ENTRA_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 
-const TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.user.entraInsights.title',
-  { defaultMessage: 'Entra Data' }
-);
+const TITLE = ENTRA_INSIGHTS_TITLE;
 
 export interface EntraInsightsProps {
   /** Managed user hit containing the Entra asset document _id and _index. */

@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { setOverviewPageStateAction } from '../../../state';
 import { useOverviewDateRange } from './use_overview_date_range';
 

@@ -12,7 +12,7 @@ cleanup() {
   echo "Stopping services..."
   pkill -f 'org.elasticsearch.bootstrap' 2>/dev/null || true
   pkill -f 'scripts/kibana' 2>/dev/null || true
-  pkill -f 'kbn-optimizer' 2>/dev/null || true
+  pkill -f 'kbn-rspack-optimizer' 2>/dev/null || true
   # Give processes a moment to exit
   sleep 3
   # Force-kill anything remaining
@@ -27,7 +27,7 @@ cd "$KIBANA_ROOT"
 bash "$KIBANA_ROOT/.ona/bootstrap.sh"
 
 echo "=== Starting Elasticsearch ==="
-yarn es snapshot &
+pnpm es snapshot &
 
 echo "Waiting for Elasticsearch to be ready..."
 for i in $(seq 1 60); do
@@ -43,7 +43,7 @@ for i in $(seq 1 60); do
 done
 
 echo "=== Starting Kibana ==="
-yarn start --no-base-path --server.host=0.0.0.0 &
+pnpm start --no-base-path --server.host=0.0.0.0 &
 
 echo "Waiting for Kibana to be available..."
 for i in $(seq 1 120); do

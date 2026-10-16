@@ -12,8 +12,10 @@ import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useSearchAttacks, useInvalidateSearchAttacks } from './use_search_attacks';
 import { searchAttacks } from '../api';
 import { getSearchAttacksResponseMock } from '../__mocks__/attacks';
+import { useDeepEqualSelector } from '../../../hooks/use_selector';
 
 jest.mock('../../../hooks/use_app_toasts');
+jest.mock('../../../hooks/use_selector');
 jest.mock('../api');
 
 const createWrapper = () => {
@@ -80,7 +82,13 @@ describe('useSearchAttacks', () => {
 });
 
 describe('useInvalidateSearchAttacks', () => {
-  it('should invalidate queries', () => {
+  const mockRefetch = jest.fn();
+
+  beforeEach(() => {
+    (useDeepEqualSelector as jest.Mock).mockReturnValue([{ refetch: mockRefetch }]);
+  });
+
+  it('should invalidate queries and refetch global queries', () => {
     const queryClient = new QueryClient();
     const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
@@ -95,5 +103,6 @@ describe('useInvalidateSearchAttacks', () => {
     expect(invalidateQueriesSpy).toHaveBeenCalledWith(['GET', expect.any(String)], {
       refetchType: 'active',
     });
+    expect(mockRefetch).toHaveBeenCalled();
   });
 });

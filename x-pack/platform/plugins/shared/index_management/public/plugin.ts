@@ -76,6 +76,8 @@ export class IndexMgmtUIPlugin
     enableSemanticText: boolean;
     enforceAdaptiveAllocations: boolean;
     enableFailureStoreRetentionDisabling: boolean;
+    enableIndexMode: boolean;
+    enableVectorCount: boolean;
     isServerless: boolean;
   };
   private hasAtLeastEnterpriseLicense: boolean = false;
@@ -102,6 +104,8 @@ export class IndexMgmtUIPlugin
       enableTogglingDataRetention,
       enableProjectLevelRetentionChecks,
       enableFailureStoreRetentionDisabling,
+      enableIndexMode,
+      enableVectorCount,
       dev: { enableSemanticText },
     } = ctx.config.get<ClientConfigType>();
 
@@ -122,6 +126,8 @@ export class IndexMgmtUIPlugin
       enableSemanticText: enableSemanticText ?? true,
       enforceAdaptiveAllocations: isServerless,
       enableFailureStoreRetentionDisabling: enableFailureStoreRetentionDisabling ?? true,
+      enableIndexMode: enableIndexMode ?? true,
+      enableVectorCount: enableVectorCount ?? false,
     };
 
     this.indexDataEnricher = indexDataEnricher;

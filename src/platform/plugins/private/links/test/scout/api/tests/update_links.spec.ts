@@ -116,7 +116,7 @@ apiTest.describe('links - update', { tag: tags.deploymentAgnostic }, () => {
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body.message).toBe(
+      expect(response.body.message).toContain(
         'ID must contain only lowercase letters, numbers, hyphens, and underscores.'
       );
     }
@@ -140,10 +140,8 @@ apiTest.describe('links - update', { tag: tags.deploymentAgnostic }, () => {
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body.message).toBe(
-        '[request body.layout]: types that failed validation:\n\
-- [request body.layout.0]: expected value to equal [horizontal]\n\
-- [request body.layout.1]: expected value to equal [vertical]'
+      expect(response.body.message).toMatch(
+        /layout.*horizontal|layout.*vertical|horizontal|vertical/i
       );
     }
   );

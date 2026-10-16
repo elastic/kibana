@@ -10,9 +10,9 @@ import { css } from '@emotion/react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiImage, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '../../../common/constants';
+import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
 import { SecuritySolutionLinkButton } from '../../common/components/links';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { HeaderPage } from '../../common/components/header_page';
 import { EntityAnalyticsLearnMoreLink } from '../components/entity_analytics_learn_more_link';
 import illustrationSearchAnalytics from '../../common/images/illustration_search_analytics.svg';
 
@@ -31,7 +31,7 @@ export const EntityStoreDisabledEmptyPromptBody = React.memo(() => (
     color="plain"
     css={css`
       .euiEmptyPrompt__icon {
-        min-inline-size: 160px;
+        min-inline-size: 224px;
         text-align: center;
       }
       .euiEmptyPrompt__content {
@@ -39,16 +39,22 @@ export const EntityStoreDisabledEmptyPromptBody = React.memo(() => (
       }
     `}
     data-test-subj="entityStoreDisabledEmptyPrompt"
-    icon={<EuiImage size={128} alt="" url={illustrationSearchAnalytics} />}
+    icon={<EuiImage size={192} alt="" url={illustrationSearchAnalytics} />}
     layout="horizontal"
-    style={{ maxWidth: 624 }}
+    style={{ maxWidth: 800 }}
     title={
       <h2>
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics"
-          defaultMessage="Enable Entity analytics to collect entity data and access analytics capabilities"
+          defaultMessage="Enable Entity analytics"
         />
       </h2>
+    }
+    body={
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics.body"
+        defaultMessage="Start collecting entity data across your environment, so you can spot your riskiest entities and anomalous behavior at a glance, and catch threats before they escalate."
+      />
     }
     actions={
       <SecuritySolutionLinkButton
@@ -97,14 +103,7 @@ export const EntityStoreDisabledEmptyPrompt = React.memo(() => (
       height: calc(100vh - 240px);
     `}
   >
-    <HeaderPage
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.homePage.pageTitle"
-          defaultMessage="Entity analytics"
-        />
-      }
-    />
+    <EntityAnalyticsHomeHeader />
     <EuiFlexGroup
       alignItems="center"
       justifyContent="center"

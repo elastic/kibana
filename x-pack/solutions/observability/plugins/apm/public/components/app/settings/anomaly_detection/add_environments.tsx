@@ -89,6 +89,7 @@ export function AddEnvironments({ currentEnvironments, onCreateJobSuccess, onCan
         fullWidth
       >
         <EuiComboBox
+          data-test-subj="apmAnomalyDetectionEnvironmentsComboBox"
           isLoading={isLoading}
           placeholder={i18n.translate(
             'xpack.apm.settings.anomalyDetection.addEnvironments.selectorPlaceholder',

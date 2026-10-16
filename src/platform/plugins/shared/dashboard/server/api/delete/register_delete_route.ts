@@ -9,9 +9,9 @@
 
 import { once } from 'lodash';
 
+import { z } from '@kbn/zod';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { logRequest } from '@kbn/as-code-utils';
-import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -30,6 +30,7 @@ export function registerDeleteRoute(
   const deleteRoute = router.delete({
     path: `${basePath}/{id}`,
     summary: `Delete a dashboard`,
+    operationId: 'delete-dashboard',
     ...routeConfig,
     description: 'Permanently deletes a dashboard by ID.',
   });
@@ -50,13 +51,13 @@ export function registerDeleteRoute(
       },
       validate: {
         request: {
-          params: schema.object({
-            id: schema.string({
-              meta: {
+          params: z
+            .object({
+              id: z.string().meta({
                 description: 'The dashboard ID, as returned by the create or search endpoints.',
-              },
-            }),
-          }),
+              }),
+            })
+            .strict(),
         },
         response: {
           200: {
@@ -75,7 +76,7 @@ export function registerDeleteRoute(
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
           const result = await deleteDashboard(ctx, req.params.id, getCachedDashboardStateSchema());
           try {

@@ -17,6 +17,15 @@ jest.mock('../assignee_cell', () => ({
     <div data-test-subj="mockAssigneeCell">{assigneeUid ?? 'no-assignee'}</div>
   ),
 }));
+jest.mock('../user_profile_display', () => ({
+  UserProfileDisplay: ({
+    userProfileUid,
+    emptyState = '—',
+  }: {
+    userProfileUid: string | null | undefined;
+    emptyState?: React.ReactNode;
+  }) => <div data-test-subj="mockUserProfileDisplay">{userProfileUid ?? emptyState}</div>,
+}));
 
 jest.mock('../grouping/alerting_episode_grouping_tags', () => ({
   AlertingEpisodeGroupingTags: ({
@@ -61,6 +70,63 @@ describe('AlertEpisodeOverviewList', () => {
     expect(screen.getByTestId('mockAssigneeCell')).toHaveTextContent('user-1');
   });
 
+  it('renders a Tags row with a badge per tag when the group has tags', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList
+          {...baseProps}
+          groupAction={{
+            groupHash: 'gh-1',
+            ruleId: 'rule-1',
+            lastDeactivateAction: null,
+            lastDeactivateActor: null,
+            lastSnoozeAction: null,
+            lastSnoozeActor: null,
+            snoozedUntil: null,
+            tags: ['tag-a', 'tag-b'],
+          }}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Alert tags')).toBeInTheDocument();
+    const tagsRow = screen.getByTestId('alertingV2EpisodeDetailsOverviewListTags');
+    expect(tagsRow).toHaveTextContent('tag-a');
+    expect(tagsRow).toHaveTextContent('tag-b');
+  });
+
+  it('hides the grouping row and keeps other rows when grouping is forbidden', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList {...baseProps} groupingStatus="hidden" />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByText('Grouping')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mockGroupingTags')).not.toBeInTheDocument();
+    // Other episode metadata rows remain visible.
+    expect(screen.getByText('Triggered')).toBeInTheDocument();
+    expect(screen.getByText('Duration')).toBeInTheDocument();
+    expect(screen.getByTestId('mockAssigneeCell')).toHaveTextContent('user-1');
+  });
+
+  it('renders an inline grouping error and keeps other rows when the rule fails to load', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList {...baseProps} groupingStatus="error" />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Grouping')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('alertingV2EpisodeDetailsOverviewListGroupingError')
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('mockGroupingTags')).not.toBeInTheDocument();
+    // Other episode metadata rows remain visible.
+    expect(screen.getByText('Triggered')).toBeInTheDocument();
+    expect(screen.getByTestId('mockAssigneeCell')).toHaveTextContent('user-1');
+  });
+
   it('renders dashes for missing optional metadata values', () => {
     render(
       <I18nProvider>
@@ -93,6 +159,8 @@ describe('AlertEpisodeOverviewList', () => {
             lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
             lastAssigneeUid: null,
             lastAckActor: 'user-acker',
+            lastDeactivateAction: null,
+            lastDeactivateActor: null,
           }}
         />
       </I18nProvider>
@@ -100,7 +168,7 @@ describe('AlertEpisodeOverviewList', () => {
 
     expect(screen.getByText('Acknowledged by')).toBeInTheDocument();
     expect(
-      screen.getAllByTestId('mockAssigneeCell').find((el) => el.textContent === 'user-acker')
+      screen.getAllByTestId('mockUserProfileDisplay').find((el) => el.textContent === 'user-acker')
     ).toBeInTheDocument();
   });
 
@@ -109,13 +177,23 @@ describe('AlertEpisodeOverviewList', () => {
       <I18nProvider>
         <AlertEpisodeOverviewList
           {...baseProps}
+          episodeAction={{
+            episodeId: 'ep-1',
+            ruleId: 'rule-1',
+            groupHash: 'gh-1',
+            lastAckAction: null,
+            lastAssigneeUid: null,
+            lastAckActor: null,
+            lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+            lastDeactivateActor: 'user-resolver',
+          }}
           groupAction={{
             groupHash: 'gh-1',
             ruleId: 'rule-1',
             lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
-            lastDeactivateActor: 'user-resolver',
+            lastDeactivateActor: null,
             lastSnoozeAction: null,
-            snoozeExpiry: null,
+            snoozedUntil: null,
             tags: [],
             lastSnoozeActor: null,
           }}
@@ -125,8 +203,33 @@ describe('AlertEpisodeOverviewList', () => {
 
     expect(screen.getByText('Resolved by')).toBeInTheDocument();
     expect(
-      screen.getAllByTestId('mockAssigneeCell').find((el) => el.textContent === 'user-resolver')
+      screen
+        .getAllByTestId('mockUserProfileDisplay')
+        .find((el) => el.textContent === 'user-resolver')
     ).toBeInTheDocument();
+  });
+
+  it('does not render the resolved-by row when the latest episode action reopened it', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList
+          {...baseProps}
+          episodeAction={{
+            episodeId: 'ep-1',
+            ruleId: 'rule-1',
+            groupHash: 'gh-1',
+            lastAckAction: null,
+            lastAssigneeUid: null,
+            lastAckActor: null,
+            lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+            lastDeactivateActor: 'previous-resolver',
+          }}
+          groupAction={undefined}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByText('Resolved by')).not.toBeInTheDocument();
   });
 
   it('renders the snoozed-by and snoozed-until rows when the group is snoozed', () => {
@@ -139,7 +242,7 @@ describe('AlertEpisodeOverviewList', () => {
             ruleId: 'rule-1',
             lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
             lastSnoozeActor: 'user-snoozer',
-            snoozeExpiry: '2030-01-01T00:00:00.000Z',
+            snoozedUntil: '2030-01-01T00:00:00.000Z',
             lastDeactivateAction: null,
             lastDeactivateActor: null,
             tags: [],
@@ -151,7 +254,107 @@ describe('AlertEpisodeOverviewList', () => {
     expect(screen.getByText('Snoozed by')).toBeInTheDocument();
     expect(screen.getByText('Snoozed until')).toBeInTheDocument();
     expect(
-      screen.getAllByTestId('mockAssigneeCell').find((el) => el.textContent === 'user-snoozer')
+      screen
+        .getAllByTestId('mockUserProfileDisplay')
+        .find((el) => el.textContent === 'user-snoozer')
     ).toBeInTheDocument();
+  });
+
+  it('renders snoozed-by and a dash for snoozed-until when the snooze is indefinite', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList
+          {...baseProps}
+          groupAction={{
+            groupHash: 'gh-1',
+            ruleId: 'rule-1',
+            lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+            lastSnoozeActor: 'user-snoozer',
+            snoozedUntil: null,
+            lastDeactivateAction: null,
+            lastDeactivateActor: null,
+            tags: [],
+          }}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Snoozed by')).toBeInTheDocument();
+    expect(screen.getByText('Snoozed until')).toBeInTheDocument();
+    expect(screen.getByText('—')).toBeInTheDocument();
+  });
+
+  it('does not render snooze rows when snooze expiry has lapsed', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList
+          {...baseProps}
+          groupAction={{
+            groupHash: 'gh-1',
+            ruleId: 'rule-1',
+            lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+            lastSnoozeActor: 'user-snoozer',
+            snoozedUntil: '2020-01-01T00:00:00.000Z',
+            lastDeactivateAction: null,
+            lastDeactivateActor: null,
+            tags: [],
+          }}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByText('Snoozed by')).not.toBeInTheDocument();
+    expect(screen.queryByText('Snoozed until')).not.toBeInTheDocument();
+  });
+
+  it('renders View in source system for an absolute http(s) data.alert_url', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList
+          {...baseProps}
+          groupingData={{
+            ...baseProps.groupingData,
+            alert_url: 'https://monitoring.example/alerts/1',
+          }}
+        />
+      </I18nProvider>
+    );
+
+    const link = screen.getByTestId('alertingV2EpisodeDetailsOverviewListAlertUrl');
+    expect(link).toHaveAttribute('href', 'https://monitoring.example/alerts/1');
+  });
+
+  it('does not render a link for javascript: or data: alert_url values', () => {
+    // Built dynamically so eslint no-script-url does not flag the XSS fixture string.
+    const javascriptAlertUrl = ['java', 'script:alert(document.domain)'].join('');
+    const { rerender } = render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList
+          {...baseProps}
+          groupingData={{
+            ...baseProps.groupingData,
+            alert_url: javascriptAlertUrl,
+          }}
+        />
+      </I18nProvider>
+    );
+    expect(
+      screen.queryByTestId('alertingV2EpisodeDetailsOverviewListAlertUrl')
+    ).not.toBeInTheDocument();
+
+    rerender(
+      <I18nProvider>
+        <AlertEpisodeOverviewList
+          {...baseProps}
+          groupingData={{
+            ...baseProps.groupingData,
+            alert_url: 'data:text/html,<script>alert(1)</script>',
+          }}
+        />
+      </I18nProvider>
+    );
+    expect(
+      screen.queryByTestId('alertingV2EpisodeDetailsOverviewListAlertUrl')
+    ).not.toBeInTheDocument();
   });
 });

@@ -8,7 +8,6 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { HeaderPage } from '../../../../common/components/header_page';
-import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';
 import { SecurityPageName } from '../../../../app/types';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -53,11 +52,7 @@ export const RuleChangesHistoryPageHeader = memo(function RuleChangesHistoryPage
 
   return (
     <HeaderPage
-      title={
-        <>
-          {rule?.name ?? ''} <TechnicalPreviewBadge label="" />
-        </>
-      }
+      title={rule?.name ?? ''}
       subtitle={subTitle}
       subtitle2={statusInfo}
       backOptions={{

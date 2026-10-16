@@ -45,7 +45,7 @@ describe('AlertEpisodesRelated', () => {
     );
 
     expect(screen.getByTestId('mockRuleSubsection')).toBeInTheDocument();
-    expect(screen.getByText('Related alert episodes')).toBeInTheDocument();
+    expect(screen.getByText('Related alerts')).toBeInTheDocument();
     // should not render since the groupHash is undefined
     expect(screen.queryByTestId('mockGroupSubsection')).not.toBeInTheDocument();
   });
@@ -63,5 +63,25 @@ describe('AlertEpisodesRelated', () => {
     );
 
     expect(screen.getByTestId('mockGroupSubsection')).toBeInTheDocument();
+  });
+
+  it('uses the short title at panel size when compressed', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodesRelated
+          currentEpisodeId="ep-1"
+          groupHash={undefined}
+          ruleState={loadedRuleState}
+          getEpisodeDetailsHref={(id) => `/base/${id}`}
+          compressed
+        />
+      </I18nProvider>
+    );
+
+    const heading = screen.getByTestId('alertingV2RelatedAlertEpisodesSection');
+    expect(heading).toHaveTextContent('Related');
+    expect(heading).not.toHaveTextContent('Related alerts');
+    // EuiTitle puts the test subj on its child, so this is the heading itself.
+    expect(heading.tagName).toBe('H2');
   });
 });

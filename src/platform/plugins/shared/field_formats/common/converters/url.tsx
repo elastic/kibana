@@ -16,6 +16,7 @@ import { FieldFormat } from '../field_format';
 import type {
   ReactConvertFunction,
   TextContextTypeConvert,
+  FieldFormatsGetConfigFn,
   FieldFormatMetaParams,
   FieldFormatParams,
 } from '../types';
@@ -23,6 +24,16 @@ import { FIELD_FORMAT_IDS } from '../types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const allowedUrlSchemes = ['http://', 'https://', 'mailto:'];
+
+/**
+ * Escapes a value for embedding inside a single-quoted rison string: rison
+ * protects its delimiters with `!`, so `'` becomes `!'` and `!` becomes `!!`.
+ * Composed with encodeURIComponent this reproduces exactly how Kibana itself
+ * encodes such values in its app URLs, making `{{risonValue}}` safe to place
+ * inside the rison state of a Kibana URL template (e.g. `query:'{{risonValue}}'`)
+ * where a plain `{{value}}` would break the rison parser.
+ */
+const risonEscape = (value: string): string => value.replace(/[!']/g, (char) => `!${char}`);
 
 const URL_TYPES = [
   {
@@ -64,8 +75,11 @@ export class UrlFormat extends FieldFormat {
   ];
   static urlTypes = URL_TYPES;
 
-  constructor(params: FieldFormatParams & FieldFormatMetaParams) {
-    super(params);
+  constructor(
+    params?: FieldFormatParams & FieldFormatMetaParams,
+    getConfig?: FieldFormatsGetConfigFn
+  ) {
+    super(params, getConfig);
     this.compileTemplate = memoize(this.compileTemplate);
   }
 
@@ -99,6 +113,7 @@ export class UrlFormat extends FieldFormat {
 
     return this.compileTemplate(template)({
       value: encodeURIComponent(strValue),
+      risonValue: encodeURIComponent(risonEscape(strValue)),
       rawValue: value,
     });
   }
@@ -142,7 +157,7 @@ export class UrlFormat extends FieldFormat {
     // After the missing value check, rawValue is guaranteed to be a valid string or number
     const value = rawValue as string | number;
 
-    const { field, hit } = options;
+    const { field, hit, isInteractive = true } = options;
     const { parsedUrl } = this._params;
     const { basePath, pathname, origin } = parsedUrl || {};
 
@@ -217,6 +232,12 @@ export class UrlFormat extends FieldFormat {
         const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
         const fieldName = field?.name;
         const linkContent = getHighlightReact(label, fieldName, hit);
+
+        // Non-interactive contexts (e.g. a non-interactive dashboard panel) must not expose a
+        // live navigation control, so render the same content without the anchor.
+        if (!isInteractive) {
+          return linkContent;
+        }
 
         return (
           <a href={`${prefix}${url}`} target={linkTarget} rel="noopener noreferrer">

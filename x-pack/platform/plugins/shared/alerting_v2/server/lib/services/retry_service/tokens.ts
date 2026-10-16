@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import type { IRetryService } from './alerting_retry_service';
 
-export const RetryServiceToken = Symbol.for(
-  'alerting_v2.RetryService'
-) as ServiceIdentifier<IRetryService>;
+export const RetryServiceToken = createToken<IRetryService>('alerting_v2.RetryService');

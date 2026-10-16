@@ -26,6 +26,7 @@ import {
   isComputedColumn,
   getQuerySummary,
   buildRenameSourceFieldMap,
+  resolveSourceField,
 } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import { buildEsQuery, type Filter, getTimeZoneFromSettings } from '@kbn/es-query';
@@ -99,6 +100,7 @@ function mapResponseToDatatable(
   const hasEmptyColumns = body.all_columns && body.all_columns?.length > body.columns.length;
   const lookup = new Set(hasEmptyColumns ? body.columns?.map(({ name }) => name) || [] : []);
   const indexPattern = getIndexPatternFromESQLQuery(query);
+  const approximationApplied = body.approximation_applied;
 
   const appliedTimeRange = input?.timeRange
     ? {
@@ -127,9 +129,11 @@ function mapResponseToDatatable(
         ? KBN_FIELD_TYPES.CONFLICT
         : esFieldTypeToKibanaFieldType(type);
 
-      const isSourceFieldFilterable =
-        !querySummary.newColumns.has(name) || (renameSourceFieldMap?.has(name) ?? false);
-      const sourceField = renameSourceFieldMap?.get(name) ?? name;
+      const { isSourceFieldFilterable, sourceField } = resolveSourceField(
+        name,
+        querySummary,
+        renameSourceFieldMap ?? new Map()
+      );
 
       return {
         id: name,
@@ -184,6 +188,7 @@ function mapResponseToDatatable(
       statistics: {
         totalCount: normalizedValues.length,
       },
+      ...(approximationApplied !== undefined && { approximationApplied }),
     },
     columns: updatedWithVariablesColumns,
     rows,
@@ -277,6 +282,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           : 'UTC',
         locale,
         include_execution_metadata: true,
+        settings: { column_metadata: true },
       };
 
       if (input) {
@@ -363,6 +369,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             approximation: input?.isApproximate,
             dropNullColumns: true,
             includeExecutionMetadata: true,
+            columnMetadata: true,
           }
         );
 

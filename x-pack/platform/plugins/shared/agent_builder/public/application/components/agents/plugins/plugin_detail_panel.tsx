@@ -189,7 +189,7 @@ const PluginIdFooter: React.FC<{ pluginId: string }> = ({ pluginId }) => {
               disableScreenReaderOutput
             >
               <EuiButtonIcon
-                iconType="copyClipboard"
+                iconType="copy"
                 onClick={copy}
                 aria-label={labels.agentPlugins.pluginDetailIdCopyLabel}
                 size="xs"
@@ -243,13 +243,6 @@ const SkillDetailFlyout: React.FC<{
                 <h4>{labels.agentPlugins.pluginDetailNameLabel}</h4>
               </EuiTitle>
               <EuiText size="s">{skill.name}</EuiText>
-            </EuiFlexItem>
-            <EuiHorizontalRule margin="none" />
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xxxs">
-                <h4>{labels.agentPlugins.pluginDetailIdLabel}</h4>
-              </EuiTitle>
-              <EuiText size="s">{skill.id}</EuiText>
             </EuiFlexItem>
             <EuiHorizontalRule margin="none" />
             <EuiFlexItem grow={false}>

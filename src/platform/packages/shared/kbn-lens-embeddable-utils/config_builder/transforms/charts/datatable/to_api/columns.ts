@@ -33,6 +33,18 @@ type APIMetricRowCommonProps = Partial<
   Pick<NonNullable<DatatableConfig['metrics']>[number], 'visible' | 'alignment' | 'width'>
 >;
 
+type NonProgressColorMode = Exclude<NonNullable<ColumnState['colorMode']>, 'progress'>;
+
+function assertNoUnsupportedProgressDecoration(
+  column: ColumnState
+): asserts column is ColumnState & { colorMode?: NonProgressColorMode } {
+  if (column.colorMode === 'progress') {
+    throw new Error(
+      `Datatable column ${column.columnId} uses the unsupported 'progress' cell decoration in Lens as code export`
+    );
+  }
+}
+
 function buildCommonMetricRowProps(column: ColumnState): APIMetricRowCommonProps {
   return stripUndefined<APIMetricRowCommonProps>({
     visible: column.hidden != null ? !column.hidden : undefined,
@@ -49,6 +61,8 @@ function buildCommonMetricRowProps(column: ColumnState): APIMetricRowCommonProps
 export function buildColorProps(
   column: ColumnState
 ): Partial<Pick<NonNullable<DatatableConfig['metrics']>[number], 'apply_color_to' | 'color'>> {
+  assertNoUnsupportedProgressDecoration(column);
+
   const { colorMode, palette, colorMapping } = column;
   if (!colorMode || colorMode === 'none') return {};
 
@@ -67,7 +81,8 @@ export function buildColorProps(
       apply_color_to: applyColorTo,
       color: palette.params
         ? fromColorByValueLensStateToAPI(palette)
-        : fromColorMappingLensStateToAPI(undefined, palette as PaletteOutput), // support for legacy palettes
+        : // Intentional `as PaletteOutput` type assertion as the legacy palette export bridge accepts palettes with opaque params.
+          fromColorMappingLensStateToAPI(undefined, palette as PaletteOutput), // support for legacy palettes
     };
   }
 
@@ -110,6 +125,8 @@ type APIRowPropsNoESQL = APIMetricRowCommonProps &
   >;
 
 function buildRowsAPINoESQL(column: ColumnState): APIRowPropsNoESQL {
+  assertNoUnsupportedProgressDecoration(column);
+
   const { colorMode, colorMapping, palette } = column;
   return {
     ...buildRowCommonProps(column),
@@ -118,7 +135,8 @@ function buildRowsAPINoESQL(column: ColumnState): APIRowPropsNoESQL {
           apply_color_to: colorModeToApplyColorTo(colorMode),
           color:
             colorMapping || palette
-              ? fromColorMappingLensStateToAPI(colorMapping, palette as PaletteOutput)
+              ? // Intentional `as PaletteOutput` type assertion as the legacy palette export bridge accepts palettes with opaque params.
+                fromColorMappingLensStateToAPI(colorMapping, palette as PaletteOutput)
               : AUTO_COLOR,
         }
       : {}),

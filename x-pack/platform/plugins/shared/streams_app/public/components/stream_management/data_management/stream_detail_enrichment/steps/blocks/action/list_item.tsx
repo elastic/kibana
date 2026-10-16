@@ -220,7 +220,7 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                           </div>
                         }
                       >
-                        <EuiBadge color="danger" iconType="warning">
+                        <EuiBadge color="danger" iconType="warning" tabIndex={0}>
                           {i18n.translate(
                             'xpack.streams.streamDetailView.managementTab.enrichment.validationErrorBadge',
                             {

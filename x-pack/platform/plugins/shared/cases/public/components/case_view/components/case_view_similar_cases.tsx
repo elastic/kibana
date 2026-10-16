@@ -13,8 +13,7 @@ import type { CaseUI } from '../../../../common/ui/types';
 
 import { CASES_TABLE_PER_PAGE_VALUES, type EuiBasicTableOnChange } from '../../all_cases/types';
 import { SimilarCasesTable } from '../../similar_cases/table';
-import { useCasesConfig } from '../../../common/lib/kibana';
-import { SidebarToggleButton } from '../../cases_redesign/case_view/components/sidebar/sidebar_toggle_button';
+import { SidebarToggleButton } from './sidebar/sidebar_toggle_button';
 
 interface CaseViewSimilarCasesProps {
   caseData: CaseUI;
@@ -22,7 +21,6 @@ interface CaseViewSimilarCasesProps {
 
 export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) => {
   const { euiTheme } = useEuiTheme();
-  const { detailsRedesignEnabled } = useCasesConfig();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(CASES_TABLE_PER_PAGE_VALUES[0]);
 
@@ -33,9 +31,11 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
     enabled: true,
   });
 
-  const tableOnChangeCallback = useCallback(({ page, sort }: EuiBasicTableOnChange) => {
-    setPageIndex(page.index);
-    setPageSize(page.size);
+  const tableOnChangeCallback = useCallback(({ page }: EuiBasicTableOnChange) => {
+    if (page) {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    }
   }, []);
 
   const pagination = useMemo(
@@ -50,15 +50,13 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      {detailsRedesignEnabled && (
-        <EuiFlexItem grow={false} css={{ paddingTop: euiTheme.size.s }}>
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <SidebarToggleButton />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false} css={{ paddingTop: euiTheme.size.s }}>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <SidebarToggleButton />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
       <EuiFlexItem>
         <SimilarCasesTable
           isLoading={isLoadingCases}

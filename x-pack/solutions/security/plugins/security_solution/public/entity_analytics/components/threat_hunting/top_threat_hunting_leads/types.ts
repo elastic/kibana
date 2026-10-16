@@ -16,16 +16,22 @@ export interface Observation {
   metadata: Record<string, unknown>;
 }
 
+export interface RelatedEntity {
+  id: string;
+  type: string;
+  name: string;
+  kinds: string[];
+  riskLevel?: string;
+  criticality?: string;
+  interactedWithAtLeast?: number;
+}
+
 export interface HuntingLead {
   id: string;
   title: string;
   byline: string;
   description: string;
-  /**
-   * `id`, when present, is the Entity Store EUID (e.g. `"host:8c67cb16-..."`),
-   * used to open the correct entity flyout by id rather than by display name.
-   */
-  entities: Array<{ type: string; name: string; id?: string }>;
+  entity: { type: string; name: string; id: string };
   tags: string[];
   priority: number;
   chatRecommendations: string[];
@@ -34,6 +40,9 @@ export interface HuntingLead {
   status: 'active' | 'dismissed' | 'expired';
   observations: Observation[];
   sourceType: 'adhoc' | 'scheduled';
+  topRelatedEntities: RelatedEntity[];
+  relatedEntityCounts: Record<string, number>;
+  origin: 'observations' | 'exploratory';
 }
 
 export interface ApiLead extends HuntingLead {
@@ -45,7 +54,7 @@ export const fromApiLead = (lead: ApiLead): HuntingLead => ({
   title: lead.title,
   byline: lead.byline,
   description: lead.description,
-  entities: lead.entities,
+  entity: lead.entity,
   tags: lead.tags,
   priority: lead.priority,
   chatRecommendations: lead.chatRecommendations,
@@ -54,4 +63,7 @@ export const fromApiLead = (lead: ApiLead): HuntingLead => ({
   status: lead.status,
   observations: lead.observations,
   sourceType: lead.sourceType,
+  topRelatedEntities: lead.topRelatedEntities,
+  relatedEntityCounts: lead.relatedEntityCounts,
+  origin: lead.origin,
 });

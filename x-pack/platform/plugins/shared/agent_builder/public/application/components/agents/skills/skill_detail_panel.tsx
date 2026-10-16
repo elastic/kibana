@@ -54,26 +54,15 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
         title={skill?.name ?? skillId}
         isReadOnly={skill?.readonly ?? false}
         headerContent={
-          <>
-            <EuiText
-              size="s"
-              color="subdued"
-              css={css`
-                margin-top: ${euiTheme.size.s};
-              `}
-            >
-              {skill?.id}
-            </EuiText>
-            <EuiText
-              size="s"
-              color="subdued"
-              css={css`
-                margin-top: ${euiTheme.size.l};
-              `}
-            >
-              {skill?.description}
-            </EuiText>
-          </>
+          <EuiText
+            size="s"
+            color="subdued"
+            css={css`
+              margin-top: ${euiTheme.size.l};
+            `}
+          >
+            {skill?.description}
+          </EuiText>
         }
         headerActions={(openConfirmRemove) => (
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>

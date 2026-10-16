@@ -17,7 +17,7 @@ import {
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useLocation } from 'react-router-dom';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
@@ -195,7 +195,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
   );
 
   const { dataView, status } = useDataView(PageScope.explore);
-  const selectedPatterns = useSelectedPatterns(PageScope.explore);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const indicesExist = !!dataView.matchedIndices?.length;
 
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
@@ -226,8 +226,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     if (!entityStoreV2Enabled || noEntityInStore) {
       return legacyFilters;
     }
-    const entityDslFilter = euidApi?.euid?.dsl.getEuidFilterBasedOnDocument(
-      EntityType.host,
+    const entityDslFilter = euidApi?.euid?.dsl.getEuidFilterBasedOnEntityRecord(
+      euidApi.getBuiltInEntityDefinition(EntityType.host),
       entityFromStoreResult.entityRecord
     );
     return entityDslFilter ? euidDslFilterToPageFilters(entityDslFilter) : legacyFilters;
@@ -236,7 +236,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     entityFromStoreResult.entityRecord,
     entityStoreV2Enabled,
     noEntityInStore,
-    euidApi?.euid,
+    euidApi,
   ]);
 
   const { indexPatterns: securityDefaultPatterns } = useSecurityDefaultPatterns();
@@ -253,6 +253,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     startDate: from,
     hostName: detailName,
     entityId: entityStoreV2Enabled ? entityFromStoreResult.entityRecord?.entity?.id : undefined,
+    entityRecord: entityStoreV2Enabled ? entityFromStoreResult.entityRecord : undefined,
+    entityStoreInitialLoading: entityStoreV2Enabled && entityFromStoreResult.isInitialLoading,
     indexNames: selectedPatterns,
     skip: selectedPatterns.length === 0,
   });
@@ -412,6 +414,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                     contextID={PageScope.explore}
                     scopeId={PageScope.explore}
                     queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
+                    hideAnomalies={false}
                   />
                   <EuiHorizontalRule />
                   <EuiSpacer />
@@ -432,13 +435,13 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                   <AnomalyTableProvider
                     criteriaFields={hostToCriteria({
                       hostItem: hostDetailsForOverview,
-                      euid: euidApi?.euid,
+                      euidApi: euidApi ?? undefined,
                       entityRecord: entityStoreV2Enabled
                         ? entityFromStoreResult.entityRecord
                         : undefined,
                     })}
                     filterQuery={buildAnomaliesTableInfluencersFilterQuery({
-                      euid: euidApi?.euid,
+                      euidApi: euidApi ?? undefined,
                       entityType: 'host',
                       isScopedToEntity: true,
                       identityFields: resolvedIdentityFields,

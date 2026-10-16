@@ -22,7 +22,7 @@ import {
   tap,
   throwError,
 } from 'rxjs';
-import { withExecuteToolSpan } from '@kbn/inference-tracing';
+import { withExecuteToolSpan, markToolSpanAsError } from '@kbn/inference-tracing';
 import { createToolNotFoundError } from '@kbn/inference-plugin/common/chat_complete/errors';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
@@ -110,7 +110,9 @@ export function executeFunctionAndCatchError({
         });
       }),
       catchError((error) => {
-        span?.recordException(error);
+        if (span) {
+          markToolSpanAsError(span, { error });
+        }
         logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
 
         if (isToolValidationError(error)) {

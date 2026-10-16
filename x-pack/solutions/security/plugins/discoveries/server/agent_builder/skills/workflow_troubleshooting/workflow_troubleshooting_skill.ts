@@ -125,9 +125,9 @@ problem, not a pipeline problem. Diagnose the report run separately:
 
 ## Gate Returned No Alerts (skill additional retrieval was the sole source)
 
-A failure_reason of \`Gate returned no alerts: the skill's additional retrieval was the
-sole source (0 deterministic candidate alerts) but the gate added 0 alerts … Failing
-closed\` is a **fail-closed guard**, not a silent "no matching alerts" success. It means
+A failure_reason of \`No alerts were available to analyze for the selected time range: no
+candidate alerts were retrieved and the skill's additional retrieval returned none\` is a
+**fail-closed guard**, not a silent "no matching alerts" success. It means
 the run had **no deterministic candidate alerts** — the gate's own additional retrieval
 was the ONLY source of alerts — AND the gate emitted an empty \`added_alert_ids\` (it
 either retrieved nothing or dropped everything it retrieved). Rather than report zero
@@ -625,10 +625,10 @@ changes for this category.
 
 ### validation_error
 
-**Pattern:** Error messages containing "Gate returned no alerts", "sole source", or
-"Failing closed", or a generation-phase failure whose \`failed_step\` is \`alert_retrieval\`
-with a failure_reason that names the gate. The most common case is the **gate sole-source
-zero-alerts guard**: the skill's additional retrieval was the only source of alerts (every
+**Pattern:** Error messages containing "No alerts were available to analyze" or "the
+skill's additional retrieval returned none", or a generation-phase failure whose
+\`failed_step\` is \`alert_retrieval\`. The most common case is the **gate sole source
+zero-alerts guard**: the skill's additional retrieval was the sole source of alerts (every
 deterministic retrieval toggle off, skill toggle on) and the gate emitted an empty
 \`added_alert_ids\`, so the pipeline fails closed instead of reporting a silent "no matching
 alerts" success.

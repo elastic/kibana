@@ -67,14 +67,14 @@ describe('lens_reference helpers', () => {
   });
 
   describe('toSupportedChartType', () => {
-    it.each(['xy', 'metric', 'pie', 'heatmap', 'datatable', 'region_map'])(
+    it.each(['xy', 'metric', 'pie', 'heatmap', 'data_table', 'tag_cloud', 'region_map'])(
       'returns %s unchanged for a supported chart type',
       (type) => {
         expect(toSupportedChartType(type)).toBe(type);
       }
     );
 
-    it.each(['lnsXY', 'lnsPie', 'bar', 'line', 'area', 'unknown', ''])(
+    it.each(['lnsXY', 'lnsPie', 'bar', 'line', 'area', 'datatable', 'tagcloud', 'unknown', ''])(
       'returns undefined for the unsupported value %p',
       (type) => {
         expect(toSupportedChartType(type)).toBeUndefined();

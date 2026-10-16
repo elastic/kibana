@@ -13,7 +13,10 @@ import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { SavedSearchQuery } from '@kbn/ml-query-utils';
 
-import type { LatestFunctionConfig } from '../../../../../../../server/routes/api_schemas/transforms';
+import type {
+  LatestFunctionConfig,
+  PutTransformsRequestSchema,
+} from '../../../../../../../server/routes/api_schemas/transforms';
 import type { EsFieldName } from '../../../../../../../common/types/fields';
 
 import type {
@@ -51,6 +54,7 @@ export interface StepDefineExposedState {
   runtimeMappings?: RuntimeMappings;
   runtimeMappingsUpdated: boolean;
   isRuntimeMappingsEditorEnabled: boolean;
+  projectRouting?: PutTransformsRequestSchema['source']['project_routing'];
   timeRangeMs?: TimeRangeMs;
   isDatePickerApplyEnabled: boolean;
   /**

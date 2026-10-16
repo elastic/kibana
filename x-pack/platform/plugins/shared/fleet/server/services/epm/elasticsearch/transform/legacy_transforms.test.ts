@@ -13,7 +13,7 @@ jest.mock('../../packages/get', () => {
 });
 
 import { errors } from '@elastic/elasticsearch';
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -35,18 +35,37 @@ import { installTransforms } from './install';
 describe('test transform install with legacy schema', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  // Tracks the "persisted" epm-packages SO attributes that savedObjectsClient.get/.update mocks
+  // read from and write to below, so repeated get/update cycles within a test see each other's
+  // writes the same way they would against a real saved objects index. Tests seed this with
+  // `currentAttributes = { installed_es: previousInstallation.installed_es }` before calling
+  // installTransforms.
+  let currentAttributes: Partial<Installation> = {};
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
     esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReset();
     (getInstallationObject as jest.MockedFunction<typeof getInstallationObject>).mockReset();
     savedObjectsClient = savedObjectsClientMock.create();
-    savedObjectsClient.update.mockImplementation(async (type, id, attributes) => ({
-      type: PACKAGES_SAVED_OBJECT_TYPE,
-      id: 'endpoint',
-      attributes,
-      references: [],
-    }));
+    currentAttributes = {};
+    savedObjectsClient.get.mockImplementation(
+      async () =>
+        ({
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          id: 'endpoint',
+          attributes: currentAttributes,
+          references: [],
+        } as any)
+    );
+    savedObjectsClient.update.mockImplementation(async (type, id, attributes) => {
+      currentAttributes = { ...currentAttributes, ...(attributes as Partial<Installation>) };
+      return {
+        type: PACKAGES_SAVED_OBJECT_TYPE,
+        id: 'endpoint',
+        attributes,
+        references: [],
+      };
+    });
   });
 
   afterEach(() => {
@@ -90,16 +109,7 @@ describe('test transform install with legacy schema', () => {
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
-
-    (
-      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
-    ).mockReturnValueOnce(
-      Promise.resolve({
-        attributes: {
-          installed_es: previousInstallation.installed_es,
-        },
-      } as unknown as SavedObject<Installation>)
-    );
+    currentAttributes = { installed_es: previousInstallation.installed_es };
 
     esClient.transform.getTransform.mockResponseOnce({
       count: 1,
@@ -248,34 +258,10 @@ describe('test transform install with legacy schema', () => {
       ],
     ]);
 
+    // Single SO update: assetsToAdd and assetsToRemove are applied in one call so the old
+    // ref is removed and the new refs are added atomically. The previous code used two
+    // separate calls which wiped the new refs on same-version reinstalls (elastic/kibana#217503).
     expect(savedObjectsClient.update.mock.calls).toEqual([
-      [
-        'epm-packages',
-        'endpoint',
-        {
-          installed_es: [
-            {
-              id: 'metrics-endpoint.policy-0.16.0-dev.0',
-              type: 'ingest_pipeline',
-            },
-            {
-              id: 'endpoint.metadata_current-default-0.15.0-dev.0',
-              type: 'transform',
-            },
-            {
-              id: 'endpoint.metadata-default-0.16.0-dev.0',
-              type: 'transform',
-            },
-            {
-              id: 'endpoint.metadata_current-default-0.16.0-dev.0',
-              type: 'transform',
-            },
-          ],
-        },
-        {
-          refresh: false,
-        },
-      ],
       [
         'epm-packages',
         'endpoint',
@@ -302,6 +288,75 @@ describe('test transform install with legacy schema', () => {
     ]);
   });
 
+  test('same-version reinstall keeps transform refs in installed_es', async () => {
+    // Regression test for elastic/kibana#217503: force-reinstalling the same package version
+    // produced legacy transform ids byte-identical to the previous refs. The old two-call SO
+    // update pattern added the refs first, then removed the "previous" refs — wiping the freshly
+    // added ones and leaving installed_es with zero transform entries while ES still had the
+    // live transforms. On the next upgrade nothing was deleted and duplicates accumulated.
+    const version = '0.16.0-dev.0';
+    const transformId = `endpoint.metadata_current-default-${version}`;
+
+    const installation: Installation = {
+      installed_es: [
+        {
+          id: transformId,
+          type: ElasticsearchAssetType.transform,
+        },
+      ],
+    } as unknown as Installation;
+
+    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReturnValueOnce(
+      Promise.resolve(installation)
+    );
+    currentAttributes = { installed_es: installation.installed_es };
+
+    await installTransforms({
+      packageInstallContext: {
+        packageInfo: {
+          name: 'endpoint',
+          version,
+          data_streams: [
+            {
+              type: 'metrics',
+              dataset: 'endpoint.metadata_current',
+              title: 'Endpoint Metadata Current',
+              release: 'experimental',
+              package: 'endpoint',
+              ingest_pipeline: 'default',
+              elasticsearch: { 'index_template.mappings': { dynamic: false } },
+              path: 'metadata_current',
+            },
+          ],
+        },
+        paths: [`endpoint-${version}/elasticsearch/transform/metadata_current/default.json`],
+        assetsMap: new Map([
+          [
+            `endpoint-${version}/elasticsearch/transform/metadata_current/default.json`,
+            Buffer.from('{"content": "data"}'),
+          ],
+        ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              `endpoint-${version}/elasticsearch/transform/metadata_current/default.json`,
+              Buffer.from('{"content": "data"}'),
+            ],
+          ])
+        ),
+      } as unknown as PackageInstallContext,
+      esClient,
+      savedObjectsClient,
+      logger: loggerMock.create(),
+      esReferences: installation.installed_es,
+    });
+
+    // The transform ref must still be present — not wiped by the reinstall.
+    expect(currentAttributes.installed_es).toEqual([
+      { id: transformId, type: ElasticsearchAssetType.transform },
+    ]);
+  });
+
   test('can install new version and when no older version', async () => {
     const previousInstallation: Installation = {
       installed_es: [],
@@ -318,14 +373,7 @@ describe('test transform install with legacy schema', () => {
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
-
-    (
-      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
-    ).mockReturnValueOnce(
-      Promise.resolve({
-        attributes: { installed_es: [] },
-      } as unknown as SavedObject<Installation>)
-    );
+    currentAttributes = { installed_es: [] };
 
     await installTransforms({
       packageInstallContext: {
@@ -426,14 +474,7 @@ describe('test transform install with legacy schema', () => {
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
-
-    (
-      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
-    ).mockReturnValueOnce(
-      Promise.resolve({
-        attributes: { installed_es: currentInstallation.installed_es },
-      } as unknown as SavedObject<Installation>)
-    );
+    currentAttributes = { installed_es: currentInstallation.installed_es };
 
     esClient.transform.getTransform.mockResponseOnce({
       count: 1,
@@ -542,14 +583,7 @@ describe('test transform install with legacy schema', () => {
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
-
-    (
-      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
-    ).mockReturnValueOnce(
-      Promise.resolve({
-        attributes: { installed_es: [] },
-      } as unknown as SavedObject<Installation>)
-    );
+    currentAttributes = { installed_es: [] };
 
     esClient.transport.request.mockImplementationOnce(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(

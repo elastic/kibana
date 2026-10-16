@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
 export const ruleNotifyWhen = {
   CHANGE: 'onActionGroupChange',
   ACTIVE: 'onActiveAlert',
@@ -46,11 +44,7 @@ export const ruleExecutionStatusWarningReason = {
   EXECUTION: 'ruleExecution',
 } as const;
 
-export const MISSING_UIAM_API_KEY_TAG = i18n.translate('xpack.alerting.missingUiamApiKeyTag', {
-  defaultMessage: 'Missing Universal Api Key',
-});
-
-/**
- * Feature flag for provisioning UIAM API keys for alerting rules
- */
-export const PROVISION_UIAM_API_KEYS_FEATURE_FLAG = 'alerting.rules.provisionUiamApiKeys';
+export {
+  MISSING_UIAM_API_KEY_TAG,
+  LEGACY_MISSING_UIAM_API_KEY_TAG,
+} from '../../../common/constants';

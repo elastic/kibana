@@ -45,7 +45,7 @@ export const EditModalFooterBar = ({ draftState, onUndo, onRedo, onCancel, onSav
             <EuiFlexItem grow={false}>
               <EuiToolTip content={undoLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
-                  iconType="editorUndo"
+                  iconType="undo"
                   aria-label={undoLabel}
                   onClick={onUndo}
                   isDisabled={!draftState.canUndo}
@@ -56,7 +56,7 @@ export const EditModalFooterBar = ({ draftState, onUndo, onRedo, onCancel, onSav
             <EuiFlexItem grow={false}>
               <EuiToolTip content={redoLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
-                  iconType="editorRedo"
+                  iconType="redo"
                   aria-label={redoLabel}
                   onClick={onRedo}
                   isDisabled={!draftState.canRedo}

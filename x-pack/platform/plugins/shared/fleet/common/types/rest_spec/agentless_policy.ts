@@ -12,7 +12,7 @@ import { SO_SEARCH_LIMIT } from '../../constants';
 import { SimplifiedCreatePackagePolicyRequestBodySchema } from '../models/package_policy_schema';
 import {
   AgentlessPolicySchema,
-  type AgentlessPolicyResponseSchema,
+  AgentlessPolicyResponseSchema,
 } from '../models/agentless_policy_schema';
 import type { AgentlessPolicy } from '../models/agentless_policy';
 
@@ -187,7 +187,9 @@ export const DeleteAgentlessPolicyResponseSchema = schema.object(
   }
 );
 
-export type CreateAgentlessPolicyResponse = TypeOf<typeof AgentlessPolicyResponseSchema>;
+export const CreateAgentlessPolicyResponseSchema = AgentlessPolicyResponseSchema;
+
+export type CreateAgentlessPolicyResponse = TypeOf<typeof CreateAgentlessPolicyResponseSchema>;
 
 export interface CreateAgentlessPolicyRequest {
   body: TypeOf<typeof CreateAgentlessPolicyRequestSchema.body>;

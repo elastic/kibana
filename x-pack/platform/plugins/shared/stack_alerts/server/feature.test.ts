@@ -169,6 +169,15 @@ describe('Stack Alerts Feature Privileges', () => {
       ]
     `);
   });
+
+  test('both privileges include the API access needed by the rule details page', () => {
+    expect(BUILT_IN_ALERTS_FEATURE.privileges?.all.api).toEqual(
+      expect.arrayContaining(['rac', 'bulkGetUserProfiles'])
+    );
+    expect(BUILT_IN_ALERTS_FEATURE.privileges?.read.api).toEqual(
+      expect.arrayContaining(['rac', 'bulkGetUserProfiles'])
+    );
+  });
 });
 
 describe('Stack Alerts Only Feature Privileges', () => {
@@ -388,9 +397,11 @@ describe('Stack Alerts Only Feature Privileges', () => {
     expect(readPrivilege?.api).toContain('rac');
   });
 
-  test('both privileges grant access to triggers/actions management', () => {
-    expect(allPrivilege?.management?.insightsAndAlerting).toContain('triggersActions');
-    expect(readPrivilege?.management?.insightsAndAlerting).toContain('triggersActions');
+  test('both privileges grant access to the Alerts management link but not Rules', () => {
+    expect(allPrivilege?.management?.insightsAndAlerting).toContain('triggersActionsAlerts');
+    expect(readPrivilege?.management?.insightsAndAlerting).toContain('triggersActionsAlerts');
+    expect(allPrivilege?.management?.insightsAndAlerting).not.toContain('triggersActionsRules');
+    expect(readPrivilege?.management?.insightsAndAlerting).not.toContain('triggersActionsRules');
   });
 
   test('"all" privilege grants the "write" UI capability for alert-modify actions', () => {

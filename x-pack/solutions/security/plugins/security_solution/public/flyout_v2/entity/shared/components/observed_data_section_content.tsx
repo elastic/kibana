@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { type EntityStoreEuid, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { type EntityStoreEuidApi, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -45,6 +45,8 @@ export interface ObservedDataSectionProps {
   scopeId: string;
   /** Query id registered with the inspect button. */
   queryId: string;
+  /** When true, omits the "Max anomaly score by job" row and skips anomaly data fetching. Defaults to false*/
+  hideAnomalies: boolean;
 }
 
 const resolveEntityAnomalyConfig = ({
@@ -52,13 +54,13 @@ const resolveEntityAnomalyConfig = ({
   observedData,
   entityRecord,
   identityFields,
-  euid,
+  euidApi,
 }: {
   entityType: EntityType.host | EntityType.user;
   observedData: ObservedData<HostItem> | ObservedData<UserItem>;
   entityRecord: EntityStoreRecord | null | undefined;
   identityFields: IdentityFields;
-  euid: EntityStoreEuid | undefined;
+  euidApi: EntityStoreEuidApi | undefined;
 }) => {
   switch (entityType) {
     case EntityType.host: {
@@ -68,7 +70,7 @@ const resolveEntityAnomalyConfig = ({
         criteriaFields: hostToCriteria({
           hostItem: (observedData as ObservedData<HostItem>).details,
           entityRecord,
-          euid,
+          euidApi,
         }),
       };
     }
@@ -81,7 +83,7 @@ const resolveEntityAnomalyConfig = ({
           userName: nameFallback ?? '',
           entityRecord,
           identityFields,
-          euid,
+          euidApi,
         }),
       };
     }
@@ -89,7 +91,15 @@ const resolveEntityAnomalyConfig = ({
 };
 
 export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps) => {
-  const { entityType, observedData, identityFields, entityRecord, contextID, scopeId } = props;
+  const {
+    entityType,
+    observedData,
+    identityFields,
+    entityRecord,
+    contextID,
+    scopeId,
+    hideAnomalies = false,
+  } = props;
 
   const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
 
@@ -97,21 +107,20 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
 
   const { jobNameById } = useInstalledSecurityJobNameById();
   const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
-  const euidApi = useEntityStoreEuidApi();
-  const euid = euidApi?.euid;
+  const euidApi = useEntityStoreEuidApi() ?? undefined;
 
   const { nameFallback, criteriaFields } = resolveEntityAnomalyConfig({
     entityType,
     observedData,
     entityRecord,
     identityFields,
-    euid,
+    euidApi,
   });
 
   const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
     criteriaFields,
     filterQuery: buildAnomaliesTableInfluencersFilterQuery({
-      euid,
+      euidApi,
       entityType,
       isScopedToEntity: true,
       identityFields,
@@ -120,7 +129,7 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
     }),
     startDate: from,
     endDate: to,
-    skip: isInitializing,
+    skip: isInitializing || !!hideAnomalies,
     jobIds,
     aggregationInterval: 'auto',
   });
@@ -139,17 +148,17 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
   );
 
   const hostFields = useObservedHostFields(
-    observedDataWithAnomalies as ObservedEntityData<HostItem>
+    observedDataWithAnomalies as ObservedEntityData<HostItem>,
+    hideAnomalies
   );
   const userFields = useObservedUserFields(
-    observedDataWithAnomalies as ObservedEntityData<UserItem>
+    observedDataWithAnomalies as ObservedEntityData<UserItem>,
+    hideAnomalies
   );
   const observedFields = entityType === EntityType.host ? hostFields : userFields;
 
   const renderFlyoutLink = useCallback(
-    (flyoutLinkProps: OpenFlyoutLinkProps) => (
-      <OpenFlyoutLink {...flyoutLinkProps} asParent={false} />
-    ),
+    (flyoutLinkProps: OpenFlyoutLinkProps) => <OpenFlyoutLink {...flyoutLinkProps} />,
     []
   );
 

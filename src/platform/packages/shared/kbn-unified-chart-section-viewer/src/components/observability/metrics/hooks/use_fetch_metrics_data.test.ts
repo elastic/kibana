@@ -16,6 +16,7 @@ const mockTrackRequest = jest.fn(
   }
 );
 const mockTrackMetricsInfo = jest.fn();
+const mockTrackEsqlQueryFailure = jest.fn();
 
 // Mock ALL external heavy dependencies with factory functions to avoid loading
 // their transitive dependency trees (e.g., @kbn/data-plugin/public).
@@ -30,6 +31,7 @@ jest.mock('../utils/get_esql_query', () => ({
 }));
 jest.mock('@kbn/esql-utils', () => ({
   buildMetricsInfoQuery: jest.fn((esql: string, dims?: string[], postFilter?: string) => {
+    if (!esql?.trim()) return '';
     const preFilter = dims?.length ? ' | WHERE dim IS NOT NULL' : '';
     const post = postFilter ? ` | WHERE ${postFilter}` : '';
     return `${esql}${preFilter} | METRICS_INFO${post}`;
@@ -39,7 +41,14 @@ jest.mock('@kbn/esql-utils', () => ({
     (fields: string[] | undefined, clause: (field: string) => string, separator = ' AND ') =>
       fields?.map(clause).join(separator) ?? ''
   ),
+  // Still required by getFetchParamsMock (kbn-unified-histogram) which imports it
+  // from @kbn/esql-utils to process breakdown fields. Not used by the hook itself.
   hasTransformationalCommand: jest.fn(() => false),
+  // Used by buildEsqlQueryFailureEvent for the `query_type` telemetry field.
+  getSourceCommandFromESQLQuery: jest.fn((esql?: string) => {
+    const sourceCommand = esql?.trim().match(/^(TS|FROM)\b/i);
+    return sourceCommand ? sourceCommand[1].toUpperCase() : '';
+  }),
 }));
 jest.mock('@kbn/field-utils', () => ({
   getFieldIconType: jest.fn(() => 'number'),
@@ -47,6 +56,7 @@ jest.mock('@kbn/field-utils', () => ({
 jest.mock('../../../../context/ebt_telemetry_context', () => ({
   useTelemetry: () => ({
     trackMetricsInfo: mockTrackMetricsInfo,
+    trackEsqlQueryFailure: mockTrackEsqlQueryFailure,
   }),
 }));
 jest.mock('../../../../context/chart_section_inspector', () => ({
@@ -61,7 +71,6 @@ jest.mock('../../../chart/hooks/use_report_chart_section_error', () => ({
 
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { Dimension, ParsedMetricsWithTelemetry } from '../../../../types';
 import { useFetchMetricsData } from './use_fetch_metrics_data';
@@ -69,6 +78,10 @@ import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { EsqlResponseError } from '../../../../common/errors/esql_response_error';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
+import {
+  METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE,
+  METRICS_PROFILE_TELEMETRY_NAME,
+} from '../telemetry/constants';
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockParseMetricsWithTelemetry = parseMetricsWithTelemetry as jest.MockedFunction<
@@ -102,23 +115,6 @@ const createMockParsedMetrics = (
   },
 });
 
-// Minimal DataView surface the hook-under-test and its collaborators actually
-// read. `isTimeBased` is a type predicate on DataView, so we declare the
-// stub as its plain boolean sibling and cast once at the use site via the
-// DataView `as unknown as` below.
-type MockDataView = Pick<DataView, 'getFieldByName' | 'getIndexPattern'> & {
-  isTimeBased: () => boolean;
-};
-
-// Default to "every requested field exists" so the appliedDimensions
-// derivation in useFetchMetricsData (#264957) is a no-op for existing
-// tests. Tests that exercise the prune behavior override this per-test.
-const createMockDataView = (): MockDataView => ({
-  getFieldByName: jest.fn((name: string) => ({ name } as unknown as DataViewField)),
-  getIndexPattern: () => 'metrics-*',
-  isTimeBased: () => true,
-});
-
 // Minimal services surface the hook-under-test reads: `data.search.search`
 // and `uiSettings`. Declared as a partial so we don't have to mock the
 // entire UnifiedHistogramServices tree.
@@ -132,14 +128,12 @@ const createMockServices = (): MockServices => ({
   uiSettings: {},
 });
 
-const createDefaultParams = (overrides?: Record<string, unknown>) => ({
+const createDefaultParams = () => ({
   fetchParams: getFetchParamsMock({
     query: { esql: 'TS metrics-*' },
-    dataView: createMockDataView() as unknown as DataView,
     timeRange: { from: 'now-15m', to: 'now' },
     filters: [],
     esqlVariables: [],
-    ...overrides,
   }),
   services: createMockServices() as unknown as ChartSectionProps['services'],
   isComponentVisible: true,
@@ -157,10 +151,15 @@ describe('useFetchMetricsData', () => {
     const { getEsqlQuery } = jest.requireMock('../utils/get_esql_query');
     getEsqlQuery.mockImplementation((query: { esql?: string } | undefined) => query?.esql);
 
-    const { buildMetricsInfoQuery, buildJoinedFilter, hasTransformationalCommand } =
-      jest.requireMock('@kbn/esql-utils');
+    const {
+      buildMetricsInfoQuery,
+      buildJoinedFilter,
+      hasTransformationalCommand,
+      getSourceCommandFromESQLQuery,
+    } = jest.requireMock('@kbn/esql-utils');
     buildMetricsInfoQuery.mockImplementation(
       (esql: string, dims?: string[], postFilter?: string) => {
+        if (!esql?.trim()) return '';
         const preFilter = dims?.length ? ' | WHERE dim IS NOT NULL' : '';
         const post = postFilter ? ` | WHERE ${postFilter}` : '';
         return `${esql}${preFilter} | METRICS_INFO${post}`;
@@ -171,6 +170,10 @@ describe('useFetchMetricsData', () => {
         fields?.map(clause).join(separator) ?? ''
     );
     hasTransformationalCommand.mockImplementation(() => false);
+    getSourceCommandFromESQLQuery.mockImplementation((esql?: string) => {
+      const sourceCommand = esql?.trim().match(/^(TS|FROM)\b/i);
+      return sourceCommand ? sourceCommand[1].toUpperCase() : '';
+    });
 
     mockTrackRequest.mockImplementation(
       async (_name: string, _desc: string, fn: () => Promise<{ data: unknown }>) => {
@@ -192,7 +195,11 @@ describe('useFetchMetricsData', () => {
           dimension_fields: ['host.name'],
         },
       ],
-      rawResponse: {},
+      rawResponse: {
+        columns: [],
+        values: [],
+        requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+      },
       requestParams: { query: 'TS metrics-* | METRICS_INFO' },
     });
 
@@ -214,7 +221,7 @@ describe('useFetchMetricsData', () => {
       expect(result.current.allDimensions).toEqual([hostDimension]);
     });
 
-    it('returns sorted metricItems and allDimensions', async () => {
+    it('returns sorted allDimensions', async () => {
       const parsed = createMockParsedMetrics(
         ['system.memory.utilization', 'system.cpu.utilization'],
         [serviceDimension, hostDimension]
@@ -228,8 +235,6 @@ describe('useFetchMetricsData', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      expect(result.current.metricItems[0].metricName).toBe('system.cpu.utilization');
-      expect(result.current.metricItems[1].metricName).toBe('system.memory.utilization');
       expect(result.current.allDimensions[0].name).toBe('host.name');
       expect(result.current.allDimensions[1].name).toBe('service.name');
     });
@@ -237,7 +242,11 @@ describe('useFetchMetricsData', () => {
     it('returns empty arrays when no data is available', async () => {
       mockExecuteEsqlQuery.mockResolvedValue({
         documents: [],
-        rawResponse: {},
+        rawResponse: {
+          columns: [],
+          values: [],
+          requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+        },
         requestParams: { query: 'TS metrics-* | METRICS_INFO' },
       });
       mockParseMetricsWithTelemetry.mockReturnValue({
@@ -265,6 +274,75 @@ describe('useFetchMetricsData', () => {
     });
   });
 
+  describe('loadedFetchParams', () => {
+    it('reports the fetch params the metric items were fetched under, not the ones in flight', async () => {
+      let resolveSecondFetch: (value: unknown) => void = () => {};
+      const secondFetch = new Promise((resolve) => {
+        resolveSecondFetch = resolve;
+      });
+      const response = {
+        documents: [
+          {
+            metric_name: 'system.cpu.utilization',
+            index_name: 'metrics-*',
+            unit: null,
+            metric_type: 'gauge',
+            field_type: 'double',
+            dimension_fields: ['host.name'],
+          },
+        ],
+        rawResponse: {
+          columns: [],
+          values: [],
+          requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+        },
+        requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+      };
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(response)
+        .mockImplementationOnce(() => secondFetch as Promise<typeof response>);
+
+      const defaults = createDefaultParams();
+      const params = {
+        ...defaults,
+        fetchParams: {
+          ...defaults.fetchParams,
+          searchSessionId: 'session-1',
+        },
+      };
+      const { result, rerender } = renderHook(
+        (props: ReturnType<typeof createDefaultParams>) => useFetchMetricsData(props),
+        { initialProps: params }
+      );
+
+      await waitFor(() =>
+        expect(result.current.loadedFetchParams?.searchSessionId).toBe('session-1')
+      );
+
+      // A Discover refresh starts a new session and replaces the abort controller.
+      rerender({
+        ...params,
+        fetchParams: {
+          ...params.fetchParams,
+          searchSessionId: 'session-2',
+          abortController: new AbortController(),
+        },
+      });
+
+      await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2));
+      expect(result.current.loading).toBe(true);
+      expect(result.current.loadedFetchParams?.searchSessionId).toBe('session-1');
+
+      await act(async () => {
+        resolveSecondFetch(response);
+      });
+
+      await waitFor(() =>
+        expect(result.current.loadedFetchParams?.searchSessionId).toBe('session-2')
+      );
+    });
+  });
+
   describe('shouldFetch guard', () => {
     it('does not fetch when component is not visible', async () => {
       const params = createDefaultParams();
@@ -279,33 +357,9 @@ describe('useFetchMetricsData', () => {
       expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
     });
 
-    it('does not fetch when query is undefined', async () => {
-      const params = createDefaultParams({ query: undefined });
-
-      renderHook(() => useFetchMetricsData(params));
-
-      await act(async () => {
-        await new Promise((r) => setTimeout(r, 50));
-      });
-
-      expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-    });
-
-    it('does not fetch when dataView is undefined', async () => {
-      const params = createDefaultParams({ dataView: undefined });
-
-      renderHook(() => useFetchMetricsData(params));
-
-      await act(async () => {
-        await new Promise((r) => setTimeout(r, 50));
-      });
-
-      expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-    });
-
-    it('does not fetch when query has a transformational command', async () => {
-      const { hasTransformationalCommand } = jest.requireMock('@kbn/esql-utils');
-      hasTransformationalCommand.mockReturnValue(true);
+    it('does not fetch when metricsInfoQuery is empty', async () => {
+      const { buildMetricsInfoQuery } = jest.requireMock('@kbn/esql-utils');
+      buildMetricsInfoQuery.mockReturnValue('');
 
       const params = createDefaultParams();
 
@@ -371,7 +425,11 @@ describe('useFetchMetricsData', () => {
               dimension_fields: ['host.name'],
             },
           ],
-          rawResponse: {},
+          rawResponse: {
+            columns: [],
+            values: [],
+            requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+          },
           requestParams: { query: 'TS metrics-* | METRICS_INFO' },
         };
       });
@@ -408,7 +466,11 @@ describe('useFetchMetricsData', () => {
             dimension_fields: ['host.name'],
           },
         ],
-        rawResponse: {},
+        rawResponse: {
+          columns: [],
+          values: [],
+          requestParams: { query: 'TS metrics-* | METRICS_INFO' },
+        },
         requestParams: { query: 'TS metrics-* | METRICS_INFO' },
       });
 
@@ -579,10 +641,80 @@ describe('useFetchMetricsData', () => {
       });
     });
 
+    it(`emits ${METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE} for a circuit breaker reported on HTTP 200`, async () => {
+      // The scenario behind elastic/elasticsearch#154978: a `TS metrics-*`
+      // query trips the request circuit breaker, and Elasticsearch returns the
+      // failure embedded in a 200 body rather than as an HTTP error.
+      const circuitBreakerError = new EsqlResponseError(
+        {
+          type: 'circuit_breaking_exception',
+          reason: '[request] Data too large, data for [<reused_arrays>] would be [524288444/500mb]',
+        },
+        { status: 429 }
+      );
+      mockExecuteEsqlQuery.mockRejectedValue(circuitBreakerError);
+
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.error).toBe(circuitBreakerError);
+      });
+
+      expect(mockTrackEsqlQueryFailure).toHaveBeenCalledTimes(1);
+      expect(mockTrackEsqlQueryFailure).toHaveBeenCalledWith({
+        error_type: 'circuit_breaking_exception',
+        error_category: 'resource_limit',
+        status_code: 429,
+        query_type: 'TS',
+        profile: METRICS_PROFILE_TELEMETRY_NAME,
+      });
+    });
+
+    it(`emits ${METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE} for a rejected HTTP request`, async () => {
+      const requestError = Object.assign(new Error('Bad Request'), {
+        attributes: {
+          error: { type: 'verification_exception', reason: 'Unknown column [x]' },
+          rawResponse: { status: 400 },
+        },
+      });
+      mockExecuteEsqlQuery.mockRejectedValue(requestError);
+
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.error).toBe(requestError);
+      });
+
+      expect(mockTrackEsqlQueryFailure).toHaveBeenCalledWith({
+        error_type: 'verification_exception',
+        error_category: 'user_input',
+        status_code: 400,
+        query_type: 'TS',
+        profile: METRICS_PROFILE_TELEMETRY_NAME,
+      });
+    });
+
+    it(`does not emit ${METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE} for a cancelled refetch`, async () => {
+      const abortError = new Error('aborted');
+      abortError.name = 'AbortError';
+      mockExecuteEsqlQuery.mockRejectedValue(abortError);
+
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.error).toBeTruthy();
+      });
+
+      expect(mockTrackEsqlQueryFailure).not.toHaveBeenCalled();
+    });
+
     it('does not re-fire on re-renders that preserve the error reference', async () => {
       // `useAsyncFn` exposes a stable error reference for a given failed run,
-      // so the reporter useEffect (deps: [error, profileId]) does not re-fire
-      // on identity-preserving re-renders. Repeat failures with fresh Error
+      // so the reporter useEffect keyed on `error` does not re-fire on
+      // identity-preserving re-renders. Repeat failures with fresh Error
       // instances do produce fresh reports - exercised by the sibling test.
       const fetchError = new Error('re-render test');
       mockExecuteEsqlQuery.mockRejectedValue(fetchError);
@@ -696,11 +828,11 @@ describe('useFetchMetricsData', () => {
       '@kbn/esql-utils'
     ) as { buildMetricsInfoQuery: jest.Mock };
 
-    it('passes no dimensions to the query when none of the selected ones exist on the current data view', async () => {
+    it('passes no dimensions to the query when none of the selected ones exist in columnsMap', async () => {
       const params = createDefaultParams();
       params.selectedDimensionNames = [hostDimension];
-      // Stream B does not carry `host.name` — simulate the issue scenario.
-      (params.fetchParams.dataView as any).getFieldByName = jest.fn(() => undefined);
+      // Stream B does not carry `host.name` — simulate by providing an empty columnsMap.
+      params.fetchParams = { ...params.fetchParams, columnsMap: {} };
 
       const { result } = renderHook(() => useFetchMetricsData(params));
 
@@ -714,13 +846,14 @@ describe('useFetchMetricsData', () => {
       expect(params.selectedDimensionNames).toEqual([hostDimension]);
     });
 
-    it('keeps only the subset of selected dimensions that exist on the current data view', async () => {
+    it('keeps only the subset of selected dimensions that exist in columnsMap', async () => {
       const params = createDefaultParams();
       params.selectedDimensionNames = [hostDimension, serviceDimension];
-      // Only `host.name` exists on the current data view.
-      (params.fetchParams.dataView as any).getFieldByName = jest.fn((name: string) =>
-        name === 'host.name' ? { name } : undefined
-      );
+      // Only `host.name` is in columnsMap.
+      params.fetchParams = {
+        ...params.fetchParams,
+        columnsMap: { 'host.name': {} as any },
+      };
 
       const { result } = renderHook(() => useFetchMetricsData(params));
 
@@ -736,10 +869,10 @@ describe('useFetchMetricsData', () => {
       expect(result.current.activeDimensions).toEqual([hostDimension]);
     });
 
-    it('passes all selected dimensions when they all exist on the current data view', async () => {
+    it('passes all selected dimensions when columnsMap is undefined', async () => {
       const params = createDefaultParams();
       params.selectedDimensionNames = [hostDimension, serviceDimension];
-      // Default mock returns a stub field for every requested name.
+      // No columnsMap means no filtering — all dimensions pass through.
 
       const { result } = renderHook(() => useFetchMetricsData(params));
 
@@ -755,24 +888,10 @@ describe('useFetchMetricsData', () => {
       expect(result.current.activeDimensions).toEqual([hostDimension, serviceDimension]);
     });
 
-    it('does not validate when dataView is undefined (fetch is already gated by shouldFetch)', async () => {
-      const params = createDefaultParams({ dataView: undefined });
-      params.selectedDimensionNames = [hostDimension];
-
-      renderHook(() => useFetchMetricsData(params));
-
-      await act(async () => {
-        await new Promise((r) => setTimeout(r, 50));
-      });
-
-      // No fetch happens because the effect bails out when dataView is missing.
-      expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-    });
-
-    it('does not invoke getFieldByName when there are no selected dimensions', async () => {
+    it('passes all dimensions when columnsMap is undefined (no validation applied)', async () => {
       const params = createDefaultParams();
-      const getFieldByName = jest.fn((name: string) => ({ name }));
-      (params.fetchParams.dataView as any).getFieldByName = getFieldByName;
+      params.selectedDimensionNames = [hostDimension];
+      // columnsMap is undefined by default — all selected dimensions pass through.
 
       const { result } = renderHook(() => useFetchMetricsData(params));
 
@@ -780,16 +899,35 @@ describe('useFetchMetricsData', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      // The validation memo short-circuits when selectedDimensionNames is empty/undefined,
-      // so getFieldByName is only reached by the unrelated getFieldType helper inside the
-      // parser (which doesn't run for the empty document set used here).
-      expect(getFieldByName).not.toHaveBeenCalled();
+      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith(
+        'TS metrics-*',
+        ['host.name'],
+        'MV_CONTAINS(dimension_fields, "host.name")'
+      );
+      expect(result.current.activeDimensions).toEqual([hostDimension]);
+    });
+
+    it('does not filter dimensions when none are selected', async () => {
+      const params = createDefaultParams();
+      // No selectedDimensionNames — activeDimensions should be empty.
+
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
       expect(result.current.activeDimensions).toEqual([]);
     });
 
-    it('refetches when the applied set changes after a data view switch', async () => {
+    it('refetches when the applied set changes after a columnsMap switch', async () => {
       const params = createDefaultParams();
       params.selectedDimensionNames = [hostDimension];
+      // Start with host.name present in columnsMap.
+      params.fetchParams = {
+        ...params.fetchParams,
+        columnsMap: { 'host.name': {} as any },
+      };
 
       const { rerender } = renderHook(
         (props: ReturnType<typeof createDefaultParams>) => useFetchMetricsData(props),
@@ -800,18 +938,10 @@ describe('useFetchMetricsData', () => {
         expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
       });
 
-      // Switch to a data view that doesn't carry `host.name` — same intent,
-      // different applied set, so we expect a refetch with the pruned dimensions.
+      // Switch to empty columnsMap — host.name no longer exists.
       const switchedParams = {
         ...params,
-        fetchParams: {
-          ...params.fetchParams,
-          dataView: {
-            getFieldByName: jest.fn(() => undefined),
-            getIndexPattern: () => 'metrics-*',
-            isTimeBased: () => true,
-          } as any,
-        },
+        fetchParams: { ...params.fetchParams, columnsMap: {} },
       };
       rerender(switchedParams);
 

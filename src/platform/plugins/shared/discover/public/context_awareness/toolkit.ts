@@ -9,9 +9,11 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { ProfileStateDefinition } from '../../common/context_awareness';
 import type { OpenInNewTabParams, UpdateESQLQueryFn } from './types';
-import type { ProfileStateAdapter, ProfileStateDefinition } from './profile_state';
+import type { ProfileStateAdapter } from './profile_state_adapter';
 
 /**
  * Host-provided actions that profiles can use in extension point implementations.
@@ -57,7 +59,7 @@ export interface ContextAwarenessToolkit {
   /**
    * Returns host-scoped profile state for the requested definition.
    */
-  readonly getStateAdapter: <TState extends object>(
+  readonly getStateAdapter: <TState extends SerializableRecord>(
     definition: ProfileStateDefinition<TState>
   ) => ProfileStateAdapter<TState>;
 }

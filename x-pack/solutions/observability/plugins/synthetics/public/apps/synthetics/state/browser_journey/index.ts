@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { createReducer } from '@reduxjs/toolkit';
-
-import { isScreenshotBlockDoc } from '../../../../../common/runtime_types';
+import { createReducer } from 'redux-toolkit-v1';
 
 import type { BrowserJourneyState } from './models';
 import {
@@ -19,6 +17,7 @@ import {
   fetchBlocksAction,
   setBlockLoadingAction,
 } from './actions';
+import { isScreenshotBlockDoc } from '../../../../../common/runtime_types/schemas/ping_guards';
 
 const initialState: BrowserJourneyState = {
   blocks: {},

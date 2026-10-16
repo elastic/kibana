@@ -6,10 +6,13 @@
  */
 
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { AvailabilityContext } from '@kbn/agent-builder-server';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import { createCasesClientMock, type CasesClientMock } from '../../client/mocks';
 import { searchCasesTool } from './search_cases';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
+import { makeCoreWithSolution } from '../utils/mock_core_with_solution';
+import { createCasesToolAvailability } from '../utils/get_cases_tool_availability';
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -247,6 +250,23 @@ describe('searchCasesTool handler — by_alert mode', () => {
     const { results } = result as unknown as { results: Array<{ data: Record<string, unknown> }> };
     expect(results[0].data.total).toBe(0);
   });
+
+  it('rejects more than 100 alert_ids at the schema level', () => {
+    const casesClient = createCasesClientMock();
+    const { tool } = buildTool(casesClient);
+
+    const tooMany = tool.schema.safeParse({
+      mode: 'by_alert',
+      alert_ids: Array.from({ length: 101 }, (_, i) => `alert-${i}`),
+    });
+    expect(tooMany.success).toBe(false);
+
+    const atLimit = tool.schema.safeParse({
+      mode: 'by_alert',
+      alert_ids: Array.from({ length: 100 }, (_, i) => `alert-${i}`),
+    });
+    expect(atLimit.success).toBe(true);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -315,5 +335,37 @@ describe('searchCasesTool handler — search mode', () => {
     );
     const { results } = result as unknown as { results: Array<{ data: Record<string, unknown> }> };
     expect(results[0].data.message).toMatch(/page 1 of/i);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests: availability
+// ---------------------------------------------------------------------------
+
+describe('searchCasesTool availability', () => {
+  it('returns unavailable for es solution', async () => {
+    const coreSetup = makeCoreWithSolution('es');
+    const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
+    const tool = { ...searchCasesTool(coreSetup, jest.fn()), availability };
+    const request = httpServerMock.createKibanaRequest();
+    const result = await tool.availability!.handler({ request } as AvailabilityContext);
+    expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
+  });
+
+  it('returns available for classic solution', async () => {
+    const coreSetup = makeCoreWithSolution('classic');
+    const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
+    const tool = { ...searchCasesTool(coreSetup, jest.fn()), availability };
+    const request = httpServerMock.createKibanaRequest();
+    const result = await tool.availability!.handler({ request } as AvailabilityContext);
+    expect(result).toEqual({ status: 'available' });
+  });
+
+  it('cacheMode is space', () => {
+    const coreSetup = coreMock.createSetup();
+    coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
+    const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
+    const tool = { ...searchCasesTool(coreSetup, jest.fn()), availability };
+    expect(tool.availability?.cacheMode).toBe('space');
   });
 });

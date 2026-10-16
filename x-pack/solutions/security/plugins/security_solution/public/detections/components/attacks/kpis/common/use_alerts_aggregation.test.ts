@@ -13,10 +13,13 @@ import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/u
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
+import { fetchQueryUnifiedAlerts } from '../../../../containers/detection_engine/alerts/api';
+import { useInspectButton } from '../../../alerts_kpis/common/hooks';
 
 jest.mock('../../../../containers/detection_engine/alerts/use_query');
 jest.mock('../../../../../common/containers/use_global_time');
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../alerts_kpis/common/hooks');
 
 describe('useAlertsAggregation', () => {
   const mockFrom = 'now-15m';
@@ -25,17 +28,26 @@ describe('useAlertsAggregation', () => {
     get: jest.fn().mockReturnValue(true),
   };
   const mockRefetch = jest.fn();
-  const mockSetQuery = jest.fn();
+  const mockSetAlertsQuery = jest.fn();
+  const mockDeleteQuery = jest.fn();
+  const mockSetGlobalQuery = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useGlobalTime as jest.Mock).mockReturnValue({ from: mockFrom, to: mockTo });
+    (useGlobalTime as jest.Mock).mockReturnValue({
+      from: mockFrom,
+      to: mockTo,
+      deleteQuery: mockDeleteQuery,
+      setQuery: mockSetGlobalQuery,
+    });
     (useKibana as jest.Mock).mockReturnValue({ services: { uiSettings: mockUiSettings } });
     (useQueryAlerts as jest.Mock).mockReturnValue({
       data: undefined,
       loading: false,
       refetch: mockRefetch,
-      setQuery: mockSetQuery,
+      request: 'request',
+      response: 'response',
+      setQuery: mockSetAlertsQuery,
     });
   });
 
@@ -58,6 +70,7 @@ describe('useAlertsAggregation', () => {
 
     expect(useQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
+        fetchMethod: fetchQueryUnifiedAlerts,
         query: expect.objectContaining({
           query: expect.objectContaining({
             bool: expect.objectContaining({
@@ -93,11 +106,11 @@ describe('useAlertsAggregation', () => {
       }
     );
 
-    expect(mockSetQuery).toHaveBeenCalledWith(expect.objectContaining({ size: 0 }));
+    expect(mockSetAlertsQuery).toHaveBeenCalledWith(expect.objectContaining({ size: 0 }));
 
     rerender({ size: 10 });
 
-    expect(mockSetQuery).toHaveBeenCalledWith(expect.objectContaining({ size: 10 }));
+    expect(mockSetAlertsQuery).toHaveBeenCalledWith(expect.objectContaining({ size: 10 }));
   });
 
   it('returns data, loading, and refetch from useQueryAlerts', () => {
@@ -106,7 +119,9 @@ describe('useAlertsAggregation', () => {
       data: mockData,
       loading: true,
       refetch: mockRefetch,
-      setQuery: mockSetQuery,
+      request: 'request',
+      response: 'response',
+      setQuery: mockSetAlertsQuery,
     });
 
     const { result } = renderHook(() =>
@@ -118,6 +133,40 @@ describe('useAlertsAggregation', () => {
 
     expect(result.current.data).toBe(mockData);
     expect(result.current.loading).toBe(true);
-    expect(result.current.refetch).toBe(mockRefetch);
+    result.current.refetch();
+    expect(mockRefetch).toHaveBeenCalled();
+  });
+
+  it('registers the query for global refetch after mutations', () => {
+    renderHook(() =>
+      useAlertsAggregation({
+        aggs: {},
+        queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_IDS,
+      })
+    );
+
+    expect(useInspectButton).toHaveBeenCalledWith(
+      expect.objectContaining({
+        deleteQuery: mockDeleteQuery,
+        setQuery: mockSetGlobalQuery,
+        uniqueQueryId: ALERTS_QUERY_NAMES.COUNT_ATTACKS_IDS,
+      })
+    );
+  });
+
+  it('uses custom uniqueQueryId when provided', () => {
+    renderHook(() =>
+      useAlertsAggregation({
+        aggs: {},
+        queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_IDS,
+        uniqueQueryId: 'attacks-kpi-attacks-list',
+      })
+    );
+
+    expect(useInspectButton).toHaveBeenCalledWith(
+      expect.objectContaining({
+        uniqueQueryId: 'attacks-kpi-attacks-list',
+      })
+    );
   });
 });

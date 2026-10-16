@@ -9,7 +9,7 @@
 
 import { EuiCheckbox, EuiConfirmModal } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { selectHasChanges } from '../../../entities/workflows/store/workflow_detail/selectors';

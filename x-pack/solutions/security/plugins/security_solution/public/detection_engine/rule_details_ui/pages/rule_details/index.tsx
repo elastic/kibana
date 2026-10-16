@@ -27,11 +27,11 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import { noop } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
+import type { ConnectedProps } from 'react-redux-v7';
+import { connect, useDispatch } from 'react-redux-v7';
 import styled from 'styled-components';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import { isTab } from '@kbn/timelines-plugin/public';
 import {
   dataTableActions,
@@ -129,11 +129,12 @@ import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { MissingDetectionsPrivilegesCallOut } from '../../../../detections/components/callouts/missing_detections_privileges_callout';
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
+import { useRuleAuthorDisplayNames } from '../../../rule_management/logic/use_rule_author_display_names';
+import { useSyncShowBuildingBlockAlerts } from './use_sync_show_building_block_alerts';
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
 import { type RuleResponse, type Status } from '../../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
-import { useSignalHelpers } from '../../../../sourcerer/containers/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
 import { EditRuleSettingButtonLink } from './edit_rule_settings_button_link/edit_rule_settings_button_link';
@@ -157,7 +158,6 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useDeprecatedRuleDetailsCallout } from '../../../rule_management/components/rule_deprecation';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { CpsMlRuleCallout } from '../../../rule_management_ui/components/cps_ml_rule_callout/callout';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 
@@ -241,13 +241,17 @@ export const RuleDetailsPage = connector(
       'ruleChangesHistoryEnabled'
     );
     const [ruleChangesHistoryAdvancedSetting] = useUiSetting$<boolean>(
-      ENABLE_RULE_CHANGES_HISTORY_SETTING,
-      false
+      ENABLE_RULE_CHANGES_HISTORY_SETTING
     );
     const isRuleChangesHistoryEnabled =
       ruleChangesHistoryFFEnabled && ruleChangesHistoryAdvancedSetting;
 
-    const { application, timelines: timelinesUi, spaces: spacesApi } = useKibana().services;
+    const {
+      application,
+      timelines: timelinesUi,
+      spaces: spacesApi,
+      aiRuleCreation,
+    } = useKibana().services;
     const {
       navigateToApp,
       capabilities: { actions },
@@ -308,7 +312,6 @@ export const RuleDetailsPage = connector(
       isExistingRule,
     } = useRuleWithFallback(ruleId);
 
-    const { pollForSignalIndex } = useSignalHelpers();
     const [rule, setRule] = useState<RuleResponse | null>(null);
     const [shouldStackAboutContent, setShouldStackAboutContent] = useState(false);
     const isLoading = useMemo(() => ruleLoading && rule == null, [rule, ruleLoading]);
@@ -340,8 +343,11 @@ export const RuleDetailsPage = connector(
             ruleActionsData: null,
           };
 
-    const { showBuildingBlockAlerts, setShowBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } =
-      useDataTableFilters(TableId.alertsOnRuleDetailsPage);
+    const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
+      TableId.alertsOnRuleDetailsPage
+    );
+    // Page lifetime so tab navigation does not remount and reset the toolbar filter.
+    useSyncShowBuildingBlockAlerts(rule?.building_block_type != null);
 
     const mlCapabilities = useMlCapabilities();
     const { globalFullScreen } = useGlobalFullScreen();
@@ -363,6 +369,21 @@ export const RuleDetailsPage = connector(
         path: getRuleDetailsTabUrl(ruleId ?? '', 'alerts', ''),
       });
     }, [navigateToApp, ruleId]);
+
+    // Sync after a chat-driven rule save. Must refetch here: the save handler can't write
+    // to this page's react-query cache (security pages use the Cases context's query client).
+    useEffect(() => {
+      let prevSaving: ReadonlySet<string> = new Set();
+      const savingSub = aiRuleCreation.saving$.subscribe((saving) => {
+        if (saving.size < prevSaving.size) {
+          refreshRule();
+        }
+        prevSaving = saving;
+      });
+      return () => {
+        savingSub.unsubscribe();
+      };
+    }, [aiRuleCreation, refreshRule]);
 
     // persist rule until refresh is complete
     useEffect(() => {
@@ -396,13 +417,19 @@ export const RuleDetailsPage = connector(
           : undefined,
       [isExistingRule, ruleLoading]
     );
+    const { createdBy, updatedBy } = useRuleAuthorDisplayNames({
+      createdBy: rule?.created_by,
+      createdByProfileUid: rule?.created_by_profile_uid,
+      updatedBy: rule?.updated_by,
+      updatedByProfileUid: rule?.updated_by_profile_uid,
+    });
     const subTitle = useMemo(
       () =>
         rule ? (
           [
-            <CreatedBy createdBy={rule.created_by} createdAt={rule.created_at} />,
+            <CreatedBy createdBy={createdBy} createdAt={rule.created_at} />,
             rule.updated_by != null ? (
-              <UpdatedBy updatedBy={rule.updated_by} updatedAt={rule.updated_at} />
+              <UpdatedBy updatedBy={updatedBy} updatedAt={rule.updated_at} />
             ) : (
               ''
             ),
@@ -416,7 +443,7 @@ export const RuleDetailsPage = connector(
         ) : ruleLoading ? (
           <EuiLoadingSpinner size="m" />
         ) : null,
-      [rule, ruleLoading, isRuleChangesHistoryEnabled]
+      [rule, ruleLoading, isRuleChangesHistoryEnabled, createdBy, updatedBy]
     );
 
     // Callback for when open/closed filter changes
@@ -430,12 +457,6 @@ export const RuleDetailsPage = connector(
       },
       [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
     );
-
-    const isBuildingBlockTypeNotNull = rule?.building_block_type != null;
-    // Set showBuildingBlockAlerts if rule is a Building Block Rule otherwise we won't show alerts
-    useEffect(() => {
-      setShowBuildingBlockAlerts(isBuildingBlockTypeNotNull);
-    }, [isBuildingBlockTypeNotNull, setShowBuildingBlockAlerts]);
 
     const ruleRuleId = rule?.rule_id ?? '';
     const alertDefaultFilters = useMemo(
@@ -660,7 +681,6 @@ export const RuleDetailsPage = connector(
       <>
         <NeedAdminForUpdateRulesCallOut />
         <MissingDetectionsPrivilegesCallOut />
-        {isMlRule(rule?.type) && <CpsMlRuleCallout />}
         {upgradeCallout}
         {deprecationCallout}
         {isBulkDuplicateConfirmationVisible && (
@@ -871,11 +891,7 @@ export const RuleDetailsPage = connector(
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                       <>
                         <FiltersGlobal>
-                          <SiemSearchBar
-                            dataView={dataView}
-                            pollForSignalIndex={pollForSignalIndex}
-                            id={InputsModelId.global}
-                          />
+                          <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
                         </FiltersGlobal>
                         <EuiSpacer />
                         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">

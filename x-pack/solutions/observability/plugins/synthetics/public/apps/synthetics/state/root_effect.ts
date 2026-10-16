@@ -6,7 +6,6 @@
  */
 
 import { all, fork } from 'redux-saga/effects';
-import { getMaintenanceWindowsEffect } from './maintenance_windows';
 import { getCertsListEffect } from './certs';
 import {
   addGlobalParamEffect,
@@ -44,16 +43,22 @@ import {
 import { fetchServiceLocationsEffect } from './service_locations';
 import { browserJourneyEffects, fetchJourneyStepsEffect } from './browser_journey';
 import {
+  appendOverviewStatusEffect,
   augmentStaleStatusEffect,
   fetchOverviewStatusEffect,
   fetchStaleStatusEffect,
+  refreshRemainingCardWindowEffect,
 } from './overview_status';
 import { fetchMonitorStatusHeatmap, quietFetchMonitorStatusHeatmap } from './status_heatmap';
 import { fetchOverviewTrendStats, refreshOverviewTrendStats } from './overview/effects';
 import { fetchAgentPoliciesEffect } from './agent_policies';
+import { fetchAgentStatsEffect } from './agent_stats';
 import { fetchMonitorHealthEffect } from './monitor_health';
+import type { RequestCancellationManager } from './request_cancellation_manager';
 
-export const rootEffect = function* root(): Generator {
+export const rootEffect = function* root(
+  requestCancellationManager?: RequestCancellationManager
+): Generator {
   yield all([
     fork(fetchSyntheticsEnablementEffect),
     fork(upsertMonitorEffect),
@@ -62,11 +67,14 @@ export const rootEffect = function* root(): Generator {
     fork(fetchMonitorListEffect),
     fork(fetchSyntheticsMonitorEffect),
     fork(browserJourneyEffects),
-    fork(fetchOverviewStatusEffect),
-    fork(fetchStaleStatusEffect),
+    fork(fetchOverviewStatusEffect, requestCancellationManager),
+    fork(appendOverviewStatusEffect, requestCancellationManager),
+    fork(fetchStaleStatusEffect, requestCancellationManager),
     fork(augmentStaleStatusEffect),
+    fork(refreshRemainingCardWindowEffect),
     fork(fetchNetworkEventsEffect),
     fork(fetchAgentPoliciesEffect),
+    fork(fetchAgentStatsEffect),
     fork(fetchDynamicSettingsEffect),
     fork(fetchLocationMonitorsEffect),
     fork(setDynamicSettingsEffect),
@@ -86,11 +94,10 @@ export const rootEffect = function* root(): Generator {
     fork(enableDefaultAlertingSilentlyEffect),
     fork(fetchMonitorStatusHeatmap),
     fork(quietFetchMonitorStatusHeatmap),
-    fork(fetchOverviewTrendStats),
-    fork(refreshOverviewTrendStats),
+    fork(fetchOverviewTrendStats, requestCancellationManager),
+    fork(refreshOverviewTrendStats, requestCancellationManager),
     fork(inspectStatusRuleEffect),
     fork(inspectTLSRuleEffect),
-    fork(getMaintenanceWindowsEffect),
     ...privateLocationsEffects.map((effect) => fork(effect)),
     fork(fetchMonitorHealthEffect),
   ]);

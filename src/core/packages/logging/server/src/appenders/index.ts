@@ -8,14 +8,19 @@
  */
 
 import type { ConsoleAppenderConfig } from './console';
-import type { FileAppenderConfig } from './file';
-import type { OtelAppenderConfig } from './otel';
+import type { FileAppenderConfig, FileAppenderPluginConfig } from './file';
+import type { OtelAppenderConfig, OtelAppenderPluginConfig } from './otel';
 import type { RewriteAppenderConfig } from './rewrite';
-import type { RollingFileAppenderConfig } from './rolling_file';
+import type { RollingFileAppenderConfig, RollingFileAppenderPluginConfig } from './rolling_file';
 
 export type { ConsoleAppenderConfig } from './console';
-export type { FileAppenderConfig } from './file';
-export type { OtelAppenderConfig, OtelAppenderTlsConfig } from './otel';
+export type { FileAppenderConfig, FileAppenderPluginConfig } from './file';
+export type {
+  OtelAppenderConfig,
+  OtelAppenderPluginConfig,
+  OtelAppenderTlsConfig,
+  OtelAttributesTransform,
+} from './otel';
 export type {
   RewriteAppenderConfig,
   MetaRewritePolicyConfig,
@@ -24,6 +29,7 @@ export type {
 } from './rewrite';
 export type {
   RollingFileAppenderConfig,
+  RollingFileAppenderPluginConfig,
   TriggeringPolicyConfig,
   SizeLimitTriggeringPolicyConfig,
   TimeIntervalTriggeringPolicyConfig,
@@ -31,6 +37,7 @@ export type {
   RollingStrategyConfig,
   RetentionPolicyConfig,
 } from './rolling_file';
+export type { LogFileWriteError, LogFileWriteErrorHandler } from './write_error';
 
 /** @public */
 export type AppenderConfigType =
@@ -39,3 +46,14 @@ export type AppenderConfigType =
   | OtelAppenderConfig
   | RewriteAppenderConfig
   | RollingFileAppenderConfig;
+
+/**
+ * Appender configs accepted by {@link LoggingServiceSetup.configure}: every YAML-safe
+ * {@link AppenderConfigType} plus the plugin-only appender options.
+ * @public
+ */
+export type PluginAppenderConfigType =
+  | AppenderConfigType
+  | FileAppenderPluginConfig
+  | OtelAppenderPluginConfig
+  | RollingFileAppenderPluginConfig;

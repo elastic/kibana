@@ -48,9 +48,11 @@ import {
   buildCriteriaFields,
   consumeSmvContextLoadResult,
   fetchAnomaliesTableData$,
+  buildSmvEmptyFocusStatePatch,
   getModelPlotEnabledForDetector,
   getSmvContextLoadErrorMessages,
   getSmvDataReloadPlan,
+  getSmvFocusLoadErrorMessage,
   loadSingleMetricContextData,
   smvReloadSnapshotFromSmvHostProps,
   subscribeSmvBrushToFocusZoom,
@@ -65,6 +67,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     chartWidth: PropTypes.number.isRequired,
     chartHeight: PropTypes.number,
     lastRefresh: PropTypes.number.isRequired,
+    onLoading: PropTypes.func,
     onRenderComplete: PropTypes.func,
     previousRefresh: PropTypes.number.isRequired,
     selectedJob: PropTypes.object.isRequired,
@@ -260,7 +263,9 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     if (this.props.toastNotificationService) {
       this.props.toastNotificationService.displayErrorToast(error, errorMsg, 2000);
     }
-    this.setState({ loading: false, chartDataError: errorMsg });
+    this.setState({ loading: false, chartDataError: errorMsg }, () => {
+      this.props.onRenderComplete?.();
+    });
   };
 
   loadSingleMetricData = (fullRefresh = true) => {
@@ -288,6 +293,8 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     const contextLoadSignal = this.contextLoadAbortController.signal;
 
     this.contextChartSelectedInitCallDone = false;
+
+    this.props.onLoading?.(true);
 
     // Only when `fullRefresh` is true we'll reset all data
     // and show the loading spinner within the page.
@@ -355,12 +362,11 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
             },
             applyZoomSelection: (range) => this.contextChartSelected(range),
             applyStatePatch: (patch) => this.setState(patch),
-            afterStatePatch: (statePatch) => {
-              if (
-                statePatch.dataNotChartable !== true &&
-                this.props.onRenderComplete !== undefined
-              ) {
-                this.props.onRenderComplete();
+            // If focus will load next, wait for applyFocusPipelinePatch before completing.
+            // Otherwise complete now (empty / dataNotChartable / no zoom) so reporting cannot hang.
+            afterStatePatch: (_statePatch, { hasPendingFocus }) => {
+              if (!hasPendingFocus) {
+                this.props.onRenderComplete?.();
               }
             },
           });
@@ -421,9 +427,11 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
           zoomToFocusLoaded: this.state.zoomToFocusLoaded,
         }),
         onFocusPipelineStarting: () => {
+          this.props.onLoading?.(true);
           this.setState({
             loading: true,
             fullRefresh: false,
+            chartDataError: undefined,
           });
         },
         getFocusAggregationInterval: (selection) => this.getFocusAggregationInterval(selection),
@@ -433,7 +441,21 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
           this.loadAnomaliesTableData(earliestMs, latestMs),
         readModelPlotEnabled: () => this.state.modelPlotEnabled,
         readSelectedForecastId: () => this.props.selectedForecastId,
-        applyFocusPipelinePatch: (patch) => this.setState(patch),
+        applyFocusPipelinePatch: (patch) => {
+          this.setState(patch, () => {
+            this.props.onRenderComplete?.();
+          });
+        },
+        onFocusPipelineEmpty: (selection) => {
+          // Empty focus is terminal for reporting, not an error.
+          this.setState(buildSmvEmptyFocusStatePatch(selection), () => {
+            this.props.onRenderComplete?.();
+          });
+        },
+        onFocusPipelineError: (error) => {
+          // Completes reporting via onRenderComplete so deferred focus waits cannot hang.
+          this.displayErrorToastMessages(error, getSmvFocusLoadErrorMessage());
+        },
       })
     );
 
@@ -494,6 +516,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       chartHeight,
       lastRefresh,
       onForecastComplete,
+      isInteractive,
       selectedEntities,
       selectedDetectorIndex,
       selectedJob,
@@ -548,6 +571,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       zoomFromFocusLoaded,
       zoomToFocusLoaded,
       autoZoomDuration,
+      isInteractive,
     };
 
     const entityControls = this.getControlsForDetector();
@@ -570,7 +594,6 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     this.previousChartProps = chartProps;
     this.previousShowForecast = showForecast;
     this.previousShowModelBounds = showModelBounds;
-
     return (
       <SingleMetricViewerChartSurface
         fieldNamesWithEmptyValues={fieldNamesWithEmptyValues}
@@ -606,9 +629,10 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
               <EntityFieldNamesAndFilterButtons
                 api={this.props.api}
                 entityData={chartDetails.entityData}
+                isInteractive={isInteractive}
               />
               <EuiFlexGroup style={{ float: 'right' }} alignItems="center">
-                {showModelBoundsCheckbox && (
+                {isInteractive && showModelBoundsCheckbox && (
                   <TimeseriesExplorerCheckbox
                     id="toggleModelBoundsCheckbox"
                     label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
@@ -619,7 +643,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                   />
                 )}
 
-                {showAnnotationsCheckbox && (
+                {isInteractive && showAnnotationsCheckbox && (
                   <TimeseriesExplorerCheckbox
                     id="toggleAnnotationsCheckbox"
                     label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
@@ -630,7 +654,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                   />
                 )}
 
-                {showForecastCheckbox && (
+                {isInteractive && showForecastCheckbox && (
                   <EuiFlexItem grow={false}>
                     <TimeseriesExplorerCheckbox
                       id="toggleShowForecastCheckbox"
@@ -647,7 +671,8 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                   </EuiFlexItem>
                 )}
 
-                {arePartitioningFieldsProvided &&
+                {isInteractive &&
+                  arePartitioningFieldsProvided &&
                   selectedJob &&
                   shouldShowForecastButton === true && (
                     <EuiFlexItem grow={false} style={{ textAlign: 'right' }}>

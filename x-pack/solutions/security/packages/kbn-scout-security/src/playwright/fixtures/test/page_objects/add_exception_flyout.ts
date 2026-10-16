@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { subj } from '@kbn/test-subj-selector';
-import { EuiComboBoxWrapper, type ScoutPage, type Locator } from '@kbn/scout';
+import { type ScoutPage, type Locator } from '@kbn/scout';
 
 export enum AddExceptionButtonType {
   OR = 'or',
@@ -61,28 +61,26 @@ export class AddExceptionFlyoutPage {
     value: string;
   }) {
     const entrySelector = `${subj('exceptionItemEntryContainer')} >> nth=${entryIndex}`;
+    const entryScope = this.page.locator(entrySelector);
 
-    const fieldCombo = new EuiComboBoxWrapper(this.page, {
-      locator: `${entrySelector} >> ${subj('fieldAutocompleteComboBox')}`,
-    });
+    // Scope each combo to this entry (there can be several) via the helper's scope arg.
+    const fieldCombo = this.page.components.comboBox('fieldAutocompleteComboBox', entryScope);
+    const valueCombo = this.page.components.comboBox('valuesAutocompleteMatch', entryScope);
 
-    const valueCombo = new EuiComboBoxWrapper(this.page, {
-      locator: `${entrySelector} >> ${subj('valuesAutocompleteMatch')}`,
-    });
-
-    await fieldCombo.selectSingleOption(field);
+    // Field is an existing option (type-to-filter, then select); value is committed
+    // as a custom onCreateOption match. Both combos start empty, so no clear is needed.
+    await fieldCombo.setSelectedOptions([field]);
     await this.selectOperator(entrySelector, operator);
-    await valueCombo.setCustomSingleOption(value);
+    await valueCombo.setCustomSelectedOptions([value]);
   }
 
   /**
    * Manually selects an operator on the condition entry at the given selector.
    *
-   * We can't use {@link EuiComboBoxWrapper.selectSingleOption} here: it calls
-   * `clear()` first, which clicks the combobox's clear button. The operator
-   * combo is a required EUI combobox (`isClearable={false}`) so the clear
-   * button isn't rendered, and the click times out. Field/value combos avoid
-   * this only because they start empty and `clear()` short-circuits.
+   * We open the dropdown and click the option directly rather than routing
+   * through the combobox helper: the operator combo is a required EUI combobox
+   * (`isClearable={false}`) that already has a value selected, so picking from
+   * the open list is unambiguous.
    * @param entrySelector
    * @param operator
    */

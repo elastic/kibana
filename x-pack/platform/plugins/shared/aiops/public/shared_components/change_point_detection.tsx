@@ -65,6 +65,7 @@ export interface ChangePointDetectionProps {
   onRenderComplete: () => void;
   onError: (error: Error) => void;
   filtersApi?: PublishesFilters;
+  parentApi: unknown;
 }
 
 const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
@@ -86,6 +87,7 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
   embeddingOrigin,
   lastReloadRequestTime,
   filtersApi,
+  parentApi,
 }) => {
   const deps = useMemo(() => {
     const { charts, lens, data, usageCollection, fieldFormats, share, storage, unifiedSearch } =
@@ -135,10 +137,8 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
     );
   }, [manualReload$]);
 
-  // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376>
   return (
     <div
-      data-shared-item=""
       data-test-subj="aiopsEmbeddableChangePointChart"
       css={css`
         width: 100%;
@@ -165,6 +165,7 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
                     onLoading={onLoading}
                     onRenderComplete={onRenderComplete}
                     onError={onError}
+                    parentApi={parentApi}
                   />
                 </ChangePointDetectionControlsContextProvider>
               </FilterQueryContextProvider>

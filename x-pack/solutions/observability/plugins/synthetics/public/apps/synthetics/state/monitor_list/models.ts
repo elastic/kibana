@@ -8,7 +8,7 @@
 import type { ErrorToastOptions } from '@kbn/core-notifications-browser';
 
 import type { UseLogicalAndField } from '../../../../../common/constants';
-import type { MonitorListSortField } from '../../../../../common/runtime_types/monitor_management/sort_field';
+import type { MonitorListSortField } from '../../../../../common/runtime_types/schemas/sort_field';
 import type {
   EncryptedSyntheticsMonitor,
   FetchMonitorManagementListQueryArgs,
@@ -31,6 +31,9 @@ export interface MonitorFilterState {
   // pings only from the selected remote clusters.
   remoteNames?: string[];
   showFromAllSpaces?: boolean;
+  // When `false`, hides read-only Heartbeat / Agent autodiscovered monitors
+  // (`origin: 'heartbeat'`) from the overview. Persisted in localStorage.
+  includeHeartbeatMonitors?: boolean;
   useLogicalAndFor?: UseLogicalAndField[];
   // Date-range window for the overview list, sourced from the page-level date
   // picker so it stays in sync with the visualizations. Each monitor's status

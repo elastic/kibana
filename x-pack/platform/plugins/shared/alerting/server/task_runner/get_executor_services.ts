@@ -96,9 +96,12 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
     wrappedScopedClusterClient,
     getDataViews: async () => {
       const dataViews = await withAlertingSpan('alerting:get-data-views-factory', () =>
+        // Use the current-user client so `fieldCaps` requests carry the rule's UIAM auth and fan
+        // out across the space's CPS-connected projects, consistent with the search clients. The
+        // internal user is always origin-only and is not CPS-capable.
         context.dataViews.dataViewsServiceFactory(
           savedObjectsClient,
-          scopedClusterClient.asInternalUser
+          scopedClusterClient.asCurrentUser
         )
       );
       return dataViews;
@@ -125,6 +128,18 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
       });
     },
 
-    getCpsData: () => resolveCpsData(scopedClusterClient.asCurrentUser, ruleData.spaceId, logger),
+    // `resolveCpsData` reads two different kinds of ES endpoint:
+    // - `/_project_routing/{npre}` (routing expression) is operator-only and user-agnostic, so it
+    //   is called as the internal user to avoid the `security_exception` a rule's scoped API key
+    //   raises (see #276771).
+    // - `/_project/tags` (linked projects) is role-filtered, so it is called as the current user to
+    //   reflect the projects the rule execution actually targets.
+    getCpsData: () =>
+      resolveCpsData(
+        scopedClusterClient.asInternalUser,
+        scopedClusterClient.asCurrentUser,
+        ruleData.spaceId,
+        logger
+      ),
   };
 };

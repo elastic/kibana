@@ -7,10 +7,10 @@
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { ConsolePluginStart } from '@kbn/console-plugin/public';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { ElasticsearchHomePublicStart } from '@kbn/elasticsearch-home/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessVectordbPluginSetup {}
@@ -18,16 +18,20 @@ export interface ServerlessVectordbPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessVectordbPluginStart {}
 
+export interface ServerlessVectordbSetupDependencies {
+  console?: ConsolePluginSetup;
+}
+
 export interface ServerlessVectordbAppStartDependencies {
   share: SharePluginStart;
   console?: ConsolePluginStart;
   cloud?: CloudStart;
-  agentBuilder: AgentBuilderPluginStart;
+  elasticsearchHome: ElasticsearchHomePublicStart;
 }
 
 export interface ServerlessVectordbStartDependencies
   extends ServerlessVectordbAppStartDependencies {
-  serverless: ServerlessPluginStart;
+  navigation: NavigationPublicPluginStart;
 }
 
 export type ServerlessVectordbServices = CoreStart &

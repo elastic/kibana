@@ -34,7 +34,6 @@ import { useKibana } from '../../../lib/kibana';
 import { getNavCategories } from './categories';
 import { useParentLinks } from '../../../links/links_hooks';
 import { CLASSIC_LAUNCHPAD_PANEL_LINK_ENTRIES } from '../../../../onboarding/links';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 export const EUI_HEADER_HEIGHT = '93px';
 
@@ -96,8 +95,7 @@ const formatLink = (
 };
 
 const useSolutionSideNavItems = (
-  chatExperience: AIChatExperience,
-  isClassicNavExternalLinksEnabled: boolean
+  chatExperience: AIChatExperience
 ): SolutionSideNavItem<string>[] | undefined => {
   const navLinks = useNavLinks();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps(); // adds href and onClick props
@@ -264,19 +262,8 @@ const useSolutionSideNavItems = (
       },
     ];
 
-    return [
-      ...(isClassicNavExternalLinksEnabled ? externalLinks : []),
-      ...bodyItems,
-      ...(classicFooterItems ? classicFooterItems : []),
-    ];
-  }, [
-    application,
-    chatExperience,
-    navLinks,
-    getSecuritySolutionLinkProps,
-    classicFooterItems,
-    isClassicNavExternalLinksEnabled,
-  ]);
+    return [...externalLinks, ...bodyItems, ...(classicFooterItems ? classicFooterItems : [])];
+  }, [application, chatExperience, navLinks, getSecuritySolutionLinkProps, classicFooterItems]);
 
   return sideNavItems;
 };
@@ -314,19 +301,13 @@ const usePanelBottomOffset = (): string | undefined => {
 export const SecuritySideNav: React.FC = () => {
   const {
     settings: { client },
-    featureFlags: { getBooleanValue },
+    featureFlags,
   } = useKibana().services;
 
   const chatExperience = useObservable(client.get$(AI_CHAT_EXPERIENCE_TYPE));
-  const isNewEAHomePageEnabled = useIsExperimentalFeatureEnabled(
-    'entityAnalyticsNewHomePageEnabled'
-  );
-  const isClassicNavExternalLinksEnabled = useIsExperimentalFeatureEnabled(
-    'securityClassicNavExternalLinks'
-  );
   const enableAlertsAndAttacksAlignment = useIsAlertsAndAttacksAlignmentEnabled();
-  const isAgentBuilderNavAtTop = getBooleanValue(AGENT_BUILDER_NAV_AT_TOP_FLAG, false);
-  const items = useSolutionSideNavItems(chatExperience, isClassicNavExternalLinksEnabled);
+  const isAgentBuilderNavAtTop = featureFlags.useBooleanValue(AGENT_BUILDER_NAV_AT_TOP_FLAG, false);
+  const items = useSolutionSideNavItems(chatExperience);
   const selectedId = useSelectedId();
   const panelTopOffset = usePanelTopOffset();
   const panelBottomOffset = usePanelBottomOffset();
@@ -335,17 +316,9 @@ export const SecuritySideNav: React.FC = () => {
     return getNavCategories(
       chatExperience,
       enableAlertsAndAttacksAlignment,
-      isNewEAHomePageEnabled,
-      isClassicNavExternalLinksEnabled,
       isAgentBuilderNavAtTop
     );
-  }, [
-    enableAlertsAndAttacksAlignment,
-    isNewEAHomePageEnabled,
-    chatExperience,
-    isAgentBuilderNavAtTop,
-    isClassicNavExternalLinksEnabled,
-  ]);
+  }, [enableAlertsAndAttacksAlignment, chatExperience, isAgentBuilderNavAtTop]);
 
   if (!items) {
     return <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />;

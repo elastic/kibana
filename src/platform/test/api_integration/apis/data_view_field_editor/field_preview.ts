@@ -45,15 +45,21 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   const deleteIndex = async () => {
-    await es.indices.delete({
-      index: INDEX_NAME,
-    });
+    await es.indices.delete({ index: INDEX_NAME }, { ignore: [404] });
   };
 
+  // Migration recommendation: MIGRATE TO SCOUT (API). See individual tests.
+  // No existing coverage. Merge with the serverless copy into one Scout API test
+  // (`tags.deploymentAgnostic`). The plugin has no `test/scout/api` yet, so scaffold it first
+  // (`node scripts/scout generate`). The route has authz disabled and relies on Elasticsearch
+  // privileges, so the Scout role needs read access to the index (the FTR copies use admin).
   describe('Field preview', function () {
     before(async () => await createIndex());
     after(async () => await deleteIndex());
 
+    // Migration recommendation: MIGRATE TO SCOUT (API)
+    // Runs real painless scripts against an index; needs real ES.
+    // Target: src/platform/plugins/shared/data_view_field_editor/test/scout/api/tests/field_preview.spec.ts (new)
     describe('should return the script value', () => {
       const tests = [
         {
@@ -101,6 +107,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    // Migration recommendation: MIGRATE TO SCOUT (API)
+    // The 400s exercise the route's schema validation. A schema-only unit test would change in lockstep
+    // with the schema and not catch an unintended change to the endpoint's payload contract.
+    // Target: src/platform/plugins/shared/data_view_field_editor/test/scout/api/tests/field_preview.spec.ts (new)
     describe('payload validation', () => {
       it('should require a script', async () => {
         await supertest
@@ -142,6 +152,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    // Migration recommendation: MIGRATE TO SCOUT (API)
+    // Pins ES's cast error wording parsed by `getErrorCodeFromErrorReason`; needs real ES.
+    // Target: src/platform/plugins/shared/data_view_field_editor/test/scout/api/tests/field_preview.spec.ts (new)
     describe('Error messages', () => {
       // As ES does not return error codes we will add a test to make sure its error message string
       // does not change overtime as we rely on it to extract our own error code.
