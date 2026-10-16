@@ -148676,6 +148676,7 @@ components:
             - alert
             - assignees
             - attachment
+            - bulkAttachments
             - comment
             - connector
             - create_case
@@ -150941,6 +150942,26 @@ components:
       properties:
         assignees:
           $ref: '#/components/schemas/Cases_assignees'
+    Cases_payload_bulk_attachments:
+      description: The payload for a bulk attachments user action, recorded when a user removes one or more attachments of the same type from a case in a single action.
+      type: object
+      properties:
+        bulkAttachments:
+          type: object
+          properties:
+            attachmentType:
+              description: The attachment type, such as `security.alert` or `file`.
+              example: security.alert
+              type: string
+            count:
+              description: The number of attachments of this type.
+              example: 3
+              type: integer
+          required:
+            - attachmentType
+            - count
+      required:
+        - bulkAttachments
     Cases_payload_connector:
       type: object
       properties:
@@ -152020,6 +152041,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Cases_payload_alert_comment'
             - $ref: '#/components/schemas/Cases_payload_assignees'
+            - $ref: '#/components/schemas/Cases_payload_bulk_attachments'
             - $ref: '#/components/schemas/Cases_payload_connector'
             - $ref: '#/components/schemas/Cases_payload_create_case'
             - $ref: '#/components/schemas/Cases_payload_delete'
@@ -152036,6 +152058,7 @@ components:
           description: The type of action.
           enum:
             - assignees
+            - bulkAttachments
             - category
             - comment
             - connector
