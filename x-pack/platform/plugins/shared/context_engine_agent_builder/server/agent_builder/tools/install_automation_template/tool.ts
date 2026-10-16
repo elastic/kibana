@@ -412,6 +412,27 @@ export const createInstallAutomationTemplateTool = ({
         getWorkflowsManagement,
       });
 
+      // A template whose rendered YAML fails validation is stored as invalid rather than rejected,
+      // so the install effectively failed: report it as an error with the diagnostics instead of
+      // claiming success for a workflow that cannot be enabled or run.
+      if (result.valid === false) {
+        const details = result.validationErrors?.length
+          ? ` ${result.validationErrors.join('; ')}`
+          : '';
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message:
+                  `Automation template was saved as workflow "${result.workflowId}" but its ` +
+                  `definition is invalid, so it cannot be enabled or run.${details}`,
+              },
+            },
+          ],
+        };
+      }
+
       return {
         results: [
           {
