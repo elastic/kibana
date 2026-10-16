@@ -108,6 +108,8 @@ describe('runDiscoverPlaywrightConfigs', () => {
     },
   ];
 
+  const originalTargetAttributes = process.env.SCOUT_TARGET_ATTRIBUTES;
+
   beforeAll(() => {
     flagsReader = {
       enum: jest.fn(),
@@ -122,6 +124,14 @@ describe('runDiscoverPlaywrightConfigs', () => {
       warn: jest.fn(),
       warning: jest.fn(),
     } as any;
+  });
+
+  afterAll(() => {
+    if (originalTargetAttributes === undefined) {
+      delete process.env.SCOUT_TARGET_ATTRIBUTES;
+    } else {
+      process.env.SCOUT_TARGET_ATTRIBUTES = originalTargetAttributes;
+    }
   });
 
   beforeEach(() => {
@@ -141,6 +151,8 @@ describe('runDiscoverPlaywrightConfigs', () => {
     (fs.existsSync as jest.Mock).mockReturnValue(false);
     (fs.mkdirSync as jest.Mock).mockImplementation(jest.fn());
     (fs.writeFileSync as jest.Mock).mockImplementation(jest.fn());
+
+    delete process.env.SCOUT_TARGET_ATTRIBUTES;
 
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockReturnValue(false);
