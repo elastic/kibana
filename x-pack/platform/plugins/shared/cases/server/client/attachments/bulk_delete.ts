@@ -15,18 +15,18 @@ import type { FileServiceStart } from '@kbn/files-plugin/server';
 import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors';
 import type { AttachmentAttributesV2 } from '../../../common/types/domain';
 import {
-  AttachmentRequestRtV2,
-  BulkDeleteAttachmentsRequestRt,
-  BulkDeleteFileAttachmentsRequestRt,
+  AttachmentRequestSchemaV2,
+  BulkDeleteAttachmentsRequestSchema,
+  BulkDeleteFileAttachmentsRequestSchema,
 } from '../../../common/types/api';
-import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod, decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 import type { BulkDeleteArgs, BulkDeleteFileArgs } from './types';
-import { CaseFileMetadataForDeletionRt } from '../../../common/files';
+import { CaseFileMetadataForDeletionSchema } from '../../../common/files';
 import type { CasesClient } from '../client';
 import { createFileEntities, deleteFiles } from '../files';
 import { handleAlerts, updateCaseAttachmentStats } from './delete';
@@ -70,7 +70,7 @@ export const bulkDeleteAttachments = async (
   } = clientArgs;
 
   try {
-    const request = decodeWithExcessOrThrow(BulkDeleteAttachmentsRequestRt)({
+    const request = decodeWithExcessOrThrowZod(BulkDeleteAttachmentsRequestSchema)({
       ids: savedObjectIds,
     });
     const uniqueIds = [...new Set(request.ids)];
@@ -154,7 +154,7 @@ export const bulkDeleteAttachments = async (
     const attachmentDeletions = attachmentsInCase.map((attachment) => ({
       id: attachment.id,
       owner: attachment.attributes.owner,
-      attachment: decodeOrThrow(AttachmentRequestRtV2)(attachment.attributes),
+      attachment: decodeOrThrowZod(AttachmentRequestSchemaV2)(attachment.attributes),
       savedObjectType: attachment.type as AttachmentSavedObjectType,
     }));
 
@@ -223,7 +223,9 @@ export const bulkDeleteFileAttachments = async (
   } = clientArgs;
 
   try {
-    const request = decodeWithExcessOrThrow(BulkDeleteFileAttachmentsRequestRt)({ ids: fileIds });
+    const request = decodeWithExcessOrThrowZod(BulkDeleteFileAttachmentsRequestSchema)({
+      ids: fileIds,
+    });
 
     await casesClient.cases.resolve({ id: caseId, includeComments: false });
 
@@ -335,10 +337,9 @@ const getFiles = async ({
   const files = retrieveFilesIgnoringNotFound(fileSettleResults, fileIds, logger);
 
   const [validFiles, invalidFiles] = partition(files, (file) => {
+    const parsed = CaseFileMetadataForDeletionSchema.safeParse(file.data.meta);
     return (
-      CaseFileMetadataForDeletionRt.is(file.data.meta) &&
-      file.data.meta.caseIds.length === 1 &&
-      file.data.meta.caseIds.includes(caseId)
+      parsed.success && parsed.data.caseIds.length === 1 && parsed.data.caseIds.includes(caseId)
     );
   }) as [File[], File[]];
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { decodeOrThrow } from '../runtime_types';
-import { ConfigurationPartialAttributesRt } from './configure';
+import { decodeOrThrowZod } from '../runtime_types';
+import { ConfigurationPartialAttributesSchema } from './configure';
 
 describe('Configuration', () => {
-  describe('ConfigurationPartialAttributesRt', () => {
+  describe('ConfigurationPartialAttributesSchema', () => {
     it('strips excess fields from the result', () => {
-      const res = decodeOrThrow(ConfigurationPartialAttributesRt)({
+      const res = decodeOrThrowZod(ConfigurationPartialAttributesSchema)({
         bananas: 'yes',
         created_at: '123',
       });
@@ -22,7 +22,7 @@ describe('Configuration', () => {
     });
 
     it('should not throw even with an empty object', () => {
-      expect(() => decodeOrThrow(ConfigurationPartialAttributesRt)({})).not.toThrow();
+      expect(() => decodeOrThrowZod(ConfigurationPartialAttributesSchema)({})).not.toThrow();
     });
   });
 });

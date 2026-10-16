@@ -13,7 +13,7 @@ import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
 import { stringToIntegerWithDefault } from '.';
 import { SortFieldCase } from '../../../../common/ui';
 import { LEGACY_SUPPORTED_STATE_KEYS, ALL_CASES_STATE_URL_KEY } from '../constants';
-import { AllCasesURLQueryParamsRt, validateSchema } from '../schema';
+import { AllCasesURLQueryParamsSchema, validateSchema } from '../schema';
 import type { AllCasesURLQueryParams } from '../types';
 
 type LegacySupportedKeys = (typeof LEGACY_SUPPORTED_STATE_KEYS)[number];
@@ -109,7 +109,10 @@ export function parseUrlParams(urlParams: URLSearchParams): AllCasesURLQueryPara
     return {};
   }
 
-  const validatedAllCasesParams = validateSchema(parsedAllCasesParams, AllCasesURLQueryParamsRt);
+  const validatedAllCasesParams = validateSchema(
+    parsedAllCasesParams,
+    AllCasesURLQueryParamsSchema
+  );
 
   if (!validatedAllCasesParams) {
     return {};
@@ -119,7 +122,10 @@ export function parseUrlParams(urlParams: URLSearchParams): AllCasesURLQueryPara
 }
 
 const parseAndValidateLegacyUrl = (urlParams: URLSearchParams): AllCasesURLQueryParams => {
-  const validatedUrlParams = validateSchema(parseLegacyUrl(urlParams), AllCasesURLQueryParamsRt);
+  const validatedUrlParams = validateSchema(
+    parseLegacyUrl(urlParams),
+    AllCasesURLQueryParamsSchema
+  );
 
   if (!validatedUrlParams) {
     return {};

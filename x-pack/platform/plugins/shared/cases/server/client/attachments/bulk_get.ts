@@ -8,8 +8,8 @@
 import { partition } from 'lodash';
 import type { BulkGetUnifiedAttachmentsResponse } from '../../../common/types/api';
 import {
-  BulkGetUnifiedAttachmentsRequestRt,
-  BulkGetUnifiedAttachmentsResponseRt,
+  BulkGetUnifiedAttachmentsRequestSchema,
+  BulkGetUnifiedAttachmentsResponseSchema,
 } from '../../../common/types/api';
 import type { AttachmentAttributes, AttachmentAttributesV2 } from '../../../common/types/domain';
 import { flattenAttachmentSavedObjects } from '../../common/utils';
@@ -22,7 +22,7 @@ import type { CasesClient } from '../client';
 import type { AttachmentSavedObject, SOWithErrors } from '../../common/types';
 import { partitionByCaseAssociation } from '../../common/partitioning';
 import { getCaseReferenceId } from '../../common/references';
-import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod, decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 
 type AttachmentSavedObjectWithErrors = Array<SOWithErrors<AttachmentAttributes>>;
 
@@ -41,7 +41,7 @@ export async function bulkGet(
   } = clientArgs;
 
   try {
-    const request = decodeWithExcessOrThrow(BulkGetUnifiedAttachmentsRequestRt)({
+    const request = decodeWithExcessOrThrowZod(BulkGetUnifiedAttachmentsRequestSchema)({
       ids: savedObjectIds,
     });
 
@@ -70,7 +70,7 @@ export async function bulkGet(
       attachments: flattenAttachmentSavedObjects(authorizedAttachments),
       errors,
     };
-    return decodeOrThrow(BulkGetUnifiedAttachmentsResponseRt)(res);
+    return decodeOrThrowZod(BulkGetUnifiedAttachmentsResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to bulk get attachments for case id: ${caseID}: ${error}`,

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
-const DocumentRt = rt.strict({
-  id: rt.string,
-  index: rt.string,
-  attached_at: rt.string,
+const DocumentSchema = z.object({
+  id: z.string().max(512),
+  index: z.string().max(256),
+  attached_at: z.string().max(50),
 });
 
-export const DocumentResponseRt = rt.array(DocumentRt);
-export type DocumentResponse = rt.TypeOf<typeof DocumentResponseRt>;
+export const DocumentResponseSchema = z.array(DocumentSchema);
+
+export type DocumentResponse = z.infer<typeof DocumentResponseSchema>;

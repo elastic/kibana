@@ -688,7 +688,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ assignees }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        `Failed to bulk create cases: Error: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_PER_CASE}.`
+        `Failed to bulk create cases: Error: cases.0.assignees: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_PER_CASE}.`
       );
     });
 
@@ -709,7 +709,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ foo: 'bar' }) }, clientArgs, casesClientMock)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: invalid keys \\"foo\\""`
+        `"Failed to bulk create cases: Error: Excess keys are not allowed"`
       );
     });
 
@@ -735,7 +735,8 @@ describe('bulkCreate', () => {
           {
             cases: getCases({
               extended_fields: {
-                large_as_keyword: 'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1),
+                // 2-byte characters: within the request char cap, over the byte cap
+                large_as_keyword: 'é'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES / 2 + 1),
               },
             }),
           },
@@ -1015,7 +1016,7 @@ describe('bulkCreate', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to bulk create cases: Error: The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
+        `Failed to bulk create cases: Error: cases.0.title: The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
       );
     });
 
@@ -1023,7 +1024,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ title: '' }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to bulk create cases: Error: The title field cannot be an empty string.'
+        'Failed to bulk create cases: Error: cases.0.title: The title field cannot be an empty string.'
       );
     });
 
@@ -1031,7 +1032,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ title: '   ' }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to bulk create cases: Error: The title field cannot be an empty string.'
+        'Failed to bulk create cases: Error: cases.0.title: The title field cannot be an empty string.'
       );
     });
 
@@ -1070,7 +1071,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ description }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        `Failed to bulk create cases: Error: The length of the description is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}.`
+        `Failed to bulk create cases: Error: cases.0.description: The length of the description is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}.`
       );
     });
 
@@ -1078,7 +1079,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ description: '' }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to bulk create cases: Error: The description field cannot be an empty string.'
+        'Failed to bulk create cases: Error: cases.0.description: The description field cannot be an empty string.'
       );
     });
 
@@ -1086,7 +1087,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ description: '   ' }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to bulk create cases: Error: The description field cannot be an empty string.'
+        'Failed to bulk create cases: Error: cases.0.description: The description field cannot be an empty string.'
       );
     });
 
@@ -1126,7 +1127,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ tags }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        `Failed to bulk create cases: Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
+        `Failed to bulk create cases: Error: cases.0.tags: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
       );
     });
 
@@ -1134,7 +1135,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ tags: [''] }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to bulk create cases: Error: The tag field cannot be an empty string.'
+        'Failed to bulk create cases: Error: cases.0.tags.0: The tag field cannot be an empty string.'
       );
     });
 
@@ -1142,7 +1143,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ tags: ['  '] }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to bulk create cases: Error: The tag field cannot be an empty string.'
+        'Failed to bulk create cases: Error: cases.0.tags.0: The tag field cannot be an empty string.'
       );
     });
 
@@ -1154,7 +1155,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ tags: [tag] }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        `Failed to bulk create cases: Error: The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
+        `Failed to bulk create cases: Error: cases.0.tags.0: The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
       );
     });
 
@@ -1191,7 +1192,7 @@ describe('bulkCreate', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to bulk create cases: Error: The length of the category is too long.'
+        'Failed to bulk create cases: Error: cases.0.category: The length of the category is too long.'
       );
     });
 
@@ -1199,7 +1200,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ category: '' }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to bulk create cases: Error: The category field cannot be an empty string.,Invalid value "" supplied to "cases,category"'
+        'Failed to bulk create cases: Error: cases.0.category: The category field cannot be an empty string.'
       );
     });
 
@@ -1207,7 +1208,7 @@ describe('bulkCreate', () => {
       await expect(
         bulkCreate({ cases: getCases({ category: '   ' }) }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to bulk create cases: Error: The category field cannot be an empty string.,Invalid value "   " supplied to "cases,category"'
+        'Failed to bulk create cases: Error: cases.0.category: The category field cannot be an empty string.'
       );
     });
 
@@ -1392,7 +1393,7 @@ describe('bulkCreate', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: The length of the field customFields is too long. Array must be of length <= 10."`
+        `"Failed to bulk create cases: Error: cases.0.customFields: The length of the field customFields is too long. Array must be of length <= 10."`
       );
     });
 

@@ -8,7 +8,10 @@
 import type { SavedObject } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { AttachmentAttributes } from '../../../common/types/domain';
-import { AttachmentAttributesRt, AttachmentPatchAttributesRt } from '../../../common/types/domain';
+import {
+  AttachmentAttributesSchema,
+  AttachmentPatchAttributesSchema,
+} from '../../../common/types/domain';
 import type { User } from './user';
 
 export interface AttachmentRequestAttributes {
@@ -51,5 +54,5 @@ export type AttachmentPersistedAttributes = AttachmentRequestAttributes &
 export type AttachmentTransformedAttributes = AttachmentAttributes;
 export type AttachmentSavedObjectTransformed = SavedObject<AttachmentTransformedAttributes>;
 
-export const AttachmentTransformedAttributesRt = AttachmentAttributesRt;
-export const AttachmentPartialAttributesRt = AttachmentPatchAttributesRt;
+export const AttachmentTransformedAttributesSchema = AttachmentAttributesSchema;
+export const AttachmentPartialAttributesSchema = AttachmentPatchAttributesSchema;

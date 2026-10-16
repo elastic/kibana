@@ -6,7 +6,7 @@
  */
 
 import {
-  CaseFileMetadataForDeletionRt,
+  CaseFileMetadataForDeletionSchema,
   constructFileKindIdByOwner,
   constructFilesHttpOperationPrivilege,
   constructOwnerFromFileKind,
@@ -65,30 +65,22 @@ describe('files index', () => {
     });
   });
 
-  describe('CaseFileMetadataForDeletionRt', () => {
+  describe('CaseFileMetadataForDeletionSchema', () => {
     const defaultRequest = {
       caseIds: ['case-id-1', 'case-id-2'],
     };
 
-    it('has expected attributes in request', () => {
-      const query = CaseFileMetadataForDeletionRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('parses expected attributes in request', () => {
+      expect(CaseFileMetadataForDeletionSchema.parse(defaultRequest)).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = CaseFileMetadataForDeletionRt.decode({
+    it('strips foo:bar attributes from request', () => {
+      const parsed = CaseFileMetadataForDeletionSchema.parse({
         caseIds: ['case-id-1', 'case-id-2'],
         foo: 'bar',
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(parsed).toStrictEqual(defaultRequest);
     });
   });
 });

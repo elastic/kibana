@@ -7,11 +7,11 @@
 
 import Boom from '@hapi/boom';
 
-import { UnifiedAttachmentPutRequestRt } from '../../../common/types/api';
+import { UnifiedAttachmentPutRequestSchema } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import type { Case } from '../../../common/types/domain';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
@@ -32,8 +32,8 @@ export async function update(
 
   try {
     const { id: queryCommentId, ...putRequest } = queryParams;
-    const { version: queryCommentVersion, ...queryRestAttributes } = decodeWithExcessOrThrow(
-      UnifiedAttachmentPutRequestRt
+    const { version: queryCommentVersion, ...queryRestAttributes } = decodeWithExcessOrThrowZod(
+      UnifiedAttachmentPutRequestSchema
     )(putRequest);
 
     await validateMaxUserActions({

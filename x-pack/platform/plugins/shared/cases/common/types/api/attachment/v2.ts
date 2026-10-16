@@ -5,94 +5,200 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import {
+  MAX_ATTACHMENT_ID_LENGTH,
+  MAX_ATTACHMENT_JSON_LENGTH,
   MAX_BULK_CREATE_ATTACHMENTS,
   MAX_BULK_GET_ATTACHMENTS,
   MAX_COMMENTS_PER_PAGE,
   MAX_ATTACHMENT_TYPE_LENGTH,
   MAX_ATTACHMENT_TYPES_PER_QUERY,
+  MAX_IDS_PER_ATTACHMENT,
+  MAX_OWNER_LENGTH,
+  MAX_SAVED_OBJECT_VERSION_LENGTH,
 } from '../../../constants';
-import { UnifiedAttachmentRt, UnifiedAttachmentPayloadRt } from '../../domain/attachment/v2';
-import { limitedArraySchema, limitedStringSchema, paginationSchema } from '../../../schema';
+import {
+  UnifiedAttachmentPayloadSchema,
+  UnifiedAttachmentSchema,
+  UnifiedReferenceAttachmentPayloadSchema,
+  UnifiedValueAttachmentPayloadSchema,
+} from '../../domain/attachment/v2';
+import {
+  limitedArraySchema,
+  limitedJsonObjectSchema,
+  limitedStringSchema,
+  paginationSchema,
+} from '../../../schema';
 
-export const UnifiedAttachmentPutRequestRt = rt.intersection([
-  UnifiedAttachmentPayloadRt,
-  rt.strict({ version: rt.string }),
+export const UnifiedAttachmentPutRequestSchema = z.union([
+  UnifiedReferenceAttachmentPayloadSchema.extend({ version: z.string().max(512) }),
+  UnifiedValueAttachmentPayloadSchema.extend({ version: z.string().max(512) }),
 ]);
 
-export const BulkCreateUnifiedAttachmentsRequestRt = limitedArraySchema({
-  codec: UnifiedAttachmentPayloadRt,
+const attachmentTypeSchema = z.string().max(MAX_ATTACHMENT_TYPE_LENGTH);
+const attachmentOwnerSchema = z.string().max(MAX_OWNER_LENGTH);
+const attachmentIdSchema = z.union([
+  z.string().max(MAX_ATTACHMENT_ID_LENGTH),
+  z.array(z.string().max(MAX_ATTACHMENT_ID_LENGTH)).max(MAX_IDS_PER_ATTACHMENT),
+]);
+const attachmentDataSchema = limitedJsonObjectSchema({
+  fieldName: 'data',
+  max: MAX_ATTACHMENT_JSON_LENGTH,
+});
+const attachmentMetadataSchema = limitedJsonObjectSchema({
+  fieldName: 'metadata',
+  max: MAX_ATTACHMENT_JSON_LENGTH,
+});
+
+/**
+ * Type-agnostic bounds checked on every unified attachment write, before its registered schema.
+ */
+export const UnifiedAttachmentBoundsSchema = z.object({
+  type: attachmentTypeSchema,
+  owner: attachmentOwnerSchema,
+  attachmentId: attachmentIdSchema.optional(),
+  data: attachmentDataSchema.nullable().optional(),
+  metadata: attachmentMetadataSchema.nullable().optional(),
+});
+
+const unifiedReferenceAttachmentRouteRequestShape = {
+  type: attachmentTypeSchema,
+  attachmentId: attachmentIdSchema,
+  owner: attachmentOwnerSchema,
+  data: attachmentDataSchema.nullable().optional(),
+  metadata: attachmentMetadataSchema.nullable().optional(),
+};
+
+const unifiedValueAttachmentRouteRequestShape = {
+  type: attachmentTypeSchema,
+  data: attachmentDataSchema,
+  owner: attachmentOwnerSchema,
+  metadata: attachmentMetadataSchema.nullable().optional(),
+};
+
+const versionShape = { version: z.string().max(MAX_SAVED_OBJECT_VERSION_LENGTH) };
+
+/**
+ * Bounded body for `POST /api/cases/{case_id}/attachments`.
+ */
+export const UnifiedAttachmentRouteRequestSchema = z.union([
+  z.object(unifiedReferenceAttachmentRouteRequestShape).strict(),
+  z.object(unifiedValueAttachmentRouteRequestShape).strict(),
+]);
+
+/**
+ * Bounded body for `PUT /api/cases/{case_id}/attachments/{id}`.
+ */
+export const UnifiedAttachmentPutRouteRequestSchema = z.union([
+  z.object({ ...unifiedReferenceAttachmentRouteRequestShape, ...versionShape }).strict(),
+  z.object({ ...unifiedValueAttachmentRouteRequestShape, ...versionShape }).strict(),
+]);
+
+export const UnifiedAttachmentPatchRouteRequestSchema = z.union([
+  z
+    .object({
+      ...unifiedReferenceAttachmentRouteRequestShape,
+      ...versionShape,
+      id: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
+    })
+    .strict(),
+  z
+    .object({
+      ...unifiedValueAttachmentRouteRequestShape,
+      ...versionShape,
+      id: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
+    })
+    .strict(),
+]);
+
+export const BulkCreateUnifiedAttachmentsRequestSchema = limitedArraySchema({
+  codec: UnifiedAttachmentPayloadSchema,
   min: 0,
   max: MAX_BULK_CREATE_ATTACHMENTS,
   fieldName: 'attachments',
 });
 
-const AttachmentTypeStringRt = limitedStringSchema({
-  fieldName: 'type',
-  min: 1,
-  max: MAX_ATTACHMENT_TYPE_LENGTH,
+/**
+ * Bounded variant of the bulk create body, built from the strict per-attachment route schema.
+ */
+export const BulkCreateUnifiedAttachmentsRouteRequestSchema = limitedArraySchema({
+  codec: UnifiedAttachmentRouteRequestSchema,
+  min: 0,
+  max: MAX_BULK_CREATE_ATTACHMENTS,
+  fieldName: 'attachments',
 });
-const AttachmentTypeQueryParamRt = rt.union([
-  AttachmentTypeStringRt,
-  limitedArraySchema({
-    codec: AttachmentTypeStringRt,
-    min: 1,
-    max: MAX_ATTACHMENT_TYPES_PER_QUERY,
-    fieldName: 'type',
-  }),
-]);
 
-export const UnifiedAttachmentsFindQueryParamsRt = rt.intersection([
-  rt.exact(
-    rt.partial({
-      sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
-      type: AttachmentTypeQueryParamRt,
-    })
-  ),
-  paginationSchema({ maxPerPage: MAX_COMMENTS_PER_PAGE }),
-]);
-
-export const UnifiedAttachmentsFindResponseRt = rt.strict({
-  data: rt.array(UnifiedAttachmentRt),
-  page: rt.number,
-  per_page: rt.number,
-  total: rt.number,
-});
-export type UnifiedAttachmentPutRequest = rt.TypeOf<typeof UnifiedAttachmentPutRequestRt>;
-
-export const BulkGetUnifiedAttachmentsRequestRt = rt.strict({
+export const BulkGetUnifiedAttachmentsRequestSchema = z.object({
   ids: limitedArraySchema({
-    codec: rt.string,
+    codec: z.string().max(512),
     min: 1,
     max: MAX_BULK_GET_ATTACHMENTS,
     fieldName: 'ids',
   }),
 });
 
-export const BulkGetAttachmentErrorsRt = rt.array(
-  rt.strict({
-    error: rt.string,
-    message: rt.string,
-    status: rt.union([rt.undefined, rt.number]),
-    savedObjectId: rt.string,
+export const BulkGetAttachmentErrorsSchema = z.array(
+  z.object({
+    error: z.string().max(32000),
+    message: z.string().max(32000),
+    status: z.number().optional(),
+    savedObjectId: z.string().max(512),
   })
 );
 
-export const BulkGetUnifiedAttachmentsResponseRt = rt.strict({
-  attachments: rt.array(UnifiedAttachmentRt),
-  errors: BulkGetAttachmentErrorsRt,
+export const BulkGetUnifiedAttachmentsResponseSchema = z.object({
+  attachments: z.array(UnifiedAttachmentSchema),
+  errors: BulkGetAttachmentErrorsSchema,
 });
 
-export type BulkCreateUnifiedAttachmentsRequest = rt.TypeOf<
-  typeof BulkCreateUnifiedAttachmentsRequestRt
->;
-export type UnifiedAttachmentsFindQueryParams = rt.TypeOf<
-  typeof UnifiedAttachmentsFindQueryParamsRt
->;
-export type UnifiedAttachmentsFindResponse = rt.TypeOf<typeof UnifiedAttachmentsFindResponseRt>;
+const AttachmentTypeStringSchema = limitedStringSchema({
+  fieldName: 'type',
+  min: 1,
+  max: MAX_ATTACHMENT_TYPE_LENGTH,
+});
+const AttachmentTypeQueryParamSchema = z.union([
+  AttachmentTypeStringSchema,
+  limitedArraySchema({
+    codec: AttachmentTypeStringSchema,
+    min: 1,
+    max: MAX_ATTACHMENT_TYPES_PER_QUERY,
+    fieldName: 'type',
+  }),
+]);
 
-export type BulkGetUnifiedAttachmentsRequest = rt.TypeOf<typeof BulkGetUnifiedAttachmentsRequestRt>;
-export type BulkGetUnifiedAttachmentsResponse = rt.TypeOf<
-  typeof BulkGetUnifiedAttachmentsResponseRt
+export const UnifiedAttachmentsFindQueryParamsSchema = paginationSchema({
+  maxPerPage: MAX_COMMENTS_PER_PAGE,
+}).extend({
+  sortOrder: z.enum(['desc', 'asc']).optional(),
+  type: AttachmentTypeQueryParamSchema.optional(),
+});
+
+export const UnifiedAttachmentsFindResponseSchema = z.object({
+  data: z.array(UnifiedAttachmentSchema),
+  page: z.number(),
+  per_page: z.number(),
+  total: z.number(),
+});
+
+export type UnifiedAttachmentRouteRequest = z.infer<typeof UnifiedAttachmentRouteRequestSchema>;
+export type UnifiedAttachmentPutRouteRequest = z.infer<
+  typeof UnifiedAttachmentPutRouteRequestSchema
+>;
+export type UnifiedAttachmentPutRequest = z.infer<typeof UnifiedAttachmentPutRequestSchema>;
+export type BulkCreateUnifiedAttachmentsRequest = z.infer<
+  typeof BulkCreateUnifiedAttachmentsRequestSchema
+>;
+export type BulkCreateUnifiedAttachmentsRouteRequest = z.infer<
+  typeof BulkCreateUnifiedAttachmentsRouteRequestSchema
+>;
+export type UnifiedAttachmentsFindQueryParams = z.infer<
+  typeof UnifiedAttachmentsFindQueryParamsSchema
+>;
+export type UnifiedAttachmentsFindResponse = z.infer<typeof UnifiedAttachmentsFindResponseSchema>;
+export type BulkGetUnifiedAttachmentsRequest = z.infer<
+  typeof BulkGetUnifiedAttachmentsRequestSchema
+>;
+export type BulkGetUnifiedAttachmentsResponse = z.infer<
+  typeof BulkGetUnifiedAttachmentsResponseSchema
 >;

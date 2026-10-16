@@ -21,10 +21,10 @@ import {
 } from '../../../common/utils/attachments';
 import type { AttachmentAttributes, Case } from '../../../common/types/domain';
 import {
-  CaseRt,
   CaseStatuses,
   UserActionActions,
   UserActionTypes,
+  CaseSchema,
 } from '../../../common/types/domain';
 
 import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
@@ -32,7 +32,6 @@ import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
 import type { AttachmentSavedObjectType } from '../../services/user_actions/types';
 import { createCaseError } from '../error';
-import { decodeOrThrow } from '../runtime_types';
 import { AttachmentLimitChecker } from '../limiter_checker';
 import type { AlertInfo } from '../types';
 import type { CaseSavedObjectTransformed } from '../types/case';
@@ -47,6 +46,7 @@ import {
   getIDsAndIndicesAsArrays,
   countEventsForID,
 } from '../utils';
+import { decodeOrThrowZod } from '../runtime_types';
 import { extractCommentContent, isUnifiedPayloadCommentAttachment } from '../attachments/comment';
 import type {
   AttachmentAttributesV2,
@@ -702,7 +702,7 @@ export class CaseCommentModel {
         ...this.formatForEncoding(comments.total),
       };
 
-      return decodeOrThrow(CaseRt)(caseResponse);
+      return decodeOrThrowZod(CaseSchema)(caseResponse);
     } catch (error) {
       throw createCaseError({
         message: `Failed encoding the commentable case, case id: ${this.caseInfo.id}: ${error}`,

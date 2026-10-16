@@ -27,7 +27,7 @@ describe('get', () => {
           { options: { owner: 'cases', foo: 'bar' }, alertID: 'test-alert' },
           clientArgs
         )
-      ).rejects.toThrow('invalid keys "foo"');
+      ).rejects.toThrow('Excess keys are not allowed');
     });
   });
 
@@ -35,7 +35,7 @@ describe('get', () => {
     it('throws with excess fields', async () => {
       // @ts-expect-error: excess attribute
       await expect(getTags({ owner: 'cases', foo: 'bar' }, clientArgs)).rejects.toThrow(
-        'invalid keys "foo"'
+        'Excess keys are not allowed'
       );
     });
   });
@@ -44,7 +44,7 @@ describe('get', () => {
     it('throws with excess fields', async () => {
       // @ts-expect-error: excess attribute
       await expect(getReporters({ owner: 'cases', foo: 'bar' }, clientArgs)).rejects.toThrow(
-        'invalid keys "foo"'
+        'Excess keys are not allowed'
       );
     });
   });
@@ -53,7 +53,7 @@ describe('get', () => {
     it('throws with excess fields', async () => {
       // @ts-expect-error: excess attribute
       await expect(getCategories({ owner: 'cases', foo: 'bar' }, clientArgs)).rejects.toThrow(
-        'invalid keys "foo"'
+        'Excess keys are not allowed'
       );
     });
   });

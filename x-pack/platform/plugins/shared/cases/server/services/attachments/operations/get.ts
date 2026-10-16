@@ -17,7 +17,7 @@ import {
 } from '../../../../common/utils/attachments';
 import { getAttachmentSavedObjectType } from '../../../common/attachments';
 import { isSOError } from '../../../common/error';
-import { decodeOrThrow } from '../../../common/runtime_types';
+import { decodeOrThrowZod } from '../../../common/runtime_types';
 import type { AttachmentPersistedAttributes } from '../../../common/types/attachments_v1';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
@@ -36,11 +36,11 @@ import type {
   AttachmentTotals,
   DocumentAttachmentAttributesV2,
 } from '../../../../common/types/domain';
+import { AttachmentType } from '../../../../common/types/domain';
 import {
-  AttachmentType,
-  DocumentAttachmentAttributesRtV2,
-  UnifiedAttachmentAttributesRt,
-} from '../../../../common/types/domain';
+  DocumentAttachmentAttributesSchemaV2,
+  UnifiedAttachmentAttributesSchema,
+} from '../../../../common/types/domain/attachment/v2';
 import type {
   AlertIdsAggsResult,
   AttackIdsAggsResult,
@@ -310,7 +310,9 @@ export class AttachmentGetter {
 
     for (const so of response.saved_objects) {
       try {
-        const validatedAttributes = decodeOrThrow(DocumentAttachmentAttributesRtV2)(so.attributes);
+        const validatedAttributes = decodeOrThrowZod(DocumentAttachmentAttributesSchemaV2)(
+          so.attributes
+        );
         decoded.push(Object.assign(so, { attributes: validatedAttributes }));
       } catch (error) {
         this.context.log.warn(
@@ -387,7 +389,9 @@ export class AttachmentGetter {
 
     for (const so of response.saved_objects) {
       try {
-        const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(so.attributes);
+        const validatedAttributes = decodeOrThrowZod(UnifiedAttachmentAttributesSchema)(
+          so.attributes
+        ) as UnifiedAttachmentAttributes;
         decoded.push(Object.assign(so, { attributes: validatedAttributes }));
       } catch (error) {
         this.context.log.warn(
