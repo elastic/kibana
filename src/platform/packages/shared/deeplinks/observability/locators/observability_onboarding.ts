@@ -15,12 +15,6 @@ export interface ObservabilityOnboardingLocatorParams extends SerializableRecord
   /** If given, it will load the given onboarding flow
    * else will load the main onboarding screen.
    */
-  source?:
-    | 'auto-detect'
-    | 'customLogs'
-    | 'kubernetes'
-    | 'kubernetes-otel'
-    | 'otel-logs'
-    | 'firehose';
+  source?: 'auto-detect' | 'customLogs' | 'kubernetes' | 'kubernetes-otel' | 'otel-logs';
   category?: 'host' | 'kubernetes' | 'application' | 'cloud';
 }

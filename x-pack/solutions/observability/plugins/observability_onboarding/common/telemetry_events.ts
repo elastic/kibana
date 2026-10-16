@@ -146,11 +146,6 @@ export const OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT: EventTypeOpts<{
   },
 };
 
-interface OnboardingFirehoseFlowEventContext {
-  selectedCreateStackOption?: string;
-  cloudServiceProvider?: string;
-}
-
 interface OnboardingAutoDetectEventContext {
   installSource: string;
   pkgVersion: string;
@@ -172,7 +167,6 @@ interface OnboardingKubernetesEventContext {
  */
 export interface OnboardingFlowEventContext {
   autoDetect?: OnboardingAutoDetectEventContext;
-  firehose?: OnboardingFirehoseFlowEventContext;
   cloudforwarder?: OnboardingCloudForwarderEventContext;
   kubernetes?: OnboardingKubernetesEventContext;
 }
@@ -193,29 +187,6 @@ const flowContextSchema: SchemaValue<OnboardingFlowEventContext | undefined> = {
           _meta: { description: 'The version of the package used to create the integration.' },
         },
         title: { type: 'keyword', _meta: { description: 'The visual name of the package.' } },
-      },
-      _meta: {
-        optional: true,
-      },
-    },
-    firehose: {
-      properties: {
-        selectedCreateStackOption: {
-          type: 'keyword',
-          _meta: {
-            description:
-              'Which option for creating CloudFormation stack is selected in the UI while data was detected. Serves as a good indication of the way user chose to create the stack.',
-            optional: true,
-          },
-        },
-        cloudServiceProvider: {
-          type: 'keyword',
-          _meta: {
-            description:
-              "The cloud service provider where the stack is deployed. Can be 'aws', 'gcp' or 'azure'",
-            optional: true,
-          },
-        },
       },
       _meta: {
         optional: true,
@@ -350,7 +321,7 @@ export const OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT: Eve
     dataset: {
       type: 'keyword',
       _meta: {
-        description: 'ES index which was detected to have data from the firehose stream',
+        description: 'ES index which was detected to have data',
       },
     },
     context: flowContextSchema,

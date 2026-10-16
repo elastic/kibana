@@ -15,7 +15,6 @@ import {
   AutoDetectPage,
   LandingPage,
   OtelLogsPage,
-  FirehosePage,
   OtelApmPage,
   CloudForwarderPage,
   KubernetesPage,
@@ -49,7 +48,7 @@ export function ObservabilityOnboardingFlow() {
   const {
     services: {
       featureFlags,
-      context: { isDev, isCloud, isServerless },
+      context: { isDev, isServerless },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const isAddDataPageV2Enabled = featureFlags.useBooleanValue(IS_ADD_DATA_PAGE_V2_ENABLED, false);
@@ -108,11 +107,6 @@ export function ObservabilityOnboardingFlow() {
         <Route path="/otel-logs">
           <OtelLogsPage />
         </Route>
-        {(isCloud || isDev) && (
-          <Route path="/firehose">
-            <FirehosePage />
-          </Route>
-        )}
         {isManagedOtlpServiceAvailable && (
           <Route path="/otel-apm">
             <OtelApmPage />
