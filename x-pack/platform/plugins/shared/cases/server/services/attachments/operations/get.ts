@@ -468,32 +468,52 @@ export class AttachmentGetter {
   }
 
   /**
-   * Retrieves all the attacks attached to a case.
+   * Returns the subset of `attackIds` that is already attached to a case.
    */
-  public async getAllAttackIds({ caseId }: { caseId: string }): Promise<Set<string>> {
-    try {
-      this.context.log.debug(`Attempting to GET all attack ids for case id ${caseId}`);
+  public async getAttachedAttackIds({
+    caseId,
+    attackIds,
+  }: {
+    caseId: string;
+    attackIds: string[];
+  }): Promise<Set<string>> {
+    const requestedIds = [...new Set(attackIds)];
+    if (requestedIds.length === 0) {
+      return new Set();
+    }
 
-      // Attacks only ever exist as unified attachments — unlike alerts and events there is no
-      // legacy `cases-comments` shape to union in. `MAX_ALERTS_PER_CASE` bounds the terms
-      // aggregation for the same reason `getAllEventIds` uses it: attacks have no per-case
-      // limit of their own, and it is the largest per-case attachment bound there is.
+    try {
+      this.context.log.debug(`Attempting to GET attached attack ids for case id ${caseId}`);
+
+      // Attacks have no legacy `cases-comments` shape to union in, and filtering on the requested
+      // ids bounds the aggregation by the request rather than by the attacks on the case.
       const res = await this.context.unsecuredSavedObjectsClient.find<unknown, AttackIdsAggsResult>(
         {
           type: CASE_ATTACHMENT_SAVED_OBJECT,
           hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-          filter: buildFilter({
-            filters: [SECURITY_ATTACK_ATTACHMENT_TYPE],
-            field: 'type',
-            operator: 'or',
-            type: CASE_ATTACHMENT_SAVED_OBJECT,
-          }),
+          filter: combineFilters(
+            [
+              buildFilter({
+                filters: [SECURITY_ATTACK_ATTACHMENT_TYPE],
+                field: 'type',
+                operator: 'or',
+                type: CASE_ATTACHMENT_SAVED_OBJECT,
+              }),
+              buildFilter({
+                filters: requestedIds,
+                field: 'attachmentId',
+                operator: 'or',
+                type: CASE_ATTACHMENT_SAVED_OBJECT,
+              }),
+            ],
+            NodeBuilderOperators.and
+          ),
           perPage: 0,
           aggs: {
             attackIds: {
               terms: {
                 field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId`,
-                size: MAX_ALERTS_PER_CASE,
+                size: requestedIds.length,
               },
             },
           },
@@ -502,7 +522,7 @@ export class AttachmentGetter {
 
       return new Set(res.aggregations?.attackIds.buckets.map((bucket) => bucket.key) ?? []);
     } catch (error) {
-      this.context.log.error(`Error on GET all attack ids for case id ${caseId}: ${error}`);
+      this.context.log.error(`Error on GET attached attack ids for case id ${caseId}: ${error}`);
       throw error;
     }
   }
