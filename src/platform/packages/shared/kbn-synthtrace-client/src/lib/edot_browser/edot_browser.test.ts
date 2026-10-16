@@ -297,6 +297,20 @@ describe('edotBrowser', () => {
       expect(JSON.parse(doc.body?.text ?? '')).toEqual({ target: 'img.hero' });
     });
 
+    it('keeps CLS precision in the attribution body', () => {
+      const [doc] = client
+        .webVital({
+          name: 'cls',
+          value: 0.0213,
+          id: 'v5-1-2',
+          navigationType: 'navigate',
+          attribution: { largestShiftValue: 0.0213 },
+        })
+        .serialize();
+
+      expect(JSON.parse(doc.body?.text ?? '')).toEqual({ largestShiftValue: 0.0213 });
+    });
+
     it('keeps CLS values of 0 fractional', () => {
       const [doc] = client
         .webVital({ name: 'cls', value: 0, id: 'v5-1-2', navigationType: 'navigate' })

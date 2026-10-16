@@ -190,6 +190,7 @@ export class EdotBrowserClient {
   }) {
     // CLS is unitless and small, all other vitals are milliseconds
     const decimals = name === 'cls' ? 4 : 1;
+    const precision = 10 ** decimals;
     const log = this.log('browser.web_vital', 'web-vitals', {
       'browser.web_vital.name': name,
       'browser.web_vital.value': asFloat(value, decimals),
@@ -202,7 +203,7 @@ export class EdotBrowserClient {
       ? log.message(
           JSON.stringify(attribution, (_key, attributionValue) =>
             typeof attributionValue === 'number'
-              ? Math.round(attributionValue * 10) / 10
+              ? Math.round(attributionValue * precision) / precision
               : attributionValue
           )
         )
