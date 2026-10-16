@@ -130,19 +130,68 @@ const ImpactEntityRow = ({
   );
 };
 
+/** The flyout lists this many entities up front; "Show more" reveals the next batch. */
+const INITIAL_VISIBLE_ENTITIES = 5;
+const ENTITIES_PER_SHOW_MORE = 10;
+
 const EntityList = ({
   entities,
   onOpenEntity,
 }: {
   entities: ImpactContentEntity[];
   onOpenEntity?: (entity: ImpactEntityTarget) => void;
-}) => (
-  <GroupedAttachmentList data-test-subj="investigationImpactEntities">
-    {entities.map((entity) => (
-      <ImpactEntityRow key={entity.id} entity={entity} onOpenEntity={onOpenEntity} />
-    ))}
-  </GroupedAttachmentList>
-);
+}) => {
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_ENTITIES);
+  const hiddenCount = Math.max(0, entities.length - visibleCount);
+  const canCollapse = visibleCount > INITIAL_VISIBLE_ENTITIES;
+  const nextBatch = Math.min(ENTITIES_PER_SHOW_MORE, hiddenCount);
+
+  return (
+    <>
+      <GroupedAttachmentList data-test-subj="investigationImpactEntities">
+        {entities.slice(0, visibleCount).map((entity) => (
+          <ImpactEntityRow key={entity.id} entity={entity} onOpenEntity={onOpenEntity} />
+        ))}
+      </GroupedAttachmentList>
+      {(hiddenCount > 0 || canCollapse) && (
+        <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
+          {hiddenCount > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                flush="left"
+                onClick={() => setVisibleCount((count) => count + ENTITIES_PER_SHOW_MORE)}
+                data-test-subj="investigationImpactEntitiesShowMore"
+              >
+                {i18n.translate('xpack.agenticInvestigations.impact.attachments.showMoreEntities', {
+                  defaultMessage: 'Show {count} more ({hidden} hidden)',
+                  values: { count: nextBatch, hidden: hiddenCount },
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+          {canCollapse && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                flush="left"
+                onClick={() => setVisibleCount(INITIAL_VISIBLE_ENTITIES)}
+                data-test-subj="investigationImpactEntitiesShowFewer"
+              >
+                {i18n.translate(
+                  'xpack.agenticInvestigations.impact.attachments.showFewerEntities',
+                  {
+                    defaultMessage: 'Show fewer',
+                  }
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      )}
+    </>
+  );
+};
 
 const EntityBadges = ({ entities }: { entities: ImpactContentEntity[] }) => (
   <EuiFlexGroup gutterSize="s" wrap responsive={false} data-test-subj="investigationImpactEntities">

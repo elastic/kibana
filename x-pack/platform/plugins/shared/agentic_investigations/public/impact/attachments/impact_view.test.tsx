@@ -64,6 +64,46 @@ describe('ImpactView', () => {
     expect(screen.getByText('Errors rose after the deploy.')).toBeInTheDocument();
   });
 
+  describe('entity list paging', () => {
+    const entities = (count: number) =>
+      Array.from({ length: count }, (_, index) => ({ id: `host-${index}`, type: 'host' }));
+    const rowCount = () => screen.getAllByTestId('investigationImpactEntityRow').length;
+
+    it('shows five entities, then ten more per click, and collapses back to five', () => {
+      renderView({ ...base, entities: entities(40) });
+
+      expect(rowCount()).toBe(5);
+      expect(screen.queryByTestId('investigationImpactEntitiesShowFewer')).not.toBeInTheDocument();
+      expect(screen.getByTestId('investigationImpactEntitiesShowMore')).toHaveTextContent(
+        'Show 10 more (35 hidden)'
+      );
+
+      fireEvent.click(screen.getByTestId('investigationImpactEntitiesShowMore'));
+      expect(rowCount()).toBe(15);
+      fireEvent.click(screen.getByTestId('investigationImpactEntitiesShowMore'));
+      fireEvent.click(screen.getByTestId('investigationImpactEntitiesShowMore'));
+      expect(rowCount()).toBe(35);
+      // Only five left: the button offers exactly what remains.
+      expect(screen.getByTestId('investigationImpactEntitiesShowMore')).toHaveTextContent(
+        'Show 5 more (5 hidden)'
+      );
+      fireEvent.click(screen.getByTestId('investigationImpactEntitiesShowMore'));
+      expect(rowCount()).toBe(40);
+      expect(screen.queryByTestId('investigationImpactEntitiesShowMore')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('investigationImpactEntitiesShowFewer'));
+      expect(rowCount()).toBe(5);
+    });
+
+    it('has no controls when the list fits in five', () => {
+      renderView({ ...base, entities: entities(5) });
+
+      expect(rowCount()).toBe(5);
+      expect(screen.queryByTestId('investigationImpactEntitiesShowMore')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('investigationImpactEntitiesShowFewer')).not.toBeInTheDocument();
+    });
+  });
+
   it('renders an entity list in the details flyout when impact is entities only', () => {
     renderView({
       ...base,
