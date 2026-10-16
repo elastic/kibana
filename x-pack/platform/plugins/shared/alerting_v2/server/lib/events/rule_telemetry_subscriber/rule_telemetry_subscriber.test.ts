@@ -13,6 +13,7 @@ import { createLoggerService } from '../../services/logger_service/logger_servic
 import { createRuleResponse } from '../../test_utils';
 import {
   RULE_CREATED_EBT_EVENT_TYPE,
+  RULE_DELETED_EBT_EVENT_TYPE,
   RULE_EBT_EVENT_TYPE_BY_OPERATION,
   RULE_OPERATIONS,
 } from '../../telemetry/rule_changed_event';
@@ -187,16 +188,28 @@ describe('RuleTelemetrySubscriber', () => {
       expect(data).not.toHaveProperty('builder_type');
     });
 
-    it('skips events without a rule', async () => {
+    it('reports rule_id and origin when the domain rule is missing', async () => {
       subscriber.start();
 
       await handler()(createdEvent({ ruleId: 'rule-1', spaceId: 'default' }), context);
       await handler(RULE_DELETED_EVENT_TYPE)(
-        eventOfType(RULE_DELETED_EVENT_TYPE, { ruleId: 'rule-1', spaceId: 'default' }),
+        eventOfType(RULE_DELETED_EVENT_TYPE, {
+          ruleId: 'rule-1',
+          spaceId: 'default',
+          channel: 'system',
+          app: 'nightshift',
+        }),
         context
       );
 
-      expect(ebtService.reportEvent).not.toHaveBeenCalled();
+      expect(ebtService.reportEvent).toHaveBeenNthCalledWith(1, RULE_CREATED_EBT_EVENT_TYPE, {
+        rule_id: 'rule-1',
+        origin: { actor: 'user', channel: 'api' },
+      });
+      expect(ebtService.reportEvent).toHaveBeenNthCalledWith(2, RULE_DELETED_EBT_EVENT_TYPE, {
+        rule_id: 'rule-1',
+        origin: { actor: 'user', channel: 'system', app: 'nightshift' },
+      });
     });
   });
 

@@ -54,10 +54,10 @@ export interface RuleChangedEventOrigin {
 export interface RuleChangedEventData {
   rule_id: string;
   template_id?: string;
-  created_at: string;
-  kind: RuleKind;
+  created_at?: string;
+  kind?: RuleKind;
   builder_type?: string;
-  enabled: boolean;
+  enabled?: boolean;
   origin: RuleChangedEventOrigin;
 }
 
@@ -79,16 +79,17 @@ const ruleChangedEventSchema: EventTypeOpts<RuleChangedEventData>['schema'] = {
   created_at: {
     type: 'date',
     _meta: {
-      description: 'ISO timestamp of when the rule was created.',
-      optional: false,
+      description:
+        'ISO timestamp of when the rule was created. Absent when the domain rule could not be read.',
+      optional: true,
     },
   },
   kind: {
     type: 'keyword',
     _meta: {
       description:
-        'Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).',
-      optional: false,
+        'Whether the rule creates alerts (`alert`) or only stores matching events (`signal`). Absent when the domain rule could not be read.',
+      optional: true,
     },
   },
   builder_type: {
@@ -102,8 +103,8 @@ const ruleChangedEventSchema: EventTypeOpts<RuleChangedEventData>['schema'] = {
     type: 'boolean',
     _meta: {
       description:
-        'Whether the rule was enabled after the operation (for `rule.deleted`, whether it was enabled when deleted).',
-      optional: false,
+        'Whether the rule was enabled after the operation (for `rule.deleted`, whether it was enabled when deleted). Absent when the domain rule could not be read.',
+      optional: true,
     },
   },
   origin: {
@@ -147,22 +148,39 @@ export const ruleChangeTelemetryEvents: Array<EventTypeOpts<RuleChangedEventData
     schema: ruleChangedEventSchema,
   }));
 
-/** Projects the telemetry payload from the domain rule; optional fields are omitted when absent. */
+const toEventOrigin = ({
+  actor,
+  channel,
+  app,
+}: RuleChangedEventOrigin): RuleChangedEventOrigin => ({
+  actor,
+  channel,
+  ...(app ? { app } : {}),
+});
+
+/** Projects a rule-change telemetry payload. Rule fields are omitted when `rule` is absent. */
 export const buildRuleChangedEventData = (
-  rule: RuleResponse,
-  { actor, channel, app }: RuleChangedEventOrigin
+  rule: RuleResponse | undefined,
+  origin: RuleChangedEventOrigin,
+  ruleId: string
 ): RuleChangedEventData => {
-  const { id, kind, enabled, created_at: createdAt, metadata } = rule;
+  const eventOrigin = toEventOrigin(origin);
+
+  if (!rule) {
+    return { rule_id: ruleId, origin: eventOrigin };
+  }
+
+  const { kind, enabled, created_at: createdAt, metadata } = rule;
   const templateId = metadata.template?.id;
   const builderType = metadata.builder?.type;
 
   return {
-    rule_id: id,
+    rule_id: ruleId,
     ...(templateId ? { template_id: templateId } : {}),
     created_at: createdAt,
     kind,
     ...(builderType ? { builder_type: builderType } : {}),
     enabled,
-    origin: { actor, channel, ...(app ? { app } : {}) },
+    origin: eventOrigin,
   };
 };

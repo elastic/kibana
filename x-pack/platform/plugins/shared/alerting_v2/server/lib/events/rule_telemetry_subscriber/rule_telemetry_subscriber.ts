@@ -32,7 +32,8 @@ type ReportedRuleEvent = Extract<RuleEvent, { type: RuleOperation }>;
  * Singleton bus subscriber that reports rule-lifecycle domain events as
  * event-based telemetry (EBT) through the {@link EbtServiceContract}.
  *
- * Events without a domain rule are skipped since there is nothing to project.
+ * Events without a domain rule still report `rule_id` and `origin`. Fields that
+ * come from the rule are omitted.
  */
 @injectable()
 export class RuleTelemetrySubscriber {
@@ -77,15 +78,12 @@ export class RuleTelemetrySubscriber {
 
   #reportRuleChanged(event: ReportedRuleEvent, { origin: actor }: AlertingPublisherContext): void {
     const { type: operation, payload } = event;
-    const { rule, channel, app } = payload;
-
-    if (!rule) {
-      return;
-    }
+    const { ruleId, rule, channel, app } = payload;
+    const eventOrigin = { actor, channel, app };
 
     this.ebtService.reportEvent(
       RULE_EBT_EVENT_TYPE_BY_OPERATION[operation],
-      buildRuleChangedEventData(rule, { actor, channel, app })
+      buildRuleChangedEventData(rule, eventOrigin, ruleId)
     );
   }
 }
