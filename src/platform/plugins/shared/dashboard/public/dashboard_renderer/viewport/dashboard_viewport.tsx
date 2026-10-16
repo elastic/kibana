@@ -50,7 +50,24 @@ export const DashboardViewport = () => {
     dashboardApi.settings.showHintBar$,
     dashboardApi.isSelectMode$
   );
-  const toolbarPresence = useSelectedPanelsToolbarPresence(isSelectMode);
+  const { panelCount, visiblePanelCount, sectionCount } = useMemo(() => {
+    const panels = Object.values(layout.panels);
+    const visiblePanels = panels.filter(({ grid }) => {
+      return !dashboardInternalApi.isSectionCollapsed(grid.sectionId);
+    });
+    return {
+      panelCount: panels.length,
+      visiblePanelCount: visiblePanels.length,
+      sectionCount: Object.keys(layout.sections).length,
+    };
+  }, [layout, dashboardInternalApi]);
+
+  // an empty dashboard has no panels to select, so it never shows the toolbar
+  const toolbarPresence = useSelectedPanelsToolbarPresence(isSelectMode && panelCount > 0);
+  useEffect(() => {
+    // e.g. after deleting every panel from the toolbar
+    if (panelCount === 0) dashboardApi.exitSelectMode();
+  }, [panelCount, dashboardApi]);
 
   // cache the floating bars' icons up front, so they appear together with the bars' entrance
   useEffect(() => {
@@ -96,6 +113,7 @@ export const DashboardViewport = () => {
       isModifierAlone = false;
       const active = document.activeElement as HTMLElement | null;
       if (active?.closest('input, textarea, [contenteditable="true"], [role="dialog"]')) return;
+      if (Object.keys(dashboardApi.layout$.value.panels).length === 0) return;
       dashboardApi.enterSelectMode();
     };
     const cancelModifierAlone = () => (isModifierAlone = false);
@@ -113,18 +131,6 @@ export const DashboardViewport = () => {
       window.removeEventListener('blur', cancelModifierAlone);
     };
   }, [viewMode, dashboardApi]);
-
-  const { panelCount, visiblePanelCount, sectionCount } = useMemo(() => {
-    const panels = Object.values(layout.panels);
-    const visiblePanels = panels.filter(({ grid }) => {
-      return !dashboardInternalApi.isSectionCollapsed(grid.sectionId);
-    });
-    return {
-      panelCount: panels.length,
-      visiblePanelCount: visiblePanels.length,
-      sectionCount: Object.keys(layout.sections).length,
-    };
-  }, [layout, dashboardInternalApi]);
 
   const classes = classNames('dshDashboardViewport', {
     'dshDashboardViewport--empty': panelCount === 0 && sectionCount === 0,
