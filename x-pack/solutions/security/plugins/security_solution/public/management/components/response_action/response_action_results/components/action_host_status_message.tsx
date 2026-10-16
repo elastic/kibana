@@ -43,6 +43,7 @@ export const ActionHostStatusMessage = memo<ActionHostStatusMessageProps>(
       // CrowdStrike specific status override: Isolate/Release actions shows "submitted" only to the user
       if (
         agentActionState.isCompleted &&
+        agentActionState.wasSuccessful &&
         action.agentType === 'crowdstrike' &&
         !isRunScriptAction(action)
       ) {

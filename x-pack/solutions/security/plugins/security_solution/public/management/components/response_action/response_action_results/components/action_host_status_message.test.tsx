@@ -136,14 +136,12 @@ describe('ActionHostStatusMessage component', () => {
       );
     });
 
-    it('should show "submitted" message when completed with failure (isolate)', () => {
+    it('should show "failed" message when completed with failure (isolate)', () => {
       setAgentState({ wasSuccessful: false });
       render();
 
       expect(renderResult.getByTestId(testId).textContent).toEqual(
-        OUTPUT_MESSAGES.submittedSuccessfully(
-          RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP.isolate
-        )
+        OUTPUT_MESSAGES.hasFailed(RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP.isolate)
       );
     });
 
