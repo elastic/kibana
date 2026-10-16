@@ -77,7 +77,7 @@ type HistogramPercentileOption = EuiSuperSelectOption<HistogramPercentile> & {
   tooltipProps?: { content: string };
 };
 
-const DISTRIBUTION_UNAVAILABLE_TOOLTIP = i18n.translate(
+const DISTRIBUTION_UNAVAILABLE_WITH_DIMENSIONS_TOOLTIP = i18n.translate(
   'metricsExperience.gridSettingsFlyout.distributionUnavailableTooltip',
   {
     defaultMessage:
@@ -85,14 +85,29 @@ const DISTRIBUTION_UNAVAILABLE_TOOLTIP = i18n.translate(
   }
 );
 
+const DISTRIBUTION_UNAVAILABLE_WITHOUT_HEATMAPS_TOOLTIP = i18n.translate(
+  'metricsExperience.gridSettingsFlyout.distributionUnavailableWithoutHeatmapsTooltip',
+  {
+    defaultMessage:
+      'Distribution is unavailable while heatmaps are disabled. Histograms use the 95th percentile instead.',
+  }
+);
+
 export const buildHistogramPercentileOptions = ({
   hasDimensions = false,
+  isHeatmapsEnabled = true,
 }: {
   hasDimensions?: boolean;
+  /** When false, distribution stays in the menu but the chart draws the 95th percentile. */
+  isHeatmapsEnabled?: boolean;
 } = {}): HistogramPercentileOption[] =>
   HISTOGRAM_PERCENTILE_OPTIONS.map((option) => {
     const label = HISTOGRAM_PERCENTILE_LABELS[option];
-    const isDistributionUnavailable = hasDimensions && option === 'distribution';
+    const isDistributionUnavailable =
+      option === 'distribution' && (!isHeatmapsEnabled || hasDimensions);
+    const distributionUnavailableTooltip = isHeatmapsEnabled
+      ? DISTRIBUTION_UNAVAILABLE_WITH_DIMENSIONS_TOOLTIP
+      : DISTRIBUTION_UNAVAILABLE_WITHOUT_HEATMAPS_TOOLTIP;
 
     return {
       value: option,
@@ -104,7 +119,7 @@ export const buildHistogramPercentileOptions = ({
       ...(isDistributionUnavailable
         ? {
             hasAriaDisabled: true,
-            tooltipProps: { content: DISTRIBUTION_UNAVAILABLE_TOOLTIP },
+            tooltipProps: { content: distributionUnavailableTooltip },
           }
         : {}),
       'data-test-subj': `metricsExperienceGridSettingsHistogramOption-${option}`,

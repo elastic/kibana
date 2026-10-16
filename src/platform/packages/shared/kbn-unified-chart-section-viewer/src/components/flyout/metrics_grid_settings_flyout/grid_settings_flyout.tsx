@@ -27,7 +27,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type MetricsGridSettings } from '@kbn/discover-utils';
+import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../common/constants';
 import { useTelemetry } from '../../../context/ebt_telemetry_context';
+import { useFeatureFlag } from '../../../hooks/use_feature_flag';
 import { COUNTER_OPTIONS, GAUGE_OPTIONS, buildHistogramPercentileOptions } from './options';
 import { getAggregationConfigChanges } from './get_aggregation_config_changes';
 import { getChangedSettings } from './get_changed_settings';
@@ -57,10 +59,18 @@ export const GridSettingsFlyout = ({
     }
   );
 
+  const isHeatmapsEnabled = useFeatureFlag(
+    FEATURE_FLAGS.IS_HEATMAPS_ENABLED,
+    FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_HEATMAPS_ENABLED]
+  );
   const [draftSettings, setDraftSettings] = useState<MetricsGridSettings>(gridSettings);
   const histogramOptions = useMemo(
-    () => buildHistogramPercentileOptions({ hasDimensions: gridSettings.dimensions.length > 0 }),
-    [gridSettings.dimensions.length]
+    () =>
+      buildHistogramPercentileOptions({
+        hasDimensions: gridSettings.dimensions.length > 0,
+        isHeatmapsEnabled,
+      }),
+    [gridSettings.dimensions.length, isHeatmapsEnabled]
   );
 
   const pendingUpdate = useMemo(
