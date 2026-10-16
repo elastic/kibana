@@ -48,6 +48,7 @@ describe('legacy_vis panel type migration', () => {
         title: 'Panel title',
         hide_border: true,
         time_range: { from: 'now-15m', to: 'now' },
+        uiState: {},
       },
     });
   });

@@ -142,6 +142,20 @@ describe('migrateLegacyVegaPanel', () => {
     states.forEach((state) => expect(schema.parse(state)).toEqual(state));
   });
 
+  test('legacy panel keys are stripped by the vega panel schema', () => {
+    const legacyPanelConfig = { title: 'Panel title', uiState: {}, enhancements: {} };
+    const state = migrateLegacyVegaPanel({
+      savedVis: getSavedVis(),
+      panelConfig: legacyPanelConfig,
+    });
+
+    expect(getVegaEmbeddableSchema(mockGetDrilldownsSchema).parse(state)).toEqual({
+      title: 'Panel title',
+      description: 'Legacy description',
+      spec: { format: 'hjson', value: '{ mark: point }' },
+    });
+  });
+
   test('throws when the visualization has no spec', () => {
     expect(() =>
       migrateLegacyVegaPanel({ savedVis: { ...getSavedVis(), params: {} }, panelConfig: {} })

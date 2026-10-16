@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pick } from 'lodash';
 import type { PanelTypeMigration } from '@kbn/embeddable-plugin/server';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import type {
@@ -33,17 +32,7 @@ export const getLegacyVisPanelTypeMigration = (
     const migration = getLegacyPanelMigration(savedVis.type);
     if (!migration) return;
 
-    const migratedConfig = migration.migrate({
-      savedVis,
-      panelConfig: pick(state, [
-        'title',
-        'description',
-        'hide_title',
-        'hide_border',
-        'time_range',
-        'drilldowns',
-      ]),
-    });
+    const migratedConfig = migration.migrate({ savedVis, panelConfig: state });
     return migratedConfig && { type: migration.to, config: migratedConfig };
   },
 });

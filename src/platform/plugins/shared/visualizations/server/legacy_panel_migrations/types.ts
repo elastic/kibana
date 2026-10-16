@@ -19,6 +19,11 @@ export interface LegacyPanelMigration {
    */
   migrate: (args: {
     savedVis: SerializedVis;
+    /**
+     * The rest of the panel config, such as titles, time range and drilldowns. It can include
+     * legacy keys that the target panel schema does not accept; the container strips or rejects
+     * them when it validates the migrated config.
+     */
     panelConfig: VisualizeEmbeddableBaseState;
   }) => Record<string, unknown> | undefined;
 }
