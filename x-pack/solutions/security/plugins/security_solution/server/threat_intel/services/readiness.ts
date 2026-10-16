@@ -21,7 +21,7 @@ import {
 } from '../../../common/threat_intel';
 import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
 import { buildSpaceFilterTerms } from '../lib/space_filter';
-import { USABLE_REPORT_FILTER } from '../lib/usable_report_filter';
+import { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from '../lib/usable_report_filter';
 
 const REQUIRED_REPORT_SEMANTIC_FIELDS = ['title', 'body_text'] as const;
 
@@ -165,6 +165,7 @@ const loadUsableStats = async ({
   spaceId: string;
 }): Promise<{
   usableReportCount: number;
+  indicatorEligibleReportCount: number;
   lastIngestAt: string | null;
   lastEnrichAt: string | null;
 }> => {
@@ -175,12 +176,13 @@ const loadUsableStats = async ({
     track_total_hits: true,
     query: {
       bool: {
-        filter: [buildSpaceFilterTerms(spaceId), USABLE_REPORT_FILTER],
+        filter: [buildSpaceFilterTerms(spaceId), HUNT_USABLE_FILTER],
       },
     },
     aggs: {
       last_ingest: { max: { field: 'lineage.ingested_at' } },
       last_enrich: { max: { field: 'lineage.extracted_at' } },
+      indicator_eligible: { filter: INDICATOR_ELIGIBLE_FILTER },
     },
   });
 
@@ -188,8 +190,13 @@ const loadUsableStats = async ({
   const usableReportCount =
     typeof total === 'number' ? total : typeof total?.value === 'number' ? total.value : 0;
 
+  const indicatorEligibleAgg = response.aggregations?.indicator_eligible as
+    | { doc_count?: number }
+    | undefined;
+
   return {
     usableReportCount,
+    indicatorEligibleReportCount: indicatorEligibleAgg?.doc_count ?? 0,
     lastIngestAt: maxAggToIso(
       response.aggregations?.last_ingest as
         | { value?: number | null; value_as_string?: string }
@@ -245,6 +252,7 @@ export const getThreatIntelReadiness = async ({
       status: 'blocked',
       reasonCodes,
       usableReportCount: 0,
+      indicatorEligibleReportCount: 0,
       lastIngestAt: null,
       lastEnrichAt: null,
       ...(optional.length > 0 ? { optional } : {}),
@@ -286,12 +294,14 @@ export const getThreatIntelReadiness = async ({
   }
 
   let usableReportCount = 0;
+  let indicatorEligibleReportCount = 0;
   let lastIngestAt: string | null = null;
   let lastEnrichAt: string | null = null;
   let statsAvailable = true;
   try {
     const stats = await loadUsableStats({ esClient, spaceId });
     usableReportCount = stats.usableReportCount;
+    indicatorEligibleReportCount = stats.indicatorEligibleReportCount;
     lastIngestAt = stats.lastIngestAt;
     lastEnrichAt = stats.lastEnrichAt;
   } catch (err) {
@@ -314,6 +324,7 @@ export const getThreatIntelReadiness = async ({
     status,
     reasonCodes,
     usableReportCount,
+    indicatorEligibleReportCount,
     lastIngestAt,
     lastEnrichAt,
     ...(optional.length > 0 ? { optional } : {}),

@@ -12,7 +12,13 @@ import {
 } from '@kbn/alertzero-common';
 import type { HuntModels, HuntModelTier } from '../types';
 
-export const HUNT_MODEL_TIERS: readonly HuntModelTier[] = ['efficient', 'balanced', 'frontier'];
+/**
+ * The tiers a hunt has a consumer for. Balanced is registered for the other AlertZero Workers but
+ * nothing in the hunt runs on it: Tier 2 ES|QL generation moved back to Frontier after Claude
+ * Sonnet 5 on EIS refused the hunt's generation prompt (`finish_reason: content_filter`) for
+ * nearly every behavior of a threat report, which Opus 5 answers.
+ */
+export const HUNT_MODEL_TIERS: readonly HuntModelTier[] = ['efficient', 'frontier'];
 
 /** The AlertZero inference feature each hunt tier resolves its model through. */
 export const HUNT_MODEL_TIER_FEATURE_IDS: Record<HuntModelTier, string> = {
@@ -21,8 +27,8 @@ export const HUNT_MODEL_TIER_FEATURE_IDS: Record<HuntModelTier, string> = {
   frontier: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
 };
 
-/** The tiers Tier 2 needs together: Frontier for extraction, Balanced for ES|QL generation. */
-export const TIER2_MODEL_TIERS: readonly HuntModelTier[] = ['balanced', 'frontier'];
+/** The tiers Tier 2 needs: Frontier, for both extraction and ES|QL generation. */
+export const TIER2_MODEL_TIERS: readonly HuntModelTier[] = ['frontier'];
 
 const HUNT_MODEL_TIER_LABELS: Record<HuntModelTier, string> = {
   efficient: 'Efficient',

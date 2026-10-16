@@ -9,6 +9,7 @@ import type { TopNFunctions } from '@kbn/profiling-utils';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
+import { profilingSchemaQuerySchema } from './profiling_schema_query';
 
 export type ServicesFunctionsResponse = TopNFunctions;
 
@@ -27,7 +28,8 @@ export const servicesFunctionsRoute = defineRoute<ServicesFunctionsResponse>()({
             transactionType: z.string(),
           })
         )
-        .merge(kuerySchema),
+        .merge(kuerySchema)
+        .merge(profilingSchemaQuerySchema),
     })
   ),
 });

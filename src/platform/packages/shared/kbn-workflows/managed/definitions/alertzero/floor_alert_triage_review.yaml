@@ -58,6 +58,12 @@ triggers:
           description: >-
             Alert `_id` values classified as false positive at or above the confidence floor.
             These are the alerts the proposal closes.
+        entity_summary:
+          type: string
+          maxLength: 256
+          description: >-
+            Hosts and users behind the candidates, worded for the proposal title, such as
+            `on build-agent-01 (svc-backup)`. Empty or omitted when no candidate names one.
         confidence_floor:
           type: number
           description: Confidence floor the candidates passed, quoted in the proposal and its comment.
@@ -144,7 +150,8 @@ steps:
       inputs:
         conversationId: "{{ inputs.conversation_id }}"
         title: >-
-          Close {{ variables.fp_candidate_count }} {% if variables.fp_candidate_count == 1 %}alert{% else %}alerts{% endif %} as false positive
+          {%- assign entity_summary = inputs.entity_summary | default: '' -%}
+          Close {% if variables.fp_candidate_count == 1 and entity_summary != '' %}alert{% elsif variables.fp_candidate_count == 1 %}1 alert{% else %}{{ variables.fp_candidate_count }} alerts{% endif %}{% if entity_summary != '' %} {{ entity_summary }}{% endif %} as false positive
         comment: >-
           {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} from rule "{{ inputs.rule_name }}" {% if variables.fp_candidate_count == 1 %}was{% else %}were{% endif %} classified as false positives at or above the configured confidence floor ({{ inputs.confidence_floor }}).
           Approving this proposal will close them with workflow_reason=false_positive.
