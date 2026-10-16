@@ -38,15 +38,17 @@ describe('resolveHuntModels', () => {
       .mockImplementation(async ({ featureId }) => ({ ok: true, model: modelFor(featureId) }));
   });
 
-  it('resolves every tier on its own feature id by default', async () => {
+  it('resolves the tiers hunts use, each on its own feature id, by default', async () => {
     const { models, failures } = await resolve();
 
     expect(failures).toEqual([]);
     expect(models).toEqual({
       efficient: modelFor(ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID),
-      balanced: modelFor(ALERTZERO_BALANCED_INFERENCE_FEATURE_ID),
       frontier: modelFor(ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID),
     });
+    expect(resolveScopedModelMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ featureId: ALERTZERO_BALANCED_INFERENCE_FEATURE_ID })
+    );
   });
 
   it('resolves only the tiers it is asked for', async () => {
@@ -58,19 +60,18 @@ describe('resolveHuntModels', () => {
 
   it('leaves the other tiers intact when one has no usable connector', async () => {
     resolveScopedModelMock.mockImplementation(async ({ featureId }) =>
-      featureId === ALERTZERO_BALANCED_INFERENCE_FEATURE_ID
-        ? { ok: false, reason: 'no_connector', message: 'no balanced connector' }
+      featureId === ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID
+        ? { ok: false, reason: 'no_connector', message: 'no efficient connector' }
         : { ok: true, model: modelFor(featureId) }
     );
 
     const { models, failures } = await resolve();
 
     expect(models).toEqual({
-      efficient: modelFor(ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID),
       frontier: modelFor(ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID),
     });
     expect(failures).toEqual([
-      { tier: 'balanced', reason: 'no_connector', message: 'no balanced connector' },
+      { tier: 'efficient', reason: 'no_connector', message: 'no efficient connector' },
     ]);
   });
 
@@ -101,7 +102,7 @@ describe('resolveHuntModels', () => {
     const { models, failures } = await resolve();
 
     expect(models.efficient).toBeUndefined();
-    expect(models.balanced).toBeDefined();
+    expect(models.frontier).toBeDefined();
     expect(failures).toEqual([
       { tier: 'efficient', reason: 'resolution_error', message: 'connector store unavailable' },
     ]);

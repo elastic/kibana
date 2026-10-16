@@ -89,6 +89,7 @@ export {
 export {
   HuntCoordinatorRequestBody,
   HuntCoordinatorResponse,
+  HuntCoordinatorResult,
   HuntCoordinatorStatus,
 } from './hunt/hunt_coordinator_route.gen';
 export {

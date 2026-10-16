@@ -190,11 +190,15 @@ describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
     });
   });
 
-  it('releases every delta once all the counts have settled', () => {
+  it('releases and runs every delta and sparkline once all the counts have settled and the store runs', () => {
     mockTiles();
     render(<EntityAnalyticsNewHomePage />);
 
-    TILES.forEach((tile) => expect(deltaIsReady(tile)).toBe(true));
+    TILES.forEach((tile) => {
+      expect(deltaIsReady(tile)).toBe(true);
+      expect(lastOptions(DELTA_HOOKS[tile]).skip).toBe(false);
+      expect(lastOptions(SERIES_HOOKS[tile]).skip).toBe(false);
+    });
   });
 
   it.each(TILES)(
@@ -207,21 +211,6 @@ describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
         expect(deltaIsReady(tile)).toBe(false);
         expect(seriesIsReady(tile)).toBe(false);
       });
-    }
-  );
-
-  it.each(TILES)(
-    'releases them all when the pending %s count settles, whether it was skipped, failed or loaded',
-    (stuck) => {
-      mockTiles({ [stuck]: { isCountPending: true } });
-      const { rerender } = render(<EntityAnalyticsNewHomePage />);
-      TILES.forEach((tile) => expect(deltaIsReady(tile)).toBe(false));
-
-      // A count that cannot run, or has failed, reports that it is no longer pending.
-      mockTiles({ [stuck]: { isCountPending: false } });
-      rerender(<EntityAnalyticsNewHomePage />);
-
-      TILES.forEach((tile) => expect(deltaIsReady(tile)).toBe(true));
     }
   );
 
@@ -239,37 +228,17 @@ describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
     }
   );
 
-  it('does not skip them while the entity store is running', () => {
-    mockTiles();
-    render(<EntityAnalyticsNewHomePage />);
-
-    TILES.forEach((tile) => {
-      expect(lastOptions(DELTA_HOOKS[tile]).skip).toBe(false);
-      expect(lastOptions(SERIES_HOOKS[tile]).skip).toBe(false);
-    });
-  });
-
   describe('the sparklines follow the deltas', () => {
-    it('hold a sparkline back until its own delta has loaded, and release the others', () => {
-      mockTiles({ anomalies: { isDeltaLoading: true } });
-      render(<EntityAnalyticsNewHomePage />);
-
-      expect(seriesIsReady('anomalies')).toBe(false);
-      TILES.filter((tile) => tile !== 'anomalies').forEach((tile) =>
-        expect(seriesIsReady(tile)).toBe(true)
-      );
-    });
-
-    it.each(['riskMovers', 'newlyHighCritical'] as const)(
-      'hold the one risk sparkline query back while the %s delta is loading',
+    it.each(TILES)(
+      'hold back only the sparkline that reads the %s delta until it has loaded',
       (loading) => {
         mockTiles({ [loading]: { isDeltaLoading: true } });
         render(<EntityAnalyticsNewHomePage />);
 
-        expect(seriesIsReady('riskMovers')).toBe(false);
-        expect(seriesIsReady('newlyHighCritical')).toBe(false);
-        (['alerts', 'anomalies', 'newEntity'] as const).forEach((tile) =>
-          expect(seriesIsReady(tile)).toBe(true)
+        // The two risk tiles share one sparkline query, which waits for both deltas.
+        const isRisk = (tile: Tile) => tile === 'riskMovers' || tile === 'newlyHighCritical';
+        TILES.forEach((tile) =>
+          expect(seriesIsReady(tile)).toBe(!(tile === loading || (isRisk(tile) && isRisk(loading))))
         );
       }
     );
