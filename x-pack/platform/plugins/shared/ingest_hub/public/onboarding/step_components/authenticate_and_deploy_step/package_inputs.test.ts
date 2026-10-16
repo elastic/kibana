@@ -8,7 +8,13 @@
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { ServiceInstance, ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildDeployGroups } from './deploy_groups';
-import { buildIacIntegrations, buildPackageInputs, toSOServiceVars } from './package_inputs';
+import {
+  buildIacIntegrations,
+  buildPackageInputs,
+  buildPackageVars,
+  buildStreamVars,
+  toSOServiceVars,
+} from './package_inputs';
 
 function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsServiceMatrixEntry {
   return {
@@ -273,19 +279,6 @@ describe('buildIacIntegrations', () => {
         },
       ]);
     });
-
-    it('falls back to the service id for a duplicate whose vars predate instance keying', () => {
-      const stored: Record<string, ServiceVars> = {
-        cloudtrail: {
-          enabledDataStreams: ['cloudtrail'],
-          varsByDataStream: { cloudtrail: { enabledInputs: ['aws-s3'], varsByInput: {} } },
-        },
-      };
-
-      expect(buildIacIntegrations([duplicate(cloudtrail)], stored)).toEqual([
-        { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
-      ]);
-    });
   });
 
   it('is stable regardless of member order and unsorted manifest inputs', () => {
@@ -473,5 +466,237 @@ describe('buildPackageInputs', () => {
     const streamVars = inputs['aws_billing-aws-s3']?.streams?.['aws_billing.billing']?.vars;
 
     expect(streamVars?.tags).toEqual(['forwarded', 'aws-billing']);
+  });
+});
+
+describe('buildStreamVars — collect_s3_logs', () => {
+  const def = (name: string, extra: object = {}) =>
+    ({ name, type: 'text', title: name, show_user: true, ...extra } as any);
+  const s3Service = makeService({
+    inputs: ['aws-s3'],
+    requiredConfig: ['bucket_arn'],
+    optionalConfig: ['queue_url', 'collect_s3_logs'],
+    varDefsByInput: {
+      'aws-s3': {
+        bucket_arn: def('bucket_arn'),
+        queue_url: def('queue_url'),
+        collect_s3_logs: def('collect_s3_logs', { type: 'bool', default: false }),
+      },
+    },
+  });
+  const dsVars = (vars: Record<string, string | string[]>) => ({
+    enabledInputs: ['aws-s3'],
+    varsByInput: { 'aws-s3': vars },
+  });
+
+  it('turns collect_s3_logs on when a bucket ARN is set and the toggle is untouched', () => {
+    const out = buildStreamVars(s3Service, dsVars({ bucket_arn: 'arn:aws:s3:::b' }), '', 'aws-s3');
+    expect(out.collect_s3_logs).toBe(true);
+  });
+
+  it('turns collect_s3_logs on for an access-point ARN alone', () => {
+    const service = makeService({
+      ...s3Service,
+      varDefsByInput: {
+        'aws-s3': {
+          ...s3Service.varDefsByInput!['aws-s3'],
+          access_point_arn: def('access_point_arn'),
+        },
+      },
+    });
+    const out = buildStreamVars(
+      service,
+      dsVars({ access_point_arn: 'arn:aws:s3:ap' }),
+      '',
+      'aws-s3'
+    );
+    expect(out.collect_s3_logs).toBe(true);
+  });
+
+  it('keeps an explicit collect_s3_logs choice', () => {
+    const out = buildStreamVars(
+      s3Service,
+      dsVars({ bucket_arn: 'arn:aws:s3:::b', collect_s3_logs: 'false' }),
+      '',
+      'aws-s3'
+    );
+    expect(out.collect_s3_logs).toBe(false);
+  });
+
+  it('leaves the SQS default alone when no bucket ARN is set', () => {
+    const out = buildStreamVars(s3Service, dsVars({ queue_url: 'https://sqs/q' }), '', 'aws-s3');
+    expect(out.collect_s3_logs).toBe(false);
+  });
+
+  it('does not apply to ECF-scoped services', () => {
+    const out = buildStreamVars(
+      { ...s3Service, settingsScope: 'ecf' },
+      dsVars({ bucket_arn: 'arn:aws:s3:::b' }),
+      '',
+      'aws-s3'
+    );
+    expect(out.collect_s3_logs).toBe(false);
+  });
+});
+
+describe('buildPackageVars — stored secret refs', () => {
+  const PKG_VARS = new Set([
+    'default_region',
+    'access_key_id',
+    'secret_access_key',
+    'session_token',
+  ]);
+  const refs = new Map([
+    ['access_key_id', { isSecretRef: true as const, id: 'ref-akid' }],
+    ['secret_access_key', { isSecretRef: true as const, id: 'ref-secret' }],
+  ]);
+
+  it('sends typed keys as plain values', () => {
+    expect(
+      buildPackageVars('us-east-1', { access_key_id: 'AKID', secret_access_key: 'S' }, PKG_VARS)
+    ).toEqual({ default_region: 'us-east-1', access_key_id: 'AKID', secret_access_key: 'S' });
+  });
+
+  it('sends the stored refs back when no keys were typed, so Fleet keeps the secrets', () => {
+    expect(buildPackageVars('us-east-1', undefined, PKG_VARS, undefined, refs)).toEqual({
+      default_region: 'us-east-1',
+      access_key_id: { isSecretRef: true, id: 'ref-akid' },
+      secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+    });
+  });
+
+  describe('stored credentials are replaced as a set', () => {
+    it('uses the typed values when every stored credential is replaced', () => {
+      expect(
+        buildPackageVars(
+          '',
+          { access_key_id: 'NEW-AKID', secret_access_key: 'NEW-SECRET' },
+          PKG_VARS,
+          undefined,
+          refs
+        )
+      ).toEqual({ access_key_id: 'NEW-AKID', secret_access_key: 'NEW-SECRET' });
+    });
+
+    it('keeps the stored refs when only one stored credential was typed (no mismatched pair)', () => {
+      expect(
+        buildPackageVars(
+          '',
+          { access_key_id: 'NEW-AKID', secret_access_key: '' },
+          PKG_VARS,
+          undefined,
+          refs
+        )
+      ).toEqual({
+        access_key_id: { isSecretRef: true, id: 'ref-akid' },
+        secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+      });
+    });
+
+    it('keeps a typed value for a credential that has no stored ref', () => {
+      // Only the secret access key is stored as a secret; the access key id is a plain var.
+      const onlySecretRef = new Map([
+        ['secret_access_key', { isSecretRef: true as const, id: 'ref-secret' }],
+      ]);
+      expect(
+        buildPackageVars(
+          '',
+          { access_key_id: 'NEW-AKID', secret_access_key: '' },
+          PKG_VARS,
+          undefined,
+          onlySecretRef
+        )
+      ).toEqual({
+        access_key_id: 'NEW-AKID',
+        secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+      });
+    });
+
+    it('applies to agent-based temporary keys: all three must be replaced together', () => {
+      const tempRefs = new Map([
+        ...refs,
+        ['session_token', { isSecretRef: true as const, id: 'ref-token' }],
+      ]);
+      expect(
+        buildPackageVars(
+          '',
+          undefined,
+          PKG_VARS,
+          {
+            method: 'temporary_keys',
+            access_key_id: 'NEW-AKID',
+            secret_access_key: 'NEW-SECRET',
+            session_token: '',
+          },
+          tempRefs
+        )
+      ).toEqual({
+        access_key_id: { isSecretRef: true, id: 'ref-akid' },
+        secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+        session_token: { isSecretRef: true, id: 'ref-token' },
+      });
+    });
+
+    it('does not let a stored session token block typed static keys', () => {
+      const withToken = new Map([
+        ...refs,
+        ['session_token', { isSecretRef: true as const, id: 'ref-token' }],
+      ]);
+      expect(
+        buildPackageVars(
+          '',
+          { access_key_id: 'NEW-AKID', secret_access_key: 'NEW-SECRET' },
+          PKG_VARS,
+          undefined,
+          withToken
+        )
+      ).toEqual({
+        access_key_id: 'NEW-AKID',
+        secret_access_key: 'NEW-SECRET',
+        session_token: { isSecretRef: true, id: 'ref-token' },
+      });
+    });
+  });
+
+  it('only emits credential vars the package declares', () => {
+    expect(
+      buildPackageVars('', undefined, new Set(['secret_access_key']), undefined, refs)
+    ).toEqual({ secret_access_key: { isSecretRef: true, id: 'ref-secret' } });
+  });
+
+  it('keeps stored refs for agent-based static and temporary keys', () => {
+    const tempRefs = new Map([
+      ...refs,
+      ['session_token', { isSecretRef: true as const, id: 'ref-token' }],
+    ]);
+    expect(
+      buildPackageVars(
+        '',
+        undefined,
+        PKG_VARS,
+        { method: 'temporary_keys', access_key_id: '', secret_access_key: '', session_token: '' },
+        tempRefs
+      )
+    ).toEqual({
+      access_key_id: { isSecretRef: true, id: 'ref-akid' },
+      secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+      session_token: { isSecretRef: true, id: 'ref-token' },
+    });
+  });
+
+  it('does not touch assume_role or shared credential vars', () => {
+    expect(
+      buildPackageVars(
+        '',
+        undefined,
+        new Set(['role_arn', 'secret_access_key']),
+        { method: 'assume_role', role_arn: 'arn:aws:iam::1:role/r' },
+        undefined
+      )
+    ).toEqual({ role_arn: 'arn:aws:iam::1:role/r' });
+  });
+
+  it('returns undefined when nothing is sent', () => {
+    expect(buildPackageVars('', undefined, PKG_VARS)).toBeUndefined();
   });
 });

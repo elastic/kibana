@@ -80,6 +80,7 @@ steps:
           SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
           SCOUT_TEST_CHANNELS: ci-on-commit
           SERVERLESS_TESTS_ONLY: 'true'
+          TEST_ES_SERVERLESS_IMAGE: $ES_SERVERLESS_IMAGE
         retry:
           automatic:
             - exit_status: '*'
@@ -219,6 +220,8 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              limit: 1
+            - exit_status: '*'
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh

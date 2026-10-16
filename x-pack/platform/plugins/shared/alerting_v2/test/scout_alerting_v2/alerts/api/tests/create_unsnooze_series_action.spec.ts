@@ -13,6 +13,7 @@ import {
   apiTest,
   buildAlertEvent,
   buildGroupHash,
+  getSnoozeSeriesActionUrl,
   getUnsnoozeSeriesActionUrl,
   NO_ACCESS_ROLE,
   testData,
@@ -51,6 +52,12 @@ apiTest.describe('Create unsnooze series action API', { tag: '@local-stateful-cl
         }),
       ]);
 
+      const snoozeResponse = await apiClient.post(getSnoozeSeriesActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: {},
+      });
+      expect(snoozeResponse).toHaveStatusCode(204);
+
       const response = await apiClient.post(getUnsnoozeSeriesActionUrl(groupHash), {
         headers: writerHeaders,
         body: {},
@@ -64,14 +71,89 @@ apiTest.describe('Create unsnooze series action API', { tag: '@local-stateful-cl
       });
       expect(actions).toHaveLength(1);
       // Series actions target the series as a whole, so the persisted doc
-      // carries `episode_id: null` even though an episode exists.
+      // carries `alert_id: null` even though an episode exists.
       expect(actions[0]).toMatchObject({
         action_type: 'unsnooze',
         group_hash: groupHash,
-        episode_id: null,
+        alert_id: null,
         rule_id: ruleId,
         space_id: 'default',
       });
+    }
+  );
+
+  apiTest(
+    'precondition: unsnoozing a series that was never snoozed returns 409 and writes nothing',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'unsnooze-never-snoozed-rule';
+      const groupHash = buildGroupHash('unsnooze-never-snoozed-group');
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          alert: { id: 'unsnooze-never-snoozed-episode', status: 'active' },
+        }),
+      ]);
+
+      const response = await apiClient.post(getUnsnoozeSeriesActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: {},
+      });
+
+      expect(response).toHaveStatusCode(409);
+      expect(response.body.code).toBe('INVALID_ALERT_STATE_TRANSITION');
+      expect(response.body.details).toStrictEqual({
+        group_hash: groupHash,
+        action_type: 'unsnooze',
+      });
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['unsnooze'],
+      });
+      expect(actions).toHaveLength(0);
+    }
+  );
+
+  apiTest(
+    'precondition: a repeated unsnooze returns 409 and writes no second action',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'unsnooze-repeat-rule';
+      const groupHash = buildGroupHash('unsnooze-repeat-group');
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          alert: { id: 'unsnooze-repeat-episode', status: 'active' },
+        }),
+      ]);
+
+      const snoozeResponse = await apiClient.post(getSnoozeSeriesActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: {},
+      });
+      expect(snoozeResponse).toHaveStatusCode(204);
+
+      const firstResponse = await apiClient.post(getUnsnoozeSeriesActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: {},
+      });
+      expect(firstResponse).toHaveStatusCode(204);
+
+      const secondResponse = await apiClient.post(getUnsnoozeSeriesActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: {},
+      });
+      expect(secondResponse).toHaveStatusCode(409);
+      expect(secondResponse.body.code).toBe('INVALID_ALERT_STATE_TRANSITION');
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['unsnooze'],
+      });
+      expect(actions).toHaveLength(1);
     }
   );
 

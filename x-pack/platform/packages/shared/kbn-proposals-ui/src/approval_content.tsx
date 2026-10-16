@@ -131,6 +131,8 @@ export const ApprovalContent = memo<ApprovalContentProps>(
 
     const actorName = currentActorName ?? APPROVAL_MODAL_TRANSLATIONS.currentActorFallback;
     const isExpired = isProposalExpired(proposal);
+    const isReplaced = proposal.supersededBy !== undefined || proposal.status === 'superseded';
+    const displayMode = isReplaced ? 'view' : mode;
     const decision = getProposalDecision(proposal);
     const tone = getProposalTone(proposal);
 
@@ -138,7 +140,8 @@ export const ApprovalContent = memo<ApprovalContentProps>(
       ? {
           label: APPROVAL_MODAL_TRANSLATIONS.approve,
           onClick: onApprove,
-          isDisabled: isExpired || readOnly,
+          color: 'primary',
+          isDisabled: isReplaced || isExpired || readOnly,
           'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm` : undefined,
         }
       : undefined;
@@ -170,10 +173,11 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const isDeclineDisabled = dismissReason === 'other' && rationale.trim() === '';
 
     const resolvedPrimaryAction: ApprovalAction | undefined =
-      mode === 'declining'
+      displayMode === 'declining'
         ? {
             label: APPROVAL_MODAL_TRANSLATIONS.dismiss,
             color: 'danger',
+            fill: false,
             iconType: 'cross',
             onClick: declineConfirmAction,
             isDisabled: isDeclineDisabled || primaryAction?.isDisabled,
@@ -182,7 +186,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
         : primaryAction;
 
     const resolvedSecondaryActions: ApprovalAction[] | undefined =
-      mode === 'declining'
+      displayMode === 'declining'
         ? [
             {
               label: APPROVAL_MODAL_TRANSLATIONS.cancelDecline,
@@ -200,7 +204,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
                     color: 'text' as const,
                     iconType: 'cross' as const,
                     onClick: startDeclining,
-                    isDisabled: primaryAction?.isDisabled,
+                    isDisabled: isReplaced || primaryAction?.isDisabled,
                     'data-test-subj': dataTestSubj ? `${dataTestSubj}-dismiss` : undefined,
                   },
                 ]
@@ -218,19 +222,35 @@ export const ApprovalContent = memo<ApprovalContentProps>(
       }
     }, []);
 
-    const approvalPhase: ApprovalPhase = decision ? decision.status : isSubmitting ?? 'pending';
+    const approvalPhase: ApprovalPhase = isReplaced
+      ? 'pending'
+      : decision
+      ? decision.status
+      : isSubmitting ?? 'pending';
 
-    const badge = getApprovalOutcomeBadge(approvalPhase);
-    const banner = getApprovalOutcomeBanner(approvalPhase);
-    const bannerSuffix = decision?.reason ?? banner?.hint;
+    // A replaced card stays 'pending' for the footer and banner (see `approvalPhase`), but a failed
+    // attempt still has to say how it ended; replaced revisions keep no badge, since their
+    // successor carries the live state.
+    const isReplacedFailure = isReplaced && decision?.status === 'failed';
+    const badge = getApprovalOutcomeBadge(isReplacedFailure ? 'failed' : approvalPhase);
+    const banner = isReplaced ? undefined : getApprovalOutcomeBanner(approvalPhase);
+    const bannerSuffix = decision?.reason;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
+    const replacedCaption = isReplaced ? getProposalCaption(proposal) : undefined;
     const headerCaption = decision?.actorName ? (
-      <ApprovalActorTime actorName={decision.actorName} at={decision.decidedAt} />
-    ) : isSubmitting && since ? (
+      <>
+        {replacedCaption && `${replacedCaption} • `}
+        <ApprovalActorTime
+          actorName={decision.actorName}
+          at={decision.decidedAt}
+          executed={decision.status === 'failed'}
+        />
+      </>
+    ) : !isReplaced && isSubmitting && since ? (
       <ApprovalActorTime actorName={actorName} at={since} live />
     ) : (
-      getProposalCaption(proposal, { includeRiskDetails: true })
+      getProposalCaption(proposal, { includeRiskDetails: !isReplaced })
     );
 
     const defaultButtonColor: EuiButtonColor = tone === 'danger' ? 'danger' : 'primary';
@@ -243,19 +263,20 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     // "Declining", and the footer with Cancel/Decline is gone too (via `isSettledOrTransient`) —
     // showing the form alongside a banner that says the decision is already in flight would be
     // confusing.
-    const showDeclineForm = mode === 'declining' && isSubmitting !== 'declining';
+    const showDeclineForm = displayMode === 'declining' && isSubmitting !== 'declining';
 
     return (
       <>
         <ApprovalContentHeader
           badge={badge}
+          showStatusBadge={!isReplaced || isReplacedFailure}
           caption={headerCaption}
           title={proposal.title}
           titleId={titleId ?? generatedTitleId}
         />
 
         <ApprovalContentBody
-          mode={mode}
+          mode={displayMode}
           comment={proposal.comment}
           banner={banner}
           bannerSuffix={bannerSuffix}
@@ -263,17 +284,21 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           data-test-subj={dataTestSubj}
         />
 
-        {mode === 'view' && alwaysAllow && (
+        {displayMode === 'view' && alwaysAllow && (
           <AlwaysAllowCheckbox
             option={alwaysAllow}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-always-allow` : undefined}
           />
         )}
 
+        {/* A replaced card's only callout is why its own attempt failed; the rest belong to the
+            live successor. */}
         <ApprovalStatusCallouts
-          isPending={approvalPhase === 'pending'}
+          isPending={!isReplaced && approvalPhase === 'pending'}
           previousExecutionError={proposal.previousExecutionError}
-          isExpired={isExpired}
+          failedAttemptError={isReplacedFailure ? proposal.executionError : undefined}
+          isExpired={!isReplaced && isExpired}
+          expiredReason={proposal.rationale}
           data-test-subj={dataTestSubj}
         />
 

@@ -10,7 +10,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
 import { pick } from 'lodash/fp';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { SecurityPageName } from '../../../../common/constants';
@@ -23,12 +24,11 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { InputsModelId } from '../../../common/store/inputs/constants';
-import { HeaderPage } from '../../../common/components/header_page';
 import { inputsSelectors } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { DashboardToolBar } from '../../components/dashboard_tool_bar';
 import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
-import { DashboardTitle } from '../../components/dashboard_title';
+import { useDashboardTitle } from '../../hooks/use_dashboard_title';
 
 const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
 
@@ -58,18 +58,26 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   );
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
-  const [dashboardTitle, setDashboardTitle] = useState<string>();
 
   const { dashboardContainer, dashboardInternalApi, handleDashboardLoaded } =
     useDashboardRenderer(savedObjectId);
+  const dashboardTitle = useDashboardTitle(dashboardContainer);
   const onDashboardToolBarLoad = useCallback((mode: ViewMode) => {
     setViewMode(mode);
   }, []);
   const { dataView } = useDataView();
+  const { euiTheme } = useEuiTheme();
+  const filtersGlobalStyles = useMemo(
+    () =>
+      css({
+        borderBottom: euiTheme.border.thin,
+      }),
+    [euiTheme.border.thin]
+  );
 
   return (
     <>
-      <FiltersGlobal>
+      <FiltersGlobal color="plain" hasBorder={false} panelCss={filtersGlobalStyles}>
         <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
       </FiltersGlobal>
       <SecuritySolutionPageWrapper>
@@ -81,22 +89,11 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
         >
           <EuiFlexItem grow={false}>
             {dashboardContainer && dashboardInternalApi && (
-              <>
-                <HeaderPage
-                  border
-                  title={
-                    <DashboardTitle
-                      dashboardContainer={dashboardContainer}
-                      onTitleLoaded={setDashboardTitle}
-                    />
-                  }
-                />
-                <DashboardToolBar
-                  dashboardContainer={dashboardContainer}
-                  dashboardInternalApi={dashboardInternalApi}
-                  onLoad={onDashboardToolBarLoad}
-                />
-              </>
+              <DashboardToolBar
+                dashboardContainer={dashboardContainer}
+                dashboardInternalApi={dashboardInternalApi}
+                onLoad={onDashboardToolBarLoad}
+              />
             )}
           </EuiFlexItem>
           {!errorState && (

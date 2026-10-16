@@ -76,3 +76,4 @@ export const DISCOVER_SESSION_API_BASE_PATH = '/api/discover_sessions';
 export const DISCOVER_SESSION_INTERNAL_API_BASE_PATH = '/internal/discover_sessions';
 export const DISCOVER_SESSION_API_ACCESS = 'internal' as const;
 export const DISCOVER_SESSION_API_VERSION = '1';
+export const DISCOVER_SESSION_INTERNAL_API_VERSION = '1';

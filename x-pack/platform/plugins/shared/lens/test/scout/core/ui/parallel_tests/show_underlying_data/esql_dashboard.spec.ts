@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { EsqlEditor } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   createLogstashLensEditorSuiteSetup,
@@ -94,12 +94,11 @@ spaceTest.describe(
               kbnUrl,
               click: () => page.testSubj.click(openInDiscoverAction),
             });
-            const discoverEditor = new KibanaCodeEditorWrapper(discoverPage);
+            const discoverEsqlEditor = new EsqlEditor(discoverPage);
 
-            await expect(discoverPage.testSubj.locator('ESQLEditor')).toBeVisible();
-            await discoverEditor.waitCodeEditorReady('ESQLEditor');
-            await expect(discoverEditor.getCodeEditorContent()).toContainText('from logs*');
-            await expect(discoverEditor.getCodeEditorContent()).toContainText('maxB = max(bytes)');
+            await discoverEsqlEditor.waitReady();
+            await expect(discoverEsqlEditor.content).toContainText('from logs*');
+            await expect(discoverEsqlEditor.content).toContainText('maxB = max(bytes)');
           }
         );
       }

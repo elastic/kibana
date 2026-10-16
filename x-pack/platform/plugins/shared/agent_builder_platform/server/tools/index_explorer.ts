@@ -10,6 +10,7 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { indexExplorer } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { includeFrozenSchema } from './include_frozen_schema';
 
 const indexExplorerSchema = z.object({
   query: z
@@ -23,6 +24,7 @@ const indexExplorerSchema = z.object({
     .string()
     .optional()
     .describe('(optional) Index pattern to filter indices by. Defaults to *.'),
+  include_frozen: includeFrozenSchema,
 });
 
 export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerSchema> => {
@@ -49,8 +51,8 @@ Tool result: [{ type: "index", name: '.alerts' }]
     },
     schema: indexExplorerSchema,
     handler: async (
-      { query: nlQuery, indexPattern = '*', limit = 1 },
-      { esClient, experimentalFeatures, modelProvider, logger }
+      { query: nlQuery, indexPattern = '*', limit = 1, include_frozen: includeFrozen = false },
+      { esClient, modelProvider, logger }
     ) => {
       logger.debug(
         `Index explorer tool called with query: ${nlQuery}, indexPattern: ${indexPattern}, limit: ${limit}`
@@ -60,8 +62,9 @@ Tool result: [{ type: "index", name: '.alerts' }]
         nlQuery,
         indexPattern,
         limit,
-        includeDatasets: experimentalFeatures.datasets,
+        includeDatasets: true,
         includeViews: true,
+        includeFrozen,
         esClient: esClient.asCurrentUser,
         model,
       });

@@ -364,6 +364,7 @@ describe('StepExecutionRuntime', () => {
           startedAt: originalStartedAt,
         })
       );
+      expect(workflowLogger.logInfo).not.toHaveBeenCalled();
     });
   });
 

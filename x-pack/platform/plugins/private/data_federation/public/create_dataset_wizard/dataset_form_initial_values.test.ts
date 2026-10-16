@@ -23,6 +23,12 @@ describe('dataset_form_initial_values', () => {
       formatWasAutoDetected: false,
       additionalCommonSettingsIsOpen: true,
       additionalAdvancedSettingsIsOpen: false,
+      modeIsValid: true,
+      headerRowIsValid: true,
+      trimSpacesIsValid: true,
+      partitionDetectionIsValid: true,
+      errorModeIsValid: true,
+      schemaResolutionIsValid: true,
       unmanagedSettings: {},
     });
     expect(values.settings.format).toBe('');

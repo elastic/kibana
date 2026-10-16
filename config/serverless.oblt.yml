@@ -14,6 +14,10 @@ xpack.significantEvents.enabled: false
 xpack.nightshiftSources.enabled: false
 xpack.nightshift_investigations.enabled: false
 
+# Escalations are AlertZero-only for now: no escalations sub-feature, routes, or template UI.
+# A plugin flag rather than a feature override, which would fail while the plugin is disabled.
+xpack.agenticInvestigations.escalations.enabled: false
+
 # Disabled Observability plugins
 xpack.ux.enabled: false
 xpack.legacy_uptime.enabled: false
@@ -112,3 +116,6 @@ xpack.ml.compatibleModuleType: 'observability'
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
+
+## ES|QL Data Federation in stack management
+xpack.dataFederation.enabled: true

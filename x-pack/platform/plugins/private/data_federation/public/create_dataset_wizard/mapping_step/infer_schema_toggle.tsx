@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiCheckableCard,
   EuiFlexGroup,
@@ -15,6 +16,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SchemaResolutionField } from '../components/fields/schema_resolution_field';
+import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
+
+const fillFlexItemStyles = css({ flexGrow: 1 });
+
+// Must be at least the infer card's min-content width (its one-line schema resolution toggle);
+// otherwise the cards sit side by side at unequal widths instead of wrapping.
+const CARD_FLEX_BASIS = 380;
+const cardFlexItemStyles = css({ flex: `1 1 ${CARD_FLEX_BASIS}px` });
 
 export interface InferSchemaToggleProps {
   dynamicMode: boolean;
@@ -25,17 +34,14 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
   return (
     <>
       <EuiHorizontalRule margin="m" />
-      <EuiFlexGroup gutterSize="m" responsive={false} alignItems="stretch">
-        <EuiFlexItem>
+      <EuiFlexGroup gutterSize="m" alignItems="stretch" responsive={false} wrap>
+        <EuiFlexItem css={cardFlexItemStyles}>
           <EuiCheckableCard
             id="createDatasetWizardInferSchema"
+            css={fillFlexItemStyles}
             label={
               <EuiText size="s">
-                <strong>
-                  {i18n.translate('xpack.dataFederation.createDatasetWizard.inferSchemaLabel', {
-                    defaultMessage: 'Infer unmapped fields',
-                  })}
-                </strong>
+                <strong>{createDatasetWizardStrings.inferSchemaLabel}</strong>
               </EuiText>
             }
             checked={dynamicMode}
@@ -53,16 +59,13 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
           </EuiCheckableCard>
         </EuiFlexItem>
 
-        <EuiFlexItem>
+        <EuiFlexItem css={cardFlexItemStyles}>
           <EuiCheckableCard
             id="createDatasetWizardDefineSchema"
+            css={fillFlexItemStyles}
             label={
               <EuiText size="s">
-                <strong>
-                  {i18n.translate('xpack.dataFederation.createDatasetWizard.defineSchemaLabel', {
-                    defaultMessage: 'Use mapped fields only',
-                  })}
-                </strong>
+                <strong>{createDatasetWizardStrings.defineSchemaLabel}</strong>
               </EuiText>
             }
             checked={!dynamicMode}

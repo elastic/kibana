@@ -23,12 +23,18 @@ export interface ServiceAccountsPageProps {
   canCreate: boolean;
   serviceAccountsAPIClient: Pick<PublicMethodsOf<ServiceAccountsAPIClient>, 'list'>;
   onCreateAccount: () => void;
+  /** Shows a delete action on each account when set. */
+  onDeleteAccount?: (serviceAccount: ServiceAccountTableItem) => void;
+  /** Lets the user open the workloads bound to an account when set. */
+  onViewWorkloads?: (serviceAccount: ServiceAccountTableItem) => void;
 }
 
 export const ServiceAccountsPage = ({
   canCreate,
   serviceAccountsAPIClient,
   onCreateAccount,
+  onDeleteAccount,
+  onViewWorkloads,
 }: ServiceAccountsPageProps) => {
   const [serviceAccounts, setServiceAccounts] = useState<ServiceAccountTableItem[]>([]);
   const [nextPage, setNextPage] = useState<string>();
@@ -170,6 +176,8 @@ export const ServiceAccountsPage = ({
             isLoadingMore={isLoadingMore}
             hasLoadMoreError={hasLoadMoreError}
             onLoadMore={loadMoreServiceAccounts}
+            onDeleteAccount={onDeleteAccount}
+            onViewWorkloads={onViewWorkloads}
           />
         )}
       </KibanaPageTemplate.Section>

@@ -16,8 +16,8 @@ import { AssetManagerClient } from './domain/asset_manager';
 import { EntityMaintainersClient } from './domain/entity_maintainers';
 import {
   FeatureFlags,
+  getLegacySecurityAssetsMigrationFlag,
   isDualProcessEnabled,
-  isLegacySecurityAssetsMigrationEnabled,
 } from './infra/feature_flags';
 import { EngineDescriptorClient, EntityStoreGlobalStateClient } from './domain/saved_objects';
 import { LogsExtractionClient } from './domain/logs_extraction';
@@ -127,7 +127,7 @@ export async function createRequestHandlerContext({
       analytics,
       savedObjectsClient: core.savedObjects.client,
       isLegacySecurityAssetsMigrationEnabled: () =>
-        isLegacySecurityAssetsMigrationEnabled(coreStart.featureFlags),
+        getLegacySecurityAssetsMigrationFlag(coreStart.featureFlags),
       isDualProcessEnabled: () => isDualProcessEnabled(coreStart.featureFlags),
     }),
     entityMaintainersClient: new EntityMaintainersClient({
@@ -149,6 +149,7 @@ export async function createRequestHandlerContext({
       logger,
       esClient: core.elasticsearch.client.asCurrentUser,
       namespace,
+      analytics,
     }),
     entityResolutionRuleClient: new ResolutionRulesClient(
       core.savedObjects.client,
@@ -156,6 +157,7 @@ export async function createRequestHandlerContext({
       logger
     ),
     featureFlags: new FeatureFlags(core.uiSettings.client),
+    isDualProcessEnabled: () => isDualProcessEnabled(coreStart.featureFlags),
     logsExtractionClient,
     historySnapshotClient,
     security: startPlugins.security,

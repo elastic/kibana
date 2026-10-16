@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type React from 'react';
-import { useCallback, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import type { QueryKey } from '@kbn/react-query';
 import { useQueryClient } from '@kbn/react-query';
-import type { UseAssigneePickersOptions } from './use_assignee_pickers';
-import { useAssigneePickers } from './use_assignee_pickers';
+import { AssignToUsers } from '@kbn/agentic-investigations-common';
+import {
+  useAssigneePickers,
+  type UseAssigneePickersOptions,
+} from '@kbn/agentic-investigations-plugin/public';
 
 export type { UseAssigneePickersOptions };
 
@@ -41,5 +43,10 @@ export function useQueueAssignees<T>({
     [queryClient]
   );
 
-  return useAssigneePickers({ ...rest, refresh });
+  const getPickerProps = useAssigneePickers({ ...rest, refresh });
+
+  return useCallback(
+    (item: T): React.ReactNode => <AssignToUsers {...getPickerProps(item)} />,
+    [getPickerProps]
+  );
 }

@@ -29,7 +29,7 @@ export const createOpenInDiscoverAction = (deps: OpenInDiscoverActionDeps): Epis
   id: OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
   order: 50,
   displayName: i18n.OPEN_IN_DISCOVER,
-  iconType: 'discoverApp',
+  iconType: 'productDiscover',
   isCompatible: ({ episodes }) => {
     if (episodes.length !== 1 || !episodeSupportsActions(episodes[0])) {
       return false;

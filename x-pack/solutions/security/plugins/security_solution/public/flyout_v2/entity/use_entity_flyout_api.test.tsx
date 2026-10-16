@@ -113,6 +113,81 @@ describe('useEntityFlyoutApi', () => {
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
   });
 
+  it('openHostFlyout persists resolved mode in the descriptor and omits the default single mode', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+
+    result.current.openHostFlyout({ hostName: 'host-1', entityId: 'entity-1', mode: 'resolved' });
+    expect(mockWriteOnOpen).toHaveBeenLastCalledWith(
+      expect.objectContaining({ kind: FLYOUT_DESCRIPTOR_KIND.host, mode: 'resolved' })
+    );
+
+    result.current.openHostFlyout({ hostName: 'host-1', entityId: 'entity-1', mode: 'single' });
+    expect(mockWriteOnOpen.mock.calls.at(-1)?.[0].mode).toBeUndefined();
+  });
+
+  it('entity CSP tools persist resolved mode in the descriptor and omit the default single mode', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    const base = {
+      entityType: EntityType.host,
+      value: 'my-host',
+      entityId: 'host:my-host',
+    } as const;
+
+    result.current.openEntityAlertsInsights({ ...base, mode: 'resolved', scopeId: 'scope-1' });
+    expect(mockWriteOnOpen).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityAlertsInsights,
+        mode: 'resolved',
+        scopeId: 'scope-1',
+      })
+    );
+    result.current.openEntityMisconfigurationInsights({ ...base, mode: 'resolved' });
+    expect(mockWriteOnOpen).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityMisconfigurationInsights,
+        mode: 'resolved',
+      })
+    );
+    result.current.openEntityVulnerabilityInsights({
+      ...base,
+      mode: 'resolved',
+      onShowHost: jest.fn(),
+    });
+    expect(mockWriteOnOpen).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityVulnerabilityInsights,
+        mode: 'resolved',
+      })
+    );
+
+    result.current.openEntityAlertsInsights({ ...base, mode: 'single' });
+    expect(mockWriteOnOpen.mock.calls.at(-1)?.[0].mode).toBeUndefined();
+    result.current.openEntityMisconfigurationInsights({ ...base });
+    expect(mockWriteOnOpen.mock.calls.at(-1)?.[0].mode).toBeUndefined();
+    result.current.openEntityVulnerabilityInsights({ ...base, onShowHost: jest.fn() });
+    expect(mockWriteOnOpen.mock.calls.at(-1)?.[0].mode).toBeUndefined();
+  });
+
+  it('openEntityFlyout forwards resolved mode to the descriptor', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+
+    result.current.openEntityFlyout({
+      engineType: 'user',
+      entityId: 'entity-1',
+      entityName: 'alice',
+      scopeId: 'scope-1',
+      mode: 'resolved',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith({
+      kind: FLYOUT_DESCRIPTOR_KIND.user,
+      userName: 'alice',
+      entityId: 'entity-1',
+      scopeId: 'scope-1',
+      mode: 'resolved',
+    });
+  });
+
   it('openHostFlyoutAsChild opens a system flyout that inherits the current session', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
     result.current.openHostFlyoutAsChild({ hostName: 'host-1' });

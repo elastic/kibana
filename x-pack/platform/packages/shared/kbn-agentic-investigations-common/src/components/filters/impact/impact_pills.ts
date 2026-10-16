@@ -5,32 +5,41 @@
  * 2.0.
  */
 
-import type { Investigation } from '../../../types';
-import { investigationEntityIds } from './entity_ids';
+import { type ImpactFilterable, investigationEntityIds } from './entity_ids';
 
 export interface ImpactPill {
   entityId: string;
   /** Queue rows whose conversation carries this entity. */
   count: number;
+  /** Entity type (`host`, `user`, …) when any row reported one for this id. */
+  entityType?: string;
 }
 
 /**
  * Deduped pills for the landing page. A row that lists the same id twice counts
  * once. Order is count descending, then entity id ascending.
  */
-export const impactPills = (investigations: readonly Investigation[]): ImpactPill[] => {
+export const impactPills = (items: readonly ImpactFilterable[]): ImpactPill[] => {
   const counts = new Map<string, number>();
-  for (const investigation of investigations) {
-    for (const entityId of new Set(investigationEntityIds(investigation))) {
+  const types = new Map<string, string>();
+  for (const item of items) {
+    for (const entityId of new Set(investigationEntityIds(item))) {
       counts.set(entityId, (counts.get(entityId) ?? 0) + 1);
+      const entityType = item.entityTypes?.[entityId];
+      if (entityType && !types.has(entityId)) {
+        types.set(entityId, entityType);
+      }
     }
   }
 
   return [...counts.entries()]
-    .map(([entityId, count]) => ({ entityId, count }))
+    .map(([entityId, count]) => {
+      const entityType = types.get(entityId);
+      return { entityId, count, ...(entityType ? { entityType } : {}) };
+    })
     .sort((left, right) => right.count - left.count || left.entityId.localeCompare(right.entityId));
 };
 
 /** Queue-row predicate for a single selected pill. */
-export const matchesEntityFilter = (investigation: Investigation, entityId: string): boolean =>
-  investigationEntityIds(investigation).includes(entityId);
+export const matchesEntityFilter = (item: ImpactFilterable, entityId: string): boolean =>
+  investigationEntityIds(item).includes(entityId);

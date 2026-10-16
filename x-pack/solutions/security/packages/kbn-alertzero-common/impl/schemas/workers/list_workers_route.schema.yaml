@@ -24,5 +24,8 @@ paths:
                     type: array
                     items:
                       $ref: '../components/watch_settings.schema.yaml#/components/schemas/Worker'
+                  canModifyWorkers:
+                    type: boolean
+                    description: True when the caller has the Elasticsearch cluster privilege manage_security.
                 required:
                   - workers
