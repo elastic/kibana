@@ -15,6 +15,7 @@ export * as testData from './constants';
 export { cleanupThreatReportsByIds, SECURITY_READ_ONLY_ROLE } from './helpers';
 export * from './kbn';
 export * from './alertzero';
+export * from './endpoint_analysis';
 
 /** Authenticates once per worker as the admin user and exposes the cookie-bearing API helper. */
 export const getAdminApi = async (
