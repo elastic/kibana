@@ -42,9 +42,18 @@ export const shouldStreamInferenceEndpoint = async ({
     const provider = Array.isArray(services)
       ? services.find((candidate) => candidate.service === service)
       : undefined;
-    return !supportsNonStreamingChat(provider);
+    if (!supportsNonStreamingChat(provider)) {
+      logger.debug(
+        `Streaming is disabled but inference service [${service}] does not advertise non-streaming chat completion support, streaming`
+      );
+      return true;
+    }
+    logger.debug(`Streaming is disabled, calling inference service [${service}] without _stream`);
+    return false;
   } catch (error) {
-    logger.debug(`Could not resolve the inference streaming mode, streaming: ${error.message}`);
+    logger.warn(
+      `Could not resolve the inference streaming mode, falling back to streaming: ${error.message}`
+    );
     return true;
   }
 };

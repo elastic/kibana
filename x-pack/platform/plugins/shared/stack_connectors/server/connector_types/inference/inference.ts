@@ -342,10 +342,19 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       const service = Array.isArray(services)
         ? services.find(({ service: name }) => name === this.config.provider)
         : undefined;
-      return !supportsNonStreamingChat(service);
-    } catch (error) {
+      if (!supportsNonStreamingChat(service)) {
+        this.logger.debug(
+          `Streaming is disabled but inference service [${this.config.provider}] does not advertise non-streaming chat completion support, streaming`
+        );
+        return true;
+      }
       this.logger.debug(
-        `Could not resolve the inference streaming mode, streaming: ${buildInferenceErrorMessage(
+        `Streaming is disabled, calling inference endpoint [${this.inferenceId}] without _stream`
+      );
+      return false;
+    } catch (error) {
+      this.logger.warn(
+        `Could not resolve the inference streaming mode, falling back to streaming: ${buildInferenceErrorMessage(
           error
         )}`
       );
