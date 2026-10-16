@@ -15,6 +15,7 @@ import {
   stubIndexPattern,
   stubFields,
 } from '@kbn/data-plugin/common/stubs';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { toggleFilterNegated } from '@kbn/es-query';
 import {
   getFieldFromFilter,
@@ -114,7 +115,9 @@ describe('Filter editor utils', () => {
 
     it('limits the fields to the filterable fields', () => {
       const fieldOptions = getFilterableFields(stubIndexPattern);
-      const nonFilterableFields = fieldOptions.filter((field) => !field.filterable);
+      const nonFilterableFields = fieldOptions.filter(
+        (field) => !(field as DataViewField).filterable
+      );
       expect(nonFilterableFields.length).toBe(0);
     });
   });

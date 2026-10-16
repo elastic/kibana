@@ -270,6 +270,7 @@ export function createSearchBar({
             disableSubmitAction={props.disableSubmitAction}
             screenTitle={props.screenTitle}
             indexPatterns={props.indexPatterns}
+            dataSources={props.dataSources}
             indicateNoData={props.indicateNoData}
             timeHistory={data.query.timefilter.history}
             dateRangeFrom={timeRange.from}

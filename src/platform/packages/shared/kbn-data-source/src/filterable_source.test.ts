@@ -74,6 +74,15 @@ describe('toFilterableSource', () => {
       expect(filterable.isTimeBased()).toBe(true);
     });
 
+    it('has the name of the source, and no getName, which is an optional capability', async () => {
+      const source = await statsOnDataset('named-*');
+
+      const filterable = await source.toFilterableSource();
+
+      expect(filterable.name).toBe(source.name);
+      expect('getName' in filterable).toBe(false);
+    });
+
     it('is not time based without a time field', async () => {
       const source = await statsOnDataset('no-time-*');
 

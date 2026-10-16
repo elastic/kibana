@@ -368,6 +368,7 @@ export class EsqlSource implements DataSourceBase {
     return {
       id: this.datasetId,
       title: this.title,
+      name: this.name,
       timeFieldName: this.timeFieldName,
       fields: Object.values(buildFilterableFieldSpecs(filterableFields, this.timeFieldName)),
       isTimeBased: () => this.isTimeBased(),

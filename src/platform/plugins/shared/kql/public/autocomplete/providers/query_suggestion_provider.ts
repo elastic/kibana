@@ -8,7 +8,7 @@
  */
 
 import type { ValueSuggestionsMethod } from '@kbn/data-plugin/common';
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { SuggestionsAbstraction } from '../../components/typeahead/suggestions_component';
 
 export enum QuerySuggestionTypes {
@@ -26,7 +26,7 @@ export type QuerySuggestionGetFn = (
 /** @public **/
 export interface QuerySuggestionGetFnArgs {
   language: string;
-  indexPatterns: DataView[];
+  indexPatterns: FilterableSource[];
   query: string;
   selectionStart: number;
   selectionEnd: number;
@@ -50,7 +50,7 @@ export interface QuerySuggestionBasic {
 /** @public **/
 export interface QuerySuggestionField extends QuerySuggestionBasic {
   type: QuerySuggestionTypes.Field;
-  field: DataViewField;
+  field: FilterableField;
 }
 
 /** @public **/
