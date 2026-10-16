@@ -12,6 +12,7 @@ This document contains all usage examples for `@kbn/synthtrace`. See the [README
   - [Infrastructure Scenarios](#infrastructure-scenarios)
   - [Combined Scenarios](#combined-scenarios)
   - [Specialized Scenarios](#specialized-scenarios)
+  - [Digital Experience Scenarios](#digital-experience-scenarios)
   - [SRE Incident Scenarios](#sre-incident-scenarios)
 - [Advanced Usage Examples](#advanced-usage-examples)
 
@@ -892,6 +893,52 @@ Generates data for testing agent configuration.
 
 ```sh
 node scripts/synthtrace agent_config --live
+```
+
+### Digital Experience Scenarios
+
+These scenarios generate browser Real User Monitoring data for Digital Experience. EDOT Browser data is OTel-native, as stored by the Elasticsearch exporter, with no APM enrichment:
+
+- `logs-generic.otel-default`: `browser.navigation`, `browser.navigation_timing`, `browser.resource_timing`, `browser.web_vital` (LCP, INP, CLS, FCP, TTFB), `browser.user_action.click` and `exception` events
+- `traces-generic.otel-default`: fetch/XHR `CLIENT` spans
+
+Timings and web vital values always have a fractional part, so dynamic mapping types them as `float`.
+
+The data is written through the `otelEsClient`, which indexes documents as-is. In code and Scout tests, use the `edotBrowser` DSL from `@kbn/synthtrace-client` (`edotBrowser.app()`, `edotBrowser.session()`) with the `otelSynthtraceEsClient` fixture from `@kbn/scout-synthtrace`.
+
+**Options (both scenarios):**
+
+- `withSessionId` (boolean, default `false`): writes `attributes.session.id`. EDOT Browser does not emit it yet.
+- `scale` (number, default `1`): multiplies the number of sessions per minute of every app
+
+#### `digital_experience_browser`
+
+Generates EDOT Browser data for five apps in different states of health:
+
+| `service.name`       | Health   | Notes                                               |
+| -------------------- | -------- | --------------------------------------------------- |
+| `storefront-web`     | healthy  | high traffic, good vitals                           |
+| `checkout-web`       | erroring | failing `POST /api/payment`, frequent JS errors     |
+| `media-portal-web`   | slow     | poor LCP from large images and render-blocking CSS  |
+| `support-center-web` | critical | poor INP/CLS, high error and request failure rate   |
+| `docs-web`           | healthy  | low traffic, mostly desktop browsers                |
+
+**Usage:**
+
+```sh
+node scripts/synthtrace digital_experience_browser --from=now-30m --to=now
+node scripts/synthtrace digital_experience_browser --live --scenarioOpts withSessionId=true
+node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts scale=3
+```
+
+#### `digital_experience_mixed`
+
+Generates the `digital_experience_browser` apps plus a classic Elastic APM RUM (`rum-js`) app, `legacy-storefront-rum`, in `traces-apm.rum-default`. Use it to test lists that show both OTel and classic browser apps. The classic RUM data is minimal: page-load transactions with one XHR span each, and no marks or experience metrics.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace digital_experience_mixed --from=now-30m --to=now
 ```
 
 ### SRE Incident Scenarios
