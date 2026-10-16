@@ -1,5 +1,5 @@
 {
-  "sha1": "6b10770779b1491cdae03f8b7171807530d3b61e",
+  "sha1": "ecc85ef26e52bc74b617eff5f7ecec51349130f7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -112,22 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
-        "line": 638,
+        "line": 641,
         "column": 11
-      }
-    },
-    {
-      "id": "3ec923da60545bd-5e966f521a25c6b",
-      "title": "AlertZero e2e - rule tuning renders the false-positive rate rounded (security-team#19992)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
-        "line": 545,
-        "column": 27
       }
     },
     {
@@ -140,8 +126,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
-        "line": 687,
-        "column": 29
+        "line": 673,
+        "column": 27
+      }
+    },
+    {
+      "id": "3ec923da60545bd-5e966f521a25c6b",
+      "title": "AlertZero e2e - rule tuning renders the false-positive rate rounded (security-team#19992)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
+        "line": 732,
+        "column": 7
       }
     },
     {
