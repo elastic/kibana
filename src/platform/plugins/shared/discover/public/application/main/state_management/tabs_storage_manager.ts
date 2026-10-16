@@ -115,6 +115,8 @@ export interface TabsStorageManager {
     draftSessionTitle: string | undefined;
     /** The selected draft replaced by a newer saved session, used to recognize its stale URL. */
     outdatedSelectedTab?: TabState;
+    /** Whether a newer saved session replaced the local tabs; unsaved changes moved to recently closed tabs. */
+    hasNewSavedVersion?: boolean;
   };
   getNRecentlyClosedTabs: (params: {
     previousOpenTabs: TabState[];
@@ -566,6 +568,7 @@ export const createTabsStorageManager = ({
         return {
           allTabs: openTabs,
           outdatedSelectedTab,
+          hasNewSavedVersion,
           selectedTabId,
           updatedDiscoverSession,
           draftSessionTitle: restoredDraftSessionTitle,
@@ -591,6 +594,7 @@ export const createTabsStorageManager = ({
         const allTabsWithNewTab = [...openTabs, newTab];
         return {
           allTabs: allTabsWithNewTab,
+          hasNewSavedVersion,
           selectedTabId: newTab.id,
           updatedDiscoverSession,
           draftSessionTitle: restoredDraftSessionTitle,
@@ -639,6 +643,7 @@ export const createTabsStorageManager = ({
     return {
       allTabs,
       outdatedSelectedTab,
+      hasNewSavedVersion,
       selectedTabId: selectedTab.id,
       updatedDiscoverSession,
       draftSessionTitle: undefined,

@@ -343,6 +343,7 @@ describe('TabsStorageManager', () => {
       allTabs: [toRestoredTab(mockTab1), toRestoredTab(mockTab2)],
       selectedTabId: 'tab2',
       recentlyClosedTabs: [toRestoredTab(mockRecentlyClosedTab)],
+      hasNewSavedVersion: false,
     });
     expect(urlStateStorage.get).toHaveBeenCalledWith(TAB_STATE_URL_KEY);
     expect(storage.get).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY);
@@ -1064,6 +1065,7 @@ describe('TabsStorageManager', () => {
       selectedTabId: mockTab2.id,
       recentlyClosedTabs: [toRestoredTab(mockRecentlyClosedTab)],
       updatedDiscoverSession: persistedDiscoverSession,
+      hasNewSavedVersion: false,
     });
   });
 
@@ -1098,6 +1100,7 @@ describe('TabsStorageManager', () => {
 
     expect(loadedProps.allTabs.map(({ id }) => id)).toEqual([savedTab.id]);
     expect(loadedProps.outdatedSelectedTab?.id).toBe(mockTab1.id);
+    expect(loadedProps.hasNewSavedVersion).toBe(true);
   });
 
   it('keeps unsaved changes of tabs replaced by a newer saved version as recently closed tabs', () => {
@@ -1583,6 +1586,7 @@ describe('TabsStorageManager', () => {
       selectedTabId: mockTab2.id,
       recentlyClosedTabs: [toRestoredTab(mockRecentlyClosedTab)],
       draftSessionTitle: 'My draft',
+      hasNewSavedVersion: false,
     });
   });
 

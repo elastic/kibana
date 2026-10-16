@@ -8,6 +8,7 @@
  */
 
 import { cloneDeep, differenceBy, omit } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type { DataViewSpec, QueryState } from '@kbn/data-plugin/common';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
@@ -477,7 +478,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
       : undefined;
 
     const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
-    const { draftSessionTitle, outdatedSelectedTab, ...initialTabsState } =
+    const { draftSessionTitle, outdatedSelectedTab, hasNewSavedVersion, ...initialTabsState } =
       tabsStorageManager.loadLocally({
         userId,
         spaceId,
@@ -518,6 +519,19 @@ export const initializeTabs = createInternalStateAsyncThunk(
 
     dispatch(internalStateSlice.actions.setDraftSessionTitle(draftSessionTitle));
     dispatch(setTabs(initialTabsState));
+
+    if (hasNewSavedVersion) {
+      services.toastNotifications.addInfo({
+        title: i18n.translate('discover.sessionReplacedToast.title', {
+          defaultMessage: 'Discover session updated externally',
+        }),
+        text: i18n.translate('discover.sessionReplacedToast.text', {
+          defaultMessage:
+            'The latest saved version has been loaded. Any unsaved changes are available in recently closed tabs.',
+        }),
+        'data-test-subj': 'discoverSessionReplacedToast',
+      });
+    }
 
     return {
       userId,
