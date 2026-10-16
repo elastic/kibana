@@ -11,19 +11,19 @@ import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildEntitiesWithAnomaliesCountQuery } from '../queries/entities_with_anomalies_query';
-import type { TimeRange } from '../../use_time_range_param';
 import {
-  getEntityFilterESQL,
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
-} from '../../use_entity_filters_param';
+  type TimeRange,
+} from '../../entities_grid/common';
+import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
+import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 
 const esqlSearch = async (
   searchService: ReturnType<typeof useKibana>['services']['data']['search'],
@@ -48,7 +48,6 @@ export const useEntitiesWithAnomaliesCount = ({
   entityFilters?: EntityFilters;
 }) => {
   const { data } = useKibana().services;
-  const euidApi = useEntityStoreEuidApi();
   const {
     data: resolvedIndex,
     isLoading: isIndexLoading,
@@ -61,19 +60,17 @@ export const useEntitiesWithAnomaliesCount = ({
     !isIndexLoading &&
     !isJobsLoading &&
     jobIds.length > 0 &&
-    Boolean(euidApi) &&
     Boolean(resolvedIndex?.indexName);
 
   const query = useMemo(() => {
-    if (!euidApi || !resolvedIndex?.indexName) return null;
+    if (!resolvedIndex?.indexName) return null;
     return buildEntitiesWithAnomaliesCountQuery(
-      euidApi.euid,
       resolvedIndex.indexName,
       timeRange,
-      getEntityFilterESQL(entityFilters),
+      buildEntityFilterClauses(entityFilters),
       jobIds
     );
-  }, [euidApi, resolvedIndex?.indexName, timeRange, entityFilters, jobIds]);
+  }, [resolvedIndex?.indexName, timeRange, entityFilters, jobIds]);
 
   const {
     data: queryResult,
@@ -100,7 +97,7 @@ export const useEntitiesWithAnomaliesCount = ({
     {
       enabled: isEnabled && Boolean(query),
       keepPreviousData: true,
-      staleTime: 5 * 60_000,
+      ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
       retry: 1,
     }
@@ -121,6 +118,9 @@ export const useEntitiesWithAnomaliesCount = ({
     count: queryResult?.count ?? 0,
     entityIds: isFetching ? EMPTY_ENTITY_IDS : queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
     isLoading: isJobsLoading || isIndexLoading || isLoading || isFetching,
+    // True while the count is on its way, not when its query can never run (skipped, no index, no job).
+    isCountPending:
+      isJobsLoading || isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     error: filteredError ?? indexError,
   };
 };

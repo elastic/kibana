@@ -15,6 +15,7 @@ import {
   ALERTZERO_HUNT_WORKFLOW,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW,
 } from '.';
+import { ALERTZERO_JOURNAL_NOTE_WORKFLOW } from './journal_note';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 // Route-path and cross-package id checks (including the SYSTEM_SECURITY_HUNT_*
@@ -51,13 +52,17 @@ interface YamlStep {
     result_behaviors?: string;
     report_intent_targets?: string;
     'workflow-id'?: string;
+    'run-as-mode'?: string;
     inputs?: Record<string, unknown>;
     path?: string;
     method?: string;
     body?: Record<string, unknown>;
   };
   if?: string;
-  'on-failure'?: { continue?: boolean };
+  'on-failure'?: {
+    continue?: boolean;
+    retry?: { 'max-attempts'?: number; delay?: string };
+  };
   steps?: YamlStep[];
 }
 
@@ -158,9 +163,9 @@ describe('Hunt Watch worker chain', () => {
     expect(yaml.tags ?? []).not.toContain('watch-hunt');
   });
 
-  // Narrows, but does not close, the existing-Proposals guard's race window (see the YAML's own
-  // concurrency comment for why) — queued, not dropped, so a racing run still packages rather
-  // than being silently lost.
+  // Kept for what it still buys (see the YAML's own concurrency comment for what that is, and for
+  // why it is not what keeps two runs from creating the same Proposal) — queued, not dropped, so a
+  // racing run still packages rather than being silently lost.
   it('hunt_package_report serializes per Investigation via a queued concurrency key', () => {
     expect(packageReport.settings?.concurrency).toEqual({
       key: 'hunt-package-report-{{ inputs.investigationConversationId }}',
@@ -769,6 +774,362 @@ describe('Hunt Watch worker chain', () => {
 
       expect(ctx.variables.dismiss_close_failed).toBe(false);
       expect(render(statusWith.package_status, ctx)).toBe('success');
+    });
+  });
+
+  // A finding is created under an id derived from what it proposes, and a finding a live
+  // proposal already covers creates nothing and says where it went.
+  describe('caller-chosen proposal ids and convergence', () => {
+    const gateTrigger = proposalGate.triggers?.[0]?.inputs;
+
+    it('declares proposalId on the gate and requires it: a payload without one would mint a random id and defeat the dedup', () => {
+      expect(Object.keys(gateTrigger?.properties ?? {})).toContain('proposalId');
+      expect(gateTrigger?.required).toContain('proposalId');
+    });
+
+    it('forwards the id packaging resolved when it dispatches each gate', () => {
+      const dispatch = stepIn(
+        flatten(stepIn(packageReportSteps, 'start_proposal_gates')?.steps ?? []),
+        'dispatch_gate'
+      );
+
+      expect(String(dispatch?.with?.inputs?.proposalId)).toContain('foreach.item.proposalId');
+    });
+
+    it('hands the id to the create step, which is what makes two racing runs create one proposal', () => {
+      const create = stepIn(proposalGateSteps, 'create_and_gate_proposal');
+
+      expect(String(create?.with?.inputs?.proposalId)).toContain('inputs.proposalId');
+    });
+
+    it('lets the gate carry on past a lost race instead of aborting it', () => {
+      // The loser's create fails with a conflict before any gate is parked, and the requery
+      // after it still has to run.
+      expect(stepIn(proposalGateSteps, 'create_and_gate_proposal')?.['on-failure']?.continue).toBe(
+        true
+      );
+    });
+
+    describe('a lost race', () => {
+      // Two reports that reach one host in one sweep are packaged side by side and can both find
+      // the subject free. The service creates one Proposal and refuses the other, whose gate used
+      // to carry on in silence.
+      const fetchStep = stepIn(proposalGateSteps, 'fetch_existing_proposal');
+      const resolveStep = stepIn(proposalGateSteps, 'resolve_lost_race');
+      const journalStep = stepIn(proposalGateSteps, 'journal_lost_race');
+      const lostRaceWith = resolveStep?.with as Record<string, string>;
+      const liquid = createWorkflowLiquidEngine();
+
+      const gate = (overrides: {
+        fetched?: Record<string, unknown> | undefined;
+        spaceId?: string;
+        /** The criticality this finding asks for, when it asks for one. */
+        wanted?: string;
+      }) => ({
+        inputs: {
+          conversationId: 'conv-1',
+          title: 'Isolate host A',
+          ...(overrides.wanted === undefined
+            ? {}
+            : { actionInput: { id_value: 'dev-user', criticality_level: overrides.wanted } }),
+        },
+        workflow: { spaceId: overrides.spaceId ?? 'default' },
+        steps:
+          overrides.fetched === undefined
+            ? {}
+            : { fetch_existing_proposal: { output: overrides.fetched } },
+      });
+
+      it('only reads the existing Proposal after the create failed', () => {
+        expect(fetchStep?.type).toBe('kibana.request');
+        expect(fetchStep?.if).toContain('create_and_gate_proposal.error.message');
+        expect(fetchStep?.with?.method).toBe('GET');
+        expect(fetchStep?.with?.path).toContain('/internal/proposals/{{ inputs.proposalId }}');
+      });
+
+      it('retries that read, since the winner may not be searchable yet, and carries on if it still fails', () => {
+        expect(fetchStep?.['on-failure']?.retry?.['max-attempts']).toBeGreaterThan(1);
+        expect(fetchStep?.['on-failure']?.continue).toBe(true);
+      });
+
+      it('is a lost race only when the Proposal under the id belongs to another conversation', () => {
+        const isLost = (fetched: Record<string, unknown> | undefined) =>
+          evaluateExpression(lostRaceWith.lost_race, gate({ fetched }));
+
+        expect(isLost({ conversationId: 'conv-other' })).toBe(true);
+        // The gate itself failed on this Investigation's own Proposal: not a race.
+        expect(isLost({ conversationId: 'conv-1' })).toBe(false);
+        // The read was skipped, or failed: nothing true can be said, so nothing is written.
+        expect(isLost(undefined)).toBe(false);
+        expect(isLost({})).toBe(false);
+        expect(isLost({ conversationId: '' })).toBe(false);
+      });
+
+      it('says where the finding went, and that this Investigation stays open', () => {
+        const note = liquid
+          .parseAndRenderSync(
+            lostRaceWith.lost_race_note,
+            gate({ fetched: { conversationId: 'conv-other' } })
+          )
+          .trim();
+
+        expect(note).toContain('"Isolate host A"');
+        expect(note).toContain('(/app/alertzero?selectedConversationId=conv-other)');
+        expect(note).toContain('no second Proposal was created');
+        expect(note).toContain('stays open until an analyst closes it');
+      });
+
+      describe('whether the winner covers the finding', () => {
+        // Winning the id is not covering the finding: two findings for one subject share a target
+        // but not necessarily a criticality, and a critical report asks for more than the rest.
+        const noteFor = (wanted: string | undefined, won: string | undefined) =>
+          liquid
+            .parseAndRenderSync(
+              lostRaceWith.lost_race_note,
+              gate({
+                wanted,
+                fetched: {
+                  conversationId: 'conv-other',
+                  ...(won === undefined ? {} : { actionInput: { criticality_level: won } }),
+                },
+              })
+            )
+            .trim();
+        const covered = (note: string) => note.includes('this finding is covered by that one');
+
+        it('says it is covered when the winner asks for the same level', () => {
+          expect(covered(noteFor('high_impact', 'high_impact'))).toBe(true);
+        });
+
+        it('says it is covered when the winner asks for more', () => {
+          expect(covered(noteFor('high_impact', 'extreme_impact'))).toBe(true);
+        });
+
+        it('does not say it is covered when the winner asks for less, and says what was not proposed', () => {
+          const note = noteFor('extreme_impact', 'high_impact');
+
+          expect(covered(note)).toBe(false);
+          expect(note).toContain(
+            'it asks for high_impact where this finding asks for extreme_impact'
+          );
+          expect(note).toContain('the level this finding asks for was not proposed');
+          expect(note).toContain('A manual run targeting this report proposes it');
+          // Still points at the winner, and still says the Investigation stays open.
+          expect(note).toContain('(/app/alertzero?selectedConversationId=conv-other)');
+          expect(note).toContain('stays open until an analyst closes it');
+        });
+
+        it.each([
+          ['low_impact', 'medium_impact'],
+          ['medium_impact', 'high_impact'],
+          ['high_impact', 'extreme_impact'],
+        ])('ranks %s below %s', (weaker, stronger) => {
+          expect(covered(noteFor(stronger, weaker))).toBe(false);
+          expect(covered(noteFor(weaker, stronger))).toBe(true);
+        });
+
+        it('is covered when this finding asks for no level, as the recommendation does not', () => {
+          expect(covered(noteFor(undefined, 'high_impact'))).toBe(true);
+          expect(covered(noteFor(undefined, undefined))).toBe(true);
+        });
+
+        it('is not covered when the winner asks for no level and this finding does', () => {
+          const note = noteFor('high_impact', undefined);
+
+          expect(covered(note)).toBe(false);
+          expect(note).toContain('it asks for no level where this finding asks for high_impact');
+        });
+
+        it('is covered only by the same level when it does not know the level, rather than guessing', () => {
+          expect(covered(noteFor('custom_impact', 'custom_impact'))).toBe(true);
+          expect(covered(noteFor('custom_impact', 'extreme_impact'))).toBe(false);
+          expect(covered(noteFor('extreme_impact', 'custom_impact'))).toBe(false);
+        });
+      });
+
+      it('links the space the Investigation is in', () => {
+        const note = liquid.parseAndRenderSync(
+          lostRaceWith.lost_race_note,
+          gate({ fetched: { conversationId: 'conv-other' }, spaceId: 'sec' })
+        );
+
+        expect(note).toContain('(/s/sec/app/alertzero?selectedConversationId=conv-other)');
+      });
+
+      it('names the action when the gate was given no title', () => {
+        const note = liquid.parseAndRenderSync(lostRaceWith.lost_race_note, {
+          ...gate({ fetched: { conversationId: 'conv-other' } }),
+          inputs: { conversationId: 'conv-1' },
+        });
+
+        expect(note).toContain('"the proposed action"');
+      });
+
+      it('writes it on this Investigation through the journal workflow, and never fails the gate over it', () => {
+        expect(journalStep?.if).toContain('variables.lost_race == true');
+        expect(journalStep?.with?.['workflow-id']).toBe(ALERTZERO_JOURNAL_NOTE_WORKFLOW.id);
+        expect(journalStep?.with?.['run-as-mode']).toBe('inherit');
+        expect(String(journalStep?.with?.inputs?.conversation_id)).toContain(
+          'inputs.investigationConversationId'
+        );
+        expect(String(journalStep?.with?.inputs?.message)).toContain('variables.lost_race_note');
+        expect(journalStep?.['on-failure']?.continue).toBe(true);
+      });
+
+      it('happens after the create and before the settlement requery that closes the Investigation', () => {
+        const order = proposalGate.steps.map((step) => step.name);
+
+        expect(order.indexOf('fetch_existing_proposal')).toBeGreaterThan(
+          order.indexOf('create_and_gate_proposal')
+        );
+        expect(order.indexOf('journal_lost_race')).toBeGreaterThan(
+          order.indexOf('fetch_existing_proposal')
+        );
+        expect(order.indexOf('journal_lost_race')).toBeLessThan(order.indexOf('requery_created'));
+      });
+    });
+
+    describe('the convergence notes', () => {
+      const notes = stepIn(packageReportSteps, 'write_convergence_notes') as
+        | (YamlStep & { foreach?: string; mode?: string; if?: string })
+        | undefined;
+      const noteCall = stepIn(flatten(notes?.steps ?? []), 'write_convergence_note');
+
+      it('runs one note per converged finding, and only when packaging ran and converged any', () => {
+        expect(notes?.foreach).toContain('decide_and_package.output.converged');
+        expect(notes?.if).toContain("status == 'packaged'");
+        expect(notes?.if).toContain('converged != empty');
+      });
+
+      it('lets one failed note settle without aborting the others', () => {
+        expect(notes?.mode).toBe('settled');
+      });
+
+      it('writes the line packaging composed, on this Investigation, through the journal workflow', () => {
+        expect(noteCall?.with?.['workflow-id']).toBe(ALERTZERO_JOURNAL_NOTE_WORKFLOW.id);
+        expect(noteCall?.with?.['run-as-mode']).toBe('inherit');
+        expect(String(noteCall?.with?.inputs?.conversation_id)).toContain(
+          'inputs.investigationConversationId'
+        );
+        expect(String(noteCall?.with?.inputs?.message)).toContain('foreach.item.note');
+      });
+    });
+
+    describe('the run summary', () => {
+      const summaryWith = stepIn(packageReportSteps, 'resolve_package_summary')?.with as Record<
+        string,
+        string
+      >;
+      const liquid = createWorkflowLiquidEngine();
+      const render = (output: Record<string, unknown>) =>
+        liquid
+          .parseAndRenderSync(summaryWith.package_summary, {
+            steps: {
+              decide_and_package: {
+                output: {
+                  status: 'packaged',
+                  dismiss: false,
+                  dismissHold: 'none',
+                  mintSuppression: 'none',
+                  proposals: [],
+                  converged: [],
+                  alreadyOpenCount: 0,
+                  proposalBullets: [],
+                  omittedProposalCount: 0,
+                  coverage: { written: [], skipped: [] },
+                  ...output,
+                },
+              },
+            },
+            variables: { package_status: 'success', dispatch_failed_count: 0 },
+          })
+          .trim();
+      const converged = (count: number) =>
+        Array.from({ length: count }, (_, i) => ({ proposalId: `p-${i}`, note: 'n' }));
+
+      it('says every proposal already exists when every finding converged, instead of claiming any were prepared', () => {
+        const text = render({ converged: converged(2) });
+
+        expect(text).toContain(
+          'every proposal it would have raised already exists, so none was created: 2 were raised by another Investigation (the journal says where).'
+        );
+        expect(text).not.toContain('Packaging prepared');
+      });
+
+      it('uses the singular for one', () => {
+        expect(render({ converged: converged(1) })).toContain(
+          'none was created: 1 was raised by another Investigation'
+        );
+      });
+
+      // A rerun landing on its own pending or executing proposal creates nothing and closes
+      // nothing. Without its own branch this fell through to "prepared 0 proposals ... launched an
+      // approval gate for each".
+      it('says the findings are already open on this Investigation when a rerun finds its own', () => {
+        const text = render({ alreadyOpenCount: 2 });
+
+        expect(text).toContain(
+          'every proposal it would have raised already exists, so none was created: 2 are already open on this Investigation.'
+        );
+        expect(text).not.toContain('Packaging prepared');
+        expect(text).not.toContain('raised by another Investigation');
+      });
+
+      it('uses the singular for one of its own', () => {
+        expect(render({ alreadyOpenCount: 1 })).toContain(
+          'none was created: 1 is already open on this Investigation.'
+        );
+      });
+
+      it('names both when some converged elsewhere and some are already open here', () => {
+        expect(render({ converged: converged(1), alreadyOpenCount: 2 })).toContain(
+          'none was created: 1 was raised by another Investigation (the journal says where) and 2 are already open on this Investigation.'
+        );
+      });
+
+      it('keeps the coverage clause after either', () => {
+        expect(
+          render({ alreadyOpenCount: 1, coverage: { written: [{ kiId: 'k' }], skipped: [] } })
+        ).toContain('already open on this Investigation; also recorded 1 coverage knowledge item');
+      });
+
+      it('counts converged findings beside the ones it prepared', () => {
+        const text = render({
+          proposals: [{ proposalId: 'p-new' }],
+          proposalBullets: ['- Isolate host B'],
+          converged: converged(1),
+        });
+
+        expect(text).toContain('Packaging prepared 1 proposal');
+        expect(text).toContain('1 more finding already has a Proposal, so none was created for it');
+      });
+
+      it('counts findings already open here beside the ones it prepared', () => {
+        const text = render({
+          proposals: [{ proposalId: 'p-new' }],
+          proposalBullets: ['- Isolate host B'],
+          alreadyOpenCount: 2,
+        });
+
+        expect(text).toContain('Packaging prepared 1 proposal');
+        expect(text).toContain(
+          '2 more findings already have a Proposal, so none was created for them'
+        );
+      });
+
+      it('is unchanged when nothing converged', () => {
+        const text = render({ proposals: [{ proposalId: 'p-new' }], proposalBullets: ['- x'] });
+
+        expect(text).toContain('Packaging prepared 1 proposal');
+        expect(text).not.toContain('already');
+      });
+
+      it('no longer mentions an Investigation-wide existing-proposals guard anywhere', () => {
+        expect(summaryWith.package_summary).not.toContain('existing_proposals');
+        expect(summaryWith.package_summary).not.toContain(
+          'already has a Proposal from an earlier run'
+        );
+      });
     });
   });
 });

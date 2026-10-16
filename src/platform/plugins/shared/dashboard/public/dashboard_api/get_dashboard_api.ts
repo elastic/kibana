@@ -13,7 +13,7 @@ import { v4 } from 'uuid';
 
 import type { EuiFlyoutProps } from '@elastic/eui';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-
+import type { ViewMode } from '@kbn/presentation-publishing';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardChangeSource } from '../../common/change_sources';
 import { getLastSavedState } from '../../common/default_dashboard_state';
@@ -65,6 +65,7 @@ export function getDashboardApi({
   user,
   isAccessControlEnabled,
   changedBy,
+  viewMode,
 }: {
   creationOptions?: DashboardCreationOptions;
   panelFlyoutType?: EuiFlyoutProps['type'];
@@ -75,6 +76,7 @@ export function getDashboardApi({
   user?: DashboardUser;
   isAccessControlEnabled?: boolean;
   changedBy?: readonly DashboardChangeSource[];
+  viewMode?: ViewMode;
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = readResult?.meta.managed ?? false;
@@ -96,6 +98,7 @@ export function getDashboardApi({
     },
     createdBy: readResult?.meta?.created_by,
     user,
+    viewMode,
   });
 
   const childrenSubject$: BehaviorSubject<Observable<DashboardChildren>> = new BehaviorSubject(

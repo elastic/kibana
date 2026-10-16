@@ -85,8 +85,8 @@ export async function loadDashboardApi({
     overrideState.panels = await transformPanels(overrideState.panels, overrideState.references);
   }
 
-  // Back up any view mode passed in explicitly.
-  if (viewMode) {
+  // Back up view mode passed in explicitly; do not back up non-interactive mode because it should never be restored
+  if (viewMode && viewMode !== 'non-interactive') {
     getDashboardBackupService().storeViewMode(viewMode);
   }
 
@@ -104,6 +104,7 @@ export async function loadDashboardApi({
     user,
     isAccessControlEnabled,
     changedBy: [...(creationOptions?.changedBy ?? []), ...parseChangeSources(restoredChangedBy)],
+    viewMode,
   });
   const userActivityService = getDashboardUserActivityService(api);
 

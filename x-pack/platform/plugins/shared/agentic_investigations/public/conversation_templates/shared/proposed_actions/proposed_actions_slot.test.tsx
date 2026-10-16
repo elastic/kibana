@@ -168,6 +168,21 @@ describe('ProposedActionsSlot', () => {
     expect(screen.getByText('After-hours domain admin logins — fin-dc-01')).toBeInTheDocument();
   });
 
+  it('keeps the order the API returned, so paging and display agree', () => {
+    const pending = { ...mockProposal, id: 'pending' };
+    const decidedLast = { ...decidedProposal, id: 'decided-last' };
+    const decidedFirst = { ...decidedProposal, id: 'decided-first' };
+    mockConversationProposalsPage([pending, decidedLast, decidedFirst]);
+    renderSlot();
+
+    const rows = screen.getAllByTestId(/^investigationFlyoutProposedAction-/);
+    expect(rows.map((row) => row.getAttribute('data-test-subj'))).toEqual([
+      'investigationFlyoutProposedAction-pending',
+      'investigationFlyoutProposedAction-decided-last',
+      'investigationFlyoutProposedAction-decided-first',
+    ]);
+  });
+
   it('renders every proposal as a row of the one bordered list', () => {
     mockConversationProposalsPage([mockProposal, decidedProposal]);
 
