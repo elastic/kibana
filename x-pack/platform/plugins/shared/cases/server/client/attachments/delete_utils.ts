@@ -127,8 +127,9 @@ export const deleteCaseAttachments = async (
   }
 
   // Read the same way, for the same resolved owner and the same stored payload the shrink is
-  // computed against. Authorized as an update rather than a delete: these attachments survive the
-  // request, and the audit trail should say so.
+  // computed against.
+  const payloadsById = new Map(relatedUpdates.map(({ id, payload }) => [id, payload]));
+
   const updateTargets =
     relatedUpdates.length > 0
       ? await withCaseOwnerFallback({
@@ -139,19 +140,35 @@ export const deleteCaseAttachments = async (
         })
       : [];
 
-  if (updateTargets.length > 0) {
+  // Only the attachments that lose content are authorized as updates: they survive the request
+  // holding less than they did, and the audit trail should say so. An attachment that only has
+  // its provenance rewritten is left under the deletion the caller was already authorized for.
+  // Requiring update privileges for that bookkeeping would stop a caller who may delete
+  // attachments but not edit them from removing an attack at all, which is a combination Cases
+  // grants: read plus the delete sub-feature, with no update.
+  const shrinkTargets = updateTargets.filter((target) => {
+    const payload = payloadsById.get(target.id);
+    const [decoded] = toDecodedAttachment(target, logger);
+
+    // An attachment that does not decode is skipped by the update itself, so it loses nothing.
+    return (
+      payload != null && decoded != null && dropsStoredContent(decoded.requestAttributes, payload)
+    );
+  });
+
+  if (shrinkTargets.length > 0) {
     await authorization.ensureAuthorized({
-      entities: updateTargets.map(({ id, owner }) => ({ id, owner })),
+      entities: shrinkTargets.map(({ id, owner }) => ({ id, owner })),
       operation: Operations.updateComment,
     });
-
-    // A hook builds these payloads, so they are checked exactly like ones that arrived over the
-    // API, and before anything is deleted: a payload a hook got wrong fails the whole request
-    // rather than leaving it half done.
-    relatedUpdates.forEach(({ payload }) =>
-      validateUnifiedAttachments({ query: payload, unifiedAttachmentTypeRegistry })
-    );
   }
+
+  // A hook builds these payloads, so they are checked exactly like ones that arrived over the
+  // API, and before anything is deleted: a payload a hook got wrong fails the whole request
+  // rather than leaving it half done.
+  relatedUpdates.forEach(({ payload }) =>
+    validateUnifiedAttachments({ query: payload, unifiedAttachmentTypeRegistry })
+  );
 
   // From here the attachments a hook took along are treated exactly like the requested ones: they
   // are decoded, deleted, and recorded through the same steps.
@@ -341,13 +358,19 @@ const applyAttachmentUpdates = async (
   // An update that drops nothing only rewrites bookkeeping the attachment keeps about where it
   // came from. Nothing the analyst sees changed, so it gets no activity entry and no alert is
   // unlinked.
-  const shrunkAttachments = appliableUpdates.flatMap(({ id, type, payload, stored }) => {
-    const dropped = toDroppedPayload(stored.requestAttributes, payload);
-
-    return !('attachmentId' in dropped) || toStringArray(dropped.attachmentId).length === 0
-      ? []
-      : [{ id, owner: stored.owner, savedObjectType: type, attachment: dropped, payload }];
-  });
+  const shrunkAttachments = appliableUpdates.flatMap(({ id, type, payload, stored }) =>
+    dropsStoredContent(stored.requestAttributes, payload)
+      ? [
+          {
+            id,
+            owner: stored.owner,
+            savedObjectType: type,
+            attachment: toDroppedPayload(stored.requestAttributes, payload),
+            payload,
+          },
+        ]
+      : []
+  );
 
   if (shrunkAttachments.length === 0) {
     return;
@@ -388,6 +411,22 @@ const applyAttachmentUpdates = async (
   if (alerts.length > 0) {
     await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
   }
+};
+
+/**
+ * Whether an update takes anything away from what the attachment holds.
+ *
+ * This is what separates a shrink from a relabel. A shrink removes alerts from the case and so
+ * needs update privileges, an activity entry and the alerts unlinking; a relabel moves only the
+ * provenance an attachment carries, and rides along with the deletion that caused it.
+ */
+const dropsStoredContent = (
+  stored: AttachmentRequestV2,
+  payload: RelatedAttachmentUpdate['payload']
+): boolean => {
+  const dropped = toDroppedPayload(stored, payload);
+
+  return 'attachmentId' in dropped && toStringArray(dropped.attachmentId).length > 0;
 };
 
 /**

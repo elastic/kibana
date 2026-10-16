@@ -1109,6 +1109,38 @@ describe('deleteCaseAttachments', () => {
         ).not.toHaveBeenCalled();
         expect(argsWithHook.services.alertsService.removeCaseIdFromAlerts).not.toHaveBeenCalled();
       });
+
+      // Cases grants read plus the delete sub-feature without update, so asking for update
+      // privileges here would stop those users from removing an attack at all.
+      it('does not authorize a relabel-only update as an update', async () => {
+        onDelete.mockResolvedValue({
+          relatedAttachmentIds: [],
+          relatedAttachmentUpdates: [{ id: sharedAlerts.id, payload: reprovenancedPayload }],
+        });
+
+        await deleteWithRelated([attackAttachment], false);
+
+        expect(argsWithHook.authorization.ensureAuthorized).not.toHaveBeenCalledWith(
+          expect.objectContaining({ operation: Operations.updateComment })
+        );
+        expect(argsWithHook.services.attachmentService.update).toHaveBeenCalledWith(
+          expect.objectContaining({ savedObjectId: 'shared-alerts-1' })
+        );
+      });
+
+      it('still authorizes an update that drops alerts, whatever includeRelated said', async () => {
+        onDelete.mockResolvedValue({
+          relatedAttachmentIds: [],
+          relatedAttachmentUpdates: [{ id: sharedAlerts.id, payload: shrunkPayload }],
+        });
+
+        await deleteWithRelated([attackAttachment], false);
+
+        expect(argsWithHook.authorization.ensureAuthorized).toHaveBeenCalledWith({
+          entities: [{ id: 'shared-alerts-1', owner: 'securitySolution' }],
+          operation: Operations.updateComment,
+        });
+      });
     });
   });
 });

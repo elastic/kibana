@@ -849,6 +849,9 @@ export default ({ getService }: FtrProviderContext): void => {
               metadata: {
                 index: ALERT_INDEX,
                 rule: { id: 'attack-rule-id', name: 'attack rule' },
+                // Without the provenance the removal would keep the alert whatever the alias
+                // read did, and this would stop exercising the authorization path it is about.
+                sourceAttachmentIds: [ATTACK_ID],
               },
             },
           ] as unknown as BulkCreateUnifiedAttachmentsRequest,
