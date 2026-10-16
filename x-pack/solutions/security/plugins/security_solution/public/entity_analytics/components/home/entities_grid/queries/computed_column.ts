@@ -61,6 +61,10 @@ const getEmptyValue = (column: ComputedColumn, { sort }: QueryArgs): number | nu
 const isEmptyFirst = (column: ComputedColumn, args: QueryArgs): boolean =>
   getEmptyValue(column, args) != null && args.sort.direction === 'asc';
 
+/**
+ * A page has up to 1,000 rows, but fewer entities may have a value, so this fills the page with
+ * empty rows: e.g. sorting by alerts when only 300 entities have alerts adds 700 with 0 alerts.
+ */
 const buildEmptyRowsQuery = (
   column: ComputedColumn,
   args: QueryArgs,
