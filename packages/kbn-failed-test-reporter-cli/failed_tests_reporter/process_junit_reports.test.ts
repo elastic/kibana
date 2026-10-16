@@ -236,3 +236,95 @@ describe('processJUnitReports cascading failures', () => {
     expect(reportFailuresToFile.mock.calls[0][1]).toHaveLength(3);
   });
 });
+
+describe('processJUnitReports same-error failures', () => {
+  const makeSameErrorFailure = (i: number, overrides: Partial<TestFailure> = {}): TestFailure => ({
+    ...makeFailure(i),
+    failure: `Error: expected 200 "OK", got 500 "Internal Server Error"\n    at Test._assertStatus (a.ts:${i}:1)`,
+    testType: 'ftr',
+    ...overrides,
+  });
+
+  it('reports only the first of three failures sharing an error', async () => {
+    const failures = [0, 1, 2].map((i) => makeSameErrorFailure(i));
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams();
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(createFailureIssue).toHaveBeenCalledTimes(1);
+    expect(createFailureIssue.mock.calls[0][1]).toBe(failures[0]);
+    expect(failures.map(({ sameErrorAs }) => sameErrorAs)).toEqual([
+      undefined,
+      'test 0',
+      'test 0',
+    ]);
+  });
+
+  it('does not update tracked issues for the folded failures', async () => {
+    const failures = [0, 1, 2].map((i) => makeSameErrorFailure(i));
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams(failures.map(createExistingIssue));
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(updateFailureIssue).toHaveBeenCalledTimes(1);
+    expect(updateFailureIssue.mock.calls[0][5]).toBe(failures[0]);
+  });
+
+  it('reports each failure when only two share an error', async () => {
+    const failures = [0, 1].map((i) => makeSameErrorFailure(i));
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams(failures.map(createExistingIssue));
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(updateFailureIssue).toHaveBeenCalledTimes(2);
+    expect(failures.some(({ sameErrorAs }) => sameErrorAs)).toBe(false);
+  });
+
+  it('does not count duplicate classname+name entries toward the threshold', async () => {
+    const failures = [makeSameErrorFailure(0), makeSameErrorFailure(0), makeSameErrorFailure(1)];
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams(failures.map(createExistingIssue));
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(failures.some(({ sameErrorAs }) => sameErrorAs)).toBe(false);
+  });
+
+  it('does not count irrelevant or cascading failures toward the threshold', async () => {
+    const failures = [
+      makeSameErrorFailure(0),
+      makeSameErrorFailure(1, { likelyIrrelevant: true }),
+      makeSameErrorFailure(2, { cascading: true }),
+    ];
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams();
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(failures.some(({ sameErrorAs }) => sameErrorAs)).toBe(false);
+  });
+
+  it('only applies to FTR failures', async () => {
+    const failures = [0, 1, 2].map((i) => makeSameErrorFailure(i, { testType: 'jest' }));
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams(failures.map(createExistingIssue));
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(updateFailureIssue).toHaveBeenCalledTimes(3);
+  });
+
+  it('still indexes them and hands them to the file reporter', async () => {
+    const failures = [0, 1, 2].map((i) => makeSameErrorFailure(i));
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams();
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(reportFailuresToEs.mock.calls[0][1]).toHaveLength(3);
+    expect(reportFailuresToFile.mock.calls[0][1]).toHaveLength(3);
+  });
+});

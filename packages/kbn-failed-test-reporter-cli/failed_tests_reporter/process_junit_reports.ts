@@ -8,6 +8,8 @@
  */
 
 import { addMessagesToReport } from './add_messages_to_report';
+import { extractErrorMessage } from './failure_text';
+import type { TestFailure } from './get_failures';
 import { getFailures } from './get_failures';
 import type { ProcessReportsParams } from './process_reports_types';
 import { createFailureIssue, updateFailureIssue } from './report_failure';
@@ -28,6 +30,45 @@ import { getRootMetadata, readTestReport } from './test_report';
 // Failures the FTR marked as cascading are excluded from all of this: they are the hooks that a
 // Mocha timeout forced to fail on its way out, so they all describe the same event. Only the
 // failure that caused the abort reaches GitHub, the rest are listed on its report.
+//
+// FTR failures sharing an error message with enough others in the same report are folded the same
+// way: many tests failing identically (e.g. an API they all call returning 500) is one event, and
+// reporting each one would open an issue and bump every tracked issue for it.
+const SAME_ERROR_MIN_FAILURES = 3;
+
+const markSameErrorFailures = (failures: TestFailure[]) => {
+  const failuresByError = new Map<string, TestFailure[]>();
+  const seenKeys = new Set<string>();
+
+  for (const failure of failures) {
+    if (failure.testType !== 'ftr' || failure.likelyIrrelevant || failure.cascading) {
+      continue;
+    }
+
+    const key = `${failure.classname}\n${failure.name}`;
+    const errorMessage = extractErrorMessage(failure.failure);
+    if (!errorMessage || seenKeys.has(key)) {
+      continue;
+    }
+    seenKeys.add(key);
+
+    const group = failuresByError.get(errorMessage);
+    if (group) {
+      group.push(failure);
+    } else {
+      failuresByError.set(errorMessage, [failure]);
+    }
+  }
+
+  for (const [first, ...rest] of failuresByError.values()) {
+    if (rest.length + 1 < SAME_ERROR_MIN_FAILURES) {
+      continue;
+    }
+    for (const failure of rest) {
+      failure.sameErrorAs = first.name;
+    }
+  }
+};
 
 export async function processJUnitReports(
   reportPaths: string[],
@@ -58,10 +99,13 @@ export async function processJUnitReports(
       await reportFailuresToEs(log, failures);
     }
 
+    markSameErrorFailures(failures);
+
     const seenNewIssueKeys = new Set<string>();
     let newIssueCreated = false;
     let skippedNewFailures = 0;
     let cascadingFailures = 0;
+    let sameErrorFailures = 0;
 
     for (const failure of failures) {
       const pushMessage = (msg: string) => {
@@ -85,6 +129,16 @@ export async function processJUnitReports(
         pushMessage(
           'Failure is a consequence of an earlier Mocha timeout that aborted the config run, so an ' +
             'issue was not created or updated. See the failure that caused the abort.'
+        );
+        failure.failureCount = 0;
+        continue;
+      }
+
+      if (failure.sameErrorAs) {
+        sameErrorFailures += 1;
+        pushMessage(
+          `Failure has the same error as "${failure.sameErrorAs}", an earlier failure in this ` +
+            'run, so an issue was not created or updated. See that failure for details.'
         );
         failure.failureCount = 0;
         continue;
@@ -152,6 +206,13 @@ export async function processJUnitReports(
         `Ignored ${cascadingFailures} failure(s) in ${reportPath} that cascaded from an earlier ` +
           `Mocha timeout aborting the config run. They are listed on the report of the failure ` +
           `that caused the abort.`
+      );
+    }
+
+    if (sameErrorFailures > 0) {
+      log.info(
+        `Ignored ${sameErrorFailures} failure(s) in ${reportPath} that failed with the same error ` +
+          `as an earlier failure. They are listed on the report of that failure.`
       );
     }
 

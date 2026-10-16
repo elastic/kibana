@@ -180,4 +180,43 @@ describe('reportFailuresToFile', () => {
       'Run aborted after this failure:'
     );
   });
+
+  describe('same-error failures', () => {
+    const readHtmlOf = (name: string) => {
+      const dir = Path.join(tmpDir, 'target', 'test_failures');
+      return Fs.readdirSync(dir)
+        .filter((file) => file.endsWith('.html'))
+        .map((file) => Fs.readFileSync(Path.join(dir, file), 'utf8').replaceAll('<wbr />', ''))
+        .find((html) => html.includes(`<h1>${name}</h1>`));
+    };
+
+    const failures = () => [
+      makeFailure('first'),
+      makeFailure('second', { sameErrorAs: 'first' }),
+      makeFailure('third', { sameErrorAs: 'first' }),
+    ];
+
+    it('keeps artifacts for every failure', async () => {
+      await report(failures());
+
+      expect(readArtifacts().filter((file) => file.endsWith('.html'))).toHaveLength(3);
+    });
+
+    it('lists the folded failures on the report of the first one', async () => {
+      await report(failures());
+
+      const html = readHtmlOf('first');
+      expect(html).toContain('Same error in 2 other tests');
+      expect(html).toContain('<li><code>second</code></li>');
+      expect(html).toContain('<li><code>third</code></li>');
+    });
+
+    it('points the folded failures at the first one', async () => {
+      await report(failures());
+
+      const html = readHtmlOf('second');
+      expect(html).toContain('Not reported, same error as <code>first</code>');
+      expect(html).not.toContain('Same error in');
+    });
+  });
 });

@@ -167,9 +167,11 @@ const renderDetailsTable = (failure: TestFailure, bkMeta: BuildkiteMetadata) => 
         renderDetailsRow('Code owners', escape(formatOwners(failure.owners))),
         renderDetailsRow(
           'Failures in tracked branches',
-          `<span class="badge rounded-pill bg-danger">${failureCount}</span>${
-            failure.githubIssue ? ` ${renderIssueLink(failure.githubIssue)}` : ''
-          }`
+          failure.sameErrorAs
+            ? `Not reported, same error as ${renderCode(failure.sameErrorAs)}`
+            : `<span class="badge rounded-pill bg-danger">${failureCount}</span>${
+                failure.githubIssue ? ` ${renderIssueLink(failure.githubIssue)}` : ''
+              }`
         ),
         renderDetailsRow(
           'Buildkite job',
@@ -215,6 +217,38 @@ const renderAbortedRunSection = (cascading: TestFailure[]) => {
       ${cascading.map(({ name }) => `<li>${renderCode(name)}</li>`).join('\n      ')}
     </ul>
   </section>`;
+};
+
+const renderSameErrorSection = (names: string[]) => {
+  if (!names.length) {
+    return '';
+  }
+
+  return `<section>
+    <h2>Same error in ${names.length} other test${names.length === 1 ? '' : 's'}</h2>
+    <p>
+      These tests failed with the same error in this run. Only this failure was reported to GitHub.
+    </p>
+    <ul class="sameError">
+      ${names.map((name) => `<li>${renderCode(name)}</li>`).join('\n      ')}
+    </ul>
+  </section>`;
+};
+
+const groupSameErrorFailureNames = (failures: TestFailure[]) => {
+  const namesByFirstFailure = new Map<string, string[]>();
+  for (const { name, sameErrorAs } of failures) {
+    if (!sameErrorAs) {
+      continue;
+    }
+    const names = namesByFirstFailure.get(sameErrorAs);
+    if (names) {
+      names.push(name);
+    } else {
+      namesByFirstFailure.set(sameErrorAs, [name]);
+    }
+  }
+  return namesByFirstFailure;
 };
 
 const renderStdoutSection = (failure: TestFailure) => {
@@ -269,6 +303,7 @@ export async function reportFailuresToFile(
 
   const journeyMeta = getJourneyMetadata(rootMeta);
   const { reported, cascading, rootCause } = partitionCascadingFailures(failures);
+  const sameErrorNamesByFailure = groupSameErrorFailureNames(failures);
 
   const template = Fs.readFileSync(
     require.resolve('./report_failures_to_file_html_template.html')
@@ -278,6 +313,7 @@ export async function reportFailuresToFile(
   // So let's just write files for the first 20
   for (const failure of reported.slice(0, 20)) {
     const abortedRunnables = failure === rootCause ? cascading.map(({ name }) => name) : [];
+    const sameErrorFailures = sameErrorNamesByFailure.get(failure.name) ?? [];
     const hash = createHash('sha256').update(failure.name).digest('hex');
     const filenameBase = `${
       process.env.BUILDKITE_JOB_ID ? process.env.BUILDKITE_JOB_ID + '_' : ''
@@ -295,6 +331,9 @@ export async function reportFailuresToFile(
             ...abortedRunnables,
           ]
         : [],
+      sameErrorFailures.length
+        ? ['', 'Same error in:', '--------------', ...sameErrorFailures]
+        : [],
       failure['system-out'] ? ['', 'Standard Out:', '-------------', failure['system-out']] : [],
     ]
       .flat()
@@ -304,6 +343,7 @@ export async function reportFailuresToFile(
       {
         ...failure,
         ...(abortedRunnables.length ? { abortedRunnables } : {}),
+        ...(sameErrorFailures.length ? { sameErrorFailures } : {}),
         hash,
         buildId: bkMeta.buildId,
         jobId: bkMeta.jobId,
@@ -333,6 +373,7 @@ export async function reportFailuresToFile(
         }
         ${renderErrorSection(failure)}
         ${failure === rootCause ? renderAbortedRunSection(cascading) : ''}
+        ${renderSameErrorSection(sameErrorFailures)}
         ${
           journeyMeta
             ? await getJourneySnapshotHtml(log, journeyMeta)
