@@ -9,7 +9,10 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
-import { createAttachmentAlreadyExistsError } from '@kbn/agent-builder-common';
+import {
+  createAttachmentAlreadyExistsError,
+  createAttachmentNotFoundError,
+} from '@kbn/agent-builder-common';
 import {
   ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
   ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
@@ -488,6 +491,25 @@ describe('registerHuntCoordinatorRoute', () => {
         )
       );
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('conversation vanished'));
+    });
+
+    it('logs at warn, not error, when the child already deleted the attachment', async () => {
+      const { handler, context, logger, attachmentsClient } = makeDeps();
+      attachmentsClient.update.mockRejectedValue(
+        createAttachmentNotFoundError({ attachmentId: 'hunt-coordinator-result-run-1' })
+      );
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor({ run_id: 'run-1' }), response);
+      await flushJob();
+
+      expect(response.ok).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'result attachment hunt-coordinator-result-run-1 is gone, the hunt child gave up'
+        )
+      );
+      expect(logger.error).not.toHaveBeenCalled();
     });
   });
 

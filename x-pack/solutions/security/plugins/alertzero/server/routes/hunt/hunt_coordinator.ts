@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
+import { isAttachmentNotFoundError } from '@kbn/agent-builder-common';
 import type { HuntCoordinatorResponse, HuntCoordinatorResult } from '@kbn/alertzero-common';
 import {
   API_VERSIONS,
@@ -31,7 +32,7 @@ import type { HuntModels } from '../../services/watches/hunt/types';
 import { buildSseData } from '../../services/watches/hunt/common/sse_mapper';
 import { buildImpactEntities } from '../../services/watches/hunt/common/build_impact_entities';
 import { resolveHuntModels } from './lib/hunt_models';
-import { writeRunning, writeTerminal } from './lib/hunt_coordinator_result_store';
+import { envelopeBase, writeRunning, writeTerminal } from './lib/hunt_coordinator_result_store';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
@@ -40,11 +41,6 @@ export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinato
 
 /** Safe message for failed envelopes; the real error is logged only. */
 const FAILED_MESSAGE = 'Hunt coordinator failed';
-
-const envelopeBase = (runId: string, reportId?: string) => ({
-  run_id: runId,
-  ...(reportId ? { report_id: reportId } : {}),
-});
 
 /** Detached Tier 1 + Tier 2 run; writes only the hidden result attachment. */
 const runHuntCoordinatorJob = async ({
@@ -98,6 +94,16 @@ const runHuntCoordinatorJob = async ({
       logger.info(`hunt_coordinator: result written (${logMeta('completed')})`);
     }
   } catch (err) {
+    if (isAttachmentNotFoundError(err)) {
+      // The child deletes the attachment once its poll gives up, so a run that outlives
+      // that window has nowhere left to write; the child already reported it unfinished.
+      logger.warn(
+        `hunt_coordinator: result attachment ${attachmentId} is gone, the hunt child gave up before the run finished (${logMeta(
+          envelope.state
+        )})`
+      );
+      return;
+    }
     // Child will poll until its limit and report the run unfinished.
     logger.error(
       `hunt_coordinator: could not write the result attachment ${attachmentId} (${logMeta(

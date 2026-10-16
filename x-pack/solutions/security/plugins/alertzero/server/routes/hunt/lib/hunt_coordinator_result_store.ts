@@ -18,6 +18,12 @@ import type {
 
 export const HUNT_COORDINATOR_RESULT_ATTACHMENT_DESCRIPTION = 'Hunt coordinator result (internal)';
 
+/** `run_id` plus the optional `report_id` that every envelope state carries. */
+export const envelopeBase = (runId: string, reportId?: string) => ({
+  run_id: runId,
+  ...(reportId ? { report_id: reportId } : {}),
+});
+
 interface StoreTarget {
   client: AttachmentPublicClient;
   conversationId: string;
@@ -33,8 +39,7 @@ export const writeRunning = async ({
   reportId,
 }: StoreTarget & { runId: string; reportId?: string }): Promise<void> => {
   const data: HuntCoordinatorResultAttachment = {
-    run_id: runId,
-    ...(reportId ? { report_id: reportId } : {}),
+    ...envelopeBase(runId, reportId),
     state: 'running',
   };
   try {
