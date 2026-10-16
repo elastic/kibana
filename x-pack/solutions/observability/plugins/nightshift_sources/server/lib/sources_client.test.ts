@@ -336,6 +336,36 @@ describe('SourcesClient', () => {
     });
   });
 
+  describe('validateQuery', () => {
+    it('reports whether any index exists yet behind an accepted query', async () => {
+      const { client, dataEsClient } = setup();
+
+      await expect(client.validateQuery({ esql: 'FROM logs-nginx-*' })).resolves.toEqual({
+        type: 'logs',
+        indexExists: true,
+      });
+
+      dataEsClient.esql.query.mockResponseOnce(withoutColumns);
+      await expect(client.validateQuery({ esql: 'FROM logs-none-*' })).resolves.toEqual({
+        type: 'logs',
+        indexExists: false,
+      });
+
+      dataEsClient.esql.query.mockRejectedValueOnce(unknownIndexError());
+      await expect(client.validateQuery({ esql: 'FROM logs-none' })).resolves.toEqual({
+        type: 'logs',
+        indexExists: false,
+      });
+
+      dataEsClient.esql.query
+        .mockRejectedValueOnce(unknownColumnError())
+        .mockResponseOnce(withoutColumns);
+      await expect(
+        client.validateQuery({ esql: 'FROM logs-none-* | WHERE status >= 500' })
+      ).resolves.toEqual({ type: 'logs', indexExists: false });
+    });
+  });
+
   describe('create', () => {
     it('validates, writes the saved object with a generated view name, then puts the view', async () => {
       const { client, soClient, viewsClient, dataEsClient } = setup();

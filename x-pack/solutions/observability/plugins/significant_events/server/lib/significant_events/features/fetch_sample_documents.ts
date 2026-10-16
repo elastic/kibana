@@ -16,6 +16,8 @@ import { withSpan } from '@kbn/apm-utils';
 import { getEntityFilters } from './get_entity_filters';
 import { parseError } from '../../streams/parse_error';
 import { createSignificantEventsTracedEsClient } from '../create_significant_events_traced_es_client';
+import { isIndexNotFoundError } from '../latest_source_query';
+import { StatusError } from '../../errors/status_error';
 
 const EMPTY_SAMPLE: { hits: Array<SearchHit<Record<string, unknown>>> } = { hits: [] };
 
@@ -36,6 +38,13 @@ const withRandomSamplingErrorContext = async <T>(
   try {
     return await promise;
   } catch (err) {
+    // A source can be created before its index exists; that is not a sampling failure.
+    if (isIndexNotFoundError(err)) {
+      throw new StatusError(
+        'The source reads an index that does not exist yet. Onboard the source again once the index has data.',
+        400
+      );
+    }
     throw new Error(
       `Random sampling query failed (samplingTimeoutMs=${samplingTimeoutMs}ms): ${
         parseError(err).message
