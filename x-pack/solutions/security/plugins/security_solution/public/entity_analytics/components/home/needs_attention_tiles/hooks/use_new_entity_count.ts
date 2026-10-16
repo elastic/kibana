@@ -22,6 +22,7 @@ import {
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
 } from '../../use_entity_filters_param';
+import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 
 export const useNewEntityCount = ({
   spaceId,
@@ -89,7 +90,7 @@ export const useNewEntityCount = ({
     },
     {
       keepPreviousData: true,
-      staleTime: 5 * 60_000,
+      ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
       enabled: isEnabled,
       retry: 1,

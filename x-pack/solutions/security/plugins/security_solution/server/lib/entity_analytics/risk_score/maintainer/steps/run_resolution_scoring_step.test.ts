@@ -62,11 +62,13 @@ describe('runResolutionScoringStep', () => {
       watchlistConfigs: new Map(),
       idBasedRiskScoringEnabled: true,
       writer: {} as unknown as RiskEngineDataWriter,
+      alertFilters: [],
     });
 
     expect(calculateResolutionEntityScores).toHaveBeenCalledWith(
       expect.objectContaining({
         abortSignal: abortController.signal,
+        alertFilters: [],
       })
     );
     expect(result).toEqual({
@@ -96,6 +98,7 @@ describe('runResolutionScoringStep', () => {
       watchlistConfigs: new Map(),
       idBasedRiskScoringEnabled: true,
       writer: {} as unknown as RiskEngineDataWriter,
+      alertFilters: [],
     });
 
     expect(result).toEqual({

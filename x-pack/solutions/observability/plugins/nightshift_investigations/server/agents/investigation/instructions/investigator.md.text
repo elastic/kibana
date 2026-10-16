@@ -46,6 +46,13 @@ Follow these steps in order.
      yourself. Victim-vs-root-cause reasoning still depends on call-graph and timing evidence;
      you just collect it via ES|QL or `_search` from the sandbox.
    - Change detection — compare counts or stats across adjacent time windows with ES|QL STATS.
+   - Version changes — for each component involved, compare which versions were running before
+     onset and during the incident (`container.image.name`, `container.image.tag`, or the
+     component's own version field). A version that changed shortly before onset is a leading
+     candidate.
+   - Concentration — break failures down by pod, node, host and cluster (for example
+     `kubernetes.pod.name`, `kubernetes.node.name`, `host.name`). When they concentrate on one
+     instance, investigate that instance before any fleet-wide explanation.
    - **Source code (when available)** — if logs or Cortex point to a specific bug, file, or
      function, confirm the mechanism using a connector listed in `/workspace/connectors.md`.
      Tie findings to concrete lines or functions.
@@ -360,6 +367,20 @@ sets overflow context:
   window. A `STATS` with no `@timestamp` filter scans the entire index and will timeout. Use
   literal timestamps, not `now-1h`. Schema
   probes (`| LIMIT 0`, or a single-row `| LIMIT 1`) are exempt.
+- **Filter on structured fields before matching text.** Free-text matching on message fields
+  (`LIKE`, `RLIKE`, especially with a leading `*` or `%`) is the slowest kind of query on large
+  log indices. First narrow with structured fields — service, host, pod or container, log level,
+  error or event code — then match text inside that subset.
+- **Never group by free text.** `STATS … BY message` (or any other free-text field) over more than
+  a few minutes is very expensive. Group by structured fields, or count a few specific message
+  patterns you already know about.
+- **Start narrow and widen deliberately.** Begin with the incident window and the most relevant
+  data source; widen the window or the index pattern only when the narrow query returns nothing
+  useful. Check volume with `COUNT(*)` before pulling rows.
+- **When a query times out, change it — do not repeat it.** Add a structured filter, shorten the
+  window or drop the text match; rerunning the same query costs the full timeout again. Run a
+  query you expect to be expensive on its own, not batched with other calls, so it does not delay
+  results you could already act on.
 - Kickoff `Related sources` list each source as `- <slug> (id <id>): FROM <view_name>`. Probe a
   source with `FROM <view_name> | LIMIT 0` before querying it, and keep the literal `$.` prefix of
   the view name. If a view is not accessible, note it and continue with other signals. The
@@ -561,6 +582,14 @@ per action, at most 3, strongest first:
 - `confidence` — `high`, `medium`, or `low`: how strongly the findings support that the action
   resolves or mitigates the confirmed problem.
 - `impact` — how disruptive carrying it out is.
+- `category` — always one of these, the one that best names the kind of action:
+  - `mitigate` — restore service without fixing the cause: roll back a deploy, config change, or
+    feature flag; restart; fail over; shift traffic; shed load; add capacity.
+  - `remediate` — a lasting change to the code, config, or deployment that removes the cause.
+  - `investigate` — gather what is still needed to act safely, such as logs, a heap dump, or a
+    profile.
+  - `escalate` — bring in a person or team: page the owning on-call, or open a ticket with the
+    owner of a dependency.
 
 ```json
 {
@@ -568,7 +597,8 @@ per action, at most 3, strongest first:
   "comment": "The 14:02 deploy lowered `connection_pool.max_size` from 100 to 20, and orders-api exhausted the pool under normal load.\n\n```yaml\nconnection_pool:\n  max_size: 100\n```",
   "origin": "nightshift",
   "confidence": "high",
-  "impact": "low"
+  "impact": "low",
+  "category": "mitigate"
 }
 ```
 
