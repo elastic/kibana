@@ -64,7 +64,7 @@ const generateDashboardSchema = z.object({
     .max(1000)
     .optional()
     .describe(
-      'Where panels and sections go, in plain words: the user\'s own arrangement or size request, e.g. "make the table full width", and where your new sections and moved panels belong, e.g. "put the Key metrics section at the top". Omit it when the user asked for no arrangement and the place of your changes does not matter: panels are then placed and sized automatically.'
+      'Where panels and sections go, in plain words: the user\'s own arrangement or size request, e.g. "make the table full width", and where your new sections and moved panels belong, e.g. "put the Key metrics section at the top", and which edited panels need another size, e.g. "Response codes is now a table, size it as one". Omit it when the user asked for no arrangement and the place of your changes does not matter: panels are then placed and sized automatically.'
     ),
 });
 

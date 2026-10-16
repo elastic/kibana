@@ -19,44 +19,25 @@ export interface LayoutPanel {
   title?: string;
   /** The text of a markdown panel, or the config of a custom content panel, to size it by. */
   content?: string;
-  /** Set on the panels of the previous dashboard only. */
+  /** Omitted for a panel added to its container in this call, which the layout call places. */
   grid?: { x: number; y: number; w: number; h: number };
 }
 
 export interface LayoutSection {
   id: string;
   title: string;
-  /** Set on the sections of the previous dashboard only. */
+  /** Omitted for a section added in this call. */
   y?: number;
   /** Panels of the section; grids are relative to the section. */
   panels: LayoutPanel[];
 }
 
-export interface LayoutDashboard {
-  panels: LayoutPanel[];
-  sections: LayoutSection[];
-}
-
-/** Ids of the panels and sections that changed since the previous dashboard. */
-export interface LayoutChanges {
-  addedPanels?: string[];
-  removedPanels?: string[];
-  /** Panels now in another container. */
-  movedPanels?: string[];
-  /** Panels whose chart type or content changed. */
-  editedPanels?: string[];
-  addedSections?: string[];
-  removedSections?: string[];
-}
-
+/** The dashboard as it is after the operations, with the grids of the panels already placed. */
 export interface LayoutRequest {
   /** Where panels and sections go, from the user or the authoring agent. */
   instructions?: string;
-  /** The dashboard before this call, with its grids; omitted for a new dashboard. */
-  previous?: LayoutDashboard;
-  /** The dashboard after this call, without grids. */
-  current: LayoutDashboard;
-  changes: LayoutChanges;
+  panels: LayoutPanel[];
+  sections: LayoutSection[];
 }
 
 const arrangedPanelsSchema = z
@@ -75,12 +56,12 @@ const arrangedPanelsSchema = z
   )
   .max(500);
 
-/** Grid positions returned by the layout call, in the containers of the current dashboard. */
+/** Grid positions returned by the layout call, in the containers of the request. */
 export const layoutArrangementSchema = z.object({
   plan: z
     .string()
     .describe(
-      'Written before the grids: per container, the rows that change and why, then each changed row as its panels with `w` and `h`. Check that the widths of every row add up to 48 and that panels side by side end on the same row.'
+      'Written before the grids: per container, the rows you change and why, then each changed row as `w×h` per panel. Check that the widths of every row add up to 48 and that panels side by side end on the same row.'
     ),
   panels: arrangedPanelsSchema.describe('Every top-level panel.'),
   sections: z

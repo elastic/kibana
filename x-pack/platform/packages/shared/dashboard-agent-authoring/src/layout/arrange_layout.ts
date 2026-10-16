@@ -20,8 +20,6 @@ import {
   layoutArrangementSchema,
   type ArrangeDashboardLayout,
   type LayoutArrangement,
-  type LayoutChanges,
-  type LayoutDashboard,
   type LayoutPanel,
   type LayoutRequest,
 } from './types';
@@ -39,54 +37,68 @@ const getContent = ({ type, config }: AttachmentPanel): string | undefined => {
 };
 
 /** Short ids for the layout call, since models miscopy long ids such as UUIDs. */
-const createAliases = (...widgetLists: Widgets[]): Map<string, string> => {
+const createAliases = (widgets: Widgets): Map<string, string> => {
   const aliasById = new Map<string, string>();
   let panelCount = 0;
   let sectionCount = 0;
-  for (const widget of widgetLists.flat()) {
-    const panels = isSection(widget) ? widget.panels : [widget];
-    if (isSection(widget) && !aliasById.has(widget.id)) {
+  for (const widget of widgets) {
+    if (isSection(widget)) {
       aliasById.set(widget.id, `s${++sectionCount}`);
     }
-    for (const { id } of panels) {
-      if (!aliasById.has(id)) {
-        aliasById.set(id, `p${++panelCount}`);
-      }
+    for (const { id } of isSection(widget) ? widget.panels : [widget]) {
+      aliasById.set(id, `p${++panelCount}`);
     }
   }
   return aliasById;
 };
 
-const toLayoutPanel = (
-  panel: AttachmentPanel,
-  withGrid: boolean,
-  aliasById: ReadonlyMap<string, string>
-): LayoutPanel => {
-  const { id, type, config, grid } = panel;
-  const content = getContent(panel);
-  return {
-    id: aliasById.get(id) ?? id,
-    type,
-    ...(typeof config.type === 'string' ? { chartType: config.type } : {}),
-    ...(typeof config.title === 'string' ? { title: config.title } : {}),
-    ...(content !== undefined ? { content: content.slice(0, MAX_CONTENT_LENGTH) } : {}),
-    ...(withGrid ? { grid } : {}),
-  };
-};
+const toPanelKey = (sectionId: string | null, panelId: string): string =>
+  `${sectionId ?? ''}/${panelId}`;
+
+/** Keys of the sections, and of the panels in their containers, that a dashboard already places. */
+const getPlacedKeys = (widgets: Widgets): Set<string> =>
+  new Set(
+    widgets.flatMap((widget) =>
+      isSection(widget)
+        ? [widget.id, ...widget.panels.map(({ id }) => toPanelKey(widget.id, id))]
+        : [toPanelKey(null, widget.id)]
+    )
+  );
+
+const countPanels = (widgets: Widgets): number =>
+  widgets.reduce((count, widget) => count + (isSection(widget) ? widget.panels.length : 1), 0);
 
 const byReadingOrder = (a: AttachmentPanel, b: AttachmentPanel): number =>
   a.grid.y - b.grid.y || a.grid.x - b.grid.x;
 
-const toLayoutDashboard = (
+/**
+ * The dashboard with short ids. Panels new to their container (added or moved) are sent without a
+ * grid and new sections without a row, since their placeholder positions are for the call to set.
+ */
+const toLayoutRequest = (
   widgets: Widgets,
-  withGrid: boolean,
-  aliasById: ReadonlyMap<string, string>
-): LayoutDashboard => {
-  const toLayoutPanels = (panels: AttachmentPanel[]) =>
-    [...panels].sort(byReadingOrder).map((panel) => toLayoutPanel(panel, withGrid, aliasById));
+  placedKeys: ReadonlySet<string>,
+  aliasById: ReadonlyMap<string, string>,
+  instructions: string | undefined
+): LayoutRequest => {
+  const toLayoutPanels = (panels: AttachmentPanel[], sectionId: string | null): LayoutPanel[] =>
+    [...panels].sort(byReadingOrder).map((panel) => {
+      const { id, type, config, grid } = panel;
+      const content = getContent(panel);
+      return {
+        id: aliasById.get(id) ?? id,
+        type,
+        ...(typeof config.type === 'string' ? { chartType: config.type } : {}),
+        ...(typeof config.title === 'string' ? { title: config.title } : {}),
+        ...(content !== undefined ? { content: content.slice(0, MAX_CONTENT_LENGTH) } : {}),
+        ...(placedKeys.has(toPanelKey(sectionId, id)) ? { grid } : {}),
+      };
+    });
   return {
+    ...(instructions !== undefined ? { instructions } : {}),
     panels: toLayoutPanels(
-      widgets.filter((widget): widget is AttachmentPanel => !isSection(widget))
+      widgets.filter((widget): widget is AttachmentPanel => !isSection(widget)),
+      null
     ),
     sections: widgets
       .filter(isSection)
@@ -94,63 +106,15 @@ const toLayoutDashboard = (
       .map(({ id, title, grid, panels }) => ({
         id: aliasById.get(id) ?? id,
         title,
-        ...(withGrid ? { y: grid.y } : {}),
-        panels: toLayoutPanels(panels),
+        ...(placedKeys.has(id) ? { y: grid.y } : {}),
+        panels: toLayoutPanels(panels, id),
       })),
   };
 };
 
-/** Each panel by id, with the id of its section, or null for a top-level panel. */
-const getPanelsById = (
-  widgets: Widgets
-): Map<string, { panel: AttachmentPanel; sectionId: string | null }> =>
-  new Map(
-    widgets.flatMap(
-      (widget): Array<[string, { panel: AttachmentPanel; sectionId: string | null }]> =>
-        isSection(widget)
-          ? widget.panels.map((panel) => [panel.id, { panel, sectionId: widget.id }])
-          : [[widget.id, { panel: widget, sectionId: null }]]
-    )
-  );
-
-const getChanges = (
-  previousWidgets: Widgets,
-  currentWidgets: Widgets,
-  aliasById: ReadonlyMap<string, string>
-): LayoutChanges => {
-  const previousPanels = getPanelsById(previousWidgets);
-  const currentPanels = getPanelsById(currentWidgets);
-  const previousSectionIds = new Set(previousWidgets.filter(isSection).map(({ id }) => id));
-  const currentSectionIds = new Set(currentWidgets.filter(isSection).map(({ id }) => id));
-  const currentIds = [...currentPanels.keys()];
-  const isEdited = (id: string): boolean => {
-    const previous = previousPanels.get(id)?.panel;
-    const current = currentPanels.get(id)?.panel;
-    return (
-      previous !== undefined &&
-      current !== undefined &&
-      (previous.type !== current.type ||
-        previous.config.type !== current.config.type ||
-        getContent(previous) !== getContent(current))
-    );
-  };
-  const toAliases = (ids: string[]): string[] | undefined =>
-    ids.length > 0 ? ids.map((id) => aliasById.get(id) ?? id) : undefined;
-  return {
-    addedPanels: toAliases(currentIds.filter((id) => !previousPanels.has(id))),
-    removedPanels: toAliases([...previousPanels.keys()].filter((id) => !currentPanels.has(id))),
-    movedPanels: toAliases(
-      currentIds.filter(
-        (id) =>
-          previousPanels.has(id) &&
-          previousPanels.get(id)?.sectionId !== currentPanels.get(id)?.sectionId
-      )
-    ),
-    editedPanels: toAliases(currentIds.filter(isEdited)),
-    addedSections: toAliases([...currentSectionIds].filter((id) => !previousSectionIds.has(id))),
-    removedSections: toAliases([...previousSectionIds].filter((id) => !currentSectionIds.has(id))),
-  };
-};
+const hasUnplacedWidgets = ({ panels, sections }: LayoutRequest): boolean =>
+  sections.some(({ y }) => y === undefined) ||
+  [...panels, ...sections.flatMap((section) => section.panels)].some(({ grid }) => !grid);
 
 interface ArrangeLayoutParams {
   /** Panels and sections before this call; empty for a new dashboard. */
@@ -170,10 +134,10 @@ interface ArrangeLayoutResult {
 
 /**
  * Sets the grid of every panel and section with the injected `arrangeLayout` model call, when the
- * user or the agent asked for a layout, or panels or sections were added, removed, moved to another
- * container, or changed chart type or content. The call gets the previous dashboard with its grids,
- * the current one, and what changed. When the call fails, the dashboard keeps its current layout,
- * and a failure is returned if a layout was asked for.
+ * user or the agent asked for a layout, a panel or section is new to its container, or a panel was
+ * removed. The call gets the dashboard as it is, without the placeholder grids of new panels. When
+ * the call fails, the dashboard keeps its current layout, and a failure is returned if a layout was
+ * asked for.
  */
 export const arrangeDashboardLayout = async ({
   originalPanels,
@@ -186,20 +150,17 @@ export const arrangeDashboardLayout = async ({
     return { dashboardData };
   }
 
-  const aliasById = createAliases(dashboardData.panels, originalPanels);
-  const changes = getChanges(originalPanels, dashboardData.panels, aliasById);
-  if (instructions === undefined && Object.values(changes).every((ids) => ids === undefined)) {
+  const aliasById = createAliases(dashboardData.panels);
+  const request = toLayoutRequest(
+    dashboardData.panels,
+    getPlacedKeys(originalPanels),
+    aliasById,
+    instructions
+  );
+  const panelWasRemoved = countPanels(dashboardData.panels) < countPanels(originalPanels);
+  if (instructions === undefined && !hasUnplacedWidgets(request) && !panelWasRemoved) {
     return { dashboardData };
   }
-
-  const request: LayoutRequest = {
-    ...(instructions !== undefined ? { instructions } : {}),
-    ...(originalPanels.length > 0
-      ? { previous: toLayoutDashboard(originalPanels, true, aliasById) }
-      : {}),
-    current: toLayoutDashboard(dashboardData.panels, false, aliasById),
-    changes,
-  };
 
   try {
     const arrangement = await requestArrangement(arrangeLayout, request, aliasById);
@@ -256,7 +217,7 @@ const requestArrangement = async (
   }
   const idByAlias = new Map([...aliasById].map(([id, alias]) => [alias, id]));
   const toId = (alias: string): string => idByAlias.get(alias) ?? alias;
-  const issue = getIncompleteArrangementIssue(request.current, result.data, toId);
+  const issue = getIncompleteArrangementIssue(request, result.data, toId);
   if (issue) {
     throw new Error(`incomplete arrangement: ${issue}`);
   }
@@ -270,7 +231,7 @@ const requestArrangement = async (
  * whole. Both sides use aliases; `toId` reports the original ids.
  */
 const getIncompleteArrangementIssue = (
-  { panels, sections }: LayoutDashboard,
+  { panels, sections }: LayoutRequest,
   arrangement: LayoutArrangement,
   toId: (alias: string) => string
 ): string | undefined => {

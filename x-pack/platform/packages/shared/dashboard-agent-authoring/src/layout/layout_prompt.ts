@@ -13,17 +13,14 @@ The dashboard uses a **48-column grid**; the origin \`(0, 0)\` is the top-left c
 
 ## What you get
 
-- \`previous\`: the dashboard before this edit, with the \`grid\` of every panel and the \`y\` of every section; omitted for a new dashboard.
-- \`current\`: the dashboard after this edit, without grids. \`panels\` are the top-level panels; \`sections\` each list their panels, whose coordinates are section-relative. Markdown and custom content panels include their \`content\`.
-- \`changes\`: the ids of panels added, removed, moved to another container, or edited (chart type or content changed), and of sections added or removed.
-- \`instructions\`: where panels and sections go, from the user or the authoring agent. They override the rules below.
+The dashboard as it is now: \`panels\` are the top-level panels, and \`sections\` each list their panels, whose coordinates are section-relative. Panels without a \`grid\` and sections without a \`y\` are new in this edit, or moved here from another container: place them. Markdown and custom content panels include their \`content\`. \`instructions\`, when given, say where panels and sections go, from the user or the authoring agent; they override the rules below.
 
 ## How to lay out
 
-- Start from the \`previous\` grids. The user may have arranged them by hand, so without \`instructions\` change only the rows that hold an added, removed, moved or edited panel, and the rows below them that must move up or down. When \`instructions\` place a panel relative to another, e.g. next to or below it, the rows of both panels are affected too. "Next to" or "beside" means the same \`y\`, side by side; "below" means the next row. A full row does not stop the move: when A and B fill a row and C must go next to B, put B and C in that row and move A out of it, e.g. to the row C left. Keep every other panel's grid as it is, even where it breaks the rules below.
+- Keep every panel's \`grid\` unless it is in a row you must change, since the user may have arranged it by hand. A row changes when it receives a panel without a grid, when it has a gap, or when \`instructions\` name one of its panels; the rows below it move up or down with it. When \`instructions\` place a panel relative to another, e.g. next to or below it, the rows of both panels change. "Next to" or "beside" means the same \`y\`, side by side; "below" means the next row. A full row does not stop the move: when A and B fill a row and C must go next to B, put B and C in that row and move A out of it, e.g. to the row C left. Keep every other panel's grid as it is, even where it breaks the rules below.
 - Every row you change follows the sizing and packing rules in full: leaving empty space is never a way to keep a panel unchanged.
-- Size added and edited panels by *Grid sizes by chart type*.
-- In a new dashboard, or when \`instructions\` ask to rearrange the whole dashboard, lead with a markdown introduction when there is one, then metrics and gauges, then trends, then breakdowns and tables, and size every panel by *Grid sizes by chart type*.
+- Size panels without a grid, and panels that \`instructions\` ask to resize, by *Grid sizes by chart type*.
+- When no panel has a grid, or when \`instructions\` ask to rearrange the whole dashboard, lead with a markdown introduction when there is one, then metrics and gauges, then trends, then breakdowns and tables, and size every panel by *Grid sizes by chart type*.
 
 ## Grid sizes by chart type
 
@@ -38,7 +35,7 @@ Use these sizes — **do not make metric or gauge panels full-width**:
 - **Datatable** (\`data_table\`) → \`w: 24–48, h: 12–16\`. Prefer full-width so columns are readable.
 - **Custom content** → \`w: 24–48\`, \`h\` from what its \`content\` shows, for the rows its ES|QL query returns (respect its \`LIMIT\`): \`h: 6–8\` for a KPI or status card, or one short row of them; \`h: 10–16\` for a list, table or status board; \`h: 16–20\` for a multi-section layout or a drawn chart or diagram. Too short makes the panel scroll and too tall leaves an empty gap; between two sizes, take the larger.
 - **Vega and ML panels** → \`w: 24–48, h: 12–16\`.
-- **Any other type** (legacy visualizations, maps, saved searches) → \`w: 24\` by default, up to \`48\`. Keep its \`previous\` \`h\` when it has one.
+- **Any other type** (legacy visualizations, maps, saved searches) → \`w: 24\` by default, up to \`48\`. Keep its \`h\` when it has a grid.
 
 Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 
@@ -53,7 +50,7 @@ Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 
 - Each section has its own coordinate space: the coordinates of its panels are section-relative and start at \`y: 0\`. The same grid rules apply within each section.
 - A section occupies exactly one row (\`h: 1\`) in the outer grid, whatever the height of its panels. Top-level panels and sections never share a row. Compute outer \`y\` in order: top-level panels advance by \`y + h\`, sections by \`y + 1\`.
-- Place a new section among the other sections by purpose, e.g. key metrics before trends. Keep the outer order from \`previous\`: a top-level panel that was above a section stays above it, and one between two sections stays between them. A new section is inserted into that order; it never moves an existing panel or section past another one. For example, with \`intro, KPIs, Traffic, note, Errors\`, a new section before Traffic gives \`intro, KPIs, New, Traffic, note, Errors\`.
+- Place a new section among the other sections by purpose, e.g. key metrics before trends. Keep the outer order of the sections and top-level panels that have a \`y\`: a top-level panel that was above a section stays above it, and one between two sections stays between them. A section without a \`y\` is inserted into that order; it never moves an existing panel or section past another one. For example, with \`intro, KPIs, Traffic, note, Errors\`, a new section before Traffic gives \`intro, KPIs, New, Traffic, note, Errors\`.
 
 ## Example: 4 KPI metrics + 2 time-series charts + 1 breakdown bar chart
 
