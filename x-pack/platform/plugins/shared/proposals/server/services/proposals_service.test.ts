@@ -2143,7 +2143,6 @@ describe('ProposalsService', () => {
           origin: 'alertzero',
           categories: ['respond', 'investigate'],
           excludeSuperseded: true,
-          excludeUndecidedSuperseded: false,
           excludeExpired: false,
         },
         SPACE_ID,

@@ -46,7 +46,6 @@ export class ImpactPillsService {
           categories,
           status: 'pending',
           excludeSuperseded: true,
-          excludeUndecidedSuperseded: false,
           excludeExpired: false,
         },
         spaceId,
@@ -58,8 +57,7 @@ export class ImpactPillsService {
             {
               origin,
               decidedWithinHours,
-              excludeSuperseded: false,
-              excludeUndecidedSuperseded: true,
+              excludeSuperseded: true,
               excludeExpired: false,
             },
             spaceId,
