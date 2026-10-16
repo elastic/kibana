@@ -18,7 +18,7 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
  * system, so `setup` is never called.
  */
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 export type ProposalsConfig = TypeOf<typeof configSchema>;
