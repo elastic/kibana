@@ -33,7 +33,9 @@ import { alertingV2Overrides } from './alerting_v2.mts';
 import { securityImportsOverrides } from './security_imports.mts';
 
 export default defineConfig<OxlintConfig>({
-  plugins: ['react', 'typescript', 'import', 'jsx-a11y', 'react-perf', 'node', 'jest'],
+  // `import` stays out while no `import/*` rule is enabled: the plugin alone makes oxlint resolve
+  // and parse every imported module, which roughly doubles full-repo lint time.
+  plugins: ['react', 'typescript', 'jsx-a11y', 'react-perf', 'node', 'jest'],
   jsPlugins: [
     {
       name: '@kbn/eslint',
