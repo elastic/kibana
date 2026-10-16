@@ -20,6 +20,8 @@ export interface SpaceDependencies {
   getSpaceId?: (request: KibanaRequest) => Promise<string>;
   getAccessibleSpaceIds?: (request: KibanaRequest) => Promise<string[]>;
   checkManageEvalsPrivileges?: (request: KibanaRequest, spaceIds: string[]) => Promise<boolean>;
+  /** Spaces the caller has `read_evals` in. */
+  getEvalsReadableSpaceIds?: (request: KibanaRequest) => Promise<string[]>;
 }
 
 export type ResolveTargetSpacesResult =

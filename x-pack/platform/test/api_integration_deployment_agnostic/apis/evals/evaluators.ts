@@ -74,7 +74,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('trace evidence', () => {
       const traceId = uniqueTraceId();
-      const traceIndex = `traces-evals-evidence-ftr-${suffix}`;
+      const traceIndex = `traces-evals-evidence-ftr-${suffix}-default`;
 
       before(async () => {
         await seedTrace(es, traceIndex, traceId, [

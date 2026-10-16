@@ -96,13 +96,16 @@ export interface SeedTraceSpan {
 }
 
 // Creates a `traces-*` index with both legacy `trace_id` and OTel `trace.id` fields and seeds spans.
+// The evals routes read `traces-*-{space}` and filter on `data_stream.namespace`, so `index` must
+// end with `-{namespace}` and the spans carry that namespace (`default` unless told otherwise).
 // Note: this writes a concrete `traces-*` index, which can clash with data-stream templates on some
 // clusters; fine locally, but revisit if the traces suite is ever enabled on MKI (skipMKI today).
 export const seedTrace = async (
   esClient: Client,
   index: string,
   traceId: string,
-  spans: SeedTraceSpan[]
+  spans: SeedTraceSpan[],
+  { namespace = 'default' }: { namespace?: string } = {}
 ): Promise<void> => {
   await esClient.indices.create({
     index,
@@ -117,6 +120,7 @@ export const seedTrace = async (
       ],
       properties: {
         trace_id: { type: 'keyword' },
+        data_stream: { type: 'object', properties: { namespace: { type: 'keyword' } } },
         trace: { type: 'object', properties: { id: { type: 'keyword' } } },
         span_id: { type: 'keyword' },
         parent_span_id: { type: 'keyword' },
@@ -137,6 +141,7 @@ export const seedTrace = async (
       { index: {} },
       {
         trace_id: traceId,
+        data_stream: { namespace },
         trace: { id: traceId },
         span_id: span.spanId,
         ...(span.parentSpanId ? { parent_span_id: span.parentSpanId } : {}),
@@ -162,16 +167,19 @@ const TRACING_PROJECT_TIMESTAMP = '2024-01-01T00:00:00.000Z';
 
 // Seeds root spans (one per trace, `name` = project) plus a token-bearing child span,
 // shaped so the tracing projects route's `scope.name` and root-span filters match.
+// As with `seedTrace`, `index` must end with `-{namespace}`.
 export const seedTracingProjects = async (
   esClient: Client,
   index: string,
-  projects: SeedTracingProject[]
+  projects: SeedTracingProject[],
+  { namespace = 'default' }: { namespace?: string } = {}
 ): Promise<void> => {
   await esClient.indices.create({
     index,
     mappings: {
       properties: {
         trace_id: { type: 'keyword' },
+        data_stream: { type: 'object', properties: { namespace: { type: 'keyword' } } },
         span_id: { type: 'keyword' },
         parent_span_id: { type: 'keyword' },
         name: { type: 'keyword' },
@@ -192,6 +200,7 @@ export const seedTracingProjects = async (
         { index: {} },
         {
           trace_id: traceId,
+          data_stream: { namespace },
           span_id: `${traceId}-root`,
           name: project.name,
           scope: { name: '@kbn/evals' },
@@ -203,6 +212,7 @@ export const seedTracingProjects = async (
         { index: {} },
         {
           trace_id: traceId,
+          data_stream: { namespace },
           span_id: `${traceId}-child`,
           parent_span_id: `${traceId}-root`,
           name: 'llm call',

@@ -89,6 +89,10 @@ export const registerEvaluateRoute = ({
             // its own change. Only persisted evaluators run here, so the prompt is not
             // caller-controlled the way it is on `_test`.
             traceReader: coreContext.elasticsearch.client.asInternalUser,
+            // Judge spans go to the request's space. The trace read stays unscoped: this
+            // route is reached by workflows and the CLI, whose traces may be written in a
+            // different space than the one the request names.
+            spaceId,
           });
 
           return response.ok({ body: { results } });

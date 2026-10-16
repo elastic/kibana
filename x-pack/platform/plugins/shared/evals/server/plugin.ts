@@ -198,6 +198,24 @@ export class EvalsPlugin
       return allSpaces.map(({ id }) => id);
     };
 
+    // When security is disabled there is no per-space authz to enforce, so every visible space counts.
+    const getEvalsReadableSpaceIds = async (request: KibanaRequest): Promise<string[]> => {
+      const spaceIds = await getAccessibleSpaceIds(request);
+      const [, pluginsStart] = await coreSetup.getStartServices();
+      const security = pluginsStart.security;
+      if (!security || spaceIds.length === 0) {
+        return spaceIds;
+      }
+      const { privileges } = await security.authz
+        .checkPrivilegesWithRequest(request)
+        .atSpaces(spaceIds, {
+          kibana: [security.authz.actions.api.get(EVALS_API_PRIVILEGES.read)],
+        });
+      return privileges.kibana.flatMap(({ authorized, resource }) =>
+        authorized && resource ? [resource] : []
+      );
+    };
+
     registerRoutes({
       router,
       logger: this.logger,
@@ -211,6 +229,7 @@ export class EvalsPlugin
       getCurrentUsername,
       checkManageEvalsPrivileges,
       getAccessibleSpaceIds,
+      getEvalsReadableSpaceIds,
       taskProviderRegistry: this.taskProviderRegistry,
       workflowsManagement,
     });

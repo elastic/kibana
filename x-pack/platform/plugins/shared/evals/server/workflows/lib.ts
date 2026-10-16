@@ -22,6 +22,7 @@ import type {
   IngestScoresResponse,
   Model,
 } from '@kbn/evals-common';
+import { withEvalSpace } from '@kbn/inference-tracing';
 import { buildScoreDocuments, mapWithConcurrency, ConcurrencyAbortError } from '@kbn/evals-runner';
 import type { EvaluatorResult, RunnerExample } from '@kbn/evals-runner';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
@@ -84,16 +85,19 @@ export const runTask = async (
   if (!provider) {
     throw new Error(`Unknown task provider "${providerName}"`);
   }
-  return provider.run({
-    input,
-    connectorId: target.connectorId,
-    agentId: target.agentId,
-    params: target.params,
-    logger: runtime.logger,
-    abortSignal: runtime.abortSignal,
-    getInferenceClient: runtime.getInferenceClient,
-    callKibanaApi: runtime.callKibanaApi,
-  });
+  // Spans the task starts are written to the workflow's space, so its traces stay with it.
+  return withEvalSpace(runtime.spaceId, () =>
+    provider.run({
+      input,
+      connectorId: target.connectorId,
+      agentId: target.agentId,
+      params: target.params,
+      logger: runtime.logger,
+      abortSignal: runtime.abortSignal,
+      getInferenceClient: runtime.getInferenceClient,
+      callKibanaApi: runtime.callKibanaApi,
+    })
+  );
 };
 
 /** The graded scores plus any evaluator-level failures returned by `/_evaluate`. */

@@ -85,6 +85,23 @@ The plugin reads from the following indices:
 
 Run evaluation suites via the `@kbn/evals` CLI to populate the scores and traces indices. See the [`@kbn/evals` README](../../packages/shared/kbn-evals/README.md) for details.
 
+### Traces and spaces
+
+Traces are space aware. Every span started while an in-tool experiment runs a task or an LLM judge, including the HTTP and Elasticsearch client spans under it, is written to the data stream namespace of the space that ran it (`traces-<dataset>-<spaceId>`). This works through the `data_stream.namespace` span attribute, which the EDOT collector routes on. Agent Builder spans are already routed by space.
+
+The trace routes (`/internal/evals/tracing/projects`, `.../traces`, `/internal/evals/traces/{traceId}`, trace evidence, evaluator validation and instrumentation probes, and `_test`) read only `traces-*-<spaceId>` and filter on `data_stream.namespace`. Evidence that comes from log events (the `otel-genai-events` and Claude Code profiles) follows the same rules on `logs-*-<spaceId>`; logs from external apps land in the default namespace, so they show up in the default space.
+
+When a score visible in the space references the trace (task, evaluator or online score `trace_id`), the read also covers every other space the caller has `read_evals` in. That covers experiments run in one space that assign their scores to others, and CLI suite runs, whose Kibana calls land in the default space but whose scores are written to the `--space-ids` you pass. Score ingestion takes trace ids as given, so a score never grants access by itself: a trace written in a space the caller can't read evals in stays hidden, even when a score points at it. Viewing CLI traces from a `--space-ids` space therefore also needs `read_evals` in the default space.
+
+Things to know:
+
+- Traces written before this change to a namespace other than `default` no longer show up in the evals UI. Existing `*-default` traces keep showing in the default space.
+- `_evaluate` (used by the CLI and workflows) reads as the internal user and is not scoped on the trace read. Its LLM judge spans are written to the space of the request.
+- CLI suite runs call Kibana without a space prefix, so their task and judge traces are written to the default space even when scores go to other `--space-ids`. They open from experiment pages in those spaces through their scores, but they are not listed on the Tracing page there.
+- A trace written in another space only becomes readable once a score referencing it is stored. Until then, trace reads from the score's space (evidence, `_test`) find no trace documents.
+- Online evals sample the index pattern set on the rule. It defaults to the Agent Builder traces of the current space, and it is free text: a pattern that matches other spaces samples their traces too.
+- Space isolation in the plugin is enforced by these routes, not by Elasticsearch. A user with read access to `traces-*` or `logs-*` can still query other spaces' data directly (Dev Tools, Discover). For real isolation, give roles document-level security on `traces-*` and `logs-*` with a `term` query on `data_stream.namespace` set to the space id, or name the space's data streams explicitly. An index pattern like `traces-*-<spaceId>` is not enough: space ids can contain `-`, so `traces-*-sales` also matches the `a-sales` space's `traces-agent_builder.otel-a-sales`.
+
 ## Score ingestion
 
 The `@kbn/evals` CLI sends scores via `POST /internal/evals/scores` rather than writing directly to Elasticsearch. The plugin validates the payload and persists documents to the `.evaluation-scores` data stream.
@@ -234,7 +251,7 @@ Profile definitions live in [`server/evaluators/evidence/profiles.ts`](server/ev
 
 `_evaluate` uses the same whole-round `complete` readiness check.
 
-The endpoint requires `read_evals` and current-user read access to `traces-*` and `logs-*`. Explicit authorization failures return `403`; wildcard searches silently narrowed to authorized indices can still appear as `404`. Exhausted transient Elasticsearch failures return `503`. The endpoint returns full message and tool content, does not persist it, and supports one turn only.
+The endpoint requires `read_evals` and current-user read access to the traces and logs of the space (`traces-*-<spaceId>` and `logs-*-<spaceId>`, or `traces-*` and `logs-*`). Explicit authorization failures return `403`; wildcard searches silently narrowed to authorized indices can still appear as `404`. Exhausted transient Elasticsearch failures return `503`. The endpoint returns full message and tool content, does not persist it, and supports one turn only.
 
 ## UI pages
 

@@ -58,6 +58,81 @@ describe('createTraceAccessor', () => {
       });
     });
 
+    it('limits the traces source to the given spaces', async () => {
+      const { esClient, searchMock } = createEsClient();
+      const accessor = createTraceAccessor({
+        traceId: validTraceId,
+        esClient,
+        spaceIds: ['marketing', 'default'],
+      });
+
+      await accessor.runSearch('traces', {
+        filter: [{ type: 'term', field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
+        size: 1,
+      });
+
+      expect(searchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: ['traces-*-marketing', 'traces-*-default'],
+          query: {
+            bool: {
+              filter: [
+                { term: { 'trace.id': validTraceId } },
+                { terms: { 'data_stream.namespace': ['marketing', 'default'] } },
+                { term: { 'attributes.elastic.inference.span.kind': 'TOOL' } },
+              ],
+            },
+          },
+        })
+      );
+    });
+
+    it('matches nothing, instead of searching every index, when given no spaces', async () => {
+      const { esClient, searchMock } = createEsClient();
+      const accessor = createTraceAccessor({ traceId: validTraceId, esClient, spaceIds: [] });
+
+      await accessor.runSearch('traces', { size: 1 });
+
+      expect(searchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: 'traces-*',
+          query: {
+            bool: {
+              filter: [
+                { term: { 'trace.id': validTraceId } },
+                { terms: { 'data_stream.namespace': [] } },
+              ],
+            },
+          },
+        })
+      );
+    });
+
+    it('limits the logs source to the same spaces, so log evidence follows the trace rules', async () => {
+      const { esClient, searchMock } = createEsClient();
+      const accessor = createTraceAccessor({
+        traceId: validTraceId,
+        esClient,
+        spaceIds: ['marketing'],
+      });
+
+      await accessor.runSearch('logs', { filter: [], size: 1 });
+
+      expect(searchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: ['logs-*-marketing'],
+          query: {
+            bool: {
+              filter: [
+                { term: { trace_id: validTraceId } },
+                { terms: { 'data_stream.namespace': ['marketing'] } },
+              ],
+            },
+          },
+        })
+      );
+    });
+
     it('builds trace-scoped DSL query for logs source with exists filter', async () => {
       const { esClient, searchMock } = createEsClient();
       const accessor = createTraceAccessor({ traceId: validTraceId, esClient });

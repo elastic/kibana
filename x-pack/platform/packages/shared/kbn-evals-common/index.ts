@@ -41,6 +41,14 @@ export { getDatasetId } from './impl/dataset_ids';
 export { getEvaluatorDefinitionId, getEvaluatorSuccessorId } from './impl/evaluator_ids';
 export { ALL_SPACES_ID, DEFAULT_SPACE_ID, resolveDatasetHomeSpace } from './impl/spaces';
 export {
+  TRACES_NAMESPACE_FIELD,
+  buildAgentBuilderSpaceTracesIndex,
+  buildSpaceLogsIndexPattern,
+  buildSpaceTracesIndexPattern,
+  buildTracesNamespaceFilter,
+  buildTracesNamespacesFilter,
+} from './impl/traces';
+export {
   pairScores,
   compareScores,
   resolveDirection,

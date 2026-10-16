@@ -178,8 +178,14 @@ describe('POST /internal/evals/evaluators/_validate', () => {
     return { handler, routeConfig, getSpaceId };
   };
 
+  const noScoreHits = { hits: { total: { value: 0 }, hits: [] } };
+
   const buildContext = (searchMock = buildRouteSearchMock()) =>
     ({
+      evals: Promise.resolve({
+        evaluationScoreService: { search: jest.fn().mockResolvedValue(noScoreHits) },
+        onlineScoreService: { search: jest.fn().mockResolvedValue(noScoreHits) },
+      }),
       core: Promise.resolve({
         elasticsearch: {
           client: {

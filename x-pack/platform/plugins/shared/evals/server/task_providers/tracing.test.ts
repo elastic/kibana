@@ -7,7 +7,12 @@
 
 import { context, propagation } from '@opentelemetry/api';
 import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
-import { BAGGAGE_TRACKING_BEACON_KEY, BAGGAGE_TRACKING_BEACON_VALUE } from '@kbn/inference-tracing';
+import {
+  BAGGAGE_TRACKING_BEACON_KEY,
+  BAGGAGE_TRACKING_BEACON_VALUE,
+  getEvalSpaceId,
+  withEvalSpace,
+} from '@kbn/inference-tracing';
 import { withEvalsEvaluatorSpan, withEvalsTaskSpan } from './tracing';
 
 describe('withEvalsTaskSpan', () => {
@@ -39,6 +44,24 @@ describe('withEvalsTaskSpan', () => {
     // token/output evaluators — summing over the task's trace id — find nothing.
     expect(beaconInsideTask).toBe(BAGGAGE_TRACKING_BEACON_VALUE);
     expect(result).toBe('done');
+  });
+
+  it('keeps the eval space inside the fresh root span', async () => {
+    const seen = await withEvalSpace('marketing', () =>
+      withEvalsTaskSpan('evals.test.task', async () => getEvalSpaceId(context.active()))
+    );
+
+    // The task span is rooted at a new context, which would otherwise drop the space and
+    // send the task's spans to the default space's traces.
+    expect(seen).toBe('marketing');
+  });
+
+  it('has no eval space when the caller set none', async () => {
+    const seen = await withEvalsTaskSpan('evals.test.task', async () =>
+      getEvalSpaceId(context.active())
+    );
+
+    expect(seen).toBeUndefined();
   });
 
   it('propagates errors thrown by the task', async () => {

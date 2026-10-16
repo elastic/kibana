@@ -13,7 +13,7 @@ import {
   trace,
   type Span,
 } from '@opentelemetry/api';
-import { withInferenceContext } from '@kbn/inference-tracing';
+import { carryEvalSpaceId, withInferenceContext } from '@kbn/inference-tracing';
 
 /** OpenTelemetry's sentinel for "no valid trace" (a non-recording / no-op span). */
 const INVALID_TRACE_ID = '00000000000000000000000000000000';
@@ -60,7 +60,10 @@ const withEvalsRootSpan = <T>(
 ): Promise<T> =>
   withInferenceContext(() => {
     const baggage = propagation.getBaggage(context.active());
-    const parentContext = baggage ? propagation.setBaggage(ROOT_CONTEXT, baggage) : ROOT_CONTEXT;
+    // The fresh root drops everything but baggage, so the space is carried over by hand.
+    const parentContext = carryEvalSpaceId(
+      baggage ? propagation.setBaggage(ROOT_CONTEXT, baggage) : ROOT_CONTEXT
+    );
 
     return context.with(parentContext, () =>
       evalsTracer.startActiveSpan(

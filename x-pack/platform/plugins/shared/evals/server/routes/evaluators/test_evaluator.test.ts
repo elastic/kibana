@@ -45,6 +45,15 @@ const JUDGE: LlmJudgeConfig = {
   output: { scores: [{ name: 'quality', type: 'number' }] },
 };
 
+// No score references any trace, so trace reads stay scoped to the request space.
+const noScoresEvalsContext = () => {
+  const noHits = { hits: { total: { value: 0 }, hits: [] } };
+  return {
+    evaluationScoreService: { search: jest.fn().mockResolvedValue(noHits) },
+    onlineScoreService: { search: jest.fn().mockResolvedValue(noHits) },
+  };
+};
+
 describe('POST /internal/evals/evaluators/_test', () => {
   const setup = ({ prompt = jest.fn() }: { prompt?: jest.Mock } = {}) => {
     const router = httpServiceMock.createRouter();
@@ -82,6 +91,7 @@ describe('POST /internal/evals/evaluators/_test', () => {
     const asInternalUser = { search: jest.fn() };
     const asCurrentUser = { search: jest.fn() };
     const context = {
+      evals: Promise.resolve(noScoresEvalsContext()),
       core: Promise.resolve({ elasticsearch: { client: { asInternalUser, asCurrentUser } } }),
     } as unknown as Parameters<typeof handler>[0];
 
@@ -198,6 +208,7 @@ describe('POST /internal/evals/evaluators/_test', () => {
       API_VERSIONS.internal.v1
     ].handler;
     const context = {
+      evals: Promise.resolve(noScoresEvalsContext()),
       core: Promise.resolve({
         elasticsearch: { client: { asInternalUser: { search: jest.fn() } } },
       }),
@@ -292,6 +303,7 @@ describe('POST /internal/evals/evaluators/_test', () => {
       API_VERSIONS.internal.v1
     ].handler;
     const context = {
+      evals: Promise.resolve(noScoresEvalsContext()),
       core: Promise.resolve({
         elasticsearch: { client: { asInternalUser: { search: jest.fn() } } },
       }),

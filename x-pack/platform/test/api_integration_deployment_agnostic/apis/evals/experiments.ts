@@ -80,7 +80,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const repeatedRunOutput = { answer: `answer-${repeatedExampleId}-repetition-1` };
     const codeEvaluatorName = 'latency';
     const judgeModel = { id: 'gpt-4o', family: 'gpt-4', provider: 'openai' };
-    const traceIndex = `traces-evals-ftr-experiments-${suiteId}`;
+    const traceIndex = `traces-evals-ftr-experiments-${suiteId}-default`;
     const taskTraceId = (index: number) => `task-trace-${suiteId}-${index}`;
     const evaluatorTraceId = (index: number) => `evaluator-trace-${suiteId}-${index}`;
 

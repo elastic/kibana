@@ -15,6 +15,11 @@ import type { EvidenceRound } from './evidence/types';
 export interface TraceAccessor {
   traceId: string;
   esClient: ElasticsearchClient;
+  /**
+   * Limits span and log reads to the documents written in these spaces. Leave it unset for
+   * reads that must find a trace by id wherever it was written, such as evaluator runs.
+   */
+  spaceIds?: readonly string[];
 }
 
 export interface EvaluatorContext<ReferenceData = Record<string, unknown>> {

@@ -109,6 +109,9 @@ export const registerGetExperimentTracesRoute = ({
           }
 
           const spanResponse = await esClient.msearch<TraceSpanSource>({
+            // Not narrowed to the space's traces: the trace ids come from this space's
+            // score documents, which is what grants the read. A trace is written to the
+            // space of the request that produced it, which can differ from its scores'.
             index: TRACES_INDEX_PATTERN,
             searches: traceReferences.flatMap((reference) => [
               {},

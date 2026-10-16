@@ -13,6 +13,7 @@ import {
   type TestEvaluatorResponse,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import { compileUserDefinedEvaluator } from '../../evaluators/user_defined/compile';
 import { withUncachedTemplates } from '../../evaluators/user_defined/draft_template_cache';
@@ -21,6 +22,7 @@ import {
   validateJudgeConfig,
 } from '../../evaluators/user_defined/validate_config';
 import type { RouteDependencies } from '../register_routes';
+import { resolveTraceReadSpaces } from '../traces/resolve_trace_read_spaces';
 import { builtInEvaluatorConflict } from './shared/handle_evaluator_error';
 import { EvaluationExecutionError, executeEvaluators } from './shared/execute_evaluators';
 
@@ -29,6 +31,8 @@ export const registerTestEvaluatorRoute = ({
   logger,
   evaluatorRegistry,
   getInferenceStart,
+  getSpaceId,
+  getEvalsReadableSpaceIds,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -76,6 +80,8 @@ export const registerTestEvaluatorRoute = ({
 
         try {
           const coreContext = await context.core;
+          const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
+          const evalsContext = await context.evals;
           // This draft is rendered once and never stored, so it is held out of the shared
           // template cache for the duration of the run.
           const [result] = await withUncachedTemplates(
@@ -92,6 +98,15 @@ export const registerTestEvaluatorRoute = ({
                 // would let `manage_evals` alone pull back trace content the caller has no
                 // Elasticsearch privileges for.
                 traceReader: coreContext.elasticsearch.client.asCurrentUser,
+                spaceId,
+                resolveTraceReadSpaces: (traceId) =>
+                  resolveTraceReadSpaces({
+                    evalsContext,
+                    spaceId,
+                    traceId,
+                    getEvalsReadableSpaceIds:
+                      getEvalsReadableSpaceIds && (() => getEvalsReadableSpaceIds(request)),
+                  }),
               })
           );
           const testResult: TestEvaluatorResponse['result'] = {
