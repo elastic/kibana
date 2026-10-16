@@ -170,8 +170,8 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toContain(`${internalNamespaces.workflows}.validate_workflow`);
     });
 
-    it('starts authoring from a template rather than from a blank workflow', () => {
-      expect(content).toMatch(/Start from the template\. Do not write a workflow/);
+    it('starts authoring from the checklist rather than guessing at a workflow shape', () => {
+      expect(content).toMatch(/Draft against the checklist\. Do not guess at a workflow shape/);
       expect(content).toMatch(/all take a raw\s+`yaml` string/);
     });
 
@@ -249,21 +249,35 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/Never rerun a\s+failed call unchanged/);
     });
 
-    it('points the strategies without an install path at the unit-profile-template shape', () => {
-      expect(content).toMatch(
-        /Outlier, atomic facts, detection[^\n]*\n[^\n]*start from the shape of `unit-profile-template`/
+    it('says plainly that unit-profile-template is not a file any tool can hand back', () => {
+      const prose = content.replace(/\s+/g, ' ');
+
+      expect(prose).toMatch(
+        /Outlier, atomic facts, detection and connector automations have no template of their own, and no file to start from either/
+      );
+      expect(prose).toMatch(
+        /`unit-profile-template` is YAML the install tool holds internally.*not something `load_skill` or any other tool hands\s+back/
+      );
+      expect(content).not.toMatch(/load_skill.{0,40}referenced_files.{0,80}unit-profile-template/s);
+    });
+
+    it('tells the subagent not to look for the template file, since no tool can retrieve it', () => {
+      const prose = content.replace(/\s+/g, ' ');
+
+      expect(prose).toMatch(/There is no template file for this strategy/);
+      expect(prose).toMatch(
+        /it is never among `load_skill`'s `referenced_files`, and no tool — not `read_file`, not `list_files` — can retrieve\s+it/
       );
     });
 
-    it('says what a template already encodes, so it is edited rather than rewritten', () => {
-      expect(content).toMatch(/a fresh draft gets\s+wrong/);
-      expect(content).toMatch(/Take it literally/);
-      expect(content).toMatch(/none of them announce themselves/);
-    });
+    it('has the subagent draft against the checklist instead of a named template', () => {
+      const prose = content.replace(/\s+/g, ' ');
 
-    it('has the brief name the workflow it starts from, since a subagent without one writes from nothing', () => {
-      expect(content).toMatch(/\*\*the workflow it starts from, by name\*\*/);
-      expect(content).toMatch(/rediscovering what\s+that automation already encodes/);
+      expect(prose).toMatch(/\*\*the checklist every draft has to satisfy\*\*/);
+      expect(prose).toMatch(
+        /None of the strategies briefed to a subagent has a template, or a file to start\s+from/
+      );
+      expect(content).not.toMatch(/\*\*the workflow it starts from, by name\*\*/);
     });
 
     it('points at the lookup tools that cover built-in and connector step types', () => {
@@ -376,9 +390,9 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/cannot govern the first/);
     });
 
-    it('points at the referenced-file path instead of browsing the filesystem', () => {
-      expect(content).toMatch(/among its `referenced_files` with\s+absolute paths/);
-      expect(content).toMatch(/nothing to go looking for with `list_files`/);
+    it('tells the subagent no tool can retrieve the unit-profile-template file, rather than pointing it at referenced_files', () => {
+      expect(content).toMatch(/no tool — not `read_file`, not `list_files` — can retrieve\s+it/);
+      expect(content).not.toMatch(/templates? arrive(?:s)? .{0,40}`referenced_files`/s);
     });
 
     it('explains the five-match cliff that makes keyword step lookups useless', () => {

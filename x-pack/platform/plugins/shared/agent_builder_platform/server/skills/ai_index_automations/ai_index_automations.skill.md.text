@@ -293,19 +293,19 @@ Index metadata, bottom-up document and unit profile automations are installed by
 `platform.context_engine.install_automation_template`. Do not write their YAML and do not start a
 subagent for them. Installing the same template with the same `name` replaces that automation in
 place; a different `name` adds another.
-Outlier, atomic facts, detection and connector automations have no template of their own. Do not
-look for one and do not invent a name; start from the shape of `unit-profile-template`, which is
-the YAML the install tool provides for the Cumulative strategy. It is a
-complete workflow that runs as it stands, and it already carries the parts a fresh draft gets
-wrong: the grounding, the prompt's output schema, the single `data.set` that builds the indicator
-so verification and the write see the same document, the `verifiers` on `createKi`, the `ki_id`
-scheme that makes a re-run replace rather than duplicate, and the `attributes.esql` wiring the
-verifiers read.
+Outlier, atomic facts, detection and connector automations have no template of their own, and no
+file to start from either: `unit-profile-template` is YAML the install tool holds internally to
+render the Cumulative strategy's automation, not something `load_skill` or any other tool hands
+back. Do not name it to a subagent or send one looking for it. Draft these against the checklist
+in "What every automation must do" above: the grounding, the prompt's output schema, the single
+`data.set` that builds the indicator so verification and the write see the same document, the
+`verifiers` on `createKi`, the `ki_id` scheme that makes a re-run replace rather than duplicate,
+and the `attributes.esql` wiring the verifiers read.
 
-It opens with a comment saying what to change and what to leave, and declares what varies in
-`consts` at the top — the AI Index id, the source index, the fields the strategy turns on. The
-`consts` are the three strategy answers written down, so a brief that states them names the
-install arguments almost one for one.
+Each template opens with a comment saying what to change and what to leave, and declares what
+varies in `consts` at the top — the AI Index id, the source index, the fields the strategy turns
+on. The `consts` are the three strategy answers written down, so a brief that states them names
+the install arguments almost one for one.
 
 **Index/Table Metadata** (`type: index_metadata`) — call
 `platform.context_engine.install_automation_template` with `template: index_metadata`. Pass
@@ -430,15 +430,15 @@ will invent it confidently. Put in the prompt:
   the provenance ids (`trace_ids`, `conversation_id`, the source index and document id) that
   become its `references`, plus the error text for `attributes.error_text`. The subagent cannot
   see the signals; what is not in the brief is not in the KI
-- **the workflow it starts from, by name** — `unit-profile-template` — and the values its
-  `consts` block should take. None of the strategies briefed to a subagent has a template of its
-  own, so every brief names that one and says to adapt its shape rather than copy it verbatim; say
-  as much, and say not to invent another name. Index metadata, bottom-up document and unit
+- **the checklist every draft has to satisfy**, restated rather than pointed at a file: the
+  grounding, the prompt's output schema, the single `data.set` that builds the indicator so
+  verification and the write see the same document, the `verifiers` on `createKi`, the `ki_id`
+  scheme that makes a re-run replace rather than duplicate, and the `attributes.esql` wiring the
+  verifiers read. None of the strategies briefed to a subagent has a template, or a file to start
+  from — `unit-profile-template` is YAML the install tool holds internally, and no tool hands it
+  back — so say that plainly rather than naming it. Index metadata, bottom-up document and unit
   profile automations are not briefed to a subagent at all: call
-  `platform.context_engine.install_automation_template` yourself. This is the single
-  highest-value line in the brief: a subagent that has been handed a worked automation edits it,
-  and one that has not writes a workflow from nothing and spends its budget rediscovering what
-  that automation already encodes
+  `platform.context_engine.install_automation_template` yourself
 - an instruction to make its first call `load_skill` on `ai-index-automations`, by id, ahead of
   every other tool. `load_skill` takes the id directly and returns the skill's content, its tools
   and the paths of its referenced files, so a subagent that has been handed the id has nothing to
@@ -451,10 +451,10 @@ will invent it confidently. Put in the prompt:
 - that the complete final YAML must come back verbatim, together with the pilot's run time (the
   `started_at` and `finished_at` the execution result carries) and how many units the pilot
   wrote, which is what the time estimate before the save is computed from
-- the three rules below, restated in the prompt rather than left to the skill: start from the named
-  template rather than writing a workflow, never generate one, and never validate a definition you
-  are about to run. A skill read on the second call cannot govern the first, and a subagent that
-  discovers these mid-flight has usually spent half its budget by then
+- the three rules below, restated in the prompt rather than left to the skill: draft against the
+  checklist rather than guessing at a workflow shape, never generate one, and never validate a
+  definition you are about to run. A skill read on the second call cannot govern the first, and a
+  subagent that discovers these mid-flight has usually spent half its budget by then
 
 That last point is worth stating bluntly in the prompt, because `run_subagent` tells the model its
 job is to summarize. A summary of a workflow is worthless here: the YAML *is* the deliverable. Ask
@@ -467,7 +467,7 @@ is still wrong rather than burning the budget silently.
 
 **Never run the build subagent on `effort: low`.** `run_subagent` takes an `effort` level, and
 `low` routes the subagent to the fast model. Drafting, piloting and fixing a workflow is the
-hardest step in this flow, and a template edit that drops a `consts` key or a pilot read that
+hardest step in this flow, and a draft that drops a `consts` key or a pilot read that
 misses an empty field is exactly what a smaller model gets wrong. Leave `effort` at its default
 or set it higher; the saving from `low` is one cheaper call against a build that has to be redone.
 
@@ -483,22 +483,19 @@ done before it is loaded is done without the rules, and is usually thrown away.
 One skill is enough. This one carries the step contracts, the syntax and the templates; nothing
 else here needs a second one.
 
-The templates arrive the same way. `load_skill` returns them among its `referenced_files` with
-absolute paths, and `read_file` on the one the brief named is the whole retrieval — there is
-nothing to go looking for with `list_files`.
+There is no template file for this strategy. `unit-profile-template` is YAML the install tool
+holds internally to render and install the Cumulative strategy's automation; it is never among
+`load_skill`'s `referenced_files`, and no tool — not `read_file`, not `list_files` — can retrieve
+it. Do not spend a call looking for it.
 
-**Start from the template. Do not write a workflow.** The template the brief named is a complete
-automation that has been run. Read it, fill in its `consts` block, and add the grounding the
-strategy needs. That is the draft. Authoring one from nothing is a long generate-and-repair loop
-that arrives somewhere worse, because the template already encodes the things a fresh draft gets
-wrong and a run does not catch: the single `data.set` that builds the indicator so verification and
-the write see the same document, the `verifiers` on `createKi`, the `ki_id` scheme that makes a re-run
+**Draft against the checklist. Do not guess at a workflow shape.** Build directly from "What every
+automation must do" and the `context-engine` step contracts, both above: the grounding, the
+prompt's output schema, the single `data.set` that builds the indicator so verification and the
+write see the same document, the `verifiers` on `createKi`, the `ki_id` scheme that makes a re-run
 replace rather than duplicate, and the `attributes.esql` wiring that decides what the verifiers
-actually check.
-
-Each template opens with a comment saying what to change and what to leave. Take it literally.
-Rewriting the parts it tells you to leave is how a draft acquires faults the template does not
-have, and none of them announce themselves — the workflow still runs, and still writes indicators.
+actually check. A run catches a mistake here only slowly, one failed write at a time, so drafting
+against the checklist up front — what the four install-tool templates already encode for the
+strategies that have one — is the only safeguard available for a strategy that does not.
 
 Every `ai.prompt` step in the templates carries `connector-id: .google-gemini-3.5-flash-chat_completion`.
 That is the default, not a placeholder: leave it as it stands unless the user has named another
@@ -511,7 +508,7 @@ not any skill offered it (the default agent has it; the Context Engine agent doe
 its own description and `workflow-authoring` present it as the way to author and to repair a
 definition. Neither of them
 knows you are holding a workflow that has been run. Generating from a description throws that away
-and returns a draft with the faults the template was written to avoid; generating a *fix* re-rolls
+and returns a draft with the faults the checklist above is meant to avoid; generating a *fix* re-rolls
 parts of the definition you had already settled, and every re-roll is a chance to lose something a
 pilot proved. There is no edit it makes that you cannot make yourself in the YAML in front of you.
 
@@ -521,7 +518,7 @@ The generic attachment guidance offers that, and it does not apply here — the 
 from the YAML you hand back, so an edit made to an attachment instead of to your own copy is an
 edit that never reaches what gets saved.
 
-The template is text from the moment you read it. `platform.workflows.validate_workflow`,
+Your draft is text from the moment you write it. `platform.workflows.validate_workflow`,
 `platform.core.execute_workflow` and `platform.workflows.workflow_execute_step` all take a raw
 `yaml` string, so it can be edited, checked and run in place, with nothing in between and nothing
 to read an edit back out of.
