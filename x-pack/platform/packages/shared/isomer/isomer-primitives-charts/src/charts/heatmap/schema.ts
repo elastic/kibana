@@ -19,14 +19,20 @@ import {
   MAX_GRID_CELLS,
 } from '../../model/text';
 import {
+  bucketsResolve,
+  DEFAULT_TIME_ZONE,
   granularitySchema,
+  intervalRule,
   isTime,
   timeAxisIssues,
+  timeIntervalSchema,
   timeKindRule,
   timeRule,
   timeSpellingRule,
   timeValue,
+  timeWindowSchema,
   timeZoneSchema,
+  windowRule,
 } from '../../model/time';
 import { toneSchema } from '../../model/tone';
 
@@ -82,6 +88,12 @@ const xSchema = z
         title: axisTitle,
         timeZone: timeZoneSchema().optional(),
         granularity: granularitySchema().optional(),
+        interval: timeIntervalSchema().optional(),
+        domain: timeWindowSchema()
+          .describe(
+            `The window the data was queried over, which the columns span. Leave out to fit the cells; ${windowRule}.`
+          )
+          .optional(),
       })
       .strict()
       .describe(`Times as ISO 8601; ${timeKindRule}; ${timeSpellingRule}.`),
@@ -242,6 +254,23 @@ export const schema = z
     )
   )
   .check(
+    crossRefine(
+      ({ x, cells }) =>
+        x.type !== 'time' ||
+        x.interval === undefined ||
+        cells.length > MAX_DATA_POINTS ||
+        !cells.every((cell) => isTime(cell.x)) ||
+        (x.domain !== undefined && !isTime(x.domain.from)) ||
+        bucketsResolve(
+          cells.map((cell) => cell.x),
+          x.interval,
+          x.timeZone ?? DEFAULT_TIME_ZONE,
+          x.domain?.from
+        ),
+      { error: intervalRule, path: ['x', 'interval'], rule: intervalRule }
+    )
+  )
+  .check(
     crossSuperRefine(
       ({ x, y, cells }, context) => {
         if (cells.length > MAX_DATA_POINTS) {
@@ -304,12 +333,24 @@ export const schema = z
         if (x.type !== 'time' || cells.length > MAX_DATA_POINTS) {
           return;
         }
-        for (const { index, rule } of timeAxisIssues(cells.map((cell) => cell.x))) {
+        const paths: (string | number)[][] = [
+          ...cells.map((_, index) => ['cells', index, 'x']),
+          ...(x.domain
+            ? [
+                ['x', 'domain', 'from'],
+                ['x', 'domain', 'to'],
+              ]
+            : []),
+        ];
+        for (const { index, rule } of timeAxisIssues([
+          ...cells.map((cell) => cell.x),
+          ...(x.domain ? [x.domain.from, x.domain.to] : []),
+        ])) {
           if (rule !== timeRule) {
             context.addIssue({
               code: 'custom',
               message: rule,
-              path: ['cells', index, 'x'],
+              path: paths[index]!,
             });
           }
         }

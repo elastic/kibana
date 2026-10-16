@@ -19,8 +19,10 @@ import {
   MAX_GRID_CELLS,
 } from '../../model/text';
 import {
+  bucketsResolve,
+  DEFAULT_TIME_ZONE,
   granularitySchema,
-  isoTime,
+  intervalRule,
   isTime,
   timeAxisIssues,
   timeIntervalSchema,
@@ -28,7 +30,9 @@ import {
   timeRule,
   timeSpellingRule,
   timeValue,
+  timeWindowSchema,
   timeZoneSchema,
+  windowRule,
 } from '../../model/time';
 import { toneSchema } from '../../model/tone';
 
@@ -46,20 +50,9 @@ const xTypeRule =
   'every point’s `x` is a string for `category`, a time for `time`, and a number for `number`';
 const categoryRule = 'when `categories` is declared, every point’s `x` is one of their keys';
 
-const windowRule = '`domain.from` is before `domain.to`';
-
-const timeDomainSchema = z
-  .object({ from: isoTime(), to: isoTime() })
-  .strict()
-  .check(
-    crossRefine(({ from, to }) => timeValue(from) < timeValue(to), {
-      error: windowRule,
-      rule: windowRule,
-    })
-  )
-  .describe(
-    `The window the data was queried over, which the axis spans. With \`interval\`, a bucket running past either end is partial, and every surface marks it. Leave out to fit the points; ${windowRule}.`
-  );
+const timeDomainSchema = timeWindowSchema().describe(
+  `The window the data was queried over, which the axis spans. With \`interval\`, a bucket running past either end is partial, and every surface marks it. Leave out to fit the points; ${windowRule}.`
+);
 
 const xSchema = z
   .discriminatedUnion('type', [
@@ -313,6 +306,22 @@ export const schema = z
         return positions * series.length <= MAX_GRID_CELLS;
       },
       { error: gridRule, path: ['series'], rule: gridRule }
+    )
+  )
+  .check(
+    crossRefine(
+      ({ x, series }) => {
+        if (x.type !== 'time' || x.interval === undefined || pointCount(series) > MAX_DATA_POINTS) {
+          return true;
+        }
+        const times = series.flatMap(({ points }) => points.map(({ x: at }) => at));
+        return (
+          !times.every(isTime) ||
+          (x.domain !== undefined && !isTime(x.domain.from)) ||
+          bucketsResolve(times, x.interval, x.timeZone ?? DEFAULT_TIME_ZONE, x.domain?.from)
+        );
+      },
+      { error: intervalRule, path: ['x', 'interval'], rule: intervalRule }
     )
   )
   .check(
