@@ -8,42 +8,42 @@
  */
 
 import { pick } from 'lodash';
-import type { PanelTypeMigration, PanelTypeMigrationResult } from '@kbn/embeddable-plugin/server';
+import type { PanelTypeMigration } from '@kbn/embeddable-plugin/server';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
-import type { VisualizeByValueState } from '../../common/embeddable/types';
+import type {
+  VisualizeByReferenceState,
+  VisualizeByValueState,
+} from '../../common/embeddable/types';
 import type { LegacyPanelMigration } from './types';
 
 /**
- * Migrates by-value legacy visualization panels with the migration registered for their vis type.
+ * Migrates a by-value legacy visualization panel with the migration registered for its vis type.
  * By-reference panels are left unchanged.
  */
 export const getLegacyVisPanelTypeMigration = (
   getLegacyPanelMigration: (visType: string) => LegacyPanelMigration | undefined
 ): PanelTypeMigration => ({
   from: VISUALIZE_EMBEDDABLE_TYPE,
-  migrateOut: (panels) =>
-    panels.flatMap(({ id, config }): PanelTypeMigrationResult[] => {
-      if (config.savedObjectId) return [];
+  migrateOut: (config) => {
+    const { savedObjectId, savedVis, ...state } = config as Partial<
+      VisualizeByReferenceState & VisualizeByValueState
+    >;
+    if (savedObjectId || !savedVis) return;
 
-      const { savedVis, ...state } = config as Partial<VisualizeByValueState>;
-      const migration = savedVis && getLegacyPanelMigration(savedVis.type);
-      if (!savedVis || !migration) return [];
+    const migration = getLegacyPanelMigration(savedVis.type);
+    if (!migration) return;
 
-      try {
-        const migratedConfig = migration.migrate({
-          savedVis,
-          panelConfig: pick(state, [
-            'title',
-            'description',
-            'hide_title',
-            'hide_border',
-            'time_range',
-            'drilldowns',
-          ]),
-        });
-        return migratedConfig ? [{ panelId: id, type: migration.to, config: migratedConfig }] : [];
-      } catch (error) {
-        return [{ panelId: id, error: error instanceof Error ? error : new Error(String(error)) }];
-      }
-    }),
+    const migratedConfig = migration.migrate({
+      savedVis,
+      panelConfig: pick(state, [
+        'title',
+        'description',
+        'hide_title',
+        'hide_border',
+        'time_range',
+        'drilldowns',
+      ]),
+    });
+    return migratedConfig && { type: migration.to, config: migratedConfig };
+  },
 });

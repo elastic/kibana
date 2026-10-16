@@ -7,17 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type PanelTypeMigrationResult =
-  | { panelId: string; type: string; config: Record<string, unknown> }
-  | { panelId: string; error: Error };
-
 export interface PanelTypeMigration {
   from: string;
   /**
-   * Receives all panels of the `from` type in a single dashboard. Panels omitted from the results
-   * are left unchanged.
+   * Returns the target panel type and config for a panel of the `from` type, or `undefined` to leave
+   * the panel unchanged. Throwing drops the panel with a warning.
    */
-  migrateOut: (
-    panels: ReadonlyArray<{ id: string; config: Record<string, unknown> }>
-  ) => readonly PanelTypeMigrationResult[];
+  migrateOut: (config: object) => { type: string; config: object } | undefined;
 }

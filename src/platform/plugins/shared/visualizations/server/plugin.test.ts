@@ -28,19 +28,9 @@ describe('VisualizationsPlugin', () => {
     const [[{ from, migrateOut }]] = embeddable.registerPanelTypeMigration.mock.calls;
     expect(from).toBe(VISUALIZE_EMBEDDABLE_TYPE);
     expect(
-      migrateOut([
-        {
-          id: 'panel-1',
-          config: {
-            savedVis: {
-              title: 'Vega',
-              type: 'vega',
-              params: {},
-              data: { aggs: [], searchSource: {} },
-            },
-          },
-        },
-      ])
-    ).toEqual([{ panelId: 'panel-1', type: 'vega', config: { spec: 'migrated' } }]);
+      migrateOut({
+        savedVis: { title: 'Vega', type: 'vega', params: {}, data: { aggs: [], searchSource: {} } },
+      })
+    ).toEqual({ type: 'vega', config: { spec: 'migrated' } });
   });
 });

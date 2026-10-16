@@ -263,15 +263,9 @@ describe('transformPanelsOut', () => {
     });
 
     it('replaces type and config when a migration succeeds', () => {
+      const migrateOut = jest.fn().mockReturnValue({ type: 'target', config: { migrated: true } });
       mockGetPanelTypeMigration.mockImplementation((from: string) =>
-        from === 'source'
-          ? {
-              from,
-              migrateOut: () => [
-                { panelId: 'panel-1', type: 'target', config: { migrated: true } },
-              ],
-            }
-          : undefined
+        from === 'source' ? { from, migrateOut } : undefined
       );
 
       expect(transformPanelsOut(panelsJSON, [], [], false, true)).toEqual({
@@ -285,6 +279,7 @@ describe('transformPanelsOut', () => {
         ],
         warnings: [],
       });
+      expect(migrateOut).toHaveBeenCalledWith({ foo: 'bar' });
     });
 
     it('does not migrate panels when migratePanelTypes is false', () => {
@@ -296,48 +291,8 @@ describe('transformPanelsOut', () => {
       expect(result.panels).toEqual([expect.objectContaining({ type: 'source' })]);
     });
 
-    it('passes all panels of a type to one migrateOut call', () => {
-      const migrateOut = jest.fn().mockReturnValue([]);
-      mockGetPanelTypeMigration.mockImplementation((from: string) =>
-        from === 'source' ? { from, migrateOut } : undefined
-      );
-
-      transformPanelsOut(
-        JSON.stringify([
-          {
-            type: 'source',
-            embeddableConfig: { a: 1 },
-            panelIndex: 'panel-a',
-            gridData: { h: 10, i: 'panel-a', w: 10, x: 0, y: 0 },
-          },
-          {
-            type: 'other',
-            embeddableConfig: {},
-            panelIndex: 'panel-other',
-            gridData: { h: 10, i: 'panel-other', w: 10, x: 10, y: 0 },
-          },
-          {
-            type: 'source',
-            embeddableConfig: { b: 2 },
-            panelIndex: 'panel-b',
-            gridData: { h: 10, i: 'panel-b', w: 10, x: 20, y: 0 },
-          },
-        ]),
-        [],
-        [],
-        false,
-        true
-      );
-
-      expect(migrateOut).toHaveBeenCalledTimes(1);
-      expect(migrateOut).toHaveBeenCalledWith([
-        { id: 'panel-a', config: { a: 1 } },
-        { id: 'panel-b', config: { b: 2 } },
-      ]);
-    });
-
-    it('keeps a panel unchanged when the migration omits it', () => {
-      mockGetPanelTypeMigration.mockReturnValue({ from: 'source', migrateOut: () => [] });
+    it('keeps a panel unchanged when the migration returns undefined', () => {
+      mockGetPanelTypeMigration.mockReturnValue({ from: 'source', migrateOut: () => undefined });
 
       const result = transformPanelsOut(panelsJSON, [], [], false, true);
       expect(result.panels).toEqual([
@@ -346,31 +301,7 @@ describe('transformPanelsOut', () => {
       expect(result.warnings).toEqual([]);
     });
 
-    it('drops a panel when the migration returns an error for it', () => {
-      mockGetPanelTypeMigration.mockReturnValue({
-        from: 'source',
-        migrateOut: () => [{ panelId: 'panel-1', error: new Error('nope') }],
-      });
-
-      expect(transformPanelsOut(panelsJSON, [], [], false, true)).toMatchInlineSnapshot(`
-        Object {
-          "panels": Array [],
-          "warnings": Array [
-            Object {
-              "message": "Unable to migrate panel type. Error: nope",
-              "panel_config": Object {
-                "foo": "bar",
-              },
-              "panel_references": Array [],
-              "panel_type": "source",
-              "type": "dropped_panel",
-            },
-          ],
-        }
-      `);
-    });
-
-    it('drops all panels of a type when migrateOut throws', () => {
+    it('drops a panel when the migration throws', () => {
       mockGetPanelTypeMigration.mockReturnValue({
         from: 'source',
         migrateOut: () => {
@@ -378,14 +309,18 @@ describe('transformPanelsOut', () => {
         },
       });
 
-      const result = transformPanelsOut(panelsJSON, [], [], false, true);
-      expect(result.panels).toEqual([]);
-      expect(result.warnings).toEqual([
-        expect.objectContaining({
-          panel_type: 'source',
-          message: 'Unable to migrate panel type. Error: migration failed',
-        }),
-      ]);
+      expect(transformPanelsOut(panelsJSON, [], [], false, true)).toEqual({
+        panels: [],
+        warnings: [
+          {
+            type: 'dropped_panel',
+            panel_type: 'source',
+            panel_config: { foo: 'bar' },
+            panel_references: [],
+            message: 'Unable to transform panel config. Error: migration failed',
+          },
+        ],
+      });
     });
 
     it('drops a migrated panel when target schema validation fails', () => {
@@ -402,16 +337,13 @@ describe('transformPanelsOut', () => {
       );
       mockGetPanelTypeMigration.mockReturnValue({
         from: 'source',
-        migrateOut: () => [{ panelId: 'panel-1', type: 'target', config: { migrated: true } }],
+        migrateOut: () => ({ type: 'target', config: { migrated: true } }),
       });
 
       const result = transformPanelsOut(panelsJSON, [], [], false, true);
       expect(result.panels).toEqual([]);
       expect(result.warnings).toEqual([
         expect.objectContaining({
-          type: 'dropped_panel',
-          panel_type: 'target',
-          panel_config: { foo: 'bar' },
           message: 'Unable to transform panel config. Error: Target schema failure',
         }),
       ]);
@@ -420,16 +352,15 @@ describe('transformPanelsOut', () => {
     it('drops a migrated panel when the target type has no schema', () => {
       mockGetPanelTypeMigration.mockReturnValue({
         from: 'source',
-        migrateOut: () => [{ panelId: 'panel-1', type: 'unregistered', config: {} }],
+        migrateOut: () => ({ type: 'unregistered', config: {} }),
       });
 
       const result = transformPanelsOut(panelsJSON, [], [], false, true);
       expect(result.panels).toEqual([]);
       expect(result.warnings).toEqual([
         expect.objectContaining({
-          panel_type: 'unregistered',
           message:
-            'Unable to transform panel config. Error: Panel type "unregistered" migrated from "source" has no schema',
+            'Unable to transform panel config. Error: Panel type "unregistered" has no schema',
         }),
       ]);
     });
