@@ -406,18 +406,23 @@ describe('shouldAddIntegrationFromCatalog', () => {
     ).toBe(false);
   });
 
-  it.each(['supabase', 'awsfirehose', 'cribl', 'contrast_security'])(
-    'should return false for %s even if it has data streams',
-    (name) => {
-      expect(
-        shouldAddIntegrationFromCatalog({
-          name,
-          type: 'integration',
-          data_streams: [{ name: 'logs' }],
-        } as any)
-      ).toBe(false);
-    }
-  );
+  it.each([
+    'supabase',
+    'awsfirehose',
+    'cribl',
+    'contrast_security',
+    'elastic_agent',
+    'elastic_govcloud',
+    'keeper',
+  ])('should return false for %s even if it has data streams', (name) => {
+    expect(
+      shouldAddIntegrationFromCatalog({
+        name,
+        type: 'integration',
+        data_streams: [{ name: 'logs' }],
+      } as any)
+    ).toBe(false);
+  });
 
   it('should return true for uploaded packages that only carry saved object attributes', () => {
     expect(shouldAddIntegrationFromCatalog({ name: 'my_uploaded_package' })).toBe(true);
