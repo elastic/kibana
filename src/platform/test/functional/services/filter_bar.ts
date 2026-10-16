@@ -239,8 +239,12 @@ export class FilterBarService extends FtrService {
 
   public async openFilterBuilder() {
     await this.retry.try(async () => {
+      // "Add filter" is disabled while a search that can be cancelled is loading, e.g. right after
+      // navigating to Discover, and a click on a disabled button is silently ignored
+      await this.testSubjects.waitForEnabled('addFilter');
       await this.testSubjects.click('addFilter');
-      await this.testSubjects.existOrFail('addFilterPopover');
+      // Short timeout so a click that was still ignored is retried instead of waiting it out
+      await this.testSubjects.existOrFail('addFilterPopover', { timeout: 10_000 });
     });
   }
 
