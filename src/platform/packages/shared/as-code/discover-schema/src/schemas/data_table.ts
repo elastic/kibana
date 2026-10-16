@@ -53,7 +53,7 @@ export const dataTableSchema = z
       .optional()
       .meta({
         description:
-          'Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting or the referenced saved object.',
+          'Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting.',
       }),
     column_settings: z.record(z.string(), columnSettingsEntrySchema).optional().meta({
       description:
@@ -67,14 +67,14 @@ export const dataTableSchema = z
       .optional()
       .meta({
         description:
-          'The table row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.',
+          'The table row spacing. If omitted, Kibana determines the density from its current settings, such as the user preference.',
       }),
     header_row_height: z
       .union([z.number().min(1).max(5), z.literal('auto')])
       .optional()
       .meta({
         description:
-          'The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.',
+          'The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Kibana determines the height from its current settings, such as the user preference.',
       }),
     row_height: z
       .union([z.number().min(1).max(20), z.literal('auto')])
