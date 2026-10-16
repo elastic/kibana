@@ -1,0 +1,60 @@
+# Publishes kibana-full.yaml: kibana.yaml with the placeholder Dashboards operations replaced by
+# the full ones from the separately hosted Dashboards API spec (https://dashboardsapispec.kibana.dev).
+# Remove this workflow, and oas_docs/scripts/merge_dashboards_oas.js, once kibana.yaml carries
+# the full schemas. See https://github.com/elastic/kibana/issues/266195
+name: OpenAPI publish (stateful, full)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'oas_docs/output/kibana.yaml'
+      - 'oas_docs/scripts/merge_dashboards_oas.js'
+      - '.github/workflows/openapi-publish-stateful-full.yml'
+  # The Dashboards spec is published independently of this repo, so pick up its changes daily.
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: openapi-publish-stateful-full
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  DASHBOARDS_SPEC_URL: https://dashboardsapispec.kibana.dev/dashboards-openapi.yaml
+  FULL_SPEC_PATH: oas_docs/output/kibana-full.yaml
+
+jobs:
+  publish:
+    # The object key uses the branch name, so only main may publish.
+    if: github.repository == 'elastic/kibana' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '20'
+
+      - name: Download the Dashboards API spec
+        run: curl --fail --silent --show-error --location --retry 3 --output "$RUNNER_TEMP/dashboards-openapi.yaml" "$DASHBOARDS_SPEC_URL"
+
+      - name: Merge the Dashboards API spec into kibana.yaml
+        run: |
+          npm install --silent --no-package-lock --prefix "$RUNNER_TEMP/oas-deps" yaml@2.8.3
+          NODE_PATH="$RUNNER_TEMP/oas-deps/node_modules" node oas_docs/scripts/merge_dashboards_oas.js \
+            oas_docs/output/kibana.yaml "$RUNNER_TEMP/dashboards-openapi.yaml" "$FULL_SPEC_PATH"
+
+      - uses: elastic/docs-actions/openapi/lint@v1
+        with:
+          spec-path: ${{ env.FULL_SPEC_PATH }}
+
+      - uses: elastic/docs-actions/openapi/upload@v1
+        with:
+          spec-path: ${{ env.FULL_SPEC_PATH }}
+          spec-name: kibana-full
