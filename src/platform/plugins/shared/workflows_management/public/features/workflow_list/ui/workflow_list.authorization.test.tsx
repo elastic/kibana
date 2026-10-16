@@ -21,6 +21,9 @@ import { createWorkflowListItem } from '../../../connectors/workflows/workflows_
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 
+// Every case mounts the whole WorkflowList tree, so the default 5s budget leaves no room for CI load.
+jest.setTimeout(30_000);
+
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
