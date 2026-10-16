@@ -8,6 +8,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../../../common/proposals/origin';
+import { retryTransient } from './retry_transient';
 import type { CountExistingProposals } from './run_package_report';
 
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
@@ -20,6 +21,9 @@ type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
  * another solution's Proposal on the same conversation, however unlikely, never false-positives
  * the guard.
  *
+ * A transient failure is retried before it counts as one (see `retryTransient`): a run whose
+ * baseline cannot be read mints nothing and is not retried by the next sweep.
+ *
  * Logs and rethrows on a lookup failure rather than swallowing it: the caller
  * (`run_package_report.ts`) is what decides to fail closed, and separately records that the skip
  * was because the check itself failed, not because Proposals were actually found.
@@ -29,25 +33,32 @@ export const createExistingProposalsCounter = ({
   spaceId,
   request,
   logger,
+  retry,
 }: {
   proposalsService: ProposalsService;
   spaceId: string;
   request: KibanaRequest;
   logger?: Logger;
+  retry?: Parameters<typeof retryTransient>[1];
 }): CountExistingProposals => {
   return async (conversationId) => {
     try {
-      const { total } = await proposalsService.list(
-        {
-          conversationId,
-          origin: ALERTZERO_PROPOSAL_ORIGIN,
-          size: 1,
-          from: 0,
-          excludeSuperseded: false,
-          excludeExpired: false,
-        },
-        spaceId,
-        request
+      const { total } = await retryTransient(
+        () =>
+          proposalsService.list(
+            {
+              conversationId,
+              origin: ALERTZERO_PROPOSAL_ORIGIN,
+              size: 1,
+              from: 0,
+              excludeSuperseded: false,
+              excludeUndecidedSuperseded: false,
+              excludeExpired: false,
+            },
+            spaceId,
+            request
+          ),
+        retry
       );
       return total;
     } catch (err) {

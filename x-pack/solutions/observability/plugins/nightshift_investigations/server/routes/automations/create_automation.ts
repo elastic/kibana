@@ -10,7 +10,7 @@ import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
-import { automationCompletionSchema } from '../../lib/automations/schemas';
+import { automationCompletionSchema, promptTemplateSchema } from '../../lib/automations/schemas';
 import { generateWorkflowYaml } from '../../lib/automations/generate_workflow_yaml';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 import { triggerRowSchema } from './trigger_row_schema';
@@ -20,7 +20,7 @@ const triggerSchema = z.object({
 });
 
 const executionSchema = z.object({
-  promptTemplate: z.string().max(50000).optional(),
+  promptTemplate: promptTemplateSchema.optional(),
   reasoningMode: z.enum(['investigate', 'observe']).optional(),
   agentId: z.string().max(512).optional(),
   connectorId: z.string().max(512).optional(),
@@ -52,7 +52,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       automationType: z.enum(['custom', 'managed']).optional(),
       trigger: triggerSchema,
       execution: executionSchema,
-      completion: automationCompletionSchema,
+      completions: z.array(automationCompletionSchema).max(10),
       runtime: runtimeSchema,
     }),
   }),
@@ -76,7 +76,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       isEnabled: params.body.isEnabled ?? false,
       trigger: params.body.trigger,
       execution: params.body.execution,
-      completion: params.body.completion,
+      completions: params.body.completions,
       runtime: params.body.runtime,
       createdAt: now,
       updatedAt: now,

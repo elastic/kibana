@@ -26,8 +26,8 @@ const ALERTS_ICON = 'warning';
 /** Classic Observability alerts label for nav and global search. */
 export const getObservabilityAlertsLinkTitle = (alertingV2Enabled: boolean): string =>
   alertingV2Enabled
-    ? i18n.translate('xpack.observability.nav.alertsV1', {
-        defaultMessage: 'Alerts (V1)',
+    ? i18n.translate('xpack.observability.nav.alertsClassic', {
+        defaultMessage: 'Alerts (Classic)',
       })
     : i18n.translate('xpack.observability.alertsLinkTitle', {
         defaultMessage: 'Alerts',
@@ -52,11 +52,16 @@ const hasManagementCapability = (core: CoreStart, capabilityId: string): boolean
  * Same gate as classic nav (`updateGlobalNavigation` / `hasObservabilityCapabilities`):
  * any Observability app capability, not alerting-specific privileges.
  */
-const canReadV1Alerts = (core: CoreStart): boolean =>
+export const canReadV1Alerts = (core: CoreStart): boolean =>
   hasObservabilityCapabilities(core.application.capabilities);
 
-const canReadV1Rules = (core: CoreStart): boolean =>
+/** Gate for the Classic rules link in the Alerting panel. */
+export const canReadV1Rules = (core: CoreStart): boolean =>
   hasManagementCapability(core, V1_RULES_MANAGEMENT_ID);
+
+/** Gate for the Maintenance windows link in the Alerting panel. */
+export const canReadMaintenanceWindows = (core: CoreStart): boolean =>
+  hasManagementCapability(core, MAINTENANCE_WINDOWS_MANAGEMENT_ID);
 
 const maybeSection = (
   children: PanelOpenerChildDefinition[],
@@ -131,7 +136,7 @@ const getNotificationsSection = (core: CoreStart): PanelOpenerChildDefinition[] 
     });
   }
 
-  if (hasManagementCapability(core, MAINTENANCE_WINDOWS_MANAGEMENT_ID)) {
+  if (canReadMaintenanceWindows(core)) {
     notificationsChildren.push({ link: 'management:maintenanceWindows' });
   }
 

@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { trackCreateRuleRequests } from '../../../common/track_create_rule_requests';
 import { buildCreateRuleData, test } from '../fixtures';
 
 const TEST_INDEX = 'test-rule-builder';
@@ -60,9 +61,12 @@ test.describe(
     });
 
     test('create flow: configure threshold builder and submit', async ({
+      page,
       pageObjects,
       apiServices,
     }) => {
+      const { createRequestUrls, installRequestUrls } = trackCreateRuleRequests(page);
+
       await test.step('open threshold builder flyout', async () => {
         await pageObjects.ruleBuilder.openCreateBuilderFlyout('threshold');
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
@@ -135,6 +139,13 @@ test.describe(
       await test.step('the persisted rule has builder metadata', async () => {
         const { items } = await apiServices.alertingV2.rules.find({ search: RULE_NAME });
         expect(items[0]?.metadata?.builder).toStrictEqual({ type: 'threshold' });
+      });
+
+      await test.step('the rule was created through the create API, not the rule template API', async () => {
+        const { items } = await apiServices.alertingV2.rules.find({ search: RULE_NAME });
+        expect(items[0]?.metadata?.template).toBeUndefined();
+        expect(createRequestUrls).toHaveLength(1);
+        expect(installRequestUrls).toHaveLength(0);
       });
     });
 

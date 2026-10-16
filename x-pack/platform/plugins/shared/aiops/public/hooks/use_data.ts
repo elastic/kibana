@@ -40,7 +40,11 @@ export const useData = (
   barTarget: number = DEFAULT_BAR_TARGET,
   changePointsByDefault = true,
   timeRange?: { min: Moment; max: Moment },
-  projectRoutingOverride?: string
+  projectRoutingOverride?: string,
+  /** ES|QL document scope; when set, document counts come from ES|QL instead of DSL. */
+  esqlQuery?: string,
+  /** Upper limit for the number of histogram buckets, instead of the `histogram:maxBars` setting. */
+  maxBars?: number
 ) => {
   const { executionContext, uiSettings, cps } = useAiopsAppContext();
   const { projectRouting } = useProjectRouting(cps, projectRoutingOverride);
@@ -70,6 +74,9 @@ export const useData = (
       _timeBuckets.setInterval('auto');
       _timeBuckets.setBounds(timefilterActiveBounds);
       _timeBuckets.setBarTarget(barTarget);
+      if (maxBars !== undefined) {
+        _timeBuckets.setMaxBars(maxBars);
+      }
       return {
         earliest: timefilterActiveBounds.min?.valueOf(),
         latest: timefilterActiveBounds.max?.valueOf(),
@@ -110,7 +117,8 @@ export const useData = (
     selectedSignificantItemStatsRequest,
     lastRefresh,
     changePointsByDefault,
-    projectRoutingOverride
+    projectRoutingOverride,
+    esqlQuery
   );
 
   useEffect(() => {

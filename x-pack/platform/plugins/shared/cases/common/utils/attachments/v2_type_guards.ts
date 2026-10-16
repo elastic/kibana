@@ -17,6 +17,7 @@ import {
   SECURITY_ALERT_ATTACHMENT_TYPE,
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
   STACK_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '../../constants/attachments';
 
 const isReferenceAttachmentId = (value: unknown): value is string | string[] => {
@@ -91,3 +92,7 @@ export const isUnifiedAlertAttachment = (
   attachment: AttachmentRequestV2
 ): attachment is UnifiedReferenceAttachmentPayload =>
   isUnifiedReferenceAttachmentRequest(attachment) && UNIFIED_ALERT_TYPES.has(attachment.type);
+
+// ------ Attack -------
+export const isAttackAttachmentType = (type: string): boolean =>
+  type === SECURITY_ATTACK_ATTACHMENT_TYPE;

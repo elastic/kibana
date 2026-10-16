@@ -19,8 +19,8 @@ export const CREATE_ACK_EPISODE_ACTION_REQUEST: CreateAckEpisodeActionBody = {};
 export const createAckEpisodeActionOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     requestBody: {
-      name: 'createAckEpisodeActionRequest',
-      summary: 'Acknowledge the alert episode',
+      name: 'createAckAlertActionRequest',
+      summary: 'Acknowledge the alert',
       value: CREATE_ACK_EPISODE_ACTION_REQUEST,
     },
     responses: {

@@ -43,6 +43,7 @@ jest.mock('@kbn/discover-utils', () => {
   return {
     DiscoverFlyouts: { metricInsights: 'metricInsights' },
     dismissAllFlyoutsExceptFor: jest.fn(),
+    fieldConstants: jest.requireActual('@kbn/discover-utils/src/field_constants'),
     METRICS_GRID_HISTOGRAM_PERCENTILES,
     METRICS_GRID_SETTINGS_DEFAULTS,
     METRICS_GRID_SIMPLE_AGGREGATIONS,
