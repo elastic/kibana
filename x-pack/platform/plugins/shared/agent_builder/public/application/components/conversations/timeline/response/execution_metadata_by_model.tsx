@@ -38,10 +38,18 @@ const labels = {
     defaultMessage: 'LLM calls',
   }),
   tokensSent: i18n.translate('xpack.agentBuilder.response.metadataPopover.byModel.tokensSent', {
-    defaultMessage: 'Tokens sent (cached)',
+    defaultMessage: 'Tokens sent',
   }),
+  tokensSentWithCache: i18n.translate(
+    'xpack.agentBuilder.response.metadataPopover.byModel.tokensSentWithCache',
+    { defaultMessage: 'Tokens sent (cached)' }
+  ),
   tokensReceived: i18n.translate(
     'xpack.agentBuilder.response.metadataPopover.byModel.tokensReceived',
+    { defaultMessage: 'Tokens received' }
+  ),
+  tokensReceivedWithReasoning: i18n.translate(
+    'xpack.agentBuilder.response.metadataPopover.byModel.tokensReceivedWithReasoning',
     { defaultMessage: 'Tokens received (reasoning)' }
   ),
   allModels: i18n.translate('xpack.agentBuilder.response.metadataPopover.byModel.allModels', {
@@ -145,7 +153,10 @@ const ModelName: React.FC<{ label: string; tooltip: string; color: string }> = (
   );
 };
 
-const columns: Array<EuiBasicTableColumn<ModelRow>> = [
+const getColumns = (
+  hasCache: boolean,
+  hasReasoning: boolean
+): Array<EuiBasicTableColumn<ModelRow>> => [
   {
     field: 'label',
     name: <HeaderCell>{labels.model}</HeaderCell>,
@@ -170,29 +181,47 @@ const columns: Array<EuiBasicTableColumn<ModelRow>> = [
   },
   {
     field: 'inputTokens',
-    name: <HeaderCell isRightAligned>{labels.tokensSent}</HeaderCell>,
+    name: (
+      <HeaderCell isRightAligned>
+        {hasCache ? labels.tokensSentWithCache : labels.tokensSent}
+      </HeaderCell>
+    ),
     width: '30%',
     align: RIGHT_ALIGNMENT,
     render: (inputTokens: number, { cachedInputTokens }: ModelRow) => (
       <Cell>
-        <strong>{formatCompactNumber(inputTokens)}</strong>{' '}
-        <EuiTextColor color="subdued">
-          (<ReportedTokens value={cachedInputTokens} />)
-        </EuiTextColor>
+        <strong>{formatCompactNumber(inputTokens)}</strong>
+        {hasCache && (
+          <>
+            {' '}
+            <EuiTextColor color="subdued">
+              (<ReportedTokens value={cachedInputTokens} />)
+            </EuiTextColor>
+          </>
+        )}
       </Cell>
     ),
   },
   {
     field: 'outputTokens',
-    name: <HeaderCell isRightAligned>{labels.tokensReceived}</HeaderCell>,
+    name: (
+      <HeaderCell isRightAligned>
+        {hasReasoning ? labels.tokensReceivedWithReasoning : labels.tokensReceived}
+      </HeaderCell>
+    ),
     width: '21%',
     align: RIGHT_ALIGNMENT,
     render: (outputTokens: number, { reasoningTokens }: ModelRow) => (
       <Cell>
-        <strong>{formatCompactNumber(outputTokens)}</strong>{' '}
-        <EuiTextColor color="subdued">
-          (<ReportedTokens value={reasoningTokens} />)
-        </EuiTextColor>
+        <strong>{formatCompactNumber(outputTokens)}</strong>
+        {hasReasoning && (
+          <>
+            {' '}
+            <EuiTextColor color="subdued">
+              (<ReportedTokens value={reasoningTokens} />)
+            </EuiTextColor>
+          </>
+        )}
       </Cell>
     ),
   },
@@ -209,6 +238,10 @@ export const ExecutionMetadataByModel: React.FC<ExecutionMetadataByModelProps> =
     services: { http },
   } = useKibana();
   const { data: aiConnectors } = useLoadConnectors({ http, featureId: 'agent_builder' });
+
+  const hasCache = modelUsage.cached_input_tokens !== undefined;
+  const hasReasoning = modelUsage.reasoning_tokens !== undefined;
+  const columns = useMemo(() => getColumns(hasCache, hasReasoning), [hasCache, hasReasoning]);
 
   const rows = useMemo<ModelRow[]>(() => {
     const connectors = modelUsage.connectors ?? [];

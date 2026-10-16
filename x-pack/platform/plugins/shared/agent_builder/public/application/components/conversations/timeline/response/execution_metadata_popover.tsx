@@ -80,7 +80,9 @@ const TABS = {
 
 type MetadataTab = keyof typeof TABS;
 
-const isMetadataTab = (id: string): id is MetadataTab => Object.keys(TABS).includes(id);
+const TAB_IDS = Object.keys(TABS) as MetadataTab[];
+
+const isMetadataTab = (id: string): id is MetadataTab => TAB_IDS.some((tabId) => tabId === id);
 
 interface ExecutionMetadataPopoverProps {
   executionTerminatedEvent: ExecutionTerminatedEvent;
@@ -115,18 +117,6 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
   }
 
   const hasSeveralModels = (modelUsage.connectors?.length ?? 0) >= MIN_MODELS_FOR_TABS;
-  const tabOptions = (Object.keys(TABS) as MetadataTab[]).map((id) => ({
-    id,
-    label: TABS[id].label,
-    'data-test-subj': TABS[id].testSubj,
-    ...(id === selectedTab
-      ? {}
-      : getEbtProps({
-          element: AGENT_BUILDER_UI_EBT.element.pageContent,
-          action: TABS[id].ebtAction,
-          detail: 'conversation',
-        })),
-  }));
   const seconds = Math.round(timeMs / 1000);
   const secondsLabel = i18n.translate('xpack.agentBuilder.response.metadataPopover.seconds', {
     defaultMessage: '{seconds}s',
@@ -174,17 +164,34 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
             <EuiFlexItem grow={false}>
               <EuiButtonGroup
                 legend={labels.tabsLegend}
-                options={tabOptions}
+                variant="selection"
                 idSelected={selectedTab}
                 onChange={(id) => {
                   if (isMetadataTab(id)) {
                     setSelectedTab(id);
                   }
                 }}
-                buttonSize="compressed"
+                buttonSize="s"
                 isFullWidth
                 data-test-subj="executionMetadataTabs"
-              />
+              >
+                {TAB_IDS.map((id) => (
+                  <EuiButton
+                    key={id}
+                    id={id}
+                    data-test-subj={TABS[id].testSubj}
+                    {...(id === selectedTab
+                      ? {}
+                      : getEbtProps({
+                          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                          action: TABS[id].ebtAction,
+                          detail: 'conversation',
+                        }))}
+                  >
+                    {TABS[id].label}
+                  </EuiButton>
+                ))}
+              </EuiButtonGroup>
               <EuiSpacer size="xs" />
             </EuiFlexItem>
           )}

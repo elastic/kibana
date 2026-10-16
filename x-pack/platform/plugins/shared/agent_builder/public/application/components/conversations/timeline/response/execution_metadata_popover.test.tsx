@@ -306,11 +306,10 @@ describe('ExecutionMetadataPopover', () => {
       const user = await openPopover();
       await user.click(screen.getByTestId('executionMetadataByModelTab'));
 
-      // the cached tokens of the fast model, and the reasoning tokens of both models
       const fast = screen.getByTestId('executionMetadataModelRow-fast-connector');
-      expect(within(fast).getAllByLabelText('Not reported by this model')).toHaveLength(2);
+      expect(within(fast).getByLabelText('Not reported by this model')).toHaveTextContent('—');
       const main = screen.getByTestId('executionMetadataModelRow-main-connector');
-      expect(within(main).getAllByLabelText('Not reported by this model')).toHaveLength(1);
+      expect(within(main).queryByLabelText('Not reported by this model')).not.toBeInTheDocument();
     });
 
     it('shows the reasoning tokens of each model, with a dash for a model that does not report them', async () => {
@@ -334,21 +333,35 @@ describe('ExecutionMetadataPopover', () => {
       ).toHaveLength(2);
     });
 
-    it('shows a dash for the reasoning of every model when none reported it', async () => {
+    it('does not mention the cached tokens when no model reported them', async () => {
+      const { cached_input_tokens: _cached, ...usageWithoutTopLevelCache } = usageWithBreakdown;
+      render(
+        <ExecutionMetadataPopover
+          executionTerminatedEvent={eventWithUsage({
+            ...usageWithoutTopLevelCache,
+            connectors: (usageWithBreakdown.connectors ?? []).map(
+              ({ cached_input_tokens: _connectorCached, ...connector }) => connector
+            ),
+          })}
+        />
+      );
+      const user = await openPopover();
+      await user.click(screen.getByTestId('executionMetadataByModelTab'));
+
+      expect(screen.getByText('Tokens sent')).toBeInTheDocument();
+      expect(screen.queryByText('Tokens sent (cached)')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('Not reported by this model')).not.toBeInTheDocument();
+    });
+
+    it('does not mention the reasoning when no model reported it', async () => {
       render(
         <ExecutionMetadataPopover executionTerminatedEvent={eventWithUsage(usageWithBreakdown)} />
       );
       const user = await openPopover();
       await user.click(screen.getByTestId('executionMetadataByModelTab'));
 
-      expect(screen.getByText('Tokens received (reasoning)')).toBeInTheDocument();
-      for (const rowKey of ['all', 'main-connector']) {
-        expect(
-          within(screen.getByTestId(`executionMetadataModelRow-${rowKey}`)).getAllByLabelText(
-            'Not reported by this model'
-          )
-        ).toHaveLength(1);
-      }
+      expect(screen.getByText('Tokens received')).toBeInTheDocument();
+      expect(screen.queryByText('Tokens received (reasoning)')).not.toBeInTheDocument();
     });
 
     it('falls back to the model, then to the connector id, when the connector name is unknown', async () => {
