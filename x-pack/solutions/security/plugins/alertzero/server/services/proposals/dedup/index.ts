@@ -9,8 +9,21 @@
 // propose an action computes the subject key, asks the slot resolver whether a live Proposal
 // already holds it, and either mints under the returned id or converges onto the live one.
 
-export { buildProposalSubjectKey, PROPOSAL_SUBJECT_UUID_NAMESPACE } from './proposal_subject_key';
+export {
+  buildProposalSubjectKey,
+  buildProposalSubjectKeyFromActionInput,
+  PROPOSAL_SUBJECT_UUID_NAMESPACE,
+} from './proposal_subject_key';
 export { buildProposalId } from './proposal_id';
+export {
+  computeExpectedProposalCount,
+  resolveProposals,
+  settleProposals,
+  type ResolvedProposals,
+  type ResolveProposalsDeps,
+  type SettleableProposal,
+  type SettleProposalsDeps,
+} from './settle_proposals';
 export {
   createProposalSlotResolver,
   type LiveProposal,

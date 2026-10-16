@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { buildProposalSubjectKey } from './proposal_subject_key';
+import {
+  buildProposalSubjectKey,
+  buildProposalSubjectKeyFromActionInput,
+} from './proposal_subject_key';
 
 describe('buildProposalSubjectKey', () => {
   it('builds stable subject keys for the same host × action × process', () => {
@@ -47,5 +50,106 @@ describe('buildProposalSubjectKey', () => {
         processKey: 'entity:ent-4242',
       })
     ).toBe('e7f4d23d-c0a4-57a8-804e-a1cbca13bc1c');
+  });
+});
+
+// Hunt builds its keys from run state (agent id, process selector, identity). A worker that only
+// has the action input has to land on the same key, or the two never converge.
+describe('buildProposalSubjectKeyFromActionInput', () => {
+  const ISOLATE = 'system-security-action-isolate-host';
+  const KILL = 'system-security-action-kill-process';
+  const CRITICALITY = 'system-security-action-set-asset-criticality';
+
+  it('keys a host action by the agent, as Hunt does', () => {
+    expect(
+      buildProposalSubjectKeyFromActionInput({
+        actionWorkflowId: ISOLATE,
+        actionInput: { endpoint_ids: ['agent-a'] },
+      })
+    ).toBe(buildProposalSubjectKey({ subjectId: 'agent-a', actionWorkflowId: ISOLATE }));
+  });
+
+  it('keys a process action by the agent and entity id, spelled as a Hunt process selector', () => {
+    expect(
+      buildProposalSubjectKeyFromActionInput({
+        actionWorkflowId: KILL,
+        actionInput: { endpoint_ids: ['agent-a'], parameters: { entity_id: 'ent-1' } },
+      })
+    ).toBe(
+      buildProposalSubjectKey({
+        subjectId: 'agent-a',
+        actionWorkflowId: KILL,
+        processKey: 'entity_id:ent-1',
+      })
+    );
+  });
+
+  it('falls back to the pid, and does not confuse it with an entity id', () => {
+    const byPid = buildProposalSubjectKeyFromActionInput({
+      actionWorkflowId: KILL,
+      actionInput: { endpoint_ids: ['agent-a'], parameters: { pid: 4242 } },
+    });
+    expect(byPid).toBe(
+      buildProposalSubjectKey({
+        subjectId: 'agent-a',
+        actionWorkflowId: KILL,
+        processKey: 'pid:4242',
+      })
+    );
+    expect(byPid).not.toBe(
+      buildProposalSubjectKeyFromActionInput({
+        actionWorkflowId: KILL,
+        actionInput: { endpoint_ids: ['agent-a'], parameters: { entity_id: '4242' } },
+      })
+    );
+  });
+
+  it('prefers the entity id when both are present', () => {
+    expect(
+      buildProposalSubjectKeyFromActionInput({
+        actionWorkflowId: KILL,
+        actionInput: { endpoint_ids: ['agent-a'], parameters: { entity_id: 'ent-1', pid: 4242 } },
+      })
+    ).toBe(
+      buildProposalSubjectKey({
+        subjectId: 'agent-a',
+        actionWorkflowId: KILL,
+        processKey: 'entity_id:ent-1',
+      })
+    );
+  });
+
+  it('keys an identity action as <kind>:<value>, as Hunt does', () => {
+    expect(
+      buildProposalSubjectKeyFromActionInput({
+        actionWorkflowId: CRITICALITY,
+        actionInput: { id_field: 'user.name', id_value: 'alice', criticality_level: 'high_impact' },
+      })
+    ).toBe(buildProposalSubjectKey({ subjectId: 'user:alice', actionWorkflowId: CRITICALITY }));
+    expect(
+      buildProposalSubjectKeyFromActionInput({
+        actionWorkflowId: CRITICALITY,
+        actionInput: { id_field: 'service.name', id_value: 'svc' },
+      })
+    ).toBe(buildProposalSubjectKey({ subjectId: 'service:svc', actionWorkflowId: CRITICALITY }));
+  });
+
+  it('returns nothing when the input names no target', () => {
+    expect(buildProposalSubjectKeyFromActionInput({ actionWorkflowId: ISOLATE })).toBeUndefined();
+    expect(
+      buildProposalSubjectKeyFromActionInput({ actionWorkflowId: ISOLATE, actionInput: {} })
+    ).toBeUndefined();
+    expect(
+      buildProposalSubjectKeyFromActionInput({
+        actionWorkflowId: ISOLATE,
+        actionInput: { endpoint_ids: [] },
+      })
+    ).toBeUndefined();
+    expect(
+      buildProposalSubjectKeyFromActionInput({
+        actionWorkflowId: CRITICALITY,
+        actionInput: { id_field: 'user.name' },
+      })
+    ).toBeUndefined();
   });
 });

@@ -35,3 +35,55 @@ export const buildProposalSubjectKey = ({
     : `${subjectId}|${actionWorkflowId}`;
   return uuidv5(material, PROPOSAL_SUBJECT_UUID_NAMESPACE);
 };
+
+const firstString = (value: unknown): string | undefined =>
+  Array.isArray(value) && typeof value[0] === 'string' ? value[0] : undefined;
+
+const asString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value !== '' ? value : undefined;
+
+const asNumber = (value: unknown): number | undefined =>
+  typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+
+/**
+ * The subject key for an action read off its own input, so a worker that has the action input
+ * but no notion of "subject" lands on the same key Hunt builds from its run state:
+ *
+ * - host and process actions: `endpoint_ids[0]`, plus `parameters.entity_id` or `parameters.pid`
+ *   as the process key, spelled the way Hunt's process selectors spell it;
+ * - identity actions: `id_field` + `id_value`, as `<kind>:<value>` where kind is the field's
+ *   first segment (`user.name` -> `user`).
+ *
+ * `undefined` when the input names no target; the caller decides what to key such a proposal on.
+ */
+export const buildProposalSubjectKeyFromActionInput = ({
+  actionWorkflowId,
+  actionInput,
+}: {
+  actionWorkflowId: string;
+  actionInput?: Record<string, unknown>;
+}): string | undefined => {
+  if (actionInput === undefined) {
+    return undefined;
+  }
+  const agentId = firstString(actionInput.endpoint_ids);
+  if (agentId !== undefined) {
+    const parameters = (actionInput.parameters ?? {}) as Record<string, unknown>;
+    const entityId = asString(parameters.entity_id);
+    const pid = asNumber(parameters.pid);
+    const processKey =
+      entityId !== undefined
+        ? `entity_id:${entityId}`
+        : pid !== undefined
+        ? `pid:${pid}`
+        : undefined;
+    return buildProposalSubjectKey({ subjectId: agentId, actionWorkflowId, processKey });
+  }
+  const idField = asString(actionInput.id_field);
+  const idValue = asString(actionInput.id_value);
+  if (idField !== undefined && idValue !== undefined) {
+    const kind = idField.split('.')[0];
+    return buildProposalSubjectKey({ subjectId: `${kind}:${idValue}`, actionWorkflowId });
+  }
+  return undefined;
+};
