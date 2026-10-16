@@ -83,6 +83,10 @@ const buildEmptyRowsQuery = (
   ...buildRowFieldsSteps(args, args.sort.field, ...Object.keys(column.emptyValues)),
 ];
 
+/**
+ * Each lookup lists its rows' ids in the query, and a query can't be too long, so the rows are
+ * split: e.g. a search matching 5,000 entities looks up their alerts in 10 queries of 500, at once.
+ */
 const fetchValuesInChunks = async (
   column: ComputedColumn,
   rows: readonly Row[],
