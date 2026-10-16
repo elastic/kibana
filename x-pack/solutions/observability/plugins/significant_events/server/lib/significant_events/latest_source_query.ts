@@ -9,6 +9,7 @@ import { esql, type ComposerQuery, type ComposerSortShorthand } from '@elastic/e
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { detectionSkipSchema, type DetectionSkip } from '@kbn/significant-events-schema';
 import dateMath from '@kbn/datemath';
 import { getSourceColumnIndex, toEsqlRequest } from '../streams/esql';
 import {
@@ -27,8 +28,8 @@ export const isIndexNotFoundError = (error: unknown): boolean => {
   return false;
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+/** A stored skip has no `checked_at`: it is the marker's own timestamp. */
+const skipSchema = () => detectionSkipSchema.omit({ checked_at: true });
 
 // esClient.esql.query() return type doesn't match ESQLSearchResponse.
 // Known typing gap in the ES client — centralized here to avoid scattered assertions.
@@ -426,7 +427,7 @@ export type LatestSourceGroupBy = string | [string, string] | [string, string, s
 
 export type LatestSourceWhereCondition = ESQLAstExpression;
 
-interface RunGetProcessedMarkerIdsArgs {
+interface RunGetProcessedMarkersArgs {
   esClient: ElasticsearchClient;
   space: string;
   index: string;
@@ -435,47 +436,62 @@ interface RunGetProcessedMarkerIdsArgs {
   chunkSize?: number;
 }
 
+/** What a processed marker says about the detection it references. */
+export interface ProcessedMarker {
+  /** When the marker was written. */
+  processedAt: string;
+  /** Why the classifier closed the detection, when it did. */
+  skip?: Omit<DetectionSkip, 'checked_at'>;
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 /**
- * Returns the set of ids that have a processed marker in the data stream. A marker
- * is any document carrying `processed_by` (detections carry `change_point_type` instead).
- * Because `detection_id` is unique-per-detection, membership is a plain semijoin: a detection
- * is processed iff a marker references its exact id — no timestamp comparison needed.
+ * Returns the processed marker of each given id that has one. A marker is any document carrying
+ * `processed_by` (detections carry `change_point_type` instead). Because `detection_id` is
+ * unique-per-detection, membership is a plain semijoin: a detection is processed iff a marker
+ * references its exact id, with no timestamp comparison. When several markers reference an id, the
+ * newest that carries a `skip` wins, otherwise the newest.
  */
-export const runGetProcessedMarkerIds = async ({
+export const runGetProcessedMarkers = async ({
   esClient,
   space,
   index,
   idField,
   idValues,
   chunkSize = 250,
-}: RunGetProcessedMarkerIdsArgs): Promise<Set<string>> => {
-  if (!idValues.length) return new Set();
-
-  const processed = new Set<string>();
-  const idCol = esql.col(idField);
+}: RunGetProcessedMarkersArgs): Promise<Map<string, ProcessedMarker>> => {
+  const markers = new Map<string, ProcessedMarker>();
+  if (!idValues.length) return markers;
 
   for (let i = 0; i < idValues.length; i += chunkSize) {
     const batch = idValues.slice(i, i + chunkSize);
     const where = inFilter({ where: undefined, field: idField, values: batch });
 
-    // `detection_id` / `processed_by` are ordinary mapped fields referenced in WHERE/STATS/KEEP —
-    // NOT ES|QL METADATA (which only accepts `_id`, `_source`, …). Passing them as `columns` here
-    // emitted `FROM … METADATA detection_id, processed_by` and failed with a verification_exception.
-    let query = fromIndexForSpace({ index, space });
+    // `detection_id` / `processed_by` are ordinary mapped fields referenced in WHERE/KEEP, NOT
+    // ES|QL METADATA (which only accepts `_id`, `_source`, …). The skip reason is an unmapped
+    // `_source` field, so `_source` is read.
+    let query = fromIndexForSpace({ index, space, columns: ['_source'] });
     query = query.where`${esql.col('processed_by')} IS NOT NULL`;
     if (where) {
       query = query.where`${where}`;
     }
-    query = query.pipe`STATS marker_count = COUNT(*) BY ${idCol}`.keep(idField);
+    query = query.pipe`SORT @timestamp DESC`.keep(idField, '@timestamp', '_source');
 
     const response = await queryEsql({ esClient, query });
-    const rows = esqlToObjects<Record<string, string>>(response);
-    for (const row of rows) {
+    for (const row of esqlToObjects<Record<string, unknown>>(response)) {
       const id = row[idField];
-      if (id) processed.add(id);
+      const processedAt = row['@timestamp'];
+      if (typeof id !== 'string' || typeof processedAt !== 'string') continue;
+      const parsed = skipSchema().safeParse(isRecord(row._source) ? row._source.skip : undefined);
+      const skip = parsed.success ? parsed.data : undefined;
+      const known = markers.get(id);
+      if (known?.skip || (known && !skip)) continue;
+      markers.set(id, { processedAt, ...(skip ? { skip } : {}) });
     }
   }
-  return processed;
+  return markers;
 };
 
 /**

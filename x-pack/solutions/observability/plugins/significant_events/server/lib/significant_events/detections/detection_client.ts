@@ -21,7 +21,7 @@ import {
   runPaginatedLatestSourceEsqlQuery,
   runFindByIdEsqlQuery,
   runFindByIdsEsqlQuery,
-  runGetProcessedMarkerIds,
+  runGetProcessedMarkers,
 } from '../latest_source_query';
 import {
   DETECTIONS_DATA_STREAM,
@@ -94,8 +94,8 @@ export class DetectionClient {
   }
 
   // `processed` is derived: a detection is processed iff a marker references its exact id.
-  private async getProcessedIds(detectionIds: string[]): Promise<Set<string>> {
-    return runGetProcessedMarkerIds({
+  private async getProcessedMarkers(detectionIds: string[]) {
+    return runGetProcessedMarkers({
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: DETECTIONS_DATA_STREAM,
@@ -296,11 +296,16 @@ export class DetectionClient {
   }
 
   private async withDerivedProcessed(rawHits: RawDetection[]): Promise<Detection[]> {
-    const processedIds = await this.getProcessedIds(
+    const markers = await this.getProcessedMarkers(
       rawHits.map((h) => h.detection_id).filter((id): id is string => Boolean(id))
     );
-    return rawHits.map(
-      (raw) => ({ ...raw, processed: processedIds.has(raw.detection_id ?? '') } as Detection)
-    );
+    return rawHits.map((raw) => {
+      const marker = markers.get(raw.detection_id ?? '');
+      return {
+        ...raw,
+        processed: marker !== undefined,
+        ...(marker?.skip ? { skip: { ...marker.skip, checked_at: marker.processedAt } } : {}),
+      } as Detection;
+    });
   }
 }

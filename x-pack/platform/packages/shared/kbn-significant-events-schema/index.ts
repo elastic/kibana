@@ -83,6 +83,7 @@ export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
   type Detection,
+  type DetectionSkip,
   type ChangePointType,
   CHANGE_POINT_TYPES,
   type KnowledgeIndicator,
@@ -109,6 +110,7 @@ export {
   SEVERITY_CONTRACT_RULE,
   getSeverityLabel,
   detectionSchema,
+  detectionSkipSchema,
   blastRadiusEntrySchema,
   causalFeatureSchema,
   signalEntrySchema,

@@ -6,7 +6,7 @@
  */
 
 import type { DataStreamDefinition } from '@kbn/core-data-streams-server';
-import type { Detection } from '@kbn/significant-events-schema';
+import type { Detection, DetectionSkip } from '@kbn/significant-events-schema';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
 
@@ -26,26 +26,14 @@ export const detectionsMappings = {
   },
 } satisfies MappingsDefinition;
 
-/** Why the classifier skipped a detection; stored on the processed marker. */
-export interface DetectionSkip {
-  reason: string;
-  probe_status?: string;
-  baseline?: {
-    decision: string;
-    value: number;
-    samples: number;
-    median?: number;
-    threshold?: number;
-  };
-}
-
 /** `_source`-only fields the Detection and Discovery workflows also persist (mappings are `dynamic: false`). */
 interface UnmappedDetectionFields {
   source_id?: string;
   alert_index?: string;
   workflow_execution_id?: string;
   scanned_by?: string;
-  skip?: DetectionSkip;
+  /** Why the classifier closed the detection; `checked_at` is the marker's own timestamp. */
+  skip?: Omit<DetectionSkip, 'checked_at'>;
 }
 
 export type StoredDetection = GetFieldsOf<typeof detectionsMappings> & UnmappedDetectionFields;
