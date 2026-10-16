@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -21,22 +21,9 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { DELAY_MODE } from './form/types';
 import type { FormValues } from './form/types';
 import { RuleFormProvider, type RuleFormServices, type RuleFormMeta } from './form/contexts';
+import { createTestQueryClient } from './query_client_test_utils';
 
-/**
- * Creates a QueryClient configured for testing (no retries, silent logger).
- */
-export const createTestQueryClient = () =>
-  new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-    logger: {
-      log: () => {},
-      warn: () => {},
-      error: () => {},
-    },
-  });
+export { createTestQueryClient, createQueryClientWrapper } from './query_client_test_utils';
 
 /**
  * Minimal dashboard start contract mock returning an empty find service.
@@ -70,17 +57,6 @@ export const createMockServices = (): RuleFormServices => ({
   uiActions: uiActionsPluginMock.createStartContract(),
   dashboard: createMockDashboardStart(),
 });
-
-/**
- * Creates a wrapper component with QueryClientProvider for testing hooks.
- * Use this for hook tests that only need React Query context.
- */
-export const createQueryClientWrapper = () => {
-  const queryClient = createTestQueryClient();
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
 
 /**
  * Default form values for testing.
