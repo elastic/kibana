@@ -47,12 +47,15 @@ const toRequest = ({
   query,
   tail,
   window,
+  dropNullColumns,
 }: {
   query: string;
   tail?: string;
   window: ProbeWindow;
+  dropNullColumns?: boolean;
 }) =>
   ({
+    ...(dropNullColumns ? { drop_null_columns: true } : {}),
     // A new line before the pipe, so a stored query ending in a `//` comment cannot swallow it.
     query: tail === undefined ? query : `${query.trimEnd()}\n| ${tail}`,
     params: [{ _tstart: window.from }, { _tend: window.to }],
@@ -71,6 +74,7 @@ export const runStoredQuery = async ({
   query,
   tail,
   window,
+  dropNullColumns,
   timeoutMs,
   deadlineAt,
   abortSignal,
@@ -79,6 +83,8 @@ export const runStoredQuery = async ({
   query: string | undefined;
   /** The command appended to the stored query, for example `LIMIT 1`; none for a complete query. */
   tail?: string;
+  /** Leave out the columns that are null in every row, as the agent's own query tool does. */
+  dropNullColumns?: boolean;
   window: ProbeWindow;
   /** Per-probe timeout; also capped by the time left until `deadlineAt`. */
   timeoutMs: number;
@@ -106,9 +112,12 @@ export const runStoredQuery = async ({
 
   const timeoutSignal = AbortSignal.timeout(Math.min(timeoutMs, remainingMs));
   try {
-    const response = await esClient.esql.query(toRequest({ query, tail, window }), {
-      signal: AbortSignal.any([abortSignal, timeoutSignal]),
-    });
+    const response = await esClient.esql.query(
+      toRequest({ query, tail, window, dropNullColumns }),
+      {
+        signal: AbortSignal.any([abortSignal, timeoutSignal]),
+      }
+    );
     return finish('ok', response.values, response.columns);
   } catch {
     if (abortSignal.aborted) return finish('aborted');

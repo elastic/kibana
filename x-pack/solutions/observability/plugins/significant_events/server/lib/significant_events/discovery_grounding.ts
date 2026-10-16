@@ -79,6 +79,7 @@ export const runDiscoveryGrounding = async ({
         esClient,
         query,
         window,
+        dropNullColumns: true,
         timeoutMs: QUERY_TIMEOUT_MS,
         deadlineAt,
         abortSignal,

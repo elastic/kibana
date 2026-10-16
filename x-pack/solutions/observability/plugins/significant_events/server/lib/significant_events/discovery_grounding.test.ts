@@ -116,6 +116,20 @@ describe('runDiscoveryGrounding', () => {
     expect(none.profile?.spread.query).not.toContain('BY');
   });
 
+  it('asks Elasticsearch to leave out the columns that are null in every row', async () => {
+    const { esClient, query } = fakeEs(() => ({ values: [['row']] }));
+
+    await run({
+      context: contextOf(queryKi('rule-A', 'FROM logs | WHERE service.name == "a"')),
+      esClient,
+    });
+
+    expect(query).toHaveBeenCalledWith(
+      expect.objectContaining({ drop_null_columns: true }),
+      expect.anything()
+    );
+  });
+
   it('does not profile a rule whose sample returned no rows', async () => {
     const { esClient, query } = fakeEs(() => ({ values: [] }));
 
