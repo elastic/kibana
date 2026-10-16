@@ -71,7 +71,7 @@ export const useScriptActionItems = ({
               icon: 'download',
               key: 'download',
               name: tableActionLabels.table.actions.download,
-              href: basePath.get() + script.downloadUri,
+              href: basePath.prepend(script.downloadUri),
               children: renderActionItem(tableActionLabels.table.actions.download),
             },
           ]
