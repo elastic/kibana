@@ -41,6 +41,7 @@ export interface BuildOptions {
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
   targetServerlessPlatforms: boolean;
+  targetCloudPlatforms: boolean;
   skipServerless: boolean;
   tarZstd: boolean;
   withExamplePlugins: boolean;
@@ -119,6 +120,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.InstallChromium);
     await globalRun(Tasks.CopyBinScripts);
     await globalRun(Tasks.CleanNodeBuilds);
+    await globalRun(Tasks.CreateDistributionDefaults);
 
     await globalRun(Tasks.AssertFileTime);
     await globalRun(Tasks.AssertPathLength);

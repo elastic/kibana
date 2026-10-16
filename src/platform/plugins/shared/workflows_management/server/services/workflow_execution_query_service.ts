@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { ExecutionType } from '@kbn/workflows';
 import type {
   EsWorkflowStepExecution,
+  ExecutionStatus,
   WorkflowExecutionDto,
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
@@ -124,6 +125,13 @@ interface ProcessedWaitForInputFacetAggs {
   respondedBy: estypes.AggregationsStringTermsAggregate;
 }
 
+/** A workflow execution's status, read without its definition, context or steps. */
+export interface WorkflowExecutionStatusItem {
+  id: string;
+  workflowId: string;
+  status: ExecutionStatus;
+}
+
 export class WorkflowExecutionQueryService {
   constructor(private readonly deps: WorkflowExecutionQueryDeps) {}
 
@@ -142,6 +150,24 @@ export class WorkflowExecutionQueryService {
       includeOutput: options?.includeOutput,
       omitStepExecutions: options?.omitStepExecutions,
     });
+  }
+
+  /** The status of each execution found in the space; missing ids are left out of the result. */
+  async getWorkflowExecutionStatuses(
+    executionIds: string[],
+    spaceId: string
+  ): Promise<WorkflowExecutionStatusItem[]> {
+    const ids = [...new Set(executionIds)];
+    if (ids.length === 0) {
+      return [];
+    }
+    const { items } = await this.deps.workflowExecutionsDataClient.getByIds(ids, {
+      sourceIncludes: ['spaceId', 'workflowId', 'status'],
+    });
+    return items
+      .map(({ document }) => document)
+      .filter((execution) => execution.spaceId === spaceId)
+      .map(({ id, workflowId, status }) => ({ id, workflowId, status }));
   }
 
   async getChildWorkflowExecutions(
