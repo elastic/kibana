@@ -1278,6 +1278,9 @@ export class VersionSpecificPolicyAssignmentTask {
         ? `(${allVariantAgentsKuery}) and not policy_id:"${escapeQuotes(sentinelPolicyId)}"`
         : allVariantAgentsKuery;
 
+      // OpAMP collectors are not excluded here, unlike in the assignment: the ones that are on a variant or on
+      // `#sentinel` (moved there before they were excluded) are moved back to the plain policy. Leaving them
+      // would keep the variant documents from being deleted below, and strand them on a missing policy.
       const agentIds: string[] = [];
       // Include inactive agents: reassignment is a metadata update on `.fleet-agents` that is valid
       // regardless of active status. Skipping them would delete the variant documents below while an
