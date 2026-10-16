@@ -359,7 +359,7 @@ components:
         type:
           type: string
           enum: [wildcard]
-          description: Must be `wildcard` ("Match", supports `*` and `?` wildcards)
+          description: Must be `wildcard` ("Matches", supports `*` and `?` wildcards)
         value:
           type: string
           minLength: 1
