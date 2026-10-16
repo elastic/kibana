@@ -441,13 +441,12 @@ const ChartItem = React.memo(
       gridSettings,
     ]);
 
-    const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
-
     const yAxisTitle = useMemo(() => {
       const instrument = firstNonNullable(metricItem.metricTypes);
       return instrument ? getAggregationLabel({ instrument, gridSettings }) : undefined;
     }, [metricItem.metricTypes, gridSettings]);
 
+    const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const chartLayers = useChartLayers({
       dimensions: applicableDimensions,
       metricItem,
