@@ -8,6 +8,7 @@
 import type { Action, Dispatch, MiddlewareAPI } from '@reduxjs/toolkit';
 import { makeConfigureStore, onActiveDataChange, setExecutionContext } from '.';
 import { mockStoreDeps } from '../mocks';
+import { makeLensReducer } from './lens_slice';
 import type { TableInspectorAdapter } from '@kbn/lens-common';
 import type { Filter } from '@kbn/es-query';
 
@@ -26,6 +27,30 @@ describe('state management initialization and middlewares', () => {
   });
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('store configuration', () => {
+    test('initializes the lens reducer when preloaded state omits it', () => {
+      const storeDeps = mockStoreDeps();
+      const storeWithDefaults = makeConfigureStore(storeDeps, {});
+      expect(storeWithDefaults.getState()).toEqual({
+        lens: makeLensReducer(storeDeps).getInitialState(),
+      });
+    });
+
+    test('uses supplied preloaded state', () => {
+      const preloadedState = {
+        lens: { ...store.getState().lens, searchSessionId: 'preloaded-session' },
+      };
+      const preloadedStore = makeConfigureStore(mockStoreDeps(), preloadedState);
+      expect(preloadedStore.getState()).toEqual(preloadedState);
+    });
+
+    test('preserves default thunk middleware', () => {
+      const result = store.dispatch((_dispatch, getState) => getState().lens.searchSessionId);
+      expect(result).toBe(store.getState().lens.searchSessionId);
+      expect(updaterFn).not.toHaveBeenCalled();
+    });
   });
 
   describe('customMiddleware', () => {
