@@ -51,6 +51,29 @@ describe('fetchPrefetchedContext', () => {
     });
   });
 
+  it('sends the detection times too when the grounding results are prefetched', async () => {
+    process.env.SIGEVENTS_EVAL_PREFETCH_GROUNDING = 'true';
+    const fetch = makeFetch();
+
+    try {
+      await fetchPrefetchedContext({
+        fetch: asHandler(fetch),
+        detections: [
+          { rule_uuid: 'r1', source_id: 's1', '@timestamp': '2026-10-16T09:56:07.779Z' },
+          { rule_uuid: 'r2', source_id: 's1' },
+        ],
+      });
+    } finally {
+      delete process.env.SIGEVENTS_EVAL_PREFETCH_GROUNDING;
+    }
+
+    expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({
+      rule_uuids: ['r1', 'r2'],
+      source_ids: ['s1'],
+      detections: [{ rule_uuid: 'r1', detected_at: '2026-10-16T09:56:07.779Z' }],
+    });
+  });
+
   it('fetches nothing for a batch without rules', async () => {
     process.env.SIGEVENTS_EVAL_PREFETCH_CONTEXT = 'true';
     const fetch = makeFetch();

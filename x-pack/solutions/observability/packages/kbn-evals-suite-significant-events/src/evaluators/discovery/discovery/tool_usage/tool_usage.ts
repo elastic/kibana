@@ -13,7 +13,10 @@ import {
   isToolId,
   summarizePersistenceCalls,
 } from '../../utils/tool_usage';
-import { isPrefetchedContextEnabled } from '../../../../prefetched_context';
+import {
+  isPrefetchedContextEnabled,
+  isPrefetchedGroundingEnabled,
+} from '../../../../prefetched_context';
 import type { DiscoveryEvaluator } from '../../types';
 import type {
   ContinuationCycle,
@@ -37,6 +40,9 @@ const isTool = isToolId;
 
 /** With the KI context in the message the agent has nothing to search, so a missing `ki_search` is correct. */
 const kiSearchRequired = (): boolean => !isPrefetchedContextEnabled();
+
+/** With the grounding results in the message the agent has no query of its own to run. */
+const esqlRequired = (): boolean => !isPrefetchedGroundingEnabled();
 
 const calledCanonical = (calledTools: Set<string>, canonical: string): boolean =>
   [...calledTools].some((toolId) => isTool(toolId, canonical));
@@ -131,7 +137,7 @@ const hasGroundedNoEventDecision = ({
 
   return (
     (hasQueryKiSearch || !kiSearchRequired()) &&
-    esqlCallCount >= detectionCount &&
+    (esqlCallCount >= detectionCount || !esqlRequired()) &&
     calledCanonical(calledTools, TOOL_ID_EVENT_SEARCH)
   );
 };
@@ -302,7 +308,7 @@ export const scoreToolUsage = ({
   }
 
   const expected = [
-    TOOL_ID_EXECUTE_ESQL,
+    ...(esqlRequired() ? [TOOL_ID_EXECUTE_ESQL] : []),
     ...(kiSearchRequired() ? [TOOL_ID_KI_SEARCH] : []),
     TOOL_ID_EVENT_SEARCH,
   ];
