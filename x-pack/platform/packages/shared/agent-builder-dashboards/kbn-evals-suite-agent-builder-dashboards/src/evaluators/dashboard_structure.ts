@@ -30,7 +30,8 @@ type RowGold = NonNullable<DashboardStructureGold['rows']>[number];
 
 /**
  * Checks each gold row against the panels of its kind and the row above it. A
- * row shares its top and height, so it leaves no gap above the next row.
+ * row shares its top and height, so it leaves no gap above the next row. A
+ * missing row also fails the row below it, which cannot be directly below it.
  */
 const checkRows = (rows: readonly RowGold[], dashboard: DashboardAttachmentData): Check[] => {
   const containers = getPanelContainers(dashboard);
@@ -63,7 +64,7 @@ const checkRows = (rows: readonly RowGold[], dashboard: DashboardAttachmentData)
         ? `${kind} row is not directly below rows[${index - 1}]`
         : undefined,
     ]);
-    previous = first === undefined ? undefined : { panels: rowPanels, container };
+    previous = { panels: rowPanels, container };
 
     return {
       assertion: `rows[${index}]`,
