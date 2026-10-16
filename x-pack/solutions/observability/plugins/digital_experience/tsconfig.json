@@ -3,13 +3,14 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout_digital_experience/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*", "test/scout_digital_experience/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/data-plugin",
     "@kbn/datemath",
     "@kbn/deeplinks-observability",
+    "@kbn/ebt-click",
     "@kbn/features-plugin",
     "@kbn/i18n",
     "@kbn/kibana-react-plugin",

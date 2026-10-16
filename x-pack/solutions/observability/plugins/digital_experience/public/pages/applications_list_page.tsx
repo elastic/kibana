@@ -10,8 +10,10 @@ import { EuiBasicTable, EuiEmptyPrompt, EuiLink, EuiPageHeader, EuiSpacer } from
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import dateMath from '@kbn/datemath';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../common/feature';
 import { TimeRangePicker } from '../components/time_range_picker';
+import { APPLICATIONS_LIST_EBT_ELEMENTS } from '../ebt_constants';
 import { useDigitalExperienceRouter } from '../hooks/use_digital_experience_router';
 import { useKibanaServices } from '../hooks/use_kibana_services';
 import { useTimeRange } from '../hooks/use_time_range';
@@ -76,6 +78,10 @@ export function ApplicationsListPage() {
       render: (serviceName: string) => (
         <EuiLink
           data-test-subj="digitalExperienceApplicationLink"
+          {...getEbtProps({
+            action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
+            element: APPLICATIONS_LIST_EBT_ELEMENTS.APPLICATION_LINK,
+          })}
           href={application.getUrlForApp(DIGITAL_EXPERIENCE_FEATURE_ID, {
             path: router.link('/{serviceName}', { path: { serviceName }, query: timeRange }),
           })}
