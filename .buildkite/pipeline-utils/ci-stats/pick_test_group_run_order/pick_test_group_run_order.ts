@@ -30,7 +30,12 @@ import {
   filterJestUnitConfigsByAffected,
   resolveSelectiveTestingContext,
 } from './selective_testing.ts';
-import { buildFunctionalStepGroup, buildJestStep, registerCancelKeys } from './steps.ts';
+import {
+  buildDynamicFunctionalStepGroup,
+  buildFunctionalStepGroup,
+  buildJestStep,
+  registerCancelKeys,
+} from './steps.ts';
 import type { FtrRunOrder, FunctionalGroup } from './types.ts';
 
 /**
@@ -195,6 +200,50 @@ export async function pickTestGroupRunOrder() {
     bk.uploadArtifacts('ftr_run_order.json');
   }
 
+  if (config.ftrDynamicScheduling && functionalGroups.length > 0) {
+    const queues = new Map(functionalGroups.map(({ key, queue }) => [key, queue]));
+    const tasks = Object.entries(ftrRunOrder)
+      .flatMap(([key, { names, expectedDurationMin }]) =>
+        names.map((name) => ({
+          config: name,
+          queue: queues.get(key) ?? ftrManifest.default.queue,
+          expectedDurationMin: expectedDurationMin / names.length,
+        }))
+      )
+      .sort((a, b) => b.expectedDurationMin - a.expectedDurationMin);
+    Fs.writeFileSync(
+      'ftr_dynamic_plan.json',
+      JSON.stringify(
+        { tasks, workerCount: functionalGroups.length, retryCount: config.ftrConfigsRetryCount },
+        null,
+        2
+      )
+    );
+    bk.uploadArtifacts('ftr_dynamic_plan.json');
+  }
+
+  const functionalStepGroup =
+    functionalGroups.length > 0 &&
+    (config.ftrDynamicScheduling
+      ? buildDynamicFunctionalStepGroup({
+          command: requireVariable(config.ftrConfigsScript, 'FTR_CONFIGS_SCRIPT'),
+          functionalGroups,
+          defaultQueue: ftrManifest.default.queue,
+          ftrExtraArgs: config.ftrExtraArgs,
+          envFromLabels: config.envFromLabels,
+          dependsOn: config.ftrConfigsDeps,
+          retryCount: config.ftrConfigsRetryCount,
+        })
+      : buildFunctionalStepGroup({
+          command: requireVariable(config.ftrConfigsScript, 'FTR_CONFIGS_SCRIPT'),
+          functionalGroups,
+          defaultQueue: ftrManifest.default.queue,
+          ftrExtraArgs: config.ftrExtraArgs,
+          envFromLabels: config.envFromLabels,
+          dependsOn: config.ftrConfigsDeps,
+          retryCount: config.ftrConfigsRetryCount,
+        }));
+
   const steps: BuildkiteStep[] = [
     unit.count > 0 &&
       buildJestStep({
@@ -218,22 +267,19 @@ export async function pickTestGroupRunOrder() {
         dependsOn: config.jestConfigsDeps,
         retryCount: config.jestConfigsRetryCount,
       }),
-    functionalGroups.length > 0 &&
-      buildFunctionalStepGroup({
-        command: requireVariable(config.ftrConfigsScript, 'FTR_CONFIGS_SCRIPT'),
-        functionalGroups,
-        defaultQueue: ftrManifest.default.queue,
-        ftrExtraArgs: config.ftrExtraArgs,
-        envFromLabels: config.envFromLabels,
-        dependsOn: config.ftrConfigsDeps,
-        retryCount: config.ftrConfigsRetryCount,
-      }),
+    functionalStepGroup,
   ].filter((s): s is BuildkiteStep => Boolean(s));
 
   registerCancelKeys(bk, {
     unitCount: unit.count,
     integrationCount: integration.count,
     functionalGroups,
+    dynamicFtrStepKeys:
+      config.ftrDynamicScheduling && functionalStepGroup
+        ? functionalStepGroup.steps
+            .map((step) => ('key' in step ? step.key : undefined))
+            .filter((key): key is string => Boolean(key))
+        : undefined,
   });
 
   bk.uploadSteps(steps);

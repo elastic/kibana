@@ -2,7 +2,11 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/steps/functional/common.sh
+if [[ "${FTR_SKIP_SETUP:-}" == "true" ]]; then
+  source .buildkite/scripts/common/util.sh
+else
+  source .buildkite/scripts/steps/functional/common.sh
+fi
 source .buildkite/scripts/steps/test/ftr_smart_retry.sh
 
 BUILDKITE_PARALLEL_JOB=${BUILDKITE_PARALLEL_JOB:-}

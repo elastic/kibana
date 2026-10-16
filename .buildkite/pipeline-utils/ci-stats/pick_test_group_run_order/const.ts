@@ -30,6 +30,7 @@
  *   LIMIT_CONFIG_TYPE            — comma-separated subset of: unit, integration, functional
  *   LIMIT_SOLUTIONS              — comma-separated subset of: observability, search, security, vectordb
  *   FTR_CONFIG_PATTERNS          — glob patterns to restrict which FTR configs run
+ *   FTR_DYNAMIC_SCHEDULING       — opt into the experimental FTR coordinator and worker pool
  *   FUNCTIONAL_MINIMUM_ISOLATION_MIN — minimum expected isolation time for FTR groups
  *   FTR_CONFIGS_DEPS             — comma-separated Buildkite step keys this step depends on
  *   JEST_CONFIGS_DEPS            — comma-separated Buildkite step keys this step depends on

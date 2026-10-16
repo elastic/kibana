@@ -27,6 +27,10 @@ if [[ -f ftr_run_order.json ]]; then
   upload_tmp_artifact ftr_run_order.json ftr_run_order.json "$BUILDKITE_BUILD_ID"
 fi
 
+if [[ -f ftr_dynamic_plan.json ]]; then
+  upload_tmp_artifact ftr_dynamic_plan.json ftr_dynamic_plan.json "$BUILDKITE_BUILD_ID"
+fi
+
 if [[ ${STORE_CACHE} == "true" ]]; then
   echo "--- Wait for store_cache"
   store_cache_exit=0
