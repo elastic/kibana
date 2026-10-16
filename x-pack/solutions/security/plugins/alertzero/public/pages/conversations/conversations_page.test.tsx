@@ -23,6 +23,7 @@ import {
 } from '@kbn/proposals-plugin/public';
 import {
   useAssignInvestigation,
+  useProposalImpactPills,
   useUserProfiles,
   useSuggestUserProfiles,
   useSetInvestigationStatus,
@@ -36,6 +37,7 @@ import {
 } from '../../hooks/use_proposals_api';
 import { CATEGORY_PAGE_SIZE, CLOSED_PAGE_SIZE } from './queue/use_queue_section';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
+import { useRunningSummary } from '../../hooks/use_running_summary';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { ConversationsPage } from './conversations_page';
 
@@ -43,8 +45,7 @@ jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
   ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
 }));
 
-// Only the mutations are stubbed: the module also exports DISMISS_REASON_OPTIONS, which
-// the dismiss modal's select needs for real.
+// Only the mutations are stubbed — everything else this module exports stays real.
 jest.mock('@kbn/proposals-plugin/public', () => ({
   ...jest.requireActual('@kbn/proposals-plugin/public'),
   useApproveProposal: jest.fn(),
@@ -54,15 +55,47 @@ jest.mock('@kbn/proposals-plugin/public', () => ({
 }));
 // Only the profile lookup and the assignee-picker's own hooks are stubbed here — two separate
 // jest.mock calls for the same module would silently replace one another rather than merge.
-jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
-  ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
-  useCurrentUserProfile: jest.fn(() => ({ data: null })),
-  useAssignInvestigation: jest.fn(),
-  useUserProfiles: jest.fn(),
-  useSuggestUserProfiles: jest.fn(),
-  useSetInvestigationStatus: jest.fn(),
-  useInvestigationClosePreview: jest.fn(),
-}));
+jest.mock('@kbn/agentic-investigations-plugin/public', () => {
+  const mockUseSetInvestigationStatus = jest.fn();
+  return {
+    ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
+    useCurrentUserProfile: jest.fn(() => ({ data: null })),
+    useProposalImpactPills: jest.fn(),
+    useAssignInvestigation: jest.fn(),
+    useUserProfiles: jest.fn(),
+    useSuggestUserProfiles: jest.fn(),
+    useSetInvestigationStatus: mockUseSetInvestigationStatus,
+    useInvestigationClosePreview: jest.fn(),
+    // Stub the lazy close-investigation modal so lazy-loading and provider complexity don't
+    // affect unit tests. The stub renders a minimal dialog and calls the mocked status hook
+    // so the mutation assertions still hold.
+    // eslint-disable-next-line react/display-name
+    LazyConnectedCloseInvestigationModal: ({
+      investigation,
+      onClose,
+    }: {
+      investigation: { conversationId?: string; id?: string };
+      onClose: () => void;
+    }) => {
+      const { mutate } = mockUseSetInvestigationStatus();
+      return (
+        <div role="dialog" aria-label="Close this investigation?">
+          <button
+            onClick={() =>
+              mutate({
+                investigationId: investigation.conversationId ?? investigation.id,
+                body: { status: 'closed', dismiss_reason: undefined, rationale: undefined },
+              })
+            }
+          >
+            Close investigation
+          </button>
+          <button onClick={onClose}>Cancel</button>
+        </div>
+      );
+    },
+  };
+});
 jest.mock('@kbn/agentic-investigations-common', () => {
   const actual = jest.requireActual('@kbn/agentic-investigations-common');
   return {
@@ -95,48 +128,18 @@ jest.mock('@kbn/agentic-investigations-common', () => {
 });
 jest.mock('../../hooks/use_proposals_api');
 jest.mock('../../hooks/use_proposal_charts_summary');
+jest.mock('../../hooks/use_running_summary');
 jest.mock('../../components/proposals_trend_chart', () => ({
   ProposalsTrendChartRow: () => null,
 }));
-// Stub the lazy close-investigation modal so lazy-loading and provider complexity don't
-// affect unit tests. The stub renders a minimal dialog and calls the mocked status hook
-// so the mutation assertions still hold.
-jest.mock('../../components/connected_status/connected_close_investigation_modal', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const agenticInvestigationsPublic = require('@kbn/agentic-investigations-plugin/public');
-  // eslint-disable-next-line react/display-name
-  const ConnectedCloseInvestigationModal = ({
-    investigation,
-    onClose,
-  }: {
-    investigation: { conversationId?: string; id?: string };
-    onClose: () => void;
-  }) => {
-    const { mutate } = agenticInvestigationsPublic.useSetInvestigationStatus();
-    return (
-      <div role="dialog" aria-label="Close this investigation?">
-        <button
-          onClick={() =>
-            mutate({
-              investigationId: investigation.conversationId ?? investigation.id,
-              body: { status: 'closed', dismiss_reason: undefined, rationale: undefined },
-            })
-          }
-        >
-          Close investigation
-        </button>
-        <button onClick={onClose}>Cancel</button>
-      </div>
-    );
-  };
-  return { ConnectedCloseInvestigationModal };
-});
 
 const mockUseProposalsByCategory = useProposalsByCategory as jest.Mock;
 const mockUseProposalsByCategoryCount = useProposalsByCategoryCount as jest.Mock;
 const mockUseClosedProposals = useClosedProposals as jest.Mock;
 const mockUseClosedProposalsCount = useClosedProposalsCount as jest.Mock;
 const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
+const mockUseRunningSummary = useRunningSummary as jest.Mock;
+const mockUseProposalImpactPills = useProposalImpactPills as jest.Mock;
 const mockUseApproveProposal = useApproveProposal as jest.Mock;
 const mockUseDismissProposal = useDismissProposal as jest.Mock;
 const mockUseIsApprovingProposal = useIsApprovingProposal as jest.Mock;
@@ -157,13 +160,26 @@ const fetchNextPage: Record<string, jest.Mock> = {};
  * whole bucket and the pages only what was asked for, so the fake keeps them apart.
  */
 const mockProposals = (groups: Record<string, ProposalItem[]>) => {
-  const count = (all: ProposalItem[], enabled: boolean) => ({
-    data: enabled ? { proposals: [], total: all.length } : undefined,
+  // The server applies the entity filter, so the fake narrows the rows the same way.
+  const narrowed = (rows: ProposalItem[], entity?: string | null) =>
+    entity ? rows.filter(({ entityIds }) => entityIds?.includes(entity)) : rows;
+
+  const count = (rows: ProposalItem[], enabled: boolean, entity?: string | null) => ({
+    data: enabled ? { proposals: [], total: narrowed(rows, entity).length } : undefined,
     isLoading: false,
     error: undefined,
   });
 
-  const pages = (bucket: string, all: ProposalItem[], firstPageSize: number, enabled: boolean) => {
+  const pages = (
+    bucket: string,
+    rows: ProposalItem[],
+    {
+      firstPageSize,
+      enabled,
+      entity,
+    }: { firstPageSize: number; enabled: boolean; entity?: string | null }
+  ) => {
+    const all = narrowed(rows, entity);
     // Resolves, like the real one: the caller waits on it to hear that a page failed.
     fetchNextPage[bucket] = fetchNextPage[bucket] ?? jest.fn().mockResolvedValue({});
     if (!enabled) {
@@ -189,25 +205,34 @@ const mockProposals = (groups: Record<string, ProposalItem[]>) => {
     };
   };
 
-  mockUseProposalsByCategoryCount.mockImplementation((category: string, enabled: boolean) =>
-    count(groups[category] ?? [], enabled)
+  mockUseProposalsByCategoryCount.mockImplementation(
+    (category: string, enabled: boolean, entity?: string | null) =>
+      count(groups[category] ?? [], enabled, entity)
   );
-  mockUseClosedProposalsCount.mockImplementation((enabled: boolean) =>
-    count(groups.closed ?? [], enabled)
+  mockUseClosedProposalsCount.mockImplementation((enabled: boolean, entity?: string | null) =>
+    count(groups.closed ?? [], enabled, entity)
   );
 
   mockUseProposalsByCategory.mockImplementation(
-    (category: string, { firstPageSize, enabled }: { firstPageSize: number; enabled: boolean }) =>
-      pages(category, groups[category] ?? [], firstPageSize, enabled)
+    (
+      category: string,
+      options: { firstPageSize: number; enabled: boolean; entity?: string | null }
+    ) => pages(category, groups[category] ?? [], options)
   );
   mockUseClosedProposals.mockImplementation(
-    ({ firstPageSize, enabled }: { firstPageSize: number; enabled: boolean }) =>
-      pages('closed', groups.closed ?? [], firstPageSize, enabled)
+    (options: { firstPageSize: number; enabled: boolean; entity?: string | null }) =>
+      pages('closed', groups.closed ?? [], options)
   );
 };
 
-/** The Closed accordion starts collapsed, so its rows need an expand first. */
-const expandClosed = () => fireEvent.click(screen.getByRole('button', { name: /^Closed/ }));
+/**
+ * The Closed accordion starts collapsed, so its rows need an expand first. Awaiting flushes the
+ * badge's MutationObserver update, which would otherwise land outside `act`.
+ */
+const expandClosed = async () => {
+  fireEvent.click(screen.getByRole('button', { name: /^Closed Actions/ }));
+  await act(async () => {});
+};
 
 /** The header count comes from the charts-summary scalar, not from the pages above. */
 const mockOpenCount = (currentOpen: number) =>
@@ -233,21 +258,37 @@ const proposal: ProposalItem = {
   category: 'investigate',
   origin: 'alertzero',
   createdAt: '2024-01-01T00:00:00Z',
-  expired: false,
   conversationAssignees: [],
 };
 
 const renderPage = (
   initialEntry: string,
-  { capabilities = {} }: { capabilities?: Record<string, unknown> } = {}
+  {
+    capabilities = {},
+    proposalsCapabilities = { showProposals: true, decideProposals: true },
+    alertZeroWrite = true,
+  }: {
+    capabilities?: Record<string, unknown>;
+    proposalsCapabilities?: Record<string, boolean>;
+    alertZeroWrite?: boolean;
+  } = {}
 ) => {
   const core = coreMock.createStart();
+  core.application.capabilities = {
+    ...core.application.capabilities,
+    alertzero: { show: true, write: alertZeroWrite },
+    proposals: proposalsCapabilities,
+  };
   // The real service returns a URL; the mock returns undefined, which would silently drop the
   // chat control's href and make the link assertions vacuous.
   core.application.getUrlForApp.mockImplementation(
     (appId, options) => `/app/${appId}${options?.path ?? ''}`
   );
   (core.application.capabilities as Record<string, unknown>).agenticInvestigations = capabilities;
+  // The real hooks behind the details flyout and the assignee picker read these services, and
+  // react-query rejects a query function that resolves to undefined.
+  core.http.get.mockResolvedValue(proposal);
+  core.userProfile.suggest.mockResolvedValue([]);
   const agentBuilder = agentBuilderMocks.createStart();
   const closeFlyout = jest.fn();
   (agentBuilder.openConversationDetails as jest.Mock).mockResolvedValue(closeFlyout);
@@ -298,7 +339,39 @@ beforeEach(() => {
     isFetching: false,
     refetch: jest.fn(),
   });
+  mockUseProposalImpactPills.mockReturnValue({ data: [] });
   mockOpenCount(0);
+  mockUseRunningSummary.mockReturnValue({ watchCount: 4, enabledWorkerCount: 6, workerCount: 6 });
+});
+
+describe('ConversationsPage proposals access', () => {
+  afterEach(() => jest.clearAllMocks());
+
+  it.each<Record<string, boolean>>([{}, { showProposals: false }])(
+    'names the missing privilege and prevents queue requests with capabilities %s',
+    (proposalsCapabilities) => {
+      renderPage('/', { proposalsCapabilities });
+
+      expect(
+        screen.getByText(
+          'To view the AlertZero queue in this space, you need the Proposed Actions Read privilege.'
+        )
+      ).toBeInTheDocument();
+      expect(mockUseProposalsByCategory).not.toHaveBeenCalled();
+      expect(mockUseProposalsByCategoryCount).not.toHaveBeenCalled();
+      expect(mockUseClosedProposals).not.toHaveBeenCalled();
+      expect(mockUseClosedProposalsCount).not.toHaveBeenCalled();
+      expect(mockUseProposalChartsSummary).not.toHaveBeenCalled();
+    }
+  );
+
+  it('allows the queue with Proposals read access alone', () => {
+    mockProposals({ investigate: [proposal] });
+    renderPage('/', { proposalsCapabilities: { showProposals: true, decideProposals: false } });
+
+    expect(screen.queryByTestId('alertzeroProposalsPrivilegesGate')).not.toBeInTheDocument();
+    expect(mockUseProposalsByCategory).toHaveBeenCalled();
+  });
 });
 
 describe('ConversationsPage scan failures', () => {
@@ -338,11 +411,11 @@ describe('ConversationsPage details flyout', () => {
   it("puts the card's conversation in the URL rather than the proposal id", async () => {
     const { agentBuilder, history } = renderPage('/');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Impossible travel — exec account' }));
+    fireEvent.click(screen.getByRole('button', { name: proposal.title }));
 
-    // Cards are keyed by proposal id, so the click has to resolve through the proposal's
-    // conversation: the URL must carry `inv-1`, never the `prop-1` that was clicked.
-    expect(history.location.search).toBe('?selectedConversationId=inv-1');
+    // The flyout addresses the conversation, so `selectedConversationId` is `inv-1`, never the
+    // `prop-1` that was clicked; the clicked proposal rides along only to mark its card.
+    expect(history.location.search).toBe('?selectedConversationId=inv-1&selectedProposalId=prop-1');
     await waitFor(() => {
       expect(agentBuilder.openConversationDetails).toHaveBeenCalledWith(
         expect.objectContaining({ conversationId: 'inv-1' })
@@ -371,21 +444,42 @@ describe('ConversationsPage details flyout', () => {
     expect(history.location.search).toBe('');
   });
 
-  it('marks the cards of the open conversation, not just the clicked one', async () => {
+  it('marks only the clicked card, not its siblings in the same conversation', async () => {
     const sibling: ProposalItem = { ...proposal, id: 'prop-2', comment: 'Second proposal.' };
     mockProposals({ investigate: [proposal, sibling] });
 
+    renderPage('/');
+
+    const [first, second] = screen.getAllByRole('button', { name: proposal.title });
+    fireEvent.click(second);
+
+    expect(second).toHaveAttribute('aria-current', 'true');
+    expect(first).not.toHaveAttribute('aria-current');
+  });
+
+  it('ignores a proposal id that belongs to a different conversation', async () => {
+    mockProposals({ investigate: [proposal] });
+
+    renderPage('/?selectedConversationId=inv-2&selectedProposalId=prop-1');
+
+    expect(screen.getByRole('button', { name: proposal.title })).not.toHaveAttribute(
+      'aria-current'
+    );
+  });
+
+  it('marks no card when the link names only the conversation', async () => {
+    mockProposals({ investigate: [proposal] });
+
     renderPage('/?selectedConversationId=inv-1');
 
-    // Both rows belong to the conversation the flyout is showing.
-    const cards = screen.getAllByRole('button', { name: 'Impossible travel — exec account' });
-    expect(cards).toHaveLength(2);
-    cards.forEach((card) => expect(card).toHaveAttribute('aria-current', 'true'));
+    expect(screen.getByRole('button', { name: proposal.title })).not.toHaveAttribute(
+      'aria-current'
+    );
   });
 
   it('stops marking the card as current once the conversation leaves the URL', async () => {
     const { history } = renderPage('/');
-    const card = screen.getByRole('button', { name: 'Impossible travel — exec account' });
+    const card = screen.getByRole('button', { name: proposal.title });
 
     fireEvent.click(card);
     expect(card).toHaveAttribute('aria-current', 'true');
@@ -414,7 +508,7 @@ describe('ConversationsPage open in chat', () => {
     // The chat is the investigation's own Agent Builder conversation, so the card resolves its
     // proposal to that conversation and its agent — the route is scoped to the agent.
     expect(core.application.navigateToApp).toHaveBeenCalledWith('agent_builder', {
-      path: '/agents/elastic-ai-agent/conversations/inv-1?openConversationDetails=true',
+      path: '/agents/elastic-ai-agent/conversations/inv-1?openConversationDetails=true&sidebarCollapsed=true',
     });
   });
 
@@ -422,11 +516,11 @@ describe('ConversationsPage open in chat', () => {
     const { core } = renderPage('/');
 
     expect(core.application.getUrlForApp).toHaveBeenCalledWith('agent_builder', {
-      path: '/agents/elastic-ai-agent/conversations/inv-1?openConversationDetails=true',
+      path: '/agents/elastic-ai-agent/conversations/inv-1?openConversationDetails=true&sidebarCollapsed=true',
     });
     expect(chatControl()).toHaveAttribute(
       'href',
-      '/app/agent_builder/agents/elastic-ai-agent/conversations/inv-1?openConversationDetails=true'
+      '/app/agent_builder/agents/elastic-ai-agent/conversations/inv-1?openConversationDetails=true&sidebarCollapsed=true'
     );
   });
 
@@ -439,7 +533,7 @@ describe('ConversationsPage open in chat', () => {
     fireEvent.click(chatControl());
 
     expect(core.application.navigateToApp).toHaveBeenCalledWith('agent_builder', {
-      path: '/conversations/inv-1?openConversationDetails=true',
+      path: '/conversations/inv-1?openConversationDetails=true&sidebarCollapsed=true',
     });
   });
 
@@ -485,16 +579,28 @@ describe('ConversationsPage decisions', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: 'Revoke sessions' }));
   };
 
-  it('submits the action input the analyst was shown, so the API can refuse a stale approval', () => {
-    renderPage('/');
+  it('allows Proposals Manage to approve without AlertZero Write and submits the displayed input', async () => {
+    renderPage('/', { alertZeroWrite: false });
     openApproval();
 
     fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
 
-    expect(approveMutateAsync).toHaveBeenCalledWith({
-      id: 'prop-1',
-      body: { actionInput: { user: 'cfo@corp' } },
-    });
+    await waitFor(() =>
+      expect(approveMutateAsync).toHaveBeenCalledWith({
+        id: 'prop-1',
+        body: { actionInput: { user: 'cfo@corp' } },
+      })
+    );
+  });
+
+  it('does not offer proposal decisions without Proposals Manage even with AlertZero All', () => {
+    renderPage('/', { proposalsCapabilities: { showProposals: true, decideProposals: false } });
+    // Only the read-only "Copy link" remains in the menu: no decision can be made from it.
+    fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
+    expect(screen.getByRole('menuitem', { name: 'Copy link' })).toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Revoke sessions' })).not.toBeInTheDocument();
+    expect(approveMutateAsync).not.toHaveBeenCalled();
+    expect(dismissMutateAsync).not.toHaveBeenCalled();
   });
 
   it('stays open and shows Applying while useIsApprovingProposal reports this proposal in flight', () => {
@@ -511,27 +617,55 @@ describe('ConversationsPage decisions', () => {
     expect(screen.getByRole('dialog', { name: 'Revoke sessions' })).toBeInTheDocument();
   });
 
-  it('hands Dismiss off to the dismiss modal rather than deciding without a reason', () => {
+  it('shows the reason form in the same modal, not a second one, when Decline is clicked', () => {
     renderPage('/');
     openApproval();
 
     fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
 
-    // The approval modal closes and the reason form takes over for the same proposal: a
-    // dismissal is a decision with a reason, never a silent close.
-    expect(screen.queryByRole('dialog', { name: 'Revoke sessions' })).not.toBeInTheDocument();
+    // Same dialog, same title — its body swapped to the reason form rather than a second modal
+    // (the old flow's own) opening beside or instead of it.
+    expect(screen.getByRole('dialog', { name: 'Revoke sessions' })).toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: 'Action modal' })).not.toBeInTheDocument();
+    expect(approvalDialog().getByRole('radio', { name: 'Decline without a reason' })).toBeChecked();
+  });
 
-    const dialog = within(screen.getByRole('dialog', { name: 'Action modal' }));
-    fireEvent.change(screen.getByTestId('alertZeroDismissReasonSelect'), {
-      target: { value: 'low_value' },
-    });
-    fireEvent.change(dialog.getByRole('textbox'), { target: { value: 'Not worth chasing.' } });
-    fireEvent.click(dialog.getByRole('button', { name: 'Dismiss' }));
+  it('submits the selected reason and rationale, and returns to the read-only decided state', async () => {
+    renderPage('/');
+    openApproval();
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
 
-    expect(dismissMutateAsync).toHaveBeenCalledWith({
-      id: 'prop-1',
-      body: { dismissReason: 'low_value', rationale: 'Not worth chasing.' },
+    fireEvent.click(
+      approvalDialog().getByRole('radio', {
+        name: 'No actions needed (risk is acceptable)',
+      })
+    );
+    fireEvent.change(approvalDialog().getByRole('textbox'), {
+      target: { value: 'Not worth chasing.' },
     });
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
+
+    await waitFor(() =>
+      expect(dismissMutateAsync).toHaveBeenCalledWith({
+        id: 'prop-1',
+        body: { dismissReason: 'risk_accepted', rationale: 'Not worth chasing.' },
+      })
+    );
+    // The modal resets its form once the decision resolves; wait for that before the test ends.
+    await waitFor(() =>
+      expect(approvalDialog().getByRole('button', { name: 'Approve' })).toBeInTheDocument()
+    );
+  });
+
+  it('returns to the approval view without declining when Cancel is clicked', () => {
+    renderPage('/');
+    openApproval();
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
+
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Cancel' }));
+
+    expect(approvalDialog().getByRole('button', { name: 'Approve' })).toBeInTheDocument();
+    expect(dismissMutateAsync).not.toHaveBeenCalled();
   });
 
   it('opens the close-investigation modal when the ⋮ Close action is triggered with manage capability', () => {
@@ -550,15 +684,15 @@ describe('ConversationsPage decisions', () => {
     });
   });
 
-  it('hides the actions menu trigger for a decided proposal when escalation is not available', () => {
-    // A decided investigation without `canManageEscalations` has no available actions —
-    // the menu trigger must not be rendered at all, not just show an empty popover.
+  it('offers only Copy link for a decided proposal when escalation is not available', async () => {
+    // A decided investigation without `canManageEscalations` keeps just the read-only item.
     mockProposals({ closed: [{ ...actionProposal, decidedAt: '2024-01-02T00:00:00Z' }] });
 
     renderPage('/');
-    expandClosed();
+    await expandClosed();
 
-    expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
+    expect(screen.getAllByRole('menuitem').map((item) => item.textContent)).toEqual(['Copy link']);
   });
 
   // That the scalar itself excludes decided proposals is covered in the service tests.
@@ -601,6 +735,103 @@ describe('ConversationsPage decisions', () => {
   });
 });
 
+describe('ConversationsPage idle state', () => {
+  it('shows the workers-running panel and idle header when nothing is open or closed', () => {
+    mockProposals({});
+    mockOpenCount(0);
+
+    renderPage('/');
+
+    expect(screen.getByTestId('alertZeroWorkersRunningPanel')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toContain(
+      'Your Watches are running. No actions need you'
+    );
+    expect(screen.getByTestId('alertZeroPageHeaderSubtitle')).toHaveTextContent(
+      '4 Watches are running right now · 6 of 6 Workers are enabled'
+    );
+  });
+
+  it('does not render the queue sections when idle', () => {
+    mockProposals({});
+    mockOpenCount(0);
+
+    renderPage('/');
+
+    expect(screen.getByTestId('alertZeroWorkersRunningPanel')).toBeInTheDocument();
+    ['Investigate', 'Respond', 'Closed Actions'].forEach((name) =>
+      expect(screen.queryByRole('button', { name: new RegExp(`^${name}`) })).not.toBeInTheDocument()
+    );
+  });
+
+  it('renders the queue sections when not idle', () => {
+    mockProposals({ respond: [{ ...proposal, category: 'respond' }] });
+    mockOpenCount(1);
+
+    renderPage('/');
+
+    expect(screen.getByRole('button', { name: /^Respond/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Closed Actions/ })).toBeInTheDocument();
+  });
+
+  it('does not claim Workers are running when none is enabled', () => {
+    mockProposals({});
+    mockOpenCount(0);
+    mockUseRunningSummary.mockReturnValue({ watchCount: 0, enabledWorkerCount: 0, workerCount: 5 });
+
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertZeroWorkersRunningPanel')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1 }).textContent).not.toContain(
+      'Your Watches are running'
+    );
+    expect(screen.getByRole('button', { name: /^Respond/ })).toBeInTheDocument();
+  });
+
+  it('keeps the queue sections and their retry control when a section failed to load', () => {
+    mockProposals({});
+    mockOpenCount(0);
+    mockUseProposalsByCategoryCount.mockImplementation((category: string) => ({
+      data: category === 'investigate' ? undefined : { proposals: [], total: 0 },
+      isLoading: false,
+      error: category === 'investigate' ? new Error('boom') : undefined,
+    }));
+    mockUseProposalsByCategory.mockImplementation((category: string) => ({
+      data:
+        category === 'investigate'
+          ? undefined
+          : { pages: [{ proposals: [], total: 0 }], pageParams: [undefined] },
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      isInitialLoading: false,
+      error: category === 'investigate' ? new Error('boom') : undefined,
+    }));
+
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertZeroWorkersRunningPanel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('conversationQueueError-investigate')).toBeInTheDocument();
+  });
+
+  it('hides the panel while proposals are open', () => {
+    mockProposals({ investigate: [proposal] });
+    mockOpenCount(1);
+
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertZeroWorkersRunningPanel')).not.toBeInTheDocument();
+  });
+
+  it('hides the panel when the window holds only closed proposals', () => {
+    mockProposals({ closed: [{ ...proposal, decidedAt: '2024-01-02T00:00:00Z' }] });
+    mockOpenCount(0);
+
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertZeroWorkersRunningPanel')).not.toBeInTheDocument();
+  });
+});
+
 describe('ConversationsPage queue sections', () => {
   const closedProposal = { ...proposal, id: 'prop-c', decidedAt: '2024-01-02T00:00:00Z' };
   const bucketOf = (size: number, overrides: Partial<ProposalItem> = {}) =>
@@ -622,14 +853,14 @@ describe('ConversationsPage queue sections', () => {
 
     renderPage('/');
 
-    expect(screen.getByRole('button', { name: /^Closed/ })).toHaveTextContent('2');
+    expect(screen.getByRole('button', { name: /^Closed Actions/ })).toHaveTextContent('2');
   });
 
-  it('fetches rows once Closed is expanded', () => {
+  it('fetches rows once Closed is expanded', async () => {
     mockProposals({ closed: [closedProposal] });
 
     renderPage('/');
-    expandClosed();
+    await expandClosed();
 
     expect(mockUseClosedProposals).toHaveBeenLastCalledWith(
       expect.objectContaining({ enabled: true, firstPageSize: CLOSED_PAGE_SIZE })
@@ -637,12 +868,12 @@ describe('ConversationsPage queue sections', () => {
     expect(screen.getByText(closedProposal.conversationTitle!)).toBeInTheDocument();
   });
 
-  it('stops the rows query again when Closed is collapsed', () => {
+  it('stops the rows query again when Closed is collapsed', async () => {
     mockProposals({ closed: [closedProposal] });
 
     renderPage('/');
-    expandClosed();
-    expandClosed();
+    await expandClosed();
+    await expandClosed();
 
     expect(mockUseClosedProposals).toHaveBeenLastCalledWith(
       expect.objectContaining({ enabled: false })
@@ -667,9 +898,9 @@ describe('ConversationsPage queue sections', () => {
 
     renderPage('/');
 
-    expect(mockUseProposalsByCategoryCount).toHaveBeenCalledWith('respond', false);
+    expect(mockUseProposalsByCategoryCount).toHaveBeenCalledWith('respond', false, null);
     // Collapsed, so nothing else can report it.
-    expect(mockUseClosedProposalsCount).toHaveBeenLastCalledWith(true);
+    expect(mockUseClosedProposalsCount).toHaveBeenLastCalledWith(true, null);
   });
 
   describe('show more', () => {
@@ -700,7 +931,7 @@ describe('ConversationsPage queue sections', () => {
       expect(fetchNextPage.respond).toHaveBeenCalled();
     });
 
-    it('is offered on Closed too, once expanded', () => {
+    it('is offered on Closed too, once expanded', async () => {
       mockProposals({
         closed: bucketOf(CLOSED_PAGE_SIZE + 7).map((p) => ({
           ...p,
@@ -709,7 +940,7 @@ describe('ConversationsPage queue sections', () => {
       });
 
       renderPage('/');
-      expandClosed();
+      await expandClosed();
 
       expect(screen.getByTestId('conversationQueueShowMore-closed')).toHaveTextContent(
         'Show more (7)'
@@ -721,6 +952,11 @@ describe('ConversationsPage queue sections', () => {
     // The review this fixes: an aggregate across all four queries let a healthy
     // `respond` suppress a broken `investigate`, which then read as simply empty.
     mockProposals({ respond: [proposal] });
+    mockUseProposalsByCategoryCount.mockImplementation((category: string) => ({
+      data: category === 'investigate' ? undefined : { proposals: [], total: 1 },
+      isLoading: false,
+      error: category === 'investigate' ? new Error('boom') : undefined,
+    }));
     mockUseProposalsByCategory.mockImplementation((category: string) =>
       category === 'investigate'
         ? {
@@ -752,7 +988,7 @@ describe('ConversationsPage queue sections', () => {
     expect(screen.queryByTestId('conversationQueueError-respond')).not.toBeInTheDocument();
   });
 
-  it('scaffolds only as many rows as the bucket holds, not a whole page', () => {
+  it('scaffolds only as many rows as the bucket holds, not a whole page', async () => {
     // The count read already said the bucket holds 3, so a 25-row scaffold would
     // promise rows that are never coming.
     mockProposals({});
@@ -771,7 +1007,7 @@ describe('ConversationsPage queue sections', () => {
     });
 
     renderPage('/');
-    expandClosed();
+    await expandClosed();
 
     const scaffold = screen.getByLabelText('Loading events…');
     expect(within(scaffold).getAllByRole('progressbar')).toHaveLength(6);
@@ -791,36 +1027,92 @@ describe('ConversationsPage impact pills', () => {
     conversationTitle: 'User investigation',
     entityIds: ['user-1'],
   };
+  const pills = [
+    { entityId: 'host-1', count: 1 },
+    { entityId: 'user-1', count: 1 },
+  ];
 
   beforeEach(() => {
     mockProposals({ investigate: [hostProposal, userProposal] });
+    mockUseProposalImpactPills.mockReturnValue({ data: pills });
   });
+
+  // Toggling a pill changes the section badges' text; awaiting flushes the resulting
+  // MutationObserver update, which would otherwise land outside `act`.
+  const togglePill = async (name: string) => {
+    fireEvent.click(screen.getByRole('button', { name }));
+    await act(async () => {});
+  };
 
   afterEach(() => jest.clearAllMocks());
 
-  it('filters the queue to conversations whose entity ids include the selected pill', () => {
+  it('reads the pills for the whole queue, not from the loaded rows', () => {
     renderPage('/');
 
-    expect(screen.getByText('Host investigation')).toBeInTheDocument();
-    expect(screen.getByText('User investigation')).toBeInTheDocument();
+    expect(mockUseProposalImpactPills).toHaveBeenCalledWith({
+      origin: 'alertzero',
+      categories: ['respond', 'investigate', 'configure'],
+      decidedWithinHours: 72,
+    });
+  });
 
-    fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+  it('keeps the pills when a section holding their entities is collapsed', async () => {
+    mockProposals({
+      respond: [{ ...proposal, id: 'prop-respond', category: 'respond', entityIds: ['host-9'] }],
+      investigate: [hostProposal],
+    });
+    mockUseProposalImpactPills.mockReturnValue({
+      data: [
+        { entityId: 'host-1', count: 1 },
+        { entityId: 'host-9', count: 1 },
+      ],
+    });
+    mockOpenCount(2);
+    renderPage('/');
 
+    fireEvent.click(screen.getByRole('button', { name: /^Respond/ }));
+    await act(async () => {});
+
+    expect(screen.getByRole('button', { name: 'host-9' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'host-1' })).toBeInTheDocument();
+  });
+
+  it('asks every section for the selected entity, so the server filters them all', async () => {
+    renderPage('/');
+
+    await togglePill('host-1');
+
+    for (const category of ['respond', 'investigate', 'configure']) {
+      expect(mockUseProposalsByCategory).toHaveBeenCalledWith(
+        category,
+        expect.objectContaining({ entity: 'host-1' })
+      );
+      expect(mockUseProposalsByCategoryCount).toHaveBeenCalledWith(
+        category,
+        expect.any(Boolean),
+        'host-1'
+      );
+    }
+    expect(mockUseClosedProposals).toHaveBeenLastCalledWith(
+      expect.objectContaining({ entity: 'host-1' })
+    );
     expect(screen.getByText('Host investigation')).toBeInTheDocument();
     expect(screen.queryByText('User investigation')).not.toBeInTheDocument();
   });
 
-  it('clears the filter when the selected pill is clicked again', () => {
+  it('clears the filter when the selected pill is clicked again', async () => {
     renderPage('/');
 
-    fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
-    fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+    await togglePill('host-1');
+    await togglePill('host-1');
 
+    expect(mockUseProposalsByCategory.mock.calls.at(-1)?.[1]).toMatchObject({ entity: null });
     expect(screen.getByText('Host investigation')).toBeInTheDocument();
     expect(screen.getByText('User investigation')).toBeInTheDocument();
   });
 
-  it('hides the pill row when no proposal carries entity ids and leaves the queue unfiltered', () => {
+  it('hides the pill row when the queue has no entities and leaves it unfiltered', () => {
+    mockUseProposalImpactPills.mockReturnValue({ data: [] });
     mockProposals({ investigate: [{ ...proposal, conversationTitle: 'No impact' }] });
     renderPage('/');
 
@@ -828,13 +1120,13 @@ describe('ConversationsPage impact pills', () => {
     expect(screen.getByText('No impact')).toBeInTheDocument();
   });
 
-  it('clears the filter when the selected entity disappears from the loaded proposals', () => {
+  it('clears the filter when the selected entity disappears from the pills', async () => {
     const { rerender } = renderPage('/');
 
-    fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+    await togglePill('host-1');
     expect(screen.queryByText('User investigation')).not.toBeInTheDocument();
 
-    mockProposals({ investigate: [userProposal] });
+    mockUseProposalImpactPills.mockReturnValue({ data: [{ entityId: 'user-1', count: 1 }] });
     rerender();
 
     expect(screen.queryByRole('button', { name: 'host-1' })).not.toBeInTheDocument();
@@ -842,7 +1134,7 @@ describe('ConversationsPage impact pills', () => {
     expect(screen.queryByText('No events match the current filter.')).not.toBeInTheDocument();
   });
 
-  it('shows the filtered empty state in a section whose rows do not carry the selected entity', () => {
+  it('shows the filtered empty state in a section the selected entity does not reach', async () => {
     mockProposals({
       investigate: [hostProposal],
       respond: [
@@ -857,7 +1149,7 @@ describe('ConversationsPage impact pills', () => {
     });
     renderPage('/');
 
-    fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+    await togglePill('host-1');
 
     expect(screen.getByText('Host investigation')).toBeInTheDocument();
     expect(screen.queryByText('Respond investigation')).not.toBeInTheDocument();

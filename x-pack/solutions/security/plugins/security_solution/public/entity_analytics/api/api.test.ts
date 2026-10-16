@@ -64,3 +64,87 @@ describe('useEntityAnalyticsRoutes — executionContext propagation on v2 branch
     );
   });
 });
+
+describe('useEntityAnalyticsRoutes — executionContext propagation on entity details flyout endpoints', () => {
+  const context = {
+    child: {
+      type: 'security_solution',
+      name: 'entity_analytics:entity_details_flyout',
+      id: 'test-panel',
+    },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useKibanaMock.mockReturnValue({ services: { http: { fetch: mockFetch } } });
+    mockFetch.mockResolvedValue({});
+  });
+
+  it('forwards context to http.fetch in fetchEntityDetailsHighlights', async () => {
+    const { result } = renderHook(() => useEntityAnalyticsRoutes());
+    const signal = new AbortController().signal;
+
+    await result.current.fetchEntityDetailsHighlights({
+      params: {
+        entityType: 'user',
+        entityIdentifier: 'alice',
+        anonymizationFields: [],
+        from: 1,
+        to: 2,
+        connectorId: 'connector-1',
+      },
+      signal,
+      context,
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ method: 'POST', signal, context })
+    );
+  });
+
+  it('forwards context to http.fetch in saveEntityAiSummary', async () => {
+    const { result } = renderHook(() => useEntityAnalyticsRoutes());
+
+    await result.current.saveEntityAiSummary({
+      params: {
+        entityId: 'alice',
+        entityType: 'user',
+        summary: {
+          highlights: [],
+          recommended_actions: [],
+          generated_at: 1,
+          staleness: { enabled_signals: [], snapshot: {} },
+        },
+        modelOutputCounts: { highlights: 0, recommendedActions: 0 },
+      },
+      context,
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ method: 'POST', context })
+    );
+  });
+
+  it('forwards context and query to http.fetch in fetchPersistedAiSummary', async () => {
+    const { result } = renderHook(() => useEntityAnalyticsRoutes());
+    const signal = new AbortController().signal;
+
+    await result.current.fetchPersistedAiSummary({
+      params: { entityType: 'user', entityIdentifier: 'alice' },
+      signal,
+      context,
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        method: 'GET',
+        query: { entityId: 'alice', entityType: 'user' },
+        signal,
+        context,
+      })
+    );
+  });
+});

@@ -119,12 +119,24 @@ export const getPolicySettingsFormTestSubjects = (
         modeSelect: perOsRansomwareTestSubj('windows-mode'),
         notifyUserCheckbox: perOsRansomwareTestSubj('windows-notifyUser-checkbox'),
         notifyCustomMessage: perOsRansomwareTestSubj('windows-notifyUser-customMessage'),
+        notifyTooltipIcon: perOsRansomwareTestSubj('windows-notifyUser-tooltipIcon'),
+        notifySupportedVersion: perOsRansomwareTestSubj('windows-notifyUser-supportedVersion'),
       },
       mac: {
         row: perOsRansomwareTestSubj('mac'),
         modeSelect: perOsRansomwareTestSubj('mac-mode'),
         notifyUserCheckbox: perOsRansomwareTestSubj('mac-notifyUser-checkbox'),
         notifyCustomMessage: perOsRansomwareTestSubj('mac-notifyUser-customMessage'),
+        notifyTooltipIcon: perOsRansomwareTestSubj('mac-notifyUser-tooltipIcon'),
+        notifySupportedVersion: perOsRansomwareTestSubj('mac-notifyUser-supportedVersion'),
+      },
+      linux: {
+        row: perOsRansomwareTestSubj('linux'),
+        modeSelect: perOsRansomwareTestSubj('linux-mode'),
+        notifyUserCheckbox: perOsRansomwareTestSubj('linux-notifyUser-checkbox'),
+        notifyCustomMessage: perOsRansomwareTestSubj('linux-notifyUser-customMessage'),
+        notifyTooltipIcon: perOsRansomwareTestSubj('linux-notifyUser-tooltipIcon'),
+        notifySupportedVersion: perOsRansomwareTestSubj('linux-notifyUser-supportedVersion'),
       },
     },
     memory: {
@@ -152,16 +164,37 @@ export const getPolicySettingsFormTestSubjects = (
         row: perOsMemoryTestSubj('windows'),
         modeSelect: perOsMemoryTestSubj('windows-mode'),
         notifyUserCheckbox: perOsMemoryTestSubj('windows-notifyUser-checkbox'),
+        customYaraSignatures: perOsMemoryTestSubj('windows-customYaraSignatures'),
+        customYaraSignaturesEnableDisableSwitch: perOsMemoryTestSubj(
+          'windows-customYaraSignatures-enableDisableSwitch'
+        ),
+        customYaraSignaturesTooltipIcon: perOsMemoryTestSubj(
+          'windows-customYaraSignatures-tooltipIcon'
+        ),
       },
       mac: {
         row: perOsMemoryTestSubj('mac'),
         modeSelect: perOsMemoryTestSubj('mac-mode'),
         notifyUserCheckbox: perOsMemoryTestSubj('mac-notifyUser-checkbox'),
+        customYaraSignatures: perOsMemoryTestSubj('mac-customYaraSignatures'),
+        customYaraSignaturesEnableDisableSwitch: perOsMemoryTestSubj(
+          'mac-customYaraSignatures-enableDisableSwitch'
+        ),
+        customYaraSignaturesTooltipIcon: perOsMemoryTestSubj(
+          'mac-customYaraSignatures-tooltipIcon'
+        ),
       },
       linux: {
         row: perOsMemoryTestSubj('linux'),
         modeSelect: perOsMemoryTestSubj('linux-mode'),
         notifyUserCheckbox: perOsMemoryTestSubj('linux-notifyUser-checkbox'),
+        customYaraSignatures: perOsMemoryTestSubj('linux-customYaraSignatures'),
+        customYaraSignaturesEnableDisableSwitch: perOsMemoryTestSubj(
+          'linux-customYaraSignatures-enableDisableSwitch'
+        ),
+        customYaraSignaturesTooltipIcon: perOsMemoryTestSubj(
+          'linux-customYaraSignatures-tooltipIcon'
+        ),
       },
     },
     behaviour: {

@@ -9,7 +9,12 @@ import { omitBy, isUndefined } from 'lodash';
 import pLimit from 'p-limit';
 import { z } from '@kbn/zod/v4';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { Logger, SavedObjectsClientContract, SavedObjectAttributes } from '@kbn/core/server';
+import type {
+  Logger,
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+} from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { EARS_AUTH_ID } from '@kbn/connector-specs';
 import { retryIfConflicts } from './retry_if_conflicts';
@@ -28,6 +33,11 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 export const MAX_TOKENS_RETURNED = 1;
 const MAX_RETRY_ATTEMPTS = 3;
 const REVOKE_CONCURRENCY = 10;
+const DECRYPT_CONCURRENCY = 10;
+const TOKEN_LOOKUP_PAGE_SIZE = 100;
+
+const isFutureOrUnset = (isoDate: string | undefined, now: number): boolean =>
+  !isoDate || Date.parse(isoDate) > now;
 
 interface ConstructorOptions {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
@@ -383,6 +393,94 @@ export class UserConnectorTokenClient {
       );
       return { hasErrors: true, connectorToken: null };
     }
+  }
+
+  /**
+   * Returns the subset of `connectorIds` for which the user holds a token that is effectively
+   * usable: the access token is unexpired, or it can be refreshed with an unexpired refresh token.
+   */
+  public async getUsableOAuthConnectorIds({
+    profileUid,
+    connectorIds,
+  }: {
+    profileUid: string;
+    connectorIds: string[];
+  }): Promise<Set<string>> {
+    const usableConnectorIds = new Set<string>();
+    if (connectorIds.length === 0) {
+      return usableConnectorIds;
+    }
+
+    const connectorIdFilter = connectorIds
+      .map((id) => `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${id}"`)
+      .join(' OR ');
+
+    // Only the latest token per connector counts, matching `get`. A connector can have several
+    // tokens, so page until every connector has been seen rather than assuming one token each.
+    const latestTokenByConnectorId = new Map<string, SavedObject<UserConnectorToken>>();
+    try {
+      for (let page = 1; latestTokenByConnectorId.size < connectorIds.length; page++) {
+        const { saved_objects: tokens, total } =
+          await this.unsecuredSavedObjectsClient.find<UserConnectorToken>({
+            type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+            perPage: TOKEN_LOOKUP_PAGE_SIZE,
+            page,
+            filter: `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid: "${profileUid}" AND (${connectorIdFilter})`,
+            sortField: 'updated_at',
+            sortOrder: 'desc',
+          });
+        for (const token of tokens) {
+          if (!latestTokenByConnectorId.has(token.attributes.connectorId)) {
+            latestTokenByConnectorId.set(token.attributes.connectorId, token);
+          }
+        }
+        if (page * TOKEN_LOOKUP_PAGE_SIZE >= total) {
+          break;
+        }
+      }
+    } catch (err) {
+      this.logger.error(
+        `Failed to fetch user_connector_tokens for profileUid "${profileUid}". Error: ${err.message}`
+      );
+      return usableConnectorIds;
+    }
+
+    const limit = pLimit(DECRYPT_CONCURRENCY);
+    await Promise.all(
+      [...latestTokenByConnectorId].map(([connectorId, token]) =>
+        limit(async () => {
+          const { expiresAt, refreshTokenExpiresAt } = token.attributes;
+          const now = Date.now();
+
+          if (isFutureOrUnset(expiresAt, now)) {
+            usableConnectorIds.add(connectorId);
+            return;
+          }
+
+          // The refresh token lives in the encrypted credentials, so it must be decrypted to check.
+          if (!isFutureOrUnset(refreshTokenExpiresAt, now)) {
+            return;
+          }
+          try {
+            const decrypted =
+              await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<UserConnectorToken>(
+                USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+                token.id
+              );
+            const { refreshToken } = decrypted.attributes.credentials ?? {};
+            if (typeof refreshToken === 'string' && refreshToken.length > 0) {
+              usableConnectorIds.add(connectorId);
+            }
+          } catch (err) {
+            this.logger.error(
+              `Failed to decrypt user_connector_token for connectorId "${connectorId}". Error: ${err.message}`
+            );
+          }
+        })
+      )
+    );
+
+    return usableConnectorIds;
   }
 
   /**

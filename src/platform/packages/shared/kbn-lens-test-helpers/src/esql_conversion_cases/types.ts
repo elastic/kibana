@@ -37,6 +37,7 @@ export interface EsqlConversionSuccess {
   readonly expectedSourceIds: Readonly<Record<string, readonly string[]>>;
   readonly expectedFormats?: Readonly<Record<string, unknown>>;
   readonly expectedLabels?: Readonly<Record<string, readonly string[]>>;
+  readonly expectedDropPartials?: Readonly<Record<string, boolean>>;
   /** EVAL-only queries preserve source columns in addition to generated columns. */
   readonly allowAdditionalColumns?: true;
 }
@@ -63,6 +64,8 @@ export interface EsqlConversionCase {
   readonly columnRoles?: Readonly<Record<string, string>>;
   /** Models a detached time picker; auto date histograms fall back to 1h. */
   readonly omitDateRange?: true;
+  /** Synthetic unit-only case that cannot run against the pinned sample datasets. */
+  readonly skipApiExecution?: true;
   readonly expected: EsqlConversionSuccess | EsqlConversionFailure;
 }
 

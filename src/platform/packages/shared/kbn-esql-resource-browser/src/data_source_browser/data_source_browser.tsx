@@ -23,13 +23,14 @@ import {
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { ESQLSourceResult, EsqlView } from '@kbn/esql-types';
+import { ESQL_VIEWS_CAPABILITIES, ESQL_VIEWS_FEATURE_ID } from '@kbn/esql-types';
 import type { ILicense } from '@kbn/licensing-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getDatasets, getESQLSources, getTimeseriesIndices, getViews } from '@kbn/esql-utils';
 import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
 import { getSourceTypeKey, getSourceTypeLabel } from './utils';
 import { DATA_SOURCE_BROWSER_I18N_KEYS } from './i18n';
-import { DataSourceSelectionChange } from '../types';
+import { DataSourceSelectionChange, type DataSourceSelectionDetails } from '../types';
 import { useAllSources } from './use_all_sources';
 
 // Filter panel size constants
@@ -56,7 +57,11 @@ interface DataSourceBrowserProps {
   selectedSources?: string[];
   onClose: () => void;
   onCloseComplete?: () => void;
-  onSelect: (sourceName: string, change: DataSourceSelectionChange) => void;
+  onSelect: (
+    sourceName: string,
+    change: DataSourceSelectionChange,
+    details: DataSourceSelectionDetails
+  ) => void;
   position?: { top?: number; left?: number };
 }
 
@@ -87,6 +92,9 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
 
   const getDatasetsCallback = useCallback(() => getDatasets(http), [http]);
 
+  const canReadViews =
+    application.capabilities[ESQL_VIEWS_FEATURE_ID]?.[ESQL_VIEWS_CAPABILITIES.read] === true;
+
   const getViewsCallback = useCallback(async () => {
     // Refreshes the cache entry the editor reads, rather than reading it.
     const result = await getViews.call({ forceRefresh: true }, http);
@@ -109,7 +117,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
     getSources: getSourcesCallback,
     getTimeseriesIndices: getTimeseriesIndicesCallback,
     getDatasets: getDatasetsCallback,
-    getViews: getViewsCallback,
+    getViews: canReadViews ? getViewsCallback : undefined,
     isTimeseries,
   });
   const { euiTheme } = useEuiTheme();
@@ -210,6 +218,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
         type: source.type,
         typeKey: getSourceTypeKey(source.type),
         title: source.title,
+        isView: source.isView === true,
       },
     }));
   }, [allSources, selectedSources]);
@@ -251,8 +260,9 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
 
       const key = changedOption.key as string;
       const isAdding = changedOption.checked === 'on';
-
-      onSelect(key, isAdding ? DataSourceSelectionChange.Add : DataSourceSelectionChange.Remove);
+      onSelect(key, isAdding ? DataSourceSelectionChange.Add : DataSourceSelectionChange.Remove, {
+        isView: changedOption.data?.isView === true,
+      });
     },
     [onSelect]
   );

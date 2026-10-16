@@ -15,7 +15,7 @@ import { DISPATCH_CHUNK_SIZE } from '../constants';
 import {
   createActionGroup,
   createActionPolicy,
-  createAlertEpisode,
+  createAlert,
   createDispatcherPipelineInput,
   createDispatcherPipelineState,
 } from '../fixtures/test_utils';
@@ -140,7 +140,7 @@ describe('DispatchStep', () => {
               id: 'g1',
               policyId: 'p1',
               groupKey: group.groupKey,
-              episodes: group.episodes,
+              alerts: [expect.objectContaining({ alert_id: 'alert-1', alert_status: 'active' })],
             }),
           }),
           triggeredBy: 'action_policy',
@@ -152,6 +152,71 @@ describe('DispatchStep', () => {
         }),
       })
     );
+  });
+
+  it('authenticates with the raw secret when the policy API key is a stored UIAM key', async () => {
+    const step = new DispatchStep(mockWfm, mockLicenseService);
+    const uiamSecret = 'essu_uiam-secret';
+    const storedUiamApiKey = Buffer.from(`uiam-key-id:${uiamSecret}`).toString('base64');
+
+    mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
+      { status: 'fulfilled', value: [createWorkflowDetailDto()] },
+    ]);
+    mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
+
+    const state = createDispatcherPipelineState({
+      dispatch: [
+        createActionGroup({
+          id: 'g1',
+          policyId: 'p1',
+          destinations: [{ type: 'workflow', id: 'workflow-1' }],
+        }),
+      ],
+      policies: new Map([['p1', createActionPolicy({ id: 'p1', apiKey: storedUiamApiKey })]]),
+    });
+
+    await step.execute(state, loggerService);
+
+    // Presenting the base64 envelope would make Elasticsearch look the id up as a native key.
+    const expectedRequest = expect.objectContaining({
+      headers: expect.objectContaining({ authorization: `ApiKey ${uiamSecret}` }),
+    });
+    expect(mockWfm.getWorkflowsByIdsForRequests).toHaveBeenCalledWith([
+      expect.objectContaining({ request: expectedRequest }),
+    ]);
+    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledWith(expect.any(Array), expectedRequest);
+  });
+
+  it('passes an Elasticsearch policy API key through unchanged', async () => {
+    const step = new DispatchStep(mockWfm, mockLicenseService);
+    const esApiKey = Buffer.from('es-key-id:es-key-secret').toString('base64');
+
+    mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
+      { status: 'fulfilled', value: [createWorkflowDetailDto()] },
+    ]);
+    mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
+
+    const state = createDispatcherPipelineState({
+      dispatch: [
+        createActionGroup({
+          id: 'g1',
+          policyId: 'p1',
+          destinations: [{ type: 'workflow', id: 'workflow-1' }],
+        }),
+      ],
+      policies: new Map([['p1', createActionPolicy({ id: 'p1', apiKey: esApiKey })]]),
+    });
+
+    await step.execute(state, loggerService);
+
+    // Only UIAM keys are unwrapped: an ES key keeps its `base64(id:secret)` form.
+    const expectedRequest = expect.objectContaining({
+      headers: expect.objectContaining({ authorization: `ApiKey ${esApiKey}` }),
+    });
+    expect(mockWfm.getWorkflowsByIdsForRequests).toHaveBeenCalledWith([
+      expect.objectContaining({ request: expectedRequest }),
+    ]);
+    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledWith(expect.any(Array), expectedRequest);
   });
 
   it('skips dispatch when policy has no API key', async () => {
@@ -399,12 +464,12 @@ describe('DispatchStep', () => {
     ]);
     mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
 
-    const episode = createAlertEpisode({ rule_id: 'rule-1' });
+    const alert = createAlert({ rule_id: 'rule-1' });
     const group = createActionGroup({
       id: 'g1',
       policyId: 'p1',
       destinations: [{ type: 'workflow', id: 'workflow-1' }],
-      episodes: [episode],
+      alerts: [alert],
       rules: { 'rule-1': { name: 'CPU spike monitor' } },
     });
     const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
@@ -438,12 +503,12 @@ describe('DispatchStep', () => {
     ]);
     mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
 
-    const episode = createAlertEpisode({ rule_id: 'rule-unknown' });
+    const alert = createAlert({ rule_id: 'rule-unknown' });
     const group = createActionGroup({
       id: 'g1',
       policyId: 'p1',
       destinations: [{ type: 'workflow', id: 'workflow-1' }],
-      episodes: [episode],
+      alerts: [alert],
       rules: {},
     });
     const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
@@ -460,6 +525,61 @@ describe('DispatchStep', () => {
       [
         expect.objectContaining({
           inputs: expect.objectContaining({ payload: expect.objectContaining({ rules: {} }) }),
+        }),
+      ],
+      expect.anything()
+    );
+  });
+
+  it('maps group alerts to payload alerts with alert_id and alert_status', async () => {
+    const step = new DispatchStep(mockWfm, mockLicenseService);
+
+    mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
+      { status: 'fulfilled', value: [createWorkflowDetailDto()] },
+    ]);
+    mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
+
+    const alert = createAlert({
+      alert_id: 'ep-1',
+      alert_status: 'recovering',
+      severity: 'high',
+      data: { host: { name: 'web-1' } },
+    });
+    const group = createActionGroup({
+      id: 'g1',
+      policyId: 'p1',
+      destinations: [{ type: 'workflow', id: 'workflow-1' }],
+      alerts: [alert],
+    });
+    const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
+
+    const state = createDispatcherPipelineState({
+      dispatch: [group],
+      policies: new Map([['p1', policy]]),
+    });
+
+    await step.execute(state, loggerService);
+
+    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          inputs: expect.objectContaining({
+            payload: expect.objectContaining({
+              alerts: [
+                {
+                  last_event_timestamp: '2026-01-22T07:10:00.000Z',
+                  rule_id: 'rule-1',
+                  source: 'internal',
+                  space_id: 'default',
+                  group_hash: 'hash-1',
+                  alert_id: 'ep-1',
+                  alert_status: 'recovering',
+                  severity: 'high',
+                  data: { host: { name: 'web-1' } },
+                },
+              ],
+            }),
+          }),
         }),
       ],
       expect.anything()
@@ -492,12 +612,12 @@ describe('DispatchStep', () => {
   it('records a missing_api_key failure per destination when the policy has no API key', async () => {
     const step = new DispatchStep(mockWfm, mockLicenseService);
 
-    const episode = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' });
+    const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
     const group = createActionGroup({
       id: 'g1',
       policyId: 'p1',
       spaceId: 'default',
-      episodes: [episode],
+      alerts: [alert],
       destinations: [
         { type: 'workflow', id: 'workflow-1' },
         { type: 'workflow', id: 'workflow-2' },
@@ -517,7 +637,7 @@ describe('DispatchStep', () => {
         spaceId: 'default',
         actionGroupId: 'g1',
         workflowId: 'workflow-1',
-        episodes: [episode],
+        alerts: [alert],
         reason: DISPATCH_FAILURE_REASONS.MISSING_API_KEY,
         message: expect.stringContaining('No API key found for policy p1'),
       },
@@ -526,7 +646,7 @@ describe('DispatchStep', () => {
         spaceId: 'default',
         actionGroupId: 'g1',
         workflowId: 'workflow-2',
-        episodes: [episode],
+        alerts: [alert],
         reason: DISPATCH_FAILURE_REASONS.MISSING_API_KEY,
         message: expect.stringContaining('No API key found for policy p1'),
       },

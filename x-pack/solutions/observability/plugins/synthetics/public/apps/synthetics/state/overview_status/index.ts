@@ -23,6 +23,8 @@ import {
 import type { IHttpSerializedFetchError } from '..';
 import {
   appendOverviewStatusAction,
+  cancelAppendOverviewStatusAction,
+  cancelOverviewStatusAction,
   clearOverviewStatusErrorAction,
   fetchOverviewStatusAction,
   fetchStaleStatusAction,
@@ -143,6 +145,16 @@ const initialState: OverviewStatusStateReducer = {
   error: null,
   settled: false,
   isInitialLoad: true,
+};
+
+const clearInFlightOverviewStatus = (state: OverviewStatusStateReducer) => {
+  state.loading = false;
+  state.silentReplaceInFlight = false;
+  state.pendingAppendRequest = undefined;
+  state.pendingFillAppend = undefined;
+  state.refreshThrough = undefined;
+  state.fillThrough = undefined;
+  state.fillAllInFlight = false;
 };
 
 const buildAllConfigs = (status: OverviewStatusState): OverviewStatusMetaData[] =>
@@ -476,6 +488,9 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       state.fillThrough = undefined;
       state.fillAllInFlight = false;
     })
+    .addCase(cancelOverviewStatusAction, (state) => {
+      clearInFlightOverviewStatus(state);
+    })
     .addCase(appendOverviewStatusAction.get, (state, action) => {
       if (!action.payload.silent) {
         // Keep the current page visible while the next one loads.
@@ -520,6 +535,9 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       state.refreshThrough = undefined;
       state.fillThrough = undefined;
       state.fillAllInFlight = false;
+    })
+    .addCase(cancelAppendOverviewStatusAction, (state) => {
+      clearInFlightOverviewStatus(state);
     })
     .addCase(fetchStaleStatusAction.success, (state, action) => {
       // Store the latest prior-run facts and promote the genuinely stale

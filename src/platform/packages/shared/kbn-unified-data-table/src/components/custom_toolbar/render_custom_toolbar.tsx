@@ -31,6 +31,7 @@ interface RenderCustomToolbarProps extends UnifiedDataTableRenderCustomToolbarPr
   leftSide?: React.ReactElement;
   centerContent?: React.ReactNode;
   bottomSection?: React.ReactElement;
+  wrap?: boolean;
 }
 
 export const internalRenderCustomToolbar = (
@@ -41,6 +42,7 @@ export const internalRenderCustomToolbar = (
     leftSide,
     centerContent,
     bottomSection,
+    wrap = true,
     toolbarProps: {
       hasRoomForGridControls,
       columnControl,
@@ -92,7 +94,7 @@ export const internalRenderCustomToolbar = (
         className="unifiedDataTableToolbar"
         css={styles.toolbar}
         data-test-subj="unifiedDataTableToolbar"
-        wrap
+        wrap={wrap}
       >
         <EuiFlexItem grow={false}>
           {leftSide || (
@@ -160,11 +162,13 @@ export const getRenderCustomToolbarWithElements = ({
   leftSide,
   centerContent,
   bottomSection,
+  wrap = true,
 }: {
   saveToDashboardButton?: React.ReactElement;
   leftSide?: React.ReactElement;
   centerContent?: React.ReactNode;
   bottomSection?: React.ReactElement;
+  wrap?: boolean;
 }): UnifiedDataTableRenderCustomToolbar => {
   const reservedSpace = <></>;
   return (props) =>
@@ -174,6 +178,7 @@ export const getRenderCustomToolbarWithElements = ({
       centerContent,
       bottomSection,
       saveToDashboardButton,
+      wrap,
     });
 };
 

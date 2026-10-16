@@ -30,6 +30,7 @@ import {
   TEXT_BASED_HISTOGRAM_OVERLAY_APPLIED_META,
   TEXT_BASED_HISTOGRAM_OVERLAY_APPROXIMATE_META,
 } from '@kbn/lens-common';
+import type { DataSource } from '@kbn/data-source';
 import { Histogram } from './histogram';
 import type {
   UnifiedHistogramBucketInterval,
@@ -166,18 +167,17 @@ export function UnifiedHistogramChart({
   }, [visContext?.attributes]);
 
   const {
-    dataView,
+    dataSource,
     query,
     timeRange,
     relativeTimeRange,
     abortController,
-    columns,
     controlsState,
-    isESQLQuery: isPlainRecord,
     breakdown,
   } = fetchParams;
+  const isEsql = dataSource.kind === 'esql';
   const hasLensSuggestions = Boolean(
-    isPlainRecord &&
+    isEsql &&
       lensVisServiceCurrentSuggestionContext?.type === UnifiedHistogramSuggestionType.lensSuggestion
   );
   const overlayAttributes = useHistogramOverlayAttributes({
@@ -230,7 +230,7 @@ export function UnifiedHistogramChart({
       }
 
       const adapterTables = adapters?.tables?.tables;
-      const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord);
+      const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, dataSource);
 
       if (overlaySeries && !isLoading) {
         const tables = Object.values(adapterTables ?? {});
@@ -259,7 +259,7 @@ export function UnifiedHistogramChart({
       if (response) {
         const newBucketInterval = buildBucketInterval({
           data: services.data,
-          dataView,
+          dataSource,
           timeInterval: chart?.timeInterval,
           timeRange,
           response,
@@ -305,39 +305,36 @@ export function UnifiedHistogramChart({
 
   const onEditVisualization = useEditVisualization({
     services,
-    dataView,
+    dataSource,
     relativeTimeRange,
     lensAttributes: visContext?.attributes,
-    isPlainRecord,
   });
 
   const toolbarToggleActions = useMemo(() => renderToggleActions(), [renderToggleActions]);
 
   const toolbarSelectors = useMemo(
     () => [
-      chartVisible && !isPlainRecord && !!onTimeIntervalChange ? (
+      chartVisible && !isEsql && !!onTimeIntervalChange ? (
         <TimeIntervalSelector chart={chart} onTimeIntervalChange={onTimeIntervalChange} />
       ) : null,
       <div>
         {chartVisible && breakdown && (
           <BreakdownFieldSelector
-            dataView={dataView}
+            dataSource={dataSource}
             breakdown={breakdown}
             onBreakdownFieldChange={onBreakdownFieldChange}
-            esqlColumns={isPlainRecord ? columns : undefined}
           />
         )}
       </div>,
     ],
     [
       chartVisible,
-      isPlainRecord,
+      isEsql,
       onTimeIntervalChange,
       chart,
       breakdown,
-      dataView,
+      dataSource,
       onBreakdownFieldChange,
-      columns,
     ]
   );
 
@@ -352,7 +349,7 @@ export function UnifiedHistogramChart({
   const LensSaveModalComponent = services.lens.SaveModalComponent;
 
   const canCustomizeVisualization =
-    isPlainRecord &&
+    isEsql &&
     currentSuggestion &&
     [
       UnifiedHistogramSuggestionType.lensSuggestion,
@@ -448,11 +445,10 @@ export function UnifiedHistogramChart({
               {lensPropsContext && (
                 <HistogramMemoized
                   services={services}
-                  dataView={dataView}
+                  dataSource={dataSource}
                   chart={chart}
                   bucketInterval={bucketInterval}
                   visContext={visContext}
-                  isPlainRecord={isPlainRecord}
                   abortController={abortController}
                   {...histogramProps}
                   {...lensPropsContext}
@@ -482,7 +478,7 @@ export function UnifiedHistogramChart({
           dataLoading$={dataLoading$}
           isFlyoutVisible={isFlyoutVisible}
           setIsFlyoutVisible={setIsFlyoutVisible}
-          isPlainRecord={isPlainRecord}
+          dataSource={dataSource}
           query={query}
           currentSuggestionContext={lensVisServiceCurrentSuggestionContext}
           onSuggestionContextEdit={onSuggestionContextEdit}
@@ -500,11 +496,12 @@ const computeTotalHits = (
         [key: string]: Datatable;
       }
     | undefined,
-  isPlainRecord?: boolean
+  dataSource: DataSource
 ) => {
-  if (isPlainRecord && hasLensSuggestions) {
+  const isEsql = dataSource.kind === 'esql';
+  if (isEsql && hasLensSuggestions) {
     return Object.values(adapterTables ?? {})?.[0]?.rows?.length;
-  } else if (isPlainRecord && !hasLensSuggestions) {
+  } else if (isEsql && !hasLensSuggestions) {
     // ES|QL histogram case
     const rows = Object.values(adapterTables ?? {})?.[0]?.rows;
     if (!rows) {

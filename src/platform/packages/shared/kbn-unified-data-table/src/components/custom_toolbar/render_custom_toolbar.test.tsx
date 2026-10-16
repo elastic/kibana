@@ -114,4 +114,23 @@ describe('renderCustomToolbar', () => {
     expect(screen.queryByText('center message')).not.toBeInTheDocument();
     expect(screen.queryByTestId('unifiedDataTableToolbarCenterContent')).not.toBeInTheDocument();
   });
+
+  it('should keep controls on one line when wrap is false', () => {
+    expect(
+      getRenderCustomToolbarWithElements({
+        leftSide: <div>left</div>,
+        wrap: false,
+      })({
+        toolbarProps: {
+          hasRoomForGridControls: true,
+          columnControl: 'column',
+          columnSortingControl: 'columnSorting',
+          displayControl: 'display',
+          fullScreenControl: 'fullScreen',
+          keyboardShortcutsControl: 'keyboard',
+        },
+        gridProps: {},
+      })
+    ).toMatchSnapshot();
+  });
 });

@@ -7,11 +7,13 @@
 
 import Path from 'path';
 import { readFile } from 'fs/promises';
+import { promqlFunctionDefinitions } from '@elastic/esql-definitions/promql-functions';
 
 export enum EsqlDocEntry {
   syntax = 'syntax.md',
   examples = 'examples.md',
   tsQueries = 'ts_queries.md',
+  promqlQueries = 'promql_queries.md',
 }
 
 export interface EsqlLoadedDocumentation {
@@ -44,6 +46,25 @@ export const loadDocumentation = (): Promise<EsqlLoadedDocumentation> => {
   return cachedDocumentation;
 };
 
+/** Placeholder in `promql_queries.md`, replaced with the PromQL functions that ES|QL supports. */
+export const PROMQL_FUNCTIONS_PLACEHOLDER = '{{promql_functions}}';
+
+// derived from the generated PromQL function definitions, which are synced from Elasticsearch,
+// so that the supported functions do not have to be maintained by hand here
+const getPromqlFunctionNames = (): string =>
+  promqlFunctionDefinitions
+    .map(({ name }) => `\`${name}\``)
+    .sort()
+    .join(', ');
+
+// notes for maintainers, which are not meant for the model
+const HTML_COMMENT = /^[ \t]*<!--[\s\S]*?-->[ \t]*\n?/gm;
+
 const loadFile = async (entry: EsqlDocEntry): Promise<string> => {
-  return (await readFile(Path.join(__dirname, `./${entry}`))).toString('utf-8');
+  const content = (await readFile(Path.join(__dirname, `./${entry}`)))
+    .toString('utf-8')
+    .replace(HTML_COMMENT, '');
+  return entry === EsqlDocEntry.promqlQueries
+    ? content.replace(PROMQL_FUNCTIONS_PLACEHOLDER, getPromqlFunctionNames())
+    : content;
 };

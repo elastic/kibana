@@ -123,9 +123,9 @@ export const ALERTING_V2_RULES_READ_ROLE: KibanaRole = {
 };
 
 /**
- * Alerting v2 rules read access plus the classic Rules management capability
- * (`stackAlerts`). Used to assert that the Rules list heading shows both the
- * V1 and V2 rules tabs when the viewer can read both surfaces.
+ * Alerting v2 rules read access plus a classic (v1) Rules capability.
+ * Used to assert that the Rules list heading shows both the V1 and V2 rules
+ * tabs when the viewer can read both surfaces.
  */
 export const ALERTING_V2_RULES_READ_AND_V1_READ_ROLE: KibanaRole = {
   elasticsearch: READER_ES_PRIVILEGES,
@@ -135,6 +135,7 @@ export const ALERTING_V2_RULES_READ_AND_V1_READ_ROLE: KibanaRole = {
       feature: {
         alerting_v2_rules: ['read'],
         stackAlerts: ['read'],
+        logs: ['read'],
         discover: ['read'],
       },
       spaces: ['*'],
@@ -240,6 +241,31 @@ export const ALERTING_V2_ACTION_POLICY_FORM_ROLE: KibanaRole = {
         alerting_v2_rules: ['read'],
         alerting_v2_alerts: ['read'],
         workflowsManagement: ['read'],
+        discover: ['all'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+/**
+ * Owner of an action policy whose workflow destination really runs. The dispatcher
+ * schedules the workflow with the API key minted for the policy, so the owner needs:
+ *
+ * - `alerting_v2_action_policies: ['all']` and `alerting_v2_rules: ['read']` — the create
+ *   and upsert routes require `rules.read` on top of `actionPolicies.write`.
+ * - `workflowsManagement: [..., 'workflow_read', 'workflow_execute']` — the dispatcher
+ *   looks the workflow up and starts it as that user.
+ */
+export const ALERTING_V2_ACTION_POLICY_DISPATCH_ROLE: KibanaRole = {
+  elasticsearch: WRITER_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_action_policies: ['all'],
+        alerting_v2_rules: ['read'],
+        workflowsManagement: ['minimal_read', 'workflow_read', 'workflow_execute'],
         discover: ['all'],
       },
       spaces: ['*'],

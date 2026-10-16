@@ -8,7 +8,6 @@
  */
 
 import type { Capabilities } from '@kbn/core/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import {
   TEXT_BASED_HISTOGRAM_OVERLAY_APPLIED_META,
@@ -22,6 +21,8 @@ import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import { allSuggestionsMock } from '../../__mocks__/suggestions';
 import { checkChartAvailability } from './utils/check_chart_availability';
+import type { DataSource } from '@kbn/data-source';
+import { DataViewSource, EsqlSource } from '@kbn/data-source';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { getFetchParamsMock, getFetch$Mock } from '../../__mocks__/fetch_params';
@@ -45,9 +46,9 @@ interface MountComponentProps {
   noHits?: boolean;
   noBreakdown?: boolean;
   chartHidden?: boolean;
-  dataView?: DataView;
+  dataSource?: DataSource;
   allSuggestions?: Suggestion[];
-  isPlainRecord?: boolean;
+  isEsql?: boolean;
   hasDashboardPermissions?: boolean;
   isChartLoading?: boolean;
   isTransformationalESQL?: boolean;
@@ -66,9 +67,9 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
     noHits,
     noBreakdown,
     chartHidden = false,
-    dataView = dataViewWithTimefieldMock,
+    dataSource: propsDataSource,
     allSuggestions,
-    isPlainRecord,
+    isEsql,
     hasDashboardPermissions,
     isChartLoading,
     isTransformationalESQL,
@@ -77,6 +78,19 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
     rerenderParent,
     withLensActions,
   } = mountProps;
+  const dataSource = propsDataSource ?? new DataViewSource(dataViewWithTimefieldMock);
+  const lensDataView =
+    dataSource instanceof DataViewSource ? dataSource.getDataView() : dataViewWithTimefieldMock;
+  const esqlQuery = isTransformationalESQL
+    ? 'from logs | limit 10 | stats var0 = avg(bytes) by extension'
+    : 'from logs | limit 10';
+  EsqlSource.clearCache();
+  const fetchDataSource = isEsql
+    ? await EsqlSource.create({
+        query: esqlQuery,
+        timeFieldName: dataSource.isTimeBased() ? '@timestamp' : undefined,
+      })
+    : dataSource;
 
   // Handle mockEditVisualization separately to distinguish between "not passed" and "passed as undefined"
   mockUseEditVisualization =
@@ -108,11 +122,9 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
       };
 
   const fetchParams = getFetchParamsMock({
-    dataView,
-    query: isPlainRecord
-      ? isTransformationalESQL
-        ? { esql: 'from logs | limit 10 | stats var0 = avg(bytes) by extension' }
-        : { esql: 'from logs | limit 10' }
+    dataSource: fetchDataSource,
+    query: isEsql
+      ? { esql: esqlQuery }
       : {
           language: 'kuery',
           query: '',
@@ -127,9 +139,8 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
     await getLensVisMock({
       query: fetchParams.query,
       filters: fetchParams.filters,
-      isPlainRecord: Boolean(isPlainRecord),
       timeInterval: 'auto',
-      dataView,
+      dataView: lensDataView,
       breakdownField: fetchParams.breakdown?.field,
       columns: [],
       allSuggestions,
@@ -152,8 +163,8 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
     onChartHiddenChange: jest.fn(),
     onTimeIntervalChange: jest.fn(),
     withDefaultActions: undefined,
+    isChartAvailable: checkChartAvailability({ chart, dataSource: fetchDataSource }),
     withLensActions,
-    isChartAvailable: checkChartAvailability({ chart, dataView, isPlainRecord }),
     renderToggleActions: () => <span data-test-subj={toggleActionsTestId}>Toggle actions</span>,
     fetch$: getFetch$Mock(),
     fetchParams,
@@ -237,8 +248,8 @@ describe('Chart', () => {
 
   test('should render when is text based, transformational and non-time-based', async () => {
     await mountComponent({
-      isPlainRecord: true,
-      dataView: dataViewMock,
+      isEsql: true,
+      dataSource: new DataViewSource(dataViewMock),
       isTransformationalESQL: true,
     });
 
@@ -250,8 +261,8 @@ describe('Chart', () => {
 
   test('should not render when is text based, non-transformational and non-time-based', async () => {
     await mountComponent({
-      isPlainRecord: true,
-      dataView: dataViewMock,
+      isEsql: true,
+      dataSource: new DataViewSource(dataViewMock),
       isTransformationalESQL: false,
     });
 
@@ -266,8 +277,8 @@ describe('Chart', () => {
   test('should not render when is text based, non-transformational, non-time-based and suggestions are available', async () => {
     await mountComponent({
       allSuggestions: allSuggestionsMock,
-      isPlainRecord: true,
-      dataView: dataViewMock,
+      isEsql: true,
+      dataSource: new DataViewSource(dataViewMock),
       isTransformationalESQL: false,
     });
 
@@ -281,7 +292,7 @@ describe('Chart', () => {
 
   test('should render when is text based, non-transformational and time-based', async () => {
     await mountComponent({
-      isPlainRecord: true,
+      isEsql: true,
       isTransformationalESQL: false,
     });
 
@@ -293,7 +304,7 @@ describe('Chart', () => {
 
   test('should render when is text based, transformational and time-based', async () => {
     await mountComponent({
-      isPlainRecord: true,
+      isEsql: true,
       isTransformationalESQL: true,
     });
 
@@ -306,7 +317,7 @@ describe('Chart', () => {
   test('should not render when is text based, transformational and no suggestions available', async () => {
     await mountComponent({
       allSuggestions: [],
-      isPlainRecord: true,
+      isEsql: true,
       isTransformationalESQL: true,
     });
 
@@ -321,7 +332,7 @@ describe('Chart', () => {
   test('render progress bar when text based and request is loading', async () => {
     jest.useFakeTimers();
 
-    await mountComponent({ isPlainRecord: true, isChartLoading: true });
+    await mountComponent({ isEsql: true, isChartLoading: true });
 
     act(() => {
       jest.advanceTimersByTime(500);
@@ -348,7 +359,7 @@ describe('Chart', () => {
   });
 
   it('should not render chart if data view is not time based', async () => {
-    await mountComponent({ dataView: dataViewMock });
+    await mountComponent({ dataSource: new DataViewSource(dataViewMock) });
 
     expect(screen.queryByText('unifiedHistogramChart')).not.toBeInTheDocument();
   });
@@ -383,7 +394,7 @@ describe('Chart', () => {
     await mountComponent({
       allSuggestions: [],
       isTransformationalESQL: false,
-      isPlainRecord: true,
+      isEsql: true,
       hasDashboardPermissions: false,
     });
 
@@ -407,8 +418,8 @@ describe('Chart', () => {
 
   it('hides Lens edit and save actions when withLensActions is false', async () => {
     await mountComponent({
-      isPlainRecord: true,
-      dataView: dataViewMock,
+      isEsql: true,
+      dataSource: new DataViewSource(dataViewMock),
       isTransformationalESQL: true,
       withLensActions: false,
     });
@@ -432,9 +443,9 @@ describe('Chart', () => {
     lensSaveModalComponentMock.mockClear();
 
     await mountComponent({
-      isPlainRecord: true,
+      isEsql: true,
       isTransformationalESQL: true,
-      dataView: dataViewMock,
+      dataSource: new DataViewSource(dataViewMock),
     });
 
     await user.click(screen.getByRole('button', { name: 'Save visualization to dashboard' }));

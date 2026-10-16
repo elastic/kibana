@@ -12,6 +12,8 @@ import { buildPackageInputs, buildPackageVars, getPackageVarNames } from '../pac
 import type { PackageInputEntry, AgentCredentialVars } from '../package_inputs';
 import { REGION_FIELD_NAMES } from '../../service_settings_step/field_config';
 import type { DeployGroup } from '../deploy_groups';
+import type { SecretRefValue } from '../secret_refs';
+import { buildGroupPolicyNameStem } from '../deploy_group_helpers';
 
 export interface BuildPackagePolicyOpts {
   namespace: string;
@@ -46,8 +48,7 @@ export function buildPackagePolicyName(group: DeployGroup): string {
     return `${safe}-${Date.now()}`;
   }
   // Bundled originals — named after the package.
-  const pkg = group.groupId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);
-  return `${pkg}-${Date.now()}`;
+  return `${buildGroupPolicyNameStem(group)}-${Date.now()}`;
 }
 
 /**
@@ -176,8 +177,8 @@ export function mapPolicyIdsByName(
  * NOTE: cloud_connector is NOT included — it is an agentless-only auth mechanism.
  * Any connectorId on authenticateAndDeployStep is intentionally ignored here.
  *
- * NOTE: namespace is intentionally omitted per package policy — Fleet schema documents
- * "When not specified, it inherits the agent policy namespace". Only the agent policy carries it.
+ * NOTE: namespace is only set when the group has one. Fleet schema documents "When not specified,
+ * it inherits the agent policy namespace", so an unset namespace lets each agent policy's apply.
  */
 export async function buildGroupPackagePolicy(
   group: DeployGroup,
@@ -186,7 +187,8 @@ export async function buildGroupPackagePolicy(
 ): Promise<{
   name: string;
   package: { name: string; version: string };
-  vars?: Record<string, string>;
+  namespace?: string;
+  vars?: Record<string, string | SecretRefValue>;
   inputs: Record<string, unknown>;
 }> {
   const { members } = group;
@@ -201,13 +203,25 @@ export async function buildGroupPackagePolicy(
 
   // Build serviceVarsMap for all members. Key by service.id for buildPackageInputs.
   // Look up vars by instanceId first; fall back to serviceId for sessions predating instance keying.
+  // Guard enabledDataStreams against stale session state: package updates can remove data streams,
+  // so only keep dsIds the current service matrix actually recognises.
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of members) {
-    serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ??
-      storedServiceVars[instance.serviceId] ?? {
+    const rawVars = storedServiceVars[instance.instanceId] ?? storedServiceVars[instance.serviceId];
+    if (!rawVars) {
+      serviceVarsMap[service.id] = {
         enabledDataStreams: service.dataStreams,
         varsByDataStream: {},
       };
+    } else {
+      const filtered = rawVars.enabledDataStreams.filter((dsId) =>
+        service.dataStreams.includes(dsId)
+      );
+      serviceVarsMap[service.id] =
+        filtered.length === rawVars.enabledDataStreams.length
+          ? rawVars
+          : { ...rawVars, enabledDataStreams: filtered };
+    }
   }
 
   const services = members.map(({ service }) => service);
@@ -239,7 +253,8 @@ export async function buildGroupPackagePolicy(
     globalRegion,
     authenticateAndDeployStep.staticKeys,
     pkgVarNames,
-    agentCredentials
+    agentCredentials,
+    authenticateAndDeployStep.existingSecretRefs
   );
 
   if (Object.keys(prunedInputs).length === 0) {
@@ -263,6 +278,7 @@ export async function buildGroupPackagePolicy(
       return {
         name: buildPackagePolicyName(group),
         package: { name: firstService.packageName, version: pkgVersion },
+        ...(group.namespace ? { namespace: group.namespace } : {}),
         ...(vars ? { vars } : {}),
         inputs: { ...disabledOtherInputs, ...selfDisabled },
       };
@@ -286,6 +302,7 @@ export async function buildGroupPackagePolicy(
   return {
     name: buildPackagePolicyName(group),
     package: { name: firstService.packageName, version: pkgVersion },
+    ...(group.namespace ? { namespace: group.namespace } : {}),
     ...(vars ? { vars } : {}),
     // disabled entries first so our enabled inputs win if there's any key overlap
     inputs: { ...disabledOtherInputs, ...prunedInputs },
