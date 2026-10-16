@@ -250,13 +250,14 @@ d=$(mktemp -d) && cp gate_checklist.yaml "$d/gate-checklist.yaml"
   that is the first place to look.
 - A confirmed hit raises more than one Proposal, so the hit rows use a minimum rather than an
   exact count.
-- On the `aws-iam-assume-role` scenario, Tier 2 fails to ground an ES|QL query for at least one
-  derived technique (`generation_failed`), which makes the hunt `incomplete_retryable` and the
-  run `partial` with no evidence written. Four of four observed runs: `historic-01` inside
-  `hard-multi-candidate` lost T1548.005 (a technique the report does not name), and every
-  holdout run of `historic-03` lost T1059.001, the process chain the report leads with, while
-  T1078.004 executed and hit. Rows on that scenario accept `completed` or `partial`, check
-  evidence with `iff_hunt_success`, and do not pin Tier 2 execution (zero when every generated
-  query fails, as one holdout run showed). The golden hit (`aws-iam-historic-01`) does not show
-  this and keeps its exact pins. This is a Worker signal the suite reports rather than hides:
-  the scenario never reaches `completed` today.
+- On the `aws-iam-assume-role` scenario, Tier 2 often ends `incomplete_retryable`, which makes
+  the run `partial` with no evidence written. Before Tier 2 ES|QL generation moved to the
+  Frontier tier (#298211) the cause was `generation_failed` on at least one derived technique in
+  four of four runs (T1059.001 on every holdout run of `historic-03`, T1548.005 on `historic-01`
+  inside `hard-multi-candidate`), and one run executed no Tier 2 query at all. After #298211 the
+  holdout `historic-03` run grounded and hit all three techniques and ended `completed`, while
+  `historic-01` still ended `incomplete_retryable`, this time on `quote_ungrounded` for a
+  technique the report does not name (T1562.008). Rows on that scenario accept `completed` or
+  `partial`, check evidence with `iff_hunt_success`, and do not pin Tier 2 execution. The golden
+  hit (`aws-iam-historic-01`) does not show this and keeps its exact pins. Tighten the holdout
+  row to `completed` once a few more runs hold.

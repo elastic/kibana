@@ -28,7 +28,7 @@ import {
   PUBLIC_API_VERSION,
   RESOLVE_INDEX_SCOPE_GATE_STEP_ID,
   RESOLVE_RUN_OUTCOME_STEP_ID,
-  RUN_HUNT_COORDINATOR_STEP_ID,
+  READ_HUNT_RESULT_STEP_ID,
   SELECT_CANDIDATE_REPORTS_STEP_ID,
   THREAT_REPORTS_INDEX,
   WRITE_RUN_CONCLUSION_STEP_ID,
@@ -90,8 +90,8 @@ export interface HuntReportArtifacts {
   stages: Record<string, { status: string; startedAt?: string }>;
   hunt?: HuntStepOutput;
   /**
-   * `run_hunt_coordinator` output from the `hunt` child execution, minus Tier 1 sample hits:
-   * the window, index patterns, resolved IOCs and Tier 2 targets the narrative reports.
+   * The coordinator result the `hunt` child polled from `read_hunt_result`, minus Tier 1 sample
+   * hits: the window, index patterns, resolved IOCs and Tier 2 targets the narrative reports.
    */
   coordinator?: Record<string, unknown>;
   packaging?: PackageStepOutput;
@@ -204,11 +204,25 @@ const getCoordinatorOutput = async ({
     headers: apiVersion(PUBLIC_API_VERSION),
     query: { includeOutput: true },
   });
-  const output = execution.stepExecutions
-    .filter((s) => s.stepId === RUN_HUNT_COORDINATOR_STEP_ID)
-    .map((s) => asRecord(s.output))
+  return readCoordinatorResult(execution.stepExecutions);
+};
+
+/**
+ * The coordinator result from the hunt child's poll loop. `read_hunt_result` runs once per
+ * iteration and only the `completed` read carries `data.result`; a `failed` read carries
+ * `data.error` instead and a run that never finished has no completed read at all, so both
+ * yield `undefined` here, the same as a coordinator that was never started.
+ */
+export const readCoordinatorResult = (
+  stepExecutions: Array<Pick<WorkflowStepExecutionDto, 'stepId' | 'output'>>
+): Record<string, unknown> | undefined => {
+  const result = stepExecutions
+    .filter((s) => s.stepId === READ_HUNT_RESULT_STEP_ID)
+    .map((s) => asRecord(asRecord(s.output)?.data))
+    .filter((data): data is Record<string, unknown> => data?.state === 'completed')
+    .map((data) => asRecord(data.result))
     .find((o) => o !== undefined);
-  return output && withoutTier1Hits(output);
+  return result && withoutTier1Hits(result);
 };
 
 const listPendingProposalsInSpace = async ({

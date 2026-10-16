@@ -14,6 +14,7 @@
     "@kbn/alertzero-common",
     "@kbn/management-settings-ids",
     "@kbn/repo-info",
-    "@kbn/proposals-common"
+    "@kbn/proposals-common",
+    "@kbn/utility-types"
   ]
 }

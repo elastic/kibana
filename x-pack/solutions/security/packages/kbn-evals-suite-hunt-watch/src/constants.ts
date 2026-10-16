@@ -46,8 +46,16 @@ export const HUNT_STEP_ID = 'hunt';
 export const PACKAGE_REPORT_STEP_ID = 'package_report';
 export const WRITE_RUN_CONCLUSION_STEP_ID = 'write_run_conclusion';
 export const RESOLVE_RUN_OUTCOME_STEP_ID = 'resolve_run_outcome';
-/** Step inside the `hunt` child workflow whose output is the full coordinator response. */
+/**
+ * Step inside the `hunt` child workflow that starts the coordinator. Since the coordinator went
+ * async its output is only the start envelope (`run_id`, `state`, `result_attachment_id`).
+ */
 export const RUN_HUNT_COORDINATOR_STEP_ID = 'run_hunt_coordinator';
+/**
+ * Poll step inside the `hunt` child workflow. Runs once per poll iteration; the iteration whose
+ * `output.data.state` is `completed` carries the full coordinator result under `data.result`.
+ */
+export const READ_HUNT_RESULT_STEP_ID = 'read_hunt_result';
 
 /** Every step id the Worker yaml must still declare for the client/evaluators to work. */
 export const REQUIRED_WORKER_STEP_IDS = [
