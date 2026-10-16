@@ -53,7 +53,12 @@ export const useNewEntityDelta = ({
   const previousQuery = useMemo(
     () =>
       index
-        ? buildNewEntityCountQuery(index, timeRange, buildEntityFilterClauses(entityFilters), 'previous')
+        ? buildNewEntityCountQuery(
+            index,
+            timeRange,
+            buildEntityFilterClauses(entityFilters),
+            'previous'
+          )
         : null,
     [index, timeRange, entityFilters]
   );
