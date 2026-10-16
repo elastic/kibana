@@ -15,7 +15,7 @@ import { mappings, type MappingsDefinition } from '@kbn/es-mappings';
 import type { Notification } from '../../common/types';
 
 /** The append-only data stream backing the Notification Center. */
-export const NOTIFICATION_DATA_STREAM_NAME = '.kibana-notification-center' as const;
+export const NOTIFICATION_DATA_STREAM_NAME = '.notifications' as const;
 
 /** Retention ceiling; per-severity TTLs are enforced by the cleanup task. */
 export const NOTIFICATION_DATA_RETENTION = '180d' as const;

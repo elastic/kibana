@@ -100,7 +100,7 @@ The structure of the notification document is defined in [`common/`](./common):
 
 - [`notification_schema.ts`](./common/notification_schema.ts) — the Zod
   `notificationSchema` for the document stored in the append-only
-  `.kibana-notification-center` data stream. We use Zod because the shape is shared across
+  `.notifications` data stream. We use Zod because the shape is shared across
   server and browser code.
 
 ### Severity
@@ -232,7 +232,7 @@ export const reportDeprecatedEndpoint = async (
 Read it back from ES (Dev Tools → Console, or `curl` against Elasticsearch):
 
 ```
-GET /.kibana-notification-center/_search
+GET /.notifications/_search
 ```
 
 ## Seeding a local dev stack
