@@ -11,7 +11,7 @@ import { z } from '@kbn/zod';
 import {
   asCodeMetaSchema,
   asCodePaginationResponseMetaSchema,
-  asCodeSearchRequestSchema,
+  getAsCodeSearchRequestSchema,
   getAsCodeTagsSchema,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
@@ -98,7 +98,18 @@ export const discoverSessionSanitizeResponseSchema = z
   })
   .strict();
 
-export const discoverSessionSearchRequestParamsSchema = asCodeSearchRequestSchema.extend({
+export const discoverSessionSearchRequestParamsSchema = getAsCodeSearchRequestSchema({
+  tags: {
+    description:
+      'A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, Discover sessions matching any of the tag IDs are included.',
+    arrayDescription: 'Tag IDs to include.',
+  },
+  excluded_tags: {
+    description:
+      'A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, Discover sessions matching any of the tag IDs are excluded.',
+    arrayDescription: 'Tag IDs to exclude.',
+  },
+}).extend({
   query: z
     .string()
     .max(MAX_SEARCH_QUERY_LENGTH)
@@ -107,20 +118,6 @@ export const discoverSessionSearchRequestParamsSchema = asCodeSearchRequestSchem
         'Full-text search (`simple_query_string`) over `title` and `description`. All terms must match.',
     })
     .optional(),
-  tags: z
-    .union([z.string(), getAsCodeTagsSchema('Tag IDs to include.', 100)])
-    .optional()
-    .meta({
-      description:
-        'A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, Discover sessions matching any of the tag IDs are included.',
-    }),
-  excluded_tags: z
-    .union([z.string(), getAsCodeTagsSchema('Tag IDs to exclude.', 100)])
-    .optional()
-    .meta({
-      description:
-        'A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, Discover sessions matching any of the tag IDs are excluded.',
-    }),
 });
 
 const discoverSessionSearchItemSchema = z
