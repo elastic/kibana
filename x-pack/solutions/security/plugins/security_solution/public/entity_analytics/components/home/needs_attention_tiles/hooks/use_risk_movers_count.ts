@@ -22,6 +22,7 @@ import {
   type TimeRange,
 } from '../../entities_grid/common';
 import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
+import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 
 export const useRiskMoversCount = ({
   spaceId,
@@ -84,7 +85,7 @@ export const useRiskMoversCount = ({
     {
       enabled: isEnabled && Boolean(query),
       keepPreviousData: true,
-      staleTime: 5 * 60_000,
+      ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
       retry: 1,
     }

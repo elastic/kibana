@@ -784,7 +784,7 @@ src/platform/packages/shared/react/kibana_context/theme @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_mount @elastic/appex-sharedux
 src/platform/packages/shared/react/use_observable @elastic/appex-sharedux
 src/platform/packages/shared/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
-src/platform/packages/shared/serverless/settings/observability_project @elastic/appex-sharedux @elastic/kibana-management @elastic/observability-ui
+src/platform/packages/shared/serverless/settings/observability_project @elastic/observability-ui @elastic/kibana-management
 src/platform/packages/shared/serverless/settings/search_project @elastic/search-ml-ux @elastic/kibana-management
 src/platform/packages/shared/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
 src/platform/packages/shared/serverless/settings/vectordb_project @elastic/search-ml-ux
@@ -1187,6 +1187,7 @@ x-pack/platform/packages/shared/security/form_components @elastic/kibana-securit
 x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_public @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_server @elastic/kibana-security
+x-pack/platform/plugins/private/ai_anonymization_settings @elastic/security-investigations
 x-pack/platform/plugins/private/banners @elastic/appex-sharedux
 x-pack/platform/plugins/private/canvas @elastic/kibana-dashboards
 x-pack/platform/plugins/private/cloud_integrations/cloud_chat @elastic/kibana-core
