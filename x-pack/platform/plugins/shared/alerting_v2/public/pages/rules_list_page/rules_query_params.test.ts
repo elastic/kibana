@@ -9,6 +9,7 @@ import {
   ENABLED_FILTER_ID,
   KIND_FILTER_ID,
   TAG_FILTER_ID,
+  TEMPLATE_FILTER_ID,
   toRulesQueryParams,
 } from './rules_query_params';
 
@@ -94,5 +95,39 @@ describe('toRulesQueryParams', () => {
         [KIND_FILTER_ID]: { exclude: ['signal'] },
       })
     ).toEqual({});
+  });
+
+  it('maps the template to a KQL filter', () => {
+    expect(
+      toRulesQueryParams({
+        [TEMPLATE_FILTER_ID]: { include: ['nginx-error-rate'] },
+      })
+    ).toEqual({ filter: 'metadata.template.id: "nginx-error-rate"' });
+  });
+
+  it('honors only the first template and ignores template exclusions', () => {
+    expect(
+      toRulesQueryParams({
+        [TEMPLATE_FILTER_ID]: { include: ['a-template', 'b-template'] },
+      })
+    ).toEqual({ filter: 'metadata.template.id: "a-template"' });
+    expect(
+      toRulesQueryParams({
+        [TEMPLATE_FILTER_ID]: { exclude: ['a-template'] },
+      })
+    ).toEqual({});
+  });
+
+  it('combines the template with the other filters and search', () => {
+    expect(
+      toRulesQueryParams({
+        search: 'cpu',
+        [KIND_FILTER_ID]: { include: ['alert'] },
+        [TEMPLATE_FILTER_ID]: { include: ['nginx-error-rate'] },
+      })
+    ).toEqual({
+      filter: 'kind: alert AND metadata.template.id: "nginx-error-rate"',
+      search: 'cpu',
+    });
   });
 });

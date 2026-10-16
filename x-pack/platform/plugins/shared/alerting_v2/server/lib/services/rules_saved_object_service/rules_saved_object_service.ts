@@ -587,15 +587,15 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
 
   /**
    * Counts the rules in the current space that were created from each of the given
-   * rule templates. Templates with no rules are omitted from the result.
+   * rule templates. Templates with no rules are omitted from the result. `templateIds`
+   * must be distinct.
    *
    * The terms aggregation is limited to the requested ids with an exact-value
    * `include`, so its cost scales with the number of ids and not with the number
    * of templates that have rules.
    */
   public async countByTemplateIds(templateIds: string[]): Promise<Record<string, number>> {
-    const uniqueTemplateIds = [...new Set(templateIds)];
-    if (uniqueTemplateIds.length === 0) {
+    if (templateIds.length === 0) {
       return {};
     }
 
@@ -606,8 +606,8 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
         template_counts: {
           terms: {
             field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.template.id`,
-            size: uniqueTemplateIds.length,
-            include: uniqueTemplateIds,
+            size: templateIds.length,
+            include: templateIds,
           },
         },
       },

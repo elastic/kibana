@@ -484,6 +484,21 @@ describe('RulesListPage', () => {
     });
   });
 
+  it('passes the template from a ?q=template:"<id>" link to findItems', async () => {
+    render(
+      <ListPageTestProviders initialEntries={['/?q=template:"nginx-error-rate"']}>
+        <RulesListPage />
+      </ListPageTestProviders>
+    );
+    await waitForRules();
+
+    await waitFor(() => {
+      expect(lastFindItemsArgs().filters.template).toMatchObject({
+        include: ['nginx-error-rate'],
+      });
+    });
+  });
+
   it('uses name ascending as the default sort', async () => {
     renderPage();
     await waitForRules();

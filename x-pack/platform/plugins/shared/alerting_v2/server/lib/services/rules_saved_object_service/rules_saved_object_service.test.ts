@@ -494,18 +494,6 @@ describe('RulesSavedObjectService', () => {
       });
     });
 
-    it('deduplicates the requested ids', async () => {
-      mockSavedObjectsClient.find.mockResolvedValue(mockTemplateCountsResponse([]));
-
-      await rulesSavedObjectService.countByTemplateIds(['template-1', 'template-1']);
-
-      const call = mockSavedObjectsClient.find.mock.calls[0][0];
-      expect((call.aggs as any).template_counts.terms).toMatchObject({
-        size: 1,
-        include: ['template-1'],
-      });
-    });
-
     it('does not query when no ids are given', async () => {
       const counts = await rulesSavedObjectService.countByTemplateIds([]);
 

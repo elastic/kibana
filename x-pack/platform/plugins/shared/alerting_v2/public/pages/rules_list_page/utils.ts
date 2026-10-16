@@ -19,11 +19,14 @@ export const buildRulesListFilter = ({
   kind,
   tags,
   excludedTags,
+  templateId,
 }: {
   enabled?: string;
   kind?: string;
   tags?: string[];
   excludedTags?: string[];
+  /** Only the rules created from the rule template with this id. */
+  templateId?: string;
 }) => {
   const enabledValue = enabled === 'true' ? true : enabled === 'false' ? false : undefined;
   const kindValue = kind === 'alert' || kind === 'signal' ? kind : undefined;
@@ -35,6 +38,7 @@ export const buildRulesListFilter = ({
     buildTagsClause(tags),
     excludedTagsClause ? `NOT ${excludedTagsClause}` : undefined,
     kindValue ? `kind: ${kindValue}` : undefined,
+    templateId ? `metadata.template.id: "${escapeKqlValue(templateId)}"` : undefined,
   ].filter((clause): clause is string => Boolean(clause));
 
   return clauses.length > 0 ? clauses.join(' AND ') : undefined;

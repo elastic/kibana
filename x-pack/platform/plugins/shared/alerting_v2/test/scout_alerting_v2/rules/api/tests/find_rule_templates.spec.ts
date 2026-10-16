@@ -14,7 +14,6 @@ import {
   buildRuleTemplateData,
   buildV1RuleTemplateAttributes,
   getFindRuleTemplatesUrl,
-  getInstallRuleTemplateUrl,
   NO_ACCESS_ROLE,
   RULE_TEMPLATE_PER_PAGE_MAX,
   RULE_TEMPLATE_TAGS_MAX_COUNT,
@@ -102,11 +101,10 @@ apiTest.describe('Find rule templates API', { tag: DEPLOYMENTS_WITH_ALERTING_V2 
           { templateId: 'b-template', name: 'rule-from-b-1' },
         ];
         for (const { templateId, name } of installs) {
-          const response = await apiClient.post(getInstallRuleTemplateUrl(templateId), {
-            headers: adminHeaders,
-            body: buildCreateRuleData({ metadata: { name } }),
-          });
-          expect(response).toHaveStatusCode(201);
+          await apiServices.alertingV2.ruleTemplates.install(
+            templateId,
+            buildCreateRuleData({ metadata: { name } })
+          );
         }
 
         expect(await getRuleCounts()).toStrictEqual({

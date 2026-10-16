@@ -63,6 +63,35 @@ describe('buildRulesListFilter', () => {
     );
   });
 
+  it('builds a KQL filter for the template a rule was created from', () => {
+    expect(buildRulesListFilter({ templateId: 'nginx-error-rate' })).toBe(
+      'metadata.template.id: "nginx-error-rate"'
+    );
+  });
+
+  it('escapes double quotes and backslashes in the template id', () => {
+    expect(buildRulesListFilter({ templateId: 'a"b\\c' })).toBe(
+      'metadata.template.id: "a\\"b\\\\c"'
+    );
+  });
+
+  it('ignores an empty template id', () => {
+    expect(buildRulesListFilter({ templateId: '' })).toBeUndefined();
+  });
+
+  it('combines the template with the other filters', () => {
+    expect(
+      buildRulesListFilter({
+        enabled: 'true',
+        tags: ['prod'],
+        kind: 'alert',
+        templateId: 'nginx-error-rate',
+      })
+    ).toBe(
+      'enabled: true AND (metadata.tags: "prod") AND kind: alert AND metadata.template.id: "nginx-error-rate"'
+    );
+  });
+
   it('ignores empty tag arrays', () => {
     expect(buildRulesListFilter({ tags: [], excludedTags: [] })).toBeUndefined();
   });

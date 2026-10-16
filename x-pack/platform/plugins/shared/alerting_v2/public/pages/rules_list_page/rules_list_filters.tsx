@@ -14,7 +14,12 @@ import { filter } from '@kbn/content-list-toolbar';
 import { i18n } from '@kbn/i18n';
 import { createTagsFilter } from '../../components/create_tags_filter';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
-import { ENABLED_FILTER_ID, KIND_FILTER_ID, TAG_FILTER_ID } from './rules_query_params';
+import {
+  ENABLED_FILTER_ID,
+  KIND_FILTER_ID,
+  TAG_FILTER_ID,
+  TEMPLATE_FILTER_ID,
+} from './rules_query_params';
 
 const STATUS_FILTER_TITLE = i18n.translate('xpack.alertingV2.rulesList.statusFilter.label', {
   defaultMessage: 'Status',
@@ -145,8 +150,17 @@ const tagFieldDefinition: FieldDefinition = {
   resolveDisplayToId: (displayValue) => displayValue,
 };
 
+// Registers `template:<id>` so the search bar and `?q=` links recognize it as a
+// structured filter. Ids are shown as-is: there is no popover to pick from.
+const templateFieldDefinition: FieldDefinition = {
+  fieldName: TEMPLATE_FILTER_ID,
+  resolveIdToDisplay: (id) => id,
+  resolveDisplayToId: (displayValue) => displayValue,
+};
+
 export const RULES_LIST_FEATURES_FIELDS: FieldDefinition[] = [
   enabledFieldDefinition,
   kindFieldDefinition,
   tagFieldDefinition,
+  templateFieldDefinition,
 ];
