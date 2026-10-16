@@ -107,6 +107,15 @@ const getRemovedGrids = (
 };
 
 /**
+ * Writes the ids that `instructions` name as short ids, like the rest of the request. Ids that are
+ * plain words are left, since they may be words of the instructions.
+ */
+const aliasInstructions = (instructions: string, aliasById: ReadonlyMap<string, string>): string =>
+  [...aliasById]
+    .filter(([id]) => /[^A-Za-z]/.test(id))
+    .reduce((text, [id, alias]) => text.split(id).join(alias), instructions);
+
+/**
  * The dashboard with short ids. Panels new to their container (added or moved) are sent without a
  * grid and new sections without a row, since their placeholder positions are for the call to set.
  * Moved panels keep their size. Each changed container lists the space its removed and moved-out
@@ -139,7 +148,9 @@ const toLayoutRequest = (
       };
     });
   return {
-    ...(instructions !== undefined ? { instructions } : {}),
+    ...(instructions !== undefined
+      ? { instructions: aliasInstructions(instructions, aliasById) }
+      : {}),
     panels: toLayoutPanels(
       widgets.filter((widget): widget is AttachmentPanel => !isSection(widget)),
       null
@@ -238,15 +249,7 @@ const requestArrangement = async (
   if (issue) {
     throw new Error(`incomplete arrangement: ${issue}`);
   }
-  const keptSectionIds = new Set(
-    request.sections.filter(({ panels }) => !panels).map(({ id }) => id)
-  );
-  return {
-    ...arrangement,
-    sections: arrangement.sections.map((section) =>
-      keptSectionIds.has(section.id) ? { ...section, panels: [] } : section
-    ),
-  };
+  return arrangement;
 };
 
 /**
