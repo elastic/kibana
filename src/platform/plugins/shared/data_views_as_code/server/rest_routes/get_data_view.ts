@@ -44,6 +44,10 @@ export const registerGetDataViewAsCodeRoute = ({
     .addVersion(
       {
         version: INITIAL_REST_VERSION,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).getDataViewOASOperationObject,
+        },
         validate: {
           request: {
             params: schema.object(
@@ -51,6 +55,9 @@ export const registerGetDataViewAsCodeRoute = ({
                 id: schema.string({
                   minLength: 1,
                   maxLength: 1_000,
+                  meta: {
+                    description: 'The id of the data view.',
+                  },
                 }),
               },
               { unknowns: 'allow' }

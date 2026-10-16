@@ -43,6 +43,10 @@ export const registerGetDataViewsAsCodeRoute = ({
     .addVersion(
       {
         version: INITIAL_REST_VERSION,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).getDataViewsOASOperationObject,
+        },
         validate: {
           request: {
             query: asCodePaginationParamsSchema.extend({

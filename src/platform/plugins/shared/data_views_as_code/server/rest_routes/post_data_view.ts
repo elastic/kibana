@@ -41,6 +41,10 @@ export const registerPostDataViewAsCodeRoute = ({
     .addVersion(
       {
         version: INITIAL_REST_VERSION,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).postDataViewOASOperationObject,
+        },
         validate: {
           request: {
             body: savedDataViewSpecSchemaWithoutId,

@@ -48,6 +48,9 @@ export const registerDeleteDataViewAsCodeRoute = ({
               id: schema.string({
                 minLength: 1,
                 maxLength: 1_000,
+                meta: {
+                  description: 'The id of the data view.',
+                },
               }),
             }),
           },

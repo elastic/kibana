@@ -42,6 +42,10 @@ export const registerPutDataViewAsCodeRoute = ({
     .addVersion(
       {
         version: INITIAL_REST_VERSION,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).putDataViewOASOperationObject,
+        },
         validate: {
           request: {
             params: schema.object(
