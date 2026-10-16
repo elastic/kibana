@@ -164,7 +164,7 @@ async function collectWorkflowDiagnostics(
         `      properties:\n` +
         `        payload:\n` +
         `          $ref: '${ALERTING_V2_NOTIFICATION_GROUP_REF}'\n` +
-        `Ref: skills/platform/alerting/action-policy-authoring/references/workflow-dispatch-payload.md`,
+        `Ref: skills/platform/alerting/action-policy-management/references/workflow-dispatch-payload.md`,
     });
     return diagnostics;
   }
@@ -184,7 +184,7 @@ async function collectWorkflowDiagnostics(
         `      properties:\n` +
         `        payload:\n` +
         `          $ref: '${ALERTING_V2_NOTIFICATION_GROUP_REF}'\n` +
-        `Ref: skills/platform/alerting/action-policy-authoring/references/workflow-dispatch-payload.md`,
+        `Ref: skills/platform/alerting/action-policy-management/references/workflow-dispatch-payload.md`,
     });
   }
 
