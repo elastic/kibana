@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleEventChannel, RuleKind, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { RuleKind, RuleResponse, RuleTelemetryChannel } from '@kbn/alerting-v2-schemas';
 import type { EventTypeOpts } from '@kbn/core/server';
 import {
   RULE_CREATED_EVENT_TYPE,
@@ -46,7 +46,7 @@ export type RuleEbtEventType = (typeof RULE_EBT_EVENT_TYPE_BY_OPERATION)[RuleOpe
 
 export interface RuleChangedEventOrigin {
   actor: EventOrigin;
-  channel: RuleEventChannel;
+  channel: RuleTelemetryChannel;
   app?: string;
 }
 

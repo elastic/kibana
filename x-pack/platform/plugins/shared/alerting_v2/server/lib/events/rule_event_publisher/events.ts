@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleEventChannel, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { RuleResponse, RuleTelemetryChannel } from '@kbn/alerting-v2-schemas';
 
 /**
  * Data carried by every rule-lifecycle domain event.
@@ -34,7 +34,7 @@ export interface RuleEventPayload {
    */
   readonly correlationId?: string;
   /** Channel the change was made through, derived from the rules client's request. */
-  readonly channel: RuleEventChannel;
+  readonly channel: RuleTelemetryChannel;
   /** App the change was made from, when known. */
   readonly app?: string;
 }

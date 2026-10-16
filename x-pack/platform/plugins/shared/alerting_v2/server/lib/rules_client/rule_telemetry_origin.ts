@@ -9,8 +9,8 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import {
   ruleEventAppTelemetrySchema,
-  type RuleEventChannel,
-  type RuleEventOrigin,
+  type RuleTelemetryChannel,
+  type RuleTelemetryOrigin,
 } from '@kbn/alerting-v2-schemas';
 
 /** Options an in-process caller passes when it asks for a rules client. */
@@ -41,7 +41,7 @@ const toBoundedApp = (app: string | undefined): string | undefined => {
   return parsed.success ? parsed.data : undefined;
 };
 
-const getChannel = (request: KibanaRequest): RuleEventChannel => {
+const getChannel = (request: KibanaRequest): RuleTelemetryChannel => {
   if (request.isFakeRequest) {
     return 'system';
   }
@@ -75,7 +75,7 @@ const getAppFromExecutionContext = (request: KibanaRequest): string | undefined 
 export const resolveRuleTelemetryEventOrigin = (
   request: KibanaRequest,
   options?: CreateRulesClientOptions
-): RuleEventOrigin => {
+): RuleTelemetryOrigin => {
   const channel = getChannel(request);
   const app =
     toBoundedApp(options?.app) ||

@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { resolveRuleTelemetryEventOrigin } from './rule_event_origin';
+import { resolveRuleTelemetryEventOrigin } from './rule_telemetry_origin';
 
 const UI_HEADERS = {
   'kbn-version': '9.0.0',

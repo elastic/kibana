@@ -15,8 +15,8 @@ import {
   FIND_DEFAULT_PER_PAGE,
   isStateTransitionAllowed,
   updateRuleDataSchema,
-  type RuleEventOrigin,
   type RuleKind,
+  type RuleTelemetryOrigin,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { Request, PluginInitializer } from '@kbn/core-di-server';
@@ -79,7 +79,7 @@ import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
 import {
   resolveRuleTelemetryEventOrigin,
   type CreateRulesClientOptions,
-} from './rule_event_origin';
+} from './rule_telemetry_origin';
 import { RulesClientOptionsToken } from './tokens';
 import type {
   BulkByIdsParams,
@@ -239,8 +239,8 @@ export class RulesClient {
     return { spaceId: this.spaceId };
   }
 
-  /** Channel and app for a rule-change telemetry event. Resolved on mutation, not on reads. */
-  private resolveRuleTelemetryEventOrigin(): RuleEventOrigin {
+  /** Channel and app for a rule-change telemetry event. */
+  private resolveRuleTelemetryEventOrigin(): RuleTelemetryOrigin {
     return resolveRuleTelemetryEventOrigin(this.request, this.rulesClientOptions);
   }
 

@@ -19,7 +19,7 @@ export const RULE_EVENT_CHANNELS = ['system', 'ui', 'api'] as const;
 
 export const ruleEventChannelTelemetrySchema = lazySchema(() => z.enum(RULE_EVENT_CHANNELS));
 
-export type RuleEventChannel = z.infer<typeof ruleEventChannelTelemetrySchema>;
+export type RuleTelemetryChannel = z.infer<typeof ruleEventChannelTelemetrySchema>;
 
 /**
  * App id carried on a rule-change telemetry event. Bounded so telemetry cannot
@@ -37,7 +37,7 @@ export const ruleEventAppTelemetrySchema = lazySchema(() =>
     .describe('App the rule change was made from.')
 );
 
-export type RuleEventApp = z.infer<typeof ruleEventAppTelemetrySchema>;
+export type RuleTelemetryApp = z.infer<typeof ruleEventAppTelemetrySchema>;
 
 /** Where a rule change came from. `app` is omitted when it is unknown or rejected. */
 export const ruleEventOriginTelemetrySchema = lazySchema(() =>
@@ -47,4 +47,4 @@ export const ruleEventOriginTelemetrySchema = lazySchema(() =>
   })
 );
 
-export type RuleEventOrigin = z.infer<typeof ruleEventOriginTelemetrySchema>;
+export type RuleTelemetryOrigin = z.infer<typeof ruleEventOriginTelemetrySchema>;
