@@ -6,13 +6,15 @@
  */
 
 import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
-import type { AppHeaderBadge, AppHeaderTab } from '@kbn/app-header';
+import type { AppHeaderBadge, AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
+import type { AppMenuItemType } from '@kbn/app-menu';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import {
   AiIndexCreatedCallout,
   AutomationsPanel,
@@ -25,7 +27,9 @@ import {
 } from '../components/ai_index_detail';
 import { ListKiPanel } from '../components/ki';
 import { useAiIndex } from '../hooks/use_ai_index';
+import { useAiIndexDestLinks } from '../hooks/use_ai_index_dest_links';
 import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
+import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
 import { useListKi } from '../hooks/use_list_ki';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useNavigation } from '../hooks/use_navigation';
@@ -63,6 +67,17 @@ const automationsLockedAriaLabel = i18n.translate(
   }
 );
 
+const editBackingIndexMenuLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.listKi.editBackingIndexMenuLabel',
+  {
+    defaultMessage: 'Edit backing index',
+  }
+);
+
+const discoverLinkLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.discoverLink', {
+  defaultMessage: 'Open in Discover',
+});
+
 const signalsLockedAriaLabel = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.signals.lockedAriaLabel',
   {
@@ -75,6 +90,7 @@ export const AiIndexDetailPage = () => {
   const location = useLocation<AiIndexCreatedLocationState | undefined>();
   const history = useHistory<AiIndexCreatedLocationState | undefined>();
   const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
+  const { destValue, discoverHref, indexManagementHref } = useAiIndexDestLinks(aiIndex?.dest);
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const isMemoryEnabled = useMemoryEnabled();
   const [selectedTab, setSelectedTab] = useState<DetailTabId>('overview');
@@ -101,12 +117,14 @@ export const AiIndexDetailPage = () => {
   const { summary, isLoading: isKiSummaryLoading } = useListKi({
     aiIndexId: aiIndex?.id,
     size: KI_SUMMARY_PAGE_SIZE,
+    lifecycleStatus: ['active'],
     enabled: aiIndex !== undefined,
     notifyOnError: true,
   });
 
   const showKnowledgeIndicatorsTab =
     aiIndex !== undefined && !isKiSummaryLoading && summary.total > 0;
+  const isKnowledgeIndicatorsTab = selectedTab === 'knowledge_indicators';
 
   const { hideEditControls, showAutomationsPanel, showSignalsSection, showSignalsPanel } =
     useAiIndexOverviewSections({
@@ -115,6 +133,8 @@ export const AiIndexDetailPage = () => {
     });
   const pageTitle = aiIndex?.id ?? id ?? '';
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
+
+  useContextEngineBreadcrumbs(pageTitle || undefined);
 
   const headerBadges = useMemo<AppHeaderBadge[] | undefined>(
     () =>
@@ -129,6 +149,47 @@ export const AiIndexDetailPage = () => {
         : undefined,
     [aiIndex?.managed]
   );
+
+  const headerMenu = useMemo<AppHeaderMenu | undefined>(() => {
+    if (!isKnowledgeIndicatorsTab || !aiIndex) {
+      return undefined;
+    }
+
+    const items: AppMenuItemType[] = [];
+
+    if (indexManagementHref !== undefined) {
+      items.push({
+        id: 'contextListKiBackingIndex',
+        label: editBackingIndexMenuLabel,
+        iconType: 'index',
+        href: indexManagementHref,
+        overflow: true,
+        testId: 'contextListKiPanelDestLink',
+        ebt: { action: CONTEXT_ENGINE_UI_EBT.action.listKi.DEST_LINK },
+      });
+    }
+
+    const primaryActionItem =
+      discoverHref === undefined
+        ? undefined
+        : {
+            id: 'contextListKiDiscover',
+            label: discoverLinkLabel,
+            iconType: 'discoverApp',
+            href: discoverHref,
+            testId: 'contextListKiDiscoverLink',
+            ebt: { action: CONTEXT_ENGINE_UI_EBT.action.listKi.DISCOVER_LINK },
+          };
+
+    if (primaryActionItem === undefined && items.length === 0) {
+      return undefined;
+    }
+
+    return {
+      primaryActionItem,
+      items,
+    };
+  }, [aiIndex, discoverHref, indexManagementHref, isKnowledgeIndicatorsTab]);
 
   const headerTabs = useMemo<AppHeaderTab[] | undefined>(() => {
     if (error) {
@@ -269,7 +330,7 @@ export const AiIndexDetailPage = () => {
       )}
 
       {selectedTab === 'knowledge_indicators' && showKnowledgeIndicatorsTab && aiIndex && (
-        <ListKiPanel aiIndex={aiIndex} />
+        <ListKiPanel aiIndex={aiIndex} discoverHref={discoverHref} />
       )}
     </>
   );
@@ -287,6 +348,7 @@ export const AiIndexDetailPage = () => {
           navigateToContextEngine(CONTEXT_ENGINE_PATHS.landing);
         }}
         pageTitle={pageTitle}
+        menu={headerMenu}
         badges={headerBadges}
         tabs={headerTabs}
       />
