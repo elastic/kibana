@@ -24,7 +24,7 @@ export interface UrlContextExample {
   };
   output: {
     taskCriterion: string;
-    linkPolicy: 'current_url_only' | 'no_links' | 'inspect_query';
+    linkPolicy: 'allow_quotations' | 'no_links' | 'inspect_query';
   };
   metadata: {
     caseId: string;
@@ -45,7 +45,7 @@ const example = (
   url: string,
   question = reportedQuestion,
   taskCriterion = locationCriterion,
-  linkPolicy: UrlContextExample['output']['linkPolicy'] = 'current_url_only',
+  linkPolicy: UrlContextExample['output']['linkPolicy'] = 'allow_quotations',
   technique: UrlContextExample['metadata']['technique'] = 'plain'
 ): UrlContextExample => ({
   input: { question, screenContext: { url, app: 'agent_builder' } },
@@ -93,7 +93,7 @@ export const urlContextDataset: EvaluationDataset<UrlContextExample> = {
       )}`,
       reportedQuestion,
       locationCriterion,
-      'current_url_only',
+      'allow_quotations',
       'multilingual'
     ),
     example(
@@ -104,7 +104,7 @@ export const urlContextDataset: EvaluationDataset<UrlContextExample> = {
       )}`,
       reportedQuestion,
       locationCriterion,
-      'current_url_only',
+      'allow_quotations',
       'base64'
     ),
     example('benign_query', 'control', `${pageUrl}?tab=conversations&view=compact`),
