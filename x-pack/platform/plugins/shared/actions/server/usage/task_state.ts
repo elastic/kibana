@@ -41,6 +41,14 @@ const v2Schema = v1Schema.extends({
   ),
 });
 
+const v3Schema = v2Schema.extends({
+  count_by_auth_type: schema.recordOf(schema.string(), schema.number()),
+  count_by_type_and_auth_type: schema.recordOf(
+    schema.string(),
+    schema.recordOf(schema.string(), schema.number())
+  ),
+});
+
 /**
  * WARNING: Do not modify the existing versioned schema(s) below, instead define a new version (ex: 2, 3, 4).
  * This is required to support zero-downtime upgrades and rollbacks. See https://github.com/elastic/kibana/issues/155764.
@@ -84,9 +92,17 @@ export const stateSchemaByVersion = {
     },
     schema: v2Schema,
   },
+  3: {
+    up: (state: Record<string, unknown>) => ({
+      ...state,
+      count_by_auth_type: state.count_by_auth_type || {},
+      count_by_type_and_auth_type: state.count_by_type_and_auth_type || {},
+    }),
+    schema: v3Schema,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[2].schema;
+const latestTaskStateSchema = stateSchemaByVersion[3].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
@@ -96,6 +112,8 @@ export const emptyState: LatestTaskStateSchema = {
   count_total: 0,
   count_by_type: {},
   count_gen_ai_provider_types: {},
+  count_by_auth_type: {},
+  count_by_type_and_auth_type: {},
   count_active_total: 0,
   count_active_by_type: {},
   count_active_alert_history_connectors: 0,
