@@ -6,7 +6,7 @@
  */
 
 import type { TimeRange } from '../../entities_grid/common';
-import { buildAlertTilesHead } from './entities_with_alerts_query';
+import { GROUP_ON_WATCHLIST, buildAlertTilesHead } from './entities_with_alerts_query';
 import {
   SERIES_BUCKET_COLUMN,
   buildSeriesBucketExpression,
@@ -64,12 +64,15 @@ export const buildAlertBasedTilesSeriesQuery = (
     );
     counts.push(
       `${severeAlertsSeriesColumn(k)} = COUNT(${severeAlertsSeriesColumn(k)})`,
-      `${watchlistedSeriesColumn(k)} = COUNT(CASE(group_watchlisted, ${alertedColumn(k)}, null))`
+      `${watchlistedSeriesColumn(k)} = COUNT(CASE(${GROUP_ON_WATCHLIST}, ${alertedColumn(
+        k
+      )}, null))`
     );
   }
 
   parts.push(`| STATS`);
   parts.push(`    ${perGroup.join(',\n    ')},`);
+  parts.push(`    member_watchlisted = MAX(member_watchlisted),`);
   parts.push(`    group_watchlisted = MAX(group_watchlisted)`);
   parts.push(`    BY effective_id`);
   parts.push(`| STATS`);

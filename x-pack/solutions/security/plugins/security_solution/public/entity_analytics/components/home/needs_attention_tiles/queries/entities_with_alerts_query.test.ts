@@ -33,12 +33,16 @@ describe('buildAlertBasedTilesQuery', () => {
     expect(query).toContain('watchlisted_entity_ids');
   });
 
-  it('has no new & alerting tile any more: no first_seen, no second join, no is_new', () => {
+  it('has no new & alerting tile any more: no first_seen and no is_new', () => {
     const query = buildAlertBasedTilesQuery('.entities-v1', 'default', '7d');
     expect(query).not.toContain('new_alerting');
     expect(query).not.toContain('is_new');
     expect(query).not.toContain('first_seen');
-    expect(query.match(/\| LOOKUP JOIN/g)).toHaveLength(1);
+  });
+
+  it('joins twice: the alerting entity, and the main entity of each group that has aliases', () => {
+    const query = buildAlertBasedTilesQuery('.entities-v1', 'default', '7d');
+    expect(query.match(/\| LOOKUP JOIN/g)).toHaveLength(2);
   });
 
   it('counts only entities with a high or critical alert as severely alerting', () => {
@@ -51,23 +55,37 @@ describe('buildAlertBasedTilesQuery', () => {
   it('keeps counting watchlisted entities with an alert of any severity', () => {
     const query = buildAlertBasedTilesQuery('.entities-v1', 'default');
     expect(query).toContain(
-      'watchlisted_id = CASE(has_alert AND group_watchlisted, effective_id, null)'
+      'watchlisted_id = CASE(has_alert AND (COALESCE(member_watchlisted, false) OR COALESCE(group_watchlisted, false)), effective_id, null)'
     );
-    expect(query).not.toContain('has_severe_alert AND group_watchlisted');
+    expect(query).not.toContain('has_severe_alert AND');
   });
 
   it('aggregates the alerting records per resolved entity before the tile counts', () => {
     const query = buildAlertBasedTilesQuery('.entities-v1', 'default');
     expect(query).toContain(
-      '| STATS has_severe_alert = MAX(has_severe_alert), has_alert = MAX(has_alert), group_watchlisted = MAX(group_watchlisted) BY effective_id'
+      '| STATS has_severe_alert = MAX(has_severe_alert), has_alert = MAX(has_alert), member_watchlisted = MAX(member_watchlisted), group_watchlisted = MAX(group_watchlisted) BY effective_id'
     );
-    expect(query).not.toContain('| RENAME effective_id AS `entity.id`');
+    // The only rename is in the alias part, where the group id becomes the key of the lookup.
+    expect(query.match(/\| RENAME effective_id AS `entity.id`/g)).toHaveLength(1);
+    expect(query.indexOf('| RENAME effective_id AS `entity.id`')).toBeGreaterThan(
+      query.indexOf('`entity.relationships.resolution.resolved_to` IS NOT NULL')
+    );
   });
 
-  it('marks a group watchlisted when any member is, from the entity index, not just the alerting ones', () => {
+  it('marks a group watchlisted from the member that alerted, or from its aliases and main entity', () => {
     const query = buildAlertBasedTilesQuery('.entities-v1', 'default');
-    expect(query).toContain('  | WHERE entity.attributes.watchlists IS NOT NULL');
-    expect(query).toContain('| STATS group_watchlisted = MAX(group_watchlisted) BY effective_id');
+    // The member that alerted: for a single entity this is the whole group.
+    expect(query).toContain('member_watchlisted = entity.attributes.watchlists IS NOT NULL');
+    // Groups with aliases: the aliases, then the main entity of those groups only.
+    expect(query).toContain('  | WHERE `entity.relationships.resolution.resolved_to` IS NOT NULL');
+    expect(query).toContain(
+      'group_watchlisted = COALESCE(alias_watchlisted, false) OR entity.attributes.watchlists IS NOT NULL'
+    );
+  });
+
+  it('does not read every watchlisted entity', () => {
+    const query = buildAlertBasedTilesQuery('.entities-v1', 'default');
+    expect(query).not.toContain('| WHERE entity.attributes.watchlists IS NOT NULL');
   });
 
   it('applies entity filter clauses after the LOOKUP JOIN', () => {

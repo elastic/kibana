@@ -76,17 +76,21 @@ FROM (
   | RENAME _ea_entity_id AS \`entity.id\`
   | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
   | WHERE entity.name IS NOT NULL
-  | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id), has_alert = true
-  | KEEP effective_id, has_alert, has_severe_alert
+  | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id), has_alert = true, member_watchlisted = entity.attributes.watchlists IS NOT NULL
+  | KEEP effective_id, has_alert, has_severe_alert, member_watchlisted
 ), (
   FROM .entities.v2.latest.default-00001
-  | WHERE entity.attributes.watchlists IS NOT NULL
-  | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id), group_watchlisted = true
-  | STATS group_watchlisted = MAX(group_watchlisted) BY effective_id
+  | WHERE \`entity.relationships.resolution.resolved_to\` IS NOT NULL
+  | EVAL alias_watchlisted = entity.attributes.watchlists IS NOT NULL
+  | STATS alias_watchlisted = MAX(alias_watchlisted) BY effective_id = \`entity.relationships.resolution.resolved_to\`
+  | RENAME effective_id AS \`entity.id\`
+  | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
+  | EVAL group_watchlisted = COALESCE(alias_watchlisted, false) OR entity.attributes.watchlists IS NOT NULL, effective_id = entity.id
+  | KEEP effective_id, group_watchlisted
 )
-| STATS has_severe_alert = MAX(has_severe_alert), has_alert = MAX(has_alert), group_watchlisted = MAX(group_watchlisted) BY effective_id
+| STATS has_severe_alert = MAX(has_severe_alert), has_alert = MAX(has_alert), member_watchlisted = MAX(member_watchlisted), group_watchlisted = MAX(group_watchlisted) BY effective_id
 | EVAL severe_id = CASE(has_severe_alert, effective_id, null)
-| EVAL watchlisted_id = CASE(has_alert AND group_watchlisted, effective_id, null)
+| EVAL watchlisted_id = CASE(has_alert AND (COALESCE(member_watchlisted, false) OR COALESCE(group_watchlisted, false)), effective_id, null)
 | STATS
     severe_alerts_count      = COUNT(severe_id),
     severe_alerts_entity_ids = VALUES(severe_id),
@@ -298,17 +302,21 @@ FROM (
   | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
   | WHERE entity.name IS NOT NULL
   | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
-  | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id), has_alert = true
-  | KEEP effective_id, has_alert, has_severe_alert
+  | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id), has_alert = true, member_watchlisted = entity.attributes.watchlists IS NOT NULL
+  | KEEP effective_id, has_alert, has_severe_alert, member_watchlisted
 ), (
   FROM .entities.v2.latest.default-00001
-  | WHERE entity.attributes.watchlists IS NOT NULL
-  | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id), group_watchlisted = true
-  | STATS group_watchlisted = MAX(group_watchlisted) BY effective_id
+  | WHERE \`entity.relationships.resolution.resolved_to\` IS NOT NULL
+  | EVAL alias_watchlisted = entity.attributes.watchlists IS NOT NULL
+  | STATS alias_watchlisted = MAX(alias_watchlisted) BY effective_id = \`entity.relationships.resolution.resolved_to\`
+  | RENAME effective_id AS \`entity.id\`
+  | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
+  | EVAL group_watchlisted = COALESCE(alias_watchlisted, false) OR entity.attributes.watchlists IS NOT NULL, effective_id = entity.id
+  | KEEP effective_id, group_watchlisted
 )
-| STATS has_severe_alert = MAX(has_severe_alert), has_alert = MAX(has_alert), group_watchlisted = MAX(group_watchlisted) BY effective_id
+| STATS has_severe_alert = MAX(has_severe_alert), has_alert = MAX(has_alert), member_watchlisted = MAX(member_watchlisted), group_watchlisted = MAX(group_watchlisted) BY effective_id
 | EVAL severe_id = CASE(has_severe_alert, effective_id, null)
-| EVAL watchlisted_id = CASE(has_alert AND group_watchlisted, effective_id, null)
+| EVAL watchlisted_id = CASE(has_alert AND (COALESCE(member_watchlisted, false) OR COALESCE(group_watchlisted, false)), effective_id, null)
 | STATS
     severe_alerts_count      = COUNT(severe_id),
     severe_alerts_entity_ids = VALUES(severe_id),
