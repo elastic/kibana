@@ -9,7 +9,7 @@
     "id": "customApp",
     "browser": true,
     "server": true,
-    "requiredPlugins": ["embeddable", "data", "dataViews", "esql", "lens", "uiActions"],
+    "requiredPlugins": ["embeddable", "data", "dataViews", "esql", "features", "lens", "uiActions"],
     "optionalPlugins": ["agentBuilder"]
   }
 }

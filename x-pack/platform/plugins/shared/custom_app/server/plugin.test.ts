@@ -10,6 +10,7 @@ import {
   isAllowedBuiltinSkill,
   isAllowedBuiltinTool,
 } from '@kbn/agent-builder-server/allow_lists';
+import { coreMock } from '@kbn/core/server/mocks';
 import { CUSTOM_APP_EMBEDDABLE_TYPE } from '@kbn/custom-app-common';
 import { CUSTOM_APP_CONTEXT_ATTACHMENT_TYPE } from '../common/app_context_attachment';
 import { CustomAppPlugin } from './plugin';
@@ -20,6 +21,8 @@ import {
 } from './tools/update_custom_app_tool';
 
 const setup = (withAgentBuilder: boolean) => {
+  const core = coreMock.createSetup();
+  const features = { registerKibanaFeature: jest.fn() };
   const embeddable = { registerEmbeddableServerDefinition: jest.fn() };
   const agentBuilder = {
     attachments: { registerType: jest.fn() },
@@ -27,12 +30,13 @@ const setup = (withAgentBuilder: boolean) => {
     skills: { register: jest.fn() },
   };
 
-  new CustomAppPlugin().setup(
-    {} as never,
-    { embeddable, ...(withAgentBuilder ? { agentBuilder } : {}) } as never
-  );
+  new CustomAppPlugin().setup(core, {
+    embeddable,
+    features,
+    ...(withAgentBuilder ? { agentBuilder } : {}),
+  } as never);
 
-  return { embeddable, agentBuilder };
+  return { core, features, embeddable, agentBuilder };
 };
 
 describe('CustomAppPlugin on the server', () => {
@@ -44,6 +48,22 @@ describe('CustomAppPlugin on the server', () => {
         CUSTOM_APP_EMBEDDABLE_TYPE,
         expect.objectContaining({ getSchema: expect.any(Function) })
       );
+    });
+  });
+
+  describe('saved apps', () => {
+    it('registers the type, the feature that governs it and the routes, with or without Agent Builder', () => {
+      [true, false].forEach((withAgentBuilder) => {
+        const { core, features } = setup(withAgentBuilder);
+
+        expect(core.savedObjects.registerType).toHaveBeenCalledWith(
+          expect.objectContaining({ name: 'custom_app' })
+        );
+        expect(features.registerKibanaFeature).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'customApp' })
+        );
+        expect(core.http.createRouter).toHaveBeenCalled();
+      });
     });
   });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { appDocumentShapeSchema } from '@kbn/custom-app-common';
 
 /**
@@ -13,26 +13,28 @@ import { appDocumentShapeSchema } from '@kbn/custom-app-common';
  * the document is checked here; what the tool then finds wrong across it (a value that does not
  * exist, two components with one id) it reports in words the agent can act on.
  */
-export const customAppUpdateSchema = z.object({
-  embeddable_id: z
-    .string()
-    .min(1)
-    .max(256)
-    .optional()
-    .describe(
-      'The embeddable_id of the custom app to change, as shown in its context. Use this for an app the user sent to chat from a panel.'
+export const customAppUpdateSchema = lazySchema(() =>
+  z.object({
+    embeddable_id: z
+      .string()
+      .min(1)
+      .max(256)
+      .optional()
+      .describe(
+        'The embeddable_id of the custom app to change, as shown in its context. Use this for an app the user sent to chat from a panel.'
+      ),
+    attachment_id: z
+      .string()
+      .min(1)
+      .max(256)
+      .optional()
+      .describe(
+        'The attachment_id returned when the app was created in this conversation. Use this instead of embeddable_id for such an app.'
+      ),
+    document: appDocumentShapeSchema.describe(
+      'The complete app as it should be after the change. Start from the current document in the context and change only what was asked.'
     ),
-  attachment_id: z
-    .string()
-    .min(1)
-    .max(256)
-    .optional()
-    .describe(
-      'The attachment_id returned when the app was created in this conversation. Use this instead of embeddable_id for such an app.'
-    ),
-  document: appDocumentShapeSchema.describe(
-    'The complete app as it should be after the change. Start from the current document in the context and change only what was asked.'
-  ),
-});
+  })
+);
 
 export type CustomAppUpdate = z.output<typeof customAppUpdateSchema>;
