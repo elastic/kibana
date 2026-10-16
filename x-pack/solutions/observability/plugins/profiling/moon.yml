@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/io-ts-utils'
   - '@kbn/unified-search-plugin'
   - '@kbn/es-query'
+  - '@kbn/config'
   - '@kbn/config-schema'
   - '@kbn/features-plugin'
   - '@kbn/logging'
@@ -38,7 +39,7 @@ dependsOn:
   - '@kbn/apm-utils'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/fleet-plugin'
-  - '@kbn/shared-ux-page-no-data-types'
+  - '@kbn/shared-ux-card-no-data'
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/spaces-plugin'
   - '@kbn/cloud-plugin'
@@ -67,6 +68,7 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/app-header'
   - '@kbn/ui-callout'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

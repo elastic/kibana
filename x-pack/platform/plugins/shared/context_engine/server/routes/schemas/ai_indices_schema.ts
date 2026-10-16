@@ -38,10 +38,13 @@ import {
 } from '../../../common/constants';
 import type { ImprovementAction } from '../../../common/http_api/improvement_actions';
 import { IMPROVEMENT_ACTIONS } from '../../../common/http_api/improvement_actions';
-import { MAX_KI_ID_LENGTH } from '../../../common/step_types/ki';
+import {
+  KI_LIFECYCLE_STATUSES,
+  MAX_KI_ID_LENGTH,
+  type KiLifecycleStatus,
+} from '../../../common/step_types/ki';
 import {
   validateAbsoluteSignalWindow,
-  validateAiIndexDestValue,
   validateAiIndexId,
   validateAiIndexQueryLimit,
   validateFeedbackAnalysisInterval,
@@ -212,7 +215,6 @@ const aiIndexDestSchema = schema.object(
     value: schema.string({
       minLength: 1,
       maxLength: MAX_AI_INDEX_DEST_VALUE_LENGTH,
-      validate: validateAiIndexDestValue,
       meta: {
         description:
           'The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI Index ID. System indices are not allowed.',
@@ -259,6 +261,13 @@ const aiIndexPropertiesSchema = {
       meta: { description: 'Human-readable description of the AI Index.' },
     })
   ),
+  memory_enabled: schema.maybe(
+    schema.boolean({
+      meta: {
+        description: 'Whether this AI index accepts memory writes. Defaults to true when omitted.',
+      },
+    })
+  ),
   feedback_analysis: schema.maybe(feedbackAnalysisSchema),
   dest: aiIndexDestSchema,
   automations: schema.arrayOf(aiIndexAutomationSchema, {
@@ -293,6 +302,30 @@ export const createAiIndexBodySchema = schema.object({
 });
 export const putAiIndexBodySchema = schema.object(aiIndexPropertiesSchema);
 
+const kiLifecycleStatusQuerySchema = schema.oneOf(
+  KI_LIFECYCLE_STATUSES.map((status) => schema.literal(status)) as [Type<KiLifecycleStatus>],
+  {
+    meta: {
+      description: 'Knowledge Indicator governance.lifecycle.status value.',
+    },
+  }
+);
+
+const kiLifecycleStatusesQuerySchema = schema.oneOf(
+  [
+    kiLifecycleStatusQuerySchema,
+    schema.arrayOf(kiLifecycleStatusQuerySchema, {
+      maxSize: KI_LIFECYCLE_STATUSES.length,
+    }),
+  ],
+  {
+    meta: {
+      description:
+        'When set, filter by governance.lifecycle.status (unset counts as active). When omitted, deleted KIs are excluded.',
+    },
+  }
+);
+
 export const listKisQuerySchema = schema.object({
   size: schema.number({
     min: 0,
@@ -306,6 +339,7 @@ export const listKisQuerySchema = schema.object({
       meta: { description: 'When set, return only KIs of this type.' },
     })
   ),
+  lifecycle_status: schema.maybe(kiLifecycleStatusesQuerySchema),
 });
 
 export const getKiQuerySchema = schema.object({
@@ -314,6 +348,7 @@ export const getKiQuerySchema = schema.object({
     maxLength: MAX_INDEX_NAME_BYTES,
     meta: { description: 'The Elasticsearch index that stores the Knowledge Indicator.' },
   }),
+  lifecycle_status: schema.maybe(kiLifecycleStatusesQuerySchema),
 });
 
 export const queryAiIndicesBodySchema = schema.object({
@@ -476,6 +511,9 @@ export const aiIndexHttpItemResponseSchema = () =>
       meta: {
         description: 'Whether the AI Index is managed by a plugin and therefore immutable.',
       },
+    }),
+    memory_enabled: schema.boolean({
+      meta: { description: 'Whether this AI Index accepts memory writes.' },
     }),
     date_created: schema.string({
       meta: { description: 'ISO 8601 timestamp of when the AI Index was created.' },

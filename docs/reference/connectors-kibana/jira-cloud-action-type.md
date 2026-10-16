@@ -11,6 +11,8 @@ applies_to:
 
 The Jira Cloud connector communicates with the Jira Cloud REST API v3 to search, create, and manage issues, projects, and users. It supports two authentication methods: Basic authentication (email and API token) and OAuth 2.0 Authorization Code flow. Both methods connect to your Atlassian site by subdomain.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-jira-cloud-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

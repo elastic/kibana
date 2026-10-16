@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { ProposalGateFixture } from './proposal_gate_fixture';
 import { createProposalGateFixture } from './proposal_gate_fixture';
@@ -109,6 +110,71 @@ describe('create-investigation-proposal workflow execution', () => {
       expect(proposal.category).toBe('tune');
       expect(proposal.impact).toBe('low');
       expect(proposal.confidence).toBe('medium');
+    });
+  });
+
+  describe('a caller-supplied proposalId', () => {
+    const ID = '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50';
+
+    it('should create the proposal under that id and park on it', async () => {
+      await fixture.start({ proposalId: ID });
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.onlyProposal().id).toBe(ID);
+    });
+
+    it.each([
+      ['live', undefined],
+      ['dismissed', false],
+    ])(
+      'should fail the run, gate nothing and touch nothing when the id belongs to a %s proposal',
+      async (_label, answer) => {
+        // The service refuses a duplicate id and says nothing more, and the
+        // workflow does not interpret it. It fails at the create step, before any
+        // proposal id is held, so the failure handler has nothing to settle and
+        // no gate is ever parked.
+        await fixture.start({ proposalId: ID });
+        if (answer !== undefined) {
+          await fixture.resume(answer);
+        }
+        const existing = fixture.onlyProposal();
+        const cardsBefore = fixture.attachedProposalIds().length;
+
+        await fixture.start({ proposalId: ID });
+
+        expect(fixture.executionStatus()).toBe(ExecutionStatus.FAILED);
+        expect(fixture.proposals()).toHaveLength(1);
+        expect(fixture.onlyProposal()).toEqual(existing);
+        expect(fixture.attachedProposalIds()).toHaveLength(cardsBefore);
+      }
+    );
+
+    it('should refuse an id another execution already created, without parking', async () => {
+      await fixture.seedProposal({ id: ID });
+
+      await fixture.start({ proposalId: ID });
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.FAILED);
+      expect(fixture.stepExecutions('await_decision')).toHaveLength(0);
+      expect(fixture.onlyProposal().status).toBe('pending');
+    });
+
+    it('should create and park normally under a different id', async () => {
+      await fixture.seedProposal({ id: '0c5d1b9e-3a47-5f2b-8d61-9e4a7c2b1f08' });
+
+      await fixture.start({ proposalId: ID });
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.proposals()).toHaveLength(2);
+    });
+
+    it('should leave a proposal with no id unaffected: every run mints its own', async () => {
+      await fixture.seedProposal({});
+
+      await fixture.start({});
+
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.proposals()).toHaveLength(2);
     });
   });
 
@@ -234,6 +300,7 @@ describe('create-investigation-proposal workflow execution', () => {
       await fixture.resume(true);
 
       const [supersededOriginal, revision] = fixture.proposals();
+      expect(fixture.attachedProposalIds()).toEqual(fixture.proposals().map(({ id }) => id));
       expect(supersededOriginal.id).toBe(original.id);
       expect(supersededOriginal.status).toBe('superseded');
       expect(supersededOriginal.supersededBy).toBe(revision.id);
@@ -325,6 +392,7 @@ describe('create-investigation-proposal workflow execution', () => {
       await fixture.resume(true);
 
       const [original, clone] = fixture.proposals();
+      expect(fixture.attachedProposalIds()).toEqual([original.id, clone.id]);
       expect(clone).toBeDefined();
       expect(original.supersededBy).toBe(clone.id);
       expect(clone.decision).toBeUndefined();
@@ -404,6 +472,59 @@ describe('create-investigation-proposal workflow execution', () => {
       await fixture.timeOutGate();
 
       expect(fixture.onlyProposal().executionError).toContain('timeout');
+    });
+  });
+
+  // A cancelled gate runs no handler, so the workflow never settles its record;
+  // the service has to, the next time the proposal is read or decided.
+  describe('a cancelled gate', () => {
+    const SPACE_ID = 'fake_space_id';
+
+    it('should settle the proposal as expired on the next read', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+      fixture.cancelGate();
+
+      const proposal = await fixture.service.get(
+        fixture.onlyProposal().id,
+        SPACE_ID,
+        httpServerMock.createKibanaRequest()
+      );
+
+      expect(proposal.status).toBe('expired');
+      expect(fixture.onlyProposal()).toMatchObject({
+        status: 'expired',
+        executionError: expect.stringContaining('cancelled'),
+      });
+      expect(fixture.onlyProposal().decision).toBeUndefined();
+    });
+
+    it('should refuse a decision on it and settle the proposal instead', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+      fixture.cancelGate();
+
+      await expect(
+        fixture.service.releaseGate(fixture.onlyProposal().id, {
+          approved: true,
+          spaceId: SPACE_ID,
+          request: httpServerMock.createKibanaRequest(),
+        })
+      ).rejects.toThrow(/can no longer be decided/);
+
+      expect(fixture.onlyProposal().status).toBe('expired');
+      expect(fixture.stepExecutions('execute_action', 'workflow.execute')).toHaveLength(0);
+    });
+
+    it('should leave a proposal whose gate is still parked to the gate', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+
+      await fixture.service.get(
+        fixture.onlyProposal().id,
+        SPACE_ID,
+        httpServerMock.createKibanaRequest()
+      );
+
+      expect(fixture.onlyProposal().status).toBe('pending');
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
     });
   });
 

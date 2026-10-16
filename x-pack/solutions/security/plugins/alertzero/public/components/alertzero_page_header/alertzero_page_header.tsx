@@ -13,6 +13,7 @@ import {
   EuiIcon,
   EuiPageHeader,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -108,6 +109,12 @@ export interface AlertZeroPageHeaderProps {
   /** The count could not be fetched, so `eventCount` says nothing about reality. */
   hasError?: boolean;
   eventCount?: number;
+  /** Replaces the time-of-day greeting. */
+  greeting?: string;
+  /** Replaces the title derived from the queue state. */
+  title?: string;
+  /** Supporting line under the heading. */
+  subtitle?: string;
 }
 /**
  * Page header for AlertZero routes.
@@ -122,16 +129,21 @@ export const AlertZeroPageHeader: React.FC<AlertZeroPageHeaderProps> = ({
   isLoading = false,
   hasError = false,
   eventCount = 0,
+  greeting,
+  title: titleOverride,
+  subtitle,
 }) => {
   const { euiTheme } = useEuiTheme();
   const timeZone = useKibanaTimeZone();
-  const title = getAlertZeroHeroTitle({
-    isQueueEmpty,
-    isLoading,
-    hasError,
-    hasNeedsAction: eventCount > 0,
-    eventCount,
-  });
+  const title =
+    titleOverride ??
+    getAlertZeroHeroTitle({
+      isQueueEmpty,
+      isLoading,
+      hasError,
+      hasNeedsAction: eventCount > 0,
+      eventCount,
+    });
   return (
     <>
       <EuiPageHeader
@@ -188,15 +200,23 @@ export const AlertZeroPageHeader: React.FC<AlertZeroPageHeaderProps> = ({
             <EuiTitle size="m" css={{ fontWeight: 500 }}>
               <h1>
                 <span style={{ color: euiTheme.colors.mediumShade }}>
-                  {getAlertZeroGreeting(timeZone)}
+                  {greeting ?? getAlertZeroGreeting(timeZone)}
                 </span>{' '}
                 <span>{title}</span>
               </h1>
             </EuiTitle>
+            {subtitle && (
+              <EuiText size="s" color="subdued" data-test-subj="alertZeroPageHeaderSubtitle">
+                {subtitle}
+              </EuiText>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageHeader>
-      <EuiSpacer size="l" />
+      {/* Pages stack sections with a large column gap; the reference design adds only a small
+          inset under the greeting, so the content sits close to the title. Keep in step with
+          `EscalationsPageHeader`, which mirrors this header. */}
+      <EuiSpacer size="s" />
     </>
   );
 };

@@ -8,8 +8,9 @@ import { i18n } from '@kbn/i18n';
 
 import { omit, isEmpty } from 'lodash';
 import { z } from '@kbn/zod';
-import { AlertConfigSchema } from '../../../common/runtime_types/monitor_management/alert_config_schema';
-import { formatZodErrors } from '../../../common/runtime_types/zod/format_errors';
+import { AlertConfigSchema } from '../../../common/runtime_types/schemas/alert_config_schema';
+import { formatZodErrors } from '../../../common/runtime_types/schemas/format_errors';
+import { isJsonObjectString } from '../../../common/utils/is_json_object_string';
 import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { flattenAndFormatObject } from '../../synthetics_service/project_monitor/normalizers/common_fields';
 import type {
@@ -22,10 +23,10 @@ import {
   CodeEditorMode,
   ConfigKey,
   FormMonitorType,
+  KerberosAuthType,
   MonitorTypeEnum,
   type SyntheticsPrivateLocations,
 } from '../../../common/runtime_types';
-import { getZodMonitorCodecs } from './zod_monitor_codecs';
 
 import {
   ALLOWED_SCHEDULES_IN_MINUTES,
@@ -37,6 +38,30 @@ import {
   monitorTypeRequiresPrivateLocations,
 } from '../../../common/utils/monitor_location_support';
 import { privateLocationCoversAllMonitorSpaces } from './monitor_locations_utils';
+import {
+  APIFieldsCodec,
+  BrowserFieldsCodec,
+  HTTPFieldsCodec,
+  ICMPFieldsCodec,
+  TCPFieldsCodec,
+} from '../../../common/runtime_types/schemas/monitor_types';
+import { MonitorTypeCodec } from '../../../common/runtime_types/schemas/monitor_configs';
+import { ProjectMonitorCodec } from '../../../common/runtime_types/schemas/monitor_types_project';
+
+type MonitorCodecType =
+  | typeof ICMPFieldsCodec
+  | typeof TCPFieldsCodec
+  | typeof HTTPFieldsCodec
+  | typeof BrowserFieldsCodec
+  | typeof APIFieldsCodec;
+
+const monitorTypeToCodecMap: Record<MonitorTypeEnum, MonitorCodecType> = {
+  [MonitorTypeEnum.ICMP]: ICMPFieldsCodec,
+  [MonitorTypeEnum.TCP]: TCPFieldsCodec,
+  [MonitorTypeEnum.HTTP]: HTTPFieldsCodec,
+  [MonitorTypeEnum.BROWSER]: BrowserFieldsCodec,
+  [MonitorTypeEnum.API]: APIFieldsCodec,
+};
 
 export interface ValidationResult {
   valid: boolean;
@@ -81,8 +106,6 @@ export function validateMonitor(
   spaceId: string,
   isServerless = false
 ): ValidationResult {
-  const { MonitorTypeCodec, monitorTypeToCodecMap, ICMPFieldsCodec } = getZodMonitorCodecs();
-
   const { [ConfigKey.MONITOR_TYPE]: monitorType, [ConfigKey.KIBANA_SPACES]: kSpaces } =
     monitorFields;
 
@@ -167,6 +190,85 @@ export function validateMonitor(
     };
   }
 
+  if (monitorType === MonitorTypeEnum.HTTP) {
+    const hasBasicAuth = Boolean(
+      monitorFields[ConfigKey.USERNAME] || monitorFields[ConfigKey.PASSWORD]
+    );
+    const kerberos = monitorFields[ConfigKey.KERBEROS];
+    const ntlm = monitorFields[ConfigKey.NTLM];
+    const enabledAuthSchemes = [
+      hasBasicAuth,
+      Boolean(kerberos?.enabled),
+      Boolean(ntlm?.enabled),
+    ].filter(Boolean);
+
+    if (enabledAuthSchemes.length > 1) {
+      return {
+        valid: false,
+        reason: INVALID_AUTH_CONFIGURATION_ERROR,
+        details: INVALID_AUTH_CONFIGURATION_DETAILS,
+        payload: monitorFields,
+      };
+    }
+
+    // Heartbeat: exactly one of config_path / krb5_conf when Kerberos is enabled.
+    if (kerberos?.enabled) {
+      const hasPath = Boolean(kerberos.config_path?.trim());
+      const hasInline = Boolean(kerberos.krb5_conf?.trim());
+      if (hasPath === hasInline) {
+        return {
+          valid: false,
+          reason: INVALID_AUTH_CONFIGURATION_ERROR,
+          details: INVALID_KERBEROS_CONFIG_DETAILS,
+          payload: monitorFields,
+        };
+      }
+
+      if (kerberos.auth_type === KerberosAuthType.PASSWORD) {
+        if (!kerberos.username?.trim() || !kerberos.password?.trim()) {
+          return {
+            valid: false,
+            reason: INVALID_AUTH_CONFIGURATION_ERROR,
+            details: INVALID_KERBEROS_PASSWORD_CREDENTIALS_DETAILS,
+            payload: monitorFields,
+          };
+        }
+      } else if (kerberos.auth_type === KerberosAuthType.KEYTAB) {
+        // Heartbeat: NewWithKeytab(config.Username, ...) — principal is required with the keytab path.
+        if (!kerberos.username?.trim() || !kerberos.keytab?.trim()) {
+          return {
+            valid: false,
+            reason: INVALID_AUTH_CONFIGURATION_ERROR,
+            details: INVALID_KERBEROS_KEYTAB_CREDENTIALS_DETAILS,
+            payload: monitorFields,
+          };
+        }
+      }
+
+      // Host-file paths (config_path / keytab) are not provisionable on managed public locations.
+      const usesHostFile =
+        hasPath ||
+        (kerberos.auth_type === KerberosAuthType.KEYTAB && Boolean(kerberos.keytab?.trim()));
+      if (usesHostFile && hasPublicServiceLocation(monitorFields.locations)) {
+        return {
+          valid: false,
+          reason: INVALID_AUTH_CONFIGURATION_ERROR,
+          details: INVALID_KERBEROS_HOST_FILE_PUBLIC_LOCATION_DETAILS,
+          payload: monitorFields,
+        };
+      }
+    }
+
+    if (ntlm?.enabled && (!ntlm.username?.trim() || !ntlm.password?.trim())) {
+      return {
+        valid: false,
+        reason: INVALID_AUTH_CONFIGURATION_ERROR,
+        details: INVALID_NTLM_CREDENTIALS_DETAILS,
+        payload: monitorFields,
+      };
+    }
+  }
+
   if (monitorType === MonitorTypeEnum.BROWSER || monitorType === MonitorTypeEnum.API) {
     const inlineScript = monitorFields[ConfigKey.SOURCE_INLINE];
     const projectContent = monitorFields[ConfigKey.SOURCE_PROJECT_CONTENT];
@@ -245,8 +347,10 @@ export function validateMonitor(
   };
 }
 
-export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
-  const { MonitorTypeCodec } = getZodMonitorCodecs();
+export const normalizeAPIConfig = (
+  monitor: CreateMonitorPayLoad,
+  { previousParams }: { previousParams?: string } = {}
+) => {
   const monitorType = monitor.type as MonitorTypeEnum;
   const decodedType = MonitorTypeCodec.safeParse(monitorType);
 
@@ -343,8 +447,13 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
     };
   }
 
-  if (rawParams) {
-    const { value, error } = validateParams(rawParams);
+  // An empty string clears params. Any other explicitly supplied value, including falsy ones such
+  // as `false`, `0` or `null`, must be validated: skipping them would silently drop the stored
+  // params. `null` is only tolerated when there was no stored value to lose.
+  const isParamsProvided = rawParams !== undefined && rawParams !== '';
+  const isNullWithoutStoredParams = rawParams == null && previousParams == null;
+  if (isParamsProvided && !isNullWithoutStoredParams) {
+    const { value, error } = validateParams(rawParams, previousParams);
     if (error) {
       formattedConfig[ConfigKey.PARAMS] = rawParams as string;
       return {
@@ -398,10 +507,15 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
 };
 const RecordSchema = z.record(z.string(), z.string());
 
-const validateParams = (jsonString: string | any) => {
+const validateParams = (jsonString: string | any, previousParams?: string) => {
   if (typeof jsonString === 'string') {
     try {
       JSON.parse(jsonString);
+      // Params are spread into an object before reaching Heartbeat, so arrays and scalars never
+      // arrive intact. Stored values are exempt so unrelated edits of older monitors still save.
+      if (!isJsonObjectString(jsonString) && jsonString !== previousParams) {
+        return { error: new Error('Params must be a JSON object.') };
+      }
       return { value: jsonString };
     } catch (e) {
       return { error: e };
@@ -449,7 +563,6 @@ export function validateProjectMonitor(
     return serverlessError;
   }
 
-  const { ProjectMonitorCodec } = getZodMonitorCodecs();
   const locationsError = validateLocation(monitorFields, publicLocations, privateLocations);
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
   const decodedMonitor = ProjectMonitorCodec.safeParse(monitorFields);
@@ -574,6 +687,58 @@ const INVALID_PAYLOAD_ERROR = i18n.translate(
 const INVALID_TYPE_ERROR = i18n.translate('xpack.synthetics.server.monitors.invalidTypeError', {
   defaultMessage: 'Monitor type is invalid',
 });
+
+const INVALID_AUTH_CONFIGURATION_ERROR = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidAuthConfigurationError',
+  {
+    defaultMessage: 'Monitor authentication configuration is invalid',
+  }
+);
+
+const INVALID_AUTH_CONFIGURATION_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidAuthConfigurationDetails',
+  {
+    defaultMessage:
+      'Only one authentication method can be enabled per HTTP monitor. Choose one of basic authentication (username/password), Kerberos, or NTLM.',
+  }
+);
+
+const INVALID_KERBEROS_CONFIG_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidKerberosConfigDetails',
+  {
+    defaultMessage:
+      'Kerberos requires exactly one of config_path (file on the agent) or krb5_conf (inline krb5.conf body).',
+  }
+);
+
+const INVALID_KERBEROS_PASSWORD_CREDENTIALS_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidKerberosPasswordCredentialsDetails',
+  {
+    defaultMessage: 'Kerberos password authentication requires both username and password.',
+  }
+);
+
+const INVALID_KERBEROS_KEYTAB_CREDENTIALS_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidKerberosKeytabCredentialsDetails',
+  {
+    defaultMessage: 'Kerberos keytab authentication requires both username and a keytab path.',
+  }
+);
+
+const INVALID_KERBEROS_HOST_FILE_PUBLIC_LOCATION_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidKerberosHostFilePublicLocationDetails',
+  {
+    defaultMessage:
+      'Kerberos host-file settings (config_path or keytab) are only supported on private locations. Use an inline krb5_conf on public locations, or a private location for keytab auth.',
+  }
+);
+
+const INVALID_NTLM_CREDENTIALS_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidNtlmCredentialsDetails',
+  {
+    defaultMessage: 'NTLM authentication requires both username and password.',
+  }
+);
 
 const INVALID_SCHEDULE_ERROR = i18n.translate(
   'xpack.synthetics.server.monitors.invalidScheduleError',

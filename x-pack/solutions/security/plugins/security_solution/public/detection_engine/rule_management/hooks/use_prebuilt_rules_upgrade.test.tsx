@@ -190,6 +190,42 @@ describe('usePrebuiltRulesUpgrade', () => {
     );
   });
 
+  it('issues no request when every selected rule id is stale on upgradeRulesToTarget', async () => {
+    const onUpgrade = jest.fn();
+    const { result } = renderHook(() => usePrebuiltRulesUpgrade({ onUpgrade }), {
+      wrapper: TestProviders,
+    });
+
+    await act(async () => {
+      await result.current.upgradeRulesToTarget(['ghost-rule-1', 'ghost-rule-2']);
+    });
+
+    expect(confirmLegacyMLJobs).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+    expect(onUpgrade).not.toHaveBeenCalled();
+    expect(result.current.loadingRules).toEqual([]);
+  });
+
+  it('issues no request when every selected rule id is stale on upgradeRules with customization enabled', async () => {
+    mockUsePrebuiltRulesCustomizationStatus.mockReturnValue({
+      isRulesCustomizationEnabled: true,
+    });
+
+    const onUpgrade = jest.fn();
+    const { result } = renderHook(() => usePrebuiltRulesUpgrade({ onUpgrade }), {
+      wrapper: TestProviders,
+    });
+
+    await act(async () => {
+      await result.current.upgradeRules(['ghost-rule-1', 'ghost-rule-2']);
+    });
+
+    expect(confirmLegacyMLJobs).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+    expect(onUpgrade).not.toHaveBeenCalled();
+    expect(result.current.loadingRules).toEqual([]);
+  });
+
   describe('upgradeAllRulesToTarget', () => {
     it('issues one ALL_RULES/TARGET request with no filter when no search term or filters are supplied', async () => {
       const { result } = renderHook(() => usePrebuiltRulesUpgrade({}), {

@@ -149,9 +149,9 @@ export function WorkflowVisualEditorFlyout({
         display: 'flex',
         flexDirection: 'column',
         background: euiTheme.colors.backgroundBasePlain,
-        borderRadius: 8,
+        borderRadius: euiTheme.border.radius.panel,
         overflow: 'hidden',
-        border: `1px solid ${euiTheme.colors.borderBasePlain}`,
+        border: euiTheme.border.thin,
       }}
     >
       <div
@@ -161,7 +161,7 @@ export function WorkflowVisualEditorFlyout({
           display: 'flex',
           alignItems: 'center',
           gap: 16,
-          borderBottom: `1px solid ${euiTheme.colors.borderBasePlain}`,
+          borderBottom: euiTheme.border.thin,
           flexShrink: 0,
         }}
       >
@@ -187,8 +187,8 @@ export function WorkflowVisualEditorFlyout({
                     // Echoes the idle chip colours from the graph node so the
                     // flyout header reads as the same step that was clicked.
                     background: flyoutChip.fill,
-                    border: `1px solid ${flyoutChip.border}`,
-                    borderRadius: euiTheme.border.radius.small,
+                    border: `${euiTheme.border.width.thin} solid ${flyoutChip.border}`,
+                    borderRadius: euiTheme.border.radius.control,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -365,7 +365,7 @@ export function WorkflowVisualEditorFlyout({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
+            borderTop: euiTheme.border.thin,
             flexShrink: 0,
             background: euiTheme.colors.backgroundBasePlain,
           }}

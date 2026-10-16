@@ -7,6 +7,8 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { ExecutionStatus } from '@kbn/workflows';
+import { ALERTZERO_ACTION_WORKFLOW_IDS } from '@kbn/workflows/managed';
 import type {
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
@@ -14,6 +16,8 @@ import type {
   WorkflowExecutionListDto,
   WorkflowListDto,
 } from '@kbn/workflows';
+/** `managedBy` stamped on AlertZero managed workflow executions. */
+const ALERTZERO_MANAGED_BY = 'alertzero';
 
 /**
  * Structural subset of WorkflowsManagementApi used by AlertZero Worker enablement and recent runs.
@@ -45,6 +49,23 @@ export interface WatchWorkflowsManagementClient {
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowExecutionListDto>;
+
+  /**
+   * Failed AlertZero managed executions in the trailing 24 hours, across workflows.
+   * Test runs are included: the Workflows editor Run button records one.
+   */
+  searchFailedManagedExecutions(
+    params: { page: number; size: number },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowExecutionListDto>;
+
+  /** The newest execution of one workflow in any status, so a later success can be told from a failure. */
+  getLatestWorkflowExecution(
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowExecutionListDto['results'][number] | undefined>;
 
   getWorkflowExecution(
     workflowExecutionId: string,
@@ -113,6 +134,52 @@ export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagem
     request: KibanaRequest
   ): Promise<WorkflowExecutionListDto> {
     return this.management.getClient(request).getWorkflowExecutions(params, spaceId);
+  }
+
+  searchFailedManagedExecutions(
+    params: { page: number; size: number },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowExecutionListDto> {
+    return this.management.searchExecutionsView(
+      {
+        request,
+        statuses: [ExecutionStatus.FAILED],
+        finishedAfter: 'now-24h',
+        includeManagedExecutions: true,
+        query: {
+          bool: {
+            filter: [{ term: { managedBy: ALERTZERO_MANAGED_BY } }],
+            must_not: [{ terms: { originManagedWorkflowId: [...ALERTZERO_ACTION_WORKFLOW_IDS] } }],
+          },
+        },
+        sortField: 'finishedAt',
+        sortOrder: 'desc',
+        page: params.page,
+        size: params.size,
+      },
+      spaceId
+    );
+  }
+
+  async getLatestWorkflowExecution(
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowExecutionListDto['results'][number] | undefined> {
+    const { results } = await this.management.searchExecutionsView(
+      {
+        request,
+        includeManagedExecutions: true,
+        query: { bool: { filter: [{ term: { workflowId } }] } },
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+        page: 1,
+        size: 1,
+      },
+      spaceId
+    );
+    return results[0];
   }
 
   getWorkflowExecution(

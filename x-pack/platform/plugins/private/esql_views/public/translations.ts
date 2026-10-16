@@ -73,6 +73,15 @@ export const translations = {
   queryColumn: i18n.translate('xpack.esqlViews.managementPage.queryColumn', {
     defaultMessage: 'Query',
   }),
+  reservedBadgeLabel: i18n.translate('xpack.esqlViews.managementPage.reservedBadgeLabel', {
+    defaultMessage: 'Reserved',
+  }),
+  reservedViewsFilterLabel: i18n.translate(
+    'xpack.esqlViews.managementPage.reservedViewsFilterLabel',
+    {
+      defaultMessage: 'Reserved views',
+    }
+  ),
   showFullQueryForView: (viewName: string) =>
     i18n.translate('xpack.esqlViews.managementPage.showFullQueryForView', {
       defaultMessage: 'Show full query for {viewName}',
@@ -99,12 +108,6 @@ export const translations = {
   flyoutSubtitle: i18n.translate('xpack.esqlViews.managementPage.flyoutSubtitle', {
     defaultMessage:
       'Changes affect every dashboard, alert, and other saved object that uses this view.',
-  }),
-  viewDetailsTitle: i18n.translate('xpack.esqlViews.managementPage.viewDetailsTitle', {
-    defaultMessage: 'ES|QL view details',
-  }),
-  viewDetailsDescription: i18n.translate('xpack.esqlViews.managementPage.viewDetailsDescription', {
-    defaultMessage: 'Name and describe the view.',
   }),
   viewNameLabel: i18n.translate('xpack.esqlViews.managementPage.viewNameLabel', {
     defaultMessage: 'Name',
@@ -137,6 +140,36 @@ export const translations = {
   viewQueryDescription: i18n.translate('xpack.esqlViews.managementPage.viewQueryDescription', {
     defaultMessage: 'Write a new query, or select a recently or starred query.',
   }),
+  previewResultsTitle: i18n.translate('xpack.esqlViews.managementPage.previewResultsTitle', {
+    defaultMessage: 'ES|QL query results',
+  }),
+  previewEmptyTitle: i18n.translate('xpack.esqlViews.managementPage.previewEmptyTitle', {
+    defaultMessage: 'No results yet',
+  }),
+  previewEmptyDescription: i18n.translate(
+    'xpack.esqlViews.managementPage.previewEmptyDescription',
+    {
+      defaultMessage: 'Run the query above to preview its results here.',
+    }
+  ),
+  previewLoadingTitle: i18n.translate('xpack.esqlViews.managementPage.previewLoadingTitle', {
+    defaultMessage: 'Running ES|QL query',
+  }),
+  previewGridLoadingTitle: i18n.translate(
+    'xpack.esqlViews.managementPage.previewGridLoadingTitle',
+    {
+      defaultMessage: 'Loading preview results',
+    }
+  ),
+  previewNoResultsTitle: i18n.translate('xpack.esqlViews.managementPage.previewNoResultsTitle', {
+    defaultMessage: 'No results found',
+  }),
+  previewNoResultsDescription: i18n.translate(
+    'xpack.esqlViews.managementPage.previewNoResultsDescription',
+    {
+      defaultMessage: 'The query ran successfully but returned no results.',
+    }
+  ),
   nameRequiredErrorMessage: i18n.translate(
     'xpack.esqlViews.managementPage.nameRequiredErrorMessage',
     {
@@ -206,4 +239,74 @@ export const translations = {
   cancelButtonLabel: i18n.translate('xpack.esqlViews.managementPage.cancelButtonLabel', {
     defaultMessage: 'Cancel',
   }),
+  selectRowAriaLabel: i18n.translate('xpack.esqlViews.managementPage.selectRowAriaLabel', {
+    defaultMessage: 'Select this row',
+  }),
+  reservedViewNotSelectable: i18n.translate(
+    'xpack.esqlViews.managementPage.reservedViewNotSelectable',
+    {
+      defaultMessage: 'Reserved views cannot be deleted.',
+    }
+  ),
+  reservedViewActionsDisabled: i18n.translate(
+    'xpack.esqlViews.managementPage.reservedViewActionsDisabled',
+    {
+      defaultMessage: 'Reserved views cannot be edited or deleted.',
+    }
+  ),
+  openInDiscoverButtonLabel: i18n.translate(
+    'xpack.esqlViews.managementPage.openInDiscoverButtonLabel',
+    {
+      defaultMessage: 'Open in Discover',
+    }
+  ),
+  openInDiscoverButtonTooltip: i18n.translate(
+    'xpack.esqlViews.managementPage.openInDiscoverButtonTooltip',
+    {
+      defaultMessage: 'Open this view in Discover',
+    }
+  ),
+  deleteViewButtonLabel: i18n.translate('xpack.esqlViews.managementPage.deleteViewButtonLabel', {
+    defaultMessage: 'Delete',
+  }),
+  bulkDeleteButtonLabel: (count: number) =>
+    i18n.translate('xpack.esqlViews.managementPage.bulkDeleteButtonLabel', {
+      defaultMessage: 'Delete {count, plural, one {# view} other {# views}}',
+      values: { count },
+    }),
+  deleteModalTitle: (count: number, name: string) =>
+    i18n.translate('xpack.esqlViews.managementPage.deleteModal.title', {
+      defaultMessage: '{count, plural, one {Delete view "{name}"?} other {Delete # views?}}',
+      values: { count, name },
+    }),
+  deleteModalBody: (count: number) =>
+    i18n.translate('xpack.esqlViews.managementPage.deleteModal.body', {
+      defaultMessage:
+        '{count, plural, one {This permanently deletes the view from Elasticsearch. Any query that references this view will fail, including queries in dashboards, alerts, and other saved objects.} other {This permanently deletes # views from Elasticsearch. Any query that references these views will fail, including queries in dashboards, alerts, and other saved objects.}}',
+      values: { count },
+    }),
+  deleteModalCancelButtonLabel: i18n.translate(
+    'xpack.esqlViews.managementPage.deleteModal.cancelButtonLabel',
+    {
+      defaultMessage: 'Cancel',
+    }
+  ),
+  deleteModalConfirmButtonLabel: i18n.translate(
+    'xpack.esqlViews.managementPage.deleteModal.confirmButtonLabel',
+    {
+      defaultMessage: 'Delete',
+    }
+  ),
+  deleteSuccess: (count: number, name: string) =>
+    i18n.translate('xpack.esqlViews.managementPage.deleteSuccess', {
+      defaultMessage:
+        '{count, plural, one {View "{name}" was deleted.} other {# views were deleted.}}',
+      values: { count, name },
+    }),
+  deleteError: (count: number, name: string) =>
+    i18n.translate('xpack.esqlViews.managementPage.deleteError', {
+      defaultMessage:
+        '{count, plural, one {Failed to delete view "{name}".} other {Failed to delete # views.}}',
+      values: { count, name },
+    }),
 };

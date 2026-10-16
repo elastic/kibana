@@ -27,8 +27,7 @@ export const COMMENTS_STORAGE = {
       }),
       anchor: types.object({ enabled: false }),
       trail: types.object({ enabled: false }),
-      // The size of the screenshot, which the list shows; the image is a
-      // document of SNAPSHOTS_STORAGE under the comment's id, read on its own.
+      // The screenshot's size; the image is a document of SNAPSHOTS_STORAGE under the comment's id.
       snapshot: types.object({
         properties: { mimeType: types.keyword(), width: types.long(), height: types.long() },
       }),

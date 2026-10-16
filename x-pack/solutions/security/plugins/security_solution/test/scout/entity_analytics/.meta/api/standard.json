@@ -1,5 +1,5 @@
 {
-  "sha1": "b0f3542295323b05ffa11899a516d67ba63d3bbd",
+  "sha1": "40ee702078a72135ccedd89924fd3e74dc8cb835",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -98,6 +98,70 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
         "line": 323,
         "column": 67
+      }
+    },
+    {
+      "id": "eefcaa97be43b3f-4c811ed6dc2e1bd",
+      "title": "Entity case counts counts the distinct open and in-progress cases of each entity in the space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/entity_case_counts/entity_case_counts.spec.ts",
+        "line": 123,
+        "column": 25
+      }
+    },
+    {
+      "id": "eefcaa97be43b3f-2ae3e645b1eaf7c",
+      "title": "Entity case counts counts only the cases of the request space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/entity_case_counts/entity_case_counts.spec.ts",
+        "line": 130,
+        "column": 64
+      }
+    },
+    {
+      "id": "eefcaa97be43b3f-34b0fbf4249ecca",
+      "title": "Entity case counts is forbidden without Security cases access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/entity_case_counts/entity_case_counts.spec.ts",
+        "line": 140,
+        "column": 24
+      }
+    },
+    {
+      "id": "eefcaa97be43b3f-93d6299550eb5f4",
+      "title": "Entity case counts is forbidden without entity analytics access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/entity_case_counts/entity_case_counts.spec.ts",
+        "line": 144,
+        "column": 94
       }
     },
     {
@@ -728,8 +792,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/administers_maintainer.spec.ts",
-        "line": 111,
-        "column": 32
+        "line": 120,
+        "column": 13
       }
     },
     {
@@ -744,8 +808,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/administers_maintainer.spec.ts",
-        "line": 139,
-        "column": 25
+        "line": 148,
+        "column": 24
       }
     },
     {
@@ -760,8 +824,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/administers_maintainer.spec.ts",
-        "line": 210,
-        "column": 25
+        "line": 218,
+        "column": 48
       }
     },
     {
@@ -776,8 +840,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/administers_maintainer.spec.ts",
-        "line": 248,
-        "column": 94
+        "line": 255,
+        "column": 29
       }
     },
     {
@@ -792,8 +856,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/administers_maintainer.spec.ts",
-        "line": 273,
-        "column": 21
+        "line": 280,
+        "column": 70
       }
     },
     {
@@ -856,7 +920,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/entra_id_owns_maintainer.spec.ts",
-        "line": 138,
+        "line": 141,
         "column": 24
       }
     },
@@ -872,7 +936,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/entra_id_owns_maintainer.spec.ts",
-        "line": 172,
+        "line": 175,
         "column": 80
       }
     },
@@ -888,7 +952,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/entra_id_owns_maintainer.spec.ts",
-        "line": 225,
+        "line": 228,
         "column": 6
       }
     },
@@ -904,7 +968,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/entra_id_owns_maintainer.spec.ts",
-        "line": 264,
+        "line": 267,
         "column": 7
       }
     },
@@ -920,8 +984,88 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/entra_id_owns_maintainer.spec.ts",
-        "line": 300,
+        "line": 303,
         "column": 25
+      }
+    },
+    {
+      "id": "7eca0ac9750c8af-eac777ba948903c",
+      "title": "Entity Store supervises maintainer (SailPoint, user → user) resolves supervises.ids for a manager's email-keyed reports",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/sailpoint_supervises_maintainer.spec.ts",
+        "line": 103,
+        "column": 42
+      }
+    },
+    {
+      "id": "7eca0ac9750c8af-b9baf3fced80650",
+      "title": "Entity Store supervises maintainer (SailPoint, user → user) resolves supervises.ids from user.id when a report has no email",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/sailpoint_supervises_maintainer.spec.ts",
+        "line": 143,
+        "column": 22
+      }
+    },
+    {
+      "id": "7eca0ac9750c8af-0606d31a3d5051c",
+      "title": "Entity Store supervises maintainer (SailPoint, user → user) does not build a target from an empty-string email",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/sailpoint_supervises_maintainer.spec.ts",
+        "line": 178,
+        "column": 25
+      }
+    },
+    {
+      "id": "7eca0ac9750c8af-d70027650b1fb8f",
+      "title": "Entity Store supervises maintainer (SailPoint, user → user) writes only reports that exist as entities, drops phantom raw_identifiers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/sailpoint_supervises_maintainer.spec.ts",
+        "line": 223,
+        "column": 11
+      }
+    },
+    {
+      "id": "7eca0ac9750c8af-a4f5de5e5fa3593",
+      "title": "Entity Store supervises maintainer (SailPoint, user → user) leaves an actor from another source untouched",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/sailpoint_supervises_maintainer.spec.ts",
+        "line": 261,
+        "column": 11
       }
     },
     {
@@ -936,7 +1080,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/supervises_okta_maintainer.spec.ts",
-        "line": 105,
+        "line": 108,
         "column": 42
       }
     },
@@ -952,7 +1096,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/supervises_okta_maintainer.spec.ts",
-        "line": 137,
+        "line": 140,
         "column": 25
       }
     },
@@ -968,7 +1112,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/supervises_okta_maintainer.spec.ts",
-        "line": 223,
+        "line": 226,
         "column": 48
       }
     },
@@ -984,7 +1128,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/supervises_okta_maintainer.spec.ts",
-        "line": 300,
+        "line": 303,
         "column": 9
       }
     },
@@ -1000,7 +1144,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/supervises_okta_maintainer.spec.ts",
-        "line": 341,
+        "line": 344,
         "column": 94
       }
     },
@@ -1016,7 +1160,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/supervises_okta_maintainer.spec.ts",
-        "line": 370,
+        "line": 373,
         "column": 68
       }
     },
@@ -1032,8 +1176,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/workday_supervises_maintainer.spec.ts",
-        "line": 132,
-        "column": 24
+        "line": 138,
+        "column": 35
       }
     },
     {
@@ -1048,8 +1192,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/workday_supervises_maintainer.spec.ts",
-        "line": 163,
-        "column": 28
+        "line": 169,
+        "column": 9
       }
     },
     {
@@ -1064,8 +1208,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/workday_supervises_maintainer.spec.ts",
-        "line": 209,
-        "column": 27
+        "line": 216,
+        "column": 25
       }
     },
     {
@@ -1080,8 +1224,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/workday_supervises_maintainer.spec.ts",
-        "line": 227,
-        "column": 6
+        "line": 232,
+        "column": 21
       }
     },
     {
@@ -1096,8 +1240,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/workday_supervises_maintainer.spec.ts",
-        "line": 250,
-        "column": 87
+        "line": 259,
+        "column": 9
       }
     },
     {
@@ -1112,8 +1256,88 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/workday_supervises_maintainer.spec.ts",
-        "line": 287,
-        "column": 30
+        "line": 297,
+        "column": 9
+      }
+    },
+    {
+      "id": "12b4b26abca43f8-781788e2ad48adc",
+      "title": "Entity Store supervises maintainer (workday, log-inverted) follows a manager change instead of reporting to both managers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/workday_supervises_maintainer.spec.ts",
+        "line": 339,
+        "column": 87
+      }
+    },
+    {
+      "id": "12b4b26abca43f8-d96e81a045e7202",
+      "title": "Entity Store supervises maintainer (workday, log-inverted) moves the report to the new manager when the worker is reassigned",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/workday_supervises_maintainer.spec.ts",
+        "line": 405,
+        "column": 9
+      }
+    },
+    {
+      "id": "12b4b26abca43f8-1e816a6fd1a967d",
+      "title": "Entity Store supervises maintainer (workday, log-inverted) does not clear a supervises relationship on an entity from a different source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/workday_supervises_maintainer.spec.ts",
+        "line": 488,
+        "column": 9
+      }
+    },
+    {
+      "id": "12b4b26abca43f8-eeb999d853a6c8f",
+      "title": "Entity Store supervises maintainer (workday, log-inverted) preserves raw_identifiers on the entities it clears",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/workday_supervises_maintainer.spec.ts",
+        "line": 523,
+        "column": 32
+      }
+    },
+    {
+      "id": "12b4b26abca43f8-a20abb85119a7be",
+      "title": "Entity Store supervises maintainer (workday, log-inverted) keeps a manager who still has reports after the reset",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/workday_supervises_maintainer.spec.ts",
+        "line": 613,
+        "column": 21
       }
     },
     {

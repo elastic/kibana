@@ -28,9 +28,10 @@ const { SCHEDULE_INTERVAL } = testData;
  * Index a list of alert events by their `data['host.name']` value.
  *
  * Several tests breach multiple groups in a single executor batch and need to
- * assert per-group output. Because the events share a `@timestamp`, their
- * order in `.rule-events` is not deterministic, so we look them up by host
- * name instead of asserting positional array order.
+ * assert per-group output. Events in one batch are indexed together and get
+ * near-identical ES-assigned `@timestamp` values, so their order in
+ * `.rule-events` is not deterministic; we look them up by host name instead of
+ * asserting positional array order.
  */
 const groupEventsByHost = (events: AlertEvent[]): Record<string, AlertEvent> =>
   keyBy(events, (event) => event.data['host.name'] as string);
@@ -283,6 +284,63 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
         }
       );
 
+      apiTest(
+        'stamps timestamp in Elasticsearch on every event of a multi-batch run',
+        async ({ apiServices }) => {
+          // The executor omits `@timestamp`; the data stream's final pipeline
+          // assigns it at ingest. A run spanning several 100-row batches must
+          // still persist every event with a timestamp no older than the run.
+          const groupCount = 250;
+          const hostPrefix = 'host-multi-batch-';
+
+          await apiServices.alertingV2.sourceIndex.indexDocs({
+            index: SOURCE_INDEX,
+            docs: Array.from({ length: groupCount }, (_, i) => ({
+              '@timestamp': new Date().toISOString(),
+              'host.name': `${hostPrefix}${i}`,
+              severity: 'high',
+              value: 1,
+            })),
+          });
+
+          const rule = await apiServices.alertingV2.rules.create(
+            buildCreateRuleData({
+              metadata: { name: 'executor-multi-batch-timestamps' },
+              grouping: { fields: ['host.name'] },
+              query: {
+                base: `FROM ${SOURCE_INDEX} | WHERE host.name LIKE "${hostPrefix}*" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+              },
+            })
+          );
+
+          await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, groupCount, {
+            status: 'breached',
+            size: groupCount,
+          });
+
+          // Stop the rule so it doesn't keep writing 250 events per tick for the rest of the suite.
+          await apiServices.alertingV2.rules.disable(rule.id);
+
+          const events = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+            status: 'breached',
+            size: groupCount,
+          });
+          expect(events).toHaveLength(groupCount);
+
+          // All events must come from a single run and cover every group; otherwise a
+          // later run could backfill batches that an earlier run dropped.
+          expect(new Set(events.map((event) => event.scheduled_timestamp)).size).toBe(1);
+          expect(new Set(events.map((event) => event.group_hash)).size).toBe(groupCount);
+
+          const scheduled = Date.parse(events[0].scheduled_timestamp!);
+          for (const event of events) {
+            const timestamp = Date.parse(event['@timestamp']);
+            expect(Number.isNaN(timestamp)).toBe(false);
+            expect(timestamp).toBeGreaterThanOrEqual(scheduled);
+          }
+        }
+      );
+
       apiTest('writes one event per group when grouping.fields is set', async ({ apiServices }) => {
         await apiServices.alertingV2.sourceIndex.indexDocs({
           index: SOURCE_INDEX,
@@ -488,7 +546,13 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           });
 
           expect(breachEvents).toHaveLength(2);
-          expect(breachEvents[0].group_hash).not.toBe(breachEvents[1].group_hash);
+          // An ungrouped rule is a single series: every returned row is a rule
+          // event sharing one group_hash and one episode (alert.id), while each
+          // event still carries its own row data.
+          expect(breachEvents[0].group_hash).toBe(breachEvents[1].group_hash);
+
+          const episodeIds = new Set(breachEvents.map((event) => event.alert?.id).filter(Boolean));
+          expect(episodeIds.size).toBe(1);
 
           const eventsByHost = groupEventsByHost(breachEvents);
           expect(eventsByHost['host-grouping-fallback-a'].data).toMatchObject({

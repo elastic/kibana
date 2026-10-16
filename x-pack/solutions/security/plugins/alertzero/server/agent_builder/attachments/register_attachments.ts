@@ -7,6 +7,8 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { createThreatAttachmentType } from './threat';
+import { createSignificantSecurityEventAttachmentType } from './significant_security_event';
+import { createHuntCoordinatorResultAttachmentType } from './hunt_coordinator_result';
 
 /**
  * Registers the Hunt Watch attachment types on the
@@ -17,4 +19,6 @@ import { createThreatAttachmentType } from './threat';
  */
 export const registerAttachments = (agentBuilder: AgentBuilderPluginSetup) => {
   agentBuilder.attachments.registerType(createThreatAttachmentType());
+  agentBuilder.attachments.registerType(createSignificantSecurityEventAttachmentType());
+  agentBuilder.attachments.registerType(createHuntCoordinatorResultAttachmentType());
 };

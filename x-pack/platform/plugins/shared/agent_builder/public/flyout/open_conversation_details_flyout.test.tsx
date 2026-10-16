@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
@@ -21,13 +22,17 @@ describe('openConversationDetailsFlyout', () => {
     });
     core.overlays.openSystemFlyout.mockReturnValue({ close, onClose: onClosed });
 
-    const open = (onClose?: () => void) =>
+    const open = ({
+      onClose,
+      trailingActions,
+    }: { onClose?: () => void; trailingActions?: EuiFlyoutMenuAction[] } = {}) =>
       openConversationDetailsFlyout({
         core,
         conversationsService: { get: jest.fn() } as unknown as ConversationsService,
         conversationTemplatesService: new ConversationTemplatesService(),
         conversationId: 'conversation',
         onClose,
+        trailingActions,
       });
 
     return { core, close, open, closeFlyout: () => resolveClosed() };
@@ -49,11 +54,36 @@ describe('openConversationDetailsFlyout', () => {
     );
   });
 
+  it('renders the caller menu actions in the flyout menu bar', async () => {
+    const { core, open } = setup();
+    const copyLink: EuiFlyoutMenuAction = {
+      iconType: 'link',
+      'aria-label': 'Copy link',
+      onClick: jest.fn(),
+    };
+
+    await open({ trailingActions: [copyLink] });
+
+    expect(core.overlays.openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ flyoutMenuProps: { trailingActions: [copyLink] } })
+    );
+  });
+
+  it('renders no menu actions by default', async () => {
+    const { core, open } = setup();
+
+    await open();
+
+    const [[, options]] = core.overlays.openSystemFlyout.mock.calls;
+    expect(options?.flyoutMenuProps?.trailingActions).toBeUndefined();
+  });
+
   it('notifies the caller once the flyout closes', async () => {
     const { open, closeFlyout } = setup();
     const onClose = jest.fn();
 
-    await open(onClose);
+    await open({ onClose });
     await Promise.resolve();
 
     expect(onClose).not.toHaveBeenCalled();

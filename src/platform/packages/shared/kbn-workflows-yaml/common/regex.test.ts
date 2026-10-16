@@ -103,6 +103,8 @@ describe('regex patterns', () => {
         'response.data["user-info"].name',
         'user[abc]',
         'inputs.payload.rules[ep.rule_id].name',
+        'foreach.item.2',
+        'steps.search.output.hits.0._source',
       ];
 
       validPaths.forEach((path) => {
@@ -150,6 +152,8 @@ describe('regex patterns', () => {
         'response.data["user-info"].name',
         'user[abc]',
         'inputs.payload.rules[ep.rule_id].name',
+        'foreach.item.2',
+        'steps.search.output.hits.0._source',
       ];
 
       validPaths.forEach((path) => {
