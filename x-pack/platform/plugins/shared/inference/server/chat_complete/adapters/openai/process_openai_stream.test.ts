@@ -39,6 +39,29 @@ describe('processOpenAIStream', () => {
     ]);
   });
 
+  it('emits chunk events for reasoning-only deltas', async () => {
+    const result = await lastValueFrom(
+      of(
+        JSON.stringify({
+          id: 'reasoning',
+          object: 'chat.completion.chunk',
+          created: 1753747200,
+          model: 'gpt-5',
+          choices: [{ index: 0, delta: { reasoning: 'thinking...' }, finish_reason: null }],
+        })
+      ).pipe(processOpenAIStream(), toArray())
+    );
+
+    expect(result).toEqual([
+      {
+        content: '',
+        reasoning: 'thinking...',
+        tool_calls: [],
+        type: ChatCompletionEventType.ChatCompletionChunk,
+      },
+    ]);
+  });
+
   it('preserves token-limit errors for accepted null-object chunks', async () => {
     const result$ = of(
       JSON.stringify({

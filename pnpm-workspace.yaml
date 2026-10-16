@@ -33,7 +33,6 @@ allowBuilds:
   'core-js-pure': false # donation banner
   'es5-ext': false # prints an informational message
   'lmdb': false # native bindings; prebuilds are sufficient
-  'ms-chromium-edge-driver': false # downloads Edge driver only if EDGEDRIVER_DOWNLOAD_ON_INSTALL
   'msgpackr-extract': false # native bindings; prebuilds are sufficient
   'msw': false # copies a worker script if configured; unused
   'nice-napi': false # optional piscina nice-value helper
@@ -1380,6 +1379,7 @@ packages:
   - 'x-pack/platform/packages/shared/security/plugin_types_common'
   - 'x-pack/platform/packages/shared/security/plugin_types_public'
   - 'x-pack/platform/packages/shared/security/plugin_types_server'
+  - 'x-pack/platform/plugins/private/ai_anonymization_settings'
   - 'x-pack/platform/plugins/private/banners'
   - 'x-pack/platform/plugins/private/canvas'
   - 'x-pack/platform/plugins/private/cloud_integrations/cloud_chat'
@@ -1419,6 +1419,7 @@ packages:
   - 'x-pack/platform/plugins/private/rollup'
   - 'x-pack/platform/plugins/private/runtime_fields'
   - 'x-pack/platform/plugins/private/snapshot_restore'
+  - 'x-pack/platform/plugins/private/subscription_status'
   - 'x-pack/platform/plugins/private/task_manager_dependencies'
   - 'x-pack/platform/plugins/private/telemetry_collection_xpack'
   - 'x-pack/platform/plugins/private/transform'
@@ -1452,6 +1453,7 @@ packages:
   - 'x-pack/platform/plugins/shared/data_quality'
   - 'x-pack/platform/plugins/shared/dataset_quality'
   - 'x-pack/platform/plugins/shared/elastic_console'
+  - 'x-pack/platform/plugins/shared/elasticsearch_home'
   - 'x-pack/platform/plugins/shared/embeddable_alerts_table'
   - 'x-pack/platform/plugins/shared/encrypted_saved_objects'
   - 'x-pack/platform/plugins/shared/entity_store'
@@ -1664,6 +1666,7 @@ packages:
   - 'x-pack/solutions/security/packages/navigation'
   - 'x-pack/solutions/security/packages/security-ai-prompts'
   - 'x-pack/solutions/security/packages/security-mitre-attack-common'
+  - 'x-pack/solutions/security/packages/security-mitre-attack-mocks'
   - 'x-pack/solutions/security/packages/security-mitre-attack-server'
   - 'x-pack/solutions/security/packages/side-nav'
   - 'x-pack/solutions/security/packages/siem-readiness'

@@ -156,7 +156,9 @@ export function getViewMode(api: unknown) {
 
 export function getRenderMode(api: unknown): RenderMode {
   const mode = getViewMode(api) ?? 'view';
-  return mode === 'print' ? 'view' : mode;
+  if (mode === 'print') return 'view';
+  if (mode === 'non-interactive') return 'preview';
+  return mode;
 }
 
 function apiHasExecutionContextFunction(
