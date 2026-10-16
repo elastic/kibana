@@ -6,7 +6,7 @@
  */
 
 import { createToken } from '@kbn/core-di';
-import type { CreateRulesClientOptions } from './rule_ebt_origin';
+import type { CreateRulesClientOptions } from '../telemetry/rule_ebt_origin';
 
 /** Options the calling plugin passed when it asked for a rules client. Defaults to none. */
 export const RulesClientOptionsToken = createToken<CreateRulesClientOptions>(
