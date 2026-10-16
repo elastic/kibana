@@ -23,6 +23,7 @@ import {
 } from './entities_in_view';
 import {
   ENTITY_TYPE_FILTER,
+  buildFilterClause,
   buildRowFieldsSteps,
   buildSortSuffix,
   fetchPerIdChunk,
@@ -77,7 +78,7 @@ const buildSortedByFieldQuery = (
   condition?: string
 ): string[] => [
   ...buildEntitiesInViewSteps(args),
-  ...(condition ? [`| WHERE ${condition}`] : []),
+  ...buildFilterClause(condition),
   ...buildSortSuffix(sortField, args.sort.direction, args.pageSize + 1),
   ...buildRowFieldsSteps(args),
 ];

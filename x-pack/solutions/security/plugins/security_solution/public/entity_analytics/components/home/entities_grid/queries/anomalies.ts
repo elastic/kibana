@@ -13,6 +13,7 @@ import {
   ML_ANOMALY_INDICES,
   buildAnomalyJobFilter,
   buildEntityAggregations,
+  buildFilterClause,
   buildIdentityPrefilter,
   buildJoinedPageSteps,
   buildLookback,
@@ -42,7 +43,7 @@ const buildAnomalyEntityRows = (
   `| WHERE ${ANOMALY_RECORD_FILTER} AND \`@timestamp\` >= ${buildLookback(
     timeRange
   )} AND ${buildAnomalyJobFilter(anomalyJobIds)}`,
-  ...(identityPrefilter ? [`| WHERE ${identityPrefilter}`] : []),
+  ...buildFilterClause(identityPrefilter),
   ...buildEuidStages(),
 ];
 
