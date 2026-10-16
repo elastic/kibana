@@ -53,8 +53,10 @@ asks whether something is written points here.
 `refutes` signal, only when all hold:
 1. Its rule is in an accepted live event's `signal_rule_uuids`.
 2. The event's stored signal for that rule is `confirms`, `inconclusive`, or `not_checked`.
-3. The grounding query returned found rows that are healthy or show no failure. An empty or errored
-   query is `inconclusive`, never `refutes`.
+3. The grounding query returned found rows that are healthy or show no failure, or it ran without
+   error and returned no rows while the event's stored signal for the rule is `confirms` (the
+   failure rows are gone). Any other empty result, and any errored query, is `inconclusive`, never
+   `refutes`.
 
 A stored `off_topic` signal never qualifies: it records an observed error the authored query does not
 measure, so only a re-check of that error can clear it. A `refutes` detection that meets the checklist
@@ -486,7 +488,8 @@ Steps 1–5 are complete for every detection. Persist every event item in one ca
 rules were written.
 
 1. **Build the items.** Follow the `platform_sig_events_events_write` field descriptions and apply
-   `<field_rules>`. One item per new event and one per accepted continuation. Each `rule_uuid`
+   `<field_rules>`. One item per new event and one continuation item per distinct accepted `event_id`, holding every
+   rule bound to it; no two items share an `event_id`. Each `rule_uuid`
    appears in exactly one item's signals, exactly once. Only new-event items omit `event_id`;
    continuations carry the accepted `event_id` and this cycle's grounded signals only.
 2. **Copy the topology.** Write the finalized `causal_features` and `blast_radius` on every item; do
@@ -498,6 +501,7 @@ rules were written.
    - Each new-event item has a `confirms` or observed-error `off_topic` signal and satisfies
      `<incident_matching>` pre-check rules 1–3; otherwise drop it and add its `rule_uuid`s to
      `written_rule_uuids`. Do not split a Topology Match continuation to satisfy the pre-check.
+   - No two items carry the same `event_id`; merge continuations bound to one event into one item.
    - Each continuation has at least one signal, and its `event_id` equals the recorded accepted
      event's `event_id` and matches an active event from this run's `event_search` results,
      character for character.
@@ -533,7 +537,10 @@ re-announced as a fresh critical event is noise, not signal.
    existing event is closed by the engine, not by you. The recovery checklist in `<eligibility>`
    still applies. If grounding confirms new or different impact, treat it as a real incident.
 2. **Unchanged continuation.** Applied at Step 2, not during grouping. An unchanged continuation adds
-   no new rule UUID and carries no new `confirms` signal: copy compact `title`, `summary`,
+   no new rule UUID, carries no new `confirms` signal, and flips no stored verdict. A recovery
+   (stored `confirms` replaced by `refutes`) is not unchanged: keep the stored `title`,
+   `symptom_hypothesis`, and `summary` as they are, and set `severity` per Step 5. Otherwise copy
+   compact `title`, `summary`,
    `symptom_hypothesis`, and `severity`; the server keeps the stored `title` and `symptom_hypothesis`
    and returns `narrative_preserved: true`. Otherwise rate severity per Step 5, and extend `summary`
    and `symptom_hypothesis` (keep their wording) only when mechanism or impact changed.
