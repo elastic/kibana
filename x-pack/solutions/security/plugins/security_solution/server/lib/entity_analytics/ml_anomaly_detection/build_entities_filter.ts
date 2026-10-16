@@ -13,8 +13,8 @@ import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_
  * Build a DSL filter matching documents of any of the given entity records, or `undefined` when
  * none of the records carries the identity fields needed to build one.
  *
- * A single record's filter is returned as-is. When several records are OR'd together, each one is
- * a named query (`_name` = `entity.id`) so Elasticsearch reports which record(s) a hit belongs to
+ * A single-record request's filter is returned as-is. When several records are requested (even if
+ * only one yields a filter), each filter is OR'd as a named query (`_name` = `entity.id`) so Elasticsearch reports which record(s) a hit belongs to
  * via `hit.matched_queries`; see {@link getMatchedEntityId}.
  */
 export const buildEntitiesFilter = (
@@ -30,12 +30,13 @@ export const buildEntitiesFilter = (
   if (filters.length === 0) {
     return undefined;
   }
-  // Single record, return its filter directly.
-  if (filters.length === 1) {
-    return filters[0].filter;
+  // Genuinely single-record request, return its filter directly.
+  if (entityRecords.length === 1) {
+    return filters?.[0]?.filter;
   }
 
-  // Multiple records, return a named query so we can associate hits with the corresponding entity IDs.
+  // Multi-record request, return named queries so we can associate hits with the corresponding
+  // entity IDs, even when only one record yields a usable filter.
   return {
     bool: {
       should: filters.map(({ filter, entityId }) =>
