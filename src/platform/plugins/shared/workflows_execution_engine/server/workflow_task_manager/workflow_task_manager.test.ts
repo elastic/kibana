@@ -205,7 +205,6 @@ describe('WorkflowTaskManager', () => {
         {
           request: fakeRequest,
           cloneApiKey: true,
-          waitForApiKeyRefresh: true,
         }
       );
       expect(mockTaskManager.schedule.mock.calls[0][0].priority).toBeUndefined();
@@ -307,7 +306,7 @@ describe('WorkflowTaskManager', () => {
           runAt: resumeAt,
           scope: ['workflow', 'workflow:test-workflow-id', 'workflow:execution:test-execution-id'],
         },
-        { request: fakeRequest, cloneApiKey: true, waitForApiKeyRefresh: true }
+        { request: fakeRequest, cloneApiKey: true }
       );
       expect(mockTaskManager.schedule.mock.calls[0][0].priority).toBeUndefined();
     });
@@ -365,7 +364,7 @@ describe('WorkflowTaskManager', () => {
       expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
       expect(mockTaskManager.schedule).toHaveBeenCalledWith(
         expect.objectContaining({ runAt: resumeAt }),
-        { request: fakeRequest, cloneApiKey: true, waitForApiKeyRefresh: true }
+        { request: fakeRequest, cloneApiKey: true }
       );
     });
 
@@ -436,7 +435,7 @@ describe('WorkflowTaskManager', () => {
           scope: [`workflow:execution:${executionId}`],
           priority: TaskPriority.Standard,
         },
-        { request: fakeRequest, cloneApiKey: true, waitForApiKeyRefresh: true }
+        { request: fakeRequest, cloneApiKey: true }
       );
       // runAt must not be set — task runs at the next available slot
       const scheduledTask = (mockTaskManager.ensureScheduled as jest.Mock).mock.calls[0][0];
@@ -462,7 +461,7 @@ describe('WorkflowTaskManager', () => {
           taskType: WORKFLOW_RESUME_TASK_TYPE,
           priority: TaskPriority.UserInteractive,
         }),
-        { request: fakeRequest, cloneApiKey: true, waitForApiKeyRefresh: true }
+        { request: fakeRequest, cloneApiKey: true }
       );
     });
 
@@ -683,7 +682,7 @@ describe('WorkflowTaskManager', () => {
           id: stableId,
           priority: TaskPriority.UserInteractive,
         }),
-        { request: fakeRequest, cloneApiKey: true, waitForApiKeyRefresh: true }
+        { request: fakeRequest, cloneApiKey: true }
       );
       expect(mockTaskManager.runSoon).toHaveBeenCalledWith(stableId, {
         priority: TaskPriority.UserInteractive,
@@ -770,7 +769,7 @@ describe('WorkflowTaskManager', () => {
           params: { workflowRunId: params.executionId, spaceId: 'default' },
           runAt: expect.any(Date),
         }),
-        { request: fakeRequest, cloneApiKey: true, waitForApiKeyRefresh: true }
+        { request: fakeRequest, cloneApiKey: true }
       );
     });
 
@@ -839,7 +838,7 @@ describe('WorkflowTaskManager', () => {
       });
       expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({ id: getWorkflowWakeTaskId('test-execution-id') }),
-        { request: fakeRequest, cloneApiKey: true, waitForApiKeyRefresh: true }
+        { request: fakeRequest, cloneApiKey: true }
       );
       expect(mockTaskManager.ensureScheduled.mock.invocationCallOrder[0]).toBeLessThan(
         mockTaskManager.schedule.mock.invocationCallOrder[0]
@@ -1160,7 +1159,7 @@ describe('WorkflowTaskManager', () => {
           taskType: 'workflow:run',
           runAt: new Date('2025-08-06T20:00:00.000Z'),
         }),
-        { request: fakeRequest, cloneApiKey: true, waitForApiKeyRefresh: true }
+        { request: fakeRequest, cloneApiKey: true }
       );
       expect(mockTaskManager.schedule.mock.calls[0][0].priority).toBe(TaskPriority.Standard);
       jest.useRealTimers();
@@ -1187,7 +1186,7 @@ describe('WorkflowTaskManager', () => {
           taskType: 'workflow:run',
           priority: TaskPriority.UserInteractive,
         }),
-        { request: fakeRequest, cloneApiKey: true, waitForApiKeyRefresh: true }
+        { request: fakeRequest, cloneApiKey: true }
       );
       jest.useRealTimers();
     });

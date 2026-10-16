@@ -822,9 +822,9 @@ export interface ApiKeyOptions {
    */
   cloneApiKey?: boolean;
   /**
-   * When true, wait for Elasticsearch to refresh after granting or cloning the task's API key, so
-   * a search-based lookup of the new key (e.g. `GET _security/api_key`) finds it as soon as the
-   * task runs. Costs up to one refresh interval per schedule.
+   * Defaults to true. Set to false to skip waiting for Elasticsearch to refresh after granting or
+   * cloning the task's API key: scheduling is faster, but a search-based lookup of the new key
+   * (e.g. `GET _security/api_key`) may briefly miss it when the task runs.
    */
   waitForApiKeyRefresh?: boolean;
   /**

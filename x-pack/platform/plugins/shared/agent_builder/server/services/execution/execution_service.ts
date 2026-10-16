@@ -206,8 +206,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
               request,
               cloneApiKey: true,
-              // The run looks up the cloned key's owner, so it must be visible before it starts.
-              waitForApiKeyRefresh: true,
             });
           }
 
@@ -494,8 +492,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     await this.deps.taskManager.ensureScheduled(task, {
       request,
       cloneApiKey: true,
-      // The run looks up the cloned key's owner, so it must be visible before it starts.
-      waitForApiKeyRefresh: true,
     });
 
     this.logger.debug(`Scheduled remote agent execution ${executionId} for agent ${agentId}`);

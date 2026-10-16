@@ -205,7 +205,7 @@ export const createApiKey = async (
 
   const apiKeyByTaskIdMap = new Map<string, EncodedApiKeyResult>();
   const cloneApiKey = shouldCloneApiKeyFromRequest(security, request, options, user);
-  const refresh = options?.waitForApiKeyRefresh === true ? 'wait_for' : false;
+  const refresh = options?.waitForApiKeyRefresh === false ? false : 'wait_for';
 
   if (cloneApiKey) {
     return grantApiKeysForTaskTypes({

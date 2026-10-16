@@ -239,7 +239,7 @@ describe('AgentExecutionService', () => {
           params: { executionId: result.executionId },
           scope: ['agent-builder'],
         }),
-        { request, cloneApiKey: true, waitForApiKeyRefresh: true }
+        { request, cloneApiKey: true }
       );
       expect(mockTaskManagerRunSoon).not.toHaveBeenCalled();
     });

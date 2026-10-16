@@ -147,7 +147,7 @@ describe('api_key_utils', () => {
           role_descriptors: {},
           metadata: { managed: true },
         },
-        { refresh: false }
+        { refresh: 'wait_for' }
       );
     });
 
@@ -237,7 +237,7 @@ describe('api_key_utils', () => {
         {
           name: 'TaskManager: report - testUser',
           metadata: { managed: true },
-          refresh: false,
+          refresh: 'wait_for',
         }
       );
       expect(coreStart.security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
@@ -275,12 +275,12 @@ describe('api_key_utils', () => {
       expect(coreStart.security.authc.apiKeys.cloneAsInternalUser).toHaveBeenCalledWith(request, {
         name: 'TaskManager: report - testUser',
         metadata: { managed: true },
-        refresh: false,
+        refresh: 'wait_for',
       });
       expect(coreStart.security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
     });
 
-    test('should wait for refresh when cloning with waitForApiKeyRefresh', async () => {
+    test('should not wait for refresh when cloning with waitForApiKeyRefresh false', async () => {
       const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
       const request = httpServerMock.createKibanaRequest({
         headers: {
@@ -302,17 +302,17 @@ describe('api_key_utils', () => {
 
       await createApiKey([mockTask], request, coreStart.security, {
         cloneApiKey: true,
-        waitForApiKeyRefresh: true,
+        waitForApiKeyRefresh: false,
       });
 
       expect(coreStart.security.authc.apiKeys.cloneAsInternalUser).toHaveBeenCalledWith(request, {
         name: 'TaskManager: report - testUser',
         metadata: { managed: true },
-        refresh: 'wait_for',
+        refresh: false,
       });
     });
 
-    test('should wait for refresh when granting with waitForApiKeyRefresh', async () => {
+    test('should not wait for refresh when granting with waitForApiKeyRefresh false', async () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = coreMock.createStart();
 
@@ -326,7 +326,7 @@ describe('api_key_utils', () => {
         api_key: 'apiKey',
       });
 
-      await createApiKey([mockTask], request, coreStart.security, { waitForApiKeyRefresh: true });
+      await createApiKey([mockTask], request, coreStart.security, { waitForApiKeyRefresh: false });
 
       expect(coreStart.security.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
         request,
@@ -335,7 +335,7 @@ describe('api_key_utils', () => {
           role_descriptors: {},
           metadata: { managed: true },
         },
-        { refresh: 'wait_for' }
+        { refresh: false }
       );
     });
 
