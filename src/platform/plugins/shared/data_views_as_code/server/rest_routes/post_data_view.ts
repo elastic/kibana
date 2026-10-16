@@ -26,6 +26,7 @@ export const registerPostDataViewAsCodeRoute = ({
       enableQueryVersion: true,
       description: 'Create a data view',
       options: {
+        tags: ['oas-tag:data views'],
         availability: {
           stability: 'stable',
           since: '9.6.0',
@@ -47,6 +48,7 @@ export const registerPostDataViewAsCodeRoute = ({
           response: {
             201: {
               body: () => asCodeResponseSchema,
+              description: 'created',
             },
             400: {
               description: 'invalid request',

@@ -27,6 +27,7 @@ export const registerDeleteDataViewAsCodeRoute = ({
       enableQueryVersion: true,
       description: 'Delete a data view by id',
       options: {
+        tags: ['oas-tag:data views'],
         availability: {
           stability: 'stable',
           since: '9.6.0',

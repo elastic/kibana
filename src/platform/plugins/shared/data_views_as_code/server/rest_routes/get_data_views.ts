@@ -27,6 +27,7 @@ export const registerGetDataViewsAsCodeRoute = ({
       enableQueryVersion: true,
       description: 'Get all data views paginated',
       options: {
+        tags: ['oas-tag:data views'],
         availability: {
           stability: 'stable',
           since: '9.6.0',
@@ -54,6 +55,7 @@ export const registerGetDataViewsAsCodeRoute = ({
           response: {
             200: {
               body: () => asCodePaginatedResponseSchema,
+              description: 'OK',
             },
             400: {
               description: 'bad request',
