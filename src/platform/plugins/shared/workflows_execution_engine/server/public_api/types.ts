@@ -15,7 +15,6 @@ import type {
   ExecutionStatus,
   ExecutionType,
   WorkflowExecutionCollapseField,
-  WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,
@@ -205,11 +204,6 @@ export interface GetDailyExecutionCountsParams {
   includeManaged?: boolean;
 }
 
-export interface GetLatestExecutionByWorkflowParams {
-  workflowIds: readonly string[];
-  spaceId: string;
-}
-
 export interface HasNonTerminalExecutionParams {
   workflowId: string;
   /** Omitted for a global managed definition: search every space. */
@@ -229,8 +223,5 @@ export interface WorkflowExecutionReadApi {
   getDailyExecutionCounts: (
     params: GetDailyExecutionCountsParams
   ) => Promise<DailyExecutionCount[]>;
-  getLatestExecutionByWorkflow: (
-    params: GetLatestExecutionByWorkflowParams
-  ) => Promise<Record<string, WorkflowExecutionHistoryModel[]>>;
   hasNonTerminalExecution: (params: HasNonTerminalExecutionParams) => Promise<boolean>;
 }

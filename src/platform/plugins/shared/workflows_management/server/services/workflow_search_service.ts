@@ -10,6 +10,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaRequest } from '@kbn/core/server';
 import type {
+  EsWorkflowExecution,
   WorkflowAggsDto,
   WorkflowDetailDto,
   WorkflowExecutionHistoryModel,
@@ -22,10 +23,7 @@ import type {
   ExecutionVisibility,
   StepExecutionsDataClient,
 } from '@kbn/workflows-execution-engine/server';
-import {
-  getDailyExecutionCounts,
-  getLatestExecutionByWorkflow,
-} from '@kbn/workflows-execution-engine/server';
+import { getDailyExecutionCounts } from '@kbn/workflows-execution-engine/server';
 
 import type { WorkflowSearchDeps } from './types';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
@@ -403,13 +401,80 @@ export class WorkflowSearchService {
     workflowIds: string[],
     spaceId: string
   ): Promise<Record<string, WorkflowExecutionHistoryModel[]>> {
-    return getLatestExecutionByWorkflow(
-      {
-        logger: this.deps.logger,
-        workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
-        stepExecutionsDataClient: {} as StepExecutionsDataClient,
-      },
-      { workflowIds, spaceId }
-    );
+    if (workflowIds.length === 0) {
+      return {};
+    }
+
+    try {
+      const response = await this.deps.workflowExecutionsDataClient.search({
+        size: 0,
+        query: {
+          bool: {
+            must: [
+              { terms: { workflowId: workflowIds } },
+              {
+                bool: {
+                  should: [
+                    { term: { spaceId } },
+                    { bool: { must_not: { exists: { field: 'spaceId' } } } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          workflows: {
+            terms: { field: 'workflowId', size: workflowIds.length },
+            aggs: {
+              recent_executions: {
+                top_hits: { size: 1, sort: [{ finishedAt: { order: 'desc' } }] },
+              },
+            },
+          },
+        },
+      });
+
+      const result: Record<string, WorkflowExecutionHistoryModel[]> = {};
+      const aggregate = response.aggregations?.workflows;
+      if (!aggregate || !('buckets' in aggregate) || !Array.isArray(aggregate.buckets)) {
+        return result;
+      }
+
+      for (const bucket of aggregate.buckets as LatestExecutionBucket[]) {
+        const execution = bucket.recent_executions.hits.hits[0]?._source;
+        if (execution) {
+          result[bucket.key] = [
+            {
+              id: execution.id,
+              workflowId: execution.workflowId,
+              workflowName: execution.workflowDefinition?.name || 'Unknown Workflow',
+              status: execution.status,
+              startedAt: execution.startedAt,
+              finishedAt: execution.finishedAt || execution.startedAt,
+              duration:
+                execution.finishedAt && execution.startedAt
+                  ? new Date(execution.finishedAt).getTime() -
+                    new Date(execution.startedAt).getTime()
+                  : null,
+            },
+          ];
+        }
+      }
+      return result;
+    } catch (error) {
+      if (!isIndexNotFoundError(error)) {
+        this.deps.logger.error(`Failed to fetch recent executions for workflows: ${error}`);
+      }
+      return {};
+    }
   }
+}
+
+interface LatestExecutionBucket {
+  key: string;
+  recent_executions: {
+    hits: { hits: Array<{ _source?: EsWorkflowExecution }> };
+  };
 }

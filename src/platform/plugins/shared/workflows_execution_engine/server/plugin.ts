@@ -78,7 +78,6 @@ import { getChildExecutions } from './public_api/get_child_executions';
 import { getDailyExecutionCounts } from './public_api/get_daily_execution_counts';
 import { getExecution } from './public_api/get_execution';
 import { getExecutionSteps } from './public_api/get_execution_steps';
-import { getLatestExecutionByWorkflow } from './public_api/get_latest_execution_by_workflow';
 import { getStep } from './public_api/get_step';
 import { getStepFacets } from './public_api/get_step_facets';
 import { getWaitingStepId } from './public_api/get_waiting_step_id';
@@ -2091,8 +2090,6 @@ export class WorkflowsExecutionEnginePlugin
         getStep: (params) => getStep(executionReadDeps, params),
         getWaitingStepId: (params) => getWaitingStepId(executionReadDeps, params),
         getDailyExecutionCounts: (params) => getDailyExecutionCounts(executionReadDeps, params),
-        getLatestExecutionByWorkflow: (params) =>
-          getLatestExecutionByWorkflow(executionReadDeps, params),
         hasNonTerminalExecution: (params) => hasNonTerminalExecution(executionReadDeps, params),
       },
       __internalStorage: {

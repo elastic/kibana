@@ -39,7 +39,6 @@ export type {
   GetDailyExecutionCountsParams,
   GetExecutionParams,
   GetExecutionStepsParams,
-  GetLatestExecutionByWorkflowParams,
   GetStepFacetsParams,
   GetStepParams,
   GetWaitingStepIdParams,
@@ -60,7 +59,6 @@ export { getChildExecutions } from './public_api/get_child_executions';
 export { getDailyExecutionCounts } from './public_api/get_daily_execution_counts';
 export { getExecution } from './public_api/get_execution';
 export { getExecutionSteps } from './public_api/get_execution_steps';
-export { getLatestExecutionByWorkflow } from './public_api/get_latest_execution_by_workflow';
 export { getStep } from './public_api/get_step';
 export { getStepFacets } from './public_api/get_step_facets';
 export { getWaitingStepId } from './public_api/get_waiting_step_id';

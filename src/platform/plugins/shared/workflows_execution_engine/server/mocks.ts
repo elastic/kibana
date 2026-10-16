@@ -56,7 +56,6 @@ export const workflowsExecutionEngineMock = {
       getStep: jest.fn(),
       getWaitingStepId: jest.fn(),
       getDailyExecutionCounts: jest.fn(),
-      getLatestExecutionByWorkflow: jest.fn(),
       hasNonTerminalExecution: jest.fn(),
     },
     triggerEvents: {
