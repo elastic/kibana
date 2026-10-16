@@ -200428,29 +200428,46 @@ components:
           properties:
             parameters:
               oneOf:
-                - type: object
-                  properties:
+                - properties:
+                    kill_descendants:
+                      description: Whether to terminate all child processes of the specified process. Valid only for Endpoint agent type.
+                      example: true
+                      type: boolean
                     pid:
                       description: The process ID (PID) of the process to terminate.
                       example: 123
                       minimum: 1
                       type: integer
-                - type: object
-                  properties:
+                  required:
+                    - pid
+                  title: PID
+                  type: object
+                - properties:
                     entity_id:
                       description: The entity ID of the process to terminate.
                       example: abc123
                       maxLength: 256
                       minLength: 1
                       type: string
-                - type: object
-                  properties:
+                    kill_descendants:
+                      description: Whether to terminate all child processes of the specified process. Valid only for Endpoint agent type.
+                      example: true
+                      type: boolean
+                  required:
+                    - entity_id
+                  title: Entity ID
+                  type: object
+                - properties:
                     process_name:
                       description: The name of the process to terminate. Valid for SentinelOne agent type only.
                       example: Elastic
                       maxLength: 1024
                       minLength: 1
                       type: string
+                  required:
+                    - process_name
+                  title: Process Name
+                  type: object
           required:
             - parameters
     Security_Endpoint_Management_API_Kuery:
