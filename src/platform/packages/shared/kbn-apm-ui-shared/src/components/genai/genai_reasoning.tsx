@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiAccordion, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiAccordion, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { GenAiFieldValue } from './genai_field_value';
 
 const REASONING_LABEL = i18n.translate('apmUiShared.genAi.messages.reasoning', {
   defaultMessage: 'Reasoning',
@@ -30,9 +31,7 @@ export function GenAiReasoning({ content }: Props) {
       paddingSize="s"
       data-test-subj="genAiReasoningPart"
     >
-      <EuiText size="s" css={{ whiteSpace: 'pre-wrap' }}>
-        {content}
-      </EuiText>
+      <GenAiFieldValue value={content} />
     </EuiAccordion>
   );
 }
