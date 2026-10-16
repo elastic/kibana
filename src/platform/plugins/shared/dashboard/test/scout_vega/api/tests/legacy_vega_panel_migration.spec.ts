@@ -22,7 +22,7 @@ import {
   LEGACY_VEGA_VISUALIZATION_ID,
 } from '../fixtures';
 
-const LEGACY_VEGA_MIGRATION_FLAG = 'dashboard.legacyVegaPanelMigration';
+const LEGACY_VEGA_MIGRATION_FLAG = 'vega.legacyPanelMigration';
 
 const MIGRATED_PANELS = [
   {

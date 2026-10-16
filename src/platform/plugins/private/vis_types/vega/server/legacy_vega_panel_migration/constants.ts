@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const LEGACY_VEGA_PANEL_MIGRATION_FEATURE_FLAG = 'dashboard.legacyVegaPanelMigration';
+export const LEGACY_VEGA_PANEL_MIGRATION_FEATURE_FLAG = 'vega.legacyPanelMigration';
 export const LEGACY_VEGA_PANEL_MIGRATION_DEFAULT = false;

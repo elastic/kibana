@@ -29,7 +29,7 @@ save/load routes store and return it as-is.
 
 ## Legacy Vega panel migration
 
-The `dashboard.legacyVegaPanelMigration` feature flag (off by default) converts by-value legacy Vega
+The `vega.legacyPanelMigration` feature flag (off by default) converts by-value legacy Vega
 visualization panels (`legacy_vis` panels with a `vega` `savedVis`) into `vega` panels when a
 dashboard is read, through the public REST API and the Dashboard app. The stored dashboard is not
 changed. The migration also requires `vega.standaloneEmbeddable`, which is only read when Kibana
