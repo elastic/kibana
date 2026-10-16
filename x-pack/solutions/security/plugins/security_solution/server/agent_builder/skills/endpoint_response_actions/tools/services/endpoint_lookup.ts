@@ -17,6 +17,7 @@ import { NotFoundError } from '../../../../../endpoint/errors';
 import {
   MAX_AMBIGUOUS_CANDIDATES,
   collectPages,
+  getMetadataAgentId,
   isLiveFleetStatus,
   isLiveHostStatus,
   selectEndpointHost,
@@ -463,7 +464,7 @@ export function createEndpointLookupService(
       // ambiguity), and downstream reads filtering on the Fleet id miss the
       // metadata doc. Fleet-id-first with the endpoint id as fallback
       // mirrors `EndpointMetadataService.getEnrichedHostMetadata()`.
-      const agentId = entry.metadata?.elastic?.agent?.id || entry.metadata?.agent?.id;
+      const agentId = getMetadataAgentId(entry);
       if (!agentId) {
         return [];
       }
