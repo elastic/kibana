@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import type { RuleEventChannel } from '../../rules_client/rule_event_origin';
+import type { RuleEventChannel, RuleResponse } from '@kbn/alerting-v2-schemas';
 
 /**
  * Data carried by every rule-lifecycle domain event.

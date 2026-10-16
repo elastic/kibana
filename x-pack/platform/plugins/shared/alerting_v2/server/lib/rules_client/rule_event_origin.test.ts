@@ -105,6 +105,45 @@ describe('resolveRuleEventOrigin', () => {
       expect(resolveRuleEventOrigin(request)).toEqual({ channel: 'ui' });
     });
 
+    it.each(['observabilityAlerting', 'agent_builder', 'app.name:id'])(
+      'keeps a configured app id of %s',
+      (app) => {
+        expect(resolveRuleEventOrigin(createRequest(), { app })).toEqual({
+          channel: 'api',
+          app,
+        });
+      }
+    );
+
+    it.each([
+      ['contains a space', 'my app'],
+      ['contains a slash', 'discover/app'],
+      ['is longer than 64 characters', 'a'.repeat(65)],
+    ])('omits a configured app that %s', (_description, app) => {
+      expect(resolveRuleEventOrigin(createRequest(), { app })).toEqual({ channel: 'api' });
+    });
+
+    it('uses the execution context when the configured app is outside the allowed set', () => {
+      const request = createRequest({
+        ...UI_HEADERS,
+        'x-kbn-context': executionContextHeader({ name: 'discover' }),
+      });
+
+      expect(resolveRuleEventOrigin(request, { app: 'not an app' })).toEqual({
+        channel: 'ui',
+        app: 'discover',
+      });
+    });
+
+    it('omits an execution-context name outside the allowed set', () => {
+      const request = createRequest({
+        ...UI_HEADERS,
+        'x-kbn-context': executionContextHeader({ name: 'discover/app' }),
+      });
+
+      expect(resolveRuleEventOrigin(request)).toEqual({ channel: 'ui' });
+    });
+
     it('ignores the execution context on `api` requests', () => {
       const request = createRequest({
         'x-kbn-context': executionContextHeader({ type: 'application', name: 'discover' }),

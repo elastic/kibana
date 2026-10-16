@@ -32,6 +32,7 @@ import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/err
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
+import type { RuleEventOrigin } from '@kbn/alerting-v2-schemas';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import {
@@ -75,11 +76,7 @@ import type { PluginConfig } from '../../config';
 import { convertEveryToSchedulesPerMinute, parseDurationToMs } from '../duration';
 import { buildMatchingRulesFilter, buildRuleSoFilter } from './build_rule_filter';
 import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
-import {
-  resolveRuleEventOrigin,
-  type RuleEventOrigin,
-  type CreateRulesClientOptions,
-} from './rule_event_origin';
+import { resolveRuleEventOrigin, type CreateRulesClientOptions } from './rule_event_origin';
 import { RulesClientOptionsToken } from './tokens';
 import type {
   BulkByIdsParams,

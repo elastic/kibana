@@ -7,14 +7,13 @@
 
 import { inject, injectable } from 'inversify';
 import { v4 as uuidv4 } from 'uuid';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { RuleEventChannel, RuleResponse } from '@kbn/alerting-v2-schemas';
 import {
   AlertingDomainEventBusToken,
   type AlertingDomainEvent,
   type AlertingPublisherContext,
 } from '../domain_events';
 import type { EventBus } from '../event_bus';
-import type { RuleEventChannel } from '../../rules_client/rule_event_origin';
 import {
   RULE_CREATED_EVENT_TYPE,
   RULE_DELETED_EVENT_TYPE,

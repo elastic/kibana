@@ -7,11 +7,7 @@
 
 export { createRuleDataSchema, updateRuleDataSchema } from '@kbn/alerting-v2-schemas';
 export { RulesClient } from './rules_client';
-export {
-  RULE_EVENT_CHANNELS,
-  type RuleEventChannel,
-  type CreateRulesClientOptions,
-} from './rule_event_origin';
+export type { CreateRulesClientOptions } from './rule_event_origin';
 export type {
   BulkByIdsParams,
   BulkByQueryParams,

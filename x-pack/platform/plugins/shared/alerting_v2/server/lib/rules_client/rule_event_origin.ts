@@ -7,19 +7,11 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-
-/**
- * Closed vocabulary of the channels rule changes are made through. It is derived from
- * the request the rules client was created with and carried on every rule event; it is
- * not persisted on the rule.
- *
- * - `system`: a fake request, i.e. Kibana acting on its own behalf (for example a task).
- * - `ui`: a request made by the Kibana browser app.
- * - `api`: any other request.
- */
-export const RULE_EVENT_CHANNELS = ['system', 'ui', 'api'] as const;
-
-export type RuleEventChannel = (typeof RULE_EVENT_CHANNELS)[number];
+import {
+  ruleEventAppTelemetrySchema,
+  type RuleEventChannel,
+  type RuleEventOrigin,
+} from '@kbn/alerting-v2-schemas';
 
 /** Options an in-process caller passes when it asks for a rules client. */
 export interface CreateRulesClientOptions {
@@ -27,11 +19,6 @@ export interface CreateRulesClientOptions {
    * The app making changes through this client, carried on every rule event.
    * Takes precedence over the app derived from the request.
    */
-  app?: string;
-}
-
-export interface RuleEventOrigin {
-  channel: RuleEventChannel;
   app?: string;
 }
 
@@ -44,6 +31,15 @@ const UI_REQUEST_HEADERS = ['kbn-version', 'referer', X_ELASTIC_INTERNAL_ORIGIN_
 
 /** Header Core's browser execution context service sets on every `core.http.fetch` call. */
 const EXECUTION_CONTEXT_HEADER = 'x-kbn-context';
+
+const toBoundedApp = (app: string | undefined): string | undefined => {
+  if (app === undefined) {
+    return undefined;
+  }
+
+  const parsed = ruleEventAppTelemetrySchema.safeParse(app);
+  return parsed.success ? parsed.data : undefined;
+};
 
 const getChannel = (request: KibanaRequest): RuleEventChannel => {
   if (request.isFakeRequest) {
@@ -64,7 +60,7 @@ const getAppFromExecutionContext = (request: KibanaRequest): string | undefined 
 
   try {
     const { name } = JSON.parse(decodeURIComponent(rawContext)) as { name?: unknown };
-    return typeof name === 'string' && name.length > 0 ? name : undefined;
+    return typeof name === 'string' ? toBoundedApp(name) : undefined;
   } catch (err) {
     return undefined;
   }
@@ -73,14 +69,17 @@ const getAppFromExecutionContext = (request: KibanaRequest): string | undefined 
 /**
  * Resolves where a rule change came from: the channel is derived from the request, and
  * the app is the one configured by the calling plugin or, for UI requests, the one named in
- * the execution context. The app is undefined in every other case.
+ * the execution context. The app is omitted when it fails {@link ruleEventAppTelemetrySchema}, and
+ * undefined in every other case.
  */
 export const resolveRuleEventOrigin = (
   request: KibanaRequest,
   options?: CreateRulesClientOptions
 ): RuleEventOrigin => {
   const channel = getChannel(request);
-  const app = options?.app || (channel === 'ui' ? getAppFromExecutionContext(request) : undefined);
+  const app =
+    toBoundedApp(options?.app) ||
+    (channel === 'ui' ? getAppFromExecutionContext(request) : undefined);
 
   return { channel, ...(app ? { app } : {}) };
 };

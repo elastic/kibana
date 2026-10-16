@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleKind, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { RuleEventChannel, RuleKind, RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { EventTypeOpts } from '@kbn/core/server';
 import {
   RULE_CREATED_EVENT_TYPE,
@@ -14,7 +14,6 @@ import {
   RULE_ENABLED_EVENT_TYPE,
   RULE_UPDATED_EVENT_TYPE,
 } from '../events/rule_event_publisher/events';
-import type { RuleEventChannel } from '../rules_client/rule_event_origin';
 import type { EventOrigin } from '../event_origin/token';
 
 /** Domain operations reported as telemetry. Each one is its own EBT event type. */
