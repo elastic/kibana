@@ -142,21 +142,27 @@ export function AnimatedEdge({
     [centerX, centerY]
   );
 
-  const openEdgeRoutingFlyout = useCallback((e: React.MouseEvent<SVGGElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    openRoutingFlyout(id, 'routing');
-    menu.off();
-    hover.off();
-  }, [id, openRoutingFlyout, menu, hover]);
+  const openEdgeRoutingFlyout = useCallback(
+    (e: React.MouseEvent<SVGGElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openRoutingFlyout(id, 'routing');
+      menu.off();
+      hover.off();
+    },
+    [id, openRoutingFlyout, menu, hover]
+  );
 
-  const openEdgeProcessingFlyout = useCallback((e: React.MouseEvent<SVGGElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    openRoutingFlyout(id, 'processing');
-    menu.off();
-    hover.off();
-  }, [id, openRoutingFlyout, menu, hover]);
+  const openEdgeProcessingFlyout = useCallback(
+    (e: React.MouseEvent<SVGGElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openRoutingFlyout(id, 'processing');
+      menu.off();
+      hover.off();
+    },
+    [id, openRoutingFlyout, menu, hover]
+  );
 
   const isActive = isHovered || Boolean(selected);
   const strokeColor = isActive ? 'transparent' : euiTheme.colors.borderBaseProminent;
