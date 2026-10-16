@@ -119,19 +119,11 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
               iconType="error"
               iconColor="subdued"
               textColor="subdued"
-              message={i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.endOfLife', {
-                defaultMessage: 'End-of-life: {date}',
-                values: { date: endOfLifeDate },
-              })}
-              tooltipTitle={i18n.translate(
-                'xpack.searchInferenceEndpoints.eisModelCard.endOfLifeTooltip.title',
-                { defaultMessage: 'Model no longer available' }
-              )}
+              message={endOfLifeDate}
               tooltip={i18n.translate(
                 'xpack.searchInferenceEndpoints.eisModelCard.endOfLifeTooltip.content',
                 {
-                  defaultMessage:
-                    'This model has reached end of life on {date}. Use a more recent model instead.',
+                  defaultMessage: 'This model has been unavailable since {date}.',
                   values: { date: endOfLifeDate },
                 }
               )}

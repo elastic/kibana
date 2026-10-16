@@ -100,7 +100,7 @@ test.describe('EIS Models Page', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     await test.step('EOL model card renders the end-of-life date once those models are shown', async () => {
       await eisModels.showEndOfLifeModels();
       await expect(eisModels.modelCard('OpenAI Davinci')).toBeVisible();
-      await expect(eisModels.modelCardMeta('OpenAI Davinci')).toHaveText('End-of-life: 2020-01-01');
+      await expect(eisModels.modelCardMeta('OpenAI Davinci')).toHaveText('2020-01-01');
       await expect(eisModels.modelStatusBadge('OpenAI Davinci', 'eol')).toBeHidden();
       await expect(eisModels.modelStatusBadge('OpenAI Davinci', 'deprecated')).toBeHidden();
     });
