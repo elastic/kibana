@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { DEPLOYMENTS_WITH_ALERTING_V2 } from '../../../common/constants';
+import { API_ENGINE_TAG } from '../../../common/constants';
 import {
   ALERTING_V2_RULES_ALL_ROLE,
   ALERTING_V2_RULES_READ_ROLE,
@@ -20,7 +20,7 @@ import {
   testData,
 } from '../fixtures';
 
-apiTest.describe('Install rule template API', { tag: DEPLOYMENTS_WITH_ALERTING_V2 }, () => {
+apiTest.describe('Install rule template API', { tag: API_ENGINE_TAG }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
 
