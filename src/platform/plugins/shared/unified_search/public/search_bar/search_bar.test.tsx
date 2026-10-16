@@ -504,6 +504,32 @@ describe('SearchBar', () => {
       expect(screen.getByTestId('dataViewPickerTrigger')).toBeEnabled();
       expect(screen.getByRole('button', { name: 'Filter actions' })).toBeInTheDocument();
     });
+
+    // EuiPopover updates `aria-expanded` on its trigger only while the trigger is enabled, so
+    // disabling it in the same update that closes the popover leaves a closed popover
+    // advertising itself as expanded. The lock must therefore wait for the popover to close.
+    // The data view picker sets `aria-expanded` itself as a prop, so it is not affected.
+    it.each([
+      { trigger: 'query bar menu', testSubj: 'showQueryBarMenu' },
+      { trigger: 'add filter', testSubj: 'addFilter' },
+    ])(
+      'keeps the $trigger trigger enabled while its popover is open and locks it once closed',
+      async ({ testSubj }) => {
+        const user = userEvent.setup();
+        const { rerender } = render(wrapSearchBarInContext(getProps()));
+
+        await user.click(await screen.findByTestId(testSubj));
+        rerender(wrapSearchBarInContext(getProps({ isLoading: true, onCancel: jest.fn() })));
+
+        expect(screen.getByTestId(testSubj)).toBeEnabled();
+
+        await user.click(screen.getByTestId(testSubj));
+
+        await waitFor(() => {
+          expect(screen.getByTestId(testSubj)).toBeDisabled();
+        });
+      }
+    );
   });
 
   it('Should call onQuerySubmit with isUpdate prop as false when dateRange is provided', async () => {

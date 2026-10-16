@@ -1286,7 +1286,8 @@ export const QueryBarTopRow = React.memo(
                 size: 's',
                 display: 'empty',
               }}
-              isDisabled={props.isDisabled || isLocked}
+              isDisabled={props.isDisabled}
+              isLocked={isLocked}
               suggestionsAbstraction={props.suggestionsAbstraction}
             />
           </EuiFlexItem>

@@ -31,6 +31,7 @@ import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import type { QueryBarMenuPanelsProps, AdditionalQueryBarMenuItems } from './query_bar_menu_panels';
 import { useQueryBarMenuPanels, QueryBarMenuPanel } from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
+import { useDeferredTriggerLock } from './use_deferred_trigger_lock';
 import type { WithCloseFilterEditorConfirmModalProps } from '../filter_bar/filter_editor';
 import { withCloseFilterEditorConfirmModal } from '../filter_bar/filter_editor';
 
@@ -76,6 +77,11 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
   indexPatterns?: Array<DataView | string>;
   buttonProps?: Partial<EuiButtonIconProps>;
   isDisabled?: boolean;
+  /**
+   * Locks the trigger while a search is running. Applied once the popover is closed, see
+   * `useDeferredTriggerLock`.
+   */
+  isLocked?: boolean;
   suggestionsAbstraction?: SuggestionsAbstraction;
   renderQueryInputAppend?: () => React.ReactNode;
   queryBarMenuRef: RefObject<EuiContextMenuClass>;
@@ -112,12 +118,14 @@ function QueryBarMenuComponent({
   filtersForSuggestions,
   buttonProps,
   isDisabled,
+  isLocked = false,
   onCloseFilterPopover,
   onLocalFilterCreate,
   onLocalFilterUpdate,
   suggestionsAbstraction,
   queryBarMenuRef,
 }: QueryBarMenuProps) {
+  const isTriggerLocked = useDeferredTriggerLock(isLocked, openQueryBarMenu);
   const [renderedComponent, setRenderedComponent] = useState('menu');
   const [currentPanelId, setCurrentPanelId] = useState<EuiContextMenuPanelId>(
     QueryBarMenuPanel.main
@@ -155,7 +163,7 @@ function QueryBarMenuComponent({
         display="empty"
         color="text"
         onClick={onButtonClick}
-        isDisabled={isDisabled}
+        isDisabled={isDisabled || isTriggerLocked}
         iconType="ellipsis"
         aria-label={strings.getFilterSetButtonLabel()}
         data-test-subj="showQueryBarMenu"

@@ -15,6 +15,7 @@ import type { Filter } from '@kbn/es-query';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
+import { useDeferredTriggerLock } from './use_deferred_trigger_lock';
 import type { WithCloseFilterEditorConfirmModalProps } from '../filter_bar/filter_editor';
 import { withCloseFilterEditorConfirmModal } from '../filter_bar/filter_editor';
 
@@ -32,6 +33,11 @@ interface AddFilterPopoverProps extends WithCloseFilterEditorConfirmModalProps {
   filtersForSuggestions?: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   isDisabled?: boolean;
+  /**
+   * Locks the trigger while a search is running. Applied once the popover is closed, see
+   * `useDeferredTriggerLock`.
+   */
+  isLocked?: boolean;
   buttonProps?: Partial<EuiButtonIconProps>;
   suggestionsAbstraction?: SuggestionsAbstraction;
 }
@@ -44,12 +50,14 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
   onFiltersUpdated,
   buttonProps,
   isDisabled,
+  isLocked = false,
   onCloseFilterPopover,
   onLocalFilterUpdate,
   onLocalFilterCreate,
   suggestionsAbstraction,
 }: AddFilterPopoverProps) {
   const [showAddFilterPopover, setShowAddFilterPopover] = useState(false);
+  const isTriggerLocked = useDeferredTriggerLock(isLocked, showAddFilterPopover);
 
   const button = (
     <EuiToolTip content={strings.getAddFilterButtonLabel()} disableScreenReaderOutput>
@@ -61,7 +69,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
         data-test-subj="addFilter"
         onClick={() => setShowAddFilterPopover((isOpen) => !isOpen)}
         size="s"
-        disabled={isDisabled}
+        disabled={isDisabled || isTriggerLocked}
         {...buttonProps}
       />
     </EuiToolTip>
