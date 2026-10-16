@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/digital-experience-plugin",
-  "owner": ["@elastic/obs-signals-logs-team"],
+  "owner": ["@elastic/obs-signals-rum-team"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
