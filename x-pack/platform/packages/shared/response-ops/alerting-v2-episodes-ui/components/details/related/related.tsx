@@ -18,7 +18,6 @@ export interface AlertEpisodesRelatedProps {
   currentEpisodeId: string | undefined;
   groupHash: string | undefined;
   ruleState: RuleState;
-  /** Where the episode was ingested from. Relates episodes by source when the episode has no rule. */
   source?: string;
   getEpisodeDetailsHref: (episodeId: string) => string;
   /**

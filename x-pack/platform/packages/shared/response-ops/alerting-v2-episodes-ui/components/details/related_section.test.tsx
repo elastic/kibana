@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
@@ -76,7 +76,7 @@ describe('AlertEpisodesRelatedSection', () => {
       { wrapper }
     );
 
-    await waitFor(() => expect(screen.getByTestId('alertEpisodesRelatedStub')).toBeInTheDocument());
+    expect(await screen.findByTestId('alertEpisodesRelatedStub')).toBeInTheDocument();
 
     expect(AlertEpisodesRelated).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -111,7 +111,7 @@ describe('AlertEpisodesRelatedSection', () => {
       { wrapper }
     );
 
-    await waitFor(() => expect(screen.getByTestId('alertEpisodesRelatedStub')).toBeInTheDocument());
+    expect(await screen.findByTestId('alertEpisodesRelatedStub')).toBeInTheDocument();
 
     expect(AlertEpisodesRelated).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -138,7 +138,7 @@ describe('AlertEpisodesRelatedSection', () => {
       { wrapper }
     );
 
-    await waitFor(() => expect(screen.getByTestId('alertEpisodesRelatedStub')).toBeInTheDocument());
+    expect(await screen.findByTestId('alertEpisodesRelatedStub')).toBeInTheDocument();
 
     expect(AlertEpisodesRelated).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -168,9 +168,7 @@ describe('AlertEpisodesRelatedSection', () => {
       { wrapper }
     );
 
-    await waitFor(() =>
-      expect(screen.getByTestId('alertingV2EpisodesRelatedSectionError')).toBeInTheDocument()
-    );
+    expect(await screen.findByTestId('alertingV2EpisodesRelatedSectionError')).toBeInTheDocument();
   });
 
   it('renders the loading state while events are loading', () => {
@@ -208,8 +206,6 @@ describe('AlertEpisodesRelatedSection', () => {
       { wrapper }
     );
 
-    await waitFor(() =>
-      expect(screen.getByTestId('alertingV2EpisodesRelatedSectionError')).toBeInTheDocument()
-    );
+    expect(await screen.findByTestId('alertingV2EpisodesRelatedSectionError')).toBeInTheDocument();
   });
 });
