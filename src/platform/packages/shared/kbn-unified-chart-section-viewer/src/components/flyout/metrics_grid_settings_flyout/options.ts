@@ -68,15 +68,48 @@ export const buildSimpleAggregationOptions = (
     'data-test-subj': `${dataTestSubjPrefix}-${option}`,
   }));
 
-export const buildHistogramPercentileOptions = (): Array<
-  EuiSuperSelectOption<HistogramPercentile>
-> =>
-  HISTOGRAM_PERCENTILE_OPTIONS.map((option) => ({
-    value: option,
-    inputDisplay: HISTOGRAM_PERCENTILE_LABELS[option],
-    dropdownDisplay: HISTOGRAM_PERCENTILE_LABELS[option],
-    'data-test-subj': `metricsExperienceGridSettingsHistogramOption-${option}`,
-  }));
+/**
+ * `EuiSuperSelect` forwards unknown option fields onto the row. `hasAriaDisabled`
+ * keeps a disabled row hoverable so `tooltipProps` can explain why it is disabled.
+ */
+type HistogramPercentileOption = EuiSuperSelectOption<HistogramPercentile> & {
+  hasAriaDisabled?: boolean;
+  tooltipProps?: { content: string };
+};
+
+const DISTRIBUTION_UNAVAILABLE_TOOLTIP = i18n.translate(
+  'metricsExperience.gridSettingsFlyout.distributionUnavailableTooltip',
+  {
+    defaultMessage:
+      'Distribution is unavailable while dimensions are selected. Histograms use the 95th percentile instead.',
+  }
+);
+
+export const buildHistogramPercentileOptions = ({
+  hasDimensions = false,
+}: {
+  hasDimensions?: boolean;
+} = {}): HistogramPercentileOption[] =>
+  HISTOGRAM_PERCENTILE_OPTIONS.map((option) => {
+    const label = HISTOGRAM_PERCENTILE_LABELS[option];
+    const isDistributionUnavailable = hasDimensions && option === 'distribution';
+
+    return {
+      value: option,
+      // The closed control shows the series the chart actually draws. The menu
+      // row stays "Distribution" so the stored value is unchanged.
+      inputDisplay: isDistributionUnavailable ? HISTOGRAM_PERCENTILE_LABELS.p95 : label,
+      dropdownDisplay: label,
+      disabled: isDistributionUnavailable,
+      ...(isDistributionUnavailable
+        ? {
+            hasAriaDisabled: true,
+            tooltipProps: { content: DISTRIBUTION_UNAVAILABLE_TOOLTIP },
+          }
+        : {}),
+      'data-test-subj': `metricsExperienceGridSettingsHistogramOption-${option}`,
+    };
+  });
 
 export const COUNTER_OPTIONS = buildSimpleAggregationOptions(
   'metricsExperienceGridSettingsCounterOption'

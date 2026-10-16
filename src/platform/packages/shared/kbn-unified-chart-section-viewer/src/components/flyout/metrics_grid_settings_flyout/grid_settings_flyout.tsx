@@ -28,7 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { type MetricsGridSettings } from '@kbn/discover-utils';
 import { useTelemetry } from '../../../context/ebt_telemetry_context';
-import { COUNTER_OPTIONS, GAUGE_OPTIONS, HISTOGRAM_OPTIONS } from './options';
+import { COUNTER_OPTIONS, GAUGE_OPTIONS, buildHistogramPercentileOptions } from './options';
 import { getAggregationConfigChanges } from './get_aggregation_config_changes';
 import { getChangedSettings } from './get_changed_settings';
 
@@ -58,6 +58,10 @@ export const GridSettingsFlyout = ({
   );
 
   const [draftSettings, setDraftSettings] = useState<MetricsGridSettings>(gridSettings);
+  const histogramOptions = useMemo(
+    () => buildHistogramPercentileOptions({ hasDimensions: gridSettings.dimensions.length > 0 }),
+    [gridSettings.dimensions.length]
+  );
 
   const pendingUpdate = useMemo(
     () => getChangedSettings(draftSettings, gridSettings),
@@ -159,7 +163,7 @@ export const GridSettingsFlyout = ({
           >
             <EuiSuperSelect
               data-test-subj="metricsExperienceGridSettingsHistogramSelect"
-              options={HISTOGRAM_OPTIONS}
+              options={histogramOptions}
               valueOfSelected={draftSettings.histogramPercentile}
               onChange={(value) => onSettingChange('histogramPercentile', value)}
             />
