@@ -19,6 +19,7 @@ import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../../t
 import {
   checkEndpointListForOnlyIsolatedHosts,
   checkEndpointListForOnlyUnIsolatedHosts,
+  releaseHostActionViaAPI,
 } from '../../../tasks/isolate';
 
 import { login } from '../../../tasks/login';
@@ -62,7 +63,14 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   afterEach(function () {
-    if (Cypress.env('IS_CI') && this.currentTest?.isFailed() && createdHost) {
+    if (!this.currentTest?.isFailed() || !createdHost) {
+      return;
+    }
+
+    // Leaving the host isolated makes the next attempt fail on `checkEndpointListForOnlyUnIsolatedHosts()`
+    releaseHostActionViaAPI(createdHost.agentId);
+
+    if (Cypress.env('IS_CI')) {
       cy.task('captureHostVmAgentDiagnostics', {
         hostname: createdHost.hostname,
         fileNamePrefix: this.currentTest?.fullTitle(),
