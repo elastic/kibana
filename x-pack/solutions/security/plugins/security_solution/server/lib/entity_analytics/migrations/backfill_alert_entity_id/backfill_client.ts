@@ -29,6 +29,7 @@ export interface TargetIndices {
 
 /**
  * Selects alerts inside the pinned window that have no EUID stamped yet.
+ * Filters for indices that the backfill can write to.
  *
  * What makes a pass self-limiting, and a reissued request safe: every alert stamped leaves the
  * result set for good, so a new request picks up exactly what the previous one did not reach.
@@ -36,13 +37,29 @@ export interface TargetIndices {
 export const buildBackfillQuery = (
   window: Range,
   usableIndices: Set<string>
-): { bool: QueryDslBoolQuery } => ({
+): { bool: QueryDslBoolQuery } => {
+  const { bool } = buildUnstampedAlertsQuery(window);
+
+  return {
+    bool: {
+      ...bool,
+      filter: [
+        ...(Array.isArray(bool.filter) ? bool.filter : [bool.filter]),
+        // Restricted here rather than left to the update to fail, so alerts in indices we cannot
+        // write to are never matched and the script never runs against them.
+        { terms: { _index: [...usableIndices] } },
+      ],
+    },
+  };
+};
+
+/**
+ * Every alert inside the window that still needs an EUID, wherever it lives.
+ */
+export const buildUnstampedAlertsQuery = (window: Range): { bool: QueryDslBoolQuery } => ({
   bool: {
     filter: [
       { range: { '@timestamp': { gte: window.start, lt: window.end } } },
-      // Restricted here rather than left to the update to fail, so alerts in indices we cannot
-      // write to are never matched and the script never runs against them.
-      { terms: { _index: [...usableIndices] } },
       {
         bool: {
           should: getEntityAnalyticsEntityTypes().map((entityType) =>

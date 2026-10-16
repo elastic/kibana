@@ -31,11 +31,13 @@ import {
   asKibanaLogger,
   createTestIndices,
   createWrongTypeIndex,
+  deleteSeededAlerts,
   deleteTestIndices,
   pollUntilComplete,
   readBackfillProgress,
   seedDocuments,
   seedHosts,
+  seededBySuite,
 } from '../../fixtures/alert_entity_id_backfill/helpers';
 
 /**
@@ -54,12 +56,7 @@ apiTest.describe('alert entity.id backfill requests', { tag: BACKFILL_TAGS }, ()
 
   apiTest.afterEach(async ({ esClient }) => {
     await deleteTestIndices(esClient);
-    await esClient.deleteByQuery({
-      index: ALERTS_INDEX,
-      refresh: true,
-      conflicts: 'proceed',
-      query: { match_all: {} },
-    });
+    await deleteSeededAlerts(esClient);
   });
 
   const start = async (esClient: EsClient, logger: Logger, maxDocs: number) => {
@@ -200,7 +197,12 @@ apiTest.describe('alert entity.id backfill requests', { tag: BACKFILL_TAGS }, ()
         refresh: true,
         conflicts: 'proceed',
         requests_per_second: 500,
-        query: { bool: { must_not: [{ exists: { field: ALERT_ENTITY_ID } }] } },
+        query: {
+          bool: {
+            filter: [seededBySuite()],
+            must_not: [{ exists: { field: ALERT_ENTITY_ID } }],
+          },
+        },
         script: { lang: 'painless', source: script },
       });
 
@@ -211,7 +213,11 @@ apiTest.describe('alert entity.id backfill requests', { tag: BACKFILL_TAGS }, ()
       // index missing the mapping would succeed and be invisible to scoring.
       const stamped = await esClient.search({
         index: ALERTS_INDEX,
-        query: { term: { [ALERT_ENTITY_ID]: 'host:ubq-host-1' } },
+        query: {
+          bool: {
+            filter: [seededBySuite(), { term: { [ALERT_ENTITY_ID]: 'host:ubq-host-1' } }],
+          },
+        },
       });
 
       expect((stamped.hits.hits ?? []).length).toBeGreaterThan(0);
@@ -227,7 +233,12 @@ apiTest.describe('alert entity.id backfill requests', { tag: BACKFILL_TAGS }, ()
         index: ALERTS_INDEX,
         refresh: true,
         conflicts: 'proceed',
-        query: { bool: { must_not: [{ exists: { field: ALERT_ENTITY_ID } }] } },
+        query: {
+          bool: {
+            filter: [seededBySuite()],
+            must_not: [{ exists: { field: ALERT_ENTITY_ID } }],
+          },
+        },
         script: { lang: 'painless', source: script },
       });
 

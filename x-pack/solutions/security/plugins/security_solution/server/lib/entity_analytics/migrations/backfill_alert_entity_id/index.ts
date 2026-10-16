@@ -6,9 +6,8 @@
  */
 
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { RunContext } from '@kbn/task-manager-plugin/server';
-import { TaskPriority } from '@kbn/task-manager-plugin/server';
-import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import type { RunContext } from '@kbn/task-manager-plugin/server/task';
+import { getDeleteTaskRunResult, TaskPriority } from '@kbn/task-manager-plugin/server/task';
 
 import type { EntityStoreStartContract } from '@kbn/entity-store/server';
 import type { EntityAnalyticsMigrationsParams } from '..';
@@ -36,11 +35,13 @@ import {
   TASK_SCOPE,
   TASK_TIMEOUT,
   TASK_TYPE,
+  UNKNOWN_ALERT_COUNT,
 } from './constants';
 import type { BackfillProgress } from './backfill_client';
 import {
   BackfillRequestFailedError,
   buildBackfillQuery,
+  buildUnstampedAlertsQuery,
   cancelBackfill,
   countPendingAlerts,
   pollBackfill,
@@ -178,7 +179,7 @@ const advanceSpace = async ({
     if (vanished) {
       // Dropping the id reissues the request next run; alerts already stamped are excluded by the
       // query, so the reissued request picks up exactly what the lost one had not reached.
-      return { progress: { ...progress, window, esTaskId: undefined, failures: 0 } };
+      return { progress: { ...progress, window, esTaskId: undefined } };
     }
 
     if (!completed) {
@@ -186,7 +187,8 @@ const advanceSpace = async ({
       // its own count from zero, so folding an in-flight figure in would make the total regress.
       logger.debug(`Backfill in progress for space "${spaceId}": ${updated} alerts stamped.`);
       return {
-        progress: { ...progress, window, failures: 0 },
+        // if the request had a failure but then started to stamp without failing, the failures is reset to 0
+        progress: { ...progress, window, failures: updated > 0 ? 0 : progress.failures },
         nextPollMs: nextPollDelayMs(backfill),
       };
     }
@@ -261,6 +263,7 @@ const advanceSpace = async ({
         failures: 0,
         conflictReissues: progress.conflictReissues,
         stamped,
+        unstampedAtStart: progress.unstampedAtStart,
       },
     };
   }
@@ -321,6 +324,21 @@ const advanceSpace = async ({
     return { progress: { ...progress, window: undefined, done: true, failures: 0 } };
   }
 
+  // Counted once, on the first request. A later one is a reissue over what earlier ones left
+  let unstampedAtStart = progress.unstampedAtStart;
+  if (unstampedAtStart === undefined) {
+    unstampedAtStart = await countPendingAlerts({
+      esClient,
+      logger,
+      alertsIndex,
+      query: buildUnstampedAlertsQuery(window),
+      signal,
+    }).catch((e) => {
+      logger.debug(`Could not count unstamped alerts for "${alertsIndex}": ${e.message}`);
+      return UNKNOWN_ALERT_COUNT;
+    });
+  }
+
   const esTaskId = await startBackfill({
     esClient,
     logger,
@@ -340,29 +358,33 @@ const advanceSpace = async ({
       pending === undefined ? '' : ` Alerts left to stamp: ${pending}.`
     }`
   );
-  return { progress: { ...progress, window, esTaskId, failures: 0 } };
+  return { progress: { ...progress, window, esTaskId, unstampedAtStart } };
 };
 
-/**
- * Removes the task, stopping every update-by-query it has running first.
- */
-const removeTask = async ({
-  esClient,
-  logger,
-  spaces,
-  signal,
-}: {
+interface SpaceRequestsParams {
   esClient: ElasticsearchClient;
   logger: Logger;
   spaces: Record<string, SpaceProgress>;
   signal: AbortSignal;
-}) => {
+}
+
+/**
+ * Stops whichever of `spaces` have an update-by-query running.
+ */
+const cancelRunningRequests = async ({ esClient, logger, spaces, signal }: SpaceRequestsParams) => {
   for (const [spaceId, { esTaskId }] of Object.entries(spaces)) {
     if (esTaskId !== undefined) {
       logger.info(`Cancelling the update-by-query still running for space "${spaceId}".`);
       await cancelBackfill({ esClient, logger, esTaskId, signal });
     }
   }
+};
+
+/**
+ * Removes the task, stopping every update-by-query it has running first.
+ */
+const removeTask = async (params: SpaceRequestsParams) => {
+  await cancelRunningRequests(params);
 
   return getDeleteTaskRunResult();
 };
@@ -398,9 +420,9 @@ export const runBackfillTask = async ({
 
   const configuredSpaces = await findSpacesRiskEngineConfig(coreStart, logger);
 
-  // Rebuilt against the live space list rather than carried over: spaces that have been deleted
-  // or had their engine disabled are dropped, so the task is not kept alive waiting on one that
-  // no longer exists, and spaces created since the last run pick up a default.
+  // Rebuilt against the live space list rather than carried over, so the task is not kept alive
+  // waiting on a space that no longer exists, and spaces created since the last run pick up a
+  // default.
   const spaces: Record<string, SpaceProgress> = {};
   for (const { spaceId } of configuredSpaces) {
     spaces[spaceId] = state.spaces[spaceId] ?? { ...defaultSpaceProgress };
@@ -413,6 +435,17 @@ export const runBackfillTask = async ({
     return removeTask({ esClient, logger, spaces: state.spaces, signal });
   }
 
+  // prevent started backfill to continue running for spaces that no longer exist
+  const configuredSpaceIds = new Set(configuredSpaces.map(({ spaceId }) => spaceId));
+  const droppedSpaces = Object.fromEntries(
+    Object.entries(state.spaces).filter(([spaceId]) => !configuredSpaceIds.has(spaceId))
+  );
+  if (Object.keys(droppedSpaces).length > 0) {
+    logger.info(
+      `Cancelling the running backfill for dropped spaces: ${Object.keys(droppedSpaces).join(', ')}`
+    );
+    await cancelRunningRequests({ esClient, logger, spaces: droppedSpaces, signal });
+  }
   const pending: ConfiguredSpace[] = [];
   for (const space of configuredSpaces) {
     if (!spaces[space.spaceId].done) {
@@ -515,12 +548,30 @@ export const runBackfillTask = async ({
   const updatedState: LatestTaskStateSchema = { spaces, runs: state.runs + 1, firstRunAt };
   const remaining = progresses.filter(({ done }) => !done).length;
   const totalStamped = progresses.reduce((sum, { stamped }) => sum + stamped, 0);
+  const totalLeftUnstamped = progresses.reduce(
+    (sum, { unstampedAtStart, stamped }) =>
+      unstampedAtStart === undefined || unstampedAtStart === UNKNOWN_ALERT_COUNT
+        ? sum
+        : sum + Math.max(0, unstampedAtStart - stamped),
+    0
+  );
+  // Counts spaces that have an unknown alert count so that the total left unstamped is not
+  // understated. A space with no count is only a true zero if it retired of its own accord —
+  // nothing left to stamp, or no alerts index yet. One still unfinished, or given up on before
+  // its alerts were ever counted, has a backlog nobody measured.
+  const spacesWithUnknownAlertCount = progresses.filter(
+    ({ done, failures, unstampedAtStart }) =>
+      unstampedAtStart === UNKNOWN_ALERT_COUNT ||
+      (unstampedAtStart === undefined && (!done || failures >= MAX_CONSECUTIVE_SPACE_FAILURES))
+  ).length;
   logTaskCompletion({ logger, taskRuns: updatedState.runs, spaces, progresses });
 
   const abandoned = progresses.filter(
     ({ failures }) => failures >= MAX_CONSECUTIVE_SPACE_FAILURES
   ).length;
-  const spacesCompleted = Object.keys(spaces).length - abandoned;
+  const spacesCompleted = progresses.filter(
+    ({ done, failures }) => done && failures < MAX_CONSECUTIVE_SPACE_FAILURES
+  ).length;
 
   const reportCompletion = (reachedRunLimit: boolean) => {
     coreStart.analytics.reportEvent(ALERT_ENTITY_ID_BACKFILL_COMPLETED_EVENT.eventType, {
@@ -529,6 +580,8 @@ export const runBackfillTask = async ({
       spacesCompleted,
       spacesAbandoned: abandoned,
       alertsStamped: totalStamped,
+      alertsLeftUnstamped: totalLeftUnstamped,
+      spacesWithUnknownAlertCount,
       reachedRunLimit,
     });
   };
@@ -578,10 +631,7 @@ const createBackfillTaskRunner =
             logger,
             entityStore: depsStart.entityStore,
             enabled,
-            state: {
-              spaces: taskState.spaces ?? defaultState.spaces,
-              runs: taskState.runs ?? defaultState.runs,
-            },
+            state: { ...defaultState, ...taskState },
             signal,
           });
         }

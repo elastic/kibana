@@ -26,8 +26,19 @@ export const MAPPED_INDEX = `${ALIAS}-000001`;
 export const UNMAPPED_INDEX = `${ALIAS}-000002`;
 export const WRONG_TYPE_INDEX = `${ALIAS}-000003`;
 
-/** Wide enough that every seeded alert falls inside it. */
-export const WINDOW = { start: '2020-01-01T00:00:00.000Z', end: '2030-01-01T00:00:00.000Z' };
+/**
+ * Marks every alert these suites seed into the real alerts index, in order to scope reads and deletes to it.
+ */
+export const SUITE_MARKER_FIELD = 'kibana.alert.rule.name';
+export const SUITE_MARKER = `entity-analytics-backfill-${Date.now()}-${Math.random()
+  .toString(36)
+  .slice(2, 8)}`;
+
+/** Alerts this suite seeded, and nothing else. */
+export const seededBySuite = () => ({ term: { [SUITE_MARKER_FIELD]: SUITE_MARKER } });
+
+export const WINDOW = { start: '2031-01-01T00:00:00.000Z', end: '2031-02-01T00:00:00.000Z' };
+export const SEEDED_AT = '2031-01-15T00:00:00.000Z';
 
 export const SIGNAL = new AbortController().signal;
 
@@ -94,6 +105,16 @@ export const createWrongTypeIndex = async (esClient: EsClient) => {
   });
 };
 
+export const deleteSeededAlerts = async (esClient: EsClient) => {
+  await esClient.deleteByQuery({
+    index: ALERTS_INDEX,
+    refresh: true,
+    conflicts: 'proceed',
+    ignore_unavailable: true,
+    query: seededBySuite(),
+  });
+};
+
 export const deleteTestIndices = async (esClient: EsClient) => {
   // Named rather than a wildcard: clusters run with `action.destructive_requires_name`.
   // `ignore_unavailable` because only some tests create the wrong-type index, and without it one
@@ -108,15 +129,17 @@ export const seedDocuments = async (
   esClient: EsClient,
   index: string,
   documents: Array<Record<string, unknown>>
-) => {
-  await esClient.bulk({
+): Promise<string[]> => {
+  const response = await esClient.bulk({
     index,
     refresh: true,
     operations: documents.flatMap((document) => [
       { create: {} },
-      { '@timestamp': new Date().toISOString(), ...document },
+      { '@timestamp': SEEDED_AT, [SUITE_MARKER_FIELD]: SUITE_MARKER, ...document },
     ]),
   });
+
+  return response.items.flatMap((item) => (item.create?._id ? [item.create._id] : []));
 };
 
 export const seedHosts = (esClient: EsClient, index: string, count: number) =>

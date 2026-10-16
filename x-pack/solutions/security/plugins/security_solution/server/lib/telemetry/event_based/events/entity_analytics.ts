@@ -15,6 +15,8 @@ export const ALERT_ENTITY_ID_BACKFILL_COMPLETED_EVENT: EventTypeOpts<{
   spacesCompleted: number;
   spacesAbandoned: number;
   alertsStamped: number;
+  alertsLeftUnstamped: number;
+  spacesWithUnknownAlertCount: number;
   reachedRunLimit: boolean;
 }> = {
   eventType: 'alert_entity_id_backfill_completed',
@@ -43,6 +45,20 @@ export const ALERT_ENTITY_ID_BACKFILL_COMPLETED_EVENT: EventTypeOpts<{
     alertsStamped: {
       type: 'long',
       _meta: { description: 'Alerts that had kibana.alert.entity.id written onto them' },
+    },
+    alertsLeftUnstamped: {
+      type: 'long',
+      _meta: {
+        description:
+          'Alerts still without kibana.alert.entity.id, which keep using the risk scoring fallback. Counted as the backlog a space started with less what it stamped, so it covers spaces given up on as well as ones that finished, and includes alerts in indices the backfill cannot write to.',
+      },
+    },
+    spacesWithUnknownAlertCount: {
+      type: 'long',
+      _meta: {
+        description:
+          'Spaces left out of alertsLeftUnstamped, because the alerts waiting there were never counted — the count failed, or the backfill stopped before reaching the space. A non-zero value means alertsLeftUnstamped is lower than the true figure.',
+      },
     },
     reachedRunLimit: {
       type: 'boolean',

@@ -11,6 +11,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   BackfillRequestFailedError,
   buildBackfillQuery,
+  buildUnstampedAlertsQuery,
   cancelBackfill,
   pollBackfill,
   resolveTargetIndices,
@@ -31,6 +32,13 @@ describe('buildBackfillQuery', () => {
     const query = buildBackfillQuery(WINDOW, USABLE);
 
     expect(query.bool?.filter).toContainEqual({ terms: { _index: ['index-1'] } });
+  });
+
+  it('counts alerts in every index, including ones it cannot write to', () => {
+    const query = buildUnstampedAlertsQuery(WINDOW);
+
+    expect(query.bool?.filter).not.toContainEqual({ terms: { _index: ['index-1'] } });
+    expect(query.bool?.must_not).toStrictEqual(buildBackfillQuery(WINDOW, USABLE).bool?.must_not);
   });
 
   it('skips alerts that are already stamped', () => {

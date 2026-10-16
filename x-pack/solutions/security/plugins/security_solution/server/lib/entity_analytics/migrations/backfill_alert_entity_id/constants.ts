@@ -80,3 +80,8 @@ export const MAX_CONSECUTIVE_SPACE_FAILURES = 3;
  * limit. At the polling interval above this is over a month, far more than a backfill needs.
  */
 export const MAX_RUNS = 10_000;
+
+/**
+ * Stored as a space's `unstampedAtStart` when counting the alerts there failed.
+ */
+export const UNKNOWN_ALERT_COUNT = -1;

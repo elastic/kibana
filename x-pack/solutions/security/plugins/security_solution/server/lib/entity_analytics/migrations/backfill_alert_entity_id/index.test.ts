@@ -9,7 +9,7 @@ import type { CoreStart } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { runBackfillTask } from '.';
+import { runBackfillTask, scheduleAlertEntityIdBackfill } from '.';
 import {
   BackfillRequestFailedError,
   cancelBackfill,
@@ -27,6 +27,7 @@ import {
   MAX_CONSECUTIVE_SPACE_FAILURES,
   MAX_RUNS,
   MIN_RUN_INTERVAL_MS,
+  UNKNOWN_ALERT_COUNT,
   RUN_INTERVAL_MS,
 } from './constants';
 
@@ -65,6 +66,7 @@ const createCoreStart = (spaces: SpaceFixture[]) =>
   ({
     elasticsearch: { client: elasticsearchServiceMock.createClusterClient() },
     analytics: { reportEvent: reportEventMock },
+    executionContext: { withContext: (_context: unknown, fn: () => unknown) => fn() },
     savedObjects: {
       createInternalRepository: () => ({
         find: jest.fn().mockResolvedValue({
@@ -98,6 +100,84 @@ const runTask = (spaces: SpaceFixture[], state = defaultState, logger = loggerMo
     state,
     signal: new AbortController().signal,
   });
+
+/**
+ * Driving the registered task runner rather than `runBackfillTask`, so the state the runner hands
+ * over is covered too. Calling `runBackfillTask` directly skips that step.
+ */
+describe('the registered task runner', () => {
+  const runViaTaskManager = async (taskState: Partial<LatestTaskStateSchema>) => {
+    const spaces: SpaceFixture[] = [{ spaceId: 'default' }];
+    const definitions: Record<
+      string,
+      { createTaskRunner: (ctx: unknown) => { run: () => unknown } }
+    > = {};
+
+    await scheduleAlertEntityIdBackfill({
+      taskManager: {
+        registerTaskDefinitions: (registry: typeof definitions) =>
+          Object.assign(definitions, registry),
+      },
+      logger: loggerMock.create(),
+      getStartServices: async () => [
+        createCoreStart(spaces),
+        { entityStore: createEntityStore(spaces), taskManager: undefined },
+      ],
+    } as never);
+
+    const [definition] = Object.values(definitions);
+    const runner = definition.createTaskRunner({
+      taskInstance: { state: taskState },
+      signal: new AbortController().signal,
+    });
+
+    return runner.run();
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resolveTargetIndicesMock.mockResolvedValue({ usable: new Set(['index-1']), unusable: 0 });
+    countPendingAlertsMock.mockResolvedValue(100);
+    startBackfillMock.mockResolvedValue('node:123');
+    pollBackfillMock.mockResolvedValue({
+      completed: false,
+      updated: 50,
+      total: 10_000,
+      versionConflicts: 0,
+      vanished: false,
+      failures: [],
+    });
+  });
+
+  it('carries every persisted state field into the run', async () => {
+    const firstRunAt = '2026-10-01T00:00:00.000Z';
+    const stamped = 7;
+    const storedRuns = 12;
+
+    const result = await runViaTaskManager({
+      spaces: {
+        default: {
+          esTaskId: 'node:123',
+          done: false,
+          failures: 0,
+          conflictReissues: 0,
+          stamped: 7,
+        },
+      },
+      runs: 12,
+      firstRunAt,
+    });
+
+    expect(stateOf(result)).toMatchObject({ firstRunAt, runs: storedRuns + 1 });
+    expect(stateOf(result).spaces.default).toMatchObject({ stamped });
+  });
+
+  it('starts from the defaults when there is no state yet', async () => {
+    const result = await runViaTaskManager({});
+
+    expect(stateOf(result).runs).toBe(1);
+  });
+});
 
 describe('runBackfillTask', () => {
   beforeEach(() => {
@@ -139,6 +219,34 @@ describe('runBackfillTask', () => {
       expect.objectContaining({ esTaskId: 'node:123' })
     );
     expect(startBackfillMock).not.toHaveBeenCalled();
+  });
+
+  it('marks the starting alert count unknown when it cannot be counted', async () => {
+    countPendingAlertsMock.mockResolvedValueOnce(100).mockRejectedValueOnce(new Error('es down'));
+
+    const result = await runTask([{ spaceId: 'default' }]);
+
+    expect(stateOf(result).spaces.default).toMatchObject({ unstampedAtStart: UNKNOWN_ALERT_COUNT });
+  });
+
+  it('keeps the starting backlog from the first request when a later one is issued', async () => {
+    countPendingAlertsMock.mockResolvedValue(40);
+    const state = {
+      spaces: {
+        default: {
+          done: false,
+          failures: 0,
+          conflictReissues: 1,
+          stamped: 960,
+          unstampedAtStart: 1_000,
+        },
+      },
+      runs: 4,
+    };
+
+    const result = await runTask([{ spaceId: 'default' }], state);
+
+    expect(stateOf(result).spaces.default).toMatchObject({ unstampedAtStart: 1_000 });
   });
 
   it('starts the request even when the pending count fails', async () => {
@@ -539,6 +647,46 @@ describe('runBackfillTask', () => {
     expect(stateOf(result).spaces.default).toMatchObject({ failures: 0, done: false });
   });
 
+  it('gives up on a space whose request keeps failing instead of relaunching forever', async () => {
+    pollBackfillMock.mockResolvedValue({
+      completed: true,
+      updated: 0,
+      total: 10_000,
+      versionConflicts: 0,
+      vanished: false,
+      failures: ['{"cause":{"type":"cluster_block_exception"}}'],
+    });
+    let state: LatestTaskStateSchema = {
+      spaces: {
+        default: {
+          esTaskId: 'node:123',
+          done: false,
+          failures: 0,
+          conflictReissues: 0,
+          stamped: 0,
+        },
+      },
+      runs: 0,
+    };
+
+    state = stateOf(await runTask([{ spaceId: 'default' }], state));
+    expect(state.spaces.default).toMatchObject({ failures: 1, esTaskId: undefined });
+
+    // The replacement request. Elasticsearch accepting it is not progress, so the failure stands.
+    state = stateOf(await runTask([{ spaceId: 'default' }], state));
+    expect(state.spaces.default).toMatchObject({ failures: 1, esTaskId: 'node:123' });
+
+    state = stateOf(await runTask([{ spaceId: 'default' }], state));
+    expect(state.spaces.default).toMatchObject({ failures: 2, esTaskId: undefined });
+
+    state = stateOf(await runTask([{ spaceId: 'default' }], state));
+    expect(state.spaces.default).toMatchObject({ failures: 2, esTaskId: 'node:123' });
+
+    await expect(runTask([{ spaceId: 'default' }], state)).resolves.toMatchObject({
+      shouldDeleteTask: true,
+    });
+  });
+
   it('ignores a space where Entity Analytics was never set up', async () => {
     const result = await runTask([{ spaceId: 'off', riskScoring: 'never_started' }]);
 
@@ -764,6 +912,35 @@ describe('runBackfillTask', () => {
     expect(startBackfillMock).not.toHaveBeenCalled();
   });
 
+  it('stops the request of a space that no longer exists', async () => {
+    const state = {
+      spaces: {
+        default: {
+          esTaskId: 'node:still-wanted',
+          done: false,
+          failures: 0,
+          conflictReissues: 0,
+          stamped: 0,
+        },
+        deleted: {
+          esTaskId: 'node:orphaned',
+          done: false,
+          failures: 0,
+          conflictReissues: 0,
+          stamped: 0,
+        },
+      },
+      runs: 3,
+    };
+
+    await runTask([{ spaceId: 'default' }], state);
+
+    expect(cancelBackfillMock).toHaveBeenCalledTimes(1);
+    expect(cancelBackfillMock).toHaveBeenCalledWith(
+      expect.objectContaining({ esTaskId: 'node:orphaned' })
+    );
+  });
+
   it('stops the request still running when the kill switch is set', async () => {
     const state = {
       spaces: {
@@ -908,6 +1085,158 @@ describe('runBackfillTask', () => {
       expect(reportEventMock).toHaveBeenCalledWith(
         'alert_entity_id_backfill_completed',
         expect.objectContaining({ spacesCompleted: 0, spacesAbandoned: 1 })
+      );
+    });
+
+    it('reports what the backfill left behind, for finished and abandoned spaces alike', async () => {
+      startBackfillMock.mockRejectedValue(new Error('index gone'));
+      const state = {
+        spaces: {
+          finished: {
+            done: true,
+            failures: 0,
+            conflictReissues: 0,
+            stamped: 900,
+            unstampedAtStart: 1_000,
+          },
+          broken: {
+            done: false,
+            failures: MAX_CONSECUTIVE_SPACE_FAILURES - 1,
+            conflictReissues: 0,
+            stamped: 50,
+            unstampedAtStart: 4_000,
+          },
+        },
+        runs: 5,
+      };
+
+      await runTask([{ spaceId: 'finished' }, { spaceId: 'broken' }], state);
+
+      expect(reportEventMock).toHaveBeenCalledWith(
+        'alert_entity_id_backfill_completed',
+        // 100 from the space that finished (1_000 - 900), 3_950 from the one given up on (4_000 - 50), and both counted.
+        expect.objectContaining({
+          alertsStamped: 950,
+          alertsLeftUnstamped: 4_050,
+          spacesWithUnknownAlertCount: 0,
+        })
+      );
+    });
+
+    it('leaves out a space whose starting backlog could not be counted', async () => {
+      startBackfillMock.mockRejectedValue(new Error('index gone'));
+      const state = {
+        spaces: {
+          broken: {
+            done: false,
+            failures: MAX_CONSECUTIVE_SPACE_FAILURES - 1,
+            conflictReissues: 0,
+            stamped: 0,
+            unstampedAtStart: UNKNOWN_ALERT_COUNT,
+          },
+        },
+        runs: 5,
+      };
+
+      await runTask([{ spaceId: 'broken' }], state);
+
+      expect(reportEventMock).toHaveBeenCalledWith(
+        'alert_entity_id_backfill_completed',
+        expect.objectContaining({ alertsLeftUnstamped: 0, spacesWithUnknownAlertCount: 1 })
+      );
+    });
+
+    it('flags a space given up on before its alerts were counted', async () => {
+      resolveTargetIndicesMock.mockResolvedValue({ usable: new Set<string>(), unusable: 2 });
+      const state = {
+        spaces: {
+          blocked: {
+            done: false,
+            failures: MAX_CONSECUTIVE_SPACE_FAILURES - 1,
+            conflictReissues: 0,
+            stamped: 0,
+          },
+        },
+        runs: 5,
+      };
+
+      await runTask([{ spaceId: 'blocked' }], state);
+
+      expect(reportEventMock).toHaveBeenCalledWith(
+        'alert_entity_id_backfill_completed',
+        expect.objectContaining({
+          alertsLeftUnstamped: 0,
+          spacesWithUnknownAlertCount: 1,
+          spacesAbandoned: 1,
+        })
+      );
+    });
+
+    it('treats a space that retired with nothing to stamp as a true zero', async () => {
+      countPendingAlertsMock.mockResolvedValue(0);
+
+      await runTask([{ spaceId: 'default' }]);
+
+      expect(reportEventMock).toHaveBeenCalledWith(
+        'alert_entity_id_backfill_completed',
+        expect.objectContaining({ alertsLeftUnstamped: 0, spacesWithUnknownAlertCount: 0 })
+      );
+    });
+
+    it('flags a space the backfill never reached as uncounted', async () => {
+      pollBackfillMock.mockResolvedValue({
+        completed: false,
+        updated: 10,
+        total: 10_000,
+        versionConflicts: 0,
+        vanished: false,
+        failures: [],
+      });
+      const state = {
+        spaces: {
+          running: {
+            esTaskId: 'node:123',
+            done: false,
+            failures: 0,
+            conflictReissues: 0,
+            stamped: 5,
+          },
+        },
+        runs: MAX_RUNS - 1,
+      };
+
+      await runTask([{ spaceId: 'running' }], state);
+
+      expect(reportEventMock).toHaveBeenCalledWith(
+        'alert_entity_id_backfill_completed',
+        expect.objectContaining({ spacesWithUnknownAlertCount: 1, reachedRunLimit: true })
+      );
+    });
+
+    it('does not count unfinished spaces as completed when it gives up at the run limit', async () => {
+      const state = {
+        spaces: {
+          finished: { done: true, failures: 0, conflictReissues: 0, stamped: 10 },
+          unfinished: {
+            esTaskId: 'node:123',
+            done: false,
+            failures: 0,
+            conflictReissues: 0,
+            stamped: 5,
+          },
+        },
+        runs: MAX_RUNS - 1,
+      };
+
+      await runTask([{ spaceId: 'finished' }, { spaceId: 'unfinished' }], state);
+
+      expect(reportEventMock).toHaveBeenCalledWith(
+        'alert_entity_id_backfill_completed',
+        expect.objectContaining({
+          spacesCompleted: 1,
+          spacesAbandoned: 0,
+          reachedRunLimit: true,
+        })
       );
     });
   });

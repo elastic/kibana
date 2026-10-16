@@ -29,6 +29,8 @@ const spaceProgressSchema = schema.object({
   // Alerts stamped by requests that have finished. A request still in flight is not counted until
   // it completes, so this never goes backwards.
   stamped: schema.number(),
+  // Alerts waiting to be stamped when this space's first request was issued.
+  unstampedAtStart: schema.maybe(schema.number()),
 });
 
 export type SpaceProgress = TypeOf<typeof spaceProgressSchema>;
@@ -60,6 +62,8 @@ const toSpaceProgress = (value: unknown): SpaceProgress => {
     failures: toCount(progress.failures),
     conflictReissues: toCount(progress.conflictReissues),
     stamped: toCount(progress.stamped),
+    unstampedAtStart:
+      typeof progress.unstampedAtStart === 'number' ? progress.unstampedAtStart : undefined,
   };
 };
 
@@ -102,4 +106,5 @@ export const defaultSpaceProgress: SpaceProgress = {
   failures: 0,
   conflictReissues: 0,
   stamped: 0,
+  unstampedAtStart: undefined,
 };

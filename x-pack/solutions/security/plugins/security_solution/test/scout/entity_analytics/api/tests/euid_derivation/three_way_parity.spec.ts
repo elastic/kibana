@@ -18,6 +18,7 @@ import { EntityType } from '../../../../../../common/entity_analytics/types';
 import {
   ALERTS_INDEX,
   BACKFILL_TAGS,
+  deleteSeededAlerts,
   seedDocuments,
 } from '../../fixtures/alert_entity_id_backfill/helpers';
 
@@ -38,23 +39,22 @@ import {
  */
 apiTest.describe('EUID derivation parity', { tag: BACKFILL_TAGS }, () => {
   apiTest.afterEach(async ({ esClient }) => {
-    await esClient.deleteByQuery({
-      index: ALERTS_INDEX,
-      refresh: true,
-      conflicts: 'proceed',
-      query: { match_all: {} },
-    });
+    await deleteSeededAlerts(esClient);
   });
 
-  /** The EUIDs Elasticsearch derives for every alert in the index, by doc-values and by `_source`. */
-  const deriveInElasticsearch = async (esClient: EsClient, entityType: EntityType) => {
+  /** The EUIDs Elasticsearch derives for one alert, by doc-values and by `_source`. */
+  const deriveInElasticsearch = async (
+    esClient: EsClient,
+    entityType: EntityType,
+    alertId: string
+  ) => {
     const definition = getBuiltInEntityDefinition(entityType);
     await esClient.indices.refresh({ index: ALERTS_INDEX });
 
     const response = await esClient.search({
       index: ALERTS_INDEX,
-      size: 100,
-      query: { match_all: {} },
+      size: 1,
+      query: { ids: { values: [alertId] } },
       runtime_mappings: {
         euid_doc_values: euid.painless.getEuidRuntimeMapping(definition, {
           applyPostAggFilter: false,
@@ -81,10 +81,10 @@ apiTest.describe('EUID derivation parity', { tag: BACKFILL_TAGS }, () => {
     entityType: EntityType,
     document: Record<string, unknown>
   ) => {
-    await seedDocuments(esClient, ALERTS_INDEX, [document]);
+    const [alertId] = await seedDocuments(esClient, ALERTS_INDEX, [document]);
 
-    const alerts = await deriveInElasticsearch(esClient, entityType);
-    expect(alerts.length).toBeGreaterThan(0);
+    const alerts = await deriveInElasticsearch(esClient, entityType, alertId);
+    expect(alerts).toHaveLength(1);
 
     const definition = getBuiltInEntityDefinition(entityType);
     return alerts.map(({ source, fromDocValues, fromPainlessSource }) => ({

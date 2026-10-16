@@ -33,6 +33,7 @@ describe('backfill task state, version 1', () => {
       failures: 1,
       conflictReissues: 1,
       stamped: 42,
+      unstampedAtStart: 1_000,
     };
 
     expect(migrate({ spaces: { default: progress }, runs: 7 })).toEqual({
@@ -52,7 +53,14 @@ describe('backfill task state, version 1', () => {
       failures: 0,
       conflictReissues: 0,
       stamped: 0,
+      unstampedAtStart: undefined,
     });
+  });
+
+  it('leaves an unusable starting backlog unset rather than counting it as zero', () => {
+    const { spaces } = migrate({ spaces: { default: { done: true, unstampedAtStart: 'lots' } } });
+
+    expect(spaces.default.unstampedAtStart).toBeUndefined();
   });
 
   it('drops an Elasticsearch task id that is not a string', () => {
