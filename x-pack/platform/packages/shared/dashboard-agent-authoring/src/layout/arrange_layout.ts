@@ -64,6 +64,21 @@ const getPlacedKeys = (widgets: Widgets): Set<string> =>
     )
   );
 
+/**
+ * Containers whose panels differ from the original dashboard, by section id; `''` is the top level,
+ * which also changes when a section is added or removed.
+ */
+const getChangedContainers = (
+  placedKeys: ReadonlySet<string>,
+  originalKeys: ReadonlySet<string>
+): Set<string> =>
+  new Set(
+    [
+      ...[...placedKeys].filter((key) => !originalKeys.has(key)),
+      ...[...originalKeys].filter((key) => !placedKeys.has(key)),
+    ].map((key) => (key.includes('/') ? key.slice(0, key.indexOf('/')) : ''))
+  );
+
 const getPanelIds = (widgets: Widgets): Set<string> =>
   new Set(
     widgets.flatMap((widget) => (isSection(widget) ? widget.panels : [widget]).map(({ id }) => id))
@@ -75,11 +90,13 @@ const byReadingOrder = (a: AttachmentPanel, b: AttachmentPanel): number =>
 /**
  * The dashboard with short ids. Panels new to their container (added or moved) are sent without a
  * grid and new sections without a row, since their placeholder positions are for the call to set.
- * Moved panels keep their size.
+ * Moved panels keep their size. Without instructions, sections this call did not change are sent
+ * without their panels, so they keep their layout.
  */
 const toLayoutRequest = (
   widgets: Widgets,
   originalWidgets: Widgets,
+  changedContainers: ReadonlySet<string>,
   aliasById: ReadonlyMap<string, string>,
   instructions: string | undefined
 ): LayoutRequest => {
@@ -115,14 +132,12 @@ const toLayoutRequest = (
         id: aliasById.get(id) ?? id,
         title,
         ...(placedKeys.has(id) ? { y: grid.y } : {}),
-        panels: toLayoutPanels(panels, id),
+        ...(instructions !== undefined || changedContainers.has(id)
+          ? { panels: toLayoutPanels(panels, id) }
+          : {}),
       })),
   };
 };
-
-const hasUnplacedWidgets = ({ panels, sections }: LayoutRequest): boolean =>
-  sections.some(({ y }) => y === undefined) ||
-  [...panels, ...sections.flatMap((section) => section.panels)].some(({ grid }) => !grid);
 
 interface ArrangeLayoutParams {
   /** Panels and sections before this call; empty for a new dashboard. */
@@ -159,12 +174,20 @@ export const arrangeDashboardLayout = async ({
   }
 
   const aliasById = createAliases(dashboardData.panels);
-  const request = toLayoutRequest(dashboardData.panels, originalPanels, aliasById, instructions);
-  const currentPanelIds = getPanelIds(dashboardData.panels);
-  const panelWasRemoved = [...getPanelIds(originalPanels)].some((id) => !currentPanelIds.has(id));
-  if (instructions === undefined && !hasUnplacedWidgets(request) && !panelWasRemoved) {
+  const changedContainers = getChangedContainers(
+    getPlacedKeys(dashboardData.panels),
+    getPlacedKeys(originalPanels)
+  );
+  if (instructions === undefined && changedContainers.size === 0) {
     return { dashboardData };
   }
+  const request = toLayoutRequest(
+    dashboardData.panels,
+    originalPanels,
+    changedContainers,
+    aliasById,
+    instructions
+  );
 
   const idByAlias = new Map([...aliasById].map(([id, alias]) => [alias, id]));
   const toId = (alias: string): string => idByAlias.get(alias) ?? alias;
@@ -203,7 +226,15 @@ const requestArrangement = async (
   if (issue) {
     throw new Error(`incomplete arrangement: ${issue}`);
   }
-  return arrangement;
+  const keptSectionIds = new Set(
+    request.sections.filter(({ panels }) => !panels).map(({ id }) => id)
+  );
+  return {
+    ...arrangement,
+    sections: arrangement.sections.map((section) =>
+      keptSectionIds.has(section.id) ? { ...section, panels: [] } : section
+    ),
+  };
 };
 
 /**
@@ -239,10 +270,9 @@ const getIncompleteArrangementIssue = (
 
   const containers = [
     { requested: panels, arranged: arrangement.panels },
-    ...sections.map(({ id, panels: requested }) => ({
-      requested,
-      arranged: arrangedSectionsById.get(id)?.panels ?? [],
-    })),
+    ...sections.flatMap(({ id, panels: requested }) =>
+      requested ? [{ requested, arranged: arrangedSectionsById.get(id)?.panels ?? [] }] : []
+    ),
   ];
   for (const { requested, arranged } of containers) {
     const overflowingPanel = arranged.find(({ x, w }) => x + w > GRID_COLUMNS);

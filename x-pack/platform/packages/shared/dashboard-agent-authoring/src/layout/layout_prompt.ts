@@ -13,7 +13,7 @@ The dashboard uses a **48-column grid**; the origin \`(0, 0)\` is the top-left c
 
 ## What you get
 
-The dashboard as it is now: \`panels\` are the top-level panels, and \`sections\` each list their panels, whose coordinates are section-relative. Panels without a \`grid\` and sections without a \`y\` are new in this edit, or moved here from another container: place them. A moved panel has the \`size\` it had in its old container: keep it unless the row needs another width. Markdown and custom content panels include their \`content\`. \`instructions\`, when given, say where panels and sections go, from the user or the authoring agent; they override the rules below.
+The dashboard as it is now: \`panels\` are the top-level panels, and \`sections\` each list their panels, whose coordinates are section-relative. Panels without a \`grid\` and sections without a \`y\` are new in this edit, or moved here from another container: place them. A moved panel has the \`size\` it had in its old container: keep it unless the row needs another width. A section without \`panels\` keeps its layout: return only its \`y\`, with \`panels: []\`. Markdown and custom content panels include their \`content\`. \`instructions\`, when given, say where panels and sections go, from the user or the authoring agent; they override the rules below.
 
 ## How to lay out
 

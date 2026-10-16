@@ -74,7 +74,7 @@ const keepRequestedLayout = async ({
     sections: sections.map(({ id, y, panels: sectionPanels }) => ({
       id,
       y: y ?? 0,
-      panels: toArrangedPanels(sectionPanels),
+      panels: toArrangedPanels(sectionPanels ?? []),
     })),
   };
 };

@@ -118,7 +118,7 @@ describe('arrangeDashboardLayout', () => {
     );
   });
 
-  it('sends the dashboard with short ids, without the grids of new panels, and applies the arrangement', async () => {
+  it('sends the dashboard with short ids, without the grids of new panels or the panels of unchanged sections, and applies the arrangement', async () => {
     const arrangeLayout = jest.fn(async () => completeArrangement);
 
     const result = await arrange(arrangeLayout);
@@ -134,23 +134,14 @@ describe('arrangeDashboardLayout', () => {
         { ...existingPanel, grid: { x: 0, y: 0, w: 24, h: 9 } },
         { ...existingPanel, id: 'p3', title: 'Panel new-panel' },
       ],
-      sections: [
-        {
-          id: 's1',
-          title: 'Section section-a',
-          y: 9,
-          panels: [
-            { ...existingPanel, id: 'p2', title: 'Panel inner', grid: { x: 0, y: 0, w: 24, h: 9 } },
-          ],
-        },
-      ],
+      sections: [{ id: 's1', title: 'Section section-a', y: 9 }],
     });
     expect(result.dashboardData.panels).toEqual([
       expect.objectContaining({ id: 'existing', grid: { x: 0, y: 0, w: 48, h: 9 } }),
       expect.objectContaining({
         id: 'section-a',
         grid: { y: 18 },
-        panels: [expect.objectContaining({ id: 'inner', grid: { x: 0, y: 0, w: 12, h: 6 } })],
+        panels: [expect.objectContaining({ id: 'inner', grid: { x: 0, y: 0, w: 24, h: 9 } })],
       }),
       expect.objectContaining({ id: 'new-panel', grid: { x: 0, y: 9, w: 48, h: 9 } }),
     ]);
@@ -247,20 +238,17 @@ describe('arrangeDashboardLayout', () => {
   it.each<[string, LayoutArrangement, string]>([
     [
       'misses a panel',
-      {
-        ...completeArrangement,
-        sections: [{ id: 's1', y: 18, panels: [] }],
-      },
-      'panel "inner" is missing from its container',
+      { ...completeArrangement, panels: [completeArrangement.panels[0]] },
+      'panel "new-panel" is missing from its container',
     ],
     [
       'places a panel in another container',
       {
         ...completeArrangement,
-        panels: [...completeArrangement.panels, { id: 'p2', x: 0, y: 18, w: 48, h: 9 }],
-        sections: [{ id: 's1', y: 27, panels: [] }],
+        panels: [completeArrangement.panels[1]],
+        sections: [{ id: 's1', y: 18, panels: [{ id: 'p1', x: 0, y: 0, w: 48, h: 9 }] }],
       },
-      'panel "inner" is missing from its container',
+      'panel "existing" is missing from its container',
     ],
     [
       'returns an unknown id',

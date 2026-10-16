@@ -30,8 +30,11 @@ export interface LayoutSection {
   title: string;
   /** Omitted for a section added in this call. */
   y?: number;
-  /** Panels of the section; grids are relative to the section. */
-  panels: LayoutPanel[];
+  /**
+   * Panels of the section; grids are relative to the section. Omitted for a section that keeps its
+   * layout.
+   */
+  panels?: LayoutPanel[];
 }
 
 /** The dashboard as it is after the operations, with the grids of the panels already placed. */
