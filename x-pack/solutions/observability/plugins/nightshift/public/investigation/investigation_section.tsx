@@ -147,7 +147,7 @@ const SectionPanel = ({
       css={css`
         box-sizing: border-box;
         overflow: hidden;
-        border-radius: ${euiTheme.size.s};
+        border-radius: ${euiTheme.border.radius.panel};
       `}
     >
       {children}

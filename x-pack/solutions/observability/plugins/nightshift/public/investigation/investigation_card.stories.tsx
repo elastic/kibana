@@ -307,7 +307,7 @@ const StateCard = ({
         css={css`
           box-sizing: border-box;
           overflow: hidden;
-          border-radius: ${euiTheme.size.s};
+          border-radius: ${euiTheme.border.radius.panel};
         `}
       >
         <InvestigationCard
@@ -361,7 +361,7 @@ const InvestigationCardStatesGallery = (): React.ReactElement => {
             box-sizing: border-box;
             max-width: 720px;
             overflow: hidden;
-            border-radius: ${euiTheme.size.s};
+            border-radius: ${euiTheme.border.radius.panel};
           `}
         >
           <EuiFlexGroup
