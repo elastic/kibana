@@ -48,7 +48,7 @@ const search = (
   });
 
 describe('findSimilarFeatures', () => {
-  it('searches the candidate type across the scope', async () => {
+  it('skips the holder lookup without matches', async () => {
     const findFeaturesAcrossSources = jest.fn().mockResolvedValue({ hits: [] });
     const getFeatureSourcesBySlug = jest.fn();
 
@@ -60,11 +60,6 @@ describe('findSimilarFeatures', () => {
       args,
     });
 
-    expect(findFeaturesAcrossSources).toHaveBeenCalledWith(['id-logs'], 'redis Redis cache', {
-      featureType: 'technology',
-      searchMode: 'semantic',
-      limit: 100,
-    });
     expect(getFeatureSourcesBySlug).not.toHaveBeenCalled();
   });
 

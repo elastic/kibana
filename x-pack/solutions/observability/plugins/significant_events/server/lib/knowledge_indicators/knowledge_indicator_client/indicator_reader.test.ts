@@ -237,7 +237,7 @@ describe('IndicatorReader.getFeatureSourcesBySlug', () => {
     feature: { slug, type: 'technology', subtype: 'cache', properties: {}, confidence: 90 },
   });
 
-  it('groups active holders by slug', async () => {
+  it('groups active latest holders by slug', async () => {
     const { reader, runEsql } = makeReader();
     runEsql.mockResolvedValueOnce({
       hits: [
@@ -266,18 +266,9 @@ describe('IndicatorReader.getFeatureSourcesBySlug', () => {
     expect(query).toContain('`source.id` IN ("src-a", "src-b", "src-c")');
     expect(query).toContain('(excluded IS NULL OR excluded == FALSE)');
     expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
-  });
-
-  it('filters slug and type after the latest-revision pick so tombstones win', async () => {
-    const { reader, runEsql } = makeReader();
-    runEsql.mockResolvedValueOnce({ hits: [] });
-
-    await reader.getFeatureSourcesBySlug(['src-a'], 'technology', ['redis']);
-
-    const query = capturedQueryString(runEsql);
     const grouping = query.indexOf('INLINE STATS');
-    expect(query.indexOf('`source.id` IN ("src-a")')).toBeLessThan(grouping);
-    expect(query.indexOf('`feature.slug` IN ("redis")')).toBeGreaterThan(grouping);
+    expect(query.indexOf('`source.id` IN ("src-a", "src-b", "src-c")')).toBeLessThan(grouping);
+    expect(query.indexOf('`feature.slug` IN ("redis", "kafka")')).toBeGreaterThan(grouping);
     expect(query.indexOf('`feature.type` IN ("technology")')).toBeGreaterThan(grouping);
     expect(query.indexOf('deleted IS NULL')).toBeGreaterThan(grouping);
   });

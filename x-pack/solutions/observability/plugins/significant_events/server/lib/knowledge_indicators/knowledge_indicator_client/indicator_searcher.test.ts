@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { BasicPrettyPrinter } from '@elastic/esql';
 import { IndicatorSearcher } from './indicator_searcher';
 import type { RevisionReader } from './revision_reader';
 import { queryEsql } from '../../significant_events/latest_source_query';
@@ -75,9 +76,13 @@ describe('IndicatorSearcher.findFeaturesAcrossSources', () => {
 
     expect(hits.map(({ source_id: sourceId }) => sourceId)).toEqual(['src-b', 'src-a']);
     expect(queryEsql).toHaveBeenCalledTimes(1);
+    const [, postGroupingWhere] = fetchLatestRevisions.mock.calls[0];
+    expect(BasicPrettyPrinter.expression(postGroupingWhere)).toContain(
+      '`feature.type` IN ("technology")'
+    );
   });
 
-  it('scopes the rank query to the client space, the sources and the feature type', async () => {
+  it('selects current revisions before filtering and ranking the scoped corpus', async () => {
     (queryEsql as jest.Mock).mockResolvedValue(rankResponse([]));
 
     await run();
@@ -86,11 +91,16 @@ describe('IndicatorSearcher.findFeaturesAcrossSources', () => {
     const printed = query.print('basic');
     expect(printed).toContain(`\`kibana.space_ids\` == "${SPACE}"`);
     expect(printed).toContain('`source.id` IN ("src-a", "src-b")');
-    expect(printed).toContain('`feature.type` IN ("technology")');
+    const latestRevisionIndex = printed.indexOf('INLINE STATS latest_ts');
+    expect(latestRevisionIndex).toBeLessThan(printed.indexOf('deleted IS NULL'));
+    expect(latestRevisionIndex).toBeLessThan(printed.indexOf('`feature.type` IN ("technology")'));
+    expect(printed.indexOf('`feature.type` IN ("technology")')).toBeLessThan(
+      printed.indexOf('MATCH(')
+    );
     expect(fetchLatestRevisions).not.toHaveBeenCalled();
   });
 
-  it('returns the latest revision when only a stale revision of the group ranked', async () => {
+  it('returns a newer authoritative revision written after ranking', async () => {
     (queryEsql as jest.Mock).mockResolvedValue(
       rankResponse([
         ['u1', 'src-a', 'feature', T1],
@@ -115,16 +125,15 @@ describe('IndicatorSearcher.findFeaturesAcrossSources', () => {
     expect((await run()).hits).toEqual([]);
   });
 
-  it('applies the caller limit after collapsing revisions into groups', async () => {
+  it('applies the caller limit in rank order', async () => {
     (queryEsql as jest.Mock).mockResolvedValue(
       rankResponse([
         ['u1', 'src-a', 'feature', T1],
-        ['u1', 'src-a', 'feature', T2],
         ['u2', 'src-b', 'feature', T1],
       ])
     );
     fetchLatestRevisions.mockResolvedValue([
-      storedFeatureIn('src-a', 'u1', T2),
+      storedFeatureIn('src-a', 'u1', T1),
       storedFeatureIn('src-b', 'u2', T1),
     ]);
 

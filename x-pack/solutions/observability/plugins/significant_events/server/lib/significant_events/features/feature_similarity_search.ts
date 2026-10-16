@@ -44,7 +44,6 @@ export interface FeatureSimilarityGroup {
   error?: string;
 }
 
-/** Slug for a stored source id; ids are opaque, slugs are what the model reads and writes. */
 export type SourceSlugResolver = (sourceId: string) => string;
 
 const MAX_SIMILAR_FEATURES = 5;
@@ -60,7 +59,6 @@ const compareRepresentative = (currentSourceId: string) => (a: Feature, b: Featu
   Number(b.source_id === currentSourceId) - Number(a.source_id === currentSourceId) ||
   toTime(b.updated_at) - toTime(a.updated_at);
 
-// One slot per slug, in relevance order, so cross-source copies cannot fill the hit window.
 const collapseBySlug = (
   features: Feature[],
   currentSourceId: string,
@@ -93,7 +91,6 @@ const collapseBySlug = (
 export interface FindSimilarFeaturesScope {
   kiClient: Pick<KnowledgeIndicatorClient, 'findFeaturesAcrossSources' | 'getFeatureSourcesBySlug'>;
   sourceIds: string[];
-  /** Source being analyzed; its own copy wins a confidence tie. */
   currentSourceId: string;
   getSourceSlug: SourceSlugResolver;
 }
@@ -131,7 +128,6 @@ export const findSimilarFeatures = async ({
   });
 };
 
-// Each candidate costs three ES|QL queries over the whole feature corpus of the space.
 const CANDIDATE_CONCURRENCY = 5;
 
 export const searchFeaturesForCandidates = async ({

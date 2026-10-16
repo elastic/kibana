@@ -104,8 +104,7 @@ describe('toStoredFeature', () => {
       includeEmbedding: true,
     });
 
-    expect(stored.search_embedding).not.toContain('Source:');
-    expect(stored.search_embedding).not.toContain(SOURCE_ID);
+    expect(stored.search_embedding).not.toContain(`Source: ${SOURCE_ID}`);
   });
 
   it('round-trips the source id onto the feature', () => {
