@@ -557,6 +557,23 @@ export class AlertService {
   }
 
   /**
+   * Whether Elasticsearch refused a read because the caller holds no privilege on the pattern.
+   *
+   * A caller with read somewhere else gets an empty result for a pattern it cannot see, because
+   * the wildcard resolves to no authorized index. A caller with no index privileges at all is
+   * refused the search action outright, before resolution, so the same absence arrives as an
+   * error instead. Both mean the attack is not readable, so they must be treated alike.
+   */
+  private static isUnauthorizedRead(error: unknown): boolean {
+    const candidate = error as {
+      statusCode?: number;
+      body?: { error?: { type?: string } };
+    };
+
+    return candidate?.statusCode === 403 || candidate?.body?.error?.type === 'security_exception';
+  }
+
+  /**
    * Reads each referenced attack's authorization fields as the caller, keyed by `_id`.
    *
    * Searches an index pattern rather than `mget`-ing the attachment's index: privileges are granted
@@ -584,15 +601,32 @@ export class AlertService {
     await pMap(
       Array.from(idsByPattern.entries()),
       async ([index, ids]) => {
-        const { hits } = await this.scopedClusterClient.search<AttackAuthorizationFields>({
-          index,
-          size: ids.length,
-          query: { ids: { values: ids } },
-          _source: [ALERT_RULE_TYPE_ID, SPACE_IDS],
-          // A pattern that currently resolves to nothing is a missing attack, not a failure.
-          ignore_unavailable: true,
-          allow_no_indices: true,
-        });
+        let hits;
+
+        try {
+          ({ hits } = await this.scopedClusterClient.search<AttackAuthorizationFields>({
+            index,
+            size: ids.length,
+            query: { ids: { values: ids } },
+            _source: [ALERT_RULE_TYPE_ID, SPACE_IDS],
+            // A pattern that currently resolves to nothing is a missing attack, not a failure.
+            ignore_unavailable: true,
+            allow_no_indices: true,
+          }));
+        } catch (error) {
+          if (!AlertService.isUnauthorizedRead(error)) {
+            throw error;
+          }
+
+          // Leaving the ids unresolved reports them as not found, the same as an empty result.
+          this.logger.debug(
+            `Caller cannot read ${index}, treating its referenced attacks as not found: ${ids.join(
+              ', '
+            )}`
+          );
+
+          return;
+        }
 
         for (const hit of hits.hits) {
           if (hit._id != null) {
