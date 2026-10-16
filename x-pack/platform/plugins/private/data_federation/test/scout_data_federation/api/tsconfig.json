@@ -9,6 +9,5 @@
   },
   "kbn_references": [
     "@kbn/scout",
-    "@kbn/data-federation-plugin"
   ]
 }
