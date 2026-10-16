@@ -8,7 +8,7 @@
 import type { MetricVisualizationState } from '@kbn/lens-common';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return typeof value === 'object' && value !== null;
 }
 
 export function isMetricVisualizationState(state: unknown): state is MetricVisualizationState {

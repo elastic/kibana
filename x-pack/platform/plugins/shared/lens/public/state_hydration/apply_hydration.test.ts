@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { DatasourceStates, TextBasedPersistedState } from '@kbn/lens-common';
+import type { DatasourceStates, IndexPatternMap, TextBasedPersistedState } from '@kbn/lens-common';
 import { LENS_DATASOURCE_ID, LENS_METRIC_ID } from '@kbn/lens-common';
+import { createMockedIndexPattern } from '../datasources/form_based/mocks';
 import { applyStateHydration } from './apply_hydration';
 
 const visualizationState = {
@@ -41,6 +42,29 @@ const formBasedDatasourceStates = (): DatasourceStates => ({
     },
   },
 });
+
+const indexPatterns: IndexPatternMap = {
+  'esql-logs': createMockedIndexPattern({ id: 'esql-logs', timeFieldName: '@timestamp' }),
+};
+
+const textBasedDatasourceStates = (): DatasourceStates => ({
+  [LENS_DATASOURCE_ID.TEXT_BASED]: {
+    isLoading: false,
+    state: {
+      layers: {
+        layer_0: {
+          columns: [{ columnId: 'col1', fieldName: 'bytes', meta: { type: 'number' } }],
+          query: { esql: 'FROM logs-*' },
+          index: 'esql-logs',
+        },
+      },
+    },
+  },
+});
+
+const textBasedLayerTimeField = (datasourceStates: DatasourceStates) =>
+  (datasourceStates[LENS_DATASOURCE_ID.TEXT_BASED]?.state as TextBasedPersistedState).layers.layer_0
+    .timeField;
 
 const secondaryColumnLabel = (datasourceStates: DatasourceStates) =>
   (
@@ -113,6 +137,52 @@ describe('applyStateHydration', () => {
     expect(secondaryColumnLabel(result.datasourceStates)).toBe('Custom Name');
   });
 
+  it('hydrates text-based layer time fields for a non-metric visualization when indexPatterns are passed', () => {
+    const datasourceStates = textBasedDatasourceStates();
+    const result = applyStateHydration({
+      visualizationId: 'lnsXY',
+      visualizationState: { layers: [] },
+      datasourceStates,
+      context: 'editor',
+      indexPatterns,
+    });
+
+    expect(textBasedLayerTimeField(result.datasourceStates)).toBe('@timestamp');
+    expect(result.visualizationState).toEqual({ layers: [] });
+  });
+
+  it('skips text-based time-field hydration when there is no text-based datasource', () => {
+    const datasourceStates = formBasedDatasourceStates();
+    const result = applyStateHydration({
+      visualizationId: 'lnsXY',
+      visualizationState: { layers: [] },
+      datasourceStates,
+      context: 'editor',
+      indexPatterns,
+    });
+
+    expect(result).toEqual({
+      visualizationState: { layers: [] },
+      datasourceStates,
+    });
+  });
+
+  it('skips text-based time-field hydration when indexPatterns are omitted', () => {
+    const datasourceStates = textBasedDatasourceStates();
+    const result = applyStateHydration({
+      visualizationId: 'lnsXY',
+      visualizationState: { layers: [] },
+      datasourceStates,
+      context: 'editor',
+    });
+
+    expect(result).toEqual({
+      visualizationState: { layers: [] },
+      datasourceStates,
+    });
+    expect(textBasedLayerTimeField(result.datasourceStates)).toBeUndefined();
+  });
+
   it.each(['editor', 'expression'] as const)(
     'rebuilds a missing ES|QL metric trendline on the %s path',
     (context) => {
@@ -133,7 +203,6 @@ describe('applyStateHydration', () => {
               layer_0: {
                 index: 'esql-logs',
                 query: { esql: 'FROM logs-* | STATS avg_bytes = AVG(bytes)' },
-                timeField: '@timestamp',
                 columns: [
                   {
                     columnId: 'metric_accessor_metric',
@@ -152,13 +221,76 @@ describe('applyStateHydration', () => {
         visualizationState: metricVisualizationState,
         datasourceStates,
         context,
+        indexPatterns,
       });
 
       const layers = (
         result.datasourceStates[LENS_DATASOURCE_ID.TEXT_BASED]?.state as TextBasedPersistedState
       ).layers;
 
+      expect(layers.layer_0.timeField).toBe('@timestamp');
       expect(layers.layer_0_trendline.query?.esql).toContain('BUCKET');
     }
   );
+
+  it('rebuilds a trendline whose query still uses a stale time field after time-field backfill', () => {
+    const metricVisualizationState = {
+      layerId: 'layer_0',
+      layerType: 'data' as const,
+      metricAccessor: 'metric_accessor_metric',
+      trendlineLayerId: 'layer_0_trendline',
+      trendlineLayerType: 'metricTrendline' as const,
+      trendlineMetricAccessor: 'metric_accessor_trendline',
+      trendlineTimeAccessor: 'x_date_histogram',
+    };
+    const datasourceStates: DatasourceStates = {
+      [LENS_DATASOURCE_ID.TEXT_BASED]: {
+        isLoading: false,
+        state: {
+          layers: {
+            layer_0: {
+              index: 'esql-logs',
+              query: { esql: 'FROM logs-* | STATS avg_bytes = AVG(bytes)' },
+              columns: [
+                {
+                  columnId: 'metric_accessor_metric',
+                  fieldName: 'avg_bytes',
+                  meta: { type: 'number' },
+                },
+              ],
+            },
+            layer_0_trendline: {
+              index: 'esql-logs',
+              query: {
+                esql: 'FROM logs-* | STATS avg_bytes = AVG(bytes) BY BUCKET(order_date, 1 hour)',
+              },
+              columns: [
+                {
+                  columnId: 'x_date_histogram',
+                  fieldName: 'order_date',
+                  meta: { type: 'date' },
+                },
+              ],
+            },
+          },
+        },
+      },
+    };
+
+    const result = applyStateHydration({
+      visualizationId: LENS_METRIC_ID,
+      visualizationState: metricVisualizationState,
+      datasourceStates,
+      context: 'expression',
+      indexPatterns,
+    });
+
+    const trendlineLayer = (
+      result.datasourceStates[LENS_DATASOURCE_ID.TEXT_BASED]?.state as TextBasedPersistedState
+    ).layers.layer_0_trendline;
+
+    expect(trendlineLayer.timeField).toBe('@timestamp');
+    expect(trendlineLayer.query?.esql).toContain('BUCKET');
+    expect(trendlineLayer.query?.esql).not.toContain('order_date');
+  });
 });

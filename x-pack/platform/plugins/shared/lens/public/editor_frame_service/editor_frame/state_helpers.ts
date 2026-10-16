@@ -315,6 +315,7 @@ export async function initializeSources(
     visualizationState: initializedVisualizationState,
     datasourceStates: initializedDatasourceStates,
     context: 'editor',
+    indexPatterns,
   });
 
   return {
@@ -490,6 +491,7 @@ export async function persistedStateToExpression(
     visualizationState: initializedVisualizationState,
     datasourceStates: initializedDatasourceStates,
     context: 'expression',
+    indexPatterns,
   });
 
   const datasourceLayers = getDatasourceLayers(
