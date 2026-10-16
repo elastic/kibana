@@ -24,7 +24,6 @@ export const createLayoutArranger =
     const { chatModel } = await modelProvider.getDefaultModel();
     const { system, user } = buildLayoutPrompt(request);
 
-    // Not a forced tool choice, which some models (e.g. Claude with extended thinking) reject.
     const response = await chatModel
       .bindTools(
         [
