@@ -294,12 +294,12 @@ steps:
               limit: 3
 
       - label: 'Evals: Detection Watch Rule Creation'
-        key: kbn-evals-weekly-detection-watch-rule-creation
+        key: kbn-evals-weekly-az-detection-watch-rule-creation
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:
           KBN_EVALS: '1'
           FTR_EIS_CCM: '1'
-          EVAL_SUITE_ID: 'detection-watch-rule-creation'
+          EVAL_SUITE_ID: 'az-detection-watch-rule-creation'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *weekly_eis_core_models

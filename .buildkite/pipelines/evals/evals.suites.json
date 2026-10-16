@@ -493,16 +493,16 @@
       ]
     },
     {
-      "id": "detection-watch-rule-creation",
+      "id": "az-detection-watch-rule-creation",
       "name": "Detection Watch Rule Creation",
       "slackChannel": "#security-generative-ai-evals",
-      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation/playwright.config.ts",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-az-detection-watch-rule-creation/playwright.config.ts",
       "tags": [
         "security",
         "detection-engineering"
       ],
       "ciLabels": [
-        "evals:detection-watch-rule-creation"
+        "evals:az-detection-watch-rule-creation"
       ],
       "serverConfigSet": "evals_detection_watch_rule_creation"
     },

@@ -5522,9 +5522,9 @@ importers:
       '@kbn/evals-suite-attack-discovery-fp-tp':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp
-      '@kbn/evals-suite-detection-watch-rule-creation':
+      '@kbn/evals-suite-az-detection-watch-rule-creation':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-az-detection-watch-rule-creation
       '@kbn/evals-suite-endpoint':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-endpoint
@@ -9743,7 +9743,7 @@ importers:
 
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp: {}
 
-  x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation: {}
+  x-pack/solutions/security/packages/kbn-evals-suite-az-detection-watch-rule-creation: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-endpoint: {}
 

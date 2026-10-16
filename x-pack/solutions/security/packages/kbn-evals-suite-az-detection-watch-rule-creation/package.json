@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/evals-suite-detection-watch-rule-creation",
+  "name": "@kbn/evals-suite-az-detection-watch-rule-creation",
   "private": true,
   "version": "1.0.0",
   "license": "Elastic License 2.0"
