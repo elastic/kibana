@@ -6,19 +6,13 @@
  */
 
 import * as rt from 'io-ts';
-import { MAX_BULK_CREATE_ATTACHMENTS } from '../../../constants';
 import {
   AttachmentPatchRequestRt,
   AttachmentRequestRt,
   AttachmentRequestWithoutRefsRt,
 } from './v1';
-import {
-  AttachmentRtV2,
-  AttachmentsRtV2,
-  UnifiedAttachmentPayloadRt,
-} from '../../domain/attachment/v2';
+import { AttachmentRtV2, UnifiedAttachmentPayloadRt } from '../../domain/attachment/v2';
 import { UnifiedAttachmentPutRequestRt } from './v2';
-import { limitedArraySchema } from '../../../schema';
 
 export const AttachmentRequestRtV2 = rt.union([AttachmentRequestRt, UnifiedAttachmentPayloadRt]);
 export const AttachmentRequestWithoutRefsRtV2 = rt.union([
@@ -37,32 +31,6 @@ export const AttachmentsFindResponseRtV2 = rt.strict({
   total: rt.number,
 });
 
-// Version-spanning bulk-create payload: the internal route still accepts both v1
-// legacy and unified wire shapes and converts to unified before the client call.
-export const BulkCreateAttachmentsRequestRtV2 = limitedArraySchema({
-  codec: AttachmentRequestRtV2,
-  min: 0,
-  max: MAX_BULK_CREATE_ATTACHMENTS,
-  fieldName: 'attachments',
-});
-
-// Bulk-get response still accepts leftover cases-comments shapes: the getter
-// decodes the legacy-shaped branch for unknown persistable-state subtype ids.
-// Narrow this to unified-only once that fallback is gone.
-export const BulkGetAttachmentsResponseRtV2 = rt.strict({
-  attachments: AttachmentsRtV2,
-  errors: rt.array(
-    rt.strict({
-      error: rt.string,
-      message: rt.string,
-      status: rt.union([rt.undefined, rt.number]),
-      savedObjectId: rt.string,
-    })
-  ),
-});
-
 export type AttachmentRequestV2 = rt.TypeOf<typeof AttachmentRequestRtV2>;
 export type AttachmentPatchRequestV2 = rt.TypeOf<typeof AttachmentPatchRequestRtV2>;
 export type AttachmentsFindResponseV2 = rt.TypeOf<typeof AttachmentsFindResponseRtV2>;
-export type BulkCreateAttachmentsRequestV2 = rt.TypeOf<typeof BulkCreateAttachmentsRequestRtV2>;
-export type BulkGetAttachmentsResponseV2 = rt.TypeOf<typeof BulkGetAttachmentsResponseRtV2>;

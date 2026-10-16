@@ -206,20 +206,36 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
             <EuiButton
               onClick={onCreate.bind(null, updatedProps)}
               fill
-              aria-label={i18n.translate(
-                'xpack.aiops.embeddablePatternAnalysis.config.applyFlyoutAriaLabel',
-                {
-                  defaultMessage: 'Apply changes',
-                }
-              )}
+              aria-label={
+                isNewPanel
+                  ? i18n.translate(
+                      'xpack.aiops.embeddablePatternAnalysis.config.saveFlyoutAriaLabel',
+                      {
+                        defaultMessage: 'Save pattern analysis',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.aiops.embeddablePatternAnalysis.config.applyFlyoutAriaLabel',
+                      {
+                        defaultMessage: 'Apply changes',
+                      }
+                    )
+              }
               isDisabled={!isFormValid}
-              iconType="check"
+              iconType={isNewPanel ? undefined : 'check'}
               data-test-subj="aiopsPatternAnalysisConfirmButton"
             >
-              <FormattedMessage
-                id="xpack.aiops.embeddablePatternAnalysis.config.applyAndCloseLabel"
-                defaultMessage="Apply and close"
-              />
+              {isNewPanel ? (
+                <FormattedMessage
+                  id="xpack.aiops.embeddablePatternAnalysis.config.saveButtonLabel"
+                  defaultMessage="Save"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.aiops.embeddablePatternAnalysis.config.applyAndCloseLabel"
+                  defaultMessage="Apply and close"
+                />
+              )}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

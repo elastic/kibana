@@ -30,6 +30,7 @@ import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bul
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { AttacksActionMenu } from './attacks_action_menu';
 import { ATTACK_DISCOVERY_ACTION_IDS } from '../../../../common/constants/action_ids';
+import { toAttacksToAttach } from '../../../../cases/attachments/attack/utils';
 
 interface AttacksGroupTakeActionItemsProps {
   attack: AttackDiscoveryAlert;
@@ -39,6 +40,8 @@ interface AttacksGroupTakeActionItemsProps {
   onActionSuccess?: () => void;
   /** Whether to include the AI assistant action in the menu (default true) */
   showAiAssistantAction?: boolean;
+  /** Whether to include the navigation action (default true); off where the surface has its own. */
+  showNavigationAction?: boolean;
   /** Telemetry source for action events (e.g. flyout vs table) */
   telemetrySource: AttacksActionTelemetrySource;
   /**
@@ -58,6 +61,7 @@ export function AttacksGroupTakeActionItems({
   closePopover,
   onActionSuccess,
   showAiAssistantAction = true,
+  showNavigationAction = true,
   telemetrySource,
   isRemoteDocument,
 }: AttacksGroupTakeActionItemsProps) {
@@ -121,7 +125,10 @@ export function AttacksGroupTakeActionItems({
     telemetrySource,
   });
 
-  const attacksWithTimelineAlerts = useMemo(() => [{ ...baseAttackProps }], [baseAttackProps]);
+  const attacksWithTimelineAlerts = useMemo(
+    () => [{ ...baseAttackProps, timestamp: attack.timestamp }],
+    [attack.timestamp, baseAttackProps]
+  );
 
   const { items: runWorkflowItems, panels: runWorkflowPanels } =
     useAttackRunWorkflowContextMenuItems({
@@ -157,11 +164,14 @@ export function AttacksGroupTakeActionItems({
     [attack, baseAttackProps]
   );
 
+  const attacksToAttach = useMemo(() => toAttacksToAttach([attack]), [attack]);
+
   const { items: casesItems, panels: casePanels } = useAttackCaseContextMenuItems({
     closePopover,
     attacksWithCase,
     telemetrySource,
     title: attack.title,
+    attacksToAttach,
   });
   const { items: viewInAiAssistantItems } = useAttackViewInAiAssistantContextMenuItems({
     attack,
@@ -221,7 +231,7 @@ export function AttacksGroupTakeActionItems({
       casePanels={casePanels}
       datasetItems={datasetItems}
       isRemoteDocument={isRemoteDocument}
-      navigationItems={navigationItems}
+      navigationItems={showNavigationAction || isRemoteDocument ? navigationItems : []}
       runWorkflowItems={runWorkflowItems}
       runWorkflowPanels={runWorkflowPanels}
       showAiAssistantAction={showAiAssistantAction}

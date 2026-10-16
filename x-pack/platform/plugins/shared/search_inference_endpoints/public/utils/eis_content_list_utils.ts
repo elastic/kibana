@@ -19,6 +19,8 @@ import {
   getModelEOLDate,
   getModelReleaseDate,
   getProviderOptions,
+  getRegionOptions,
+  modelMatchesRegionOption,
   MODEL_TYPE_FILTERS,
   type EisDisplayOptions,
   type GroupedModel,
@@ -31,6 +33,9 @@ export const EIS_PROVIDER_FILTER_ID = 'provider';
 
 /** Filter dimension for the task-type category (`LLM`, `Embedding`, `Rerank`). */
 export const EIS_CATEGORY_FILTER_ID = 'category';
+
+/** Filter dimension for geographies and regions where a model is available. */
+export const EIS_REGION_FILTER_ID = 'region';
 
 /** Sort field for the model name; matches the `Column.Name` id. */
 export const EIS_NAME_SORT_FIELD = 'title';
@@ -127,6 +132,7 @@ export const createEisFindItems =
   async ({ searchQuery, filters, sort, page }) => {
     const providerFilter = getIncludeExclude(filters[EIS_PROVIDER_FILTER_ID]);
     const categoryFilter = getIncludeExclude(filters[EIS_CATEGORY_FILTER_ID]);
+    const regionFilter = getIncludeExclude(filters[EIS_REGION_FILTER_ID]);
     const selectedTaskTypes = new Set(categoryFilter.include as TaskTypeCategory[]);
 
     const matched = sortModels(
@@ -134,12 +140,17 @@ export const createEisFindItems =
         searchQuery,
         selectedProviders: providerFilter.include,
         selectedTaskTypes,
+        selectedRegionOptions: regionFilter.include,
         ...displayOptions,
-      }).filter(
-        ({ modelCreator, categories }) =>
-          !providerFilter.exclude.includes(modelCreator) &&
-          !categories.some((category) => categoryFilter.exclude.includes(category))
-      ),
+      }).filter((model) => {
+        if (providerFilter.exclude.includes(model.modelCreator)) {
+          return false;
+        }
+        if (model.categories.some((category) => categoryFilter.exclude.includes(category))) {
+          return false;
+        }
+        return !regionFilter.exclude.some((key) => modelMatchesRegionOption(model, key));
+      }),
       sort
     );
 
@@ -150,11 +161,12 @@ export const createEisFindItems =
   };
 
 /**
- * Registers the two custom dimensions with the search bar so `provider:` and
- * `category:` resolve in typed queries, not just via the toolbar controls.
+ * Registers the custom dimensions with the search bar so `provider:`,
+ * `category:`, and `region:` resolve in typed queries, not just via the toolbar controls.
  */
 export const createEisFieldDefinitions = (models: GroupedModel[]): FieldDefinition[] => {
   const providers = getProviderOptions(models).map(({ key }) => key);
+  const regionOptions = getRegionOptions(models.flatMap((model) => model.endpoints));
   const matchesPartial = (value: string, partial: string) =>
     value.toLowerCase().includes(partial.toLowerCase());
 
@@ -177,6 +189,16 @@ export const createEisFieldDefinitions = (models: GroupedModel[]): FieldDefiniti
         MODEL_TYPE_FILTERS.filter(({ label }) => matchesPartial(label, displayValue)).map(
           ({ key }) => key
         ),
+    },
+    {
+      fieldName: EIS_REGION_FILTER_ID,
+      resolveIdToDisplay: (id) => regionOptions.find(({ key }) => key === id)?.label ?? id,
+      resolveDisplayToId: (displayValue) =>
+        regionOptions.find(({ label }) => label.toLowerCase() === displayValue.toLowerCase())?.key,
+      resolveFuzzyDisplayToIds: (displayValue) =>
+        regionOptions
+          .filter(({ label }) => matchesPartial(label, displayValue))
+          .map(({ key }) => key),
     },
   ];
 };

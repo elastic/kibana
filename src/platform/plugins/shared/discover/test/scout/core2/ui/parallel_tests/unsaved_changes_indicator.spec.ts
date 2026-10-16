@@ -110,7 +110,7 @@ spaceTest.describe('Discover unsaved changes indicator', { tag: tags.deploymentA
       await pageObjects.discover.loadSavedSearch('ES|QL Discover Session');
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
 
-      await pageObjects.discover.codeEditor.setCodeEditorValue('from logstash-* | limit 100');
+      await pageObjects.esqlEditor.setQuery('from logstash-* | limit 100');
       await pageObjects.discover.submitQuery();
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeVisible();
     }

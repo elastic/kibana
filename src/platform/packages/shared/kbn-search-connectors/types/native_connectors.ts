@@ -4444,10 +4444,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 4,
         required: true,
         sensitive: false,
-        tooltip: getEnableDocumentLevelSecurityTooltip(
-          translate('searchConnectors.nativeConnectors.salesforce.name', {
-            defaultMessage: 'Salesforce',
-          })
+        tooltip: translate(
+          'searchConnectors.content.nativeConnectors.salesforce.useDocumentLevelSecurityTooltip',
+          {
+            defaultMessage:
+              'Document level security applies Salesforce object-level Read permissions in Elasticsearch. Every user who can read an object type can access all synced records of that type; record-level sharing is not applied. Access control syncs keep user identities up to date.',
+          }
         ),
         type: BOOLEAN,
         ui_restrictions: [],
@@ -5102,6 +5104,42 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ui_restrictions: [],
         validations: [],
         value: true,
+      },
+      acl_sync_concurrency: {
+        default_value: 10,
+        depends_on: [
+          {
+            field: 'use_document_level_security',
+            value: true,
+          },
+        ],
+        display: NUMERIC,
+        label: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.aclSyncConcurrencyLabel',
+          {
+            defaultMessage: 'Maximum concurrent access control requests',
+          }
+        ),
+        options: [],
+        order: 18,
+        required: false,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.aclSyncConcurrencyTooltip',
+          {
+            defaultMessage:
+              'Number of users processed in parallel during an access control sync. Lower this value if Microsoft Graph throttles the connector.',
+          }
+        ),
+        type: INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [
+          {
+            type: 'greater_than',
+            constraint: 0,
+          },
+        ],
+        value: 10,
       },
     },
     features: {

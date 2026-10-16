@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/significant-events-app-plugin",
-  "owner": "@elastic/nightshift-sre-agent-team",
+  "owner": "@elastic/nightshift",
   "description": "Significant Events UI",
   "group": "observability",
   "visibility": "private",
@@ -12,14 +12,13 @@
     "requiredPlugins": [
       "charts",
       "data",
-      "licensing",
+      "nightshiftSources",
       "share",
       "significantEvents",
-      "streams",
       "unifiedSearch",
     ],
-    "optionalPlugins": ["agentBuilder", "cloud", "cps", "nightshiftInvestigations", "spaces"],
-    "requiredBundles": ["kibanaReact", "observabilityAIAssistant", "stackConnectors"],
+    "optionalPlugins": ["agentBuilder", "cloud", "cps", "spaces"],
+    "requiredBundles": ["kibanaReact"],
     "extraPublicDirs": ["common"],
   },
 }

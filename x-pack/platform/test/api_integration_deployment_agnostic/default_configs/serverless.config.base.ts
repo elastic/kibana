@@ -36,7 +36,6 @@ const esServerArgsFromController = {
   es: [],
   oblt: ['xpack.apm_data.enabled=true'],
   security: ['xpack.security.authc.api_key.cache.max_keys=70000'],
-  workplaceai: [],
   vectordb: [],
 };
 
@@ -62,7 +61,6 @@ const kbnServerArgsFromController = {
     // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
     `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
   ],
-  workplaceai: [],
   vectordb: [],
 };
 

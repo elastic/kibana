@@ -23,6 +23,7 @@ import {
   executeEsql,
   validateEsqlQuery,
   buildTimeRangeParams,
+  buildTimeSeriesTimeRangeFilter,
 } from '../utils/esql';
 import { createRequestDocumentationPrompt, createGenerateEsqlPrompt } from './prompts';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
@@ -43,6 +44,7 @@ import {
 } from './actions';
 import type { EsqlLoadedDocumentation } from './documentation';
 import { hasRejectedJoinTarget } from './join_errors';
+import { withPromqlKeyword } from './promql_keyword';
 
 export const requestDocumentationSchema = z
   .object({
@@ -137,10 +139,15 @@ export const createNlToEsqlGraph = ({
         nlQuery: state.nlQuery,
         documentation,
         resource: state.resource,
+        additionalContext: state.additionalContext,
       })
     );
 
-    const requestedKeywords = [...commands, ...functions];
+    const requestedKeywords = withPromqlKeyword(
+      [...commands, ...functions],
+      state.nlQuery,
+      state.additionalContext
+    );
     const fetchedDoc = docBase.getDocumentation(requestedKeywords);
 
     const action: RequestDocumentationAction = {
@@ -312,7 +319,15 @@ export const createNlToEsqlGraph = ({
       const results = await executeEsql({
         query,
         params: buildTimeRangeParams(state.timeRange),
-        ...(schemaOnly ? { limit: 1, dropNullColumns: false } : {}),
+        // The schema probe only collects columns, so bounding it to the time range is safe and
+        // keeps TS and PROMQL queries from aggregating all data.
+        ...(schemaOnly
+          ? {
+              limit: 1,
+              dropNullColumns: false,
+              filter: buildTimeSeriesTimeRangeFilter(query, state.timeRange),
+            }
+          : {}),
         includeFrozen,
         esClient,
       });

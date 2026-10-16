@@ -38,11 +38,30 @@ export interface SetupDeps {
   pluginPaths: string[];
 }
 
+/** @internal */
+export interface InternalI18nServiceSetup extends I18nServiceSetup {
+  /**
+   * When `true`, Kibana writes a `KBN_LOCALE` cookie on every rendered
+   * response so the browser remembers the resolved locale across page loads,
+   * anonymous pages, and post-logout browsing. Controlled by
+   * `i18n.allowLocaleCookie` in `kibana.yml`. Defaults to `true`.
+   */
+  allowLocaleCookie: boolean;
+
+  /**
+   * When `true`, Kibana falls back to the browser's `Accept-Language` header
+   * when neither the user profile nor the `KBN_LOCALE` cookie selects a locale.
+   * Controlled by `i18n.detectBrowserLocale` in `kibana.yml`. Defaults to `true`.
+   */
+  detectBrowserLocale: boolean;
+}
+
 export interface InternalI18nServicePreboot {
   getTranslationHash(): string;
   getTranslationHashes(): Record<string, string>;
   getAvailableLocales(): ReadonlyArray<AvailableLocale>;
   allowLocaleCookie: boolean;
+  detectBrowserLocale: boolean;
 }
 
 export class I18nService {
@@ -62,6 +81,7 @@ export class I18nService {
       translationHashes,
       localeFileMap,
       allowLocaleCookie,
+      detectBrowserLocale,
     } = await this.initTranslations(pluginPaths);
     const { dist: isDist } = this.coreContext.env.packageInfo;
     http.registerRoutes('', (router) =>
@@ -79,10 +99,11 @@ export class I18nService {
       getTranslationHashes: () => translationHashes,
       getAvailableLocales: () => availableLocales,
       allowLocaleCookie,
+      detectBrowserLocale,
     };
   }
 
-  public async setup({ pluginPaths, http }: SetupDeps): Promise<I18nServiceSetup> {
+  public async setup({ pluginPaths, http }: SetupDeps): Promise<InternalI18nServiceSetup> {
     const {
       defaultLocale,
       locales,
@@ -92,6 +113,7 @@ export class I18nService {
       translationHashes,
       localeFileMap,
       allowLocaleCookie,
+      detectBrowserLocale,
     } = await this.initTranslations(pluginPaths);
 
     const router = http.createRouter('');
@@ -112,6 +134,7 @@ export class I18nService {
       getTranslationHash: () => translationHash,
       getTranslationHashes: () => translationHashes,
       allowLocaleCookie,
+      detectBrowserLocale,
     };
   }
 
@@ -158,6 +181,7 @@ export class I18nService {
       translationHashes,
       localeFileMap,
       allowLocaleCookie: i18nConfig.allowLocaleCookie,
+      detectBrowserLocale: i18nConfig.detectBrowserLocale,
     };
   }
 }

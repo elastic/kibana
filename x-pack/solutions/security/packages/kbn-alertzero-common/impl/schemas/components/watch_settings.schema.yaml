@@ -30,6 +30,15 @@ components:
         Run health of a long-running worker, shown instead of a timestamp when not ok. Workers only —
         a skill is invoked rather than run continuously, so it has no health of its own.
 
+    WorkerBlockingReason:
+      type: string
+      enum: [no_model]
+      description: >-
+        Why a Worker can't run in this space. `no_model`: the space has no AI model to run it on (no
+        LLM connector and no Elastic Managed LLM, or "use only the default connector" is on with no
+        default set). It applies to every Worker alike, and while it holds the Worker can't be
+        switched on; switching it off is still allowed.
+
     WorkerSettingsExtras:
       type: object
       additionalProperties: true
@@ -58,6 +67,13 @@ components:
           description: >-
             Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to
             render the interval control.
+        serviceAccountId:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          description: >-
+            Service account this worker runs as. Omitted until one is selected. Already installed
+            workers stay readable without it. Enabling the worker requires a non-empty id.
         extras:
           $ref: '#/components/schemas/WorkerSettingsExtras'
           description: Omitted for Workers that declare no Worker-specific settings.
@@ -76,6 +92,14 @@ components:
           $ref: '#/components/schemas/WatchAutonomyLevel'
         scheduleInterval:
           $ref: '#/components/schemas/WorkerScheduleInterval'
+        serviceAccountId:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          nullable: true
+          description: >-
+            Omitted keeps the stored account. A non-empty id sets it. Null clears it. Enabling a
+            worker requires a non-empty id, including a save that leaves an already enabled worker on.
         extras:
           $ref: '#/components/schemas/WorkerSettingsExtras'
 
@@ -92,6 +116,7 @@ components:
         - settings
         - settingsRevision
         - workflowId
+        - blockingReasons
       properties:
         id:
           type: string
@@ -130,6 +155,13 @@ components:
             Id of this Worker's installed per-space workflow. Null when that workflow has not
             been installed yet. The client uses it to open the workflow's Executions tab and
             does not derive it from the Worker id.
+        blockingReasons:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkerBlockingReason'
+          description: >-
+            Why this Worker can't run; empty when nothing blocks it. A blocking reason never
+            changes the stored `enabled` value.
         skills:
           type: array
           items:
