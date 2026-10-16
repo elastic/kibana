@@ -129,14 +129,14 @@ describe('InvestigationCard', () => {
     const item = investigation();
     renderCard({ investigation: item, onClick });
 
-    fireEvent.click(screen.getByTestId('investigationCard'));
-    fireEvent.keyDown(screen.getByTestId('investigationCard'), { key: 'Enter' });
+    fireEvent.click(screen.getByTestId('investigationCardButton'));
+    fireEvent.keyDown(screen.getByTestId('investigationCardButton'), { key: 'Enter' });
 
     expect(onClick).toHaveBeenCalledTimes(2);
     expect(onClick).toHaveBeenCalledWith(item);
   });
 
-  it('renders trailing actions on the age row without opening the card when they are clicked', () => {
+  it('keeps trailing actions outside the card button so they do not open the card', () => {
     const onClick = jest.fn();
     renderCard({
       investigation: investigation(),
@@ -148,9 +148,11 @@ describe('InvestigationCard', () => {
       ),
     });
 
+    const cardButton = screen.getByTestId('investigationCardButton');
+    expect(cardButton).not.toContainElement(screen.getByTestId('cardAction'));
+
     fireEvent.click(screen.getByTestId('cardAction'));
 
-    expect(screen.getByTestId('cardAction')).toBeInTheDocument();
     expect(onClick).not.toHaveBeenCalled();
   });
 });

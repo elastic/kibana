@@ -26,12 +26,12 @@ const MAX_VISIBLE_ENTITIES = 3;
 
 export interface InvestigationCardProps {
   investigation: InvestigationSummary;
-  /** Makes the card a button; for example to open the conversation details flyout. */
+  /** Makes the main card content a button; for example to open the conversation details flyout. */
   onClick?: (investigation: InvestigationSummary) => void;
   isSelected?: boolean;
   /**
-   * Trailing controls on the age row (open in chat, overflow menu, …). The host owns the actions
-   * and must stop click propagation so they do not open the card.
+   * Trailing controls on the age row (open in chat, overflow menu, …). Rendered as a sibling of
+   * the card button so actions are not nested interactive controls.
    */
   actions?: React.ReactNode;
 }
@@ -86,6 +86,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   const title = getInvestigationDisplayTitle(investigation);
   const { summary } = metadata;
   const hasEntities = (investigation.impact?.entities?.length ?? 0) > 0;
+  const isInteractive = onClick != null;
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
@@ -94,127 +95,141 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
     }
   };
 
+  const inProgressStatus = inProgress ? (
+    <span
+      data-test-subj="investigationCardRunning"
+      css={css`
+        display: inline-flex;
+        align-items: center;
+        gap: ${euiTheme.size.xs};
+      `}
+    >
+      <EuiText
+        size="xs"
+        component="span"
+        css={[
+          aiLabelCss,
+          css`
+            padding: 0;
+            line-height: 1;
+          `,
+        ]}
+      >
+        {IN_PROGRESS_LABEL}
+      </EuiText>
+      <InvestigatingTypingDots color={aiDotsFill} />
+    </span>
+  ) : undefined;
+
+  const cardBody = (
+    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <ConversationMetaInfo timestamp={createdAt} inFlightStatus={inProgressStatus} />
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false} css={{ minWidth: 0, paddingBlockStart: euiTheme.size.xs }}>
+        <EuiText size="s">
+          <p
+            className="eui-textTruncate"
+            title={title}
+            css={css`
+              margin: 0;
+              font-weight: ${euiTheme.font.weight.semiBold};
+            `}
+            data-test-subj="investigationCardTitle"
+          >
+            {title}
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+
+      {summary && (
+        <EuiFlexItem grow={false} css={{ paddingBlockStart: euiTheme.size.xs }}>
+          <EuiText size="xs" color="subdued">
+            <p
+              data-test-subj="investigationCardSummary"
+              css={css`
+                margin: 0;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+              `}
+            >
+              {summary}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      )}
+
+      {hasEntities && (
+        <EuiFlexItem
+          grow={false}
+          css={{
+            // 8px under the summary; 4px when the badges follow the title directly.
+            paddingBlockStart: summary ? euiTheme.size.s : euiTheme.size.xs,
+          }}
+        >
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+            <EntityChips investigation={investigation} />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+
   return (
     <div
       data-test-subj="investigationCard"
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      aria-pressed={onClick ? isSelected : undefined}
-      onClick={onClick ? () => onClick(investigation) : undefined}
-      onKeyDown={onClick ? handleKeyDown : undefined}
       css={css`
         /* Top matches the right (16px); bottom/left stay 24px so content aligns with ConversationCard. */
         padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l};
         background: ${isSelected
           ? euiTheme.colors.backgroundBaseInteractiveSelect
           : euiTheme.colors.backgroundBasePlain};
-        ${onClick ? 'cursor: pointer;' : ''}
-        ${onClick && !isSelected
-          ? `&:hover { background: ${euiTheme.colors.backgroundBaseSubdued}; }`
+        ${isInteractive && !isSelected
+          ? `&:has([data-test-subj='investigationCardButton']:hover) {
+              background: ${euiTheme.colors.backgroundBaseSubdued};
+            }`
           : ''}
       `}
     >
-      <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="s"
-            responsive={false}
-            justifyContent="spaceBetween"
+      <div
+        css={css`
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          column-gap: ${euiTheme.size.s};
+          align-items: start;
+        `}
+      >
+        <div
+          role={isInteractive ? 'button' : undefined}
+          tabIndex={isInteractive ? 0 : undefined}
+          aria-label={isInteractive ? title : undefined}
+          aria-pressed={isInteractive ? isSelected : undefined}
+          data-test-subj={isInteractive ? 'investigationCardButton' : undefined}
+          onClick={isInteractive ? () => onClick(investigation) : undefined}
+          onKeyDown={isInteractive ? handleKeyDown : undefined}
+          css={css`
+            grid-column: 1;
+            grid-row: 1 / -1;
+            min-width: 0;
+            ${isInteractive ? 'cursor: pointer;' : ''}
+          `}
+        >
+          {cardBody}
+        </div>
+        {actions != null && (
+          <div
+            css={css`
+              grid-column: 2;
+              grid-row: 1;
+            `}
           >
-            <EuiFlexItem grow={false}>
-              <ConversationMetaInfo
-                timestamp={createdAt}
-                inFlightStatus={
-                  inProgress ? (
-                    <span
-                      data-test-subj="investigationCardRunning"
-                      css={css`
-                        display: inline-flex;
-                        align-items: center;
-                        gap: ${euiTheme.size.xs};
-                      `}
-                    >
-                      <EuiText
-                        size="xs"
-                        component="span"
-                        css={[
-                          aiLabelCss,
-                          css`
-                            padding: 0;
-                            line-height: 1;
-                          `,
-                        ]}
-                      >
-                        {IN_PROGRESS_LABEL}
-                      </EuiText>
-                      <InvestigatingTypingDots color={aiDotsFill} />
-                    </span>
-                  ) : undefined
-                }
-              />
-            </EuiFlexItem>
-            {actions != null && (
-              <EuiFlexItem
-                grow={false}
-                onClick={(event: React.MouseEvent) => event.stopPropagation()}
-                onKeyDown={(event: React.KeyboardEvent) => event.stopPropagation()}
-              >
-                {actions}
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false} css={{ minWidth: 0, paddingBlockStart: euiTheme.size.xs }}>
-          <EuiText size="s">
-            <p
-              className="eui-textTruncate"
-              title={title}
-              css={css`
-                margin: 0;
-                font-weight: ${euiTheme.font.weight.semiBold};
-              `}
-              data-test-subj="investigationCardTitle"
-            >
-              {title}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-
-        {summary && (
-          <EuiFlexItem grow={false} css={{ paddingBlockStart: euiTheme.size.xs }}>
-            <EuiText size="xs" color="subdued">
-              <p
-                data-test-subj="investigationCardSummary"
-                css={css`
-                  margin: 0;
-                  display: -webkit-box;
-                  -webkit-line-clamp: 2;
-                  -webkit-box-orient: vertical;
-                  overflow: hidden;
-                `}
-              >
-                {summary}
-              </p>
-            </EuiText>
-          </EuiFlexItem>
+            {actions}
+          </div>
         )}
-
-        {hasEntities && (
-          <EuiFlexItem
-            grow={false}
-            css={{
-              // 8px under the summary; 4px when the badges follow the title directly.
-              paddingBlockStart: summary ? euiTheme.size.s : euiTheme.size.xs,
-            }}
-          >
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-              <EntityChips investigation={investigation} />
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      </div>
     </div>
   );
 };
