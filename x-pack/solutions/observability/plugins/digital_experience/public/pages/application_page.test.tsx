@@ -21,36 +21,44 @@ const timeRange = { rangeFrom: 'now-7d', rangeTo: 'now' };
 const setTimeRange = jest.fn();
 
 beforeEach(() => {
-  jest.mocked(useTimeRange).mockReturnValue({ timeRange, isTimeRangeInUrl: true, setTimeRange });
+  jest.mocked(useTimeRange).mockReturnValue({
+    timeRange,
+    isTimeRangeInUrl: true,
+    setTimeRange,
+  });
 });
 
 describe('ApplicationPage', () => {
-  it('renders the Classic RUM dashboard with the path serviceName and only the Overview tab', () => {
+  it('renders the Classic RUM dashboard with the path serviceName and only the Overview tab', async () => {
     const ClassicRumDashboard = jest.fn(({ serviceName }: { serviceName: string }) => (
       <div data-test-subj="classicRumDashboard">{serviceName}</div>
     ));
+    const getClassicRumDashboard = jest.fn().mockResolvedValue(ClassicRumDashboard);
     useKibanaServicesMock.mockReturnValue({
-      ux: { ClassicRumDashboard },
+      ux: { getClassicRumDashboard },
     } as unknown as ReturnType<typeof useKibanaServices>);
 
     render(<ApplicationPage serviceName="my-app" />);
 
+    expect(await screen.findByTestId('classicRumDashboard')).toHaveTextContent('my-app');
     expect(useRouteBreadcrumb).toHaveBeenCalledWith([{ title: 'my-app' }, { title: 'Overview' }]);
     expect(ClassicRumDashboard.mock.calls[0][0]).toEqual({
       serviceName: 'my-app',
       timeRange,
       onTimeRangeChange: setTimeRange,
     });
-    expect(screen.getByTestId('classicRumDashboard')).toHaveTextContent('my-app');
+    expect(getClassicRumDashboard).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('digitalExperienceTab-overview')).toBeInTheDocument();
     expect(screen.queryByText('Sessions')).not.toBeInTheDocument();
   });
 
-  it('renders an empty prompt when the ux plugin is not available', () => {
-    useKibanaServicesMock.mockReturnValue({} as unknown as ReturnType<typeof useKibanaServices>);
+  it('renders an empty prompt when the dashboard cannot be loaded', async () => {
+    useKibanaServicesMock.mockReturnValue({
+      ux: { getClassicRumDashboard: jest.fn().mockRejectedValue(new Error('chunk failed')) },
+    } as unknown as ReturnType<typeof useKibanaServices>);
 
     render(<ApplicationPage serviceName="my-app" />);
 
-    expect(screen.getByTestId('digitalExperienceOverviewEmpty')).toBeInTheDocument();
+    expect(await screen.findByTestId('digitalExperienceOverviewEmpty')).toBeInTheDocument();
   });
 });

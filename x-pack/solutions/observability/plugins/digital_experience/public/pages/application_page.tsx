@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiPageHeader } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiPageHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useAbortableAsync } from '@kbn/react-hooks';
 import { useRouteBreadcrumb } from '../breadcrumbs/use_route_breadcrumb';
 import { useKibanaServices } from '../hooks/use_kibana_services';
 import { useTimeRange } from '../hooks/use_time_range';
@@ -23,6 +24,27 @@ const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
   }),
 };
 
+const overviewUnavailablePrompt = (
+  <EuiEmptyPrompt
+    data-test-subj="digitalExperienceOverviewEmpty"
+    iconType="package"
+    title={
+      <h2>
+        {i18n.translate('xpack.digitalExperience.application.overview.empty.title', {
+          defaultMessage: 'No overview available',
+        })}
+      </h2>
+    }
+    body={
+      <p>
+        {i18n.translate('xpack.digitalExperience.application.overview.empty.body', {
+          defaultMessage: 'The Overview for this application could not be loaded.',
+        })}
+      </p>
+    }
+  />
+);
+
 export function ApplicationPage({ serviceName }: { serviceName: string }) {
   const { ux } = useKibanaServices();
   const { timeRange, setTimeRange } = useTimeRange();
@@ -30,6 +52,25 @@ export function ApplicationPage({ serviceName }: { serviceName: string }) {
   const selectedTab: ApplicationTabId = 'overview';
 
   useRouteBreadcrumb([{ title: serviceName }, { title: APPLICATION_TAB_LABELS[selectedTab] }]);
+
+  // The dashboard code is downloaded on first use; ux caches it for later visits.
+  const { value: ClassicRumDashboard, error } = useAbortableAsync(
+    async () => ux?.getClassicRumDashboard(),
+    [ux]
+  );
+
+  const renderOverview = () => {
+    if (ClassicRumDashboard) {
+      return (
+        <ClassicRumDashboard
+          serviceName={serviceName}
+          timeRange={timeRange}
+          onTimeRangeChange={setTimeRange}
+        />
+      );
+    }
+    return !ux || error ? overviewUnavailablePrompt : <EuiLoadingSpinner size="xl" />;
+  };
 
   return (
     <>
@@ -42,33 +83,7 @@ export function ApplicationPage({ serviceName }: { serviceName: string }) {
           'data-test-subj': `digitalExperienceTab-${id}`,
         }))}
       />
-      {ux ? (
-        <ux.ClassicRumDashboard
-          serviceName={serviceName}
-          timeRange={timeRange}
-          onTimeRangeChange={setTimeRange}
-        />
-      ) : (
-        <EuiEmptyPrompt
-          data-test-subj="digitalExperienceOverviewEmpty"
-          iconType="package"
-          title={
-            <h2>
-              {i18n.translate('xpack.digitalExperience.application.overview.empty.title', {
-                defaultMessage: 'No overview available',
-              })}
-            </h2>
-          }
-          body={
-            <p>
-              {i18n.translate('xpack.digitalExperience.application.overview.empty.body', {
-                defaultMessage:
-                  'The Overview for this application is not available in this deployment yet.',
-              })}
-            </p>
-          }
-        />
-      )}
+      {renderOverview()}
     </>
   );
 }

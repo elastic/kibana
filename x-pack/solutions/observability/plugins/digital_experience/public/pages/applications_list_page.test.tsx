@@ -19,110 +19,107 @@ jest.mock('../hooks/use_time_range');
 jest.mock('../hooks/use_digital_experience_router');
 jest.mock('../components/time_range_picker', () => ({ TimeRangePicker: jest.fn(() => null) }));
 
-const useKibanaServicesMock = jest.mocked(useKibanaServices);
 const timeRange = { rangeFrom: 'now-15m', rangeTo: 'now' };
-
-beforeEach(() => {
-  jest.clearAllMocks();
-  jest
-    .mocked(useTimeRange)
-    .mockReturnValue({ timeRange, isTimeRangeInUrl: true, setTimeRange: jest.fn() });
-  jest.mocked(useDigitalExperienceRouter).mockReturnValue(digitalExperienceRouter);
-});
-
 const addError = jest.fn();
 
-const createServices = (ux?: { fetchClassicRumApplications: jest.Mock }) =>
-  ({
+const mockTimeRange = (range: ReturnType<typeof useTimeRange>['timeRange']) =>
+  jest.mocked(useTimeRange).mockReturnValue({
+    timeRange: range,
+    isTimeRangeInUrl: true,
+    setTimeRange: jest.fn(),
+  });
+
+const renderPage = (fetchClassicRumApplications: jest.Mock) => {
+  jest.mocked(useKibanaServices).mockReturnValue({
     application: {
       getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
     },
     notifications: { toasts: { addError } },
-    ux,
+    ux: { fetchClassicRumApplications },
   } as unknown as ReturnType<typeof useKibanaServices>);
+  return render(<ApplicationsListPage />);
+};
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockTimeRange(timeRange);
+  jest.mocked(useDigitalExperienceRouter).mockReturnValue(digitalExperienceRouter);
+});
 
 describe('ApplicationsListPage', () => {
-  it('lists the applications returned by ux, each linking to its application view with the time range', async () => {
-    const ux = { fetchClassicRumApplications: jest.fn().mockResolvedValue(['app-a', 'app-b']) };
-    useKibanaServicesMock.mockReturnValue(createServices(ux));
-
-    render(<ApplicationsListPage />);
+  it('lists the applications, each linking to its application view with the time range', async () => {
+    const fetchApplications = jest.fn().mockResolvedValue(['app-a', 'app-b']);
+    renderPage(fetchApplications);
 
     const links = await screen.findAllByTestId('digitalExperienceApplicationLink');
     expect(links.map((link) => link.getAttribute('href'))).toEqual([
       '/app/digital_experience/app-a?rangeFrom=now-15m&rangeTo=now',
       '/app/digital_experience/app-b?rangeFrom=now-15m&rangeTo=now',
     ]);
-    expect(ux.fetchClassicRumApplications).toHaveBeenCalledWith({
+    expect(fetchApplications).toHaveBeenCalledWith({
       start: expect.any(Number),
       end: expect.any(Number),
       signal: expect.any(AbortSignal),
     });
   });
 
-  it('shows an error toast and the empty prompt when the fetch fails', async () => {
-    const error = new Error('boom');
-    const ux = { fetchClassicRumApplications: jest.fn().mockRejectedValue(error) };
-    useKibanaServicesMock.mockReturnValue(createServices(ux));
+  it('shows the loading state, not the empty prompt, while the request is pending', () => {
+    renderPage(jest.fn(() => new Promise<string[]>(() => {})));
 
-    render(<ApplicationsListPage />);
-
-    await waitFor(() =>
-      expect(addError).toHaveBeenCalledWith(error, { title: 'Could not load the applications' })
-    );
-    expect(await screen.findByTestId('digitalExperienceApplicationsEmpty')).toBeInTheDocument();
-  });
-
-  it('shows the loading table, not the empty prompt, while the fetch is pending', () => {
-    const ux = { fetchClassicRumApplications: jest.fn(() => new Promise<string[]>(() => {})) };
-    useKibanaServicesMock.mockReturnValue(createServices(ux));
-
-    render(<ApplicationsListPage />);
-
-    expect(screen.getByTestId('digitalExperienceApplicationsTable')).toBeInTheDocument();
+    expect(screen.getByText('Loading applications…')).toBeInTheDocument();
     expect(screen.queryByTestId('digitalExperienceApplicationsEmpty')).not.toBeInTheDocument();
   });
 
-  it('aborts the pending fetch on unmount', () => {
-    const fetchClassicRumApplications = jest.fn(
-      (_params: { signal: AbortSignal }) => new Promise<string[]>(() => {})
-    );
-    useKibanaServicesMock.mockReturnValue(createServices({ fetchClassicRumApplications }));
-
-    const { unmount } = render(<ApplicationsListPage />);
-    const [[{ signal }]] = fetchClassicRumApplications.mock.calls;
-    unmount();
-
-    expect(signal.aborted).toBe(true);
-  });
-
-  it('shows an empty prompt when there are no results', async () => {
-    const ux = { fetchClassicRumApplications: jest.fn().mockResolvedValue([]) };
-    useKibanaServicesMock.mockReturnValue(createServices(ux));
-
-    render(<ApplicationsListPage />);
+  it('shows the empty prompt when there are no applications', async () => {
+    renderPage(jest.fn().mockResolvedValue([]));
 
     expect(await screen.findByTestId('digitalExperienceApplicationsEmpty')).toBeInTheDocument();
-    expect(ux.fetchClassicRumApplications).toHaveBeenCalled();
+  });
+
+  it('shows an error toast and the empty prompt when the request fails', async () => {
+    const error = new Error('boom');
+    renderPage(jest.fn().mockRejectedValue(error));
+
+    expect(await screen.findByTestId('digitalExperienceApplicationsEmpty')).toBeInTheDocument();
+    expect(addError).toHaveBeenCalledWith(error, { title: 'Could not load the applications' });
+  });
+
+  it('drops the previous results and reports an invalid range without fetching', async () => {
+    const fetchApplications = jest.fn().mockResolvedValue(['app-a']);
+    const { rerender } = renderPage(fetchApplications);
+    await screen.findByTestId('digitalExperienceApplicationLink');
+
+    mockTimeRange({ rangeFrom: 'not-a-date', rangeTo: 'now' });
+    rerender(<ApplicationsListPage />);
+
+    expect(await screen.findByTestId('digitalExperienceApplicationsEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('digitalExperienceApplicationLink')).not.toBeInTheDocument();
+    expect(addError).toHaveBeenCalledWith(expect.any(Error), {
+      title: 'Could not load the applications',
+    });
+    expect(fetchApplications).toHaveBeenCalledTimes(1);
   });
 
   it('fetches again when the time range picker refreshes', async () => {
-    const ux = { fetchClassicRumApplications: jest.fn().mockResolvedValue([]) };
-    useKibanaServicesMock.mockReturnValue(createServices(ux));
-    render(<ApplicationsListPage />);
-    await waitFor(() => expect(ux.fetchClassicRumApplications).toHaveBeenCalledTimes(1));
+    const fetchApplications = jest.fn().mockResolvedValue([]);
+    renderPage(fetchApplications);
+    await waitFor(() => expect(fetchApplications).toHaveBeenCalledTimes(1));
 
     const { onRefresh } = jest.mocked(TimeRangePicker).mock.calls[0][0];
     act(() => onRefresh());
 
-    await waitFor(() => expect(ux.fetchClassicRumApplications).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(fetchApplications).toHaveBeenCalledTimes(2));
   });
 
-  it('shows an empty prompt without the ux plugin', () => {
-    useKibanaServicesMock.mockReturnValue(createServices());
+  it('aborts the pending request on unmount', () => {
+    const fetchApplications = jest.fn(
+      (_params: { signal: AbortSignal }) => new Promise<string[]>(() => {})
+    );
+    const { unmount } = renderPage(fetchApplications);
+    const [[{ signal }]] = fetchApplications.mock.calls;
 
-    render(<ApplicationsListPage />);
+    unmount();
 
-    expect(screen.getByTestId('digitalExperienceApplicationsEmpty')).toBeInTheDocument();
+    expect(signal.aborted).toBe(true);
   });
 });

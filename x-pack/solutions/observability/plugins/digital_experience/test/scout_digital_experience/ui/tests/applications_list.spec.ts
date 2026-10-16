@@ -41,9 +41,11 @@ test.describe(
       });
 
       await test.step('links back to the list with the same time range', async () => {
-        const href = await digitalExperience.breadcrumbLink('Applications').getAttribute('href');
+        const applicationsLink = digitalExperience.breadcrumbLink('Applications');
+        await expect(applicationsLink).toHaveAttribute('href', /\/app\/digital_experience\/?\?/);
+        const href = String(await applicationsLink.getAttribute('href'));
 
-        expect(hasTimeRange(new URL(href ?? '', page.url()))).toBe(true);
+        expect(hasTimeRange(new URL(href, page.url()))).toBe(true);
       });
     });
   }

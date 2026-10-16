@@ -60,7 +60,6 @@ describe('useTimeRange', () => {
     expect(result.current.timeRange).toEqual({ rangeFrom: 'now-15m', rangeTo: 'now' });
     expect(result.current.isTimeRangeInUrl).toBe(false);
   });
-
   it('sets the time range in the timefilter and the URL, keeping other params', () => {
     mockRoute(
       { rangeFrom: 'now-15m', rangeTo: 'now' },

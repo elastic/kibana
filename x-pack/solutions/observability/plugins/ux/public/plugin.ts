@@ -47,14 +47,13 @@ import type {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { OBLT_UX_APP_ID } from '@kbn/deeplinks-observability';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { createLazyClassicRumDashboard } from './components/classic_rum_dashboard/lazy_classic_rum_dashboard';
 import type { ClassicRumDashboardProps } from './components/classic_rum_dashboard/types';
 
 export type UxPluginSetup = void;
 
 export interface UxPluginStart {
-  /** The Classic RUM dashboard of one service, to render inside another app. */
-  ClassicRumDashboard: ComponentType<ClassicRumDashboardProps>;
+  /** Loads the Classic RUM dashboard, which renders one service inside another app. */
+  getClassicRumDashboard(): Promise<ComponentType<ClassicRumDashboardProps>>;
   /** Names of the services with RUM data in the range, in epoch milliseconds. */
   fetchClassicRumApplications(params: {
     start: number;
@@ -239,13 +238,29 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
   }
 
   public start(core: CoreStart, plugins: ApmPluginStartDeps): UxPluginStart {
+    // Loaded on first use and cached, so the dashboard code stays out of the page-load bundle.
+    let classicRumDashboard: Promise<ComponentType<ClassicRumDashboardProps>> | undefined;
+
     return {
-      ClassicRumDashboard: createLazyClassicRumDashboard({
-        core,
-        setupDeps: this.pluginSetupDeps,
-        startDeps: plugins,
-        isDev: this.initContext.env.mode.dev,
-      }),
+      getClassicRumDashboard: () => {
+        classicRumDashboard ??= Promise.all([
+          import('./components/classic_rum_dashboard/classic_rum_dashboard'),
+          plugins.spaces?.getActiveSpace(),
+        ]).then(([{ createClassicRumDashboard }, activeSpace]) =>
+          createClassicRumDashboard({
+            core,
+            setupDeps: this.pluginSetupDeps,
+            startDeps: plugins,
+            isDev: this.initContext.env.mode.dev,
+            spaceId: activeSpace?.id ?? 'default',
+          })
+        );
+        // A failed download is not cached, so the next visit retries it.
+        classicRumDashboard.catch(() => {
+          classicRumDashboard = undefined;
+        });
+        return classicRumDashboard;
+      },
       fetchClassicRumApplications: async (params) => {
         const { fetchClassicRumApplications } = await import(
           './services/rest/fetch_classic_rum_applications'

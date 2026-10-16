@@ -13812,6 +13812,25 @@
             }
           }
         },
+        "digital_experience": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
+              },
+              "value": {
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
+              }
+            }
+          }
+        },
         "enterpriseSearch": {
           "type": "array",
           "items": {
