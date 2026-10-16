@@ -227,7 +227,7 @@ steps:
             FROM .significant_events-detections
             | INLINE STATS processed_count = COUNT(processed_by) BY detection_id
             | WHERE change_point_type IS NOT NULL AND processed_count == 0
-            | KEEP detection_id
+            | KEEP detection_id, rule_uuid
           filter:
             bool:
               filter:
@@ -263,6 +263,8 @@ steps:
                 detection_ids:
                   - '{{ foreach.item[0] }}'
                 processed_by: '{{ execution.id }}'
+                # The classifier's decision for this detection's rule, so the marker says why.
+                skip: '${{ steps.classify_detections.output.decisions | where: ''rule_uuid'', foreach.item[1] | first }}'
             on-failure:
               continue: true
 
