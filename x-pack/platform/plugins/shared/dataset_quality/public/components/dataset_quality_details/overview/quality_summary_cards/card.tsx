@@ -117,7 +117,7 @@ export function Card({
       isDisabled={onClick ? isCardDisabled : undefined}
       onClick={isClickable ? onClick : undefined}
       css={cardStyle}
-      aria-pressed={isSelected}
+      aria-current={isSelected ? 'true' : undefined}
       title={content}
       titleElement="span"
       textAlign="left"
