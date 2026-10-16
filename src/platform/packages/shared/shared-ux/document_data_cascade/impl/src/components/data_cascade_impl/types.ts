@@ -66,12 +66,12 @@ export interface CascadeRowCellRendererProps<G extends GroupNode, L extends Leaf
   virtualizerController: ChildVirtualizerController;
   rowIndex: number;
   /**
-   * Portal information for the sticky header. When `isActiveSticky` is true and `extensionPointElement`
-   * is available, the child can use `createPortal` to render content into the sticky header.
+   * Portal information for the sticky header. When `isActiveSticky` is true the sticky header is being
+   * displayed for the row and the child can use `createPortal` to render content into `extensionPointElement`.
    * This allows the child to maintain its React tree relationship with the portaled content,
    * ensuring state updates trigger proper re-renders.
    */
-  stickyHeaderExtensionPoint: StickyHeaderExtensionPointContextValue | null;
+  stickyHeaderExtensionPoint: StickyHeaderExtensionPointContextValue;
 }
 
 export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends LeafNode>
@@ -186,9 +186,14 @@ export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNod
    */
   isMobile: boolean;
   /**
-   * Denotes if the row is sticky.
+   * Denotes if the row is the sticky candidate, i.e. the nearest expanded ancestor of the first visible row.
    */
   isActiveSticky: boolean;
+  /**
+   * Denotes if the sticky header slot is currently displayed. The slot only becomes visible once the
+   * sticky row's own header has scrolled out of view, which can be later than `isActiveSticky` turning true.
+   */
+  isStickyHeaderVisible: boolean;
   /**
    * Ref that provides a reference to the DOM element that renders the cascade row.
    */
