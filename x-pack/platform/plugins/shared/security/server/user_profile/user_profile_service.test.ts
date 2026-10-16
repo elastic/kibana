@@ -694,7 +694,7 @@ describe('UserProfileService', () => {
         });
       });
 
-      it('returns `null` if api key retrieval fails (e.g. forbidden)', async () => {
+      it('fails if api key retrieval fails (e.g. forbidden)', async () => {
         const failureReason = new errors.ResponseError(
           securityMock.createApiResponse({ statusCode: 500, body: 'some message' })
         );
@@ -703,7 +703,9 @@ describe('UserProfileService', () => {
           .asCurrentUser.security.getApiKey.mockRejectedValue(failureReason);
 
         const startContract = userProfileService.start(mockStartParams);
-        await expect(startContract.getCurrent({ request: mockApiKeyRequest })).resolves.toBeNull();
+        await expect(startContract.getCurrent({ request: mockApiKeyRequest })).rejects.toBe(
+          failureReason
+        );
 
         expect(
           mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
@@ -1285,7 +1287,7 @@ describe('UserProfileService', () => {
         });
       });
 
-      it('returns `null` if api key retrieval fails (e.g. forbidden)', async () => {
+      it('fails if api key retrieval fails (e.g. forbidden)', async () => {
         const failureReason = new errors.ResponseError(
           securityMock.createApiResponse({ statusCode: 500, body: 'some message' })
         );
@@ -1296,7 +1298,7 @@ describe('UserProfileService', () => {
         const startContract = userProfileService.start(mockStartParams);
         await expect(
           startContract.getCurrentProfileId({ request: mockApiKeyRequest })
-        ).resolves.toBeNull();
+        ).rejects.toBe(failureReason);
 
         expect(
           mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey

@@ -310,7 +310,9 @@ export class UserProfileService {
    * Retrieves the user profile ID from an API key authenticated request by retrieving the API Key itself.
    * @param clusterClient The cluster client
    * @param request The HTTP request
-   * @returns The profile ID if found, undefined otherwise
+   * @returns The profile ID if found, undefined when the caller legitimately has none
+   * @throws If the API key lookup itself fails, since that leaves the caller's identity unknown
+   * rather than proving they have no profile.
    */
   private async getCurrentUserProfileIdViaApiKey(
     clusterClient: IClusterClient,
@@ -339,6 +341,7 @@ export class UserProfileService {
       this.logger.error(
         `Failed to retrieve API key for user profile retrieval: ${getDetailedErrorMessage(error)}`
       );
+      throw error;
     }
   }
 
@@ -465,7 +468,16 @@ export class UserProfileService {
         this.logger.debug(
           `Request to get current user profile is authenticated via API key [fake=${!!fakeRequestProfileResolution}].`
         );
-        profileId = await this.getCurrentUserProfileIdViaApiKey(clusterClient, request);
+        try {
+          profileId = await this.getCurrentUserProfileIdViaApiKey(clusterClient, request);
+        } catch (error) {
+          recordFailure({
+            profileActivationRequired,
+            apiKeyRetrievalRequired,
+            fakeRequestProfileResolution,
+          });
+          throw error;
+        }
       }
     }
 
