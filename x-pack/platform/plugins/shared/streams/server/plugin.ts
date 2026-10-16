@@ -13,7 +13,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, SPACES_EXTENSION_ID } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import { registerRoutes } from '@kbn/server-route-repository';
@@ -60,6 +60,11 @@ import { createConfigDistributorClient } from './lib/unit_config/config_distribu
 import { createEncryptionKeyStore } from './lib/unit_config/encryption_key_store';
 import { createCredentialPreparer } from './lib/unit_config/seal_credentials';
 import type { UnitConfigHooks } from './lib/unit_config/types';
+import {
+  registerRepublishUnitsTask,
+  scheduleRepublishUnitsTask,
+} from './lib/unit_config/republish_units_task';
+import { StreamsUnitService } from './lib/saved_objects/streams_unit_service';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 const STREAMS_ALLOWED_PROJECT_TYPES = ['observability', 'security'];
@@ -94,6 +99,8 @@ export class StreamsPlugin
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
+  private republishUnitsEnabled = false;
+  private readonly stopController = new AbortController();
   private attachmentService?: AttachmentService;
   private streamsService?: StreamsService;
   private streamsGetScopedClients?: GetScopedClients;
@@ -301,6 +308,33 @@ export class StreamsPlugin
         : undefined,
     };
 
+    this.republishUnitsEnabled = this.config.canvas.enabled && Boolean(this.config.distributor.url);
+    if (this.republishUnitsEnabled) {
+      const republishLogger = this.logger.get('republish-units');
+      registerRepublishUnitsTask({
+        taskManager: plugins.taskManager,
+        logger: republishLogger,
+        stopSignal: this.stopController.signal,
+        getRepublisher: async () => {
+          const [coreStart, pluginsStart] = await core.getStartServices();
+          return new StreamsUnitService({
+            soClient: coreStart.savedObjects.getUnsafeInternalClient({
+              includedHiddenTypes: [STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE],
+              excludedExtensions: [SPACES_EXTENSION_ID],
+            }),
+            logger: republishLogger,
+            validateUnit: unitConfigHooks.validate,
+            publishUnit: unitConfigHooks.publish,
+            prepareCredentials: unitConfigHooks.prepareCredentials,
+            encryptedSavedObjectsClient: pluginsStart.encryptedSavedObjects.getClient({
+              includedHiddenTypes: [STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE],
+            }),
+            canEncrypt: this.canEncrypt,
+          });
+        },
+      });
+    }
+
     const routeRegistrationOptions = {
       dependencies: {
         server: this.server,
@@ -492,10 +526,18 @@ export class StreamsPlugin
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
 
+    if (this.republishUnitsEnabled) {
+      void scheduleRepublishUnitsTask({
+        taskManager: plugins.taskManager,
+        logger: this.logger.get('republish-units'),
+      });
+    }
+
     return {};
   }
 
   public async stop() {
+    this.stopController.abort();
     this.subscriptions.forEach((s) => s.unsubscribe());
     await this.patternExtractionService?.stop();
   }

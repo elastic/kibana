@@ -91,3 +91,10 @@ export interface UnitConfigHooks {
    */
   prepareCredentials?: PrepareUnitCredentials;
 }
+
+export type RepublishUnitOutcome =
+  | 'republished'
+  | 'resealed'
+  | 'conflict'
+  | 'aborted'
+  | 'not_found';

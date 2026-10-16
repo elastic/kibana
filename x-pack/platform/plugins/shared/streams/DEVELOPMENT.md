@@ -63,6 +63,7 @@ Important consequences:
 - `streams-configuration` is an Encrypted Saved Object. `secrets` is encrypted at rest. `unit_id` and `sealed_credentials` are in AAD, so the cache stays readable but is authenticated: editing or swapping a cached blob makes `secrets` fail to decrypt, and the next save fails before anything is sent. `unit` is **not** in AAD (canvas edits would re-encrypt on every save). Always overwrite the full document, and do not `soClient.update` encrypted or AAD attributes.
 - v1 uses a single unit id: `default` (`STREAMS_DEFAULT_UNIT_ID`).
 - Unit PUT order: seal credentials → distributor validate → configuration SO → distributor publish → UI metadata. A validation failure writes nothing. A publish failure rolls back the configuration SO (including decrypted `secrets` and `sealed_credentials`).
+- `streams:republish-units` re-sends every stored unit every 30 minutes and re-seals after a key rotation. See "Republish and key rotation".
 - Without `xpack.streams.distributor.url`, validate and publish are no-ops.
 - PUT requires `xpack.encryptedSavedObjects.encryptionKey` (`canEncrypt`). Dev mode configures a static key automatically.
 
@@ -125,7 +126,28 @@ Without a client certificate (a local fake distributor), set `xpack.cloud.server
 
 The distributor's main branch ignores `credentials` on validate and cannot compile `{ credential }` references yet, so a local tilt run with a reference fails validation until the backend catches up (ingest-dev#9480).
 
-Kibana re-seals a unit's secrets only when the unit is saved. A unit that is not saved again after a key rotation keeps blobs under the previous kid, which the collector still accepts while that key stays in the Secret.
+#### Republish and key rotation
+
+When `xpack.streams.canvas.enabled` and `xpack.streams.distributor.url` are both set, the task `streams:republish-units` runs every 30 minutes and once after Kibana starts. For each stored unit it runs the same credential preparation as a save, with the stored secrets as input.
+
+- Same kid and target: the stored blobs are reused and the task only sends `PUT /v1/units/{id}` again, without validate or an SO write. The distributor answers `unchanged`. This is the periodic re-issue the distributor expects, and it recreates a missing `StreamUnit`.
+- New kid, or new target (read from the client certificate at startup): the task re-seals, validates, writes the SO with the version it read, and publishes. If the PUT fails, times out or Kibana stops, the re-seal stays and the next run only sends the PUT. A rollback would roll the collector twice when a timed-out PUT was in fact applied.
+- Right before the PUT the task reads the version again. If a user save landed in between, it skips the unit.
+- Errors are logged at warn per unit, and the next run is the retry. A document from an earlier build whose cached blobs are not in the AAD keeps failing until `POST /internal/streams/unit/<id>/_reset`.
+
+A save can still race a task PUT in either direction. The distributor briefly holds the older unit, or the save gets a 409 from the distributor and rolls back. Every run sends the stored document again, so the distributor converges on the next sweep. An ordering token on the PUT is a spec follow-up.
+
+The task uses `getUnsafeInternalClient`, which keeps the encrypted saved objects extension, so a re-seal stores `secrets` encrypted.
+
+To check a rotation locally, write a new key file, then point `current-kid` at it:
+
+```bash
+KID2="$(date -u +%Y%m%d_%H%M%S)_$(openssl rand -hex 4)"
+openssl rand 32 > "/tmp/streams-encryption-key/streams-encryption-key.$KID2"
+printf '%s' "$KID2" > /tmp/streams-encryption-key/current-kid
+```
+
+Restart Kibana or wait for the next run. The log shows `Re-sealed credentials of Streams unit [default] and republished it`.
 
 ### Reset canvas saved objects
 
