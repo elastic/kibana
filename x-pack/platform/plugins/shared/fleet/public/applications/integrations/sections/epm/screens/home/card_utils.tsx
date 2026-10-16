@@ -23,7 +23,10 @@ import type {
 } from '@kbn/custom-integrations-plugin/common';
 
 import { hasDeferredInstallations } from '../../../../../../services/has_deferred_installations';
-import { getPackageReleaseLabel } from '../../../../../../../common/services';
+import {
+  getPackageReleaseLabel,
+  shouldAddIntegrationFromCatalog,
+} from '../../../../../../../common/services';
 
 import { dataTypes, installationStatuses } from '../../../../../../../common/constants';
 import type {
@@ -164,11 +167,11 @@ export const mapToCard = ({
       isDeprecated = true;
     }
 
-    // Content packages have no add-integration flow; keep linking to the overview page.
-    // Non-content packages go to the add-integration page only when the feature flag is on.
+    // Packages without an add-integration flow (content, documentation-only, assets-only) keep
+    // linking to the overview page. The rest go to the add-integration page when the feature flag is on.
     const { enableIntegrationTileClickToAdd } = ExperimentalFeaturesService.get();
     const url =
-      item.type === 'content' || !enableIntegrationTileClickToAdd
+      !enableIntegrationTileClickToAdd || !shouldAddIntegrationFromCatalog(item)
         ? getHref('integration_details_overview', {
             pkgkey: `${item.name}-${version}`,
             ...(item.integration ? { integration: item.integration } : {}),

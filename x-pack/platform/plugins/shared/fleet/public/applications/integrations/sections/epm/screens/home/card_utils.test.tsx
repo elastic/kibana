@@ -310,7 +310,103 @@ describe('Card utils', () => {
 
       it('should route integration packages to the add-integration page', () => {
         const cardItem = mapToCard({
-          item: { id: 'okta', name: 'okta', version: '1.0.0', type: 'integration' },
+          item: {
+            id: 'okta',
+            name: 'okta',
+            version: '1.0.0',
+            type: 'integration',
+            data_streams: [{ type: 'logs' }],
+          },
+          addBasePath,
+          getHref,
+        } as any);
+
+        expect(cardItem.url).toBe('add_integration_to_policy');
+      });
+
+      it('should route integration packages with policy templates and no data streams to the add-integration page', () => {
+        const cardItem = mapToCard({
+          item: {
+            id: 'apm',
+            name: 'apm',
+            version: '1.0.0',
+            type: 'integration',
+            policy_templates: [{ name: 'apmserver' }],
+          },
+          addBasePath,
+          getHref,
+        } as any);
+
+        expect(cardItem.url).toBe('add_integration_to_policy');
+      });
+
+      it('should route integration packages without data streams or policy templates to the overview page', () => {
+        const cardItem = mapToCard({
+          item: { id: 'corelight', name: 'corelight', version: '1.0.0', type: 'integration' },
+          addBasePath,
+          getHref,
+        } as any);
+
+        expect(cardItem.url).toBe('integration_details_overview');
+      });
+
+      it('should route supabase to the overview page even though it has data streams', () => {
+        const cardItem = mapToCard({
+          item: {
+            id: 'supabase',
+            name: 'supabase',
+            version: '1.0.0',
+            type: 'integration',
+            data_streams: [{ type: 'metrics' }],
+          },
+          addBasePath,
+          getHref,
+        } as any);
+
+        expect(cardItem.url).toBe('integration_details_overview');
+      });
+
+      it('should route uploaded packages with data streams to the add-integration page', () => {
+        const cardItem = mapToCard({
+          item: {
+            id: 'my_upload',
+            name: 'my_upload',
+            version: '1.0.0',
+            type: 'integration',
+            data_streams: [{ type: 'logs' }],
+            installationInfo: { version: '1.0.0', install_source: 'upload' },
+          },
+          addBasePath,
+          getHref,
+        } as any);
+
+        expect(cardItem.url).toBe('add_integration_to_policy');
+      });
+
+      it('should route uploaded packages without data streams or policy templates to the overview page', () => {
+        const cardItem = mapToCard({
+          item: {
+            id: 'my_upload',
+            name: 'my_upload',
+            version: '1.0.0',
+            type: 'integration',
+            installationInfo: { version: '1.0.0', install_source: 'upload' },
+          },
+          addBasePath,
+          getHref,
+        } as any);
+
+        expect(cardItem.url).toBe('integration_details_overview');
+      });
+
+      it('should route uploaded packages with only saved object attributes to the add-integration page', () => {
+        const cardItem = mapToCard({
+          item: {
+            id: 'my_upload',
+            name: 'my_upload',
+            version: '1.0.0',
+            installationInfo: { version: '1.0.0', install_source: 'upload' },
+          },
           addBasePath,
           getHref,
         } as any);
