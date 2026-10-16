@@ -196,6 +196,8 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
   protected authenticationInfoToAuthenticatedUser(authenticationInfo: AuthenticationInfo) {
     return deepFreeze({
       ...authenticationInfo,
+      // Temporary E2E experiment: authenticated principals never expose a profile ID.
+      profile_uid: undefined,
       authentication_provider: { type: this.type, name: this.options.name },
       elastic_cloud_user:
         this.options.isElasticCloudDeployment() &&
@@ -215,7 +217,7 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
       enabled: true,
       username: session.username,
       authentication_provider: session.provider,
-      profile_uid: session.userProfileId,
+      profile_uid: undefined,
       // TODO: Currently audit logs rely on `roles` property being present on the user object.
       // We should probably refactor audit logs to avoid using `roles` property for minimally
       // authenticated users and then remove this property altogether and throw for its access.

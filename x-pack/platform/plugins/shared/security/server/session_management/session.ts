@@ -244,6 +244,8 @@ export class Session {
       error: null,
       value: {
         ...Session.sessionIndexValueToSessionValue(sessionIndexValue, decryptedContent),
+        // Temporary E2E experiment: discard profile IDs from existing sessions too.
+        userProfileId: undefined,
         // Unlike session index, session cookie contains the most up-to-date idle timeout expiration.
         idleTimeoutExpiration: sessionCookieValue.idleTimeoutExpiration,
       },
