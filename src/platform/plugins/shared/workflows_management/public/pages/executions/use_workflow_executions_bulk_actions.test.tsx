@@ -25,7 +25,7 @@ import {
   useWorkflowExecutionsBulkActions,
 } from './use_workflow_executions_bulk_actions';
 import { createStartServicesMock } from '../../mocks';
-import { getTestProvider } from '../../shared/mocks/test_providers';
+import { getHookTestProvider } from '../../shared/mocks/test_providers';
 
 const mockRunWorkflow = jest.fn();
 const mockTestWorkflow = jest.fn();
@@ -88,7 +88,7 @@ describe('useWorkflowExecutionsBulkActions', () => {
           selectedExecutionIds: ['exec-1'],
         }),
       {
-        wrapper: getTestProvider({ services }),
+        wrapper: getHookTestProvider({ services }),
       }
     );
 
@@ -112,7 +112,7 @@ describe('useWorkflowExecutionsBulkActions', () => {
           selectedExecutionIds: ['exec-1'],
         }),
       {
-        wrapper: getTestProvider({ services }),
+        wrapper: getHookTestProvider({ services }),
       }
     );
 
@@ -135,7 +135,7 @@ describe('useWorkflowExecutionsBulkActions', () => {
           selectedExecutionIds: ['exec-1'],
         }),
       {
-        wrapper: getTestProvider({ services }),
+        wrapper: getHookTestProvider({ services }),
       }
     );
 
@@ -159,7 +159,7 @@ describe('useWorkflowExecutionsBulkActions', () => {
           selectedExecutionIds: ['exec-1', 'exec-2'],
         }),
       {
-        wrapper: getTestProvider({ services }),
+        wrapper: getHookTestProvider({ services }),
       }
     );
 
@@ -190,7 +190,7 @@ describe('useWorkflowExecutionsBulkActions', () => {
           selectedExecutionIds: ['exec-1'],
         }),
       {
-        wrapper: getTestProvider({ services }),
+        wrapper: getHookTestProvider({ services }),
       }
     );
 
@@ -227,7 +227,7 @@ describe('useWorkflowExecutionsBulkActions', () => {
           selectedExecutionIds: ['exec-1', 'exec-2'],
         }),
       {
-        wrapper: getTestProvider({ services }),
+        wrapper: getHookTestProvider({ services }),
       }
     );
 
@@ -269,7 +269,7 @@ describe('useWorkflowExecutionRerun', () => {
 
     const { result } = renderHook(
       () => useWorkflowExecutionRerun({ setSelectedExecution: mockSetSelectedExecution }),
-      { wrapper: getTestProvider({ services }) }
+      { wrapper: getHookTestProvider({ services }) }
     );
 
     await act(async () => {
@@ -296,7 +296,7 @@ describe('useWorkflowExecutionRerun', () => {
 
     const { result } = renderHook(
       () => useWorkflowExecutionRerun({ setSelectedExecution: mockSetSelectedExecution }),
-      { wrapper: getTestProvider({ services }) }
+      { wrapper: getHookTestProvider({ services }) }
     );
 
     await act(async () => {
@@ -325,7 +325,7 @@ describe('useWorkflowExecutionRerun', () => {
 
     const { result } = renderHook(
       () => useWorkflowExecutionRerun({ setSelectedExecution: mockSetSelectedExecution }),
-      { wrapper: getTestProvider({ services }) }
+      { wrapper: getHookTestProvider({ services }) }
     );
 
     await act(async () => {
@@ -346,7 +346,7 @@ describe('useWorkflowExecutionRerun', () => {
 
     const { result } = renderHook(
       () => useWorkflowExecutionRerun({ setSelectedExecution: mockSetSelectedExecution }),
-      { wrapper: getTestProvider({ services }) }
+      { wrapper: getHookTestProvider({ services }) }
     );
 
     await act(async () => {
