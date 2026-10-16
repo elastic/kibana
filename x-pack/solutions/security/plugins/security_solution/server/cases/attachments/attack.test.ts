@@ -19,15 +19,25 @@ import {
 import { getAttackOnDelete } from './attack';
 
 const ATTACK_INDEX = '.alerts-security.attack.discovery.alerts-default';
+/** What the attachment actually snapshots: the concrete backing index behind the alias. */
+const ATTACK_BACKING_INDEX = '.internal.alerts-security.attack.discovery.alerts-default-000001';
+const ATTACK_PATTERN = '.alerts-security.attack.discovery.alerts-*';
+const AD_HOC_BACKING_INDEX =
+  '.internal.adhoc.alerts-security.attack.discovery.alerts-default-000001';
+const AD_HOC_PATTERN = '.adhoc.alerts-security.attack.discovery.alerts-*';
 
-const attackTarget = (id: string, attackId: string): AttachmentDeleteTarget =>
+const attackTarget = (
+  id: string,
+  attackId: string,
+  index: string = ATTACK_INDEX
+): AttachmentDeleteTarget =>
   ({
     id,
     attributes: {
       type: SECURITY_ATTACK_ATTACHMENT_TYPE,
       attachmentId: attackId,
       owner: 'securitySolution',
-      metadata: { title: attackId, alertCount: 1, index: ATTACK_INDEX },
+      metadata: { title: attackId, alertCount: 1, index },
     },
   } as unknown as AttachmentDeleteTarget);
 
@@ -116,11 +126,33 @@ describe('getAttackOnDelete', () => {
     expect(result).toEqual({ relatedAttachmentIds: ['alert-att-1'] });
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: ATTACK_INDEX,
+        index: ATTACK_PATTERN,
         query: { ids: { values: ['attack-1'] } },
       })
     );
   });
+
+  it.each([
+    ['scheduled', ATTACK_BACKING_INDEX, ATTACK_PATTERN],
+    ['ad hoc', AD_HOC_BACKING_INDEX, AD_HOC_PATTERN],
+  ])(
+    'reads a %s attack through the readable pattern rather than its backing index',
+    async (_name, backingIndex, pattern) => {
+      // Users hold read on the alias pattern, not on `.internal.alerts-*`. Reading the
+      // snapshotted backing index would be refused and silently strand the attack's alerts.
+      mockAttacks([attackHit('attack-1', ['alert-1'])]);
+
+      const result = await onDelete({
+        caseId: 'case-1',
+        request,
+        attachments: [attackTarget('attack-att-1', 'attack-1', backingIndex)],
+        remainingAttachments: [alertTarget('alert-att-1', ['alert-1'])],
+      });
+
+      expect(result).toEqual({ relatedAttachmentIds: ['alert-att-1'] });
+      expect(esClient.search).toHaveBeenCalledWith(expect.objectContaining({ index: pattern }));
+    }
+  );
 
   it('keeps the alert attachments another attached attack still claims', async () => {
     mockAttacks([

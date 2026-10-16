@@ -43,7 +43,7 @@ export const bulkDeleteCaseAttachments = async ({
     return;
   }
 
-  const url = getCaseBulkDeleteAttachmentsUrl(caseId);
+  const url = getCaseBulkDeleteAttachmentsUrl(encodeURIComponent(caseId));
 
   for (let start = 0; start < attachmentIds.length; start += MAX_BULK_DELETE_ATTACHMENTS) {
     const ids = attachmentIds.slice(start, start + MAX_BULK_DELETE_ATTACHMENTS);
@@ -157,10 +157,13 @@ export const fetchCaseAttachments = async ({
   caseId,
   signal,
 }: FetchCaseAttachmentsParams): Promise<CaseAttachment[]> => {
-  const response = await http.get<ResolveCaseResponse>(`${getCaseDetailsUrl(caseId)}/resolve`, {
-    query: { includeComments: true },
-    signal,
-  });
+  const response = await http.get<ResolveCaseResponse>(
+    `${getCaseDetailsUrl(encodeURIComponent(caseId))}/resolve`,
+    {
+      query: { includeComments: true },
+      signal,
+    }
+  );
 
   return (response.case.comments ?? []).flatMap(toCaseAttachments);
 };

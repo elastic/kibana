@@ -16,6 +16,7 @@ import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
   getOriginalAlertIds,
+  toReadableAttackIndexPattern,
   transformInternalReplacements,
 } from '@kbn/elastic-assistant-common';
 import { z } from '@kbn/zod/v4';
@@ -52,7 +53,16 @@ const toAttackReferences = (targets: readonly AttachmentDeleteTarget[]): AttackR
   targets.flatMap(({ attributes }) => {
     const parsed = StoredAttackAttachmentSchema.safeParse(attributes);
     return parsed.success
-      ? [{ attackId: parsed.data.attachmentId, index: parsed.data.metadata.index }]
+      ? [
+          {
+            attackId: parsed.data.attachmentId,
+            // The attachment snapshots the concrete backing index the attack was found in, and
+            // most users hold read on the alias pattern rather than on that index. Reading it
+            // verbatim as the requesting user is refused, which would quietly strand the
+            // attack's alerts on the case; see `toReadableAttackIndexPattern`.
+            index: toReadableAttackIndexPattern(parsed.data.metadata.index),
+          },
+        ]
       : [];
   });
 

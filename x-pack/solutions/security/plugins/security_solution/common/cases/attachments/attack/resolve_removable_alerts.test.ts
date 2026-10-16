@@ -7,8 +7,10 @@
 
 import {
   AttachmentType,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
 import type { CaseAlertAttachment, CaseAttachmentWithId } from './resolve_removable_alerts';
 import {
@@ -37,6 +39,25 @@ describe('getCaseAlertAttachments', () => {
       { id: 'attachment-1', alertIds: ['alert-1', 'alert-2'] },
       { id: 'attachment-2', alertIds: ['alert-3'] },
     ]);
+  });
+
+  it('ignores alert attachments from the other alert families', () => {
+    // A document id only identifies an alert alongside its index, so an observability or stack
+    // alert whose id happens to match one in the attack must not be swept up with it.
+    const comments = [
+      {
+        id: 'attachment-1',
+        type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+        attachmentId: 'alert-1',
+      },
+      {
+        id: 'attachment-2',
+        type: STACK_ALERT_ATTACHMENT_TYPE,
+        attachmentId: 'alert-2',
+      },
+    ] as unknown as CaseAttachmentWithId[];
+
+    expect(getCaseAlertAttachments(comments)).toEqual([]);
   });
 
   it('ignores attachments that are not unified alerts', () => {

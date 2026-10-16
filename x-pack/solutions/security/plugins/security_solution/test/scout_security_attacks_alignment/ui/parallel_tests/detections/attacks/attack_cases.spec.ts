@@ -44,7 +44,8 @@ import {
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
-import { spaceTest, tags } from '../../../fixtures';
+import { getPlaywrightTagsFor } from '@kbn/scout-security';
+import { spaceTest } from '../../../fixtures';
 import {
   ATTACK_GRID_COLUMN_ID,
   ATTACK_TAKE_ACTION_ITEM_TEST_ID,
@@ -109,7 +110,9 @@ const findSeededAttacks = async (kbnClient: KbnClient, spaceId: string): Promise
   const response = await kbnClient.request({
     method: 'GET',
     path: buildSpacePath(spaceId, '/api/attack_discovery/_find'),
-    query: { per_page: 10, search: SEEDED_TITLE, scheduled: true, shared: true },
+    // No `scheduled` filter: it would return scheduled discoveries alone, and the seed's
+    // second attack is ad hoc, which the shared-alert removal test addresses by title.
+    query: { per_page: 10, search: SEEDED_TITLE, shared: true },
   });
 
   return (response.data as { data: FoundAttack[] }).data;
@@ -163,7 +166,15 @@ const getAttackAttachments = (attachments: readonly FoundCaseAttachment[]): Foun
 
 spaceTest.describe(
   'Attack case attachments',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  {
+    // Local only: the suite needs `attackAttachmentsEnabled`, which defaults off and is turned
+    // on by this config set's Scout server args. Cloud targets boot without it, so the
+    // `security.attack` attachment type is never registered there.
+    tag: [
+      ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
+      ...getPlaywrightTagsFor('serverless', 'security_complete', 'local'),
+    ],
+  },
   () => {
     /**
      * The seeded attack whose alert set a test re-pointed, and the set to put back. Held across
@@ -330,10 +341,7 @@ spaceTest.describe(
           await attackCases.openRowMoreActionsMenu();
 
           await expect(
-            attackCases.rowMoreActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.addToExistingCase)
-          ).toBeVisible();
-          await expect(
-            attackCases.rowMoreActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.addToNewCase)
+            attackCases.rowMoreActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.addToCase)
           ).toBeVisible();
           await expect(
             attackCases.rowMoreActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.markAcknowledged)
@@ -475,10 +483,7 @@ spaceTest.describe(
             await attackCases.openBulkTakeActionMenu();
 
             await expect(
-              attackCases.bulkActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.addToExistingCase)
-            ).toBeVisible();
-            await expect(
-              attackCases.bulkActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.addToNewCase)
+              attackCases.bulkActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.addToCase)
             ).toBeVisible();
             await expect(
               attackCases.bulkActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.markAcknowledged)

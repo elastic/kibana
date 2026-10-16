@@ -6,6 +6,7 @@
  */
 
 import { isUnifiedAlertAttachment, toStringArray } from '@kbn/cases-plugin/common';
+import { SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
 
 /** A case attachment, as the case view or the Cases server holds it, with its saved object id. */
 export type CaseAttachmentWithId = Parameters<typeof isUnifiedAlertAttachment>[0] & { id: string };
@@ -51,15 +52,17 @@ const EMPTY_UNRESOLVABLE: RemovableAlertAttachments = {
  * Extracts the case's `security.alert` attachments in the shape
  * {@link resolveRemovableAlertAttachments} consumes.
  *
- * Only unified alert attachments are considered: the attack attach path writes
- * `security.alert`, so a legacy alert attachment on the case was never brought in by an
- * attack and must not be swept up by one being removed.
+ * Only `security.alert` attachments are considered. A legacy `alert` attachment was never
+ * brought in by an attack, and the observability and stack alert types that
+ * `isUnifiedAlertAttachment` also accepts carry document ids from different alert families: an
+ * id is only meaningful alongside its index, so matching one of those against an attack's
+ * alert ids could remove an attachment the attack has nothing to do with.
  */
 export const getCaseAlertAttachments = (
   comments: readonly CaseAttachmentWithId[]
 ): CaseAlertAttachment[] =>
   comments.flatMap((comment) =>
-    isUnifiedAlertAttachment(comment)
+    isUnifiedAlertAttachment(comment) && comment.type === SECURITY_ALERT_ATTACHMENT_TYPE
       ? [{ id: comment.id, alertIds: toStringArray(comment.attachmentId) }]
       : []
   );

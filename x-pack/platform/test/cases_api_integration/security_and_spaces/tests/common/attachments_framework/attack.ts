@@ -757,6 +757,62 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(comments[0].metadata?.index).to.eql(ATTACK_INDEX);
       });
 
+      it('takes the attack alerts for a user who can read the alias but not the backing index', async () => {
+        // The removal resolves the attack's alerts as the requesting user. Reading the
+        // snapshotted backing index would be refused for this role and the alerts would be
+        // silently stranded on the case, so the readable pattern has to be used there too.
+        const alertId = 'attack-alias-removal-alert';
+        await indexAttackDocuments({
+          es,
+          attackIds: [ATTACK_ID],
+          alertIds: [alertId],
+          alertIdsByAttackId: { [ATTACK_ID]: [alertId] },
+          spaceId: 'space1',
+        });
+
+        const postedCase = await createCase(supertestWithoutAuth, postCaseRequest, 200, {
+          user: superUser,
+          space: 'space1',
+        });
+
+        const updatedCase = await bulkCreateAttachments({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          params: [
+            attackAttachment,
+            {
+              type: SECURITY_ALERT_ATTACHMENT_TYPE,
+              owner: OWNER,
+              attachmentId: alertId,
+              metadata: {
+                index: ALERT_INDEX,
+                rule: { id: 'attack-rule-id', name: 'attack rule' },
+              },
+            },
+          ] as unknown as BulkCreateUnifiedAttachmentsRequest,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        const attackAttachmentId = updatedCase.comments!.find(
+          (comment) => comment.type === SECURITY_ATTACK_ATTACHMENT_TYPE
+        )!.id;
+
+        await deleteComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          commentId: attackAttachmentId,
+          auth: { user: secOnlyReadAttackAlias, space: 'space1' },
+        });
+
+        expect(
+          await getAllComments({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            auth: { user: superUser, space: 'space1' },
+          })
+        ).to.eql([]);
+      });
+
       it('rejects an attack from a user with the same privileges but no read on the alias', async () => {
         const postedCase = await createCase(supertestWithoutAuth, postCaseRequest, 200, {
           user: superUser,

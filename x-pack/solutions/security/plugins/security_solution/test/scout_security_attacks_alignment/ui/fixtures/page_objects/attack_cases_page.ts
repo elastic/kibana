@@ -70,8 +70,8 @@ const INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID = 'investigateInTimelineButton';
  * items.
  */
 export const ATTACK_TAKE_ACTION_ITEM_TEST_ID = {
-  addToExistingCase: 'attack-add-to-existing-case',
-  addToNewCase: 'attack-add-to-new-case',
+  // One item for both destinations: the case selector modal it opens also creates a new case.
+  addToCase: 'attack-add-to-case',
   // The seeded attacks are open, so the status items offered are "acknowledge" and "close".
   markAcknowledged: 'acknowledged-attack-status',
   manageTags: 'attack-tags-context-menu-item',
