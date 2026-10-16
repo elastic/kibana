@@ -31,12 +31,22 @@ import { getRootMetadata, readTestReport } from './test_report';
 // Mocha timeout forced to fail on its way out, so they all describe the same event. Only the
 // failure that caused the abort reaches GitHub, the rest are listed on its report.
 //
-// FTR failures sharing an error message with enough others in the same report are folded the same
-// way: many tests failing identically (e.g. an API they all call returning 500) is one event, and
-// reporting each one would open an issue and bump every tracked issue for it.
+// FTR failures sharing an error message with enough others in the same report are one event too
+// (e.g. an API they all call returning 500), so the group opens at most one new issue: for its
+// first failure, and only when none of its tests is tracked yet. Tracked issues are still updated.
 const SAME_ERROR_MIN_FAILURES = 3;
 
-const markSameErrorFailures = (failures: TestFailure[]) => {
+const describeFailure = ({ name, location }: TestFailure) =>
+  location && location !== 'unknown' ? `"${name}" (${location})` : `"${name}"`;
+
+/**
+ * Point every failure in a same-error group at the group's first failure. Returns, per first
+ * failure, the issue of a tracked test in its group, which then stands in for a new issue.
+ */
+const markSameErrorFailures = (
+  failures: TestFailure[],
+  getTrackedIssueUrl: (failure: TestFailure) => string | undefined
+) => {
   const failuresByError = new Map<string, TestFailure[]>();
   const seenKeys = new Set<string>();
 
@@ -60,14 +70,22 @@ const markSameErrorFailures = (failures: TestFailure[]) => {
     }
   }
 
+  const trackedIssueUrlByFirstFailure = new Map<TestFailure, string>();
   for (const [first, ...rest] of failuresByError.values()) {
     if (rest.length + 1 < SAME_ERROR_MIN_FAILURES) {
       continue;
     }
+
+    let trackedIssueUrl: string | undefined;
     for (const failure of rest) {
-      failure.sameErrorAs = first.name;
+      failure.sameErrorAs = first;
+      trackedIssueUrl ??= getTrackedIssueUrl(failure);
+    }
+    if (trackedIssueUrl) {
+      trackedIssueUrlByFirstFailure.set(first, trackedIssueUrl);
     }
   }
+  return trackedIssueUrlByFirstFailure;
 };
 
 export async function processJUnitReports(
@@ -99,7 +117,10 @@ export async function processJUnitReports(
       await reportFailuresToEs(log, failures);
     }
 
-    markSameErrorFailures(failures);
+    const trackedSameErrorIssueUrls = markSameErrorFailures(
+      failures,
+      (failure) => existingIssues.getForFailure(failure)?.github.htmlUrl
+    );
 
     const seenNewIssueKeys = new Set<string>();
     let newIssueCreated = false;
@@ -134,16 +155,6 @@ export async function processJUnitReports(
         continue;
       }
 
-      if (failure.sameErrorAs) {
-        sameErrorFailures += 1;
-        pushMessage(
-          `Failure has the same error as "${failure.sameErrorAs}", an earlier failure in this ` +
-            'run, so an issue was not created or updated. See that failure for details.'
-        );
-        failure.failureCount = 0;
-        continue;
-      }
-
       // Deduplicate by classname+name: retry artifacts can emit the same test twice in one XML.
       const key = `${failure.classname}\n${failure.name}`;
       if (seenNewIssueKeys.has(key)) {
@@ -170,6 +181,27 @@ export async function processJUnitReports(
         if (updateGithub) {
           pushMessage(`Updated existing issue: ${url} (fail count: ${newCount})`);
         }
+        continue;
+      }
+
+      if (failure.sameErrorAs) {
+        sameErrorFailures += 1;
+        pushMessage(
+          `Skipped opening a new issue: failed with the same error as ` +
+            `${describeFailure(failure.sameErrorAs)}, an earlier failure in this run`
+        );
+        failure.failureCount = 0;
+        continue;
+      }
+
+      const trackedSameErrorIssueUrl = trackedSameErrorIssueUrls.get(failure);
+      if (trackedSameErrorIssueUrl) {
+        sameErrorFailures += 1;
+        pushMessage(
+          'Skipped opening a new issue: later tests in this run failed with the same error and ' +
+            `one is already tracked: ${trackedSameErrorIssueUrl}`
+        );
+        failure.failureCount = 0;
         continue;
       }
 
@@ -211,8 +243,8 @@ export async function processJUnitReports(
 
     if (sameErrorFailures > 0) {
       log.info(
-        `Ignored ${sameErrorFailures} failure(s) in ${reportPath} that failed with the same error ` +
-          `as an earlier failure. They are listed on the report of that failure.`
+        `Skipped opening new issues for ${sameErrorFailures} failure(s) in ${reportPath} that ` +
+          `share their error with other failures in the run. Tracked issues were updated normally.`
       );
     }
 
