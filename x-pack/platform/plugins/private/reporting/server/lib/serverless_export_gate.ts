@@ -34,5 +34,6 @@ export async function isServerlessExportEnabled({
       ? REPORTING_SERVERLESS_SCHEDULED_EXPORT_ENABLED
       : REPORTING_SERVERLESS_ON_DEMAND_EXPORT_ENABLED;
 
+  // oxlint-disable-next-line @kbn/eslint/no_feature_flag_snapshot -- called on every report request and task run, so each check reads the current flag value
   return firstValueFrom(featureFlags.getBooleanValue$(flag, false));
 }
