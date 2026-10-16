@@ -62,7 +62,6 @@ describe('writeRunning', () => {
     expect(client.create.mock.calls[0][0].data).toEqual({ run_id: 'run-1', state: 'running' });
   });
 
-  // The hunt child reads by id, so an existing record must carry this run's state.
   it('refreshes an existing attachment to running instead of surfacing the conflict', async () => {
     const client = makeClient();
     client.create.mockRejectedValue(

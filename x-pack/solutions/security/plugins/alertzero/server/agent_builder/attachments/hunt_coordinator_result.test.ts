@@ -63,8 +63,6 @@ describe('createHuntCoordinatorResultAttachmentType', () => {
     expect(attachmentType.isReadonly).toBe(true);
   });
 
-  // The agent's attachment listing includes hidden attachments, so any description would be
-  // read as guidance about analyst content. There is none to give.
   it('has no agent description', () => {
     expect(attachmentType.getAgentDescription).toBeUndefined();
   });
@@ -89,10 +87,7 @@ describe('createHuntCoordinatorResultAttachmentType', () => {
       expect(result.valid).toBe(true);
     });
 
-    // The route's terminal write goes through this validate before the child can poll the
-    // result. Route tests mock the attachment client, so they never exercise the lock; a
-    // producer field that drifts from HuntCoordinatorResult would only surface as a silent
-    // poll timeout after writeTerminal fails.
+    // Route tests mock the attachment client; this locks the enriched write shape.
     it('accepts the enriched completed shape the route stores on a confirmed hit', async () => {
       const enriched: HuntCoordinatorResult = {
         ...fullResult,

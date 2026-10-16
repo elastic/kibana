@@ -586,10 +586,7 @@ describe('Hunt Watch worker chain', () => {
     });
   });
 
-  // The start call answers before the run finishes, so "the coordinator answered" is no longer
-  // the sentinel: the polled envelope's `state` is. A run the poll gave up on (still `running`,
-  // or never read) and a run that reported failure both have to render `failed` with a reason
-  // the Investigation can carry, and neither may render `partial`.
+  // Polled `state` is the sentinel (not "start answered"); give-up / failed → failed, not partial.
   describe('hunt — result status from the polled envelope', () => {
     const variables = stepIn(huntSteps, 'resolve_result_status')?.with as Record<string, string>;
     const liquid = createWorkflowLiquidEngine();

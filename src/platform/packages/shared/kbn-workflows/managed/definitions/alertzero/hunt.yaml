@@ -77,21 +77,12 @@ outputs:
         type: object
         additionalProperties: true
 steps:
-  # Start + poll, not one long call. The two-tier run can take minutes, longer
-  # than Cloud's edge or Kibana's own socket timeout keeps a `kibana.request`
-  # open, so the coordinator route answers at once with `{ run_id, state:
-  # running, result_attachment_id }` after creating a hidden placeholder
-  # attachment on this report's Investigation. The detached run updates that
-  # attachment to `{ state: completed, result }` or `{ state: failed, error }`;
-  # `poll_hunt_coordinator` below reads it until one of those lands. Every step
-  # after the poll reads `steps.read_hunt_result.output.data.result`, which is
-  # the same body this call used to return.
+  # Start + poll: POST returns `{ run_id, state: running, result_attachment_id }`
+  # immediately; the pipeline updates that hidden attachment. Downstream reads
+  # `steps.read_hunt_result.output.data.result`.
   #
-  # The coordinator's request body is snake_case (report_id, run_id, trigger)
-  # and knows the Investigation only as the conversation its result is written
-  # to; this step is the camelCase -> snake_case mapping layer so no other
-  # caller has to repeat it. The coordinator reads what to search (the space's
-  # default data view) itself; nothing here scopes the hunt.
+  # Snake_case body mapping (incl. conversation_id). The coordinator resolves
+  # its own search scope; nothing here scopes the hunt.
   - name: run_hunt_coordinator
     type: kibana.request
     # No Investigation to attach findings to (the Worker's find_or_create
@@ -122,26 +113,9 @@ steps:
             stage: hunt_coordinator
             reason: "{{ steps.run_hunt_coordinator.error.message }}"
 
-  # Do-while: the first read always runs. 60 x 10s = 10 minutes, the same budget
-  # the Defend response actions poll with and past the longest Tier 2 run seen.
-  #
-  # Nothing in this loop fails the child. The Worker's parallel branch needs
-  # every child to resolve `completed` for its per-report packaging to run, so
-  # every way out of here lands in `resolve_result_status`, which renders
-  # `failed` when the last read is not a terminal state:
-  # - `on-limit: continue` exits the loop without a throw when the 60 reads are
-  #   spent. Not `fail`: the engine skips the condition on the final iteration,
-  #   so `fail` would mark a run that completed on read 60 as failed too. The
-  #   wall clock is still bounded by `timeout`.
-  # - `timeout` and three failed reads in a row throw out of the loop, and
-  #   `on-failure: continue` on the loop swallows that.
-  # - A `failed` envelope is a successful read, so the loop simply ends.
-  # A run that is still going when the child gives up is left alone: it may
-  # still update the hidden attachment later, which nothing reads.
-  #
-  # Read by id, not list: the route created the placeholder before it
-  # answered, so the attachment exists from the first read and the id in the
-  # start response is the one to read. No `ai.attachment.list`.
+  # Do-while poll (60 × 10s / 10m). Never fails the child: Worker packaging needs
+  # `completed`. Prefer `on-limit: continue` over `fail` (engine skips the
+  # condition on the last iteration). Read by the start response id, not list.
   - name: poll_hunt_coordinator
     type: while
     if: "${{ steps.run_hunt_coordinator.output.result_attachment_id != nil }}"
@@ -155,8 +129,7 @@ steps:
     steps:
       - name: read_hunt_result
         type: ai.attachment.read
-        # A broken read leaves `output` unset for this iteration, so `state` is
-        # nil and the loop keeps polling until the limit.
+        # Failed read leaves output unset → keep polling.
         on-failure:
           retry:
             max-attempts: 3
@@ -301,12 +274,9 @@ steps:
 
   # `.kibana-threat-reports` is plugin-owned and hidden, so this runs as an internal route
   # (asInternalUser) rather than a plain `elasticsearch.update`, which would run as whichever
-  # identity enabled the workflow and 403 for every non-superuser. Kept as its own step after
-  # the poll has read a completed result, rather than written by the coordinator run itself:
-  # the child can give up on a run (poll limit, timeout) that is still going, and a write from
-  # inside that run would not be cancelled by that, so it would stamp a report the workflow
-  # itself goes on to report as a failed hunt. A separate downstream step only runs once this
-  # workflow has the result in hand, which keeps evidence strictly after success.
+  # identity enabled the workflow and 403 for every non-superuser. Kept after a successful
+  # poll (not inside the detached coordinator job): a child that gives up must not leave a
+  # background stamp on a run it reports as failed.
   - name: write_evidence
     type: kibana.request
     if: "${{ steps.read_hunt_result.output.data.result.completed_successfully == true }}"
@@ -340,8 +310,7 @@ steps:
       # having never been fully searched. Gating on `completed_successfully`
       # instead would call that second case a success, which is the same
       # conflation this file avoids when stamping `last_hunt_status`.
-      # `failed`: the coordinator start failed or was skipped, the run reported
-      # failure, or the poll gave up before the run finished.
+      # `failed`: start failed/skipped, failed envelope, or poll gave up.
       result_status: |-
         {%- if steps.read_hunt_result.output.data.result.completeness == "complete" -%}
         success
@@ -395,10 +364,7 @@ steps:
       # the packaging step's input limit.
       result_behaviors: "${{ steps.read_hunt_result.output.data.result.tier2.behaviors | compact | where: 'execution.executed', true | slice: 0, 20 }}"
 
-  # The hidden result attachment has done its job once the outputs above are
-  # computed. Permanent, so no soft-deleted record is left to collide with a
-  # rerun under the same run id. A failed delete leaves an inert hidden
-  # attachment behind and is not worth failing the child over.
+  # Permanent delete after outputs are set; continue on failure.
   - name: delete_hunt_result
     type: ai.attachment.delete
     if: "${{ steps.run_hunt_coordinator.output.result_attachment_id != nil }}"

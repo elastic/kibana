@@ -13,31 +13,25 @@ import { huntCoordinatorResultAttachmentSchema } from '../../../common/hunt_coor
 export const HUNT_COORDINATOR_RESULT_ATTACHMENT_ID =
   ALERTZERO_ATTACHMENT_TYPES.huntCoordinatorResult;
 
+const parseData = (input: unknown) => huntCoordinatorResultAttachmentSchema.safeParse(input);
+
 /**
- * Hidden handoff between the hunt coordinator route and the hunt child workflow, not analyst
- * content. The route creates one per run with `hidden: true`, so it raises no timeline event
- * and renders no card, but the Investigation agent's attachment listing still includes hidden
- * attachments, so everything the agent can read from this type has to be inert: a one-line
- * `format` that names the run and its state, no agent description, and no rendering
- * instructions (which is why this is not built with `createReadonlyAttachmentType`).
- *
- * Read-only so the agent cannot create or update one through the attachment tools. The hunt
- * child deletes the attachment once it has consumed the result.
+ * Hidden route↔hunt-child handoff. Readonly, no agent description; `format` is one inert line
+ * so listing hidden attachments does not feed the agent the full result.
  */
 export const createHuntCoordinatorResultAttachmentType = (): AttachmentTypeDefinition => ({
   id: HUNT_COORDINATOR_RESULT_ATTACHMENT_ID,
   isReadonly: true,
-  // The formatted line is a run id plus a state word; the full result never reaches the agent.
   maxContentLength: 1_000,
   validate: (input) => {
-    const parseResult = huntCoordinatorResultAttachmentSchema.safeParse(input);
+    const parseResult = parseData(input);
     if (parseResult.success) {
       return { valid: true, data: parseResult.data };
     }
     return { valid: false, error: parseResult.error.message };
   },
   format: (attachment: Attachment<string, unknown>) => {
-    const parseResult = huntCoordinatorResultAttachmentSchema.safeParse(attachment.data);
+    const parseResult = parseData(attachment.data);
     if (!parseResult.success) {
       throw new Error(
         `Invalid ${HUNT_COORDINATOR_RESULT_ATTACHMENT_ID} attachment data for attachment ${attachment.id}`

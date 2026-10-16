@@ -134,9 +134,6 @@ describe('system-security-hunt-execute', () => {
     expect(body.conversation_id).toBe('{{ inputs.investigationConversationId }}');
   });
 
-  // The start call answers before the run finishes; the result lands on a hidden attachment the
-  // route names in its response. Everything downstream reads the polled result, so the loop's
-  // shape is the contract between this file and the route.
   describe('polls the hidden result attachment the start call named', () => {
     const TERMINAL_CHECK =
       "${{ steps.read_hunt_result.output.data.state != 'completed' and steps.read_hunt_result.output.data.state != 'failed' }}";
@@ -195,10 +192,7 @@ describe('system-security-hunt-execute', () => {
       expect(names.indexOf('delete_hunt_result')).toBeLessThan(names.indexOf('emit_result'));
     });
 
-    // The Worker's parallel branch needs every child to resolve `completed` for per-report
-    // packaging to run, so a start error, a poll give-up and a failed run all have to end in
-    // `workflow.output`, never a thrown step. The only other fallback is the SSE upsert, whose
-    // update step swallows its own failure.
+    // Worker packaging requires every child to complete; no workflow.fail exits.
     it('has no step that fails the workflow, and every fallback completes the child or continues', () => {
       const all = flattenSteps(workflow.steps);
       const withFallback = all.filter((step) => step['on-failure']?.fallback);

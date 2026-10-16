@@ -46,19 +46,11 @@ export const ALERTZERO_MANAGED_WORKFLOW_OWNER_ID = 'alertzero' as const;
 export const ALERTZERO_ATTACHMENT_TYPES = {
   threat: 'security.threat',
   significantSecurityEvent: 'security.significant_security_event',
-  /**
-   * Hidden, server-registered only: the hunt coordinator's start + poll handoff. The POST
-   * creates it `running` on the report's Investigation, the detached pipeline updates it to a
-   * terminal envelope, and the hunt child polls then deletes it. Never rendered to analysts.
-   */
+  /** Hidden start+poll handoff; server-registered only. */
   huntCoordinatorResult: 'security.hunt_coordinator_result',
 } as const;
 
-/**
- * Id prefix of the hidden result attachment one hunt coordinator run writes. The suffix is the
- * run id, so one sweep's children never read a prior sweep's result on the same Investigation.
- * The route returns the full id as `result_attachment_id`; the hunt child never rebuilds it.
- */
+/** Prefix for `hunt-coordinator-result-{runId}`; the route returns the full id. */
 export const HUNT_COORDINATOR_RESULT_ATTACHMENT_ID_PREFIX = 'hunt-coordinator-result-' as const;
 
 export const buildHuntCoordinatorResultAttachmentId = (runId: string): string =>

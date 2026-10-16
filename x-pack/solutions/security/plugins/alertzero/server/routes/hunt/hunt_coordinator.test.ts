@@ -339,11 +339,6 @@ describe('registerHuntCoordinatorRoute', () => {
     });
   });
 
-  /**
-   * The route's whole reason to exist: the HTTP call must not wait for the pipeline. The
-   * placeholder is the hunt child's poll target, so it has to be on the Investigation before
-   * the child can learn its id.
-   */
   describe('start + poll contract', () => {
     it('answers while the coordinator is still running, then writes the result when it finishes', async () => {
       const pending = deferred<HuntCoordinatorResult>();
@@ -413,8 +408,6 @@ describe('registerHuntCoordinatorRoute', () => {
       );
     });
 
-    // A rerun of the same sweep id, or a placeholder a prior attempt left behind: the child
-    // reads by id, so the record has to carry this run's state rather than 409 the start.
     it('refreshes an existing placeholder to running and still starts the run', async () => {
       const { handler, context, attachmentsClient } = makeDeps();
       attachmentsClient.create.mockRejectedValue(
@@ -498,10 +491,6 @@ describe('registerHuntCoordinatorRoute', () => {
     });
   });
 
-  /**
-   * Nothing may start until the hunt child has a placeholder to poll: a 500 here is the only
-   * signal it gets, and it already maps one to a failed hunt.
-   */
   describe('before the run detaches', () => {
     it('returns a generic 500 and starts nothing when Agent Builder has not started', async () => {
       const { handler, context, logger, attachmentsClient } = makeDeps({
@@ -539,11 +528,6 @@ describe('registerHuntCoordinatorRoute', () => {
     });
   });
 
-  /**
-   * The gate that puts `sse` on the result is three conditions wide (confirmed hit,
-   * a named report, the request's space) and the mapper it calls is real here. A
-   * regression in any of them removes or mis-scopes every attachment the hunt writes.
-   */
   describe('SSE entries on the stored result', () => {
     const confirmedResult: HuntCoordinatorResult = {
       ...coordinatorResult,
