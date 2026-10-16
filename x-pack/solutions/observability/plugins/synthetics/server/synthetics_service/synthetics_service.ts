@@ -66,6 +66,9 @@ export class SyntheticsService {
 
   public indexTemplateExists?: boolean;
   private indexTemplateInstalling?: boolean;
+  // Tracks whether the index template installation is currently in a failed state.
+  // Used to avoid re-logging the same failure at ERROR level on every sync interval.
+  private indexTemplateInstallFailed?: boolean;
 
   public isAllowed: boolean;
   public signupUrl: string | null;
@@ -128,19 +131,39 @@ export class SyntheticsService {
         ) {
           this.logger.info('Installed synthetics index templates');
           this.indexTemplateExists = true;
+          this.indexTemplateInstallFailed = false;
         } else if (
           installedPackage.name === 'synthetics' &&
           installedPackage.install_status === 'install_failed'
         ) {
-          this.logger.warn(new IndexTemplateInstallationError());
           this.indexTemplateExists = false;
+          this.logIndexTemplateInstallationFailure();
         }
       }
     } catch (e) {
-      this.logger.error(e);
       this.indexTemplateInstalling = false;
-      this.logger.warn(new IndexTemplateInstallationError());
+      this.logIndexTemplateInstallationFailure(e);
     }
+  }
+
+  // The synthetics sync task retries the index template installation on every interval, so a
+  // persistent failure (e.g. the Fleet global component templates are not yet installed in a
+  // multi-Kibana deployment) would otherwise be logged at ERROR indefinitely. Log the failure at
+  // ERROR on the first occurrence only, then downgrade repeated failures to DEBUG until the
+  // installation succeeds again.
+  private logIndexTemplateInstallationFailure(error?: Error) {
+    if (this.indexTemplateInstallFailed) {
+      if (error) {
+        this.logger.debug(error.message);
+      }
+      this.logger.debug(new IndexTemplateInstallationError().message);
+      return;
+    }
+    this.indexTemplateInstallFailed = true;
+    if (error) {
+      this.logger.error(error);
+    }
+    this.logger.warn(new IndexTemplateInstallationError());
   }
 
   public async registerServiceLocations() {
