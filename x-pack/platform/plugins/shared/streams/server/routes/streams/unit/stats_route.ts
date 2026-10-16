@@ -30,8 +30,6 @@ export const getStreamsUnitStatsRoute = createServerRoute({
     path: z.object({
       id: streamsUnitIdentifierSchema.describe('The unit id.'),
     }),
-    // The route repository drops an empty `{}` body, so `params.body` is undefined for it.
-    // The handler must use `params.body ?? {}`.
     body: streamsUnitStatsRequestSchema,
   }),
   handler: async ({ request, getScopedClients }): Promise<StreamsUnit.StatsResponse> => {
