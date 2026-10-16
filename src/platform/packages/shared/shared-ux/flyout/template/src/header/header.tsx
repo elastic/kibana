@@ -37,7 +37,11 @@ import {
   useFlyoutTabs,
   useFlyoutTemplateConfig,
 } from '../context';
-import { renderTitleIcon, renderTitleWithIcon } from '../title_adornments';
+import {
+  renderTitleIcon,
+  renderTitleLoading,
+  renderTitleWithAdornments,
+} from '../title_adornments';
 import type { FlyoutHeaderProps } from '../types';
 import { FLYOUT_HEADER_CLASS_NAME } from '../use_header_collapse';
 import { Badge, badgePart, BADGE_PART_NAME, type HeaderBadgeDescriptor } from './badge';
@@ -223,6 +227,7 @@ export const HeaderZone = ({
   titleText,
   titleIcon,
   titleTooltip,
+  isLoading = false,
   description,
   collapsed = false,
   children,
@@ -244,6 +249,7 @@ export const HeaderZone = ({
   } = useFlyoutHeaderCollapse();
   const isCollapsed = collapsed || isScrollCollapsed;
   const titleIconNode = renderTitleIcon(titleIcon, titleTooltip);
+  const titleLoadingNode = renderTitleLoading(isLoading);
   // The collapsed title truncates, so a string title gets a native hover reveal. A node title is
   // left untitled: a native `title` on its ancestor would cover any tooltip the node renders.
   const collapsedTitleText = typeof title === 'string' ? titleText ?? title : undefined;
@@ -319,15 +325,17 @@ export const HeaderZone = ({
                     </EuiTitle>
                   </EuiFlexItem>
                   {titleIconNode && <EuiFlexItem grow={false}>{titleIconNode}</EuiFlexItem>}
+                  {titleLoadingNode && <EuiFlexItem grow={false}>{titleLoadingNode}</EuiFlexItem>}
                 </EuiFlexGroup>
               ) : (
-                renderTitleWithIcon(
+                renderTitleWithAdornments(
                   <EuiTitle size="m">
                     <h3 id={flyoutTitleId} css={titleCss}>
                       {title}
                     </h3>
                   </EuiTitle>,
-                  titleIconNode
+                  titleIconNode,
+                  titleLoadingNode
                 )
               )}
             </div>

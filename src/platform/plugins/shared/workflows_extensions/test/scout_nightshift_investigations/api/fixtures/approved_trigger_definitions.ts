@@ -68,7 +68,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.actions.alertAssigned',
-    schemaHash: '0516506647c941f5cd0b255fee04fa9eb0254e85291a9e51c4f78cc07c9ae65c',
+    schemaHash: 'bdbe4b8494809fa5e3a5311440aa4ff485bae7a2acd6d8989489aec8c36a279d',
   },
   {
     id: 'alerting.actions.alertDeactivated',
