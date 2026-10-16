@@ -134,7 +134,8 @@ test.describe(
         await expect(ruleLibrary.createdToast(TEMPLATE_RULE_NAME)).toBeVisible({
           timeout: 30_000,
         });
-        await expect(ruleLibrary.ruleCountLink(TEMPLATE_RULE_NAME)).toHaveText('1', {
+        // An external link also carries screen reader text, so match the leading number only.
+        await expect(ruleLibrary.ruleCountLink(TEMPLATE_RULE_NAME)).toHaveText(/^1(?!\d)/, {
           timeout: 30_000,
         });
       });
@@ -143,7 +144,11 @@ test.describe(
         const { items } = await apiServices.alertingV2.rules.find({ search: TEMPLATE_RULE_NAME });
         const [installedRule] = items;
 
-        await ruleLibrary.ruleCountLink(TEMPLATE_RULE_NAME).click();
+        // The link opens in a new tab, so follow its href in this tab instead.
+        const countLink = ruleLibrary.ruleCountLink(TEMPLATE_RULE_NAME);
+        await expect(countLink).toHaveAttribute('target', '_blank');
+        const href = await countLink.evaluate((link) => (link as HTMLAnchorElement).href);
+        await page.goto(href);
 
         await expect(rulesList.rulesListTable).toBeVisible({ timeout: 30_000 });
         await expect(rulesList.ruleNameLink(installedRule.id)).toBeVisible({ timeout: 30_000 });

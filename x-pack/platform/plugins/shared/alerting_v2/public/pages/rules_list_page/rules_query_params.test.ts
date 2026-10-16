@@ -102,20 +102,25 @@ describe('toRulesQueryParams', () => {
       toRulesQueryParams({
         [TEMPLATE_FILTER_ID]: { include: ['nginx-error-rate'] },
       })
-    ).toEqual({ filter: 'metadata.template.id: "nginx-error-rate"' });
+    ).toEqual({ filter: '(metadata.template.id: "nginx-error-rate")' });
   });
 
-  it('honors only the first template and ignores template exclusions', () => {
+  it('maps several templates to an OR filter', () => {
     expect(
       toRulesQueryParams({
         [TEMPLATE_FILTER_ID]: { include: ['a-template', 'b-template'] },
       })
-    ).toEqual({ filter: 'metadata.template.id: "a-template"' });
+    ).toEqual({
+      filter: '(metadata.template.id: "a-template" OR metadata.template.id: "b-template")',
+    });
+  });
+
+  it('maps excluded templates to a negated filter', () => {
     expect(
       toRulesQueryParams({
         [TEMPLATE_FILTER_ID]: { exclude: ['a-template'] },
       })
-    ).toEqual({});
+    ).toEqual({ filter: 'NOT (metadata.template.id: "a-template")' });
   });
 
   it('combines the template with the other filters and search', () => {
@@ -126,7 +131,7 @@ describe('toRulesQueryParams', () => {
         [TEMPLATE_FILTER_ID]: { include: ['nginx-error-rate'] },
       })
     ).toEqual({
-      filter: 'kind: alert AND metadata.template.id: "nginx-error-rate"',
+      filter: 'kind: alert AND (metadata.template.id: "nginx-error-rate")',
       search: 'cpu',
     });
   });

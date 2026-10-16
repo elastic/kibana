@@ -355,8 +355,7 @@ describe('RuleLibraryList', () => {
       });
     };
 
-    it('links the number of derived rules to the rules list filtered by the template', async () => {
-      const user = userEvent.setup();
+    it('links the number of derived rules to the rules list filtered by the template, in a new tab', async () => {
       const locators = createMockLocators();
       (locators.rulesLocators.getRedirectUrl as jest.Mock).mockReturnValue('/rules?q=template');
       resolveTemplateWithRuleCount(3);
@@ -366,13 +365,9 @@ describe('RuleLibraryList', () => {
       const link = await screen.findByTestId('ruleLibraryRuleCountLink');
       expect(link).toHaveTextContent('3');
       expect(link).toHaveAttribute('href', '/rules?q=template');
+      expect(link).toHaveAttribute('target', '_blank');
+      expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
       expect(locators.rulesLocators.getRedirectUrl).toHaveBeenCalledWith({
-        derivedFromTemplateId: 'template-1',
-      });
-
-      await user.click(link);
-
-      expect(locators.rulesLocators.navigateSync).toHaveBeenCalledWith({
         derivedFromTemplateId: 'template-1',
       });
     });

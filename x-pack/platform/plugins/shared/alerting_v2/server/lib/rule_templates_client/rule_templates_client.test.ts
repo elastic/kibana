@@ -213,13 +213,23 @@ describe('RuleTemplatesClient', () => {
         expect(rulesClient.getRuleCountsByTemplateId).toHaveBeenCalledWith(['valid']);
       });
 
-      it('propagates failures to count the rules', async () => {
+      it('lists the templates without rule_count and logs when counting the rules fails', async () => {
         const savedObjectsClient = savedObjectsClientMock.create();
         savedObjectsClient.find.mockResolvedValue(findResponse(['template-1']));
-        const { client, rulesClient } = createClient(savedObjectsClient);
+        const { client, rulesClient, mockLogger } = createClient(savedObjectsClient);
         rulesClient.getRuleCountsByTemplateId.mockRejectedValue(new Error('Unavailable'));
 
-        await expect(client.findRuleTemplates()).rejects.toThrow('Unavailable');
+        const result = await client.findRuleTemplates();
+
+        expect(result.items).toEqual([{ id: 'template-1', ...validTemplateAttributes }]);
+        expect(result.items[0]).not.toHaveProperty('rule_count');
+        expect(result.total).toBe(1);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          'Failed to count the rules created from each rule template',
+          expect.objectContaining({
+            labels: { code: ALERTING_LOG_CODES.RULE_TEMPLATE_RULE_COUNT_FAILED },
+          })
+        );
       });
     });
 

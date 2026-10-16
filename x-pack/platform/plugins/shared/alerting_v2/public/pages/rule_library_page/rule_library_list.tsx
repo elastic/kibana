@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, type MouseEvent } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiEmptyPrompt,
@@ -84,14 +84,11 @@ export const RuleLibraryList = () => {
     if (ruleCount === undefined) return null;
     if (ruleCount === 0) return ruleCount;
 
-    const params = { derivedFromTemplateId: templateId };
     return (
       <EuiLink
-        href={rulesLocators.getRedirectUrl(params)}
-        onClick={(event: MouseEvent) => {
-          event.preventDefault();
-          rulesLocators.navigateSync(params);
-        }}
+        href={rulesLocators.getRedirectUrl({ derivedFromTemplateId: templateId })}
+        target="_blank"
+        rel="noopener noreferrer"
         data-test-subj="ruleLibraryRuleCountLink"
       >
         {ruleCount}
