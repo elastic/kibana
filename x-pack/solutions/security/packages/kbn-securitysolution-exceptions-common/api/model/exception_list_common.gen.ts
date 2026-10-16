@@ -348,11 +348,11 @@ export const BlocklistPathOrFileNameWildcardEntry = lazySchema(() =>
         'File path or file name field (available on all OS). `file.name.caseless` is used for\n`wildcard` (Match) entries on Windows and macOS, since both have case-insensitive filesystems.\n'
       ),
     /**
-     * Must be `wildcard` ("Match", supports `*` and `?` wildcards)
+     * Must be `wildcard` ("Matches", supports `*` and `?` wildcards)
      */
     type: z
       .literal('wildcard')
-      .describe('Must be `wildcard` ("Match", supports `*` and `?` wildcards)'),
+      .describe('Must be `wildcard` ("Matches", supports `*` and `?` wildcards)'),
     /**
      * Single value
      */
