@@ -352,13 +352,17 @@ export function createEvaluatePersonaMatrixDataset({
             taskOutput,
             judgeCapOptions
           );
-          if (judgePayloadTrim.trimmed.length) {
+          if (judgePayloadTrim.trimmed.length || judgePayloadTrim.overBudget) {
             log.info(
               `[persona-matrix][judge-cap] ${example.id ?? question}: judge payload ${
                 judgePayloadTrim.charsBefore
               } -> ${judgePayloadTrim.charsAfter} chars, trimmed ${
                 judgePayloadTrim.trimmed.length
-              } tool result(s)`
+              } tool result(s)${
+                judgePayloadTrim.overBudget
+                  ? ' (STILL OVER BUDGET: non-result fields alone exceed it)'
+                  : ''
+              }`
             );
           }
           const [correctnessResult, groundednessResult] = await Promise.all([
@@ -384,7 +388,9 @@ export function createEvaluatePersonaMatrixDataset({
             ...(taskOutput as object),
             correctnessAnalysis: correctnessResult?.metadata,
             groundednessAnalysis: groundednessResult?.metadata,
-            ...(judgePayloadTrim.trimmed.length ? { judgePayloadTrim } : {}),
+            ...(judgePayloadTrim.trimmed.length || judgePayloadTrim.overBudget
+              ? { judgePayloadTrim }
+              : {}),
           } as TaskOutput;
         },
       },

@@ -29,9 +29,6 @@ export const JUDGE_PAYLOAD_BUDGET_ENV = 'PERSONA_MATRIX_JUDGE_PAYLOAD_BUDGET';
  * and stay comparable with earlier baselines. A 1M-token judge window is ~2.5M chars of dense
  * JSON; `PERSONA_MATRIX_JUDGE_PAYLOAD_BUDGET=600000` leaves generous headroom for reasoning.
  */
-/** Chars kept from a result trimmed by the second (budget) pass. */
-const BUDGET_PASS_KEEP_CHARS = 500;
-
 export interface JudgePayloadCapOptions {
   /** Per-tool-result cap in chars. 0 disables the per-result pass. */
   resultCharCap: number;
@@ -51,6 +48,8 @@ export interface JudgePayloadReport {
   trimmed: TrimmedResult[];
   charsBefore: number;
   charsAfter: number;
+  /** True when the payload still exceeds `payloadCharBudget` because the untouched fields alone do. */
+  overBudget: boolean;
 }
 
 interface Step {
@@ -101,7 +100,15 @@ export const capJudgePayload = <T extends TaskOutput>(
   const source = output as unknown as { steps?: unknown } | null;
   const steps = Array.isArray(source?.steps) ? (source?.steps as Step[]) : [];
   const charsBefore = sizeOf(output);
-  const untouched = { output, report: { trimmed: [], charsBefore, charsAfter: charsBefore } };
+  const untouched = {
+    output,
+    report: {
+      trimmed: [],
+      charsBefore,
+      charsAfter: charsBefore,
+      overBudget: payloadCharBudget > 0 && charsBefore > payloadCharBudget,
+    },
+  };
 
   if (!steps.length || (!resultCharCap && !payloadCharBudget)) {
     return untouched;
@@ -139,21 +146,54 @@ export const capJudgePayload = <T extends TaskOutput>(
       .sort((a, b) => b.size - a.size);
     let total = sizeOf({ ...source, steps: capped });
     for (const { index, size } of bySizeDesc) {
-      // Sorted largest-first: once a result is too small to be worth trimming, so are the rest.
-      if (total <= payloadCharBudget || size <= BUDGET_PASS_KEEP_CHARS) {
+      // Sorted largest-first: steps without results sort last, so nothing left to trim.
+      if (total <= payloadCharBudget || size === 0) {
         break;
       }
-      trim(index, BUDGET_PASS_KEEP_CHARS, 'budget');
+      const serialized = JSON.stringify(capped[index].results);
+      // Total payload size if this step's results were replaced by a stub keeping `keep` chars.
+      // Measured on the real serialization so stub text and JSON escaping are accounted for.
+      const totalWith = (keep: number) =>
+        sizeOf({
+          ...source,
+          steps: capped.map((step, i) =>
+            i === index ? { ...step, results: stubResults(serialized, keep) } : step
+          ),
+        });
+      const emptyStubTotal = totalWith(0);
+      // Trim only when the replacement stub is actually smaller; then keep the largest prefix
+      // that lets the whole payload fit (size grows with `keep`), or 0 when even an empty stub
+      // leaves the payload over budget and the next result has to give up more.
+      if (emptyStubTotal < total) {
+        let keep = 0;
+        if (emptyStubTotal <= payloadCharBudget) {
+          let high = serialized.length;
+          while (keep < high) {
+            const mid = Math.ceil((keep + high) / 2);
+            if (totalWith(mid) <= payloadCharBudget) {
+              keep = mid;
+            } else {
+              high = mid - 1;
+            }
+          }
+        }
+        trim(index, keep, 'budget');
+      }
       total = sizeOf({ ...source, steps: capped });
     }
   }
 
+  const overBudget =
+    payloadCharBudget > 0 && sizeOf({ ...source, steps: capped }) > payloadCharBudget;
   if (!trimmed.length) {
-    return untouched;
+    return { output, report: { trimmed, charsBefore, charsAfter: charsBefore, overBudget } };
   }
 
   const result = { ...source, steps: capped } as unknown as T;
-  return { output: result, report: { trimmed, charsBefore, charsAfter: sizeOf(result) } };
+  return {
+    output: result,
+    report: { trimmed, charsBefore, charsAfter: sizeOf(result), overBudget },
+  };
 };
 
 /**
@@ -170,11 +210,15 @@ export const withJudgePayloadCap = (
   evaluate: async (args) => {
     const { output, report } = capJudgePayload(args.output, options);
     const result = await inner.evaluate({ ...args, output });
-    if (!report.trimmed.length) {
+    if (!report.trimmed.length && !report.overBudget) {
       return result;
     }
     log.info(
-      `[persona-matrix][judge-cap] ${inner.name}: judge payload ${report.charsBefore} -> ${report.charsAfter} chars, trimmed ${report.trimmed.length} tool result(s)`
+      `[persona-matrix][judge-cap] ${inner.name}: judge payload ${report.charsBefore} -> ${
+        report.charsAfter
+      } chars, trimmed ${report.trimmed.length} tool result(s)${
+        report.overBudget ? ' (STILL OVER BUDGET: non-result fields alone exceed it)' : ''
+      }`
     );
     return { ...result, metadata: { ...result?.metadata, judgePayloadTrim: report } };
   },
