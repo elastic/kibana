@@ -11,6 +11,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { loggerMock } from '@kbn/logging-mocks';
 
 import type { InstallSource } from '../../../../../common/types';
+import { ElasticsearchAssetType } from '../../../../../common';
 import { FleetUnauthorizedError } from '../../../../errors';
 import { getInstallation } from '../../packages/get';
 
@@ -27,14 +28,22 @@ describe('handleTransformReauthorizeAndStart - install source gate', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
 
-  const reauthorize = () =>
+  const transformId = 'logs-my_package.probe-default-1.0.0';
+
+  const installation = (installSource: InstallSource, ids: string[] = [transformId]) =>
+    ({
+      install_source: installSource,
+      installed_es: ids.map((id) => ({ id, type: ElasticsearchAssetType.transform })),
+    } as any);
+
+  const reauthorize = (ids: string[] = [transformId]) =>
     handleTransformReauthorizeAndStart({
       esClient,
       savedObjectsClient,
       logger: loggerMock.create(),
       pkgName: 'my_package',
       pkgVersion: '1.0.0',
-      transforms: [{ transformId: 'logs-my_package.probe-default-1.0.0' }],
+      transforms: ids.map((id) => ({ transformId: id })),
       secondaryAuth: { headers: { 'es-secondary-authorization': 'ApiKey encoded-key' } },
       username: 'elastic',
     });
@@ -58,7 +67,7 @@ describe('handleTransformReauthorizeAndStart - install source gate', () => {
   it.each(['upload', 'custom'] as const)(
     'refuses to reauthorize a transform from a %s package',
     async (installSource: InstallSource) => {
-      mockedGetInstallation.mockResolvedValue({ install_source: installSource } as any);
+      mockedGetInstallation.mockResolvedValue(installation(installSource));
 
       await expect(reauthorize()).rejects.toThrow(FleetUnauthorizedError);
       expect(esClient.transform.updateTransform).not.toHaveBeenCalled();
@@ -73,10 +82,31 @@ describe('handleTransformReauthorizeAndStart - install source gate', () => {
     expect(esClient.transform.updateTransform).not.toHaveBeenCalled();
   });
 
+  // The transform ids come from the request body. Pointing the URL at a trusted package while
+  // naming an uploaded package's transform must not satisfy the gate above.
+  it('refuses a transform the named installation does not own', async () => {
+    mockedGetInstallation.mockResolvedValue(installation('registry'));
+
+    await expect(reauthorize(['logs-uploaded_package.evil-default-1.0.0'])).rejects.toThrow(
+      /not installed by package my_package/
+    );
+    expect(esClient.transform.getTransform).not.toHaveBeenCalled();
+    expect(esClient.transform.updateTransform).not.toHaveBeenCalled();
+  });
+
+  it('refuses when only some of the requested transforms are owned', async () => {
+    mockedGetInstallation.mockResolvedValue(installation('registry'));
+
+    await expect(
+      reauthorize([transformId, 'logs-uploaded_package.evil-default-1.0.0'])
+    ).rejects.toThrow(FleetUnauthorizedError);
+    expect(esClient.transform.getTransform).not.toHaveBeenCalled();
+  });
+
   it.each(['registry', 'bundled'] as const)(
     'allows reauthorizing a transform from a %s package',
     async (installSource: InstallSource) => {
-      mockedGetInstallation.mockResolvedValue({ install_source: installSource } as any);
+      mockedGetInstallation.mockResolvedValue(installation(installSource));
 
       await expect(reauthorize()).resolves.toEqual([]);
       expect(esClient.transform.getTransform).toHaveBeenCalled();

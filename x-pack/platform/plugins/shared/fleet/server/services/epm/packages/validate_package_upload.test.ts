@@ -149,12 +149,35 @@ describe('validatePackageUpload', () => {
       }
     });
 
-    it('rejects a restricted destination alias', async () => {
-      await expectUploadRejected(
-        transformUpload(
-          'source:\n  index: ["my_index"]\ndest:\n  index: "my_dest"\n  aliases:\n    - alias: ".fleet-policies"\n'
-        )
-      );
+    // getDestinationIndexAliases accepts an array of strings, an array of {alias} objects, a bare
+    // string, and an object keyed by alias name. Screening only one shape would let the others
+    // install a dot-prefixed alias.
+    it.each([
+      [
+        'array of objects',
+        'dest:\n  index: "my_dest"\n  aliases:\n    - alias: ".fleet-policies"\n',
+      ],
+      ['array of strings', 'dest:\n  index: "my_dest"\n  aliases:\n    - ".fleet-policies"\n'],
+      ['bare string', 'dest:\n  index: "my_dest"\n  aliases: ".fleet-policies"\n'],
+      [
+        'object keyed by alias',
+        'dest:\n  index: "my_dest"\n  aliases:\n    ".fleet-policies": {}\n',
+      ],
+    ])('rejects a restricted destination alias given as %s', async (_label, destYaml) => {
+      await expectUploadRejected(transformUpload(`source:\n  index: ["my_index"]\n${destYaml}`));
+    });
+
+    it('allows ordinary destination aliases in every supported shape', async () => {
+      for (const destYaml of [
+        'dest:\n  index: "my_dest"\n  aliases:\n    - alias: "my_dest.latest"\n',
+        'dest:\n  index: "my_dest"\n  aliases:\n    - "my_dest.latest"\n',
+        'dest:\n  index: "my_dest"\n  aliases: "my_dest.latest"\n',
+        'dest:\n  index: "my_dest"\n  aliases:\n    "my_dest.latest": {}\n',
+      ]) {
+        await expect(
+          validateUpload(transformUpload(`source:\n  index: ["my_index"]\n${destYaml}`))
+        ).resolves.toBeUndefined();
+      }
     });
 
     it('rejects a restricted index in a legacy JSON transform spec', async () => {

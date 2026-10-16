@@ -28,7 +28,10 @@ import { airGappedUtils } from '../airgapped';
 import { getPathParts } from '../archive';
 import { isTopLevelPipeline } from '../elasticsearch/ingest_pipeline/helpers';
 import { isRemoteIndexExpression } from '../elasticsearch/transform/ccs_transform_source';
-import { isTransform } from '../elasticsearch/transform/transform_utils';
+import {
+  getDestinationIndexAliases,
+  isTransform,
+} from '../elasticsearch/transform/transform_utils';
 import * as Registry from '../registry';
 
 import { getBundledPackageByName } from './bundled_packages';
@@ -229,16 +232,11 @@ function collectTransformIndexExpressions(content: unknown): string[] {
 
   push(dest?.index);
 
-  const aliases = dest?.aliases;
-  if (Array.isArray(aliases)) {
-    for (const alias of aliases) {
-      if (typeof alias === 'string') {
-        push(alias);
-      } else if (alias && typeof alias === 'object') {
-        push((alias as { alias?: unknown }).alias);
-      }
-    }
-  }
+  // Resolve aliases with the installer's own helper rather than re-reading `dest.aliases` here.
+  // It accepts three shapes — an array, a bare string, and an object keyed by alias name — and
+  // screening only the array form would let `aliases: ".hidden"` or `aliases: { ".hidden": {} }`
+  // through upload validation and still be installed as a dot-prefixed alias.
+  getDestinationIndexAliases(dest?.aliases).forEach(({ alias }) => push(alias));
 
   return expressions;
 }

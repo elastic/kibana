@@ -177,6 +177,26 @@ export async function handleTransformReauthorizeAndStart({
     );
   }
 
+  // The transform ids come from the request body, not from the package named in the URL. Without
+  // this check the gate above could be satisfied by pointing the URL at any trusted package while
+  // naming an uploaded package's transform in the body, which would rebind it to the caller.
+  // Only transforms this installation actually owns may be reauthorized through its route.
+  const installedTransformIds = new Set(
+    (installation?.installed_es ?? [])
+      .filter((asset) => asset.type === ElasticsearchAssetType.transform)
+      .map((asset) => asset.id)
+  );
+  const unownedTransformIds = transforms
+    .map(({ transformId }) => transformId)
+    .filter((transformId) => !installedTransformIds.has(transformId));
+  if (unownedTransformIds.length > 0) {
+    throw new FleetUnauthorizedError(
+      `Cannot reauthorize transforms that are not installed by package ${pkgName}: ${unownedTransformIds.join(
+        ', '
+      )}.`
+    );
+  }
+
   const transformInfos = await retryTransientEsErrors(
     () =>
       esClient.transform.getTransform(

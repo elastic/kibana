@@ -10,13 +10,21 @@ import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupTestUsers, testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esClient = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
   const retry = getService('retry');
+  const security = getService('security');
+
+  // The remediation is about a Space-scoped, non-superuser package manager, so uploads run as a
+  // user holding only Fleet/Integrations privileges in the default Space and no Elasticsearch
+  // index privileges at all. That is what makes the privileges check below meaningful.
+  const uploader = testUsers.fleet_all_int_all_default_space_only;
 
   const pkgName = 'transform_identity_test';
   const pkgVersion = '1.0.0';
@@ -24,23 +32,32 @@ export default function (providerContext: FtrProviderContext) {
   const transformModuleId = 'probe';
   const transformVersion = '1.0.0';
   const transformId = `logs-${pkgName}.${transformModuleId}-default-${transformVersion}`;
+  // A second version with a bumped fleet_transform_version, which is what makes the installer
+  // remove the previous transform rather than leave it in place.
+  const upgradeVersion = '1.1.0';
+  const upgradeTransformId = `logs-${pkgName}.${transformModuleId}-default-${upgradeVersion}`;
 
   // `start: false` keeps the assertions on the created transform rather than on whether
   // Elasticsearch could start it against a source index this test never creates.
   const buildPackageZip = async ({
     sourceIndex,
-    transformPath = `${pkgKey}/elasticsearch/transform/${transformModuleId}/transform.yml`,
+    version = pkgVersion,
+    transformPath,
   }: {
     sourceIndex: string;
+    version?: string;
     transformPath?: string;
   }): Promise<Buffer> => {
+    const key = `${pkgName}-${version}`;
+    const path =
+      transformPath ?? `${key}/elasticsearch/transform/${transformModuleId}/transform.yml`;
     const zip = new JSZip();
     zip.file(
-      `${pkgKey}/manifest.yml`,
+      `${key}/manifest.yml`,
       [
         `name: ${pkgName}`,
         `title: Transform Install Identity Test`,
-        `version: ${pkgVersion}`,
+        `version: ${version}`,
         `description: Test package for uploaded transform identity`,
         `type: integration`,
         `format_version: 1.0.0`,
@@ -52,11 +69,11 @@ export default function (providerContext: FtrProviderContext) {
       ].join('\n')
     );
     zip.file(
-      `${pkgKey}/elasticsearch/transform/${transformModuleId}/manifest.yml`,
+      `${key}/elasticsearch/transform/${transformModuleId}/manifest.yml`,
       ['start: false'].join('\n')
     );
     zip.file(
-      transformPath,
+      path,
       [
         `source:`,
         `  index: ["${sourceIndex}"]`,
@@ -67,15 +84,16 @@ export default function (providerContext: FtrProviderContext) {
         `  sort: "@timestamp"`,
         `frequency: 1m`,
         `_meta:`,
-        `  fleet_transform_version: ${transformVersion}`,
+        `  fleet_transform_version: ${version}`,
       ].join('\n')
     );
     return await zip.generateAsync({ type: 'nodebuffer' });
   };
 
   const uploadPackage = (buf: Buffer) =>
-    supertest
+    supertestWithoutAuth
       .post(`/api/fleet/epm/packages`)
+      .auth(uploader.username, uploader.password)
       .set('kbn-xsrf', 'xxxx')
       .type('application/zip')
       .send(buf);
@@ -85,6 +103,7 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       await fleetAndAgents.setup();
+      await setupTestUsers(security);
     });
 
     beforeEach(async () => {
@@ -108,10 +127,15 @@ export default function (providerContext: FtrProviderContext) {
       await supertest
         .delete(`/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
         .set('kbn-xsrf', 'xxxx');
-      await esClient.transform.deleteTransform(
-        { transform_id: transformId, force: true },
-        { ignore: [404] }
-      );
+      await supertest
+        .delete(`/api/fleet/epm/packages/${pkgName}/${upgradeVersion}`)
+        .set('kbn-xsrf', 'xxxx');
+      for (const id of [transformId, upgradeTransformId]) {
+        await esClient.transform.deleteTransform(
+          { transform_id: id, force: true },
+          { ignore: [404] }
+        );
+      }
     });
 
     it('creates an uploaded transform with the installing user credentials, not kibana_system', async () => {
@@ -130,6 +154,16 @@ export default function (providerContext: FtrProviderContext) {
       expect(authorization).to.be.an('object');
       expect(authorization?.api_key).to.be.an('object');
       expect(authorization?.roles).to.be(undefined);
+      // Fleet names the granted key after the user it was granted for, so this pins the
+      // transform to the uploader rather than to whoever happened to be privileged.
+      expect(authorization?.api_key?.name).to.contain(uploader.username);
+
+      // The uploader holds no Elasticsearch index privileges, so Elasticsearch refuses to run
+      // the transform instead of it inheriting kibana_system's reach.
+      const { transforms: stats } = await esClient.transform.getTransformStats({
+        transform_id: transformId,
+      });
+      expect(stats[0].health?.status).to.be('red');
 
       // Persisted so the reauthorize flow stays caller-bound too.
       expect(
@@ -172,6 +206,47 @@ export default function (providerContext: FtrProviderContext) {
         allow_no_match: true,
       });
       expect(count).to.be(0);
+    });
+
+    it('removes the transform when the uploaded package is uninstalled', async () => {
+      const buf = await buildPackageZip({ sourceIndex: 'logs-transform_identity_test-*' });
+      await uploadPackage(buf).expect(200);
+
+      await supertest
+        .delete(`/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      // delete_dest_index is authorized against the uploader's key, which cannot delete indices.
+      // Requesting it would strand the transform, so uninstall must drop the transform alone.
+      const { count } = await esClient.transform.getTransform({
+        transform_id: `logs-${pkgName}.*`,
+        allow_no_match: true,
+      });
+      expect(count).to.be(0);
+    });
+
+    it('replaces the transform when a newer fleet_transform_version is uploaded', async () => {
+      await uploadPackage(
+        await buildPackageZip({ sourceIndex: 'logs-transform_identity_test-*' })
+      ).expect(200);
+
+      await uploadPackage(
+        await buildPackageZip({
+          sourceIndex: 'logs-transform_identity_test-*',
+          version: upgradeVersion,
+        })
+      ).expect(200);
+
+      const { transforms } = await esClient.transform.getTransform({
+        transform_id: `logs-${pkgName}.*`,
+        allow_no_match: true,
+      });
+      expect(transforms.map(({ id }) => id)).to.eql([upgradeTransformId]);
+
+      await supertest
+        .delete(`/api/fleet/epm/packages/${pkgName}/${upgradeVersion}`)
+        .set('kbn-xsrf', 'xxxx');
     });
 
     it('rejects a restricted index in a transform placed outside elasticsearch/', async () => {
