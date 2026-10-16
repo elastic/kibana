@@ -67,9 +67,34 @@ export interface AttachmentDeleteContext {
   remainingAttachments: readonly AttachmentDeleteTarget[];
 }
 
+export interface AttachmentUpdate {
+  /** The attachment saved object id, from `remainingAttachments`. */
+  id: string;
+  /**
+   * The payload replacing the stored one. Validated against the type's schema like any other
+   * write, and neither the type nor the owner may change.
+   */
+  payload: UnifiedAttachmentPayload;
+}
+
 export interface AttachmentDeleteResult {
   /** Ids from `remainingAttachments` to delete in the same operation. */
   relatedAttachmentIds: readonly string[];
+  /**
+   * Attachments from `remainingAttachments` to shrink rather than delete, for when the deleted
+   * attachment contributed only part of what one of them holds.
+   *
+   * An attachment is stored whole, so a type that adds several items in one attachment cannot
+   * undo its own contribution by deleting it: whatever another attachment still depends on would
+   * go with it. Rewriting the payload instead drops only the part that is no longer wanted.
+   *
+   * An id named here and in `relatedAttachmentIds` is deleted; the delete wins.
+   *
+   * An update that drops nothing records no activity on the case. A hook uses one of those to
+   * rewrite its own bookkeeping, which the analyst never sees, and an entry saying an attachment
+   * was edited when nothing visible changed is worse than no entry at all.
+   */
+  relatedAttachmentUpdates?: readonly AttachmentUpdate[];
 }
 
 /**

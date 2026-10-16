@@ -8,16 +8,21 @@
 import Boom from '@hapi/boom';
 
 import type { AttachmentAttributesV2 } from '../../../common/types/domain';
+import { UserActionTypes, UserActionActions } from '../../../common/types/domain';
 import type { AttachmentRequestV2 } from '../../../common/types/api';
 import { AttachmentRequestRtV2 } from '../../../common/types/api';
+import { toStringArray } from '../../../common/utils/attachments';
 import { decodeOrThrow } from '../../common/runtime_types';
 import { getAlertInfoFromComments } from '../../common/utils';
 import { getCaseReferenceId } from '../../common/references';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { OperationDetails } from '../../authorization';
+import { Operations } from '../../authorization';
 import type { AttachmentForDeletion } from '../../services/attachments/types';
 import type { CasesClientArgs } from '../types';
 import { deleteFiles, getFileEntitiesForCase } from '../files';
+import { validateUnifiedAttachments } from './validators';
+import type { RelatedAttachmentUpdate } from './related_deletions';
 import { getRelatedAttachmentsToDelete } from './related_deletions';
 import { emitAttachmentsDeletedEvents } from './trigger_utils';
 
@@ -62,6 +67,7 @@ export const deleteCaseAttachments = async (
     logger,
     authorization,
     fileService,
+    unifiedAttachmentTypeRegistry,
   } = clientArgs;
 
   let caseRead: Promise<CaseSavedObjectTransformed> | undefined;
@@ -89,9 +95,9 @@ export const deleteCaseAttachments = async (
 
   // Resolved once the requested attachments are known to be valid and authorized, so a hook never
   // runs for a request that is about to be rejected.
-  const relatedRefs = includeRelated
+  const { refs: relatedRefs, updates: relatedUpdates } = includeRelated
     ? await getRelatedAttachmentsToDelete({ caseId, attachments: ownedAttachments, clientArgs })
-    : [];
+    : { refs: [], updates: [] };
 
   // Read for deletion like the requested attachments, so they carry the same file id and the same
   // owner fallback. A file is never taken along: it is deleted through the file attachments
@@ -111,6 +117,33 @@ export const deleteCaseAttachments = async (
       entities: relatedAttachments.map(({ id, owner }) => ({ id, owner })),
       operation,
     });
+  }
+
+  // Read the same way, for the same resolved owner and the same stored payload the shrink is
+  // computed against. Authorized as an update rather than a delete: these attachments survive the
+  // request, and the audit trail should say so.
+  const updateTargets =
+    relatedUpdates.length > 0
+      ? await withCaseOwnerFallback({
+          attachments: await attachmentService.getter.bulkGetForDeletionByType(
+            relatedUpdates.map(({ id, type }) => ({ id, type }))
+          ),
+          getCase,
+        })
+      : [];
+
+  if (updateTargets.length > 0) {
+    await authorization.ensureAuthorized({
+      entities: updateTargets.map(({ id, owner }) => ({ id, owner })),
+      operation: Operations.updateComment,
+    });
+
+    // A hook builds these payloads, so they are checked exactly like ones that arrived over the
+    // API, and before anything is deleted: a payload a hook got wrong fails the whole request
+    // rather than leaving it half done.
+    relatedUpdates.forEach(({ payload }) =>
+      validateUnifiedAttachments({ query: payload, unifiedAttachmentTypeRegistry })
+    );
   }
 
   // From here the attachments a hook took along are treated exactly like the requested ones: they
@@ -163,6 +196,11 @@ export const deleteCaseAttachments = async (
       [...attachmentsToDelete, ...fileReferences].flatMap(({ id, fileId }) =>
         !deletedIds.has(id) && fileId != null ? [fileId] : []
       )
+    );
+
+    await applyAttachmentUpdates(
+      { caseId, updates: relatedUpdates, targets: updateTargets },
+      clientArgs
     );
 
     await recordDeletion(
@@ -239,6 +277,138 @@ const recordDeletion = async (
   });
 
   emitAttachmentsDeletedEvents(clientArgs, caseId, attachments);
+};
+
+interface ApplyAttachmentUpdatesArgs {
+  caseId: string;
+  updates: RelatedAttachmentUpdate[];
+  targets: OwnedAttachment[];
+}
+
+/**
+ * Rewrites the attachments a hook asked to shrink instead of delete, and unlinks the alerts they
+ * no longer hold.
+ *
+ * Runs after the deletes and before the case stats are recomputed, so the counts are taken once
+ * both halves of the removal are in the index. Unlike the PUT route there is no version check:
+ * nothing here came from a caller holding a stale copy, and failing a delete because someone
+ * else touched an unrelated attachment would be worse than the write it prevents.
+ */
+const applyAttachmentUpdates = async (
+  { caseId, updates, targets }: ApplyAttachmentUpdatesArgs,
+  clientArgs: CasesClientArgs
+): Promise<void> => {
+  const {
+    user,
+    logger,
+    services: { attachmentService, userActionService, alertsService },
+  } = clientArgs;
+
+  const targetsById = new Map(targets.map((target) => [target.id, target]));
+
+  // An attachment whose stored fields do not decode cannot be shrunk: without the payload the
+  // update replaces there is no way to tell what it is losing.
+  const appliableUpdates = updates.flatMap(({ id, type, payload }) => {
+    const target = targetsById.get(id);
+    const [decoded] = target != null ? toDecodedAttachment(target, logger) : [];
+
+    return decoded == null ? [] : [{ id, type, payload, stored: decoded }];
+  });
+
+  if (appliableUpdates.length === 0) {
+    return;
+  }
+
+  const updatedAt = new Date().toISOString();
+
+  for (const { id, payload, stored } of appliableUpdates) {
+    // The stored references are written back because the attribute extraction that runs on update
+    // does not know about the case reference and would otherwise drop it.
+    await attachmentService.update({
+      savedObjectId: id,
+      updatedAttributes: { ...payload, updated_at: updatedAt, updated_by: user },
+      options: { references: stored.references, refresh: true },
+    });
+  }
+
+  // An update that drops nothing only rewrites bookkeeping the attachment keeps about where it
+  // came from. Nothing the analyst sees changed, so it gets no activity entry and no alert is
+  // unlinked.
+  const shrunkAttachments = appliableUpdates.flatMap(({ id, type, payload, stored }) => {
+    const dropped = toDroppedPayload(stored.requestAttributes, payload);
+
+    return !('attachmentId' in dropped) || toStringArray(dropped.attachmentId).length === 0
+      ? []
+      : [{ id, owner: stored.owner, savedObjectType: type, attachment: dropped, payload }];
+  });
+
+  if (shrunkAttachments.length === 0) {
+    return;
+  }
+
+  // What left the case is recorded as a deletion of the part that left, so the activity reads as
+  // the alerts being removed rather than as an unexplained edit, and so a connector push forgets
+  // them. The update that follows puts back what the attachment still holds: the two are read in
+  // order, and a deletion alone would drop the kept alerts from the push as well.
+  await userActionService.creator.bulkCreateAttachmentDeletion({
+    caseId,
+    attachments: shrunkAttachments.map(({ id, owner, savedObjectType, attachment }) => ({
+      id,
+      owner,
+      savedObjectType,
+      attachment,
+    })),
+    user,
+  });
+
+  for (const { id, owner, savedObjectType, payload } of shrunkAttachments) {
+    await userActionService.creator.createUserAction({
+      userAction: {
+        type: UserActionTypes.comment,
+        action: UserActionActions.update,
+        caseId,
+        savedObjectId: id,
+        savedObjectType,
+        payload: { attachment: payload },
+        user,
+        owner,
+      },
+    });
+  }
+
+  const alerts = getAlertInfoFromComments(shrunkAttachments.map(({ attachment }) => attachment));
+
+  if (alerts.length > 0) {
+    await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
+  }
+};
+
+/**
+ * The part of the stored payload the update drops, used to unlink exactly the alerts that left.
+ *
+ * `metadata.index` runs parallel to `attachmentId`, so the dropped indices are taken by position.
+ * A scalar index applies to every alert and is kept as is; an array that does not line up is left
+ * alone rather than realigned on a guess.
+ */
+const toDroppedPayload = (
+  stored: AttachmentRequestV2,
+  payload: RelatedAttachmentUpdate['payload']
+): AttachmentRequestV2 => {
+  const storedIds = 'attachmentId' in stored ? toStringArray(stored.attachmentId) : [];
+  const keptIds = new Set('attachmentId' in payload ? toStringArray(payload.attachmentId) : []);
+  const droppedPositions = storedIds.flatMap((id, position) => (keptIds.has(id) ? [] : [position]));
+
+  const storedIndex = 'metadata' in stored ? stored.metadata?.index : undefined;
+  const index =
+    Array.isArray(storedIndex) && storedIndex.length === storedIds.length
+      ? droppedPositions.map((position) => storedIndex[position])
+      : storedIndex;
+
+  return {
+    ...stored,
+    attachmentId: droppedPositions.map((position) => storedIds[position]),
+    metadata: { ...('metadata' in stored ? stored.metadata : {}), index },
+  } as AttachmentRequestV2;
 };
 
 const hasOwner = (attachment: AttachmentForDeletion): attachment is OwnedAttachment =>

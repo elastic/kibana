@@ -94,6 +94,7 @@ describe('useRemovableAlertAttachments', () => {
     expect(result.current).toEqual({
       isLoading: true,
       attachmentIds: [],
+      updates: [],
       alertIds: [],
       isResolvable: false,
     });
@@ -121,6 +122,7 @@ describe('useRemovableAlertAttachments', () => {
     expect(result.current).toEqual({
       isLoading: false,
       attachmentIds: [],
+      updates: [],
       alertIds: [],
       isResolvable: false,
     });
@@ -146,12 +148,21 @@ describe('useRemovableAlertAttachments', () => {
     expect(result.current).toEqual({
       isLoading: false,
       attachmentIds: ['so-alert-1', 'so-alert-2'],
+      // `alert-3` is no longer part of the attack, so it stays, attributed to no attack.
+      updates: [
+        {
+          id: 'so-alert-3',
+          keptAlertIds: ['alert-3'],
+          removedAlertIds: [],
+          sourceAttackIds: [],
+        },
+      ],
       alertIds: ['alert-1', 'alert-2'],
       isResolvable: true,
     });
   });
 
-  it('excludes alerts still claimed by another attack on the case', () => {
+  it('excludes alerts still claimed by another attack on the case, relabelling them onto it', () => {
     useFindAttackDiscoveriesMock.mockReturnValue(
       findResult([
         { id: 'attack-1', alertIds: ['alert-1', 'alert-2'] },
@@ -174,6 +185,14 @@ describe('useRemovableAlertAttachments', () => {
     expect(result.current).toEqual({
       isLoading: false,
       attachmentIds: ['so-alert-1'],
+      updates: [
+        {
+          id: 'so-alert-2',
+          keptAlertIds: ['alert-2'],
+          removedAlertIds: [],
+          sourceAttackIds: ['attack-2'],
+        },
+      ],
       alertIds: ['alert-1'],
       isResolvable: true,
     });
@@ -200,6 +219,7 @@ describe('useRemovableAlertAttachments', () => {
     expect(result.current).toEqual({
       isLoading: false,
       attachmentIds: ['so-alert-1'],
+      updates: [],
       alertIds: ['alert-1'],
       isResolvable: true,
     });
@@ -218,6 +238,7 @@ describe('useRemovableAlertAttachments', () => {
     expect(result.current).toEqual({
       isLoading: false,
       attachmentIds: [],
+      updates: [],
       alertIds: [],
       isResolvable: false,
     });
@@ -241,6 +262,79 @@ describe('useRemovableAlertAttachments', () => {
 
     expect(result.current.isResolvable).toBe(false);
     expect(result.current.attachmentIds).toEqual([]);
+    expect(result.current.updates).toEqual([]);
+  });
+
+  it('shrinks an alert attachment shared with another attack on the case', () => {
+    useFindAttackDiscoveriesMock.mockReturnValue(
+      findResult([
+        { id: 'attack-1', alertIds: ['alert-shared', 'alert-1'] },
+        { id: 'attack-2', alertIds: ['alert-shared', 'alert-2'] },
+      ])
+    );
+
+    const { result } = renderHook(() =>
+      useRemovableAlertAttachments({
+        comments: [
+          attackAttachment('attack-1'),
+          attackAttachment('attack-2'),
+          alertAttachment('so-alert-1', ['alert-shared', 'alert-1']),
+          alertAttachment('so-alert-2', ['alert-2'], ['attack-2']),
+        ],
+        attackIds: ['attack-1'],
+      })
+    );
+
+    expect(result.current).toEqual({
+      isLoading: false,
+      attachmentIds: [],
+      updates: [
+        {
+          id: 'so-alert-1',
+          keptAlertIds: ['alert-shared'],
+          removedAlertIds: ['alert-1'],
+          sourceAttackIds: ['attack-2'],
+        },
+      ],
+      alertIds: ['alert-1'],
+      isResolvable: true,
+    });
+  });
+
+  it('counts no alert for an attachment it only relabels', () => {
+    useFindAttackDiscoveriesMock.mockReturnValue(
+      findResult([
+        { id: 'attack-1', alertIds: ['alert-shared'] },
+        { id: 'attack-2', alertIds: ['alert-shared', 'alert-2'] },
+      ])
+    );
+
+    const { result } = renderHook(() =>
+      useRemovableAlertAttachments({
+        comments: [
+          attackAttachment('attack-1'),
+          attackAttachment('attack-2'),
+          alertAttachment('so-alert-1', ['alert-shared']),
+          alertAttachment('so-alert-2', ['alert-2'], ['attack-2']),
+        ],
+        attackIds: ['attack-1'],
+      })
+    );
+
+    expect(result.current).toEqual({
+      isLoading: false,
+      attachmentIds: [],
+      updates: [
+        {
+          id: 'so-alert-1',
+          keptAlertIds: ['alert-shared'],
+          removedAlertIds: [],
+          sourceAttackIds: ['attack-2'],
+        },
+      ],
+      alertIds: [],
+      isResolvable: true,
+    });
   });
 
   describe('a selection of several attacks', () => {
@@ -268,13 +362,14 @@ describe('useRemovableAlertAttachments', () => {
       expect(result.current).toEqual({
         isLoading: false,
         attachmentIds: ['so-alert-1', 'so-alert-cross'],
+        updates: [],
         // alert-2 belongs to both selected attacks and is counted once.
         alertIds: ['alert-1', 'alert-2', 'alert-3'],
         isResolvable: true,
       });
     });
 
-    it('still excludes alerts claimed by an attack outside the selection', () => {
+    it('still excludes alerts claimed by an attack outside the selection, relabelling them onto it', () => {
       useFindAttackDiscoveriesMock.mockReturnValue(
         findResult([
           { id: 'attack-1', alertIds: ['alert-1'] },
@@ -299,6 +394,14 @@ describe('useRemovableAlertAttachments', () => {
       expect(result.current).toEqual({
         isLoading: false,
         attachmentIds: ['so-alert-1'],
+        updates: [
+          {
+            id: 'so-alert-2',
+            keptAlertIds: ['alert-2'],
+            removedAlertIds: [],
+            sourceAttackIds: ['attack-3'],
+          },
+        ],
         alertIds: ['alert-1'],
         isResolvable: true,
       });
@@ -322,6 +425,7 @@ describe('useRemovableAlertAttachments', () => {
 
       expect(result.current.isResolvable).toBe(false);
       expect(result.current.attachmentIds).toEqual([]);
+      expect(result.current.updates).toEqual([]);
     });
   });
 });

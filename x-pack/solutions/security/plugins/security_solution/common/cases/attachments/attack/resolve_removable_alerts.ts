@@ -33,12 +33,41 @@ export interface CaseAlertAttachment {
 }
 
 /**
+ * An alert attachment that an attack removal shrinks rather than deletes, because only part of
+ * what it holds belongs to the attack being removed.
+ */
+export interface RemovableAlertAttachmentUpdate {
+  /** The attachment saved object id. */
+  id: string;
+  /** The alert document ids that stay on the attachment. */
+  keptAlertIds: string[];
+  /** The alert document ids dropped from it, which leave the case. */
+  removedAlertIds: string[];
+  /**
+   * The provenance to write back, naming the attacks still on the case that claim the kept
+   * alerts.
+   *
+   * The remainder has to be relabelled because the attack that introduced it is going. Left
+   * naming the removed attack, the attachment would match no attack still on the case, so
+   * removing the attacks that actually depend on those alerts would never reconsider it and
+   * they would stay on the case forever.
+   *
+   * Empty when no remaining attack claims any of the kept alerts, which makes the attachment
+   * untouchable by a later attack removal. That is the same conservative position as an
+   * attachment the analyst made themselves.
+   */
+  sourceAttackIds: string[];
+}
+
+/**
  * The outcome of resolving which alerts an attack may take with it when removed.
  */
 export interface RemovableAlertAttachments {
   /** Attachment saved object ids to pass to the bulk-delete endpoint. */
   attachmentIds: string[];
-  /** The alert document ids those attachments cover, for the count shown in the prompt. */
+  /** Attachments to shrink instead, because they also hold alerts that must stay. */
+  updates: RemovableAlertAttachmentUpdate[];
+  /** The alert document ids leaving the case, for the count shown in the prompt. */
   alertIds: string[];
   /**
    * False when at least one attack attachment on the case could not be resolved — either the
@@ -51,6 +80,7 @@ export interface RemovableAlertAttachments {
 
 const EMPTY_UNRESOLVABLE: RemovableAlertAttachments = {
   attachmentIds: [],
+  updates: [],
   alertIds: [],
   isResolvable: false,
 };
@@ -102,14 +132,14 @@ export const getCaseAlertAttachments = (
  *   what the analyst captured; orphaned evidence stays on the case.
  * - Attack↔alert is many-to-many, so an alert claimed by another attack attached to the same
  *   case is excluded — removing this attack must not strip evidence from that one.
- * - An alert attachment referencing several alerts can only be deleted whole, so it is
- *   returned only when *every* alert it references is removable. A partially-shared
- *   attachment stays, again erring toward keeping evidence.
+ * - An alert attachment that holds both removable and non-removable alerts is shrunk rather than
+ *   deleted whole: the removable ones are dropped and the rest stay. This is what makes removal
+ *   independent of the order the attacks were attached in. The attack attached first holds the
+ *   shared alert alongside its own exclusive ones, and without shrinking, removing it would have
+ *   to choose between stripping evidence from the other attack and stranding its own.
  *
- * That last consequence is the known gap: when two attacks share an alert, the one attached
- * first holds both the shared alert and its own exclusive ones in a single attachment, so
- * removing it takes nothing and leaves its exclusive alerts behind. Closing that needs the
- * Cases `onDelete` contract to be able to shrink an attachment instead of deleting it whole.
+ * A shrunk attachment is relabelled to the attacks still claiming what it kept, so the alerts it
+ * holds on their behalf remain removable when those attacks are themselves removed.
  *
  * Returns an empty, non-resolvable result rather than throwing when an alert set is missing —
  * a deleted attack, one aged into a frozen tier, or one outside the user's access all arrive
@@ -119,46 +149,81 @@ export const getCaseAlertAttachments = (
  * @param removedAttackIds attack document ids of the attachments being removed, matched against each attachment's provenance.
  * @param attackAlertIds de-anonymised alert ids of the attacks being removed, or `undefined`/`null` when they could not be resolved.
  * @param alertAttachments the case's `security.alert` attachments, from {@link getCaseAlertAttachments}.
- * @param otherAttackAlertIds de-anonymised alert ids of every *other* attack attachment on the case, one entry each, `undefined`/`null` where unresolved.
+ * @param otherAttacks every *other* attack attachment on the case, with its de-anonymised alert ids, `undefined`/`null` where unresolved.
  */
 export const resolveRemovableAlertAttachments = ({
   removedAttackIds,
   attackAlertIds,
   alertAttachments,
-  otherAttackAlertIds,
+  otherAttacks,
 }: {
   removedAttackIds: readonly string[];
   attackAlertIds: readonly string[] | undefined | null;
   alertAttachments: readonly CaseAlertAttachment[];
-  otherAttackAlertIds: ReadonlyArray<readonly string[] | undefined | null>;
+  otherAttacks: ReadonlyArray<{ id: string; alertIds: readonly string[] | undefined | null }>;
 }): RemovableAlertAttachments => {
-  if (attackAlertIds == null || otherAttackAlertIds.some((ids) => ids == null)) {
+  if (attackAlertIds == null || otherAttacks.some(({ alertIds }) => alertIds == null)) {
     return EMPTY_UNRESOLVABLE;
   }
 
   const removedAttackIdSet = new Set(removedAttackIds);
   const attackAlertIdSet = new Set(attackAlertIds);
-  const claimedByOtherAttacks = new Set(otherAttackAlertIds.flatMap((ids) => ids ?? []));
+  const claimedByOtherAttacks = new Set(otherAttacks.flatMap(({ alertIds }) => alertIds ?? []));
+
+  /** The attacks still on the case that list any of these alerts, for the rewritten provenance. */
+  const claimantsOf = (keptAlertIds: readonly string[]): string[] => {
+    const keptAlertIdSet = new Set(keptAlertIds);
+
+    return otherAttacks
+      .filter(({ alertIds: ids }) => (ids ?? []).some((alertId) => keptAlertIdSet.has(alertId)))
+      .map(({ id }) => id);
+  };
+
+  // An attachment with no alerts cannot be attributed to this attack, and one the attack did not
+  // create is never touched, whatever it holds.
+  const candidates = alertAttachments.filter(
+    ({ alertIds: ids, sourceAttackIds }) =>
+      ids.length > 0 && sourceAttackIds.some((attackId) => removedAttackIdSet.has(attackId))
+  );
 
   const attachmentIds: string[] = [];
+  const updates: RemovableAlertAttachmentUpdate[] = [];
   const alertIds = new Set<string>();
 
-  for (const { id, alertIds: attachmentAlertIds, sourceAttackIds } of alertAttachments) {
-    // An empty attachment cannot be attributed to this attack, so leave it alone.
-    const isRemovable =
-      attachmentAlertIds.length > 0 &&
-      sourceAttackIds.some((attackId) => removedAttackIdSet.has(attackId)) &&
-      attachmentAlertIds.every(
-        (alertId) => attackAlertIdSet.has(alertId) && !claimedByOtherAttacks.has(alertId)
-      );
+  for (const { id, alertIds: attachmentAlertIds } of candidates) {
+    const removedAlertIds = attachmentAlertIds.filter(
+      (alertId) => attackAlertIdSet.has(alertId) && !claimedByOtherAttacks.has(alertId)
+    );
 
-    if (isRemovable) {
+    if (removedAlertIds.length === attachmentAlertIds.length) {
       attachmentIds.push(id);
-      attachmentAlertIds.forEach((alertId) => alertIds.add(alertId));
+    } else if (removedAlertIds.length > 0) {
+      const removedAlertIdSet = new Set(removedAlertIds);
+      const keptAlertIds = attachmentAlertIds.filter((alertId) => !removedAlertIdSet.has(alertId));
+
+      updates.push({
+        id,
+        keptAlertIds,
+        removedAlertIds,
+        sourceAttackIds: claimantsOf(keptAlertIds),
+      });
+    } else {
+      // Nothing here may go, but the attack that put it there is leaving. Left naming that attack
+      // the attachment would match no attack still on the case, so removing the attacks that do
+      // claim its alerts would never reconsider it and they would stay forever. Only the label
+      // changes; what the analyst sees is untouched.
+      updates.push({
+        id,
+        keptAlertIds: [...attachmentAlertIds],
+        removedAlertIds: [],
+        sourceAttackIds: claimantsOf(attachmentAlertIds),
+      });
     }
+
+    removedAlertIds.forEach((alertId) => alertIds.add(alertId));
   }
 
-  return { attachmentIds, alertIds: Array.from(alertIds), isResolvable: true };
+  return { attachmentIds, updates, alertIds: Array.from(alertIds), isResolvable: true };
 };
 
 /**
@@ -191,6 +256,6 @@ export const resolveRemovableAlertAttachmentsForAttacks = ({
       ? undefined
       : [...new Set(removedAlertIds.flatMap((ids) => ids ?? []))],
     alertAttachments,
-    otherAttackAlertIds: otherAttackIds.map((id) => alertIdsByAttackId.get(id)),
+    otherAttacks: otherAttackIds.map((id) => ({ id, alertIds: alertIdsByAttackId.get(id) })),
   });
 };

@@ -176,9 +176,9 @@ describe('registerCaseAttachments', () => {
     if (!result.success) {
       // The FTR flag-off suite asserts this reaches the API response, so the message has to
       // name the flag rather than read as a generic type mismatch.
-      expect(result.error.issues.map(({ message }) => message).join('; ')).toContain(
-        'attackAttachmentsEnabled'
-      );
+      expect(
+        result.error.issues.map((issue: { message: string }) => issue.message).join('; ')
+      ).toContain('attackAttachmentsEnabled');
     }
   });
 

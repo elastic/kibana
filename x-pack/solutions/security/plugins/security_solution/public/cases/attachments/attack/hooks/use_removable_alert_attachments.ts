@@ -26,6 +26,7 @@ export interface UseRemovableAlertAttachmentsResult extends RemovableAlertAttach
 const LOADING: UseRemovableAlertAttachmentsResult = {
   isLoading: true,
   attachmentIds: [],
+  updates: [],
   alertIds: [],
   isResolvable: false,
 };
@@ -33,6 +34,7 @@ const LOADING: UseRemovableAlertAttachmentsResult = {
 const UNRESOLVABLE: UseRemovableAlertAttachmentsResult = {
   isLoading: false,
   attachmentIds: [],
+  updates: [],
   alertIds: [],
   isResolvable: false,
 };

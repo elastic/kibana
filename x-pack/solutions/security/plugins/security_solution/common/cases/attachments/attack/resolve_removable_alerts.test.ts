@@ -16,6 +16,7 @@ import type { CaseAlertAttachment, CaseAttachmentWithId } from './resolve_remova
 import {
   getCaseAlertAttachments,
   resolveRemovableAlertAttachments,
+  resolveRemovableAlertAttachmentsForAttacks,
 } from './resolve_removable_alerts';
 
 const REMOVED_ATTACK_ID = 'attack-1';
@@ -94,10 +95,10 @@ describe('resolveRemovableAlertAttachments', () => {
       resolveRemovableAlertAttachments({
         removedAttackIds: [REMOVED_ATTACK_ID],
         attackAlertIds: ['alert-1', 'alert-2'],
-        alertAttachments: [alertAttachment('attachment-1', ['alert-9'])],
-        otherAttackAlertIds: [],
+        alertAttachments: [alertAttachment('attachment-1', ['alert-9'], ['attack-2'])],
+        otherAttacks: [{ id: 'attack-2', alertIds: ['alert-9'] }],
       })
-    ).toEqual({ attachmentIds: [], alertIds: [], isResolvable: true });
+    ).toEqual({ attachmentIds: [], updates: [], alertIds: [], isResolvable: true });
   });
 
   it('returns every attachment when the attack is the only claimant', () => {
@@ -109,16 +110,17 @@ describe('resolveRemovableAlertAttachments', () => {
           alertAttachment('attachment-1', ['alert-1']),
           alertAttachment('attachment-2', ['alert-2']),
         ],
-        otherAttackAlertIds: [],
+        otherAttacks: [],
       })
     ).toEqual({
       attachmentIds: ['attachment-1', 'attachment-2'],
+      updates: [],
       alertIds: ['alert-1', 'alert-2'],
       isResolvable: true,
     });
   });
 
-  it('excludes every alert when another attached attack claims the same set', () => {
+  it('excludes every alert when another attached attack claims the same set, relabelling them onto it', () => {
     expect(
       resolveRemovableAlertAttachments({
         removedAttackIds: [REMOVED_ATTACK_ID],
@@ -127,12 +129,30 @@ describe('resolveRemovableAlertAttachments', () => {
           alertAttachment('attachment-1', ['alert-1']),
           alertAttachment('attachment-2', ['alert-2']),
         ],
-        otherAttackAlertIds: [['alert-1', 'alert-2']],
+        otherAttacks: [{ id: 'attack-2', alertIds: ['alert-1', 'alert-2'] }],
       })
-    ).toEqual({ attachmentIds: [], alertIds: [], isResolvable: true });
+    ).toEqual({
+      attachmentIds: [],
+      updates: [
+        {
+          id: 'attachment-1',
+          keptAlertIds: ['alert-1'],
+          removedAlertIds: [],
+          sourceAttackIds: ['attack-2'],
+        },
+        {
+          id: 'attachment-2',
+          keptAlertIds: ['alert-2'],
+          removedAlertIds: [],
+          sourceAttackIds: ['attack-2'],
+        },
+      ],
+      alertIds: [],
+      isResolvable: true,
+    });
   });
 
-  it('excludes only the alerts another attached attack also claims', () => {
+  it('excludes only the alerts another attached attack also claims, relabelling them onto it', () => {
     expect(
       resolveRemovableAlertAttachments({
         removedAttackIds: [REMOVED_ATTACK_ID],
@@ -142,16 +162,27 @@ describe('resolveRemovableAlertAttachments', () => {
           alertAttachment('attachment-2', ['alert-2']),
           alertAttachment('attachment-3', ['alert-3']),
         ],
-        otherAttackAlertIds: [['alert-2'], ['alert-9']],
+        otherAttacks: [
+          { id: 'attack-2', alertIds: ['alert-2'] },
+          { id: 'attack-3', alertIds: ['alert-9'] },
+        ],
       })
     ).toEqual({
       attachmentIds: ['attachment-1', 'attachment-3'],
+      updates: [
+        {
+          id: 'attachment-2',
+          keptAlertIds: ['alert-2'],
+          removedAlertIds: [],
+          sourceAttackIds: ['attack-2'],
+        },
+      ],
       alertIds: ['alert-1', 'alert-3'],
       isResolvable: true,
     });
   });
 
-  it('never returns an alert that left the attack since attach time', () => {
+  it('never returns an alert that left the attack since attach time, relabelling it onto no attack', () => {
     expect(
       resolveRemovableAlertAttachments({
         removedAttackIds: [REMOVED_ATTACK_ID],
@@ -161,10 +192,18 @@ describe('resolveRemovableAlertAttachments', () => {
           alertAttachment('attachment-1', ['alert-1']),
           alertAttachment('attachment-2', ['alert-2']),
         ],
-        otherAttackAlertIds: [],
+        otherAttacks: [],
       })
     ).toEqual({
       attachmentIds: ['attachment-1'],
+      updates: [
+        {
+          id: 'attachment-2',
+          keptAlertIds: ['alert-2'],
+          removedAlertIds: [],
+          sourceAttackIds: [],
+        },
+      ],
       alertIds: ['alert-1'],
       isResolvable: true,
     });
@@ -178,35 +217,29 @@ describe('resolveRemovableAlertAttachments', () => {
           removedAttackIds: [REMOVED_ATTACK_ID],
           attackAlertIds,
           alertAttachments: [alertAttachment('attachment-1', ['alert-1'])],
-          otherAttackAlertIds: [],
+          otherAttacks: [],
         })
-      ).toEqual({ attachmentIds: [], alertIds: [], isResolvable: false });
+      ).toEqual({ attachmentIds: [], updates: [], alertIds: [], isResolvable: false });
     }
   );
 
-  it('reports unresolvable when another attached attack cannot be resolved', () => {
-    expect(
-      resolveRemovableAlertAttachments({
-        removedAttackIds: [REMOVED_ATTACK_ID],
-        attackAlertIds: ['alert-1'],
-        alertAttachments: [alertAttachment('attachment-1', ['alert-1'])],
-        otherAttackAlertIds: [undefined],
-      })
-    ).toEqual({ attachmentIds: [], alertIds: [], isResolvable: false });
-  });
-
-  it('keeps an attachment whose alerts are only partly removable', () => {
-    expect(
-      resolveRemovableAlertAttachments({
-        removedAttackIds: [REMOVED_ATTACK_ID],
-        attackAlertIds: ['alert-1', 'alert-2'],
-        // One attachment covers both alerts, but another attack claims `alert-2`, so deleting
-        // the attachment would strip evidence from that attack too.
-        alertAttachments: [alertAttachment('attachment-1', ['alert-1', 'alert-2'])],
-        otherAttackAlertIds: [['alert-2']],
-      })
-    ).toEqual({ attachmentIds: [], alertIds: [], isResolvable: true });
-  });
+  it.each([[undefined], [null]])(
+    'reports unresolvable when another attached attack cannot be resolved (%p)',
+    (alertIds) => {
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: [REMOVED_ATTACK_ID],
+          attackAlertIds: ['alert-1', 'alert-2'],
+          // Would otherwise be shrunk, so an unresolved claimant must block the update as well.
+          alertAttachments: [alertAttachment('attachment-1', ['alert-1', 'alert-2'])],
+          otherAttacks: [
+            { id: 'attack-2', alertIds: ['alert-2'] },
+            { id: 'attack-3', alertIds },
+          ],
+        })
+      ).toEqual({ attachmentIds: [], updates: [], alertIds: [], isResolvable: false });
+    }
+  );
 
   it('dedupes alert ids reported across attachments', () => {
     expect(
@@ -217,10 +250,11 @@ describe('resolveRemovableAlertAttachments', () => {
           alertAttachment('attachment-1', ['alert-1']),
           alertAttachment('attachment-2', ['alert-1']),
         ],
-        otherAttackAlertIds: [],
+        otherAttacks: [],
       })
     ).toEqual({
       attachmentIds: ['attachment-1', 'attachment-2'],
+      updates: [],
       alertIds: ['alert-1'],
       isResolvable: true,
     });
@@ -232,9 +266,9 @@ describe('resolveRemovableAlertAttachments', () => {
         removedAttackIds: [REMOVED_ATTACK_ID],
         attackAlertIds: ['alert-1'],
         alertAttachments: [alertAttachment('attachment-1', [])],
-        otherAttackAlertIds: [],
+        otherAttacks: [],
       })
-    ).toEqual({ attachmentIds: [], alertIds: [], isResolvable: true });
+    ).toEqual({ attachmentIds: [], updates: [], alertIds: [], isResolvable: true });
   });
 
   it('returns nothing when the case has no alert attachments', () => {
@@ -243,9 +277,9 @@ describe('resolveRemovableAlertAttachments', () => {
         removedAttackIds: [REMOVED_ATTACK_ID],
         attackAlertIds: ['alert-1'],
         alertAttachments: [],
-        otherAttackAlertIds: [],
+        otherAttacks: [],
       })
-    ).toEqual({ attachmentIds: [], alertIds: [], isResolvable: true });
+    ).toEqual({ attachmentIds: [], updates: [], alertIds: [], isResolvable: true });
   });
 
   describe('provenance', () => {
@@ -260,13 +294,25 @@ describe('resolveRemovableAlertAttachments', () => {
             alertAttachment('attachment-1', ['alert-1'], []),
             alertAttachment('attachment-2', ['alert-2']),
           ],
-          otherAttackAlertIds: [],
+          otherAttacks: [],
         })
       ).toEqual({
         attachmentIds: ['attachment-2'],
+        updates: [],
         alertIds: ['alert-2'],
         isResolvable: true,
       });
+    });
+
+    it('never shrinks an attachment the analyst made, even when the attack lists part of it', () => {
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: [REMOVED_ATTACK_ID],
+          attackAlertIds: ['alert-1'],
+          alertAttachments: [alertAttachment('attachment-1', ['alert-1', 'alert-2'], [])],
+          otherAttacks: [],
+        })
+      ).toEqual({ attachmentIds: [], updates: [], alertIds: [], isResolvable: true });
     });
 
     it('never returns an alert another attack put on the case', () => {
@@ -275,9 +321,9 @@ describe('resolveRemovableAlertAttachments', () => {
           removedAttackIds: [REMOVED_ATTACK_ID],
           attackAlertIds: ['alert-1'],
           alertAttachments: [alertAttachment('attachment-1', ['alert-1'], ['attack-2'])],
-          otherAttackAlertIds: [],
+          otherAttacks: [],
         })
-      ).toEqual({ attachmentIds: [], alertIds: [], isResolvable: true });
+      ).toEqual({ attachmentIds: [], updates: [], alertIds: [], isResolvable: true });
     });
 
     it('returns an attachment any of the removed attacks created', () => {
@@ -286,13 +332,432 @@ describe('resolveRemovableAlertAttachments', () => {
           removedAttackIds: [REMOVED_ATTACK_ID, 'attack-2'],
           attackAlertIds: ['alert-1'],
           alertAttachments: [alertAttachment('attachment-1', ['alert-1'], ['attack-2'])],
-          otherAttackAlertIds: [],
+          otherAttacks: [],
         })
       ).toEqual({
         attachmentIds: ['attachment-1'],
+        updates: [],
         alertIds: ['alert-1'],
         isResolvable: true,
       });
     });
+  });
+
+  describe('attacks sharing an alert, removed in either order', () => {
+    // Attack A is attached first and its attachment holds the shared alert. Attack B is
+    // attached second, and the Cases dedupe leaves its attachment holding only its own alert.
+    const attachedAfterDedupe = [
+      alertAttachment('attachment-a', ['alert-shared', 'alert-a1'], ['attack-a']),
+      alertAttachment('attachment-b', ['alert-b1'], ['attack-b']),
+    ];
+
+    it('shrinks the attachment of the first attack and relabels the shared alert onto the second', () => {
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: ['attack-a'],
+          attackAlertIds: ['alert-shared', 'alert-a1'],
+          alertAttachments: attachedAfterDedupe,
+          otherAttacks: [{ id: 'attack-b', alertIds: ['alert-shared', 'alert-b1'] }],
+        })
+      ).toEqual({
+        attachmentIds: [],
+        updates: [
+          {
+            id: 'attachment-a',
+            keptAlertIds: ['alert-shared'],
+            removedAlertIds: ['alert-a1'],
+            sourceAttackIds: ['attack-b'],
+          },
+        ],
+        alertIds: ['alert-a1'],
+        isResolvable: true,
+      });
+    });
+
+    it('takes the shared alert with the second attack once the first has gone', () => {
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: ['attack-b'],
+          attackAlertIds: ['alert-shared', 'alert-b1'],
+          alertAttachments: [
+            alertAttachment('attachment-a', ['alert-shared'], ['attack-b']),
+            alertAttachment('attachment-b', ['alert-b1'], ['attack-b']),
+          ],
+          otherAttacks: [],
+        })
+      ).toEqual({
+        attachmentIds: ['attachment-a', 'attachment-b'],
+        updates: [],
+        alertIds: ['alert-shared', 'alert-b1'],
+        isResolvable: true,
+      });
+    });
+
+    it('takes only what the second attack introduced when it is removed first', () => {
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: ['attack-b'],
+          attackAlertIds: ['alert-shared', 'alert-b1'],
+          alertAttachments: attachedAfterDedupe,
+          otherAttacks: [{ id: 'attack-a', alertIds: ['alert-shared', 'alert-a1'] }],
+        })
+      ).toEqual({
+        attachmentIds: ['attachment-b'],
+        updates: [],
+        alertIds: ['alert-b1'],
+        isResolvable: true,
+      });
+    });
+  });
+
+  describe('an attachment the removed attack created but may take nothing from', () => {
+    it('is relabelled onto the attack still claiming it, so that attack can take it later', () => {
+      const removedFirst = resolveRemovableAlertAttachments({
+        removedAttackIds: ['attack-a'],
+        attackAlertIds: ['alert-shared'],
+        alertAttachments: [
+          alertAttachment('attachment-a', ['alert-shared'], ['attack-a']),
+          alertAttachment('attachment-b', ['alert-b1'], ['attack-b']),
+        ],
+        otherAttacks: [{ id: 'attack-b', alertIds: ['alert-shared', 'alert-b1'] }],
+      });
+
+      expect(removedFirst).toEqual({
+        attachmentIds: [],
+        updates: [
+          {
+            id: 'attachment-a',
+            keptAlertIds: ['alert-shared'],
+            removedAlertIds: [],
+            sourceAttackIds: ['attack-b'],
+          },
+        ],
+        alertIds: [],
+        isResolvable: true,
+      });
+
+      const [relabelled] = removedFirst.updates;
+
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: ['attack-b'],
+          attackAlertIds: ['alert-shared', 'alert-b1'],
+          alertAttachments: [
+            alertAttachment(relabelled.id, relabelled.keptAlertIds, relabelled.sourceAttackIds),
+            alertAttachment('attachment-b', ['alert-b1'], ['attack-b']),
+          ],
+          otherAttacks: [],
+        })
+      ).toEqual({
+        attachmentIds: ['attachment-a', 'attachment-b'],
+        updates: [],
+        alertIds: ['alert-shared', 'alert-b1'],
+        isResolvable: true,
+      });
+    });
+
+    it('is relabelled onto no attack when its alerts left the removed attack and nothing else claims them', () => {
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: ['attack-a'],
+          // `alert-orphan` was attached with the attack but is no longer part of it.
+          attackAlertIds: ['alert-a1'],
+          alertAttachments: [alertAttachment('attachment-a', ['alert-orphan'], ['attack-a'])],
+          otherAttacks: [{ id: 'attack-b', alertIds: ['alert-b1'] }],
+        })
+      ).toEqual({
+        attachmentIds: [],
+        updates: [
+          {
+            id: 'attachment-a',
+            keptAlertIds: ['alert-orphan'],
+            removedAlertIds: [],
+            sourceAttackIds: [],
+          },
+        ],
+        alertIds: [],
+        isResolvable: true,
+      });
+    });
+
+    it('is relabelled with its alerts in their original order', () => {
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: [REMOVED_ATTACK_ID],
+          attackAlertIds: ['alert-1', 'alert-2'],
+          alertAttachments: [alertAttachment('attachment-1', ['alert-2', 'alert-1'])],
+          otherAttacks: [
+            { id: 'attack-2', alertIds: ['alert-1'] },
+            { id: 'attack-3', alertIds: ['alert-2'] },
+          ],
+        })
+      ).toEqual({
+        attachmentIds: [],
+        updates: [
+          {
+            id: 'attachment-1',
+            keptAlertIds: ['alert-2', 'alert-1'],
+            removedAlertIds: [],
+            sourceAttackIds: ['attack-2', 'attack-3'],
+          },
+        ],
+        alertIds: [],
+        isResolvable: true,
+      });
+    });
+  });
+
+  describe('an attachment whose alerts are only partly removable', () => {
+    it('is shrunk to the alerts another attack still claims', () => {
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: [REMOVED_ATTACK_ID],
+          attackAlertIds: ['alert-1', 'alert-2'],
+          // Deleting the attachment whole would strip `alert-2` from the other attack, and
+          // keeping it whole would strand `alert-1` on the case.
+          alertAttachments: [alertAttachment('attachment-1', ['alert-1', 'alert-2'])],
+          otherAttacks: [{ id: 'attack-2', alertIds: ['alert-2'] }],
+        })
+      ).toEqual({
+        attachmentIds: [],
+        updates: [
+          {
+            id: 'attachment-1',
+            keptAlertIds: ['alert-2'],
+            removedAlertIds: ['alert-1'],
+            sourceAttackIds: ['attack-2'],
+          },
+        ],
+        alertIds: ['alert-1'],
+        isResolvable: true,
+      });
+    });
+
+    it('keeps its remaining alerts in their original order', () => {
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: [REMOVED_ATTACK_ID],
+          attackAlertIds: ['alert-1', 'alert-2', 'alert-3', 'alert-4', 'alert-5'],
+          alertAttachments: [
+            alertAttachment('attachment-1', [
+              'alert-5',
+              'alert-1',
+              'alert-4',
+              'alert-2',
+              'alert-3',
+            ]),
+          ],
+          otherAttacks: [{ id: 'attack-2', alertIds: ['alert-3', 'alert-4', 'alert-5'] }],
+        })
+      ).toEqual({
+        attachmentIds: [],
+        updates: [
+          {
+            id: 'attachment-1',
+            keptAlertIds: ['alert-5', 'alert-4', 'alert-3'],
+            removedAlertIds: ['alert-1', 'alert-2'],
+            sourceAttackIds: ['attack-2'],
+          },
+        ],
+        alertIds: ['alert-1', 'alert-2'],
+        isResolvable: true,
+      });
+    });
+
+    it('keeps an alert that left the attack since attach time while dropping the rest', () => {
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: [REMOVED_ATTACK_ID],
+          // `alert-orphan` was attached with the attack but is no longer part of it.
+          attackAlertIds: ['alert-1'],
+          alertAttachments: [alertAttachment('attachment-1', ['alert-orphan', 'alert-1'])],
+          otherAttacks: [],
+        })
+      ).toEqual({
+        attachmentIds: [],
+        updates: [
+          {
+            id: 'attachment-1',
+            keptAlertIds: ['alert-orphan'],
+            removedAlertIds: ['alert-1'],
+            sourceAttackIds: [],
+          },
+        ],
+        alertIds: ['alert-1'],
+        isResolvable: true,
+      });
+    });
+
+    it('is relabelled to no attack when none still on the case claims what it kept', () => {
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: [REMOVED_ATTACK_ID],
+          attackAlertIds: ['alert-1'],
+          alertAttachments: [alertAttachment('attachment-1', ['alert-1', 'alert-orphan'])],
+          otherAttacks: [{ id: 'attack-2', alertIds: ['alert-9'] }],
+        })
+      ).toEqual({
+        attachmentIds: [],
+        updates: [
+          {
+            id: 'attachment-1',
+            keptAlertIds: ['alert-orphan'],
+            removedAlertIds: ['alert-1'],
+            sourceAttackIds: [],
+          },
+        ],
+        alertIds: ['alert-1'],
+        isResolvable: true,
+      });
+    });
+
+    it('is relabelled to every attack still on the case claiming any of what it kept', () => {
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: [REMOVED_ATTACK_ID],
+          attackAlertIds: ['alert-1', 'alert-2', 'alert-3'],
+          alertAttachments: [alertAttachment('attachment-1', ['alert-1', 'alert-2', 'alert-3'])],
+          otherAttacks: [
+            { id: 'attack-2', alertIds: ['alert-2'] },
+            { id: 'attack-3', alertIds: ['alert-9'] },
+            { id: 'attack-4', alertIds: ['alert-3', 'alert-9'] },
+          ],
+        })
+      ).toEqual({
+        attachmentIds: [],
+        updates: [
+          {
+            id: 'attachment-1',
+            keptAlertIds: ['alert-2', 'alert-3'],
+            removedAlertIds: ['alert-1'],
+            sourceAttackIds: ['attack-2', 'attack-4'],
+          },
+        ],
+        alertIds: ['alert-1'],
+        isResolvable: true,
+      });
+    });
+
+    it('is deleted whole once the removed attacks together cover every alert it holds', () => {
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: [REMOVED_ATTACK_ID, 'attack-2'],
+          attackAlertIds: ['alert-1', 'alert-2'],
+          alertAttachments: [alertAttachment('attachment-1', ['alert-1', 'alert-2'])],
+          otherAttacks: [{ id: 'attack-3', alertIds: ['alert-9'] }],
+        })
+      ).toEqual({
+        attachmentIds: ['attachment-1'],
+        updates: [],
+        alertIds: ['alert-1', 'alert-2'],
+        isResolvable: true,
+      });
+    });
+
+    it('is shrunk alongside attachments deleted whole, relabelled or left alone in the same removal', () => {
+      expect(
+        resolveRemovableAlertAttachments({
+          removedAttackIds: [REMOVED_ATTACK_ID],
+          attackAlertIds: ['alert-1', 'alert-2', 'alert-3'],
+          alertAttachments: [
+            alertAttachment('attachment-whole', ['alert-1']),
+            alertAttachment('attachment-partial', ['alert-1', 'alert-2', 'alert-3']),
+            alertAttachment('attachment-claimed', ['alert-3']),
+            alertAttachment('attachment-other', ['alert-3'], ['attack-2']),
+          ],
+          otherAttacks: [{ id: 'attack-2', alertIds: ['alert-3'] }],
+        })
+      ).toEqual({
+        attachmentIds: ['attachment-whole'],
+        updates: [
+          {
+            id: 'attachment-partial',
+            keptAlertIds: ['alert-3'],
+            removedAlertIds: ['alert-1', 'alert-2'],
+            sourceAttackIds: ['attack-2'],
+          },
+          {
+            id: 'attachment-claimed',
+            keptAlertIds: ['alert-3'],
+            removedAlertIds: [],
+            sourceAttackIds: ['attack-2'],
+          },
+        ],
+        // `alert-1` leaves through both attachments and is counted once.
+        alertIds: ['alert-1', 'alert-2'],
+        isResolvable: true,
+      });
+    });
+  });
+});
+
+describe('resolveRemovableAlertAttachmentsForAttacks', () => {
+  it('shrinks an attachment by the union of every removed attack', () => {
+    expect(
+      resolveRemovableAlertAttachmentsForAttacks({
+        removedAttackIds: ['attack-1', 'attack-2'],
+        otherAttackIds: ['attack-3'],
+        alertIdsByAttackId: new Map([
+          ['attack-1', ['alert-1']],
+          ['attack-2', ['alert-2']],
+          ['attack-3', ['alert-3']],
+        ]),
+        // Created by `attack-1` alone, yet `alert-2` goes with it because `attack-2` leaves too.
+        alertAttachments: [alertAttachment('attachment-1', ['alert-1', 'alert-2', 'alert-3'])],
+      })
+    ).toEqual({
+      attachmentIds: [],
+      updates: [
+        {
+          id: 'attachment-1',
+          keptAlertIds: ['alert-3'],
+          removedAlertIds: ['alert-1', 'alert-2'],
+          sourceAttackIds: ['attack-3'],
+        },
+      ],
+      alertIds: ['alert-1', 'alert-2'],
+      isResolvable: true,
+    });
+  });
+
+  it('keeps an alert shared within the selection removable rather than claimed', () => {
+    expect(
+      resolveRemovableAlertAttachmentsForAttacks({
+        removedAttackIds: ['attack-1', 'attack-2'],
+        otherAttackIds: [],
+        alertIdsByAttackId: new Map([
+          ['attack-1', ['alert-1', 'alert-2']],
+          ['attack-2', ['alert-2']],
+        ]),
+        alertAttachments: [alertAttachment('attachment-1', ['alert-1', 'alert-2'])],
+      })
+    ).toEqual({
+      attachmentIds: ['attachment-1'],
+      updates: [],
+      alertIds: ['alert-1', 'alert-2'],
+      isResolvable: true,
+    });
+  });
+
+  it('is not resolvable when any removed attack is missing its alert ids', () => {
+    expect(
+      resolveRemovableAlertAttachmentsForAttacks({
+        removedAttackIds: ['attack-1', 'attack-2'],
+        otherAttackIds: [],
+        alertIdsByAttackId: new Map([['attack-1', ['alert-1']]]),
+        alertAttachments: [alertAttachment('attachment-1', ['alert-1', 'alert-2'])],
+      })
+    ).toEqual({ attachmentIds: [], updates: [], alertIds: [], isResolvable: false });
+  });
+
+  it('is not resolvable when any other attack is missing its alert ids', () => {
+    expect(
+      resolveRemovableAlertAttachmentsForAttacks({
+        removedAttackIds: ['attack-1'],
+        otherAttackIds: ['attack-2'],
+        alertIdsByAttackId: new Map([['attack-1', ['alert-1']]]),
+        alertAttachments: [alertAttachment('attachment-1', ['alert-1', 'alert-2'])],
+      })
+    ).toEqual({ attachmentIds: [], updates: [], alertIds: [], isResolvable: false });
   });
 });

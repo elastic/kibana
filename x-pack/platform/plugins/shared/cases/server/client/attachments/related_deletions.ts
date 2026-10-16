@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import type { AttachmentAttributesV2 } from '../../../common/types/domain';
-import type { AttachmentDeleteTarget, AttachmentOnDelete } from '../../attachment_framework/types';
+import type {
+  AttachmentAttributesV2,
+  UnifiedAttachmentPayload,
+} from '../../../common/types/domain';
+import type {
+  AttachmentDeleteTarget,
+  AttachmentOnDelete,
+  AttachmentUpdate,
+} from '../../attachment_framework/types';
 import type { AttachmentSavedObjectType } from '../../services/user_actions/types';
 import type { CasesClientArgs } from '../types';
 
@@ -16,9 +23,21 @@ export interface RelatedAttachmentRef {
   type: AttachmentSavedObjectType;
 }
 
+/** An attachment a hook asked to shrink rather than delete, with the payload replacing its own. */
+export interface RelatedAttachmentUpdate extends RelatedAttachmentRef {
+  payload: UnifiedAttachmentPayload;
+}
+
+export interface RelatedAttachments {
+  refs: RelatedAttachmentRef[];
+  updates: RelatedAttachmentUpdate[];
+}
+
+const EMPTY_RELATED: RelatedAttachments = { refs: [], updates: [] };
+
 /**
- * Returns references to the case's remaining attachments that the `onDelete` hooks of the deleted
- * attachment types ask to take along.
+ * Returns the attachments of this case that the `onDelete` hooks of the deleted attachment types
+ * ask to take along, and those they ask to shrink instead.
  */
 export const getRelatedAttachmentsToDelete = async ({
   caseId,
@@ -28,7 +47,7 @@ export const getRelatedAttachmentsToDelete = async ({
   caseId: string;
   attachments: ReadonlyArray<{ id: string; attributes?: AttachmentAttributesV2 }>;
   clientArgs: CasesClientArgs;
-}): Promise<RelatedAttachmentRef[]> => {
+}): Promise<RelatedAttachments> => {
   const {
     unifiedAttachmentTypeRegistry,
     services: { caseService },
@@ -53,7 +72,7 @@ export const getRelatedAttachmentsToDelete = async ({
   }
 
   if (targetsByHook.size === 0) {
-    return [];
+    return EMPTY_RELATED;
   }
 
   const deletedIds = new Set(attachments.map(({ id }) => id));
@@ -62,20 +81,45 @@ export const getRelatedAttachmentsToDelete = async ({
   const remainingTargets = remainingAttachments.map(({ id, attributes }) => ({ id, attributes }));
 
   const relatedIds = new Set<string>();
+  const updatesById = new Map<string, AttachmentUpdate>();
   for (const [onDelete, targets] of targetsByHook) {
-    const { relatedAttachmentIds } = await onDelete({
+    const { relatedAttachmentIds, relatedAttachmentUpdates = [] } = await onDelete({
       caseId,
       request,
       attachments: targets,
       remainingAttachments: remainingTargets,
     });
     relatedAttachmentIds.forEach((id) => relatedIds.add(id));
+    // Two hooks shrinking the same attachment would each have written over the other's result, so
+    // the last one wins either way; keeping one update per id at least makes that a single write.
+    relatedAttachmentUpdates.forEach((update) => updatesById.set(update.id, update));
   }
 
-  // A hook can only take attachments that belong to this case. Only the reference is returned:
-  // the caller reads them for deletion the same way it read the requested ones, so a taken
-  // attachment carries the same file id, owner fallback and decode handling.
-  return remainingAttachments
+  // A hook can only take or shrink attachments that belong to this case. Only the reference is
+  // returned: the caller reads them for deletion the same way it read the requested ones, so a
+  // taken attachment carries the same file id, owner fallback and decode handling.
+  const refs = remainingAttachments
     .filter(({ id }) => relatedIds.has(id))
     .map(({ id, type }) => ({ id, type: type as AttachmentSavedObjectType }));
+
+  const updates = remainingAttachments.flatMap(({ id, type, attributes }) => {
+    const update = updatesById.get(id);
+
+    // Deleting the attachment makes shrinking it pointless, and a hook may not use an update to
+    // change what an attachment is or who owns it.
+    const isApplicable =
+      update != null && !relatedIds.has(id) && update.payload.type === attributes.type;
+
+    return isApplicable
+      ? [
+          {
+            id,
+            type: type as AttachmentSavedObjectType,
+            payload: { ...update.payload, owner: attributes.owner },
+          },
+        ]
+      : [];
+  });
+
+  return { refs, updates };
 };

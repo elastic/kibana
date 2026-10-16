@@ -53,6 +53,7 @@ export type {
   AttachmentDeleteResult,
   AttachmentDeleteTarget,
   AttachmentOnDelete,
+  AttachmentUpdate,
   AttachmentWorkflowDefinition,
   UnifiedAttachmentTypeSetup,
   WorkflowAttachmentResolverContext,

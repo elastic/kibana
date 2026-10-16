@@ -9,9 +9,14 @@ import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   AttachmentDeleteTarget,
   AttachmentOnDelete,
+  AttachmentUpdate,
   UnifiedAttachmentTypeSetup,
 } from '@kbn/cases-plugin/server';
-import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import {
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
+  isUnifiedAlertAttachment,
+  toStringArray,
+} from '@kbn/cases-plugin/common';
 import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
@@ -22,6 +27,7 @@ import {
 import { z } from '@kbn/zod/v4';
 import { AttackAttachmentPayloadSchema } from '../../../common/cases/attachments/attack';
 import { validateAttackWorkflowTargets } from './workflow_validation';
+import type { RemovableAlertAttachmentUpdate } from '../../../common/cases/attachments/attack/resolve_removable_alerts';
 import {
   getCaseAlertAttachments,
   resolveRemovableAlertAttachmentsForAttacks,
@@ -132,6 +138,57 @@ const getAlertIdsByAttackId = async ({
 };
 
 /**
+ * Rewrites a partially removed alert attachment: the alerts it keeps, the `metadata.index`
+ * entries that belong to them, and the provenance relabelled onto the attacks still claiming
+ * them.
+ *
+ * `metadata.index` runs parallel to `attachmentId`, so the kept indices are taken by position
+ * rather than by value: an alert id says nothing about which index it came from, and alerts on
+ * one case can live in different indices.
+ */
+const toAttachmentUpdate = ({
+  update,
+  attributes,
+}: {
+  update: RemovableAlertAttachmentUpdate;
+  attributes: AttachmentDeleteTarget['attributes'];
+}): AttachmentUpdate[] => {
+  if (!isUnifiedAlertAttachment(attributes)) {
+    return [];
+  }
+
+  const storedAlertIds = toStringArray(attributes.attachmentId);
+  const keptAlertIdSet = new Set(update.keptAlertIds);
+  const keptPositions = storedAlertIds.flatMap((alertId, position) =>
+    keptAlertIdSet.has(alertId) ? [position] : []
+  );
+
+  const storedIndex = attributes.metadata?.index;
+  // A scalar index applies to every alert, and an array that does not line up is not safe to
+  // realign, so both are left exactly as they are.
+  const index =
+    Array.isArray(storedIndex) && storedIndex.length === storedAlertIds.length
+      ? keptPositions.map((position) => storedIndex[position])
+      : storedIndex;
+
+  return [
+    {
+      id: update.id,
+      payload: {
+        type: attributes.type,
+        owner: attributes.owner,
+        attachmentId: keptPositions.map((position) => storedAlertIds[position]),
+        metadata: {
+          ...attributes.metadata,
+          ...(index === undefined ? {} : { index }),
+          sourceAttachmentIds: update.sourceAttackIds,
+        },
+      },
+    },
+  ];
+};
+
+/**
  * Takes the alert attachments an attack brought to the case with it when the attack is deleted,
  * keeping any alert another attached attack still claims.
  */
@@ -158,14 +215,25 @@ export const getAttackOnDelete =
       logger,
     });
 
-    const { attachmentIds } = resolveRemovableAlertAttachmentsForAttacks({
+    const { attachmentIds, updates } = resolveRemovableAlertAttachmentsForAttacks({
       removedAttackIds: removedAttacks.map(({ attackId }) => attackId),
       otherAttackIds: otherAttacks.map(({ attackId }) => attackId),
       alertIdsByAttackId,
       alertAttachments,
     });
 
-    return { relatedAttachmentIds: attachmentIds };
+    const attributesById = new Map(
+      remainingAttachments.map(({ id, attributes }) => [id, attributes])
+    );
+
+    return {
+      relatedAttachmentIds: attachmentIds,
+      relatedAttachmentUpdates: updates.flatMap((update) => {
+        const attributes = attributesById.get(update.id);
+
+        return attributes == null ? [] : toAttachmentUpdate({ update, attributes });
+      }),
+    };
   };
 
 /**

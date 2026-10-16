@@ -9,8 +9,9 @@ import type { EuiCommentProps } from '@elastic/eui';
 
 import type { SnakeToCamelCase } from '../../../../common/types';
 import type { CommentUserAction } from '../../../../common/types/domain';
-import { UserActionActions } from '../../../../common/types/domain';
+import { AttachmentType, UserActionActions } from '../../../../common/types/domain';
 import { type AttachmentTypeRegistry } from '../../../../common/registry';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import type { AttachmentUIV2 } from '../../../../common/ui/types';
 import { createCommonUpdateUserActionBuilder } from '../common';
@@ -25,7 +26,18 @@ import {
   toUnifiedAttachmentType,
 } from '../../../../common/utils/attachments';
 
-const getUpdateLabelTitle = () => `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
+/**
+ * An edit to a user comment is an edit to its text; an edit to any other attachment is not a
+ * comment at all, and calling it one hides what changed. The attachment types that are edited
+ * rather than replaced say what left in their own activity entry, which is recorded alongside.
+ */
+const getUpdateLabelTitle = (userAction: SnakeToCamelCase<CommentUserAction>) => {
+  const { type } = userAction.payload.comment;
+
+  return type === COMMENT_ATTACHMENT_TYPE || type === AttachmentType.user
+    ? `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`
+    : `${i18n.EDITED_FIELD} ${i18n.ATTACHMENT.toLowerCase()}`;
+};
 
 interface DeleteLabelTitle {
   userAction: SnakeToCamelCase<CommentUserAction>;
@@ -245,7 +257,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
       });
     }
 
-    const label = getUpdateLabelTitle();
+    const label = getUpdateLabelTitle(attachmentUserAction);
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
       userProfiles,
