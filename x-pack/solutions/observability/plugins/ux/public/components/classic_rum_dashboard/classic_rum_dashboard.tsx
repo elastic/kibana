@@ -50,8 +50,7 @@ export const createClassicRumDashboard = ({
   };
 
   return ({ serviceName, timeRange, onTimeRangeChange }) => {
-    // The dashboard keeps its own in-memory URL state, so the pinned service name never leaks
-    // into, or gets overwritten by, the URL of the host app.
+    // An in-memory URL keeps the dashboard state out of the host app's URL.
     const history = useEmbeddedHistory({ serviceName, timeRange, onTimeRangeChange });
 
     return (
@@ -63,6 +62,7 @@ export const createClassicRumDashboard = ({
                 <UrlParamsProvider>
                   <CsmSharedContextProvider>
                     <EuiPageSection paddingSize="m" restrictWidth={false}>
+                      {/* The host pins the service, so the select that switches it is hidden. */}
                       <DashboardToolbar showWebApplicationSelect={false} />
                       <RumOverview />
                     </EuiPageSection>

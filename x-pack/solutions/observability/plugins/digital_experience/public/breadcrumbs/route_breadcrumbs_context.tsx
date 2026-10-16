@@ -24,7 +24,7 @@ interface RouteBreadcrumbsApi {
 
 export const RouteBreadcrumbsContext = createContext<RouteBreadcrumbsApi | undefined>(undefined);
 
-/** Joins the breadcrumbs registered by each matched route, outermost first. */
+/** Joins the crumbs of each matched route, outermost first, leaving the current page unlinked. */
 export const toChromeBreadcrumbs = (
   matches: RouteMatch[],
   registered: ReadonlyMap<Route, RouteBreadcrumb[]>
@@ -35,15 +35,11 @@ export const toChromeBreadcrumbs = (
 
   return [
     ...parents.map(({ title, href }) => ({ text: title, href })),
-    // The current page is the last breadcrumb and never links to itself.
     ...(current ? [{ text: current.title }] : []),
   ];
 };
 
-/**
- * Collects the breadcrumbs each matched route registers with `useRouteBreadcrumb` and sets them
- * through observability's `useBreadcrumbs` (Observability root crumb, page title, serverless).
- */
+/** Sets the crumbs registered by the matched routes through Observability's `useBreadcrumbs`. */
 export function RouteBreadcrumbsContextProvider({ children }: { children: React.ReactNode }) {
   const [registered, setRegistered] = useState<ReadonlyMap<Route, RouteBreadcrumb[]>>(new Map());
   const matches = useMatchRoutes();

@@ -11,7 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../../plugin';
 import type { ClassicRumDashboardProps } from './types';
 
-/** The Classic RUM dashboard as a component that loads its code and the active space on first render. */
+/** Classic RUM dashboard that loads its code and the active space on first render. */
 export const createLazyClassicRumDashboard = (deps: {
   core: CoreStart;
   setupDeps: ApmPluginSetupDeps;

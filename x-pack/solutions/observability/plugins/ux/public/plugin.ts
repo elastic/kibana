@@ -53,12 +53,15 @@ import type { ClassicRumDashboardProps } from './components/classic_rum_dashboar
 export type UxPluginSetup = void;
 
 export interface UxPluginStart {
+  /** The Classic RUM dashboard of one service, to render inside another app. */
   ClassicRumDashboard: ComponentType<ClassicRumDashboardProps>;
+  /** Names of the services with RUM data in the range, in epoch milliseconds. */
   fetchClassicRumApplications(params: {
     start: number;
     end: number;
     signal?: AbortSignal;
   }): Promise<string[]>;
+  /** Hides User Experience from the navigation; the app stays reachable by URL. */
   hideLegacyNavigation(): void;
 }
 
@@ -249,7 +252,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
         );
         return fetchClassicRumApplications({ ...params, core, data: plugins.data });
       },
-      // The nav sections are read once all plugins have started, so hiding during start is in time.
+      // Nav sections are read after all plugins start, so calling this during start is in time.
       hideLegacyNavigation: () => {
         this.legacyNavigationHidden = true;
         this.appUpdater$.next(() => ({ visibleIn: [] }));

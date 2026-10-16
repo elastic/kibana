@@ -14,10 +14,7 @@ import { useDigitalExperienceRouter } from '../hooks/use_digital_experience_rout
 import { useSyncTimeRange, useTimeRange } from '../hooks/use_time_range';
 import { APPLICATIONS_LABEL, DIGITAL_EXPERIENCE_LABEL } from '../labels';
 
-/**
- * Root route: registers `Digital Experience › Applications`. "Digital Experience" is a section label;
- * "Applications" links back to the list, keeping the time range.
- */
+/** Root route: syncs the time range and registers the `Digital Experience › Applications` crumbs. */
 export function DigitalExperienceLayout() {
   const { application } = useKibanaServices();
   const router = useDigitalExperienceRouter();

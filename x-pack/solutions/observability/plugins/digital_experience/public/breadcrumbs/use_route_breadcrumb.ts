@@ -20,15 +20,14 @@ export const useRouteBreadcrumb = (breadcrumbs: RouteBreadcrumb[]): void => {
   const { match } = useCurrentRoute();
   const route = match?.route;
 
-  // Runs on every new array; the provider ignores crumbs equal to the stored ones, so callers
-  // can pass a plain array without memoizing it.
+  // The provider ignores unchanged crumbs, so callers can pass an inline array.
   useEffect(() => {
     if (route) {
       api.set(route, breadcrumbs);
     }
   }, [api, route, breadcrumbs]);
 
-  // Unregisters only when the component unmounts or moves to another route.
+  // Separate effect, so a crumb update does not unregister and re-register the route.
   useEffect(() => {
     if (!route) {
       return;

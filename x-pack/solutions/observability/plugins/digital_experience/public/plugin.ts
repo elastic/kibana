@@ -33,7 +33,7 @@ export class DigitalExperiencePlugin
                 {
                   label: DIGITAL_EXPERIENCE_LABEL,
                   sortKey: 600,
-                  // Prefix match on the app root, so Applications stays selected in the Application view.
+                  // Prefix match, so Applications stays selected in the Application view.
                   entries: [
                     { label: APPLICATIONS_LABEL, app: DIGITAL_EXPERIENCE_FEATURE_ID, path: '/' },
                   ],

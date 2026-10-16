@@ -12,15 +12,12 @@ import { useTimeRange } from '../hooks/use_time_range';
 
 type OnQuerySubmit = NonNullable<StatefulSearchBarProps['onQuerySubmit']>;
 
-/**
- * Date picker of the app, rendered through Unified Search (date picker only) so it follows Kibana's
- * picker: quick ranges from advanced settings and the new date range picker behind its flag.
- */
+/** Date picker of the app, rendered by Unified Search so it follows Kibana's picker settings. */
 export function TimeRangePicker({ onRefresh }: { onRefresh: () => void }) {
   const { unifiedSearch } = useKibanaServices();
   const { timeRange, setTimeRange } = useTimeRange();
 
-  // Unified Search reports `isUpdate: false` when the range did not change, i.e. the Refresh button.
+  // `isUpdate` is false when the range did not change, which means Refresh was clicked.
   const onQuerySubmit = useCallback<OnQuerySubmit>(
     ({ dateRange }, isUpdate) => {
       if (isUpdate) {

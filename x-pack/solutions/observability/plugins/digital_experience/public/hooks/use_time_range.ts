@@ -17,14 +17,11 @@ export interface TimeRange {
   rangeTo: string;
 }
 
-/** `search` with the time range set and the other params kept, encoded like the typed router's links. */
+// Unsorted, so the other params keep their order like in the typed router's links.
 const withTimeRange = (search: string, timeRange: TimeRange): string =>
   qs.stringify({ ...qs.parse(search), ...timeRange }, { sort: false });
 
-/**
- * The time range of the app: the `rangeFrom` / `rangeTo` query params of the root route, falling
- * back to the global timefilter. `setTimeRange` updates the URL and the timefilter.
- */
+/** Time range from the `rangeFrom` / `rangeTo` URL params, falling back to the global timefilter. */
 export const useTimeRange = (): {
   timeRange: TimeRange;
   isTimeRangeInUrl: boolean;
@@ -53,11 +50,7 @@ export const useTimeRange = (): {
   return { timeRange, isTimeRangeInUrl, setTimeRange };
 };
 
-/**
- * Keeps the URL and the global timefilter in sync with the app time range. Used once, by the root
- * route: it writes the range into a URL that has none (so reloads and shared links keep it) and
- * mirrors the URL range into the timefilter (so other Kibana apps open with the same range).
- */
+/** Writes the time range into a URL without one and mirrors it into the global timefilter. */
 export const useSyncTimeRange = (): void => {
   const { data } = useKibanaServices();
   const { timefilter } = data.query.timefilter;
