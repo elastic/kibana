@@ -109,6 +109,23 @@ describe('index_patterns/* error handler', () => {
       expect(converted.output.statusCode).toBe(403);
     });
 
+    it('uses the ES error reason as the message instead of "[object Object]"', () => {
+      const error = new esErrors.ResponseError({
+        statusCode: 500,
+        body: {
+          error: {
+            type: 'no_such_remote_cluster_exception',
+            reason: 'no such remote cluster: [x]',
+          },
+        },
+      } as ConstructorParameters<typeof esErrors.ResponseError>[0]);
+
+      const converted = convertEsError(indices, error) as Boom.Boom;
+
+      expect(converted.message).toContain('no such remote cluster: [x]');
+      expect(converted.message).not.toContain('[object Object]');
+    });
+
     it('handles errors that are already Boom errors', () => {
       const error = new Error() as Error & { statusCode?: number };
       error.statusCode = 401;
