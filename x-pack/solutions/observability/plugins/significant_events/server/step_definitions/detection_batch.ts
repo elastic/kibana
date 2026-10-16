@@ -1,0 +1,103 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
+import { lazySchema, z } from '@kbn/zod/v4';
+import { BASELINE_DECISIONS } from './baseline';
+import { DECISION_REASONS, PROBE_STATUSES } from './classify_detection';
+
+/** The columns `get_detections` returns, used when the caller does not name them. */
+export const DEFAULT_DETECTION_COLUMNS = [
+  'rule_uuid',
+  '_source',
+  'score',
+  'recent_detection_count',
+  'flaky_probe',
+] as const;
+
+/** Why a detection reached the agent, with the events its rule is already a member of. */
+export const batchClassifierSchema = lazySchema(() =>
+  z.object({
+    reason: z.enum(DECISION_REASONS),
+    probe_status: z.enum(PROBE_STATUSES).optional(),
+    baseline: z
+      .object({
+        decision: z.enum(BASELINE_DECISIONS),
+        value: z.number(),
+        samples: z.number().int().min(0),
+        median: z.number().optional(),
+        threshold: z.number().optional(),
+      })
+      .optional(),
+    live_events: z
+      .array(
+        z.object({
+          event_id: z.string().max(MAX_ID_LENGTH).optional(),
+          status: z.string().max(32),
+          stored_verdict: z.string().max(32),
+        })
+      )
+      .max(50),
+  })
+);
+
+/** One detection as the agent reads it: named fields only, no column positions. */
+export const batchEntrySchema = lazySchema(() =>
+  z.object({
+    '@timestamp': z.string().max(64).optional(),
+    detection_id: z.string().max(MAX_ID_LENGTH).optional(),
+    rule_uuid: z.string().max(MAX_ID_LENGTH).optional(),
+    rule_name: z.string().max(512).optional(),
+    source_id: z.string().max(MAX_ID_LENGTH).optional(),
+    change_point_type: z.string().max(64).optional(),
+    p_value: z.number().optional(),
+    recent_detection_count: z.number().optional(),
+    flaky_probe: z.boolean().optional(),
+    /** Only when the classifier is enforcing: while it only records, the agent judges unprompted. */
+    classifier: batchClassifierSchema.optional(),
+  })
+);
+
+export type BatchClassifier = z.infer<typeof batchClassifierSchema>;
+export type BatchEntry = z.infer<typeof batchEntrySchema>;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const text = (value: unknown): string | undefined =>
+  typeof value === 'string' ? value : undefined;
+const number = (value: unknown): number | undefined =>
+  typeof value === 'number' ? value : undefined;
+
+/** Names a detection row's cells, and keeps the fields the agent reads. */
+export const toBatchEntry = ({
+  columns = DEFAULT_DETECTION_COLUMNS,
+  row,
+  classifier,
+}: {
+  columns?: readonly string[];
+  row: readonly unknown[];
+  classifier?: BatchClassifier;
+}): BatchEntry => {
+  const cells = new Map(columns.map((name, index) => [name, row[index]]));
+  const source = cells.get('_source');
+  const stored = isRecord(source) ? source : {};
+  const flaky = cells.get('flaky_probe');
+
+  return {
+    '@timestamp': text(stored['@timestamp']),
+    detection_id: text(stored.detection_id),
+    rule_uuid: text(cells.get('rule_uuid')) ?? text(stored.rule_uuid),
+    rule_name: text(stored.rule_name),
+    source_id: text(stored.source_id),
+    change_point_type: text(stored.change_point_type),
+    p_value: number(stored.p_value),
+    recent_detection_count: number(cells.get('recent_detection_count')),
+    flaky_probe: typeof flaky === 'boolean' ? flaky : undefined,
+    ...(classifier ? { classifier } : {}),
+  };
+};

@@ -9,6 +9,14 @@ tool result, or a KI; with no source, make no claim.
 - **`## Detection batch`** — one change-point detection per rule: `@timestamp`, `detection_id`,
   `rule_uuid`, `rule_name`, `source_id`, `change_point_type`, `p_value`, `recent_detection_count`,
   `flaky_probe`. Copy `source_id` as is into `slugs` and signal `source_id`.
+- **`classifier`** (optional, per detection) — present only when the pre-agent classifier is
+  enforcing. `reason` is why the detection reached you: `possible_recovery` (its stored query now
+  returns nothing, while a live event records the rule as breaching), `possible_rebreach` (it returns
+  rows, while the event records the rule as healthy), `not_live_member` (the rule is in no live
+  event), or a probe that could not judge (`unjudged_member`, `no_stored_query`, `probe_error`,
+  `probe_timeout`, `probe_aborted`, `over_cap`). `live_events` lists the events the rule is already a
+  member of (`event_id`, `status`, `stored_verdict`). It points at what to verify and at routing
+  candidates; it is never evidence: every verdict and number comes from grounding.
 - `p_value`, `change_point_type`, and `recent_detection_count` adjust `confidence` only; the
   grounding verdict decides whether a signal is real.
 - `flaky_probe: true` → apply `<chronic_and_recurring>` rule 1. Otherwise ignore
