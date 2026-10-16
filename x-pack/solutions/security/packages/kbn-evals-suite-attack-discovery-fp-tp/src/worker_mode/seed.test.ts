@@ -6,6 +6,7 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import { FP_TP_INFERENCE_FEATURE_ID } from '../constants';
 import type { FpTpLiveKbnRequest } from '../world';
 import { buildWorkerModePlan } from './plan';
 import {
@@ -151,7 +152,7 @@ describe('ensureReasoningMapping', () => {
 
   it('returns the existing mapping without writing', async () => {
     const kbnRequest = okKbnRequest(
-      settings([other, { feature_id: 'alertzero_reasoning', endpoints: [{ id: 'gpt' }] }])
+      settings([other, { feature_id: FP_TP_INFERENCE_FEATURE_ID, endpoints: [{ id: 'gpt' }] }])
     );
     await expect(ensureReasoningMapping(kbnRequest)).resolves.toBe('gpt');
     expect(kbnRequest.mock.calls.filter(([{ method }]) => method === 'PUT')).toEqual([]);
@@ -162,7 +163,7 @@ describe('ensureReasoningMapping', () => {
     await expect(ensureReasoningMapping(kbnRequest, 'claude')).resolves.toBe('claude');
     const [[put]] = kbnRequest.mock.calls.filter(([{ method }]) => method === 'PUT');
     expect(put.body).toEqual({
-      features: [other, { feature_id: 'alertzero_reasoning', endpoints: [{ id: 'claude' }] }],
+      features: [other, { feature_id: FP_TP_INFERENCE_FEATURE_ID, endpoints: [{ id: 'claude' }] }],
     });
   });
 

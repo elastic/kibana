@@ -9,6 +9,7 @@ import { mkdir, writeFile } from 'fs/promises';
 import { dirname, resolve } from 'path';
 import { Client } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
+import { FP_TP_INFERENCE_FEATURE_ID } from '../src/constants';
 import { createLiveKbnRequest } from '../src/world';
 import {
   assertWorkerModeSpace,
@@ -89,7 +90,7 @@ run(
         space,
         reasoningConnectorId: optionalString(flags.reasoningConnectorId),
       });
-      log.info(`alertzero_reasoning → ${connectorId}`);
+      log.info(`${FP_TP_INFERENCE_FEATURE_ID} → ${connectorId}`);
 
       const cleaned = await cleanupWorkerModeSpace({ esClient, kbnRequest, space });
       log.info(
@@ -234,7 +235,7 @@ run(
         --username              Basic auth username (Default: elastic)
         --password              Basic auth password (Default: changeme)
         --apiKey                ApiKey for Kibana and Elasticsearch; overrides Basic auth
-        --reasoningConnectorId  Connector to map alertzero_reasoning to in the space
+        --reasoningConnectorId  Connector to map alertzero_frontier to in the space
                                 (Default: keep the existing mapping; one is required)
         --serviceAccountId      Service account the Worker runs as (Default: the stored one,
                                 else alertzero_attack_discovery, created if missing)

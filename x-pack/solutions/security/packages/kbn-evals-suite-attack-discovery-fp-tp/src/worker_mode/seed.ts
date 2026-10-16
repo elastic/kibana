@@ -123,7 +123,7 @@ const readInferenceFeatures = async (
 };
 
 /**
- * Makes sure the space maps the `alertzero_reasoning` feature, which both generation and
+ * Makes sure the space maps the `alertzero_frontier` feature, which both generation and
  * the FP/TP analysis resolve their connector from. With `connectorId` the mapping is set
  * (other features are kept); without it an existing mapping is required. Returns the
  * mapped connector id.

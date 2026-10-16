@@ -55,14 +55,9 @@ interface ServiceAccountEntry {
   assumable: boolean;
 }
 
-/**
- * Returns the AD Worker's service account: the one the Worker already runs as, else an
- * enabled, assumable account with the Worker's name, else a new one with the Worker's
- * built-in role (what the AlertZero pages do on an admin's first visit).
- */
-export const ensureAdWorkerServiceAccount = async (
+const listServiceAccounts = async (
   kbnRequest: FpTpLiveKbnRequest
-): Promise<string> => {
+): Promise<ServiceAccountEntry[]> => {
   const accounts: ServiceAccountEntry[] = [];
   let after: string | undefined;
   do {
@@ -78,7 +73,11 @@ export const ensureAdWorkerServiceAccount = async (
     accounts.push(...page.serviceAccounts);
     after = page.nextPage;
   } while (after !== undefined);
+  return accounts;
+};
 
+/** The id of a usable account with the Worker's name; throws when one exists but is unusable. */
+const findUsableAccountId = (accounts: readonly ServiceAccountEntry[]): string | undefined => {
   const usable = accounts.find(
     ({ name, enabled, assumable }) =>
       name === AD_WORKER_SERVICE_ACCOUNT_NAME && enabled && assumable
@@ -92,19 +91,41 @@ export const ensureAdWorkerServiceAccount = async (
         'assumable. Fix it, or pass --serviceAccountId.'
     );
   }
-  const created = requireOk<{ id: string }>(
+  return undefined;
+};
+
+/**
+ * Returns the AD Worker's service account: an enabled, assumable account with the
+ * Worker's name, else a new one with the Worker's built-in role (what the AlertZero pages
+ * do on an admin's first visit). A 409 means another seed created it concurrently, so the
+ * accounts are listed again.
+ */
+export const ensureAdWorkerServiceAccount = async (
+  kbnRequest: FpTpLiveKbnRequest
+): Promise<string> => {
+  const existing = findUsableAccountId(await listServiceAccounts(kbnRequest));
+  if (existing !== undefined) {
+    return existing;
+  }
+  const created = await kbnRequest({
+    method: 'POST',
+    path: SERVICE_ACCOUNT_ROUTE,
+    body: {
+      name: AD_WORKER_SERVICE_ACCOUNT_NAME,
+      description: `AlertZero Attack Discovery Worker (role ${AD_WORKER_SERVICE_ACCOUNT_NAME})`,
+      roles: [AD_WORKER_SERVICE_ACCOUNT_NAME],
+    },
+  });
+  if (created.statusCode === 409) {
+    const concurrent = findUsableAccountId(await listServiceAccounts(kbnRequest));
+    if (concurrent !== undefined) {
+      return concurrent;
+    }
+  }
+  return requireOk<{ id: string }>(
     `Failed to create service account ${AD_WORKER_SERVICE_ACCOUNT_NAME}`,
-    await kbnRequest({
-      method: 'POST',
-      path: SERVICE_ACCOUNT_ROUTE,
-      body: {
-        name: AD_WORKER_SERVICE_ACCOUNT_NAME,
-        description: `AlertZero Attack Discovery Worker (role ${AD_WORKER_SERVICE_ACCOUNT_NAME})`,
-        roles: [AD_WORKER_SERVICE_ACCOUNT_NAME],
-      },
-    })
-  );
-  return created.id;
+    created
+  ).id;
 };
 
 interface WorkerResponse {

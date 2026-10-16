@@ -183,6 +183,47 @@ describe('enableAdWorker', () => {
     });
   });
 
+  it('uses the account another seed created concurrently when the create returns 409', async () => {
+    let lists = 0;
+    const kbnRequest = jest.fn(async ({ method, path }: KbnCall) => {
+      if (isWorkersList({ method, path })) {
+        return { statusCode: 200, body: { workers: [worker({ settingsRevision: null })] } };
+      }
+      if (method === 'GET' && path.startsWith('/internal/security/service_account')) {
+        lists += 1;
+        return {
+          statusCode: 200,
+          body: {
+            serviceAccounts:
+              lists === 1
+                ? []
+                : [
+                    {
+                      id: 'kibana/alertzero_attack_discovery',
+                      name: 'alertzero_attack_discovery',
+                      enabled: true,
+                      assumable: true,
+                    },
+                  ],
+          },
+        };
+      }
+      if (method === 'POST' && path === '/internal/security/service_account') {
+        return { statusCode: 409, body: { message: 'version_conflict_engine_exception' } };
+      }
+      return { statusCode: 200, body: { worker: worker({ enabled: true }) } };
+    }) as jest.Mock & FpTpLiveKbnRequest;
+
+    await enableAdWorker({ kbnRequest });
+
+    const [[patch]] = kbnRequest.mock.calls.filter(([call]) => isWorkerPatch(call));
+    expect(patch.body).toEqual(
+      expect.objectContaining({
+        settings: { autonomy: 'manual', serviceAccountId: 'kibana/alertzero_attack_discovery' },
+      })
+    );
+  });
+
   it('throws when the space has no model for the worker', async () => {
     const kbnRequest = routeStub([
       [isWorkersList, { workers: [worker({ blockingReasons: ['no_model'] })] }],
