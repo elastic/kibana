@@ -54,7 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should display create filter button when tooltip is locked', async () => {
-        const exists = await testSubjects.exists('mapTooltipCreateFilterButton');
+        const exists = await testSubjects.waitForExists('mapTooltipCreateFilterButton');
         expect(exists).to.be(true);
       });
 
