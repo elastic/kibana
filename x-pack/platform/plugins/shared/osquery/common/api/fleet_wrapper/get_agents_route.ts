@@ -11,7 +11,7 @@ import { boundedString } from '../packs/shared_schemas';
 // `kuery` is free-form KQL from the picker's search box, bounded here so an oversized
 // expression cannot reach Elasticsearch. Real values are tens of characters.
 export const getAgentsRequestQuerySchema = t.partial({
-  kuery: boundedString(2048),
+  kuery: boundedString(4096),
   page: t.union([t.number, t.string]),
   perPage: t.union([t.number, t.string]),
   sortField: boundedString(256),

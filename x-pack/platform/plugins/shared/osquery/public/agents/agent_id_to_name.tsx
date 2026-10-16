@@ -30,7 +30,7 @@ const AgentIdToNameComponent: React.FC<AgentIdToNameProps> = ({ agentId }) => {
         })}
         target="_blank"
       >
-        {data?.local_metadata.host.name ?? data?.local_metadata.host.hostname ?? agentId}
+        {data?.local_metadata.host.name ?? agentId}
       </EuiLink>
     </EuiToolTip>
   );

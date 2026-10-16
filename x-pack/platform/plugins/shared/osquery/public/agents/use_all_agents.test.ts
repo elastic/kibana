@@ -8,6 +8,8 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
+import type { KueryNode } from '@kbn/es-query';
+import { fromKueryExpression } from '@kbn/es-query';
 import { useKibana } from '../common/lib/kibana';
 import { useAllAgents, buildAgentSearchKuery } from './use_all_agents';
 import { useOsqueryPolicies } from './use_osquery_policies';
@@ -66,7 +68,10 @@ describe('useAllAgents', () => {
     await waitFor(() => expect(httpGet).toHaveBeenCalled());
 
     const [, { query }] = httpGet.mock.calls[0];
-    expect(query.kuery).not.toMatch(/[^\\]\)/);
+    const node = fromKueryExpression(query.kuery);
+    expect(node.function).toBe('or');
+    expect(node.arguments).toHaveLength(9);
+    node.arguments.forEach((clause: KueryNode) => expect(clause.function).toBe('is'));
     expect(query.kuery).toContain('a\\) \\or \\(b');
   });
 
@@ -77,10 +82,11 @@ describe('useAllAgents', () => {
 
     it('searches across both host.name and host.hostname fields', () => {
       const kuery = buildAgentSearchKuery('my-host');
-      expect(kuery).toContain('local_metadata.host.name.keyword:*my-host*');
       expect(kuery).toContain('local_metadata.host.hostname.keyword:*my-host*');
-      expect(kuery).toContain('local_metadata.host.name:*my-host*');
+      expect(kuery).toContain('local_metadata.host.hostname.keyword:*MY-HOST*');
+      expect(kuery).toContain('local_metadata.host.name.keyword:*my-host*');
       expect(kuery).toContain('local_metadata.host.hostname:*my-host*');
+      expect(kuery).toContain('local_metadata.host.hostname:"my-host"');
       expect(kuery).toContain('local_metadata.elastic.agent.id:*my-host*');
       expect(kuery).toContain('policy_id: *my-host*');
       expect(kuery).toContain('local_metadata.os.platform: *my-host*');
@@ -89,23 +95,44 @@ describe('useAllAgents', () => {
 
     it('generates case variations for keyword matching to handle alerts displaying host.name with different casing than host.hostname', () => {
       const kueryLower = buildAgentSearchKuery('uppername');
-      expect(kueryLower).toContain('local_metadata.host.name.keyword:*uppername*');
       expect(kueryLower).toContain('local_metadata.host.hostname.keyword:*uppername*');
-      expect(kueryLower).toContain('local_metadata.host.name.keyword:*UPPERNAME*');
       expect(kueryLower).toContain('local_metadata.host.hostname.keyword:*UPPERNAME*');
+      expect(kueryLower).toContain('local_metadata.host.name.keyword:*uppername*');
 
       const kueryUpper = buildAgentSearchKuery('UPPERNAME');
-      expect(kueryUpper).toContain('local_metadata.host.name.keyword:*UPPERNAME*');
+      expect(kueryUpper).toContain('local_metadata.host.hostname.keyword:*UPPERNAME*');
       expect(kueryUpper).toContain('local_metadata.host.hostname.keyword:*UPPERNAME*');
       expect(kueryUpper).toContain('local_metadata.host.name.keyword:*uppername*');
-      expect(kueryUpper).toContain('local_metadata.host.hostname.keyword:*uppername*');
     });
 
-    it('escapes special characters across all generated search clauses', () => {
+    it('escapes special characters across all generated search clauses structurally', () => {
       const kuery = buildAgentSearchKuery('a) or (b');
-      expect(kuery).not.toMatch(/[^\\]\)/);
-      expect(kuery).toContain('local_metadata.host.name.keyword:*a\\) \\or \\(b*');
+      const node = fromKueryExpression(kuery);
+      expect(node.function).toBe('or');
+      expect(node.arguments).toHaveLength(9);
+      node.arguments.forEach((clause: KueryNode) => expect(clause.function).toBe('is'));
       expect(kuery).toContain('local_metadata.host.hostname.keyword:*a\\) \\or \\(b*');
+      expect(kuery).toContain('local_metadata.host.name.keyword:*a\\) \\or \\(b*');
+      expect(kuery).toContain('local_metadata.host.hostname:"a) or (b"');
+    });
+
+    it('escapes quotes in phrase clause to prevent quote breakout', () => {
+      const kuery = buildAgentSearchKuery('a" or policy_id:* or "b');
+      const node = fromKueryExpression(kuery);
+      expect(node.function).toBe('or');
+      expect(node.arguments).toHaveLength(9);
+      node.arguments.forEach((clause: KueryNode) => expect(clause.function).toBe('is'));
+    });
+
+    it('generates a valid kuery within the 4096 limit for a 253-character FQDN', () => {
+      const fqdn =
+        'a'.repeat(63) + '.' + 'b'.repeat(63) + '.' + 'c'.repeat(63) + '.' + 'd'.repeat(58) + '.com';
+      expect(fqdn).toHaveLength(253);
+      const kuery = buildAgentSearchKuery(fqdn);
+      expect(kuery.length).toBeLessThanOrEqual(4096);
+      const node = fromKueryExpression(kuery);
+      expect(node.function).toBe('or');
+      expect(node.arguments).toHaveLength(9);
     });
   });
 

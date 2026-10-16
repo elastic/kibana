@@ -17,7 +17,7 @@ const BULK_AGENT_DETAILS_ROUTE = '/internal/osquery/fleet_wrapper/agents/_bulk';
 
 interface AgentDetails {
   id: string;
-  local_metadata?: { host?: { name?: string; hostname?: string } };
+  local_metadata?: { host?: { name?: string } };
 }
 
 interface BulkAgentDetailsResponse {
@@ -64,8 +64,7 @@ export const useBulkAgentDetails = (agentIds: string[]) => {
   const agentNameMap = useMemo(() => {
     const map = new Map<string, string>();
     agentsData?.agents?.forEach((agent) => {
-      const hostname =
-        agent.local_metadata?.host?.name || agent.local_metadata?.host?.hostname || agent.id;
+      const hostname = agent.local_metadata?.host?.name || agent.id;
       map.set(agent.id, hostname);
     });
 

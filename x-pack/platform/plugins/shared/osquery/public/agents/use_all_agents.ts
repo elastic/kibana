@@ -26,8 +26,8 @@ interface RequestOptions {
  * Builds the Kuery string for searching agents.
  * Searches across host.name (as displayed in Security alerts) and host.hostname
  * (as displayed on Fleet agents), along with agent id, policy id, platform, and policy name.
- * Generates case variations for keyword matching to ensure case-insensitive matching
- * across unanalyzed keyword fields.
+ * Generates targeted case variations and phrase matching to ensure case-insensitive matching
+ * across keyword and analyzed fields without redundant scans.
  */
 export const buildAgentSearchKuery = (searchValue: string): string => {
   if (!searchValue) {
@@ -35,22 +35,13 @@ export const buildAgentSearchKuery = (searchValue: string): string => {
   }
 
   const escapedSearch = escapeKuery(searchValue);
-  const searchTerms = Array.from(
-    new Set([searchValue, searchValue.toLowerCase(), searchValue.toUpperCase()])
-  );
-
-  const hostClauses = searchTerms.flatMap((term) => {
-    const escapedTerm = escapeKuery(term);
-    return [
-      `local_metadata.host.name.keyword:*${escapedTerm}*`,
-      `local_metadata.host.hostname.keyword:*${escapedTerm}*`,
-    ];
-  });
 
   const queryParts = [
-    ...hostClauses,
-    `local_metadata.host.name:*${escapedSearch}*`,
+    `local_metadata.host.hostname.keyword:*${escapedSearch}*`,
+    `local_metadata.host.hostname.keyword:*${escapeKuery(searchValue.toUpperCase())}*`,
+    `local_metadata.host.name.keyword:*${escapeKuery(searchValue.toLowerCase())}*`,
     `local_metadata.host.hostname:*${escapedSearch}*`,
+    `local_metadata.host.hostname:"${searchValue.replace(/[\\"]/g, '\\$&')}"`,
     `local_metadata.elastic.agent.id:*${escapedSearch}*`,
     `policy_id: *${escapedSearch}*`,
     `local_metadata.os.platform: *${escapedSearch}*`,

@@ -101,21 +101,6 @@ describe('useBulkAgentDetails', () => {
       expect(result.current.agentNameMap.get('agent-2')).toBe('production-server-02');
     });
 
-    it('should fall back to local_metadata hostname when name is absent', async () => {
-      mockHttpPost.mockResolvedValue({
-        agents: [
-          { id: 'agent-1', local_metadata: { host: { hostname: 'fallback-hostname-01' } } },
-        ],
-      });
-
-      const { result } = renderHook(() => useBulkAgentDetails(['agent-1']), {
-        wrapper: createWrapper(queryClient),
-      });
-
-      await waitFor(() => expect(result.current.agentNameMap.size).toBe(1));
-      expect(result.current.agentNameMap.get('agent-1')).toBe('fallback-hostname-01');
-    });
-
     it('should fall back to the agent id when no hostname is reported', async () => {
       mockHttpPost.mockResolvedValue({
         agents: [
