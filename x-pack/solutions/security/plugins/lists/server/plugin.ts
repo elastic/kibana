@@ -12,6 +12,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+
 import type { ConfigType } from './config';
 import { initRoutes } from './routes/init_routes';
 import { ListClient } from './services/lists/list_client';
