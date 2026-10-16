@@ -22,7 +22,6 @@ export const servers: ScoutServerConfig = {
         (arg) => !arg.startsWith(AGENT_BUILDER_EXPERIMENTAL_FEATURES_ARG)
       ),
       '--uiSettings.overrides.alerting:v2:enabled=true',
-      '--uiSettings.overrides.alerting:v2:experimentalFeatures=false',
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=false',
       /* Disable tracing redaction so exported spans carry real prompt/response
        * content when inspecting eval runs in Phoenix or Kibana's Tracing UI. */

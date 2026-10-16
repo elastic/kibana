@@ -314,7 +314,7 @@ describe('createRuleAttachmentType', () => {
   describe('getAgentDescription', () => {
     it('mentions rule attachment, persistence states, and the rule-authoring skill', () => {
       const description = definition.getAgentDescription!();
-      expect(description).toContain('Alerting v2 rule');
+      expect(description).toContain('Universal Rule');
       expect(description).toContain('proposed');
       expect(description).toContain('saved rule');
       expect(description).toContain('rule-authoring');
