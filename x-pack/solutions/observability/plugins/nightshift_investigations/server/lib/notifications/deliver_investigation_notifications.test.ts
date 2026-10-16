@@ -119,6 +119,22 @@ describe('investigation notification lifecycle', () => {
       }
     );
 
+    it('retries without blocks when Slack rejects the blocks', async () => {
+      const { send, execute, client } = setup();
+      execute.mockResolvedValueOnce({ status: 'error', message: 'invalid_blocks' } as never);
+      expect(await send('started', 'exec-1', [input])).toEqual({
+        sent: 1,
+        failed: 0,
+        unconfirmed: 0,
+      });
+      expect(execute).toHaveBeenCalledTimes(2);
+      expect(execute.mock.calls[1][0].params.subActionParams).not.toHaveProperty('blocks');
+      expect((await client.get())?.attempts[0]).toMatchObject({
+        status: 'sent',
+        message_ts: '1.000001',
+      });
+    });
+
     it('posts a terminal reply when the started reply was not confirmed', async () => {
       const { send, execute } = setup();
       execute.mockResolvedValueOnce({ status: 'error', message: 'not_in_channel' } as never);
