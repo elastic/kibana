@@ -7,6 +7,7 @@
 
 import type { Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { KibanaIsomerRuntime } from '@kbn/isomer';
+import { createRuntime } from './create_runtime';
 
 export type IsomerPluginSetup = Record<string, never>;
 
@@ -17,14 +18,6 @@ export interface IsomerPluginStart {
    */
   getRuntime: () => Promise<KibanaIsomerRuntime>;
 }
-
-const createRuntime = async (): Promise<KibanaIsomerRuntime> => {
-  const [{ createKibanaIsomerRuntime }, { componentsPack }] = await Promise.all([
-    import('@kbn/isomer'),
-    import('@kbn/isomer-components'),
-  ]);
-  return createKibanaIsomerRuntime({ packs: [componentsPack] });
-};
 
 export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart> {
   private readonly logger: Logger;
