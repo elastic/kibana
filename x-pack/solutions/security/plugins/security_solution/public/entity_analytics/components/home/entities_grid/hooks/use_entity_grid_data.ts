@@ -247,7 +247,8 @@ export const useEntityGridData = (
   return {
     rows,
     isEnriching: enrichment.isEnriching,
-    total: countQuery.data ?? rows.length,
+    /** Undefined until the count arrives: the rows loaded so far aren't the total. */
+    total: countQuery.data,
     updatedAt: Math.max(rowsQuery.dataUpdatedAt, enrichment.dataUpdatedAt) || null,
     isFetching:
       resolvedEntityFilterOverrides.isFetching ||

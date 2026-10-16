@@ -288,6 +288,15 @@ describe('useEntityGridData', () => {
 
       await waitFor(() => expect(result.current.total).toBe(40));
     });
+
+    it('is undefined until the count arrives, not the number of rows loaded', async () => {
+      mockRunQuery.mockReturnValue(new Promise(() => {}));
+      const { result } = renderGridData();
+
+      await waitFor(() => expect(result.current.rows).toHaveLength(2));
+
+      expect(result.current.total).toBeUndefined();
+    });
   });
 
   describe('errors', () => {

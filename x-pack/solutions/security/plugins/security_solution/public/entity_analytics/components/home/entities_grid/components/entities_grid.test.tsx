@@ -121,6 +121,9 @@ describe('EntitiesGrid', () => {
 
     renderGrid({ toolbarControls: <div /> });
 
-    expect(screen.getByText('Showing 2 of 3,789 resolved entities')).toBeInTheDocument();
+    // The total is short, with the exact one in a tooltip.
+    expect(document.querySelector('.entityAnalyticsDataTableTotal')).toHaveTextContent(
+      'Showing 2 of 3.8k resolved entities'
+    );
   });
 });

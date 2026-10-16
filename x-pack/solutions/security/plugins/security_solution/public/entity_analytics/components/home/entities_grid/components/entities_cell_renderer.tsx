@@ -8,7 +8,7 @@
 import React, { createContext, useContext } from 'react';
 import { assertNever } from '@kbn/std';
 import type { EuiThemeComputed, RenderCellValue } from '@elastic/eui';
-import { css, keyframes } from '@emotion/react';
+import { css } from '@emotion/react';
 import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
 import type { Row } from '../common';
 import { ENRICHED_FIELDS, isGridColumnId, type GridColumnId } from '../grid_columns';
@@ -23,6 +23,7 @@ import { RiskScoreChangeCell } from './cells/risk_score_change_cell';
 import { RiskScoreValueCell } from './cells/risk_score_value_cell';
 import { SourceCell } from './cells/source_cell';
 import { WatchlistsCell } from './cells/watchlists_cell';
+import { loadingPlaceholderCss } from './entities_grid_styles';
 
 export interface CellHandlers {
   onEntityNameClick?: (row: Row) => void;
@@ -49,23 +50,11 @@ export const EntityGridRowsContext = createContext<EntityGridRows>({
   isEnriching: false,
 });
 
-/** Pulses opacity only, which the compositor animates without repainting the cells. */
-const loadingPulse = keyframes`
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-`;
-
-const loadingPlaceholderCss = css`
-  display: inline-block;
-  vertical-align: middle;
+/** Shaped like "—", so a cell holds still when its value arrives. */
+const cellLoadingPlaceholderCss = css`
   inline-size: 1em;
   block-size: 2px;
   border-radius: 1px;
-  animation: ${loadingPulse} 1.2s ease-in-out infinite;
-
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-  }
 `;
 
 /** Hours before a date shows as absolute: never, so the columns read as how long ago. */
@@ -144,7 +133,12 @@ export const renderEntityCell = (
   // Enrichers set every field they own (null or 0 when empty), so `undefined` here
   // means "not loaded yet", not "no value". Show a placeholder rather than "—".
   if (isEnriching && value === undefined && ENRICHED_FIELDS.has(columnId)) {
-    return <span css={loadingPlaceholderCss} style={{ background: euiTheme.colors.lightShade }} />;
+    return (
+      <span
+        css={[loadingPlaceholderCss, cellLoadingPlaceholderCss]}
+        style={{ background: euiTheme.colors.lightShade }}
+      />
+    );
   }
   if (!isGridColumnId(columnId)) {
     return <DefaultCell value={value} />;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import type {
   EuiDataGridCustomBodyProps,
   EuiDataGridStyleCellPaddings,
@@ -19,6 +19,23 @@ export const gridRowCss = css`
 
 export const gridRowCellsCss = css`
   display: flex;
+`;
+
+/** Pulses opacity only, which the compositor animates without repainting. */
+const loadingPulse = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+`;
+
+/** A placeholder for a value still loading; its size and color are up to the caller. */
+export const loadingPlaceholderCss = css`
+  display: inline-block;
+  vertical-align: middle;
+  animation: ${loadingPulse} 1.2s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `;
 
 /** EUI grid row heights for the compact (s), normal (m) and expanded (l) densities. */
