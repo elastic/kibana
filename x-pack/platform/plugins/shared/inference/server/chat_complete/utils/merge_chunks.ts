@@ -10,6 +10,7 @@ import type { ChatCompletionChunkEvent, UnvalidatedToolCall } from '@kbn/inferen
 interface UnvalidatedMessage {
   content: string;
   refusal?: string;
+  reasoning?: string;
   tool_calls: UnvalidatedToolCall[];
 }
 
@@ -77,6 +78,9 @@ export const mergeChunks = (chunks: ChatCompletionChunkEvent[]): UnvalidatedMess
       prev.content += chunk.content ?? '';
       if (chunk.refusal) {
         prev.refusal = chunk.refusal;
+      }
+      if (chunk.reasoning) {
+        prev.reasoning = (prev.reasoning ?? '') + chunk.reasoning;
       }
 
       return prev;

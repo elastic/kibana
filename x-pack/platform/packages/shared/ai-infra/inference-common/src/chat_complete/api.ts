@@ -248,6 +248,10 @@ export interface ChatCompleteResponse<
    */
   refusal?: string;
   /**
+   * Reasoning (thinking) text returned by the model, if any.
+   */
+  reasoning?: string;
+  /**
    * The eventual tool calls performed by the LLM.
    */
   toolCalls: ToolCallOfToolOptions<TOptions>[];

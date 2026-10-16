@@ -8,6 +8,15 @@
 import type OpenAI from 'openai';
 import type { ChatCompletionReasoning } from '@kbn/inference-common';
 
+/**
+ * Assistant message param with `reasoning`, which the openai SDK types omit.
+ * The Elasticsearch unified chat completion API accepts it on assistant messages.
+ */
+export type OpenAIAssistantMessageParamWithReasoning =
+  OpenAI.ChatCompletionAssistantMessageParam & {
+    reasoning?: string;
+  };
+
 export type OpenAIRequest = Omit<OpenAI.ChatCompletionCreateParams, 'model'> & {
   model?: string;
   /**

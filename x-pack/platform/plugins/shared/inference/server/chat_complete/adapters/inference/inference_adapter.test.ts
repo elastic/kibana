@@ -427,6 +427,51 @@ describe('inferenceAdapter', () => {
       });
     });
 
+    it('replays reasoning on assistant messages from the conversation history', () => {
+      inferenceAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [
+            { role: MessageRole.User, content: 'question' },
+            { role: MessageRole.Assistant, content: 'answer', reasoning: 'thinking...' },
+            { role: MessageRole.User, content: 'follow up' },
+          ],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      const { body } = executorMock.invoke.mock.calls[0][0].subActionParams;
+      expect(body.messages).toEqual([
+        { role: 'user', content: 'question' },
+        { role: 'assistant', content: 'answer', reasoning: 'thinking...' },
+        { role: 'user', content: 'follow up' },
+      ]);
+    });
+
+    it('keeps requests byte-identical for assistant messages without reasoning', () => {
+      inferenceAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [
+            { role: MessageRole.User, content: 'question' },
+            { role: MessageRole.Assistant, content: 'answer' },
+            { role: MessageRole.User, content: 'follow up' },
+          ],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      const { body } = executorMock.invoke.mock.calls[0][0].subActionParams;
+      expect(body.messages).toEqual([
+        { role: 'user', content: 'question' },
+        { role: 'assistant', content: 'answer' },
+        { role: 'user', content: 'follow up' },
+      ]);
+      expect(JSON.stringify(body)).not.toContain('reasoning');
+    });
+
     it('omits reasoning when tools are absent and reasoning is not provided', () => {
       inferenceAdapter
         .chatComplete({

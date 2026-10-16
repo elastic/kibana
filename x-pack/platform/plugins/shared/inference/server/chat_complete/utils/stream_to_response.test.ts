@@ -37,6 +37,28 @@ describe('streamToResponse', () => {
     });
   });
 
+  it('includes reasoning on the response when the message event carries it', async () => {
+    const withReasoning = {
+      ...messageEvent('message'),
+      reasoning: 'thinking',
+    } as ChatCompletionMessageEvent;
+    const response = await streamToResponse(
+      fromEvents(
+        chunkEvent('chunk_1'),
+        tokensEvent({ prompt: 1, completion: 2, total: 3 }),
+        withReasoning
+      )
+    );
+
+    expect(response.reasoning).toEqual('thinking');
+  });
+
+  it('omits reasoning when the message event does not carry it', async () => {
+    const response = await streamToResponse(fromEvents(messageEvent('message')));
+
+    expect(response).not.toHaveProperty('reasoning');
+  });
+
   it('returns a response with model if present in the token event', async () => {
     const response = await streamToResponse(
       fromEvents(

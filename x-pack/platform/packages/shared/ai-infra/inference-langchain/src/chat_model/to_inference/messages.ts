@@ -44,6 +44,9 @@ export const messagesToInference = (messages: BaseMessage[]) => {
         output.messages.push({
           role: MessageRole.Assistant,
           content: extractMessageTextContent(message),
+          ...(typeof message.additional_kwargs?.reasoning === 'string'
+            ? { reasoning: message.additional_kwargs.reasoning }
+            : {}),
           toolCalls: message.tool_calls?.length
             ? message.tool_calls.map(toolCallToInference)
             : message.additional_kwargs?.tool_calls?.length
