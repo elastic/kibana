@@ -19,6 +19,7 @@ import { createWorkpadRouteContext } from './workpad_route_context';
 
 jest.mock('./kibana_services', () => ({
   embeddableService: {
+    getPanelTypeMigration: () => undefined,
     getTransforms: () => ({
       transformIn: jest.fn((config: any) => {
         const { savedObjectId, ...remainingConfig } = config;
