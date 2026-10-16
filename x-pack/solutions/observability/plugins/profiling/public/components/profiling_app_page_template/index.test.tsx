@@ -27,6 +27,9 @@ jest.mock('../contexts/profiling_schema/profiling_schema_context', () => ({
 jest.mock('../schema_selector', () => ({
   ProfilingAppSchemaSelector: jest.fn(() => null),
 }));
+jest.mock('../universal_profiling_setup_incomplete_callout', () => ({
+  UniversalProfilingSetupIncompleteCallout: jest.fn(() => null),
+}));
 
 import { useLocation } from 'react-router-dom';
 import type { ProfilingStatus } from '@kbn/profiling-utils';
@@ -39,6 +42,7 @@ import { useProfilingStatus } from '../contexts/profiling_status/use_profiling_s
 import { ProfilingSchemaContextProvider } from '../contexts/profiling_schema/profiling_schema_context';
 import { AsyncStatus } from '../../hooks/use_async';
 import { ProfilingAppSchemaSelector } from '../schema_selector';
+import { UniversalProfilingSetupIncompleteCallout } from '../universal_profiling_setup_incomplete_callout';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
 import {
   ProfilingAppPageTemplate,
@@ -290,6 +294,24 @@ describe('ProfilingAppPageTemplate', () => {
 
       expect(ProfilingSchemaContextProvider).not.toHaveBeenCalled();
       expect(ProfilingAppSchemaSelector).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Universal Profiling setup incomplete callout', () => {
+    it('is rendered on pages with the selector when the Universal Profiling schema is selected', () => {
+      renderTemplate('?schema=ecs', { showSchemaSelector: true });
+
+      expect(UniversalProfilingSetupIncompleteCallout).toHaveBeenCalled();
+    });
+
+    it.each([
+      ['the OpenTelemetry schema is selected', '?schema=otel', { showSchemaSelector: true }],
+      ['no schema is selected yet', '', { showSchemaSelector: true }],
+      ['the page has no selector', '?schema=ecs', {}],
+    ])('is not rendered when %s', (_name, search, props) => {
+      renderTemplate(search, props);
+
+      expect(UniversalProfilingSetupIncompleteCallout).not.toHaveBeenCalled();
     });
   });
 });
