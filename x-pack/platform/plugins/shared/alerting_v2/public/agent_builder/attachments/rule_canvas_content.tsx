@@ -18,10 +18,7 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
-import {
-  bindLocatorsToHost,
-  getAlertingV2Locators,
-} from '../../application/bind_locators_to_host';
+import { bindLocatorsToHost, getAlertingV2Locators } from '../../application/bind_locators_to_host';
 import { LocatorProvider } from '../../application/locator_context';
 import {
   RuleSummaryAboutSection,
