@@ -13,11 +13,18 @@ import {
   RenderServiceSaturatedError,
   RenderServiceUnavailableError,
 } from '@kbn/reporting-common';
-import { decideRenderRetry, RESCHEDULE_DELAY_MS } from './render_retry';
+import {
+  attemptsMade,
+  decideRenderRetry,
+  isNewAttempt,
+  MAX_UNAVAILABLE_RUNS,
+  RESCHEDULE_DELAY_MS,
+} from './render_retry';
 
 const NOW = Date.parse('2026-10-14T12:00:00Z');
 const noJitter = () => 0.5;
-const decide = (error: unknown, state = {}) => decideRenderRetry(error, state, NOW, noJitter);
+const decide = (error: unknown, state = {}, attempts = 1) =>
+  decideRenderRetry(error, state, { attempts, maxAttempts: 3 }, NOW, noJitter);
 
 describe('decideRenderRetry', () => {
   it('leaves errors that did not come from page-render-service to the usual handling', () => {
@@ -25,47 +32,47 @@ describe('decideRenderRetry', () => {
     expect(decide(new QueueTimeoutError())).toBeUndefined();
   });
 
-  it('hands a report waiting for capacity straight back, marking the next run as no new attempt', () => {
-    const state = { renderFailures: { unavailable: 1 } };
-
-    expect(decide(new RenderServiceSaturatedError(), state)).toEqual({
+  it('hands a report waiting for capacity straight back, as queuing', () => {
+    expect(decide(new RenderServiceSaturatedError(), { unavailableRuns: 1 })).toEqual({
       action: 'hand_back',
       reason: 'saturated',
       runAt: new Date(NOW),
-      state: { renderFailures: { unavailable: 1 }, waitingForCapacity: true },
+      state: { unavailableRuns: 1, queued: true },
     });
   });
 
-  it('counts the run after a wait as a new attempt again', () => {
-    const decision = decide(new RenderFailedError(), { waitingForCapacity: true });
-
-    expect(decision).toMatchObject({ state: { renderFailures: { render_failure: 1 } } });
-    expect((decision as { state: object }).state).not.toHaveProperty('waitingForCapacity');
-  });
-
-  it.each([
-    ['an unreachable service', new RenderServiceUnavailableError(), 'unavailable', 4],
-    ['a failed render', new RenderFailedError(), 'render_failure', 3],
-  ])('reschedules %s, counting runs in the task state', (_name, error, failureClass, maxRuns) => {
+  it('reschedules an unreachable service as queuing, until it has used its runs', () => {
     let state = {};
-    for (let run = 1; run < maxRuns; run++) {
-      const decision = decide(error, state);
+    for (let run = 1; run < MAX_UNAVAILABLE_RUNS; run++) {
+      const decision = decide(new RenderServiceUnavailableError(), state);
       expect(decision).toEqual({
         action: 'reschedule',
-        reason: failureClass,
+        reason: 'unavailable',
         runAt: new Date(NOW + RESCHEDULE_DELAY_MS),
-        state: { renderFailures: { [failureClass]: run } },
+        state: { unavailableRuns: run, queued: true },
       });
       state = (decision as { state: object }).state;
     }
 
-    expect(decide(error, state)).toEqual({ action: 'fail', reason: failureClass });
+    expect(decide(new RenderServiceUnavailableError(), state)).toEqual({
+      action: 'fail',
+      reason: 'unavailable',
+    });
   });
 
-  it('counts each kind of failure separately', () => {
-    expect(decide(new RenderFailedError(), { renderFailures: { unavailable: 3 } })).toMatchObject({
+  it('reschedules a failed render as another attempt', () => {
+    expect(decide(new RenderFailedError(), { unavailableRuns: 2, queued: true }, 2)).toEqual({
       action: 'reschedule',
-      state: { renderFailures: { unavailable: 3, render_failure: 1 } },
+      reason: 'render_failure',
+      runAt: new Date(NOW + RESCHEDULE_DELAY_MS),
+      state: { unavailableRuns: 2, queued: false },
+    });
+  });
+
+  it('fails a failed render once the report has used its attempts', () => {
+    expect(decide(new RenderFailedError(), {}, 3)).toEqual({
+      action: 'fail',
+      reason: 'render_failure',
     });
   });
 
@@ -86,10 +93,47 @@ describe('decideRenderRetry', () => {
   it('spreads reschedules across ±50% of the delay', () => {
     const at = (random: number) =>
       (
-        decideRenderRetry(new RenderFailedError(), {}, NOW, () => random) as { runAt: Date }
+        decideRenderRetry(
+          new RenderFailedError(),
+          {},
+          { attempts: 1, maxAttempts: 3 },
+          NOW,
+          () => random
+        ) as { runAt: Date }
       ).runAt.getTime() - NOW;
 
     expect(at(0)).toBe(RESCHEDULE_DELAY_MS / 2);
     expect(at(0.999)).toBeLessThan(RESCHEDULE_DELAY_MS * 1.5);
+  });
+});
+
+describe('isNewAttempt', () => {
+  it('counts a run with no render retries behind it', () => {
+    expect(isNewAttempt(undefined, 1)).toBe(true);
+    expect(isNewAttempt({}, 2)).toBe(true);
+  });
+
+  it('does not count the run after queuing', () => {
+    expect(isNewAttempt({ queued: true }, 1)).toBe(false);
+  });
+
+  it('counts the run after a failed render', () => {
+    expect(isNewAttempt({ queued: false }, 1)).toBe(true);
+  });
+
+  it('counts a retry after the run that followed queuing failed', () => {
+    // A thrown failure keeps the task state, but Task Manager counts the attempt.
+    expect(isNewAttempt({ queued: true }, 2)).toBe(true);
+  });
+});
+
+describe('attemptsMade', () => {
+  it("uses Task Manager's count when nothing was rescheduled", () => {
+    expect(attemptsMade(undefined, 2, 5)).toBe(2);
+  });
+
+  it("uses the report's count once a reschedule has restarted Task Manager's", () => {
+    expect(attemptsMade({ queued: false }, 1, 2)).toBe(2);
+    expect(attemptsMade({ queued: true }, 2, 1)).toBe(2);
   });
 });

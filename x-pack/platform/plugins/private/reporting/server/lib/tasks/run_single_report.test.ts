@@ -17,6 +17,7 @@ import {
   RenderFailedError,
   RenderRequestRejectedError,
   RenderServiceSaturatedError,
+  RenderServiceUnavailableError,
 } from '@kbn/reporting-common';
 import type { ReportDocument, TaskRunResult } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
@@ -525,7 +526,10 @@ describe('Run Single Report Task', () => {
     });
   });
 
-  it('claims a report after a capacity hand-back without counting a new attempt', async () => {
+  it.each([
+    ['does not count the run after queuing for page-render-service', 1, 1, false],
+    ['counts a retry after the run that followed queuing failed', 2, 2, true],
+  ])('%s as an attempt', async (_name, taskAttempts, claimedAttempts, claimTracked) => {
     mockReporting.getExportTypesRegistry().register({
       id: 'test1',
       name: 'Test1',
@@ -570,7 +574,8 @@ describe('Run Single Report Task', () => {
       .createTaskRunner({
         taskInstance: {
           id: 'random-task-id',
-          state: { waitingForCapacity: true },
+          attempts: taskAttempts,
+          state: { queued: true },
           params: { index: 'cool-reporting-index', id: 'test1', jobtype: 'test1', payload: {} },
         },
         fakeRequest: fakeRawRequest,
@@ -579,9 +584,9 @@ describe('Run Single Report Task', () => {
 
     expect(setReportClaimed).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ attempts: 1 })
+      expect.objectContaining({ attempts: claimedAttempts })
     );
-    expect(mockEventTracker.claimJob).not.toHaveBeenCalled();
+    expect(mockEventTracker.claimJob).toHaveBeenCalledTimes(claimTracked ? 1 : 0);
   });
 
   it('throws during reporting if Kibana starts shutting down', async () => {
@@ -1145,7 +1150,11 @@ describe('Run Single Report Task', () => {
 
     async function runFailingWith(
       error: Error,
-      { state = {}, attempts = 1 }: { state?: object; attempts?: number } = {}
+      {
+        state = {},
+        attempts = 1,
+        reportAttempts = 1,
+      }: { state?: object; attempts?: number; reportAttempts?: number } = {}
     ) {
       configType = createMockConfigSchema({ capture: { maxAttempts: 3 } });
       mockReporting = await createMockReportingCore(configType);
@@ -1181,6 +1190,7 @@ describe('Run Single Report Task', () => {
           jobtype: 'test1',
           status: 'pending',
           created_at: CREATED_AT,
+          attempts: reportAttempts,
         } as never);
       jest
         // @ts-expect-error TS compilation fails: this overrides a protected method of the RunSingleReportTask instance
@@ -1217,23 +1227,33 @@ describe('Run Single Report Task', () => {
     });
 
     it('hands a report waiting for capacity back to Task Manager without recording an error', async () => {
-      const state = { renderFailures: { unavailable: 1 } };
-      const { result, store } = await runFailingWith(new RenderServiceSaturatedError(), { state });
+      const { result, store } = await runFailingWith(new RenderServiceSaturatedError(), {
+        state: { unavailableRuns: 1 },
+      });
 
       await expect(result).resolves.toEqual({
         runAt: expect.any(Date),
-        state: { ...state, waitingForCapacity: true },
+        state: { unavailableRuns: 1, queued: true },
       });
       expect(store.setReportError).not.toHaveBeenCalled();
       expect(store.setReportFailed).not.toHaveBeenCalled();
     });
 
-    it('reschedules a failed render, counting it in the task state', async () => {
+    it('reschedules an unreachable service as queuing, not an attempt', async () => {
+      const { result } = await runFailingWith(new RenderServiceUnavailableError('down'));
+
+      await expect(result).resolves.toEqual({
+        runAt: expect.any(Date),
+        state: { unavailableRuns: 1, queued: true },
+      });
+    });
+
+    it('reschedules a failed render as another attempt', async () => {
       const { result, store } = await runFailingWith(new RenderFailedError('boom'));
 
       await expect(result).resolves.toEqual({
         runAt: expect.any(Date),
-        state: { renderFailures: { render_failure: 1 } },
+        state: { unavailableRuns: 0, queued: false },
       });
       expect(store.setReportError).toHaveBeenCalled();
       expect(store.setReportFailed).not.toHaveBeenCalled();
@@ -1253,9 +1273,22 @@ describe('Run Single Report Task', () => {
       );
     });
 
-    it('fails for good once a failed render has used its runs', async () => {
+    it("fails for good once a failed render has used the report's attempts", async () => {
       const { result, store } = await runFailingWith(new RenderFailedError('boom'), {
-        state: { renderFailures: { render_failure: 2 } },
+        reportAttempts: 3,
+      });
+
+      const error = await result.catch((e: Error) => e);
+      expect(isUnrecoverableError(error as Error)).toBe(true);
+      expect(store.setReportFailed).toHaveBeenCalled();
+    });
+
+    it("fails for good when any error ends the report's last attempt after a reschedule", async () => {
+      // A reschedule restarted Task Manager's count, so it alone would run the report again.
+      const { result, store } = await runFailingWith(new Error('boom'), {
+        state: { unavailableRuns: 0, queued: false },
+        attempts: 1,
+        reportAttempts: 3,
       });
 
       const error = await result.catch((e: Error) => e);

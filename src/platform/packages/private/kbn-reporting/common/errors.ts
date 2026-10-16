@@ -194,6 +194,12 @@ export class RenderServiceSaturatedError extends RenderServiceError {
   public get retryClass() {
     return 'capacity' as const;
   }
+
+  public humanFriendlyMessage() {
+    return i18n.translate('reporting.common.renderServiceSaturatedErrorMessage', {
+      defaultMessage: `Can't generate this report because the rendering service is busy. Try again later.`,
+    });
+  }
 }
 
 export class RenderServiceUnavailableError extends RenderServiceError {
@@ -220,6 +226,12 @@ export class RenderFailedError extends RenderServiceError {
   public get retryClass() {
     return 'render_failure' as const;
   }
+
+  public humanFriendlyMessage() {
+    return i18n.translate('reporting.common.renderFailedErrorMessage', {
+      defaultMessage: `Can't generate this report because the rendering service could not render the page.`,
+    });
+  }
 }
 
 export class RenderRequestRejectedError extends RenderServiceError {
@@ -229,6 +241,12 @@ export class RenderRequestRejectedError extends RenderServiceError {
   }
   public get retryClass() {
     return 'unrecoverable' as const;
+  }
+
+  public humanFriendlyMessage() {
+    return i18n.translate('reporting.common.renderRequestRejectedErrorMessage', {
+      defaultMessage: `Can't generate this report because the rendering service rejected the request.`,
+    });
   }
 }
 

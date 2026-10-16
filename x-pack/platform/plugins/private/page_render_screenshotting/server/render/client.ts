@@ -186,9 +186,10 @@ async function postWithRetry(
       );
     }
     if (now + waitMs > waitUntil) {
-      // Hand the worker back rather than hold it for the whole ladder.
+      // Hand the worker back rather than hold it for the whole ladder. Scheduled reports cannot be
+      // handed back, so the message doesn't promise a reschedule.
       throw new RenderServiceSaturatedError(
-        `page-render-service is at capacity; rescheduling the report after waiting ${Math.round(
+        `page-render-service is still at capacity after waiting ${Math.round(
           (now - runStartedAt) / 1000
         )}s in this run`
       );

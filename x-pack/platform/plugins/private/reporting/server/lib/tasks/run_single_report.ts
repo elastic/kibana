@@ -19,6 +19,7 @@ import { errorLogger } from './error_logger';
 import type { PrepareJobResults } from './run_report';
 import { RunReportTask } from './run_report';
 import type { RenderRetryState } from './render_retry';
+import { isNewAttempt } from './render_retry';
 
 type SingleReportTaskInstance = Omit<TaskInstance, 'params'> & {
   params: ReportTaskParams;
@@ -32,7 +33,7 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
     return REPORTING_EXECUTE_TYPE;
   }
 
-  /** `newAttempt` is false when the last run only handed back while waiting for capacity. */
+  /** `newAttempt` is false when the last run was only queuing for page-render-service. */
   private async claimJob(task: ReportTaskParams, newAttempt = true): Promise<SavedReport> {
     const store = await this.opts.reporting.getStore();
     const report = await store.findReportFromTask(task); // receives seq_no and primary_term
@@ -96,8 +97,10 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
       }
 
       // Update job status to claimed
-      const { waitingForCapacity } = (taskInstance.state ?? {}) as RenderRetryState;
-      report = await this.claimJob(task, !waitingForCapacity);
+      report = await this.claimJob(
+        task,
+        isNewAttempt(taskInstance.state as RenderRetryState | undefined, taskInstance.attempts)
+      );
 
       // Track report in UI
       this.opts.reporting.trackReport(jobId);

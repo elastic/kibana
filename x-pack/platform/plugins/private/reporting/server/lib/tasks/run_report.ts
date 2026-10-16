@@ -61,7 +61,7 @@ import type { EmailNotificationService } from '../../services/notifications/emai
 import type { ScheduledReportType } from '../../types';
 import { retryOnError } from '../retry_on_error';
 import type { RenderRetryState } from './render_retry';
-import { decideRenderRetry } from './render_retry';
+import { attemptsMade, decideRenderRetry } from './render_retry';
 import { reportingTelemetry } from './reporting_telemetry';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
@@ -760,8 +760,12 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               },
             });
           } catch (failedToExecuteErr) {
+            const renderRetryState = taskInstance.state as RenderRetryState | undefined;
             const renderRetry = this.reschedulesRenderRetries
-              ? decideRenderRetry(failedToExecuteErr, taskInstance.state as RenderRetryState)
+              ? decideRenderRetry(failedToExecuteErr, renderRetryState, {
+                  attempts,
+                  maxAttempts: maxAttempts.maxTaskAttempts,
+                })
               : undefined;
             if (renderRetry) {
               reportingTelemetry.recordRenderRetry(renderRetry.reason, renderRetry.action);
@@ -777,10 +781,11 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               return { runAt: renderRetry.runAt, state: renderRetry.state };
             }
 
+            const attemptCount = attemptsMade(renderRetryState, taskAttempts ?? 0, attempts);
             const isLastAttempt = renderRetry
               ? renderRetry.action === 'fail'
-              : taskAttempts
-              ? taskAttempts >= maxAttempts.maxTaskAttempts
+              : attemptCount
+              ? attemptCount >= maxAttempts.maxTaskAttempts
               : true;
             eventLog.logError(failedToExecuteErr);
 
@@ -820,8 +825,12 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
             if (renderRetry?.action === 'reschedule') {
               return { runAt: renderRetry.runAt, state: renderRetry.state };
             }
-            if (renderRetry?.action === 'fail') {
-              // Ends the task now instead of spending its remaining attempts.
+            if (
+              renderRetry?.action === 'fail' ||
+              (isLastAttempt && attemptCount > (taskAttempts ?? 0))
+            ) {
+              // Ends the task now. Task Manager's own count may have restarted at a reschedule, and
+              // would otherwise run a report that has used its attempts.
               throwUnrecoverableError(failedToExecuteErr);
             }
 
