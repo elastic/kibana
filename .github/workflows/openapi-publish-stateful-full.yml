@@ -1,0 +1,74 @@
+# Publishes kibana-full.yaml: kibana.yaml with the placeholder Dashboards operations replaced by
+# the full ones generated from https://github.com/elastic/dashboards-api-spec.
+# Remove this workflow, and oas_docs/scripts/merge_dashboards_oas.js, once kibana.yaml carries
+# the full schemas. See https://github.com/elastic/kibana/issues/266195
+name: OpenAPI publish (stateful, full)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'oas_docs/output/kibana.yaml'
+      - 'oas_docs/scripts/merge_dashboards_oas.js'
+      - '.github/workflows/openapi-publish-stateful-full.yml'
+  # The Dashboards spec lives in its own repo. That repo can send a `dashboards-api-spec-updated`
+  # repository_dispatch event to publish right away, and the daily run catches up otherwise.
+  repository_dispatch:
+    types: [dashboards-api-spec-updated]
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: openapi-publish-stateful-full
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  DASHBOARDS_REPO_PATH: dashboards-api-spec
+  FULL_SPEC_PATH: oas_docs/output/kibana-full.yaml
+
+jobs:
+  publish:
+    # The object key uses the branch name, so only main may publish.
+    if: github.repository == 'elastic/kibana' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '20'
+
+      - name: Check out the Dashboards API spec
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: elastic/dashboards-api-spec
+          ref: main
+          path: ${{ env.DASHBOARDS_REPO_PATH }}
+          persist-credentials: false
+
+      - name: Generate the Dashboards API spec
+        working-directory: ${{ env.DASHBOARDS_REPO_PATH }}
+        run: |
+          npm ci --omit=dev --silent
+          mkdir -p generated
+          node scripts/filter-openapi.mjs
+
+      - name: Merge the Dashboards API spec into kibana.yaml
+        run: |
+          NODE_PATH="$GITHUB_WORKSPACE/$DASHBOARDS_REPO_PATH/node_modules" node oas_docs/scripts/merge_dashboards_oas.js \
+            oas_docs/output/kibana.yaml "$DASHBOARDS_REPO_PATH/generated/dashboards-openapi.yaml" "$FULL_SPEC_PATH"
+
+      - uses: elastic/docs-actions/openapi/lint@v1
+        with:
+          spec-path: ${{ env.FULL_SPEC_PATH }}
+
+      - uses: elastic/docs-actions/openapi/upload@v1
+        with:
+          spec-path: ${{ env.FULL_SPEC_PATH }}
+          spec-name: kibana-full
