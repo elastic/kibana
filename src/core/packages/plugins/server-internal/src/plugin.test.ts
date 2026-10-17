@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContainerModule } from 'inversify';
+import { ContainerModule, type Container } from 'inversify';
 import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -22,7 +22,8 @@ import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import type { PluginManifest } from '@kbn/core-plugins-server';
 import { PluginType } from '@kbn/core-base-common';
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
-import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
+import { OnSetup, OnStart, PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
+import { CoreInjectionService } from '@kbn/core-di-internal';
 import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-server';
 import { createRuntimePluginContractResolverMock } from './test_helpers';
 import { PluginWrapper } from './plugin';
@@ -731,4 +732,74 @@ describe('#getConfigSchema()', () => {
       `"Configuration schema expected to be an instance of Type"`
     );
   });
+});
+
+test('plugin stop leaves plugin tokens resolvable for in-flight tasks and SML', async () => {
+  // alerting_v2 is module-only. PluginWrapper.stop() unbinds the plugin
+  // container while Task Manager can still be running (it is a dependency, so
+  // it stops later) and while SML still holds the OnSetup container.
+  const injection = new CoreInjectionService();
+  const injectionSetup = injection.setup();
+  const injectionStart = injection.start();
+  const dispatcherToken = Symbol.for('alerting_v2.DispatcherServiceInternal');
+  const settingsToken = Symbol.for('alerting_v2.SettingsService');
+
+  let capturedInjection: { fork: () => Container } | undefined;
+  let smlContainer: Container | undefined;
+
+  const manifest = createPluginManifest();
+  const opaqueId = Symbol('alertingVTwo');
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-module',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext({
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo,
+      nodeInfo,
+    }),
+  });
+
+  mockContainerModuleCallback.mockImplementationOnce(({ bind }) => {
+    bind(dispatcherToken).toConstantValue('dispatcher');
+    bind(settingsToken).toConstantValue('settings');
+    bind(OnSetup).toConstantValue((container: Container) => {
+      smlContainer = container;
+    });
+    bind(OnStart).toConstantValue((container: Container) => {
+      capturedInjection = container.get(CoreStart('injection'));
+    });
+    bind(Setup).toConstantValue({});
+    bind(Start).toConstantValue({ ok: true });
+  });
+
+  await plugin.init();
+  plugin.setup(
+    createPluginSetupContext({
+      deps: { ...coreInternalLifecycleMock.createInternalSetup(), injection: injectionSetup },
+      plugin,
+      runtimeResolver,
+    }),
+    {}
+  );
+  plugin.start(
+    createPluginStartContext({
+      deps: { ...coreInternalLifecycleMock.createInternalStart(), injection: injectionStart },
+      plugin,
+      runtimeResolver,
+    }),
+    {}
+  );
+
+  const inFlightFork = capturedInjection!.fork();
+  expect(inFlightFork.get(dispatcherToken)).toBe('dispatcher');
+  expect(smlContainer!.get(settingsToken)).toBe('settings');
+
+  await plugin.stop();
+
+  expect(smlContainer!.get(settingsToken)).toBe('settings');
+  expect(inFlightFork.get(dispatcherToken)).toBe('dispatcher');
+  expect(capturedInjection!.fork().get(dispatcherToken)).toBe('dispatcher');
 });
