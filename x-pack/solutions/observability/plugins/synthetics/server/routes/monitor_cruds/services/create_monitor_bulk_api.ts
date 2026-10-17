@@ -191,7 +191,8 @@ export class CreateMonitorBulkAPI {
       const validation = validateMonitor(
         normalizedMonitor,
         this.routeContext.spaceId,
-        this.routeContext.server.cloud?.isServerlessEnabled
+        this.routeContext.server.cloud?.isServerlessEnabled,
+        { checkInlineScript: true }
       );
       if (!validation.valid || !validation.decodedMonitor) {
         throw bulkCreateValidationError(

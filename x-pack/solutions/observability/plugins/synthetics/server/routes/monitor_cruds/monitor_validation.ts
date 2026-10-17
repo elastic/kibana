@@ -38,6 +38,7 @@ import {
   monitorTypeRequiresPrivateLocations,
 } from '../../../common/utils/monitor_location_support';
 import { privateLocationCoversAllMonitorSpaces } from './monitor_locations_utils';
+import { getInlineScriptError } from './validate_inline_script';
 import {
   APIFieldsCodec,
   BrowserFieldsCodec,
@@ -100,11 +101,14 @@ const getApiServerlessValidationError = (
  * Validates monitor fields with respect to the relevant Codec identified by object's 'type' property.
  * @param monitorFields {MonitorFields} The mixed type representing the possible monitor payload from UI.
  * @param spaceId
+ * @param checkInlineScript Rejects browser scripts that cannot run. Set on save paths only: the
+ * saved object migrations also call this, and existing monitors must still migrate.
  */
 export function validateMonitor(
   monitorFields: MonitorFields,
   spaceId: string,
-  isServerless = false
+  isServerless = false,
+  { checkInlineScript = false }: { checkInlineScript?: boolean } = {}
 ): ValidationResult {
   const { [ConfigKey.MONITOR_TYPE]: monitorType, [ConfigKey.KIBANA_SPACES]: kSpaces } =
     monitorFields;
@@ -285,6 +289,18 @@ export function validateMonitor(
         }),
         payload: monitorFields,
       };
+    }
+
+    if (checkInlineScript && monitorType === MonitorTypeEnum.BROWSER && inlineScript) {
+      const scriptError = getInlineScriptError(inlineScript);
+      if (scriptError) {
+        return {
+          valid: false,
+          reason: INVALID_INLINE_SCRIPT_ERROR,
+          details: scriptError,
+          payload: monitorFields,
+        };
+      }
     }
 
     if (
@@ -669,6 +685,13 @@ export function validateLocation(
     return EMPTY_LOCATION_ERROR;
   }
 }
+
+const INVALID_INLINE_SCRIPT_ERROR = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidInlineScriptError',
+  {
+    defaultMessage: 'Invalid browser monitor script',
+  }
+);
 
 export const INVALID_CONFIGURATION_ERROR = i18n.translate(
   'xpack.synthetics.server.monitors.invalidConfigurationError',

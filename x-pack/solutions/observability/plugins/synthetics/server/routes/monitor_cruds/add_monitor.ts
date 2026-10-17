@@ -119,7 +119,8 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       const validationResult = validateMonitor(
         monitorWithDefaults,
         spaceId,
-        server.cloud?.isServerlessEnabled
+        server.cloud?.isServerlessEnabled,
+        { checkInlineScript: true }
       );
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {

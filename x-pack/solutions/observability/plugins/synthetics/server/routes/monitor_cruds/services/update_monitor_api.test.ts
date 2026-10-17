@@ -307,11 +307,63 @@ describe('UpdateMonitorAPI', () => {
       expect(result.survivors).toHaveLength(1);
       expect(validateMonitor).toHaveBeenCalledWith(
         expect.objectContaining({ [ConfigKey.URLS]: 'https://new.example.com' }),
-        'default'
+        'default',
+        undefined,
+        { checkInlineScript: false }
       );
       const persisted = result.survivors[0].monitorWithRevision as Record<string, unknown>;
       expect(persisted[ConfigKey.URLS]).toBe('https://new.example.com');
       expect(persisted).not.toHaveProperty('url');
+    });
+
+    describe('inline script check', () => {
+      const brokenScript = 'step("x", async () => {{{ this is not js';
+
+      it('checks the inline script when it changes', async () => {
+        const { validateMonitor } = jest.requireMock('../monitor_validation');
+        const { routeContext, mocks } = createMockRouteContext();
+        mocks.findDecryptedMonitors.mockResolvedValue([
+          mockDecryptedMonitor({
+            attributes: { type: 'browser', [ConfigKey.SOURCE_INLINE]: 'step("a", async () => {})' },
+          }),
+        ]);
+
+        const api = new UpdateMonitorAPI(routeContext);
+        const result = await api.execute({
+          updates: updatesFor(['mon-1'], {
+            [ConfigKey.SOURCE_INLINE]: 'step("b", async () => {})',
+          }),
+        });
+
+        expect(result.perIdErrors).toEqual({});
+        expect(validateMonitor).toHaveBeenCalledWith(
+          expect.objectContaining({ [ConfigKey.SOURCE_INLINE]: 'step("b", async () => {})' }),
+          'default',
+          undefined,
+          { checkInlineScript: true }
+        );
+      });
+
+      it('does not check an unchanged script, so a legacy broken monitor can still be disabled', async () => {
+        const { validateMonitor } = jest.requireMock('../monitor_validation');
+        const { routeContext, mocks } = createMockRouteContext();
+        mocks.findDecryptedMonitors.mockResolvedValue([
+          mockDecryptedMonitor({
+            attributes: { type: 'browser', [ConfigKey.SOURCE_INLINE]: brokenScript },
+          }),
+        ]);
+
+        const api = new UpdateMonitorAPI(routeContext);
+        const result = await api.execute({ updates: updatesFor(['mon-1'], { enabled: false }) });
+
+        expect(result.perIdErrors).toEqual({});
+        expect(validateMonitor).toHaveBeenCalledWith(
+          expect.objectContaining({ [ConfigKey.SOURCE_INLINE]: brokenScript }),
+          'default',
+          undefined,
+          { checkInlineScript: false }
+        );
+      });
     });
   });
 

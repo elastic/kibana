@@ -143,7 +143,15 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         maintenanceWindows
       );
 
-      const validationResult = validateMonitor(editedMonitor as MonitorFields, spaceId);
+      // Only check a script that changed, so a monitor saved with a broken script can still be
+      // edited or disabled
+      const checkInlineScript =
+        (editedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE] !==
+        (normalizedPreviousMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE];
+
+      const validationResult = validateMonitor(editedMonitor as MonitorFields, spaceId, undefined, {
+        checkInlineScript,
+      });
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {
         const { reason: message, details, payload } = validationResult;
