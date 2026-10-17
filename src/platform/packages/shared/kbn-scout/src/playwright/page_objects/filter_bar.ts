@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Locator } from 'playwright/test';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
@@ -105,18 +106,31 @@ export class FilterBar {
     }
   }
 
+  /**
+   * Opens a filter pill's actions menu and clicks one of its items. While a search that can be
+   * cancelled is loading, pills render read-only and ignore clicks, so retry until the menu opens.
+   */
+  private async clickFilterMenuItem(pill: Locator, menuItemTestSubj: string) {
+    const menuItem = this.page.testSubj.locator(menuItemTestSubj);
+    await expect(async () => {
+      if (!(await menuItem.isVisible())) {
+        await pill.click();
+      }
+      await expect(menuItem).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 30_000 });
+    await menuItem.click();
+  }
+
   async removeAllFilters() {
     while ((await this.getFilterCount()) > 0) {
       const [filter] = await this.page.testSubj.locator('~filter').all();
-      await filter.click();
-      await this.page.testSubj.click('deleteFilter');
+      await this.clickFilterMenuItem(filter, 'deleteFilter');
     }
   }
 
   async removeFilter(field: string) {
     const filterBadge = this.page.testSubj.locator(`~filter & ~filter-key-${field}`);
-    await filterBadge.click();
-    await this.page.testSubj.click('deleteFilter');
+    await this.clickFilterMenuItem(filterBadge, 'deleteFilter');
   }
 
   async getFilterCount(): Promise<number> {
@@ -139,18 +153,20 @@ export class FilterBar {
   }
 
   async toggleFilterEnabled(field: string) {
-    await this.page.testSubj.click(`~filter & ~filter-key-${field}`);
-    await this.page.testSubj.click('disableFilter');
+    const pill = this.page.testSubj.locator(`~filter & ~filter-key-${field}`);
+    await this.clickFilterMenuItem(pill, 'disableFilter');
   }
 
   async toggleFilterPinned(field: string) {
-    await this.page.testSubj.click(`~filter & ~filter-key-${field}`);
-    await this.page.testSubj.click('pinFilter');
+    const pill = this.page.testSubj.locator(`~filter & ~filter-key-${field}`);
+    await this.clickFilterMenuItem(pill, 'pinFilter');
   }
 
   async clickEditFilter(field: string, value: string) {
-    await this.page.testSubj.click(`~filter & ~filter-key-${field} & ~filter-value-${value}`);
-    await this.page.testSubj.click('editFilter');
+    const pill = this.page.testSubj.locator(
+      `~filter & ~filter-key-${field} & ~filter-value-${value}`
+    );
+    await this.clickFilterMenuItem(pill, 'editFilter');
 
     const filterEditor = this.page.getByRole('dialog').filter({ hasText: 'Edit filter' });
     await filterEditor.waitFor({ state: 'visible' });
@@ -171,8 +187,8 @@ export class FilterBar {
   }
 
   async toggleFilterNegated(field: string) {
-    await this.page.testSubj.click(`~filter & ~filter-key-${field}`);
-    await this.page.testSubj.click('negateFilter');
+    const pill = this.page.testSubj.locator(`~filter & ~filter-key-${field}`);
+    await this.clickFilterMenuItem(pill, 'negateFilter');
   }
 
   async hasFilterWithId(
@@ -194,8 +210,8 @@ export class FilterBar {
   }
 
   async clickEditFilterById(id: string) {
-    await this.page.testSubj.click(`~filter & ~filter-id-${id}`);
-    await this.page.testSubj.click('editFilter');
+    const pill = this.page.testSubj.locator(`~filter & ~filter-id-${id}`);
+    await this.clickFilterMenuItem(pill, 'editFilter');
   }
 
   async getFilterEditorPreview(): Promise<string> {

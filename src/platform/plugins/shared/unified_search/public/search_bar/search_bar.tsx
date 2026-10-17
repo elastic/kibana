@@ -51,6 +51,7 @@ import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
 import type { QueryBarTopRowProps, ShowDatePicker } from '../query_string_input/query_bar_top_row';
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
+import { isSearchLocked } from '../query_string_input/is_search_locked';
 import { FilterBar, FilterItems } from '../filter_bar';
 import { searchBarStyles } from './search_bar.styles';
 import { QuerySubmitTrigger } from './query_submit_metadata';
@@ -684,6 +685,11 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     const { isBackgroundSearchEnabled, session } = this.services.data.search;
     const isESQLQuery = isOfAggregateQueryType(query);
     const isScreenshotMode = this.props.isScreenshotMode === true;
+    // The query input stays editable: changing it doesn't emit new state until it is submitted
+    const isLocked = isSearchLocked({
+      isLoading: this.props.isLoading,
+      onCancel: this.props.onCancel,
+    });
     const styles = searchBarStyles(theme, isESQLQuery);
     const cssStyles = [
       styles.uniSearchBar,
@@ -750,6 +756,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
         showSaveQuery={this.props.showSaveQuery}
         showSavedQueryControls={this.props.showSavedQueryControls}
         isDisabled={this.props.isDisabled}
+        isLocked={isLocked}
         buttonProps={{ size: this.shouldShowDatePickerAsBadge() ? 's' : 'm' }}
         indexPatterns={this.props.indexPatterns}
         timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
@@ -779,7 +786,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
-          readOnly={this.props.isDisabled}
+          readOnly={this.props.isDisabled || isLocked}
           suggestionsAbstraction={this.props.suggestionsAbstraction}
         />
       ) : (
@@ -791,7 +798,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
-          isDisabled={this.props.isDisabled}
+          isDisabled={this.props.isDisabled || isLocked}
           data-test-subj="unifiedFilterBar"
           prepend={this.props.prependFilterBar}
           suggestionsAbstraction={this.props.suggestionsAbstraction}

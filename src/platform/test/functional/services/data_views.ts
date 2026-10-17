@@ -74,7 +74,16 @@ export class DataViewsService extends FtrService {
     hasTimeField = false,
     changeTimestampField,
   }: DataViewOptions) {
-    await this.testSubjects.click('*dataView-switch-link');
+    // The switcher is disabled while a search that can be cancelled is loading, e.g. right after
+    // navigating to Discover, and a click on a disabled button is silently ignored. The search can
+    // start just after the switcher was found enabled, so retry until the picker has opened.
+    await this.retry.try(async () => {
+      if (!(await this.testSubjects.exists('changeDataViewPopover'))) {
+        await this.testSubjects.waitForEnabled('*dataView-switch-link');
+        await this.testSubjects.click('*dataView-switch-link');
+      }
+      await this.testSubjects.existOrFail('changeDataViewPopover', { timeout: 5_000 });
+    });
     await this.testSubjects.click('dataview-create-new');
     await this.create({ name, adHoc, hasTimeField, changeTimestampField });
   }

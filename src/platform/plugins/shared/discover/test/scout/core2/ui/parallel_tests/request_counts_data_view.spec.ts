@@ -160,6 +160,8 @@ spaceTest.describe(
       async ({ pageObjects, network }) => {
         await pageObjects.queryBar.setQuery('bytes > 1000');
         await pageObjects.discover.submitQuery();
+        // The date picker is locked while the submitted query is loading
+        await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.datePicker.setAbsoluteRange({
           from: 'Sep 21, 2015 @ 06:31:44.000',
           to: 'Sep 23, 2015 @ 00:00:00.000',

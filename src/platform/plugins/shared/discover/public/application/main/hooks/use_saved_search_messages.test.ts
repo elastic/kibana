@@ -10,6 +10,7 @@
 import {
   checkHitCount,
   sendCompleteMsg,
+  sendCancelledMsg,
   sendErrorMsg,
   sendErrorTo,
   sendLoadingMsg,
@@ -23,6 +24,8 @@ import { BehaviorSubject } from 'rxjs';
 import type {
   DataDocumentsMsg,
   DataMainMsg,
+  DataTotalHitsMsg,
+  SavedSearchData,
 } from '../state_management/discover_data_state_container';
 import { filter } from 'rxjs';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
@@ -190,5 +193,54 @@ describe('test useSavedSearch message generators', () => {
       done();
     });
     checkHitCount(main$, 0);
+  });
+
+  describe('sendCancelledMsg', () => {
+    const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    const query = { esql: 'from foo' };
+
+    const createDataSubjects = (fetchStatus: FetchStatus): SavedSearchData => ({
+      main$: new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.LOADING }),
+      documents$: new BehaviorSubject<DataDocumentsMsg>({ fetchStatus, query, result: records }),
+      totalHits$: new BehaviorSubject<DataTotalHitsMsg>({ fetchStatus, result: 42 }),
+    });
+
+    test.each([FetchStatus.LOADING, FetchStatus.PARTIAL])(
+      'promotes %s to COMPLETE and keeps the existing values',
+      (fetchStatus) => {
+        const data = createDataSubjects(fetchStatus);
+
+        sendCancelledMsg(data);
+
+        expect(data.documents$.getValue()).toEqual({
+          fetchStatus: FetchStatus.COMPLETE,
+          query,
+          result: records,
+        });
+        expect(data.documents$.getValue().error).toBeUndefined();
+        expect(data.totalHits$.getValue()).toEqual({
+          fetchStatus: FetchStatus.COMPLETE,
+          result: 42,
+        });
+        // main$ is settled by fetchAll once documents$ and totalHits$ are terminal
+        expect(data.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+      }
+    );
+
+    test.each([FetchStatus.COMPLETE, FetchStatus.ERROR, FetchStatus.UNINITIALIZED])(
+      'leaves %s untouched',
+      (fetchStatus) => {
+        const data = createDataSubjects(fetchStatus);
+        const documentsValues: DataDocumentsMsg[] = [];
+        const totalHitsValues: DataTotalHitsMsg[] = [];
+        data.documents$.subscribe((value) => documentsValues.push(value));
+        data.totalHits$.subscribe((value) => totalHitsValues.push(value));
+
+        sendCancelledMsg(data);
+
+        expect(documentsValues).toHaveLength(1);
+        expect(totalHitsValues).toHaveLength(1);
+      }
+    );
   });
 });

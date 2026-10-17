@@ -132,9 +132,9 @@ export interface DiscoverDataStateContainer {
   reset: () => void;
 
   /**
-   * cancels the running queries
+   * cancels the running queries, by default as an explicit user cancellation
    */
-  cancel: () => void;
+  cancel: (reason?: AbortReason) => void;
 
   /**
    * gets active AbortController for running queries
@@ -500,6 +500,7 @@ export function getDataStateContainer({
           }
 
           abortController = new AbortController();
+          const fetchAbortController = abortController;
 
           const query = getCurrentTab().appState.query;
           const isEsqlQuery = isOfAggregateQueryType(query);
@@ -556,6 +557,7 @@ export function getDataStateContainer({
             ...commonFetchParams,
             reset: options.reset,
             abortController,
+            isActiveFetch: () => abortController === fetchAbortController,
             onFetchRecordsComplete: async () => {
               const { profileAppStateDefaults: currentProfileAppStateDefaults } = getCurrentTab();
 

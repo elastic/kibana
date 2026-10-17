@@ -643,6 +643,93 @@ describe('QueryBarTopRowTopRow', () => {
     });
   });
 
+  describe('while a cancellable query is loading', () => {
+    const renderTopRow = (props: { isLoading: boolean; onCancel?: () => void }) =>
+      render(
+        wrapQueryBarTopRowInContext({
+          query: kqlQuery,
+          isDirty: false,
+          indexPatterns: [stubIndexPattern],
+          timeHistory: mockTimeHistory,
+          dateRangeFrom: 'now-15m',
+          dateRangeTo: 'now',
+          showDatePicker: true,
+          showAddFilter: true,
+          filters: [],
+          onFiltersUpdated: noop,
+          ...props,
+        })
+      );
+
+    it('locks the date picker and add filter, but not the query input or cancel', async () => {
+      renderTopRow({ isLoading: true, onCancel: jest.fn() });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('dateRangePickerControlButton')).toBeDisabled();
+      });
+      expect(screen.getByTestId('dateRangePickerPreviousButton')).toBeDisabled();
+      expect(screen.getByTestId('dateRangePickerNextButton')).toBeDisabled();
+      expect(screen.getByTestId('addFilter')).toBeDisabled();
+      expect(screen.getByTestId('queryCancelButton')).toBeEnabled();
+      expect(screen.getByTestId('unifiedQueryInput').querySelector('textarea')).toBeEnabled();
+    });
+
+    it('locks the legacy date picker as well', async () => {
+      useNewDateRangePickerFlag = false;
+      renderTopRow({ isLoading: true, onCancel: jest.fn() });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('superDatePickerToggleQuickMenuButton')).toBeDisabled();
+      });
+      expect(screen.getByTestId('addFilter')).toBeDisabled();
+    });
+
+    it('unlocks the date picker and add filter once the query has settled', async () => {
+      const { rerender } = renderTopRow({ isLoading: true, onCancel: jest.fn() });
+      await waitFor(() => {
+        expect(screen.getByTestId('dateRangePickerControlButton')).toBeDisabled();
+      });
+
+      rerender(
+        wrapQueryBarTopRowInContext({
+          query: kqlQuery,
+          isDirty: false,
+          indexPatterns: [stubIndexPattern],
+          timeHistory: mockTimeHistory,
+          dateRangeFrom: 'now-15m',
+          dateRangeTo: 'now',
+          showDatePicker: true,
+          showAddFilter: true,
+          filters: [],
+          onFiltersUpdated: noop,
+          isLoading: false,
+          onCancel: jest.fn(),
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('dateRangePickerControlButton')).toBeEnabled();
+      });
+      expect(screen.getByTestId('dateRangePickerPreviousButton')).toBeEnabled();
+      expect(screen.getByTestId('dateRangePickerNextButton')).toBeEnabled();
+      expect(screen.getByTestId('addFilter')).toBeEnabled();
+    });
+
+    it.each([
+      { description: 'loading without a cancel handler', isLoading: true, onCancel: undefined },
+      { description: 'a cancel handler without loading', isLoading: false, onCancel: jest.fn() },
+    ])('does not lock with $description', async ({ isLoading, onCancel }) => {
+      renderTopRow({ isLoading, onCancel });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('dateRangePickerControlButton')).toBeEnabled();
+      });
+      expect(screen.getByTestId('dateRangePickerPreviousButton')).toBeEnabled();
+      expect(screen.getByTestId('dateRangePickerNextButton')).toBeEnabled();
+      expect(screen.getByTestId('addFilter')).toBeEnabled();
+    });
+  });
+
   it('Should NOT render cancel button when not loading', async () => {
     render(
       wrapQueryBarTopRowInContext({

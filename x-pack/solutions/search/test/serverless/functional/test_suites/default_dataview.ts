@@ -11,6 +11,7 @@ import type { RoleCredentials } from '../services';
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlSearchNavigation = getService('svlSearchNavigation');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const discover = getPageObject('discover');
@@ -37,7 +38,14 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     it('should show discover but with no data', async () => {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
       await testSubjects.existOrFail('discover-dataView-switch-link');
-      await testSubjects.click('discover-dataView-switch-link');
+      // The switcher is disabled while Discover's first search is loading, and a click on a
+      // disabled button is silently ignored, so retry until the picker has opened
+      await retry.try(async () => {
+        if (!(await testSubjects.exists('changeDataViewPopover'))) {
+          await testSubjects.click('discover-dataView-switch-link');
+        }
+        await testSubjects.existOrFail('changeDataViewPopover', { timeout: 5_000 });
+      });
       await testSubjects.existOrFail('indexPattern-add-field');
     });
 

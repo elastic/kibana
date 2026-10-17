@@ -75,6 +75,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Hit count must be inside the retry: the count query can produce the callout even
         // when the documents query fails, so asserting both ensures a real retry on failure.
         await retry.try(async () => {
+          // A failed attempt can leave its stalled search loading, which locks the filter bar.
+          // Cancel it and wait for the search to settle before touching the filters.
+          await retry.waitFor('the previous search to settle', async () => {
+            if (!(await testSubjects.exists('queryCancelButton'))) {
+              return true;
+            }
+            if (await testSubjects.isEnabled('queryCancelButton')) {
+              await testSubjects.click('queryCancelButton');
+            }
+            return false;
+          });
+
           // No-op on the first attempt, when there's no filter yet to remove.
           await filterBar.removeAllFilters().catch(() => {});
 
