@@ -114,6 +114,23 @@ const getPreviousKinds = (
   );
 };
 
+/** The ids of the markdown panels whose text changed, which may need another height. */
+const getChangedTextIds = (widgets: Widgets, originalWidgets: Widgets): Set<string> => {
+  const originalPanelsById = getPanelsById(originalWidgets);
+  return new Set(
+    [...getPanelsById(widgets).values()]
+      .filter((panel) => {
+        const originalPanel = originalPanelsById.get(panel.id);
+        return (
+          panel.type === MARKDOWN_EMBEDDABLE_TYPE &&
+          originalPanel?.type === MARKDOWN_EMBEDDABLE_TYPE &&
+          originalPanel.config.content !== panel.config.content
+        );
+      })
+      .map(({ id }) => id)
+  );
+};
+
 const byReadingOrder = (a: AttachmentPanel, b: AttachmentPanel): number =>
   a.grid.y - b.grid.y || a.grid.x - b.grid.x;
 
@@ -148,13 +165,15 @@ const aliasInstructions = (instructions: string, aliasById: ReadonlyMap<string, 
 /**
  * The dashboard with short ids. Panels new to their container (added or moved) are sent without a
  * grid and new sections without a row, since their placeholder positions are for the call to set.
- * Moved panels keep their size. Retyped panels name the kind their grid was sized for. Each changed
- * container lists the space its removed and moved-out panels left.
+ * Moved panels keep their size. Retyped panels name the kind their grid was sized for, and markdown
+ * panels whose text changed are flagged. Each changed container lists the space its removed and
+ * moved-out panels left.
  */
 const toLayoutRequest = (
   widgets: Widgets,
   originalWidgets: Widgets,
   previousKinds: ReadonlyMap<string, LayoutPanelKind>,
+  changedTextIds: ReadonlySet<string>,
   aliasById: ReadonlyMap<string, string>,
   instructions: string | undefined
 ): LayoutRequest => {
@@ -183,6 +202,7 @@ const toLayoutRequest = (
         ...(content !== undefined ? { content: content.slice(0, MAX_CONTENT_LENGTH) } : {}),
         ...getPlacementHint(panel, sectionId),
         ...(previousKind ? { retypedFrom: previousKind } : {}),
+        ...(changedTextIds.has(id) ? { textChanged: true as const } : {}),
       };
     });
   return {
@@ -226,7 +246,8 @@ interface ArrangeLayoutResult {
 /**
  * Sets the grid of every panel and section with the injected `arrangeLayout` model call, when the
  * user or the agent asked for a layout, a panel or section is new to its container, a panel was
- * removed, or a panel changed its kind and may need another size. The call gets the dashboard as it is, without the placeholder grids of new panels. When
+ * removed, or a panel changed its kind or markdown text and may need another size. The call gets the
+ * dashboard as it is, without the placeholder grids of new panels. When
  * the call fails, the dashboard keeps its current layout, and a failure is returned if a layout was
  * asked for.
  */
@@ -243,9 +264,11 @@ export const arrangeDashboardLayout = async ({
 
   const aliasById = createAliases(dashboardData.panels);
   const previousKinds = getPreviousKinds(dashboardData.panels, originalPanels);
+  const changedTextIds = getChangedTextIds(dashboardData.panels, originalPanels);
   if (
     instructions === undefined &&
     previousKinds.size === 0 &&
+    changedTextIds.size === 0 &&
     !hasContainerChanges(dashboardData.panels, originalPanels)
   ) {
     return { dashboardData };
@@ -254,6 +277,7 @@ export const arrangeDashboardLayout = async ({
     dashboardData.panels,
     originalPanels,
     previousKinds,
+    changedTextIds,
     aliasById,
     instructions
   );

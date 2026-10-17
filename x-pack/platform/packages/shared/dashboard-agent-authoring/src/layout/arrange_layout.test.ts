@@ -266,7 +266,7 @@ describe('arrangeDashboardLayout', () => {
     );
   });
 
-  it('sends the content of markdown panels', async () => {
+  it('sends the content of markdown panels and flags the ones whose text changed', async () => {
     const arrangeLayout = jest.fn(async () => ({
       plan: '',
       panels: [{ id: 'p1', x: 0, y: 0, w: 48, h: 6 }],
@@ -282,14 +282,17 @@ describe('arrangeDashboardLayout', () => {
     await arrangeDashboardLayout({
       originalPanels: [createMarkdownPanel('Short')],
       dashboardData: { title: 'Dashboard', panels: [createMarkdownPanel('Longer text')] },
-      instructions: 'the intro is longer now',
       arrangeLayout,
       logger,
     });
 
     const [[{ panels }]] = arrangeLayout.mock.calls as unknown as [[LayoutRequest]];
     expect(panels[0]).toEqual(
-      expect.objectContaining({ content: 'Longer text', grid: { x: 0, y: 0, w: 48, h: 4 } })
+      expect.objectContaining({
+        content: 'Longer text',
+        grid: { x: 0, y: 0, w: 48, h: 4 },
+        textChanged: true,
+      })
     );
   });
 

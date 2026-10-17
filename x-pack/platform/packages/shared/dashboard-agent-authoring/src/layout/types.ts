@@ -29,6 +29,8 @@ export interface LayoutPanel extends LayoutPanelKind {
   title?: string;
   /** Set for a panel whose kind changed in this call: the kind its current grid was sized for. */
   retypedFrom?: LayoutPanelKind;
+  /** Set for a markdown panel whose text changed in this call, since its grid was sized for the old text. */
+  textChanged?: true;
   /** The text of a markdown panel, or the config of a custom content panel, to size it by. */
   content?: string;
   /** Omitted for a panel added to its container in this call, which the layout call places. */
