@@ -7,20 +7,14 @@
 
 import type { StreamsUnit } from '@kbn/streams-schema';
 import type { Unit } from '../../../services/unit_repository';
-import type { DestinationType, DestinationViewModel } from './types';
+import type { DestinationViewModel, S3DestinationFormData } from './types';
 
 /** streams-spec elasticsearch.schema.yaml: an index containing `{{` is a template. */
 const INDEX_TEMPLATE_PATTERN = /\{\{/;
 
 export type UnitDestination = NonNullable<StreamsUnit.Configuration['destinations']>[number];
 
-const LOCAL_ELASTICSEARCH_TYPE: DestinationType = 'elasticsearch';
-
-const LOCAL_ELASTICSEARCH_TELEMETRY: UnitDestination['supported_telemetry'] = [
-  'logs',
-  'metrics',
-  'traces',
-];
+const ALL_TELEMETRY: UnitDestination['supported_telemetry'] = ['logs', 'metrics', 'traces'];
 
 export const getUnitDestinations = (unit: Unit): UnitDestination[] => unit.unit.destinations ?? [];
 
@@ -69,21 +63,33 @@ const readDestinationIndexPatterns = (destination: UnitDestination, index: strin
   return indexUsesTemplate(index) ? [] : [index];
 };
 
+/** Credentials (`access_key_id`, `secret_access_key`) are deliberately not read. */
 export const toDestinationViewModel = (
   destination: UnitDestination
 ): DestinationViewModel | undefined => {
-  if (destination.type !== LOCAL_ELASTICSEARCH_TYPE) {
-    return undefined;
+  const name = destination.name ?? destination.id;
+  switch (destination.type) {
+    case 'elasticsearch': {
+      const index = readDestinationIndex(destination);
+      return {
+        id: destination.id,
+        name,
+        type: 'elasticsearch',
+        index,
+        indexPatterns: readDestinationIndexPatterns(destination, index),
+      };
+    }
+    case 's3':
+      return {
+        id: destination.id,
+        name,
+        type: 's3',
+        bucket: readConfigString(destination, 'bucket') ?? '',
+        region: readConfigString(destination, 'region') ?? '',
+      };
+    default:
+      return undefined;
   }
-
-  const index = readDestinationIndex(destination);
-  return {
-    id: destination.id,
-    name: destination.name ?? destination.id,
-    type: LOCAL_ELASTICSEARCH_TYPE,
-    index,
-    indexPatterns: readDestinationIndexPatterns(destination, index),
-  };
 };
 
 export const getConfiguredDestinations = (unit: Unit): DestinationViewModel[] =>
@@ -116,8 +122,32 @@ export const createUnitDestination = ({
   return {
     id,
     name,
-    type: LOCAL_ELASTICSEARCH_TYPE,
-    supported_telemetry: LOCAL_ELASTICSEARCH_TELEMETRY,
+    type: 'elasticsearch',
+    supported_telemetry: ALL_TELEMETRY,
     config,
   };
 };
+
+/**
+ * S3 destination with the config entry names from the streams spec.
+ * Credentials are plain text in `config` until credential sealing lands.
+ */
+export const createS3UnitDestination = ({
+  id,
+  name,
+  region,
+  bucket,
+  accessKey,
+  secret,
+}: S3DestinationFormData & { id: string; name: string }): UnitDestination => ({
+  id,
+  name,
+  type: 's3',
+  supported_telemetry: ALL_TELEMETRY,
+  config: [
+    { name: 'bucket', value: bucket },
+    { name: 'region', value: region },
+    { name: 'access_key_id', value: accessKey },
+    { name: 'secret_access_key', value: secret },
+  ],
+});

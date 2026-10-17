@@ -6,11 +6,24 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { DestinationType } from './types';
 
 export const LOCAL_ELASTICSEARCH_LABEL = i18n.translate(
   'xpack.streams.destinations.localElasticsearchTypeLabel',
   { defaultMessage: 'Local Elasticsearch' }
 );
+
+export const AMAZON_S3_LABEL = i18n.translate('xpack.streams.destinations.s3TypeLabel', {
+  defaultMessage: 'Amazon S3',
+});
+
+const DESTINATION_TYPE_LABELS: Record<DestinationType, string> = {
+  elasticsearch: LOCAL_ELASTICSEARCH_LABEL,
+  s3: AMAZON_S3_LABEL,
+};
+
+export const getDestinationTypeLabel = (type: DestinationType): string =>
+  DESTINATION_TYPE_LABELS[type];
 
 export const DESTINATION_INDEX_LABEL = i18n.translate('xpack.streams.destinations.indexLabel', {
   defaultMessage: 'Index',

@@ -43,6 +43,8 @@ interface CreateDestinationModalProps {
     | 'elasticsearchIndexPatterns'
     | 'indexError'
     | 'indexPatternsError'
+    | 's3Form'
+    | 's3Errors'
     | 'canCreateDestination'
     | 'persistenceError'
     | 'isCreatingDestination'
@@ -51,6 +53,7 @@ interface CreateDestinationModalProps {
     | 'setCreateDestinationName'
     | 'setElasticsearchIndex'
     | 'setElasticsearchIndexPatterns'
+    | 'setS3Form'
     | 'validateCreationForm'
   >;
   onClose: () => void;
@@ -66,6 +69,8 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
     elasticsearchIndexPatterns,
     indexError,
     indexPatternsError,
+    s3Form,
+    s3Errors,
     canCreateDestination,
     persistenceError,
     isCreatingDestination,
@@ -74,6 +79,7 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
     setCreateDestinationName,
     setElasticsearchIndex,
     setElasticsearchIndexPatterns,
+    setS3Form,
     validateCreationForm,
   } = destinations;
   const modalTitleId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationModalTitle' });
@@ -193,9 +199,12 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
                           indexPatterns={elasticsearchIndexPatterns}
                           indexError={indexError}
                           indexPatternsError={indexPatternsError}
+                          s3Form={s3Form}
+                          s3Errors={s3Errors}
                           disabled={isCreatingDestination}
                           onIndexChange={setElasticsearchIndex}
                           onIndexPatternsChange={setElasticsearchIndexPatterns}
+                          onS3Change={setS3Form}
                           onBlur={validateCreationForm}
                         />
                       )}

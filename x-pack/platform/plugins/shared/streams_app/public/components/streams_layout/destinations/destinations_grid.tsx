@@ -26,7 +26,7 @@ import type {
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { ROW_ACTIONS_COLUMN_WIDTH, RowActionsMenu } from '../row_actions_menu';
-import { LOCAL_ELASTICSEARCH_LABEL } from './destination_type_config';
+import { getDestinationTypeLabel } from './destination_type_config';
 import type { DestinationViewModel } from './types';
 
 export type DestinationsGridStatus = 'loading' | 'ready' | 'unavailable';
@@ -73,7 +73,7 @@ export const getDestinationSortableValue = (
 ): string => {
   switch (columnId) {
     case 'type':
-      return LOCAL_ELASTICSEARCH_LABEL;
+      return getDestinationTypeLabel(destination.type);
     case 'name':
     default:
       return destination.name;
@@ -139,7 +139,7 @@ export const DestinationsGrid = ({
           </EuiButtonEmpty>
         );
       }
-      return <EuiBadge color="hollow">{LOCAL_ELASTICSEARCH_LABEL}</EuiBadge>;
+      return <EuiBadge color="hollow">{getDestinationTypeLabel(destination.type)}</EuiBadge>;
     },
     [destinations, onOpenDestination]
   );

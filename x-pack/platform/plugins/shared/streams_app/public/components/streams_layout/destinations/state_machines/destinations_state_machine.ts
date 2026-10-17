@@ -15,6 +15,7 @@ import { notifyUnitUpdated } from '../../notify_unit_updated';
 import { createDestinationId } from '../destination_helpers';
 import { canSubmitDestinationForm, getDestinationCreationFormErrors } from '../destination_form';
 import {
+  createS3UnitDestination,
   createUnitDestination,
   getConfiguredDestinations,
   getUnitDestinations,
@@ -28,8 +29,9 @@ import type {
   DestinationCreationFormErrors,
   DestinationStorageKind,
   DestinationViewModel,
+  S3DestinationFormData,
 } from '../types';
-import { EMPTY_ELASTICSEARCH_DESTINATION_FORM } from '../types';
+import { EMPTY_ELASTICSEARCH_DESTINATION_FORM, EMPTY_S3_DESTINATION_FORM } from '../types';
 import { removeComponentFromPipelines } from '../../../../services/unit_connections';
 import type { Unit } from '../../../../services/unit_repository';
 
@@ -88,6 +90,7 @@ export type DestinationsStateEvent =
   | { type: 'storageKind.select'; storageKind: DestinationStorageKind }
   | { type: 'destinationName.change'; destinationName: string }
   | { type: 'elasticsearch.change'; index?: string; indexPatterns?: string }
+  | { type: 's3.change'; changes: Partial<S3DestinationFormData> }
   | { type: 'creationForm.blur' }
   | { type: 'modal.openCreate'; associatedUnconfiguredNodeId?: string }
   | { type: 'modal.closeCreate' }
@@ -178,6 +181,7 @@ export const destinationsStateMachine = setup({
             storageKind: 'local_elasticsearch' as const,
             destinationName: '',
             elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM },
+            s3: { ...EMPTY_S3_DESTINATION_FORM },
           },
           formErrors: {},
           includeUnconfiguredNode: context.includeUnconfiguredNodeOnCreate,
@@ -284,28 +288,54 @@ export const destinationsStateMachine = setup({
         },
       };
     }),
+    updateS3Form: assign(({ context, event }) => {
+      if (event.type !== 's3.change' || !context.creationContext) {
+        return {};
+      }
+      const formData: DestinationCreationFormData = {
+        ...context.creationContext.formData,
+        s3: { ...context.creationContext.formData.s3, ...event.changes },
+      };
+      return {
+        creationContext: {
+          ...context.creationContext,
+          formData,
+          formErrors: getCreationFormErrors({
+            formData,
+            unitDefinition: context.unitDefinition,
+          }),
+        },
+      };
+    }),
     stageCreatedDestination: assign(({ context, event }) => {
       if (event.type !== 'destination.create' || !context.creationContext) {
         return {};
       }
-      const { destinationName, elasticsearch, storageKind } = context.creationContext.formData;
-      if (storageKind !== 'local_elasticsearch') {
-        return {};
-      }
+      const { destinationName, elasticsearch, s3, storageKind } = context.creationContext.formData;
       const name = destinationName.trim();
-      const index = elasticsearch.index.trim();
       const id = createDestinationId({
         name,
         existingIds: collectUnitComponentIds(context.unitDefinition.unit),
       });
-      const unitDestination = createUnitDestination({
-        id,
-        name,
-        index,
-        indexPatterns: indexUsesTemplate(index)
-          ? parseIndexPatterns(elasticsearch.indexPatterns)
-          : [],
-      });
+      const index = elasticsearch.index.trim();
+      const unitDestination =
+        storageKind === 'local_elasticsearch'
+          ? createUnitDestination({
+              id,
+              name,
+              index,
+              indexPatterns: indexUsesTemplate(index)
+                ? parseIndexPatterns(elasticsearch.indexPatterns)
+                : [],
+            })
+          : createS3UnitDestination({
+              id,
+              name,
+              region: s3.region.trim(),
+              bucket: s3.bucket.trim(),
+              accessKey: s3.accessKey.trim(),
+              secret: s3.secret.trim(),
+            });
       const destination = toDestinationViewModel(unitDestination);
       if (!destination) {
         return {};
@@ -521,6 +551,7 @@ export const destinationsStateMachine = setup({
             'storageKind.select': { actions: 'selectStorageKind' },
             'destinationName.change': { actions: 'updateDestinationName' },
             'elasticsearch.change': { actions: 'updateElasticsearchForm' },
+            's3.change': { actions: 'updateS3Form' },
             'creationForm.blur': { actions: 'validateCreationForm' },
             'destination.create': [
               {

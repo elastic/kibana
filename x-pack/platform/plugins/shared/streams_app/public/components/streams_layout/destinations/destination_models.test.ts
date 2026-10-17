@@ -8,6 +8,7 @@
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { getDestinationNameValidationError } from './destination_helpers';
 import {
+  createS3UnitDestination,
   createUnitDestination,
   getConfiguredDestinations,
   withUnitDestinations,
@@ -99,5 +100,50 @@ describe('destination models', () => {
       },
       { name: 'index_patterns', value: ['logs-*-*'] },
     ]);
+  });
+
+  describe('S3', () => {
+    const s3Destination = createS3UnitDestination({
+      id: 's3-archive',
+      name: 'S3 archive',
+      region: 'eu-west-1',
+      bucket: 'demo-bucket',
+      accessKey: 'AKIAEXAMPLEKEYID',
+      secret: 'example-secret-access-key',
+    });
+
+    it('writes the bucket, region, access_key_id and secret_access_key config entries', () => {
+      expect(s3Destination).toEqual({
+        id: 's3-archive',
+        name: 'S3 archive',
+        type: 's3',
+        supported_telemetry: ['logs', 'metrics', 'traces'],
+        config: [
+          { name: 'bucket', value: 'demo-bucket' },
+          { name: 'region', value: 'eu-west-1' },
+          { name: 'access_key_id', value: 'AKIAEXAMPLEKEYID' },
+          { name: 'secret_access_key', value: 'example-secret-access-key' },
+        ],
+      });
+    });
+
+    it('maps S3 destinations without their credentials', () => {
+      const [, s3] = getConfiguredDestinations(
+        withUnitDestinations(storedUnit, [...storedUnit.unit.destinations, s3Destination])
+      );
+
+      expect(s3).toEqual({
+        id: 's3-archive',
+        name: 'S3 archive',
+        type: 's3',
+        bucket: 'demo-bucket',
+        region: 'eu-west-1',
+      });
+      expect(Object.keys(s3)).not.toContain('secret_access_key');
+      expect(Object.keys(s3)).not.toContain('access_key_id');
+      expect(Object.keys(s3)).not.toContain('accessKey');
+      expect(JSON.stringify(s3)).not.toContain('example-secret-access-key');
+      expect(JSON.stringify(s3)).not.toContain('AKIAEXAMPLEKEYID');
+    });
   });
 });

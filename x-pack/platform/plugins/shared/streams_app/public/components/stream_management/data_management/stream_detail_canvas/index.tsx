@@ -774,7 +774,8 @@ function StreamsCanvasInner() {
   const flyoutDestination = flyoutName
     ? destinations.find((destination) => destination.id === flyoutName)
     : undefined;
-  const flyoutStreamName = flyoutDestination?.index ?? flyoutName;
+  const flyoutStreamName =
+    flyoutDestination?.type === 'elasticsearch' ? flyoutDestination.index : flyoutName;
 
   return (
     <div css={canvasColumnStyles}>
@@ -957,7 +958,7 @@ const buildConfiguredDestinationNode = (
       }),
   data: {
     destinationId: destination.id,
-    streamName: destination.index,
+    streamName: destination.type === 'elasticsearch' ? destination.index : undefined,
     title: destination.name,
     subtitle: hasConnectedSource
       ? undefined

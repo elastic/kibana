@@ -9,18 +9,20 @@ import type { DestinationNameValidationError } from './destination_helpers';
 
 /**
  * Destination storage choices shown in the create form.
- * Only `local_elasticsearch` is persisted today. Add a kind here, a fields
- * component, and a registry entry to introduce another type.
+ * Add a kind here, a fields component, and a registry entry to introduce another type.
  */
 export type DestinationStorageKind = 'local_elasticsearch' | 'external_storage';
 
 /** Unit destination types the UI can list and create. */
-export type DestinationType = 'elasticsearch';
+export type DestinationType = 'elasticsearch' | 's3';
 
-export interface DestinationViewModel {
+interface DestinationViewModelBase {
   id: string;
   name: string;
-  type: DestinationType;
+}
+
+export interface ElasticsearchDestinationViewModel extends DestinationViewModelBase {
+  type: 'elasticsearch';
   /** Elasticsearch `config` entry `index`. */
   index: string;
   /**
@@ -30,6 +32,15 @@ export interface DestinationViewModel {
   indexPatterns: string[];
 }
 
+/** Never carries credentials, so they can't reach the table or canvas. */
+export interface S3DestinationViewModel extends DestinationViewModelBase {
+  type: 's3';
+  bucket: string;
+  region: string;
+}
+
+export type DestinationViewModel = ElasticsearchDestinationViewModel | S3DestinationViewModel;
+
 /** Per-type form state. Each destination type owns its own slice. */
 export interface ElasticsearchDestinationFormData {
   index: string;
@@ -37,13 +48,23 @@ export interface ElasticsearchDestinationFormData {
   indexPatterns: string;
 }
 
+export interface S3DestinationFormData {
+  region: string;
+  bucket: string;
+  accessKey: string;
+  secret: string;
+}
+
 export interface DestinationCreationFormData {
   storageKind: DestinationStorageKind;
   destinationName: string;
   elasticsearch: ElasticsearchDestinationFormData;
+  s3: S3DestinationFormData;
 }
 
-export interface DestinationCreationFormErrors {
+export type S3DestinationFormErrors = Partial<Record<keyof S3DestinationFormData, 'required'>>;
+
+export interface DestinationCreationFormErrors extends S3DestinationFormErrors {
   destinationName?: DestinationNameValidationError;
   index?: 'required';
   indexPatterns?: 'required' | 'invalid';
@@ -52,4 +73,11 @@ export interface DestinationCreationFormErrors {
 export const EMPTY_ELASTICSEARCH_DESTINATION_FORM: ElasticsearchDestinationFormData = {
   index: '',
   indexPatterns: '',
+};
+
+export const EMPTY_S3_DESTINATION_FORM: S3DestinationFormData = {
+  region: '',
+  bucket: '',
+  accessKey: '',
+  secret: '',
 };
