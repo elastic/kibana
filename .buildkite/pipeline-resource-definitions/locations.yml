@@ -66,6 +66,8 @@ spec:
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-version-bump.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-vm-build-orchestrator.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-vm-images.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-workflow-step-schema-republish.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-workflow-step-schema-sync.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-ess/gen-ai-evals.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-defend-workflows.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-detection-engine.yml

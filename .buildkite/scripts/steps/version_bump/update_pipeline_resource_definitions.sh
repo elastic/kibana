@@ -14,6 +14,8 @@ FILES=(
   ".buildkite/pipeline-resource-definitions/kibana-es-snapshots.yml"
   ".buildkite/pipeline-resource-definitions/kibana-on-merge.yml"
   ".buildkite/pipeline-resource-definitions/kibana-scout-update-metadata.yml"
+  ".buildkite/pipeline-resource-definitions/kibana-workflow-step-schema-republish.yml"
+  ".buildkite/pipeline-resource-definitions/kibana-workflow-step-schema-sync.yml"
 )
 
 for file in "${FILES[@]}"; do
@@ -67,6 +69,29 @@ else
   ' "$scout_metadata" > "${scout_metadata}.tmp" && mv "${scout_metadata}.tmp" "$scout_metadata"
   if ! grep -q "branch: '${BRANCH}'" "$scout_metadata"; then
     echo "ERROR: Failed to insert ${BRANCH} schedule into kibana-scout-update-metadata.yml — 'branch: main' pattern not found" >&2
+    exit 1
+  fi
+fi
+
+echo "Adding ${BRANCH} daily schedule to kibana-workflow-step-schema-sync.yml"
+schema_sync=".buildkite/pipeline-resource-definitions/kibana-workflow-step-schema-sync.yml"
+if grep -q "branch: '${BRANCH}'" "$schema_sync"; then
+  echo "Schedule for ${BRANCH} already exists in kibana-workflow-step-schema-sync.yml, skipping"
+else
+  awk -v branch="$BRANCH" '
+    !done && /^          branch: main$/ {
+      print
+      print "        Daily (" branch "):"
+      print "          cronline: 0 0 * * * America/New_York"
+      print "          message: Daily workflow step schema sync"
+      print "          branch: \047" branch "\047"
+      done = 1
+      next
+    }
+    { print }
+  ' "$schema_sync" > "${schema_sync}.tmp" && mv "${schema_sync}.tmp" "$schema_sync"
+  if ! grep -q "branch: '${BRANCH}'" "$schema_sync"; then
+    echo "ERROR: Failed to insert ${BRANCH} schedule into kibana-workflow-step-schema-sync.yml — 'branch: main' pattern not found" >&2
     exit 1
   fi
 fi
