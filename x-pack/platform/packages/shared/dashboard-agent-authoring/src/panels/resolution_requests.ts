@@ -6,86 +6,104 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
-import type { PanelCreationRequest } from '../operations/panel_creation';
 import {
   findConfigPanelType,
   findPanelRenderer,
-  type EditPanelRequestInput,
+  getEditableEmbeddableTypes,
+  type PanelRequestContent,
   type PanelResolutionRequest,
+  type UpsertPanelContent,
 } from '.';
+import { isEsqlLensPanel } from './vis';
 
-/** Error for a panel that cannot be edited with a request. */
-export const getPanelEditError = ({ id, type }: AttachmentPanel): string => {
+/**
+ * Error for content that cannot edit the existing panel: it targets another kind, or the panel is
+ * a Lens panel not backed by ES|QL. Undefined when the content can edit the panel.
+ */
+export const getPanelEditError = (
+  content: UpsertPanelContent,
+  existingPanel: AttachmentPanel
+): string | undefined => {
+  const { id, type } = existingPanel;
+  const replaceHint = `To replace it with another kind of panel, remove "${id}" and add the new panel with a new id in the same call.`;
+  const renderer = findPanelRenderer(type);
+  if (renderer === 'lens' && !isEsqlLensPanel(existingPanel)) {
+    return `Panel "${id}" is a Lens panel that is not backed by ES|QL, so it cannot be edited. ${replaceHint}`;
+  }
+  if (getEditableEmbeddableTypes(content).includes(type)) {
+    return undefined;
+  }
+  if (renderer) {
+    return `Panel "${id}" is a ${renderer} panel. Edit it with source: "request", renderer: "${renderer}". ${replaceHint}`;
+  }
   const configPanelType = findConfigPanelType(type);
-  return configPanelType
-    ? `Panel "${id}" is a ${configPanelType.label} panel. Edit it with source: "config", type: "${configPanelType.type}".`
-    : `Panel "${id}" with type "${type}" is not supported for inline editing.`;
+  if (configPanelType) {
+    return `Panel "${id}" is a ${configPanelType.label} panel. Edit it with source: "config", type: "${configPanelType.type}". ${replaceHint}`;
+  }
+  return `Panel "${id}" with type "${type}" cannot be edited. ${replaceHint}`;
+};
+
+type ResolutionRequestResult = { request: PanelResolutionRequest } | { error: string };
+
+/** Maps request content for a new panel onto the resolution request for its renderer. */
+export const toCreationResolutionRequest = (
+  content: PanelRequestContent,
+  identifier: string
+): ResolutionRequestResult => {
+  if (content.renderer === 'custom_content') {
+    const { renderer, query, esql } = content;
+    if (query === undefined) {
+      return { error: `Panel "${identifier}" is new. Provide \`query\` to create it.` };
+    }
+    return { request: { identifier, renderer, nlQuery: query, esql: esql ?? undefined } };
+  }
+
+  const { renderer, query, index, esql, chartType } = content;
+  if (renderer !== 'vega' && chartType === undefined) {
+    return {
+      error: `Panel "${identifier}" is new. Provide \`chartType\` to create a Lens panel.`,
+    };
+  }
+  return { request: { identifier, renderer, nlQuery: query, index, esql, chartType } };
 };
 
 /**
- * Builds the resolution request for a request edit. Lens and Vega edits may
- * omit the renderer, which the existing panel then decides. Custom content
- * edits must name it: without it the edit is parsed as a Lens edit, which lacks
- * custom content's fields. An explicit renderer that disagrees with the panel
- * fails instead of being rewritten. This is the only place an edit's renderer is
- * decided; the resolvers trust the one on the request.
+ * Builds the resolution request for request content that edits a panel of the same kind (see
+ * `getPanelEditError`). Lens and Vega edits may omit the renderer, which the existing panel then
+ * decides. This is the only place an edit's renderer is decided; the resolvers trust the one on
+ * the request.
  */
 export const toEditResolutionRequest = (
-  panelInput: EditPanelRequestInput,
+  content: PanelRequestContent,
   existingPanel: AttachmentPanel
-): { request: PanelResolutionRequest } | { error: string } => {
+): ResolutionRequestResult => {
+  const base = { identifier: existingPanel.id, existingPanel };
+
+  if (content.renderer === 'custom_content') {
+    const { renderer, query, esql } = content;
+    if (query === undefined && esql === undefined) {
+      return {
+        error: `Panel "${existingPanel.id}" edit needs \`query\`, \`esql\`, or both.`,
+      };
+    }
+    return { request: { ...base, renderer, nlQuery: query, esql } };
+  }
+
   const renderer = findPanelRenderer(existingPanel.type);
-  if (!renderer) {
-    return { error: getPanelEditError(existingPanel) };
+  if (renderer !== 'lens' && renderer !== 'vega') {
+    throw new Error(`Panel "${existingPanel.id}" cannot be edited with a Lens or Vega request.`);
   }
-  if (panelInput.renderer && panelInput.renderer !== renderer) {
-    return {
-      error: `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited with renderer: "${panelInput.renderer}". Use renderer: "${renderer}".`,
-    };
-  }
-
-  const base = {
-    operationType: 'edit_panels' as const,
-    identifier: panelInput.panelId,
-    existingPanel,
-  };
-
-  if (panelInput.renderer === 'custom_content') {
-    const { query, esql } = panelInput;
-    return { request: { ...base, renderer: panelInput.renderer, nlQuery: query, esql } };
-  }
-  if (renderer === 'custom_content') {
-    return {
-      error: `Panel "${existingPanel.id}" is a custom content panel. Edit it with source: "request", renderer: "custom_content".`,
-    };
-  }
-
-  const { query, esql, chartType, preserveESQL } = panelInput;
+  const { query, index, esql, chartType, preserveESQL } = content;
   return {
     request: {
       ...base,
       renderer,
       nlQuery: query,
+      index,
       esql,
       chartType,
       preserveESQL,
-      applyChartRules: panelInput.renderer === 'vega' ? undefined : panelInput.applyChartRules,
+      applyChartRules: content.renderer === 'vega' ? undefined : content.applyChartRules,
     },
   };
-};
-
-/** Maps a new-panel request input onto the resolution request for its renderer. */
-export const toCreationResolutionRequest = ({
-  operationType,
-  panelInput,
-}: PanelCreationRequest): PanelResolutionRequest => {
-  const { query, esql } = panelInput;
-  const base = { operationType, identifier: query, nlQuery: query, esql };
-
-  if (panelInput.renderer === 'custom_content') {
-    return { ...base, renderer: panelInput.renderer };
-  }
-
-  const { renderer, index, chartType } = panelInput;
-  return { ...base, renderer, index, chartType };
 };

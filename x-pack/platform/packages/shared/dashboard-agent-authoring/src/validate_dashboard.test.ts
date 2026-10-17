@@ -187,7 +187,7 @@ describe('discardInvalidChanges', () => {
     expect(result.discardedPanelIds).toEqual(new Set(['a']));
   });
 
-  it('ignores invalid panels the operations did not change, including ones moved into a section', () => {
+  it('ignores invalid panels the change did not touch, including ones moved into a section', () => {
     const untouchedPanel = createInvalidPanel('a');
     const movedPanel = createInvalidPanel('b');
     const originalDashboardData = { title: 'Dashboard', panels: [untouchedPanel, movedPanel] };
@@ -205,7 +205,7 @@ describe('discardInvalidChanges', () => {
     expect(result).toEqual({ dashboardData, failures: [], discardedPanelIds: new Set() });
   });
 
-  it('ignores invalid panels and controls the operations copied without changing them', () => {
+  it('ignores invalid panels and controls the change copied without editing them', () => {
     const originalDashboardData = {
       title: 'Dashboard',
       panels: [createInvalidPanel('a')],
@@ -239,7 +239,7 @@ describe('discardInvalidChanges', () => {
     expect(result.discardedPanelIds).toEqual(new Set(['a']));
   });
 
-  it('names a panel by its title in failures', () => {
+  it('names a panel by its id in failures', () => {
     const result = discardInvalidChanges({
       originalDashboardData: { title: 'Dashboard', panels: [] },
       dashboardData: {
@@ -249,7 +249,7 @@ describe('discardInvalidChanges', () => {
       validator,
     });
 
-    expect(result.failures).toEqual([expect.objectContaining({ identifier: '"Errors" (b)' })]);
+    expect(result.failures).toEqual([expect.objectContaining({ identifier: 'b' })]);
   });
 
   it('drops invalid new controls and keeps invalid controls that already existed', () => {

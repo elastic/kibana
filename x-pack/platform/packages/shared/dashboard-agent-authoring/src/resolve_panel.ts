@@ -6,6 +6,7 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import { DASHBOARD_FAILURE_TYPES } from './failure_types';
 import type { DashboardFailure } from './utils';
 
 /**
@@ -30,9 +31,6 @@ export type PanelContentAttempt =
       failure: DashboardFailure;
     };
 
-/** Operations that can trigger inline panel resolution. */
-export type InlinePanelOperationType = 'add_section' | 'add_panels' | 'edit_panels';
-
 /** One-sentence note describing a chart authored during the current turn. */
 export interface PanelAuthoringNote {
   panelId: string;
@@ -45,21 +43,19 @@ export interface PanelAuthoringNote {
  * own payload (e.g. `panels/vis` adds the natural-language / ES|QL fields).
  */
 export interface PanelResolutionRequestBase {
-  operationType: InlinePanelOperationType;
   /** Human-facing identifier for failure attribution (panelId or the query). */
   identifier: string;
-  /** Present when editing an existing panel; `edit_panels` has checked it matches the renderer. */
+  /** Present when editing an existing panel; upsert has checked it matches the renderer. */
   existingPanel?: AttachmentPanel;
 }
 
 export const createPanelFailureResult = (
-  type: DashboardFailure['type'],
   identifier: string,
   error: string
 ): Extract<PanelContentAttempt, { type: 'failure' }> => ({
   type: 'failure',
   failure: {
-    type,
+    type: DASHBOARD_FAILURE_TYPES.upsertDashboard,
     identifier,
     error,
   },

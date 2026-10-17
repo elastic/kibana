@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import {
   ControlValuesSource,
   DEFAULT_DSL_OPTIONS_LIST_STATE,
@@ -21,6 +20,7 @@ import type { Logger } from '@kbn/logging';
 import { formatEsqlIdentifier } from '@kbn/esql-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { z } from '@kbn/zod/v4';
+import { getControlIds, getSectionsById, indexPanelsById } from './dashboard_state';
 import { DASHBOARD_FAILURE_TYPES } from './failure_types';
 import { getErrorMessage, type DashboardFailure } from './utils';
 import type { ControlFieldCapabilities, ResolveControlFieldCapabilities } from './types';
@@ -64,13 +64,9 @@ const dataControlInputFields = {
   ...controlLayoutFields,
 };
 
-const optionsListControlInputSchema = z.object({
-  type: z.literal(OPTIONS_LIST_CONTROL),
-  ...dataControlInputFields,
-});
-
-const rangeSliderControlInputSchema = z.object({
-  type: z.literal(RANGE_SLIDER_CONTROL),
+/** Options lists and range sliders take the same fields, so they share one schema. */
+const dataControlInputSchema = z.object({
+  type: z.enum([OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL]),
   ...dataControlInputFields,
 });
 
@@ -81,8 +77,7 @@ const timeSliderControlInputSchema = z.object({
 });
 
 export const controlInputSchema = z.discriminatedUnion('type', [
-  optionsListControlInputSchema,
-  rangeSliderControlInputSchema,
+  dataControlInputSchema,
   timeSliderControlInputSchema,
 ]);
 
@@ -124,7 +119,7 @@ const filterDuplicateTimeSliders = ({
     }
 
     failures.push({
-      type: DASHBOARD_FAILURE_TYPES.addControls,
+      type: DASHBOARD_FAILURE_TYPES.controls,
       identifier: `controls[${controlInputIndex}]`,
       error: 'A dashboard can contain at most one time_slider_control.',
     });
@@ -202,7 +197,7 @@ const recordControlFailure = ({
   fieldName: string;
   message: string;
 }) => {
-  const type = DASHBOARD_FAILURE_TYPES.addControls;
+  const type = DASHBOARD_FAILURE_TYPES.controls;
   const group = failures.find((failure) => failure.type === type && failure.error === message);
   if (group) {
     group.identifier = `${group.identifier}, ${fieldName}`;
@@ -349,9 +344,23 @@ const resolveControlFields = async ({
   return resolvedControls;
 };
 
-const buildStoredControl = (control: ControlInput): DashboardPinnedPanel => {
+/**
+ * Readable id the agent can repeat, e.g. "host.name-options-list" or "time-slider", with a numeric
+ * suffix when another panel, section, or control already uses it.
+ */
+const createControlId = (control: ControlInput, usedIds: Set<string>): string => {
+  const kind = control.type.replace(/_control$/, '').replace(/_/g, '-');
+  const baseId = control.type === TIME_SLIDER_CONTROL ? kind : `${control.field_name}-${kind}`;
+  let id = baseId;
+  for (let suffix = 2; usedIds.has(id); suffix++) {
+    id = `${baseId}-${suffix}`;
+  }
+  usedIds.add(id);
+  return id;
+};
+
+const buildStoredControl = (control: ControlInput, id: string): DashboardPinnedPanel => {
   const { type, width = 'medium', grow = true } = control;
-  const id = uuidv4();
 
   if (type === TIME_SLIDER_CONTROL) {
     const config = {
@@ -403,8 +412,8 @@ const buildStoredControl = (control: ControlInput): DashboardPinnedPanel => {
 };
 
 /**
- * Appends controls to the dashboard, leaving out duplicate time sliders and controls on fields
- * that cannot back them.
+ * Appends controls to the dashboard, leaving out duplicate time sliders and controls whose field
+ * cannot back them.
  */
 export const appendControls = async ({
   dashboardData,
@@ -437,9 +446,18 @@ export const appendControls = async ({
     return dashboardData;
   }
 
-  const newControls = controlsToAdd.map(buildStoredControl);
+  const usedIds = new Set([
+    ...indexPanelsById(dashboardData.panels).keys(),
+    ...getSectionsById(dashboardData).keys(),
+    ...getControlIds(dashboardData),
+  ]);
   return {
     ...dashboardData,
-    pinned_panels: [...existingControls, ...newControls],
+    pinned_panels: [
+      ...existingControls,
+      ...controlsToAdd.map((control) =>
+        buildStoredControl(control, createControlId(control, usedIds))
+      ),
+    ],
   };
 };
