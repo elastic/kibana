@@ -6,11 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import {
-  ATTACHMENT_REF_ACTOR,
-  type VersionedAttachment,
-} from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
@@ -20,25 +15,8 @@ import {
   type SmlAttachHttpResponse,
   type SmlAttachHttpResultItem,
 } from '../../../common/http_api/sml';
+import { createAttachmentPublicClient } from '../../services/attachments';
 import { AGENT_BUILDER_WRITE_SECURITY } from '../route_security';
-import { applyAttachmentRefsToRounds } from '../../services/conversation/client/migrate_attachments';
-
-const mergeAttachmentsById = (
-  latestAttachments: VersionedAttachment[],
-  stateManagerAttachments: VersionedAttachment[]
-) => {
-  const mergedAttachments = new Map<string, VersionedAttachment>();
-
-  for (const attachment of stateManagerAttachments) {
-    mergedAttachments.set(attachment.id, attachment);
-  }
-
-  for (const attachment of latestAttachments) {
-    mergedAttachments.set(attachment.id, attachment);
-  }
-
-  return Array.from(mergedAttachments.values());
-};
 
 export function registerInternalSmlRoutes({
   router,
@@ -73,16 +51,10 @@ export function registerInternalSmlRoutes({
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
         const esClient = (await ctx.core).elasticsearch.client;
         const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-        const conversationClient = await conversationsService.getScopedClient({ request });
 
-        const conversationForAttach = await conversationClient.get(conversationId);
-        if (conversationForAttach.rounds.length === 0) {
-          return response.badRequest({
-            body: {
-              message: `Conversation '${conversationId}' has no rounds — cannot attach SML items without an existing round`,
-            },
-          });
-        }
+        // Fail with 404 before resolving any SML item when the conversation does not exist.
+        const conversationClient = await conversationsService.getScopedClient({ request });
+        await conversationClient.get(conversationId);
 
         const resolvedItems = await agentBuilderSml.resolveSmlAttachItems({
           entryIds,
@@ -93,68 +65,55 @@ export function registerInternalSmlRoutes({
           logger,
         });
 
-        const stateManager = createAttachmentStateManager(conversationForAttach.attachments ?? [], {
-          getTypeDefinition: attachmentsService.getTypeDefinition,
+        // Each item is persisted through the attachment client so it lands in
+        // `conversation.attachments` with its `attachment_added` event, like any other
+        // attachment created over HTTP. Items are written sequentially: they target the same
+        // conversation document and a per-item write keeps one failure from discarding the rest.
+        const attachmentClient = createAttachmentPublicClient({
+          request,
+          conversationsService,
+          attachmentsService,
+          coreStart,
+          spaces: startDeps.spaces,
+          source: 'http_api',
         });
 
-        // Format the results for the HTTP API
-        const resultItems = await Promise.all(
-          resolvedItems.map(async (r): Promise<SmlAttachHttpResultItem> => {
-            if (!r.success) {
-              return {
-                success: false,
-                entry_id: r.entry_id,
-                attachment_type: r.attachment_type,
-                message: r.message,
-              };
-            }
+        const resultItems: SmlAttachHttpResultItem[] = [];
+        for (const r of resolvedItems) {
+          if (!r.success) {
+            resultItems.push({
+              success: false,
+              entry_id: r.entry_id,
+              attachment_type: r.attachment_type,
+              message: r.message,
+            });
+            continue;
+          }
 
-            try {
-              const added = await stateManager.add(r.attachment, ATTACHMENT_REF_ACTOR.system, {
-                request,
-                spaceId,
-                savedObjectsClient,
-              });
+          try {
+            const added = await attachmentClient.create({
+              conversationId,
+              type: r.attachment.type,
+              data: r.attachment.data,
+              origin: r.attachment.origin,
+              description: r.attachment.description,
+            });
 
-              return {
-                success: true,
-                entry_id: r.entry_id,
-                conversation_attachment_id: added.id,
-                attachment_type: r.attachment.type,
-                message: `Attachment '${added.id}' of type '${r.attachment.type}' created from SML item '${r.entry_id}'`,
-              };
-            } catch (e) {
-              return {
-                success: false,
-                entry_id: r.entry_id,
-                attachment_type: r.attachment.type,
-                message: e instanceof Error ? e.message : String(e),
-              };
-            }
-          })
-        );
-
-        // Update the conversation with the new attachments
-        if (resultItems.some((r) => r.success)) {
-          const latestConversation = await conversationClient.get(conversationId);
-          const newRefs = stateManager.getAccessedRefs();
-
-          const lastRoundIndex = latestConversation.rounds.length - 1;
-          const updatedRounds = applyAttachmentRefsToRounds(
-            latestConversation.rounds,
-            new Map([[lastRoundIndex, newRefs]])
-          );
-          // Merge attachments to prevent duplication or overwriting older attachments
-          const mergedAttachments = mergeAttachmentsById(
-            latestConversation.attachments ?? [],
-            stateManager.getAll()
-          );
-
-          await conversationClient.update({
-            id: conversationId,
-            attachments: mergedAttachments,
-            rounds: updatedRounds,
-          });
+            resultItems.push({
+              success: true,
+              entry_id: r.entry_id,
+              conversation_attachment_id: added.id,
+              attachment_type: r.attachment.type,
+              message: `Attachment '${added.id}' of type '${r.attachment.type}' created from SML item '${r.entry_id}'`,
+            });
+          } catch (e) {
+            resultItems.push({
+              success: false,
+              entry_id: r.entry_id,
+              attachment_type: r.attachment.type,
+              message: e instanceof Error ? e.message : String(e),
+            });
+          }
         }
 
         const body: SmlAttachHttpResponse = { results: resultItems };

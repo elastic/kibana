@@ -9,7 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import type { ChromeStyle } from './layout.types';
+import type { LayoutAppearance } from './layout.types';
 import type { LayoutDimensions } from './layout.types';
 
 /**
@@ -29,7 +29,7 @@ export type LayoutConfig = Pick<
   | 'applicationMarginBottom'
   | 'applicationMarginRight'
 > & {
-  chromeStyle?: ChromeStyle;
+  appearance?: LayoutAppearance;
 };
 
 /** Update function type for layout config */

@@ -11,31 +11,63 @@ import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
+import type { AppHeaderShareAction, AppHeaderTitle } from '@kbn/app-header';
 import { DiscoverAppHeader } from '@kbn/app-header/discover';
 import { AppMenuActionId } from '@kbn/discover-utils';
+import { i18n } from '@kbn/i18n';
 import { getChromeHeaderBack, getChromeHeaderTitle } from './utils';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { useInternalStateSelector } from '../../state_management/redux';
-import { useIsChromeNextProjectHeader } from './use_is_chrome_next_project_header';
+import {
+  internalStateActions,
+  useInternalStateDispatch,
+  useInternalStateSelector,
+} from '../../state_management/redux';
+import { useIsProjectChromeStyle } from './use_is_project_chrome_style';
 
 interface ChromeAppHeaderProps {
   menu?: AppMenuConfig;
+  share?: AppHeaderShareAction;
   tabsBar?: ReactNode;
 }
 
-export const ChromeAppHeader = ({ menu, tabsBar }: ChromeAppHeaderProps) => {
-  const { embeddableEditor } = useDiscoverServices();
-  const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
+export const ChromeAppHeader = ({ menu, share, tabsBar }: ChromeAppHeaderProps) => {
+  const { capabilities, embeddableEditor } = useDiscoverServices();
+  const dispatch = useInternalStateDispatch();
+  const isProjectChromeStyle = useIsProjectChromeStyle();
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
+  const draftSessionTitle = useInternalStateSelector((state) => state.draftSessionTitle);
+  const sessionTitle = persistedDiscoverSession?.title ?? draftSessionTitle;
+  const canRenameSession = Boolean(
+    capabilities.discover_v2.save &&
+      !persistedDiscoverSession?.managed &&
+      !embeddableEditor.isEmbeddedEditor()
+  );
 
-  const title = useMemo(() => {
-    return getChromeHeaderTitle({
-      embeddableEditor,
-      sessionTitle: persistedDiscoverSession?.title,
-    });
-  }, [embeddableEditor, persistedDiscoverSession?.title]);
+  const title = useMemo((): AppHeaderTitle => {
+    const text = getChromeHeaderTitle({ embeddableEditor, sessionTitle });
+
+    if (!canRenameSession) {
+      return text;
+    }
+
+    return {
+      text,
+      ariaLabel: i18n.translate('discover.appHeader.renameSessionAriaLabel', {
+        defaultMessage: 'Edit Discover session name',
+      }),
+      onSave: async (newTitle) => {
+        try {
+          await dispatch(internalStateActions.renameDiscoverSession({ newTitle })).unwrap();
+        } catch {
+          return i18n.translate('discover.appHeader.renameSessionErrorMessage', {
+            defaultMessage: 'Unable to rename Discover session',
+          });
+        }
+      },
+    };
+  }, [canRenameSession, dispatch, embeddableEditor, sessionTitle]);
 
   const back = useMemo(() => {
     return getChromeHeaderBack(embeddableEditor);
@@ -68,7 +100,7 @@ export const ChromeAppHeader = ({ menu, tabsBar }: ChromeAppHeaderProps) => {
     };
   }, [menu]);
 
-  if (!isChromeNextProjectHeader) {
+  if (!isProjectChromeStyle) {
     return null;
   }
 
@@ -82,6 +114,7 @@ export const ChromeAppHeader = ({ menu, tabsBar }: ChromeAppHeaderProps) => {
         title={title}
         back={back}
         menu={appMenu}
+        share={share}
         sticky={false}
         spacing="compact"
         tabsBar={tabsBar}

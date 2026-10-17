@@ -86,7 +86,7 @@ export const ErrorGroupsList = ({
             data-test-subj={`syntheticsErrorGroupExpand-${item.name}`}
             onClick={() => toggleRow(item.name)}
             aria-label={expandedRows[item.name] ? COLLAPSE_LABEL : EXPAND_LABEL}
-            iconType={expandedRows[item.name] ? 'arrowDown' : 'arrowRight'}
+            iconType={expandedRows[item.name] ? 'chevronSingleDown' : 'chevronSingleRight'}
           />
         </EuiToolTip>
       ),

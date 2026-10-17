@@ -61,7 +61,6 @@ import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/pu
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -172,7 +171,6 @@ export interface LensPluginStartDependencies {
   charts: ChartsPluginStart;
   eventAnnotation: EventAnnotationPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-  presentationUtil: PresentationUtilPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViewEditor: DataViewEditorStart;
   inspector: InspectorStartContract;

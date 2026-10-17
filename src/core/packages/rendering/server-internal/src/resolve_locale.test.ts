@@ -42,6 +42,7 @@ const baseArgs = (overrides: Partial<ResolveLocaleArgs> = {}): ResolveLocaleArgs
   translationHashes: { en: 'h1', 'fr-FR': 'h2', 'ja-JP': 'h3' },
   serverBasePath: '',
   allowLocaleCookie: true,
+  detectBrowserLocale: true,
   ...overrides,
 });
 
@@ -270,6 +271,167 @@ describe('resolveLocale', () => {
     });
   });
 
+  describe('detectBrowserLocale', () => {
+    it('ignores Accept-Language and falls back to the en default when false', () => {
+      const result = resolveLocale(
+        baseArgs({
+          detectBrowserLocale: false,
+          request: buildRequest({ acceptLanguage: 'ja-JP,en;q=0.5' }),
+        })
+      );
+      expect(result.locale).toBe('en');
+      expect(result.source).toBe('default');
+      expect(result.setCookieHeader).toContain(`${KBN_LOCALE_COOKIE_NAME}=en`);
+    });
+
+    it('still reports browserPreferredLocale for telemetry when false', () => {
+      const result = resolveLocale(
+        baseArgs({
+          detectBrowserLocale: false,
+          request: buildRequest({ acceptLanguage: 'ja-JP,en;q=0.5' }),
+        })
+      );
+      expect(result.browserPreferredLocale).toBe('ja-JP');
+    });
+
+    it('still respects the user profile locale when false', () => {
+      const result = resolveLocale(
+        baseArgs({
+          detectBrowserLocale: false,
+          userSettingLocale: 'fr-FR',
+          request: buildRequest({ acceptLanguage: 'ja-JP' }),
+        })
+      );
+      expect(result.locale).toBe('fr-FR');
+      expect(result.source).toBe('profile');
+    });
+
+    it('still respects the KBN_LOCALE cookie when false', () => {
+      const result = resolveLocale(
+        baseArgs({
+          detectBrowserLocale: false,
+          request: buildRequest({
+            cookie: `${KBN_LOCALE_COOKIE_NAME}=fr-FR`,
+            acceptLanguage: 'ja-JP',
+          }),
+        })
+      );
+      expect(result.locale).toBe('fr-FR');
+      expect(result.source).toBe('cookie');
+    });
+
+    it('still respects an explicitly configured defaultLocale when false', () => {
+      const result = resolveLocale(
+        baseArgs({
+          detectBrowserLocale: false,
+          configLocale: 'fr-FR',
+          request: buildRequest({ acceptLanguage: 'ja-JP' }),
+        })
+      );
+      expect(result.locale).toBe('fr-FR');
+      expect(result.source).toBe('config');
+    });
+
+    it('ignores Accept-Language when both detectBrowserLocale and allowLocaleCookie are false', () => {
+      const result = resolveLocale(
+        baseArgs({
+          detectBrowserLocale: false,
+          allowLocaleCookie: false,
+          request: buildRequest({
+            cookie: `${KBN_LOCALE_COOKIE_NAME}=fr-FR`,
+            acceptLanguage: 'ja-JP',
+          }),
+        })
+      );
+      expect(result.locale).toBe('en');
+      expect(result.source).toBe('default');
+    });
+  });
+
+  describe('browserPreferredLocale', () => {
+    it('reflects the Accept-Language match even when the user profile wins', () => {
+      const result = resolveLocale(
+        baseArgs({
+          userSettingLocale: 'ja-JP',
+          request: buildRequest({ acceptLanguage: 'fr-FR,en;q=0.5' }),
+        })
+      );
+      expect(result.locale).toBe('ja-JP');
+      expect(result.browserPreferredLocale).toBe('fr-FR');
+    });
+
+    it('reflects the Accept-Language match even when the KBN_LOCALE cookie wins', () => {
+      const result = resolveLocale(
+        baseArgs({
+          request: buildRequest({
+            cookie: `${KBN_LOCALE_COOKIE_NAME}=ja-JP`,
+            acceptLanguage: 'fr-FR,en;q=0.5',
+          }),
+        })
+      );
+      expect(result.locale).toBe('ja-JP');
+      expect(result.browserPreferredLocale).toBe('fr-FR');
+    });
+
+    it('reflects the Accept-Language match even when a config override wins', () => {
+      const result = resolveLocale(
+        baseArgs({
+          configLocale: 'fr-FR',
+          request: buildRequest({ acceptLanguage: 'ja-JP,en;q=0.5' }),
+        })
+      );
+      expect(result.locale).toBe('fr-FR');
+      expect(result.browserPreferredLocale).toBe('ja-JP');
+    });
+
+    it('is undefined when the browser preference cannot be served', () => {
+      const result = resolveLocale(
+        baseArgs({
+          request: buildRequest({ acceptLanguage: 'es-ES,pt-BR;q=0.5' }),
+        })
+      );
+      expect(result.browserPreferredLocale).toBeUndefined();
+    });
+  });
+
+  describe('source', () => {
+    it('is `profile` when the user profile setting wins', () => {
+      const result = resolveLocale(baseArgs({ userSettingLocale: 'ja-JP' }));
+      expect(result.source).toBe('profile');
+    });
+
+    it('is `cookie` when the KBN_LOCALE cookie wins', () => {
+      const result = resolveLocale(
+        baseArgs({ request: buildRequest({ cookie: `${KBN_LOCALE_COOKIE_NAME}=fr-FR` }) })
+      );
+      expect(result.source).toBe('cookie');
+    });
+
+    it('is `config` when a non-default configLocale wins', () => {
+      const result = resolveLocale(
+        baseArgs({
+          configLocale: 'fr-FR',
+          request: buildRequest({ acceptLanguage: 'ja-JP' }),
+        })
+      );
+      expect(result.source).toBe('config');
+    });
+
+    it('is `browser` when Accept-Language wins', () => {
+      const result = resolveLocale(
+        baseArgs({ request: buildRequest({ acceptLanguage: 'ja-JP,en;q=0.5' }) })
+      );
+      expect(result.locale).toBe('ja-JP');
+      expect(result.source).toBe('browser');
+    });
+
+    it('is `default` when nothing else applies and the built-in en is used', () => {
+      const result = resolveLocale(baseArgs());
+      expect(result.locale).toBe('en');
+      expect(result.source).toBe('default');
+    });
+  });
+
   describe('Set-Cookie header', () => {
     it('always emits a Set-Cookie value matching the resolved locale', () => {
       const result = resolveLocale(baseArgs());
@@ -454,5 +616,20 @@ describe('pickFromAcceptLanguage', () => {
 
   it('returns undefined when the only matching candidate has no translation hash', () => {
     expect(pickFromAcceptLanguage('fr-CH', ['fr-FR'], {})).toBeUndefined();
+  });
+
+  // resolveLocale calls this on the render path for every request, so growing it
+  // into an async/deferred lookup would cost a microtask per response.
+  describe('synchronous contract', () => {
+    it('is not declared async', () => {
+      expect(pickFromAcceptLanguage.constructor.name).toBe('Function');
+    });
+
+    it('returns a plain value rather than a thenable', () => {
+      const result = pickFromAcceptLanguage('fr-FR', ['en', 'fr-FR'], hashesFor(['en', 'fr-FR']));
+      expect(result).toBe('fr-FR');
+      expect(result).not.toBeInstanceOf(Promise);
+      expect((result as unknown as PromiseLike<unknown>).then).toBeUndefined();
+    });
   });
 });

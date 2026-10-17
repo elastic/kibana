@@ -21,6 +21,7 @@ import type {
 import { registerSkills } from './skills';
 import { createDashboardAttachmentType } from './attachment_types';
 import { createDashboardSmlType } from './sml_types';
+import { createDashboardAppStateValidator } from './tools/generate/validate_dashboard_app_state';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -48,6 +49,10 @@ export class AgentBuilderDashboardsPlugin
       const [, startDeps] = await coreSetup.getStartServices();
       return startDeps.dashboard.client;
     };
+    const getDashboardValidator = async () => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return createDashboardAppStateValidator(startDeps.embeddable);
+    };
 
     setupDeps.agentBuilder.attachments.registerType(
       createDashboardAttachmentType({
@@ -56,7 +61,9 @@ export class AgentBuilderDashboardsPlugin
       }) as Parameters<typeof setupDeps.agentBuilder.attachments.registerType>[0]
     );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
-    registerSkills(setupDeps.agentBuilder);
+
+    registerSkills(setupDeps.agentBuilder, { getDashboardValidator });
+
     return {};
   }
 

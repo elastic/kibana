@@ -39,8 +39,11 @@ describe('KubernetesConnector', () => {
       expect(KubernetesConnector.metadata.displayName).toBe('Kubernetes');
     });
 
-    it('supports agentBuilder features', () => {
-      expect(KubernetesConnector.metadata.supportedFeatureIds).toEqual(['agentBuilder']);
+    it('supports workflows and agentBuilder features', () => {
+      expect(KubernetesConnector.metadata.supportedFeatureIds).toEqual([
+        'workflows',
+        'agentBuilder',
+      ]);
     });
 
     it('is marked as technical preview', () => {

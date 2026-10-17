@@ -80,6 +80,7 @@ describe('createUrlSyncObservables', () => {
       runtimeStateManager: toolkit.runtimeStateManager,
       tabId: persistedTab.id,
       initializeSingleTab: toolkit.initializeSingleTab,
+      services,
     };
   };
 
@@ -126,7 +127,7 @@ describe('createUrlSyncObservables', () => {
     expect(currentAppState.query).toBeDefined();
 
     const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
-    const snapshotsByProfileId = selectTab(internalState.getState(), tabId).defaultProfileState
+    const snapshotsByProfileId = selectTab(internalState.getState(), tabId).profileAppStateDefaults
       .snapshotsByProfileId;
 
     let state = internalState.getState();
@@ -143,8 +144,8 @@ describe('createUrlSyncObservables', () => {
     state = internalState.getState();
     tab = selectTab(state, tabId);
     expect(tab.appState.hideChart).toBe(true);
-    expect(tab.defaultProfileState.snapshotsByProfileId).toBe(snapshotsByProfileId);
-    expect(tab.defaultProfileState.snapshotsByProfileId[profileId]).toBe(
+    expect(tab.profileAppStateDefaults.snapshotsByProfileId).toBe(snapshotsByProfileId);
+    expect(tab.profileAppStateDefaults.snapshotsByProfileId[profileId]).toBe(
       snapshotsByProfileId[profileId]
     );
   });
@@ -179,6 +180,20 @@ describe('createUrlSyncObservables', () => {
     state = internalState.getState();
     tab = selectTab(state, tabId);
     expect(tab.globalState.filters).toEqual(newFilters);
+  });
+
+  it('should normalize an invalid time range to the timefilter default when set on globalStateContainer', async () => {
+    const { result, internalState, tabId, services } = await setup();
+
+    result.globalStateContainer.set({
+      time: { from: 'now-15m', to: 'to-infinity-and-beyond' },
+      refreshInterval: undefined,
+      filters: undefined,
+    });
+
+    const state = internalState.getState();
+    const tab = selectTab(state, tabId);
+    expect(tab.globalState.timeRange).toEqual(services.timefilter.getTimeDefaults());
   });
 
   it('should not set app state when nothing is passed', async () => {

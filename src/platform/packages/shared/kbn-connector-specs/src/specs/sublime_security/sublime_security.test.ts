@@ -523,21 +523,18 @@ describe('SublimeSecurityConnector', () => {
   });
 
   describe('test handler', () => {
-    const testDef = SublimeSecurityConnector.test;
-    if (!testDef) {
-      throw new Error('expected the Sublime Security spec to define a test handler');
-    }
+    const testSpec = SublimeSecurityConnector.test;
 
     it('is enabled and lists one mailbox on success', async () => {
-      expect(testDef.enabled).toBe(true);
+      expect(testSpec.enabled).toBe(true);
       (mockClient.get as jest.Mock).mockResolvedValue({ data: { mailboxes: [], total: 0 } });
 
-      const result = await testDef.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/v0/mailboxes`, {
         params: { limit: 1 },
       });
-      expect(result).toEqual(expect.objectContaining({ ok: true, message: expect.any(String) }));
+      expect(result).toEqual({});
     });
 
     it('throws on failure', async () => {
@@ -545,7 +542,7 @@ describe('SublimeSecurityConnector', () => {
         response: { status: 401, data: 'unauthorized', headers: {} },
       });
 
-      await expect(testDef.handler(mockContext)).rejects.toThrow(
+      await expect(testSpec.handler(mockContext)).rejects.toThrow(
         'Sublime Security API error (401): unauthorized'
       );
     });

@@ -65,7 +65,7 @@ describe('StreamActiveRecord', () => {
       stateMock
     );
 
-    expect(stream.doHandleUpsertChange).toBeCalledWith(
+    expect(stream.doHandleUpsertChange).toHaveBeenCalledWith(
       { test: 'definition' },
       stateMock,
       stateMock
@@ -83,7 +83,7 @@ describe('StreamActiveRecord', () => {
       stateMock
     );
 
-    expect(stream.doHandleDeleteChange).toBeCalledWith('test', stateMock, stateMock);
+    expect(stream.doHandleDeleteChange).toHaveBeenCalledWith('test', stateMock, stateMock);
     expect(cascadingChanges).toEqual([cascadingDelete]);
     expect(stream.changeStatus).toEqual('deleted');
   });
@@ -94,7 +94,7 @@ describe('StreamActiveRecord', () => {
 
     const validationResult = await stream.validate(stateMock, stateMock);
 
-    expect(stream.doValidateUpsertion).toBeCalledWith(stateMock, stateMock);
+    expect(stream.doValidateUpsertion).toHaveBeenCalledWith(stateMock, stateMock);
     expect(validationResult).toEqual({ isValid: false, errors: ['test_upserted'] });
   });
 
@@ -104,7 +104,7 @@ describe('StreamActiveRecord', () => {
 
     const validationResult = await stream.validate(stateMock, stateMock);
 
-    expect(stream.doValidateDeletion).toBeCalledWith(stateMock, stateMock);
+    expect(stream.doValidateDeletion).toHaveBeenCalledWith(stateMock, stateMock);
     expect(validationResult).toEqual({ isValid: false, errors: ['test_deleted'] });
   });
 
@@ -113,8 +113,8 @@ describe('StreamActiveRecord', () => {
 
     const validationResult = await stream.validate(stateMock, stateMock);
 
-    expect(stream.doValidateUpsertion).not.toBeCalled();
-    expect(stream.doValidateDeletion).not.toBeCalled();
+    expect(stream.doValidateUpsertion).not.toHaveBeenCalled();
+    expect(stream.doValidateDeletion).not.toHaveBeenCalled();
     expect(validationResult).toEqual({ isValid: true, errors: [] });
   });
 
@@ -141,7 +141,7 @@ describe('StreamActiveRecord', () => {
       undefined
     );
 
-    expect(stream.doDetermineCreateActions).toBeCalled();
+    expect(stream.doDetermineCreateActions).toHaveBeenCalled();
     expect(elasticsearchActions).toEqual(['create_actions']);
   });
 
@@ -155,7 +155,7 @@ describe('StreamActiveRecord', () => {
       new TestStream({ name: 'test_stream' }, stateDependenciesMock)
     );
 
-    expect(stream.doDetermineUpdateActions).toBeCalled();
+    expect(stream.doDetermineUpdateActions).toHaveBeenCalled();
     expect(elasticsearchActions).toEqual(['update_actions']);
   });
 
@@ -169,7 +169,7 @@ describe('StreamActiveRecord', () => {
       undefined
     );
 
-    expect(stream.doDetermineDeleteActions).toBeCalled();
+    expect(stream.doDetermineDeleteActions).toHaveBeenCalled();
     expect(elasticsearchActions).toEqual(['delete_actions']);
   });
 

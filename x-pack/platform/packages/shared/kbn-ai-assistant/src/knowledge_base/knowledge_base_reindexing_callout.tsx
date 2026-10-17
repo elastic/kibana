@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { css } from '@emotion/css';
-import { EuiCallOut, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 export const KnowledgeBaseReindexingCallout = () => {
@@ -19,19 +20,16 @@ export const KnowledgeBaseReindexingCallout = () => {
   `;
 
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       className={knowledgeBaseReindexingCalloutName}
       title={i18n.translate('xpack.aiAssistant.knowledgeBase.reindexingCalloutTitle', {
         defaultMessage: 'Re-indexing in progress.',
       })}
-      color="warning"
-      iconType="warning"
       data-test-subj="knowledgeBaseReindexingCallOut"
-    >
-      {i18n.translate('xpack.aiAssistant.knowledgeBase.reindexingCalloutBody', {
+      text={i18n.translate('xpack.aiAssistant.knowledgeBase.reindexingCalloutBody', {
         defaultMessage:
           'Knowledge base is currently being re-indexed. If you have entries, some may be unavailable until the operation completes.',
       })}
-    </EuiCallOut>
+    />
   );
 };

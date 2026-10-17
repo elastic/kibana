@@ -10,6 +10,8 @@
 import { omit, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import { resolveMaintenanceWindowsOrThrow } from '../../maintenance_windows/resolve_maintenance_windows';
 import { hasNoParams } from '../../formatters/param_utils';
 import { formatLocation } from '../../../../common/utils/location_formatter';
 import type {
@@ -40,6 +42,7 @@ export interface NormalizedProjectProps {
   projectId: string;
   namespace: string;
   version: string;
+  maintenanceWindows?: MaintenanceWindow[];
 }
 
 export interface Error {
@@ -60,6 +63,7 @@ export const getNormalizeCommonFields = ({
   monitor,
   projectId,
   namespace,
+  maintenanceWindows = [],
 }: NormalizedProjectProps): { errors: Error[]; normalizedFields: Partial<CommonFields> } => {
   const defaultFields = DEFAULT_COMMON_FIELDS;
   const errors = [];
@@ -103,8 +107,10 @@ export const getNormalizeCommonFields = ({
     // picking out keys specifically, so users can't add arbitrary fields
     [ConfigKey.ALERT_CONFIG]: getAlertConfig(monitor),
     [ConfigKey.LABELS]: monitor.fields || defaultFields[ConfigKey.LABELS],
-    [ConfigKey.MAINTENANCE_WINDOWS]:
-      monitor.maintenanceWindows || defaultFields[ConfigKey.MAINTENANCE_WINDOWS],
+    [ConfigKey.MAINTENANCE_WINDOWS]: resolveMaintenanceWindowsOrThrow(
+      monitor.maintenanceWindows,
+      maintenanceWindows
+    ),
     [ConfigKey.KIBANA_SPACES]: monitor.spaces || defaultFields[ConfigKey.KIBANA_SPACES],
     ...(monitor[ConfigKey.APM_SERVICE_NAME] && {
       [ConfigKey.APM_SERVICE_NAME]: monitor[ConfigKey.APM_SERVICE_NAME],

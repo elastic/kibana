@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import path from 'path';
+import { z } from '@kbn/zod';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
+import { MAX_PARAM_VALUE_LENGTH, MAX_ROUTE_ID_LENGTH, routeId } from '../../zod_query';
 import { validateRouteSpaceName } from '../../common';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type { SyntheticsParamRequest, SyntheticsParams } from '../../../../common/runtime_types';
@@ -21,11 +22,11 @@ import {
   VaultParamSourceSchema,
 } from '../../../synthetics_service/formatters/vault_param_formatter';
 
-const RequestParamsSchema = schema.object({
-  id: schema.string(),
+const RequestParamsSchema = z.strictObject({
+  id: routeId.describe('The unique identifier for the parameter.'),
 });
 
-type RequestParams = TypeOf<typeof RequestParamsSchema>;
+type RequestParams = z.infer<typeof RequestParamsSchema>;
 
 export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   SyntheticsParams | undefined,
@@ -33,25 +34,46 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
 > = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.PARAMS + '/{id}',
+  options: {
+    summary: 'Update a parameter',
+    description:
+      'Update a parameter in the Synthetics app.\n\nYou must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.',
+    operationId: 'put-parameter',
+    oasOperationObject: () => path.join(__dirname, 'examples/put_parameter.yaml'),
+  },
   validate: {},
   validation: {
     request: {
       params: RequestParamsSchema,
-      body: schema.object({
-        key: schema.maybe(
-          schema.string({
-            minLength: 1,
-          })
-        ),
-        value: schema.maybe(
-          schema.string({
-            minLength: 1,
-          })
-        ),
-        source: schema.maybe(VaultParamSourceSchema),
-        description: schema.maybe(schema.string()),
-        tags: schema.maybe(schema.arrayOf(schema.string())),
-      }),
+      body: z
+        .strictObject({
+          key: z
+            .string()
+            .min(1)
+            .max(MAX_ROUTE_ID_LENGTH)
+            .optional()
+            .describe('The key of the parameter.'),
+          value: z
+            .string()
+            .min(1)
+            .max(MAX_PARAM_VALUE_LENGTH)
+            .optional()
+            .describe('The updated value associated with the parameter.'),
+          source: VaultParamSourceSchema.optional().describe(
+            'Resolve the value from HashiCorp Vault at runtime instead of storing it.'
+          ),
+          description: z
+            .string()
+            .max(4096)
+            .optional()
+            .describe('The updated description of the parameter.'),
+          tags: z
+            .array(z.string().max(256))
+            .max(100)
+            .optional()
+            .describe('An array of updated tags to categorize the parameter.'),
+        })
+        .describe('The request body cannot be empty; at least one attribute is required.'),
     },
   },
   handler: async (routeContext) => {

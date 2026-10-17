@@ -19,4 +19,8 @@ describe('getAllLogsDataViewSpec', () => {
       })
     );
   });
+
+  it('marks the data view as managed so it is not editable, since it is recreated on every navigation', () => {
+    expect(getAllLogsDataViewSpec({ allLogsIndexPattern: 'logs-*' }).managed).toBe(true);
+  });
 });

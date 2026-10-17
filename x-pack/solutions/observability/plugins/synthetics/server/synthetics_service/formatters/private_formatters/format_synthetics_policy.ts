@@ -17,31 +17,35 @@ import {
   formatMWs,
   handleMultilineStringFormatter,
   replaceStringWithParams,
+  resolveHttpAuthParams,
 } from '../formatting_utils';
-import { referencedConnectionNames } from '../vault_param_formatter';
-import type { HeartbeatVaultConfig } from '../../get_vault_connection';
+import { referencedConnectionNames, stripVaultConnectionNames } from '../vault_param_formatter';
+import { toSecretStoreEntry, type HeartbeatVaultConfig } from '../../get_vault_connection';
 import { syntheticsPolicyFormatters } from './formatters';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
 
+export const VAULT_PACKAGE_UPGRADE_MESSAGE =
+  'Vault secret references require the Synthetics integration version 1.13.0 or later. Upgrade the Synthetics package in Fleet and try again.';
+
 /**
- * Selects only the Vault connections a monitor actually references (by name;
- * undefined = the default connection), so an agent never receives credentials for
- * connections the monitor does not use. Fails closed: a reference to a connection
- * that is not configured throws rather than silently shipping nothing (or all).
+ * Picks the one Vault connection a monitor uses (Heartbeat takes a single `vault`
+ * entry per monitor). `undefined` in `referenced` is the default connection, which
+ * is only well-defined when exactly one connection exists. Fails closed: an unknown
+ * connection, or more than one distinct connection, throws instead of shipping the
+ * wrong credentials.
  */
-export const scopeVaultConnections = (
+export const selectVaultConnection = (
   all: HeartbeatVaultConfig[],
   referenced: Set<string | undefined>,
   monitorName?: string
-): HeartbeatVaultConfig[] => {
+): HeartbeatVaultConfig | undefined => {
   const byName = new Map(all.map((c) => [c.name, c]));
-  const scoped = new Map<string, HeartbeatVaultConfig>();
+  const selected = new Map<string, HeartbeatVaultConfig>();
   for (const name of referenced) {
     if (name === undefined) {
-      // The default connection is only well-defined when exactly one exists. With
-      // several, an unqualified ${vault/..} has no default — don't over-ship; the
-      // agent reports the unresolved reference at runtime.
-      if (all.length === 1) scoped.set(all[0].name, all[0]);
+      // With several connections an unqualified reference has no default — don't
+      // guess; the agent reports the unresolved reference at runtime.
+      if (all.length === 1) selected.set(all[0].name, all[0]);
       continue;
     }
     const conn = byName.get(name);
@@ -52,9 +56,16 @@ export const scopeVaultConnections = (
         }" references Vault connection "${name}", which is not configured`
       );
     }
-    scoped.set(conn.name, conn);
+    selected.set(conn.name, conn);
   }
-  return [...scoped.values()];
+  if (selected.size > 1) {
+    throw new Error(
+      `Monitor "${monitorName ?? ''}" references multiple Vault connections (${[
+        ...selected.keys(),
+      ].join(', ')}); a monitor can use only one`
+    );
+  }
+  return [...selected.values()][0];
 };
 
 export interface ProcessorFields {
@@ -69,6 +80,30 @@ export interface ProcessorFields {
   kibanaUrl?: string;
 }
 
+const HTTP_AUTH_PACKAGE_KEYS = [ConfigKey.KERBEROS, ConfigKey.NTLM] as const;
+
+export const HTTP_AUTH_PACKAGE_UPGRADE_MESSAGE =
+  'Kerberos and NTLM authentication require the Synthetics integration version 1.12.0 or later. Upgrade the Synthetics package in Fleet and try again.';
+
+/**
+ * Enabled Kerberos/NTLM must map onto package vars. Older synthetics packages
+ * omit these keys; writing would silently drop auth and leave the monitor
+ * unauthenticated.
+ */
+export const assertHttpAuthPackageVarsAvailable = (
+  config: Partial<MonitorFields & ProcessorFields>,
+  vars: NewPackagePolicy['inputs'][number]['streams'][number]['vars'] | undefined
+) => {
+  for (const key of HTTP_AUTH_PACKAGE_KEYS) {
+    const auth = config[key];
+    if (auth && typeof auth === 'object' && 'enabled' in auth && auth.enabled && !vars?.[key]) {
+      throw new Error(HTTP_AUTH_PACKAGE_UPGRADE_MESSAGE);
+    }
+  }
+};
+
+export { resolveHttpAuthParams };
+
 export const formatSyntheticsPolicy = (
   newPolicy: NewPackagePolicy,
   monitorType: MonitorTypeEnum,
@@ -78,7 +113,8 @@ export const formatSyntheticsPolicy = (
   isLegacy?: boolean,
   vaultConnections?: HeartbeatVaultConfig[]
 ) => {
-  const configKeys = Object.keys(config) as ConfigKey[];
+  const resolvedConfig = resolveHttpAuthParams(config, params);
+  const configKeys = Object.keys(resolvedConfig) as ConfigKey[];
 
   const formattedPolicy = cloneDeep(newPolicy);
 
@@ -107,17 +143,36 @@ export const formatSyntheticsPolicy = (
         }
       });
     }
+    // API monitors emit a companion `synthetics.api.network` document per
+    // request via Heartbeat's enrichSynthEvent → SetEventDataset path.
+    // Enabling the `api.network` stream here is what causes Fleet to include
+    // the matching index privileges in the generated agent API key. Without
+    // it, journey/network_info events are produced and routed correctly by
+    // Heartbeat but rejected at the bulk indexing layer with a 403, leaving
+    // the api.network data stream silently empty.
+    if (monitorType === 'api') {
+      currentInput.streams.forEach((stream) => {
+        if (stream.data_stream.dataset === 'api.network') {
+          stream.enabled = true;
+        }
+      });
+    }
   }
+
+  assertHttpAuthPackageVarsAvailable(resolvedConfig, dataStream?.vars);
 
   configKeys.forEach((key) => {
     const configItem = dataStream?.vars?.[key];
     if (configItem) {
       if (syntheticsPolicyFormatters[key]) {
-        configItem.value = syntheticsPolicyFormatters[key]?.(config, key);
+        configItem.value = syntheticsPolicyFormatters[key]?.(resolvedConfig, key);
       } else if (key === ConfigKey.MONITOR_SOURCE_TYPE && isLegacy) {
         configItem.value = undefined;
       } else {
-        configItem.value = config[key] === undefined || config[key] === null ? null : config[key];
+        configItem.value =
+          resolvedConfig[key] === undefined || resolvedConfig[key] === null
+            ? null
+            : resolvedConfig[key];
       }
       if (!PARAMS_KEYS_TO_SKIP.includes(key)) {
         configItem.value = replaceStringWithParams(configItem.value, params);
@@ -129,19 +184,21 @@ export const formatSyntheticsPolicy = (
     }
   });
 
-  // Collect the vault connection names this monitor references BEFORE any value is
-  // transformed below — the browser inline script is base64-encoded a few lines
-  // down, which would otherwise hide a ${vault/..} token inside it from detection
-  // (C3). Empty when the monitor references no vault-backed secret.
+  // Collect the vault connections this monitor references, then drop the Kibana-only
+  // `<connection>@` prefix so Heartbeat sees plain vault://<path>#<field>. Heartbeat
+  // does not resolve references in the inline script, so it is left alone.
   const referencedVaultConnections = new Set<string | undefined>();
-  Object.values(dataStream?.vars ?? {}).forEach((v) => {
-    referencedConnectionNames(v?.value).forEach((n) => referencedVaultConnections.add(n));
+  Object.entries(dataStream?.vars ?? {}).forEach(([key, item]) => {
+    if (!item || key === ConfigKey.SOURCE_INLINE) return;
+    referencedConnectionNames(item.value).forEach((name) => referencedVaultConnections.add(name));
+    item.value = stripVaultConnectionNames(item.value);
   });
 
-  // This field is NOT in the monitor config, but needs to be set in the policy
-  // so Heartbeat knows to decode the base64-encoded script
+  // Heartbeat decodes inline scripts when source.inline.encoding=base64.
+  // synthetics 1.10.0 added this var to the API input with the same name as
+  // browser, so encode whenever the installed package exposes it.
   const encodingVar = dataStream?.vars?.['source.inline.encoding'];
-  if (monitorType === 'browser' && encodingVar && config[ConfigKey.SOURCE_INLINE]) {
+  if (encodingVar && resolvedConfig[ConfigKey.SOURCE_INLINE]) {
     encodingVar.value = 'base64';
     const inlineScript = dataStream.vars?.[ConfigKey.SOURCE_INLINE];
     if (inlineScript && typeof inlineScript.value === 'string') {
@@ -151,12 +208,12 @@ export const formatSyntheticsPolicy = (
 
   const processorItem = dataStream?.vars?.processors;
   if (processorItem) {
-    processorItem.value = processorsFormatter(config as MonitorFields & ProcessorFields);
+    processorItem.value = processorsFormatter(resolvedConfig as MonitorFields & ProcessorFields);
   }
 
   const mwItem = dataStream?.vars?.[ConfigKey.MAINTENANCE_WINDOWS];
-  if (config[ConfigKey.MAINTENANCE_WINDOWS]?.length && mwItem) {
-    const maintenanceWindows = config[ConfigKey.MAINTENANCE_WINDOWS];
+  if (resolvedConfig[ConfigKey.MAINTENANCE_WINDOWS]?.length && mwItem) {
+    const maintenanceWindows = resolvedConfig[ConfigKey.MAINTENANCE_WINDOWS];
     const formattedVal = formatMWs(
       maintenanceWindows.map((window) => {
         if (typeof window === 'string') {
@@ -173,24 +230,34 @@ export const formatSyntheticsPolicy = (
   // TODO: remove this once we remove legacy support
   const throttling = dataStream?.vars?.[LegacyConfigKey.THROTTLING_CONFIG];
   if (throttling) {
-    throttling.value = throttlingFormatter?.(config, ConfigKey.THROTTLING_CONFIG);
+    throttling.value = throttlingFormatter?.(resolvedConfig, ConfigKey.THROTTLING_CONFIG);
   }
 
-  // Vault connections: when this monitor references a vault-backed secret
-  // (${vault/[<name>@]<path>#<field>} in any resolved field) attach ONLY the
-  // referenced connections (not every connection in the space) to the `vault` var,
-  // base64-encoded. That var is `secret: true` in the package, so Fleet stores it
-  // as a single Fleet secret and the compiled policy carries only a
+  // Drop disabled inputs so we persist only the single active input. Disabled inputs never
+  // contribute to the compiled agent policy and only bloat the saved object. A guard in Fleet's
+  // `updatePackageInputs` keeps them from being re-added on package upgrade. Only strip once the
+  // active input is resolved, so an unknown monitor type still yields the template.
+  if (currentInput && dataStream) {
+    formattedPolicy.inputs = formattedPolicy.inputs.filter((input) => input.enabled);
+  }
+
+  // Vault: when this monitor references a vault secret (vault://[<name>@]<path>#<field>
+  // in any resolved field) attach the one connection it uses to the `secret_stores`
+  // var, base64-encoded. That var is `secret: true` in the package, so Fleet stores
+  // it as a Fleet secret and the compiled policy carries only a
   // $co.elastic.secret{...} reference.
-  const vaultItem = dataStream?.vars?.vault;
-  if (vaultItem && vaultConnections?.length && referencedVaultConnections.size > 0) {
-    const scoped = scopeVaultConnections(
-      vaultConnections,
-      referencedVaultConnections,
-      config[ConfigKey.NAME]
-    );
-    if (scoped.length > 0) {
-      vaultItem.value = Buffer.from(JSON.stringify(scoped)).toString('base64');
+  if (dataStream && referencedVaultConnections.size > 0) {
+    const secretStoresItem = dataStream.vars?.secret_stores;
+    if (!secretStoresItem) {
+      throw new Error(VAULT_PACKAGE_UPGRADE_MESSAGE);
+    }
+    const connection = vaultConnections?.length
+      ? selectVaultConnection(vaultConnections, referencedVaultConnections, config[ConfigKey.NAME])
+      : undefined;
+    if (connection) {
+      secretStoresItem.value = Buffer.from(
+        JSON.stringify([toSecretStoreEntry(connection)])
+      ).toString('base64');
     }
   }
 

@@ -56,11 +56,11 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
 
 const alertMockHit = createMockHit({ 'event.kind': 'signal' });
 
-const renderResponseSection = ({ isRulePreview = false }: { isRulePreview?: boolean } = {}) =>
+const renderResponseSection = () =>
   render(
     <Provider store={store}>
       <Router history={history}>
-        <ResponseSection hit={alertMockHit} isRulePreview={isRulePreview} />
+        <ResponseSection hit={alertMockHit} />
       </Router>
     </Provider>
   );
@@ -79,18 +79,18 @@ describe('<ResponseSection />', () => {
         overlays: {
           openSystemFlyout: mockOpenSystemFlyout,
         },
+        storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
         telemetry: { reportEvent: jest.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
   });
 
-  it('forwards hit and isRulePreview to ResponseSectionContent', () => {
-    renderResponseSection({ isRulePreview: true });
+  it('forwards hit and onShowResponseDetails to ResponseSectionContent', () => {
+    renderResponseSection();
 
     expect(mockResponseSectionContent).toHaveBeenCalledWith(
       expect.objectContaining({
         hit: alertMockHit,
-        isRulePreview: true,
         onShowResponseDetails: expect.any(Function),
       }),
       {}

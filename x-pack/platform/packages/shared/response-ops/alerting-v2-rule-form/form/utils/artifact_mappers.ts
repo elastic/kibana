@@ -7,7 +7,11 @@
 
 import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 
-export type RuleArtifactPayload = Array<{ id: string; type: string; value: string }>;
+export type RuleArtifactPayload = Array<{
+  id: string;
+  type: string;
+  data: Record<string, any>;
+}>;
 
 export interface RuleArtifactSlices {
   artifacts?: RuleArtifactPayload;
@@ -15,37 +19,13 @@ export interface RuleArtifactSlices {
   dashboardArtifacts?: RuleArtifactPayload;
 }
 
-const NORMALIZED_ARTIFACT_TYPES = new Set([RUNBOOK_ARTIFACT_TYPE, DASHBOARD_ARTIFACT_TYPE]);
-
-const createArtifactId = (artifactType: string) =>
-  `${artifactType}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-
 export const mapArtifacts = (
   artifacts: RuleArtifactPayload | undefined
-): RuleArtifactPayload | undefined => {
-  const currentArtifacts = artifacts ?? [];
-
-  const normalizedArtifacts = currentArtifacts.flatMap((artifact) => {
-    if (!NORMALIZED_ARTIFACT_TYPES.has(artifact.type)) {
-      return [artifact];
-    }
-
-    const artifactValue = artifact.value.trim();
-    if (!artifactValue) {
-      return [];
-    }
-
-    return [
-      {
-        ...artifact,
-        id: artifact.id.trim() ? artifact.id : createArtifactId(artifact.type),
-        value: artifactValue,
-      },
-    ];
-  });
-
-  return normalizedArtifacts.length ? normalizedArtifacts : undefined;
-};
+): RuleArtifactPayload | undefined =>
+  artifacts?.length
+    ? // Drop any leftover legacy keys (e.g. migrated `value`) before write.
+      artifacts.map(({ id, type, data }) => ({ id, type, data }))
+    : undefined;
 
 export const splitArtifactsByType = (
   artifacts: RuleArtifactPayload | undefined

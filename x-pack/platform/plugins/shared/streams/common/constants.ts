@@ -12,10 +12,15 @@ export const ASSET_VERSION = 1;
 export const ATTACHMENT_SUGGESTIONS_LIMIT = 50;
 
 export const STREAMS_FEATURE_ID = 'streams';
-export const STREAMS_CONSUMER = 'streams';
-export const STREAMS_PRODUCER = 'streams';
 
-export const STREAMS_RULE_REGISTRATION_CONTEXT = 'streams';
+export const STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE = 'streams-configuration';
+export const STREAMS_UI_METADATA_SAVED_OBJECT_TYPE = 'streams-ui-metadata';
+export const STREAMS_METADATA_REFERENCE_NAME = 'streamsMetadata';
+/** V1 has a single authored unit; callers should use this id until multiple units exist. */
+export const STREAMS_DEFAULT_UNIT_ID = 'default';
+
+export const getStreamsUiMetadataSavedObjectId = (configurationSavedObjectId: string): string =>
+  `${configurationSavedObjectId}-streams-ui-metadata`;
 
 export const STREAMS_API_PRIVILEGES = {
   read: 'read_stream',

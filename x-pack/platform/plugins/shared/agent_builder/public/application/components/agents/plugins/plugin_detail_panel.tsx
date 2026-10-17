@@ -189,7 +189,7 @@ const PluginIdFooter: React.FC<{ pluginId: string }> = ({ pluginId }) => {
               disableScreenReaderOutput
             >
               <EuiButtonIcon
-                iconType="copyClipboard"
+                iconType="copy"
                 onClick={copy}
                 aria-label={labels.agentPlugins.pluginDetailIdCopyLabel}
                 size="xs"

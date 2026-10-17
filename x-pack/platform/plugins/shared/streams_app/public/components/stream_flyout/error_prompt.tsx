@@ -13,7 +13,7 @@ import type { StreamFlyoutProps } from '.';
 export function ErrorPrompt({ name, onClose }: StreamFlyoutProps) {
   return (
     <EuiEmptyPrompt
-      iconType="search"
+      iconType="magnify"
       title={
         <h2>
           {i18n.translate('xpack.streams.flyout.error.title', {

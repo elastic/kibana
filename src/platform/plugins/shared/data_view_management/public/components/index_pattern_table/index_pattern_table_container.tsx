@@ -12,18 +12,14 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { RouteComponentProps } from 'react-router-dom';
 import { useLocation, withRouter } from 'react-router-dom';
 import { DataViewType } from '@kbn/data-views-plugin/public';
-import { i18n } from '@kbn/i18n';
 import type { IndexPatternManagmentContext } from '../../types';
+import { dataViewsListTitle } from '../breadcrumbs';
 import { IndexPatternTableWithRouter } from './index_pattern_table';
 
 interface Props extends RouteComponentProps {
   canSave: boolean;
   showCreateDialog?: boolean;
 }
-
-const title = i18n.translate('indexPatternManagement.dataViewTable.title', {
-  defaultMessage: 'Data Views',
-});
 
 export const IndexPatternTableContainer = ({
   history,
@@ -36,11 +32,11 @@ export const IndexPatternTableContainer = ({
     new URLSearchParams(useLocation().search).get('type') === DataViewType.ROLLUP &&
     dataViews.getRollupsEnabled();
   return (
-    <div data-test-subj="indexPatternTable" role="region" aria-label={title}>
+    <div data-test-subj="indexPatternTable" role="region" aria-label={dataViewsListTitle}>
       <IndexPatternTableWithRouter
         canSave={canSave}
         setShowCreateDialog={setShowCreateDialog}
-        title={title}
+        title={dataViewsListTitle}
       />
       {showCreateDialog && (
         <IndexPatternEditor

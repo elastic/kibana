@@ -128,6 +128,12 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.securitySolution.siemReadiness.integrationSelectablePopover.popoverAriaLabel',
+        {
+          defaultMessage: 'Integrations',
+        }
+      )}
       panelPaddingSize="none"
       button={
         <>

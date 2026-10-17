@@ -31,8 +31,12 @@ import { ChromeComponentsProvider, type ChromeComponentsDeps } from './context';
  * Internal to this package — not re-exported from `index.ts`.
  */
 export const createMockChromeComponentsDeps = () => {
+  const currentLocation$ = new BehaviorSubject<string>('/');
+  const application = applicationServiceMock.createInternalStartContract();
+  application.currentLocation$ = currentLocation$;
+
   return {
-    application: applicationServiceMock.createInternalStartContract(),
+    application,
     http: httpServiceMock.createSetupContract({ basePath: '/test' }),
     docLinks: docLinksServiceMock.createStartContract(),
     customBranding: {

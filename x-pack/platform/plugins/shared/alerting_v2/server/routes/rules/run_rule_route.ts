@@ -17,6 +17,7 @@ import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
+import { runRuleOasExamples } from './run_rule_oas_example';
 
 @injectable()
 export class RunRuleRoute extends BaseAlertingRoute {
@@ -28,15 +29,18 @@ export class RunRuleRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Run a rule now',
+    oasOperationObject: runRuleOasExamples,
   } as const;
   static schemas = {
     request: {
       params: ruleIdParamsSchema,
     },
     response: {
-      204: {
-        description: 'The rule run was triggered successfully.',
+      202: {
+        description:
+          'The run was accepted: the rule is scheduled to run. Requests that arrive before the run starts are collapsed into a single run. Poll the rule execution history to observe the result.',
       },
       400: {
         body: () => errorResponseSchema,
@@ -71,6 +75,6 @@ export class RunRuleRoute extends BaseAlertingRoute {
 
   protected async execute() {
     await this.rulesClient.runRuleNow({ id: this.request.params.id });
-    return this.ctx.response.noContent();
+    return this.ctx.response.accepted();
   }
 }

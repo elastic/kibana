@@ -16,6 +16,7 @@ import type {
 } from '@kbn/task-manager-plugin/server/task';
 import { createToken } from '@kbn/core-di';
 import type { Newable } from 'inversify';
+import type { PluginConfig } from '../../../config';
 
 type TaskRunnerConstructor<T> = Newable<T>;
 
@@ -24,6 +25,7 @@ export interface AlertingTaskRunner {
     taskInstance: RunContext['taskInstance'];
     signal: RunContext['signal'];
     executionUuid: RunContext['executionUuid'];
+    setCustomTaskRunEventFields: RunContext['setCustomTaskRunEventFields'];
   }): Promise<RunResult>;
 }
 
@@ -36,6 +38,7 @@ export interface AlertingTaskDefinition<TRunner extends AlertingTaskRunner = Ale
   taskType: string;
   title: string;
   timeout: string;
+  resolveTimeout?: (config: PluginConfig) => string;
   paramsSchema?: ObjectType;
   stateSchemaByVersion?: Record<
     number,
@@ -127,7 +130,13 @@ export function createTaskRunnerFactory({
   injectionPromise: Promise<CoreDiServiceStart>;
 }): TaskRunnerFactory {
   return ({ taskRunnerClass, taskType, requiresFakeRequest = true }) => {
-    return ({ taskInstance, signal, fakeRequest, executionUuid }: RunContext) => ({
+    return ({
+      taskInstance,
+      signal,
+      fakeRequest,
+      executionUuid,
+      setCustomTaskRunEventFields,
+    }: RunContext) => ({
       run: async () => {
         if (requiresFakeRequest && !fakeRequest) {
           throw new Error(
@@ -153,7 +162,12 @@ export function createTaskRunnerFactory({
 
         try {
           const runner = scope.get(taskRunnerClass);
-          return await runner.run({ taskInstance, signal, executionUuid });
+          return await runner.run({
+            taskInstance,
+            signal,
+            executionUuid,
+            setCustomTaskRunEventFields,
+          });
         } finally {
           await scope.unbindAllAsync();
         }

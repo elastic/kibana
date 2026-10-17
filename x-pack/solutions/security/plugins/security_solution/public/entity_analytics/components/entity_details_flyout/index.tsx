@@ -163,9 +163,11 @@ export const getResolutionGroupTab = ({
 
 export const getAnomaliesTab = ({
   entityId,
+  entityName,
   entityType,
 }: {
   entityId: string;
+  entityName: string;
   entityType: EntityStoreEntityType;
 }) => ({
   id: EntityDetailsLeftPanelTab.ANOMALIES,
@@ -176,5 +178,5 @@ export const getAnomaliesTab = ({
       defaultMessage="Behavioral anomalies"
     />
   ),
-  content: <AnomaliesTab entityId={entityId} entityType={entityType} />,
+  content: <AnomaliesTab entityId={entityId} entityName={entityName} entityType={entityType} />,
 });

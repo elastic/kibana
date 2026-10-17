@@ -20,7 +20,7 @@ const connectorIcons: Array<{ match: string[]; icon: IconType }> = [
   { match: ['elastic'], icon: 'logoElastic' },
 ];
 
-const fallbackIconType = 'compute';
+const fallbackIconType = 'processor';
 
 export const ConnectorIcon: React.FC<{ connectorName?: string }> = ({ connectorName }) => {
   let iconType: IconType = fallbackIconType;

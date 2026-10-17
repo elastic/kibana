@@ -20,7 +20,7 @@ export type GetMappingsResponse = IndicesGetMappingIndexMappingRecord;
 export type GetMappingsActions = Actions<GetMappingsArgs, GetMappingsResponse>;
 
 export const getMappings = async ({ indexName }: GetMappingsArgs) => {
-  const route = `/internal/enterprise_search/mappings/${indexName}`;
+  const route = `/internal/enterprise_search/mappings/${encodeURIComponent(indexName)}`;
 
   return await HttpLogic.values.http.get<IndicesGetMappingIndexMappingRecord>(route);
 };

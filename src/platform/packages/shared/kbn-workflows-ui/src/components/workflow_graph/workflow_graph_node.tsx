@@ -16,9 +16,15 @@ import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, TRIGGER_STEP_TYPES } from '@kbn/workflows';
 import { deslugifyStepName } from './deslugify_step_name';
+import { getStepChipPalette } from './step_chip_palette';
+import type { ChipOutcome } from './step_chip_palette';
+
+/** Inset from the node's right edge where spec 07's fork port (failure anchor) sits. */
+const FAILURE_PORT_RIGHT_INSET = 24;
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
 import type { RenderStepIcon } from './workflow_graph_actions_context';
-import { getStepIconType, getTriggerTypeIconType } from '../step_icons';
+import { getStepFamily, getStepIconType, getTriggerTypeIconType } from '../step_icons';
+import type { StepFamily } from '../step_icons';
 
 export interface WorkflowGraphNodeData extends Record<string, unknown> {
   readonly label: string;
@@ -37,6 +43,12 @@ export interface WorkflowGraphNodeData extends Record<string, unknown> {
     readonly retry?: { readonly 'max-attempts'?: number };
     readonly 'on-failure'?: { readonly retry?: { readonly 'max-attempts'?: number } };
   };
+  /**
+   * Node id of the step that owns this node's fallback lane. Present on every
+   * node inside an `on-failure.fallback` lane; absent elsewhere. Consumed by
+   * the minimap colour callback and specs 03/07 for gestural authoring.
+   */
+  readonly fallbackOf?: string;
 }
 
 /**
@@ -51,185 +63,102 @@ function getStepMaxAttempts(step: WorkflowGraphNodeData['step']): number | undef
   return typeof value === 'number' && value > 0 ? value : undefined;
 }
 
-// Branded multi-color icons keep their natural palette; everything else is
-// tinted with the trigger/step accent color.
+// Branded multi-color icons keep their natural palette while idle. This set
+// guards only the EuiIcon `color` prop on the fallback render path — force-fill
+// on outcome still reaches these icons via the CSS override.
 const LOGO_ICONS = new Set<IconType>(['logoElasticsearch', 'logoKibana']);
-
-interface NodePalette {
-  readonly outerBorder: string;
-  readonly iconAreaBg: string;
-  readonly innerBoxBorder: string;
-  readonly iconColor: string;
-  readonly selectedBorder: string;
-}
 
 type EuiTheme = ReturnType<typeof useEuiTheme>['euiTheme'];
 
 // ----------- Pure color/state helpers -----------
 
-interface ExecutionState {
+export interface ExecutionState {
   readonly isRunning: boolean;
   readonly isSuccess: boolean;
   readonly isFailed: boolean;
 }
 
-function resolveExecutionState(execStatus: ExecutionStatus | undefined): ExecutionState {
+/**
+ * Maps the full ExecutionStatus enum to the three visual buckets used by the
+ * graph canvas:
+ *
+ * - isRunning  → spinner only; card and chip colours unchanged
+ * - isSuccess  → green border + green chip + checkCircleFill
+ * - isFailed   → red border + red chip + errorFill
+ * - none of the above → fully neutral (QUEUED, SKIPPED, CANCELLED, no record)
+ *
+ * CANCELLED is intentionally neutral — it aligns with the plugin's canonical
+ * status_badge map (subdued/grey) and honours "colour only on effective
+ * execution". WAITING_FOR_CHILD gains a spinner it was missing (a foreach
+ * waiting on children is executing).
+ */
+export function resolveExecutionState(execStatus: ExecutionStatus | undefined): ExecutionState {
   const isRunning =
     execStatus === ExecutionStatus.RUNNING ||
+    execStatus === ExecutionStatus.PENDING ||
     execStatus === ExecutionStatus.WAITING ||
     execStatus === ExecutionStatus.WAITING_FOR_INPUT ||
-    execStatus === ExecutionStatus.PENDING;
+    execStatus === ExecutionStatus.WAITING_FOR_CHILD;
   const isSuccess = execStatus === ExecutionStatus.COMPLETED;
   const isFailed =
-    execStatus === ExecutionStatus.FAILED ||
-    execStatus === ExecutionStatus.TIMED_OUT ||
-    execStatus === ExecutionStatus.CANCELLED;
+    execStatus === ExecutionStatus.FAILED || execStatus === ExecutionStatus.TIMED_OUT;
   return { isRunning, isSuccess, isFailed };
 }
 
-function pickByExecStatus(
-  isSuccess: boolean,
-  isFailed: boolean,
-  success: string,
-  failed: string,
-  idle: string
-): string {
-  if (isSuccess) return success;
-  if (isFailed) return failed;
-  return idle;
-}
-
-function resolveBorderColor(
-  { isRunning, isSuccess, isFailed }: ExecutionState,
-  isActive: boolean,
-  options: { running: string; success: string; fail: string; selected: string; idle: string }
-): string {
-  if (isRunning) return options.running;
-  if (!isActive) return options.idle;
-  if (isFailed) return options.fail;
-  if (isSuccess) return options.success;
-  return options.selected;
+/** Derives the ChipOutcome from execution state for the palette helper. */
+function toChipOutcome({ isSuccess, isFailed }: ExecutionState): ChipOutcome {
+  if (isSuccess) return 'success';
+  if (isFailed) return 'failure';
+  return 'none';
 }
 
 interface NodeColors {
-  readonly palette: NodePalette;
-  readonly triggerIconColor: string;
+  readonly chip: ReturnType<typeof getStepChipPalette>;
   readonly stepLabelColor: string;
-  readonly borderColor: string;
-  readonly iconAreaBg: string;
-  readonly innerBoxBorder: string;
-  readonly iconColor: string;
-  readonly forceTriggerPinkFill: boolean;
+  readonly cardBorderColor: string;
   readonly retryBadgeBg: string;
+  readonly retryBadgeBorderColor: string;
   readonly retryBadgeColor: string;
   readonly statusSuccessColor: string;
   readonly statusFailColor: string;
-  readonly borderRadius: number;
   readonly hasStatusIcon: boolean;
+  /** True when the icon must be force-filled to override a rich-colour logo. */
+  readonly forceFill: boolean;
 }
 
 export function resolveNodeColors(
   euiTheme: EuiTheme,
-  isTriggerNode: boolean,
-  { isRunning, isSuccess, isFailed }: ExecutionState,
-  isActive: boolean
+  family: StepFamily,
+  { isRunning, isSuccess, isFailed }: ExecutionState
 ): NodeColors {
   const { colors } = euiTheme;
 
-  // Step palette tokens
-  const stepOuterBorder = colors.backgroundLightPrimary;
-  const stepIconAreaBg = colors.backgroundLightPrimary;
-  const stepInnerBoxBorder = colors.borderBaseSubdued;
-  const stepIconColor = colors.primary;
-  const stepSelectedBorder = colors.primary;
+  // Card border: execution status only — no selection gate.
+  // A node with no execution record (or QUEUED/SKIPPED/CANCELLED) is neutral.
+  const cardBorderColor = isSuccess
+    ? colors.success
+    : isFailed
+    ? colors.danger
+    : colors.borderBasePlain;
 
-  // Trigger palette tokens
-  const triggerOuterBorder = colors.backgroundLightAccent;
-  const triggerIconAreaBg = colors.backgroundBaseAccent;
-  const triggerInnerBoxBorder = colors.borderBaseAccent;
-  const triggerIconColor = colors.accent;
-  const triggerSelectedBorder = colors.accent;
+  const outcome = toChipOutcome({ isRunning, isSuccess, isFailed });
+  const chip = getStepChipPalette(euiTheme, family, outcome);
 
-  // Execution status tokens
-  const statusRunningBorder = colors.primary;
-  const statusSuccessBg = colors.backgroundBaseSuccess;
-  const statusSuccessColor = colors.success;
-  const statusFailColor = colors.danger;
-
-  const palette: NodePalette = isTriggerNode
-    ? {
-        outerBorder: triggerOuterBorder,
-        iconAreaBg: triggerIconAreaBg,
-        innerBoxBorder: triggerInnerBoxBorder,
-        iconColor: triggerIconColor,
-        selectedBorder: triggerSelectedBorder,
-      }
-    : {
-        outerBorder: stepOuterBorder,
-        iconAreaBg: stepIconAreaBg,
-        innerBoxBorder: stepInnerBoxBorder,
-        iconColor: stepIconColor,
-        selectedBorder: stepSelectedBorder,
-      };
-
-  // Running always shows the in-progress ring. Active nodes take the status
-  // colour after execution; idle nodes show the family tint.
-  const borderColor = resolveBorderColor({ isRunning, isSuccess, isFailed }, isActive, {
-    running: statusRunningBorder,
-    success: statusSuccessColor,
-    fail: statusFailColor,
-    selected: palette.selectedBorder,
-    idle: palette.outerBorder,
-  });
-
-  const iconAreaBg = pickByExecStatus(
-    isSuccess,
-    isFailed,
-    statusSuccessBg,
-    colors.backgroundBaseDanger,
-    palette.iconAreaBg
-  );
-
-  // Inner box border keeps neutral while only selection is active; status
-  // states recolour it.
-  const innerBoxBorder = pickByExecStatus(
-    isSuccess,
-    isFailed,
-    statusSuccessColor,
-    statusFailColor,
-    palette.innerBoxBorder
-  );
-
-  // Trigger icon stays pink while idle; once execution kicks off it shares
-  // the same success/failed colours as regular steps.
-  const iconColor = pickByExecStatus(
-    isSuccess,
-    isFailed,
-    statusSuccessColor,
-    statusFailColor,
-    palette.iconColor
-  );
-
-  // Triggers in their idle pink state need a hard `fill` override because
-  // EuiIcon paints `fill` directly onto the SVG paths, beating CSS `color`
-  // inheritance.
-  const forceTriggerPinkFill = isTriggerNode && !isSuccess && !isFailed;
+  // Force-fill is true only on outcome (not idle) so brand logos keep their
+  // natural palette while idle and only get recoloured when a status fires.
+  const forceFill = isSuccess || isFailed;
 
   return {
-    palette,
-    triggerIconColor,
+    chip,
     stepLabelColor: colors.textHeading,
-    borderColor,
-    iconAreaBg,
-    innerBoxBorder,
-    iconColor,
-    forceTriggerPinkFill,
+    cardBorderColor,
     retryBadgeBg: colors.backgroundBaseWarning,
+    retryBadgeBorderColor: colors.borderBaseWarning,
     retryBadgeColor: colors.textWarning,
-    statusSuccessColor,
-    statusFailColor,
-    borderRadius: isRunning ? 8 : 10,
+    statusSuccessColor: colors.success,
+    statusFailColor: colors.danger,
     hasStatusIcon: isRunning || isSuccess || isFailed,
+    forceFill,
   };
 }
 
@@ -239,16 +168,15 @@ export function resolveNodeColors(
 function NodeStepIcon({
   iconType,
   iconColor,
-  forceTriggerPinkFill,
-  triggerIconColor,
+  forceFill,
   renderStepIcon,
   stepType,
   isTrigger,
 }: {
   iconType: ReturnType<typeof getStepIconType>;
   iconColor: string;
-  forceTriggerPinkFill: boolean;
-  triggerIconColor: string;
+  /** When true, force-fills the SVG paths to override rich-colour logos on outcome. */
+  forceFill: boolean;
   renderStepIcon?: RenderStepIcon;
   stepType: string;
   isTrigger: boolean;
@@ -258,7 +186,7 @@ function NodeStepIcon({
       <div
         css={[
           { color: iconColor, display: 'flex' },
-          forceTriggerPinkFill && { '& svg, & svg *': { fill: triggerIconColor } },
+          forceFill && { '& svg, & svg *': { fill: iconColor } },
         ]}
       >
         {renderStepIcon({ stepType, isTrigger, size: 'm', color: iconColor })}
@@ -269,7 +197,8 @@ function NodeStepIcon({
     <EuiIcon
       type={iconType}
       size="m"
-      color={LOGO_ICONS.has(String(iconType)) ? undefined : iconColor}
+      color={LOGO_ICONS.has(String(iconType)) && !forceFill ? undefined : iconColor}
+      css={forceFill ? { '& *, & path': { fill: iconColor } } : undefined}
       aria-hidden={true}
     />
   );
@@ -282,8 +211,7 @@ function NodePreviewCard({
   isTrigger,
   isTriggerNode,
   iconType,
-  palette,
-  triggerIconColor,
+  family,
   renderStepIcon,
   targetHandlePos,
   sourceHandlePos,
@@ -293,12 +221,13 @@ function NodePreviewCard({
   isTrigger?: boolean;
   isTriggerNode: boolean;
   iconType: ReturnType<typeof getStepIconType>;
-  palette: NodePalette;
-  triggerIconColor: string;
+  family: StepFamily;
   renderStepIcon?: RenderStepIcon;
   targetHandlePos: Position;
   sourceHandlePos: Position;
 }) {
+  const { euiTheme } = useEuiTheme();
+  const chip = getStepChipPalette(euiTheme, family, 'none');
   return (
     <>
       {!isTrigger && <Handle type="target" position={targetHandlePos} style={{ opacity: 0 }} />}
@@ -307,9 +236,9 @@ function NodePreviewCard({
         css={{
           width: '100%',
           height: '100%',
-          background: palette.iconAreaBg,
-          border: `1px solid ${palette.outerBorder}`,
-          borderRadius: 6,
+          background: chip.fill,
+          border: `1px solid ${chip.border}`,
+          borderRadius: euiTheme.border.radius.medium,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -317,15 +246,28 @@ function NodePreviewCard({
       >
         <NodeStepIcon
           iconType={iconType}
-          iconColor={palette.iconColor}
-          forceTriggerPinkFill={isTriggerNode}
-          triggerIconColor={triggerIconColor}
+          iconColor={chip.icon}
+          forceFill={false}
           renderStepIcon={renderStepIcon}
           stepType={stepType}
           isTrigger={isTrigger ?? false}
         />
       </div>
       <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
+      {/* Secondary source handle for the fallback edge — always on the bottom
+          edge, inset from the right corner. `Position.Bottom` is unconditional:
+          in LR the fallback margin is below the spine, so the route must leave
+          the bottom edge rather than the right centre. `transform: 'none'`
+          overrides React Flow's `.react-flow__handle-bottom` default of
+          `translate(-50%, 0)` so that `right` + `left: auto` places the handle
+          precisely. The visible port is spec 07's; React Flow reads
+          sourceHandle="fallback" on the edge to pick these coordinates. */}
+      <Handle
+        type="source"
+        id="fallback"
+        position={Position.Bottom}
+        style={{ opacity: 0, right: FAILURE_PORT_RIGHT_INSET, left: 'auto', transform: 'none' }}
+      />
     </>
   );
 }
@@ -334,11 +276,13 @@ function NodePreviewCard({
 function NodeRetryBadge({
   maxAttempts,
   bgColor,
+  borderColor,
   textColor,
   fontFamily,
 }: {
   maxAttempts: number;
   bgColor: string;
+  borderColor: string;
   textColor: string;
   fontFamily: string;
 }) {
@@ -369,6 +313,7 @@ function NodeRetryBadge({
           paddingBottom: 4,
           borderRadius: 999,
           background: bgColor,
+          border: `1px solid ${borderColor}`,
           color: textColor,
           fontFamily,
           fontSize: 12,
@@ -418,7 +363,7 @@ function NodeStatusIcon({
       {isRunning ? (
         <EuiLoadingSpinner size="m" />
       ) : isSuccess ? (
-        <EuiIcon type="checkInCircleFilled" color={successColor} size="m" aria-hidden={true} />
+        <EuiIcon type="checkCircleFill" color={successColor} size="m" aria-hidden={true} />
       ) : (
         <EuiIcon type="errorFill" color={failColor} size="m" aria-hidden={true} />
       )}
@@ -476,6 +421,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   const displayLabel = isTriggerNode ? label : deslugifyStepName(label);
 
   const iconType = isTriggerNode ? getTriggerTypeIconType(stepType) : getStepIconType(stepType);
+  const family = getStepFamily(stepType, isTriggerNode);
   const maxAttempts = getStepMaxAttempts(step);
   const targetHandlePos = node.targetPosition ?? Position.Top;
   const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
@@ -485,7 +431,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   const { onStepRun, canRunSteps, renderStepIcon, onStepSelect } = useWorkflowGraphActions();
 
   const execState = resolveExecutionState(stepExecution?.status);
-  const colors = resolveNodeColors(euiTheme, isTriggerNode, execState, isActive ?? false);
+  const colors = resolveNodeColors(euiTheme, family, execState);
 
   const showActions =
     Boolean(canRunSteps && onStepRun) &&
@@ -503,8 +449,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
         isTrigger={isTrigger}
         isTriggerNode={isTriggerNode}
         iconType={iconType}
-        palette={colors.palette}
-        triggerIconColor={colors.triggerIconColor}
+        family={family}
         renderStepIcon={renderStepIcon}
         targetHandlePos={targetHandlePos}
         sourceHandlePos={sourceHandlePos}
@@ -535,63 +480,51 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             width: '100%',
             height: '100%',
             background: euiTheme.colors.backgroundBasePlain,
-            // Flat card: a 1px border tinted to the node's
-            // family (light blue for steps, light pink for triggers) via
-            // `palette.outerBorder`. Active/running/status states recolor it.
-            border: `1px solid ${colors.borderColor}`,
-            borderRadius: colors.borderRadius,
-            // Clip children to the card's rounded shape so the icon pane's
-            // corners stay concentric with the card border (otherwise the pane
-            // and card render two slightly different corner arcs).
-            overflow: 'hidden',
+            // Border carries execution status — neutral when unexecuted,
+            // green on COMPLETED, red on FAILED/TIMED_OUT.
+            border: `1px solid ${colors.cardBorderColor}`,
+            borderRadius: euiTheme.border.radius.medium,
             display: 'flex',
             alignItems: 'center',
-            gap: 16,
-            // 16px gutter on the right whenever any meta is present (retry badge,
-            // status icon, or hover action) so the retry badge sits at the
-            // design's 16px inset from the step's right edge.
-            paddingRight: 16,
-            transition: 'border-color 120ms ease, background 120ms ease',
+            // Asymmetric padding: chip is 12px from left edge (matching the
+            // mockup), retry badge / status icon sit 16px from the right edge.
+            padding: '12px 16px 12px 12px',
+            gap: 12,
+            transition: 'border-color 120ms ease',
+          },
+          // Selection uses outline so it composes with any border colour:
+          // a completed (green-border) or failed (red-border) node still
+          // shows a visible selection ring without conflating the two signals.
+          isActive && {
+            outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.primary}`,
+            outlineOffset: 2,
           },
         ]}
       >
-        {/* Icon area — colored background pane. No own corner radius: the card's
-            `overflow: hidden` clips it to the rounded shape, so the pane fills
-            flush into the corner with no gap. */}
+        {/* Icon chip — 28×28 tinted box whose colours come from the family
+            palette at idle and switch to success/danger on execution outcome. */}
         <div
           css={{
             flex: '0 0 auto',
-            height: '100%',
-            background: colors.iconAreaBg,
+            width: 28,
+            height: 28,
+            background: colors.chip.fill,
+            border: `1px solid ${colors.chip.border}`,
+            borderRadius: euiTheme.border.radius.small,
             display: 'flex',
             alignItems: 'center',
-            padding: 12,
-            transition: 'background 120ms ease',
+            justifyContent: 'center',
+            transition: 'background 120ms ease, border-color 120ms ease',
           }}
         >
-          <div
-            css={{
-              width: 40,
-              height: 40,
-              background: euiTheme.colors.backgroundBasePlain,
-              border: `1px solid ${colors.innerBoxBorder}`,
-              borderRadius: 8,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'border-color 120ms ease',
-            }}
-          >
-            <NodeStepIcon
-              iconType={iconType}
-              iconColor={colors.iconColor}
-              forceTriggerPinkFill={colors.forceTriggerPinkFill}
-              triggerIconColor={colors.triggerIconColor}
-              renderStepIcon={renderStepIcon}
-              stepType={stepType}
-              isTrigger={isTrigger ?? false}
-            />
-          </div>
+          <NodeStepIcon
+            iconType={iconType}
+            iconColor={colors.chip.icon}
+            forceFill={colors.forceFill}
+            renderStepIcon={renderStepIcon}
+            stepType={stepType}
+            isTrigger={isTrigger ?? false}
+          />
         </div>
 
         <span
@@ -620,6 +553,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
           <NodeRetryBadge
             maxAttempts={maxAttempts}
             bgColor={colors.retryBadgeBg}
+            borderColor={colors.retryBadgeBorderColor}
             textColor={colors.retryBadgeColor}
             fontFamily={euiTheme.font.family}
           />
@@ -639,6 +573,13 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
         )}
       </div>
       <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
+      {/* See note on the preview-mode component above for fallback handle semantics. */}
+      <Handle
+        type="source"
+        id="fallback"
+        position={Position.Bottom}
+        style={{ opacity: 0, right: FAILURE_PORT_RIGHT_INSET, left: 'auto', transform: 'none' }}
+      />
     </>
   );
 }
@@ -661,6 +602,7 @@ function nodePropsAreEqual(
     prev.data.stepExecution?.status === next.data.stepExecution?.status &&
     prev.data.preview === next.data.preview &&
     prev.data.step === next.data.step &&
+    prev.data.fallbackOf === next.data.fallbackOf &&
     prev.selected === next.selected &&
     prev.targetPosition === next.targetPosition &&
     prev.sourcePosition === next.sourcePosition &&

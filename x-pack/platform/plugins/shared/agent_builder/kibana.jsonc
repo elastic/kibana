@@ -26,7 +26,6 @@
       "lens",
       "licensing",
       "management",
-      "presentationUtil",
       "agentBuilderSml",
       "share",
       "spaces",
@@ -37,12 +36,14 @@
       "unifiedSearch",
       "esUiShared",
       "workflowsExtensions",
-      "searchInferenceEndpoints"
+      "searchInferenceEndpoints",
+      "files"
     ],
     "requiredBundles": [
       "kibanaReact",
       "usageCollection",
-      "security"
+      "security",
+      "presentationUtil"
     ],
     "optionalPlugins": [
       "cloud",

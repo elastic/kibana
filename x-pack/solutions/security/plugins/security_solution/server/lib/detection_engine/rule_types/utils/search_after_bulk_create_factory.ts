@@ -7,7 +7,9 @@
 
 import { identity } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { singleSearchAfter } from './single_search_after';
+import { getNoReadableShardsWarning, hasZeroShards } from './no_readable_shards';
 import { filterEventsAgainstList } from './large_list_filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
 import { buildEventsSearchQuery } from './build_events_query';
@@ -17,6 +19,8 @@ import {
   getTotalHitsValue,
   mergeReturns,
   getSafeSortIds,
+  getSafeNanosSortIds,
+  getUnusableCursorWarning,
 } from './utils';
 import type {
   SearchAfterAndBulkCreateParams,
@@ -78,6 +82,8 @@ export const searchAfterAndBulkCreateFactory = async ({
     searchAfterSize: pageSize,
     primaryTimestamp,
     secondaryTimestamp,
+    dateNanosTimestampFields,
+    mixedTimestampFields,
     unprocessedExceptions: exceptionsList,
     tuple,
     ruleExecutionLogger,
@@ -89,11 +95,13 @@ export const searchAfterAndBulkCreateFactory = async ({
     let searchingIteration = 0;
     let totalEventsFound = 0;
     const loggedRequests: RulePreviewLoggedRequest[] = [];
+    const hasDateNanosTimestampFields = dateNanosTimestampFields.length > 0;
 
     // sortId tells us where to start our next consecutive search_after query
     let sortIds: estypes.SortResults | undefined;
 
     const maxSignals = maxSignalsOverride ?? tuple.maxSignals;
+    let searchSize = Math.ceil(Math.min(maxSignals, pageSize));
 
     while (toReturn.createdSignalsCount <= maxSignals) {
       const cycleNum = `cycle ${searchingIteration++}`;
@@ -111,18 +119,21 @@ export const searchAfterAndBulkCreateFactory = async ({
           to: tuple.to.toISOString(),
           runtimeMappings,
           filter,
-          size: Math.ceil(Math.min(maxSignals, pageSize)),
+          size: searchSize,
           sortOrder,
           searchAfterSortIds: sortIds,
           primaryTimestamp,
           secondaryTimestamp,
           trackTotalHits,
           additionalFilters,
+          dateNanosTimestampFields,
+          mixedTimestampFields,
         });
         const {
           searchResult,
           searchDuration,
           searchErrors,
+          searchWarnings,
           loggedRequests: singleSearchLoggedRequests = [],
         } = await singleSearchAfter({
           searchRequest: searchAfterQuery,
@@ -143,14 +154,29 @@ export const searchAfterAndBulkCreateFactory = async ({
           createSearchAfterReturnType({
             searchAfterTimes: [searchDuration],
             errors: searchErrors,
+            warningMessages: searchWarnings,
           }),
         ]);
         loggedRequests.push(...singleSearchLoggedRequests);
+
+        if (searchErrors.length === 0 && hasZeroShards(searchResult)) {
+          toReturn.warningMessages.push(
+            getNoReadableShardsWarning({
+              inputIndex: inputIndexPattern,
+              cpsLinkedProjects: sharedParams.cpsData?.linkedProjects,
+            })
+          );
+          break;
+        }
+
         // determine if there are any candidate signals to be processed
         const totalHits = getTotalHitsValue(searchResult.hits.total);
-        const lastSortIds = getSafeSortIds(
-          searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort
-        );
+        const lastHitSort = searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort;
+        // with date_nanos, sort values are formatted ISO strings which round-trip exactly;
+        // getSafeSortIds would corrupt them (its null branch produces an out-of-range cursor)
+        const lastSortIds = hasDateNanosTimestampFields
+          ? getSafeNanosSortIds(lastHitSort)
+          : getSafeSortIds(lastHitSort);
 
         if (totalHits === 0 || searchResult.hits.hits.length === 0) {
           ruleExecutionLogger.trace(
@@ -206,6 +232,22 @@ export const searchAfterAndBulkCreateFactory = async ({
           }
         }
 
+        if (hasDateNanosTimestampFields && searchResult.hits.hits.length < searchSize) {
+          ruleExecutionLogger.trace(
+            `${cycleNum}: Last page reached\nFound ${searchResult.hits.hits.length} of the ${searchSize} requested events, so no further pages exist.`
+          );
+          break;
+        }
+
+        const cursorWarning = hasDateNanosTimestampFields
+          ? getUnusableCursorWarning(lastSortIds, sortIds)
+          : undefined;
+        if (cursorWarning != null) {
+          toReturn.warningMessages.push(cursorWarning);
+          ruleExecutionLogger.warn(`${cycleNum}: ${cursorWarning}`);
+          break;
+        }
+
         // ES can return negative sort id for date field, when sort order set to desc
         // this could happen when event has empty sort field
         // https://github.com/elastic/kibana/issues/174573 (happens to IM rule only since it uses desc order for events search)
@@ -218,18 +260,32 @@ export const searchAfterAndBulkCreateFactory = async ({
           break;
         }
       } catch (exc: unknown) {
-        ruleExecutionLogger.error(
-          `${cycleNum}: Error extracting/processing events or creating alerts\nError: ${JSON.stringify(
-            exc
-          )}`
-        );
-        return mergeReturns([
-          toReturn,
-          createSearchAfterReturnType({
-            success: false,
-            errors: [`${exc}`],
-          }),
-        ]);
+        if (isMaximumResponseSizeExceededError(exc) && searchSize > 1) {
+          // halve the page size and retry the same search_after window with the reduced size
+          const reducedSearchSize = Math.floor(searchSize / 2);
+          const warningMessage = `The search response exceeded the "elasticsearch.maxResponseSize" limit, reducing the number of events fetched per page from ${searchSize} to ${reducedSearchSize} and retrying. Error: ${exc.message}`;
+
+          ruleExecutionLogger.warn(`${cycleNum}: ${warningMessage}`);
+          toReturn.warningMessages.push(warningMessage);
+          searchSize = reducedSearchSize;
+        } else {
+          const errorMessage = isMaximumResponseSizeExceededError(exc)
+            ? `A single event exceeded the "elasticsearch.maxResponseSize" limit, it is impossible to fetch events for this rule. Error: ${exc.message}`
+            : `${exc}`;
+
+          ruleExecutionLogger.error(
+            `${cycleNum}: Error extracting/processing events or creating alerts\nError: ${JSON.stringify(
+              exc
+            )}`
+          );
+          return mergeReturns([
+            toReturn,
+            createSearchAfterReturnType({
+              success: false,
+              errors: [errorMessage],
+            }),
+          ]);
+        }
       }
     }
     ruleExecutionLogger.debug(`Alerts created: ${toReturn.createdSignalsCount}`);

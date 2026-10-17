@@ -8,6 +8,7 @@
  */
 
 import controls from '@elastic/eui/lib/components/icon/svgs/controls.svg';
+import globe from '@elastic/eui/lib/components/icon/svgs/globe.svg';
 import beta from './icons/beta.svg';
 import bolt from './icons/bolt.svg';
 import branch from './icons/branch.svg';
@@ -39,6 +40,7 @@ export const HardcodedIcons: Record<string, string> = {
   elasticsearch: elasticsearchLogoSvg,
   kibana: kibanaLogoSvg,
   console: 'commandLine',
+  http: 'globe',
   'data.set': database,
   foreach: 'refresh',
   while: 'refresh',
@@ -70,6 +72,7 @@ const CSS_ICON_URL_OVERRIDES: Record<string, string> = {
   '.slack': slackLogoSvg,
   '.slack_api': slackLogoSvg,
   console: consoleSvg,
+  http: globe,
   foreach: refresh,
   while: refresh,
   if: branch,

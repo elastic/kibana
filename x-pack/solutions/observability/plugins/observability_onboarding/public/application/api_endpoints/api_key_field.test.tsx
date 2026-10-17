@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { ApiKeyField } from './api_key_field';
 
@@ -31,6 +31,18 @@ describe('ApiKeyField', () => {
     ).toBeInTheDocument();
   });
 
+  it('supports a compact created-before placeholder', () => {
+    render(
+      <ApiKeyField
+        {...defaultProps}
+        wasKeyCreatedBefore={true}
+        createdBeforePlaceholder="Cannot display existing keys"
+      />
+    );
+
+    expect(screen.getByPlaceholderText('Cannot display existing keys')).toBeInTheDocument();
+  });
+
   it('shows the key value when a key is present in memory', () => {
     render(
       <ApiKeyField {...defaultProps} wasKeyCreatedBefore={true} encodedApiKey="encoded-key" />
@@ -51,5 +63,62 @@ describe('ApiKeyField', () => {
     );
 
     expect(screen.getByRole('button', { name: /show password/i })).toBeInTheDocument();
+  });
+
+  it('renders default test subjects without a suffix', () => {
+    render(<ApiKeyField {...defaultProps} />);
+
+    expect(screen.getByTestId('observabilityOnboardingApiEndpointApiKeyValue')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('observabilityOnboardingApiEndpointCreateApiKeyButton')
+    ).toBeInTheDocument();
+  });
+
+  it('suffixes test subjects and applies a custom aria label', () => {
+    render(
+      <ApiKeyField
+        {...defaultProps}
+        dataTestSubjSuffix="-supabase"
+        ariaLabel="Supabase API key"
+        encodedApiKey="encoded-key"
+      />
+    );
+
+    expect(
+      screen.getByTestId('observabilityOnboardingApiEndpointApiKeyValue-supabase')
+    ).toHaveAttribute('aria-label', 'Supabase API key');
+    expect(
+      screen.getByTestId('observabilityOnboardingApiEndpointApiKeyCopyButton-supabase')
+    ).toHaveAttribute('aria-label', 'Copy Supabase API key to clipboard');
+    expect(
+      screen.getByTestId('observabilityOnboardingApiEndpointCreateApiKeyButton-supabase')
+    ).toBeInTheDocument();
+  });
+
+  it('names the copy button after the default label when no aria label is given', () => {
+    render(<ApiKeyField {...defaultProps} encodedApiKey="encoded-key" />);
+
+    expect(
+      screen.getByTestId('observabilityOnboardingApiEndpointApiKeyCopyButton')
+    ).toHaveAttribute('aria-label', 'Copy API key to clipboard');
+  });
+
+  it('disables only the create button when isDisabled is set', () => {
+    render(<ApiKeyField {...defaultProps} isDisabled={true} />);
+
+    expect(
+      screen.getByTestId('observabilityOnboardingApiEndpointCreateApiKeyButton')
+    ).toBeDisabled();
+    expect(screen.queryByText(/don't have permission/)).not.toBeInTheDocument();
+  });
+
+  it('explains when the create button is disabled by another key request', async () => {
+    render(<ApiKeyField {...defaultProps} isDisabled={true} />);
+
+    fireEvent.mouseOver(screen.getByTestId('observabilityOnboardingApiEndpointCreateApiKeyButton'));
+
+    expect(
+      await screen.findByText('Another API key is being created. Wait for it to finish.')
+    ).toBeInTheDocument();
   });
 });

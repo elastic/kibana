@@ -7,10 +7,50 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { AiIndexAutomation } from '../../../../common/http_api/ai_indices';
 import { AutomationRow } from './automation_row';
+
+jest.mock('./workflow_yaml_preview_flyout', () => ({
+  WorkflowYamlPreviewFlyout: ({
+    workflowId,
+    workflowName,
+    onClose,
+  }: {
+    workflowId: string;
+    workflowName: string;
+    onClose: () => void;
+  }) => (
+    <div data-test-subj="contextWorkflowYamlPreviewFlyout">
+      <span>{workflowName}</span>
+      <span>{workflowId}</span>
+      <button type="button" onClick={onClose}>
+        Close preview
+      </button>
+    </div>
+  ),
+}));
+
+jest.mock('./automation_delete_confirm_modal', () => ({
+  AutomationDeleteConfirmModal: ({
+    onCancel,
+    onConfirm,
+  }: {
+    name: string;
+    onCancel: () => void;
+    onConfirm: () => Promise<boolean | void>;
+  }) => (
+    <div data-test-subj="contextAutomationDeleteConfirmModalStub">
+      <button type="button" onClick={onCancel}>
+        Cancel
+      </button>
+      <button type="button" onClick={() => void onConfirm()}>
+        Confirm
+      </button>
+    </div>
+  ),
+}));
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(
@@ -31,9 +71,9 @@ const createDefaultProps = (
   name: 'My Workflow',
   enabled: true,
   editHref: '/app/workflows/workflow-1',
-  isEditing: true,
-  isRemoveDisabled: false,
-  onRemove: jest.fn(),
+  isReadOnly: false,
+  isDisabled: false,
+  onDelete: jest.fn().mockResolvedValue(true),
   ...overrides,
 });
 
@@ -43,6 +83,10 @@ const renderAutomationRow = (
   const props = createDefaultProps(overrides);
   renderWithProviders(<AutomationRow {...props} />);
   return props;
+};
+
+const openActionsMenu = () => {
+  fireEvent.click(screen.getByTestId('contextAutomationRowActionsButton'));
 };
 
 describe('AutomationRow', () => {
@@ -84,55 +128,89 @@ describe('AutomationRow', () => {
     expect(screen.queryByText('Disabled')).not.toBeInTheDocument();
   });
 
-  it('renders the Edit workflow link with the given editHref and target="_blank"', () => {
-    renderAutomationRow({ editHref: '/app/workflows/edit/123' });
+  it('opens the YAML preview flyout when View is chosen from the actions menu', () => {
+    renderAutomationRow({ name: 'My Workflow' });
 
-    const link = screen.getByTestId('contextOpenWorkflowButton');
-    expect(link).toHaveAttribute('href', '/app/workflows/edit/123');
-    expect(link).toHaveAttribute('target', '_blank');
+    openActionsMenu();
+    fireEvent.click(screen.getByTestId('contextPreviewWorkflowButton'));
+
+    const flyout = screen.getByTestId('contextWorkflowYamlPreviewFlyout');
+    expect(flyout).toBeInTheDocument();
+    expect(flyout).toHaveTextContent('My Workflow');
+    expect(flyout).toHaveTextContent('workflow-value-id');
   });
 
-  it('renders no actions when isEditing is false', () => {
-    renderAutomationRow({ isEditing: false });
+  it('shows only View in the actions menu when isReadOnly is true', () => {
+    renderAutomationRow({ isReadOnly: true });
 
+    openActionsMenu();
+
+    expect(screen.getByTestId('contextPreviewWorkflowButton')).toBeInTheDocument();
     expect(screen.queryByTestId('contextOpenWorkflowButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextRemoveAutomationButton')).not.toBeInTheDocument();
   });
 
-  it('renders the actions when isEditing is true', () => {
-    renderAutomationRow({ isEditing: true });
+  it('shows Edit and Delete in the actions menu when isReadOnly is false', () => {
+    renderAutomationRow({ isReadOnly: false, editHref: '/app/workflows/edit/123' });
 
-    expect(screen.getByTestId('contextOpenWorkflowButton')).toBeInTheDocument();
+    openActionsMenu();
+
+    const link = screen.getByTestId('contextOpenWorkflowButton');
+    expect(link).toHaveAttribute('href', '/app/workflows/edit/123');
     expect(screen.getByTestId('contextRemoveAutomationButton')).toBeInTheDocument();
   });
 
-  it('calls onRemove exactly once when the remove button is clicked', () => {
-    const { onRemove } = renderAutomationRow({ isEditing: true });
+  it('disables the delete menu item when isDisabled is true', () => {
+    renderAutomationRow({ isDisabled: true });
 
-    fireEvent.click(screen.getByTestId('contextRemoveAutomationButton'));
-
-    expect(onRemove).toHaveBeenCalledTimes(1);
-  });
-
-  it('disables the remove button when isRemoveDisabled is true', () => {
-    renderAutomationRow({ isEditing: true, isRemoveDisabled: true });
+    openActionsMenu();
 
     expect(screen.getByTestId('contextRemoveAutomationButton')).toBeDisabled();
   });
 
-  it('does not call onRemove when clicking the disabled remove button', () => {
-    const { onRemove } = renderAutomationRow({ isEditing: true, isRemoveDisabled: true });
+  it('opens the delete confirm modal without calling onDelete when Delete is chosen', () => {
+    const { onDelete } = renderAutomationRow();
 
+    openActionsMenu();
     fireEvent.click(screen.getByTestId('contextRemoveAutomationButton'));
 
-    expect(onRemove).not.toHaveBeenCalled();
+    expect(screen.getByTestId('contextAutomationDeleteConfirmModalStub')).toBeInTheDocument();
+    expect(onDelete).not.toHaveBeenCalled();
   });
 
-  it("includes the display name in the remove button's accessible label", () => {
-    renderAutomationRow({ name: 'My Workflow', isEditing: true });
+  it('calls onDelete once and closes the modal when delete is confirmed', async () => {
+    const { onDelete } = renderAutomationRow();
 
-    expect(
-      screen.getByRole('button', { name: 'Remove automation My Workflow' })
-    ).toBeInTheDocument();
+    openActionsMenu();
+    fireEvent.click(screen.getByTestId('contextRemoveAutomationButton'));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+    await waitFor(() => {
+      expect(onDelete).toHaveBeenCalledTimes(1);
+    });
+    expect(screen.queryByTestId('contextAutomationDeleteConfirmModalStub')).not.toBeInTheDocument();
+  });
+
+  it('keeps the modal open when onDelete reports a failed save', async () => {
+    renderAutomationRow({ onDelete: jest.fn().mockResolvedValue(false) });
+
+    openActionsMenu();
+    fireEvent.click(screen.getByTestId('contextRemoveAutomationButton'));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('contextAutomationDeleteConfirmModalStub')).toBeInTheDocument();
+    });
+  });
+
+  it('does not call onDelete and closes the modal when delete is cancelled', () => {
+    const { onDelete } = renderAutomationRow();
+
+    openActionsMenu();
+    fireEvent.click(screen.getByTestId('contextRemoveAutomationButton'));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(onDelete).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('contextAutomationDeleteConfirmModalStub')).not.toBeInTheDocument();
   });
 });

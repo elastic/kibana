@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/fleet-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/fleet'
+  defaultOwner: '@elastic/streams-ui'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/fleet-plugin'
   description: Moon project for @kbn/fleet-plugin
   channel: ''
-  owner: '@elastic/fleet'
+  owner: '@elastic/streams-ui'
   sourceRoot: x-pack/platform/plugins/shared/fleet
 dependsOn:
   - '@kbn/core'
@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/i18n-react'
   - '@kbn/custom-integrations-plugin'
+  - '@kbn/ui-callout'
   - '@kbn/deeplinks-management'
   - '@kbn/core-application-common'
   - '@kbn/core-capabilities-common'
@@ -113,12 +114,15 @@ dependsOn:
   - '@kbn/core-di'
   - '@kbn/licensing-types'
   - '@kbn/alerting-plugin'
+  - '@kbn/alerting-v2-utils'
+  - '@kbn/deeplinks-observability'
   - '@kbn/core-spaces-common'
   - '@kbn/setup-node-env'
   - '@kbn/react-query'
   - '@kbn/fs'
   - '@kbn/kql'
   - '@kbn/scout'
+  - '@kbn/es'
   - '@kbn/reporting-common'
   - '@kbn/reporting-plugin'
   - '@kbn/user-profile-components'
@@ -133,6 +137,7 @@ dependsOn:
   - '@kbn/elastic-agent-condition-language'
   - '@kbn/app-header'
   - '@kbn/core-http-browser'
+  - '@kbn/core-feature-flags-server'
 tags:
   - plugin
   - prod
@@ -150,5 +155,8 @@ fileGroups:
     - package.json
     - test/scout/**/*
     - test/scout_automatic_import/**/*
+    - test/scout_fi_agentless/**/*
+    - test/scout_iac_provisioner/**/*
+    - test/scout_fleet_real_agent/**/*
     - '!target/**/*'
 tasks: {}

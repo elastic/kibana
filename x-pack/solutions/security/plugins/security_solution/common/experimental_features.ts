@@ -45,6 +45,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointMemoryDump: true,
 
   /**
+   * `physical` memory dump type for the Memory Dump response action for Elastic Defend Endpoint
+   * Release: 9.6, backported to 9.5.x
+   */
+  responseActionsEndpointMemoryDumpRaw: true,
+
+  /**
    * `runscript` response action for Elastic Defend Endpoint
    * Release: 9.4
    */
@@ -66,20 +72,41 @@ export const allowedExperimentalValues = Object.freeze({
    * `cancel` response action for Elastic Defend Endpoint
    * Release: 9.5
    */
-  responseActionsEndpointCancel: false,
+  responseActionsEndpointCancel: true,
 
   /**
    * `kill_descendants` parameter option for the `kill-process` response action for Elastic Defend Endpoint
    * Release: 9.6
    */
-  responseActionsEndpointKillProcessDescendants: false,
+  responseActionsEndpointKillProcessDescendants: true,
 
   /**
    * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
-   * (Fleet remote output) is visible from the managing cluster's Kibana. Off by default while
-   * we test impact on other features.
+   * (Fleet remote output) is visible from the managing cluster's Kibana.
+   * Release: 9.5
    */
-  defendRemoteOutputCcs: false,
+  defendRemoteOutputCcs: true,
+
+  /**
+   * Enables Cross-Project Search fan-out for Elastic Defend read paths on serverless, moving the reads
+   * it covers from the internal user to a project-routed current-user client. Fan-out additionally
+   * requires the request to resolve at least one linked project via `cps.isCpsActive()`, so a
+   * serverless project with no linked projects reads exactly as it did before CPS. Off until the
+   * request user holds index privileges on the Defend indices: a missing grant drops rows silently.
+   */
+  defendCrossProjectSearch: true,
+
+  /**
+   * AI Agent chat-first endpoint response actions skill (read-only: list endpoints,
+   * endpoint status, response action status)
+   * Release: TBD
+   *
+   * Ships disabled: it surfaces endpoint response-action state to chat and is
+   * the landing spot for the upcoming dispatch tools, so it must not be enabled
+   * by default on any branch. Enable it explicitly via config (or a Scout
+   * evals config) for local/CI testing.
+   */
+  endpointResponseActionsSkill: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -100,8 +127,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
+
   /**
-   * Enables the new Entity Analytics home page experience.
+   * Retired no-op. The Entity Analytics homepage is always on. Kept so existing
+   * `xpack.securitySolution.enableExperimental` entries, including
+   * `disable:entityAnalyticsNewHomePageEnabled`, remain valid during upgrade.
    */
   entityAnalyticsNewHomePageEnabled: true,
 
@@ -143,6 +173,13 @@ export const allowedExperimentalValues = Object.freeze({
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,
+
+  /**
+   * Enables the v2 rule migration agent graph, which runs pre-built rule matching
+   * (security-team#18589) through a dedicated subgraph that generates its own semantic
+   * queries and calls pre-built rules search as a tool, instead of the v1 one-shot node.
+   */
+  ruleMigrationGraphv2: false,
 
   /**
    * Enables the Defend Insights Policy Response Failure feature
@@ -197,6 +234,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Protects all the work related to the attacks and alerts alignment effort
    */
   enableAlertsAndAttacksAlignment: true,
+  /**
+   * Enables attaching an attack, together with its constituent alerts, to a case from
+   * the Attacks page and the attack flyout, and registers the `security.attack` unified
+   * cases attachment type on the server.
+   */
+  attackAttachmentsEnabled: false,
   /**
    *  Enables the QRadar rules import feature
    */
@@ -253,10 +296,20 @@ export const allowedExperimentalValues = Object.freeze({
   pciComplianceAgentBuilder: true,
 
   /**
-   * Enables the investigate-rule Agent Builder skill.
-   * Gates skill registration so the feature can ship dark and be enabled per environment.
+   * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
    */
-  investigateRuleSkill: false,
+  endpointForensicAnalysisSkill: true,
+
+  /**
+   * Enables the Elastic Defend Policy Management Agent Builder skill (read-only prose workflows).
+   * Shipped dark by default; enable per environment via config.
+   */
+  elasticDefendPolicyManagementSkill: false,
+
+  /**
+   * Enables the investigate-rule Agent Builder skill.
+   */
+  investigateRuleSkill: true,
 
   /**
    * Enables the find-security-rules Agent Builder skill.
@@ -289,12 +342,6 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsAnomalyDetails: true,
 
   /**
-   * Enables the deprecated prebuilt rules UI
-   * Release: 9.4
-   */
-  prebuiltRulesDeprecationUIEnabled: true,
-
-  /**
    * Enables the Detection Rule Changes History API endpoint
    * (`GET /api/detection_engine/rules/_history`).
    *
@@ -321,6 +368,35 @@ export const allowedExperimentalValues = Object.freeze({
    * from the locally stored kibana mappings after a MITRE version bump.
    */
   mitreAttackUpdatesUIEnabled: true,
+
+  /**
+   * Enables the reworked Elastic Defend policy settings form with
+   * per-operating-system protection configuration.
+   * Release: 9.6
+   */
+  perOsPolicySettings: true,
+
+  /**
+   * Enables ransomware protection for Linux in Elastic Defend policies.
+   * When disabled, `linux.ransomware` is not added to new policies, is stripped from updated
+   * ones, and is not shown in the UI.
+   * Requires `perOsPolicySettings`: the Linux toggle exists only in the per-OS policy form, so the
+   * feature is treated as disabled unless both flags are on (`isLinuxRansomwareProtectionEnabled`).
+   * Release: 9.6
+   */
+  linuxRansomwareProtection: false,
+
+  /**
+   * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
+   * creation policy but has no entity store record, create the entity (with its risk score)
+   * instead of silently dropping the score.
+   */
+  riskScoreCreateMissingEntitiesEnabled: true,
+
+  /**
+   * Enables the SIEM Rule Migrations Agent Builder tools.
+   */
+  siemRuleMigrationsAgentBuilderEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

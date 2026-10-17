@@ -10,52 +10,50 @@ import { syntheticsVaultConnectionType } from '../../common/types/saved_objects'
 import type { SyntheticsServerSetup } from '../types';
 
 /**
- * A Heartbeat-shaped `vault:` connection, assembled from an encrypted connection
- * saved object. This is what Heartbeat's resolver reads to expand
- * ${vault/[<name>@]<path>#<field>} references. Snake-cased to match Heartbeat
- * (go-ucfg) config keys.
+ * A Heartbeat `secret_stores` entry of type `vault`, assembled from an encrypted
+ * connection saved object. Heartbeat resolves `vault://<path>#<field>` references
+ * with it. Snake-cased to match Heartbeat (go-ucfg) config keys.
  */
 export interface HeartbeatVaultConfig {
-  enabled: true;
+  type: 'vault';
+  // Kibana-only: not read by Heartbeat. The saved object name, used to pick the
+  // connection a monitor references (`vault://<name>@...`); never part of the
+  // delivered entry (see `toSecretStoreEntry`).
   name: string;
-  // Secret-provider backend. Heartbeat's resolver factory switches on this; it
-  // defaults to hashicorp_vault when absent. The provider-specific fields below are
-  // flattened onto the wire blob (the stored connection keeps them under
-  // config/secrets), so a new provider adds fields here plus an agent resolver.
-  type: string;
   address: string;
-  auth_method: 'token' | 'approle';
-  kv_mount?: string;
   namespace?: string;
-  tls_skip_verify?: boolean;
-  secret_refresh_interval?: string;
-  // Opaque version (the connection's refreshedAt). Bumping it changes the blob,
-  // which forces the agent to re-resolve — the manual "refresh" mechanism.
+  kv_mount?: string;
+  auth: { token: string } | { approle: { role_id: string; secret_id: string } };
+  ssl?: { verification_mode: 'none' };
+  // Opaque version (the connection's refreshedAt). Heartbeat shares one store (and
+  // its 5 minute secret cache) per distinct entry, so bumping this forces fresh
+  // reads — the manual "refresh" mechanism.
   version?: string;
-  token?: string;
-  role_id?: string;
-  secret_id?: string;
 }
 
-const toHeartbeatConfig = (attributes: SyntheticsVaultConnection): HeartbeatVaultConfig => ({
-  enabled: true,
-  name: attributes.name,
-  type: attributes.type,
-  address: attributes.config.address,
-  auth_method: attributes.config.authMethod,
-  kv_mount: attributes.config.kvMount,
-  namespace: attributes.config.namespace,
-  tls_skip_verify: attributes.config.tlsSkipVerify,
-  secret_refresh_interval: attributes.secretRefreshInterval,
-  version: attributes.refreshedAt,
-  token: attributes.secrets?.token,
-  role_id: attributes.config.roleId,
-  secret_id: attributes.secrets?.secretId,
-});
+/** The entry as delivered to Heartbeat: everything except Kibana's own `name`. */
+export const toSecretStoreEntry = ({ name: _name, ...entry }: HeartbeatVaultConfig) => entry;
+
+const toHeartbeatConfig = (attributes: SyntheticsVaultConnection): HeartbeatVaultConfig => {
+  const { config, secrets } = attributes;
+  return {
+    type: 'vault',
+    name: attributes.name,
+    address: config.address,
+    namespace: config.namespace,
+    kv_mount: config.kvMount,
+    auth:
+      config.authMethod === 'approle'
+        ? { approle: { role_id: config.roleId ?? '', secret_id: secrets?.secretId ?? '' } }
+        : { token: secrets?.token ?? '' },
+    ...(config.tlsSkipVerify ? { ssl: { verification_mode: 'none' as const } } : {}),
+    version: attributes.refreshedAt,
+  };
+};
 
 /**
  * Reads and decrypts every Vault connection for a space and returns them as an
- * array of Heartbeat `vault:` connection blocks. Empty when none are configured.
+ * array of Heartbeat `secret_stores` vault entries. Empty when none are configured.
  *
  * Note: this yields plaintext secrets, so it must only be used when assembling
  * the config delivered to a private-location agent (via a Fleet secret) — never

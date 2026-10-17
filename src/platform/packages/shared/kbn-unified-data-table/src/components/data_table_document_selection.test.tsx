@@ -9,6 +9,7 @@
 
 import type { DataTableCompareToolbarBtn } from './data_table_document_selection';
 import React from 'react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
 import {
   buildSelectedDocsState,
@@ -204,7 +205,6 @@ describe('document selection', () => {
         enableComparisonMode: true,
         fieldFormats: servicesMock.fieldFormats,
         isFilterActive: false,
-        isPlainRecord: false,
         pageIndex: 0,
         pageSize: 2,
         rows: dataTableContextRowsMock,
@@ -263,7 +263,6 @@ describe('document selection', () => {
         enableComparisonMode: false,
         fieldFormats: servicesMock.fieldFormats,
         isFilterActive: false,
-        isPlainRecord: false,
         pageIndex: 0,
         pageSize: 2,
         rows: dataTableContextRowsMock,
@@ -301,7 +300,6 @@ describe('document selection', () => {
         fieldFormats: servicesMock.fieldFormats,
         hideDefaultBulkActions: true,
         isFilterActive: false,
-        isPlainRecord: false,
         pageIndex: 0,
         pageSize: 2,
         rows: dataTableContextRowsMock,
@@ -332,7 +330,6 @@ describe('document selection', () => {
         enableComparisonMode: true,
         fieldFormats: servicesMock.fieldFormats,
         isFilterActive: false,
-        isPlainRecord: false,
         pageIndex: 0,
         pageSize: 2,
         rows: dataTableContextRowsMock,
@@ -358,7 +355,6 @@ describe('document selection', () => {
         enableComparisonMode: true,
         fieldFormats: servicesMock.fieldFormats,
         isFilterActive: false,
-        isPlainRecord: false,
         pageIndex: 0,
         pageSize: 2,
         rows: dataTableContextRowsMock,
@@ -390,7 +386,6 @@ describe('document selection', () => {
         enableComparisonMode: true,
         fieldFormats: servicesMock.fieldFormats,
         isFilterActive: false,
-        isPlainRecord: false,
         pageIndex: 1,
         pageSize: 2,
         rows: dataTableContextRowsMock,
@@ -416,7 +411,6 @@ describe('document selection', () => {
         enableComparisonMode: true,
         fieldFormats: servicesMock.fieldFormats,
         isFilterActive: false,
-        isPlainRecord: false,
         pageIndex: 1,
         pageSize: 2,
         rows: dataTableContextRowsMock,
@@ -443,7 +437,6 @@ describe('document selection', () => {
       enableComparisonMode: true,
       fieldFormats: servicesMock.fieldFormats,
       isFilterActive: false,
-      isPlainRecord: false,
       pageIndex: 0,
       pageSize: 2,
       rows: dataTableContextRowsMock,
@@ -474,6 +467,7 @@ describe('document selection', () => {
           const menuButton = await screen.findByRole('button', { name: /Selected/ });
 
           await userEvent.click(menuButton);
+          await waitForEuiPopoverOpen();
 
           return screen.queryByTestId('unifiedDataTableCompareSelectedDocuments');
         },

@@ -17,10 +17,12 @@ import {
   GETTING_STARTED_PATH,
 } from '../common/constants';
 import { createNavigationTree } from './navigation_tree';
+import { CONSOLE_DEFAULT_CONTENT } from './console_default_content';
 import type {
   ServerlessVectordbPluginSetup,
   ServerlessVectordbPluginStart,
   ServerlessVectordbServices,
+  ServerlessVectordbSetupDependencies,
   ServerlessVectordbStartDependencies,
 } from './types';
 
@@ -29,13 +31,16 @@ export class ServerlessVectordbPlugin
     Plugin<
       ServerlessVectordbPluginSetup,
       ServerlessVectordbPluginStart,
-      {},
+      ServerlessVectordbSetupDependencies,
       ServerlessVectordbStartDependencies
     >
 {
   public setup(
-    core: CoreSetup<ServerlessVectordbStartDependencies, ServerlessVectordbPluginStart>
+    core: CoreSetup<ServerlessVectordbStartDependencies, ServerlessVectordbPluginStart>,
+    { console: consolePlugin }: ServerlessVectordbSetupDependencies
   ): ServerlessVectordbPluginSetup {
+    consolePlugin?.setDefaultEditorContent?.(CONSOLE_DEFAULT_CONTENT);
+
     core.application.register({
       id: VECTORDB_APP_ID,
       title: i18n.translate('xpack.serverlessVectordb.app.title', {
@@ -62,7 +67,7 @@ export class ServerlessVectordbPlugin
           share: depsStart.share,
           console: depsStart.console,
           cloud: depsStart.cloud,
-          agentBuilder: depsStart.agentBuilder,
+          elasticsearchHome: depsStart.elasticsearchHome,
           history: params.history,
         };
         return renderApp(coreStart, appServices, params);

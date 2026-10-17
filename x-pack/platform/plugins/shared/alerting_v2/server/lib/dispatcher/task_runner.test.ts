@@ -7,7 +7,13 @@
 
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import type { DispatcherServiceContract } from './dispatcher';
+import { createDispatcherPipelineInput } from './fixtures/test_utils';
 import { DispatcherTaskRunner } from './task_runner';
+
+const createMockPipelineResult = () => ({
+  completed: true,
+  finalState: { input: createDispatcherPipelineInput() },
+});
 
 describe('DispatcherTaskRunner', () => {
   let dispatcherService: jest.Mocked<DispatcherServiceContract>;
@@ -19,7 +25,7 @@ describe('DispatcherTaskRunner', () => {
     id: 'task-1',
     params: {},
     state: {
-      previousStartedAt: '2026-01-22T07:30:00.000Z',
+      eventWatermark: '2026-01-22T07:30:00.000Z',
     },
     scheduledAt: new Date('2026-01-22T07:30:00.000Z'),
     startedAt: new Date('2026-01-22T07:30:00.000Z'),
@@ -36,30 +42,83 @@ describe('DispatcherTaskRunner', () => {
   });
 
   describe('run', () => {
-    it('maps task state to dispatcher params', async () => {
+    it('maps task state to dispatcher params (eventWatermark + stuckTicks)', async () => {
+      const instanceWithStuckTicks: ConcreteTaskInstance = {
+        ...taskInstance,
+        state: { eventWatermark: '2026-01-22T07:30:00.000Z', stuckTicks: 3 },
+      };
+
       dispatcherService.run.mockResolvedValue({
         startedAt: new Date('2026-01-22T07:45:00.000Z'),
+        nextWatermark: new Date('2026-01-22T07:45:00.000Z'),
+        nextStuckTicks: 0,
+        pipelineResult: createMockPipelineResult(),
+      });
+
+      await runner.run({ taskInstance: instanceWithStuckTicks, signal });
+
+      const [params] = dispatcherService.run.mock.calls[0];
+      expect(params.signal).toBe(signal);
+      expect(params.eventWatermark?.toISOString()).toBe('2026-01-22T07:30:00.000Z');
+      expect(params.stuckTicks).toBe(3);
+    });
+
+    it('defaults stuckTicks to 0 when absent from task state', async () => {
+      dispatcherService.run.mockResolvedValue({
+        startedAt: new Date('2026-01-22T07:45:00.000Z'),
+        nextWatermark: new Date('2026-01-22T07:45:00.000Z'),
+        nextStuckTicks: 0,
+        pipelineResult: createMockPipelineResult(),
       });
 
       await runner.run({ taskInstance, signal });
 
       const [params] = dispatcherService.run.mock.calls[0];
+      expect(params.stuckTicks).toBe(0);
       expect(params.signal).toBe(signal);
-      expect(params.previousStartedAt?.toISOString()).toBe('2026-01-22T07:30:00.000Z');
+      expect(params.taskId).toBe(taskInstance.id);
     });
 
-    it('returns updated previousStartedAt in state', async () => {
+    it('returns updated eventWatermark and stuckTicks in state', async () => {
       dispatcherService.run.mockResolvedValue({
         startedAt: new Date('2026-01-22T07:45:00.000Z'),
+        nextWatermark: new Date('2026-01-22T07:45:00.000Z'),
+        nextStuckTicks: 2,
+        pipelineResult: createMockPipelineResult(),
       });
 
       const result = await runner.run({ taskInstance, signal });
 
       expect(result).toEqual({
         state: {
-          previousStartedAt: '2026-01-22T07:45:00.000Z',
+          eventWatermark: '2026-01-22T07:45:00.000Z',
+          stuckTicks: 2,
         },
       });
+    });
+
+    it('passes undefined eventWatermark when task state has no watermark (cold start)', async () => {
+      dispatcherService.run.mockResolvedValue({
+        startedAt: new Date('2026-01-22T07:45:00.000Z'),
+        nextWatermark: new Date('2026-01-22T07:45:00.000Z'),
+        nextStuckTicks: 0,
+        pipelineResult: createMockPipelineResult(),
+      });
+
+      // @ts-expect-error: not all fields are required for these tests
+      const emptyStateInstance: ConcreteTaskInstance = {
+        id: 'task-1',
+        params: {},
+        state: {},
+        scheduledAt: new Date('2026-01-22T07:30:00.000Z'),
+        startedAt: new Date('2026-01-22T07:30:00.000Z'),
+      };
+
+      await runner.run({ taskInstance: emptyStateInstance, signal });
+
+      const [params] = dispatcherService.run.mock.calls[0];
+      expect(params.eventWatermark).toBeUndefined();
+      expect(params.stuckTicks).toBe(0);
     });
   });
 });

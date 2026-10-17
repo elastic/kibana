@@ -122,6 +122,8 @@ export const oauthDisconnectRoute = (
           );
         }
 
+        await actionsClient.evictClientPool(connectorId);
+
         await connectorTokenClient.deleteConnectorTokens({
           connectorId,
           profileUid,

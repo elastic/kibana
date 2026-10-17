@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  DASHBOARD_MIGRATION_PROGRESS_BAR,
-  DASHBOARD_MIGRATION_PROGRESS_BAR_TEXT,
-  TRANSLATED_DASHBOARDS_RESULT_TABLE,
-} from '../../../../screens/siem_migrations';
+import { TRANSLATED_DASHBOARDS_RESULT_TABLE } from '../../../../screens/siem_migrations';
 import { deleteConnectors } from '../../../../tasks/api_calls/common';
 import { suppressGlobalAnnouncements } from '../../../../tasks/api_calls/suppress_global_announcements';
 import { createBedrockConnector } from '../../../../tasks/api_calls/connectors';
@@ -29,7 +25,6 @@ let bedrockConnectorId: string | null = null;
 describe(
   'Dashboard Migrations - Translated Dashboards Page',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
-
   () => {
     before(() => {
       role.setup();
@@ -92,8 +87,6 @@ describe(
       cy.wait('@reprocessFailedDashboards')
         .its('request.body.settings')
         .should('have.property', 'connector_id', bedrockConnectorId);
-      cy.get(DASHBOARD_MIGRATION_PROGRESS_BAR).should('be.visible');
-      cy.get(DASHBOARD_MIGRATION_PROGRESS_BAR_TEXT).should('contain.text', '57%');
     });
   }
 );

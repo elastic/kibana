@@ -16,12 +16,16 @@ import {
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_CATEGORY_LENGTH,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
+  MAX_EXTENDED_FIELD_FILTERS,
   MAX_DELETE_IDS_LENGTH,
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
   MAX_TAGS_PER_CASE,
+  MAX_TEMPLATE_DEFINITION_LENGTH,
+  MAX_TEMPLATE_KEY_LENGTH,
   MAX_TITLE_LENGTH,
 } from '../../../constants';
 import {
@@ -41,7 +45,6 @@ import {
   CaseSettingsSchema,
   CaseSeveritySchema,
   CaseStatusSchema,
-  CaseTemplateSchema,
   RelatedCaseSchema,
   SimilarCaseSchema,
 } from '../../domain_zod/case/v1';
@@ -81,6 +84,15 @@ export const CaseRequestCustomFieldsSchema = limitedArraySchema({
   max: MAX_CUSTOM_FIELDS_PER_CASE,
 });
 
+/**
+ * Template reference accepted on case UPDATE — zod mirror of `CaseUpdateRequestTemplateRt`.
+ * Unlike creation, `version` is required: the server does not resolve a latest version on update.
+ */
+export const CaseUpdateRequestTemplateSchema = z.object({
+  id: z.string().max(MAX_TEMPLATE_KEY_LENGTH),
+  version: z.number().int().min(1),
+});
+
 export const CaseBaseOptionalFieldsRequestSchema = z.object({
   description: limitedStringSchema({
     fieldName: 'description',
@@ -110,7 +122,7 @@ export const CaseBaseOptionalFieldsRequestSchema = z.object({
     .optional(),
   customFields: CaseRequestCustomFieldsSchema.optional(),
   settings: CaseSettingsSchema.optional(),
-  template: CaseTemplateSchema.nullable().optional(),
+  template: CaseUpdateRequestTemplateSchema.nullable().optional(),
   [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
 });
 
@@ -278,8 +290,16 @@ const CasesSearchRequestSearchFieldsValues = [
 export const CasesSearchRequestSearchFieldsSchema = z.enum(CasesSearchRequestSearchFieldsValues);
 
 const ExtendedFieldFilterSchema = z.object({
-  label: z.string(),
-  value: z.string(),
+  label: limitedStringSchema({
+    fieldName: 'extendedFieldFilters.label',
+    min: 1,
+    max: MAX_TEMPLATE_DEFINITION_LENGTH,
+  }),
+  value: limitedStringSchema({
+    fieldName: 'extendedFieldFilters.value',
+    min: 1,
+    max: MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
+  }),
 });
 
 export const CasesSearchRequestSchema = CasesFindRequestBaseFieldsSchema.extend({
@@ -289,7 +309,12 @@ export const CasesSearchRequestSchema = CasesFindRequestBaseFieldsSchema.extend(
   searchFields: z
     .union([z.array(CasesSearchRequestSearchFieldsSchema), CasesSearchRequestSearchFieldsSchema])
     .optional(),
-  extendedFieldFilters: z.array(ExtendedFieldFilterSchema).optional(),
+  extendedFieldFilters: limitedArraySchema({
+    codec: ExtendedFieldFilterSchema,
+    fieldName: 'extendedFieldFilters',
+    min: 0,
+    max: MAX_EXTENDED_FIELD_FILTERS,
+  }).optional(),
 });
 
 export const CasesFindRequestWithCustomFieldsSchema = CasesFindRequestSchema.extend({

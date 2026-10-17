@@ -478,7 +478,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="xs"
-            iconType="popout"
+            iconType="external"
             onClick={handleOpenEntityAnalytics}
             data-test-subj="entityAttachmentTableOpenEntityAnalytics"
             aria-label={OPEN_ENTITY_ANALYTICS_LABEL}

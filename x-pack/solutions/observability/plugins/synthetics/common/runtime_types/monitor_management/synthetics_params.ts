@@ -5,78 +5,18 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-
-/**
- * A vault-backed param resolves its value from HashiCorp Vault at runtime,
- * inside Heartbeat. Kibana only stores this reference (path + field); it never
- * fetches or stores the plaintext secret. The effective param `value` is the
- * edge-resolved token `${vault/<path>#<field>}`.
- */
-export const SyntheticsParamVaultSourceCodec = t.intersection([
-  t.type({
-    type: t.literal('vault'),
-    path: t.string,
-    field: t.string,
-  }),
-  t.partial({
-    // Name of the Vault connection to resolve against (omit = default connection).
-    connection: t.string,
-  }),
-]);
-
-export type SyntheticsParamVaultSource = t.TypeOf<typeof SyntheticsParamVaultSourceCodec>;
-
-export const SyntheticsParamsReadonlyCodec = t.intersection([
-  t.interface({
-    id: t.string,
-    key: t.string,
-  }),
-  t.partial({
-    description: t.string,
-    tags: t.array(t.string),
-    namespaces: t.array(t.string),
-    source: SyntheticsParamVaultSourceCodec,
-  }),
-]);
-
-export const SyntheticsParamsReadonlyCodecList = t.array(SyntheticsParamsReadonlyCodec);
-
-export type SyntheticsParamsReadonly = t.TypeOf<typeof SyntheticsParamsReadonlyCodec>;
-
-export const SyntheticsParamsCodec = t.intersection([
+import type { SchemaOutput } from '../schema_output';
+import type {
+  SyntheticsParamVaultSourceCodec,
   SyntheticsParamsReadonlyCodec,
-  t.interface({ value: t.string }),
-]);
+  SyntheticsParamsCodec,
+  DeleteParamsResponseCodec,
+  SyntheticsParamRequestCodec,
+} from '../schemas/synthetics_params';
 
-export type SyntheticsParams = t.TypeOf<typeof SyntheticsParamsCodec>;
-
-export type SyntheticsParamSOAttributes = t.TypeOf<typeof SyntheticsParamsCodec>;
-
-export const DeleteParamsResponseCodec = t.intersection([
-  t.interface({
-    id: t.string,
-    deleted: t.boolean,
-  }),
-  t.partial({
-    error: t.string,
-  }),
-]);
-
-export type DeleteParamsResponse = t.TypeOf<typeof DeleteParamsResponseCodec>;
-
-export const SyntheticsParamRequestCodec = t.intersection([
-  t.interface({
-    key: t.string,
-  }),
-  t.partial({
-    // Either `value` (literal) or `source` (vault-backed) must be provided.
-    value: t.string,
-    source: SyntheticsParamVaultSourceCodec,
-    description: t.string,
-    tags: t.array(t.string),
-    share_across_spaces: t.boolean,
-  }),
-]);
-
-export type SyntheticsParamRequest = t.TypeOf<typeof SyntheticsParamRequestCodec>;
+export type SyntheticsParamVaultSource = SchemaOutput<typeof SyntheticsParamVaultSourceCodec>;
+export type SyntheticsParamsReadonly = SchemaOutput<typeof SyntheticsParamsReadonlyCodec>;
+export type SyntheticsParams = SchemaOutput<typeof SyntheticsParamsCodec>;
+export type SyntheticsParamSOAttributes = SchemaOutput<typeof SyntheticsParamsCodec>;
+export type DeleteParamsResponse = SchemaOutput<typeof DeleteParamsResponseCodec>;
+export type SyntheticsParamRequest = SchemaOutput<typeof SyntheticsParamRequestCodec>;

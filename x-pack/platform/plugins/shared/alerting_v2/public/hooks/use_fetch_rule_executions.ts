@@ -8,56 +8,69 @@
 import { useQuery } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
 import type {
-  GetRuleExecutionsRequest,
-  GetRuleExecutionsResponse,
+  ListRuleExecutionsRequest,
+  ListRuleExecutionsResponse,
   RuleExecutionOutcome,
 } from '@kbn/alerting-v2-schemas';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
 import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 import { ruleExecutionKeys } from './query_key_factory';
 
-export interface GetRuleExecutionsUiParams {
+export interface ListRuleExecutionsUiParams {
   page?: number;
   perPage?: number;
   ruleIds?: string[];
-  outcome?: RuleExecutionOutcome[];
+  outcomes?: RuleExecutionOutcome[];
   from?: string;
   to?: string;
-  sort?: 'startedAt' | 'duration';
+  sortField?: 'startedAt' | 'duration';
   sortOrder?: 'asc' | 'desc';
+  enabled?: boolean;
 }
 
-export const toGetRuleExecutionsRequest = ({
+const SORT_FIELD_BY_UI_FIELD = {
+  startedAt: 'started_at',
+  duration: 'duration_ms',
+} as const satisfies Record<
+  NonNullable<ListRuleExecutionsUiParams['sortField']>,
+  ListRuleExecutionsRequest['sort_field']
+>;
+
+export const toListRuleExecutionsRequest = ({
   page,
   perPage,
   ruleIds,
-  outcome,
+  outcomes,
   from,
   to,
-  sort,
+  sortField,
   sortOrder,
   ...rest
-}: GetRuleExecutionsUiParams): Complete<Partial<GetRuleExecutionsRequest>> => {
+}: Omit<ListRuleExecutionsUiParams, 'enabled'>): Complete<Partial<ListRuleExecutionsRequest>> => {
   assertAllFieldsMapped(rest);
   return {
     page,
     per_page: perPage,
-    rule_id: ruleIds,
-    outcome,
+    rule_ids: ruleIds,
+    outcomes,
     from,
     to,
-    sort: sort === 'startedAt' ? 'started_at' : sort,
+    sort_field: sortField && SORT_FIELD_BY_UI_FIELD[sortField],
     sort_order: sortOrder,
   };
 };
 
-export const useFetchRuleExecutions = (params: GetRuleExecutionsUiParams) => {
+export const useFetchRuleExecutions = ({
+  enabled = true,
+  ...params
+}: ListRuleExecutionsUiParams) => {
   const api = useService(ExecutionHistoryApi);
 
-  return useQuery<GetRuleExecutionsResponse, Error>({
+  return useQuery<ListRuleExecutionsResponse, Error>({
     queryKey: ruleExecutionKeys.list(params),
-    queryFn: () => api.getRuleExecutions(toGetRuleExecutionsRequest(params)),
+    queryFn: () => api.listRuleExecutions(toListRuleExecutionsRequest(params)),
     refetchOnWindowFocus: false,
     keepPreviousData: true,
+    enabled,
   });
 };

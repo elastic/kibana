@@ -15,6 +15,7 @@ import { assignCaseStepCommonDefinition } from '../../common/workflows/steps/ass
 import { closeCaseStepCommonDefinition } from '../../common/workflows/steps/close_case';
 import { deleteCasesStepCommonDefinition } from '../../common/workflows/steps/delete_cases';
 import { deleteObservableStepCommonDefinition } from '../../common/workflows/steps/delete_observable';
+import { bulkDeleteObservablesStepCommonDefinition } from '../../common/workflows/steps/bulk_delete_observables';
 import { findCasesStepCommonDefinition } from '../../common/workflows/steps/find_cases';
 import { findSimilarCasesStepCommonDefinition } from '../../common/workflows/steps/find_similar_cases';
 import { getAllAttachmentsStepCommonDefinition } from '../../common/workflows/steps/get_all_attachments';
@@ -23,6 +24,7 @@ import { getCasesByAlertIdStepCommonDefinition } from '../../common/workflows/st
 import { getCasesStepCommonDefinition } from '../../common/workflows/steps/get_cases';
 import { pushCasesStepCommonDefinition } from '../../common/workflows/steps/push_cases';
 import { setDescriptionStepCommonDefinition } from '../../common/workflows/steps/set_description';
+import { setExtendedFieldsStepCommonDefinition } from '../../common/workflows/steps/set_extended_fields';
 import { setSeverityStepCommonDefinition } from '../../common/workflows/steps/set_severity';
 import { setStatusStepCommonDefinition } from '../../common/workflows/steps/set_status';
 import { setTitleStepCommonDefinition } from '../../common/workflows/steps/set_title';
@@ -84,6 +86,10 @@ export const setDescriptionStepDefinition = createPublicCaseStepDefinition({
   ...setDescriptionStepCommonDefinition,
 });
 
+export const setExtendedFieldsStepDefinition = createPublicCaseStepDefinition({
+  ...setExtendedFieldsStepCommonDefinition,
+});
+
 export const setSeverityStepDefinition = createPublicCaseStepDefinition({
   ...setSeverityStepCommonDefinition,
 });
@@ -122,6 +128,10 @@ export const updateObservableStepDefinition = createPublicCaseStepDefinition({
 
 export const deleteObservableStepDefinition = createPublicCaseStepDefinition({
   ...deleteObservableStepCommonDefinition,
+});
+
+export const bulkDeleteObservablesStepDefinition = createPublicCaseStepDefinition({
+  ...bulkDeleteObservablesStepCommonDefinition,
 });
 
 export const getCasesStepDefinition = createPublicCaseStepDefinition({

@@ -12,7 +12,6 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiConfirmModal,
   EuiFieldPassword,
   EuiFieldText,
@@ -34,6 +33,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import type {
@@ -59,7 +59,6 @@ interface FormState {
   authMethod: VaultAuthMethod;
   namespace: string;
   kvMount: string;
-  secretRefreshInterval: string;
   roleId: string;
   token: string;
   secretId: string;
@@ -75,7 +74,6 @@ const blankForm = (): FormState => ({
   authMethod: 'approle',
   namespace: '',
   kvMount: 'secret',
-  secretRefreshInterval: '5m',
   roleId: '',
   token: '',
   secretId: '',
@@ -91,7 +89,6 @@ const toForm = (c: VaultConnectionStatus): FormState => ({
   authMethod: c.config?.authMethod ?? 'approle',
   namespace: c.config?.namespace ?? '',
   kvMount: c.config?.kvMount ?? 'secret',
-  secretRefreshInterval: c.secretRefreshInterval ?? '5m',
   roleId: c.config?.roleId ?? '',
   token: '',
   secretId: '',
@@ -204,7 +201,6 @@ export const VaultConnectionPanel = () => {
       const body = {
         name: editing.name.trim(),
         type: editing.type,
-        secretRefreshInterval: editing.secretRefreshInterval.trim() || undefined,
         config,
         secrets,
       };
@@ -259,11 +255,6 @@ export const VaultConnectionPanel = () => {
     {
       name: AUTH_METHOD_LABEL,
       render: (c: VaultConnectionStatus) => c.config?.authMethod ?? '',
-    },
-    {
-      field: 'secretRefreshInterval',
-      name: REFRESH_INTERVAL_LABEL,
-      render: (v?: string) => v ?? '5m',
     },
     {
       name: ACTIONS_LABEL,
@@ -450,21 +441,6 @@ export const VaultConnectionPanel = () => {
                       />
                     </EuiFormRow>
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFormRow
-                      fullWidth
-                      label={REFRESH_INTERVAL_LABEL}
-                      helpText={REFRESH_INTERVAL_HELP}
-                    >
-                      <EuiFieldText
-                        fullWidth
-                        data-test-subj="syntheticsVaultRefreshInterval"
-                        placeholder="5m"
-                        value={editing.secretRefreshInterval}
-                        onChange={(e) => set('secretRefreshInterval', e.target.value)}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
                 </EuiFlexGroup>
                 {editing.authMethod === 'token' ? (
                   <EuiFormRow
@@ -522,12 +498,11 @@ export const VaultConnectionPanel = () => {
                 {testResult && (
                   <>
                     <EuiSpacer size="s" />
-                    <EuiCallOut
-                      size="s"
-                      color={testResult.ok ? 'success' : 'danger'}
-                      iconType={testResult.ok ? 'check' : 'warning'}
-                      title={testResult.message}
-                    />
+                    {testResult.ok ? (
+                      <KbnSuccessCallout size="s" title={testResult.message} />
+                    ) : (
+                      <KbnDangerCallout size="s" title={testResult.message} />
+                    )}
                   </>
                 )}
               </EuiForm>
@@ -582,6 +557,7 @@ export const VaultConnectionPanel = () => {
       {deleteTarget && (
         <EuiConfirmModal
           title={DELETE_CONFIRM_TITLE}
+          aria-label={DELETE_CONFIRM_TITLE}
           onCancel={() => setDeleteTarget(null)}
           onConfirm={async () => {
             const name = deleteTarget;
@@ -634,15 +610,6 @@ const AUTH_METHOD_LABEL = i18n.translate('xpack.synthetics.vaultConnection.authM
 const KV_MOUNT_LABEL = i18n.translate('xpack.synthetics.vaultConnection.kvMount', {
   defaultMessage: 'KV v2 mount',
 });
-const REFRESH_INTERVAL_LABEL = i18n.translate('xpack.synthetics.vaultConnection.refreshInterval', {
-  defaultMessage: 'Secret refresh interval',
-});
-const REFRESH_INTERVAL_HELP = i18n.translate(
-  'xpack.synthetics.vaultConnection.refreshIntervalHelp',
-  {
-    defaultMessage: 'How long the agent caches a resolved secret, e.g. "5m", "1h".',
-  }
-);
 const TOKEN_LABEL = i18n.translate('xpack.synthetics.vaultConnection.token', {
   defaultMessage: 'Token',
 });

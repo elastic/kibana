@@ -81,7 +81,6 @@ describe('TableFieldValueCell', () => {
               eventId={eventId}
               values={hostIpValues}
               ruleId="ruleId"
-              isRulePreview={false}
             />
           </DocumentDetailsContext.Provider>
         </TestProviders>
@@ -105,7 +104,6 @@ describe('TableFieldValueCell', () => {
               fieldFromBrowserField={undefined} // <-- no metadata
               values={hostIpValues}
               ruleId="ruleId"
-              isRulePreview={false}
             />
           </DocumentDetailsContext.Provider>
         </TestProviders>
@@ -153,7 +151,6 @@ describe('TableFieldValueCell', () => {
               fieldFromBrowserField={messageFieldFromBrowserField}
               values={messageValues}
               ruleId="ruleId"
-              isRulePreview={false}
             />
           </DocumentDetailsContext.Provider>
         </TestProviders>
@@ -191,7 +188,6 @@ describe('TableFieldValueCell', () => {
               fieldFromBrowserField={hostIpFieldFromBrowserField} // <-- metadata
               values={hostIpValues}
               ruleId="ruleId"
-              isRulePreview={false}
             />
           </DocumentDetailsContext.Provider>
         </TestProviders>
@@ -256,7 +252,6 @@ describe('TableFieldValueCell', () => {
               fieldFromBrowserField={hostIpFieldFromBrowserField}
               values={hostIpValues}
               ruleId="ruleId"
-              isRulePreview={false}
               renderFlyoutLink={renderFlyoutLink}
             />
           </DocumentDetailsContext.Provider>

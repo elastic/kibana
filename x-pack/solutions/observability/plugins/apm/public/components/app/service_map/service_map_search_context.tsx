@@ -43,8 +43,11 @@ export function ServiceMapSearchProvider({ children }: { children: React.ReactNo
 
   const setHighlightedServiceNames = useCallback((names: string[]) => {
     setHighlightedServiceNamesState((prev) => {
-      if (prev.length === names.length && prev.every((name, index) => name === names[index])) {
-        return prev;
+      if (prev.length === names.length) {
+        const prevSet = new Set(prev);
+        if (names.every((name) => prevSet.has(name))) {
+          return prev;
+        }
       }
       return names;
     });

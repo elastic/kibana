@@ -5,19 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiCallOut,
-  EuiCode,
-  EuiFieldText,
-  EuiFormRow,
-  EuiSelect,
-  EuiSpacer,
-  EuiTextArea,
-} from '@elastic/eui';
+import { EuiCode, EuiFieldText, EuiFormRow, EuiSelect, EuiSpacer, EuiTextArea } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useFormContext, useFormState } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { OptionalText } from '../components/optional_text';
 import type { ListParamItem } from './params_list';
 import type { ParamFormData, ParamValueSourceType } from './add_param_form';
@@ -58,14 +51,13 @@ export const ParamValueField = ({
           />
         </EuiFormRow>
         <EuiSpacer size="xs" />
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount
           size="s"
           title={i18n.translate('xpack.synthetics.paramValueField.euiCallOut.newValue', {
             defaultMessage:
               'Assign a new value to update this parameter, or leave blank to keep the current value.',
           })}
-          iconType="info"
         />
       </>
     );
@@ -157,17 +149,16 @@ const VaultSourceFields = () => {
         />
       </EuiFormRow>
       <EuiSpacer size="xs" />
-      <EuiCallOut
+      <KbnInfoCallout
         announceOnMount
         size="s"
-        iconType="lock"
         title={i18n.translate('xpack.synthetics.paramValueField.vaultCallout', {
           defaultMessage:
             'The secret is resolved at runtime by the agent (Heartbeat) from HashiCorp Vault, so it only applies to monitors on private locations. Kibana stores only this reference and never the plaintext secret.',
         })}
       >
-        <EuiCode>{'${vault/<connection>@<path>#<field>}'}</EuiCode>
-      </EuiCallOut>
+        <EuiCode>{'vault://<connection>@<path>#<field>'}</EuiCode>
+      </KbnInfoCallout>
     </>
   );
 };

@@ -10,10 +10,14 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
+import { InitialTabStateService } from '../plugin_imports/initial_tab_state_service';
+import { DataSourceService } from '@kbn/data-source';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { searchSessionsManagementMock } from '@kbn/search-sessions-management-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
 import {
   analyticsServiceMock,
   coreMock,
@@ -27,6 +31,7 @@ import {
   CONTEXT_STEP_SETTING,
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
+  ENABLE_SOLUTION_PROFILES_IN_CLASSIC_SETTING,
   MAX_DOC_FIELDS_DISPLAYED,
   SAMPLE_SIZE_SETTING,
   SAMPLE_ROWS_PER_PAGE_SETTING,
@@ -53,6 +58,7 @@ import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/moc
 import { createUrlTrackerMock } from './url_tracker.mock';
 import { createBrowserHistory } from 'history';
 import { cpsPluginMock } from '@kbn/cps/public/mocks';
+import type { DiscoverSessionService } from '../session';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -171,6 +177,8 @@ export function createDiscoverServicesMock(): DiscoverServices {
         return false;
       } else if (key === SEARCH_ON_PAGE_LOAD_SETTING) {
         return true;
+      } else if (key === ENABLE_SOLUTION_PROFILES_IN_CLASSIC_SETTING) {
+        return true;
       }
     }),
     isDefault: jest.fn((key: string) => {
@@ -193,6 +201,18 @@ export function createDiscoverServicesMock(): DiscoverServices {
   history.push('/');
 
   const { profilesManagerMock } = createContextAwarenessMocks();
+  const savedSearch = savedSearchPluginMock.createStartContract();
+  const discoverSessionService: DiscoverSessionService = {
+    get: jest.fn(async (id: string) => ({
+      session: await savedSearch.getDiscoverSession(id),
+      warnings: [],
+    })),
+    save: jest.fn(async (session: SaveDiscoverSessionParams) => ({
+      ...session,
+      id: session.id ?? 'new-session',
+      managed: false,
+    })),
+  };
 
   return {
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
@@ -202,6 +222,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     chrome: corePluginMock.chrome,
     history,
     getScopedHistory: () => scopedHistoryMock.create(),
+    initialTabStateService: new InitialTabStateService(),
     data: dataPlugin,
     dataVisualizer: {
       FieldStatisticsTable: jest.fn(() => createElement('div')),
@@ -246,6 +267,9 @@ export function createDiscoverServicesMock(): DiscoverServices {
         if (path.startsWith('/internal/esql/get_timefield')) {
           return Promise.resolve({ timeField: '@timestamp' });
         }
+        if (path.startsWith('/internal/esql/source_info')) {
+          return Promise.resolve({ columns: [] });
+        }
         return Promise.resolve('');
       }),
     },
@@ -276,6 +300,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       addWarning: jest.fn(),
       addDanger: jest.fn(),
       addSuccess: jest.fn(),
+      addError: jest.fn(),
     },
     notifications: {
       toasts: notificationServiceMock.createStartContract().toasts,
@@ -287,8 +312,11 @@ export function createDiscoverServicesMock(): DiscoverServices {
         updateTagsReferences: jest.fn(),
       },
     },
-    savedSearch: savedSearchPluginMock.createStartContract(),
+    savedSearch,
+    discoverSessionService,
+    searchSessionsManagement: searchSessionsManagementMock.createStartContract(),
     dataViews: dataPlugin.dataViews,
+    dataSourceService: new DataSourceService(dataPlugin.dataViews),
     timefilter: dataPlugin.query.timefilter.timefilter,
     lens: {
       EmbeddableComponent: jest.fn(() => null),
@@ -317,7 +345,6 @@ export function createDiscoverServicesMock(): DiscoverServices {
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: jest.fn(() => false),
       getIsEsqlDefault: jest.fn(() => false),
-      getEmbeddableTransformsEnabled: jest.fn(() => true),
     },
     embeddableEditor: {
       isByValueEditor: jest.fn(() => false),
@@ -331,6 +358,12 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     alertingVTwo: {
       CreateRuleOptionsFlyout: jest.fn(() => null),
+      RulesPage: jest.fn(() => null),
+      RuleLibraryPage: jest.fn(() => null),
+      EpisodesPage: jest.fn(() => null),
+      ActionPoliciesPage: jest.fn(() => null),
+      ExecutionHistoryPage: jest.fn(() => null),
+      createAlertingV2HostApp: jest.fn(),
     },
     trackUiMetric: jest.fn(),
     logger: { get: jest.fn(() => loggerMock.create()) },

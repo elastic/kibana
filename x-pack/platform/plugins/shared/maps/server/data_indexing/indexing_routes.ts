@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { Logger } from '@kbn/core/server';
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
@@ -55,10 +55,12 @@ export function initIndexingRoutes({
         version: '1',
         validate: {
           request: {
-            body: schema.object({
-              index: schema.string(),
-              mappings: schema.any(),
-            }),
+            body: z
+              .object({
+                index: z.string(),
+                mappings: z.any().optional(),
+              })
+              .strict(),
           },
         },
       },
@@ -114,10 +116,12 @@ export function initIndexingRoutes({
         version: '1',
         validate: {
           request: {
-            body: schema.object({
-              index: schema.string(),
-              data: schema.any(),
-            }),
+            body: z
+              .object({
+                index: z.string(),
+                data: z.any().optional(),
+              })
+              .strict(),
           },
         },
       },
@@ -157,12 +161,16 @@ export function initIndexingRoutes({
         version: '1',
         validate: {
           request: {
-            params: schema.object({
-              featureId: schema.string(),
-            }),
-            body: schema.object({
-              index: schema.string(),
-            }),
+            params: z
+              .object({
+                featureId: z.string(),
+              })
+              .strict(),
+            body: z
+              .object({
+                index: z.string(),
+              })
+              .strict(),
           },
         },
       },
@@ -226,9 +234,11 @@ export function initIndexingRoutes({
         version: '1',
         validate: {
           request: {
-            query: schema.object({
-              indexPattern: schema.string(),
-            }),
+            query: z
+              .object({
+                indexPattern: z.string(),
+              })
+              .strict(),
           },
         },
       },
@@ -260,9 +270,11 @@ export function initIndexingRoutes({
         version: '1',
         validate: {
           request: {
-            query: schema.object({
-              index: schema.string(),
-            }),
+            query: z
+              .object({
+                index: z.string(),
+              })
+              .strict(),
           },
         },
       },

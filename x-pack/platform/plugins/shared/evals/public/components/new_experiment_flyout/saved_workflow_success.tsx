@@ -59,7 +59,7 @@ export const SavedWorkflowSuccess: React.FC<SavedWorkflowSuccessProps> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiEmptyPrompt
-          iconType="checkInCircleFilled"
+          iconType="checkCircleFill"
           iconColor="success"
           title={
             <h2>
@@ -85,7 +85,7 @@ export const SavedWorkflowSuccess: React.FC<SavedWorkflowSuccessProps> = ({
               ? [
                   <EuiButton
                     key="open"
-                    iconType="popout"
+                    iconType="external"
                     href={savedWorkflowHref}
                     data-test-subj="evalsSavedOpenWorkflowButton"
                   >

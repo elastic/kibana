@@ -71,6 +71,7 @@ export async function getServiceAnomalies({
                 AnomalyDetectorType.txLatency,
                 AnomalyDetectorType.txThroughput,
                 AnomalyDetectorType.txFailureRate,
+                AnomalyDetectorType.txLowCount,
               ],
             }),
             ...rangeQuery(start, end, 'timestamp'),

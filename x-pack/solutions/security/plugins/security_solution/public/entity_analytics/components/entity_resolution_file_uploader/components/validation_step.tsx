@@ -39,7 +39,7 @@ export const EntityResolutionValidationStep: React.FC<ValidationStepProps> = Rea
           <>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="checkInCircleFilled" color="success" aria-hidden={true} />
+                <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xxs">

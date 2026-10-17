@@ -40,7 +40,6 @@ const toStatus = (attributes: SyntheticsVaultConnection): VaultConnectionStatus 
   configured: true,
   name: attributes.name,
   type: attributes.type,
-  secretRefreshInterval: attributes.secretRefreshInterval,
   refreshedAt: attributes.refreshedAt,
   // Non-secret provider config, returned verbatim.
   config: attributes.config,
@@ -92,11 +91,6 @@ const isHttpUrl = (v: string): string | undefined => {
   }
 };
 
-// A Go duration string, e.g. "5m", "30s", "1.5h" — matches Heartbeat's parser so a
-// value that would fail at config-unpack on every agent is rejected up front.
-const isDuration = (v: string): string | undefined =>
-  /^\d+(\.\d+)?(ms|s|m|h)$/.test(v) ? undefined : 'must be a duration like "5m", "30s", or "1h"';
-
 // HashiCorp Vault provider request shapes. Adding a provider means adding its
 // config/secrets schema and turning `type`/`config`/`secrets` into a discriminated
 // `schema.oneOf` keyed on `type`.
@@ -124,7 +118,6 @@ const SaveBodySchema = schema.object({
         : 'must contain only letters, numbers, and . _ -',
   }),
   type: schema.maybe(schema.literal('hashicorp_vault')),
-  secretRefreshInterval: schema.maybe(schema.string({ maxLength: 32, validate: isDuration })),
   config: HashiCorpVaultConfigSchema,
   secrets: schema.maybe(HashiCorpVaultSecretsSchema),
 });
@@ -219,7 +212,6 @@ export const saveVaultConnectionRoute: SyntheticsRestApiRouteFactory<
       name: body.name,
       type,
       config: body.config,
-      secretRefreshInterval: body.secretRefreshInterval,
       refreshedAt: new Date().toISOString(),
       secrets,
       hasSecret,

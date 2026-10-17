@@ -9,6 +9,10 @@ import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import { type UseEuiTheme } from '@elastic/eui';
 import { openLazyFlyout } from '@kbn/presentation-util';
+
+/** Default width for ES|QL inline flyouts. DSL panels keep `openLazyFlyout`'s 500px. */
+export const LENS_ESQL_INLINE_FLYOUT_SIZE = 600;
+
 /**
  * Shared logic to mount the inline config panel
  * @param ConfigPanel
@@ -22,7 +26,7 @@ export const mountInlinePanel = async ({
   core,
   api,
   loadContent,
-  options: { dataTestSubj, uuid, container, returnFocus } = {},
+  options: { dataTestSubj, uuid, container, returnFocus, isEsql } = {},
 }: {
   core: CoreStart;
   api?: unknown;
@@ -37,6 +41,7 @@ export const mountInlinePanel = async ({
     uuid?: string;
     container?: HTMLElement | null;
     returnFocus?: () => void;
+    isEsql?: boolean;
   };
 }) => {
   if (container) {
@@ -53,6 +58,7 @@ export const mountInlinePanel = async ({
     loadContent,
     flyoutProps: {
       ...lensFlyoutProps,
+      ...(isEsql ? { size: LENS_ESQL_INLINE_FLYOUT_SIZE } : {}),
       'data-test-subj': dataTestSubj ?? 'customizeLens',
       focusedPanelId: uuid,
     },
@@ -62,7 +68,7 @@ export const mountInlinePanel = async ({
 // styles needed to display extra drop targets that are outside of the config panel main area while also allowing to scroll vertically
 const inlineFlyoutStyles = ({ euiTheme }: UseEuiTheme) => `
   clip-path: none;
-  max-inline-size: 640px;
+  max-inline-size: 800px;
   min-inline-size: 256px;
   background:${euiTheme.colors.backgroundBaseSubdued};
 
@@ -81,4 +87,6 @@ export const lensFlyoutProps: OverlayFlyoutOpenOptions = {
   'data-test-subj': 'customizeLens',
   isResizable: true,
   outsideClickCloses: true,
+  // Close button lives in FlyoutWrapper so it can call the same onCancel as Cancel.
+  hideCloseButton: true,
 };

@@ -81,6 +81,463 @@ console.log('\n── 500 already surfaced via console → not double-reported �
   );
 }
 
+console.log('\n── 500 surfaced only via the browser\'s own auto-generated console message (no path in text) → still not double-reported ──');
+{
+  // Regression test for a real gap found during Task 8 live browser validation
+  // (browser_run_code_unsafe against a real fetch() 500 with no app-level error
+  // handling at all): Chromium auto-logs "Failed to load resource: the server
+  // responded with a status of 500 (Internal Server Error)" for every failed
+  // load, with NO path/URL in the text — unlike the "500 @ /api/foo" shape the
+  // action-500-already-surfaced fixture above uses. classify-console.js's own
+  // `\b50[0-9]\b` rule has no path requirement, so Detector B always classifies
+  // this message as a Level 1 server_error regardless of path. Before this
+  // fixture existed, `alreadySurfaced`'s path-match requirement meant this
+  // real, common message shape could never satisfy it, so the reducer wrongly
+  // emitted a second, differently-worded Level 1 finding for the same event.
+  const r = reduceAction(json('action-500-already-surfaced-browser-native'));
+  assert(
+    !r.level1.some((i) => i.type === 'silent_server_error'),
+    'action-500-already-surfaced-browser-native → no silent_server_error (browser-native message already covers it, even without a path)'
+  );
+}
+
+console.log(
+  '\n── Two distinct 500s sharing a status but only ONE native message → the second is still reported (no cross-path leakage) ──'
+);
+{
+  // P2 review finding on the fix above: consoleText is action-wide, so a
+  // naive "does a native 500 message exist anywhere in this action"
+  // presence check would let ONE native message wrongly cover EVERY 500 in
+  // the action, silently missing a second, genuinely-unsurfaced 500 to a
+  // different path. The fix consumes one message per qualifying event
+  // instead of testing presence, so only as many events as there are
+  // matching native messages get treated as already-surfaced.
+  const r = reduceAction({
+    network: [
+      {
+        method: 'GET',
+        url: 'https://kibana.example/internal/entity_analytics/monitoring/entity_source',
+        status: 500,
+        ok: false,
+        failure: null,
+        requestedAt: 0,
+        respondedAt: 100,
+        resourceType: 'fetch',
+      },
+      {
+        method: 'GET',
+        url: 'https://kibana.example/internal/entity_analytics/risk_score',
+        status: 500,
+        ok: false,
+        failure: null,
+        requestedAt: 200,
+        respondedAt: 300,
+        resourceType: 'fetch',
+      },
+    ],
+    console: [
+      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+    ],
+  });
+  const silentErrors = r.level1.filter((i) => i.type === 'silent_server_error');
+  assert(
+    silentErrors.length === 1,
+    'two distinct 500s + one native message → exactly one silent_server_error survives, not zero',
+    JSON.stringify(r.level1)
+  );
+  assert(
+    !!silentErrors[0] && silentErrors[0].path === '/internal/entity_analytics/risk_score',
+    'the second (later-in-time) 500 is the one still reported — the first claims the sole native message',
+    JSON.stringify(silentErrors)
+  );
+}
+
+console.log('\n── Two 500s with TWO native messages → both are covered, neither double-reported ──');
+{
+  const r = reduceAction({
+    network: [
+      {
+        method: 'GET',
+        url: 'https://kibana.example/internal/a',
+        status: 500,
+        ok: false,
+        failure: null,
+        requestedAt: 0,
+        respondedAt: 100,
+        resourceType: 'fetch',
+      },
+      {
+        method: 'GET',
+        url: 'https://kibana.example/internal/b',
+        status: 500,
+        ok: false,
+        failure: null,
+        requestedAt: 200,
+        respondedAt: 300,
+        resourceType: 'fetch',
+      },
+    ],
+    console: [
+      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+    ],
+  });
+  assert(
+    !r.level1.some((i) => i.type === 'silent_server_error'),
+    'two 500s + two native messages → both are covered, zero silent_server_error findings',
+    JSON.stringify(r.level1)
+  );
+}
+
+console.log('\n── Different statuses each keep their own native-message pool (no cross-status leakage) ──');
+{
+  const r = reduceAction({
+    network: [
+      {
+        method: 'GET',
+        url: 'https://kibana.example/internal/a',
+        status: 500,
+        ok: false,
+        failure: null,
+        requestedAt: 0,
+        respondedAt: 100,
+        resourceType: 'fetch',
+      },
+      {
+        method: 'GET',
+        url: 'https://kibana.example/internal/b',
+        status: 503,
+        ok: false,
+        failure: null,
+        requestedAt: 200,
+        respondedAt: 300,
+        resourceType: 'fetch',
+      },
+    ],
+    console: [
+      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+    ],
+  });
+  const silentErrors = r.level1.filter((i) => i.type === 'silent_server_error');
+  assert(
+    silentErrors.length === 1 && silentErrors[0].status === 503,
+    'a native 500 message never covers a 503 — the 503 is still reported',
+    JSON.stringify(silentErrors)
+  );
+}
+
+console.log(
+  '\n── One native message + one path-specific own message, same status, different paths → order must not matter ──'
+);
+{
+  // Regression for a bug the "two distinct 500s + one native message" fix
+  // above introduced: claiming the sole native-message credit strictly by
+  // arrival order (before checking whether an event has its own path-
+  // specific message) let a path-matched event steal the credit a
+  // *different*, genuinely-silent event needed, purely depending on which
+  // one sorted first. Both arrival orders below must produce the same,
+  // correct result: zero silent_server_error findings, since every event
+  // has *something* covering it (its own message or the native one).
+  const networkFor = (bFirst) => [
+    {
+      method: 'GET',
+      url: bFirst ? 'https://kibana.example/api/b' : 'https://kibana.example/api/a',
+      status: 500,
+      ok: false,
+      failure: null,
+      requestedAt: 0,
+      respondedAt: 100,
+      resourceType: 'fetch',
+    },
+    {
+      method: 'GET',
+      url: bFirst ? 'https://kibana.example/api/a' : 'https://kibana.example/api/b',
+      status: 500,
+      ok: false,
+      failure: null,
+      requestedAt: 200,
+      respondedAt: 300,
+      resourceType: 'fetch',
+    },
+  ];
+  const consoleMessages = [
+    { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+    { type: 'error', text: '500 @ /api/b' },
+  ];
+
+  const bSecond = reduceAction({ network: networkFor(false), console: consoleMessages });
+  assert(
+    bSecond.level1.filter((i) => i.type === 'silent_server_error').length === 0,
+    '/api/b (own message) arrives SECOND → both /api/a (native credit) and /api/b (own message) are surfaced',
+    JSON.stringify(bSecond.level1)
+  );
+
+  const bFirst = reduceAction({ network: networkFor(true), console: consoleMessages });
+  assert(
+    bFirst.level1.filter((i) => i.type === 'silent_server_error').length === 0,
+    '/api/b (own message) arrives FIRST → /api/b must not steal the native credit /api/a needs; same result as above',
+    JSON.stringify(bFirst.level1)
+  );
+}
+
+console.log(
+  '\n── Own-path-message matching is count-based, not presence-based: query variants must not share one credit unboundedly ──'
+);
+{
+  // P2 review finding: a hand-authored message like "500 @ /api/data" never
+  // includes the query string (pathnameOf strips it), so a presence test
+  // (`consoleText.includes(path)`) would let ONE such message wrongly cover
+  // every query-variant request to that path — two independent requests,
+  // /api/data?page=1 and /api/data?page=2, are not the same request just
+  // because they share a pathname.
+  const eventFor = (query, requestedAt) => ({
+    method: 'GET',
+    url: `https://kibana.example/api/data?page=${query}`,
+    status: 500,
+    ok: false,
+    failure: null,
+    requestedAt,
+    respondedAt: requestedAt + 50,
+    resourceType: 'fetch',
+  });
+
+  const oneMessage = reduceAction({
+    network: [eventFor(1, 0), eventFor(2, 100)],
+    console: [{ type: 'error', text: '500 @ /api/data' }],
+  });
+  const oneMessageSilent = oneMessage.level1.filter((i) => i.type === 'silent_server_error');
+  assert(
+    oneMessageSilent.length === 1,
+    'two query-variant 500s + ONE path-only own-message → exactly one is still reported, not zero',
+    JSON.stringify(oneMessage.level1)
+  );
+  assert(
+    !!oneMessageSilent[0] && oneMessageSilent[0].url.includes('page=2'),
+    'the second (later-in-time) query variant is the one still reported — the first claims the sole own-message credit',
+    JSON.stringify(oneMessageSilent)
+  );
+
+  const twoMessages = reduceAction({
+    network: [eventFor(1, 0), eventFor(2, 100)],
+    console: [
+      { type: 'error', text: '500 @ /api/data' },
+      { type: 'error', text: '500 @ /api/data' },
+    ],
+  });
+  assert(
+    !twoMessages.level1.some((i) => i.type === 'silent_server_error'),
+    'two query-variant 500s + TWO path-only own-messages → both are covered, zero silent_server_error findings',
+    JSON.stringify(twoMessages.level1)
+  );
+}
+
+console.log(
+  '\n── An abandoned request reserves its plausible native-message credit, so it can no longer wrongly cover an unrelated real 500 ──'
+);
+{
+  // Fix for a P2 review finding: an abandonedByNavigation event never
+  // consumes its own credit (excluded from `qualifying` entirely), so if
+  // the browser genuinely logged a native message for it, that message
+  // used to stay in the shared pool and get wrongly claimed by a completely
+  // unrelated real 500 of the same status — there is no request<->message
+  // ID link in the data to attribute the native message to the abandoned
+  // request specifically, so the reducer now reserves one credit per
+  // same-status abandoned event *before* any qualifying event can claim
+  // one, treating the ambiguity conservatively (assume the abandoned event
+  // used it) rather than risk a false negative on the real request.
+  const abandonedEvent = {
+    method: 'GET',
+    url: 'https://kibana.example/api/abandoned',
+    status: 500,
+    ok: false,
+    failure: null,
+    requestedAt: 0,
+    respondedAt: null,
+    abandonedByNavigation: true,
+    resourceType: 'fetch',
+  };
+  const unrelatedRealEvent = {
+    method: 'GET',
+    url: 'https://kibana.example/api/unrelated',
+    status: 500,
+    ok: false,
+    failure: null,
+    requestedAt: 100,
+    respondedAt: 150,
+    resourceType: 'fetch',
+  };
+  const r = reduceAction({
+    network: [abandonedEvent, unrelatedRealEvent],
+    console: [
+      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+    ],
+  });
+  assert(
+    r.level3.some((i) => i.type === 'request_abandoned_by_navigation'),
+    'the abandoned request still gets its own Level 3 finding, independent of the credit pool',
+    JSON.stringify(r)
+  );
+  assert(
+    r.level1.some((i) => i.type === 'silent_server_error' && i.url.includes('unrelated')),
+    "the sole native credit is reserved for the abandoned event, so the unrelated real 500 is now correctly reported as silent rather than wrongly suppressed",
+    JSON.stringify(r.level1)
+  );
+
+  // Two native messages for the same status: one reserved for the abandoned
+  // event, one left for the real event — the real event should still be
+  // covered when the pool is large enough for both.
+  const r2 = reduceAction({
+    network: [abandonedEvent, unrelatedRealEvent],
+    console: [
+      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+    ],
+  });
+  assert(
+    !r2.level1.some((i) => i.type === 'silent_server_error'),
+    'with a second native message available, the real event is still covered once the abandoned event\'s reservation is satisfied',
+    JSON.stringify(r2.level1)
+  );
+}
+
+console.log(
+  '\n── Explicit acceptance: the reservation above is a deliberate trade-off, not a blind spot — it can create a false positive too ──'
+);
+{
+  // P2 review finding (round 5): the test above only demonstrates the
+  // reservation *fixing* a false negative. Point taken — the exact same
+  // mechanism, run on data where the native message actually belonged to
+  // the real (non-abandoned) request rather than the abandoned one, trades
+  // that false negative for a false positive instead: the real request
+  // gets wrongly reported as silent even though it did have console
+  // coverage. This is not a fixable misattribution the way the exact-path
+  // test above is — a native message carries no path *or timestamp* (see
+  // the ConsoleEvent shape in the module doc comment), so there is no data
+  // in this shape to decide which of the two same-status events actually
+  // produced it. Both directions of this trade-off are accepted
+  // deliberately, because a false positive here is a finding a human
+  // reviews and dismisses, while the false negative this reservation
+  // replaces is a genuinely silent error the whole point of this detector
+  // is to catch. This test is intentionally identical in shape to the one
+  // above — the point is that "the real request has legitimate coverage" is
+  // indistinguishable, from this data, from "the abandoned request does",
+  // so the same fixture must be read as covering both interpretations.
+  const abandoned = {
+    method: 'GET',
+    url: 'https://kibana.example/api/abandoned',
+    status: 500,
+    ok: false,
+    failure: null,
+    requestedAt: 0,
+    respondedAt: null,
+    abandonedByNavigation: true,
+    resourceType: 'fetch',
+  };
+  const realRequestWithLegitimateCoverage = {
+    method: 'GET',
+    url: 'https://kibana.example/api/normal',
+    status: 500,
+    ok: false,
+    failure: null,
+    requestedAt: 100,
+    respondedAt: 150,
+    resourceType: 'fetch',
+  };
+  const r = reduceAction({
+    network: [abandoned, realRequestWithLegitimateCoverage],
+    console: [
+      // Ground truth this fixture asserts: this message was actually
+      // logged for /api/normal's failure, not for the abandoned request.
+      // The reducer cannot know that from a native message alone.
+      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+    ],
+  });
+  assert(
+    r.level1.some((i) => i.type === 'silent_server_error' && i.url.includes('normal')),
+    'accepted false positive: /api/normal is reported as silent even though this fixture\'s ground truth is that the console message was really its own — indistinguishable from the true-positive fixture above given only { type, text } console events',
+    JSON.stringify(r.level1)
+  );
+}
+
+console.log(
+  '\n── Own-path-message matching consumes individual messages globally AND requires an exact path, not a substring ──'
+);
+{
+  // P2 review finding (round 4): the per-(status, path) count from the
+  // prior fix still let two *different* keys double-spend the same message
+  // whenever one path is a substring of the other — text.includes("/api/data")
+  // is true for a message about "/api/data/export" too, so a single message
+  // wrongly covered two independent requests to genuinely different paths.
+  const eventFor = (path, requestedAt) => ({
+    method: 'GET',
+    url: `https://kibana.example${path}`,
+    status: 500,
+    ok: false,
+    failure: null,
+    requestedAt,
+    respondedAt: requestedAt + 50,
+    resourceType: 'fetch',
+  });
+
+  const oneMessage = reduceAction({
+    network: [eventFor('/api/data', 0), eventFor('/api/data/export', 100)],
+    console: [{ type: 'error', text: '500 @ /api/data/export' }],
+  });
+  const oneMessageSilent = oneMessage.level1.filter((i) => i.type === 'silent_server_error');
+  assert(
+    oneMessageSilent.length === 1,
+    'two prefix-overlapping-path 500s + ONE message → exactly one is still reported, not zero',
+    JSON.stringify(oneMessage.level1)
+  );
+
+  // P2 review finding (round 5): the count-fix above still didn't check
+  // *which* request the round-4 test's single message pinned as silent — it
+  // only checked the count, so a real misattribution bug slipped through:
+  // a plain substring test let the SHORTER path ("/api/data", which sorts
+  // first by requestedAt above) consume a message that unambiguously named
+  // the LONGER path ("/api/data/export"), so the genuinely-silent shorter
+  // request was wrongly marked "surfaced" while the request that really
+  // had its own message got reported as silent instead — the exact inverse
+  // of the correct answer. Unlike the native-message pool (no path data at
+  // all, so misattribution there is a genuine, irreducible ambiguity), a
+  // message that names "/api/data/export" is never actually about
+  // "/api/data" — there is no ambiguity to accept here, only imprecision to
+  // fix. Assert the correct endpoint specifically, in both time orders, so
+  // a future regression can't silently satisfy the weaker "count === 1"
+  // check above while flipping the attribution again.
+  assert(
+    oneMessageSilent[0] && oneMessageSilent[0].path === '/api/data',
+    'the shorter path, which never got its own message, is the one reported as silent — not the longer path that did',
+    JSON.stringify(oneMessageSilent)
+  );
+
+  const oneMessageReversedOrder = reduceAction({
+    network: [eventFor('/api/data/export', 0), eventFor('/api/data', 100)],
+    console: [{ type: 'error', text: '500 @ /api/data/export' }],
+  });
+  const reversedSilent = oneMessageReversedOrder.level1.filter(
+    (i) => i.type === 'silent_server_error'
+  );
+  assert(
+    reversedSilent.length === 1 && reversedSilent[0].path === '/api/data',
+    'same correct attribution regardless of which request sorts first by requestedAt — the fix is exact-path matching, not arrival order',
+    JSON.stringify(reversedSilent)
+  );
+
+  const twoMessages = reduceAction({
+    network: [eventFor('/api/data', 0), eventFor('/api/data/export', 100)],
+    console: [
+      { type: 'error', text: '500 @ /api/data' },
+      { type: 'error', text: '500 @ /api/data/export' },
+    ],
+  });
+  assert(
+    !twoMessages.level1.some((i) => i.type === 'silent_server_error'),
+    'two prefix-overlapping-path 500s + TWO distinct, exactly-matching messages → both are covered, zero silent_server_error findings',
+    JSON.stringify(twoMessages.level1)
+  );
+}
+
 // ══════════════════════════════════════════════════════════════════════════
 // PENDING / STUCK / ABANDONED
 // ══════════════════════════════════════════════════════════════════════════
@@ -615,6 +1072,80 @@ console.log('\n── Bridge redaction (doc snippet) agrees with redactUrl (redu
         `doc=${redactFromDoc(url)}\n         reducer=${redactUrl(url)}`
       );
     }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// LIVE-CAPTURED FIXTURES (Task 8 seeded-harness validation, real browser)
+//
+// Each live-drain-scenario*.json is a verbatim drain captured via the
+// browser_run_code_unsafe bridge against
+// ../manual-tools/seeded-live-harness.html, not hand-authored like the
+// fixtures above. Parametrized here so a future reducer change that
+// silently alters one of these six scenarios' outcomes fails a test run
+// instead of only being noticed on the next manual MCP pass — see
+// ../reports/task8-live-validation-report.md for the full narrative.
+// ══════════════════════════════════════════════════════════════════════════
+
+console.log('\n── Live-captured fixtures: documented outcome per scenario is pinned ───');
+{
+  const expectations = [
+    {
+      name: 'live-drain-scenario3-query-variants',
+      describe: 'three ?q=/?page= variants of the same path',
+      check: (r) =>
+        r.level1.length === 0 && r.level2.length === 0 && r.level3.length === 0,
+      label: 'query-variants → 0 findings (full-URL grouping correctly treats them as distinct)',
+    },
+    {
+      name: 'live-drain-scenario4-duplicate-click',
+      describe: 'the same exact call fired twice in quick succession, overlapping in flight',
+      check: (r) => r.level2.some((i) => i.type === 'duplicate_api_call'),
+      label: 'duplicate-click → Level 2 duplicate_api_call',
+    },
+    {
+      name: 'live-drain-scenario6-known-noise-genuine-failure',
+      describe:
+        '5 sequential (non-overlapping) polls to a seeded endpoint, one of which fails with a 500',
+      // Documented gap, not a silently-expected pass: DUPLICATE_WINDOW_MS is
+      // a time-span threshold, not an in-flight-overlap check, so five
+      // sequential polls landing within 500ms of each other are flagged as
+      // duplicate_api_call exactly like a genuine double-submit would be.
+      // See ../reports/task8-live-validation-report.md's "Known limitations" — an
+      // overlap check (are two requests for the same signature ever
+      // in-flight at the same time?) would distinguish this from a true
+      // duplicate without relying on a path allowlist. The genuine failure
+      // itself is correctly not double-reported (0 Level 1).
+      check: (r) =>
+        r.level1.length === 0 &&
+        r.level2.some((i) => i.type === 'duplicate_api_call' && i.count === 5),
+      label:
+        'known-noise-genuine-failure → 0 Level 1 (no double-report), but a documented Level 2 ' +
+        'false positive on the sequential polling (duplicate_api_call, count 5) — tracked, not silently expected to disappear',
+    },
+    {
+      name: 'live-drain-scenario7-permission-gating',
+      describe: 'a 403 from an admin-only endpoint',
+      check: (r) => r.level1.length === 0 && r.level2.length === 0,
+      label: 'permission-gating (403) → 0 Level 1/2 findings (status < 500 is out of scope by design)',
+    },
+    {
+      name: 'live-drain-scenario8-cancellation',
+      describe: 'a request cancelled by the user before it settles',
+      check: (r) => r.level1.length === 0 && r.level2.length === 0 && r.level3.length === 0,
+      label: 'cancellation → 0 findings (correctly silent)',
+    },
+    {
+      name: 'live-drain-scenario9-refresh-mid-request',
+      describe: 'a page refresh while a request is still in flight',
+      check: (r) => r.level3.some((i) => i.type === 'request_abandoned_by_navigation'),
+      label: 'refresh-mid-request → Level 3 request_abandoned_by_navigation (value-add over legacy, which has no equivalent)',
+    },
+  ];
+
+  for (const { name, describe, check, label } of expectations) {
+    const r = reduceAction(json(name));
+    assert(check(r), `${name} (${describe}) → ${label}`, JSON.stringify({ level1: r.level1, level2: r.level2, level3: r.level3 }));
   }
 }
 

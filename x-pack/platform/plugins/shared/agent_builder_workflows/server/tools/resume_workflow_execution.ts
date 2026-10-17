@@ -7,10 +7,15 @@
 
 import { z } from '@kbn/zod/v4';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import { getExecutionState } from '@kbn/agent-builder-tools-base/workflows';
+import {
+  getExecutionState,
+  hasWorkflowExecutePrivilege,
+  hasWorkflowExecutionReadPrivilege,
+} from '@kbn/agent-builder-tools-base/workflows';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 
 const resumeWorkflowExecutionSchema = z.object({
@@ -28,8 +33,10 @@ const resumeWorkflowExecutionSchema = z.object({
 
 export const resumeWorkflowExecutionTool = ({
   workflowsManagement,
+  getSecurity,
 }: {
   workflowsManagement: WorkflowsServerPluginSetup;
+  getSecurity: () => SecurityPluginStart | undefined;
 }): BuiltinToolDefinition<typeof resumeWorkflowExecutionSchema> => {
   const { management: workflowApi } = workflowsManagement;
 
@@ -51,8 +58,25 @@ export const resumeWorkflowExecutionTool = ({
     **If status has not changed after those polls:** tell the user their resume was **submitted**, but you **could not confirm** the new execution state from Kibana yet - do **not** invent a second approval workflow.
     `),
     schema: resumeWorkflowExecutionSchema,
+    annotations: {
+      title: 'Resume Workflow Execution',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     handler: async ({ executionId, input }, { spaceId, request }) => {
       try {
+        if (!(await hasWorkflowExecutePrivilege({ security: getSecurity(), request, spaceId }))) {
+          return {
+            results: [
+              errorResult(
+                "Unauthorized to resume workflow execution. The 'workflowsManagement' execute privilege is required."
+              ),
+            ],
+          };
+        }
+
         await workflowApi.resumeWorkflowExecution(executionId, spaceId, input, request, {
           channel: 'agent_builder',
         });
@@ -64,9 +88,13 @@ export const resumeWorkflowExecutionTool = ({
       }
 
       // Failure here is non-fatal & the resume already happened so the LLM must not retry it
-      let execution: Awaited<ReturnType<typeof getExecutionState>>;
+      let execution: Awaited<ReturnType<typeof getExecutionState>> = null;
       try {
-        execution = await getExecutionState({ executionId, spaceId, workflowApi });
+        if (
+          await hasWorkflowExecutionReadPrivilege({ security: getSecurity(), request, spaceId })
+        ) {
+          execution = await getExecutionState({ executionId, spaceId, workflowApi, request });
+        }
       } catch {
         execution = null;
       }

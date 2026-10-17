@@ -9,18 +9,22 @@
 
 import { BehaviorSubject } from 'rxjs';
 import React from 'react';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { DataSourceType } from '../../../../../common/data_sources';
 import type { ContextWithProfileId } from '../../../profile_service';
 import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import type { ProfileProviderServices } from '../../profile_provider_services';
 import {
   CHANGE_POINT_DATA_SOURCE_PROFILE_ID,
   type ChangePointChartSectionSnapshot,
 } from './change_point_context';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
 import { createChangePointDataSourceProfileProvider } from './profile';
+import { createChangePointSummarySeriesCache } from './change_point_summary_series';
 
 const RESOLUTION_MISMATCH = { isMatch: false };
 
@@ -41,13 +45,24 @@ describe('createChangePointDataSourceProfileProvider', () => {
     ...overrides,
   });
 
-  const provider = createChangePointDataSourceProfileProvider();
+  const mockServices = {
+    charts: {
+      theme: {
+        useChartsBaseTheme: () => ({}),
+      },
+    } as unknown as ChartsPluginStart,
+    data: { search: { esql: jest.fn() } },
+  } as unknown as ProfileProviderServices;
+
+  const provider = createChangePointDataSourceProfileProvider(mockServices);
 
   /** Builds a minimal resolved context for use in profile accessor tests. */
   const buildContext = (overrides: Record<string, unknown> = {}) => ({
     category: DataSourceCategory.Default,
+    typeColumnId: 'type',
     pvalueColumnId: 'pvalue',
     chartSectionProps$: new BehaviorSubject<ChangePointChartSectionSnapshot | undefined>(undefined),
+    summarySeriesCache: createChangePointSummarySeriesCache(),
     ...overrides,
   });
 
@@ -73,21 +88,21 @@ describe('createChangePointDataSourceProfileProvider', () => {
 
   describe('resolve', () => {
     describe('matches', () => {
-      it('returns isMatch true with category and pvalueColumnId for a query with top-level CHANGE_POINT', async () => {
+      it('returns isMatch true with category, column ids, and chartSectionProps$ for a top-level CHANGE_POINT query', async () => {
         const context = await resolveMatch();
         expect(context).toMatchObject({
           category: DataSourceCategory.Default,
+          typeColumnId: 'type',
           pvalueColumnId: 'pvalue',
+        });
+        expect(context.chartSectionProps$).toBeInstanceOf(BehaviorSubject);
+        expect((context.chartSectionProps$ as BehaviorSubject<unknown>).getValue()).toBeUndefined();
+        expect(context.summarySeriesCache).toEqual({
+          getSeries$: expect.any(Function),
         });
       });
 
-      it('includes a BehaviorSubject as chartSectionProps$ in the context', async () => {
-        const context = await resolveMatch();
-        expect(context.chartSectionProps$).toBeInstanceOf(BehaviorSubject);
-        expect((context.chartSectionProps$ as BehaviorSubject<unknown>).getValue()).toBeUndefined();
-      });
-
-      it('picks up a custom pvalue AS alias', async () => {
+      it('picks up custom type and pvalue AS aliases', async () => {
         const context = await resolveMatch({
           query: {
             esql: 'FROM logs-* | STATS avg_val = AVG(bytes) BY bucket = BUCKET(@timestamp, 1h) | CHANGE_POINT avg_val ON bucket AS change_type, p_value',
@@ -95,13 +110,16 @@ describe('createChangePointDataSourceProfileProvider', () => {
         });
         expect(context).toMatchObject({
           category: DataSourceCategory.Default,
+          typeColumnId: 'change_type',
           pvalueColumnId: 'p_value',
         });
       });
 
-      it('context does not include typeColumnId', async () => {
-        const context = await resolveMatch();
-        expect(context).not.toHaveProperty('typeColumnId');
+      it('creates an isolated Summary series cache for each resolved context', async () => {
+        const firstContext = await resolveMatch();
+        const secondContext = await resolveMatch();
+
+        expect(firstContext.summarySeriesCache).not.toBe(secondContext.summarySeriesCache);
       });
     });
 
@@ -157,22 +175,63 @@ describe('createChangePointDataSourceProfileProvider', () => {
     });
   });
 
+  describe('getDefaultAppState', () => {
+    it('defaults to type, pvalue, and Summary columns', () => {
+      const getDefaultAppState = provider.profile.getDefaultAppState!(() => ({}), {
+        context: buildContext(),
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      });
+      expect(getDefaultAppState({ dataView: {} as DataView })).toEqual({
+        columns: [{ name: 'type' }, { name: SOURCE_COLUMN }, { name: 'pvalue' }],
+        rowHeight: 3,
+      });
+    });
+
+    it('uses type and pvalue aliases from context', () => {
+      const getDefaultAppState = provider.profile.getDefaultAppState!(() => ({}), {
+        context: buildContext({ typeColumnId: 'change_type', pvalueColumnId: 'p_value' }),
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      });
+      expect(getDefaultAppState({ dataView: {} as DataView })).toEqual({
+        columns: [{ name: 'change_type' }, { name: SOURCE_COLUMN }, { name: 'p_value' }],
+        rowHeight: 3,
+      });
+    });
+  });
+
   describe('getColumnsConfiguration', () => {
-    it('customises the pvalue column when pvalueColumnId is present', () => {
+    it('customises the pvalue header and keeps Summary non-expandable', () => {
       const getColumns = provider.profile.getColumnsConfiguration!(() => ({}), {
         context: buildContext({ pvalueColumnId: 'my_pvalue' }),
         toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
-      expect(getColumns()).toHaveProperty('my_pvalue');
+      const config = getColumns();
+      expect(config).toHaveProperty('my_pvalue');
+      expect(
+        config[SOURCE_COLUMN]!({
+          column: { id: SOURCE_COLUMN, cellActions: [jest.fn()] } as never,
+          headerRowHeight: 1,
+        })
+      ).toEqual(
+        expect.objectContaining({
+          isExpandable: false,
+          cellActions: [],
+        })
+      );
     });
 
-    it('returns base config when pvalueColumnId is absent', () => {
-      const base = { existing: {} as never };
-      const getColumns = provider.profile.getColumnsConfiguration!(() => base, {
-        context: buildContext({ pvalueColumnId: '' }),
-        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
-      });
-      expect(getColumns()).toBe(base);
+    it('keeps Summary config and previous columns when pvalueColumnId is empty', () => {
+      const getColumns = provider.profile.getColumnsConfiguration!(
+        () => ({ existing: {} as never }),
+        {
+          context: buildContext({ pvalueColumnId: '' }),
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        }
+      );
+      const result = getColumns();
+      expect(result).toHaveProperty('existing');
+      expect(result).toHaveProperty(SOURCE_COLUMN);
+      expect(result).not.toHaveProperty('');
     });
   });
 
@@ -189,13 +248,13 @@ describe('createChangePointDataSourceProfileProvider', () => {
       });
     };
 
-    it('registers a function renderer for the pvalue column', () => {
+    it('registers pvalue and Summary renderers', () => {
       const renderers = buildRenderers('pvalue');
-      expect(renderers).toHaveProperty('pvalue');
       expect(renderers.pvalue).toBeInstanceOf(Function);
+      expect(renderers[SOURCE_COLUMN]).toBeInstanceOf(Function);
     });
 
-    it('falls through to prev when pvalueColumnId is empty', () => {
+    it('keeps Summary and prev renderers when pvalueColumnId is empty', () => {
       const existingRenderer = jest.fn();
       const prevRenderers = { some_col: existingRenderer };
       const getCellRenderers = provider.profile.getCellRenderers!(() => prevRenderers, {
@@ -207,7 +266,9 @@ describe('createChangePointDataSourceProfileProvider', () => {
         dataView: {} as DataView,
         density: undefined,
       });
-      expect(renderers).toBe(prevRenderers);
+      expect(renderers.some_col).toBe(existingRenderer);
+      expect(renderers[SOURCE_COLUMN]).toBeInstanceOf(Function);
+      expect(renderers).not.toHaveProperty('');
     });
   });
 

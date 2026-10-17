@@ -134,11 +134,13 @@ spaceTest.describe('Discover tabs - data view editing', { tag: '@local-stateful-
         const newFieldName = '_test_new_field';
         const editedFieldName = '_test_new_field_edited';
 
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
+        await discover.createNewTabAndSearch();
         expect(await discover.getSelectedDataViewName()).toBe(currentName);
 
-        await discover.createRuntimeField(newFieldName, RUNTIME_FIELD_SCRIPT);
+        await discover.createRuntimeField({
+          fieldName: newFieldName,
+          script: RUNTIME_FIELD_SCRIPT,
+        });
         await unifiedFieldList.searchField(newFieldName);
         await expect(unifiedFieldList.getAvailableField(newFieldName)).toBeVisible();
 
@@ -193,8 +195,7 @@ spaceTest.describe('Discover tabs - data view editing', { tag: '@local-stateful-
         const firstTabName = await discover.getSelectedDataViewName();
         const newFieldName = '_test_new_field2';
 
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
+        await discover.createNewTabAndSearch();
         await discover.createDataViewFromSearchBar({
           name: secondDataViewName,
           adHoc: isAdHocDataView,
@@ -202,7 +203,10 @@ spaceTest.describe('Discover tabs - data view editing', { tag: '@local-stateful-
         await discover.waitUntilTabIsLoaded();
         const secondTabName = await discover.getSelectedDataViewName();
 
-        await discover.createRuntimeField(newFieldName, RUNTIME_FIELD_SCRIPT);
+        await discover.createRuntimeField({
+          fieldName: newFieldName,
+          script: RUNTIME_FIELD_SCRIPT,
+        });
         await unifiedFieldList.searchField(newFieldName);
         await expect(unifiedFieldList.getAvailableField(newFieldName)).toBeVisible();
 
