@@ -1,0 +1,1245 @@
+{
+  "id": "vendor_f_scanner",
+  "title": "Vendor F scanner",
+  "description": "Nextron THOR scanner findings",
+  "cohort": "recent",
+  "format": "json",
+  "samples": [
+    {
+      "line": "{\"time\":\"2025-12-10T18:00:00Z\",\"hostname\":\"testhost\",\"level\":\"Info\",\"module\":\"AtJobs\",\"message\":\"At Job detected\",\"scanid\":\"S-TestStart001\",\"job\":\"C:\\\\Windows\\\\System32\\\\Tasks\\\\test\",\"command\":\"\",\"start\":\"2014-01-01T00:00:00+00:00, 2014-01-01T01:00:00+00:00\",\"user\":\"\",\"runlevel\":\"\",\"logontype\":\"\",\"files\":null,\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T18:00:00.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "testhost"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "At Job detected",
+        "related": {
+          "hosts": [
+            "testhost"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "module": "AtJobs",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"time\":\"2025-12-10T18:00:00Z\",\"hostname\":\"testhost\",\"level\":\"Warning\",\"module\":\"Filescan\",\"message\":\"Suspicious file found\",\"scanid\":\"S-TestGrok001\",\"score\":50,\"file\":{\"path\":\"c:\\\\users\\\\administrator\\\\mimidrv.sys\",\"type\":\"EXE\"},\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T18:00:00.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "file": {
+          "name": "mimidrv.sys",
+          "path": "c:\\users\\administrator\\mimidrv.sys"
+        },
+        "host": {
+          "name": "testhost"
+        },
+        "log": {
+          "level": "Warning"
+        },
+        "message": "Suspicious file found",
+        "related": {
+          "hosts": [
+            "testhost"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "file"
+          ],
+          "kind": "event",
+          "module": "Filescan",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"time\":\"2025-12-10T18:00:01Z\",\"hostname\":\"testhost\",\"level\":\"Warning\",\"module\":\"Filescan\",\"message\":\"Suspicious file found\",\"scanid\":\"S-TestGrok002\",\"score\":50,\"file\":{\"path\":\"/suspicious.bin\",\"type\":\"ELF\"},\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T18:00:01.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "file": {
+          "name": "suspicious.bin",
+          "path": "/suspicious.bin"
+        },
+        "host": {
+          "name": "testhost"
+        },
+        "log": {
+          "level": "Warning"
+        },
+        "message": "Suspicious file found",
+        "related": {
+          "hosts": [
+            "testhost"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "file"
+          ],
+          "kind": "event",
+          "module": "Filescan",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"time\":\"2025-12-10T18:00:02Z\",\"hostname\":\"testhost\",\"level\":\"Warning\",\"module\":\"Filescan\",\"message\":\"Suspicious file found\",\"scanid\":\"S-TestGrok003\",\"score\":50,\"file\":{\"path\":\"\\\\\\\\server\\\\share\\\\malware.exe\",\"type\":\"EXE\"},\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T18:00:02.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "file": {
+          "name": "malware.exe",
+          "path": "\\\\server\\share\\malware.exe"
+        },
+        "host": {
+          "name": "testhost"
+        },
+        "log": {
+          "level": "Warning"
+        },
+        "message": "Suspicious file found",
+        "related": {
+          "hosts": [
+            "testhost"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "file"
+          ],
+          "kind": "event",
+          "module": "Filescan",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"time\":\"2025-12-10T18:00:03Z\",\"hostname\":\"testhost\",\"level\":\"Info\",\"module\":\"Amcache\",\"message\":\"Analyzing Amcache Hive\",\"scanid\":\"S-TestString001\",\"file\":\"C:\\\\Windows\\\\appcompat\\\\Programs\\\\Amcache.hve.tmp.LOG1\",\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T18:00:03.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "file": {
+          "name": "Amcache.hve.tmp.LOG1",
+          "path": "C:\\Windows\\appcompat\\Programs\\Amcache.hve.tmp.LOG1"
+        },
+        "host": {
+          "name": "testhost"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "Analyzing Amcache Hive",
+        "related": {
+          "hosts": [
+            "testhost"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "registry"
+          ],
+          "kind": "event",
+          "module": "Amcache",
+          "type": [
+            "access"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T17:58:42Z\",\"hostname\":\"mymachinename\",\"level\":\"Info\",\"module\":\"Report\",\"message\":\"Thor Scan finished\",\"scanid\":\"S-VavZi0stuDo\",\"end_time\":\"2025-11-10T17:58:42.4290563Z\",\"alerts\":0,\"warnings\":16,\"notices\":30,\"errors\":0,\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T17:58:42.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "Thor Scan finished",
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "configuration"
+          ],
+          "end": "2025-11-10T17:58:42.429Z",
+          "kind": "event",
+          "module": "Report",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T17:58:42Z\",\"hostname\":\"mymachinename\",\"level\":\"Info\",\"module\":\"EtwWatcher\",\"message\":\"Stopped background task to detect CobaltStrike beacon activity\",\"scanid\":\"S-VavZi0stuDo\",\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T17:58:42.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "Stopped background task to detect CobaltStrike beacon activity",
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "module": "EtwWatcher",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T17:58:42Z\",\"hostname\":\"mymachinename\",\"level\":\"Info\",\"module\":\"Filescan\",\"message\":\"Finished module\",\"scanid\":\"S-VavZi0stuDo\",\"duration\":\"0 hours 44 mins 8 secs\",\"scanned_elements\":126218,\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T17:58:42.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "Finished module",
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "file"
+          ],
+          "kind": "event",
+          "module": "Filescan",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T17:58:01Z\",\"hostname\":\"mymachinename\",\"level\":\"Info\",\"module\":\"Amcache\",\"message\":\"Analyzing Amcache Hive\",\"scanid\":\"S-VavZi0stuDo\",\"file\":\"C:\\\\Windows\\\\appcompat\\\\Programs\\\\Amcache.hve.tmp.LOG1\",\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T17:58:01.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "file": {
+          "name": "Amcache.hve.tmp.LOG1",
+          "path": "C:\\Windows\\appcompat\\Programs\\Amcache.hve.tmp.LOG1"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "Analyzing Amcache Hive",
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "registry"
+          ],
+          "kind": "event",
+          "module": "Amcache",
+          "type": [
+            "access"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T17:58:01Z\",\"hostname\":\"mymachinename\",\"level\":\"Info\",\"module\":\"RegistryHive\",\"message\":\"Scanning registry\",\"scanid\":\"S-VavZi0stuDo\",\"hive\":\"C:\\\\Windows\\\\appcompat\\\\Programs\\\\Amcache.hve.tmp.LOG1\",\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T17:58:01.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "Scanning registry",
+        "registry": {
+          "path": "C:\\Windows\\appcompat\\Programs\\Amcache.hve.tmp.LOG1"
+        },
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "registry"
+          ],
+          "kind": "event",
+          "module": "RegistryHive",
+          "type": [
+            "access"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T17:57:37Z\",\"hostname\":\"mymachinename\",\"level\":\"Info\",\"module\":\"AtJobs\",\"message\":\"At Job detected\",\"scanid\":\"S-VavZi0stuDo\",\"job\":\"C:\\\\Windows\\\\WaaS\\\\tasks\\\\5ffea6126f02e78b9099eb4614d2d339f03ca5a8.xml\",\"command\":\"%systemroot%\\\\system32\\\\usoclient.exe\",\"start\":\"\",\"user\":\"S-1-5-18\",\"runlevel\":\"LeastPrivilege\",\"logontype\":\"\",\"files\":[{\"path\":\"C:\\\\Windows\\\\WaaS\\\\tasks\\\\5ffea6126f02e78b9099eb4614d2d339f03ca5a8.xml\",\"exists\":\"yes\",\"type\":\"Windows At Job\",\"size\":6488,\"md5\":\"350c4f51757d9ad9a87e5307c03001cd\",\"sha1\":\"8af77c3c54c8a188435905ec6a2f572de90a729f\",\"sha256\":\"d8d26c61956684316ac72382046b4636b3ba7f87f182fd43148b233e1ca8376a\",\"firstbytes\":\"fffe3c003f0078006d006c002000760065007200 / \\u003c?xml ver\",\"created\":\"2021-05-08T08:14:42.8926498Z\",\"owner\":\"NT SERVICE\\\\TrustedInstaller\"},{\"path\":\"C:\\\\Windows\\\\system32\\\\usoclient.exe\",\"exists\":\"yes\",\"type\":\"EXE\",\"size\":90112,\"md5\":\"1feddb97cdc1d931766010363f9b945e\",\"sha1\":\"b3837bc524fb8d1c67025d7fa90c30c0a4a7657d\",\"sha256\":\"0eccf139a5c8f2dcb8dd648eff85c42309456ea74ee90fae9adab4fb06968006\",\"firstbytes\":\"4d5a90000300000004000000ffff0000b8000000 / MZ\",\"created\":\"2025-09-12T18:15:53.5554443Z\",\"owner\":\"NT SERVICE\\\\TrustedInstaller\",\"company\":\"Microsoft Corporation\",\"desc\":\"UsoClient\",\"legal_copyright\":\"© Microsoft Corporation. All rights reserved.\",\"product\":\"Microsoft® Windows® Operating System\",\"original_name\":\"UsoClient\",\"internal_name\":\"UsoClient\",\"imphash\":\"59970db1d5ef76d2ab92ae1bf6482723\"}],\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T17:57:37.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "At Job detected",
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ],
+          "user": [
+            "S-1-5-18"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "S-1-5-18"
+        },
+        "event": {
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "module": "AtJobs",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T17:56:20Z\",\"hostname\":\"mymachinename\",\"level\":\"Info\",\"module\":\"WMIPersistence\",\"message\":\"WMI info\",\"scanid\":\"S-VavZi0stuDo\",\"key\":\"Binding 0\",\"filtertype\":\"NTEventLogEventConsumer\",\"eventfiltername\":\"SCM Event Log Filter\",\"eventconsumername\":\"SCM Event Log Consumer\",\"eventfilter\":\"select * from MSFT_SCMEventLogEvent\",\"eventconsumer\":\"\",\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T17:56:20.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "WMI info",
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "module": "WMIPersistence",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T17:14:33Z\",\"hostname\":\"mymachinename\",\"level\":\"Info\",\"module\":\"Eventlog\",\"message\":\"Finished module\",\"scanid\":\"S-VavZi0stuDo\",\"duration\":\"0 hours 0 mins 38 secs\",\"scanned_elements\":49840,\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T17:14:33.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "Finished module",
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "module": "Eventlog",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T17:13:54Z\",\"hostname\":\"mymachinename\",\"level\":\"Info\",\"module\":\"RegistryChecks\",\"message\":\"Finished module\",\"scanid\":\"S-VavZi0stuDo\",\"duration\":\"0 hours 0 mins 53 secs\",\"scanned_elements\":496069,\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T17:13:54.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "Finished module",
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "registry"
+          ],
+          "kind": "event",
+          "module": "RegistryChecks",
+          "type": [
+            "access"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T17:13:00Z\",\"hostname\":\"mymachinename\",\"level\":\"Info\",\"module\":\"ScheduledTasks\",\"message\":\"Task\",\"scanid\":\"S-VavZi0stuDo\",\"name\":\"UpdateLibrary\",\"path\":\"\\\\Microsoft\\\\Windows\\\\Windows Media Sharing\\\\UpdateLibrary\",\"command\":\"\\\"%ProgramFiles%\\\\Windows Media Player\\\\wmpnscfg.exe\\\"\",\"enabled\":\"true\",\"lastrun\":\"0001-01-01T00:00:00Z\",\"nextrun\":\"0001-01-01T00:00:00Z\",\"file\":{\"size\":90112,\"md5\":\"ec604a0d8a27976ab136a489d9b6aa76\",\"sha1\":\"5c8e0b60caad1cf28706f8389059c8603cf51eaf\",\"sha256\":\"7eb3e426d02dc018ec1d9afa5328389354e62f74ac207f08f62b08befbb45f06\",\"firstbytes\":\"4d5a90000300000004000000ffff0000b8000000 / MZ\",\"created\":\"2021-05-08T09:37:44.6340724Z\",\"modified\":\"2021-05-07T21:54:00Z\",\"accessed\":\"2021-05-08T09:37:44.6340724Z\",\"permissions\":\"APPLICATION PACKAGE AUTHORITY\\\\ALL APPLICATION PACKAGES:R / APPLICATION PACKAGE AUTHORITY\\\\ALL RESTRICTED APPLICATION PACKAGES:R / BUILTIN\\\\Administrators:R / BUILTIN\\\\Users:R / NT AUTHORITY\\\\SYSTEM:R / NT SERVICE\\\\TrustedInstaller:F\",\"owner\":\"NT SERVICE\\\\TrustedInstaller\",\"company\":\"Microsoft Corporation\",\"desc\":\"Windows Media Player Network Sharing Service Configuration Application\",\"legal_copyright\":\"© Microsoft Corporation. All rights reserved.\",\"product\":\"Microsoft® Windows® Operating System\",\"original_name\":\"WMPNSCFG.EXE.MUI\",\"imphash\":\"c38242470146ca32c2a3f1ab0cffd0ab\"},\"files\":null,\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T17:13:00.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "file": {
+          "accessed": "2021-05-08T09:37:44.634Z",
+          "created": "2021-05-08T09:37:44.634Z",
+          "hash": {
+            "md5": "ec604a0d8a27976ab136a489d9b6aa76",
+            "sha1": "5c8e0b60caad1cf28706f8389059c8603cf51eaf",
+            "sha256": "7eb3e426d02dc018ec1d9afa5328389354e62f74ac207f08f62b08befbb45f06"
+          },
+          "mtime": "2021-05-07T21:54:00.000Z",
+          "owner": "NT SERVICE\\TrustedInstaller",
+          "size": 90112
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "Task",
+        "related": {
+          "hash": [
+            "ec604a0d8a27976ab136a489d9b6aa76",
+            "5c8e0b60caad1cf28706f8389059c8603cf51eaf",
+            "7eb3e426d02dc018ec1d9afa5328389354e62f74ac207f08f62b08befbb45f06"
+          ],
+          "hosts": [
+            "mymachinename"
+          ],
+          "user": [
+            "NT SERVICE\\TrustedInstaller"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "module": "ScheduledTasks",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T17:08:01Z\",\"hostname\":\"mymachinename\",\"level\":\"Info\",\"module\":\"ServiceCheck\",\"message\":\"Service entry\",\"scanid\":\"S-VavZi0stuDo\",\"key\":\"System\\\\CurrentControlSet\\\\Services\\\\WpnUserService\",\"key_name\":\"WpnUserService\",\"service_name\":\"@%SystemRoot%\\\\system32\\\\WpnUserService.dll,-1\",\"image_path\":\"%SystemRoot%\\\\system32\\\\svchost.exe -k UnistackSvcGroup\",\"modified\":\"2025-09-12T18:24:28.2102156Z\",\"start_type\":\"AUTO_START\",\"user\":\"LocalSystem\",\"description\":\"@%SystemRoot%\\\\system32\\\\WpnUserService.dll,-2\",\"image\":{\"size\":106496,\"md5\":\"1c9cdc829cd81d78f1b06281b998a4e4\",\"sha1\":\"0ea3742d5046b4dd49832672d677862f7cdfba16\",\"sha256\":\"1a37ac55c634989d601bc5ff24e5d71b984eb7ad76217e5a52f36621fe86dd69\",\"firstbytes\":\"4d5a90000300000004000000ffff0000b8000000 / MZ\",\"created\":\"2025-09-12T18:15:45.1300412Z\",\"modified\":\"2025-09-12T18:15:45.1300412Z\",\"accessed\":\"2025-09-12T18:15:45.1300412Z\",\"permissions\":\"APPLICATION PACKAGE AUTHORITY\\\\ALL APPLICATION PACKAGES:R / APPLICATION PACKAGE AUTHORITY\\\\ALL RESTRICTED APPLICATION PACKAGES:R / BUILTIN\\\\Administrators:R / BUILTIN\\\\Users:R / NT AUTHORITY\\\\SYSTEM:R / NT SERVICE\\\\TrustedInstaller:F\",\"owner\":\"NT SERVICE\\\\TrustedInstaller\",\"company\":\"Microsoft Corporation\",\"desc\":\"Windows Push Notification User Service\",\"legal_copyright\":\"© Microsoft Corporation. All rights reserved.\",\"product\":\"Microsoft® Windows® Operating System\",\"original_name\":\"WpnUserService.dll.mui\",\"internal_name\":\"WpnUserService\",\"imphash\":\"a65a278de77765f323fbe44bdb6a808c\"},\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T17:08:01.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "Service entry",
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ],
+          "user": [
+            "LocalSystem",
+            "NT SERVICE\\TrustedInstaller"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "LocalSystem"
+        },
+        "event": {
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "module": "ServiceCheck",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T17:13:00Z\",\"hostname\":\"mymachinename\",\"level\":\"Info\",\"module\":\"ScheduledTasks\",\"message\":\"Task\",\"scanid\":\"S-VavZi0stuDo\",\"name\":\"Server Initial Configuration Task\",\"path\":\"\\\\Microsoft\\\\Windows\\\\Server Initial Configuration Task\",\"command\":\"%windir%\\\\system32\\\\srvinitconfig.exe /disableconfigtask\",\"enabled\":\"false\",\"lastrun\":\"2025-09-13T00:47:00Z\",\"nextrun\":\"0001-01-01T00:00:00Z\",\"file\":{\"size\":73728,\"md5\":\"6395857d79bc9b4290002c7d66839e8c\",\"sha1\":\"10da9787bb8e69ef3f012265c29bd3fa9b37916a\",\"sha256\":\"985c15d87f5fd6b62d5d569978370c01e23bc7fa1a57e3acd526bd3db1541318\",\"firstbytes\":\"4d5a90000300000004000000ffff0000b8000000 / MZ\",\"created\":\"2025-09-12T18:15:06.5525205Z\",\"modified\":\"2025-09-12T18:15:06.5525205Z\",\"accessed\":\"2025-09-12T18:15:06.5525205Z\",\"permissions\":\"APPLICATION PACKAGE AUTHORITY\\\\ALL APPLICATION PACKAGES:R / APPLICATION PACKAGE AUTHORITY\\\\ALL RESTRICTED APPLICATION PACKAGES:R / BUILTIN\\\\Administrators:R / BUILTIN\\\\Users:R / NT AUTHORITY\\\\SYSTEM:R / NT SERVICE\\\\TrustedInstaller:F\",\"owner\":\"NT SERVICE\\\\TrustedInstaller\",\"company\":\"Microsoft Corporation\",\"desc\":\"Server Configurations\",\"legal_copyright\":\"© Microsoft Corporation. All rights reserved.\",\"product\":\"Microsoft® Windows® Operating System\",\"original_name\":\"SrvInitConfig.exe\",\"internal_name\":\"SrvInitConfig.exe\",\"imphash\":\"b33f8014279efc94b8cc2b371d076f45\"},\"files\":null,\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T17:13:00.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "file": {
+          "accessed": "2025-09-12T18:15:06.552Z",
+          "created": "2025-09-12T18:15:06.552Z",
+          "hash": {
+            "md5": "6395857d79bc9b4290002c7d66839e8c",
+            "sha1": "10da9787bb8e69ef3f012265c29bd3fa9b37916a",
+            "sha256": "985c15d87f5fd6b62d5d569978370c01e23bc7fa1a57e3acd526bd3db1541318"
+          },
+          "mtime": "2025-09-12T18:15:06.552Z",
+          "owner": "NT SERVICE\\TrustedInstaller",
+          "size": 73728
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "Task",
+        "related": {
+          "hash": [
+            "6395857d79bc9b4290002c7d66839e8c",
+            "10da9787bb8e69ef3f012265c29bd3fa9b37916a",
+            "985c15d87f5fd6b62d5d569978370c01e23bc7fa1a57e3acd526bd3db1541318"
+          ],
+          "hosts": [
+            "mymachinename"
+          ],
+          "user": [
+            "NT SERVICE\\TrustedInstaller"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "module": "ScheduledTasks",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T17:12:59Z\",\"hostname\":\"mymachinename\",\"level\":\"Info\",\"module\":\"Users\",\"message\":\"Finished module\",\"scanid\":\"S-VavZi0stuDo\",\"duration\":\"0 hours 0 mins 0 secs\",\"scanned_elements\":5,\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T17:12:59.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "Finished module",
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "iam"
+          ],
+          "kind": "event",
+          "module": "Users",
+          "type": [
+            "info",
+            "user"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T17:12:59Z\",\"hostname\":\"mymachinename\",\"level\":\"Notice\",\"module\":\"UserDir\",\"message\":\"Recently modified profile\",\"scanid\":\"S-VavZi0stuDo\",\"user\":\"Default\",\"created\":\"2021-05-08T08:06:51.7150288Z\",\"modified\":\"2025-11-10T16:07:40.9921271Z\",\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T17:12:59.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Notice"
+        },
+        "message": "Recently modified profile",
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ],
+          "user": [
+            "Default"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "Default"
+        },
+        "event": {
+          "category": [
+            "iam"
+          ],
+          "kind": "event",
+          "module": "UserDir",
+          "type": [
+            "info",
+            "user"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T17:12:58Z\",\"hostname\":\"mymachinename\",\"level\":\"Info\",\"module\":\"NetworkShares\",\"message\":\"Starting module\",\"scanid\":\"S-VavZi0stuDo\",\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T17:12:58.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "Starting module",
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network"
+          ],
+          "kind": "event",
+          "module": "NetworkShares",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T17:12:58Z\",\"hostname\":\"mymachinename\",\"level\":\"Info\",\"module\":\"Timestomp\",\"message\":\"Finished module\",\"scanid\":\"S-VavZi0stuDo\",\"duration\":\"0 hours 4 mins 56 secs\",\"scanned_elements\":393940,\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T17:12:58.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "Finished module",
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "file"
+          ],
+          "kind": "event",
+          "module": "Timestomp",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T17:07:41Z\",\"hostname\":\"mymachinename\",\"level\":\"Info\",\"module\":\"ProcessCheck\",\"message\":\"Process info\",\"scanid\":\"S-VavZi0stuDo\",\"pid\":8596,\"command\":\"\\\"C:\\\\Windows\\\\system32\\\\cmd.exe\\\" \",\"ppid\":6156,\"parent\":\"C:\\\\Windows\\\\explorer.exe\",\"process_name\":\"cmd.exe\",\"owner\":\"MY-WINDOWS\\\\user\",\"created\":\"2025-11-10T16:41:59Z\",\"session\":\"RDP-Tcp#0\",\"image\":{\"path\":\"C:\\\\Windows\\\\System32\\\\cmd.exe\",\"type\":\"EXE\",\"size\":335872,\"md5\":\"8903a3381fbb033a45f5c2c50c175c54\",\"sha1\":\"bc2820b5ee7b43c172005b66546f12316de8c081\",\"sha256\":\"f7c237a49b96fd77c047910e13f24aac4678a0f94babdb06643dba63f38d48e5\",\"firstbytes\":\"4d5a90000300000004000000ffff0000b8000000 / MZ\",\"created\":\"2025-09-12T18:15:50.4452914Z\",\"modified\":\"2025-09-12T18:15:50.4608728Z\",\"accessed\":\"2025-09-12T18:15:50.4608728Z\",\"permissions\":\"APPLICATION PACKAGE AUTHORITY\\\\ALL APPLICATION PACKAGES:R / APPLICATION PACKAGE AUTHORITY\\\\ALL RESTRICTED APPLICATION PACKAGES:R / BUILTIN\\\\Administrators:R / BUILTIN\\\\Users:R / NT AUTHORITY\\\\SYSTEM:R / NT SERVICE\\\\TrustedInstaller:F\",\"owner\":\"NT SERVICE\\\\TrustedInstaller\",\"company\":\"Microsoft Corporation\",\"desc\":\"Windows Command Processor\",\"legal_copyright\":\"© Microsoft Corporation. All rights reserved.\",\"product\":\"Microsoft® Windows® Operating System\",\"original_name\":\"Cmd.Exe.MUI\",\"internal_name\":\"cmd\",\"imphash\":\"d60b77062898dc6bfae7fe11a0f8806c\"},\"connection_count\":0,\"listen_ports\":\"\",\"files\":[{\"path\":\"C:\\\\Windows\\\\system32\\\\cmd.exe\",\"exists\":\"yes\",\"type\":\"EXE\",\"size\":335872,\"md5\":\"8903a3381fbb033a45f5c2c50c175c54\",\"sha1\":\"bc2820b5ee7b43c172005b66546f12316de8c081\",\"sha256\":\"f7c237a49b96fd77c047910e13f24aac4678a0f94babdb06643dba63f38d48e5\",\"firstbytes\":\"4d5a90000300000004000000ffff0000b8000000 / MZ\",\"created\":\"2025-09-12T18:15:50.4452914Z\",\"owner\":\"NT SERVICE\\\\TrustedInstaller\",\"company\":\"Microsoft Corporation\",\"desc\":\"Windows Command Processor\",\"legal_copyright\":\"© Microsoft Corporation. All rights reserved.\",\"product\":\"Microsoft® Windows® Operating System\",\"original_name\":\"Cmd.Exe.MUI\",\"internal_name\":\"cmd\",\"imphash\":\"d60b77062898dc6bfae7fe11a0f8806c\"},{\"path\":\"C:\\\\Windows\\\\explorer.exe\",\"exists\":\"yes\",\"type\":\"EXE\",\"size\":4835944,\"md5\":\"1fb8907465fb58429762d97c1fbea04a\",\"sha1\":\"8baa602fdc6ba67545c0717e2b9063a0bfe3f278\",\"sha256\":\"53f36699c35c8f2360608a79f0809ba888c61f15886ae2b1f209a3e9b896cba7\",\"firstbytes\":\"4d5a90000300000004000000ffff0000b8000000 / MZ\",\"created\":\"2025-09-12T18:16:55.2973003Z\",\"owner\":\"NT SERVICE\\\\TrustedInstaller\",\"company\":\"Microsoft Corporation\",\"desc\":\"Windows Explorer\",\"legal_copyright\":\"© Microsoft Corporation. All rights reserved.\",\"product\":\"Microsoft® Windows® Operating System\",\"original_name\":\"EXPLORER.EXE.MUI\",\"internal_name\":\"explorer\",\"imphash\":\"becd30ee79098b21a5ba5e5cf0e18b83\"}],\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T17:07:41.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "Process info",
+        "process": {
+          "command_line": "\"C:\\Windows\\system32\\cmd.exe\" ",
+          "executable": "C:\\Windows\\System32\\cmd.exe",
+          "name": "cmd.exe",
+          "parent": {
+            "executable": "C:\\Windows\\explorer.exe",
+            "pid": 6156
+          },
+          "pid": 8596
+        },
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ],
+          "user": [
+            "NT SERVICE\\TrustedInstaller",
+            "MY-WINDOWS\\user"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "process"
+          ],
+          "kind": "event",
+          "module": "ProcessCheck",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T17:12:59Z\",\"hostname\":\"mymachinename\",\"level\":\"Info\",\"module\":\"LSASessions\",\"message\":\"Finished module\",\"scanid\":\"S-VavZi0stuDo\",\"duration\":\"0 hours 0 mins 0 secs\",\"scanned_elements\":1,\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T17:12:59.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "Finished module",
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "session",
+            "iam"
+          ],
+          "kind": "event",
+          "module": "LSASessions",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-12-10T07:01:34Z\",\"hostname\":\"mymachinename\",\"level\":\"Info\",\"module\":\"Init\",\"message\":\"Adding sigma rules from 1 files in /tmp/thor-cloud-scan-26154/signatures/sigma/windows/registry/registry_setinfo\",\"scanid\":\"S-kWmLaJd2ndo\",\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-12-10T07:01:34.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Info"
+        },
+        "message": "Adding sigma rules from 1 files in /tmp/thor-cloud-scan-26154/signatures/sigma/windows/registry/registry_setinfo",
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "module": "Init",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-07-18T20:01:20Z\",\"hostname\":\"mymachinename\",\"level\":\"Warning\",\"module\":\"Filescan\",\"message\":\"Possibly Dangerous file found\",\"scanid\":\"S-7KSH3xjAGds\",\"score\":79,\"file\":{\"path\":\"/home/customUser/.cache/mozilla/firefox/zyhqea6k.default-release/cache2/entries/8150BE2E21D5453573AE7FFB5458F076F1E79984\",\"ext\":\"\",\"type\":\"Import\",\"size\":68665,\"md5\":\"58fa3ac66305a0514b157bf92ce87fff\",\"sha1\":\"9d11cea8deee4e1f52adb316d634a01688fa10df\",\"sha256\":\"050ccb98325922f241eadd60093a3968ed73e1cbadeee8e54dad57943a927c1b\",\"firstbytes\":\"696d706f7274207b20637265617465486f74436f / import { createHotCo\",\"changed\":\"2025-01-07T12:42:14.439958213+01:00\",\"modified\":\"2025-01-07T12:42:14.439958213+01:00\",\"accessed\":\"2025-07-18T14:43:36.978603724+02:00\",\"permissions\":\"-rw-------\",\"owner\":\"customUser\",\"group\":\"customUser\"},\"reasons\":[{\"name\":\"YARA rule SUSP_Encoded_MimikatzKeywords1 / Detects encoded keyword - sekurlsa::logonpasswords\",\"score\":70,\"signature\":{\"ref\":\"Internal Research - Permutator\",\"ruledate\":\"2022-04-27\",\"tags\":[\"SCRIPT\",\"SUSP\",\"T1027\"],\"rulename\":\"SUSP_Encoded_MimikatzKeywords1\",\"author\":\"Florian Roth\"},\"matched\":[{\"data\":\"c2VrdXJsc2E6OmxvZ29ucGFzc3dvcmRz\",\"context\":\"AgICAgIHtgIyBFdmlsIHN0cmluZ3MgZnJvbSBvdXIgY2FzZVxuc2VrdXJsc2E6OmxvZ29ucGFzc3dvcmRzXG5mYWlsZWQgdG8gY3JlYXRlIFNlcnZpY2UgJ0dBTUVPVkVSJ1\",\"offset\":58979}],\"sigtype\":\"internal\",\"sigclass\":\"YARA Rule\"},{\"name\":\"YARA rule GODMODERULES_IDDQD_God_Mode_Rule / Detects a wide array of cyber threats, from malware and ransomware to advanced persistent threats (APTs)\",\"score\":60,\"signature\":{\"ref\":\"Internal Research - get a god mode rule set with THOR by Nextron Systems\",\"ruledate\":\"2024-01-12\",\"rulename\":\"GODMODERULES_IDDQD_God_Mode_Rule\",\"author\":\"Florian Roth\"},\"matched\":[{\"data\":\"sekurlsa::logonpasswords\",\"context\":\"ck: true, children: `# Evil strings from our case\\u000asekurlsa::logonpasswords\\u000afailed to create Service 'GAMEOVER'\\u000akiwi.eo.oe` }\",\"offset\":16402}],\"sigtype\":\"custom\",\"sigclass\":\"YARA Rule\"}],\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-07-18T20:01:20.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "file": {
+          "accessed": "2025-07-18T12:43:36.978Z",
+          "ctime": "2025-01-07T11:42:14.439Z",
+          "group": "customUser",
+          "hash": {
+            "md5": "58fa3ac66305a0514b157bf92ce87fff",
+            "sha1": "9d11cea8deee4e1f52adb316d634a01688fa10df",
+            "sha256": "050ccb98325922f241eadd60093a3968ed73e1cbadeee8e54dad57943a927c1b"
+          },
+          "mtime": "2025-01-07T11:42:14.439Z",
+          "name": "8150BE2E21D5453573AE7FFB5458F076F1E79984",
+          "owner": "customUser",
+          "path": "/home/customUser/.cache/mozilla/firefox/zyhqea6k.default-release/cache2/entries/8150BE2E21D5453573AE7FFB5458F076F1E79984",
+          "size": 68665
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Warning"
+        },
+        "message": "Possibly Dangerous file found",
+        "related": {
+          "hash": [
+            "58fa3ac66305a0514b157bf92ce87fff",
+            "9d11cea8deee4e1f52adb316d634a01688fa10df",
+            "050ccb98325922f241eadd60093a3968ed73e1cbadeee8e54dad57943a927c1b"
+          ],
+          "hosts": [
+            "mymachinename"
+          ],
+          "user": [
+            "customUser"
+          ]
+        },
+        "rule": {
+          "author": [
+            "Florian Roth"
+          ],
+          "description": "YARA rule SUSP_Encoded_MimikatzKeywords1 / Detects encoded keyword - sekurlsa::logonpasswords",
+          "id": "SUSP_Encoded_MimikatzKeywords1",
+          "name": "YARA rule SUSP_Encoded_MimikatzKeywords1 / Detects encoded keyword - sekurlsa::logonpasswords",
+          "ruleset": "Internal Research - Permutator"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "file"
+          ],
+          "kind": "event",
+          "module": "Filescan",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-07-18T20:29:47Z\",\"hostname\":\"mymachinename\",\"level\":\"Warning\",\"module\":\"VulnerabilityCheck\",\"message\":\"Tomcat credentials weakness\",\"scanid\":\"S-7KSH3xjAGds\",\"reason\":\"Password is too short\",\"user\":\"role3\",\"file\":\"/home/customUser/vulnerabilitycheck/testdata/tomcat-users.xml\",\"score\":70,\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-07-18T20:29:47.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "file": {
+          "name": "tomcat-users.xml",
+          "path": "/home/customUser/vulnerabilitycheck/testdata/tomcat-users.xml"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Warning"
+        },
+        "message": "Tomcat credentials weakness",
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ],
+          "user": [
+            "role3"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "role3"
+        },
+        "event": {
+          "category": [
+            "vulnerability"
+          ],
+          "kind": "event",
+          "module": "VulnerabilityCheck",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-07-18T20:29:47Z\",\"hostname\":\"mymachinename\",\"level\":\"Warning\",\"module\":\"RegistryHive\",\"message\":\"Suspicious MS Office connection cache entry\",\"scanid\":\"S-7KSH3xjAGds\",\"path\":\"/home/customUser/registryhive/testdata/msofficecache.hve\",\"entry\":\"http://10.0.2.15:8000/\",\"reason\":\"Port explicitly specified\",\"modified\":\"2022-05-31T12:05:58+02:00\",\"key\":\"SOFTWARE\\\\Microsoft\\\\Office\\\\16.0\\\\Common\\\\Internet\\\\Server Cache\\\\http://10.0.2.15:8000/\",\"score\":70,\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-07-18T20:29:47.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Warning"
+        },
+        "message": "Suspicious MS Office connection cache entry",
+        "registry": {
+          "key": "SOFTWARE\\Microsoft\\Office\\16.0\\Common\\Internet\\Server Cache\\http://10.0.2.15:8000/",
+          "value": "http://10.0.2.15:8000/"
+        },
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "registry"
+          ],
+          "kind": "event",
+          "module": "RegistryHive",
+          "type": [
+            "access"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-07-18T20:29:42Z\",\"hostname\":\"mymachinename\",\"level\":\"Notice\",\"module\":\"Filescan\",\"message\":\"Suspicious file found\",\"scanid\":\"S-7KSH3xjAGds\",\"score\":40,\"file\":{\"path\":\"/home/customUser/tests/data/x.txt\",\"ext\":\".txt\",\"type\":\"UNKNOWN\",\"size\":1000099,\"md5\":\"c2d0d7053e7cbd33d6c6cee3de6d64b2\",\"sha1\":\"0b4a167ded66166a2eaefe02be89189acbcb79b1\",\"sha256\":\"fc7aea262036db5dc1f293e1599746f3223fccb9c9b833eb01d578bfca1004fe\",\"firstbytes\":\"5858585858585858585858585858585858585858 / XXXXXXXXXXXXXXXXXXXX\",\"changed\":\"2024-03-15T09:37:32.272546799+01:00\",\"modified\":\"2024-03-15T09:37:32.272546799+01:00\",\"accessed\":\"2025-07-18T11:02:19.017744538+02:00\",\"permissions\":\"-rw-r--r--\",\"owner\":\"customUser\",\"group\":\"customUser\"},\"reasons\":[{\"name\":\"Filename IOC \\\\x.txt\",\"score\":40,\"signature\":{\"ref\":\"BSI CSW-Nr. 2017-200525-1034\"},\"matched\":[{\"data\":\"/x.txt\"}],\"sigtype\":\"internal\",\"sigclass\":\"Filename IOC\"}],\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-07-18T20:29:42.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "file": {
+          "accessed": "2025-07-18T09:02:19.017Z",
+          "ctime": "2024-03-15T08:37:32.272Z",
+          "group": "customUser",
+          "hash": {
+            "md5": "c2d0d7053e7cbd33d6c6cee3de6d64b2",
+            "sha1": "0b4a167ded66166a2eaefe02be89189acbcb79b1",
+            "sha256": "fc7aea262036db5dc1f293e1599746f3223fccb9c9b833eb01d578bfca1004fe"
+          },
+          "mtime": "2024-03-15T08:37:32.272Z",
+          "name": "x.txt",
+          "owner": "customUser",
+          "path": "/home/customUser/tests/data/x.txt",
+          "size": 1000099
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Notice"
+        },
+        "message": "Suspicious file found",
+        "related": {
+          "hash": [
+            "c2d0d7053e7cbd33d6c6cee3de6d64b2",
+            "0b4a167ded66166a2eaefe02be89189acbcb79b1",
+            "fc7aea262036db5dc1f293e1599746f3223fccb9c9b833eb01d578bfca1004fe"
+          ],
+          "hosts": [
+            "mymachinename"
+          ],
+          "user": [
+            "customUser"
+          ]
+        },
+        "rule": {
+          "description": "Filename IOC \\x.txt",
+          "name": "Filename IOC \\x.txt",
+          "ruleset": "BSI CSW-Nr. 2017-200525-1034"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "file"
+          ],
+          "kind": "event",
+          "module": "Filescan",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-07-18T20:29:03Z\",\"hostname\":\"mymachinename\",\"level\":\"Alert\",\"module\":\"Filescan\",\"message\":\"Malware file found\",\"scanid\":\"S-7KSH3xjAGds\",\"score\":96,\"file\":{\"path\":\"/home/customUser/workdir/thorhtml/public/testEvents1.json\",\"ext\":\".json\",\"type\":\"UNKNOWN\",\"size\":165705,\"md5\":\"4417209fab0f7bc3c0b9f3933bddb9fb\",\"sha1\":\"75ecd244a8db5c6f4b906da28783d113e7b66dfc\",\"sha256\":\"f787ce7b2f941d0b4fa9dd9e9cf81d7a6b1215cbb99b9932ca3c0ed0388d78e5\",\"firstbytes\":\"5b0a202020207b0a202020202020202022747970 / [     {         \\\"typ\",\"changed\":\"2024-03-15T09:35:01.142549038+01:00\",\"modified\":\"2024-03-15T09:35:01.142549038+01:00\",\"accessed\":\"2025-07-18T10:57:49.116288713+02:00\",\"permissions\":\"-rw-r--r--\",\"owner\":\"customUser\",\"group\":\"customUser\"},\"reasons\":[{\"name\":\"YARA rule Bitcoin_Miner_cpuminer / Detects a Bitcoin CPU Miner - often bundled with malware - file sppscv.exe\",\"score\":90,\"signature\":{\"ref\":\"Internal Research\",\"ruledate\":\"2016-12-02\",\"tags\":[\"EXE\",\"FILE\",\"MAL\"],\"rulename\":\"Bitcoin_Miner_cpuminer\",\"author\":\"Florian Roth\"},\"matched\":[{\"data\":\"User-Agent: cpuminer\",\"context\":\"               {\\u000a                        \\\"data\\\": \\\"User-Agent: cpuminer\\\",\\u000a                        \\\"context\\\": \\\"\\\\u0080JSON \",\"offset\":159364},{\"data\":\"-p, --pass=PASSWORD   password for mining server\",\"context\":\"SERNAME   username for mining server\\\\u000d\\\\u000a  -p, --pass=PASSWORD   password for mining server\\\\u000d\\\\u000a      --cert=FILE       certificate fo\",\"offset\":157003}],\"sigtype\":\"internal\",\"sigclass\":\"YARA Rule\"},{\"name\":\"YARA rule SIGNATURE_BASE_PUA_Cryptominer_Jan19_1 / Detects Crypto Miner strings\",\"score\":80,\"signature\":{\"ref\":\"Internal Research\",\"ruledate\":\"2023-12-05\",\"tags\":[\"FILE\"],\"rulename\":\"SIGNATURE_BASE_PUA_Cryptominer_Jan19_1\",\"author\":\"Florian Roth (Nextron Systems)\"},\"matched\":[{\"data\":\"Stratum notify: invalid Merkle branch\",\"context\":\"               {\\u000a                        \\\"data\\\": \\\"Stratum notify: invalid Merkle branch\\\",\\u000a                        \\\"context\\\": \\\".0\\\\u0000\\\\u0\",\"offset\":160890},{\"data\":\"-t, --threads=N       number of miner threads (default: number of processors)\",\"context\":\"HOST[:PORT]  connect through a proxy\\\\u000d\\\\u000a  -t, --threads=N       number of miner threads (default: number of processors)\\\\u000d\\\\u000a  -r, --retries=N       number of time\",\"offset\":157293},{\"data\":\"User-Agent: cpuminer/\",\"context\":\"u000a%s\\\\u000d\\\\u000a\\\\u0000Content-Length: %lu\\\\u0000User-Agent: cpuminer/2.3.3\\\\u0000X-Mining-Extensions: midstate\\\\u0000HTTP\",\"offset\":158272}],\"sigtype\":\"custom\",\"sigclass\":\"YARA Rule\"}],\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-07-18T20:29:03.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "file": {
+          "accessed": "2025-07-18T08:57:49.116Z",
+          "ctime": "2024-03-15T08:35:01.142Z",
+          "group": "customUser",
+          "hash": {
+            "md5": "4417209fab0f7bc3c0b9f3933bddb9fb",
+            "sha1": "75ecd244a8db5c6f4b906da28783d113e7b66dfc",
+            "sha256": "f787ce7b2f941d0b4fa9dd9e9cf81d7a6b1215cbb99b9932ca3c0ed0388d78e5"
+          },
+          "mtime": "2024-03-15T08:35:01.142Z",
+          "name": "testEvents1.json",
+          "owner": "customUser",
+          "path": "/home/customUser/workdir/thorhtml/public/testEvents1.json",
+          "size": 165705
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Alert"
+        },
+        "message": "Malware file found",
+        "related": {
+          "hash": [
+            "4417209fab0f7bc3c0b9f3933bddb9fb",
+            "75ecd244a8db5c6f4b906da28783d113e7b66dfc",
+            "f787ce7b2f941d0b4fa9dd9e9cf81d7a6b1215cbb99b9932ca3c0ed0388d78e5"
+          ],
+          "hosts": [
+            "mymachinename"
+          ],
+          "user": [
+            "customUser"
+          ]
+        },
+        "rule": {
+          "author": [
+            "Florian Roth"
+          ],
+          "description": "YARA rule Bitcoin_Miner_cpuminer / Detects a Bitcoin CPU Miner - often bundled with malware - file sppscv.exe",
+          "id": "Bitcoin_Miner_cpuminer",
+          "name": "YARA rule Bitcoin_Miner_cpuminer / Detects a Bitcoin CPU Miner - often bundled with malware - file sppscv.exe",
+          "ruleset": "Internal Research"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "file",
+            "malware"
+          ],
+          "kind": "alert",
+          "module": "Filescan",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"campaign_id\": \"2b054111-bad7-4bac-a14e-8fa8a88f1111\",\"time\":\"2025-07-18T20:01:02Z\",\"hostname\":\"mymachinename\",\"level\":\"Notice\",\"module\":\"Users\",\"message\":\"User is disabled with active login shell\",\"scanid\":\"S-7KSH3xjAGds\",\"user\":\"git\",\"userid\":\"971\",\"groupid\":\"971\",\"home\":\"/\",\"full_name\":\"git daemon user\",\"shell\":\"/usr/bin/git-shell\",\"score\":50,\"log_version\":\"v2.0.0\"}",
+      "expected": {
+        "@timestamp": "2025-07-18T20:01:02.000Z",
+        "ecs": {
+          "version": "9.4.0"
+        },
+        "host": {
+          "name": "mymachinename"
+        },
+        "log": {
+          "level": "Notice"
+        },
+        "message": "User is disabled with active login shell",
+        "related": {
+          "hosts": [
+            "mymachinename"
+          ],
+          "user": [
+            "git"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "full_name": "git daemon user",
+          "id": "971",
+          "name": "git"
+        },
+        "event": {
+          "category": [
+            "iam"
+          ],
+          "kind": "event",
+          "module": "Users",
+          "type": [
+            "info",
+            "user"
+          ]
+        }
+      }
+    }
+  ]
+}

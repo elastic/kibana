@@ -1,0 +1,127 @@
+{
+  "id": "vendor_k_app",
+  "title": "Vendor K application",
+  "description": "App server logs",
+  "cohort": "recent",
+  "format": "text",
+  "samples": [
+    {
+      "line": "logger=settings t=2026-02-07T15:15:44.004076068Z level=info msg=\"Starting Grafana\" version=12.3.2 commit=df2547decd50d14defa20ec9ce1c2e2bc9462d72 branch=release-12.3.2 compiled=2026-02-07T15:15:43Z",
+      "expected": {
+        "@timestamp": "2026-02-07T15:15:44.004Z",
+        "log": {
+          "level": "info",
+          "logger": "settings"
+        },
+        "message": "Starting Grafana",
+        "event": {
+          "ingested": "2026-02-20T14:46:09.616941794Z",
+          "kind": "event",
+          "severity": 6
+        }
+      }
+    },
+    {
+      "line": "logger=http.server t=2026-02-16T12:45:42.692301382Z level=info msg=\"HTTP Server Listen\" address=[::]:3000 protocol=http subUrl= socket=",
+      "expected": {
+        "@timestamp": "2026-02-16T12:45:42.692Z",
+        "log": {
+          "level": "info",
+          "logger": "http.server"
+        },
+        "message": "HTTP Server Listen",
+        "event": {
+          "ingested": "2026-02-20T14:46:09.616952419Z",
+          "kind": "event",
+          "severity": 6
+        }
+      }
+    },
+    {
+      "line": "logger=context userId=1 orgId=1 uname=admin t=2026-02-16T12:45:43.249930447Z level=info msg=\"Request Completed\" method=GET path=/api/live/ws status=-1 remote_addr=172.30.0.1 time_ms=8 duration=8.507063ms size=0 referer= handler=/api/live/ws status_source=server",
+      "expected": {
+        "@timestamp": "2026-02-16T12:45:43.249Z",
+        "client": {
+          "ip": "172.30.0.1"
+        },
+        "http": {
+          "request": {
+            "method": "GET"
+          },
+          "response": {
+            "body": {
+              "bytes": 0
+            },
+            "status_code": -1
+          }
+        },
+        "log": {
+          "level": "info",
+          "logger": "context"
+        },
+        "message": "Request Completed",
+        "url": {
+          "path": "/api/live/ws"
+        },
+        "user": {
+          "name": "admin"
+        },
+        "event": {
+          "duration": 8507063,
+          "ingested": "2026-02-20T14:46:09.616953835Z",
+          "kind": "event",
+          "severity": 6
+        }
+      }
+    },
+    {
+      "line": "logger=plugin.backgroundinstaller t=2026-02-16T12:45:43.643969583Z level=error msg=\"Failed to install plugin\" pluginId=grafana-lokiexplore-app version= error=\"failed to extract plugin archive: could not create \\\"/var/lib/grafana/plugins/grafana-lokiexplore-app\\\", permission denied, make sure you have write access to plugin dir\"",
+      "expected": {
+        "@timestamp": "2026-02-16T12:45:43.643Z",
+        "log": {
+          "level": "error",
+          "logger": "plugin.backgroundinstaller"
+        },
+        "message": "Failed to install plugin",
+        "event": {
+          "ingested": "2026-02-20T14:46:09.616954835Z",
+          "kind": "event",
+          "severity": 3
+        }
+      }
+    },
+    {
+      "line": "logger=cleanup t=2026-02-16T12:55:42.72528003Z level=info msg=\"Completed cleanup jobs\" duration=34.77328ms",
+      "expected": {
+        "@timestamp": "2026-02-16T12:55:42.725Z",
+        "log": {
+          "level": "info",
+          "logger": "cleanup"
+        },
+        "message": "Completed cleanup jobs",
+        "event": {
+          "duration": 34773280,
+          "ingested": "2026-02-20T14:46:09.616955752Z",
+          "kind": "event",
+          "severity": 6
+        }
+      }
+    },
+    {
+      "line": "t=2026-02-16T16:38:11.262999508Z lvl=eror msg=\"Database connection failed\" logger=sqlstore error=\"dial tcp 127.0.0.1:5432: connect: connection refused\"",
+      "expected": {
+        "@timestamp": "2026-02-16T16:38:11.262Z",
+        "log": {
+          "level": "error",
+          "logger": "sqlstore"
+        },
+        "message": "Database connection failed",
+        "event": {
+          "ingested": "2026-02-20T14:46:09.616956669Z",
+          "kind": "event",
+          "severity": 3
+        }
+      }
+    }
+  ]
+}
