@@ -14,6 +14,49 @@ import {
   isEmptyModelResponseErrorCode,
 } from '.';
 
+describe('EMPTY_MODEL_RESPONSE_ERROR_MARKER', () => {
+  // The marker is matched against persisted error *strings*, so it is only useful while it stays a
+  // substring of the message the error is built from. These tests fail if that link breaks.
+  it('is a substring of the message EmptyModelResponseError raises', () => {
+    const error = new EmptyModelResponseError({
+      completionTokens: 0,
+      connectorId: 'test-connector-id',
+      contentLength: 0,
+      responseBody: '',
+    });
+
+    expect(error.message).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
+  });
+
+  it('is a substring of the persisted error built from that thrown error', () => {
+    const cause = new EmptyModelResponseError({
+      completionTokens: 0,
+      connectorId: 'test-connector-id',
+      contentLength: 0,
+      responseBody: '',
+    });
+
+    const persisted = getEmptyModelResponseError({
+      cause,
+      generationAttempts: 3,
+      llmType: 'inference',
+      nodeName: 'generate',
+    });
+
+    expect(persisted).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
+  });
+
+  it('is a substring of the persisted error built without a cause', () => {
+    const persisted = getEmptyModelResponseError({
+      generationAttempts: 3,
+      llmType: 'inference',
+      nodeName: 'refine',
+    });
+
+    expect(persisted).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
+  });
+});
+
 describe('getEmptyModelResponseError', () => {
   it('names the node, the llm type and the attempt', () => {
     const error = getEmptyModelResponseError({

@@ -15,7 +15,7 @@ import { discardPreviousGenerations } from './helpers/discard_previous_generatio
 import { extractJson } from '../helpers/extract_json';
 import { getAnonymizedDocsFromState } from './helpers/get_anonymized_docs_from_state';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
-import { getCombined } from '../helpers/get_combined';
+import { getCombined, getCombinedAfterFailedAttempt } from '../helpers/get_combined';
 import { generationsAreRepeating } from '../helpers/generations_are_repeating';
 import { getUseUnrefinedResults } from './helpers/get_use_unrefined_results';
 import {
@@ -96,6 +96,10 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
             `generate node received an empty response (${llmType}) on attempt ${generationAttempts}; recording an error instead of treating it as a repeated generation`
         );
 
+        // `...state` deliberately keeps the accumulated `combinedGenerations`: this attempt produced
+        // no content, so there is nothing to add and nothing to invalidate. The catch block below
+        // follows the same rule via getCombinedAfterFailedAttempt, so an empty completion leaves the
+        // same state whether the LLM guard threw or this node noticed it.
         return {
           ...state,
           errors: [
@@ -206,7 +210,13 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
 
       return {
         ...state,
-        combinedGenerations: combinedResponse,
+        // `combinedResponse` is only assigned once the response was combined, so it is still '' when
+        // the failure produced no content; getCombinedAfterFailedAttempt then keeps the accumulated
+        // generations instead of dropping them (see its doc comment).
+        combinedGenerations: getCombinedAfterFailedAttempt({
+          combinedGenerations,
+          combinedResponse,
+        }),
         errors: [...state.errors, persistedError],
         generationAttempts: generationAttempts + 1,
         generations: [...generations, partialResponse],

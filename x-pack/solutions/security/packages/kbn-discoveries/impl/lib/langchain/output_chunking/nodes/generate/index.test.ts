@@ -26,6 +26,7 @@ import {
   ATTACK_DISCOVERY_REFINE,
 } from '../../../../../__mocks__/mock_prompts';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
+import { EMPTY_MODEL_RESPONSE_ERROR_MARKER } from '../helpers/empty_model_response';
 import { getAnonymizedDocsFromState } from './helpers/get_anonymized_docs_from_state';
 import { getGenerateNode } from '.';
 import { getAttackDiscoveriesGenerationSchema } from '../../../../../attack_discovery/graphs/default_attack_discovery_graph/schemas';
@@ -369,9 +370,9 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
 
     expect(state.generationAttempts).toBe(3);
     expect(state.errors).toHaveLength(3);
-    expect(
-      state.errors.every((error) => error.includes('the model returned an empty response'))
-    ).toBe(true);
+    expect(state.errors.every((error) => error.includes(EMPTY_MODEL_RESPONSE_ERROR_MARKER))).toBe(
+      true
+    );
     expect(state.combinedGenerations).toBe('');
     expect(mockResponseIsHallucinated).not.toHaveBeenCalled();
   });
@@ -395,7 +396,72 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     expect(state.generations).toEqual([]);
     expect(state.generationAttempts).toBe(1);
     expect(state.errors).toHaveLength(1);
-    expect(state.errors[0]).toContain('the model returned an empty response');
+    expect(state.errors[0]).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
+  });
+
+  it('keeps the generations accumulated by earlier attempts when the model returns an empty response', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue('');
+
+    const generateNode = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const withAccumulatedGenerations = {
+      ...initialGraphState,
+      combinedGenerations: '{"insights":[',
+      generationAttempts: 1,
+      generations: ['{"insights":['],
+    };
+
+    const state = await generateNode(withAccumulatedGenerations);
+
+    // an attempt that produced no content adds nothing and invalidates nothing: the partial results
+    // of the earlier attempts stay in state as the input for the next attempt
+    expect(state.combinedGenerations).toBe('{"insights":[');
+    expect(state.generations).toEqual(['{"insights":[']);
+    expect(state.generationAttempts).toBe(2);
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
+  });
+
+  it('keeps the generations accumulated by earlier attempts when an empty completion is thrown', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockRejectedValue(
+      new EmptyModelResponseError({
+        completionTokens: 0,
+        connectorId: 'test-connector-id',
+        contentLength: 0,
+        responseBody: '',
+      })
+    );
+
+    const generateNode = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await generateNode({
+      ...initialGraphState,
+      combinedGenerations: '{"insights":[',
+      generationAttempts: 1,
+      generations: ['{"insights":['],
+    });
+
+    // same state as the empty-completion branch above, whether the guard threw or the node noticed
+    expect(state.combinedGenerations).toBe('{"insights":[');
+    expect(state.errors[0]).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
   });
 
   it('persists a bounded prefix of a raw response that cannot be parsed', async () => {
@@ -454,7 +520,7 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     const state = await generateNode(initialGraphState);
 
     expect(state.errors).toHaveLength(1);
-    expect(state.errors[0]).toContain('the model returned an empty response');
+    expect(state.errors[0]).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
     expect(state.errors[0]).toContain('test-connector-id');
     expect(state.errors[0]).toContain('anthropic-claude-5.5-opus');
     expect(state.errors[0]).toContain('prompt tokens: 128390');

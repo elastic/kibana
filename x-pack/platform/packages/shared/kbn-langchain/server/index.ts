@@ -11,6 +11,7 @@ import { ActionsClientChatVertexAI } from './language_models/chat_vertex';
 import { ActionsClientChatBedrockConverse } from './language_models/chat_bedrock_converse';
 import {
   EMPTY_MODEL_RESPONSE_ERROR_CODE,
+  EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
   EmptyModelResponseError,
   MAX_RESPONSE_PREVIEW_LENGTH,
   getBoundedResponsePreview,
@@ -22,6 +23,7 @@ import { getDefaultArguments } from './language_models/constants';
 
 export {
   EMPTY_MODEL_RESPONSE_ERROR_CODE,
+  EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
   EmptyModelResponseError,
   MAX_RESPONSE_PREVIEW_LENGTH,
   getBoundedResponsePreview,

@@ -14,7 +14,7 @@ import type { BaseGraphState, GraphInsightTypes } from '../../../../types';
 import { discardPreviousRefinements } from './helpers/discard_previous_refinements';
 import { extractJson } from '../helpers/extract_json';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
-import { getCombined } from '../helpers/get_combined';
+import { getCombined, getCombinedAfterFailedAttempt } from '../helpers/get_combined';
 import { getCombinedRefinePrompt } from './helpers/get_combined_refine_prompt';
 import { generationsAreRepeating } from '../helpers/generations_are_repeating';
 import { getMaxHallucinationFailuresReached } from '../../helpers/get_max_hallucination_failures_reached';
@@ -110,6 +110,10 @@ export const getRefineNode = <T extends GraphInsightTypes>({
           maxRetriesReached,
         });
 
+        // `...state` deliberately keeps the accumulated `combinedRefinements`: this attempt produced
+        // no content, so there is nothing to add and nothing to invalidate. The catch block below
+        // follows the same rule via getCombinedAfterFailedAttempt, so an empty completion leaves the
+        // same state whether the LLM guard threw or this node noticed it.
         return {
           ...state,
           insights: useUnrefinedResults ? unrefinedResults : null,
@@ -230,7 +234,13 @@ export const getRefineNode = <T extends GraphInsightTypes>({
       return {
         ...state,
         insights: useUnrefinedResults ? unrefinedResults : null,
-        combinedRefinements: combinedResponse,
+        // `combinedResponse` is only assigned once the response was combined, so it is still '' when
+        // the failure produced no content; getCombinedAfterFailedAttempt then keeps the accumulated
+        // refinements instead of dropping them (see its doc comment).
+        combinedRefinements: getCombinedAfterFailedAttempt({
+          combinedGenerations: combinedRefinements,
+          combinedResponse,
+        }),
         errors: [...state.errors, persistedError],
         generationAttempts: generationAttempts + 1,
         refinements: [...refinements, partialResponse],

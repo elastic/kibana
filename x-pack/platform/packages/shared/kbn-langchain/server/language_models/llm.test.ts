@@ -11,7 +11,12 @@ import type { InferenceClient } from '@kbn/inference-common';
 
 import { ActionsClientLlm } from './llm';
 import { mockActionResponse } from './mocks';
-import { EMPTY_MODEL_RESPONSE_ERROR_CODE, EmptyModelResponseError, getDefaultArguments } from '..';
+import {
+  EMPTY_MODEL_RESPONSE_ERROR_CODE,
+  EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
+  EmptyModelResponseError,
+  getDefaultArguments,
+} from '..';
 import { DEFAULT_TIMEOUT } from './constants';
 
 const connectorId = 'mock-connector-id';
@@ -358,7 +363,7 @@ describe('ActionsClientLlm', () => {
         const error = await actionsClientLlm._call(prompt).catch((e) => e);
 
         expect(error).toBeInstanceOf(EmptyModelResponseError);
-        expect(error.message).toContain('the model returned an empty response');
+        expect(error.message).toContain(EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX);
         expect(error.message).toContain(connectorId);
         expect(error.message).toContain('anthropic-claude-5.5-opus');
         expect(error.message).toContain('prompt tokens: 128390');
