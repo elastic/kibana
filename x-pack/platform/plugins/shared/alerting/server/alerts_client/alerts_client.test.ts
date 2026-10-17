@@ -1978,8 +1978,8 @@ describe('Alerts Client', () => {
 
           await alertsClient.persistAlerts();
 
-          expect(logger.error).toHaveBeenCalledWith(
-            `Error writing recovered alert(1) to .alerts-test.alerts-default - existing alert document not found ${ruleInfo}.`,
+          expect(logger.warn).toHaveBeenCalledWith(
+            `Not updating recovered alert(1) in .alerts-test.alerts-default - existing alert document not found ${ruleInfo}.`,
             logTags
           );
         });
