@@ -70,7 +70,10 @@ describe('listAgentConnectors', () => {
       { id: 'slack-1', name: 'My Slack', actionTypeId: '.slack' },
       { id: 'email-1', name: 'Ops email', actionTypeId: '.email' },
     ]);
-    expect(actionsClient.getAll).toHaveBeenCalledWith({ includeSystemActions: false });
+    expect(actionsClient.getAll).toHaveBeenCalledWith({
+      includeSystemActions: false,
+      sandboxCapableOnly: true,
+    });
   });
 
   it('ignores allowed ids that the current user cannot see', async () => {
