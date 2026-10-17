@@ -24,7 +24,7 @@ export interface MicrosoftDefenderEndpointLogEsDoc {
   };
   cloud: {
     instance: {
-      id: string;
+      id: string | string[];
     };
   };
   microsoft: {

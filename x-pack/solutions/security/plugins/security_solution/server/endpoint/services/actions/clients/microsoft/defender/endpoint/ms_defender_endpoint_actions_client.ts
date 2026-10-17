@@ -23,14 +23,17 @@ import type {
   MicrosoftDefenderEndpointRunScriptParams,
   MicrosoftDefenderGetLibraryFilesResponse,
 } from '@kbn/connector-schemas/microsoft_defender_endpoint';
-import { groupBy } from 'lodash';
+import { castArray, groupBy } from 'lodash';
 import { Writable, type Readable } from 'stream';
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import pRetry from 'p-retry';
 import { v4 as uuidv4 } from 'uuid';
 import { isResponseActionCancelable } from '../../../../../../../../common/endpoint/service/response_actions/is_response_action_cancelable';
 import { buildIndexNameWithNamespace } from '../../../../../../../../common/endpoint/utils/index_name_utilities';
-import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
+import {
+  MICROSOFT_DEFENDER_AGENT_ID_FIELDS,
+  MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION,
+} from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import type {
   IsolationRouteRequestBody,
   RunScriptActionRequestBody,
@@ -170,19 +173,39 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     }
 
     const esClient = this.options.esClient;
+    // Match the requested id against every field that can hold it. These can be multi-valued
+    // (m365_defender alert/incident docs), so we aggregate per requested id instead of using `collapse`
+    const buildIdMatchQuery = (ids: string | string[]): QueryDslQueryContainer => ({
+      bool: {
+        should: MICROSOFT_DEFENDER_AGENT_ID_FIELDS.map((field) => ({
+          terms: { [field]: castArray(ids) },
+        })),
+        minimum_should_match: 1,
+      },
+    });
     const esSearchRequest: SearchRequest = {
       index: await this.fetchIndexNames(),
-      query: { bool: { filter: [{ terms: { 'cloud.instance.id': agentIds } }] } },
-      collapse: {
-        field: 'cloud.instance.id',
-        inner_hits: {
-          name: 'most_recent',
-          size: 1,
-          _source: ['agent', 'cloud.instance.id', 'event.created'],
-          sort: [{ 'event.created': 'desc' }],
+      size: 0,
+      query: { bool: { filter: [buildIdMatchQuery(agentIds)] } },
+      aggs: {
+        agents: {
+          filters: {
+            filters: Object.fromEntries(agentIds.map((id) => [id, buildIdMatchQuery(id)])),
+          },
+          aggs: {
+            most_recent: {
+              top_hits: {
+                size: 1,
+                _source: ['agent.id'],
+                // `@timestamp` only. `event.created` is missing on `m365_defender.event`, and a
+                // secondary sort leaves those docs last behind any doc that has `event.created`.
+                // `@timestamp` is on every data stream, so the newest document wins across them.
+                sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
+              },
+            },
+          },
         },
       },
-      _source: false,
       ignore_unavailable: true,
     };
 
@@ -199,8 +222,22 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
     const msDefenderLogEsResults = await esClient
       .search<
-        MicrosoftDefenderEndpointLogEsDoc,
-        { most_recent: MicrosoftDefenderEndpointLogEsDoc }
+        unknown,
+        {
+          agents: {
+            buckets: Record<
+              string,
+              {
+                doc_count: number;
+                most_recent: {
+                  hits: {
+                    hits: Array<{ _source?: Pick<MicrosoftDefenderEndpointLogEsDoc, 'agent'> }>;
+                  };
+                };
+              }
+            >;
+          };
+        }
       >(esSearchRequest)
       .catch(catchAndWrapError);
 
@@ -209,18 +246,20 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     );
 
     const agentIdsFound: string[] = [];
-    const fleetAgentIdToMsDefenderAgentIdMap: Record<string, string> = (
-      msDefenderLogEsResults.hits.hits ?? []
-    ).reduce((acc, esDoc) => {
-      const doc = esDoc.inner_hits?.most_recent.hits.hits[0]._source;
+    const fleetAgentIdToMsDefenderAgentIdMap: Record<string, string> = {};
 
-      if (doc) {
-        agentIdsFound.push(doc.cloud.instance.id);
-        acc[doc.agent.id] = doc.cloud.instance.id;
+    for (const [requestedAgentId, bucket] of Object.entries(
+      msDefenderLogEsResults.aggregations?.agents.buckets ?? {}
+    )) {
+      const elasticAgentId =
+        bucket.doc_count > 0 ? bucket.most_recent.hits.hits[0]?._source?.agent?.id : undefined;
+
+      if (elasticAgentId) {
+        agentIdsFound.push(requestedAgentId);
+        fleetAgentIdToMsDefenderAgentIdMap[elasticAgentId] = requestedAgentId;
       }
+    }
 
-      return acc;
-    }, {} as Record<string, string>);
     const elasticAgentIds = Object.keys(fleetAgentIdToMsDefenderAgentIdMap);
 
     if (elasticAgentIds.length === 0) {
