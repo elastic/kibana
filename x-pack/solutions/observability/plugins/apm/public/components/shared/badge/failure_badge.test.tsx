@@ -7,7 +7,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { FailureBadge } from './failure_badge';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { FailureBadge, getFailureBadgeDescriptor } from './failure_badge';
 
 describe('FailureBadge', () => {
   it('renders the failure badge when outcome is "failure"', () => {
@@ -38,5 +39,22 @@ describe('FailureBadge', () => {
   it('does not render when outcome is undefined', () => {
     const { container } = render(<FailureBadge />);
     expect(container).toBeEmptyDOMElement();
+  });
+});
+
+describe('getFailureBadgeDescriptor', () => {
+  const euiTheme = { colors: { danger: '#ff0000' } } as EuiThemeComputed;
+
+  it('describes the badge for a failed outcome', () => {
+    expect(getFailureBadgeDescriptor('failure', euiTheme)).toEqual({
+      label: 'failure',
+      color: '#ff0000',
+      toolTipContent: 'event.outcome = failure',
+    });
+  });
+
+  it('returns undefined for any other outcome', () => {
+    expect(getFailureBadgeDescriptor('success', euiTheme)).toBeUndefined();
+    expect(getFailureBadgeDescriptor(undefined, euiTheme)).toBeUndefined();
   });
 });
