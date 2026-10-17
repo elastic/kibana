@@ -80,6 +80,11 @@ export interface MigrateDocumentOptions {
    * Defaults to `false`.
    */
   allowDowngrade?: boolean;
+  /**
+   * Only deep clone the document when a migration is going to run, see {@link DocumentMigrateOptions.lazyClone}.
+   * Defaults to `false`.
+   */
+  lazyClone?: boolean;
 }
 
 /** @internal */
