@@ -129,7 +129,12 @@ export const buildConnectorEnv = ({
   return { env, secretValues };
 };
 
-/** Redacts injected secret values (and their common encodings) from command output. */
+/**
+ * Replaces every exact, plain-text occurrence of an injected secret value in command output.
+ * Encoded or transformed forms (base64, URL encoding, split or reversed strings) are not
+ * redacted, nor are values shorter than {@link MIN_REDACTABLE_SECRET_LENGTH}. This keeps secrets
+ * printed by accident out of tool results; it does not stop a command from exfiltrating them.
+ */
 export const redactSecrets = (text: string, secretValues: readonly string[]): string =>
   createOutputRedactor(secretValues).redact(text);
 
@@ -154,9 +159,8 @@ export const createConnectorCredentialResolver =
     if ('errorMessage' in authorized) return authorized;
     const { connector, inMemoryConnector } = authorized;
 
-    logger.debug(
-      `Injecting credentials for connector ${connectorId} into a single sandbox command`
-    );
+    // Also called to build the output redactor, so this does not mean the values were injected.
+    logger.debug(`Resolved credentials for connector ${connectorId}`);
 
     // Config comes from the in-memory connector, not from `get()`: the actions client omits
     // config for preconfigured connectors unless they opt in with `exposeConfig`, which would

@@ -6,16 +6,20 @@
  */
 
 import type { ZodObject } from '@kbn/zod/v4';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import type { SandboxSecretsClient } from '../../sandbox_secrets';
-import { deriveConnectorCredentialSecretValues } from './connector_credentials';
+import {
+  deriveConnectorCredentialSecretValues,
+  type ResolveConnectorCredentials,
+} from './connector_credentials';
 import { createOutputRedactor, redactDeep, type OutputRedactor } from './output_redactor';
+import { getSandboxCallContext, type SandboxCallContext } from './tool_utils';
 
-export type GetSandboxOutputRedactor = (request: KibanaRequest) => Promise<OutputRedactor>;
+export type GetSandboxOutputRedactor = (callContext: SandboxCallContext) => Promise<OutputRedactor>;
 
 const collectSecretLeaves = (value: unknown): string[] => {
   if (typeof value === 'string') return [value];
@@ -28,22 +32,31 @@ const collectSecretLeaves = (value: unknown): string[] => {
 };
 
 /**
- * Builds the redactor for sandbox tool output: every sandbox secret stored in the request's space
- * and every in-memory connector secret. Whether or not a call requested them, any of these may
- * have been written to a file or kept alive in a process by an earlier command.
+ * Builds the redactor for sandbox tool output: every sandbox secret stored in the request's space,
+ * every in-memory connector secret, and every secret value the connector credential resolver hands
+ * out for the agent's connectors. Whether or not a call requested them, any of these may have been
+ * written to a file or kept alive in a process by an earlier command.
+ *
+ * The resolver is the only way connector credentials reach the sandbox, and it denies connectors
+ * outside the agent's allow-list. Asking it for every allowed connector therefore covers whatever
+ * it injects, whichever source it reads from (in-memory connectors today, saved object connectors
+ * or framework-issued tokens later), without a second list of credential sources to keep in sync.
  */
 export const createSandboxOutputRedactorProvider =
   ({
     getDeps,
+    resolveConnectorCredentials,
   }: {
     getDeps: () => {
       actions?: ActionsPluginStart;
       sandboxSecretsClient?: Pick<SandboxSecretsClient, 'getRedactionValues'>;
     };
+    resolveConnectorCredentials?: ResolveConnectorCredentials;
   }): GetSandboxOutputRedactor =>
-  async (request) => {
+  async (callContext) => {
     const { actions, sandboxSecretsClient } = getDeps();
-    const sandboxSecretValues = (await sandboxSecretsClient?.getRedactionValues(request)) ?? [];
+    const sandboxSecretValues =
+      (await sandboxSecretsClient?.getRedactionValues(callContext.request)) ?? [];
     // Every raw secret leaf, plus any values a credential resolver derives from them (e.g. the
     // bare API key `deriveConnectorCredentialSecretValues` extracts out of an `Authorization`
     // header) — a value that never appears verbatim in `secrets` itself would otherwise round-trip
@@ -52,7 +65,22 @@ export const createSandboxOutputRedactorProvider =
       ...collectSecretLeaves(secrets),
       ...deriveConnectorCredentialSecretValues(secrets),
     ]);
-    return createOutputRedactor([...sandboxSecretValues, ...connectorSecretValues]);
+    // A connector the resolver denies cannot have had credentials injected by this agent either.
+    const resolvedCredentials = resolveConnectorCredentials
+      ? await Promise.all(
+          callContext.allowedConnectorIds.map((connectorId) =>
+            resolveConnectorCredentials(connectorId, callContext)
+          )
+        )
+      : [];
+    const resolvedSecretValues = resolvedCredentials.flatMap((resolved) =>
+      'errorMessage' in resolved ? [] : resolved.secretValues
+    );
+    return createOutputRedactor([
+      ...sandboxSecretValues,
+      ...connectorSecretValues,
+      ...resolvedSecretValues,
+    ]);
   };
 
 /**
@@ -74,9 +102,9 @@ export const withSandboxOutputRedaction = <TSchema extends ZodObject>(
   handler: async (params, context) => {
     let redactor: OutputRedactor;
     try {
-      redactor = await getOutputRedactor(context.request);
+      redactor = await getOutputRedactor(getSandboxCallContext(context));
     } catch (err) {
-      logger.error(`Loading sandbox secrets for output redaction failed: ${err.message}`);
+      logger.error(`Loading secrets for sandbox output redaction failed: ${err.message}`);
       return {
         results: [
           {

@@ -154,6 +154,9 @@ export const createSandboxBashTool = ({
           results: [{ type: ToolResultType.error, data: { message: resolved.errorMessage } }],
         };
       }
+      logger.debug(
+        `Injecting credentials for connector ${connector_id} into a single sandbox command`
+      );
       credentialEnv = resolved.env;
       secretValues = resolved.secretValues;
     }
