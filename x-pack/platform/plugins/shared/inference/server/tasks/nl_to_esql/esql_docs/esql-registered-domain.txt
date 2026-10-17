@@ -1,6 +1,6 @@
 # REGISTERED-DOMAIN
 
-The `REGISTERED_DOMAIN` processing command parses a fully qualified domain name (FQDN) string and extracts its domain, registered domain, top-level domain, and subdomain into new columns using the public suffix list.
+The `REGISTERED_DOMAIN` processing command parses a fully qualified domain name (FQDN) string and extracts its parts into new columns using the public suffix list.
 
 The new columns are prefixed with the specified `prefix` followed by a dot (`.`):
 
@@ -17,17 +17,17 @@ If a part is missing or the input is not a valid FQDN, the corresponding column 
 
 ### Parameters
 
-#### `prefix`
+#### prefix
 
 The prefix for the output columns. The extracted parts are available as `prefix.part_name`.
 
-#### `expression`
+#### expression
 
 The string expression containing the FQDN to parse.
 
 ## Examples
 
-Parse an FQDN and extract its registered domain parts:
+Parse an FQDN and extract its domain parts:
 
 ```esql
 ROW fqdn = "www.example.co.uk"
@@ -38,7 +38,7 @@ ROW fqdn = "www.example.co.uk"
 rd.domain:keyword | rd.registered_domain:keyword | rd.top_level_domain:keyword | rd.subdomain:keyword
 www.example.co.uk | example.co.uk | co.uk | www
 
-Filter web logs by registered domain and count matching subdomains:
+Filter web logs to events for the registered domain `elastic.co` and count them by subdomain:
 
 ```esql
 FROM web_logs
@@ -49,4 +49,4 @@ FROM web_logs
 
 ## Limitations
 
-`REGISTERED_DOMAIN` doesn't support multi-value inputs.
+This command doesn't support multi-value inputs.

@@ -1,6 +1,8 @@
 # TS-INFO
 
-The `TS_INFO` processing command retrieves information about individual time series available in time series data streams, along with the dimension values that identify each series. It returns one row per metric and time series combination, including `metric_name`, `data_stream`, `unit`, `metric_type`, `field_type`, `dimension_fields`, and a JSON-encoded `dimensions` column.
+The `TS_INFO` processing command retrieves metadata about individual time series in time series data streams, including the metric, data stream, field metadata, dimension fields, and JSON-encoded dimension values that identify each series.
+
+`TS_INFO` returns one row per metric and time series combination. Any `WHERE` filters before `TS_INFO` narrow the set of time series considered.
 
 ## Syntax
 
@@ -12,7 +14,7 @@ The `TS_INFO` processing command retrieves information about individual time ser
 
 ## Examples
 
-List every metric and time series pair in the targeted data stream, sorted by metric name and dimension values:
+List every metric and time series pair in the targeted data stream, sorted by metric name and dimension values.
 
 ```esql
 TS k8s
@@ -20,7 +22,7 @@ TS k8s
 | SORT metric_name, dimensions
 ```
 
-Discover time series matching a `cluster` filter:
+Discover time series with matching `cluster` dimension values before retrieving metadata.
 
 ```esql
 TS k8s
@@ -29,7 +31,7 @@ TS k8s
 | SORT metric_name, dimensions
 ```
 
-Select only metric names and dimension values:
+Select only the metric name and dimensions columns for production cluster series.
 
 ```esql
 TS k8s
@@ -39,7 +41,7 @@ TS k8s
 | SORT metric_name, dimensions
 ```
 
-Filter metadata rows by metric type:
+Filter metadata rows to return only gauge metrics.
 
 ```esql
 TS k8s
@@ -48,7 +50,7 @@ TS k8s
 | SORT metric_name, dimensions
 ```
 
-Count distinct time series per metric:
+Count distinct time series for each metric.
 
 ```esql
 TS k8s
@@ -57,13 +59,14 @@ TS k8s
 | SORT metric_name
 ```
 
-series_count:long | metric_name:keyword
-9 | network.eth0.rx
-9 | network.eth0.tx
-9 | network.total_bytes_in
-9 | network.total_cost
+| series_count:long | metric_name:keyword |
+|---:|---|
+| 9 | network.eth0.rx |
+| 9 | network.eth0.tx |
+| 9 | network.total_bytes_in |
+| 9 | network.total_cost |
 
-Count distinct metrics per time series:
+Count distinct metrics reported by each time series.
 
 ```esql
 TS k8s
@@ -72,16 +75,17 @@ TS k8s
 | SORT dimensions
 ```
 
-metric_count:long | dimensions:keyword
-4 | {"cluster":"prod","pod":"one","region":"[eu, us]"}
-4 | {"cluster":"prod","pod":"three","region":"[eu, us]"}
-4 | {"cluster":"prod","pod":"two","region":"[eu, us]"}
-4 | {"cluster":"qa","pod":"one"}
-4 | {"cluster":"qa","pod":"three"}
-4 | {"cluster":"qa","pod":"two"}
-4 | {"cluster":"staging","pod":"one","region":"us"}
-4 | {"cluster":"staging","pod":"three","region":"us"}
-4 | {"cluster":"staging","pod":"two","region":"us"}
+| metric_count:long | dimensions:keyword |
+|---:|---|
+| 4 | {"cluster":"prod","pod":"one","region":"[eu, us]"} |
+| 4 | {"cluster":"prod","pod":"three","region":"[eu, us]"} |
+| 4 | {"cluster":"prod","pod":"two","region":"[eu, us]"} |
+| 4 | {"cluster":"qa","pod":"one"} |
+| 4 | {"cluster":"qa","pod":"three"} |
+| 4 | {"cluster":"qa","pod":"two"} |
+| 4 | {"cluster":"staging","pod":"one","region":"us"} |
+| 4 | {"cluster":"staging","pod":"three","region":"us"} |
+| 4 | {"cluster":"staging","pod":"two","region":"us"} |
 
 ## Limitations
 
