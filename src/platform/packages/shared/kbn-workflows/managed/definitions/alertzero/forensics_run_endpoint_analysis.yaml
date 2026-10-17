@@ -54,6 +54,10 @@ outputs:
       type: boolean
     attachments_written:
       type: boolean
+    proposals_submitted:
+      type: number
+    proposals_converged:
+      type: number
 
 consts:
   # Journal notes call `system-alertzero-journal-note` by literal id, not a const:
@@ -64,6 +68,18 @@ consts:
   max_recommended_actions: 8
   # Fallback when the KI carries no `attributes.autonomy`.
   default_autonomy: manual
+  # Liquid has no array literal, so `| default: []` falls back to nothing at all
+  # rather than to an empty array. A const is the only way to spell that fallback.
+  no_rows: []
+  # The revision at which this run stops adding itself to a live Proposal's comment.
+  # Same ceiling as Hunt's `MAX_AUTOMATIC_REVISION` (converge_on_live_proposal.ts):
+  # every addition is a new revision row and a new card in the owner's conversation,
+  # and an analyst reading revision N is refused when they decide it once N+1 lands.
+  max_automatic_revision: 5
+  # A comment this long or longer is not revised. The Proposals service caps a comment
+  # at 8192 characters (`MAX_COMMENT_LENGTH`), and the "Also raised by" line this run
+  # appends is under 192 with the longest conversation id and space id.
+  max_revisable_comment_length: 8000
 
 steps:
   # A read error fails the run, leaving the indicator pending for the next
@@ -885,10 +901,197 @@ steps:
     with:
       level: "{{ steps.read_ki.output.hits.hits[0]._source.attributes.autonomy | default: consts.default_autonomy }}"
 
+  # ---------------------------------------------------------------------------
+  # Duplicate check. Another Investigation can reach the same host first: an
+  # Attack Discovery handoff and a Hunt handoff for one host open two
+  # Investigations, and each would otherwise propose its own isolate for the
+  # same agent. Hunt Watch solves this in TypeScript (`resolve_proposal_slot.ts`:
+  # a deterministic Proposal id per subject, plus a walk of the Proposals
+  # service's revision chain). This run is YAML only and the Proposals plugin
+  # exposes neither a uuidv5 filter nor a latest-revision route, so it does the
+  # list-and-filter version instead: read every live AlertZero Proposal in the
+  # space, and treat a recommended action as covered when a live Proposal asks
+  # for the same action on the same target.
+  #
+  # One subject namespace with Hunt, on purpose: the filter is `origin:
+  # alertzero`, not this worker, and the match key below is the same target
+  # fields Hunt's `holdsSubject` compares (`endpoint_ids`, `parameters.entity_id`,
+  # `id_field`, `id_value`; `parameters.pid` added for a kill the agent could
+  # only name by pid), so a Hunt isolate on an agent covers a Forensics isolate
+  # on that agent and the other way round.
+  #
+  # Known gaps, accepted for this version and documented rather than hidden:
+  # - No race protection. Two runs that list in the same moment both see the
+  #   subject free and both mint. Hunt's `op_type: create` under a derived id is
+  #   what closes that, and it needs a step type.
+  # - `size` caps at 100 per status. A space carrying more than 100 live
+  #   AlertZero Proposals of one status is only checked against the first 100.
+  # - A live Proposal on an Investigation that has since been closed still
+  #   counts as covering. The status route refuses to close over a pending
+  #   Proposal, so this needs an executing one on a closed Investigation.
+  #
+  # Both lists continue on failure and the check fails OPEN: a run that cannot
+  # tell what exists submits everything, as it did before this check existed,
+  # and `journal_proposals_queued` says so. Hunt fails closed here, but a Hunt
+  # report can be re-hunted by a manual run; this indicator's one attempt is
+  # spent, and its recommendations exist only in this run's agent output, so
+  # minting nothing would lose the containment for good. A duplicate card an
+  # analyst dismisses is the lesser harm.
+  #
+  # `pending` is read with `excludeExpired` so a Proposal past its deadline
+  # that the gate has not settled yet is not converged onto; `executing` keeps
+  # running past its deadline, so it is not. `excludeSuperseded` on both leaves
+  # only the live head of each revision chain, whose `id` is what `revise` wants.
+  - name: list_pending_proposals
+    type: kibana.request
+    if: >-
+      ${{ steps.resolve_run_outcome.output.attached == true
+        and steps.forensic_analysis.output.structured_output.propose == true
+        and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0 }}
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals"
+      headers:
+        elastic-api-version: "1"
+      query:
+        origin: alertzero
+        status: pending
+        excludeSuperseded: "true"
+        excludeExpired: "true"
+        size: 100
+    on-failure:
+      continue: true
+
+  - name: list_executing_proposals
+    type: kibana.request
+    if: >-
+      ${{ steps.resolve_run_outcome.output.attached == true
+        and steps.forensic_analysis.output.structured_output.propose == true
+        and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0 }}
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals"
+      headers:
+        elastic-api-version: "1"
+      query:
+        origin: alertzero
+        status: executing
+        excludeSuperseded: "true"
+        size: 100
+    on-failure:
+      continue: true
+
+  # `checked` is false when either read failed, so the note can say the check was
+  # partial. `concat` treats a missing second list as empty, so one failed read
+  # still filters against the other.
+  - name: resolve_live_proposals
+    type: data.set
+    if: >-
+      ${{ steps.resolve_run_outcome.output.attached == true
+        and steps.forensic_analysis.output.structured_output.propose == true
+        and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0 }}
+    with:
+      checked: >-
+        ${{ steps.list_pending_proposals.output.proposals != nil
+          and steps.list_executing_proposals.output.proposals != nil }}
+      proposals: "${{ steps.list_pending_proposals.output.proposals | default: consts.no_rows | concat: steps.list_executing_proposals.output.proposals }}"
+
+  # Splits the agent's recommendations into what this run mints (`new`) and what
+  # a live Proposal already holds (`covered`), as JSON text; the next step parses
+  # it. Liquid cannot build an array any other way.
+  #
+  # The match key is the action plus every target field it names. Two keys are
+  # equal only when both name the target the same way, so a kill by `entity_id`
+  # never absorbs a kill by `pid` for what might be a different process. Hunt's
+  # own kills always carry `endpoint_ids` + `parameters.entity_id` and nothing
+  # else target-shaped, so a Forensics kill built to the same catalog schema
+  # lands on the same key. The key is also what dedupes the agent's own list: a
+  # recommendation repeating an earlier one in the same run is dropped silently.
+  #
+  # Each covered entry carries what the convergence loop below needs: whether the
+  # live Proposal belongs to this Investigation (a rerun finding its own; counted,
+  # not noted), whether it can still be revised (pending and undecided), whether
+  # its comment already names this Investigation, and whether this run should add
+  # itself to it (revisable, not yet named, under the revision ceiling, with room
+  # left in the comment).
+  - name: resolve_proposal_plan
+    type: data.set
+    if: >-
+      ${{ steps.resolve_run_outcome.output.attached == true
+        and steps.forensic_analysis.output.structured_output.propose == true
+        and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0 }}
+    with:
+      plan_json: |-
+        {%- assign investigation_id = steps.resolve_request.output.investigation_id -%}
+        {%- assign live = steps.resolve_live_proposals.output.proposals -%}
+        {%- assign seen = '' -%}
+        {%- assign new_items = '' -%}
+        {%- assign covered_items = '' -%}
+        {%- for action in steps.forensic_analysis.output.structured_output.recommendedActions -%}
+          {%- capture key -%}<{{ action.actionId }}|{{ action.actionInput.endpoint_ids | join: ',' }}|{{ action.actionInput.parameters.entity_id }}|{{ action.actionInput.parameters.pid }}|{{ action.actionInput.id_field }}|{{ action.actionInput.id_value }}>{%- endcapture -%}
+          {%- if seen contains key -%}{%- continue -%}{%- endif -%}
+          {%- assign seen = seen | append: key -%}
+          {%- assign covered = false -%}
+          {%- for p in live -%}
+            {%- capture live_key -%}<{{ p.actionWorkflowId }}|{{ p.actionInput.endpoint_ids | join: ',' }}|{{ p.actionInput.parameters.entity_id }}|{{ p.actionInput.parameters.pid }}|{{ p.actionInput.id_field }}|{{ p.actionInput.id_value }}>{%- endcapture -%}
+            {%- if live_key != key -%}{%- continue -%}{%- endif -%}
+            {%- assign covered = true -%}
+            {%- assign comment = p.comment | default: '' -%}
+            {%- assign revision = p.revision | default: 1 -%}
+            {%- assign revisable = false -%}
+            {%- if p.status == 'pending' and p.decision == nil -%}{%- assign revisable = true -%}{%- endif -%}
+            {%- assign mentioned = false -%}
+            {%- if comment contains investigation_id -%}{%- assign mentioned = true -%}{%- endif -%}
+            {%- assign revise = false -%}
+            {%- if revisable == true and mentioned == false and revision < consts.max_automatic_revision and comment.size < consts.max_revisable_comment_length -%}{%- assign revise = true -%}{%- endif -%}
+            {%- capture item -%}
+              {"title": {{ action.title | default: '' | json }}, "proposalId": {{ p.id | json }}, "ownerConversationId": {{ p.conversationId | json }}, "sameInvestigation": {% if p.conversationId == investigation_id %}true{% else %}false{% endif %}, "revisable": {{ revisable }}, "mentioned": {{ mentioned }}, "revise": {{ revise }}, "comment": {{ comment | json }}}
+            {%- endcapture -%}
+            {%- if covered_items != '' -%}{%- assign covered_items = covered_items | append: ',' -%}{%- endif -%}
+            {%- assign covered_items = covered_items | append: item -%}
+            {%- break -%}
+          {%- endfor -%}
+          {%- if covered == false -%}
+            {%- capture item -%}{{ action | json }}{%- endcapture -%}
+            {%- if new_items != '' -%}{%- assign new_items = new_items | append: ',' -%}{%- endif -%}
+            {%- assign new_items = new_items | append: item -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {"new": [{{ new_items }}], "covered": [{{ covered_items }}]}
+
+  - name: resolve_proposal_lists
+    type: data.set
+    if: >-
+      ${{ steps.resolve_run_outcome.output.attached == true
+        and steps.forensic_analysis.output.structured_output.propose == true
+        and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0 }}
+    with:
+      plan: "${{ steps.resolve_proposal_plan.output.plan_json | json_parse }}"
+
+  # `converged` is what another Investigation holds: the journal reports it and
+  # this run adds itself to it. A live Proposal this Investigation already holds
+  # (a rerun landing on its own) is only counted: nothing to add, nothing to say.
+  # Every later step keys off these counts; a skipped step leaves them nil, and
+  # `nil > 0` is false.
+  - name: resolve_proposal_counts
+    type: data.set
+    if: >-
+      ${{ steps.resolve_run_outcome.output.attached == true
+        and steps.forensic_analysis.output.structured_output.propose == true
+        and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0 }}
+    with:
+      new_count: "${{ steps.resolve_proposal_lists.output.plan.new.size }}"
+      converged: "${{ steps.resolve_proposal_lists.output.plan.covered | where_exp: 'entry', 'entry.sameInvestigation != true' }}"
+      converged_count: "${{ steps.resolve_proposal_lists.output.plan.covered | where_exp: 'entry', 'entry.sameInvestigation != true' | size }}"
+      already_open_count: "${{ steps.resolve_proposal_lists.output.plan.covered | where_exp: 'entry', 'entry.sameInvestigation == true' | size }}"
+
   # Written before any proposal starts. Each proposal posts its own comment as
   # soon as it reaches the approval gate, and those runs are asynchronous, so a
   # note after the dispatch lands among them. The count is the list about to be
-  # queued; a rejection after this is `journal_proposals_lost`.
+  # queued; a rejection after this is `journal_proposals_lost`. Also the one
+  # place the duplicate check reports its totals: what was covered, by whom, and
+  # whether the check could be made at all. The per-Proposal detail is in the
+  # convergence notes below.
   - name: journal_proposals_queued
     type: workflow.execute
     if: >-
@@ -904,11 +1107,20 @@ steps:
       run-as-mode: inherit
       inputs:
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
-        message: >-
-          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` is submitting
-          {{ steps.forensic_analysis.output.structured_output.recommendedActions.size }} containment proposal(s)
+        message: |-
+          {%- assign new_count = steps.resolve_proposal_counts.output.new_count | default: 0 -%}
+          {%- assign converged_count = steps.resolve_proposal_counts.output.converged_count | default: 0 -%}
+          {%- assign already_open_count = steps.resolve_proposal_counts.output.already_open_count | default: 0 -%}
+          {%- if new_count > 0 -%}
+          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` is submitting {{ new_count }} containment proposal(s)
           {%- if steps.resolve_autonomy.output.level == 'supervised' %} for auto-approval{% else %} for analyst approval{% endif %}.
-          The investigation closes once every proposal on it has been decided.
+          {%- else -%}
+          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` found containment worth proposing, but every proposal it would have raised already exists, so none was created.
+          {%- endif -%}
+          {%- if converged_count > 0 %} {{ converged_count }} already raised by another Investigation; the notes below say where.{% endif -%}
+          {%- if already_open_count > 0 %} {{ already_open_count }} already open on this investigation.{% endif -%}
+          {%- if steps.resolve_live_proposals.output.checked != true %} Existing proposals could not be fully checked, so a duplicate of one may have been submitted.{% endif -%}
+          {%- if new_count > 0 %} The investigation closes once every proposal on it has been decided.{% else %} The investigation stays open until an analyst closes it.{% endif -%}
 
   # The gate closes the investigation once every proposal on it is settled, and
   # its creation barrier (`created >= expectedProposalCount`) counts every
@@ -921,12 +1133,14 @@ steps:
   # has no step type, so it reads the route. `size: 1`: only `total` is read.
   # Failing open to `0` here is the lesser risk: a premature close is undone by
   # the bridge's own reopen on the next proposal, a blocked close is manual.
+  #
+  # Only what this run mints is added to the baseline. A finding that converged
+  # onto another Investigation's Proposal mints nothing, and that Proposal is
+  # counted on neither side; one this Investigation already holds is in the
+  # baseline already.
   - name: count_existing_proposals
     type: kibana.request
-    if: >-
-      ${{ steps.resolve_run_outcome.output.attached == true
-        and steps.forensic_analysis.output.structured_output.propose == true
-        and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0 }}
+    if: "${{ steps.resolve_proposal_counts.output.new_count > 0 }}"
     with:
       method: GET
       path: "/s/{{ workflow.spaceId }}/internal/proposals"
@@ -939,15 +1153,12 @@ steps:
       continue: true
 
   # Filters apply left to right, so `default: 0` covers only the count read
-  # (skipped or failed) before the recommended actions are added on.
+  # (skipped or failed) before this run's new proposals are added on.
   - name: resolve_expected_proposals
     type: data.set
-    if: >-
-      ${{ steps.resolve_run_outcome.output.attached == true
-        and steps.forensic_analysis.output.structured_output.propose == true
-        and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0 }}
+    if: "${{ steps.resolve_proposal_counts.output.new_count > 0 }}"
     with:
-      count: "${{ steps.count_existing_proposals.output.total | default: 0 | plus: steps.forensic_analysis.output.structured_output.recommendedActions.size }}"
+      count: "${{ steps.count_existing_proposals.output.total | default: 0 | plus: steps.resolve_proposal_counts.output.new_count }}"
 
   # Containment is proposed on the investigation, not returned as run output.
   # `executeAsync` so this run does not sit in the 72h approval gate; each
@@ -960,13 +1171,15 @@ steps:
   # produce an array in this engine, and `foreach` hard-fails when its source is
   # missing. The step runs only when the list has items, so a missing or empty
   # list skips the fan-out instead of failing the run after the agent.
+  #
+  # Iterates `plan.new`, not the agent's list: what a live Proposal already
+  # holds is not dispatched. A run whose every recommendation was covered
+  # dispatches no gate, so nothing of this run's closes the Investigation; it
+  # stays open until an analyst closes it, which `journal_proposals_queued` says.
   - name: propose_actions
     type: parallel
-    if: >-
-      ${{ steps.resolve_run_outcome.output.attached == true
-        and steps.forensic_analysis.output.structured_output.propose == true
-        and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0 }}
-    foreach: "${{ steps.forensic_analysis.output.structured_output.recommendedActions }}"
+    if: "${{ steps.resolve_proposal_counts.output.new_count > 0 }}"
+    foreach: "${{ steps.resolve_proposal_lists.output.plan.new }}"
     mode: settled
     concurrency:
       # must use a literal until https://github.com/elastic/security-team/issues/19967 is fixed
@@ -1003,6 +1216,64 @@ steps:
             # rather than to this run
             confidence: "{{ foreach.item.confidence | default: '' }}"
             autoApprove: "${{ steps.resolve_autonomy.output.level == 'supervised' }}"
+
+  # A recommendation a live Proposal from another Investigation already holds
+  # created nothing above. Two things tell the analyst where it went, the same
+  # two Hunt writes when it converges (`converge_on_live_proposal.ts`):
+  # - the live Proposal's comment gets an "Also raised by [Investigation]" line,
+  #   so whoever approves it sees every Investigation that reached that host;
+  # - this Investigation gets a journal line naming the Proposal and linking the
+  #   Investigation that raised it.
+  #
+  # Sequential `foreach`, not `parallel`: the note's wording depends on whether
+  # the revise just before it landed, and a `foreach` body is where a later
+  # step can read an earlier one's output for the same item and still continue
+  # past its failure. The list is at most `max_recommended_actions` long.
+  #
+  # Revising is a write the Proposals service does not check the caller for;
+  # the route does, and this worker's role carries `feature_proposals.all`. A
+  # refused or failed revise is not fatal: the duplicate was avoided either way,
+  # and the line is a courtesy. The note then says only what is true.
+  - name: converge_on_live_proposals
+    type: foreach
+    if: "${{ steps.resolve_proposal_counts.output.converged_count > 0 }}"
+    foreach: "${{ steps.resolve_proposal_counts.output.converged }}"
+    steps:
+      - name: revise_live_proposal
+        type: kibana.request
+        if: "${{ foreach.item.revise == true }}"
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/proposals/{{ foreach.item.proposalId }}/revisions"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "1"
+            Content-Type: application/json
+          body:
+            comment: |-
+              {{ foreach.item.comment }}
+
+              Also raised by [Investigation]({% if workflow.spaceId != 'default' %}/s/{{ workflow.spaceId }}{% endif %}/app/alertzero?selectedConversationId={{ steps.resolve_request.output.investigation_id }}).
+        on-failure:
+          continue: true
+
+      # "Added to it" only when it was: the comment already named this
+      # Investigation, or the revise above returned a new revision.
+      - name: journal_convergence_note
+        type: workflow.execute
+        with:
+          workflow-id: system-alertzero-journal-note
+          run-as-mode: inherit
+          inputs:
+            conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+            message: >-
+              A Proposal for "{{ foreach.item.title }}"
+              {%- if foreach.item.revisable == true %} is already awaiting a decision{% else %} has already been approved and is being carried out{% endif %},
+              raised by [another Investigation]({% if workflow.spaceId != 'default' %}/s/{{ workflow.spaceId }}{% endif %}/app/alertzero?selectedConversationId={{ foreach.item.ownerConversationId }}).
+              This run found the same thing, so no second Proposal was created.
+              {%- if foreach.item.mentioned == true or steps.revise_live_proposal.output.proposalId != blank %} This Investigation was added to it.{% endif %}
+        on-failure:
+          continue: true
 
   # `0` when the step did not run: no host, findings did not land, the agent
   # did not propose, or the list was empty. A later check treats only a real
@@ -1202,3 +1473,8 @@ steps:
       # Reported so a run that analyzed a host but landed nothing on the investigation
       # is visible from its own output, which is what makes the handoff desk-testable.
       attachments_written: "${{ steps.resolve_run_outcome.output.attached == true }}"
+      # Gates dispatched and findings a live Proposal already held, so a run that
+      # proposed nothing because everything was covered reads as that, not as a
+      # run that found nothing to propose. `0` when the agent did not propose.
+      proposals_submitted: "${{ steps.resolve_proposal_counts.output.new_count | default: 0 }}"
+      proposals_converged: "${{ steps.resolve_proposal_counts.output.converged_count | default: 0 }}"
