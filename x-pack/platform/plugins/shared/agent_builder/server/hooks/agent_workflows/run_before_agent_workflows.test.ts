@@ -15,6 +15,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { ExecutionConversationAccess } from '@kbn/agent-builder-server';
 import { runBeforeAgentWorkflows } from './run_before_agent_workflows';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
+import { context as otelContext, createContextKey, ROOT_CONTEXT } from '@opentelemetry/api';
 import { getCurrentSpaceId } from '../../utils/spaces';
 
 jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
@@ -777,5 +778,38 @@ describe('runBeforeAgentWorkflows', () => {
         expect.objectContaining({ workflowParams: { prompt: 'hello' } })
       );
     });
+  });
+
+  it('detaches executeWorkflow from the active OpenTelemetry context using ROOT_CONTEXT', async () => {
+    const context = createContext();
+    const { workflowApi, getInternalServices } = createDeps();
+    const testKey = createContextKey('test.foreground_span_key');
+    let observedContextDuringExecute: unknown = 'unset';
+
+    executeWorkflowMock.mockImplementation(async () => {
+      observedContextDuringExecute = otelContext.active().getValue(testKey);
+      return {
+        success: true,
+        execution: {
+          execution_id: 'exec-ctx',
+          status: ExecutionStatus.COMPLETED,
+          workflow_id: 'wf-1',
+          started_at: '2026-01-01T00:00:00.000Z',
+          output: {},
+        },
+      };
+    });
+
+    const parentCtx = ROOT_CONTEXT.setValue(testKey, 'foreground-span');
+    await otelContext.with(parentCtx, () =>
+      runBeforeAgentWorkflows({
+        context,
+        workflowApi,
+        getInternalServices,
+        logger,
+      })
+    );
+
+    expect(observedContextDuringExecute).toBeUndefined();
   });
 });
