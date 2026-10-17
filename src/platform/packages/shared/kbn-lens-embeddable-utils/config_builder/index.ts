@@ -8,6 +8,8 @@
  */
 
 export { LensConfigBuilder } from './config_builder';
+export { LENS_ERROR_CODES, LensConversionError } from './errors';
+export type { LensErrorCode } from './errors';
 export type {
   DataViewsCommon,
   LensAttributes,

@@ -38,6 +38,7 @@ import {
   AS_CODE_DATA_VIEW_SPEC_TYPE,
 } from '@kbn/as-code-data-views-schema';
 import type { AsCodeDataViewReference } from '@kbn/as-code-data-views-schema';
+import { LENS_ERROR_CODES, LensConversionError } from '../errors';
 import type { LensAttributes } from '../types';
 import type { LensApiAllOperations, LensApiConfig, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
@@ -355,7 +356,10 @@ export function buildDataSourceStateNoESQL(
     inlineDataViewId
   );
   if (!dataViewId) {
-    throw new Error(`Cannot resolve the data view for layer "${layerId}".`);
+    throw new LensConversionError(
+      `Cannot resolve the data view for layer "${layerId}".`,
+      LENS_ERROR_CODES.DATA_VIEW_NOT_FOUND
+    );
   }
   return buildDataViewDataSource(dataViewId, adHocDataViews);
 }

@@ -79,6 +79,7 @@ export function initializeInternalApi(
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
   return {
+    loadError: initialState.loadError,
     attributes$,
     overrides$,
     disableTriggers$,

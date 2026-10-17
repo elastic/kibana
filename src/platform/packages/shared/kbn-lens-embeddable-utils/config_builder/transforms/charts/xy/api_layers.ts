@@ -25,6 +25,7 @@ import {
   isPersistedLinkedByValueAnnotationsLayer,
   isRuntimeByReferenceAnnotationsLayer,
 } from '@kbn/lens-common';
+import { LENS_ERROR_CODES, LensConversionError } from '../../../errors';
 import type {
   AnnotationLayerByValueType,
   AnnotationLayerType,
@@ -472,7 +473,10 @@ export function buildAPIAnnotationsLayer(
 
   if (hasQueryAnnotation && !dataViewId) {
     // A query annotation without a resolvable data view cannot be represented.
-    throw new Error('XY visualization: cannot find data view ID for annotation layer.');
+    throw new LensConversionError(
+      'XY visualization: cannot find data view ID for annotation layer.',
+      LENS_ERROR_CODES.DATA_VIEW_NOT_FOUND
+    );
   }
 
   const dataSource: DataSourceTypeNoESQL | null =
