@@ -823,7 +823,8 @@ describe('healthRoute', () => {
       expect.anything(),
       expect.anything(),
       expect.anything(),
-      1
+      1,
+      expect.anything()
     );
 
     await sleep(1000);
@@ -833,7 +834,8 @@ describe('healthRoute', () => {
       expect.anything(),
       expect.anything(),
       expect.anything(),
-      2
+      2,
+      expect.anything()
     );
   });
 });

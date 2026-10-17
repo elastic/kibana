@@ -21,7 +21,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ServiceStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import type { MonitoringStats, RawMonitoringStats } from '../monitoring';
-import { summarizeMonitoringStats, HealthStatus } from '../monitoring';
+import { summarizeMonitoringStats, HealthStatus, createHealthStatusLogger } from '../monitoring';
 import type { TaskManagerConfig } from '../config';
 import { logHealthMetrics } from '../lib/log_health_metrics';
 import { calculateHealthStatus } from '../lib/calculate_health_status';
@@ -91,13 +91,15 @@ export function healthRoute(params: HealthRouteParams): {
   // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
   // consider the system unhealthy
   const requiredHotStatsFreshness: number = config.monitored_stats_required_freshness;
+  const healthStatusLogger = createHealthStatusLogger(logger);
 
   function getHealthStatus(monitoredStats: MonitoringStats) {
     const summarizedStats = summarizeMonitoringStats(
       logger,
       monitoredStats,
       config,
-      numOfKibanaInstances
+      numOfKibanaInstances,
+      healthStatusLogger
     );
     const { status, reason } = calculateHealthStatus(
       summarizedStats,
