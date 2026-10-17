@@ -1221,6 +1221,100 @@ describe('deleteCaseAttachments', () => {
           });
         });
 
+        it('records what the retry actually wrote, not what the hook first asked for', async () => {
+          let conflicted = false;
+          argsWithHook.services.attachmentService.update.mockImplementation(async () => {
+            if (conflicted) {
+              return {} as never;
+            }
+            conflicted = true;
+            throw conflict();
+          });
+          mockRefetchAfter(() => conflicted);
+
+          await deleteWithRelated([attackAttachment]);
+
+          const { creator } = argsWithHook.services.userActionService;
+
+          // alert-3 is what this removal took out of the copy that won; alert-1 was already
+          // gone, so it is neither recorded as leaving nor unlinked a second time.
+          expect(creator.bulkCreateAttachmentDeletion).toHaveBeenCalledWith(
+            expect.objectContaining({
+              attachments: [
+                expect.objectContaining({
+                  attachment: expect.objectContaining({ attachmentId: ['alert-3'] }),
+                }),
+              ],
+            })
+          );
+          expect(creator.createUserAction).toHaveBeenCalledWith({
+            userAction: expect.objectContaining({
+              payload: {
+                attachment: expect.objectContaining({
+                  attachmentId: ['alert-2'],
+                  metadata: expect.objectContaining({ sourceAttachmentIds: ['attack-doc-2'] }),
+                }),
+              },
+            }),
+          });
+          expect(argsWithHook.services.alertsService.removeCaseIdFromAlerts).toHaveBeenCalledWith({
+            caseId,
+            alerts: [{ id: 'alert-3', index: 'index-3' }],
+          });
+        });
+
+        it('keeps the provenance the removal assigns when the rebase runs', async () => {
+          // A shrink that also hands the attachment over to another attack.
+          onDelete.mockResolvedValue({
+            relatedAttachmentIds: [],
+            relatedAttachmentUpdates: [
+              {
+                id: sharedAlerts.id,
+                payload: {
+                  ...shrunkPayload,
+                  metadata: { index: ['index-2'], sourceAttachmentIds: ['attack-doc-2'] },
+                },
+              },
+            ],
+          });
+
+          const stillOurs: AttachmentForDeletion = {
+            ...afterConcurrentRemoval,
+            attributes: {
+              ...afterConcurrentRemoval.attributes,
+              metadata: {
+                index: ['index-2', 'index-3'],
+                sourceAttachmentIds: ['attack-doc-1'],
+              },
+            } as unknown as AttachmentAttributesV2,
+          };
+
+          let conflicted = false;
+          argsWithHook.services.attachmentService.update.mockImplementation(async () => {
+            if (conflicted) {
+              return {} as never;
+            }
+            conflicted = true;
+            throw conflict();
+          });
+          argsWithHook.services.attachmentService.getter.bulkGetForDeletionByType.mockImplementation(
+            async (refs) =>
+              [
+                toAttachmentForDeletion(relatedComment),
+                toAttachmentForDeletion(relatedAlert),
+                conflicted ? stillOurs : { ...versioned, attributes: stillOurs.attributes },
+              ].filter(({ id }) => refs.some((ref) => ref.id === id))
+          );
+
+          await deleteWithRelated([attackAttachment]);
+
+          const [, retry] = argsWithHook.services.attachmentService.update.mock.calls;
+
+          expect(
+            (retry[0].updatedAttributes as { metadata?: Record<string, unknown> }).metadata
+          ).toEqual(expect.objectContaining({ sourceAttachmentIds: ['attack-doc-2'] }));
+        });
+
         it('leaves the attachment as it stands when the conflicts do not settle', async () => {
           argsWithHook.services.attachmentService.update.mockRejectedValue(conflict());
           mockRefetchAfter(() => true);
@@ -1231,6 +1325,22 @@ describe('deleteCaseAttachments', () => {
           expect(argsWithHook.logger.warn).toHaveBeenCalledWith(
             expect.stringContaining('kept changing while being shrunk')
           );
+
+          // Nothing landed, so nothing is recorded as having left the shrunk attachment and no
+          // alert of its is unlinked. The deleted attack attachment is still recorded.
+          expect(
+            argsWithHook.services.userActionService.creator.bulkCreateAttachmentDeletion
+          ).not.toHaveBeenCalledWith(
+            expect.objectContaining({
+              attachments: expect.arrayContaining([
+                expect.objectContaining({ id: 'shared-alerts-1' }),
+              ]),
+            })
+          );
+          expect(
+            argsWithHook.services.userActionService.creator.createUserAction
+          ).not.toHaveBeenCalled();
+          expect(argsWithHook.services.alertsService.removeCaseIdFromAlerts).not.toHaveBeenCalled();
         });
 
         it('gives up the provenance it is dropping even when that empties it', async () => {

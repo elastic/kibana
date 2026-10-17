@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { difference } from 'lodash';
+import { difference, union } from 'lodash';
 
 import type { AttachmentAttributesV2 } from '../../../common/types/domain';
 import { UserActionTypes, UserActionActions } from '../../../common/types/domain';
@@ -348,14 +348,26 @@ const applyAttachmentUpdates = async (
 
   const updatedAt = new Date().toISOString();
 
+  // Only what actually landed, and in the shape it landed in: a write that kept conflicting
+  // leaves nothing behind, and one that was recomputed against a newer copy left different
+  // alerts than the hook first asked for.
+  const writtenUpdates = [];
+
   for (const { id, type, payload, stored } of appliableUpdates) {
-    await writeAttachmentUpdate({ id, type, payload, stored, updatedAt }, clientArgs);
+    const written = await writeAttachmentUpdate(
+      { id, type, payload, stored, updatedAt },
+      clientArgs
+    );
+
+    if (written != null) {
+      writtenUpdates.push({ id, type, ...written });
+    }
   }
 
   // An update that drops nothing only rewrites bookkeeping the attachment keeps about where it
   // came from. Nothing the analyst sees changed, so it gets no activity entry and no alert is
   // unlinked.
-  const shrunkAttachments = appliableUpdates.flatMap(({ id, type, payload, stored }) =>
+  const shrunkAttachments = writtenUpdates.flatMap(({ id, type, payload, stored }) =>
     dropsStoredContent(stored.requestAttributes, payload)
       ? [
           {
@@ -427,16 +439,20 @@ interface WriteAttachmentUpdateArgs {
  * The hook decides what an attachment keeps by reading it, so two removals that touch the same
  * attachment both compute a remainder from the copy they read. Writing those remainders blindly
  * lets the later one put back the alerts the earlier one took out. The version turns that into a
- * conflict, and the conflict is resolved by re-reading the attachment and taking the same alerts
- * and the same provenance out of the copy that won, rather than by replacing it wholesale.
+ * conflict, and the conflict is resolved by re-reading the attachment and reapplying this
+ * removal to the copy that won, rather than by replacing it wholesale.
  *
- * A conflict that outlives the attempts is logged and dropped. The deletions it accompanies are
- * already in the index, and a half-applied relabel is better than failing a delete that worked.
+ * Returns what was written over what, so the activity entry and the alert unlinking describe the
+ * write that landed. Nothing is returned when nothing landed: the deletions are already in the
+ * index, so a conflict that outlives the attempts leaves the attachment as it stands rather than
+ * failing a delete that worked.
  */
 const writeAttachmentUpdate = async (
   { id, type, payload, stored, updatedAt }: WriteAttachmentUpdateArgs,
   clientArgs: CasesClientArgs
-): Promise<void> => {
+): Promise<
+  { payload: RelatedAttachmentUpdate['payload']; stored: DecodedAttachment } | undefined
+> => {
   const {
     user,
     logger,
@@ -456,7 +472,7 @@ const writeAttachmentUpdate = async (
         options: { references: current.references, refresh: true, version: current.version },
       });
 
-      return;
+      return { payload: currentPayload, stored: current };
     } catch (error) {
       if (!isConflictError(error)) {
         throw error;
@@ -495,11 +511,11 @@ const isConflictError = (error: unknown): boolean =>
     : (error as { statusCode?: number })?.statusCode === 409;
 
 /**
- * Recomputes a shrink against the copy of the attachment that is actually stored.
+ * Reapplies a removal to the copy of the attachment that is actually stored.
  *
- * Only what this update took out is reapplied: the alerts it dropped, and the provenance it
- * stopped claiming. Everything else is taken from the current copy, so whatever another removal
- * did in the meantime survives.
+ * Only what this removal did is carried over: the alerts it dropped, the provenance it stopped
+ * claiming, and the provenance it took on. Everything else comes from the current copy, so
+ * whatever another removal did in the meantime survives.
  */
 const rebaseOntoCurrent = ({
   stored,
@@ -512,9 +528,11 @@ const rebaseOntoCurrent = ({
 }): RelatedAttachmentUpdate['payload'] => {
   const dropped = toDroppedPayload(stored, payload);
   const droppedIds = new Set('attachmentId' in dropped ? toStringArray(dropped.attachmentId) : []);
-  const droppedSources = new Set(
-    difference(readSourceAttachmentIds(stored), readSourceAttachmentIds(payload))
-  );
+
+  const storedSources = readSourceAttachmentIds(stored);
+  const payloadSources = readSourceAttachmentIds(payload);
+  const droppedSources = new Set(difference(storedSources, payloadSources));
+  const addedSources = difference(payloadSources, storedSources);
 
   const currentIds = 'attachmentId' in current ? toStringArray(current.attachmentId) : [];
   const keptPositions = currentIds.flatMap((alertId, position) =>
@@ -529,7 +547,10 @@ const rebaseOntoCurrent = ({
       : currentIndex;
 
   const currentSources = readSourceAttachmentIds(current);
-  const sourceAttachmentIds = currentSources.filter((sourceId) => !droppedSources.has(sourceId));
+  const sourceAttachmentIds = union(
+    currentSources.filter((sourceId) => !droppedSources.has(sourceId)),
+    addedSources
+  );
 
   return {
     ...current,
@@ -538,8 +559,9 @@ const rebaseOntoCurrent = ({
       ...('metadata' in current ? current.metadata : {}),
       index,
       // Written back even when it empties, so the spread above cannot restore the provenance
-      // this removal is giving up. Left alone on an attachment that never carried any.
-      ...(currentSources.length > 0 ? { sourceAttachmentIds } : {}),
+      // this removal is giving up. Left alone on an attachment that never carried any and is
+      // not being given any.
+      ...(currentSources.length > 0 || addedSources.length > 0 ? { sourceAttachmentIds } : {}),
     },
   } as RelatedAttachmentUpdate['payload'];
 };
