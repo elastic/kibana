@@ -311,6 +311,9 @@ describe('server/investigation_round', () => {
       expect(
         isEvidenceToolCall(SANDBOX_WRITE_FILE_TOOL_ID, { file_path: '/workspace/a.txt' })
       ).toBe(false);
+      expect(
+        isEvidenceToolCall('platform.streams.investigation_progress_report', { summary: 'step' })
+      ).toBe(false);
       expect(isEvidenceToolCall(SANDBOX_BASH_TOOL_ID, { command: 'ps aux' })).toBe(true);
     });
   });

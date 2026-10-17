@@ -40,6 +40,7 @@ const FILE_TOOL_IDS = new Set<string>([
 export const NON_EVIDENCE_TOOL_IDS = new Set<string>([
   // The agent records its findings with these; they are conclusions, not evidence.
   ...INVESTIGATION_TOOL_IDS,
+  'platform.streams.investigation_progress_report',
   PROPOSALS_CREATE_TOOL_ID,
   internalTools.writeTodos,
   internalTools.listFiles,
