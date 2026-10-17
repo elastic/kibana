@@ -30,10 +30,6 @@ Authentication
 :   API Key and Application Key. Both are required for monitor, downtime, incident, event, metric, and log actions. Create them under **Organization Settings > API Keys** and **Organization Settings > Application Keys** in Datadog.
 
 ## Receive Datadog webhook events [datadog-inbound-events]
-```{applies_to}
-serverless: preview
-stack: preview 9.6+
-```
 
 The connector can start a workflow from a Datadog monitor webhook. A saved connector does not receive events until **Receive events** is turned on for that connector. After you save a new connector, {{kib}} shows the **Webhook URL** and the ingest token once, so copy them then. For an existing connector, save it, then select **Rotate ingest token**. A new token stops the previous one from working. This toggle appears when `xpack.actions.inboundEvents.enabled` is `true`.
 
@@ -90,10 +86,6 @@ https://<kibana-host>/s/<space-id>/api/actions/events/.datadog/<connector-id>?to
 The ingest token authenticates the webhook request. The workflow runs with the identity of the last user who saved the connector. The token is separate from the connector's API key and application key.
 
 ## Start a workflow from Datadog events [datadog-inbound-howto]
-```{applies_to}
-serverless: preview
-stack: preview 9.6+
-```
 
 To run a {{kib}} workflow when a Datadog monitor changes state, create a webhook and add it to the monitor notification. {{kib}} does not create the webhook for you.
 
