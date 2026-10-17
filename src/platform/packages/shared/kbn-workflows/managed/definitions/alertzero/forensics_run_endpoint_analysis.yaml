@@ -376,10 +376,18 @@ steps:
                 I have an alert on {{ steps.resolve_host.output.host_name }}.
                 Perform forensic analysis and extract all IoCs.
                 Write the reconstruction to `timeline.events` and the indicators to `iocs`,
-                matching this step's schema. Use `rationale` only for the assessment:
-                - Whether this is a real incident, which other hosts are affected, what the
-                  data gaps are, and why the evidence supports any actions you recommend.
-                  Do not restate `timeline` or `iocs` there.
+                matching this step's schema. Use `rationale` only for the assessment.
+
+                Write `rationale` as markdown, in ASD-STE100 Simplified Technical English.
+                Use short sentences. Put one idea in each sentence.
+                - One paragraph first. State whether this is a real incident and give the strongest reason.
+                  Say why the evidence supports containment, or why it does not.
+                - Then these headings, each with a bullet list. Omit a heading that has nothing to report:
+                  - `## Affected hosts`. One bullet per host. Name the host and its role.
+                  - `## Data gaps`. One bullet per gap. Name the telemetry that is missing.
+                - Do not list the actions. `recommendedActions` carries each action, and each card's
+                  `title` and `comment` name its target and the evidence.
+                - Do not restate `timeline` or `iocs`. Do not repeat the journal label as a heading.
 
                 After the forensic reconstruction,
                 - Assess whether this represents a real incident that warrants containment.
@@ -406,7 +414,6 @@ steps:
                 - If the evidence cannot fill what an entry's `inputSchema.properties.actionInput` requires, drop that action. Set
                   propose=false when that leaves nothing. Never guess an id, pid, path, or command that is
                   not in the evidence.
-                - Cite hosts, process/path, tactics, and why this action now in rationale.
                 - Set `title` on every recommendation to a short plain-text label of that one action
                   and its target, using the catalog entry's `name`. A host action names the host
                   (`Isolate host WIN-ANALYST01`). A process action names the process and the host
@@ -445,9 +452,13 @@ steps:
                     minLength: 1
                     maxLength: 7900
                     description: >
-                      Assessment only: whether this is a real incident, other affected hosts,
-                      data gaps, and why the evidence supports the recommended actions. The
-                      reconstruction itself belongs in `timeline`, the indicators in `iocs`.
+                      Assessment only, as markdown in ASD-STE100 Simplified Technical English.
+                      One opening paragraph, then the headings `## Affected hosts` and `## Data gaps`,
+                      each with one bullet per item. Omit a heading that has nothing to report.
+                      Say whether this is a real incident, which other hosts are affected, what the
+                      data gaps are, and why the evidence supports containment or does not. Do not
+                      list the actions; `recommendedActions` carries those. The reconstruction itself
+                      belongs in `timeline`, the indicators in `iocs`.
                   # `timeline` and `iocs` mirror the `security.investigation.timeline` and
                   # `security.investigation.iocs` attachment payloads exactly, so the attach steps
                   # below can pass them through untouched. Changing a field name here without
@@ -757,8 +768,13 @@ steps:
               run-as-mode: inherit
               inputs:
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
-                message: >-
-                  {%- if steps.forensic_analysis.output.structured_output.propose == true -%}Rationale for proposed actions{%- else -%}Rationale for ending investigation{%- endif -%}: {{ steps.forensic_analysis.output.structured_output.rationale }}
+                # `#` renders larger than the `##` sections inside `rationale`. A blank line
+                # after it keeps the first section on its own line. The journal renders
+                # this user message as markdown.
+                message: |-
+                  {%- if steps.forensic_analysis.output.structured_output.propose == true -%}# Rationale for proposed actions{%- else -%}# Rationale for ending investigation{%- endif %}
+
+                  {{ steps.forensic_analysis.output.structured_output.rationale }}
 
         else:
           - name: journal_no_host
