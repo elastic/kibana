@@ -31,6 +31,7 @@ import { buildTokenResponseOptions } from '../lib/request_oauth_token';
 import { requestEarsToken } from '../lib/ears/request_ears_token';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
+import { getConnectorAuthType, recordConnectorAuth } from '../lib/connector_metrics';
 
 const querySchema = schema.object(
   {
@@ -537,6 +538,11 @@ export const oauthCallbackRoute = (
               oauthState.createdBy ?? 'none'
             }, got ${profileUid}`
           );
+          recordConnectorAuth({
+            phase: 'authorize',
+            authType: 'unknown',
+            errorType: 'user_mismatch',
+          });
           return respondWithError(res, {
             statusCode: 403,
             details: i18n.translate('xpack.actions.oauthCallback.error.userMismatch', {
@@ -558,6 +564,11 @@ export const oauthCallbackRoute = (
             ? `${providerError}\n\n${errorDescription}`
             : providerError;
           routeLogger.error(`OAuth provider error for connector ${stateConnectorId}: ${details}`);
+          recordConnectorAuth({
+            phase: 'authorize',
+            authType: 'unknown',
+            errorType: 'provider_error',
+          });
           return respondWithError(res, {
             statusCode: 400,
             details,
@@ -566,6 +577,8 @@ export const oauthCallbackRoute = (
           });
         }
 
+        let connectorTypeId: string | undefined;
+        let connectorAuthType = 'unknown';
         try {
           const connectorEncryptedClient = encryptedSavedObjects.getClient({
             includedHiddenTypes: ['action'],
@@ -584,6 +597,8 @@ export const oauthCallbackRoute = (
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
           const authType = secrets.authType || config?.authType;
+          connectorTypeId = rawAction.attributes.actionTypeId;
+          connectorAuthType = getConnectorAuthType({ config, secrets });
           const provider = secrets.provider;
 
           let tokenResult;
@@ -677,6 +692,11 @@ export const oauthCallbackRoute = (
 
           await oauthStateClient.delete(oauthState.id);
 
+          recordConnectorAuth({
+            phase: 'authorize',
+            authType: connectorAuthType,
+            connectorType: connectorTypeId,
+          });
           return respondWithSuccess(res, {
             connectorId: stateConnectorId,
             returnUrl: kibanaReturnUrl,
@@ -688,6 +708,12 @@ export const oauthCallbackRoute = (
             routeLogger.debug(`OAuth callback error stack: ${err.stack}`);
           }
 
+          recordConnectorAuth({
+            phase: 'authorize',
+            authType: connectorAuthType,
+            connectorType: connectorTypeId,
+            errorType: 'other',
+          });
           return respondWithError(res, {
             details: GENERIC_OAUTH_ERROR,
             statusCode: getErrorStatusCode(err),

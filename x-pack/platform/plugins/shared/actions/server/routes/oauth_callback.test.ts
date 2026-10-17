@@ -18,6 +18,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { actionsConfigMock } from '../actions_config.mock';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { oauthCallbackRoute } from './oauth_callback';
+import { connectorAuthCounter } from '../lib/connector_metrics';
 import { OAuthStateClient } from '../lib/oauth_state_client';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
@@ -114,6 +115,7 @@ describe('oauthCallbackRoute', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.spyOn(connectorAuthCounter, 'add').mockImplementation(() => {});
     router = httpServiceMock.createRouter();
     (verifyAccessAndContext as jest.Mock).mockImplementation((_license, handler) => handler);
 
@@ -316,6 +318,7 @@ describe('oauthCallbackRoute', () => {
     const connectorEncryptedClient = {
       getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
         attributes: {
+          actionTypeId: '.google_drive',
           config: { tokenUrl: 'https://provider.example.com/token' },
           secrets: {
             clientId: 'client-id',
@@ -403,6 +406,13 @@ describe('oauthCallbackRoute', () => {
       },
     });
     expect(mockActionsClient.evictClientPool).toHaveBeenCalledWith('connector-1');
+    expect(connectorAuthCounter.add).toHaveBeenCalledTimes(1);
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'authorize',
+      'connector.auth_type': 'none',
+      'connector.type': '.google_drive',
+      success: true,
+    });
     expect(credentialMutationOrder).toEqual([
       'evictClientPoolStarted',
       'evictClientPoolFinished',
@@ -508,6 +518,12 @@ describe('oauthCallbackRoute', () => {
     await handler(context, req, res);
 
     expect(mockLogger.error).toHaveBeenCalledWith('OAuth callback failed: Token exchange failed');
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'authorize',
+      'connector.auth_type': 'none',
+      success: false,
+      'error.type': 'other',
+    });
     expect(res.redirected).toHaveBeenCalledWith({
       headers: {
         location:
@@ -584,6 +600,12 @@ describe('oauthCallbackRoute', () => {
 
     await handler(context, req, res);
 
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'authorize',
+      'connector.auth_type': 'unknown',
+      success: false,
+      'error.type': 'user_mismatch',
+    });
     expect(mockRequestOAuthAuthorizationCodeToken).not.toHaveBeenCalled();
     expect(mockConnectorTokenClientInstance.createWithRefreshToken).not.toHaveBeenCalled();
     expect(res.redirected).toHaveBeenCalledWith({

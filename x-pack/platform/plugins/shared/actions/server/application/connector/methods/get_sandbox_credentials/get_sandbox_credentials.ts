@@ -60,6 +60,7 @@ export async function getSandboxCredentials(
 
   const headers = await getCredential({
     connectorId,
+    connectorTypeId: actionTypeId,
     secrets: validatedSecrets,
     connectorTokenClient: context.connectorTokenClient,
     authMode,

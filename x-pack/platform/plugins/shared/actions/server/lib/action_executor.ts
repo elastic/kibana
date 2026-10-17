@@ -25,6 +25,12 @@ import { isConnectorAuthorizationError } from '@kbn/connector-specs';
 import { IN_MEMORY_CONNECTOR_REVISION } from './single_file_connectors/build_client_lease_key';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
+import type { ConnectorExecuteErrorType } from './connector_metrics';
+import {
+  getConnectorAuthType,
+  recordConnectorAuth,
+  recordConnectorExecute,
+} from './connector_metrics';
 import {
   getGenAiTokenTracking,
   shouldTrackGenAiToken,
@@ -443,6 +449,11 @@ export class ActionExecutor {
         }
 
         if (this.connectorRateLimiter.isRateLimited(actionTypeId)) {
+          recordConnectorExecute({
+            connectorType: actionTypeId,
+            errorType: 'rate_limited',
+            errorSource: 'user',
+          });
           return {
             actionId,
             status: 'error',
@@ -575,10 +586,17 @@ export class ActionExecutor {
             },
           });
           eventLogger.logEvent(event);
+          recordConnectorExecute({
+            connectorType: actionTypeId,
+            errorType: 'invalid',
+            errorSource: err.result?.errorSource === TaskErrorSource.USER ? 'user' : 'framework',
+          });
           return err.result;
         }
 
         let rawResult: ActionTypeExecutorRawResult<unknown>;
+        let errorType: ConnectorExecuteErrorType = 'other';
+        const executionStartedAt = Date.now();
         try {
           if (checkCanExecuteFn) {
             await checkCanExecuteFn(actionTypeId);
@@ -610,8 +628,16 @@ export class ActionExecutor {
         } catch (err) {
           const errorSource = getErrorSource(err) || TaskErrorSource.FRAMEWORK;
           if (err.reason === ActionExecutionErrorReason.Authorization) {
+            errorType = 'unauthorized';
             rawResult = err.result;
           } else if (isConnectorAuthorizationError(err)) {
+            errorType = 'auth_failed';
+            recordConnectorAuth({
+              phase: 'execute',
+              authType: getConnectorAuthType({ config, secrets }),
+              connectorType: actionTypeId,
+              errorType: 'authorization_failed',
+            });
             rawResult = {
               actionId,
               status: 'error',
@@ -647,6 +673,20 @@ export class ActionExecutor {
           actionId,
           status: 'ok',
         };
+
+        const { subAction } = validatedParams;
+        recordConnectorExecute({
+          connectorType: actionTypeId,
+          // Validated against the connector's params schema, so the value is bounded.
+          ...(typeof subAction === 'string' ? { subAction } : {}),
+          ...(result.status === 'ok'
+            ? {}
+            : {
+                errorType,
+                errorSource: result.errorSource === TaskErrorSource.USER ? 'user' : 'framework',
+              }),
+          durationMs: Date.now() - executionStartedAt,
+        });
 
         event.event = event.event || {};
 
