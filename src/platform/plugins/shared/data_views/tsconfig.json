@@ -44,6 +44,7 @@
     "@kbn/cps",
     "@kbn/cps-utils",
     "@kbn/as-code-data-views-schema",
+    "@kbn/core-spaces-common",
   ],
   "exclude": [
     "target/**/*",

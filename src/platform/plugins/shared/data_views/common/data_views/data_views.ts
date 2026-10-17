@@ -13,6 +13,7 @@ import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
+import { UNKNOWN_SPACE } from '@kbn/core-spaces-common';
 import type { PersistenceAPI } from '../types';
 import { DataViewLazy } from './data_view_lazy';
 import { DEFAULT_DATA_VIEW_ID } from '../constants';
@@ -1240,7 +1241,7 @@ export class DataViewsService {
 
   async createAndSaveDataViewLazy(spec: DataViewSpec, overwrite = false) {
     const dataViewLazy = await this.createFromSpecLazy(spec);
-    await this.createSavedObject(dataViewLazy, overwrite);
+    await this.createSavedObject(dataViewLazy, overwrite, spec.namespaces === undefined);
     await this.setDefault(dataViewLazy.id!);
     return dataViewLazy;
   }
@@ -1260,7 +1261,7 @@ export class DataViewsService {
     displayErrors = true
   ) {
     const dataView = await this.createFromSpec(spec, skipFetchFields, displayErrors);
-    await this.createSavedObject(dataView, overwrite);
+    await this.createSavedObject(dataView, overwrite, spec.namespaces === undefined);
     await this.setDefault(dataView.id!);
     return dataView;
   }
@@ -1271,7 +1272,11 @@ export class DataViewsService {
    * @param override Overwrite if existing index pattern exists
    */
 
-  async createSavedObject(dataView: AbstractDataView, overwrite = false) {
+  async createSavedObject(
+    dataView: AbstractDataView,
+    overwrite = false,
+    preserveNamespaces = false
+  ) {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError();
     }
@@ -1279,10 +1284,22 @@ export class DataViewsService {
 
     if (dupe) {
       if (overwrite) {
-        await this.delete(dupe.id);
+        if (dupe.id !== dataView.id) {
+          if (preserveNamespaces && dupe.namespaces) {
+            // Spaces the user cannot access are redacted as UNKNOWN_SPACE; replacing the data view would drop it from them
+            if (dupe.namespaces.includes(UNKNOWN_SPACE)) {
+              throw new DataViewInsufficientAccessError(dupe.id);
+            }
+            dataView.namespaces = dupe.namespaces;
+          }
+          await this.delete(dupe.id);
+        }
       } else {
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
       }
+    }
+    if (overwrite && dataView.id) {
+      this.clearInstanceCache(dataView.id);
     }
     const body = dataView.getAsSavedObjectBody();
 
