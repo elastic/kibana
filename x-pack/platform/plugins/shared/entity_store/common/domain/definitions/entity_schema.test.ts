@@ -168,6 +168,39 @@ describe('entitySchema', () => {
     expect(entitySchema.safeParse({ ...core, description: 'a'.repeat(1024) }).success).toBe(true);
     expect(entitySchema.safeParse({ ...core, description: 'a'.repeat(1025) }).success).toBe(false);
   });
+
+  describe('dynamic', () => {
+    const dynamic = {
+      sources: [
+        {
+          indexPattern: 'metrics-kubeletstatsreceiver.otel-default',
+          attributes: [{ name: 'namespace', field: 'k8s.namespace.name' }],
+        },
+      ],
+    };
+
+    it('accepts a dynamic block with the core only', () => {
+      expect(entitySchema.parse({ ...core, dynamic }).dynamic).toEqual(dynamic);
+    });
+
+    it('accepts both blocks', () => {
+      const parsed = entitySchema.parse({ ...core, extraction: { fields: [field] }, dynamic });
+      expect(parsed.extraction?.fields).toEqual([field]);
+      expect(parsed.dynamic).toEqual(dynamic);
+    });
+
+    it('rejects an unknown key inside dynamic', () => {
+      expect(
+        entitySchema.safeParse({ ...core, dynamic: { ...dynamic, metrics: [] } }).success
+      ).toBe(false);
+    });
+
+    it('accepts a definition with neither block', () => {
+      const parsed = entitySchema.parse(core);
+      expect(parsed.extraction).toBeUndefined();
+      expect(parsed.dynamic).toBeUndefined();
+    });
+  });
 });
 
 describe('extractionBlockSchema', () => {

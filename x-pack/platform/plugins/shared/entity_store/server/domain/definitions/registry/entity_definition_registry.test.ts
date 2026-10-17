@@ -12,6 +12,16 @@ import { serviceEntityDefinition } from '../../../../common/domain/definitions/s
 import { genericEntityDefinition } from '../../../../common/domain/definitions/generic';
 import type { ExtractionBlock } from '../../../../common/domain/definitions/entity_schema';
 import {
+  DYNAMIC_DEFINITION_FIXTURES,
+  hostDynamicDefinition,
+  k8sPodDynamicDefinition,
+  userShapedDynamicDefinition,
+} from '../../../../common/domain/definitions/dynamic/__fixtures__/dynamic_definitions';
+import {
+  NO_IDENTITY_ATTRIBUTE_RULE,
+  SERVABLE_IDENTITY_RULE,
+} from '../../../../common/domain/definitions/dynamic/dynamic_definition_rules';
+import {
   EntityDefinitionRegistry,
   ENTITY_DEFINITION_TYPE_PATTERN,
   type RegistrableEntityDefinition,
@@ -435,6 +445,78 @@ describe('EntityDefinitionRegistry', () => {
         reason: 'type name is already registered',
       });
       expect(registry.get('host')).toBe(hostEntityDefinition);
+    });
+  });
+  // The registry parses with a schema derived from the unrefined object shape, so these prove the
+  // whole-definition rules are applied there too and not only by `entitySchema`.
+  describe('dynamic definitions', () => {
+    it.each(DYNAMIC_DEFINITION_FIXTURES.map((definition) => [definition.type, definition]))(
+      'registers the %s fixture',
+      (type, definition) => {
+        expect(registry.register(definition)).toEqual({ ok: true });
+        expect(registry.get(type)?.dynamic).toEqual(definition.dynamic);
+        expect(registry.rejected()).toEqual([]);
+      }
+    );
+
+    it('rejects the user-shaped definition with the servable identity rule', () => {
+      const result = registry.register(userShapedDynamicDefinition);
+
+      expect(result.ok).toBe(false);
+      expect(result.ok === false && result.reason).toContain(
+        `identityField.euidRanking.branches: ${SERVABLE_IDENTITY_RULE}:`
+      );
+      expect(registry.get('user')).toBeUndefined();
+    });
+
+    it('rejects a documentsFilter that is not the derived presence filter', () => {
+      const { identityField } = hostDynamicDefinition;
+      const result = registry.register({
+        ...hostDynamicDefinition,
+        identityField: {
+          ...identityField,
+          documentsFilter: { field: 'host.id', exists: true },
+        },
+      });
+
+      expect(result.ok === false && result.reason).toContain(
+        `identityField.documentsFilter: ${SERVABLE_IDENTITY_RULE}:`
+      );
+    });
+
+    it('rejects an attribute that reads the identity field', () => {
+      const [source] = k8sPodDynamicDefinition.dynamic?.sources ?? [];
+      const result = registry.register({
+        ...k8sPodDynamicDefinition,
+        dynamic: { sources: [{ ...source, attributes: [{ name: 'uid', field: 'k8s.pod.uid' }] }] },
+      });
+
+      expect(result.ok === false && result.reason).toContain(
+        `dynamic.sources.0.attributes.0.field: ${NO_IDENTITY_ATTRIBUTE_RULE}:`
+      );
+    });
+
+    it('still rejects unknown keys alongside a dynamic block', () => {
+      const withStaleId = {
+        ...k8sPodDynamicDefinition,
+        id: 'k8s.pod-default',
+      } as unknown as RegistrableEntityDefinition;
+
+      expect(registry.register(withStaleId).ok).toBe(false);
+    });
+
+    it('registers the built-ins, which carry no dynamic block', () => {
+      const builtIns: RegistrableEntityDefinition[] = [
+        userEntityDefinition,
+        hostEntityDefinition,
+        serviceEntityDefinition,
+        genericEntityDefinition,
+      ];
+
+      builtIns.forEach((definition) => {
+        expect(definition.dynamic).toBeUndefined();
+        expect(registry.register(definition)).toEqual({ ok: true });
+      });
     });
   });
 });
