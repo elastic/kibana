@@ -10,7 +10,11 @@ import { set } from '@kbn/safer-lodash-set';
 import type { AgentlessAgentPolicyConfig, GlobalDataTag } from '../../../common/types';
 import { getSettings } from '../../services/form_settings';
 
-import { AgentPolicyBaseSchema, FullAgentPolicyResponseSchema } from './agent_policy';
+import {
+  AgentPolicyBaseSchema,
+  FullAgentPolicyResponseSchema,
+  NewAgentPolicySchema,
+} from './agent_policy';
 
 describe('AgentPolicyBaseSchema', () => {
   describe('global_data_tags validations', () => {
@@ -172,6 +176,52 @@ describe('AgentPolicyBaseSchema', () => {
         AgentPolicyBaseSchema.overrides.validate({ 'agent.monitoring.use_output': 'custom' });
       }).not.toThrow();
     });
+  });
+});
+
+// Bounds are enforced on the REST schema (NewAgentPolicySchema), not the SO base schema.
+describe('schema field length limits', () => {
+  const minValid = { name: 'test', namespace: 'default' };
+
+  it('rejects a policy name over 255 characters', () => {
+    expect(() => NewAgentPolicySchema.validate({ ...minValid, name: 'a'.repeat(256) })).toThrow();
+  });
+
+  it('accepts a policy name at exactly 255 characters', () => {
+    expect(() =>
+      NewAgentPolicySchema.validate({ ...minValid, name: 'a'.repeat(255) })
+    ).not.toThrow();
+  });
+
+  it('rejects a description over 10 000 characters', () => {
+    expect(() =>
+      NewAgentPolicySchema.validate({ ...minValid, description: 'a'.repeat(10_001) })
+    ).toThrow();
+  });
+
+  it('rejects a data_output_id over 512 characters', () => {
+    expect(() =>
+      NewAgentPolicySchema.validate({ ...minValid, data_output_id: 'a'.repeat(513) })
+    ).toThrow();
+  });
+
+  // The platform string helpers default to minLength: 1. These fields are adopted with an
+  // explicit minLength: 0 so that empty strings keep validating as they did before — Fleet's
+  // own package policy form seeds id/output fields with ''.
+  it.each([
+    ['id', { id: '' }],
+    ['data_output_id', { data_output_id: '' }],
+    ['monitoring_output_id', { monitoring_output_id: '' }],
+    ['download_source_id', { download_source_id: '' }],
+    ['fleet_server_host_id', { fleet_server_host_id: '' }],
+    ['space_ids', { space_ids: [''] }],
+    ['description', { description: '' }],
+  ])('still accepts an empty %s', (_name, field) => {
+    expect(() => NewAgentPolicySchema.validate({ ...minValid, ...field })).not.toThrow();
+  });
+
+  it('still requires a non-empty policy name', () => {
+    expect(() => NewAgentPolicySchema.validate({ ...minValid, name: '' })).toThrow();
   });
 });
 

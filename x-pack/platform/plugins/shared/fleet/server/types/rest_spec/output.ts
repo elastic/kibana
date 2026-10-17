@@ -12,22 +12,28 @@ import { ListResponseSchema } from '../../routes/schema/utils';
 
 export const GetOneOutputRequestSchema = {
   params: schema.object({
-    outputId: schema.string({ meta: { description: 'The ID of the output' } }),
+    outputId: schema.savedObjectId({
+      minLength: 0,
+      meta: { description: 'The ID of the output' },
+    }),
   }),
 };
 
 export const DeleteOutputRequestSchema = {
   params: schema.object({
-    outputId: schema.string({ meta: { description: 'The ID of the output' } }),
+    outputId: schema.savedObjectId({
+      minLength: 0,
+      meta: { description: 'The ID of the output' },
+    }),
   }),
 };
 
 export const DeleteOutputResponseSchema = schema.object({
-  id: schema.string(),
+  id: schema.savedObjectId({ minLength: 0 }),
 });
 
 export const GenerateLogstashApiKeyResponseSchema = schema.object({
-  api_key: schema.string(),
+  api_key: schema.string({ maxLength: 1000 }),
 });
 
 export const GetOutputsRequestSchema = {};
@@ -40,29 +46,38 @@ export const PostOutputRequestSchema = {
 
 export const PutOutputRequestSchema = {
   params: schema.object({
-    outputId: schema.string({ meta: { description: 'The ID of the output' } }),
+    outputId: schema.savedObjectId({
+      minLength: 0,
+      meta: { description: 'The ID of the output' },
+    }),
   }),
   body: UpdateOutputSchema,
 };
 
 export const GetLatestOutputHealthRequestSchema = {
   params: schema.object({
-    outputId: schema.string({ meta: { description: 'The ID of the output' } }),
+    outputId: schema.savedObjectId({
+      minLength: 0,
+      meta: { description: 'The ID of the output' },
+    }),
   }),
 };
 
 export const GetLatestOutputHealthResponseSchema = schema.object({
   state: schema.string({
+    maxLength: 50,
     meta: {
       description: 'state of output, HEALTHY or DEGRADED',
     },
   }),
   message: schema.string({
+    maxLength: 10000,
     meta: {
       description: 'long message if unhealthy',
     },
   }),
   timestamp: schema.string({
+    maxLength: 50,
     meta: {
       description: 'timestamp of reported state',
     },

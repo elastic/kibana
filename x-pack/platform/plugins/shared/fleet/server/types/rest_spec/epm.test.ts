@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UpdatePackageRequestSchema } from './epm';
+import { UpdatePackageRequestSchema, GetFileRequestSchema } from './epm';
 
 describe('UpdatePackageRequestSchema', () => {
   it('accepts a namespace_customization_settings entry with an ilm_policy', () => {
@@ -38,6 +38,28 @@ describe('UpdatePackageRequestSchema', () => {
     expect(() =>
       UpdatePackageRequestSchema.body.validate({
         namespace_customization_enabled_for: ['a'.repeat(101)],
+      })
+    ).toThrow();
+  });
+});
+
+describe('schema field length limits', () => {
+  it('rejects a pkgName over 255 characters', () => {
+    expect(() =>
+      GetFileRequestSchema.params.validate({
+        pkgName: 'a'.repeat(256),
+        pkgVersion: '1.0.0',
+        filePath: '/path/to/file',
+      })
+    ).toThrow();
+  });
+
+  it('rejects a pkgVersion over 512 characters', () => {
+    expect(() =>
+      GetFileRequestSchema.params.validate({
+        pkgName: 'my-package',
+        pkgVersion: 'a'.repeat(513),
+        filePath: '/path/to/file',
       })
     ).toThrow();
   });
