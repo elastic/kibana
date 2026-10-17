@@ -1,0 +1,46 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ChatCallbackResponse, ConversationOriginType } from '@kbn/agent-builder-common';
+
+/** The external conversation a callback turn came from. */
+export interface CallbackOriginResolverContext {
+  origin: { type: ConversationOriginType; external_conversation_id: string };
+  spaceId: string;
+  /** The callback request, for resolvers that read as the caller. */
+  request: KibanaRequest;
+}
+
+/** The conversation an external conversation continues, or `undefined` when none does. Throws when the lookup fails. */
+export type CallbackOriginResolver = (
+  context: CallbackOriginResolverContext
+) => Promise<{ conversationId: string } | undefined>;
+
+/** Delivers callback payloads to the callback URLs it handles. */
+export interface CallbackTransportDefinition {
+  id: string;
+  /** Whether this transport delivers to the given callback URL. */
+  handles(callbackUrl: string): boolean;
+  send(
+    callbackUrl: string,
+    payload: ChatCallbackResponse,
+    signal: AbortSignal
+  ): Promise<{ status: number }>;
+}
+
+/** AgentBuilder callbacks setup contract. */
+export interface CallbacksSetup {
+  /**
+   * Registers a resolver the callback converse route asks first for an external conversation's
+   * conversation. When it returns `undefined`, the default lookup by origin runs. Only one may be
+   * registered.
+   */
+  registerOriginResolver(resolver: CallbackOriginResolver): void;
+  /** Registers a callback transport. The first registered transport that handles a URL delivers to it. */
+  registerTransport(transport: CallbackTransportDefinition): void;
+}

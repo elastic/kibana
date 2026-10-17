@@ -221,6 +221,12 @@ export type {
   ConversationUpdatePublicRequest,
   ConversationAddEventsRequest,
 } from './conversations';
+export type {
+  CallbackOriginResolver,
+  CallbackOriginResolverContext,
+  CallbackTransportDefinition,
+  CallbacksSetup,
+} from './callbacks';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export type {
   AvailabilityContext,

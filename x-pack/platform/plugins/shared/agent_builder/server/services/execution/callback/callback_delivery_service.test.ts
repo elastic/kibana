@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AgentBuilderErrorCode } from '@kbn/agent-builder-common';
+import type { KibanaRequest } from '@kbn/core/server';
+import { AgentBuilderErrorCode, ConversationOriginType } from '@kbn/agent-builder-common';
 import type { ChatCallbackFailureResponse } from '../../../../common/http_api/chat_callback';
 import { CallbackDeliveryService } from './callback_delivery_service';
 
@@ -125,6 +126,128 @@ describe('createTransport', () => {
 
     expect(relayClient.postCallback).not.toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('posts through the first registered transport that handles the URL', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch');
+    const relayClient = {
+      isRelayOrigin: jest.fn().mockReturnValue(true),
+      postCallback: jest.fn(),
+    };
+    const service = createCallbackDeliveryService(jest.fn(), relayClient);
+    const skipped = { id: 'skipped', handles: jest.fn().mockReturnValue(false), send: jest.fn() };
+    const first = {
+      id: 'first',
+      handles: jest.fn().mockReturnValue(true),
+      send: jest.fn().mockResolvedValue({ status: 202 }),
+    };
+    const second = { id: 'second', handles: jest.fn().mockReturnValue(true), send: jest.fn() };
+    const { registerTransport } = service.setup();
+    registerTransport(skipped);
+    registerTransport(first);
+    registerTransport(second);
+
+    const abortController = new AbortController();
+    const response = await service.createTransport(callbackUrl)(
+      failurePayload,
+      abortController.signal
+    );
+
+    expect(response).toEqual({ status: 202 });
+    expect(first.send).toHaveBeenCalledWith(callbackUrl, failurePayload, abortController.signal);
+    expect(skipped.send).not.toHaveBeenCalled();
+    expect(second.send).not.toHaveBeenCalled();
+    expect(relayClient.postCallback).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('keeps the Relay and fetch selection when no registered transport handles the URL', async () => {
+    const relayClient = {
+      isRelayOrigin: jest.fn().mockReturnValue(true),
+      postCallback: jest.fn().mockResolvedValue({ status: 204 }),
+    };
+    const service = createCallbackDeliveryService(jest.fn(), relayClient);
+    service.setup().registerTransport({
+      id: 'other',
+      handles: () => false,
+      send: jest.fn(),
+    });
+
+    await service.createTransport(callbackUrl)(failurePayload, new AbortController().signal);
+
+    expect(relayClient.postCallback).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects a transport registered twice with the same id', () => {
+    const { registerTransport } = createCallbackDeliveryService().setup();
+    const transport = { id: 'transport-1', handles: () => true, send: jest.fn() };
+    registerTransport(transport);
+
+    expect(() => registerTransport(transport)).toThrow(
+      'Callback transport [transport-1] is already registered'
+    );
+  });
+});
+
+describe('resolveOrigin', () => {
+  const context = {
+    origin: { type: ConversationOriginType.Slack, external_conversation_id: 'thread-1' },
+    spaceId: 'default',
+    request: {} as KibanaRequest,
+  };
+
+  it('returns the registered resolver answer without asking the default', async () => {
+    const service = createCallbackDeliveryService();
+    const registered = jest.fn().mockResolvedValue({ conversationId: 'investigation-1' });
+    const defaultOriginResolver = jest.fn();
+    service.setup().registerOriginResolver(registered);
+    service.start({ defaultOriginResolver });
+
+    await expect(service.resolveOrigin(context)).resolves.toEqual({
+      conversationId: 'investigation-1',
+    });
+    expect(registered).toHaveBeenCalledWith(context);
+    expect(defaultOriginResolver).not.toHaveBeenCalled();
+  });
+
+  it('falls through to the default when the registered resolver finds nothing', async () => {
+    const service = createCallbackDeliveryService();
+    service.setup().registerOriginResolver(jest.fn().mockResolvedValue(undefined));
+    service.start({
+      defaultOriginResolver: jest.fn().mockResolvedValue({ conversationId: 'conversation-1' }),
+    });
+
+    await expect(service.resolveOrigin(context)).resolves.toEqual({
+      conversationId: 'conversation-1',
+    });
+  });
+
+  it('runs only the default when no resolver is registered', async () => {
+    const service = createCallbackDeliveryService();
+    const defaultOriginResolver = jest.fn().mockResolvedValue(undefined);
+    service.start({ defaultOriginResolver });
+
+    await expect(service.resolveOrigin(context)).resolves.toBeUndefined();
+    expect(defaultOriginResolver).toHaveBeenCalledWith(context);
+  });
+
+  it('propagates a registered resolver error without asking the default', async () => {
+    const service = createCallbackDeliveryService();
+    const defaultOriginResolver = jest.fn();
+    service.setup().registerOriginResolver(jest.fn().mockRejectedValue(new Error('lookup failed')));
+    service.start({ defaultOriginResolver });
+
+    await expect(service.resolveOrigin(context)).rejects.toThrow('lookup failed');
+    expect(defaultOriginResolver).not.toHaveBeenCalled();
+  });
+
+  it('rejects a second resolver', () => {
+    const { registerOriginResolver } = createCallbackDeliveryService().setup();
+    registerOriginResolver(jest.fn());
+
+    expect(() => registerOriginResolver(jest.fn())).toThrow(
+      'A callback origin resolver is already registered'
+    );
   });
 });
 

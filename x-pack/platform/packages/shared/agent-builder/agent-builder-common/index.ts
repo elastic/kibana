@@ -511,6 +511,9 @@ export {
   type ValidConversationEventType,
   assertValidConversationEventType,
   type ConversationAddEventInput,
+  type ChatCallbackEventResponse,
+  type ChatCallbackFailureResponse,
+  type ChatCallbackResponse,
 } from './chat';
 export {
   type PublicSkillDefinition,

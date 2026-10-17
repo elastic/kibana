@@ -9,6 +9,7 @@ import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentCreateRequest, ConversationTemplate } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from './conversations';
+import type { CallbacksSetup } from './callbacks';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition, AttachmentPublicClient } from './attachments';
 import type { RendererTypeDefinition } from './renderers';
@@ -303,6 +304,11 @@ export interface AgentBuilderPluginSetup {
    * Conversations setup contract, which can be used to opt in to conversation workflow triggers.
    */
   conversations: ConversationsSetup;
+  /**
+   * Callbacks setup contract, which can be used to resolve the conversation a callback turn
+   * continues and to register callback transports.
+   */
+  callbacks: CallbacksSetup;
   /**
    * Renderers setup contract, which can be used to register renderer types.
    */
