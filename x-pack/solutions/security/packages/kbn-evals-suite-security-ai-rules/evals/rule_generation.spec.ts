@@ -13,8 +13,20 @@ import { hardCases } from '../datasets/hard_cases';
 import { standardPairs } from '../datasets/standard_pairs';
 import { complexPairs } from '../datasets/complex_pairs';
 import { negativePairs } from '../datasets/negative_pairs';
+import { cleanupSourceData, createSourceDataRunId, seedSourceData } from '../src/source_data';
 
 evaluate.describe('AI Rule Generation', { tag: tags.serverless.security.complete }, () => {
+  const sourceDataRunId = createSourceDataRunId();
+
+  evaluate.beforeAll(async ({ esClient }) => {
+    await seedSourceData(esClient, sourceDataRunId);
+  });
+
+  // The run ID is known before seeding, so a partial seed is cleaned up too.
+  evaluate.afterAll(async ({ esClient }) => {
+    await cleanupSourceData(esClient, sourceDataRunId);
+  });
+
   evaluate(
     'generates accurate detection rules',
     async ({ executorClient, evaluators, chatClient, evaluationInferenceClient, log }) => {
