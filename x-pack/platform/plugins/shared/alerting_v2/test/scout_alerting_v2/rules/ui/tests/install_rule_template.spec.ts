@@ -12,7 +12,7 @@ import {
   seedMockRuleTemplates,
 } from '../../../common/mock_rule_templates';
 import { trackCreateRuleRequests } from '../../../common/track_create_rule_requests';
-import { test } from '../fixtures';
+import { buildCreateRuleData, test } from '../fixtures';
 
 const { id: TEMPLATE_ID, attributes: TEMPLATE_ATTRIBUTES } = MOCK_RULE_TEMPLATES.nginxErrorRate;
 const TEMPLATE_RULE_NAME = TEMPLATE_ATTRIBUTES.rule.metadata.name;
@@ -109,6 +109,51 @@ test.describe(
         await expect(ruleDetails.heading(TEMPLATE_RULE_NAME)).toBeVisible();
         await expect(ruleDetails.disabledBadge).toBeVisible();
         expect(page.url()).toContain(ruleId!);
+      });
+    });
+
+    test('the rule count links to the rules created from the template', async ({
+      apiServices,
+      page,
+      pageObjects,
+    }) => {
+      const { ruleLibrary, rulesList } = pageObjects;
+      const unrelatedRule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'scout-rule-not-from-a-template' } })
+      );
+
+      await test.step('a template without rules has no count link', async () => {
+        await ruleLibrary.goto();
+        await ruleLibrary.search(TEMPLATE_RULE_NAME);
+        await expect(ruleLibrary.templateRow(TEMPLATE_RULE_NAME)).toBeVisible({ timeout: 60_000 });
+        await expect(ruleLibrary.ruleCountLink(TEMPLATE_RULE_NAME)).toBeHidden();
+      });
+
+      await test.step('installing the template updates the count', async () => {
+        await ruleLibrary.installButton(TEMPLATE_RULE_NAME).click();
+        await expect(ruleLibrary.createdToast(TEMPLATE_RULE_NAME)).toBeVisible({
+          timeout: 30_000,
+        });
+        // An external link also carries screen reader text, so match the leading number only.
+        await expect(ruleLibrary.ruleCountLink(TEMPLATE_RULE_NAME)).toHaveText(/^1(?!\d)/, {
+          timeout: 30_000,
+        });
+      });
+
+      await test.step('the count opens the rules list filtered to that template', async () => {
+        const { items } = await apiServices.alertingV2.rules.find({ search: TEMPLATE_RULE_NAME });
+        const [installedRule] = items;
+
+        // The link opens in a new tab, so follow its href in this tab instead.
+        const countLink = ruleLibrary.ruleCountLink(TEMPLATE_RULE_NAME);
+        await expect(countLink).toHaveAttribute('target', '_blank');
+        const href = await countLink.evaluate((link) => (link as HTMLAnchorElement).href);
+        await page.goto(href);
+
+        await expect(rulesList.rulesListTable).toBeVisible({ timeout: 30_000 });
+        await expect(rulesList.ruleNameLink(installedRule.id)).toBeVisible({ timeout: 30_000 });
+        await expect(rulesList.ruleNameLink(unrelatedRule.id)).toBeHidden();
+        expect(decodeURIComponent(page.url())).toContain(`template:"${TEMPLATE_ID}"`);
       });
     });
   }

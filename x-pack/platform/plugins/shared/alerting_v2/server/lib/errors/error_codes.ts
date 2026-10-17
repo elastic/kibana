@@ -582,6 +582,11 @@ export const ALERTING_LOG_CODES = {
    * page; get maps it to not-found. Operator should investigate package drift.
    */
   RULE_TEMPLATE_VALIDATION_FAILED: 'RULE_TEMPLATE_VALIDATION_FAILED',
+  /**
+   * Counting the rules created from each listed template failed. Find returns the
+   * templates without `rule_count` instead of failing the whole listing.
+   */
+  RULE_TEMPLATE_RULE_COUNT_FAILED: 'RULE_TEMPLATE_RULE_COUNT_FAILED',
 
   // ─────────────────────────── Agent Builder ─────────────────────────
   /** `refresh_alert` failed; tool returns an error result. */

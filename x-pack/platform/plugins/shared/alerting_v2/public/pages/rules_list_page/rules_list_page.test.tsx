@@ -11,6 +11,7 @@ import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import { contentListQueryClient } from '@kbn/content-list-provider';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT } from '../../constants';
+import { getRulesLocation } from '../../locator_get_location';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { RulesListPage } from './rules_list_page';
 
@@ -515,6 +516,42 @@ describe('RulesListPage', () => {
       expect(lastFindItemsArgs().filters.kind).toMatchObject({ include: ['signal'] });
     });
   });
+
+  it('passes the template from a ?q=template:"<id>" link to findItems', async () => {
+    render(
+      <ListPageTestProviders initialEntries={['/?q=template:"nginx-error-rate"']}>
+        <RulesListPage />
+      </ListPageTestProviders>
+    );
+    await waitForRules();
+
+    await waitFor(() => {
+      expect(lastFindItemsArgs().filters.template).toMatchObject({
+        include: ['nginx-error-rate'],
+      });
+    });
+  });
+
+  it.each(['kubernetes_otel-1.2.0-pod.crashloop', 'with space/and:colon', 'quote"and\\slash'])(
+    'applies the template filter from the locator link for template id %s',
+    async (templateId) => {
+      const { path } = getRulesLocation({
+        derivedFromTemplateId: templateId,
+        host: { app: 'alerting', pathPrefix: '/' },
+      });
+
+      render(
+        <ListPageTestProviders initialEntries={[path]}>
+          <RulesListPage />
+        </ListPageTestProviders>
+      );
+      await waitForRules();
+
+      await waitFor(() => {
+        expect(lastFindItemsArgs().filters.template).toMatchObject({ include: [templateId] });
+      });
+    }
+  );
 
   it('uses name ascending as the default sort', async () => {
     renderPage();

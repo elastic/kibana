@@ -23,6 +23,8 @@ export interface AlertingV2RulesLocatorParams extends SerializableRecord {
   ruleId?: string;
   page?: 'list' | 'details' | 'sequence_create';
   templateId?: string;
+  /** Opens the list filtered to the rules that were created from this rule template. */
+  derivedFromTemplateId?: string;
   host: LocatorHost;
 }
 
