@@ -14,6 +14,7 @@ import type { HuntBehaviorModels } from '../types';
 import { huntBehavior } from './hunt_behavior';
 import { ESQL_GENERATION_INSTRUCTIONS } from './extraction_contract';
 import { buildMitreCatalog } from './mitre_catalog';
+import { UNGROUNDED_QUERY_FIXTURES } from './ungrounded_query_fixtures';
 
 /**
  * A small ATT&CK Enterprise entity set for tests that need real-looking technique ids, plus 30
@@ -1018,6 +1019,30 @@ describe('huntBehavior', () => {
       expect(result.behaviors[0].execution?.inconclusive_reason).toBe('query_out_of_scope');
       expect(debugSpy).not.toHaveBeenCalledWith(expect.stringContaining('ungrounded query'));
     });
+
+    it.each(UNGROUNDED_QUERY_FIXTURES)(
+      '$name: rescues through the real wrapper on the retry',
+      async ({ reportText, evidenceQuote, iocValues, query, rewrittenQuery }) => {
+        generateEsqlMock
+          .mockResolvedValueOnce({ query })
+          .mockResolvedValueOnce({ query: rewrittenQuery });
+
+        const result = await huntBehavior(
+          buildMockModel([{ ...t1078Candidate, evidence_quote: evidenceQuote }]),
+          logger,
+          {
+            ...executeParams,
+            text: reportText,
+            iocs: iocValues.map((value) => ({ type: 'domain', value })),
+          },
+          esClient
+        );
+
+        expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+        expect(result.behaviors[0].validated_esql).toContain(rewrittenQuery);
+        expect(result.incomplete?.some((i) => i.reason === 'query_ungrounded')).not.toBe(true);
+      }
+    );
   });
 
   describe('collapsing same-artifact behaviors', () => {
