@@ -18,6 +18,7 @@ import {
 } from '../../../../common/steps/ai';
 import type { InferenceWorkflowsStartDeps } from '../../../types';
 import { AI_PROMPT_FEATURE_ID } from '../ai_feature_ids';
+import { extractStructuredContent, wrapStructuredOutputSchema } from './extract_structured_content';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
 
 interface MessageWithUsage {
@@ -164,15 +165,10 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
 
       if (context.input.schema) {
         const runnable = chatModel.withStructuredOutput(
-          {
-            type: 'object',
-            properties: {
-              // withStructuredOutput fails if outputSchema is not an object.
-              // for example, if the user expects an array, we wrap it into an object here
-              // and then unwrap it below
-              response: context.input.schema,
-            },
-          },
+          // withStructuredOutput fails if outputSchema is not an object.
+          // for example, if the user expects an array, we wrap it into an object here
+          // and then unwrap it below
+          wrapStructuredOutputSchema(context.input.schema),
           {
             name: 'extract_structured_response',
             includeRaw: true,
@@ -189,7 +185,12 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
           // so we only return the content here, but looking ahead we might have response_metadata returned,
           // so we keep the same output structure with potential response_metadata addition in the future.
           output: {
-            content: invocationResult.parsed.response,
+            content: extractStructuredContent({
+              parsed: invocationResult.parsed,
+              schema: context.input.schema,
+              responseMetadata: invocationResult.raw?.response_metadata,
+              logger: context.logger,
+            }),
             metadata: buildMetadata(invocationResult.raw, resolvedConnectorId),
           },
         };
