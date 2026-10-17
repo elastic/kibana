@@ -647,6 +647,9 @@ export class Server {
           UIAM_INTERNAL_CALLER_ATTESTATION_HEADER
         ];
       });
+      httpStart.setSelfClientOwnClientAuthenticationCheck((value) =>
+        uiam.isOwnClientAuthentication(value)
+      );
     }
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,
