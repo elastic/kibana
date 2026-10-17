@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../../../common/constants';
 import { mlServicesMock } from '../../../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
@@ -24,6 +25,7 @@ import {
   getPerformBulkActionDuplicateSchemaMock,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
+import { BulkActionTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
 import { validateRuleResponseActions as _validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { ConfigType } from '../../../../../../config';
@@ -154,6 +156,200 @@ describe('Perform bulk action route', () => {
       expect(response.body).toEqual({
         message: 'Alert suppression is enabled with platinum license or above.',
         status_code: 403,
+      });
+    });
+  });
+
+  describe('delete action', () => {
+    const getBulkDeleteRequest = () =>
+      requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: { ...getBulkDisableRuleActionSchemaMock(), action: BulkActionTypeEnum.delete },
+      });
+
+    const getBulkDeleteByIdsRequest = (ids: string[], query?: { dry_run: boolean }) =>
+      requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        query,
+        body: { query: undefined, ids, action: BulkActionTypeEnum.delete },
+      });
+
+    it('returns 200 with the rule in deleted when deleteRule succeeds', async () => {
+      clients.detectionRulesClient.deleteRule.mockResolvedValue(undefined);
+
+      const response = await server.inject(
+        getBulkDeleteRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.body.attributes.summary).toEqual({
+        failed: 0,
+        skipped: 0,
+        succeeded: 1,
+        total: 1,
+      });
+      expect(response.body.attributes.results.deleted).toHaveLength(1);
+      expect(response.body.attributes.results.deleted[0].id).toEqual(mockRule.id);
+    });
+
+    it('returns 200 with skipped rules when deleteRule reports the rule was not found', async () => {
+      clients.detectionRulesClient.deleteRule.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('alert', mockRule.id)
+      );
+
+      const response = await server.inject(
+        getBulkDeleteRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.body.attributes.summary).toEqual({
+        failed: 0,
+        skipped: 1,
+        succeeded: 0,
+        total: 1,
+      });
+      expect(response.body.attributes.results.deleted).toEqual([]);
+      expect(response.body.attributes.results.skipped).toEqual([
+        { id: mockRule.id, name: mockRule.name, skip_reason: 'RULE_NOT_FOUND' },
+      ]);
+    });
+
+    it('returns 200 with skipped rules when rules are not found at fetch time', async () => {
+      const missingId = 'missing-rule-id';
+      bulkGetRulesMock.mockResolvedValue({
+        rules: [],
+        errors: [{ id: missingId, error: { statusCode: 404 } }],
+      });
+
+      const response = await server.inject(
+        getBulkDeleteByIdsRequest([missingId]),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.body.attributes.summary).toEqual({
+        failed: 0,
+        skipped: 1,
+        succeeded: 0,
+        total: 1,
+      });
+      expect(response.body.attributes.results.skipped).toEqual([
+        { id: missingId, skip_reason: 'RULE_NOT_FOUND' },
+      ]);
+    });
+
+    it('returns 500 when rules fail to be fetched for a reason other than not found', async () => {
+      const brokenId = 'broken-rule-id';
+      bulkGetRulesMock.mockResolvedValue({
+        rules: [],
+        errors: [{ id: brokenId, error: { statusCode: 500 } }],
+      });
+
+      const response = await server.inject(
+        getBulkDeleteByIdsRequest([brokenId]),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body.attributes.summary).toEqual({
+        failed: 1,
+        skipped: 0,
+        succeeded: 0,
+        total: 1,
+      });
+      expect(response.body.attributes.errors).toEqual([
+        { message: 'Error resolving the rule', status_code: 500, rules: [{ id: brokenId }] },
+      ]);
+    });
+
+    it('returns 200 with skipped rules when rules are not found at fetch time during dry run', async () => {
+      const missingId = 'missing-rule-id';
+      bulkGetRulesMock.mockResolvedValue({
+        rules: [],
+        errors: [{ id: missingId, error: { statusCode: 404 } }],
+      });
+
+      const response = await server.inject(
+        getBulkDeleteByIdsRequest([missingId], { dry_run: true }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.body.attributes.summary).toEqual({
+        failed: 0,
+        skipped: 1,
+        succeeded: 0,
+        total: 1,
+      });
+      expect(clients.detectionRulesClient.deleteRule).not.toHaveBeenCalled();
+    });
+
+    it('returns 500 with mixed success, skipped, and error in one request', async () => {
+      const missingId = 'missing-rule-id';
+      bulkGetRulesMock.mockResolvedValue({
+        rules: [mockRule, { ...mockRule, id: 'rule-not-found-on-delete' }, mockRule],
+        errors: [{ id: missingId, error: { statusCode: 404 } }],
+      });
+      clients.detectionRulesClient.deleteRule
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createGenericNotFoundError('alert', 'rule-not-found-on-delete')
+        )
+        .mockRejectedValueOnce(new Error('Internal error'));
+
+      const response = await server.inject(
+        getBulkDeleteByIdsRequest([
+          mockRule.id,
+          'rule-not-found-on-delete',
+          mockRule.id,
+          missingId,
+        ]),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body.attributes.summary).toEqual({
+        failed: 1,
+        skipped: 2,
+        succeeded: 1,
+        total: 4,
+      });
+      expect(response.body.attributes.results.deleted).toHaveLength(1);
+      expect(response.body.attributes.results.skipped).toHaveLength(2);
+      expect(response.body.attributes.errors).toEqual([
+        {
+          message: 'Internal error',
+          status_code: 500,
+          rules: [{ id: mockRule.id, name: mockRule.name }],
+        },
+      ]);
+    });
+
+    it('returns 500 when deletion fails with a non-404 error', async () => {
+      clients.detectionRulesClient.deleteRule.mockRejectedValue(new Error('Test error'));
+
+      const response = await server.inject(
+        getBulkDeleteRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body.attributes.errors).toEqual([
+        {
+          message: 'Test error',
+          status_code: 500,
+          rules: [{ id: mockRule.id, name: mockRule.name }],
+        },
+      ]);
+      expect(response.body.attributes.summary).toEqual({
+        failed: 1,
+        skipped: 0,
+        succeeded: 0,
+        total: 1,
       });
     });
   });
