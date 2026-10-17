@@ -25,8 +25,26 @@ export interface TsdbScenarioContext {
   tsdbScenario: TsdbScenario;
 }
 
-export const sumFirstNValues = (count: number, bars: Array<{ y: number }> | undefined): number =>
-  (bars ?? []).slice(0, count).reduce((sum, bar) => sum + bar.y, 0);
+/** A bar from the elastic-charts debug state, with its bucket start as epoch milliseconds. */
+export interface ChartBar {
+  x: number;
+  y: number;
+}
+
+const sumBarValues = (bars: ChartBar[]): number => bars.reduce((sum, { y }) => sum + y, 0);
+
+/** Sums bar values on each side of a stream rollover, splitting by bucket timestamp. */
+export const sumBarsAroundRollover = (
+  bars: ChartBar[] | undefined,
+  { beforeRollover, afterRollover }: TsdbScenarioTimeRange
+): { before: number; after: number } => {
+  // The document clusters sit an hour apart, so the midpoint lands in that gap at any interval.
+  const rolloverMidpoint = (Date.parse(beforeRollover) + Date.parse(afterRollover)) / 2;
+  return {
+    before: sumBarValues((bars ?? []).filter(({ x }) => x < rolloverMidpoint)),
+    after: sumBarValues((bars ?? []).filter(({ x }) => x >= rolloverMidpoint)),
+  };
+};
 
 const PICKER_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
