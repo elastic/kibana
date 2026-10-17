@@ -24,6 +24,7 @@ import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-int
 import type { SavedObjectsConfigType } from '@kbn/core-saved-objects-base-server-internal';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import type { SharedGlobalConfigKeys } from './shared_global_config';
+import type { PluginInitialization } from './plugin_initialization';
 type Maybe<T> = T | undefined;
 
 /**
@@ -270,6 +271,26 @@ export interface PluginManifest {
    * configured, etc.) Default is false.
    */
   readonly enabledOnAnonymousPages?: boolean;
+
+  /**
+   * Set to `true` when the plugin implements the `initialize()` lifecycle hook
+   * (see the `Plugin` interface).
+   *
+   * Core needs to know before any plugin code runs: while `initialize()` has not
+   * succeeded on this Kibana instance, routes registered through the plugin's
+   * router answer 503 and the plugin's browser apps show a loading screen.
+   * Core throws at boot when the flag and the method disagree. Only standard
+   * plugins with a server entry may set it.
+   *
+   * Core decides when `initialize()` runs: right after the plugin start loop at
+   * boot while `plugins.initializeOnBoot` is `true` (the default), otherwise on
+   * first use, or right after boot on a node without the `ui` role. It runs on
+   * every Kibana instance against the same cluster, so the work must be safe to
+   * run concurrently.
+   *
+   * Default is `false`.
+   */
+  readonly hasInitialization?: boolean;
 }
 
 /**
@@ -297,6 +318,40 @@ export interface Plugin<
   setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
 
   start(core: CoreStart, plugins: TPluginsStart): TStart;
+
+  /**
+   * Expensive, Elasticsearch-bound initialization work, kept out of `setup()` and `start()`.
+   *
+   * Core calls it with the same arguments as `start()` and alone decides when. With
+   * `plugins.initializeOnBoot: true` (the default) it runs at boot, once every plugin's
+   * `start()` has returned. With `plugins.initializeOnBoot: false` it runs on first use:
+   * a request to one of the plugin's routes, one of its browser apps loading, the
+   * plugin's own `this.initialization.initialize()` call, a dependent's
+   * `core.plugins.initializePlugin()` call, or, on a node without the `ui` role, right
+   * after boot, since no request would ever reach it there. Plugin code is identical in
+   * both modes: `start()` runs at boot either way and never waits for it, and a contract
+   * function that needs initialized state awaits `this.initialization.initialize()`
+   * itself (see {@link PluginInitializerContext.initialization}). Do not await
+   * `this.initialization.initialize()` from inside this method, directly or through one
+   * of your contract functions: it would wait for itself and never settle.
+   *
+   * While it has not succeeded on this Kibana instance, routes registered through the
+   * plugin's router answer 503 and the plugin's browser apps show a loading screen.
+   * A thrown error never fails boot: core retries in the background with a jittered
+   * exponential backoff, a bounded number of times. While a retry is scheduled, requests
+   * keep getting 503, and the plugin's own `this.initialization.initialize()` call starts
+   * a fresh attempt at once; once background retries are exhausted, the next request or
+   * call starts one.
+   * Success is sticky for the lifetime of the process.
+   *
+   * @remarks Runs on every Kibana instance against the same cluster, concurrently and
+   * without coordination, so the work must be safe to run more than once. Only plugins
+   * whose manifest sets `hasInitialization: true` may implement it; core throws at boot
+   * when the flag and the method disagree.
+   *
+   * @public
+   */
+  initialize?(core: CoreStart, plugins: TPluginsStart): Promise<void>;
 
   stop?(): MaybePromise<void>;
 }
@@ -443,6 +498,36 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
      */
     get: <T = ConfigSchema>() => T;
   };
+  /**
+   * Status of this plugin's own {@link Plugin.initialize} work, and the way to wait for it.
+   * Core decides when that work runs (see `plugins.initializeOnBoot`); awaiting it here is
+   * what keeps the plugin's code correct in either mode.
+   *
+   * Keep it on the instance and await `initialize()` from the contract functions, task
+   * runners and other post-boot code paths that need initialized state. Routes registered
+   * through the plugin's own router are gated by core and need nothing extra:
+   *
+   * @example
+   * ```ts
+   * constructor(ctx: PluginInitializerContext) {
+   *   this.initialization = ctx.initialization;
+   * }
+   * start() {
+   *   return {
+   *     search: async () => {
+   *       await this.initialization.initialize();
+   *       // work that needs the indices
+   *     },
+   *     getLabel: () => 'no init needed',
+   *   };
+   * }
+   * ```
+   *
+   * Plugins without `initialize()` report `available` once their `start()` has returned,
+   * so the object is safe to use from any plugin. Preboot plugins have no initialization
+   * and report `idle`.
+   */
+  initialization: PluginInitialization;
 }
 
 /**

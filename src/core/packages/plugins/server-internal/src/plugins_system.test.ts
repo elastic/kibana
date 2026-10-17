@@ -14,7 +14,7 @@ import {
   runtimeResolverMock,
 } from './plugins_system.test.mocks';
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { type PluginName, PluginType } from '@kbn/core-base-common';
@@ -27,6 +27,17 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { PluginWrapper } from './plugin';
 import { findCircularDependencies, normalizeCycle, PluginsSystem } from './plugins_system';
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
+import { DeferredInitEngine, toServiceStatus } from './deferred_init';
+
+interface CreatePluginOptions {
+  required?: string[];
+  optional?: string[];
+  runtime?: string[];
+  server?: boolean;
+  ui?: boolean;
+  type?: PluginType;
+  hasInitialization?: boolean;
+}
 
 function createPlugin(
   id: string,
@@ -37,14 +48,8 @@ function createPlugin(
     server = true,
     ui = true,
     type = PluginType.standard,
-  }: {
-    required?: string[];
-    optional?: string[];
-    runtime?: string[];
-    server?: boolean;
-    ui?: boolean;
-    type?: PluginType;
-  } = {}
+    hasInitialization = false,
+  }: CreatePluginOptions = {}
 ): PluginWrapper<any, any> {
   const plugin = new PluginWrapper<any, any>({
     path: 'some-path',
@@ -61,6 +66,7 @@ function createPlugin(
       server,
       ui,
       owner: { name: 'foo' },
+      hasInitialization,
     },
     opaqueId: Symbol(id),
     initializerContext: { logger } as any,
@@ -81,6 +87,7 @@ let coreContext: CoreContext;
 
 beforeEach(() => {
   runtimeResolverMock.setDependencyMap.mockReset();
+  runtimeResolverMock.setDeferredInitEngine.mockReset();
   runtimeResolverMock.resolveSetupRequests.mockReset();
   runtimeResolverMock.resolveStartRequests.mockReset();
 
@@ -730,6 +737,416 @@ describe('start', () => {
       pluginA: 'contractA',
       pluginB: 'contractB',
     });
+  });
+});
+
+describe('lifecycle guard', () => {
+  const createSystemWithEngine = () => {
+    const engine = new DeferredInitEngine(logger.get());
+    jest.spyOn(engine, 'beginLifecycle');
+    jest.spyOn(engine, 'endLifecycle');
+    const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
+    const plugin = createPlugin('somePlugin');
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    jest.spyOn(plugin, 'start').mockReturnValue('contract');
+    localPluginsSystem.addPlugin(plugin);
+    return { engine, localPluginsSystem, plugin };
+  };
+
+  it("brackets the setup loop with beginLifecycle('setup') and endLifecycle", async () => {
+    const { engine, localPluginsSystem } = createSystemWithEngine();
+
+    await localPluginsSystem.setupPlugins(setupDeps);
+
+    expect(engine.beginLifecycle).toHaveBeenCalledTimes(1);
+    expect(engine.beginLifecycle).toHaveBeenCalledWith('setup');
+    expect(engine.endLifecycle).toHaveBeenCalledTimes(1);
+    expect((engine.beginLifecycle as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+      (engine.endLifecycle as jest.Mock).mock.invocationCallOrder[0]
+    );
+  });
+
+  it("brackets the start loop with beginLifecycle('start') and endLifecycle", async () => {
+    const { engine, localPluginsSystem } = createSystemWithEngine();
+    await localPluginsSystem.setupPlugins(setupDeps);
+    (engine.beginLifecycle as jest.Mock).mockClear();
+    (engine.endLifecycle as jest.Mock).mockClear();
+
+    await localPluginsSystem.startPlugins(startDeps);
+
+    expect(engine.beginLifecycle).toHaveBeenCalledTimes(1);
+    expect(engine.beginLifecycle).toHaveBeenCalledWith('start');
+    expect(engine.endLifecycle).toHaveBeenCalledTimes(1);
+    expect((engine.beginLifecycle as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+      (engine.endLifecycle as jest.Mock).mock.invocationCallOrder[0]
+    );
+  });
+
+  it('clears the lifecycle even when a plugin setup() throws', async () => {
+    const { engine, localPluginsSystem, plugin } = createSystemWithEngine();
+    const error = new Error('boom');
+    jest.spyOn(plugin, 'setup').mockRejectedValueOnce(error);
+
+    await expect(localPluginsSystem.setupPlugins(setupDeps)).rejects.toBe(error);
+
+    expect(engine.endLifecycle).toHaveBeenCalledTimes(1);
+  });
+
+  it('clears the lifecycle even when a plugin start() throws', async () => {
+    const { engine, localPluginsSystem, plugin } = createSystemWithEngine();
+    const error = new Error('boom');
+    jest.spyOn(plugin, 'start').mockRejectedValueOnce(error);
+    await localPluginsSystem.setupPlugins(setupDeps);
+    (engine.endLifecycle as jest.Mock).mockClear();
+
+    await expect(localPluginsSystem.startPlugins(startDeps)).rejects.toBe(error);
+
+    expect(engine.endLifecycle).toHaveBeenCalledTimes(1);
+  });
+
+  it('propagates a start() error immediately, without retrying', async () => {
+    const plugin = createPlugin('failing-start');
+    jest.spyOn(plugin, 'setup').mockResolvedValue({});
+    const error = new Error('boom');
+    jest.spyOn(plugin, 'start').mockRejectedValueOnce(error);
+
+    pluginsSystem.addPlugin(plugin);
+    mockCreatePluginSetupContext.mockImplementation(() => ({}));
+    mockCreatePluginStartContext.mockImplementation(() => ({}));
+
+    await pluginsSystem.setupPlugins(setupDeps);
+
+    await expect(pluginsSystem.startPlugins(startDeps)).rejects.toBe(error);
+    expect(plugin.start).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('DeferredInitEngine wiring', () => {
+  it('registers the DeferredInitEngine with the runtime contract resolver, when present', async () => {
+    const engine = new DeferredInitEngine(logger.get());
+    const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
+    const plugin = createPlugin('somePlugin');
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    localPluginsSystem.addPlugin(plugin);
+
+    await localPluginsSystem.setupPlugins(setupDeps);
+
+    expect(runtimeResolverMock.setDeferredInitEngine).toHaveBeenCalledWith(engine);
+  });
+
+  it('does not attempt to register an engine when none was provided', async () => {
+    const plugin = createPlugin('somePlugin');
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    pluginsSystem.addPlugin(plugin);
+
+    await pluginsSystem.setupPlugins(setupDeps);
+
+    expect(runtimeResolverMock.setDeferredInitEngine).not.toHaveBeenCalled();
+  });
+});
+
+describe('initialize()', () => {
+  const setupContext = { setup: 'context' };
+  const startContext = { start: 'context' };
+  const headlessRoles = { ui: false, backgroundTasks: true, migrator: false };
+  const headlessMessage =
+    'This node has no "ui" role, so no request can initialize its plugins; running initialize() for [pluginA] now.';
+  const eagerMessage = 'Running initialize() for 1 plugin(s) now that all plugins have started.';
+  const lifecycleGuardMessage = (phase: string) =>
+    `Cannot wait for plugin "pluginA" to initialize during the plugin ${phase} lifecycle: it would block boot. Call initialize() from a route handler, a task runner, or a function returned from start() that runs after boot.`;
+  const never = () => new Promise<void>(() => {});
+  const infoMessages = () => loggingSystemMock.collect(logger).info.flat();
+
+  let engine: DeferredInitEngine;
+  let system: PluginsSystem<PluginType.standard>;
+
+  beforeEach(() => {
+    engine = new DeferredInitEngine(logger.get());
+    system = new PluginsSystem(coreContext, PluginType.standard, engine);
+    mockCreatePluginSetupContext.mockReturnValue(setupContext);
+    mockCreatePluginStartContext.mockReturnValue(startContext);
+    jest.mocked(setupDeps.status.plugins.set).mockClear();
+  });
+
+  afterEach(() => {
+    mockCreatePluginSetupContext.mockReset();
+    mockCreatePluginStartContext.mockReset();
+  });
+
+  const addPlugin = (id: string, options: CreatePluginOptions = {}) => {
+    const plugin = createPlugin(id, options);
+    jest.spyOn(plugin, 'setup').mockReturnValue(`${id}-setup`);
+    jest.spyOn(plugin, 'start').mockReturnValue(`${id}-start`);
+    system.addPlugin(plugin);
+    return plugin;
+  };
+
+  // The hook resolves at once unless the test says otherwise.
+  const addInitializingPlugin = (
+    id: string,
+    initialize: () => Promise<void> = () => Promise.resolve(),
+    options: CreatePluginOptions = {}
+  ) => {
+    const plugin = addPlugin(id, { ...options, hasInitialization: true });
+    const runInitialize = jest.spyOn(plugin, 'runInitialize').mockImplementation(initialize);
+    return { plugin, runInitialize };
+  };
+
+  it('injects the start contract of a plugin with initialize() into its dependents at boot', async () => {
+    const { plugin: pluginA } = addInitializingPlugin('pluginA');
+    const pluginB = addPlugin('pluginB', { required: ['pluginA'] });
+
+    await system.setupPlugins(setupDeps);
+    const contracts = await system.startPlugins(startDeps);
+
+    expect(pluginA.start).toHaveBeenCalledTimes(1);
+    expect(pluginB.setup).toHaveBeenCalledWith(setupContext, { pluginA: 'pluginA-setup' });
+    expect(pluginB.start).toHaveBeenCalledWith(startContext, { pluginA: 'pluginA-start' });
+    expect([...contracts]).toEqual([
+      ['pluginA', 'pluginA-start'],
+      ['pluginB', 'pluginB-start'],
+    ]);
+  });
+
+  it('runs initialize() once every plugin has started, without awaiting it', async () => {
+    const { plugin: pluginA, runInitialize } = addInitializingPlugin('pluginA', never);
+    const pluginB = addPlugin('pluginB', { required: ['pluginA'] });
+
+    await system.setupPlugins(setupDeps);
+    await system.startPlugins(startDeps);
+
+    expect(pluginA.start).toHaveBeenCalledTimes(1);
+    expect(pluginB.start).toHaveBeenCalledTimes(1);
+    expect(runInitialize).toHaveBeenCalledTimes(1);
+    expect(runInitialize).toHaveBeenCalledWith(startContext, {});
+    expect(runInitialize.mock.invocationCallOrder[0]).toBeGreaterThan(
+      (pluginB.start as jest.Mock).mock.invocationCallOrder[0]
+    );
+    expect(engine.getStatus('pluginA').state).toBe('initializing');
+    expect(infoMessages()).toContain(eagerMessage);
+  });
+
+  it('leaves initialize() to a later call when initializeOnBoot is false', async () => {
+    system.setInitializeOnBoot(false);
+    const { runInitialize } = addInitializingPlugin('pluginA');
+
+    await system.setupPlugins(setupDeps);
+    await system.startPlugins(startDeps);
+
+    expect(runInitialize).not.toHaveBeenCalled();
+    expect(engine.getStatus('pluginA').state).toBe('idle');
+
+    await engine.initialize('pluginA');
+
+    expect(runInitialize).toHaveBeenCalledTimes(1);
+    expect(runInitialize).toHaveBeenCalledWith(startContext, {});
+    expect(engine.getStatus('pluginA').state).toBe('available');
+  });
+
+  describe('on a node without the ui role', () => {
+    it('runs initialize() after boot when initializeOnBoot is false, since no request ever will', async () => {
+      system.setInitializeOnBoot(false);
+      system.setNodeRoles(headlessRoles);
+      const { runInitialize } = addInitializingPlugin('pluginA', never);
+      addPlugin('plain');
+
+      await system.setupPlugins(setupDeps);
+      await system.startPlugins(startDeps);
+
+      expect(runInitialize).toHaveBeenCalledTimes(1);
+      expect(engine.getStatus('pluginA').state).toBe('initializing');
+      expect(infoMessages()).toContain(headlessMessage);
+    });
+
+    it('leaves plugins idle on a node with the ui role', async () => {
+      system.setInitializeOnBoot(false);
+      system.setNodeRoles({ ui: true, backgroundTasks: true, migrator: false });
+      const { runInitialize } = addInitializingPlugin('pluginA');
+
+      await system.setupPlugins(setupDeps);
+      await system.startPlugins(startDeps);
+
+      expect(runInitialize).not.toHaveBeenCalled();
+      expect(engine.getStatus('pluginA').state).toBe('idle');
+    });
+
+    it('leaves plugins idle when the node roles are unknown', async () => {
+      system.setInitializeOnBoot(false);
+      const { runInitialize } = addInitializingPlugin('pluginA');
+
+      await system.setupPlugins(setupDeps);
+      await system.startPlugins(startDeps);
+
+      expect(runInitialize).not.toHaveBeenCalled();
+      expect(engine.getStatus('pluginA').state).toBe('idle');
+    });
+
+    it('runs initialize() through the regular boot path when initializeOnBoot is true', async () => {
+      system.setNodeRoles(headlessRoles);
+      const { runInitialize } = addInitializingPlugin('pluginA', never);
+
+      await system.setupPlugins(setupDeps);
+      await system.startPlugins(startDeps);
+
+      expect(runInitialize).toHaveBeenCalledTimes(1);
+      expect(engine.getStatus('pluginA').state).toBe('initializing');
+      expect(infoMessages()).toContain(eagerMessage);
+      expect(infoMessages()).not.toContain(headlessMessage);
+    });
+  });
+
+  it('rejects a plugin that sets hasInitialization without a server entry before any setup() runs', async () => {
+    const browserOnly = addPlugin('browserOnly', { hasInitialization: true, server: false });
+    const other = addPlugin('other');
+
+    await expect(system.setupPlugins(setupDeps)).rejects.toThrow(
+      'Plugin "browserOnly" sets "hasInitialization: true" but has no server entry; initialize() is a server-side lifecycle.'
+    );
+    expect(browserOnly.setup).not.toHaveBeenCalled();
+    expect(other.setup).not.toHaveBeenCalled();
+  });
+
+  it('reports a plugin without initialize() as idle before start and available after it', async () => {
+    addPlugin('plain');
+
+    await system.setupPlugins(setupDeps);
+    expect(engine.getStatus('plain').state).toBe('idle');
+
+    await system.startPlugins(startDeps);
+    expect(engine.getStatus('plain').state).toBe('available');
+  });
+
+  it('rejects initialize() awaited from start() with the lifecycle guard message', async () => {
+    const { plugin } = addInitializingPlugin('pluginA');
+    let request: Promise<void> | undefined;
+    jest.spyOn(plugin, 'start').mockImplementation(() => {
+      request = engine.initialize('pluginA');
+      // Swallowed here so boot proceeds; the assertion below reads the rejection itself.
+      request.catch(() => {});
+      return 'pluginA-start';
+    });
+
+    await system.setupPlugins(setupDeps);
+    await system.startPlugins(startDeps);
+
+    await expect(request).rejects.toThrow(lifecycleGuardMessage('start'));
+  });
+
+  it('rejects initialize() awaited from setup() with the lifecycle guard message', async () => {
+    const { plugin } = addInitializingPlugin('pluginA');
+    let request: Promise<void> | undefined;
+    jest.spyOn(plugin, 'setup').mockImplementation(() => {
+      request = engine.initialize('pluginA');
+      request.catch(() => {});
+      return 'pluginA-setup';
+    });
+
+    await system.setupPlugins(setupDeps);
+
+    await expect(request).rejects.toThrow(lifecycleGuardMessage('setup'));
+  });
+
+  it('registers a /status entry for plugins with initialize() only', async () => {
+    addInitializingPlugin('pluginA');
+    addPlugin('plain');
+
+    await system.setupPlugins(setupDeps);
+
+    const statusSet = jest.mocked(setupDeps.status.plugins.set);
+    expect(statusSet).toHaveBeenCalledTimes(1);
+    const [pluginName, status$] = statusSet.mock.calls[0];
+    expect(pluginName).toBe('pluginA');
+    await expect(firstValueFrom(status$)).resolves.toEqual(
+      toServiceStatus('pluginA', { state: 'idle', attempts: 0 })
+    );
+  });
+});
+
+describe('start - slow start() warning', () => {
+  const slowStartWarning = (pluginName: string, durationMs: number) =>
+    `Start lifecycle of "${pluginName}" plugin took ${durationMs}ms, which exceeds 1s. Move initialization work (index setup, data loading, Elasticsearch calls) into the plugin's initialize() hook so start() returns immediately.`;
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  // A synchronous start() that spends `durationMs` on the fake clock before returning.
+  const bootWithSyncStart = async (
+    system: PluginsSystem<PluginType.standard>,
+    pluginName: string,
+    durationMs: number
+  ) => {
+    const plugin = createPlugin(pluginName);
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    jest.spyOn(plugin, 'start').mockImplementation(() => {
+      jest.advanceTimersByTime(durationMs);
+      return 'contract';
+    });
+    system.addPlugin(plugin);
+    await system.setupPlugins(setupDeps);
+    await system.startPlugins(startDeps);
+  };
+
+  // An asynchronous start() whose promise settles after `durationMs` on the fake clock.
+  const bootWithAsyncStart = async (
+    system: PluginsSystem<PluginType.standard>,
+    pluginName: string,
+    durationMs: number
+  ) => {
+    const plugin = createPlugin(pluginName);
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    jest
+      .spyOn(plugin, 'start')
+      .mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve('contract'), durationMs))
+      );
+    system.addPlugin(plugin);
+    await system.setupPlugins(setupDeps);
+    const started = system.startPlugins(startDeps);
+    await jest.advanceTimersByTimeAsync(durationMs);
+    await started;
+  };
+
+  it('warns when an asynchronous start() takes more than 1s to settle', async () => {
+    await bootWithAsyncStart(pluginsSystem, 'slow-async-start', 1500);
+
+    expect(loggingSystemMock.collect(logger).warn.flat()).toEqual([
+      expect.stringContaining('asynchronous start lifecycle'),
+      slowStartWarning('slow-async-start', 1500),
+    ]);
+  });
+
+  it('warns when a synchronous start() takes more than 1s', async () => {
+    await bootWithSyncStart(pluginsSystem, 'slow-start', 1500);
+
+    expect(loggingSystemMock.collect(logger).warn.flat()).toEqual([
+      slowStartWarning('slow-start', 1500),
+    ]);
+  });
+
+  it('stays silent when start() returns within 1s', async () => {
+    await bootWithSyncStart(pluginsSystem, 'quick-start', 200);
+
+    expect(loggingSystemMock.collect(logger).warn).toHaveLength(0);
+  });
+
+  it('warns in production mode, not only in dev', async () => {
+    env = Env.createDefault(
+      REPO_ROOT,
+      getEnvOptions({ cliArgs: { dev: false, envName: 'production' } })
+    );
+    coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
+    const productionSystem = new PluginsSystem(coreContext, PluginType.standard);
+
+    await bootWithSyncStart(productionSystem, 'slow-start', 1500);
+
+    expect(loggingSystemMock.collect(logger).warn.flat()).toEqual([
+      slowStartWarning('slow-start', 1500),
+    ]);
   });
 });
 

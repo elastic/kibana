@@ -116,6 +116,27 @@ export class PluginWrapper<
         `Plugin "${this.name}" does not export the "plugin" definition or "module" (${this.path}).`
       );
     }
+
+    this.assertInitializationDeclared();
+  }
+
+  /**
+   * Whether the manifest declares that this plugin implements `initialize()`.
+   */
+  public get hasInitialization(): boolean {
+    return this.manifest.hasInitialization === true;
+  }
+
+  /**
+   * Runs the plugin's `initialize()` with the arguments its `start()` received. Core's
+   * initialization engine calls this when it decides the plugin should initialize.
+   */
+  public async runInitialize(startContext: CoreStart, plugins: TPluginsStart): Promise<void> {
+    const { instance } = this;
+    if (!instance || !('initialize' in instance) || typeof instance.initialize !== 'function') {
+      throw new Error(`Plugin "${this.name}" does not implement initialize().`);
+    }
+    await instance.initialize(startContext, plugins);
   }
 
   /**
@@ -244,6 +265,31 @@ export class PluginWrapper<
     }
 
     return instance;
+  }
+
+  /** Enforces at `init()` that the manifest flag and the `initialize()` method agree, and that preboot plugins have neither. */
+  private assertInitializationDeclared(): void {
+    const { instance } = this;
+    const implementsInitialize =
+      instance !== undefined &&
+      'initialize' in instance &&
+      typeof instance.initialize === 'function';
+
+    if (this.hasInitialization && this.manifest.type === PluginType.preboot) {
+      throw new Error(
+        `Plugin "${this.name}" is a preboot plugin and cannot set "hasInitialization": initialize() runs after start(), which preboot plugins do not have.`
+      );
+    }
+    if (this.hasInitialization && !implementsInitialize) {
+      throw new Error(
+        `Plugin "${this.name}" sets "hasInitialization: true" in its manifest but its plugin class does not implement initialize().`
+      );
+    }
+    if (implementsInitialize && !this.hasInitialization) {
+      throw new Error(
+        `Plugin "${this.name}" has an initialize() method but its manifest does not set "hasInitialization: true". initialize() is a lifecycle hook reserved by core: set the flag if this method is meant to be it, otherwise rename the method.`
+      );
+    }
   }
 
   private isPrebootPluginInstance(

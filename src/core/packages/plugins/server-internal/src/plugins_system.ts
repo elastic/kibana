@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { map } from 'rxjs';
 import { withTimeout, isPromise } from '@kbn/std';
 import type { DiscoveredPlugin, PluginName } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import { PluginType } from '@kbn/core-base-common';
+import type { NodeRoles } from '@kbn/core-node-server';
 import type { PluginWrapper } from './plugin';
 import { type PluginDependencies } from './types';
 import {
@@ -25,20 +27,47 @@ import type {
   PluginsServiceStartDeps,
 } from './plugins_service';
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
+import { type DeferredInitEngine, toServiceStatus } from './deferred_init';
 
 const Sec = 1000;
+/** A `start()` slower than this is doing work that belongs in `initialize()`. */
+const SLOW_START_WARNING_MS = 1 * Sec;
 
 /** @internal */
 export class PluginsSystem<T extends PluginType> {
-  private readonly runtimeResolver = new RuntimePluginContractResolver();
+  private readonly runtimeResolver: RuntimePluginContractResolver;
   private readonly plugins = new Map<PluginName, PluginWrapper>();
   private readonly log: Logger;
   // `satup`, the past-tense version of the noun `setup`.
   private readonly satupPlugins: PluginName[] = [];
   private sortedPluginNames?: Set<string>;
+  private nodeRoles?: NodeRoles;
+  private initializeOnBoot = true;
 
-  constructor(private readonly coreContext: CoreContext, public readonly type: T) {
+  constructor(
+    private readonly coreContext: CoreContext,
+    public readonly type: T,
+    private readonly deferredInitEngine?: DeferredInitEngine
+  ) {
     this.log = coreContext.logger.get('plugins-system', this.type);
+    this.runtimeResolver = new RuntimePluginContractResolver();
+  }
+
+  /**
+   * Records this node's roles. A node without the `ui` role never receives the requests that
+   * would initialize its plugins on first use, so {@link startPlugins} runs their `initialize()`
+   * itself once boot is done.
+   */
+  public setNodeRoles(roles: NodeRoles): void {
+    this.nodeRoles = roles;
+  }
+
+  /**
+   * Whether {@link startPlugins} runs every plugin's `initialize()` as soon as the start loop is
+   * over (the default), or leaves each one to the first request or call that needs it.
+   */
+  public setInitializeOnBoot(value: boolean): void {
+    this.initializeOnBoot = value;
   }
 
   public addPlugin(plugin: PluginWrapper) {
@@ -96,8 +125,14 @@ export class PluginsSystem<T extends PluginType> {
       return contracts;
     }
 
+    assertInitializationIsServerSide(this.plugins);
+
     const runtimeDependencies = buildPluginRuntimeDependencyMap(this.plugins);
     this.runtimeResolver.setDependencyMap(runtimeDependencies);
+    const engine = this.deferredInitEngine;
+    if (engine) {
+      this.runtimeResolver.setDeferredInitEngine(engine);
+    }
 
     const sortedPlugins = new Map(
       [...this.getTopologicallySortedPluginNames()]
@@ -108,60 +143,83 @@ export class PluginsSystem<T extends PluginType> {
       `Setting up [${sortedPlugins.size}] plugins: [${[...sortedPlugins.keys()].join(',')}]`
     );
 
-    for (const [pluginName, plugin] of sortedPlugins) {
-      this.log.debug(`Setting up plugin "${pluginName}"...`);
-      const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
-      const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
-        // Only set if present. Could be absent if plugin does not have server-side code or is a
-        // missing optional dependency.
-        if (contracts.has(dependencyName)) {
-          depContracts[dependencyName] = contracts.get(dependencyName);
-        }
+    // Awaiting a plugin's initialization from inside `setup()` would hold boot on deliberately
+    // expensive work, so the engine rejects it while this loop runs. Cleared in `finally` so a
+    // thrown `setup()` cannot leave the guard stuck for post-boot callers.
+    engine?.beginLifecycle('setup');
+    try {
+      for (const [pluginName, plugin] of sortedPlugins) {
+        this.log.debug(`Setting up plugin "${pluginName}"...`);
+        const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
+        const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
+          // Only set if present. Could be absent if plugin does not have server-side code or is a
+          // missing optional dependency.
+          if (contracts.has(dependencyName)) {
+            depContracts[dependencyName] = contracts.get(dependencyName);
+          }
 
-        return depContracts;
-      }, {} as Record<PluginName, unknown>);
+          return depContracts;
+        }, {} as Record<PluginName, unknown>);
 
-      let pluginSetupContext;
-      if (this.type === PluginType.preboot) {
-        pluginSetupContext = createPluginPrebootSetupContext({
-          deps: deps as PluginsServicePrebootSetupDeps,
-          plugin,
-        });
-      } else {
-        pluginSetupContext = createPluginSetupContext({
-          deps: deps as PluginsServiceSetupDeps,
-          plugin,
-          runtimeResolver: this.runtimeResolver,
-        });
-      }
-
-      await plugin.init();
-      let contract: unknown;
-      const contractOrPromise = plugin.setup(pluginSetupContext, pluginDepContracts);
-      if (isPromise(contractOrPromise)) {
-        if (this.coreContext.env.mode.dev) {
-          this.log.warn(
-            `Plugin ${pluginName} is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.`
-          );
-        }
-        const contractMaybe = await withTimeout<any>({
-          promise: contractOrPromise,
-          timeoutMs: 10 * Sec,
-        });
-
-        if (contractMaybe.timedout) {
-          throw new Error(
-            `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
-          );
+        let pluginSetupContext;
+        if (this.type === PluginType.preboot) {
+          pluginSetupContext = createPluginPrebootSetupContext({
+            deps: deps as PluginsServicePrebootSetupDeps,
+            plugin,
+          });
         } else {
-          contract = contractMaybe.value;
+          pluginSetupContext = createPluginSetupContext({
+            deps: deps as PluginsServiceSetupDeps,
+            plugin,
+            runtimeResolver: this.runtimeResolver,
+            deferredInitEngine: this.deferredInitEngine,
+          });
         }
-      } else {
-        contract = contractOrPromise;
-      }
 
-      contracts.set(pluginName, contract);
-      this.satupPlugins.push(pluginName);
+        await plugin.init();
+
+        if (engine && plugin.hasInitialization) {
+          engine.register(pluginName);
+          // Core mirrors the plugin's initialization state into its `/status` entry, so the plugin
+          // author writes no status code. Read-only: `status$` never starts an attempt.
+          (deps as PluginsServiceSetupDeps).status.plugins.set(
+            pluginName,
+            engine.status$(pluginName).pipe(map((status) => toServiceStatus(pluginName, status)))
+          );
+          this.log.info(
+            `Plugin "${pluginName}" has an initialize() hook; its routes and apps are served once it has run.`
+          );
+        }
+
+        let contract: unknown;
+        const contractOrPromise = plugin.setup(pluginSetupContext, pluginDepContracts);
+        if (isPromise(contractOrPromise)) {
+          if (this.coreContext.env.mode.dev) {
+            this.log.warn(
+              `Plugin ${pluginName} is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.`
+            );
+          }
+          const contractMaybe = await withTimeout<any>({
+            promise: contractOrPromise,
+            timeoutMs: 10 * Sec,
+          });
+
+          if (contractMaybe.timedout) {
+            throw new Error(
+              `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+            );
+          } else {
+            contract = contractMaybe.value;
+          }
+        } else {
+          contract = contractOrPromise;
+        }
+
+        contracts.set(pluginName, contract);
+        this.satupPlugins.push(pluginName);
+      }
+    } finally {
+      engine?.endLifecycle();
     }
 
     this.runtimeResolver.resolveSetupRequests(contracts);
@@ -181,53 +239,132 @@ export class PluginsSystem<T extends PluginType> {
 
     this.log.info(`Starting [${this.satupPlugins.length}] plugins: [${[...this.satupPlugins]}]`);
 
-    for (const pluginName of this.satupPlugins) {
-      this.log.debug(`Starting plugin "${pluginName}"...`);
-      const plugin = this.plugins.get(pluginName)!;
-      const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
-      const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
-        // Only set if present. Could be absent if plugin does not have server-side code or is a
-        // missing optional dependency.
-        if (contracts.has(dependencyName)) {
-          depContracts[dependencyName] = contracts.get(dependencyName);
-        }
+    const engine = this.deferredInitEngine;
+    const toInitialize: PluginName[] = [];
+    // Awaiting a plugin's initialization from inside `start()` would hold boot on deliberately
+    // expensive work, so the engine rejects it while this loop runs. Cleared in `finally` so a
+    // thrown `start()` cannot leave the guard stuck for post-boot callers.
+    engine?.beginLifecycle('start');
+    try {
+      for (const pluginName of this.satupPlugins) {
+        this.log.debug(`Starting plugin "${pluginName}"...`);
+        const plugin = this.plugins.get(pluginName)!;
+        const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
+        const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
+          // Only set if present. Could be absent if plugin does not have server-side code or is a
+          // missing optional dependency.
+          if (contracts.has(dependencyName)) {
+            depContracts[dependencyName] = contracts.get(dependencyName);
+          }
 
-        return depContracts;
-      }, {} as Record<PluginName, unknown>);
-
-      let contract: unknown;
-      const contractOrPromise = plugin.start(
-        createPluginStartContext({ deps, plugin, runtimeResolver: this.runtimeResolver }),
-        pluginDepContracts
-      );
-      if (isPromise(contractOrPromise)) {
-        if (this.coreContext.env.mode.dev) {
-          this.log.warn(
-            `Plugin ${pluginName} is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.`
-          );
-        }
-        const contractMaybe = await withTimeout({
-          promise: contractOrPromise,
-          timeoutMs: 10 * Sec,
+          return depContracts;
+        }, {} as Record<PluginName, unknown>);
+        const startContext = createPluginStartContext({
+          deps,
+          plugin,
+          runtimeResolver: this.runtimeResolver,
         });
 
-        if (contractMaybe.timedout) {
-          throw new Error(
-            `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+        // `initialize()` receives exactly what `start()` receives; the engine decides when it runs.
+        if (engine && plugin.hasInitialization) {
+          engine.setRunner(pluginName, () =>
+            plugin.runInitialize(startContext, pluginDepContracts)
           );
-        } else {
-          contract = contractMaybe.value;
         }
-      } else {
-        contract = contractOrPromise;
-      }
 
-      contracts.set(pluginName, contract);
+        let contract: unknown;
+        const startedAt = performance.now();
+        const contractOrPromise = plugin.start(startContext, pluginDepContracts);
+        if (isPromise(contractOrPromise)) {
+          if (this.coreContext.env.mode.dev) {
+            this.log.warn(
+              `Plugin ${pluginName} is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.`
+            );
+          }
+          const contractMaybe = await withTimeout({
+            promise: contractOrPromise,
+            timeoutMs: 10 * Sec,
+          });
+
+          if (contractMaybe.timedout) {
+            throw new Error(
+              `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+            );
+          } else {
+            contract = contractMaybe.value;
+          }
+        } else {
+          contract = contractOrPromise;
+        }
+        const startDurationMs = performance.now() - startedAt;
+        if (startDurationMs > SLOW_START_WARNING_MS) {
+          this.log.warn(
+            `Start lifecycle of "${pluginName}" plugin took ${Math.round(
+              startDurationMs
+            )}ms, which exceeds 1s. Move initialization work (index setup, data loading, Elasticsearch calls) into the plugin's initialize() hook so start() returns immediately.`
+          );
+        }
+
+        contracts.set(pluginName, contract);
+        if (engine) {
+          if (plugin.hasInitialization) {
+            toInitialize.push(pluginName);
+          } else {
+            engine.markAvailable(pluginName);
+          }
+        }
+      }
+    } finally {
+      engine?.endLifecycle();
     }
 
     this.runtimeResolver.resolveStartRequests(contracts);
 
+    // Only once the loop is over: an `initialize()` body may await a dependency's initialization,
+    // which the lifecycle guard rejects while the start loop is active.
+    if (engine && this.initializeOnBoot) {
+      this.initializePlugins(engine, toInitialize);
+    } else if (engine) {
+      this.initializePluginsOnHeadlessNode(engine, toInitialize);
+    }
+
     return contracts;
+  }
+
+  /** Runs `initialize()` for the given plugins in start order, without waiting for any of them. */
+  private initializePlugins(engine: DeferredInitEngine, pluginNames: PluginName[]): void {
+    if (pluginNames.length === 0) {
+      return;
+    }
+    this.log.info(
+      `Running initialize() for ${pluginNames.length} plugin(s) now that all plugins have started.`
+    );
+    for (const pluginName of pluginNames) {
+      engine.ensureInitialized(pluginName);
+    }
+  }
+
+  /**
+   * A node without the `ui` role serves no pages and no UI-driven API calls, so no request would
+   * ever initialize its plugins and their background tasks would be claimed and skipped forever.
+   * There is nothing worth waiting for on such a node, so run every `initialize()` now that boot
+   * is done. Non-blocking: the attempts run concurrently with the rest of core's start.
+   */
+  private initializePluginsOnHeadlessNode(
+    engine: DeferredInitEngine,
+    pluginNames: PluginName[]
+  ): void {
+    if (this.nodeRoles === undefined || this.nodeRoles.ui || pluginNames.length === 0) {
+      return;
+    }
+    this.log.info(
+      `This node has no "ui" role, so no request can initialize its plugins; running initialize() for [${pluginNames.join(
+        ','
+      )}] now.`
+    );
+    for (const pluginName of pluginNames) {
+      engine.ensureInitialized(pluginName);
+    }
   }
 
   public async stopPlugins() {
@@ -293,6 +430,7 @@ export class PluginsSystem<T extends PluginType> {
             runtimePluginDependencies: plugin.manifest.runtimePluginDependencies,
             requiredBundles: plugin.manifest.requiredBundles,
             enabledOnAnonymousPages: plugin.manifest.enabledOnAnonymousPages,
+            hasInitialization: plugin.manifest.hasInitialization,
           },
         ];
       })
@@ -404,6 +542,21 @@ const buildReverseDependencyMap = (
     reverseMap.set(pluginName, []);
   }
   return reverseMap;
+};
+
+/**
+ * Rejects a plugin that declares `initialize()` without a server entry: `initialize()` is a
+ * server-side lifecycle. `kbn-repo-packages` already refuses such a `kibana.jsonc`; this covers
+ * plugins discovered from a `kibana.json` on disk.
+ */
+const assertInitializationIsServerSide = (pluginMap: Map<PluginName, PluginWrapper>): void => {
+  for (const plugin of pluginMap.values()) {
+    if (plugin.hasInitialization && !plugin.includesServerPlugin) {
+      throw new Error(
+        `Plugin "${plugin.name}" sets "hasInitialization: true" but has no server entry; initialize() is a server-side lifecycle.`
+      );
+    }
+  }
 };
 
 const buildPluginRuntimeDependencyMap = (

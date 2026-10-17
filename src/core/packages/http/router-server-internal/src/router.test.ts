@@ -11,6 +11,7 @@ import type { ResponseToolkit, ResponseObject } from '@hapi/hapi';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { isConfigSchema, schema } from '@kbn/config-schema';
 import { createRequestMock } from '@kbn/hapi-mocks/src/request';
+import { PluginInitializationError } from '@kbn/core-deferred-init-common';
 import { createFooValidation } from './router.test.util';
 import { Router, type RouterOptions } from './router';
 import type { RouteValidatorRequestAndResponses } from '@kbn/core-http-server';
@@ -507,6 +508,61 @@ describe('Router', () => {
       );
       const [route] = router.getRoutes();
       expect(route.options).toEqual({});
+    });
+  });
+
+  describe('error handling', () => {
+    it('converts a PluginInitializationError thrown from a handler into a 503 with Retry-After', async () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      router.get(
+        {
+          path: '/',
+          validate: false,
+          security: {
+            authz: { enabled: false, reason: 'test' },
+          },
+        },
+        () => {
+          // No `status` on the error -> falls back to `failed`, the state an initialization
+          // attempt rejects in.
+          throw new PluginInitializationError('myPlugin');
+        }
+      );
+      const [{ handler }] = router.getRoutes();
+
+      await handler(createRequestMock(), mockResponseToolkit);
+
+      expect(mockResponseToolkit.response).toHaveBeenCalledWith({
+        pluginId: 'myPlugin',
+        status: 'failed',
+      });
+      expect(mockResponse.code).toHaveBeenCalledWith(503);
+      expect(mockResponse.header).toHaveBeenCalledWith('retry-after', '1');
+    });
+
+    it('reports the real state carried on the PluginInitializationError in the 503 body', async () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      router.get(
+        {
+          path: '/',
+          validate: false,
+          security: {
+            authz: { enabled: false, reason: 'test' },
+          },
+        },
+        () => {
+          throw new PluginInitializationError('myPlugin', { status: 'initializing' });
+        }
+      );
+      const [{ handler }] = router.getRoutes();
+
+      await handler(createRequestMock(), mockResponseToolkit);
+
+      expect(mockResponseToolkit.response).toHaveBeenCalledWith({
+        pluginId: 'myPlugin',
+        status: 'initializing',
+      });
+      expect(mockResponse.code).toHaveBeenCalledWith(503);
     });
   });
 });
