@@ -43,7 +43,7 @@ export function chunksIntoMessage<TToolOptions extends ToolOptions>({
 
           logger.debug(() => `Received completed message: ${JSON.stringify(concatenatedChunk)}`);
 
-          const { content, refusal, tool_calls: toolCalls } = concatenatedChunk;
+          const { content, refusal, reasoning, tool_calls: toolCalls } = concatenatedChunk;
 
           const validatedToolCalls = validateToolCalls<TToolOptions>({
             ...toolOptions,
@@ -55,6 +55,7 @@ export function chunksIntoMessage<TToolOptions extends ToolOptions>({
             type: ChatCompletionEventType.ChatCompletionMessage,
             content,
             ...(refusal ? { refusal } : {}),
+            ...(reasoning ? { reasoning } : {}),
             toolCalls: validatedToolCalls,
           };
         })

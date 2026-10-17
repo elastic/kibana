@@ -34,6 +34,34 @@ describe('mergeChunks', () => {
     });
   });
 
+  it('concatenates reasoning chunks into a single message', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        reasoning: 'Let me think',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [],
+      },
+      {
+        content: '',
+        reasoning: ' about this',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [],
+      },
+      {
+        content: 'answer',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [],
+      },
+    ]);
+
+    expect(message).toEqual({
+      content: 'answer',
+      reasoning: 'Let me think about this',
+      tool_calls: [],
+    });
+  });
+
   it('concatenates tool calls', async () => {
     const message = mergeChunks([
       {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HumanMessage, ToolMessage } from '@langchain/core/messages';
+import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
 import type { UserMessage } from '@kbn/inference-common';
 import { messagesToInference } from './messages';
 
@@ -37,6 +37,34 @@ describe('messagesToInference', () => {
       expect((messages[0] as UserMessage).content).toEqual([
         { type: 'image', source: { data: 'not-a-data-url', mimeType: '' } },
       ]);
+    });
+  });
+
+  describe('assistant reasoning', () => {
+    it('replays reasoning from AIMessage additional_kwargs', () => {
+      const input = new AIMessage({
+        content: 'answer',
+        additional_kwargs: { reasoning: 'thinking...' },
+      });
+
+      const { messages } = messagesToInference([input]);
+
+      expect(messages[0]).toEqual({
+        role: 'assistant',
+        content: 'answer',
+        reasoning: 'thinking...',
+      });
+    });
+
+    it('omits reasoning when additional_kwargs has none', () => {
+      const input = new AIMessage({ content: 'answer' });
+
+      const { messages } = messagesToInference([input]);
+
+      expect(messages[0]).toEqual({
+        role: 'assistant',
+        content: 'answer',
+      });
     });
   });
 

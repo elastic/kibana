@@ -61,6 +61,11 @@ export type AssistantMessage<TToolCalls extends ToolCall[] | undefined = ToolCal
      * Optional refusal reason returned by the model when content is filtered.
      */
     refusal?: string | null;
+    /**
+     * Reasoning (thinking) text returned by the model for this turn, if any.
+     * Sent back to providers that support replaying it in multi-turn conversations.
+     */
+    reasoning?: string;
     // make sure `toolCalls` inherits the optionality from `TToolCalls`
   } & (TToolCalls extends ToolCall[]
       ? {

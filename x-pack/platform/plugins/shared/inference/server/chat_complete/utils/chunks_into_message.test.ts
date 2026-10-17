@@ -54,6 +54,34 @@ describe('chunksIntoMessage', () => {
     });
   });
 
+  it('emits the merged reasoning on the message event', async () => {
+    const message = await lastValueFrom(
+      chunksIntoMessage({ logger, toolOptions: {} })(
+        fromEvents(
+          {
+            content: '',
+            reasoning: 'thinking',
+            type: ChatCompletionEventType.ChatCompletionChunk,
+            tool_calls: [],
+          },
+          {
+            content: ' answer',
+            reasoning: ' more',
+            type: ChatCompletionEventType.ChatCompletionChunk,
+            tool_calls: [],
+          }
+        )
+      )
+    );
+
+    expect(message).toEqual({
+      content: ' answer',
+      reasoning: 'thinking more',
+      toolCalls: [],
+      type: ChatCompletionEventType.ChatCompletionMessage,
+    });
+  });
+
   it('parses tool calls', async () => {
     const message = await lastValueFrom(
       chunksIntoMessage({
