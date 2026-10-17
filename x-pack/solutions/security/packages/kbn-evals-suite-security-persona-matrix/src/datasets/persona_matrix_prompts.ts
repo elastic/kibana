@@ -183,6 +183,16 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
       question:
         'I want a new rule to detect the Chrysalis side-loading pattern we just hunted down. ' +
         'Draft it as an ES|QL rule with appropriate tags and threat mappings.',
+      // Each example starts a new conversation, so "the pattern we just hunted down" needs its
+      // antecedent supplied out-of-band; without it the agent asks the user and the round pauses.
+      // The attachment keeps the original question wording intact.
+      attachment:
+        'Hunt Findings (Chrysalis side-loading):\n' +
+        '  Host: srv-win-defend-01\n' +
+        '  Process: BluetoothService.exe side-loads log.dll\n' +
+        '  File hash (sha256): 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f\n' +
+        '  Path: C:\\Users\\Public\\\n' +
+        '  MITRE: T1574.002 (DLL Side-Loading)',
     },
     output: {
       reference:
