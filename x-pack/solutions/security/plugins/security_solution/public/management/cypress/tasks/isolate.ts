@@ -95,6 +95,25 @@ export const isolateHostActionViaAPI = (agentId: string): void => {
     });
 };
 
+/**
+ * Queues a release (unisolate) action without waiting for it to complete and without failing on a
+ * non-2xx response, which makes it safe to call from cleanup hooks that run after a test failed.
+ */
+export const releaseHostActionViaAPI = (agentId: string): void => {
+  cy.request({
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'elastic-api-version': API_VERSIONS.public.v1,
+    },
+    method: 'POST',
+    url: 'api/endpoint/action/unisolate',
+    body: {
+      endpoint_ids: [agentId],
+    },
+    failOnStatusCode: false,
+  });
+};
+
 export const checkEndpointIsolationStatus = (
   endpointHostname: string,
   expectIsolated: boolean

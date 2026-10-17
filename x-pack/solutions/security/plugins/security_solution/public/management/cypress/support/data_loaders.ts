@@ -80,6 +80,10 @@ import type {
 } from './create_and_enroll_endpoint_host_ci';
 import { createAndEnrollEndpointHostCI } from './create_and_enroll_endpoint_host_ci';
 
+// Must stay comfortably below Cypress's 60s `taskTimeout`, so that a VM that stopped answering
+// SSH (ex. because the test isolated it) never times out `cy.task()` and fails the calling test.
+const CAPTURE_AGENT_DIAGNOSTICS_TIMEOUT_MS = 45_000;
+
 /**
  * Test Role/User loader for cypress. Checks to see if running in serverless and handles it as appropriate
  */
@@ -510,16 +514,27 @@ export const dataLoadersForRealEndpoints = (
 
       await mkdir(localDiagnosticsDir, { recursive: true });
 
-      // generate diagnostics file on the host and then download it
-      await vmClient.exec(
-        `sudo /opt/Elastic/Agent/elastic-agent diagnostics --file ${vmDiagnosticsFile}`
-      );
-      return vmClient.download(vmDiagnosticsFile, localDiagnosticsFile).then((response) => {
+      // Collecting a diagnostics bundle is best-effort debug tooling, so a failure to capture it
+      // must never fail (nor abort) the test that it is trying to collect diagnostics for.
+      try {
+        // generate diagnostics file on the host and then download it
+        await vmClient.exec(
+          `sudo /opt/Elastic/Agent/elastic-agent diagnostics --file ${vmDiagnosticsFile}`,
+          { timeoutMs: CAPTURE_AGENT_DIAGNOSTICS_TIMEOUT_MS }
+        );
+
+        const response = await vmClient.download(vmDiagnosticsFile, localDiagnosticsFile);
+
         log.info(`Agent diagnostic file for host [${hostname}] has been downloaded and is available at:
   ${response.filePath}
 `);
+
         return { filePath: response.filePath };
-      });
+      } catch (error) {
+        log.warning(`Unable to capture agent diagnostics for host VM [${hostname}]: ${error}`);
+
+        return { filePath: null };
+      }
     },
 
     /**
