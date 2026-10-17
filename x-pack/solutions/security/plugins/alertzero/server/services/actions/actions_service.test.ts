@@ -155,18 +155,18 @@ describe('ActionsService', () => {
   it('passes a subject list through as subjects and omits subjects when undeclared', async () => {
     const { client } = makeManagement([
       page([
-        workflowItem('criticality', {
-          name: 'Set asset criticality',
-          subject: ['user', 'service'],
+        workflowItem('both', {
+          name: 'Isolate host or kill process',
+          subject: ['host', 'process'],
         }),
         workflowItem('legacy', { name: 'Legacy action' }),
       ]),
     ]);
     const service = new ActionsService(() => client, logger);
     const result = await service.list('default', request);
-    expect(result.actions.find((a) => a.workflowId === 'criticality')?.subjects).toEqual([
-      'user',
-      'service',
+    expect(result.actions.find((a) => a.workflowId === 'both')?.subjects).toEqual([
+      'host',
+      'process',
     ]);
     expect(result.actions.find((a) => a.workflowId === 'legacy')).not.toHaveProperty('subjects');
   });
@@ -175,7 +175,7 @@ describe('ActionsService', () => {
     const { client } = makeManagement([
       page([
         workflowItem('bad-subject', { name: 'Bad', subject: 'container' }),
-        workflowItem('valid', { name: 'Valid', subject: ['user'] }),
+        workflowItem('valid', { name: 'Valid', subject: ['host'] }),
       ]),
     ]);
     const service = new ActionsService(() => client, logger);
