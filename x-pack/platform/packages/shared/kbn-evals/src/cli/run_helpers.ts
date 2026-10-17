@@ -35,6 +35,7 @@ import { resolveScoutTarget, type ScoutTarget } from './scout_target';
 import { readCachedEisConnectors } from './eis_connectors_cache';
 import { parseSpaceIds } from '../utils/space_ids';
 import { getConcurrencyFromEnv, parseConcurrency } from '../utils/concurrency';
+import { getReasoningEffortFromEnv, parseReasoningEffort } from '../utils/reasoning_effort';
 import {
   runConfigInit,
   runConnectorSetup,
@@ -213,6 +214,24 @@ export const readConcurrencyFlag = (flagsReader: FlagsReader): string | undefine
     }
     // Without the flag, EVAL_CONCURRENCY passes through untouched to the Playwright config.
     getConcurrencyFromEnv();
+    return undefined;
+  } catch (error) {
+    throw createFlagError(error instanceof Error ? error.message : String(error));
+  }
+};
+
+/** Reads `--reasoning-effort`, failing on a bad flag or `EVAL_REASONING_EFFORT` before a stack boots. */
+export const readReasoningEffortFlag = (flagsReader: FlagsReader): string | undefined => {
+  try {
+    const effort = parseReasoningEffort(
+      flagsReader.string('reasoning-effort'),
+      '--reasoning-effort'
+    );
+    if (effort !== undefined) {
+      return effort;
+    }
+    // Without the flag, EVAL_REASONING_EFFORT passes through untouched to the Playwright config.
+    getReasoningEffortFromEnv();
     return undefined;
   } catch (error) {
     throw createFlagError(error instanceof Error ? error.message : String(error));
@@ -427,6 +446,11 @@ export const buildEvalRunEnv = ({
     envOverrides.EVAL_CONCURRENCY = concurrency;
   }
 
+  const reasoningEffort = readReasoningEffortFlag(flagsReader);
+  if (reasoningEffort) {
+    envOverrides.EVAL_REASONING_EFFORT = reasoningEffort;
+  }
+
   const spaceIds = readSpaceIdsFlag(flagsReader);
   if (spaceIds) {
     envOverrides.EVAL_SPACE_IDS = spaceIds.join(',');
@@ -504,6 +528,11 @@ export const buildEvalRunArgs = ({
     runArgs.push('--concurrency', concurrency);
   }
 
+  const reasoningEffort = readReasoningEffortFlag(flagsReader);
+  if (reasoningEffort) {
+    runArgs.push('--reasoning-effort', reasoningEffort);
+  }
+
   const spaceIds = readSpaceIdsFlag(flagsReader);
   if (spaceIds) {
     runArgs.push('--space-ids', spaceIds.join(','));
@@ -539,6 +568,7 @@ export const evalRunFlags: FlagOptions = {
     'config',
     'evaluation-connector-id',
     'project',
+    'reasoning-effort',
     'repetitions',
     'concurrency',
     'space-ids',

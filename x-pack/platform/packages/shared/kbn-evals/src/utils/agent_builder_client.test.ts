@@ -49,6 +49,46 @@ describe('createAgentBuilderClient', () => {
     });
   });
 
+  it('sends the client-level reasoning level with every turn', async () => {
+    http.fetch.mockResolvedValue({});
+    const reasoningClient = createAgentBuilderClient({
+      fetch: http.fetch,
+      log,
+      connectorId: 'my-connector',
+      reasoningLevel: 'high',
+    });
+
+    await reasoningClient.converse({ agentId: 'my-agent', input: 'question' });
+
+    expect(lastRequestBody()).toMatchObject({ reasoning_level: 'high' });
+  });
+
+  it('lets a turn override the client-level reasoning level', async () => {
+    http.fetch.mockResolvedValue({});
+    const reasoningClient = createAgentBuilderClient({
+      fetch: http.fetch,
+      log,
+      connectorId: 'my-connector',
+      reasoningLevel: 'high',
+    });
+
+    await reasoningClient.converse({
+      agentId: 'my-agent',
+      input: 'question',
+      reasoningLevel: 'low',
+    });
+
+    expect(lastRequestBody()).toMatchObject({ reasoning_level: 'low' });
+  });
+
+  it('omits reasoning_level when neither the client nor the turn sets one', async () => {
+    http.fetch.mockResolvedValue({});
+
+    await client.converse({ agentId: 'my-agent', input: 'question' });
+
+    expect(lastRequestBody()).not.toHaveProperty('reasoning_level');
+  });
+
   it('creates a private conversation', async () => {
     http.fetch.mockResolvedValue({ id: 'conv-1' });
 

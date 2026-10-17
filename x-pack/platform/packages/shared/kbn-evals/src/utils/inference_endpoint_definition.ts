@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { InferenceEndpointRequestBody } from '@kbn/inference-common';
+import type {
+  ChatCompletionReasoningEffort,
+  InferenceEndpointRequestBody,
+} from '@kbn/inference-common';
+import { REASONING_EFFORT_LEVELS, isReasoningEffort } from '@kbn/inference-common';
 
 type AddEndpointConfig = InferenceEndpointRequestBody['config'];
 
@@ -16,6 +20,7 @@ export interface InferenceEndpointDefinition
   id: string;
   name: string;
   secrets?: Partial<InferenceEndpointRequestBody['secrets']>;
+  reasoningEffort?: ChatCompletionReasoningEffort;
 }
 
 /**
@@ -56,6 +61,13 @@ export function loadInferenceEndpoints(): InferenceEndpointDefinition[] {
     }
     if (typeof d.name !== 'string' || d.name.length === 0) {
       throw new Error(`Inference endpoint "${id}" is missing required field "name"`);
+    }
+    if (d.reasoningEffort !== undefined && !isReasoningEffort(d.reasoningEffort)) {
+      throw new Error(
+        `Inference endpoint "${id}" has an unknown "reasoningEffort" ${JSON.stringify(
+          d.reasoningEffort
+        )}; expected one of ${REASONING_EFFORT_LEVELS.join(', ')}`
+      );
     }
     return { ...d, id, type: 'inference_endpoint' } as InferenceEndpointDefinition;
   });

@@ -43,6 +43,7 @@ export const registerGetExperimentsRoute = ({ router, logger, getSpaceId }: Rout
           const {
             suite_id: suiteId,
             model_id: modelId,
+            reasoning_effort: reasoningEffort,
             branch,
             search,
             dataset_id: datasetId,
@@ -59,6 +60,7 @@ export const registerGetExperimentsRoute = ({ router, logger, getSpaceId }: Rout
             query: buildExperimentsListingFilterQuery({
               suiteId,
               modelId,
+              reasoningEffort,
               branch,
               search,
               datasetId,

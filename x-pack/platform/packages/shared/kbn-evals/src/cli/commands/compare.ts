@@ -15,6 +15,7 @@ import { EvalsClient } from '../../utils/evals_client';
 import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
 import { getSpaceIdsFromEnv } from '../../utils/space_ids';
 import { readSpaceIdsFlag } from '../run_helpers';
+import { parseExecutionIdModelSegment } from '../../utils/build_execution_id';
 import { formatCompareReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
 
@@ -146,15 +147,20 @@ export const compareCmd: Command<void> = {
         }
       }
 
-      // Extract model ID from the composite for model-matched baseline lookup,
-      // so we don't compare haiku scores against a sonnet baseline (or vice versa).
-      const taskModelId = targetExperimentId.includes('::')
-        ? targetExperimentId.split('::').pop()
+      // Extract the model (and reasoning effort, when the run set one) from the composite for a
+      // model-matched baseline lookup, so we don't compare haiku scores against a sonnet
+      // baseline, or a high-effort run against a low-effort one.
+      const modelSegment = targetExperimentId.includes('::')
+        ? parseExecutionIdModelSegment(targetExperimentId.split('::').pop()!)
         : undefined;
+      const taskModelId = modelSegment?.modelId;
+      const reasoningEffort = modelSegment?.reasoningEffort;
 
       log.info(
         `Looking up latest baseline experiment for suite "${suiteId}" on branch "${baselineBranch}"${
-          taskModelId ? ` (model: ${taskModelId})` : ''
+          taskModelId
+            ? ` (model: ${taskModelId}${reasoningEffort ? ` @${reasoningEffort}` : ''})`
+            : ''
         }...`
       );
 
@@ -162,6 +168,7 @@ export const compareCmd: Command<void> = {
         suiteId,
         branch: baselineBranch,
         taskModelId,
+        reasoningEffort,
         excludeExecutionId: targetExperimentId,
       });
 

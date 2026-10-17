@@ -10,13 +10,22 @@
  *
  * @see https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-chat-completion-unified
  */
-export type ChatCompletionReasoningEffort =
-  | 'none'
-  | 'minimal'
-  | 'low'
-  | 'medium'
-  | 'high'
-  | 'xhigh';
+export const REASONING_EFFORT_LEVELS = [
+  'none',
+  'minimal',
+  'low',
+  'medium',
+  'high',
+  'xhigh',
+] as const;
+
+export type ChatCompletionReasoningEffort = (typeof REASONING_EFFORT_LEVELS)[number];
+
+/**
+ * Type guard checking that `value` is one of {@link REASONING_EFFORT_LEVELS}.
+ */
+export const isReasoningEffort = (value: unknown): value is ChatCompletionReasoningEffort =>
+  typeof value === 'string' && (REASONING_EFFORT_LEVELS as readonly string[]).includes(value);
 
 /**
  * Reasoning configuration forwarded to Elasticsearch `_inference/chat_completion`.

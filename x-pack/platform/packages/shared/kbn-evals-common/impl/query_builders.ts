@@ -24,6 +24,7 @@ interface ExperimentFilterOptions {
 interface ExperimentsListingFilterOptions {
   suiteId?: string;
   modelId?: string;
+  reasoningEffort?: string;
   branch?: string;
   search?: string;
   datasetId?: string;
@@ -42,7 +43,12 @@ interface TermsBucket {
 }
 
 interface EvaluatorModelsAggregation {
-  buckets?: Array<{ key: string; family?: TermsBucket; provider?: TermsBucket }>;
+  buckets?: Array<{
+    key: string;
+    family?: TermsBucket;
+    provider?: TermsBucket;
+    reasoning_effort?: TermsBucket;
+  }>;
 }
 
 interface ExperimentBucket {
@@ -57,6 +63,7 @@ interface ExperimentBucket {
   task_model_id?: TermsBucket;
   task_model_family?: TermsBucket;
   task_model_provider?: TermsBucket;
+  task_model_reasoning_effort?: TermsBucket;
   evaluator_models?: EvaluatorModelsAggregation;
   git_branch?: TermsBucket;
   git_commit_sha?: TermsBucket;
@@ -80,7 +87,12 @@ export interface ExperimentsListingResult {
     suite_id: string | undefined;
     dataset_ids: string[];
     dataset_names: string[];
-    task_model: { id: string; family: string | undefined; provider: string | undefined };
+    task_model: {
+      id: string;
+      family: string | undefined;
+      provider: string | undefined;
+      reasoning_effort?: string;
+    };
     evaluator_model?: EvaluatorJudgeModel;
     evaluator_models: EvaluatorJudgeModel[];
     git_branch: string | null;
@@ -187,6 +199,7 @@ export interface EvaluatorJudgeModel {
   id: string;
   family: string | undefined;
   provider: string | undefined;
+  reasoning_effort?: string;
 }
 
 /**
@@ -200,6 +213,7 @@ export const buildEvaluatorModelsAggregation = () => ({
   aggs: {
     family: { terms: { field: 'evaluator.model.family', size: 1 } },
     provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+    reasoning_effort: { terms: { field: 'evaluator.model.reasoning_effort', size: 1 } },
   },
 });
 
@@ -209,7 +223,13 @@ const toEvaluatorModels = (
   (aggregation?.buckets ?? []).map((bucket) => {
     const family = firstBucket(bucket.family);
     const provider = firstBucket(bucket.provider);
-    return { id: buildModelDisplayId(bucket.key, family, provider), family, provider };
+    const reasoningEffort = firstBucket(bucket.reasoning_effort);
+    return {
+      id: buildModelDisplayId(bucket.key, family, provider),
+      family,
+      provider,
+      ...(reasoningEffort && { reasoning_effort: reasoningEffort }),
+    };
   });
 
 /**
@@ -257,6 +277,7 @@ export const buildExperimentEvaluatorsAggregation = () => ({
       aggs: {
         family: { terms: { field: 'evaluator.model.family', size: 1 } },
         provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+        reasoning_effort: { terms: { field: 'evaluator.model.reasoning_effort', size: 1 } },
       },
     },
   },
@@ -324,6 +345,7 @@ export const buildStatsAggregation = () => ({
             aggs: {
               family: { terms: { field: 'evaluator.model.family', size: 1 } },
               provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+              reasoning_effort: { terms: { field: 'evaluator.model.reasoning_effort', size: 1 } },
             },
           },
         },
@@ -570,6 +592,9 @@ export const buildExperimentsListingFilterQuery = (
   if (options?.modelId) {
     filters.push({ term: { 'task.model.id': options.modelId } });
   }
+  if (options?.reasoningEffort) {
+    filters.push({ term: { 'task.model.reasoning_effort': options.reasoningEffort } });
+  }
   if (options?.branch) {
     filters.push({
       wildcard: {
@@ -644,6 +669,7 @@ export const buildExperimentsListingAggregation = ({
       task_model_id: { terms: { field: 'task.model.id', size: 1 } },
       task_model_family: { terms: { field: 'task.model.family', size: 1 } },
       task_model_provider: { terms: { field: 'task.model.provider', size: 1 } },
+      task_model_reasoning_effort: { terms: { field: 'task.model.reasoning_effort', size: 1 } },
       // The singular `evaluator_model` is the first of these rather than its own agg, so the
       // listing cannot report a predominant judge that disagrees with the set it lists.
       evaluator_models: buildEvaluatorModelsAggregation(),
@@ -678,6 +704,7 @@ export const parseExperimentsListingResponse = (
   const experiments = experimentBuckets.map((bucket) => {
     const taskFamily = firstBucket(bucket.task_model_family);
     const taskProvider = firstBucket(bucket.task_model_provider);
+    const taskReasoningEffort = firstBucket(bucket.task_model_reasoning_effort);
     const evaluatorModels = toEvaluatorModels(bucket.evaluator_models);
 
     return {
@@ -693,6 +720,7 @@ export const parseExperimentsListingResponse = (
         id: buildModelDisplayId(firstBucket(bucket.task_model_id), taskFamily, taskProvider),
         family: taskFamily,
         provider: taskProvider,
+        ...(taskReasoningEffort && { reasoning_effort: taskReasoningEffort }),
       },
       // The judge that produced the most scores, and unset for experiments judged only by code
       // evaluators, which have no model at all. Reporting them as the "unknown" that
@@ -734,9 +762,7 @@ interface StatsAggregations {
           };
           score_median?: { values?: Record<string, number | null> };
           evaluator_kind?: TermsBucket;
-          evaluator_model_id?: {
-            buckets?: Array<{ key: string; family?: TermsBucket; provider?: TermsBucket }>;
-          };
+          evaluator_model_id?: EvaluatorModelsAggregation;
         }>;
       };
     }>;
@@ -749,7 +775,12 @@ export interface ExperimentDetailEvaluatorStat {
   evaluator_name: string;
   example_count: number;
   /** Model this evaluator judged with; absent for code evaluators. */
-  evaluator_model?: { id: string; family: string | undefined; provider: string | undefined };
+  evaluator_model?: {
+    id: string;
+    family: string | undefined;
+    provider: string | undefined;
+    reasoning_effort?: string;
+  };
   stats: {
     mean: number;
     median: number;
@@ -787,6 +818,7 @@ export const parseStatsAggregationResponse = (
       const modelId = modelBucket?.key;
       const modelFamily = firstBucket(modelBucket?.family);
       const modelProvider = firstBucket(modelBucket?.provider);
+      const modelReasoningEffort = firstBucket(modelBucket?.reasoning_effort);
 
       return {
         dataset_id: datasetId,
@@ -800,6 +832,7 @@ export const parseStatsAggregationResponse = (
             id: buildModelDisplayId(modelId, modelFamily, modelProvider),
             family: modelFamily,
             provider: modelProvider,
+            ...(modelReasoningEffort && { reasoning_effort: modelReasoningEffort }),
           },
         }),
         stats: {
@@ -827,6 +860,19 @@ export const buildModelDisplayId = (id?: string, family?: string, provider?: str
   if (id) return id;
   if (family && provider) return `${provider}/${family}`;
   return family ?? provider ?? 'unknown';
+};
+
+/**
+ * Appends the reasoning effort it ran with when one was set, e.g. `anthropic-claude-4.6-opus (high)`.
+ */
+export const buildModelDisplayLabel = (model: {
+  id?: string;
+  family?: string;
+  provider?: string;
+  reasoning_effort?: string;
+}): string => {
+  const id = buildModelDisplayId(model.id, model.family, model.provider);
+  return model.reasoning_effort ? `${id} (${model.reasoning_effort})` : id;
 };
 
 // ---------------------------------------------------------------------------

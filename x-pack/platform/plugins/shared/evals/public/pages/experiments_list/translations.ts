@@ -50,6 +50,20 @@ export const SUITE_FILTER_ALL_OPTION = i18n.translate(
   }
 );
 
+export const REASONING_EFFORT_FILTER_ARIA_LABEL = i18n.translate(
+  'xpack.evals.experimentsList.reasoningEffortFilterAriaLabel',
+  {
+    defaultMessage: 'Filter experiments by the reasoning effort',
+  }
+);
+
+export const REASONING_EFFORT_FILTER_ALL_OPTION = i18n.translate(
+  'xpack.evals.experimentsList.reasoningEffortFilterAllOption',
+  {
+    defaultMessage: 'All reasoning efforts',
+  }
+);
+
 export const LOAD_ERROR_TITLE = i18n.translate('xpack.evals.experimentsList.loadErrorTitle', {
   defaultMessage: 'Unable to load experiments',
 });

@@ -669,6 +669,63 @@ describe('EvalsClient', () => {
       );
     });
 
+    it('forwards reasoning_effort and picks only a baseline recorded at that effort', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({
+          experiments: [
+            makeExperiment('bk-old::smoke-tests::haiku@high', {
+              task_model: { id: 'haiku', reasoning_effort: 'high' },
+            }),
+          ],
+          total: 1,
+        })
+      );
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.findLatestBaselineExperiment({
+        suiteId: 'smoke-tests',
+        branch: 'main',
+        taskModelId: 'haiku',
+        reasoningEffort: 'high',
+      });
+
+      expect(kbnClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({ model_id: 'haiku', reasoning_effort: 'high' }),
+        })
+      );
+      expect(result?.executionId).toBe('bk-old::smoke-tests::haiku@high');
+    });
+
+    it('never picks a variant baseline for a target that set no reasoning effort', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({
+          experiments: [
+            makeExperiment('bk-newer::smoke-tests::haiku@high', {
+              task_model: { id: 'haiku', reasoning_effort: 'high' },
+            }),
+            makeExperiment('bk-older::smoke-tests::haiku', { task_model: { id: 'haiku' } }),
+          ],
+          total: 2,
+        })
+      );
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.findLatestBaselineExperiment({
+        suiteId: 'smoke-tests',
+        branch: 'main',
+        taskModelId: 'haiku',
+      });
+
+      const call = kbnClient.request.mock.calls[0][0] as { query: Record<string, unknown> };
+      expect(call.query).not.toHaveProperty('reasoning_effort');
+      expect(result?.executionId).toBe('bk-older::smoke-tests::haiku');
+    });
+
     it('omits model_id from query when taskModelId is not provided', async () => {
       const kbnClient = createMockKbnClient();
       const log = createLog();

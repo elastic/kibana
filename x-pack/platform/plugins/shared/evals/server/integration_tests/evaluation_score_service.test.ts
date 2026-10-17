@@ -21,6 +21,7 @@ const getPayload = (experimentId: string): IngestScoresRequestBodyInput => ({
     id: 'task-model-1',
     family: 'family-a',
     provider: 'provider-a',
+    reasoning_effort: 'high',
   },
   evaluator_model: {
     id: 'evaluator-model-1',
@@ -152,8 +153,28 @@ describe('EvaluationScoreService integration', () => {
       },
     });
     expect(searchResult.hits.hits).toHaveLength(payload.scores.length);
-    const sources = searchResult.hits.hits.map((hit) => hit._source as { space_ids?: string[] });
+    const sources = searchResult.hits.hits.map(
+      (hit) =>
+        hit._source as {
+          space_ids?: string[];
+          task?: { model?: { reasoning_effort?: string } };
+          evaluator?: { model?: { reasoning_effort?: string } };
+        }
+    );
     expect(sources.every((source) => source?.space_ids?.includes('default'))).toBe(true);
+    expect(sources.every((source) => source?.task?.model?.reasoning_effort === 'high')).toBe(true);
+    expect(
+      sources.every((source) => source?.evaluator?.model?.reasoning_effort === undefined)
+    ).toBe(true);
+
+    const mapping = await esClient.indices.getFieldMapping({
+      index: EvaluationIndices.SCORES,
+      fields: ['task.model.reasoning_effort', 'evaluator.model.reasoning_effort'],
+    });
+    const fieldTypes = Object.values(mapping).flatMap((index) =>
+      Object.values(index.mappings).map((field) => Object.values(field.mapping)[0]?.type)
+    );
+    expect(fieldTypes).toEqual(['keyword', 'keyword']);
 
     const secondWrite = await service.write(payload, ['default']);
     expect(secondWrite).toEqual({ ingested: 0, conflicted: payload.scores.length, failed: [] });

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { BoundInferenceClient, Model } from '@kbn/inference-common';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { HttpHandler } from '@kbn/core/public';
 import type { DatasetMaturity, Direction, Model as ScoreModel } from '@kbn/evals-common';
 import type { EsClient, ScoutWorkerFixtures } from '@kbn/scout';
 import type { EvalConnector } from './utils/eval_connector';
+import type { EvalModel } from './utils/build_model_from_connector';
 import type { EvaluationCriterion } from './evaluators/criteria';
 import { type EvaluationReporter } from './utils/reporting/evaluation_reporter';
 import type {
@@ -249,8 +250,8 @@ export interface ReportDisplayOptions {
 }
 export interface EvaluationReport {
   stats: EvaluatorStats[];
-  model: Model;
-  evaluatorModel: Model;
+  model: EvalModel;
+  evaluatorModel: EvalModel;
   repetitions: number;
   experimentId: string;
 }

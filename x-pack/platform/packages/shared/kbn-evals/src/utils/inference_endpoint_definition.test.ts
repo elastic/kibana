@@ -98,6 +98,36 @@ describe('loadInferenceEndpoints', () => {
     });
   });
 
+  it('loads the reasoning effort a definition asks for', () => {
+    process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = JSON.stringify({
+      'eis-claude-opus-effort-high': {
+        name: 'EIS claude-opus (high)',
+        inferenceId: '.anthropic-claude-opus',
+        provider: 'elastic',
+        taskType: 'chat_completion',
+        reasoningEffort: 'high',
+      },
+    });
+
+    expect(loadInferenceEndpoints()[0].reasoningEffort).toBe('high');
+  });
+
+  it('throws when a definition names an unknown reasoning effort', () => {
+    process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = JSON.stringify({
+      'eis-claude-opus-effort-max': {
+        name: 'EIS claude-opus (max)',
+        inferenceId: '.anthropic-claude-opus',
+        provider: 'elastic',
+        taskType: 'chat_completion',
+        reasoningEffort: 'max',
+      },
+    });
+
+    expect(() => loadInferenceEndpoints()).toThrow(
+      /"eis-claude-opus-effort-max" has an unknown "reasoningEffort" "max"; expected one of none, minimal, low, medium, high, xhigh/
+    );
+  });
+
   it('throws when the JSON is not an object', () => {
     process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = JSON.stringify([{ name: 'bad' }]);
     expect(() => loadInferenceEndpoints()).toThrow(

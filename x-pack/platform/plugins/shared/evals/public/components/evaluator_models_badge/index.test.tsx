@@ -24,6 +24,25 @@ describe('EvaluatorModelsBadge', () => {
     expect(badge.closest('[tabindex="0"]')).toBeInTheDocument();
   });
 
+  it('appends the reasoning effort the judge ran with', () => {
+    render(<EvaluatorModelsBadge models={[{ id: 'claude-opus', reasoning_effort: 'high' }]} />);
+
+    expect(screen.getByText('claude-opus (high)')).toBeInTheDocument();
+  });
+
+  it('treats the same model at two reasoning efforts as two judges', () => {
+    render(
+      <EvaluatorModelsBadge
+        models={[
+          { id: 'claude-opus', reasoning_effort: 'high' },
+          { id: 'claude-opus', reasoning_effort: 'low' },
+        ]}
+      />
+    );
+
+    expect(screen.getByText('2 models')).toBeInTheDocument();
+  });
+
   it('reports no judge for an experiment scored only by code evaluators', () => {
     render(<EvaluatorModelsBadge models={[]} />);
 

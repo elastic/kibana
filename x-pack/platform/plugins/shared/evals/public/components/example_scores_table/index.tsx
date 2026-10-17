@@ -33,10 +33,11 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type {
-  EvaluationExperimentDatasetExample,
-  EvaluationExperimentExamplePreview,
-  EvaluationScoreDocument,
+import {
+  buildModelDisplayLabel,
+  type EvaluationExperimentDatasetExample,
+  type EvaluationExperimentExamplePreview,
+  type EvaluationScoreDocument,
 } from '@kbn/evals-common';
 import { useExperimentExampleDetails } from '../../hooks/use_evals_api';
 import * as i18n from './translations';
@@ -159,7 +160,11 @@ const splitScoreName = (scoreName: string): { evaluatorName: string; scoreLabel:
  * that happens to be present and label the others with it.
  */
 const collectModelIds = (scores: EvaluationExperimentDatasetExample['scores']): Set<string> =>
-  new Set(scores.map((scoreDoc) => scoreDoc.evaluator.model?.id ?? ''));
+  new Set(
+    scores.map((scoreDoc) =>
+      scoreDoc.evaluator.model ? buildModelDisplayLabel(scoreDoc.evaluator.model) : ''
+    )
+  );
 
 const collectVersions = (scores: EvaluationExperimentDatasetExample['scores']): Set<string> =>
   new Set(scores.map((scoreDoc) => scoreDoc.evaluator.version ?? ''));
@@ -527,7 +532,11 @@ const EvaluatorScoreGroupBlock: React.FC<{
         score={score}
         exampleId={exampleId}
         scoreLabel={score.evaluator.name}
-        judgeModelId={showJudge ? score.evaluator.model?.id : undefined}
+        judgeModelId={
+          showJudge && score.evaluator.model
+            ? buildModelDisplayLabel(score.evaluator.model)
+            : undefined
+        }
         version={score.evaluator.version}
         onTraceClick={onTraceClick}
       />
@@ -566,7 +575,9 @@ const EvaluatorScoreGroupBlock: React.FC<{
             scoreLabel={splitScoreName(score.evaluator.name).scoreLabel}
             judgeModelId={
               // The group heading already names a shared judge; only per-score judges are left.
-              showJudge && !sharedModelId ? score.evaluator.model?.id : undefined
+              showJudge && !sharedModelId && score.evaluator.model
+                ? buildModelDisplayLabel(score.evaluator.model)
+                : undefined
             }
             // Likewise: only shown here when a mid-run edit split the group across versions.
             version={sharedVersion ? undefined : score.evaluator.version}

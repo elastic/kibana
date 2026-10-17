@@ -107,12 +107,18 @@ export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: Route
           // unlike `firstDoc`, which reflects whichever judge the unsorted search happens to hit.
           const evaluatorModels = parseEvaluatorModelsAggregation(aggregations);
 
-          const toModelDisplay = (model?: { id?: string; family?: string; provider?: string }) => {
+          const toModelDisplay = (model?: {
+            id?: string;
+            family?: string;
+            provider?: string;
+            reasoning_effort?: string;
+          }) => {
             if (!model) return undefined;
             return {
               id: buildModelDisplayId(model.id, model.family, model.provider),
               family: model.family,
               provider: model.provider,
+              ...(model.reasoning_effort && { reasoning_effort: model.reasoning_effort }),
             };
           };
 

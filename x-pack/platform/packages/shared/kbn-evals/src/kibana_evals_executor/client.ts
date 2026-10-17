@@ -10,8 +10,8 @@ import { v5 as uuidv5 } from 'uuid';
 import { randomUUID } from 'crypto';
 import { withInferenceContext } from '@kbn/inference-tracing';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { Model } from '@kbn/inference-common';
 import { DEFAULT_SPACE_ID, getDatasetId } from '@kbn/evals-common';
+import type { EvalModel } from '../utils/build_model_from_connector';
 import type {
   EvalsExecutorClient,
   Evaluator,
@@ -31,15 +31,14 @@ const EXPERIMENT_UUID_NAMESPACE = 'c7e6c018-66dc-4511-b97d-046e2194d017';
 function computeExperimentId(
   executionId: string | undefined,
   experimentName: string,
-  modelId: string | undefined
+  model: Pick<EvalModel, 'id' | 'reasoningEffort'>
 ): string {
   if (!executionId) {
     return randomUUID();
   }
-  return uuidv5(
-    `${executionId}::${experimentName}::${modelId ?? 'unknown'}`,
-    EXPERIMENT_UUID_NAMESPACE
-  );
+  const modelId = model.id ?? 'unknown';
+  const modelKey = model.reasoningEffort ? `${modelId}@${model.reasoningEffort}` : modelId;
+  return uuidv5(`${executionId}::${experimentName}::${modelKey}`, EXPERIMENT_UUID_NAMESPACE);
 }
 
 export class KibanaEvalsClient implements EvalsExecutorClient {
@@ -48,7 +47,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
   constructor(
     private readonly options: {
       log: SomeDevLog;
-      model: Model;
+      model: EvalModel;
       executionId?: string;
       repetitions?: number;
       /** Examples each experiment runs at once when the spec doesn't pass its own. */
@@ -199,7 +198,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       const experimentId = computeExperimentId(
         this.options.executionId,
         experimentName,
-        this.options.model.id
+        this.options.model
       );
       await this.options.onExperimentStart?.({ experimentId });
       const repetitions = this.options.repetitions ?? 3;
