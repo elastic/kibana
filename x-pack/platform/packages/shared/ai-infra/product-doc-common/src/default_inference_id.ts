@@ -6,6 +6,7 @@
  */
 
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { isImpliedDefaultElserInferenceId } from './is_default_inference_endpoint';
 import type { ResourceType } from './resource_type';
 
 export const productDocInferenceIdCandidates = [
@@ -94,6 +95,85 @@ export const resolveDefaultInferenceIdFromInferenceGet = async (
   } catch {
     return defaultInferenceEndpoints.ELSER;
   }
+};
+
+/**
+ * Index identity for a default embedding model. ELSER and ELSER-on-EIS share one index;
+ * every other inference ID has its own.
+ */
+export const getDefaultInferenceIndexKey = (inferenceId: string): string => {
+  return isImpliedDefaultElserInferenceId(inferenceId) ? 'elser' : inferenceId.toLowerCase();
+};
+
+export interface DefaultInferenceMigration {
+  currentDefaultInferenceId: string;
+  /** One installed inference ID per previous default index that should be deleted. */
+  supersededInferenceIds: string[];
+  /** The current default has no installed documentation yet. */
+  installCurrentDefault: boolean;
+}
+
+/**
+ * When the environment default changes (for example ELSER to Jina), the previous default's
+ * documentation has to be removed and the new default installed. Custom inference IDs are
+ * left in place. ELSER and ELSER-on-EIS are the same installation, so switching between
+ * them is not a migration.
+ *
+ * An explicit request migrates only when it targets the current default or a superseded one.
+ * A blanket update (no requested IDs) always migrates.
+ */
+export const planDefaultInferenceMigration = ({
+  installedInferenceIds,
+  currentDefaultInferenceId,
+  requestedInferenceIds,
+}: {
+  installedInferenceIds: readonly string[];
+  currentDefaultInferenceId: string;
+  requestedInferenceIds?: readonly string[];
+}): DefaultInferenceMigration | undefined => {
+  const defaultIds = new Set<string>(productDocInferenceIdCandidates);
+  if (!defaultIds.has(currentDefaultInferenceId)) {
+    return undefined;
+  }
+
+  const currentKey = getDefaultInferenceIndexKey(currentDefaultInferenceId);
+  const supersededByKey = new Map<string, string>();
+  for (const inferenceId of installedInferenceIds) {
+    if (!defaultIds.has(inferenceId)) {
+      continue;
+    }
+    const key = getDefaultInferenceIndexKey(inferenceId);
+    if (key === currentKey || supersededByKey.has(key)) {
+      continue;
+    }
+    supersededByKey.set(key, inferenceId);
+  }
+
+  const supersededInferenceIds = [...supersededByKey.values()];
+  if (supersededInferenceIds.length === 0) {
+    return undefined;
+  }
+
+  const requested = requestedInferenceIds ?? [];
+  if (
+    requested.length > 0 &&
+    !requested.some((inferenceId) => {
+      const key = getDefaultInferenceIndexKey(inferenceId);
+      return key === currentKey || supersededByKey.has(key);
+    })
+  ) {
+    return undefined;
+  }
+
+  const currentAlreadyInstalled = installedInferenceIds.some(
+    (inferenceId) => getDefaultInferenceIndexKey(inferenceId) === currentKey
+  );
+
+  return {
+    currentDefaultInferenceId,
+    supersededInferenceIds,
+    installCurrentDefault: !currentAlreadyInstalled,
+  };
 };
 
 export const resolveInstalledProductDocInferenceId = async ({

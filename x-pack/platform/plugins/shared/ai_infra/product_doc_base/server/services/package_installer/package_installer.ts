@@ -135,13 +135,16 @@ export class PackageInstaller {
     await logArtifactsFolderUsage(this.artifactsFolderPath, this.log);
   }
 
-  private getArtifactRepositoryOptions(): {
+  private getArtifactRepositoryOptions(inferenceId?: string): {
     artifactRepositoryUrl: string;
     artifactRepositoryProxyUrl?: string;
+    inferenceId?: string;
   } {
     return {
       artifactRepositoryUrl: this.artifactRepositoryUrl,
       artifactRepositoryProxyUrl: this.artifactRepositoryProxyUrl,
+      // Scopes `latest` LastModified to this inference ID's object key
+      ...(inferenceId ? { inferenceId } : {}),
     };
   }
 
@@ -199,6 +202,153 @@ export class PackageInstaller {
   }
 
   /**
+   * Whether any installed product docs are behind the repository: either the installable
+   * version differs, or GCS LastModified is newer than the stored artifactLastModified.
+   * When `includeAvailableArtifacts` is set, also returns the installable artifact and its
+   * last-modified date for products that are not installed.
+   * Returns undefined when the repository listing cannot be read (best-effort for status UX).
+   */
+  async isProductDocUpdateAvailable({
+    inferenceId,
+    includeAvailableArtifacts = false,
+  }: {
+    inferenceId: string;
+    includeAvailableArtifacts?: boolean;
+  }): Promise<ProductDocUpdateAvailability | undefined> {
+    try {
+      const [{ versions, lastModifiedByProductVersion }, installStatuses] = await Promise.all([
+        fetchArtifactVersions(this.getArtifactRepositoryOptions(inferenceId)),
+        this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
+      ]);
+
+      let isUpdateAvailable = false;
+      let availableArtifact: AvailableArtifact | undefined;
+      let listedArtifact: AvailableArtifact | undefined;
+      const installedArtifactLastModifiedByProduct: Partial<Record<ProductName, string>> = {};
+
+      for (const [name, productState] of Object.entries(installStatuses)) {
+        const productName = name as ProductName;
+        if (!includeAvailableArtifacts && productState.status !== 'installed') {
+          continue;
+        }
+        const availableVersions = versions[productName];
+        if (!availableVersions?.length) {
+          continue;
+        }
+
+        let installableVersion: string;
+        try {
+          installableVersion = await this.resolveInstallableVersion({
+            productName,
+            inferenceId,
+            availableVersions,
+          });
+        } catch (error) {
+          if (!isArtifactMissingError(error)) {
+            throw error;
+          }
+          continue;
+        }
+
+        const gcsLastModified = lastModifiedByProductVersion[productName]?.[installableVersion];
+        if (includeAvailableArtifacts) {
+          listedArtifact = preferAvailableArtifact(listedArtifact, {
+            version: installableVersion,
+            lastModified: gcsLastModified,
+          });
+        }
+        if (productState.status !== 'installed') {
+          continue;
+        }
+        const installedVersionLastModified = productState.version
+          ? lastModifiedByProductVersion[productName]?.[productState.version]
+          : undefined;
+        if (productState.version !== installableVersion) {
+          isUpdateAvailable = true;
+          availableArtifact = preferAvailableArtifact(availableArtifact, {
+            version: installableVersion,
+            lastModified: gcsLastModified,
+          });
+          rememberInstalledZipDate(
+            installedArtifactLastModifiedByProduct,
+            productName,
+            productState.artifactLastModified,
+            installedVersionLastModified
+          );
+          continue;
+        }
+
+        // `latest-<timestamp>` already encodes the listing time; equal versions mean same upload.
+        // Stateful major.minor keys can be overwritten in place, so compare LastModified there.
+        if (extractLatestVersionTimestamp(installableVersion) !== undefined) {
+          continue;
+        }
+
+        const installedLastModified = productState.artifactLastModified;
+        // HTTP Last-Modified is second-precision; GCS list XML often includes milliseconds.
+        // Compare at second resolution so the same object is not treated as an update.
+        if (
+          installedLastModified &&
+          gcsLastModified &&
+          toSecondPrecisionMs(installedLastModified) < toSecondPrecisionMs(gcsLastModified)
+        ) {
+          isUpdateAvailable = true;
+          availableArtifact = preferAvailableArtifact(availableArtifact, {
+            version: installableVersion,
+            lastModified: gcsLastModified,
+          });
+          continue;
+        }
+
+        // No stored zip date. A repository object modified after this install is a newer upload
+        // of the same stack version. Leave that date off the installed version so it is not
+        // shown as both installed and available.
+        if (
+          !installedLastModified &&
+          gcsLastModified &&
+          productState.updatedAt &&
+          toSecondPrecisionMs(productState.updatedAt) < toSecondPrecisionMs(gcsLastModified)
+        ) {
+          isUpdateAvailable = true;
+          availableArtifact = preferAvailableArtifact(availableArtifact, {
+            version: installableVersion,
+            lastModified: gcsLastModified,
+          });
+          continue;
+        }
+
+        rememberInstalledZipDate(
+          installedArtifactLastModifiedByProduct,
+          productName,
+          installedLastModified,
+          installedVersionLastModified
+        );
+      }
+
+      const reportedArtifact = isUpdateAvailable ? availableArtifact : listedArtifact;
+      return {
+        isUpdateAvailable,
+        ...(reportedArtifact?.lastModified
+          ? { availableArtifactLastModified: reportedArtifact.lastModified }
+          : {}),
+        ...(reportedArtifact?.stackVersion
+          ? { availableStackVersion: reportedArtifact.stackVersion }
+          : {}),
+        ...(Object.keys(installedArtifactLastModifiedByProduct).length
+          ? { installedArtifactLastModifiedByProduct }
+          : {}),
+      };
+    } catch (error) {
+      this.log.warn(
+        `Unable to determine whether product documentation updates are available: ${
+          (error as Error).message
+        }`
+      );
+      return undefined;
+    }
+  }
+
+  /**
    * Returns the installed products whose version differs from the version selected for this deployment.
    */
   async getProductsToUpdate(params: {
@@ -206,8 +356,8 @@ export class PackageInstaller {
     forceUpdate?: boolean;
   }): Promise<ProductName[]> {
     const { inferenceId, forceUpdate } = params;
-    const [repositoryVersions, installStatuses] = await Promise.all([
-      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+    const [{ versions: repositoryVersions }, installStatuses] = await Promise.all([
+      fetchArtifactVersions(this.getArtifactRepositoryOptions(inferenceId)),
       this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
     ]);
     const toUpdate: ProductName[] = [];
@@ -287,8 +437,8 @@ export class PackageInstaller {
     inferenceId?: string;
   }): Promise<boolean> {
     const { productName, inferenceId } = params;
-    const [repositoryVersions, inferenceInfo] = await Promise.all([
-      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+    const [{ versions: repositoryVersions }, inferenceInfo] = await Promise.all([
+      fetchArtifactVersions(this.getArtifactRepositoryOptions(inferenceId)),
       this.getInferenceInfo(inferenceId),
     ]);
     const availableVersions = repositoryVersions[productName];
@@ -321,8 +471,8 @@ export class PackageInstaller {
     since: Date;
   }): Promise<boolean> {
     const { productName, inferenceId, since } = params;
-    const [repositoryVersions, installStatuses] = await Promise.all([
-      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+    const [{ versions: repositoryVersions }, installStatuses] = await Promise.all([
+      fetchArtifactVersions(this.getArtifactRepositoryOptions(inferenceId)),
       this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
     ]);
     const availableVersions = repositoryVersions[productName];
@@ -372,8 +522,8 @@ export class PackageInstaller {
     since: Date;
   }): Promise<boolean> {
     const { productName, inferenceId, forceUpdate, since } = params;
-    const [repositoryVersions, installStatuses] = await Promise.all([
-      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+    const [{ versions: repositoryVersions }, installStatuses] = await Promise.all([
+      fetchArtifactVersions(this.getArtifactRepositoryOptions(inferenceId)),
       this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
     ]);
     const productState = installStatuses[productName];
@@ -445,8 +595,8 @@ export class PackageInstaller {
     since?: Date;
   }): Promise<void> {
     const { inferenceId, forceUpdate, since } = params;
-    const [repositoryVersions, openapiSpecInstallStatus] = await Promise.all([
-      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+    const [{ versions: repositoryVersions }, openapiSpecInstallStatus] = await Promise.all([
+      fetchArtifactVersions(this.getArtifactRepositoryOptions(inferenceId)),
       this.productDocClient.getOpenapiSpecInstallationStatus({ inferenceId }),
     ]);
     const openAPISpecVersionToUpgradeTo = selectVersion(
@@ -552,11 +702,12 @@ export class PackageInstaller {
       // Resolved up front so a failed download still gets cleaned up
       artifactFullPath = getSafePath(artifactPathAtVolume).fullPath;
       this.log.debug(`Downloading from [${artifactUrl}] to [${artifactPathAtVolume}]`);
-      artifactFullPath = await downloadToDisk(
+      const downloadResult = await downloadToDisk(
         artifactUrl,
         artifactPathAtVolume,
         this.artifactRepositoryProxyUrl
       );
+      artifactFullPath = downloadResult.artifactFullPath;
 
       zipArchive = await openZipArchive(artifactFullPath);
       this.assertValidArtifactArchive(zipArchive, artifactFullPath);
@@ -595,7 +746,12 @@ export class PackageInstaller {
         log: this.log,
         inferenceId,
       });
-      await this.productDocClient.setInstallationSuccessful(productName, indexName, inferenceId);
+      await this.productDocClient.setInstallationSuccessful({
+        productName,
+        indexName,
+        inferenceId,
+        artifactLastModified: downloadResult.lastModified,
+      });
 
       this.log.info(
         `Documentation installation successful for product [${productName}] and version [${productVersion}]`
@@ -695,7 +851,7 @@ export class PackageInstaller {
       // Determine version to install
       selectedVersion = version;
       if (!selectedVersion) {
-        const availableVersions = await fetchSecurityLabsVersions({
+        const { versions: availableVersions } = await fetchSecurityLabsVersions({
           ...this.getArtifactRepositoryOptions(),
           inferenceId: effectiveInferenceId,
         });
@@ -715,11 +871,12 @@ export class PackageInstaller {
       artifactFullPath = getSafePath(artifactPath).fullPath;
 
       this.log.debug(`Downloading Security Labs from [${artifactUrl}] to [${artifactPath}]`);
-      artifactFullPath = await downloadToDisk(
+      const downloadResult = await downloadToDisk(
         artifactUrl,
         artifactPath,
         this.artifactRepositoryProxyUrl
       );
+      artifactFullPath = downloadResult.artifactFullPath;
 
       zipArchive = await openZipArchive(artifactFullPath);
       this.assertValidArtifactArchive(zipArchive, artifactFullPath);
@@ -762,6 +919,7 @@ export class PackageInstaller {
         version: selectedVersion,
         indexName,
         inferenceId: effectiveInferenceId,
+        artifactLastModified: downloadResult.lastModified,
       });
 
       this.log.info(`Security Labs installation successful for version [${selectedVersion}]`);
@@ -818,8 +976,10 @@ export class PackageInstaller {
    */
   async getSecurityLabsStatus({
     inferenceId,
+    includeAvailableArtifacts = false,
   }: {
     inferenceId?: string;
+    includeAvailableArtifacts?: boolean;
   }): Promise<SecurityLabsStatusResponse> {
     try {
       const effectiveInferenceId = inferenceId ?? this.elserInferenceId;
@@ -829,13 +989,17 @@ export class PackageInstaller {
 
       // Compute latest version (best-effort) for UX and auto-update checks.
       let repoLatestVersion: string | undefined;
+      let repoLatestLastModified: string | undefined;
       try {
-        const versions = await fetchSecurityLabsVersions({
+        const { versions, lastModifiedByVersion } = await fetchSecurityLabsVersions({
           ...this.getArtifactRepositoryOptions(),
           inferenceId: effectiveInferenceId,
         });
         if (versions.length > 0) {
           repoLatestVersion = versions.slice().sort().reverse()[0];
+          repoLatestLastModified = repoLatestVersion
+            ? lastModifiedByVersion[repoLatestVersion]
+            : undefined;
         }
       } catch (e) {
         // ignore
@@ -847,22 +1011,40 @@ export class PackageInstaller {
         Boolean(installedVersion) &&
         Boolean(repoLatestVersion) &&
         installedVersion !== repoLatestVersion;
+      const availableArtifactFields =
+        (includeAvailableArtifacts || isUpdateAvailable) && repoLatestLastModified
+          ? { availableArtifactLastModified: repoLatestLastModified }
+          : {};
+      const listedVersionFields =
+        includeAvailableArtifacts && repoLatestVersion ? { latestVersion: repoLatestVersion } : {};
 
       // If we have a saved-object based status, return it (augmented with update info).
       // (Backwards compatibility: if not found, fall back to index existence checks below.)
       if (status.status !== 'uninstalled' || status.version || status.failureReason) {
-        return { ...status, latestVersion: repoLatestVersion, isUpdateAvailable };
+        return {
+          ...status,
+          latestVersion: repoLatestVersion,
+          isUpdateAvailable,
+          ...availableArtifactFields,
+        };
       }
 
       const indexName = getSecurityLabsIndexName(effectiveInferenceId);
       const exists = await this.esClient.indices.exists({ index: indexName });
-      if (!exists) return { status: 'uninstalled' };
+      if (!exists)
+        return { status: 'uninstalled', ...availableArtifactFields, ...listedVersionFields };
 
       const countResponse = await this.esClient.count({ index: indexName });
-      if (countResponse.count === 0) return { status: 'uninstalled' };
+      if (countResponse.count === 0) {
+        return { status: 'uninstalled', ...availableArtifactFields, ...listedVersionFields };
+      }
 
       // Unknown version (legacy install), but installed.
-      return { status: 'installed', latestVersion: repoLatestVersion };
+      return {
+        status: 'installed',
+        latestVersion: repoLatestVersion,
+        ...availableArtifactFields,
+      };
     } catch (error) {
       this.log.error(`Error checking Security Labs status: ${error.message}`);
       return {
@@ -882,7 +1064,7 @@ export class PackageInstaller {
       return;
     }
 
-    const availableVersions = await fetchSecurityLabsVersions({
+    const { versions: availableVersions } = await fetchSecurityLabsVersions({
       ...this.getArtifactRepositoryOptions(),
       inferenceId,
     });
@@ -940,11 +1122,12 @@ export class PackageInstaller {
       artifactFullPath = getSafePath(artifactPath).fullPath;
 
       this.log.debug(`Downloading OpenAPI artifact from [${artifactUrl}] to [${artifactPath}]`);
-      artifactFullPath = await downloadToDisk(
+      const downloadResult = await downloadToDisk(
         artifactUrl,
         artifactPath,
         this.artifactRepositoryProxyUrl
       );
+      artifactFullPath = downloadResult.artifactFullPath;
 
       zipArchive = await openZipArchive(artifactFullPath);
       this.assertValidArtifactArchive(zipArchive, artifactFullPath, { openApi: true });
@@ -1023,6 +1206,7 @@ export class PackageInstaller {
           productVersion: stackVersion,
           indexName,
           inferenceId: effectiveInferenceId,
+          artifactLastModified: downloadResult.lastModified,
         });
 
         this.log.info(`OpenAPI Spec installation successful for ${productName}`);
@@ -1202,7 +1386,7 @@ export class PackageInstaller {
     let fallbackVersionsLoaded = false;
 
     if (!explicitVersionProvided) {
-      const availableVersions = await this.fetchArtifactVersionsWithRetry();
+      const { versions: availableVersions } = await this.fetchArtifactVersionsWithRetry();
       candidateVersions.push(...getPreviousVersions(selectedVersion, availableVersions.openapi));
       fallbackVersionsLoaded = true;
     }
@@ -1231,7 +1415,7 @@ export class PackageInstaller {
         lastMissingError = error as Error;
         if (explicitVersionProvided && !fallbackVersionsLoaded) {
           try {
-            const availableVersions = await this.fetchArtifactVersionsWithRetry();
+            const { versions: availableVersions } = await this.fetchArtifactVersionsWithRetry();
             candidateVersions.push(
               ...getPreviousVersions(selectedVersion, availableVersions.openapi)
             );
@@ -1439,6 +1623,66 @@ const extractLatestVersionTimestamp = (version: string): number | undefined => {
   }
   const timestamp = Date.parse(latestWithTimestampMatch[1]);
   return Number.isNaN(timestamp) ? undefined : timestamp;
+};
+
+/** Truncate to whole seconds for comparing HTTP vs GCS list LastModified values. */
+const toSecondPrecisionMs = (isoTimestamp: string): number => {
+  const timestamp = new Date(isoTimestamp).getTime();
+  return Number.isNaN(timestamp) ? Number.NaN : Math.floor(timestamp / 1000) * 1000;
+};
+
+export interface ProductDocUpdateAvailability {
+  isUpdateAvailable: boolean;
+  /** ISO 8601 LastModified of the newest installable artifact that is ahead of the install. */
+  availableArtifactLastModified?: string;
+  /** Major.minor stack version of that artifact. Omitted for serverless `latest` zips. */
+  availableStackVersion?: string;
+  /**
+   * Repository LastModified for an installed zip that has no stored date and is not itself
+   * the pending update. Keyed by product so the version line can show `9.6 | Sep 28, 2026`.
+   */
+  installedArtifactLastModifiedByProduct?: Partial<Record<ProductName, string>>;
+}
+
+const rememberInstalledZipDate = (
+  byProduct: Partial<Record<ProductName, string>>,
+  productName: ProductName,
+  storedLastModified: string | undefined,
+  repositoryLastModified: string | undefined
+): void => {
+  if (storedLastModified || !repositoryLastModified) {
+    return;
+  }
+  byProduct[productName] = repositoryLastModified;
+};
+
+interface AvailableArtifact {
+  lastModified?: string;
+  stackVersion?: string;
+}
+
+const STACK_VERSION_PATTERN = /^\d+\.\d+$/;
+
+const preferAvailableArtifact = (
+  current: AvailableArtifact | undefined,
+  candidate: { version: string; lastModified?: string }
+): AvailableArtifact => {
+  const next: AvailableArtifact = {
+    ...(candidate.lastModified ? { lastModified: candidate.lastModified } : {}),
+    ...(STACK_VERSION_PATTERN.test(candidate.version) ? { stackVersion: candidate.version } : {}),
+  };
+  const currentMs = current?.lastModified ? toSecondPrecisionMs(current.lastModified) : undefined;
+  const nextMs = next.lastModified ? toSecondPrecisionMs(next.lastModified) : undefined;
+  if (nextMs !== undefined && (currentMs === undefined || nextMs > currentMs)) {
+    return next;
+  }
+  if (!current) {
+    return next;
+  }
+  if (currentMs === undefined && !current.stackVersion && next.stackVersion) {
+    return { ...current, stackVersion: next.stackVersion };
+  }
+  return current;
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

@@ -34,4 +34,6 @@ export interface ProductInstallState {
   failureReason?: string;
   /** Last time the status was written, ISO 8601 */
   updatedAt?: string;
+  /** ISO 8601 last-modified time of the installed artifact, when known. */
+  artifactLastModified?: string;
 }
