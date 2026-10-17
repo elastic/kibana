@@ -163,12 +163,16 @@ export class StreamsApp {
     await this.page.gotoApp(`streams`);
   }
 
-  async gotoStreamManagementTab(streamName: string, tabName: string) {
-    await this.page.gotoApp(`streams/${streamName}/management/${tabName}`);
+  async gotoStreamManagementTab(
+    streamName: string,
+    tabName: string,
+    options?: Parameters<ScoutPage['gotoApp']>[2]
+  ) {
+    await this.page.gotoApp(`streams/${streamName}/management/${tabName}`, undefined, options);
   }
 
-  async gotoPartitioningTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'partitioning');
+  async gotoPartitioningTab(streamName: string, options?: Parameters<ScoutPage['gotoApp']>[2]) {
+    await this.gotoStreamManagementTab(streamName, 'partitioning', options);
   }
 
   async gotoDataRetentionTab(streamName: string) {
