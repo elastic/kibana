@@ -1753,6 +1753,12 @@ importers:
       '@kbn/css-utils':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-css-utils
+      '@kbn/custom-app-common':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/custom-app/custom-app-common
+      '@kbn/custom-app-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/custom_app
       '@kbn/custom-branding-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/custom_branding
@@ -8999,6 +9005,8 @@ importers:
 
   x-pack/platform/packages/shared/alerting-rule-utils: {}
 
+  x-pack/platform/packages/shared/custom-app/custom-app-common: {}
+
   x-pack/platform/packages/shared/custom-content/custom-content-common: {}
 
   x-pack/platform/packages/shared/custom-content/custom-content-renderer: {}
@@ -9376,6 +9384,8 @@ importers:
   x-pack/platform/plugins/shared/context_engine: {}
 
   x-pack/platform/plugins/shared/context_engine_agent_builder: {}
+
+  x-pack/platform/plugins/shared/custom_app: {}
 
   x-pack/platform/plugins/shared/custom_content: {}
 

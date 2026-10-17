@@ -11,6 +11,7 @@ import type { PanelContent, PanelContentAttempt } from '../../resolve_panel';
 import { sectionIdField, type ConfigPanelKind, type RequestPanelKind } from './panel_kind';
 import { lensPanelKind, vegaPanelKind, type VisPanelResolutionRequest } from './vis';
 import { markdownPanelKind } from './markdown';
+import { customAppPanelKind } from './custom_app';
 import { customContentPanelKind, type CustomContentPanelResolutionRequest } from './custom_content';
 import {
   anomalyChartsPanelKind,
@@ -44,6 +45,7 @@ export type {
 
 const CONFIG_PANEL_KINDS = [
   markdownPanelKind,
+  customAppPanelKind,
   anomalyChartsPanelKind,
   anomalySwimlanePanelKind,
   singleMetricViewerPanelKind,

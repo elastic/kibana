@@ -223,6 +223,20 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
     );
   });
 
+  it('binds the parameters it is given next to the time range, for a query with its own', async () => {
+    await resolve({
+      prompt: 'Show revenue',
+      esqlQuery: 'FROM logs | WHERE @timestamp >= ?_tstart AND service == ?service',
+      esqlParams: [{ service: 'checkout' }],
+    });
+
+    expect(mockEsqlQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: [{ _tstart: expect.any(String) }, { service: 'checkout' }],
+      })
+    );
+  });
+
   it('sends no params for a query without time parameters', async () => {
     await resolve({ prompt: 'Show revenue', esqlQuery: 'FROM logs' });
 

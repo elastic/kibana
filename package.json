@@ -609,6 +609,8 @@
     "@kbn/crypto": "workspace:*",
     "@kbn/crypto-browser": "workspace:*",
     "@kbn/css-utils": "workspace:*",
+    "@kbn/custom-app-common": "workspace:*",
+    "@kbn/custom-app-plugin": "workspace:*",
     "@kbn/custom-branding-plugin": "workspace:*",
     "@kbn/custom-content-common": "workspace:*",
     "@kbn/custom-content-plugin": "workspace:*",
