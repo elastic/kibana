@@ -100,7 +100,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       spaceId: request.spaceId,
       apiKeyCreatedByUser,
       ...(apiKeyCreatedByUser && uiamApiKeyExternal ? { uiamApiKeyExternal } : {}),
-      userProfileId: user?.profile_uid,
+      userProfileId: opts?.userProfileId ?? user?.profile_uid,
       userName: user?.username,
     });
 

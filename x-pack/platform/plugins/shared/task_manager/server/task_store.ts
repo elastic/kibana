@@ -21,6 +21,7 @@ import type {
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
   SecurityServiceStart,
+  UserProfileServiceStart,
   KibanaRequest,
   SavedObject,
   ISavedObjectsSerializer,
@@ -94,6 +95,7 @@ export interface StoreOpts {
   allowReadingInvalidState: boolean;
   logger: Logger;
   security: SecurityServiceStart;
+  userProfile?: UserProfileServiceStart;
   canEncryptSavedObjects?: boolean;
   esoClient?: EncryptedSavedObjectsClient;
   getIsSecurityEnabled: () => boolean;
@@ -219,6 +221,7 @@ export class TaskStore {
   private serializer: ISavedObjectsSerializer;
   private adHocTaskCounter: AdHocTaskCounter;
   private security: SecurityServiceStart;
+  private userProfile?: UserProfileServiceStart;
   private canEncryptSavedObjects?: boolean;
   private getIsSecurityEnabled: () => boolean;
   private logger: Logger;
@@ -271,6 +274,7 @@ export class TaskStore {
       allowReadingInvalidState: opts.allowReadingInvalidState,
     });
     this.security = opts.security;
+    this.userProfile = opts.userProfile;
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
     this.getIsSecurityEnabled = opts.getIsSecurityEnabled;
     this.logger = opts.logger;
@@ -426,6 +430,25 @@ export class TaskStore {
     return Boolean(options?.request) && this.getIsSecurityEnabled();
   }
 
+  /**
+   * Resolves the scheduler's profile uid so task runs can identify them without looking up the
+   * task's API key. A failed lookup leaves it undefined rather than failing the schedule.
+   */
+  private async resolveSchedulerProfileId(request: KibanaRequest): Promise<string | undefined> {
+    const profileUid = this.security.authc.getCurrentUser(request)?.profile_uid;
+
+    if (profileUid || !this.userProfile) {
+      return profileUid;
+    }
+
+    try {
+      return (await this.userProfile.getCurrentProfileId({ request })) ?? undefined;
+    } catch (error) {
+      this.logger.debug(`Could not resolve the scheduler's profile uid: ${error.message}`);
+      return undefined;
+    }
+  }
+
   private async grantApiKeysFromRequest(
     taskInstances: TaskInstance[],
     options?: ApiKeyOptions
@@ -437,7 +460,10 @@ export class TaskStore {
 
     const createdTargets: InvalidationTarget[] = [];
     try {
+      const userProfileId = await this.resolveSchedulerProfileId(request);
+
       return await this.apiKeyStrategy.grantApiKeys(taskInstances, request, this.security, {
+        ...(userProfileId ? { userProfileId } : {}),
         ...(options?.onEsKey === true ? { onEsKey: true } : {}),
         ...(options?.cloneApiKey === true ? { cloneApiKey: true } : {}),
         onApiKeyCreated: (target) => createdTargets.push(target),
