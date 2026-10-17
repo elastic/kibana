@@ -6,7 +6,11 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { ActionsClientLlm } from '@kbn/langchain/server';
+import {
+  EmptyModelResponseError,
+  MAX_RESPONSE_PREVIEW_LENGTH,
+  type ActionsClientLlm,
+} from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import { FakeLLM } from '@langchain/core/utils/testing';
@@ -175,12 +179,18 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     expect(state).toEqual({
       ...initialGraphState,
       combinedGenerations: '{"key": "value"}',
-      errors: [
-        'generate node is unable to parse (fake) response from attempt 0; (this may be an incomplete response from the model): [\n  {\n    "expected": "array",\n    "code": "invalid_type",\n    "path": [\n      "insights"\n    ],\n    "message": "Invalid input: expected array, received undefined"\n  }\n]',
-      ],
+      errors: [expect.any(String)],
       generationAttempts: 1,
       generations: ['{"key": "value"}'],
     });
+
+    // the parse failure AND the raw response are persisted: on serverless there is no log-level
+    // switch that would let support recover the bytes from a debug-only log:
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain(
+      'generate node is unable to parse (fake) response from attempt 0; (this may be an incomplete response from the model):'
+    );
+    expect(state.errors[0]).toContain(response);
   });
 
   it('handles hallucinations', async () => {
@@ -294,12 +304,15 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     expect(state).toEqual({
       ...withPreviousGenerations,
       combinedGenerations: 'gen0gen1',
-      errors: [
-        'generate node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): SyntaxError: Unexpected token \'g\', "gen0gen1" is not valid JSON',
-      ],
+      errors: [expect.any(String)],
       generationAttempts: 2,
       generations: ['gen0', 'gen1'],
     });
+
+    expect(state.errors[0]).toContain(
+      'generate node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): SyntaxError: Unexpected token \'g\', "gen0gen1" is not valid JSON'
+    );
+    expect(state.errors[0]).toContain('raw response (4 characters): "gen1"');
   });
 
   it('logs the raw response at debug when the response cannot be parsed', async () => {
@@ -332,6 +345,119 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     await generateNode(initialGraphState);
 
     expect(debugMessages.some((message) => message.includes(rawResponse))).toBe(true);
+  });
+
+  it('records an error for every empty response instead of discarding one as a repeated generation', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue('');
+
+    const generateNode = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    // three empty responses in a row: previously the third one was classified as a repeated
+    // generation and discarded without an error entry, under-reporting the failed attempts:
+    let state = await generateNode(initialGraphState);
+    state = await generateNode(state);
+    state = await generateNode(state);
+
+    expect(state.generationAttempts).toBe(3);
+    expect(state.errors).toHaveLength(3);
+    expect(
+      state.errors.every((error) => error.includes('the model returned an empty response'))
+    ).toBe(true);
+    expect(state.combinedGenerations).toBe('');
+    expect(mockResponseIsHallucinated).not.toHaveBeenCalled();
+  });
+
+  it('does not add an empty (or whitespace-only) response to the generations', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue('   \n');
+
+    const generateNode = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await generateNode(initialGraphState);
+
+    expect(state.generations).toEqual([]);
+    expect(state.generationAttempts).toBe(1);
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain('the model returned an empty response');
+  });
+
+  it('persists a bounded prefix of a raw response that cannot be parsed', async () => {
+    const rawResponse = `<html>502 Bad Gateway${'x'.repeat(MAX_RESPONSE_PREVIEW_LENGTH)}</html>`;
+
+    const mockLlmWithResponse = new FakeLLM({
+      response: rawResponse,
+    }) as unknown as ActionsClientLlm;
+    const mockInvoke = getChainWithFormatInstructions({
+      llm: mockLlmWithResponse,
+      generationSchema,
+    }).chain.invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue(rawResponse);
+
+    const generateNode = getGenerateNode({
+      llm: mockLlmWithResponse,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await generateNode(initialGraphState);
+
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain(`raw response (${rawResponse.length} characters)`);
+    expect(state.errors[0]).toContain(rawResponse.slice(0, MAX_RESPONSE_PREVIEW_LENGTH));
+    expect(state.errors[0]).toContain(`truncated, ${rawResponse.length} characters total`);
+  });
+
+  it('classifies a thrown empty completion as an empty model response, keeping the connector details', async () => {
+    const emptyResponseError = new EmptyModelResponseError({
+      completionTokens: 0,
+      connectorId: 'test-connector-id',
+      contentLength: 0,
+      model: 'anthropic-claude-5.5-opus',
+      promptTokens: 128390,
+      responseBody: '',
+      traceId: 'test-trace-id',
+    });
+
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockRejectedValue(emptyResponseError);
+
+    const generateNode = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await generateNode(initialGraphState);
+
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain('the model returned an empty response');
+    expect(state.errors[0]).toContain('test-connector-id');
+    expect(state.errors[0]).toContain('anthropic-claude-5.5-opus');
+    expect(state.errors[0]).toContain('prompt tokens: 128390');
   });
 
   it('returns unrefined results when combined responses pass validation', async () => {
