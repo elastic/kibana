@@ -74,6 +74,49 @@ describe('toFilterableSource', () => {
       expect(filterable.isTimeBased()).toBe(true);
     });
 
+    describe('sharing between queries on the same dataset', () => {
+      const onDataset = (title: string, esql: string, timeFieldName = '@timestamp') =>
+        EsqlSource.create({
+          query: esql,
+          timeFieldName,
+          resultColumns: [makeColumn('avg_bytes', 'number', 'double', true)],
+        }).then((source) => ({ source, title, timeFieldName }));
+
+      it('returns the same object for queries on the same dataset, like the shared DataView', async () => {
+        await seedDataset('shared-*', '@timestamp');
+        const first = await onDataset('shared-*', 'FROM shared-* | STATS avg_bytes = AVG(bytes)');
+        const second = await onDataset('shared-*', 'FROM shared-* | WHERE bytes > 10 | LIMIT 5');
+
+        expect(first.source.id).not.toBe(second.source.id);
+        expect(await second.source.toFilterableSource()).toBe(
+          await first.source.toFilterableSource()
+        );
+      });
+
+      it('returns another object for another dataset or time field', async () => {
+        await seedDataset('one-*', '@timestamp');
+        await seedDataset('two-*', '@timestamp');
+        await seedDataset('one-*', 'event.ingested');
+        const base = await onDataset('one-*', 'FROM one-* | LIMIT 1');
+        const otherTarget = await onDataset('two-*', 'FROM two-* | LIMIT 1');
+        const otherTime = await onDataset('one-*', 'FROM one-* | LIMIT 1', 'event.ingested');
+
+        const filterable = await base.source.toFilterableSource();
+
+        expect(await otherTarget.source.toFilterableSource()).not.toBe(filterable);
+        expect(await otherTime.source.toFilterableSource()).not.toBe(filterable);
+      });
+    });
+
+    it('has the name of the source, and no getName, which is an optional capability', async () => {
+      const source = await statsOnDataset('named-*');
+
+      const filterable = await source.toFilterableSource();
+
+      expect(filterable.name).toBe(source.name);
+      expect('getName' in filterable).toBe(false);
+    });
+
     it('is not time based without a time field', async () => {
       const source = await statsOnDataset('no-time-*');
 
