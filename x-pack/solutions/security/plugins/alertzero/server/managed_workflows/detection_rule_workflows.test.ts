@@ -1721,6 +1721,111 @@ describe('detection rule workflows', () => {
         expect(outputs.harvest_failed).toContain('steps.harvest_fp_alerts_by_rule.error != null');
         expect(outputs.lookup_failed).toContain('steps.list_active_reviews.error != null');
       });
+
+      // A failed harvest is not a quiet sweep: zero reviews after it does not mean no
+      // noisy rule, so the run ends failed and the failed-scan callout can list it
+      // (security-team#20132). The lookup failure is a deliberate fail-open and is not.
+      describe('terminal status', () => {
+        const terminal = (name: string) =>
+          tuningSteps.find((step) => step.name === name) as unknown as {
+            if: string;
+            status: string;
+            with: Record<string, string>;
+          };
+        const failedStep = terminal('emit_harvest_failed');
+        const completedStep = terminal('emit_result');
+
+        const evaluate = async (errors: Partial<Record<string, { message: string } | null>>) => {
+          const context = {
+            consts: tuning.consts,
+            steps: {
+              harvest_fp_alerts_by_rule: { error: null },
+              list_enabled_candidates: { error: null },
+              list_active_reviews: { error: null },
+              resolve_fanout_rows: { output: { rows: [] } },
+              collect_active_rules: { output: { expected: 0 } },
+            } as Record<string, unknown>,
+          };
+          for (const [name, error] of Object.entries(errors)) {
+            context.steps[name] = { error };
+          }
+          const { message, ...typed } = failedStep.with;
+          return {
+            fails: resolveExpression(failedStep.if, context),
+            completes: resolveExpression(completedStep.if, context),
+            // `message` is a string template; the rest are typed `${{ }}` expressions.
+            message: await createWorkflowLiquidEngine().parseAndRender(message, context),
+            outputs: Object.fromEntries(
+              Object.entries(typed).map(([key, value]) => [key, resolveExpression(value, context)])
+            ),
+          };
+        };
+
+        it('ends failed when the harvest failed, with the reason and the declared outputs', async () => {
+          const { fails, completes, outputs, message } = await evaluate({
+            harvest_fp_alerts_by_rule: { message: 'search_phase_execution_exception' },
+          });
+
+          expect(fails).toBe(true);
+          expect(completes).toBe(false);
+          expect(outputs).toMatchObject({
+            harvest_failed: true,
+            lookup_failed: false,
+            reviews_requested: 0,
+          });
+          expect(message).toContain('search_phase_execution_exception');
+        });
+
+        it('ends failed when the enabled-rule lookup after the harvest failed', async () => {
+          const { fails, completes, message } = await evaluate({
+            list_enabled_candidates: { message: 'rules client unavailable' },
+          });
+
+          expect(fails).toBe(true);
+          expect(completes).toBe(false);
+          expect(message).toContain('rules client unavailable');
+        });
+
+        it('completes when the harvest succeeded', async () => {
+          const { fails, completes } = await evaluate({});
+
+          expect(fails).toBe(false);
+          expect(completes).toBe(true);
+        });
+
+        // An empty `terms` filter matches nothing, so the sweep did its work.
+        it('completes when only the active-review lookup failed, which is a fail-open', async () => {
+          const { fails, completes } = await evaluate({ list_active_reviews: { message: 'boom' } });
+
+          expect(fails).toBe(false);
+          expect(completes).toBe(true);
+        });
+
+        it('fails only after the expire and review steps, and only through workflow.output', () => {
+          const names = tuningSteps.map(({ name }) => name);
+
+          expect(failedStep.status).toBe('failed');
+          expect(completedStep.status).toBe('completed');
+          expect(names.indexOf('emit_harvest_failed')).toBeGreaterThan(
+            names.indexOf('expire_stale_tuning_proposals')
+          );
+          expect(names.indexOf('emit_harvest_failed')).toBeGreaterThan(
+            names.indexOf('run_reviews')
+          );
+        });
+
+        it('declares every output the failure path emits', () => {
+          const declared = (tuning.outputs as unknown as Array<{ name: string }>).map(
+            ({ name }) => name
+          );
+
+          expect(
+            Object.keys(failedStep.with)
+              .filter((key) => key !== 'message')
+              .sort()
+          ).toEqual([...declared].sort());
+        });
+      });
     });
 
     describe('coverage sweep', () => {
