@@ -48,6 +48,7 @@ describe('setupDependencies', () => {
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
+    get: jest.fn().mockReturnThis(),
   } as unknown as Logger;
 
   const mockConfig: WorkflowsExecutionEngineConfig = {
@@ -63,6 +64,7 @@ describe('setupDependencies', () => {
     },
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024),
     eviction: {
+      maxCacheSize: new ByteSizeValue(10 * 1024 * 1024),
       minPayloadSize: new ByteSizeValue(10 * 1024),
     },
     collectQueueMetrics: false,

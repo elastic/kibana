@@ -130,49 +130,19 @@ export class StepExecutionRuntime {
     }
     const error = this.stepIoService.getStepError(this.stepExecutionId);
     return {
-      input: this.stepIoService.getStepInput(this.stepExecutionId) || {},
-      output: this.stepIoService.getStepOutput(this.stepExecutionId) || {},
+      input: this.stepIoService.read(this.stepExecutionId, 'input') || {},
+      output: this.stepIoService.read(this.stepExecutionId, 'output') || {},
       error: error ? new ExecutionError(error) : undefined,
     };
   }
 
   /**
-   * Brings the given step executions' outputs back into in-memory state so a
-   * subsequent {@link getCurrentStepResult} can read them.
-   *
-   * Needed by callers that read another step execution's output *directly*
-   * rather than through a template: the template path is pre-warmed by
-   * `StepIoService.prepareForRead`, which targets outputs by static template
-   * analysis and therefore cannot see a direct read. Resume-time `load()` marks
-   * every non-pinned step deferred, so without this a direct read of an output
-   * written in an earlier tick silently yields `{}`.
-   *
-   * Takes a list so a caller reading many outputs pays one ES round trip.
-   * No-op for ids that are already resident.
-   *
-   * Read-pins the whole requested set for `consumerId` before awaiting, and the
-   * caller MUST {@link releaseReadOutputPins} once its synchronous reads are
-   * done. Pinning is not bookkeeping: `rehydrateOutputs` snapshots only the ids
-   * that are evicted when it starts, so without a pin a *resident* id in the
-   * set can be flushed and evicted by the concurrent persistence loop during
-   * the ES round trip — after which it was neither fetched by that call nor
-   * still in memory, and reads back as `{}`. `prepareForRead` pins before its
-   * own await for exactly this reason.
+   * Brings the given step executions' outputs back into the LRU cache so a
+   * subsequent {@link getCurrentStepResult} can read them. One Elasticsearch
+   * round trip for the ids that are not already cached.
    */
-  public async rehydrateStepOutputs(
-    stepExecutionIds: ReadonlyArray<string>,
-    consumerId: string = this.stepExecutionId
-  ): Promise<void> {
-    this.stepIoService.pinOutputsForRead(consumerId, stepExecutionIds);
-    await this.stepIoService.rehydrateOutputs(stepExecutionIds);
-  }
-
-  /**
-   * Releases the pins taken by {@link rehydrateStepOutputs}. Idempotent, so it
-   * is safe in a `finally`.
-   */
-  public releaseReadOutputPins(consumerId: string = this.stepExecutionId): void {
-    this.stepIoService.releaseReadPins(consumerId);
+  public async rehydrateStepOutputs(stepExecutionIds: ReadonlyArray<string>): Promise<void> {
+    await this.stepIoService.rehydrate(stepExecutionIds, stepExecutionIds);
   }
 
   public getCurrentStepState(): Record<string, unknown> | undefined {
@@ -210,7 +180,7 @@ export class StepExecutionRuntime {
   }
 
   public setInput(input: Record<string, unknown>): void {
-    this.stepIoService.setStepInput(this.stepExecutionId, input as JsonValue);
+    this.stepIoService.write(this.stepExecutionId, 'input', input as JsonValue);
   }
 
   /** Stamps the optional HITL audit envelope on the in-memory step doc (flushed with the next step write). */
@@ -252,8 +222,9 @@ export class StepExecutionRuntime {
       ...(usage ? { usage } : {}),
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
-    this.stepIoService.setStepOutput(
+    this.stepIoService.write(
       this.stepExecutionId,
+      'output',
       (stepOutput ?? null) as JsonValue | null,
       sizeBytes
     );
@@ -316,12 +287,9 @@ export class StepExecutionRuntime {
       ...(usage ? { usage } : {}),
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
-    // When partial output is provided, persist it so it remains reachable via
-    // `steps.x.output`. Otherwise write the `null` FAILED-step sentinel —
-    // distinct from `undefined` (evicted) so the eviction predicate can keep
-    // them apart.
-    this.stepIoService.setStepOutput(
+    this.stepIoService.write(
       this.stepExecutionId,
+      'output',
       partialOutput !== undefined ? (partialOutput as JsonValue) : null
     );
     this.logStepFail(executionError);
@@ -361,7 +329,7 @@ export class StepExecutionRuntime {
       error: serializedError,
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
-    this.stepIoService.setStepOutput(this.stepExecutionId, null);
+    this.stepIoService.write(this.stepExecutionId, 'output', null);
     this.logStepFail(executionError);
   }
 

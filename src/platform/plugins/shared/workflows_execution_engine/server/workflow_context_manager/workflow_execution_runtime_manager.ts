@@ -31,7 +31,6 @@ import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionCursor } from './workflow_execution_cursor';
 import type { WorkflowExecutionState } from './workflow_execution_state';
-import type { WorkflowRuntimeGraph } from './workflow_runtime_graph';
 import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
@@ -41,7 +40,6 @@ interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
   stepIoService: StepIoService;
   workflowExecution: EsWorkflowExecution;
-  workflowExecutionGraph: WorkflowRuntimeGraph;
   workflowExecutionCursor: WorkflowExecutionCursor;
   workflowLogger: IWorkflowEventLogger;
   coreStart?: CoreStart;
@@ -77,14 +75,12 @@ export class WorkflowExecutionRuntimeManager {
   private stepIoService: StepIoService;
   private entryTransactionId?: string;
   private workflowTransaction?: agent.Transaction; // APM transaction instance
-  private workflowGraph: WorkflowRuntimeGraph;
   private coreStart?: CoreStart;
   private dependencies?: ContextDependencies;
   private telemetryClient?: WorkflowExecutionTelemetryClient;
   private telemetryReported: boolean = false;
 
   constructor(workflowExecutionRuntimeManagerInit: WorkflowExecutionRuntimeManagerInit) {
-    this.workflowGraph = workflowExecutionRuntimeManagerInit.workflowExecutionGraph;
     this.workflowExecutionCursor = workflowExecutionRuntimeManagerInit.workflowExecutionCursor;
 
     // Use workflow execution ID as traceId for APM compatibility
@@ -469,7 +465,10 @@ export class WorkflowExecutionRuntimeManager {
     };
     this.workflowExecutionState.updateWorkflowExecution(updatedWorkflowExecution);
     this.logWorkflowStart();
-    await this.stepIoService.flush();
+    await Promise.all([
+      this.workflowExecutionState.flushWorkflowDoc(),
+      this.workflowExecutionState.flushStepChanges(),
+    ]);
   }
 
   public async resume(): Promise<void> {
@@ -478,8 +477,7 @@ export class WorkflowExecutionRuntimeManager {
         'Execution can`t be resummed because current node ID is not set in execution state'
       );
     }
-    await this.stepIoService.load();
-    this.stepIoService.evictCompletedLoopsOnResume(this.workflowGraph);
+    await this.workflowExecutionState.load();
     this.workflowExecutionCursor.navigateToNode(this.workflowExecution.currentNodeId);
     this.workflowExecutionCursor.commitPendingNavigation();
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {

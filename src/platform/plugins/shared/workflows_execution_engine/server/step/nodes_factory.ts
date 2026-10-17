@@ -96,7 +96,6 @@ import { WorkflowOutputStepImpl } from './workflow_output_step/workflow_output_s
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
-import type { StepIoService } from '../workflow_context_manager/step_io_service';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowRuntimeGraph } from '../workflow_context_manager/workflow_runtime_graph';
@@ -109,8 +108,7 @@ export class NodesFactory {
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
     private workflowGraph: WorkflowRuntimeGraph,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
-    private dependencies: ContextDependencies,
-    private stepIoService: StepIoService
+    private dependencies: ContextDependencies
   ) {}
 
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
@@ -196,8 +194,7 @@ export class NodesFactory {
           node as EnterForeachNode,
           this.workflowRuntime,
           stepExecutionRuntime,
-          stepLogger,
-          this.stepIoService
+          stepLogger
         );
       case 'enter-foreach-iteration':
         return new EnterForeachIterationNodeImpl(
@@ -213,26 +210,21 @@ export class NodesFactory {
           node as ExitForeachNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger,
-          this.stepIoService,
-          this.workflowGraph
+          stepLogger
         );
       case 'enter-while':
         return new EnterWhileNodeImpl(
           node as EnterWhileNode,
           this.workflowRuntime,
           stepExecutionRuntime,
-          stepLogger,
-          this.stepIoService
+          stepLogger
         );
       case 'exit-while':
         return new ExitWhileNodeImpl(
           node as ExitWhileNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger,
-          this.stepIoService,
-          this.workflowGraph
+          stepLogger
         );
       case 'enter-parallel':
         return new EnterParallelNodeImpl(
@@ -252,9 +244,7 @@ export class NodesFactory {
           stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger,
-          this.stepExecutionRuntimeFactory,
-          this.stepIoService,
-          this.workflowGraph
+          this.stepExecutionRuntimeFactory
         );
       case 'loop-continue':
         return new LoopContinueNodeImpl(
@@ -262,9 +252,7 @@ export class NodesFactory {
           stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger,
-          this.stepExecutionRuntimeFactory,
-          this.stepIoService,
-          this.workflowGraph
+          this.stepExecutionRuntimeFactory
         );
       case 'enter-retry':
         return new EnterRetryNodeImpl(
