@@ -29,6 +29,7 @@ export const useEpisodesBulkActions = ({
       .filter((action) => action.supportsBulk !== false)
       .map((action) => ({
         key: action.id,
+        'data-test-subj': `episodesBulkAction-${action.id}`,
         label: action.displayName,
         icon: action.iconType,
         isAvailable: ({ selectedDocIds }) =>

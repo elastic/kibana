@@ -6,6 +6,7 @@
  */
 
 import {
+  ALERT_CASE_IDS,
   ALERT_DURATION,
   ALERT_END,
   ALERT_FLAPPING,
@@ -55,6 +56,7 @@ export const CLASSIC_ALERT_EPISODE_SOURCE_FIELDS = [
   ALERT_SEVERITY,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
+  ALERT_CASE_IDS,
   ALERT_GROUPING,
   ALERT_FLAPPING,
 ] as const;
@@ -88,6 +90,7 @@ export interface ClassicAlertSource {
   [ALERT_SEVERITY]?: string;
   [ALERT_WORKFLOW_STATUS]?: string;
   [ALERT_WORKFLOW_TAGS]?: string | string[];
+  [ALERT_CASE_IDS]?: string | string[];
   [ALERT_GROUPING]?: Record<string, unknown>;
   [ALERT_FLAPPING]?: boolean;
 }
@@ -99,6 +102,7 @@ export interface ClassicAlertActionContext {
   readonly ruleId: string;
   readonly workflowStatus: string | undefined;
   readonly workflowTags: string[];
+  readonly caseIds: string[];
 }
 
 const asStringArray = (value: string | string[] | undefined): string[] => {
@@ -149,6 +153,7 @@ export const mapClassicAlertToEpisode = (
     ruleId: source[ALERT_RULE_UUID] ?? '',
     workflowStatus: source[ALERT_WORKFLOW_STATUS],
     workflowTags,
+    caseIds: asStringArray(source[ALERT_CASE_IDS]),
   };
 
   return {

@@ -21,8 +21,10 @@ import {
 } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
+import type { EpisodeAction, EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
+import { closeAddToCaseModal, createAddToCaseAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import { EuiPageSection } from '@elastic/eui';
 import { ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
 import { AlertingNavPromo } from '@kbn/observability-plugin/public';
@@ -34,15 +36,34 @@ import {
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
+import type { ObservabilityAlertingCases } from '../types';
 import { createInvestigateEpisodeAction } from '../actions/investigate_episode_action';
 import { hasObservabilityAlertingCapabilities } from './has_observability_alerting_privilege';
 
-const createObservabilityEpisodeActions = () => [createInvestigateEpisodeAction()];
+const OBSERVABILITY_CASES_OWNER = 'observability';
+
+const createObservabilityEpisodeActions = (
+  cases: ObservabilityAlertingCases | undefined,
+  { rendering }: EpisodeActionsDeps
+): EpisodeAction[] => [
+  createInvestigateEpisodeAction(),
+  ...(cases
+    ? [
+        createAddToCaseAction({
+          cases: cases.service,
+          owner: OBSERVABILITY_CASES_OWNER,
+          rendering,
+          kibanaServices: cases.kibanaServices,
+        }),
+      ]
+    : []),
+];
 
 interface ObservabilityAlertingAppProps {
   coreStart: CoreStart;
   alertingVTwo: AlertingV2PublicStart;
   triggersActionsUi: Pick<TriggersAndActionsUIPublicPluginStart, 'getClassicRulesPage'>;
+  cases?: ObservabilityAlertingCases;
   ObservabilityPageTemplate: ObservabilitySharedPluginStart['navigation']['PageTemplate'];
   history: ScopedHistory;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
@@ -133,6 +154,7 @@ export const ObservabilityAlertingApp = ({
   coreStart,
   alertingVTwo,
   triggersActionsUi,
+  cases,
   ObservabilityPageTemplate,
   history,
   setBreadcrumbs,
@@ -145,6 +167,10 @@ export const ObservabilityAlertingApp = ({
     ExecutionHistoryPage,
     createAlertingV2HostApp: createHost,
   } = alertingVTwo;
+
+  useEffect(() => {
+    return closeAddToCaseModal;
+  }, []);
 
   const hostApp = useObservabilityHostApp(createHost);
   const prepend = coreStart.http.basePath.prepend;
@@ -162,6 +188,11 @@ export const ObservabilityAlertingApp = ({
   }, [hasV2Rules, prepend]);
   const rulesV1Tabs = useObservabilityRulesTabs(prepend, 'v1', rulesTabVisibility);
   const rulesV2Tabs = useObservabilityRulesTabs(prepend, 'v2', rulesTabVisibility);
+
+  const createActions = useCallback(
+    (deps: EpisodeActionsDeps) => createObservabilityEpisodeActions(cases, deps),
+    [cases]
+  );
 
   const privilegeCheck: PrivilegeCheck = useCallback(
     (features, _capability) => {
@@ -189,7 +220,7 @@ export const ObservabilityAlertingApp = ({
               setBreadcrumbs={setBreadcrumbs}
               hostApp={hostApp}
               privilegeCheck={privilegeCheck}
-              createActions={createObservabilityEpisodeActions}
+              createActions={createActions}
               manageRulesHref={manageRulesHref}
             />
             <Route exact path={OBSERVABILITY_ALERTING_ALERTS_PATH}>

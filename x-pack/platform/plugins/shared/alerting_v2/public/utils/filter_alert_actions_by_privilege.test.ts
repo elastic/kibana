@@ -22,6 +22,7 @@ const makeAction = (id: string): EpisodeAction => ({
 
 const ackAction = makeAction('ALERTING_V2_ACK_EPISODE');
 const discoverAction = makeAction('ALERTING_V2_OPEN_EPISODE_IN_DISCOVER');
+const addToCaseAction = makeAction('ALERTING_V2_ADD_EPISODE_TO_CASE');
 
 describe('filterAlertActionsByPrivilege', () => {
   it('returns every action for the "all" capability', () => {
@@ -35,6 +36,14 @@ describe('filterAlertActionsByPrivilege', () => {
       ALERT_ACTIONS_PRIVILEGE.read
     );
     expect(result).toEqual([discoverAction]);
+  });
+
+  it('keeps the add to case action for the "read" capability', () => {
+    const result = filterAlertActionsByPrivilege(
+      [ackAction, addToCaseAction],
+      ALERT_ACTIONS_PRIVILEGE.read
+    );
+    expect(result).toEqual([addToCaseAction]);
   });
 
   it('hides actions that are not explicitly read-safe by default', () => {
