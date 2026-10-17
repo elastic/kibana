@@ -100,6 +100,29 @@ function getExpressionForLayer(
       ignoreGlobalFilters: Boolean(layer.ignoreGlobalFilters),
     });
 
+    const overlay = layer.histogramOverlay;
+
+    if (overlay) {
+      textBasedQueryToAst.chain.push({
+        type: 'function',
+        function: 'lens_stack_histogram_series',
+        arguments: {
+          timeColumn: [overlay.timeColumn],
+          totalColumn: [overlay.totalColumn],
+          overlayColumn: [overlay.overlayColumn],
+          remainderColumn: [overlay.remainderColumn],
+          label: [overlay.label],
+          from: [overlay.from],
+          to: [overlay.to],
+          values: [JSON.stringify(overlay.values)],
+          isSampled: [overlay.isSampled],
+          ...(overlay.sampleProbability !== undefined
+            ? { sampleProbability: [overlay.sampleProbability] }
+            : {}),
+        },
+      });
+    }
+
     textBasedQueryToAst.chain.push({
       type: 'function',
       function: 'lens_map_to_columns',

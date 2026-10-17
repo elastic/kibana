@@ -19,7 +19,7 @@ import {
   type DataCascadeRestorableState,
 } from '@kbn/shared-ux-document-data-cascade';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
-import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
+import { getCountSparkline, getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { EsqlQuery } from '@elastic/esql';
 import { type ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { getStatsCommandToOperateOn } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers/utils';
@@ -37,6 +37,19 @@ import { useEsqlDataCascadeRowActionHelpers } from './blocks/use_row_header_comp
 import { useDataCascadeRowExpansionHandlers, useGroupedCascadeData } from './hooks';
 import { useCascadedDocumentsContext } from './cascaded_documents_provider';
 import { useCascadedDocumentsTelemetry } from './telemetry';
+import {
+  buildHistogramOverlaySelection,
+  resolveHistogramOverlayPublication,
+} from './histogram_overlay_selection';
+import { getSingleCategorizeGroupField } from '../histogram_overlay/histogram_overlay_series';
+import { getPatternComparisonMessageState } from '../histogram_overlay/pattern_comparison_message';
+import {
+  publishHistogramOverlaySelection,
+  useAppStateSelector,
+  useCurrentTabRuntimeState,
+  useInternalStateSelector,
+  useRuntimeStateManager,
+} from '../../../state_management/redux';
 
 export interface ESQLDataCascadeProps
   extends Pick<
@@ -66,7 +79,17 @@ const ESQLDataCascade = React.memo(
       getDataCascadeUiState,
       setDataCascadeUiState,
       cascadeGroupingChangeHandler,
+      esqlQuery,
+      timeRange,
+      documentsFetchStatus,
+      documentsQuery,
     } = useCascadedDocumentsContext();
+    const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
+    const runtimeStateManager = useRuntimeStateManager();
+    const histogramOverlaySelection = useCurrentTabRuntimeState(
+      (tab) => tab.histogramOverlaySelection$
+    );
+    const histogramOverlayResult = useCurrentTabRuntimeState((tab) => tab.histogramOverlayResult$);
 
     const { data: cascadeGroupData, columnTypes } = useGroupedCascadeData({
       selectedCascadeGroups,
@@ -94,9 +117,23 @@ const ESQLDataCascade = React.memo(
       [cascadeGroupingChangeHandler, trackCascadeOptOut]
     );
 
+    const chartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
+    const sparkline = useMemo(() => getCountSparkline(esqlQuery.esql), [esqlQuery.esql]);
+    const canComparePatterns = useMemo(
+      () => Boolean(getSingleCategorizeGroupField(queryMeta.groupByFields)) && Boolean(sparkline),
+      [queryMeta.groupByFields, sparkline]
+    );
+    const patternComparison = getPatternComparisonMessageState({
+      canCompare: canComparePatterns,
+      chartHidden,
+      selection: histogramOverlaySelection,
+      result: histogramOverlayResult,
+    });
+
     const customTableHeading = useEsqlDataCascadeHeaderComponent({
       renderViewModeToggle,
       cascadeGroupingChangeHandler: cascadeGroupingChangeHandlerWithTracking,
+      patternComparison,
     });
 
     const { rowActions, rowHeaderMeta, rowHeaderTitle } = useEsqlDataCascadeRowHeaderComponents(
@@ -156,6 +193,66 @@ const ESQLDataCascade = React.memo(
         unsubscribeSnapshot();
       };
     }, [dataCascadeRef, latestSetDataCascadeUiState]);
+
+    useEffect(() => {
+      const snapshotStore = dataCascadeRef?.getUISnapshotStore();
+
+      if (!snapshotStore) {
+        publishHistogramOverlaySelection(runtimeStateManager, currentTabId, undefined);
+        return;
+      }
+
+      const publish = () => {
+        const snapshot = snapshotStore.getSnapshot();
+        const decision = resolveHistogramOverlayPublication({
+          fetchStatus: documentsFetchStatus,
+          rowsQuery: documentsQuery,
+          currentQuery: esqlQuery.esql,
+          expanded: snapshot.expanded,
+          selectedNodeId: histogramOverlaySelection?.nodeId,
+        });
+
+        if (decision === 'preserve') {
+          return;
+        }
+
+        publishHistogramOverlaySelection(
+          runtimeStateManager,
+          currentTabId,
+          decision === 'clear'
+            ? undefined
+            : buildHistogramOverlaySelection({
+                expanded: snapshot.expanded,
+                nodes: cascadeGroupData,
+                query: esqlQuery.esql,
+                timeRange,
+                queryMeta,
+                sparkline,
+              })
+        );
+      };
+
+      publish();
+      return snapshotStore.subscribe(publish);
+    }, [
+      cascadeGroupData,
+      currentTabId,
+      dataCascadeRef,
+      documentsFetchStatus,
+      documentsQuery,
+      esqlQuery.esql,
+      histogramOverlaySelection?.nodeId,
+      queryMeta,
+      runtimeStateManager,
+      sparkline,
+      timeRange,
+    ]);
+
+    useEffect(() => {
+      return () => {
+        publishHistogramOverlaySelection(runtimeStateManager, currentTabId, undefined);
+      };
+    }, [currentTabId, runtimeStateManager]);
 
     return (
       <DataCascade<ESQLDataGroupNode>

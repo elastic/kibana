@@ -24,3 +24,6 @@ export const LENS_RANGE_MODES = {
   Range: 'range',
   Histogram: 'histogram',
 } as const;
+
+export const TEXT_BASED_HISTOGRAM_OVERLAY_APPLIED_META = 'histogramOverlayApplied';
+export const TEXT_BASED_HISTOGRAM_OVERLAY_APPROXIMATE_META = 'histogramOverlayApproximate';

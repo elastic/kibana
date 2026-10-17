@@ -22,8 +22,9 @@ import {
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import {
@@ -87,6 +88,10 @@ export interface DataDocumentsMsg extends DataMsg {
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
   approximationApplied?: boolean;
+  requestContext?: {
+    timeRange: TimeRange | undefined;
+    esqlVariables: ESQLControlVariable[] | undefined;
+  };
 }
 
 export interface DataTotalHitsMsg extends DataMsg {
