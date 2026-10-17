@@ -17,14 +17,22 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CodeEditorProps } from './code_editor';
-export type { CodeEditorProps } from './code_editor';
+export type { CodeEditorProps, CodeEditorScope } from './code_editor';
 export { monaco, BarePluginApi, jsonDefaults } from '@kbn/monaco';
+export type { KbnMonacoLanguageThemeResolver } from '@kbn/monaco';
+// per-editor chrome; the value export is for editors created with `monaco.editor.create*` directly
+export { applyKbnCodeEditorChromeOverrides } from './react_monaco_editor/utils/chrome_overrides';
+export type {
+  KbnCodeEditorChromeColorId,
+  KbnCodeEditorChromeColors,
+  KbnCodeEditorChromeOverrides,
+  KbnCodeEditorChromeOverridesHandle,
+} from './react_monaco_editor/utils/chrome_overrides';
 export * from './react_monaco_editor/languages/supported';
 export {
-  // editor themes
+  // editor theme
   CODE_EDITOR_DEFAULT_THEME_ID,
-  CODE_EDITOR_TRANSPARENT_THEME_ID,
-  defaultThemesResolvers,
+  initializeRegisteredLanguagesTheme,
   // language definitions
   XJsonLang,
   PainlessLang,
@@ -40,12 +48,8 @@ export {
   HJsonLang,
   PromQLLang,
   // esql
-  ESQL_DARK_THEME_ID,
-  ESQL_LIGHT_THEME_ID,
   ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
   // console
-  CONSOLE_THEME_ID,
-  CONSOLE_OUTPUT_THEME_ID,
   getParsedRequestsProvider,
   ConsoleParsedRequestsProvider,
   ConsoleWorkerProxyService,

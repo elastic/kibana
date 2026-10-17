@@ -46,12 +46,6 @@ jest.mock('@kbn/workflows/spec/lib/build_fields_zod_validator', () => ({
   })),
 }));
 
-// Mock theme constant
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
-}));
-
 const renderWithProviders = (component: React.ReactElement) => {
   return render(component, { wrapper: I18nProvider });
 };

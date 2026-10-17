@@ -25,7 +25,7 @@ import { useSelector } from 'react-redux-v7';
 import { CodeEditor, jsonDefaults, type monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import { WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
+import { workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
 import { InputValidationCallout } from './input_validation_callout';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
@@ -402,6 +402,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
                 >
                   <CodeEditor
                     languageId="json"
+                    chromeOverrides={workflowsEditorChromeOverrides}
                     value={value}
                     width="100%"
                     height="100%"
@@ -424,7 +425,6 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
                       renderWhitespace: 'all',
                       wordWrapColumn: 80,
                       wrappingIndent: 'indent',
-                      theme: WORKFLOWS_MONACO_EDITOR_THEME,
                       formatOnType: true,
                       quickSuggestions: false,
                       suggestOnTriggerCharacters: false,

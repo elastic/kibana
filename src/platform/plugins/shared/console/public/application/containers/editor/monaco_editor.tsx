@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip, useEuiTheme } fro
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor/code_editor';
 import type { monaco } from '@kbn/monaco';
-import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ConsoleLang } from '@kbn/monaco';
+import { CONSOLE_LANG_ID, ConsoleLang } from '@kbn/monaco';
 
 import { i18n } from '@kbn/i18n';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
@@ -284,7 +284,6 @@ export const MonacoEditor = ({
         options={{
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
-          theme: CONSOLE_THEME_ID,
           // Only let Enter accept an auto-triggered suggestion when accepting it would actually
           // change the text. Without this, a fully typed term (e.g. `?pretty`) keeps the widget
           // open and Enter gets consumed by a no-op acceptance instead of inserting a new line.

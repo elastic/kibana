@@ -8,8 +8,8 @@
  */
 
 import { makeHighContrastColor, type UseEuiTheme } from '@elastic/eui';
-import { defaultThemesResolvers, CODE_EDITOR_DEFAULT_THEME_ID } from '../../../code_editor';
-import { themeRuleGroupBuilderFactory } from '../../../common/theme';
+import { themeRuleGroupBuilderFactory } from '../../theming/helpers';
+import type { KbnMonacoLanguageThemeResolver } from '../../theming';
 
 const buildRuleGroup = themeRuleGroupBuilderFactory();
 
@@ -27,19 +27,15 @@ const getConsoleColorConfig = (themeVars: UseEuiTheme['euiTheme']) => {
   };
 };
 
-export const buildConsoleTheme = ({ colorMode, euiTheme, ...rest }: UseEuiTheme) => {
+/**
+ * Console's own token rules. The shared palette is seeded into Console's namespace at registration,
+ * so only the overrides are listed here.
+ */
+export const buildConsoleTheme: KbnMonacoLanguageThemeResolver = ({ euiTheme }) => {
   const consoleColors = getConsoleColorConfig(euiTheme);
 
-  const themeBase = defaultThemesResolvers[CODE_EDITOR_DEFAULT_THEME_ID]({
-    colorMode,
-    euiTheme,
-    ...rest,
-  });
-
   return {
-    ...themeBase,
     rules: [
-      ...themeBase.rules,
       ...buildRuleGroup(
         ['string-literal', 'multi-string', 'punctuation.end-triple-quote'],
         makeHighContrastColor(euiTheme.colors.textDanger)(consoleColors.background)
@@ -124,9 +120,5 @@ export const buildConsoleTheme = ({ colorMode, euiTheme, ...rest }: UseEuiTheme)
         makeHighContrastColor(consoleColors.urlTextColor)(consoleColors.background)
       ),
     ],
-    colors: {
-      ...themeBase.colors,
-      'editorLineNumber.foreground': euiTheme.colors.textPrimary,
-    },
   };
 };
