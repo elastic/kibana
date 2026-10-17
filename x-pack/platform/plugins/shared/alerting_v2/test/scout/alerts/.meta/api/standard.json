@@ -1,5 +1,5 @@
 {
-  "sha1": "88b5f94118c52cfc4cb67f217a5b63abc64c63b3",
+  "sha1": "582f6bc5a12806a3c8c9d339b8ef8c59b3e34c60",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -781,12 +781,15 @@
       "title": "Create ack episode action API ack: writes an ack action and returns 204",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 40,
-        "column": 33
+        "line": 31,
+        "column": 23
       }
     },
     {
@@ -794,12 +797,15 @@
       "title": "Create ack episode action API ack: audit actions work on old (superseded) episodes",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 70,
-        "column": 14
+        "line": 62,
+        "column": 12
       }
     },
     {
@@ -807,12 +813,15 @@
       "title": "Create ack episode action API ack: a repeated ack returns 409 and writes no second action",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 118,
-        "column": 11
+        "line": 110,
+        "column": 14
       }
     },
     {
@@ -820,12 +829,15 @@
       "title": "Create ack episode action API ack: acking again after an unack returns 204",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 157,
-        "column": 11
+        "line": 150,
+        "column": 15
       }
     },
     {
@@ -833,12 +845,15 @@
       "title": "Create ack episode action API schema: rejects alert_id in the body (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 195,
-        "column": 29
+        "line": 187,
+        "column": 26
       }
     },
     {
@@ -846,12 +861,15 @@
       "title": "Create ack episode action API schema: rejects unknown body fields (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 207,
-        "column": 20
+        "line": 196,
+        "column": 25
       }
     },
     {
@@ -859,12 +877,15 @@
       "title": "Create ack episode action API schema: rejects alert_id over 150 chars with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 215,
-        "column": 100
+        "line": 204,
+        "column": 16
       }
     },
     {
@@ -872,12 +893,15 @@
       "title": "Create ack episode action API returns 404 when alert_id matches no events",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 221,
-        "column": 14
+        "line": 211,
+        "column": 11
       }
     },
     {
@@ -885,12 +909,15 @@
       "title": "Create ack episode action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 231,
-        "column": 7
+        "line": 220,
+        "column": 67
       }
     },
     {
@@ -898,12 +925,15 @@
       "title": "Create ack episode action API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 240,
-        "column": 63
+        "line": 228,
+        "column": 5
       }
     },
     {
@@ -1887,12 +1917,15 @@
       "title": "Create tag episode action API tag: writes a tag action and returns 204",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 39,
-        "column": 33
+        "line": 30,
+        "column": 23
       }
     },
     {
@@ -1900,12 +1933,15 @@
       "title": "Create tag episode action API tag: an empty tags array clears the tags and returns 204",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 74,
-        "column": 21
+        "line": 66,
+        "column": 22
       }
     },
     {
@@ -1913,12 +1949,15 @@
       "title": "Create tag episode action API tag: repeating the current set returns 409 regardless of order",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 116,
-        "column": 30
+        "line": 108,
+        "column": 9
       }
     },
     {
@@ -1926,12 +1965,15 @@
       "title": "Create tag episode action API tag: re-applying a cleared set returns 204",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 161,
-        "column": 97
+        "line": 153,
+        "column": 23
       }
     },
     {
@@ -1939,12 +1981,15 @@
       "title": "Create tag episode action API tag: audit actions work on old (superseded) episodes",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 209,
-        "column": 31
+        "line": 200,
+        "column": 29
       }
     },
     {
@@ -1952,12 +1997,15 @@
       "title": "Create tag episode action API schema: rejects body missing tags with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 255,
-        "column": 73
+        "line": 247,
+        "column": 12
       }
     },
     {
@@ -1965,12 +2013,15 @@
       "title": "Create tag episode action API schema: rejects more than 20 tags with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 262,
-        "column": 24
+        "line": 254,
+        "column": 13
       }
     },
     {
@@ -1978,12 +2029,15 @@
       "title": "Create tag episode action API schema: rejects an empty tag string with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 271,
-        "column": 24
+        "line": 263,
+        "column": 13
       }
     },
     {
@@ -1991,12 +2045,15 @@
       "title": "Create tag episode action API schema: rejects a tag over 128 chars with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 281,
-        "column": 18
+        "line": 272,
+        "column": 33
       }
     },
     {
@@ -2004,12 +2061,15 @@
       "title": "Create tag episode action API schema: rejects non-string tag elements with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 290,
-        "column": 18
+        "line": 281,
+        "column": 30
       }
     },
     {
@@ -2017,12 +2077,15 @@
       "title": "Create tag episode action API schema: rejects unknown body fields (strict mode) with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 299,
-        "column": 18
+        "line": 290,
+        "column": 22
       }
     },
     {
@@ -2030,12 +2093,15 @@
       "title": "Create tag episode action API schema: rejects alert_id over 150 chars with 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 309,
-        "column": 15
+        "line": 299,
+        "column": 36
       }
     },
     {
@@ -2043,12 +2109,15 @@
       "title": "Create tag episode action API returns 404 when alert_id matches no events",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 318,
-        "column": 27
+        "line": 309,
+        "column": 13
       }
     },
     {
@@ -2056,12 +2125,15 @@
       "title": "Create tag episode action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 332,
-        "column": 25
+        "line": 322,
+        "column": 43
       }
     },
     {
@@ -2069,12 +2141,15 @@
       "title": "Create tag episode action API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 342,
-        "column": 2
+        "line": 401,
+        "column": 27
       }
     },
     {
