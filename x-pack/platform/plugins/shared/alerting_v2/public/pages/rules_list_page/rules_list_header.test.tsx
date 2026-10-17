@@ -19,7 +19,6 @@ let mockExperimentalFeaturesEnabled = true;
 let mockAreAgentBuilderSkillsAvailable = true;
 let mockAgentBuilderSkillsRequirements = {
   hasAgentBuilderCapability: true,
-  isExperimentalFeaturesEnabled: true,
 };
 
 /** Non-empty so the assertions below prove each href is run through `basePath.prepend`. */
@@ -94,7 +93,6 @@ describe('RulesListHeader', () => {
     mockAreAgentBuilderSkillsAvailable = true;
     mockAgentBuilderSkillsRequirements = {
       hasAgentBuilderCapability: true,
-      isExperimentalFeaturesEnabled: true,
     };
   });
 

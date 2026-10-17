@@ -15,10 +15,10 @@ import { expect } from '@playwright/test';
 import { tags } from '@kbn/scout';
 import { evaluate } from '../../src/evaluate';
 import {
-  ACTION_POLICY_MANAGEMENT_SKILL_ID,
+  ACTION_POLICY_AUTHORING_SKILL_ID,
   ALERTING_TOOL_IDS,
   DETECTION_RULE_EDIT_SKILL_ID,
-  RULE_MANAGEMENT_SKILL_ID,
+  RULE_AUTHORING_SKILL_ID,
   WORKFLOW_AUTHORING_SKILL_ID,
   WORKFLOW_GENERATION_TOOL_ID,
   WORKFLOW_YAML_ATTACHMENT_TYPE,
@@ -27,7 +27,7 @@ import { assertActionPolicyWorkflowLiquid } from '../../src/assert_action_policy
 import { getLatestAttachmentData } from '../../src/evaluators/expected_attachment';
 
 evaluate.describe(
-  'Alerting V2 rule-management skill - action policies (notifications)',
+  'Alerting V2 rule-authoring skill - action policies (notifications)',
   { tag: tags.serverless.observability.complete },
   () => {
     evaluate(
@@ -36,12 +36,12 @@ evaluate.describe(
         void emailConnectorId; // Seeds the `.email` connector default notification setup requires.
         await evaluateDataset({
           dataset: {
-            name: 'alerting-v2: rule-management notification setup',
+            name: 'alerting-v2: rule-authoring notification setup',
             description:
               'Exercises the cross-skill notification setup flow. Turn 1 is a fully-specified ' +
               'composed rule creation request on the seeded host-metrics index; after composing the complete ' +
               'alert rule the agent should proactively offer to set up email notifications. ' +
-              'Turn 2 accepts: the agent should load the action-policy-management skill (and ' +
+              'Turn 2 accepts: the agent should load the action-policy-authoring skill (and ' +
               'workflow-authoring), generate a notification workflow (an email connector is ' +
               'seeded), and compose the action policy via manage_action_policy — never claiming ' +
               'any artifact was persisted.',
@@ -57,7 +57,7 @@ evaluate.describe(
                 output: {
                   criteria: [
                     'The first-turn response composes the rule AND proactively asks whether the user wants to set up (email) notifications for it — proactive means the assistant raises notifications itself; merely complying after the user brings it up on turn 2 does not satisfy this.',
-                    'After the user accepts notifications, the assistant loads the action-policy-management skill to own workflow + action policy setup (rather than composing those from the rule-management skill alone).',
+                    'After the user accepts notifications, the assistant loads the action-policy-authoring skill to own workflow + action policy setup (rather than composing those from the rule-authoring skill alone).',
                     'The assistant does not claim that no email connector is configured — one exists in the environment and should be discovered (e.g. via platform.workflows.get_connectors).',
                     'The action policy uses per_alert grouping and on_status_change throttle.',
                     'The final manage_action_policy call ends with a validate operation, and validation succeeds (after corrective retries if needed).',
@@ -65,8 +65,8 @@ evaluate.describe(
                     'The assistant does not require the rule to be saved before the action policy, but reminds the user that the rule is still unsaved and that the policy will not match any alerts until the rule carrying its routing tag is saved.',
                   ],
                   expectedSkills: [
-                    RULE_MANAGEMENT_SKILL_ID,
-                    ACTION_POLICY_MANAGEMENT_SKILL_ID,
+                    RULE_AUTHORING_SKILL_ID,
+                    ACTION_POLICY_AUTHORING_SKILL_ID,
                     WORKFLOW_AUTHORING_SKILL_ID,
                   ],
                   notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],

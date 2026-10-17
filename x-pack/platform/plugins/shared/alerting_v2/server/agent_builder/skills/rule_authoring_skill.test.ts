@@ -6,14 +6,13 @@
  */
 
 import {
-  ACTION_POLICY_MANAGEMENT_SKILL_ID,
+  ACTION_POLICY_AUTHORING_SKILL_ID,
   ALERTING_TOOL_IDS,
-  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
-  RULE_MANAGEMENT_SKILL_ID,
+  RULE_AUTHORING_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
-import { createAlertingV2Availability } from './alerting_v2_experimental_availability';
-import { createRuleManagementSkill } from './rule_management_skill';
+import { createAlertingV2Availability } from './alerting_v2_availability';
+import { createRuleAuthoringSkill } from './rule_authoring_skill';
 
 const createDeps = () => ({
   logger: {
@@ -28,43 +27,45 @@ const createDeps = () => ({
   }),
 });
 
-describe('createRuleManagementSkill', () => {
+describe('createRuleAuthoringSkill', () => {
   it('generates schema docs without throwing', () => {
-    expect(() => createRuleManagementSkill(createDeps())).not.toThrow();
+    expect(() => createRuleAuthoringSkill(createDeps())).not.toThrow();
   });
 
-  it('registers the skill under the stable rule-management id and name', () => {
-    const skill = createRuleManagementSkill(createDeps());
+  it('registers the skill under the stable rule-authoring id and name', () => {
+    const skill = createRuleAuthoringSkill(createDeps());
 
-    expect(skill.id).toBe(RULE_MANAGEMENT_SKILL_ID);
-    expect(skill.name).toBe(RULE_MANAGEMENT_SKILL_ID);
+    expect(skill.id).toBe(RULE_AUTHORING_SKILL_ID);
+    expect(skill.name).toBe(RULE_AUTHORING_SKILL_ID);
     expect(skill.basePath).toBe('skills/platform/alerting');
   });
 
-  it('marks the skill as experimental so it is gated behind agent builder experimental features', () => {
-    const skill = createRuleManagementSkill(createDeps());
+  it('is not gated behind agent builder experimental features', () => {
+    const skill = createRuleAuthoringSkill(createDeps());
 
-    expect(skill.experimental).toBe(true);
+    expect(skill.experimental).not.toBe(true);
   });
 
   it('gates the skill on the alerting:v2:enabled advanced setting', () => {
-    const skill = createRuleManagementSkill(createDeps());
+    const skill = createRuleAuthoringSkill(createDeps());
 
     expect(skill.uiSettingRequired).toBe('alerting:v2:enabled');
   });
 
-  it('is unavailable when the current space has not enabled Alerting V2 experimental features', async () => {
-    const skill = createRuleManagementSkill(createDeps());
+  it('stays available when universal alerting experimental features are disabled', async () => {
+    const skill = createRuleAuthoringSkill(createDeps());
     const uiSettings = { get: jest.fn().mockResolvedValue(false) };
 
-    await expect(skill.availability?.handler({ uiSettings } as never)).resolves.toEqual({
-      status: 'unavailable',
+    await expect(
+      skill.availability?.handler({ request: {}, uiSettings } as never)
+    ).resolves.toEqual({
+      status: 'available',
     });
-    expect(uiSettings.get).toHaveBeenCalledWith(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID);
+    expect(uiSettings.get).not.toHaveBeenCalled();
   });
 
   it('exposes only the manage rule inline tool', async () => {
-    const skill = createRuleManagementSkill(createDeps());
+    const skill = createRuleAuthoringSkill(createDeps());
 
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
     const inlineToolIds = inlineTools.map((tool) => tool.id);
@@ -73,11 +74,11 @@ describe('createRuleManagementSkill', () => {
     expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.manageActionPolicy);
   });
 
-  it('defers notification and action policy setup to the action-policy-management skill', () => {
-    const skill = createRuleManagementSkill(createDeps());
+  it('defers notification and action policy setup to the action-policy-authoring skill', () => {
+    const skill = createRuleAuthoringSkill(createDeps());
 
-    expect(skill.description).toContain(ACTION_POLICY_MANAGEMENT_SKILL_ID);
-    expect(skill.content).toContain(ACTION_POLICY_MANAGEMENT_SKILL_ID);
+    expect(skill.description).toContain(ACTION_POLICY_AUTHORING_SKILL_ID);
+    expect(skill.content).toContain(ACTION_POLICY_AUTHORING_SKILL_ID);
     expect(skill.content).toContain('Would you like to set up email notifications for this rule?');
     expect(skill.content).not.toContain('Part 2: Action Policies');
     expect(skill.content).not.toContain('Part 3: Default Notification Setup');

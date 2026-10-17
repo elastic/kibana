@@ -14,9 +14,9 @@ import { COMMON_HEADERS } from '../fixtures/constants';
 const SKILLS_API = '/api/agent_builder/skills';
 const GLOBAL_SETTINGS_API = '/api/kibana/global_settings';
 const ALERTING_V2_ENABLED_SETTING = 'alerting:v2:enabled';
-const RULE_MANAGEMENT_SKILL_ID = 'rule-management';
-const ACTION_POLICY_MANAGEMENT_SKILL_ID = 'action-policy-management';
-const ALERTING_V2_SKILL_IDS = [RULE_MANAGEMENT_SKILL_ID, ACTION_POLICY_MANAGEMENT_SKILL_ID];
+const RULE_AUTHORING_SKILL_ID = 'rule-authoring';
+const ACTION_POLICY_AUTHORING_SKILL_ID = 'action-policy-authoring';
+const ALERTING_V2_SKILL_IDS = [RULE_AUTHORING_SKILL_ID, ACTION_POLICY_AUTHORING_SKILL_ID];
 // Several times the 10s uiSettings cache TTL, which a write only invalidates on the node serving it.
 const SETTINGS_PROPAGATION_TIMEOUT = 30_000;
 const RESTRICTED_SOLUTION_SPACES = [
@@ -31,12 +31,11 @@ const OBSERVABILITY_SOLUTION_SPACE = {
 const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => skill.id);
 
 /*
- * Alerting V2 Agent Builder skills (`rule-management` and
- * `action-policy-management`) are gated behind the Agent Builder
- * experimental-features advanced setting and `alerting:v2:enabled`. Both
- * skills also share one additional, space-scoped gate:
- * `alerting:v2:experimentalFeatures`. This suite exercises all gates before
- * asserting either skill is listed.
+ * Alerting V2 Agent Builder skills (`rule-authoring` and
+ * `action-policy-authoring`) are gated on `alerting:v2:enabled` and on
+ * Observability or Classic spaces. They are listed even when
+ * `agentBuilder:experimentalFeatures` and `alerting:v2:experimentalFeatures`
+ * are off.
  *
  * This is the canonical gating suite because the generic Scout config does not
  * pin `alerting:v2:enabled` (it defaults to on), so it can be flipped at runtime.
@@ -57,51 +56,6 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
       { headers: { ...COMMON_HEADERS, ...apiKeyHeader }, responseType: 'json' }
     );
   });
-
-  apiTest(
-    'does not list the alerting V2 skills when neither gate is enabled',
-    { tag: tags.deploymentAgnostic },
-    async ({ apiClient, requestAuth }) => {
-      const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
-
-      const response = await apiClient.get(SKILLS_API, {
-        headers: { ...COMMON_HEADERS, ...apiKeyHeader },
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(Array.isArray(response.body.results)).toBe(true);
-      // Anchor against a positive signal so a regressed/empty skills endpoint
-      // can't make this negative assertion pass vacuously.
-      expect(response.body.results.length).toBeGreaterThan(0);
-      for (const skillId of ALERTING_V2_SKILL_IDS) {
-        expect(getSkillIds(response.body.results)).not.toContain(skillId);
-      }
-    }
-  );
-
-  apiTest(
-    'does not list the alerting V2 skills when only experimental features are enabled',
-    { tag: tags.deploymentAgnostic },
-    async ({ apiClient, kbnClient, requestAuth }) => {
-      await kbnClient.uiSettings.update({
-        [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
-      });
-
-      const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
-      const response = await apiClient.get(SKILLS_API, {
-        headers: { ...COMMON_HEADERS, ...apiKeyHeader },
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(Array.isArray(response.body.results)).toBe(true);
-      expect(response.body.results.length).toBeGreaterThan(0);
-      for (const skillId of ALERTING_V2_SKILL_IDS) {
-        expect(getSkillIds(response.body.results)).not.toContain(skillId);
-      }
-    }
-  );
 
   // Toggling `alerting:v2:enabled` requires the Alerting V2 plugin, which only
   // ships enabled on stateful; on serverless the plugin is disabled.
@@ -135,39 +89,12 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
   );
 
   apiTest(
-    'does not list either Alerting V2 skill when its experimental gate is disabled',
+    'lists both Alerting V2 skills when alerting:v2:enabled is on and experimental features are off',
     { tag: tags.stateful.classic },
     async ({ apiClient, kbnClient, requestAuth }) => {
       await kbnClient.uiSettings.update({
-        [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
-      });
-
-      const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
-      const headers = { ...COMMON_HEADERS, ...apiKeyHeader };
-
-      const setResponse = await apiClient.post(
-        `${GLOBAL_SETTINGS_API}/${ALERTING_V2_ENABLED_SETTING}`,
-        { headers, body: { value: true }, responseType: 'json' }
-      );
-      expect(setResponse).toHaveStatusCode(200);
-
-      const response = await apiClient.get(SKILLS_API, { headers, responseType: 'json' });
-      expect(response).toHaveStatusCode(200);
-      expect(Array.isArray(response.body.results)).toBe(true);
-
-      const skillIds = getSkillIds(response.body.results);
-      expect(skillIds).not.toContain(RULE_MANAGEMENT_SKILL_ID);
-      expect(skillIds).not.toContain(ACTION_POLICY_MANAGEMENT_SKILL_ID);
-    }
-  );
-
-  apiTest(
-    'lists both Alerting V2 skills when all applicable gates are enabled',
-    { tag: tags.stateful.classic },
-    async ({ apiClient, kbnClient, requestAuth }) => {
-      await kbnClient.uiSettings.update({
-        [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
-        [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
+        [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: false,
+        [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: false,
       });
 
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
@@ -209,8 +136,8 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
           await apiServices.spaces.setSolutionView({ id, solution });
           await kbnClient.uiSettings.update(
             {
-              [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
-              [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
+              [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: false,
+              [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: false,
             },
             { space: id }
           );
@@ -257,8 +184,8 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
         await apiServices.spaces.setSolutionView({ id, solution });
         await kbnClient.uiSettings.update(
           {
-            [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
-            [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
+            [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: false,
+            [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: false,
           },
           { space: id }
         );

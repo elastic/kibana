@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/alerting-v2-constants';
-import { createAlertingV2Availability } from './alerting_v2_experimental_availability';
+import { createAlertingV2Availability } from './alerting_v2_availability';
 
-const createContext = (experimentalFeaturesEnabled = true) => {
-  const uiSettings = { get: jest.fn().mockResolvedValue(experimentalFeaturesEnabled) };
+const createContext = () => {
+  const uiSettings = { get: jest.fn() };
 
   return {
     context: { request: {}, uiSettings, spaceId: 'default' } as never,
@@ -18,17 +17,14 @@ const createContext = (experimentalFeaturesEnabled = true) => {
 };
 
 describe('createAlertingV2Availability', () => {
-  it('is unavailable before resolving project or space when the experimental gate is disabled', async () => {
-    const getActiveSpace = jest.fn();
+  it('does not consult universal alerting or Agent Builder experimental feature settings', async () => {
     const availability = createAlertingV2Availability({
-      getActiveSpace,
-      projectType: 'security',
+      getActiveSpace: jest.fn().mockResolvedValue({}),
     });
-    const { context, uiSettings } = createContext(false);
+    const { context, uiSettings } = createContext();
 
-    await expect(availability.handler(context)).resolves.toEqual({ status: 'unavailable' });
-    expect(uiSettings.get).toHaveBeenCalledWith(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID);
-    expect(getActiveSpace).not.toHaveBeenCalled();
+    await expect(availability.handler(context)).resolves.toEqual({ status: 'available' });
+    expect(uiSettings.get).not.toHaveBeenCalled();
   });
 
   it.each(['security', 'search'] as const)(
@@ -39,7 +35,7 @@ describe('createAlertingV2Availability', () => {
 
       await expect(availability.handler(createContext().context)).resolves.toEqual({
         status: 'unavailable',
-        reason: 'Alerting v2 skills are only available in Observability projects',
+        reason: 'Universal alerting skills are only available in Observability projects',
       });
       expect(getActiveSpace).not.toHaveBeenCalled();
     }
@@ -79,7 +75,7 @@ describe('createAlertingV2Availability', () => {
 
       await expect(availability.handler(createContext().context)).resolves.toEqual({
         status: 'unavailable',
-        reason: 'Alerting v2 skills are only available in Observability or Classic spaces',
+        reason: 'Universal alerting skills are only available in Observability or Classic spaces',
       });
     }
   );

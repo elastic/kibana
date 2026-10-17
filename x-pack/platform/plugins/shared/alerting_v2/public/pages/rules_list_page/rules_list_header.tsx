@@ -33,7 +33,6 @@ const getRulesListMenu = ({
   onCreateWithAgent,
   onBuildSequence,
   showBuildSequence,
-  showCreateWithAgent,
   createWithAgentDisabled,
   createWithAgentTooltipText,
 }: {
@@ -42,7 +41,6 @@ const getRulesListMenu = ({
   onCreateWithAgent: () => void;
   onBuildSequence: () => void;
   showBuildSequence: boolean;
-  showCreateWithAgent: boolean;
   createWithAgentDisabled?: boolean;
   createWithAgentTooltipText?: string;
 }): AppHeaderMenu => ({
@@ -87,22 +85,18 @@ const getRulesListMenu = ({
           run: onCreateEsqlRule,
           testId: 'createEsqlRuleButton',
         },
-        ...(showCreateWithAgent
-          ? [
-              {
-                id: 'createWithAgent',
-                label: i18n.translate('xpack.alertingV2.rulesList.createWithAgentButton', {
-                  defaultMessage: 'Create with agent (Experimental)',
-                }),
-                iconType: 'sparkles' as const,
-                order: 1,
-                run: onCreateWithAgent,
-                testId: 'createWithAgentButton',
-                disableButton: createWithAgentDisabled,
-                tooltipContent: createWithAgentTooltipText,
-              },
-            ]
-          : []),
+        {
+          id: 'createWithAgent',
+          label: i18n.translate('xpack.alertingV2.rulesList.createWithAgentButton', {
+            defaultMessage: 'Create with agent',
+          }),
+          iconType: 'sparkles' as const,
+          order: 1,
+          run: onCreateWithAgent,
+          testId: 'createWithAgentButton',
+          disableButton: createWithAgentDisabled,
+          tooltipContent: createWithAgentTooltipText,
+        },
       ],
     },
   },
@@ -135,7 +129,6 @@ export const RulesListHeader = ({
   const basePath = useService(CoreStart('http')).basePath;
   const hostTabs = useHostTabs();
   const showBuildSequence = useAlertingV2ExperimentalFeatures();
-  const showCreateWithAgent = useAlertingV2ExperimentalFeatures();
   const createWithAgentDisabled = !useAreAgentBuilderSkillsAvailable();
   const createWithAgentTooltipText = getCreateWithAgentTooltipText(
     useAgentBuilderSkillsRequirements()
@@ -187,7 +180,6 @@ export const RulesListHeader = ({
             onCreateWithAgent,
             onBuildSequence,
             showBuildSequence,
-            showCreateWithAgent,
             createWithAgentDisabled,
             createWithAgentTooltipText,
           })
@@ -199,7 +191,6 @@ export const RulesListHeader = ({
       onCreateWithAgent,
       onBuildSequence,
       showBuildSequence,
-      showCreateWithAgent,
       createWithAgentDisabled,
       createWithAgentTooltipText,
     ]
