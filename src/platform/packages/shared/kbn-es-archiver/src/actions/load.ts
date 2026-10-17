@@ -30,6 +30,10 @@ import {
   isSavedObjectIndex,
   Progress,
   createDefaultSpace,
+  deleteIndex,
+  deleteDataStream,
+  type CreatedTarget,
+  type Stats,
   type LoadActionPerfOptions,
 } from '../lib';
 
@@ -52,6 +56,42 @@ We also recommend migrating existing tests to 'kbnArchiver' whenever possible. A
 ${resolve(__dirname, '../fixtures/override_saved_objects_index/exception_list.json')}.
 Find more information here: https://github.com/elastic/kibana/issues/161882`;
 };
+
+/**
+ * Delete the indices and data streams a failed load created, so that a later `loadIfNeeded` does not
+ * skip over a partially ingested archive because its indices happen to exist.
+ */
+export async function deleteCreatedTargets({
+  client,
+  stats,
+  log,
+  createdTargets,
+}: {
+  client: Client;
+  stats: Stats;
+  log: ToolingLog;
+  createdTargets: CreatedTarget[];
+}) {
+  for (const target of createdTargets) {
+    // The load aborted before it could restore these, so deleting them would leave Kibana without them.
+    if (isSavedObjectIndex(target.name)) {
+      continue;
+    }
+
+    try {
+      if (target.type === 'data_stream') {
+        await deleteDataStream(client, target.name, target.template);
+        stats.deletedDataStream(target.name, target.template);
+      } else {
+        await deleteIndex({ client, stats, index: target.name, log });
+      }
+    } catch (error) {
+      log.warning(
+        `Failed to delete ${target.type} "${target.name}" while cleaning up after a failed load: ${error.message}`
+      );
+    }
+  }
+}
 
 export async function loadAction({
   inputDir,
@@ -83,6 +123,7 @@ export async function loadAction({
   const files = prioritizeMappings(await readDirectory(inputDir));
   const kibanaPluginIds = dataOnly ? [] : await kbnClient!.plugins.getEnabledIds();
   const targetsWithoutIdGeneration: string[] = [];
+  const createdTargets: CreatedTarget[] = [];
 
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
@@ -102,26 +143,33 @@ export async function loadAction({
   const progress = new Progress();
   progress.activate(log);
 
-  await createPromiseFromStreams([
-    recordStream,
-    createCreateIndexStream({
-      client,
-      stats,
-      skipExisting,
-      docsOnly,
-      isArchiveInExceptionList,
-      log,
-      targetsWithoutIdGeneration,
-    }),
-    createIndexDocRecordsStream(
-      client,
-      stats,
-      progress,
-      useCreate,
-      performance,
-      targetsWithoutIdGeneration
-    ),
-  ]);
+  try {
+    await createPromiseFromStreams([
+      recordStream,
+      createCreateIndexStream({
+        client,
+        stats,
+        skipExisting,
+        docsOnly,
+        isArchiveInExceptionList,
+        log,
+        targetsWithoutIdGeneration,
+        createdTargets,
+      }),
+      createIndexDocRecordsStream(
+        client,
+        stats,
+        progress,
+        useCreate,
+        performance,
+        targetsWithoutIdGeneration
+      ),
+    ]);
+  } catch (error) {
+    progress.deactivate();
+    await deleteCreatedTargets({ client, stats, log, createdTargets });
+    throw error;
+  }
 
   progress.deactivate();
   const result = stats.toJSON();

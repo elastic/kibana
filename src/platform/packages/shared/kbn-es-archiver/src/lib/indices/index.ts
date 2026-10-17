@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createCreateIndexStream } from './create_index_stream';
+export { createCreateIndexStream, type CreatedTarget } from './create_index_stream';
 export { createDeleteIndexStream } from './delete_index_stream';
+export { deleteIndex } from './delete_index';
+export { deleteDataStream } from './delete_data_stream';
 export { createGenerateIndexRecordsStream } from './generate_index_records_stream';
 export {
   migrateSavedObjectIndices,
