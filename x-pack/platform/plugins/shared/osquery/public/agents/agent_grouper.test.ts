@@ -158,6 +158,42 @@ describe('AgentGrouper', () => {
         expect(opt.value?.id).toEqual(ag.local_metadata.elastic.agent.id);
       });
     });
+
+    it('falls back to local_metadata.host.name when hostname is missing', () => {
+      const agentData: GroupedAgent[] = [
+        {
+          id: 'agent-1',
+          policy_id: 'policy-1',
+          status: 'online',
+          local_metadata: {
+            elastic: { agent: { id: 'agent-1' } },
+            host: { name: 'host-from-name' } as any,
+            os: { platform: 'darwin' },
+          },
+        } as GroupedAgent,
+      ];
+
+      const result = generateAgentOption(AGENT_SELECTION_LABEL, AGENT_GROUP_KEY.Agent, agentData);
+      expect(result.options[0].label).toEqual('host-from-name (agent-1)');
+    });
+
+    it('falls back to agent id when both hostname and name are missing without leading space', () => {
+      const agentData: GroupedAgent[] = [
+        {
+          id: 'agent-1',
+          policy_id: 'policy-1',
+          status: 'online',
+          local_metadata: {
+            elastic: { agent: { id: 'agent-1' } },
+            host: {} as any,
+            os: { platform: 'darwin' },
+          },
+        } as GroupedAgent,
+      ];
+
+      const result = generateAgentOption(AGENT_SELECTION_LABEL, AGENT_GROUP_KEY.Agent, agentData);
+      expect(result.options[0].label).toEqual('agent-1');
+    });
   });
 
   describe('generateAgentOption - policy group key normalization', () => {
