@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  ToolResultType,
+} from '@kbn/agent-builder-common';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
-import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
+import { INVESTIGATION_TIMEOUT_MS, UNPERSISTED_CONVERSATION_ERROR, runInvestigation } from './task';
 import { ungradedPlaceholder } from './placeholder';
 
 jest.mock('timers/promises', () => ({ setTimeout: jest.fn().mockResolvedValue(undefined) }));
@@ -211,6 +215,25 @@ it('reports an investigation that finished without a conclusion, keeping its evi
     expected: undefined,
   });
   expect(placeholder).toMatchObject({ score: 1, label: 'ungraded' });
+});
+
+it('flags a finished investigation whose conversation never finished persisting', async () => {
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ investigation_id: 'unpersisted' })
+    .mockResolvedValueOnce(investigation({ id: 'unpersisted' }))
+    .mockResolvedValue({
+      rounds: [
+        { trace_id: 'partial-trace', status: ConversationRoundStatus.inProgress, steps: [] },
+      ],
+    });
+
+  expect(await runInvestigation(fetch, example, connector)).toMatchObject({
+    workflow_status: 'complete',
+    execution_error: UNPERSISTED_CONVERSATION_ERROR,
+    conversation_round_count: 1,
+    traceId: 'partial-trace',
+  });
 });
 
 it('reports an investigation start failure as execution evidence', async () => {

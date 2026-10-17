@@ -26,6 +26,8 @@ import type {
 export const INVESTIGATION_TIMEOUT_MS = 30 * 60_000;
 /** The execution error of a run that ended without a `verdict`; judges still grade its hypotheses. */
 export const NO_CONCLUSION_ERROR = 'Investigation finished without recording a conclusion';
+export const UNPERSISTED_CONVERSATION_ERROR =
+  'Investigation conversation still had an unfinished round after polling';
 const MAX_PERSISTED_REPORT_BYTES = 512 * 1024;
 const POLL_INTERVAL_MS = 1000;
 /** How many polls a finished investigation's conversation gets to persist its rounds. */
@@ -212,6 +214,9 @@ export const runInvestigation = async (
       investigation.id,
       !investigation.in_progress
     );
+    if (!investigation.in_progress && !isPersisted(conversation)) {
+      output.execution_error = UNPERSISTED_CONVERSATION_ERROR;
+    }
     output.conversation_round_count = conversation.rounds.length;
     output.traceId = conversation.rounds
       .flatMap(({ trace_id: traceId }) => (typeof traceId === 'string' ? [traceId] : traceId ?? []))
