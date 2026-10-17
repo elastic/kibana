@@ -42,6 +42,18 @@ kibana_vars=(
     csp.report_only.object_src
     csp.report_only.connect_src
     permissionsPolicy.report_to
+    permissionsPolicy.camera
+    permissionsPolicy.display_capture
+    permissionsPolicy.fullscreen
+    permissionsPolicy.geolocation
+    permissionsPolicy.microphone
+    permissionsPolicy.web_share
+    permissionsPolicy.report_only.camera
+    permissionsPolicy.report_only.display_capture
+    permissionsPolicy.report_only.fullscreen
+    permissionsPolicy.report_only.geolocation
+    permissionsPolicy.report_only.microphone
+    permissionsPolicy.report_only.web_share
     data.autocomplete.valueSuggestions.terminateAfter
     data.autocomplete.valueSuggestions.timeout
     data.search.asyncSearch.waitForCompletion
@@ -177,6 +189,7 @@ kibana_vars=(
     server.restrictInternalApis
     server.securityResponseHeaders.disableEmbedding
     server.securityResponseHeaders.permissionsPolicy
+    server.securityResponseHeaders.permissionsPolicyReportOnly
     server.securityResponseHeaders.referrerPolicy
     server.securityResponseHeaders.strictTransportSecurity
     server.securityResponseHeaders.xContentTypeOptions

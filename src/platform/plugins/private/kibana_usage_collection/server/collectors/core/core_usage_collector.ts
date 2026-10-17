@@ -266,7 +266,7 @@ export function getCoreUsageCollector(
               type: 'boolean',
               _meta: {
                 description:
-                  'Indicates if the permissionsPolicy response header has been configured.',
+                  'Indicates if the deprecated server.securityResponseHeaders.permissionsPolicy setting has been used to override the built-in permissions policy.',
               },
             },
             disableEmbedding: {

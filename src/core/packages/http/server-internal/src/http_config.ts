@@ -391,6 +391,56 @@ export const config: ServiceConfigDescriptor<HttpConfigType> = {
         });
       }
     },
+    (settings, fromPath, addDeprecation) => {
+      const cfg = get(settings, fromPath);
+      const permissionsPolicy = cfg?.securityResponseHeaders?.permissionsPolicy;
+      // Only fires when the setting is present. A deprecation that fires on default configuration
+      // would break the "one warning by default" assertion in config_deprecation.test.ts.
+      if (permissionsPolicy === null) {
+        // `null` switches the header off, and the per-directive settings only add sources to it,
+        // so they cannot express this. Pointing the administrator at them would turn the header
+        // back on, which is the opposite of what they configured.
+        addDeprecation({
+          level: 'warning',
+          configPath: `${fromPath}.securityResponseHeaders.permissionsPolicy`,
+          title: `Setting "${fromPath}.securityResponseHeaders.permissionsPolicy" is deprecated`,
+          message: `"${fromPath}.securityResponseHeaders.permissionsPolicy" is set to null, which disables the Permissions-Policy header. The setting is deprecated and will be removed in 10.0.0. The "permissionsPolicy.<directive>" settings that replace it only add sources to Kibana's built-in policy, so from 10.0.0 the header cannot be disabled.`,
+          correctiveActions: {
+            manualSteps: [
+              `Confirm that Kibana's built-in permissions policy is acceptable for your deployment, because the header is sent from 10.0.0 onwards.`,
+              `If your deployment requires the Permissions-Policy header to be absent, open an issue at https://github.com/elastic/kibana/issues before 10.0.0.`,
+            ],
+          },
+        });
+      } else if (permissionsPolicy !== undefined) {
+        addDeprecation({
+          level: 'warning',
+          configPath: `${fromPath}.securityResponseHeaders.permissionsPolicy`,
+          title: `Setting "${fromPath}.securityResponseHeaders.permissionsPolicy" is deprecated`,
+          message: `"${fromPath}.securityResponseHeaders.permissionsPolicy" replaces Kibana's entire permissions policy, so later changes to the built-in policy are lost. It is deprecated and will be removed in 10.0.0.`,
+          correctiveActions: {
+            manualSteps: [
+              `Remove "${fromPath}.securityResponseHeaders.permissionsPolicy" from your Kibana configuration file.`,
+              `Add only the sources you need to the matching "permissionsPolicy.<directive>" setting, for example "permissionsPolicy.camera: ['self']". These are added to Kibana's built-in policy rather than replacing it.`,
+            ],
+          },
+        });
+      }
+      if (cfg?.securityResponseHeaders?.permissionsPolicyReportOnly !== undefined) {
+        addDeprecation({
+          level: 'warning',
+          configPath: `${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly`,
+          title: `Setting "${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly" is deprecated`,
+          message: `"${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly" is deprecated and will be removed in 10.0.0.`,
+          correctiveActions: {
+            manualSteps: [
+              `Remove "${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly" from your Kibana configuration file.`,
+              `Add the sources you want to report on to the matching "permissionsPolicy.report_only.<directive>" setting, for example "permissionsPolicy.report_only.camera: ['self']".`,
+            ],
+          },
+        });
+      }
+    },
   ],
 };
 

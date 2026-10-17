@@ -19,8 +19,18 @@ export default function ({ getService }: FtrProviderContext) {
   describe('security/response_headers', function () {
     const baseCSP = `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; frame-ancestors 'self'`;
     const defaultCOOP = 'same-origin';
-    const defaultPermissionsPolicy =
-      'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=();report-to=violations-endpoint';
+    // `report-to` is a parameter of each dictionary member, not of the header, so it is repeated
+    // on every directive. Serverless configures `permissionsPolicy.report_to` to mimic MKI.
+    const defaultPermissionsPolicy = [
+      'camera=()',
+      'display-capture=()',
+      'fullscreen=(self)',
+      'geolocation=()',
+      'microphone=()',
+      'web-share=()',
+    ]
+      .map((directive) => `${directive};report-to=violations-endpoint`)
+      .join(', ');
     const defaultStrictTransportSecurity = 'max-age=31536000; includeSubDomains';
     const defaultReferrerPolicy = 'strict-origin-when-cross-origin';
     const defaultXContentTypeOptions = 'nosniff';

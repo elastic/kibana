@@ -7,5 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { permissionsPolicyConfig } from './config';
-export type { PermissionsPolicyConfigType } from './config';
+export { permissionsPolicyConfig, permissionsPolicyDirectiveSettings } from './config';
+export type { PermissionsPolicyConfigType, PermissionsPolicyDirectiveSetting } from './config';
+export { PermissionsPolicyDirectives, defaultRules } from './permissions_policy_directives';
+export type { PermissionsPolicyDirectiveName } from './permissions_policy_directives';
