@@ -1573,6 +1573,7 @@ packages:
   - 'x-pack/solutions/observability/plugins/apm'
   - 'x-pack/solutions/observability/plugins/apm_data_access'
   - 'x-pack/solutions/observability/plugins/client_apps'
+  - 'x-pack/solutions/observability/plugins/digital_experience'
   - 'x-pack/solutions/observability/plugins/entity_inventory'
   - 'x-pack/solutions/observability/plugins/exploratory_view'
   - 'x-pack/solutions/observability/plugins/infra'

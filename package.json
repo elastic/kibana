@@ -675,6 +675,7 @@
     "@kbn/dependency-injection-example-plugin": "workspace:*",
     "@kbn/dev-tools-plugin": "workspace:*",
     "@kbn/developer-examples-plugin": "workspace:*",
+    "@kbn/digital-experience-plugin": "workspace:*",
     "@kbn/discover-contextual-components": "workspace:*",
     "@kbn/discover-customization-examples-plugin": "workspace:*",
     "@kbn/discover-enhanced-plugin": "workspace:*",

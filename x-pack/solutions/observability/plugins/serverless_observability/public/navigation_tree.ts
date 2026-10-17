@@ -174,6 +174,12 @@ export const createNavigationTree = ({
             ],
           },
           {
+            link: 'digital_experience',
+            title: i18n.translate('xpack.serverlessObservability.nav.digitalExperience', {
+              defaultMessage: 'Digital Experience',
+            }),
+          },
+          {
             id: 'synthetics',
             title: i18n.translate('xpack.serverlessObservability.nav.synthetics', {
               defaultMessage: 'Synthetics',

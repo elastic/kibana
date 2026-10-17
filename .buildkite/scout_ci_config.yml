@@ -34,6 +34,7 @@ plugins:
     - data_visualizer
     - dataset_quality
     - dev_tools
+    - digital_experience
     - discover
     - discoverCustomizationExamples
     - discoveries

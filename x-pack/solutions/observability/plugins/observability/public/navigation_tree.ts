@@ -171,6 +171,12 @@ function createNavTree({
                   defaultMessage: 'User experience',
                 }),
               },
+              {
+                link: 'digital_experience',
+                title: i18n.translate('xpack.observability.obltNav.apm.digitalExperience', {
+                  defaultMessage: 'Digital Experience',
+                }),
+              },
             ],
           },
           {

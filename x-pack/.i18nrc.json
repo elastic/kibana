@@ -59,6 +59,7 @@
     "xpack.dataQuality": "platform/plugins/shared/data_quality",
     "xpack.datasetQuality": "platform/plugins/shared/dataset_quality",
     "xpack.dataUsage": "platform/plugins/private/data_usage",
+    "xpack.digitalExperience": "solutions/observability/plugins/digital_experience",
     "xpack.discover": "platform/plugins/private/discover_enhanced",
     "xpack.createClassicStreamFlyout": "platform/packages/shared/kbn-classic-stream-flyout",
     "xpack.crossClusterReplication": "platform/plugins/private/cross_cluster_replication",
