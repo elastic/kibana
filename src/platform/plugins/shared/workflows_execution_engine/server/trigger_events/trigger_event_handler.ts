@@ -28,13 +28,11 @@ import {
 } from './event_context/event_chain_context';
 import { initializeTriggerEventsClient, writeTriggerEvent } from './event_logs';
 import type { TriggerEventsDataStreamClient } from './event_logs/trigger_events_data_stream';
-import {
-  classifyWorkflowTriggerMatch,
-  findMatchingWorkflowTrigger,
-} from './filter_workflows_by_trigger_condition';
+import { findMatchingWorkflowTrigger } from './filter_workflows_by_trigger_condition';
 import { resolveWorkflowEventsModeFromOn } from './lib/resolve_workflow_events_mode_from_on';
+import { groupSubscribedWorkflows, matchSubscriptionGroups } from './subscription_groups';
+import { SubscriptionResolutionCache } from './subscription_resolution_cache';
 import {
-  createEmptyTriggerResolutionStats,
   createEmptyTriggerScheduleStats,
   type TriggerEventScheduleStats,
 } from './trigger_event_stats';
@@ -47,7 +45,7 @@ import {
 } from '../lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import type { ScheduleWorkflow } from '../types';
+import type { InvalidateSubscriptionCacheRequest, ScheduleWorkflow } from '../types';
 
 export interface EmitEventParams {
   triggerId: string;
@@ -173,6 +171,7 @@ export class TriggerEventHandler {
   private readonly config: EventTriggersConfig;
   private readonly logger: Logger;
   private readonly triggerEventsClientPromise: Promise<TriggerEventsDataStreamClient | undefined>;
+  private readonly subscriptionCache: SubscriptionResolutionCache;
 
   constructor(deps: TriggerEventHandlerDeps) {
     this.scheduleWorkflow = deps.scheduleWorkflow;
@@ -188,6 +187,18 @@ export class TriggerEventHandler {
     this.workflowExecutionRepository = deps.workflowExecutionRepository;
     this.triggerEventsClientPromise =
       deps.triggerEventsClientPromise ?? initializeTriggerEventsClient(coreStart.dataStreams);
+    this.subscriptionCache = new SubscriptionResolutionCache({
+      ttlMs: this.config.subscriptionCacheTtl.asMilliseconds(),
+    });
+  }
+
+  /** Drops this node's cached subscribers for the given triggers, or the whole cache. */
+  invalidateSubscriptionCache(params: InvalidateSubscriptionCacheRequest): void {
+    if ('all' in params) {
+      this.subscriptionCache.invalidateAll();
+      return;
+    }
+    this.subscriptionCache.invalidate(params);
   }
 
   async handleEvent(params: EmitEventParams): Promise<void> {
@@ -223,7 +234,11 @@ export class TriggerEventHandler {
     this.validateTrigger(triggerId, spaceId, payload);
 
     const resolutionStartMs = Date.now();
-    const { workflows, stats: resolutionStats } = await this.resolveMatchingWorkflowSubscriptions(
+    const {
+      workflows,
+      stats: resolutionStats,
+      subscriptionCacheOutcome,
+    } = await this.resolveMatchingWorkflowSubscriptions(
       triggerId,
       spaceId,
       eventContextForResolution
@@ -285,6 +300,7 @@ export class TriggerEventHandler {
       config: this.config,
       eventChainContext,
       subscriberResolutionMs,
+      subscriptionCacheOutcome,
       resolutionStats,
       scheduleStats,
     });
@@ -387,42 +403,51 @@ export class TriggerEventHandler {
     spaceId: string,
     eventContext: Record<string, unknown>
   ) {
-    const allWorkflows = await this.workflowRepository.getWorkflowsSubscribedToTrigger(
-      triggerId,
-      spaceId
-    );
-
     const requiresConnectorId =
       this.workflowsExtensions.getTriggerDefinition(triggerId)?.requiresConnectorId === true;
-    const stats = createEmptyTriggerResolutionStats();
-    stats.subscribedCount = allWorkflows.length;
-    const workflows: WorkflowDetailDto[] = [];
 
-    for (const workflow of allWorkflows) {
-      const outcome = classifyWorkflowTriggerMatch(workflow, triggerId, eventContext, this.logger, {
-        requiresConnectorId,
-      });
-      switch (outcome) {
-        case 'disabled':
-          stats.disabledCount += 1;
-          break;
-        case 'connector_id_mismatch':
-          stats.connectorIdMismatchCount += 1;
-          break;
-        case 'kql_false':
-          stats.kqlFalseCount += 1;
-          break;
-        case 'kql_error':
-          stats.kqlErrorCount += 1;
-          break;
-        case 'matched':
-          stats.matchedCount += 1;
-          workflows.push(workflow);
-          break;
-      }
+    let loadedWorkflows: WorkflowDetailDto[] | undefined;
+    const resolution = await this.subscriptionCache.load(spaceId, triggerId, async () => {
+      loadedWorkflows = await this.workflowRepository.getWorkflowsSubscribedToTrigger(
+        triggerId,
+        spaceId
+      );
+      return groupSubscribedWorkflows(loadedWorkflows, triggerId, requiresConnectorId);
+    });
+
+    const { matchedIds, stats } = matchSubscriptionGroups({
+      groups: resolution.entry.groups,
+      event: eventContext,
+      requiresConnectorId,
+      logger: this.logger,
+      triggerId,
+    });
+    const workflows = await this.loadMatchedWorkflows(matchedIds, spaceId, loadedWorkflows);
+    if (resolution.outcome === 'hit' && workflows.length < matchedIds.length) {
+      this.logger.debug(
+        `Dropping subscriber cache for trigger ${triggerId} in space ${spaceId}: matched ${matchedIds.length} workflows and loaded ${workflows.length}`
+      );
+      this.subscriptionCache.invalidate({ spaceId, triggerIds: [triggerId] });
     }
+    return { workflows, stats, subscriptionCacheOutcome: resolution.outcome };
+  }
 
-    return { workflows, stats };
+  private async loadMatchedWorkflows(
+    matchedIds: readonly string[],
+    spaceId: string,
+    loadedWorkflows: WorkflowDetailDto[] | undefined
+  ): Promise<WorkflowDetailDto[]> {
+    if (matchedIds.length === 0) {
+      return [];
+    }
+    if (loadedWorkflows) {
+      const byId = new Map(loadedWorkflows.map((workflow) => [workflow.id, workflow]));
+      return matchedIds.flatMap((id) => {
+        const workflow = byId.get(id);
+        return workflow ? [workflow] : [];
+      });
+    }
+    return this.workflowRepository.getWorkflowsByIds(matchedIds, spaceId);
   }
 
   private async writeTriggerEvents(params: {

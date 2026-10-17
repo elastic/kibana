@@ -38,6 +38,28 @@ const isCustomTrigger = (trigger: unknown): trigger is CustomTrigger =>
 const getYamlConnectorId = (trigger: CustomTrigger): string =>
   readTrimmedString(trigger['connector-id']);
 
+/** Trigger blocks of `triggerId`, in YAML order. */
+export const listTriggersOfType = (
+  triggers: readonly unknown[] | undefined,
+  triggerId: string
+): CustomTrigger[] =>
+  (triggers ?? []).filter(
+    (trigger): trigger is CustomTrigger => isCustomTrigger(trigger) && trigger.type === triggerId
+  );
+
+/** Trimmed KQL `on.condition`, or `""` when the block matches every event. */
+export const readTriggerCondition = (trigger: CustomTrigger): string => {
+  const onBlock = trigger.on;
+  const condition =
+    onBlock && typeof onBlock === 'object' && onBlock !== null && 'condition' in onBlock
+      ? onBlock.condition
+      : undefined;
+  return typeof condition === 'string' ? condition.trim() : '';
+};
+
+/** Trimmed YAML `connector-id`, or `""` when the block has none. */
+export const readYamlConnectorId = (trigger: CustomTrigger): string => getYamlConnectorId(trigger);
+
 /**
  * Picks the YAML trigger block to evaluate for this emit.
  * When `requiresConnectorId`, scans every same-type block and returns an exact
@@ -51,9 +73,7 @@ export const findMatchingWorkflowTrigger = (
   payload: Record<string, unknown>,
   requiresConnectorId?: boolean
 ): CustomTrigger | undefined => {
-  const ofType = (triggers ?? []).filter(
-    (trigger): trigger is CustomTrigger => isCustomTrigger(trigger) && trigger.type === triggerId
-  );
+  const ofType = listTriggersOfType(triggers, triggerId);
   if (ofType.length === 0) {
     return undefined;
   }
@@ -104,12 +124,7 @@ export function classifyWorkflowTriggerMatch(
     return requiresConnectorId && hasType ? 'connector_id_mismatch' : 'kql_false';
   }
 
-  const onBlock = matchingTrigger.on;
-  const condition =
-    onBlock && typeof onBlock === 'object' && onBlock !== null && 'condition' in onBlock
-      ? onBlock.condition
-      : undefined;
-  const conditionStr = typeof condition === 'string' ? condition.trim() : '';
+  const conditionStr = readTriggerCondition(matchingTrigger);
 
   if (conditionStr === '') {
     return 'matched';

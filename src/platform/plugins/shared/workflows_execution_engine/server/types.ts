@@ -30,6 +30,7 @@ import type {
   SearchTriggerEventLogParams,
   SearchTriggerEventLogResult,
 } from './trigger_events/event_logs/trigger_event_log_query';
+import type { InvalidateSubscriptionCacheParams } from './trigger_events/subscription_resolution_cache';
 import type { EmitEvent } from './trigger_events/trigger_event_handler';
 import type { IWorkflowLogsQueryService } from './workflow_event_logger';
 
@@ -59,6 +60,9 @@ export interface WorkflowsExecutionEnginePluginSetup {
   [key: string]: unknown;
 }
 
+/** Drops one space's triggers, every space for those triggers, or the whole cache. */
+export type InvalidateSubscriptionCacheRequest = InvalidateSubscriptionCacheParams | { all: true };
+
 export interface TriggerEventsContract {
   emitEvent: EmitEvent;
   isEnabled: boolean;
@@ -67,6 +71,7 @@ export interface TriggerEventsContract {
   searchTriggerEventLog: (
     params: SearchTriggerEventLogParams
   ) => Promise<SearchTriggerEventLogResult>;
+  invalidateSubscriptionCache: (params: InvalidateSubscriptionCacheRequest) => void;
 }
 
 export interface WorkflowsExecutionEnginePluginStart {

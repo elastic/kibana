@@ -22,6 +22,7 @@ export type {
   DataClient,
   GetStepExecutionsByIdsOptions,
   GetWorkflowExecutionsByIdsOptions,
+  InvalidateSubscriptionCacheRequest,
   StepExecutionsDataClient,
   TriggerEventsContract,
   WorkflowExecutionsDataClient,

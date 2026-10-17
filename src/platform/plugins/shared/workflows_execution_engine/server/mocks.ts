@@ -56,6 +56,7 @@ export const workflowsExecutionEngineMock = {
         page: 1,
         size: 10,
       }),
+      invalidateSubscriptionCache: jest.fn(),
     },
     config: {
       maxWorkflowDepth: 10,
