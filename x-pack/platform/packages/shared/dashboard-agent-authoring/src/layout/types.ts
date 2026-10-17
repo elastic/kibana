@@ -15,14 +15,20 @@ export interface LayoutGrid {
   h: number;
 }
 
-/** A panel as the layout call sees it. */
-export interface LayoutPanel {
-  id: string;
+/** What a panel shows, which decides the size it needs. */
+export interface LayoutPanelKind {
   /** Embeddable type, e.g. `lens` or `markdown`. */
   type: string;
   /** Lens chart type, e.g. `metric` or `xy`, when known. */
   chartType?: string;
+}
+
+/** A panel as the layout call sees it. */
+export interface LayoutPanel extends LayoutPanelKind {
+  id: string;
   title?: string;
+  /** Set for a panel whose kind changed in this call: the kind its current grid was sized for. */
+  retypedFrom?: LayoutPanelKind;
   /** The text of a markdown panel, or the config of a custom content panel, to size it by. */
   content?: string;
   /** Omitted for a panel added to its container in this call, which the layout call places. */

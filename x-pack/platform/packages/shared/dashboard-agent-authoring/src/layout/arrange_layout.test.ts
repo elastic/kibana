@@ -93,7 +93,7 @@ describe('arrangeDashboardLayout', () => {
     expect(result.dashboardData).toBe(dashboardWithRetitledPanel);
   });
 
-  it('calls the layout for a chart type change only when there is a layout request', async () => {
+  it('calls the layout for a chart type change, with the chart type the grid was sized for', async () => {
     const arrangeLayout = jest.fn(async () => ({
       plan: '',
       panels: [{ id: 'p1', x: 0, y: 0, w: 48, h: 10 }],
@@ -105,15 +105,22 @@ describe('arrangeDashboardLayout', () => {
     };
 
     await arrange(arrangeLayout, { dashboardData: dashboardWithNewChartType });
-    expect(arrangeLayout).not.toHaveBeenCalled();
 
-    await arrange(arrangeLayout, {
-      dashboardData: dashboardWithNewChartType,
-      instructions: 'size the chart as an xy chart',
-    });
     expect(arrangeLayout).toHaveBeenCalledWith(
       expect.objectContaining({
-        panels: [expect.objectContaining({ id: 'p1', chartType: 'xy', grid: expect.any(Object) })],
+        panels: [
+          expect.objectContaining({
+            id: 'p1',
+            chartType: 'xy',
+            grid: expect.any(Object),
+            retypedFrom: { type: LENS_EMBEDDABLE_TYPE, chartType: 'metric' },
+          }),
+        ],
+        sections: [
+          expect.objectContaining({
+            panels: [expect.not.objectContaining({ retypedFrom: expect.anything() })],
+          }),
+        ],
       })
     );
   });

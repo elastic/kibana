@@ -21,6 +21,7 @@ import {
   type LayoutArrangement,
   type LayoutGrid,
   type LayoutPanel,
+  type LayoutPanelKind,
   type LayoutRequest,
 } from './types';
 
@@ -80,6 +81,39 @@ const hasContainerChanges = (widgets: Widgets, originalWidgets: Widgets): boolea
   );
 };
 
+const getKind = ({ type, config }: AttachmentPanel): LayoutPanelKind => ({
+  type,
+  ...(typeof config.type === 'string' ? { chartType: config.type } : {}),
+});
+
+const getPanelsById = (widgets: Widgets): Map<string, AttachmentPanel> =>
+  new Map(
+    widgets
+      .flatMap((widget) => (isSection(widget) ? widget.panels : [widget]))
+      .map((panel) => [panel.id, panel])
+  );
+
+/** The previous kind of every panel whose kind changed, e.g. a donut edited into a table. */
+const getPreviousKinds = (
+  widgets: Widgets,
+  originalWidgets: Widgets
+): Map<string, LayoutPanelKind> => {
+  const originalPanelsById = getPanelsById(originalWidgets);
+  return new Map(
+    [...getPanelsById(widgets).values()].flatMap((panel): Array<[string, LayoutPanelKind]> => {
+      const originalPanel = originalPanelsById.get(panel.id);
+      if (!originalPanel) {
+        return [];
+      }
+      const previousKind = getKind(originalPanel);
+      const kind = getKind(panel);
+      return previousKind.type === kind.type && previousKind.chartType === kind.chartType
+        ? []
+        : [[panel.id, previousKind]];
+    })
+  );
+};
+
 const byReadingOrder = (a: AttachmentPanel, b: AttachmentPanel): number =>
   a.grid.y - b.grid.y || a.grid.x - b.grid.x;
 
@@ -114,12 +148,13 @@ const aliasInstructions = (instructions: string, aliasById: ReadonlyMap<string, 
 /**
  * The dashboard with short ids. Panels new to their container (added or moved) are sent without a
  * grid and new sections without a row, since their placeholder positions are for the call to set.
- * Moved panels keep their size. Each changed container lists the space its removed and moved-out
- * panels left.
+ * Moved panels keep their size. Retyped panels name the kind their grid was sized for. Each changed
+ * container lists the space its removed and moved-out panels left.
  */
 const toLayoutRequest = (
   widgets: Widgets,
   originalWidgets: Widgets,
+  previousKinds: ReadonlyMap<string, LayoutPanelKind>,
   aliasById: ReadonlyMap<string, string>,
   instructions: string | undefined
 ): LayoutRequest => {
@@ -138,15 +173,16 @@ const toLayoutRequest = (
   };
   const toLayoutPanels = (panels: AttachmentPanel[], sectionId: string | null): LayoutPanel[] =>
     [...panels].sort(byReadingOrder).map((panel) => {
-      const { id, type, config } = panel;
+      const { id, config } = panel;
       const content = getContent(panel);
+      const previousKind = previousKinds.get(id);
       return {
         id: aliasById.get(id) ?? id,
-        type,
-        ...(typeof config.type === 'string' ? { chartType: config.type } : {}),
+        ...getKind(panel),
         ...(typeof config.title === 'string' ? { title: config.title } : {}),
         ...(content !== undefined ? { content: content.slice(0, MAX_CONTENT_LENGTH) } : {}),
         ...getPlacementHint(panel, sectionId),
+        ...(previousKind ? { retypedFrom: previousKind } : {}),
       };
     });
   return {
@@ -189,8 +225,8 @@ interface ArrangeLayoutResult {
 
 /**
  * Sets the grid of every panel and section with the injected `arrangeLayout` model call, when the
- * user or the agent asked for a layout, a panel or section is new to its container, or a panel was
- * removed. The call gets the dashboard as it is, without the placeholder grids of new panels. When
+ * user or the agent asked for a layout, a panel or section is new to its container, a panel was
+ * removed, or a panel changed its kind and may need another size. The call gets the dashboard as it is, without the placeholder grids of new panels. When
  * the call fails, the dashboard keeps its current layout, and a failure is returned if a layout was
  * asked for.
  */
@@ -206,10 +242,21 @@ export const arrangeDashboardLayout = async ({
   }
 
   const aliasById = createAliases(dashboardData.panels);
-  if (instructions === undefined && !hasContainerChanges(dashboardData.panels, originalPanels)) {
+  const previousKinds = getPreviousKinds(dashboardData.panels, originalPanels);
+  if (
+    instructions === undefined &&
+    previousKinds.size === 0 &&
+    !hasContainerChanges(dashboardData.panels, originalPanels)
+  ) {
     return { dashboardData };
   }
-  const request = toLayoutRequest(dashboardData.panels, originalPanels, aliasById, instructions);
+  const request = toLayoutRequest(
+    dashboardData.panels,
+    originalPanels,
+    previousKinds,
+    aliasById,
+    instructions
+  );
 
   const idByAlias = new Map([...aliasById].map(([id, alias]) => [alias, id]));
   const toId = (alias: string): string => idByAlias.get(alias) ?? alias;
