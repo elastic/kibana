@@ -913,18 +913,29 @@ paths:
         content:
           application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*:
             schema: {}
+            examples:
+              ingestEventsRequest:
+                $ref: '#/components/examples/ingest_events_request'
+              ingestEventsChallengeRequest:
+                $ref: '#/components/examples/ingest_events_challenge_request'
       responses:
         '200':
           content:
             application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_ingest_events_ack_response'
+              examples:
+                ingestEventsAckResponse:
+                  $ref: '#/components/examples/ingest_events_ack_response'
           description: Connector HTTP 200 ack. No event is emitted. JSON or a plain-text body.
         '202':
           content:
             application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_ingest_events_response'
+              examples:
+                ingestEventsResponse:
+                  $ref: '#/components/examples/ingest_events_response'
           description: The ingress request was accepted. Downstream emit failures may still be partial; see server logs.
         '403':
           description: Inbound connector events are disabled.
@@ -147887,6 +147898,24 @@ components:
           referenced_by_count: 2
           is_missing_secrets: false
           is_system_action: false
+    ingest_events_request:
+      summary: Ingest a connector event.
+      value:
+        eventType: order.created
+        orderId: '1'
+    ingest_events_challenge_request:
+      summary: Inbound webhook handshake. A top-level string challenge is echoed and no event is emitted.
+      value:
+        type: ping
+        challenge: abc
+    ingest_events_ack_response:
+      summary: Connector HTTP 200 ack. No event is emitted.
+      value:
+        challenge: abc
+    ingest_events_response:
+      summary: The ingress request was accepted.
+      value:
+        ok: true
     get_roles_response1:
       summary: Get all role details
       value:
