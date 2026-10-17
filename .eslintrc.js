@@ -2441,7 +2441,6 @@ module.exports.overrides.push({
     'x-pack/platform/plugins/shared/content_connectors/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/shared/index_management/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/shared/lens/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/shared/license_management/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/shared/maps/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/shared/osquery/**/*.{js,mjs,ts,tsx}',
