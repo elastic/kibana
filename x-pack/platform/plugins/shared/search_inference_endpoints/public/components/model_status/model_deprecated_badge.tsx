@@ -26,15 +26,7 @@ export const ModelDeprecatedBadge = ({ id, metadata, iconOnly }: ModelDeprecated
   const tooltipContent = getModelDeprecatedMessage(eolDate);
 
   return (
-    <EuiToolTip
-      title={i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.title',
-        {
-          defaultMessage: 'Deprecation notice',
-        }
-      )}
-      content={tooltipContent}
-    >
+    <EuiToolTip content={tooltipContent}>
       <EuiBadge
         tabIndex={0}
         iconSide="left"

@@ -18,11 +18,12 @@ import {
   useEuiTheme,
   type UseEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { GroupedModel } from '../../utils/eis_utils';
 import {
+  getModelDeprecatedMessage,
   getModelEOLDate,
+  getModelEOLMessage,
   getModelTitle,
   getProviderKeyForCreator,
   isModelEndOfLifeReached,
@@ -119,22 +120,8 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
               iconType="error"
               iconColor="subdued"
               textColor="subdued"
-              message={i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.endOfLife', {
-                defaultMessage: 'End-of-life: {date}',
-                values: { date: endOfLifeDate },
-              })}
-              tooltipTitle={i18n.translate(
-                'xpack.searchInferenceEndpoints.eisModelCard.endOfLifeTooltip.title',
-                { defaultMessage: 'Model no longer available' }
-              )}
-              tooltip={i18n.translate(
-                'xpack.searchInferenceEndpoints.eisModelCard.endOfLifeTooltip.content',
-                {
-                  defaultMessage:
-                    'This model has reached end of life on {date}. Use a more recent model instead.',
-                  values: { date: endOfLifeDate },
-                }
-              )}
+              message={endOfLifeDate}
+              tooltip={getModelEOLMessage(endOfLifeDate)}
               tooltipTestSubj={`eisModelCardEndOfLifeTooltip-${modelName}`}
             />
           </EuiFlexItem>
@@ -146,25 +133,8 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
               iconType="warning"
               iconColor="warning"
               textColor="warning"
-              message={i18n.translate(
-                'xpack.searchInferenceEndpoints.eisModelCard.nearingEndOfLife',
-                {
-                  defaultMessage: 'Nearing end-of-life: {date}',
-                  values: { date: endOfLifeDate },
-                }
-              )}
-              tooltipTitle={i18n.translate(
-                'xpack.searchInferenceEndpoints.eisModelCard.nearingEndOfLifeTooltip.title',
-                { defaultMessage: 'Model soon no longer available' }
-              )}
-              tooltip={i18n.translate(
-                'xpack.searchInferenceEndpoints.eisModelCard.nearingEndOfLifeTooltip.content',
-                {
-                  defaultMessage:
-                    'This model is reaching end of life on {date}. It will no longer be available after that date. We recommend using a more recent model.',
-                  values: { date: endOfLifeDate },
-                }
-              )}
+              message={endOfLifeDate}
+              tooltip={getModelDeprecatedMessage(endOfLifeDate)}
               tooltipTestSubj={`eisModelCardNearingEndOfLifeTooltip-${modelName}`}
             />
           </EuiFlexItem>

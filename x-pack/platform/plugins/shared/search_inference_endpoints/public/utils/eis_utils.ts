@@ -367,8 +367,7 @@ export function getModelEOLMessage(eolFormattedDate: string | null) {
     ? i18n.translate(
         'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.content',
         {
-          defaultMessage:
-            "This model's end of life date is {eolFormattedDate}. It is no longer available.",
+          defaultMessage: 'This model has been unavailable since {eolFormattedDate}.',
           values: { eolFormattedDate },
         }
       )
@@ -385,8 +384,7 @@ export function getModelDeprecatedMessage(deprecatedFormattedDate: string | null
     ? i18n.translate(
         'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.content',
         {
-          defaultMessage:
-            'This model will be deprecated on {deprecatedFormattedDate}. We recommend a newer model for optimal results.',
+          defaultMessage: 'This model will be unavailable after {deprecatedFormattedDate}.',
           values: { deprecatedFormattedDate },
         }
       )

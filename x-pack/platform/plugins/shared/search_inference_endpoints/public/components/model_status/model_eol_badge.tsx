@@ -26,15 +26,7 @@ export const ModelEOLBadge = ({ id, metadata, iconOnly }: ModelEOLBadgeProps) =>
   const tooltipContent = getModelEOLMessage(eolDate);
 
   return (
-    <EuiToolTip
-      title={i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.title',
-        {
-          defaultMessage: 'End of life notice',
-        }
-      )}
-      content={tooltipContent}
-    >
+    <EuiToolTip content={tooltipContent}>
       <EuiBadge
         tabIndex={0}
         iconSide="left"
