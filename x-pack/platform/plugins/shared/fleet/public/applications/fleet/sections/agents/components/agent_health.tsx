@@ -30,6 +30,8 @@ import { AgentUpgradeAgentModal } from './agent_upgrade_modal';
 type Props = EuiBadgeProps & {
   agent: Agent;
   fromDetails?: boolean;
+  /** Skip the check-in tooltip, for hosts that attach their own tooltip to the badge. */
+  hideTooltip?: boolean;
 };
 
 function getStatusComponent({
@@ -134,6 +136,7 @@ const WrappedWarningCallout = styled(KbnWarningCallout)`
 export const AgentHealth: React.FunctionComponent<Props> = ({
   agent,
   fromDetails,
+  hideTooltip,
   ...restOfProps
 }) => {
   const { last_checkin: lastCheckIn, last_checkin_message: lastCheckInMessage } = agent;
@@ -177,58 +180,65 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
 
   const { docLinks } = useStartServices();
 
+  const badge =
+    isStuckInUpdating(agent) && !fromDetails ? (
+      <div className="eui-textNoWrap">
+        {getStatusComponent({
+          status: agent.status,
+          upgradeDetails: agent.upgrade_details,
+          ...restOfProps,
+        })}
+        &nbsp;
+        <EuiIcon type="warning" color="warning" aria-hidden={true} />
+      </div>
+    ) : (
+      <>
+        {getStatusComponent({
+          status: agent.status,
+          upgradeDetails: agent.upgrade_details,
+          ...restOfProps,
+        })}
+        {previousToOfflineStatus
+          ? getStatusComponent({
+              status: previousToOfflineStatus,
+              ...restOfProps,
+            })
+          : null}
+      </>
+    );
+
   return (
     <>
-      <EuiToolTip
-        position="top"
-        content={
-          <>
-            <p>{lastCheckinText}</p>
-            <p>{lastCheckInMessageText}</p>
-            {isStuckInUpdating(agent) ? (
-              isAgentInFailedUpgradeState(agent.upgrade_details) ? (
-                <FormattedMessage
-                  id="xpack.fleet.agentHealth.failedUpgradeTooltipText"
-                  defaultMessage="Agent upgrade failed. Consider restarting the upgrade."
-                />
-              ) : (
-                <p>
+      {hideTooltip ? (
+        badge
+      ) : (
+        <EuiToolTip
+          position="top"
+          content={
+            <>
+              <p>{lastCheckinText}</p>
+              <p>{lastCheckInMessageText}</p>
+              {isStuckInUpdating(agent) ? (
+                isAgentInFailedUpgradeState(agent.upgrade_details) ? (
                   <FormattedMessage
-                    id="xpack.fleet.agentHealth.restartUpgradeTooltipText"
-                    defaultMessage="Agent may be stuck updating. Consider restarting the upgrade."
+                    id="xpack.fleet.agentHealth.failedUpgradeTooltipText"
+                    defaultMessage="Agent upgrade failed. Consider restarting the upgrade."
                   />
-                </p>
-              )
-            ) : null}
-          </>
-        }
-      >
-        {isStuckInUpdating(agent) && !fromDetails ? (
-          <div className="eui-textNoWrap">
-            {getStatusComponent({
-              status: agent.status,
-              upgradeDetails: agent.upgrade_details,
-              ...restOfProps,
-            })}
-            &nbsp;
-            <EuiIcon type="warning" color="warning" aria-hidden={true} />
-          </div>
-        ) : (
-          <>
-            {getStatusComponent({
-              status: agent.status,
-              upgradeDetails: agent.upgrade_details,
-              ...restOfProps,
-            })}
-            {previousToOfflineStatus
-              ? getStatusComponent({
-                  status: previousToOfflineStatus,
-                  ...restOfProps,
-                })
-              : null}
-          </>
-        )}
-      </EuiToolTip>
+                ) : (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.fleet.agentHealth.restartUpgradeTooltipText"
+                      defaultMessage="Agent may be stuck updating. Consider restarting the upgrade."
+                    />
+                  </p>
+                )
+              ) : null}
+            </>
+          }
+        >
+          {badge}
+        </EuiToolTip>
+      )}
       {fromDetails && isStuckInUpdating(agent) ? (
         <>
           <EuiSpacer size="m" />
