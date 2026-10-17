@@ -89,6 +89,15 @@ describe('renderBriefing', () => {
     expect(briefing).not.toContain('Rows returned by the example');
   });
 
+  it('omits the row count line when the example row count is unknown', () => {
+    // `row_count` is optional now: a dropped tool result leaves it undefined,
+    // which must not be interpolated into the briefing as 'undefined'.
+    const briefing = render({
+      groups: [{ ...GROUP, example: { query: 'FROM logs-orders | LIMIT 10' } }],
+    });
+    expect(briefing).not.toContain('Rows returned by the example');
+    expect(briefing).not.toContain('undefined');
+  });
   it('truncates an example long enough to crowd out the rest of the briefing', () => {
     const briefing = render({
       groups: [{ ...GROUP, example: { query: 'x'.repeat(2000), row_count: 0 } }],
