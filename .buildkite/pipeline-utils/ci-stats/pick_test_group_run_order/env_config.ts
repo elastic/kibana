@@ -66,6 +66,7 @@ export function loadRunOrderConfig() {
     functionalMinimumIsolationMin: parseOptionalFloatEnv('FUNCTIONAL_MINIMUM_ISOLATION_MIN'),
 
     ftrConfigsRetryCount: parseIntEnv('FTR_CONFIGS_RETRY_COUNT', RETRIES.FTR),
+    ftrDynamicScheduling: process.env.FTR_DYNAMIC_SCHEDULING === 'true',
     jestConfigsRetryCount: parseIntEnv('JEST_CONFIGS_RETRY_COUNT', RETRIES.JEST),
 
     // FTR_CONFIGS_DEPS / JEST_CONFIGS_DEPS originally use an explicit `!== undefined`

@@ -94,6 +94,57 @@ export function buildFunctionalStepGroup(
   };
 }
 
+/** Build a coordinator and the same number of FTR workers as the static plan. */
+export function buildDynamicFunctionalStepGroup(
+  opts: FunctionalStepGroupOptions
+): BuildkiteGroupStep | undefined {
+  if (opts.functionalGroups.length === 0) return undefined;
+
+  const workersByQueue = Map.groupBy(
+    opts.functionalGroups,
+    ({ queue }) => queue || opts.defaultQueue
+  );
+  const workers = [...workersByQueue.entries()].flatMap(([queue, groups], queueIndex) =>
+    groups.map(
+      (_, workerIndex): BuildkiteStep => ({
+        label: `FTR worker ${queueIndex + 1}/${workerIndex + 1}`,
+        command: '.buildkite/scripts/steps/test/ftr_dynamic_worker.sh',
+        timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES,
+        key: `ftr_dynamic_${queueIndex}_${workerIndex}`,
+        agents: expandAgentQueue(queue, AGENT_DISK_GIB.FTR),
+        env: {
+          FTR_DYNAMIC_QUEUE: queue,
+          ...opts.ftrExtraArgs,
+          ...opts.envFromLabels,
+        },
+        retry: {
+          automatic: [
+            { exit_status: '-1', limit: RETRIES.INFRA },
+            { exit_status: '*', limit: 1 },
+          ],
+        },
+      })
+    )
+  );
+
+  return {
+    group: 'FTR Configs',
+    key: STEP_KEYS.FTR_GROUP,
+    depends_on: opts.dependsOn,
+    steps: [
+      {
+        label: 'FTR coordinator',
+        command: '.buildkite/scripts/steps/test/ftr_dynamic_coordinator.sh',
+        timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES + 10,
+        key: 'ftr_dynamic_coordinator',
+        agents: expandAgentQueue(opts.defaultQueue, AGENT_DISK_GIB.FTR),
+        retry: { automatic: [{ exit_status: '-1', limit: RETRIES.INFRA }] },
+      },
+      ...workers,
+    ],
+  };
+}
+
 /**
  * Sort rule (preserved from original):
  * - both numeric → ascending numeric
@@ -120,11 +171,20 @@ export function sortFunctionalGroups(groups: FunctionalGroup[]): FunctionalGroup
  */
 export function registerCancelKeys(
   bk: BuildkiteClient,
-  args: { unitCount: number; integrationCount: number; functionalGroups: FunctionalGroup[] }
+  args: {
+    unitCount: number;
+    integrationCount: number;
+    functionalGroups: FunctionalGroup[];
+    dynamicFtrStepKeys?: string[];
+  }
 ): void {
   const cancelKeys: string[] = [];
   if (args.unitCount > 0) cancelKeys.push(STEP_KEYS.JEST_UNIT);
   if (args.integrationCount > 0) cancelKeys.push(STEP_KEYS.JEST_INTEGRATION);
-  for (const fg of args.functionalGroups) cancelKeys.push(fg.key);
+  if (args.dynamicFtrStepKeys) {
+    cancelKeys.push(...args.dynamicFtrStepKeys);
+  } else {
+    for (const fg of args.functionalGroups) cancelKeys.push(fg.key);
+  }
   bk.setMetadata('cancel_on_gate_failure_batch:test_groups', JSON.stringify(cancelKeys));
 }

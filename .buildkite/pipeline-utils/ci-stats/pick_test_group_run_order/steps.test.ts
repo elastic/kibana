@@ -12,6 +12,7 @@ jest.mock('#pipeline-utils', () => ({
 }));
 
 import {
+  buildDynamicFunctionalStepGroup,
   buildFunctionalStepGroup,
   buildJestStep,
   registerCancelKeys,
@@ -52,6 +53,30 @@ describe('buildJestStep', () => {
   it('omits the wildcard retry when retryCount is 0', () => {
     const step = buildJestStep({ ...baseOpts, retryCount: 0 }) as any;
     expect(step.retry.automatic).toEqual([{ exit_status: '-1', limit: 3 }]);
+  });
+});
+
+describe('buildDynamicFunctionalStepGroup', () => {
+  it('creates one coordinator and one worker per static group in the same queues', () => {
+    const step = buildDynamicFunctionalStepGroup({
+      command: 'unused',
+      functionalGroups: [
+        { title: 'A', key: 'a', sortBy: 1, queue: 'regular' },
+        { title: 'B', key: 'b', sortBy: 2, queue: 'regular' },
+        { title: 'C', key: 'c', sortBy: 3, queue: 'special' },
+      ],
+      defaultQueue: 'regular',
+      ftrExtraArgs: {},
+      envFromLabels: {},
+      dependsOn: ['build'],
+      retryCount: 1,
+    });
+
+    expect(step?.steps).toHaveLength(4);
+    expect(
+      step?.steps.map((job) => ('env' in job ? job.env?.FTR_DYNAMIC_QUEUE : undefined))
+    ).toEqual([undefined, 'regular', 'regular', 'special']);
+    expect(step?.depends_on).toEqual(['build']);
   });
 });
 
