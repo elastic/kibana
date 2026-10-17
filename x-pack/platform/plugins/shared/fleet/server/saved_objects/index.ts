@@ -15,6 +15,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+  IAC_CALLBACK_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 
 import {
@@ -61,6 +62,7 @@ import {
   CloudConnectorSchemaV5,
   CloudOnboardingDeploymentSchemaV1,
   CloudOnboardingDeploymentSchemaV2,
+  IacCallbackSchemaV1,
 } from '../types';
 
 import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
@@ -2181,6 +2183,34 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV2,
+          },
+        },
+      },
+    },
+    [IAC_CALLBACK_SAVED_OBJECT_TYPE]: {
+      name: IAC_CALLBACK_SAVED_OBJECT_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: false,
+      // The stack's Lambda calls the receive route without a space prefix, so the record must be
+      // reachable from any space; the space the launch happened in is kept in `space_id`.
+      namespaceType: 'agnostic',
+      management: {
+        importableAndExportable: false,
+      },
+      mappings: {
+        dynamic: false,
+        properties: {
+          api_key_id: { type: 'keyword' },
+          status: { type: 'keyword' },
+          expires_at: { type: 'date' },
+        },
+      },
+      modelVersions: {
+        1: {
+          changes: [],
+          schemas: {
+            forwardCompatibility: IacCallbackSchemaV1.extends({}, { unknowns: 'ignore' }),
+            create: IacCallbackSchemaV1,
           },
         },
       },

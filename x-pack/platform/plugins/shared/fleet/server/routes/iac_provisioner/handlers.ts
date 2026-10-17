@@ -10,12 +10,15 @@ import type { KibanaResponseFactory } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
 import { iacProvisionerService } from '../../services';
+import { iacCallbackService } from '../../services/iac_callback';
 import {
   buildIacProvisionerIntegrations,
   isBuildError,
 } from '../../services/iac_provisioner_integrations';
 import { appContextService } from '../../services/app_context';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
+import { isAwsIdentityFederationEnabled } from '../../services/utils/aws_identity_federation';
+import { getIacCallbackAvailability } from '../../services/utils/iac_callback_availability';
 import {
   reportIacProvisionerRenderCompleted,
   reportIacProvisionerRenderRequested,
@@ -28,6 +31,13 @@ import {
 import { getErrorMessage } from '../../errors/utils';
 import type { FleetRequestHandler } from '../../types';
 import type { RenderIacTemplateRequestSchema } from '../../types/rest_spec/iac_provisioner';
+import type {
+  CreateIacCallbackRequestSchema,
+  DeleteIacCallbackRequestSchema,
+  GetIacCallbackRequestSchema,
+  ReceiveIacCallbackRequestSchema,
+} from '../../types/rest_spec/iac_callback';
+import type { IacCallback } from '../../../common/types/models/iac_callback';
 import type { IacProvisionerRenderFlow } from '../../../common/telemetry/iac_provisioner_events';
 
 export const renderIacTemplateHandler: FleetRequestHandler<
@@ -176,4 +186,153 @@ const mapIacProvisionerRouteError = ({
     statusCode: 500,
     body: { message: unexpectedMessage },
   });
+};
+
+const CALLBACK_NOT_FOUND = { body: { message: 'Callback not found' } };
+
+/**
+ * Records are space-agnostic because the stack calls Kibana without a space. The browser routes
+ * only return records from the space the launch happened in; others read as missing.
+ */
+const getCallbackInSpace = async (
+  id: string,
+  spaceId: string
+): Promise<IacCallback | undefined> => {
+  const item = await iacCallbackService.get(
+    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+    id
+  );
+  return item && item.space_id === spaceId ? item : undefined;
+};
+
+const AWS_IDENTITY_FEDERATION_DISABLED = {
+  body: { message: 'AWS identity federation is not enabled' },
+};
+
+/**
+ * Tells the browser whether a launched stack could report back to this Kibana, so it can refuse
+ * the launch with the reason instead of waiting for a report that cannot arrive.
+ */
+export const getIacCallbackAvailabilityHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
+  if (!(await isAwsIdentityFederationEnabled())) {
+    return response.notFound(AWS_IDENTITY_FEDERATION_DISABLED);
+  }
+  const { available, kibanaUrl, reason } = getIacCallbackAvailability();
+  return response.ok({
+    body: {
+      available,
+      ...(kibanaUrl ? { kibana_url: kibanaUrl } : {}),
+      ...(reason ? { reason } : {}),
+    },
+  });
+};
+
+export const createIacCallbackHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof CreateIacCallbackRequestSchema.body>
+> = async (context, request, response) => {
+  if (!(await isAwsIdentityFederationEnabled())) {
+    return response.notFound(AWS_IDENTITY_FEDERATION_DISABLED);
+  }
+  // A public URL the stack cannot be given (not https) is refused, so no key is minted for a
+  // report that cannot arrive. Without a configured public URL there is nothing to check; the
+  // caller supplies the URL to the stack and is responsible for it.
+  const availability = getIacCallbackAvailability();
+  if (!availability.available && availability.kibanaUrl) {
+    return response.customError({
+      statusCode: 412,
+      body: { message: availability.reason ?? 'Kibana cannot be reached at its public URL' },
+    });
+  }
+  const { spaceId } = await context.fleet;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+  const { provider, ...identity } = request.body;
+
+  // Internal clients: creating the key must not need the user's `manage_api_key` privilege (it
+  // is unavailable on Serverless), and the type is space-agnostic.
+  const { item, apiKey } = await iacCallbackService.create(
+    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+    appContextService.getInternalUserESClient(),
+    { provider, createdBy: user?.username, spaceId, identity }
+  );
+
+  return response.ok({ body: { item, api_key: apiKey } });
+};
+
+export const getIacCallbackHandler: FleetRequestHandler<
+  TypeOf<typeof GetIacCallbackRequestSchema.params>
+> = async (context, request, response) => {
+  const { spaceId } = await context.fleet;
+  const item = await getCallbackInSpace(request.params.callbackId, spaceId);
+  if (!item) {
+    return response.notFound(CALLBACK_NOT_FOUND);
+  }
+  return response.ok({ body: { item } });
+};
+
+/**
+ * Retires a record the browser no longer waits on, for example because the identity is being
+ * created by hand. Answers with the record as the stack left it when it had already reported.
+ */
+export const deleteIacCallbackHandler: FleetRequestHandler<
+  TypeOf<typeof DeleteIacCallbackRequestSchema.params>
+> = async (context, request, response) => {
+  const { spaceId } = await context.fleet;
+  const existing = await getCallbackInSpace(request.params.callbackId, spaceId);
+  if (!existing) {
+    return response.notFound(CALLBACK_NOT_FOUND);
+  }
+  const item = await iacCallbackService.cancel(
+    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+    existing.id
+  );
+  if (!item) {
+    return response.notFound(CALLBACK_NOT_FOUND);
+  }
+  return response.ok({ body: { item } });
+};
+
+/**
+ * Called by the stack's Lambda. Kibana has already authenticated the API key; the service then
+ * checks that it is this record's key.
+ */
+export const receiveIacCallbackHandler: FleetRequestHandler<
+  TypeOf<typeof ReceiveIacCallbackRequestSchema.params>,
+  undefined,
+  TypeOf<typeof ReceiveIacCallbackRequestSchema.body>
+> = async (context, request, response) => {
+  const logger = appContextService.getLogger().get('IacProvisioner receiveIacCallbackHandler');
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request);
+  const apiKeyId = user?.authentication_type === 'api_key' ? user.api_key?.id : undefined;
+
+  const result = await iacCallbackService.receive(
+    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+    request.params.callbackId,
+    { apiKeyId, payload: request.body }
+  );
+  // Never log the key.
+  logger.info(`IaC callback report [id=${request.params.callbackId}] outcome=${result.outcome}`);
+
+  switch (result.outcome) {
+    case 'received':
+      return response.ok({ body: { status: result.item.status } });
+    case 'not_found':
+      return response.notFound(CALLBACK_NOT_FOUND);
+    case 'conflict':
+      return response.conflict({
+        body: { message: 'Callback already received with different values' },
+      });
+    case 'gone':
+      return response.customError({
+        statusCode: 410,
+        body: { message: 'Callback is no longer accepting values' },
+      });
+    case 'invalid':
+      return response.badRequest({ body: { message: result.message } });
+  }
 };
