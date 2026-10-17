@@ -7,7 +7,7 @@
 
 import { EuiFormRow, EuiDatePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import React from 'react';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import type { CreateAnnotationForm } from './create_annotation';
@@ -21,9 +21,9 @@ const getHelpfulDateFormat = (dateFormat: string) => {
 };
 
 export function AnnotationRange() {
-  const { control, watch } = useFormContext<CreateAnnotationForm>();
+  const { control } = useFormContext<CreateAnnotationForm>();
 
-  const eventEnd = watch('event.end');
+  const eventEnd = useWatch({ control, name: 'event.end' });
   const dateFormatDefault = useUiSetting<string>('dateFormat');
   const dateFormat = getHelpfulDateFormat(dateFormatDefault);
 
