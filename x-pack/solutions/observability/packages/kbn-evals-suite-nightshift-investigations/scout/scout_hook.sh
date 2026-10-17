@@ -84,13 +84,42 @@ certificate="$(pem_path SANDBOX_CLIENT_CERT_PATH '.sandbox.ssl.certificate')"
 key="$(pem_path SANDBOX_CLIENT_KEY_PATH '.sandbox.ssl.key')"
 ca="$(pem_path SANDBOX_CA_CERT_PATH '.sandbox.ssl.certificateAuthorities')"
 
-telemetry_url="$(resolve NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL '.nightshift.telemetry.url')"
-telemetry_key="$(resolve NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY '.nightshift.telemetry.apiKey')"
-readable_indices="$(resolve NIGHTSHIFT_SANDBOX_READABLE_INDICES '.nightshift.telemetry.readableIndices')"
+# NIGHTSHIFT_TELEMETRY_TARGET (none | profile; unset: profile when any telemetry setting is set)
+# resolves to telemetry_url, telemetry_key and readable_indices for kibana.telemetry.yml. The URL
+# and key come from one source, so a partial profile block is never completed from the shell.
+profile_url="$(config_value '.nightshift.telemetry.url')"
+profile_key="$(config_value '.nightshift.telemetry.apiKey')"
+if [[ -z "$profile_url$profile_key" ]]; then
+  profile_url="${NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL:-}"
+  profile_key="${NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY:-}"
+fi
+profile_indices="$(resolve NIGHTSHIFT_SANDBOX_READABLE_INDICES '.nightshift.telemetry.readableIndices')"
+default_target=none
+[[ -n "$profile_url$profile_key$profile_indices" ]] && default_target=profile
+telemetry_target="${NIGHTSHIFT_TELEMETRY_TARGET:-$default_target}"
+
+case "$telemetry_target" in
+  none) telemetry_url='' telemetry_key='' readable_indices='' ;;
+  profile)
+    telemetry_url="$profile_url" telemetry_key="$profile_key" readable_indices="$profile_indices"
+    ;;
+  *)
+    echo "nightshift-investigations scout hook: NIGHTSHIFT_TELEMETRY_TARGET must be none or" \
+      "profile, got \"$telemetry_target\"" >&2
+    exit 1
+    ;;
+esac
+
 telemetry_config=''
-if [[ -n "$telemetry_url$telemetry_key$readable_indices" ]]; then
+if [[ "$telemetry_target" != none ]]; then
   if [[ -z "$telemetry_url" || -z "$telemetry_key" ]]; then
-    echo "nightshift-investigations scout hook: remote telemetry requires both URL and API key" >&2
+    echo "nightshift-investigations scout hook: telemetry target $telemetry_target requires both" \
+      "URL and API key from one source (nightshift.telemetry or NIGHTSHIFT_SANDBOX_*)" >&2
+    exit 1
+  fi
+  # The URL becomes unredacted connector config, so credentials belong in the API key alone.
+  if [[ "$telemetry_url" == *@* ]]; then
+    echo "nightshift-investigations scout hook: telemetry URL must not embed credentials" >&2
     exit 1
   fi
   if [[ -z "$api_key" ]]; then
