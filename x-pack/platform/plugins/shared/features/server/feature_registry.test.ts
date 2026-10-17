@@ -3701,6 +3701,42 @@ describe('FeatureRegistry', () => {
       );
     });
 
+    it('allows privileges to declare only requiredAnyIndexPrivileges', () => {
+      const feature: ElasticsearchFeatureConfig = {
+        id: 'test-feature',
+        privileges: [
+          {
+            requiredClusterPrivileges: [],
+            requiredAnyIndexPrivileges: ['read'],
+            ui: ['ui_a'],
+          },
+        ],
+      };
+      const featureRegistry = new FeatureRegistry();
+      featureRegistry.registerElasticsearchFeature(feature);
+      featureRegistry.lockRegistration();
+      expect(featureRegistry.getAllElasticsearchFeatures()[0].toRaw()).toEqual(feature);
+    });
+
+    it('requires requiredAnyIndexPrivileges to be an array of strings', () => {
+      const feature: ElasticsearchFeatureConfig = {
+        id: 'test-feature',
+        privileges: [
+          {
+            requiredClusterPrivileges: [],
+            requiredAnyIndexPrivileges: 'read',
+            ui: [],
+          },
+        ],
+      } as any;
+      const featureRegistry = new FeatureRegistry();
+      expect(() =>
+        featureRegistry.registerElasticsearchFeature(feature)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[privileges.0.requiredAnyIndexPrivileges]: could not parse array value from json input"`
+      );
+    });
+
     it('does not allow duplicate privilege ids', () => {
       const feature: ElasticsearchFeatureConfig = {
         id: 'test-feature',
