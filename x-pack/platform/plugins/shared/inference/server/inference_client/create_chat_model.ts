@@ -82,5 +82,6 @@ export const createChatModel = async ({
     ...chatModelOptions,
     chatComplete: client.chatComplete,
     connector,
+    logger,
   });
 };
