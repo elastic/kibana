@@ -45,6 +45,7 @@ interface SkillLibraryPanelProps {
   onToggleSkill: (skill: PublicSkillSummary, isActive: boolean) => void;
   enableElasticCapabilities?: boolean;
   builtinSkillIdSet?: Set<string>;
+  inheritedSkillIdSet?: ReadonlySet<string>;
 }
 
 export const SkillLibraryPanel: React.FC<SkillLibraryPanelProps> = ({
@@ -54,11 +55,16 @@ export const SkillLibraryPanel: React.FC<SkillLibraryPanelProps> = ({
   onToggleSkill,
   enableElasticCapabilities = false,
   builtinSkillIdSet,
+  inheritedSkillIdSet,
 }) => {
-  const disabledItemIdSet = useMemo(() => {
-    if (!enableElasticCapabilities || !builtinSkillIdSet) return undefined;
-    return builtinSkillIdSet;
-  }, [enableElasticCapabilities, builtinSkillIdSet]);
+  const disabledItemIdSet = useMemo(
+    () =>
+      new Set([
+        ...(inheritedSkillIdSet ?? []),
+        ...(enableElasticCapabilities ? builtinSkillIdSet ?? [] : []),
+      ]),
+    [enableElasticCapabilities, builtinSkillIdSet, inheritedSkillIdSet]
+  );
   const readOnlyItemIdSet = useMemo(
     () => new Set(allSkills.filter((s) => s.readonly).map((s) => s.id)),
     [allSkills]

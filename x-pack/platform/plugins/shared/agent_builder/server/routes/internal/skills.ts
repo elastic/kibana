@@ -12,7 +12,7 @@ import {
   SKILL_USED_BY_AGENTS_ERROR_CODE,
   type BulkDeleteSkillResponse,
   type BulkDeleteSkillResult,
-  type ListSkillsResponse,
+  type ListAgentSkillsResponse,
 } from '../../../common/http_api/skills';
 import { internalApiPath } from '../../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, SKILLS_WRITE_SECURITY } from '../route_security';
@@ -48,14 +48,25 @@ export function registerInternalSkillsRoutes({
 
       const skillRegistry = await skillService.getRegistry({ request });
 
+      const [agentConfiguration, baseConfiguration] = await Promise.all([
+        agentsService.resolveAgentConfiguration({ agent, request }),
+        agentsService.resolveAgentBaseConfiguration({ agentType: agent.type, request }),
+      ]);
+      const inheritedSkillIds = new Set(baseConfiguration.skill_ids ?? []);
+
       const agentSkills = await resolveAgentSkills({
         skills: skillRegistry,
-        agentConfiguration: agent.configuration,
+        agentConfiguration,
       });
 
-      const results = await Promise.all(agentSkills.map(internalToPublicSummary));
+      const results = await Promise.all(
+        agentSkills.map(async (skill) => ({
+          ...(await internalToPublicSummary(skill)),
+          is_default: inheritedSkillIds.has(skill.id),
+        }))
+      );
 
-      return response.ok<ListSkillsResponse>({ body: { results } });
+      return response.ok<ListAgentSkillsResponse>({ body: { results } });
     })
   );
 

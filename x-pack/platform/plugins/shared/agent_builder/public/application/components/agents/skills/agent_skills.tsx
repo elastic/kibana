@@ -27,6 +27,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useCanUpdateAgent } from '../../../hooks/agents/use_can_update_agent';
+import { useInheritedSkillIds } from '../../../hooks/skills/use_inherited_skill_ids';
 import { useSkillsService } from '../../../hooks/skills/use_skills';
 import { useFlyoutState } from '../../../hooks/use_flyout_state';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -55,6 +56,7 @@ export const AgentSkills: React.FC = () => {
 
   const { agent, isLoading: agentLoading } = useAgentBuilderAgentById(agentId);
   const { skills: allSkills, isLoading: skillsLoading } = useSkillsService();
+  const { inheritedSkillIds, isLoading: inheritedSkillsLoading } = useInheritedSkillIds(agentId);
   const { manageSkills } = useUiPrivileges();
   const canEditAgent = useCanUpdateAgent({ agent });
 
@@ -86,11 +88,6 @@ export const AgentSkills: React.FC = () => {
     [agent?.configuration?.skill_ids]
   );
 
-  const agentSkillIdSet = useMemo(
-    () => (agentSkillIds ? new Set(agentSkillIds) : undefined),
-    [agentSkillIds]
-  );
-
   const enableElasticCapabilities = agent?.configuration?.enable_elastic_capabilities ?? false;
 
   const autoIncludedBuiltinSkills = useMemo(
@@ -104,11 +101,15 @@ export const AgentSkills: React.FC = () => {
   );
 
   const activeSkills = useMemo(() => {
-    return getActiveSkills(allSkills, agentSkillIds, enableElasticCapabilities);
-  }, [allSkills, agentSkillIds, enableElasticCapabilities]);
+    return getActiveSkills(allSkills, agentSkillIds, enableElasticCapabilities, inheritedSkillIds);
+  }, [allSkills, agentSkillIds, enableElasticCapabilities, inheritedSkillIds]);
+
+  // Inherited and auto-included skills always apply, so they cannot be toggled or removed.
+  const isSkillLocked = (skill: PublicSkillSummary) =>
+    inheritedSkillIds.has(skill.id) || isSkillAutoIncluded(skill, enableElasticCapabilities);
 
   useEffect(() => {
-    if (agentLoading || skillsLoading) return;
+    if (agentLoading || skillsLoading || inheritedSkillsLoading) return;
 
     // When a newly added skill is pending to be selected. Once it is active, select it.
     if (pendingSelectSkillIdRef.current) {
@@ -133,7 +134,14 @@ export const AgentSkills: React.FC = () => {
     if (selectedSkillNotActive) {
       setSelectedSkillId(activeSkills[0]?.id ?? null);
     }
-  }, [activeSkills, selectedSkillId, setSelectedSkillId, agentLoading, skillsLoading]);
+  }, [
+    activeSkills,
+    selectedSkillId,
+    setSelectedSkillId,
+    agentLoading,
+    skillsLoading,
+    inheritedSkillsLoading,
+  ]);
 
   const filteredActiveSkills = useMemo(() => {
     if (!searchQuery.trim()) return activeSkills;
@@ -152,7 +160,7 @@ export const AgentSkills: React.FC = () => {
   };
 
   const handleToggleSkill = (skill: PublicSkillSummary, isActive: boolean) => {
-    if (isSkillAutoIncluded(skill, enableElasticCapabilities)) return;
+    if (isSkillLocked(skill)) return;
     if (isActive) {
       handleAddSkill(skill);
     } else {
@@ -164,22 +172,19 @@ export const AgentSkills: React.FC = () => {
     if (!selectedSkillId) return;
     const skill = activeSkills.find((s) => s.id === selectedSkillId);
     if (skill) {
-      if (isSkillAutoIncluded(skill, enableElasticCapabilities)) return;
+      if (isSkillLocked(skill)) return;
       handleRemoveSkillWithReport(skill);
     }
   };
 
-  const libraryActiveSkillIdSet = useMemo(() => {
-    if (!agentSkillIdSet) {
-      return enableElasticCapabilities ? builtinSkillIdSet : new Set<string>();
-    }
-    if (enableElasticCapabilities) return new Set([...agentSkillIdSet, ...builtinSkillIdSet]);
-    return agentSkillIdSet;
-  }, [agentSkillIdSet, enableElasticCapabilities, builtinSkillIdSet]);
+  const libraryActiveSkillIdSet = useMemo(
+    () => new Set(activeSkills.map(({ id }) => id)),
+    [activeSkills]
+  );
 
   const showCustomizeEmptyState = activeSkills.length === 0 && !searchQuery.trim();
 
-  const isLoading = agentLoading || skillsLoading;
+  const isLoading = agentLoading || skillsLoading || inheritedSkillsLoading;
 
   if (isLoading) {
     return (
@@ -199,6 +204,7 @@ export const AgentSkills: React.FC = () => {
           onToggleSkill={handleToggleSkill}
           enableElasticCapabilities={enableElasticCapabilities}
           builtinSkillIdSet={builtinSkillIdSet}
+          inheritedSkillIdSet={inheritedSkillIds}
         />
       ) : null}
       {editingSkillId ? (
@@ -343,7 +349,7 @@ export const AgentSkills: React.FC = () => {
                         isSelected={selectedSkillId === skill.id}
                         onSelect={(s) => handleSelectSkill(s.id)}
                         onRemove={handleRemoveSkillWithReport}
-                        isAutoIncluded={isSkillAutoIncluded(skill, enableElasticCapabilities)}
+                        isAutoIncluded={isSkillLocked(skill)}
                         canEditAgent={canEditAgent}
                       />
                     </EuiFlexItem>
@@ -359,9 +365,7 @@ export const AgentSkills: React.FC = () => {
                   onEdit={() => setEditingSkillId(selectedSkillId)}
                   onRemove={handleRemoveSelectedSkill}
                   isAutoIncluded={activeSkills.some(
-                    (skill) =>
-                      skill.id === selectedSkillId &&
-                      isSkillAutoIncluded(skill, enableElasticCapabilities)
+                    (skill) => skill.id === selectedSkillId && isSkillLocked(skill)
                   )}
                   canEditAgent={canEditAgent}
                   canManageSkills={manageSkills}

@@ -15,7 +15,11 @@ import {
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { isAllowedBuiltinAgent, isAllowedAgentType } from '@kbn/agent-builder-server/allow_lists';
-import { agentBuilderDefaultAiIndexId, chatAgentTypeId } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAiIndexId,
+  chatAgentTypeId,
+  kiRetrievalSkillId,
+} from '@kbn/agent-builder-common';
 import type { AgentConfiguration, AgentDefinition } from '@kbn/agent-builder-common';
 import { AgentsService } from './agents_service';
 import { defaultAiIndices } from './default_ai_indices';
@@ -219,6 +223,21 @@ describe('AgentsService', () => {
         const resolved = await resolve({ tools: [], ai_indices: [] });
 
         expect(resolved.ai_indices).toEqual(Object.keys(defaultAiIndices));
+      });
+
+      it('grants the ki-retrieval skill to chat agents that selected no skills', async () => {
+        const resolved = await resolve({ tools: [], skill_ids: [] });
+
+        expect(resolved.skill_ids).toEqual([kiRetrievalSkillId]);
+      });
+
+      it("unions the ki-retrieval skill with the agent's own skills, without duplicates", async () => {
+        const resolved = await resolve({
+          tools: [],
+          skill_ids: ['custom-skill', kiRetrievalSkillId],
+        });
+
+        expect(resolved.skill_ids).toEqual([kiRetrievalSkillId, 'custom-skill']);
       });
     });
 

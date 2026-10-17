@@ -35,6 +35,11 @@ export const agentBuilderDefaultAgentId = 'elastic-ai-agent';
 export const agentBuilderDefaultAiIndexId = 'elastic';
 
 /**
+ * ID of the skill every chat agent gets for querying its AI indices.
+ */
+export const kiRetrievalSkillId = 'ki-retrieval';
+
+/**
  * Definition of a agentBuilder agent.
  */
 export interface AgentDefinition {
