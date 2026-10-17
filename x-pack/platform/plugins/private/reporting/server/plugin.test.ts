@@ -291,6 +291,36 @@ describe('Reporting Plugin', () => {
         expect.objectContaining({ id: PNG_REPORT_TYPE_V2 })
       );
     });
+
+    it('registers the deprecated PDF v1 export type in traditional build flavour', () => {
+      registerSpy.mockClear();
+      plugin.setup(coreSetup, pluginSetup);
+
+      expect(registerSpy.mock.calls.map(([exportType]) => exportType.id)).toEqual([
+        CSV_REPORT_TYPE,
+        CSV_REPORT_TYPE_V2,
+        PDF_REPORT_TYPE,
+        PDF_REPORT_TYPE_V2,
+        PNG_REPORT_TYPE_V2,
+      ]);
+    });
+
+    it('does not register the deprecated PDF v1 export type in serverless build flavour', () => {
+      const serverlessInitContext = coreMock.createPluginInitializerContext(configSchema);
+      // Force type-cast to convert `ReadOnly<PackageInfo>` to mutable `PackageInfo`.
+      (serverlessInitContext.env.packageInfo as PackageInfo).buildFlavor = 'serverless';
+      plugin = new ReportingPlugin(serverlessInitContext);
+
+      registerSpy.mockClear();
+      plugin.setup(coreSetup, pluginSetup);
+
+      expect(registerSpy.mock.calls.map(([exportType]) => exportType.id)).toEqual([
+        CSV_REPORT_TYPE,
+        CSV_REPORT_TYPE_V2,
+        PDF_REPORT_TYPE_V2,
+        PNG_REPORT_TYPE_V2,
+      ]);
+    });
   });
 
   describe('features registration', () => {
