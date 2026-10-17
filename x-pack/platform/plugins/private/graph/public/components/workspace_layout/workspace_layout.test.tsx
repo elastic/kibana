@@ -15,13 +15,12 @@ import type {
   GraphSavePolicy,
   GraphWorkspaceSavedObject,
   IndexPatternProvider,
-  Workspace,
-  WorkspaceNode,
+  RuntimeGraph,
 } from '../../types';
 import type { OverlayStart, Capabilities } from '@kbn/core/public';
 import type { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
-import { GraphVisualization } from '../graph_visualization';
 import { ControlPanel } from '../control_panel';
+import { ReduxGraphVisualization as GraphVisualization } from '../graph_visualization';
 
 jest.mock('react-router-dom', () => {
   const useLocation = () => ({
@@ -34,7 +33,6 @@ jest.mock('react-router-dom', () => {
 
 describe('workspace_layout', () => {
   const defaultProps = {
-    renderCounter: 1,
     loading: false,
     savedWorkspace: { id: 'test' } as GraphWorkspaceSavedObject,
     hasFields: true,
@@ -58,8 +56,9 @@ describe('workspace_layout', () => {
         json: jest.fn(),
       }),
       reset: jest.fn(),
+      getRequests: jest.fn(() => []),
     } as unknown as RequestAdapter,
-    workspace: {} as unknown as Workspace,
+    runtimeGraph: {} as unknown as RuntimeGraph,
   };
   it('should display conflict notification if outcome is conflict', () => {
     shallow(
@@ -117,22 +116,20 @@ describe('workspace_layout', () => {
   });
 
   it('rerenders the control panel when editor focus changes', () => {
-    const firstNode = { id: 'first-node' } as WorkspaceNode;
-    const secondNode = { id: 'second-node' } as WorkspaceNode;
     const component = shallow(<WorkspaceLayoutComponent {...defaultProps} />);
 
-    component.find(ControlPanel).prop('selectSelected')(firstNode);
+    component.find(ControlPanel).prop('selectSelected')('first-node');
     component.update();
     expect(component.find(ControlPanel).props()).toMatchObject({
       control: 'editLabel',
-      selectedNode: firstNode,
+      selectedNodeId: 'first-node',
     });
 
-    component.find(ControlPanel).prop('selectSelected')(secondNode);
+    component.find(ControlPanel).prop('selectSelected')('second-node');
     component.update();
     expect(component.find(ControlPanel).props()).toMatchObject({
       control: 'editLabel',
-      selectedNode: secondNode,
+      selectedNodeId: 'second-node',
     });
   });
 });

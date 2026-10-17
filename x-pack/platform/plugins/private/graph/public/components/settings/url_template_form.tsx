@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { UrlTemplate } from '../../types';
-import { outlinkEncoders } from '../../helpers/outlink_encoders';
+import { getOutlinkEncoder, outlinkEncoders } from '../../helpers/outlink_encoders';
 import { urlTemplateIconChoices } from '../../helpers/style_choices';
 import { isUrlTemplateValid, isKibanaUrl, replaceKibanaUrlParam } from '../../helpers/url_template';
 import { isEqual } from '../helpers';
@@ -53,13 +53,14 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
     isUpdateForm(props)
       ? props.initialTemplate
       : {
-          encoder: outlinkEncoders[0],
+          encoderId: outlinkEncoders[0].id,
           icon: null,
           description: '',
           url: '',
         };
 
   const [currentTemplate, setCurrentTemplate] = useState(getInitialTemplate);
+  const currentEncoder = getOutlinkEncoder(currentTemplate.encoderId) ?? outlinkEncoders[0];
 
   const euiThemeContext = useEuiTheme();
 
@@ -102,10 +103,10 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
       ...currentTemplate,
       url: replaceKibanaUrlParam(currentTemplate.url),
       // reset to kql encoder
-      encoder:
-        currentTemplate.encoder.type === 'kql'
-          ? currentTemplate.encoder
-          : outlinkEncoders.find((enc) => enc.type === 'kql')!,
+      encoderId:
+        currentEncoder.type === 'kql'
+          ? currentEncoder.id
+          : outlinkEncoders.find((encoder) => encoder.type === 'kql')!.id,
     });
     setAutoformatUrl(false);
   }
@@ -148,6 +149,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
       paddingSize="m"
     >
       <form
+        data-test-subj={isUpdateForm(props) ? 'graphUpdateDrilldownForm' : 'graphNewDrilldownForm'}
         onSubmit={(e) => {
           e.preventDefault();
           onSubmit(currentTemplate);
@@ -166,6 +168,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
         >
           <EuiFieldText
             fullWidth
+            data-test-subj="graphDrilldownTitle"
             value={currentTemplate.description}
             isInvalid={touched.description && !currentTemplate.description}
             onChange={(e) => setValue('description', e.target.value)}
@@ -222,6 +225,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
         >
           <EuiFieldText
             fullWidth
+            data-test-subj="graphDrilldownUrl"
             placeholder="https://www.google.co.uk/#q={{gquery}}"
             value={currentTemplate.url}
             onChange={(e) => {
@@ -244,7 +248,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
         </EuiFormRow>
         <EuiFormRow
           fullWidth
-          helpText={currentTemplate.encoder.description}
+          helpText={currentEncoder.description}
           label={i18n.translate('xpack.graph.settings.drillDowns.urlEncoderInputLabel', {
             defaultMessage: 'URL parameter type',
           })}
@@ -254,16 +258,19 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             data-test-subj="graphDrilldownEncoder"
             singleSelection={{ asPlainText: true }}
             isClearable={false}
-            options={outlinkEncoders.map((encoder) => ({ label: encoder.title, value: encoder }))}
+            options={outlinkEncoders.map((encoder) => ({
+              label: encoder.title,
+              value: encoder.id,
+            }))}
             selectedOptions={[
               {
-                label: currentTemplate.encoder.title,
-                value: currentTemplate.encoder,
+                label: currentEncoder.title,
+                value: currentEncoder.id,
               },
             ]}
             onChange={(choices) => {
               // choices[0].value can't be null because `isClearable` is set to false above
-              setValue('encoder', choices[0].value!);
+              setValue('encoderId', choices[0].value!);
             }}
           />
         </EuiFormRow>
@@ -330,7 +337,12 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton type="submit" fill isDisabled={urlPlaceholderMissing || formIncomplete}>
+            <EuiButton
+              type="submit"
+              fill
+              isDisabled={urlPlaceholderMissing || formIncomplete}
+              data-test-subj="graphSaveDrilldown"
+            >
               {isUpdateForm(props)
                 ? i18n.translate('xpack.graph.settings.drillDowns.updateSaveButtonLabel', {
                     defaultMessage: 'Update drilldown',

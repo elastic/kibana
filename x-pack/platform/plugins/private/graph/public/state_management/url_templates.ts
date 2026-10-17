@@ -11,31 +11,43 @@ import { i18n } from '@kbn/i18n';
 import { modifyUrl } from '@kbn/std';
 import rison from '@kbn/rison';
 import { format, parse } from 'url';
-import type { GraphState, GraphStoreDependencies, StartGraphListening } from './store';
+import { v4 as uuidv4 } from 'uuid';
+import type { GraphState } from './store';
 import type { UrlTemplate } from '../types';
 import { reset } from './global';
 import type { IndexpatternDatasource } from './datasource';
 import { setDatasource, requestDatasource } from './datasource';
 import { outlinkEncoders } from '../helpers/outlink_encoders';
 import { urlTemplatePlaceholder } from '../helpers/url_template';
-import { matchesOne } from './helpers';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/urlTemplates');
 
-export const loadTemplates = actionCreator<UrlTemplate[]>('LOAD_TEMPLATES');
-export const saveTemplate = actionCreator<{ index: number; template: UrlTemplate }>(
-  'SAVE_TEMPLATE'
-);
-export const removeTemplate = actionCreator<UrlTemplate>('REMOVE_TEMPLATE');
+const loadTemplatesAction = actionCreator<UrlTemplateState[]>('LOAD_TEMPLATES');
+const saveTemplateAction = actionCreator<{
+  id: string;
+  isNew: boolean;
+  template: UrlTemplate;
+}>('SAVE_TEMPLATE');
+export const removeTemplate = actionCreator<string>('REMOVE_TEMPLATE');
 
-export type UrlTemplatesState = UrlTemplate[];
+export const loadTemplates = (templates: UrlTemplate[]) =>
+  loadTemplatesAction(templates.map((template) => ({ ...template, id: uuidv4() })));
+
+export const saveTemplate = ({ id, template }: { id?: string; template: UrlTemplate }) =>
+  saveTemplateAction({ id: id ?? uuidv4(), isNew: id === undefined, template });
+
+export interface UrlTemplateState extends UrlTemplate {
+  id: string;
+}
+
+export type UrlTemplatesState = UrlTemplateState[];
 
 const initialTemplates: UrlTemplatesState = [];
 
 function generateDefaultTemplate(
   datasource: IndexpatternDatasource,
   addBasePath: (url: string) => string
-): UrlTemplate {
+): UrlTemplateState {
   const appPath = modifyUrl('/', (parsed) => {
     parsed.query._a = rison.encode({
       columns: ['_source'],
@@ -62,11 +74,12 @@ function generateDefaultTemplate(
   );
 
   return {
+    id: `graph-default-url-template-${datasource.id}`,
     url: discoverUrl,
     description: i18n.translate('xpack.graph.settings.drillDowns.defaultUrlTemplateTitle', {
       defaultMessage: 'Raw documents',
     }),
-    encoder: outlinkEncoders[0],
+    encoderId: outlinkEncoders[0].id,
     isDefault: true,
     icon: null,
   };
@@ -82,50 +95,32 @@ export const urlTemplatesReducer = (addBasePath: (url: string) => string) =>
       const customTemplates = templates.filter((template) => !template.isDefault);
       return [...customTemplates, generateDefaultTemplate(datasource, addBasePath)];
     })
-    .case(loadTemplates, (_currentTemplates, newTemplates) => {
-      return newTemplates.map((template) =>
-        template.isDefault && template.url?.startsWith('/app/discover') // as in saved objects of sample data sets
+    .case(loadTemplatesAction, (_currentTemplates, newTemplates) => {
+      return newTemplates.map((template) => ({
+        ...template,
+        ...(template.isDefault && template.url?.startsWith('/app/discover') // as in saved objects of sample data sets
           ? {
-              ...template,
               url: addBasePath(template.url).replace(
                 encodeURIComponent(urlTemplatePlaceholder),
                 urlTemplatePlaceholder
               ),
             }
-          : template
-      );
+          : {}),
+      }));
     })
-    .case(saveTemplate, (templates, { index: indexToUpdate, template: updatedTemplate }) => {
+    .case(saveTemplateAction, (templates, { id, isNew, template: updatedTemplate }) => {
       // set default flag to false as soon as template is overwritten.
-      const newTemplate = { ...updatedTemplate, isDefault: false };
-      return indexToUpdate === -1
-        ? [...templates, newTemplate]
-        : templates.map((template, index) => (index === indexToUpdate ? newTemplate : template));
+      return isNew
+        ? [...templates, { ...updatedTemplate, id, isDefault: false }]
+        : templates.map((template) =>
+            template.id === id
+              ? { ...updatedTemplate, id: template.id, isDefault: false }
+              : template
+          );
     })
-    .case(removeTemplate, (templates, templateToDelete) =>
-      templates.filter((template) => template !== templateToDelete)
+    .case(removeTemplate, (templates, idToDelete) =>
+      templates.filter((template) => template.id !== idToDelete)
     )
     .build();
 
 export const templatesSelector = (state: GraphState) => state.urlTemplates;
-
-/**
- * Listener making sure the templates are always synced up to the scope.
- *
- * Won't be necessary once the side bar is moved to redux
- */
-export const registerUrlTemplatesListeners = (
-  startListening: StartGraphListening,
-  { notifyReact }: GraphStoreDependencies
-) => {
-  startListening({
-    predicate: matchesOne(
-      loadTemplates,
-      saveTemplate,
-      removeTemplate,
-      requestDatasource,
-      setDatasource
-    ),
-    effect: () => notifyReact(),
-  });
-};

@@ -21,19 +21,14 @@ import { FieldManager } from '../field_manager';
 import type { ControlType, IndexPatternProvider, TermIntersect, WorkspaceNode } from '../../types';
 import { WorkspaceTopNavMenu } from './workspace_top_nav_menu';
 import { GuidancePanel } from '../guidance_panel';
-import type { GraphWorkspaceSavedObject, Workspace } from '../../types';
+import type { GraphWorkspaceSavedObject, RuntimeGraph } from '../../types';
 import type { GraphServices } from '../../application';
 import { ControlPanel } from '../control_panel';
-import { GraphVisualization } from '../graph_visualization';
+import { ReduxGraphVisualization } from '../graph_visualization';
 import { colorChoices } from '../../helpers/style_choices';
 import type { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
 import { getEditUrl } from '../../services/url';
 
-/**
- * Each component, which depends on `worksapce`
- * should not be memoized, since it will not get updates.
- * This behaviour should be changed after migrating `worksapce` to redux
- */
 const FieldManagerMemoized = memo(FieldManager);
 const GuidancePanelMemoized = memo(GuidancePanel);
 
@@ -47,13 +42,13 @@ type WorkspaceLayoutProps = Pick<
   | 'spaces'
   | 'inspect'
 > & {
-  renderCounter: number;
-  workspace?: Workspace;
+  runtimeGraph?: RuntimeGraph;
   loading: boolean;
   savedWorkspace: GraphWorkspaceSavedObject;
   indexPatternProvider: IndexPatternProvider;
   sharingSavedObjectProps?: SharingSavedObjectProps;
   requestAdapter: RequestAdapter;
+  getMergeCandidates?: (nodes: WorkspaceNode[]) => Promise<TermIntersect[]>;
 };
 
 interface WorkspaceLayoutStateProps {
@@ -62,8 +57,7 @@ interface WorkspaceLayoutStateProps {
 }
 
 export const WorkspaceLayoutComponent = ({
-  renderCounter,
-  workspace,
+  runtimeGraph,
   loading,
   savedWorkspace,
   hasFields,
@@ -78,12 +72,13 @@ export const WorkspaceLayoutComponent = ({
   spaces,
   inspect,
   requestAdapter,
+  getMergeCandidates,
 }: WorkspaceLayoutProps & WorkspaceLayoutStateProps) => {
   const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [mergeCandidates, setMergeCandidates] = useState<TermIntersect[]>([]);
   const [control, setControl] = useState<ControlType>('none');
-  const [selectedNode, setSelectedNode] = useState<WorkspaceNode>();
+  const [selectedNodeId, setSelectedNodeId] = useState<string>();
 
   const search = useLocation().search;
   const urlQuery = new URLSearchParams(search).get('query');
@@ -94,13 +89,13 @@ export const WorkspaceLayoutComponent = ({
     workspaceInitialized || savedWorkspace.id || savedWorkspace.isSaving
   );
 
-  const selectSelected = useCallback((node: WorkspaceNode) => {
-    setSelectedNode(node);
+  const selectSelected = useCallback((nodeId: string) => {
+    setSelectedNodeId(nodeId);
     setControl('editLabel');
   }, []);
 
   const onSetControl = useCallback((newControl: ControlType) => {
-    setSelectedNode(undefined);
+    setSelectedNodeId(undefined);
     setControl(newControl);
   }, []);
 
@@ -180,7 +175,6 @@ export const WorkspaceLayoutComponent = ({
   return (
     <Fragment>
       <WorkspaceTopNavMenu
-        workspace={workspace}
         savedWorkspace={savedWorkspace}
         graphSavePolicy={graphSavePolicy}
         capabilities={capabilities}
@@ -211,22 +205,21 @@ export const WorkspaceLayoutComponent = ({
         </div>
       )}
 
-      {isInitialized && workspace && (
+      {isInitialized && runtimeGraph && (
         <div id="GraphSvgContainer" css={styles.container}>
           <div css={styles.visualization}>
-            <GraphVisualization
-              workspace={workspace}
+            <ReduxGraphVisualization
+              runtimeGraph={runtimeGraph}
               selectSelected={selectSelected}
               onSetControl={onSetControl}
               onSetMergeCandidates={onSetMergeCandidates}
+              getMergeCandidates={getMergeCandidates}
             />
           </div>
 
           <ControlPanel
-            renderCounter={renderCounter}
-            workspace={workspace}
             control={control}
-            selectedNode={selectedNode}
+            selectedNodeId={selectedNodeId}
             colors={colorChoices}
             mergeCandidates={mergeCandidates}
             selectSelected={selectSelected}

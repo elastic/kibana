@@ -157,7 +157,7 @@ describe('persistence listeners', () => {
 
     it('serializes the latest runtime workspace when saving is confirmed', async () => {
       env.store.dispatch(saveWorkspace({} as GraphWorkspaceSavedObject));
-      const runtimeWorkspace = env.mockedDeps.getWorkspace();
+      const runtimeWorkspace = env.mockedDeps.getRuntimeGraph();
       if (!runtimeWorkspace) {
         throw new Error('Expected a runtime workspace');
       }

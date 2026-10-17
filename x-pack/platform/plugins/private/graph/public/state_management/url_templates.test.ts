@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { urlTemplatesReducer, saveTemplate, loadTemplates } from './url_templates';
+import {
+  urlTemplatesReducer,
+  saveTemplate,
+  loadTemplates,
+  type UrlTemplateState,
+} from './url_templates';
 import { requestDatasource } from './datasource';
 import { outlinkEncoders } from '../helpers/outlink_encoders';
 import type { UrlTemplate } from '../types';
@@ -24,7 +29,7 @@ describe('url_templates', () => {
         })
       );
       expect(templates.length).toBe(1);
-      expect(templates[0].encoder).toBe(outlinkEncoders[0]);
+      expect(templates[0].encoderId).toBe(outlinkEncoders[0].id);
       expect(templates[0].url).not.toContain('test-pattern');
       expect(templates[0].url).toContain('123456');
       expect(templates[0].isDefault).toBe(true);
@@ -34,13 +39,15 @@ describe('url_templates', () => {
       const templates = urlTemplatesReducer(addBasePath)(
         [
           {
+            id: 'default-template',
             description: 'default template',
             isDefault: true,
-          } as UrlTemplate,
+          } as UrlTemplateState,
           {
+            id: 'custom-template',
             description: 'custom template',
             isDefault: false,
-          } as UrlTemplate,
+          } as UrlTemplateState,
         ],
         requestDatasource({
           type: 'indexpattern',
@@ -58,12 +65,13 @@ describe('url_templates', () => {
       const templates = urlTemplatesReducer(addBasePath)(
         [
           {
+            id: 'existing-template',
             description: 'abc',
             isDefault: true,
-          } as UrlTemplate,
+          } as UrlTemplateState,
         ],
         saveTemplate({
-          index: 0,
+          id: 'existing-template',
           template: {
             description: 'def',
             isDefault: true,
@@ -73,6 +81,7 @@ describe('url_templates', () => {
       expect(templates.length).toBe(1);
       expect(templates[0].description).toBe('def');
       expect(templates[0].isDefault).toBe(false);
+      expect(templates[0].id).toBe('existing-template');
     });
 
     it('should patch default urls with a space-aware prefix', () => {
@@ -94,6 +103,9 @@ describe('url_templates', () => {
       expect(templates[0].isDefault).toBe(true);
       expect(templates[1].url).toBe('https://example.com?and-the-rest');
       expect(templates[1].isDefault).toBe(true);
+      expect(templates[0].id).toEqual(expect.any(String));
+      expect(templates[1].id).toEqual(expect.any(String));
+      expect(templates[0].id).not.toBe(templates[1].id);
     });
   });
 });

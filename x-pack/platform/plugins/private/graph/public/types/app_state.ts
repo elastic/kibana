@@ -8,13 +8,12 @@
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
 import type { GenericIcon } from '../helpers/style_choices';
-import type { OutlinkEncoder } from '../helpers/outlink_encoders';
 
 export interface UrlTemplate {
   url: string;
   description: string;
   icon: GenericIcon | null;
-  encoder: OutlinkEncoder;
+  encoderId: string;
   isDefault?: boolean;
 }
 

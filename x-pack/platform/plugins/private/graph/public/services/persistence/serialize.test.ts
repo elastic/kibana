@@ -6,19 +6,18 @@
  */
 
 import { reduxStateToSavedWorkspace } from './serialize';
-import type {
-  GraphWorkspaceSavedObject,
-  UrlTemplate,
-  AdvancedSettings,
-  WorkspaceField,
-} from '../../types';
+import type { GraphWorkspaceSavedObject, AdvancedSettings, WorkspaceField } from '../../types';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
-import type { IndexpatternDatasource, WorkspaceState } from '../../state_management';
+import type {
+  IndexpatternDatasource,
+  WorkspaceState,
+  UrlTemplateState,
+} from '../../state_management';
 
 describe('serialize', () => {
   let appState: {
     workspace: WorkspaceState;
-    urlTemplates: UrlTemplate[];
+    urlTemplates: UrlTemplateState[];
     advancedSettings: AdvancedSettings;
     selectedIndex: IndexpatternDatasource;
     selectedFields: WorkspaceField[];
@@ -58,14 +57,20 @@ describe('serialize', () => {
       },
       urlTemplates: [
         {
+          id: 'internal-template-id',
           description: 'Template',
-          encoder: outlinkEncoders[0],
+          encoderId: outlinkEncoders[0].id,
           icon: { id: 'd', package: 'eui', label: '', prevName: '' },
           url: 'test-url',
         },
       ],
       workspace: {
         isInitialized: true,
+        isLayoutRunning: false,
+        selectedNodeIds: [],
+        selectedEdgeIds: [],
+        undoHistory: [],
+        redoHistory: [],
         nodesById: {
           'node-0': {
             id: 'node-0',
