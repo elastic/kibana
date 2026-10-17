@@ -9,6 +9,11 @@ import { config } from './config';
 import { KIBANA_PRODUCT_TIERS, KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 
 describe('Cloud plugin config', () => {
+  it('accepts xpack.cloud.pointer_compression so the ECH start script can read it', () => {
+    expect(config.schema.validate({ pointer_compression: false }).pointer_compression).toBe(false);
+    expect(config.schema.validate({ pointer_compression: true }).pointer_compression).toBe(true);
+  });
+
   it('evicts unknown properties under the `serverless` structure', () => {
     const output = config.schema.validate({
       serverless: {
