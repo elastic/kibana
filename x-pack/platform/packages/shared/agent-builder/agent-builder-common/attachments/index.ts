@@ -14,6 +14,8 @@ export type {
   ConnectorAttachment,
 } from './attachments';
 
+export type { MarkdownNode, SurfaceNode, SurfaceComposition } from './surface_composition';
+
 export type {
   StaleAttachment,
   FreshAttachment,

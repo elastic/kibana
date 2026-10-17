@@ -124,4 +124,47 @@ describe('skill attachment type', () => {
       expect(description).toContain('render_attachment');
     });
   });
+
+  describe('toSurfaceComposition', () => {
+    const toSurfaceComposition = async (data: SkillAttachmentData) =>
+      definition.toSurfaceComposition?.(buildAttachment(data), formatContext);
+
+    it('shows the skill with its tools, files and instructions', async () => {
+      expect(await toSurfaceComposition(validSkill)).toEqual({
+        type: 'view',
+        title: 'Incident triage',
+        subtitle: 'incident-triage',
+        body: [
+          {
+            type: 'markdown',
+            text: [
+              'Use when investigating production incidents.',
+              'Tools: platform.core.execute_esql',
+              'Files: ./examples/examples.md',
+              '```markdown\n## When to Use\n\nUse this skill when triaging incidents.\n```',
+            ].join('\n\n'),
+          },
+        ],
+      });
+    });
+
+    it('leaves out tools and files when there are none, and fences content with backticks', async () => {
+      const composition = await toSurfaceComposition({
+        ...validSkill,
+        skill: {
+          ...validSkill.skill,
+          tool_ids: [],
+          referenced_content: undefined,
+          content: '```esql\nFROM logs\n```',
+        },
+      });
+
+      expect(composition?.body).toEqual([
+        {
+          type: 'markdown',
+          text: 'Use when investigating production incidents.\n\n````markdown\n```esql\nFROM logs\n```\n````',
+        },
+      ]);
+    });
+  });
 });

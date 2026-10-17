@@ -6,7 +6,7 @@
  */
 
 import type { ConversationOriginType, SurfacePayload } from '@kbn/agent-builder-common';
-import type { SurfaceComposition } from '@kbn/agent-builder-server/attachments';
+import type { SurfaceComposition } from '@kbn/agent-builder-common/attachments';
 
 /** Renders the response message for the surface rounds from one origin type came from. */
 export interface SurfaceRenderer {

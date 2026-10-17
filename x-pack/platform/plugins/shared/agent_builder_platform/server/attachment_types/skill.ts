@@ -11,6 +11,11 @@ import {
   skillAttachmentDataSchema,
   type SkillAttachmentData,
 } from '../../common/attachments';
+import { toCodeFence } from './markdown';
+
+/** The paths of the skill's referenced files, relative to its SKILL.md. */
+const getReferencedFilePaths = ({ referenced_content: files = [] }: SkillAttachmentData['skill']) =>
+  files.map(({ relativePath, name }) => `${relativePath}/${name}.md`);
 
 /**
  * Server-side definition for the `skill` attachment type.
@@ -50,8 +55,8 @@ export const createSkillAttachmentType = (): AttachmentTypeDefinition<
         const {
           data: { skill },
         } = attachment;
-        const referencedSummary = (skill.referenced_content ?? [])
-          .map((item) => `- ${item.relativePath}/${item.name}.md`)
+        const referencedSummary = getReferencedFilePaths(skill)
+          .map((path) => `- ${path}`)
           .join('\n');
         const value = [
           `Skill (id: ${skill.id})`,
@@ -68,6 +73,21 @@ export const createSkillAttachmentType = (): AttachmentTypeDefinition<
         return { type: 'text', value };
       },
     };
+  },
+  toSurfaceComposition: ({ data: { skill } }) => {
+    const { id, name, description, content, tool_ids: toolIds } = skill;
+    const files = getReferencedFilePaths(skill);
+
+    const text = [
+      description,
+      toolIds.length > 0 && `Tools: ${toolIds.join(', ')}`,
+      files.length > 0 && `Files: ${files.join(', ')}`,
+      toCodeFence(content, 'markdown'),
+    ]
+      .filter(Boolean)
+      .join('\n\n');
+
+    return { type: 'view', title: name, subtitle: id, body: [{ type: 'markdown', text }] };
   },
   getAgentDescription: () => {
     return `A \`skill\` attachment is a versioned draft of an Agent Builder skill. When \`mode\` is "create" the card shows a "Create" button (POST). When \`mode\` is "edit" the card shows an "Edit in Management" link if the skill has no unsaved changes, or a "Save changes" button (PUT) once edits are present. \`skill.id\` always identifies the persisted skill. In both cases \`skill\` holds the full content including \`id\`. Render it inline by emitting <render_attachment id="ATTACHMENT_ID" />. Emit at most one render per round — if you call \`patch_skill\` after loading or proposing the skill, hold the render until after the final patch so the user sees a single up-to-date card. Do not invent attachment ids — only render ids returned by propose_skill, load_skill_for_editing, or patch_skill.`;

@@ -523,4 +523,70 @@ describe('connector attachment type', () => {
       expect(connectorType.isReadonly).toBe(true);
     });
   });
+
+  describe('toSurfaceComposition', () => {
+    const toSurfaceComposition = async (data: ConnectorAttachmentData) =>
+      connectorType.toSurfaceComposition?.(createAttachment(data), formatContext);
+
+    it('shows the connector with its description and enabled sub-actions', async () => {
+      const inputSchema = z.object({ query: z.string() });
+
+      getConnectorSpecMock.mockReturnValue({
+        metadata: {
+          id: '.slack2',
+          displayName: 'Slack',
+          description: 'Search and send Slack messages',
+          minimumLicense: 'enterprise',
+          supportedFeatureIds: [],
+        },
+        actions: {
+          searchMessages: {
+            isTool: true,
+            scope: 'read' as const,
+            description: 'Search Slack messages',
+            input: inputSchema,
+            handler: jest.fn(),
+          },
+          sendMessage: {
+            isTool: true,
+            scope: 'read' as const,
+            description: 'Send a message to a channel',
+            input: inputSchema,
+            handler: jest.fn(),
+          },
+        },
+        test: { handler: jest.fn(), enabled: false },
+      });
+
+      expect(
+        await toSurfaceComposition({
+          connector_id: 'connector-456',
+          connector_name: 'Team Slack',
+          connector_type: '.slack2',
+          selected_actions: ['searchMessages'],
+        })
+      ).toEqual({
+        type: 'view',
+        title: 'Team Slack',
+        subtitle: '.slack2',
+        body: [
+          {
+            type: 'markdown',
+            text: 'Search and send Slack messages\n\n**Actions**\n- searchMessages',
+          },
+        ],
+      });
+    });
+
+    it('shows only the name and type when no spec is found', async () => {
+      getConnectorSpecMock.mockReturnValue(undefined);
+
+      expect(await toSurfaceComposition(validData)).toEqual({
+        type: 'view',
+        title: 'My Github Connector',
+        subtitle: '.github',
+        body: [],
+      });
+    });
+  });
 });

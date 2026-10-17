@@ -18,6 +18,18 @@ import {
   formatConnectorActionLine,
   getConnectorSpec,
 } from '@kbn/connector-specs';
+import { toBulletList } from './markdown';
+
+/** The connector's spec, when known, and the sub-actions its instance enables. */
+const getEnabledActions = ({
+  connector_type: connectorType,
+  selected_actions: selectedActions,
+}: ConnectorAttachmentData) => {
+  const spec = getConnectorSpec(connectorType);
+  const actions = spec ? filterActionsBySelection(spec.actions, selectedActions) : [];
+
+  return { spec, actions };
+};
 
 /**
  * Creates the definition for the `connector` attachment type.
@@ -54,8 +66,7 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
         selected_actions: selectedActions,
       } = attachment.data;
 
-      const spec = getConnectorSpec(connectorType);
-      const subActionEntries = spec ? filterActionsBySelection(spec.actions, selectedActions) : [];
+      const { spec, actions: subActionEntries } = getEnabledActions(attachment.data);
 
       return {
         getRepresentation: () => {
@@ -105,6 +116,26 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
         },
 
         getBoundedTools: () => [],
+      };
+    },
+
+    toSurfaceComposition: ({ data }) => {
+      const { connector_name: connectorName, connector_type: connectorType } = data;
+      const { spec, actions } = getEnabledActions(data);
+      const actionNames = actions.map(([actionName]) => actionName);
+
+      const text = [
+        spec?.metadata.description,
+        actionNames.length > 0 && `**Actions**\n${toBulletList(actionNames)}`,
+      ]
+        .filter(Boolean)
+        .join('\n\n');
+
+      return {
+        type: 'view',
+        title: connectorName,
+        subtitle: connectorType,
+        body: text ? [{ type: 'markdown', text }] : [],
       };
     },
 

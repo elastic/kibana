@@ -112,4 +112,62 @@ describe('connector_setup attachment type', () => {
       expect(description).toContain('render_attachment');
     });
   });
+
+  describe('toSurfaceComposition', () => {
+    const toSurfaceComposition = async (data: ConnectorSetupAttachmentData, origin?: string) =>
+      attachmentType.toSurfaceComposition?.({ ...createAttachment(data), origin }, formatContext);
+
+    it('shows the reason, and asks to finish the setup in Kibana', async () => {
+      expect(await toSurfaceComposition(validData)).toEqual({
+        type: 'view',
+        title: 'GitHub',
+        subtitle: 'Setup',
+        body: [
+          {
+            type: 'markdown',
+            text: 'Investigate issues across services\n\nFinish setting it up in Kibana.',
+          },
+        ],
+      });
+    });
+
+    it('shows the connector as connected once it has been created', async () => {
+      const composition = await toSurfaceComposition(validData, 'connector-123');
+
+      expect(composition?.subtitle).toBe('Connected');
+      expect(composition?.body).toEqual([
+        { type: 'markdown', text: 'Investigate issues across services' },
+      ]);
+    });
+
+    it('falls back to the spec display name and a default reason', async () => {
+      getConnectorSpecMock.mockReturnValue({
+        metadata: {
+          id: '.notion',
+          displayName: 'Notion',
+          description: 'Notion connector',
+          minimumLicense: 'enterprise',
+          supportedFeatureIds: [],
+        },
+        actions: {},
+        test: { handler: jest.fn(), enabled: false },
+      });
+
+      const composition = await toSurfaceComposition({ connector_type: '.notion' });
+
+      expect(composition?.title).toBe('Notion');
+      expect(composition?.body).toEqual([
+        {
+          type: 'markdown',
+          text: 'Configure the Notion connector so the agent can use it here.\n\nFinish setting it up in Kibana.',
+        },
+      ]);
+    });
+
+    it('falls back to the connector type when no spec is found', async () => {
+      getConnectorSpecMock.mockReturnValue(undefined);
+
+      expect((await toSurfaceComposition({ connector_type: '.unknown' }))?.title).toBe('.unknown');
+    });
+  });
 });

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { Composition, PrimitiveNode } from '@elastic/isomer-sdk';
 import type { MaybePromise } from '@kbn/utility-types';
 import type {
   Attachment,
-  VersionedAttachment,
+  SurfaceComposition,
   VersionedAttachmentWithOrigin,
 } from '@kbn/agent-builder-common/attachments';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -92,13 +91,15 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    */
   maxContentLength?: number;
   /**
-   * Maps the attachment's data to a surface composition, so it renders on surfaces other than
-   * Kibana, such as Slack. Without it, those surfaces leave it out.
+   * Maps the attachment, at the version being rendered, to a surface composition: what a person
+   * sees on a surface, such as Slack or the browser, never what the agent reads. It runs on the
+   * server, and the same composition renders on every surface, so it must not assume one.
+   * Without it, those surfaces leave the attachment out.
    */
   toSurfaceComposition?: (
-    data: TContent,
+    attachment: Attachment<TType, TContent>,
     context: AttachmentSurfaceCompositionContext
-  ) => SurfaceComposition;
+  ) => MaybePromise<SurfaceComposition>;
 }
 
 /**
@@ -120,28 +121,10 @@ export interface AttachmentResolveContext extends AttachmentFormatContext {
 }
 
 /**
- * Context passed to the {@link AttachmentTypeDefinition.toSurfaceComposition} function.
+ * Context passed to the {@link AttachmentTypeDefinition.toSurfaceComposition} function: the
+ * request and space it renders for, like {@link AttachmentFormatContext}.
  */
-export interface AttachmentSurfaceCompositionContext {
-  attachment: VersionedAttachment;
-  version: number;
-}
-
-/** A block of GitHub-flavored markdown in a {@link SurfaceComposition}. */
-export interface MarkdownNode extends PrimitiveNode {
-  type: 'markdown';
-  text: string;
-}
-
-/** The node types of a {@link SurfaceComposition}, the ones Agent Builder's Isomer pack renders. */
-export type SurfaceNode = MarkdownNode;
-
-/**
- * An [Isomer](https://github.com/elastic/isomer) composition built from Agent Builder's node
- * types: the same document renders to every surface, such as Slack. What an attachment type's
- * `toSurfaceComposition` returns, and what a response message becomes.
- */
-export type SurfaceComposition = Composition<SurfaceNode>;
+export type AttachmentSurfaceCompositionContext = AttachmentFormatContext;
 
 /**
  * Return type for attachment's validation handlers.
