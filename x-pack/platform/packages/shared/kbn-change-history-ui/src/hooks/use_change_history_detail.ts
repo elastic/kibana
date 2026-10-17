@@ -41,12 +41,12 @@ export const useChangeHistoryDetail = ({
       objectId,
       changeId: changeId ?? '__none__',
       scope,
+      supports,
     }),
     ({ signal }) => {
       if (!changeId) {
         throw new Error('changeId is required');
       }
-
       return adapter.getChange({ objectId, changeId, signal });
     },
     {

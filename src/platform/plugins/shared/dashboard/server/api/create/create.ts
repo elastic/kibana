@@ -11,18 +11,29 @@ import type { RequestTiming } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { INITIAL_HISTORY_SEQUENCE } from '../../change_history/history_sequence';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
 import type { DashboardCreateResponseBody } from './types';
+import {
+  addToHistory,
+  getNextHistorySequenceFromHistory,
+  getHistorySnapshot,
+} from '../../change_history/util';
+
+export interface CreateOptions {
+  id?: string;
+  serverTiming?: RequestTiming;
+  spaceId?: string;
+  isDashboardAppRequest?: boolean;
+}
 
 export async function create(
   requestCtx: RequestHandlerContext,
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   createBody: DashboardState,
-  serverTiming?: RequestTiming,
-  isDashboardAppRequest: boolean = false,
-  id?: string
+  { id, serverTiming, spaceId, isDashboardAppRequest = false }: CreateOptions = {}
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const { access_control: accessControl, ...restOfData } = createBody;
@@ -36,6 +47,11 @@ export async function create(
   const supportsAccessControl = core.savedObjects.typeRegistry.supportsAccessControl(
     DASHBOARD_SAVED_OBJECT_TYPE
   );
+  // a recreated ID may still have history from a deleted dashboard
+  const historySequence =
+    id !== undefined
+      ? await getNextHistorySequenceFromHistory({ spaceId, dashboardId: id })
+      : INITIAL_HISTORY_SEQUENCE;
   const savedObject = await core.savedObjects.client.create(
     DASHBOARD_SAVED_OBJECT_TYPE,
     soAttributes,
@@ -50,6 +66,23 @@ export async function create(
         }),
     }
   );
+
+  const snapshot = getHistorySnapshot({
+    attributes: soAttributes,
+    references: soReferences,
+    strictValidationSchema,
+  });
+  if (snapshot) {
+    await addToHistory({
+      ctx: requestCtx,
+      dashboardId: savedObject.id,
+      snapshot,
+      spaceId,
+      sequence: historySequence,
+      timestamp: savedObject.updated_at ?? new Date(Date.now()).toISOString(),
+      type: 'create',
+    });
+  }
 
   return getDashboardCRUResponseBody(
     savedObject,

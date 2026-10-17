@@ -17,6 +17,7 @@ import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import type { DashboardApi, DashboardInternalApi } from '../dashboard_api/types';
 import { uiActionsService } from '../services/kibana_services';
 import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
+import { DashboardChangeHistoryProvider } from '../dashboard_history/dashboard_change_history_provider';
 
 export interface DashboardTopNavProps extends InternalDashboardTopNavProps {
   dashboardApi: DashboardApi;
@@ -27,7 +28,9 @@ export const DashboardTopNavWithContext = (props: DashboardTopNavProps) => (
   <KibanaContextProvider services={{ uiActions: uiActionsService }}>
     <DashboardContext.Provider value={props.dashboardApi}>
       <DashboardInternalContext.Provider value={props.dashboardInternalApi}>
-        <InternalDashboardTopNav {...props} />
+        <DashboardChangeHistoryProvider>
+          <InternalDashboardTopNav {...props} />
+        </DashboardChangeHistoryProvider>
       </DashboardInternalContext.Provider>
     </DashboardContext.Provider>
   </KibanaContextProvider>

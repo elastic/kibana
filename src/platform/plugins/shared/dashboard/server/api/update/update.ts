@@ -9,21 +9,31 @@
 
 import Boom from '@hapi/boom';
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
-import type { RequestTiming } from '@kbn/core-http-server';
-import type { SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
+import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
-import type { DashboardCreateResponseBody } from '../create';
+import type { CreateOptions, DashboardCreateResponseBody } from '../create';
 import { create } from '../create';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
 import type { Operation } from '../types';
 import type { DashboardUpdateResponseBody } from './types';
+import { hasContentChanged } from '../../change_history/history_sequence';
+import {
+  addToHistory,
+  getHistorySnapshot,
+  getNextHistorySequenceFromHistory,
+} from '../../change_history/util';
+
+export interface UpdateOptions extends Omit<CreateOptions, 'id'> {
+  /** Sequence number of the history version this update restores */
+  restoredFrom?: number;
+}
 
 /**
  * Upserts a dashboard by id — creates it if it doesn't exist, or updates it if it does.
@@ -40,8 +50,7 @@ export async function update(
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   id: string,
   updateBody: DashboardState,
-  serverTiming?: RequestTiming,
-  isDashboardAppRequest: boolean = false
+  { serverTiming, spaceId, isDashboardAppRequest = false, restoredFrom }: UpdateOptions = {}
 ): Promise<{
   body: DashboardCreateResponseBody | DashboardUpdateResponseBody;
   operation: Operation;
@@ -64,11 +73,11 @@ export async function update(
   }
 
   let existingAccessMode: SavedObjectAccessControl['accessMode'] | undefined;
-  let isNewDocument = false;
 
   // Determine whether the document already exists.
+  let existing: SavedObject<DashboardSavedObjectAttributes> | undefined;
   try {
-    const existing = await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
+    existing = await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
       DASHBOARD_SAVED_OBJECT_TYPE,
       id
     );
@@ -77,21 +86,17 @@ export async function update(
     if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
       throw e;
     }
-    isNewDocument = true;
   }
-
   // Create path
-  if (isNewDocument) {
+  if (!existing) {
     asCodeIdSchema.parse(id);
 
-    const body = await create(
-      requestCtx,
-      strictValidationSchema,
-      updateBody,
+    const body = await create(requestCtx, strictValidationSchema, updateBody, {
+      id,
       serverTiming,
+      spaceId,
       isDashboardAppRequest,
-      id
-    );
+    });
     return { body, operation: 'create' };
   }
 
@@ -101,6 +106,7 @@ export async function update(
   const shouldChangeAccessMode =
     desiredAccessMode !== undefined && desiredAccessMode !== currentAccessMode;
 
+  let expectedVersion = existing.version;
   if (shouldChangeAccessMode) {
     const changeAccessModeResponse = await core.savedObjects.client.changeAccessMode(
       [{ type: DASHBOARD_SAVED_OBJECT_TYPE, id }],
@@ -112,7 +118,26 @@ export async function update(
     if (changeAccessModeResponse.objects[0]?.error) {
       throw changeAccessModeResponse.objects[0].error;
     }
+
+    /**
+     * `changeAccessMode`  updates the same saved object and advances its version, so the object
+     * read earlier is stale
+     */
+    existing = await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
+      DASHBOARD_SAVED_OBJECT_TYPE,
+      id
+    );
+    expectedVersion = existing.version;
   }
+
+  // Unchanged content creates no new version; otherwise continue from the history, which outlives the saved object
+  const hasChanged = hasContentChanged(existing, {
+    attributes: soAttributes,
+    references: soReferences,
+  });
+  const newSequence = hasChanged
+    ? await getNextHistorySequenceFromHistory({ spaceId, dashboardId: id })
+    : undefined;
 
   let savedObject: SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>;
   try {
@@ -124,8 +149,26 @@ export async function update(
         references: soReferences,
         /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
         mergeAttributes: false,
+        /** optimistic concurrency control: throws a 409 if the document changed since `expectedVersion` was read */
+        version: expectedVersion,
       }
     );
+    const snapshot = getHistorySnapshot({
+      attributes: soAttributes,
+      references: soReferences,
+      strictValidationSchema,
+    });
+    if (snapshot && newSequence !== undefined) {
+      await addToHistory({
+        ctx: requestCtx,
+        dashboardId: id,
+        snapshot,
+        spaceId,
+        sequence: newSequence,
+        timestamp: savedObject.updated_at ?? new Date(Date.now()).toISOString(),
+        restoredFrom,
+      });
+    }
   } catch (e) {
     // if update failed, let's attempt to roll back the access mode change if we changed it
     if (shouldChangeAccessMode) {

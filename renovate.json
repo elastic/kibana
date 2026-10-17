@@ -420,11 +420,7 @@
     },
     {
       "groupName": "monaco",
-      "matchDepNames": [
-        "monaco-yaml",
-        "monaco-editor",
-        "monaco-promql"
-      ],
+      "matchDepNames": ["monaco-yaml", "monaco-editor", "monaco-promql"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
@@ -1819,7 +1815,12 @@
       "matchDepNames": ["camelcase-keys"],
       "reviewers": ["team:security-detection-engineering", "team:security-investigations"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Detection Engineering", "Team:Security Investigations", "effort:low", "blocked"],
+      "addLabels": [
+        "Team:Detection Engineering",
+        "Team:Security Investigations",
+        "effort:low",
+        "blocked"
+      ],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },

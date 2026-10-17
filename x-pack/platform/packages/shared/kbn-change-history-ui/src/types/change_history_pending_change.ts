@@ -23,4 +23,6 @@ export interface ChangeHistoryPendingChange {
   snapshot: unknown;
   /** Optional diff vs the last committed version. */
   changes?: ChangeHistoryListItemChanges;
+  /** Optional metadata about the event. Information that does not form part of the ECS schema. */
+  metadata?: Record<string, unknown>;
 }
