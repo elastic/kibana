@@ -12,6 +12,10 @@ import { servers as evalsAgentBuilderConfig } from '../../evals_agent_builder/st
 
 export const servers: ScoutServerConfig = {
   ...evalsAgentBuilderConfig,
+  esTestCluster: {
+    ...evalsAgentBuilderConfig.esTestCluster,
+    serverArgs: [...evalsAgentBuilderConfig.esTestCluster.serverArgs, 'xpack.ml.enabled=false'],
+  },
   kbnTestServer: {
     ...evalsAgentBuilderConfig.kbnTestServer,
     serverArgs: [
