@@ -31,6 +31,7 @@ describe('createBaseHandlerContext', () => {
     expect(context.config).toEqual(config);
     expect(context.stepId).toBe('custom-step');
     expect(context.stepType).toBe('my-custom-type');
+    expect(context.maxStepSizeBytes).toBe(10 * 1024 * 1024);
     expect(context.abortSignal).toBe(mocks.stepExecutionRuntime.abortController.signal);
 
     context.contextManager.getContext();
@@ -119,5 +120,24 @@ describe('createBaseHandlerContext', () => {
       signal: mocks.stepExecutionRuntime.abortController.signal,
     });
     expect(result).toEqual({ status: 200, headers: {}, body: { ok: true } });
+  });
+
+  it('resolves maxStepSizeBytes from the step max-step-size', () => {
+    const mocks = createHandlerTestMocks();
+    const node = {
+      ...defaultTestNode,
+      configuration: { with: {}, 'max-step-size': '5mb' },
+    };
+
+    const context = createBaseHandlerContext(
+      {},
+      {},
+      {},
+      node as any,
+      mocks.stepExecutionRuntime as any,
+      mocks.workflowLogger as any
+    );
+
+    expect(context.maxStepSizeBytes).toBe(5 * 1024 * 1024);
   });
 });

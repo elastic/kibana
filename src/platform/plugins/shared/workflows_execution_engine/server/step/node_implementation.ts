@@ -12,8 +12,7 @@ import type { ByteSizeValue } from '@kbn/config-schema';
 import type { SerializedError } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
-  DEFAULT_MAX_STEP_SIZE,
-  parseByteSize,
+  resolveMaxStepSizeBytes,
   ResponseSizeLimitError,
   safeOutputSize,
   toExecutionError,
@@ -269,35 +268,21 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
    * Returns the default on invalid/unparseable values to avoid crashing the step.
    */
   protected getMaxResponseBytes(): number {
+    const workflowSettings =
+      this.stepExecutionRuntime.workflowExecution?.workflowDefinition?.settings;
+    let pluginMaxResponseSize: number | ByteSizeValue | undefined;
     try {
-      // 1. Step-level override (from YAML — auto-populated in constructor)
-      const stepLimit = this.step['max-step-size'];
-      if (stepLimit) {
-        return parseByteSize(stepLimit);
-      }
-
-      // 2. Workflow-level override (from YAML settings, via runtime — not user-facing context)
-      const workflowSettings =
-        this.stepExecutionRuntime.workflowExecution?.workflowDefinition?.settings;
-      const workflowLimit = workflowSettings?.['max-step-size'];
-      if (workflowLimit) {
-        return parseByteSize(workflowLimit);
-      }
-
-      // 3. Plugin config default (from kibana.yml)
-      const pluginConfig = this.stepExecutionRuntime.contextManager.getDependencies().config;
-      if (pluginConfig?.maxResponseSize) {
-        const configValue = pluginConfig.maxResponseSize;
-        return typeof configValue === 'number'
-          ? configValue
-          : (configValue as ByteSizeValue).getValueInBytes();
-      }
-
-      // 4. Hardcoded fallback
-      return parseByteSize(DEFAULT_MAX_STEP_SIZE);
+      pluginMaxResponseSize =
+        this.stepExecutionRuntime.contextManager.getDependencies().config?.maxResponseSize;
     } catch {
-      return parseByteSize(DEFAULT_MAX_STEP_SIZE);
+      pluginMaxResponseSize = undefined;
     }
+
+    return resolveMaxStepSizeBytes({
+      stepMaxStepSize: this.step['max-step-size'],
+      workflowMaxStepSize: workflowSettings?.['max-step-size'],
+      pluginMaxResponseSize,
+    });
   }
 
   // Helper for handling on-failure, retries, etc.

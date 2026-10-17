@@ -66,6 +66,10 @@ export {
   conf as yamlConf,
   language as yamlLanguage,
 } from 'monaco-editor/languages/definitions/yaml/yaml.js';
+export {
+  conf as shellConf,
+  language as shellLanguage,
+} from 'monaco-editor/languages/definitions/shell/shell.js';
 export { jsonDefaults } from 'monaco-editor/languages/features/json/register.js';
 export {
   MenuId,
