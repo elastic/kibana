@@ -52,6 +52,7 @@ import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-action
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DocViewerGridImplementation } from '@kbn/unified-doc-viewer/types';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
@@ -78,6 +79,8 @@ import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
+  DEFAULT_ENABLE_TANSTACK_DOC_VIEWER_TABLE,
+  ENABLE_TANSTACK_DOC_VIEWER_TABLE_FEATURE_FLAG_KEY,
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
   SESSION_HTTP_API_ENABLED_FEATURE_FLAG_KEY,
 } from './constants';
@@ -105,6 +108,7 @@ export interface UrlTracker {
 export interface DiscoverFeatureFlags {
   getCascadeLayoutEnabled: () => boolean;
   getIsEsqlDefault: () => boolean;
+  getDocViewerGridImplementation: () => DocViewerGridImplementation;
 }
 
 export interface DiscoverServices {
@@ -250,6 +254,14 @@ export const buildServices = ({
       getCascadeLayoutEnabled: () =>
         readBooleanFlag(core, CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, true),
       getIsEsqlDefault: () => readBooleanFlag(core, IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
+      getDocViewerGridImplementation: () =>
+        readBooleanFlag(
+          core,
+          ENABLE_TANSTACK_DOC_VIEWER_TABLE_FEATURE_FLAG_KEY,
+          DEFAULT_ENABLE_TANSTACK_DOC_VIEWER_TABLE
+        )
+          ? 'tanstack'
+          : 'unified',
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
