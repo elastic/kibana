@@ -19,15 +19,18 @@ import { createTraceBasedEvaluator } from './factory';
 export function createChatCallsEvaluator({
   traceEsClient,
   log,
+  tracesUnavailableForSuiteMode,
 }: {
   traceEsClient: EsClient;
   log: ToolingLog;
+  tracesUnavailableForSuiteMode?: boolean;
 }): Evaluator {
   return createTraceBasedEvaluator({
     traceEsClient,
     log,
     config: {
       name: 'Chat Calls',
+      tracesUnavailableForSuiteMode,
       direction: 'neutral',
       buildQuery: (traceId) => `FROM traces-*
 | WHERE trace.id == "${traceId}" AND attributes.gen_ai.operation.name == "chat"

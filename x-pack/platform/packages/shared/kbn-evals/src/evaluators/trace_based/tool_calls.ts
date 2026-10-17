@@ -13,15 +13,18 @@ import { createTraceBasedEvaluator } from './factory';
 export function createToolCallsEvaluator({
   traceEsClient,
   log,
+  tracesUnavailableForSuiteMode,
 }: {
   traceEsClient: EsClient;
   log: ToolingLog;
+  tracesUnavailableForSuiteMode?: boolean;
 }): Evaluator {
   return createTraceBasedEvaluator({
     traceEsClient,
     log,
     config: {
       name: 'Tool Calls',
+      tracesUnavailableForSuiteMode,
       direction: 'neutral',
       buildQuery: (traceId) => `FROM traces-*
 | WHERE trace.id == "${traceId}" AND attributes.elastic.inference.span.kind == "TOOL"

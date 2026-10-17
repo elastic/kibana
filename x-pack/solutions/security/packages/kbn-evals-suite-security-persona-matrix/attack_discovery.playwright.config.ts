@@ -17,4 +17,8 @@ export default createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,
   testIgnore: '**/persona_matrix.spec.ts',
   timeout: 30 * 60_000,
+  // AD generation spans are exported to the eval stack's local Scout ES by
+  // AgentBuilderSpanProcessor, never to TRACING_ES_URL, so the trace store is
+  // readable but always empty for this suite's traces.
+  tracesUnavailableForSuiteMode: true,
 });
