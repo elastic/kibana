@@ -16,6 +16,7 @@ import type {
   CascadeRootVirtualizerReturnValue,
 } from '../../../lib/core/virtualizer';
 import { DataCascadeProvider } from '../../../store_provider';
+import { StickyHeaderExtensionPointProvider } from '../data_cascade_row/components/cascade_row_header_extension_point';
 
 const renderComponent = ({
   cascadeGroups,
@@ -39,16 +40,21 @@ const renderComponent = ({
       cascadeGroups={cascadeGroups}
       initialGroupColumn={initialGroupColumn}
     >
-      {/* @ts-expect-error -- we don't need to provide all the props */}
-      <CascadeRowCellPrimitive
-        size="m"
-        onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}
-        onCascadeLeafNodeCollapsed={onCascadeLeafNodeCollapsed}
-        row={row}
-        getVirtualizer={getVirtualizer}
+      <StickyHeaderExtensionPointProvider
+        isDisplayed={false}
+        extensionPointElement={document.createElement('div')}
       >
-        {children}
-      </CascadeRowCellPrimitive>
+        {/* @ts-expect-error -- we don't need to provide all the props */}
+        <CascadeRowCellPrimitive
+          size="m"
+          onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}
+          onCascadeLeafNodeCollapsed={onCascadeLeafNodeCollapsed}
+          row={row}
+          getVirtualizer={getVirtualizer}
+        >
+          {children}
+        </CascadeRowCellPrimitive>
+      </StickyHeaderExtensionPointProvider>
     </DataCascadeProvider>
   );
 };
@@ -182,6 +188,10 @@ describe('CascadeRowCellPrimitive', () => {
             nodePathMap: expect.any(Object),
             data: expect.anything(),
             rowIndex: expect.any(Number),
+            stickyHeaderExtensionPoint: expect.objectContaining({
+              isDisplayed: false,
+              extensionPointElement: expect.any(HTMLDivElement),
+            }),
           })
         );
       });

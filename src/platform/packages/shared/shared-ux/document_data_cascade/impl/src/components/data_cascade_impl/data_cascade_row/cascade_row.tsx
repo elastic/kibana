@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { CascadeRowPrimitiveProps } from '../types';
@@ -26,6 +26,7 @@ import {
   childRowAttribute,
 } from './cascade_row.styles';
 import { CascadeRowHeaderPrimitive } from './components/cascade_row_header';
+import { StickyHeaderExtensionPointProvider } from './components/cascade_row_header_extension_point';
 
 export { CascadeRowHeaderPrimitive };
 
@@ -33,10 +34,11 @@ export { CascadeRowHeaderPrimitive };
  * @internal
  * @description Internal component that is used to render a row in the data cascade component.
  */
-export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
+function CascadeRowPrimitiveComponent<G extends GroupNode, L extends LeafNode>({
   isMobile,
   activeStickyRenderSlotRef,
   isActiveSticky,
+  isStickyHeaderVisible,
   innerRef,
   onCascadeGroupNodeExpanded,
   onCascadeGroupNodeCollapsed,
@@ -61,6 +63,24 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
   });
 
   const isGroupNode = isCascadeGroupRowNode(currentGroupByColumns, rowInstance);
+
+  // The extension point element is created once and re-attached to the sticky header whenever it is
+  // displayed. Keeping it stable lets descendant cells portal into it on the very render that the
+  // sticky header appears, instead of one commit later once a ref would have been populated.
+  const [stickyHeaderExtensionElement] = useState(() => {
+    const element = document.createElement('div');
+    element.setAttribute('data-test-subj', 'sticky-header-extension-point');
+    return element;
+  });
+
+  const attachStickyHeaderExtensionElement = useCallback(
+    (host: HTMLDivElement | null) => {
+      if (host && stickyHeaderExtensionElement.parentElement !== host) {
+        host.appendChild(stickyHeaderExtensionElement);
+      }
+    },
+    [stickyHeaderExtensionElement]
+  );
 
   const cellId = useMemo(() => {
     if (isGroupNode) return null;
@@ -126,16 +146,39 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
     >
       <EuiFlexGroup direction="column" gutterSize={size} css={styles.rowInner}>
         <React.Fragment>
+          {/**
+           * `isActiveSticky` is true when the user's scroll position exceeds the row header's Y position, when this happens
+           * we portal the entire sticky header into a designated area within the grid container that stays sticky on scroll,
+           * given the actual rendered header might be so far way, keeping it sticky would require a transform to bring it into view,
+           * which would be visually jarring since we would have to adjust on every scroll event.
+           */}
           {isActiveSticky && activeStickyRenderSlotRef.current
             ? createPortal(
-                <div css={styles.rowStickyHeaderInner}>{rowHeader}</div>,
+                <EuiFlexGroup
+                  css={styles.rowStickyHeaderInner}
+                  direction="column"
+                  gutterSize="none"
+                >
+                  <EuiFlexItem>{rowHeader}</EuiFlexItem>
+                  <EuiFlexItem
+                    ref={attachStickyHeaderExtensionElement}
+                    css={styles.rowStickyHeaderExtensionPointWrapper}
+                  />
+                </EuiFlexGroup>,
                 activeStickyRenderSlotRef.current,
                 `${rowId}-sticky-header`
               )
             : null}
         </React.Fragment>
         <EuiFlexItem>{rowHeader}</EuiFlexItem>
-        <React.Fragment>
+        {/**
+         * Descendants are only told the sticky header is active once the slot is actually displayed,
+         * so content they move into it never disappears into a hidden slot ahead of the reveal.
+         */}
+        <StickyHeaderExtensionPointProvider
+          extensionPointElement={stickyHeaderExtensionElement}
+          isDisplayed={isActiveSticky && isStickyHeaderVisible}
+        >
           {!isGroupNode && rowIsExpanded && hasAllParentsExpanded && (
             <EuiFlexItem role="gridcell">
               {rowVisibleCells.map((cell) => (
@@ -143,8 +186,18 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
               ))}
             </EuiFlexItem>
           )}
-        </React.Fragment>
+        </StickyHeaderExtensionPointProvider>
       </EuiFlexGroup>
     </div>
   );
 }
+
+/**
+ * @internal
+ * @description Memoized so that the per-scroll re-render of the virtualized list only reconciles rows whose
+ * props actually changed. Table state changes (expansion, selection) still re-render every row through the
+ * cascade store context, which bypasses the memo.
+ */
+export const CascadeRowPrimitive = React.memo(
+  CascadeRowPrimitiveComponent
+) as typeof CascadeRowPrimitiveComponent;

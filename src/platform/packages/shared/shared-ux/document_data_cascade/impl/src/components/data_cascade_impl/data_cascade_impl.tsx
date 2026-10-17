@@ -36,7 +36,11 @@ import {
   useRegisterCascadeAccessibilityHelpers,
   useTreeGridContainerARIAAttributes,
 } from '../../lib/core/accessibility';
-import { dataCascadeImplStyles, relativePosition } from './data_cascade_impl.styles';
+import {
+  dataCascadeImplStyles,
+  relativePosition,
+  stickyHeaderVisibleAttribute,
+} from './data_cascade_impl.styles';
 import type { DataCascadeImplProps, DataCascadeRowProps, DataCascadeRowCellProps } from './types';
 
 /**
@@ -181,12 +185,18 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     scrollToRowIndex: virtualizerInstance.current!.scrollToVirtualizedIndex,
   });
 
+  const shouldRenderStickyHeader =
+    activeStickyIndex !== null &&
+    (virtualizerInstance.current?.scrollOffset ?? 0) >
+      (virtualizerInstance.current?.virtualizedRowComputedTranslateValue.get(0) ?? 0);
+
   const virtualCascadeRowRenderer = useCallback<VirtualizedCascadeListProps<G>['listItemRenderer']>(
     ({ row, isActiveSticky, virtualItem, virtualRowStyle }) => (
       <CascadeRowPrimitive<G, L>
         {...{
           size,
           isActiveSticky,
+          isStickyHeaderVisible: shouldRenderStickyHeader,
           enableRowSelection,
           rowInstance: row,
           virtualRow: virtualItem,
@@ -200,15 +210,10 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
         }}
       />
     ),
-    [size, enableRowSelection, isMobile, getVirtualizer, rowElement.props]
+    [size, enableRowSelection, isMobile, getVirtualizer, rowElement.props, shouldRenderStickyHeader]
   );
 
   const treeGridContainerARIAAttributes = useTreeGridContainerARIAAttributes(headerId);
-
-  const shouldRenderStickyHeader =
-    activeStickyIndex !== null &&
-    (virtualizerInstance.current?.scrollOffset ?? 0) >
-      (virtualizerInstance.current?.virtualizedRowComputedTranslateValue.get(0) ?? 0);
 
   const cascadeTreeGridRenderer = useCallback(
     (containerSize: EuiAutoSize) => {
@@ -238,14 +243,11 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
             style={containerSize}
             data-test-subj="dataCascadeScrollContainer"
           >
-            {/* Always render the slot so the ref is available immediately.
-            Use hidden style when not visible to avoid layout impact. */}
+            {/* Always render the slot so the ref is available immediately; the sticky header content
+            transitions in and out based on the visibility attribute. */}
             <div
-              css={
-                shouldRenderStickyHeader
-                  ? styles.cascadeTreeGridHeaderStickyRenderSlot
-                  : styles.cascadeTreeGridHeaderStickyRenderSlotHidden
-              }
+              css={styles.cascadeTreeGridHeaderStickyRenderSlot}
+              {...{ [stickyHeaderVisibleAttribute]: shouldRenderStickyHeader }}
             >
               <div ref={activeStickyRenderSlotRef} />
             </div>

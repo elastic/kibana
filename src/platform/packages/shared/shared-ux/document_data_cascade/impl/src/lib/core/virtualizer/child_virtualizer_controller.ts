@@ -79,6 +79,12 @@ export interface ChildVirtualizerController {
    * existed at creation time.
    */
   haveAllRestoringChildrenStabilized(): boolean;
+  /**
+   * Returns true when a registered child for the given root row shares the
+   * root's scroll element (i.e. is not detached). Such a child owns the scroll
+   * corrections for size changes of its own content.
+   */
+  hasAttachedChildForRow(rowIndex: number): boolean;
   destroy(): void;
 }
 
@@ -362,6 +368,17 @@ export const createChildVirtualizerController = ({
       return true;
     };
 
+  const hasAttachedChildForRow: ChildVirtualizerController['hasAttachedChildForRow'] = (
+    rowIndex
+  ) => {
+    for (const child of connectedChildren.values()) {
+      if (child.rowIndex === rowIndex && !child.isDetached) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   const markRootStable: ChildVirtualizerController['markRootStable'] = () => {
     rootStable = true;
     notifyListeners();
@@ -396,6 +413,7 @@ export const createChildVirtualizerController = ({
     clearPersistedAnchor,
     hasConnectedChildWithPersistedAnchor,
     haveAllRestoringChildrenStabilized,
+    hasAttachedChildForRow,
     destroy,
   };
 };
