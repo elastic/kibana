@@ -12,10 +12,10 @@ import {
   createTsdbScenarioTimeRange,
   enableElasticChartDebug,
   getDowngradeBoundaryData,
-  sumFirstNValues,
+  sumBarsAroundRollover,
   test,
 } from '../fixtures';
-import type { TsdbScenarioContext, TsdbScenarioIndex } from '../fixtures';
+import type { ChartBar, TsdbScenarioContext, TsdbScenarioIndex } from '../fixtures';
 
 const RESOURCE_SUFFIX = `${process.pid}-${Date.now()}`;
 // Serverless Security's editor role grants data access to the sample-data namespace.
@@ -28,7 +28,7 @@ interface ScenarioResult {
   /** Count of `lns-indexPatternDimension-average incompatible` elements. */
   incompatibleAverageCount: number;
   /** Bar chart data from the full time range with empty rows enabled. */
-  bars: Array<{ y: number }>;
+  bars: ChartBar[];
   /** Whether the before-downgrade time window contains any data. */
   hasDataBeforeDowngrade: boolean;
   /** Whether the after-downgrade time window contains any data. */
@@ -119,25 +119,13 @@ const runScenario = async (
   };
 };
 
-const getScenarioData = ({ bars }: ScenarioResult) => {
-  // Bucket boundaries can vary with chart interval selection. Lens does not count a downsample
-  // target as an additional contribution beside its source stream.
-  const columnsToCheck = Math.floor(bars.length / 2);
-  return {
-    beforeDowngrade: sumFirstNValues(columnsToCheck, bars),
-    afterDowngrade: sumFirstNValues(columnsToCheck, [...bars].reverse()),
-  };
-};
-
 const assertDowngradeResult = (result: ScenarioResult) => {
   expect.soft(result.incompatibleAverageCount).toBe(0);
   expect.soft(result.hasDataBeforeDowngrade).toBe(true);
   expect.soft(result.hasDataAfterDowngrade).toBe(true);
-  const counts = getScenarioData(result);
-  expect
-    .soft(counts.beforeDowngrade)
-    .toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
-  expect.soft(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
+  const { before, after } = sumBarsAroundRollover(result.bars, TIME_RANGE);
+  expect.soft(before).toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
+  expect.soft(after).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
 };
 
 test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgnostic }, () => {

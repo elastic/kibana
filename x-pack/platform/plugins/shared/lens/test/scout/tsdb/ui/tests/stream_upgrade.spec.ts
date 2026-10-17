@@ -11,10 +11,10 @@ import {
   TSDB_SCENARIO_DOCUMENT_COUNT,
   createTsdbScenarioTimeRange,
   enableElasticChartDebug,
-  sumFirstNValues,
+  sumBarsAroundRollover,
   test,
 } from '../fixtures';
-import type { TsdbScenarioContext, TsdbScenarioIndex } from '../fixtures';
+import type { ChartBar, TsdbScenarioContext, TsdbScenarioIndex } from '../fixtures';
 
 const RESOURCE_SUFFIX = `${process.pid}-${Date.now()}`;
 // Serverless Security's editor role grants data access to the sample-data namespace.
@@ -26,8 +26,8 @@ const TIME_RANGE = createTsdbScenarioTimeRange();
 interface ScenarioResult {
   /** Count of `lns-indexPatternDimension-average incompatible` elements. */
   incompatibleAverageCount: number;
-  counterBars: Array<{ y: number }>;
-  countBars: Array<{ y: number }>;
+  counterBars: ChartBar[];
+  countBars: ChartBar[];
   expectedDocumentCountBeforeRollover: number;
 }
 
@@ -103,14 +103,12 @@ const runScenario = async (
 };
 
 const getScenarioData = ({ counterBars, countBars }: ScenarioResult) => {
-  // Bucket boundaries can vary with chart interval selection. Lens does not count a downsample
-  // target as an additional contribution beside its source stream.
-  const columnsToCheck = Math.floor(countBars.length / 2);
+  const { before, after } = sumBarsAroundRollover(countBars, TIME_RANGE);
   return {
     firstCounter: counterBars[0]?.y,
     lastCounter: counterBars[counterBars.length - 1]?.y,
-    beforeUpgradeCount: sumFirstNValues(columnsToCheck, countBars),
-    afterUpgradeCount: sumFirstNValues(columnsToCheck, [...countBars].reverse()),
+    beforeUpgradeCount: before,
+    afterUpgradeCount: after,
   };
 };
 
