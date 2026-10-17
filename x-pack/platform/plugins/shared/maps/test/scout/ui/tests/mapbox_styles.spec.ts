@@ -5,39 +5,37 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import { test } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
-/**
- * Purpose: mapbox style smoke test
- *
- * Migration: migrate to scout
- */
-export default function ({ getPageObjects, getService }) {
-  const { maps } = getPageObjects(['maps']);
-  const inspector = getService('inspector');
-  const security = getService('security');
+const KBN_ARCHIVE = 'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json';
+const ES_ARCHIVE_MAPS_DATA = 'x-pack/platform/test/fixtures/es_archives/maps/data';
 
-  describe('mapbox styles', () => {
-    let mapboxStyle;
-    before(async () => {
-      await security.testUser.setRoles(
-        ['global_maps_all', 'geoshape_data_reader', 'meta_for_geoshape_data_reader'],
-        { skipBrowserRefresh: true }
+const JOIN_EXAMPLE_MAP_ID = '1649cc70-f736-11e8-8ce0-9723965e01e3';
+
+test.describe('Maps - mapbox styles', { tag: '@local-stateful-classic' }, () => {
+  test.beforeAll(async ({ esArchiver, kbnClient }) => {
+    await esArchiver.loadIfNeeded(ES_ARCHIVE_MAPS_DATA);
+    await kbnClient.importExport.load(KBN_ARCHIVE);
+  });
+
+  test.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginAsPrivilegedUser();
+  });
+
+  test.afterAll(async ({ kbnClient }) => {
+    await kbnClient.savedObjects.cleanStandardList();
+  });
+
+  test('layer styles', async ({ pageObjects }) => {
+    await pageObjects.maps.openMapWithId(JOIN_EXAMPLE_MAP_ID);
+    const mapboxStyle = await pageObjects.maps.getMapboxStyle();
+
+    await test.step('should style circle layer as expected', () => {
+      const layer = mapboxStyle.layers.find(
+        (mbLayer: { id: string }) => mbLayer.id === 'n1t6f_circle'
       );
-      await maps.loadSavedMap('join example');
-      mapboxStyle = await maps.getMapboxStyle();
-    });
-
-    after(async () => {
-      await inspector.close();
-      await security.testUser.restoreDefaults();
-    });
-
-    it('should style circle layer as expected', async () => {
-      const layer = mapboxStyle.layers.find((mbLayer) => {
-        return mbLayer.id === 'n1t6f_circle';
-      });
-      expect(layer).to.eql({
+      expect(layer).toStrictEqual({
         id: 'n1t6f_circle',
         type: 'circle',
         source: 'n1t6f',
@@ -113,11 +111,11 @@ export default function ({ getPageObjects, getService }) {
       });
     });
 
-    it('should style fill layer as expected', async () => {
-      const layer = mapboxStyle.layers.find((mbLayer) => {
-        return mbLayer.id === 'n1t6f_fill';
-      });
-      expect(layer).to.eql({
+    await test.step('should style fill layer as expected', () => {
+      const layer = mapboxStyle.layers.find(
+        (mbLayer: { id: string }) => mbLayer.id === 'n1t6f_fill'
+      );
+      expect(layer).toStrictEqual({
         id: 'n1t6f_fill',
         type: 'fill',
         source: 'n1t6f',
@@ -188,11 +186,11 @@ export default function ({ getPageObjects, getService }) {
       });
     });
 
-    it('should style fill layer as expected again', async () => {
-      const layer = mapboxStyle.layers.find((mbLayer) => {
-        return mbLayer.id === 'n1t6f_line';
-      });
-      expect(layer).to.eql({
+    await test.step('should style line layer as expected', () => {
+      const layer = mapboxStyle.layers.find(
+        (mbLayer: { id: string }) => mbLayer.id === 'n1t6f_line'
+      );
+      expect(layer).toStrictEqual({
         id: 'n1t6f_line',
         type: 'line',
         source: 'n1t6f',
@@ -214,4 +212,4 @@ export default function ({ getPageObjects, getService }) {
       });
     });
   });
-}
+});

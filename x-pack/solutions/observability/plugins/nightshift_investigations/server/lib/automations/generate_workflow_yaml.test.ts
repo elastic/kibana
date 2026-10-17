@@ -406,6 +406,30 @@ describe('generateWorkflowYaml', () => {
         });
       });
 
+      it("names the message's thread, so a reply in it continues the investigation", () => {
+        const automation = slackAutomation(slackRow());
+        automation.completions = [{ action: 'post_to_slack', targetMode: 'thread' }];
+        const yaml = parse(generateWorkflowYaml('auto-123', automation));
+        expect(yaml.steps[0].with.slack_thread).toEqual({
+          workspace: '{{ event.workspace }}',
+          channel: '{{ event.channel }}',
+          thread_ts: '{{ event.messageId }}',
+        });
+      });
+
+      it.each<[string, NightshiftAutomationAttributes['completions']]>([
+        ['reports nowhere', []],
+        [
+          'reports in another channel',
+          [{ action: 'post_to_slack', targetMode: 'channel', destination: '#prod-alerts' }],
+        ],
+      ])('leaves the thread unnamed when the automation %s', (_, completions) => {
+        const automation = slackAutomation(slackRow());
+        automation.completions = completions;
+        const yaml = parse(generateWorkflowYaml('auto-123', automation));
+        expect(yaml.steps[0].with.slack_thread).toBeUndefined();
+      });
+
       it('puts the slack message in the prompt after the prompt template', () => {
         const automation = slackAutomation(slackRow());
         automation.execution.promptTemplate = 'Look for deploy problems.';

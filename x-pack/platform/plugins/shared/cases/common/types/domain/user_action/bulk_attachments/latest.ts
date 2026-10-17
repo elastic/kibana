@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('lens', function () {
-    loadTestFile(require.resolve('./choropleth_chart'));
-  });
-}
+export * from './v1';
