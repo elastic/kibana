@@ -10,7 +10,7 @@ import path from 'path';
 import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
 import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
-import { sanitizeSvg } from '@kbn/fs';
+import { sanitizeSvg } from '@kbn/content-sanitization';
 
 import type { GetFileRequestSchema, FleetRequestHandler } from '../../types';
 import { getFile, getInstallation } from '../../services/epm/packages';
