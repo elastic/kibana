@@ -755,28 +755,35 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
     expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
   });
 
-  it('refuses to open a new event without a breaching member', async () => {
-    await expect(
-      eventsWriteBulkHandler({
+  it.each([
+    ['healthy members', 'refutes', 'recovering'],
+    ['members that cannot be judged', 'inconclusive', 'active'],
+  ] as const)(
+    'opens a new event from %s, with the status the verdicts give',
+    async (_label, verdict, status) => {
+      const results = await eventsWriteBulkHandler({
         eventSearchClient: makeEventSearchClient(),
         inputs: [
           {
             ...baseInput,
             status: undefined,
+            severity: 'low',
             signals: [
               makeDetectionSignal({
                 ruleUuid: 'rule-1',
-                verdict: 'refutes',
-                description: 'Healthy',
+                verdict,
+                description: 'Not breaching',
                 changePointType: 'dip',
               }),
             ],
           },
         ],
-      })
-    ).rejects.toThrow('without a breaching member');
-    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
-  });
+      });
+
+      expect(results[0]).toMatchObject({ written: true, status });
+      expect(writtenDocs()[0].status).toBe(status);
+    }
+  );
 
   it('sets aside a refuting continuation of an unknown event without failing the batch', async () => {
     const results = await eventsWriteBulkHandler({

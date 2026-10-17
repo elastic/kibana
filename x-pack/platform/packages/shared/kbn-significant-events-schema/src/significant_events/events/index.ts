@@ -11,10 +11,9 @@ import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import dedent from 'dedent';
 import { significantEventBaseSchema } from '../common_schemas';
 import {
-  ASSESSMENT_NOTE_ROLE_RULE,
-  MAX_ASSESSMENT_NOTE_LENGTH,
   MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
+  ASSESSMENT_NOTE_ROLE_RULE,
   NO_RAW_SENSITIVE_VALUES_RULE,
 } from '../constants';
 
@@ -101,9 +100,10 @@ export const significantEventSchema = lazySchema(() =>
       .optional()
       .describe(
         dedent`
-        Concise rationale for this assessment. Max ${MAX_ASSESSMENT_NOTE_LENGTH} chars.
+        Rationale for this assessment: why this severity, what was ruled out, and why this confidence.
         ${ASSESSMENT_NOTE_ROLE_RULE}
-        Record the reasoning, ambiguity, or caveat that is not already in the title, symptom_hypothesis, summary, or signal descriptions. Do not restate the observed condition, error signature, impact, query steps, or detection artifacts.
+        Good: "High: checkout fails 18.5% of attempts and the ledger write path is blocked, meeting the high condition. Payment retries were ruled out; breadth across regions is unmeasured. Confidence is 70.0% because the mechanism is corroborated by one source."
+        Bad: "Confidence is 0.7" or "Confidence is 70%": the note states the confidence field as a percentage with one decimal, so a confidence of 0.7 is written 70.0%.
 
         ${NO_RAW_SENSITIVE_VALUES_RULE}
         `

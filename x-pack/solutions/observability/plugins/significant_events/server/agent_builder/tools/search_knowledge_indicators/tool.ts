@@ -26,25 +26,20 @@ import dedent from 'dedent';
 import { DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE } from '@kbn/nightshift-ai';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
-import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import {
   KNOWLEDGE_INDICATOR_FEATURE_TYPES,
   MAX_COMPACT_META_ARRAY_SAMPLE,
   MAX_COMPACT_META_KEYS,
-  searchKnowledgeIndicatorsToolHandler,
 } from './handler';
 import {
-  loadSourceCatalog,
-  resolveSourcesBySlug,
-  restrictCatalogToReadable,
-} from '../../utils/resolve_source_slugs';
+  KI_SEARCH_MAX_PER_PAGE_FULL,
+  MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE,
+  searchKnowledgeIndicatorsForRequest,
+} from './search_for_request';
 
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID =
   platformSignificantEventsTools.searchKnowledgeIndicators;
-
-const MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE = 50;
-const KI_SEARCH_MAX_PER_PAGE_FULL = 10;
 
 const searchKnowledgeIndicatorsSchema = lazySchema(() =>
   z.object({
@@ -125,6 +120,8 @@ const searchKnowledgeIndicatorsSchema = lazySchema(() =>
   })
 );
 
+export type SearchKnowledgeIndicatorsParams = z.infer<typeof searchKnowledgeIndicatorsSchema>;
+
 export function createSearchKnowledgeIndicatorsTool({
   getScopedClients,
   server,
@@ -193,43 +190,12 @@ export function createSearchKnowledgeIndicatorsTool({
       const { request } = context;
 
       try {
-        const scopedClients = await getScopedClients({ request });
-
-        await assertSignificantEventsAccess({
+        const output = await searchKnowledgeIndicatorsForRequest({
+          request,
+          getScopedClients,
           server,
-          licensing: scopedClients.licensing,
-        });
-        await assertCanReadSignificantEvents({ request, server });
-
-        const { view, slugs, ...restParams } = toolParams;
-        const maxPerPage =
-          view === 'full' ? KI_SEARCH_MAX_PER_PAGE_FULL : MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE;
-        const fullCatalog = await loadSourceCatalog(scopedClients.sourcesClient);
-        const sources = slugs ? resolveSourcesBySlug(fullCatalog, slugs) : undefined;
-        // Stored KIs are read as the internal user, so check the caller's own data access first.
-        // Named sources must all be readable; an unscoped search covers only the readable ones.
-        if (sources) {
-          await Promise.all(
-            sources.map(({ id }) => scopedClients.sourcesClient.assertReadable(id))
-          );
-        }
-        const catalog = sources
-          ? fullCatalog
-          : await restrictCatalogToReadable(fullCatalog, scopedClients.sourcesClient);
-        const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-        const params = {
-          ...restParams,
-          ...(sources ? { source_ids: sources.map((source) => source.id) } : {}),
-          per_page: Math.min(restParams.per_page, maxPerPage),
-        };
-
-        const output = await searchKnowledgeIndicatorsToolHandler({
-          catalog,
-          sources,
-          kiClient,
           logger,
-          params,
-          view,
+          toolParams,
         });
 
         return {

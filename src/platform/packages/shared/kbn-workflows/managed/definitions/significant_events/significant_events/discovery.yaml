@@ -37,6 +37,42 @@ triggers:
           type: number
           default: 80
           description: 'Rules with severity_score at or above this value are never suppressed, however frequently they fire. Default matches the 80-critical investigation boundary; set above 100 to disable the exemption.'
+        classifierShadowMode:
+          type: boolean
+          default: true
+          description: 'When true, the detection classifier only records which detections it would skip and every detection still goes to the agent. Set to false to enforce the skips.'
+        prefetchGroundingContext:
+          type: boolean
+          default: false
+          description: 'When true, the knowledge indicators of the batch (the grounding skill''s Step 1 searches) are fetched before the agent runs and sent in its message, so it makes no ki_search call. Off until the discovery evaluation shows no loss in verdicts or events.'
+        prefetchGroundingResults:
+          type: boolean
+          default: false
+          description: 'When true, the grounding samples and no-scope profiles of the batch''s rules are also run before the agent and sent with its knowledge indicators, so the agent reads them instead of running those queries. Implies the knowledge indicators are fetched; off until the discovery evaluation shows no loss.'
+        classifierProbeWindowMinutes:
+          type: number
+          default: 20
+          minimum: 15
+          maximum: 360
+          description: 'Window, ending now, over which the classifier re-runs a rule''s stored query. Keep it short: on c0, windows over about 30 minutes let earlier matches hide recoveries from the agent.'
+        classifierProbeTimeoutMs:
+          type: number
+          default: 8000
+          minimum: 1000
+          maximum: 30000
+          description: 'Per-probe timeout for re-running a stored query. A probe that times out sends its detection to the agent.'
+        classifierProbeConcurrency:
+          type: number
+          default: 5
+          minimum: 1
+          maximum: 10
+          description: 'Maximum stored-query probes the classifier runs at once.'
+        classifierBudgetMs:
+          type: number
+          default: 20000
+          minimum: 2000
+          maximum: 60000
+          description: 'Shared time budget for all probes of one run. Probes not started when it is spent send their detection to the agent.'
         rootTriggeredBy:
           type: string
           description: 'Root workflow trigger type propagated by a managed driver.'
@@ -52,6 +88,16 @@ outputs:
     type: boolean
   - name: suppressedRuleCount
     type: number
+  - name: skippedCount
+    type: number
+  - name: needsAgentCount
+    type: number
+  - name: classifierShadowMode
+    type: boolean
+  - name: classifierReasonCounts
+    type: string
+  - name: classifierProbeStatusCounts
+    type: string
 consts:
   DETECTIONS_INDEX: '.significant_events-detections'
   INVESTIGATABLE_SEVERITIES: ['critical', 'high']
@@ -91,6 +137,11 @@ steps:
           processedCount: 0
           hasWork: false
           suppressedRuleCount: 0
+          skippedCount: 0
+          needsAgentCount: 0
+          classifierShadowMode: '${{ inputs.classifierShadowMode }}'
+          classifierReasonCounts: '{}'
+          classifierProbeStatusCounts: '{}'
 
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
   - name: set_initial_vars
@@ -139,10 +190,99 @@ steps:
       continue: true
 
   # Size must be computed separately — comparison operators cannot follow a filter chain.
+  # This is the raw count; it is the fallback when classify_detections fails or is absent.
+  - name: count_detections
+    type: data.set
+    with:
+      detectionCount: '${{ steps.get_detections.output.values | size | default: 0 }}'
+
+  # Decides per detection whether the agent needs to see it (see classifierShadowMode). Read-only.
+  # A failure here must never change behavior, so every consumer below falls back to the
+  # get_detections rows when this step has no output.
+  - name: classify_detections
+    type: significantEvents.classifyDetections
+    with:
+      # No `| default: []`: the engine evaluates that to undefined even for an empty array, and the
+      # step already treats a missing `rows` as an empty batch.
+      rows: '${{ steps.get_detections.output.values }}'
+      columns: "${{ steps.get_detections.output.columns | map: 'name' }}"
+      space_id: '{{ variables.spaceId }}'
+      shadow_mode: '${{ inputs.classifierShadowMode }}'
+      probe_window_minutes: '${{ inputs.classifierProbeWindowMinutes }}'
+      probe_timeout_ms: '${{ inputs.classifierProbeTimeoutMs }}'
+      probe_concurrency: '${{ inputs.classifierProbeConcurrency }}'
+      budget_ms: '${{ inputs.classifierBudgetMs }}'
+    on-failure:
+      continue: true
+
+  # Detections the classifier skipped are done: stamp them processed so they leave the queue. This
+  # runs before the batch gate, so it does not depend on the agent running or succeeding. A failed
+  # stamp only leaves the detection to be re-selected and re-classified next cycle.
+  - name: count_skipped_rules
+    type: data.set
+    with:
+      skippedRuleCount: '${{ steps.classify_detections.output.skipped_rule_uuids | size | default: 0 }}'
+
+  - name: stamp_skipped_detections
+    type: if
+    condition: '${{ steps.count_skipped_rules.output.skippedRuleCount > 0 }}'
+    steps:
+      # Same query shape as get_written_rules_backlog: markers carry no rule_uuid, so the rule
+      # filter must stay a should alongside `exists: processed_by`.
+      - name: get_skipped_rules_backlog
+        type: elasticsearch.esql.query
+        with:
+          query: |-
+            FROM .significant_events-detections
+            | INLINE STATS processed_count = COUNT(processed_by) BY detection_id
+            | WHERE change_point_type IS NOT NULL AND processed_count == 0
+            | KEEP detection_id, rule_uuid
+          filter:
+            bool:
+              filter:
+                - term:
+                    kibana.space_ids: '{{ variables.spaceId }}'
+                - bool:
+                    should:
+                      - terms:
+                          rule_uuid: '${{ steps.classify_detections.output.skipped_rule_uuids }}'
+                      - exists:
+                          field: processed_by
+                    minimum_should_match: 1
+                - range:
+                    '@timestamp':
+                      gte: '{{ inputs.detectionLookback }}'
+        on-failure:
+          continue: true
+
+      - name: foreach_stamp_skipped
+        type: foreach
+        foreach: '${{ steps.get_skipped_rules_backlog.output.values | default: [] }}'
+        iteration-on-failure:
+          continue: true
+        steps:
+          - name: write_skipped_marker
+            type: kibana.request
+            with:
+              method: POST
+              path: '/s/{{ variables.spaceId }}/internal/significant_events/detections/_mark_processed'
+              headers:
+                x-elastic-internal-origin: 'kibana'
+              body:
+                detection_ids:
+                  - '{{ foreach.item[0] }}'
+                processed_by: '{{ execution.id }}'
+                # The classifier's decision for this detection's rule, so the marker says why.
+                skip: '${{ steps.classify_detections.output.decisions | where: ''rule_uuid'', foreach.item[1] | first }}'
+            on-failure:
+              continue: true
+
+  # Rows for the agent. `default` would also replace a legitimately empty classified batch with the
+  # raw rows, so only a missing output falls back to the raw count; a real 0 stays 0.
   - name: compute_batch_size
     type: data.set
     with:
-      processedCount: '${{ steps.get_detections.output.values | size | default: 0 }}'
+      processedCount: '${{ steps.classify_detections.output.row_count | default: steps.count_detections.output.detectionCount }}'
 
   - name: compute_suppressed_count
     type: elasticsearch.esql.query
@@ -191,6 +331,11 @@ steps:
           processedCount: '${{ steps.compute_batch_size.output.processedCount }}'
           hasWork: false
           suppressedRuleCount: '${{ steps.compute_suppressed_count.output.values[0][0] | default: 0 }}'
+          skippedCount: '${{ steps.classify_detections.output.skipped_count | default: 0 }}'
+          needsAgentCount: '${{ steps.classify_detections.output.needs_agent_count | default: 0 }}'
+          classifierShadowMode: '${{ inputs.classifierShadowMode }}'
+          classifierReasonCounts: "${{ steps.classify_detections.output.reason_counts | json | default: '{}' }}"
+          classifierProbeStatusCounts: "${{ steps.classify_detections.output.probe_status_counts | json | default: '{}' }}"
 
   # -----------------------------------------------------------------------
   # Correlate detections into discoveries.
@@ -200,6 +345,39 @@ steps:
     with:
       step: discovery
       connector_id: '{{ inputs.connector_id }}'
+
+  # The grounding skill's Step 1 searches, run here when enabled. A failure only leaves the agent to
+  # run them itself: the message carries the section only when this step has an output.
+  - name: get_discovery_context
+    type: kibana.request
+    if: '${{ inputs.prefetchGroundingContext and not inputs.prefetchGroundingResults and steps.classify_detections.output.row_count > 0 }}'
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/discovery/_context'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        rule_uuids: '${{ steps.classify_detections.output.rule_uuids }}'
+        source_ids: '${{ steps.classify_detections.output.source_ids }}'
+    on-failure:
+      continue: true
+
+  # The same route with the detection times: it also runs the rules' grounding queries as the caller.
+  - name: get_discovery_grounding
+    type: kibana.request
+    if: '${{ inputs.prefetchGroundingResults and steps.classify_detections.output.row_count > 0 }}'
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/discovery/_context'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        rule_uuids: '${{ steps.classify_detections.output.rule_uuids }}'
+        source_ids: '${{ steps.classify_detections.output.source_ids }}'
+        detections: '${{ steps.classify_detections.output.detections }}'
+    timeout: '120s'
+    on-failure:
+      continue: true
 
   - name: run_discovery_agent
     type: ai.agent
@@ -216,8 +394,14 @@ steps:
       message: |
         ## Detection batch
 
-        Columns: {{ steps.get_detections.output.columns | map: 'name' | json }}
-        Rows: {{ steps.get_detections.output.values | json }}
+        {% if steps.classify_detections.error == null and steps.classify_detections.output != null %}{{ steps.classify_detections.output.batch | json }}{% else %}Columns: {{ steps.get_detections.output.columns | map: 'name' | json }}
+        Rows: {{ steps.get_detections.output.values | json }}{% endif %}
+        {% assign prefetched = steps.get_discovery_grounding.output | default: steps.get_discovery_context.output %}
+        {% if prefetched != null %}
+        ## Prefetched context
+
+        {{ prefetched | json }}
+        {% endif %}
       schema:
         type: object
         properties:
@@ -228,10 +412,10 @@ steps:
             description: >-
               rule_uuid of every detection that is done this cycle: a detection whose
               events_write result was written: true or skipped with reason
-              existing_active_event or unchanged_outcome, or a detection intentionally
-              determined not event-eligible for which no write was attempted.
-              Failed (bulk_error or unknown_event_id) or unattempted event-eligible writes
-              must not be included.
+              existing_active_event or unchanged_outcome, or a same-batch duplicate of one
+              that was written.
+              Failed (bulk_error or unknown_event_id) or unattempted writes must not be
+              included.
               Used both as a hallucination guardrail (schema validation forces the agent
               to report real activity) and as the per-rule filter for which detections
               get stamped as processed. Full discovery data is written via the
@@ -442,3 +626,8 @@ steps:
       processedCount: '${{ steps.compute_batch_size.output.processedCount }}'
       hasWork: true
       suppressedRuleCount: '${{ steps.compute_suppressed_count.output.values[0][0] | default: 0 }}'
+      skippedCount: '${{ steps.classify_detections.output.skipped_count | default: 0 }}'
+      needsAgentCount: '${{ steps.classify_detections.output.needs_agent_count | default: 0 }}'
+      classifierShadowMode: '${{ inputs.classifierShadowMode }}'
+      classifierReasonCounts: "${{ steps.classify_detections.output.reason_counts | json | default: '{}' }}"
+      classifierProbeStatusCounts: "${{ steps.classify_detections.output.probe_status_counts | json | default: '{}' }}"

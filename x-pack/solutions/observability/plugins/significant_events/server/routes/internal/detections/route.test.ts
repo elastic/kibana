@@ -81,6 +81,35 @@ describe('detection marker routes', () => {
     ).toBe(false);
   });
 
+  it('accepts the classifier outcome on a processed marker and drops unknown keys from it', () => {
+    const bodySchema = markProcessedRoute.params.shape.body;
+    const parsed = bodySchema.safeParse({
+      detection_ids: ['d-1'],
+      processed_by: 'exec-1',
+      skip: {
+        reason: 'still_breaching',
+        probe_status: 'ok',
+        baseline: { decision: 'background', value: 150, samples: 60, median: 122.5 },
+        decision: 'skip',
+        rule_uuid: 'rule-1',
+      },
+    });
+
+    expect(parsed.success).toBe(true);
+    expect(parsed.data?.skip).toEqual({
+      reason: 'still_breaching',
+      probe_status: 'ok',
+      baseline: { decision: 'background', value: 150, samples: 60, median: 122.5 },
+    });
+    expect(
+      bodySchema.safeParse({
+        detection_ids: ['d-1'],
+        processed_by: 'exec-1',
+        skip: { reason: 'x'.repeat(65) },
+      }).success
+    ).toBe(false);
+  });
+
   it('bound the number of rules marked scanned per request', () => {
     const bodySchema = markScannedRoute.params.shape.body;
     expect(bodySchema.safeParse({ rule_uuids: ['rule-1'], scanned_by: 'exec-1' }).success).toBe(

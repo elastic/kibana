@@ -1,2 +1,5 @@
 ## Detection batch
-{{{activeBatch}}}
+{{{activeBatch}}}{{#prefetchedContext}}
+
+## Prefetched context
+{{{prefetchedContext}}}{{/prefetchedContext}}

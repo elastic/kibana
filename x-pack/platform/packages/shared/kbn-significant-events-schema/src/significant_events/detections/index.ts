@@ -30,6 +30,30 @@ export const CHANGE_POINT_TYPES = [
 export type ChangePointType = (typeof CHANGE_POINT_TYPES)[number];
 
 /**
+ * Why the classifier closed a detection without the discovery agent: its decision for the rule, the
+ * probe that backed it and the baseline it observed. Stored on the detection's processed marker, so
+ * `checked_at` is the marker's timestamp and is only present on reads.
+ */
+export const detectionSkipSchema = lazySchema(() =>
+  z.object({
+    reason: z.string().max(64),
+    probe_status: z.string().max(32).optional(),
+    baseline: z
+      .object({
+        decision: z.string().max(32),
+        value: z.number(),
+        samples: z.number().int().min(0),
+        median: z.number().optional(),
+        threshold: z.number().optional(),
+      })
+      .optional(),
+    checked_at: isoDateTime({ offset: true }).optional(),
+  })
+);
+
+export type DetectionSkip = z.infer<typeof detectionSkipSchema>;
+
+/**
  * Detection — an immutable change-point observation. `change_point_type` and
  * `p_value` are top-level (no nested `detection_evidence`). `processed` is derived
  * at read time from the presence of a processed marker (see `processedMarkerSchema`)
@@ -80,6 +104,8 @@ export const detectionSchema = lazySchema(() =>
     workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
     // Derived at read time from processed-marker membership; never stored.
     processed: z.boolean(),
+    // Derived at read time from the processed marker; set when the classifier closed the detection.
+    skip: detectionSkipSchema.optional(),
   })
 );
 

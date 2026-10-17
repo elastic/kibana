@@ -6,6 +6,7 @@
  */
 
 import type { DiscoveryEvaluator } from '../../types';
+import { isPrefetchedGroundingEnabled } from '../../../../prefetched_context';
 import { summarizeEsqlGrounding } from '../../utils/tool_usage';
 
 /**
@@ -31,7 +32,8 @@ export const confirmedEvidencesEvaluator: DiscoveryEvaluator = {
 
     const esqlCallCount = summarizeEsqlGrounding(steps ?? []).noOfToolCalls;
     // Require at least one execute_esql call per active event from Step 1 grounding.
-    const sufficientEsqlCoverage = esqlCallCount >= openEvents.length;
+    const sufficientEsqlCoverage =
+      isPrefetchedGroundingEnabled() || esqlCallCount >= openEvents.length;
 
     let satisfied = 0;
     const issues: string[] = [];

@@ -52,6 +52,7 @@ import {
   extractWriteItemsFromToolCall,
 } from '../../src/evaluators/discovery/utils/parse_agent_output';
 import { buildDiscoveryInput } from '../../src/evaluators/discovery/discovery/build_agent_input';
+import { fetchPrefetchedContext } from '../../src/prefetched_context';
 import type { ContinuationCycle } from '../../src/evaluators/discovery/discovery/continuation/continuation_stability';
 
 // Must match the `sha256(space:source:fingerprint)` series key written by `events_write`, so the
@@ -356,7 +357,13 @@ evaluate.describe(
                     source_id: sourceForEvaluation.id,
                   }));
                   // Same message shape as the production batch.
-                  const agentInput = buildDiscoveryInput({ detections: stampedDetections });
+                  const agentInput = buildDiscoveryInput({
+                    detections: stampedDetections,
+                    prefetchedContext: await fetchPrefetchedContext({
+                      fetch,
+                      detections: stampedDetections,
+                    }),
+                  });
 
                   const converseResult = await agentBuilderClient.converse({
                     agentId: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
@@ -614,7 +621,13 @@ evaluate.describe(
                             : {}),
                           detection_id: `${base.detection_id ?? base.rule_uuid}-fire-${i}`,
                         };
-                        const agentInput = buildDiscoveryInput({ detections: [detection] });
+                        const agentInput = buildDiscoveryInput({
+                          detections: [detection],
+                          prefetchedContext: await fetchPrefetchedContext({
+                            fetch,
+                            detections: [detection],
+                          }),
+                        });
 
                         const converseResult = await agentBuilderClient.converse({
                           agentId: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,

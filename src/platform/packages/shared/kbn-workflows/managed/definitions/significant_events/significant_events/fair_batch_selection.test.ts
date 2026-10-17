@@ -138,6 +138,11 @@ describe('significant events fair batch selection', () => {
       'processedCount',
       'hasWork',
       'suppressedRuleCount',
+      'skippedCount',
+      'needsAgentCount',
+      'classifierShadowMode',
+      'classifierReasonCounts',
+      'classifierProbeStatusCounts',
     ]);
     expect(discovery.steps.find(({ name }) => name === 'output_result')?.with).toMatchObject({
       hasWork: true,

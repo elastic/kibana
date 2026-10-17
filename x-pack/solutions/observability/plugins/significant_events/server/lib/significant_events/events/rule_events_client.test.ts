@@ -598,6 +598,127 @@ describe('RuleEventsClient', () => {
     });
   });
 
+  describe('findLiveMembers', () => {
+    const detectionSignal = ({
+      ruleUuid,
+      verdict,
+      esqlQuery,
+    }: {
+      ruleUuid: string;
+      verdict: string;
+      esqlQuery?: string;
+    }) => ({
+      type: 'detection',
+      source_id: 'logs.checkout',
+      description: 'Observed rows',
+      verdict,
+      metadata: { rule_uuid: ruleUuid },
+      ...(esqlQuery ? { evidence: { esql_query: esqlQuery, result: 'found' } } : {}),
+    });
+
+    const seriesRow = ({
+      eventId,
+      status = 'active',
+      signals,
+    }: {
+      eventId: string;
+      status?: string;
+      signals: unknown[];
+    }): MockRow => ({
+      source: ruleEventSource({ alert: { status } }),
+      dataJson: JSON.stringify({ ...dataDoc, event_id: eventId, signals }),
+    });
+
+    it('returns an empty map without querying when no rules are requested', async () => {
+      const { client, query } = createClient(async () => sourceResponse([]));
+
+      const members = await client.findLiveMembers({ ruleUuids: [] });
+
+      expect(members.size).toBe(0);
+      expect(query).not.toHaveBeenCalled();
+    });
+
+    it('narrows to live series that contain the requested rules', async () => {
+      const { client, query } = createClient(async () => sourceResponse([]));
+
+      await client.findLiveMembers({ ruleUuids: ['rule-A'] });
+
+      const q = lastQuery(query);
+      expect(q).toContain('`alert.status` IN ("active", "recovering")');
+      expect(q).toContain(
+        'MV_INTERSECTS(FIELD_EXTRACT(data, "signals.metadata.rule_uuid"), ["rule-A"])'
+      );
+    });
+
+    it('pairs each requested rule with its series status, verdict and stored query', async () => {
+      const rows = [
+        seriesRow({
+          eventId: 'event-1',
+          signals: [
+            detectionSignal({ ruleUuid: 'rule-A', verdict: 'confirms', esqlQuery: 'FROM $.a' }),
+            detectionSignal({ ruleUuid: 'rule-other', verdict: 'refutes', esqlQuery: 'FROM $.o' }),
+          ],
+        }),
+      ];
+      const { client } = createClient(async () => sourceResponse(rows));
+
+      const members = await client.findLiveMembers({ ruleUuids: ['rule-A'] });
+
+      expect([...members.keys()]).toEqual(['rule-A']);
+      expect(members.get('rule-A')).toEqual([
+        { eventId: 'event-1', status: 'active', verdict: 'confirms', esqlQuery: 'FROM $.a' },
+      ]);
+    });
+
+    it('returns one entry per live series when a rule is a member of several', async () => {
+      const rows = [
+        seriesRow({
+          eventId: 'event-1',
+          signals: [detectionSignal({ ruleUuid: 'rule-A', verdict: 'confirms', esqlQuery: 'q' })],
+        }),
+        seriesRow({
+          eventId: 'event-2',
+          status: 'recovering',
+          signals: [detectionSignal({ ruleUuid: 'rule-A', verdict: 'refutes', esqlQuery: 'q' })],
+        }),
+      ];
+      const { client } = createClient(async () => sourceResponse(rows));
+
+      const members = await client.findLiveMembers({ ruleUuids: ['rule-A'] });
+
+      expect(
+        members.get('rule-A')?.map(({ eventId, status, verdict }) => [eventId, status, verdict])
+      ).toEqual([
+        ['event-1', 'active', 'confirms'],
+        ['event-2', 'recovering', 'refutes'],
+      ]);
+    });
+
+    it('leaves the stored query undefined when the signal ran no query', async () => {
+      const rows = [
+        seriesRow({
+          eventId: 'event-1',
+          signals: [detectionSignal({ ruleUuid: 'rule-A', verdict: 'not_checked' })],
+        }),
+      ];
+      const { client } = createClient(async () => sourceResponse(rows));
+
+      const members = await client.findLiveMembers({ ruleUuids: ['rule-A'] });
+
+      expect(members.get('rule-A')).toEqual([
+        { eventId: 'event-1', status: 'active', verdict: 'not_checked', esqlQuery: undefined },
+      ]);
+    });
+
+    it('omits rules that are in no live series', async () => {
+      const { client } = createClient(async () => sourceResponse([]));
+
+      const members = await client.findLiveMembers({ ruleUuids: ['rule-A', 'rule-B'] });
+
+      expect(members.size).toBe(0);
+    });
+  });
+
   describe('findLatestByCurrentStateBatch', () => {
     it('applies a group_hash keyset when afterGroupHash is present', async () => {
       const { client, query } = createClient(async () => sourceResponse([]));

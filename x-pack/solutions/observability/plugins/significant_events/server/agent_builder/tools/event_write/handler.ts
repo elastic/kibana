@@ -165,8 +165,7 @@ const keepKnownEvents = ({
 /**
  * Keeps the items that have a status to write. An item states one only when its caller owns the
  * decision (`event_create`); otherwise the lifecycle decides from the members' verdicts once this
- * write is merged. When it has nothing to write, a closed event is set aside as unchanged; a new
- * event without a breach is not an event (the tool's schema rejects it), so that throws.
+ * write is merged. When it has nothing to write, a closed event is set aside as unchanged.
  */
 const decideStatuses = ({
   candidates,
@@ -192,11 +191,16 @@ const decideStatuses = ({
       input.event_id === undefined || !isLive
         ? input.signals ?? []
         : mergeSignalsLatestPerRule(priorDocs, input.signals ?? [], timestamp);
+    const outcome = assessMembers(signals);
     const decision = decideLifecycle({
       state: { status: latest?.status },
-      change: StatusChange.assessed(assessMembers(signals)),
+      change: StatusChange.assessed(outcome),
     });
-    if (decision.write) {
+    // A continuation names an event that exists. Only a breach may open one under an id it names;
+    // a healthy or unjudged item for an unknown id is set aside, never created.
+    const continuesUnknownEvent =
+      latest === undefined && input.event_id !== undefined && outcome !== 'breached';
+    if (decision.write && !continuesUnknownEvent) {
       stage.kept.push({ ...candidate, status: decision.status });
       return;
     }
@@ -217,9 +221,9 @@ const decideStatuses = ({
       return;
     }
     if (latest === undefined) {
-      // Invariant: the tool schema rejects this input, so only an internal caller can reach it.
+      // Invariant: a series with no version always has something to write, so this is unreachable.
       throw createBulkWriteValidationError(
-        `events_write: item ${candidate.index} would open a new event without a breaching member.`
+        `events_write: item ${candidate.index} has no event to leave unchanged.`
       );
     }
 

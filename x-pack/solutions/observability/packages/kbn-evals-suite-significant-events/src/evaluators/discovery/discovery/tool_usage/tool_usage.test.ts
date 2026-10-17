@@ -183,6 +183,79 @@ describe('scoreToolUsage', () => {
     });
   });
 
+  describe('when the KI context is prefetched into the message', () => {
+    const original = process.env.SIGEVENTS_EVAL_PREFETCH_CONTEXT;
+    const withoutKiSearch = allExpectedTools.filter((s) => s.tool_id !== TOOL_ID_KI_SEARCH);
+
+    beforeEach(() => {
+      process.env.SIGEVENTS_EVAL_PREFETCH_CONTEXT = 'true';
+    });
+
+    afterEach(() => {
+      if (original === undefined) {
+        delete process.env.SIGEVENTS_EVAL_PREFETCH_CONTEXT;
+      } else {
+        process.env.SIGEVENTS_EVAL_PREFETCH_CONTEXT = original;
+      }
+    });
+
+    it('does not require a ki_search call', () => {
+      expect(scoreToolUsage({ steps: withoutKiSearch, detectionCount: 1 })).toMatchObject({
+        score: 1,
+        label: 'correct',
+      });
+    });
+
+    it('still requires the other grounding tools and the write', () => {
+      const withoutEsql = withoutKiSearch.filter((s) => s.tool_id !== TOOL_ID_EXECUTE_ESQL);
+      // A missing write is only accepted as a grounded no-event decision, which needs routing.
+      const withoutWrite = withoutKiSearch.filter(
+        (s) => s.tool_id !== TOOL_ID_EVENTS_WRITE && s.tool_id !== TOOL_ID_EVENT_SEARCH
+      );
+
+      expect(scoreToolUsage({ steps: withoutEsql, detectionCount: 1 }).label).toBe(
+        `missing-${TOOL_ID_EXECUTE_ESQL}`
+      );
+      expect(scoreToolUsage({ steps: withoutWrite, detectionCount: 1 }).label).toBe(
+        `missing-${TOOL_ID_EVENTS_WRITE}`
+      );
+    });
+  });
+
+  describe('when the grounding results are prefetched into the message', () => {
+    const original = process.env.SIGEVENTS_EVAL_PREFETCH_GROUNDING;
+    const withoutEsqlOrKiSearch = allExpectedTools.filter(
+      (s) => s.tool_id !== TOOL_ID_EXECUTE_ESQL && s.tool_id !== TOOL_ID_KI_SEARCH
+    );
+
+    beforeEach(() => {
+      process.env.SIGEVENTS_EVAL_PREFETCH_GROUNDING = 'true';
+    });
+
+    afterEach(() => {
+      if (original === undefined) {
+        delete process.env.SIGEVENTS_EVAL_PREFETCH_GROUNDING;
+      } else {
+        process.env.SIGEVENTS_EVAL_PREFETCH_GROUNDING = original;
+      }
+    });
+
+    it('requires neither an execute_esql nor a ki_search call', () => {
+      expect(scoreToolUsage({ steps: withoutEsqlOrKiSearch, detectionCount: 1 })).toMatchObject({
+        score: 1,
+        label: 'correct',
+      });
+    });
+
+    it('still requires routing and the write', () => {
+      const withoutRouting = withoutEsqlOrKiSearch.filter(
+        (s) => s.tool_id !== TOOL_ID_EVENT_SEARCH
+      );
+
+      expect(scoreToolUsage({ steps: withoutRouting, detectionCount: 1 }).score).toBeLessThan(1);
+    });
+  });
+
   it('gives partial credit when one of the three expected grounding tools is missing', () => {
     const steps = allExpectedTools.filter((s) => s.tool_id !== TOOL_ID_EVENT_SEARCH);
     const result = scoreToolUsage({ steps, detectionCount: 1 });
