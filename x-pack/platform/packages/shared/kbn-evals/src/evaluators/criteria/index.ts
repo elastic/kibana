@@ -126,16 +126,13 @@ export function createCriteriaEvaluator({
         return val;
       }
 
-      const maxScore = sumBy(structuredCriteria, (criterion) => criterion.score);
-
       const successful = results.filter(({ evaluation }) => evaluation.result === 'PASS');
       const failed = results.filter(({ evaluation }) => evaluation.result === 'FAIL');
       const notApplicable = results.filter(({ evaluation }) => evaluation.result === 'N/A');
 
-      const totalScore = sumBy(
-        successful.concat(notApplicable),
-        ({ criterion }) => criterion.score
-      );
+      const applicable = successful.concat(failed);
+      const maxScore = sumBy(applicable, ({ criterion }) => criterion.score);
+      const totalScore = sumBy(successful, ({ criterion }) => criterion.score);
 
       return {
         explanation: results
@@ -155,7 +152,7 @@ export function createCriteriaEvaluator({
             weight: criterion.score,
           })),
         },
-        score: normalize(totalScore / maxScore),
+        score: applicable.length === 0 ? null : normalize(totalScore / maxScore),
       };
     },
     kind: 'LLM',
