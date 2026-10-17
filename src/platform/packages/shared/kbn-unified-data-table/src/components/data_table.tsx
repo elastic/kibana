@@ -1366,7 +1366,10 @@ const InternalUnifiedDataTable = React.forwardRef<
     // When a custom toolbar is used, in-table search is passed via
     // gridProps.inTableSearchControl. Otherwise it goes on EUI's right controls.
     const additionalControls = useMemo(() => {
-      if (!externalAdditionalControls && !selectedDocsCount && !inTableSearchControl) {
+      if (
+        !isInteractive ||
+        (!externalAdditionalControls && !selectedDocsCount && !inTableSearchControl)
+      ) {
         return null;
       }
 
@@ -1558,7 +1561,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         additionalControls,
         showDisplaySelector,
         showKeyboardShortcuts: isInteractive && showKeyboardShortcuts,
-        showFullScreenSelector: showFullScreenButton,
+        showFullScreenSelector: isInteractive && showFullScreenButton,
       }),
       [
         isJsonSourceMode,
@@ -1716,7 +1719,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 columnVisibility={columnsVisibility}
                 data-test-subj="docTable"
                 leadingControlColumns={leadingControlColumns}
-                onColumnResize={onResize}
+                onColumnResize={isInteractive ? onResize : undefined}
                 pagination={paginationMode === 'multiPage' ? paginationObj : undefined}
                 renderCellValue={renderCellValueWithInTableSearchSupport}
                 ref={dataGridRef}

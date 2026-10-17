@@ -164,6 +164,7 @@ export function SearchEmbeddableGridComponent({
   const savedSearchFilters = apiFilters;
 
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
+  const isInteractive = viewMode !== 'non-interactive' && viewMode !== 'print';
 
   const sort = useMemo(
     () => getSortArray(savedSearch.sort ?? [], dataView, isEsql),
@@ -484,7 +485,7 @@ export function SearchEmbeddableGridComponent({
       showSortSelector={showSortSelector}
       searchContext={searchContext}
       flyoutMenuTrailingActions={flyoutMenuTrailingActions}
-      isInteractive={viewMode !== 'non-interactive'}
+      isInteractive={isInteractive}
     />
   );
 }
