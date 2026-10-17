@@ -308,3 +308,95 @@ describe('ExpectedSkillInvocation evaluator', () => {
     });
   });
 });
+
+describe('ToolUsageOnly evaluator', () => {
+  const expectedTool = 'security.find_rules';
+  const preambleTool = 'security.discover_rule_tags';
+  const otherTool = 'security.detection_rules';
+
+  function toolCallOutput(toolIds: string[]): TaskOutput {
+    return {
+      messages: [],
+      errors: [],
+      steps: toolIds.map((tool_id) => ({ type: 'tool_call', tool_id, results: [] })),
+    } satisfies TaskOutput;
+  }
+
+  async function evaluateToolUsageOnly(output: TaskOutput, metadata: Record<string, unknown>) {
+    const { dependencies, runExperiment } = createTestSetup();
+
+    await createEvaluateDataset(dependencies)({
+      dataset: {
+        name: 'test-dataset',
+        description: 'dataset for ToolUsageOnly evaluator tests',
+        examples: [{ input: { question: 'Find rules' }, output: {} }],
+      },
+    });
+
+    const [, selectedEvaluators] = runExperiment.mock.calls[0];
+    const evaluator = selectedEvaluators.find((it) => it.name === 'ToolUsageOnly');
+    if (!evaluator) {
+      throw new Error('ToolUsageOnly evaluator was not registered');
+    }
+
+    return evaluator.evaluate({
+      input: { question: 'Find rules' },
+      expected: {},
+      output,
+      metadata,
+    });
+  }
+
+  it('scores 1 when an allowed preamble tool is called before the expected tool', async () => {
+    const result = await evaluateToolUsageOnly(toolCallOutput([preambleTool, expectedTool]), {
+      expectedOnlyToolId: expectedTool,
+      allowedPrecedingToolIds: [preambleTool],
+    });
+
+    expect(result.score).toBe(1);
+  });
+
+  it('scores 0 when the allowed preamble tool is called after the expected tool', async () => {
+    const result = await evaluateToolUsageOnly(toolCallOutput([expectedTool, preambleTool]), {
+      expectedOnlyToolId: expectedTool,
+      allowedPrecedingToolIds: [preambleTool],
+    });
+
+    expect(result.score).toBe(0);
+  });
+
+  it('scores 0 when a non-allowed domain tool is called alongside the expected tool', async () => {
+    const result = await evaluateToolUsageOnly(
+      toolCallOutput([preambleTool, otherTool, expectedTool]),
+      { expectedOnlyToolId: expectedTool, allowedPrecedingToolIds: [preambleTool] }
+    );
+
+    expect(result.score).toBe(0);
+  });
+
+  it('keeps strict only-tool semantics when allowedPrecedingToolIds is not set', async () => {
+    const result = await evaluateToolUsageOnly(toolCallOutput([preambleTool, expectedTool]), {
+      expectedOnlyToolId: expectedTool,
+    });
+
+    expect(result.score).toBe(0);
+  });
+
+  it('still scores 1 with only the expected tool when allowedPrecedingToolIds is set', async () => {
+    const result = await evaluateToolUsageOnly(toolCallOutput([expectedTool]), {
+      expectedOnlyToolId: expectedTool,
+      allowedPrecedingToolIds: [preambleTool],
+    });
+
+    expect(result.score).toBe(1);
+  });
+
+  it('scores 0 when the expected tool is never called', async () => {
+    const result = await evaluateToolUsageOnly(toolCallOutput([preambleTool]), {
+      expectedOnlyToolId: expectedTool,
+      allowedPrecedingToolIds: [preambleTool],
+    });
+
+    expect(result.score).toBe(0);
+  });
+});
