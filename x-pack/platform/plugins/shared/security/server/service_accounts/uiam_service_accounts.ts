@@ -10,7 +10,11 @@ import Boom from '@hapi/boom';
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
-import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
+import type {
+  CreateServiceAccountServerParams,
+  ServiceAccount,
+  ServiceAccountSummary,
+} from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type {
   AuditLogger,
@@ -376,6 +380,38 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     }
 
     return toDirectoryEntry(this.cloudProjectContext, account);
+  }
+
+  /**
+   * UIAM reads are already authorized against Kibana's certificate rather than the user, so this
+   * is {@link get} without the user's privilege check.
+   */
+  async getSummary(id: string): Promise<ServiceAccountSummary | null> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot get a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    let account: UiamServiceAccountDetails;
+    try {
+      account = await this.uiam.getServiceAccount(id);
+    } catch (e) {
+      // The same two answers that `get` reports as a 404.
+      if (getNotFound(id, e) || (Boom.isBoom(e) && e.output.statusCode === 404)) {
+        return null;
+      }
+      this.logger.error(`Failed to get service account: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+
+    if (account.revoked) {
+      this.logger.debug(`Service account [${id}] was found, but it was revoked`);
+      return null;
+    }
+
+    const { name, enabled, assumable } = toDirectoryEntry(this.cloudProjectContext, account);
+    return { id: account.id, name, enabled, assumable };
   }
 
   /**

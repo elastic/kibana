@@ -32,7 +32,9 @@ const setup = (value = yaml) => {
   mocks.model.getVersionId = jest.fn(() => 1);
   const directory: jest.Mocked<ServiceAccountDirectory> = {
     isEnabled: jest.fn(() => true),
-    get: jest.fn().mockResolvedValue(account),
+    canManage: jest.fn(() => true),
+    get: jest.fn(),
+    describe: jest.fn().mockResolvedValue(account),
     list: jest.fn(),
   };
   return { ...mocks, directory };
@@ -43,7 +45,7 @@ describe('service account editor badge', () => {
     const { editor, model, decorationsCollection, directory } = setup();
     const registration = registerServiceAccountDecorations(editor, directory);
     await Promise.resolve();
-    expect(directory.get).toHaveBeenCalledWith('account-a');
+    expect(directory.describe).toHaveBeenCalledWith('account-a', undefined);
     expect(decorationsCollection.set).toHaveBeenCalledWith([
       expect.objectContaining({
         options: expect.objectContaining({
@@ -67,7 +69,7 @@ describe('service account editor badge', () => {
     const { editor, directory, decorationsCollection } = setup(value);
     const registration = registerServiceAccountDecorations(editor, directory);
     await Promise.resolve();
-    expect(directory.get).not.toHaveBeenCalled();
+    expect(directory.describe).not.toHaveBeenCalled();
     expect(decorationsCollection.set).not.toHaveBeenCalled();
     registration.dispose();
   });
@@ -76,7 +78,7 @@ describe('service account editor badge', () => {
     'does not mark an unavailable account as connected',
     async (flags) => {
       const { editor, decorationsCollection, directory } = setup();
-      directory.get.mockResolvedValue({ ...account, ...flags });
+      directory.describe.mockResolvedValue({ ...account, ...flags });
       const registration = registerServiceAccountDecorations(editor, directory);
       await Promise.resolve();
       expect(decorationsCollection.set).toHaveBeenCalledWith([
@@ -107,7 +109,7 @@ describe('service account editor badge', () => {
         }),
       }),
     ]);
-    expect(directory.get).not.toHaveBeenCalled();
+    expect(directory.describe).not.toHaveBeenCalled();
     expect(model.getValue()).toBe(value);
     registration.dispose();
   });
@@ -126,13 +128,21 @@ describe('service account editor badge', () => {
         }),
       ])
     );
-    expect(directory.get).not.toHaveBeenCalled();
+    expect(directory.describe).not.toHaveBeenCalled();
+    registration.dispose();
+  });
+
+  it('describes the ID in the context of the saved workflow', async () => {
+    const { editor, directory } = setup();
+    const registration = registerServiceAccountDecorations(editor, directory, 'workflow-1');
+    await Promise.resolve();
+    expect(directory.describe).toHaveBeenCalledWith('account-a', 'workflow-1');
     registration.dispose();
   });
 
   it('leaves a raw ID when the directory is inaccessible', async () => {
     const { editor, decorationsCollection, directory } = setup();
-    directory.get.mockResolvedValue(null);
+    directory.describe.mockResolvedValue(null);
     const registration = registerServiceAccountDecorations(editor, directory);
     await Promise.resolve();
     expect(decorationsCollection.set).toHaveBeenCalledWith([]);
@@ -142,7 +152,7 @@ describe('service account editor badge', () => {
   it('ignores a lookup that finishes after the editor switched documents', async () => {
     const { editor, decorationsCollection, directory } = setup();
     let resolveAccount: (value: WorkflowServiceAccount) => void = () => {};
-    directory.get.mockReturnValue(
+    directory.describe.mockReturnValue(
       new Promise((resolve) => {
         resolveAccount = resolve;
       })
@@ -160,7 +170,7 @@ describe('service account editor badge', () => {
   it('disposes listeners and ignores an outstanding lookup after unmount', async () => {
     const { editor, decorationsCollection, directory } = setup();
     let resolveAccount: (value: WorkflowServiceAccount) => void = () => {};
-    directory.get.mockReturnValue(
+    directory.describe.mockReturnValue(
       new Promise((resolve) => {
         resolveAccount = resolve;
       })

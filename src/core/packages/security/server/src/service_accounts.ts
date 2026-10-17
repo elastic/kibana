@@ -17,6 +17,7 @@ import type {
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
   ServiceAccountWorkloadRef,
+  ServiceAccountSummary,
 } from '@kbn/core-security-common';
 
 /**
@@ -131,6 +132,18 @@ export interface CoreServiceAccountsService {
   getWorkloadBinding(
     params: ServiceAccountWorkloadCoordinates
   ): Promise<ServiceAccountWorkloadBinding | null>;
+
+  /**
+   * Returns the name and status of a service account, or `null` when there is no such account.
+   * Throws if the account cannot be read, or if service accounts are unavailable.
+   *
+   * Kibana reads the account as itself, so this performs no user authorization. It exists so that
+   * a user who can see a workload can see which account it runs as without having to manage
+   * service accounts. Before calling it on a user's behalf, the calling plugin must confirm that
+   * the user can see a workload that runs, or ran, as the account. Never pass it an account id
+   * the user supplied: that would let them read the name of any account.
+   */
+  getServiceAccountSummary(serviceAccountId: string): Promise<ServiceAccountSummary | null>;
 
   /**
    * Runs `fn` with a request authenticated as the workload's service account, for use with

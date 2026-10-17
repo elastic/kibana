@@ -1014,6 +1014,69 @@ describe('UiamServiceAccounts', () => {
     });
   });
 
+  describe('#getSummary', () => {
+    const retrievedAccount = {
+      ...validResponse,
+      revoked: false,
+      description: 'Relays the nightshift alerts.',
+      creator: { type: 'user' as const, id: 'user-id' },
+    };
+
+    it('reports only the name and status of the account UIAM returns', async () => {
+      mockUiam.getServiceAccount.mockResolvedValue(retrievedAccount);
+
+      await expect(serviceAccounts.getSummary('service-account-id')).resolves.toEqual({
+        id: validResponse.id,
+        name: validResponse.name,
+        enabled: true,
+        assumable: true,
+      });
+      expect(mockUiam.getServiceAccount).toHaveBeenCalledWith('service-account-id');
+    });
+
+    it('authorizes no user', async () => {
+      mockUiam.getServiceAccount.mockResolvedValue(retrievedAccount);
+
+      await serviceAccounts.getSummary('service-account-id');
+
+      expect(mockCheckPrivilegesWithRequest).not.toHaveBeenCalled();
+    });
+
+    it('resolves `null` when UIAM has no such account', async () => {
+      mockUiam.getServiceAccount.mockRejectedValue(Boom.notFound('Not found'));
+
+      await expect(serviceAccounts.getSummary('service-account-id')).resolves.toBeNull();
+    });
+
+    it('resolves `null` for the 403 UIAM sends for an account it does not know', async () => {
+      mockUiam.getServiceAccount.mockRejectedValue(uiamRefusal('0xEDF789', 403));
+
+      await expect(serviceAccounts.getSummary('service-account-id')).resolves.toBeNull();
+    });
+
+    it('resolves `null` for an account UIAM still holds but has revoked', async () => {
+      mockUiam.getServiceAccount.mockResolvedValue({ ...retrievedAccount, revoked: true });
+
+      await expect(serviceAccounts.getSummary('service-account-id')).resolves.toBeNull();
+    });
+
+    it('propagates any other UIAM refusal unchanged', async () => {
+      const refusal = uiamRefusal('0x93B121', 403);
+      mockUiam.getServiceAccount.mockRejectedValue(refusal);
+
+      await expect(serviceAccounts.getSummary('service-account-id')).rejects.toBe(refusal);
+    });
+
+    it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+
+      await expect(serviceAccounts.getSummary('service-account-id')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(mockUiam.getServiceAccount).not.toHaveBeenCalled();
+    });
+  });
+
   describe('#delete', () => {
     beforeEach(() => {
       getCurrentUser.mockReturnValue(mockAuthenticatedUser({ username: 'user-id' }));
