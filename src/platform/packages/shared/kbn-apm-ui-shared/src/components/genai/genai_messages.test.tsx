@@ -224,6 +224,27 @@ describe('GenAiMessages', () => {
     expect(response).toHaveTextContent('done');
   });
 
+  it('renders reasoning parts as plain text inside a collapsed accordion', () => {
+    const reasoning = '1. **Analyze**\n[not json]';
+    renderMessages([], [
+      {
+        role: 'assistant',
+        parts: [
+          { type: 'reasoning', content: reasoning },
+          { type: 'text', content: 'Final answer' },
+        ],
+      },
+    ] as unknown as Array<{ role: string; content?: string }>);
+    const part = screen.getByTestId('genAiReasoningPart');
+    expect(part).toHaveTextContent('Reasoning');
+    expect(screen.getByRole('button', { name: 'Reasoning' })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
+    expect(part.textContent).toContain('[not json]');
+    expect(screen.getByText('Final answer')).toBeInTheDocument();
+  });
+
   it('renders output messages after input messages', () => {
     renderMessages([{ role: 'user', content: 'Hello' }], [{ role: 'assistant', content: 'Hi' }]);
     const messages = screen.getAllByTestId(/genAiMessage-/);
