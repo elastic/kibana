@@ -26,17 +26,18 @@ test.describe(
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('primary body items are visible and linked', async () => {
-        const primaryDeepLinks = [
-          'discover',
-          'dashboards',
-          'workflows',
-          'observability-overview:alerts',
-        ];
+        const primaryDeepLinks = ['discover', 'dashboards', 'workflows'];
         for (const deepLinkId of primaryDeepLinks) {
           const item = nav.navItemInPrimaryByDeepLinkId(deepLinkId);
           await expect(item).toBeVisible();
           await expect(item).toHaveAttribute('href', /.+/);
         }
+      });
+
+      await test.step('Alerts is visible and linked (primary or More, depending on overflow)', async () => {
+        const alerts = await nav.revealBodyNavItemByDeepLinkId('observability-overview:alerts');
+        await expect(alerts).toBeVisible();
+        await expect(alerts).toHaveAttribute('href', /.+/);
       });
 
       await test.step('Open More menu', async () => {
@@ -91,9 +92,11 @@ test.describe(
       });
 
       await test.step('Alerts', async () => {
-        await nav.navItemInPrimaryByDeepLinkId('observability-overview:alerts').click();
+        await nav.clickBodyNavItemByDeepLinkId('observability-overview:alerts');
         await expect(page.testSubj.locator('alertsPageWithData')).toBeVisible();
-        await expect(nav.activeNavItemByDeepLinkId('observability-overview:alerts')).toBeVisible();
+
+        const alerts = await nav.revealBodyNavItemByDeepLinkId('observability-overview:alerts');
+        await expect(alerts).toHaveAttribute('data-test-subj', /nav-item-isActive/);
       });
 
       await test.step('SLOs (via More menu)', async () => {
