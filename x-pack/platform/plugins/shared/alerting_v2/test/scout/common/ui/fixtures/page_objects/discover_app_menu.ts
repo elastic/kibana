@@ -79,7 +79,7 @@ export class DiscoverAppMenu {
 
   /** Waits until ComposeDiscoverFlyout is open and the sandbox gate is cleared. */
   async waitForComposeDiscoverFlyout() {
-    await this.page.locator('[aria-labelledby="composeDiscoverFlyoutTitle"]').waitFor({
+    await this.page.testSubj.locator('composeDiscoverFlyout').waitFor({
       state: 'visible',
     });
     await this.page.waitForFunction(() =>

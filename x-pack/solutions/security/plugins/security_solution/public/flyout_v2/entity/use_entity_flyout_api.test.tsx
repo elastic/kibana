@@ -125,6 +125,49 @@ describe('useEntityFlyoutApi', () => {
     expect(mockWriteOnOpen.mock.calls.at(-1)?.[0].mode).toBeUndefined();
   });
 
+  it('entity CSP tools persist resolved mode in the descriptor and omit the default single mode', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    const base = {
+      entityType: EntityType.host,
+      value: 'my-host',
+      entityId: 'host:my-host',
+    } as const;
+
+    result.current.openEntityAlertsInsights({ ...base, mode: 'resolved', scopeId: 'scope-1' });
+    expect(mockWriteOnOpen).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityAlertsInsights,
+        mode: 'resolved',
+        scopeId: 'scope-1',
+      })
+    );
+    result.current.openEntityMisconfigurationInsights({ ...base, mode: 'resolved' });
+    expect(mockWriteOnOpen).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityMisconfigurationInsights,
+        mode: 'resolved',
+      })
+    );
+    result.current.openEntityVulnerabilityInsights({
+      ...base,
+      mode: 'resolved',
+      onShowHost: jest.fn(),
+    });
+    expect(mockWriteOnOpen).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityVulnerabilityInsights,
+        mode: 'resolved',
+      })
+    );
+
+    result.current.openEntityAlertsInsights({ ...base, mode: 'single' });
+    expect(mockWriteOnOpen.mock.calls.at(-1)?.[0].mode).toBeUndefined();
+    result.current.openEntityMisconfigurationInsights({ ...base });
+    expect(mockWriteOnOpen.mock.calls.at(-1)?.[0].mode).toBeUndefined();
+    result.current.openEntityVulnerabilityInsights({ ...base, onShowHost: jest.fn() });
+    expect(mockWriteOnOpen.mock.calls.at(-1)?.[0].mode).toBeUndefined();
+  });
+
   it('openEntityFlyout forwards resolved mode to the descriptor', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
 
