@@ -24,6 +24,7 @@
     "@kbn/esql-language",
     "@kbn/esql-types",
     "@kbn/esql-utils",
+    "@kbn/esql-server-utils",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",

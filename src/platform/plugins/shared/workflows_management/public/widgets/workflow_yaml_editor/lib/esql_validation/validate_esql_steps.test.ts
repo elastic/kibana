@@ -149,7 +149,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
     });
   });
 
-  describe('skip path: Liquid in structural position', () => {
+  describe('grammar-only path: Liquid in structural position', () => {
     // Numbers reference the scenario matrix in the plan
     // (`/Users/marcoliberati/.claude/plans/you-are-a-very-fancy-waffle.md`).
     const cases: Array<{ row: number | string; description: string; query: string }> = [
@@ -184,11 +184,16 @@ describe('validateEsqlSteps — Liquid policy', () => {
     ];
 
     for (const { row, description, query } of cases) {
-      it(`row ${row}: skips validation for ${description}`, async () => {
+      it(`row ${row}: checks only grammar for ${description}`, async () => {
+        mockValidate.mockResolvedValue({ errors: [], warnings: [] });
         const text = buildStep(query);
         const markers = await validateEsqlFromText(text, stubCallbacks);
         expect(markers).toEqual([]);
-        expect(mockValidate).not.toHaveBeenCalled();
+        // Placeholders replace every Liquid span, and no callbacks are passed.
+        expect(mockValidate).toHaveBeenCalledTimes(1);
+        expect(mockValidate.mock.calls[0]).toHaveLength(1);
+        expect(mockValidate.mock.calls[0][0]).not.toMatch(/[{}]/);
+        expect(mockValidate.mock.calls[0][0].trim()).toHaveLength(query.length);
       });
     }
   });
@@ -220,7 +225,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
   });
 
   describe('multi-step robustness', () => {
-    it('skips one step on Liquid and validates another', async () => {
+    it('drops placeholder diagnostics on one step and keeps the next step diagnostics', async () => {
       const text = `steps:
   - name: liquid_step
     type: elasticsearch.esql.query
@@ -245,8 +250,9 @@ describe('validateEsqlSteps — Liquid policy', () => {
         warnings: [],
       });
       const markers = await validateEsqlFromText(text, stubCallbacks);
-      // The first step is skipped (structural Liquid); only the second runs.
-      expect(mockValidate).toHaveBeenCalledTimes(1);
+      // Both steps run. On the first, offsets 13–18 fall on the placeholder for
+      // `{{ env }}`, so that diagnostic is dropped.
+      expect(mockValidate).toHaveBeenCalledTimes(2);
       expect(markers).toHaveLength(1);
       expect(markers[0].message).toBe('Unknown command');
     });
