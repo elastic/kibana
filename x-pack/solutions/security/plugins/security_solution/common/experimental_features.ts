@@ -301,10 +301,9 @@ export const allowedExperimentalValues = Object.freeze({
   endpointForensicAnalysisSkill: true,
 
   /**
-   * Enables the Elastic Defend Policy Management Agent Builder skill (read-only prose workflows).
-   * Shipped dark by default; enable per environment via config.
+   * Enables the Elastic Defend Policy Management Agent Builder skill
    */
-  elasticDefendPolicyManagementSkill: false,
+  elasticDefendPolicyManagementSkill: true,
 
   /**
    * Enables the investigate-rule Agent Builder skill.
