@@ -28,6 +28,7 @@ const eligibilityContext = (
     trustedDevicesExperimental?: boolean;
     endpointCustomYaraSignatures?: boolean;
     customYaraSignaturesExperimental?: boolean;
+    aiDataCollectionExperimental?: boolean;
     linuxRansomwareProtection?: boolean;
     endpointProtectionUpdates?: boolean;
     serverless?: boolean;
@@ -41,6 +42,7 @@ const eligibilityContext = (
     trustedDevicesExperimental: options.trustedDevicesExperimental ?? true,
     endpointCustomYaraSignatures: options.endpointCustomYaraSignatures ?? true,
     customYaraSignaturesExperimental: options.customYaraSignaturesExperimental ?? true,
+    aiDataCollectionExperimental: options.aiDataCollectionExperimental ?? true,
     linuxRansomwareProtection: options.linuxRansomwareProtection ?? true,
     endpointProtectionUpdates: options.endpointProtectionUpdates ?? true,
     serverless: options.serverless ?? false,
@@ -289,6 +291,26 @@ describe('computePathEligibility', () => {
     ).toEqual({
       eligible: false,
       reason: 'custom_yara_signatures_experimental_disabled',
+    });
+  });
+
+  it('marks ai_data_collection ineligible on every OS when the experimental flag is off', () => {
+    const context = eligibilityContext(policyFactory(), { aiDataCollectionExperimental: false });
+
+    for (const os of ['windows', 'mac', 'linux'] as const) {
+      expect(computePathEligibility(`${os}.ai_data_collection.enabled`, context)).toEqual({
+        eligible: false,
+        reason: 'ai_data_collection_experimental_disabled',
+      });
+    }
+    expect(computePathEligibility('windows.malware.mode', context)).toEqual({ eligible: true });
+  });
+
+  it('marks ai_data_collection eligible when the experimental flag is on', () => {
+    const context = eligibilityContext(policyFactory(), { aiDataCollectionExperimental: true });
+
+    expect(computePathEligibility('windows.ai_data_collection.enabled', context)).toEqual({
+      eligible: true,
     });
   });
 

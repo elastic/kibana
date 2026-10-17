@@ -23,6 +23,7 @@ import {
   checkIfPopupMessagesContainCustomNotifications,
   resetCustomNotifications,
   removeCustomYaraSignatures,
+  removeAiDataCollection,
   removeDeviceControl,
   removeLinuxDnsEvents,
   removeLinuxRansomware,
@@ -742,6 +743,50 @@ describe('Policy Config helpers', () => {
     });
   });
 
+  describe('removeAiDataCollection', () => {
+    let policy: PolicyConfig;
+
+    beforeEach(() => {
+      policy = policyFactory();
+    });
+
+    it.each(['windows', 'mac', 'linux'] as const)('removes ai_data_collection from %s', (os) => {
+      const result = removeAiDataCollection(policy);
+
+      expect(result[os]).not.toHaveProperty('ai_data_collection');
+    });
+
+    it.each(['windows', 'mac', 'linux'] as const)('preserves all other %s fields', (os) => {
+      const result = removeAiDataCollection(policy);
+      const { ai_data_collection: _removed, ...rest } = policy[os];
+
+      expect(result[os]).toEqual(rest);
+    });
+
+    it('preserves global fields unchanged', () => {
+      const result = removeAiDataCollection(policy);
+
+      expect(result.global_manifest_version).toEqual(policy.global_manifest_version);
+      expect(result.global_telemetry_enabled).toEqual(policy.global_telemetry_enabled);
+      expect(result.meta).toEqual(policy.meta);
+    });
+
+    it('returns a new policy object without mutating the original', () => {
+      const originalPolicy = JSON.parse(JSON.stringify(policy));
+      const result = removeAiDataCollection(policy);
+
+      expect(policy).toEqual(originalPolicy);
+      expect(policy.windows.ai_data_collection).toBeDefined();
+      expect(policy.mac.ai_data_collection).toBeDefined();
+      expect(policy.linux.ai_data_collection).toBeDefined();
+
+      expect(result).not.toBe(policy);
+      expect(result.windows).not.toBe(policy.windows);
+      expect(result.mac).not.toBe(policy.mac);
+      expect(result.linux).not.toBe(policy.linux);
+    });
+  });
+
   describe('custom_yara_signatures', () => {
     it('writes custom_yara_signatures only for OSes in osList', () => {
       const policy = policyFactory();
@@ -872,6 +917,7 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
     billable: false,
   },
   windows: {
+    ai_data_collection: { enabled: true },
     events: {
       credential_access: true,
       dll_and_driver_load: true,
@@ -903,6 +949,7 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
     attack_surface_reduction: { credential_hardening: { enabled: false } },
   },
   mac: {
+    ai_data_collection: { enabled: true },
     events: { dns: true, process: true, file: true, network: true, security: true },
     malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
@@ -926,6 +973,7 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
     },
   },
   linux: {
+    ai_data_collection: { enabled: true },
     events: {
       dns: true,
       file: true,

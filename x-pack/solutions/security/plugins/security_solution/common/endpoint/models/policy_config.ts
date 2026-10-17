@@ -104,6 +104,9 @@ export const policyFactory = ({
           enabled: true,
         },
       },
+      ai_data_collection: {
+        enabled: true,
+      },
     },
     mac: {
       events: {
@@ -164,6 +167,9 @@ export const policyFactory = ({
       advanced: {
         capture_env_vars: 'DYLD_INSERT_LIBRARIES,DYLD_FRAMEWORK_PATH,DYLD_LIBRARY_PATH,LD_PRELOAD',
       },
+      ai_data_collection: {
+        enabled: true,
+      },
     },
     linux: {
       events: {
@@ -216,6 +222,9 @@ export const policyFactory = ({
       },
       advanced: {
         capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
+      },
+      ai_data_collection: {
+        enabled: true,
       },
     },
   };
