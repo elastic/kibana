@@ -351,6 +351,7 @@ export interface DocLinks {
       knowledgeBaseIndexEntries: string;
     };
     readonly cloudSecurityPosture: string;
+    readonly cloudNativeVulnerabilityManagement: string;
     readonly cspmGcpAgentless: string;
     readonly installElasticDefend: string;
     readonly artifactControl: string;
