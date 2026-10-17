@@ -8,14 +8,20 @@
  */
 
 import type { ContractRequest, ContractResponse, Responder, Violation } from '../contract/types';
-import type { Recording, RejectedResponse, ResponseFixture } from '../engine/response_engine';
+import type {
+  OperationRef,
+  Recording,
+  RejectedResponse,
+  ResponseFixture,
+} from '../engine/response_engine';
 import { createResponseEngine } from '../engine/response_engine';
 import type { PaginationOptions } from '../engine/paginate';
 import { withPagination } from '../engine/paginate';
 import { sampleResponse } from '../engine/sample_response';
-import type { OpenApiDocument } from '../openapi';
+import type { ContractOperation, OpenApiDocument } from '../openapi';
 import { loadContractOperations } from '../openapi';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
+import { findTokenEndpoints, respondToTokenRequest } from '../openapi/token_endpoints';
 
 /** One request the mock received, for assertions in tests. */
 export interface ContractCall {
@@ -23,14 +29,21 @@ export interface ContractCall {
   readonly request: string;
   /** The matched operation's `operationId`, or `METHOD /path` when it has none. */
   readonly operation?: string;
+  /** The matched operation's method (lowercase), path template and, for named specs, spec name. */
+  readonly matched?: OperationRef;
+  /** Set for requests to the token URL of an OAuth 2 flow, which the mock answers itself. */
+  readonly token?: true;
   readonly status: number;
   readonly requestViolations: readonly Violation[];
   readonly responseViolations: readonly Violation[];
 }
 
 export interface ContractMockOptions extends PaginationOptions {
-  /** The vendor specs the connector targets, e.g. both API versions it calls. */
-  readonly specs: readonly OpenApiDocument[];
+  /**
+   * The vendor specs the connector targets, e.g. both API versions it calls. Named specs (such
+   * as `{ v1, v2 }`) let `calls`, fixtures, recordings and pagination tell their operations apart.
+   */
+  readonly specs: readonly OpenApiDocument[] | Readonly<Record<string, OpenApiDocument>>;
   /** Hand-written responses, served in preference to everything else. */
   readonly fixtures?: readonly ResponseFixture[];
   /** Responses captured from the vendor, served when they still conform to the spec. */
@@ -86,6 +99,32 @@ const toContractRequest = async (request: Request): Promise<ContractRequest> => 
   };
 };
 
+const isDocumentList = (specs: ContractMockOptions['specs']): specs is readonly OpenApiDocument[] =>
+  Array.isArray(specs);
+
+// Loading copies and normalizes the document, which takes seconds and gigabytes for specs such
+// as Microsoft Graph, so mocks created from the same document share its operations.
+const loadedSpecs = new WeakMap<OpenApiDocument, Map<string | undefined, ContractOperation[]>>();
+
+const loadSpec = (document: OpenApiDocument, source?: string): ContractOperation[] => {
+  const bySource = loadedSpecs.get(document) ?? new Map();
+  loadedSpecs.set(document, bySource);
+  const operations = bySource.get(source) ?? loadContractOperations(document, source);
+  bySource.set(source, operations);
+  return operations;
+};
+
+const loadSpecs = (specs: ContractMockOptions['specs']): ContractOperation[] =>
+  isDocumentList(specs)
+    ? specs.flatMap((document) => loadSpec(document))
+    : Object.entries(specs).flatMap(([source, document]) => loadSpec(document, source));
+
+const toOperationRef = ({ method, path, spec: { source } }: ContractOperation): OperationRef => ({
+  method,
+  path,
+  ...(source === undefined ? {} : { source }),
+});
+
 // HTTP sends no body with these, though specs such as Jira's declare content for 204 responses.
 const NULL_BODY_STATUSES = new Set([101, 204, 205, 304]);
 
@@ -101,8 +140,9 @@ const toResponse = ({ statusCode, headers, body }: ContractResponse): Response =
 
 /**
  * Creates a `fetch` that answers requests in-process from a vendor spec. Unmatched requests
- * get 404 and requests that break the spec get 422 listing the violations; every request is
- * recorded in `calls`. Axios clients can use it with `{ adapter: 'fetch', env: { fetch } }`.
+ * get 404, requests without the credentials the operation requires get 401, and requests that
+ * break the spec get 422 listing the violations; every request is recorded in `calls`. The
+ * token URLs of the specs' OAuth 2 flows issue stub tokens. Axios clients can use it with `{ adapter: 'fetch', env: { fetch } }`.
  */
 export const createContractMockFetch = ({
   specs,
@@ -112,7 +152,8 @@ export const createContractMockFetch = ({
   collectionSize,
   respond = sampleResponse,
 }: ContractMockOptions): ContractMock => {
-  const operations = specs.flatMap(loadContractOperations);
+  const operations = loadSpecs(specs);
+  const tokenEndpoints = findTokenEndpoints(operations);
   const engine = createResponseEngine(operations, { fixtures, recordings, fallback: respond });
   const contract = createOpenApiAdapter(
     operations,
@@ -129,6 +170,19 @@ export const createContractMockFetch = ({
       request.url.pathname
     }`;
     const routed = contract.route(request);
+    const grants = tokenEndpoints.get(`${request.url.origin}${request.url.pathname}`);
+    if (!('operation' in routed) && grants) {
+      const response = respondToTokenRequest(grants, request);
+      calls.push({
+        request: description,
+        operation: 'OAuth token',
+        token: true,
+        status: response.statusCode,
+        requestViolations: [],
+        responseViolations: [],
+      });
+      return response;
+    }
     if (!('operation' in routed)) {
       calls.push({
         request: description,
@@ -142,17 +196,22 @@ export const createContractMockFetch = ({
 
     const { operation } = routed;
     const name = operation.id;
-    const requestViolations = contract.validateRequest(routed, request);
+    const matched = toOperationRef(operation);
+    const authViolations = contract.authenticate(routed, request);
+    const requestViolations =
+      authViolations.length > 0 ? authViolations : contract.validateRequest(routed, request);
     if (requestViolations.length > 0) {
+      const statusCode = authViolations.length > 0 ? 401 : 422;
       calls.push({
         request: description,
         operation: name,
-        status: 422,
+        matched,
+        status: statusCode,
         requestViolations,
         responseViolations: [],
       });
       return {
-        statusCode: 422,
+        statusCode,
         headers: JSON_HEADERS,
         body: { operation: name, violations: requestViolations },
       };
@@ -163,6 +222,7 @@ export const createContractMockFetch = ({
     calls.push({
       request: description,
       operation: name,
+      matched,
       status: response.statusCode,
       requestViolations,
       responseViolations,

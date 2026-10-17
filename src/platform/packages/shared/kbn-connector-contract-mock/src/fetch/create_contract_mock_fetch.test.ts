@@ -75,6 +75,7 @@ describe('createContractMockFetch', () => {
       {
         request: 'GET https://api.example.com/v1/items',
         operation: 'listItems',
+        matched: { method: 'get', path: '/items' },
         status: 200,
         requestViolations: [],
         responseViolations: [],
@@ -146,5 +147,44 @@ describe('createContractMockFetch', () => {
     await fetch(`${BASE_URL}/items`);
 
     expect(calls[0].responseViolations).toEqual([expect.objectContaining({ code: 'required' })]);
+  });
+
+  describe('with named specs', () => {
+    const v2 = { ...spec, servers: [{ url: 'https://api.example.com/v2' }] };
+    const fixture = (source?: string) => ({
+      operation: { method: 'GET', path: '/items', ...(source ? { source } : {}) },
+      response: { status: 200, body: [{ name: source ?? 'any' }] },
+    });
+
+    it('records which spec each call matched', async () => {
+      const { fetch, calls } = createContractMockFetch({ specs: { v1: spec, v2 } });
+
+      await fetch('https://api.example.com/v2/items');
+
+      expect(calls[0].matched).toEqual({ source: 'v2', method: 'get', path: '/items' });
+    });
+
+    it('applies fixtures to the spec they name, or to every spec', async () => {
+      const named = createContractMockFetch({ specs: { v1: spec, v2 }, fixtures: [fixture('v2')] });
+      const unnamed = createContractMockFetch({ specs: { v1: spec, v2 }, fixtures: [fixture()] });
+      const bodyOf = async (mockFetch: typeof fetch, version: string) =>
+        (await mockFetch(`https://api.example.com/${version}/items`)).json();
+
+      expect(await bodyOf(named.fetch, 'v2')).toEqual([{ name: 'v2' }]);
+      expect(await bodyOf(named.fetch, 'v1')).toEqual([{ name: 'string' }]);
+      expect(await bodyOf(unnamed.fetch, 'v1')).toEqual([{ name: 'any' }]);
+      expect(await bodyOf(unnamed.fetch, 'v2')).toEqual([{ name: 'any' }]);
+    });
+
+    it('rejects fixtures naming a spec without the operation', () => {
+      const { rejectedResponses } = createContractMockFetch({
+        specs: { v1: spec },
+        fixtures: [fixture('v2')],
+      });
+
+      expect(rejectedResponses).toEqual([
+        expect.objectContaining({ source: 'fixture', operation: 'GET /items' }),
+      ]);
+    });
   });
 });

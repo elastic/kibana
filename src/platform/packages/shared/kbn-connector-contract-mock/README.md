@@ -16,11 +16,35 @@ The mock is a standard `fetch`. Connector clients built on axios use it through 
 
 For every request, the mock:
 
-1. routes it to an operation by server URL and path template, answering **404** with the method and URL when none matches and **405** naming the allowed methods when only the method is wrong;
+1. routes it to an operation by server URL and path template, answering **404** with the method and URL when none matches and **405** naming the allowed methods when only the method is wrong. When several templates match, the one with the fewest parameters wins, then the one with the most literal text, so `/items/new` and `/items/{id}:archive` both take precedence over `/items/{id}`;
 2. validates it against the operation, answering **422** with `{ operation, violations }` when it breaks the spec. Parameters are deserialized by `style` and `explode` and checked against their schemas, as is the body for its declared content type. Undeclared query parameters and repeated keys for `explode: false` parameters are flagged too;
 3. builds a response, then validates its status code, headers and body against the spec.
 
-Each request is recorded in `calls` with its operation, status, and request and response violations, so tests can assert that a connector stays within the contract.
+Each request is recorded in `calls` with its operation, status, and request and response violations, so tests can assert that a connector stays within the contract. `matched` gives the operation's method and path template.
+
+Connectors that call several vendor specs (one per API version or product) can name them:
+
+```ts
+const { fetch, calls } = createContractMockFetch({ specs: { v1: datadogV1, v2: datadogV2 } });
+```
+
+Each call's `matched.source` then says which spec answered it. Fixtures, recordings and pagination entries can name a `source` next to their method and path template to apply to that spec only; without one, they apply to the operation in every spec.
+
+## Credentials
+
+Requests need the credentials of one of the operation's `security` requirements (or the document's), in the place each scheme declares: the `apiKey` header, query parameter or cookie, or an `Authorization` header with the `http` scheme (`Basic`, `Bearer`, …), and `Bearer` for `oauth2` and `openIdConnect`. Any value is accepted. A request without them gets **401** listing what the operation expects, which catches connectors that forget a credential or send it in the wrong place. Schemes that can't be checked on a request, such as `mutualTLS`, count as present, and API keys in the query string aren't reported as undeclared parameters.
+
+The `tokenUrl` and `refreshUrl` of each `oauth2` flow (relative ones resolved against the server) issue stub bearer tokens, as an authorization server would (RFC 6749): a form-encoded `POST` with the `grant_type` of a declared flow and the parameters it requires gets a token, and `client_credentials` also needs `client_id` or Basic client authentication. Token URLs also accept JWT bearer assertions (RFC 7523, `urn:ietf:params:oauth:grant-type:jwt-bearer`), as service accounts such as Google's send them; signatures aren't checked, and an assertion that claims a `target_audience` gets an `id_token`, as Google issues. Other requests get the OAuth error a vendor would return, such as `unsupported_grant_type`. Token requests are recorded in `calls` with `token: true`. Token URLs the spec also documents as operations are answered by those operations.
+
+Vendor specs are sometimes wrong about authentication too. Trello's declares only OAuth2 for most operations, while the API also takes `key` and `token` query parameters; an overlay can add the missing requirement:
+
+```yaml
+- target: $.paths.*.*.security
+  description: Trello also accepts the API key and token as query parameters.
+  update:
+    - APIKey: []
+      APIToken: []
+```
 
 ## Responses
 
@@ -51,6 +75,8 @@ const { fetch, rejectedResponses } = createContractMockFetch({
 ```
 
 Examples and samples use the lowest declared 2xx response (then `2XX`, then `default`; operations without one, such as downloads that redirect or endpoints the vendor removed, get their lowest declared 3xx, then their lowest declared status) and the content type that best matches the request's `Accept` header, preferring JSON; the mock answers **406** when no content type matches. Sampled values come from the schema's first `examples` entry, `example` or `default` that conforms to the schema, then its `const` or first `enum` value, and otherwise from a placeholder that stays within the schema's type, format and bounds (`minimum`/`maximum`, `multipleOf`, `minLength`/`maxLength`, `minItems`/`maxItems`, and `pattern`, sampled from the regex). Vendors' examples often contradict their own schemas (a date-time under `format: date`, a number for a string), so non-conforming ones are skipped; examples of schemas merged from `allOf` parts are used unchecked. For `oneOf`, the first variant whose sample matches exactly one variant is used. Below a fixed depth only required properties are generated, which keeps recursive schemas finite. Required properties the schema doesn't declare are filled from `additionalProperties`, or with `null`. Pass `respond: (operation, request) => response` to replace examples and samples.
+
+`sampleJsonSchema(schema, { optional, boundary })` samples a standalone JSON Schema the same way, with refs resolving against the schema itself (`#/$defs/...`), for example to generate inputs from a zod schema converted with `z.toJSONSchema`. `optional: 'required'` leaves out optional properties at every depth; `boundary: true` samples at the upper bounds, ignoring examples and defaults.
 
 To test how a connector handles extreme responses, pass `respond: sampleBoundaryResponse`. It skips examples and samples bodies at the schema's upper bounds: strings at `maxLength` (1024 characters when unbounded), numbers at `maximum` or the largest value of their format (`int32`, `float`; `int64` and unbounded integers at `Number.MAX_SAFE_INTEGER`), arrays at `maxItems` (capped at 100; 3 items when unbounded, one for `uniqueItems`), and the last `enum` value. Fixtures and recordings are still preferred. Vendor `oneOf`s whose variants only differ in their examples can't be sampled without them, and are reported in the call's `responseViolations`; an overlay can correct them.
 
@@ -100,7 +126,7 @@ The mock then enforces the API's real contract, and recordings the vendor's spec
 
 Google API Discovery documents convert to OpenAPI 3.0 with `convertDiscovery` (`isDiscoveryDocument` recognizes them). Each method becomes an operation at its `flatPath` under `rootUrl` + `servicePath`. Reserved expansions such as `v1/{+name}:access` can't match requests, because OpenAPI path parameters can't contain slashes, so `flatPath` is used instead. Each operation gets the API-wide parameters next to its own, its request and response schemas as JSON bodies, and its OAuth scopes as security requirements. Schemas become components, with draft 3 `required: true` property flags moved into `required` lists. Simple media uploads become operations of their own, served from `rootUrl`.
 
-`loadContractOperations` accepts a parsed OpenAPI 3.x or Swagger 2.0 document (converted to OpenAPI 3.0 first) and returns its operations: method, path, servers, parameters (with `style` and `explode` defaults applied), request body and responses. Parameter, request body, response and header refs are resolved. Schemas are not dereferenced: each one stays in place in a copy of the document, together with its JSON pointer, so its refs keep resolving against the document. This keeps large specs such as Microsoft Graph fast to load. The schema dialect follows the OpenAPI version: OpenAPI 3.0 schemas for 3.0, JSON Schema 2020-12 for 3.1 and later.
+`loadContractOperations` accepts a parsed OpenAPI 3.x or Swagger 2.0 document (converted to OpenAPI 3.0 first, with `convertSwagger2`, which is also exported) and returns its operations: method, path, servers, parameters (with `style` and `explode` defaults applied), request body and responses. Parameter, request body, response and header refs are resolved. Schemas are not dereferenced: each one stays in place in a copy of the document, together with its JSON pointer, so its refs keep resolving against the document. This keeps large specs such as Microsoft Graph fast to load. The schema dialect follows the OpenAPI version: OpenAPI 3.0 schemas for 3.0, JSON Schema 2020-12 for 3.1 and later.
 
 Loading also rewrites schemas as plain JSON Schema and repairs defects common in vendor specs, in place and following refs: OpenAPI 3.0's `nullable` becomes a union with `null`, duplicate `enum` values are removed, regex escapes that are invalid under the `u` flag are dropped, and OpenAPI 3.0's boolean `exclusiveMinimum`/`exclusiveMaximum` become numeric bounds. It then checks every schema for defects that would break validation (unresolvable `$ref`s, unknown `type`s, patterns that don't compile, and keywords with values of the wrong type) and throws an `InvalidSchemaError` listing each operation and location that still has one, so a broken spec fails at load instead of on the first request that uses it.
 
