@@ -31,13 +31,12 @@ const swcTransform = (path, source, cache) => {
     }
   }
 
-  const result = getTransformSync()(
+  const config = getNodeRegisterSwcConfig(path, {
+    inlineSourceMaps: !cache,
+    inlineSourcesContent: !cache,
     source,
-    getNodeRegisterSwcConfig(path, {
-      inlineSourceMaps: !cache,
-      inlineSourcesContent: !cache,
-    })
-  );
+  });
+  const result = getTransformSync()(source, config);
 
   if (!result.code) {
     throw new Error(`swc failed to transpile [${path}]`);

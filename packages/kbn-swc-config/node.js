@@ -7,4 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = require('./src/node');
+/** @type {typeof import('./src/node')} */
+const nodeConfig = require('./src/node');
+
+module.exports = nodeConfig;
