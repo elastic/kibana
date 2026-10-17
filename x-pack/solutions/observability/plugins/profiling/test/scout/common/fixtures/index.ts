@@ -18,6 +18,7 @@ import {
 export interface ProfilingHelper {
   installPolicies: () => Promise<void>;
   cleanupPolicies: (opts?: { includeAgentPolicy?: boolean }) => Promise<void>;
+  deletePolicy: (id: string) => Promise<void>;
   getPolicyIds: () => Promise<{ collectorId?: string; symbolizerId?: string }>;
   loadOtelData: () => Promise<void>;
 }
@@ -26,7 +27,7 @@ const APM_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
 
 export const apiTest = base.extend<{}, { profilingHelper: ProfilingHelper }>({
   profilingHelper: [
-    async ({ apiServices, esClient, log, profilingSetup }, use) => {
+    async ({ apiServices, esClient, kbnClient, log, profilingSetup }, use) => {
       const installPolicies = async (): Promise<void> => {
         log.info('Checking if APM agent policy exists, creating if needed...');
         const getPolicyResponse = await apiServices.fleet.agent_policies.get({
@@ -51,6 +52,15 @@ export const apiTest = base.extend<{}, { profilingHelper: ProfilingHelper }>({
         } else {
           log.info(`APM agent policy '${APM_AGENT_POLICY_ID}' already exists`);
         }
+      };
+
+      // On cloud the profiling integrations live on the hosted `policy-elastic-agent-on-cloud` agent policy, which Fleet refuses to modify without `force` — the same flag the profiling setup route uses to install them.
+      const deletePolicy = async (id: string): Promise<void> => {
+        await kbnClient.request({
+          method: 'DELETE',
+          path: `/api/fleet/package_policies/${id}`,
+          query: { force: true },
+        });
       };
 
       const cleanupPolicies = async (
@@ -86,10 +96,8 @@ export const apiTest = base.extend<{}, { profilingHelper: ProfilingHelper }>({
         }
 
         await Promise.all([
-          collectorId ? apiServices.fleet.package_policies.delete(collectorId) : Promise.resolve(),
-          symbolizerId
-            ? apiServices.fleet.package_policies.delete(symbolizerId)
-            : Promise.resolve(),
+          collectorId ? deletePolicy(collectorId) : Promise.resolve(),
+          symbolizerId ? deletePolicy(symbolizerId) : Promise.resolve(),
           apmPolicyPromise,
         ]);
 
@@ -128,6 +136,7 @@ export const apiTest = base.extend<{}, { profilingHelper: ProfilingHelper }>({
       await use({
         installPolicies,
         cleanupPolicies,
+        deletePolicy,
         getPolicyIds,
         loadOtelData,
       });

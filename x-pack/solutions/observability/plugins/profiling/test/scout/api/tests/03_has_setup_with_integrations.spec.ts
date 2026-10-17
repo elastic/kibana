@@ -54,7 +54,7 @@ apiTest.describe('Collector integration is not installed', { tag: tags.stateful.
       .poll(
         async () => {
           const status = await getViewerStatus(apiClient);
-          return status.has_setup === false;
+          return status.has_setup;
         },
         {
           timeout: 30_000,
@@ -63,16 +63,16 @@ apiTest.describe('Collector integration is not installed', { tag: tags.stateful.
             'has_setup did not converge to expected value after Fleet package policy deletion',
         }
       )
-      .toBe(true);
+      .toBe(false);
   };
 
-  apiTest('collector integration missing', async ({ profilingHelper, apiServices, apiClient }) => {
+  apiTest('collector integration missing', async ({ profilingHelper, apiClient }) => {
     const ids = await profilingHelper.getPolicyIds();
     const collectorId = ids.collectorId;
 
     expect(collectorId).toBeDefined();
 
-    await apiServices.fleet.package_policies.delete(collectorId!);
+    await profilingHelper.deletePolicy(collectorId!);
 
     const adminRes = await apiClient.get(esResourcesEndpoint);
     const adminStatus = adminRes.body;
@@ -89,23 +89,20 @@ apiTest.describe('Collector integration is not installed', { tag: tags.stateful.
     expect(readStatus.has_required_role).toBe(false);
   });
 
-  apiTest(
-    'Symbolizer integration is not installed',
-    async ({ profilingHelper, apiClient, apiServices }) => {
-      const ids = await profilingHelper.getPolicyIds();
-      const symbolizerId = ids.symbolizerId;
+  apiTest('Symbolizer integration is not installed', async ({ profilingHelper, apiClient }) => {
+    const ids = await profilingHelper.getPolicyIds();
+    const symbolizerId = ids.symbolizerId;
 
-      expect(symbolizerId).toBeDefined();
+    expect(symbolizerId).toBeDefined();
 
-      await apiServices.fleet.package_policies.delete(symbolizerId!);
+    await profilingHelper.deletePolicy(symbolizerId!);
 
-      await waitForExpectedHasSetup(apiClient);
+    await waitForExpectedHasSetup(apiClient);
 
-      const readStatus = await getViewerStatus(apiClient);
-      expect(readStatus.has_setup).toBe(false);
-      expect(readStatus.has_data).toBe(true);
-      expect(readStatus.pre_8_9_1_data).toBeDefined();
-      expect(readStatus.has_required_role).toBe(false);
-    }
-  );
+    const readStatus = await getViewerStatus(apiClient);
+    expect(readStatus.has_setup).toBe(false);
+    expect(readStatus.has_data).toBe(true);
+    expect(readStatus.pre_8_9_1_data).toBeDefined();
+    expect(readStatus.has_required_role).toBe(false);
+  });
 });
