@@ -236,10 +236,24 @@ const dashboardGridStyles = {
           zIndex: euiTheme.levels.toast,
         },
 
-      // Hide hover actions when dashboard has an overlay
-      '.dshDashboardGrid__item--hideHoverActions .embPanel__hoverActions': {
-        visibility: 'hidden !important' as 'hidden',
-      },
+      // Hide hover actions when dashboard has an overlay (blurred panels).
+      '.dshDashboardGrid__item--hideHoverActions:not(.dshDashboardGrid__item--focused) .embPanel__hoverActions':
+        {
+          visibility: 'hidden !important' as 'hidden',
+        },
+      // When a panel is focused for edit, keep the drag handle visible and hide the rest of
+      // the hover actions so they leave layout. Combined-wrapper chrome is undone in
+      // useHoverActionStyles so the remaining handle matches an individual pill.
+      // https://github.com/elastic/kibana/issues/278578
+      '.dshDashboardGrid__item--hideHoverActions.dshDashboardGrid__item--focused .embPanel__hoverActions':
+        {
+          visibility: 'visible !important' as 'visible',
+          opacity: 1,
+          zIndex: euiTheme.levels.menu,
+          '& > :not(.embPanel--dragHandle)': {
+            display: 'none',
+          },
+        },
       '&.dshLayout-isMaximizedPanel': {
         height: '100%', // need to override the kbn-grid-layout height when a single panel is expanded
         '.dshDashboardGrid__item--expanded': {
