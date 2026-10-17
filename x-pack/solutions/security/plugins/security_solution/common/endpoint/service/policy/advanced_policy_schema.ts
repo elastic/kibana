@@ -1054,6 +1054,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.malware.elf_model',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.malware.elf_model',
+      {
+        defaultMessage:
+          'Enable the machine learning model for ELF files. When disabled (false), blocklist, exceptionlist, and YARA scanning of ELF files continue. Default: true.',
+      }
+    ),
+  },
+  {
     key: 'linux.advanced.memory_protection.enable_fork_scan',
     first_supported_version: '8.14',
     documentation: i18n.translate(
