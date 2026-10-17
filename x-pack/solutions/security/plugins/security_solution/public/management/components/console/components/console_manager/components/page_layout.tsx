@@ -38,6 +38,8 @@ const EuiPanelStyled = styled(EuiPanel)`
 
 export type PageLayoutProps = PropsWithChildren<{
   pageTitle?: ReactNode;
+  /** `id` applied to the element holding `pageTitle`, so that a container can reference it as its accessible name */
+  pageTitleId?: string;
   pageDescription?: ReactNode;
   pageBody?: ReactNode;
   actions?: ReactNode | ReactNode[];
@@ -52,6 +54,7 @@ export type PageLayoutProps = PropsWithChildren<{
 export const PageLayout = memo<PageLayoutProps>(
   ({
     pageTitle,
+    pageTitleId,
     pageDescription,
     pageBody,
     actions,
@@ -99,12 +102,14 @@ export const PageLayout = memo<PageLayoutProps>(
           <EuiSpacer size="m" />
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <span data-test-subj={getTestId('titleHolder')}>{pageTitle}</span>
+              <span id={pageTitleId} data-test-subj={getTestId('titleHolder')}>
+                {pageTitle}
+              </span>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    }, [getTestId, headerBackComponent, hideHeader, pageTitle]);
+    }, [getTestId, headerBackComponent, hideHeader, pageTitle, pageTitleId]);
 
     const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = useCallback((event) => {
       // We prevent the response console - which is currently displayed in a full page overlay - from
@@ -156,9 +161,7 @@ export const PageLayout = memo<PageLayoutProps>(
             className={consoleBodyClassName}
             data-test-subj={getTestId('consoleBody')}
           >
-            <div role="main" className="full-height">
-              {children}
-            </div>
+            <div className="full-height">{children}</div>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanelStyled>
