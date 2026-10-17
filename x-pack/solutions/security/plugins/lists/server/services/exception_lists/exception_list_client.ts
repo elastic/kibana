@@ -121,6 +121,9 @@ export class ExceptionListClient {
   /** User creating, modifying, deleting, or updating an exception list */
   private readonly user: string;
 
+  /** Human-readable user label for comment authors */
+  private readonly userDisplayName: string;
+
   /** Saved objects client to create, modify, delete, an exception list */
   private readonly savedObjectsClient: SavedObjectsClientContract;
 
@@ -143,12 +146,14 @@ export class ExceptionListClient {
    */
   constructor({
     user,
+    userDisplayName = user,
     savedObjectsClient,
     serverExtensionsClient,
     enableServerExtensionPoints = true,
     request,
   }: ConstructorOptions) {
     this.user = user;
+    this.userDisplayName = userDisplayName;
     this.savedObjectsClient = savedObjectsClient;
     this.serverExtensionsClient = serverExtensionsClient;
     this.enableServerExtensionPoints = enableServerExtensionPoints;
@@ -156,7 +161,7 @@ export class ExceptionListClient {
   }
 
   private getServerExtensionCallbackContext(): ServerExtensionCallbackContext {
-    const { user, serverExtensionsClient, savedObjectsClient, request } = this;
+    const { user, userDisplayName, serverExtensionsClient, savedObjectsClient, request } = this;
     let exceptionListClient: undefined | ExceptionListClient;
 
     return {
@@ -169,6 +174,7 @@ export class ExceptionListClient {
             savedObjectsClient,
             serverExtensionsClient,
             user,
+            userDisplayName,
           });
         }
 
@@ -301,7 +307,7 @@ export class ExceptionListClient {
     tags,
     type,
   }: CreateEndpointListItemOptions): Promise<ExceptionListItemSchema> => {
-    const { savedObjectsClient, user } = this;
+    const { savedObjectsClient, user, userDisplayName } = this;
     await this.createEndpointList();
 
     let itemData: CreateExceptionListItemOptions = {
@@ -337,6 +343,7 @@ export class ExceptionListClient {
       ...itemData,
       savedObjectsClient,
       user,
+      userDisplayName,
     });
   };
 
@@ -394,7 +401,7 @@ export class ExceptionListClient {
     tags,
     type,
   }: UpdateEndpointListItemOptions): Promise<ExceptionListItemSchema | null> => {
-    const { savedObjectsClient, user } = this;
+    const { savedObjectsClient, user, userDisplayName } = this;
     await this.createEndpointList();
 
     let updatedItem: UpdateExceptionListItemOptions = {
@@ -431,6 +438,7 @@ export class ExceptionListClient {
       ...updatedItem,
       savedObjectsClient,
       user,
+      userDisplayName,
     });
   };
 
@@ -625,7 +633,7 @@ export class ExceptionListClient {
     tags,
     type,
   }: CreateExceptionListItemOptions): Promise<ExceptionListItemSchema> => {
-    const { savedObjectsClient, user } = this;
+    const { savedObjectsClient, user, userDisplayName } = this;
     let itemData: CreateExceptionListItemOptions = {
       comments,
       description,
@@ -659,6 +667,7 @@ export class ExceptionListClient {
       ...itemData,
       savedObjectsClient,
       user,
+      userDisplayName,
     });
   };
 
@@ -699,7 +708,7 @@ export class ExceptionListClient {
     tags,
     type,
   }: UpdateExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
-    const { savedObjectsClient, user } = this;
+    const { savedObjectsClient, user, userDisplayName } = this;
     let updatedItem: UpdateExceptionListItemOptions = {
       _version,
       comments,
@@ -734,6 +743,7 @@ export class ExceptionListClient {
       ...updatedItem,
       savedObjectsClient,
       user,
+      userDisplayName,
     });
   };
 
@@ -774,7 +784,7 @@ export class ExceptionListClient {
     tags,
     type,
   }: UpdateExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
-    const { savedObjectsClient, user } = this;
+    const { savedObjectsClient, user, userDisplayName } = this;
     let updatedItem: UpdateExceptionListItemOptions = {
       _version,
       comments,
@@ -809,6 +819,7 @@ export class ExceptionListClient {
       ...updatedItem,
       savedObjectsClient,
       user,
+      userDisplayName,
     });
   };
 
