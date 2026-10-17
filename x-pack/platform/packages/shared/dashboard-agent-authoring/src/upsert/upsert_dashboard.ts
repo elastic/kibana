@@ -116,6 +116,8 @@ const rejectInvalidItems = (
 
   const panelsById = indexPanelsById(dashboardData.panels);
   const existingSectionIds = new Set(getSectionsById(dashboardData).keys());
+  const controlIds = new Set(getControlIds(dashboardData));
+  const sectionIdByPanelId = getSectionIdByPanelId(dashboardData);
 
   const duplicateSectionIds = findDuplicates(requestedSections.map(({ id }) => id));
   const validSections = requestedSections.filter(({ id, title }) => {
@@ -125,6 +127,10 @@ const rejectInvalidItems = (
     }
     if (panelsById.has(id)) {
       recordFailure(id, `"${id}" is a panel id. Use a different id for the section.`);
+      return false;
+    }
+    if (controlIds.has(id)) {
+      recordFailure(id, `"${id}" is a control id. Use a different id for the section.`);
       return false;
     }
     if (!existingSectionIds.has(id) && title === undefined) {
@@ -143,6 +149,18 @@ const rejectInvalidItems = (
     }
     if (sectionIds.has(id)) {
       recordFailure(id, `"${id}" is a section id. Use a different id for the panel.`);
+      return false;
+    }
+    if (controlIds.has(id)) {
+      recordFailure(id, `"${id}" is a control id. Use a different id for the panel.`);
+      return false;
+    }
+    const currentSectionId = sectionIdByPanelId.get(id);
+    if (section === undefined && currentSectionId && removedIds.has(currentSectionId)) {
+      recordFailure(
+        id,
+        `Panel "${id}" is in section "${currentSectionId}", which is removed in this call, so the panel is removed with it. To keep the panel, move it out with \`section\`.`
+      );
       return false;
     }
     if (typeof section === 'string' && removedIds.has(section)) {
@@ -191,7 +209,7 @@ const upsertSections = (
   sections: UpsertSectionItem[]
 ): DashboardAttachmentData =>
   sections.reduce((nextDashboardData, { id, title, collapsed }) => {
-    if (findSectionIndex(nextDashboardData.panels, id) !== -1 || title === undefined) {
+    if (findSectionIndex(nextDashboardData.panels, id) !== -1) {
       return {
         ...nextDashboardData,
         panels: nextDashboardData.panels.map((widget) =>
@@ -204,6 +222,10 @@ const upsertSections = (
             : widget
         ),
       };
+    }
+    // rejectInvalidItems leaves out new sections without a title.
+    if (title === undefined) {
+      return nextDashboardData;
     }
 
     const newSection: DashboardSection = {
