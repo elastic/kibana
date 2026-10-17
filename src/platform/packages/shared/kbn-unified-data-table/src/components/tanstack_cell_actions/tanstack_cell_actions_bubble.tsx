@@ -8,7 +8,7 @@
  */
 
 import type { CSSProperties, ReactElement } from 'react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiPortal, keys, useEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
@@ -61,6 +61,9 @@ export const TanStackCellActionsBubble = React.memo(
     const [isOpen, setIsOpen] = useState(false);
     const [useFixedLayer, setUseFixedLayer] = useState(false);
     const [fixedLayerStyle, setFixedLayerStyle] = useState<CSSProperties>();
+    // A transformed ancestor (e.g. a virtualized row) becomes the containing block of `position: fixed`,
+    // so the measured delta between the intended and rendered position is cancelled out.
+    const fixedLayerOffsetRef = useRef({ top: 0, right: 0 });
     const collapsedRadius = euiTheme.border.radius.small;
     const openRadius = euiTheme.size.m;
     const actionInsetPx = parseInt(euiTheme.size.xxs, 10) || 4;
@@ -133,9 +136,10 @@ export const TanStackCellActionsBubble = React.memo(
       setUseFixedLayer(needsFixedLayer);
       if (needsFixedLayer && anchorCellRef.current) {
         const rect = anchorCellRef.current.getBoundingClientRect();
+        const { top: offsetTop, right: offsetRight } = fixedLayerOffsetRef.current;
         setFixedLayerStyle({
-          top: rect.top + actionInsetPx,
-          right: window.innerWidth - rect.right + actionInsetPx,
+          top: rect.top + actionInsetPx - offsetTop,
+          right: window.innerWidth - rect.right + actionInsetPx - offsetRight,
         });
       }
       return needsFixedLayer;
@@ -175,6 +179,28 @@ export const TanStackCellActionsBubble = React.memo(
         openBubble();
       }, CELL_ACTIONS_HOVER_OPEN_DELAY_MS);
     }, [clearOpenTimer, isOpen, openBubble]);
+
+    useLayoutEffect(() => {
+      const bubble = bubbleRef.current;
+      const anchor = anchorCellRef.current;
+      if (!isOpen || !useFixedLayer || !bubble || !anchor) {
+        fixedLayerOffsetRef.current = { top: 0, right: 0 };
+        return;
+      }
+      const anchorRect = anchor.getBoundingClientRect();
+      const bubbleRect = bubble.getBoundingClientRect();
+      const deltaTop = bubbleRect.top - (anchorRect.top + actionInsetPx);
+      const deltaRight = bubbleRect.right - (anchorRect.right - actionInsetPx);
+      if (Math.abs(deltaTop) < 0.5 && Math.abs(deltaRight) < 0.5) {
+        return;
+      }
+      const { top: offsetTop, right: offsetRight } = fixedLayerOffsetRef.current;
+      fixedLayerOffsetRef.current = {
+        top: offsetTop + deltaTop,
+        right: offsetRight - deltaRight,
+      };
+      refreshFixedLayer();
+    }, [actionInsetPx, anchorCellRef, fixedLayerStyle, isOpen, refreshFixedLayer, useFixedLayer]);
 
     useEffect(() => {
       if (!isOpen || !useFixedLayer) {

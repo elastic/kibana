@@ -40,6 +40,7 @@ import {
   EuiIconTip,
   EuiPopover,
   EuiPopoverFooter,
+  EuiPortal,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -143,7 +144,16 @@ const FieldTableCell = memo(
     const isActive = useContext(GridCellActiveContext);
     const anchorCellRef = useContext(GridCellAnchorContext);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const openPopover = useCallback(() => setIsPopoverOpen(true), []);
+    // Viewport rect of what opened the popover (the expand icon, or the cell for keyboard); it anchors the panel.
+    const [popoverAnchorRect, setPopoverAnchorRect] = useState<DOMRect>();
+    const openPopover = useCallback(
+      (anchor?: HTMLElement | null) => {
+        const element = anchor ?? anchorCellRef?.current;
+        setPopoverAnchorRect(element?.getBoundingClientRect());
+        setIsPopoverOpen(true);
+      },
+      [anchorCellRef]
+    );
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
     // Like EuiDataGrid, Enter or F2 on the focused cell opens its popover.
@@ -153,7 +163,7 @@ const FieldTableCell = memo(
       const onKeyDown = (event: globalThis.KeyboardEvent) => {
         if (event.target === cellElement && (event.key === keys.ENTER || event.key === keys.F2)) {
           event.preventDefault();
-          openPopover();
+          openPopover(cellElement);
         }
       };
       cellElement.addEventListener('keydown', onKeyDown);
@@ -198,7 +208,9 @@ const FieldTableCell = memo(
             iconSize="s"
             color="text"
             display="empty"
-            onClick={openPopover}
+            onClick={(event: React.MouseEvent<HTMLButtonElement>) =>
+              openPopover(event.currentTarget)
+            }
           />
         </EuiToolTip>
       );
@@ -224,53 +236,56 @@ const FieldTableCell = memo(
               actionButtons={actionButtons}
               stayVisible={isPopoverOpen}
             />
-            {isPopoverOpen && (
-              <EuiPopover
-                isOpen
-                closePopover={closePopover}
-                anchorPosition="downRight"
-                aria-label={i18n.translate('unifiedDocViewer.fieldsTable.cellPopoverAriaLabel', {
-                  defaultMessage: 'Cell details',
-                })}
-                panelPaddingSize="s"
-                panelProps={{ 'data-test-subj': 'euiDataGridExpansionPopover' }}
-                button={<span aria-hidden="true" css={hiddenPopoverAnchorStyles} />}
-              >
-                <EuiText size="s" css={popoverContentStyles}>
-                  <TableCell
-                    searchTerm={searchTerm || ''}
-                    rows={rows}
-                    rowIndex={rowIndex}
-                    columnId={columnId}
-                    isDetails
-                    isESQLMode={isEsqlMode}
-                    onFindSearchTermMatch={onFindSearchTermMatch}
-                  />
-                </EuiText>
-                {cellActions.length > 0 && (
-                  <EuiPopoverFooter>
-                    <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-                      {cellActions.map((Action, idx) => (
-                        <EuiFlexItem key={idx} grow={false}>
-                          <Action
-                            rowIndex={rowIndex}
-                            colIndex={colIndex}
-                            columnId={columnId}
-                            Component={CellActionPopoverButton}
-                            isExpanded
-                          />
-                        </EuiFlexItem>
-                      ))}
-                    </EuiFlexGroup>
-                  </EuiPopoverFooter>
-                )}
-                {Boolean(warningMessage) && (
-                  <div>
-                    <EuiSpacer size="xs" />
-                    <KbnWarningCallout announceOnMount={false} title={warningMessage} size="s" />
-                  </div>
-                )}
-              </EuiPopover>
+            {isPopoverOpen && popoverAnchorRect && (
+              <EuiPortal>
+                <EuiPopover
+                  css={getPopoverAnchorStyles(popoverAnchorRect)}
+                  isOpen
+                  closePopover={closePopover}
+                  anchorPosition="downRight"
+                  aria-label={i18n.translate('unifiedDocViewer.fieldsTable.cellPopoverAriaLabel', {
+                    defaultMessage: 'Cell details',
+                  })}
+                  panelPaddingSize="s"
+                  panelProps={{ 'data-test-subj': 'euiDataGridExpansionPopover' }}
+                  button={<span aria-hidden="true" />}
+                >
+                  <EuiText size="s" css={popoverContentStyles}>
+                    <TableCell
+                      searchTerm={searchTerm || ''}
+                      rows={rows}
+                      rowIndex={rowIndex}
+                      columnId={columnId}
+                      isDetails
+                      isESQLMode={isEsqlMode}
+                      onFindSearchTermMatch={onFindSearchTermMatch}
+                    />
+                  </EuiText>
+                  {cellActions.length > 0 && (
+                    <EuiPopoverFooter>
+                      <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+                        {cellActions.map((Action, idx) => (
+                          <EuiFlexItem key={idx} grow={false}>
+                            <Action
+                              rowIndex={rowIndex}
+                              colIndex={colIndex}
+                              columnId={columnId}
+                              Component={CellActionPopoverButton}
+                              isExpanded
+                            />
+                          </EuiFlexItem>
+                        ))}
+                      </EuiFlexGroup>
+                    </EuiPopoverFooter>
+                  )}
+                  {Boolean(warningMessage) && (
+                    <div>
+                      <EuiSpacer size="xs" />
+                      <KbnWarningCallout announceOnMount={false} title={warningMessage} size="s" />
+                    </div>
+                  )}
+                </EuiPopover>
+              </EuiPortal>
             )}
           </div>
         )}
@@ -724,15 +739,24 @@ export const TanStackTableGrid = ({
   );
 };
 
+// EuiPopover anchors to its own wrapper: overlay it on the expand icon (the trigger unmounts when the
+// bubble collapses), fixed in the viewport because the portal sits outside the virtualized rows.
+const getPopoverAnchorStyles = ({ top, left, width, height }: DOMRect) =>
+  css({
+    position: 'fixed',
+    display: 'block',
+    top,
+    left,
+    width,
+    height,
+    pointerEvents: 'none',
+  });
+
 const popoverContentStyles = css({
   maxInlineSize: 'min(75vw, 600px)',
   maxBlockSize: '50vh',
   overflow: 'auto',
   wordBreak: 'break-word',
-});
-
-const hiddenPopoverAnchorStyles = css({
-  display: 'none',
 });
 
 // Keeps the bubble and expansion popover anchor out of the row layout (matches legacy actions bar).
