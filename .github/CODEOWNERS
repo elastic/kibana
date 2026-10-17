@@ -2985,6 +2985,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fix @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-validator/** @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug @elastic/security-engineering-productivity
+/x-pack/solutions/security/plugins/security_solution/.agents/skills/security-pr-test-impact @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/references @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
@@ -3884,6 +3885,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.github/workflows/flaky-fix-verifier.* @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/shared/flaky-fix-guidelines.md @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-fix-review-reminder.yml @elastic/appex-qa
+/.github/workflows/security-pr-test-impact-comment.yml @elastic/kibana-operations @elastic/security-engineering-productivity
 /.github/scripts/ @elastic/apps-dx
 /.github/scripts/flaky_fix_review_reminder* @elastic/appex-qa
 /.github/scripts/bundle_size_limits_comment* @elastic/kibana-operations

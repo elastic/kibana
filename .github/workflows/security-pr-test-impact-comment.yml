@@ -1,0 +1,163 @@
+name: Security PR test impact on comment
+
+# Posts the read-only `security-pr-test-impact` report as one sticky comment when an
+# Elastic member comments `/test-impact` on a pull request.
+#
+# Safety: the job runs the workflow and script from `main` and reads the PR only through the
+# GitHub API (file list + patches). It never checks out or executes code from the PR branch,
+# so it is safe for fork PRs. The report is deterministic (no LLM); the agent-only Checks
+# section is replaced by a pointer to run the skill locally.
+#
+# Owner: @elastic/security-engineering-productivity
+# Skill: x-pack/solutions/security/plugins/security_solution/.agents/skills/security-pr-test-impact
+
+on:
+  issue_comment:
+    types: [created]
+  # Manual trigger, mainly to exercise this job from a branch before it reaches `main`
+  # (issue_comment workflows only run from the default branch):
+  #   gh workflow run security-pr-test-impact-comment.yml -r <branch> -f pr_number=<n>
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number to analyze and comment on
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  test_impact:
+    name: Post PR test impact report on /test-impact comment
+    if: |
+      github.event_name == 'workflow_dispatch'
+      || (
+        github.event.issue.pull_request
+        && github.event.sender.type != 'Bot'
+        && contains(fromJSON('["MEMBER","OWNER"]'), github.event.comment.author_association)
+        && (github.event.comment.body == '/test-impact' || startsWith(github.event.comment.body, '/test-impact '))
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: security-pr-test-impact-${{ github.event.issue.number || inputs.pr_number }}
+      cancel-in-progress: true
+    env:
+      PR_NUMBER: ${{ github.event.issue.number || inputs.pr_number }}
+    permissions:
+      contents: read
+      issues: write # reaction on the triggering comment (issue-comment API)
+      pull-requests: write # sticky report comment
+    steps:
+      - name: Acknowledge the command
+        if: github.event_name == 'issue_comment'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'eyes',
+            });
+
+      # Checkout of `main` only. This provides the script, CODEOWNERS, tsconfig.base.json and
+      # the existing tests the matcher links against. Never check out the PR head here.
+      - name: Checkout main
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: main
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Run the matcher
+        id: run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PAGER: cat
+          SKILL: x-pack/solutions/security/plugins/security_solution/.agents/skills/security-pr-test-impact
+        run: |
+          set -euo pipefail
+          mkdir -p .agents/tmp
+          node "$SKILL/scripts/pr_test_impact.mjs" --pr "$PR_NUMBER" --ref HEAD --compact \
+            > .agents/tmp/pr-test-impact-comment.md
+          node "$SKILL/scripts/pr_test_impact.mjs" --pr "$PR_NUMBER" --ref HEAD \
+            > .agents/tmp/pr-test-impact-full.md
+          node "$SKILL/scripts/pr_test_impact.mjs" --pr "$PR_NUMBER" --ref HEAD --format json \
+            > .agents/tmp/pr-test-impact-full.json
+
+      - name: Upload full report
+        if: steps.run.outcome == 'success'
+        id: artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: security-pr-test-impact-${{ env.PR_NUMBER }}
+          path: |
+            .agents/tmp/pr-test-impact-full.md
+            .agents/tmp/pr-test-impact-full.json
+          retention-days: 14
+
+      # `!cancelled()` (not `always()`): a run superseded by a newer `/test-impact` on the same PR
+      # must not post a stale or half-built comment.
+      - name: Create or update the sticky comment
+        if: ${{ !cancelled() }}
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          RUN_OK: ${{ steps.run.outcome }}
+          ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const MARKER = '<!-- security-pr-test-impact -->';
+            const prNumber = Number(process.env.PR_NUMBER);
+            const LIMIT = 65000; // GitHub comment body limit is 65536
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const footer = [
+              '',
+              '---',
+              `_Posted by [\`security-pr-test-impact\`](${runUrl}) on request (\`/test-impact\`). ` +
+                (process.env.ARTIFACT_URL ? `Full report and JSON: [workflow artifact](${process.env.ARTIFACT_URL}). ` : '') +
+                'Re-run by commenting `/test-impact` again; this comment is updated in place._',
+            ].join('\n');
+
+            let body;
+            if (process.env.RUN_OK !== 'success') {
+              body = `${MARKER}\n**PR test impact:** no report was produced. Most often the matcher could not read this PR from GitHub (file lists are never guessed); see the [workflow run](${runUrl}) for the exact error.${footer}`;
+            } else {
+              body = fs.readFileSync('.agents/tmp/pr-test-impact-comment.md', 'utf8');
+              if (body.length + footer.length > LIMIT) {
+                const cut = body.lastIndexOf('\n', LIMIT - footer.length - 200);
+                body = `${body.slice(0, cut)}\n\n_…truncated to fit a GitHub comment; the full report is in the workflow artifact._`;
+              }
+              body += footer;
+            }
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              per_page: 100,
+            });
+            const existing = comments.find((c) => c.body && c.body.includes(MARKER));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body,
+              });
+            }
