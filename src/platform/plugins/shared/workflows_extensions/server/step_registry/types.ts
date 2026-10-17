@@ -334,6 +334,14 @@ export function createPollServerStepDefinition<
 // -----------------------------------------------------------------------------
 
 /**
+ * Metadata attached to a step log entry. Arbitrary additional fields are allowed.
+ */
+export interface StepLogMeta {
+  tags?: string[];
+  [key: string]: unknown;
+}
+
+/**
  * Context provided to custom step handlers during execution.
  * This gives access to runtime services needed for step execution.
  */
@@ -363,9 +371,9 @@ export interface StepHandlerContext<TInput = z.ZodType, TConfig = z.ZodObject> {
    * Logger scoped to this step execution
    */
   logger: {
-    debug(message: string, meta?: object): void;
-    info(message: string, meta?: object): void;
-    warn(message: string, meta?: object): void;
+    debug(message: string, meta?: StepLogMeta): void;
+    info(message: string, meta?: StepLogMeta): void;
+    warn(message: string, meta?: StepLogMeta): void;
     error(message: string, error?: Error): void;
   };
 

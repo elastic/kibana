@@ -13,6 +13,7 @@ import type {
   ExecutionType,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
+  WorkflowExecutionLogEntry,
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,
   WorkflowsEventsLogDocumentSource,
@@ -153,18 +154,6 @@ export interface GetExecutionLogsParams {
   page?: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
-}
-
-export interface WorkflowExecutionLogEntry {
-  id: string;
-  timestamp: string;
-  level?: 'trace' | 'debug' | 'info' | 'warn' | 'error';
-  message: string;
-  stepId?: string;
-  stepName?: string;
-  connectorType?: string;
-  duration?: number;
-  additionalData?: Record<string, unknown>;
 }
 
 export interface WorkflowExecutionLogsResponse {
