@@ -21,6 +21,7 @@ import { hasObservabilityCapabilities } from '@kbn/observability-shared-plugin/p
 
 const PANEL_ID = 'alerting';
 const ALERTS_LINK = 'observability-overview:alerts' as const;
+const STACK_MANAGEMENT_RULES_LINK = 'management:triggersActions' as const;
 const ALERTS_ICON = 'warning';
 
 /** Classic Observability alerts label for nav and global search. */
@@ -74,9 +75,14 @@ const maybeSection = (
   return [{ ...section, children }];
 };
 
-const getAlertsSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
+const getAlertsChildren = (core: CoreStart, isV2Enabled: boolean): PanelOpenerChildDefinition[] => {
+  if (!isV2Enabled) {
+    return canReadV1Alerts(core)
+      ? [{ link: ALERTS_LINK, title: getObservabilityAlertsLinkTitle(false) }]
+      : [];
+  }
+
   const alertsChildren: PanelOpenerChildDefinition[] = [];
-  const isV2Enabled = isAlertingV2Enabled(core);
 
   if (hasAlertingV2Capability(core, 'alerts') || canReadV1Alerts(core)) {
     alertsChildren.push({
@@ -87,49 +93,60 @@ const getAlertsSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
     });
   }
 
-  if (isV2Enabled && canReadV1Alerts(core) && shouldShowV1ObservabilityAlertsTable(core)) {
+  if (canReadV1Alerts(core) && shouldShowV1ObservabilityAlertsTable(core)) {
     alertsChildren.push({
       link: ALERTS_LINK,
-      title: getObservabilityAlertsLinkTitle(isV2Enabled),
+      title: getObservabilityAlertsLinkTitle(true),
     });
   }
 
-  return maybeSection(alertsChildren, { breadcrumbStatus: 'hidden' });
+  return alertsChildren;
 };
 
-const getRuleManagementSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
-  const canReadV2Rules = hasAlertingV2Capability(core, 'rules');
-  const canReadClassicRules = canReadV1Rules(core);
+const getAlertsSection = (core: CoreStart, isV2Enabled: boolean): PanelOpenerChildDefinition[] =>
+  maybeSection(getAlertsChildren(core, isV2Enabled), { breadcrumbStatus: 'hidden' });
 
-  if (!canReadV2Rules && !canReadClassicRules) {
-    return [];
+const getRulesTitle = (): string =>
+  i18n.translate('xpack.observability.nav.rulesV1', { defaultMessage: 'Rules' });
+
+const getRulesChildren = (core: CoreStart, isV2Enabled: boolean): PanelOpenerChildDefinition[] => {
+  if (!isV2Enabled) {
+    return canReadV1Rules(core)
+      ? [{ link: STACK_MANAGEMENT_RULES_LINK, title: getRulesTitle() }]
+      : [];
   }
 
-  const rulesChildren: PanelOpenerChildDefinition[] = [];
-
-  if (canReadV2Rules) {
-    rulesChildren.push({ link: obsAlertingLink('rules-v2') });
-    rulesChildren.push({ link: obsAlertingLink('rules-v1'), sideNavStatus: 'hidden' });
-  } else {
-    rulesChildren.push({
-      link: obsAlertingLink('rules-v1'),
-      title: i18n.translate('xpack.observability.nav.rulesV1', { defaultMessage: 'Rules' }),
-    });
+  if (hasAlertingV2Capability(core, 'rules')) {
+    return [
+      { link: obsAlertingLink('rules-v2') },
+      { link: obsAlertingLink('rules-v1'), sideNavStatus: 'hidden' },
+    ];
   }
 
-  return maybeSection(rulesChildren, {
+  return canReadV1Rules(core)
+    ? [{ link: obsAlertingLink('rules-v1'), title: getRulesTitle() }]
+    : [];
+};
+
+const getRuleManagementSection = (
+  core: CoreStart,
+  isV2Enabled: boolean
+): PanelOpenerChildDefinition[] =>
+  maybeSection(getRulesChildren(core, isV2Enabled), {
     title: i18n.translate('xpack.observability.nav.ruleManagement', {
       defaultMessage: 'Rule Management',
     }),
     breadcrumbStatus: 'hidden',
   });
-};
 
 // Side nav renders at most two `new` badges per panel. Those slots are Action policies and Execution history.
-const getNotificationsSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
+const getNotificationsSection = (
+  core: CoreStart,
+  isV2Enabled: boolean
+): PanelOpenerChildDefinition[] => {
   const notificationsChildren: PanelOpenerChildDefinition[] = [];
 
-  if (hasAlertingV2Capability(core, 'actionPolicies')) {
+  if (isV2Enabled && hasAlertingV2Capability(core, 'actionPolicies')) {
     notificationsChildren.push({
       link: obsAlertingLink('action-policies'),
       badgeType: 'new',
@@ -148,8 +165,11 @@ const getNotificationsSection = (core: CoreStart): PanelOpenerChildDefinition[] 
   });
 };
 
-const getOperationsSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
-  if (!hasAlertingV2Capability(core, 'executionHistory')) {
+const getOperationsSection = (
+  core: CoreStart,
+  isV2Enabled: boolean
+): PanelOpenerChildDefinition[] => {
+  if (!isV2Enabled || !hasAlertingV2Capability(core, 'executionHistory')) {
     return [];
   }
 
@@ -170,29 +190,16 @@ const getOperationsSection = (core: CoreStart): PanelOpenerChildDefinition[] => 
 };
 
 /**
- * While v2 is off, `getAlertsNavPanel` only returns the classic Alerts link.
- * Stack Management Rules is then the only project-nav path to the Rules page.
+ * Alerting panel for the Observability solution nav and serverless. While v2 is off,
+ * it only links to pages that exist without the `observabilityAlerting` app.
  */
-export const shouldIncludeStackManagementRules = (core: CoreStart): boolean =>
-  !isAlertingV2Enabled(core);
-
 export const getAlertsNavPanel = (core: CoreStart): RootNodeDefinition[] => {
-  if (!isAlertingV2Enabled(core)) {
-    return [
-      {
-        link: ALERTS_LINK,
-        icon: ALERTS_ICON,
-        title: getObservabilityAlertsLinkTitle(false),
-        getIsActive: getAlertsIsActive,
-      },
-    ];
-  }
-
+  const isV2Enabled = isAlertingV2Enabled(core);
   const children = [
-    ...getAlertsSection(core),
-    ...getRuleManagementSection(core),
-    ...getNotificationsSection(core),
-    ...getOperationsSection(core),
+    ...getAlertsSection(core, isV2Enabled),
+    ...getRuleManagementSection(core, isV2Enabled),
+    ...getNotificationsSection(core, isV2Enabled),
+    ...getOperationsSection(core, isV2Enabled),
   ];
 
   if (children.length === 0) {

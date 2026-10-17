@@ -47,7 +47,7 @@ export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
 export { DatePicker } from './pages/overview/components/date_picker';
 export { NightshiftNavigationIcon } from '@kbn/observability-shared-plugin/public';
-export { getAlertsNavPanel, shouldIncludeStackManagementRules } from './nav/get_alerts_nav_panel';
+export { getAlertsNavPanel } from './nav/get_alerts_nav_panel';
 export { AlertingNavPromo } from './nav/alerting_nav_tour';
 
 export type {
