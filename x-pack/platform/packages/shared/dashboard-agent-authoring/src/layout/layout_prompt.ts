@@ -11,24 +11,25 @@ import { layoutArrangementSchema, type LayoutArrangement, type LayoutRequest } f
 
 const JSON_BLOCK_REGEX = /```(?:json)?([\s\S]*?)```/;
 
-const LAYOUT_SYSTEM_PROMPT = `You lay out the panels of a Kibana dashboard. Return the grid \`{ x, y, w, h }\` of every panel and the \`y\` of every section. Every panel stays in its container: return the top-level panels in \`panels\`, and the panels of each section in that section's \`panels\`. Order panels by purpose only within their container.
+const LAYOUT_SYSTEM_PROMPT = `You lay out the panels of a Kibana dashboard. Return the grid \`x, y, w, h\` of every panel and the \`y\` of every section. Every panel stays in its container: return the top-level panels in \`panels\`, and the panels of each section with that section. Order panels by purpose only within their container.
 
 The dashboard uses a **48-column grid**; the origin \`(0, 0)\` is the top-left corner. On a 16:9 screen, roughly **20–24 rows** are visible without scrolling.
 
 ## What you get
 
-The dashboard as it is now: \`panels\` are the top-level panels, and \`sections\` each list their panels, whose coordinates are section-relative. Panels without a \`grid\` and sections without a \`y\` are new in this edit, or moved here from another container: place them. A moved panel has the \`size\` it had in its old container: keep it unless the row needs another width. A panel with \`retypedFrom\` changed its chart type in this edit, and its \`grid\` or \`size\` was set for that old type. \`removed\` lists the space that panels removed from a container, or moved out of it, left there. Return \`panels: []\` for a section that keeps its layout: it keeps every grid, and you return only its \`y\`. Markdown and custom content panels include their \`content\`. \`instructions\`, when given, say where panels and sections go, from the user or the authoring agent; they override the rules below.
+The dashboard as it is now: \`panels\` are the top-level panels, and \`sections\` each list their panels, whose coordinates are section-relative. Panels without a \`grid\` and sections without a \`y\` are new in this edit, or moved here from another container: place them. A moved panel has the \`size\` it had in its old container: keep it unless the row needs another width. A panel with \`retypedFrom\` changed its chart type in this edit, and its \`grid\` or \`size\` was set for that old type. \`removed\` lists the space that panels removed from a container, or moved out of it, left there. Return an empty panel list, \`["s1", 12, []]\`, for a section that keeps its layout: it keeps every grid, and you return only its \`y\`. Markdown and custom content panels include their \`content\`. \`instructions\`, when given, say where panels and sections go, from the user or the authoring agent; they override the rules below.
 
 ## Answer
 
 Answer with one JSON object in a \`json\` code block, and nothing else:
 
 \`\`\`json
-{"plan":"…","panels":[{"id":"p1","x":0,"y":0,"w":24,"h":10}],"sections":[{"id":"s1","y":10,"panels":[{"id":"p2","x":0,"y":0,"w":12,"h":6}]}]}
+{"plan":"top: 24×10 24×10; s1: 12×6 12×6 24×6","panels":[["p1",0,0,24,10],["p3",24,0,24,10]],"sections":[["s1",10,[["p2",0,0,12,6],["p4",12,0,12,6],["p5",24,0,24,6]]]]}
 \`\`\`
 
-- \`plan\` comes first: per container, the rows you change and why, then each changed row as \`w×h\` per panel. Check that the widths of every row add up to 48 and that panels side by side end on the same row.
-- \`panels\` has every top-level panel, and \`sections\` has every section, with its row \`y\` in the top-level grid and the section-relative grids of its panels.
+- \`plan\` comes first and stays short: per container you change, each changed row as \`w×h\` per panel, with no explanations. Check that the widths of every row add up to 48 and that panels side by side end on the same row.
+- \`panels\` has every top-level panel as \`[id, x, y, w, h]\`.
+- \`sections\` has every section as \`[id, y, panels]\`: its row \`y\` in the top-level grid, and its panels as \`[id, x, y, w, h]\` in section-relative coordinates.
 
 ## How to lay out
 

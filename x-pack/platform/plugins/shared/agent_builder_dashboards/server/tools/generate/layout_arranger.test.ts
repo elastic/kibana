@@ -14,8 +14,10 @@ const request: LayoutRequest = {
   sections: [],
 };
 
+const answer = JSON.stringify({ plan: 'top: 48×6', panels: [['p1', 0, 0, 48, 6]], sections: [] });
+
 const arrangement: LayoutArrangement = {
-  plan: 'One full-width row.',
+  plan: 'top: 48×6',
   panels: [{ id: 'p1', x: 0, y: 0, w: 48, h: 6 }],
   sections: [],
 };
@@ -33,19 +35,14 @@ const createModelProvider = (texts: string[]) => {
 
 describe('createLayoutArranger', () => {
   it('returns the arrangement of a readable answer', async () => {
-    const { modelProvider, invoke } = createModelProvider([
-      `\`\`\`json\n${JSON.stringify(arrangement)}\n\`\`\``,
-    ]);
+    const { modelProvider, invoke } = createModelProvider([`\`\`\`json\n${answer}\n\`\`\``]);
 
     await expect(createLayoutArranger({ modelProvider })(request)).resolves.toEqual(arrangement);
     expect(invoke).toHaveBeenCalledTimes(1);
   });
 
   it('asks again once with the error when the answer cannot be read', async () => {
-    const { modelProvider, invoke } = createModelProvider([
-      'not json',
-      JSON.stringify(arrangement),
-    ]);
+    const { modelProvider, invoke } = createModelProvider(['not json', answer]);
 
     await expect(createLayoutArranger({ modelProvider })(request)).resolves.toEqual(arrangement);
     expect(invoke).toHaveBeenCalledTimes(2);
