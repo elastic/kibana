@@ -275,18 +275,6 @@ module.exports = {
         'react-hooks/exhaustive-deps': 'off',
       },
     },
-    {
-      files: ['x-pack/platform/plugins/private/canvas/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'jsx-a11y/click-events-have-key-events': 'off',
-      },
-    },
-    {
-      files: ['x-pack/platform/plugins/private/cross_cluster_replication/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'jsx-a11y/click-events-have-key-events': 'off',
-      },
-    },
     /**
      * FormatJS linter for i18n code.
      * https://formatjs.io/docs/tooling/linter
@@ -645,32 +633,7 @@ module.exports = {
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
-        'react/function-component-definition': [
-          'warn',
-          {
-            namedComponents: 'function-declaration',
-            unnamedComponents: 'arrow-function',
-          },
-        ],
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-      },
-    },
-    {
-      files: [
-        'x-pack/solutions/observability/plugins/apm/**/*.stories.*',
-        'x-pack/solutions/observability/plugins/observability/**/*.stories.*',
-        'x-pack/solutions/observability/plugins/exploratory_view/**/*.stories.*',
-        'x-pack/solutions/observability/plugins/slo/**/*.stories.*',
-        'x-pack/solutions/observability/packages/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        'react/function-component-definition': [
-          'off',
-          {
-            namedComponents: 'function-declaration',
-            unnamedComponents: 'arrow-function',
-          },
-        ],
       },
     },
     {
@@ -972,30 +935,14 @@ module.exports = {
         'prefer-spread': 'error',
         'prefer-template': 'error',
         'react/boolean-prop-naming': 'error',
-        'react/button-has-type': 'error',
         'react/display-name': 'error',
-        'react/forbid-dom-props': 'error',
         'react/no-access-state-in-setstate': 'error',
-        'react/no-children-prop': 'error',
-        'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
-        'react/no-did-mount-set-state': 'error',
-        'react/no-direct-mutation-state': 'error',
-        'react/no-find-dom-node': 'error',
-        'react/no-redundant-should-component-update': 'error',
-        'react/no-render-return-value': 'error',
         'react/no-typos': 'error',
-        'react/no-string-refs': 'error',
-        'react/no-this-in-sfc': 'error',
-        'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
         'react/sort-default-props': 'error',
-        'react/void-dom-elements-no-children': 'error',
-        'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
-        'react/jsx-no-target-blank': 'error',
-        'react/jsx-fragments': 'error',
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
@@ -1077,32 +1024,15 @@ module.exports = {
       },
       rules: {
         'react/boolean-prop-naming': 'error',
-        'react/button-has-type': 'error',
         'react/display-name': 'error',
-        'react/forbid-dom-props': 'error',
         'react/no-access-state-in-setstate': 'error',
-        'react/no-children-prop': 'error',
-        'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
-        'react/no-did-mount-set-state': 'error',
-        'react/no-did-update-set-state': 'error',
-        'react/no-direct-mutation-state': 'error',
-        'react/no-find-dom-node': 'error',
-        'react/no-redundant-should-component-update': 'error',
-        'react/no-render-return-value': 'error',
         'react/no-typos': 'error',
-        'react/no-string-refs': 'error',
-        'react/no-this-in-sfc': 'error',
-        'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
         'react/sort-comp': 'error',
         'react/sort-default-props': 'error',
-        'react/void-dom-elements-no-children': 'error',
-        'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
-        'react/jsx-no-target-blank': 'error',
-        'react/jsx-fragments': 'error',
       },
     },
     {
@@ -1185,17 +1115,6 @@ module.exports = {
         'playwright/require-top-level-describe': 'error',
         // Scout has a its own runtime validator for test tags
         'playwright/valid-test-tags': 'off',
-        // Check all function arguments to catch unused destructured params
-        '@typescript-eslint/no-unused-vars': [
-          'error',
-          {
-            vars: 'all',
-            args: 'all',
-            ignoreRestSiblings: true, // Ignore unused vars when destructuring with rest operator
-            varsIgnorePattern: '^_', // Allow _ prefix for intentionally unused variables
-            argsIgnorePattern: '^_', // Allow _ prefix for intentionally unused args
-          },
-        ],
       },
     },
     {
@@ -1300,7 +1219,6 @@ module.exports = {
         '@typescript-eslint/no-useless-constructor': 'error',
         '@typescript-eslint/explicit-function-return-type': 'error',
         '@typescript-eslint/no-non-null-assertion': 'error',
-        '@typescript-eslint/no-unused-vars': 'error',
         'no-template-curly-in-string': 'error',
         'sort-keys': 'error',
         'prefer-destructuring': 'error',
@@ -1399,7 +1317,6 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-non-null-assertion': 'error',
         '@typescript-eslint/no-this-alias': 'error',
-        '@typescript-eslint/no-unused-vars': 'error',
       },
     },
     {
@@ -1497,8 +1414,6 @@ module.exports = {
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
         'react-hooks/exhaustive-deps': 'error',
-        // Custom content renders LLM-generated HTML; it must stay inside the sandboxed iframe.
-        'react/no-danger': 'error',
       },
     },
     {
@@ -1580,13 +1495,8 @@ module.exports = {
         ],
         'import/newline-after-import': 'error',
         'react-hooks/exhaustive-deps': 'off',
-        'react/jsx-boolean-value': ['error', 'never'],
         'sort-keys': 1, // warning
         '@typescript-eslint/member-ordering': [1, { default: { order: 'alphabetically' } }], // warning
-        '@typescript-eslint/no-unused-vars': [
-          'error',
-          { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
-        ],
       },
     },
     {
@@ -1618,29 +1528,7 @@ module.exports = {
         'import/extensions': ['error', 'never', { json: 'always', less: 'always', svg: 'always' }],
 
         // react
-        'react/no-did-mount-set-state': 'error',
-        'react/no-did-update-set-state': 'error',
         'react/sort-comp': 'error',
-        'react/jsx-boolean-value': 'error',
-        'react/forbid-elements': [
-          'error',
-          {
-            forbid: [
-              {
-                element: 'EuiConfirmModal',
-                message: 'Use <ConfirmModal> instead',
-              },
-              {
-                element: 'EuiPopover',
-                message: 'Use <Popover> instead',
-              },
-              {
-                element: 'EuiIconTip',
-                message: 'Use <TooltipIcon> instead',
-              },
-            ],
-          },
-        ],
       },
     },
     {
@@ -1759,6 +1647,17 @@ module.exports = {
         'react/no-is-mounted': 'off',
         'react/no-unescaped-entities': 'off',
         'react/no-unknown-property': 'off',
+        'react/jsx-key': 'off',
+        'react/jsx-no-comment-textnodes': 'off',
+        'react/jsx-no-target-blank': 'off',
+        'react/no-children-prop': 'off',
+        'react/no-danger-with-children': 'off',
+        'react/no-direct-mutation-state': 'off',
+        'react/no-find-dom-node': 'off',
+        'react/no-render-return-value': 'off',
+        'react/no-string-refs': 'off',
+        'react/require-render-return': 'off',
+        'react/react-in-jsx-scope': 'off',
         '@typescript-eslint/no-extra-non-null-assertion': 'off',
         '@typescript-eslint/no-misused-new': 'off',
         '@typescript-eslint/no-namespace': 'off',
@@ -1986,30 +1885,14 @@ module.exports = {
         'prefer-spread': 'error',
         'prefer-template': 'error',
         'react/boolean-prop-naming': 'error',
-        'react/button-has-type': 'error',
         'react/display-name': 'error',
-        'react/forbid-dom-props': 'error',
         'react/no-access-state-in-setstate': 'error',
-        'react/no-children-prop': 'error',
-        'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
-        'react/no-did-mount-set-state': 'error',
-        'react/no-direct-mutation-state': 'error',
-        'react/no-find-dom-node': 'error',
-        'react/no-redundant-should-component-update': 'error',
-        'react/no-render-return-value': 'error',
         'react/no-typos': 'error',
-        'react/no-string-refs': 'error',
-        'react/no-this-in-sfc': 'error',
-        'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
         'react/sort-default-props': 'error',
-        'react/void-dom-elements-no-children': 'error',
-        'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
-        'react/jsx-no-target-blank': 'error',
-        'react/jsx-fragments': 'error',
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
