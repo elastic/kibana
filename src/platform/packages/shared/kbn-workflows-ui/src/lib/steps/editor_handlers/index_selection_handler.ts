@@ -182,6 +182,7 @@ export const getIndexSelectionHandler = (
             path: indexManagementUrl,
           },
         ],
+        severity: 'warning',
       };
     },
   };

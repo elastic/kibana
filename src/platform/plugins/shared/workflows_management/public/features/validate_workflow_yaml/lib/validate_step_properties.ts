@@ -11,7 +11,6 @@ import type { SelectionDetails, SelectionOption } from '@kbn/workflows';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import type { StepPropertyItem, StepPropertyValidationResult } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
-import { isTemplateReference } from './is_template_reference';
 import { stepSchemas } from '../../../../common/step_schemas';
 import {
   getCachedSearchOption,
@@ -46,7 +45,7 @@ function buildValidationResult(
   if (hasError) {
     return {
       id: stepPropertyItem.id,
-      severity: 'error',
+      severity: details.severity ?? 'error',
       message: details.message,
       beforeMessage,
       afterMessage: null,
@@ -94,11 +93,16 @@ function getPropertySchema(
   return result.schema;
 }
 
+function containsTemplate(value: string): boolean {
+  return value.includes('{{') || value.includes('{%');
+}
+
 function shouldValidateProperty(item: StepPropertyItem): boolean {
   const { propertyValue, context } = item;
   const { stepType, scope, propertyKey } = context;
 
-  if (typeof propertyValue === 'string' && isTemplateReference(propertyValue)) {
+  // A template anywhere in the value (e.g. `.alerts-{{ variables.spaceId }}`) resolves only at runtime
+  if (typeof propertyValue === 'string' && containsTemplate(propertyValue)) {
     return false;
   }
   if (propertyValue === null || propertyValue === undefined) {

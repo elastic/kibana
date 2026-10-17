@@ -14,7 +14,7 @@ import {
   type NormalizableFieldSchema,
   normalizeFieldsToJsonSchema,
 } from '@kbn/workflows/spec/lib/field_conversion';
-import { getStepNodesWithType } from '@kbn/workflows-yaml';
+import { getStepNodesWithType, isDynamicValue } from '@kbn/workflows-yaml';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { getMonacoRangeFromYamlNode } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { validateWorkflowFields } from '../../../widgets/workflow_yaml_editor/lib/validation/validate_workflow_fields';
@@ -179,7 +179,11 @@ export function validateWorkflowOutputsInYaml(
     const validation = validateWorkflowFields(outputStep.withValues, outputsSchema, 'output');
 
     if (!validation.isValid) {
-      for (const error of validation.errors) {
+      // `${{ }}` values resolve at runtime, so their raw string form says nothing about the type
+      const staticErrors = validation.errors.filter(
+        ({ fieldName }) => !fieldName || !isDynamicValue(outputStep.withValues[fieldName])
+      );
+      for (const error of staticErrors) {
         const errorNode = error.fieldName
           ? findFieldNodeInWith(outputStep.withNode, error.fieldName)
           : outputStep.withNode;

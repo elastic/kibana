@@ -30,7 +30,6 @@ import { validateLiquidForLoopCollections } from './validate_liquid_for_loop_col
 import { positionAt } from './__fixtures__/text_position';
 import { getContextSchemaForStep } from '../context/get_context_for_path';
 import {
-  FOREACH_ITEM_SCHEMA_DESC,
   getForeachCollectionDiagnostic,
   getForeachItemSchema,
 } from '../context/get_foreach_state_schema';
@@ -167,7 +166,7 @@ steps:
     ).toHaveLength(0);
   });
 
-  it('maps runtime JSON string collection paths to warning diagnostics', () => {
+  it('does not report runtime JSON string collection paths', () => {
     const stepContext = DynamicStepContextSchema.extend({
       steps: z.object({
         fetch: z.object({ output: z.string() }),
@@ -178,10 +177,7 @@ steps:
         getForeachItemSchema(stepContext, 'steps.fetch.output'),
         'steps.fetch.output'
       )
-    ).toEqual({
-      message: FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON,
-      severity: 'warning',
-    });
+    ).toBeNull();
 
     const runtimeLineCounter = new LineCounter();
     const runtimeDoc = parseDocument(FOR_LOOP_RUNTIME_JSON_YAML, {
@@ -214,14 +210,10 @@ steps:
       runtimeLineCounter,
       forLoopRuntimeJsonWorkflowDefinition
     );
-    expect(
-      runtimeResults.some(
-        (r) => r.severity === 'warning' && r.message === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON
-      )
-    ).toBe(true);
+    expect(runtimeResults).toHaveLength(0);
   });
 
-  it('maps ES|QL result cell collections to warning diagnostics', () => {
+  it('does not report ES|QL result cell collections', () => {
     const esqlLineCounter = new LineCounter();
     const esqlDoc = parseDocument(FOR_LOOP_ESQL_CELL_YAML, { lineCounter: esqlLineCounter });
     const esqlGraph = WorkflowGraph.fromWorkflowDefinition(forLoopEsqlCellWorkflowDefinition);
@@ -239,12 +231,7 @@ steps:
       forLoopEsqlCellWorkflowDefinition
     );
 
-    expect(esqlResults.filter((r) => r.severity === 'error')).toHaveLength(0);
-    expect(
-      esqlResults.some(
-        (r) => r.severity === 'warning' && r.message === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE
-      )
-    ).toBe(true);
+    expect(esqlResults).toHaveLength(0);
   });
 
   it('does not error when the collection resolves to a string literal via assign filters', () => {

@@ -128,6 +128,39 @@ steps:
       expect(results).toHaveLength(0);
     });
 
+    it('should skip type checks for ${{ }} values but still report missing required fields', () => {
+      const yamlString = `name: test
+outputs:
+  required:
+    - items
+    - count
+    - label
+  properties:
+    items:
+      type: array
+    count:
+      type: number
+    label:
+      type: string
+steps:
+  - name: return
+    type: workflow.output
+    with:
+      items: "\${{ variables.items }}"
+      count: "\${{ variables.items | size }}"`;
+
+      const { yamlDocument, model } = buildTestContext(yamlString);
+      const parseResult = parseWorkflowYamlForAutocomplete(yamlString);
+      const workflowOutputs = parseResult.success
+        ? (parseResult.data.outputs as JsonModelSchemaType)
+        : undefined;
+
+      const results = validateWorkflowOutputsInYaml(yamlDocument, model, workflowOutputs);
+
+      expect(results).toHaveLength(1);
+      expect(results[0].message).toContain('label');
+    });
+
     it('should validate using outputs from YAML document when workflowOutputs is undefined (fallback)', () => {
       const yamlString = `name: test
 outputs:

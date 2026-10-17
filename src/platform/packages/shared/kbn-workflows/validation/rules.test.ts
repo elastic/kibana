@@ -43,7 +43,6 @@ describe('workflow validation rules registry', () => {
         "targetWorkflowNotFound",
         "unboundedParallelFanOut",
         "unknownInputKey",
-        "unknownVariableType",
         "variablePathParseError",
         "yamlSyntaxError",
       ]
