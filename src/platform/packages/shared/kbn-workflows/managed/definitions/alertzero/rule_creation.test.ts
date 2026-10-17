@@ -170,6 +170,7 @@ describe('Detection Rule Creation worker', () => {
         stepByName('draft_creation')?.with?.schema as JSONSchema7
       );
       const noDraft = {
+        skipped: true,
         attachment_id: '',
         reason: 'The data source does not exist.',
         rule: {
@@ -312,5 +313,51 @@ describe('Detection Rule Creation worker', () => {
         .map(([name]) => name);
       expect(uncapped).toEqual([]);
     });
+  });
+});
+
+const draftStep = stepByName('draft_creation');
+const message = String(draftStep?.with?.message ?? '');
+const draftSchema = draftStep?.with?.schema as
+  | { properties?: Record<string, unknown>; required?: string[] }
+  | undefined;
+
+describe('Rule Creation worker draft_creation prompt', () => {
+  it('is an ai.agent step with a message and structured output schema', () => {
+    expect(draftStep?.type).toBe('ai.agent');
+    expect(message.length).toBeGreaterThan(0);
+    expect(draftSchema?.properties).toBeDefined();
+  });
+
+  it('keeps the provided-context short-circuit', () => {
+    expect(message).toMatch(/supplied context is\s+sufficient; do not ask a follow-up question/);
+  });
+
+  it('declares a quality gate that declines unwinnable gaps instead of drafting', () => {
+    expect(message).toMatch(/[Qq]uality gate/);
+    expect(message).toMatch(/confidence is below 0\.3/);
+    expect(message).toMatch(/catch-all/);
+    expect(message).toMatch(/set skipped to true/);
+  });
+
+  it('exposes the gate decision in the structured output schema', () => {
+    expect(draftSchema?.properties).toHaveProperty('skipped');
+    expect(draftSchema?.properties).toHaveProperty('reason');
+    // The agent must always declare the gate decision; a declined draft carries no rule.
+    expect(draftSchema?.required).toContain('skipped');
+    expect(draftSchema?.required).not.toContain('rule');
+  });
+
+  it('forbids speculative tools the workflow already covers in later steps', () => {
+    expect(message).toMatch(/[Nn]o speculative tools/);
+    expect(message).toMatch(/no rule\s+preview/);
+  });
+
+  it('bounds corroboration to at most one lookup', () => {
+    expect(message).toMatch(/at most one/);
+  });
+
+  it('forbids tool calls after the draft tool returns', () => {
+    expect(message).toMatch(/call no further tools/);
   });
 });
