@@ -25,6 +25,7 @@ import {
   inSpace,
   IS_NOT_DELETED,
   IS_NOT_EXCLUDED,
+  IS_NOT_EXPIRED,
 } from '../esql_helpers';
 import {
   DESCRIPTION,
@@ -50,7 +51,9 @@ import { fromStoredFeature, fromStoredQuery } from './serializers';
 import { searchWithKeywordFallback } from '../../streams/search_with_keyword_fallback';
 import {
   esqlToObjects,
+  pickLatestPerGroup,
   queryEsql,
+  withWhere,
   type LatestSourceWhereCondition,
 } from '../../significant_events/latest_source_query';
 import type { SearchMode } from '../../../../common/queries';
@@ -59,6 +62,7 @@ import type { RevisionReader } from './revision_reader';
 import type { RuleUnbackedFilter } from './types';
 
 const SEARCH_SIZE_LIMIT = 10_000;
+const CROSS_SOURCE_RANK_LIMIT = 300;
 const QUERY_FEATURE_ID = 'query.features.id';
 
 type RankedIndicatorRow = Record<string, unknown> & {
@@ -161,6 +165,97 @@ export class IndicatorSearcher {
     return {
       hits: hits.flatMap((h) => (h.type === 'feature' ? [h.feature] : [])),
     };
+  }
+
+  async findFeaturesAcrossSources(
+    sourceIds: string[],
+    query: string,
+    options: { featureType: string; searchMode?: SearchMode; limit?: number }
+  ): Promise<{ hits: Feature[] }> {
+    if (sourceIds.length === 0) {
+      return { hits: [] };
+    }
+
+    return searchWithKeywordFallback(
+      this.logger,
+      { searchMode: options.searchMode, label: 'KnowledgeIndicator', sourceIds },
+      (mode) => this.executeFindFeaturesAcrossSources(mode, sourceIds, query, options)
+    );
+  }
+
+  private async executeFindFeaturesAcrossSources(
+    mode: SearchMode,
+    sourceIds: string[],
+    queryText: string,
+    { featureType, limit }: { featureType: string; limit?: number }
+  ): Promise<{ hits: Feature[] }> {
+    const rankWhere = andWhere(
+      combineWhere(inPredicate(SOURCE_ID, sourceIds), inPredicate(TYPE, [KI_TYPE_FEATURE])),
+      inSpace(this.space)
+    );
+
+    const query = this.buildRankQuery(
+      mode,
+      rankWhere,
+      queryText,
+      [KI_TYPE_FEATURE],
+      CROSS_SOURCE_RANK_LIMIT,
+      {
+        latestPerGroupWhere: combineWhere(
+          IS_NOT_DELETED,
+          IS_NOT_EXCLUDED,
+          IS_NOT_EXPIRED,
+          inPredicate(FEATURE_TYPE, [featureType])
+        ),
+      }
+    );
+    const rankedRows = esqlToObjects<RankedIndicatorRow>(
+      await queryEsql({ esClient: this.esClient, query })
+    );
+
+    const rankedKeys = new Set<string>();
+    const ids = new Set<string>();
+    for (const row of rankedRows) {
+      const id = row[ID];
+      const sourceId = row[SOURCE_ID];
+      if (typeof id !== 'string' || typeof sourceId !== 'string') {
+        continue;
+      }
+      rankedKeys.add(`${sourceId}:${id}`);
+      ids.add(id);
+    }
+    this.logger.debug(
+      `Cross-source feature search: ${rankedKeys.size} distinct groups in ${rankedRows.length} ranked rows`
+    );
+    if (rankedKeys.size === 0) {
+      return { hits: [] };
+    }
+
+    const latest = await this.revisionReader.fetchLatestRevisions(
+      combineWhere(
+        inPredicate(SOURCE_ID, sourceIds),
+        inPredicate(TYPE, [KI_TYPE_FEATURE]),
+        inPredicate(ID, Array.from(ids))
+      ),
+      combineWhere(
+        IS_NOT_DELETED,
+        IS_NOT_EXCLUDED,
+        IS_NOT_EXPIRED,
+        inPredicate(FEATURE_TYPE, [featureType])
+      )
+    );
+    const latestByKey = new Map(
+      latest
+        .filter(isStoredFeatureKnowledgeIndicator)
+        .map((doc) => [`${doc['source.id']}:${doc.id}`, doc])
+    );
+
+    const hits: Feature[] = [];
+    for (const key of rankedKeys) {
+      const doc = latestByKey.get(key);
+      if (doc) hits.push(fromStoredFeature(doc));
+    }
+    return { hits: limit === undefined ? hits : hits.slice(0, limit) };
   }
 
   async findQueries(
@@ -320,39 +415,37 @@ export class IndicatorSearcher {
     where: LatestSourceWhereCondition,
     queryText: string,
     types: KnowledgeIndicatorType[],
-    limit: number
+    limit: number,
+    options: { latestPerGroupWhere?: LatestSourceWhereCondition } = {}
   ): ComposerQuery {
+    let rankQuery = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_score', '_id', '_index'])
+      .where`${where}`;
+    if (options.latestPerGroupWhere) {
+      rankQuery = pickLatestPerGroup(rankQuery, [SOURCE_ID, TYPE, ID]);
+      rankQuery = withWhere(rankQuery, options.latestPerGroupWhere);
+    }
+
     if (mode === 'semantic') {
-      return esql`FROM ${KNOWLEDGE_INDICATORS_DATA_STREAM} METADATA _score, _id, _index
-        | WHERE ${where}
-        | FORK (
+      return rankQuery.pipe`FORK (
             WHERE MATCH(${esql.col(SEARCH_EMBEDDING)}, ${{ q: queryText }})
             | SORT _score DESC
             | LIMIT ${limit}
-          )
-        | FUSE LINEAR WITH {"normalizer":"minmax"}
-        | WHERE _score >= ${this.config.semantic_min_score}
-        | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
-        | SORT _score DESC
-        | LIMIT ${limit}`;
+          )`.pipe`FUSE LINEAR WITH {"normalizer":"minmax"}`
+        .where`_score >= ${this.config.semantic_min_score}`
+        .pipe`KEEP _id, _index, _score, ${rankGroupKeyColumns()}`.pipe`SORT _score DESC`.limit(
+        limit
+      );
     }
 
     const keyword = this.buildKeywordExpressions(queryText, types);
     if (mode === 'keyword') {
-      return esql`FROM ${KNOWLEDGE_INDICATORS_DATA_STREAM} METADATA _score, _id, _index
-        | WHERE ${where}
-        | WHERE ${keyword.condition}
-        | EVAL _score = ${keyword.score}
-        | WHERE _score > 0
-        | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
-        | SORT _score DESC
-        | LIMIT ${limit}`;
+      return rankQuery.where`${keyword.condition}`.pipe`EVAL _score = ${keyword.score}`
+        .where`_score > 0`.pipe`KEEP _id, _index, _score, ${rankGroupKeyColumns()}`
+        .pipe`SORT _score DESC`.limit(limit);
     }
 
     // Threshold the semantic branch in-place (FUSE LINEAR + fake group) before RRF-fusing with keyword; final KEEP drops the FUSE keys _id/_index.
-    return esql`FROM ${KNOWLEDGE_INDICATORS_DATA_STREAM} METADATA _score, _id, _index
-      | WHERE ${where}
-      | FORK
+    return rankQuery.pipe`FORK
           (
             WHERE MATCH(${esql.col(SEARCH_EMBEDDING)}, ${{ q: queryText }})
             | SORT _score DESC
@@ -372,10 +465,8 @@ export class IndicatorSearcher {
             | LIMIT ${limit}
             | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
           )
-      | FUSE RRF WITH {"rank_constant":${this.config.rrf_rank_constant}}
-      | SORT _score DESC
-      | KEEP ${rankGroupKeyColumns()}, _score
-      | LIMIT ${limit}`;
+      `.pipe`FUSE RRF WITH {"rank_constant":${this.config.rrf_rank_constant}}`
+      .pipe`SORT _score DESC`.pipe`KEEP ${rankGroupKeyColumns()}, _score`.limit(limit);
   }
 
   private buildKeywordExpressions(
