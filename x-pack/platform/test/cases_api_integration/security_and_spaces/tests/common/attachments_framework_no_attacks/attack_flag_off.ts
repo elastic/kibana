@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    it('rejects a security.attack attachment as unregistered', async () => {
+    it('rejects a security.attack attachment while the flag gates the attach path', async () => {
       const postedCase = await createCase(supertest, getPostCaseRequest({ owner: OWNER }));
 
       const response = (await createComment({
@@ -58,9 +58,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(response.statusCode).to.be(400);
       expect(response.error).to.be('Bad Request');
+      // The type stays registered with the flag off so that attacks attached while it was on
+      // keep rendering and keep taking their alerts with them when removed. Only the attach
+      // path is gated, so this is a payload rejection rather than an unregistered type.
       expect(response.message).to.contain(
-        `Attachment type ${SECURITY_ATTACK_ATTACHMENT_TYPE} is not registered`
+        `Invalid attachment payload for type '${SECURITY_ATTACK_ATTACHMENT_TYPE}'`
       );
+      expect(response.message).to.contain('attackAttachmentsEnabled');
 
       const comments = await getAllComments({ supertest, caseId: postedCase.id });
       expect(comments.length).to.be(0);

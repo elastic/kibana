@@ -27,6 +27,22 @@ export const AlertAttachmentMetadataSchema = z
           .strict(),
       ])
       .optional(),
+    /**
+     * The `attachmentId`s of the attachments that put these alerts on the case, for types whose
+     * `onDelete` hook takes its alerts with it. Absent on an attachment the analyst created
+     * directly, which is the point: without it there is no way to tell an alert a cascading type
+     * contributed from one the analyst attached themselves, and removing the former would delete
+     * the latter.
+     *
+     * Written by the attaching client and narrowed server side by `filterDuplicatedAttachments`,
+     * which drops ids already on the case but keeps the rest of the metadata. What survives that
+     * filter is exactly the set of alerts this attachment introduced, so the stored value is the
+     * provenance rather than a claim.
+     *
+     * Several ids because an alert may be contributed by more than one source, and because a
+     * partial removal relabels the remainder onto the sources that still hold it.
+     */
+    sourceAttachmentIds: z.array(z.string()).optional(),
   })
   .strict();
 

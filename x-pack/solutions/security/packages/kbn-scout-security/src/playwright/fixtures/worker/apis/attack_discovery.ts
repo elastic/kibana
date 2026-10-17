@@ -43,14 +43,18 @@ export const getAttackDiscoveryApiService = ({
   return {
     seedAttackData: async () => {
       await measurePerformanceAsync(log, 'security.attackDiscovery.seedAttackData', async () => {
+        // Counted across both the scheduled and the ad hoc indices, and across owners. The pair
+        // this creates is one scheduled attack and one manual one, and the manual one is rewritten
+        // below to an ad hoc rule owned by a user. Narrowing the count to shared scheduled attacks
+        // therefore only ever found one of the two, so the guard never held and every spec sharing
+        // this worker space seeded another pair. Specs that filter the attacks table by type and
+        // expect a single row then failed on whatever ran second.
         const findSeededResponse = await kbnClient.request({
           method: 'GET',
           path: `${basePath}/api/attack_discovery/_find`,
           query: {
             per_page: 2,
             search: SEEDED_ATTACK_TITLE,
-            scheduled: true,
-            shared: true,
           },
         });
 

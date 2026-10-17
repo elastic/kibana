@@ -30,6 +30,7 @@ export const bulkDeleteAttachmentsRoute = createCasesRoute({
         minSize: 1,
         maxSize: MAX_BULK_DELETE_ATTACHMENTS,
       }),
+      include_related: schema.maybe(schema.boolean()),
     }),
   },
   routerOptions: {
@@ -43,6 +44,7 @@ export const bulkDeleteAttachmentsRoute = createCasesRoute({
       await client.attachments.bulkDelete({
         caseId: request.params.case_id,
         savedObjectIds: request.body.ids,
+        includeRelated: request.body.include_related,
       });
 
       return response.noContent();

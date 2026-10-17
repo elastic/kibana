@@ -98,6 +98,29 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('edited comment')).toBeInTheDocument();
     });
 
+    it('renders an edit to an attachment that is not a comment as an attachment', async () => {
+      const userAction = getUserAction('comment', UserActionActions.update, {
+        payload: {
+          comment: {
+            type: STACK_ALERT_ATTACHMENT_TYPE,
+            attachmentId: ['alert-id-1'],
+            metadata: { index: ['alert-index-1'] },
+            owner: 'securitySolution',
+          },
+        },
+      });
+
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        attachments: [],
+        userAction,
+      });
+
+      renderWithTestingProviders(<EuiCommentList comments={builder.build()} />);
+
+      expect(screen.getByText('edited attachment')).toBeInTheDocument();
+    });
+
     it('renders correctly when editing a comment whose attachment saved object is missing', async () => {
       const userAction = getUserAction('comment', UserActionActions.update);
       const builder = createCommentUserActionBuilder({

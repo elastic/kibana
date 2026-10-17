@@ -22,7 +22,7 @@ import { deleteCaseAttachments, doNotExistOnCaseMessage } from './delete_utils';
 
 /** Deletes attachments of any type from a case, rejecting the request if any id is not found. */
 export const bulkDeleteAttachments = async (
-  { caseId, savedObjectIds }: BulkDeleteArgs,
+  { caseId, savedObjectIds, includeRelated = true }: BulkDeleteArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
   const {
@@ -49,6 +49,7 @@ export const bulkDeleteAttachments = async (
         caseId,
         attachments,
         operation: Operations.deleteComment,
+        includeRelated,
       },
       clientArgs
     );
@@ -105,7 +106,11 @@ export const bulkDeleteFileAttachments = async (
 
     if (attachments.length > 0) {
       await deleteCaseAttachments(
-        { caseId, attachments, operation: Operations.deleteComment },
+        // A file attachment takes nothing along with it: the hooks exist to keep an attachment in
+        // step with the one that introduced it, and a file is never introduced by another type.
+        // The hooks still run, so a type that records where an attachment came from can correct
+        // that record; only the deletions they ask for are refused.
+        { caseId, attachments, operation: Operations.deleteComment, includeRelated: false },
         clientArgs
       );
     }

@@ -1,5 +1,5 @@
 {
-  "sha1": "53de60be7708ac38cc25663953c63167df21e20a",
+  "sha1": "baf5dcdb57955b3162df41380867c4338ef0134b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,48 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/global.setup.ts",
         "line": 5,
         "column": 1
+      }
+    },
+    {
+      "id": "1f3b1f0fa751de1-7ce279b71bf6533",
+      "title": "Attack case attachments attaches an attack to a new case and renders the preview card and Attacks grid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_cases.spec.ts",
+        "line": 190,
+        "column": 15
+      }
+    },
+    {
+      "id": "1f3b1f0fa751de1-9f1cd6d6afe1cea",
+      "title": "Attack case attachments removes an attack from its activity card, keeping the alerts another attack claims",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_cases.spec.ts",
+        "line": 315,
+        "column": 11
+      }
+    },
+    {
+      "id": "1f3b1f0fa751de1-4dc13498cd38f70",
+      "title": "Attack case attachments opens the attack flyout from the \"Show attack details\" action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_cases.spec.ts",
+        "line": 466,
+        "column": 34
       }
     },
     {

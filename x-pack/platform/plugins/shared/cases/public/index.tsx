@@ -54,6 +54,7 @@ export type {
   CaseAttachmentWorkflowTarget,
   UseCaseAttachmentWorkflowRunParams,
 } from './components/workflows/use_case_attachment_workflow_run';
+export { useRefreshCaseViewPage } from './components/case_view/use_on_refresh_case_view_page';
 export { ShowTableButton } from './components/attachments/common/show_table_button';
 export type {
   CasesTimelineIntegration,

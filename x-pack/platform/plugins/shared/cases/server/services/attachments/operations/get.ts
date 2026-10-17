@@ -176,7 +176,7 @@ export class AttachmentGetter {
   private toAttachmentForDeletion(
     so: SavedObject<AttachmentPersistedAttributes> | SavedObject<UnifiedAttachmentAttributes>
   ): AttachmentForDeletion {
-    const { id, type, references } = so;
+    const { id, type, references, version } = so;
     const attributes = this.injectForDeletion(so);
     const { owner: rawOwner }: Record<string, unknown> = attributes;
     const attachment = {
@@ -185,6 +185,7 @@ export class AttachmentGetter {
       owner: typeof rawOwner === 'string' && rawOwner.length > 0 ? rawOwner : undefined,
       references,
       fileId: getStoredFileId(attributes),
+      version,
     };
 
     try {

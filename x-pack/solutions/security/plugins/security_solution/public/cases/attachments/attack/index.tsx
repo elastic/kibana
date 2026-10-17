@@ -76,6 +76,12 @@ const ShowAttackButton = React.lazy(async () => {
   const { ShowAttackButton: Component } = await import('./components/show_attack_button');
   return { default: Component };
 });
+const RemoveAttackCardAction = React.lazy(async () => {
+  const { RemoveAttackCardAction: Component } = await import(
+    './components/remove_attack_card_action'
+  );
+  return { default: Component };
+});
 
 const AttackTabContentWrapper: ComponentType<CommonAttachmentListViewProps> = (props) => (
   <Suspense fallback={null}>
@@ -107,8 +113,13 @@ export const getAttackAttachment = () =>
         />
       ),
       children: AttackAttachmentChildrenLazy,
+      // The framework's own trash action removes the attack attachment on its own. Attacks bring
+      // their constituent alerts onto the case with them, so removal is registered here instead,
+      // to offer to take those alerts back off — see `resolveRemovableAlertAttachments` for which
+      // of them are actually the attack's to remove.
+      hideDefaultActions: true,
       getActions: (actionProps: AttackAttachmentViewProps) => {
-        const { attachmentId, metadata, savedObjectId } = actionProps;
+        const { attachmentId, caseData, metadata, permissions, savedObjectId } = actionProps;
         if (!metadata) {
           return [];
         }
@@ -128,6 +139,24 @@ export const getAttackAttachment = () =>
               </Suspense>
             ),
           },
+          ...(permissions.delete
+            ? [
+                {
+                  type: AttachmentActionType.CUSTOM as const,
+                  isPrimary: true,
+                  render: () => (
+                    <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+                      <RemoveAttackCardAction
+                        attackId={attachmentId}
+                        attackTitle={metadata.title}
+                        caseId={caseData.id}
+                        savedObjectId={savedObjectId}
+                      />
+                    </Suspense>
+                  ),
+                },
+              ]
+            : []),
         ];
       },
     }),
@@ -214,7 +243,7 @@ export type AttackAttachmentWithoutOwner = Omit<AttackAttachmentPayload, 'owner'
 export interface AlertAttachmentWithoutOwner {
   type: typeof SECURITY_ALERT_ATTACHMENT_TYPE;
   attachmentId: string[];
-  metadata: { index: string };
+  metadata: { index: string; sourceAttachmentIds: string[] };
 }
 
 /** How many attacks one add-to-case may carry; each attack takes two bulk-create attachments. */
@@ -347,7 +376,11 @@ export const buildAttacksAttachments = (
       attachments.push({
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
         attachmentId: attachedAlertIds,
-        metadata: { index: attack.alertsIndex },
+        // Records which attack put these alerts on the case. Cases drops the ids already
+        // attached before persisting this, so what survives is the set this attack actually
+        // introduced rather than the set it claims — which is the only way to tell an alert the
+        // attack brought from one the analyst attached themselves.
+        metadata: { index: attack.alertsIndex, sourceAttachmentIds: [attack.id] },
       });
     }
   }

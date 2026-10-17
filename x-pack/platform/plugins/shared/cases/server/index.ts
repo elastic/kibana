@@ -49,6 +49,11 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
 
 export type { CasesServerSetup, CasesServerStart, CloseReasonValidator } from './types';
 export type {
+  AttachmentDeleteContext,
+  AttachmentDeleteResult,
+  AttachmentDeleteTarget,
+  AttachmentOnDelete,
+  AttachmentUpdate,
   AttachmentWorkflowDefinition,
   UnifiedAttachmentTypeSetup,
   WorkflowAttachmentResolverContext,

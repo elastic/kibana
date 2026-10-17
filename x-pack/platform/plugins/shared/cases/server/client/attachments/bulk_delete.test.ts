@@ -6,13 +6,17 @@
  */
 
 import type { File } from '@kbn/files-plugin/common';
+import { z } from '@kbn/zod/v4';
 import { bulkDeleteAttachments, bulkDeleteFileAttachments } from './bulk_delete';
+import type { AttachmentAttributesV2 } from '../../../common/types/domain';
 import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_BULK_DELETE_ATTACHMENTS,
   MAX_DELETE_FILES,
 } from '../../../common/constants';
+import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { Operations } from '../../authorization';
 import type { AttachmentForDeletion } from '../../services/attachments/types';
@@ -82,6 +86,78 @@ describe('bulk_delete', () => {
       expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
         expect.objectContaining({ operation: Operations.deleteComment })
       );
+    });
+
+    describe('related attachments', () => {
+      const attackAttachment: AttachmentForDeletion = {
+        ...userComment,
+        id: 'attack-attachment-1',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+        attributes: {
+          ...mockCaseComments[0].attributes,
+          type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+          attachmentId: 'attack-doc-1',
+          metadata: { title: 'Credential harvesting', alertCount: 1, index: '.alerts-attacks' },
+        } as unknown as AttachmentAttributesV2,
+      };
+      const onDelete = jest.fn();
+      const argsWithHook = createCasesClientMockArgs();
+      argsWithHook.unifiedAttachmentTypeRegistry.register({
+        id: SECURITY_ATTACK_ATTACHMENT_TYPE,
+        schema: z.object({}),
+        onDelete,
+      });
+
+      beforeEach(() => {
+        onDelete.mockResolvedValue({ relatedAttachmentIds: [otherUserComment.id] });
+        argsWithHook.services.attachmentService.getter.bulkGetForDeletion.mockResolvedValue([
+          attackAttachment,
+        ]);
+        argsWithHook.services.attachmentService.getter.bulkGetForDeletionByType.mockResolvedValue([
+          otherUserComment,
+        ]);
+        argsWithHook.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+          new Map()
+        );
+        argsWithHook.services.attachmentService.bulkDelete.mockImplementation(
+          async ({ savedObjectIds }) => savedObjectIds
+        );
+        argsWithHook.services.caseService.getAllCaseComments.mockResolvedValue({
+          saved_objects: [mockCaseComments[1]].map((so) => ({ ...so, score: 0 })),
+          total: 1,
+          per_page: 100,
+          page: 1,
+        });
+      });
+
+      it('deletes the attachments the onDelete hook names by default', async () => {
+        await bulkDeleteAttachments(
+          { caseId: 'mock-id-1', savedObjectIds: ['attack-attachment-1'] },
+          argsWithHook
+        );
+
+        expect(argsWithHook.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
+          savedObjectIds: ['attack-attachment-1', 'mock-comment-2'],
+          refresh: true,
+        });
+      });
+
+      it('runs the onDelete hook but takes nothing along when includeRelated is false', async () => {
+        await bulkDeleteAttachments(
+          {
+            caseId: 'mock-id-1',
+            savedObjectIds: ['attack-attachment-1'],
+            includeRelated: false,
+          },
+          argsWithHook
+        );
+
+        expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ includeRelated: false }));
+        expect(argsWithHook.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
+          savedObjectIds: ['attack-attachment-1'],
+          refresh: true,
+        });
+      });
     });
 
     describe('errors', () => {
@@ -247,6 +323,40 @@ describe('bulk_delete', () => {
 
       expect(clientArgs.services.attachmentService.bulkDelete).not.toHaveBeenCalled();
       expect(clientArgs.fileService.delete).not.toHaveBeenCalled();
+    });
+
+    it('does not take attachments along with the deleted file attachments', async () => {
+      const onDelete = jest.fn().mockResolvedValue({ relatedAttachmentIds: ['mock-comment-1'] });
+      const argsWithHook = createCasesClientMockArgs();
+      argsWithHook.unifiedAttachmentTypeRegistry.register({
+        id: attributes.type,
+        schema: z.object({}),
+        onDelete,
+      });
+      argsWithHook.fileService.getById.mockResolvedValue(mockFile([caseId]));
+      argsWithHook.services.attachmentService.getter.getFileAttachmentsForDeletion.mockResolvedValue(
+        [fileAttachment]
+      );
+      argsWithHook.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+      argsWithHook.services.attachmentService.bulkDelete.mockImplementation(
+        async ({ savedObjectIds }) => savedObjectIds
+      );
+      argsWithHook.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 100,
+        page: 1,
+      });
+
+      await bulkDeleteFileAttachments({ caseId, fileIds: [fileId] }, argsWithHook, casesClient);
+
+      expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ includeRelated: false }));
+      expect(argsWithHook.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
+        savedObjectIds: ['file-attachment-1'],
+        refresh: true,
+      });
     });
 
     it('emits the event for the deleted file attachments', async () => {
