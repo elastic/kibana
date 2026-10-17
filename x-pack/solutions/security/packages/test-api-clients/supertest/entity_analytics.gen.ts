@@ -30,14 +30,7 @@ import type {
 import type { BulkUpsertAssetCriticalityRecordsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
 import type { ConfigureRiskEngineSavedObjectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
 import type { CreateAssetCriticalityRecordRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/create_asset_criticality.gen';
-import type {
-  CreateEntitySourceRequestBodyInput,
-  DeleteEntitySourceRequestParamsInput,
-  GetEntitySourceRequestParamsInput,
-  ListEntitySourcesRequestQueryInput,
-  UpdateEntitySourceRequestParamsInput,
-  UpdateEntitySourceRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+import type { CreateEntitySourceRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import type { CreatePrivilegesImportIndexRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/create_index.gen';
 import type { CreatePrivMonUserRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/create.gen';
 import type { CreateWatchlistRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/management/create.gen';
@@ -46,25 +39,27 @@ import type {
   CreateWatchlistEntitySourceRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/create.gen';
 import type { DeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
+import type { DeleteEntitySourceRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import type { DeleteMonitoringEngineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/engine/delete.gen';
 import type { DeletePrivMonUserRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/delete.gen';
 import type { DeleteWatchlistEntitySourceRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/delete.gen';
-import type {
-  DeprecatedTriggerRiskScoreCalculationRequestBodyInput,
-  TriggerRiskScoreCalculationRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
+import type { DeprecatedTriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import type { EntityDetailsHighlightsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_details/highlights.gen';
 import type { FindAssetCriticalityRecordsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/list_asset_criticality.gen';
 import type {
   GetAnomalyOverviewRequestParamsInput,
   GetAnomalyOverviewRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/anomaly_summary/anomaly_summary.gen';
+import type {
   GetAnomalySummaryRequestParamsInput,
   GetAnomalySummaryRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/anomaly_summary/anomaly_summary.gen';
 import type { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
+import type { GetEntitySourceRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import type { GetRiskScoreHistoryRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/risk_score_history_route.gen';
 import type { GetWatchlistRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/management/get.gen';
 import type { GetWatchlistEntitySourceRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/get.gen';
+import type { ListEntitySourcesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import type { ListPrivMonUsersRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/list.gen';
 import type {
   ListWatchlistEntitySourcesRequestQueryInput,
@@ -74,10 +69,15 @@ import type { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-pl
 import type { ScheduleRiskEngineNowRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_schedule_now_route.gen';
 import type { SearchPrivilegesIndicesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/search_indices.gen';
 import type { SyncWatchlistRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/sync/sync.gen';
+import type { TriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import type {
   UnassignWatchlistEntitiesRequestParamsInput,
   UnassignWatchlistEntitiesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/entities/unassign.gen';
+import type {
+  UpdateEntitySourceRequestParamsInput,
+  UpdateEntitySourceRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import type {
   UpdatePrivMonUserRequestParamsInput,
   UpdatePrivMonUserRequestBodyInput,

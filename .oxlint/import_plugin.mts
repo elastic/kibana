@@ -215,6 +215,16 @@ export const importPluginOverrides: OxlintOverride[] = [
     },
   },
   {
+    // The supertest API client template imports every request input type per operation and relies
+    // on `@kbn/imports/no_unused_imports` to remove the ones that do not exist. Merging duplicates in
+    // the same fix run overlaps with those removals, and the merged order then differed between CI
+    // and local runs, so these bundles keep one import per operation.
+    files: ['x-pack/solutions/security/packages/test-api-clients/supertest/*.gen.ts'],
+    rules: {
+      'import/no-duplicates': 'off',
+    },
+  },
+  {
     // Lists front end and common files
     files: inDirs([
       'x-pack/solutions/security/plugins/lists/public',

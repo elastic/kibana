@@ -19,7 +19,7 @@ import { formatOutput } from './lib/format_output';
 import { getGeneratedFilePath } from './lib/get_generated_file_path';
 import { removeGenArtifacts } from './lib/remove_gen_artifacts';
 import { lint } from './openapi_linter';
-import { getGenerationContext, getRequestInputImports } from './parser/get_generation_context';
+import { getGenerationContext } from './parser/get_generation_context';
 import type { OpenApiDocument, ParsedSource } from './parser/openapi_types';
 import type { TemplateName } from './template_service/template_service';
 import { initTemplateService } from './template_service/template_service';
@@ -110,7 +110,6 @@ export const generate = async (config: GeneratorConfig) => {
 
     const result = TemplateService.compileBundleTemplate(templateName, {
       operations,
-      requestInputImports: getRequestInputImports(operations),
       sources: parsedSources,
       info: {
         title,

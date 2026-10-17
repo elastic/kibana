@@ -23,53 +23,55 @@ import {
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 
+import type { GetAgentDetailsRequestParamsInput } from '@kbn/osquery-plugin/common/api/fleet_wrapper/fleet_wrapper.gen';
+import type { GetAgentPolicyRequestParamsInput } from '@kbn/osquery-plugin/common/api/fleet_wrapper/fleet_wrapper.gen';
+import type { GetAgentsRequestQueryInput } from '@kbn/osquery-plugin/common/api/fleet_wrapper/fleet_wrapper.gen';
+import type { OsqueryCopyPacksRequestParamsInput } from '@kbn/osquery-plugin/common/api/packs/packs.gen';
+import type { OsqueryCopySavedQueryRequestParamsInput } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
+import type { OsqueryCreateLiveQueryRequestBodyInput } from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
+import type { OsqueryCreatePacksRequestBodyInput } from '@kbn/osquery-plugin/common/api/packs/packs.gen';
+import type { OsqueryCreateSavedQueryRequestBodyInput } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
+import type { OsqueryDeletePacksRequestParamsInput } from '@kbn/osquery-plugin/common/api/packs/packs.gen';
+import type { OsqueryDeleteSavedQueryRequestParamsInput } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
 import type {
-  GetAgentDetailsRequestParamsInput,
-  GetAgentPolicyRequestParamsInput,
-  GetAgentsRequestQueryInput,
-} from '@kbn/osquery-plugin/common/api/fleet_wrapper/fleet_wrapper.gen';
-import type {
-  OsqueryCopyPacksRequestParamsInput,
-  OsqueryCreatePacksRequestBodyInput,
-  OsqueryDeletePacksRequestParamsInput,
-  OsqueryFindPacksRequestQueryInput,
-  OsqueryGetPacksDetailsRequestParamsInput,
-  OsqueryUpdatePacksRequestParamsInput,
-  OsqueryUpdatePacksRequestBodyInput,
-} from '@kbn/osquery-plugin/common/api/packs/packs.gen';
-import type {
-  OsqueryCopySavedQueryRequestParamsInput,
-  OsqueryCreateSavedQueryRequestBodyInput,
-  OsqueryDeleteSavedQueryRequestParamsInput,
-  OsqueryFindSavedQueriesRequestQueryInput,
-  OsqueryGetSavedQueryDetailsRequestParamsInput,
-  OsqueryUpdateSavedQueryRequestParamsInput,
-  OsqueryUpdateSavedQueryRequestBodyInput,
-} from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
-import type {
-  OsqueryCreateLiveQueryRequestBodyInput,
   OsqueryExportLiveQueryResultsRequestQueryInput,
   OsqueryExportLiveQueryResultsRequestParamsInput,
   OsqueryExportLiveQueryResultsRequestBodyInput,
-  OsqueryFindLiveQueriesRequestQueryInput,
-  OsqueryGetLiveQueryDetailsRequestParamsInput,
-  OsqueryGetLiveQueryResultsRequestQueryInput,
-  OsqueryGetLiveQueryResultsRequestParamsInput,
 } from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
 import type {
   OsqueryExportScheduledQueryResultsRequestQueryInput,
   OsqueryExportScheduledQueryResultsRequestParamsInput,
   OsqueryExportScheduledQueryResultsRequestBodyInput,
+} from '@kbn/osquery-plugin/common/api/scheduled_results/scheduled_results.gen';
+import type { OsqueryFindLiveQueriesRequestQueryInput } from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
+import type { OsqueryFindPacksRequestQueryInput } from '@kbn/osquery-plugin/common/api/packs/packs.gen';
+import type { OsqueryFindSavedQueriesRequestQueryInput } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
+import type { OsqueryGetLiveQueryDetailsRequestParamsInput } from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
+import type {
+  OsqueryGetLiveQueryResultsRequestQueryInput,
+  OsqueryGetLiveQueryResultsRequestParamsInput,
+} from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
+import type { OsqueryGetPacksDetailsRequestParamsInput } from '@kbn/osquery-plugin/common/api/packs/packs.gen';
+import type { OsqueryGetSavedQueryDetailsRequestParamsInput } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
+import type {
   OsqueryGetScheduledActionResultsRequestQueryInput,
   OsqueryGetScheduledActionResultsRequestParamsInput,
+} from '@kbn/osquery-plugin/common/api/scheduled_results/scheduled_results.gen';
+import type {
   OsqueryGetScheduledQueryResultsRequestQueryInput,
   OsqueryGetScheduledQueryResultsRequestParamsInput,
 } from '@kbn/osquery-plugin/common/api/scheduled_results/scheduled_results.gen';
 import type { OsqueryGetUnifiedHistoryRequestQueryInput } from '@kbn/osquery-plugin/common/api/unified_history/unified_history.gen';
 import type {
-  ReadAssetsStatusRequestQueryInput,
-  UpdateAssetsStatusRequestQueryInput,
-} from '@kbn/osquery-plugin/common/api/asset/assets.gen';
+  OsqueryUpdatePacksRequestParamsInput,
+  OsqueryUpdatePacksRequestBodyInput,
+} from '@kbn/osquery-plugin/common/api/packs/packs.gen';
+import type {
+  OsqueryUpdateSavedQueryRequestParamsInput,
+  OsqueryUpdateSavedQueryRequestBodyInput,
+} from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
+import type { ReadAssetsStatusRequestQueryInput } from '@kbn/osquery-plugin/common/api/asset/assets.gen';
+import type { UpdateAssetsStatusRequestQueryInput } from '@kbn/osquery-plugin/common/api/asset/assets.gen';
 
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
