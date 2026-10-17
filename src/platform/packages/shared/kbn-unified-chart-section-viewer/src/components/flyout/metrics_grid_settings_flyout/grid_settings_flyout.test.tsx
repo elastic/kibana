@@ -11,15 +11,18 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiSuperSelectTestHarness } from '@kbn/test-eui-helpers';
-import { GridSettingsFlyout } from './grid_settings_flyout';
 import { type MetricsGridSettings } from '@kbn/discover-utils';
+import { FEATURE_FLAGS } from '../../../common/constants';
+import { ExternalServicesProvider } from '../../../context/external_services';
+import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags_mock';
+import { GridSettingsFlyout } from './grid_settings_flyout';
 
 jest.mock('@kbn/discover-utils', () => {
-  const { METRICS_GRID_HISTOGRAM_PERCENTILES, METRICS_GRID_SIMPLE_AGGREGATIONS } =
+  const { METRICS_GRID_HISTOGRAM_VISUALIZATIONS, METRICS_GRID_SIMPLE_AGGREGATIONS } =
     jest.requireActual('@kbn/discover-utils/src/data_types/metrics');
 
   return {
-    METRICS_GRID_HISTOGRAM_PERCENTILES,
+    METRICS_GRID_HISTOGRAM_VISUALIZATIONS,
     METRICS_GRID_SIMPLE_AGGREGATIONS,
   };
 });
@@ -35,7 +38,7 @@ jest.mock('../../../context/ebt_telemetry_context', () => ({
 const defaultSettings: MetricsGridSettings = {
   counterAggregation: 'sum',
   gaugeAggregation: 'avg',
-  histogramPercentile: 'p95',
+  histogramPercentile: 'distribution',
   dimensions: [],
   searchTerm: '',
 };
@@ -46,13 +49,29 @@ const histogramSelect = new EuiSuperSelectTestHarness(
   'metricsExperienceGridSettingsHistogramSelect'
 );
 
+const renderFlyout = (
+  ui: React.ReactElement,
+  { isHeatmapsEnabled = true }: { isHeatmapsEnabled?: boolean } = {}
+) =>
+  render(
+    <ExternalServicesProvider
+      externalServices={{
+        featureFlags: createFeatureFlagsMock({
+          [FEATURE_FLAGS.IS_HEATMAPS_ENABLED]: isHeatmapsEnabled,
+        }),
+      }}
+    >
+      {ui}
+    </ExternalServicesProvider>
+  );
+
 describe('GridSettingsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders the aggregation settings inside an accordion that is open by default', () => {
-    render(
+    renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
         onGridSettingsChange={jest.fn()}
@@ -65,11 +84,11 @@ describe('GridSettingsFlyout', () => {
     ).toBeInTheDocument();
     expect(counterSelect.getSelected()).toContain('Sum');
     expect(gaugeSelect.getSelected()).toContain('Average');
-    expect(histogramSelect.getSelected()).toContain('95th percentile');
+    expect(histogramSelect.getSelected()).toContain('Distribution');
   });
 
   it('disables "Apply and close" until a selection actually changes', async () => {
-    render(
+    renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
         onGridSettingsChange={jest.fn()}
@@ -87,7 +106,7 @@ describe('GridSettingsFlyout', () => {
   it('does not call onGridSettingsChange until "Apply and close" is clicked, then closes', async () => {
     const onGridSettingsChange = jest.fn();
     const onClose = jest.fn();
-    render(
+    renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
         onGridSettingsChange={onGridSettingsChange}
@@ -112,7 +131,7 @@ describe('GridSettingsFlyout', () => {
   });
 
   it('reports each changed metric type when multiple settings are applied', async () => {
-    render(
+    renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
         onGridSettingsChange={jest.fn()}
@@ -132,7 +151,7 @@ describe('GridSettingsFlyout', () => {
     });
     expect(mockTrackAggregationConfigChanged).toHaveBeenNthCalledWith(2, {
       metric_type: 'histogram',
-      previous_aggregation: 'p95',
+      previous_aggregation: 'distribution',
       new_aggregation: 'p99',
     });
   });
@@ -140,7 +159,7 @@ describe('GridSettingsFlyout', () => {
   it('discards the draft and does not call onGridSettingsChange when Cancel is clicked', async () => {
     const onGridSettingsChange = jest.fn();
     const onClose = jest.fn();
-    render(
+    renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
         onGridSettingsChange={onGridSettingsChange}
@@ -157,10 +176,112 @@ describe('GridSettingsFlyout', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it('hides Distribution and shows the 95th percentile when heatmaps are disabled', async () => {
+    renderFlyout(
+      <GridSettingsFlyout
+        gridSettings={defaultSettings}
+        onGridSettingsChange={jest.fn()}
+        onClose={jest.fn()}
+      />,
+      { isHeatmapsEnabled: false }
+    );
+
+    expect(histogramSelect.getSelected()).toContain('95th percentile');
+    expect(screen.getByTestId('metricsExperienceGridSettingsApplyButton')).toBeDisabled();
+
+    await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsHistogramSelect'));
+    expect(
+      screen.queryByTestId('metricsExperienceGridSettingsHistogramOption-distribution')
+    ).not.toBeInTheDocument();
+    expect(
+      await screen.findByTestId('metricsExperienceGridSettingsHistogramOption-p95')
+    ).toBeInTheDocument();
+  });
+
+  it('keeps a selected percentile when heatmaps hide Distribution', async () => {
+    renderFlyout(
+      <GridSettingsFlyout
+        gridSettings={{ ...defaultSettings, histogramPercentile: 'p90' }}
+        onGridSettingsChange={jest.fn()}
+        onClose={jest.fn()}
+      />,
+      { isHeatmapsEnabled: false }
+    );
+
+    expect(histogramSelect.getSelected()).toContain('90th percentile');
+
+    await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsHistogramSelect'));
+    expect(
+      screen.queryByTestId('metricsExperienceGridSettingsHistogramOption-distribution')
+    ).not.toBeInTheDocument();
+    expect(
+      await screen.findByTestId('metricsExperienceGridSettingsHistogramOption-p90')
+    ).toBeInTheDocument();
+  });
+
+  it('shows the 95th percentile and disables Distribution when dimensions are selected', async () => {
+    const onGridSettingsChange = jest.fn();
+    renderFlyout(
+      <GridSettingsFlyout
+        gridSettings={{ ...defaultSettings, dimensions: ['host.name'] }}
+        onGridSettingsChange={onGridSettingsChange}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(histogramSelect.getSelected()).toContain('95th percentile');
+    expect(screen.getByTestId('metricsExperienceGridSettingsApplyButton')).toBeDisabled();
+
+    await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsHistogramSelect'));
+    const distributionOption = await screen.findByTestId(
+      'metricsExperienceGridSettingsHistogramOption-distribution'
+    );
+    expect(distributionOption).toHaveAttribute('aria-disabled', 'true');
+    expect(distributionOption).toHaveTextContent('Distribution');
+
+    const tooltipAnchor = distributionOption.parentElement;
+    if (!tooltipAnchor) {
+      throw new Error('Expected the distribution option to be wrapped for its tooltip');
+    }
+    await userEvent.hover(tooltipAnchor);
+    expect(
+      await screen.findByText(
+        'Distribution is unavailable while dimensions are selected. Histograms use the 95th percentile instead.'
+      )
+    ).toBeInTheDocument();
+
+    await userEvent.keyboard('{Escape}');
+    await counterSelect.select('metricsExperienceGridSettingsCounterOption-max');
+    await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsApplyButton'));
+
+    expect(onGridSettingsChange).toHaveBeenCalledWith({ counterAggregation: 'max' });
+  });
+
+  it('keeps a selected percentile when dimensions disable Distribution', async () => {
+    renderFlyout(
+      <GridSettingsFlyout
+        gridSettings={{
+          ...defaultSettings,
+          histogramPercentile: 'p90',
+          dimensions: ['host.name'],
+        }}
+        onGridSettingsChange={jest.fn()}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(histogramSelect.getSelected()).toContain('90th percentile');
+
+    await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsHistogramSelect'));
+    expect(
+      await screen.findByTestId('metricsExperienceGridSettingsHistogramOption-distribution')
+    ).toHaveAttribute('aria-disabled', 'true');
+  });
+
   it('discards the draft and does not call onGridSettingsChange when the flyout close button is clicked', async () => {
     const onGridSettingsChange = jest.fn();
     const onClose = jest.fn();
-    render(
+    renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
         onGridSettingsChange={onGridSettingsChange}

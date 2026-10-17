@@ -37,7 +37,18 @@ export const MAX_METRICS_TAB_STATE_STRING_LENGTH = 1000;
  */
 export const METRICS_GRID_SIMPLE_AGGREGATIONS = ['avg', 'sum', 'min', 'max'] as const;
 
-export const METRICS_GRID_HISTOGRAM_PERCENTILES = ['p50', 'p75', 'p90', 'p95', 'p99'] as const;
+/**
+ * Visualizations for histogram metrics in the metrics grid.
+ * `distribution` draws a heatmap. The percentile values draw a series.
+ */
+export const METRICS_GRID_HISTOGRAM_VISUALIZATIONS = [
+  'distribution',
+  'p50',
+  'p75',
+  'p90',
+  'p95',
+  'p99',
+] as const;
 
 export const METRICS_GRID_SORT_FIELDS = ['alphabetically', 'recency'] as const;
 

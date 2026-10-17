@@ -8,6 +8,7 @@
  */
 
 import { useMemo } from 'react';
+import type { HistogramVisualization } from '@kbn/discover-utils';
 import type { LensHeatmapConfig } from '@kbn/lens-embeddable-utils';
 import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../../common/constants';
 import {
@@ -28,6 +29,8 @@ export interface UseHistogramHeatmapParams {
   histogramBoundsLoading: boolean;
   whereStatements?: readonly string[];
   originalSource?: string;
+  histogramPercentile: HistogramVisualization;
+  description?: string;
 }
 
 export interface HistogramHeatmapState {
@@ -45,13 +48,17 @@ export const useHistogramHeatmap = ({
   histogramBoundsLoading,
   whereStatements,
   originalSource,
+  histogramPercentile,
+  description,
 }: UseHistogramHeatmapParams): HistogramHeatmapState => {
   const isHeatmapsEnabled = useFeatureFlag(
     FEATURE_FLAGS.IS_HEATMAPS_ENABLED,
     FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_HEATMAPS_ENABLED]
   );
+  // Percentile settings always draw the series chart. Only distribution can draw a heatmap.
   const isHistogramDistribution =
     isHeatmapsEnabled &&
+    histogramPercentile === 'distribution' &&
     isHistogramMetric(
       firstNonNullable(metricItem.fieldTypes),
       firstNonNullable(metricItem.metricTypes)
@@ -83,9 +90,13 @@ export const useHistogramHeatmap = ({
   const heatmapConfig = useMemo(
     () =>
       distributionQuery
-        ? buildHistogramHeatmapConfig({ query: distributionQuery, title: metricItem.metricName })
+        ? buildHistogramHeatmapConfig({
+            query: distributionQuery,
+            title: metricItem.metricName,
+            description,
+          })
         : undefined,
-    [distributionQuery, metricItem.metricName]
+    [distributionQuery, metricItem.metricName, description]
   );
 
   return { shouldRenderHistogram, boundsError, distributionQuery, heatmapConfig };

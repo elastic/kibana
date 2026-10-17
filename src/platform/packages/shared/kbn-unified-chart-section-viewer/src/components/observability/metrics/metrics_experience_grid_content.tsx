@@ -85,7 +85,8 @@ export const MetricsExperienceGridContent = ({
   const { whereStatements: loadedWhereStatements, userSource: loadedUserSource } =
     useEsqlQueryParts(loadedFetchParams?.query);
 
-  const { searchTerm, currentPage, onPageChange, profileId } = useMetricsExperienceState();
+  const { searchTerm, currentPage, onPageChange, profileId, gridSettings } =
+    useMetricsExperienceState();
 
   const {
     currentPageItems: currentPageFields = [],
@@ -98,7 +99,7 @@ export const MetricsExperienceGridContent = ({
   }) ?? {};
 
   const { loading: histogramBoundsLoading, bounds: histogramBounds } = useFetchHistogramBounds({
-    enabled: isComponentVisible,
+    enabled: isComponentVisible && gridSettings.histogramPercentile === 'distribution',
     metricItems: currentPageFields,
     fetchParams: loadedFetchParams,
     services,

@@ -9,7 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { HistogramPercentileValue } from '@kbn/discover-utils';
+import { HistogramVisualizationValue } from '@kbn/discover-utils';
 import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 import { FunctionNames } from '@kbn/esql-language';
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
@@ -205,11 +205,12 @@ const SCHEMA_SIMPLE_AGGREGATION = schema.oneOf([
 ]);
 
 const SCHEMA_HISTOGRAM_PERCENTILE = schema.oneOf([
-  schema.literal(`${HistogramPercentileValue.P50}`),
-  schema.literal(`${HistogramPercentileValue.P75}`),
-  schema.literal(`${HistogramPercentileValue.P90}`),
-  schema.literal(`${HistogramPercentileValue.P95}`),
-  schema.literal(`${HistogramPercentileValue.P99}`),
+  schema.literal(`${HistogramVisualizationValue.Distribution}`),
+  schema.literal(`${HistogramVisualizationValue.P50}`),
+  schema.literal(`${HistogramVisualizationValue.P75}`),
+  schema.literal(`${HistogramVisualizationValue.P90}`),
+  schema.literal(`${HistogramVisualizationValue.P95}`),
+  schema.literal(`${HistogramVisualizationValue.P99}`),
 ]);
 
 const SCHEMA_TAB_TYPE_STATE_V16 = schema.oneOf([

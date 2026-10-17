@@ -346,6 +346,19 @@ describe('MetricsExperienceGridContent', () => {
     );
   });
 
+  it('skips the histogram bounds fetch when a percentile is selected', () => {
+    useMetricsExperienceStateMock.mockReturnValue({
+      ...useMetricsExperienceStateMock(),
+      gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramPercentile: 'p95' },
+    });
+
+    render(<MetricsExperienceGridContent {...defaultProps} />, { wrapper: IntlProvider });
+
+    expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
+  });
+
   it('keeps the histogram bounds fetch disabled while the chart section is hidden', () => {
     render(<MetricsExperienceGridContent {...defaultProps} isComponentVisible={false} />, {
       wrapper: IntlProvider,

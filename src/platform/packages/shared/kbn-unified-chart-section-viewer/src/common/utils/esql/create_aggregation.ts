@@ -64,6 +64,11 @@ function applyCastIfNeeded(types: ES_FIELD_TYPES[], field: ESQLAstExpression): E
 }
 
 function resolvePercentileValue(settings: MetricsGridSettings): number {
+  // Distribution draws a heatmap. The series fallback, used when a heatmap
+  // cannot be drawn, stays on the previous default percentile.
+  if (settings.histogramPercentile === 'distribution') {
+    return HISTOGRAM_PERCENTILE_VALUES.p95;
+  }
   return HISTOGRAM_PERCENTILE_VALUES[settings.histogramPercentile];
 }
 

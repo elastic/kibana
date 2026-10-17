@@ -12,7 +12,7 @@ import {
   DiscoverTabType,
   MAX_METRICS_TAB_DIMENSIONS,
   MAX_METRICS_TAB_STATE_STRING_LENGTH,
-  METRICS_GRID_HISTOGRAM_PERCENTILES,
+  METRICS_GRID_HISTOGRAM_VISUALIZATIONS,
   METRICS_GRID_SIMPLE_AGGREGATIONS,
   METRICS_GRID_SORT_DIRECTIONS,
   METRICS_GRID_SORT_FIELDS,
@@ -42,8 +42,10 @@ export const discoverSessionApiMetricsTabTypeStateSchema = z
     gauge_aggregation: simpleAggregationSchema.meta({
       description: 'Aggregation applied to gauge metric fields.',
     }),
-    histogram_percentile: z.enum(METRICS_GRID_HISTOGRAM_PERCENTILES).meta({
-      description: 'Percentile displayed for histogram metric fields.',
+    histogram_percentile: z.enum(METRICS_GRID_HISTOGRAM_VISUALIZATIONS).meta({
+      description:
+        'How histogram metric fields are displayed. `distribution` shows a heatmap. ' +
+        'A percentile value shows that percentile as a series.',
     }),
     grid_sort_field: z
       .enum(METRICS_GRID_SORT_FIELDS)

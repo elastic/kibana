@@ -16,6 +16,7 @@ describe('buildHistogramHeatmapConfig', () => {
     expect(buildHistogramHeatmapConfig({ query, title: 'latency' })).toEqual({
       chartType: 'heatmap',
       title: 'latency',
+      description: undefined,
       dataset: { esql: query },
       value: 'count',
       xAxis: 'TBUCKET(100)',
@@ -23,5 +24,15 @@ describe('buildHistogramHeatmapConfig', () => {
       legend: { show: false },
       axisLabel: { xAxis: true, yAxis: true },
     });
+  });
+
+  it('keeps the panel description used to disambiguate data streams', () => {
+    expect(
+      buildHistogramHeatmapConfig({
+        query,
+        title: 'latency',
+        description: 'Data stream: metrics-a',
+      })
+    ).toEqual(expect.objectContaining({ description: 'Data stream: metrics-a' }));
   });
 });

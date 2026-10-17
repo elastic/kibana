@@ -27,8 +27,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type MetricsGridSettings } from '@kbn/discover-utils';
+import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../common/constants';
 import { useTelemetry } from '../../../context/ebt_telemetry_context';
-import { COUNTER_OPTIONS, GAUGE_OPTIONS, HISTOGRAM_OPTIONS } from './options';
+import { useFeatureFlag } from '../../../hooks/use_feature_flag';
+import { COUNTER_OPTIONS, GAUGE_OPTIONS, buildHistogramVisualizationOptions } from './options';
 import { getAggregationConfigChanges } from './get_aggregation_config_changes';
 import { getChangedSettings } from './get_changed_settings';
 
@@ -49,15 +51,33 @@ export const GridSettingsFlyout = ({
     prefix: 'metricsGridSettingsAggregationAccordion',
   });
 
-  const aggregationGroupDescription = i18n.translate(
-    'metricsExperience.gridSettingsFlyout.aggregationGroupDescription',
+  const dataDisplayGroupDescription = i18n.translate(
+    'metricsExperience.gridSettingsFlyout.dataDisplayGroupTooltip',
     {
       defaultMessage:
-        'Set how values are aggregated for each metric type. Changes apply to every metric of that type in this Discover tab.',
+        'Set how data is displayed for each metric type. Changes apply to every metric of that type in this Discover tab.',
     }
   );
 
+  const isHeatmapsEnabled = useFeatureFlag(
+    FEATURE_FLAGS.IS_HEATMAPS_ENABLED,
+    FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_HEATMAPS_ENABLED]
+  );
   const [draftSettings, setDraftSettings] = useState<MetricsGridSettings>(gridSettings);
+  const histogramOptions = useMemo(
+    () =>
+      buildHistogramVisualizationOptions({
+        hasDimensions: gridSettings.dimensions.length > 0,
+        isHeatmapsEnabled,
+      }),
+    [gridSettings.dimensions.length, isHeatmapsEnabled]
+  );
+  // Distribution is omitted while heatmaps are off. The series chart already
+  // draws the 95th percentile for that stored value.
+  const histogramValueOfSelected =
+    !isHeatmapsEnabled && draftSettings.histogramPercentile === 'distribution'
+      ? 'p95'
+      : draftSettings.histogramPercentile;
 
   const pendingUpdate = useMemo(
     () => getChangedSettings(draftSettings, gridSettings),
@@ -108,8 +128,8 @@ export const GridSettingsFlyout = ({
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
                   <h5>
-                    {i18n.translate('metricsExperience.gridSettingsFlyout.aggregationGroupLabel', {
-                      defaultMessage: 'Aggregations',
+                    {i18n.translate('metricsExperience.gridSettingsFlyout.dataDisplayGroupTitle', {
+                      defaultMessage: 'Data display',
                     })}
                   </h5>
                 </EuiTitle>
@@ -118,8 +138,8 @@ export const GridSettingsFlyout = ({
                 <EuiIconTip
                   type="info"
                   color="subdued"
-                  aria-label={aggregationGroupDescription}
-                  content={aggregationGroupDescription}
+                  aria-label={dataDisplayGroupDescription}
+                  content={dataDisplayGroupDescription}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -159,8 +179,8 @@ export const GridSettingsFlyout = ({
           >
             <EuiSuperSelect
               data-test-subj="metricsExperienceGridSettingsHistogramSelect"
-              options={HISTOGRAM_OPTIONS}
-              valueOfSelected={draftSettings.histogramPercentile}
+              options={histogramOptions}
+              valueOfSelected={histogramValueOfSelected}
               onChange={(value) => onSettingChange('histogramPercentile', value)}
             />
           </EuiFormRow>

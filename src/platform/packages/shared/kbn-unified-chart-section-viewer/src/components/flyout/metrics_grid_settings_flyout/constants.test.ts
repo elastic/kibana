@@ -8,12 +8,12 @@
  */
 
 import {
-  METRICS_GRID_HISTOGRAM_PERCENTILES,
+  METRICS_GRID_HISTOGRAM_VISUALIZATIONS,
   METRICS_GRID_SETTINGS_DEFAULTS,
   METRICS_GRID_SIMPLE_AGGREGATIONS,
 } from '@kbn/discover-utils';
 import {
-  HISTOGRAM_PERCENTILE_OPTIONS,
+  HISTOGRAM_VISUALIZATION_OPTIONS,
   HISTOGRAM_PERCENTILE_VALUES,
   SIMPLE_AGGREGATION_OPTIONS,
 } from './constants';
@@ -23,7 +23,7 @@ describe('grid_settings constants', () => {
     expect(METRICS_GRID_SETTINGS_DEFAULTS).toEqual({
       counterAggregation: 'sum',
       gaugeAggregation: 'avg',
-      histogramPercentile: 'p95',
+      histogramPercentile: 'distribution',
       dimensions: [],
       searchTerm: '',
     });
@@ -33,8 +33,8 @@ describe('grid_settings constants', () => {
     expect(SIMPLE_AGGREGATION_OPTIONS).toBe(METRICS_GRID_SIMPLE_AGGREGATIONS);
   });
 
-  it('uses the canonical histogram percentile options', () => {
-    expect(HISTOGRAM_PERCENTILE_OPTIONS).toBe(METRICS_GRID_HISTOGRAM_PERCENTILES);
+  it('uses the canonical histogram visualization options', () => {
+    expect(HISTOGRAM_VISUALIZATION_OPTIONS).toBe(METRICS_GRID_HISTOGRAM_VISUALIZATIONS);
   });
 
   it('maps every histogram percentile option to its numeric value', () => {

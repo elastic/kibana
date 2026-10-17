@@ -158212,8 +158212,9 @@ components:
                             description: When `true`, fields with null values are hidden in the JSON document view.
                             type: boolean
                           histogram_percentile:
-                            description: Percentile displayed for histogram metric fields.
+                            description: How histogram metric fields are displayed. `distribution` shows a heatmap. A percentile value shows that percentile as a series.
                             enum:
+                              - distribution
                               - p50
                               - p75
                               - p90

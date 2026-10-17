@@ -8,9 +8,9 @@
  */
 
 import {
-  METRICS_GRID_HISTOGRAM_PERCENTILES,
+  METRICS_GRID_HISTOGRAM_VISUALIZATIONS,
   METRICS_GRID_SIMPLE_AGGREGATIONS,
-  type HistogramPercentile,
+  type HistogramVisualization,
   type MetricsGridSettings,
 } from '@kbn/discover-utils';
 
@@ -23,9 +23,12 @@ export const FLYOUT_SETTING_KEYS = [
 
 export const SIMPLE_AGGREGATION_OPTIONS = METRICS_GRID_SIMPLE_AGGREGATIONS;
 
-export const HISTOGRAM_PERCENTILE_OPTIONS = METRICS_GRID_HISTOGRAM_PERCENTILES;
+export const HISTOGRAM_VISUALIZATION_OPTIONS = METRICS_GRID_HISTOGRAM_VISUALIZATIONS;
 
-export const HISTOGRAM_PERCENTILE_VALUES: Record<HistogramPercentile, number> = {
+/** Numeric percentiles. `distribution` is a heatmap and has no percentile value. */
+type NumericHistogramPercentile = Exclude<HistogramVisualization, 'distribution'>;
+
+export const HISTOGRAM_PERCENTILE_VALUES: Record<NumericHistogramPercentile, number> = {
   p50: 50,
   p75: 75,
   p90: 90,
