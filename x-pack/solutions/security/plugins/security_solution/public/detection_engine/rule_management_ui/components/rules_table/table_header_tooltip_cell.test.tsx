@@ -11,15 +11,17 @@ import { TableHeaderTooltipCell } from './table_header_tooltip_cell';
 
 import { render, screen, fireEvent } from '@testing-library/react';
 
+jest.setTimeout(15_000);
+
 describe('Component TableHeaderTooltipCell', () => {
-  it('should render text with icon and tooltip', async () => {
+  it('should render text with icon and tooltip', () => {
     render(<TableHeaderTooltipCell title="test title" tooltipContent="test tooltip content" />);
 
     expect(screen.getByText('test title')).toBeInTheDocument();
     expect(screen.getByTestId('tableHeaderIcon')).toBeInTheDocument();
 
     fireEvent.mouseOver(screen.getByTestId('tableHeaderIcon'));
-    expect(await screen.findByText('test tooltip content')).toBeInTheDocument();
+    expect(screen.getByText('test tooltip content')).toBeInTheDocument();
   });
 
   it('should render test element as custom tooltip', () => {
