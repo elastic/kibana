@@ -61,7 +61,6 @@
     "@kbn/proposals-plugin",
     "@kbn/proposals-common",
     "@kbn/core-security-common",
-    "@kbn/eval-kql",
-    "@kbn/core-logging-server-mocks"
+    "@kbn/eval-kql"
   ]
 }

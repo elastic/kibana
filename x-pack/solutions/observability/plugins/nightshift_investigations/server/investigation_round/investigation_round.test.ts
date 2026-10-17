@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { SANDBOX_BASH_TOOL_ID } from '../tools/sandbox_bash/tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../tools/sandbox_bash/str_replace_tool';
@@ -28,8 +28,8 @@ import {
 } from '.';
 
 describe('server/investigation_round', () => {
-  const request = httpServerMock.createKibanaRequest();
-  const logger = loggingSystemMock.createLogger();
+  const request = {} as KibanaRequest;
+  const logger = loggerMock.create();
 
   beforeEach(() => {
     jest.clearAllMocks();
