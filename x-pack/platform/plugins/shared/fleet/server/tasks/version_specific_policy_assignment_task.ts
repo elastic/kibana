@@ -40,6 +40,7 @@ import {
 } from '../services/utils/version_specific_policies';
 import { fetchAllAgentsByKuery, getAgentsByKuery } from '../services/agents';
 import { reassignAgents } from '../services/agents/reassign';
+import { AgentReassignmentError } from '../errors';
 import {
   splitVersionSuffixFromPolicyId,
   classifyPolicyId,
@@ -498,9 +499,7 @@ export class VersionSpecificPolicyAssignmentTask {
               signal
             );
           } catch (error) {
-            this.logger.error(
-              `[VersionSpecificPolicyAssignmentTask] Error reassigning agents to ${targetPolicyId}: ${error}`
-            );
+            this.logReassignError(targetPolicyId, error);
           }
         },
         { concurrency: MAX_CONCURRENT_REASSIGNMENTS }
@@ -984,9 +983,20 @@ export class VersionSpecificPolicyAssignmentTask {
         `[VersionSpecificPolicyAssignmentTask] Successfully reassigned agents to ${targetPolicyId}`
       );
     } catch (error) {
-      this.logger.error(
-        `[VersionSpecificPolicyAssignmentTask] Error reassigning agents to ${targetPolicyId}: ${error}`
-      );
+      this.logReassignError(targetPolicyId, error);
+    }
+  }
+
+  /**
+   * `AgentReassignmentError` means that there was nothing to reassign, e.g. the agents were already moved
+   * to the target policy since they were selected. That is expected, so it is not logged as an error.
+   */
+  private logReassignError(targetPolicyId: string, error: unknown) {
+    const message = `[VersionSpecificPolicyAssignmentTask] Error reassigning agents to ${targetPolicyId}: ${error}`;
+    if (error instanceof AgentReassignmentError) {
+      this.logger.debug(message);
+    } else {
+      this.logger.error(message);
     }
   }
 
