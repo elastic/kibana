@@ -19,6 +19,7 @@ import {
   type Evaluator,
   type TaskOutput,
 } from '@kbn/evals';
+import { createSecurityRelevanceEvaluator } from '@kbn/security-evals-matrix';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   PersonaMatrixExample,
@@ -256,6 +257,16 @@ export const createPersonaMatrixSkillInvokedEvaluator = ({
   },
 });
 
+/**
+ * Platform Factuality / Sequence Accuracy plus the security-owned `Relevance` (code-derived label,
+ * empty response scores 0). The security entry replaces the platform one under the same evaluator
+ * name so the golden formula and dashboards keep resolving it.
+ */
+export const createPersonaMatrixQuantitativeEvaluators = (): Evaluator[] =>
+  createQuantitativeCorrectnessEvaluators().map((evaluator) =>
+    evaluator.name === 'Relevance' ? createSecurityRelevanceEvaluator() : evaluator
+  );
+
 export function createEvaluatePersonaMatrixDataset({
   chatClient,
   evaluators,
@@ -293,7 +304,7 @@ export function createEvaluatePersonaMatrixDataset({
       skillInvokedEvaluator,
       trajectoryEvaluator,
       expectedToolCalledEvaluator,
-      ...createQuantitativeCorrectnessEvaluators(),
+      ...createPersonaMatrixQuantitativeEvaluators(),
       createQuantitativeGroundednessEvaluator(),
       evaluators.criteria([
         'Relevance: The response directly addresses the user security question.',
