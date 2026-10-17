@@ -55,9 +55,9 @@ const TO_MS = FROM_MS + 7 * 24 * 60 * 60 * 1000; // 7 days later
 const mockEntityRecord = { entity: { id: 'entity-1' }, host: { name: 'entity-1' } };
 
 const baseParams = {
-  entityId: 'entity-1',
+  entityIds: ['entity-1'],
   entityType: 'host' as const,
-  entityRecord: mockEntityRecord,
+  entityRecords: [mockEntityRecord],
   fromMs: FROM_MS,
   toMs: TO_MS,
   logger: mockLogger,
@@ -565,9 +565,9 @@ describe('getEntityAnomalyOverview', () => {
 
       const before = Date.now();
       const result = await getEntityAnomalyOverview({
-        entityId: 'entity-1',
+        entityIds: ['entity-1'],
         entityType: 'host' as const,
-        entityRecord: mockEntityRecord,
+        entityRecords: [mockEntityRecord],
         logger: mockLogger,
         ml: mockMl,
         request: mockRequest,

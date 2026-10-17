@@ -57,9 +57,9 @@ describe('fetchBaselineBehavior', () => {
   });
 
   const defaultOpts = {
-    entityId: 'user:alice',
+    entityIds: ['user:alice'],
     entityType: 'user' as const,
-    entityRecord: mockEntityRecord,
+    entityRecords: [mockEntityRecord],
     jobId: 'test-job',
     jobConfig: makeJobConfig(),
   };
