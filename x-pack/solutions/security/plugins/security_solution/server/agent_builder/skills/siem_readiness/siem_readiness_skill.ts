@@ -39,6 +39,15 @@ Use this skill when the user asks about:
 - \`security.siem_readiness.get_continuity\` — ingest pipeline stats (docs processed, failure rate, serving indices)
 - \`security.siem_readiness.get_retention\` — retention policy per data stream / index, days, and compliance status
 
+## Tool Discipline (no speculative calls)
+
+The four readiness tools return **pre-computed, authoritative** results: \`status\`, \`summary\`, \`actionableFindings\`, and the blast-radius fields are all derived server-side from the underlying indices, pipelines, and rules. Every extra tool call costs a turn, latency, and input tokens that are re-read on every subsequent step — and cannot add information the tools already returned.
+
+- **Treat tool output as the source of truth.** Never re-derive coverage, quality, continuity, or retention by querying indices directly — the readiness tools already queried them. Do not call \`platform.core.search\`, \`platform.core.get_document_by_id\`, \`platform.core.generate_esql\`, or \`platform.core.index_explorer\` to corroborate a readiness result.
+- **One pass per dimension, bounded.** Call each readiness tool at most once per question. For a broad readiness question, the single parallel call of all four tools IS the complete assessment — not the first step of an escalation. Do not re-call a tool with different parameters to double-check a result.
+- **No post-assessment calls.** Once you have the dimension results, render the four-section response immediately. \`actionableFindings\` is the complete finding list — further tool calls cannot produce more findings.
+- **noData is a terminal answer.** A \`noData\` status or empty \`items\` array means there is nothing to assess — report it as-is. Do not call other tools or query raw indices to confirm the absence, and never fabricate findings to fill the gap.
+
 ## Response Structure
 
 Every SIEM readiness response MUST follow this four-section structure. Use markdown headers and formatting so the response is easy to scan.
