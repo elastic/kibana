@@ -67,7 +67,7 @@ const saveAutomationSchema = z
       .max(MAX_WORKFLOW_YAML_LENGTH)
       .optional()
       .describe(
-        'Complete workflow YAML to save. Use when the definition did not come from generate_workflow — for example when a subagent authored and tested it and returned the YAML.'
+        'Complete workflow YAML to save. Use when the definition did not come from generate_workflow — for example a workflow drafted and tested outside this conversation.'
       ),
     workflowId: z
       .string()

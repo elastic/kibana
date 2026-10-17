@@ -68,21 +68,15 @@ describe('aiIndexAutomationsSkill', () => {
     }
   });
 
-  it('is the skill that carries the authoring and execution tools', async () => {
+  it('is the skill that carries the install, save and run tools', async () => {
     const toolIds = (await aiIndexAutomationsSkill.getRegistryTools?.()) ?? [];
 
     expect(toolIds).toEqual([
       platformCoreTools.executeWorkflow,
       platformCoreTools.getWorkflowExecutionStatus,
-      platformCoreTools.generateEsql,
-      platformCoreTools.executeEsql,
       contextEngineAiIndexTools.queryAiIndices,
-      `${internalNamespaces.workflows}.validate_workflow`,
       `${internalNamespaces.workflows}.get_workflow`,
       `${internalNamespaces.workflows}.get_step_definitions`,
-      `${internalNamespaces.workflows}.get_trigger_definitions`,
-      `${internalNamespaces.workflows}.get_examples`,
-      `${internalNamespaces.workflows}.workflow_execute_step`,
       contextEngineAutomationTools.installAutomationTemplate,
       contextEngineAutomationTools.saveAutomation,
       contextEngineAutomationTools.runAutomation,
@@ -106,14 +100,15 @@ describe('aiIndexAutomationsSkill', () => {
 
     expect(toolIds).not.toContain(platformCoreTools.generateWorkflow);
 
-    // Unbinding it does not take it away — it is in `defaultAgentToolIds`, and `run_subagent`
-    // gives a subagent the parent's configuration — so every mention has to be a prohibition.
-    const mentions = aiIndexAutomationsSkill.content
-      .split('\n')
-      .filter((line) => line.includes('generate_workflow'));
+    // Unbinding it does not take it away — it is in `defaultAgentToolIds` — so every mention has
+    // to be a prohibition. Normalize whitespace first since the markdown hard-wraps sentences.
+    const prose = aiIndexAutomationsSkill.content.replace(/\s+/g, ' ');
+    const mentions = [...prose.matchAll(/[^.]*generate_workflow[^.]*\./g)].map(
+      ([sentence]) => sentence
+    );
 
     expect(mentions.length).toBeGreaterThan(0);
-    expect(mentions.every((line) => /must not call|Do not generate/.test(line))).toBe(true);
+    expect(mentions.every((sentence) => /not a tool to call here/.test(sentence))).toBe(true);
   });
 
   it('only instructs the agent to call tools that are actually bound', async () => {
@@ -165,16 +160,6 @@ describe('aiIndexAutomationsSkill', () => {
       }
     });
 
-    it('requires the final untested edit to be validated, since no run covers it', () => {
-      expect(content).toMatch(/Validate outright in one place: the last edit/);
-      expect(content).toContain(`${internalNamespaces.workflows}.validate_workflow`);
-    });
-
-    it('starts authoring from a template rather than from a blank workflow', () => {
-      expect(content).toMatch(/Start from the template\. Do not write a workflow/);
-      expect(content).toMatch(/all take a raw\s+`yaml` string/);
-    });
-
     it('names each template where its strategy is described, so the brief can cite one', () => {
       // Install-tool strategies: template param appears near each strategy description.
       expect(content).toMatch(/Index\/Table Metadata.*\n?.*template: index_metadata/);
@@ -201,12 +186,6 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).not.toMatch(/fingerprint|profile_version|freshness_field/);
     });
 
-    it('has the brief carry the three strategy answers and the counted findings', () => {
-      expect(content).toMatch(/\*\*as its three answers\*\*/);
-      expect(content).toMatch(/\*\*the counted findings\*\*/);
-      expect(content).toMatch(/what is not in the brief is not in the KI/i);
-    });
-
     it('retries ai.prompt in a sequential loop only, since a parallel branch cannot hold it', () => {
       const prose = content.replace(/\s+/g, ' ');
 
@@ -230,7 +209,9 @@ describe('aiIndexAutomationsSkill', () => {
     it('describes the template safeguards as verifiers on createKi, not a verifyKi gate or a retry', () => {
       expect(content).not.toMatch(/the `verifyKi` gate/);
       expect(content).not.toMatch(/the retry on the model call/);
-      expect(content.replace(/\s+/g, ' ')).toMatch(/the `verifiers` on `createKi`/);
+      expect(content.replace(/\s+/g, ' ')).toMatch(
+        /pass `verifiers` to every `context-engine\.createKi`/
+      );
     });
 
     it('points at the shared references for the shape and the catalog instead of restating them', () => {
@@ -245,60 +226,11 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).not.toContain('loop.continue');
     });
 
-    it('never reruns a failed call unchanged', () => {
-      expect(content).toMatch(/Never rerun a\s+failed call unchanged/);
-    });
-
-    it('points the strategies without an install path at the unit-profile-template shape', () => {
+    it('points strategies without a template at the Workflow editor, not install_automation_template', () => {
       expect(content).toMatch(
-        /Outlier, atomic facts, detection[^\n]*\n[^\n]*start from the shape of `unit-profile-template`/
+        /Selective \/ Outlier.*Atomic Facts.*Connector.*Detection \/ Feature.*have no template/s
       );
-    });
-
-    it('says what a template already encodes, so it is edited rather than rewritten', () => {
-      expect(content).toMatch(/a fresh draft gets\s+wrong/);
-      expect(content).toMatch(/Take it literally/);
-      expect(content).toMatch(/none of them announce themselves/);
-    });
-
-    it('has the brief name the workflow it starts from, since a subagent without one writes from nothing', () => {
-      expect(content).toMatch(/\*\*the workflow it starts from, by name\*\*/);
-      expect(content).toMatch(/rediscovering what\s+that automation already encodes/);
-    });
-
-    it('points at the lookup tools that cover built-in and connector step types', () => {
-      expect(content).toContain(`${internalNamespaces.workflows}.get_step_definitions`);
-      expect(content).toContain(`${internalNamespaces.workflows}.get_trigger_definitions`);
-      expect(content).toContain(`${internalNamespaces.workflows}.get_examples`);
-    });
-
-    it('offers single-step execution for isolating a failing step', () => {
-      expect(content).toContain(`${internalNamespaces.workflows}.workflow_execute_step`);
-      expect(content).toMatch(/runs that step alone out of the inline YAML/);
-    });
-
-    it('delegates the build-and-test loop rather than saving an unrun draft', () => {
-      expect(content).toContain('delegate the build-and-test loop to a subagent');
-      expect(content).toMatch(/A workflow that has never run is a guess/);
-      expect(content).toMatch(/complete final YAML must come back verbatim/);
-    });
-
-    it('bounds the iteration, since the subagent shares the run step limit', () => {
-      expect(content).toMatch(/at most five attempts/);
-    });
-
-    it('keeps the build subagent off the fast model', () => {
-      expect(content).toMatch(/\*\*Never run the build subagent on `effort: low`\.\*\*/);
-      expect(content).toMatch(/`low` routes the subagent to the fast model/);
-      expect(content).toMatch(/Leave `effort` at its default\s+or set it higher/);
-    });
-
-    it('has the subagent bring back the pilot run time and unit count', () => {
-      expect(content).toMatch(/together with the pilot's run time/);
-      expect(content).toMatch(/`started_at` and `finished_at`/);
-      expect(content).toMatch(
-        /what the pilot cost: how many units it wrote and how long the\s+successful run took/
-      );
+      expect(content).toMatch(/tell the user to build it in the Workflow editor/);
     });
 
     it('states the full-run time estimate from the pilot before the save, as a rough figure', () => {
@@ -313,21 +245,6 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/neither a\s+floor nor a ceiling/);
       expect(content).not.toMatch(/Say \*at least\*|a straight-line projection is a floor/);
       expect(content).toMatch(/Show the three numbers, not only the result/);
-    });
-
-    it('has the subagent pilot one full batch of its loop, so the per-unit arithmetic holds', () => {
-      const prose = content.replace(/\s+/g, ' ');
-      expect(prose).toMatch(
-        /Pilot on one full batch of the loop: as many units as its `concurrency`, 5 unless the workflow sets another/
-      );
-      expect(prose).toMatch(/a smaller pilot finishes in about the time of one unit/);
-      expect(prose).toMatch(
-        /"the pilot wrote 5 indicators in 80 seconds; the full run writes 100 units, so expect roughly 27 minutes"/
-      );
-      expect(prose).not.toMatch(/4 indicators in 64 seconds/);
-      expect(prose).toMatch(
-        /When the pilot wrote fewer indicators than the batch it covered, say how many and do not project/
-      );
     });
 
     it('flags a projection over one hour in bold between siren markers', () => {
@@ -345,67 +262,6 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/say the token count was not measured rather than estimating one/);
     });
 
-    it('has the subagent load the skill by id rather than search for an id it was given', () => {
-      expect(content).toMatch(/`load_skill` on `ai-index-automations`/);
-      expect(content).toMatch(/do not reach for\s+`search_relevant_skills`/);
-    });
-
-    it('keeps the subagent off workflow-authoring, which teaches the flow this replaces', () => {
-      expect(content).toMatch(/Do not load it to author one of these/);
-      expect(content).toMatch(/do not send it to `workflow-authoring`/);
-      expect(content).toMatch(/One skill is enough/);
-    });
-
-    it('forbids generation outright, since unbinding the tool cannot remove it', () => {
-      expect(content).toMatch(/\*\*Do not generate a workflow\.\*\*/);
-      expect(content).toMatch(/must not call `platform\.core\.generate_workflow`/);
-    });
-
-    it('does not claim every agent has generate_workflow, since the Context Engine agent does not', () => {
-      expect(content).not.toMatch(/in every agent's default\s+toolset/);
-      expect(content).toMatch(/the default agent has it; the Context\s+Engine agent does not/);
-    });
-
-    it('keeps the attachment read-only, against the generic guidance that offers an update', () => {
-      expect(content).toMatch(/a handoff, not a workspace/);
-      expect(content).toMatch(/do not try to write back to it with `attachment_update`/);
-    });
-
-    it('restates the rules in the brief, since a skill loaded late cannot govern earlier calls', () => {
-      expect(content).toMatch(/restated in the prompt rather than left to the skill/);
-      expect(content).toMatch(/cannot govern the first/);
-    });
-
-    it('points at the referenced-file path instead of browsing the filesystem', () => {
-      expect(content).toMatch(/among its `referenced_files` with\s+absolute paths/);
-      expect(content).toMatch(/nothing to go looking for with `list_files`/);
-    });
-
-    it('explains the five-match cliff that makes keyword step lookups useless', () => {
-      expect(content).toMatch(/only when the query matches five types or fewer/);
-      expect(content).toMatch(/Pass `stepType` with an exact id/);
-    });
-
-    it('names the closed set of step types, so lookups can be targeted', () => {
-      for (const stepType of [
-        '`elasticsearch.esql.query`',
-        '`elasticsearch.search`',
-        '`elasticsearch.request`',
-        '`ai.prompt`',
-        '`parallel`',
-        '`foreach`',
-        '`if`',
-        '`data.set`',
-        '`console`',
-      ]) {
-        expect(content).toContain(stepType);
-      }
-    });
-
-    it('asks for one examples call rather than one per step', () => {
-      expect(content).toMatch(/one call for the example library rather than one per step/);
-    });
-
     it('names the default connector for every prompt step, inside and outside the templates', () => {
       expect(content).toMatch(
         /set its\s+`connector-id` to `\.google-gemini-3\.5-flash-chat_completion`/
@@ -415,16 +271,6 @@ describe('aiIndexAutomationsSkill', () => {
         /a\s+workflow you assemble outside the templates carries it too, on each `ai\.prompt` and `ai\.agent`\s+step/
       );
       expect(content).toMatch(/Use a different connector only when the user names one/);
-    });
-
-    it('says the templates carry the default connector and it is not a placeholder', () => {
-      expect(content).toMatch(
-        /Every `ai\.prompt` step in the templates carries `connector-id: \.google-gemini-3\.5-flash-chat_completion`/
-      );
-      expect(content).toMatch(/That is the default, not a placeholder/);
-      expect(content).toMatch(
-        /put the same id on any prompt step you add or write outside the templates/
-      );
     });
 
     it('requires ${{ }} for non-strings, since {{ }} stringifies objects and booleans', () => {
@@ -441,80 +287,6 @@ describe('aiIndexAutomationsSkill', () => {
 
     it('explains that both mistakes survive validation, so drafting is the only place to catch them', () => {
       expect(content).toMatch(/Both of these parse, validate and run/);
-    });
-
-    it('expands tags before filtering, since == skips multivalued rows', () => {
-      expect(content).toContain(
-        `Query\nthe tag back with \`${contextEngineAiIndexTools.queryAiIndices}\``
-      );
-      expect(content).toMatch(/\| MV_EXPAND tags\n\| WHERE tags == "ce-pilot-<runId>"/);
-      expect(content).toMatch(/`MV_EXPAND tags` is not optional/);
-      expect(content).toMatch(/skips multivalued\s+rows outright/);
-    });
-
-    it('reads pilot output by KI id and shows its references, not the backing _id', () => {
-      expect(content).toMatch(/\| KEEP id, title, type, content, attributes, references\n/);
-      expect(content).not.toMatch(/FROM <destination> METADATA _id\n\| MV_EXPAND tags/);
-    });
-
-    it('cleans up by KI ids read through the space-scoped tool, never a raw backing-store query', () => {
-      const prose = content.replace(/\s+/g, ' ');
-
-      expect(prose).toContain('Read the ids first with `platform.context_engine.query_ai_indices`');
-      expect(content).toMatch(/\| WHERE tags == "ce-pilot-<runId>"\n\| STATS BY id\n/);
-      expect(prose).toContain(
-        'a `foreach` over `consts.ki_ids` calling `context-engine.deleteKi` with `ki_id` set to each `id`'
-      );
-      expect(content).not.toMatch(/an `elasticsearch\.esql\.query` selecting `id`/);
-    });
-
-    it('confirms cleanup through the query tool, which hides deleted revisions', () => {
-      expect(content).toMatch(
-        /FROM <destination>\n\| MV_EXPAND tags\n\| WHERE tags == "ce-pilot-<runId>"\n\| LIMIT 1/
-      );
-      expect(content).not.toMatch(/\| INLINE STATS latest = MAX\(@timestamp\) BY id/);
-    });
-
-    it('warns that the unexpanded query looks like a pilot that wrote nothing', () => {
-      expect(content).toMatch(/returns nothing at all — which reads exactly like a pilot/);
-    });
-
-    it('requires the pilot to tag its indicators and delete them afterwards', () => {
-      expect(content).toContain('ce-pilot-');
-      expect(content).toContain('context-engine.deleteKi');
-      expect(content).toMatch(/cleanup is not optional/);
-    });
-
-    it('isolates pilot writes by prefixing ki_id with the run tag', () => {
-      expect(content).toMatch(
-        /Prefix the\s+`ki_id` on `context-engine\.createKi` with the same `ce-pilot-<runId>-`/
-      );
-      expect(content).toMatch(/the `ce-pilot-\*` prefix from `ki_id`/);
-    });
-
-    it('puts the pilot tag where the templates build the indicator, not on the write step', () => {
-      expect(content).toMatch(/tag goes on that step's `ki\.tags` list/);
-      expect(content).toMatch(/not on\s+`context-engine\.createKi`/);
-    });
-
-    it('points the pilot bound at the install tool arguments and custom workflow consts', () => {
-      expect(content).toMatch(
-        /`maxUnits`, `maxDocuments` and\n`corpusFilter` are arguments to the install tool/
-      );
-    });
-
-    it('saves the piloted definition rather than a regenerated one', () => {
-      expect(content).toMatch(/Save the YAML exactly as the subagent returned it/);
-    });
-
-    it('does not pay for a validate call before a run that validates anyway', () => {
-      expect(content).toMatch(/Do not validate and then run/);
-      expect(content).toMatch(/parses and validates before a single step executes/);
-    });
-
-    it('says what a separate validate call adds over a failed run', () => {
-      expect(content).toMatch(/warnings the execution path drops/);
-      expect(content).toMatch(/definitions of every built-in and connector step type/);
     });
 
     it('writes out the context-engine step contracts, which no discovery tool can return', () => {
@@ -579,12 +351,6 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/`verifiers` list is non-empty and duplicate-free/);
     });
 
-    it('asks the brief for the ids a targeted KI turns into references', () => {
-      expect(content).toMatch(
-        /the provenance ids \(`trace_ids`, `conversation_id`, the source index and document id\) that\s+become its `references`/
-      );
-    });
-
     it('bounds what a KI attribute can hold, since indicators carry ES|QL in one', () => {
       expect(content).toMatch(/never nested objects/);
       expect(content).toContain('10,000 characters');
@@ -595,14 +361,9 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/not a substitute\s+for\s+`createKi`/);
     });
 
-    it('names the check validation does not cover, since a valid draft can still match nothing', () => {
-      expect(content).toMatch(/does \*\*not\*\* establish that a query inside it returns anything/);
-      expect(content).toContain(platformCoreTools.executeEsql);
-    });
-
     it('does not let piloting a workflow be read as licence to run the saved one', () => {
       expect(content).toContain('Running one is a separate decision');
-      expect(content).toMatch(/Running the saved automation is not the same act/);
+      expect(content).toMatch(/Piloting and running are not the same act/);
     });
 
     it('gives save and run each their own confirmation dialog', () => {
@@ -641,11 +402,6 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/Keep `maxDocuments` within the KI budget/);
       expect(content).not.toMatch(/defaults to 25/);
       expect(content).not.toMatch(/raise it\s+deliberately/);
-    });
-
-    it('points the subagent brief at the budget rather than multiplying it per claim', () => {
-      expect(content).toMatch(/the KI budget: at most 100 KIs per run during onboarding/);
-      expect(content).not.toMatch(/multiplied by the claims per document/);
     });
 
     it('states the budget once in the catalog, with the bound a fan-out workflow writes for itself', () => {
@@ -814,12 +570,12 @@ describe('aiIndexAutomationsSkill', () => {
       expect(prose).toMatch(/one ranked query capped at `maxUnits`/);
     });
 
-    it('sends a unit that needs a second index to a custom workflow', () => {
+    it('sends a unit that needs a second index to the Workflow editor, not this conversation', () => {
       expect(prose).toMatch(
-        /The template reads one index\. A unit that needs data from a second index .* is a custom workflow built through a subagent/
+        /The template reads one index\. A unit that needs data from a second index .* needs a workflow built outside this conversation, in the Workflow editor/
       );
       expect(catalog).toMatch(
-        /one index for the `unit_profile` template; a unit drawn from several\s+indices is a custom workflow/
+        /When the unit needs a second index, it needs a\s+workflow built in the Workflow editor/
       );
       expect(catalog).not.toMatch(/from one or several indices/);
     });
