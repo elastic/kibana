@@ -7,6 +7,7 @@
 
 import {
   EMPTY_MODEL_RESPONSE_ERROR_CODE,
+  EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
   EmptyModelResponseError,
   getBoundedResponsePreview,
   isEmptyModelResponseError,
@@ -31,7 +32,7 @@ describe('EmptyModelResponseError', () => {
   it('carries the connector, model, token counts and trace id in the message', () => {
     const error = getError();
 
-    expect(error.message).toContain('the model returned an empty response');
+    expect(error.message).toContain(EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX);
     expect(error.message).toContain('test-connector-id');
     expect(error.message).toContain('anthropic-claude-5.5-opus');
     expect(error.message).toContain('prompt tokens: 128390');
@@ -81,7 +82,7 @@ describe('isEmptyModelResponseError', () => {
   it('returns false for other errors, and for non-errors', () => {
     expect(isEmptyModelResponseError(new Error('boom'))).toBe(false);
     expect(isEmptyModelResponseError(undefined)).toBe(false);
-    expect(isEmptyModelResponseError('the model returned an empty response')).toBe(false);
+    expect(isEmptyModelResponseError(EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX)).toBe(false);
   });
 });
 

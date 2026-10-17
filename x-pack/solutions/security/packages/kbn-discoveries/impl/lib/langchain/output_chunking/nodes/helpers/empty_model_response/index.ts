@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-import { EMPTY_MODEL_RESPONSE_ERROR_CODE } from '@kbn/langchain/server';
+import {
+  EMPTY_MODEL_RESPONSE_ERROR_CODE,
+  EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
+} from '@kbn/langchain/server';
 
 /**
  * Stable phrase written into the persisted `errors` entries of the generate and refine nodes when a
  * model returns no content. `throwIfErrorCountsExceeded` matches on it to report the real cause
  * instead of prescribing a remedy that cannot work.
+ *
+ * It is the leading phrase of the message `EmptyModelResponseError` is built from, imported rather
+ * than copied: a local copy would drift out of sync with the error text and stop matching, silently
+ * reverting the remedy to "send fewer alerts". The coupling is asserted in this module's test.
  */
-export const EMPTY_MODEL_RESPONSE_ERROR_MARKER = 'the model returned an empty response';
+export const EMPTY_MODEL_RESPONSE_ERROR_MARKER = EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX;
 
 /** Returns true when a persisted graph error was produced for an empty model response. */
 export const isEmptyModelResponseError = (error: string): boolean =>

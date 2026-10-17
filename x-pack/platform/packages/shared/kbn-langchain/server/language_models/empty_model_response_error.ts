@@ -15,6 +15,16 @@ export const MAX_RESPONSE_PREVIEW_LENGTH = 500;
 export const EMPTY_MODEL_RESPONSE_ERROR_CODE = 'EMPTY_MODEL_RESPONSE';
 
 /**
+ * Leading phrase of every `EmptyModelResponseError` message.
+ *
+ * Exported so that consumers which can only inspect a persisted message string (Attack Discovery
+ * stores the failure text, not the error object) can match on the same phrase the error is built
+ * from. The phrase is written once, here: a second copy in another package would drift silently and
+ * a drifted copy stops matching, which re-introduces the misleading "send fewer alerts" remedy.
+ */
+export const EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX = 'the model returned an empty response';
+
+/**
  * Returns a bounded, single-line-safe preview of a model response. The full body can be megabytes
  * and, on serverless, there is no log-level switch that would let support recover it later, so the
  * preview is what gets persisted alongside the error.
@@ -72,7 +82,7 @@ export class EmptyModelResponseError extends Error {
     traceId,
   }: EmptyModelResponseErrorParams) {
     super(
-      `the model returned an empty response (code: ${EMPTY_MODEL_RESPONSE_ERROR_CODE}); ` +
+      `${EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX} (code: ${EMPTY_MODEL_RESPONSE_ERROR_CODE}); ` +
         `connectorId: ${connectorId}; ` +
         `model: ${model ?? 'unknown'}; ` +
         `prompt tokens: ${promptTokens ?? 'unknown'}; ` +

@@ -27,6 +27,7 @@ import {
 import { getAttackDiscoveriesGenerationSchema } from '../../../../../attack_discovery/graphs/default_attack_discovery_graph/schemas';
 import type { AttackDiscoveryGraphState } from '../../../../types';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
+import { EMPTY_MODEL_RESPONSE_ERROR_MARKER } from '../helpers/empty_model_response';
 import { getRefineNode } from '.';
 
 const attackDiscoveryTimestamp = '2024-10-11T17:55:59.702Z';
@@ -369,10 +370,71 @@ ${ATTACK_DISCOVERY_REFINE}
 
     expect(state.generationAttempts).toBe(4);
     expect(state.errors).toHaveLength(3);
-    expect(
-      state.errors.every((error) => error.includes('the model returned an empty response'))
-    ).toBe(true);
+    expect(state.errors.every((error) => error.includes(EMPTY_MODEL_RESPONSE_ERROR_MARKER))).toBe(
+      true
+    );
     expect(state.refinements).toEqual([]); // <-- an empty response is not a refinement
+  });
+
+  it('keeps the refinements accumulated by earlier attempts when the model returns an empty response', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue('');
+
+    const refineNode = getRefineNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await refineNode({
+      ...initialGraphState,
+      combinedRefinements: '{"insights":[',
+      generationAttempts: 2,
+      refinements: ['{"insights":['],
+    });
+
+    // an attempt that produced no content adds nothing and invalidates nothing: the partial results
+    // of the earlier attempts stay in state as the input for the next attempt
+    expect(state.combinedRefinements).toBe('{"insights":[');
+    expect(state.refinements).toEqual(['{"insights":[']);
+    expect(state.generationAttempts).toBe(3);
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
+  });
+
+  it('keeps the refinements accumulated by earlier attempts when an empty completion is thrown', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockRejectedValue(
+      new EmptyModelResponseError({
+        completionTokens: 0,
+        connectorId: 'test-connector-id',
+        contentLength: 0,
+        responseBody: '',
+      })
+    );
+
+    const refineNode = getRefineNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await refineNode({
+      ...initialGraphState,
+      combinedRefinements: '{"insights":[',
+      generationAttempts: 2,
+      refinements: ['{"insights":['],
+    });
+
+    // same state as the empty-completion branch above, whether the guard threw or the node noticed
+    expect(state.combinedRefinements).toBe('{"insights":[');
+    expect(state.errors[0]).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
   });
 
   it('falls back to the unrefined results when the attempts are exhausted by empty responses', async () => {
@@ -423,7 +485,7 @@ ${ATTACK_DISCOVERY_REFINE}
     const state = await refineNode(initialGraphState);
 
     expect(state.errors).toHaveLength(1);
-    expect(state.errors[0]).toContain('the model returned an empty response');
+    expect(state.errors[0]).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
     expect(state.errors[0]).toContain('test-connector-id');
     expect(state.errors[0]).toContain('prompt tokens: 128390');
   });
