@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import { MITRE_ATTACK_FRAMEWORK } from '@kbn/security-mitre-attack-common';
 import type {
   RuleIndexEntry,
   IndexToRulesMap,
@@ -52,8 +53,11 @@ const extractTactics = (params: RuleParams): Array<{ id: string; name: string }>
 
   const tactics: Array<{ id: string; name: string }> = [];
   for (const item of threat) {
+    // SIEM readiness is MITRE ATT&CK-only; ATLAS entries are skipped (missing framework counts as ATT&CK, matching the save-path default).
+    const { framework } = item as { framework?: string };
+    const isAttack = !framework || framework === MITRE_ATTACK_FRAMEWORK;
     const tactic = item.tactic as ThreatTactic | undefined;
-    if (tactic?.id && tactic?.name) {
+    if (isAttack && tactic?.id && tactic?.name) {
       tactics.push({ id: tactic.id, name: tactic.name });
     }
   }
