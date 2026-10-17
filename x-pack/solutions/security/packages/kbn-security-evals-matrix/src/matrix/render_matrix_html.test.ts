@@ -989,3 +989,84 @@ describe('round 8 regression: self-judged disclosure on not-recommended cells', 
     expect(html).toContain('fail (self-judged)');
   });
 });
+
+describe('renderMatrixHtml via shared report module', () => {
+  it('renders through the shared HTML adapter without losing matrix content', () => {
+    const matrix: Matrix = {
+      ...mockMatrix,
+      evaluatorSaturation: [
+        {
+          evaluatorName: 'judge-x',
+          saturated: true,
+          range: 0.4,
+          observations: 1,
+          mean: 0.9,
+          stdev: 0.01,
+          distinctValues: 1,
+        },
+      ],
+      proprietary: [
+        {
+          ...mockMatrix.proprietary[0],
+          tier: 1,
+          cells: {
+            alert: { kind: 'score', value: 8.12 },
+            threat: { kind: 'score', value: 6.5, selfJudged: true },
+          },
+          overall: { kind: 'score', value: 7.31 },
+          coverage: { covered: 1, total: 2 },
+        },
+      ],
+    };
+    const html = renderMatrixHtml(matrix, mockConfig, {
+      branch: 'main',
+      buildUrl: 'https://ci.example.com/build/42',
+      methodologyNotes: ['note one'],
+    });
+    // Summary table content.
+    expect(html).toContain('✓ 8.12');
+    expect(html).toContain('✓ 6.5 SJ');
+    expect(html).toContain('Scored by the same model being evaluated');
+    expect(html).toContain('✓ 7.31 T1');
+    expect(html).toContain('Tie tier 1');
+    // Coverage folded into the row subtitle.
+    expect(html).toContain('test-model · 1/2');
+    // Provenance link for safe build URLs.
+    expect(html).toContain('<a href="https://ci.example.com/build/42">build</a>');
+    // Methodology notes from provenance and saturation disclosure.
+    expect(html).toContain('note one');
+    expect(html).toContain('Overall excludes 1 non-discriminating evaluator(s)');
+    // Legend survives the move onto the report model (apostrophe HTML-escaped).
+    expect(html).toContain('the model&#x27;s score (0–10)');
+  });
+
+  it('discloses code-evaluated suites without an agent trace', () => {
+    const traces: MatrixTraceData = {
+      'test-model:alert': {
+        scores: { judge_x: 0.8 },
+        stepCount: 0,
+        toolCount: 0,
+      },
+    };
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {}, traces);
+    expect(html).toContain(
+      'No agent trace — this suite is evaluated without a conversational agent.'
+    );
+  });
+
+  it('escapes untrusted model output through the shared path', () => {
+    const traces: MatrixTraceData = {
+      'test-model:alert': {
+        question: '<img src=x onerror=alert(1)>',
+        toolTrail: ['<script>'],
+        answer: '[x](javascript:alert(1))',
+        stepCount: 0,
+        toolCount: 0,
+      },
+    };
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {}, traces);
+    expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
+    expect(html).toContain('&lt;script&gt;');
+    expect(html).not.toMatch(/href="javascript:/i);
+  });
+});
