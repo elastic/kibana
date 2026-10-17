@@ -8,6 +8,7 @@
 import type { EsClient, KbnClient, ScoutLogger } from '@kbn/scout-oblt';
 import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../common/constants';
+import { enableCompositeSloFeatureFlag } from '../../common/composite_slo_feature_flag';
 
 const SLO_NAME = 'Test Stack SLO';
 const TRANSFORM_READY_TIMEOUT_MS = 90_000;
@@ -59,7 +60,9 @@ const scheduleNowAndWaitForProgress = async (
 globalSetupHook(
   'Setup environment for SLO tests',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  async ({ sloData, esClient, kbnClient, log }) => {
+  async ({ sloData, apiServices, esClient, kbnClient, log }) => {
+    await enableCompositeSloFeatureFlag({ apiServices, kbnClient, log });
+
     await sloData.generateSloData();
 
     // Repeated local runs accumulate identically-named SLOs in the same cluster.
