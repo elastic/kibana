@@ -616,6 +616,26 @@ describe('trajectory', () => {
     ).toBeLessThan(1);
   });
 
+  it('ignores harness planning tools such as write_todos', async () => {
+    expect(
+      await score(
+        trajectory,
+        { ...completed, toolCallIds: ['write_todos', 'write_todos'] },
+        'false_positive'
+      )
+    ).toBe(1);
+  });
+
+  it('still scores 0 when a domain tool is called alongside write_todos', async () => {
+    expect(
+      await score(
+        trajectory,
+        { ...completed, toolCallIds: ['write_todos', 'search', 'write_todos'] },
+        'false_positive'
+      )
+    ).toBe(0);
+  });
+
   it('returns N/A when traces are unavailable', async () => {
     expect(
       await score(trajectory, { ...completed, toolCallsUnavailable: true }, 'false_positive')
