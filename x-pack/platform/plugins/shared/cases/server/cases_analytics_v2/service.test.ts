@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { coreMock, elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { CasesAnalyticsV2Service, V2_NOOP_DATA_VIEW_REFRESHER } from './service';
@@ -20,6 +20,10 @@ import {
 import { ensureCaseIndex } from './ensure_indices/case';
 import { ensureActivityIndex } from './ensure_indices/activity';
 import { RESET_TASK_ID, RESET_TASK_TYPE } from './reconciliation/reset_task';
+import {
+  INCREMENTAL_ID_BACKFILL_TASK_ID,
+  INCREMENTAL_ID_BACKFILL_TASK_TYPE,
+} from './incremental_id_backfill';
 import { makeCase, makeUserAction } from './__test_helpers__';
 
 jest.mock('./ensure_indices/case');
@@ -33,6 +37,7 @@ const buildService = () =>
     enableAdminRoutes: false,
     resetTaskTimeoutMinutes: 60,
     resetPageDelayMs: 0,
+    incrementalIdEnabled: false,
   });
 
 describe('CasesAnalyticsV2Service', () => {
@@ -143,6 +148,7 @@ describe('CasesAnalyticsV2Service', () => {
         enableAdminRoutes: false,
         resetTaskTimeoutMinutes: 60,
         resetPageDelayMs: 0,
+        incrementalIdEnabled: false,
       });
 
     const startService = async (service: CasesAnalyticsV2Service) => {
@@ -213,6 +219,7 @@ describe('CasesAnalyticsV2Service', () => {
         enableAdminRoutes: false,
         resetTaskTimeoutMinutes: 60,
         resetPageDelayMs: 0,
+        incrementalIdEnabled: false,
       });
 
     const startWithTaskManager = async (service: CasesAnalyticsV2Service) => {
@@ -299,6 +306,95 @@ describe('CasesAnalyticsV2Service', () => {
       await service.triggerBackfillReconciliation();
 
       expect(clearSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('incremental id backfill task', () => {
+    const build = (incrementalIdEnabled: boolean) =>
+      new CasesAnalyticsV2Service({
+        logger: loggerMock.create(),
+        enabled: true,
+        reconciliationIntervalMinutes: 30,
+        enableAdminRoutes: false,
+        resetTaskTimeoutMinutes: 60,
+        resetPageDelayMs: 0,
+        incrementalIdEnabled,
+      });
+
+    const setup = (service: CasesAnalyticsV2Service) => {
+      const taskManagerSetup = taskManagerMock.createSetup();
+      service.setup({
+        core: coreMock.createSetup(),
+        taskManager: taskManagerSetup,
+      });
+      const definition = (taskManagerSetup.registerTaskDefinitions as jest.Mock).mock.calls
+        .map(([defs]) => defs[INCREMENTAL_ID_BACKFILL_TASK_TYPE])
+        .find(Boolean);
+      const getRunnerDeps = () =>
+        definition
+          .createTaskRunner({ taskInstance: {}, signal: new AbortController().signal })
+          .run();
+      return { definition, getRunnerDeps };
+    };
+
+    const start = async (service: CasesAnalyticsV2Service) => {
+      const taskManager = taskManagerMock.createStart();
+      await service.start({
+        esClient: elasticsearchServiceMock.createElasticsearchClient(),
+        taskManager,
+        internalSavedObjectsClient: savedObjectsClientMock.create(),
+        dataViewsService: {} as unknown as DataViewsServerPluginStart,
+      });
+      return taskManager;
+    };
+
+    afterEach(() => jest.clearAllMocks());
+
+    it('schedules the backfill on start when incremental ids are enabled', async () => {
+      (ensureCaseIndex as jest.Mock).mockResolvedValue(undefined);
+      (ensureActivityIndex as jest.Mock).mockResolvedValue(undefined);
+      const service = build(true);
+      const { definition } = setup(service);
+
+      const taskManager = await start(service);
+
+      expect(definition).toBeDefined();
+      expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: INCREMENTAL_ID_BACKFILL_TASK_ID,
+          taskType: INCREMENTAL_ID_BACKFILL_TASK_TYPE,
+        })
+      );
+    });
+
+    it('registers but never schedules the backfill when incremental ids are disabled', async () => {
+      (ensureCaseIndex as jest.Mock).mockResolvedValue(undefined);
+      (ensureActivityIndex as jest.Mock).mockResolvedValue(undefined);
+      const service = build(false);
+      const { definition } = setup(service);
+
+      const taskManager = await start(service);
+
+      expect(definition).toBeDefined();
+      expect(taskManager.ensureScheduled).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: INCREMENTAL_ID_BACKFILL_TASK_ID })
+      );
+    });
+
+    it('fails the run (so Task Manager retries) when it fires before start', async () => {
+      const { getRunnerDeps } = setup(build(true));
+
+      await expect(getRunnerDeps()).rejects.toThrow('before service start completed');
+    });
+
+    it('fails the run instead of writing through the no-op writer when .cases failed to bootstrap', async () => {
+      (ensureCaseIndex as jest.Mock).mockRejectedValue(new Error('shard limit'));
+      (ensureActivityIndex as jest.Mock).mockResolvedValue(undefined);
+      const service = build(true);
+      const { getRunnerDeps } = setup(service);
+      await start(service);
+
+      await expect(getRunnerDeps()).rejects.toThrow('before service start completed');
     });
   });
 });

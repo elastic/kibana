@@ -15,6 +15,7 @@ import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_co
 import { CASE_SAVED_OBJECT, CASE_ID_INCREMENTER_SAVED_OBJECT } from '../../../common/constants';
 import { CasesIncrementalIdService } from '../../services/incremental_id';
 import type { ConfigType } from '../../config';
+import type { CasesAnalyticsV2WriterContract } from '../../cases_analytics_v2/writer';
 
 export const CASES_INCREMENTAL_ID_SYNC_TASK_TYPE = 'cases_incremental_id_assignment';
 export const CASES_INCREMENTAL_ID_SYNC_TASK_ID = `cases:${CASES_INCREMENTAL_ID_SYNC_TASK_TYPE}`;
@@ -29,7 +30,8 @@ export class IncrementalIdTaskManager {
     taskManager: TaskManagerSetupContract,
     config: ConfigType['incrementalId'],
     logger: Logger,
-    usageCollection?: UsageCollectionSetup
+    usageCollection?: UsageCollectionSetup,
+    private analyticsV2Writer?: CasesAnalyticsV2WriterContract
   ) {
     this.config = config;
     this.logger = logger.get('incremental_id_task');
@@ -50,7 +52,8 @@ export class IncrementalIdTaskManager {
           }
           const casesIncrementService = new CasesIncrementalIdService(
             this.internalSavedObjectsClient,
-            this.logger
+            this.logger,
+            this.analyticsV2Writer
           );
           return {
             run: async () => {
