@@ -15,6 +15,8 @@ export const AI_INDEX_BY_ID_PATH = `${AI_INDEX_PATH}/{aiIndexId}`;
 /** Id-less; ids cannot start with `_` (`AI_INDEX_ID_PATTERN`), so this never collides with `{aiIndexId}`. */
 export const AI_INDEX_QUERY_PATH = `${AI_INDEX_PATH}/_query`;
 export const AI_INDEX_DESCRIBE_PATH = `${AI_INDEX_BY_ID_PATH}/_describe`;
+export const AI_INDEX_MEMORIES_PATH = `${AI_INDEX_BY_ID_PATH}/memories`;
+export const AI_INDEX_MEMORY_BY_ID_PATH = `${AI_INDEX_MEMORIES_PATH}/{memoryId}`;
 export const AI_INDEX_KI_SUMMARY_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/ki_summary`;
 export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/feedback_analysis`;
 export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
@@ -90,6 +92,9 @@ export const MAX_AI_INDEX_TRACES = 100;
 export const MAX_AI_INDEX_TRACE_VALUE_LENGTH = 10240;
 /** Cap on comma-separated index/data-stream/alias expressions inside a single 'index' trace value. */
 export const MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS = 50;
+
+/** Provenance URI recorded for memory writes made through the public API. */
+export const MEMORY_API_PROVENANCE_SOURCE = 'api://context_engine.ai_index.memories';
 
 /** AI-index ES|QL query API bounds. */
 export const MAX_AI_INDEX_QUERY_LENGTH = 10000;

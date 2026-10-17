@@ -21,6 +21,7 @@ import type {
 import type { WorkflowEnablementApi } from './feedback_analysis/schedule';
 import type { AiIndexProperties } from '../common/http_api/ai_indices';
 import type { AiIndexDataReadServiceApi } from './ai_indices/data_read_service';
+import type { AiIndexMemoryWriteServiceApi } from './ai_indices/memory_write_service';
 import type { AiIndexService } from './ai_indices/service';
 import type { ImprovementsServiceApi } from './improvements/service';
 import type { SignalsServiceApi } from './signals/service';
@@ -36,10 +37,21 @@ export interface GetAiIndexDataReadServiceParams {
   request: KibanaRequest;
 }
 
+export interface GetAiIndexMemoryWriteServiceParams {
+  /** Request-scoped client; Elasticsearch authorizes every write. */
+  esClient: ElasticsearchClient;
+  /** Space, audit scope, and caller-scoped Memory settings are resolved from this request. */
+  request: KibanaRequest;
+}
+
 export interface ContextEnginePluginStart {
   getAiIndexService: () => AiIndexService;
   /** Caller-scoped AI-index reads (query, and later describe/list). */
   getAiIndexDataReadService: (params: GetAiIndexDataReadServiceParams) => AiIndexDataReadServiceApi;
+  /** Caller-scoped Memory writes shared by tools and public APIs. */
+  getAiIndexMemoryWriteService: (
+    params: GetAiIndexMemoryWriteServiceParams
+  ) => AiIndexMemoryWriteServiceApi;
   /** The signals store. */
   getSignalsService: () => SignalsServiceApi;
   /**
