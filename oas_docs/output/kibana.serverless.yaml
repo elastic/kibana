@@ -12900,6 +12900,14 @@ paths:
             maxItems: 50
             minItems: 1
             type: array
+        - description: Free-text search. Matches rule name, description or rule ID (case-insensitive). Combined with rule_ids using AND.
+          in: query
+          name: search
+          required: false
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
         - description: 'Outcome filter. '
           in: query
           name: outcomes
@@ -147701,6 +147709,20 @@ components:
           maximum: 9007199254740991
           minimum: 1
           type: integer
+        search_matches:
+          additionalProperties: false
+          description: Match counts for the active search. Omitted when no search was provided. When is_truncated is true the server ID filter was capped and the result may be truncated.
+          type: object
+          properties:
+            is_truncated:
+              description: True when the server filter cap was reached and results may be truncated.
+              type: boolean
+            rules:
+              description: 'Rules matching the search. This count is an estimate: results above 10,000 may be reported as 10,000.'
+              type: number
+          required:
+            - rules
+            - is_truncated
         total:
           description: 'The number of rule executions matching the query. This count is an estimate: results above 10,000 may be reported as 10,000.'
           maximum: 9007199254740991

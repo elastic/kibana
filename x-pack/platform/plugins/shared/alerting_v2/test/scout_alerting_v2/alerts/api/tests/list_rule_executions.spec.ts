@@ -14,6 +14,7 @@ import {
   buildCreateRuleData,
   listRuleExecutionsUrl,
   NO_ACCESS_ROLE,
+  READ_ROLE,
   testData,
 } from '../fixtures';
 
@@ -22,6 +23,9 @@ const OTHER_SPACE_ID = 'cross-space-execution-history';
 apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' }, () => {
   let readerCredentials: RoleApiCredentials;
   let readerHeaders: Record<string, string>;
+  // READ_ROLE can read rules as well as execution history, which the name lookup needs.
+  let searcherHeaders: Record<string, string>;
+  const nameSuffix = Date.now();
 
   apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
     readerCredentials = await requestAuth.getApiKeyForCustomRole(
@@ -29,6 +33,9 @@ apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' },
     );
 
     readerHeaders = { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader };
+
+    const searcherCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
+    searcherHeaders = { ...testData.COMMON_HEADERS, ...searcherCredentials.apiKeyHeader };
 
     await apiServices.spaces.delete(OTHER_SPACE_ID);
     await apiServices.spaces.create({ id: OTHER_SPACE_ID, name: OTHER_SPACE_ID });
@@ -196,4 +203,82 @@ apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' },
       expect(response).toHaveStatusCode(403);
     }
   );
+
+  apiTest(
+    'search: returns only the executions of rules whose name matches the search',
+    async ({ apiServices, apiClient }) => {
+      const matchingRule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: `searchable-cpu-rule-${nameSuffix}` } })
+      );
+      const otherRule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: `searchable-memory-rule-${nameSuffix}` } })
+      );
+
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
+        ruleId: matchingRule.id,
+        runs: 1,
+      });
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({ ruleId: otherRule.id, runs: 1 });
+
+      const response = await apiClient.get(
+        listRuleExecutionsUrl({ search: `searchable-cpu-rule-${nameSuffix}`, per_page: 100 }),
+        { headers: searcherHeaders }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.items.length).toBeGreaterThanOrEqual(1);
+      for (const item of response.body.items) {
+        expect(item.rule.id).toBe(matchingRule.id);
+      }
+      expect(response.body.search_matches).toStrictEqual({ rules: 1, is_truncated: false });
+    }
+  );
+
+  apiTest(
+    'search: applies the other filters on top of the search',
+    async ({ apiServices, apiClient }) => {
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: `searchable-filtered-rule-${nameSuffix}` } })
+      );
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({ ruleId: rule.id, runs: 1 });
+
+      const response = await apiClient.get(
+        listRuleExecutionsUrl({
+          search: `searchable-filtered-rule-${nameSuffix}`,
+          outcomes: ['success'],
+        }),
+        { headers: searcherHeaders }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.items.length).toBeGreaterThanOrEqual(1);
+      for (const item of response.body.items) {
+        expect(item.outcome).toBe('success');
+        expect(item.rule.id).toBe(rule.id);
+      }
+    }
+  );
+
+  apiTest(
+    'search: returns an empty page, not an error, when nothing matches',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(
+        listRuleExecutionsUrl({ search: `no-such-rule-${nameSuffix}` }),
+        { headers: searcherHeaders }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.items).toStrictEqual([]);
+      expect(response.body.total).toBe(0);
+      expect(response.body.search_matches).toStrictEqual({ rules: 0, is_truncated: false });
+    }
+  );
+
+  apiTest('validation: rejects a search longer than the maximum', async ({ apiClient }) => {
+    const response = await apiClient.get(listRuleExecutionsUrl({ search: 'a'.repeat(257) }), {
+      headers: searcherHeaders,
+    });
+
+    expect(response).toHaveStatusCode(400);
+  });
 });
