@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { EMPTY_MODEL_RESPONSE_ERROR_CODE, EmptyModelResponseError } from '@kbn/langchain/server';
+import {
+  EMPTY_MODEL_RESPONSE_ERROR_CODE,
+  EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
+  EmptyModelResponseError,
+} from '@kbn/langchain/server';
 
 import {
   EMPTY_MODEL_RESPONSE_ERROR_MARKER,
@@ -17,6 +21,12 @@ import {
 describe('EMPTY_MODEL_RESPONSE_ERROR_MARKER', () => {
   // The marker is matched against persisted error *strings*, so it is only useful while it stays a
   // substring of the message the error is built from. These tests fail if that link breaks.
+  it('is the phrase @kbn/langchain exports, not a copy of it', () => {
+    // A copy that happens to read the same today stops matching the moment the shared phrase
+    // changes, which silently reverts the remedy to "send fewer alerts".
+    expect(EMPTY_MODEL_RESPONSE_ERROR_MARKER).toBe(EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX);
+  });
+
   it('is a substring of the message EmptyModelResponseError raises', () => {
     const error = new EmptyModelResponseError({
       completionTokens: 0,
