@@ -34,6 +34,8 @@ export type {
   EpisodesSortState,
 } from './episodes_query';
 
+export { convertKqlToEsqlExpression } from './kql_to_esql';
+
 export { buildEpisodeQuery, buildEpisodeGroupHashQuery } from './episode_query';
 export type { EpisodeGroupHashEsqlRow } from './episode_query';
 
