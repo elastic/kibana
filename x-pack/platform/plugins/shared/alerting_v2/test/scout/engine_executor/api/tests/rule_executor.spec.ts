@@ -24,6 +24,7 @@ const { SCHEDULE_INTERVAL } = testData;
 // On a loaded flaky-runner host a single executor run can take tens of seconds,
 // so waits that need two completed runs get a budget above the 45s default.
 const SLOW_EXECUTIONS_TIMEOUT_MS = 90_000;
+const SLOW_EXECUTIONS_TEST_TIMEOUT_MS = 150_000;
 
 /**
  * Index a list of alert events by their `data['host.name']` value.
@@ -1158,6 +1159,8 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
   apiTest(
     'does not recover a group when recover query returns no matching active group',
     async ({ apiServices }) => {
+      apiTest.setTimeout(SLOW_EXECUTIONS_TEST_TIMEOUT_MS);
+
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [

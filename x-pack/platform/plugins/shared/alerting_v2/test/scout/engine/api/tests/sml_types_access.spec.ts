@@ -11,7 +11,7 @@ import { expect } from '@kbn/scout/api';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { ACTION_POLICY_KI_TYPE, RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import type { ActionPolicyResponse, CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_ACTION_POLICY_API_PATH,
   ALERTING_V2_RULE_API_PATH,
@@ -159,17 +159,12 @@ apiTest.describe('Agent Builder — alerting V2 SML type access', { tag: API_ENG
     ruleId = createdRule.data.id;
     ruleAttachmentId = `${RULE_KI_TYPE}://${ruleId}`;
 
-    const createdPolicy = await kbnClient.request<ActionPolicyResponse>({
-      method: 'POST',
-      path: ALERTING_V2_ACTION_POLICY_API_PATH,
-      headers: COMMON_HEADERS,
-      body: {
-        name: policyTitle,
-        description: 'Scout SML type access action policy',
-        destinations: [{ type: 'workflow', id: 'scout-sml-workflow-id' }],
-      },
+    const createdPolicy = await apiServices.alertingV2.actionPolicies.create({
+      name: policyTitle,
+      description: 'Scout SML type access action policy',
+      destinations: [{ type: 'workflow', id: 'scout-sml-workflow-id' }],
     });
-    policyId = createdPolicy.data.id;
+    policyId = createdPolicy.id;
     policyAttachmentId = `${ACTION_POLICY_KI_TYPE}://${policyId}`;
 
     await apiServices.alertingV2.taskManager.runSoon(smlCrawlerTaskId(RULE_KI_TYPE), {
