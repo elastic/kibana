@@ -64,7 +64,7 @@ const generateDashboardSchema = z.object({
     .max(1000)
     .optional()
     .describe(
-      'Where panels and sections go, in plain words: the user\'s own arrangement or size request, e.g. "make the table full width", and where your new sections and moved panels belong, e.g. "put the Key metrics section at the top", and which edited panels need another size, e.g. "Response codes is now a table, size it as one". Omit it when the user asked for no arrangement and the place of your changes does not matter: panels are then placed and sized automatically.'
+      'The user\'s own arrangement or size request, in plain words, e.g. "make the table full width". Omit it otherwise: new, moved, and removed panels and sections are placed and sized automatically from the operations, so do not describe where your changes go.'
     ),
 });
 
@@ -148,7 +148,7 @@ Use operations[] to:
 6. remove panels
 7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)
 
-Panel positions and sizes are set automatically after the operations run; \`layout\` says where things go, and the summary shows the resulting \`grid\` of every panel.`,
+Panel positions and sizes are set automatically after the operations run; \`layout\` only carries the user's own arrangement request, and the summary shows the resulting \`grid\` of every panel.`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations, layout },

@@ -7,4 +7,4 @@
 
 export const gridLayoutPrompt = `## Panel Layout
 
-Panel positions and sizes are set automatically. The layout step sees panel types, chart types and titles, but not what a panel is for, so say in \`layout\` where new sections and moved panels belong, by purpose. Never write coordinates, and follow the enhance workflow when it says to set \`layout\`.`;
+Panel positions and sizes are set automatically from the operations: new, moved, and removed panels and sections are placed without help. Set \`layout\` only to pass on the user's own arrangement or size request, or when the enhance workflow says to set it. Never write coordinates.`;
