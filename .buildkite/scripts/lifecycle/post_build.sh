@@ -33,3 +33,12 @@ if [[ "${GITHUB_PR_NUMBER:-}" ]]; then
     buildkite-agent meta-data set pr_comment:docs_changes:head "* [Documentation Changes](${DOCS_CHANGES_URL})"
   fi
 fi
+
+if [[ "${REPORT_FAILED_TESTS_TO_GITHUB:-}" == "true" ]]; then
+  echo "--- Bootstrap Kibana"
+  export KBN_BOOTSTRAP_NO_PREBUILT=true
+  .buildkite/scripts/bootstrap.sh
+
+  echo "--- Report failed tests to GitHub"
+  node "$(dirname "${0}")/report_failed_test_issues.ts"
+fi

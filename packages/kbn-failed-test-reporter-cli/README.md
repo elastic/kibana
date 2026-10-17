@@ -15,6 +15,12 @@ attempts linked to their Buildkite jobs. Existing issues receive the link the ne
 updates them; failure comments on `main` include it too. Tests without an exact file path are left
 without a history link.
 
+### Buildkite reporting
+
+Test jobs run with `--no-github-update`. When `REPORT_FAILED_TESTS_TO_GITHUB` is enabled, Post-Build
+downloads their reports and files GitHub issues. Retries of a step are reported together, and
+Post-Build fails without reporting when more than 50 tests failed.
+
 ## `node scripts/report_flaky_test_issues`
 
 Reads a flaky test report written by `node scripts/scout discover-flaky-tests`, groups the flaky
