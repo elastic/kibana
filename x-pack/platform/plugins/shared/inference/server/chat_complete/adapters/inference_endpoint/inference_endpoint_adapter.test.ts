@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Readable } from 'node:stream';
 import type OpenAI from 'openai';
 import { v4 } from 'uuid';
 import { lastValueFrom, toArray, filter, noop, of } from 'rxjs';
@@ -16,7 +17,10 @@ import {
   isChatCompletionChunkEvent,
   isChatCompletionTokenCountEvent,
   InferenceEndpointProvider,
+  isInferenceProviderError,
+  DEFAULT_STREAM_IDLE_TIMEOUT_MS,
 } from '@kbn/inference-common';
+import { getRetryFilter } from '../../../../common/utils/error_retry_filter';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
 import type { OpenAIChatCompletionChunkDelta } from '../openai/types';
@@ -664,6 +668,62 @@ describe('inferenceEndpointAdapter', () => {
           }),
         })
       );
+    });
+
+    it('forwards firstByteTimeoutMs to the executor', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          firstByteTimeoutMs: 45_000,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({ firstByteTimeoutMs: 45_000 })
+      );
+    });
+
+    it('fails an idle stream with a retryable provider error after idleTimeoutMs', async () => {
+      executorMock.invoke.mockResolvedValue(new Readable({ read: () => {} }));
+
+      const error = await lastValueFrom(
+        inferenceEndpointAdapter.chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          idleTimeoutMs: 20,
+        })
+      ).catch((e) => e);
+
+      expect(isInferenceProviderError(error)).toBe(true);
+      expect(error.meta.status).toBe(504);
+      expect(getRetryFilter('auto')(error)).toBe(true);
+    });
+
+    it('applies the default idle timeout to inference endpoint streams', async () => {
+      jest.useFakeTimers();
+      try {
+        executorMock.invoke.mockResolvedValue(new Readable({ read: () => {} }));
+
+        const error$ = lastValueFrom(
+          inferenceEndpointAdapter.chatComplete({
+            ...defaultArgs,
+            messages: [{ role: MessageRole.User, content: 'question' }],
+          })
+        ).catch((e) => e);
+
+        await jest.advanceTimersByTimeAsync(DEFAULT_STREAM_IDLE_TIMEOUT_MS + 1);
+
+        const error = await error$;
+        expect(error.message).toBe(`Inference stream idle for ${DEFAULT_STREAM_IDLE_TIMEOUT_MS}ms`);
+        expect(getRetryFilter('auto')(error)).toBe(true);
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('propagates the abort signal', () => {

@@ -130,7 +130,12 @@ export {
 
 export { Tokenizer, generateFakeToolCallId, ShortIdTable } from './src/utils';
 
-export { elasticModelDictionary, MAX_STREAM_DURATION_MS } from './src/const';
+export {
+  elasticModelDictionary,
+  MAX_STREAM_DURATION_MS,
+  DEFAULT_FIRST_BYTE_TIMEOUT_MS,
+  DEFAULT_STREAM_IDLE_TIMEOUT_MS,
+} from './src/const';
 
 export { truncateList } from './src/truncate_list';
 export {
