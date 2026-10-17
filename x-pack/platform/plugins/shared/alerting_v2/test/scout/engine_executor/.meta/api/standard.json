@@ -1,5 +1,5 @@
 {
-  "sha1": "8353b55de95b69c26c29f79011b2c402539a0de6",
+  "sha1": "70050e0ddfed2c261049c22960adf82407d3c944",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -655,13 +655,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_executor/api/tests/task_run_event_fields.spec.ts",
-        "line": 65,
-        "column": 47
+        "line": 68,
+        "column": 49
       }
     },
     {
@@ -671,13 +670,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_executor/api/tests/task_run_event_fields.spec.ts",
-        "line": 110,
-        "column": 18
+        "line": 113,
+        "column": 20
       }
     },
     {
@@ -687,13 +685,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_executor/api/tests/task_run_event_fields.spec.ts",
-        "line": 134,
-        "column": 26
+        "line": 137,
+        "column": 28
       }
     },
     {
@@ -703,13 +700,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_executor/api/tests/task_run_event_fields.spec.ts",
-        "line": 165,
-        "column": 18
+        "line": 168,
+        "column": 20
       }
     },
     {

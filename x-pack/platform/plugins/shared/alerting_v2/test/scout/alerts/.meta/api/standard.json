@@ -1,5 +1,5 @@
 {
-  "sha1": "582f6bc5a12806a3c8c9d339b8ef8c59b3e34c60",
+  "sha1": "b2d0a70eb9c097dddda8c02456a536e8120139b8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2845,12 +2845,15 @@
       "title": "Rule event fields suggestions API returns the union of data.* field names across all matching alerts when no matcher is given",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 87,
-        "column": 13
+        "line": 77,
+        "column": 47
       }
     },
     {
@@ -2858,12 +2861,15 @@
       "title": "Rule event fields suggestions API falls back to the unfiltered result when matcher cannot be parsed",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 110,
-        "column": 6
+        "line": 104,
+        "column": 14
       }
     },
     {
@@ -2871,12 +2877,15 @@
       "title": "Rule event fields suggestions API validation: rejects empty matcher with a 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 126,
-        "column": 13
+        "line": 116,
+        "column": 84
       }
     },
     {
@@ -2884,12 +2893,15 @@
       "title": "Rule event fields suggestions API validation: rejects matcher longer than the schema limit with a 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 133,
-        "column": 14
+        "line": 127,
+        "column": 5
       }
     },
     {
@@ -2897,12 +2909,15 @@
       "title": "Rule event fields suggestions API authorization: returns 200 for a user with read-only privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 145,
-        "column": 10
+        "line": 138,
+        "column": 14
       }
     },
     {
@@ -2910,12 +2925,15 @@
       "title": "Rule event fields suggestions API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 155,
-        "column": 15
+        "line": 150,
+        "column": 18
       }
     },
     {
@@ -2923,12 +2941,15 @@
       "title": "Suggest user profiles API matches the profile of a user that has signed in",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 61,
-        "column": 13
+        "line": 55,
+        "column": 5
       }
     },
     {
@@ -2936,12 +2957,15 @@
       "title": "Suggest user profiles API returns an empty list when nothing matches the search term",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 74,
-        "column": 74
+        "line": 65,
+        "column": 5
       }
     },
     {
@@ -2949,12 +2973,15 @@
       "title": "Suggest user profiles API returns an unfiltered list when the body has no name",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 84,
-        "column": 14
+        "line": 77,
+        "column": 9
       }
     },
     {
@@ -2962,12 +2989,15 @@
       "title": "Suggest user profiles API returns an unfiltered list when the name is empty",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 103,
-        "column": 78
+        "line": 94,
+        "column": 5
       }
     },
     {
@@ -2975,12 +3005,15 @@
       "title": "Suggest user profiles API validation: rejects a name longer than the schema limit",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 110,
-        "column": 71
+        "line": 101,
+        "column": 18
       }
     },
     {
@@ -2988,12 +3021,15 @@
       "title": "Suggest user profiles API validation: rejects a size above the schema limit",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 116,
-        "column": 20
+        "line": 109,
+        "column": 11
       }
     },
     {
@@ -3001,12 +3037,15 @@
       "title": "Suggest user profiles API validation: rejects a negative size",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 122,
-        "column": 14
+        "line": 114,
+        "column": 5
       }
     },
     {
@@ -3014,12 +3053,15 @@
       "title": "Suggest user profiles API validation: rejects a fractional size",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 131,
-        "column": 8
+        "line": 124,
+        "column": 12
       }
     },
     {
@@ -3027,12 +3069,15 @@
       "title": "Suggest user profiles API authorization: returns 200 for a user with read-only alerts privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 140,
-        "column": 31
+        "line": 132,
+        "column": 6
       }
     },
     {
@@ -3040,12 +3085,15 @@
       "title": "Suggest user profiles API authorization: returns 200 for a user with all alerts privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 148,
-        "column": 13
+        "line": 138,
+        "column": 75
       }
     },
     {
@@ -3053,12 +3101,15 @@
       "title": "Suggest user profiles API authorization: returns 403 for a user with rules privileges but no alerts privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 159,
-        "column": 63
+        "line": 150,
+        "column": 22
       }
     },
     {
@@ -3066,12 +3117,15 @@
       "title": "Suggest user profiles API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/user_profiles_suggestions.spec.ts",
-        "line": 172,
-        "column": 32
+        "line": 163,
+        "column": 65
       }
     },
     {

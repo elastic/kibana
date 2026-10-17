@@ -1,5 +1,5 @@
 {
-  "sha1": "52a486eaa27922cc7b4475594cfbfabc169289f0",
+  "sha1": "aa8f201d3f2e56d0465620c8f46804aa3f001f52",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -146,8 +146,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/install_rule_template.spec.ts",
-        "line": 28,
-        "column": 25
+        "line": 22,
+        "column": 23
       }
     },
     {
@@ -160,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/install_rule_template.spec.ts",
-        "line": 36,
-        "column": 74
+        "line": 31,
+        "column": 5
       }
     },
     {

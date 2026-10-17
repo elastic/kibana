@@ -1,5 +1,5 @@
 {
-  "sha1": "84adc3dcc7c55051fba7a65cc2c0f25d515a9b5a",
+  "sha1": "ebbfa8e02448579eae2f0d84119ee04d581308dc",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2894,12 +2894,14 @@
       "title": "Patch action policy saved object clears a field by removing its key, never by storing null",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/patch.spec.ts",
-        "line": 39,
-        "column": 61
+        "line": 41,
+        "column": 19
       }
     },
     {
@@ -2907,12 +2909,14 @@
       "title": "Patch action policy saved object leaves every field the body omits unchanged on disk",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/patch.spec.ts",
-        "line": 67,
-        "column": 12
+        "line": 72,
+        "column": 16
       }
     },
     {
@@ -2920,12 +2924,14 @@
       "title": "Patch action policy saved object clears a nested leaf without disturbing its siblings",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/patch.spec.ts",
-        "line": 93,
-        "column": 17
+        "line": 99,
+        "column": 19
       }
     },
     {
@@ -2933,12 +2939,14 @@
       "title": "Patch action policy saved object drops a throttle interval the merged strategy does not use",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/patch.spec.ts",
-        "line": 108,
-        "column": 60
+        "line": 114,
+        "column": 62
       }
     },
     {
@@ -2946,12 +2954,14 @@
       "title": "Patch action policy saved object clears the description by removing its key",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/patch.spec.ts",
-        "line": 122,
-        "column": 91
+        "line": 130,
+        "column": 95
       }
     },
     {
@@ -2959,12 +2969,14 @@
       "title": "Patch action policy saved object rejects an empty union patch and leaves the stored block alone",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/patch.spec.ts",
-        "line": 132,
-        "column": 27
+        "line": 141,
+        "column": 29
       }
     },
     {
@@ -2972,12 +2984,14 @@
       "title": "Patch action policy saved object clears the matcher when its last leaf goes, leaving a catch-all policy",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/patch.spec.ts",
-        "line": 166,
-        "column": 20
+        "line": 175,
+        "column": 22
       }
     },
     {
@@ -2985,12 +2999,14 @@
       "title": "Patch action policy saved object never writes enabled or the snooze state",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/patch.spec.ts",
-        "line": 191,
-        "column": 65
+        "line": 200,
+        "column": 67
       }
     },
     {

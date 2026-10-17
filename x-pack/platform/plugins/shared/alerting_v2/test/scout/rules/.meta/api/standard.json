@@ -1,5 +1,5 @@
 {
-  "sha1": "b53ad07ca6f2bddd4664c132468b821db2189b93",
+  "sha1": "9c9f95975aba8599b63731d609aa95261af0996e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2765,12 +2765,15 @@
       "title": "Find rules API search: should find rules by name prefix",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 56,
-        "column": 44
+        "line": 46,
+        "column": 5
       }
     },
     {
@@ -2778,12 +2781,15 @@
       "title": "Find rules API search: should find rules by description prefix",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 69,
-        "column": 90
+        "line": 59,
+        "column": 5
       }
     },
     {
@@ -2791,12 +2797,15 @@
       "title": "Find rules API search: should AND multiple terms together",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 91,
-        "column": 45
+        "line": 78,
+        "column": 49
       }
     },
     {
@@ -2804,12 +2813,15 @@
       "title": "Find rules API search: should match the name regardless of casing",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 111,
-        "column": 26
+        "line": 98,
+        "column": 25
       }
     },
     {
@@ -2817,12 +2829,15 @@
       "title": "Find rules API search: should not error on simple_query_string operators in user input",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 125,
-        "column": 14
+        "line": 113,
+        "column": 5
       }
     },
     {
@@ -2830,12 +2845,15 @@
       "title": "Find rules API search: should return empty results when no fields match",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 148,
-        "column": 45
+        "line": 136,
+        "column": 41
       }
     },
     {
@@ -2843,12 +2861,15 @@
       "title": "Find rules API pagination: should respect page and perPage and report total / current page",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 159,
-        "column": 24
+        "line": 147,
+        "column": 18
       }
     },
     {
@@ -2856,12 +2877,15 @@
       "title": "Find rules API pagination: should return zero items when page is beyond the result set",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 197,
-        "column": 83
+        "line": 181,
+        "column": 20
       }
     },
     {
@@ -2869,12 +2893,15 @@
       "title": "Find rules API sort: should sort rules by name in ascending order",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 207,
-        "column": 88
+        "line": 192,
+        "column": 11
       }
     },
     {
@@ -2882,12 +2909,15 @@
       "title": "Find rules API sort: should sort rules by name in descending order",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 227,
-        "column": 11
+        "line": 213,
+        "column": 14
       }
     },
     {
@@ -2895,12 +2925,15 @@
       "title": "Find rules API filter: should filter rules by enabled state",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 253,
-        "column": 7
+        "line": 237,
+        "column": 25
       }
     },
     {
@@ -2908,12 +2941,15 @@
       "title": "Find rules API filter: should filter rules by metadata.tags",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 285,
-        "column": 26
+        "line": 269,
+        "column": 59
       }
     },
     {
@@ -2921,12 +2957,15 @@
       "title": "Find rules API filter: should support compound expressions with AND/OR/NOT",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 309,
-        "column": 60
+        "line": 292,
+        "column": 88
       }
     },
     {
@@ -2934,12 +2973,15 @@
       "title": "Find rules API filter: should reject filters that reference unknown fields with a 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 333,
-        "column": 10
+        "line": 318,
+        "column": 41
       }
     },
     {
@@ -2947,12 +2989,15 @@
       "title": "Find rules API filter: rejects malformed KQL with a 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 353,
-        "column": 7
+        "line": 337,
+        "column": 25
       }
     },
     {
@@ -2960,12 +3005,15 @@
       "title": "Find rules API validation: should reject perPage above the maximum",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 359,
-        "column": 10
+        "line": 345,
+        "column": 32
       }
     },
     {
@@ -2973,12 +3021,15 @@
       "title": "Find rules API validation: should reject perPage below the minimum",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 369,
-        "column": 6
+        "line": 354,
+        "column": 64
       }
     },
     {
@@ -2986,12 +3037,15 @@
       "title": "Find rules API validation: should reject page values below 1",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 374,
-        "column": 9
+        "line": 360,
+        "column": 12
       }
     },
     {
@@ -2999,12 +3053,15 @@
       "title": "Find rules API validation: should reject non-numeric page values",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 381,
-        "column": 90
+        "line": 366,
+        "column": 7
       }
     },
     {
@@ -3012,12 +3069,15 @@
       "title": "Find rules API validation: should reject unknown sortField values",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 390,
-        "column": 24
+        "line": 373,
+        "column": 73
       }
     },
     {
@@ -3025,12 +3085,15 @@
       "title": "Find rules API validation: should reject unknown sortOrder values",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 398,
-        "column": 71
+        "line": 382,
+        "column": 22
       }
     },
     {
@@ -3038,12 +3101,15 @@
       "title": "Find rules API validation: should reject empty search after trimming whitespace",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 407,
-        "column": 13
+        "line": 390,
+        "column": 89
       }
     },
     {
@@ -3051,12 +3117,15 @@
       "title": "Find rules API authorization: should return 200 for a user with read-only alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 413,
-        "column": 14
+        "line": 399,
+        "column": 11
       }
     },
     {
@@ -3064,12 +3133,15 @@
       "title": "Find rules API authorization: should return 200 for a user with full alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 426,
-        "column": 24
+        "line": 410,
+        "column": 54
       }
     },
     {
@@ -3077,12 +3149,15 @@
       "title": "Find rules API authorization: should return 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 439,
-        "column": 20
+        "line": 425,
+        "column": 14
       }
     },
     {
@@ -4050,12 +4125,15 @@
       "title": "Match rules API tags: should return the alert rules with any of the matcher tags as routing tags, sorted by name",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/match_rules.spec.ts",
-        "line": 90,
-        "column": 13
+        "line": 80,
+        "column": 82
       }
     },
     {
@@ -4063,12 +4141,15 @@
       "title": "Match rules API tags: should ignore the matcher expression",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/match_rules.spec.ts",
-        "line": 104,
-        "column": 20
+        "line": 95,
+        "column": 26
       }
     },
     {
@@ -4076,12 +4157,15 @@
       "title": "Match rules API tags: should return an empty list when no rule has the matcher tags",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/match_rules.spec.ts",
-        "line": 119,
-        "column": 37
+        "line": 109,
+        "column": 54
       }
     },
     {
@@ -4089,12 +4173,15 @@
       "title": "Match rules API tags: should not match rules that only have the matcher tags as rule tags",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/match_rules.spec.ts",
-        "line": 133,
-        "column": 37
+        "line": 123,
+        "column": 52
       }
     },
     {
@@ -4102,12 +4189,15 @@
       "title": "Match rules API kind: should not return signal rules, even when they have the matcher tags",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/match_rules.spec.ts",
-        "line": 148,
-        "column": 36
+        "line": 139,
+        "column": 10
       }
     },
     {
@@ -4115,12 +4205,15 @@
       "title": "Match rules API catch-all: should return every alert rule when the matcher has no tags",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/match_rules.spec.ts",
-        "line": 161,
-        "column": 72
+        "line": 152,
+        "column": 22
       }
     },
     {
@@ -4128,12 +4221,15 @@
       "title": "Match rules API pagination: should paginate the matching rules",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/match_rules.spec.ts",
-        "line": 177,
-        "column": 16
+        "line": 168,
+        "column": 29
       }
     },
     {
@@ -4141,12 +4237,15 @@
       "title": "Match rules API validation: should return 400 for an empty or half-null matcher",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/match_rules.spec.ts",
-        "line": 193,
-        "column": 15
+        "line": 183,
+        "column": 37
       }
     },
     {
@@ -4154,12 +4253,15 @@
       "title": "Match rules API validation: should return 400 for unknown top-level keys",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/match_rules.spec.ts",
-        "line": 215,
-        "column": 25
+        "line": 205,
+        "column": 43
       }
     },
     {
@@ -4167,12 +4269,15 @@
       "title": "Match rules API validation: should return 400 when per_page exceeds the maximum",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/match_rules.spec.ts",
-        "line": 220,
-        "column": 28
+        "line": 210,
+        "column": 42
       }
     },
     {
@@ -4180,11 +4285,14 @@
       "title": "Match rules API authorization: should return 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/match_rules.spec.ts",
-        "line": 246,
+        "line": 242,
         "column": 27
       }
     },
@@ -4193,12 +4301,15 @@
       "title": "Matcher value suggestions API alert_status: returns a 200 with an array of suggested values for a static field",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 88,
-        "column": 7
+        "line": 80,
+        "column": 31
       }
     },
     {
@@ -4206,12 +4317,15 @@
       "title": "Matcher value suggestions API filters static suggestions by the query prefix",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 104,
-        "column": 9
+        "line": 97,
+        "column": 18
       }
     },
     {
@@ -4219,12 +4333,15 @@
       "title": "Matcher value suggestions API group_hash: aggregates the values stored on the alert events",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 119,
-        "column": 24
+        "line": 111,
+        "column": 39
       }
     },
     {
@@ -4232,12 +4349,15 @@
       "title": "Matcher value suggestions API group_hash: escapes regexp characters in the query before filtering",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 133,
-        "column": 27
+        "line": 127,
+        "column": 30
       }
     },
     {
@@ -4245,12 +4365,15 @@
       "title": "Matcher value suggestions API alert_id: aggregates the alert ids stored on the alert events",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 149,
-        "column": 27
+        "line": 143,
+        "column": 30
       }
     },
     {
@@ -4258,12 +4381,15 @@
       "title": "Matcher value suggestions API data.*: aggregates the values of a field nested under data",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 165,
-        "column": 27
+        "line": 156,
+        "column": 25
       }
     },
     {
@@ -4271,12 +4397,15 @@
       "title": "Matcher value suggestions API returns an empty list for an unsupported field",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 182,
-        "column": 27
+        "line": 176,
+        "column": 29
       }
     },
     {
@@ -4284,12 +4413,15 @@
       "title": "Matcher value suggestions API validation: rejects body with unknown top-level keys (strict schema)",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 195,
-        "column": 13
+        "line": 185,
+        "column": 86
       }
     },
     {
@@ -4297,12 +4429,15 @@
       "title": "Matcher value suggestions API validation: accepts fieldMeta and filters sent by the KQL value suggestion provider",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 204,
-        "column": 7
+        "line": 198,
+        "column": 14
       }
     },
     {
@@ -4310,12 +4445,15 @@
       "title": "Matcher value suggestions API validation: rejects a body without a query",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 222,
-        "column": 16
+        "line": 213,
+        "column": 24
       }
     },
     {
@@ -4323,12 +4461,15 @@
       "title": "Matcher value suggestions API validation: rejects an empty field",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 229,
-        "column": 22
+        "line": 221,
+        "column": 20
       }
     },
     {
@@ -4336,12 +4477,15 @@
       "title": "Matcher value suggestions API validation: rejects a field longer than the schema limit",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 240,
-        "column": 24
+        "line": 233,
+        "column": 7
       }
     },
     {
@@ -4349,12 +4493,15 @@
       "title": "Matcher value suggestions API validation: rejects a query longer than the schema limit",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 250,
-        "column": 76
+        "line": 243,
+        "column": 18
       }
     },
     {
@@ -4362,12 +4509,15 @@
       "title": "Matcher value suggestions API authorization: returns 200 for a user with read privileges on rules and alerts",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 261,
-        "column": 13
+        "line": 251,
+        "column": 96
       }
     },
     {
@@ -4375,12 +4525,15 @@
       "title": "Matcher value suggestions API authorization: returns 403 for a user with rules privileges but no alerts privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 272,
-        "column": 82
+        "line": 263,
+        "column": 22
       }
     },
     {
@@ -4388,11 +4541,14 @@
       "title": "Matcher value suggestions API authorization: returns 403 for a user with alerts privileges but no rules privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 285,
+        "line": 276,
         "column": 27
       }
     },
@@ -4401,12 +4557,15 @@
       "title": "Matcher value suggestions API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 296,
-        "column": 6
+        "line": 290,
+        "column": 23
       }
     },
     {
@@ -4414,7 +4573,9 @@
       "title": "Patch rule saved object clears a leaf by removing its key, never by storing null",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/patch.spec.ts",
@@ -4427,7 +4588,9 @@
       "title": "Patch rule saved object leaves every branch the body omits byte-identical on disk",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/patch.spec.ts",
@@ -4440,7 +4603,9 @@
       "title": "Patch rule saved object merges a nested phase leaf and stores only the nested form",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/patch.spec.ts",
@@ -4453,7 +4618,9 @@
       "title": "Patch rule saved object replaces a variant and a list as a unit instead of merging them",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/patch.spec.ts",
@@ -4466,7 +4633,9 @@
       "title": "Patch rule saved object clears artifacts by removing the key, not by storing []",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/patch.spec.ts",
@@ -4479,7 +4648,9 @@
       "title": "Patch rule saved object clears a state transition phase when its last leaf goes, keeping the other phase",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/patch.spec.ts",
@@ -4494,8 +4665,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
@@ -4510,8 +4680,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
@@ -4526,8 +4695,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
@@ -4542,8 +4710,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
@@ -4558,8 +4725,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
@@ -4574,8 +4740,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
@@ -4590,8 +4755,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
@@ -4606,8 +4770,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
@@ -4622,8 +4785,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
@@ -4638,8 +4800,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
@@ -4654,8 +4815,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
@@ -4670,8 +4830,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
@@ -4686,8 +4845,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
@@ -4702,8 +4860,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
@@ -4718,8 +4875,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
@@ -4734,8 +4890,7 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
@@ -4748,7 +4903,9 @@
       "title": "Rule metadata.template create: rejects metadata.template in the body",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_metadata_template.spec.ts",
@@ -4761,7 +4918,9 @@
       "title": "Rule metadata.template update: rejects metadata.template in the body",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_metadata_template.spec.ts",
@@ -4774,7 +4933,9 @@
       "title": "Rule metadata.template upsert: rejects metadata.template in the body",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_metadata_template.spec.ts",
@@ -4787,7 +4948,9 @@
       "title": "Rule metadata.template get and find: return metadata.template when present",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_metadata_template.spec.ts",
@@ -4800,7 +4963,9 @@
       "title": "Rule metadata.template update: keeps metadata.template",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_metadata_template.spec.ts",
@@ -4813,7 +4978,9 @@
       "title": "Rule metadata.template upsert: keeps metadata.template on an existing rule",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_metadata_template.spec.ts",
