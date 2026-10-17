@@ -32,7 +32,7 @@ export interface FleetApiService {
     get: (queryParams?: Record<string, any>) => Promise<any>;
     getById: (id: string) => Promise<any>;
     create: (body: PackagePolicyCreateBody, queryParams?: Record<string, string>) => Promise<any>;
-    delete: (id: string) => Promise<any>;
+    delete: (id: string, opts?: { force?: boolean }) => Promise<any>;
     bulkDelete: (ids: [string]) => Promise<any>;
   };
   agent_policies: {
