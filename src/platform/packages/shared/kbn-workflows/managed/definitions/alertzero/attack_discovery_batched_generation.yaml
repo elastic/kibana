@@ -149,6 +149,12 @@ steps:
           # tier is therefore unregistered. Keep in sync with
           # ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
           feature_id: alertzero_frontier
+          # No ground-truth gate: each generated attack goes to a review whose FP/TP
+          # analysis owns the false-positive decision. The gate corroborates the
+          # alerts against the same entities and raw events and hands its
+          # false-positive triage to the generation prompt, so generation dropped
+          # false-positive chains before any review saw them.
+          ground_truth_gate_enabled: false
           # The discoveries are read back from the index below instead. They
           # dominate this step's output, and an output above the engine's
           # eviction threshold is dropped from in-memory state before the

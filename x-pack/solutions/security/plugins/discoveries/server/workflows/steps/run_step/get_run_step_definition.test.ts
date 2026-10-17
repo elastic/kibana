@@ -723,6 +723,41 @@ describe('getRunStepDefinition', () => {
     });
   });
 
+  describe('ground_truth_gate_enabled', () => {
+    it('keeps the gate and the skill on when the input is omitted', async () => {
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(syncMockContext as never);
+
+      expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowConfig: expect.objectContaining({
+            ground_truth_gate_enabled: true,
+            skill_enabled: true,
+          }),
+        })
+      );
+    });
+
+    it('turns off the gate and the skill when false', async () => {
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler({
+        ...baseMockContext,
+        input: { ...syncMockContext.input, ground_truth_gate_enabled: false },
+      } as never);
+
+      expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowConfig: expect.objectContaining({
+            ground_truth_gate_enabled: false,
+            skill_enabled: false,
+          }),
+        })
+      );
+    });
+  });
+
   describe('provided alerts auto-detection', () => {
     it('disables default retrieval and forwards alerts when alerts are non-empty', async () => {
       const contextWithAlerts = {
