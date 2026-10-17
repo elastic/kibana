@@ -15,6 +15,7 @@ import {
   commentsAddedTriggerCommonDefinition,
   extendedFieldsUpdatedTriggerCommonDefinition,
   observablesAddedTriggerCommonDefinition,
+  incrementalIdAssignedTriggerCommonDefinition,
 } from '../../../common/workflows/triggers';
 
 export function registerCaseWorkflowTriggers(
@@ -32,4 +33,5 @@ export function registerCaseWorkflowTriggers(
   workflowsExtensions.registerTriggerDefinition(commentsAddedTriggerCommonDefinition);
   workflowsExtensions.registerTriggerDefinition(extendedFieldsUpdatedTriggerCommonDefinition);
   workflowsExtensions.registerTriggerDefinition(observablesAddedTriggerCommonDefinition);
+  workflowsExtensions.registerTriggerDefinition(incrementalIdAssignedTriggerCommonDefinition);
 }

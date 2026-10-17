@@ -155,6 +155,10 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: 'cfb4b84727e79d6826fa8a786b7591ea1a86661c7fff2bb2fa768abbc3aaf37c',
   },
   {
+    id: 'cases.incrementalIdAssigned',
+    schemaHash: '86af43fbcf5a7a98f833ad2870061302ae81845c25c87a83c44f776340b300a1',
+  },
+  {
     id: 'cases.observablesAdded',
     schemaHash: '2b1c57a5609d19590cd953edd380d4db7ee6ea2c62c370915b1e71dc98cc0483',
   },
