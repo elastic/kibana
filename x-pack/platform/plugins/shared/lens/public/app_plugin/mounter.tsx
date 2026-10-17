@@ -52,6 +52,7 @@ import { getPreloadedState } from '../state_management/lens_slice';
 import { getLensInspectorService } from '../lens_inspector_service';
 import { LensDocumentService } from '../persistence';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
+import { takeStoredVisualizeFieldContext } from '../trigger_actions/visualize_field_context_transfer';
 
 function getInitialContext(history: AppMountParameters['history']) {
   const historyLocationState = history.location.state as
@@ -74,6 +75,17 @@ function getInitialContext(history: AppMountParameters['history']) {
         originatingApp: historyLocationState.originatingApp,
       };
     }
+  }
+
+  // history state does not survive window.open, so the visualize-field action stores
+  // the context in sessionStorage when it opens Lens in a new tab
+  const storedContext = takeStoredVisualizeFieldContext();
+  if (storedContext) {
+    return {
+      contextType: ACTION_VISUALIZE_LENS_FIELD,
+      initialContext: storedContext.payload,
+      originatingApp: storedContext.originatingApp,
+    };
   }
 }
 
