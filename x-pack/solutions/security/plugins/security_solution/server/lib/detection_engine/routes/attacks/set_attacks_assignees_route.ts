@@ -25,6 +25,7 @@ import {
   MAX_ASSIGNEES_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
 import { updateAlertsAssignees } from '../common/operations/update_alerts_assignees';
+import { auditAlertUpdatePreOperationFailure } from '../common/operations/audit_alert_updates';
 import { prefetchChangedListFieldIds } from '../common/operations/prefetch_previous_statuses';
 import { validateAlertAssigneesArrays } from '../common/validators/validate_alert_arrays';
 import { getAttackAlertsIndex } from '../common/index_patterns/get_attack_alerts_index';
@@ -75,6 +76,10 @@ export const setAttacksAssigneesRoute = (
 
         const validationErrors = validateAlertAssigneesArrays(assignees);
         if (validationErrors.length) {
+          auditAlertUpdatePreOperationFailure(
+            (await context.securitySolution)?.getAuditLogger(),
+            'Invalid alert update request'
+          );
           reportAttacksApiCallError(
             telemetrySender,
             telemetryFields,
