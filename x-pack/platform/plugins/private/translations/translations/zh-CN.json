@@ -1678,7 +1678,6 @@
     "core.ui.observabilityNavList.label": "可观测性",
     "core.ui.overlays.banner.attentionTitle": "注意",
     "core.ui.overlays.banner.closeButtonLabel": "关闭",
-    "core.ui.pageChangeAnnouncements": "页面切换提示",
     "core.ui.primaryNav.addData": "添加集成",
     "core.ui.primaryNav.cloud.breadCrumbDropdown.manageDeploymentLabel": "管理此部署",
     "core.ui.primaryNav.cloud.deploymentLabel": "部署",
