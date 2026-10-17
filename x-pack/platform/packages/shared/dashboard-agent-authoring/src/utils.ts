@@ -6,13 +6,13 @@
  */
 
 import type { DashboardOperation } from './operations';
-import { type DashboardOperationFailureType } from './failure_types';
+import { type DashboardFailureType } from './failure_types';
 
 /**
  * Failure record for tracking dashboard operation errors.
  */
-export interface OperationFailure {
-  type: DashboardOperationFailureType;
+export interface DashboardFailure {
+  type: DashboardFailureType;
   identifier: string;
   error: string;
 }

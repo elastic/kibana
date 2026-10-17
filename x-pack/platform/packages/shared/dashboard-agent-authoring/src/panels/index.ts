@@ -7,7 +7,7 @@
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
-import type { PanelContent, PanelContentAttempt } from '../../resolve_panel';
+import type { PanelContent, PanelContentAttempt } from '../resolve_panel';
 import { sectionIdField, type ConfigPanelKind, type RequestPanelKind } from './panel_kind';
 import { lensPanelKind, vegaPanelKind, type VisPanelResolutionRequest } from './vis';
 import { markdownPanelKind } from './markdown';
