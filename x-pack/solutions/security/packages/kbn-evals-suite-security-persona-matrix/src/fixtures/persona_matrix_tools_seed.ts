@@ -258,7 +258,7 @@ export async function seedPersonaMatrixTools({
         'escalate a case or notify a channel.',
       tags: ['persona-matrix', 'parity-shim'],
       configuration: {
-        query: `FROM ${PARITY_ALERT_INDEX} | WHERE kibana.alert.rule.name LIKE "*Chrysalis*" | KEEP kibana.alert.rule.name, kibana.alert.reason | LIMIT 10`,
+        query: `FROM ${PARITY_ALERT_INDEX} | WHERE kibana.alert.reason LIKE "*Chrysalis*" | KEEP kibana.alert.rule.name, kibana.alert.reason | LIMIT 10`,
         params: {},
       },
     },

@@ -7,6 +7,7 @@
 
 import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { PARITY_DOCS } from './chrysalis_parity_docs';
 
 const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
 
@@ -143,6 +144,39 @@ describe('persona_matrix_tools_seed', () => {
       expect(puts[0][0].body.configuration.tools).toEqual([
         { tool_ids: [...PERSONA_MATRIX_TOOL_IDS, ...PERSONA_MATRIX_PARITY_TOOL_IDS] },
       ]);
+    });
+  });
+
+  describe('parity shim ES|QL filters match the seeded parity docs', () => {
+    const getDeep = (obj: unknown, path: string): unknown =>
+      path.split('.').reduce<unknown>((acc, key) => (acc as Record<string, unknown>)?.[key], obj);
+
+    // Minimal evaluator for the `FROM <index> | WHERE <field> LIKE "*<needle>*"` shape the
+    // shims use. Fails loudly on any other shape so the test cannot silently pass.
+    const matchesForQuery = (query: string) => {
+      const parsed = /^FROM (\S+) \| WHERE ([\w.]+) LIKE "\*(.+)\*"/.exec(query);
+      if (!parsed) {
+        throw new Error(`Unsupported shim query shape: ${query}`);
+      }
+      const [, index, field, needle] = parsed;
+      return PARITY_DOCS.filter(
+        (parityDoc) =>
+          parityDoc.index === index && String(getDeep(parityDoc.doc, field) ?? '').includes(needle)
+      );
+    };
+
+    it('create.channel returns at least one seeded Chrysalis alert', async () => {
+      const mod = await import('./persona_matrix_tools_seed');
+      const client = createClient();
+      await mod.seedPersonaMatrixTools({ kbnClient: asKbn(client), log, parity: true });
+
+      const createChannelBody = client.request.mock.calls
+        .map(([req]) => req)
+        .find((req) => req.method === 'POST' && req.body?.id === 'create.channel')?.body;
+      expect(createChannelBody).toBeDefined();
+
+      const matches = matchesForQuery(createChannelBody.configuration.query);
+      expect(matches.length).toBeGreaterThanOrEqual(1);
     });
   });
 
