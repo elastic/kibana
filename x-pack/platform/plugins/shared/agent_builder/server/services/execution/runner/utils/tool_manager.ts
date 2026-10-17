@@ -22,12 +22,14 @@ import type {
   ToolName,
   AddToolOptions,
   AddToolInput,
+  ExecutableToolWithOrigin,
 } from '@kbn/agent-builder-server/runner/tool_manager';
 import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
 import {
   buildGuardedToolContent,
   DEFAULT_MAX_TOOL_RESULT_TOKENS,
 } from '../../run_agent/utils/tool_result_guardrail';
+import { DynamicToolRegistry } from './dynamic_tool_registry';
 
 export const createToolManager = (): ToolManager => {
   return new ToolManager({
@@ -41,6 +43,9 @@ export const createToolManager = (): ToolManager => {
  *
  * Dynamic tools are limited to a certain capacity to prevent too many tools from being added to the agent.
  * Least recently used tools are evicted when the capacity is reached.
+ *
+ * Tools registered with `registerDynamicTools` are a third kind: never bound to the model, only
+ * reachable through the `execute_dynamic_tool` meta-tool (see `DynamicToolRegistry`).
  */
 export class ToolManager implements IToolManager {
   private staticTools: Map<ToolName, StructuredTool> = new Map<ToolName, StructuredTool>();
@@ -49,6 +54,7 @@ export class ToolManager implements IToolManager {
   private toolOrigins: Map<string, ToolOrigin>;
   private toolTypes: Map<string, ToolType>;
   private executableTools: Map<string, ExecutableTool> = new Map<string, ExecutableTool>();
+  private dynamicToolRegistry = new DynamicToolRegistry();
   private eventEmitter?: AgentEventEmitterFn;
   private maxToolResultTokens: number = DEFAULT_MAX_TOOL_RESULT_TOKENS;
 
@@ -175,14 +181,16 @@ export class ToolManager implements IToolManager {
     origin: ToolOrigin | undefined;
     type: ToolType | undefined;
   } {
-    return {
-      origin: this.toolOrigins.get(toolId),
-      type: this.toolTypes.get(toolId),
-    };
+    const origin = this.toolOrigins.get(toolId);
+    if (origin !== undefined) {
+      return { origin, type: this.toolTypes.get(toolId) };
+    }
+    const dynamicTool = this.dynamicToolRegistry.get(toolId);
+    return { origin: dynamicTool?.origin, type: dynamicTool?.type };
   }
 
   public getExecutable(toolId: string): ExecutableTool | undefined {
-    return this.executableTools.get(toolId);
+    return this.executableTools.get(toolId) ?? this.dynamicToolRegistry.get(toolId);
   }
 
   /**
@@ -190,7 +198,21 @@ export class ToolManager implements IToolManager {
    * Returns undefined if the tool is not found or has no summarizer.
    */
   public getSummarizer(toolId: string): ToolReturnSummarizerFn | undefined {
-    return this.executableTools.get(toolId)?.summarizeToolReturn;
+    return this.getExecutable(toolId)?.summarizeToolReturn;
+  }
+
+  public registerDynamicTools(tools: ExecutableToolWithOrigin[]): ExecutableToolWithOrigin[] {
+    const registrable = tools.filter((tool) => !this.executableTools.has(tool.id));
+    this.dynamicToolRegistry.register(registrable);
+    return registrable;
+  }
+
+  public getDynamicTool(toolId: string): ExecutableToolWithOrigin | undefined {
+    return this.dynamicToolRegistry.get(toolId);
+  }
+
+  public listDynamicTools(): ExecutableToolWithOrigin[] {
+    return this.dynamicToolRegistry.list();
   }
 
   /**

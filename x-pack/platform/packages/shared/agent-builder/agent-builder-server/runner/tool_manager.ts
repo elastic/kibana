@@ -6,7 +6,12 @@
  */
 
 import type { StructuredTool } from '@langchain/core/tools';
-import type { BrowserApiToolMetadata, ToolOrigin, ToolType } from '@kbn/agent-builder-common';
+import type {
+  BrowserApiToolMetadata,
+  ToolDefinitionWithSchema,
+  ToolOrigin,
+  ToolType,
+} from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { ToolReturnSummarizerFn } from '../tools/builtin';
 import type { AgentEventEmitterFn, ExecutableTool } from '..';
@@ -23,6 +28,16 @@ export interface AddToolOptions {
 
 export type ExecutableToolWithOrigin = ExecutableTool & { origin: ToolOrigin };
 export type BrowserToolWithOrigin = BrowserApiToolMetadata & { origin: ToolOrigin };
+
+/**
+ * A tool reachable through the `execute_dynamic_tool` meta-tool, as written into the transcript.
+ * `parameters` is the same JSON schema the provider receives for a natively bound tool.
+ */
+export interface DynamicToolDefinition {
+  tool_id: string;
+  description: string;
+  parameters: ToolDefinitionWithSchema['schema'];
+}
 
 export enum ToolManagerToolType {
   executable = 'executable',
@@ -95,6 +110,7 @@ export interface ToolManager {
    * if no such tool was registered for this run. Use with `Runner.runInternalTool`
    * to dispatch a tool from outside the LangChain graph (e.g. `exec_tool` in bash)
    * while still going through the standard hooks/telemetry pipeline.
+   * Resolves natively bound tools first, then tools registered with `registerDynamicTools`.
    */
   getExecutable(toolId: string): ExecutableTool | undefined;
 
@@ -104,6 +120,27 @@ export interface ToolManager {
    * @returns array of internal tool IDs
    */
   getDynamicToolIds(): string[];
+
+  /**
+   * Registers tools reachable only through the `execute_dynamic_tool` meta-tool. They are not
+   * bound to the model, so `list()` does not include them; their definitions are written into
+   * the transcript instead. Registering an id again replaces the previous entry.
+   *
+   * Ids already bound natively are skipped, as the model calls those directly. Returns the tools
+   * that were registered, so callers render definitions only for those.
+   */
+  registerDynamicTools(tools: ExecutableToolWithOrigin[]): ExecutableToolWithOrigin[];
+
+  /**
+   * Returns a tool registered with `registerDynamicTools`, or `undefined` for natively bound
+   * and unknown ids.
+   */
+  getDynamicTool(toolId: string): ExecutableToolWithOrigin | undefined;
+
+  /**
+   * Lists the tools registered with `registerDynamicTools`.
+   */
+  listDynamicTools(): ExecutableToolWithOrigin[];
 
   /**
    * Gets the summarizer function for a tool by its internal tool ID.

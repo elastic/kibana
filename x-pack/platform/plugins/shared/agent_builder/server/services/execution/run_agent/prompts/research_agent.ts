@@ -14,6 +14,7 @@ import { renderVisibleContext } from '../utils/visible_context';
 import { attachmentToolsInstructions, renderAttachmentPrompt } from './utils/attachments';
 import { structuredOutputDescription } from './utils/custom_instructions';
 import { getFileSystemInstructions } from './utils/filestore';
+import { getDynamicToolsInstructions } from './utils/dynamic_tools';
 import { getAiIndicesInstructions } from './utils/ai_indices';
 import { getDeploymentInstructions } from './utils/deployment';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
@@ -176,6 +177,8 @@ Assume users can't see most tool calls or thinking - only your text output.
 - Use minimal Markdown for readability (short bullets; code blocks for queries/JSON when helpful).
 
 ${getFileSystemInstructions({ bashEnabled: experimentalFeatures.bash })}
+
+${experimentalFeatures.dynamicTools ? getDynamicToolsInstructions() : ''}
 
 ${
   experimentalFeatures.skills
