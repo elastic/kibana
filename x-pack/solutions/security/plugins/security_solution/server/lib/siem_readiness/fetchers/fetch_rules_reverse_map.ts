@@ -39,12 +39,6 @@ export interface FetchRulesReverseMapDeps {
   categoriesData?: CategoriesResponse;
 }
 
-interface ThreatTactic {
-  id?: string;
-  name?: string;
-  reference?: string;
-}
-
 const extractTactics = (params: RuleParams): Array<{ id: string; name: string }> => {
   const threat = params.threat;
   if (!threat || !Array.isArray(threat)) {
@@ -52,11 +46,9 @@ const extractTactics = (params: RuleParams): Array<{ id: string; name: string }>
   }
 
   const tactics: Array<{ id: string; name: string }> = [];
-  for (const item of threat) {
+  for (const { framework, tactic } of threat) {
     // SIEM readiness is MITRE ATT&CK-only; ATLAS entries are skipped (missing framework counts as ATT&CK, matching the save-path default).
-    const { framework } = item as { framework?: string };
     const isAttack = !framework || framework === MITRE_ATTACK_FRAMEWORK;
-    const tactic = item.tactic as ThreatTactic | undefined;
     if (isAttack && tactic?.id && tactic?.name) {
       tactics.push({ id: tactic.id, name: tactic.name });
     }
