@@ -183,6 +183,54 @@ describe('throwIfErrorCountsExceeded', () => {
     });
   });
 
+  describe('when the errors are empty model responses', () => {
+    const emptyModelResponseError =
+      'generate node detected that the model returned an empty response (inference) on attempt 9; the response contained no content. This is a model or connector problem, not a prompt-size problem. Underlying error: the model returned an empty response (code: EMPTY_MODEL_RESPONSE); connectorId: test-connector-id; model: anthropic-claude-5.5-opus; prompt tokens: 128390; completion tokens: 0;';
+
+    const getMessage = () => {
+      try {
+        throwIfErrorCountsExceeded({
+          ...defaultParams,
+          errors: [emptyModelResponseError],
+          generationAttempts: 10,
+          maxGenerationAttempts: 10,
+        });
+      } catch (error) {
+        return (error as Error).message;
+      }
+
+      throw new Error('expected throwIfErrorCountsExceeded to throw');
+    };
+
+    it('does NOT tell the user to send fewer alerts', () => {
+      expect(getMessage()).not.toContain('Try sending fewer alerts');
+    });
+
+    it('names the empty model response as the cause', () => {
+      expect(getMessage()).toContain('The model returned an empty response');
+      expect(getMessage()).toContain('will not help');
+    });
+
+    it('keeps the connector, model and token counts in the thrown message', () => {
+      const message = getMessage();
+
+      expect(message).toContain('test-connector-id');
+      expect(message).toContain('anthropic-claude-5.5-opus');
+      expect(message).toContain('prompt tokens: 128390');
+    });
+
+    it('keeps the existing remedy when the errors are not empty model responses', () => {
+      expect(() =>
+        throwIfErrorCountsExceeded({
+          ...defaultParams,
+          errors: ['generate node is unable to parse (fake) response from attempt 9'],
+          generationAttempts: 10,
+          maxGenerationAttempts: 10,
+        })
+      ).toThrow(/Try sending fewer alerts/);
+    });
+  });
+
   describe('when no logger is provided', () => {
     it('does not throw when calling without a logger and counts are under threshold', () => {
       expect(() =>

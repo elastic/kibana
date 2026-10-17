@@ -16,6 +16,7 @@ import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import { DEFAULT_TIMEOUT, getDefaultArguments } from './constants';
 
+import { EmptyModelResponseError } from './empty_model_response_error';
 import { getMessageContentAndRole } from './helpers';
 import type { TraceOptions } from './types';
 
@@ -149,6 +150,14 @@ export class ActionsClientLlm extends LLM {
             `${LLM_TYPE}#_call response\ntraceId: ${this.#traceId}\nresponse:\n${result.content}`
         );
 
+        this.#throwIfResponseIsEmpty({
+          completionTokens: result.tokens?.completion,
+          content: result.content,
+          model: result.model,
+          promptTokens: result.tokens?.prompt,
+          toolCallCount: result.toolCalls?.length,
+        });
+
         return result.content;
       } catch (error) {
         // .inference/EIS failure: the thrown message carries the upstream error body. This is the ONLY
@@ -247,6 +256,53 @@ export class ActionsClientLlm extends LLM {
       () => `${LLM_TYPE}#_call response\ntraceId: ${this.#traceId}\nresponse:\n${content}`
     );
 
+    // a tool-call-only response is not empty; the guard must not trip for a future tool-using caller:
+    this.#throwIfResponseIsEmpty({
+      content,
+      model: this.model,
+      toolCallCount: Array.isArray(get('data.toolCalls', actionResult))
+        ? (get('data.toolCalls', actionResult) as unknown[]).length
+        : undefined,
+    });
+
     return content; // per the contact of _call, return a string
+  }
+
+  /**
+   * Throws (and logs at `error`, i.e. persisted) when a model returns a successful completion with
+   * no content. Returning the empty string instead would surface later as an unrelated JSON parse
+   * error, and on serverless there is no log-level switch that would let support recover the
+   * response bytes afterwards.
+   */
+  #throwIfResponseIsEmpty({
+    completionTokens,
+    content,
+    model,
+    promptTokens,
+    toolCallCount,
+  }: {
+    completionTokens?: number;
+    content: string;
+    model?: string;
+    promptTokens?: number;
+    toolCallCount?: number;
+  }): void {
+    if (content.trim().length > 0 || (toolCallCount ?? 0) > 0) {
+      return;
+    }
+
+    const error = new EmptyModelResponseError({
+      completionTokens,
+      connectorId: this.#connectorId,
+      contentLength: content.length,
+      model,
+      promptTokens,
+      responseBody: content,
+      traceId: this.#traceId,
+    });
+
+    this.#logger.error(error);
+
+    throw error;
   }
 }

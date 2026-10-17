@@ -8,6 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/core/server';
 
+import { isEmptyModelResponseError } from '../../../lib/langchain/output_chunking/nodes/helpers/empty_model_response';
+
+export const EMPTY_MODEL_RESPONSE_REMEDY_NOTE =
+  'The model returned an empty response (no content, 0 completion tokens) for these attempts, so sending fewer alerts to this model will not help: this is a model or connector problem, not a prompt-size problem. Check the connector and model used for Attack Discovery; their ids and the prompt/completion token counts are in the errors below.';
+
 export const MAX_HALLUCINATION_FAILURES = (hallucinationFailures: number) =>
   i18n.translate(
     'xpack.discoveries.attackDiscovery.graphs.throwIfErrorCountsExceeded.maxHallucinationFailuresErrorMessage',
@@ -24,6 +29,15 @@ export const MAX_GENERATION_ATTEMPTS = (generationAttempts: number) =>
     {
       defaultMessage:
         'Maximum generation attempts ({generationAttempts}) reached. Try sending fewer alerts to this model.',
+      values: { generationAttempts },
+    }
+  );
+
+export const MAX_GENERATION_ATTEMPTS_WITH_EMPTY_MODEL_RESPONSE = (generationAttempts: number) =>
+  i18n.translate(
+    'xpack.discoveries.attackDiscovery.graphs.throwIfErrorCountsExceeded.maxGenerationAttemptsWithEmptyModelResponseErrorMessage',
+    {
+      defaultMessage: `Maximum generation attempts ({generationAttempts}) reached. ${EMPTY_MODEL_RESPONSE_REMEDY_NOTE}`,
       values: { generationAttempts },
     }
   );
@@ -53,9 +67,15 @@ export const throwIfErrorCountsExceeded = ({
   }
 
   if (generationAttempts >= maxGenerationAttempts) {
-    const generationAttemptsError = `${MAX_GENERATION_ATTEMPTS(generationAttempts)}\n${errors.join(
-      ',\n'
-    )}`;
+    // An empty model response is a model/connector failure: report that instead of the "send fewer
+    // alerts" advice, which provably cannot help (see getEmptyModelResponseError):
+    const hasEmptyModelResponseErrors = errors.some(isEmptyModelResponseError);
+
+    const generationAttemptsError = `${
+      hasEmptyModelResponseErrors
+        ? MAX_GENERATION_ATTEMPTS_WITH_EMPTY_MODEL_RESPONSE(generationAttempts)
+        : MAX_GENERATION_ATTEMPTS(generationAttempts)
+    }\n${errors.join(',\n')}`;
 
     logger?.error(generationAttemptsError);
     throw new Error(generationAttemptsError);

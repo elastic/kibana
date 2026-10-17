@@ -7,6 +7,7 @@
 
 import type { BaseLLM } from '@langchain/core/language_models/llms';
 import type { Logger } from '@kbn/core/server';
+import { getBoundedResponsePreview } from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
 
 import type { BaseGraphState, GraphInsightTypes } from '../../../../types';
@@ -17,6 +18,10 @@ import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format
 import { getCombined } from '../helpers/get_combined';
 import { generationsAreRepeating } from '../helpers/generations_are_repeating';
 import { getUseUnrefinedResults } from './helpers/get_use_unrefined_results';
+import {
+  getEmptyModelResponseError,
+  isEmptyModelResponseErrorCode,
+} from '../helpers/empty_model_response';
 import { parseCombinedOrThrow } from '../helpers/parse_combined_or_throw';
 
 export const getGenerateNode = <T extends GraphInsightTypes>({
@@ -82,6 +87,28 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
 
       // LOCAL MUTATION:
       partialResponse = extractJson(rawResponse); // remove the surrounding ```json```
+
+      // An empty completion is a model or connector failure, not a "generation": record it as an
+      // error and do NOT add it to `generations` (see getEmptyModelResponseError).
+      if (partialResponse.trim() === '') {
+        logger?.debug(
+          () =>
+            `generate node received an empty response (${llmType}) on attempt ${generationAttempts}; recording an error instead of treating it as a repeated generation`
+        );
+
+        return {
+          ...state,
+          errors: [
+            ...state.errors,
+            getEmptyModelResponseError({
+              generationAttempts,
+              llmType,
+              nodeName: 'generate',
+            }),
+          ],
+          generationAttempts: generationAttempts + 1,
+        };
+      }
 
       // if the response is hallucinated, discard previous generations and start over:
       if (responseIsHallucinated(partialResponse)) {
@@ -155,17 +182,32 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
         unrefinedResults,
       };
     } catch (error) {
-      const parsingError = `generate node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${error}`;
+      const parsingError = isEmptyModelResponseErrorCode(error)
+        ? getEmptyModelResponseError({
+            cause: error,
+            generationAttempts,
+            llmType: llm._llmType(),
+            nodeName: 'generate',
+          })
+        : `generate node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${error}`;
       logger?.debug(() => parsingError); // logged at debug level because the error is expected when the model returns an incomplete response
       logger?.debug(
         () =>
           `generate node raw response that failed to parse (${llm._llmType()}) from attempt ${generationAttempts}:\n${rawResponse}`
       );
 
+      // Persist a bounded prefix of the raw response with the error: on serverless there is no
+      // log-level switch, so a debug-only log leaves the bytes unrecoverable in support.
+      const rawResponsePreview = getBoundedResponsePreview(rawResponse);
+      const persistedError =
+        rawResponse.length > 0
+          ? `${parsingError}; raw response (${rawResponse.length} characters): "${rawResponsePreview}"`
+          : parsingError;
+
       return {
         ...state,
         combinedGenerations: combinedResponse,
-        errors: [...state.errors, parsingError],
+        errors: [...state.errors, persistedError],
         generationAttempts: generationAttempts + 1,
         generations: [...generations, partialResponse],
       };

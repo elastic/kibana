@@ -6,7 +6,7 @@
  */
 
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
-import type { ActionsClientLlm } from '@kbn/langchain/server';
+import { EmptyModelResponseError, type ActionsClientLlm } from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
 import { loggerMock } from '@kbn/logging-mocks';
 import { FakeLLM } from '@langchain/core/utils/testing';
@@ -186,12 +186,18 @@ ${ATTACK_DISCOVERY_REFINE}
     expect(state).toEqual({
       ...initialGraphState,
       combinedRefinements: '{"key": "value"}',
-      errors: [
-        'refine node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): [\n  {\n    "expected": "array",\n    "code": "invalid_type",\n    "path": [\n      "insights"\n    ],\n    "message": "Invalid input: expected array, received undefined"\n  }\n]',
-      ],
+      errors: [expect.any(String)],
       generationAttempts: 2,
       refinements: ['{"key": "value"}'],
     });
+
+    // the parse failure AND the raw response are persisted: on serverless there is no log-level
+    // switch that would let support recover the bytes from a debug-only log:
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain(
+      'refine node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model):'
+    );
+    expect(state.errors[0]).toContain(response);
   });
 
   it('logs the raw response at debug when the response cannot be parsed', async () => {
@@ -331,12 +337,95 @@ ${ATTACK_DISCOVERY_REFINE}
     expect(state).toEqual({
       ...withPreviousGenerations,
       combinedRefinements: 'refine0refine1',
-      errors: [
-        'refine node is unable to parse (fake) response from attempt 2; (this may be an incomplete response from the model): SyntaxError: Unexpected token \'r\', "refine0refine1" is not valid JSON',
-      ],
+      errors: [expect.any(String)],
       generationAttempts: 3,
       refinements: ['refine0', 'refine1'],
     });
+
+    expect(state.errors[0]).toContain(
+      'refine node is unable to parse (fake) response from attempt 2; (this may be an incomplete response from the model): SyntaxError: Unexpected token'
+    );
+    expect(state.errors[0]).toContain('raw response (7 characters): "refine1"');
+  });
+
+  it('records an error for every empty response instead of discarding one as a repeated generation', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue('');
+
+    const refineNode = getRefineNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    // three empty responses in a row: previously the third one was classified as a repeated
+    // generation and discarded without an error entry, under-reporting the failed attempts:
+    let state = await refineNode(initialGraphState);
+    state = await refineNode(state);
+    state = await refineNode(state);
+
+    expect(state.generationAttempts).toBe(4);
+    expect(state.errors).toHaveLength(3);
+    expect(
+      state.errors.every((error) => error.includes('the model returned an empty response'))
+    ).toBe(true);
+    expect(state.refinements).toEqual([]); // <-- an empty response is not a refinement
+  });
+
+  it('falls back to the unrefined results when the attempts are exhausted by empty responses', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue('');
+
+    const refineNode = getRefineNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await refineNode({
+      ...initialGraphState,
+      generationAttempts: 9,
+      generations: [],
+    });
+
+    expect(state.insights).toEqual(initialGraphState.unrefinedResults);
+  });
+
+  it('classifies a thrown empty completion as an empty model response', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockRejectedValue(
+      new EmptyModelResponseError({
+        completionTokens: 0,
+        connectorId: 'test-connector-id',
+        contentLength: 0,
+        model: 'anthropic-claude-5.5-opus',
+        promptTokens: 128390,
+        responseBody: '',
+        traceId: 'test-trace-id',
+      })
+    );
+
+    const refineNode = getRefineNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await refineNode(initialGraphState);
+
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain('the model returned an empty response');
+    expect(state.errors[0]).toContain('test-connector-id');
+    expect(state.errors[0]).toContain('prompt tokens: 128390');
   });
 
   it('returns refined results when combined responses pass validation', async () => {
@@ -413,11 +502,16 @@ ${ATTACK_DISCOVERY_REFINE}
       ...withPreviousGenerations,
       insights: state.unrefinedResults, // <-- the unrefined results are returned
       combinedRefinements: 'refine1this will not pass JSON parsing',
-      errors: [
-        'refine node is unable to parse (fake) response from attempt 9; (this may be an incomplete response from the model): SyntaxError: Unexpected token \'r\', "refine1thi"... is not valid JSON',
-      ],
+      errors: [expect.any(String)],
       generationAttempts: 10,
       refinements: ['refine1', response],
     });
+
+    expect(state.errors[0]).toContain(
+      'refine node is unable to parse (fake) response from attempt 9; (this may be an incomplete response from the model): SyntaxError: Unexpected token'
+    );
+    expect(state.errors[0]).toContain(
+      `raw response (${response.length} characters): "${response}"`
+    );
   });
 });
