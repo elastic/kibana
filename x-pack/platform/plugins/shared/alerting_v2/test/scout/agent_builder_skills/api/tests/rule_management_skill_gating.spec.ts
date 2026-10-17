@@ -132,19 +132,25 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
     'does not list the alerting V2 skills when both experimental gates are on but alerting:v2:enabled is off',
     { tag: tags.stateful.classic },
     async ({ apiClient, kbnClient, requestAuth }) => {
-      // alerting:v2:enabled is left unset (off) to isolate it from the two
+      // Explicitly disable alerting:v2:enabled to isolate it from the two
       // experimental gates: with both of those on, the skills must still stay
-      // hidden purely because Alerting V2 is disabled.
+      // hidden purely because Alerting V2 is disabled. The setting defaults to
+      // on, so it has to be turned off explicitly rather than left unset.
       await kbnClient.uiSettings.update({
         [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
         [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
       });
 
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
-      const response = await apiClient.get(SKILLS_API, {
-        headers: { ...COMMON_HEADERS, ...apiKeyHeader },
-        responseType: 'json',
-      });
+      const headers = { ...COMMON_HEADERS, ...apiKeyHeader };
+
+      const setResponse = await apiClient.post(
+        `${GLOBAL_SETTINGS_API}/${ALERTING_V2_ENABLED_SETTING}`,
+        { headers, body: { value: false }, responseType: 'json' }
+      );
+      expect(setResponse).toHaveStatusCode(200);
+
+      const response = await apiClient.get(SKILLS_API, { headers, responseType: 'json' });
 
       expect(response).toHaveStatusCode(200);
       expect(Array.isArray(response.body.results)).toBe(true);
