@@ -22,6 +22,12 @@ import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manage
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 /**
+ * Lifts Kibana's `elasticsearch.requestTimeout` cap (30s by default). The step `timeout` and
+ * workflow cancellation abort sooner through the step's abort signal.
+ */
+const ELASTICSEARCH_STEP_REQUEST_TIMEOUT_MS = 300_000;
+
+/**
  * Whether the connector for `stepType` defaults to HEAD, which the ES transport resolves to a
  * scalar boolean instead of the JSON object every other API returns.
  */
@@ -198,7 +204,11 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
     params: any
   ): Promise<any> {
     const maxResponseBytes = this.getMaxResponseBytes();
-    const transportOptions = maxResponseBytes > 0 ? { maxResponseSize: maxResponseBytes } : {};
+    const transportOptions = {
+      signal: this.stepExecutionRuntime.abortController.signal,
+      requestTimeout: ELASTICSEARCH_STEP_REQUEST_TIMEOUT_MS,
+      ...(maxResponseBytes > 0 ? { maxResponseSize: maxResponseBytes } : {}),
+    };
 
     // Support both raw API format and connector-driven syntax
     if (params.request) {
