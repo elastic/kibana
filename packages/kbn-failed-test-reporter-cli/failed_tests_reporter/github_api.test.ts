@@ -77,6 +77,137 @@ describe('GithubApi writes', () => {
     jest.useRealTimers();
   });
 
+  describe('selector GitHub operations', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('reads the actual timeline in dry-run mode, following Link pagination', async () => {
+      const next = 'https://api.github.com/repos/elastic/kibana/issues/1/timeline?page=2';
+      const fetchMock = jest
+        .spyOn(global, 'fetch')
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify([{ id: 1, event: 'reopened' }]), {
+            headers: { link: `<${next}>; rel="next"` },
+          })
+        )
+        .mockResolvedValueOnce(
+          jsonResponse([{ id: 2, event: 'unlabeled', label: { name: 'ai:fix-flaky' } }])
+        );
+      const api = new GithubApi({ log, token: 'secret', dryRun: true });
+      expect(await api.getIssueTimeline(1)).toHaveLength(2);
+      expect(fetchMock.mock.calls[1][0]).toBe(next);
+    });
+
+    const closingPage = (
+      nodes: Array<{ number: number; state: string; mergedAt: string | null; repo?: string }>,
+      endCursor: string | null = null
+    ) =>
+      jsonResponse({
+        data: {
+          repository: {
+            issue: {
+              closedByPullRequestsReferences: {
+                nodes: nodes.map(({ repo = 'elastic/kibana', ...pr }) => ({
+                  ...pr,
+                  repository: { nameWithOwner: repo },
+                })),
+                pageInfo: { hasNextPage: endCursor !== null, endCursor },
+              },
+            },
+          },
+        },
+      });
+
+    it('reads and paginates the PRs linked as closing an issue in dry run, excluding other repositories', async () => {
+      jest.useFakeTimers();
+      const fetchMock = jest
+        .spyOn(global, 'fetch')
+        .mockResolvedValueOnce(
+          closingPage(
+            [
+              { number: 10, state: 'MERGED', mergedAt: '2026-09-09T12:00:00Z' },
+              { number: 99, state: 'OPEN', mergedAt: null, repo: 'other/repo' },
+            ],
+            'next'
+          )
+        )
+        .mockResolvedValueOnce(closingPage([{ number: 11, state: 'OPEN', mergedAt: null }]));
+      const api = new GithubApi({ log, token: 'secret', dryRun: true });
+      const result = api.getIssueFixPullRequests(42);
+      await jest.runAllTimersAsync();
+      expect(await result).toEqual([
+        { number: 10, state: 'MERGED', mergedAt: '2026-09-09T12:00:00Z' },
+        { number: 11, state: 'OPEN', mergedAt: null },
+      ]);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(fetchMock.mock.calls[0][0]).toBe('https://api.github.com/graphql');
+      const [first, second] = fetchMock.mock.calls.map(([, init]) =>
+        JSON.parse(String(init?.body))
+      );
+      // Closed and merged PRs are only listed on request
+      expect(first.query).toContain('includeClosedPrs: true');
+      expect(first.variables).toMatchObject({ owner: 'elastic', name: 'kibana', number: 42 });
+      expect(second.variables.after).toBe('next');
+    });
+
+    it('rejects GraphQL errors rather than treating unreadable links as no fix', async () => {
+      jest.spyOn(global, 'fetch').mockResolvedValue(
+        jsonResponse({
+          data: { repository: null },
+          errors: [{ message: 'Access denied' }],
+        })
+      );
+      const api = new GithubApi({ log, token: 'secret', dryRun: true });
+      await expect(api.getIssueFixPullRequests(42)).rejects.toThrow('Access denied');
+    });
+
+    it('rejects a merged PR without a merge time', async () => {
+      jest
+        .spyOn(global, 'fetch')
+        .mockResolvedValue(closingPage([{ number: 10, state: 'MERGED', mergedAt: null }]));
+      const api = new GithubApi({ log, token: 'secret', dryRun: true });
+      await expect(api.getIssueFixPullRequests(42)).rejects.toThrow('invalid state');
+    });
+
+    it('rejects incomplete fix PR pagination', async () => {
+      jest.spyOn(global, 'fetch').mockResolvedValue(
+        jsonResponse({
+          data: {
+            repository: {
+              issue: {
+                closedByPullRequestsReferences: {
+                  nodes: [],
+                  pageInfo: { hasNextPage: true, endCursor: null },
+                },
+              },
+            },
+          },
+        })
+      );
+      const api = new GithubApi({ log, token: 'secret', dryRun: true });
+      await expect(api.getIssueFixPullRequests(42)).rejects.toThrow('Incomplete fix PR history');
+    });
+
+    it.each(['network', 'server'])(
+      'never retries an uncertain trigger write (%s)',
+      async (failure) => {
+        const fetchMock = jest.spyOn(global, 'fetch');
+        if (failure === 'network') fetchMock.mockRejectedValue(new Error('connection lost'));
+        else fetchMock.mockResolvedValue(new Response('server error', { status: 502 }));
+        const api = new GithubApi({ log, token: 'secret', dryRun: false });
+        await expect(api.addLabelsOnce(1, ['ai:fix-flaky'])).rejects.toThrow();
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+      }
+    );
+
+    it('rejects a successful response that did not actually apply the label', async () => {
+      jest.spyOn(global, 'fetch').mockResolvedValue(jsonResponse([]));
+      const api = new GithubApi({ log, token: 'secret', dryRun: false });
+      await expect(api.addLabelsOnce(1, ['ai:fix-flaky'])).rejects.toThrow('did not apply');
+    });
+  });
+
   it('logs writes without sending them in dry-run mode', async () => {
     const fetchMock = jest.spyOn(global, 'fetch');
     const api = new GithubApi({ log, token: undefined, dryRun: true });

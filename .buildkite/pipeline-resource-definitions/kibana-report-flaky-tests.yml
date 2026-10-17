@@ -35,6 +35,9 @@ spec:
         FLAKY_TESTS_MAX_NEW_ISSUES: '10'
         # Leave out flaky tests that were skipped since
         FLAKY_TESTS_OMIT_SKIPPED_TESTS: 'true'
+        # Independent of sandbox issue creation; enable only after reviewing selector dry runs.
+        FLAKY_FIXES_ENABLED: 'false'
+        FLAKY_FIXES_MAX_REQUESTS: '5'
       allow_rebuilds: true
       branch_configuration: main
       cancel_intermediate_builds: true

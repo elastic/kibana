@@ -10,9 +10,6 @@ on:
         type: string
   issues:
     types: [opened, labeled, reopened]
-  # listen for new "new failure" comment
-  issue_comment:
-    types: [created]
 
 permissions:
   contents: read
@@ -22,20 +19,14 @@ permissions:
   checks: read
   models: read
 
-# run for one of three triggers:
+# Investigate independently of automatic fix scheduling:
 # - manual dispatch with an issue number
 # - a failed-test issue opened, reopened, or first labeled failed-test
-# - kibanamachine's "new failure" comment that brings failcount to 2
 if: >-
   ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '')
   || (github.event_name == 'issues' && !github.event.issue.pull_request
   && contains(github.event.issue.labels.*.name, 'failed-test')
-  && (github.event.action != 'labeled' || github.event.label.name == 'failed-test'))
-  || (github.event_name == 'issue_comment' && !github.event.issue.pull_request
-  && contains(github.event.issue.labels.*.name, 'failed-test')
-  && github.event.comment.user.login == 'kibanamachine'
-  && (contains(github.event.issue.body, '"test.failCount":2,')
-  || contains(github.event.issue.body, '"test.failCount":2}'))) }}
+  && (github.event.action != 'labeled' || github.event.label.name == 'failed-test')) }}
 
 concurrency:
   # Keep one investigation lane per issue. Events that can't activate this workflow still
@@ -43,25 +34,12 @@ concurrency:
   # with `cancel-in-progress` they would kill an in-flight investigation and then skip
   # themselves. Give those events their own group suffix:
   # - unrelated `labeled` events (e.g. `Team:*`, `needs-team`) → the label name
-  # - `issue_comment` events other than kibanamachine's failCount-2 "New failure" comment
-  #   (team pings, `/skip`, later "New failure" comments) → `comment-<id>`
   group: >-
     failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}-${{
       (
         github.event.action == 'labeled' &&
         github.event.label.name != 'failed-test' &&
         github.event.label.name
-      ) ||
-      (
-        github.event_name == 'issue_comment' &&
-        !(
-          github.event.comment.user.login == 'kibanamachine' &&
-          (
-            contains(github.event.issue.body, '"test.failCount":2,') ||
-            contains(github.event.issue.body, '"test.failCount":2}')
-          )
-        ) &&
-        format('comment-{0}', github.event.comment.id)
       ) ||
       'investigate'
     }}
@@ -97,6 +75,30 @@ tools:
     toolsets: [default, actions, search]
   web-fetch:
   bash: true
+
+jobs:
+  activation:
+    needs: [prepare_investigation]
+  prepare_investigation:
+    needs: pre_activation
+    if: needs.pre_activation.outputs.activated == 'true'
+    runs-on: ubuntu-slim
+    permissions:
+      issues: write
+    steps:
+      - name: Clear stale AI fixability before investigating
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const issue_number = Number(process.env.ISSUE_NUMBER);
+            if (!Number.isSafeInteger(issue_number) || issue_number <= 0) {
+              throw new Error('Expected a positive issue number');
+            }
+            const params = { ...context.repo, issue_number };
+            const { data: issue } = await github.rest.issues.get(params);
+            if (issue.labels.some(label => label.name === 'failure:ai-fixable')) {
+              await github.rest.issues.removeLabel({ ...params, name: 'failure:ai-fixable' });
+            }
 
 network:
   allowed:
@@ -140,28 +142,19 @@ safe-outputs:
       - failure:ai-fixable
       - failure:fix-did-not-hold
       - failure:insufficient-data
-      # fix-request label that triggers the Flaky Test Fixer workflow
-      - ai:fix-flaky
-    max: 5
+    max: 4
     target: *issue_number
-    # Label as `kibanamachine` so the `ai:fix-flaky` labeled event triggers the
-    # Flaky Test Fixer (default GITHUB_TOKEN events don't trigger workflows).
     github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
     # Use the REST endpoint: with issue intents on, GitHub only applies HIGH-confidence
     # labels and parks the rest as pending suggestions, so a `medium` verdict added no
-    # labels and `ai:fix-flaky` never fired (https://github.com/github/gh-aw/issues/53654).
+    # labels (https://github.com/github/gh-aw/issues/53654).
     issue-intent: false
   # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
-  # stale. Allow removing any `failure:*` label plus a lingering `ai:fix-flaky` fix
-  # request so the fresh verdict can replace them (`failure:*` also clears deprecated ones).
-  # max=5 covers a full stale verdict: up to four investigator labels (a classification,
-  # `failure:ai-fixable`, `failure:fix-did-not-hold`, and `failure:insufficient-data`)
-  # plus a lingering `ai:fix-flaky`.
+  # stale. Only diagnosis labels belong to this workflow; requests belong to the selector/user.
   remove-labels:
     allowed:
       - failure:*
-      - ai:fix-flaky
-    max: 5
+    max: 4
     target: *issue_number
   # Lets the agent close the issue when the verdict is that there is nothing to
   # fix in the repository (see "Close the issue when there is nothing to fix").
@@ -213,13 +206,13 @@ When the failing test path is under `x-pack/solutions/security/test/security_sol
 
 Do **not** write `#### Root cause & evidence` or `#### Additional context` in the issue comment. The `<details>` block contains only `#### Proposed fix` (and `#### Data collection issues` only if a screenshot fetch failed).
 
-| Doctor action | Comment's Proposed fix | `failure:ai-fixable` / `ai:fix-flaky` |
+| Doctor action | Comment's Proposed fix | `failure:ai-fixable` |
 | --- | --- | --- |
 | `migrate`, or any action that requires writing a **new** Scout spec or page object | Migrate. Point at `x-pack/solutions/security/plugins/security_solution/.agents/skills/security-cypress-to-scout-migration/` (plus `scout-ui-testing` / `scout-api-testing` as needed). | Neither. The fixer will not open that PR. |
 | `move-to-api-or-unit` when that test **already exists** and Cypress is duplicate | Treat as `delete`. | Yes — so the fixer can delete. |
 | `move-to-api-or-unit` when a **new** API/unit test would be needed | Same handoff as migrate; name the API/unit destination. | Neither. |
 | `delete` | Delete the case (and unused helpers). | Yes — so the fixer can delete. |
-| `fix-app`, or `cypress-fix` on a `@serverlessQA` test | Smallest product or Cypress patch, existing Fix proposal / guidelines. | Unchanged (existing Automatic fix request). |
+| `fix-app`, or `cypress-fix` on a `@serverlessQA` test | Smallest product or Cypress patch, existing Fix proposal / guidelines. | When a concrete fix is supported by the evidence. |
 | `none` (environment / no repo change) | No repo change. | Neither. |
 
 When the doctor action is `migrate`, a new Scout spec, or a new API / unit (including Jest) spec, set `classification` to `test-needs-migration` and apply `failure:test-needs-migration`. Do **not** use `test-needs-update` / `failure:test-needs-update` for that. `test-needs-update` remains for Cypress-layer flakes that are not a migration (`delete`, `@serverlessQA` `cypress-fix`).
@@ -279,23 +272,21 @@ Add exactly one classification label to the issue that matches the chosen `class
 
 ### "Is the issue fixable?" label
 
-Add `failure:ai-fixable` to the issue if we are confident that a fix is available (it would imply opening a PR against the codebase). For Security Cypress, do **not** add `failure:ai-fixable` or `ai:fix-flaky` when the doctor action is `migrate`, a new Scout spec, a new API/unit test, or `none` — the fixer will not implement those.
+Add `failure:ai-fixable` to the issue if we are confident that a fix is available (it would imply opening a PR against the codebase). For Security Cypress, do **not** add `failure:ai-fixable` when the doctor action is `migrate`, a new Scout spec, a new API/unit test, or `none` — the fixer will not implement those.
 
-### Automatic fix request
+### Automatic fix selection
 
-Request an automatic fix immediately for a fixable **`application`** failure. For every other classification, only request a fix after the failure has **recurred** — a test that failed at least twice on tracked branches, not a first-time one-off — so we don't spend a fix run on a fluke. Read `test.failCount` from the issue body's `kibanaCiData` metadata (the `<!-- kibanaCiData = ... -->` comment): `test.failCount >= 2` means it recurred. If that metadata is missing, treat the failure as recurring only when the timeline shows it — a "New failure" comment from `kibanamachine`, or a prior reopen.
+This workflow diagnoses failures; it never adds or removes `ai:fix-flaky`. The `kibana-report-flaky-tests` pipeline owns all automatic requests, including application failures. It selects at most one AI-fixable representative per framework/test file and open episode, using the flaky report and prior-request history.
 
-- **`application`, and you added `failure:ai-fixable`:** add `ai:fix-flaky` immediately, regardless of `failCount`.
-- **Any other classification that recurred (`failCount >= 2`), and you added `failure:ai-fixable`:** add `ai:fix-flaky` to request a fix — its `labeled` event triggers the Flaky Test Fixer workflow, which opens a draft fix PR. If this is a re-run whose verdict is unchanged, just add the label — don't repost the analysis (see "Comment format").
-- **Any other classification with a first-time failure (`failCount` is 1, no recurrence):** do **not** add `ai:fix-flaky` yet, even if a fix is available — a single failure is likely a one-off and not worth a fix run. Still add `failure:ai-fixable` if a fix exists (so the signal is recorded) and leave the issue open. When the test fails again the reporter reopens the issue or posts a new-failure comment; either re-triggers this investigation at `failCount` 2, which requests the fix then.
+The preparation step clears stale `failure:ai-fixable`. Restore it only when your fresh verdict supports a fix, including when the diagnosis is unchanged. A failed or inconclusive investigation must not leave a stale positive signal.
 
-**Skip** the `ai:fix-flaky` label — regardless of `failCount` — when a fix PR for this issue is already up (open, in draft, or in review) in the Kibana repository; you already check for one when writing the note block below, so don't request a duplicate. Also skip `ai:fix-flaky` (and `failure:ai-fixable`) for Security Cypress when the doctor action is `migrate`, a new Scout spec, a new API/unit test, or `none`.
+Mention an existing fix PR rather than promising another one. Selection can be held for missing evidence, team opt-outs, prior requests, an open PR, unsupported scope, or the request budget. Do not promise that another failure will automatically request a fix.
 
-An engineer can still request a fix for any issue by adding `ai:fix-flaky` manually; that path does not go through this workflow and is unaffected by the recurrence gate or the team opt-out below.
+An engineer can still add `ai:fix-flaky` or dispatch the fixer manually. Do not alter these requests. The selector reads existing request events and fix PR relationships; it adds no tracking labels or bookkeeping comments.
 
 #### Teams opted out of automatic fix requests
 
-Some teams prefer to request fixes themselves. When the issue carries one of these `Team:` labels, never add `ai:fix-flaky` — regardless of classification or `failCount`. Still add `failure:ai-fixable` when a fix is available, and use the "Fix available, team opted out" tip in "Comment format" so the team sees how to request one.
+Some teams prefer to request fixes themselves. The selector excludes these teams. Still add `failure:ai-fixable` when a fix is available, and use the "Fix available, team opted out" tip:
 
 - `Team:Kibana Management`
 
@@ -320,7 +311,7 @@ When you set it, the comment's `#### Additional context` → "Open questions" bu
 
 ### Refresh stale labels on re-investigation
 
-This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, `failure:fix-did-not-hold`, `failure:insufficient-data`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification, `failure:ai-fixable` only if a fix is still available, `failure:fix-did-not-hold` only if a merged fix for this same failure still demonstrably did not hold, and `failure:insufficient-data` only if data is still the blocker. Clear a lingering `ai:fix-flaky` only when your fresh verdict is **not** fixable; when it is, keep (or add) it per "Automatic fix request". If the existing labels already match your verdict, leave them as they are.
+This issue may have been investigated before (for example, it was reopened after a prior verdict). Remove `failure:*` labels that no longer match, keep the single correct classification, restore `failure:ai-fixable` only if a fix is still available, and keep `failure:fix-did-not-hold` or `failure:insufficient-data` only when supported by fresh evidence. Leave all `ai:*` request labels alone.
 
 ## Close the issue when there is clearly nothing to fix
 
@@ -328,7 +319,7 @@ When the verdict is that no change to this repository is needed, close the issue
 
 - the classification is `ci-environment` and `confidence` is `medium` or `high`: the failure came from a transient, external, or one-off cause with nothing test- or product-related to fix;
 - the failure is not recurring: a CI-environment failure that keeps hitting the same test or suite needs escalation, not closing — leave it open. **Exception:** pre-fix CI lag (the run's `Build hash` predates the fix — see the `flaky-test-investigator` skill's pipelines reference) is closable **even if it repeats**, because repeated lag is expected until the Cloud image catches up with `main`, not a problem to escalate;
-- you did not add `failure:ai-fixable` or `ai:fix-flaky`, and no fix PR referencing this issue is open.
+- you did not add `failure:ai-fixable`, the issue does not carry `ai:fix-flaky`, and no fix PR referencing this issue is open.
 
 Call the tool at most once, only after posting the verdict comment, and do not attach a closing comment to it. Instead, make the close visible in the verdict comment with a note block right after (and outside) the `<details>` block:
 
@@ -349,7 +340,7 @@ When in doubt, leave the issue open.
 
 ## Comment format
 
-Post at most one comment on the issue. **On a re-run** — a reopen or a recurrence comment, where the issue already carries a prior investigation comment — read that latest comment first: if your fresh verdict agrees with it (same classification and root cause), **skip the comment entirely** and just apply the label changes the recurrence calls for — e.g. add `ai:fix-flaky`, plus add or remove any other labels as necessary. For Security Cypress, also compare **doctor actions**: if the prior comment proposed a Cypress wait, intercept, toast, or reopening a Cypress PR, and the doctor now says leave Cypress (`migrate` / `delete` / `move-to-api-or-unit` / `none`), the verdict **differs** — post. Post a comment only for the first investigation, or when your verdict genuinely differs (new evidence, a different root cause, a different doctor action, or the prior verdict was inconclusive and now is not).
+Post at most one comment on the issue. **On a re-run** — a reopen or manual dispatch — read the latest investigation first: if your fresh verdict agrees (same classification and root cause), **skip the comment** and refresh the diagnosis labels, restoring `failure:ai-fixable` if justified. For Security Cypress, also compare doctor actions: a changed action requires a new comment. Post only for the first investigation or a genuinely changed verdict.
 
 When you do post, optimize for a reviewer who spends ~30 seconds on it: the visible header must carry the verdict on its own, and the collapsed details must be skimmable, not exhaustive.
 
@@ -366,25 +357,16 @@ The comment has different parts: a compact header that stays visible on the issu
 
 **Inside the `<details>` block, every section starts with `#### Section name` on its own line** (e.g., `#### Proposed fix`, `#### Root cause & evidence`).
 
-Use `> [!TIP]` only when the callout suggests the reader add a label; use `> [!NOTE]` for a purely informational callout (an incoming fix, an existing fix PR, or an auto-close). Add one of the following snippets right after (and outside) the `<details>` block, only when a fix is needed and available (see "Automatic fix request").
+Use `> [!TIP]` when suggesting a manual request, and `> [!NOTE]` for an existing fix PR or auto-close. If a fix PR is already open, link it instead of suggesting another request.
 
-**Fix requested** — you added `failure:ai-fixable` and `ai:fix-flaky`. Informational, so use a note:
-
-```markdown
-> [!NOTE]
-> Marked "AI-fixable": fix PR incoming within ~20-30 min.
-```
-
-If a fix PR is already up (in draft or in review) in the Kibana repository — the case where you skipped the `ai:fix-flaky` label — mention the PR link in the note instead of the automatic-request sentence.
-
-**Fix held** — you added `failure:ai-fixable` without `ai:fix-flaky` because this is a first-time failure (`failCount` is 1). This suggests a label, so use a tip:
+**Fix available** — you added `failure:ai-fixable` and no fix PR is open:
 
 ```markdown
 > [!TIP]
-> Marked "AI-fixable". Add `ai:fix-flaky` to request a fix now; otherwise it will be requested automatically if the test fails again.
+> Marked "AI-fixable". The central flaky-test pipeline may select one issue for this test file. Add `ai:fix-flaky` to request a fix manually.
 ```
 
-**Fix available, team opted out** — you added `failure:ai-fixable` without `ai:fix-flaky` because the issue's team has opted out of automatic fix requests (see "Teams opted out of automatic fix requests"). Fixes are never requested automatically for it, so don't promise one:
+**Fix available, team opted out** — you added `failure:ai-fixable` and the issue's team has opted out of automatic fix requests (see "Teams opted out of automatic fix requests"). Fixes are never requested automatically for it, so don't promise one:
 
 ```markdown
 > [!TIP]

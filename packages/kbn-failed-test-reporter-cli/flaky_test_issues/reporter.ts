@@ -297,7 +297,18 @@ export const reportFlakySuiteIssues = async (
       const created = await github.createIssue(title, body, issueLabels(suite, githubRepo));
       log.info(`created #${created.number} ${created.html_url}: ${describeSuite(suite)}`);
       // Later suites of this run match against it too, an untitled suite's issue covers its file
-      addIssueToIndex(index, describeIssue({ ...created, title, body, labels: [], state: 'open' }));
+      addIssueToIndex(
+        index,
+        describeIssue({
+          ...created,
+          title,
+          body,
+          labels: [],
+          state: 'open',
+          created_at: new Date().toISOString(),
+          closed_at: null,
+        })
+      );
       record({
         action: 'created',
         ...ref,

@@ -2,6 +2,11 @@
 
 CLIs that turn CI test results into GitHub issues on `elastic/kibana`.
 
+## `node scripts/request_flaky_test_fixes`
+
+Requests at most one AI fix (`ai:fix-flaky`) per flaky test file in `kibana-report-flaky-tests`,
+based on the flaky report and GitHub history. Dry run unless `FLAKY_FIXES_ENABLED=true`.
+
 ## `node scripts/report_failed_tests`
 
 Reads JUnit and Scout reports of a CI job and files or updates one `failed-test` issue per
