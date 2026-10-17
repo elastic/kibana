@@ -6,13 +6,14 @@
  */
 
 import { randomUUID } from 'node:crypto';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
 const RUN_ID = randomUUID().slice(0, 8);
 const SOURCE_INDEX = `scout-esql-views-preview-${RUN_ID}`;
 
-spaceTest.describe('ES|QL View query preview', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('ES|QL View query preview', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ esClient }) => {
     await esClient.indices.create({ index: SOURCE_INDEX });
     await esClient.index({

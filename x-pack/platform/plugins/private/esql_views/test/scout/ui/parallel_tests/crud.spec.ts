@@ -6,6 +6,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { deleteEsqlViews, getEsqlView } from '../fixtures/esql_views_api';
 import { spaceTest } from '../fixtures';
@@ -16,7 +17,7 @@ const INITIAL_QUERY = 'ROW value = 1';
 const UPDATED_DESCRIPTION = 'Edited through the management UI';
 const UPDATED_QUERY = 'ROW value = 2';
 
-spaceTest.describe('ES|QL View create and edit', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('ES|QL View create and edit', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.esqlViews.goto();
