@@ -26,6 +26,7 @@ import type { Task } from '../lib';
 import { deleteAll, scanCopy, write } from '../lib';
 import type { Record } from '../lib/fs_records';
 import { fleetBuildTasks } from './fleet';
+import { shouldBundlePluginServer } from './bundle_plugin_server';
 
 const distPerms = (rec: Record) => (rec.type === 'file' ? 0o644 : 0o755);
 
@@ -132,6 +133,7 @@ export const BuildPackages: Task = {
       const matchNoParse = pkg.manifest.build?.noParse
         ? makeMatcher(pkg.manifest.build.noParse)
         : false;
+      const bundleServer = shouldBundlePluginServer(pkg);
 
       log.verbose(`starting copy of ${pkg.manifest.id}`);
 
@@ -170,6 +172,17 @@ export const BuildPackages: Task = {
               rec.source.rel.startsWith('public/') &&
               rec.source.rel !== 'public/assets' &&
               !rec.source.rel.startsWith('public/assets/')
+            ) {
+              return false;
+            }
+
+            // For server-bundled plugins, exclude server/ source files compiled by BundlePluginServers.
+            if (
+              bundleServer &&
+              rec.type === 'file' &&
+              rec.source.rel.startsWith('server/') &&
+              !(matchNoParse && matchNoParse(rec.source.rel)) &&
+              /\.(?:[jt]sx?|mjs|text|ya?ml)$/.test(rec.source.name)
             ) {
               return false;
             }

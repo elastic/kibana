@@ -88,6 +88,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.CreateEmptyDirsAndFiles);
     await globalRun(Tasks.CreateReadme);
     await globalRun(Tasks.BuildPackages);
+    await globalRun(Tasks.BundlePluginServers);
     await globalRun(Tasks.AssertPackageEntryPoints);
     await globalRun(Tasks.ReplaceFavicon);
     await globalRun(Tasks.BuildBundles);

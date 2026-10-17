@@ -107,6 +107,11 @@ export function initRoutes(
   // Wrapping the already-loaded provider keeps us inside the in-flight Auth cycle function after
   // session lookup, which is the window that invalidates the shared ES token (kibana#258232).
   const findPkiAuthenticationProvider = () => {
+    try {
+      require('@kbn/security-plugin/server/authentication/providers/pki');
+    } catch {
+      // Fall through to the require.cache walk below.
+    }
     for (const [moduleId, cached] of Object.entries(require.cache)) {
       const normalizedId = moduleId.replaceAll('\\', '/');
       if (normalizedId.includes('.test.')) {
