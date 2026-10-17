@@ -5513,6 +5513,9 @@ importers:
       '@kbn/evals-suite-alerts-rag':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag
+      '@kbn/evals-suite-alertzero-worker-chain':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-alertzero-worker-chain
       '@kbn/evals-suite-attack-discovery':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery
@@ -5807,6 +5810,9 @@ importers:
       '@kbn/security-evals-alerts-snapshot':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot
+      '@kbn/security-evals-chain-safety':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-security-evals-chain-safety
       '@kbn/security-evals-matrix':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-security-evals-matrix
@@ -9739,6 +9745,8 @@ importers:
 
   x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag: {}
 
+  x-pack/solutions/security/packages/kbn-evals-suite-alertzero-worker-chain: {}
+
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder: {}
@@ -9772,6 +9780,8 @@ importers:
   x-pack/solutions/security/packages/kbn-scout-security: {}
 
   x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot: {}
+
+  x-pack/solutions/security/packages/kbn-security-evals-chain-safety: {}
 
   x-pack/solutions/security/packages/kbn-security-evals-matrix: {}
 
