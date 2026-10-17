@@ -7,6 +7,14 @@
 
 import { syncParamsSettingsParamsRoute } from './settings/params/sync_global_params_settings';
 import { syncParamsSyntheticsParamsRoute } from './settings/params/sync_global_params';
+import {
+  getVaultConnectionsRoute,
+  saveVaultConnectionRoute,
+  deleteVaultConnectionRoute,
+  refreshVaultConnectionsRoute,
+  testVaultConnectionRoute,
+  getFleetSecretStorageStatusRoute,
+} from './settings/vault/vault_connection';
 import { cleanupPrivateLocationRoute } from './settings/private_locations/cleanup_private_locations';
 import { resetPrivateLocationRoute } from './settings/private_locations/reset_private_location';
 import { getSyntheticsTriggerTaskRun } from './tasks/trigger_task_run';
@@ -153,6 +161,12 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   cleanupPrivateLocationRoute,
   resetPrivateLocationRoute,
   syncParamsSyntheticsParamsRoute,
+  getVaultConnectionsRoute,
+  saveVaultConnectionRoute,
+  deleteVaultConnectionRoute,
+  refreshVaultConnectionsRoute,
+  testVaultConnectionRoute,
+  getFleetSecretStorageStatusRoute,
   syncParamsSettingsParamsRoute,
   getMonitorsHealthRoute,
   getMonitorHealthRoute,

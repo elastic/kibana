@@ -8,6 +8,7 @@ export type * from './alerts';
 export type * from './certs';
 export type * from './common';
 export type * from './dynamic_settings';
+export * from './settings/vault_connection';
 export * from './monitor';
 export * from './ping';
 export type * from './snapshot';

@@ -6,13 +6,31 @@
  */
 import React from 'react';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
-import { EuiCheckbox, EuiComboBox, EuiFieldText, EuiForm, EuiFormRow } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiCheckbox,
+  EuiComboBox,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Controller, useFormContext, useFormState } from 'react-hook-form';
+import { Controller, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import { OptionalText } from '../components/optional_text';
 import { ParamValueField } from './param_value_field';
-import type { SyntheticsParams } from '../../../../../../common/runtime_types';
+import type {
+  SyntheticsParams,
+  SyntheticsParamVaultSource,
+} from '../../../../../../common/runtime_types';
 import type { ListParamItem } from './params_list';
+
+export type ParamValueSourceType = 'value' | 'vault';
+
+export interface ParamFormData extends Omit<SyntheticsParams, 'id' | 'value' | 'source'> {
+  value?: string;
+  sourceType?: ParamValueSourceType;
+  source?: Partial<SyntheticsParamVaultSource>;
+}
 
 export const AddParamForm = ({
   items,
@@ -21,8 +39,9 @@ export const AddParamForm = ({
   items: ListParamItem[];
   isEditingItem: ListParamItem | null;
 }) => {
-  const { register, control } = useFormContext<SyntheticsParams>();
-  const { errors } = useFormState<SyntheticsParams>();
+  const { register, control } = useFormContext<ParamFormData>();
+  const { errors } = useFormState<ParamFormData>();
+  const sourceType = (useWatch({ control, name: 'sourceType' }) ?? 'value') as ParamValueSourceType;
 
   const tagsList = items.reduce((acc, item) => {
     const tags = item.tags || [];
@@ -57,7 +76,35 @@ export const AddParamForm = ({
           })}
         />
       </EuiFormRow>
-      <ParamValueField isEditingItem={isEditingItem} />
+      <EuiFormRow fullWidth label={VALUE_SOURCE_LABEL}>
+        <Controller
+          control={control}
+          name="sourceType"
+          render={({ field }) => (
+            <EuiButtonGroup
+              legend={VALUE_SOURCE_LABEL}
+              buttonSize="compressed"
+              isFullWidth
+              options={[
+                {
+                  id: 'value',
+                  label: LITERAL_VALUE_LABEL,
+                  'data-test-subj': 'syntheticsParamSourceLiteral',
+                },
+                {
+                  id: 'vault',
+                  label: VAULT_SOURCE_OPTION_LABEL,
+                  iconType: 'lock',
+                  'data-test-subj': 'syntheticsParamSourceVault',
+                },
+              ]}
+              idSelected={sourceType}
+              onChange={(id) => field.onChange(id)}
+            />
+          )}
+        />
+      </EuiFormRow>
+      <ParamValueField isEditingItem={isEditingItem} sourceType={sourceType} />
       <EuiFormRow fullWidth label={TAGS_LABEL} labelAppend={<OptionalText />}>
         <Controller
           control={control}
@@ -154,3 +201,24 @@ const KEY_EXISTS = i18n.translate('xpack.synthetics.monitorManagement.param.keyE
 export const VALUE_REQUIRED = i18n.translate('xpack.synthetics.monitorManagement.value.required', {
   defaultMessage: 'Value is required',
 });
+
+export const VALUE_SOURCE_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.paramForm.valueSourceLabel',
+  {
+    defaultMessage: 'Value source',
+  }
+);
+
+export const LITERAL_VALUE_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.paramForm.literalValueLabel',
+  {
+    defaultMessage: 'Literal value',
+  }
+);
+
+export const VAULT_SOURCE_OPTION_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.paramForm.vaultSourceLabel',
+  {
+    defaultMessage: 'HashiCorp Vault',
+  }
+);

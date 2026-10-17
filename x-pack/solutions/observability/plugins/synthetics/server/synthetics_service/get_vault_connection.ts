@@ -1,0 +1,97 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { SyntheticsVaultConnection } from '../../common/runtime_types';
+import { syntheticsVaultConnectionType } from '../../common/types/saved_objects';
+import type { SyntheticsServerSetup } from '../types';
+
+/**
+ * A Heartbeat `secret_stores` entry of type `vault`, assembled from an encrypted
+ * connection saved object. Heartbeat resolves `vault://<path>#<field>` references
+ * with it. Snake-cased to match Heartbeat (go-ucfg) config keys.
+ */
+export interface HeartbeatVaultConfig {
+  type: 'vault';
+  // Kibana-only: not read by Heartbeat. The saved object name, used to pick the
+  // connection a monitor references (`vault://<name>@...`); never part of the
+  // delivered entry (see `toSecretStoreEntry`).
+  name: string;
+  address: string;
+  namespace?: string;
+  kv_mount?: string;
+  auth: { token: string } | { approle: { role_id: string; secret_id: string } };
+  ssl?: { verification_mode: 'none' };
+  // Opaque version (the connection's refreshedAt). Heartbeat shares one store (and
+  // its 5 minute secret cache) per distinct entry, so bumping this forces fresh
+  // reads — the manual "refresh" mechanism.
+  version?: string;
+}
+
+/** The entry as delivered to Heartbeat: everything except Kibana's own `name`. */
+export const toSecretStoreEntry = ({ name: _name, ...entry }: HeartbeatVaultConfig) => entry;
+
+const toHeartbeatConfig = (attributes: SyntheticsVaultConnection): HeartbeatVaultConfig => {
+  const { config, secrets } = attributes;
+  return {
+    type: 'vault',
+    name: attributes.name,
+    address: config.address,
+    namespace: config.namespace,
+    kv_mount: config.kvMount,
+    auth:
+      config.authMethod === 'approle'
+        ? { approle: { role_id: config.roleId ?? '', secret_id: secrets?.secretId ?? '' } }
+        : { token: secrets?.token ?? '' },
+    ...(config.tlsSkipVerify ? { ssl: { verification_mode: 'none' as const } } : {}),
+    version: attributes.refreshedAt,
+  };
+};
+
+/**
+ * Reads and decrypts every Vault connection for a space and returns them as an
+ * array of Heartbeat `secret_stores` vault entries. Empty when none are configured.
+ *
+ * Note: this yields plaintext secrets, so it must only be used when assembling
+ * the config delivered to a private-location agent (via a Fleet secret) — never
+ * returned to the browser.
+ */
+export const getVaultConnectionConfigs = async (
+  server: SyntheticsServerSetup,
+  spaceId: string
+): Promise<HeartbeatVaultConfig[]> => {
+  // Resilient by design: this is fetched once per policy-sync (E1) up front, so a
+  // failure here must NOT break the whole batch (including monitors that use no
+  // vault). Degrade to "no connections" — non-vault monitors are unaffected, and a
+  // vault monitor with a now-missing connection fails closed at its own policy
+  // generation rather than taking the sync down.
+  try {
+    const encryptedClient = server.encryptedSavedObjects.getClient();
+    const finder =
+      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsVaultConnection>(
+        {
+          type: syntheticsVaultConnectionType,
+          perPage: 1000,
+          namespaces: [spaceId],
+        }
+      );
+
+    const configs: HeartbeatVaultConfig[] = [];
+    for await (const result of finder.find()) {
+      for (const so of result.saved_objects) {
+        // Skip decrypt-failed objects (attributes stripped) rather than emitting a
+        // connection with no secret.
+        if (so.error || !so.attributes) continue;
+        configs.push(toHeartbeatConfig(so.attributes));
+      }
+    }
+    finder.close().catch(() => {});
+    return configs;
+  } catch (e) {
+    server.logger?.error(`Vault: failed to load connections for space "${spaceId}": ${e.message}`);
+    return [];
+  }
+};

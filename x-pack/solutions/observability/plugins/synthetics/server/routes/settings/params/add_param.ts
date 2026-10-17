@@ -25,6 +25,10 @@ import type {
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
+import {
+  buildVaultReference,
+  VaultParamSourceSchema,
+} from '../../../synthetics_service/formatters/vault_param_formatter';
 
 export const ParamsObjectSchema = z
   .strictObject({
@@ -33,7 +37,13 @@ export const ParamsObjectSchema = z
       .string()
       .min(1)
       .max(MAX_PARAM_VALUE_LENGTH)
-      .describe('The value associated with the parameter.'),
+      .optional()
+      .describe(
+        'The value associated with the parameter. Provide either `value` or `source`, not both.'
+      ),
+    source: VaultParamSourceSchema.optional().describe(
+      'Resolve the value from HashiCorp Vault at runtime instead of storing it. Provide either `value` or `source`, not both.'
+    ),
     description: z.string().max(4096).optional().describe('A description of the parameter.'),
     tags: z
       .array(z.string().max(256))
@@ -80,6 +90,27 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
         id: DEFAULT_SPACE_ID,
       };
+
+      const paramsToValidate = Array.isArray(request.body) ? request.body : [request.body];
+      const invalid = (paramsToValidate as SyntheticsParamRequest[]).find(
+        (param) => !param.value && !param.source
+      );
+      if (invalid) {
+        return response.badRequest({
+          body: { message: `Param "${invalid.key}" must have either a value or a vault source` },
+        });
+      }
+      // D4: a param is either a literal value or a vault source, not both.
+      const ambiguous = (paramsToValidate as SyntheticsParamRequest[]).find(
+        (param) => param.value && param.source
+      );
+      if (ambiguous) {
+        return response.badRequest({
+          body: {
+            message: `Param "${ambiguous.key}" must not set both a value and a vault source`,
+          },
+        });
+      }
 
       const savedObjectsData = parseParamBody(
         spaceId,
@@ -214,7 +245,7 @@ const findConflictingKeyInNamespaces = async (
 
 const toClientResponse = (savedObject: SavedObject<Omit<SyntheticsParamSOAttributes, 'id'>>) => {
   const { id, attributes: data, namespaces } = savedObject;
-  const { description, key, tags } = data;
+  const { description, key, tags, source } = data;
   return {
     id,
     description,
@@ -222,6 +253,27 @@ const toClientResponse = (savedObject: SavedObject<Omit<SyntheticsParamSOAttribu
     namespaces,
     tags,
     value: data.value,
+    source,
+  };
+};
+
+/**
+ * Builds the stored SO attributes for a param request. For a vault-backed param
+ * the effective `value` is derived as an edge-resolved reference token
+ * (vault://[<connection>@]<path>#<field>) and the structured `source` is persisted so the UI
+ * can round-trip it. Kibana never resolves the reference — Heartbeat does.
+ */
+const toParamAttributes = (
+  param: SyntheticsParamRequest
+): Omit<SyntheticsParamSOAttributes, 'id'> => {
+  const { share_across_spaces: _shareAcrossSpaces, value, source, ...rest } = param;
+  const effectiveValue = source
+    ? buildVaultReference(source.path, source.field, source.connection)
+    : value ?? '';
+  return {
+    ...rest,
+    ...(source ? { source } : {}),
+    value: effectiveValue,
   };
 };
 
@@ -229,24 +281,10 @@ const parseParamBody = (
   spaceId: string,
   body: SyntheticsParamRequest[] | SyntheticsParamRequest
 ): Array<SavedObjectsBulkCreateObject<Omit<SyntheticsParamSOAttributes, 'id'>>> => {
-  if (Array.isArray(body)) {
-    const params = body as SyntheticsParamRequest[];
-    return params.map((param) => {
-      const { share_across_spaces: shareAcrossSpaces, ...data } = param;
-      return {
-        type: syntheticsParamType,
-        attributes: data,
-        initialNamespaces: shareAcrossSpaces ? [ALL_SPACES_ID] : [spaceId],
-      };
-    });
-  }
-
-  const { share_across_spaces: shareAcrossSpaces, ...data } = body;
-  return [
-    {
-      type: syntheticsParamType,
-      attributes: data,
-      initialNamespaces: shareAcrossSpaces ? [ALL_SPACES_ID] : [spaceId],
-    },
-  ];
+  const params = Array.isArray(body) ? body : [body];
+  return params.map((param) => ({
+    type: syntheticsParamType,
+    attributes: toParamAttributes(param),
+    initialNamespaces: param.share_across_spaces ? [ALL_SPACES_ID] : [spaceId],
+  }));
 };
