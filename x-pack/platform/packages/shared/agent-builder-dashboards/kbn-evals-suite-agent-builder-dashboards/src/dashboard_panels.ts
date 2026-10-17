@@ -21,13 +21,16 @@ export const isRecord = (value: unknown): value is Record<string, unknown> =>
 /** Panels that share one coordinate space: the top level, or one section. */
 export interface PanelContainer {
   /** `undefined` for the top level. */
+  sectionId?: string;
+  /** `undefined` for the top level. */
   sectionTitle?: string;
   panels: AttachmentPanel[];
 }
 
 export const getPanelContainers = (dashboard: DashboardAttachmentData): PanelContainer[] => [
   { panels: dashboard.panels.filter((widget): widget is AttachmentPanel => !isSection(widget)) },
-  ...dashboard.panels.filter(isSection).map(({ title, panels }) => ({
+  ...dashboard.panels.filter(isSection).map(({ id, title, panels }) => ({
+    sectionId: id,
     sectionTitle: title,
     panels,
   })),
@@ -102,6 +105,10 @@ export const getControlFields = (control: Record<string, unknown>): string[] => 
 /** Reading order inside a container: top to bottom, then left to right. */
 export const byReadingOrder = (a: AttachmentPanel, b: AttachmentPanel): number =>
   a.grid.y - b.grid.y || a.grid.x - b.grid.x;
+
+/** `x,y wxh`, the grid as the evaluators print it. */
+export const formatGrid = ({ x, y, w, h }: AttachmentPanel['grid']): string =>
+  `${x},${y} ${w}x${h}`;
 
 const formatPanel = (panel: AttachmentPanel, indent: string): string => {
   const { id, config, grid } = panel;

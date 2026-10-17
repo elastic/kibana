@@ -166,6 +166,7 @@ ${TIME_WINDOW}
 export const MESSY_LOGS_DASHBOARD_DEFECTS: EnhanceDefectId[] = [
   'title_not_rewritten',
   'full_width_kpi',
+  'layout_gap',
   'summary_not_first',
   'summary_panel_titled',
   'chart_panel_untitled',
