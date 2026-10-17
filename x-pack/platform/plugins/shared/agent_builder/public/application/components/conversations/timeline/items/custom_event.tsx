@@ -9,8 +9,9 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { getConversationRoundAuthorDisplayName } from '@kbn/agent-builder-common';
+import { EventActorType, getConversationRoundAuthorDisplayName } from '@kbn/agent-builder-common';
 import { useConversationId } from '../../../../context/conversation/use_conversation_id';
+import { useUserMessageAuthor } from '../../../../hooks/use_user_message_author';
 import { AuthorHeader } from '../author_header';
 import { TimelineRenderErrorBoundary } from '../timeline_render_error_boundary';
 import type { CustomEventItem } from '../types';
@@ -36,6 +37,16 @@ interface CustomEventRowProps {
 const CustomEventRow = ({ item, conversationId, isStreaming }: CustomEventRowProps) => {
   const { euiTheme } = useEuiTheme();
   const { definition, event } = item;
+  const { actor } = event;
+  const { name: userName } = useUserMessageAuthor({
+    author:
+      actor.type === EventActorType.user
+        ? { id: actor.id, username: actor.username, full_name: actor.full_name }
+        : undefined,
+    origin: actor.origin,
+    isPendingCurrentRound: false,
+  });
+  const authorName = userName ?? getConversationRoundAuthorDisplayName(actor);
   const ctx = { conversationId, isStreaming };
   const header = definition.getHeader?.(event, ctx);
   const content = definition.render(event, ctx);
@@ -62,11 +73,7 @@ const CustomEventRow = ({ item, conversationId, isStreaming }: CustomEventRowPro
         <EuiFlexGroup direction="column" gutterSize="s">
           {header && (
             <EuiFlexItem grow={false}>
-              <AuthorHeader
-                name={getConversationRoundAuthorDisplayName(event.actor)}
-                label={header.label}
-                startedAt={event.created_at}
-              />
+              <AuthorHeader name={authorName} label={header.label} startedAt={event.created_at} />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>{content}</EuiFlexItem>
