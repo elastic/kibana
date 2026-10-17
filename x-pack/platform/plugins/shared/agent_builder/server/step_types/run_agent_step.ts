@@ -15,7 +15,10 @@ import {
   toAutoApprovedApis,
   AgentExecutionMode,
 } from '@kbn/agent-builder-common';
+import type { KibanaRequest } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { isTemplateRequiredConnector, MessageRole } from '@kbn/inference-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { firstValueFrom, tap, toArray } from 'rxjs';
 import type { ServiceManager } from '../services';
@@ -31,6 +34,107 @@ import {
   runAgentStepCommonDefinition,
 } from '../../common/step_types/run_agent_step';
 import { resolveConnectorIdByFeature } from '../utils/resolve_connector_id_by_feature';
+
+const parseTemplateJson = (content: string): unknown => {
+  const fenced = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const candidate = (fenced?.[1] ?? content).trim();
+  const start = candidate.indexOf('{');
+  const end = candidate.lastIndexOf('}');
+  if (start === -1 || end <= start) {
+    throw new Error('Template response did not contain a JSON object');
+  }
+  return JSON.parse(candidate.slice(start, end + 1));
+};
+
+/**
+ * When the connector requires an EIS template, call chat completion directly.
+ * Returns undefined so the caller keeps the agent path.
+ */
+const completeWithPromptTemplate = async ({
+  inference,
+  request,
+  connectorId,
+  templateId,
+  templateVersion,
+  templateVariables,
+  schema,
+  abortSignal,
+}: {
+  inference: InferenceServerStart | undefined;
+  request: KibanaRequest;
+  connectorId: string | undefined;
+  templateId: string | undefined;
+  templateVersion: number | undefined;
+  templateVariables: Record<string, unknown>;
+  schema: unknown;
+  abortSignal?: AbortSignal;
+}): Promise<
+  | {
+      message: string;
+      structuredOutput: unknown;
+      usage: {
+        connectorId?: string;
+        inputTokens: number;
+        outputTokens: number;
+        cachedTokens: number;
+        totalTokens: number;
+      };
+    }
+  | undefined
+> => {
+  if (!connectorId || !inference) {
+    if (templateId) {
+      throw new Error('Inference is not available, so the prompt template cannot be sent');
+    }
+    return undefined;
+  }
+
+  const client = inference.getClient({ request });
+  let templateRequired = false;
+  try {
+    const connector = await client.getConnectorById(connectorId);
+    templateRequired = isTemplateRequiredConnector(connector);
+  } catch (error) {
+    if (templateId) {
+      throw error;
+    }
+    return undefined;
+  }
+
+  if (!templateRequired) {
+    return undefined;
+  }
+
+  if (!templateId || templateVersion == null) {
+    throw new Error(
+      `Connector "${connectorId}" requires a prompt template and cannot be called with messages`
+    );
+  }
+
+  const response = await client.chatComplete({
+    connectorId,
+    stream: false,
+    messages: [{ role: MessageRole.User, content: '' }],
+    template: { id: templateId, version: templateVersion, variables: templateVariables },
+    abortSignal,
+  });
+
+  const structuredOutput = schema ? parseTemplateJson(response.content) : undefined;
+  const promptTokens = response.tokens?.prompt ?? 0;
+  const completionTokens = response.tokens?.completion ?? 0;
+
+  return {
+    message: schema ? JSON.stringify(structuredOutput) : response.content,
+    structuredOutput,
+    usage: {
+      connectorId,
+      inputTokens: promptTokens,
+      outputTokens: completionTokens,
+      cachedTokens: response.tokens?.cached ?? 0,
+      totalTokens: response.tokens?.total ?? promptTokens + completionTokens,
+    },
+  };
+};
 
 /**
  * Parses a `max-step-size` value (e.g. `"10mb"`, `"1gb"`, or a raw byte count) into bytes,
@@ -76,6 +180,9 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           metadata,
           configuration_overrides: configurationOverrides,
           approvals,
+          template_id: templateIdRaw,
+          template_version: templateVersionRaw,
+          template_variables: templateVariables,
         } = context.input;
 
         const {
@@ -128,6 +235,26 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             request,
             searchInferenceEndpoints,
           });
+        }
+
+        const templateResult = await completeWithPromptTemplate({
+          inference: serviceManager.internalStart?.inference,
+          request,
+          connectorId: effectiveConnectorId,
+          templateId: normalizeOptionalStringParam(templateIdRaw),
+          templateVersion: templateVersionRaw,
+          templateVariables: templateVariables ?? {},
+          schema,
+          abortSignal: context.abortSignal,
+        });
+        if (templateResult) {
+          return {
+            output: {
+              message: templateResult.message,
+              structured_output: templateResult.structuredOutput,
+              metadata: { usage: { ...usage, ...templateResult.usage } },
+            },
+          };
         }
 
         const storeConversation = !ephemeral && (createConversation || Boolean(conversationId));

@@ -264,6 +264,16 @@ steps:
         enable_elastic_capabilities: false
         tools: []
         skill_ids: []
+      # Used only when the connector requires an EIS prompt template.
+      template_id: ".attack-discovery-fp-tp"
+      template_version: 1
+      template_variables:
+        discovery: "{{ steps.load_attack_discovery.output.hits.hits[0] | json }}"
+        cited_alerts: "{{ steps.load_alerts.output.hits.hits | json }}"
+        entities: "{{ steps.load_entities.output.hits.hits | default: consts.no_rows | json }}"
+        events: "{{ steps.load_events.output.hits.hits | default: consts.no_rows | json }}"
+        entities_failed: "${{ steps.source_status.output.entities_failed }}"
+        events_failed: "${{ steps.source_status.output.events_failed }}"
       message: |
         You judge ONE persisted Attack Discovery as a chain: do the world facts around its
         cited alerts support the attack story it tells? You do not generate a discovery,

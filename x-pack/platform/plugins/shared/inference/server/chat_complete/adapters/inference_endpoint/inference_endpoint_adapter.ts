@@ -58,6 +58,15 @@ export interface InferenceEndpointAdapterChatCompleteOptions {
   toolChoice?: ToolOptions['toolChoice'];
   cacheControl?: ChatCompleteCacheControl;
   sessionId?: string;
+  /**
+   * When set, the request body is `{ template }` and messages/tools are omitted.
+   * EIS renders the prompt. Caller-supplied messages are rejected for these models.
+   */
+  template?: {
+    id: string;
+    version: number;
+    variables: Record<string, unknown>;
+  };
 }
 
 export const inferenceEndpointAdapter = {
@@ -82,7 +91,26 @@ export const inferenceEndpointAdapter = {
       metadata,
       cacheControl,
       sessionId,
+      template,
     } = options;
+
+    if (template) {
+      const request = {
+        ...getTemperatureIfValid(temperature, { modelId: endpointModelId ?? modelName }),
+        template,
+      };
+      return defer(() =>
+        executor.invoke({
+          body: request,
+          signal: abortSignal,
+          metadata,
+          timeout,
+        })
+      ).pipe(
+        switchMap((stream) => eventSourceStreamIntoObservable(stream)),
+        processOpenAIStream({ allowNullObjectWithChoices: true })
+      );
+    }
 
     const useSimulatedFunctionCalling = functionCalling === 'simulated';
 

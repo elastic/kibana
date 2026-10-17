@@ -103,6 +103,8 @@ type SpanModel = Parameters<typeof withChatCompleteSpan>[0]['model'];
 interface ResolvedPipelineContext {
   callbackContext: ChatCompleteCallbackContext;
   getSpanModel: (modelName?: string) => SpanModel | undefined;
+  /** Inference endpoints can send `{ template }` instead of messages. */
+  supportsTemplates: boolean;
   chatComplete: (
     options: ChatCompletePipelineAdapterOptions
   ) => Observable<InferenceConnectorAdapterChatCompleteEvent>;
@@ -213,7 +215,7 @@ function createChatCompletePipeline({
     anonymizationRules: from(anonymizationRulesPromise),
   }).pipe(
     switchMap(({ context, anonymizationRules }) => {
-      const { callbackContext, getSpanModel, chatComplete } = context;
+      const { callbackContext, getSpanModel, chatComplete, supportsTemplates } = context;
 
       const {
         system,
@@ -229,7 +231,35 @@ function createChatCompletePipeline({
         maxContentLength,
         cacheControl,
         sessionId,
+        template,
       } = callback(callbackContext);
+
+      if (template) {
+        if (!supportsTemplates) {
+          throw createInferenceRequestError(
+            'Chat completion templates are only supported for inference endpoints',
+            400
+          );
+        }
+
+        return chatComplete({
+          system,
+          messages: [],
+          template,
+          temperature,
+          reasoning,
+          logger,
+          functionCalling,
+          modelName,
+          abortSignal,
+          metadata,
+          timeout,
+          maxContentLength,
+          cacheControl,
+          sessionId,
+          stream,
+        }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }));
+      }
 
       const messages = sanitizeMessages(givenMessages);
 
@@ -390,6 +420,7 @@ function resolveAndCreatePipeline({
                       provider: endpointMeta.provider,
                     } as SpanModel)
                   : undefined,
+              supportsTemplates: true,
               chatComplete: (options) =>
                 inferenceEndpointAdapter.chatComplete({
                   ...options,
@@ -432,6 +463,7 @@ function resolveAndCreatePipeline({
                         provider: endpointMeta.provider,
                       } as SpanModel)
                     : undefined,
+                supportsTemplates: true,
                 chatComplete: (options) =>
                   inferenceEndpointAdapter.chatComplete({
                     ...options,
@@ -466,6 +498,7 @@ function resolveAndCreatePipeline({
                 family: getConnectorFamily(connector),
                 provider: getConnectorProvider(connector),
               }),
+              supportsTemplates: false,
               chatComplete: (options) => inferenceAdapter.chatComplete({ ...options, executor }),
             };
           };

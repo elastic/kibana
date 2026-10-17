@@ -98,9 +98,23 @@ export type ChatCompleteOptions = {
    */
   system?: string;
   /**
-   * The list of messages for the current conversation
+   * The list of messages for the current conversation.
+   *
+   * Ignored when `template` is set. A template-only endpoint rejects messages,
+   * so pass an empty list together with `template`.
    */
   messages: Message[];
+  /**
+   * EIS prompt template. Mutually exclusive with `messages` on the wire:
+   * when this is set, the inference endpoint adapter sends `template` and
+   * omits `messages` and `tools`. Elasticsearch forwards `id`, `version`,
+   * and `variables` unchanged. The id starts with a dot.
+   */
+  template?: {
+    id: string;
+    version: number;
+    variables: Record<string, unknown>;
+  };
   /**
    * LLM temperature. All models support the 0-1 range (some supports more).
    * Defaults to 0;

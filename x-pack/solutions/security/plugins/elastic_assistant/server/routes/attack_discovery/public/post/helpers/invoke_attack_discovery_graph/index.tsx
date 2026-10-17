@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ApiConfig, AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import { resolveAttackDiscoveryTemplateCompletion } from '@kbn/discoveries';
 import type { InferenceClient, InferenceConnectorType } from '@kbn/inference-common';
 import { ActionsClientLlm, InferenceClientLlm } from '@kbn/langchain/server';
 import type { BaseLLM } from '@langchain/core/language_models/llms';
@@ -133,6 +134,11 @@ export const invokeAttackDiscoveryGraph = async ({
     savedObjectsClient,
   });
 
+  const completeWithTemplate = await resolveAttackDiscoveryTemplateCompletion({
+    inferenceClient: isInferenceEndpoint ? inferenceClient : undefined,
+    connectorId: apiConfig.connectorId,
+  });
+
   const graph = getDefaultAttackDiscoveryGraph({
     alertsIndexPattern,
     anonymizationFields,
@@ -146,6 +152,7 @@ export const invokeAttackDiscoveryGraph = async ({
     replacements: latestReplacements,
     size,
     start,
+    ...(completeWithTemplate ? { completeWithTemplate } : {}),
   });
 
   logger?.debug(() => 'invokeAttackDiscoveryGraph: invoking the Attack discovery graph');
