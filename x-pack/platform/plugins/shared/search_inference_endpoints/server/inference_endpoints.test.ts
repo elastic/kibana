@@ -16,7 +16,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { InferenceFeatureConfig } from './types';
 import type { InferenceSettingsAttributes } from '../common/types';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
-import { getForFeature } from './inference_endpoints';
+import { getDeclaredParameters, getForFeature } from './inference_endpoints';
 
 const createValidFeature = (
   overrides: Partial<InferenceFeatureConfig> = {}
@@ -477,6 +477,349 @@ describe('getForFeature', () => {
     });
   });
 
+  describe('model parameters', () => {
+    const lowEffort = { reasoning: { effort: 'low' as const } };
+
+    it('returns declared parameters with recommended endpoints and omits them for plain ids', async () => {
+      registry.register(
+        createValidFeature({
+          featureId: 'f1',
+          recommendedEndpoints: [{ id: 'rec1', parameters: lowEffort }, 'rec2'],
+        })
+      );
+      const result = await getForFeature(
+        registry,
+        createSoClient(),
+        createGetConnectorById(['rec1', 'rec2']),
+        'f1',
+        logger
+      );
+      expect(result.endpoints).toEqual([
+        { ...createConnector('rec1'), parameters: lowEffort },
+        createConnector('rec2'),
+      ]);
+      expect(result.endpoints[1]).not.toHaveProperty('parameters');
+    });
+
+    it('does not let callers change the registered parameters through a returned connector', async () => {
+      registry.register(
+        createValidFeature({
+          featureId: 'f1',
+          recommendedEndpoints: [{ id: 'rec1', parameters: { reasoning: { effort: 'low' } } }],
+        })
+      );
+      const resolve = () =>
+        getForFeature(registry, createSoClient(), createGetConnectorById(['rec1']), 'f1', logger);
+
+      const {
+        endpoints: [{ parameters }],
+      } = await resolve();
+      if (parameters?.reasoning) {
+        parameters.reasoning.effort = 'none';
+      }
+      const second = await resolve();
+
+      expect(second.endpoints[0].parameters).toEqual({ reasoning: { effort: 'low' } });
+      expect(registry.get('f1')?.recommendedEndpoints[0].parameters).toEqual({
+        reasoning: { effort: 'low' },
+      });
+    });
+
+    it('inherits parent parameters when the child has no recommended endpoints', async () => {
+      registry.register(
+        createValidFeature({
+          featureId: 'parent',
+          recommendedEndpoints: [{ id: 'prec1', parameters: lowEffort }],
+        })
+      );
+      registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
+      const result = await getForFeature(
+        registry,
+        createSoClient(),
+        createGetConnectorById(['prec1']),
+        'child',
+        logger
+      );
+      expect(result.endpoints).toEqual([{ ...createConnector('prec1'), parameters: lowEffort }]);
+    });
+
+    it('applies declared parameters to SO override endpoints with a matching id', async () => {
+      registry.register(
+        createValidFeature({
+          featureId: 'f1',
+          recommendedEndpoints: [{ id: 'rec1', parameters: lowEffort }],
+        })
+      );
+      const result = await getForFeature(
+        registry,
+        createSoClient([{ feature_id: 'f1', endpoints: [{ id: 'rec1' }] }]),
+        createGetConnectorById(['rec1']),
+        'f1',
+        logger
+      );
+      expect(result).toEqual({
+        endpoints: [{ ...createConnector('rec1'), parameters: lowEffort }],
+        warnings: [],
+        soEntryFound: true,
+      });
+    });
+
+    it('does not apply declared parameters to SO override endpoints with a different id', async () => {
+      registry.register(
+        createValidFeature({
+          featureId: 'f1',
+          recommendedEndpoints: [{ id: 'rec1', parameters: lowEffort }],
+        })
+      );
+      const result = await getForFeature(
+        registry,
+        createSoClient([{ feature_id: 'f1', endpoints: [{ id: 'so_ep' }] }]),
+        createGetConnectorById(['so_ep']),
+        'f1',
+        logger
+      );
+      expect(result.endpoints).toEqual([createConnector('so_ep')]);
+    });
+
+    it('applies parent declared parameters to a parent SO override resolved for a child', async () => {
+      registry.register(
+        createValidFeature({
+          featureId: 'parent',
+          recommendedEndpoints: [{ id: 'rec1', parameters: lowEffort }],
+        })
+      );
+      registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
+      const result = await getForFeature(
+        registry,
+        createSoClient([{ feature_id: 'parent', endpoints: [{ id: 'rec1' }] }]),
+        createGetConnectorById(['rec1']),
+        'child',
+        logger
+      );
+      expect(result.endpoints).toEqual([{ ...createConnector('rec1'), parameters: lowEffort }]);
+    });
+
+    it('applies parent parameters when the child declares other endpoints but not the SO override one', async () => {
+      registry.register(
+        createValidFeature({
+          featureId: 'parent',
+          recommendedEndpoints: [{ id: 'rec1', parameters: lowEffort }],
+        })
+      );
+      registry.register(
+        createValidFeature({
+          featureId: 'child',
+          parentFeatureId: 'parent',
+          recommendedEndpoints: ['child_rec'],
+        })
+      );
+      const result = await getForFeature(
+        registry,
+        createSoClient([{ feature_id: 'parent', endpoints: [{ id: 'rec1' }] }]),
+        createGetConnectorById(['rec1']),
+        'child',
+        logger
+      );
+      expect(result.endpoints).toEqual([{ ...createConnector('rec1'), parameters: lowEffort }]);
+    });
+
+    it('applies parent parameters to an SO override on the child for an endpoint only the parent declares', async () => {
+      registry.register(
+        createValidFeature({
+          featureId: 'parent',
+          recommendedEndpoints: [{ id: 'rec1', parameters: lowEffort }],
+        })
+      );
+      registry.register(
+        createValidFeature({
+          featureId: 'child',
+          parentFeatureId: 'parent',
+          recommendedEndpoints: ['child_rec'],
+        })
+      );
+      const result = await getForFeature(
+        registry,
+        createSoClient([{ feature_id: 'child', endpoints: [{ id: 'rec1' }] }]),
+        createGetConnectorById(['rec1']),
+        'child',
+        logger
+      );
+      expect(result.endpoints).toEqual([{ ...createConnector('rec1'), parameters: lowEffort }]);
+    });
+
+    it('uses the nearest declaration of each SO override endpoint across the chain', async () => {
+      const highEffort = { reasoning: { effort: 'high' as const } };
+      const lowTemperature = { temperature: 0.2 };
+      registry.register(
+        createValidFeature({
+          featureId: 'grandparent',
+          recommendedEndpoints: [
+            { id: 'gpt', parameters: lowEffort },
+            { id: 'claude', parameters: lowTemperature },
+          ],
+        })
+      );
+      registry.register(
+        createValidFeature({
+          featureId: 'parent',
+          parentFeatureId: 'grandparent',
+          recommendedEndpoints: [{ id: 'gpt', parameters: highEffort }],
+        })
+      );
+      registry.register(
+        createValidFeature({
+          featureId: 'child',
+          parentFeatureId: 'parent',
+          recommendedEndpoints: ['haiku'],
+        })
+      );
+      const result = await getForFeature(
+        registry,
+        createSoClient([
+          {
+            feature_id: 'grandparent',
+            endpoints: [{ id: 'gpt' }, { id: 'claude' }, { id: 'gemini' }],
+          },
+        ]),
+        createGetConnectorById(['gpt', 'claude', 'gemini']),
+        'child',
+        logger
+      );
+      expect(result.endpoints).toEqual([
+        { ...createConnector('gpt'), parameters: highEffort },
+        { ...createConnector('claude'), parameters: lowTemperature },
+        createConnector('gemini'),
+      ]);
+      expect(result.endpoints[2]).not.toHaveProperty('parameters');
+    });
+
+    it('inherits parent parameters when the child recommends the same endpoint as a plain id', async () => {
+      registry.register(
+        createValidFeature({
+          featureId: 'parent',
+          recommendedEndpoints: [{ id: 'rec1', parameters: lowEffort }],
+        })
+      );
+      registry.register(
+        createValidFeature({
+          featureId: 'child',
+          parentFeatureId: 'parent',
+          recommendedEndpoints: ['rec1', 'child_rec'],
+        })
+      );
+      const result = await getForFeature(
+        registry,
+        createSoClient(),
+        createGetConnectorById(['rec1', 'child_rec']),
+        'child',
+        logger
+      );
+      expect(result.endpoints).toEqual([
+        { ...createConnector('rec1'), parameters: lowEffort },
+        createConnector('child_rec'),
+      ]);
+    });
+
+    it('inherits parent parameters for an SO override endpoint the child lists as a plain id', async () => {
+      registry.register(
+        createValidFeature({
+          featureId: 'parent',
+          recommendedEndpoints: [{ id: 'rec1', parameters: lowEffort }],
+        })
+      );
+      registry.register(
+        createValidFeature({
+          featureId: 'child',
+          parentFeatureId: 'parent',
+          recommendedEndpoints: ['rec1'],
+        })
+      );
+      const result = await getForFeature(
+        registry,
+        createSoClient([{ feature_id: 'parent', endpoints: [{ id: 'rec1' }] }]),
+        createGetConnectorById(['rec1']),
+        'child',
+        logger
+      );
+      expect(result.endpoints).toEqual([{ ...createConnector('rec1'), parameters: lowEffort }]);
+    });
+
+    it('lets a child opt out of parent parameters with an empty parameters object', async () => {
+      registry.register(
+        createValidFeature({
+          featureId: 'parent',
+          recommendedEndpoints: [{ id: 'rec1', parameters: lowEffort }],
+        })
+      );
+      registry.register(
+        createValidFeature({
+          featureId: 'child',
+          parentFeatureId: 'parent',
+          recommendedEndpoints: [{ id: 'rec1', parameters: {} }],
+        })
+      );
+      const result = await getForFeature(
+        registry,
+        createSoClient(),
+        createGetConnectorById(['rec1']),
+        'child',
+        logger
+      );
+      expect(result.endpoints).toEqual([{ ...createConnector('rec1'), parameters: {} }]);
+    });
+
+    it('prefers child parameters over parent parameters for the same endpoint', async () => {
+      const highEffort = { reasoning: { effort: 'high' as const } };
+      registry.register(
+        createValidFeature({
+          featureId: 'parent',
+          recommendedEndpoints: [{ id: 'rec1', parameters: lowEffort }],
+        })
+      );
+      registry.register(
+        createValidFeature({
+          featureId: 'child',
+          parentFeatureId: 'parent',
+          recommendedEndpoints: [{ id: 'rec1', parameters: highEffort }],
+        })
+      );
+      const result = await getForFeature(
+        registry,
+        createSoClient(),
+        createGetConnectorById(['rec1']),
+        'child',
+        logger
+      );
+      expect(result.endpoints).toEqual([{ ...createConnector('rec1'), parameters: highEffort }]);
+    });
+
+    it('returns the Kibana default endpoint without parameters', async () => {
+      registry.register(createValidFeature({ featureId: 'f1', taskType: 'chat_completion' }));
+      const result = await getForFeature(
+        registry,
+        createSoClient(),
+        createGetConnectorById([defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION]),
+        'f1',
+        logger
+      );
+      expect(result.endpoints[0]).not.toHaveProperty('parameters');
+    });
+
+    it('returns SO override endpoints without parameters when the declared chain is cyclic', async () => {
+      registry.register(createValidFeature({ featureId: 'a' }));
+      registry.register(createValidFeature({ featureId: 'b', parentFeatureId: 'a' }));
+      (registry as any).features.get('a').parentFeatureId = 'b';
+      const result = await getForFeature(
+        registry,
+        createSoClient([{ feature_id: 'a', endpoints: [{ id: 'so_ep' }] }]),
+        createGetConnectorById(['so_ep']),
+        'a',
+        logger
+      );
+      expect(result.endpoints).toEqual([createConnector('so_ep')]);
+    });
+  });
+
   describe('onlyReturnConfigured option', () => {
     it('returns empty list instead of KIBANA_DEFAULT when no SO or recommended endpoints exist', async () => {
       registry.register(createValidFeature({ featureId: 'f1', taskType: 'chat_completion' }));
@@ -552,5 +895,42 @@ describe('getForFeature', () => {
       expect(result.warnings[0]).toContain('missing');
       expect(result.soEntryFound).toBe(false);
     });
+  });
+});
+
+describe('getDeclaredParameters', () => {
+  const highEffort = { reasoning: { effort: 'high' as const } };
+  let registry: InferenceFeatureRegistry;
+
+  beforeEach(() => {
+    registry = new InferenceFeatureRegistry(loggingSystemMock.createLogger());
+    registry.register(
+      createValidFeature({
+        featureId: 'parent',
+        recommendedEndpoints: [{ id: 'declared', parameters: highEffort }, 'plain'],
+      })
+    );
+    registry.register(
+      createValidFeature({
+        featureId: 'child',
+        parentFeatureId: 'parent',
+        recommendedEndpoints: ['other'],
+      })
+    );
+  });
+
+  it('returns the parameters a parent declares even when the endpoint is not in the child list', () => {
+    expect(getDeclaredParameters(registry, 'child', 'declared')).toEqual(highEffort);
+  });
+
+  it('returns undefined for endpoints without declared parameters', () => {
+    expect(getDeclaredParameters(registry, 'child', 'plain')).toBeUndefined();
+    expect(getDeclaredParameters(registry, 'child', 'unknown')).toBeUndefined();
+    expect(getDeclaredParameters(registry, 'unregistered', 'declared')).toBeUndefined();
+  });
+
+  it('returns a copy that does not change the registered parameters', () => {
+    const parameters = getDeclaredParameters(registry, 'child', 'declared');
+    expect(parameters).not.toBe(registry.get('parent')?.recommendedEndpoints[0].parameters);
   });
 });

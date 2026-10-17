@@ -6,7 +6,7 @@
  */
 
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { InferenceConnector, InferenceModelParameters } from '@kbn/inference-common';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
@@ -42,6 +42,7 @@ export interface ResolvedConnectorsForFeature {
  * @param getForFeature  Resolves feature-specific endpoints (without the global default).
  * @param getConnectorList  Returns the full connector catalog (not called when `opts.onlyReturnConfigured` is true).
  * @param getConnectorById  Fetches a single connector by ID (used for the global default).
+ * @param getDeclaredParameters  Returns the parameters the feature chain declares for an endpoint ID (used for the global default).
  * @param uiSettingsClient  Scoped UI-settings client to read the default connector setting.
  * @param featureId  The feature to resolve connectors for.
  * @param opts  Optional resolution options (see {@link GetForFeatureOptions}).
@@ -51,6 +52,7 @@ export const resolveModelsForFeature = async ({
   getForFeature,
   getConnectorList,
   getConnectorById,
+  getDeclaredParameters,
   uiSettingsClient,
   featureId,
   ignoreGlobalDefault = false,
@@ -60,6 +62,7 @@ export const resolveModelsForFeature = async ({
   getForFeature: (featureId: string) => Promise<ResolvedInferenceEndpoints>;
   getConnectorList: () => Promise<InferenceConnector[]>;
   getConnectorById: (id: string) => Promise<InferenceConnector>;
+  getDeclaredParameters: (endpointId: string) => InferenceModelParameters | undefined;
   uiSettingsClient: IUiSettingsClient;
   featureId: string;
   ignoreGlobalDefault?: boolean;
@@ -80,23 +83,27 @@ export const resolveModelsForFeature = async ({
     }
   };
 
+  const getFeatureEndpoints = () =>
+    getForFeature(featureId).catch((e): ResolvedInferenceEndpoints => {
+      logger.error(`Failed to resolve endpoints for feature "${featureId}": ${e.message}`);
+      return { endpoints: [], warnings: [], soEntryFound: false };
+    });
+
   if (defaultConnectorOnly) {
     if (!defaultConnectorId || defaultConnectorId === NO_DEFAULT_CONNECTOR) {
       return { connectors: [], warnings: [], soEntryFound: false };
     }
     const connector = await fetchConnectorById(defaultConnectorId);
+    const parameters = getDeclaredParameters(defaultConnectorId);
     return {
-      connectors: connector ? [connector] : [],
+      connectors: connector ? [parameters ? { ...connector, parameters } : connector] : [],
       warnings: [],
       soEntryFound: false,
     };
   }
 
   if (opts?.onlyReturnConfigured) {
-    const featureResult = await getForFeature(featureId).catch((e): ResolvedInferenceEndpoints => {
-      logger.error(`Failed to resolve endpoints for feature "${featureId}": ${e.message}`);
-      return { endpoints: [], warnings: [], soEntryFound: false };
-    });
+    const featureResult = await getFeatureEndpoints();
     const { soEntryFound } = featureResult;
     return {
       connectors: soEntryFound
@@ -108,10 +115,7 @@ export const resolveModelsForFeature = async ({
   }
 
   const [featureResult, allConnectors] = await Promise.all([
-    getForFeature(featureId).catch((e): ResolvedInferenceEndpoints => {
-      logger.error(`Failed to resolve endpoints for feature "${featureId}": ${e.message}`);
-      return { endpoints: [], warnings: [], soEntryFound: false };
-    }),
+    getFeatureEndpoints(),
     getConnectorList().catch((e): InferenceConnector[] => {
       logger.error(`Failed to load connector list: ${e.message}`);
       return [];
@@ -130,8 +134,9 @@ export const resolveModelsForFeature = async ({
   ) {
     const defaultConnector = await fetchConnectorById(defaultConnectorId);
     if (defaultConnector) {
+      const parameters = getDeclaredParameters(defaultConnectorId);
       connectors = [
-        defaultConnector,
+        parameters ? { ...defaultConnector, parameters } : defaultConnector,
         ...merged.filter((c) => c.connectorId !== defaultConnectorId),
       ];
     }

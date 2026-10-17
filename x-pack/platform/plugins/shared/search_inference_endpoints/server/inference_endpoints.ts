@@ -8,11 +8,20 @@
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { type InferenceConnector, defaultInferenceEndpoints } from '@kbn/inference-common';
+import {
+  type InferenceConnector,
+  type InferenceModelParameters,
+  defaultInferenceEndpoints,
+} from '@kbn/inference-common';
 import { INFERENCE_SETTINGS_SO_TYPE, INFERENCE_SETTINGS_ID } from '../common/constants';
 import type { InferenceSettingsAttributes } from '../common/types';
 import type { InferenceFeatureRegistry } from './inference_feature_registry';
-import type { GetForFeatureOptions, ResolvedInferenceEndpoints } from './types';
+import type {
+  GetForFeatureOptions,
+  RecommendedEndpoint,
+  RegisteredInferenceFeature,
+  ResolvedInferenceEndpoints,
+} from './types';
 
 /**
  * Returns the resolved inference endpoints for a feature.
@@ -35,14 +44,14 @@ export const getForFeature = async (
   opts?: GetForFeatureOptions
 ): Promise<ResolvedInferenceEndpoints> => {
   const {
-    ids,
+    endpoints: resolvedEndpoints,
     warnings: resolveWarnings,
     soEntryFound,
-  } = await resolveEndpointIds(registry, soClient, featureId, logger, opts);
-  if (ids.length === 0) {
+  } = await resolveEndpoints(registry, soClient, featureId, logger, opts);
+  if (resolvedEndpoints.length === 0) {
     return { endpoints: [], warnings: resolveWarnings, soEntryFound };
   }
-  const result = await fetchConnectorsByIds(getConnectorById, ids);
+  const result = await fetchConnectors(getConnectorById, resolvedEndpoints);
   return {
     endpoints: result.endpoints,
     warnings: [...resolveWarnings, ...result.warnings],
@@ -51,20 +60,22 @@ export const getForFeature = async (
 };
 
 /**
- * Fetches connectors by their IDs using getConnectorById.
+ * Fetches the connector for each endpoint using getConnectorById and attaches its parameters.
  * Returns warnings for any IDs that were not found.
  */
-const fetchConnectorsByIds = async (
+const fetchConnectors = async (
   getConnectorById: (id: string) => Promise<InferenceConnector>,
-  ids: string[]
+  resolvedEndpoints: RecommendedEndpoint[]
 ): Promise<Omit<ResolvedInferenceEndpoints, 'soEntryFound'>> => {
-  const endpoints: InferenceConnector[] = [];
+  const endpoints: ResolvedInferenceEndpoints['endpoints'] = [];
   const warnings: string[] = [];
 
-  for (const id of ids) {
+  for (const { id, parameters } of resolvedEndpoints) {
     try {
       const connector = await getConnectorById(id);
-      endpoints.push(connector);
+      endpoints.push(
+        parameters ? { ...connector, parameters: structuredClone(parameters) } : connector
+      );
     } catch (e) {
       warnings.push(
         i18n.translate('xpack.searchInferenceEndpoints.endpoints.endpointNotFound', {
@@ -78,12 +89,58 @@ const fetchConnectorsByIds = async (
   return { endpoints, warnings };
 };
 
-interface ResolvedEndpointIds {
-  ids: string[];
+interface ResolvedFeatureEndpoints {
+  endpoints: RecommendedEndpoint[];
   warnings: string[];
   /** True when an SO entry was found for the feature (even if it had an empty endpoints list). */
   soEntryFound: boolean;
 }
+
+type SoFeatureSetting = InferenceSettingsAttributes['features'][number];
+
+const getFeatureChain = (
+  registry: InferenceFeatureRegistry,
+  featureId: string
+): RegisteredInferenceFeature[] => {
+  const chain: RegisteredInferenceFeature[] = [];
+  let feature = registry.get(featureId);
+  while (feature && !chain.includes(feature)) {
+    chain.push(feature);
+    feature = feature.parentFeatureId ? registry.get(feature.parentFeatureId) : undefined;
+  }
+  return chain;
+};
+
+const findDeclaredEndpoint = (
+  registry: InferenceFeatureRegistry,
+  featureId: string,
+  endpointId: string
+): RecommendedEndpoint => {
+  const declared = getFeatureChain(registry, featureId)
+    .flatMap(({ recommendedEndpoints }) => recommendedEndpoints)
+    .find(({ id, parameters }) => id === endpointId && parameters !== undefined);
+  return declared ?? { id: endpointId };
+};
+
+const withDeclaredParameters = (
+  registry: InferenceFeatureRegistry,
+  featureId: string,
+  endpoints: Array<{ id: string }>
+): RecommendedEndpoint[] =>
+  endpoints.map(({ id }) => findDeclaredEndpoint(registry, featureId, id));
+
+/**
+ * Returns a copy of the parameters the feature chain declares for an endpoint id, regardless of
+ * whether that endpoint is in the feature's resolved list.
+ */
+export const getDeclaredParameters = (
+  registry: InferenceFeatureRegistry,
+  featureId: string,
+  endpointId: string
+): InferenceModelParameters | undefined => {
+  const { parameters } = findDeclaredEndpoint(registry, featureId, endpointId);
+  return parameters && structuredClone(parameters);
+};
 
 /**
  * Pure resolution logic that walks the fallback chain for a feature using
@@ -95,14 +152,18 @@ interface ResolvedEndpointIds {
  * 2. Walk parentFeatureId chain, checking SO overrides at each level
  * 3. First non-empty recommendedEndpoints found in the chain
  * 4. Kibana default chat-completion endpoint
+ *
+ * Each endpoint carries the parameters of the nearest feature in the chain, starting from the
+ * requested feature, that declares parameters for the same endpoint id. A plain id declares
+ * nothing and inherits; `{ id, parameters: {} }` opts out of inherited parameters.
  */
-export const resolveFeatureEndpointIds = (
+export const resolveFeatureEndpoints = (
   registry: InferenceFeatureRegistry,
-  soFeaturesMap: Map<string, InferenceSettingsAttributes['features'][number]>,
+  soFeaturesMap: Map<string, SoFeatureSetting>,
   featureId: string,
   logger: Logger,
   opts?: GetForFeatureOptions
-): ResolvedEndpointIds => {
+): ResolvedFeatureEndpoints => {
   let current = registry.get(featureId);
   if (!current) {
     logger.warn(
@@ -111,7 +172,7 @@ export const resolveFeatureEndpointIds = (
         values: { featureId },
       })
     );
-    return { ids: [], warnings: [], soEntryFound: false };
+    return { endpoints: [], warnings: [], soEntryFound: false };
   }
   let recEntry = current.recommendedEndpoints?.length
     ? { featureId: current.featureId, recommendedEndpoints: current.recommendedEndpoints }
@@ -128,13 +189,13 @@ export const resolveFeatureEndpointIds = (
   const initialSoEntry = soFeaturesMap.get(currentId);
   if (initialSoEntry && initialSoEntry.endpoints.length > 0) {
     return {
-      ids: initialSoEntry.endpoints.map((e) => e.id),
+      endpoints: withDeclaredParameters(registry, featureId, initialSoEntry.endpoints),
       warnings: [],
       soEntryFound: true,
     };
   }
   if (initialSoEntry && initialSoEntry.endpoints.length === 0) {
-    return { ids: [], warnings: [], soEntryFound: true };
+    return { endpoints: [], warnings: [], soEntryFound: true };
   }
 
   visited.add(currentId);
@@ -144,7 +205,7 @@ export const resolveFeatureEndpointIds = (
     while (true) {
       if (visited.has(currentId)) {
         return {
-          ids: [],
+          endpoints: [],
           warnings: [
             i18n.translate('xpack.searchInferenceEndpoints.endpoints.cyclicDependency', {
               defaultMessage:
@@ -171,13 +232,13 @@ export const resolveFeatureEndpointIds = (
       const soEntry = soFeaturesMap.get(currentId);
       if (soEntry && soEntry.endpoints.length > 0) {
         return {
-          ids: soEntry.endpoints.map((e) => e.id),
+          endpoints: withDeclaredParameters(registry, featureId, soEntry.endpoints),
           warnings: [],
           soEntryFound: true,
         };
       }
       if (soEntry && soEntry.endpoints.length === 0) {
-        return { ids: [], warnings: [], soEntryFound: true };
+        return { endpoints: [], warnings: [], soEntryFound: true };
       }
 
       if (current.parentFeatureId) {
@@ -189,26 +250,26 @@ export const resolveFeatureEndpointIds = (
   }
 
   return {
-    ids:
-      recEntry?.recommendedEndpoints ??
-      (opts?.onlyReturnConfigured
-        ? []
-        : [defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION]),
+    endpoints: recEntry
+      ? withDeclaredParameters(registry, featureId, recEntry.recommendedEndpoints)
+      : opts?.onlyReturnConfigured
+      ? []
+      : [{ id: defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION }],
     warnings: [],
     soEntryFound: false,
   };
 };
 
-const resolveEndpointIds = async (
+const resolveEndpoints = async (
   registry: InferenceFeatureRegistry,
   soClient: SavedObjectsClientContract,
   featureId: string,
   logger: Logger,
   opts?: GetForFeatureOptions
-): Promise<ResolvedEndpointIds> => {
+): Promise<ResolvedFeatureEndpoints> => {
   const soFeatures = await readSettingsFeatures(soClient, logger);
   const soFeaturesMap = new Map(soFeatures.map((f) => [f.feature_id, f]));
-  return resolveFeatureEndpointIds(registry, soFeaturesMap, featureId, logger, opts);
+  return resolveFeatureEndpoints(registry, soFeaturesMap, featureId, logger, opts);
 };
 
 const readSettingsFeatures = async (
