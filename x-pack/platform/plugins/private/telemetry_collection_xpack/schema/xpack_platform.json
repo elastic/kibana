@@ -10873,6 +10873,74 @@
         }
       }
     },
+    "context_engine": {
+      "properties": {
+        "ai_indices": {
+          "properties": {
+            "user": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of user-created AI indices across all spaces"
+              }
+            },
+            "managed": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of managed AI index entries across all spaces; one per space the managed AI index is bootstrapped in"
+              }
+            }
+          }
+        },
+        "kis": {
+          "properties": {
+            "user": {
+              "properties": {
+                "active": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of active, unexpired KIs in user-created AI indices"
+                  }
+                },
+                "expired": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of active KIs past their expires_at in user-created AI indices"
+                  }
+                },
+                "deleted": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of KIs with lifecycle status deleted in user-created AI indices"
+                  }
+                }
+              }
+            },
+            "managed": {
+              "properties": {
+                "active": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of active, unexpired KIs in managed AI indices"
+                  }
+                },
+                "expired": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of active KIs past their expires_at in managed AI indices"
+                  }
+                },
+                "deleted": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of KIs with lifecycle status deleted in managed AI indices"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "discoverEnhanced": {
       "properties": {
         "exploreDataInChartActionEnabled": {
