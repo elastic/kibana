@@ -50,8 +50,9 @@ export { UnifiedDataTableSourceColumnHeader } from './src/components/data_table_
 
 export { type EuiDataGridRefProps } from '@elastic/eui';
 
-export { TanStackCellActionsBubble } from './src/components/tanstack_cell_actions/tanstack_cell_actions_bubble';
 export {
-  TANSTACK_CELL_ACTIONS_CLASS,
-  tanStackCellActionsStyles,
-} from './src/components/tanstack_cell_actions/tanstack_cell_actions_styles';
+  CellActionsBubble,
+  type CellActionsBubbleAction,
+  type CellActionsBubbleProps,
+} from './src/components/cell_actions_bubble/cell_actions_bubble';
+export { cellActionsHostStyles } from './src/components/cell_actions_bubble/cell_actions_bubble_styles';

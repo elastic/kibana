@@ -10,28 +10,26 @@
 import { css, keyframes } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
-export const TANSTACK_CELL_ACTIONS_CLASS = 'tsg-cellActions';
+export const CELL_ACTIONS_BUBBLE_CLASS = 'kbnCellActionsBubble';
 
 const cellActionPopIn = keyframes({
   from: { opacity: 0, transform: 'scale(0.35)' },
   to: { opacity: 1, transform: 'scale(1)' },
 });
 
-export const tanStackCellActionsStyles = {
-  cellWithActions: (_themeContext: UseEuiTheme) =>
-    css({
-      position: 'relative',
-      overflow: 'hidden',
-      [`&:hover .${TANSTACK_CELL_ACTIONS_CLASS}, &:focus-within .${TANSTACK_CELL_ACTIONS_CLASS}`]: {
-        display: 'flex',
-      },
-      [`&.tsg-actionsDismissed .${TANSTACK_CELL_ACTIONS_CLASS}, &.tsg-actionsDismissed:hover .${TANSTACK_CELL_ACTIONS_CLASS}, &.tsg-actionsDismissed:focus-within .${TANSTACK_CELL_ACTIONS_CLASS}`]:
-        {
-          display: 'none',
-          pointerEvents: 'none',
-        },
-    }),
+/**
+ * Styles for the cell that hosts a `CellActionsBubble`. The bubble is shown while the cell is
+ * hovered or contains focus, and is positioned relative to the cell.
+ */
+export const cellActionsHostStyles = css({
+  position: 'relative',
+  overflow: 'hidden',
+  [`&:hover .${CELL_ACTIONS_BUBBLE_CLASS}, &:focus-within .${CELL_ACTIONS_BUBBLE_CLASS}`]: {
+    display: 'flex',
+  },
+});
 
+export const cellActionsBubbleStyles = {
   cellActions: (themeContext: UseEuiTheme) => {
     const { euiTheme } = themeContext;
     return css({
@@ -43,6 +41,7 @@ export const tanStackCellActionsStyles = {
       alignItems: 'center',
       boxSizing: 'border-box',
       transformOrigin: 'right center',
+      pointerEvents: 'auto',
     });
   },
 

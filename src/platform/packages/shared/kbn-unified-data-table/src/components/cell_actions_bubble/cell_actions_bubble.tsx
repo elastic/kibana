@@ -8,14 +8,11 @@
  */
 
 import type { CSSProperties, ReactElement } from 'react';
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiPortal, keys, useEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import {
-  TANSTACK_CELL_ACTIONS_CLASS,
-  tanStackCellActionsStyles,
-} from './tanstack_cell_actions_styles';
+import { CELL_ACTIONS_BUBBLE_CLASS, cellActionsBubbleStyles } from './cell_actions_bubble_styles';
 
 const CELL_ACTIONS_HOVER_OPEN_DELAY_MS = 350;
 const CELL_ACTION_ICON_WIDTH = 28;
@@ -36,8 +33,15 @@ const cellActionsNeedFixedLayer = (
   return openWidth > cellWidth - insetPx;
 };
 
-export interface TanStackCellActionsBubbleProps {
-  actionButtons: ReactElement[];
+export interface CellActionsBubbleAction {
+  /** Stable identifier, used as the React key. */
+  id: string;
+  /** The action control, typically an icon button. */
+  element: ReactElement;
+}
+
+export interface CellActionsBubbleProps {
+  actions: CellActionsBubbleAction[];
   anchorCellRef: React.RefObject<HTMLElement | null>;
   /** Keeps the trigger visible when a related popover (e.g. expand) is open. */
   stayVisible?: boolean;
@@ -45,33 +49,30 @@ export interface TanStackCellActionsBubbleProps {
   toolbarAriaLabel?: string;
 }
 
-export const TanStackCellActionsBubble = React.memo(
+export const CellActionsBubble = React.memo(
   ({
-    actionButtons,
+    actions,
     anchorCellRef,
     stayVisible = false,
     triggerTestSubj = 'tanStackCellActionsButton',
     toolbarAriaLabel,
-  }: TanStackCellActionsBubbleProps) => {
+  }: CellActionsBubbleProps) => {
     const { euiTheme } = useEuiTheme();
-    const styles = useMemoCss(tanStackCellActionsStyles);
+    const styles = useMemoCss(cellActionsBubbleStyles);
     const bubbleRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLButtonElement>(null);
     const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [isOpen, setIsOpen] = useState(false);
     const [useFixedLayer, setUseFixedLayer] = useState(false);
     const [fixedLayerStyle, setFixedLayerStyle] = useState<CSSProperties>();
-    // A transformed ancestor (e.g. a virtualized row) becomes the containing block of `position: fixed`,
-    // so the measured delta between the intended and rendered position is cancelled out.
-    const fixedLayerOffsetRef = useRef({ top: 0, right: 0 });
     const collapsedRadius = euiTheme.border.radius.small;
     const openRadius = euiTheme.size.m;
     const actionInsetPx = parseInt(euiTheme.size.xxs, 10) || 4;
-    const actionCount = actionButtons.length;
+    const actionCount = actions.length;
 
     const cellActionsLabel =
       toolbarAriaLabel ??
-      i18n.translate('unifiedDataTable.tanStack.cellActionsButtonAriaLabel', {
+      i18n.translate('unifiedDataTable.cellActionsBubble.triggerAriaLabel', {
         defaultMessage: 'Cell actions',
       });
 
@@ -136,10 +137,9 @@ export const TanStackCellActionsBubble = React.memo(
       setUseFixedLayer(needsFixedLayer);
       if (needsFixedLayer && anchorCellRef.current) {
         const rect = anchorCellRef.current.getBoundingClientRect();
-        const { top: offsetTop, right: offsetRight } = fixedLayerOffsetRef.current;
         setFixedLayerStyle({
-          top: rect.top + actionInsetPx - offsetTop,
-          right: window.innerWidth - rect.right + actionInsetPx - offsetRight,
+          top: rect.top + actionInsetPx,
+          right: window.innerWidth - rect.right + actionInsetPx,
         });
       }
       return needsFixedLayer;
@@ -180,36 +180,27 @@ export const TanStackCellActionsBubble = React.memo(
       }, CELL_ACTIONS_HOVER_OPEN_DELAY_MS);
     }, [clearOpenTimer, isOpen, openBubble]);
 
-    useLayoutEffect(() => {
-      const bubble = bubbleRef.current;
-      const anchor = anchorCellRef.current;
-      if (!isOpen || !useFixedLayer || !bubble || !anchor) {
-        fixedLayerOffsetRef.current = { top: 0, right: 0 };
-        return;
-      }
-      const anchorRect = anchor.getBoundingClientRect();
-      const bubbleRect = bubble.getBoundingClientRect();
-      const deltaTop = bubbleRect.top - (anchorRect.top + actionInsetPx);
-      const deltaRight = bubbleRect.right - (anchorRect.right - actionInsetPx);
-      if (Math.abs(deltaTop) < 0.5 && Math.abs(deltaRight) < 0.5) {
-        return;
-      }
-      const { top: offsetTop, right: offsetRight } = fixedLayerOffsetRef.current;
-      fixedLayerOffsetRef.current = {
-        top: offsetTop + deltaTop,
-        right: offsetRight - deltaRight,
-      };
-      refreshFixedLayer();
-    }, [actionInsetPx, anchorCellRef, fixedLayerStyle, isOpen, refreshFixedLayer, useFixedLayer]);
-
     useEffect(() => {
       if (!isOpen || !useFixedLayer) {
         return;
       }
-      const updateFixedLayer = () => refreshFixedLayer();
+      // Scroll events can fire many times per frame, measure at most once per frame.
+      let frame: number | undefined;
+      const updateFixedLayer = () => {
+        if (frame !== undefined) {
+          return;
+        }
+        frame = requestAnimationFrame(() => {
+          frame = undefined;
+          refreshFixedLayer();
+        });
+      };
       window.addEventListener('scroll', updateFixedLayer, true);
       window.addEventListener('resize', updateFixedLayer);
       return () => {
+        if (frame !== undefined) {
+          cancelAnimationFrame(frame);
+        }
         window.removeEventListener('scroll', updateFixedLayer, true);
         window.removeEventListener('resize', updateFixedLayer);
       };
@@ -288,37 +279,47 @@ export const TanStackCellActionsBubble = React.memo(
       [closeBubble, isOpen, openBubble]
     );
 
-    const handleToolbarKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (event.key !== keys.ARROW_LEFT && event.key !== keys.ARROW_RIGHT) {
-        return;
-      }
-      const toolbar = bubbleRef.current?.querySelector<HTMLElement>('[role="toolbar"]');
-      const toolbarActionButtons = toolbar
-        ? Array.from(toolbar.querySelectorAll<HTMLButtonElement>('button'))
-        : [];
-      if (toolbarActionButtons.length === 0) {
-        return;
-      }
+    const handleToolbarKeyDown = useCallback(
+      (event: React.KeyboardEvent<HTMLDivElement>) => {
+        // The fixed layer is portaled to the end of <body>, so Tab would leave the page content.
+        // Collapse the toolbar and return focus to the in-cell trigger instead.
+        if (event.key === keys.TAB && useFixedLayer) {
+          event.preventDefault();
+          closeBubble(true);
+          return;
+        }
+        if (event.key !== keys.ARROW_LEFT && event.key !== keys.ARROW_RIGHT) {
+          return;
+        }
+        const toolbar = bubbleRef.current?.querySelector<HTMLElement>('[role="toolbar"]');
+        const toolbarActionButtons = toolbar
+          ? Array.from(toolbar.querySelectorAll<HTMLButtonElement>('button'))
+          : [];
+        if (toolbarActionButtons.length === 0) {
+          return;
+        }
 
-      event.preventDefault();
-      event.stopPropagation();
-      const currentIndex = toolbarActionButtons.indexOf(
-        document.activeElement as HTMLButtonElement
-      );
-      const delta = event.key === keys.ARROW_RIGHT ? 1 : -1;
-      const nextIndex =
-        currentIndex >= 0
-          ? (currentIndex + delta + toolbarActionButtons.length) % toolbarActionButtons.length
-          : delta > 0
-          ? 0
-          : toolbarActionButtons.length - 1;
-      toolbarActionButtons[nextIndex]?.focus();
-    }, []);
+        event.preventDefault();
+        event.stopPropagation();
+        const currentIndex = toolbarActionButtons.indexOf(
+          document.activeElement as HTMLButtonElement
+        );
+        const delta = event.key === keys.ARROW_RIGHT ? 1 : -1;
+        const nextIndex =
+          currentIndex >= 0
+            ? (currentIndex + delta + toolbarActionButtons.length) % toolbarActionButtons.length
+            : delta > 0
+            ? 0
+            : toolbarActionButtons.length - 1;
+        toolbarActionButtons[nextIndex]?.focus();
+      },
+      [closeBubble, useFixedLayer]
+    );
 
     const bubble = (
       <div
         ref={bubbleRef}
-        className={TANSTACK_CELL_ACTIONS_CLASS}
+        className={CELL_ACTIONS_BUBBLE_CLASS}
         css={[
           styles.cellActions,
           stayVisible && styles.cellActionsStayVisible,
@@ -337,13 +338,13 @@ export const TanStackCellActionsBubble = React.memo(
             css={styles.cellActionsToolbar}
             onKeyDown={handleToolbarKeyDown}
           >
-            {actionButtons.map((button, index) => (
+            {actions.map(({ id, element }, index) => (
               <span
-                key={button.key ?? index}
+                key={id}
                 css={styles.cellActionPop}
                 style={{ animationDelay: `${index * 45}ms` }}
               >
-                {button}
+                {element}
               </span>
             ))}
           </div>
@@ -377,4 +378,4 @@ export const TanStackCellActionsBubble = React.memo(
   }
 );
 
-TanStackCellActionsBubble.displayName = 'TanStackCellActionsBubble';
+CellActionsBubble.displayName = 'CellActionsBubble';

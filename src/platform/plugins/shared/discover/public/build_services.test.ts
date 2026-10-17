@@ -64,7 +64,7 @@ describe('discoverFeatureFlags', () => {
 
     expect(services.discoverFeatureFlags.getCascadeLayoutEnabled()).toBe(false);
     expect(services.discoverFeatureFlags.getIsEsqlDefault()).toBe(false);
-    expect(services.discoverFeatureFlags.getEnableTanstackDocViewerTable()).toBe(true);
+    expect(services.discoverFeatureFlags.getDocViewerGridImplementation()).toBe('tanstack');
   });
 
   it('returns the fallback when the observable emits after subscribe returns', () => {

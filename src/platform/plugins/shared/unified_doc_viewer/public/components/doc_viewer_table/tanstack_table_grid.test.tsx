@@ -11,10 +11,11 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
+import { coreMock } from '@kbn/core/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { buildHitMock } from '../../__mocks__';
 import { FieldRow } from './field_row';
-import { GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE } from './table_grid';
+import { GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE } from './table_grid_constants';
 import type { TanStackTableGridProps } from './tanstack_table_grid';
 import { TanStackTableGrid } from './tanstack_table_grid';
 
@@ -64,10 +65,10 @@ describe('TanStackTableGrid', () => {
   });
 
   const defaultProps: TanStackTableGridProps = {
-    id: 'test-table',
     containerWidth: 800,
     rows: mockRows,
     isEsqlMode: false,
+    toasts: coreMock.createStart().notifications.toasts,
     filter: jest.fn(),
     onAddColumn: jest.fn(),
     onRemoveColumn: jest.fn(),
@@ -172,6 +173,51 @@ describe('TanStackTableGrid', () => {
     expect(within(popover).getByText('valueA')).toBeInTheDocument();
     expect(within(popover).getByTestId('copyValueButton-fieldA')).toBeInTheDocument();
     expect(within(popover).getByText('Unindexed fields cannot be searched')).toBeInTheDocument();
+  });
+
+  describe('keyboard accessibility', () => {
+    const getCell = (text: string) =>
+      screen.getByText(text).closest<HTMLElement>('[role="gridcell"]')!;
+
+    it('exposes column indexes and a single tab stop', () => {
+      render(<TanStackTableGrid {...defaultProps} />);
+      expect(getCell('fieldA')).toHaveAttribute('aria-colindex', '2');
+      expect(getCell('valueA')).toHaveAttribute('aria-colindex', '3');
+      const tabStops = screen
+        .getAllByRole('gridcell')
+        .concat(screen.getAllByRole('columnheader'))
+        .filter((cell) => cell.getAttribute('tabindex') === '0');
+      expect(tabStops).toEqual([getCell('fieldA')]);
+    });
+
+    it('moves focus and the tab stop with the arrow keys', async () => {
+      render(<TanStackTableGrid {...defaultProps} />);
+      getCell('fieldA').focus();
+
+      await userEvent.keyboard('{ArrowRight}');
+      expect(getCell('valueA')).toHaveFocus();
+      expect(getCell('valueA')).toHaveAttribute('tabindex', '0');
+      expect(getCell('fieldA')).toHaveAttribute('tabindex', '-1');
+
+      await userEvent.keyboard('{ArrowDown}');
+      expect(getCell('valueB')).toHaveFocus();
+
+      await userEvent.keyboard('{Home}');
+      expect(
+        screen.getByTestId('unifiedDocViewer_pinControlButton_fieldB').closest('[role="gridcell"]')
+      ).toHaveFocus();
+    });
+
+    it('opens the cell popover with Enter as a focus-trapped dialog', async () => {
+      render(<TanStackTableGrid {...defaultProps} />);
+      getCell('valueA').focus();
+      await userEvent.keyboard('{Enter}');
+
+      const popover = await screen.findByTestId('euiDataGridExpansionPopover');
+      expect(within(popover).getByText('valueA')).toBeInTheDocument();
+      // jsdom does not move focus into the focus trap, so assert that the popover owns focus.
+      expect(popover).toHaveAttribute('aria-modal', 'true');
+    });
   });
 
   it('only renders the rows within the viewport', () => {

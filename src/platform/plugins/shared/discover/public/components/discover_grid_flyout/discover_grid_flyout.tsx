@@ -15,7 +15,6 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataSource } from '@kbn/data-source';
 import type { DocViewerProps, DocViewsRegistry } from '@kbn/unified-doc-viewer';
-import type { DocViewerGridImplementation } from '@kbn/unified-doc-viewer/types';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { UnifiedDocViewerFlyoutProps } from '@kbn/unified-doc-viewer-plugin/public';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
@@ -98,8 +97,7 @@ export function DiscoverGridFlyout({
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   const isEsqlQuery = isOfAggregateQueryType(query);
-  const gridImplementation: DocViewerGridImplementation =
-    services.discoverFeatureFlags.getEnableTanstackDocViewerTable() ? 'tanstack' : 'unified';
+  const gridImplementation = services.discoverFeatureFlags.getDocViewerGridImplementation();
   // Get actual hit with updated highlighted searches
   const actualHit = useMemo(() => hits?.find(({ id }) => id === hit?.id) || hit, [hit, hits]);
 
