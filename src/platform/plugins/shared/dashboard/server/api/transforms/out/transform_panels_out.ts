@@ -29,7 +29,8 @@ export function transformPanelsOut(
   panelsJSON: string = '[]',
   sections: SavedDashboardSection[] = [],
   containerReferences: SavedObjectReference[] = [],
-  isDashboardAppRequest: boolean = false
+  isDashboardAppRequest: boolean = false,
+  migratePanelTypes: boolean = false
 ): { panels: DashboardState['panels']; warnings: Warnings } {
   const topLevelPanels: DashboardPanel[] = [];
   const warnings: Warnings = [];
@@ -64,7 +65,8 @@ export function transformPanelsOut(
         panel,
         panelReferences,
         containerReferences,
-        isDashboardAppRequest
+        isDashboardAppRequest,
+        migratePanelTypes
       );
     } catch (err) {
       let message = err.message;
@@ -114,7 +116,8 @@ function transformPanel(
   panel: SavedDashboardPanel,
   panelReferences: SavedObjectReference[],
   containerReferences: SavedObjectReference[] = [],
-  isDashboardAppRequest: boolean = false
+  isDashboardAppRequest: boolean = false,
+  migratePanelTypes: boolean = false
 ) {
   const { embeddableConfig, gridData, panelIndex, type } = panel;
 
@@ -130,14 +133,25 @@ function transformPanel(
     transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences, undefined) ??
     defaultTransform(embeddableConfig);
 
-  if (transforms?.schema) {
-    transformedPanelConfig = transforms.schema.parse(transformedPanelConfig);
+  let panelType = type;
+  let schema = transforms?.schema;
+
+  const migrated = migratePanelTypes
+    ? embeddableService?.getPanelTypeMigration(type)?.migrateOut(transformedPanelConfig)
+    : undefined;
+  if (migrated) {
+    ({ type: panelType, config: transformedPanelConfig } = migrated);
+    schema = embeddableService?.getTransforms(panelType)?.schema;
+  }
+
+  if (schema) {
+    transformedPanelConfig = schema.parse(transformedPanelConfig);
   }
 
   return {
     grid: restOfGrid,
     config: transformedPanelConfig,
     id: panelIndex,
-    type,
+    type: panelType,
   };
 }

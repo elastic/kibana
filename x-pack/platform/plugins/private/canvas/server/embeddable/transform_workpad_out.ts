@@ -49,7 +49,8 @@ const extractMapCenterFromAst = (
 
 export function transformWorkpadOut(
   workpad: WorkpadAttributes,
-  references: SavedObjectReference[] = []
+  references: SavedObjectReference[] = [],
+  migratePanelTypes: boolean = false
 ): WorkpadAttributes {
   const pages = workpad.pages.map((page) => {
     const elements = page.elements.map((element) => {
@@ -149,6 +150,17 @@ export function transformWorkpadOut(
               referencesForElement
             );
             fn.arguments.config[0] = encode(transformedConfig);
+
+            const migrated = migratePanelTypes
+              ? embeddableService
+                  .getPanelTypeMigration(embeddableType)
+                  ?.migrateOut(transformedConfig)
+              : undefined;
+            if (migrated) {
+              fn.arguments.type[0] = migrated.type;
+              // By-value configs migrated by Canvas carry the embeddable type, so keep it in sync
+              fn.arguments.config[0] = encode({ ...migrated.config, type: migrated.type });
+            }
           }
         } catch (error) {
           logger.warn(

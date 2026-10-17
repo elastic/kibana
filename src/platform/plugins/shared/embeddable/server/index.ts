@@ -13,6 +13,8 @@ export type { EmbeddableSetup, EmbeddableStart };
 
 export type { EmbeddableRegistryDefinition } from './types';
 
+export type { PanelTypeMigration } from './panel_type_migrations/types';
+
 export type {
   DrilldownState,
   SerializedDrilldowns,

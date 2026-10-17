@@ -14,6 +14,7 @@ import { DefaultEditorSize } from '@kbn/vis-default-editor-plugin/public';
 import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { VIS_EVENT_TO_TRIGGER, VisGroups } from '@kbn/visualizations-plugin/public';
 
+import { VEGA_VIS_NAME } from '../common/constants';
 import { getDefaultSpec } from './default_spec';
 import { extractIndexPatternsFromSpec } from './lib/extract_index_pattern';
 import { extractProjectRoutingOverrides } from './lib/extract_project_routing_overrides';
@@ -27,7 +28,7 @@ import type { VisParams } from './vega_fn';
 import { VegaIcon, vegaTitleInWizard } from './vega_icon';
 
 export const vegaVisType: VisTypeDefinition<VisParams> = {
-  name: 'vega',
+  name: VEGA_VIS_NAME,
   title: 'Vega',
   getInfoMessage,
   description: i18n.translate('visTypeVega.type.vegaDescription', {

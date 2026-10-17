@@ -45,7 +45,11 @@ import type { ConfigSchema } from '../server/config';
 
 import { getVegaInspectorView } from './vega_inspector/vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
+import {
+  VEGA_EMBEDDABLE_TYPE,
+  VEGA_STANDALONE_EMBEDDABLE_FLAG,
+  VEGA_VIS_NAME,
+} from '../common/constants';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
 
 /** @internal */
@@ -106,7 +110,7 @@ export class VegaPlugin implements Plugin<void, void> {
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 
-    visualizations.createBaseVisualizationAsync('vega', async () => {
+    visualizations.createBaseVisualizationAsync(VEGA_VIS_NAME, async () => {
       const [[, startPlugins], { vegaVisType, createVegaFn, getVegaVisRenderer }] =
         await Promise.all([core.getStartServices(), import('./async_module')]);
       if (!startPlugins.expressions.getFunction('vega')) {
