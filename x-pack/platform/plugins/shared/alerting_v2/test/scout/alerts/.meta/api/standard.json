@@ -1,5 +1,5 @@
 {
-  "sha1": "b2d0a70eb9c097dddda8c02456a536e8120139b8",
+  "sha1": "5db5097ceff7c98e020ff4d3c30d95cbc24b57f0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2845,10 +2845,7 @@
       "title": "Rule event fields suggestions API returns the union of data.* field names across all matching alerts when no matcher is given",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
@@ -2861,10 +2858,7 @@
       "title": "Rule event fields suggestions API falls back to the unfiltered result when matcher cannot be parsed",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
@@ -2877,10 +2871,7 @@
       "title": "Rule event fields suggestions API validation: rejects empty matcher with a 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
@@ -2893,10 +2884,7 @@
       "title": "Rule event fields suggestions API validation: rejects matcher longer than the schema limit with a 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
@@ -2909,10 +2897,7 @@
       "title": "Rule event fields suggestions API authorization: returns 200 for a user with read-only privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
@@ -2925,10 +2910,7 @@
       "title": "Rule event fields suggestions API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
