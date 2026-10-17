@@ -1,0 +1,146 @@
+{
+  "sha1": "7c3b3e53656aa3cdc9d0fe6e22af5844103ef972",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "32064aaf21304c9-abc3c97abd88ccf",
+      "title": "Enable alerting:v2:enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/management/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "806265ae80d8d60-10363d3dc3e0993",
+      "title": "Alerting pages - required privileges user with full access can view every page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/management/ui/tests/management_required_privileges.spec.ts",
+        "line": 60,
+        "column": 62
+      }
+    },
+    {
+      "id": "806265ae80d8d60-d0aa84aea634556",
+      "title": "Alerting pages - required privileges user with read-only access can view every page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/management/ui/tests/management_required_privileges.spec.ts",
+        "line": 60,
+        "column": 87
+      }
+    },
+    {
+      "id": "806265ae80d8d60-76307e7473aa577",
+      "title": "Alerting pages - required privileges user without alerting_v2 access sees the required privileges prompt on every page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/management/ui/tests/management_required_privileges.spec.ts",
+        "line": 61,
+        "column": 8
+      }
+    },
+    {
+      "id": "806265ae80d8d60-7c7141653dbc093",
+      "title": "Alerting pages - required privileges user with rules read-only role can view the Rules and Rule library pages",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/management/ui/tests/management_required_privileges.spec.ts",
+        "line": 63,
+        "column": 8
+      }
+    },
+    {
+      "id": "806265ae80d8d60-8921cc75f3f73b5",
+      "title": "Alerting pages - required privileges user with alerts read-only role can only view the Alerts page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/management/ui/tests/management_required_privileges.spec.ts",
+        "line": 81,
+        "column": 5
+      }
+    },
+    {
+      "id": "806265ae80d8d60-f227e8e070cd42e",
+      "title": "Alerting pages - required privileges user with action policies read-only role can only view the Action Policies page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/management/ui/tests/management_required_privileges.spec.ts",
+        "line": 49,
+        "column": 24
+      }
+    },
+    {
+      "id": "806265ae80d8d60-6c35fd794895eda",
+      "title": "Alerting pages - required privileges user with execution history read-only role can only view the Execution History page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/management/ui/tests/management_required_privileges.spec.ts",
+        "line": 52,
+        "column": 24
+      }
+    },
+    {
+      "id": "dd3d4015aa24736-ebf10327abcc16d",
+      "title": "Unset alerting:v2:enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/management/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    }
+  ]
+}
