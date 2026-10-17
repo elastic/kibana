@@ -187,12 +187,6 @@ describe('useDiscoverHistogram', () => {
         }
       `);
     });
-
-    it('should return the isChartLoading params for ES|QL mode', async () => {
-      const { hook } = await renderUseDiscoverHistogram();
-      const isChartLoading = hook.result.current.isChartLoading;
-      expect(isChartLoading).toBe(false);
-    });
   });
 
   describe('state', () => {
@@ -434,7 +428,7 @@ describe('useDiscoverHistogram', () => {
       expect(mockCheckHitCount).not.toHaveBeenCalled();
     });
 
-    it('should set isChartLoading to true for fetch start', async () => {
+    it('should not tie the chart loading state to the documents fetch', async () => {
       const { toolkit } = await setup();
       const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
       toolkit.internalState.dispatch(
@@ -446,11 +440,7 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         dataStateContainer.data$.documents$.next({ fetchStatus: FetchStatus.LOADING });
       });
-      expect(hook.result.current.isChartLoading).toBe(true);
-      act(() => {
-        dataStateContainer.data$.documents$.next({ fetchStatus: FetchStatus.COMPLETE });
-      });
-      expect(hook.result.current.isChartLoading).toBe(false);
+      expect(hook.result.current.isChartLoading).toBeUndefined();
     });
 
     it('should use timerange + timeRangeRelative + query given by the internalState', async () => {
