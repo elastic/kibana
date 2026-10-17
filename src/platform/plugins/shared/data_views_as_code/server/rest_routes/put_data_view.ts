@@ -23,9 +23,16 @@ export const registerPutDataViewAsCodeRoute = ({
   router.versioned
     .put({
       path: UPDATE_DATA_VIEW_AS_CODE_PATH,
-      access: 'internal',
+      access: 'public',
       enableQueryVersion: true,
       description: 'Update a data view by id',
+      options: {
+        tags: ['oas-tag:data views'],
+        availability: {
+          stability: 'stable',
+          since: '9.6.0',
+        },
+      },
       security: {
         authz: {
           requiredPrivileges: ['indexPatterns:manage'],
@@ -35,6 +42,10 @@ export const registerPutDataViewAsCodeRoute = ({
     .addVersion(
       {
         version: INITIAL_REST_VERSION,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).putDataViewOASOperationObject,
+        },
         validate: {
           request: {
             params: schema.object(

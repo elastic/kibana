@@ -22,13 +22,14 @@ export const registerPostDataViewAsCodeRoute = ({
   router.versioned
     .post({
       path: CREATE_DATA_VIEW_AS_CODE_PATH,
-      access: 'internal',
+      access: 'public',
       enableQueryVersion: true,
       description: 'Create a data view',
       options: {
+        tags: ['oas-tag:data views'],
         availability: {
-          stability: 'tech_preview',
-          since: '9.5.0',
+          stability: 'stable',
+          since: '9.6.0',
         },
       },
       security: {
@@ -40,6 +41,10 @@ export const registerPostDataViewAsCodeRoute = ({
     .addVersion(
       {
         version: INITIAL_REST_VERSION,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).postDataViewOASOperationObject,
+        },
         validate: {
           request: {
             body: savedDataViewSpecSchemaWithoutId,
@@ -47,6 +52,7 @@ export const registerPostDataViewAsCodeRoute = ({
           response: {
             201: {
               body: () => asCodeResponseSchema,
+              description: 'created',
             },
             400: {
               description: 'invalid request',
