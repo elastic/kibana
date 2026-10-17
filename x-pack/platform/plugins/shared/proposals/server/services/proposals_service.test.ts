@@ -14,6 +14,7 @@ import {
   type ListProposalsQuery,
 } from '@kbn/proposals-common';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
+import { IMPACT_RANK_FIELD } from '../storage/sort_ranks';
 import {
   ProposalAlreadyExistsError,
   ProposalConflictError,
@@ -118,8 +119,18 @@ const createWorkflowsApi = () => ({
       },
     ],
   }),
+  getWorkflowExecutionStatuses: jest.fn().mockResolvedValue([
+    {
+      id: EXECUTION_ID,
+      workflowId: 'system-create-proposal',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+    },
+  ]),
   resumeWorkflowExecution: jest.fn().mockResolvedValue({ resumedBy: 'analyst' }),
 });
+
+/** A deadline that has already passed, independent of the clock the suite runs at. */
+const PAST_DEADLINE = '2000-01-01T00:00:00.000Z';
 
 /** Pass `null` for `workflowsApi` to simulate the API being unavailable. */
 const createService = (
@@ -985,13 +996,90 @@ describe('ProposalsService', () => {
       const { service, workflowsApi } = createService(storage);
       workflowsApi.getWorkflowExecution.mockResolvedValue({
         id: EXECUTION_ID,
-        status: ExecutionStatus.COMPLETED,
+        status: ExecutionStatus.RUNNING,
         stepExecutions: [],
       });
 
       await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
         ProposalConflictError
       );
+      // Still running, so the gate can settle it itself.
+      expect(storage.index).not.toHaveBeenCalled();
+      expect(workflowsApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('should settle the proposal and refuse the decision when its gate execution has ended', async () => {
+      const storage = createStorage(baseDocument());
+      const { service, workflowsApi } = createService(storage);
+      workflowsApi.getWorkflowExecution.mockResolvedValue({
+        id: EXECUTION_ID,
+        status: ExecutionStatus.CANCELLED,
+        stepExecutions: [],
+      });
+
+      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toThrow(
+        /can no longer be decided: The gate execution ended as cancelled/
+      );
+
+      const [[indexArgs]] = storage.index.mock.calls;
+      expect(indexArgs.document).toEqual(
+        expect.objectContaining({
+          status: 'expired',
+          decidedAt: expect.any(String),
+          executionError: expect.stringContaining('cancelled'),
+        })
+      );
+      expect(indexArgs.document.decision).toBeUndefined();
+      expect(workflowsApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('should refuse the decision without settling the proposal or reading its gate when its deadline has passed', async () => {
+      // The live gate expires the record itself; only an ended gate is settled here.
+      const storage = createStorage(baseDocument({ expiresAt: PAST_DEADLINE }));
+      const { service, workflowsApi } = createService(storage);
+
+      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toThrow(
+        /passed its decision deadline/
+      );
+
+      expect(storage.index).not.toHaveBeenCalled();
+      expect(workflowsApi.getWorkflowExecution).not.toHaveBeenCalled();
+      expect(workflowsApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('should still refuse the decision when settling the proposal of an ended gate fails', async () => {
+      const storage = createStorage(baseDocument());
+      const { service, workflowsApi, logger } = createService(storage);
+      workflowsApi.getWorkflowExecution.mockResolvedValue({
+        id: EXECUTION_ID,
+        status: ExecutionStatus.CANCELLED,
+        stepExecutions: [],
+      });
+      storage.index.mockRejectedValue(new Error('cluster unavailable'));
+
+      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toThrow(
+        /can no longer be decided/
+      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('cluster unavailable'));
+    });
+
+    it('should still refuse the decision when another actor settled the proposal of an ended gate first', async () => {
+      const storage = createStorage(baseDocument());
+      const { service, workflowsApi, logger } = createService(storage);
+      workflowsApi.getWorkflowExecution.mockResolvedValue({
+        id: EXECUTION_ID,
+        status: ExecutionStatus.CANCELLED,
+        stepExecutions: [],
+      });
+      storage.index.mockRejectedValue(
+        Object.assign(new Error('version conflict'), { statusCode: 409 })
+      );
+
+      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toThrow(
+        /can no longer be decided/
+      );
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('moved before'));
+      expect(workflowsApi.resumeWorkflowExecution).not.toHaveBeenCalled();
     });
 
     it('should refuse a proposal with no gate execution rather than report success', async () => {
@@ -1083,6 +1171,24 @@ describe('ProposalsService', () => {
       // leave a rationale behind for a decision that never happened.
       expect(storage.index).not.toHaveBeenCalled();
       expect(workflowsApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('should leave nothing written when the gate is not waiting for input', async () => {
+      const storage = createStorage(baseDocument());
+      const { service, workflowsApi } = createService(storage);
+      workflowsApi.getWorkflowExecution.mockResolvedValue({
+        id: EXECUTION_ID,
+        status: ExecutionStatus.RUNNING,
+        stepExecutions: [],
+      });
+
+      await expect(
+        service.releaseGate(
+          'proposal-1',
+          releaseParams({ approved: false, dismissReason: 'risk_accepted' })
+        )
+      ).rejects.toBeInstanceOf(ProposalConflictError);
+      expect(storage.index).not.toHaveBeenCalled();
     });
 
     it('should leave nothing written when someone else already decided', async () => {
@@ -2015,7 +2121,91 @@ describe('ProposalsService', () => {
     });
   });
 
+  describe('countByConversation', () => {
+    it('counts the matching proposals per conversation in one aggregation', async () => {
+      const storage = createStorage();
+      storage.search.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: {
+          by_conversation: {
+            buckets: [
+              { key: 'conv-1', doc_count: 3 },
+              { key: 'conv-2', doc_count: 1 },
+            ],
+          },
+        },
+      });
+      const { service } = createService(storage);
+
+      const counts = await service.countByConversation(
+        {
+          status: 'pending',
+          origin: 'alertzero',
+          categories: ['respond', 'investigate'],
+          excludeSuperseded: true,
+          excludeExpired: false,
+        },
+        SPACE_ID,
+        500
+      );
+
+      expect([...counts.entries()]).toEqual([
+        ['conv-1', 3],
+        ['conv-2', 1],
+      ]);
+      const [searchRequest] = storage.search.mock.calls[0];
+      expect(searchRequest).toMatchObject({
+        size: 0,
+        aggs: { by_conversation: { terms: { field: 'conversationId', size: 500 } } },
+      });
+      expect(searchRequest.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { spaceId: SPACE_ID } },
+          { term: { status: 'pending' } },
+          { term: { origin: 'alertzero' } },
+          { terms: { category: ['respond', 'investigate'] } },
+        ])
+      );
+    });
+  });
+
   describe('getLatestRevision', () => {
+    it('rejects an id nothing is under with ProposalNotFoundError, which a caller reads as "free"', async () => {
+      // Hunt picks the id a proposal is created under by asking each generation of a subject
+      // whether anything is there, and treats exactly this error as "no": anything else fails closed.
+      const { service } = createService(createStorage());
+
+      await expect(service.getLatestRevision('nothing-here', SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalNotFoundError
+      );
+    });
+
+    it('does not find a proposal that is in another space', async () => {
+      // The read is filtered to the caller's space, so another space's proposal under the same id
+      // does not hold a subject here.
+      const storage = createStorage();
+      storage.search.mockImplementation(
+        async ({ query }: { query: { bool: { filter: Array<Record<string, any>> } } }) => {
+          const space = query.bool.filter.find(
+            (clause) => 'term' in clause && 'spaceId' in clause.term
+          );
+          return space?.term.spaceId === 'other-space'
+            ? {
+                hits: {
+                  hits: [searchHit(baseDocument({ spaceId: 'other-space' }))],
+                  total: { value: 1 },
+                },
+              }
+            : { hits: { hits: [], total: { value: 0 } } };
+        }
+      );
+      const { service } = createService(storage);
+
+      await expect(service.getLatestRevision('proposal-1', SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalNotFoundError
+      );
+    });
+
     it('returns the proposal itself when it is the live revision', async () => {
       const storage = createStorage(baseDocument({ rootProposalId: 'proposal-1', revision: 1 }));
       const { service } = createService(storage);
@@ -2183,6 +2373,22 @@ describe('ProposalsService', () => {
       );
     });
 
+    it('should restrict to a set of conversations for in-process callers', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(
+        { ...listQuery(), conversationIds: ['conv-1', 'conv-2'] },
+        SPACE_ID,
+        request
+      );
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.query.bool.filter).toEqual(
+        expect.arrayContaining([{ terms: { conversationId: ['conv-1', 'conv-2'] } }])
+      );
+    });
+
     it('should order by rank in Elasticsearch rather than after the fetch', async () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
@@ -2284,6 +2490,31 @@ describe('ProposalsService', () => {
       );
     });
 
+    it('should order a conversation history newest first when asked, undecided leading', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery({ order: 'newest' }), SPACE_ID, request);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.sort).toEqual([
+        { decidedAt: { order: 'desc', missing: '_first' } },
+        { createdAt: { order: 'desc' } },
+        { rootProposalId: { order: 'asc' } },
+        { revision: { order: 'asc' } },
+      ]);
+    });
+
+    it('should keep ranking by priority unless a newest-first order is asked for', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery(), SPACE_ID, request);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.sort[0]).toEqual({ [IMPACT_RANK_FIELD]: { order: 'asc' } });
+    });
+
     it('should bound the closed queue to the requested recency window', async () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
@@ -2344,6 +2575,293 @@ describe('ProposalsService', () => {
       await service.list(listQuery(), SPACE_ID, request);
 
       expect(workflowsApi.getWorkflow).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('settling orphaned proposals on read', () => {
+    const gateStatus = (status: ExecutionStatus, id = EXECUTION_ID) => [
+      { id, workflowId: 'system-create-proposal', status },
+    ];
+
+    it('should settle a pending proposal as expired when its gate execution was cancelled', async () => {
+      const storage = createStorage(baseDocument({ expiresAt: '2099-01-01T00:00:00.000Z' }));
+      const { service, workflowsApi } = createService(storage);
+      workflowsApi.getWorkflowExecutionStatuses.mockResolvedValue(
+        gateStatus(ExecutionStatus.CANCELLED)
+      );
+
+      const proposal = await service.get('proposal-1', SPACE_ID, request);
+
+      expect(workflowsApi.getWorkflowExecutionStatuses).toHaveBeenCalledWith(
+        [EXECUTION_ID],
+        SPACE_ID,
+        { request }
+      );
+      expect(proposal.status).toBe('expired');
+      expect(proposal.executionError).toBe(
+        'The gate execution ended as cancelled before it settled the proposal.'
+      );
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ status: 'expired', decidedAt: expect.any(String) }),
+        })
+      );
+    });
+
+    it('should settle an executing proposal as failed when its gate execution timed out', async () => {
+      const storage = createStorage(
+        baseDocument({ status: 'executing', decision: 'approved', expiresAt: PAST_DEADLINE })
+      );
+      const { service, workflowsApi } = createService(storage);
+      workflowsApi.getWorkflowExecutionStatuses.mockResolvedValue(
+        gateStatus(ExecutionStatus.TIMED_OUT)
+      );
+
+      const proposal = await service.get('proposal-1', SPACE_ID, request);
+
+      // An executing action runs past the deadline, so only the ended gate settles it.
+      expect(proposal.status).toBe('failed');
+      expect(proposal.decision).toBe('approved');
+      expect(proposal.executionError).toContain('timed_out');
+    });
+
+    it('should leave a proposal untouched when its gate is still waiting', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      const proposal = await service.get('proposal-1', SPACE_ID, request);
+
+      expect(proposal.status).toBe('pending');
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('should leave a pending proposal to its live gate when its deadline has passed', async () => {
+      // A decision released just before the deadline may still be on its way to
+      // the gate; settling now would make the gate's own write conflict.
+      const storage = createStorage(baseDocument({ expiresAt: PAST_DEADLINE }));
+      const { service, workflowsApi } = createService(storage);
+      workflowsApi.getWorkflowExecutionStatuses.mockResolvedValue(
+        gateStatus(ExecutionStatus.RUNNING)
+      );
+
+      const proposal = await service.get('proposal-1', SPACE_ID, request);
+
+      expect(workflowsApi.getWorkflowExecutionStatuses).toHaveBeenCalled();
+      expect(proposal.status).toBe('pending');
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('should leave an executing proposal untouched past its deadline while its gate runs', async () => {
+      const storage = createStorage(
+        baseDocument({ status: 'executing', decision: 'approved', expiresAt: PAST_DEADLINE })
+      );
+      const { service, workflowsApi } = createService(storage);
+      workflowsApi.getWorkflowExecutionStatuses.mockResolvedValue(
+        gateStatus(ExecutionStatus.RUNNING)
+      );
+
+      const proposal = await service.get('proposal-1', SPACE_ID, request);
+
+      expect(proposal.status).toBe('executing');
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('should leave a proposal untouched when its gate execution is missing or unreadable', async () => {
+      const storage = createStorage(baseDocument());
+      const { service, workflowsApi } = createService(storage);
+      workflowsApi.getWorkflowExecutionStatuses.mockResolvedValue([]);
+
+      const proposal = await service.get('proposal-1', SPACE_ID, request);
+
+      expect(proposal.status).toBe('pending');
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('should not read the gate of a proposal that has already settled', async () => {
+      const storage = createStorage(baseDocument({ status: 'succeeded', decision: 'approved' }));
+      const { service, workflowsApi } = createService(storage);
+
+      await service.get('proposal-1', SPACE_ID, request);
+
+      expect(workflowsApi.getWorkflowExecutionStatuses).not.toHaveBeenCalled();
+    });
+
+    it('should not read the gate of a superseded proposal', async () => {
+      const storage = createStorage(baseDocument({ supersededBy: 'proposal-2' }));
+      const { service, workflowsApi } = createService(storage);
+
+      await service.get('proposal-1', SPACE_ID, request);
+
+      expect(workflowsApi.getWorkflowExecutionStatuses).not.toHaveBeenCalled();
+    });
+
+    it('should return the proposal as read when its gate executions cannot be read', async () => {
+      const storage = createStorage(baseDocument());
+      const { service, workflowsApi, logger } = createService(storage);
+      workflowsApi.getWorkflowExecutionStatuses.mockRejectedValue(new Error('index unavailable'));
+
+      const proposal = await service.get('proposal-1', SPACE_ID, request);
+
+      expect(proposal.status).toBe('pending');
+      expect(storage.index).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('index unavailable'));
+    });
+
+    it('should return the proposal as read when another actor moved it first', async () => {
+      const storage = createStorage(baseDocument());
+      const { service, workflowsApi, logger } = createService(storage);
+      workflowsApi.getWorkflowExecutionStatuses.mockResolvedValue(
+        gateStatus(ExecutionStatus.CANCELLED)
+      );
+      storage.index.mockRejectedValue(
+        Object.assign(new Error('version conflict'), { statusCode: 409 })
+      );
+
+      const proposal = await service.get('proposal-1', SPACE_ID, request);
+
+      expect(proposal.status).toBe('pending');
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('moved before'));
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    // `update` accepts the same terminal status twice, so without the fresh check the
+    // settle would replace the error the gate recorded with its own generic one.
+    it.each([
+      {
+        read: 'executing',
+        readDocument: baseDocument({ status: 'executing', decision: 'approved' }),
+        storedDocument: baseDocument({
+          status: 'failed',
+          decision: 'approved',
+          executionError: 'Action workflow failed: rule not found',
+        }),
+        endedAs: ExecutionStatus.FAILED,
+      },
+      {
+        read: 'pending',
+        readDocument: baseDocument(),
+        storedDocument: baseDocument({
+          status: 'expired',
+          executionError: 'Step await_decision timed out',
+        }),
+        endedAs: ExecutionStatus.COMPLETED,
+      },
+    ])(
+      'should keep the outcome the gate recorded when it settled the $read proposal first',
+      async ({ readDocument, storedDocument, endedAs }) => {
+        const storage = createStorage(storedDocument);
+        storage.search.mockResolvedValueOnce({
+          hits: { hits: [searchHit(readDocument)], total: { value: 1 } },
+        });
+        const { service, workflowsApi } = createService(storage);
+        workflowsApi.getWorkflowExecutionStatuses.mockResolvedValue(gateStatus(endedAs));
+
+        const proposal = await service.get('proposal-1', SPACE_ID, request);
+
+        expect(storage.index).not.toHaveBeenCalled();
+        expect(proposal).toMatchObject({
+          status: storedDocument.status,
+          executionError: storedDocument.executionError,
+        });
+      }
+    );
+
+    it('should settle as failed when the proposal was approved after it was read', async () => {
+      const storage = createStorage(baseDocument({ status: 'executing', decision: 'approved' }));
+      storage.search.mockResolvedValueOnce({
+        hits: { hits: [searchHit(baseDocument())], total: { value: 1 } },
+      });
+      const { service, workflowsApi } = createService(storage);
+      workflowsApi.getWorkflowExecutionStatuses.mockResolvedValue(
+        gateStatus(ExecutionStatus.CANCELLED)
+      );
+
+      const proposal = await service.get('proposal-1', SPACE_ID, request);
+
+      expect(proposal).toMatchObject({ status: 'failed', decision: 'approved' });
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({ document: expect.objectContaining({ status: 'failed' }) })
+      );
+    });
+
+    it('should read the gates of a whole page in one bulk read', async () => {
+      const storage = createStorage();
+      storage.search.mockResolvedValue({
+        hits: {
+          hits: [
+            searchHit(baseDocument({ workflowExecutionId: 'exec-1' }), 'p1'),
+            searchHit(baseDocument({ workflowExecutionId: 'exec-2' }), 'p2'),
+            searchHit(
+              baseDocument({
+                status: 'succeeded',
+                decision: 'approved',
+                workflowExecutionId: 'exec-3',
+              }),
+              'p3'
+            ),
+          ],
+          total: { value: 3 },
+        },
+      });
+      const { service, workflowsApi } = createService(storage);
+
+      await service.list(listQuery(), SPACE_ID, request);
+
+      expect(workflowsApi.getWorkflowExecutionStatuses).toHaveBeenCalledTimes(1);
+      expect(workflowsApi.getWorkflowExecutionStatuses).toHaveBeenCalledWith(
+        ['exec-1', 'exec-2'],
+        SPACE_ID,
+        { request }
+      );
+    });
+
+    it('should drop only the proposals settled on read from a status-filtered page and lower the total', async () => {
+      const documents: Record<string, ProposalDocument> = {
+        p1: baseDocument({ workflowExecutionId: 'exec-1' }),
+        p2: baseDocument({ workflowExecutionId: 'exec-2' }),
+        p3: baseDocument({ workflowExecutionId: 'exec-3' }),
+      };
+      const storage = createStorage();
+      // The page search returns every row; the settle's own load asks for one id.
+      storage.search.mockImplementation(async (searchRequest: any) => {
+        const ids: string[] | undefined = searchRequest.query.bool.filter.find(
+          (clause: { ids?: { values: string[] } }) => clause.ids
+        )?.ids.values;
+        const hits = Object.entries(documents)
+          .filter(([id]) => ids === undefined || ids.includes(id))
+          .map(([id, document]) => searchHit(document, id));
+        return { hits: { hits, total: { value: hits.length } } };
+      });
+      const { service, workflowsApi } = createService(storage);
+      workflowsApi.getWorkflowExecutionStatuses.mockResolvedValue([
+        ...gateStatus(ExecutionStatus.WAITING_FOR_INPUT, 'exec-1'),
+        ...gateStatus(ExecutionStatus.CANCELLED, 'exec-2'),
+        ...gateStatus(ExecutionStatus.WAITING_FOR_INPUT, 'exec-3'),
+      ]);
+
+      const { proposals, total } = await service.list(
+        listQuery({ status: 'pending' }),
+        SPACE_ID,
+        request
+      );
+
+      expect(proposals.map(({ id }) => id)).toEqual(['p1', 'p3']);
+      expect(total).toBe(2);
+      expect(storage.index).toHaveBeenCalledTimes(1);
+      expect(storage.index).toHaveBeenCalledWith(expect.objectContaining({ id: 'p2' }));
+    });
+
+    it('should keep a proposal settled on read when no status was asked for', async () => {
+      const storage = createStorage(baseDocument());
+      const { service, workflowsApi } = createService(storage);
+      workflowsApi.getWorkflowExecutionStatuses.mockResolvedValue(
+        gateStatus(ExecutionStatus.CANCELLED)
+      );
+
+      const { proposals, total } = await service.list(listQuery(), SPACE_ID, request);
+
+      expect(proposals).toEqual([expect.objectContaining({ id: 'proposal-1', status: 'expired' })]);
+      expect(total).toBe(1);
     });
   });
 

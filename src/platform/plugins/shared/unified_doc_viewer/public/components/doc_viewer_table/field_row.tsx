@@ -104,9 +104,6 @@ export class FieldRow {
         flattenedValue: this.flattenedValue,
         dataTableRecord: this.#hit,
         fieldFormats: this.#fieldFormats,
-        options: {
-          compatibleWithCSV: true,
-        },
       }).formattedString;
       this.#isFormattedAsText = true;
     }

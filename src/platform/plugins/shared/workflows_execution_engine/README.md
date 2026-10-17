@@ -526,6 +526,12 @@ The plugin stores data in Elasticsearch using the following indices:
 
 ---
 
+### Execution Telemetry (EBT)
+
+Execution outcomes and trigger dispatches are also reported as event-based telemetry, which is not stored in these indices. See [docs/telemetry.md](./docs/telemetry.md) for the execution lineage fields and how to join a sub-workflow chain with them.
+
+---
+
 ## Step Types
 
 The engine supports various step types for different workflow operations:

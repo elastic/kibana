@@ -7,10 +7,11 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
-import type { Impact } from '../../../common/impact/impact';
+import type { Impact, ImpactEntity } from '../../../common/impact/impact';
 import { MAX_IMPACT_CONVERSATION_IDS } from '../../../common/impact/constants';
 import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
 import { filterReadableConversationIds } from '../../investigations/services/readable_conversation_ids';
+import { MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS } from '../../investigation_attachments/attachment_doc_service';
 import type { ImpactService } from './impact_service';
 
 /**
@@ -27,6 +28,19 @@ export interface ImpactReadClient {
    * document are absent from the map.
    */
   getEntityIdsByConversationId: (conversationIds: string[]) => Promise<Map<string, string[]>>;
+  /**
+   * Same read as `getEntityIdsByConversationId`, keeping each entity's `id` and `type` so the
+   * landing page can show what kind of entity a pill stands for.
+   */
+  getEntitiesByConversationId: (
+    conversationIds: string[]
+  ) => Promise<Map<string, Array<Pick<ImpactEntity, 'id' | 'type'>>>>;
+  /**
+   * Conversations whose impact lists the entity, for filtering a list by an Impact pill. Bounded
+   * by {@link MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS}; conversations the caller cannot read
+   * are left out.
+   */
+  searchConversationIdsByEntityId: (entityId: string) => Promise<string[]>;
 }
 
 export interface ImpactClientDeps {
@@ -57,23 +71,57 @@ export const createImpactClient =
       return getImpactService().listByConversationIds(readableIds, getSpaceId(request));
     };
 
+    const getEntitiesByConversationId: ImpactReadClient['getEntitiesByConversationId'] = async (
+      conversationIds
+    ) => {
+      await privileges.assertCanRead(request);
+      const readableIds = await filterReadableConversationIds(
+        await getConversationClient(request),
+        conversationIds
+      );
+      const spaceId = getSpaceId(request);
+      const chunks = Array.from(
+        { length: Math.ceil(readableIds.length / MAX_IMPACT_CONVERSATION_IDS) },
+        (_, index) =>
+          readableIds.slice(
+            index * MAX_IMPACT_CONVERSATION_IDS,
+            (index + 1) * MAX_IMPACT_CONVERSATION_IDS
+          )
+      );
+      const impacts = (
+        await Promise.all(
+          chunks.map((chunk) => getImpactService().listByConversationIds(chunk, spaceId))
+        )
+      ).flat();
+      return new Map(
+        impacts.map((impact) => [
+          impact.conversationId,
+          (impact.entities ?? []).map(({ id, type }) => ({ id, type })),
+        ])
+      );
+    };
+
     return {
       listByConversationIds,
+      getEntitiesByConversationId,
       getEntityIdsByConversationId: async (conversationIds) => {
-        const uniqueIds = [...new Set(conversationIds)];
-        const entityIds = new Map<string, string[]>();
-        for (let i = 0; i < uniqueIds.length; i += MAX_IMPACT_CONVERSATION_IDS) {
-          const impacts = await listByConversationIds(
-            uniqueIds.slice(i, i + MAX_IMPACT_CONVERSATION_IDS)
-          );
-          for (const impact of impacts) {
-            entityIds.set(
-              impact.conversationId,
-              (impact.entities ?? []).map((entity) => entity.id)
-            );
-          }
-        }
-        return entityIds;
+        const entities = await getEntitiesByConversationId(conversationIds);
+        return new Map([...entities].map(([id, list]) => [id, list.map((entity) => entity.id)]));
+      },
+      searchConversationIdsByEntityId: async (entityId) => {
+        await privileges.assertCanRead(request);
+        const conversationIds = await getImpactService()
+          .getDocumentService()
+          .searchConversationIds({
+            spaceId: getSpaceId(request),
+            size: MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS,
+            filter: [
+              {
+                nested: { path: 'entities', query: { term: { 'entities.id': entityId } } },
+              },
+            ],
+          });
+        return filterReadableConversationIds(await getConversationClient(request), conversationIds);
       },
     };
   };

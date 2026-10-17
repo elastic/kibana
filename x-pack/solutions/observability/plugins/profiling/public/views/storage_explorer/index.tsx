@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import React, { useState, useEffect } from 'react';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { useEnabledProfilingStatus } from '../../components/contexts/profiling_status/use_enabled_profiling_status';
@@ -29,12 +30,12 @@ import { DataBreakdown } from './data_breakdown';
 import { DistinctProbabilisticValuesWarning } from './distinct_probabilistic_values_warning';
 import { HostBreakdown } from './host_breakdown';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
+import { OtelNotSupportedCallout } from './otel_not_supported_callout';
 import { Summary } from './summary';
 import {
   getStorageExplorerAvailability,
   StorageExplorerAvailability,
 } from '../../utils/get_storage_explorer_availability';
-import { AddDataTabs } from '../add_data_view/types';
 
 export function StorageExplorerView() {
   const {
@@ -52,7 +53,7 @@ export function StorageExplorerView() {
     if (availability === StorageExplorerAvailability.NotSetUp) {
       profilingRouter.replace('/add-data-instructions', {
         path: {},
-        query: { selectedTab: AddDataTabs.Kubernetes },
+        query: { schema: ProfilingSchema.ECS },
       });
     } else if (availability === StorageExplorerAvailability.NotAvailable) {
       profilingRouter.replace('/', { path: {}, query: { rangeFrom, rangeTo, kuery } });
@@ -134,6 +135,7 @@ function StorageExplorerContent() {
       showBetaBadge
     >
       <EuiFlexGroup direction="column">
+        <OtelNotSupportedCallout />
         <EuiFlexItem grow={false}>
           <EuiPanel hasShadow={false} color="subdued">
             <PrimaryProfilingSearchBar />

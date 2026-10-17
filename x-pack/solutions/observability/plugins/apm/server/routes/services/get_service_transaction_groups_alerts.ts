@@ -11,6 +11,7 @@ import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../commo
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { AggregationType } from '../../../common/rules/apm_rule_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { getAlertsBadgeEndMs } from '../../utils/get_alerts_badge_end';
 import type { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { MAX_NUMBER_OF_TX_GROUPS } from './get_service_transaction_groups';
 
@@ -48,6 +49,9 @@ export async function getServiceTransactionGroupsAlerts({
 }): Promise<ServiceTransactionGroupAlertsResponse> {
   const ALERT_RULE_PARAMETERS_AGGREGATION_TYPE = `${ALERT_RULE_PARAMETERS}.aggregationType`;
 
+  // Same window as service-level badge counts: extend a past picker end to now.
+  const badgesEnd = getAlertsBadgeEndMs(end);
+
   const params = {
     size: 0,
     track_total_hits: false,
@@ -55,7 +59,7 @@ export async function getServiceTransactionGroupsAlerts({
       bool: {
         filter: [
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
-          ...rangeQuery(start, end),
+          ...rangeQuery(start, badgesEnd),
           ...kqlQuery(kuery),
           ...termQuery(SERVICE_NAME, serviceName),
           ...termQuery(TRANSACTION_TYPE, transactionType),

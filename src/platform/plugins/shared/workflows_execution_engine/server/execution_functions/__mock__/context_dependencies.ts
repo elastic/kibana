@@ -23,6 +23,7 @@ export const mockContextDependencies = () => ({
   workflowsExtensions: workflowsExtensionsMock.createStart(),
   config: {
     enabled: true,
+    storage: { source: 'plain_index' as const, dataRetention: '90d' },
     eventDriven: {
       enabled: true,
       logEvents: true,

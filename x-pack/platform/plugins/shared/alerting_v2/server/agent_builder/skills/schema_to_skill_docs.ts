@@ -572,7 +572,7 @@ export const getDescribedVariants = (
   return values;
 };
 
-export const getEpisodeStatusValues = (): string[] =>
+export const getAlertStatusValues = (): string[] =>
   getDescribedEnumValues(alertEpisodeStatusSchema, 'alertEpisodeStatusSchema').map(
     ({ value }) => value
   );
@@ -672,14 +672,14 @@ const getRuleKindProductLabel = (kind: string): string => {
 /** Generates the Rule Kind section with heading, per-kind subsections, and immutability note. */
 export const generateRuleKindDoc = (): string => {
   const kinds = getDescribedEnumValues(ruleKindSchema, 'ruleKindSchema');
-  const episodeStatuses = formatEnumValuesList(getEpisodeStatusValues());
+  const alertStatuses = formatEnumValuesList(getAlertStatusValues());
   const transitionFields = formatEnumValuesList(getStateTransitionFields());
 
   const kindSections = kinds.flatMap(({ value, description }, i) => {
     const heading = `### ${getRuleKindProductLabel(value)} (\`kind: ${value}\`)`;
     const lines = [heading, description];
     if (value === 'alert') {
-      lines.push(`Alert statuses: ${episodeStatuses}.`);
+      lines.push(`Alert statuses: ${alertStatuses}.`);
       lines.push(`State transition fields: ${transitionFields}.`);
     }
     return i > 0 ? ['', ...lines] : lines;
@@ -855,11 +855,11 @@ export const generateRecoveryStrategyDoc = (): string => {
  * / `alertEventSeveritySchema`.
  */
 export const generateMatcherContextDoc = (): string => {
-  const episodeStatuses = formatEnumValuesList(getEpisodeStatusValues());
+  const alertStatuses = formatEnumValuesList(getAlertStatusValues());
   const severities = formatEnumValuesList(getSeverityValues());
 
   const formatMatcherFieldType = (path: string, type: string): string => {
-    if (path === 'alert_status') return episodeStatuses;
+    if (path === 'alert_status') return alertStatuses;
     if (path === 'severity') return severities;
     if (path === 'data') return '`data.*` object';
     return type;
@@ -1034,8 +1034,8 @@ export const generateSingleRuleActionPolicyDoc = (): string =>
     '> Do not put the routing tag in `tags`; rule tags do not link policies.',
     '',
     '> **Save reminder**: `manage_rule` only updates the in-memory rule attachment.',
-    '> The routing tag only takes effect once the user saves the rule',
-    '> (Rule → Workflow → Action Policy save order).',
+    '> The routing tag only exists once the user saves the rule; until then, this policy',
+    '> will not match any alerts (unless another saved rule already carries the tag).',
     '',
     '### 2. Create the action policy',
     '',

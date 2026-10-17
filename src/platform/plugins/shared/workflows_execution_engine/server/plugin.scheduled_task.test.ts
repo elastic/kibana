@@ -131,6 +131,7 @@ describe('workflow:scheduled task runner', () => {
     taskDefinitions = {};
     initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
+      storage: { source: 'plain_index', dataRetention: '90d' },
       eventDriven: {
         enabled: true,
         logEvents: true,
