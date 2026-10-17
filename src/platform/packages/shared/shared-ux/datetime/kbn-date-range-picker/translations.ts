@@ -70,6 +70,10 @@ export const inputControlTexts = {
   hintTextPrefix: i18n.translate('sharedUXPackages.dateRangePicker.inputControl.hintTextPrefix', {
     defaultMessage: 'Type',
   }),
+  confirmScrollChangeAriaLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.inputControl.confirmScrollChangeAriaLabel',
+    { defaultMessage: 'Apply time range' }
+  ),
   roundedSuffix: i18n.translate('sharedUXPackages.dateRangePicker.inputControl.roundedSuffix', {
     defaultMessage: '(rounded)',
   }),
