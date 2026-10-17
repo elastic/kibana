@@ -8,9 +8,9 @@
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { Entity, EntityType } from '@kbn/entity-store/common';
-import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { compact } from 'lodash';
+import { buildEntitiesFilter } from '../ml_anomaly_detection/build_entities_filter';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/constants';
 import {
   deriveBucketInterval,
@@ -42,9 +42,9 @@ interface OverviewAggs {
 }
 
 interface GetEntityAnomalyOverviewParams {
-  entityId: string;
+  entityIds: string[];
   entityType: EntityType;
-  entityRecord: Entity;
+  entityRecords: Entity[];
   fromMs?: number;
   toMs?: number;
   scoreRanges?: AnomalyScoreRange[];
@@ -81,9 +81,9 @@ interface AnomalyOverview {
 }
 
 export const getEntityAnomalyOverview = async ({
-  entityId,
+  entityIds,
   entityType,
-  entityRecord,
+  entityRecords,
   fromMs,
   toMs,
   scoreRanges,
@@ -138,13 +138,12 @@ export const getEntityAnomalyOverview = async ({
 
   if (threatTactics && threatTactics.length > 0 && resolvedJobIds.length === 0) return empty;
 
-  const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(
-    getBuiltInEntityDefinition(entityType),
-    entityRecord
-  );
+  const entityFilter = buildEntitiesFilter(entityType, entityRecords);
   if (!entityFilter) {
     logger.warn(
-      `Cannot build entity filter for "${entityId}" (type: ${entityType}): entity record lacks identity fields`
+      `Cannot build entity filter for "${entityIds.join(
+        ', '
+      )}" (type: ${entityType}): entity records lack identity fields`
     );
     return empty;
   }
@@ -197,7 +196,7 @@ export const getEntityAnomalyOverview = async ({
     const total = resp.hits.total;
     totalAnomaliesCount = total == null ? 0 : typeof total === 'number' ? total : total.value;
   } catch (err) {
-    logger.warn(`Error fetching anomaly overview for "${entityId}": ${err}`);
+    logger.warn(`Error fetching anomaly overview for "${entityIds.join(', ')}": ${err}`);
     return empty;
   }
 

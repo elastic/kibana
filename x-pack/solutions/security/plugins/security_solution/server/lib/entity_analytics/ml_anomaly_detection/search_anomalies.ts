@@ -9,7 +9,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { Entity, EntityType } from '@kbn/entity-store/common';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
+import { buildEntitiesFilter, getMatchedEntityId } from './build_entities_filter';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK } from '../../../../common/constants';
 import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
 import { getSecurityMlJobIds } from './get_security_ml_job_ids';
@@ -82,8 +82,8 @@ const DEFAULT_SORT_SPEC: Array<{ field: AnomalySortField; order: AnomalySortOrde
 
 export interface SearchEntityAnomaliesOpts {
   entityType: EntityType;
-  entityId: string;
-  entityRecord: Entity;
+  entityIds: string[];
+  entityRecords: Entity[];
   fromMs?: number;
   toMs?: number;
   scoreRanges?: AnomalyScoreRange[];
@@ -105,8 +105,8 @@ export interface SearchEntityAnomaliesResult {
 
 export const searchEntityAnomalies = async ({
   entityType,
-  entityId,
-  entityRecord,
+  entityIds,
+  entityRecords,
   fromMs,
   toMs,
   scoreRanges,
@@ -134,13 +134,12 @@ export const searchEntityAnomalies = async ({
 
   if (effectiveJobIds.length === 0) return empty;
 
-  const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(
-    getBuiltInEntityDefinition(entityType),
-    entityRecord
-  );
+  const entityFilter = buildEntitiesFilter(entityType, entityRecords);
   if (!entityFilter) {
     logger.warn(
-      `Cannot build entity filter for "${entityId}" (type: ${entityType}): entity record lacks identity fields`
+      `Cannot build entity filter for "${entityIds.join(
+        ', '
+      )}" (type: ${entityType}): entity records lack identity fields`
     );
     return empty;
   }
@@ -186,12 +185,14 @@ export const searchEntityAnomalies = async ({
           hit._source?.typical?.[0] != null &&
           hit._source?.detector_index != null
       )
-      .map((hit) => mapToAnomalyHit(hit, entityId));
+      .map((hit) =>
+        mapToAnomalyHit(hit, getMatchedEntityId(hit.matched_queries, entityIds) ?? entityIds[0])
+      );
 
     return { hits, total };
   } catch (error) {
     logger.warn(
-      `Error searching anomalies for entity "${entityId}" (type: ${entityType}): ${
+      `Error searching anomalies for entity "${entityIds.join(', ')}" (type: ${entityType}): ${
         error instanceof Error ? error.message : String(error)
       }`
     );
