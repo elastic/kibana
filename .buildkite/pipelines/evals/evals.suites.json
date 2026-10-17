@@ -31,6 +31,27 @@
       ]
     },
     {
+      "id": "agent-builder-security",
+      "name": "Agent Builder Security",
+      "slackChannel": "#apps-security-alerts",
+      "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/security.playwright.config.ts",
+      "serverConfigSet": "evals_agent_builder",
+      "tags": [
+        "platform",
+        "agent-builder",
+        "kibana-security"
+      ],
+      "ciLabels": [
+        "evals:agent-builder-security"
+      ],
+      "stepTimeoutInMinutes": 60,
+      "weeklyEisModelGroups": [
+        "eis/anthropic-claude-4.5-haiku",
+        "eis/google-gemini-3.1-flash-lite",
+        "eis/openai-gpt-5.4-mini"
+      ]
+    },
+    {
       "id": "ml",
       "name": "ML Agent Builder Skills",
       "slackChannel": "#agent-builder-alerts",
