@@ -17,7 +17,7 @@ import {
   MAX_AI_INDEX_QUERY_RESPONSE_BYTES,
 } from '../../common/constants';
 import type { QueryAiIndicesRequest } from '../../common/http_api/ai_indices';
-import { buildAiIndexSpaceFilter } from '../../common/space_filter';
+import { buildAiIndexReadFilter } from '../../common/space_filter';
 import { AiIndexQueryResponseTooLargeError, InvalidAiIndexQueryError } from './errors';
 import { queryAiIndices } from './query';
 
@@ -34,10 +34,11 @@ describe('queryAiIndices', () => {
 
   const lastRequest = () => esqlQuery.mock.calls[0][0];
 
-  it('injects the space filter, response cap, and default limit', async () => {
+  it('injects the read filter, response cap, and default limit', async () => {
     const result = await queryAiIndices({
       esClient,
       spaceId: 'marketing',
+      scopeIds: ['user://u_1'],
       query: 'FROM ai-index-idx-a',
     });
 
@@ -45,7 +46,7 @@ describe('queryAiIndices', () => {
     expect(esqlQuery).toHaveBeenCalledWith(
       {
         query: `FROM ai-index-idx-a | LIMIT ${DEFAULT_AI_INDEX_QUERY_LIMIT}`,
-        filter: buildAiIndexSpaceFilter('marketing'),
+        filter: buildAiIndexReadFilter({ spaceId: 'marketing', scopeIds: ['user://u_1'] }),
         drop_null_columns: true,
         allow_partial_results: true,
       },
@@ -57,6 +58,7 @@ describe('queryAiIndices', () => {
     await queryAiIndices({
       esClient,
       spaceId: 'default',
+      scopeIds: [],
       query: 'FROM ai-index-idx-a | LIMIT 5000',
       limit: 50,
     });
@@ -68,6 +70,7 @@ describe('queryAiIndices', () => {
     await queryAiIndices({
       esClient,
       spaceId: 'default',
+      scopeIds: [],
       query: 'FROM ai-index-idx-a | LIMIT ?max',
       params: { max: 5000 },
     });
@@ -81,6 +84,7 @@ describe('queryAiIndices', () => {
     await queryAiIndices({
       esClient,
       spaceId: 'default',
+      scopeIds: [],
       query: 'FROM ai-index-idx-a',
       limit: MAX_AI_INDEX_QUERY_LIMIT,
     });
@@ -92,6 +96,7 @@ describe('queryAiIndices', () => {
     await queryAiIndices({
       esClient,
       spaceId: 'default',
+      scopeIds: [],
       query: 'FROM ai-index-idx-a | KEEP title',
       limit: 5,
       aiIndexDests: [{ type: 'index', value: 'ai-index-idx-a' }],
@@ -106,6 +111,7 @@ describe('queryAiIndices', () => {
     await queryAiIndices({
       esClient,
       spaceId: 'default',
+      scopeIds: [],
       query: 'FROM ai-index-idx-a | NOT_A_COMMAND',
       limit: 5,
     });
@@ -115,7 +121,13 @@ describe('queryAiIndices', () => {
 
   describe('input bounds', () => {
     const run = (input: Partial<QueryAiIndicesRequest>) =>
-      queryAiIndices({ esClient, spaceId: 'default', query: 'FROM ai-index-idx-a', ...input });
+      queryAiIndices({
+        esClient,
+        spaceId: 'default',
+        scopeIds: [],
+        query: 'FROM ai-index-idx-a',
+        ...input,
+      });
 
     it.each([
       ['fractional', 1.5],
@@ -159,6 +171,7 @@ describe('queryAiIndices', () => {
     await queryAiIndices({
       esClient,
       spaceId: 'default',
+      scopeIds: [],
       query: 'FROM ai-index-idx-a | WHERE type == ?type AND score > ?min',
       params: { type: 'faq', min: 0.5 },
     });
@@ -167,7 +180,12 @@ describe('queryAiIndices', () => {
   });
 
   it('omits params when none are given', async () => {
-    await queryAiIndices({ esClient, spaceId: 'default', query: 'FROM ai-index-idx-a' });
+    await queryAiIndices({
+      esClient,
+      spaceId: 'default',
+      scopeIds: [],
+      query: 'FROM ai-index-idx-a',
+    });
 
     expect(lastRequest()).not.toHaveProperty('params');
   });
@@ -176,6 +194,7 @@ describe('queryAiIndices', () => {
     await queryAiIndices({
       esClient,
       spaceId: 'default',
+      scopeIds: [],
       query: 'FROM ai-index-idx-a,ai-index-ds-b,ai-index-* | LIMIT 10',
     });
 
@@ -190,7 +209,7 @@ describe('queryAiIndices', () => {
     );
 
     await expect(
-      queryAiIndices({ esClient, spaceId: 'default', query: 'FROM ai-index-idx-a' })
+      queryAiIndices({ esClient, spaceId: 'default', scopeIds: [], query: 'FROM ai-index-idx-a' })
     ).rejects.toBeInstanceOf(AiIndexQueryResponseTooLargeError);
   });
 
@@ -198,7 +217,7 @@ describe('queryAiIndices', () => {
     esqlQuery.mockRejectedValue(new Error('boom'));
 
     await expect(
-      queryAiIndices({ esClient, spaceId: 'default', query: 'FROM ai-index-idx-a' })
+      queryAiIndices({ esClient, spaceId: 'default', scopeIds: [], query: 'FROM ai-index-idx-a' })
     ).rejects.toThrow('boom');
   });
 });

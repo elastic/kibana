@@ -249,6 +249,16 @@ describe('AiIndexService', () => {
       expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
       expect(storageClient.index).not.toHaveBeenCalled();
     });
+
+    it('rejects a memory index dest on create', async () => {
+      await expect(
+        service.create('memory', DEFAULT_SPACE, {
+          ...properties,
+          dest: { type: 'index', value: '.ai-memory-elastic' },
+        })
+      ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
   });
 
   describe('put', () => {
@@ -717,6 +727,22 @@ describe('AiIndexService', () => {
         service.putManaged('elastic', DEFAULT_SPACE, {
           ...managedProperties,
           dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
+        })
+      ).resolves.toBe('created');
+      expect(storageClient.index).toHaveBeenCalled();
+    });
+
+    it('accepts a memory managed index dest', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [{ name: '.ai-memory-elastic', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+
+      await expect(
+        service.putManaged('memory', DEFAULT_SPACE, {
+          ...managedProperties,
+          dest: { type: 'index', value: '.ai-memory-elastic' },
         })
       ).resolves.toBe('created');
       expect(storageClient.index).toHaveBeenCalled();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { MEMORY_READ_ACTION } from '@kbn/context-engine-plugin/common/memory';
+
 interface MemoryReference {
   uri: string;
   relation?: string;
@@ -14,6 +16,16 @@ interface MemoryReference {
 interface MemoryWriter {
   uri: string;
   metadata: Record<string, string | number>;
+}
+
+interface MemoryKibanaPrivilegeGroup {
+  space: string;
+  name: string[];
+  count: number;
+}
+
+interface MemoryPermissions {
+  kibana: { privileges: MemoryKibanaPrivilegeGroup[] };
 }
 
 type MemoryLifecycleStatus = 'active' | 'deleted';
@@ -41,23 +53,38 @@ export interface StoredMemoryDocument {
   references?: MemoryReference[];
   attributes?: Record<string, string | number | boolean | string[]>;
   governance?: MemoryGovernance;
+  /** Principals that may read the memory; absent means shared with everyone who can read the index. */
+  scope_id?: string[];
+  permissions?: MemoryPermissions;
 }
 
 export const createMemoryWriter = ({
+  userScopeId,
   toolId,
   runId,
   agentId,
 }: {
+  userScopeId: string;
   toolId: string;
   runId: string;
   agentId?: string;
 }): MemoryWriter => ({
-  uri: `tool://${toolId}`,
+  uri: userScopeId,
   metadata: {
+    tool_id: toolId,
     run_id: runId,
     ...(agentId !== undefined && { agent_id: agentId }),
   },
 });
+
+export const createMemoryPermissions = (spaceId: string): MemoryPermissions => ({
+  kibana: { privileges: [{ space: spaceId, name: [MEMORY_READ_ACTION], count: 1 }] },
+});
+
+export const isMemoryInScope = (
+  document: Pick<StoredMemoryDocument, 'scope_id'>,
+  scopeId: string
+): boolean => document.scope_id === undefined || document.scope_id.includes(scopeId);
 
 export const createConversationReferences = (
   conversationId: string | undefined

@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuditLogger } from '@kbn/core-security-server';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
-import { buildAiIndexSpaceFilter } from '../../common/space_filter';
+import { buildAiIndexReadFilter } from '../../common/space_filter';
 import { AiIndexDataReadService } from './data_read_service';
 import { describeAiIndex } from './describe';
 import { AiIndexNotFoundError, AiIndexNotReadableError } from './errors';
@@ -46,6 +46,7 @@ describe('AiIndexDataReadService', () => {
   const service = new AiIndexDataReadService({
     esClient,
     spaceId: 'marketing',
+    getScopeIds: async () => ['user://u_1'],
     auditLogger,
     aiIndexService,
     logger,
@@ -77,7 +78,7 @@ describe('AiIndexDataReadService', () => {
       expect(esqlQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           query: 'FROM ai-index-idx-a | LIMIT 10',
-          filter: buildAiIndexSpaceFilter('marketing'),
+          filter: buildAiIndexReadFilter({ spaceId: 'marketing', scopeIds: ['user://u_1'] }),
         }),
         expect.anything()
       );
