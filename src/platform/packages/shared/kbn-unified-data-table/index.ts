@@ -56,3 +56,10 @@ export {
   type CellActionsBubbleProps,
 } from './src/components/cell_actions_bubble/cell_actions_bubble';
 export { cellActionsHostStyles } from './src/components/cell_actions_bubble/cell_actions_bubble_styles';
+export type { GridBounds, GridPosition } from './src/components/grid_keyboard_navigation';
+export {
+  GRID_CELL_SELECTOR,
+  GRID_KEYS,
+  getGridPosition,
+  getNextGridPosition,
+} from './src/components/grid_keyboard_navigation';

@@ -21,11 +21,18 @@ import {
 } from '@tanstack/react-table';
 import { useVirtualizer, type Virtualizer } from '@tanstack/react-virtual';
 import type { EuiDataGridColumnCellAction } from '@elastic/eui';
-import { EuiIconTip, keys, useResizeObserver } from '@elastic/eui';
+import { EuiIconTip, useResizeObserver } from '@elastic/eui';
 import type { IToasts } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { GridPosition } from '@kbn/unified-data-table';
+import {
+  GRID_CELL_SELECTOR,
+  GRID_KEYS,
+  getGridPosition,
+  getNextGridPosition,
+} from '@kbn/unified-data-table';
 import type { FieldRow } from './field_row';
 import { PinControlCell } from './get_pin_control';
 import { useRestorableRef } from './restorable_state';
@@ -70,18 +77,6 @@ export interface TanStackTableGridProps {
 
 type FieldColumnId = typeof GRID_COLUMN_FIELD_NAME | typeof GRID_COLUMN_FIELD_VALUE;
 
-/** 1-based position of a cell, matching its `aria-rowindex` and `aria-colindex`. */
-interface GridPosition {
-  row: number;
-  col: number;
-}
-
-interface GridBounds {
-  firstRow: number;
-  lastRow: number;
-  colCount: number;
-}
-
 const estimateSize = () => ESTIMATED_ROW_HEIGHT;
 const getRowId = (row: FieldRow) => row.name;
 
@@ -90,51 +85,6 @@ const getInitialNameColumnWidth = (containerWidth: number) =>
     Math.max(Math.round(containerWidth * 0.3), MIN_NAME_COLUMN_WIDTH),
     MAX_NAME_COLUMN_WIDTH
   );
-
-const GRID_CELL_SELECTOR = '[role="gridcell"], [role="columnheader"]';
-
-const getGridPosition = (element: EventTarget | null): GridPosition | undefined => {
-  if (!(element instanceof Element)) {
-    return undefined;
-  }
-  const cell = element.closest(GRID_CELL_SELECTOR);
-  const col = Number(cell?.getAttribute('aria-colindex'));
-  const row = Number(cell?.closest('[role="row"]')?.getAttribute('aria-rowindex'));
-  return col > 0 && row > 0 ? { row, col } : undefined;
-};
-
-const getNextGridPosition = (
-  { row, col }: GridPosition,
-  { key, ctrlKey }: Pick<KeyboardEvent, 'key' | 'ctrlKey'>,
-  { firstRow, lastRow, colCount }: GridBounds
-): GridPosition | undefined => {
-  switch (key) {
-    case keys.ARROW_UP:
-      return { row: Math.max(row - 1, firstRow), col };
-    case keys.ARROW_DOWN:
-      return { row: Math.min(row + 1, lastRow), col };
-    case keys.ARROW_LEFT:
-      return { row, col: Math.max(col - 1, 1) };
-    case keys.ARROW_RIGHT:
-      return { row, col: Math.min(col + 1, colCount) };
-    case keys.HOME:
-      return ctrlKey ? { row: firstRow, col: 1 } : { row, col: 1 };
-    case keys.END:
-      return ctrlKey ? { row: lastRow, col: colCount } : { row, col: colCount };
-    default:
-      return undefined;
-  }
-};
-
-// Like EuiDataGrid, keep keys used inside the grid from reaching the flyout
-// (arrow keys navigate between documents and Escape closes it).
-const GRID_KEYS = new Set<string>([
-  keys.ARROW_LEFT,
-  keys.ARROW_RIGHT,
-  keys.ARROW_UP,
-  keys.ARROW_DOWN,
-  keys.ESCAPE,
-]);
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
