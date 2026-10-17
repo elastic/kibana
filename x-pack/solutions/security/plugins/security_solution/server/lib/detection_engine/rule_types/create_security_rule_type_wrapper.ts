@@ -425,6 +425,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     inputIndex,
                     exceptionFilter,
                     unprocessedExceptions,
+                    allExceptionItems: exceptionItems,
+                    startedAt,
                     runtimeMappings: {
                       ...runtimeMappings,
                       ...timestampRuntimeMappings,

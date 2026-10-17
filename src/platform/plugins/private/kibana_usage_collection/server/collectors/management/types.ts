@@ -97,6 +97,7 @@ export interface UsageStats {
   'securitySolution:enableAssetInventory': boolean;
   'securitySolution:enableSiemReadiness': boolean;
   'securitySolution:enableCloudConnector': boolean;
+  'securitySolution:enableEsqlRuleComputedFieldExceptions': boolean;
   'securitySolution:suppressionBehaviorOnAlertClosure': string;
   'securitySolution:defaultValueReportMinutes': string;
   'securitySolution:defaultValueReportRate': string;
