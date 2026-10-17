@@ -7,7 +7,6 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { tags } from '@kbn/scout';
 import type {
   ListRuleChangeHistoryResponse,
   RuleChangeHistoryDetail,
@@ -17,7 +16,7 @@ import { ALERTING_V2_RULES_READ_ROLE, apiTest, buildCreateRuleData, testData } f
 
 const CHANGE_HISTORY_URL = testData.INTERNAL_CHANGE_HISTORY_RULES_API_PATH;
 
-apiTest.describe('Rule change history API', { tag: tags.stateful.classic }, () => {
+apiTest.describe('Rule change history API', { tag: testData.API_ENGINE_NON_MKI_TAG }, () => {
   let readerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ apiServices, requestAuth }) => {

@@ -38,7 +38,7 @@ const dashboardReference = (dashboardId: string, artifactId = 'db-1') => ({
   id: dashboardId,
 });
 
-apiTest.describe('Rule artifacts API', { tag: testData.API_ENGINE_TAG }, () => {
+apiTest.describe('Rule artifacts API', { tag: testData.API_ENGINE_NON_MKI_TAG }, () => {
   let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {

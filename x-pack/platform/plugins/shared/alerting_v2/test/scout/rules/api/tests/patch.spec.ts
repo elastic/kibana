@@ -32,7 +32,7 @@ const BASE_QUERY = 'FROM logs-* | STATS count = COUNT(*) BY host.name';
  * `toApiStateTransition` and `toApiArtifacts` all drop keys on the way out of the server, so a
  * response and a GET agree with each other even when the document on disk is wrong.
  */
-apiTest.describe('Patch rule saved object', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('Patch rule saved object', { tag: testData.API_ENGINE_NON_MKI_TAG }, () => {
   apiTest.afterEach(async ({ apiServices }) => {
     await apiServices.alertingV2.rules.cleanUp();
   });

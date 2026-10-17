@@ -10,6 +10,13 @@ import { getPlaywrightTagsFor, tags } from '@kbn/scout';
 // Other serverless projects hide the alerting v2 features, so no role can be granted them there.
 export const API_ENGINE_TAG = [...tags.stateful.all, ...tags.serverless.observability.complete];
 
+// For specs that read the raw saved object on disk via `system_indices_superuser`. That native
+// user exists on stateful and on local serverless, but not on MKI, so these exclude cloud serverless.
+export const API_ENGINE_NON_MKI_TAG = [
+  ...tags.stateful.all,
+  ...getPlaywrightTagsFor('serverless', 'observability_complete', 'local'),
+];
+
 export const UI_TAG = [
   ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
   ...getPlaywrightTagsFor('serverless', 'observability_complete', 'local'),

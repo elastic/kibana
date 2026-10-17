@@ -48,189 +48,193 @@ const reportedStatus =
  * do not test APIs but what the rule executor reports about its own runs. The
  * observable surface is the event-log document, not an HTTP response.
  */
-apiTest.describe('Rule executor task-run event fields', { tag: testData.API_ENGINE_TAG }, () => {
-  const SOURCE_INDEX = `test-alerting-v2-task-run-fields-source-${randomUUID()}`;
-  const createdRuleIds: string[] = [];
+apiTest.describe(
+  'Rule executor task-run event fields',
+  { tag: testData.API_ENGINE_NON_MKI_TAG },
+  () => {
+    const SOURCE_INDEX = `test-alerting-v2-task-run-fields-source-${randomUUID()}`;
+    const createdRuleIds: string[] = [];
 
-  apiTest.beforeAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.sourceIndex.create({
-      index: SOURCE_INDEX,
-      mappings: {
-        'host.name': { type: 'keyword' },
-        value: { type: 'long' },
-      },
-    });
-  });
-
-  apiTest.afterAll(async ({ apiServices }) => {
-    for (const ruleId of createdRuleIds) {
-      await apiServices.alertingV2.rules.delete(ruleId);
-      await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId });
-    }
-    await apiServices.alertingV2.sourceIndex.delete({ index: SOURCE_INDEX });
-  });
-
-  // eslint-disable-next-line @kbn/eslint/scout_require_api_client_in_api_test
-  apiTest(
-    'reports success, rule identity, and the counters a breaching run produced',
-    async ({ apiServices }) => {
-      await apiServices.alertingV2.sourceIndex.indexDocs({
+    apiTest.beforeAll(async ({ apiServices }) => {
+      await apiServices.alertingV2.sourceIndex.create({
         index: SOURCE_INDEX,
-        docs: [
-          {
-            '@timestamp': new Date().toISOString(),
-            'host.name': 'host-reports-success',
-            value: 1,
-          },
-        ],
+        mappings: {
+          'host.name': { type: 'keyword' },
+          value: { type: 'long' },
+        },
       });
+    });
 
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({
-          metadata: { name: 'task-run-fields-success' },
-          query: {
-            base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-reports-success" | STATS count = COUNT(*) BY host.name`,
-            breach: { segment: 'WHERE count >= 1' },
-          },
-        })
-      );
-      createdRuleIds.push(rule.id);
+    apiTest.afterAll(async ({ apiServices }) => {
+      for (const ruleId of createdRuleIds) {
+        await apiServices.alertingV2.rules.delete(ruleId);
+        await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId });
+      }
+      await apiServices.alertingV2.sourceIndex.delete({ index: SOURCE_INDEX });
+    });
 
-      // Counters are per-run, and only the run that first sees a group opens
-      // an episode for it, so select the earliest run that produced events
-      // rather than whichever run happened to be reported first.
-      const run = await apiServices.alertingV2.ruleRunner.waitForReportedRun({
-        ruleId: rule.id,
-        match: (candidate) => (candidate['metrics.ruleEventsGenerated'] ?? 0) > 0,
-      });
+    // eslint-disable-next-line @kbn/eslint/scout_require_api_client_in_api_test
+    apiTest(
+      'reports success, rule identity, and the counters a breaching run produced',
+      async ({ apiServices }) => {
+        await apiServices.alertingV2.sourceIndex.indexDocs({
+          index: SOURCE_INDEX,
+          docs: [
+            {
+              '@timestamp': new Date().toISOString(),
+              'host.name': 'host-reports-success',
+              value: 1,
+            },
+          ],
+        });
 
-      expect(run.status).toBe('success');
+        const rule = await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            metadata: { name: 'task-run-fields-success' },
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-reports-success" | STATS count = COUNT(*) BY host.name`,
+              breach: { segment: 'WHERE count >= 1' },
+            },
+          })
+        );
+        createdRuleIds.push(rule.id);
 
-      // A run that completed without halting has nothing to explain.
-      expect(run.reason).toBeUndefined();
+        // Counters are per-run, and only the run that first sees a group opens
+        // an episode for it, so select the earliest run that produced events
+        // rather than whichever run happened to be reported first.
+        const run = await apiServices.alertingV2.ruleRunner.waitForReportedRun({
+          ruleId: rule.id,
+          match: (candidate) => (candidate['metrics.ruleEventsGenerated'] ?? 0) > 0,
+        });
 
-      expect(run['rule.id']).toBe(rule.id);
-      expect(run['rule.spaceId']).toBe('default');
-      expect(run['rule.version']).toBe(rule.version);
+        expect(run.status).toBe('success');
 
-      expect(run['metrics.rowsReturnedByQuery']).toBeGreaterThanOrEqual(1);
-      expect(run['metrics.newEpisodesGenerated']).toBeGreaterThanOrEqual(1);
+        // A run that completed without halting has nothing to explain.
+        expect(run.reason).toBeUndefined();
 
-      // `kind: 'alert'` rules persist `type: 'alert'` documents, and the
-      // signal counter only counts `type: 'signal'` ones.
-      expect(run['metrics.signalsGenerated']).toBe(0);
+        expect(run['rule.id']).toBe(rule.id);
+        expect(run['rule.spaceId']).toBe('default');
+        expect(run['rule.version']).toBe(rule.version);
 
-      // Nothing was truncated, which is why the run is a clean `success`
-      // rather than a `warning`.
-      expect(run['metrics.groupsDroppedByLimit']).toBe(0);
-      expect(run['metrics.rowsDroppedByLimit']).toBe(0);
-    }
-  );
+        expect(run['metrics.rowsReturnedByQuery']).toBeGreaterThanOrEqual(1);
+        expect(run['metrics.newEpisodesGenerated']).toBeGreaterThanOrEqual(1);
 
-  // eslint-disable-next-line @kbn/eslint/scout_require_api_client_in_api_test
-  apiTest(
-    'reports every counter as zero on a run that matches nothing',
-    async ({ apiServices }) => {
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({
-          metadata: { name: 'task-run-fields-quiet' },
-          query: {
-            base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-never-indexed" | STATS count = COUNT(*) BY host.name`,
-            breach: { segment: 'WHERE count >= 1' },
-          },
-        })
-      );
-      createdRuleIds.push(rule.id);
+        // `kind: 'alert'` rules persist `type: 'alert'` documents, and the
+        // signal counter only counts `type: 'signal'` ones.
+        expect(run['metrics.signalsGenerated']).toBe(0);
 
-      const run = await apiServices.alertingV2.ruleRunner.waitForReportedRun({
-        ruleId: rule.id,
-        match: reportedStatus('success'),
-      });
+        // Nothing was truncated, which is why the run is a clean `success`
+        // rather than a `warning`.
+        expect(run['metrics.groupsDroppedByLimit']).toBe(0);
+        expect(run['metrics.rowsDroppedByLimit']).toBe(0);
+      }
+    );
 
-      expect(run).toMatchObject(ZEROED_COUNTERS);
-      expect(run.reason).toBeUndefined();
-    }
-  );
+    // eslint-disable-next-line @kbn/eslint/scout_require_api_client_in_api_test
+    apiTest(
+      'reports every counter as zero on a run that matches nothing',
+      async ({ apiServices }) => {
+        const rule = await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            metadata: { name: 'task-run-fields-quiet' },
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-never-indexed" | STATS count = COUNT(*) BY host.name`,
+              breach: { segment: 'WHERE count >= 1' },
+            },
+          })
+        );
+        createdRuleIds.push(rule.id);
 
-  // eslint-disable-next-line @kbn/eslint/scout_require_api_client_in_api_test
-  apiTest(
-    'reports failed with the code owned by the step that threw, and still reports counters',
-    async ({ apiServices }) => {
-      // Targets an index that does not exist. The ES|QL parser accepts the
-      // query, so rule creation succeeds and the failure happens at run time
-      // inside `execute_rule_query`.
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({
-          metadata: { name: 'task-run-fields-failed' },
-          query: {
-            base: 'FROM nonexistent-index-task-run-fields-zzz | STATS count = COUNT(*)',
-            breach: { segment: 'WHERE count >= 1' },
-          },
-        })
-      );
-      createdRuleIds.push(rule.id);
+        const run = await apiServices.alertingV2.ruleRunner.waitForReportedRun({
+          ruleId: rule.id,
+          match: reportedStatus('success'),
+        });
 
-      const run = await apiServices.alertingV2.ruleRunner.waitForReportedRun({
-        ruleId: rule.id,
-        match: reportedStatus('failed'),
-      });
+        expect(run).toMatchObject(ZEROED_COUNTERS);
+        expect(run.reason).toBeUndefined();
+      }
+    );
 
-      // `execute_rule_query` publishes `query_failed`. This asserts the
-      // published code rather than the step name, which is exactly the
-      // distinction the reason catalog exists to keep.
-      expect(run.reason).toBe('query_failed');
-      expect(run['rule.id']).toBe(rule.id);
-      expect(run['rule.spaceId']).toBe('default');
+    // eslint-disable-next-line @kbn/eslint/scout_require_api_client_in_api_test
+    apiTest(
+      'reports failed with the code owned by the step that threw, and still reports counters',
+      async ({ apiServices }) => {
+        // Targets an index that does not exist. The ES|QL parser accepts the
+        // query, so rule creation succeeds and the failure happens at run time
+        // inside `execute_rule_query`.
+        const rule = await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            metadata: { name: 'task-run-fields-failed' },
+            query: {
+              base: 'FROM nonexistent-index-task-run-fields-zzz | STATS count = COUNT(*)',
+              breach: { segment: 'WHERE count >= 1' },
+            },
+          })
+        );
+        createdRuleIds.push(rule.id);
 
-      // A failing run still reports its counters: they travel out of the
-      // pipeline on the error instead of being lost with the return value.
-      expect(run).toMatchObject(ZEROED_COUNTERS);
-    }
-  );
+        const run = await apiServices.alertingV2.ruleRunner.waitForReportedRun({
+          ruleId: rule.id,
+          match: reportedStatus('failed'),
+        });
 
-  // eslint-disable-next-line @kbn/eslint/scout_require_api_client_in_api_test
-  apiTest(
-    'reports skipped with the halt reason when the rule is disabled',
-    async ({ apiServices }) => {
-      apiTest.setTimeout(DISABLED_RUN_TEST_TIMEOUT_MS);
+        // `execute_rule_query` publishes `query_failed`. This asserts the
+        // published code rather than the step name, which is exactly the
+        // distinction the reason catalog exists to keep.
+        expect(run.reason).toBe('query_failed');
+        expect(run['rule.id']).toBe(rule.id);
+        expect(run['rule.spaceId']).toBe('default');
 
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({
-          metadata: { name: 'task-run-fields-skipped' },
-          query: {
-            base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-skipped" | STATS count = COUNT(*) BY host.name`,
-            breach: { segment: 'WHERE count >= 1' },
-          },
-        })
-      );
-      createdRuleIds.push(rule.id);
+        // A failing run still reports its counters: they travel out of the
+        // pipeline on the error instead of being lost with the return value.
+        expect(run).toMatchObject(ZEROED_COUNTERS);
+      }
+    );
 
-      // Run once so the task is known to be scheduled and ticking before the
-      // rule is taken away from it.
-      await apiServices.alertingV2.ruleRunner.waitForExecutions({ ruleId: rule.id, runs: 1 });
+    // eslint-disable-next-line @kbn/eslint/scout_require_api_client_in_api_test
+    apiTest(
+      'reports skipped with the halt reason when the rule is disabled',
+      async ({ apiServices }) => {
+        apiTest.setTimeout(DISABLED_RUN_TEST_TIMEOUT_MS);
 
-      // Disabling through the API unschedules the task, so the halt could only
-      // be caught by racing it. Writing the attribute directly leaves the task
-      // running against a rule that says it must not. `_run` then rejects, so
-      // the skipped run arrives on the next scheduled tick.
-      await apiServices.alertingV2.ruleSavedObject.setEnabled(rule.id, false);
+        const rule = await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            metadata: { name: 'task-run-fields-skipped' },
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-skipped" | STATS count = COUNT(*) BY host.name`,
+              breach: { segment: 'WHERE count >= 1' },
+            },
+          })
+        );
+        createdRuleIds.push(rule.id);
 
-      const run = await apiServices.alertingV2.ruleRunner.waitForReportedRun({
-        ruleId: rule.id,
-        match: reportedStatus('skipped'),
-        timeoutMs: DISABLED_RUN_TIMEOUT_MS,
-      });
+        // Run once so the task is known to be scheduled and ticking before the
+        // rule is taken away from it.
+        await apiServices.alertingV2.ruleRunner.waitForExecutions({ ruleId: rule.id, runs: 1 });
 
-      // A halt is a deliberate early exit, so the run is neither a success nor
-      // a failure — and it names which halt it was.
-      expect(run.reason).toBe('rule_disabled');
-      expect(run['rule.id']).toBe(rule.id);
+        // Disabling through the API unschedules the task, so the halt could only
+        // be caught by racing it. Writing the attribute directly leaves the task
+        // running against a rule that says it must not. `_run` then rejects, so
+        // the skipped run arrives on the next scheduled tick.
+        await apiServices.alertingV2.ruleSavedObject.setEnabled(rule.id, false);
 
-      // `validate_rule` halts after `fetch_rule`, so the version is known.
-      expect(run['rule.version']).toBe(rule.version);
+        const run = await apiServices.alertingV2.ruleRunner.waitForReportedRun({
+          ruleId: rule.id,
+          match: reportedStatus('skipped'),
+          timeoutMs: DISABLED_RUN_TIMEOUT_MS,
+        });
 
-      // Nothing was evaluated, so every counter is zero.
-      expect(run).toMatchObject(ZEROED_COUNTERS);
-    }
-  );
-});
+        // A halt is a deliberate early exit, so the run is neither a success nor
+        // a failure — and it names which halt it was.
+        expect(run.reason).toBe('rule_disabled');
+        expect(run['rule.id']).toBe(rule.id);
+
+        // `validate_rule` halts after `fetch_rule`, so the version is known.
+        expect(run['rule.version']).toBe(rule.version);
+
+        // Nothing was evaluated, so every counter is zero.
+        expect(run).toMatchObject(ZEROED_COUNTERS);
+      }
+    );
+  }
+);

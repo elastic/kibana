@@ -18,7 +18,7 @@ import {
 
 const TEMPLATE = { id: 'template-1' };
 
-apiTest.describe('Rule metadata.template', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('Rule metadata.template', { tag: testData.API_ENGINE_NON_MKI_TAG }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
 

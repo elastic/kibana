@@ -6,7 +6,6 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
-import { getPlaywrightTagsFor } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
@@ -14,7 +13,7 @@ import {
   ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
 } from '@kbn/alerting-v2-constants';
 import { MAX_KQL_LENGTH } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_ALERTS_READ_ROLE, apiTest, NO_ACCESS_ROLE } from '../fixtures';
+import { ALERTING_V2_ALERTS_READ_ROLE, apiTest, NO_ACCESS_ROLE, testData } from '../fixtures';
 
 const RULE_ID_A = 'matcher-suggestions-rule-a';
 const RULE_ID_B = 'matcher-suggestions-rule-b';
@@ -61,122 +60,112 @@ const seedAlertEvents = async (esClient: EsClient): Promise<void> => {
   });
 };
 
-/*
- * The authorization tests below use `requestAuth.getApiKeyForCustomRole`, and
- * custom-role auth is not yet supported on Elastic Cloud Hosted. To avoid
- * silent false-positives, the entire suite is restricted to local stateful
- * (classic) until ECH support lands. This matches the find-rules suite.
- */
-apiTest.describe(
-  'Rule event fields suggestions API',
-  { tag: getPlaywrightTagsFor('stateful', 'classic', 'local') },
-  () => {
-    let adminCredentials: RoleApiCredentials;
-    let adminHeaders: Record<string, string>;
+apiTest.describe('Rule event fields suggestions API', { tag: testData.API_ENGINE_TAG }, () => {
+  let adminCredentials: RoleApiCredentials;
+  let adminHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
-      adminHeaders = { ...adminCredentials.apiKeyHeader };
-    });
+  apiTest.beforeAll(async ({ requestAuth }) => {
+    adminCredentials = await requestAuth.getApiKeyForAdmin();
+    adminHeaders = { ...adminCredentials.apiKeyHeader };
+  });
 
-    apiTest.beforeEach(async ({ apiServices, esClient }) => {
-      await apiServices.alertingV2.ruleEvents.cleanUp();
-      await seedAlertEvents(esClient);
-    });
+  apiTest.beforeEach(async ({ apiServices, esClient }) => {
+    await apiServices.alertingV2.ruleEvents.cleanUp();
+    await seedAlertEvents(esClient);
+  });
 
-    apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.ruleEvents.cleanUp();
-    });
+  apiTest.afterAll(async ({ apiServices }) => {
+    await apiServices.alertingV2.ruleEvents.cleanUp();
+  });
 
-    apiTest(
-      'returns the union of data.* field names across all matching alerts when no matcher is given',
-      async ({ apiClient }) => {
-        const response = await apiClient.get(ruleEventFieldsUrl(), {
-          headers: adminHeaders,
-          responseType: 'json',
-        });
-
-        expect(response).toHaveStatusCode(200);
-        expect(response.body).toStrictEqual(
-          expect.arrayContaining([
-            'data.cpu',
-            'data.host',
-            'data.latency',
-            'data.region',
-            'data.service',
-          ])
-        );
-      }
-    );
-
-    apiTest(
-      'falls back to the unfiltered result when matcher cannot be parsed',
-      async ({ apiClient }) => {
-        // Trailing colon makes this an unparseable KQL expression.
-        const response = await apiClient.get(ruleEventFieldsUrl({ matcher: 'episode_id :' }), {
-          headers: adminHeaders,
-          responseType: 'json',
-        });
-
-        expect(response).toHaveStatusCode(200);
-        expect(response.body).toStrictEqual(expect.arrayContaining(['data.host', 'data.service']));
-      }
-    );
-
-    apiTest('validation: rejects empty matcher with a 400', async ({ apiClient }) => {
-      const response = await apiClient.get(`${RULE_EVENT_FIELDS_PATH}?matcher=`, {
+  apiTest(
+    'returns the union of data.* field names across all matching alerts when no matcher is given',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(ruleEventFieldsUrl(), {
         headers: adminHeaders,
         responseType: 'json',
       });
 
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual(
+        expect.arrayContaining([
+          'data.cpu',
+          'data.host',
+          'data.latency',
+          'data.region',
+          'data.service',
+        ])
+      );
+    }
+  );
+
+  apiTest(
+    'falls back to the unfiltered result when matcher cannot be parsed',
+    async ({ apiClient }) => {
+      // Trailing colon makes this an unparseable KQL expression.
+      const response = await apiClient.get(ruleEventFieldsUrl({ matcher: 'episode_id :' }), {
+        headers: adminHeaders,
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual(expect.arrayContaining(['data.host', 'data.service']));
+    }
+  );
+
+  apiTest('validation: rejects empty matcher with a 400', async ({ apiClient }) => {
+    const response = await apiClient.get(`${RULE_EVENT_FIELDS_PATH}?matcher=`, {
+      headers: adminHeaders,
+      responseType: 'json',
     });
 
-    apiTest(
-      'validation: rejects matcher longer than the schema limit with a 400',
-      async ({ apiClient }) => {
-        const response = await apiClient.get(
-          ruleEventFieldsUrl({ matcher: 'a'.repeat(MAX_KQL_LENGTH + 1) }),
-          {
-            headers: adminHeaders,
-            responseType: 'json',
-          }
-        );
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
 
-        expect(response).toHaveStatusCode(400);
-        expect(response.body.code).toBe('BAD_REQUEST');
-      }
-    );
-
-    apiTest(
-      'authorization: returns 200 for a user with read-only privileges',
-      async ({ apiClient, requestAuth }) => {
-        const readerCredentials = await requestAuth.getApiKeyForCustomRole(
-          ALERTING_V2_ALERTS_READ_ROLE
-        );
-
-        const response = await apiClient.get(ruleEventFieldsUrl(), {
-          headers: readerCredentials.apiKeyHeader,
+  apiTest(
+    'validation: rejects matcher longer than the schema limit with a 400',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(
+        ruleEventFieldsUrl({ matcher: 'a'.repeat(MAX_KQL_LENGTH + 1) }),
+        {
+          headers: adminHeaders,
           responseType: 'json',
-        });
+        }
+      );
 
-        expect(response).toHaveStatusCode(200);
-      }
-    );
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
 
-    apiTest(
-      'authorization: returns 403 for a user without alerting_v2 privileges',
-      async ({ apiClient, requestAuth }) => {
-        const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
+  apiTest(
+    'authorization: returns 200 for a user with read-only privileges',
+    async ({ apiClient, requestAuth }) => {
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ALERTS_READ_ROLE
+      );
 
-        const response = await apiClient.get(ruleEventFieldsUrl(), {
-          headers: noAccessCredentials.apiKeyHeader,
-          responseType: 'json',
-        });
+      const response = await apiClient.get(ruleEventFieldsUrl(), {
+        headers: readerCredentials.apiKeyHeader,
+        responseType: 'json',
+      });
 
-        expect(response).toHaveStatusCode(403);
-      }
-    );
-  }
-);
+      expect(response).toHaveStatusCode(200);
+    }
+  );
+
+  apiTest(
+    'authorization: returns 403 for a user without alerting_v2 privileges',
+    async ({ apiClient, requestAuth }) => {
+      const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
+
+      const response = await apiClient.get(ruleEventFieldsUrl(), {
+        headers: noAccessCredentials.apiKeyHeader,
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+    }
+  );
+});

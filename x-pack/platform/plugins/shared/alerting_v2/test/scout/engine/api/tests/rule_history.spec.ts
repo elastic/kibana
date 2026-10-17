@@ -62,7 +62,7 @@ const expectSequenceMatchesRuleVersion = (doc: ChangeHistoryDocument, rule: Rule
   expect(doc.object.sequence).toBe(rule.version);
 };
 
-apiTest.describe('Rule change history', { tag: testData.API_ENGINE_TAG }, () => {
+apiTest.describe('Rule change history', { tag: testData.API_ENGINE_NON_MKI_TAG }, () => {
   apiTest.beforeAll(async ({ apiServices }) => {
     await apiServices.alertingV2.rules.cleanUp();
     await apiServices.alertingV2.ruleChangesHistory.cleanUp();
