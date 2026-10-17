@@ -12,6 +12,7 @@ import { render } from '@testing-library/react';
 import { ImageViewer } from './image_viewer';
 import { ImageViewerContext } from './image_viewer_context';
 import type { ImageConfig } from '../../types';
+import { createValidateUrl } from '../../utils/validate_url';
 
 const validateUrl = jest.fn(() => ({ isValid: true }));
 
@@ -19,12 +20,26 @@ beforeEach(() => {
   validateUrl.mockImplementation(() => ({ isValid: true }));
 });
 
-const DefaultImageViewer = (props: { imageConfig: ImageConfig; isScreenshotMode?: boolean }) => {
+const PNG_DATA_URL =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==';
+const SVG_DATA_URL = 'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=';
+
+// uses the real url validator, rather than the mock above
+const validateDataUrl = createValidateUrl({
+  validateUrl: (url: string) => new URL(url),
+  isInternalUrl: () => false,
+});
+
+const DefaultImageViewer = (props: {
+  imageConfig: ImageConfig;
+  isScreenshotMode?: boolean;
+  validateUrl?: typeof validateDataUrl;
+}) => {
   return (
     <ImageViewerContext.Provider
       value={{
         getImageDownloadHref: (fileId: string) => `https://elastic.co/${fileId}`,
-        validateUrl,
+        validateUrl: props.validateUrl ?? validateUrl,
       }}
     >
       <ImageViewer imageConfig={props.imageConfig} isScreenshotMode={props.isScreenshotMode} />
@@ -104,4 +119,36 @@ test('image is eager when in screenshotting mode', () => {
   );
 
   expect(getByAltText(`alt text`)).toHaveAttribute('loading', 'eager');
+});
+
+test('should display an image by a base64 data url', () => {
+  const { getByAltText, queryByTestId } = render(
+    <DefaultImageViewer
+      validateUrl={validateDataUrl}
+      imageConfig={{
+        src: { type: 'url', url: PNG_DATA_URL },
+        object_fit: 'fill',
+        alt_text: 'alt text',
+      }}
+    />
+  );
+
+  expect(getByAltText(`alt text`)).toHaveAttribute('src', PNG_DATA_URL);
+  expect(queryByTestId(`imageNotFound`)).toBeNull();
+});
+
+test('should display a 404 for an unsupported data url', () => {
+  const { queryByAltText, getByTestId } = render(
+    <DefaultImageViewer
+      validateUrl={validateDataUrl}
+      imageConfig={{
+        src: { type: 'url', url: SVG_DATA_URL },
+        object_fit: 'fill',
+        alt_text: 'alt text',
+      }}
+    />
+  );
+
+  expect(queryByAltText(`alt text`)).toBeNull();
+  expect(getByTestId(`imageNotFound`)).toBeVisible();
 });
