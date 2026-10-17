@@ -28,6 +28,7 @@ import type { EventBus } from '../event_bus';
 import type { AlertActionEvent } from '../alert_action_event_publisher/events';
 import type { RuleEvent } from '../rule_event_publisher/events';
 import type { RuleExecutorEvent } from '../rule_executor_event_publisher/events';
+import type { AlertStatusChangedEvent } from '../alert_status_changed_event_publisher/events';
 
 export type {
   AlertActionEvent,
@@ -89,6 +90,9 @@ export {
   RULE_EXECUTION_FAILED_EVENT_TYPE,
 } from '../rule_executor_event_publisher/events';
 
+export type { AlertStatusChangedEvent } from '../alert_status_changed_event_publisher/events';
+export { ALERT_STATUS_CHANGED_EVENT_TYPE } from '../alert_status_changed_event_publisher/events';
+
 /**
  * Discriminated union of every domain event the alerting framework publishes
  * on its event bus.
@@ -97,7 +101,11 @@ export {
  * (and its own envelope shape if it diverges). Extend this union by adding
  * each subdomain's sub-union here.
  */
-export type AlertingDomainEvent = AlertActionEvent | RuleEvent | RuleExecutorEvent;
+export type AlertingDomainEvent =
+  | AlertActionEvent
+  | RuleEvent
+  | RuleExecutorEvent
+  | AlertStatusChangedEvent;
 
 /**
  * Publisher-side context threaded through every alerting bus publish call.

@@ -46,7 +46,12 @@ export class DirectorStep implements RuleExecutionStep {
 
       yield {
         type: 'continue',
-        state: { ...state, alertEventsBatch: alertEvents, newEpisodeIds: stats.newEpisodeIds },
+        state: {
+          ...state,
+          alertEventsBatch: alertEvents,
+          newEpisodeIds: stats.newEpisodeIds,
+          alertStatusTransitions: stats.statusTransitions,
+        },
       };
     });
   }

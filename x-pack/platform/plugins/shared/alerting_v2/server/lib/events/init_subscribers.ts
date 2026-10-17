@@ -10,6 +10,7 @@ import { AlertActionWorkflowSubscriber } from './alert_action_workflow_subscribe
 import { RuleWorkflowSubscriber } from './rule_workflow_subscriber/rule_workflow_subscriber';
 import { RuleChangesHistorySubscriber } from './rule_changes_history_subscriber/rule_changes_history_subscriber';
 import { RuleExecutorWorkflowSubscriber } from './rule_executor_workflow_subscriber/rule_executor_workflow_subscriber';
+import { AlertStatusChangedWorkflowSubscriber } from './alert_status_changed_workflow_subscriber/alert_status_changed_workflow_subscriber';
 
 /**
  * Activates every event-bus subscriber. Intended to be invoked from the
@@ -23,4 +24,5 @@ export function initSubscribers(container: Container): void {
   container.get(RuleWorkflowSubscriber).start();
   container.get(RuleChangesHistorySubscriber).start();
   container.get(RuleExecutorWorkflowSubscriber).start();
+  container.get(AlertStatusChangedWorkflowSubscriber).start();
 }
