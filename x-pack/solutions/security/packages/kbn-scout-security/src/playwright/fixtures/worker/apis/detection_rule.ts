@@ -15,6 +15,7 @@ const DETECTION_ENGINE_RULES_BULK_ACTION = '/api/detection_engine/rules/_bulk_ac
 
 export interface DetectionRuleApiService {
   createCustomQueryRule: (body: CustomQueryRule) => Promise<{ id: string }>;
+  getById: (id: string) => Promise<CustomQueryRule>;
   disable: (id: string) => Promise<void>;
   createEqlRule: (body: EqlRule) => Promise<{ id: string }>;
   deleteAll: () => Promise<void>;
@@ -48,6 +49,14 @@ export const getDetectionRuleApiService = ({
       createRule('createCustomQueryRule', body),
 
     createEqlRule: async (body = EQL_RULE) => createRule('createEqlRule', body),
+
+    getById: async (id: string) => {
+      const { data } = await kbnClient.request<CustomQueryRule>({
+        method: 'GET',
+        path: `${basePath}${DETECTION_ENGINE_RULES_URL}?id=${encodeURIComponent(id)}`,
+      });
+      return data;
+    },
 
     disable: async (id: string) => {
       await measurePerformanceAsync(log, 'security.detectionRule.disable', async () => {
