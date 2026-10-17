@@ -926,6 +926,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_ingest_events_response'
           description: The ingress request was accepted. Downstream emit failures may still be partial; see server logs.
+        '403':
+          description: Inbound connector events are disabled.
         '404':
           description: Connector, connector type, or ingest token was not found or failed verification.
         '429':
