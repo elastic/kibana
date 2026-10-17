@@ -260,6 +260,67 @@ describe('cascading failures', () => {
   });
 });
 
+describe('infrastructure failures', () => {
+  const report = (rootAttrs: string, failure: string) => `
+    <testsuites name="ftr" ${rootAttrs}>
+      <testsuite name="FTR" timestamp="2026-07-15T12:00:00" time="1" tests="1" failures="1" skipped="0">
+        <testcase classname="FTR.x-pack/a·ts" name="a test" time="1">
+          <failure>${failure}</failure>
+        </testcase>
+      </testsuite>
+    </testsuites>
+  `;
+
+  it.each([
+    ['Error: Failed to parse SAML response value.', 'auth'],
+    ["Error: User with 'viewer' role is not defined", 'role'],
+    ['Error: connect ECONNREFUSED 10.0.0.1:443', 'connection'],
+    ['TimeoutError: Request timed out\n    at runRequest (Transport.ts:708:38)', 'es_timeout'],
+  ])('attributes "%s" on Cloud to infrastructure (%s)', async (message, category) => {
+    const [failure] = getFailures(
+      await parseTestReport(report('target="cloud-serverless-search"', message))
+    );
+
+    expect(failure.likelyIrrelevant).toBe(true);
+    expect(failure.infraReason?.category).toBe(category);
+  });
+
+  it('keeps the same errors relevant on local runs', async () => {
+    const failures = await Promise.all(
+      ['Error: connect ECONNREFUSED 127.0.0.1:5620', 'TimeoutError: Request timed out'].map(
+        async (message) =>
+          getFailures(await parseTestReport(report('target="local-serverless-search"', message)))
+      )
+    );
+
+    for (const [failure] of failures) {
+      expect(failure.likelyIrrelevant).toBe(false);
+      expect(failure.infraReason).toBeUndefined();
+    }
+  });
+
+  it('keeps them relevant when the report has no target', async () => {
+    const [failure] = getFailures(
+      await parseTestReport(report('', 'Error: Failed to parse SAML response value.'))
+    );
+
+    expect(failure.infraReason).toBeUndefined();
+  });
+
+  it('does not apply to non-FTR reports', async () => {
+    const [failure] = getFailures(
+      await parseTestReport(
+        report('target="cloud-serverless-search"', 'Error: connect ECONNREFUSED').replace(
+          'name="ftr"',
+          'name="jest"'
+        )
+      )
+    );
+
+    expect(failure.infraReason).toBeUndefined();
+  });
+});
+
 it('rewrites absolute checkout paths as repository relative ones', async () => {
   const report = await parseTestReport(`
     <testsuites name="ftr">

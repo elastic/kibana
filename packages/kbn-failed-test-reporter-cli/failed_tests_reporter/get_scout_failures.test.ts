@@ -73,6 +73,14 @@ describe('getScoutFailures', () => {
     expect(failure.infraReason?.category).toBe(category);
   });
 
+  it('keeps Elasticsearch request timeouts relevant, that rule is FTR only', async () => {
+    const message = 'TimeoutError: Request timed out';
+    const [failure] = await getScoutFailures(
+      writeReport([createEntry({ error: { message, stack_trace: message } })])
+    );
+    expect(failure.infraReason).toBeUndefined();
+  });
+
   it('keeps local SAML failures relevant but still attributes local ECONNREFUSED to infra', async () => {
     const target = 'local-serverless-observability_complete';
     const samlMessage = 'Error: SAML callback failed: expected 302, got 401';
