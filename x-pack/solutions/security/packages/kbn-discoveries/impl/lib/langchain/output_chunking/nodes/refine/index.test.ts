@@ -468,7 +468,7 @@ ${ATTACK_DISCOVERY_REFINE}
         completionTokens: 0,
         connectorId: 'test-connector-id',
         contentLength: 0,
-        model: 'anthropic-claude-5.5-opus',
+        model: 'test-model',
         promptTokens: 128390,
         responseBody: '',
         traceId: 'test-trace-id',

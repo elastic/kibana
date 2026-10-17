@@ -96,7 +96,7 @@ describe('getEmptyModelResponseError', () => {
       completionTokens: 0,
       connectorId: 'test-connector-id',
       contentLength: 0,
-      model: 'anthropic-claude-5.5-opus',
+      model: 'test-model',
       promptTokens: 128390,
       responseBody: '',
       traceId: 'test-trace-id',
@@ -110,7 +110,7 @@ describe('getEmptyModelResponseError', () => {
     });
 
     expect(error).toContain('test-connector-id');
-    expect(error).toContain('anthropic-claude-5.5-opus');
+    expect(error).toContain('test-model');
     expect(error).toContain('prompt tokens: 128390');
   });
 

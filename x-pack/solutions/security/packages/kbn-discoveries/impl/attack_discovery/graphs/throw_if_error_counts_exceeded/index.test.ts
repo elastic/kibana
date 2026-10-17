@@ -185,7 +185,7 @@ describe('throwIfErrorCountsExceeded', () => {
 
   describe('when the errors are empty model responses', () => {
     const emptyModelResponseError =
-      'generate node detected that the model returned an empty response (inference) on attempt 9; the response contained no content. This is a model or connector problem, not a prompt-size problem. Underlying error: the model returned an empty response (code: EMPTY_MODEL_RESPONSE); connectorId: test-connector-id; model: anthropic-claude-5.5-opus; prompt tokens: 128390; completion tokens: 0;';
+      'generate node detected that the model returned an empty response (inference) on attempt 9; the response contained no content. This is a model or connector problem, not a prompt-size problem. Underlying error: the model returned an empty response (code: EMPTY_MODEL_RESPONSE); connectorId: test-connector-id; model: test-model; prompt tokens: 128390; completion tokens: 0;';
 
     const getMessage = () => {
       try {
@@ -215,7 +215,7 @@ describe('throwIfErrorCountsExceeded', () => {
       const message = getMessage();
 
       expect(message).toContain('test-connector-id');
-      expect(message).toContain('anthropic-claude-5.5-opus');
+      expect(message).toContain('test-model');
       expect(message).toContain('prompt tokens: 128390');
     });
 

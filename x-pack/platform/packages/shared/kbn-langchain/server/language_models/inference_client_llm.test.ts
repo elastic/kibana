@@ -124,7 +124,7 @@ describe('InferenceClientLlm', () => {
     it('rejects with an empty-response error when the model returns no content', async () => {
       (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
         content: '',
-        model: 'anthropic-claude-5.5-opus',
+        model: 'test-model',
         tokens: { completion: 0, prompt: 128390, total: 128390 },
         toolCalls: [],
       });
@@ -133,7 +133,7 @@ describe('InferenceClientLlm', () => {
         connectorId,
         inferenceClient: mockInferenceClient,
         logger: mockLogger,
-        model: 'anthropic-claude-5.5-opus',
+        model: 'test-model',
       });
 
       const error = await llm._call('test prompt').catch((e) => e);
@@ -141,7 +141,7 @@ describe('InferenceClientLlm', () => {
       expect(error).toBeInstanceOf(EmptyModelResponseError);
       expect(error.message).toContain('the model returned an empty response');
       expect(error.message).toContain(connectorId);
-      expect(error.message).toContain('anthropic-claude-5.5-opus');
+      expect(error.message).toContain('test-model');
       expect(error.message).toContain('prompt tokens: 128390');
       expect(error.message).toContain('completion tokens: 0');
       expect(error).toEqual(
@@ -150,7 +150,7 @@ describe('InferenceClientLlm', () => {
           completionTokens: 0,
           connectorId,
           contentLength: 0,
-          model: 'anthropic-claude-5.5-opus',
+          model: 'test-model',
           promptTokens: 128390,
         })
       );
