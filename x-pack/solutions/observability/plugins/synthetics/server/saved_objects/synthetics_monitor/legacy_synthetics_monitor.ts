@@ -9,6 +9,7 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { attributesToIncludeInAAD } from './synthetics_monitor_config';
 import { monitorConfigMappings } from './monitor_mappings';
+import { scheduleIntervalModelVersion, scheduleUnitModelVersion } from './schedule_model_version';
 import { legacySyntheticsMonitorTypeSingle } from '../../../common/types/saved_objects';
 import { LegacyConfigKey, secretKeys } from '../../../common/constants/monitor_management';
 import { monitorMigrations } from '../migrations/monitors';
@@ -72,6 +73,8 @@ export const getLegacySyntheticsMonitorSavedObjectType = (
           },
         ],
       },
+      '3': scheduleUnitModelVersion,
+      '4': scheduleIntervalModelVersion,
     },
   };
 };

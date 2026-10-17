@@ -102,7 +102,14 @@ export const monitorConfigMappings: SavedObjectsTypeMappingDefinition = {
         number: {
           type: 'integer',
         },
+        unit: {
+          type: 'keyword',
+        },
       },
+    },
+    // Kept outside `schedule`: that attribute is part of the encryption AAD.
+    schedule_interval_seconds: {
+      type: 'integer',
     },
     enabled: {
       type: 'boolean',

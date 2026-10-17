@@ -7,7 +7,7 @@
 
 import type { SyntheticsMonitorSchedule } from '../runtime_types';
 import { ScheduleUnit } from '../runtime_types';
-import { scheduleToMilli } from './schedule_to_time';
+import { scheduleToMilli, scheduleToSeconds, withScheduleInterval } from './schedule_to_time';
 
 describe('schedule_to_time', () => {
   describe('scheduleToMilli', () => {
@@ -19,6 +19,33 @@ describe('schedule_to_time', () => {
     it('converts minutes schedule to millis', () => {
       const schedule: SyntheticsMonitorSchedule = { unit: ScheduleUnit.MINUTES, number: '6' };
       expect(scheduleToMilli(schedule)).toEqual(6 * 60 * 1000);
+    });
+  });
+
+  describe('scheduleToSeconds', () => {
+    it('keeps seconds and converts minutes', () => {
+      expect(scheduleToSeconds({ unit: ScheduleUnit.SECONDS, number: '10' })).toBe(10);
+      expect(scheduleToSeconds({ unit: ScheduleUnit.MINUTES, number: '10' })).toBe(600);
+      expect(scheduleToSeconds({ unit: ScheduleUnit.MINUTES, number: '5' })).toBe(300);
+    });
+  });
+
+  describe('withScheduleInterval', () => {
+    it('stores the duration beside the schedule', () => {
+      expect(
+        withScheduleInterval({
+          name: 'login',
+          schedule: { number: '10', unit: ScheduleUnit.SECONDS },
+        })
+      ).toEqual({
+        name: 'login',
+        schedule: { number: '10', unit: ScheduleUnit.SECONDS },
+        schedule_interval_seconds: 10,
+      });
+    });
+
+    it('leaves attributes unchanged when there is no schedule', () => {
+      expect(withScheduleInterval({ name: 'login' })).toEqual({ name: 'login' });
     });
   });
 });

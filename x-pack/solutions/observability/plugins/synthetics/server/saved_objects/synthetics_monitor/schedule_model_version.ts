@@ -1,0 +1,78 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  SavedObjectModelDataBackfillFn,
+  SavedObjectsModelVersion,
+} from '@kbn/core-saved-objects-server';
+import { ScheduleUnit } from '../../../common/runtime_types';
+import { SCHEDULE_INTERVAL_FIELD, scheduleToSeconds } from '../../../common/lib/schedule_to_time';
+
+export const scheduleUnitModelVersion: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        schedule: {
+          properties: {
+            unit: { type: 'keyword' },
+          },
+        },
+      },
+    },
+  ],
+};
+
+interface ScheduleAttributes {
+  schedule?: {
+    number?: string;
+    unit?: string;
+  };
+}
+
+export const backfillScheduleInterval: SavedObjectModelDataBackfillFn<
+  ScheduleAttributes,
+  { schedule_interval_seconds?: number }
+> = (document) => {
+  const schedule = document.attributes.schedule;
+  if (!schedule?.number) {
+    return { attributes: {} };
+  }
+  // A missing unit is minutes, matching schedules saved before unit was indexed.
+  let unit: ScheduleUnit | undefined;
+  if (schedule.unit === ScheduleUnit.SECONDS) {
+    unit = ScheduleUnit.SECONDS;
+  } else if (schedule.unit === ScheduleUnit.MINUTES || schedule.unit == null) {
+    unit = ScheduleUnit.MINUTES;
+  }
+  if (!unit) {
+    return { attributes: {} };
+  }
+  return {
+    attributes: {
+      [SCHEDULE_INTERVAL_FIELD]: scheduleToSeconds({
+        number: schedule.number,
+        unit,
+      }),
+    },
+  };
+};
+
+export const scheduleIntervalModelVersion: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        [SCHEDULE_INTERVAL_FIELD]: { type: 'integer' },
+      },
+    },
+    {
+      type: 'data_backfill',
+      backfillFn: backfillScheduleInterval,
+    },
+  ],
+};

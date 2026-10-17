@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { invert } from 'lodash';
 import type { ServiceLocations } from '../../../../../common/runtime_types';
-import { MonitorTypeEnum } from '../../../../../common/runtime_types';
+import { MonitorTypeEnum, ScheduleUnit } from '../../../../../common/runtime_types';
 import type { MonitorFilterState } from '../../state';
 
 export type SyntheticsMonitorFilterField = keyof Omit<
@@ -63,10 +63,7 @@ export function getSyntheticsFilterDisplayValues(
       }));
     case 'schedules':
       return values.map(({ label, count }: { label: string; count: number }) => ({
-        label: i18n.translate('xpack.synthetics.monitorFilters.frequencyLabel', {
-          defaultMessage: `Every {count} minutes`,
-          values: { count: label },
-        }),
+        label: scheduleFrequencyDisplayLabel(label),
         count,
       }));
     case 'locations':
@@ -90,7 +87,7 @@ export function getSyntheticsFilterKeyForLabel(value: string, field: SyntheticsM
     case 'monitorTypes':
       return invert(monitorTypeKeyLabelMap)[value] ?? value;
     case 'schedules':
-      return (value ?? '').replace(/\D/g, '');
+      return scheduleKeyForLabel(value);
     default:
       return value;
   }
@@ -101,6 +98,57 @@ export const valueToLabelWithEmptyCount = (value?: string | string[]): LabelWith
     return value.map((v) => ({ label: v, count: 0 }));
   }
   return value ? [{ label: value, count: 0 }] : [];
+};
+
+/** A bare number is minutes, matching older filter URLs. */
+const parseScheduleFilterKey = (
+  value: string
+): { number: string; unit: ScheduleUnit } | undefined => {
+  const match = /^(\d+)([sm])?$/.exec(value);
+  if (!match) {
+    return undefined;
+  }
+  return {
+    number: match[1],
+    unit: match[2] === ScheduleUnit.SECONDS ? ScheduleUnit.SECONDS : ScheduleUnit.MINUTES,
+  };
+};
+
+const scheduleFrequencyLabel = (count: number, unit: ScheduleUnit): string => {
+  if (unit === ScheduleUnit.SECONDS) {
+    return i18n.translate('xpack.synthetics.monitorFilters.frequencyInSecondsLabel', {
+      defaultMessage: 'Every {count} {count, plural, one {second} other {seconds}}',
+      values: { count },
+    });
+  }
+  return i18n.translate('xpack.synthetics.monitorFilters.frequencyInMinutesLabel', {
+    defaultMessage: 'Every {count} {count, plural, one {minute} other {minutes}}',
+    values: { count },
+  });
+};
+
+const scheduleFrequencyDisplayLabel = (value: string): string => {
+  const parsed = parseScheduleFilterKey(value);
+  return parsed ? scheduleFrequencyLabel(Number(parsed.number), parsed.unit) : value;
+};
+
+const scheduleKeyForLabel = (value: string): string => {
+  const parsed = parseScheduleFilterKey(value ?? '');
+  if (parsed) {
+    return `${parsed.number}${parsed.unit}`;
+  }
+
+  const digits = (value ?? '').replace(/\D/g, '');
+  if (!digits) {
+    return '';
+  }
+
+  const count = Number(digits);
+  const unit =
+    value === scheduleFrequencyLabel(count, ScheduleUnit.SECONDS)
+      ? ScheduleUnit.SECONDS
+      : ScheduleUnit.MINUTES;
+  return `${digits}${unit}`;
 };
 
 export const monitorTypeKeyLabelMap: Record<MonitorTypeEnum, string> = {
