@@ -11,6 +11,35 @@ import { buildAd2SeedPlan, getAd2ScenarioAlertIds } from './registry';
 describe('AD2 scenario registry (clean profile)', () => {
   const fixedBaseTime = new Date('2026-07-13T12:00:00.000Z');
 
+  it('stamps the enrolled agent id onto the alerts of the mapped host when agentIdByHost is set', () => {
+    const plan = buildAd2SeedPlan({
+      profile: 'clean',
+      scenarioKey: 'encoded-powershell',
+      baseTime: fixedBaseTime,
+      agentIdByHost: { 'wks-alice-01': 'enrolled-agent-id' },
+    });
+    // Scenario 'encoded-powershell' runs on wks-alice-01, so every alert (and raw event)
+    // carries the enrolled agent id instead of the synthetic seeded one.
+    expect(plan.alerts.length).toBeGreaterThan(0);
+    for (const alert of plan.alerts) {
+      expect((alert.source.agent as { id?: string }).id).toBe('enrolled-agent-id');
+    }
+    for (const event of plan.rawEvents) {
+      expect((event.source.agent as { id?: string }).id).toBe('enrolled-agent-id');
+    }
+  });
+
+  it('keeps the synthetic agent ids when agentIdByHost is unset', () => {
+    const plan = buildAd2SeedPlan({
+      profile: 'clean',
+      scenarioKey: 'encoded-powershell',
+      baseTime: fixedBaseTime,
+    });
+    const synthetic = plan.alerts.map((alert) => (alert.source.agent as { id: string }).id);
+    expect(synthetic.every((id) => id !== 'enrolled-agent-id')).toBe(true);
+    expect(new Set(synthetic).size).toBe(1); // one synthetic agent per host
+  });
+
   it('builds 16 alerts and raw events for the clean profile', () => {
     const plan = buildAd2SeedPlan({ profile: 'clean', baseTime: fixedBaseTime });
 

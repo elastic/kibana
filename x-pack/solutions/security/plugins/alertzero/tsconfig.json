@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/security-plugin-types-server",
@@ -46,6 +46,7 @@
     "@kbn/logging-mocks",
     "@kbn/core-http-server-mocks",
     "@kbn/core-security-server",
+    "@kbn/scout-security",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-server",
     "@kbn/charts-theme",

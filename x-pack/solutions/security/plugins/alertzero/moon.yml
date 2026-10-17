@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-security-server'
+  - '@kbn/scout-security'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-http-server'
   - '@kbn/charts-theme'
@@ -96,6 +97,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

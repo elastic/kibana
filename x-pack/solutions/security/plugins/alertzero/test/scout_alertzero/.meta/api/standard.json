@@ -1,0 +1,36 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "8e7b651129dfe98-460301e2b6bc371",
+      "title": "AlertZero managed workflows system-security-detection-coverage: is installed and valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/managed_workflows.spec.ts",
+        "line": 44,
+        "column": 26
+      }
+    },
+    {
+      "id": "8e7b651129dfe98-f29d7699313e391",
+      "title": "AlertZero managed workflows system-security-floor-alert-triage-default: is installed and valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/managed_workflows.spec.ts",
+        "line": 44,
+        "column": 26
+      }
+    }
+  ]
+}
