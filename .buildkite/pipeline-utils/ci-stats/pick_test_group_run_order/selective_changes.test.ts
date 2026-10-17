@@ -8,10 +8,10 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import * as gitStrategy from '../../affected-packages/strategy_git.ts';
+import { join, resolve } from 'node:path';
+import * as moonStrategy from '../../affected-packages/strategy_moon.ts';
 
 let mockRepoRoot: string;
 jest.mock('../../get_kibana_dir.ts', () => ({ getKibanaDir: () => mockRepoRoot }));
@@ -40,7 +40,14 @@ describe('resolveSelectiveTestingChanges', () => {
 
   beforeEach(() => {
     jest.spyOn(console, 'log').mockImplementation(() => {});
+    // The temp repo has no node_modules, so point at the Kibana checkout's moon.
+    process.env.MOON_BIN = resolve(__dirname, '../../../../node_modules/.bin/moon');
     mockRepoRoot = mkdtempSync(join(tmpdir(), 'selective-changes-'));
+    mkdirSync(join(mockRepoRoot, '.moon'));
+    writeFileSync(
+      join(mockRepoRoot, '.moon/workspace.yml'),
+      'vcs:\n  client: git\n  defaultBranch: main\n'
+    );
     git('init', '-b', 'main');
     git('config', 'user.name', 'Test');
     git('config', 'user.email', 'test@example.com');
@@ -53,6 +60,7 @@ describe('resolveSelectiveTestingChanges', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+    delete process.env.MOON_BIN;
     rmSync(mockRepoRoot, { recursive: true, force: true });
   });
 
@@ -82,11 +90,11 @@ describe('resolveSelectiveTestingChanges', () => {
   it.each([true, false])(
     'propagates changed-file detection failures (merge queue: %s)',
     (isMergeQueue) => {
-      jest.spyOn(gitStrategy, 'listChangedFiles').mockImplementationOnce(() => {
-        throw new Error('git diff failed');
+      jest.spyOn(moonStrategy, 'listChangedFilesMoon').mockImplementationOnce(() => {
+        throw new Error('moon query changed-files failed');
       });
       expect(() => resolveSelectiveTestingChanges(groupBase, isMergeQueue)).toThrow(
-        'git diff failed'
+        'moon query changed-files failed'
       );
     }
   );
@@ -114,5 +122,16 @@ describe('resolveSelectiveTestingChanges', () => {
     expect(console.log).toHaveBeenCalledWith(
       `Selective testing comparison: base=${originalBase} head=${groupHead} changedFiles=3`
     );
+  });
+
+  it('includes files deleted since the base, since they still change their module', () => {
+    git('rm', '-q', 'README.md');
+    git('commit', '-m', 'delete README.md');
+
+    expect(resolveSelectiveTestingChanges(groupBase, false)).toEqual([
+      'README.md',
+      'first.ts',
+      'second.ts',
+    ]);
   });
 });

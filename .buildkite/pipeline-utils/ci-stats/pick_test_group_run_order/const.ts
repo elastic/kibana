@@ -40,7 +40,10 @@
  *                                       squash groups, the parent of HEAD); selective-testing base
  *   MERGE_QUEUE_MERGE_BASE       — merge base with main, below earlier queued PRs; ci-stats only
  *   GITHUB_PR_LABELS             — comma-separated PR labels; ci:prevent-selective-testing
- *                                  disables selective testing
+ *                                  disables selective testing (Jest filtering and FTR domains)
+ *   FTR_DOMAIN_SELECTION         — off | dry-run | enabled; on PRs, run only the FTR manifest
+ *                                  domains the diff affects (dry-run only annotates the skips).
+ *                                  Ignored when LIMIT_SOLUTIONS is set.
  */
 
 /**
