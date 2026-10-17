@@ -81,7 +81,7 @@ describe('series queries apply the entity filters where the count does', () => {
       tile: 'alert based',
       series: buildAlertBasedTilesSeriesQuery(INDEX, NAMESPACE, '7d', FILTERS),
       count: buildAlertBasedTilesQuery(INDEX, NAMESPACE, '7d', FILTERS),
-      shared: lookupJoinTo('| EVAL is_watchlisted'),
+      shared: lookupJoinTo('| EVAL effective_id'),
     },
     {
       tile: 'anomalies',
@@ -94,7 +94,10 @@ describe('series queries apply the entity filters where the count does', () => {
       series: buildNewEntitySeriesQuery(INDEX, '7d', FILTERS),
       count: buildNewEntityCountQuery(INDEX, '7d', FILTERS),
       shared: (query: string) =>
-        query.slice(query.indexOf('| WHERE entity.risk'), query.indexOf('| EVAL effective_id')),
+        query.slice(
+          query.indexOf('| WHERE entity.name IS NOT NULL'),
+          query.indexOf('| EVAL group_score')
+        ),
     },
   ])('for the $tile tile', ({ series, count, shared }) => {
     expect(shared(series)).toContain(FILTERS[0]);

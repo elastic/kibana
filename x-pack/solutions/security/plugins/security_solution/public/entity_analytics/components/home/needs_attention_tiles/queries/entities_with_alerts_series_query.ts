@@ -6,7 +6,7 @@
  */
 
 import type { TimeRange } from '../../entities_grid/common';
-import { buildAlertTilesHead } from './entities_with_alerts_query';
+import { GROUP_ON_WATCHLIST, buildAlertTilesHead } from './entities_with_alerts_query';
 import {
   SERIES_BUCKET_COLUMN,
   buildSeriesBucketExpression,
@@ -19,6 +19,9 @@ import {
 export const severeAlertsSeriesColumn = (k: number): string => `severe_alerts_${k}`;
 
 /** Returns the result column of dot `k` (0 = newest) of the Watchlisted tile. */
+/** The helper column of dot `k`: the earliest bucket in its window with an alert of any severity. */
+const alertedColumn = (k: number): string => `alerted_${k}`;
+
 export const watchlistedSeriesColumn = (k: number): string => `watchlisted_${k}`;
 
 /**
@@ -47,26 +50,29 @@ export const buildAlertBasedTilesSeriesQuery = (
     bucketExpression: buildSeriesBucketExpression(timeRange),
   });
 
-  const perEntity: string[] = [];
+  // One row per resolved group: for each dot, the earliest bucket inside its window in which the
+  // group had an alert (`any`) or a severe alert; plus whether any of its members is watchlisted.
+  const perGroup: string[] = [];
   const counts: string[] = [];
   for (let k = 0; k < dots; k++) {
     const dotWindow = buildSeriesDotWindow(timeRange, k);
-    perEntity.push(
+    perGroup.push(
       `${severeAlertsSeriesColumn(
         k
       )} = MIN(${SERIES_BUCKET_COLUMN}) WHERE has_severe_alert AND ${dotWindow}`,
-      `${watchlistedSeriesColumn(
-        k
-      )} = MIN(${SERIES_BUCKET_COLUMN}) WHERE is_watchlisted AND ${dotWindow}`
+      `${alertedColumn(k)} = MIN(${SERIES_BUCKET_COLUMN}) WHERE ${dotWindow}`
     );
     counts.push(
       `${severeAlertsSeriesColumn(k)} = COUNT(${severeAlertsSeriesColumn(k)})`,
-      `${watchlistedSeriesColumn(k)} = COUNT(${watchlistedSeriesColumn(k)})`
+      `${watchlistedSeriesColumn(k)} = COUNT(CASE(${GROUP_ON_WATCHLIST}, ${alertedColumn(
+        k
+      )}, null))`
     );
   }
 
   parts.push(`| STATS`);
-  parts.push(`    ${perEntity.join(',\n    ')}`);
+  parts.push(`    ${perGroup.join(',\n    ')},`);
+  parts.push(`    group_on_watchlist = MAX(group_on_watchlist)`);
   parts.push(`    BY effective_id`);
   parts.push(`| STATS`);
   parts.push(`    ${counts.join(',\n    ')}`);
