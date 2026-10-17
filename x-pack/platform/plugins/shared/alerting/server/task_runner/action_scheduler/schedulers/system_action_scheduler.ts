@@ -13,6 +13,7 @@ import type { RuleTypeState, RuleAlertData } from '../../../../common';
 import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
 import {
   buildRuleUrl,
+  collectAlertContextByUuid,
   formatActionToEnqueue,
   getSummarizedAlerts,
   shouldScheduleAction,
@@ -63,9 +64,13 @@ export class SystemActionScheduler<
     return 1;
   }
 
-  public async getActionsToSchedule(
-    _: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>
-  ): Promise<ActionsToSchedule[]> {
+  public async getActionsToSchedule({
+    activeAlerts,
+    recoveredAlerts,
+  }: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
+    ActionsToSchedule[]
+  > {
+    const contextByAlertUuid = collectAlertContextByUuid(activeAlerts, recoveredAlerts);
     const executables: Array<{
       action: RuleSystemAction;
       summarizedAlerts: CombinedSummarizedAlerts;
@@ -172,6 +177,7 @@ export class SystemActionScheduler<
         ruleUrl: ruleUrl?.absoluteUrl,
         spaceId: this.context.taskInstance.params.spaceId,
         params: action.params,
+        contextByAlertUuid,
       });
 
       const actionToRun = Object.assign(action, { params: connectorAdapterActionParams });

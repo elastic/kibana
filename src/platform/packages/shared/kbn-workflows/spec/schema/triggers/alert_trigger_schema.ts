@@ -23,6 +23,7 @@ export const AlertSchema = z.object({
     alert: z.unknown(),
   }),
   '@timestamp': z.string(),
+  context: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const RuleSchema = z.object({
