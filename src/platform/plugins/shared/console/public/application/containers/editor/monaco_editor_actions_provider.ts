@@ -825,6 +825,7 @@ export class MonacoEditorActionsProvider {
     position: monaco.Position,
     context: monaco.languages.CompletionContext
   ): Promise<monaco.languages.CompletionList> {
+    const modelVersionId = model.getVersionId();
     // A triple-quoted string holds raw content (e.g. a Painless script), so Console has nothing
     // to suggest inside one. `triggerSuggestions` already suppresses its own auto-trigger there,
     // but this provider is also invoked directly (manual Ctrl+Space, Monaco trigger characters),
@@ -884,6 +885,13 @@ export class MonacoEditorActionsProvider {
       const request = await this.getRequestEndingAtOrBeforeLine(model, position.lineNumber);
       if (!request) {
         return { suggestions: [] };
+      }
+      // The awaits above (parser worker round trip) can outlive keystrokes. Body suggestions read the
+      // text after `position` from the live model to decide whether to expand a template and which
+      // range to replace, so computing them for a stale position yields mangled insertions.
+      // `incomplete` makes Monaco query the provider again on the next keystroke.
+      if (model.getVersionId() !== modelVersionId) {
+        return { suggestions: [], incomplete: true };
       }
       const requestStartLineNumber = request.startLineNumber;
       const suggestions = await getBodyCompletionItems(
