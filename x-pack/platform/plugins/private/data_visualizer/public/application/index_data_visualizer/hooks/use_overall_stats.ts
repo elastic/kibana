@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
 import type { Subscription } from 'rxjs';
 import { map } from 'rxjs';
@@ -69,7 +70,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
   esql = false,
   searchStrategyParams: TParams | undefined,
   lastRefresh: number,
-  probability?: number | null
+  probability?: number | null,
+  requestCancellationManager?: RequestCancellationManager
 ): {
   progress: DataStatsFetchProgress;
   overallStats: OverallStats;
@@ -95,8 +97,14 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     getInitialProgress()
   );
 
-  const abortCtrl = useRef(new AbortController());
-  const populatedFieldsAbortCtrl = useRef(new AbortController());
+  const [initialAbortCtrl] = useState(
+    () => requestCancellationManager?.createChildController() ?? new AbortController()
+  );
+  const [initialPopulatedFieldsAbortCtrl] = useState(
+    () => requestCancellationManager?.createChildController() ?? new AbortController()
+  );
+  const abortCtrl = useRef(initialAbortCtrl);
+  const populatedFieldsAbortCtrl = useRef(initialPopulatedFieldsAbortCtrl);
 
   const searchSubscription$ = useRef<Subscription>();
 
@@ -113,7 +121,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
       const fetchPopulatedFields = async () => {
         populatedFieldsAbortCtrl.current.abort();
-        populatedFieldsAbortCtrl.current = new AbortController();
+        populatedFieldsAbortCtrl.current =
+          requestCancellationManager?.createChildController() ?? new AbortController();
 
         // Trick to avoid duplicate getFieldsForWildcard requests
         // wouldn't make sense to make time-based query if either earliest & latest timestamps is undefined
@@ -170,7 +179,15 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     try {
       searchSubscription$.current?.unsubscribe();
       abortCtrl.current.abort();
-      abortCtrl.current = new AbortController();
+      abortCtrl.current =
+        requestCancellationManager?.createChildController() ?? new AbortController();
+
+      // The panel was cancelled and no new load has started yet, don't start requests.
+      // Note this must not mark the fetch as loaded, that would report the panel as rendered.
+      if (requestCancellationManager?.signal.aborted) {
+        setFetchState({ isRunning: false, cancelled: true });
+        return;
+      }
 
       if (
         !searchStrategyParams ||
@@ -386,9 +403,12 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           });
         },
         error: (error) => {
-          if (error.name !== 'AbortError') {
-            displayError(toasts, searchStrategyParams.index, extractErrorProperties(error));
+          if (error.name === 'AbortError') {
+            setFetchState({ isRunning: false, cancelled: true });
+            return;
           }
+
+          displayError(toasts, searchStrategyParams.index, extractErrorProperties(error));
 
           setFetchState({
             isRunning: false,
@@ -415,6 +435,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     lastRefresh,
     probability,
     populatedFieldsInIndexWithoutRuntimeFields,
+    requestCancellationManager,
   ]);
 
   const cancelFetch = useCallback(() => {

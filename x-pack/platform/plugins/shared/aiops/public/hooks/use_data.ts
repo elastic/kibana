@@ -22,6 +22,7 @@ import type { GroupTableItem } from '@kbn/aiops-log-rate-analysis/state';
 
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { ProjectRouting } from '@kbn/es-query';
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 
 import { useAiopsAppContext } from './use_aiops_app_context';
@@ -40,7 +41,9 @@ export const useData = (
   barTarget: number = DEFAULT_BAR_TARGET,
   changePointsByDefault = true,
   timeRange?: { min: Moment; max: Moment },
+  requestCancellationManager?: RequestCancellationManager,
   projectRoutingOverride?: string,
+  onDocumentCountLoadingChange?: (isLoading: boolean) => void,
   /** ES|QL document scope; when set, document counts come from ES|QL instead of DSL. */
   esqlQuery?: string,
   /** Upper limit for the number of histogram buckets, instead of the `histogram:maxBars` setting. */
@@ -117,7 +120,9 @@ export const useData = (
     selectedSignificantItemStatsRequest,
     lastRefresh,
     changePointsByDefault,
+    requestCancellationManager,
     projectRoutingOverride,
+    onDocumentCountLoadingChange,
     esqlQuery
   );
 

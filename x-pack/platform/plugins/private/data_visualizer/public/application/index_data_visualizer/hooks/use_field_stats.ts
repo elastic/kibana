@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import type { Observable, Subscription } from 'rxjs';
 import { combineLatest, from, Subject } from 'rxjs';
@@ -65,7 +66,8 @@ export function useFieldStatsSearchStrategy(
   searchStrategyParams: OverallStatsSearchStrategyParams | undefined,
   fieldStatsParams: FieldStatsParams | undefined,
   dataVisualizerListState: DataVisualizerIndexBasedAppState,
-  samplingProbability: number | null
+  samplingProbability: number | null,
+  requestCancellationManager?: RequestCancellationManager
 ): FieldStatsSearchStrategyReturnBase {
   const {
     services: {
@@ -81,7 +83,10 @@ export function useFieldStatsSearchStrategy(
     getInitialProgress()
   );
 
-  const abortCtrl = useRef(new AbortController());
+  const [initialAbortCtrl] = useState(
+    () => requestCancellationManager?.createChildController() ?? new AbortController()
+  );
+  const abortCtrl = useRef(initialAbortCtrl);
   const searchSubscription$ = useRef<Subscription>();
   const retries$ = useRef<Subscription>();
 
@@ -89,7 +94,15 @@ export function useFieldStatsSearchStrategy(
     searchSubscription$.current?.unsubscribe();
     retries$.current?.unsubscribe();
     abortCtrl.current.abort();
-    abortCtrl.current = new AbortController();
+    abortCtrl.current =
+      requestCancellationManager?.createChildController() ?? new AbortController();
+
+    // The panel was cancelled and no new load has started yet, don't start requests.
+    if (requestCancellationManager?.signal.aborted) {
+      setFetchState({ isRunning: false, cancelled: true });
+      return;
+    }
+
     setFetchState({
       ...getInitialProgress(),
       error: undefined,
@@ -198,6 +211,12 @@ export function useFieldStatsSearchStrategy(
       .filter((obs) => obs !== undefined) as Array<Observable<FieldStats[] | FieldStatsError>>;
 
     const onError = (error: any) => {
+      // Cancelled requests are not errors
+      if (error?.name === 'AbortError') {
+        setFetchState({ isRunning: false, cancelled: true });
+        return;
+      }
+
       // eslint-disable-next-line no-console
       console.error(
         i18n.translate('xpack.dataVisualizer.index.errorFetchingFieldStatisticsMessage', {
@@ -312,6 +331,7 @@ export function useFieldStatsSearchStrategy(
     dataVisualizerListState.sortDirection,
     dataVisualizerListState.sortField,
     samplingProbability,
+    requestCancellationManager,
   ]);
 
   const cancelFetch = useCallback(() => {

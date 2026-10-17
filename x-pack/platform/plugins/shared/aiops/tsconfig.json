@@ -9,6 +9,7 @@
     "public/**/*",
     "scripts/**/*",
     "server/**/*",
+    "test/scout/**/*",
     "types/**/*"
   ],
   "kbn_references": [
@@ -69,6 +70,7 @@
     "@kbn/presentation-util-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/saved-search-plugin",
+    "@kbn/scout",
     "@kbn/search-types",
     "@kbn/share-plugin",
     "@kbn/shared-ux-utility",

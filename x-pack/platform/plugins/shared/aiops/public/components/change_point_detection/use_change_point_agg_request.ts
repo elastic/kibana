@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { MappingRuntimeFields, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { METRIC_TYPE } from '@kbn/analytics';
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import { useReload } from '../../hooks/use_reload';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import type {
@@ -119,7 +120,8 @@ export function useChangePointResults(
   fieldConfig: FieldConfig,
   requestParams: ChangePointDetectionRequestParams,
   query: QueryDslQueryContainer,
-  splitFieldCardinality: number | null
+  splitFieldCardinality: number | null,
+  requestCancellationManager?: RequestCancellationManager
 ) {
   const {
     notifications: { toasts },
@@ -149,7 +151,7 @@ export function useChangePointResults(
     );
   }, [splitFieldCardinality]);
 
-  const { runRequest, cancelRequest } = useCancellableSearch();
+  const { runRequest, cancelRequest } = useCancellableSearch(requestCancellationManager);
 
   const reset = useCallback(() => {
     cancelRequest();

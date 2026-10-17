@@ -119,7 +119,8 @@ export const getFieldStatsChartEmbeddableFactory = (
         resetData$,
         fieldStatsStateManager,
       } = initializeFieldStatsControls(state, deps.uiSettings);
-      const { onError, dataLoading$, blockingError$ } = dataLoadingApi;
+      const { onError, dataLoading$, blockingError$, cancelRequests, requestCancellationManager } =
+        dataLoadingApi;
 
       const validDataViewId: string | undefined =
         state.view_type === FieldStatsInitializerViewType.DATA_VIEW &&
@@ -214,6 +215,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         dataLoading$,
         // PublishesBlockingError
         blockingError$,
+        cancelRequests,
         getTypeDisplayName: () =>
           i18n.translate('xpack.dataVisualizer.fieldStats.typeDisplayName', {
             defaultMessage: 'field statistics',
@@ -254,6 +256,11 @@ export const getFieldStatsChartEmbeddableFactory = (
         map(() => Date.now())
       );
       const reset$ = resetData$.pipe(skip(1), distinctUntilChanged());
+
+      // Starting a new load lifts a previous cancellation.
+      subscriptions.add(
+        merge(fetch$(api), reset$).subscribe(() => requestCancellationManager.startLoad())
+      );
 
       const onTableUpdate = (changes: Partial<DataVisualizerTableState>) => {
         if (isDefined(changes?.showDistributions)) {
@@ -410,6 +417,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                 resetData$={reset$}
                 timeRange={timeRange}
                 onRenderComplete={dataLoadingApi.onRenderComplete}
+                requestCancellationManager={requestCancellationManager}
                 isInteractive={viewMode !== 'non-interactive'}
               />
             </EuiFlexItem>

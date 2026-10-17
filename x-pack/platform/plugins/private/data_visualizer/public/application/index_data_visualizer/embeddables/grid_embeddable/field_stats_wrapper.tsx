@@ -68,6 +68,7 @@ const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps
         resetData$={props.resetData$}
         onRenderComplete={props.onRenderComplete}
         onFieldsCountChange={props.onFieldsCountChange}
+        requestCancellationManager={props.requestCancellationManager}
         isInteractive={props.isInteractive}
       />
     );
@@ -94,7 +95,6 @@ const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps
         resetData$={props.resetData$}
         onRenderComplete={props.onRenderComplete}
         onFieldsCountChange={props.onFieldsCountChange}
-        isInteractive={props.isInteractive}
       />
     );
   } else {
@@ -205,6 +205,7 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
             timeRange={props.timeRange}
             onRenderComplete={props.onRenderComplete}
             onFieldsCountChange={props.onFieldsCountChange}
+            requestCancellationManager={props.requestCancellationManager}
             isInteractive={props.isInteractive}
           />
         </DatePickerContextProvider>

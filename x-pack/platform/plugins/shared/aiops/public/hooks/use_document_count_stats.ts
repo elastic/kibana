@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
 
@@ -62,7 +63,9 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   searchParamsCompare: TParams | undefined,
   lastRefresh: number,
   changePointsByDefault = true,
+  requestCancellationManager?: RequestCancellationManager,
   projectRoutingOverride?: string,
+  onLoadingChange?: (isLoading: boolean) => void,
   esqlQuery?: string
 ): DocumentStats {
   const {
@@ -72,6 +75,9 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   } = useAiopsAppContext();
 
   const abortCtrl = useRef(new AbortController());
+  // Only the latest request may report that loading finished, a superseded request
+  // finishing late must not clear the loading state of the one that replaced it.
+  const latestRequestId = useRef(0);
 
   const [documentStats, setDocumentStats] = useState<DocumentStats>({
     sampleProbability: 1,
@@ -85,15 +91,27 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   );
 
   const fetchDocumentCountData = useCallback(async () => {
+    const requestId = ++latestRequestId.current;
+
     if (!searchParams) return;
 
     if (documentStatsCache[cacheKey]) {
       setDocumentStats(documentStatsCache[cacheKey]);
+      onLoadingChange?.(false);
       return;
     }
 
+    // The panel was cancelled and no new load has started yet, don't start requests.
+    if (requestCancellationManager?.signal.aborted) {
+      onLoadingChange?.(false);
+      return;
+    }
+
+    onLoadingChange?.(true);
+
     try {
-      abortCtrl.current = new AbortController();
+      abortCtrl.current =
+        requestCancellationManager?.createChildController() ?? new AbortController();
 
       if (
         esqlQuery !== undefined &&
@@ -214,10 +232,21 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
           errorMessage: extractErrorMessage(error),
         }));
       }
+    } finally {
+      if (requestId === latestRequestId.current) {
+        onLoadingChange?.(false);
+      }
     }
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.search, documentStatsCache, cacheKey]);
+  }, [
+    data?.search,
+    documentStatsCache,
+    cacheKey,
+    requestCancellationManager,
+    projectRoutingOverride,
+    onLoadingChange,
+  ]);
 
   useEffect(
     function getDocumentCountData() {

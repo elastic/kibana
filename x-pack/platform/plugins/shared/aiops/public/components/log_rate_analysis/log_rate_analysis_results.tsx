@@ -24,6 +24,7 @@ import { KbnWarningCallout } from '@kbn/ui-callout';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ProgressControls } from '@kbn/aiops-components';
 import { cancelStream, startStream } from '@kbn/ml-response-stream/client';
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import {
   clearAllRowState,
   setGroupResults,
@@ -92,6 +93,8 @@ interface LogRateAnalysisResultsProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
+  /** Optional manager used by dashboard panels to cancel in-flight and pending requests */
+  requestCancellationManager?: RequestCancellationManager;
   parentApi?: unknown;
 }
 
@@ -100,6 +103,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   searchQuery,
   barColorOverride,
   barHighlightColorOverride,
+  requestCancellationManager,
   parentApi,
 }) => {
   const { analytics, http, embeddingOrigin, cps } = useAiopsAppContext();
@@ -125,7 +129,10 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   // Store the performance metric's start time using a ref
   // to be able to track it across rerenders.
   const analysisStartTime = useRef<number | undefined>(window.performance.now());
-  const abortCtrl = useRef(new AbortController());
+  const [initialAbortCtrl] = useState(
+    () => requestCancellationManager?.createChildController() ?? new AbortController()
+  );
+  const abortCtrl = useRef(initialAbortCtrl);
   const previousSearchQuery = useRef(searchQuery);
   const [overrides, setOverrides] = useState<AiopsLogRateAnalysisSchema['overrides'] | undefined>(
     undefined
@@ -163,6 +170,26 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     abortCtrl.current.abort();
     dispatch(cancelStream());
   }
+
+  // Propagates cancellations from the dashboard panel. Aborting the stream request alone
+  // isn't enough, `cancelStream` also marks the stream as no longer running.
+  useEffect(() => {
+    const signal = requestCancellationManager?.signal;
+    if (!signal) return;
+
+    const onAbort = () => {
+      abortCtrl.current.abort();
+      dispatch(cancelStream());
+    };
+
+    if (signal.aborted) {
+      onAbort();
+      return;
+    }
+
+    signal.addEventListener('abort', onAbort, { once: true });
+    return () => signal.removeEventListener('abort', onAbort);
+  }, [requestCancellationManager, dispatch]);
 
   useEffect(() => {
     if (!isRunning) {
@@ -213,6 +240,19 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   // Start handler clears possibly hovered or pinned
   // significant items on analysis refresh.
   function startHandler(continueAnalysis = false, resetGroupButton = true) {
+    if (!continueAnalysis) {
+      // An explicit restart by the user lifts a previous cancellation of the panel.
+      requestCancellationManager?.resumeAfterCancellation();
+    } else if (requestCancellationManager?.signal.aborted) {
+      // The panel was cancelled, don't automatically continue the analysis.
+      return;
+    }
+
+    if (abortCtrl.current.signal.aborted) {
+      abortCtrl.current =
+        requestCancellationManager?.createChildController() ?? new AbortController();
+    }
+
     if (!continueAnalysis) {
       dispatch(resetResults());
       setOverrides({
@@ -288,7 +328,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 
   useEffect(() => {
     if (shouldStart && startParams) {
-      dispatch(startStream(startParams));
+      if (!requestCancellationManager?.signal.aborted) {
+        dispatch(startStream(startParams));
+      }
       setShouldStart(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -297,7 +339,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   // On mount, fetch field candidates first. Once they are populated,
   // the actual analysis will be triggered.
   useEffect(() => {
-    if (startParams) {
+    if (startParams && !requestCancellationManager?.signal.aborted) {
       dispatch(fetchFieldCandidates(startParams));
       dispatch(setCurrentAnalysisType(analysisType));
       dispatch(setCurrentAnalysisWindowParameters(chartWindowParameters));

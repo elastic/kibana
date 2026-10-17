@@ -11,10 +11,16 @@ import React from 'react';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, Subscription, map, merge } from 'rxjs';
+import { BehaviorSubject, Subscription, distinctUntilChanged, map, merge } from 'rxjs';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import {
+  apiHasExecutionContext,
   fetch$,
   getViewModeSubject,
+  initializeStateApi,
+  initializeTimeRangeManager,
+  initializeTitleManager,
+  RequestCancellationManager,
   timeRangeComparators,
   titleComparators,
   useStateFromPublishingSubject,
@@ -22,13 +28,6 @@ import {
 } from '@kbn/presentation-publishing';
 import useUnmount from 'react-use/lib/useUnmount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import {
-  apiHasExecutionContext,
-  initializeTimeRangeManager,
-  initializeTitleManager,
-} from '@kbn/presentation-publishing';
-import { initializeStateApi } from '@kbn/presentation-publishing';
-import { distinctUntilChanged } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
@@ -111,6 +110,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
         },
       });
 
+      const requestCancellationManager = new RequestCancellationManager();
+
       const api = finalizeApi({
         isEditingEnabled: () => true,
         getTypeDisplayName: () =>
@@ -146,6 +147,12 @@ export const getAnomalyChartsReactEmbeddableFactory = (
         ...chartsManager.api,
         ...chartsManager.dataLoadingApi,
         ...stateApi,
+        cancelRequests: (reason?: AbortReason) => {
+          requestCancellationManager.cancel(reason);
+          // Without this the dashboard keeps showing the panel as loading, which keeps the
+          // cancel button visible and blocks `waitForPanelsToLoad$`.
+          chartsManager.dataLoadingApi.onLoading(false);
+        },
         dataViews$: buildDataViewPublishingApi(
           {
             anomalyDetectorService: mlServices.anomalyDetectorService,
@@ -214,6 +221,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                     onRenderComplete={onRenderComplete}
                     onError={onError}
                     timeRange$={appliedTimeRange$}
+                    requestCancellationManager={requestCancellationManager}
                     isInteractive={viewMode !== 'non-interactive'}
                   />
                 </div>

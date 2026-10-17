@@ -9,17 +9,32 @@ import { useCallback, useRef, useState } from 'react';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { tap } from 'rxjs';
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
-export function useCancellableSearch() {
+export function useCancellableSearch(requestCancellationManager?: RequestCancellationManager) {
   const { data } = useAiopsAppContext();
-  const abortController = useRef(new AbortController());
+  // Lazily created so rendering doesn't attach a new listener to the manager each time
+  const [initialController] = useState(
+    () => requestCancellationManager?.createChildController() ?? new AbortController()
+  );
+  const abortController = useRef<AbortController>(initialController);
   const [isLoading, setIsFetching] = useState<boolean>(false);
 
   const runRequest = useCallback(
     <RequestBody extends IKibanaSearchRequest, ResponseType extends IKibanaSearchResponse>(
       requestBody: RequestBody
     ): Promise<ResponseType | null> => {
+      // A controller aborted by the manager stays aborted until the next load starts,
+      // at which point the manager's signal is replaced and we need a fresh child.
+      if (
+        requestCancellationManager &&
+        abortController.current.signal.aborted &&
+        !requestCancellationManager.signal.aborted
+      ) {
+        abortController.current = requestCancellationManager.createChildController();
+      }
+
       return new Promise((resolve, reject) => {
         data.search
           .search<RequestBody, ResponseType>(requestBody, {
@@ -51,13 +66,14 @@ export function useCancellableSearch() {
           });
       });
     },
-    [data.search]
+    [data.search, requestCancellationManager]
   );
 
   const cancelRequest = useCallback(() => {
     abortController.current.abort();
-    abortController.current = new AbortController();
-  }, []);
+    abortController.current =
+      requestCancellationManager?.createChildController() ?? new AbortController();
+  }, [requestCancellationManager]);
 
   return { runRequest, cancelRequest, isLoading };
 }

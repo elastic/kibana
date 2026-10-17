@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef, useCallback, useMemo } from 'react';
+import { useRef, useState, useCallback, useMemo } from 'react';
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
@@ -19,6 +19,7 @@ import { processCategoryResults } from '@kbn/aiops-log-pattern-analysis/process_
 import type { CatResponse } from '@kbn/aiops-log-pattern-analysis/types';
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import type { RandomSamplerStorage } from './sampling_menu';
@@ -29,10 +30,17 @@ export type EventRate = Array<{
   docCount: number;
 }>;
 
-export function useCategorizeRequest(randomSamplerStorage: RandomSamplerStorage) {
+export function useCategorizeRequest(
+  randomSamplerStorage: RandomSamplerStorage,
+  requestCancellationManager?: RequestCancellationManager
+) {
   const { data } = useAiopsAppContext();
 
-  const abortController = useRef(new AbortController());
+  // Lazily created so rendering doesn't attach a new listener to the manager each time
+  const [initialController] = useState(
+    () => requestCancellationManager?.createChildController() ?? new AbortController()
+  );
+  const abortController = useRef<AbortController>(initialController);
 
   const randomSampler = useMemo(
     () => new RandomSampler(randomSamplerStorage),
@@ -97,8 +105,9 @@ export function useCategorizeRequest(randomSamplerStorage: RandomSamplerStorage)
 
   const cancelRequest = useCallback(() => {
     abortController.current.abort();
-    abortController.current = new AbortController();
-  }, []);
+    abortController.current =
+      requestCancellationManager?.createChildController() ?? new AbortController();
+  }, [requestCancellationManager]);
 
   return { runCategorizeRequest, cancelRequest, randomSampler };
 }

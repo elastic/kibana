@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import { ESQL_ASYNC_SEARCH_STRATEGY, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
@@ -212,7 +213,8 @@ export const useESQLOverallStatsData = (
         totalCount?: number;
         timeRange?: TimeRange;
       }
-    | undefined
+    | undefined,
+  requestCancellationManager?: RequestCancellationManager
 ) => {
   const {
     services: {
@@ -225,7 +227,7 @@ export const useESQLOverallStatsData = (
   const previousDocCountRequest = useRef('');
   const previousError = useRef<Error | undefined>();
 
-  const { runRequest, cancelRequest } = useCancellableSearch(data);
+  const { runRequest, cancelRequest } = useCancellableSearch(data, requestCancellationManager);
 
   const [tableData, setTableData] = useReducer(getReducer<Data>(), getInitialData());
   const [queryHistoryStatus, setQueryHistoryStatus] = useState<boolean | undefined>(false);
@@ -267,6 +269,12 @@ export const useESQLOverallStatsData = (
         previousExecutionTs.current = fieldStatsRequest.lastRefresh;
 
         cancelRequest();
+
+        // The panel was cancelled and no new load has started yet, don't start requests.
+        if (requestCancellationManager?.signal.aborted) {
+          setOverallStatsProgress({ isRunning: false, cancelled: true });
+          return;
+        }
 
         setOverallStatsProgress({
           ...getInitialProgress(),
@@ -313,6 +321,13 @@ export const useESQLOverallStatsData = (
           { strategy: ESQL_ASYNC_SEARCH_STRATEGY }
         )) as ESQLResponse | undefined;
         setQueryHistoryStatus(false);
+
+        // `runRequest` resolves with `null` when the request was cancelled.
+        if (!columnsResp) {
+          setOverallStatsProgress({ isRunning: false, cancelled: true });
+          return;
+        }
+
         const columnInfo = columnsResp?.rawResponse
           ? columnsResp.rawResponse.all_columns ?? columnsResp.rawResponse.columns
           : [];
@@ -374,6 +389,11 @@ export const useESQLOverallStatsData = (
             onError,
             timeRange
           );
+
+          if (requestCancellationManager?.signal.aborted) {
+            setOverallStatsProgress({ isRunning: false, cancelled: true });
+            return;
+          }
 
           totalCount = results.totalCount;
           documentCountStats = results.documentCountStats;
@@ -486,6 +506,11 @@ export const useESQLOverallStatsData = (
           setTableData({ exampleDocs });
         }
       } catch (error) {
+        if (error.name === 'AbortError') {
+          setOverallStatsProgress({ isRunning: false, cancelled: true });
+          setQueryHistoryStatus(false);
+          return;
+        }
         setOverallStatsProgress({
           loaded: 100,
           isRunning: false,

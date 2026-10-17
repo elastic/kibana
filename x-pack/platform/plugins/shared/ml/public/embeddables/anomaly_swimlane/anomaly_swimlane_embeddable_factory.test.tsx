@@ -11,6 +11,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { render, waitFor, screen } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
+import { apiCanCancelRequests } from '@kbn/presentation-publishing';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
 import { getAnomalySwimLaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
@@ -135,6 +136,41 @@ describe('getAnomalySwimLaneEmbeddableFactory', () => {
 
       expect(screen.getByTestId<HTMLElement>('mlSwimLaneEmbeddable_1234')).toBeInTheDocument();
     });
+  });
+
+  it('should implement CanCancelRequests and stop reporting loading when cancelled', async () => {
+    const uuid = '1234';
+    const parentApi = {
+      executionContext: {
+        type: 'dashboard',
+        id: 'dashboard-id',
+      },
+    };
+    const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
+      initialState: {
+        swimlane_type: 'viewBy',
+        job_ids: ['my-job'],
+        view_by: 'overall',
+      } satisfies AnomalySwimLaneEmbeddableState,
+      finalizeApi: (preFinalizeApi) => {
+        return {
+          ...preFinalizeApi,
+          uuid,
+          parentApi,
+          type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+        } as AnomalySwimLaneEmbeddableApi;
+      },
+      parentApi,
+      uuid,
+    });
+
+    expect(apiCanCancelRequests(api)).toBe(true);
+    expect(api.dataLoading$?.value).toBe(true);
+
+    api.cancelRequests();
+
+    expect(api.dataLoading$?.value).toBe(false);
   });
 
   describe('non-interactive mode', () => {

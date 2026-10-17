@@ -7,10 +7,12 @@
 
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
+import { AnomalyChartsEmbeddablePage } from './anomaly_charts_embeddable';
 import { MlDataVisualizerActions } from './ml_data_visualizer_actions';
 import { MlJobWizard } from './ml_job_wizard';
 
 export interface MlUiPageObjects extends PageObjects {
+  anomalyChartsEmbeddable: AnomalyChartsEmbeddablePage;
   mlDataVisualizerActions: MlDataVisualizerActions;
   mlJobWizard: MlJobWizard;
 }
@@ -18,6 +20,7 @@ export interface MlUiPageObjects extends PageObjects {
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): MlUiPageObjects {
   return {
     ...pageObjects,
+    anomalyChartsEmbeddable: createLazyPageObject(AnomalyChartsEmbeddablePage, page),
     mlDataVisualizerActions: createLazyPageObject(MlDataVisualizerActions, page),
     mlJobWizard: createLazyPageObject(MlJobWizard, page),
   };

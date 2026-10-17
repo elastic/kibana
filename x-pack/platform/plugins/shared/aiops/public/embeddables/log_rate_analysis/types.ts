@@ -7,6 +7,7 @@
 
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
+  CanCancelRequests,
   HasEditCapabilities,
   PublishesDataViews,
   PublishesTimeRange,
@@ -20,6 +21,7 @@ export interface LogRateAnalysisComponentApi {
 }
 
 export type LogRateAnalysisEmbeddableApi = DefaultEmbeddableApi<LogRateAnalysisEmbeddableState> &
+  CanCancelRequests &
   HasEditCapabilities &
   PublishesDataViews &
   PublishesTimeRange &
