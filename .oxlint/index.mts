@@ -26,11 +26,13 @@ import { reactRules } from './react.mts';
 import { kibanaOverrides, kibanaRules } from './kibana.mts';
 import { licenseHeaderOverrides } from './license_headers.mts';
 import { scoutOverrides } from './scout.mts';
+import { importsOverrides } from './imports.mts';
 import { i18nOverrides } from './i18n.mts';
 import { telemetryOverrides } from './telemetry.mts';
 import { kbnUiOverrides, kbnUiRules } from './kbn_ui.mts';
 import { alertingV2Overrides } from './alerting_v2.mts';
 import { securityImportsOverrides } from './security_imports.mts';
+import { importPluginOverrides } from './import_plugin.mts';
 
 export default defineConfig<OxlintConfig>({
   plugins: ['react', 'typescript', 'import', 'jsx-a11y', 'react-perf', 'node', 'jest'],
@@ -38,6 +40,10 @@ export default defineConfig<OxlintConfig>({
     {
       name: '@kbn/eslint',
       specifier: './packages/kbn-eslint-plugin-eslint/oxlint_plugin.js',
+    },
+    {
+      name: '@kbn/imports',
+      specifier: './packages/kbn-eslint-plugin-imports/oxlint_plugin.js',
     },
     {
       name: '@kbn/i18n',
@@ -72,9 +78,11 @@ export default defineConfig<OxlintConfig>({
     ...kbnUiRules,
   },
   overrides: [
+    ...importPluginOverrides,
     ...licenseHeaderOverrides,
     ...kibanaOverrides,
     ...scoutOverrides,
+    ...importsOverrides,
     ...i18nOverrides,
     ...telemetryOverrides,
     ...securityImportsOverrides,

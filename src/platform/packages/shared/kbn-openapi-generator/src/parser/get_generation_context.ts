@@ -29,12 +29,49 @@ export interface GenerationContext {
   useZodHelpers: boolean;
 }
 
+export interface RequestInputImport {
+  sourcePath: string;
+  names: string[];
+}
+
 export interface BundleGenerationContext {
   operations: NormalizedOperation[];
+  /** One import per source module, so bundles have no duplicate or unused type imports */
+  requestInputImports: RequestInputImport[];
   sources: ParsedSource[];
   info: OpenAPIV3.InfoObject;
   config: Pick<GeneratorConfig, 'schemaNameTransform'>;
 }
+
+/**
+ * Group the request input types of bundled operations by the module that exports them, in the
+ * order the operations are bundled.
+ */
+export const getRequestInputImports = (
+  operations: ReadonlyArray<NormalizedOperation & { sourcePath: string }>
+): RequestInputImport[] => {
+  const namesBySource = new Map<string, string[]>();
+  for (const { operationId, sourcePath, requestQuery, requestParams, requestBody } of operations) {
+    const names: string[] = [];
+    if (requestQuery) {
+      names.push(`${operationId}RequestQueryInput`);
+    }
+    if (requestParams) {
+      names.push(`${operationId}RequestParamsInput`);
+    }
+    if (requestBody) {
+      names.push(`${operationId}RequestBodyInput`);
+    }
+    const sourceNames = namesBySource.get(sourcePath);
+    if (sourceNames) {
+      sourceNames.push(...names);
+    } else if (names.length > 0) {
+      namesBySource.set(sourcePath, names);
+    }
+  }
+
+  return Array.from(namesBySource, ([sourcePath, names]) => ({ sourcePath, names }));
+};
 
 /**
  * Returns true when the document contains schema features that require helpers
