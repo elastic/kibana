@@ -638,6 +638,7 @@ const AlertsListPageContent = () => {
         title={i18n.EPISODES_LIST_PAGE_TITLE}
         spacing="bleed"
         menu={alertsMenu}
+        docLink={services.docLinks.links.alerting.viewAndManageAlerts}
       />
       <EuiSpacer size="m" />
       <NewAlertingExperienceBanner />
