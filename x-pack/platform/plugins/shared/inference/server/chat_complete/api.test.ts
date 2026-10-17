@@ -189,6 +189,110 @@ describe('createChatCompleteApi', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Adapter for type .gen-ai not implemented"`);
   });
 
+  describe('reasoning effort validation', () => {
+    const createEisConnector = (supportedEffortLevels: string[] | undefined) =>
+      createInferenceConnectorMock({
+        name: 'EIS model',
+        connectorId: 'eis-connector',
+        isEis: true,
+        metadata: {
+          display: { name: 'EIS model' },
+          ...(supportedEffortLevels && {
+            capabilities: { reasoning: { supported_effort_levels: supportedEffortLevels } },
+          }),
+        },
+      });
+
+    it('rejects with a 400 request error when the EIS model does not support the level', async () => {
+      inferenceExecutor = createInferenceExecutorMock({
+        connector: createEisConnector(['low', 'medium']),
+      });
+      getInferenceExecutorMock.mockResolvedValue(inferenceExecutor);
+
+      const promise = chatComplete({
+        connectorId: 'eis-connector',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        reasoning: { effort: 'high' },
+        maxRetries: 0,
+      });
+
+      await expect(promise).rejects.toThrow(
+        'Reasoning level "high" is not supported by model "EIS model" (eis-connector). Supported levels: low, medium.'
+      );
+      await expect(promise).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.requestError,
+        status: 400,
+      });
+      expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
+    });
+
+    it('forwards the request when the EIS model supports the level', async () => {
+      inferenceExecutor = createInferenceExecutorMock({
+        connector: createEisConnector(['low', 'high']),
+      });
+      getInferenceExecutorMock.mockResolvedValue(inferenceExecutor);
+
+      await chatComplete({
+        connectorId: 'eis-connector',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        reasoning: { effort: 'high' },
+        maxRetries: 0,
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ reasoning: { effort: 'high' } })
+      );
+    });
+
+    it('forwards the request when the EIS model does not advertise supported levels', async () => {
+      inferenceExecutor = createInferenceExecutorMock({
+        connector: createEisConnector(undefined),
+      });
+      getInferenceExecutorMock.mockResolvedValue(inferenceExecutor);
+
+      await chatComplete({
+        connectorId: 'eis-connector',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        reasoning: { effort: 'xhigh' },
+        maxRetries: 0,
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ reasoning: { effort: 'xhigh' } })
+      );
+    });
+
+    it('forwards the request for a non-EIS connector regardless of the level', async () => {
+      await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        reasoning: { effort: 'xhigh' },
+        maxRetries: 0,
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ reasoning: { effort: 'xhigh' } })
+      );
+    });
+
+    it('does not validate when no effort is requested', async () => {
+      inferenceExecutor = createInferenceExecutorMock({
+        connector: createEisConnector(['low']),
+      });
+      getInferenceExecutorMock.mockResolvedValue(inferenceExecutor);
+
+      await chatComplete({
+        connectorId: 'eis-connector',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        reasoning: { exclude: true },
+        maxRetries: 0,
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('response mode', () => {
     it('reuses carried replacementsId when found', async () => {
       inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));

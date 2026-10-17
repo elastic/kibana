@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatCompleteOptions, Model } from '@kbn/inference-common';
+import type { ChatCompleteOptions, InferenceConnector, Model } from '@kbn/inference-common';
 import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import {
   createInferenceInternalError,
@@ -16,6 +16,7 @@ import {
   getConnectorProvider,
   getConnectorPlatform,
   getConnectorDefaultModel,
+  validateReasoningEffort,
   type ChatCompleteCompositeResponse,
   MessageRole,
 } from '@kbn/inference-common';
@@ -102,6 +103,7 @@ type SpanModel = Parameters<typeof withChatCompleteSpan>[0]['model'];
 
 interface ResolvedPipelineContext {
   callbackContext: ChatCompleteCallbackContext;
+  connector?: InferenceConnector;
   getSpanModel: (modelName?: string) => SpanModel | undefined;
   chatComplete: (
     options: ChatCompletePipelineAdapterOptions
@@ -213,7 +215,7 @@ function createChatCompletePipeline({
     anonymizationRules: from(anonymizationRulesPromise),
   }).pipe(
     switchMap(({ context, anonymizationRules }) => {
-      const { callbackContext, getSpanModel, chatComplete } = context;
+      const { callbackContext, connector, getSpanModel, chatComplete } = context;
 
       const {
         system,
@@ -230,6 +232,11 @@ function createChatCompletePipeline({
         cacheControl,
         sessionId,
       } = callback(callbackContext);
+
+      // Reject reasoning levels the model is known not to support before sending the request,so callers get a 400
+      if (connector && reasoning?.effort) {
+        validateReasoningEffort(connector, reasoning.effort);
+      }
 
       const messages = sanitizeMessages(givenMessages);
 
@@ -424,6 +431,7 @@ function resolveAndCreatePipeline({
                 callbackContext: {
                   model: endpointMeta.modelId ? { id: endpointMeta.modelId } : undefined,
                 },
+                connector,
                 getSpanModel: (modelName) =>
                   endpointMeta.provider
                     ? ({
@@ -460,6 +468,7 @@ function resolveAndCreatePipeline({
                   platform: getConnectorPlatform(connector),
                 },
               },
+              connector,
               getSpanModel: (modelName) => ({
                 id: modelName ?? getConnectorDefaultModel(connector),
                 family: getConnectorFamily(connector),
