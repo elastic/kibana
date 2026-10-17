@@ -21,17 +21,17 @@ export type {
 
 export type { DashboardValidationIssue, DashboardValidator } from './src/validate_dashboard';
 
-export { getRendererEmbeddableType } from './src/operations/panels';
+export { getRendererEmbeddableType } from './src/panels';
 export type {
   CustomContentPanelAddRequest,
   CustomContentPanelEditRequest,
   CustomContentPanelResolutionRequest,
   ResolvePanelContent,
   VisPanelResolutionRequest,
-} from './src/operations/panels';
+} from './src/panels';
 
 export type {
   ControlFieldCapability,
   ResolveAttachmentPanel,
   ResolveControlFieldCapabilities,
-} from './src/operations/types';
+} from './src/types';
