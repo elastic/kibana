@@ -149,8 +149,23 @@ const renderIssueLink = (url: string) => {
   return renderLink(url, number ? `#${number}` : url);
 };
 
+const getKnownLocation = ({ location }: TestFailure) =>
+  location && location !== 'unknown' ? location : '';
+
+const renderFailureRef = (failure: TestFailure) => {
+  const location = getKnownLocation(failure);
+  return `${renderCode(failure.name)}${location ? ` in ${renderCode(location)}` : ''}`;
+};
+
+const toFailureRef = ({ classname, name, location, githubIssue }: TestFailure) => ({
+  classname,
+  name,
+  location,
+  githubIssue,
+});
+
 const renderDetailsTable = (failure: TestFailure, bkMeta: BuildkiteMetadata) => {
-  const location = failure.location && failure.location !== 'unknown' ? failure.location : '';
+  const location = getKnownLocation(failure);
   const configPath = getConfigPathFromCommandLine(failure.commandLine);
   const failureCount = failure.failureCount || 0;
 
@@ -171,11 +186,16 @@ const renderDetailsTable = (failure: TestFailure, bkMeta: BuildkiteMetadata) => 
             failure.githubIssue ? ` ${renderIssueLink(failure.githubIssue)}` : ''
           }`
         ),
+        failure.sameErrorAs
+          ? renderDetailsRow('Same error as', renderFailureRef(failure.sameErrorAs))
+          : '',
         renderDetailsRow(
           'Buildkite job',
           bkMeta.jobUrl ? renderLink(bkMeta.jobUrl, bkMeta.jobName || bkMeta.jobUrl) : NOT_AVAILABLE
         ),
-      ].join('\n      ')}
+      ]
+        .filter(Boolean)
+        .join('\n      ')}
     </tbody>
   </table>`;
 };
@@ -215,6 +235,46 @@ const renderAbortedRunSection = (cascading: TestFailure[]) => {
       ${cascading.map(({ name }) => `<li>${renderCode(name)}</li>`).join('\n      ')}
     </ul>
   </section>`;
+};
+
+const renderSameErrorSection = (sameError: TestFailure[]) => {
+  if (!sameError.length) {
+    return '';
+  }
+
+  return `<section>
+    <h2>Same error in ${sameError.length} other test${sameError.length === 1 ? '' : 's'}</h2>
+    <p>
+      These tests failed with the same error in this run, so they opened no new GitHub issues.
+      Tests that were already tracked updated their issues.
+    </p>
+    <ul class="sameError">
+      ${sameError
+        .map(
+          (failure) =>
+            `<li>${renderFailureRef(failure)}${
+              failure.githubIssue ? ` ${renderIssueLink(failure.githubIssue)}` : ''
+            }</li>`
+        )
+        .join('\n      ')}
+    </ul>
+  </section>`;
+};
+
+const groupSameErrorFailures = (failures: TestFailure[]) => {
+  const sameErrorByFirstFailure = new Map<TestFailure, TestFailure[]>();
+  for (const failure of failures) {
+    if (!failure.sameErrorAs) {
+      continue;
+    }
+    const group = sameErrorByFirstFailure.get(failure.sameErrorAs);
+    if (group) {
+      group.push(failure);
+    } else {
+      sameErrorByFirstFailure.set(failure.sameErrorAs, [failure]);
+    }
+  }
+  return sameErrorByFirstFailure;
 };
 
 const renderStdoutSection = (failure: TestFailure) => {
@@ -269,6 +329,7 @@ export async function reportFailuresToFile(
 
   const journeyMeta = getJourneyMetadata(rootMeta);
   const { reported, cascading, rootCause } = partitionCascadingFailures(failures);
+  const sameErrorByFailure = groupSameErrorFailures(failures);
 
   const template = Fs.readFileSync(
     require.resolve('./report_failures_to_file_html_template.html')
@@ -278,6 +339,7 @@ export async function reportFailuresToFile(
   // So let's just write files for the first 20
   for (const failure of reported.slice(0, 20)) {
     const abortedRunnables = failure === rootCause ? cascading.map(({ name }) => name) : [];
+    const sameError = sameErrorByFailure.get(failure) ?? [];
     const hash = createHash('sha256').update(failure.name).digest('hex');
     const filenameBase = `${
       process.env.BUILDKITE_JOB_ID ? process.env.BUILDKITE_JOB_ID + '_' : ''
@@ -295,6 +357,12 @@ export async function reportFailuresToFile(
             ...abortedRunnables,
           ]
         : [],
+      failure.sameErrorAs
+        ? ['', 'Same error as:', '--------------', failure.sameErrorAs.name]
+        : [],
+      sameError.length
+        ? ['', 'Same error in:', '--------------', ...sameError.map(({ name }) => name)]
+        : [],
       failure['system-out'] ? ['', 'Standard Out:', '-------------', failure['system-out']] : [],
     ]
       .flat()
@@ -303,7 +371,9 @@ export async function reportFailuresToFile(
     const failureJSON = JSON.stringify(
       {
         ...failure,
+        ...(failure.sameErrorAs ? { sameErrorAs: toFailureRef(failure.sameErrorAs) } : {}),
         ...(abortedRunnables.length ? { abortedRunnables } : {}),
+        ...(sameError.length ? { sameErrorFailures: sameError.map(toFailureRef) } : {}),
         hash,
         buildId: bkMeta.buildId,
         jobId: bkMeta.jobId,
@@ -333,6 +403,7 @@ export async function reportFailuresToFile(
         }
         ${renderErrorSection(failure)}
         ${failure === rootCause ? renderAbortedRunSection(cascading) : ''}
+        ${renderSameErrorSection(sameError)}
         ${
           journeyMeta
             ? await getJourneySnapshotHtml(log, journeyMeta)
