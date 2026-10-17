@@ -8,10 +8,11 @@
  */
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { writeErrorHandler } from '@kbn/as-code-utils';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { writeErrorHandler } from '@kbn/as-code-utils';
+import { createOnRequestValidationError } from './on_request_validation_error';
 import { getRouteConfig } from './get_route_config';
 import {
   discoverSessionSearchRequestParamsSchema,
@@ -43,6 +44,7 @@ export const registerSearchRoute = (
             (await import('./oas_examples')).searchDiscoverSessionsOASOperationObject,
         },
         validate: {
+          onRequestValidationError: createOnRequestValidationError(logger),
           request: {
             query: discoverSessionSearchRequestParamsSchema,
           },

@@ -194,19 +194,32 @@ describe('registerInternalRoutes', () => {
   };
 
   it.each([
-    ['post', DISCOVER_SESSION_INTERNAL_API_BASE_PATH, { body: discoverSessionInternalDataSchema }],
+    [
+      'post',
+      DISCOVER_SESSION_INTERNAL_API_BASE_PATH,
+      {
+        request: { body: discoverSessionInternalDataSchema },
+        onRequestValidationError: expect.any(Function),
+      },
+    ],
     [
       'put',
       SESSION_PATH,
-      { params: discoverSessionInternalParamsSchema, body: discoverSessionInternalDataSchema },
+      {
+        request: {
+          params: discoverSessionInternalParamsSchema,
+          body: discoverSessionInternalDataSchema,
+        },
+        onRequestValidationError: expect.any(Function),
+      },
     ],
-    ['get', SESSION_PATH, { params: discoverSessionInternalParamsSchema }],
-  ] as const)('registers %s with internal access and validation', (method, path, requestSchema) => {
+    ['get', SESSION_PATH, { request: { params: discoverSessionInternalParamsSchema } }],
+  ] as const)('registers %s with internal access and validation', (method, path, validation) => {
     const { config } = router.versioned.getRoute(method, path);
 
     expect(config.access).toBe('internal');
     expect(config.security).toEqual({ authz: AuthzDisabled.delegateToSOClient });
-    expect(getVersion(method, path).config.validate).toMatchObject({ request: requestSchema });
+    expect(getVersion(method, path).config.validate).toMatchObject(validation);
   });
 
   describe('POST', () => {
@@ -339,9 +352,7 @@ describe('registerInternalRoutes', () => {
 
       expect(response.badRequest).toHaveBeenCalledWith({
         body: {
-          message: expect.stringContaining(
-            'ID must contain only lowercase letters, numbers, hyphens, and underscores.'
-          ),
+          message: '✖ ID must contain only lowercase letters, numbers, hyphens, and underscores.',
         },
       });
       expect(core.savedObjects.client.create).not.toHaveBeenCalled();
