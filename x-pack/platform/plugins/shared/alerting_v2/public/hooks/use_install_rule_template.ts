@@ -14,6 +14,18 @@ export const useInstallRuleTemplate = () => {
 
   return useMutation({
     mutationFn: (template: RuleTemplateResponse) =>
-      mutateAsync({ payload: template.rule, enabled: false, templateId: template.id }),
+      mutateAsync({
+        // Stamp the template lineage so the created rule carries provenance.
+        // Ref: rule-source.md "What this design needs from the framework"
+        payload: {
+          ...template.rule,
+          metadata: {
+            ...template.rule.metadata,
+            source: { type: 'template' as const, version: 1, id: template.id },
+          },
+        },
+        enabled: false,
+        templateId: template.id,
+      }),
   });
 };

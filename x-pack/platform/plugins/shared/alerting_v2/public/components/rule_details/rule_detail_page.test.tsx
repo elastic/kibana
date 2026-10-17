@@ -144,8 +144,12 @@ const baseRule: RuleApiResponse = {
   version: 1,
   metadata: {
     name: 'Test Events Rule',
+    signature_id: 'test-sig-id',
+    revision: 0,
+    source: { type: 'internal' as const, version: 1 },
     description: 'Test rule description',
     tags: ['prod', 'infra'],
+    ownership: { managed: false },
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },

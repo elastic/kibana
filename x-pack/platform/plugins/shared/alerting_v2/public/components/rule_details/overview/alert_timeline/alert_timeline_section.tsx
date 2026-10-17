@@ -90,7 +90,7 @@ export const AlertTimelineSection: React.FC = () => {
           from: new Date(windowStartMs).toISOString(),
           to: new Date(windowEndMs).toISOString(),
         },
-        ruleEsql: getRootEsqlQuery(rule.query),
+        ruleEsql: rule.query ? getRootEsqlQuery(rule.query) : undefined,
       }),
     [share, application.capabilities, uiSettings, windowStartMs, windowEndMs, rule.query]
   );

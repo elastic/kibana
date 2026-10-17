@@ -181,4 +181,99 @@ apiTest.describe('Bulk delete rules by IDs API', { tag: '@local-stateful-classic
       expect(remaining.items.map((r) => r.id)).toContain(rule.id);
     }
   );
+
+  // ---------------------------------------------------------------------------
+  // Step 5.3: managed-rule write gate on the bulk-delete path
+  //
+  // Managed rules are refused per-item with RULE_IS_MANAGED. A mixed batch
+  // (managed + unmanaged) deletes exactly the unmanaged ones and reports an
+  // error for each managed rule.
+  //
+  // To simulate a managed rule without a registered managed builder type, we
+  // create a plain rule then patch its stored ownership directly in ES. This
+  // matches how a model-version backfill would stamp existing rules.
+  //
+  // Ref: rule-ownership.md "Path by path"
+  // ---------------------------------------------------------------------------
+
+  apiTest(
+    'managed-rule gate: should refuse a managed rule with RULE_IS_MANAGED and leave it intact',
+    async ({ apiClient, apiServices }) => {
+      const managedRule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'managed-rule' } })
+      );
+      try {
+        // Stamp managed ownership directly — the generic API has no identity so
+        // cannot create a managed rule through the create endpoint.
+        await apiServices.alertingV2.ruleSavedObject.setOwnership(managedRule.id, {
+          managed: true,
+          solution: 'security',
+          domain: 'detection',
+        });
+
+        const response = await apiClient.post(BULK_DELETE_URL, {
+          headers: writerHeaders,
+          body: { ids: [managedRule.id] },
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.affected_count).toBe(0);
+        expect(response.body.errors).toHaveLength(1);
+        expect(response.body.errors[0]).toMatchObject({
+          id: managedRule.id,
+          error: { code: 'RULE_IS_MANAGED' },
+        });
+        // The rule must still exist.
+        const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
+        expect(remaining.items.map((r) => r.id)).toContain(managedRule.id);
+      } finally {
+        // Un-manage so the normal cleanup can delete this rule.
+        await apiServices.alertingV2.ruleSavedObject.setOwnership(managedRule.id, {
+          managed: false,
+        });
+      }
+    }
+  );
+
+  apiTest(
+    'managed-rule gate: should delete unmanaged rules and refuse managed ones in a mixed batch',
+    async ({ apiClient, apiServices }) => {
+      const managedRule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'managed-in-batch' } })
+      );
+      const unmanagedRule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'unmanaged-in-batch' } })
+      );
+      try {
+        await apiServices.alertingV2.ruleSavedObject.setOwnership(managedRule.id, {
+          managed: true,
+          solution: 'security',
+          domain: 'detection',
+        });
+
+        const response = await apiClient.post(BULK_DELETE_URL, {
+          headers: writerHeaders,
+          body: { ids: [managedRule.id, unmanagedRule.id] },
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.affected_count).toBe(1);
+        expect(response.body.errors).toHaveLength(1);
+        expect(response.body.errors[0]).toMatchObject({
+          id: managedRule.id,
+          error: { code: 'RULE_IS_MANAGED' },
+        });
+        // The unmanaged rule is gone; the managed one remains.
+        const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
+        const remainingIds = remaining.items.map((r) => r.id);
+        expect(remainingIds).toContain(managedRule.id);
+        expect(remainingIds).not.toContain(unmanagedRule.id);
+      } finally {
+        // Un-manage so the normal cleanup can delete this rule.
+        await apiServices.alertingV2.ruleSavedObject.setOwnership(managedRule.id, {
+          managed: false,
+        });
+      }
+    }
+  );
 });
