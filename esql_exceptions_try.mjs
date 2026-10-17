@@ -355,13 +355,26 @@ const planFor = (on) => {
       return { status: 'dsl', text: 'stays in the DSL filter' };
     }
     // A negative entry on a field that exists nowhere is true for every row, so it is left out of the stage; any other entry on it never matches.
-    if (ex.items.some((it) => it.kind === 'missing' && it.included)) return { status: 'skipped', text: 'not applied (field_not_found): it has a computed column and an entry that is not negative on a field that is in neither the source nor the query output' };
+    if (ex.items.some((it) => it.kind === 'missing' && it.included))
+      return {
+        status: 'skipped',
+        text: 'not applied (field_not_found): it has a computed column and an entry that is not negative on a field that is in neither the source nor the query output',
+      };
     let skip;
     for (const it of ex.items) {
       if (it.kind === 'missing') continue;
-      if (it.invalid && END_FAILS_ON_INVALID(it.type)) failures.push(`Kibana fails the rule before the query runs (value_not_supported): ${JSON.stringify(INVALID_VALUES[it.type])} cannot be written for a column of type ${it.type}`);
-      else if (it.base === 'matches' && !['keyword', 'text'].includes(it.type)) skip ??= 'not applied (operator_not_supported_on_type): "matches" is only supported on keyword and text columns at the end of the query';
-      else if (it.type === 'double' && it.base !== 'exists') skip ??= 'not applied (operator_not_supported_on_type): "is" and "is one of" are not supported on double columns, because a float is widened to double';
+      if (it.invalid && END_FAILS_ON_INVALID(it.type))
+        failures.push(
+          `Kibana fails the rule before the query runs (value_not_supported): ${JSON.stringify(
+            INVALID_VALUES[it.type]
+          )} cannot be written for a column of type ${it.type}`
+        );
+      else if (it.base === 'matches' && !['keyword', 'text'].includes(it.type))
+        skip ??=
+          'not applied (operator_not_supported_on_type): "matches" is only supported on keyword and text columns at the end of the query';
+      else if (it.type === 'double' && it.base !== 'exists')
+        skip ??=
+          'not applied (operator_not_supported_on_type): "is" and "is one of" are not supported on double columns, because a float is widened to double';
     }
     return skip
       ? { status: 'skipped', text: skip }

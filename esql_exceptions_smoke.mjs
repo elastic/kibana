@@ -251,8 +251,16 @@ const items = [
   ],
   [LISTS.computed, 'c_int is abc (not applied, bad value)', [e('match', 'c_int', 'abc')]],
   [LISTS.computed, 'c_long matches 4* (not applied)', [e('wildcard', 'c_long', '4*')]],
-  [LISTS.computed, 'ghost.field is not x, a field that exists nowhere (stays in the DSL filter and excludes every document)', [e('match', 'ghost.field', 'x', 'excluded')]],
-  [LISTS.computed, 'dropped_f and c_tier (debug)', [e('match', 'dropped_f', 'd'), e('match', 'c_tier', 'gold')]],
+  [
+    LISTS.computed,
+    'ghost.field is not x, a field that exists nowhere (stays in the DSL filter and excludes every document)',
+    [e('match', 'ghost.field', 'x', 'excluded')],
+  ],
+  [
+    LISTS.computed,
+    'dropped_f and c_tier (debug)',
+    [e('match', 'dropped_f', 'd'), e('match', 'c_tier', 'gold')],
+  ],
   [LISTS.negative, 'c_keyword is not kw-keep', [e('match', 'c_keyword', 'kw-keep', 'excluded')]],
   [LISTS.negative, 'c_ip does not exist', [e('exists', 'c_ip', undefined, 'excluded')]],
 ];
