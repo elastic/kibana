@@ -57,23 +57,32 @@ export class ElasticsearchService {
 
   start(): ElasticsearchServiceStart {
     return {
-      // We'll need to get rid of this as soon as Core's Elasticsearch service exposes this
-      // functionality in the scope of https://github.com/elastic/kibana/issues/41983.
+      // Core's `status.core$` tells us whether Elasticsearch is available, but it doesn't combine
+      // that with the license or schedule retries for work that fails while it's online, so we do
+      // both here.
       watchOnlineStatus$: () => {
-        const RETRY_SCALE_DURATION = 100;
-        const RETRY_TIMEOUT_MAX = 10000;
+        const RETRY_BASE_DELAY = 1000;
+        const RETRY_MAX_DELAY = 10000;
         const retries$ = new BehaviorSubject(0);
 
         const retryScheduler = {
           scheduleRetry: () => {
             const retriesElapsed = retries$.getValue() + 1;
-            const nextRetryTimeout = Math.min(
-              retriesElapsed * RETRY_SCALE_DURATION,
-              RETRY_TIMEOUT_MAX
+            // Every Kibana instance that fails at the same time would otherwise retry at the same
+            // time too. The delay doubles on each attempt up to the max, and we randomize the
+            // upper half of it to spread instances out.
+            const maxRetryTimeout = Math.min(
+              RETRY_BASE_DELAY * 2 ** (retriesElapsed - 1),
+              RETRY_MAX_DELAY
+            );
+            const nextRetryTimeout = Math.round(
+              maxRetryTimeout / 2 + Math.random() * (maxRetryTimeout / 2)
             );
 
             this.#logger.debug(`Scheduling re-try in ${nextRetryTimeout} ms.`);
 
+            // Only keep one pending retry, even if more than one failure asks for it.
+            clearTimeout(retryTimeout);
             retryTimeout = setTimeout(() => retries$.next(retriesElapsed), nextRetryTimeout);
           },
         };

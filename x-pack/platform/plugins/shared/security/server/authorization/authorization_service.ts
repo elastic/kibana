@@ -50,6 +50,7 @@ import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { APPLICATION_PREFIX } from '../../common/constants';
 import { canRedirectRequest } from '../authentication';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
+import { createOnlineStatusTaskRunner } from '../elasticsearch';
 import { createRedirectHtmlPage } from '../lib/html_page_utils';
 import type { SpacesService } from '../plugin';
 
@@ -220,18 +221,17 @@ export class AuthorizationService {
 
     this.statusSubscription = online$
       .pipe(
-        switchMap(async ({ scheduleRetry }) => {
-          try {
-            await registerPrivilegesWithCluster(
+        switchMap(
+          createOnlineStatusTaskRunner((signal) =>
+            registerPrivilegesWithCluster(
               this.logger,
               this.privileges,
               this.applicationName,
-              clusterClient
-            );
-          } catch (err) {
-            scheduleRetry();
-          }
-        })
+              clusterClient,
+              signal
+            )
+          )
+        )
       )
       .subscribe();
   }

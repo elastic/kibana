@@ -300,6 +300,45 @@ describe('SessionManagementService', () => {
       expect(mockScheduleRetry).toHaveBeenCalledTimes(2);
     });
 
+    it(`doesn't schedule cleanup task or retry from a run that a newer status replaced`, async () => {
+      const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
+      service.start({
+        audit: auditSetupMock,
+        elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+        kibanaIndexName: '.kibana',
+        online$: mockStatusSubject.asObservable(),
+        taskManager: mockTaskManager,
+      });
+
+      let rejectFirstInitialize!: (err: Error) => void;
+      mockSessionIndexInitialize.mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve, reject) => {
+            rejectFirstInitialize = reject;
+          })
+      );
+
+      const firstScheduleRetry = jest.fn();
+      mockStatusSubject.next({ scheduleRetry: firstScheduleRetry });
+      await nextTick();
+      expect(mockSessionIndexInitialize).toHaveBeenCalledTimes(1);
+
+      // A newer status arrives while the first run is still initializing the index. It waits for
+      // the first run to settle before it starts.
+      const secondScheduleRetry = jest.fn();
+      mockStatusSubject.next({ scheduleRetry: secondScheduleRetry });
+      await nextTick();
+      expect(mockSessionIndexInitialize).toHaveBeenCalledTimes(1);
+
+      rejectFirstInitialize(new Error('ugh :/'));
+      await nextTick();
+
+      expect(mockSessionIndexInitialize).toHaveBeenCalledTimes(2);
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
+      expect(firstScheduleRetry).not.toHaveBeenCalled();
+      expect(secondScheduleRetry).not.toHaveBeenCalled();
+    });
+
     it('schedules retry if cleanup task registration fails', async () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
