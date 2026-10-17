@@ -7,7 +7,6 @@
 
 // TODO: clintandrewhall - Replace this file with SDK exports once https://github.com/elastic/isomer/issues/221 ships.
 
-import type { UrlTransform } from 'react-markdown';
 import { sanitizeAssetUrl, sanitizeNavigationHref } from '@elastic/isomer-sdk';
 
 // Micromark is superlinear past these, the same bounds the SDK uses before parsing authored Markdown.
@@ -59,5 +58,5 @@ const sanitizeParsedDestination = (
 };
 
 /** Navigation policy for `href`, asset policy for `src`, on an already-decoded destination. */
-export const urlTransform: UrlTransform = (url, key) =>
+export const urlTransform = (url: string, key: 'href' | 'src'): string =>
   sanitizeParsedDestination(url, key === 'src' ? sanitizeAssetUrl : sanitizeNavigationHref) ?? '';

@@ -38,6 +38,38 @@ describe('markdown', () => {
     expect(markup).not.toContain('data:');
   });
 
+  it('renders headings, code, and tight and loose lists to React', () => {
+    expect(react('## Title')).toContain('<h2>Title</h2>');
+    expect(react('```js\nconst a = 1;\n```')).toContain(
+      '<pre><code class="language-js">const a = 1;</code></pre>'
+    );
+    expect(react('- a\n- b')).toContain('<ul><li>a</li><li>b</li></ul>');
+    expect(react('- a\n\n- b')).toContain('<li><p>a</p></li>');
+    expect(react('3. a\n4. b')).toContain('<ol start="3">');
+  });
+
+  it('renders task list items as disabled checkboxes', () => {
+    const markup = react('- [x] done');
+
+    expect(markup).toMatch(/<input type="checkbox"[^>]* disabled=""[^>]* checked=""\/> done/);
+  });
+
+  it('resolves reference links through their definitions', () => {
+    const markup = react('[docs][1]\n\n[1]: https://www.elastic.co "Elastic"');
+
+    expect(markup).toContain('<a href="https://www.elastic.co" title="Elastic">docs</a>');
+    expect(react('[docs][missing]')).not.toContain('<a');
+  });
+
+  it('never loads react-markdown, which the server build cannot require', () => {
+    jest.isolateModules(() => {
+      jest.doMock('react-markdown', () => {
+        throw new Error('react-markdown was loaded');
+      });
+      expect(() => jest.requireActual('.')).not.toThrow();
+    });
+  });
+
   it('uses the asset policy for images and the navigation policy for links', () => {
     const image = `![dot](${PNG})`;
     const link = `[dot](${PNG})`;

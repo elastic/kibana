@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import Markdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import type { PrimitiveNode } from '@elastic/isomer-sdk';
 import { nodeAnchor, requiredString, z } from '@elastic/isomer-sdk';
 import { md } from '@elastic/isomer-sdk/markdown';
 import { definePrimitive } from '../../define';
-import { exceedsParseBudget, urlTransform } from './markdown_safety';
+import { exceedsParseBudget } from './markdown_safety';
+import { parseMarkdown, renderMdast } from './render_mdast';
 
 /** A block of GitHub-flavored Markdown. */
 export interface MarkdownNode extends PrimitiveNode {
@@ -42,17 +41,14 @@ const headerAndTableExample: MarkdownNode = {
 
 const examples: MarkdownNode[] = [example, headerAndTableExample];
 
-const remarkPlugins = [remarkGfm];
-
 const renderMarkdown = (text: string): React.ReactNode => {
   if (exceedsParseBudget(text)) {
     return text;
   }
   try {
-    return Markdown({ children: text, remarkPlugins, skipHtml: true, urlTransform });
+    return renderMdast(parseMarkdown(text));
   } catch (error) {
-    // `Markdown` parses synchronously and uses no hooks, so a `RangeError` can be
-    // caught here.
+    // Parsing and rendering are synchronous, so a `RangeError` from deep nesting is caught here.
     if (!(error instanceof RangeError)) {
       throw error;
     }
