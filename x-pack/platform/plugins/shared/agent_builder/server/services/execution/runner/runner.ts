@@ -27,7 +27,7 @@ import {
   isAgentBuilderError,
   normalizeInteractive,
 } from '@kbn/agent-builder-common';
-import type { InteractivityConfig } from '@kbn/agent-builder-common';
+import type { InteractivityConfig, UserIdAndName } from '@kbn/agent-builder-common';
 import { findUnknownApis, formatUnknownApis } from '@kbn/agent-builder-common/apis/known_apis';
 import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
 import type {
@@ -118,6 +118,8 @@ export interface CreateScopedRunnerDeps {
   // other deps
   logger: Logger;
   request: KibanaRequest;
+  /** Identity the run acts as, when it differs from the request's own. */
+  user?: UserIdAndName;
   defaultConnectorId?: string;
   /**
    * Optional CPS project routing expression scoping this run's search tools to a set of projects
@@ -192,6 +194,7 @@ export type CreateRunnerDeps = Omit<
   | 'parentExecutionId'
   | 'conversationAccess'
   | 'experimentalFeatures'
+  | 'user'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
 };
@@ -297,8 +300,10 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     parentExecutionId,
     conversationAccess = 'readWrite',
     workflowExecutionId,
+    user,
   }: {
     request: KibanaRequest;
+    user?: UserIdAndName;
     /** Agent id for this run; used to lazily resolve Deductive-only config. */
     agentId?: string;
     defaultConnectorId?: string;
@@ -386,6 +391,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       ...runnerDeps,
       modelProvider,
       request,
+      user,
       defaultConnectorId,
       projectRouting,
       abortSignal,
@@ -451,6 +457,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         parentExecutionId,
         conversationAccess = 'readWrite',
         workflowExecutionId,
+        user,
         ...otherParams
       } = params;
       const { agentId } = params;
@@ -472,6 +479,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         parentExecutionId,
         conversationAccess,
         workflowExecutionId,
+        user,
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,

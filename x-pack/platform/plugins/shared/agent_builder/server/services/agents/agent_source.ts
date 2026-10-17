@@ -7,7 +7,7 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AgentAccessControl } from '@kbn/agent-builder-common';
+import type { AgentAccessControl, UserIdAndName } from '@kbn/agent-builder-common';
 import type { GetAgentAccessControlResponse } from '../../../common/http_api/agents';
 import type {
   AgentAccessControlUpdateRequest,
@@ -51,6 +51,7 @@ export type AgentProvider = ReadonlyAgentProvider | WritableAgentProvider;
 export type AgentProviderFn<ReadOnly extends boolean> = (opts: {
   space: string;
   request: KibanaRequest;
+  user?: UserIdAndName;
 }) => MaybePromise<ReadOnly extends true ? ReadonlyAgentProvider : WritableAgentProvider>;
 
 export const isWritableProvider = (provider: AgentProvider): provider is WritableAgentProvider => {
