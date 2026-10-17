@@ -158,6 +158,11 @@ steps:
       continue: true
     with:
       index: "ai-index-idx-{{ inputs.ai_index_id | default: consts.ai_index_id }}"
+      # The index exists only after the first indicator is written. Before then the
+      # search would fail with index_not_found_exception. With these two flags it returns
+      # no hits and the sweep ends normally with nothing to review.
+      ignore_unavailable: true
+      allow_no_indices: true
       # A plain number. The step rejects a template in a number field. Set to the
       # maximum allowed batch_size input so the search always returns enough candidates.
       # consts.batch_size and the batch_size input maximum (50) must not exceed this.
