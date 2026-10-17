@@ -95,7 +95,11 @@ describe('ApplyMaintenanceWindowStep', () => {
     expect(result.data?.triage?.dispatchable).toHaveLength(0);
     expect(result.data?.triage?.suppressed).toHaveLength(1);
     expect(result.data?.triage?.suppressed[0]).toEqual(
-      expect.objectContaining({ rule_id: alert.rule_id, reason: 'maintenance_window:mw-1' })
+      expect.objectContaining({
+        rule_id: alert.rule_id,
+        reason: 'maintenance_window:mw-1',
+        maintenance_window_id: 'mw-1',
+      })
     );
   });
 

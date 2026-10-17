@@ -64,7 +64,12 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
       }
 
       const maintenanceWindow = findMatchingMaintenanceWindow(candidates, alert);
-      return maintenanceWindow ? maintenanceWindowReason(maintenanceWindow.id) : undefined;
+      return maintenanceWindow
+        ? {
+            reason: maintenanceWindowReason(maintenanceWindow.id),
+            maintenance_window_id: maintenanceWindow.id,
+          }
+        : undefined;
     });
 
     if (newTriage === triage) {

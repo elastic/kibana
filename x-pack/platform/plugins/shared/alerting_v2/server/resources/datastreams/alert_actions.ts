@@ -11,7 +11,7 @@ import { lazySchema, z } from '@kbn/zod/v4';
 import { getIngestTimestampPipeline } from './ingest_timestamp_pipeline';
 import type { ResourceDefinition } from './types';
 
-export const ALERT_ACTIONS_DATA_STREAM_VERSION = 8;
+export const ALERT_ACTIONS_DATA_STREAM_VERSION = 9;
 export const ALERT_ACTIONS_BACKING_INDEX = '.ds-.alert-actions-*';
 export const ALERT_ACTIONS_RESOURCE_KEY = `data_stream:${ALERT_ACTIONS_DATA_STREAM}`;
 
@@ -39,6 +39,8 @@ const mappings: MappingsDefinition = {
     action_group_id: { type: 'keyword' },
     source: { type: 'keyword' },
     reason: { type: 'text' },
+    // Set since v9 on dispatcher `suppress` docs written for a maintenance window.
+    maintenance_window_id: { type: 'keyword' },
     space_id: { type: 'keyword' },
   },
 };
@@ -73,6 +75,7 @@ export const alertActionSchema = lazySchema(() =>
     source: z.string().optional(),
     tags: z.array(z.string()).optional(),
     reason: z.string().optional(),
+    maintenance_window_id: z.string().optional(),
     space_id: z.string(),
   })
 );

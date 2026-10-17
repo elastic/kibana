@@ -106,6 +106,7 @@ describe('StoreActionsStep', () => {
       docs: [
         {
           group_hash: 'hash-1',
+          alert_id: 'alert-1',
           last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
           actor: { type: 'internal' },
           action_type: 'suppress',
@@ -116,6 +117,49 @@ describe('StoreActionsStep', () => {
         },
       ],
     });
+  });
+
+  it('records the maintenance window id on a suppress doc', async () => {
+    const mockService = createMockStorageServiceContract();
+    const step = new StoreActionsStep(mockService);
+
+    const alert = createAlert({ alert_id: 'alert-9', rule_id: 'rule-1', group_hash: 'hash-1' });
+
+    const state = createDispatcherPipelineState({
+      suppressed: [{ ...alert, reason: 'maintenance_window:mw-1', maintenance_window_id: 'mw-1' }],
+      throttled: [],
+      dispatch: [],
+      rules: createRules('rule-1'),
+    });
+
+    await step.execute(state, logger);
+
+    expect(mockService.bulkIndexDocs.mock.calls[0][0].docs).toEqual([
+      expect.objectContaining({
+        action_type: 'suppress',
+        alert_id: 'alert-9',
+        reason: 'maintenance_window:mw-1',
+        maintenance_window_id: 'mw-1',
+      }),
+    ]);
+  });
+
+  it('omits maintenance_window_id from a suppress doc that has none', async () => {
+    const mockService = createMockStorageServiceContract();
+    const step = new StoreActionsStep(mockService);
+
+    const state = createDispatcherPipelineState({
+      suppressed: [{ ...createAlert(), reason: 'user acknowledged' }],
+      throttled: [],
+      dispatch: [],
+      rules: createRules('rule-1'),
+    });
+
+    await step.execute(state, logger);
+
+    expect(mockService.bulkIndexDocs.mock.calls[0][0].docs[0]).not.toHaveProperty(
+      'maintenance_window_id'
+    );
   });
 
   it('records throttled notification groups with throttle-specific reason', async () => {
@@ -150,6 +194,7 @@ describe('StoreActionsStep', () => {
       docs: [
         {
           group_hash: 'hash-1',
+          alert_id: 'alert-1',
           last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
           actor: { type: 'internal' },
           action_type: 'suppress',
@@ -193,6 +238,7 @@ describe('StoreActionsStep', () => {
     expect(callArgs.docs).toHaveLength(2);
     expect(callArgs.docs[0]).toEqual({
       group_hash: 'hash-1',
+      alert_id: 'alert-1',
       last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
       actor: { type: 'internal' },
       action_type: 'fire',
@@ -364,6 +410,7 @@ describe('StoreActionsStep', () => {
 
     expect(callArgs.docs[0]).toEqual({
       group_hash: 'hash-suppressed',
+      alert_id: 'ep-suppressed',
       last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
       actor: { type: 'internal' },
       action_type: 'suppress',
@@ -375,6 +422,7 @@ describe('StoreActionsStep', () => {
 
     expect(callArgs.docs[1]).toEqual({
       group_hash: 'hash-throttled',
+      alert_id: 'ep-throttled',
       last_series_event_timestamp: '2026-01-22T07:10:00.000Z',
       actor: { type: 'internal' },
       action_type: 'suppress',
@@ -386,6 +434,7 @@ describe('StoreActionsStep', () => {
 
     expect(callArgs.docs[2]).toEqual({
       group_hash: 'hash-dispatch',
+      alert_id: 'ep-dispatch',
       last_series_event_timestamp: '2026-01-22T07:20:00.000Z',
       actor: { type: 'internal' },
       action_type: 'fire',
@@ -436,6 +485,7 @@ describe('StoreActionsStep', () => {
       docs: [
         {
           group_hash: 'hash-unmatched',
+          alert_id: 'ep-unmatched',
           last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
           actor: { type: 'internal' },
           action_type: 'unmatched',
@@ -547,6 +597,7 @@ describe('StoreActionsStep', () => {
     expect(noActionDocs).toHaveLength(1);
     expect(noActionDocs[0]).toEqual({
       group_hash: 'hash-unmatched',
+      alert_id: 'ep-unmatched',
       last_series_event_timestamp: '2026-01-22T07:10:00.000Z',
       actor: { type: 'internal' },
       action_type: 'unmatched',
