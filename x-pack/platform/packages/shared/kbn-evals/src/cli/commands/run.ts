@@ -70,7 +70,14 @@ export const runSuiteCmd: Command<void> = {
 
     const { suite, resolvedConfigPath } = await resolveEvalSuite(repoRoot, log, flagsReader);
 
-    const evaluationConnectorId = await resolveEvaluationConnectorId(repoRoot, log, flagsReader);
+    const profile = flagsReader.string('profile') ?? undefined;
+
+    const evaluationConnectorId = await resolveEvaluationConnectorId(
+      repoRoot,
+      log,
+      flagsReader,
+      profile
+    );
 
     const envOverrides: Record<string, string> = {
       EVAL_CONNECTOR_ID: evaluationConnectorId,
@@ -85,7 +92,7 @@ export const runSuiteCmd: Command<void> = {
         repoRoot,
         log,
         flagsReader,
-        profile: flagsReader.string('profile') ?? undefined,
+        profile,
         suite,
       });
     Object.assign(envOverrides, profileEnvOverrides, suiteScoutEnv);
