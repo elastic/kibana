@@ -1569,8 +1569,17 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           actor: { type: 'internal' },
           source: 'internal',
           reason: `maintenance_window:${mw.id}`,
+          maintenance_window_id: mw.id,
         });
       }
+
+      // Each suppress doc is attributed to its own alert, so a reader can join
+      // the maintenance window back to an episode.
+      expect(suppressActions.map((action) => action.alert_id).sort()).toStrictEqual([
+        'rule-mw-series-1-episode-1',
+        'rule-mw-series-1-episode-2',
+        'rule-mw-series-1-episode-3',
+      ]);
 
       // A fire action for `rule-mw` would mean the MW gate let an episode
       // through, defeating the purpose of the maintenance window.
