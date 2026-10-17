@@ -1,0 +1,192 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "58bc134c-e8d2-4291-a552-b4b3e537c60b"
+  },
+  "chain": "encoded-powershell",
+  "step": "Executable dropped over SMB on srv-files-02 (target side of the ADMIN$ copy)",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.network",
+        "at": -125,
+        "doc": {
+          "event": {
+            "category": [
+              "network"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "connection_accepted",
+            "kind": "event"
+          },
+          "host": {
+            "name": "srv-files-02",
+            "id": "azqa-srv-files-02",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "srv-files-02"
+          },
+          "user": {
+            "name": "alice.chen"
+          },
+          "process": {
+            "name": "System",
+            "executable": "System",
+            "pid": 4,
+            "entity_id": "azqa-system-smb-001"
+          },
+          "source": {
+            "ip": "10.20.0.11",
+            "port": 50122
+          },
+          "destination": {
+            "ip": "10.20.0.12",
+            "port": 445
+          },
+          "network": {
+            "direction": "ingress",
+            "transport": "tcp"
+          }
+        }
+      },
+      {
+        "stream": "logs-endpoint.events.file",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "file"
+            ],
+            "type": [
+              "creation"
+            ],
+            "action": "creation",
+            "kind": "event"
+          },
+          "host": {
+            "name": "srv-files-02",
+            "id": "azqa-srv-files-02",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "srv-files-02"
+          },
+          "user": {
+            "name": "alice.chen",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "file": {
+            "path": "C:\\Windows\\Temp\\payload.exe",
+            "name": "payload.exe",
+            "extension": "exe",
+            "Ext": {
+              "header_bytes": "4d5a9000"
+            }
+          },
+          "process": {
+            "name": "System",
+            "executable": "System",
+            "pid": 4,
+            "entity_id": "azqa-system-smb-001"
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "The file written over SMB is a plain text file (not an executable/script extension, no MZ header)",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.network",
+        "at": -125,
+        "doc": {
+          "event": {
+            "category": [
+              "network"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "connection_accepted",
+            "kind": "event"
+          },
+          "host": {
+            "name": "srv-files-02",
+            "id": "azqa-srv-files-02",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "srv-files-02"
+          },
+          "user": {
+            "name": "alice.chen"
+          },
+          "process": {
+            "name": "System",
+            "executable": "System",
+            "pid": 4,
+            "entity_id": "azqa-system-smb-001"
+          },
+          "source": {
+            "ip": "10.20.0.11",
+            "port": 50122
+          },
+          "destination": {
+            "ip": "10.20.0.12",
+            "port": 445
+          },
+          "network": {
+            "direction": "ingress",
+            "transport": "tcp"
+          }
+        }
+      },
+      {
+        "stream": "logs-endpoint.events.file",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "file"
+            ],
+            "type": [
+              "creation"
+            ],
+            "action": "creation",
+            "kind": "event"
+          },
+          "host": {
+            "name": "srv-files-02",
+            "id": "azqa-srv-files-02",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "srv-files-02"
+          },
+          "user": {
+            "name": "alice.chen",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "file": {
+            "path": "C:\\Windows\\Temp\\report.txt",
+            "name": "report.txt",
+            "extension": "txt"
+          },
+          "process": {
+            "name": "System",
+            "executable": "System",
+            "pid": 4,
+            "entity_id": "azqa-system-smb-001"
+          }
+        }
+      }
+    ]
+  }
+}
