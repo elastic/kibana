@@ -11,13 +11,16 @@ import { ALERT_EPISODE_STATUS, type BulkActivateEpisodeActionItem } from '@kbn/a
 import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkActivateEpisodeActions } from './bulk_create_alert_actions';
 import { executeCompositeAction } from './execute_composite_action';
-import { episodeSupportsActions } from '../queries/episodes_query';
+import { episodeSupportsActions, type AlertEpisode } from '../queries/episodes_query';
 import * as i18n from './translations';
 
 export interface UnresolveActionDeps {
   http: HttpStart;
   notifications: NotificationsStart;
 }
+
+const hasInactiveEpisode = (episodes: AlertEpisode[]): boolean =>
+  episodes.some((ep) => ep['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE);
 
 export const createUnresolveAction = (deps: UnresolveActionDeps): EpisodeAction => ({
   id: 'ALERTING_V2_UNRESOLVE_EPISODE',
@@ -49,7 +52,10 @@ export const createUnresolveAction = (deps: UnresolveActionDeps): EpisodeAction 
       deps,
     });
   },
-  showWhenDisabled: ({ episodes }: EpisodeActionContext) =>
-    episodes.some((ep) => ep['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE),
+  showWhenDisabled: ({ episodes }: EpisodeActionContext) => hasInactiveEpisode(episodes),
+  getBulkDisabledReason: (episodes) =>
+    hasInactiveEpisode(episodes) && !episodes.every(episodeSupportsActions)
+      ? i18n.UNRESOLVE_NOT_AVAILABLE
+      : undefined,
   disabledTooltip: i18n.UNRESOLVE_NOT_AVAILABLE,
 });

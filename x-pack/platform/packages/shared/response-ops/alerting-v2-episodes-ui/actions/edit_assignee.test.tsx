@@ -18,6 +18,7 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { QueryClient } from '@kbn/react-query';
 
+import * as i18n from './translations';
 import { createEditAssigneeAction } from './edit_assignee';
 import { bulkAssignEpisodeActions } from './bulk_create_alert_actions';
 import { openAssigneeModal } from '../components/assignee_modal';
@@ -140,6 +141,22 @@ describe('createEditAssigneeAction', () => {
         )
       );
       expect(onSuccess).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getBulkDisabledReason', () => {
+    it('gives a bulk reason when the selection includes a classic alert', () => {
+      const action = createEditAssigneeAction(mockDeps);
+      const classicEpisode = {
+        ...makeEpisode('classic-1'),
+        supports_actions: false,
+        source_id: 'classic-alerts',
+      };
+
+      expect(action.getBulkDisabledReason!([makeEpisode('universal-1'), classicEpisode])).toBe(
+        i18n.EDIT_ASSIGNEE_NOT_AVAILABLE
+      );
+      expect(action.getBulkDisabledReason!([makeEpisode('universal-1')])).toBeUndefined();
     });
   });
 

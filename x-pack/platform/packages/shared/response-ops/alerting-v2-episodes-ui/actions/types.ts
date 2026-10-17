@@ -48,6 +48,7 @@ export interface EpisodeAction {
   renderInlineControl?: (ctx: EpisodeActionInlineControlContext) => ReactNode;
   showWhenDisabled?: (ctx: EpisodeActionContext) => boolean;
   disabledTooltip?: string;
+  getBulkDisabledReason?: (episodes: AlertEpisode[]) => string | undefined;
   /**
    * Whether this action is supported in multi-selection bulk contexts.
    * Defaults to `true` when omitted.
