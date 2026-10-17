@@ -13,7 +13,7 @@ import {
   ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
 } from '@kbn/alerting-v2-constants';
 import { MAX_KQL_LENGTH } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_ALERTS_READ_ROLE, apiTest, NO_ACCESS_ROLE, testData } from '../fixtures';
+import { ALERTING_V2_ALERTS_READ_ROLE, apiTest, NO_ACCESS_ROLE } from '../fixtures';
 
 const RULE_ID_A = 'matcher-suggestions-rule-a';
 const RULE_ID_B = 'matcher-suggestions-rule-b';
@@ -60,7 +60,7 @@ const seedAlertEvents = async (esClient: EsClient): Promise<void> => {
   });
 };
 
-apiTest.describe('Rule event fields suggestions API', { tag: testData.API_ENGINE_TAG }, () => {
+apiTest.describe('Rule event fields suggestions API', { tag: '@local-stateful-classic' }, () => {
   let adminCredentials: RoleApiCredentials;
   let adminHeaders: Record<string, string>;
 
