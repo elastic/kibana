@@ -20,6 +20,7 @@ import { executionStepsQuerySchema } from './get_execution_steps';
 import type { WorkflowsManagementConfig } from '../../../config';
 import { ExternalResumeError } from '../../external_resume/external_resume_error';
 import { ManagedWorkflowExecutionReadForbiddenError } from '../../managed_workflow_execution_read_error';
+import { WorkflowRequiresDelegatedIdentityError } from '../../workflow_requires_delegated_identity_error';
 import type { RouteDependencies } from '../types';
 import { MAX_WORKFLOW_ENTITY_ID_LENGTH } from '../utils/route_constants';
 import { executionIdParamSchema } from '../utils/schemas';
@@ -206,6 +207,7 @@ describe('Execution Routes', () => {
         request,
         preprocessingContext: mockContext,
         metadata: { src: 'ui' },
+        rejectDelegatedIdentity: true,
       });
       expect(result).toEqual({ type: 'ok', body: { workflowExecutionId: 'exec-1' } });
     });
@@ -257,6 +259,27 @@ describe('Execution Routes', () => {
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
         body: { message: 'Workflow is disabled. Enable it to run it.' },
       });
+    });
+
+    it('should return 403 when the workflow delegates its execution identity', async () => {
+      mockApi.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockApi.runWorkflowWithAlertPreprocessing.mockRejectedValue(
+        new WorkflowRequiresDelegatedIdentityError(
+          "Workflow 'wf-1' delegates its execution identity to a parent workflow and cannot be run standalone."
+        )
+      );
+      const h = handler('POST', path)!;
+      const request = { params: { id: 'wf-1' }, body: { inputs: {} } };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockResponse.forbidden).toHaveBeenCalledWith({
+        body: {
+          message:
+            "Workflow 'wf-1' delegates its execution identity to a parent workflow and cannot be run standalone.",
+        },
+      });
+      expect(mockResponse.customError).not.toHaveBeenCalled();
     });
 
     it('should return custom error when api.runWorkflowWithAlertPreprocessing throws', async () => {

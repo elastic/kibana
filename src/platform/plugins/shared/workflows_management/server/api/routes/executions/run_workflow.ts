@@ -86,6 +86,7 @@ export function registerRunWorkflowRoute(deps: RouteDependencies) {
             request,
             preprocessingContext: context,
             metadata,
+            rejectDelegatedIdentity: true,
           });
           audit.logWorkflowRun(request, {
             workflowId: id,

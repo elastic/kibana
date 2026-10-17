@@ -89,7 +89,7 @@ export function getConnectorType(
   };
 }
 
-function getWorkflowsConnectorTypeArgs(
+export function getWorkflowsConnectorTypeArgs(
   workflowsManagementApi: WorkflowsManagementApi
 ): GetWorkflowsConnectorTypeArgs {
   // Create workflows service function for the connector
@@ -101,6 +101,9 @@ function getWorkflowsConnectorTypeArgs(
       validateWorkflowForExecution(workflow, workflowId);
 
       const workflowToRun: WorkflowExecutionEngineModel = toWorkflowExecutionEngineModel(workflow);
+
+      // Top-level run on behalf of the caller: refuse delegated-identity-only workflows.
+      workflowsManagementApi.assertRunnableStandalone(workflowToRun);
 
       // Run the workflow, @tb: maybe switch to scheduler?
       return workflowsManagementApi.runWorkflow(workflowToRun, spaceId, inputs, request);
