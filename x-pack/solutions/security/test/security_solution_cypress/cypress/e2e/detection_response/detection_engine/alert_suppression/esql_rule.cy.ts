@@ -42,8 +42,7 @@ const workaroundForResizeObserver = () =>
     }
   });
 
-// FLAKY: https://github.com/elastic/kibana/issues/248742
-describe.skip(
+describe(
   'Detection ES|QL - Alert suppression',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
@@ -73,7 +72,7 @@ describe.skip(
       interceptEsqlQueryFieldsRequest(queryWithCustomFields, 'esqlSuppressionFieldsRequest');
       fillEsqlQueryBar(queryWithCustomFields);
 
-      cy.wait('@esqlSuppressionFieldsRequest');
+      cy.wait('@esqlSuppressionFieldsRequest', { timeout: 60000 });
       fillAlertSuppressionFields(SUPPRESS_BY_FIELDS);
       selectAlertSuppressionPerInterval();
       setAlertSuppressionDuration(2, 'h');
