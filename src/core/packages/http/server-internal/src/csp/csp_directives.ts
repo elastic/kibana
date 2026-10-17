@@ -288,6 +288,18 @@ const parseConfigDirectives = (cspConfig: CspConfigType): CspConfigDirectives =>
     reportOnlyDirectives.set('connect-src', cspConfig.report_only?.connect_src);
   }
 
+  if (cspConfig.report_only?.img_src?.length) {
+    reportOnlyDirectives.set('img-src', cspConfig.report_only?.img_src);
+  }
+
+  if (cspConfig.report_only?.font_src?.length) {
+    reportOnlyDirectives.set('font-src', cspConfig.report_only?.font_src);
+  }
+
+  if (cspConfig.report_only?.media_src?.length) {
+    reportOnlyDirectives.set('media-src', cspConfig.report_only?.media_src);
+  }
+
   return {
     enforceDirectives,
     reportOnlyDirectives,
