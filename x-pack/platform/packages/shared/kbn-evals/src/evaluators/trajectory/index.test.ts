@@ -126,4 +126,130 @@ describe('createTrajectoryEvaluator', () => {
       })
     ).toThrow('orderWeight (0.3) + coverageWeight (0.3) must sum to 1');
   });
+
+  describe('penalizeExtraCalls', () => {
+    const strictEvaluator = createTrajectoryEvaluator({
+      extractToolCalls: (output: unknown) => (output as { tools: string[] }).tools,
+      goldenPathExtractor: (expected: unknown) => (expected as { tools: string[] }).tools,
+      penalizeExtraCalls: true,
+    });
+
+    it('leaves extra calls unpenalized by default', async () => {
+      const result = await evaluator.evaluate({
+        input: {},
+        output: { tools: ['search', 'display'] },
+        expected: { tools: ['search'] },
+        metadata: null,
+      });
+
+      // The opt-in flag must not change the default behaviour other suites rely on.
+      expect(result.score).toBe(1.0);
+      expect(result.metadata).toMatchObject({ precision: 1 });
+    });
+
+    it('scales the score down for an extra call', async () => {
+      const result = await strictEvaluator.evaluate({
+        input: {},
+        output: { tools: ['search', 'hack'] },
+        expected: { tools: ['search'] },
+        metadata: null,
+      });
+
+      expect(result.score).toBe(0.5);
+      expect(result.label).toBe('extra-or-duplicate-tools');
+      expect(result.metadata).toMatchObject({
+        precision: 0.5,
+        exactSequence: false,
+        extraTools: ['hack'],
+        // `hack` is not in the golden path, so it is extra — not a duplicate of anything.
+        duplicateTools: [],
+      });
+    });
+
+    it('scales the score down for a duplicated golden call', async () => {
+      const result = await strictEvaluator.evaluate({
+        input: {},
+        output: { tools: ['search', 'search'] },
+        expected: { tools: ['search'] },
+        metadata: null,
+      });
+
+      expect(result.score).toBe(0.5);
+      expect(result.metadata).toMatchObject({ duplicateTools: ['search'], extraTools: [] });
+    });
+
+    it('does not call an unexpected tool a duplicate', async () => {
+      const result = await strictEvaluator.evaluate({
+        input: {},
+        output: { tools: ['hack', 'hack'] },
+        expected: { tools: ['search'] },
+        metadata: null,
+      });
+
+      // A tool the golden path never mentions has an expected count of zero, so comparing
+      // counts alone would report both calls as duplications of a tool that is not in the
+      // sequence at all — and the explanation would read "Duplicate tools: hack" for a tool
+      // called once.
+      expect(result.metadata).toMatchObject({
+        duplicateTools: [],
+        extraTools: ['hack', 'hack'],
+      });
+    });
+
+    it('flags a same-length sequence that swaps a golden tool for an unexpected one', async () => {
+      const result = await strictEvaluator.evaluate({
+        input: {},
+        output: { tools: ['search', 'hack'] },
+        expected: { tools: ['search', 'display'] },
+        metadata: null,
+      });
+
+      // Same length as the golden path, so the length ratio is 1; the unexpected call still
+      // has to be visible as something other than an ordinary partial match.
+      expect(result.metadata).toMatchObject({
+        precision: 1,
+        exactSequence: false,
+        extraTools: ['hack'],
+        missingTools: ['display'],
+      });
+      expect(result.score).toBeCloseTo(0.4 * 0.5 + 0.6 * 0.5);
+      expect(result.label).toBe('extra-or-duplicate-tools');
+    });
+
+    it('keeps the ordinary labels when the penalty is off', async () => {
+      const result = await evaluator.evaluate({
+        input: {},
+        output: { tools: ['search', 'hack'] },
+        expected: { tools: ['search', 'display'] },
+        metadata: null,
+      });
+
+      expect(result.label).toBe('partial');
+    });
+
+    it('does not penalize a shorter actual sequence', async () => {
+      const result = await strictEvaluator.evaluate({
+        input: {},
+        output: { tools: ['search'] },
+        expected: { tools: ['search', 'filter'] },
+        metadata: null,
+      });
+
+      // Missing calls are already reflected by order/coverage; the ratio stays 1.
+      expect(result.metadata).toMatchObject({ precision: 1, exactSequence: false });
+      expect(result.score).toBeCloseTo(0.5 * 0.5 + 0.5 * 0.5);
+    });
+
+    it('keeps a perfect score for the exact sequence', async () => {
+      const result = await strictEvaluator.evaluate({
+        input: {},
+        output: { tools: ['search', 'display'] },
+        expected: { tools: ['search', 'display'] },
+        metadata: null,
+      });
+
+      expect(result.score).toBe(1.0);
+      expect(result.metadata).toMatchObject({ precision: 1, exactSequence: true });
+    });
+  });
 });
