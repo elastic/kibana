@@ -16,6 +16,7 @@ import {
   isStateTransitionAllowed,
   updateRuleDataSchema,
   type RuleKind,
+  type RuleEbtOrigin,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { Request, PluginInitializer } from '@kbn/core-di-server';
@@ -73,8 +74,13 @@ import type { UserServiceContract } from '../services/user_service/user_service'
 import { UserService } from '../services/user_service/user_service';
 import type { PluginConfig } from '../../config';
 import { convertEveryToSchedulesPerMinute, parseDurationToMs } from '../duration';
+import {
+  resolveRuleTelemetryEventOrigin,
+  type CreateRulesClientOptions,
+} from '../telemetry/rule_ebt_origin';
 import { buildMatchingRulesFilter, buildRuleSoFilter } from './build_rule_filter';
 import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
+import { RulesClientOptionsToken } from './tokens';
 import type {
   BulkByIdsParams,
   BulkByQueryParams,
@@ -203,6 +209,7 @@ export class RulesClient {
   private readonly config: PluginConfig;
   private readonly logger: LoggerServiceContract;
   private readonly eventContext: AlertingPublisherContext;
+  private readonly rulesClientOptions: CreateRulesClientOptions;
 
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
@@ -219,15 +226,22 @@ export class RulesClient {
     @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
-    @inject(EventOriginToken) origin: EventOrigin
+    @inject(EventOriginToken) origin: EventOrigin,
+    @inject(RulesClientOptionsToken) rulesClientOptions: CreateRulesClientOptions
   ) {
     this.eventContext = { request, origin };
+    this.rulesClientOptions = rulesClientOptions;
     this.config = pluginConfigAccessor.get<PluginConfig>();
     this.logger = loggerService.forSubsystem('rulesClient');
   }
 
   private getSpaceContext(): { spaceId: string } {
     return { spaceId: this.spaceId };
+  }
+
+  /** Channel and app for a rule-change telemetry event. */
+  private resolveRuleTelemetryEventOrigin(): RuleEbtOrigin {
+    return resolveRuleTelemetryEventOrigin(this.request, this.rulesClientOptions);
   }
 
   /**
@@ -649,7 +663,7 @@ export class RulesClient {
       references: persisted.references,
     });
     this.ruleEventPublisher.emitRuleCreated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleTelemetryEventOrigin() },
     ]);
     return rule;
   }
@@ -708,7 +722,12 @@ export class RulesClient {
         references: doc.references,
       });
       items.push(rule);
-      createdRules.push({ ruleId: rule.id, spaceId, rule });
+      createdRules.push({
+        ruleId: rule.id,
+        spaceId,
+        rule,
+        ...this.resolveRuleTelemetryEventOrigin(),
+      });
     }
 
     this.ruleEventPublisher.emitRuleCreated(this.eventContext, createdRules);
@@ -794,7 +813,7 @@ export class RulesClient {
     });
 
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleTelemetryEventOrigin() },
     ]);
 
     return rule;
@@ -864,7 +883,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleDeleted(this.eventContext, [
-      { ruleId: id, spaceId: this.spaceId, rule },
+      { ruleId: id, spaceId: this.spaceId, rule, ...this.resolveRuleTelemetryEventOrigin() },
     ]);
   }
 
@@ -970,7 +989,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleEnabled(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleTelemetryEventOrigin() },
     ]);
     return rule;
   }
@@ -1015,7 +1034,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleDisabled(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleTelemetryEventOrigin() },
     ]);
     return rule;
   }
@@ -1220,8 +1239,9 @@ export class RulesClient {
                 attrs: { ...doc.attrs, version: this.getNextVersion(doc.attrs.version) },
                 references: doc.references,
               }),
+              ...this.resolveRuleTelemetryEventOrigin(),
             }
-          : { ruleId: result.id, spaceId }
+          : { ruleId: result.id, spaceId, ...this.resolveRuleTelemetryEventOrigin() }
       );
     }
 
@@ -1342,7 +1362,12 @@ export class RulesClient {
           attrs: item.attrs,
           references: item.references,
         });
-        enabledRules.push({ ruleId: rule.id, spaceId, rule });
+        enabledRules.push({
+          ruleId: rule.id,
+          spaceId,
+          rule,
+          ...this.resolveRuleTelemetryEventOrigin(),
+        });
       }
 
       await this.removeExecutorTasks({
@@ -1423,7 +1448,12 @@ export class RulesClient {
           references: item.references,
         });
         affectedCount += 1;
-        disabledRules.push({ ruleId: rule.id, spaceId, rule });
+        disabledRules.push({
+          ruleId: rule.id,
+          spaceId,
+          rule,
+          ...this.resolveRuleTelemetryEventOrigin(),
+        });
       }
     }
 
@@ -1547,7 +1577,12 @@ export class RulesClient {
         attrs: item.attrs,
         references: item.references,
       });
-      updatedRules.push({ ruleId: rule.id, spaceId, rule });
+      updatedRules.push({
+        ruleId: rule.id,
+        spaceId,
+        rule,
+        ...this.resolveRuleTelemetryEventOrigin(),
+      });
     }
 
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, updatedRules);
@@ -1864,7 +1899,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleTelemetryEventOrigin() },
     ]);
     return { rule, created: false };
   }

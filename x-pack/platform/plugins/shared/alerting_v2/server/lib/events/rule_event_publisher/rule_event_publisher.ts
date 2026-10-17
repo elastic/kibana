@@ -7,7 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import { v4 as uuidv4 } from 'uuid';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { RuleResponse, RuleEbtChannel } from '@kbn/alerting-v2-schemas';
 import {
   AlertingDomainEventBusToken,
   type AlertingDomainEvent,
@@ -33,6 +33,10 @@ export interface EventRule {
   ruleId: string;
   spaceId: string;
   rule?: RuleResponse;
+  /** Channel the change was made through. */
+  channel: RuleEbtChannel;
+  /** App the change was made from, when known. */
+  app?: string;
 }
 
 /**
@@ -99,10 +103,12 @@ export class RuleEventPublisher implements RuleEventPublisherContract {
   }
 
   private toEventPayload(rule: EventRule, correlationId?: string): RuleEventPayload {
-    const { ruleId, spaceId, rule: domainRule } = rule;
+    const { ruleId, spaceId, rule: domainRule, channel, app } = rule;
     return {
       ruleId,
       spaceId,
+      channel,
+      ...(app ? { app } : {}),
       ...(correlationId ? { correlationId } : {}),
       ...(domainRule ? { rule: domainRule } : {}),
     };

@@ -31,9 +31,13 @@ import type {
 import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { ArtifactTypeRegistry, registerBuiltinArtifactTypes } from '../artifact_types';
+import type { CreateRulesClientOptions } from '../telemetry/rule_ebt_origin';
 import { RulesClient } from './rules_client';
 import type { CreateRuleParams } from './types';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
+
+const createRequestWithHeaders = (headers: Record<string, string>): KibanaRequest =>
+  httpServerMock.createKibanaRequest({ headers });
 
 jest.mock('../rule_executor/schedule', () => {
   const actual = jest.requireActual('../rule_executor/schedule');
@@ -137,7 +141,13 @@ describe('RulesClient', () => {
     jest.useRealTimers();
   });
 
-  function createClient(rulesConfigOverrides?: Partial<PluginConfig['rules']>) {
+  function createClient(
+    rulesConfigOverrides?: Partial<PluginConfig['rules']>,
+    {
+      clientRequest = request,
+      rulesClientOptions = {},
+    }: { clientRequest?: KibanaRequest; rulesClientOptions?: CreateRulesClientOptions } = {}
+  ) {
     const config: PluginConfig = {
       enabled: true,
       invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
@@ -158,7 +168,7 @@ describe('RulesClient', () => {
       coreMock.createPluginInitializerContext<PluginConfig>(config).config;
 
     return new RulesClient(
-      request,
+      clientRequest,
       rulesSavedObjectService,
       taskManager,
       userService,
@@ -168,7 +178,8 @@ describe('RulesClient', () => {
       ruleEventPublisher,
       loggerService,
       artifactTypeRegistry,
-      'user'
+      'user',
+      rulesClientOptions
     );
   }
 
@@ -3996,8 +4007,103 @@ describe('RulesClient', () => {
 
         expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
           { request, origin: 'user' },
-          [expect.objectContaining({ ruleId: 'rule-id-wf-1', spaceId: 'space-1' })]
+          [
+            expect.objectContaining({
+              ruleId: 'rule-id-wf-1',
+              spaceId: 'space-1',
+              channel: 'api',
+            }),
+          ]
         );
+        const [, [emitted]] = (ruleEventPublisher.emitRuleCreated as jest.Mock).mock.calls[0];
+        expect(emitted).not.toHaveProperty('app');
+      });
+
+      it('emits ruleCreated with the channel derived from the request', async () => {
+        const uiRequest = createRequestWithHeaders({
+          'kbn-version': '9.0.0',
+          referer: 'http://localhost:5601/app/discover',
+          'x-elastic-internal-origin': 'kibana',
+          'x-kbn-context': encodeURIComponent(JSON.stringify({ name: 'discover' })),
+        });
+        const client = createClient(undefined, { clientRequest: uiRequest });
+
+        await client.createRule({ data: workflowCreateData, options: { id: 'rule-id-wf-ui' } });
+
+        expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
+          { request: uiRequest, origin: 'user' },
+          [expect.objectContaining({ ruleId: 'rule-id-wf-ui', channel: 'ui', app: 'discover' })]
+        );
+      });
+
+      it('emits ruleCreated with the app configured by the calling plugin', async () => {
+        const client = createClient(undefined, { rulesClientOptions: { app: 'nightshift' } });
+
+        await client.createRule({ data: workflowCreateData, options: { id: 'rule-id-wf-app' } });
+
+        expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
+          { request, origin: 'user' },
+          [expect.objectContaining({ ruleId: 'rule-id-wf-app', channel: 'api', app: 'nightshift' })]
+        );
+      });
+
+      it('emits ruleCreated with the system channel for a fake request', async () => {
+        const fakeRequest = { ...request, isFakeRequest: true };
+        const client = createClient(undefined, { clientRequest: fakeRequest });
+
+        await client.createRule({ data: workflowCreateData, options: { id: 'rule-id-wf-sys' } });
+
+        expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
+          { request: fakeRequest, origin: 'user' },
+          [expect.objectContaining({ ruleId: 'rule-id-wf-sys', channel: 'system' })]
+        );
+      });
+    });
+
+    describe('bulkCreateRules', () => {
+      const mockBulkCreateSuccess = () => {
+        rulesSavedObjectService.bulkCreate.mockImplementationOnce(async (items) =>
+          items.map((item) => ({
+            id: item.id,
+            attributes: item.attrs,
+            version: 'v1',
+            references: item.references ?? [],
+          }))
+        );
+        getRuleExecutorTaskIdMock.mockImplementation(
+          ({ ruleId }: { ruleId: string }) => `task:${ruleId}`
+        );
+      };
+
+      it('emits ruleCreated with the channel and app for every created rule', async () => {
+        const client = createClient(undefined, { rulesClientOptions: { app: 'nightshift' } });
+        mockBulkCreateSuccess();
+
+        await client.bulkCreateRules({
+          items: [
+            { ...workflowCreateData, id: 'rule-bulk-1' },
+            { ...workflowCreateData, id: 'rule-bulk-2' },
+          ],
+        });
+
+        expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
+          { request, origin: 'user' },
+          [
+            expect.objectContaining({ ruleId: 'rule-bulk-1', channel: 'api', app: 'nightshift' }),
+            expect.objectContaining({ ruleId: 'rule-bulk-2', channel: 'api', app: 'nightshift' }),
+          ]
+        );
+      });
+
+      it('omits the app when none is configured or derived', async () => {
+        const client = createClient();
+        mockBulkCreateSuccess();
+
+        await client.bulkCreateRules({ items: [{ ...workflowCreateData, id: 'rule-bulk-3' }] });
+
+        const [, [emitted]] = (ruleEventPublisher.emitRuleCreated as jest.Mock).mock.calls[0];
+        expect(emitted).toEqual(expect.objectContaining({ channel: 'api' }));
+        expect(emitted).not.toHaveProperty('app');
       });
     });
 
@@ -4114,6 +4220,24 @@ describe('RulesClient', () => {
         expect(ruleEventPublisher.emitRuleDeleted).toHaveBeenCalledWith(
           { request, origin: 'user' },
           [expect.objectContaining({ ruleId: 'rule-id-wf-4', spaceId: 'space-1' })]
+        );
+      });
+
+      it('emits ruleDeleted with the channel and app of the rules client', async () => {
+        const uiRequest = createRequestWithHeaders({
+          'kbn-version': '9.0.0',
+          referer: 'http://localhost:5601/app/discover',
+          'x-elastic-internal-origin': 'kibana',
+          'x-kbn-context': encodeURIComponent(JSON.stringify({ name: 'discover' })),
+        });
+        const client = createClient(undefined, { clientRequest: uiRequest });
+        mockGetExistingRule('rule-id-wf-origin');
+
+        await client.deleteRule({ id: 'rule-id-wf-origin' });
+
+        expect(ruleEventPublisher.emitRuleDeleted).toHaveBeenCalledWith(
+          { request: uiRequest, origin: 'user' },
+          [expect.objectContaining({ ruleId: 'rule-id-wf-origin', channel: 'ui', app: 'discover' })]
         );
       });
     });
@@ -4273,8 +4397,8 @@ describe('RulesClient', () => {
         expect(ruleEventPublisher.emitRuleDeleted).toHaveBeenCalledWith(
           { request, origin: 'user' },
           [
-            { ruleId: 'rule-1', spaceId: 'space-1' },
-            { ruleId: 'rule-2', spaceId: 'space-1' },
+            { ruleId: 'rule-1', spaceId: 'space-1', channel: 'api' },
+            { ruleId: 'rule-2', spaceId: 'space-1', channel: 'api' },
           ]
         );
       });
@@ -4294,7 +4418,7 @@ describe('RulesClient', () => {
 
         expect(ruleEventPublisher.emitRuleDeleted).toHaveBeenCalledWith(
           { request, origin: 'user' },
-          [{ ruleId: 'rule-1', spaceId: 'space-1' }]
+          [{ ruleId: 'rule-1', spaceId: 'space-1', channel: 'api' }]
         );
       });
     });

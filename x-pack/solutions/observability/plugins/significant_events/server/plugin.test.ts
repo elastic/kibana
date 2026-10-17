@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { consumeRunQuota, createRunQuotaInternalRepository } from './lib/run_quotas';
 import { knowledgeIndicatorsDataStream } from './lib/knowledge_indicators';
 import { detectionsDataStream } from './lib/significant_events/detections';
@@ -134,6 +135,43 @@ describe('SignificantEventsPlugin setup', () => {
     expect(consumeRunQuotaMock).toHaveBeenCalledWith({
       internalRepository,
       group: 'investigation',
+    });
+  });
+});
+
+describe('SignificantEventsPlugin alerting v2 rules client', () => {
+  it('requests the alerting v2 rules client attributed to nightshift', async () => {
+    const registerKnowledgeIndicatorClientProvider = jest.fn();
+    const getRulesClientWithRequestInSpace = jest.fn().mockResolvedValue({});
+    const core = createCoreSetup();
+    core.getStartServices.mockResolvedValue([
+      coreMock.createStart(),
+      {
+        inference: { getClient: jest.fn() },
+        licensing: {
+          getLicense: jest.fn().mockResolvedValue({ getFeature: () => ({ isEnabled: true }) }),
+        },
+        fieldsMetadata: { getClient: jest.fn().mockResolvedValue({}) },
+        alertingVTwo: { getRulesClientWithRequestInSpace },
+      },
+      {},
+    ] as unknown as Awaited<ReturnType<typeof core.getStartServices>>);
+    const plugin = createPlugin();
+    plugin.setup(core, {
+      streams: {
+        registerKnowledgeIndicatorClientProvider,
+        getAttachmentClient: jest.fn().mockResolvedValue({}),
+        getStreamsClient: jest.fn().mockResolvedValue({}),
+      },
+    } as unknown as SignificantEventsPluginSetupDependencies);
+    const [provideKnowledgeIndicatorClient] =
+      registerKnowledgeIndicatorClientProvider.mock.calls[0];
+    const request = httpServerMock.createKibanaRequest();
+
+    await provideKnowledgeIndicatorClient(request);
+
+    expect(getRulesClientWithRequestInSpace).toHaveBeenCalledWith(request, 'default', {
+      app: 'nightshift',
     });
   });
 });

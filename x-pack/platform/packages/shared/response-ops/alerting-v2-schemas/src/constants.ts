@@ -41,6 +41,9 @@ export const BULK_FILTER_MAX_RESOURCES = 10_000;
  */
 export const ID_MAX_LENGTH = 150;
 
+/** Maximum length of an app id carried on a rule-change event. */
+export const RULE_EVENT_APP_MAX_LENGTH = 64;
+
 /** Maximum length for KQL/filter query strings (e.g. action policy matcher, bulk operation filter). */
 export const MAX_KQL_LENGTH = 4096;
 
