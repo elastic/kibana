@@ -30,6 +30,8 @@ export interface Config {
   caData?: string;
   // This property is only used when apiProvider is OpenAiProviderType.Other
   enableNativeFunctionCalling?: boolean;
+  // This property is only used when apiProvider is OpenAiProviderType.Other
+  extraBody?: Record<string, unknown>;
 }
 
 export interface InternalConfig {
