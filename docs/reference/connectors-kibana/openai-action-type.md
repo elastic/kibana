@@ -17,14 +17,16 @@ The OpenAI connector uses [axios](https://github.com/axios/axios) to send a POST
 
 ::::{important}
 :applies_to: {"stack": "deprecated 9.5", "serverless": "deprecated"}
-This connector is deprecated and is being progressively removed from the create connector UI. Existing connectors and their rule actions continue to work.
+This connector is deprecated. Existing connectors and their rule actions continue to work.
 
-For new AI integrations, use {{es}} {{infer}} endpoints. Migrate existing LLM connectors and related rule actions before the future removal.
+{applies_to}`serverless: deprecated` {applies_to}`stack: deprecated 9.6+` You can still create connectors of this type through the API, but {{kib}} no longer lists this type when you select **Create connector**.
+
+For new AI integrations, create an {{es}} {{infer}} endpoint with the `chat_completion` task type instead. To get started, refer to [Elastic Inference](docs-content://explore-analyze/elastic-inference.md) and [External inference](docs-content://explore-analyze/elastic-inference/external.md). Migrate existing LLM connectors and related rule actions before the future removal.
 ::::
 
 ## Create connectors in {{kib}} [define-gen-ai-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
+In {{stack}} 9.5 and earlier, you can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
 
 :::{image} ../images/gen-ai-connector.png
 :alt: OpenAI connector
@@ -114,7 +116,7 @@ To view the dashboard, you need at least `read` and `view_index_metadata` privil
 
 ## Connect a local LLM
 
-You can connect a locally hosted LLM to Elastic using the OpenAI connector. Your local LLM must be compatible with the OpenAI API format.
+In {{stack}} 9.5 and earlier, you can connect a locally hosted LLM to Elastic using the OpenAI connector. Your local LLM must be compatible with the OpenAI API format.
 
 When selecting a model:
 - Download models from trusted sources only
