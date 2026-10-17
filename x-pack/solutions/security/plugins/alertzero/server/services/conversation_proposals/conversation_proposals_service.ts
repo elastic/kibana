@@ -13,7 +13,12 @@ import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigatio
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../common/proposals/origin';
-import type { ProposalItem, ProposalsPageResponse } from '../../../common/proposals/list';
+import {
+  CLOSED_DECIDED_WITHIN_HOURS,
+  type ProposalItem,
+  type ProposalsPageParams,
+  type ProposalsPageResponse,
+} from '../../../common/proposals/list';
 
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
 type GetImpactClient = AgenticInvestigationsPluginStart['getImpactClient'];
@@ -34,9 +39,6 @@ const readAssignees = (value: MetadataFieldValue | undefined): string[] => {
   return typeof value === 'string' ? [value] : [];
 };
 
-/** Fixed window for the closed-proposals queue: decisions older than this are not shown. */
-const CLOSED_DECIDED_WITHIN_HOURS = 72;
-
 /**
  * Breaks every tie the timestamps leave, so a row cannot move between two offset
  * pages and be shown twice or skipped. Unique per live proposal: `create` roots a
@@ -46,6 +48,8 @@ const TIEBREAKER: SortCombinations[] = [
   { rootProposalId: { order: 'asc' } },
   { revision: { order: 'asc' } },
 ];
+
+const EMPTY_PAGE: ProposalsPageResponse = { proposals: [], total: 0 };
 
 export class ConversationProposalsService {
   constructor(
@@ -60,10 +64,14 @@ export class ConversationProposalsService {
     category: string,
     request: KibanaRequest,
     spaceId: string,
-    { size, from }: { size: number; from: number }
+    { size, from, entity }: ProposalsPageParams
   ): Promise<ProposalsPageResponse> {
+    const entityFilter = await this.resolveEntityFilter(entity, request);
+    if (entityFilter.matchesNothing) return EMPTY_PAGE;
+
     const { proposals, total } = await this.proposalsService.list(
       {
+        ...entityFilter.filter,
         category,
         origin: ALERTZERO_PROPOSAL_ORIGIN,
         status: 'pending',
@@ -84,10 +92,14 @@ export class ConversationProposalsService {
   async listClosed(
     request: KibanaRequest,
     spaceId: string,
-    { size, from }: { size: number; from: number }
+    { size, from, entity }: ProposalsPageParams
   ): Promise<ProposalsPageResponse> {
+    const entityFilter = await this.resolveEntityFilter(entity, request);
+    if (entityFilter.matchesNothing) return EMPTY_PAGE;
+
     const { proposals, total } = await this.proposalsService.list(
       {
+        ...entityFilter.filter,
         decidedWithinHours: CLOSED_DECIDED_WITHIN_HOURS,
         // The index is shared with every other solution's proposals, and only
         // this filter keeps theirs out of an AlertZero queue.
@@ -110,6 +122,22 @@ export class ConversationProposalsService {
     );
 
     return { proposals: await this.decorate(proposals, request), total };
+  }
+
+  /**
+   * Impact lives in its own index, so an entity filter becomes the conversations that carry the
+   * entity. None means nothing can match, which saves the proposals query.
+   */
+  private async resolveEntityFilter(
+    entity: string | undefined,
+    request: KibanaRequest
+  ): Promise<{ matchesNothing: boolean; filter: { conversationIds?: string[] } }> {
+    if (entity === undefined) return { matchesNothing: false, filter: {} };
+
+    const conversationIds = await this.getImpactClient(request).searchConversationIdsByEntityId(
+      entity
+    );
+    return { matchesNothing: conversationIds.length === 0, filter: { conversationIds } };
   }
 
   /** Returns an empty map if the read fails: enrichment is decoration, not load-bearing. */
