@@ -17,6 +17,7 @@ export type {
   SerializableRecord,
   AsSerializableRecord,
 } from './src/serializable';
+export type { JsonCompatible } from './src/json_compatible';
 
 /**
  * A type that may or may not be a `Promise`.
