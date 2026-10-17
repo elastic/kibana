@@ -822,6 +822,12 @@ export interface ApiKeyOptions {
    */
   cloneApiKey?: boolean;
   /**
+   * Defaults to true. Set to false to skip waiting for Elasticsearch to refresh after granting or
+   * cloning the task's API key: scheduling is faster, but a search-based lookup of the new key
+   * (e.g. `GET _security/api_key`) may briefly miss it when the task runs.
+   */
+  waitForApiKeyRefresh?: boolean;
+  /**
    * When true with a request, grant only the Elasticsearch API key (skip UIAM). Intended for
    * tests and narrow internal flows that need tasks with ES credentials only.
    */
