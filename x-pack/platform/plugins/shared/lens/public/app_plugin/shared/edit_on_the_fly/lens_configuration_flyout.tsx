@@ -50,7 +50,7 @@ import { useHasMultipleVisibleLayers } from '../../../editor_frame_service/edito
 import { VisualizationToolbarWrapper } from '../../../editor_frame_service/editor_frame/visualization_toolbar';
 import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
-import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
+import { trackCreateUiCounterEvents, trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { useCurrentAttributes } from './use_current_attributes';
 import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
 import { LayerTabsWrapper } from './layer_tabs';
@@ -296,12 +296,19 @@ export function LensEditConfigurationFlyout({
     if (telemetryEvents && telemetryEvents.length) {
       trackSaveUiCounterEvents(telemetryEvents);
     }
+    if (isNewPanel) {
+      trackCreateUiCounterEvents(
+        isTextBasedAttributes(attributesToSave) ? 'esql' : 'dsl',
+        'dashboards'
+      );
+    }
 
     deleteUserChartTypeFromSessionStorage();
     closeFlyout?.();
   }, [
     visualization.activeId,
     savedObjectId,
+    isNewPanel,
     closeFlyout,
     onApplyCallback,
     visualization.state,

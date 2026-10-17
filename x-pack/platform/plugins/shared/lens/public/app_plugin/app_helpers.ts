@@ -23,9 +23,9 @@ import type {
   EmbeddableEditorBreadcrumb,
   EmbeddableEditorState,
 } from '@kbn/embeddable-plugin/public';
+import { DASHBOARD_APP_ID, DISCOVER_APP_ID, VISUALIZE_APP_ID } from '@kbn/deeplinks-analytics';
 import type { RedirectToOriginProps } from './types';
-
-const VISUALIZE_APP_ID = 'visualize';
+import type { LensTelemetrySource } from '../lens_ui_telemetry';
 
 /**
  * Returns true when Lens was opened to edit a panel in a container (e.g. Dashboard), indicating
@@ -33,6 +33,31 @@ const VISUALIZE_APP_ID = 'visualize';
  */
 export function isSaveAndReturn(incomingState: EmbeddableEditorState | undefined): boolean {
   return Boolean(incomingState?.originatingApp && incomingState?.originatingPath);
+}
+
+/**
+ * Returns where a chart opened in the Lens app is being created, for creation telemetry.
+ */
+export function getTelemetrySource(
+  incomingState: EmbeddableEditorState | undefined,
+  isCopy = false
+): LensTelemetrySource | undefined {
+  // if there's a embeddableId, it's an edit not a create, unless it is saved as a new copy
+  if (!incomingState || (incomingState.embeddableId && !isCopy)) {
+    return undefined;
+  }
+  const { originatingApp } = incomingState;
+  if (isSaveAndReturn(incomingState)) {
+    return originatingApp === DASHBOARD_APP_ID ? 'dashboards' : undefined;
+  }
+  // without an originating path, the chart is created in the library, i.e., Visualize or the Dashboards' Visualizations tab.
+  if (originatingApp === VISUALIZE_APP_ID || originatingApp === DASHBOARD_APP_ID) {
+    return 'library';
+  }
+  if (originatingApp === DISCOVER_APP_ID) {
+    return 'discover';
+  }
+  return undefined;
 }
 
 export function isLegacyEditorEmbeddable(
