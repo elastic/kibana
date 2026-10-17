@@ -498,7 +498,7 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
       completionTokens: 0,
       connectorId: 'test-connector-id',
       contentLength: 0,
-      model: 'anthropic-claude-5.5-opus',
+      model: 'test-model',
       promptTokens: 128390,
       responseBody: '',
       traceId: 'test-trace-id',
@@ -522,7 +522,7 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     expect(state.errors).toHaveLength(1);
     expect(state.errors[0]).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
     expect(state.errors[0]).toContain('test-connector-id');
-    expect(state.errors[0]).toContain('anthropic-claude-5.5-opus');
+    expect(state.errors[0]).toContain('test-model');
     expect(state.errors[0]).toContain('prompt tokens: 128390');
   });
 

@@ -21,7 +21,7 @@ const getError = (
     completionTokens: 0,
     connectorId: 'test-connector-id',
     contentLength: 0,
-    model: 'anthropic-claude-5.5-opus',
+    model: 'test-model',
     promptTokens: 128390,
     responseBody: '',
     traceId: 'test-trace-id',
@@ -34,7 +34,7 @@ describe('EmptyModelResponseError', () => {
 
     expect(error.message).toContain(EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX);
     expect(error.message).toContain('test-connector-id');
-    expect(error.message).toContain('anthropic-claude-5.5-opus');
+    expect(error.message).toContain('test-model');
     expect(error.message).toContain('prompt tokens: 128390');
     expect(error.message).toContain('completion tokens: 0');
     expect(error.message).toContain('test-trace-id');
