@@ -48,6 +48,26 @@ describe('AlertTriage', () => {
       expect(initial.suppressed).toHaveLength(1);
     });
 
+    it('keeps the maintenance window id of an object suppression, and omits it for a string one', () => {
+      const initial = AlertTriage.partition(
+        [createAlert({ alert_id: 'e1' }), createAlert({ alert_id: 'e2' })],
+        () => undefined
+      );
+
+      const result = initial.suppressDispatchableWhere((alert) =>
+        alert.alert_id === 'e1'
+          ? { reason: 'maintenance_window:mw-1', maintenance_window_id: 'mw-1' }
+          : 'snooze'
+      );
+
+      expect(result.suppressed.map((e) => [e.alert_id, e.reason, e.maintenance_window_id])).toEqual(
+        [
+          ['e1', 'maintenance_window:mw-1', 'mw-1'],
+          ['e2', 'snooze', undefined],
+        ]
+      );
+    });
+
     it('returns the same instance when nothing is newly suppressed', () => {
       const initial = AlertTriage.partition([createAlert({ alert_id: 'e1' })], () => undefined);
 

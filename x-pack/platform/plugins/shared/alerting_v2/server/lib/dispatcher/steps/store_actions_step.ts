@@ -56,6 +56,7 @@ export class StoreActionsStep implements DispatcherStep {
           actionType: 'suppress',
           reason: alert.reason,
           spaceId: alert.space_id,
+          maintenanceWindowId: alert.maintenance_window_id,
         })
       ),
       ...throttled.flatMap((group) =>
@@ -125,14 +126,17 @@ export function toAction({
   actionType,
   reason,
   spaceId,
+  maintenanceWindowId,
 }: {
   alert: Alert;
   actionType: 'suppress' | 'fire' | 'notified' | 'unmatched';
   reason?: string;
   spaceId: string;
+  maintenanceWindowId?: string;
 }): AlertActionDocument {
   return {
     group_hash: alert.group_hash,
+    alert_id: alert.alert_id,
     last_series_event_timestamp: alert.last_event_timestamp,
     actor: { type: alertActionActorType.internal },
     action_type: actionType,
@@ -140,5 +144,6 @@ export function toAction({
     source: alert.source,
     reason,
     space_id: spaceId,
+    ...(maintenanceWindowId !== undefined && { maintenance_window_id: maintenanceWindowId }),
   };
 }
