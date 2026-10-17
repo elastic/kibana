@@ -194,6 +194,34 @@ describe('findRulesSkill', () => {
     expect(skill.content).toMatch(/searchTerm/);
   });
 
+  it('content short-circuits tool calls when the answer is already in the conversation', () => {
+    const { getStartServices, mockLogger } = createMockDeps();
+    const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
+    expect(skill.content).toContain('Provided-data short-circuit');
+    expect(skill.content).toMatch(/answer from that data/i);
+  });
+
+  it('content forbids speculative platform.core calls', () => {
+    const { getStartServices, mockLogger } = createMockDeps();
+    const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
+    expect(skill.content).toContain('No speculative core tools');
+    expect(skill.content).toContain('platform.core.get_document_by_id');
+    expect(skill.content).toContain('platform.core.generate_esql');
+  });
+
+  it('content bounds corroboration work', () => {
+    const { getStartServices, mockLogger } = createMockDeps();
+    const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
+    expect(skill.content).toContain('Bounded corroboration');
+    expect(skill.content).toMatch(/at most 10/i);
+  });
+
+  it('content forbids post-run calls after the result set is complete', () => {
+    const { getStartServices, mockLogger } = createMockDeps();
+    const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
+    expect(skill.content).toContain('No post-run calls');
+  });
+
   it('content documents the two-tool split with a tool table', () => {
     const { getStartServices, mockLogger } = createMockDeps();
     const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
