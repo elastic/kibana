@@ -200,7 +200,7 @@ describe('ApprovalContent', () => {
       proposal: {
         ...baseProposal,
         category: 'configure',
-        action: { name: 'Block IP', reversible: true },
+        action: { name: 'Block IP', reversible: true, approvalPolicy: 'always-gate' },
       },
     });
     expect(screen.getByText('Configure • Reversible • Critical impact')).toBeInTheDocument();
@@ -220,7 +220,7 @@ describe('ApprovalContent', () => {
       proposal: {
         ...baseProposal,
         category: 'configure',
-        action: { name: 'Block IP', reversible: true },
+        action: { name: 'Block IP', reversible: true, approvalPolicy: 'always-gate' },
         expiresAt,
       },
     });
