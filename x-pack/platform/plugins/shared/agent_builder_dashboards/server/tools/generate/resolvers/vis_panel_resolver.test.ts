@@ -148,6 +148,40 @@ describe('createVisPanelResolver', () => {
     );
   });
 
+  it('keeps panel settings other than title and description out of the Lens builder input', async () => {
+    mockedBuildLensConfig.mockResolvedValue(createBuildLensConfigResult({ type: 'metric' }));
+
+    const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
+
+    await resolveVisPanel({
+      operationType: 'edit_panels',
+      identifier: 'panel-1',
+      nlQuery: 'change the title',
+      existingPanel: {
+        id: 'panel-1',
+        type: LENS_EMBEDDABLE_TYPE,
+        config: {
+          type: 'metric',
+          title: 'Requests',
+          description: 'All requests',
+          drilldowns: [{ type: 'url_drilldown', label: 'Open host', url: 'https://example.com' }],
+          hide_title: true,
+          hide_border: true,
+          time_range: { from: 'now-7d', to: 'now' },
+        },
+        grid: { w: 24, h: 12, x: 0, y: 0 },
+      },
+    });
+
+    const chartConfig = { type: 'metric', title: 'Requests', description: 'All requests' };
+    expect(mockedBuildLensConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        existingConfig: JSON.stringify(chartConfig),
+        parsedExistingConfig: chartConfig,
+      })
+    );
+  });
+
   it('creates a Vega panel in the attachment API shape (config.spec) when renderer is "vega"', async () => {
     const spec = '{"$schema":"https://vega.github.io/schema/vega-lite/v6.json"}';
     mockedBuildVegaConfig.mockResolvedValue({
@@ -235,6 +269,54 @@ describe('createVisPanelResolver', () => {
       expect.objectContaining({ existingSpec, preserveESQL: true })
     );
     expect(mockedBuildLensConfig).not.toHaveBeenCalled();
+  });
+
+  it('shows the existing title and description to the Vega builder and keeps what it returns', async () => {
+    mockedBuildVegaConfig.mockResolvedValue({
+      spec: '{"mark":"line"}',
+      title: 'Requests by host',
+      description: 'Requests per host over time',
+      esqlQuery: 'FROM logs-*',
+    });
+
+    const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
+
+    const result = await resolveVisPanel({
+      operationType: 'edit_panels',
+      identifier: 'panel-1',
+      nlQuery: 'make it a line chart',
+      renderer: 'vega',
+      existingPanel: {
+        id: 'panel-1',
+        type: VEGA_VIS_TYPE,
+        config: {
+          spec: '{"mark":"bar"}',
+          title: 'Requests by host',
+          description: 'Requests per host over time',
+          hide_border: true,
+        },
+        grid: { w: 24, h: 12, x: 0, y: 0 },
+      },
+    });
+
+    expect(mockedBuildVegaConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        existingSpec: '{"mark":"bar"}',
+        existingTitle: 'Requests by host',
+        existingDescription: 'Requests per host over time',
+      })
+    );
+    expect(result).toEqual({
+      type: 'success',
+      panelContent: {
+        type: VEGA_VIS_TYPE,
+        config: {
+          spec: '{"mark":"line"}',
+          title: 'Requests by host',
+          description: 'Requests per host over time',
+        },
+      },
+    });
   });
 
   it('reports unsupported Vega enhancement instead of ignoring the presentation mode', async () => {

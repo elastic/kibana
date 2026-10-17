@@ -8,7 +8,7 @@
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import { MARKDOWN_EMBEDDABLE_TYPE, markdownStateSchema } from '@kbn/dashboard-markdown-schemas';
 import { z } from '@kbn/zod/v4';
-import { defineConfigPanelKind } from '../panel_kind';
+import { configPanelDisplayTextFields, defineConfigPanelKind } from '../panel_kind';
 
 /**
  * Markdown panel logic.
@@ -18,9 +18,13 @@ import { defineConfigPanelKind } from '../panel_kind';
  * `config`-source input schemas.
  */
 
-/** By-value markdown panel config: the embeddable's markdown state, with bounded `content`. */
+/**
+ * By-value markdown panel config: the embeddable's markdown state, with bounded `content`,
+ * plus the panel's `title` and `description`.
+ */
 const markdownPanelConfigSchema = markdownStateSchema.extend({
   content: markdownStateSchema.shape.content.max(50000),
+  ...configPanelDisplayTextFields,
 });
 
 /**
@@ -31,7 +35,7 @@ const markdownPanelConfigInputSchema = z.object({
   source: z.literal('config'),
   type: z.literal('markdown'),
   grid: panelGridSchema,
-  config: markdownPanelConfigSchema.describe('Markdown panel config (e.g. { content }).'),
+  config: markdownPanelConfigSchema.describe('Markdown panel config (e.g. { content, title }).'),
 });
 
 /**
@@ -44,7 +48,7 @@ const editMarkdownPanelConfigInputSchema = markdownPanelConfigInputSchema
   .extend({
     panelId: z.string().max(256).describe('Existing markdown panel id to update.'),
     config: markdownPanelConfigSchema.describe(
-      'New markdown panel config (e.g. { content }). Fully replaces the existing config.'
+      'New markdown panel config (e.g. { content, title }). Fully replaces the existing config, including its title and description.'
     ),
   });
 

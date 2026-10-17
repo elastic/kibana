@@ -75,6 +75,26 @@ describe('createAuthorVegaSpecPrompt', () => {
     expect(systemText('a bar chart of counts by status')).not.toContain('REFERENCE EXAMPLES');
   });
 
+  it('asks for an optional panel description in the response', () => {
+    const text = systemText('any chart');
+    expect(text).toContain('"description": "Optional short panel description"');
+    expect(text).not.toContain('Existing panel display text');
+  });
+
+  it('shows the existing title and description and asks to keep them', () => {
+    const [system] = createAuthorVegaSpecPrompt({
+      nlQuery: 'make the bars blue',
+      esqlQuery: 'FROM logs-*',
+      existingTitle: 'Requests by host',
+      existingDescription: 'Requests per host over time',
+    });
+    const text = String((system as [string, string])[1]);
+
+    expect(text).toContain('- title: "Requests by host"');
+    expect(text).toContain('- description: "Requests per host over time"');
+    expect(text).toContain('Return it unchanged in "title" and "description"');
+  });
+
   it('includes the chart-type hint only when one is provided', () => {
     expect(systemText('any chart')).not.toContain('Suggested chart style');
 

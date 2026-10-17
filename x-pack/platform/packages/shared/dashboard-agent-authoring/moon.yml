@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/lens-common'
   - '@kbn/logging'
   - '@kbn/ml-server-schemas'
+  - '@kbn/presentation-publishing-schemas'
   - '@kbn/zod'
 tags:
   - shared-server

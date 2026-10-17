@@ -78,7 +78,13 @@ describe('createVegaGraph', () => {
   });
 
   const run = async (
-    input: { esqlQuery?: string; existingSpec?: string; existingEsql?: string } = {}
+    input: {
+      esqlQuery?: string;
+      existingSpec?: string;
+      existingEsql?: string;
+      existingTitle?: string;
+      existingDescription?: string;
+    } = {}
   ) => {
     const graph = await createVegaGraph(modelProvider, logger, events, esClient);
     return graph.invoke({
@@ -86,11 +92,14 @@ describe('createVegaGraph', () => {
       index: undefined,
       existingSpec: input.existingSpec,
       existingEsql: input.existingEsql,
+      existingTitle: input.existingTitle,
+      existingDescription: input.existingDescription,
       esqlQuery: input.esqlQuery ?? '',
       currentAttempt: 0,
       actions: [],
       spec: null,
       title: null,
+      description: null,
       error: null,
     });
   };
@@ -119,6 +128,43 @@ describe('createVegaGraph', () => {
     });
     expect(spec.mark).toBe('bar');
     expect(state.esqlQuery).toBe(GENERATED_ESQL);
+  });
+
+  it('returns the authored panel description', async () => {
+    invoke.mockResolvedValue(
+      asCodeBlock({
+        title: 'Latency by region',
+        description: '  p95 latency per region  ',
+        spec: { mark: 'bar' },
+      })
+    );
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+    expect(state.description).toBe('p95 latency per region');
+  });
+
+  it('leaves the description empty when the model omits it', async () => {
+    invoke.mockResolvedValue(asCodeBlock({ title: 'Latency by region', spec: { mark: 'bar' } }));
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+    expect(state.description).toBeNull();
+  });
+
+  it('shows the existing title and description to the model when editing', async () => {
+    invoke.mockResolvedValue(asCodeBlock({ title: 'Latency by region', spec: { mark: 'bar' } }));
+
+    await run({
+      esqlQuery: PROVIDED_ESQL,
+      existingTitle: 'Latency by region',
+      existingDescription: 'p95 latency per region',
+    });
+
+    const authorPrompt = JSON.stringify(invoke.mock.calls[0][0]);
+    expect(authorPrompt).toContain('Existing panel display text');
+    expect(authorPrompt).toContain('Latency by region');
+    expect(authorPrompt).toContain('p95 latency per region');
   });
 
   it('reuses schema-probe columns from generation even when no rows matched', async () => {

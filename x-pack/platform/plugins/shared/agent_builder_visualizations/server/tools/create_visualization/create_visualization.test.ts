@@ -414,6 +414,54 @@ describe('createVisualizationTool handler', () => {
     expect(data.time_range).toBeUndefined();
   });
 
+  it('shows the existing Vega title and description to the builder and keeps what it returns', async () => {
+    const attachments = createAttachments();
+    attachments.getAttachmentRecord.mockReturnValue({
+      id: 'existing',
+      type: VISUALIZATION_ATTACHMENT_TYPE,
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: {
+            renderer: 'vega',
+            query: 'old query',
+            visualization: {
+              spec: '{"old":true}',
+              title: 'Requests by host',
+              description: 'Requests per host over time',
+            },
+            esql: 'FROM old',
+          },
+        },
+      ],
+    });
+    mockBuildVega.mockResolvedValueOnce({
+      spec: '{"new":true}',
+      title: 'Requests by host',
+      description: 'Requests per host over time',
+      esqlQuery: 'FROM old',
+    });
+
+    const { result } = await runHandler(
+      { query: 'make it a line chart', target: attachmentTarget('existing') },
+      { attachments }
+    );
+
+    expect(mockBuildVega).toHaveBeenCalledWith(
+      expect.objectContaining({
+        existingSpec: '{"old":true}',
+        existingTitle: 'Requests by host',
+        existingDescription: 'Requests per host over time',
+      })
+    );
+    expect(result.results[0].data.visualization).toEqual({
+      spec: '{"new":true}',
+      title: 'Requests by host',
+      description: 'Requests per host over time',
+    });
+  });
+
   it('treats an attachment with no renderer as Lens when updating', async () => {
     const attachments = createAttachments();
     attachments.getAttachmentRecord.mockReturnValue({

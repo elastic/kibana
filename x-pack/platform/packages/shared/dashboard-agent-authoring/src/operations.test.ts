@@ -1838,6 +1838,205 @@ describe('executeDashboardOperations', () => {
       });
     });
 
+    describe('panel settings on edit', () => {
+      const panelSettings = {
+        hide_title: true,
+        hide_border: true,
+        time_range: { from: 'now-7d', to: 'now' },
+        drilldowns: [{ type: 'url_drilldown', label: 'Open host', url: 'https://example.com' }],
+      };
+      const displayText = { title: 'Requests', description: 'All requests' };
+
+      const editPanel = async (
+        existingPanel: AttachmentPanel,
+        panelInput: Record<string, unknown>,
+        resolvedContent: PanelContentAttempt
+      ): Promise<AttachmentPanel> => {
+        const result = await executeDashboardOperations({
+          dashboardData: { title: 'Test', panels: [existingPanel] },
+          operations: [
+            {
+              operation: 'edit_panels',
+              panels: [
+                {
+                  source: 'request',
+                  panelId: existingPanel.id,
+                  query: 'update the panel',
+                  ...panelInput,
+                },
+              ],
+            } as DashboardOperation,
+          ],
+          logger,
+          resolvePanelContent: async () => resolvedContent,
+        });
+        return getPanelsOnly(result.dashboardData.panels)[0];
+      };
+
+      it('keeps Lens panel settings, takes display text from the new config, and drops stale chart keys', async () => {
+        const panel = await editPanel(
+          {
+            ...createLensPanel('panel-1'),
+            config: {
+              type: 'xy',
+              breakdown_by: { column: 'host' },
+              ...panelSettings,
+              ...displayText,
+            },
+          },
+          {},
+          createResolvedPanelContent({
+            type: LENS_EMBEDDABLE_TYPE,
+            config: { type: 'line', title: 'Requests over time' },
+          })
+        );
+
+        expect(panel.config).toEqual({
+          ...panelSettings,
+          type: 'line',
+          title: 'Requests over time',
+        });
+      });
+
+      it('does not restore a metric title that an enhance edit drops', async () => {
+        const metrics = [{ type: 'primary', column: 'Total requests' }];
+        const panel = await editPanel(
+          {
+            ...createLensPanel('panel-1'),
+            config: { type: 'metric', title: 'Total requests', metrics, ...panelSettings },
+          },
+          { applyChartRules: true },
+          createResolvedPanelContent({
+            type: LENS_EMBEDDABLE_TYPE,
+            config: { type: 'metric', metrics },
+          })
+        );
+
+        expect(panel.config).toEqual({ ...panelSettings, type: 'metric', metrics });
+      });
+
+      it('keeps Vega panel settings', async () => {
+        const panel = await editPanel(
+          {
+            id: 'vega-1',
+            type: VEGA_VIS_TYPE,
+            config: { spec: '{"mark":"bar"}', ...panelSettings, ...displayText },
+            grid: { x: 0, y: 0, w: 24, h: 9 },
+          },
+          {},
+          createResolvedPanelContent({
+            type: VEGA_VIS_TYPE,
+            config: { spec: '{"mark":"line"}', title: 'Requests over time' },
+          })
+        );
+
+        expect(panel.config).toEqual({
+          ...panelSettings,
+          spec: '{"mark":"line"}',
+          title: 'Requests over time',
+        });
+      });
+
+      it('keeps custom content panel settings', async () => {
+        const panel = await editPanel(
+          {
+            id: 'cc-1',
+            type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+            config: { template: '<div>Old</div>', ...panelSettings, ...displayText },
+            grid: { x: 0, y: 0, w: 24, h: 6 },
+          },
+          { renderer: 'custom_content' },
+          createResolvedPanelContent({
+            type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+            config: { template: '<div>New</div>' },
+          })
+        );
+
+        expect(panel.config).toEqual({ ...panelSettings, template: '<div>New</div>' });
+      });
+
+      it('passes custom content display text edits to the resolver', async () => {
+        const resolvePanelContent = jest.fn<
+          ReturnType<ResolvePanelContent>,
+          Parameters<ResolvePanelContent>
+        >(async () =>
+          createResolvedPanelContent({
+            type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+            config: { template: '<div>Old</div>', title: 'Errors' },
+          })
+        );
+        const existingPanel: AttachmentPanel = {
+          id: 'cc-1',
+          type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+          config: { template: '<div>Old</div>', ...displayText },
+          grid: { x: 0, y: 0, w: 24, h: 6 },
+        };
+
+        await executeDashboardOperations({
+          dashboardData: { title: 'Test', panels: [existingPanel] },
+          operations: [
+            {
+              operation: 'edit_panels',
+              panels: [
+                {
+                  source: 'request',
+                  renderer: 'custom_content',
+                  panelId: 'cc-1',
+                  title: 'Errors',
+                  description: null,
+                },
+              ],
+            },
+          ],
+          logger,
+          resolvePanelContent,
+        });
+
+        expect(resolvePanelContent).toHaveBeenCalledWith(
+          expect.objectContaining({ existingPanel, title: 'Errors', description: null })
+        );
+      });
+
+      it('keeps markdown panel settings and takes display text from the new config', async () => {
+        const result = await executeDashboardOperations({
+          dashboardData: {
+            title: 'Test',
+            panels: [
+              {
+                ...createMarkdownPanel('md-1', 'old text'),
+                config: { content: 'old text', ...panelSettings, ...displayText },
+              },
+            ],
+          },
+          operations: [
+            {
+              operation: 'edit_panels',
+              panels: [
+                {
+                  source: 'config',
+                  type: 'markdown',
+                  panelId: 'md-1',
+                  config: {
+                    content: 'new text',
+                    settings: { open_links_in_new_tab: true },
+                    title: 'Summary',
+                  },
+                },
+              ],
+            },
+          ],
+          logger,
+        });
+
+        expect(getPanelsOnly(result.dashboardData.panels)[0].config).toEqual({
+          ...panelSettings,
+          content: 'new text',
+          settings: { open_links_in_new_tab: true },
+          title: 'Summary',
+        });
+      });
+    });
+
     it('resolves multiple panel edits in one edit_panels op in parallel', async () => {
       const deferredByPanelId = new Map<
         string,
@@ -2604,6 +2803,8 @@ describe('executeDashboardOperations', () => {
               renderer: 'custom_content',
               query: 'Show error rate KPI',
               esql: 'FROM logs-* | STATS error_rate = AVG(error) BY host',
+              title: 'Error rate',
+              description: 'Average error rate per host',
               grid: { x: 0, y: 0, w: 24, h: 6 },
             },
           ],
@@ -2619,6 +2820,8 @@ describe('executeDashboardOperations', () => {
       identifier: 'Show error rate KPI',
       nlQuery: 'Show error rate KPI',
       esql: 'FROM logs-* | STATS error_rate = AVG(error) BY host',
+      title: 'Error rate',
+      description: 'Average error rate per host',
     });
     expect(result.failures).toEqual([]);
     const panels = getPanelsOnly(result.dashboardData.panels);

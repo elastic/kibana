@@ -48,11 +48,15 @@ const getExistingLensConfig = (
   return candidate && typeof candidate === 'object' ? (candidate as VisualizationConfig) : null;
 };
 
-const getExistingVegaSpec = (data: VisualizationAttachmentData | undefined): string | undefined => {
+/** Reads a string field (spec, title, description) from an existing Vega visualization. */
+const getExistingVegaText = (
+  data: VisualizationAttachmentData | undefined,
+  key: 'spec' | 'title' | 'description'
+): string | undefined => {
   if (!data || data.renderer !== 'vega') {
     return undefined;
   }
-  const candidate = data.visualization?.spec;
+  const candidate = data.visualization?.[key];
   return typeof candidate === 'string' ? candidate : undefined;
 };
 
@@ -407,12 +411,13 @@ Ground first: make sure the target index exists and every field you reference is
             ...(mergedEsql ? { esql: mergedEsql } : {}),
           };
         } else if (renderer === 'vega') {
-          const existingSpec = getExistingVegaSpec(existingData);
-          const { spec, title, esqlQuery } = await buildVegaConfig({
+          const { spec, title, description, esqlQuery } = await buildVegaConfig({
             nlQuery,
             index,
             esql,
-            existingSpec,
+            existingSpec: getExistingVegaText(existingData, 'spec'),
+            existingTitle: getExistingVegaText(existingData, 'title'),
+            existingDescription: getExistingVegaText(existingData, 'description'),
             chartType,
             modelProvider,
             logger,
@@ -422,7 +427,11 @@ Ground first: make sure the target index exists and every field you reference is
           visualizationData = {
             renderer: 'vega',
             query: nlQuery,
-            visualization: { spec, ...(title ? { title } : {}) },
+            visualization: {
+              spec,
+              ...(title ? { title } : {}),
+              ...(description ? { description } : {}),
+            },
             esql: esqlQuery,
           };
         } else {

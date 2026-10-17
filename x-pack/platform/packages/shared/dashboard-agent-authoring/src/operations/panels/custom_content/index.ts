@@ -13,7 +13,7 @@ import {
 } from '@kbn/custom-content-common';
 import { z } from '@kbn/zod/v4';
 import type { PanelResolutionRequestBase } from '../../../resolve_panel';
-import { defineRequestPanelKind } from '../panel_kind';
+import { defineRequestPanelKind, panelDescriptionSchema, panelTitleSchema } from '../panel_kind';
 
 /**
  * Custom content panel requests.
@@ -21,6 +21,7 @@ import { defineRequestPanelKind } from '../panel_kind';
  * Custom content is an HTML template generated server-side, so it is requested
  * like a Lens or Vega panel (`source: 'request'`, `renderer: 'custom_content'`).
  * The host provides the resolver that turns these requests into panel content.
+ * The template is generated, but its panel `title` and `description` come from the request.
  */
 
 /** Request to generate a new custom content panel's template. */
@@ -30,6 +31,10 @@ export interface CustomContentPanelAddRequest extends PanelResolutionRequestBase
   nlQuery: string;
   /** ES|QL query feeding the template. Omit for static content. */
   esql?: string;
+  /** Panel title. Omit for a panel without one. */
+  title?: string;
+  /** Panel description. Omit for a panel without one. */
+  description?: string;
   existingPanel?: undefined;
 }
 
@@ -37,10 +42,14 @@ export interface CustomContentPanelAddRequest extends PanelResolutionRequestBase
 export interface CustomContentPanelEditRequest extends PanelResolutionRequestBase {
   renderer: 'custom_content';
   existingPanel: AttachmentPanel;
-  /** What to change. Omitted when the edit only changes the query. */
+  /** What to change. Omitted when the edit only changes the query or the display text. */
   nlQuery?: string;
   /** New ES|QL query. Omit to keep the existing query; pass `null` to remove it. */
   esql?: string | null;
+  /** New panel title. Omit to keep the existing title; pass `null` to remove it. */
+  title?: string | null;
+  /** New panel description. Omit to keep the existing description; pass `null` to remove it. */
+  description?: string | null;
 }
 
 /** Request to generate or refine a custom content panel's template; `existingPanel` tells them apart. */
@@ -71,6 +80,10 @@ const customContentPanelRequestSchema = z.object({
     .describe(
       'ES|QL query whose result rows feed the template. Omit for static content — it is not generated for you. Build it with the generate_esql tool rather than writing it yourself; the panel fails if Elasticsearch rejects it.'
     ),
+  title: panelTitleSchema
+    .optional()
+    .describe('Panel title. The template has no heading of its own, so title the panel here.'),
+  description: panelDescriptionSchema.optional().describe('Short panel description.'),
 });
 
 /** Edits an existing custom content panel by id. */
@@ -97,10 +110,24 @@ const customContentEditPanelRequestSchema = z
       .describe(
         'New ES|QL query. Omit to keep the existing query; pass null to remove it. Build it with the generate_esql tool rather than writing it yourself.'
       ),
+    title: panelTitleSchema
+      .nullable()
+      .optional()
+      .describe(
+        'New panel title. Omit to keep the existing title; pass null to remove it. A title-only edit keeps the template as is.'
+      ),
+    description: panelDescriptionSchema
+      .nullable()
+      .optional()
+      .describe(
+        'New panel description. Omit to keep the existing description; pass null to remove it.'
+      ),
   })
-  .refine(({ query, esql }) => query !== undefined || esql !== undefined, {
-    message: 'At least one of query or esql must be provided.',
-  });
+  .refine(
+    ({ query, esql, title, description }) =>
+      [query, esql, title, description].some((value) => value !== undefined),
+    { message: 'At least one of query, esql, title, or description must be provided.' }
+  );
 
 export const customContentPanelKind = defineRequestPanelKind({
   renderer: 'custom_content',

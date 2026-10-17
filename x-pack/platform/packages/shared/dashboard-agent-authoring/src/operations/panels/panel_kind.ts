@@ -17,6 +17,29 @@ export const sectionIdField = z
     'Existing section id or the key of an add_section earlier in this call. If omitted, panel is added at the top level.'
   );
 
+/** Bounded panel `title` for agent-authored panel input. */
+export const panelTitleSchema = z.string().max(256);
+
+/** Bounded panel `description` for agent-authored panel input. */
+export const panelDescriptionSchema = z.string().max(2048);
+
+/**
+ * Optional panel `title` and `description` for by-value panel configs. Edits replace the whole
+ * config, so they say how to keep the existing text.
+ */
+export const configPanelDisplayTextFields = {
+  title: panelTitleSchema
+    .optional()
+    .describe(
+      'Panel title. On edit, repeat the existing title to keep it; omit it only to leave the panel without a title.'
+    ),
+  description: panelDescriptionSchema
+    .optional()
+    .describe(
+      'Short panel description. On edit, repeat the existing description to keep it; omit it only to leave the panel without one.'
+    ),
+};
+
 interface PanelKindBase {
   /** Embeddable type panels of this kind are stored as. Edits may only target panels of this type. */
   readonly embeddableType: string;

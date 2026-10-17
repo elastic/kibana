@@ -75,7 +75,8 @@ const toCreationResolutionRequest = ({
   const base = { operationType, identifier: query, nlQuery: query, esql };
 
   if (panelInput.renderer === 'custom_content') {
-    return { ...base, renderer: panelInput.renderer };
+    const { title, description } = panelInput;
+    return { ...base, renderer: panelInput.renderer, title, description };
   }
 
   const { renderer, index, chartType } = panelInput;

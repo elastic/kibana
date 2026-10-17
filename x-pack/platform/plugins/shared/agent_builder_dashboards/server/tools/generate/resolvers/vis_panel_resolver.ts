@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import {
   buildLensConfig,
   buildVegaConfig,
@@ -19,6 +20,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
   createPanelFailureResult,
   getErrorMessage,
+  PANEL_SETTINGS_KEYS,
   type PanelContentAttempt,
   type VisPanelResolutionRequest,
 } from '@kbn/dashboard-agent-authoring';
@@ -31,10 +33,13 @@ export interface VisPanelResolverDeps {
   esClient: IScopedClusterClient;
 }
 
-/** Pull the serialized Vega spec out of an existing Vega panel's attachment config. */
-const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string | undefined => {
-  const spec = (existingPanel?.config as { spec?: unknown } | undefined)?.spec;
-  return typeof spec === 'string' ? spec : undefined;
+/** Reads a string field from an existing panel's attachment config. */
+const getExistingConfigText = (
+  existingPanel: AttachmentPanel | undefined,
+  key: 'spec' | 'title' | 'description'
+): string | undefined => {
+  const value = existingPanel?.config[key];
+  return typeof value === 'string' ? value : undefined;
 };
 
 /**
@@ -75,11 +80,13 @@ export const createVisPanelResolver = ({
         if (applyChartRules) {
           throw new Error('Presentation enhancement is only supported for ES|QL Lens panels.');
         }
-        const { spec, title, authoringNote } = await buildVegaConfig({
+        const { spec, title, description, authoringNote } = await buildVegaConfig({
           nlQuery,
           index,
           esql,
-          existingSpec: getExistingVegaSpec(existingPanel),
+          existingSpec: getExistingConfigText(existingPanel, 'spec'),
+          existingTitle: getExistingConfigText(existingPanel, 'title'),
+          existingDescription: getExistingConfigText(existingPanel, 'description'),
           preserveESQL,
           chartType,
           modelProvider,
@@ -96,13 +103,20 @@ export const createVisPanelResolver = ({
           type: 'success',
           panelContent: {
             type: VEGA_VIS_TYPE,
-            config: { spec, ...(title ? { title } : {}) },
+            config: {
+              spec,
+              ...(title ? { title } : {}),
+              ...(description ? { description } : {}),
+            },
           },
           ...(authoringNote ? { authoringNote } : {}),
         };
       }
 
-      const existingConfig = existingPanel?.config as VisualizationConfig | undefined;
+      // The Lens chart schema can't express panel settings; `edit_panels` carries them over.
+      const existingConfig = existingPanel
+        ? (omit(existingPanel.config, PANEL_SETTINGS_KEYS) as VisualizationConfig)
+        : undefined;
 
       const result = await buildLensConfig({
         nlQuery,

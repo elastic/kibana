@@ -98,6 +98,25 @@ describe('custom_content panel schemas', () => {
   it.each([
     ['add_panels', addPanelsItemSchema],
     ['add_section', addSectionPanelItemSchema],
+  ])('keeps the title and description on a custom_content request through %s', (_, schema) => {
+    const result = schema.safeParse({
+      ...customContentRequest,
+      title: 'Errors',
+      description: 'Total errors',
+    });
+
+    expect(result.data).toMatchObject({ title: 'Errors', description: 'Total errors' });
+  });
+
+  it('rejects a custom_content title over the length limit', () => {
+    expect(
+      addPanelsItemSchema.safeParse({ ...customContentRequest, title: 'x'.repeat(257) }).success
+    ).toBe(false);
+  });
+
+  it.each([
+    ['add_panels', addPanelsItemSchema],
+    ['add_section', addSectionPanelItemSchema],
   ])('rejects a custom_content request without a query through %s', (_, schema) => {
     const { query, ...withoutQuery } = customContentRequest;
 
@@ -134,6 +153,8 @@ describe('edit_panels item schema', () => {
     ['a query-only', { query: 'Updated KPI' }],
     ['an esql-only', { esql: 'FROM logs-* | STATS count = COUNT(*)' }],
     ['a query-removing', { esql: null }],
+    ['a title-only', { title: 'Errors' }],
+    ['a description-removing', { description: null }],
   ])('accepts %s custom_content edit', (_, fields) => {
     expect(editPanelItemSchema.safeParse({ ...customContentEdit, ...fields }).success).toBe(true);
   });
@@ -151,6 +172,30 @@ describe('edit_panels item schema', () => {
         config: { content: 'hello' },
       }).success
     ).toBe(true);
+  });
+
+  it('keeps the title and description on a markdown config edit', () => {
+    const result = editPanelItemSchema.safeParse({
+      source: 'config',
+      type: 'markdown',
+      panelId: 'md-1',
+      config: { content: 'hello', title: 'Summary', description: 'Key findings' },
+    });
+
+    expect(result.data).toMatchObject({
+      config: { title: 'Summary', description: 'Key findings' },
+    });
+  });
+
+  it('rejects a markdown description over the length limit', () => {
+    expect(
+      editPanelItemSchema.safeParse({
+        source: 'config',
+        type: 'markdown',
+        panelId: 'md-1',
+        config: { content: 'hello', description: 'x'.repeat(2049) },
+      }).success
+    ).toBe(false);
   });
 });
 
@@ -193,6 +238,25 @@ describe('ML anomaly panel schemas', () => {
     ['add_section', addSectionPanelItemSchema],
   ])('accepts an anomaly charts panel with title through %s', (_, schema) => {
     expect(schema.safeParse(chartsBase).success).toBe(true);
+  });
+
+  it.each([
+    ['ml_anomaly_charts', { job_ids: ['job-1'] }],
+    ['ml_anomaly_swimlane', { job_ids: ['job-1'], swimlane_type: 'overall' }],
+    ['ml_single_metric_viewer', { job_ids: ['job-1'] }],
+  ])('keeps a bounded title and description on a %s edit', (type, config) => {
+    const edit = { source: 'config', type, panelId: 'ml-1' };
+
+    expect(
+      editPanelItemSchema.safeParse({
+        ...edit,
+        config: { ...config, title: 'Anomalies', description: 'Job anomalies' },
+      }).data
+    ).toMatchObject({ config: { title: 'Anomalies', description: 'Job anomalies' } });
+    expect(
+      editPanelItemSchema.safeParse({ ...edit, config: { ...config, title: 'x'.repeat(257) } })
+        .success
+    ).toBe(false);
   });
 
   it('accepts ML anomaly panel edit_panels items', () => {

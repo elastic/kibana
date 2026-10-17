@@ -125,6 +125,23 @@ describe('buildVegaConfig', () => {
     });
   });
 
+  it('returns the authored panel description from the graph', async () => {
+    invoke.mockResolvedValue({
+      spec: SPEC,
+      title: 'Requests by host',
+      description: 'Requests per host over time',
+      error: null,
+      esqlQuery: PROVIDED_ESQL,
+    });
+
+    await expect(run(PROVIDED_ESQL)).resolves.toEqual({
+      spec: SPEC,
+      title: 'Requests by host',
+      description: 'Requests per host over time',
+      esqlQuery: PROVIDED_ESQL,
+    });
+  });
+
   it('drops an invalid provided ES|QL and warns, so the graph regenerates', async () => {
     mockedValidateEsqlQuery.mockResolvedValue('line 1, column 1: bad query');
 
@@ -186,6 +203,24 @@ describe('buildVegaConfig', () => {
         existingSpec,
       });
       expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('Recovered ES|QL'));
+    });
+
+    it('passes the existing title and description to the graph', async () => {
+      await buildVegaConfig({
+        nlQuery: 'make the bars blue',
+        existingSpec,
+        existingTitle: 'Requests by host',
+        existingDescription: 'Requests per host over time',
+        modelProvider,
+        logger,
+        events,
+        esClient,
+      });
+
+      expect(invoke.mock.calls[0][0]).toMatchObject({
+        existingTitle: 'Requests by host',
+        existingDescription: 'Requests per host over time',
+      });
     });
 
     it('has no edit context when the existing spec has no ES|QL binding to recover', async () => {

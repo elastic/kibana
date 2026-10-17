@@ -23,6 +23,8 @@ export interface AuthorSpecAction {
   spec?: Record<string, unknown>;
   /** Panel / visualization title from the authoring response schema. */
   title?: string;
+  /** Panel description from the authoring response schema. */
+  description?: string;
   /** One-sentence factual description of the authored chart and presentation choices. */
   authoringNote?: string;
   /** Raw model response, kept even when it fails to parse so a retry can repair it. */
@@ -39,6 +41,8 @@ export interface ValidateSpecAction {
   spec?: string;
   /** Panel / visualization title carried through from the matching authoring attempt. */
   title?: string;
+  /** Panel description carried through from the matching authoring attempt. */
+  description?: string;
   /** Authoring note carried through from the matching authoring attempt. */
   authoringNote?: string;
   attempt: number;
