@@ -353,6 +353,40 @@ describe('run.ts', () => {
 
       expect(result).toBe('/workspace/jest.config.js');
     });
+
+    it('should discover a jest.config.cjs when no jest.config.js exists', () => {
+      mockExistsSync.mockImplementation(
+        (path: string) => path === '/workspace/.buildkite/jest.config.cjs'
+      );
+      const exitSpy = jest.spyOn(process, 'exit').mockImplementation((() => {
+        throw new Error('process.exit called');
+      }) as never);
+
+      const log = new mockToolingLog();
+      const testFiles = ['/workspace/.buildkite/pipelines/evals/evals_suites_config.test.ts'];
+
+      try {
+        const result = discoverJestConfig(testFiles, '/workspace', 'jest.config.js', log);
+
+        expect(result).toBe('/workspace/.buildkite/jest.config.cjs');
+      } finally {
+        exitSpy.mockRestore();
+      }
+    });
+
+    it('should prefer jest.config.js over jest.config.cjs in the same directory', () => {
+      mockExistsSync.mockImplementation(
+        (path: string) =>
+          path === '/workspace/pkg/jest.config.js' || path === '/workspace/pkg/jest.config.cjs'
+      );
+
+      const log = new mockToolingLog();
+      const testFiles = ['/workspace/pkg/file.test.js'];
+
+      const result = discoverJestConfig(testFiles, '/workspace', 'jest.config.js', log);
+
+      expect(result).toBe('/workspace/pkg/jest.config.js');
+    });
   });
 
   describe('path resolution utilities', () => {
