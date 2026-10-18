@@ -226,6 +226,31 @@ describe('useEntityGridData', () => {
 
       expect(mockFetchResolvedEntityFilterOverrides).not.toHaveBeenCalled();
     });
+
+    it('does not apply the overrides of resolved rows to individual rows', async () => {
+      const { result, rerender } = renderHook(
+        (options: UseEntityGridDataOptions) => useEntityGridData(options),
+        {
+          initialProps: FILTERED_OPTIONS,
+          wrapper: ({ children }: PropsWithChildren) => (
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+          ),
+        }
+      );
+      await waitFor(() => expect(result.current.rows).toHaveLength(2));
+
+      rerender({ ...FILTERED_OPTIONS, rowsMode: 'individual' });
+
+      await waitFor(() =>
+        expect(mockFetchSortPage).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            rowsMode: 'individual',
+            entityExpression: FILTERED_OPTIONS.entityExpression,
+          }),
+          expect.anything()
+        )
+      );
+    });
   });
 
   describe('waiting', () => {

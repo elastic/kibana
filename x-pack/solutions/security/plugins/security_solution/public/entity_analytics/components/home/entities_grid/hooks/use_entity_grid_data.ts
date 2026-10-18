@@ -96,6 +96,8 @@ const getFilterOverridesKey = (context: GridContext, options: UseEntityGridDataO
       spaceId: context.spaceId,
       concreteEntityIndexName: context.concreteEntityIndexName,
       entityExpression: options.entityExpression,
+      // Individual rows never read overrides, so their key never holds the resolved rows' ones.
+      rowsMode: options.rowsMode,
     },
   ] as const;
 
