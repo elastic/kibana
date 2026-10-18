@@ -55,11 +55,11 @@ describe('pciComplianceSkill', () => {
   });
 
   /**
-   * The evals suite's shared criteria (`BASELINE_PCI_CRITERIA` in
+   * The PCI evals suite's shared criteria (`BASELINE_PCI_CRITERIA` in
    * `@kbn/evals-suite-pci-compliance`) require the DSS version, the evaluated scope and the QSA
-   * disclaimer in EVERY answer. The skill used to condition that surfacing on "audit-facing
-   * output", which four model families read as "skip it for a field-mapping reply". These tests
-   * pin the unconditional contract so the escape hatch cannot come back.
+   * disclaimer in every answer. The skill conditioned that surfacing on "audit-facing output",
+   * and the field-mapping answers omitted all three while the values sat unused in the tool
+   * results. These tests pin the unconditional contract so the conditional cannot come back.
    */
   describe('output contract', () => {
     const outputContract = (() => {
