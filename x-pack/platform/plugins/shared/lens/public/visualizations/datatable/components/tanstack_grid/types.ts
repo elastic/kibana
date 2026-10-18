@@ -50,6 +50,11 @@ export interface TanStackDatatableGridProps {
   onColumnResize?: (data: { columnId: string; width: number }) => void;
   /** Rendered in a summary row below the data, when provided. */
   renderFooterCellValue?: ComponentType<{ columnId: string; colIndex: number }>;
+  /**
+   * Called after the grid has rendered its rows, and again whenever the rendered data changes.
+   * It replaces guessing when EuiDataGrid is done rendering with a timeout.
+   */
+  onRender?: () => void;
   /** Replaces the content of the popover opened by expanding a cell. */
   renderCellPopover?: ComponentType<TanStackCellPopoverProps>;
 }

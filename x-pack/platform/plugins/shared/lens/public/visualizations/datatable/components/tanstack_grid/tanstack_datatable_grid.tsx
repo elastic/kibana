@@ -286,6 +286,7 @@ export const TanStackDatatableGrid = ({
   onColumnResize,
   renderFooterCellValue: RenderFooterCellValue,
   renderCellPopover,
+  onRender,
 }: TanStackDatatableGridProps) => {
   const themeContext = useEuiTheme();
   const styles = useMemo(() => getGridStyles(themeContext, gridStyle), [themeContext, gridStyle]);
@@ -414,6 +415,16 @@ export const TanStackDatatableGrid = ({
   });
   virtualizerRef.current = rowVirtualizer;
   const virtualItems = rowVirtualizer.getVirtualItems();
+
+  // The virtualizer renders its rows after mount: wait for them, unless there is nothing to render.
+  const hasRenderedRows = visibleRowCount === 0 || virtualItems.length > 0;
+  useEffect(() => {
+    if (!hasRenderedRows || !onRender) {
+      return;
+    }
+    const frame = requestAnimationFrame(onRender);
+    return () => cancelAnimationFrame(frame);
+  }, [hasRenderedRows, onRender, columns, renderCellValue, visibleRowCount]);
 
   // Page changes start from the top.
   const pageIndex = pagination?.pageIndex;

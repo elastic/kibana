@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
@@ -91,9 +91,12 @@ describe('DatatableComponent with the TanStack grid', () => {
       enableTanstackDatatable: true,
     });
     onDispatchEvent = jest.fn();
+    renderComplete = jest.fn();
     data = getData();
     args = getArgs();
   });
+
+  let renderComplete: jest.Mock;
 
   const renderTable = (propsOverrides: Partial<DatatableRenderProps> = {}) => {
     const props: DatatableRenderProps = {
@@ -107,7 +110,7 @@ describe('DatatableComponent with the TanStack grid', () => {
       interactive: true,
       viewMode: 'view',
       syncColors: false,
-      renderComplete: jest.fn(),
+      renderComplete,
       ...propsOverrides,
     };
     return render(<DatatableComponent {...props} />, { wrapper: I18nProvider });
@@ -120,6 +123,17 @@ describe('DatatableComponent with the TanStack grid', () => {
     expect(screen.getByRole('grid', { name: 'My table' })).toBeInTheDocument();
     expect(screen.getByTestId('lnsDataTable')).toBeInTheDocument();
     expect(getCellTexts()).toEqual(['shoes', '3', 'hats', '1', 'coats', '2']);
+  });
+
+  it('signals that rendering is complete when the grid has rendered its rows', async () => {
+    renderTable();
+    await waitFor(() => expect(renderComplete).toHaveBeenCalled());
+  });
+
+  it('signals that rendering is complete for an empty table', async () => {
+    data.rows = [];
+    renderTable();
+    await waitFor(() => expect(renderComplete).toHaveBeenCalled());
   });
 
   it('renders the EuiDataGrid when the feature flag is disabled', () => {

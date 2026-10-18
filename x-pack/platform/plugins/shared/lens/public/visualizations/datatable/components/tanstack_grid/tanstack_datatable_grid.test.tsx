@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { TanStackDatatableGrid } from './tanstack_datatable_grid';
@@ -425,6 +425,30 @@ describe('TanStackDatatableGrid', () => {
     it('does not render a footer without a footer renderer', () => {
       render(<TanStackDatatableGrid {...defaultProps} />);
       expect(screen.queryByTestId('dataGridFooterCell-a')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('onRender', () => {
+    it('is called once the rows are rendered, and again when the data changes', async () => {
+      const onRender = jest.fn();
+      const { rerender } = render(<TanStackDatatableGrid {...defaultProps} onRender={onRender} />);
+      await waitFor(() => expect(onRender).toHaveBeenCalledTimes(1));
+      expect(screen.getAllByRole('gridcell').length).toBeGreaterThan(0);
+
+      rerender(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          onRender={onRender}
+          renderCellValue={({ rowIndex }) => <>{`changed-${rowIndex}`}</>}
+        />
+      );
+      await waitFor(() => expect(onRender).toHaveBeenCalledTimes(2));
+    });
+
+    it('is called for an empty data set', async () => {
+      const onRender = jest.fn();
+      render(<TanStackDatatableGrid {...defaultProps} rowCount={0} onRender={onRender} />);
+      await waitFor(() => expect(onRender).toHaveBeenCalledTimes(1));
     });
   });
 

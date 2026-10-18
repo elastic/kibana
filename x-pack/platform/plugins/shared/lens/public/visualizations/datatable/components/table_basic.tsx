@@ -103,8 +103,6 @@ const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 20, 30, 50, 100];
 
 export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
-  const isTanStackGridEnabled = getLensFeatureFlags().enableTanstackDatatable;
-
   const isInteractive = props.interactive && props.viewMode !== 'non-interactive';
   const isDarkMode = useKibanaIsDarkMode();
   const palettes = useKbnPalettes();
@@ -122,12 +120,21 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     undefined
   );
 
+  const isTanStackGridEnabled = getLensFeatureFlags().enableTanstackDatatable;
+
+  const hasNoRows = firstLocalTable.rows.length === 0;
+
   useLayoutEffect(() => {
-    // Temporary solution: DataGrid should provide onRender callback
+    // The TanStack grid signals when it is done rendering through `onRender`, there is no grid to
+    // do that when the table is empty.
+    if (isTanStackGridEnabled && !hasNoRows) {
+      return;
+    }
+    // Temporary solution: EuiDataGrid does not provide an onRender callback
     setTimeout(() => {
       props.renderComplete();
     }, 300);
-  }, [props]);
+  }, [props, isTanStackGridEnabled, hasNoRows]);
 
   useEffect(() => {
     setPagination(
@@ -708,6 +715,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
             }
             onColumnResize={onColumnResize}
             renderFooterCellValue={renderSummaryRow}
+            onRender={props.renderComplete}
           />
         ) : (
           <EuiDataGrid
