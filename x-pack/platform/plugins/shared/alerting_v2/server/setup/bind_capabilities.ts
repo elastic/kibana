@@ -78,8 +78,9 @@ export function bindCapabilities({ bind }: ContainerModuleLoadOptions) {
       const internalClient = savedObjects.createInternalRepository([
         RULE_TEMPLATE_SAVED_OBJECT_TYPE,
       ]);
-      ref.v2RuleTemplatesAvailable =
-        await RuleTemplatesClient.hasTemplatesAsInternalUser(internalClient);
+      ref.v2RuleTemplatesAvailable = await RuleTemplatesClient.hasTemplatesAsInternalUser(
+        internalClient
+      );
     } catch (error) {
       logger.error({
         message: 'Failed to resolve system capabilities',

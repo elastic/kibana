@@ -29,10 +29,7 @@ import {
   setAlertingV2NavSettings,
   unsetAlertingV2EnabledSetting,
 } from '../fixtures/alerting_v2_setting';
-import {
-  seedV2RuleTemplate,
-  cleanUpRuleTemplates,
-} from '../fixtures/rule_template_helpers';
+import { seedV2RuleTemplate, cleanUpRuleTemplates } from '../fixtures/rule_template_helpers';
 import { observabilityAlertingNavRole } from '../fixtures/roles';
 
 const NAV_ITEMS = {

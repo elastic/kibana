@@ -58,8 +58,7 @@ const setCapabilities = (core: CoreStart, capabilities: Record<string, unknown>)
   } as Capabilities;
 };
 
-const getPanelChildren = (core: CoreStart) =>
-  getAlertsNavPanel(core)[0]?.children ?? [];
+const getPanelChildren = (core: CoreStart) => getAlertsNavPanel(core)[0]?.children ?? [];
 
 const getSectionByTitle = (core: CoreStart, title?: string) =>
   getPanelChildren(core).find((section) => section.title === title);

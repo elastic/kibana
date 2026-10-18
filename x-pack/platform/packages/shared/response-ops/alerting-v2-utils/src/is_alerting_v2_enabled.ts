@@ -123,8 +123,6 @@ export const canAccessAlertingV2Rules = (core: CoreStart): boolean => {
  * the current user's privileges and requires no browser HTTP call.
  */
 export const v2RuleTemplatesAvailable = (core: CoreStart): boolean => {
-  const caps = core.application.capabilities.alerting_v2 as
-    | Record<string, boolean>
-    | undefined;
+  const caps = core.application.capabilities.alerting_v2 as Record<string, boolean> | undefined;
   return caps?.v2RuleTemplatesAvailable === true;
 };

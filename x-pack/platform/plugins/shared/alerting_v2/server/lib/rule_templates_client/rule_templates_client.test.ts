@@ -60,7 +60,15 @@ describe('RuleTemplatesClient', () => {
     it('returns true when v2 templates exist', async () => {
       const repository = savedObjectsRepositoryMock.create();
       repository.find.mockResolvedValue({
-        saved_objects: [{ id: 't1', type: RULE_TEMPLATE_SAVED_OBJECT_TYPE, attributes: {}, references: [], score: 1 }],
+        saved_objects: [
+          {
+            id: 't1',
+            type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            score: 1,
+          },
+        ],
         total: 3,
         page: 1,
         per_page: 1,
