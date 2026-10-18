@@ -13,6 +13,7 @@ import {
   pciRequirementIdSchema,
   pciTimeRangeSchema,
 } from './pci_compliance_schemas';
+import { PCI_LEGACY_REQUIREMENT_ID_ALIASES, PCI_REQUIREMENTS } from './pci_compliance_requirements';
 
 describe('pciIndexPatternSchema', () => {
   it.each(['logs-*', 'metrics-*', 'cluster-a:logs-pci-*', 'logs-custom.myapp-2024.01'])(
@@ -82,9 +83,27 @@ describe('pciRequirementIdSchema', () => {
     expect(pciRequirementIdSchema.safeParse('8').success).toBe(true);
   });
 
+  it('accepts the legacy pre-v4.0.1 id 4.1 so a caller citing it is checked, not rejected', () => {
+    expect(pciRequirementIdSchema.safeParse('4.1').success).toBe(true);
+  });
+
+  it('accepts exactly the v4.0.1 catalog ids, "all", and the documented legacy aliases', () => {
+    expect([...pciRequirementIdSchema.options].sort()).toEqual(
+      [
+        'all',
+        ...Object.keys(PCI_REQUIREMENTS),
+        ...Object.keys(PCI_LEGACY_REQUIREMENT_ID_ALIASES),
+      ].sort()
+    );
+  });
+
   it('rejects made-up ids', () => {
     expect(pciRequirementIdSchema.safeParse('99').success).toBe(false);
     expect(pciRequirementIdSchema.safeParse('drop').success).toBe(false);
+  });
+
+  it('rejects a sub-requirement id neither the catalog nor the aliases define', () => {
+    expect(pciRequirementIdSchema.safeParse('4.9').success).toBe(false);
   });
 });
 
