@@ -278,6 +278,33 @@ describe('createWorkflowEvidenceEvaluator', () => {
     expect(result.metadata?.agentEsqlRowCounts).toEqual([97]);
   });
 
+  // Which observable proved the pipeline count's scope travels with the score:
+  // a count admitted through the `custom_query` route is visible as such, and a
+  // 0 that came from an EXCLUDED count stays distinguishable from one that came
+  // from no retrieval at all.
+  it('carries the observable that proved the pipeline count scope', async () => {
+    const params: Params = {
+      input: {} as Params['input'],
+      output: baseOutput({
+        retrievedAlertCount: 95,
+        retrievedAlertCountSource: 'pipeline_alert_retrieval',
+        passedAlertCount: null,
+        retrievalEvidence: {
+          ...EMPTY_RETRIEVAL_EVIDENCE,
+          retrievalScope: 'ad-scenario-registry-2026-07',
+          pipelineCountScopeSource: 'custom_query_filter',
+        },
+      }),
+      expected: baseExpected({ expectedRetrievedAlertCount: 95 }),
+      metadata: {} as Params['metadata'],
+    };
+
+    const result = await evaluator.evaluate(params);
+
+    expect(result.score).toBe(1);
+    expect(result.metadata?.pipelineCountScopeSource).toBe('custom_query_filter');
+  });
+
   // The same dodge, one step earlier: making NO retrieval at all must not buy
   // an `N/A` either. The reader reports 0 for a scoped example that observed
   // none of its population, so the evidence is complete and the run is scored

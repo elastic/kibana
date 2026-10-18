@@ -11,10 +11,12 @@ import {
   computeWorkflowAlertCounts,
   createEvaluateAttackDiscoveryAgentBuilderDataset,
   extractAdToolEsqlQuery,
+  extractAdToolCustomQueryFilter,
   extractAgentAlertRetrievalPopulation,
   extractAgentEsqlRowCounts,
   extractRetrievalEvidence,
   extractUnscopedAlertRetrievalRowCounts,
+  filterCarriesRetrievalScope,
   findAdToolResult,
   hasScopedAgentAlertRetrievalWithoutIdentity,
   insightsForResponse,
@@ -83,15 +85,20 @@ const recordedEsqlStep = ({
  *  Alert Retrieval phase runs (recorded dense rep 2 shape: mode `esql`). */
 const recordedAdStep = ({
   esqlQuery,
+  filter,
   executionUuid = 'e0e0e0e0-0000-0000-0000-000000000000',
 }: {
   esqlQuery?: string;
+  /** The DSL filter a `custom_query` run hands the tool (the recorded shape of
+   *  that route's retrieval scope). */
+  filter?: Record<string, unknown>;
   executionUuid?: string;
 }): AttackDiscoveryAgentBuilderTaskOutput['steps'][number] => ({
   tool_id: 'security.attack-discovery.run',
   params: {
     alert_retrieval_mode: esqlQuery == null ? 'custom_query' : 'esql',
     ...(esqlQuery == null ? {} : { esql_query: esqlQuery }),
+    ...(filter == null ? {} : { filter }),
   },
   results: [
     {
@@ -900,6 +907,42 @@ describe("the AD tool call's own ES|QL query", () => {
   });
 });
 
+describe("the AD tool call's own custom_query filter", () => {
+  const scopedFilter = {
+    bool: { must: [{ term: { 'labels.ad_portable_seed': AD2_SCENARIO_SEED_LABEL } }] },
+  };
+
+  it('reads the filter the agent handed the AD tool', () => {
+    expect(extractAdToolCustomQueryFilter([recordedAdStep({ filter: scopedFilter })])).toEqual(
+      scopedFilter
+    );
+  });
+
+  // No filter means the phase ran its own query over the whole alerts index —
+  // a different observable from "the agent scoped its retrieval".
+  it('is null when the call supplied no filter', () => {
+    expect(extractAdToolCustomQueryFilter([recordedAdStep({})])).toBeNull();
+    expect(
+      extractAdToolCustomQueryFilter([recordedAdStep({ esqlQuery: denseRetrievalQuery })])
+    ).toBeNull();
+  });
+
+  it('is null when the AD tool never ran', () => {
+    expect(
+      extractAdToolCustomQueryFilter([recordedEsqlStep({ query: denseRetrievalQuery, rows: 95 })])
+    ).toBeNull();
+  });
+
+  it('reads the first AD call, the one whose execution the response belongs to', () => {
+    const steps = [
+      recordedAdStep({ filter: scopedFilter }),
+      recordedAdStep({ filter: { term: { 'kibana.alert.severity': 'critical' } } }),
+    ];
+
+    expect(extractAdToolCustomQueryFilter(steps)).toEqual(scopedFilter);
+  });
+});
+
 describe('supplied alerts can never be read as retrieved', () => {
   // `get_pipeline_data` Step 2.5 writes the SUPPLIED alert set into the
   // retrieval block (`extraction_strategy: 'provided'`,
@@ -1076,6 +1119,203 @@ describe('the declared scope is enforced on pipeline-derived counts too', () => 
     expect(result.retrievedAlertCount).toBe(0);
     expect(result.retrievedAlertCountSource).toBe('none');
     expect(result.unscopedPipelineAlertRetrievalCounts).toEqual([]);
+  });
+});
+
+// `custom_query` mode is the OTHER route to a pipeline retrieval: the phase
+// runs the alerts index with the DSL filter the agent handed the AD tool, so
+// that filter is the observable that decides whether the count belongs to the
+// fixture. Without it a scoped example scored 0 on a run that DID retrieve
+// under its marker, which is the finding these tests close.
+describe('a custom_query filter is held to the same scope', () => {
+  const customQueryPipeline = {
+    alert_retrieval: [{ alerts_context_count: 2, extraction_strategy: 'default_custom_query' }],
+    combined_alerts: { alerts_context_count: 2 },
+  };
+  const marker = AD2_SCENARIO_SEED_LABEL;
+  const scopedFilter = { term: { 'labels.ad_portable_seed': marker } };
+  const scopedBoolFilter = { bool: { must: [scopedFilter] } };
+
+  it('admits the pipeline count when the filter requires the declared scope', () => {
+    const result = computeWorkflowAlertCounts({
+      pipeline: customQueryPipeline,
+      adToolCustomQueryFilter: scopedBoolFilter,
+      retrievalScope: marker,
+    });
+
+    expect(result.retrievedAlertCount).toBe(2);
+    expect(result.retrievedAlertCountSource).toBe('pipeline_alert_retrieval');
+    expect(result.unscopedPipelineAlertRetrievalCounts).toEqual([]);
+    expect(result.pipelineCountScopeSource).toBe('custom_query_filter');
+  });
+
+  // The tool schema's own example filter: a real query, no marker in it. The
+  // pipeline retrieved the shared index's critical alerts, none of which are
+  // this fixture's population.
+  it('excludes the pipeline count when the filter does not require the scope', () => {
+    const result = computeWorkflowAlertCounts({
+      pipeline: customQueryPipeline,
+      adToolCustomQueryFilter: { term: { 'kibana.alert.severity': 'critical' } },
+      retrievalScope: marker,
+    });
+
+    expect(result.retrievedAlertCount).toBe(0);
+    expect(result.retrievedAlertCountSource).toBe('unscoped_retrieval');
+    expect(result.unscopedPipelineAlertRetrievalCounts).toEqual([2, 2]);
+    expect(result.pipelineCountScopeSource).toBeNull();
+  });
+
+  it('excludes the pipeline count when the custom_query run supplied no filter', () => {
+    const result = computeWorkflowAlertCounts({
+      pipeline: customQueryPipeline,
+      adToolCustomQueryFilter: null,
+      retrievalScope: marker,
+    });
+
+    expect(result.retrievedAlertCount).toBe(0);
+    expect(result.unscopedPipelineAlertRetrievalCounts).toEqual([2, 2]);
+    expect(result.pipelineCountScopeSource).toBeNull();
+  });
+
+  // A `should` that admits one marker-less branch is satisfied by rows outside
+  // the fixture, exactly like an `OR` in a WHERE clause.
+  it('excludes a filter whose should admits a marker-less branch', () => {
+    const result = computeWorkflowAlertCounts({
+      pipeline: customQueryPipeline,
+      adToolCustomQueryFilter: {
+        bool: { should: [scopedFilter, { term: { 'kibana.alert.severity': 'critical' } }] },
+      },
+      retrievalScope: marker,
+    });
+
+    expect(result.retrievedAlertCount).toBe(0);
+    expect(result.pipelineCountScopeSource).toBeNull();
+  });
+
+  // `must_not` excludes the marker rather than requiring it, so it can never
+  // prove scope — however often the marker appears in it.
+  it('never reads a must_not clause as scope', () => {
+    const result = computeWorkflowAlertCounts({
+      pipeline: customQueryPipeline,
+      adToolCustomQueryFilter: { bool: { must_not: [scopedFilter] } },
+      retrievalScope: marker,
+    });
+
+    expect(result.retrievedAlertCount).toBe(0);
+    expect(result.pipelineCountScopeSource).toBeNull();
+  });
+
+  it('admits the count when the filter requires the scope as a query string', () => {
+    const result = computeWorkflowAlertCounts({
+      pipeline: customQueryPipeline,
+      adToolCustomQueryFilter: { query_string: { query: `"${marker}"` } },
+      retrievalScope: marker,
+    });
+
+    expect(result.retrievedAlertCount).toBe(2);
+    expect(result.pipelineCountScopeSource).toBe('custom_query_filter');
+  });
+
+  // Both routes were supplied and both clear their bar: the ES|QL query is the
+  // one the phase actually ran (`esql_query` wins in the tool), so that is the
+  // observable the record should name.
+  it('names the esql query when both observables cleared their bar', () => {
+    const result = computeWorkflowAlertCounts({
+      pipeline: customQueryPipeline,
+      adToolEsqlQuery: `FROM .alerts-security.alerts-default | WHERE tags == "${marker}"`,
+      adToolCustomQueryFilter: scopedBoolFilter,
+      retrievalScope: marker,
+    });
+
+    expect(result.retrievedAlertCount).toBe(2);
+    expect(result.pipelineCountScopeSource).toBe('esql_query');
+  });
+
+  it('leaves the scope source null when the example declares no scope', () => {
+    const result = computeWorkflowAlertCounts({
+      pipeline: customQueryPipeline,
+      adToolCustomQueryFilter: { term: { 'kibana.alert.severity': 'critical' } },
+      retrievalScope: null,
+    });
+
+    expect(result.retrievedAlertCount).toBe(2);
+    expect(result.pipelineCountScopeSource).toBeNull();
+  });
+});
+
+// The filter analysis is fail-closed: only clause kinds whose scope semantics
+// are known can prove scope, because admitting a count the fixture's marker does
+// not cover is the failure the gate exists to prevent.
+describe('filterCarriesRetrievalScope', () => {
+  const marker = AD2_SCENARIO_SEED_LABEL;
+  const scopedTerm = { term: { 'labels.ad_portable_seed': marker } };
+
+  it('proves scope from a term, and from the value form of the same clause', () => {
+    expect(filterCarriesRetrievalScope(scopedTerm, marker)).toBe(true);
+    expect(
+      filterCarriesRetrievalScope(
+        { term: { 'labels.ad_portable_seed': { value: marker } } },
+        marker
+      )
+    ).toBe(true);
+  });
+
+  it('proves scope from one requiring clause in a conjunctive bool', () => {
+    expect(
+      filterCarriesRetrievalScope(
+        {
+          bool: {
+            filter: [{ range: { '@timestamp': { gte: 'now-6h' } } }, scopedTerm],
+          },
+        },
+        marker
+      )
+    ).toBe(true);
+  });
+
+  it('proves scope from a should whose every branch requires it', () => {
+    expect(
+      filterCarriesRetrievalScope(
+        { bool: { should: [scopedTerm, { match: { tags: marker } }], minimum_should_match: 1 } },
+        marker
+      )
+    ).toBe(true);
+  });
+
+  it('does not prove scope from a should that is switched off', () => {
+    expect(
+      filterCarriesRetrievalScope(
+        { bool: { should: [scopedTerm], minimum_should_match: 0 } },
+        marker
+      )
+    ).toBe(false);
+  });
+
+  // A text leaf that widens past the marker admits marker-less rows, so it
+  // proves nothing even though it names the marker.
+  it('does not prove scope from a text leaf that also widens', () => {
+    expect(
+      filterCarriesRetrievalScope(
+        { query_string: { query: `${marker} OR kibana.alert.severity: critical` } },
+        marker
+      )
+    ).toBe(false);
+  });
+
+  it('does not prove scope from a shape whose semantics are not analysed', () => {
+    expect(filterCarriesRetrievalScope({}, marker)).toBe(false);
+    expect(filterCarriesRetrievalScope({ script: { script: { source: marker } } }, marker)).toBe(
+      false
+    );
+    expect(
+      filterCarriesRetrievalScope({ term: scopedTerm.term, range: { '@timestamp': {} } }, marker)
+    ).toBe(false);
+    expect(filterCarriesRetrievalScope([scopedTerm], marker)).toBe(false);
+  });
+
+  it('proves nothing without a filter, and everything without a declared scope', () => {
+    expect(filterCarriesRetrievalScope(null, marker)).toBe(false);
+    expect(filterCarriesRetrievalScope(scopedTerm, null)).toBe(true);
   });
 });
 
@@ -1281,6 +1521,7 @@ describe('retrieval evidence persisted on the task output', () => {
       retrievalScope: null,
       unscopedAgentAlertRetrievalRowCounts: [],
       unscopedPipelineAlertRetrievalCounts: [],
+      pipelineCountScopeSource: null,
     });
     // The raw alerts are the anonymized alert text: unbounded in size and copied
     // once per evaluator score document, while the set the agent saw is already
@@ -1313,6 +1554,7 @@ describe('retrieval evidence persisted on the task output', () => {
       retrievalScope: null,
       unscopedAgentAlertRetrievalRowCounts: [],
       unscopedPipelineAlertRetrievalCounts: [],
+      pipelineCountScopeSource: null,
     });
   });
 

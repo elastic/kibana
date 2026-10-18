@@ -88,6 +88,13 @@ export const createWorkflowEvidenceEvaluator = (): Evaluator<
           output.workflow.retrievalEvidence?.unscopedAgentAlertRetrievalRowCounts ?? [],
         unscopedPipelineAlertRetrievalCounts:
           output.workflow.retrievalEvidence?.unscopedPipelineAlertRetrievalCounts ?? [],
+        // Which of the two AD-call observables proved the pipeline count's
+        // scope (`esql_query` / `custom_query_filter`), so a 0 that came from a
+        // count being EXCLUDED is distinguishable from one that came from no
+        // retrieval at all — and a count admitted through the `custom_query`
+        // route is visible as such rather than as an unexplained number.
+        pipelineCountScopeSource:
+          output.workflow.retrievalEvidence?.pipelineCountScopeSource ?? null,
         stages,
         expectedRetrievedAlertCount,
         expectedPassedAlertCount,

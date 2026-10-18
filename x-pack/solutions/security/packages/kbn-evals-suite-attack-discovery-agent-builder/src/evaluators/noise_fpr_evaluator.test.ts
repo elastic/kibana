@@ -39,6 +39,7 @@ const baseOutput = (): AttackDiscoveryAgentBuilderTaskOutput => ({
       retrievalScope: null,
       unscopedAgentAlertRetrievalRowCounts: [],
       unscopedPipelineAlertRetrievalCounts: [],
+      pipelineCountScopeSource: null,
     },
   },
   adToolResult: {
