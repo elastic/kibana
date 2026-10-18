@@ -144,7 +144,7 @@ export const getGridStyles = (themeContext: UseEuiTheme, gridStyle: EuiDataGridS
       top: 0,
       right: 0,
       bottom: 0,
-      inlineSize: euiTheme.size.s,
+      inlineSize: euiTheme.size.m,
       cursor: 'col-resize',
       touchAction: 'none',
       '&::after': {

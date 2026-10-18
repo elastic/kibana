@@ -401,6 +401,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     return [
       {
         headerCellRender: () => null,
+        // The header is empty, so it needs a name for assistive technology.
+        headerCellProps: {
+          'aria-label': i18n.translate('xpack.lens.table.rowActionsColumnLabel', {
+            defaultMessage: 'Row actions',
+          }),
+        },
         width: 40,
         id: 'trailingControlColumn',
         rowCellRender: function RowCellRender({ rowIndex }) {
@@ -556,6 +562,17 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [sortedTable, props.columnFilterable]
   );
 
+  const tanStackRowHeightsOptions = useMemo(
+    () => ({
+      defaultHeight: props.args.fitRowToContent
+        ? ('auto' as const)
+        : props.args.rowHeightLines && props.args.rowHeightLines !== 1
+        ? { lineCount: props.args.rowHeightLines }
+        : undefined,
+    }),
+    [props.args.fitRowToContent, props.args.rowHeightLines]
+  );
+
   const renderTanStackCellPopover = useMemo(
     () => createRenderTanStackDatatableCellPopover(sortedTable, props.columnFilterable),
     [sortedTable, props.columnFilterable]
@@ -631,6 +648,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       {
         id: 'rowNumber',
         headerCellRender: () => null,
+        // The header is empty, so it needs a name for assistive technology.
+        headerCellProps: {
+          'aria-label': i18n.translate('xpack.lens.table.rowNumberColumnLabel', {
+            defaultMessage: 'Row number',
+          }),
+        },
         rowCellRender: function RowCellRender({ visibleRowIndex }) {
           return (
             <div
@@ -651,14 +674,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     ];
   }, [euiTheme.colors.backgroundFilledText, euiTheme.size.m, props.args.showRowNumbers]);
 
-  const tanStackRowHeightsOptions = {
-    defaultHeight: props.args.fitRowToContent
-      ? ('auto' as const)
-      : props.args.rowHeightLines && props.args.rowHeightLines !== 1
-      ? { lineCount: props.args.rowHeightLines }
-      : undefined,
-  };
-
   if (isEmpty) {
     return (
       <div
@@ -677,6 +692,27 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       defaultMessage: 'Data table visualization',
     });
 
+  // The props both grids take, the TanStack grid accepts the subset of the EuiDataGrid props used here.
+  const sharedGridProps = {
+    'aria-label': dataGridAriaLabel,
+    'data-test-subj': 'lnsDataTable',
+    columns,
+    leadingControlColumns,
+    trailingControlColumns,
+    rowCount: sortedTable.rows.length,
+    renderCellValue,
+    gridStyle,
+    sorting: props.viewMode === 'non-interactive' ? undefined : sorting,
+    pagination: pagination && {
+      ...pagination,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
+      onChangeItemsPerPage,
+      onChangePage,
+    },
+    onColumnResize,
+    renderFooterCellValue: renderSummaryRow,
+  };
+
   return (
     <div
       css={datatableContainerStyles}
@@ -694,33 +730,14 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       >
         {isTanStackGridEnabled ? (
           <TanStackDatatableGrid
-            aria-label={dataGridAriaLabel}
-            data-test-subj="lnsDataTable"
+            {...sharedGridProps}
             rowHeightsOptions={tanStackRowHeightsOptions}
-            columns={columns}
-            leadingControlColumns={leadingControlColumns}
-            trailingControlColumns={trailingControlColumns}
-            rowCount={sortedTable.rows.length}
-            renderCellValue={renderCellValue}
             renderCellPopover={renderTanStackCellPopover}
-            gridStyle={gridStyle}
-            sorting={props.viewMode === 'non-interactive' ? undefined : sorting}
-            pagination={
-              pagination && {
-                ...pagination,
-                pageSizeOptions: PAGE_SIZE_OPTIONS,
-                onChangeItemsPerPage,
-                onChangePage,
-              }
-            }
-            onColumnResize={onColumnResize}
-            renderFooterCellValue={renderSummaryRow}
             onRender={props.renderComplete}
           />
         ) : (
           <EuiDataGrid
-            aria-label={dataGridAriaLabel}
-            data-test-subj="lnsDataTable"
+            {...sharedGridProps}
             rowHeightsOptions={{
               defaultHeight: props.args.fitRowToContent
                 ? RowHeightMode.auto
@@ -730,27 +747,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
                   }
                 : undefined,
             }}
-            columns={columns}
             columnVisibility={columnVisibility}
-            leadingControlColumns={leadingControlColumns}
-            trailingControlColumns={trailingControlColumns}
-            rowCount={sortedTable.rows.length}
-            renderCellValue={renderCellValue}
             renderCellPopover={renderCellPopover}
-            gridStyle={gridStyle}
             schemaDetectors={schemaDetectors}
-            sorting={props.viewMode === 'non-interactive' ? undefined : sorting}
-            pagination={
-              pagination && {
-                ...pagination,
-                pageSizeOptions: PAGE_SIZE_OPTIONS,
-                onChangeItemsPerPage,
-                onChangePage,
-              }
-            }
-            onColumnResize={onColumnResize}
             toolbarVisibility={false}
-            renderFooterCellValue={renderSummaryRow}
             ref={dataGridRef}
           />
         )}

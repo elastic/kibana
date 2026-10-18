@@ -269,6 +269,13 @@ describe('DatatableComponent with the TanStack grid', () => {
     expect(screen.getAllByRole('button', { name: 'Show actions' })).toHaveLength(3);
   });
 
+  it('names the headers of the control columns', () => {
+    args.showRowNumbers = true;
+    renderTable({ rowHasRowClickTriggerActions: [true, true, true] });
+    expect(screen.getByRole('columnheader', { name: 'Row number' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Row actions' })).toBeInTheDocument();
+  });
+
   it('paginates and persists the page size', async () => {
     data.rows = Array.from({ length: 13 }, (_, i) => ({ a: `row-${i}`, c: i }));
     args.pageSize = 10;
