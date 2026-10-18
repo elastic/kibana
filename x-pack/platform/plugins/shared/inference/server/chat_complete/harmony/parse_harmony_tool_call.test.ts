@@ -7,8 +7,10 @@
 
 import {
   findHarmonyToolCall,
+  findUnrecoveredHarmonyCallNames,
   MAX_HARMONY_TOOL_CALL_LENGTH,
   HARMONY_TOOL_CALL_HOLD,
+  UNNAMED_HARMONY_TOOL_CALL,
 } from './parse_harmony_tool_call';
 
 // Verbatim tail of the assistant content a gpt-oss-120b completion returns when
@@ -140,5 +142,34 @@ describe('findHarmonyToolCall', () => {
     expect(longestSplitPrefix).toHaveLength(53);
     expect(HARMONY_TOOL_CALL_HOLD).toBeGreaterThanOrEqual(longestSplitPrefix.length);
     expect(MAX_HARMONY_TOOL_CALL_LENGTH).toBeGreaterThan(HARMONY_TOOL_CALL_HOLD);
+  });
+});
+
+describe('findUnrecoveredHarmonyCallNames', () => {
+  it('names every commentary call still in the content, declared or not', () => {
+    const text =
+      'analysisreasoning first.' +
+      'assistantcommentary to=functions.security.attack-discovery.get_status json{\n  "execution_uuid": "abc"\n}' +
+      'assistantcommentary to=functions.delete_index json{"index":"x"}';
+
+    expect(findUnrecoveredHarmonyCallNames(text)).toEqual([
+      'security.attack-discovery.get_status',
+      'delete_index',
+    ]);
+  });
+
+  it('reports a call whose recipient is not readable yet', () => {
+    expect(findUnrecoveredHarmonyCallNames('assistantcommentary to=functions.')).toEqual([
+      UNNAMED_HARMONY_TOOL_CALL,
+    ]);
+  });
+
+  it('reports nothing for prose, reasoning or a non-JSON recipient', () => {
+    expect(
+      findUnrecoveredHarmonyCallNames(
+        'The answer is in to=functions.load_skill json{"skill":"x"} and nothing else ran.'
+      )
+    ).toEqual([]);
+    expect(findUnrecoveredHarmonyCallNames('analysisWe should call the tool now.')).toEqual([]);
   });
 });

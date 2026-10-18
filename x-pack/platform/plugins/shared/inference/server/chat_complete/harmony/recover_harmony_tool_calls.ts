@@ -15,6 +15,7 @@ import type {
 import { ChatCompletionEventType } from '@kbn/inference-common';
 import {
   findHarmonyToolCall,
+  findUnrecoveredHarmonyCallNames,
   HARMONY_TOOL_CALL_HOLD,
   MAX_HARMONY_TOOL_CALL_LENGTH,
 } from './parse_harmony_tool_call';
@@ -54,6 +55,18 @@ export const recoverHarmonyToolCalls = ({
       const emitContent = (content: string) => {
         if (!content) {
           return;
+        }
+        // Fail loudly: a harmony call left in the content is a call that will not
+        // execute. Recovering silently is what made the leak on the weekly
+        // gpt-oss-120b evals invisible in the first place, so name the
+        // recipients that stayed text.
+        const unrecovered = findUnrecoveredHarmonyCallNames(content);
+        if (unrecovered.length > 0) {
+          logger.warn(
+            `Harmony tool call(s) for ${unrecovered.join(
+              ', '
+            )} left in the assistant content and will not execute`
+          );
         }
         subscriber.next({
           type: ChatCompletionEventType.ChatCompletionChunk,

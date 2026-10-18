@@ -7,8 +7,10 @@
 
 export {
   findHarmonyToolCall,
+  findUnrecoveredHarmonyCallNames,
   HARMONY_TOOL_CALL_HOLD,
   MAX_HARMONY_TOOL_CALL_LENGTH,
+  UNNAMED_HARMONY_TOOL_CALL,
   type HarmonyToolCall,
   type HarmonyToolCallScan,
 } from './parse_harmony_tool_call';

@@ -197,6 +197,79 @@ describe('inferenceAdapter', () => {
       ]);
     });
 
+    it('recovers the verbatim call the weekly gpt-oss-120b run leaked as content', async () => {
+      const source$ = of(
+        createOpenAIChunk({
+          delta: {
+            content:
+              'analysisThe skill loaded; now we need to get status of execution_uuid ' +
+              'a1b2c3d4-e5f6-7890-abcd-ef0123456789 using security.attack-discovery.get_status. ' +
+              "This advances user's request." +
+              'assistantcommentary to=functions.security.attack-discovery.get_status json{\n' +
+              '  "execution_uuid": "a1b2c3d4-e5f6-7890-abcd-ef0123456789"\n' +
+              '}',
+          },
+        })
+      );
+
+      executorMock.invoke.mockImplementation(async () => {
+        return {
+          actionId: '',
+          status: 'ok',
+          data: observableIntoEventSourceStream(source$, logger),
+        };
+      });
+
+      const response$ = inferenceAdapter.chatComplete({
+        ...defaultArgs,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: 'Run attack discovery for the provided alerts',
+          },
+        ],
+        tools: {
+          'security.attack-discovery.get_status': {
+            description: 'get the status of an attack discovery execution',
+            schema: { type: 'object', properties: {} },
+          },
+          load_skill: {
+            description: 'load a skill',
+            schema: { type: 'object', properties: {} },
+          },
+        },
+      });
+
+      const allChunks = await lastValueFrom(
+        response$.pipe(filter(isChatCompletionChunkEvent), toArray())
+      );
+
+      expect(allChunks).toEqual([
+        {
+          content:
+            'analysisThe skill loaded; now we need to get status of execution_uuid ' +
+            'a1b2c3d4-e5f6-7890-abcd-ef0123456789 using security.attack-discovery.get_status. ' +
+            "This advances user's request.",
+          tool_calls: [],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+        {
+          content: '',
+          tool_calls: [
+            {
+              index: 0,
+              toolCallId: 'security.attack-discovery.get_status-0',
+              function: {
+                name: 'security.attack-discovery.get_status',
+                arguments: '{\n  "execution_uuid": "a1b2c3d4-e5f6-7890-abcd-ef0123456789"\n}',
+              },
+            },
+          ],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+      ]);
+    });
+
     it('passes a native tool_calls delta through when tools are declared', async () => {
       const source$ = of(
         createOpenAIChunk({

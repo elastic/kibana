@@ -47,6 +47,18 @@ const leakedContent =
   'analysisLet me plan the tool calls. First: load the attack discovery skill.' +
   'assistantcommentary to=functions.load_skill json{\n  "skill": "attack-discovery-generator"\n}';
 
+// Verbatim assistant content of the openai-gpt-oss-120b cells in weekly build
+// 01a12766 (suite attack-discovery-agent-builder, example 0): the model reasoned,
+// then asked for the tool in text with the harmony markers stripped by the
+// serving layer, so nothing executed and the whole turn was rendered as prose.
+const leakedGetStatusContent =
+  'analysisThe skill loaded; now we need to get status of execution_uuid ' +
+  'a1b2c3d4-e5f6-7890-abcd-ef0123456789 using security.attack-discovery.get_status. ' +
+  "This advances user's request." +
+  'assistantcommentary to=functions.security.attack-discovery.get_status json{\n' +
+  '  "execution_uuid": "a1b2c3d4-e5f6-7890-abcd-ef0123456789"\n' +
+  '}';
+
 const run = async (events: ChatCompletionChunkEvent[], declaredToolNames?: readonly string[]) =>
   lastValueFrom(
     from(events).pipe(recoverHarmonyToolCalls({ logger, declaredToolNames }), toArray())
@@ -64,6 +76,10 @@ const contentOf = (events: Awaited<ReturnType<typeof run>>) =>
     .join('');
 
 describe('recoverHarmonyToolCalls', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('emits a tool call instead of content when the call arrives in one chunk', async () => {
     const events = await run([chunk(leakedContent)]);
 
@@ -115,6 +131,8 @@ describe('recoverHarmonyToolCalls', () => {
 
     expect(toolCallsOf(events)).toHaveLength(0);
     expect(contentOf(events)).toBe(`${text} tail`);
+    // Prose is not a leak: nothing to warn about.
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('holds buffered content back until an incomplete call completes', async () => {
@@ -261,5 +279,40 @@ describe('recoverHarmonyToolCalls', () => {
         },
       },
     ]);
+  });
+
+  it('recovers the verbatim call the weekly gpt-oss-120b run left in the content', async () => {
+    const events = await run(
+      [chunk(leakedGetStatusContent)],
+      ['security.attack-discovery.get_status']
+    );
+
+    expect(toolCallsOf(events)).toEqual([
+      {
+        index: 0,
+        toolCallId: 'security.attack-discovery.get_status-0',
+        function: {
+          name: 'security.attack-discovery.get_status',
+          arguments: '{\n  "execution_uuid": "a1b2c3d4-e5f6-7890-abcd-ef0123456789"\n}',
+        },
+      },
+    ]);
+    expect(contentOf(events)).toBe(
+      'analysisThe skill loaded; now we need to get status of execution_uuid ' +
+        'a1b2c3d4-e5f6-7890-abcd-ef0123456789 using security.attack-discovery.get_status. ' +
+        "This advances user's request."
+    );
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('warns instead of dropping a harmony call to an undeclared tool in silence', async () => {
+    const text = 'assistantcommentary to=functions.delete_index json{"index":"x"}';
+
+    const events = await run([chunk(text)], ['load_skill']);
+
+    expect(toolCallsOf(events)).toHaveLength(0);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Harmony tool call(s) for delete_index left in the assistant content and will not execute'
+    );
   });
 });

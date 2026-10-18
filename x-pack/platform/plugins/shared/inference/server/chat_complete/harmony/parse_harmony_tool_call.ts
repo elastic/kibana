@@ -224,3 +224,30 @@ export const findHarmonyToolCall = (
 
   return { type: 'none' };
 };
+
+/** Placeholder for a commentary call whose recipient name is not readable yet. */
+export const UNNAMED_HARMONY_TOOL_CALL = '<unnamed>';
+
+/**
+ * Recipients of the harmony calls still present as TEXT in `content`, whether or
+ * not the request declared them.
+ *
+ * Anything this returns is a call that will not execute: the request did not
+ * declare that tool, its arguments are not a JSON object, or the call arrived on
+ * a path where recovery is not wired. Silence there is what made the original
+ * leak invisible, so callers use this list to fail loudly.
+ */
+export const findUnrecoveredHarmonyCallNames = (content: string): string[] => {
+  const names: string[] = [];
+  let index = content.indexOf(RECIPIENT_PREFIX);
+
+  while (index >= 0) {
+    if (content.slice(0, index).match(CHANNEL_SUFFIX)) {
+      const name = content.slice(index + RECIPIENT_PREFIX.length).match(NAME)?.[0];
+      names.push(name ?? UNNAMED_HARMONY_TOOL_CALL);
+    }
+    index = content.indexOf(RECIPIENT_PREFIX, index + 1);
+  }
+
+  return names;
+};
