@@ -5,61 +5,18 @@
  * 2.0.
  */
 
-import { attachmentTools, internalTools } from '@kbn/agent-builder-common';
 import type { Evaluator } from '@kbn/evals';
 import type {
   AttackDiscoveryAgentBuilderExample,
   AttackDiscoveryAgentBuilderTaskOutput,
 } from '../types';
+import { partitionToolCalls } from './tool_call_accounting';
 
 // Distinct from the framework's `trajectory` evaluator, which computes a
 // different metric (0.5 x LCS-order + 0.5 x set-coverage) under that name.
 // The matrix report reads score docs back by evaluator name, so the two must
 // not collide.
 export const TRAJECTORY_EVALUATOR_NAME = 'StrictTrajectory';
-
-// Calls the harness pays on every run, whatever route the model picks.
-// `load_skill` is how the skill that carries the expected tool path is reached,
-// so it has never counted against precision.
-const HARNESS_TOOL_CALLS = [internalTools.loadSkill];
-
-/**
- * Calls the platform's own instructions make on any multi-step task, so they
- * measure the platform's bookkeeping contract rather than the model's route.
- *
- * - `write_todos` — its own tool description tells the agent to "use this tool
- *   frequently", for "any task that requires 3 or more distinct actions" and
- *   "after receiving new instructions". Every example in this suite is such a
- *   task, so the call is the platform's plan-tracking requirement, not an
- *   investigative choice.
- * - `attachments.add` — the report contract. The generator skill's own output
- *   format renders the attack flow graph as an attachment (`attachments.add`,
- *   type `graph`), so a compliant report pays the write-back.
- *
- * The ids come from the platform's own tool registry, so a rename in Agent
- * Builder updates this exclusion instead of silently scoring scaffolding
- * against the model.
- */
-const BOOKKEEPING_TOOL_CALLS = [internalTools.writeTodos, attachmentTools.add];
-
-/**
- * Calls the EXAMPLE's own contract forces on a compliant run.
- *
- * An example that hands its alerts as an attachment cannot be answered without
- * reading that attachment, so the read is the fixture's requirement and not a
- * routing decision the model made. Counting it capped every compliant run of
- * `provided-alerts` and `multiple-alert-sets` at `1 expected / (1 expected + 1
- * attachment read)` = 0.5: the routing requirement was satisfied and the metric
- * still could not reach its own ceiling, so it measured the fixture rather than
- * the model (F23b, build 01a14b73).
- *
- * The exclusion is conditional on the example declaring attachments, so an
- * attachment read on an example that ships none is still counted as the
- * mis-route it is.
- */
-const fixtureRequiredToolCalls = (
-  input: AttackDiscoveryAgentBuilderExample['input'] | undefined
-): string[] => (input?.attachments?.length ? [attachmentTools.read] : []);
 
 export const createStrictTrajectoryEvaluator = ({
   extractToolCalls,
@@ -103,16 +60,15 @@ export const createStrictTrajectoryEvaluator = ({
 
     // The routing requirement — the expected tools appearing in order — is
     // asserted above. Precision then counts only the calls that ARE routing
-    // decisions: the harness calls, the platform's bookkeeping calls and the
-    // steps the fixture's own contract requires are not choices the model made,
-    // so scoring them against the expected path penalises compliance.
-    const nonRoutingToolCalls = new Set([
-      ...HARNESS_TOOL_CALLS,
-      ...BOOKKEEPING_TOOL_CALLS,
-      ...fixtureRequiredToolCalls(input),
-    ]);
-    const routingToolCalls = actual.filter((tool) => !nonRoutingToolCalls.has(tool));
-    const excludedToolCalls = actual.filter((tool) => nonRoutingToolCalls.has(tool));
+    // decisions: the harness call, the platform's plan-tracking and report
+    // write-back, and the fixture's own attachment read are not choices the
+    // model made, so scoring them against the expected path penalises
+    // compliance. `tool_call_accounting` holds that rule once, shared with
+    // `CostPerAlert`, so both metrics grade the same work.
+    const { investigativeToolCalls: routingToolCalls, excludedToolCalls } = partitionToolCalls(
+      actual,
+      input
+    );
     const score = expectedPath.length / Math.max(routingToolCalls.length, expectedPath.length);
     return {
       score,
