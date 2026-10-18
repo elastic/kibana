@@ -1918,6 +1918,29 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       disabled: readOnly,
     }),
   },
+  [ConfigKey.FILMSTRIPS]: {
+    fieldKey: ConfigKey.FILMSTRIPS,
+    component: Switch,
+    controlled: true,
+    helpText: (
+      <span>
+        {i18n.translate('xpack.synthetics.monitorConfig.filmstrips.helpText', {
+          defaultMessage:
+            'Captures a series of screenshots while each step runs, shown on the step details page. This increases the amount of data stored for every run.',
+        })}
+      </span>
+    ),
+    props: ({ setValue }) => ({
+      id: 'syntheticsMonitorConfigFilmstrips',
+      label: i18n.translate('xpack.synthetics.monitorConfig.filmstrips.label', {
+        defaultMessage: 'Capture filmstrips',
+      }),
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(ConfigKey.FILMSTRIPS, !!event.target.checked);
+      },
+      disabled: readOnly,
+    }),
+  },
   [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: {
     fieldKey: ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST,
     component: TextArea,
