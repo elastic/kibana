@@ -13,7 +13,6 @@ import React, {
   memo,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -26,9 +25,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
   EuiPopoverFooter,
-  EuiPortal,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -37,8 +34,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { CellActionsBubbleAction } from '@kbn/unified-data-table';
-import { CellActionsBubble } from '@kbn/unified-data-table';
+import type { CellActionsBubbleAction, CellExpansion } from '@kbn/unified-data-table';
+import { CellActionsBubble, CellExpansionPopover, useCellExpansion } from '@kbn/unified-data-table';
 import type { FieldRow } from './field_row';
 import { TableCell } from './table_cell';
 import {
@@ -50,7 +47,7 @@ import { GRID_COLUMN_FIELD_VALUE } from './table_grid_constants';
 import type { GRID_COLUMN_FIELD_NAME } from './table_grid_constants';
 import { PIN_COLUMN_ID } from './tanstack_table_grid_constants';
 import type { TableStyles } from './tanstack_table_grid_styles';
-import { getPopoverAnchorStyles, popoverContentStyles } from './tanstack_table_grid_styles';
+import { popoverContentStyles } from './tanstack_table_grid_styles';
 
 type FieldColumnId = typeof GRID_COLUMN_FIELD_NAME | typeof GRID_COLUMN_FIELD_VALUE;
 
@@ -76,13 +73,6 @@ const useFieldTableData = () => {
   return data;
 };
 
-interface CellExpansion {
-  /** Viewport rect of what opened the expansion popover; undefined while it is closed. */
-  anchorRect?: DOMRect;
-  open: (anchor?: HTMLElement | null) => void;
-  close: () => void;
-}
-
 interface GridCellContextValue {
   // Whether the cell is hovered or focused, so the comparatively heavy cell actions only mount for it.
   isActive: boolean;
@@ -98,41 +88,6 @@ const useGridCell = () => {
     throw new Error('FieldTableCell must be rendered inside a GridCell');
   }
   return context;
-};
-
-const useCellExpansion = (cellRef: RefObject<HTMLDivElement | null>): CellExpansion => {
-  const [anchorRect, setAnchorRect] = useState<DOMRect>();
-  const isOpen = anchorRect !== undefined;
-
-  const open = useCallback(
-    (anchor?: HTMLElement | null) => {
-      const cell = cellRef.current;
-      // Focus the cell first, so the popover's focus trap returns focus to it when it closes.
-      cell?.focus({ preventScroll: true });
-      const rect = (anchor ?? cell)?.getBoundingClientRect();
-      if (rect) {
-        setAnchorRect(rect);
-      }
-    },
-    [cellRef]
-  );
-  const close = useCallback(() => setAnchorRect(undefined), []);
-
-  // The popover is anchored to a fixed rect, so it would be left behind when the cell scrolls.
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-    const onScroll = (event: Event) => {
-      if (event.target instanceof Node && event.target.contains(cellRef.current)) {
-        close();
-      }
-    };
-    window.addEventListener('scroll', onScroll, true);
-    return () => window.removeEventListener('scroll', onScroll, true);
-  }, [isOpen, cellRef, close]);
-
-  return useMemo(() => ({ anchorRect, open, close }), [anchorRect, open, close]);
 };
 
 const CellActionIconButton: typeof EuiButtonIcon = ({
@@ -249,49 +204,40 @@ export const FieldTableCell = memo(({ rowIndex, colIndex, columnId }: FieldTable
         <CellActionsBubble anchorCellRef={anchorRef} actions={actions} stayVisible={isExpanded} />
       )}
       {anchorRect && (
-        <EuiPortal>
-          <EuiPopover
-            css={getPopoverAnchorStyles(anchorRect)}
-            isOpen
-            ownFocus
-            closePopover={closeExpansion}
-            anchorPosition="downRight"
-            aria-label={i18n.translate('unifiedDocViewer.fieldsTable.cellPopoverAriaLabel', {
-              defaultMessage: 'Cell details',
-            })}
-            panelPaddingSize="s"
-            // Same test subj as EuiDataGrid's expansion popover, so existing tests keep working.
-            panelProps={{ 'data-test-subj': 'euiDataGridExpansionPopover' }}
-            button={<span aria-hidden="true" />}
-          >
-            <EuiText size="s" css={popoverContentStyles}>
-              <TableCell {...cellContentProps} isDetails />
-            </EuiText>
-            {cellActions.length > 0 && (
-              <EuiPopoverFooter>
-                <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-                  {cellActions.map((Action, idx) => (
-                    <EuiFlexItem key={idx} grow={false}>
-                      <Action
-                        rowIndex={rowIndex}
-                        colIndex={colIndex}
-                        columnId={columnId}
-                        Component={CellActionPopoverButton}
-                        isExpanded
-                      />
-                    </EuiFlexItem>
-                  ))}
-                </EuiFlexGroup>
-              </EuiPopoverFooter>
-            )}
-            {Boolean(warningMessage) && (
-              <div>
-                <EuiSpacer size="xs" />
-                <KbnWarningCallout announceOnMount={false} title={warningMessage} size="s" />
-              </div>
-            )}
-          </EuiPopover>
-        </EuiPortal>
+        <CellExpansionPopover
+          anchorRect={anchorRect}
+          onClose={closeExpansion}
+          aria-label={i18n.translate('unifiedDocViewer.fieldsTable.cellPopoverAriaLabel', {
+            defaultMessage: 'Cell details',
+          })}
+        >
+          <EuiText size="s" css={popoverContentStyles}>
+            <TableCell {...cellContentProps} isDetails />
+          </EuiText>
+          {cellActions.length > 0 && (
+            <EuiPopoverFooter>
+              <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+                {cellActions.map((Action, idx) => (
+                  <EuiFlexItem key={idx} grow={false}>
+                    <Action
+                      rowIndex={rowIndex}
+                      colIndex={colIndex}
+                      columnId={columnId}
+                      Component={CellActionPopoverButton}
+                      isExpanded
+                    />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiPopoverFooter>
+          )}
+          {Boolean(warningMessage) && (
+            <div>
+              <EuiSpacer size="xs" />
+              <KbnWarningCallout announceOnMount={false} title={warningMessage} size="s" />
+            </div>
+          )}
+        </CellExpansionPopover>
       )}
     </>
   );

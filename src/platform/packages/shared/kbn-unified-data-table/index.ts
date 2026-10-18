@@ -63,3 +63,7 @@ export {
   getGridPosition,
   getNextGridPosition,
 } from './src/components/grid_keyboard_navigation';
+export type { CellExpansion } from './src/components/cell_expansion/use_cell_expansion';
+export { useCellExpansion } from './src/components/cell_expansion/use_cell_expansion';
+export type { CellExpansionPopoverProps } from './src/components/cell_expansion/cell_expansion_popover';
+export { CellExpansionPopover } from './src/components/cell_expansion/cell_expansion_popover';

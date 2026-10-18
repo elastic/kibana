@@ -10,14 +10,17 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import type { EuiDataGridSetCellProps } from '@elastic/eui';
 import { EuiTablePagination, keys, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { useVirtualizer, type Virtualizer } from '@tanstack/react-virtual';
+import { i18n } from '@kbn/i18n';
 import type { GridPosition } from '@kbn/unified-data-table';
 import {
   CellActionsBubble,
+  CellExpansionPopover,
   cellActionsHostStyles,
   GRID_CELL_SELECTOR,
   GRID_KEYS,
   getGridPosition,
   getNextGridPosition,
+  useCellExpansion,
 } from '@kbn/unified-data-table';
 import {
   COLUMN_WIDTH_VAR_PREFIX,
@@ -25,13 +28,7 @@ import {
   MIN_COLUMN_WIDTH,
   OVERSCAN,
 } from './constants';
-import {
-  CellExpansionPopover,
-  DefaultCellPopover,
-  getBubbleActions,
-  renderPopoverFooter,
-  useCellExpansion,
-} from './grid_cell_actions';
+import { DefaultCellPopover, getBubbleActions, renderPopoverFooter } from './grid_cell_actions';
 import { GridHeaderCell } from './grid_header_cell';
 import type { GridStyles } from './styles';
 import { getGridStyles } from './styles';
@@ -195,7 +192,13 @@ const GridCell = memo(
           />
         )}
         {anchorRect && (
-          <CellExpansionPopover anchorRect={anchorRect} onClose={closeExpansion}>
+          <CellExpansionPopover
+            anchorRect={anchorRect}
+            onClose={closeExpansion}
+            aria-label={i18n.translate('xpack.lens.table.tanstackGrid.cellPopoverAriaLabel', {
+              defaultMessage: 'Cell details',
+            })}
+          >
             <RenderCellPopover
               {...actionArgs}
               schema={column?.schema}

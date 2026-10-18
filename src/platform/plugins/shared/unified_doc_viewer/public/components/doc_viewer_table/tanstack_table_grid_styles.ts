@@ -16,19 +16,6 @@ import { NAME_COLUMN_WIDTH_VAR, PIN_COLUMN_WIDTH } from './tanstack_table_grid_c
 
 export type TableStyles = ReturnType<typeof useMemoCss<typeof componentStyles>>;
 
-// EuiPopover anchors to its own wrapper: overlay it on the expand icon (the trigger unmounts when the
-// bubble collapses), fixed in the viewport because the portal sits outside the virtualized rows.
-export const getPopoverAnchorStyles = ({ top, left, width, height }: DOMRect) =>
-  css({
-    position: 'fixed',
-    display: 'block',
-    top,
-    left,
-    width,
-    height,
-    pointerEvents: 'none',
-  });
-
 export const popoverContentStyles = css({
   maxInlineSize: 'min(75vw, 600px)',
   maxBlockSize: '50vh',

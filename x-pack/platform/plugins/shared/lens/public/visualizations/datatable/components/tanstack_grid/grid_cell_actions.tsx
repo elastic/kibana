@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { ReactNode, RefObject } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import type { EuiDataGridColumnCellAction } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
   EuiPopoverFooter,
-  EuiPortal,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -25,49 +23,6 @@ import type { CellActionsBubbleAction } from '@kbn/unified-data-table';
 import type { TanStackCellPopoverProps } from './types';
 
 export const EXPAND_CELL_TEST_SUBJ = 'euiDataGridCellExpandButton';
-export const CELL_POPOVER_TEST_SUBJ = 'euiDataGridExpansionPopover';
-
-export interface CellExpansion {
-  /** Viewport rect of what opened the expansion popover; undefined while it is closed. */
-  anchorRect?: DOMRect;
-  open: (anchor?: HTMLElement | null) => void;
-  close: () => void;
-}
-
-export const useCellExpansion = (cellRef: RefObject<HTMLDivElement | null>): CellExpansion => {
-  const [anchorRect, setAnchorRect] = useState<DOMRect>();
-  const isOpen = anchorRect !== undefined;
-
-  const open = useCallback(
-    (anchor?: HTMLElement | null) => {
-      const cell = cellRef.current;
-      // Focus the cell first, so the popover's focus trap returns focus to it when it closes.
-      cell?.focus({ preventScroll: true });
-      const rect = (anchor ?? cell)?.getBoundingClientRect();
-      if (rect) {
-        setAnchorRect(rect);
-      }
-    },
-    [cellRef]
-  );
-  const close = useCallback(() => setAnchorRect(undefined), []);
-
-  // The popover is anchored to a fixed rect, so it would be left behind when the cell scrolls.
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-    const onScroll = (event: Event) => {
-      if (event.target instanceof Node && event.target.contains(cellRef.current)) {
-        close();
-      }
-    };
-    window.addEventListener('scroll', onScroll, true);
-    return () => window.removeEventListener('scroll', onScroll, true);
-  }, [isOpen, cellRef, close]);
-
-  return useMemo(() => ({ anchorRect, open, close }), [anchorRect, open, close]);
-};
 
 /** The icon variant of a cell action, shown in the cell actions bubble. */
 export const CellActionIconButton: typeof EuiButtonIcon = ({
@@ -146,9 +101,6 @@ export const getBubbleActions = (
   return actions;
 };
 
-const getPopoverAnchorStyles = ({ top, left, width, height }: DOMRect) =>
-  css({ position: 'fixed', display: 'block', top, left, width, height, pointerEvents: 'none' });
-
 const popoverContentStyles = css({
   maxInlineSize: 'min(75vw, 600px)',
   maxBlockSize: '50vh',
@@ -195,34 +147,3 @@ export const renderPopoverFooter = (
       </EuiFlexGroup>
     </EuiPopoverFooter>
   ) : undefined;
-
-interface CellExpansionPopoverProps {
-  anchorRect: DOMRect;
-  onClose: () => void;
-  children: ReactNode;
-}
-
-/** A focus-trapped popover, anchored to the rect of the element that expanded the cell. */
-export const CellExpansionPopover = ({
-  anchorRect,
-  onClose,
-  children,
-}: CellExpansionPopoverProps) => (
-  <EuiPortal>
-    <EuiPopover
-      css={getPopoverAnchorStyles(anchorRect)}
-      isOpen
-      ownFocus
-      closePopover={onClose}
-      anchorPosition="downRight"
-      aria-label={i18n.translate('xpack.lens.table.tanstackGrid.cellPopoverAriaLabel', {
-        defaultMessage: 'Cell details',
-      })}
-      panelPaddingSize="s"
-      panelProps={{ 'data-test-subj': CELL_POPOVER_TEST_SUBJ }}
-      button={<span aria-hidden="true" />}
-    >
-      {children}
-    </EuiPopover>
-  </EuiPortal>
-);
