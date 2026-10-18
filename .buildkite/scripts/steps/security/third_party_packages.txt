@@ -76,3 +76,7 @@ bump-cli
 @oxlint/plugins
 @types/mssql
 monaco-marker-data-provider
+mdast-util-from-markdown
+mdast-util-gfm
+micromark-extension-gfm
+@types/mdast
