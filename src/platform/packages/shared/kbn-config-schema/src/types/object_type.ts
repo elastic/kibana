@@ -83,11 +83,16 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
   private options: ObjectTypeOptions<P>;
 
   constructor(props: P, options: ObjectTypeOptions<P> = {}) {
+    const clonedProps = { ...props };
     const { unknowns, ...typeOptions } = options;
     const seenIds = new Map<string, Type<any>>();
-    for (const value of Object.values(props)) {
+    for (const value of Object.values(clonedProps)) {
       const id = value?.getMeta?.()?.id;
-      if (id !== undefined) {
+      const registersJoiId =
+        value instanceof ObjectType ||
+        value?.constructor?.name === 'ArrayType' ||
+        value?.constructor?.name === 'UnionType';
+      if (id !== undefined && registersJoiId) {
         const existing = seenIds.get(id);
         if (existing && existing !== value) {
           throw new Error(`Cannot add different schemas with the same id: ${id}`);
@@ -98,7 +103,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
 
     super(() => {
       const schemaKeys = {} as Record<string, AnySchema>;
-      for (const [key, value] of Object.entries(props)) {
+      for (const [key, value] of Object.entries(clonedProps)) {
         schemaKeys[key] = value.getSchema();
       }
       let schema = internals.object().keys(schemaKeys).default().optional();
@@ -120,7 +125,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
 
       return schema;
     }, typeOptions);
-    this.props = props;
+    this.props = clonedProps;
     this.options = options;
   }
 

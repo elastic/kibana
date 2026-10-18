@@ -85,4 +85,10 @@ describe('meta', () => {
     type.validate('ok');
     expect(factory).toHaveBeenCalledTimes(1);
   });
+
+  it('supports Object.freeze on Type instances without failing on validation', () => {
+    const frozenLiteral = Object.freeze(internals.any().valid('a'));
+    const frozenType = Object.freeze(new MyType({}, () => frozenLiteral));
+    expect(frozenType.validate('a')).toBe('a');
+  });
 });

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { globalRegistry } from 'zod/v4';
 import {
   isMaterializingLazyObject,
   lazyImmutableGCableObject,
@@ -31,8 +32,15 @@ export const setLazySchemaDisabled = (value: boolean): void => {
 
 export const isLazySchemaDisabled = (): boolean => disabled;
 
+const syncProxyRegistryMetadata = (proxy: object, real: object): void => {
+  const proxyMeta = globalRegistry.get(proxy as any);
+  if (proxyMeta !== undefined && !globalRegistry.has(real as any)) {
+    globalRegistry.add(real as any, proxyMeta);
+  }
+};
+
 /**
- * Zod-typed wrapper for generated schemas (e.g. from `@kbn/openapi-generator`).
+ * Zod-typed wrapper for generated and module-scope schemas.
  *
  * Default behavior: defers construction of the schema until any property
  * (`.parse`, `.safeParse`, `.shape`, ...) is first accessed, preserves laziness
@@ -54,68 +62,5 @@ export const lazySchema = <T extends object>(factory: () => T): T =>
     : lazyImmutableGCableObject(factory, {
         isZodSchema: true,
         wrapChainable: lazySchema,
+        onMaterialize: syncProxyRegistryMetadata,
       });
-
-class WeakSchemaIdMap extends Map<string, unknown> {
-  override set(key: string, value: unknown): this {
-    if (value != null && typeof value === 'object') {
-      super.set(key, new WeakRef(value));
-    }
-    return this;
-  }
-
-  override get(key: string): unknown {
-    const ref = super.get(key) as WeakRef<object> | undefined;
-    if (!ref) {
-      return undefined;
-    }
-    const deref = ref.deref();
-    if (!deref) {
-      super.delete(key);
-    }
-    return deref;
-  }
-
-  override has(key: string): boolean {
-    return this.get(key) !== undefined;
-  }
-
-  override *entries(): MapIterator<[string, unknown]> {
-    for (const [key, ref] of super.entries()) {
-      const deref = (ref as WeakRef<object>)?.deref?.();
-      if (deref !== undefined) {
-        yield [key, deref];
-      } else {
-        super.delete(key);
-      }
-    }
-  }
-
-  override *values(): MapIterator<unknown> {
-    for (const [, value] of this.entries()) {
-      yield value;
-    }
-  }
-
-  override [Symbol.iterator](): MapIterator<[string, unknown]> {
-    return this.entries();
-  }
-}
-
-/**
- * Converts `z.globalRegistry._idmap` to hold `WeakRef`s so schemas registered
- * with `.meta({ id })` remain garbage-collectable after use.
- */
-export const installWeakGlobalRegistryIdMap = (globalRegistry?: { _idmap?: unknown }): void => {
-  if (
-    globalRegistry &&
-    globalRegistry._idmap instanceof Map &&
-    !(globalRegistry._idmap instanceof WeakSchemaIdMap)
-  ) {
-    const weakMap = new WeakSchemaIdMap();
-    for (const [k, v] of (globalRegistry._idmap as Map<string, unknown>).entries()) {
-      weakMap.set(k, v);
-    }
-    globalRegistry._idmap = weakMap;
-  }
-};

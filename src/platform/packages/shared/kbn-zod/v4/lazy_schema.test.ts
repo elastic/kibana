@@ -8,7 +8,6 @@
  */
 
 import { z, isZod } from '.';
-import { LAZY_ZOD_SCHEMA } from './lazy_immutable_gcable_object';
 import { lazySchema, setLazySchemaDisabled } from './lazy_schema';
 
 /**
@@ -287,14 +286,26 @@ describe('lazySchema', () => {
       expect(factory).toHaveBeenCalledTimes(1);
     });
 
-    it('auto-wraps composite z.object / z.union / z.discriminatedUnion builders in lazySchema', () => {
-      const Obj = z.object({ a: z.string() });
-      const Union = z.union([z.string(), z.number()]);
+    it('preserves .meta(), recursive toJSONSchema, and defineProperty invariants on lazySchema', () => {
+      const S = lazySchema(() => z.object({ a: z.string() })).meta({
+        id: 'LazyMetaTest',
+        title: 'My Title',
+      });
+      expect(S.meta()).toMatchObject({ id: 'LazyMetaTest', title: 'My Title' });
 
-      expect((Obj as unknown as Record<PropertyKey, unknown>)[LAZY_ZOD_SCHEMA]).toBe(true);
-      expect((Union as unknown as Record<PropertyKey, unknown>)[LAZY_ZOD_SCHEMA]).toBe(true);
-      expect(Obj.parse({ a: 'ok' })).toEqual({ a: 'ok' });
-      expect(Union.parse(42)).toBe(42);
+      const MultiRef = z.object({ x: S, y: S.optional(), zz: S });
+      const multiJson = z.toJSONSchema(MultiRef) as Record<string, any>;
+      expect(multiJson.properties.x).toEqual({ $ref: '#/$defs/LazyMetaTest' });
+      expect(multiJson.properties.zz).toEqual({ $ref: '#/$defs/LazyMetaTest' });
+
+      const Tree: z.ZodType<any> = lazySchema(() =>
+        z.object({ v: z.number(), next: z.lazy(() => Tree.optional()) })
+      );
+      expect(() => z.toJSONSchema(Tree)).not.toThrow();
+
+      Object.defineProperty(S, 'customFlag', { value: 1, configurable: false, enumerable: true });
+      expect(Object.keys(S)).toContain('customFlag');
+      expect('customFlag' in S).toBe(true);
     });
   });
 });

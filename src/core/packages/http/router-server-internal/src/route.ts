@@ -34,6 +34,7 @@ import type { Logger } from '@kbn/logging';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { Request } from '@hapi/hapi';
 import type { Mutable } from 'utility-types';
+import { onceCacheOnSuccess } from '@kbn/std';
 import type { InternalRouterRoute, RequestHandlerEnhanced, Router } from './router';
 import { CoreKibanaRequest } from './request';
 import { RequestValidationFailure } from './request_validation_failure';
@@ -47,7 +48,6 @@ import {
   getRouteFullPath,
   validOptions,
   prepareRouteConfigValidation,
-  weakCacheOnSuccess,
 } from './util';
 import { validRouteSecurity } from './security_route_config_validator';
 
@@ -397,9 +397,9 @@ function buildLazyValidationGetters({
     // Use onceCacheOnSuccess to ensure a broken schema retries on every request
     // rather than silently bypassing validation after the first failure.
     return {
-      routeValidator: weakCacheOnSuccess(() => routeSchemasFromRouteConfig(route, method)),
-      onRequestValidationError: weakCacheOnSuccess(() => getRouteOnRequestValidationError(route)),
-      responseValidation: weakCacheOnSuccess(() => getRouteResponseValidation(route)),
+      routeValidator: onceCacheOnSuccess(() => routeSchemasFromRouteConfig(route, method)),
+      onRequestValidationError: onceCacheOnSuccess(() => getRouteOnRequestValidationError(route)),
+      responseValidation: onceCacheOnSuccess(() => getRouteResponseValidation(route)),
     };
   }
 }

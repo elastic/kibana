@@ -8,6 +8,7 @@
  */
 
 import { once } from 'lodash';
+import { onceCacheOnSuccess } from '@kbn/std';
 import {
   isFullValidatorContainer,
   type RouteValidatorFullConfigResponse,
@@ -21,35 +22,6 @@ import type { IKibanaResponse, ResponseHeaders, SafeRouteMethod } from '@kbn/cor
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { Request } from '@hapi/hapi';
 import type { InternalRouteConfig } from './route';
-
-/**
- * Caches a factory's successful result behind a `WeakRef` (for objects/functions)
- * so repeated accesses reuse the live instance while still allowing V8 GC to
- * reclaim unused route validators when idle. Retries on thrown errors.
- */
-export function weakCacheOnSuccess<T>(fn: () => T): () => T {
-  let hasPrimitiveValue = false;
-  let primitiveValue: T;
-  let ref: WeakRef<object> | undefined;
-
-  return () => {
-    if (hasPrimitiveValue) {
-      return primitiveValue;
-    }
-    const cached = ref?.deref() as T | undefined;
-    if (cached !== undefined) {
-      return cached;
-    }
-    const next = fn();
-    if (next !== null && (typeof next === 'object' || typeof next === 'function')) {
-      ref = new WeakRef(next as unknown as object);
-    } else {
-      hasPrimitiveValue = true;
-      primitiveValue = next;
-    }
-    return next;
-  };
-}
 
 function isStatusCode(key: string) {
   return !isNaN(parseInt(key, 10));
@@ -98,7 +70,7 @@ export function prepareRouteConfigValidation<P, Q, B>(
     return {
       ...config,
       options,
-      validate: weakCacheOnSuccess(() => prepareValidation(validate())),
+      validate: onceCacheOnSuccess(() => prepareValidation(validate())),
     };
   } else if (typeof config.validate === 'object' && config.validate !== null) {
     return {

@@ -13,7 +13,6 @@ import {
   injectResponseHeaders,
   prepareResponseValidation,
   prepareRouteConfigValidation,
-  weakCacheOnSuccess,
 } from './util';
 import { kibanaResponseFactory } from './response';
 
@@ -104,41 +103,5 @@ describe('injectResponseHeaders', () => {
       kibanaResponseFactory.ok({ headers: { foo: 'true', bar: 'false' } })
     );
     expect(result.options.headers).toEqual({ foo: 'false', bar: 'false', baz: 'true' });
-  });
-});
-
-describe('weakCacheOnSuccess', () => {
-  it('rebuilds the cached object after its WeakRef is cleared by GC', () => {
-    const RealWeakRef = globalThis.WeakRef;
-    let onlyRef: { evict(): void } | undefined;
-
-    function EvictableWeakRef<T extends object>(this: { target?: T; evict(): void }, target: T) {
-      this.target = target;
-      onlyRef = this;
-    }
-    EvictableWeakRef.prototype.deref = function deref<T>(this: { target?: T }): T | undefined {
-      return this.target;
-    };
-    EvictableWeakRef.prototype.evict = function evict(this: { target?: unknown }): void {
-      this.target = undefined;
-    };
-    (globalThis as { WeakRef: unknown }).WeakRef = EvictableWeakRef;
-
-    try {
-      const factory = jest.fn(() => ({ validator: true }));
-      const cached = weakCacheOnSuccess(factory);
-
-      const first = cached();
-      expect(cached()).toBe(first);
-      expect(factory).toHaveBeenCalledTimes(1);
-
-      onlyRef?.evict();
-
-      const second = cached();
-      expect(second).toEqual({ validator: true });
-      expect(factory).toHaveBeenCalledTimes(2);
-    } finally {
-      (globalThis as { WeakRef: unknown }).WeakRef = RealWeakRef;
-    }
   });
 });
