@@ -48,12 +48,14 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     urlParams: [],
     bodyParams: ['alertId', 'index', 'owner', 'rule', 'type', 'comment'],
   },
-  paramsSchema: lazySchema(() => buildParamsSchema({
-    requestSchema: add_case_comment_default_space_request,
-    additionalSchemas: {
-      fetcher: FetcherConfigSchema,
-      ...KibanaStepMetaSchema,
-    },
-  })),
+  paramsSchema: lazySchema(() =>
+    buildParamsSchema({
+      requestSchema: add_case_comment_default_space_request,
+      additionalSchemas: {
+        fetcher: FetcherConfigSchema,
+        ...KibanaStepMetaSchema,
+      },
+    })
+  ),
   outputSchema: add_case_comment_default_space_response,
 };

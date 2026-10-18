@@ -16,7 +16,7 @@
  * 2. Uses passthrough() on operations to preserve arbitrary document fields
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 import { getShapeAt } from '../../../common/utils/zod';
 
@@ -39,13 +39,15 @@ import {
  *
  * The document data can have arbitrary fields that need to be preserved.
  */
-const bulkOperationsSchema = lazySchema(() => z.array(
-  z.union([
-    global_bulk_operation_container.loose(),
-    global_bulk_update_action.loose(),
-    z.record(z.string(), z.unknown()),
-  ])
-));
+const bulkOperationsSchema = lazySchema(() =>
+  z.array(
+    z.union([
+      global_bulk_operation_container.loose(),
+      global_bulk_update_action.loose(),
+      z.record(z.string(), z.unknown()),
+    ])
+  )
+);
 
 // export contract
 export const BULK_CONTRACT: InternalConnectorContract = {
@@ -120,10 +122,12 @@ If you provide a target in the request path, it is used for any actions that don
     ],
     bodyParams: [],
   },
-  paramsSchema: lazySchema(() => z.object({
-    index: z.optional(types_indices),
-    operations: bulkOperationsSchema,
-    ...getShapeAt(bulk2_request, 'query'),
-  })),
+  paramsSchema: lazySchema(() =>
+    z.object({
+      index: z.optional(types_indices),
+      operations: bulkOperationsSchema,
+      ...getShapeAt(bulk2_request, 'query'),
+    })
+  ),
   outputSchema: bulk_response,
 };
