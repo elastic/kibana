@@ -48,7 +48,10 @@ import { esqlFixtureIndicesCreateRequests } from './indices';
  *   are visible in the evaluator metadata of a real run.
  */
 
-type MappingProperty = { type?: string; properties?: Record<string, MappingProperty> };
+interface MappingProperty {
+  type?: string;
+  properties?: Record<string, MappingProperty>;
+}
 
 export interface FixtureIndex {
   /** Concrete index name the fixture creates. */
@@ -105,9 +108,7 @@ function flattenDocument(
 export const fixtureIndices: FixtureIndex[] = [
   ...esqlFixtureIndicesCreateRequests.map((request: IndicesCreateRequest) => ({
     name: request.index,
-    fields: flattenMapping(
-      (request.mappings?.properties ?? {}) as Record<string, MappingProperty>
-    ),
+    fields: flattenMapping((request.mappings?.properties ?? {}) as Record<string, MappingProperty>),
   })),
   ...esqlFixtureDocumentRequests.map((request: IndexRequest) => ({
     name: request.index,
@@ -157,7 +158,9 @@ export function extractSources(query: string): string[] {
     .filter((part) => part.length > 0 && !part.startsWith('-'));
 }
 
-function fieldsForQuery(query: string): Array<{ name: string; type: string; userDefined: boolean }> {
+function fieldsForQuery(
+  query: string
+): Array<{ name: string; type: string; userDefined: boolean }> {
   const sources = extractSources(query);
   const indices = sources.flatMap((source) => resolveFixtureIndices(source));
   const fields = new Map<string, string>();
@@ -185,14 +188,17 @@ const messageText = (message: { text?: string; message?: string }): string =>
  * ignoring `Invalid input types` without ignoring what it hides.
  */
 function castNumericInLists(query: string): string {
-  return query.replace(/\b(not\s+in|in)\s*\(([^()]*)\)/gi, (match, operator: string, list: string) => {
-    const values = list.split(',').map((value) => value.trim());
-    if (values.length === 0 || !values.every((value) => /^-?\d+(?:\.\d+)?$/.test(value))) {
-      return match;
+  return query.replace(
+    /\b(not\s+in|in)\s*\(([^()]*)\)/gi,
+    (match, operator: string, list: string) => {
+      const values = list.split(',').map((value) => value.trim());
+      if (values.length === 0 || !values.every((value) => /^-?\d+(?:\.\d+)?$/.test(value))) {
+        return match;
+      }
+      const cast = values.some((value) => value.includes('.')) ? 'TO_DOUBLE' : 'TO_LONG';
+      return `${operator} (${values.map((value) => `${cast}(${value})`).join(', ')})`;
     }
-    const cast = values.some((value) => value.includes('.')) ? 'TO_DOUBLE' : 'TO_LONG';
-    return `${operator} (${values.map((value) => `${cast}(${value})`).join(', ')})`;
-  });
+  );
 }
 
 /**
@@ -204,9 +210,8 @@ function castNumericInLists(query: string): string {
  * with `Unknown column [user_agent]`. Resolve those fields here.
  */
 function dissectSourceFields(query: string): string[] {
-  return Array.from(
-    query.matchAll(/(?:^|\n|\|)\s*(?:dissect|grok)\s+([^\s,|]+)/gi),
-    (match) => match[1].replace(/^[`"']+|[`"']+$/g, '')
+  return Array.from(query.matchAll(/(?:^|\n|\|)\s*(?:dissect|grok)\s+([^\s,|]+)/gi), (match) =>
+    match[1].replace(/^[`"']+|[`"']+$/g, '')
   );
 }
 
@@ -244,8 +249,10 @@ export interface GoldQueryCheck {
  * so the example can only ever score 0 for execution-based evaluators.
  */
 export async function checkGoldQueries(
-  examples: ReadonlyArray<{ input?: { question?: string }; output?: { query?: string } }> =
-    esqlGenerationDataset
+  examples: ReadonlyArray<{
+    input?: { question?: string };
+    output?: { query?: string };
+  }> = esqlGenerationDataset
 ): Promise<GoldQueryCheck[]> {
   const callbacks: ValidateQueryCallbacks = {
     getSources: async () =>
