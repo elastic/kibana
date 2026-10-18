@@ -84,7 +84,7 @@ const buildAlertSortWithValueQuery = (args: QueryArgs, limit: number): string[] 
 ];
 
 /** Every entity in view in one slow query; alerts and entity docs share the FROM since FORK can't nest. */
-const buildAlertSortAllQuery = (args: QueryArgs): string[] => {
+export const buildAlertSortAllQuery = (args: QueryArgs): string[] => {
   const isEntityDoc = `_index == "${args.concreteEntityIndexName}"`;
   const isAlert = `NOT ${isEntityDoc}`;
   const isEntityInView = [
@@ -113,9 +113,13 @@ const buildAlertSortAllQuery = (args: QueryArgs): string[] => {
       ...buildEntityAggregations(ALERT_AGGREGATIONS, `${IN_VIEW_FIELD} IS NULL`),
       ...buildEntityAggregations([IN_VIEW_AGGREGATION]),
     ]),
-    // 4. Aliases count for their resolved entity; then only entities in view, sorted.
+    // 4. Aliases count for their resolved entity; then only entities in view.
     ...buildRollUpOverAliasesSteps(args, [...ALERT_AGGREGATIONS, IN_VIEW_AGGREGATION]),
     `| WHERE ${IN_VIEW_FIELD} == 1`,
+    // 5. Entities without alerts count 0 here, but null in every other read, which sorts them last.
+    `| EVAL ${[...Object.values(SEVERITY_COUNT_FIELDS), ALERT_COUNT_FIELD]
+      .map((field) => `${field} = CASE(${ALERT_COUNT_FIELD} > 0, ${field})`)
+      .join(', ')}`,
     ...buildJoinedPageSteps(args, args.sort.field, ALERT_FIELDS),
   ];
 };

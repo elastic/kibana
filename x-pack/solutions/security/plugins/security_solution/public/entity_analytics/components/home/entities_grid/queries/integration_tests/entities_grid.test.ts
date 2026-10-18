@@ -18,6 +18,7 @@ import {
   fetchResolvedEntityFilterOverrides,
   withResolvedEntityValues,
 } from '../resolved_entities';
+import { buildAlertSortAllQuery } from '../alerts';
 import { buildEntitiesInViewCountQuery } from '../entities_in_view';
 import type { EsqlRunner } from '../types';
 import { BASE_ARGS, getIds, hoursAgo, startFixtureCluster } from './fixture';
@@ -307,6 +308,18 @@ describe('entities grid on Elasticsearch', () => {
 
             expect(getIds(rows)).toEqual(expected.slice(0, pageSize + 1));
           }
+        }
+      );
+
+      it.each(EXPECTED_ORDERS.filter(([field]) => field === 'alert_count'))(
+        'ranks every entity in view by %s %s like the value rows, with no alerts as null',
+        async (field, direction, expected) => {
+          const rows = await cluster.runQuery(
+            buildAlertSortAllQuery({ ...BASE_ARGS, sort: { field, direction } })
+          );
+
+          expect(getIds(rows)).toEqual(expected);
+          expect(rows.filter((row) => row.alert_count === 0)).toEqual([]);
         }
       );
     });
