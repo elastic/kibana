@@ -21,7 +21,6 @@ import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { securityTool } from '../../constants';
 import { checkWatchlistAccess } from './check_watchlist_access';
 import { formatEntityIdsForPrompt } from './entity_ids_preview';
-import { getWatchlistToolAvailability } from './watchlist_availability';
 
 const MAX_ENTITIES_PER_CALL = 100;
 
@@ -65,16 +64,22 @@ Entities not present in the entity store are reported as \`not_found\` in the re
       idempotentHint: false,
       openWorldHint: false,
     },
+    // Availability is deliberately static here.
+    //
+    // The `manage-watchlists` skill advertises this tool unconditionally, so gating the tool
+    // itself makes the advertised tool set and the bound tool set disagree. When the gate hid
+    // the tool -- the space lookup plus the licensing round-trip can exceed the agent-builder
+    // registry's availability timeout, and the result is cached per space -- the model still
+    // called the tool because the skill documents it, and the converse route failed the entire
+    // run with a 500 "Tool ... called but was not available" instead of letting the agent
+    // recover.
+    //
+    // The watchlist API routes already enforce the feature flag and the license, and the tool
+    // handler runs per-user RBAC via `checkWatchlistAccess`, so keeping the tool bound lets
+    // those surface a recoverable error rather than silently removing the tool.
     availability: {
       cacheMode: 'space',
-      handler: ({ request }) =>
-        getWatchlistToolAvailability({
-          core,
-          request,
-          logger,
-          experimentalFeatures,
-          requireEntityStoreV2: true,
-        }),
+      handler: () => ({ status: 'available' as const }),
     },
     handler: async (
       params,

@@ -148,15 +148,20 @@ describe('addEntitiesToWatchlistTool', () => {
       expect(result.status).toBe('available');
     });
 
-    it('is unavailable when availability check returns unavailable', async () => {
+    // Regression for the F14 run killer: the tool must stay in the bound tool set even when the
+    // shared watchlist availability check reports unavailable. The `manage-watchlists` skill
+    // advertises this tool regardless, so dropping it from the bound set made the model call an
+    // unbound tool and the converse route returned a 500 "Tool ... called but was not available",
+    // which discarded the whole run (empty steps, every evaluator scoring an empty output).
+    it('stays available when the watchlist availability check reports unavailable', async () => {
       mockGetWatchlistToolAvailability.mockResolvedValueOnce({
         status: 'unavailable',
-        reason: 'not in a security space',
+        reason: 'Entity Store V2 is not enabled (required to sync watchlist membership onto entity records).',
       });
       const result = await tool.availability!.handler(
         createToolAvailabilityContext(mocks.mockRequest, 'default')
       );
-      expect(result.status).toBe('unavailable');
+      expect(result.status).toBe('available');
     });
   });
 
