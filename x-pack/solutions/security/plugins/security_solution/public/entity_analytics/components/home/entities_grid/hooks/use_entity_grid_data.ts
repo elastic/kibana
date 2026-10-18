@@ -247,20 +247,18 @@ export const useEntityGridData = (
   );
 
   return {
+    prefetch,
+    onRowsInViewChange,
     rows,
     isEnriching: enrichment.isEnriching,
-    /** Undefined until the count arrives: the rows loaded so far aren't the total. */
     total: countQuery.data,
     updatedAt: Math.max(rowsQuery.dataUpdatedAt, enrichment.dataUpdatedAt) || null,
+    isAtLoadLimit: !!rowsQuery.data?.isAtLoadLimit,
     isFetching:
       resolvedEntityFilterOverrides.isFetching ||
       rowsQuery.isFetching ||
       countQuery.isFetching ||
       enrichment.isFetching ||
       context.isEntitiesIndexLoading,
-    /** The view has more rows than the grid shows. */
-    isAtLoadLimit: !!rowsQuery.data?.isAtLoadLimit,
-    prefetch,
-    onRowsInViewChange,
   };
 };
