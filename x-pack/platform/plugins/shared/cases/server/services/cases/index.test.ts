@@ -2421,10 +2421,15 @@ describe('CasesService', () => {
           aggregations: {
             attachmentIds: {
               buckets: [
-                { key: 'host:a', references: { caseIds: { buckets: [{ key: 'case-1' }] } } },
+                {
+                  key: 'host:a',
+                  references: { cases: { caseIds: { buckets: [{ key: 'case-1' }] } } },
+                },
                 {
                   key: 'host:b',
-                  references: { caseIds: { buckets: [{ key: 'case-1' }, { key: 'case-2' }] } },
+                  references: {
+                    cases: { caseIds: { buckets: [{ key: 'case-1' }, { key: 'case-2' }] } },
+                  },
                 },
               ],
             },
@@ -2442,7 +2447,7 @@ describe('CasesService', () => {
         ]);
       });
 
-      it('reads unified attachments of the type and ids, aggregating by attachment id', async () => {
+      it('reads unified attachments of the type and ids, aggregating the case references of the requested ids', async () => {
         unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
 
         await service.getCaseIdsByAttachmentIds({
@@ -2456,12 +2461,21 @@ describe('CasesService', () => {
           perPage: 0,
           aggs: {
             attachmentIds: {
-              terms: { field: 'cases-attachments.attributes.attachmentId', size: 2 },
+              terms: {
+                field: 'cases-attachments.attributes.attachmentId',
+                size: 2,
+                include: ['host:a', 'host:b'],
+              },
               aggs: {
                 references: {
                   nested: { path: 'cases-attachments.references' },
                   aggregations: {
-                    caseIds: { terms: { field: 'cases-attachments.references.id' } },
+                    cases: {
+                      filter: { term: { 'cases-attachments.references.type': 'cases' } },
+                      aggregations: {
+                        caseIds: { terms: { field: 'cases-attachments.references.id' } },
+                      },
+                    },
                   },
                 },
               },

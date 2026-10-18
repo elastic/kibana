@@ -139,8 +139,10 @@ export interface GetCaseIdsByAttachmentIdsAggs {
     buckets: Array<{
       key: string;
       references: {
-        caseIds: {
-          buckets: Array<{ key: string }>;
+        cases: {
+          caseIds: {
+            buckets: Array<{ key: string }>;
+          };
         };
       };
     }>;

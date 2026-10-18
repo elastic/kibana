@@ -367,8 +367,35 @@ export class CasesService {
         sortField: defaultSortField,
         aggs: {
           attachmentIds: {
-            terms: { field: `${attributes}.attachmentId`, size: attachmentIds.length },
-            aggs: this.buildCaseIdsAggs(CASE_ATTACHMENT_SAVED_OBJECT, MAX_DOCS_PER_PAGE),
+            terms: {
+              field: `${attributes}.attachmentId`,
+              size: attachmentIds.length,
+              // An attachment can hold many ids; its other ids must not take the requested ones' buckets.
+              include: attachmentIds,
+            },
+            aggs: {
+              references: {
+                nested: { path: `${CASE_ATTACHMENT_SAVED_OBJECT}.references` },
+                aggregations: {
+                  // Saved-object-backed attachments also reference their target, e.g. a dashboard.
+                  cases: {
+                    filter: {
+                      term: {
+                        [`${CASE_ATTACHMENT_SAVED_OBJECT}.references.type`]: CASE_SAVED_OBJECT,
+                      },
+                    },
+                    aggregations: {
+                      caseIds: {
+                        terms: {
+                          field: `${CASE_ATTACHMENT_SAVED_OBJECT}.references.id`,
+                          size: MAX_DOCS_PER_PAGE,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
         filter: combineFilters([
@@ -382,7 +409,7 @@ export class CasesService {
 
       return (response.aggregations?.attachmentIds.buckets ?? []).map(({ key, references }) => ({
         attachmentId: key,
-        caseIds: references.caseIds.buckets.map((bucket) => bucket.key),
+        caseIds: references.cases.caseIds.buckets.map((bucket) => bucket.key),
       }));
     } catch (error) {
       this.log.error(`Error on GET cases for attachment ids ${attachmentIds.join(', ')}: ${error}`);
