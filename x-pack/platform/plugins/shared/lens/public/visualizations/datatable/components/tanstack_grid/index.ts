@@ -6,4 +6,9 @@
  */
 
 export { TanStackDatatableGrid } from './tanstack_datatable_grid';
-export type { TanStackCellValueProps, TanStackDatatableGridProps } from './types';
+export { DefaultCellPopover as TanStackDefaultCellPopover } from './grid_cell_actions';
+export type {
+  TanStackCellPopoverProps,
+  TanStackCellValueProps,
+  TanStackDatatableGridProps,
+} from './types';
