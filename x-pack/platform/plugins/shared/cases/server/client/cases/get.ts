@@ -219,16 +219,22 @@ export const getCasesByAttachmentIDs = async (
       CasesByAttachmentIDsRequestRt
     )(params);
 
-    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+    const { authorizedOwners, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.getCaseIDsByAttachmentIDs);
+
+    // The operation is scoped to cases, so the attachments read get their own owner filter.
+    const attachmentsAuthorizationFilter =
+      authorizedOwners && authorizedOwners.length > 0
+        ? getOwnersFilter(CASE_ATTACHMENT_SAVED_OBJECT, authorizedOwners)
+        : undefined;
 
     const casesOfAttachments = await caseService.getCaseIdsByAttachmentIds({
       type,
       attachmentIds,
       filter: combineAuthorizedAndOwnerFilter(
         owner,
-        authorizationFilter,
-        Operations.getCaseIDsByAttachmentIDs.savedObjectType
+        attachmentsAuthorizationFilter,
+        CASE_ATTACHMENT_SAVED_OBJECT
       ),
     });
 

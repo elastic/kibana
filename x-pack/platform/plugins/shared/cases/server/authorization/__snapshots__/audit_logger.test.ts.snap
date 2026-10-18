@@ -1861,10 +1861,10 @@ Object {
   "kibana": Object {
     "saved_object": Object {
       "id": "1",
-      "type": "cases-attachments",
+      "type": "cases",
     },
   },
-  "message": "Failed attempt to access cases-attachments [id=1] as owner \\"awesome\\"",
+  "message": "Failed attempt to access cases [id=1] as owner \\"awesome\\"",
 }
 `;
 
@@ -1907,10 +1907,10 @@ Object {
   "kibana": Object {
     "saved_object": Object {
       "id": "5",
-      "type": "cases-attachments",
+      "type": "cases",
     },
   },
-  "message": "User has accessed cases-attachments [id=5] as owner \\"super\\"",
+  "message": "User has accessed cases [id=5] as owner \\"super\\"",
 }
 `;
 

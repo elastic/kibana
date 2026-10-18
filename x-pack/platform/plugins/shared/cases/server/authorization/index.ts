@@ -9,7 +9,6 @@ import type { EcsEvent } from '@kbn/core/server';
 import type { CasesSupportedOperations } from '@kbn/security-plugin/server';
 import type { ArrayElement } from '@kbn/utility-types';
 import {
-  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
@@ -144,7 +143,7 @@ const CaseOperations = {
     action: 'case_ids_by_attachment_ids_get',
     verbs: accessVerbs,
     docType: 'cases',
-    savedObjectType: CASE_ATTACHMENT_SAVED_OBJECT,
+    savedObjectType: CASE_SAVED_OBJECT,
   },
   [ReadOperations.GetCaseMetrics]: {
     ecsType: EVENT_TYPES.access,

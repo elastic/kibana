@@ -87,6 +87,21 @@ describe('get', () => {
       expect(JSON.stringify(getAttachmentsFilter())).toContain('securitySolution');
     });
 
+    it('scopes the attachments it reads to the owners the user can read', async () => {
+      clientArgs.authorization.getAuthorizationFilter.mockResolvedValueOnce({
+        authorizedOwners: ['observability'],
+        ensureSavedObjectsAreAuthorized: () => {},
+      });
+      const { owner, ...withoutOwner } = request;
+
+      await getCasesByAttachmentIDs(withoutOwner, clientArgs);
+
+      expect(JSON.stringify(getAttachmentsFilter())).toContain(
+        'cases-attachments.attributes.owner'
+      );
+      expect(JSON.stringify(getAttachmentsFilter())).toContain('observability');
+    });
+
     it('reads the attachments of every owner the user can read without an owner', async () => {
       const { owner, ...withoutOwner } = request;
 
