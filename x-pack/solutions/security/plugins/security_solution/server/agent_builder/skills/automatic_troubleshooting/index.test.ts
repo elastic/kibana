@@ -64,6 +64,56 @@ describe('createAutomaticTroubleshootingSkill', () => {
     });
   });
 
+  // Regression fixture for run bk-01a14b73-endpoint, build 01a14b73-3b78-4ca6-b2c5-e5ce35986c37
+  // (commit 8f4c1fcc). Two examples failed because a healthy-looking endpoint ended a question
+  // that named a symptom before the seeded evidence was queried:
+  //   - endpoint: incompatible antivirus detection (gemini-3.1-pro trace
+  //     98a75e659cf439607b9000ff6489d307, gpt-5.4 trace 545c8f72b3015f886d4ec914c787be33) -
+  //     the answer was "the endpoint is healthy with no evidence of conflicts" without querying
+  //     logs-endpoint.events.process-*, where the conflicting-software events are seeded.
+  //   - endpoint: endpoint_exception_field_mismatch_explicit_prompt - the answer never compared the
+  //     exception's file.path against the alert/process field process.executable.
+  // These assertions cover the guidance that has to exist for those investigations to happen.
+  describe('named-symptom evidence rule', () => {
+    it('requires the named symptom evidence index to be queried before a no-issue verdict', () => {
+      const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
+      const content = skill.content;
+
+      expect(content).toMatch(/\*\*Named-symptom evidence rule\*\*/);
+      expect(content).toMatch(/conflicting or incompatible security software/i);
+      expect(content).toMatch(/logs-endpoint\.events\.process-\*/);
+      expect(content).toMatch(/logs-endpoint\.alerts-\*/);
+      expect(content).toMatch(/Never answer a named-symptom question with/i);
+    });
+
+    it('does not let a healthy current state satisfy the evidence requirement for a named symptom', () => {
+      const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
+      const content = skill.content;
+
+      expect(content).toContain('only when the user did not name a symptom');
+      expect(content).toMatch(
+        /healthy current state is never evidence that a named symptom is absent/i
+      );
+      // the general-health short-circuit is unchanged for questions that name no symptom
+      expect(content).toContain('question that names no symptom');
+      expect(content).toContain(
+        'ask for the specific symptom, affected time range, alert/event, or behavior they want investigated'
+      );
+    });
+
+    it('spends the tool-call budget on the named symptom instead of forbidding the lookup', () => {
+      const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
+      const content = skill.content;
+
+      expect(content).toContain(
+        "Spend that budget on targeted queries against the named symptom's evidence index first"
+      );
+      expect(content).not.toContain(
+        'Avoid broad log searches when the user names a specific endpoint and symptom.'
+      );
+    });
+  });
+
   describe('getRegistryTools', () => {
     it('returns the correct platform core tools', () => {
       const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
