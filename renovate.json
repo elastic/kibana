@@ -275,7 +275,15 @@
     },
     {
       "groupName": "Isomer dependencies",
-      "matchDepNames": ["@elastic/distillate", "@elastic/isomer-runtime", "@elastic/isomer-sdk"],
+      "matchDepNames": [
+        "@elastic/distillate",
+        "@elastic/isomer-runtime",
+        "@elastic/isomer-sdk",
+        "@types/mdast",
+        "mdast-util-from-markdown",
+        "mdast-util-gfm",
+        "micromark-extension-gfm"
+      ],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],

@@ -2506,6 +2506,9 @@ importers:
       '@kbn/isomer':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer
+      '@kbn/isomer-components':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer-components
       '@kbn/isomer-theme':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer-theme
@@ -4633,9 +4636,18 @@ importers:
       markdown-it:
         specifier: 14.2.0
         version: 14.2.0
+      mdast-util-from-markdown:
+        specifier: 2.0.3
+        version: 2.0.3(supports-color@10.2.2)
+      mdast-util-gfm:
+        specifier: 3.1.0
+        version: 3.1.0(supports-color@10.2.2)
       memoize-one:
         specifier: 6.0.0
         version: 6.0.0
+      micromark-extension-gfm:
+        specifier: 3.0.0
+        version: 3.0.0
       mime-types:
         specifier: 2.1.35
         version: 2.1.35
@@ -6230,6 +6242,9 @@ importers:
       '@types/markdown-it':
         specifier: 14.1.2
         version: 14.1.2
+      '@types/mdast':
+        specifier: 4.0.4
+        version: 4.0.4
       '@types/mime-types':
         specifier: 2.1.0
         version: 2.1.0
@@ -9018,6 +9033,8 @@ importers:
   x-pack/platform/packages/shared/ingest-pipelines: {}
 
   x-pack/platform/packages/shared/isomer/isomer: {}
+
+  x-pack/platform/packages/shared/isomer/isomer-components: {}
 
   x-pack/platform/packages/shared/isomer/isomer-theme: {}
 
