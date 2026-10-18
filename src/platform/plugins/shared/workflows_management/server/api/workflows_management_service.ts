@@ -232,6 +232,7 @@ export class WorkflowsService {
       await this.changeHistoryService.initialize({
         elasticsearchClient: coreStart.elasticsearch.client.asInternalUser,
         authService: coreStart.security.authc,
+        userProfileService: coreStart.userProfile,
       });
       return;
     }
@@ -359,7 +360,6 @@ export class WorkflowsService {
     return getHistoryForWorkflow(
       {
         changeHistoryService: this.changeHistoryService,
-        userProfileService: this.coreStart.userProfile,
         getWorkflowSource: (workflowId, sid) =>
           this.crudService.getWorkflowDocumentSource(workflowId, sid, {
             includeGlobal: true,
