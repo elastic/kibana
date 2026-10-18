@@ -127,6 +127,26 @@ describe('convertToWorkflowGraph', () => {
       }
     );
 
+    it('keeps the timeout on a step with step-level foreach', () => {
+      const executionGraph = convertToWorkflowGraph({
+        steps: [
+          {
+            name: 'request',
+            type: 'elasticsearch.search',
+            foreach: '[1,2,3]',
+            timeout: '10m',
+            with: {},
+          },
+        ],
+      } as unknown as WorkflowYaml);
+
+      expect(executionGraph.node('request')).toEqual(
+        expect.objectContaining({
+          configuration: expect.objectContaining({ timeout: '10m' }),
+        })
+      );
+    });
+
     it('does not keep the timeout on other step nodes', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as WorkflowYaml);
 
