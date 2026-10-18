@@ -21,7 +21,6 @@ import type {
   AttackDiscoveryAgentBuilderExample,
   AttackDiscoveryAgentBuilderTaskOutput,
   AttackDiscoveryRetrievalEvidence,
-  PipelineCountScopeSource,
   RetrievedAlertCountSource,
 } from './types';
 import { createAdToolResultEvaluator } from './evaluators/ad_tool_result_evaluator';
@@ -722,133 +721,6 @@ const carriesRetrievalScope = (query: string | null, retrievalScope: string | nu
   });
 };
 
-/** Leaf clause kinds whose payload holds the value(s) to match against a field.
- *  Anything else (`nested`, `script`, a kind the DSL does not define) is not
- *  analysed, because its scope semantics would have to be guessed. */
-const SCOPE_LEAF_CLAUSES: ReadonlySet<string> = new Set([
-  'ids',
-  'match',
-  'match_phrase',
-  'match_phrase_prefix',
-  'multi_match',
-  'prefix',
-  'query_string',
-  'regexp',
-  'simple_query_string',
-  'term',
-  'terms',
-  'wildcard',
-]);
-
-/**
- * Whether a clause payload names the marker in a way that REQUIRES it. The
- * payload is walked rather than pattern-matched so both spellings work —
- * `{ "tags": "<marker>" }` and `{ "tags": { "value": "<marker>" } }` — and a
- * text leaf is held to the same bar as an ES|QL predicate: naming the marker
- * is not enough, the text must not also widen past it (`OR`/`NOT` admit
- * marker-less rows, exactly as in `carriesRetrievalScope`).
- */
-const payloadRequiresScope = (payload: unknown, retrievalScope: string): boolean => {
-  if (typeof payload === 'string') {
-    return payload.includes(retrievalScope) && !/\b(?:or|not)\b/i.test(payload);
-  }
-  if (Array.isArray(payload)) {
-    return payload.some((item) => payloadRequiresScope(item, retrievalScope));
-  }
-  if (payload == null || typeof payload !== 'object') return false;
-
-  return Object.values(payload as Record<string, unknown>).some((value) =>
-    payloadRequiresScope(value, retrievalScope)
-  );
-};
-
-/** `must`/`filter` clauses, read as one conjunction: any single clause that
- *  requires the marker restricts every row the `bool` admits. */
-const conjunctiveClausesRequireScope = (clauses: unknown, retrievalScope: string): boolean =>
-  (Array.isArray(clauses) ? clauses : clauses == null ? [] : [clauses]).some((clause) =>
-    filterClauseRequiresScope(clause, retrievalScope)
-  );
-
-/**
- * `should` is disjunctive, so it restricts the `bool` only when it is the
- * `bool`'s ONLY clause set (a `must`/`filter` beside it would be satisfied by
- * rows the `should` excludes), every branch requires the marker, and it has not
- * been switched off (`minimum_should_match: 0`).
- */
-const boolRequiresScope = (bool: Record<string, unknown>, retrievalScope: string): boolean => {
-  if (conjunctiveClausesRequireScope(bool.must, retrievalScope)) return true;
-  if (conjunctiveClausesRequireScope(bool.filter, retrievalScope)) return true;
-  if (bool.must != null || bool.filter != null) return false;
-
-  const minimum = bool.minimum_should_match;
-  if (minimum === 0 || minimum === '0') return false;
-
-  const should = Array.isArray(bool.should)
-    ? bool.should
-    : bool.should == null
-    ? []
-    : [bool.should];
-
-  return (
-    should.length > 0 && should.every((clause) => filterClauseRequiresScope(clause, retrievalScope))
-  );
-};
-
-/** A DSL query object holds exactly one clause kind; anything else (an empty
- *  object, a multi-key record the search would reject, a bare array) is not a
- *  clause and proves nothing. */
-const filterClauseRequiresScope = (clause: unknown, retrievalScope: string): boolean => {
-  if (typeof clause === 'string') return payloadRequiresScope(clause, retrievalScope);
-  if (clause == null || typeof clause !== 'object' || Array.isArray(clause)) return false;
-
-  const keys = Object.keys(clause as Record<string, unknown>);
-  if (keys.length !== 1) return false;
-
-  const [kind] = keys;
-  const payload = (clause as Record<string, unknown>)[kind];
-
-  if (kind === 'bool') {
-    return payload != null && typeof payload === 'object' && !Array.isArray(payload)
-      ? boolRequiresScope(payload as Record<string, unknown>, retrievalScope)
-      : false;
-  }
-
-  // `must_not` is deliberately absent: it excludes the marker instead of
-  // requiring it, so a run that filters the fixture OUT proves no scope.
-  return SCOPE_LEAF_CLAUSES.has(kind) && payloadRequiresScope(payload, retrievalScope);
-};
-
-/**
- * Whether the Elasticsearch DSL `filter` the agent handed
- * `security.attack-discovery.run` REQUIRES the example's marker of every alert
- * the pipeline's retrieval returns.
- *
- * `custom_query` mode is the second way that phase can be scoped, and the one
- * that carried no observable until now: the step runs the alerts index with the
- * agent's `filter` ANDed onto its query
- * (`getOpenAndAcknowledgedAlertsQuery`, `filter` pushed into the outer
- * `bool.filter`), so a filter that requires the marker proves the same thing
- * `carriesRetrievalScope` proves for the ES|QL route.
- *
- * No index check accompanies this one, unlike the ES|QL route: the retrieval's
- * index is `alertsIndexPattern` from the space (`run_attack_discovery_tool`),
- * not something the filter can redirect.
- *
- * The analysis is fail-closed — only clause kinds whose semantics are known can
- * return true — because admitting a count this fixture's marker does not cover
- * is the failure the whole gate exists to prevent. `true` when the example
- * declares no scope, mirroring `carriesRetrievalScope`.
- */
-export const filterCarriesRetrievalScope = (
-  filter: unknown,
-  retrievalScope: string | null
-): boolean => {
-  if (retrievalScope == null) return true;
-  if (filter == null) return false;
-
-  return filterClauseRequiresScope(filter, retrievalScope);
-};
-
 /**
  * The agent's alerts-index retrievals, split by whether they carry the
  * example's scope (`input.retrievalScope`).
@@ -1000,28 +872,6 @@ export const extractAdToolEsqlQuery = (
 };
 
 /**
- * The Elasticsearch DSL filter the agent handed `security.attack-discovery.run`
- * (`params.filter`), when it supplied one — the observable that proves whether
- * a `custom_query`-mode pipeline count is scoped (see
- * `filterCarriesRetrievalScope`). `null` when the call supplied no filter, in
- * which case the phase ran its own unscoped query and proves nothing.
- *
- * Read from the FIRST AD call, like `extractAdToolEsqlQuery`: that is the call
- * whose execution the pipeline response is read for (`findAdToolResult`).
- */
-export const extractAdToolCustomQueryFilter = (
-  steps: AttackDiscoveryAgentBuilderTaskOutput['steps']
-): Record<string, unknown> | null => {
-  const adStep = (steps ?? []).find((step) => step?.tool_id === 'security.attack-discovery.run');
-  const params = (adStep?.params ?? {}) as { filter?: unknown };
-  const filter = params.filter;
-
-  return filter != null && typeof filter === 'object' && !Array.isArray(filter)
-    ? (filter as Record<string, unknown>)
-    : null;
-};
-
-/**
  * `alert_retrieval` extraction strategies that are NOT retrievals:
  *
  * - `provided` — the route's provided-alert reconstruction, which writes the
@@ -1066,23 +916,6 @@ const resolveRetrievedAlertCountSource = ({
   return 'none';
 };
 
-/**
- * Which observable proved that a pipeline-derived count is scoped, in
- * preference order: the ES|QL route first (it names its own index, so it proves
- * the stronger statement), then the `custom_query` filter route. `null` when
- * neither proved it — the count is excluded then, and this is what tells the
- * record which of the two was checked and came up short.
- */
-const resolvePipelineCountScopeSource = (
-  esqlQueryCarriesScope: boolean,
-  customQueryFilterCarriesScope: boolean
-): PipelineCountScopeSource | null => {
-  if (esqlQueryCarriesScope) return 'esql_query';
-  if (customQueryFilterCarriesScope) return 'custom_query_filter';
-
-  return null;
-};
-
 // The per-workflow count (`alert_retrieval[0]`) may be missing for some
 // retrieval paths (e.g. live-retrieval through the agent's own ES|QL
 // tooling), so fall back to `combined_alerts.alerts_context_count`.
@@ -1121,7 +954,6 @@ export const computeWorkflowAlertCounts = ({
   pipeline,
   adToolResult,
   adToolEsqlQuery = null,
-  adToolCustomQueryFilter = null,
   retrievalScope = null,
   agentAlertRetrievalPopulation = null,
   scopedAgentRetrievalWithoutIdentity = false,
@@ -1132,9 +964,6 @@ export const computeWorkflowAlertCounts = ({
   /** The query the agent handed the AD tool (`params.esql_query`), when it
    *  supplied one: the pipeline's own retrieval runs it. */
   adToolEsqlQuery?: string | null;
-  /** The DSL filter the agent handed the AD tool (`params.filter`), when it
-   *  supplied one: the `custom_query` route's equivalent of the query above. */
-  adToolCustomQueryFilter?: Record<string, unknown> | null;
   /** The marker the example's retrievals had to carry; `null` when the example
    *  declares none, in which case nothing can be out of scope. */
   retrievalScope?: string | null;
@@ -1154,12 +983,9 @@ export const computeWorkflowAlertCounts = ({
   retrievedAlertCount: number | null;
   retrievedAlertCountSource: RetrievedAlertCountSource;
   passedAlertCount: number | null;
-  /** Pipeline counts that were NOT admitted because neither route observable
-   *  proved `retrievalScope`. Diagnostic only — nothing scores them. */
+  /** Pipeline counts that were NOT admitted because the AD call's query did not
+   *  carry `retrievalScope`. Diagnostic only — nothing scores them. */
   unscopedPipelineAlertRetrievalCounts: number[];
-  /** Which observable proved the admitted pipeline count's scope; `null` when
-   *  no scope was declared or nothing proved it. */
-  pipelineCountScopeSource: PipelineCountScopeSource | null;
 } => {
   const entries = pipeline.alert_retrieval ?? null;
   const retrievalEntries = (entries ?? []).filter(
@@ -1184,25 +1010,12 @@ export const computeWorkflowAlertCounts = ({
   // RAW EVENTS, and an exact-looking count from those passed the fixture's
   // population assertion without any alert being retrieved.
   //
-  // `custom_query` mode is the same question through the other route: the phase
-  // runs the alerts index with the agent's DSL `filter`, so a filter that
-  // REQUIRES the marker proves the count's scope there. Neither observable
-  // present (or neither clearing its bar) leaves the count excluded.
-  //
   // With NO scope declared there is nothing to gate: the check belongs to the
   // example, so the count is admitted exactly as before.
-  const esqlQueryCarriesScope =
-    carriesRetrievalScope(adToolEsqlQuery, retrievalScope) &&
-    readsAlertsIndexQuery(adToolEsqlQuery);
-  const customQueryFilterCarriesScope = filterCarriesRetrievalScope(
-    adToolCustomQueryFilter,
-    retrievalScope
-  );
-  const pipelineCountScopeSource =
-    retrievalScope == null
-      ? null
-      : resolvePipelineCountScopeSource(esqlQueryCarriesScope, customQueryFilterCarriesScope);
-  const pipelineCountCarriesScope = retrievalScope == null || pipelineCountScopeSource != null;
+  const pipelineCountCarriesScope =
+    retrievalScope == null ||
+    (carriesRetrievalScope(adToolEsqlQuery, retrievalScope) &&
+      readsAlertsIndexQuery(adToolEsqlQuery));
   const admittedFromAlertRetrieval = pipelineCountCarriesScope ? fromAlertRetrieval : null;
   const admittedFromCombinedAlerts = pipelineCountCarriesScope ? fromCombinedAlerts : null;
   const unscopedPipelineAlertRetrievalCounts = pipelineCountCarriesScope
@@ -1234,7 +1047,6 @@ export const computeWorkflowAlertCounts = ({
     }),
     passedAlertCount: adToolResult?.alertsContextCount ?? null,
     unscopedPipelineAlertRetrievalCounts,
-    pipelineCountScopeSource,
   };
 };
 
@@ -1251,14 +1063,12 @@ export const extractRetrievalEvidence = ({
   retrievalScope = null,
   unscopedAgentAlertRetrievalRowCounts = [],
   unscopedPipelineAlertRetrievalCounts = [],
-  pipelineCountScopeSource = null,
 }: {
   pipeline?: AttackDiscoveryPipelineResponse | null;
   agentEsqlRowCounts?: number[];
   retrievalScope?: string | null;
   unscopedAgentAlertRetrievalRowCounts?: number[];
   unscopedPipelineAlertRetrievalCounts?: number[];
-  pipelineCountScopeSource?: PipelineCountScopeSource | null;
 }): AttackDiscoveryRetrievalEvidence => {
   const entries = pipeline?.alert_retrieval;
   const combined = pipeline?.combined_alerts ?? null;
@@ -1284,7 +1094,6 @@ export const extractRetrievalEvidence = ({
     retrievalScope,
     unscopedAgentAlertRetrievalRowCounts,
     unscopedPipelineAlertRetrievalCounts,
-    pipelineCountScopeSource,
   };
 };
 
@@ -1299,7 +1108,6 @@ export const buildWorkflow = ({
   adToolResult,
   agentEsqlRowCounts,
   adToolEsqlQuery = null,
-  adToolCustomQueryFilter = null,
   agentAlertRetrievalPopulation = null,
   scopedAgentRetrievalWithoutIdentity = false,
   retrievalScope = null,
@@ -1309,7 +1117,6 @@ export const buildWorkflow = ({
   adToolResult?: AttackDiscoveryAgentBuilderTaskOutput['adToolResult'];
   agentEsqlRowCounts: number[];
   adToolEsqlQuery?: string | null;
-  adToolCustomQueryFilter?: Record<string, unknown> | null;
   agentAlertRetrievalPopulation?: number | null;
   scopedAgentRetrievalWithoutIdentity?: boolean;
   retrievalScope?: string | null;
@@ -1320,12 +1127,10 @@ export const buildWorkflow = ({
     retrievedAlertCountSource,
     passedAlertCount,
     unscopedPipelineAlertRetrievalCounts,
-    pipelineCountScopeSource,
   } = computeWorkflowAlertCounts({
     pipeline: pipeline ?? {},
     adToolResult,
     adToolEsqlQuery,
-    adToolCustomQueryFilter,
     retrievalScope,
     agentAlertRetrievalPopulation,
     scopedAgentRetrievalWithoutIdentity,
@@ -1346,7 +1151,6 @@ export const buildWorkflow = ({
       retrievalScope,
       unscopedAgentAlertRetrievalRowCounts,
       unscopedPipelineAlertRetrievalCounts,
-      pipelineCountScopeSource,
     }),
   };
 };
@@ -1609,7 +1413,6 @@ const inspectWorkflow = async ({
   adToolResult,
   agentEsqlRowCounts,
   adToolEsqlQuery,
-  adToolCustomQueryFilter,
   agentAlertRetrievalPopulation,
   scopedAgentRetrievalWithoutIdentity,
   retrievalScope,
@@ -1620,7 +1423,6 @@ const inspectWorkflow = async ({
   adToolResult?: AttackDiscoveryAgentBuilderTaskOutput['adToolResult'];
   agentEsqlRowCounts: number[];
   adToolEsqlQuery: string | null;
-  adToolCustomQueryFilter: Record<string, unknown> | null;
   agentAlertRetrievalPopulation: number | null;
   scopedAgentRetrievalWithoutIdentity: boolean;
   retrievalScope: string | null;
@@ -1652,7 +1454,6 @@ const inspectWorkflow = async ({
       adToolResult,
       agentEsqlRowCounts,
       adToolEsqlQuery,
-      adToolCustomQueryFilter,
       agentAlertRetrievalPopulation,
       scopedAgentRetrievalWithoutIdentity,
       retrievalScope,
@@ -1687,10 +1488,6 @@ const buildTask =
     // — so both sides of the fallback are held to one scope (Fix 3).
     const retrievalScope = input?.retrievalScope ?? null;
     const adToolEsqlQuery = extractAdToolEsqlQuery(response.steps);
-    // The `custom_query` route's equivalent: the DSL filter the agent handed
-    // the tool is what that phase's retrieval queries the alerts index with, so
-    // it is the observable that proves a pipeline count from that route.
-    const adToolCustomQueryFilter = extractAdToolCustomQueryFilter(response.steps);
     const agentEsqlRowCounts = extractAgentEsqlRowCounts(response.steps);
     const agentAlertRetrievalPopulation = extractAgentAlertRetrievalPopulation(
       response.steps,
@@ -1715,7 +1512,6 @@ const buildTask =
           fetch,
           agentEsqlRowCounts,
           adToolEsqlQuery,
-          adToolCustomQueryFilter,
           agentAlertRetrievalPopulation,
           scopedAgentRetrievalWithoutIdentity,
           retrievalScope,
@@ -1727,7 +1523,6 @@ const buildTask =
             adToolResult,
             agentEsqlRowCounts,
             adToolEsqlQuery,
-            adToolCustomQueryFilter,
             agentAlertRetrievalPopulation,
             scopedAgentRetrievalWithoutIdentity,
             retrievalScope,

@@ -146,23 +146,6 @@ export interface AttackDiscoveryAlertRetrievalEntryEvidence {
 }
 
 /**
- * Which observable PROVED that a pipeline-derived count belonged to the
- * example's declared scope:
- *
- * - `esql_query` — the ES|QL query the agent handed `security.attack-discovery.run`
- *   (`params.esql_query`), which the pipeline's Alert Retrieval phase runs
- *   verbatim.
- * - `custom_query_filter` — the Elasticsearch DSL filter the agent handed the
- *   same call in `custom_query` mode (`params.filter`), which that phase ANDs
- *   onto its query over the alerts index.
- *
- * `null` when the example declares no scope (nothing to prove), and when
- * neither observable cleared the bar — the count was then excluded, so the
- * record says which of the two routes was checked and came up short.
- */
-export type PipelineCountScopeSource = 'esql_query' | 'custom_query_filter';
-
-/**
  * The pipeline-response facts whose absence made the dense profile's `N/A`
  * undiagnosable from the record alone: `evaluate_dataset.ts` used to keep only
  * the derived `stages`/counts, so explaining a `null` required reading the
@@ -198,10 +181,6 @@ export interface AttackDiscoveryRetrievalEvidence {
    *  when that query carries `retrievalScope`. Non-empty means the pipeline
    *  reported a retrieval this fixture's marker does not cover. */
   unscopedPipelineAlertRetrievalCounts: number[];
-  /** Which of the two route observables proved the pipeline count's scope (see
-   *  `PipelineCountScopeSource`); `null` when no scope was declared, or when
-   *  neither proved it and the count was therefore excluded. */
-  pipelineCountScopeSource: PipelineCountScopeSource | null;
 }
 
 /** Empty retrieval evidence, for fixtures that do not exercise retrieval. */
@@ -214,7 +193,6 @@ export const EMPTY_RETRIEVAL_EVIDENCE: AttackDiscoveryRetrievalEvidence = {
   retrievalScope: null,
   unscopedAgentAlertRetrievalRowCounts: [],
   unscopedPipelineAlertRetrievalCounts: [],
-  pipelineCountScopeSource: null,
 };
 
 export interface AttackDiscoveryAgentBuilderTaskOutput {
