@@ -157,6 +157,10 @@ evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.c
                 'Does not perform endpoint forensic reconstruction or patient-zero analysis',
                 'Does not query logs-endpoint.events.* indices for DFIR purposes',
               ],
+              // Mechanical form of the criteria above: no ES|QL forensic query path on a
+              // non-DFIR question. Without it this row has no golden path to align against and
+              // the Trajectory column is a declared N/A on every model.
+              forbidden_tool_sequence: [...FORENSIC_ESQL_TRAJECTORY],
             },
             metadata: { golden_id: 'ef-distractor-weather', row_type: 'distractor' },
           },
@@ -178,6 +182,7 @@ evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.c
                 'Answers as a platform/dashboard request, not a DFIR forensic workflow',
                 'Does not invoke endpoint forensic patient-zero or timeline methodology',
               ],
+              forbidden_tool_sequence: [...FORENSIC_ESQL_TRAJECTORY],
             },
             metadata: { golden_id: 'ef-distractor-dashboards', row_type: 'distractor' },
           },
@@ -207,6 +212,9 @@ evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.c
                 'Does not treat this as a forensic-reconstruction question just because a specific host is named',
                 'Defers to or is consistent with elastic-defend-configuration-troubleshooting for antivirus/security-software conflicts',
               ],
+              // Naming a host does not license the forensic ES|QL path; the observed runs answer this
+              // row through platform.core.search only.
+              forbidden_tool_sequence: [...FORENSIC_ESQL_TRAJECTORY],
             },
             metadata: { golden_id: 'ef-distractor-antivirus-conflict', row_type: 'distractor' },
           },
