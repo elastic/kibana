@@ -101,6 +101,15 @@ describe('lazySchema', () => {
       expect(Node.safeParse({ value: 1, next: { value: 'bad' } }).success).toBe(false);
     });
 
+    // Mirrors the generator's `export const FooEnum = lazySchema(() => Foo.enum)`.
+    it('supports wrapping a schema `.enum` plain object', () => {
+      const Foo = lazySchema(() => z.enum(['A', 'B']));
+      const FooEnum = lazySchema(() => Foo.enum);
+
+      expect(FooEnum.A).toBe('A');
+      expect(FooEnum.B).toBe('B');
+    });
+
     // Mirrors the cross-schema reference pattern where one generated schema
     // references another generated schema that is itself lazy.
     it('supports a lazy schema referencing another lazy schema', () => {

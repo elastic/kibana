@@ -33,6 +33,10 @@ export const setLazySchemaDisabled = (value: boolean): void => {
 export const isLazySchemaDisabled = (): boolean => disabled;
 
 const syncProxyRegistryMetadata = (proxy: object, real: object): void => {
+  // Generated `*Enum` exports wrap `schema.enum`, a plain object with no `_zod`; the registry would throw on it.
+  if (!('_zod' in real)) {
+    return;
+  }
   const proxyMeta = globalRegistry.get(proxy as any);
   if (proxyMeta !== undefined && !globalRegistry.has(real as any)) {
     globalRegistry.add(real as any, proxyMeta);
