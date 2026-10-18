@@ -1474,6 +1474,7 @@ packages:
   - 'x-pack/platform/plugins/shared/inference_workflows'
   - 'x-pack/platform/plugins/shared/ingest_hub'
   - 'x-pack/platform/plugins/shared/ingest_pipelines'
+  - 'x-pack/platform/plugins/shared/isomer'
   - 'x-pack/platform/plugins/shared/lens'
   - 'x-pack/platform/plugins/shared/license_management'
   - 'x-pack/platform/plugins/shared/licensing'
