@@ -12,14 +12,15 @@ import path from 'path';
 
 /**
  * The attachment side-effects spec asserts that `security.search_entities` was called in a way
- * that orders results by risk score. The tool documents that ordering as its *default*
- * (`sortBy` "Defaults to \"riskScore\"" in the security_solution plugin's
- * `server/agent_builder/tools/entity_analytics/search_entities_tool.ts`), so a call that omits
- * sort and filter parameters already delivers the behaviour the criterion is after. A criterion
- * that only accepts an explicit parameter fails such calls textually while the behaviour it is
- * after happened — three families failed exactly that way on build 01a14b73 (finding F13):
- * opus called `security.search_entities` with `{entityTypes: [user]}`, got the risk-ordered
- * users back, and was still scored 0 by the ToolCalls evaluator.
+ * that orders results by risk score. The tool documents that ordering as its *default*: its
+ * `sortBy` description reads `Defaults to "riskScore" (entity.risk.calculated_score_norm)` and
+ * states the ordering is always descending, so a call that omits `sortBy` and the risk filters
+ * already returns the risk-ordered entities the criterion is after.
+ *
+ * A criterion that only accepts an explicit parameter fails such calls textually while the
+ * behaviour it is after happened. Three families failed exactly that way on a weekly eval build
+ * (finding F13): each called `security.search_entities` with only `{entityTypes: [user]}`, got
+ * the risk-ordered users back, and was still scored 0 by the ToolCalls evaluator.
  *
  * The spec is a Playwright spec, so it cannot be imported into jest. These checks read both
  * sources and assert the two still agree:
@@ -52,8 +53,6 @@ const searchEntitiesCriteria = specSource
     return [...block.matchAll(/'((?:\\.|[^'\\])*)'/g)].map((match) => match[1]);
   });
 
-// The tool's `sortBy` description. Quoted values are escaped in the TypeScript source
-// (`\"riskScore\"`), so match the backslash-tolerantly instead of on an exact substring.
 const sortByDescription = toolSource.slice(toolSource.indexOf('sortBy: z'));
 
 describe('entity-analytics attachment side-effects spec vs the search_entities tool', () => {
@@ -63,7 +62,7 @@ describe('entity-analytics attachment side-effects spec vs the search_entities t
 
   it('keeps the tool default risk-score ordering the criterion relies on', () => {
     expect(sortByDescription).not.toHaveLength(0);
-    expect(sortByDescription).toMatch(/Defaults to \\?"riskScore\\?"/);
+    expect(sortByDescription).toMatch(/Defaults to "riskScore"/);
   });
 
   it('accepts the documented default as well as an explicit sort or filter parameter', () => {
