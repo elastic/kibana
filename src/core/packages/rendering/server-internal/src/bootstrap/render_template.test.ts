@@ -38,6 +38,12 @@ describe('renderTemplate', () => {
     expect(content).toMatchSnapshot();
   });
 
+  // @kbn/failed-test-reporter-cli matches this message to attribute Scout failures to the CDN
+  test('logs the asset that failed to load when bootstrap fails', async () => {
+    const content = await renderTemplate(mockParams());
+    expect(content).toContain("window.console.error('Kibana bootstrap failed: could not load '");
+  });
+
   test('loads bundles from an IIFE instead of window.onload', async () => {
     const content = await renderTemplate(mockParams());
     expect(content).not.toContain('window.onload = function');
