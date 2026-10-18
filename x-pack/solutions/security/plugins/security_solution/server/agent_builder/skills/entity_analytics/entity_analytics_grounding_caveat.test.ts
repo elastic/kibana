@@ -78,16 +78,12 @@ describe('entity analytics skill - risk score grounding caveat', () => {
 
   it('forbids the caveat even when the question asks whether the data is current', () => {
     const grounding = groundingSection();
-    expect(grounding).toContain(
-      "even when the user's question asks whether the data is current"
-    );
+    expect(grounding).toContain("even when the user's question asks whether the data is current");
     expect(grounding).toContain('do not answer the freshness part with a currency claim');
   });
 
   it('explains that a running maintainer does not mean the scores are current', () => {
-    expect(groundingSection()).toContain(
-      'reports only that the maintainer process is running'
-    );
+    expect(groundingSection()).toContain('reports only that the maintainer process is running');
   });
 
   it('keeps the stale branches: stopped and never_started must caveat, not declare the environment safe', () => {
@@ -117,6 +113,8 @@ describe('entity analytics skill - worked example for the freshness question for
       'do **not** write "the risk scoring engine is running, so the data is current and up to date"'
     );
     expect(example).toContain('any other scoring-is-current caveat');
-    expect(example).toContain('do not upgrade an empty result into "your environment is clean / safe"');
+    expect(example).toContain(
+      'do not upgrade an empty result into "your environment is clean / safe"'
+    );
   });
 });
