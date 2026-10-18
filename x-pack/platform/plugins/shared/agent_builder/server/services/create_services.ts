@@ -134,6 +134,7 @@ export class ServiceManager {
     licensing,
     deploymentInfo,
     deductiveRegister,
+    isomer,
     conversationEventBus,
   }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
     if (!this.services) {
@@ -265,6 +266,7 @@ export class ServiceManager {
 
     const surfaces = new SurfacesServiceImpl({
       attachmentsService: attachments,
+      getRuntime: isomer.getRuntime,
       logger: logger.get('surfaces'),
     });
 

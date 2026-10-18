@@ -13,6 +13,7 @@ import {
   type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AttachmentServiceStart } from '../attachments';
 import { SurfacesServiceImpl } from './surfaces_service';
@@ -66,21 +67,20 @@ const renderPayload = (
   event: RoundCompleteEvent,
   attachmentsService: AttachmentServiceStart = unmappedAttachmentsService
 ) =>
-  new SurfacesServiceImpl({ attachmentsService, logger: loggerMock.create() }).renderPayload(
-    event,
-    {
-      originType: ConversationOriginType.Slack,
-    }
-  );
+  new SurfacesServiceImpl({
+    attachmentsService,
+    logger: loggerMock.create(),
+    getRuntime: isomerPluginMock.createStartContract().getRuntime,
+  }).renderPayload(event, { originType: ConversationOriginType.Slack });
 
 describe('renderPayload', () => {
-  it('renders the payload of the round surface', () => {
-    const payload = renderPayload(createRoundCompleteEvent('Hello'));
+  it('renders the payload of the round surface', async () => {
+    const payload = await renderPayload(createRoundCompleteEvent('Hello'));
 
     expect(payload?.text).toBe('Hello');
   });
 
-  it('renders mapped attachments in place of their tags', () => {
+  it('renders mapped attachments in place of their tags', async () => {
     const event = createRoundCompleteEvent(
       'Here is the query:\n\n<render_attachment id="a1" version="1" />',
       [esqlAttachment]
@@ -94,48 +94,51 @@ describe('renderPayload', () => {
       }),
     } as unknown as AttachmentServiceStart;
 
-    const slack = JSON.stringify(renderPayload(event, attachmentsService));
+    const slack = JSON.stringify(await renderPayload(event, attachmentsService));
 
     expect(slack).toContain('FROM logs | LIMIT 10');
     expect(slack).not.toContain('render_attachment');
   });
 
-  it('leaves out unmapped attachments', () => {
+  it('leaves out unmapped attachments', async () => {
     const event = createRoundCompleteEvent('Here: <render_attachment id="a1" />', [esqlAttachment]);
 
-    const slack = JSON.stringify(renderPayload(event));
+    const slack = JSON.stringify(await renderPayload(event));
 
     expect(slack).toContain('Here:');
     expect(slack).not.toContain('Latest logs');
     expect(slack).not.toContain('render_attachment');
   });
 
-  it('renders nothing when rendering fails', () => {
+  it('renders nothing when rendering fails', async () => {
     jest.mocked(isomerSlack.renderSlackEnvelope).mockImplementationOnce(() => {
       throw new Error('boom');
     });
 
-    expect(renderPayload(createRoundCompleteEvent('Hello'))).toBeUndefined();
+    await expect(renderPayload(createRoundCompleteEvent('Hello'))).resolves.toBeUndefined();
   });
 
-  it('renders nothing when the message is empty', () => {
-    expect(renderPayload(createRoundCompleteEvent(''))).toBeUndefined();
+  it('renders nothing when the message is empty', async () => {
+    await expect(renderPayload(createRoundCompleteEvent(''))).resolves.toBeUndefined();
   });
 
-  it('renders nothing when none of the message can be rendered', () => {
+  it('renders nothing when none of the message can be rendered', async () => {
     const event = createRoundCompleteEvent('<render_attachment id="a1" />', [esqlAttachment]);
 
-    expect(renderPayload(event)).toBeUndefined();
+    await expect(renderPayload(event)).resolves.toBeUndefined();
   });
 
-  it('renders nothing for rounds without an origin', () => {
+  it('renders nothing for rounds without an origin, without building the runtime', async () => {
+    const { getRuntime } = isomerPluginMock.createStartContract();
     const surfacesService = new SurfacesServiceImpl({
       attachmentsService: unmappedAttachmentsService,
       logger: loggerMock.create(),
+      getRuntime,
     });
 
-    expect(
+    await expect(
       surfacesService.renderPayload(createRoundCompleteEvent('Hello'), { originType: undefined })
-    ).toBeUndefined();
+    ).resolves.toBeUndefined();
+    expect(getRuntime).not.toHaveBeenCalled();
   });
 });

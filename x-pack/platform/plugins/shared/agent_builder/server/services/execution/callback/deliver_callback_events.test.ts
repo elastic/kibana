@@ -6,6 +6,7 @@
  */
 
 import { defer, of, throwError, concat } from 'rxjs';
+import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   AgentBuilderErrorCode,
@@ -29,6 +30,7 @@ const surfacesDeps = {
   surfacesService: new SurfacesServiceImpl({
     attachmentsService: { getTypeDefinition } as unknown as AttachmentServiceStart,
     logger: loggerMock.create(),
+    getRuntime: isomerPluginMock.createStartContract().getRuntime,
   }),
 };
 const createConversationExecution = (url: string | null = callbackUrl): AgentExecution =>
