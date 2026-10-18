@@ -7,28 +7,31 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { expectedFixtureDocumentCounts } from './corpus';
 import { esqlFixtureDocumentRequests } from './documents';
 import { esqlFixtureIndexWildcards, esqlFixtureIndicesCreateRequests } from './indices';
 
 /**
- * Create the regression-suite fixture indices and seed the APM document
- * fixtures so the dataset's gold queries actually have something to
- * execute against.
+ * Create the regression-suite fixture indices and seed their documents so the
+ * dataset's gold queries actually have something to execute against.
  *
  * Mirrors the LangSmith-era `PrepareIndicesForAssistantGraphEvaluations`
  * loader from `x-pack/solutions/security/plugins/elastic_assistant/server/routes/evaluate/prepare_indices_for_evaluations/graph_type/assistant/`,
  * minus the multi-environment / random-date hydration: the dataset's gold
  * queries only reference bare wildcards, so we materialise one concrete
- * index per template (see `./indices.ts`).
+ * index per template (see `./indices.ts`) and seed representative ECS
+ * documents into each of them (see `./documents.ts`).
  *
- * Fail-fast on errors. The previous behaviour ("don't fail evals if
- * fixture setup fails") was load-bearing for the suite's bottom line —
- * without these indices the `ES|QL Execution Validity` and
- * `ES|QL Result Equivalence` evaluators score 0 for every example
- * (verified against a fresh Scout cluster: 28/31 gold-query failures were
- * `verification_exception` from missing indices). Surfacing the failure
- * here lets CI fail loudly instead of silently regressing to a fully
- * non-executable suite.
+ * Fail-fast on errors, in both directions. The previous behaviour ("don't fail
+ * evals if fixture setup fails") was load-bearing for the suite's bottom line:
+ * without these indices the `ES|QL Execution Validity` and `ES|QL Result
+ * Equivalence` evaluators score 0 for every example (verified against a fresh
+ * Scout cluster: 28/31 gold-query failures were `verification_exception` from
+ * missing indices). The same failure mode exists one layer down with an index
+ * that exists but holds no documents: every gold query targeting it returns an
+ * empty result set and `ES|QL Result Equivalence` scores 1.0 on two empty sets.
+ * `verifyEsqlFixtureDocuments` closes that hole by counting the seeded
+ * documents in the cluster before any example runs.
  */
 export async function setupEsqlFixtures({
   esClient,
@@ -57,24 +60,88 @@ export async function setupEsqlFixtures({
   );
 
   log.info(
-    `[esql-regression] indexing ${esqlFixtureDocumentRequests.length} sample documents (APM fixtures)`
+    `[esql-regression] indexing ${esqlFixtureDocumentRequests.length} fixture documents into ${esqlFixtureIndicesCreateRequests.length} fixture indices`
   );
 
-  for (const request of esqlFixtureDocumentRequests) {
-    try {
-      await esClient.index({ ...request, refresh: 'wait_for' });
-    } catch (err) {
-      throw new Error(`[esql-regression] failed to index sample document into "${request.index}"`, {
-        cause: err instanceof Error ? err : new Error(String(err)),
-      });
-    }
-  }
+  await indexEsqlFixtureDocuments({ esClient });
 
   await esClient.indices.refresh({
     index: esqlFixtureIndicesCreateRequests
       .map((req) => req.index)
       .concat(esqlFixtureDocumentRequests.map((req) => req.index)),
   });
+
+  await verifyEsqlFixtureDocuments({ esClient, log });
+}
+
+/**
+ * Indexes the fixture corpus in one bulk request and fails on the first
+ * rejected document. A partially indexed corpus is worse than no corpus: the
+ * documents that did land make the gold queries look executable while the
+ * missing ones quietly shrink the result sets the evaluators compare.
+ */
+export async function indexEsqlFixtureDocuments({ esClient }: { esClient: EsClient }) {
+  const operations = esqlFixtureDocumentRequests.flatMap((request) => [
+    { index: { _index: String(request.index) } },
+    (request.document ?? {}) as Record<string, unknown>,
+  ]);
+
+  const response = await esClient.bulk({ refresh: 'wait_for', operations });
+
+  if (response.errors) {
+    const failed = response.items.find((item) => {
+      const result = Object.values(item)[0];
+      return result && 'error' in result && result.error;
+    });
+    throw new Error(
+      `[esql-regression] failed to index the fixture corpus: ${JSON.stringify(failed)}`
+    );
+  }
+}
+
+/**
+ * Asserts, against the cluster, that every fixture index holds the documents
+ * `./documents.ts` seeds. Without this the suite can pass while measuring
+ * nothing: the `ES|QL Result Equivalence` evaluator scores 1.0 on a gold query
+ * and a candidate that both return no rows, so an unseeded index turns empty
+ * result sets into top scores and no other assertion notices.
+ */
+export async function verifyEsqlFixtureDocuments({
+  esClient,
+  log,
+}: {
+  esClient: EsClient;
+  log: ToolingLog;
+}): Promise<void> {
+  const expected = expectedFixtureDocumentCounts();
+
+  const counts = await Promise.all(
+    Array.from(expected, async ([index, expectedCount]) => {
+      const { count } = await esClient.count({ index });
+      return { index, expected: expectedCount, actual: count };
+    })
+  );
+
+  const wrong = counts.filter(({ expected: expectedCount, actual }) => actual !== expectedCount);
+
+  log.info(
+    `[esql-regression] fixture corpus seeded: ${counts
+      .map(({ index, actual }) => `${index}=${actual}`)
+      .join(', ')}`
+  );
+
+  if (wrong.length > 0) {
+    throw new Error(
+      `[esql-regression] fixture corpus is not seeded as expected: ${wrong
+        .map(
+          ({ index, expected: expectedCount, actual }) =>
+            `${index} holds ${actual}, expected ${expectedCount}`
+        )
+        .join(
+          '; '
+        )}. Every gold query that targets an unseeded index returns an empty result set, which the ES|QL Result Equivalence evaluator scores as 1.0 — see src/fixtures/documents.ts.`
+    );
+  }
 }
 
 /**
