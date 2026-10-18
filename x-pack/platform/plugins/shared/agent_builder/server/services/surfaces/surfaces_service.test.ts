@@ -14,6 +14,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AttachmentServiceStart } from '../attachments';
 import { SurfacesServiceImpl } from './surfaces_service';
@@ -69,10 +70,11 @@ const renderPayload = (
   event: RoundCompleteEvent,
   attachmentsService: AttachmentServiceStart = unmappedAttachmentsService
 ) =>
-  new SurfacesServiceImpl({ attachmentsService, logger: loggerMock.create() }).renderPayload(
-    event,
-    { originType: ConversationOriginType.Slack, ...context }
-  );
+  new SurfacesServiceImpl({
+    attachmentsService,
+    logger: loggerMock.create(),
+    getRuntime: isomerPluginMock.createStartContract().getRuntime,
+  }).renderPayload(event, { originType: ConversationOriginType.Slack, ...context });
 
 describe('renderPayload', () => {
   it('renders the payload of the round surface', async () => {
@@ -116,30 +118,33 @@ describe('renderPayload', () => {
       throw new Error('boom');
     });
 
-    expect(await renderPayload(createRoundCompleteEvent('Hello'))).toBeUndefined();
+    await expect(renderPayload(createRoundCompleteEvent('Hello'))).resolves.toBeUndefined();
   });
 
   it('renders nothing when the message is empty', async () => {
-    expect(await renderPayload(createRoundCompleteEvent(''))).toBeUndefined();
+    await expect(renderPayload(createRoundCompleteEvent(''))).resolves.toBeUndefined();
   });
 
   it('renders nothing when none of the message can be rendered', async () => {
     const event = createRoundCompleteEvent('<render_attachment id="a1" />', [esqlAttachment]);
 
-    expect(await renderPayload(event)).toBeUndefined();
+    await expect(renderPayload(event)).resolves.toBeUndefined();
   });
 
-  it('renders nothing for rounds without an origin', async () => {
+  it('renders nothing for rounds without an origin, without building the runtime', async () => {
+    const { getRuntime } = isomerPluginMock.createStartContract();
     const surfacesService = new SurfacesServiceImpl({
       attachmentsService: unmappedAttachmentsService,
       logger: loggerMock.create(),
+      getRuntime,
     });
 
-    expect(
-      await surfacesService.renderPayload(createRoundCompleteEvent('Hello'), {
+    await expect(
+      surfacesService.renderPayload(createRoundCompleteEvent('Hello'), {
         originType: undefined,
         ...context,
       })
-    ).toBeUndefined();
+    ).resolves.toBeUndefined();
+    expect(getRuntime).not.toHaveBeenCalled();
   });
 });
