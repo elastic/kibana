@@ -51,7 +51,7 @@ const EXPECTED_ORDERS: ReadonlyArray<[string, SortDir, string[]]> = [
   [
     'alert_count',
     'asc',
-    ['host:h3', 'service:payments', 'user:bob@okta', 'host:h2', 'user:alice@okta', 'host:h1'],
+    ['host:h2', 'user:alice@okta', 'host:h1', 'host:h3', 'service:payments', 'user:bob@okta'],
   ],
   [
     'last_seen_alert',
@@ -390,19 +390,21 @@ describe('entities grid on Elasticsearch', () => {
     };
 
     const NO_ALERTS = {
-      alert_count: 0,
-      alert_critical: 0,
-      alert_high: 0,
-      alert_medium: 0,
-      alert_low: 0,
+      alert_count: null,
+      alert_critical: null,
+      alert_high: null,
+      alert_medium: null,
+      alert_low: null,
       last_seen_alert: null,
     };
+
+    const NO_SEVERITIES = { alert_critical: 0, alert_high: 0, alert_medium: 0, alert_low: 0 };
 
     it('counts the open alerts in the window per severity, with the last one', async () => {
       expect(await fetchColumnValues('alert_count')).toEqual({
         // The alerts of host:h1 and of its two aliases: host:h4 was last alerted half an hour ago.
         'host:h1': {
-          ...NO_ALERTS,
+          ...NO_SEVERITIES,
           alert_count: 5,
           alert_critical: 2,
           alert_high: 2,
@@ -410,7 +412,7 @@ describe('entities grid on Elasticsearch', () => {
           last_seen_alert: hoursAgo(cluster.now, 0.5),
         },
         'host:h2': {
-          ...NO_ALERTS,
+          ...NO_SEVERITIES,
           alert_count: 1,
           alert_low: 1,
           last_seen_alert: hoursAgo(cluster.now, 1),
@@ -418,7 +420,7 @@ describe('entities grid on Elasticsearch', () => {
         'host:h3': NO_ALERTS,
         'service:payments': NO_ALERTS,
         'user:alice@okta': {
-          ...NO_ALERTS,
+          ...NO_SEVERITIES,
           alert_count: 2,
           alert_medium: 2,
           last_seen_alert: hoursAgo(cluster.now, 2),

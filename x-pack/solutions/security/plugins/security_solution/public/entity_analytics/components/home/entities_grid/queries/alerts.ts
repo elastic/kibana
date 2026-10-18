@@ -48,12 +48,12 @@ const ALERT_OPEN_STATUS_FILTER =
 const buildOpenAlertsCondition = (timeRange: QueryArgs['timeRange']): string =>
   `\`@timestamp\` >= ${buildLookback(timeRange)} AND (${ALERT_OPEN_STATUS_FILTER})`;
 
-/** Entities without alerts aren't in the alerts query; these let them still show and sort (0 first ascending). */
-const ALERT_EMPTY_VALUES: Readonly<Record<string, 0 | null>> = {
-  [LAST_SEEN_ALERT_FIELD]: null,
-  [ALERT_COUNT_FIELD]: 0,
-  ...Object.fromEntries(Object.values(SEVERITY_COUNT_FIELDS).map((field) => [field, 0])),
-};
+/** Entities without alerts aren't in the alerts query; null sorts them last both ways, as anomalies. */
+const ALERT_EMPTY_VALUES: Readonly<Record<string, null>> = Object.fromEntries(
+  [LAST_SEEN_ALERT_FIELD, ALERT_COUNT_FIELD, ...Object.values(SEVERITY_COUNT_FIELDS)].map(
+    (field) => [field, null]
+  )
+);
 
 const ALERT_FIELDS = Object.keys(ALERT_EMPTY_VALUES);
 
@@ -137,7 +137,7 @@ const buildOpenAlertsOfSteps = (
   ];
 };
 
-/** Rows without alerts get the empty values, so their cells show 0 instead of loading. */
+/** Rows without alerts get the empty values, so their cells show none instead of loading. */
 const toAlertFields = (rows: readonly Row[], alertColumns: Row[]): EnrichedFields => {
   const byId = new Map(alertColumns.map((row) => [getEntityId(row), row]));
   return new Map(

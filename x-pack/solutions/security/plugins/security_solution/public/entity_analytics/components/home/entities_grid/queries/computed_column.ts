@@ -63,7 +63,7 @@ const isEmptyFirst = (column: ComputedColumn, args: QueryArgs): boolean =>
 
 /**
  * A page has up to 1,000 rows, but fewer entities may have a value, so this fills the page with
- * empty rows: e.g. sorting by alerts when only 300 entities have alerts adds 700 with 0 alerts.
+ * empty rows: e.g. sorting by alerts when only 300 entities have alerts adds 700 without alerts.
  */
 const buildEmptyRowsQuery = (
   column: ComputedColumn,
@@ -100,12 +100,12 @@ const fetchValuesInChunks = async (
 };
 
 /**
- * Used when 1) sorting ascending, 2) the empty value is a number (e.g. 0 alerts), so empty rows
- * come first (a null one would sort last, as ES|QL sorts nulls last), and 3) too many entities
+ * Used when 1) sorting ascending, 2) the empty value is a number (a group of 1 record), so empty
+ * rows come first (a null one would sort last, as ES|QL sorts nulls last), and 3) too many entities
  * have a value to exclude with `NOT entity.id IN (…)`.
- * E.g. sorting by alerts ascending with 50,000 entities with alerts: the with-value query stops at
- * one page (1,001 ids), so we read entities 1,000 at a time, look up their alerts, and keep the
- * ones with 0.
+ * E.g. sorting by records ascending with 50,000 groups with aliases: the with-value query stops at
+ * one page (1,001 ids), so we read entities 1,000 at a time, look up their records, and keep the
+ * ones with 1.
  */
 const fetchEmptyRowsInBatches = async (
   column: ComputedColumn,

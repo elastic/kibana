@@ -344,7 +344,7 @@ describe('entities grid query builders', () => {
       expect(runQuery).not.toHaveBeenCalled();
     });
 
-    it('sets every alert field per entity, 0 or null for entities without alerts', async () => {
+    it('sets every alert field per entity, null for entities without alerts', async () => {
       const runQuery = jest.fn(async (_steps: readonly string[]) => [
         {
           'entity.id': 'host:h-1',
@@ -374,11 +374,11 @@ describe('entities grid query builders', () => {
         },
         'host:web-2': {
           last_seen_alert: null,
-          alert_count: 0,
-          alert_critical: 0,
-          alert_high: 0,
-          alert_medium: 0,
-          alert_low: 0,
+          alert_count: null,
+          alert_critical: null,
+          alert_high: null,
+          alert_medium: null,
+          alert_low: null,
         },
       });
     });
