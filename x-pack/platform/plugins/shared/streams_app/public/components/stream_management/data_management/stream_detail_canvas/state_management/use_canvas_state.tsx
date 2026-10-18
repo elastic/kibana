@@ -8,7 +8,7 @@ import React, { useContext, useRef, useMemo } from 'react';
 import { createActorContext } from '@xstate/react';
 import type { XYPosition } from '@xyflow/react';
 import type { Unit } from '../../../../../services/unit_repository';
-import type { CanvasCreateHistoryHandlers, CanvasStateServiceDeps } from './types';
+import type { CanvasCreateHistoryHandlers, CanvasStateServiceDeps, RouteEditModes } from './types';
 import { canvasStateMachine, createCanvasMachineImplementations } from './canvas_state_machine';
 
 const CanvasStateContext = createActorContext(canvasStateMachine);
@@ -93,6 +93,10 @@ export const useCanvasNodePositions = () => {
   return useCanvasStateSelector((state) => state.context.nodePositions);
 };
 
+export const useCanvasRoutingFlyout = () => {
+  return useCanvasStateSelector((state) => state.context.editingRoute);
+};
+
 export const useCanvasEvents = () => {
   const service = CanvasStateContext.useActorRef();
 
@@ -119,6 +123,12 @@ export const useCanvasEvents = () => {
       },
       changeUnitConnection: (unitDefinition: Unit) => {
         service.send({ type: 'unit.stage', unitDefinition });
+      },
+      openRoutingFlyout: (edgeId: string, mode: RouteEditModes) => {
+        service.send({ type: 'routing.edit.open', edgeId, mode });
+      },
+      closeRoutingFlyout: () => {
+        service.send({ type: 'routing.edit.close' });
       },
     }),
     [service]
