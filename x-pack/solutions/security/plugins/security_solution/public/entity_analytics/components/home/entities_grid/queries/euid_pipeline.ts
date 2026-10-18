@@ -16,6 +16,9 @@ import { ALLOWED_ENTITY_TYPES, ENTITY_TYPE_FIELD, getEntityIds, isOneOf } from '
 import type { Row } from '../common';
 import { buildIdentityPrefilter, indentForkBranch } from './esql';
 
+// ── EUID query pipeline builders ─────────────────────────────────────────────
+
+/** `EVAL`s of the user, host and service EUIDs into `user_euid`, `host_euid`, `service_euid`. */
 export const buildPerTypeEuidEvals = (): string[] =>
   ALLOWED_ENTITY_TYPES.flatMap((entityType) => {
     const definition = getBuiltInEntityDefinition(entityType);
@@ -26,7 +29,15 @@ export const buildPerTypeEuidEvals = (): string[] =>
     ];
   });
 
-/** One multi-value id column without CASE, which ES|QL runs row by row (most of the tile's cost). */
+/**
+ * ES|QL EVAL that folds `user_euid`, `host_euid`, and `service_euid` into one
+ * multi-value column of the ids that are present. `MV_APPEND` returns null if any
+ * argument is null, so each argument is a COALESCE that is null only when all three
+ * ids are; MV_DEDUPE drops the repeats that come from the fallbacks.
+ *
+ * A multi-condition CASE would do the same, but ES|QL evaluates it one row at a time,
+ * which made this EVAL most of the cost of the alerts tile.
+ */
 export const evalGuardedTypedEuids = (outputColumn: string): string =>
   [
     `| EVAL ${outputColumn} = MV_DEDUPE(MV_APPEND(MV_APPEND(`,
@@ -35,14 +46,20 @@ export const evalGuardedTypedEuids = (outputColumn: string): string =>
     '  COALESCE(service_euid, user_euid, host_euid)))',
   ].join('\n');
 
-/** ML records carry no entity.id, so one EUID per record is derived: user, then host, then service. */
+/**
+ * Derives one EUID per document into `entity.id` (first of user, host, service).
+ * Anomaly queries use it: ML records do not carry `entity.id`.
+ */
 export const buildEuidStages = (): string[] => [
   ...buildPerTypeEuidEvals(),
   `| EVAL \`entity.id\` = COALESCE(${ALLOWED_ENTITY_TYPES.map((t) => `${t}_euid`).join(', ')})`,
   '| WHERE `entity.id` IS NOT NULL',
 ];
 
-/** `IN` is null on multi-value fields, so each id is an `MV_CONTAINS`. */
+/**
+ * Keeps alerts stamped with any of the ids. An alert can be stamped with several ids, and
+ * `IN` is null on a multi-value field, so each id is an `MV_CONTAINS`, which checks every value.
+ */
 const buildStampedIdsCondition = (entityIds: readonly string[]): string =>
   entityIds
     .map((id) => `MV_CONTAINS(\`kibana.alert.entity.id\`, ${escapeStringValue(id)})`)
