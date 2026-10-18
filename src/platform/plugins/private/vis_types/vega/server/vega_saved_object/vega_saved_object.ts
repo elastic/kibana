@@ -87,6 +87,10 @@ export const vegaLibraryItemSavedObjectType: SavedObjectsType = {
     properties: {
       title: { type: 'text' },
       description: { type: 'text' },
+      spec: {
+        dynamic: false,
+        properties: {},
+      },
     },
   },
   migrations: () => {
