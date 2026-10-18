@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CSSProperties, FocusEvent, KeyboardEvent, MouseEvent } from 'react';
-import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
+import type { CSSProperties, FocusEvent, KeyboardEvent, MouseEvent, RefObject } from 'react';
+import React, { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { EuiDataGridSetCellProps } from '@elastic/eui';
 import { keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -18,6 +18,7 @@ import {
   getCellActionBubbleActions,
   useCellExpansion,
 } from '@kbn/unified-data-table';
+import { getInteractiveElements, setInteractiveContentTabbable } from './cell_interactive_content';
 import { DefaultCellPopover } from './default_cell_popover';
 import type { GridStyles } from './styles';
 import type { GridColumnModel, TanStackCellValueProps, TanStackDatatableGridProps } from './types';
@@ -29,12 +30,52 @@ const useCellActivation = () => {
   const [isActive, setIsActive] = useState(false);
   const onActivate = useCallback(() => setIsActive(true), []);
   const onDeactivate = useCallback(() => setIsActive(false), []);
-  const onBlur = useCallback((event: FocusEvent<HTMLDivElement>) => {
-    if (!event.currentTarget.contains(event.relatedTarget)) {
-      setIsActive(false);
+  return { isActive, onActivate, onDeactivate, setIsActive };
+};
+
+/**
+ * Keeps interactive cell content out of the tab order unless the cell is in interactive mode, also
+ * for content that is rendered later.
+ */
+const useInteractiveCellContent = (contentRef: RefObject<HTMLElement | null>) => {
+  const [isInteractiveMode, setIsInteractiveMode] = useState(false);
+
+  // After every render of the cell, which covers content it renders.
+  useLayoutEffect(() => {
+    if (contentRef.current) {
+      setInteractiveContentTabbable(contentRef.current, isInteractiveMode);
     }
-  }, []);
-  return { isActive, onActivate, onDeactivate, onBlur };
+  });
+
+  // Content can also change on its own, e.g. when it loads something.
+  useLayoutEffect(() => {
+    const content = contentRef.current;
+    if (!content) {
+      return;
+    }
+    const observer = new MutationObserver(() =>
+      setInteractiveContentTabbable(content, isInteractiveMode)
+    );
+    observer.observe(content, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [contentRef, isInteractiveMode]);
+
+  /** Starts interactive mode and focuses the first interactive element, when there is one. */
+  const enterInteractiveMode = useCallback(() => {
+    const content = contentRef.current;
+    const [first] = content ? getInteractiveElements(content) : [];
+    if (!content || !first) {
+      return false;
+    }
+    setInteractiveContentTabbable(content, true);
+    setIsInteractiveMode(true);
+    first.focus();
+    return true;
+  }, [contentRef]);
+
+  const exitInteractiveMode = useCallback(() => setIsInteractiveMode(false), []);
+
+  return { isInteractiveMode, enterInteractiveMode, exitInteractiveMode };
 };
 
 /** Single line cells are truncated, show their content as a tooltip when it does not fit. */
@@ -74,7 +115,10 @@ export const GridCell = memo(
   }: GridCellProps) => {
     const [cellProps, setCellProps] = useState<EuiDataGridSetCellProps>({});
     const cellRef = useRef<HTMLDivElement>(null);
-    const { isActive, onActivate, onDeactivate, onBlur } = useCellActivation();
+    const contentRef = useRef<HTMLDivElement>(null);
+    const { isActive, onActivate, onDeactivate, setIsActive } = useCellActivation();
+    const { isInteractiveMode, enterInteractiveMode, exitInteractiveMode } =
+      useInteractiveCellContent(contentRef);
     const { anchorRect, open: openExpansion, close: closeExpansion } = useCellExpansion(cellRef);
     const { isExpandable: isExpandableByCell, ...htmlProps } = cellProps;
     const { id: columnId, kind, control, column } = model;
@@ -99,19 +143,35 @@ export const GridCell = memo(
     };
     const CellRenderer = control ? control.rowCellRender : RenderCellValue;
 
-    // Like EuiDataGrid, Enter or F2 on the focused cell expands it.
-    const onKeyDown = useCallback(
-      (event: KeyboardEvent<HTMLDivElement>) => {
-        if (
-          isExpandable &&
-          event.target === event.currentTarget &&
-          (event.key === keys.ENTER || event.key === keys.F2)
-        ) {
-          event.preventDefault();
-          openExpansion(event.currentTarget);
+    const onBlur = useCallback(
+      (event: FocusEvent<HTMLDivElement>) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          setIsActive(false);
+          exitInteractiveMode();
         }
       },
-      [isExpandable, openExpansion]
+      [setIsActive, exitInteractiveMode]
+    );
+    // Like EuiDataGrid, Enter or F2 on the focused cell starts interactive mode when it has
+    // interactive content, and expands the cell otherwise. Escape ends interactive mode.
+    const onKeyDown = useCallback(
+      (event: KeyboardEvent<HTMLDivElement>) => {
+        const isCellFocused = event.target === event.currentTarget;
+        if (isCellFocused && (event.key === keys.ENTER || event.key === keys.F2)) {
+          if (enterInteractiveMode()) {
+            event.preventDefault();
+          } else if (isExpandable) {
+            event.preventDefault();
+            openExpansion(event.currentTarget);
+          }
+        } else if (!isCellFocused && isInteractiveMode && event.key === keys.ESCAPE) {
+          event.preventDefault();
+          event.stopPropagation();
+          exitInteractiveMode();
+          event.currentTarget.focus();
+        }
+      },
+      [isExpandable, isInteractiveMode, enterInteractiveMode, exitInteractiveMode, openExpansion]
     );
 
     const expandLabel = i18n.translate('xpack.lens.table.tanstackGrid.expandCell', {
@@ -155,13 +215,14 @@ export const GridCell = memo(
         onMouseEnter={hasActions ? onActivate : undefined}
         onMouseLeave={hasActions ? onDeactivate : undefined}
         onFocus={hasActions ? onActivate : undefined}
-        onBlur={hasActions ? onBlur : undefined}
-        onKeyDown={hasActions ? onKeyDown : undefined}
+        onBlur={onBlur}
+        onKeyDown={onKeyDown}
         css={[styles.cell, hasActions && cellActionsHostStyles]}
         style={{ ...flexStyle, ...htmlProps.style }}
       >
         {kind === 'data' ? (
           <div
+            ref={contentRef}
             css={contentCss}
             data-test-subj="lnsTanStackGridCellContent"
             onMouseEnter={isTruncated ? showTruncatedContentAsTitle : undefined}
@@ -169,7 +230,9 @@ export const GridCell = memo(
             <CellRenderer {...valueProps} />
           </div>
         ) : (
-          <CellRenderer {...valueProps} />
+          <div ref={contentRef} style={{ display: 'contents' }}>
+            <CellRenderer {...valueProps} />
+          </div>
         )}
         {bubbleActions.length > 0 && (
           <CellActionsBubble

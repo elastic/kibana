@@ -7,7 +7,7 @@
 
 import React from 'react';
 import axe from 'axe-core';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { TanStackDatatableGrid } from './tanstack_datatable_grid';
@@ -630,6 +630,115 @@ describe('TanStackDatatableGrid', () => {
       await userEvent.unhover(content);
       await userEvent.hover(content);
       expect(content).toHaveAttribute('title', '');
+    });
+  });
+
+  describe('interactive cell content', () => {
+    const onLinkClick = jest.fn();
+    const renderLinkCells = () =>
+      render(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          renderCellValue={({ rowIndex, columnId }) => (
+            <button
+              onClick={() => onLinkClick(`${columnId}${rowIndex}`)}
+            >{`${columnId}${rowIndex}`}</button>
+          )}
+        />
+      );
+
+    beforeEach(() => onLinkClick.mockClear());
+
+    it('takes interactive content out of the tab order', () => {
+      renderLinkCells();
+      screen.getAllByRole('button', { name: /^[ab][0-2]$/ }).forEach((button) => {
+        expect(button).toHaveAttribute('tabindex', '-1');
+      });
+    });
+
+    it('keeps the grid a single tab stop when focus moves from cell to cell', async () => {
+      renderLinkCells();
+      screen.getByRole('button', { name: 'a0' }).closest<HTMLElement>('[role="gridcell"]')!.focus();
+      await userEvent.tab();
+      // Nothing in the grid is left to tab to: the cell content is skipped.
+      expect(screen.getByRole('grid')).not.toContainElement(document.activeElement as HTMLElement);
+    });
+
+    it('enters interactive mode with Enter, makes the content usable, and leaves it with Escape', async () => {
+      renderLinkCells();
+      const cell = screen
+        .getByRole('button', { name: 'a1' })
+        .closest<HTMLElement>('[role="gridcell"]')!;
+      cell.focus();
+
+      await userEvent.keyboard('{Enter}');
+      const button = screen.getByRole('button', { name: 'a1' });
+      expect(button).toHaveFocus();
+      expect(button).not.toHaveAttribute('tabindex', '-1');
+      await userEvent.keyboard('{Enter}');
+      expect(onLinkClick).toHaveBeenCalledWith('a1');
+
+      await userEvent.keyboard('{Escape}');
+      expect(cell).toHaveFocus();
+      expect(screen.getByRole('button', { name: 'a1' })).toHaveAttribute('tabindex', '-1');
+    });
+
+    it('leaves interactive mode when focus leaves the cell', async () => {
+      renderLinkCells();
+      const cell = screen
+        .getByRole('button', { name: 'a1' })
+        .closest<HTMLElement>('[role="gridcell"]')!;
+      cell.focus();
+      await userEvent.keyboard('{Enter}');
+      act(() =>
+        screen
+          .getByRole('button', { name: 'b1' })
+          .closest<HTMLElement>('[role="gridcell"]')!
+          .focus()
+      );
+      expect(screen.getByRole('button', { name: 'a1' })).toHaveAttribute('tabindex', '-1');
+    });
+
+    it('applies to interactive content that is rendered later, and to control columns', async () => {
+      // The cell renders again when it sets its props, which jsdom's no-op MutationObserver cannot
+      // do for content that changes on its own.
+      const Later = ({ rowIndex, setCellProps }: TanStackCellValueProps) => {
+        const [show, setShow] = React.useState(false);
+        React.useEffect(() => {
+          setShow(true);
+          setCellProps({ className: 'loaded' });
+        }, [setCellProps]);
+        return show ? <a href="#a">{`link-${rowIndex}`}</a> : null;
+      };
+      render(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          renderCellValue={Later}
+          trailingControlColumns={[
+            {
+              id: 'actions',
+              width: 40,
+              headerCellRender: () => null,
+              rowCellRender: () => <button>Row action</button>,
+            },
+          ]}
+        />
+      );
+      // Content that is rendered later is taken out of the tab order too.
+      await waitFor(() =>
+        expect(screen.getAllByRole('link', { name: 'link-0' })[0]).toHaveAttribute('tabindex', '-1')
+      );
+      expect(screen.getAllByRole('button', { name: 'Row action' })[0]).toHaveAttribute(
+        'tabindex',
+        '-1'
+      );
+    });
+
+    it('still expands cells without interactive content with Enter', async () => {
+      render(<TanStackDatatableGrid {...defaultProps} />);
+      getCell('a1').focus();
+      await userEvent.keyboard('{Enter}');
+      expect(await screen.findByTestId('euiDataGridExpansionPopover')).toBeInTheDocument();
     });
   });
 
