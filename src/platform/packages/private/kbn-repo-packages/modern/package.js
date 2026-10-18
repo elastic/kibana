@@ -74,7 +74,7 @@ class Package {
      * Parsed package.json file from the package
      * @type {import('./types').ParsedPackageJson | undefined}
      */
-    pkg
+    pkg = undefined
   ) {
     /**
      * Absolute path to this package directory
@@ -102,8 +102,7 @@ class Package {
     /**
      * copy of the parsed package.json file in the package
      * @type {import('./types').ParsedPackageJson | undefined}
-     * @readonly
-     * @deprecated rather than accessing this directly the necessary information about the package should be reflected on the Package class.
+     * @private
      */
     this._pkg = pkg;
     this._pkgLoaded = arguments.length >= 4;
@@ -143,7 +142,6 @@ class Package {
    * copy of the parsed package.json file in the package
    *
    * @type {import('./types').ParsedPackageJson | undefined}
-   * @readonly
    * @deprecated rather than accessing this directly the necessary information about the package should be reflected on the Package class.
    */
   get pkg() {

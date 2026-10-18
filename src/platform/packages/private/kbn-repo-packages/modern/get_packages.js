@@ -115,7 +115,10 @@ function updatePackageMap(repoRoot, manifestPaths) {
 function getPackages(repoRoot) {
   /** @type {WeakRef<Array<import('./package').Package>> | Array<import('./package').Package> | undefined} */
   const cachedEntry = CACHE.get(repoRoot);
-  const cached = cachedEntry instanceof WeakRef ? cachedEntry.deref() : cachedEntry;
+  const cached =
+    typeof global.WeakRef !== 'undefined' && cachedEntry instanceof global.WeakRef
+      ? cachedEntry.deref()
+      : /** @type {Array<import('./package').Package> | undefined} */ (cachedEntry);
   if (cached) {
     return cached;
   }
@@ -126,7 +129,10 @@ function getPackages(repoRoot) {
 
   try {
     const packages = paths.map((path) => Package.fromManifest(repoRoot, path)).sort(Package.sorter);
-    CACHE.set(repoRoot, new WeakRef(packages));
+    CACHE.set(
+      repoRoot,
+      typeof global.WeakRef !== 'undefined' ? new global.WeakRef(packages) : packages
+    );
     return packages;
   } catch (error) {
     if (error.code === 'ENOENT') {
