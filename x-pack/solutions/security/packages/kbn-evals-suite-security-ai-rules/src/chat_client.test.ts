@@ -6,6 +6,10 @@
  */
 
 import { SecurityRuleGenerationClient, type EvalFetch } from './chat_client';
+// The route's own payload schema. Test files may cross plugin boundaries (the repo's
+// source classifier types them as `tests or mocks`, which may import anything), so this
+// validates the real contract instead of a hand-maintained copy of it.
+import { conversePayloadSchema } from '@kbn/agent-builder-plugin/server/routes/chat';
 
 const CONVERSE_API_PATH = '/api/agent_builder/converse';
 const CANONICAL_TOOL = 'security.create_detection_rule';
@@ -89,7 +93,7 @@ describe('SecurityRuleGenerationClient', () => {
       expect(body.connector_id).toBe('connector-1');
     });
 
-    it('sends only top-level keys the converse route schema accepts', async () => {
+    it('builds a payload the converse route schema accepts', async () => {
       const { fetch, calls } = createFetchStub(ruleCreationResponse());
       const client = createClient(fetch);
 
@@ -97,15 +101,12 @@ describe('SecurityRuleGenerationClient', () => {
 
       const body = JSON.parse(String(calls[0].options?.body)) as Record<string, unknown>;
 
-      // The converse route validates its body strictly (unknown keys => 400). `capabilities`
-      // was removed from the schema, so sending it fails every eval example.
+      // Validate against the schema the route itself validates with, rather than a copy of
+      // its key set: the route rejects unknown keys with a 400, and a hand-maintained list
+      // only fails once someone thinks to update it. `capabilities` was such a key, and
+      // sending it failed all 222 examples of every weekly run for two months.
+      expect(() => conversePayloadSchema.validate(body)).not.toThrow();
       expect(body).not.toHaveProperty('capabilities');
-      expect(Object.keys(body).sort()).toEqual([
-        'attachments',
-        'browser_api_tools',
-        'connector_id',
-        'input',
-      ]);
     });
   });
 
