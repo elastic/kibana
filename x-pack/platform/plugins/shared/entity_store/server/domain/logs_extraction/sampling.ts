@@ -7,7 +7,7 @@
 
 import { MIN_SAMPLING_RATE } from '../saved_objects';
 
-// CI trigger no-op: forces a fresh Cloud image build for PR #297920 (verifying #297688). Not for merge.
+// CI trigger no-op: forces a fresh Cloud + serverless image build for PR #297920 (verifying #297688). Not for merge.
 
 /** Per-slice inputs for the dynamic rate; all but `maxLogsPerWindow` come from the boundary probe
  * - no extra queries. */
