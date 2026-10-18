@@ -26,7 +26,10 @@ const getCellPadding = (
 export const getGridStyles = (themeContext: UseEuiTheme, gridStyle: EuiDataGridStyle = {}) => {
   const { euiTheme } = themeContext;
   const { fontSize: fontSizeKey = 'm', cellPadding, border = 'all', header, footer } = gridStyle;
-  const { fontSize } = euiFontSize(themeContext, fontSizeKey === 's' ? 's' : 'm');
+  // EuiDataGrid's font size and line height use different scales: its compact size is the `xs` font
+  // size, its normal one the `s` font size with the `m` line height, which makes rows 36px high.
+  const { fontSize } = euiFontSize(themeContext, fontSizeKey === 's' ? 'xs' : 's');
+  const { lineHeight } = euiFontSize(themeContext, fontSizeKey === 's' ? 'xs' : 'm');
   const padding = getCellPadding(themeContext, cellPadding);
   const hasHorizontalBorder = border === 'all' || border === 'horizontal';
   const hasVerticalBorder = border === 'all';
@@ -35,9 +38,7 @@ export const getGridStyles = (themeContext: UseEuiTheme, gridStyle: EuiDataGridS
 
   const getSectionStyle = (variant: EuiDataGridStyle['header'] | EuiDataGridStyle['footer']) => ({
     backgroundColor:
-      variant === 'shade'
-        ? euiTheme.colors.backgroundBaseSubdued
-        : euiTheme.colors.backgroundBasePlain,
+      variant === 'shade' ? euiTheme.colors.lightestShade : euiTheme.colors.backgroundBasePlain,
   });
 
   return {
@@ -47,6 +48,7 @@ export const getGridStyles = (themeContext: UseEuiTheme, gridStyle: EuiDataGridS
       blockSize: '100%',
       minBlockSize: 0,
       fontSize,
+      lineHeight,
     }),
     scroll: css({
       position: 'relative',
@@ -131,14 +133,18 @@ export const getGridStyles = (themeContext: UseEuiTheme, gridStyle: EuiDataGridS
       marginInlineStart: 'auto',
       lineHeight: 0,
     }),
-    // The menu button is revealed on hover and focus, it stays visible while its popover is open.
+    // The menu button is revealed on hover and focus, and stays visible while its popover is open.
+    // While hidden it takes no space, so right aligned header text reaches the edge of the cell.
     headerMenuButton: css({
+      overflow: 'hidden',
+      maxInlineSize: 0,
       opacity: 0,
       '.kbnLensTanStackGridHeaderCell:hover &, .kbnLensTanStackGridHeaderCell:focus-within &': {
+        maxInlineSize: euiTheme.size.l,
         opacity: 1,
       },
     }),
-    headerMenuButtonOpen: css({ opacity: 1 }),
+    headerMenuButtonOpen: css({ maxInlineSize: euiTheme.size.l, opacity: 1 }),
     resizeHandle: css({
       position: 'absolute',
       top: 0,

@@ -157,7 +157,12 @@ export const GridCell = memo(
     const onKeyDown = useCallback(
       (event: KeyboardEvent<HTMLDivElement>) => {
         const isCellFocused = event.target === event.currentTarget;
-        if (isCellFocused && (event.key === keys.ENTER || event.key === keys.F2)) {
+        if (isExpanded && event.key === keys.ESCAPE) {
+          // The popover moves focus into itself asynchronously, until then the cell has it.
+          event.preventDefault();
+          event.stopPropagation();
+          closeExpansion();
+        } else if (isCellFocused && (event.key === keys.ENTER || event.key === keys.F2)) {
           if (enterInteractiveMode()) {
             event.preventDefault();
           } else if (isExpandable) {
@@ -171,7 +176,15 @@ export const GridCell = memo(
           event.currentTarget.focus();
         }
       },
-      [isExpandable, isInteractiveMode, enterInteractiveMode, exitInteractiveMode, openExpansion]
+      [
+        isExpandable,
+        isExpanded,
+        isInteractiveMode,
+        enterInteractiveMode,
+        exitInteractiveMode,
+        openExpansion,
+        closeExpansion,
+      ]
     );
 
     const expandLabel = i18n.translate('xpack.lens.table.tanstackGrid.expandCell', {

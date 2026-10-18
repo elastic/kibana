@@ -734,6 +734,21 @@ describe('TanStackDatatableGrid', () => {
       );
     });
 
+    it('closes the expanded cell with Escape while the cell still has focus', async () => {
+      render(<TanStackDatatableGrid {...defaultProps} />);
+      const cell = getCell('a1');
+      cell.focus();
+      await userEvent.keyboard('{Enter}');
+      expect(await screen.findByTestId('euiDataGridExpansionPopover')).toBeInTheDocument();
+
+      // Focus is on the cell, as before the focus trap moved it into the popover.
+      act(() => cell.focus());
+      await userEvent.keyboard('{Escape}');
+      await waitFor(() =>
+        expect(screen.queryByTestId('euiDataGridExpansionPopover')).not.toBeInTheDocument()
+      );
+    });
+
     it('still expands cells without interactive content with Enter', async () => {
       render(<TanStackDatatableGrid {...defaultProps} />);
       getCell('a1').focus();
