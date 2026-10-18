@@ -8,6 +8,7 @@
 import type { RuleAction, RuleSystemAction } from '@kbn/alerting-types';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import type { TaskPriority } from '@kbn/task-manager-plugin/server';
+import type { FakeRequestUserFields } from '@kbn/core-security-server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../..';
 
 interface FormatActionToEnqueueOpts {
@@ -32,6 +33,11 @@ interface FormatActionToEnqueueOpts {
    * attach the UIAM shared secret, which UIAM rejects for external keys.
    */
   uiamApiKeyExternal?: boolean | null;
+  /**
+   * The user the rule's API key was minted for. The actions plugin persists it on the action
+   * task params and binds it to the connector execution fake request.
+   */
+  apiKeyOwnerIdentity?: FakeRequestUserFields;
   executionId: string;
   priority?: TaskPriority;
   ruleConsumer: string;
@@ -47,6 +53,7 @@ export const formatActionToEnqueue = (opts: FormatActionToEnqueueOpts) => {
     apiKeyId,
     uiamApiKeyId,
     uiamApiKeyExternal,
+    apiKeyOwnerIdentity,
     executionId,
     priority,
     ruleConsumer,
@@ -66,6 +73,8 @@ export const formatActionToEnqueue = (opts: FormatActionToEnqueueOpts) => {
     ...(uiamApiKeyId ? { uiamApiKeyId } : {}),
     // Only persisted when true: absent means internal-key treatment (fail closed).
     ...(uiamApiKeyExternal ? { uiamApiKeyExternal: true } : {}),
+    ...(apiKeyOwnerIdentity?.profileId ? { userProfileId: apiKeyOwnerIdentity.profileId } : {}),
+    ...(apiKeyOwnerIdentity?.username ? { userName: apiKeyOwnerIdentity.username } : {}),
     consumer: ruleConsumer,
     source: asSavedObjectExecutionSource({
       id: ruleId,

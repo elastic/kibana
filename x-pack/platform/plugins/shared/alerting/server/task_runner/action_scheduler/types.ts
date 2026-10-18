@@ -10,6 +10,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import type { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
 import type { TaskPriority } from '@kbn/task-manager-plugin/server';
+import type { FakeRequestUserFields } from '@kbn/core-security-server';
 import type { IAlertsClient } from '../../alerts_client/types';
 import type { Alert } from '../../alert';
 import type {
@@ -91,6 +92,11 @@ export interface ActionSchedulerOptions<
    * itself: without the UIAM shared secret, which UIAM rejects for external keys.
    */
   uiamApiKeyExternal?: boolean;
+  /**
+   * The user the rule's API key was minted for, persisted on the enqueued connector tasks so
+   * their fake requests are attributed to the same user as the rule run.
+   */
+  apiKeyOwnerIdentity?: FakeRequestUserFields;
   ruleConsumer: string;
   executionId: string;
   ruleLabel: string;

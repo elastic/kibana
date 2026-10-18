@@ -12,7 +12,7 @@ import {
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
 import { type FakeRawRequest, type Headers, type KibanaRequest } from '@kbn/core-http-server';
-import { markExternalUiamCredential } from '@kbn/core-security-server';
+import { markExternalUiamCredential, type FakeRequestUserFields } from '@kbn/core-security-server';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
@@ -75,6 +75,7 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     uiamApiKeyExternal,
     apiKeyCreatedByUser,
     apiKeyOwner,
+    apiKeyOwnerProfileUid,
     alertTypeId: ruleTypeId,
   } = rawRule;
 
@@ -88,18 +89,15 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     );
   }
 
-  const { fakeRequest, effectiveApiKey, credentialType } = getFakeKibanaRequest(
-    context,
-    spaceId,
-    apiKey,
-    {
+  const { fakeRequest, effectiveApiKey, credentialType, apiKeyOwnerIdentity } =
+    getFakeKibanaRequest(context, spaceId, apiKey, {
       uiamApiKey,
       uiamApiKeyExternal,
       apiKeyCreatedByUser,
       apiKeyOwner,
+      apiKeyOwnerProfileUid,
       ruleId,
-    }
-  );
+    });
   // Only when the run actually authenticates with the UIAM key: the fallbacks in
   // `getFakeKibanaRequest` can pick the ES key even though the rule stores a UIAM one, and
   // recording an id for a credential the connector tasks do not present would keep an unused
@@ -145,6 +143,7 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     effectiveApiKey,
     uiamApiKeyId,
     fakeRequest,
+    apiKeyOwnerIdentity,
     rule: { ...rule, snoozedInstances: rawRule.snoozedInstances ?? [] },
     validatedParams,
     version,
@@ -199,6 +198,7 @@ export interface GetFakeKibanaRequestOptions {
   uiamApiKeyExternal?: RawRule['uiamApiKeyExternal'];
   apiKeyCreatedByUser?: RawRule['apiKeyCreatedByUser'];
   apiKeyOwner?: RawRule['apiKeyOwner'];
+  apiKeyOwnerProfileUid?: RawRule['apiKeyOwnerProfileUid'];
   ruleId?: string;
 }
 
@@ -211,8 +211,16 @@ export function getFakeKibanaRequest(
   fakeRequest: KibanaRequest;
   effectiveApiKey: string | null;
   credentialType: CredentialType;
+  apiKeyOwnerIdentity?: FakeRequestUserFields;
 } {
-  const { uiamApiKey, uiamApiKeyExternal, apiKeyCreatedByUser, apiKeyOwner, ruleId } = options;
+  const {
+    uiamApiKey,
+    uiamApiKeyExternal,
+    apiKeyCreatedByUser,
+    apiKeyOwner,
+    apiKeyOwnerProfileUid,
+    ruleId,
+  } = options;
   const requestHeaders: Headers = {};
   let effectiveApiKey: string | null = null;
   let credentialType: CredentialType = 'none';
@@ -319,8 +327,33 @@ export function getFakeKibanaRequest(
     markExternalUiamCredential(fakeRequest);
   }
 
-  return { fakeRequest, effectiveApiKey, credentialType };
+  // A UIAM API key authenticates as the key itself rather than the user it was minted for, so
+  // without this, anything the run triggers would be attributed to an anonymous key id.
+  const apiKeyOwnerIdentity = getApiKeyOwnerIdentity(
+    effectiveApiKey,
+    apiKeyOwner,
+    apiKeyOwnerProfileUid
+  );
+  if (apiKeyOwnerIdentity && context.enrichFakeRequest) {
+    context.enrichFakeRequest(fakeRequest, apiKeyOwnerIdentity);
+  }
+
+  return { fakeRequest, effectiveApiKey, credentialType, apiKeyOwnerIdentity };
 }
+
+const getApiKeyOwnerIdentity = (
+  effectiveApiKey: string | null,
+  apiKeyOwner?: string | null,
+  apiKeyOwnerProfileUid?: string | null
+): FakeRequestUserFields | undefined => {
+  if (!effectiveApiKey || (!apiKeyOwner && !apiKeyOwnerProfileUid)) {
+    return undefined;
+  }
+  return {
+    ...(apiKeyOwnerProfileUid ? { profileId: apiKeyOwnerProfileUid } : {}),
+    ...(apiKeyOwner ? { username: apiKeyOwner } : {}),
+  };
+};
 
 const isLikelyNonCloudUserApiKeyOwner = (apiKeyOwner?: string | null): boolean => {
   if (typeof apiKeyOwner !== 'string') {

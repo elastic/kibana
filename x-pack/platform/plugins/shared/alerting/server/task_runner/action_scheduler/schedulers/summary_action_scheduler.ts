@@ -224,6 +224,7 @@ export class SummaryActionScheduler<
           apiKeyId: this.context.apiKeyId,
           uiamApiKeyId: this.context.uiamApiKeyId,
           uiamApiKeyExternal: this.context.uiamApiKeyExternal,
+          apiKeyOwnerIdentity: this.context.apiKeyOwnerIdentity,
           executionId: this.context.executionId,
           priority: this.context.priority,
           ruleConsumer: this.context.ruleConsumer,

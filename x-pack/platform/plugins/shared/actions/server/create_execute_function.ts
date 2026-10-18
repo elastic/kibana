@@ -51,6 +51,12 @@ export interface ExecuteOptions
    * which UIAM rejects for external keys.
    */
   uiamApiKeyExternal?: boolean;
+  /**
+   * The user `apiKey` was minted for. Bound to the execution fake request so the connector run
+   * is attributed to that user rather than to the API key.
+   */
+  userProfileId?: string;
+  userName?: string;
   executionId: string;
   actionTypeId: string;
   priority?: TaskPriority;
@@ -194,6 +200,10 @@ export function createBulkExecutionEnqueuerFunction({
           ...(actionToExecute.uiamApiKeyExternal !== undefined
             ? { uiamApiKeyExternal: actionToExecute.uiamApiKeyExternal }
             : {}),
+          ...(actionToExecute.userProfileId
+            ? { userProfileId: actionToExecute.userProfileId }
+            : {}),
+          ...(actionToExecute.userName ? { userName: actionToExecute.userName } : {}),
           ...(actionToExecute.source ? { source: actionToExecute.source.type } : {}),
         },
         references: taskReferences,

@@ -11,6 +11,7 @@ import {
   actionTaskParamsSchemaV2,
   actionTaskParamsSchemaV3,
   actionTaskParamsSchemaV4,
+  actionTaskParamsSchemaV5,
 } from '../schemas/action_task_params';
 
 export const actionTaskParamsModelVersions: SavedObjectsModelVersionMap = {
@@ -58,6 +59,13 @@ export const actionTaskParamsModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: actionTaskParamsSchemaV4.extends({}, { unknowns: 'ignore' }),
       create: actionTaskParamsSchemaV4,
+    },
+  },
+  '5': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: actionTaskParamsSchemaV5.extends({}, { unknowns: 'ignore' }),
+      create: actionTaskParamsSchemaV5,
     },
   },
 };

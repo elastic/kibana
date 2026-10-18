@@ -336,6 +336,7 @@ export class TaskRunner<
     rule,
     effectiveApiKey,
     uiamApiKeyId,
+    apiKeyOwnerIdentity,
     validatedParams: params,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
     const { activeInstances, expiredInstances } = evaluatePerAlertSnoozeExpiry(
@@ -512,6 +513,7 @@ export class TaskRunner<
       // marked by getFakeKibanaRequest from the rule's persisted `uiamApiKeyExternal`, so asking
       // it here cannot drift from what the cluster client will decide for this very run.
       uiamApiKeyExternal: isExternalUiamCredential(fakeRequest),
+      apiKeyOwnerIdentity,
       ruleConsumer: this.ruleConsumer!,
       executionId: this.executionId,
       ruleLabel,

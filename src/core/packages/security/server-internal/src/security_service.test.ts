@@ -147,27 +147,47 @@ describe('SecurityService', function () {
     });
 
     describe('#acquireFakeRequestEnricher', () => {
-      it('returns a function on the first call', () => {
+      it.each(['taskManager', 'alerting', 'actions'])(
+        'returns a function on the first call from %s',
+        (pluginId) => {
+          const setup = service.setup();
+
+          const enricher = setup.acquireFakeRequestEnricher(pluginId);
+
+          expect(typeof enricher).toBe('function');
+        }
+      );
+
+      it('lets each allowed plugin acquire it once', () => {
         const setup = service.setup();
 
-        const enricher = setup.acquireFakeRequestEnricher();
+        setup.acquireFakeRequestEnricher('taskManager');
 
-        expect(typeof enricher).toBe('function');
+        expect(() => setup.acquireFakeRequestEnricher('alerting')).not.toThrow();
+        expect(() => setup.acquireFakeRequestEnricher('actions')).not.toThrow();
       });
 
-      it('throws if called more than once (one-shot, reserved for Task Manager)', () => {
+      it('throws if the same plugin calls it more than once', () => {
         const setup = service.setup();
 
-        setup.acquireFakeRequestEnricher();
+        setup.acquireFakeRequestEnricher('alerting');
 
-        expect(() => setup.acquireFakeRequestEnricher()).toThrow(
-          /can only be called once and is reserved for Task Manager/
+        expect(() => setup.acquireFakeRequestEnricher('alerting')).toThrow(
+          /can only be called once per plugin; "alerting" already acquired it/
+        );
+      });
+
+      it('throws for a plugin that is not allowed', () => {
+        const setup = service.setup();
+
+        expect(() => setup.acquireFakeRequestEnricher('somePlugin')).toThrow(
+          /reserved for taskManager, alerting, actions; "somePlugin" is not allowed/
         );
       });
 
       it('throws when the returned enricher is invoked before the security delegate is registered', () => {
         const setup = service.setup();
-        const enricher = setup.acquireFakeRequestEnricher();
+        const enricher = setup.acquireFakeRequestEnricher('taskManager');
 
         const request = { isFakeRequest: true } as any;
         expect(() => enricher(request, { profileId: 'u_test_profile_123' })).toThrow(
@@ -177,7 +197,7 @@ describe('SecurityService', function () {
 
       it('delegates to the registered security delegate when invoked', () => {
         const setup = service.setup();
-        const enricher = setup.acquireFakeRequestEnricher();
+        const enricher = setup.acquireFakeRequestEnricher('taskManager');
 
         const fakeRequestEnricher = jest.fn();
         setup.registerSecurityDelegate({

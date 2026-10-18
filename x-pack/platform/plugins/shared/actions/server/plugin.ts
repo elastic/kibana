@@ -5,7 +5,10 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
+import {
+  extractApiKeyIdFromAuthzHeader,
+  type FakeRequestEnricher,
+} from '@kbn/core-security-server';
 import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
@@ -311,6 +314,7 @@ export class ActionsPlugin
   private licenseState: ILicenseState | null = null;
   private security?: SecurityPluginSetup;
   private securityStart?: SecurityPluginStart;
+  private enrichFakeRequest?: FakeRequestEnricher;
   private spaces?: SpacesPluginSetup;
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
@@ -346,6 +350,7 @@ export class ActionsPlugin
   ): PluginSetupContract {
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
+    this.enrichFakeRequest = core.security.acquireFakeRequestEnricher();
 
     if (!this.isESOCanEncrypt) {
       this.logger.warn(
@@ -875,6 +880,7 @@ export class ActionsPlugin
       savedObjectsRepository: core.savedObjects.createInternalRepository([
         ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
       ]),
+      enrichFakeRequest: this.enrichFakeRequest,
     });
 
     this.eventLogService!.isEsContextReady()

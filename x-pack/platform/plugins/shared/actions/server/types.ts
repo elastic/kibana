@@ -353,6 +353,12 @@ export interface ActionTaskParams extends SavedObjectAttributes {
    * which UIAM rejects for external keys.
    */
   uiamApiKeyExternal?: boolean;
+  /**
+   * The user `apiKey` was minted for. Bound to the execution fake request so `getCurrentUser`
+   * attributes the connector run to that user rather than to the API key.
+   */
+  userProfileId?: string;
+  userName?: string;
   executionId?: string;
   consumer?: string;
   source?: string;

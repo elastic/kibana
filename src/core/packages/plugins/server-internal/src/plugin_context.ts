@@ -316,7 +316,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     security: {
       registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
       fips: deps.security.fips,
-      acquireFakeRequestEnricher: () => deps.security.acquireFakeRequestEnricher(),
+      acquireFakeRequestEnricher: () => deps.security.acquireFakeRequestEnricher(plugin.name),
       serviceAccounts: {
         registerWorkloadType: (registration) =>
           deps.security.serviceAccounts.registerWorkloadType(plugin.name, registration),
