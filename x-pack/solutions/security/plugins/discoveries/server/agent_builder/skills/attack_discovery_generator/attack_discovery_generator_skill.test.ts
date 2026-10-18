@@ -238,8 +238,15 @@ describe('attackDiscoveryGeneratorSkill', () => {
       expect(attackDiscoveryGeneratorSkill.content).toContain('Retrieve alerts upstream');
     });
 
-    it('frames the default ES|QL query as a baseline that the agent may adapt', () => {
-      expect(attackDiscoveryGeneratorSkill.content).toContain('sensible **baseline**');
+    it('runs the query the tool returned unchanged instead of adapting it', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'the query you execute is **the one the tool returned**'
+      );
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'the audited retrieval path executes it **unchanged**'
+      );
+      expect(attackDiscoveryGeneratorSkill.content).not.toContain('edit the query text yourself');
+      expect(attackDiscoveryGeneratorSkill.content).not.toContain('supported adaptation path');
     });
 
     it('encourages best-effort corroboration with at least one additional tool', () => {
@@ -476,9 +483,20 @@ describe('attackDiscoveryGeneratorSkill', () => {
       );
     });
 
-    it('tells the agent to adapt the default query by editing its text', () => {
+    it('drops the complementary ES|QL slice from the corroboration options', () => {
+      expect(attackDiscoveryGeneratorSkill.content).not.toContain('complementary ES|QL slice');
       expect(attackDiscoveryGeneratorSkill.content).toContain(
-        '**edit the query text yourself and execute the edited query**'
+        'do **not** add a second ES|QL slice beside the default query'
+      );
+    });
+
+    it('reserves the esql retrieval mode for user-supplied queries', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('Did the user supply an ES|QL query');
+      expect(attackDiscoveryGeneratorSkill.content).not.toContain(
+        'Did you refine retrieval into an ES|QL query'
+      );
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'it is **not** a way to re-author or refine the default query'
       );
     });
   });
