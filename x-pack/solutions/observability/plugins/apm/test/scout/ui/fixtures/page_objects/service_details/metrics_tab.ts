@@ -50,7 +50,9 @@ export class MetricsTab extends ServiceDetailsTab {
   }
 
   protected async waitForTabLoad(): Promise<void> {
-    await this.tab.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await this.page
+      .getByTestId('apmUnifiedSearchBar')
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await this.page
       .getByTestId('apmMainTemplateServiceAgentLoader')
       .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
