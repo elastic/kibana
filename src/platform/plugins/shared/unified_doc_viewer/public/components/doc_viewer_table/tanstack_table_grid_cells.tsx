@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FocusEvent, KeyboardEvent, MouseEvent, RefObject } from 'react';
+import type { FocusEvent, KeyboardEvent, RefObject } from 'react';
 import React, {
   createContext,
   memo,
@@ -20,22 +20,18 @@ import React, {
 import { flexRender, type Cell, type Row } from '@tanstack/react-table';
 import type { Virtualizer } from '@tanstack/react-virtual';
 import type { EuiDataGridColumnCellAction } from '@elastic/eui';
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopoverFooter,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-  keys,
-} from '@elastic/eui';
+import { EuiSpacer, EuiText, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { CellActionsBubbleAction, CellExpansion } from '@kbn/unified-data-table';
-import { CellActionsBubble, CellExpansionPopover, useCellExpansion } from '@kbn/unified-data-table';
+import {
+  CellActionsBubble,
+  CellActionsPopoverFooter,
+  CellExpansionPopover,
+  getCellActionBubbleActions,
+  useCellExpansion,
+} from '@kbn/unified-data-table';
 import type { FieldRow } from './field_row';
 import { TableCell } from './table_cell';
 import {
@@ -90,28 +86,6 @@ const useGridCell = () => {
   return context;
 };
 
-const CellActionIconButton: typeof EuiButtonIcon = ({
-  children,
-  title,
-  'aria-label': ariaLabel,
-  ...rest
-}) => {
-  const label = title ?? ariaLabel;
-  // An icon-only button without an accessible name is unusable for assistive technology.
-  if (!label) {
-    return null;
-  }
-  return (
-    <EuiToolTip content={label} disableScreenReaderOutput>
-      <EuiButtonIcon {...rest} aria-label={label} size="xs" iconSize="s" color="text" />
-    </EuiToolTip>
-  );
-};
-
-const CellActionPopoverButton: typeof EuiButtonEmpty = (props) => (
-  <EuiButtonEmpty {...props} size="s" />
-);
-
 interface FieldTableCellProps {
   rowIndex: number;
   colIndex: number;
@@ -150,43 +124,15 @@ export const FieldTableCell = memo(({ rowIndex, colIndex, columnId }: FieldTable
     defaultMessage: 'Expand cell',
   });
 
-  const onExpandClick = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => openExpansion(event.currentTarget),
-    [openExpansion]
+  const actions = useMemo<CellActionsBubbleAction[]>(
+    () =>
+      getCellActionBubbleActions({
+        cellActions,
+        cell: { rowIndex, colIndex, columnId },
+        expand: { label: expandLabel, onExpand: openExpansion },
+      }),
+    [cellActions, rowIndex, colIndex, columnId, expandLabel, openExpansion]
   );
-
-  const actions = useMemo<CellActionsBubbleAction[]>(() => {
-    const sharedActionProps = {
-      rowIndex,
-      colIndex,
-      columnId,
-      isExpanded: false as const,
-    };
-    return [
-      ...cellActions.map((Action, idx) => ({
-        id: `cell-action-${idx}`,
-        element: <Action {...sharedActionProps} Component={CellActionIconButton} />,
-      })),
-      {
-        id: 'expand',
-        element: (
-          <EuiToolTip content={expandLabel} disableScreenReaderOutput>
-            <EuiButtonIcon
-              // Same test subj as EuiDataGrid's expand button, so existing tests keep working.
-              data-test-subj="euiDataGridCellExpandButton"
-              iconType="maximize"
-              aria-label={expandLabel}
-              size="xs"
-              iconSize="s"
-              color="text"
-              display="empty"
-              onClick={onExpandClick}
-            />
-          </EuiToolTip>
-        ),
-      },
-    ];
-  }, [cellActions, colIndex, columnId, expandLabel, onExpandClick, rowIndex]);
 
   const cellContentProps = {
     searchTerm: searchTerm || '',
@@ -214,23 +160,10 @@ export const FieldTableCell = memo(({ rowIndex, colIndex, columnId }: FieldTable
           <EuiText size="s" css={popoverContentStyles}>
             <TableCell {...cellContentProps} isDetails />
           </EuiText>
-          {cellActions.length > 0 && (
-            <EuiPopoverFooter>
-              <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-                {cellActions.map((Action, idx) => (
-                  <EuiFlexItem key={idx} grow={false}>
-                    <Action
-                      rowIndex={rowIndex}
-                      colIndex={colIndex}
-                      columnId={columnId}
-                      Component={CellActionPopoverButton}
-                      isExpanded
-                    />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiPopoverFooter>
-          )}
+          <CellActionsPopoverFooter
+            cellActions={cellActions}
+            cell={{ rowIndex, colIndex, columnId }}
+          />
           {Boolean(warningMessage) && (
             <div>
               <EuiSpacer size="xs" />

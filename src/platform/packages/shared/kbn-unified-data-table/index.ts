@@ -55,6 +55,14 @@ export {
   type CellActionsBubbleAction,
   type CellActionsBubbleProps,
 } from './src/components/cell_actions_bubble/cell_actions_bubble';
+export type { CellActionTarget } from './src/components/cell_actions_bubble/cell_actions';
+export {
+  CellActionIconButton,
+  CellActionPopoverButton,
+  CellActionsPopoverFooter,
+  EXPAND_CELL_TEST_SUBJ,
+  getCellActionBubbleActions,
+} from './src/components/cell_actions_bubble/cell_actions';
 export { cellActionsHostStyles } from './src/components/cell_actions_bubble/cell_actions_bubble_styles';
 export type { GridBounds, GridPosition } from './src/components/grid_keyboard_navigation';
 export type {
