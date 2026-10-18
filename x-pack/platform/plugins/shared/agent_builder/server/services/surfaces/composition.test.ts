@@ -11,9 +11,17 @@ import type {
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AttachmentServiceStart } from '../attachments';
 import { buildComposition } from './composition';
+import type { IsomerRuntime } from './types';
+
+let runtime: IsomerRuntime;
+
+beforeAll(async () => {
+  runtime = await isomerPluginMock.createStartContract().getRuntime();
+});
 
 type ToSurfaceComposition = NonNullable<AttachmentTypeDefinition['toSurfaceComposition']>;
 
@@ -60,6 +68,7 @@ const compose = (
       getTypeDefinition: (type: string) => (type === 'text' ? { toSurfaceComposition } : undefined),
     } as unknown as AttachmentServiceStart,
     logger: loggerMock.create(),
+    runtime,
   });
 
 /** The texts of the composition's nodes. */

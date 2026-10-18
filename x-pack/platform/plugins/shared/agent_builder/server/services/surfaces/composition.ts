@@ -24,7 +24,7 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
-import { isomerRuntime } from './pack';
+import type { IsomerRuntime } from './types';
 
 const { tagName, attributes } = renderAttachmentElement;
 
@@ -90,11 +90,13 @@ const resolveAttachmentNode = (
     attachments,
     attachmentsService,
     logger,
+    runtime,
   }: {
     /** The conversation's attachments, as carried by `round_complete`. */
     attachments: VersionedAttachment[];
     attachmentsService: AttachmentServiceStart;
     logger: Logger;
+    runtime: IsomerRuntime;
   }
 ): SurfaceNode[] => {
   const attachment = attachments.find(({ id }) => id === node.attachmentId);
@@ -135,7 +137,7 @@ const resolveAttachmentNode = (
       version: attachmentVersion.version,
     });
 
-    const { valid, errors } = isomerRuntime.validate(composition);
+    const { valid, errors } = runtime.validate(composition);
 
     if (!valid) {
       const reasons = errors.map(formatValidationError).join('; ');
@@ -167,12 +169,15 @@ export const buildComposition = ({
   attachments,
   attachmentsService,
   logger,
+  runtime,
 }: {
   round: ConversationRound;
   /** The conversation's attachments, as carried by `round_complete`. */
   attachments: VersionedAttachment[];
   attachmentsService: AttachmentServiceStart;
   logger: Logger;
+  /** Validates what each attachment's `toSurfaceComposition` returns. */
+  runtime: IsomerRuntime;
 }): SurfaceComposition => ({
   type: 'view',
   body: toMessageNodes(response.message).flatMap((node): SurfaceNode[] =>
@@ -181,6 +186,7 @@ export const buildComposition = ({
           attachments,
           attachmentsService,
           logger,
+          runtime,
         })
       : [node]
   ),
