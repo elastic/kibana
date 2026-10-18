@@ -158,8 +158,8 @@ evaluate.describe(
                     'The final manage_action_policy call ends with a validate operation, and validation succeeds (after corrective retries if needed).',
                   ],
                   expectedSkills: [
-                    RULE_MANAGEMENT_SKILL_ID,
-                    ACTION_POLICY_MANAGEMENT_SKILL_ID,
+                    RULE_AUTHORING_SKILL_ID,
+                    ACTION_POLICY_AUTHORING_SKILL_ID,
                     WORKFLOW_AUTHORING_SKILL_ID,
                   ],
                   notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
