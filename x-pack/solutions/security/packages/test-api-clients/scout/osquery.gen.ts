@@ -50,17 +50,17 @@ import type {
 import type {
   OsqueryCopySavedQueryRequestParamsInput,
   OsqueryCopySavedQueryResponse,
+  OsqueryGetSavedQueryDetailsRequestParamsInput,
+  OsqueryGetSavedQueryDetailsResponse,
+  OsqueryUpdateSavedQueryRequestParamsInput,
+  OsqueryUpdateSavedQueryRequestBodyInput,
+  OsqueryUpdateSavedQueryResponse,
   OsqueryCreateSavedQueryRequestBodyInput,
   OsqueryCreateSavedQueryResponse,
   OsqueryDeleteSavedQueryRequestParamsInput,
   OsqueryDeleteSavedQueryResponse,
   OsqueryFindSavedQueriesRequestQueryInput,
   OsqueryFindSavedQueriesResponse,
-  OsqueryGetSavedQueryDetailsRequestParamsInput,
-  OsqueryGetSavedQueryDetailsResponse,
-  OsqueryUpdateSavedQueryRequestParamsInput,
-  OsqueryUpdateSavedQueryRequestBodyInput,
-  OsqueryUpdateSavedQueryResponse,
 } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
 import type {
   OsqueryCreateLiveQueryRequestBodyInput,
