@@ -99,7 +99,19 @@ export const buildAlertDocument = (
     },
     host: hostDocument(scenario.host, scenario.os, runMarker),
     user: { name: scenario.user, domain: 'CONTOSO' },
-    message: step.message,
+    // The retrieval marker has to be reachable by the query the example's
+    // question implies. The AD default retrieval query matches it against
+    // `kibana.alert.rule.name`, `message`, `kibana.alert.rule.description` and
+    // `process.command_line`, so a document carrying it only in `tags` (the
+    // scope the fixture declares) is unreachable for
+    // `WHERE message LIKE "*<marker>*"` — the shape the recorded live-retrieval
+    // runs wrote — and the exact-population assertion then fails a correct
+    // retrieval. The marker is appended to `message` on EVERY seeded alert,
+    // signal and noise alike, so it scopes the run's whole population without
+    // separating target from noise (the noise/signal message-token invariants
+    // in `dense_scenarios.test.ts` / `full_profile_seed.test.ts` are unaffected:
+    // a token carried by both sides at the same rate discriminates nothing).
+    message: `${step.message} [${runMarker}]`,
     rule: {
       name: step.ruleName,
       id: ruleId,
