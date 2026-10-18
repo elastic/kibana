@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  AttackDiscoveryTransportError,
-  generateInsights,
-  runAttackDiscovery,
-} from './run_attack_discovery';
+import { generateInsights, runAttackDiscovery } from './run_attack_discovery';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { AttackDiscoveryTaskInput } from '../types';
 
@@ -144,7 +140,7 @@ describe('generateInsights', () => {
     expect(message.content).not.toContain('{query}');
   });
 
-  it('reports a wire failure as a transport error, not as a parse failure', async () => {
+  it('labels a wire failure and does not retry it as a parse failure', async () => {
     const chatComplete = jest.fn(async () => {
       throw new TypeError('fetch failed');
     });
@@ -157,22 +153,14 @@ describe('generateInsights', () => {
         prompt: 'Analyze the alerts.',
         alerts: ['alert one'],
       })
-    ).rejects.toThrow(AttackDiscoveryTransportError);
+    ).rejects.toThrow(/inference request failed on the wire: fetch failed/);
 
-    await expect(
-      generateInsights({
-        inferenceClient,
-        log,
-        prompt: 'Analyze the alerts.',
-        alerts: ['alert one'],
-      })
-    ).rejects.toThrow(/failed on the wire: fetch failed/);
-
-    // A request that never reached the model is not retried as a parse failure.
-    expect(chatComplete).toHaveBeenCalledTimes(2);
+    // one attempt: a request that never produced a response is not retried
+    // through the parse loop, which allows three attempts
+    expect(chatComplete).toHaveBeenCalledTimes(1);
   });
 
-  it('surfaces the transport failure in the task output so the cell reads as errored', async () => {
+  it('records the wire failure in the task output errors', async () => {
     const chatComplete = jest.fn(async () => {
       throw new TypeError('fetch failed');
     });
@@ -186,9 +174,11 @@ describe('generateInsights', () => {
       input: { mode: 'graphState', anonymizedAlerts: [] } as AttackDiscoveryTaskInput,
     });
 
+    // the reporting shape (null insights + one error string) is the pre-existing
+    // task-error path; this pins the message that path now carries
     expect(output.insights).toBeNull();
     expect(output.errors).toHaveLength(1);
-    expect(output.errors?.[0]).toContain('failed on the wire: fetch failed');
+    expect(output.errors?.[0]).toContain('inference request failed on the wire: fetch failed');
     expect(output.errors?.[0]).not.toContain('Failed to parse insights');
   });
 });

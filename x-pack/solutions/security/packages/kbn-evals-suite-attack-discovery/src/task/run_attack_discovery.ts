@@ -29,20 +29,6 @@ import type {
 
 const MAX_GENERATION_ATTEMPTS = 3;
 
-/**
- * Raised when the inference request never produced a model response at all
- * (a transport-level failure such as `fetch failed`). Distinguishing it from a
- * parse failure matters: a serving-layer outage must not be reported as an
- * empty model answer, and the cell it produces must be readable as an errored
- * task rather than as a weak model.
- */
-export class AttackDiscoveryTransportError extends Error {
-  constructor(message: string, options?: { cause?: unknown }) {
-    super(message, options);
-    this.name = 'AttackDiscoveryTransportError';
-  }
-}
-
 const attackDiscoveryGenerationSchema = getAttackDiscoveriesGenerationSchema({
   detailsMarkdown: 'The detailed explanation of the insight in Markdown.',
   entitySummaryMarkdown: 'A summary of the entities involved in the insight in Markdown.',
@@ -116,10 +102,11 @@ export const generateInsights = async ({
     try {
       response = await inferenceClient.chatComplete({ messages });
     } catch (error) {
-      // The request never reached the model. This is not a parse failure and
-      // must not be retried as one: hand it up as a transport error so it is
-      // reported as an errored task instead of an empty (scored) completion.
-      throw new AttackDiscoveryTransportError(
+      // The request never produced a model response. That is not a parse
+      // failure, so it is not retried through the parse loop below; label it so
+      // the recorded task error names the layer that failed instead of a bare
+      // `fetch failed`.
+      throw new Error(
         `Attack Discovery inference request failed on the wire: ${
           error instanceof Error ? error.message : String(error)
         }`,
