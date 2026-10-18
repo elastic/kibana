@@ -41,11 +41,16 @@ describe('KibanaActionStepImpl', () => {
   let workflowLogger: { logInfo: jest.Mock; logError: jest.Mock; logWarn: jest.Mock };
   const mockGetBooleanValue$ = jest.fn().mockReturnValue(of(true));
 
-  const createStep = (withValue: any, stepType = 'kibana.request', maxStepSize = 1000) => {
+  const createStep = (
+    withValue: any,
+    stepType = 'kibana.request',
+    maxStepSize = 1000,
+    timeout?: string
+  ) => {
     const node = {
       stepId: 'request',
       stepType,
-      configuration: { type: stepType, with: withValue, 'max-step-size': maxStepSize },
+      configuration: { type: stepType, with: withValue, 'max-step-size': maxStepSize, timeout },
     } as unknown as KibanaGraphNode;
     return new KibanaActionStepImpl(
       node,
@@ -190,6 +195,19 @@ describe('KibanaActionStepImpl', () => {
           signal: runtime.abortController.signal,
           timeout: 300_000,
         })
+      );
+    });
+
+    it('uses the step timeout as the headers timeout when set', async () => {
+      step = createStep(
+        { request: { method: 'GET', path: '/api/test' } },
+        undefined,
+        undefined,
+        '10m'
+      );
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+        expect.objectContaining({ timeout: 600_000 })
       );
     });
 
@@ -525,6 +543,31 @@ describe('KibanaActionStepImpl', () => {
       expect(requestBody.title).toBe('Test');
       expect(requestBody.description).toBe('Test Description');
       expect(requestBody.owner).toBe('securitySolution');
+    });
+
+    it('bounds the fetch by the step abort signal', async () => {
+      step = createStep({ request: { method: 'GET', path: '/api/test' } });
+      await (step as any)._run();
+      const fetchOptions = (global.fetch as jest.Mock).mock.calls[0][1] as RequestInit;
+      expect(fetchOptions.signal).toBe(runtime.abortController.signal);
+    });
+
+    it('uses the step timeout as the Agent headers timeout when set', async () => {
+      const { Agent } = await import('undici');
+      const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
+      MockedAgent.mockClear();
+
+      step = createStep(
+        { request: { method: 'GET', path: '/api/test' } },
+        undefined,
+        undefined,
+        '10m'
+      );
+      await (step as any)._run();
+
+      expect(MockedAgent).toHaveBeenCalledWith({ headersTimeout: 600_000 });
+      const fetchOptions = (global.fetch as jest.Mock).mock.calls[0][1] as RequestInit;
+      expect((fetchOptions as any).dispatcher).toBeDefined();
     });
 
     it('works without fetcher options and does not attach a dispatcher', async () => {

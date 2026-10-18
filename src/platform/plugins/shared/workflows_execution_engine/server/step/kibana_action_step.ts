@@ -41,7 +41,13 @@ import {
   getOutboundEventChainHeaders,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '../trigger_events/event_context/event_chain_context';
-import { getKibanaUrl, isTextContentType, readResponseStream } from '../utils';
+import {
+  getKibanaUrl,
+  isTextContentType,
+  parseDuration,
+  readResponseStream,
+  renderDuration,
+} from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -56,8 +62,8 @@ type FetcherOptions = NonNullable<z.infer<typeof FetcherConfigSchema>> & {
 };
 
 /**
- * Legacy fetch used undici's default 300s wait for response headers. The step `timeout` and
- * workflow cancellation abort sooner through the step's abort signal.
+ * Used when the step has no `timeout`. Matches undici's default 300s wait for response headers,
+ * which legacy fetch keeps in that case.
  */
 const KIBANA_STEP_RESPONSE_HEADERS_TIMEOUT_MS = 300_000;
 
@@ -204,6 +210,18 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     }
   }
 
+  private getStepTimeoutMs(): number | undefined {
+    const { timeout } = this.node.configuration;
+    if (!timeout) {
+      return undefined;
+    }
+    return parseDuration(
+      renderDuration(timeout, (value) =>
+        this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(value)
+      )
+    );
+  }
+
   private async shouldUseCoreSelfClient(): Promise<boolean> {
     return firstValueFrom(
       this.stepExecutionRuntime.contextManager
@@ -292,7 +310,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         maxErrorBodyBytes: KIBANA_STEP_ERROR_BODY_MAX_BYTES,
         target,
         signal: this.stepExecutionRuntime.abortController.signal,
-        timeout: KIBANA_STEP_RESPONSE_HEADERS_TIMEOUT_MS,
+        timeout: this.getStepTimeoutMs() ?? KIBANA_STEP_RESPONSE_HEADERS_TIMEOUT_MS,
       });
     } catch (error) {
       if (error instanceof CallKibanaApiResponseTooLargeError) {
@@ -581,10 +599,14 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       method,
       headers: outboundHeaders,
       body: fetchBody,
+      signal: this.stepExecutionRuntime.abortController.signal,
     };
 
-    // Apply undici Agent with fetcher options
-    if (fetcherOptions && Object.keys(fetcherOptions).length > 0) {
+    const stepTimeoutMs = this.getStepTimeoutMs();
+    const hasFetcherOptions = fetcherOptions && Object.keys(fetcherOptions).length > 0;
+
+    // Apply undici Agent with fetcher options and the step timeout
+    if (hasFetcherOptions || stepTimeoutMs !== undefined) {
       const { Agent } = await import('undici');
 
       const {
@@ -593,9 +615,12 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         max_redirects,
         keep_alive,
         ...otherOptions
-      } = fetcherOptions;
+      } = fetcherOptions ?? {};
 
-      const agentOptions: any = { ...otherOptions };
+      const agentOptions: any = {
+        ...(stepTimeoutMs !== undefined ? { headersTimeout: stepTimeoutMs } : {}),
+        ...otherOptions,
+      };
 
       // Map our options to undici Agent options
       if (skip_ssl_verification) {

@@ -22,7 +22,7 @@ describe('elasticsearch step timeout', () => {
   const getExecution = (fixture: WorkflowRunFixture) =>
     fixture.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id');
 
-  it('lifts the client request timeout and passes the step abort signal', async () => {
+  it('uses the step timeout as the request timeout and passes the step abort signal', async () => {
     const fixture = new WorkflowRunFixture();
     const transportRequest = getTransportRequest(fixture);
     transportRequest.mockResolvedValue({ hits: { hits: [] } });
@@ -32,7 +32,7 @@ describe('elasticsearch step timeout', () => {
 steps:
   - name: search
     type: elasticsearch.search
-    timeout: 5m
+    timeout: 10m
     with:
       index: my-index
 `,
@@ -40,8 +40,27 @@ steps:
 
     expect(getExecution(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
     expect(transportRequest.mock.calls[0][1]).toEqual(
-      expect.objectContaining({ requestTimeout: 300_000, signal: expect.any(AbortSignal) })
+      expect.objectContaining({ requestTimeout: 600_000, signal: expect.any(AbortSignal) })
     );
+  });
+
+  it('keeps the client request timeout when the step has no timeout', async () => {
+    const fixture = new WorkflowRunFixture();
+    const transportRequest = getTransportRequest(fixture);
+    transportRequest.mockResolvedValue({ hits: { hits: [] } });
+
+    await fixture.runWorkflow({
+      workflowYaml: `
+steps:
+  - name: search
+    type: elasticsearch.search
+    with:
+      index: my-index
+`,
+    });
+
+    expect(getExecution(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    expect(transportRequest.mock.calls[0][1]).not.toHaveProperty('requestTimeout');
   });
 
   it('fails with the step timeout and aborts the in-flight request', async () => {
@@ -52,12 +71,7 @@ steps:
       (_params: unknown, options?: TransportRequestOptions) =>
         new Promise((_resolve, reject) => {
           requestSignal = options?.signal;
-          const clientTimer = setTimeout(
-            () => reject(new errors.TimeoutError('Request timed out')),
-            Number(options?.requestTimeout)
-          );
           requestSignal?.addEventListener('abort', () => {
-            clearTimeout(clientTimer);
             reject(new errors.RequestAbortedError('Request aborted'));
           });
         })

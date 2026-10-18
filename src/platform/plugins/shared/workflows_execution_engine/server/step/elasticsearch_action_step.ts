@@ -17,15 +17,10 @@ import type { ElasticsearchGraphNode } from '@kbn/workflows/graph/types';
 import { formatBytes, ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
+import { parseDuration, renderDuration } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
-
-/**
- * Lifts Kibana's `elasticsearch.requestTimeout` cap (30s by default). The step `timeout` and
- * workflow cancellation abort sooner through the step's abort signal.
- */
-const ELASTICSEARCH_STEP_REQUEST_TIMEOUT_MS = 300_000;
 
 /**
  * Whether the connector for `stepType` defaults to HEAD, which the ES transport resolves to a
@@ -198,15 +193,29 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
     }
   }
 
+  private getStepTimeoutMs(): number | undefined {
+    const { timeout } = this.node.configuration;
+    if (!timeout) {
+      return undefined;
+    }
+    return parseDuration(
+      renderDuration(timeout, (value) =>
+        this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(value)
+      )
+    );
+  }
+
   private async executeElasticsearchRequest(
     esClient: ElasticsearchClient,
     stepType: string,
     params: any
   ): Promise<any> {
     const maxResponseBytes = this.getMaxResponseBytes();
+    const stepTimeoutMs = this.getStepTimeoutMs();
+    // Without a step timeout, Kibana's `elasticsearch.requestTimeout` applies.
     const transportOptions = {
       signal: this.stepExecutionRuntime.abortController.signal,
-      requestTimeout: ELASTICSEARCH_STEP_REQUEST_TIMEOUT_MS,
+      ...(stepTimeoutMs !== undefined ? { requestTimeout: stepTimeoutMs } : {}),
       ...(maxResponseBytes > 0 ? { maxResponseSize: maxResponseBytes } : {}),
     };
 

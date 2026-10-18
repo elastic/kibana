@@ -313,18 +313,19 @@ describe('ElasticsearchActionStepImpl', () => {
   });
 
   describe('transport options', () => {
-    it('should pass the request timeout and abort signal together with headers', async () => {
-      const stepWith = {
-        method: 'GET',
-        path: '/my-index/_search',
-        headers: { 'X-Custom-Header': 'value' },
-      };
+    const stepWith = {
+      method: 'GET',
+      path: '/my-index/_search',
+      headers: { 'X-Custom-Header': 'value' },
+    };
+
+    const runRawStep = async (timeout?: string) => {
       const step = {
         id: 'raw_step',
         type: 'elasticsearch.request',
         stepId: 'raw_step',
         stepType: 'elasticsearch.request',
-        configuration: { name: 'raw_step', type: 'elasticsearch.request', with: stepWith },
+        configuration: { name: 'raw_step', type: 'elasticsearch.request', with: stepWith, timeout },
       } as unknown as ElasticsearchGraphNode;
 
       const esStep = new ElasticsearchActionStepImpl(
@@ -335,15 +336,36 @@ describe('ElasticsearchActionStepImpl', () => {
       );
 
       await (esStep as any)._run(stepWith);
+      return (mockEsClient.transport.request as jest.Mock).mock.calls[0][1];
+    };
 
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
-        { method: 'GET', path: '/my-index/_search', body: undefined },
+    it('should use the step timeout as the request timeout, with the abort signal and headers', async () => {
+      const options = await runRawStep('10m');
+
+      expect(options).toEqual(
         expect.objectContaining({
-          requestTimeout: 300_000,
+          requestTimeout: 600_000,
           signal: mockStepExecutionRuntime.abortController.signal,
           headers: { 'X-Custom-Header': 'value' },
         })
       );
+    });
+
+    it('should render a templated step timeout', async () => {
+      mockContextManager.renderValueAccordingToContext.mockImplementation((value: unknown) =>
+        value === '{{ inputs.timeout }}' ? '2m' : value
+      );
+
+      const options = await runRawStep('{{ inputs.timeout }}');
+
+      expect(options.requestTimeout).toBe(120_000);
+    });
+
+    it('should keep the client request timeout when the step has no timeout', async () => {
+      const options = await runRawStep();
+
+      expect(options).not.toHaveProperty('requestTimeout');
+      expect(options.signal).toBe(mockStepExecutionRuntime.abortController.signal);
     });
   });
 

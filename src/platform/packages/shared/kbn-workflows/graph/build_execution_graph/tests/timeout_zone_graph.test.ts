@@ -108,6 +108,34 @@ describe('convertToWorkflowGraph', () => {
       );
       expect(executionGraph.node('enterTimeoutZone_run-child-sync')).toBeUndefined();
     });
+
+    it.each(['elasticsearch.search', 'kibana.request'])(
+      'keeps the timeout on the %s step node',
+      (type) => {
+        const executionGraph = convertToWorkflowGraph({
+          steps: [{ name: 'request', type, timeout: '10m', with: {} }],
+        } as unknown as WorkflowYaml);
+
+        expect(executionGraph.node('enterTimeoutZone_request')).toEqual(
+          expect.objectContaining({ timeout: '10m' })
+        );
+        expect(executionGraph.node('request')).toEqual(
+          expect.objectContaining({
+            configuration: expect.objectContaining({ timeout: '10m' }),
+          })
+        );
+      }
+    );
+
+    it('does not keep the timeout on other step nodes', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as WorkflowYaml);
+
+      expect(executionGraph.node('testAtomicStep1')).toEqual(
+        expect.objectContaining({
+          configuration: expect.not.objectContaining({ timeout: expect.anything() }),
+        })
+      );
+    });
   });
 
   describe('workflow-level timeout', () => {
