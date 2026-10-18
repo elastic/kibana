@@ -18,8 +18,13 @@ import {
 } from '../oas_meta_fields';
 
 class MyType extends Type<any> {
-  constructor(opts: TypeOptions<any> = {}) {
-    super(internals.any(), opts);
+  constructor(
+    opts: TypeOptions<any> = {},
+    schemaOrFactory:
+      | Parameters<typeof internals.any>[0]
+      | (() => ReturnType<typeof internals.any>) = () => internals.any()
+  ) {
+    super(typeof schemaOrFactory === 'function' ? schemaOrFactory : () => internals.any(), opts);
   }
 }
 
@@ -70,5 +75,16 @@ describe('meta', () => {
     const meta = type.getSchema().describe();
     expect(get(meta, 'flags.description')).toBeUndefined();
     expect(get(meta, 'metas')).toBeUndefined();
+  });
+
+  it('defers Joi schema construction until getSchema() or validate() is called', () => {
+    const factory = jest.fn(() => internals.any());
+    const type = new MyType({ meta: { description: 'deferred' } }, factory);
+    expect(factory).not.toHaveBeenCalled();
+    expect(type.getMeta()).toEqual({ description: 'deferred' });
+    expect(factory).not.toHaveBeenCalled();
+
+    type.validate('ok');
+    expect(factory).toHaveBeenCalledTimes(1);
   });
 });

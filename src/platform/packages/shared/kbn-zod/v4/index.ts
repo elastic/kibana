@@ -10,10 +10,16 @@
 // Side-effect import so the `GlobalMeta` augmentation (adding the typed
 // `openapi` field to `.meta()`) is included wherever `@kbn/zod` is imported.
 import './openapi';
+import { globalRegistry } from 'zod/v4';
+import * as z from './lazy_z';
+import { installWeakGlobalRegistryIdMap, lazySchema, setLazySchemaDisabled } from './lazy_schema';
 
-export * from 'zod/v4';
+installWeakGlobalRegistryIdMap(globalRegistry as unknown as { _idmap?: unknown });
+
+export * from './lazy_z';
+export { z };
 export { isZod } from './utils';
-export { lazySchema, setLazySchemaDisabled } from './lazy_schema';
+export { lazySchema, setLazySchemaDisabled };
 export { lazyImmutableGCableObject } from './lazy_immutable_gcable_object';
 export type { ZodObjectType } from './types';
 export type { OasMetaExtensions, OasMetaAvailability } from './openapi';

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '.';
+import { z, isZod } from '.';
+import { LAZY_ZOD_SCHEMA } from './lazy_immutable_gcable_object';
 import { lazySchema, setLazySchemaDisabled } from './lazy_schema';
 
 /**
@@ -252,6 +253,48 @@ describe('lazySchema', () => {
       // gets the exact Zod instance back — `instanceof` succeeds.
       expect(Schema).toBe(RawSchema);
       expect(Schema).toBeInstanceOf(z.ZodObject);
+    });
+  });
+
+  describe('non-materializing checks and lazy chaining', () => {
+    it('does not materialize when checked with isZod() or `_zod in schema`', () => {
+      const factory = jest.fn(() => z.object({ id: z.string() }));
+      const Schema = lazySchema(factory);
+
+      expect(isZod(Schema)).toBe(true);
+      expect('_zod' in Schema).toBe(true);
+      expect(factory).not.toHaveBeenCalled();
+    });
+
+    it('defers materialization across chained modifiers (.optional, .nullable, .describe, .meta, .extend, .partial, .omit)', () => {
+      const factory = jest.fn(() => z.object({ id: z.string(), extra: z.number() }));
+      const Base = lazySchema(factory);
+
+      const Chained = Base.partial({ extra: true })
+        .omit({ extra: true })
+        .extend({ name: z.string() })
+        .describe('Chained description')
+        .meta({ title: 'Chained Title' })
+        .optional()
+        .nullable();
+
+      expect(factory).not.toHaveBeenCalled();
+      expect(isZod(Chained)).toBe(true);
+      expect(factory).not.toHaveBeenCalled();
+
+      expect(Chained.parse({ id: '1', name: 'alice' })).toEqual({ id: '1', name: 'alice' });
+      expect(Chained.parse(null)).toBeNull();
+      expect(factory).toHaveBeenCalledTimes(1);
+    });
+
+    it('auto-wraps composite z.object / z.union / z.discriminatedUnion builders in lazySchema', () => {
+      const Obj = z.object({ a: z.string() });
+      const Union = z.union([z.string(), z.number()]);
+
+      expect((Obj as unknown as Record<PropertyKey, unknown>)[LAZY_ZOD_SCHEMA]).toBe(true);
+      expect((Union as unknown as Record<PropertyKey, unknown>)[LAZY_ZOD_SCHEMA]).toBe(true);
+      expect(Obj.parse({ a: 'ok' })).toEqual({ a: 'ok' });
+      expect(Union.parse(42)).toBe(42);
     });
   });
 });

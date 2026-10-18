@@ -8,11 +8,15 @@
  */
 
 import type * as z4 from 'zod/v4';
+import { LAZY_ZOD_SCHEMA } from './lazy_immutable_gcable_object';
 
 export function isZod(value: unknown): value is z4.ZodType {
-  // Check for v4 (has _zod symbol)
-  if (value && typeof value === 'object' && '_zod' in value) {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  if ((value as Record<PropertyKey, unknown>)[LAZY_ZOD_SCHEMA] === true) {
     return true;
   }
-  return false;
+  // Check for v4 (has _zod symbol)
+  return '_zod' in value;
 }

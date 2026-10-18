@@ -7,16 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod/v4';
+import { lazySchema, type z } from '@kbn/zod/v4';
 import { DeepStrict } from '@kbn/zod-helpers/v4';
 import type { ZodParamsObject } from '@kbn/server-route-repository-utils';
 import { noParamsValidationObject } from './validation_objects';
 
 export function makeZodValidationObject(params: ZodParamsObject) {
   return {
-    params: params.shape.path ? asStrict(params.shape.path) : noParamsValidationObject.params,
-    query: params.shape.query ? asStrict(params.shape.query) : noParamsValidationObject.query,
-    body: params.shape.body ? asStrict(params.shape.body) : noParamsValidationObject.body,
+    params: lazySchema(() =>
+      params.shape.path ? asStrict(params.shape.path) : noParamsValidationObject.params
+    ),
+    query: lazySchema(() =>
+      params.shape.query ? asStrict(params.shape.query) : noParamsValidationObject.query
+    ),
+    body: lazySchema(() =>
+      params.shape.body ? asStrict(params.shape.body) : noParamsValidationObject.body
+    ),
   };
 }
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { difference, isArray, isPlainObject } from 'lodash';
 
 function getFlattenedKeys(obj: unknown, parentKey = '', keys: Set<string> = new Set()) {
@@ -37,32 +37,34 @@ function getFlattenedKeys(obj: unknown, parentKey = '', keys: Set<string> = new 
  * schema-level errors are preserved.
  */
 export function DeepStrict<TSchema extends z.ZodType>(schema: TSchema) {
-  const checkedInputSchema = z.unknown().check((ctx) => {
-    // Trial-parse to compare input vs output keys
-    const result = schema.safeParse(ctx.value);
+  return lazySchema(() => {
+    const checkedInputSchema = z.unknown().check((ctx) => {
+      // Trial-parse to compare input vs output keys
+      const result = schema.safeParse(ctx.value);
 
-    // If the schema itself rejects the input, skip the excess key check
-    // and let the pipe's second stage produce the proper schema errors.
-    if (!result.success) {
-      return;
-    }
+      // If the schema itself rejects the input, skip the excess key check
+      // and let the pipe's second stage produce the proper schema errors.
+      if (!result.success) {
+        return;
+      }
 
-    const allInputKeys = Array.from(getFlattenedKeys(ctx.value));
-    const allOutputKeys = Array.from(getFlattenedKeys(result.data as Record<string, any>));
+      const allInputKeys = Array.from(getFlattenedKeys(ctx.value));
+      const allOutputKeys = Array.from(getFlattenedKeys(result.data as Record<string, any>));
 
-    const excessKeys = difference(allInputKeys, allOutputKeys);
+      const excessKeys = difference(allInputKeys, allOutputKeys);
 
-    if (excessKeys.length) {
-      // Zod >=4.5 pipes do not abort on `unrecognized_keys`; unions drop forwarded issues.
-      ctx.issues.push({
-        code: 'custom',
-        params: { keys: excessKeys },
-        input: ctx.value,
-        message: `Excess keys are not allowed`,
-      });
-    }
-  }) as z.ZodType<z.input<TSchema>>;
-  const outputSchema = schema as z.ZodType<z.output<TSchema>, z.input<TSchema>>;
+      if (excessKeys.length) {
+        // Zod >=4.5 pipes do not abort on `unrecognized_keys`; unions drop forwarded issues.
+        ctx.issues.push({
+          code: 'custom',
+          params: { keys: excessKeys },
+          input: ctx.value,
+          message: `Excess keys are not allowed`,
+        });
+      }
+    }) as z.ZodType<z.input<TSchema>>;
+    const outputSchema = schema as z.ZodType<z.output<TSchema>, z.input<TSchema>>;
 
-  return z.pipe<typeof checkedInputSchema, typeof outputSchema>(checkedInputSchema, outputSchema);
+    return z.pipe<typeof checkedInputSchema, typeof outputSchema>(checkedInputSchema, outputSchema);
+  });
 }

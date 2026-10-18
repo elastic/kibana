@@ -133,14 +133,29 @@ export abstract class Type<V> {
   public readonly __isKbnConfigSchemaType = true;
 
   /**
-   * Internal "schema" backed by Joi.
-   * @type {Schema}
+   * Internal "schema" backed by Joi, constructed lazily on first access and
+   * held via `WeakRef` so unused or post-validation schemas can be reclaimed.
    */
-  protected readonly internalSchema: Schema;
+  private schemaRef?: WeakRef<Schema>;
+  private readonly schemaFactory: () => Schema;
+  private readonly baseTypeOptions: TypeOptions<V>;
   private readonly meta: TypeOptions<V>['meta'];
 
-  protected constructor(schema: Schema, options: TypeOptions<V> = {}) {
+  protected constructor(schemaOrFactory: Schema | (() => Schema), options: TypeOptions<V> = {}) {
     this.meta = options.meta;
+    this.baseTypeOptions = options;
+    this.schemaFactory =
+      typeof schemaOrFactory === 'function' ? schemaOrFactory : () => schemaOrFactory;
+  }
+
+  protected get internalSchema(): Schema {
+    const cached = this.schemaRef?.deref();
+    if (cached) {
+      return cached;
+    }
+
+    let schema = this.schemaFactory();
+    const options = this.baseTypeOptions;
 
     if (options.defaultValue !== undefined) {
       schema = schema.optional();
@@ -186,7 +201,8 @@ export abstract class Type<V> {
       schema = schema.error(([error]) => this.onError(error));
     }
 
-    this.internalSchema = schema;
+    this.schemaRef = new WeakRef(schema);
+    return schema;
   }
 
   public extendsDeep(newOptions: ExtendsDeepOptions): Type<V> {
