@@ -8,8 +8,10 @@
 import type { HttpStart } from '@kbn/core/public';
 import { buildPath } from '@kbn/core-http-browser';
 import type { Reference } from '@kbn/content-management-utils';
-import { isLensDSLConfig, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import { isLensAPIFormat } from '@kbn/lens-embeddable-utils';
 import { toAsCodeTags, toStoredTags } from '@kbn/as-code-shared-transforms';
+import { isLensDSLConfig } from '@kbn/lens-embeddable-utils';
+import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 
 import type { LensSavedObjectAttributes } from '@kbn/lens-common';
 import { LENS_INTERNAL_VIS_API_PATH, LENS_INTERNAL_API_VERSION } from '../../common/constants';
@@ -65,7 +67,7 @@ export class LensClient {
 
     const chartType = this.builder?.getType(data);
 
-    if (this.builder?.isEnabled && this.builder?.isSupported(chartType)) {
+    if (this.builder?.isEnabled && this.builder?.isSupported(chartType) && isLensAPIFormat(data)) {
       const config = data as LensApiConfigLibItemNoESQL;
       const { references: tagReferences } = toStoredTags(config);
       const attributes = this.builder.fromAPIFormat(config);
@@ -279,7 +281,11 @@ export class LensClient {
     return result.data.map(({ id, data }) => {
       const chartType = this.builder?.getType(data);
 
-      if (this.builder?.isEnabled && this.builder?.isSupported(chartType)) {
+      if (
+        this.builder?.isEnabled &&
+        this.builder?.isSupported(chartType) &&
+        isLensAPIFormat(data)
+      ) {
         const config = data as LensApiConfigLibItemNoESQL;
         const { references: tagReferences } = toStoredTags(config);
         const attributes = this.builder.fromAPIFormat(config);
