@@ -83,6 +83,15 @@ describe('withResolvedEntityValues', () => {
     expect(runQuery.mock.calls[0][0].join('\n')).toContain('IN ("host:a", "host:b")');
   });
 
+  it('reads a row per group even past the 1,000 rows ES|QL returns by default', async () => {
+    const runQuery = jest.fn(async (_steps: readonly string[]) => []);
+    const rows = Array.from({ length: 1_001 }, (_, i) => row(`host:${i}`));
+
+    await withResolvedEntityValues(rows, ARGS, runQuery);
+
+    expect(runQuery.mock.calls[0][0].at(-1)).toBe('| LIMIT 1001');
+  });
+
   it('splits a long list of rows into several queries', async () => {
     const runQuery = jest.fn(async () => []);
     const manyRows = Array.from({ length: 2_001 }, (_, i) => row(`host:${i}`));

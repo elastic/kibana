@@ -118,6 +118,8 @@ const buildResolvedEntityValuesQuery = (
   `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IN (${toList(targetIds)})`,
   ...buildResolvedEntityRowSteps(args),
   `| KEEP \`entity.id\`, ${GROUP_VALUE_FIELDS.join(', ')}`,
+  // One row per target; without a LIMIT, ES|QL returns only 1,000.
+  `| LIMIT ${targetIds.length}`,
 ];
 
 /** Rows whose main entity has aliases show the whole group's values. */
