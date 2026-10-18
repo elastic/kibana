@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { asCodePaginationParamsSchema } from '@kbn/as-code-shared-schemas';
+import { asCodePaginationParamsSchema, asCodeSortQuerySchema } from '@kbn/as-code-shared-schemas';
 import { z } from '@kbn/zod';
 import { asCodePaginatedResponseSchema } from './schema';
 import { getDataViewsAsCodeService, requestHandler } from './utils';
@@ -43,6 +43,7 @@ export const registerGetDataViewsAsCodeRoute = ({
                 description:
                   'Filters results by `name` and `index_pattern` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax.',
               }),
+              sort: asCodeSortQuerySchema,
             }),
           },
           response: {
@@ -57,8 +58,8 @@ export const registerGetDataViewsAsCodeRoute = ({
       },
       requestHandler(args, async (ctx, req, res) => {
         const dataViewsAsCodeService = await getDataViewsAsCodeService(ctx, getStartServices, req);
-        const { page, per_page: perPage, query: search } = req.query;
-        const response = await dataViewsAsCodeService.search({ page, perPage, search });
+        const { page, per_page: perPage, query: search, sort } = req.query;
+        const response = await dataViewsAsCodeService.search({ page, perPage, search, sort });
 
         return res.ok({ body: response });
       })

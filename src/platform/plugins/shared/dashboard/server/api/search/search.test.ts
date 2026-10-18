@@ -13,6 +13,7 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import { search } from './search';
 
 jest.mock('@kbn/as-code-utils', () => ({
+  ...jest.requireActual('@kbn/as-code-utils'),
   findWithTagFilter: jest.fn(),
 }));
 
@@ -67,6 +68,22 @@ describe('dashboard search sort options', () => {
     const findOptions = findWithTagFilterMock.mock.calls[0][1];
     expect(findOptions).not.toHaveProperty('sortField');
     expect(findOptions).not.toHaveProperty('sortOrder');
-    expect(findOptions).toHaveProperty('search');
+    expect(findOptions).toHaveProperty('search', 'sales');
+  });
+
+  it('uses the requested sort even when a text query is present', async () => {
+    await search(
+      createRequestCtx(),
+      { page: 1, per_page: 20, query: 'sales', sort: 'meta.created_at' },
+      jest.fn() as never
+    );
+
+    expect(findWithTagFilterMock.mock.calls[0][1]).toEqual(
+      expect.objectContaining({
+        search: 'sales',
+        sortField: 'created_at',
+        sortOrder: 'asc',
+      })
+    );
   });
 });
