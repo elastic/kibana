@@ -40,7 +40,14 @@ export type {
   Responder,
   Violation,
 } from './src/contract/types';
-export { InvalidSchemaError, loadContractOperations } from './src/openapi';
+export { applyOverlay, InvalidOverlayError, JsonPathError } from './src/overlay';
+export type { OverlayAction, OverlayDocument, OverlayFinding, OverlayResult } from './src/overlay';
+export {
+  convertDiscovery,
+  InvalidSchemaError,
+  isDiscoveryDocument,
+  loadContractOperations,
+} from './src/openapi';
 export type {
   ContractOperation,
   ContractSpec,

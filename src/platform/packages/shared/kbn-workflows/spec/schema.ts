@@ -1171,6 +1171,36 @@ export type WorkflowRunAsMode = z.infer<typeof WorkflowRunAsModeSchema>;
 // Base schema shared by both workflow.execute and workflow.executeAsync
 export const WorkflowExecuteStepInputSchema = z.object({
   'workflow-id': z.string().min(1).max(1024),
+  'allowed-workflow-ids': z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(1024)
+        .regex(/^(?![\s\S]*\{[{%])[\s\S]+$/, 'Allowed workflow IDs must be literal IDs')
+    )
+    .min(1)
+    .max(100)
+    .optional()
+    .describe(
+      'Literal child workflow IDs permitted to receive the parent service account. A templated workflow-id with inherit or override requires allowed-workflow-ids or allowed-workflow-tags; checked against the saved parent definition.'
+    )
+    .meta({ doNotSuggest: true }),
+  'allowed-workflow-tags': z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(1024)
+        .regex(/^(?![\s\S]*\{[{%])[\s\S]+$/, 'Allowed workflow tags must be literal tags')
+    )
+    .min(1)
+    .max(100)
+    .optional()
+    .describe(
+      'Literal tags permitting managed children to receive the parent service account. At least one must match the saved child definition. When IDs are also supplied, both restrictions must pass.'
+    )
+    .meta({ doNotSuggest: true }),
   inputs: z.record(z.string(), z.unknown()).optional(),
   'run-as-mode': WorkflowRunAsModeSchema.optional()
     .describe(

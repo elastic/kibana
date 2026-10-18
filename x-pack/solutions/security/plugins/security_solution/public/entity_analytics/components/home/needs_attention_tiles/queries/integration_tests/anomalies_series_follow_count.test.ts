@@ -7,16 +7,17 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { createTestEsCluster } from '@kbn/test';
-import { ToolingLog } from '@kbn/tooling-log';
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { TimeRange } from '../../../entities_grid/common';
 import { buildEntitiesWithAnomaliesCountQuery } from '../entities_with_anomalies_query';
 import {
   anomaliesSeriesColumn,
   buildEntitiesWithAnomaliesSeriesQuery,
 } from '../entities_with_anomalies_series_query';
-import { getSeriesWindow, readSeriesDots } from '../tile_series_window';
+import {
+  describeSeriesFollowsCount,
+  moveWindowBack,
+  readCounts,
+} from './series_follow_count_suite';
 
 /*
  * The Entities with anomalies sparkline dots must follow the tile count. Dot k is the count query
@@ -41,7 +42,6 @@ const ENTITY_INDEX = 'entities-latest-anomalies-series-test';
 const ANOMALY_INDEX = '.ml-anomalies-shared-series-test';
 const JOBS = ['job_a'];
 const HOUR_MS = 60 * 60 * 1000;
-const RANGES: readonly TimeRange[] = ['24h', '7d', '30d'];
 const KEYWORD: MappingProperty = { type: 'keyword' };
 const DATE: MappingProperty = { type: 'date' };
 
@@ -77,123 +77,88 @@ const RECORDS: ReadonlyArray<{
   { job: 'job_a', host: 'ghost', score: 50, hoursAgo: 3.5 },
 ];
 
-describe('Entities with anomalies tile series on Elasticsearch', () => {
-  let esServer: ReturnType<typeof createTestEsCluster>;
-  let client: Client;
-
-  beforeAll(async () => {
-    esServer = createTestEsCluster({
-      log: new ToolingLog({ writeTo: process.stdout, level: 'info' }),
-    });
-    await esServer.start();
-    client = esServer.getClient();
-    await client.indices.create({
-      index: ENTITY_INDEX,
-      settings: { index: { mode: 'lookup' } },
-      mappings: {
-        properties: {
-          'entity.id': KEYWORD,
-          'entity.name': KEYWORD,
-          'entity.relationships.resolution.resolved_to': KEYWORD,
-        },
+const loadFixture = async (client: Client) => {
+  await client.indices.create({
+    index: ENTITY_INDEX,
+    settings: { index: { mode: 'lookup' } },
+    mappings: {
+      properties: {
+        'entity.id': KEYWORD,
+        'entity.name': KEYWORD,
+        'entity.relationships.resolution.resolved_to': KEYWORD,
       },
-    });
-    await client.indices.create({
-      index: ANOMALY_INDEX,
-      mappings: {
-        properties: {
-          '@timestamp': DATE,
-          result_type: KEYWORD,
-          job_id: KEYWORD,
-          is_interim: { type: 'boolean' },
-          record_score: { type: 'double' },
-          'host.id': KEYWORD,
-        },
+    },
+  });
+  await client.indices.create({
+    index: ANOMALY_INDEX,
+    mappings: {
+      properties: {
+        '@timestamp': DATE,
+        result_type: KEYWORD,
+        job_id: KEYWORD,
+        is_interim: { type: 'boolean' },
+        record_score: { type: 'double' },
+        'host.id': KEYWORD,
       },
-    });
-    const now = Date.now();
-    const response = await client.bulk({
-      operations: [
-        ...ENTITIES.flatMap(({ id, resolvedTo }) => [
-          { index: { _index: ENTITY_INDEX } },
-          {
-            'entity.id': id,
-            'entity.name': id.split(':')[1],
-            ...(resolvedTo ? { 'entity.relationships.resolution.resolved_to': resolvedTo } : {}),
-          },
-        ]),
-        ...RECORDS.flatMap(({ job, host, score, hoursAgo, interim }) => [
-          { index: { _index: ANOMALY_INDEX } },
-          {
-            '@timestamp': new Date(now - hoursAgo * HOUR_MS).toISOString(),
-            result_type: 'record',
-            job_id: job,
-            is_interim: Boolean(interim),
-            record_score: score,
-            'host.id': host,
-          },
-        ]),
-      ],
-      refresh: 'wait_for',
-    });
-    if (response.errors) throw new Error('Bulk indexing of the anomaly series fixture failed');
-  }, 300_000);
-
-  afterAll(async () => {
-    await esServer?.stop();
+    },
   });
-
-  const query = async (esql: string) =>
-    (await client.esql.query({ query: esql })) as unknown as ESQLSearchResponse;
-
-  const countValue = async (esql: string) => {
-    const { columns, values } = await query(esql);
-    return Number(values[0]?.[columns.findIndex((c) => c.name === 'value')] ?? 0);
-  };
-
-  /** The real count query with its record window moved back `k` steps of the range. */
-  const countShiftedBack = async (range: TimeRange, k: number) => {
-    const { stepHours, dots } = getSeriesWindow(range);
-    const base = buildEntitiesWithAnomaliesCountQuery(ENTITY_INDEX, range, [], JOBS);
-    const window = /@timestamp >= NOW\(\) - \d+ (days|hours)/;
-    expect(base).toMatch(window);
-    return countValue(
-      base.replace(
-        window,
-        `@timestamp >= NOW() - ${(dots + k) * stepHours}h AND @timestamp < NOW() - ${
-          k * stepHours
-        }h`
-      )
-    );
-  };
-
-  const series = async (range: TimeRange) =>
-    readSeriesDots(
-      await query(buildEntitiesWithAnomaliesSeriesQuery(ENTITY_INDEX, range, [], JOBS)),
-      range,
-      anomaliesSeriesColumn
-    );
-
-  it.each(RANGES)('every %s dot equals the count query moved back by its steps', async (range) => {
-    const { dots } = getSeriesWindow(range);
-    const got = await series(range);
-    const expected: number[] = [];
-    for (let k = dots - 1; k >= 0; k--) expected.push(await countShiftedBack(range, k));
-    expect(got).toEqual(expected);
-    expect(new Set(expected).size).toBeGreaterThan(1);
+  const now = Date.now();
+  const response = await client.bulk({
+    operations: [
+      ...ENTITIES.flatMap(({ id, resolvedTo }) => [
+        { index: { _index: ENTITY_INDEX } },
+        {
+          'entity.id': id,
+          'entity.name': id.split(':')[1],
+          ...(resolvedTo ? { 'entity.relationships.resolution.resolved_to': resolvedTo } : {}),
+        },
+      ]),
+      ...RECORDS.flatMap(({ job, host, score, hoursAgo, interim }) => [
+        { index: { _index: ANOMALY_INDEX } },
+        {
+          '@timestamp': new Date(now - hoursAgo * HOUR_MS).toISOString(),
+          result_type: 'record',
+          job_id: job,
+          is_interim: Boolean(interim),
+          record_score: score,
+          'host.id': host,
+        },
+      ]),
+    ],
+    refresh: 'wait_for',
   });
+  if (response.errors) throw new Error('Bulk indexing of the anomaly series fixture failed');
+};
 
-  it.each(RANGES)('the newest %s dot is the tile count', async (range) => {
-    const got = await series(range);
-    expect(got[got.length - 1]).toBe(
-      await countValue(buildEntitiesWithAnomaliesCountQuery(ENTITY_INDEX, range, [], JOBS))
-    );
-  });
+const buildCount = (range: TimeRange) =>
+  buildEntitiesWithAnomaliesCountQuery(ENTITY_INDEX, range, [], JOBS);
 
-  it('counts by hand: installed job, real records, aliases collapsed, one entity once', async () => {
-    // 24h: host:a (2.5h, and host:alias 5.5h), host:c (10.5h, 20.5h), host:d. Not low, live, other, ghost.
-    expect((await series('24h')).slice(-1)).toEqual([3]);
-    // 30d: host:a, host:b, host:c (300.5h is inside 720h), host:d.
-    expect((await series('30d')).slice(-1)).toEqual([4]);
-  });
+describeSeriesFollowsCount({
+  name: 'Entities with anomalies tile series',
+  loadFixture,
+  tiles: [
+    {
+      name: 'Entities with anomalies',
+      column: anomaliesSeriesColumn,
+      // 24h: host:a (2.5h, and host:alias 5.5h), host:c (10.5h, 20.5h), host:d. Not low, live,
+      // other, ghost.
+      // 30d: host:a, host:b, host:c (300.5h is inside 720h), host:d.
+      byHand: { '24h': 3, '30d': 4 },
+    },
+  ],
+  seriesQuery: (range) => buildEntitiesWithAnomaliesSeriesQuery(ENTITY_INDEX, range, [], JOBS),
+  countNow: async (range, run) => readCounts(await run(buildCount(range)), ['value']),
+  countStepsAgo: async (range, k, run) =>
+    readCounts(
+      await run(
+        moveWindowBack({
+          base: buildCount(range),
+          window: /@timestamp >= NOW\(\) - \d+ (days|hours)/,
+          field: '@timestamp',
+          range,
+          k,
+        })
+      ),
+      ['value']
+    ),
 });
