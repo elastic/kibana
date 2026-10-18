@@ -58,8 +58,14 @@ describe('get', () => {
 
     beforeEach(() => {
       clientArgs.services.caseService.getCaseIdsByAttachmentIds.mockResolvedValue([
-        { attachmentId: 'host:a', caseIds: ['case-1', 'case-2'] },
-        { attachmentId: 'host:b', caseIds: ['case-2'] },
+        {
+          attachmentId: 'host:a',
+          cases: [
+            { id: 'case-1', owner: 'securitySolution' },
+            { id: 'case-2', owner: 'securitySolution' },
+          ],
+        },
+        { attachmentId: 'host:b', cases: [{ id: 'case-2', owner: 'securitySolution' }] },
       ]);
     });
 
@@ -137,6 +143,20 @@ describe('get', () => {
       });
     });
 
+    it('authorizes and audits each case it returns once, without reading the cases', async () => {
+      const ensureSavedObjectsAreAuthorized = jest.fn();
+      clientArgs.authorization.getAuthorizationFilter.mockResolvedValueOnce({
+        ensureSavedObjectsAreAuthorized,
+      });
+
+      await getCasesByAttachmentIDs(request, clientArgs);
+
+      expect(ensureSavedObjectsAreAuthorized).toHaveBeenCalledWith([
+        { id: 'case-1', owner: 'securitySolution' },
+        { id: 'case-2', owner: 'securitySolution' },
+      ]);
+      expect(clientArgs.services.caseService.getCases).not.toHaveBeenCalled();
+    });
     it('leaves out cases that are not found', async () => {
       clientArgs.services.caseService.getCases.mockResolvedValue({
         saved_objects: [

@@ -91,7 +91,7 @@ import {
 import type {
   GetCaseIdsByAlertIdArgs,
   GetCaseIdsByAlertIdAggs,
-  CaseIdsOfAttachment,
+  CasesOfAttachment,
   GetCaseIdsByAttachmentIdsArgs,
   GetCaseIdsByAttachmentIdsAggs,
   CasesMapWithPageInfo,
@@ -346,13 +346,13 @@ export class CasesService {
   }
 
   /**
-   * The ids of the cases each attachment id is attached to. Attachment ids in no case are left out.
+   * The cases each attachment id is attached to, with their owners. Attachment ids in no case are left out.
    */
   public async getCaseIdsByAttachmentIds({
     type,
     attachmentIds,
     filter,
-  }: GetCaseIdsByAttachmentIdsArgs): Promise<CaseIdsOfAttachment[]> {
+  }: GetCaseIdsByAttachmentIdsArgs): Promise<CasesOfAttachment[]> {
     try {
       this.log.debug(`Attempting to GET cases for attachment ids ${attachmentIds.join(', ')}`);
 
@@ -390,6 +390,15 @@ export class CasesService {
                           field: `${CASE_ATTACHMENT_SAVED_OBJECT}.references.id`,
                           size: MAX_DOCS_PER_PAGE,
                         },
+                        aggregations: {
+                          // An attachment has its case's owner, so the case is authorized without reading it.
+                          attachment: {
+                            reverse_nested: {},
+                            aggregations: {
+                              owner: { terms: { field: `${attributes}.owner`, size: 1 } },
+                            },
+                          },
+                        },
                       },
                     },
                   },
@@ -409,7 +418,9 @@ export class CasesService {
 
       return (response.aggregations?.attachmentIds.buckets ?? []).map(({ key, references }) => ({
         attachmentId: key,
-        caseIds: references.cases.caseIds.buckets.map((bucket) => bucket.key),
+        cases: references.cases.caseIds.buckets.flatMap(({ key: id, attachment }) =>
+          attachment.owner.buckets.map(({ key: owner }) => ({ id, owner }))
+        ),
       }));
     } catch (error) {
       this.log.error(`Error on GET cases for attachment ids ${attachmentIds.join(', ')}: ${error}`);

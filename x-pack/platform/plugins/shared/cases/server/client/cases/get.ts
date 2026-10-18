@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { chunk } from 'lodash';
+import { chunk, uniqBy } from 'lodash';
 import pMap from 'p-map';
 import type {
   SavedObject,
@@ -219,9 +219,8 @@ export const getCasesByAttachmentIDs = async (
       CasesByAttachmentIDsRequestRt
     )(params);
 
-    const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
-      Operations.getCaseIDsByAttachmentIDs
-    );
+    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+      await authorization.getAuthorizationFilter(Operations.getCaseIDsByAttachmentIDs);
 
     const casesOfAttachments = await caseService.getCaseIdsByAttachmentIds({
       type,
@@ -233,10 +232,22 @@ export const getCasesByAttachmentIDs = async (
       ),
     });
 
+    ensureSavedObjectsAreAuthorized(
+      uniqBy(
+        casesOfAttachments.flatMap(({ cases }) => cases),
+        'id'
+      )
+    );
+
+    const caseIdsOfAttachments = casesOfAttachments.map(({ attachmentId, cases }) => ({
+      attachmentId,
+      caseIds: cases.map(({ id }) => id),
+    }));
+
     const res =
       status === undefined
-        ? casesOfAttachments
-        : await filterByCaseStatus(caseService, casesOfAttachments, asArray(status));
+        ? caseIdsOfAttachments
+        : await filterByCaseStatus(caseService, caseIdsOfAttachments, asArray(status));
 
     return decodeOrThrow(GetCaseIDsByAttachmentIDsResponseRt)(res);
   } catch (error) {

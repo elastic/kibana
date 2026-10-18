@@ -2415,7 +2415,11 @@ describe('CasesService', () => {
     });
 
     describe('getCaseIdsByAttachmentIds', () => {
-      it('maps each attachment id to the case ids that reference it', async () => {
+      it('maps each attachment id to the cases that reference it, with their owners', async () => {
+        const caseBucket = (key: string, owner: string) => ({
+          key,
+          attachment: { owner: { buckets: [{ key: owner }] } },
+        });
         unsecuredSavedObjectsClient.find.mockResolvedValue({
           ...createSOFindResponse([]),
           aggregations: {
@@ -2423,12 +2427,21 @@ describe('CasesService', () => {
               buckets: [
                 {
                   key: 'host:a',
-                  references: { cases: { caseIds: { buckets: [{ key: 'case-1' }] } } },
+                  references: {
+                    cases: { caseIds: { buckets: [caseBucket('case-1', 'securitySolution')] } },
+                  },
                 },
                 {
                   key: 'host:b',
                   references: {
-                    cases: { caseIds: { buckets: [{ key: 'case-1' }, { key: 'case-2' }] } },
+                    cases: {
+                      caseIds: {
+                        buckets: [
+                          caseBucket('case-1', 'securitySolution'),
+                          caseBucket('case-2', 'observability'),
+                        ],
+                      },
+                    },
                   },
                 },
               ],
@@ -2442,8 +2455,14 @@ describe('CasesService', () => {
         });
 
         expect(res).toEqual([
-          { attachmentId: 'host:a', caseIds: ['case-1'] },
-          { attachmentId: 'host:b', caseIds: ['case-1', 'case-2'] },
+          { attachmentId: 'host:a', cases: [{ id: 'case-1', owner: 'securitySolution' }] },
+          {
+            attachmentId: 'host:b',
+            cases: [
+              { id: 'case-1', owner: 'securitySolution' },
+              { id: 'case-2', owner: 'observability' },
+            ],
+          },
         ]);
       });
 
@@ -2473,7 +2492,19 @@ describe('CasesService', () => {
                     cases: {
                       filter: { term: { 'cases-attachments.references.type': 'cases' } },
                       aggregations: {
-                        caseIds: { terms: { field: 'cases-attachments.references.id' } },
+                        caseIds: {
+                          terms: { field: 'cases-attachments.references.id' },
+                          aggregations: {
+                            attachment: {
+                              reverse_nested: {},
+                              aggregations: {
+                                owner: {
+                                  terms: { field: 'cases-attachments.attributes.owner', size: 1 },
+                                },
+                              },
+                            },
+                          },
+                        },
                       },
                     },
                   },

@@ -134,6 +134,12 @@ export interface CaseIdsOfAttachment {
   caseIds: string[];
 }
 
+/** The cases one attachment id is attached to, with their owners for authorization. */
+export interface CasesOfAttachment {
+  attachmentId: string;
+  cases: Array<{ id: string; owner: string }>;
+}
+
 export interface GetCaseIdsByAttachmentIdsAggs {
   attachmentIds: {
     buckets: Array<{
@@ -141,7 +147,10 @@ export interface GetCaseIdsByAttachmentIdsAggs {
       references: {
         cases: {
           caseIds: {
-            buckets: Array<{ key: string }>;
+            buckets: Array<{
+              key: string;
+              attachment: { owner: { buckets: Array<{ key: string }> } };
+            }>;
           };
         };
       };
