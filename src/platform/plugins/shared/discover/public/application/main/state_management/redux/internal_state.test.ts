@@ -8,14 +8,15 @@
  */
 
 import { ExistenceFetchStatus } from '@kbn/unified-field-list';
-import { ESQL_TYPE } from '@kbn/data-view-utils';
-import { EsqlSource } from '@kbn/data-source';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import { createMockDataViewsService } from '@kbn/data-source/src/__mocks__/data_views_service.mock';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import {
   createTabItem,
   DEFAULT_EXPANDED_DOC_OWNER,
   DEFAULT_HISTOGRAM_KEY_PREFIX,
   internalStateActions,
+  getTabDataView,
   selectTabRuntimeState,
   selectTab,
 } from '.';
@@ -44,26 +45,15 @@ describe('InternalStateStore', () => {
     };
   };
 
-  const toEsqlDataView = (source: EsqlSource) =>
-    buildDataViewMock({
-      id: source.id,
-      title: source.title,
-      type: ESQL_TYPE,
-      timeFieldName: source.timeFieldName,
-      fields: deepMockedFields,
-      isPersisted: false,
-    });
+  const registerEsqlSource = (source: EsqlSource) =>
+    registerEsqlSourceInDataViewsCache(createMockDataViewsService(), source);
 
   it('should set data view', async () => {
     const { store, runtimeStateManager } = await setup();
     const tabId = store.getState().tabs.unsafeCurrentId;
-    expect(
-      selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value
-    ).toBeUndefined();
+    expect(getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId))).toBeUndefined();
     store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
-    expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value).toBe(
-      dataViewMock
-    );
+    expect(getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId))).toBe(dataViewMock);
   });
 
   it('should clear expandedDoc when setDataView is called with a different data view id', async () => {
@@ -99,7 +89,7 @@ describe('InternalStateStore', () => {
   });
 
   it('should not clear expandedDoc when ES|QL DataView id changes but the dataset is the same', async () => {
-    const { store, services } = await setup();
+    const { store } = await setup();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const descSource = await EsqlSource.create({
       query: 'FROM logstash-* | SORT @timestamp DESC',
@@ -111,25 +101,21 @@ describe('InternalStateStore', () => {
       resultColumns: [],
       timeFieldName: '@timestamp',
     });
-    services.dataSourceService.registerEsqlSource(descSource);
-    services.dataSourceService.registerEsqlSource(ascSource);
-
-    const esqlDataView = toEsqlDataView(descSource);
+    const esqlDataView = await registerEsqlSource(descSource);
+    await registerEsqlSource(ascSource);
     const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, esqlDataView);
 
-    store.dispatch(internalStateActions.setDataView({ tabId, dataView: esqlDataView }));
+    store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: descSource }));
     store.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: mockDoc }));
     expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
 
-    store.dispatch(
-      internalStateActions.setDataView({ tabId, dataView: toEsqlDataView(ascSource) })
-    );
+    store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: ascSource }));
 
     expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
   });
 
   it('should clear expandedDoc when ES|QL DataView index pattern changes', async () => {
-    const { store, services } = await setup();
+    const { store } = await setup();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const logsSource = await EsqlSource.create({
       query: 'FROM logstash-*',
@@ -141,19 +127,15 @@ describe('InternalStateStore', () => {
       resultColumns: [],
       timeFieldName: '@timestamp',
     });
-    services.dataSourceService.registerEsqlSource(logsSource);
-    services.dataSourceService.registerEsqlSource(metricsSource);
-
-    const esqlDataView = toEsqlDataView(logsSource);
+    const esqlDataView = await registerEsqlSource(logsSource);
+    await registerEsqlSource(metricsSource);
     const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, esqlDataView);
 
-    store.dispatch(internalStateActions.setDataView({ tabId, dataView: esqlDataView }));
+    store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: logsSource }));
     store.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: mockDoc }));
     expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
 
-    store.dispatch(
-      internalStateActions.setDataView({ tabId, dataView: toEsqlDataView(metricsSource) })
-    );
+    store.dispatch(internalStateActions.setDataSource({ tabId, dataSource: metricsSource }));
 
     expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
   });
@@ -518,9 +500,6 @@ describe('InternalStateStore', () => {
     expect(tabsState.allIds).toHaveLength(3);
     expect(tabsState.byId[items[0].id].uiState).toMatchInlineSnapshot(`
       Object {
-        "esqlEditor": Object {
-          "isHistoryOpen": true,
-        },
         "fieldList": Object {
           "nameFilter": "field0",
         },
@@ -529,9 +508,6 @@ describe('InternalStateStore', () => {
     `);
     expect(tabsState.byId[items[1].id].uiState).toMatchInlineSnapshot(`
       Object {
-        "esqlEditor": Object {
-          "isHistoryOpen": true,
-        },
         "fieldList": Object {
           "nameFilter": "field1",
         },
@@ -551,9 +527,6 @@ describe('InternalStateStore', () => {
     `);
     expect(tabsState.byId[items[2].id].uiState).toMatchInlineSnapshot(`
       Object {
-        "esqlEditor": Object {
-          "isHistoryOpen": true,
-        },
         "fieldList": Object {
           "nameFilter": "field2",
         },

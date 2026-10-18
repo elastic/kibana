@@ -8,6 +8,7 @@
  */
 
 import { buildStateSubscribe } from './build_state_subscribe';
+import { createResolvedMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import * as resolveEsqlSourceModule from '../../data_fetching/resolve_esql_source';
 import { FetchStatus } from '../../../types';
 import { dataViewComplexMock } from '../../../../__mocks__/data_view_complex';
@@ -16,7 +17,6 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { createDataViewDataSource, DataSourceType } from '../../../../../common/data_sources';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { internalStateActions, type TabState } from '../redux';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 
@@ -182,12 +182,9 @@ describe('buildStateSubscribe', () => {
   });
 
   it('pauses auto refresh when an ES|QL query switches to an index without a time field', async () => {
-    jest.spyOn(resolveEsqlSourceModule, 'resolveEsqlSource').mockResolvedValue({
-      esqlSource: {} as Awaited<
-        ReturnType<typeof resolveEsqlSourceModule.resolveEsqlSource>
-      >['esqlSource'],
-      dataView: dataViewMock,
-    });
+    jest
+      .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
+      .mockResolvedValue(await createResolvedMockEsqlSource([], [], undefined, 'FROM no-time'));
 
     toolkit.internalState.dispatch(
       toolkit.injectCurrentTab(internalStateActions.updateGlobalState)({

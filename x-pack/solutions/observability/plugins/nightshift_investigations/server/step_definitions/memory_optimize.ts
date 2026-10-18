@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MAX_KEYWORD_LENGTH } from '../../common';
@@ -22,10 +22,7 @@ import { withTimeout } from './with_timeout';
 
 const MAX_ROUND_TEXT_LENGTH = 65_536;
 
-/**
- * Bounds the post-round optimizer. It runs non-blocking, so a stall does not hold up an
- * investigation, but it should not leave a task hanging on a stuck inference call either.
- */
+/** Bounds the non-blocking post-round optimizer so a stuck inference call cannot hang a task. */
 const OPTIMIZE_TIMEOUT_MS = 120_000;
 
 export const memoryOptimizeStepDefinition = ({
@@ -33,7 +30,6 @@ export const memoryOptimizeStepDefinition = ({
   getInference,
   getSavedObjects,
   getUiSettings,
-  getMemoryEsClient,
   logger,
   isEnabled,
   telemetry,
@@ -42,7 +38,6 @@ export const memoryOptimizeStepDefinition = ({
   getInference: () => InferenceServerStart | undefined;
   getSavedObjects: () => CoreStart['savedObjects'] | undefined;
   getUiSettings: () => CoreStart['uiSettings'] | undefined;
-  getMemoryEsClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isEnabled?: () => boolean;
   telemetry: NightshiftTelemetryClient;
@@ -125,8 +120,7 @@ export const memoryOptimizeStepDefinition = ({
       }
 
       const workflowContext = context.contextManager.getContext();
-      // Workflow execution authorization is the capability boundary. Storage tenancy always comes
-      // from the trusted execution context; no workflow input can select another Space.
+      // Storage tenancy comes from the trusted execution context; no input can select another Space.
       const { spaceId } = workflowContext.workflow;
       const workflowExecutionId = workflowContext.execution.id;
       const sandboxId = context.input.sandbox_id?.trim() ? context.input.sandbox_id : undefined;
@@ -156,7 +150,7 @@ export const memoryOptimizeStepDefinition = ({
               conversationId: context.input.conversation_id,
               roundId: context.input.round_id,
               recalledIds: context.input.recalled_ids ?? [],
-              esClient: await getMemoryEsClient(),
+              esClient: context.contextManager.getScopedEsClient(),
               spaceId,
               signal,
               logger,

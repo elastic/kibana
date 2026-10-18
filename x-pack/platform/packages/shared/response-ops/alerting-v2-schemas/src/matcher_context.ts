@@ -11,8 +11,8 @@ import type { AlertEventSeverity } from './severity';
 export interface MatcherContext {
   last_event_timestamp: string;
   group_hash: string;
-  episode_id: string;
-  episode_status: AlertEpisodeStatus;
+  alert_id: string;
+  alert_status: AlertEpisodeStatus;
   severity?: AlertEventSeverity;
   data?: Record<string, unknown>;
 }
@@ -29,9 +29,9 @@ export interface MatcherContextFieldDescriptor {
  * and for Agent Builder skill docs (`generateMatcherContextDoc`).
  */
 export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
-  { path: 'episode_id', type: 'string', description: 'The alert UUID' },
+  { path: 'alert_id', type: 'string', description: 'The alert UUID' },
   {
-    path: 'episode_status',
+    path: 'alert_status',
     type: 'string',
     description: 'Alert lifecycle status',
   },
