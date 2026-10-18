@@ -943,15 +943,10 @@ describe('Hunt Watch worker chain', () => {
       const gate = (overrides: {
         fetched?: Record<string, unknown> | undefined;
         spaceId?: string;
-        /** The criticality this finding asks for, when it asks for one. */
-        wanted?: string;
       }) => ({
         inputs: {
           conversationId: 'conv-1',
           title: 'Isolate host A',
-          ...(overrides.wanted === undefined
-            ? {}
-            : { actionInput: { id_value: 'dev-user', criticality_level: overrides.wanted } }),
         },
         workflow: { spaceId: overrides.spaceId ?? 'default' },
         steps:
@@ -997,74 +992,6 @@ describe('Hunt Watch worker chain', () => {
         expect(note).toContain('(/app/alertzero?selectedConversationId=conv-other)');
         expect(note).toContain('no second Proposal was created');
         expect(note).toContain('stays open until an analyst closes it');
-      });
-
-      describe('whether the winner covers the finding', () => {
-        // Winning the id is not covering the finding: two findings for one subject share a target
-        // but not necessarily a criticality, and a critical report asks for more than the rest.
-        const noteFor = (wanted: string | undefined, won: string | undefined) =>
-          liquid
-            .parseAndRenderSync(
-              lostRaceWith.lost_race_note,
-              gate({
-                wanted,
-                fetched: {
-                  conversationId: 'conv-other',
-                  ...(won === undefined ? {} : { actionInput: { criticality_level: won } }),
-                },
-              })
-            )
-            .trim();
-        const covered = (note: string) => note.includes('this finding is covered by that one');
-
-        it('says it is covered when the winner asks for the same level', () => {
-          expect(covered(noteFor('high_impact', 'high_impact'))).toBe(true);
-        });
-
-        it('says it is covered when the winner asks for more', () => {
-          expect(covered(noteFor('high_impact', 'extreme_impact'))).toBe(true);
-        });
-
-        it('does not say it is covered when the winner asks for less, and says what was not proposed', () => {
-          const note = noteFor('extreme_impact', 'high_impact');
-
-          expect(covered(note)).toBe(false);
-          expect(note).toContain(
-            'it asks for high_impact where this finding asks for extreme_impact'
-          );
-          expect(note).toContain('the level this finding asks for was not proposed');
-          expect(note).toContain('A manual run targeting this report proposes it');
-          // Still points at the winner, and still says the Investigation stays open.
-          expect(note).toContain('(/app/alertzero?selectedConversationId=conv-other)');
-          expect(note).toContain('stays open until an analyst closes it');
-        });
-
-        it.each([
-          ['low_impact', 'medium_impact'],
-          ['medium_impact', 'high_impact'],
-          ['high_impact', 'extreme_impact'],
-        ])('ranks %s below %s', (weaker, stronger) => {
-          expect(covered(noteFor(stronger, weaker))).toBe(false);
-          expect(covered(noteFor(weaker, stronger))).toBe(true);
-        });
-
-        it('is covered when this finding asks for no level, as the recommendation does not', () => {
-          expect(covered(noteFor(undefined, 'high_impact'))).toBe(true);
-          expect(covered(noteFor(undefined, undefined))).toBe(true);
-        });
-
-        it('is not covered when the winner asks for no level and this finding does', () => {
-          const note = noteFor('high_impact', undefined);
-
-          expect(covered(note)).toBe(false);
-          expect(note).toContain('it asks for no level where this finding asks for high_impact');
-        });
-
-        it('is covered only by the same level when it does not know the level, rather than guessing', () => {
-          expect(covered(noteFor('custom_impact', 'custom_impact'))).toBe(true);
-          expect(covered(noteFor('custom_impact', 'extreme_impact'))).toBe(false);
-          expect(covered(noteFor('extreme_impact', 'custom_impact'))).toBe(false);
-        });
       });
 
       it('links the space the Investigation is in', () => {

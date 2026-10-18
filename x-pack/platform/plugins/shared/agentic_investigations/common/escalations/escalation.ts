@@ -110,6 +110,11 @@ export const listEscalationsQuerySchema = z
      * opening the escalation creation modal.
      */
     linked_investigation_id: conversationIdSchema.optional(),
+    /**
+     * When set, only escalations whose linked investigations impact this entity id are returned,
+     * and `pagination.total` counts only those.
+     */
+    entity: z.string().min(1).max(256).optional(),
   })
   .refine(({ page, per_page: perPage }) => page * perPage <= MAX_ESCALATIONS_RESULT_WINDOW, {
     message: `page * per_page must not exceed ${MAX_ESCALATIONS_RESULT_WINDOW}; escalations beyond that are not reachable through this API`,
