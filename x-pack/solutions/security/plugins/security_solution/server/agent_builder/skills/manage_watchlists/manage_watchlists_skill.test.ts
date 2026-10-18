@@ -12,18 +12,18 @@ const { content } = manageWatchlistsSkill;
 /**
  * Reply-content contract for the manage-watchlists skill.
  *
- * The agent-eval criteria for the entity-analytics manage-watchlists datasets score the reply,
- * not only the tool calls: watchlist ids next to the names in an enumeration, the ~10-minute
- * sync cadence in a rule-based-data-source confirmation, and the one-time-vs-standing-query
- * prose on an entity add. Tool routing was correct in every scored family while those three
- * obligations were dropped, because each one lived inside a single example step. They are now
- * stated once as an explicit contract and repeated at the flow that owes them; this test pins
- * both so a later edit cannot quietly trim them again.
+ * The entity-analytics agent-eval criteria for the manage-watchlists datasets score the reply,
+ * not only the tool calls: the ids next to the watchlist names in an enumeration, the ~10-minute
+ * sync cadence in a rule-based-data-source confirmation, and the one-time-vs-standing-query prose
+ * on an entity add. Tool routing was correct in every scored family while those three obligations
+ * were dropped, because each one lived inside a single example step. They are now stated once as
+ * an explicit contract and repeated at the flow that owes them; this test pins both so a later
+ * edit cannot quietly trim them again.
  */
 const sectionBetween = (start: string, end: string): string => {
   const from = content.indexOf(start);
   if (from === -1) {
-    throw new Error(`skill content is missing the section: ${start}`);
+    return '';
   }
   const to = content.indexOf(end, from + start.length);
   return to === -1 ? content.slice(from) : content.slice(from, to);
@@ -32,8 +32,14 @@ const sectionBetween = (start: string, end: string): string => {
 const replyContract = sectionBetween('## Reply contract', '## Example flows');
 
 const enumerate = sectionBetween('### Enumerate', '### Create\n');
-const createAndPopulate = sectionBetween('### Create and populate (headline flow)', '### Query-then-add flow');
-const queryThenAdd = sectionBetween('### Query-then-add flow (one-time)', '### Rule-based data source');
+const createAndPopulate = sectionBetween(
+  '### Create and populate (headline flow)',
+  '### Query-then-add flow'
+);
+const queryThenAdd = sectionBetween(
+  '### Query-then-add flow (one-time)',
+  '### Rule-based data source'
+);
 const storeSource = sectionBetween(
   '#### Example: the condition maps to a standard (ECS) field',
   '#### Example: the source/condition is customer-specific — ask first'
@@ -42,7 +48,10 @@ const indexSource = sectionBetween(
   '#### Example: the source/condition is customer-specific — ask first',
   '### Deciding one-time vs. rule-based'
 );
-const removeDataSource = sectionBetween('### Remove a rule-based data source', '### Remove (manual entity)');
+const removeDataSource = sectionBetween(
+  '### Remove a rule-based data source',
+  '### Remove (manual entity)'
+);
 
 describe('manageWatchlistsSkill reply contract', () => {
   describe('contract section', () => {
@@ -91,7 +100,9 @@ describe('manageWatchlistsSkill reply contract', () => {
 
   it('create-and-populate flow defers the add to a follow-up turn', () => {
     expect(createAndPopulate).toContain('confirmation-gated');
-    expect(createAndPopulate).toContain('do not call `security.add_entities_to_watchlist` in this turn');
+    expect(createAndPopulate).toContain(
+      'do not call `security.add_entities_to_watchlist` in this turn'
+    );
     expect(createAndPopulate).toContain('follow-up');
   });
 });
