@@ -141,7 +141,6 @@ describe('SignificantEventsPlugin setup', () => {
 
 describe('SignificantEventsPlugin alerting v2 rules client', () => {
   it('requests the alerting v2 rules client attributed to nightshift', async () => {
-    const registerKnowledgeIndicatorClientProvider = jest.fn();
     const getRulesClientWithRequestInSpace = jest.fn().mockResolvedValue({});
     const core = createCoreSetup();
     core.getStartServices.mockResolvedValue([
@@ -153,22 +152,22 @@ describe('SignificantEventsPlugin alerting v2 rules client', () => {
         },
         fieldsMetadata: { getClient: jest.fn().mockResolvedValue({}) },
         alertingVTwo: { getRulesClientWithRequestInSpace },
+        nightshiftSources: { getSourcesClient: jest.fn().mockResolvedValue({}) },
       },
       {},
     ] as unknown as Awaited<ReturnType<typeof core.getStartServices>>);
     const plugin = createPlugin();
-    plugin.setup(core, {
-      streams: {
-        registerKnowledgeIndicatorClientProvider,
-        getAttachmentClient: jest.fn().mockResolvedValue({}),
-        getStreamsClient: jest.fn().mockResolvedValue({}),
-      },
-    } as unknown as SignificantEventsPluginSetupDependencies);
-    const [provideKnowledgeIndicatorClient] =
-      registerKnowledgeIndicatorClientProvider.mock.calls[0];
+    plugin.setup(core, createSetupDeps());
     const request = httpServerMock.createKibanaRequest();
+    const { getSignificantEventsAlertingContext } = await (
+      plugin as unknown as {
+        getScopedClients: (params: { request: typeof request }) => Promise<{
+          getSignificantEventsAlertingContext: () => Promise<unknown>;
+        }>;
+      }
+    ).getScopedClients({ request });
 
-    await provideKnowledgeIndicatorClient(request);
+    await getSignificantEventsAlertingContext();
 
     expect(getRulesClientWithRequestInSpace).toHaveBeenCalledWith(request, 'default', {
       app: 'nightshift',
