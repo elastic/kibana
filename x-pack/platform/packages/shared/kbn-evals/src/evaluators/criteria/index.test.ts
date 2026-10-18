@@ -78,8 +78,25 @@ describe('createCriteriaEvaluator', () => {
     ]);
     expect(result.score).toBeCloseTo((2 + 1) / 6, 5);
     expect(result.explanation).toBe(
-      '"pass-me": Detected the thing\n"fail-me": No signal present\n"na-me": Feature not applicable'
+      '"pass-me" (PASS): Detected the thing\n' +
+        '"fail-me" (FAIL): No signal present\n' +
+        '"na-me" (N/A): Feature not applicable'
     );
+  });
+
+  it('names the per-criterion verdict so a FAIL without a reason is not rendered like a PASS', async () => {
+    mockScoreWith([
+      { id: 'pass-me', result: 'PASS', reason: 'Grounded in the alert' },
+      { id: 'fail-me', result: 'FAIL' },
+      { id: 'na-me', result: 'N/A' },
+    ]);
+
+    const result = await runEvaluation();
+
+    // The verdict is what separates a silent FAIL from a PASS; the reason stays the fallback text.
+    expect(result.explanation).toContain('"pass-me" (PASS)');
+    expect(result.explanation).toContain('"na-me" (N/A)');
+    expect(result.explanation).toContain('"fail-me" (FAIL): No explanation given');
   });
 
   it('keeps N/A at full weight and the aggregate label unchanged', async () => {
