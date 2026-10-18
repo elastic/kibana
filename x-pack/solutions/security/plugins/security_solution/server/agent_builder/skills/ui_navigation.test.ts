@@ -113,8 +113,8 @@ describe('UI-only intent manifests stay in sync with the skill content', () => {
   });
 
   it('keeps the UI-only and chat-handled intents disjoint', () => {
-    const uiOnly = UI_ONLY_NAVIGATION_INTENTS.map((intent) => intent.id);
-    const chatHandled = CHAT_HANDLED_NAVIGATION_INTENTS.map((intent) => intent.id);
+    const uiOnly: string[] = UI_ONLY_NAVIGATION_INTENTS.map((intent) => intent.id);
+    const chatHandled: string[] = CHAT_HANDLED_NAVIGATION_INTENTS.map((intent) => intent.id);
 
     expect(new Set(uiOnly).size).toBe(uiOnly.length);
     expect(new Set(chatHandled).size).toBe(chatHandled.length);

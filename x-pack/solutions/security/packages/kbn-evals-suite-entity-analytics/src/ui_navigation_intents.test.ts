@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/no-nodejs-modules
 import fs from 'fs';
+// eslint-disable-next-line import/no-nodejs-modules
 import path from 'path';
 
 import {
@@ -42,7 +44,7 @@ const DECLARED_INTENTS = [...specSource.matchAll(/ui_only_intent:\s*'([^']+)'/g)
 
 const EXAMPLE_COUNT = [...specSource.matchAll(/\binput:\s*\{\s*question:/g)].length;
 
-const UI_ONLY_IDS = new Set(UI_ONLY_NAVIGATION_INTENTS.map((intent) => intent.id));
+const UI_ONLY_IDS = new Set<string>(UI_ONLY_NAVIGATION_INTENTS.map((intent) => intent.id));
 
 describe('entity-analytics UI-navigation spec vs the product skill', () => {
   it('has examples to check (guards the source scan itself)', () => {
@@ -61,7 +63,9 @@ describe('entity-analytics UI-navigation spec vs the product skill', () => {
   });
 
   it('never asserts a redirect for an intent the product performs in chat', () => {
-    const chatHandledIds = new Set(CHAT_HANDLED_NAVIGATION_INTENTS.map((intent) => intent.id));
+    const chatHandledIds = new Set<string>(
+      CHAT_HANDLED_NAVIGATION_INTENTS.map((intent) => intent.id)
+    );
     const declaredChatHandled = DECLARED_INTENTS.filter((id) => chatHandledIds.has(id));
 
     expect(declaredChatHandled).toEqual([]);
