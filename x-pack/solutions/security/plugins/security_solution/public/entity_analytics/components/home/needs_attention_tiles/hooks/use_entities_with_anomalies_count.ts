@@ -118,6 +118,7 @@ export const useEntitiesWithAnomaliesCount = ({
     count: queryResult?.count ?? 0,
     entityIds: isFetching ? EMPTY_ENTITY_IDS : queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
     isLoading: isJobsLoading || isIndexLoading || isLoading || isFetching,
+    hasNoJobs: !isJobsLoading && jobIds.length === 0,
     // True while the count is on its way, not when its query can never run (skipped, no index, no job).
     isCountPending:
       isJobsLoading || isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),

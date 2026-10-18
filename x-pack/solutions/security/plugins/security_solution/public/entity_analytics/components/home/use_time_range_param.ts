@@ -8,8 +8,12 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
-export const TIME_RANGE_OPTIONS = ['24h', '7d', '30d'] as const;
-export type TimeRange = (typeof TIME_RANGE_OPTIONS)[number];
+import {
+  TIME_RANGE_OPTIONS,
+  type TimeRange,
+} from '../../../../common/entity_analytics/home/constants';
+
+export { TIME_RANGE_OPTIONS, type TimeRange };
 
 const DEFAULT: TimeRange = '24h';
 const PARAM_KEY = 'eaTimeRange';

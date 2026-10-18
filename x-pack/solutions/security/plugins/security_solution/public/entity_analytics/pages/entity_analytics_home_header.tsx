@@ -25,12 +25,17 @@ const SETTINGS_LABEL = i18n.translate(
 export const ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID =
   'entityAnalyticsHomeSettingsMenuItem';
 
-export const EntityAnalyticsHomeHeader = React.memo(() => {
+interface EntityAnalyticsHomeHeaderProps {
+  primaryActionItem?: AppHeaderMenu['primaryActionItem'];
+}
+
+const HomeHeader = ({ primaryActionItem }: EntityAnalyticsHomeHeaderProps) => {
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const { docLinks } = useKibana().services;
 
   const menu = useMemo<AppHeaderMenu>(
     () => ({
+      primaryActionItem,
       items: [
         {
           id: 'entityAnalyticsSettings',
@@ -43,7 +48,7 @@ export const EntityAnalyticsHomeHeader = React.memo(() => {
         },
       ],
     }),
-    [getSecuritySolutionUrl]
+    [getSecuritySolutionUrl, primaryActionItem]
   );
 
   return (
@@ -54,6 +59,7 @@ export const EntityAnalyticsHomeHeader = React.memo(() => {
       docLink={docLinks.links.securitySolution.entityAnalytics.entityRiskScoring}
     />
   );
-});
+};
 
+export const EntityAnalyticsHomeHeader = React.memo(HomeHeader);
 EntityAnalyticsHomeHeader.displayName = 'EntityAnalyticsHomeHeader';

@@ -63,6 +63,7 @@ import {
 } from '../components/home/entities_table';
 import { ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY } from '../components/home/constants';
 import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
+import { useGenerateAiBriefAction } from '../components/home/ai_brief/use_generate_ai_brief_action';
 
 const combineFilters = (
   parts: Array<QueryDslQueryContainer | null | undefined>
@@ -144,6 +145,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     watchlistedCount,
     watchlistedEntityIds,
     isLoading: alertBasedLoading,
+    error: alertBasedError,
     isCountPending: alertBasedPending,
   } = useAlertBasedTiles({
     spaceId: resolvedSpaceId,
@@ -155,6 +157,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     count: anomaliesCount,
     entityIds: anomaliesEntityIds,
     isLoading: anomaliesLoading,
+    hasNoJobs: hasNoAnomalyJobs,
+    error: anomaliesError,
     isCountPending: anomaliesPending,
   } = useEntitiesWithAnomaliesCount({
     spaceId: resolvedSpaceId,
@@ -166,6 +170,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     count: newEntityCount,
     entityIds: newEntityEntityIds,
     isLoading: newEntityLoading,
+    error: newEntityError,
     isCountPending: newEntityPending,
   } = useNewEntityCount({
     spaceId: resolvedSpaceId,
@@ -178,6 +183,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     entityIds: riskMoversEntityIds,
     isLoading: riskMoversLoading,
     isMissingIndex: riskMoversMissingIndex,
+    error: riskMoversError,
     isCountPending: riskMoversPending,
   } = useRiskMoversCount({
     spaceId: resolvedSpaceId,
@@ -190,6 +196,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     entityIds: newlyHCEntityIds,
     isLoading: newlyHCLoading,
     isMissingIndex: newlyHCMissingIndex,
+    error: newlyHCError,
     isCountPending: newlyHCPending,
   } = useNewlyHighCriticalCount({
     spaceId: resolvedSpaceId,
@@ -366,6 +373,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: alertsTrend,
         isLoading: alertBasedLoading,
+        entityIds: alertsEntityIds,
+        isUnavailable: Boolean(alertBasedError),
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
           {
@@ -396,6 +405,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: anomaliesHistoryMissing,
         trend: anomaliesTrend,
         isLoading: anomaliesLoading,
+        entityIds: anomaliesEntityIds,
+        // Without ML jobs the tile shows 0, which isn't a real count.
+        isUnavailable: Boolean(anomaliesError) || hasNoAnomalyJobs,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
           {
@@ -425,6 +437,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: riskMoversHistoryMissing,
         trend: riskMoversTrend,
         isLoading: riskMoversLoading,
+        entityIds: riskMoversEntityIds,
+        isUnavailable: Boolean(riskMoversError),
         noDataMessage: riskMoversMissingIndex
           ? i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.noData', {
               defaultMessage: 'Requires risk score history data',
@@ -467,6 +481,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: newlyHCHistoryMissing,
         trend: newlyHCTrend,
         isLoading: newlyHCLoading,
+        entityIds: newlyHCEntityIds,
+        isUnavailable: Boolean(newlyHCError),
         noDataMessage: newlyHCMissingIndex
           ? i18n.translate(
               'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.noData',
@@ -513,6 +529,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: watchlistedTrend,
         isLoading: alertBasedLoading,
+        entityIds: watchlistedEntityIds,
+        isUnavailable: Boolean(alertBasedError),
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
           {
@@ -539,6 +557,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: newEntityHistoryMissing,
         trend: newEntityTrend,
         isLoading: newEntityLoading,
+        entityIds: newEntityEntityIds,
+        isUnavailable: Boolean(newEntityError),
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
           {
@@ -557,6 +577,18 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       },
     ],
     [
+      alertsEntityIds,
+      anomaliesEntityIds,
+      riskMoversEntityIds,
+      newlyHCEntityIds,
+      watchlistedEntityIds,
+      newEntityEntityIds,
+      alertBasedError,
+      anomaliesError,
+      hasNoAnomalyJobs,
+      riskMoversError,
+      newlyHCError,
+      newEntityError,
       alertsCount,
       alertsDelta,
       alertsTrend,
@@ -596,6 +628,14 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     ]
   );
 
+  const generateAiBriefAction = useGenerateAiBriefAction({
+    cards: signalCards,
+    timeRange,
+    entityFilters,
+    // A filter that excludes a tile isn't a focus on it.
+    focusTileId: activeFilter?.exclude ? undefined : activeFilter?.cardId,
+  });
+
   const dataViewContextValue = useMemo(
     () => ({ dataView, dataViewIsLoading: isDataViewLoading }),
     [dataView, isDataViewLoading]
@@ -609,7 +649,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   return (
     <>
-      <EntityAnalyticsHomeHeader />
+      <EntityAnalyticsHomeHeader primaryActionItem={generateAiBriefAction} />
       <SecuritySolutionPageWrapper noPadding data-test-subj="entityAnalyticsNewHomePage">
         <div
           css={css`
