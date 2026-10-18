@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { attachmentTools, internalTools } from '@kbn/agent-builder-common';
 import type { Evaluator } from '@kbn/evals';
 import type {
   AttackDiscoveryAgentBuilderExample,
@@ -20,7 +21,26 @@ export const TRAJECTORY_EVALUATOR_NAME = 'StrictTrajectory';
 // Calls the harness pays on every run, whatever route the model picks.
 // `load_skill` is how the skill that carries the expected tool path is reached,
 // so it has never counted against precision.
-const HARNESS_TOOL_CALLS = ['load_skill'];
+const HARNESS_TOOL_CALLS = [internalTools.loadSkill];
+
+/**
+ * Calls the platform's own instructions make on any multi-step task, so they
+ * measure the platform's bookkeeping contract rather than the model's route.
+ *
+ * - `write_todos` — its own tool description tells the agent to "use this tool
+ *   frequently", for "any task that requires 3 or more distinct actions" and
+ *   "after receiving new instructions". Every example in this suite is such a
+ *   task, so the call is the platform's plan-tracking requirement, not an
+ *   investigative choice.
+ * - `attachments.add` — the report contract. The generator skill's own output
+ *   format renders the attack flow graph as an attachment (`attachments.add`,
+ *   type `graph`), so a compliant report pays the write-back.
+ *
+ * The ids come from the platform's own tool registry, so a rename in Agent
+ * Builder updates this exclusion instead of silently scoring scaffolding
+ * against the model.
+ */
+const BOOKKEEPING_TOOL_CALLS = [internalTools.writeTodos, attachmentTools.add];
 
 /**
  * Calls the EXAMPLE's own contract forces on a compliant run.
@@ -39,7 +59,7 @@ const HARNESS_TOOL_CALLS = ['load_skill'];
  */
 const fixtureRequiredToolCalls = (
   input: AttackDiscoveryAgentBuilderExample['input'] | undefined
-): string[] => (input?.attachments?.length ? ['attachments.read'] : []);
+): string[] => (input?.attachments?.length ? [attachmentTools.read] : []);
 
 export const createStrictTrajectoryEvaluator = ({
   extractToolCalls,
@@ -83,25 +103,29 @@ export const createStrictTrajectoryEvaluator = ({
 
     // The routing requirement — the expected tools appearing in order — is
     // asserted above. Precision then counts only the calls that ARE routing
-    // decisions: the harness calls and the steps the fixture's own contract
-    // requires are not choices the model made, so scoring them against the
-    // expected path penalises compliance.
+    // decisions: the harness calls, the platform's bookkeeping calls and the
+    // steps the fixture's own contract requires are not choices the model made,
+    // so scoring them against the expected path penalises compliance.
     const nonRoutingToolCalls = new Set([
       ...HARNESS_TOOL_CALLS,
+      ...BOOKKEEPING_TOOL_CALLS,
       ...fixtureRequiredToolCalls(input),
     ]);
     const routingToolCalls = actual.filter((tool) => !nonRoutingToolCalls.has(tool));
+    const excludedToolCalls = actual.filter((tool) => nonRoutingToolCalls.has(tool));
     const score = expectedPath.length / Math.max(routingToolCalls.length, expectedPath.length);
     return {
       score,
       explanation: `Expected path found in order. ${actual.length} total tool calls (${
         routingToolCalls.length
-      } routing, ${expectedPath.length} expected). Precision: ${score.toFixed(3)}.`,
+      } routing, ${excludedToolCalls.length} platform bookkeeping, ${
+        expectedPath.length
+      } expected). Precision: ${score.toFixed(3)}.`,
       metadata: {
         actualPath: actual,
         expectedPath,
         routingToolCalls,
-        excludedToolCalls: actual.filter((tool) => nonRoutingToolCalls.has(tool)),
+        excludedToolCalls,
       },
     };
   },

@@ -19,7 +19,7 @@ interface Params {
   metadata: AttackDiscoveryAgentBuilderExample['metadata'];
 }
 
-const ATTACHMENT_ALERTS: AttackDiscoveryAgentBuilderExample['input']['attachments'] = [
+const ATTACHMENT_ALERTS: NonNullable<AttackDiscoveryAgentBuilderExample['input']>['attachments'] = [
   { type: 'security.alerts', data: { alertIds: ['alert-1', 'alert-2'] } },
 ];
 
@@ -144,6 +144,111 @@ describe('createStrictTrajectoryEvaluator', () => {
     expect(result.score).toBe(0.5);
   });
 
+  // F2 (build 01a12766): the platform's own tool descriptions make bookkeeping
+  // calls on every multi-step task — `write_todos` is told to be used
+  // "frequently" for "any task that requires 3 or more distinct actions", and
+  // the generator skill's report contract renders the attack flow graph through
+  // `attachments.add`. Counting them against precision charged the platform's
+  // contract to the model: 22 cells of this build scored below 1.0 with the
+  // expected path satisfied in order.
+  it('scores 1 when a compliant run also writes todos', async () => {
+    const result = await evaluator.evaluate(
+      params({
+        input: {
+          expectedToolPath: ['security.attack-discovery.run'],
+          attachments: ATTACHMENT_ALERTS,
+        } as AttackDiscoveryAgentBuilderExample['input'],
+        toolIds: [
+          'load_skill',
+          'write_todos',
+          'attachments.read',
+          'security.attack-discovery.run',
+          'write_todos',
+        ],
+        expectedToolPath: ['security.attack-discovery.run'],
+      })
+    );
+
+    expect(result.score).toBe(1);
+    expect(result.metadata).toMatchObject({
+      routingToolCalls: ['security.attack-discovery.run'],
+      excludedToolCalls: ['load_skill', 'write_todos', 'attachments.read', 'write_todos'],
+    });
+  });
+
+  it('scores 1 when a compliant run also persists the report attachments', async () => {
+    const result = await evaluator.evaluate(
+      params({
+        input: {
+          expectedToolPath: ['security.attack-discovery.run'],
+          attachments: ATTACHMENT_ALERTS,
+        } as AttackDiscoveryAgentBuilderExample['input'],
+        toolIds: [
+          'load_skill',
+          'security.attack-discovery.run',
+          'attachments.add',
+          'attachments.add',
+        ],
+        expectedToolPath: ['security.attack-discovery.run'],
+      })
+    );
+
+    expect(result.score).toBe(1);
+  });
+
+  it('keeps interleaved bookkeeping calls out of the denominator on a multi-tool path', async () => {
+    const expectedToolPath = [
+      'security.attack-discovery.get_default_esql_query',
+      'platform.core.execute_esql',
+      'security.attack-discovery.run',
+    ];
+    const result = await evaluator.evaluate(
+      params({
+        input: {
+          expectedToolPath,
+        } as AttackDiscoveryAgentBuilderExample['input'],
+        toolIds: [
+          'load_skill',
+          'load_skill',
+          'security.attack-discovery.get_default_esql_query',
+          'write_todos',
+          'platform.core.execute_esql',
+          'platform.core.execute_esql',
+          'write_todos',
+          'security.attack-discovery.run',
+          'attachments.add',
+        ],
+        expectedToolPath,
+      })
+    );
+
+    // The in-order assertion still reads the recorded sequence; of the calls
+    // that are the model's own, one (`execute_esql` twice) is extra.
+    expect(result.score).toBe(0.75);
+  });
+
+  it('still counts extra routing calls that sit next to bookkeeping calls', async () => {
+    const result = await evaluator.evaluate(
+      params({
+        input: {
+          expectedToolPath: ['security.attack-discovery.run'],
+          attachments: ATTACHMENT_ALERTS,
+        } as AttackDiscoveryAgentBuilderExample['input'],
+        toolIds: [
+          'load_skill',
+          'write_todos',
+          'attachments.read',
+          'platform.core.execute_esql',
+          'security.attack-discovery.run',
+          'attachments.add',
+        ],
+        expectedToolPath: ['security.attack-discovery.run'],
+      })
+    );
+
+    expect(result.score).toBe(0.5);
+  });
+
   // Negative controls: the routing requirement itself is unchanged by the
   // precision fix — a run that never reaches the expected tool, or reaches the
   // expected tools out of order, still scores 0.
@@ -155,6 +260,21 @@ describe('createStrictTrajectoryEvaluator', () => {
           attachments: ATTACHMENT_ALERTS,
         } as AttackDiscoveryAgentBuilderExample['input'],
         toolIds: ['load_skill', 'attachments.read'],
+        expectedToolPath: ['security.attack-discovery.run'],
+      })
+    );
+
+    expect(result.score).toBe(0);
+  });
+
+  it('scores 0 when the expected tool is never called, whatever bookkeeping the run did', async () => {
+    const result = await evaluator.evaluate(
+      params({
+        input: {
+          expectedToolPath: ['security.attack-discovery.run'],
+          attachments: ATTACHMENT_ALERTS,
+        } as AttackDiscoveryAgentBuilderExample['input'],
+        toolIds: ['load_skill', 'write_todos', 'attachments.read', 'attachments.add'],
         expectedToolPath: ['security.attack-discovery.run'],
       })
     );
