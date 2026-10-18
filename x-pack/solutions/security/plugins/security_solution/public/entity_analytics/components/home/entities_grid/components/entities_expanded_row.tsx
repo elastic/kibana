@@ -264,7 +264,7 @@ export const ExpandedEntityGroup: React.FC<ExpandedEntityGroupProps> = ({
           {...rowProps}
         />
       ))}
-      {total > rows.length && rows.length > 0 && (
+      {total != null && total > rows.length && rows.length > 0 && (
         <div
           role="row"
           css={css`
