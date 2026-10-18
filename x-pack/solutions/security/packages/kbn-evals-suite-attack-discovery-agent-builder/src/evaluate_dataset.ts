@@ -877,9 +877,11 @@ export const extractAdToolEsqlQuery = (
  * - `provided` — the route's provided-alert reconstruction, which writes the
  *   alert set the model SUPPLIED into the retrieval block
  *   (`get_pipeline_data.ts` Step 2.5, `alerts_context_count: providedAlerts.length`).
- *   That branch is unreachable at this revision; making it reachable must not
- *   turn the supplied count into a retrieved one, so the exclusion is required
- *   rather than defensive.
+ *   That branch is the reading for a supplied-alerts run, not a defensive case:
+ *   no alert-retrieval workflow executes, so `alertRetrievalData` stays null and
+ *   Step 2.5 is what fills the block (build 01a12766: every entry it carries).
+ *   The count is the set the model SUPPLIED, so admitting it would answer how
+ *   many alerts the model handed over instead of how many it retrieved.
  * - `skill` — the gate (skill) decision run, merged into `alert_retrieval` by
  *   Step 5b with the alert set PASSED to generation.
  *

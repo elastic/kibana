@@ -903,9 +903,11 @@ describe("the AD tool call's own ES|QL query", () => {
 describe('supplied alerts can never be read as retrieved', () => {
   // `get_pipeline_data` Step 2.5 writes the SUPPLIED alert set into the
   // retrieval block (`extraction_strategy: 'provided'`,
-  // `alerts_context_count: providedAlerts.length`). That branch is unreachable
-  // at this revision; making it reachable without this exclusion would score the
-  // 7 provided-mode dense reps 16-vs-95 — a 0 that says nothing about retrieval.
+  // `alerts_context_count: providedAlerts.length`). That branch is the reading
+  // for a supplied-alerts run — no alert-retrieval workflow executes, so
+  // `alertRetrievalData` stays null. Taking it without this exclusion would score
+  // the 7 provided-mode dense reps 16-vs-95 — a 0 that says nothing about
+  // retrieval.
   it('reads a provided-mode reconstruction as supplied, and scores the agent retrieval', () => {
     const result = computeWorkflowAlertCounts({
       pipeline: {
