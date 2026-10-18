@@ -141,6 +141,62 @@ describe('inferenceAdapter', () => {
       ]);
     });
 
+    it('recovers a harmony tool call returned as content when tools are declared', async () => {
+      const source$ = of(
+        createOpenAIChunk({
+          delta: {
+            content:
+              'assistantcommentary to=functions.load_skill json{"skill":"attack-discovery-generator"}',
+          },
+        })
+      );
+
+      executorMock.invoke.mockImplementation(async () => {
+        return {
+          actionId: '',
+          status: 'ok',
+          data: observableIntoEventSourceStream(source$, logger),
+        };
+      });
+
+      const response$ = inferenceAdapter.chatComplete({
+        ...defaultArgs,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: 'Hello',
+          },
+        ],
+        tools: {
+          load_skill: {
+            description: 'load a skill',
+            schema: { type: 'object', properties: {} },
+          },
+        },
+      });
+
+      const allChunks = await lastValueFrom(
+        response$.pipe(filter(isChatCompletionChunkEvent), toArray())
+      );
+
+      expect(allChunks).toEqual([
+        {
+          content: '',
+          tool_calls: [
+            {
+              index: 0,
+              toolCallId: 'load_skill',
+              function: {
+                name: 'load_skill',
+                arguments: '{"skill":"attack-discovery-generator"}',
+              },
+            },
+          ],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+      ]);
+    });
+
     it('emits token count event when provided by the response', async () => {
       const source$ = of(
         createOpenAIChunk({
