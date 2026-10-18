@@ -72,6 +72,8 @@ Each tool that emits a rich attachment already explains the verbatim-copy rule i
 
 **No \`renderTag\` in the result → no tag in your reply.** If the result lists multiple candidates (\`candidateEntityIds\`), write prose only and ask the user to pick the exact EUID. Otherwise follow the tool's error/message — do not invent a tag. (Exception: \`security.entity_analytics_dashboard\` — assemble the tag from \`attachments.add\`'s \`id\` / \`current_version\` as above.)
 
+**The empty \`security.search_entities\` result is the one error you must not take at face value.** \`No entities found matching the specified criteria.\` means *that query* matched nothing, and a risk-score-sorted query misses every entity that has no score yet. Retry before reporting anything (see *Investigation pattern → 1. Find entities*) and render the \`renderTag\` from the call that did return entities — a card-less "nothing found" is the wrong answer for a list/ranking question when unscored entities exist.
+
 **Always insert a blank line** between a \`<render_attachment>\` tag and any following prose — without it the prose is dropped by the markdown parser.
 
 **Never duplicate attachment contents in prose.** The Canvas IS the user-facing view. Write only narrative alongside it: trend, outliers, and recommended next steps.
@@ -109,6 +111,8 @@ ${ENTITY_ANALYTICS_UI_NAVIGATION_CONTENT}
 - Omit \`riskScoreMin\` unless the user named a numeric floor — the tool sorts by risk score descending by default, excluding entities with no score. Pass \`sortBy: 'criticality'\` when unscored entities must appear alongside scored ones.
 - \`criticalityLevels\` **filters** (restricts to specific tiers). \`sortBy: 'criticality'\` **ranks** across all tiers (extreme → high → medium → low, risk score as tiebreaker). Do NOT stuff all four levels into \`criticalityLevels\` to simulate a sort — it is a no-op and the tool will sort by risk score instead. The two parameters compose: \`criticalityLevels\` + \`sortBy: 'criticality'\` restricts AND orders.
 - Only pass \`riskScoreChangeInterval\` when the user asks about score changes over an interval.
+- **An empty search result does not mean the entity store is empty.** The default \`sortBy: 'riskScore'\` (and any \`riskLevels\` / \`riskScoreMin\` / \`riskScoreMax\` / \`riskScoreChangeInterval\` filter) requires \`entity.risk.calculated_score_norm\` to be non-null, so entities that have not been scored yet — assets with only criticality, freshly ingested identities — are invisible to it and the tool returns the error result \`No entities found matching the specified criteria.\`. When that happens, **do not report an empty entity store**: retry once in the same turn with \`sortBy: 'criticality'\` and **no** risk-score constraint (drop \`riskScoreMin\`, \`riskScoreMax\`, \`riskLevels\`, \`riskScoreChangeInterval\`), then answer from the retry.
+- **A list/ranking answer always carries the card.** Once a call returns entities, copy its \`renderTag\` verbatim (\`security.entity\`, single card or entities table) — that Canvas is the answer, not your prose. Only if the \`sortBy: 'criticality'\` retry is empty as well may you tell the user nothing was found, and then say what the empty query covered (e.g. "no users with a risk score yet", "no high-impact hosts") instead of asserting the store has no entities.
 
 ### 2. Get profiles
 - **2+ entities from search** — the aggregate attachment is sufficient. Do NOT loop \`security.get_entity\` over every row. Only call it for specific entities when the narrative requires per-entity enrichment.
@@ -197,8 +201,9 @@ When the user wants to create a watchlist, add/remove members (one-time or stand
 User: Which users have the highest risk scores?
 
 1. \`security.search_entities\` with \`entityTypes: ['user']\` (no \`riskScoreMin\` — tool sorts by score descending). When 2+ results, the tool emits the aggregate \`security.entity\` attachment.
-2. Render the \`renderTag\` verbatim from \`search_entities\` \`other\` result.
-3. 2–4 prose bullets: top scorers, criticality gaps, suggested follow-ups.
+2. If that call returns \`No entities found matching the specified criteria.\`, the store is not necessarily empty — the risk-score sort skips users that have no score yet. Retry once with \`sortBy: 'criticality'\` and no risk-score filters, and answer from that call.
+3. Render the \`renderTag\` verbatim from the \`search_entities\` \`other\` result of the call that returned entities.
+4. 2–4 prose bullets: top scorers, criticality gaps, suggested follow-ups. Only if both calls were empty, say what was empty ("no users with a risk score yet") instead of reporting that the entity store has no users.
 
 ### Example 2: Biggest risk score increase over a period
 
