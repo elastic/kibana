@@ -309,9 +309,7 @@ describe('DestinationValidator', () => {
     it('records an error when destinationId matches a connector', async () => {
       const validator = createValidator({
         connectorLookup: {
-          findConnectorById: jest
-            .fn()
-            .mockResolvedValue({ id: 'conn-1', name: 'SRE On-Call' }),
+          findConnectorById: jest.fn().mockResolvedValue({ id: 'conn-1', name: 'SRE On-Call' }),
         },
       });
 
@@ -641,7 +639,9 @@ steps:
 `;
       const validator = createValidator();
       validator.validatePayloadFieldPaths('wf-1', yaml);
-      expect(() => validator.finalize()).toThrow(/payload fields that do not exist.*`inputs\.payload\.rule`/);
+      expect(() => validator.finalize()).toThrow(
+        /payload fields that do not exist.*`inputs\.payload\.rule`/
+      );
     });
 
     it('records a warning when blockOnStructuralErrors is false', () => {
