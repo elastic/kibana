@@ -84,6 +84,48 @@ describe('alertAnalysisSkill', () => {
     it('forbids tool calls after the final analysis is written', () => {
       expect(alertAnalysisSkill.content).toContain('make no further tool calls');
     });
+
+    it('requires the answer to lead with the direct answer', () => {
+      expect(alertAnalysisSkill.content).toContain('## Answer Shape');
+      expect(alertAnalysisSkill.content).toContain(
+        'the first sentence gives the answer to the question that was asked'
+      );
+      expect(alertAnalysisSkill.content).toContain(
+        'Lead with the direct answer to the question that was asked'
+      );
+    });
+
+    it('keeps supporting detail to what the question asks for', () => {
+      expect(alertAnalysisSkill.content).toContain('Stay in scope');
+      expect(alertAnalysisSkill.content).toContain(
+        'belongs in the answer only when the question requires it'
+      );
+      // The old mandate to compile a comprehensive analysis is what puts
+      // peripheral claims (per-host counts, alert-by-alert listings) in the
+      // answer, where the claim-level rubrics score them against Relevance.
+      expect(alertAnalysisSkill.content).not.toContain(
+        'Compile a comprehensive analysis with supporting evidence'
+      );
+      expect(alertAnalysisSkill.content).toContain(
+        'Keep supporting detail to what the question asks for'
+      );
+    });
+
+    it('requires assessment and interpretation to be marked as inference', () => {
+      expect(alertAnalysisSkill.content).toContain('Separate fact from interpretation');
+      expect(alertAnalysisSkill.content).toContain(
+        "'could indicate', 'is consistent with', 'suggests'"
+      );
+      expect(alertAnalysisSkill.content).toContain("never as 'is', 'proves', or 'confirms'");
+    });
+
+    it('ends on the answer instead of a follow-up offer', () => {
+      expect(alertAnalysisSkill.content).toContain('Do not close with an offer to help further');
+      expect(alertAnalysisSkill.content).toContain('keep it to one short sentence');
+      expect(alertAnalysisSkill.content).not.toContain(
+        'Recommend specific next steps based on disposition'
+      );
+    });
   });
 
   describe('get-related-alerts inline tool', () => {
