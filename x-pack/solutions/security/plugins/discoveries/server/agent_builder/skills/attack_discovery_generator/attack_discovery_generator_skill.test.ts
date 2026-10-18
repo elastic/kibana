@@ -501,6 +501,84 @@ describe('attackDiscoveryGeneratorSkill', () => {
     });
   });
 
+  describe('empty-retrieval stop contract (the retrieval-only fixture)', () => {
+    // dataset.ts: golden-path (missing-alert-retrieval) expects exactly
+    // [`get_default_esql_query`, `execute_esql`], `expectedWorkflowStages: []`
+    // and a `null` passedAlertCount. Any run that reaches the pipeline therefore
+    // scores 0 on WorkflowEvidence (a `null` expectation asserts the run reports
+    // null) and pays StrictTrajectory precision for every extra call
+    // (precision = expected path / all non-`load_skill` calls). The retrieval
+    // fallback ladder is what invites that extra call, so the ladder has to make
+    // an empty upstream retrieval a reported answer instead of a mode choice.
+    const ladder = () =>
+      attackDiscoveryGeneratorSkill.content
+        .split('### Choose the retrieval mode that matches the evidence you have gathered')[1]
+        .split('### Anonymization note')[0];
+
+    const decisionTreeItem = (index: number) =>
+      ladder()
+        .split('### Mode selection decision tree')[1]
+        .split('\n')
+        .find((line) => line.trim().startsWith(`${index}.`)) ?? '';
+
+    const missingAlertsRow = () =>
+      attackDiscoveryGeneratorSkill.content
+        .split('\n')
+        .find((line) => line.startsWith('- **Missing alerts**')) ?? '';
+
+    it('names the mode the audited upstream retrieval hands over to', () => {
+      expect(ladder()).toContain('the audited retrieval path is');
+      expect(ladder()).toContain('`provided`');
+    });
+
+    it('stops on an empty upstream retrieval instead of retrying it', () => {
+      expect(ladder()).toContain('Report that nothing matched and stop.');
+    });
+
+    it('makes the empty upstream retrieval the first branch of the mode tree', () => {
+      expect(decisionTreeItem(1)).toContain('empty');
+      expect(decisionTreeItem(1)).not.toContain(RUN_ATTACK_DISCOVERY_TOOL_ID);
+      expect(decisionTreeItem(1)).not.toContain('custom_query');
+    });
+
+    it('gates custom_query on a retrieval that never ran in this turn', () => {
+      const customQueryBullet =
+        ladder()
+          .split('\n')
+          .find((line) => line.startsWith('- **`custom_query`**')) ?? '';
+
+      expect(customQueryBullet).toContain('no audited upstream retrieval ran in this turn');
+      expect(decisionTreeItem(5)).toContain('Did no retrieval run in this turn');
+    });
+
+    it('keeps the empty-retrieval route on the two retrieval calls, with no pipeline re-issue', () => {
+      const [route] = missingAlertsRow().split('. ');
+
+      expect(route).toContain(GET_DEFAULT_ESQL_QUERY_TOOL_ID);
+      expect(route).toContain(platformCoreTools.executeEsql);
+      expect(route).not.toContain(RUN_ATTACK_DISCOVERY_TOOL_ID);
+      expect(missingAlertsRow()).toContain('do not switch retrieval mode');
+    });
+
+    it('does not let the upfront pattern re-issue the query on an empty result', () => {
+      const upfrontStep =
+        attackDiscoveryGeneratorSkill.content
+          .split('\n')
+          .find((line) => line.startsWith('1. **Retrieve alerts upstream.**')) ?? '';
+
+      expect(upfrontStep).toContain('report that nothing matched and stop');
+      expect(upfrontStep).not.toMatch(/broaden the window in the query text/);
+    });
+
+    it('gives the reference run-modes doc the same empty-retrieval gate', () => {
+      const runModes = attackDiscoveryGeneratorSkill.referencedContent?.find(
+        (entry) => entry.name === 'attack-discovery-run-modes'
+      );
+
+      expect(runModes?.content).toContain('no audited upstream retrieval ran in this turn');
+    });
+  });
+
   describe('referencedContent', () => {
     it('exposes three references', () => {
       expect(attackDiscoveryGeneratorSkill.referencedContent).toHaveLength(3);
