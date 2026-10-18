@@ -59,11 +59,7 @@ const SORTED_WITH_ALIASES_FIELDS: readonly string[] = [
 
 /** Resolved entities with aliases take values over them, so they're read apart and merged with the rest. */
 const fetchSortedWithAliases = async (args: QueryArgs, ctx: SortPageContext) => {
-  const withAliases = await fetchResolvedEntitiesWithAliases(
-    args,
-    ctx.runQuery,
-    buildResolvedEntitiesWithAliasesQuery(args)
-  );
+  const withAliases = await fetchResolvedEntitiesWithAliases(args, ctx.runQuery);
   const others = await fetchSortedByField(
     { ...args, pageSize: args.pageSize + withAliases.length },
     ctx
@@ -132,10 +128,14 @@ const buildCriticalityLevelQuery = (
   ...buildRowFieldsSteps(args),
 ];
 
-/** Groups with aliases as rows: read from their alias docs, with the group values. */
-const buildResolvedEntitiesWithAliasesQuery = (args: QueryArgs): string[] => [
+/** Groups with aliases as rows, all of them or those of `targetIds`: read from their alias docs, with the group values. */
+const buildResolvedEntitiesWithAliasesQuery = (
+  args: QueryArgs,
+  targetIds?: readonly string[]
+): string[] => [
   `FROM ${getEntityAlias(args.namespace)}`,
   `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
+  ...buildFilterClause(targetIds && `${RESOLVED_TO_FIELD} IN (${toList(targetIds)})`),
   ...buildResolvedEntityRowSteps(args),
   ...buildEntityFilterConditions(args).map((condition) => `| WHERE ${condition}`),
   ...buildRowFieldsSteps(args),
@@ -147,14 +147,34 @@ const buildResolvedEntitiesWithAliasesQuery = (args: QueryArgs): string[] => [
 const getNativeSortValue = (row: Row, field: string): SortValue =>
   field === CRITICALITY_FIELD ? getCriticalitySortRank(row[field]) : getSortValue(row, field);
 
-/** KQL can't run after their join, so matches are checked apart; too many would break the order, so fail. */
+/** The resolved entities the search matches, and one more to tell there are too many to read by id. */
+const buildSearchedTargetIdsQuery = (args: QueryArgs): string[] => [
+  // The entity filters apply to the group values, in the groups' query.
+  ...buildEntitiesInViewSteps({ ...args, entityExpression: undefined }),
+  '| KEEP `entity.id`',
+  `| LIMIT ${getMaxAliasGroups(args.pageSize) + 1}`,
+];
+
+/**
+ * KQL can't run after their join, so a search first finds its resolved entities and reads only
+ * their groups; when it matches too many, the groups are read and their matches checked apart.
+ * Too many groups would break the order, so fail.
+ */
 const fetchResolvedEntitiesWithAliases = async (
   args: QueryArgs,
-  runQuery: EsqlRunner,
-  query: readonly string[]
+  runQuery: EsqlRunner
 ): Promise<Row[]> => {
-  const rows = await runQuery(query);
-  if (rows.length > getMaxAliasGroups(args.pageSize)) {
+  const maxGroups = getMaxAliasGroups(args.pageSize);
+  if (args.searchExpression) {
+    const searchedIds = getEntityIds(await runQuery(buildSearchedTargetIdsQuery(args)));
+    if (searchedIds.length <= maxGroups) {
+      return fetchPerIdChunk(runQuery, searchedIds, (ids) =>
+        buildResolvedEntitiesWithAliasesQuery(args, ids)
+      );
+    }
+  }
+  const rows = await runQuery(buildResolvedEntitiesWithAliasesQuery(args));
+  if (rows.length > maxGroups) {
     throw new Error('Too many groups of entities to sort by this column');
   }
   if (!args.searchExpression) return rows;
