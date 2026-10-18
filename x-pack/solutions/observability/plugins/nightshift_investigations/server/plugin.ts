@@ -45,6 +45,8 @@ import { notificationRoutingAttachment } from './lib/notifications/notification_
 import type { StoredNotificationRouting } from './lib/notifications/notification_routing';
 import { NotificationRoutingClient } from './lib/notifications/notification_routing_client';
 import { sendNotificationsStepDefinition } from './step_definitions/send_notifications';
+import { handleInvestigationFailureStepDefinition } from './step_definitions/handle_investigation_failure';
+import { renderSlackMessageStepDefinition } from './step_definitions/render_slack_message';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
@@ -352,6 +354,21 @@ export class NightshiftInvestigationsPlugin
             getInvestigationsClient: this.getInvestigationsClient,
             getActions: () => this.actionsStart,
             getRoutingClient: this.getNotificationRoutingClient,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          handleInvestigationFailureStepDefinition({
+            investigationLocator,
+            getInvestigationsClient: this.getInvestigationsClient,
+            getActions: () => this.actionsStart,
+            getRoutingClient: this.getNotificationRoutingClient,
+            getTriggerEmitter,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          renderSlackMessageStepDefinition({
+            investigationLocator,
+            getInvestigationsClient: this.getInvestigationsClient,
           })
         );
         // Registered even when disabled: the combined workflow no-ops a writer branch instead
