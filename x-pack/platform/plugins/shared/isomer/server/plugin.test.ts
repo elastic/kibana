@@ -16,7 +16,7 @@ jest.mock('@kbn/isomer', () => {
 });
 
 const startPlugin = () => {
-  const plugin = new IsomerPlugin(coreMock.createPluginInitializerContext({ enabled: true }));
+  const plugin = new IsomerPlugin(coreMock.createPluginInitializerContext({}));
   plugin.setup();
   return plugin.start();
 };
