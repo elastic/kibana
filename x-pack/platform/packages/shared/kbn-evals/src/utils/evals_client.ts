@@ -35,11 +35,15 @@ import {
   UpsertEvaluationDatasetResponse,
   getDatasetId,
   type DatasetMaturity,
+  type EvaluationExperimentSummary,
   type EvaluationScoreDocument,
   type IngestScoresRequestBodyInput,
   type Model as EvalsModel,
 } from '@kbn/evals-common';
 import { getStatusCode } from './retry_utils';
+
+const BASELINE_LOOKUP_PAGE_SIZE = 10;
+const BASELINE_LOOKUP_MAX_PAGES = 10;
 
 export interface EvaluatorStats {
   datasetId: string;
@@ -524,39 +528,43 @@ export class EvalsClient {
     reasoningEffort?: string;
     excludeExecutionId?: string;
   }): Promise<BaselineExperiment | undefined> {
+    const isMatch = (exp: EvaluationExperimentSummary) =>
+      exp.execution_id != null &&
+      exp.execution_id !== excludeExecutionId &&
+      (taskModelId === undefined || exp.task_model?.reasoning_effort === reasoningEffort);
+
     try {
-      const response = await this.kbnClient.request({
-        path: this.path(EVALS_EXPERIMENTS_URL),
-        method: 'GET',
-        query: {
-          suite_id: suiteId,
-          branch,
-          ...(taskModelId && { model_id: taskModelId }),
-          ...(reasoningEffort && { reasoning_effort: reasoningEffort }),
-          page: 1,
-          per_page: 10,
-        },
-        headers: VERSIONED_HEADERS,
-      });
+      for (let page = 1; page <= BASELINE_LOOKUP_MAX_PAGES; page++) {
+        const response = await this.kbnClient.request({
+          path: this.path(EVALS_EXPERIMENTS_URL),
+          method: 'GET',
+          query: {
+            suite_id: suiteId,
+            branch,
+            ...(taskModelId && { model_id: taskModelId }),
+            ...(reasoningEffort && { reasoning_effort: reasoningEffort }),
+            page,
+            per_page: BASELINE_LOOKUP_PAGE_SIZE,
+          },
+          headers: VERSIONED_HEADERS,
+        });
 
-      const parsed = GetEvaluationExperimentsResponse.parse(getResponseData(response));
-      const match = parsed.experiments.find(
-        (exp) =>
-          exp.execution_id != null &&
-          exp.execution_id !== excludeExecutionId &&
-          (taskModelId === undefined || exp.task_model?.reasoning_effort === reasoningEffort)
-      );
+        const parsed = GetEvaluationExperimentsResponse.parse(getResponseData(response));
+        const match = parsed.experiments.find(isMatch);
 
-      if (!match || !match.execution_id) {
-        return undefined;
+        if (match?.execution_id) {
+          return {
+            executionId: match.execution_id,
+            timestamp: match.timestamp,
+            gitCommitSha: match.git_commit_sha ?? null,
+            gitBranch: match.git_branch ?? null,
+          };
+        }
+        if (parsed.experiments.length < BASELINE_LOOKUP_PAGE_SIZE) {
+          return undefined;
+        }
       }
-
-      return {
-        executionId: match.execution_id,
-        timestamp: match.timestamp,
-        gitCommitSha: match.git_commit_sha ?? null,
-        gitBranch: match.git_branch ?? null,
-      };
+      return undefined;
     } catch (error: unknown) {
       this.log.error(
         `Failed to find baseline experiment for suite ${suiteId} on branch ${branch}: ${
