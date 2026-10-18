@@ -10,6 +10,7 @@ import type { QueryArgs, Row } from '../common';
 import { IN_VIEW_AGGREGATION, IN_VIEW_FIELD, buildEntitiesInViewBranch } from './entities_in_view';
 import {
   ANOMALY_RECORD_FILTER,
+  ID_LIST_CHUNK_SIZE,
   ML_ANOMALY_INDICES,
   buildAnomalyJobFilter,
   buildEntityAggregations,
@@ -20,10 +21,15 @@ import {
   buildStatsByEntityClause,
   SET_UNMAPPED_NULLIFY,
   toList,
+  fetchInChunks,
 } from './esql';
 import type { EntityAggregation } from './esql';
 import { buildEuidStages } from './euid_pipeline';
-import { buildRollUpOverAliasesSteps, withEntityAliases } from './resolved_entities';
+import {
+  buildRollUpOverAliasesSteps,
+  getMergedRowsByEntity,
+  withEntityAliases,
+} from './resolved_entities';
 import type { EnrichedFields, SortPageContext } from './types';
 import { buildSortWithValueSteps, getComputedColumnQuerySpec } from './computed_column';
 import type { ComputedColumn } from './computed_column';
@@ -81,16 +87,17 @@ const fetchAnomalyCounts = async (
   if (!getEntityIds(rows).length || !args.anomalyJobIds.length) return toAnomalyCounts(rows, []);
   const entities =
     args.rowsMode === 'resolved' ? await withEntityAliases(rows, args, runQuery) : rows;
-  return toAnomalyCounts(
-    rows,
-    await runQuery([
+  // Each part lists its entities in the query, so a large group is read in several.
+  const counts = await fetchInChunks(entities, ID_LIST_CHUNK_SIZE, (part) =>
+    runQuery([
       SET_UNMAPPED_NULLIFY,
-      ...buildAnomalyEntityRows(args, buildIdentityPrefilter(entities)),
-      `| WHERE \`entity.id\` IN (${toList(getEntityIds(entities))})`,
+      ...buildAnomalyEntityRows(args, buildIdentityPrefilter(part)),
+      `| WHERE \`entity.id\` IN (${toList(getEntityIds(part))})`,
       ANOMALY_COUNT_STATS,
       ...buildRollUpOverAliasesSteps(args, ANOMALY_AGGREGATIONS),
     ])
   );
+  return toAnomalyCounts(rows, getMergedRowsByEntity(counts.flat(), ANOMALY_AGGREGATIONS));
 };
 
 const toAnomalyCounts = (rows: readonly Row[], counts: Row[]): EnrichedFields => {

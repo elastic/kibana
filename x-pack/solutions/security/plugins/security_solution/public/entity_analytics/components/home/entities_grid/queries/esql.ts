@@ -14,6 +14,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { lastValueFrom } from 'rxjs';
 import { chunk } from 'lodash';
+import pMap from 'p-map';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../../common/constants';
 import { getRiskScoreTimeSeriesIndex } from '../../../../../../common/entity_analytics/risk_engine';
 import {
@@ -63,14 +64,24 @@ export const getMaxAliasGroups = (pageSize: number): number => ESQL_MAX_RESULT_R
 /** Statements cap at 1MB and ids run ~100 chars, so an IN list holds at most this many ids. */
 export const ID_LIST_CHUNK_SIZE = 2_000;
 
+/** Queries a read runs at once: a large group or search fans out to dozens, which would flood ES. */
+const MAX_PARALLEL_QUERIES = 5;
+
+/** Fetches each chunk of `items`, a few at a time; results keep the chunks' order. */
+export const fetchInChunks = <T, R>(
+  items: readonly T[],
+  chunkSize: number,
+  fetchChunk: (itemsChunk: T[]) => Promise<R>
+): Promise<R[]> => pMap(chunk(items, chunkSize), fetchChunk, { concurrency: MAX_PARALLEL_QUERIES });
+
 export const fetchPerIdChunk = async (
   runQuery: EsqlRunner,
   ids: readonly string[],
   buildQuery: (ids: readonly string[]) => string[]
-): Promise<Row[]> => {
-  const chunks = chunk(ids, ID_LIST_CHUNK_SIZE);
-  return (await Promise.all(chunks.map((idsChunk) => runQuery(buildQuery(idsChunk))))).flat();
-};
+): Promise<Row[]> =>
+  (
+    await fetchInChunks(ids, ID_LIST_CHUNK_SIZE, (idsChunk) => runQuery(buildQuery(idsChunk)))
+  ).flat();
 
 const IDENTITY_SOURCE_FIELDS = [
   ...new Set(

@@ -344,6 +344,66 @@ describe('entities grid query builders', () => {
       expect(runQuery).not.toHaveBeenCalled();
     });
 
+    describe('a group too large for one query', () => {
+      const GROUP = 'host:big';
+      const MEMBERS = 300;
+      const groupRows = Array.from({ length: MEMBERS }, (_, i) => ({
+        'entity.id': `host:big-${i}`,
+        'entity.EngineMetadata.Type': 'host',
+        'host.id': `big-${i}`,
+        'entity.relationships.resolution.resolved_to': GROUP,
+      }));
+      const isAliasRead = (steps: readonly string[]) =>
+        steps.join('\n').includes('resolved_to IN ("host:big")');
+
+      it('reads the alerts of a resolved group in parts and adds them up', async () => {
+        const runQuery = jest.fn(async (steps: readonly string[]) =>
+          isAliasRead(steps)
+            ? groupRows
+            : [
+                {
+                  'entity.id': GROUP,
+                  alert_count: 2,
+                  alert_critical: 1,
+                  alert_high: 1,
+                  alert_medium: 0,
+                  alert_low: 0,
+                  last_seen_alert: `2026-10-18T1${runQuery.mock.calls.length}:00:00.000Z`,
+                },
+              ]
+        );
+
+        const fields = await alertsEnricher.fetch(
+          [{ 'entity.id': GROUP, 'entity.EngineMetadata.Type': 'host', 'host.id': 'big' }],
+          BASE_ARGS,
+          createRunContext(runQuery)
+        );
+
+        // 301 entities: the alias read, then two alert queries of up to 250.
+        expect(runQuery).toHaveBeenCalledTimes(3);
+        expect(fields.get(GROUP)).toEqual({
+          alert_count: 4,
+          alert_critical: 2,
+          alert_high: 2,
+          alert_medium: 0,
+          alert_low: 0,
+          last_seen_alert: '2026-10-18T13:00:00.000Z',
+        });
+      });
+
+      it('reads the alerts of many individual records of one group without failing', async () => {
+        const runQuery = jest.fn(async (_steps: readonly string[]): Promise<Row[]> => []);
+
+        await alertsEnricher.fetch(
+          groupRows,
+          { ...BASE_ARGS, rowsMode: 'individual' },
+          createRunContext(runQuery)
+        );
+
+        expect(runQuery).toHaveBeenCalledTimes(2);
+      });
+    });
+
     it('sets every alert field per entity, null for entities without alerts', async () => {
       const runQuery = jest.fn(async (_steps: readonly string[]) => [
         {

@@ -6,10 +6,11 @@
  */
 
 import type { QueryArgs, Row } from '../common';
+import type { EntityAggregation } from './esql';
 import {
   applyResolvedEntityFilterOverrides,
   fetchResolvedEntityFilterOverrides,
-  getPartsByResolvedEntity,
+  getMergedRowsByEntity,
   isFilteringByGroupValue,
   withEntityAliases,
   withResolvedEntityValues,
@@ -233,46 +234,56 @@ describe('withEntityAliases', () => {
     expect(runQuery).not.toHaveBeenCalled();
   });
 
-  it('fails when the aliases are more than the query of the read can list', async () => {
-    const runQuery = jest.fn(async (_steps: readonly string[]) =>
-      Array.from({ length: 2_001 }, (_, i) => aliasRow(`host:a${i}`, 'host:a'))
-    );
+  it('reads the aliases in pages when a response cannot hold them all', async () => {
+    const pageOf = (from: number, count: number) =>
+      Array.from({ length: count }, (_, i) =>
+        aliasRow(`host:a${String(from + i).padStart(5, '0')}`, 'host:a')
+      );
+    const runQuery = jest
+      .fn<Promise<Row[]>, [readonly string[]]>()
+      .mockResolvedValueOnce(pageOf(0, 10_000))
+      .mockResolvedValueOnce(pageOf(10_000, 3));
 
-    await expect(withEntityAliases([aliasRow('host:a')], ARGS, runQuery)).rejects.toThrow(
-      'too many aliases'
-    );
+    const rows = await withEntityAliases([aliasRow('host:a')], ARGS, runQuery);
+
+    expect(rows).toHaveLength(1 + 10_003);
+    expect(runQuery).toHaveBeenCalledTimes(2);
+    expect(runQuery.mock.calls[0][0].join('\n')).not.toContain('entity.id >');
+    expect(runQuery.mock.calls[1][0].join('\n')).toContain('entity.id > "host:a09999"');
   });
 });
 
-describe('getPartsByResolvedEntity', () => {
-  const getIdParts = (parts: Row[][]) => parts.map((part) => part.map((r) => r['entity.id']));
+describe('getMergedRowsByEntity', () => {
+  const AGGREGATIONS: EntityAggregation[] = [
+    { field: 'alert_count', aggregation: 'COUNT(*)', resolvedEntity: 'SUM' },
+    { field: 'last_seen_alert', aggregation: 'MAX(`@timestamp`)', resolvedEntity: 'MAX' },
+  ];
 
-  it('cuts the rows into parts of at most the given size', () => {
-    const rows = ['host:a', 'host:b', 'host:c'].map((id) => aliasRow(id));
-
-    expect(getIdParts(getPartsByResolvedEntity(rows, 2))).toEqual([
-      ['host:a', 'host:b'],
-      ['host:c'],
+  it('merges the rows of an entity read in several queries: counts add up, latest wins', () => {
+    expect(
+      getMergedRowsByEntity(
+        [
+          { 'entity.id': 'host:a', alert_count: 2, last_seen_alert: '2026-10-18T10:00:00.000Z' },
+          { 'entity.id': 'host:b', alert_count: 1, last_seen_alert: '2026-10-17T10:00:00.000Z' },
+          { 'entity.id': 'host:a', alert_count: 3, last_seen_alert: '2026-10-18T12:00:00.000Z' },
+        ],
+        AGGREGATIONS
+      )
+    ).toEqual([
+      { 'entity.id': 'host:a', alert_count: 5, last_seen_alert: '2026-10-18T12:00:00.000Z' },
+      { 'entity.id': 'host:b', alert_count: 1, last_seen_alert: '2026-10-17T10:00:00.000Z' },
     ]);
   });
 
-  it('keeps a resolved entity in one part with its aliases', () => {
-    const rows = [
-      aliasRow('host:a'),
-      aliasRow('host:b'),
-      aliasRow('host:b1', 'host:b'),
-      aliasRow('host:a1', 'host:a'),
-    ];
-
-    expect(getIdParts(getPartsByResolvedEntity(rows, 3))).toEqual([
-      ['host:a', 'host:a1'],
-      ['host:b', 'host:b1'],
-    ]);
-  });
-
-  it('fails for a resolved entity with more aliases than a part holds', () => {
-    const rows = [aliasRow('host:a'), aliasRow('host:a1', 'host:a'), aliasRow('host:a2', 'host:a')];
-
-    expect(() => getPartsByResolvedEntity(rows, 2)).toThrow('too many aliases');
+  it('keeps a value one of the rows lacks, and compares numbers as numbers', () => {
+    expect(
+      getMergedRowsByEntity(
+        [
+          { 'entity.id': 'host:a', alert_count: null, last_seen_alert: 9 },
+          { 'entity.id': 'host:a', alert_count: 4, last_seen_alert: 10 },
+        ],
+        AGGREGATIONS
+      )
+    ).toEqual([{ 'entity.id': 'host:a', alert_count: 4, last_seen_alert: 10 }]);
   });
 });

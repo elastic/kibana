@@ -22,6 +22,7 @@ import {
   SET_UNMAPPED_NULLIFY,
   toList,
   type EntityAggregation,
+  fetchInChunks,
 } from './esql';
 import {
   buildAlertEntityFilter,
@@ -32,7 +33,7 @@ import {
 } from './euid_pipeline';
 import {
   buildRollUpOverAliasesSteps,
-  getPartsByResolvedEntity,
+  getMergedRowsByEntity,
   withEntityAliases,
 } from './resolved_entities';
 import type { ColumnQuerySpec, EnrichedFields, SortPageContext } from './types';
@@ -165,18 +166,14 @@ const fetchAlertFields = async (
   if (!getEntityIds(rows).length) return new Map();
   const entities =
     args.rowsMode === 'resolved' ? await withEntityAliases(rows, args, runQuery) : rows;
-  // A resolved entity and its aliases must share a query to be counted together.
-  const parts = getPartsByResolvedEntity(entities, MAX_ENTITIES_PER_ALERTS_QUERY);
-  const alertColumns = await Promise.all(
-    parts.map((part) =>
-      runQuery([
-        ...buildOpenAlertsOfSteps(args, part),
-        ALERT_COLUMNS_STATS,
-        ...buildRollUpOverAliasesSteps(args, ALERT_AGGREGATIONS),
-      ])
-    )
+  const alertColumns = await fetchInChunks(entities, MAX_ENTITIES_PER_ALERTS_QUERY, (part) =>
+    runQuery([
+      ...buildOpenAlertsOfSteps(args, part),
+      ALERT_COLUMNS_STATS,
+      ...buildRollUpOverAliasesSteps(args, ALERT_AGGREGATIONS),
+    ])
   );
-  return toAlertFields(rows, alertColumns.flat());
+  return toAlertFields(rows, getMergedRowsByEntity(alertColumns.flat(), ALERT_AGGREGATIONS));
 };
 
 /** One alerts query gives both alert count and last alert, so they share one column. */

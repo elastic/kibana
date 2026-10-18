@@ -166,7 +166,9 @@ describe('fetchComputedColumnSortPage', () => {
     );
 
     expect(ids(rows)).toEqual(['m1', 'm0', 'm2']);
-    expect(calls).toEqual(['matches 10000', 'values 10000', 'search check', 'empty excluding 3']);
+    expect(calls.slice(0, 2)).toEqual(['matches 10000', 'values 10000']);
+    // The search check and the empty rows run at once, in either order.
+    expect([...calls.slice(2)].sort()).toEqual(['empty excluding 3', 'search check']);
   });
 
   it('runs the merged query when the search and the value rows are both too many', async () => {
