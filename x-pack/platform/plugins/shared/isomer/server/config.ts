@@ -8,10 +8,7 @@
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
-const configSchema = schema.object({
-  // Core skips loading this plugin entirely when false.
-  enabled: schema.boolean({ defaultValue: false }),
-});
+const configSchema = schema.object({});
 
 export type IsomerPluginConfig = TypeOf<typeof configSchema>;
 
