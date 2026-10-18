@@ -37,7 +37,12 @@ const createRunner = ({
 }) =>
   jest.fn(async (steps: readonly string[]): Promise<Row[]> => {
     const query = steps.join('\n');
-    if (query.includes('resolved_to IS NOT NULL')) return withAliases;
+    if (query.includes('resolved_to IS NOT NULL')) {
+      const targetIds = query.match(/resolved_to IN \(([^)]*)\)/)?.[1];
+      return targetIds == null
+        ? withAliases
+        : withAliases.filter((group) => targetIds.includes(`"${group['entity.id']}"`));
+    }
     if (query.includes('| KEEP `entity.id`')) return searched.map((id) => ({ 'entity.id': id }));
     const level = query.match(/asset\.criticality == "([^"]+)"/)?.[1] ?? null;
     return others.filter((other) => other['asset.criticality'] === level);
@@ -55,6 +60,34 @@ describe('sorting resolved rows by a value over the aliases', () => {
 
     const rows = await fetchSorted(
       { ...ARGS, searchExpression: 'KQL("""entity.name: web*""")' },
+      runQuery
+    );
+
+    expect(getIds(rows)).toEqual(['host:g2']);
+  });
+
+  it('reads only the groups the search matches, however many groups there are', async () => {
+    const runQuery = createRunner({
+      withAliases: Array.from({ length: 9_997 }, (_, i) => row(`host:${i}`, null)),
+      searched: ['host:42'],
+    });
+
+    const rows = await fetchSorted(
+      { ...ARGS, pageSize: 3, searchExpression: 'KQL("""entity.name: web*""")' },
+      runQuery
+    );
+
+    expect(getIds(rows)).toEqual(['host:42']);
+  });
+
+  it('checks the matches apart when the search matches too many resolved entities to read by id', async () => {
+    const runQuery = createRunner({
+      withAliases: [row('host:g1', 'low_impact'), row('host:g2', 'low_impact')],
+      searched: Array.from({ length: 9_997 }, (_, i) => `host:${i}`).concat('host:g2'),
+    });
+
+    const rows = await fetchSorted(
+      { ...ARGS, pageSize: 3, searchExpression: 'KQL("""entity.name: web*""")' },
       runQuery
     );
 

@@ -137,6 +137,25 @@ const SEARCH_CASES: readonly FilterCase[] = [
   ['a name search', WEB_SEARCH, 'alert_count', 'desc', ['host:h1', 'host:h2', 'host:h3']],
   ['a name search', WEB_SEARCH, 'group_size', 'desc', ['host:h1', 'host:h2', 'host:h3']],
   ['a name search', WEB_SEARCH, 'asset.criticality', 'desc', ['host:h1', 'host:h2', 'host:h3']],
+  // host:h1 was first seen through its alias host:h4, 40 days ago; the others 20 days ago.
+  [
+    'a name search',
+    WEB_SEARCH,
+    'entity.lifecycle.first_seen',
+    'asc',
+    ['host:h1', 'host:h2', 'host:h3'],
+  ],
+  [
+    // host:h1 is extreme impact through one of its aliases, not its own criticality.
+    'a name search and a criticality filter on the group',
+    {
+      ...WEB_SEARCH,
+      entityFilters: { ...EMPTY_ENTITY_FILTERS, assetCriticality: ['extreme_impact'] },
+    },
+    'asset.criticality',
+    'desc',
+    ['host:h1'],
+  ],
 ];
 
 const FILTER_CASES: readonly FilterCase[] = [
