@@ -186,14 +186,11 @@ describe('createForensicTrajectoryEvaluator', () => {
   });
 
   it('prefers the forbidden list when a row declares both', async () => {
-    const result = await evaluateWith(
-      ['platform.core.execute_esql'],
-      {
-        criteria: [],
-        tool_sequence: ['platform.core.generate_esql', 'platform.core.execute_esql'],
-        forbidden_tool_sequence: ['platform.core.execute_esql'],
-      }
-    );
+    const result = await evaluateWith(['platform.core.execute_esql'], {
+      criteria: [],
+      tool_sequence: ['platform.core.generate_esql', 'platform.core.execute_esql'],
+      forbidden_tool_sequence: ['platform.core.execute_esql'],
+    });
 
     expect(result.score).toBe(0);
     expect(result.label).toBe('forbidden_tools_used');
