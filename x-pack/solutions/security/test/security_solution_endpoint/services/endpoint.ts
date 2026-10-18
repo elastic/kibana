@@ -44,6 +44,7 @@ import { catchHttpErrorFormatAndThrow } from '@kbn/security-solution-plugin/comm
 import {
   startMetadataTransforms,
   stopMetadataTransforms,
+  waitForMetadataTransformsReady,
 } from '@kbn/security-solution-plugin/common/endpoint/utils/transforms';
 import type { FtrProviderContext } from '../configs/ftr_provider_context';
 
@@ -154,8 +155,9 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
       const endpointPackage = await getEndpointPackageInfo(client);
 
       if (waitUntilTransformed && customIndexFn) {
-        // need this before indexing docs so that the united transform doesn't
-        // create a checkpoint with a timestamp after the doc timestamps
+        // Match the default loader: wait until transforms exist/are healthy, then stop them
+        // before indexing so the united transform does not checkpoint after the doc timestamps.
+        await waitForMetadataTransformsReady(this.esClient, endpointPackage.version);
         await stopMetadataTransforms(this.esClient, endpointPackage.version);
       }
 
@@ -187,16 +189,20 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
             this.log
           );
 
-      if (waitUntilTransformed && customIndexFn) {
-        await startMetadataTransforms(
-          this.esClient,
-          Array.from(new Set(indexedData.hosts.map((host) => host.agent.id))),
-          endpointPackage.version
-        );
-      }
-
       if (waitUntilTransformed) {
-        const agentIds = Array.from(new Set(indexedData.agents.map((agent) => agent.agent!.id)));
+        const agentIds = Array.from(
+          new Set(
+            indexedData.agents
+              .map((agent) => agent.agent?.id)
+              .filter((id): id is string => Boolean(id))
+          )
+        );
+
+        if (customIndexFn) {
+          // United metadata joins fleet agents, not host-only metadata docs.
+          await startMetadataTransforms(this.esClient, agentIds, endpointPackage.version);
+        }
+
         await this.waitForUnitedEndpoints(agentIds, waitTimeout);
       }
 

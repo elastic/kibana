@@ -15,7 +15,7 @@ import type { CancellationToken } from '@kbn/reporting-common';
 import { JOB_STATUS, KibanaShuttingDownError, QueueTimeoutError } from '@kbn/reporting-common';
 import type { ReportDocument, TaskRunResult } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
-import { type ExportType, type ReportingConfigType } from '@kbn/reporting-server';
+import { ScheduleType, type ExportType, type ReportingConfigType } from '@kbn/reporting-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
@@ -832,7 +832,7 @@ describe('Run Scheduled Report Task', () => {
       fakeRequest: fakeRawRequest,
     } as unknown as RunContext);
 
-    await expect(() => taskRunner.run()).rejects.toThrowError('failure generating report');
+    await expect(() => taskRunner.run()).rejects.toThrow('failure generating report');
 
     expect(logger.error).toHaveBeenCalledWith(
       new Error(
@@ -852,6 +852,57 @@ describe('Run Scheduled Report Task', () => {
       completed_at: expect.any(String),
       error: expect.objectContaining({ name: 'Error', message: 'failure generating report' }),
     });
+  });
+
+  it('fails without running the export type when a serverless feature flag has disabled it', async () => {
+    const isExportTypeEnabled = jest
+      .spyOn(mockReporting, 'isExportTypeEnabled')
+      .mockResolvedValue(false);
+    const runThisTaskFn = jest.fn();
+    mockReporting.getExportTypesRegistry().register({
+      id: 'test2',
+      name: 'Test2',
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: runThisTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test2 scheduled export',
+      notifyUsage: jest.fn(),
+      jobContentEncoding: 'base64',
+      jobType: 'test2',
+      validLicenses: [],
+    } as unknown as ExportType);
+    const store = await mockReporting.getStore();
+    const thisSavedReport = new SavedReport({ ...savedReportData, jobtype: 'test2' });
+    store.addReport = jest.fn().mockImplementation(async () => thisSavedReport);
+    store.setReportFailed = jest.fn();
+
+    const task = new RunScheduledReportTask({
+      reporting: mockReporting,
+      config: configType,
+      logger,
+    });
+    await task.init(taskManagerMock.createStart(), emailNotificationService);
+    const taskRunner = task.getTaskDefinition().createTaskRunner({
+      taskInstance: {
+        id: 'report-so-id',
+        runAt: new Date('2023-10-01T00:00:00Z'),
+        params: {
+          id: 'report-so-id',
+          jobtype: 'test2',
+          schedule: {
+            rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' },
+          },
+        },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    await expect(() => taskRunner.run()).rejects.toThrow('Export type test2 is disabled');
+
+    expect(isExportTypeEnabled).toHaveBeenCalledWith('test2', ScheduleType.SCHEDULED);
+    expect(runThisTaskFn).not.toHaveBeenCalled();
   });
 
   it('should retry up to maxRetries', async () => {
@@ -912,7 +963,7 @@ describe('Run Scheduled Report Task', () => {
     } as unknown as RunContext);
 
     const runPromise = taskRunner.run();
-    const expectPromise = expect(runPromise).rejects.toThrowError('failure generating report');
+    const expectPromise = expect(runPromise).rejects.toThrow('failure generating report');
     // Advance past all retry delays
     for (let i = 0; i < 10; i++) {
       await jest.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);

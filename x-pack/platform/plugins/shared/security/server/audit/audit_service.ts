@@ -5,16 +5,28 @@
  * 2.0.
  */
 
-import { distinctUntilKeyChanged, map, shareReplay } from 'rxjs';
+import {
+  combineLatest,
+  distinctUntilKeyChanged,
+  map,
+  shareReplay,
+  startWith,
+  Subject,
+  take,
+} from 'rxjs';
 
 import type {
   HttpServiceSetup,
   KibanaRequest,
+  LogFileWriteError,
+  LogFileWriteErrorHandler,
   Logger,
   LoggerContextConfigInput,
   LoggingServiceSetup,
   StatusServiceSetup,
 } from '@kbn/core/server';
+import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
+import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
 import type { AuditEvent, AuditLogger, AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
@@ -51,6 +63,13 @@ interface AuditServiceSetupParams {
     request: KibanaRequest
   ): ReturnType<SecurityPluginSetup['authc']['getCurrentUser']> | undefined;
 
+  /**
+   * Identifies a fake request minted for a service account, without I/O. Fake requests never pass
+   * through the authenticator, so this is the only way their events can name an actor. Defaults to
+   * identifying none.
+   */
+  getFakeRequestPrincipal?(request: KibanaRequest): AuthenticatedPrincipal | null;
+
   getSID(request: KibanaRequest): Promise<string | undefined>;
 
   getSpaceId(
@@ -76,11 +95,24 @@ export class AuditService {
     status,
     isServerless = false,
     getCurrentUser,
+    getFakeRequestPrincipal = () => null,
     getSID,
     getSpaceId,
     recordAuditLoggingUsage,
   }: AuditServiceSetupParams): AuditServiceSetup {
     const auditLogPath = config.enabled ? getAuditLogPath(config.appender) : undefined;
+
+    const runtimeWriteAccess$ = new Subject<AuditLogWriteAccess>();
+    const onWriteError = auditLogPath
+      ? ({ path, code, reason }: LogFileWriteError) =>
+          runtimeWriteAccess$.next({
+            granted: false,
+            path,
+            code,
+            reason,
+            checkedAt: new Date().toISOString(),
+          })
+      : undefined;
 
     const probed$ = license.features$.pipe(
       distinctUntilKeyChanged('allowAuditLogging'),
@@ -94,8 +126,19 @@ export class AuditService {
       shareReplay(1)
     );
 
+    const state$ = combineLatest([
+      probed$,
+      runtimeWriteAccess$.pipe(take(1), startWith(undefined)),
+    ]).pipe(
+      map(([{ features, writeAccess }, runtimeFailure]) => ({
+        features,
+        writeAccess: features.allowAuditLogging ? runtimeFailure ?? writeAccess : writeAccess,
+      })),
+      shareReplay(1)
+    );
+
     const writeAccess$ = auditLogPath
-      ? probed$.pipe(map(({ writeAccess }) => writeAccess))
+      ? state$.pipe(map(({ writeAccess }) => writeAccess))
       : undefined;
 
     // Report the plugin as degraded while the audit log cannot be written, so the lost audit
@@ -104,9 +147,9 @@ export class AuditService {
 
     // Configure logging during setup and when the license changes
     logging.configure(
-      probed$.pipe(
+      state$.pipe(
         map(({ features, writeAccess }) =>
-          createLoggingConfig(config, isServerless, writeAccess)(features)
+          createLoggingConfig(config, isServerless, writeAccess, onWriteError)(features)
         )
       )
     );
@@ -114,6 +157,14 @@ export class AuditService {
     // Record feature usage at a regular interval if enabled and license allows
     const enabled = !!(config.enabled && config.appender);
     const includeSavedObjectNames = config.include_saved_object_names;
+
+    // Serverless OTel delivery expects the authentication realm in user.domain. This one field is
+    // resolved on the way in rather than in the OTel transform because no event except user_login
+    // carries the realm in the record — it is only reachable from the authenticated user here. The
+    // regular (ECS) audit log is deliberately left unchanged.
+    // We are excluding this from non-OTel appenders because we want to use the actual ES Security domain for this value,
+    // but it is not yet available to us in the authenticate response.
+    const includeUserDomain = isServerless && config.appender?.type === 'otel';
 
     if (enabled) {
       license.features$.subscribe((features) => {
@@ -149,19 +200,40 @@ export class AuditService {
         }
         const spaceId = getSpaceId(request);
         const user = getCurrentUser(request);
+        // Resolved before the first await. Callers do not await `log`, so a workload can release
+        // its fake request before this resumes, and the registry no longer knows it after that.
+        const principal = user
+          ? getAuthenticatedPrincipal(user)
+          : request.isFakeRequest
+          ? getFakeRequestPrincipal(request)
+          : null;
+        const serviceAccountId =
+          principal?.type === 'service_account' ? principal.serviceAccountId : undefined;
         const sessionId = await getSID(request);
         const forwardedFor = getForwardedFor(request);
+        // The request user is the actor. An event may also name who the action was taken on, as
+        // ECS `user.target`, and that is the event's to keep.
+        const target = event.user?.target;
 
         log({
           ...event,
-          user:
-            (user && {
-              id: user.profile_uid,
-              name: user.username,
-              ...(user.email ? { email: user.email } : {}),
-              roles: user.roles as string[],
-            }) ||
-            event.user,
+          user: user
+            ? {
+                // A service account has no user profile, so its id stands in for one.
+                id: user.profile_uid ?? serviceAccountId,
+                name: user.username,
+                ...(user.email ? { email: user.email } : {}),
+                ...(user.full_name ? { full_name: user.full_name } : {}),
+                ...(includeUserDomain && user.authentication_realm?.name
+                  ? { domain: user.authentication_realm.name }
+                  : {}),
+                roles: user.roles as string[],
+                ...(target ? { target } : {}),
+              }
+            : serviceAccountId
+            ? // The registry knows only which account a fake request runs as, not its roles.
+              { id: serviceAccountId, name: serviceAccountId, ...(target ? { target } : {}) }
+            : event.user,
           kibana: {
             space_id: spaceId,
             session_id: sessionId,
@@ -205,7 +277,12 @@ export class AuditService {
 }
 
 export const createLoggingConfig =
-  (config: ConfigType['audit'], isServerless = false, writeAccess?: AuditLogWriteAccess) =>
+  (
+    config: ConfigType['audit'],
+    isServerless = false,
+    writeAccess?: AuditLogWriteAccess,
+    onWriteError?: LogFileWriteErrorHandler
+  ) =>
   (features: Pick<SecurityLicenseFeatures, 'allowAuditLogging'>): LoggerContextConfigInput => {
     if (writeAccess && !writeAccess.granted) {
       // Audit events are dropped rather than redirected to stdout on purpose: they carry usernames,
@@ -238,15 +315,9 @@ export const createLoggingConfig =
         ? {
             ...baseAppender,
             transformAttributes: applyAuditOtelFieldMap,
-            // Slim the resource to the configured attributes — the appender's own `attributes` plus
-            // the audit service.name/service.type — dropping the detectors' host/OS/process/env
-            // fields. The allowlist also keeps the promoted keys (AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
-            // e.g. project.id): they must survive in the resource because log delivery reads them
-            // there, in addition to being copied into per-record attributes below.
-            includeResources: [
-              ...Object.keys({ ...baseAppender.attributes, ...AUDIT_OTEL_RESOURCE_ATTRIBUTES }),
-              ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
-            ],
+            // Only service identity belongs in the resource. Promotion captures project.id and
+            // other configured keys before filtering, so they remain available on each record.
+            includeResources: Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
             promoteResourceAttributes: [
               ...(baseAppender.promoteResourceAttributes ?? []),
               ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
@@ -255,8 +326,13 @@ export const createLoggingConfig =
           }
         : baseAppender;
 
+    const auditTrailAppender =
+      onWriteError && (appender.type === 'file' || appender.type === 'rolling-file')
+        ? { ...appender, onWriteError }
+        : appender;
+
     return {
-      appenders: { auditTrailAppender: appender },
+      appenders: { auditTrailAppender },
       loggers: [
         {
           name: 'audit.ecs',

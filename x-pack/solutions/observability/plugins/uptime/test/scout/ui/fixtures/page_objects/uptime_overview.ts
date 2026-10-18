@@ -47,6 +47,25 @@ export class UptimeOverviewPage {
     await this.page.testSubj.click(`monitor-page-link-${monitorId}`);
   }
 
+  async expandMonitorDetail(monitorId: string): Promise<void> {
+    await this.page.testSubj.click(`xpack.synthetics.monitorList.${monitorId}.expandMonitorDetail`);
+  }
+
+  async openMonitorActionsPopover(monitorId: string): Promise<void> {
+    await this.page.testSubj.click(`xpack.uptime.monitorList.actionsPopover.${monitorId}`);
+    await this.page.locator('[data-popover-open="true"]').waitFor({ state: 'visible' });
+  }
+
+  async openAlertsPopover(): Promise<void> {
+    await this.page.testSubj.click('xpack.synthetics.alertsPopover.toggleButton');
+    await this.page.locator('[data-popover-open="true"]').waitFor({ state: 'visible' });
+  }
+
+  async openNestedAlertContext(): Promise<void> {
+    await this.openAlertsPopover();
+    await this.page.testSubj.click('xpack.synthetics.openAlertContextPanel');
+  }
+
   async clickExploreDataButton(): Promise<void> {
     await this.page.testSubj.click('uptimeExploreDataButton');
   }

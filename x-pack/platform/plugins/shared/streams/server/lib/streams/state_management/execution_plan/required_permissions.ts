@@ -71,10 +71,8 @@ export function getRequiredPermissionsForActions({
     // since they are done by the kibana system user
     upsert_dot_streams_document,
     delete_dot_streams_document,
-    delete_queries,
     unlink_assets,
     unlink_systems,
-    unlink_features,
     update_failure_store,
     upsert_esql_view,
     delete_esql_view,

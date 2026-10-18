@@ -40,11 +40,11 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/core-di-browser",
     "@kbn/core-di",
-    "@kbn/announcement-banner",
     "@kbn/kibana-react-plugin",
     "@kbn/dashboard-plugin",
     "@kbn/cps-utils",
     "@kbn/cps",
-    "@kbn/core-ui-settings-browser-mocks"
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/ui-callout"
   ]
 }

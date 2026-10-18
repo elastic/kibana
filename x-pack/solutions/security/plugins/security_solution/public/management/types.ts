@@ -33,6 +33,7 @@ export enum AdministrationSubTab {
   eventFilters = 'event_filters',
   hostIsolationExceptions = 'host_isolation_exceptions',
   blocklist = 'blocklist',
+  customYaraSignatures = 'custom_yara_signatures',
   responseActionsHistory = 'response_actions_history',
   scriptLibrary = 'script_library',
   protectionUpdates = 'protection_updates',

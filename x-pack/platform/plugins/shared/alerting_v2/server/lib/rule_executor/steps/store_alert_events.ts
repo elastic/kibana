@@ -22,20 +22,19 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     return guardedMapStep(streamState, ['alertEventsBatch'], async (state) => {
-      const logger = state.logger.withLabels({ step: this.name });
-
-      logger.debug({
-        message: `[${this.name}] Storing alert events batch to ${ALERT_EVENTS_DATA_STREAM}`,
+      const logger = state.logger.withLabels({
+        step: this.name,
+        resource: ALERT_EVENTS_DATA_STREAM,
       });
+
+      logger.debug({ message: 'Storing alert events batch' });
 
       const bulkResult = await this.storageService.bulkIndexDocs({
         index: ALERT_EVENTS_DATA_STREAM,
         docs: state.alertEventsBatch,
       });
 
-      logger.debug({
-        message: `[${this.name}] Bulk-indexed alert events batch (attempted=${bulkResult.attempted}, persisted=${bulkResult.docs.length})`,
-      });
+      logger.debug({ message: 'Bulk-indexed alert events batch' });
 
       return {
         type: 'continue',

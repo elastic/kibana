@@ -63,7 +63,7 @@ export const actionListHandler = (
     } = req;
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const activeSpaceId = (await context.securitySolution).getSpaceId();
-    const scoped = endpointContext.service.asScoped(req);
+    const scoped = await endpointContext.service.asScoped(req);
 
     try {
       // The probe is origin-only, so under CPS an origin that has never dispatched an action would

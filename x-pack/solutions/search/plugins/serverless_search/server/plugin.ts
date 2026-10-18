@@ -27,7 +27,6 @@ import type {
   StartDependencies,
 } from './types';
 import { registerConnectorsRoutes } from './routes/connectors_routes';
-import { registerTelemetryUsageCollector } from './collectors/connectors/telemetry';
 import { registerMappingRoutes } from './routes/mapping_routes';
 import { registerIngestPipelineRoutes } from './routes/ingest_pipeline_routes';
 
@@ -79,7 +78,7 @@ export class ServerlessSearchPlugin
 
   public setup(
     { getStartServices, http }: CoreSetup<StartDependencies>,
-    { features, serverless, usageCollection }: SetupDependencies
+    { features, serverless }: SetupDependencies
   ) {
     const router = http.createRouter();
     const dependencies = {
@@ -97,10 +96,6 @@ export class ServerlessSearchPlugin
     registerIndicesRoutes(dependencies);
     registerMappingRoutes(dependencies);
     registerIngestPipelineRoutes(dependencies);
-
-    if (usageCollection) {
-      registerTelemetryUsageCollector(usageCollection, this.logger);
-    }
 
     features.registerElasticsearchFeature({
       id: 'serverlessSearch',

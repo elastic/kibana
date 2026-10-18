@@ -35,6 +35,10 @@ jest.mock('./eslint/run_eslint_contract', () => ({
   executeEslintValidation: jest.fn(),
 }));
 
+jest.mock('./oxlint/run_oxlint_contract', () => ({
+  executeOxlintValidation: jest.fn(),
+}));
+
 jest.mock('@kbn/dev-proc-runner', () => ({
   ProcRunner: jest.fn().mockImplementation(() => ({
     teardown: jest.fn(),
@@ -84,6 +88,8 @@ const mockExecuteTypeCheckValidation = jest.requireMock('./type_check_validation
   .executeTypeCheckValidation as jest.Mock;
 const mockExecuteEslintValidation = jest.requireMock('./eslint/run_eslint_contract')
   .executeEslintValidation as jest.Mock;
+const mockExecuteOxlintValidation = jest.requireMock('./oxlint/run_oxlint_contract')
+  .executeOxlintValidation as jest.Mock;
 const mockExistsSync = jest.requireMock('fs').existsSync as jest.Mock;
 const mockReaddirSync = jest.requireMock('fs').readdirSync as jest.Mock;
 const mockExeca = mockExecaFn;
@@ -160,6 +166,11 @@ describe('run_check', () => {
       failedFiles: [],
       warningCount: 0,
     });
+    mockExecuteOxlintValidation.mockResolvedValue({
+      fileCount: 3,
+      failedFiles: [],
+      warningCount: 0,
+    });
     mockExecuteTypeCheckValidation.mockResolvedValue({ projectCount: 2 });
     mockExeca.mockResolvedValue({
       exitCode: 0,
@@ -194,6 +205,7 @@ describe('run_check', () => {
     const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
     expect(output).toContain('check  scope=local');
     expect(output).toContain('lint  ✓ 3 files');
+    expect(output).toContain('oxlint✓ 3 files');
     expect(output).toContain('jest  ✓ 1 config ran, 5 tests');
     expect(output).toContain('tsc   ✓ 2 projects');
   });
@@ -261,6 +273,36 @@ describe('run_check', () => {
     expect(output).toContain('tsc   ✗ failed');
   });
 
+  it('reports oxlint failures with a reproduction command', async () => {
+    mockExecuteOxlintValidation.mockResolvedValue({
+      fileCount: 3,
+      failedFiles: ['src/foo.ts'],
+      warningCount: 0,
+    });
+
+    await handler(createArgs());
+
+    expect(process.exitCode).toBe(1);
+    const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+    expect(output).toContain('oxlint✗ failed');
+    expect(output).toContain('node scripts/lint src/foo.ts');
+    expect(output).toContain('lint  ✓ 3 files');
+  });
+
+  it('prints oxlint tool failures instead of only marking the step failed', async () => {
+    mockExecuteOxlintValidation.mockRejectedValue(
+      new Error('[oxlint] exited with 2:\nFailed to parse configuration file')
+    );
+
+    await handler(createArgs());
+
+    expect(process.exitCode).toBe(1);
+    const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+    expect(output).toContain('oxlint✗ failed');
+    expect(output).toContain('    [oxlint] exited with 2');
+    expect(output).toContain('    Failed to parse configuration file');
+  });
+
   it('shows fixed file count when eslint auto-fixes', async () => {
     mockExecuteEslintValidation.mockResolvedValue({
       fileCount: 10,
@@ -287,6 +329,35 @@ describe('run_check', () => {
     mockExistsSync.mockImplementation(
       (p: string) =>
         p === '/repo/src/core/server/integration_tests/user_storage/jest.integration.config.js'
+    );
+
+    await handler(createArgs());
+
+    expect(mockExeca).not.toHaveBeenCalledWith(
+      process.execPath,
+      expect.arrayContaining(['scripts/jest']),
+      expect.anything()
+    );
+    expect(mockRunJestViaMoon).toHaveBeenCalled();
+  });
+
+  it('skips fast path for integration tests even when a unit config sits below the integration config', async () => {
+    // integration test with a unit config nested below the integration config —
+    // the walk hits the unit config first, so it used to be run as a unit test.
+    mockResolveValidationBaseContext.mockResolvedValue({
+      ...baseContext,
+      runContext: {
+        ...baseContext.runContext,
+        changedFiles: [
+          'x-pack/platform/plugins/shared/fleet/server/integration_tests/cloud_preconfiguration.test.ts',
+        ],
+      },
+    });
+
+    mockExistsSync.mockImplementation(
+      (p: string) =>
+        p === '/repo/x-pack/platform/plugins/shared/fleet/server/jest.config.js' ||
+        p === '/repo/x-pack/platform/plugins/shared/fleet/jest.integration.config.js'
     );
 
     await handler(createArgs());
@@ -376,6 +447,42 @@ describe('run_check', () => {
 
     const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
     expect(output).toContain('jest  ✓ 2 test files · 8 tests');
+  });
+
+  it('runs only the unit test files directly when a unit and integration test change together', async () => {
+    // A unit test and an integration test in the same commit share one unit config
+    // (the integration file has none), so the fast path runs — but it must pass only
+    // the unit file to `scripts/jest`, not the integration file.
+    mockResolveValidationBaseContext.mockResolvedValue({
+      ...baseContext,
+      runContext: {
+        ...baseContext.runContext,
+        changedFiles: [
+          'packages/foo/src/bar.test.ts',
+          'x-pack/platform/plugins/shared/fleet/server/integration_tests/cloud_preconfiguration.test.ts',
+        ],
+      },
+    });
+    mockExistsSync.mockImplementation(
+      (p: string) =>
+        p === '/repo/packages/foo/jest.config.js' ||
+        p === '/repo/x-pack/platform/plugins/shared/fleet/server/jest.config.js' ||
+        p === '/repo/x-pack/platform/plugins/shared/fleet/jest.integration.config.js'
+    );
+    mockExeca.mockResolvedValue({
+      exitCode: 0,
+      stdout: 'Tests:       8 passed, 8 total\n',
+      stderr: '',
+    });
+
+    await handler(createArgs());
+
+    expect(mockExeca).toHaveBeenCalledWith(
+      process.execPath,
+      ['scripts/jest', '--runTestsByPath', '/repo/packages/foo/src/bar.test.ts', '--maxWorkers=2'],
+      expect.anything()
+    );
+    expect(mockRunJestViaMoon).not.toHaveBeenCalled();
   });
 
   it('shows failing fast-path Jest output and a minimal rerun command', async () => {

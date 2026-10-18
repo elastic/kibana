@@ -7,19 +7,19 @@
 
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '@kbn/scout';
+import { ENTITY_STORE_TAGS } from '../../../common/fixtures/constants';
 import {
-  PUBLIC_HEADERS,
-  ENTITY_STORE_ROUTES,
-  ENTITY_STORE_TAGS,
-  UPDATES_INDEX,
-} from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
-import { clearEntityStoreIndices, ingestDoc } from '../../../common/fixtures/helpers';
+  ingestDoc,
+  QUERY_TRANSLATION_TEST_INDEX,
+  setupQueryTranslationTestDataStream,
+  teardownQueryTranslationTestDataStream,
+} from '../../../common/fixtures/helpers';
 import {
   getEuidDslFilterBasedOnDocument,
   getEuidDslDocumentsContainsIdFilter,
 } from '../../../../../common/domain/euid/dsl';
 import { getEuidFromObject } from '../../../../../common/domain/euid/memory';
+import { getBuiltInEntityDefinition } from '../../../../../common/domain/definitions/registry';
 import { deriveUserEntityPreAggMetadata } from '../fixtures/user_entity_pre_agg_metadata';
 import {
   USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES,
@@ -47,7 +47,7 @@ async function searchWithFilter(
   size = 100
 ) {
   return esClient.search({
-    index: UPDATES_INDEX,
+    index: QUERY_TRANSLATION_TEST_INDEX,
     query: query ? { ...query } : {},
     size,
   }) as Promise<{
@@ -74,46 +74,22 @@ function hasDocWith(
 }
 
 apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
-  let defaultHeaders: Record<string, string>;
-
-  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
-    const credentials = await samlAuth.asInteractiveUser('admin');
-    defaultHeaders = {
-      ...credentials.cookieHeader,
-      ...PUBLIC_HEADERS,
-    };
-
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
-
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(201);
-
+  apiTest.beforeAll(async ({ esArchiver, esClient }) => {
+    await setupQueryTranslationTestDataStream(esClient);
     await esArchiver.loadIfNeeded(
-      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/updates'
+      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/query_translation_source'
     );
   });
 
-  apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(200);
-    await clearEntityStoreIndices(esClient);
+  apiTest.afterAll(async ({ esClient }) => {
+    await teardownQueryTranslationTestDataStream(esClient);
   });
 
   apiTest(
     'should return exactly the document when generic DSL is built from entity.id',
     async ({ esClient }) => {
       const docSource = { entity: { id: 'generic-id' } };
-      const dsl = getEuidDslFilterBasedOnDocument('generic', docSource);
+      const dsl = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('generic'), docSource);
       expect(dsl).toBeDefined();
 
       const result = await searchWithFilter(esClient, dsl, 10);
@@ -128,7 +104,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     'should return the expected documents when host DSL is built from host.name and host.domain',
     async ({ esClient }) => {
       const docSource = { host: { name: 'server-01', domain: 'example.com' } };
-      const dsl = getEuidDslFilterBasedOnDocument('host', docSource);
+      const dsl = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('host'), docSource);
       expect(dsl).toBeDefined();
 
       const result = await searchWithFilter(esClient, dsl, 10);
@@ -141,7 +117,9 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   apiTest(
     'should return the expected document when host DSL is built from host.name only',
     async ({ esClient }) => {
-      const dsl = getEuidDslFilterBasedOnDocument('host', { host: { name: 'desktop-02' } });
+      const dsl = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('host'), {
+        host: { name: 'desktop-02' },
+      });
       expect(dsl).toBeDefined();
 
       const result = await searchWithFilter(esClient, dsl, 10);
@@ -160,7 +138,12 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     async ({ esClient }) => {
       await searchWithFilter(esClient, { match_all: {} }, 1);
       for (const scenario of userTsNoPerDocumentDslScenarios) {
-        expect(getEuidDslFilterBasedOnDocument('user', scenario.dslFilterSource)).toBeUndefined();
+        expect(
+          getEuidDslFilterBasedOnDocument(
+            getBuiltInEntityDefinition('user'),
+            scenario.dslFilterSource
+          )
+        ).toBeUndefined();
       }
     }
   );
@@ -170,7 +153,9 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     async ({ esClient }) => {
       await searchWithFilter(esClient, { match_all: {} }, 1);
       for (const example of USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES) {
-        expect(getEuidDslFilterBasedOnDocument('user', example.doc)).toBeUndefined();
+        expect(
+          getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), example.doc)
+        ).toBeUndefined();
       }
     }
   );
@@ -183,7 +168,10 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     apiTest(
       `user.ts DSL: should return a single matching hit for scenario "${scenario.id}"`,
       async ({ esClient }) => {
-        const dsl = getEuidDslFilterBasedOnDocument('user', scenario.dslFilterSource);
+        const dsl = getEuidDslFilterBasedOnDocument(
+          getBuiltInEntityDefinition('user'),
+          scenario.dslFilterSource
+        );
         expect(dsl).toBeDefined();
 
         const result = await searchWithFilter(esClient, dsl, 10);
@@ -191,7 +179,9 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
         expect(getTotal(result.hits)).toBe(1);
         expect(result.hits.hits).toHaveLength(1);
         expect(result.hits.hits[0]._source).toMatchObject(scenario.dslFilterSource);
-        expect(getEuidFromObject('user', result.hits.hits[0])).toBe(scenario.expectedEuid);
+        expect(getEuidFromObject(getBuiltInEntityDefinition('user'), result.hits.hits[0])).toBe(
+          scenario.expectedEuid
+        );
 
         expect(scenario.expectedMeta).toBeDefined();
         const expectedMeta = scenario.expectedMeta!;
@@ -216,8 +206,11 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     apiTest(
       `user.ts DSL (ingested asset + cloud.provider): single hit for scenario "${scenario.id}"`,
       async ({ esClient }) => {
-        await ingestDoc(esClient, scenario.ingestSource!);
-        const dsl = getEuidDslFilterBasedOnDocument('user', scenario.dslFilterSource);
+        await ingestDoc(esClient, scenario.ingestSource!, QUERY_TRANSLATION_TEST_INDEX);
+        const dsl = getEuidDslFilterBasedOnDocument(
+          getBuiltInEntityDefinition('user'),
+          scenario.dslFilterSource
+        );
         expect(dsl).toBeDefined();
 
         const result = await searchWithFilter(esClient, dsl, 10);
@@ -225,7 +218,9 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
         expect(getTotal(result.hits)).toBe(1);
         expect(result.hits.hits).toHaveLength(1);
         expect(result.hits.hits[0]._source).toMatchObject(scenario.dslFilterSource);
-        expect(getEuidFromObject('user', result.hits.hits[0])).toBe(scenario.expectedEuid);
+        expect(getEuidFromObject(getBuiltInEntityDefinition('user'), result.hits.hits[0])).toBe(
+          scenario.expectedEuid
+        );
 
         expect(scenario.expectedMeta).toBeDefined();
         const expectedMeta = scenario.expectedMeta!;
@@ -236,7 +231,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
         });
 
         await esClient.deleteByQuery({
-          index: UPDATES_INDEX,
+          index: QUERY_TRANSLATION_TEST_INDEX,
           refresh: true,
           query: scenario.query as object,
         });
@@ -247,7 +242,9 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   apiTest(
     'should return exactly the mailchimp document when service DSL is built from service.name',
     async ({ esClient }) => {
-      const dsl = getEuidDslFilterBasedOnDocument('service', { service: { name: 'mailchimp' } });
+      const dsl = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('service'), {
+        service: { name: 'mailchimp' },
+      });
       expect(dsl).toBeDefined();
 
       const result = await searchWithFilter(esClient, dsl, 10);
@@ -262,7 +259,9 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   apiTest(
     'should return the service-name document when service DSL is built from service.name',
     async ({ esClient }) => {
-      const dsl = getEuidDslFilterBasedOnDocument('service', { service: { name: 'service-name' } });
+      const dsl = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('service'), {
+        service: { name: 'service-name' },
+      });
       expect(dsl).toBeDefined();
 
       const result = await searchWithFilter(esClient, dsl, 10);
@@ -275,7 +274,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   apiTest(
     'should return only documents with entity.id for generic containsId filter',
     async ({ esClient }) => {
-      const dsl = getEuidDslDocumentsContainsIdFilter('generic');
+      const dsl = getEuidDslDocumentsContainsIdFilter(getBuiltInEntityDefinition('generic'));
       const result = await searchWithFilter(esClient, dsl);
 
       expect(getTotal(result.hits)).toBe(1);
@@ -287,7 +286,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   apiTest(
     'should return documents with service identity fields for service containsId filter',
     async ({ esClient }) => {
-      const dsl = getEuidDslDocumentsContainsIdFilter('service');
+      const dsl = getEuidDslDocumentsContainsIdFilter(getBuiltInEntityDefinition('service'));
       const result = await searchWithFilter(esClient, dsl);
 
       expect(getTotal(result.hits)).toBe(2);
@@ -299,7 +298,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   apiTest(
     'should enforce exact user containsId hit count and match each archive scenario with a defined EUID',
     async ({ esClient }) => {
-      const dsl = getEuidDslDocumentsContainsIdFilter('user');
+      const dsl = getEuidDslDocumentsContainsIdFilter(getBuiltInEntityDefinition('user'));
       const result = await searchWithFilter(esClient, dsl, 100);
       const { hits } = result.hits;
 
@@ -311,7 +310,9 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
           docMatchesQuery((getDocSource(h) ?? {}) as Record<string, unknown>, scenario.query)
         );
         expect(subset, `scenario "${scenario.id}"`).toHaveLength(1);
-        expect(getEuidFromObject('user', subset[0])).toBe(scenario.expectedEuid);
+        expect(getEuidFromObject(getBuiltInEntityDefinition('user'), subset[0])).toBe(
+          scenario.expectedEuid
+        );
         expect(scenario.expectedMeta).toBeDefined();
         const expectedMeta = scenario.expectedMeta!;
         expect(deriveUserEntityPreAggMetadata(subset[0])).toStrictEqual({
@@ -344,7 +345,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   apiTest(
     'should return documents with any host identity field for host containsId filter',
     async ({ esClient }) => {
-      const dsl = getEuidDslDocumentsContainsIdFilter('host');
+      const dsl = getEuidDslDocumentsContainsIdFilter(getBuiltInEntityDefinition('host'));
       const result = await searchWithFilter(esClient, dsl);
 
       expect(getTotal(result.hits)).toBeGreaterThan(0);
@@ -359,7 +360,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   apiTest(
     'should not include bare documents with no user identity fields in user containsId results',
     async ({ esClient }) => {
-      const dsl = getEuidDslDocumentsContainsIdFilter('user');
+      const dsl = getEuidDslDocumentsContainsIdFilter(getBuiltInEntityDefinition('user'));
       const result = await searchWithFilter(esClient, dsl);
 
       const bareDocMatched = hasDocWith(result.hits.hits, (s) => {

@@ -10,7 +10,7 @@
 import type { OverlayBannersStart } from './banners';
 import type { OverlayFlyoutStart } from './flyout';
 import type { OverlayModalStart } from './modal';
-import type { OverlaySystemFlyoutStart } from './system_flyout';
+import type { OverlayFlyoutTemplateStart, OverlaySystemFlyoutStart } from './system_flyout';
 
 /** @public */
 export interface OverlayStart {
@@ -18,8 +18,13 @@ export interface OverlayStart {
   banners: OverlayBannersStart;
   /** {@link OverlayFlyoutStart#open} */
   openFlyout: OverlayFlyoutStart['open'];
-  /** Opens a system flyout that integrates with EUI Flyout Manager */
+  /**
+   * Opens a system flyout that integrates with EUI Flyout Manager
+   * @deprecated Use `openFlyoutTemplate` instead.
+   */
   openSystemFlyout: OverlaySystemFlyoutStart['open'];
+  /** Opens a system flyout rendered as a `FlyoutTemplate`. {@link OverlayFlyoutTemplateStart#open} */
+  openFlyoutTemplate: OverlayFlyoutTemplateStart['open'];
   /** {@link OverlayModalStart#open} */
   openModal: OverlayModalStart['open'];
   /** {@link OverlayModalStart#openConfirm} */

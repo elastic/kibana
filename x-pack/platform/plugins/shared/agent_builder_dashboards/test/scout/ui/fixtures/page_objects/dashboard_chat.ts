@@ -19,7 +19,7 @@ export class DashboardChatPage {
     this.addPanelChatAction = page.testSubj.locator('create-action-Create with chat');
     this.conversationInputForm = page.testSubj.locator('agentBuilderConversationInputForm');
     this.conversationInputEditor = page.testSubj.locator('agentBuilderConversationInputEditor');
-    this.roundResponses = page.testSubj.locator('agentBuilderRoundResponse');
+    this.roundResponses = page.testSubj.locator('agentBuilderResponseMessage');
   }
 
   async openFromMetricsPrompt() {

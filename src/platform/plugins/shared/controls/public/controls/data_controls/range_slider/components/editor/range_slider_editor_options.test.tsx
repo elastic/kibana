@@ -39,22 +39,22 @@ describe('RangeSliderEditorOptions', () => {
     fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
       target: { valueAsNumber: -1 },
     });
-    expect(setControlEditorValid).toBeCalledWith(false);
+    expect(setControlEditorValid).toHaveBeenCalledWith(false);
     fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
       target: { value: undefined },
     });
-    expect(setControlEditorValid).toBeCalledWith(false);
+    expect(setControlEditorValid).toHaveBeenCalledWith(false);
     fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
       target: { valueAsNumber: 0 },
     });
-    expect(setControlEditorValid).toBeCalledWith(false);
+    expect(setControlEditorValid).toHaveBeenCalledWith(false);
     fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
       target: { valueAsNumber: 0.5 },
     });
-    expect(setControlEditorValid).toBeCalledWith(true);
+    expect(setControlEditorValid).toHaveBeenCalledWith(true);
     fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
       target: { valueAsNumber: 10 },
     });
-    expect(setControlEditorValid).toBeCalledWith(true);
+    expect(setControlEditorValid).toHaveBeenCalledWith(true);
   });
 });

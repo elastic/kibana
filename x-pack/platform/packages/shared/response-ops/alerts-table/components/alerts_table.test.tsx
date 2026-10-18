@@ -515,10 +515,6 @@ describe('AlertsTable', () => {
           children: expect.anything(),
           owner: ['cases'],
           permissions: { create: true, read: true },
-          features: {
-            alerts: { sync: false },
-            observables: { enabled: true, autoExtract: false },
-          },
         },
         {}
       );
@@ -534,10 +530,6 @@ describe('AlertsTable', () => {
           children: expect.anything(),
           owner: [],
           permissions: { create: true, read: true },
-          features: {
-            alerts: { sync: false },
-            observables: { enabled: true, autoExtract: false },
-          },
         },
         {}
       );
@@ -556,35 +548,6 @@ describe('AlertsTable', () => {
           children: expect.anything(),
           owner: [],
           permissions: { create: false, read: false },
-          features: {
-            alerts: { sync: false },
-            observables: { enabled: true, autoExtract: false },
-          },
-        },
-        {}
-      );
-    });
-
-    it('should call the cases context with sync alerts turned on if defined in the cases config', async () => {
-      const CasesContextMock = jest.fn().mockReturnValue(null);
-      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
-
-      render(
-        <AlertsTable
-          {...casesTableProps}
-          casesConfiguration={{
-            featureId: 'test-feature-id',
-            owner: ['cases'],
-            syncAlerts: true,
-          }}
-        />
-      );
-      expect(CasesContextMock).toHaveBeenCalledWith(
-        {
-          children: expect.anything(),
-          owner: ['cases'],
-          permissions: { create: true, read: true },
-          features: { alerts: { sync: true }, observables: { enabled: true, autoExtract: false } },
         },
         {}
       );

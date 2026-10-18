@@ -15,18 +15,25 @@ import {
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
 } from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import {
-  clearEntityStoreIndices,
+  getHistorySnapshotIndexName,
+  getLegacySecurityHistorySnapshotIndexName,
+} from '../../../../../server/domain/asset_manager/history_snapshot_index';
+import {
+  clearInstalledEntityStoreDocuments,
   forceLogExtraction,
   normalizeKeywordList,
+  setupLogsTestDataStream,
+  stopEntityTypes,
+  startEntityTypes,
+  teardownLogsTestDataStream,
 } from '../../../common/fixtures/helpers';
 
 apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, esArchiver }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -36,31 +43,36 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
       ...credentials.cookieHeader,
       ...INTERNAL_HEADERS,
     };
+    await clearInstalledEntityStoreDocuments(esClient);
+    // Snapshot frequency is irrelevant here; this test uses FORCE_HISTORY_SNAPSHOT directly.
+    const startResponse = await startEntityTypes(apiClient, defaultHeaders, ['host']);
+    expect(startResponse.statusCode).toBe(200);
 
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
-
-    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: { historySnapshot: { frequency: '24h' } },
-    });
-    expect(installResponse.statusCode).toBe(201);
-
+    await setupLogsTestDataStream(esClient);
     await esArchiver.loadIfNeeded(
-      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/updates'
+      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/logs'
     );
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(200);
-    await clearEntityStoreIndices(esClient);
+    try {
+      const stopResponse = await stopEntityTypes(apiClient, defaultHeaders, ['host']);
+      expect(stopResponse.statusCode).toBe(200);
+    } finally {
+      try {
+        const startMaintainerResponse = await apiClient.put(
+          ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START('automated-resolution'),
+          {
+            headers: internalHeaders,
+            responseType: 'json',
+            body: {},
+          }
+        );
+        expect(startMaintainerResponse.statusCode).toBe(200);
+      } finally {
+        await teardownLogsTestDataStream(esClient);
+      }
+    }
   });
 
   apiTest(
@@ -177,6 +189,77 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
         expect(normalizeKeywordList(latestBehaviors?.rule_names)).toStrictEqual([]);
         expect(normalizeKeywordList(latestBehaviors?.anomaly_job_ids)).toStrictEqual([]);
         expect((latestEntity.lifecycle as Record<string, unknown>)?.last_activity).toBeDefined();
+      }
+    }
+  );
+
+  apiTest(
+    'history snapshot: deletes indices older than retention using the date in the index name',
+    async ({ apiClient, esClient }) => {
+      const utcDaysAgo = (days: number, hours = 0): Date => {
+        const now = new Date();
+        return new Date(
+          Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - days, hours, 0, 0, 0)
+        );
+      };
+
+      const expiredIndex = getHistorySnapshotIndexName('default', utcDaysAgo(61, 0));
+      // 59 days ago is safely within the 60-day retention window regardless of when in the
+      // UTC day the snapshot runs. Exact cutoff-day/hour behavior is covered by unit tests.
+      const withinRetentionIndex = getHistorySnapshotIndexName('default', utcDaysAgo(59, 0));
+      const recentIndex = getHistorySnapshotIndexName('default', utcDaysAgo(5, 12));
+      const expiredLegacyIndex = getLegacySecurityHistorySnapshotIndexName(
+        'default',
+        utcDaysAgo(70, 0)
+      );
+
+      // Create only indices that don't already exist so we only clean up what we own.
+      // Only swallow resource_already_exists_exception (status 400); any other error
+      // (permission denied, template error, etc.) indicates a broken test environment
+      // and should fail the test immediately rather than silently skipping creation and
+      // producing a false-positive exists===false assertion.
+      const testIndices: string[] = [];
+      await Promise.all(
+        [expiredIndex, withinRetentionIndex, recentIndex, expiredLegacyIndex].map(async (idx) => {
+          try {
+            await esClient.indices.create({ index: idx });
+            testIndices.push(idx);
+          } catch (err) {
+            if (
+              (err as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error
+                ?.type !== 'resource_already_exists_exception'
+            ) {
+              throw err;
+            }
+          }
+        })
+      );
+
+      try {
+        const snapshotResponse = await apiClient.post(
+          ENTITY_STORE_ROUTES.internal.FORCE_HISTORY_SNAPSHOT,
+          {
+            headers: internalHeaders,
+            responseType: 'json',
+            body: {},
+          }
+        );
+        expect(snapshotResponse.statusCode).toBe(200);
+        const body = snapshotResponse.body as { ok: boolean; historySnapshotIndex: string };
+        expect(body.ok).toBe(true);
+        expect(body.historySnapshotIndex).toBeDefined();
+
+        expect(await esClient.indices.exists({ index: expiredIndex })).toBe(false);
+        expect(await esClient.indices.exists({ index: expiredLegacyIndex })).toBe(false);
+        expect(await esClient.indices.exists({ index: withinRetentionIndex })).toBe(true);
+        expect(await esClient.indices.exists({ index: recentIndex })).toBe(true);
+        expect(await esClient.indices.exists({ index: body.historySnapshotIndex })).toBe(true);
+      } finally {
+        await Promise.all(
+          testIndices.map((idx) =>
+            esClient.indices.delete({ index: idx, ignore_unavailable: true }, { ignore: [404] })
+          )
+        );
       }
     }
   );

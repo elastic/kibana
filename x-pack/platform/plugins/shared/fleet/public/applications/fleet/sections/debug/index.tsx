@@ -26,12 +26,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { RequestError } from '../../hooks';
 import { useLink, useStartServices } from '../../hooks';
-import { ExperimentalFeaturesService } from '../../../../services';
-
 import {
   AgentPolicyDebugger,
   AgentlessResourcesToggle,
-  CloudOnboardingDeploymentDebugger,
   IntegrationDebugger,
   PreconfigurationDebugger,
   FleetIndexDebugger,
@@ -50,8 +47,6 @@ export const DebugPage: React.FunctionComponent<{
 }> = ({ isInitialized, setupError }) => {
   const { chrome, docLinks } = useStartServices();
   const { getHref } = useLink();
-  const { enableCloudOnboardingDeployments } = ExperimentalFeaturesService.get();
-
   const panels = [
     {
       title: i18n.translate('xpack.fleet.debug.HealthCheckStatus.title', {
@@ -109,17 +104,6 @@ export const DebugPage: React.FunctionComponent<{
       id: 'agentlessResourcesToggle',
       component: <AgentlessResourcesToggle />,
     },
-    ...(enableCloudOnboardingDeployments
-      ? [
-          {
-            title: i18n.translate('xpack.fleet.debug.cloudOnboardingDeploymentDebugger.title', {
-              defaultMessage: 'Cloud Onboarding Deployment Debugger',
-            }),
-            id: 'cloudOnboardingDeploymentDebugger',
-            component: <CloudOnboardingDeploymentDebugger />,
-          },
-        ]
-      : []),
   ];
 
   chrome.docTitle.change(['Debug', 'Fleet']);

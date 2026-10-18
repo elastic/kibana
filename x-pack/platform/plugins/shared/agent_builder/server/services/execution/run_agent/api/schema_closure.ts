@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { memoize } from 'lodash';
+import type { ApiTarget } from '@kbn/agent-builder-common';
 import { isRecord } from './types';
-import type { ApiTarget } from './types';
 
 const jsonDirByTarget: Record<ApiTarget, string> = {
   elasticsearch: 'es',
@@ -56,20 +57,13 @@ const loadSharedSchema = async (
   return schema;
 };
 
-/**
- * Loads every shared schema file an API's schema reaches, transitively.
- *
- * @param target - Backend the API belongs to.
- * @param schema - The schema to walk, typically an API's `input`.
- * @returns The loaded documents keyed by the reference that pointed at them.
- * @throws {Error} when a reference escapes the schemas package or names a file that is not a
- * JSON Schema document.
- */
-export const loadSchemaClosure = async (
+type SchemaClosure = Map<string, Record<string, unknown>>;
+
+const buildSchemaClosure = async (
   target: ApiTarget,
   schema: Record<string, unknown>
-): Promise<Map<string, Record<string, unknown>>> => {
-  const closure = new Map<string, Record<string, unknown>>();
+): Promise<SchemaClosure> => {
+  const closure: SchemaClosure = new Map();
   const pending = new Set<string>();
   collectSchemaRefs(schema, pending);
 
@@ -93,3 +87,36 @@ export const loadSchemaClosure = async (
 
   return closure;
 };
+
+const getClosureLoader = (target: ApiTarget) => {
+  const load = memoize(
+    (schema: Record<string, unknown>): Promise<SchemaClosure> =>
+      buildSchemaClosure(target, schema).catch((error) => {
+        load.cache.delete(schema);
+        throw error;
+      })
+  );
+  return load;
+};
+
+const closureLoaders: Record<
+  ApiTarget,
+  (schema: Record<string, unknown>) => Promise<SchemaClosure>
+> = {
+  elasticsearch: getClosureLoader('elasticsearch'),
+  kibana: getClosureLoader('kibana'),
+};
+
+/**
+ * Loads every shared schema file an API's schema reaches, transitively.
+ *
+ * @param target - Backend the API belongs to.
+ * @param schema - The schema to walk, typically an API's `input`.
+ * @returns The loaded documents keyed by the reference that pointed at them.
+ * @throws {Error} when a reference escapes the schemas package or names a file that is not a
+ * JSON Schema document.
+ */
+export const loadSchemaClosure = (
+  target: ApiTarget,
+  schema: Record<string, unknown>
+): Promise<SchemaClosure> => closureLoaders[target](schema);

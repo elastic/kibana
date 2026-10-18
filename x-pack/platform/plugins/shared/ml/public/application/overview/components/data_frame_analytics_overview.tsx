@@ -90,10 +90,14 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
   }, [mlApi]);
 
   return !hasDFAs ? (
-    <AnalyticsEmptyPrompt customCss={overviewPageCardCustomCss} iconSize="m" />
+    <AnalyticsEmptyPrompt customCss={overviewPageCardCustomCss} iconSize="m" titleSize="xs" />
   ) : (
     <MLEmptyPromptCard
       customCss={overviewPageCardCustomCss}
+      hasBorder
+      hasShadow={false}
+      titleSize="xs"
+      paddingSize="m"
       iconSrc={dfaImage}
       iconSize="m"
       iconAlt={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {

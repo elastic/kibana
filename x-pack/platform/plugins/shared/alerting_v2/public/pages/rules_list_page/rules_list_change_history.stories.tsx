@@ -104,7 +104,7 @@ const RulesListChangeHistoryStory = (): JSX.Element => {
         })}
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiCallOut size="s" title="Mock adapter — no Kibana server required" iconType="iInCircle" />
+      <EuiCallOut size="s" title="Mock adapter — no Kibana server required" iconType="info" />
       <EuiSpacer size="m" />
       <RulesListTable
         items={rules}
@@ -126,8 +126,7 @@ const RulesListChangeHistoryStory = (): JSX.Element => {
         onBulkEnable={noop}
         onBulkDisable={noop}
         onBulkDelete={noop}
-        onNavigateToDetails={action('navigateToDetails')}
-        onExpand={action('expand')}
+        onOpenSummary={action('openSummary')}
         onQuickEdit={action('quickEdit')}
         onEdit={action('edit')}
         onClone={action('clone')}

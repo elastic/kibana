@@ -1,8 +1,7 @@
 {
-  "sha1": "d104add6542dc4af323e3ceef6df6de1c5b5d329",
+  "sha1": "ebfcddd7fd9273f98cf0f9cedabe37fa6f23c97f",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -15,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/analyzer_resolver_linked_events.spec.ts",
-        "line": 189,
+        "line": 190,
         "column": 7
       }
     },
@@ -29,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/missing_npre_routing.spec.ts",
-        "line": 146,
+        "line": 145,
         "column": 41
       }
     },
@@ -43,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/missing_npre_routing.spec.ts",
-        "line": 147,
+        "line": 146,
         "column": 75
       }
     },
@@ -57,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/missing_npre_routing.spec.ts",
-        "line": 152,
+        "line": 151,
         "column": 5
       }
     },

@@ -9,9 +9,11 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import { rspack, type Compiler, type Stats } from '@rspack/core';
+import type { Compiler, Stats } from '@rspack/core';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
+import type { KibanaGroup } from '@kbn/projects-solutions-groups';
+import { rspack } from './rspack_runtime';
 import { createSingleCompileConfig } from './config/create_single_compile_config';
 import { isHmrEnabled } from './hmr/hmr_enabled';
 import { HmrServer } from './hmr/hmr_server';
@@ -42,10 +44,14 @@ export interface BuildOptions {
   cache?: boolean;
   examples?: boolean;
   testPlugins?: boolean;
+  /** Include `devOnly` plugins */
+  devOnly?: boolean;
   /** Explicit plugin paths passed via --plugin-path */
   pluginPaths?: string[];
   /** Directories scanned for plugins */
   pluginScanDirs?: string[];
+  /** Restrict discovery to plugins belonging to these groups */
+  allowlistPluginGroups?: readonly KibanaGroup[];
   themeTags?: ThemeTag[];
   log?: ToolingLog;
   /** Enable profiling - writes stats.json and RsDoctor report */
@@ -67,7 +73,8 @@ export interface BuildResult {
   errors?: string[];
   warnings?: string[];
   duration?: number;
-  entryCount?: number;
+  /** Number of discovered bundles (core + plugins) included in the compilation */
+  bundleCount?: number;
   totalSize?: number;
   /** Function to close the watcher (only set in watch mode) */
   close?: () => Promise<void>;
@@ -94,8 +101,10 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     cache = true,
     examples = false,
     testPlugins = false,
+    devOnly = false,
     pluginPaths,
     pluginScanDirs,
+    allowlistPluginGroups,
     themeTags = [...DEFAULT_THEME_TAGS],
     log,
     profile = false,
@@ -125,7 +134,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 
     log?.info('Creating single-compilation RSPack config...');
 
-    const config = await createSingleCompileConfig({
+    const { config, bundleCount } = await createSingleCompileConfig({
       repoRoot,
       outputRoot,
       dist,
@@ -133,8 +142,10 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       cache,
       examples,
       testPlugins,
+      devOnly,
       pluginPaths,
       pluginScanDirs,
+      allowlistPluginGroups,
       themeTags,
       log,
       profile,
@@ -150,12 +161,14 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     const compiler = rspack(config) as Compiler;
 
     if (watch) {
-      return runWatchBuild(compiler, log, startTime, repoRoot, hmrServer);
-    } else {
-      // HMR is not used outside watch mode; clean up if somehow started
-      await hmrServer?.close();
-      return runProductionBuild(compiler, log, startTime, repoRoot);
+      const result = await runWatchBuild(compiler, log, startTime, repoRoot, hmrServer);
+      return { ...result, bundleCount };
     }
+
+    // HMR is not used outside watch mode; clean up if somehow started
+    await hmrServer?.close();
+    const result = await runProductionBuild(compiler, log, startTime, repoRoot);
+    return { ...result, bundleCount };
   } catch (error: any) {
     await hmrServer?.close();
     log?.error(`Build failed: ${error.message}`);
@@ -434,7 +447,6 @@ async function runWatchBuild(
 
 interface ProcessStatsResult extends BuildResult {
   entryCount?: number;
-  totalSize?: number;
   compilationTime?: number;
   assets?: Array<{ name: string; size: number }>;
 }

@@ -32,4 +32,6 @@ export interface ProductInstallState {
   status: InstallationStatus;
   version?: string;
   failureReason?: string;
+  /** Last time the status was written, ISO 8601 */
+  updatedAt?: string;
 }

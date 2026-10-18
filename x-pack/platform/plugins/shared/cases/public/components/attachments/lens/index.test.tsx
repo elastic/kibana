@@ -183,7 +183,7 @@ describe('getVisualizationAttachmentType', () => {
         ...attachmentViewProps,
         data: {
           state: {
-            attributes: { state: { query: { esql: '' } } },
+            attributes: { state: { datasourceStates: { textBased: { layers: {} } } } },
             timeRange: {},
           },
         },
@@ -305,6 +305,20 @@ describe('getVisualizationAttachmentType', () => {
       const event = lensType.getRemovalActivity?.(attachmentViewProps);
 
       expect(event).toEqual({ event: 'removed visualization' });
+    });
+
+    it('links the cached title for a saved visualization', () => {
+      const lensType = getVisualizationAttachmentType();
+      const event = lensType.getRemovalActivity?.({
+        ...attachmentViewProps,
+        attachmentId: 'lens-1',
+        metadata: { title: 'My lens', soType: 'lens' },
+      }).event;
+
+      const services = createStartServicesMock();
+      renderWithTestingProviders(<>{event}</>, { wrapperProps: { services } });
+
+      expect(screen.getByText('removed visualization My lens')).toBeInTheDocument();
     });
   });
 });

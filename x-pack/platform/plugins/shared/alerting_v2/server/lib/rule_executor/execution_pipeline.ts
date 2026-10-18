@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { inject, injectable, multiInject } from 'inversify';
 import type {
   RuleExecutionInput,
@@ -25,6 +26,7 @@ import type {
 } from './metrics/types';
 import { MetricCollectorFactoryToken } from './metrics/tokens';
 import { RULE_EXECUTION_COUNTERS } from './metrics/counters';
+import { tagRunReport } from './execution_outcome/run_report';
 import {
   RuleExecutorEventPublisher,
   type RuleExecutorEventPublisherContract,
@@ -36,7 +38,7 @@ import {
  */
 export interface RuleExecutionPipelineInput {
   readonly ruleId: string;
-  readonly spaceId: string;
+  readonly spaceId: SpaceId;
   readonly scheduledAt: string;
   readonly executionUuid: string;
   readonly abortSignal: AbortSignal;
@@ -95,7 +97,8 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
 
         if (result.type === 'halt') {
           pipelineState.logger.debug({
-            message: `RuleExecutor: Pipeline halted at step: ${result.reason}`,
+            message: 'Pipeline halted',
+            labels: { resource: result.reason },
           });
 
           return {
@@ -116,7 +119,10 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       };
     } catch (error) {
       this.publishExecutionFailed(rawInput, pipelineState.logger, error);
-      throw error;
+      throw tagRunReport(error, {
+        ruleVersion: pipelineState.rule?.version,
+        counters: collector.finalize().counters,
+      });
     } finally {
       collector.finalize();
     }
@@ -154,7 +160,7 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
 
     if (!rule) {
       logger.warn({
-        message: `[rule_executor] Skipping rule.execution.succeeded for rule "${rawInput.ruleId}": no rule in final state.`,
+        message: 'Skipping rule execution succeeded event publish',
         code: ALERTING_LOG_CODES.RULE_EXECUTION_EVENT_PUBLISH_SKIPPED,
       });
       return;
@@ -174,9 +180,8 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       });
     } catch (error) {
       logger.warn({
-        message: `[rule_executor] Failed to publish rule.execution.succeeded event: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
+        message: 'Failed to publish rule execution succeeded event',
+        error,
         code: ALERTING_LOG_CODES.RULE_EXECUTION_EVENT_PUBLISH_FAILED,
       });
     }
@@ -194,9 +199,8 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       });
     } catch (publishError) {
       logger.warn({
-        message: `[rule_executor] Failed to publish rule.execution.failed event: ${
-          publishError instanceof Error ? publishError.message : String(publishError)
-        }`,
+        message: 'Failed to publish rule execution failed event',
+        error: publishError,
         code: ALERTING_LOG_CODES.RULE_EXECUTION_EVENT_PUBLISH_FAILED,
       });
     }

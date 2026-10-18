@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
@@ -25,34 +25,40 @@ const MAX_ENTITY_ID_VALUE_LENGTH = 1000;
  */
 export const MAX_WORKFLOW_MESSAGE_LENGTH = 1500;
 
-export const updateAssetCriticalityInputSchema = z.object({
-  entity_type: EntityType.describe(
-    'The Entity Store entity type, e.g. "host", "user" or "service"'
-  ),
-  entity_id: z
-    .string()
-    .min(1)
-    .max(MAX_ENTITY_ID_VALUE_LENGTH)
-    .describe('The Entity Store entity ID (EUID), e.g. "host:my-host"'),
-  criticality_level: AssetCriticalityLevel.nullable().describe(
-    'The criticality level ("low_impact", "medium_impact", "high_impact", "extreme_impact") to assign to the entity. Pass `null` to remove the existing criticality level.'
-  ),
-});
-
-export const updateAssetCriticalityOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
-});
-
-export const updateAssetCriticalityConfigSchema = z.object({
-  'recalculate-risk-score': z
-    .boolean()
-    .optional()
-    .default(true)
-    .describe(
-      'Whether to trigger a risk score recalculation for the entity after updating its criticality. Defaults to true.'
+export const updateAssetCriticalityInputSchema = lazySchema(() =>
+  z.object({
+    entity_type: EntityType.describe(
+      'The Entity Store entity type, e.g. "host", "user" or "service"'
     ),
-});
+    entity_id: z
+      .string()
+      .min(1)
+      .max(MAX_ENTITY_ID_VALUE_LENGTH)
+      .describe('The Entity Store entity ID (EUID), e.g. "host:my-host"'),
+    criticality_level: AssetCriticalityLevel.nullable().describe(
+      'The criticality level ("low_impact", "medium_impact", "high_impact", "extreme_impact") to assign to the entity. Pass `null` to remove the existing criticality level.'
+    ),
+  })
+);
+
+export const updateAssetCriticalityOutputSchema = lazySchema(() =>
+  z.object({
+    success: z.boolean(),
+    message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
+  })
+);
+
+export const updateAssetCriticalityConfigSchema = lazySchema(() =>
+  z.object({
+    'recalculate-risk-score': z
+      .boolean()
+      .optional()
+      .default(true)
+      .describe(
+        'Whether to trigger a risk score recalculation for the entity after updating its criticality. Defaults to true.'
+      ),
+  })
+);
 
 export const updateAssetCriticalityStepCommonDefinition: CommonStepDefinition<
   typeof updateAssetCriticalityInputSchema,

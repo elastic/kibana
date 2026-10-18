@@ -6,7 +6,13 @@
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { apiTest, tags } from '@kbn/scout-security';
+import {
+  apiTest,
+  ELASTIC_INTERNAL_ORIGIN_HEADER,
+  INTERNAL_API_HEADERS,
+  PUBLIC_API_HEADERS,
+  tags,
+} from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/common';
 import type {
@@ -38,8 +44,8 @@ const SOURCE_EVENTS_INDEX = 'logs-windows.forwarded-default';
 
 const INTERNAL_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'Kibana',
   'Content-Type': 'application/json;charset=UTF-8',
+  ...ELASTIC_INTERNAL_ORIGIN_HEADER,
 };
 
 const buildUrl = (entityEuid: string, entityType: 'user' | 'host'): string =>
@@ -89,7 +95,7 @@ apiTest.describe(
 
       log.debug(`Installing entity store...`);
       await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-        headers: { ...defaultHeaders, 'elastic-api-version': '2023-10-31' },
+        headers: { ...defaultHeaders, ...PUBLIC_API_HEADERS },
         responseType: 'json',
         body: {},
       });
@@ -136,7 +142,7 @@ apiTest.describe(
         const maxAttempts = 10;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
           const response = await apiClient.post(`/internal/ml/modules/setup/${module}`, {
-            headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+            headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
             responseType: 'json',
             body,
           });
@@ -261,7 +267,7 @@ apiTest.describe(
       // Uninstall the entity store
       await apiClient
         .post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-          headers: { ...defaultHeaders, 'elastic-api-version': '2023-10-31' },
+          headers: { ...defaultHeaders, ...PUBLIC_API_HEADERS },
           responseType: 'json',
           body: {},
         })
@@ -272,7 +278,7 @@ apiTest.describe(
       'Anomaly summary API: returns anomalies for an entity with anomaly records',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -316,7 +322,7 @@ apiTest.describe(
       'Anomaly summary API: returns correct jobName and threat fields for suspicious_login_activity_ea',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(DAVID_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -338,7 +344,7 @@ apiTest.describe(
       'Anomaly summary API: returns empty anomalies for entity with no anomaly records',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(NO_BEHAVIORS_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -355,7 +361,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         const twoYearsAgoMs = Date.now() - 2 * 365 * 24 * 60 * 60 * 1000;
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { from: twoYearsAgoMs },
         });
@@ -370,7 +376,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         const thirtyDaysAgoMs = Date.now() - 30 * 24 * 60 * 60 * 1000;
         const response = await apiClient.post(buildUrl(NO_BEHAVIORS_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { from: thirtyDaysAgoMs },
         });
@@ -381,7 +387,7 @@ apiTest.describe(
 
     apiTest('Anomaly summary API: filters anomalies by jobIds', async ({ apiClient }) => {
       const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-        headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+        headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
         responseType: 'json',
         body: { job_ids: ['auth_high_count_logon_events_ea'] },
       });
@@ -394,7 +400,7 @@ apiTest.describe(
 
     apiTest('Anomaly summary API: respects pageSize and page', async ({ apiClient }) => {
       const page1Response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-        headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+        headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
         responseType: 'json',
         body: { page_size: 1, page: 1 },
       });
@@ -406,7 +412,7 @@ apiTest.describe(
       expect(page1Body.page_size).toBe(1);
 
       const page2Response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-        headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+        headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
         responseType: 'json',
         body: { page_size: 1, page: 2 },
       });
@@ -424,7 +430,7 @@ apiTest.describe(
       'Anomaly summary API: sorts anomalies by record_score descending',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(WIN_APP01_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { sort: [{ field: 'record_score', order: 'desc' }] },
         });
@@ -438,15 +444,21 @@ apiTest.describe(
 
     apiTest(
       'Anomaly summary API: enriches anomalies with baseline values from source index',
-      async ({ apiClient }) => {
+      async ({ apiClient, log, config }) => {
+        apiTest.skip(
+          config.isCloud && config.serverless,
+          'Skipped on serverless MKI — ML datafeed setup is not properly supported'
+        );
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
 
         expect(response.statusCode).toBe(200);
         const body = response.body as AnomalySummaryResponse;
+
+        log.info(`anomaly summary response body: ${JSON.stringify(body)}`);
 
         const rareAnomaly = body.anomalies.find(
           (a) => a.jobId === 'pad_windows_rare_region_name_by_user_ea'
@@ -474,7 +486,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         // WIN_APP01 has two anomalies: scores 5.65 and 31.06. min_score=10 should exclude 5.65.
         const response = await apiClient.post(buildUrl(WIN_APP01_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 10 }] },
         });
@@ -491,7 +503,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         // WIN_APP01 has two anomalies: scores 5.65 and 31.06. max_score=10 should exclude 31.06.
         const response = await apiClient.post(buildUrl(WIN_APP01_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 0, max_score: 10 }] },
         });
@@ -508,7 +520,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         // Carol has scores 24.37 and 25.44. Range [24, 25] includes only 24.37.
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 24, max_score: 25 }] },
         });
@@ -528,7 +540,7 @@ apiTest.describe(
         // The OR-semantics host has three anomalies: scores 5 (low), 50 (gap), and 90 (high).
         // [0,10) and [75,∞) each match one of the outer scores.
         const response = await apiClient.post(buildUrl(OR_SEMANTICS_HOST_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 0, max_score: 10 }, { min_score: 75 }] },
         });
@@ -545,7 +557,7 @@ apiTest.describe(
       'Anomaly summary API: score_ranges that exclude all anomalies returns empty results',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 50 }] },
         });
@@ -561,7 +573,7 @@ apiTest.describe(
       'Anomaly summary API: returns 400 when a score_ranges min_score is negative',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: -1 }] },
         });
@@ -574,7 +586,7 @@ apiTest.describe(
       'Anomaly summary API: returns 400 when a score_ranges max_score exceeds 100',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 0, max_score: 101 }] },
         });
@@ -587,7 +599,7 @@ apiTest.describe(
       'Anomaly summary API: returns 400 when a score_ranges min_score is greater than its max_score',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 50, max_score: 25 }] },
         });
@@ -603,7 +615,7 @@ apiTest.describe(
       'Anomaly overview API: returns expected response for entity with anomaly records',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -651,7 +663,7 @@ apiTest.describe(
         // WIN_APP01 has 2 suspicious_login_activity_ea records with scores 5.65 and 31.06.
         // Both have the same timestamp so they land in the same bucket; max should be ~31.06.
         const response = await apiClient.post(buildOverviewUrl(WIN_APP01_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -671,7 +683,7 @@ apiTest.describe(
       'Anomaly overview API: returns empty anomalies for entity with no anomaly records',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(NO_BEHAVIORS_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -690,7 +702,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         const twoYearsAgoMs = Date.now() - 2 * 365 * 24 * 60 * 60 * 1000;
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { from: twoYearsAgoMs },
         });
@@ -705,7 +717,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         const thirtyDaysAgoMs = Date.now() - 30 * 24 * 60 * 60 * 1000;
         const response = await apiClient.post(buildOverviewUrl(NO_BEHAVIORS_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { from: thirtyDaysAgoMs },
         });
@@ -720,7 +732,7 @@ apiTest.describe(
         const fromMs = Date.now() - 7 * 24 * 60 * 60 * 1000;
         const toMs = Date.now();
         const response = await apiClient.post(buildOverviewUrl(NO_BEHAVIORS_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { from: fromMs, to: toMs },
         });
@@ -739,7 +751,7 @@ apiTest.describe(
         // ['Credential Access']. Filtering by 'Initial Access' excludes that job, so no
         // anomalies are returned for this entity.
         const response = await apiClient.post(buildOverviewUrl(WIN_APP01_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { threat_tactics: ['Initial Access'] },
         });
@@ -756,7 +768,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         // WIN_APP01 has two anomalies: scores 5.65 and 31.06. min_score=10 excludes 5.65.
         const response = await apiClient.post(buildOverviewUrl(WIN_APP01_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 10 }] },
         });
@@ -776,7 +788,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         // WIN_APP01 has two anomalies: scores 5.65 and 31.06. max_score=10 excludes 31.06.
         const response = await apiClient.post(buildOverviewUrl(WIN_APP01_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 0, max_score: 10 }] },
         });
@@ -797,7 +809,7 @@ apiTest.describe(
         // The OR-semantics host has three anomalies: scores 5 (low), 50 (gap), and 90 (high).
         // [0,10) and [75,∞) each match one of the outer scores.
         const response = await apiClient.post(buildOverviewUrl(OR_SEMANTICS_HOST_EUID, 'host'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 0, max_score: 10 }, { min_score: 75 }] },
         });
@@ -812,7 +824,7 @@ apiTest.describe(
       'Anomaly overview API: score_ranges that exclude all anomalies returns empty response',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 50 }] },
         });
@@ -829,7 +841,7 @@ apiTest.describe(
       'Anomaly overview API: returns 400 when a score_ranges min_score is negative',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: -1 }] },
         });
@@ -842,7 +854,7 @@ apiTest.describe(
       'Anomaly overview API: returns 400 when a score_ranges max_score exceeds 100',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 0, max_score: 101 }] },
         });
@@ -855,7 +867,7 @@ apiTest.describe(
       'Anomaly overview API: returns 400 when a score_ranges min_score is greater than its max_score',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 50, max_score: 25 }] },
         });
@@ -871,7 +883,7 @@ apiTest.describe(
       'Anomaly summary API: returns 404 for an entity that does not exist in the entity store',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(UNKNOWN_ENTITY_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -884,7 +896,7 @@ apiTest.describe(
       'Anomaly overview API: returns 404 for an entity that does not exist in the entity store',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(UNKNOWN_ENTITY_EUID, 'user'), {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -897,7 +909,7 @@ apiTest.describe(
       'Anomaly summary API: returns error for user without ML read access',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...noMlPrivsHeaders, 'elastic-api-version': '1' },
+          headers: { ...noMlPrivsHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -911,7 +923,7 @@ apiTest.describe(
       'Anomaly overview API: returns error for user without ML read access',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...noMlPrivsHeaders, 'elastic-api-version': '1' },
+          headers: { ...noMlPrivsHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -925,7 +937,7 @@ apiTest.describe(
       'Anomaly summary API: returns error for user without entity store access',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...noEntityStorePrivsHeaders, 'elastic-api-version': '1' },
+          headers: { ...noEntityStorePrivsHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -939,7 +951,7 @@ apiTest.describe(
       'Anomaly overview API: returns error for user without entity store access',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...noEntityStorePrivsHeaders, 'elastic-api-version': '1' },
+          headers: { ...noEntityStorePrivsHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
           body: {},
         });
@@ -953,7 +965,7 @@ apiTest.describe(
       'Anomaly privileges API: returns has_all_required false for user without .ml-anomlies* access',
       async ({ apiClient }) => {
         const response = await apiClient.get(ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL, {
-          headers: { ...noMlPrivsHeaders, 'elastic-api-version': '1' },
+          headers: { ...noMlPrivsHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
         });
 
@@ -966,7 +978,7 @@ apiTest.describe(
       'Anomaly privileges API: returns has_all_required true for admin with ML index access',
       async ({ apiClient }) => {
         const response = await apiClient.get(ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL, {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
         });
 
@@ -980,7 +992,7 @@ apiTest.describe(
       'Anomaly privileges API: returns has_all_required false for user without ML Kibana feature privilege',
       async ({ apiClient }) => {
         const response = await apiClient.get(ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL, {
-          headers: { ...noMlPrivsHeaders, 'elastic-api-version': '1' },
+          headers: { ...noMlPrivsHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
         });
 

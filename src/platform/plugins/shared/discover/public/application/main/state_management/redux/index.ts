@@ -17,6 +17,7 @@ export {
   type TabStateGlobalState,
   type RecentlyClosedTabState,
   type DiscoverAppState,
+  type ExpandedDocCascadePath,
   type InternalStateDataRequestParams,
   type CascadedDocumentsState,
   type ProfileAppStateDefaultField,
@@ -42,6 +43,8 @@ export const internalStateActions = {
   ...omit(
     internalStateSlice.actions,
     'setTabs',
+    'setPersistedDiscoverSession',
+    'setDraftSessionTitle',
     'disconnectTab',
     'setDefaultProfileAdHocDataViewIds',
     'setAppState',
@@ -95,6 +98,8 @@ export {
   selectCurrentProfileStateDefinition,
   selectCurrentProfileUrlState,
   selectCurrentProfileLocatorState,
+  selectCurrentTabType,
+  selectTabTypeForPersistence,
   selectIsDataViewUsedInMultipleRuntimeTabStates,
   selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,
@@ -102,7 +107,12 @@ export {
   RuntimeStateProvider,
   RuntimeStateManagerProvider,
   useRuntimeStateManager,
+  getDataViewIdOfSource,
+  pinDataViewOfSource,
+  getDataViewOfSource,
+  getTabDataView,
   useCurrentDataView,
+  useCurrentDataSource,
   useAdHocDataViews,
 } from './runtime_state';
 

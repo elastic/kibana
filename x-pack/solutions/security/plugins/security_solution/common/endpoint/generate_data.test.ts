@@ -151,6 +151,30 @@ describe('data generator', () => {
     expect(processEvent.process?.name).not.toBeNull();
   });
 
+  it('omits custom YARA signature fields when customYaraSignature is not provided', () => {
+    const alert = generator.generateMemoryAlert();
+    expect(alert.rule?.custom_yara_signature).toBeUndefined();
+  });
+
+  it('uses provided custom YARA signature fields on memory signature alerts', () => {
+    const alert = generator.generateMemoryAlert({
+      customYaraSignature: {
+        entry_id: '123-456',
+        entry_name: 'User defined entry name',
+        rule_identifier: 'User_Defined_Rule_Identifier_1',
+      },
+    });
+
+    expect(alert.rule).toEqual({
+      name: 'User_Defined_Rule_Identifier_1',
+      custom_yara_signature: {
+        entry_id: '123-456',
+        entry_name: 'User defined entry name',
+        rule_identifier: 'User_Defined_Rule_Identifier_1',
+      },
+    });
+  });
+
   it('creates other event documents', () => {
     const timestamp = new Date().getTime();
     const processEvent = generator.generateEvent({ timestamp, eventCategory: 'dns' });

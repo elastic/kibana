@@ -25,11 +25,12 @@ const defaultProps = {
   itemName: 'test-item',
   actionsAriaLabel: 'Actions for test-item',
   editLabel: 'Edit',
+  viewLabel: 'View',
   duplicateLabel: 'Duplicate',
   deleteLabel: 'Delete',
   deleteModalConfig: DELETE_MODAL_CONFIG,
   canWrite: true,
-  isReadOnly: false,
+  isDeletable: true,
   onEdit: jest.fn(),
   onDuplicate: jest.fn(),
   onDelete: jest.fn().mockResolvedValue(undefined),
@@ -57,17 +58,66 @@ describe('RowActionsMenu', () => {
     expect(screen.getByText('Delete')).toBeInTheDocument();
   });
 
-  it('shows only edit when canWrite is false', () => {
+  it('shows only the open action when canWrite is false', () => {
     renderWithIntl(React.createElement(RowActionsMenu, { ...defaultProps, canWrite: false }));
     fireEvent.click(screen.getByLabelText('Actions for test-item'));
 
-    expect(screen.getByText('Edit')).toBeInTheDocument();
+    expect(screen.getByText('View')).toBeInTheDocument();
     expect(screen.queryByText('Duplicate')).not.toBeInTheDocument();
     expect(screen.queryByText('Delete')).not.toBeInTheDocument();
   });
 
-  it('hides delete but shows duplicate when isReadOnly is true', () => {
-    renderWithIntl(React.createElement(RowActionsMenu, { ...defaultProps, isReadOnly: true }));
+  it('shows viewLabel instead of editLabel when canWrite is false', () => {
+    renderWithIntl(React.createElement(RowActionsMenu, { ...defaultProps, canWrite: false }));
+    fireEvent.click(screen.getByLabelText('Actions for test-item'));
+
+    expect(screen.getByText('View')).toBeInTheDocument();
+    expect(screen.queryByText('Edit')).not.toBeInTheDocument();
+    expect(screen.queryByText('Duplicate')).not.toBeInTheDocument();
+    expect(screen.queryByText('Delete')).not.toBeInTheDocument();
+  });
+
+  it('shows editLabel (not viewLabel) when canWrite is true', () => {
+    renderWithIntl(React.createElement(RowActionsMenu, { ...defaultProps, canWrite: true }));
+    fireEvent.click(screen.getByLabelText('Actions for test-item'));
+
+    expect(screen.getByText('Edit')).toBeInTheDocument();
+    expect(screen.queryByText('View')).not.toBeInTheDocument();
+  });
+
+  it('shows viewLabel when opensReadOnlyPage is true even though canWrite is true', () => {
+    renderWithIntl(
+      React.createElement(RowActionsMenu, {
+        ...defaultProps,
+        canWrite: true,
+        opensReadOnlyPage: true,
+      })
+    );
+    fireEvent.click(screen.getByLabelText('Actions for test-item'));
+
+    expect(screen.getByText('View')).toBeInTheDocument();
+    expect(screen.queryByText('Edit')).not.toBeInTheDocument();
+    // A writer keeps duplicate on a view-only item; only the open affordance changes.
+    expect(screen.getByText('Duplicate')).toBeInTheDocument();
+  });
+
+  it('uses the eye icon when showing viewLabel and the pencil icon otherwise', () => {
+    const { unmount } = renderWithIntl(
+      React.createElement(RowActionsMenu, { ...defaultProps, canWrite: false })
+    );
+    fireEvent.click(screen.getByLabelText('Actions for test-item'));
+
+    expect(screen.getByText('View').closest('button')).toContainHTML('data-euiicon-type="eye"');
+    unmount();
+
+    renderWithIntl(React.createElement(RowActionsMenu, { ...defaultProps, canWrite: true }));
+    fireEvent.click(screen.getByLabelText('Actions for test-item'));
+
+    expect(screen.getByText('Edit').closest('button')).toContainHTML('data-euiicon-type="pencil"');
+  });
+
+  it('hides delete but shows duplicate when isDeletable is false', () => {
+    renderWithIntl(React.createElement(RowActionsMenu, { ...defaultProps, isDeletable: false }));
     fireEvent.click(screen.getByLabelText('Actions for test-item'));
 
     expect(screen.getByText('Edit')).toBeInTheDocument();

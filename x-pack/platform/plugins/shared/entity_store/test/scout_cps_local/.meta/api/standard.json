@@ -1,13 +1,12 @@
 {
-  "sha1": "0e23b2453cd0eb5d1ebcb6bb05b32fba0aeb5153",
+  "sha1": "d29ee0d9bc587e928f8c8eab532ae373759768e5",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "1c4351ff5aa3c84-cdfe72291d65b9f",
-      "title": "Entity Store CPS logs extraction (linked serverless project) writes a user entity into updates from a linked log",
+      "id": "1c4351ff5aa3c84-18f9d1d6bc898ea",
+      "title": "Entity Store CPS logs extraction (linked serverless project) writes a user entity into latest from a linked log",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
@@ -15,13 +14,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout_cps_local/api/tests/cps_logs_extraction.spec.ts",
-        "line": 59,
+        "line": 58,
         "column": 72
       }
     },
     {
-      "id": "1c4351ff5aa3c84-70843a1de983b04",
-      "title": "Entity Store CPS logs extraction (linked serverless project) promotes a linked-log entity into latest after a follow-up main run",
+      "id": "1c4351ff5aa3c84-fc56dee37011c8c",
+      "title": "Entity Store CPS logs extraction (linked serverless project) writes a linked-log entity into latest in a single extraction run",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
@@ -29,13 +28,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout_cps_local/api/tests/cps_logs_extraction.spec.ts",
-        "line": 92,
+        "line": 91,
         "column": 18
       }
     },
     {
-      "id": "1c4351ff5aa3c84-758e64ba98d6192",
-      "title": "Entity Store CPS logs extraction (linked serverless project) produces a correct entity document after the CPS extract → promote round-trip",
+      "id": "1c4351ff5aa3c84-24edeb4c07e3c83",
+      "title": "Entity Store CPS logs extraction (linked serverless project) produces a correct entity document from a CPS log in a single extraction run",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
@@ -43,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout_cps_local/api/tests/cps_logs_extraction.spec.ts",
-        "line": 137,
-        "column": 28
+        "line": 124,
+        "column": 18
       }
     }
   ]

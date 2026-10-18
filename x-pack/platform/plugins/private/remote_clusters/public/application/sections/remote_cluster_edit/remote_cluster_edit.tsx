@@ -136,7 +136,7 @@ export const RemoteClusterEdit: React.FC<Props> = ({
           title={i18n.translate('xpack.remoteClusters.editTitle', {
             defaultMessage: 'Edit remote cluster',
           })}
-          back={`/app${CRUD_APP_BASE_PATH}/list?cluster=${encodeURIComponent(clusterName)}`}
+          backHref={`/app${CRUD_APP_BASE_PATH}/list?cluster=${encodeURIComponent(clusterName)}`}
         />
       </EuiPageSection>
 

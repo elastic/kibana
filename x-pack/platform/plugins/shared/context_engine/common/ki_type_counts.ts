@@ -7,21 +7,7 @@
 
 import type { KiTypeCount } from './http_api/ai_indices';
 
-export const KI_OTHERS_TYPE = 'others';
-export const MAX_KI_TYPE_SUMMARY_COUNT = 5;
+export const MAX_KI_TYPE_FILTER_COUNT = 5;
 
-export const groupKiTypeCountsForSummary = (
-  countsByType: KiTypeCount[],
-  total: number
-): KiTypeCount[] => {
-  const maxVisibleTypes = MAX_KI_TYPE_SUMMARY_COUNT - 1;
-
-  if (countsByType.length <= maxVisibleTypes) {
-    return countsByType;
-  }
-
-  const visibleTypes = countsByType.slice(0, maxVisibleTypes);
-  const othersCount = total - visibleTypes.reduce((sum, { count }) => sum + count, 0);
-
-  return [...visibleTypes, { type: KI_OTHERS_TYPE, count: othersCount }];
-};
+export const takeTopKiTypeCounts = (counts: KiTypeCount[]): KiTypeCount[] =>
+  counts.slice(0, MAX_KI_TYPE_FILTER_COUNT);

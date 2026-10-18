@@ -12,20 +12,34 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
+import { isRuleExecutionCancellationError } from '../../execution_context';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { isEsqlUserError } from '../../errors/esql_user_error';
+import { getFailedStep, tagFailedStep } from '../execution_outcome';
 
 /**
  * Middleware that provides centralized error handling for all steps.
  *
  * This middleware catches errors thrown by steps and logs them with
- * consistent formatting before re-throwing.
+ * consistent formatting, tags them with the step that threw, and re-throws
+ * the original error instance so Task Manager's own error decorations survive
+ * the trip back to the task runner.
+ *
+ * Because steps are composed as nested streams, an error raised in one step is
+ * observed again by every downstream step's copy of this middleware. The tag
+ * doubles as an "already reported" marker so a single failure produces a
+ * single log line, attributed to the step that actually threw rather than the
+ * last one in the chain.
  */
 @injectable()
 export class ErrorHandlingMiddleware implements RuleExecutionMiddleware {
   public readonly name = 'error_handling';
 
-  constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
+  private readonly logger: LoggerServiceContract;
+
+  constructor(@inject(LoggerServiceToken) loggerService: LoggerServiceContract) {
+    this.logger = loggerService.forSubsystem('ruleExecutor');
+  }
 
   public execute(
     ctx: RuleExecutionMiddlewareContext,
@@ -44,18 +58,17 @@ export class ErrorHandlingMiddleware implements RuleExecutionMiddleware {
           yield result;
         }
       } catch (error) {
-        const logger = (latestState?.logger ?? fallbackLogger).withLabels({
-          step: ctx.step.name,
-        });
+        const alreadyReported = getFailedStep(error) !== undefined;
 
-        logger.error({
-          message: isEsqlUserError(error) ? 'Rule query failed to parse or verify' : undefined,
-          error,
-          code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
-          labels: { step: ctx.step.name },
-        });
+        if (!alreadyReported && !isRuleExecutionCancellationError(error)) {
+          (latestState?.logger ?? fallbackLogger).withLabels({ step: ctx.step.name }).error({
+            message: isEsqlUserError(error) ? 'Rule query failed to parse or verify' : undefined,
+            error,
+            code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
+          });
+        }
 
-        throw error;
+        throw tagFailedStep(error, ctx.step.name);
       }
     })();
   }

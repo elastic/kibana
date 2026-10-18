@@ -31,12 +31,12 @@ dependsOn:
   - '@kbn/deeplinks-security'
   - '@kbn/deeplinks-fleet'
   - '@kbn/deeplinks-shared'
-  - '@kbn/deeplinks-workplace-ai'
   - '@kbn/deeplinks-vectordb'
   - '@kbn/projects-solutions-groups'
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-agent-builder'
   - '@kbn/deeplinks-context-engine'
+  - '@kbn/deeplinks-evals'
   - '@kbn/ui-side-navigation'
   - '@kbn/core-chrome-sidebar'
 tags:

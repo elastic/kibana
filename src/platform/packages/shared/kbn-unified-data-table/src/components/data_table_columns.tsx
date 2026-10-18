@@ -18,18 +18,20 @@ import {
   type EuiDataGridColumnSortingConfig,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { DataSource } from '@kbn/data-source';
+import { getDataViewFieldFromDataSource } from '@kbn/discover-utils';
 import { SOURCE_COLUMN } from '../utils/columns';
 import { ExpandButton } from './data_table_expand_button';
 import type {
   CustomGridColumnsConfiguration,
-  SourceDisplayMode,
+  DocumentsDisplayMode,
   UnifiedDataTableSettings,
 } from '../types';
-import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
+import type { ValueToStringConverter } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
 import { SelectButton, getSelectAllButton } from './data_table_document_selection';
@@ -54,14 +56,14 @@ export const getColumnDisplayName = (
   columnName: string,
   dataViewFieldDisplayName: string | undefined,
   columnDisplay: string | undefined,
-  sourceDisplayMode: SourceDisplayMode
+  documentsDisplayMode: DocumentsDisplayMode
 ) => {
   if (columnDisplay) {
     return columnDisplay;
   }
 
   if (columnName === SOURCE_COLUMN) {
-    return sourceDisplayMode === 'summary'
+    return documentsDisplayMode === 'table'
       ? i18n.translate('unifiedDataTable.grid.documentHeader', {
           defaultMessage: 'Summary',
         })
@@ -114,8 +116,10 @@ function buildEuiGridColumn({
   dataView,
   isSummaryOnlyColumn,
   isSortEnabled,
+  isResizable,
   isPlainRecord,
   toastNotifications,
+  uiActions,
   hasEditDataViewPermission,
   valueToStringConverter,
   rowsCount,
@@ -124,7 +128,7 @@ function buildEuiGridColumn({
   columnCellActions,
   cellActionsHandling,
   visibleCellActions,
-  columnsMeta,
+  dataSource,
   showColumnTokens,
   headerRowHeight,
   customGridColumnsConfiguration,
@@ -132,9 +136,10 @@ function buildEuiGridColumn({
   onResize,
   sortedColumns,
   disableCellActions = false,
+  disableColumnActions = false,
   dataGridRef,
   hideFilteringOnComputedColumns,
-  sourceDisplayMode,
+  documentsDisplayMode,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -142,8 +147,10 @@ function buildEuiGridColumn({
   dataView: DataView;
   isSummaryOnlyColumn: boolean;
   isSortEnabled: boolean;
+  isResizable: boolean;
   isPlainRecord?: boolean;
   toastNotifications: ToastsStart;
+  uiActions?: UiActionsStart;
   hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
@@ -152,7 +159,7 @@ function buildEuiGridColumn({
   columnCellActions?: EuiDataGridColumnCellAction[];
   cellActionsHandling: 'replace' | 'append';
   visibleCellActions?: number;
-  columnsMeta?: DataTableColumnsMeta;
+  dataSource?: DataSource;
   showColumnTokens?: boolean;
   headerRowHeight?: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
@@ -160,15 +167,18 @@ function buildEuiGridColumn({
   onResize: UnifiedDataTableProps['onResize'];
   sortedColumns?: EuiDataGridColumnSortingConfig[];
   disableCellActions?: boolean;
+  disableColumnActions?: boolean;
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
   hideFilteringOnComputedColumns?: boolean;
-  sourceDisplayMode: SourceDisplayMode;
+  documentsDisplayMode: DocumentsDisplayMode;
 }) {
-  const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
+  const dataViewField = getDataViewFieldFromDataSource({
     dataView,
+    dataSource,
     fieldName: columnName,
-    columnMeta: columnsMeta?.[columnName],
   });
+  // A configured time field which doesn't match any field is a regular column, like other missing fields
+  const isTimeFieldColumn = columnName === dataView.timeFieldName && Boolean(dataViewField);
   const editFieldButton =
     editField &&
     dataViewField &&
@@ -197,7 +207,7 @@ function buildEuiGridColumn({
     columnName,
     dataViewField?.displayName,
     columnDisplay,
-    sourceDisplayMode
+    documentsDisplayMode
   );
 
   const isSorted = sortedColumns?.some((column) => column.id === columnName);
@@ -215,10 +225,12 @@ function buildEuiGridColumn({
             dataViewField,
             toastNotifications,
             valueToStringConverter,
-            sourceDisplayMode,
+            documentsDisplayMode,
             onFilter,
             dataGridRef,
-            hideFilteringOnComputedColumns
+            hideFilteringOnComputedColumns,
+            uiActions,
+            dataView
           )
         : EMPTY_CELL_ACTIONS;
 
@@ -235,53 +247,56 @@ function buildEuiGridColumn({
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: columnSchema,
+    isResizable,
     isSortable:
-      isSortEnabled && isSortable({ isPlainRecord, columnName, columnSchema, dataViewField }),
+      isSortEnabled && isSortable({ dataSource, columnName, columnSchema, dataViewField }),
     display:
       showColumnTokens || headerRowHeight !== 1 ? (
         <DataTableColumnHeaderMemoized
           dataView={dataView}
           columnName={columnName}
           columnDisplayName={columnDisplayName}
-          columnsMeta={columnsMeta}
+          dataSource={dataSource}
           showColumnTokens={showColumnTokens}
           headerRowHeight={headerRowHeight}
         />
       ) : undefined,
     displayAsText: columnDisplayName,
-    actions: {
-      showHide:
-        isSummaryOnlyColumn || columnName === dataView.timeFieldName
-          ? false
-          : {
-              label: i18n.translate('unifiedDataTable.removeColumnLabel', {
-                defaultMessage: 'Remove column',
-              }),
-              iconType: 'cross',
-              'data-test-subj': 'unifiedDataTableRemoveColumn',
-            },
-      showMoveLeft: !isSummaryOnlyColumn,
-      showMoveRight: !isSummaryOnlyColumn,
-      additional: [
-        ...(resetWidthButton ? [resetWidthButton] : []),
-        ...(columnName === SOURCE_COLUMN
-          ? []
-          : [
-              buildCopyColumnNameButton({
-                columnDisplayName,
-                toastNotifications,
-              }),
-            ]),
-        buildCopyColumnValuesButton({
-          columnId: columnName,
-          columnDisplayName,
-          toastNotifications,
-          rowsCount,
-          valueToStringConverter,
-        }),
-        ...(editFieldButton ? [editFieldButton] : []),
-      ],
-    },
+    actions: disableColumnActions
+      ? false
+      : {
+          showHide:
+            isSummaryOnlyColumn || isTimeFieldColumn
+              ? false
+              : {
+                  label: i18n.translate('unifiedDataTable.removeColumnLabel', {
+                    defaultMessage: 'Remove column',
+                  }),
+                  iconType: 'cross',
+                  'data-test-subj': 'unifiedDataTableRemoveColumn',
+                },
+          showMoveLeft: !isSummaryOnlyColumn,
+          showMoveRight: !isSummaryOnlyColumn,
+          additional: [
+            ...(resetWidthButton ? [resetWidthButton] : []),
+            ...(columnName === SOURCE_COLUMN
+              ? []
+              : [
+                  buildCopyColumnNameButton({
+                    columnDisplayName,
+                    toastNotifications,
+                  }),
+                ]),
+            buildCopyColumnValuesButton({
+              columnId: columnName,
+              columnDisplayName,
+              toastNotifications,
+              rowsCount,
+              valueToStringConverter,
+            }),
+            ...(editFieldButton ? [editFieldButton] : []),
+          ],
+        },
     cellActions,
     visibleCellActions,
     displayHeaderCellProps: { className: 'unifiedDataTable__headerCell' },
@@ -293,16 +308,16 @@ function buildEuiGridColumn({
         columnDisplayName={columnDisplayName}
         headerRowHeight={headerRowHeight}
         // JSON mode do not display a tooltip, Summary mode sets undefined so the default one is displayed.
-        tooltipContent={sourceDisplayMode === 'json' ? null : undefined}
+        tooltipContent={documentsDisplayMode === 'json' ? null : undefined}
       />
     );
-    if (sourceDisplayMode === 'json') {
+    if (documentsDisplayMode === 'json') {
       column.isExpandable = false;
       column.cellActions = EMPTY_CELL_ACTIONS;
     }
   }
 
-  if (column.id === dataView.timeFieldName) {
+  if (isTimeFieldColumn) {
     column.display = (
       <DataTableTimeColumnHeaderMemoized
         dataView={dataView}
@@ -325,7 +340,7 @@ function buildEuiGridColumn({
         dataView={dataView}
         headerRowHeight={headerRowHeight}
         columnName={columnName}
-        columnsMeta={columnsMeta}
+        dataSource={dataSource}
       />
     );
   }
@@ -336,7 +351,7 @@ function buildEuiGridColumn({
 
   if (customGridColumnsConfiguration && customGridColumnsConfiguration[column.id]) {
     // Do not allow overwrites to the JSON column.
-    if (column.id === SOURCE_COLUMN && sourceDisplayMode === 'json') {
+    if (column.id === SOURCE_COLUMN && documentsDisplayMode === 'json') {
       return column;
     }
     return customGridColumnsConfiguration[column.id]({ column, headerRowHeight });
@@ -366,7 +381,9 @@ export function getEuiGridColumns({
   dataView,
   isSummaryOnlyColumn,
   isSortEnabled,
+  isResizable = true,
   disableCellActions = false,
+  disableColumnActions = false,
   isPlainRecord,
   services,
   hasEditDataViewPermission,
@@ -374,7 +391,7 @@ export function getEuiGridColumns({
   onFilter,
   editField,
   visibleCellActions,
-  columnsMeta,
+  dataSource,
   showColumnTokens,
   headerRowHeightLines,
   customGridColumnsConfiguration,
@@ -382,7 +399,7 @@ export function getEuiGridColumns({
   sortedColumns,
   dataGridRef,
   hideFilteringOnComputedColumns,
-  sourceDisplayMode,
+  documentsDisplayMode,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -392,18 +409,21 @@ export function getEuiGridColumns({
   dataView: DataView;
   isSummaryOnlyColumn: boolean;
   isSortEnabled: boolean;
+  isResizable?: boolean;
   isPlainRecord?: boolean;
   disableCellActions?: boolean;
+  disableColumnActions?: boolean;
   services: {
     uiSettings: IUiSettingsClient;
     toastNotifications: ToastsStart;
+    uiActions?: UiActionsStart;
   };
   hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
   onFilter?: DocViewFilterFn;
   editField?: (fieldName: string) => void;
   visibleCellActions?: number;
-  columnsMeta?: DataTableColumnsMeta;
+  dataSource?: DataSource;
   showColumnTokens?: boolean;
   headerRowHeightLines: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
@@ -411,7 +431,7 @@ export function getEuiGridColumns({
   sortedColumns?: EuiDataGridColumnSortingConfig[];
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
   hideFilteringOnComputedColumns?: boolean;
-  sourceDisplayMode: SourceDisplayMode;
+  documentsDisplayMode: DocumentsDisplayMode;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
   const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
@@ -427,15 +447,17 @@ export function getEuiGridColumns({
       dataView,
       isSummaryOnlyColumn,
       isSortEnabled,
+      isResizable,
       isPlainRecord,
       toastNotifications: services.toastNotifications,
+      uiActions: services.uiActions,
       hasEditDataViewPermission,
       valueToStringConverter,
       rowsCount,
       onFilter,
       editField,
       visibleCellActions,
-      columnsMeta,
+      dataSource,
       showColumnTokens,
       headerRowHeight,
       customGridColumnsConfiguration,
@@ -443,9 +465,10 @@ export function getEuiGridColumns({
       onResize,
       sortedColumns,
       disableCellActions,
+      disableColumnActions,
       dataGridRef,
       hideFilteringOnComputedColumns,
-      sourceDisplayMode,
+      documentsDisplayMode,
     })
   );
 }

@@ -16,6 +16,8 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { TutorialsCategory } from '../../../../common/constants';
 
 const basePathMock = httpServiceMock.createBasePath();
+basePathMock.prepend.mockImplementation((path: string) => path);
+const getUrlForApp = (appId: string, { path }: { path: string }) => `/app/${appId}${path}`;
 
 const commonProps: Omit<IntroductionProps, 'intl'> = {
   description: 'this is a great tutorial about...',
@@ -93,5 +95,29 @@ describe('Introduction component', () => {
       </I18nProvider>
     );
     expect(queryByText('Beats')).not.toBeInTheDocument();
+  });
+
+  it('uses Back to selection and the caller href when return params are present', () => {
+    const { getByRole } = render(
+      <I18nProvider>
+        <Introduction
+          {...commonProps}
+          hash="#/tutorial/apm?returnAppId=observabilityOnboarding&returnPath=%3F"
+          getUrlForApp={getUrlForApp}
+        />
+      </I18nProvider>
+    );
+    const link = getByRole('link', { name: 'Back to selection' });
+    expect(link).toHaveAttribute('href', '/app/observabilityOnboarding?');
+  });
+
+  it('keeps Browse all integrations without return params', () => {
+    const { getByRole } = render(
+      <I18nProvider>
+        <Introduction {...commonProps} hash="#/tutorial/apm" getUrlForApp={getUrlForApp} />
+      </I18nProvider>
+    );
+    const link = getByRole('link', { name: 'Browse all integrations' });
+    expect(link).toHaveAttribute('href', expect.stringContaining('/app/integrations'));
   });
 });

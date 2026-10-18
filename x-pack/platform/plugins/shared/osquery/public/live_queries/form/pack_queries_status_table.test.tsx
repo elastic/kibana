@@ -11,11 +11,8 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 
 import { PackQueriesStatusTable } from './pack_queries_status_table';
-import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
 import { useExportFiltersContext } from '../../results/export_filters_context';
 import type { ExportFiltersStore } from '../../results/export_filters_context';
-
-jest.mock('../../common/experimental_features_context');
 
 // `PackQueriesStatusTable` wraps its own `ExportFiltersProvider` internally, so
 // the store the toggle handler clears is the one supplied by that internal
@@ -53,22 +50,12 @@ jest.mock('../../lens/pack_view_in_lens', () => ({
 jest.mock('../../discover/pack_view_in_discover', () => ({
   PackViewInDiscoverAction: (props: Record<string, unknown>) => mockPackViewInDiscoverAction(props),
 }));
-jest.mock('../../cases/add_to_cases', () => ({
-  AddToCaseWrapper: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('../../timelines/add_to_timeline_button', () => ({
-  AddToTimelineButton: () => null,
-}));
 jest.mock('../../actions/components/tags_column', () => ({
   TagsColumn: () => null,
 }));
 jest.mock('./row_kebab_menu', () => ({
   RowKebabMenu: () => null,
 }));
-
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.MockedFunction<
-  typeof useIsExperimentalFeatureEnabled
->;
 
 const renderWithContext = (Element: React.ReactElement) =>
   render(
@@ -111,7 +98,6 @@ const twoItemData = [
 describe('PackQueriesStatusTable — export filters store', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
   });
 
   it('clears the store entry for a row when it is collapsed, but not when it is expanded', () => {
@@ -155,7 +141,6 @@ describe('PackQueriesStatusTable — view in Discover/Lens bounds', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
   });
 
   // Half of https://github.com/elastic/sdh-security-team/issues/1779 was the

@@ -5,16 +5,26 @@
  * 2.0.
  */
 
+import { mkdtempSync, rmSync } from 'fs';
 import type { Socket } from 'net';
-import { Observable } from 'rxjs';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import { BehaviorSubject, Observable } from 'rxjs';
 
+import type { LoggerContextConfigInput, ServiceStatus } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
 import { coreMock, statusServiceMock } from '@kbn/core/server/mocks';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import type { AppenderConfigType, OtelAppenderPluginConfig } from '@kbn/core-logging-server';
+import type {
+  AppenderConfigType,
+  FileAppenderPluginConfig,
+  OtelAppenderPluginConfig,
+} from '@kbn/core-logging-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
+import type { SecurityLicense, SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
 
 import {
@@ -235,6 +245,40 @@ describe('#asScoped', () => {
     audit.stop();
   });
 
+  it('keeps `user.target` from the event when the request user is resolved', async () => {
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config,
+      logging,
+      status,
+      http,
+      getCurrentUser,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+    const request = httpServerMock.createKibanaRequest();
+
+    await auditSetup.asScoped(request).log({
+      message: 'MESSAGE',
+      event: { action: 'ACTION' },
+      user: { name: 'DISCARDED', target: { id: 'kibana/relay', name: 'relay' } },
+    });
+    expect(logger.info).toHaveBeenLastCalledWith(
+      'MESSAGE',
+      expect.objectContaining({
+        user: {
+          id: 'uid',
+          name: 'jdoe',
+          roles: ['admin'],
+          target: { id: 'kibana/relay', name: 'relay' },
+        },
+      })
+    );
+    audit.stop();
+  });
+
   it('includes user.email when the current user has an email', async () => {
     const getCurrentUserWithEmail = jest.fn().mockReturnValue({
       username: 'jdoe',
@@ -267,6 +311,100 @@ describe('#asScoped', () => {
       })
     );
     audit.stop();
+  });
+
+  it('includes user.full_name when the current user has one', async () => {
+    const getCurrentUserWithFullName = jest.fn().mockReturnValue({
+      username: 'jdoe',
+      roles: ['admin'],
+      profile_uid: 'uid',
+      full_name: 'Jane Doe',
+    });
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config,
+      logging,
+      status,
+      http,
+      getCurrentUser: getCurrentUserWithFullName,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+    const request = httpServerMock.createKibanaRequest();
+
+    await auditSetup.asScoped(request).log({
+      message: 'MESSAGE',
+      event: { action: 'ACTION' },
+    });
+    expect(logger.info).toHaveBeenLastCalledWith(
+      'MESSAGE',
+      expect.objectContaining({
+        user: { id: 'uid', name: 'jdoe', full_name: 'Jane Doe', roles: ['admin'] },
+      })
+    );
+    audit.stop();
+  });
+
+  describe('user.domain (Serverless OTel only)', () => {
+    const getCurrentUserWithRealm = jest.fn().mockReturnValue({
+      username: 'jdoe',
+      roles: ['admin'],
+      profile_uid: 'uid',
+      authentication_realm: { name: 'cloud-saml-kibana', type: 'saml' },
+    });
+
+    const logWithConfig = async (
+      auditConfig: Partial<ConfigType['audit']>,
+      isServerless: boolean
+    ) => {
+      const audit = new AuditService(logger);
+      const auditSetup = audit.setup({
+        license,
+        config: createAuditConfig(auditConfig),
+        logging,
+        status,
+        http,
+        isServerless,
+        getCurrentUser: getCurrentUserWithRealm,
+        getSpaceId,
+        getSID,
+        recordAuditLoggingUsage,
+      });
+
+      await auditSetup
+        .asScoped(httpServerMock.createKibanaRequest())
+        .log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+      audit.stop();
+
+      return (logger.info.mock.calls[logger.info.mock.calls.length - 1][1] as { user: object })
+        .user;
+    };
+
+    const otelAppender = {
+      enabled: true,
+      appender: { type: 'otel' as const, protocol: 'http' as const, url: 'http://collector:4318' },
+    };
+
+    it('includes the authentication realm when serverless and shipping to OTel', async () => {
+      expect(await logWithConfig(otelAppender, true)).toEqual({
+        id: 'uid',
+        name: 'jdoe',
+        domain: 'cloud-saml-kibana',
+        roles: ['admin'],
+      });
+    });
+
+    it('omits it when serverless but not shipping to OTel', async () => {
+      const user = await logWithConfig({ enabled: true }, true);
+      expect(user).not.toHaveProperty('domain');
+    });
+
+    it('omits it when shipping to OTel but not serverless', async () => {
+      const user = await logWithConfig(otelAppender, false);
+      expect(user).not.toHaveProperty('domain');
+    });
   });
 
   it('logs event enriched with meta data from fake request', async () => {
@@ -349,6 +487,169 @@ describe('#asScoped', () => {
       })
     );
     audit.stop();
+  });
+
+  describe('service accounts', () => {
+    const SERVICE_ACCOUNT_ID = 'kibana/nightshift-relay';
+    const serviceAccountPrincipal = {
+      type: 'service_account' as const,
+      serviceAccountId: SERVICE_ACCOUNT_ID,
+      variant: 'stack' as const,
+    };
+
+    const setupWith = (
+      overrides: Partial<Parameters<AuditService['setup']>[0]> = {}
+    ): { audit: AuditService; auditSetup: ReturnType<AuditService['setup']> } => {
+      const audit = new AuditService(logger);
+      const auditSetup = audit.setup({
+        license,
+        config,
+        logging,
+        status,
+        http,
+        getCurrentUser: () => null,
+        getSpaceId: (req) => req.spaceId,
+        getSID: () => Promise.resolve(undefined),
+        recordAuditLoggingUsage,
+        ...overrides,
+      });
+      return { audit, auditSetup };
+    };
+
+    const serviceAccountFakeRequest = () =>
+      kibanaRequestFactory({
+        headers: { authorization: 'Bearer essu_token' },
+        spaceId: asSpaceId('my-space'),
+      } as FakeRawRequest);
+
+    it('names the service account a fake request runs as, without roles', async () => {
+      const getFakeRequestPrincipal = jest.fn().mockReturnValue(serviceAccountPrincipal);
+      const { audit, auditSetup } = setupWith({ getFakeRequestPrincipal });
+      const request = serviceAccountFakeRequest();
+
+      await auditSetup.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+
+      expect(getFakeRequestPrincipal).toHaveBeenCalledWith(request);
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'MESSAGE',
+        expect.objectContaining({
+          user: { id: SERVICE_ACCOUNT_ID, name: SERVICE_ACCOUNT_ID },
+          kibana: { space_id: 'my-space', session_id: undefined },
+          trace: { id: request.id },
+        })
+      );
+      audit.stop();
+    });
+
+    it('keeps `user.target` from the event on a service account fake request', async () => {
+      const { audit, auditSetup } = setupWith({
+        getFakeRequestPrincipal: () => serviceAccountPrincipal,
+      });
+
+      await auditSetup.asScoped(serviceAccountFakeRequest()).log({
+        message: 'MESSAGE',
+        event: { action: 'ACTION' },
+        user: { name: 'DISCARDED', target: { id: 'kibana/other-account' } },
+      });
+
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'MESSAGE',
+        expect.objectContaining({
+          user: {
+            id: SERVICE_ACCOUNT_ID,
+            name: SERVICE_ACCOUNT_ID,
+            target: { id: 'kibana/other-account' },
+          },
+        })
+      );
+      audit.stop();
+    });
+
+    it('keeps the event user on a fake request the service accounts backend did not mint', async () => {
+      const { audit, auditSetup } = setupWith({ getFakeRequestPrincipal: () => null });
+
+      await auditSetup.asScoped(serviceAccountFakeRequest()).log({
+        message: 'MESSAGE',
+        event: { action: 'ACTION' },
+        user: { name: 'EVENT_USER' },
+      });
+
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'MESSAGE',
+        expect.objectContaining({ user: { name: 'EVENT_USER' } })
+      );
+      audit.stop();
+    });
+
+    it('uses the service account id as `user.id` for a request authenticated with a service account token', async () => {
+      const getFakeRequestPrincipal = jest.fn();
+      const { audit, auditSetup } = setupWith({
+        getFakeRequestPrincipal,
+        getCurrentUser: () =>
+          ({
+            username: SERVICE_ACCOUNT_ID,
+            roles: [],
+            authentication_provider: { type: 'http', name: '__http__' },
+            authentication_realm: { type: '_service_account', name: '_service_account' },
+          } as never),
+      });
+
+      await auditSetup
+        .asScoped(httpServerMock.createKibanaRequest())
+        .log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'MESSAGE',
+        expect.objectContaining({
+          user: { id: SERVICE_ACCOUNT_ID, name: SERVICE_ACCOUNT_ID, roles: [] },
+        })
+      );
+      expect(getFakeRequestPrincipal).not.toHaveBeenCalled();
+      audit.stop();
+    });
+
+    it('leaves a user with a profile unchanged, without asking about fake requests', async () => {
+      const getFakeRequestPrincipal = jest.fn();
+      const { audit, auditSetup } = setupWith({ getFakeRequestPrincipal, getCurrentUser });
+
+      await auditSetup
+        .asScoped(httpServerMock.createKibanaRequest())
+        .log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'MESSAGE',
+        expect.objectContaining({ user: { id: 'uid', name: 'jdoe', roles: ['admin'] } })
+      );
+      expect(getFakeRequestPrincipal).not.toHaveBeenCalled();
+      audit.stop();
+    });
+
+    // `log` is not awaited by its callers, so a workload can release its fake request while the
+    // session lookup is still pending.
+    it('names the service account even when the fake request is released before the event is written', async () => {
+      let resolveSID: (sid: string | undefined) => void = () => {};
+      const getFakeRequestPrincipal = jest.fn().mockReturnValue(serviceAccountPrincipal);
+      const { audit, auditSetup } = setupWith({
+        getFakeRequestPrincipal,
+        getSID: () =>
+          new Promise((resolve) => {
+            resolveSID = resolve;
+          }),
+      });
+
+      const logged = auditSetup
+        .asScoped(serviceAccountFakeRequest())
+        .log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+      getFakeRequestPrincipal.mockReturnValue(null);
+      resolveSID(undefined);
+      await logged;
+
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'MESSAGE',
+        expect.objectContaining({ user: { id: SERVICE_ACCOUNT_ID, name: SERVICE_ACCOUNT_ID } })
+      );
+      audit.stop();
+    });
   });
 
   it('does not log to audit logger if event matches ignore filter', async () => {
@@ -716,18 +1017,13 @@ describe('#createLoggingConfig', () => {
 
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
     const otelAppender = appenders.auditTrailAppender as OtelAppenderPluginConfig;
-    // includeResources keeps the audit resource attribute keys plus the promoted keys (so project.id
-    // stays in the resource for log delivery); attributes supply the service.name/service.type values.
-    expect(otelAppender.includeResources).toEqual([
-      ...Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
-      ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
-    ]);
+    expect(otelAppender.includeResources).toEqual(['service.name', 'service.type']);
     expect(otelAppender.attributes).toEqual(AUDIT_OTEL_RESOURCE_ATTRIBUTES);
-    // project.id is also copied into per-record attributes (kept in both places).
+    // project.id is captured before filtering and emitted only in per-record attributes.
     expect(otelAppender.promoteResourceAttributes).toEqual(AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES);
   });
 
-  test('merges user-provided attributes with audit resource attributes', () => {
+  test('preserves configured attributes for promotion while restricting the resource to service identity', () => {
     const features = { allowAuditLogging: true };
 
     const loggingConfig = createLoggingConfig(
@@ -738,7 +1034,13 @@ describe('#createLoggingConfig', () => {
           type: 'otel',
           protocol: 'http',
           url: 'http://collector:4318/v1/logs',
-          attributes: { 'custom.attr': 'value' },
+          attributes: {
+            'custom.attr': 'value',
+            'project.id': 'configured-project',
+            'service.name': 'custom-service',
+            'service.type': 'custom-type',
+          },
+          promoteResourceAttributes: ['custom.attr'],
         },
       },
       true
@@ -748,13 +1050,12 @@ describe('#createLoggingConfig', () => {
     const otelAppender = appenders.auditTrailAppender as OtelAppenderPluginConfig;
     expect(otelAppender.attributes).toEqual({
       'custom.attr': 'value',
+      'project.id': 'configured-project',
       ...AUDIT_OTEL_RESOURCE_ATTRIBUTES,
     });
-    // includeResources must cover ALL configured attribute keys — not just the audit two — plus the
-    // promoted keys, so a deployment-provided resource attribute (e.g. project.id) is not stripped.
-    expect(otelAppender.includeResources).toEqual([
+    expect(otelAppender.includeResources).toEqual(['service.name', 'service.type']);
+    expect(otelAppender.promoteResourceAttributes).toEqual([
       'custom.attr',
-      ...Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
       ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
     ]);
   });
@@ -1065,5 +1366,155 @@ describe('#filterEvent', () => {
         },
       ])
     ).toBeFalsy();
+  });
+});
+
+describe('runtime audit log write failures', () => {
+  let testDir: string;
+
+  beforeEach(() => {
+    testDir = mkdtempSync(join(tmpdir(), 'kbn-audit-service-'));
+  });
+
+  afterEach(() => {
+    rmSync(testDir, { recursive: true, force: true });
+  });
+
+  const setupWithFileAppender = (
+    securityLicense: SecurityLicense = licenseMock.create({ allowAuditLogging: true })
+  ) => {
+    const fileName = join(testDir, 'audit.log');
+    const audit = new AuditService(logger);
+    const statusMock = statusServiceMock.createSetupContract();
+
+    audit.setup({
+      license: securityLicense,
+      config: createAuditConfig({
+        enabled: true,
+        appender: { type: 'file', fileName, layout: { type: 'json' } },
+      }),
+      logging,
+      status: statusMock,
+      http,
+      getCurrentUser,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+
+    const loggingConfigs: LoggerContextConfigInput[] = [];
+    (logging.configure.mock.calls[0][0] as Observable<LoggerContextConfigInput>).subscribe((c) =>
+      loggingConfigs.push(c)
+    );
+
+    const statuses: ServiceStatus[] = [];
+    (statusMock.set.mock.calls[0][0] as Observable<ServiceStatus>).subscribe((s) =>
+      statuses.push(s)
+    );
+
+    return { audit, fileName, loggingConfigs, statuses };
+  };
+
+  const auditAppender = (loggerContextConfig: LoggerContextConfigInput) =>
+    (loggerContextConfig.appenders as Record<string, FileAppenderPluginConfig>).auditTrailAppender;
+
+  it('hands the appender an `onWriteError` handler so a mid-write failure cannot crash Kibana', () => {
+    const { audit, loggingConfigs } = setupWithFileAppender();
+
+    const appender = auditAppender(loggingConfigs[0]);
+
+    expect(appender.type).toEqual('file');
+    expect(appender.onWriteError).toEqual(expect.any(Function));
+    audit.stop();
+  });
+
+  it('reports degraded when the appender fails mid-write, not only at startup', () => {
+    const { audit, fileName, loggingConfigs, statuses } = setupWithFileAppender();
+    const { onWriteError } = auditAppender(loggingConfigs[0]);
+
+    expect(statuses.at(-1)!.level).toEqual(ServiceStatusLevels.available);
+
+    onWriteError!({ path: fileName, code: 'ENOSPC', reason: 'ENOSPC: no space left on device' });
+
+    expect(statuses.at(-1)!.level).toEqual(ServiceStatusLevels.degraded);
+    expect(statuses.at(-1)!.summary).toEqual('Audit log cannot be written');
+    expect(statuses.at(-1)!.detail).toContain('ENOSPC');
+    audit.stop();
+  });
+
+  it('turns the audit logger off once a write has failed, so the appender stops being used', () => {
+    const { audit, fileName, loggingConfigs } = setupWithFileAppender();
+    const { onWriteError } = auditAppender(loggingConfigs[0]);
+
+    expect(loggingConfigs[0].loggers![0].level).toEqual('info');
+
+    onWriteError!({ path: fileName, code: 'EROFS', reason: 'EROFS: read-only file system' });
+
+    expect(loggingConfigs.at(-1)!.loggers![0].level).toEqual('off');
+    audit.stop();
+  });
+
+  it('reconfigures the logger only once, no matter how many writes fail before it goes off', () => {
+    const { audit, fileName, loggingConfigs } = setupWithFileAppender();
+    const { onWriteError } = auditAppender(loggingConfigs[0]);
+    const configCount = loggingConfigs.length;
+
+    // The appender now discards an errored stream and reopens the file, so records still in flight
+    // before the logger turns off each report a failure.
+    onWriteError!({ path: fileName, code: 'ENOSPC', reason: 'ENOSPC: no space left on device' });
+    onWriteError!({ path: fileName, code: 'ENOSPC', reason: 'ENOSPC: no space left on device' });
+    onWriteError!({ path: fileName, code: 'ENOSPC', reason: 'ENOSPC: no space left on device' });
+
+    expect(loggingConfigs).toHaveLength(configCount + 1);
+    expect(loggingConfigs.at(-1)!.loggers![0].level).toEqual('off');
+    audit.stop();
+  });
+
+  it('stays paused across a license change, since the probe cannot see a full disk', () => {
+    const features$ = new BehaviorSubject({
+      allowAuditLogging: true,
+    } as SecurityLicenseFeatures);
+    const { audit, fileName, loggingConfigs, statuses } = setupWithFileAppender(
+      licenseMock.create(features$)
+    );
+    const { onWriteError } = auditAppender(loggingConfigs[0]);
+
+    onWriteError!({ path: fileName, code: 'ENOSPC', reason: 'ENOSPC: no space left on device' });
+
+    expect(loggingConfigs.at(-1)!.loggers![0].level).toEqual('off');
+    expect(statuses.at(-1)!.level).toEqual(ServiceStatusLevels.degraded);
+
+    features$.next({ allowAuditLogging: false } as SecurityLicenseFeatures);
+    features$.next({ allowAuditLogging: true } as SecurityLicenseFeatures);
+
+    expect(loggingConfigs.at(-1)!.loggers![0].level).toEqual('off');
+    expect(auditAppender(loggingConfigs.at(-1)!).type).toEqual('console');
+    expect(statuses.at(-1)!.level).toEqual(ServiceStatusLevels.degraded);
+    audit.stop();
+  });
+
+  it('always installs its own handler, ignoring anything an operator put in the appender config', () => {
+    const operatorHandler = jest.fn();
+    const auditHandler = jest.fn();
+    const auditConfig = createAuditConfig({
+      enabled: true,
+      appender: {
+        type: 'file',
+        fileName: join(testDir, 'audit.log'),
+        layout: { type: 'json' },
+        onWriteError: operatorHandler,
+      } as AppenderConfigType,
+    });
+
+    const loggingConfig = createLoggingConfig(
+      auditConfig,
+      false,
+      undefined,
+      auditHandler
+    )({ allowAuditLogging: true });
+    auditAppender(loggingConfig).onWriteError!({ path: 'audit.log', reason: 'ENOSPC' });
+
+    expect(auditHandler).toHaveBeenCalledTimes(1);
+    expect(operatorHandler).not.toHaveBeenCalled();
   });
 });

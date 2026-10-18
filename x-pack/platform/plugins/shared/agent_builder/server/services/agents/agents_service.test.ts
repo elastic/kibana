@@ -18,6 +18,7 @@ import { isAllowedBuiltinAgent, isAllowedAgentType } from '@kbn/agent-builder-se
 import { agentBuilderDefaultAiIndexId, chatAgentTypeId } from '@kbn/agent-builder-common';
 import type { AgentConfiguration, AgentDefinition } from '@kbn/agent-builder-common';
 import { AgentsService } from './agents_service';
+import { defaultAiIndices } from './default_ai_indices';
 import type { AgentsServiceStart } from './types';
 import type { AgentsServiceStartDeps } from './agents_service';
 import { createMockedAgent, createToolsServiceStartMock } from '../../test_utils';
@@ -213,6 +214,12 @@ describe('AgentsService', () => {
 
         expect(resolved.ai_indices).toEqual([agentBuilderDefaultAiIndexId, 'custom-index']);
       });
+
+      it('derives the chat type defaults from the default AI indices map', async () => {
+        const resolved = await resolve({ tools: [], ai_indices: [] });
+
+        expect(resolved.ai_indices).toEqual(Object.keys(defaultAiIndices));
+      });
     });
 
     describe('#ensure', () => {
@@ -269,7 +276,11 @@ describe('AgentsService', () => {
             ...agent,
             access_control: undefined,
             created_by: undefined,
-            permissions: { update_agent: true, update_access_control: true },
+            permissions: {
+              update_agent: true,
+              update_access_control: true,
+              update_approvals: true,
+            },
           }),
         } as any);
 

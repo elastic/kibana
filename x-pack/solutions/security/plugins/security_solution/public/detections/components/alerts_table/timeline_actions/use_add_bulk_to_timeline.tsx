@@ -33,6 +33,7 @@ import type { Direction } from '../../../../../common/search_strategy';
 import { globalFiltersQuerySelector } from '../../../../common/store/inputs/selectors';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useSendBulkToTimeline } from './use_send_bulk_to_timeline';
+import { BULK_INVESTIGATE_IN_TIMELINE_ACTION_ID } from '../../../../common/constants/action_ids';
 
 const { setEventsLoading } = dataTableActions;
 
@@ -208,10 +209,12 @@ export const useAddBulkToTimelineAction = ({
         ? [
             {
               label: investigateInTimelineTitle,
-              key: 'add-bulk-to-timeline',
+              key: BULK_INVESTIGATE_IN_TIMELINE_ACTION_ID,
               'data-test-subj': 'investigate-bulk-in-timeline',
               disableOnQuery: disableActionOnSelectAll,
               onClick: onActionClick,
+              icon: 'timeline' as const,
+              groupId: 'timeline' as const,
             },
           ]
         : [],

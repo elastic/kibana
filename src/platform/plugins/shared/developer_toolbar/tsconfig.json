@@ -13,7 +13,6 @@
     "@kbn/config-schema",
     "@kbn/core-chrome-browser-internal-types",
     "@kbn/core-theme-browser-internal-types",
-    "@kbn/core-chrome-feature-flags",
     "@kbn/design-tools",
   ]
 }

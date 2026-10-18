@@ -12,6 +12,9 @@ import {
   LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT,
   LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
   LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
+  DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
+  MAX_HISTORY_SNAPSHOT_RETENTION_DAYS,
+  MAX_EXCLUDED_USER_NAMES,
 } from './constants';
 
 export const EntityStoreGlobalStateTypeName = 'entity-store-global-state';
@@ -120,11 +123,87 @@ const version3: SavedObjectsFullModelVersion = {
   },
 };
 
+const globalStateSchemaV4 = globalStateSchemaV3.extends({
+  defaultsVersion: schema.maybe(
+    schema.oneOf([schema.literal('legacy'), schema.literal('latest')] as const)
+  ),
+});
+
+const version4: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'data_backfill',
+      backfillFn: () => ({
+        // docs written before the overrides format have the defaults of that era baked into
+        // logsExtraction; mark them so reads strip those values (see legacy_defaults.ts).
+        // Every write of the new format re-stamps 'latest'.
+        attributes: {
+          defaultsVersion: 'legacy',
+        },
+      }),
+    },
+  ],
+  schemas: {
+    create: globalStateSchemaV4,
+    forwardCompatibility: globalStateSchemaV4.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
+const historySnapshotSchemaV5 = historySnapshotSchema.extends({
+  retentionDays: schema.maybe(schema.number({ min: 1, max: MAX_HISTORY_SNAPSHOT_RETENTION_DAYS })),
+});
+
+const globalStateSchemaV5 = globalStateSchemaV4.extends({
+  historySnapshot: historySnapshotSchemaV5,
+});
+
+const version5: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'data_backfill',
+      backfillFn: () => ({
+        attributes: {
+          historySnapshot: {
+            retentionDays: DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
+          },
+        },
+      }),
+    },
+  ],
+  schemas: {
+    create: globalStateSchemaV5,
+    forwardCompatibility: globalStateSchemaV5.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
+const globalStateSchemaV6 = globalStateSchemaV5.extends({
+  excludedUserNames: schema.maybe(
+    schema.arrayOf(schema.string(), { maxSize: MAX_EXCLUDED_USER_NAMES })
+  ),
+});
+
+const version6: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'data_backfill',
+      backfillFn: () => ({
+        attributes: {
+          excludedUserNames: [],
+        },
+      }),
+    },
+  ],
+  schemas: {
+    create: globalStateSchemaV6,
+    forwardCompatibility: globalStateSchemaV6.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EntityStoreGlobalStateType: SavedObjectsType = {
   name: EntityStoreGlobalStateTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EntityStoreGlobalStateTypeMappings,
-  modelVersions: { 1: version1, 2: version2, 3: version3 },
+  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4, 5: version5, 6: version6 },
   hiddenFromHttpApis: true,
 };

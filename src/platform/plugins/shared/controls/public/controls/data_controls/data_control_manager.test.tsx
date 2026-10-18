@@ -271,5 +271,33 @@ describe('initializeDataControlManager', () => {
 
       expect(mockGetESQLSingleColumnValues.mock.calls.length).toBe(initialCalls);
     });
+
+    it('keeps the derived field and data view when reinitialized with the same query', async () => {
+      mockGetESQLSingleColumnValues.mockResolvedValue({
+        values: ['US'],
+        column: { name: 'myFieldName', type: 'keyword' },
+      });
+      const {
+        data_view_id: _dataViewId,
+        field_name: _fieldName,
+        ...serializedEsqlState
+      } = esqlState;
+
+      const dataControlManager = await initializeDataControlManager({
+        controlId: 'esqlControl',
+        controlType: 'esql',
+        state: serializedEsqlState,
+        editorStateManager: initializeStateManager({}, {}),
+        parentApi: {},
+        typeDisplayName: 'ES|QL Control',
+      });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      dataControlManager.reinitializeState(dataControlManager.getLatestState());
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(dataControlManager.api.fieldName$.value).toBe('myFieldName');
+      expect(dataControlManager.api.dataViewId$.value).toBe('myDataViewId');
+    });
   });
 });

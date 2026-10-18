@@ -8,7 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SourceDisplayMode } from '../types';
+import type { DocumentsDisplayMode } from '../types';
 
 export const SOURCE_COLUMN = '_source';
 
@@ -30,19 +30,30 @@ export const isSummaryOnlyColumn = (columns: string[]): boolean =>
 export function getDisplayedColumns(
   stateColumns: string[] = [],
   dataView: DataView,
-  sourceDisplayMode: SourceDisplayMode = 'summary'
+  documentsDisplayMode: DocumentsDisplayMode = 'table'
 ) {
   // JSON mode is a single JSON cell; selected fields filter that cell instead of becoming their own
   // columns, so always show just the source column.
-  if (sourceDisplayMode === 'json') {
+  if (documentsDisplayMode === 'json') {
     return SOURCE_ONLY;
   }
   return stateColumns &&
     stateColumns.length > 0 &&
     // check if all columns where removed except the configured timeField (this can't be removed)
-    !(stateColumns.length === 1 && stateColumns[0] === dataView.timeFieldName)
+    !(stateColumns.length === 1 && isPrependedTimeFieldColumn(stateColumns[0], dataView))
     ? stateColumns
     : SOURCE_ONLY;
+}
+
+/**
+ * The configured time field column is prepended to the grid only when it matches one of the data view fields,
+ * otherwise it's a regular column which can be removed like any other column
+ */
+function isPrependedTimeFieldColumn(column: string, dataView: DataView) {
+  return (
+    column === dataView.timeFieldName &&
+    (!dataView.fields || Boolean(dataView.getFieldByName(column)))
+  );
 }
 
 export function getInnerColumns(fields: Record<string, unknown[]>, columnId: string) {

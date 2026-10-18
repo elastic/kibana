@@ -63,7 +63,7 @@ export type {
 } from './fixtures/scope/worker';
 
 // Tagging utility
-export { tags } from './tags';
+export { getPlaywrightTagsFor, tags } from './tags';
 
 // Test entrypoints
 export { test, spaceTest, lighthouseTest, globalSetupHook, globalTeardownHook } from './test/ui';
@@ -77,9 +77,9 @@ export * from './ui_components';
 
 // Page-object wrappers and helpers for shared Kibana surfaces.
 export {
+  AppMenu,
   ContentListWrapper,
+  EmbeddableAlertsTablePage,
+  InspectorPage,
   ListingTable,
-  buildContentListSearch,
-  buildContentListUrlRegex,
 } from './page_objects';
-export type { ContentListUrlState } from './page_objects';

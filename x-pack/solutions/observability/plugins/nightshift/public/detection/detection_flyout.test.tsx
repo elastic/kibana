@@ -18,6 +18,7 @@ import { SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE } from '@kbn/significant-ev
 import { DetectionFlyout } from './detection_flyout';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
 }));
 
@@ -26,8 +27,8 @@ const mockOpenChat = jest.fn();
 
 const mockStreamFeatures = jest.fn();
 
-jest.mock('../hooks/use_fetch_stream_features', () => ({
-  useFetchStreamFeatures: () => mockStreamFeatures(),
+jest.mock('../hooks/use_fetch_source_features', () => ({
+  useFetchSourceFeatures: () => mockStreamFeatures(),
 }));
 
 jest.mock('./change_point_lens_chart', () => ({
@@ -68,25 +69,24 @@ jest.mock('../hooks/use_kibana', () => ({
 const webFrontendFeature = {
   uuid: 'feat-web-frontend',
   id: 'web-frontend',
-  stream_name: 'logs.web-frontend',
+  source_id: 'logs.web-frontend',
   type: 'entity',
   subtype: 'service',
   title: 'web-frontend',
   description: 'Frontend service entity',
   properties: {},
   confidence: 90,
-  evidence: ['stream_name = logs.web-frontend'],
+  evidence: ['source_id = logs.web-frontend'],
 };
 
 const mockEvent: SignificantEvent = {
   '@timestamp': '2026-07-10T12:00:00Z',
   event_id: 'evt-001',
-  event_uuid: 'evt-uuid-001',
-  status: 'open',
-  stream_names: ['logs.web-frontend'],
+  status: 'active',
+  source_ids: ['logs.web-frontend'],
   title: 'Web latency spike',
   summary: 'Latency increased on web-frontend.',
-  severity: '80-critical',
+  severity: 'critical',
   confidence: 0.92,
   blast_radius: [
     {
@@ -94,7 +94,7 @@ const mockEvent: SignificantEvent = {
       subtype: 'service',
       feature_id: 'feat-web-frontend',
       name: 'web-frontend',
-      stream_name: 'logs.web-frontend',
+      source_id: 'logs.web-frontend',
     },
   ],
 };
@@ -103,14 +103,14 @@ const mockDetection: LifecycleDetection = {
   detection_id: 'det-1',
   rule_name: 'latency-p95-spike',
   rule_uuid: 'rule-uuid-001',
-  stream_name: 'logs.web-frontend',
+  source_id: 'logs.web-frontend',
   change_point_type: 'spike',
   '@timestamp': '2026-07-10T12:00:00Z',
 };
 
 const mockSignal: SignalEntry = {
   type: 'detection',
-  stream_name: 'logs.web-frontend',
+  source_id: 'logs.web-frontend',
   description: 'P95 latency on web-frontend rose from 120ms to 890ms.',
   verdict: 'confirms',
   evidence: {
@@ -131,7 +131,7 @@ describe('DetectionFlyout', () => {
     mockOpenChat.mockClear();
     mockStreamFeatures.mockReturnValue({
       features: [webFrontendFeature],
-      failedStreamNames: [],
+      failedSourceIds: [],
       isInitialLoading: false,
       isFetching: false,
       isError: false,
@@ -242,7 +242,7 @@ describe('DetectionFlyout', () => {
     expect(entityFlyout).toBeInTheDocument();
     expect(within(entityFlyout).getByText('Summary')).toBeInTheDocument();
     expect(within(entityFlyout).getByText(webFrontendFeature.description)).toBeInTheDocument();
-    expect(within(entityFlyout).getByText('stream_name = logs.web-frontend')).toBeInTheDocument();
+    expect(within(entityFlyout).getByText('source_id = logs.web-frontend')).toBeInTheDocument();
   });
 
   it('closes the entity flyout without closing the detection flyout', () => {
@@ -261,7 +261,7 @@ describe('DetectionFlyout', () => {
   it('hides the impacted services section when no entry resolves to a service', () => {
     mockStreamFeatures.mockReturnValue({
       features: [],
-      failedStreamNames: [],
+      failedSourceIds: [],
       isInitialLoading: false,
       isFetching: false,
       isError: false,
@@ -272,22 +272,86 @@ describe('DetectionFlyout', () => {
     expect(screen.queryByText('Impacted services')).not.toBeInTheDocument();
   });
 
-  it('names the unreachable streams while keeping the services that did resolve', () => {
+  it('includes resolved services and says when some sources failed to load', () => {
+    const paymentsFeature = {
+      ...webFrontendFeature,
+      uuid: 'feat-payments',
+      id: 'payments-api',
+      source_id: 'logs.payments',
+      title: 'payments-api',
+    };
     mockStreamFeatures.mockReturnValue({
-      features: [webFrontendFeature],
-      failedStreamNames: ['logs.payments', 'logs.checkout'],
+      features: [webFrontendFeature, paymentsFeature],
+      failedSourceIds: ['logs.payments', 'logs.checkout'],
       isInitialLoading: false,
       isFetching: false,
       isError: false,
       refetch: jest.fn(),
     });
+    renderFlyout({
+      event: {
+        ...mockEvent,
+        causal_features: [
+          {
+            feature_id: 'feat-payments',
+            type: 'entity',
+            subtype: 'service',
+            name: 'payments-api',
+            source_id: 'logs.payments',
+          },
+        ],
+      },
+    });
+
+    expect(
+      screen
+        .getAllByTestId('nightshiftDetectionFlyoutEntityChip')
+        .map(({ textContent }) => textContent)
+    ).toEqual(['web-frontend', 'payments-api']);
+    expect(
+      screen.getByText('Some sources could not be loaded, so this list may be incomplete.')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId('nightshiftDetectionFlyoutImpactedServicesRetry')
+    ).toBeInTheDocument();
+  });
+
+  it('does not title an empty list when some sources failed to load', () => {
+    const refetch = jest.fn();
+    mockStreamFeatures.mockReturnValue({
+      features: [],
+      failedSourceIds: ['logs.payments'],
+      isInitialLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch,
+    });
     renderFlyout();
 
-    expect(screen.getByText('Some impacted services could not be loaded')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftDetectionFlyoutEntitiesFailedStreams')).toHaveTextContent(
-      'No response from logs.payments, logs.checkout.'
-    );
-    expect(screen.getAllByTestId('nightshiftDetectionFlyoutEntityChip').length).toBeGreaterThan(0);
+    expect(screen.queryByText('Impacted services')).not.toBeInTheDocument();
+    expect(
+      screen.getByText('Some sources could not be loaded, so this list may be incomplete.')
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftDetectionFlyoutImpactedServicesRetry'));
+    expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('says when every source failed and offers a retry', () => {
+    const refetch = jest.fn();
+    mockStreamFeatures.mockReturnValue({
+      features: [],
+      failedSourceIds: [],
+      isInitialLoading: false,
+      isFetching: false,
+      isError: true,
+      refetch,
+    });
+    renderFlyout();
+
+    expect(screen.queryByText('Impacted services')).not.toBeInTheDocument();
+    expect(screen.getByText('Impacted services could not be loaded.')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftDetectionFlyoutImpactedServicesRetry'));
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 
   it('renders the Lens occurrence chart in the trend section', () => {

@@ -9,11 +9,18 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
 
+// Suite consistently fails on ECH: https://github.com/elastic/kibana/issues/278242
 spaceTest.describe(
   'No data views: try ES|QL from dashboard',
-  { tag: tags.deploymentAgnostic },
+  {
+    tag: [
+      ...tags.serverless.observability.complete,
+      ...tags.serverless.security.complete,
+      ...tags.serverless.search,
+      '@local-stateful-classic',
+    ],
+  },
   () => {
     // The no-data prompt only appears when the active space has no data views,
     // so this suite deliberately does *not* load the shared dashboard kbn archive
@@ -49,9 +56,8 @@ spaceTest.describe(
 
         await spaceTest.step('seeds the inline editor with the default ES|QL query', async () => {
           await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-          const codeEditor = new KibanaCodeEditorWrapper(page);
           await expect
-            .poll(() => codeEditor.getCodeEditorValue())
+            .poll(() => pageObjects.esqlEditor.getQuery())
             .toBe('FROM logs* | SORT @timestamp DESC');
         });
       }

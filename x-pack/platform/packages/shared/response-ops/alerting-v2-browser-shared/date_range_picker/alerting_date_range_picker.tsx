@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { distinctUntilChanged, map } from 'rxjs';
+import { map } from 'rxjs';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -67,6 +67,8 @@ export interface AlertingDateRangePickerProps {
   showTimeWindowButtons?: boolean | TimeWindowButtonsConfig;
   width?: 'auto' | 'restricted' | 'full';
   compressed?: boolean;
+  /** Hide the date range label and show only the duration badge. @default false */
+  collapsed?: boolean;
   persistPresets?: boolean;
   'data-test-subj'?: string;
 }
@@ -81,6 +83,7 @@ export const AlertingDateRangePicker = ({
   showTimeWindowButtons = false,
   width = 'auto',
   compressed = true,
+  collapsed = false,
   persistPresets = true,
   'data-test-subj': dataTestSubj,
 }: AlertingDateRangePickerProps) => {
@@ -90,16 +93,9 @@ export const AlertingDateRangePicker = ({
   const [autoRefresh, setAutoRefresh] = useState<AutoRefreshSettings>(DEFAULT_AUTO_REFRESH);
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
 
-  const isDateRangePickerEnabled$ = useMemo(
-    () =>
-      featureFlags
-        .getBooleanValue$(DATE_RANGE_PICKER_FEATURE_FLAG, true)
-        .pipe(distinctUntilChanged()),
-    [featureFlags]
-  );
-  const isDateRangePickerEnabled = useObservable(
-    isDateRangePickerEnabled$,
-    featureFlags.getBooleanValue(DATE_RANGE_PICKER_FEATURE_FLAG, true)
+  const isDateRangePickerEnabled = featureFlags.useBooleanValue(
+    DATE_RANGE_PICKER_FEATURE_FLAG,
+    true
   );
 
   const dateRangePickerPresets = useDateRangePickerPresets({
@@ -116,6 +112,7 @@ export const AlertingDateRangePicker = ({
   const value = `${from} to ${to}`;
   const timeZone = uiSettings.get<string>('dateFormat:tz', 'Browser');
   const dateFormat = uiSettings.get<string>('dateFormat');
+  const inputDateFormats = useMemo(() => (dateFormat ? [dateFormat] : undefined), [dateFormat]);
   const canAccessAdvancedSettings =
     (application.capabilities.advancedSettings?.save as boolean | undefined) ?? false;
 
@@ -192,7 +189,8 @@ export const AlertingDateRangePicker = ({
       onRefresh={onRefresh}
       width={width}
       compressed={compressed}
-      dateFormat={dateFormat}
+      collapsed={collapsed}
+      inputDateFormats={inputDateFormats}
       timeZone={timeZone}
       prependBasePath={http.basePath.prepend}
       canAccessAdvancedSettings={canAccessAdvancedSettings}

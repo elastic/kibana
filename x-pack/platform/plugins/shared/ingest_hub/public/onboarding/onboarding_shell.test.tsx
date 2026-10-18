@@ -18,24 +18,24 @@ jest.mock('react-use/lib/useSessionStorage');
 jest.mock('./use_aws_service_matrix', () => {
   const matrix = [
     {
-      id: 'apigateway_logs',
-      name: 'AWS API Gateway',
-      category: 'networking_content_delivery',
-      signalType: 'logs',
+      id: 'cloudtrail',
+      name: 'AWS CloudTrail',
+      category: 'management_governance',
+      signalTypes: ['logs'],
+      dataStreams: [],
       deploymentMethods: [{ method: 'ecf', preferred: true }],
       packageName: 'aws',
-      policyTemplate: 'apigateway',
       defaultEnabled: true,
       showInUI: true,
     },
     {
-      id: 'apigateway_metrics',
-      name: 'AWS API Gateway',
-      category: 'networking_content_delivery',
-      signalType: 'metrics',
+      id: 'ec2',
+      name: 'Amazon EC2',
+      category: 'compute',
+      signalTypes: ['logs', 'metrics'],
+      dataStreams: [],
       deploymentMethods: [{ method: 'managed_integration', preferred: true }],
       packageName: 'aws',
-      policyTemplate: 'apigateway',
       defaultEnabled: true,
       showInUI: true,
     },
@@ -63,7 +63,7 @@ jest.mock('./step_components', () => ({
       Continue
     </button>
   ),
-  DeployAndDetectStep: () => <div data-test-subj="deployAndDetectStep" />,
+  DetectAndReviewStep: () => <div data-test-subj="detectAndReviewStep" />,
 }));
 
 import { OnboardingFlowProvider, useOnboardingFlow } from './onboarding_flow_context';
@@ -77,8 +77,8 @@ beforeEach(() => {
   mockUseSessionStorage.mockImplementation((_key, initial) => React.useState(initial));
 });
 
-const NON_AGENTLESS_ID = 'apigateway_logs';
-const AGENTLESS_ID = 'apigateway_metrics';
+const NON_AGENTLESS_ID = 'cloudtrail';
+const AGENTLESS_ID = 'ec2';
 
 function stepIndicatorStatus(stepId: string): string | null {
   return screen.getByTestId(`onboardingStepIndicator-${stepId}`).getAttribute('data-step-status');
@@ -113,6 +113,57 @@ function renderShell(initialHash = '#services') {
     setIds: (ids: string[]) => act(() => exposedSetIds(ids)),
   };
 }
+
+describe('OnboardingShell — ?deploymentId= survives hash navigation', () => {
+  /**
+   * Regression: onContinue / onBack / step-indicator clicks spread the React `location`
+   * state (stale closure) when pushing/replacing the hash. If persistDeploymentId wrote
+   * ?deploymentId= to the URL via history.replace() just before onContinue fired, the
+   * shell's history.push({ ...location, hash }) would use the old location (no search
+   * param) and silently wipe the deployment id from the URL.
+   *
+   * Fixed by reading history.location (the live imperative value) instead.
+   */
+  it('preserves ?deploymentId= in the URL when onContinue advances from authenticate-and-deploy to detect-and-review', async () => {
+    const { history } = renderShell('#authenticate-and-deploy');
+
+    // Simulate persistDeploymentId: history.replace with the deployment id in search,
+    // keeping the current hash — exactly what useOnboardingSO.persistDeploymentId does.
+    act(() => {
+      history.replace({
+        ...history.location,
+        search: '?deploymentId=test-deployment-id',
+      });
+    });
+
+    expect(history.location.search).toBe('?deploymentId=test-deployment-id');
+
+    // onContinue fires (the deploy settled and the step advances to detect-and-review).
+    act(() => screen.getByTestId('authenticateAndDeployStep-continue').click());
+
+    expect(history.location.hash).toBe('#detect-and-review');
+    // The deployment id must survive the hash update.
+    expect(history.location.search).toBe('?deploymentId=test-deployment-id');
+  });
+
+  it('preserves ?deploymentId= when navigating back from detect-and-review', async () => {
+    const { history } = renderShell('#authenticate-and-deploy');
+
+    act(() => {
+      history.replace({ ...history.location, search: '?deploymentId=test-deployment-id' });
+    });
+
+    // Advance to detect-and-review, then navigate back.
+    act(() => screen.getByTestId('authenticateAndDeployStep-continue').click());
+    expect(history.location.hash).toBe('#detect-and-review');
+
+    // Click the step indicator for authenticate-and-deploy (a completed step — clickable).
+    act(() => screen.getByTestId('onboardingStepIndicator-authenticate-and-deploy').click());
+
+    expect(history.location.hash).toBe('#authenticate-and-deploy');
+    expect(history.location.search).toBe('?deploymentId=test-deployment-id');
+  });
+});
 
 describe('OnboardingShell — downstream step invalidation', () => {
   /**

@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule } from 'eslint';
-import type { TSESTree } from '@typescript-eslint/typescript-estree';
-import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
+import type { CreateOnceRule } from '@oxlint/plugins';
 
 /**
  * Maps component names to the prop that must carry a "compressed" value.
@@ -27,7 +25,7 @@ const COMPRESSED_REQUIREMENTS: Record<string, { prop: string; value?: string }> 
   EuiButtonGroup: { prop: 'buttonSize', value: 'compressed' },
 };
 
-export const RequireEuiFormCompressed: Rule.RuleModule = {
+export const RequireEuiFormCompressed: CreateOnceRule = {
   meta: {
     type: 'suggestion',
     docs: {
@@ -38,40 +36,34 @@ export const RequireEuiFormCompressed: Rule.RuleModule = {
     },
     schema: [],
   },
-  create(context) {
+  createOnce(context) {
     return {
-      JSXIdentifier: (node: TSESTree.Node) => {
-        if (!('name' in node)) return;
-
-        const name = String(node.name);
+      JSXIdentifier(node) {
+        const { name, parent } = node;
         const requirement = COMPRESSED_REQUIREMENTS[name];
-        if (!requirement) return;
+        if (!requirement || parent.type !== 'JSXOpeningElement') return;
 
-        const parent = node.parent;
-        if (parent?.type !== AST_NODE_TYPES.JSXOpeningElement) return;
-
-        const attributes = (parent as TSESTree.JSXOpeningElement).attributes;
         const { prop, value } = requirement;
 
-        const hasRequiredProp = attributes.some((attr) => {
+        const hasRequiredProp = parent.attributes.some((attr) => {
           if (
-            attr.type !== AST_NODE_TYPES.JSXAttribute ||
-            attr.name.type !== AST_NODE_TYPES.JSXIdentifier ||
+            attr.type !== 'JSXAttribute' ||
+            attr.name.type !== 'JSXIdentifier' ||
             attr.name.name !== prop
           ) {
             return false;
           }
           if (!value) return true;
-          if (attr.value?.type === AST_NODE_TYPES.Literal && attr.value.value === value) {
+          if (attr.value?.type === 'Literal' && attr.value.value === value) {
             return true;
           }
-          return attr.value?.type === AST_NODE_TYPES.JSXExpressionContainer;
+          return attr.value?.type === 'JSXExpressionContainer';
         });
 
         if (!hasRequiredProp) {
           const hint = value ? `\`${prop}="${value}"\`` : `the \`${prop}\` prop`;
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: 'missing',
             data: { component: name, hint },
           });

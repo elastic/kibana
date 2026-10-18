@@ -63,16 +63,6 @@ const DeveloperToolbarWrapper = (props: DeveloperToolbarProps) => {
     throw new Error('This is a test exception thrown from the developer toolbar demo');
   };
 
-  const simulateMemoryLeak = () => {
-    const leakyArray: unknown[] = [];
-    setInterval(() => {
-      // Simulate memory leak by adding data without cleanup
-      for (let i = 0; i < 1000; i++) {
-        leakyArray.push(new Array(1000).fill('leak'));
-      }
-    }, 100);
-  };
-
   const simulateFrameJank = () => {
     // Block the main thread to simulate jank
     const start = performance.now();
@@ -153,11 +143,6 @@ const DeveloperToolbarWrapper = (props: DeveloperToolbarProps) => {
           <EuiFlexItem grow={false}>
             <EuiButton size="s" color="danger" onClick={triggerException}>
               Trigger Exception
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton size="s" color="accent" onClick={simulateMemoryLeak}>
-              Simulate Memory Leak
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
