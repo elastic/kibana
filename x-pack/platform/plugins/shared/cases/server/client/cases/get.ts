@@ -244,10 +244,7 @@ export const getCasesByAttachmentIDs = async (
       caseIds: cases.map(({ id }) => id),
     }));
 
-    const res =
-      status === undefined
-        ? caseIdsOfAttachments
-        : await filterByCaseStatus(caseService, caseIdsOfAttachments, asArray(status));
+    const res = await filterByCaseStatus(caseService, caseIdsOfAttachments, status);
 
     return decodeOrThrow(GetCaseIDsByAttachmentIDsResponseRt)(res);
   } catch (error) {
@@ -260,14 +257,16 @@ export const getCasesByAttachmentIDs = async (
 };
 
 /**
- * Only the cases with one of the statuses; attachment ids left in no case are dropped. Cases whose
- * attachment outlived them are not found, so they are left out.
+ * Only the cases with one of the statuses, or every case without a status; attachment ids left in no
+ * case are dropped. Cases whose attachment outlived them are not found, so they are left out.
  */
 const filterByCaseStatus = async (
   caseService: CasesService,
   casesOfAttachments: CaseIdsOfAttachment[],
-  statuses: CaseStatuses[]
+  status: CaseStatuses | CaseStatuses[] | undefined
 ): Promise<CaseIdsOfAttachment[]> => {
+  if (status === undefined) return casesOfAttachments;
+  const statuses = asArray(status);
   const caseIds = [...new Set(casesOfAttachments.flatMap((attachment) => attachment.caseIds))];
   const responses = await pMap(
     chunk(caseIds, MAX_BULK_GET_CASES),
