@@ -99,6 +99,34 @@ describe('createCriteriaEvaluator', () => {
     expect(result.explanation).toContain('"fail-me" (FAIL): No explanation given');
   });
 
+  it('feeds the graded task output — including the analysed alert — to the judge prompt', async () => {
+    // The alert-analysis suite attaches the alert it analysed to the task output; this is the
+    // channel that carries it into the judge prompt (a FAIL on the "does not invent alert
+    // fields…" criterion is only meaningful when the judge can see the alert data at all).
+    mockScoreWith([
+      { id: 'pass-me', result: 'PASS', reason: 'Grounded in the alert' },
+      { id: 'fail-me', result: 'PASS', reason: 'Grounded in the alert' },
+      { id: 'na-me', result: 'PASS', reason: 'Grounded in the alert' },
+    ]);
+
+    await createCriteriaEvaluator({ inferenceClient, criteria, log }).evaluate({
+      input: { alertId: 'a1' },
+      output: {
+        classification: 'true_positive',
+        rationale: 'update_flash.exe was dropped in the Downloads folder',
+        alertData: { 'process.name': 'update_flash.exe', 'host.name': 'build-agent-03' },
+      },
+      expected: {},
+      metadata: null,
+    });
+
+    const judged = executeUntilValidMock.mock.calls[0][0].input as Record<string, string>;
+    expect(judged.input).toBe(JSON.stringify({ alertId: 'a1' }));
+    expect(judged.output).toContain('"process.name":"update_flash.exe"');
+    expect(judged.output).toContain('"host.name":"build-agent-03"');
+    expect(judged.output).toContain('update_flash.exe was dropped in the Downloads folder');
+  });
+
   it('keeps N/A at full weight and the aggregate label unchanged', async () => {
     mockScoreWith(
       [{ id: 'pass-me', result: 'PASS' }].concat([

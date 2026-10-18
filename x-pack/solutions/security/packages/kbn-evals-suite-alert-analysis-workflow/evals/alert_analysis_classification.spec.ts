@@ -205,17 +205,19 @@ evaluate.describe(
                 });
 
                 try {
-                  const verdict = await runAlertAnalysisWorkflow({
+                  // `alertData` rides the graded task output: the example input is only
+                  // `{ alertId }`, and the rationale judge checks the grounding criterion
+                  // ("does not invent alert fields…") against the analysed alert. The merge
+                  // lives in `runAlertAnalysisWorkflow`, under this package's unit tests.
+                  return await runAlertAnalysisWorkflow({
                     fetch,
                     log,
                     traceEsClient,
                     alertId: uniqueAlertId,
                     alertIndex,
                     classificationMethod: method,
+                    alertData: document,
                   });
-                  // The example input is only `{ alertId }`; surface the seeded document so the
-                  // rationale judge can check the grounding criterion against the real alert.
-                  return { ...verdict, alertData: document };
                 } finally {
                   await esClient
                     .delete({ index: alertIndex, id: uniqueAlertId, refresh: true })
