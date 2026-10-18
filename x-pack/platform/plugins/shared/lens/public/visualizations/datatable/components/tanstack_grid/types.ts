@@ -10,6 +10,7 @@ import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
   EuiDataGridControlColumn,
+  EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
 
@@ -42,6 +43,19 @@ export interface TanStackDatatableGridProps {
     defaultHeight?: 'auto' | { lineCount: number };
   };
   gridStyle?: EuiDataGridStyle;
+  /** Controlled, the grid does not sort rows itself: it renders `onSort` triggers in the header menu. */
+  sorting?: EuiDataGridSorting;
+  pagination?: TanStackGridPagination;
+  /** Called once when a user finishes resizing a column. */
+  onColumnResize?: (data: { columnId: string; width: number }) => void;
+}
+
+export interface TanStackGridPagination {
+  pageIndex: number;
+  pageSize: number;
+  pageSizeOptions?: number[];
+  onChangeItemsPerPage: (pageSize: number) => void;
+  onChangePage: (pageIndex: number) => void;
 }
 
 export type GridColumnKind = 'leading' | 'data' | 'trailing';

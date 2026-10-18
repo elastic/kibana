@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CSSProperties, FocusEvent, KeyboardEvent } from 'react';
-import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
+import type { CSSProperties, FocusEvent, KeyboardEvent, PointerEvent } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiDataGridSetCellProps } from '@elastic/eui';
-import { useEuiTheme, useResizeObserver } from '@elastic/eui';
+import { EuiTablePagination, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { useVirtualizer, type Virtualizer } from '@tanstack/react-virtual';
 import type { GridPosition } from '@kbn/unified-data-table';
 import {
@@ -23,6 +23,7 @@ import {
   MIN_COLUMN_WIDTH,
   OVERSCAN,
 } from './constants';
+import { GridHeaderCell } from './grid_header_cell';
 import type { GridStyles } from './styles';
 import { getGridStyles } from './styles';
 import type { GridColumnModel, TanStackCellValueProps, TanStackDatatableGridProps } from './types';
@@ -33,11 +34,20 @@ const clamp = (value: number, min: number, max: number) => Math.min(Math.max(val
 const getWidthVar = (column: GridColumnModel) =>
   `${COLUMN_WIDTH_VAR_PREFIX}-${column.ariaColIndex}`;
 
-const getColumnWidth = (column: GridColumnModel) =>
-  column.fixedWidth ?? column.column?.initialWidth;
+/** A width set by dragging, only valid while the `initialWidth` it was based on is unchanged. */
+interface WidthOverride {
+  width: number;
+  initialWidth: number | undefined;
+}
 
-const getColumnFlexStyle = (column: GridColumnModel): CSSProperties =>
-  getColumnWidth(column) != null
+const getColumnWidth = (column: GridColumnModel, override?: WidthOverride) =>
+  column.fixedWidth ??
+  (override && override.initialWidth === column.column?.initialWidth
+    ? override.width
+    : column.column?.initialWidth);
+
+const getColumnFlexStyle = (column: GridColumnModel, width: number | undefined): CSSProperties =>
+  width != null
     ? { flex: `0 0 var(${getWidthVar(column)})` }
     : { flex: '1 1 0', minInlineSize: MIN_COLUMN_WIDTH };
 
@@ -169,6 +179,9 @@ export const TanStackDatatableGrid = ({
   renderCellValue,
   rowHeightsOptions,
   gridStyle,
+  sorting,
+  pagination,
+  onColumnResize,
 }: TanStackDatatableGridProps) => {
   const themeContext = useEuiTheme();
   const styles = useMemo(() => getGridStyles(themeContext, gridStyle), [themeContext, gridStyle]);
@@ -210,31 +223,85 @@ export const TanStackDatatableGrid = ({
     }));
   }, [columns, leadingControlColumns, trailingControlColumns]);
 
-  const flexStyles = useMemo(() => columnModels.map(getColumnFlexStyle), [columnModels]);
+  const [widthOverrides, setWidthOverrides] = useState<Record<string, WidthOverride>>({});
+  const [resizingColumnId, setResizingColumnId] = useState<string>();
+
+  const columnWidths = useMemo(
+    () => columnModels.map((model) => getColumnWidth(model, widthOverrides[model.id])),
+    [columnModels, widthOverrides]
+  );
+  const flexStyles = useMemo(
+    () => columnModels.map((model, index) => getColumnFlexStyle(model, columnWidths[index])),
+    [columnModels, columnWidths]
+  );
 
   // Column widths are applied through CSS variables, so they can change without re-rendering rows.
   const containerStyle = useMemo(() => {
-    const widths = columnModels.map(getColumnWidth);
     const style: Record<string, string> = {
-      '--lnsTanStackGridMinWidth': `${widths.reduce<number>(
+      '--lnsTanStackGridMinWidth': `${columnWidths.reduce<number>(
         (sum, width) => sum + (width ?? MIN_COLUMN_WIDTH),
         0
       )}px`,
     };
     columnModels.forEach((model, index) => {
-      const width = widths[index];
+      const width = columnWidths[index];
       if (width != null) {
         style[getWidthVar(model)] = `${width}px`;
       }
     });
     return style as CSSProperties;
-  }, [columnModels]);
+  }, [columnModels, columnWidths]);
+
+  const onColumnResizeRef = useRef(onColumnResize);
+  onColumnResizeRef.current = onColumnResize;
+
+  const onResizeStart = useCallback(
+    (model: GridColumnModel, event: PointerEvent<HTMLDivElement>) => {
+      const header = event.currentTarget.parentElement;
+      if (!header || event.button !== 0) {
+        return;
+      }
+      event.preventDefault();
+      const handle = event.currentTarget;
+      handle.setPointerCapture?.(event.pointerId);
+      const startX = event.clientX;
+      const startWidth = header.getBoundingClientRect().width;
+      const isRtl = getComputedStyle(header).direction === 'rtl';
+      const initialWidth = model.column?.initialWidth;
+      let width = startWidth;
+      setResizingColumnId(model.id);
+
+      const onMove = (moveEvent: globalThis.PointerEvent) => {
+        const delta = (moveEvent.clientX - startX) * (isRtl ? -1 : 1);
+        width = Math.max(MIN_COLUMN_WIDTH, Math.round(startWidth + delta));
+        setWidthOverrides((prev) => ({ ...prev, [model.id]: { width, initialWidth } }));
+      };
+      const onEnd = () => {
+        handle.removeEventListener('pointermove', onMove);
+        handle.removeEventListener('pointerup', onEnd);
+        handle.removeEventListener('pointercancel', onEnd);
+        setResizingColumnId(undefined);
+        if (width !== startWidth) {
+          onColumnResizeRef.current?.({ columnId: model.id, width });
+        }
+      };
+      handle.addEventListener('pointermove', onMove);
+      handle.addEventListener('pointerup', onEnd);
+      handle.addEventListener('pointercancel', onEnd);
+    },
+    []
+  );
 
   const [stickyElement, setStickyElement] = useState<HTMLDivElement | null>(null);
   const { height: stickyHeight } = useResizeObserver(stickyElement, 'height');
 
+  const pageOffset = pagination ? pagination.pageIndex * pagination.pageSize : 0;
+  const visibleRowCount = pagination
+    ? Math.max(0, Math.min(pagination.pageSize, rowCount - pageOffset))
+    : rowCount;
+
   const rowVirtualizer = useVirtualizer({
-    count: rowCount,
+    count: visibleRowCount,
     getScrollElement: () => scrollRef.current,
     estimateSize,
     overscan: OVERSCAN,
@@ -244,23 +311,38 @@ export const TanStackDatatableGrid = ({
   virtualizerRef.current = rowVirtualizer;
   const virtualItems = rowVirtualizer.getVirtualItems();
 
+  // Page changes start from the top.
+  const pageIndex = pagination?.pageIndex;
+  useEffect(() => {
+    scrollRef.current?.scrollTo?.({ top: 0 });
+  }, [pageIndex]);
+
   const colCount = columnModels.length;
+  // Keyboard navigation works on rows of the current page: the header, then the visible rows.
   const firstRow = 1;
-  const lastRow = rowCount + 1;
+  const lastRow = visibleRowCount + 1;
+  const toPageRow = useCallback((row: number) => (row <= 1 ? row : row - pageOffset), [pageOffset]);
+  const fromPageRow = useCallback(
+    (row: number) => (row <= 1 ? row : row + pageOffset),
+    [pageOffset]
+  );
 
   // Roving tabindex: the grid is a single tab stop, arrow keys move between its cells.
   const [tabStop, setTabStop] = useState<GridPosition>({ row: 2, col: 1 });
   const effectiveTabStop = useMemo<GridPosition>(() => {
-    let row = clamp(tabStop.row, firstRow, Math.max(lastRow, firstRow));
-    // A virtualized row that is not rendered cannot be a tab stop, fall back to the first rendered one.
-    if (row > 1 && virtualItems.length > 0) {
-      const index = row - 2;
-      if (index < virtualItems[0].index || index > virtualItems[virtualItems.length - 1].index) {
-        row = virtualItems[0].index + 2;
+    let row = tabStop.row;
+    if (row > 1) {
+      // A row that is on another page or virtualized out cannot be a tab stop, fall back to the first rendered one.
+      const index = row - 2 - pageOffset;
+      if (
+        virtualItems.length > 0 &&
+        (index < virtualItems[0].index || index > virtualItems[virtualItems.length - 1].index)
+      ) {
+        row = virtualItems[0].index + 2 + pageOffset;
       }
     }
     return { row, col: clamp(tabStop.col, 1, Math.max(colCount, 1)) };
-  }, [tabStop, lastRow, virtualItems, colCount]);
+  }, [tabStop, pageOffset, virtualItems, colCount]);
 
   const focusCell = useCallback(
     (position: GridPosition) => {
@@ -274,8 +356,8 @@ export const TanStackDatatableGrid = ({
         return;
       }
       // The row is virtualized out, scroll it into view and focus it once it is rendered.
-      const index = position.row - 2;
-      if (index < 0 || index >= rowCount) {
+      const index = position.row - 2 - pageOffset;
+      if (index < 0 || index >= visibleRowCount) {
         return;
       }
       virtualizerRef.current?.scrollToIndex(index);
@@ -290,7 +372,7 @@ export const TanStackDatatableGrid = ({
       };
       requestAnimationFrame(focusWhenRendered);
     },
-    [rowCount]
+    [pageOffset, visibleRowCount]
   );
 
   const onFocus = useCallback((event: FocusEvent<HTMLDivElement>) => {
@@ -313,14 +395,19 @@ export const TanStackDatatableGrid = ({
       }
       const position = getGridPosition(event.target);
       const nextPosition =
-        position && getNextGridPosition(position, event, { firstRow, lastRow, colCount });
+        position &&
+        getNextGridPosition({ ...position, row: toPageRow(position.row) }, event, {
+          firstRow,
+          lastRow,
+          colCount,
+        });
       if (nextPosition) {
         event.preventDefault();
         event.stopPropagation();
-        focusCell(nextPosition);
+        focusCell({ ...nextPosition, row: fromPageRow(nextPosition.row) });
       }
     },
-    [lastRow, colCount, focusCell]
+    [lastRow, colCount, focusCell, toPageRow, fromPageRow]
   );
 
   return (
@@ -339,32 +426,21 @@ export const TanStackDatatableGrid = ({
       >
         <div ref={setStickyElement} css={styles.stickyTop}>
           <div role="row" aria-rowindex={1} css={styles.headerRow}>
-            {columnModels.map((model, index) => {
-              const { id, column, control } = model;
-              const HeaderCellRender = control?.headerCellRender;
-              return (
-                <div
-                  key={id}
-                  role="columnheader"
-                  aria-colindex={model.ariaColIndex}
-                  tabIndex={
-                    effectiveTabStop.row === 1 && effectiveTabStop.col === model.ariaColIndex
-                      ? 0
-                      : -1
-                  }
-                  data-test-subj={`dataGridHeaderCell-${id}`}
-                  data-gridcell-column-id={id}
-                  css={styles.headerCell}
-                  style={flexStyles[index]}
-                >
-                  {HeaderCellRender ? (
-                    <HeaderCellRender />
-                  ) : (
-                    column?.display ?? column?.displayAsText ?? id
-                  )}
-                </div>
-              );
-            })}
+            {columnModels.map((model, index) => (
+              <GridHeaderCell
+                key={model.id}
+                model={model}
+                flexStyle={flexStyles[index]}
+                styles={styles}
+                isTabStop={
+                  effectiveTabStop.row === 1 && effectiveTabStop.col === model.ariaColIndex
+                }
+                sortDirection={sorting?.columns.find((sort) => sort.id === model.id)?.direction}
+                sorting={sorting}
+                isResizing={resizingColumnId === model.id}
+                onResizeStart={onResizeStart}
+              />
+            ))}
           </div>
         </div>
         <div css={styles.virtualOuter} style={{ height: rowVirtualizer.getTotalSize() }}>
@@ -377,13 +453,13 @@ export const TanStackDatatableGrid = ({
             }}
           >
             {virtualItems.map(({ index, key }) => {
-              const ariaRowIndex = index + 2;
+              const ariaRowIndex = pageOffset + index + 2;
               return (
                 <GridRow
                   key={key}
                   models={columnModels}
                   flexStyles={flexStyles}
-                  rowIndex={index}
+                  rowIndex={pageOffset + index}
                   visibleRowIndex={index}
                   ariaRowIndex={ariaRowIndex}
                   isStriped={Boolean(gridStyle?.stripes) && index % 2 === 1}
@@ -401,6 +477,18 @@ export const TanStackDatatableGrid = ({
           </div>
         </div>
       </div>
+      {pagination && (
+        <EuiTablePagination
+          aria-controls={undefined}
+          activePage={pagination.pageIndex}
+          pageCount={Math.max(1, Math.ceil(rowCount / pagination.pageSize))}
+          itemsPerPage={pagination.pageSize}
+          itemsPerPageOptions={pagination.pageSizeOptions}
+          onChangePage={pagination.onChangePage}
+          onChangeItemsPerPage={pagination.onChangeItemsPerPage}
+          data-test-subj="lnsTanStackGridPagination"
+        />
+      )}
     </div>
   );
 };

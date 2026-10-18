@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { TanStackDatatableGrid } from './tanstack_datatable_grid';
@@ -128,6 +128,182 @@ describe('TanStackDatatableGrid', () => {
     expect(screen.getAllByRole('columnheader')).toHaveLength(2);
   });
 
+  describe('header menu and sorting', () => {
+    // The popover panel is not interactive while it animates in.
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    const openMenu = async (columnId: string) => {
+      await user.click(screen.getByTestId(`dataGridHeaderCellActionButton-${columnId}`));
+    };
+
+    it('triggers sorting from the header menu and toggles the active sort off', async () => {
+      const onSort = jest.fn();
+      const { rerender } = render(
+        <TanStackDatatableGrid {...defaultProps} sorting={{ columns: [], onSort }} />
+      );
+      await openMenu('a');
+      await user.click(screen.getByTestId('dataGridHeaderCellActionSortDesc'));
+      expect(onSort).toHaveBeenLastCalledWith([{ id: 'a', direction: 'desc' }]);
+
+      rerender(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          sorting={{ columns: [{ id: 'a', direction: 'desc' }], onSort }}
+        />
+      );
+      expect(screen.getByTestId('dataGridHeaderCell-a')).toHaveAttribute('aria-sort', 'descending');
+      expect(screen.getByTestId('dataGridHeaderCellSortIcon-a')).toBeInTheDocument();
+      await openMenu('a');
+      await user.click(screen.getByTestId('dataGridHeaderCellActionSortDesc'));
+      expect(onSort).toHaveBeenLastCalledWith([]);
+    });
+
+    it('renders custom labels and additional actions, and honors disabled actions', async () => {
+      const onReset = jest.fn();
+      const onSort = jest.fn();
+      render(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          sorting={{ columns: [], onSort }}
+          columns={[
+            {
+              id: 'a',
+              displayAsText: 'Column A',
+              actions: {
+                showSortAsc: { label: 'Custom ascending' },
+                showSortDesc: false,
+                additional: [
+                  { label: 'Reset width', onClick: onReset, 'data-test-subj': 'resetWidth' },
+                ],
+              },
+            },
+            { id: 'b', displayAsText: 'Column B', actions: false },
+          ]}
+        />
+      );
+      expect(screen.queryByTestId('dataGridHeaderCellActionButton-b')).not.toBeInTheDocument();
+      await openMenu('a');
+      expect(screen.getByText('Custom ascending')).toBeInTheDocument();
+      expect(screen.queryByTestId('dataGridHeaderCellActionSortDesc')).not.toBeInTheDocument();
+      await user.click(screen.getByTestId('resetWidth'));
+      expect(onReset).toHaveBeenCalledTimes(1);
+    });
+
+    it('has no menu without sorting or actions', () => {
+      render(<TanStackDatatableGrid {...defaultProps} />);
+      expect(screen.queryByTestId('dataGridHeaderCellActionButton-a')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('column resizing', () => {
+    // jsdom has no PointerEvent: fall back to a MouseEvent, which carries the coordinates.
+    beforeAll(() => {
+      Object.defineProperty(window, 'PointerEvent', { value: MouseEvent, configurable: true });
+    });
+
+    it('applies the dragged width and reports it when the drag ends', () => {
+      const onColumnResize = jest.fn();
+      render(<TanStackDatatableGrid {...defaultProps} onColumnResize={onColumnResize} />);
+      const header = screen.getByTestId('dataGridHeaderCell-a');
+      jest.spyOn(header, 'getBoundingClientRect').mockReturnValue({ width: 200 } as DOMRect);
+      const handle = screen.getByTestId('dataGridColumnResizer-a');
+
+      fireEvent.pointerDown(handle, { button: 0, clientX: 100, pointerId: 1 });
+      fireEvent.pointerMove(handle, { clientX: 160, pointerId: 1 });
+      expect(
+        screen.getByTestId('testGrid').style.getPropertyValue('--lnsTanStackGridColumnWidth-1')
+      ).toBe('260px');
+      fireEvent.pointerUp(handle, { pointerId: 1 });
+
+      expect(onColumnResize).toHaveBeenCalledTimes(1);
+      expect(onColumnResize).toHaveBeenCalledWith({ columnId: 'a', width: 260 });
+    });
+
+    it('does not offer resizing for non resizable columns and control columns', () => {
+      render(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          columns={[{ id: 'a', displayAsText: 'Column A', isResizable: false }]}
+          leadingControlColumns={[
+            { id: 'ctrl', width: 40, headerCellRender: () => null, rowCellRender: () => null },
+          ]}
+        />
+      );
+      expect(screen.queryAllByRole('separator')).toHaveLength(0);
+    });
+
+    it('drops the dragged width when the initial width changes', () => {
+      const onColumnResize = jest.fn();
+      const { rerender } = render(
+        <TanStackDatatableGrid {...defaultProps} onColumnResize={onColumnResize} />
+      );
+      const header = screen.getByTestId('dataGridHeaderCell-a');
+      jest.spyOn(header, 'getBoundingClientRect').mockReturnValue({ width: 200 } as DOMRect);
+      const handle = screen.getByTestId('dataGridColumnResizer-a');
+      fireEvent.pointerDown(handle, { button: 0, clientX: 100, pointerId: 1 });
+      fireEvent.pointerMove(handle, { clientX: 160, pointerId: 1 });
+      fireEvent.pointerUp(handle, { pointerId: 1 });
+
+      // "Reset width": the owner clears the persisted width.
+      rerender(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          columns={[{ id: 'a', displayAsText: 'Column A' }, columns[1]]}
+        />
+      );
+      expect(
+        screen.getByTestId('testGrid').style.getPropertyValue('--lnsTanStackGridColumnWidth-1')
+      ).toBe('');
+    });
+  });
+
+  describe('pagination', () => {
+    const pageRows = Array.from({ length: 25 }, (_, i) => i);
+    const renderPage = (pageIndex: number, onChangePage = jest.fn()) =>
+      render(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          rowCount={pageRows.length}
+          renderCellValue={({ rowIndex, columnId }) => <>{`${columnId}${rowIndex}`}</>}
+          pagination={{
+            pageIndex,
+            pageSize: 10,
+            pageSizeOptions: [10, 20],
+            onChangePage,
+            onChangeItemsPerPage: jest.fn(),
+          }}
+        />
+      );
+
+    it('renders only the rows of the current page with absolute row indexes', () => {
+      renderPage(2);
+      expect(screen.getAllByRole('gridcell').length).toBe(10); // 5 rows x 2 columns
+      expect(screen.getByText('a20')).toBeInTheDocument();
+      expect(screen.getByText('a24')).toBeInTheDocument();
+      expect(screen.queryByText('a19')).not.toBeInTheDocument();
+      expect(screen.getByText('a20').closest('[role="row"]')).toHaveAttribute(
+        'aria-rowindex',
+        '22'
+      );
+      expect(screen.getByRole('grid')).toHaveAttribute('aria-rowcount', '26');
+    });
+
+    it('changes page', async () => {
+      const onChangePage = jest.fn();
+      renderPage(0, onChangePage);
+      await userEvent.click(screen.getByTestId('pagination-button-next'));
+      expect(onChangePage).toHaveBeenCalledWith(1);
+    });
+
+    it('navigates with the keyboard within the page', async () => {
+      renderPage(1);
+      screen.getByText('a10').closest<HTMLElement>('[role="gridcell"]')!.focus();
+      await userEvent.keyboard('{ArrowDown}');
+      expect(screen.getByText('a11').closest('[role="gridcell"]')).toHaveFocus();
+      await userEvent.keyboard('{ArrowUp}{ArrowUp}');
+      expect(screen.getByTestId('dataGridHeaderCell-a')).toHaveFocus();
+    });
+  });
+
   describe('keyboard navigation', () => {
     it('exposes a single tab stop', () => {
       render(<TanStackDatatableGrid {...defaultProps} />);
@@ -154,9 +330,7 @@ describe('TanStackDatatableGrid', () => {
       expect(getCell('a2')).toHaveFocus();
 
       await userEvent.keyboard('{Control>}{Home}{/Control}');
-      expect(within(screen.getByRole('row', { name: /Column A/ })).getByText('Column A')).toBe(
-        document.activeElement
-      );
+      expect(screen.getByTestId('dataGridHeaderCell-a')).toHaveFocus();
     });
   });
 });

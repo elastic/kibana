@@ -118,6 +118,49 @@ export const getGridStyles = (themeContext: UseEuiTheme, gridStyle: EuiDataGridS
         outlineOffset: `calc(-1 * ${euiTheme.focus.width})`,
       },
     }),
+    headerContent: css({
+      flex: '1 1 auto',
+      minInlineSize: 0,
+      overflow: 'hidden',
+    }),
+    headerActions: css({
+      display: 'flex',
+      alignItems: 'center',
+      flex: '0 0 auto',
+      gap: euiTheme.size.xxs,
+      marginInlineStart: euiTheme.size.xxs,
+    }),
+    // The menu button is revealed on hover and focus, it stays visible while its popover is open.
+    headerMenuButton: css({
+      opacity: 0,
+      '.kbnLensTanStackGridHeaderCell:hover &, .kbnLensTanStackGridHeaderCell:focus-within &': {
+        opacity: 1,
+      },
+    }),
+    headerMenuButtonOpen: css({ opacity: 1 }),
+    resizeHandle: css({
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      inlineSize: euiTheme.size.s,
+      cursor: 'col-resize',
+      touchAction: 'none',
+      '&::after': {
+        content: '""',
+        position: 'absolute',
+        top: '20%',
+        bottom: '20%',
+        insetInlineStart: '50%',
+        inlineSize: euiTheme.size.xxs,
+        borderRadius: euiTheme.size.xs,
+        backgroundColor: 'transparent',
+      },
+      '&:hover::after': { backgroundColor: euiTheme.colors.borderBasePlain },
+    }),
+    resizeHandleActive: css({
+      '&::after': { backgroundColor: euiTheme.colors.primary },
+    }),
     // Single line, truncated: the default when rows are not fitted to their content.
     contentSingleLine: css({
       overflow: 'hidden',
