@@ -742,6 +742,55 @@ describe('TanStackDatatableGrid', () => {
     });
   });
 
+  describe('announcements', () => {
+    const pagination = (pageIndex: number) => ({
+      pageIndex,
+      pageSize: 10,
+      onChangePage: jest.fn(),
+      onChangeItemsPerPage: jest.fn(),
+    });
+
+    it('announces nothing initially', () => {
+      render(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          sorting={{ columns: [{ id: 'a', direction: 'asc' }], onSort: jest.fn() }}
+        />
+      );
+      expect(screen.queryByText(/Sorted by/)).not.toBeInTheDocument();
+    });
+
+    it('announces changes of the sorting', async () => {
+      const onSort = jest.fn();
+      const { rerender } = render(
+        <TanStackDatatableGrid {...defaultProps} sorting={{ columns: [], onSort }} />
+      );
+      rerender(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          sorting={{ columns: [{ id: 'a', direction: 'desc' }], onSort }}
+        />
+      );
+      expect(await screen.findByText('Sorted by Column A, descending')).toBeInTheDocument();
+
+      rerender(<TanStackDatatableGrid {...defaultProps} sorting={{ columns: [], onSort }} />);
+      expect(await screen.findByText('Sorting removed')).toBeInTheDocument();
+    });
+
+    it('announces page changes', async () => {
+      const { rerender } = render(
+        <TanStackDatatableGrid {...defaultProps} rowCount={25} pagination={pagination(0)} />
+      );
+      rerender(
+        <TanStackDatatableGrid {...defaultProps} rowCount={25} pagination={pagination(2)} />
+      );
+      // The live region alternates between two elements, either of them holds the message.
+      expect(
+        await screen.findAllByText('Page 3 of 3', { selector: '[role="status"]' })
+      ).not.toHaveLength(0);
+    });
+  });
+
   describe('keyboard navigation', () => {
     it('exposes a single tab stop', () => {
       render(<TanStackDatatableGrid {...defaultProps} />);

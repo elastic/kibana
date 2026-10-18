@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  EuiScreenReaderLive,
   EuiTablePagination,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -21,8 +22,7 @@ import { GridRow } from './grid_row';
 import { getGridStyles } from './styles';
 import type { GridColumnModel, TanStackDatatableGridProps } from './types';
 import { useColumnWidths } from './use_column_widths';
-
-const estimateSize = () => ESTIMATED_ROW_HEIGHT;
+import { useGridAnnouncements } from './use_grid_announcements';
 
 /** Unifies the control columns and the data columns, numbering them like `aria-colindex`. */
 const useColumnModels = ({
@@ -80,6 +80,9 @@ export const TanStackDatatableGrid = ({
   const gridId = useGeneratedHtmlId({ prefix: 'lnsTanStackGrid' });
   const scrollRef = useRef<HTMLDivElement>(null);
   const virtualizerRef = useRef<Virtualizer<HTMLDivElement, Element>>();
+  // Rows that were not measured yet are estimated to be as high as the first measured one.
+  const estimatedRowHeightRef = useRef(ESTIMATED_ROW_HEIGHT);
+  const estimateSize = useCallback(() => estimatedRowHeightRef.current, []);
 
   const defaultHeight = rowHeightsOptions?.defaultHeight;
   const isTruncated = !defaultHeight || (defaultHeight !== 'auto' && defaultHeight.lineCount <= 1);
@@ -114,6 +117,7 @@ export const TanStackDatatableGrid = ({
   });
   virtualizerRef.current = rowVirtualizer;
   const virtualItems = rowVirtualizer.getVirtualItems();
+  estimatedRowHeightRef.current = virtualItems[0]?.size ?? estimatedRowHeightRef.current;
 
   // The virtualizer renders its rows after mount: wait for them, unless there is nothing to render.
   const hasRenderedRows = visibleRowCount === 0 || virtualItems.length > 0;
@@ -124,6 +128,14 @@ export const TanStackDatatableGrid = ({
     const frame = requestAnimationFrame(onRender);
     return () => cancelAnimationFrame(frame);
   }, [hasRenderedRows, onRender, columns, renderCellValue, visibleRowCount]);
+
+  const pageCount = pagination ? Math.max(1, Math.ceil(rowCount / pagination.pageSize)) : 1;
+  const announcement = useGridAnnouncements({
+    columns,
+    sorting,
+    pageIndex: pagination?.pageIndex,
+    pageCount,
+  });
 
   // Page changes start from the top.
   const pageIndex = pagination?.pageIndex;
@@ -259,11 +271,12 @@ export const TanStackDatatableGrid = ({
           />
         )}
       </div>
+      <EuiScreenReaderLive isActive>{announcement}</EuiScreenReaderLive>
       {pagination && (
         <EuiTablePagination
           aria-controls={gridId}
           activePage={pagination.pageIndex}
-          pageCount={Math.max(1, Math.ceil(rowCount / pagination.pageSize))}
+          pageCount={pageCount}
           itemsPerPage={pagination.pageSize}
           itemsPerPageOptions={pagination.pageSizeOptions}
           onChangePage={pagination.onChangePage}

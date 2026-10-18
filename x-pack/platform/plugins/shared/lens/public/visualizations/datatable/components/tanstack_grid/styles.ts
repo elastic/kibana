@@ -91,7 +91,7 @@ export const getGridStyles = (themeContext: UseEuiTheme, gridStyle: EuiDataGridS
       borderTop: strongBorderStyle,
     }),
     virtualOuter: css({ position: 'relative', inlineSize: '100%' }),
-    virtualInner: css({ position: 'absolute', top: 0, left: 0, inlineSize: '100%' }),
+    virtualInner: css({ position: 'absolute', top: 0, insetInlineStart: 0, inlineSize: '100%' }),
     cell: css({
       position: 'relative',
       boxSizing: 'border-box',
@@ -142,7 +142,7 @@ export const getGridStyles = (themeContext: UseEuiTheme, gridStyle: EuiDataGridS
     resizeHandle: css({
       position: 'absolute',
       top: 0,
-      right: 0,
+      insetInlineEnd: 0,
       bottom: 0,
       inlineSize: euiTheme.size.m,
       cursor: 'col-resize',
