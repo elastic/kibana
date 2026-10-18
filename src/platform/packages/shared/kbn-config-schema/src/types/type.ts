@@ -138,7 +138,7 @@ export abstract class Type<V> {
    */
   private schemaRef?: WeakRef<Schema>;
   private readonly schemaFactory: () => Schema;
-  private readonly baseTypeOptions: TypeOptions<V>;
+  private readonly baseTypeOptions: TypeOptions<any>;
   private readonly meta: TypeOptions<V>['meta'];
 
   protected constructor(schemaOrFactory: Schema | (() => Schema), options: TypeOptions<V> = {}) {

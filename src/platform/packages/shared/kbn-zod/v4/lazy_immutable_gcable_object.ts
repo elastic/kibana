@@ -230,7 +230,7 @@ const SHARED_PROXY_HANDLER: ProxyHandler<LazyTarget<object>> = {
         try {
           return originalPJS(ctx, json, params);
         } finally {
-          if (addedRealToSeen && ctx?.seen?.get(real) === ctx?.seen?.get(self)) {
+          if (addedRealToSeen && ctx?.seen && ctx.seen.get(real) === ctx.seen.get(self)) {
             ctx.seen.delete(real);
           }
         }

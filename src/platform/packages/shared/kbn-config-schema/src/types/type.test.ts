@@ -20,11 +20,9 @@ import {
 class MyType extends Type<any> {
   constructor(
     opts: TypeOptions<any> = {},
-    schemaOrFactory:
-      | Parameters<typeof internals.any>[0]
-      | (() => ReturnType<typeof internals.any>) = () => internals.any()
+    schemaFactory: () => ReturnType<typeof internals.any> = () => internals.any()
   ) {
-    super(typeof schemaOrFactory === 'function' ? schemaOrFactory : () => internals.any(), opts);
+    super(schemaFactory, opts);
   }
 }
 
