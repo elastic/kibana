@@ -14,6 +14,7 @@ import {
 } from '../../utils';
 import type { InferenceConnectorAdapter } from '../../types';
 import { parseInlineFunctionCalls } from '../../simulated_function_calling';
+import { recoverHarmonyToolCalls } from '../../harmony';
 import { processOpenAIStream, emitTokenCountEstimateIfMissing } from '../openai';
 import { createRequest } from './create_openai_request';
 
@@ -50,6 +51,10 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       modelName,
     });
 
+    // Only tools declared by the caller can be called, so a call recovered from
+    // the content is only worth looking for when the request declares tools.
+    const hasNativeTools = Array.isArray(request.tools) && request.tools.length > 0;
+
     return defer(() => {
       return executor.invoke({
         subAction: 'unified_completion_stream',
@@ -68,7 +73,11 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable }),
       processOpenAIStream(),
       emitTokenCountEstimateIfMissing({ request, logger }),
-      useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
+      useSimulatedFunctionCalling
+        ? parseInlineFunctionCalls({ logger })
+        : hasNativeTools
+        ? recoverHarmonyToolCalls({ logger })
+        : identity
     );
   },
 };
