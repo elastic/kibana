@@ -13,7 +13,10 @@ import {
   providedAlertFixture,
   statusOnlyFixture,
 } from './fixtures';
-import type { AttackDiscoveryAgentBuilderExample } from './types';
+import type {
+  AttackDiscoveryAgentBuilderDataset,
+  AttackDiscoveryAgentBuilderExample,
+} from './types';
 
 const fixtureAlertIds = [...providedAlertFixture.ids];
 
@@ -38,6 +41,24 @@ const sharedCriteria = [
   `The alertIds include both fixture IDs: ${fixtureAlertIds.join(' and ')}.`,
 ];
 
+/**
+ * The weekly build runs the golden path and the cap/floor checks are registered
+ * for every dataset, so an example that hands the pipeline alerts has to carry
+ * the annotations those checks read — otherwise all of their cells are `null`
+ * with label `N/A`, adding no signal to the baseline.
+ *
+ * `maxDiscoveryCount` is the population the fixture hands over (`alertCount`):
+ * two alerts forming ONE chain on finance-ws-01, and a discovery cannot
+ * aggregate fewer than one alert, so more discoveries than the run was given is
+ * excess by construction. `minValidatedDiscoveryCount: 1` is the fixtures' own
+ * ground truth — their `expectedWorkflowStages` end in `validation`, their
+ * `attackDiscoveries` hold one discovery, and their criteria require it.
+ *
+ * Both keys stay absent on the two zero-alert fixtures
+ * (`missing-alert-retrieval`, `status-only`): they hand the pipeline nothing, so
+ * a ceiling or floor would assert about a discovery population that does not
+ * exist. Their cap/floor cells keep the `N/A` label that marks them non-scoring.
+ */
 export const goldenPathExamples: AttackDiscoveryAgentBuilderExample[] = [
   {
     input: {
@@ -54,6 +75,8 @@ export const goldenPathExamples: AttackDiscoveryAgentBuilderExample[] = [
       expectedPassedAlertCount: providedAlertFixture.alertCount,
       attackDiscoveries: expectedAttackDiscoveries,
       criteria: sharedCriteria,
+      maxDiscoveryCount: providedAlertFixture.alertCount,
+      minValidatedDiscoveryCount: 1,
     },
     metadata: {
       alertCount: providedAlertFixture.alertCount,
@@ -91,6 +114,8 @@ export const goldenPathExamples: AttackDiscoveryAgentBuilderExample[] = [
       expectedPassedAlertCount: liveRetrievalFixture.alertCount,
       attackDiscoveries: expectedAttackDiscoveries,
       criteria: sharedCriteria,
+      maxDiscoveryCount: liveRetrievalFixture.alertCount,
+      minValidatedDiscoveryCount: 1,
     },
     metadata: {
       alertCount: liveRetrievalFixture.alertCount,
@@ -114,6 +139,8 @@ export const goldenPathExamples: AttackDiscoveryAgentBuilderExample[] = [
       expectedPassedAlertCount: multipleAlertSetsFixture.alertCount,
       attackDiscoveries: expectedAttackDiscoveries,
       criteria: sharedCriteria,
+      maxDiscoveryCount: multipleAlertSetsFixture.alertCount,
+      minValidatedDiscoveryCount: 1,
     },
     metadata: {
       alertCount: multipleAlertSetsFixture.alertCount,
@@ -164,3 +191,22 @@ export const goldenPathExamples: AttackDiscoveryAgentBuilderExample[] = [
     },
   },
 ];
+
+/**
+ * The dataset the weekly golden-path spec registers, shared with the unit tests
+ * so its declarations cannot drift from what the spec runs.
+ *
+ * The fixture seeds only the two marker alerts — no noise population — so
+ * `NoiseFalsePositive` has no forbidden set to answer from and returns a
+ * deliberate `N/A` on every example: it is declared non-scoring here instead of
+ * being registered to fill the weekly baseline with a column that can never
+ * score. The evaluator itself is untouched, and the full-profile cohort, whose
+ * examples do declare noise ids, still scores it.
+ */
+export const goldenPathDataset: AttackDiscoveryAgentBuilderDataset = {
+  name: 'attack-discovery-agent-builder: golden-path',
+  description:
+    'Isolated default-Agent Builder Attack Discovery 2.0 golden path. This is not a legacy direct-generation cohort.',
+  examples: goldenPathExamples,
+  nonScoringEvaluators: ['NoiseFalsePositive'],
+};
