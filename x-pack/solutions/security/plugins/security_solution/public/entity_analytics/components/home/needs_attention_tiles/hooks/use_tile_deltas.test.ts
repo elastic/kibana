@@ -15,6 +15,7 @@ import { useEntitiesWithAnomaliesDelta } from './use_entities_with_anomalies_del
 import { useNewEntityDelta } from './use_new_entity_delta';
 import { useNewlyHighCriticalDelta, useRiskMoversDelta } from './use_risk_tiles_delta';
 import { usePreviousPeriod } from './use_previous_period';
+import { RISK_MOVER_MIN_SCORE_CHANGE } from '../queries/risk_history';
 
 jest.mock('./use_previous_period', () => ({
   ...jest.requireActual('./use_previous_period'),
@@ -220,7 +221,9 @@ describe('the risk tile deltas', () => {
 
   it('read the previous period of their own tile', () => {
     renderHook(() => useRiskMoversDelta({ ...base, count: 3 }));
-    expect(lastOptions().previousQuery).toContain('current_score - boundary_score >= 10');
+    expect(lastOptions().previousQuery).toContain(
+      `current_score - boundary_score >= ${RISK_MOVER_MIN_SCORE_CHANGE}`
+    );
     renderHook(() => useNewlyHighCriticalDelta({ ...base, count: 3 }));
     expect(lastOptions().previousQuery).toContain('current_level_num >= 3');
   });

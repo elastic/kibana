@@ -122,7 +122,11 @@ export interface HistogramBounds {
   readonly max: number;
 }
 
-export type HistogramBoundsResult = HistogramBounds | { readonly error: Error };
+/** A fetched min/max, or the request error. Missing bounds are omitted from the map. */
+export interface HistogramBoundsResult {
+  readonly bounds?: HistogramBounds;
+  readonly error?: Error;
+}
 
 export interface HistogramBoundsQuery {
   readonly metricKey: string;
