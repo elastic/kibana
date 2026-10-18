@@ -52,12 +52,12 @@ import type {
   SetupPlugins,
 } from '../../plugin_contract';
 import type { ProductFeaturesService } from '../../lib/product_features_service';
-import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 
 /**
  * Registers all security agent builder tools with the agentBuilder plugin.
  *
- * PCI compliance tools are gated behind `experimentalFeatures.pciComplianceAgentBuilder` and the
+ * PCI compliance tools are gated behind `experimentalFeatures.pciComplianceAgentBuilder`, the SIEM
+ * Readiness tools behind `experimentalFeatures.siemReadinessAgentBuilder` and the
  * `run_rule_preview` tool behind `experimentalFeatures.rulePreviewAttachmentEnabled` so the
  * features can ship dark and be enabled per environment.
  */
@@ -134,7 +134,7 @@ export const registerTools = (
     agentBuilder.tools.register(pciFieldMapperTool(core, logger));
   }
 
-  if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {
+  if (experimentalFeatures.siemReadinessAgentBuilder) {
     registerSiemReadinessTools(agentBuilder, core, logger, isServerless);
   }
 

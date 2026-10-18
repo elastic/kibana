@@ -561,7 +561,7 @@
       "ciLabels": [
         "evals:siem-readiness"
       ],
-      "serverConfigSet": "evals_tracing"
+      "serverConfigSet": "evals_siem_readiness"
     }
   ]
 }
