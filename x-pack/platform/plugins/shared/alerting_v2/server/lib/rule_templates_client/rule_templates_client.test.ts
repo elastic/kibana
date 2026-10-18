@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
@@ -56,6 +56,46 @@ const createClient = (
 };
 
 describe('RuleTemplatesClient', () => {
+  describe('hasTemplatesAsInternalUser', () => {
+    it('returns true when v2 templates exist', async () => {
+      const repository = savedObjectsRepositoryMock.create();
+      repository.find.mockResolvedValue({
+        saved_objects: [{ id: 't1', type: RULE_TEMPLATE_SAVED_OBJECT_TYPE, attributes: {}, references: [], score: 1 }],
+        total: 3,
+        page: 1,
+        per_page: 1,
+      });
+
+      await expect(RuleTemplatesClient.hasTemplatesAsInternalUser(repository)).resolves.toBe(true);
+      expect(repository.find).toHaveBeenCalledWith({
+        type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+        filter: nodeBuilder.is(`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.engine`, 'v2'),
+        perPage: 1,
+      });
+    });
+
+    it('returns false when no v2 templates exist', async () => {
+      const repository = savedObjectsRepositoryMock.create();
+      repository.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 1,
+      });
+
+      await expect(RuleTemplatesClient.hasTemplatesAsInternalUser(repository)).resolves.toBe(false);
+    });
+
+    it('propagates errors', async () => {
+      const repository = savedObjectsRepositoryMock.create();
+      repository.find.mockRejectedValue(new Error('SO unavailable'));
+
+      await expect(RuleTemplatesClient.hasTemplatesAsInternalUser(repository)).rejects.toThrow(
+        'SO unavailable'
+      );
+    });
+  });
+
   describe('getTags', () => {
     it('aggregates v2 template tags independently of list pagination', async () => {
       const savedObjectsClient = savedObjectsClientMock.create();

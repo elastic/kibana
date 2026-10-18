@@ -114,3 +114,17 @@ export const shouldShowV1ObservabilityAlertsTable = (core: CoreStart): boolean =
 export const canAccessAlertingV2Rules = (core: CoreStart): boolean => {
   return isAlertingV2Enabled(core) && hasAlertingV2Capability(core, 'rules');
 };
+
+/**
+ * Returns whether at least one rule template exists in the system.
+ *
+ * Reads the `alerting_v2.v2RuleTemplatesAvailable` capability which is resolved
+ * server-side using an internal saved objects client. Does not depend on
+ * the current user's privileges and requires no browser HTTP call.
+ */
+export const v2RuleTemplatesAvailable = (core: CoreStart): boolean => {
+  const caps = core.application.capabilities.alerting_v2 as
+    | Record<string, boolean>
+    | undefined;
+  return caps?.v2RuleTemplatesAvailable === true;
+};

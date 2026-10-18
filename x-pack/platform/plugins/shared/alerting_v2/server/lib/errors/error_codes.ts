@@ -632,6 +632,10 @@ export const ALERTING_LOG_CODES = {
    */
   TASKS_API_KEY_INVALIDATION_RUN_FAILED: 'TASKS_API_KEY_INVALIDATION_RUN_FAILED',
 
+  // ──────────────────────────── Capabilities ──────────────────────────────
+  /** System-level capabilities failed to resolve at startup. */
+  CAPABILITIES_RESOLUTION_FAILED: 'CAPABILITIES_RESOLUTION_FAILED',
+
   // ─────────────────────────────── Routes ──────────────────────────────
   /** An alerting v2 HTTP route handler failed with an unexpected 5xx error. */
   ROUTES_HANDLER_FAILED: 'ROUTES_HANDLER_FAILED',

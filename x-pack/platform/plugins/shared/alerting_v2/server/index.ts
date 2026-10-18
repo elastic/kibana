@@ -15,6 +15,7 @@ import { bindContract } from './setup/bind_contract';
 import { bindOnSetup } from './setup/bind_on_setup';
 import { bindOnStart } from './setup/bind_on_start';
 import { bindRoutes } from './setup/bind_routes';
+import { bindCapabilities } from './setup/bind_capabilities';
 import { bindServices } from './setup/bind_services';
 import { bindEvents } from './setup/bind_events';
 import { bindRuleExecutionServices } from './setup/bind_rule_executor';
@@ -35,6 +36,7 @@ const pluginModule = new ContainerModule((options) => {
   bindOnStart(options);
   bindContract(options);
   bindRoutes(options);
+  bindCapabilities(options);
   bindServices(options);
   bindEvents(options);
   bindRuleExecutionServices(options);

@@ -34,6 +34,10 @@ import {
   setAlertingV2NavSettings,
   unsetAlertingV2EnabledSetting,
 } from '../fixtures/alerting_v2_setting';
+import {
+  seedV2RuleTemplate,
+  cleanUpRuleTemplates,
+} from '../fixtures/rule_template_helpers';
 import { observabilityAlertingNavRole } from '../fixtures/roles';
 
 const ALERTS_PANEL_ID = 'alerting';
@@ -285,6 +289,40 @@ test.describe(
           nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.rulesV1)
         ).not.toBeVisible();
       });
+    });
+
+    test('shows the Rule Library link when v2 rule templates exist', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await seedV2RuleTemplate(kbnClient);
+      try {
+        await enableV2AndOpenNav({ browserAuth, pageObjects, kbnClient, scoutSpace });
+        const nav = pageObjects.observabilityNavigation;
+        await nav.openPanelById(ALERTS_PANEL_ID);
+        await expect(
+          nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.ruleLibrary)
+        ).toBeVisible({ timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS });
+      } finally {
+        await cleanUpRuleTemplates(kbnClient);
+      }
+    });
+
+    test('hides the Rule Library link when no v2 rule templates exist', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await cleanUpRuleTemplates(kbnClient);
+      await enableV2AndOpenNav({ browserAuth, pageObjects, kbnClient, scoutSpace });
+      const nav = pageObjects.observabilityNavigation;
+      await nav.openPanelById(ALERTS_PANEL_ID);
+      await expect(
+        nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.ruleLibrary)
+      ).not.toBeVisible();
     });
 
     test('clicking Alerts loads alerts when alerting v2 is enabled', async ({

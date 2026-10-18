@@ -9,6 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
   hasAlertingV2Capability,
+  v2RuleTemplatesAvailable,
   isAlertingV2Enabled,
   shouldShowV1ObservabilityAlertsTable,
 } from '@kbn/alerting-v2-utils';
@@ -17,6 +18,7 @@ import {
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_APP_ID,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
+  OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
 } from '@kbn/deeplinks-observability';
 import type { NavigationEntry, NavigationSection } from '@kbn/observability-shared-plugin/public';
 import { observabilityAppId } from '../../common';
@@ -42,6 +44,16 @@ const getAlertingEntries = (core: CoreStart): NavigationEntry[] => {
       label: getObservabilityAlertsLinkTitle(true),
       app: observabilityAppId,
       path: ALERTS_PATH,
+    });
+  }
+
+  if (v2RuleTemplatesAvailable(core) && hasAlertingV2Capability(core, 'rules')) {
+    entries.push({
+      label: i18n.translate('xpack.observability.nav.ruleLibrary', {
+        defaultMessage: 'Rule Library',
+      }),
+      app: OBSERVABILITY_ALERTING_APP_ID,
+      path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
     });
   }
 

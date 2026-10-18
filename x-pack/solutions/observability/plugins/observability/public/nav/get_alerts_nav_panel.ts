@@ -10,6 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
   hasAlertingV2Capability,
+  v2RuleTemplatesAvailable,
   isAlertingV2Enabled,
   shouldShowV1ObservabilityAlertsTable,
 } from '@kbn/alerting-v2-utils';
@@ -110,6 +111,9 @@ const getRuleManagementSection = (core: CoreStart): PanelOpenerChildDefinition[]
   if (canReadV2Rules) {
     rulesChildren.push({ link: obsAlertingLink('rules-v2') });
     rulesChildren.push({ link: obsAlertingLink('rules-v1'), sideNavStatus: 'hidden' });
+    if (v2RuleTemplatesAvailable(core)) {
+      rulesChildren.push({ link: obsAlertingLink('rule-library') });
+    }
   } else {
     rulesChildren.push({
       link: obsAlertingLink('rules-v1'),

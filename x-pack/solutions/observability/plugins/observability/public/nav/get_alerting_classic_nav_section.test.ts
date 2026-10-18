@@ -106,4 +106,29 @@ describe('getAlertingClassicNavSection', () => {
 
     expect(getEntries(core).map(({ label }) => label)).not.toContain('Alerts (Classic)');
   });
+
+  it('shows Rule Library when rule templates exist and the user has v2 rules read', () => {
+    setCapabilities(core, { ...V2_CAPABILITIES, alerting_v2: { v2RuleTemplatesAvailable: true } });
+
+    expect(getEntries(core)).toContainEqual({
+      label: 'Rule Library',
+      app: 'observabilityAlerting',
+      path: '/rule-library',
+    });
+  });
+
+  it('does not show Rule Library when no rule templates exist', () => {
+    setCapabilities(core, V2_CAPABILITIES);
+
+    expect(getEntries(core).map(({ label }) => label)).not.toContain('Rule Library');
+  });
+
+  it('does not show Rule Library when rule templates exist but user lacks v2 rules read', () => {
+    setCapabilities(core, {
+      alerting_v2_alerts: { read: true },
+      alerting_v2: { v2RuleTemplatesAvailable: true },
+    });
+
+    expect(getEntries(core).map(({ label }) => label)).not.toContain('Rule Library');
+  });
 });

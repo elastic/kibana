@@ -29,6 +29,10 @@ import {
   setAlertingV2NavSettings,
   unsetAlertingV2EnabledSetting,
 } from '../fixtures/alerting_v2_setting';
+import {
+  seedV2RuleTemplate,
+  cleanUpRuleTemplates,
+} from '../fixtures/rule_template_helpers';
 import { observabilityAlertingNavRole } from '../fixtures/roles';
 
 const NAV_ITEMS = {
@@ -36,6 +40,7 @@ const NAV_ITEMS = {
   alerts: 'observability-nav-observabilityAlerting-alerts',
   alertsClassicTable: 'observability-nav-observability-overview-alerts_(classic)',
   flatAlerts: 'observability-nav-observability-overview-alerts',
+  ruleLibrary: 'observability-nav-observabilityAlerting-rule_library',
   actionPolicies: 'observability-nav-observabilityAlerting-action_policies',
   executionHistory: 'observability-nav-observabilityAlerting-execution_history',
 } as const;
@@ -50,6 +55,7 @@ const ALL_ALERTING_ITEMS = [
   ...ALERTING_SECTION_ITEMS,
   NAV_ITEMS.alertsClassicTable,
   NAV_ITEMS.flatAlerts,
+  NAV_ITEMS.ruleLibrary,
 ] as const;
 
 const NAV_TARGETS = [
@@ -228,6 +234,49 @@ test.describe(
 
       await expect(page).toHaveURL(/\/app\/observability\/alerts(\?|#|$)/);
       await expect(navItem(page, NAV_ITEMS.alertsClassicTable)).toBeHidden();
+    });
+
+    test('shows Rule Library when v2 rule templates exist and user has v2 rules read', async ({
+      browserAuth,
+      page,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await seedV2RuleTemplate(kbnClient);
+      try {
+        await setAlertingV2NavSettings(kbnClient, scoutSpace, {
+          v2Enabled: true,
+          showV1AlertsTable: false,
+        });
+        await browserAuth.loginAsAdmin();
+        await gotoAlerting(page, '/alerts');
+
+        await expect(navItem(page, NAV_ITEMS.ruleLibrary)).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
+      } finally {
+        await cleanUpRuleTemplates(kbnClient);
+      }
+    });
+
+    test('hides Rule Library when no v2 rule templates exist', async ({
+      browserAuth,
+      page,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await cleanUpRuleTemplates(kbnClient);
+      await setAlertingV2NavSettings(kbnClient, scoutSpace, {
+        v2Enabled: true,
+        showV1AlertsTable: false,
+      });
+      await browserAuth.loginAsAdmin();
+      await gotoAlerting(page, '/alerts');
+
+      await expect(navItem(page, NAV_ITEMS.alerts)).toBeVisible({
+        timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+      });
+      await expect(navItem(page, NAV_ITEMS.ruleLibrary)).toBeHidden();
     });
 
     test('hides the Alerting section when the user has no alerting privileges', async ({

@@ -49,6 +49,10 @@ const canAccessDeepLink = (id: string, capabilities: Capabilities): boolean => {
       const { v2 } = hasObservabilityAlertingCapabilities(capabilities, 'rules');
       return v2;
     }
+    case OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID: {
+      const { v2 } = hasObservabilityAlertingCapabilities(capabilities, 'rules');
+      return v2;
+    }
     case OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID: {
       const { v2 } = hasObservabilityAlertingCapabilities(capabilities, 'actionPolicies');
       return v2;
@@ -120,7 +124,7 @@ export const getObservabilityAlertingDeepLinks = (capabilities?: Capabilities): 
         defaultMessage: 'Rule Library',
       }),
       path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
-      visibleIn: [],
+      visibleIn: SEARCHABLE_VISIBLE_IN,
       keywords: ['alerting', 'templates', 'library'],
     },
     {

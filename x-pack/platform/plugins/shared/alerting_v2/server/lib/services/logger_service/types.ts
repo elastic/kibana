@@ -56,6 +56,7 @@ export type AlertingSubsystemName =
   | 'tasks'
   | 'savedObjects'
   | 'agentBuilder'
+  | 'capabilities'
   | 'events';
 
 export interface DebugParams {

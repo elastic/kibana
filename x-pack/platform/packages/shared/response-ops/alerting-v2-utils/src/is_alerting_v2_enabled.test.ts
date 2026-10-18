@@ -14,6 +14,7 @@ import {
   isAlertingV2Enabled,
   shouldShowAlertingV2CreateRuleFlyout,
   shouldShowV1ObservabilityAlertsTable,
+  v2RuleTemplatesAvailable,
 } from './is_alerting_v2_enabled';
 
 describe('isAlertingV2AvailableInSolution', () => {
@@ -218,6 +219,45 @@ describe('shouldShowV1ObservabilityAlertsTable', () => {
     core.settings.client.get = <T>(_key: string) => undefined as T;
 
     expect(shouldShowV1ObservabilityAlertsTable(core)).toBe(false);
+  });
+});
+
+describe('v2RuleTemplatesAvailable', () => {
+  let core: CoreStart;
+
+  beforeEach(() => {
+    core = coreMock.createStart();
+  });
+
+  it('returns true when the capability is set to true', () => {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2: { v2RuleTemplatesAvailable: true },
+    };
+
+    expect(v2RuleTemplatesAvailable(core)).toBe(true);
+  });
+
+  it('returns false when the capability is set to false', () => {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2: { v2RuleTemplatesAvailable: false },
+    };
+
+    expect(v2RuleTemplatesAvailable(core)).toBe(false);
+  });
+
+  it('returns false when the alerting_v2 namespace is missing', () => {
+    expect(v2RuleTemplatesAvailable(core)).toBe(false);
+  });
+
+  it('returns false when the alerting_v2 namespace exists but the key is absent', () => {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2: {},
+    };
+
+    expect(v2RuleTemplatesAvailable(core)).toBe(false);
   });
 });
 

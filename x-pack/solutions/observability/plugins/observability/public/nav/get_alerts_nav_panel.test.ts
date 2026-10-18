@@ -58,7 +58,8 @@ const setCapabilities = (core: CoreStart, capabilities: Record<string, unknown>)
   } as Capabilities;
 };
 
-const getPanelChildren = (core: CoreStart) => getAlertsNavPanel(core)[0]?.children ?? [];
+const getPanelChildren = (core: CoreStart) =>
+  getAlertsNavPanel(core)[0]?.children ?? [];
 
 const getSectionByTitle = (core: CoreStart, title?: string) =>
   getPanelChildren(core).find((section) => section.title === title);
@@ -265,7 +266,7 @@ describe('getAlertsNavPanel', () => {
       enableV2(core);
     });
 
-    it('shows the v2 Rules link without the library when the user has v2 rules read', () => {
+    it('shows the v2 Rules link without the library when no rule templates exist', () => {
       setCapabilities(core, { alerting_v2_rules: { read: true } });
 
       expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
@@ -274,12 +275,27 @@ describe('getAlertsNavPanel', () => {
       ]);
     });
 
-    it('does not show the Rule library when the user has v2 rules write', () => {
-      setCapabilities(core, { alerting_v2_rules: { all: true } });
+    it('shows the Rule Library link when rule templates exist and the user has v2 rules read', () => {
+      setCapabilities(core, {
+        alerting_v2_rules: { read: true },
+        alerting_v2: { v2RuleTemplatesAvailable: true },
+      });
 
       expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
         { link: 'observabilityAlerting:rules-v2' },
         { link: 'observabilityAlerting:rules-v1', sideNavStatus: 'hidden' },
+        { link: 'observabilityAlerting:rule-library' },
+      ]);
+    });
+
+    it('does not show the Rule Library when rule templates exist but user has only v1 rules', () => {
+      setCapabilities(core, {
+        alerting_v2: { v2RuleTemplatesAvailable: true },
+        management: { insightsAndAlerting: { triggersActionsRules: true } },
+      });
+
+      expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
+        { link: 'observabilityAlerting:rules-v1', title: 'Rules' },
       ]);
     });
 

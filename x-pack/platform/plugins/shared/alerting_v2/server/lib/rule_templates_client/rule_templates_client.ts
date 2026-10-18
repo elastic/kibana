@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { inject, injectable } from 'inversify';
 import type {
@@ -60,6 +61,18 @@ export class RuleTemplatesClient {
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {
     this.logger = logger.forSubsystem('ruleTemplateClient');
+  }
+
+  /** Checks whether at least one v2-engine rule template exists, using an internal SO client. */
+  static async hasTemplatesAsInternalUser(
+    internalClient: ISavedObjectsRepository
+  ): Promise<boolean> {
+    const result = await internalClient.find({
+      type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+      filter: buildEngineV2Filter(),
+      perPage: 1,
+    });
+    return result.total > 0;
   }
 
   public async findRuleTemplates(
