@@ -1,5 +1,5 @@
 {
-  "sha1": "bba4afa046870a3bd9fc004a4b22f8d55cbfd97d",
+  "sha1": "8c5d36208b2f1dcb913eb2cbac0815995ba167f2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -313,8 +313,8 @@
       }
     },
     {
-      "id": "98843aa33e8d554-86ca10f6a422863",
-      "title": "Storage explorer page Host agent breakdown tab displays host agent details",
+      "id": "98843aa33e8d554-ae6e48a8d1f4eff",
+      "title": "Storage explorer page remembers that the OpenTelemetry callout was dismissed",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -327,6 +327,20 @@
       }
     },
     {
+      "id": "98843aa33e8d554-86ca10f6a422863",
+      "title": "Storage explorer page Host agent breakdown tab displays host agent details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
+        "line": 33,
+        "column": 18
+      }
+    },
+    {
       "id": "98843aa33e8d554-45172bb362490e8",
       "title": "Storage explorer page Summary stats tab will still load with kuery",
       "expectedStatus": "passed",
@@ -336,8 +350,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 21,
-        "column": 49
+        "line": 38,
+        "column": 13
       }
     },
     {
@@ -350,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 29,
-        "column": 5
+        "line": 44,
+        "column": 11
       }
     },
     {
