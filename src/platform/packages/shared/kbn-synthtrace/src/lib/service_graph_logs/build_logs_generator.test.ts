@@ -16,18 +16,18 @@ const BASE_TS = Date.parse('2023-11-15T00:00:00.000Z');
 const ONE_MIN = 60 * 1_000; // ms
 
 function serializeTick(
-  generator: ReturnType<typeof buildLogsGenerator>['generator'],
+  logsGenerator: ReturnType<typeof buildLogsGenerator>['logsGenerator'],
   timestamp: number,
   index: number
 ) {
-  return generator(timestamp, index).flatMap((entry) => entry.serialize());
+  return logsGenerator(timestamp, index).flatMap((entry) => entry.serialize());
 }
 
 function countDocsAtTick(
   graph: ServiceGraph,
   opts: Partial<Parameters<typeof buildLogsGenerator>[0]> = {}
 ): number {
-  const { generator } = buildLogsGenerator({
+  const { logsGenerator } = buildLogsGenerator({
     tickIntervalMs: ONE_MIN,
     seed: SEED,
     serviceGraph: graph,
@@ -35,7 +35,7 @@ function countDocsAtTick(
     noise: { volume: { rate: 1, jitter: 0 } },
     ...opts,
   });
-  return generator(BASE_TS, 0).length;
+  return logsGenerator(BASE_TS, 0).length;
 }
 
 const MINIMAL_GRAPH: ServiceGraph = {
@@ -72,7 +72,7 @@ describe('buildLogsGenerator — volume consistency', () => {
     // The CLAIMS graph has a diamond: claim-intake→policy-lookup and fraud-check→policy-lookup.
     // Path-based DFS visits policy-lookup from both paths, so self docs = 6 (not 5).
     // 6 self + 5 outbound + 1 infra + 1 host + 1 noise = 14; ambient 1% error may reduce count.
-    const { generator } = buildLogsGenerator({
+    const { logsGenerator: generator } = buildLogsGenerator({
       tickIntervalMs: ONE_MIN,
       seed: SEED,
       serviceGraph: DEFAULT_SERVICE_GRAPH,
@@ -87,7 +87,7 @@ describe('buildLogsGenerator — volume consistency', () => {
   });
 
   it('multiplier scales only service logs: 2×service + infra + noise', () => {
-    const { generator } = buildLogsGenerator({
+    const { logsGenerator: generator } = buildLogsGenerator({
       tickIntervalMs: ONE_MIN,
       seed: SEED,
       serviceGraph: MINIMAL_GRAPH,
@@ -102,7 +102,7 @@ describe('buildLogsGenerator — volume consistency', () => {
   });
 
   it('noise.volume=0 removes noise docs', () => {
-    const { generator } = buildLogsGenerator({
+    const { logsGenerator: generator } = buildLogsGenerator({
       tickIntervalMs: ONE_MIN,
       seed: SEED,
       serviceGraph: MINIMAL_GRAPH,
@@ -116,7 +116,7 @@ describe('buildLogsGenerator — volume consistency', () => {
   });
 
   it('infra docs are always emitted when services have infraDeps', () => {
-    const { generator } = buildLogsGenerator({
+    const { logsGenerator: generator } = buildLogsGenerator({
       tickIntervalMs: ONE_MIN,
       seed: SEED,
       serviceGraph: MINIMAL_GRAPH,
@@ -135,7 +135,7 @@ describe('buildLogsGenerator — volume consistency', () => {
     // spike.start is an absolute timestamp — must be BASE_TS + offset, not just offset.
     const BURST_TS = BASE_TS + BURST_OFFSET;
 
-    const { generator } = buildLogsGenerator({
+    const { logsGenerator: generator } = buildLogsGenerator({
       tickIntervalMs: ONE_MIN,
       seed: SEED,
       serviceGraph: MINIMAL_GRAPH,
@@ -163,7 +163,7 @@ describe('buildLogsGenerator — volume consistency', () => {
     const BURST_TS = BASE_TS + 5 * ONE_MIN;
     const volumeFn = (ts: number) => (ts >= BURST_TS ? 5 : 1);
 
-    const { generator: withFnGen } = buildLogsGenerator({
+    const { logsGenerator: withFnGen } = buildLogsGenerator({
       tickIntervalMs: ONE_MIN,
       seed: SEED,
       serviceGraph: MINIMAL_GRAPH,
@@ -179,14 +179,14 @@ describe('buildLogsGenerator — volume consistency', () => {
   });
 
   it('failures may increase volume via pre-failure warn docs on non-error ticks', () => {
-    const { generator: noFailuresGen } = buildLogsGenerator({
+    const { logsGenerator: noFailuresGen } = buildLogsGenerator({
       tickIntervalMs: ONE_MIN,
       seed: SEED,
       serviceGraph: DEFAULT_SERVICE_GRAPH,
       entryService: 'claim-intake',
       noise: { volume: { rate: 1, jitter: 0 } },
     });
-    const { generator: withFailuresGen } = buildLogsGenerator({
+    const { logsGenerator: withFailuresGen } = buildLogsGenerator({
       tickIntervalMs: ONE_MIN,
       seed: SEED,
       serviceGraph: DEFAULT_SERVICE_GRAPH,
@@ -215,7 +215,7 @@ describe('buildLogsGenerator — determinism', () => {
         serviceGraph: DEFAULT_SERVICE_GRAPH,
         entryService: 'claim-intake',
         noise: { volume: { rate: 1, jitter: 0 } },
-      }).generator;
+      }).logsGenerator;
 
     const genA = makeGenerator();
     const genB = makeGenerator();
@@ -228,7 +228,7 @@ describe('buildLogsGenerator — determinism', () => {
 
 describe('buildLogsGenerator — failure co-occurrence', () => {
   it('infra and noise docs are always emitted even when failures reduce service docs', () => {
-    const { generator } = buildLogsGenerator({
+    const { logsGenerator: generator } = buildLogsGenerator({
       tickIntervalMs: ONE_MIN,
       seed: SEED,
       serviceGraph: DEFAULT_SERVICE_GRAPH,
@@ -251,7 +251,7 @@ describe('buildLogsGenerator — failure co-occurrence', () => {
 describe('buildLogsGenerator — service channel volume', () => {
   it('volume.rate={beta:0} silences the skew channel for beta, but graph-trace docs are still emitted', () => {
     // rate={beta:0} suppresses the skew doc but the DFS graph trace still produces beta docs.
-    const { generator: withExtraGen } = buildLogsGenerator({
+    const { logsGenerator: withExtraGen } = buildLogsGenerator({
       tickIntervalMs: ONE_MIN,
       seed: SEED,
       serviceGraph: MINIMAL_GRAPH,
@@ -259,7 +259,7 @@ describe('buildLogsGenerator — service channel volume', () => {
       volume: { beta: { rate: 1 } },
       noise: { volume: { rate: 0, jitter: 0 } },
     });
-    const { generator: suppressedGen } = buildLogsGenerator({
+    const { logsGenerator: suppressedGen } = buildLogsGenerator({
       tickIntervalMs: ONE_MIN,
       seed: SEED,
       serviceGraph: MINIMAL_GRAPH,
@@ -282,7 +282,7 @@ describe('buildLogsGenerator — service channel volume', () => {
     // On non-stride ticks only infra fires (≤2 docs); on stride ticks DFS+skew+infra fires (≥6 docs).
     const TICKS = 50;
     const STRIDE = 5;
-    const { generator } = buildLogsGenerator({
+    const { logsGenerator: generator } = buildLogsGenerator({
       tickIntervalMs: ONE_MIN,
       seed: SEED,
       serviceGraph: MINIMAL_GRAPH,
@@ -306,14 +306,14 @@ describe('buildLogsGenerator — service channel volume', () => {
   });
 
   it('volume.rate={beta:1} emits 1 extra beta doc on every tick', () => {
-    const { generator: baseGen } = buildLogsGenerator({
+    const { logsGenerator: baseGen } = buildLogsGenerator({
       tickIntervalMs: ONE_MIN,
       seed: SEED,
       serviceGraph: MINIMAL_GRAPH,
       entryService: 'alpha',
       noise: { volume: { rate: 0, jitter: 0 } },
     });
-    const { generator: skewGen } = buildLogsGenerator({
+    const { logsGenerator: skewGen } = buildLogsGenerator({
       tickIntervalMs: ONE_MIN,
       seed: SEED,
       serviceGraph: MINIMAL_GRAPH,
@@ -337,14 +337,14 @@ describe('buildLogsGenerator — service channel volume', () => {
   it('volume.rate={beta:0.3} emits beta skew docs on only a fraction of ticks', () => {
     const TICKS = 200;
     const SHARE = 0.3;
-    const { generator: baseGen } = buildLogsGenerator({
+    const { logsGenerator: baseGen } = buildLogsGenerator({
       tickIntervalMs: ONE_MIN,
       seed: SEED,
       serviceGraph: MINIMAL_GRAPH,
       entryService: 'alpha',
       noise: { volume: { rate: 0, jitter: 0 } },
     });
-    const { generator: skewGen } = buildLogsGenerator({
+    const { logsGenerator: skewGen } = buildLogsGenerator({
       tickIntervalMs: ONE_MIN,
       seed: SEED,
       serviceGraph: MINIMAL_GRAPH,
@@ -381,7 +381,7 @@ describe('buildLogsGenerator — service channel volume', () => {
         entryService: 'alpha',
         volume: { beta: { rate: 0.5 } },
         noise: { volume: { rate: 0, jitter: 0 } },
-      }).generator;
+      }).logsGenerator;
 
     const genA = makeGen();
     const genB = makeGen();
