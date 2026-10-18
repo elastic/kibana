@@ -41,6 +41,16 @@ export class LensDatatable {
     const cell = this.getCellLocator(rowIndex, colIndex);
     await cell.hover();
 
+    // The TanStack grid collapses the cell actions behind a trigger, and renders them in a portal
+    // when they do not fit in the cell. EuiDataGrid shows them inside the cell on hover.
+    const isTanStackGrid =
+      (await this.dataTable.getByTestId('lnsTanStackGridCellContent').count()) > 0;
+    if (isTanStackGrid) {
+      await cell.getByTestId('tanStackCellActionsButton').click();
+      await this.page.testSubj.locator('lensDatatableFilterOut').click();
+      return;
+    }
+
     const filterOutButton = cell.getByTestId('lensDatatableFilterOut');
     await filterOutButton.click();
   }
