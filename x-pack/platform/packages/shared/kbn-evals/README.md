@@ -502,14 +502,14 @@ Use `selectEvaluators<MyExample, MyTaskOutput>(...)` for typed evaluator callbac
 
 ### Available fixtures
 
-| Fixture              | Description                                                                                                                                   |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `inferenceClient`    | Bound to the connector declared by the active Playwright project; sends its `reasoningEffort` on every call unless the call sets `reasoning`. |
-| `agentBuilderClient` | Converse with Agent Builder on the project's connector; sends its `reasoningEffort` as `reasoning_level`.                                     |
-| `executorClient`     | Runs experiments (in-Kibana executor by default).                                                                                             |
-| `evalsClient`        | Client for evals plugin APIs (scores, datasets, experiment stats).                                                                            |
-| `reportModelScore`   | Displays results in terminal (overridable for custom reporting).                                                                              |
-| `traceEsClient`      | ES client for querying OTel traces (defaults to Scout `esClient` cluster).                                                                    |
+| Fixture              | Description                                                                                                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `inferenceClient`    | Bound to the connector declared by the active Playwright project; sends the connector's `reasoningEffort` on every call, overriding any `reasoning.effort` the call sets. |
+| `agentBuilderClient` | Converse with Agent Builder on the project's connector; sends its `reasoningEffort` as `reasoning_level`.                                                                 |
+| `executorClient`     | Runs experiments (in-Kibana executor by default).                                                                                                                         |
+| `evalsClient`        | Client for evals plugin APIs (scores, datasets, experiment stats).                                                                                                        |
+| `reportModelScore`   | Displays results in terminal (overridable for custom reporting).                                                                                                          |
+| `traceEsClient`      | ES client for querying OTel traces (defaults to Scout `esClient` cluster).                                                                                                |
 
 ### Available evaluators
 
