@@ -435,12 +435,14 @@ describe('AddNewMonitorsPublicAPI', () => {
   });
 
   describe('hydrateMonitorFields namespace resolution', () => {
-    const buildApi = (spaceId: string, body: Record<string, unknown>) =>
-      new AddEditMonitorAPI({
-        routeContext: { spaceId, request: { query: {}, body } },
+    const buildApi = (spaceId: string, body: Record<string, unknown>, gettingStarted = false) => {
+      const request = { query: gettingStarted ? { gettingStarted } : {}, body };
+      return new AddEditMonitorAPI({
+        routeContext: { spaceId, request },
         spaceId,
-        request: { query: {}, body },
+        request,
       } as any);
+    };
 
     it('resolves omitted namespace to the Kibana space namespace', () => {
       const api = buildApi('test-space', { type: 'http' });
@@ -458,6 +460,15 @@ describe('AddNewMonitorsPublicAPI', () => {
         normalizedMonitor: { namespace: 'default' } as any,
       });
       expect(result.namespace).toBe('default');
+    });
+
+    it('derives the namespace from the space for the Getting Started flow', () => {
+      const api = buildApi('test-space', { type: 'browser', namespace: 'default' }, true);
+      const result = api.hydrateMonitorFields({
+        newMonitorId: 'id-1',
+        normalizedMonitor: { namespace: 'default' } as any,
+      });
+      expect(result.namespace).toBe('test_space');
     });
   });
 

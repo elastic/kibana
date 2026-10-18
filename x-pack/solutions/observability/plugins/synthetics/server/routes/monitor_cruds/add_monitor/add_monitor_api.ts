@@ -374,13 +374,16 @@ export class AddEditMonitorAPI {
   }) {
     const { request } = this.routeContext;
 
-    const { preserve_namespace: preserveNamespace } = request.query as Record<
+    const { preserve_namespace: preserveNamespace, gettingStarted } = request.query as Record<
       string,
-      { preserve_namespace?: boolean }
+      { preserve_namespace?: boolean; gettingStarted?: boolean }
     >;
     // When the caller explicitly provides a namespace we honor it verbatim (even `default`).
     // Only when it is omitted do we fall back to the Kibana space namespace. See issue #221335.
+    // The Getting Started flow always sends the `default` namespace from its static defaults rather
+    // than one the user chose, so it keeps deriving the namespace from the space.
     const isNamespaceProvided =
+      !gettingStarted &&
       (request.body as CreateMonitorPayLoad | undefined)?.[ConfigKey.NAMESPACE] !== undefined;
     return {
       ...normalizedMonitor,

@@ -359,12 +359,13 @@ apiTest.describe(
         });
         expect((updated.body as Record<string, unknown>)[ConfigKey.NAMESPACE]).toBe('default');
 
-        // An explicitly provided invalid namespace is rejected.
+        // An explicitly provided empty namespace passes the request schema but is rejected by the
+        // edit handler's namespace validation.
         await editMonitorInternal(
           apiClient,
           editorHeaders,
           monitorId,
-          { ...savedMonitor, [ConfigKey.NAMESPACE]: 'Invalid Namespace' },
+          { ...savedMonitor, [ConfigKey.NAMESPACE]: '' },
           { spaceId: SPACE_ID, statusCode: 400 }
         );
       }
