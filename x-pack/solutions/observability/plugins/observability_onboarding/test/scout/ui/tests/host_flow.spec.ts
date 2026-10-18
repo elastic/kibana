@@ -8,19 +8,12 @@
 import { expect } from '@kbn/scout-oblt/ui';
 import { tags } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
-
-const V2_FF_ID = 'observability.addDataPageV2Enabled';
+import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../../common/feature_flags';
 
 test.describe.serial(
   'Host Onboarding',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ apiServices }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': { [V2_FF_ID]: true },
-      });
-    });
-
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
@@ -137,7 +130,7 @@ test.describe.serial(
     }) => {
       try {
         await apiServices.core.settings({
-          'feature_flags.overrides': { [V2_FF_ID]: false },
+          'feature_flags.overrides': { [IS_ADD_DATA_PAGE_V2_ENABLED]: false },
         });
         await pageObjects.host.gotoPath('/host/linux');
         await pageObjects.onboarding.useCaseGridByTestId.waitFor({ state: 'visible' });
@@ -146,7 +139,7 @@ test.describe.serial(
         await expect(page).not.toHaveURL(/\/host\//);
       } finally {
         await apiServices.core.settings({
-          'feature_flags.overrides': { [V2_FF_ID]: true },
+          'feature_flags.overrides': { [IS_ADD_DATA_PAGE_V2_ENABLED]: true },
         });
       }
     });
