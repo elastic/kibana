@@ -31,7 +31,7 @@ import { getEntityId } from '../common';
 import type { Row } from '../common';
 import { useResetEntityGridFilters } from '../hooks/use_reset_entity_grid_filters';
 import { RenderEntityGridCell } from './entities_cell_renderer';
-import type { EntityGridCellContext } from './entities_cell_renderer';
+import type { EntityGridCellContext, RowCellHandlers } from './entities_cell_renderer';
 import { ExpandedEntityGroup } from './entities_expanded_row';
 import {
   ROW_HEIGHT_PX,
@@ -90,6 +90,7 @@ interface EntityGridRowProps {
   visCols: EuiDataGridCustomBodyProps['visibleColumns'];
   rowBorderCss: SerializedStyles;
   cellCss: SerializedStyles;
+  cellHandlers?: RowCellHandlers;
   groupProps: GroupProps;
 }
 
@@ -108,6 +109,7 @@ const EntityGridRow = memo(
     visCols,
     rowBorderCss,
     cellCss,
+    cellHandlers,
     groupProps,
   }: EntityGridRowProps) => (
     <>
@@ -138,7 +140,7 @@ const EntityGridRow = memo(
                   {...cellProps}
                   watchlistNames={groupProps.watchlistNames}
                   euiTheme={groupProps.euiTheme}
-                  cellHandlers={groupProps.handlers}
+                  cellHandlers={cellHandlers}
                 />
               </div>
             );
@@ -198,6 +200,7 @@ export const EntityGridCustomBody = memo(
       columns,
       watchlistNames,
       cellHandlers,
+      recordCellHandlers,
       isFetching,
       cellPadding,
       onRowsInViewChange,
@@ -231,9 +234,18 @@ export const EntityGridCustomBody = memo(
         columns,
         euiTheme,
         watchlistNames,
-        handlers: cellHandlers,
+        handlers: recordCellHandlers,
       }),
-      [timeRange, keepFields, cellPadding, visCols, columns, euiTheme, watchlistNames, cellHandlers]
+      [
+        timeRange,
+        keepFields,
+        cellPadding,
+        visCols,
+        columns,
+        euiTheme,
+        watchlistNames,
+        recordCellHandlers,
+      ]
     );
 
     // The wrapping div of EUI scrolls: a state, not a ref, so the virtualizer sees it once set.
@@ -306,6 +318,7 @@ export const EntityGridCustomBody = memo(
                     visCols={visCols}
                     rowBorderCss={rowBorderCss}
                     cellCss={cellCss}
+                    cellHandlers={cellHandlers}
                     groupProps={groupProps}
                   />
                 </div>

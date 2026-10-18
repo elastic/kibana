@@ -26,12 +26,15 @@ import {
   MAX_LOADED_ROWS,
   useEntityGridData,
 } from '../hooks/use_entity_grid_data';
-import { EntityGridRowsContext, RenderEntityGridCell } from './entities_cell_renderer';
+import {
+  EntityGridRowsContext,
+  RenderEntityGridCell,
+  bindRowsMode,
+} from './entities_cell_renderer';
 import type { CellHandlers, EntityGridCellContext, EntityGridRows } from './entities_cell_renderer';
 import { RowActionsCell } from './cells/row_actions_cell';
 import type { RowActions } from './cells/row_actions_cell';
-import { EXPANDER_COLUMN } from './entities_expanded_row';
-import { getGroupRecordsOptions } from '../hooks/use_resolved_entity';
+import { EXPANDER_COLUMN, getGroupRecordsOptions } from './entities_expanded_row';
 import { EntityGridCustomBody } from './entities_grid_custom_body';
 import { getEntityGridToolbarVisibility } from './entities_grid_toolbar';
 import { EntityGridBodyContext, useEntityGridView } from './entities_grid_view_context';
@@ -270,8 +273,16 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   );
 
   const cellContext = useMemo(
-    (): EntityGridCellContext => ({ watchlistNames, euiTheme, cellHandlers }),
-    [watchlistNames, euiTheme, cellHandlers]
+    (): EntityGridCellContext => ({
+      watchlistNames,
+      euiTheme,
+      cellHandlers: cellHandlers && bindRowsMode(cellHandlers, rowsMode),
+    }),
+    [watchlistNames, euiTheme, cellHandlers, rowsMode]
+  );
+  const recordCellHandlers = useMemo(
+    () => cellHandlers && bindRowsMode(cellHandlers, 'individual'),
+    [cellHandlers]
   );
   const rowsContext = useMemo((): EntityGridRows => ({ rows, isEnriching }), [rows, isEnriching]);
 
@@ -286,6 +297,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       prefetchChildren,
       toggleExpandedId,
       rowActions,
+      recordCellHandlers,
       isFetching,
       cellPadding,
       onRowsInViewChange,
@@ -300,6 +312,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       prefetchChildren,
       toggleExpandedId,
       rowActions,
+      recordCellHandlers,
       isFetching,
       cellPadding,
       onRowsInViewChange,

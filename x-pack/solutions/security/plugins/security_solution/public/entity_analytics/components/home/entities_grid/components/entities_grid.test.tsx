@@ -95,6 +95,27 @@ describe('EntitiesGrid', () => {
     expect(toggleExpandedId).toHaveBeenCalledWith('host:a');
   });
 
+  it('tells the page a resolved row from a record its expanded group lists', () => {
+    // Every query returns the same rows, so the expanded group lists alpha too.
+    jest.mocked(useEntityAnalyticsUrlState).mockReturnValue({
+      expandedIds: ['host:a'],
+      toggleExpandedId,
+    } as unknown as ReturnType<typeof useEntityAnalyticsUrlState>);
+    const onEntityNameClick = jest.fn();
+
+    renderGrid({ cellHandlers: { onEntityNameClick } });
+    const [groupName, recordName] = screen.getAllByText('alpha');
+    fireEvent.click(groupName);
+    fireEvent.click(recordName);
+
+    expect(onEntityNameClick).toHaveBeenNthCalledWith(1, GROUP, 'resolved');
+    expect(onEntityNameClick).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ 'entity.id': 'host:a' }),
+      'individual'
+    );
+  });
+
   it('has no expander when the rows are individual records', () => {
     renderGrid({ rowsMode: 'individual', columns: INDIVIDUAL_ROWS_COLUMNS });
 

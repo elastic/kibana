@@ -62,6 +62,7 @@ import {
 import { createDataProviders } from '../../app/actions/add_to_timeline/data_provider';
 import { useInvestigateInTimeline } from '../../common/hooks/timeline/use_investigate_in_timeline';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
+import type { EntityViewMode } from '../../flyout/entity_details/shared/types';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
 import { useKibana } from '../../common/lib/kibana';
@@ -115,6 +116,10 @@ const toSecurityEntityType = (
   if (rawType === 'user') return SecurityEntityType.user;
   return SecurityEntityType.generic;
 };
+
+/** A resolved row stands for its whole group, so its flyouts show the group too. */
+const getEntityViewMode = (rowsMode: RowsMode): EntityViewMode =>
+  rowsMode === 'resolved' ? 'resolved' : 'single';
 
 const ROWS_OPTIONS: ReadonlyArray<LabeledOption<RowsMode>> = [
   {
@@ -210,7 +215,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const activeColumns = rowsMode === 'individual' ? INDIVIDUAL_ROWS_COLUMNS : RESOLVED_ROWS_COLUMNS;
 
   const onEntityNameClick = useCallback(
-    (row: Record<string, unknown>) => {
+    (row: Record<string, unknown>, rowMode: RowsMode) => {
       const entityId = getEntityId(row);
       const entityName = getString(row, 'entity.name');
       const engineType = getString(row, ENTITY_TYPE_FIELD);
@@ -222,6 +227,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         scopeId,
         contextID: scopeId,
         origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
+        mode: getEntityViewMode(rowMode),
       });
     },
     [openEntityFlyout, scopeId]
@@ -244,13 +250,19 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   );
 
   const onAlertCountClick = useCallback(
-    (row: Record<string, unknown>) => {
+    (row: Record<string, unknown>, rowMode: RowsMode) => {
       const entityId = getEntityId(row);
       const entityName = getString(row, 'entity.name') ?? '';
       if (!entityId) return;
       const entityType = toSecurityEntityType(getString(row, ENTITY_TYPE_FIELD));
       const value = entityType === SecurityEntityType.generic ? entityId : entityName;
-      openEntityAlertsInsights({ entityType, value, entityId, scopeId });
+      openEntityAlertsInsights({
+        entityType,
+        value,
+        entityId,
+        scopeId,
+        mode: getEntityViewMode(rowMode),
+      });
     },
     [openEntityAlertsInsights, scopeId]
   );

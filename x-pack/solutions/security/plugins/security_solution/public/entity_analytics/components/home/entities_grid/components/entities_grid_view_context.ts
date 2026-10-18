@@ -9,7 +9,11 @@ import { createContext, useContext } from 'react';
 import type { EuiDataGridColumn, EuiDataGridStyleCellPaddings } from '@elastic/eui';
 import type { TimeRange } from '../common';
 import type { RowActions } from './cells/row_actions_cell';
-import type { EntityGridCellContext, EntityGridRows } from './entities_cell_renderer';
+import type {
+  EntityGridCellContext,
+  EntityGridRows,
+  RowCellHandlers,
+} from './entities_cell_renderer';
 
 /** Expand state lives here, not in the cell context, which must stay stable. */
 export interface EntityGridView extends EntityGridCellContext, EntityGridRows {
@@ -20,6 +24,8 @@ export interface EntityGridView extends EntityGridCellContext, EntityGridRows {
   prefetchChildren: (entityId: string) => void;
   toggleExpandedId: (entityId: string) => void;
   rowActions?: RowActions;
+  /** The records an expanded group lists are individual rows, whatever the grid's rows mode. */
+  recordCellHandlers?: RowCellHandlers;
   isFetching: boolean;
   cellPadding: EuiDataGridStyleCellPaddings;
   /** The body reports the rows it renders, so only those are enriched. */
