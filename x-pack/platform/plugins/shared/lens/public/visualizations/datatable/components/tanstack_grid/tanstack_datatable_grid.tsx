@@ -52,8 +52,8 @@ const getColumnWidth = (column: GridColumnModel, override?: WidthOverride) =>
     ? override.width
     : column.column?.initialWidth);
 
-const getColumnFlexStyle = (column: GridColumnModel, width: number | undefined): CSSProperties =>
-  width != null
+const getColumnFlexStyle = (column: GridColumnModel, hasFixedWidth: boolean): CSSProperties =>
+  hasFixedWidth
     ? { flex: `0 0 var(${getWidthVar(column)})` }
     : { flex: '1 1 0', minInlineSize: MIN_COLUMN_WIDTH };
 
@@ -337,9 +337,13 @@ export const TanStackDatatableGrid = ({
     () => columnModels.map((model) => getColumnWidth(model, widthOverrides[model.id])),
     [columnModels, widthOverrides]
   );
+  // Only whether a column has a fixed width matters for its style, the width itself is a CSS variable.
+  // Keeping the styles stable while a column is dragged keeps the memoized rows from re-rendering.
+  const fixedWidthKey = columnWidths.map((width) => (width != null ? '1' : '0')).join('');
   const flexStyles = useMemo(
-    () => columnModels.map((model, index) => getColumnFlexStyle(model, columnWidths[index])),
-    [columnModels, columnWidths]
+    () =>
+      columnModels.map((model, index) => getColumnFlexStyle(model, fixedWidthKey[index] === '1')),
+    [columnModels, fixedWidthKey]
   );
 
   // Column widths are applied through CSS variables, so they can change without re-rendering rows.
@@ -376,17 +380,29 @@ export const TanStackDatatableGrid = ({
       const isRtl = getComputedStyle(header).direction === 'rtl';
       const initialWidth = model.column?.initialWidth;
       let width = startWidth;
+      let frame: number | undefined;
       setResizingColumnId(model.id);
 
+      const applyWidth = () => {
+        frame = undefined;
+        setWidthOverrides((prev) => ({ ...prev, [model.id]: { width, initialWidth } }));
+      };
       const onMove = (moveEvent: globalThis.PointerEvent) => {
         const delta = (moveEvent.clientX - startX) * (isRtl ? -1 : 1);
         width = Math.max(MIN_COLUMN_WIDTH, Math.round(startWidth + delta));
-        setWidthOverrides((prev) => ({ ...prev, [model.id]: { width, initialWidth } }));
+        // Pointer events can fire many times per frame, apply the width at most once per frame.
+        if (frame === undefined) {
+          frame = requestAnimationFrame(applyWidth);
+        }
       };
       const onEnd = () => {
         handle.removeEventListener('pointermove', onMove);
         handle.removeEventListener('pointerup', onEnd);
         handle.removeEventListener('pointercancel', onEnd);
+        if (frame !== undefined) {
+          cancelAnimationFrame(frame);
+          applyWidth();
+        }
         setResizingColumnId(undefined);
         if (width !== startWidth) {
           onColumnResizeRef.current?.({ columnId: model.id, width });

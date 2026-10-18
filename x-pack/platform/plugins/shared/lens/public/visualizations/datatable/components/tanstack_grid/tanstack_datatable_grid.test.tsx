@@ -208,7 +208,7 @@ describe('TanStackDatatableGrid', () => {
       Object.defineProperty(window, 'PointerEvent', { value: MouseEvent, configurable: true });
     });
 
-    it('applies the dragged width and reports it when the drag ends', () => {
+    it('applies the dragged width and reports it when the drag ends', async () => {
       const onColumnResize = jest.fn();
       render(<TanStackDatatableGrid {...defaultProps} onColumnResize={onColumnResize} />);
       const header = screen.getByTestId('dataGridHeaderCell-a');
@@ -217,9 +217,11 @@ describe('TanStackDatatableGrid', () => {
 
       fireEvent.pointerDown(handle, { button: 0, clientX: 100, pointerId: 1 });
       fireEvent.pointerMove(handle, { clientX: 160, pointerId: 1 });
-      expect(
-        screen.getByTestId('testGrid').style.getPropertyValue('--lnsTanStackGridColumnWidth-1')
-      ).toBe('260px');
+      await waitFor(() =>
+        expect(
+          screen.getByTestId('testGrid').style.getPropertyValue('--lnsTanStackGridColumnWidth-1')
+        ).toBe('260px')
+      );
       fireEvent.pointerUp(handle, { pointerId: 1 });
 
       expect(onColumnResize).toHaveBeenCalledTimes(1);
@@ -261,6 +263,45 @@ describe('TanStackDatatableGrid', () => {
       expect(
         screen.getByTestId('testGrid').style.getPropertyValue('--lnsTanStackGridColumnWidth-1')
       ).toBe('');
+    });
+  });
+
+  describe('column resizing performance', () => {
+    beforeAll(() => {
+      Object.defineProperty(window, 'PointerEvent', { value: MouseEvent, configurable: true });
+    });
+
+    it('does not re-render the cells while a column is dragged', async () => {
+      const renderCell = jest.fn(({ rowIndex }: TanStackCellValueProps) => (
+        <>{`cell-${rowIndex}`}</>
+      ));
+      render(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          columns={[{ id: 'a', displayAsText: 'Column A', initialWidth: 200 }, columns[1]]}
+          renderCellValue={renderCell}
+        />
+      );
+      const header = screen.getByTestId('dataGridHeaderCell-a');
+      jest.spyOn(header, 'getBoundingClientRect').mockReturnValue({ width: 200 } as DOMRect);
+      const handle = screen.getByTestId('dataGridColumnResizer-a');
+      const rendersBeforeDrag = renderCell.mock.calls.length;
+
+      fireEvent.pointerDown(handle, { button: 0, clientX: 100, pointerId: 1 });
+      const dragTo = async (clientX: number) => {
+        fireEvent.pointerMove(handle, { clientX, pointerId: 1 });
+        await waitFor(() =>
+          expect(
+            screen.getByTestId('testGrid').style.getPropertyValue('--lnsTanStackGridColumnWidth-1')
+          ).toBe(`${200 + clientX - 100}px`)
+        );
+      };
+      await dragTo(110);
+      await dragTo(120);
+      await dragTo(140);
+      fireEvent.pointerUp(handle, { pointerId: 1 });
+
+      expect(renderCell.mock.calls.length).toBe(rendersBeforeDrag);
     });
   });
 
