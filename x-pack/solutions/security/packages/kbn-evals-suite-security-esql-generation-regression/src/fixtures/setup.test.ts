@@ -11,6 +11,7 @@ import {
   enrichPolicyNamesInGoldQueries,
   esqlFixtureEnrichPolicies,
   esqlFixtureEnrichPolicyNames,
+  goldQueriesFromDataset,
 } from './enrich';
 import { cleanupEsqlFixtures, setupEsqlFixtures } from './setup';
 
@@ -79,9 +80,7 @@ const asEsClient = (esClient: FakeEsClient) =>
 
 describe('setupEsqlFixtures', () => {
   it('installs every enrich policy the dataset gold queries reference', () => {
-    const goldPolicies = enrichPolicyNamesInGoldQueries(
-      esqlGenerationDataset.map((example) => example.output.query)
-    );
+    const goldPolicies = enrichPolicyNamesInGoldQueries(goldQueriesFromDataset(esqlGenerationDataset));
 
     // Guard the guard: the two ENRICH golds are what makes this test meaningful.
     expect(goldPolicies).toEqual(expect.arrayContaining(['win_events', 'ldap_lookup_new']));
@@ -116,7 +115,7 @@ describe('setupEsqlFixtures', () => {
     for (const fixture of esqlFixtureEnrichPolicies) {
       expect(esClient.enrich.putPolicy).toHaveBeenCalledWith({
         name: fixture.policyName,
-        ...fixture.policy,
+        match: fixture.policy,
       });
       expect(esClient.enrich.executePolicy).toHaveBeenCalledWith({
         name: fixture.policyName,
@@ -130,9 +129,7 @@ describe('setupEsqlFixtures', () => {
 
     await setupEsqlFixtures({ esClient: asEsClient(esClient), log: makeLog() });
 
-    const probes = esClient.esql.query.mock.calls.map(
-      (call) => (call[0] as { query: string }).query
-    );
+    const probes = esClient.esql.query.mock.calls.map((call) => (call[0] as { query: string }).query);
     for (const fixture of esqlFixtureEnrichPolicies) {
       expect(probes).toContain(fixture.probeQuery);
       // The probe is only meaningful if it actually exercises the policy.
@@ -151,19 +148,19 @@ describe('setupEsqlFixtures', () => {
       },
     });
 
-    await expect(
-      setupEsqlFixtures({ esClient: asEsClient(esClient), log: makeLog() })
-    ).rejects.toThrow(/win_events/);
+    await expect(setupEsqlFixtures({ esClient: asEsClient(esClient), log: makeLog() })).rejects.toThrow(
+      /win_events/
+    );
   });
 
   it('fails fast when a gold references an enrich policy no fixture installs', async () => {
     const dataset = jest.requireActual<typeof import('../dataset')>('../dataset');
-    const goldQuery = dataset.esqlGenerationDataset[0].output.query;
-    jest.replaceProperty(
-      dataset.esqlGenerationDataset[0].output,
-      'query',
-      `${goldQuery}\n| ENRICH not_provisioned ON event.code`
-    );
+    const example = dataset.esqlGenerationDataset[0];
+    const gold = example.output;
+    if (!gold) {
+      throw new Error('dataset example 0 has no gold output');
+    }
+    jest.replaceProperty(gold, 'query', `${gold.query}\n| ENRICH not_provisioned ON event.code`);
 
     try {
       const esClient = makeEsClient();

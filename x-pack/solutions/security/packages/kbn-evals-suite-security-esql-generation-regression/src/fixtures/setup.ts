@@ -13,6 +13,7 @@ import {
   enrichPolicyNamesInGoldQueries,
   esqlFixtureEnrichIndexWildcards,
   esqlFixtureEnrichPolicies,
+  goldQueriesFromDataset,
 } from './enrich';
 import { esqlFixtureIndexWildcards, esqlFixtureIndicesCreateRequests } from './indices';
 
@@ -123,9 +124,7 @@ async function installEnrichPolicies({
   esClient: EsClient;
   log: ToolingLog;
 }): Promise<void> {
-  const goldPolicies = enrichPolicyNamesInGoldQueries(
-    esqlGenerationDataset.map((example) => example.output.query)
-  );
+  const goldPolicies = enrichPolicyNamesInGoldQueries(goldQueriesFromDataset(esqlGenerationDataset));
   const installedPolicies = new Set(esqlFixtureEnrichPolicies.map((fixture) => fixture.policyName));
 
   const missing = goldPolicies.filter((name) => !installedPolicies.has(name));
@@ -141,15 +140,16 @@ async function installEnrichPolicies({
     log.info(`[esql-regression] installing enrich policy ${fixture.policyName}`);
 
     try {
-      await esClient.enrich.putPolicy({ name: fixture.policyName, ...fixture.policy });
+      await esClient.enrich.putPolicy({ name: fixture.policyName, match: fixture.policy });
       await esClient.enrich.executePolicy({
         name: fixture.policyName,
         wait_for_completion: true,
       });
     } catch (err) {
-      throw new Error(`[esql-regression] failed to install enrich policy "${fixture.policyName}"`, {
-        cause: err instanceof Error ? err : new Error(String(err)),
-      });
+      throw new Error(
+        `[esql-regression] failed to install enrich policy "${fixture.policyName}"`,
+        { cause: err instanceof Error ? err : new Error(String(err)) }
+      );
     }
   }
 

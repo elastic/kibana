@@ -31,7 +31,7 @@ export interface EsqlEnrichPolicyFixture {
   readonly sourceIndexCreateRequest: IndicesCreateRequest;
   /** Lookup documents indexed into the source index before the policy executes. */
   readonly sourceDocuments: ReadonlyArray<Record<string, unknown>>;
-  /** The `match` policy to install, without its name. */
+  /** The `match` policy body to install, without its name. */
   readonly policy: Omit<EnrichPolicy, 'name'>;
   /** Minimal ES|QL query that only validates once the policy resolves on the cluster. */
   readonly probeQuery: string;
@@ -57,11 +57,9 @@ export const winEventsEnrichPolicyFixture: EsqlEnrichPolicyFixture = {
     { 'event.code': 1, EVENT_DESCRIPTION: 'Process creation' },
   ],
   policy: {
-    match: {
-      indices: ['esql-enrich-win-events'],
-      match_field: 'event.code',
-      enrich_fields: ['EVENT_DESCRIPTION'],
-    },
+    indices: ['esql-enrich-win-events'],
+    match_field: 'event.code',
+    enrich_fields: ['EVENT_DESCRIPTION'],
   },
   probeQuery: 'FROM logs-* | ENRICH win_events ON event.code WITH EVENT_DESCRIPTION | LIMIT 1',
 };
@@ -84,11 +82,9 @@ export const ldapLookupEnrichPolicyFixture: EsqlEnrichPolicyFixture = {
     { 'user.name': 'svc_backup', 'group.name': 'Backup Operators' },
   ],
   policy: {
-    match: {
-      indices: ['esql-enrich-ldap-users'],
-      match_field: 'user.name',
-      enrich_fields: ['group.name'],
-    },
+    indices: ['esql-enrich-ldap-users'],
+    match_field: 'user.name',
+    enrich_fields: ['group.name'],
   },
   probeQuery: 'FROM logs-* | ENRICH ldap_lookup_new ON user.name WITH group.name | LIMIT 1',
 };
@@ -127,4 +123,11 @@ export function enrichPolicyNamesInQuery(query: string): string[] {
 /** Policy names referenced by any gold query in the dataset. */
 export function enrichPolicyNamesInGoldQueries(goldQueries: readonly string[]): string[] {
   return Array.from(new Set(goldQueries.flatMap(enrichPolicyNamesInQuery)));
+}
+
+/** Gold queries of a dataset, dropping examples that carry no ground-truth output. */
+export function goldQueriesFromDataset(
+  dataset: ReadonlyArray<{ output?: { query?: string } }>
+): string[] {
+  return dataset.flatMap((example) => (example.output?.query ? [example.output.query] : []));
 }
