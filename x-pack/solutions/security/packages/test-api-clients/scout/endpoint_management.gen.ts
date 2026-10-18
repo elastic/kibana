@@ -30,8 +30,6 @@ import type {
   CreateUpdateProtectionUpdatesNoteRequestParamsInput,
   CreateUpdateProtectionUpdatesNoteRequestBodyInput,
   CreateUpdateProtectionUpdatesNoteResponse,
-  GetProtectionUpdatesNoteRequestParamsInput,
-  GetProtectionUpdatesNoteResponse,
 } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
 import type {
   EndpointExecuteActionRequestBodyInput,
@@ -94,6 +92,10 @@ import type {
   GetPolicyResponseRequestQueryInput,
   GetPolicyResponseResponse,
 } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy_response.gen';
+import type {
+  GetProtectionUpdatesNoteRequestParamsInput,
+  GetProtectionUpdatesNoteResponse,
+} from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
 import type {
   RunScriptActionRequestBodyInput,
   RunScriptActionResponse,
