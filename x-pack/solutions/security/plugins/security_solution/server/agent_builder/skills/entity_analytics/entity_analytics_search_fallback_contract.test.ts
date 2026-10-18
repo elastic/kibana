@@ -54,7 +54,9 @@ describe('entity-analytics skill states the empty-search retry contract', () => 
   const findEntities = sectionOf('### 1. Find entities');
 
   it('says an empty search result does not mean the entity store is empty', () => {
-    expect(findEntities).toContain('An empty search result does not mean the entity store is empty');
+    expect(findEntities).toContain(
+      'An empty search result does not mean the entity store is empty'
+    );
   });
 
   it('quotes the empty-result error the tool actually returns', () => {
