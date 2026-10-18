@@ -48,6 +48,11 @@ export const CONFIGURE_ONLY_REQUESTS = [
 const FENCE_TIMEOUT_MS = 120_000;
 const FENCE_POLL_INTERVAL_MS = 1_000;
 
+const WRITE_LEASE_RETRY_TIMEOUT_MS = 20_000;
+const WRITE_LEASE_RETRY_DELAY_MS = 1_000;
+/** `StatusError`'s message from `runExclusive`, the only place the source write lease is refused. */
+const WRITE_LEASE_MESSAGE = 'Source knowledge is being updated';
+
 export const POLL_OPTIONS = { timeout: 30_000, intervals: [1_000] };
 
 export const TOOL_API_HEADERS = PUBLIC_API_HEADERS;
@@ -144,6 +149,48 @@ export const deleteDetections = async (esClient: EsClient, ruleUuid: string): Pr
   });
 };
 
+/**
+ * Source reconciliation — queued when a source is created, run again after a feature write, and
+ * repeated by the periodic sweep — holds the source's write lease, and a write in that window is
+ * rejected before touching any knowledge. Re-sends the write until the lease clears, which waits
+ * the conflict out rather than retrying an applied write, and returns the last response so a lease
+ * that never clears reports its own message. Only a lease conflict is re-sent, and it is raised
+ * after the route's authorization checks, so the 403s these suites assert still come from the
+ * first response.
+ */
+const waitOutWriteLease = async <T>(
+  send: () => Promise<T>,
+  holdsWriteLease: (response: T) => boolean
+): Promise<T> => {
+  const deadline = Date.now() + WRITE_LEASE_RETRY_TIMEOUT_MS;
+  let response = await send();
+  while (holdsWriteLease(response) && Date.now() < deadline) {
+    await delay(WRITE_LEASE_RETRY_DELAY_MS);
+    response = await send();
+  }
+  return response;
+};
+
+/** Waits out the lease on the feature routes, which report the conflict as a 409. */
+export const retryOnWriteLease = <T extends { statusCode: number }>(
+  send: () => Promise<T>
+): Promise<T> => waitOutWriteLease(send, ({ statusCode }) => statusCode === 409);
+
+/**
+ * Waits out the lease on `ki_feature_create`, which catches the conflict and answers 200 with an
+ * error result, so the wait keys on the lease holder's message rather than on a status code.
+ */
+export const retryToolOnWriteLease = <
+  T extends { body: { results?: Array<{ type: string; data?: { message?: string } }> } }
+>(
+  send: () => Promise<T>
+): Promise<T> =>
+  waitOutWriteLease(send, ({ body }) =>
+    (body.results ?? []).some(
+      ({ type, data }) => type === 'error' && (data?.message ?? '').includes(WRITE_LEASE_MESSAGE)
+    )
+  );
+
 export const seedFeature = async ({
   kbnClient,
   sourceId,
@@ -153,12 +200,19 @@ export const seedFeature = async ({
   sourceId: string;
   featureId: string;
 }): Promise<void> => {
-  await kbnClient.request({
-    method: 'POST',
-    path: `/${getFeaturesEndpoint(sourceId)}`,
-    headers: COMMON_API_HEADERS,
-    body: buildFeature(featureId),
+  const { statusCode } = await retryOnWriteLease(async () => {
+    const { status } = await kbnClient.request({
+      method: 'POST',
+      path: `/${getFeaturesEndpoint(sourceId)}`,
+      headers: COMMON_API_HEADERS,
+      body: buildFeature(featureId),
+      ignoreErrors: [409],
+    });
+    return { statusCode: status };
   });
+  if (statusCode === 409) {
+    throw new Error(`Seeding feature ${featureId} never cleared source ${sourceId}'s write lease`);
+  }
 };
 
 export const deleteFeature = async ({
@@ -170,11 +224,14 @@ export const deleteFeature = async ({
   sourceId: string;
   featureId: string;
 }): Promise<void> => {
-  await kbnClient.request({
-    method: 'DELETE',
-    path: `/${getFeaturesEndpoint(sourceId)}/${featureId}`,
-    headers: COMMON_API_HEADERS,
-    ignoreErrors: [404],
+  await retryOnWriteLease(async () => {
+    const { status } = await kbnClient.request({
+      method: 'DELETE',
+      path: `/${getFeaturesEndpoint(sourceId)}/${featureId}`,
+      headers: COMMON_API_HEADERS,
+      ignoreErrors: [404, 409],
+    });
+    return { statusCode: status };
   });
 };
 
