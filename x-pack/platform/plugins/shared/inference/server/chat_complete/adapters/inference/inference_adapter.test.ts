@@ -185,13 +185,167 @@ describe('inferenceAdapter', () => {
           tool_calls: [
             {
               index: 0,
-              toolCallId: 'load_skill',
+              toolCallId: 'load_skill-0',
               function: {
                 name: 'load_skill',
                 arguments: '{"skill":"attack-discovery-generator"}',
               },
             },
           ],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+      ]);
+    });
+
+    it('passes a native tool_calls delta through when tools are declared', async () => {
+      const source$ = of(
+        createOpenAIChunk({
+          delta: {
+            tool_calls: [
+              {
+                index: 0,
+                id: 'call_1',
+                type: 'function',
+                function: {
+                  name: 'load_skill',
+                  arguments: '{"skill":"attack-discovery-generator"}',
+                },
+              },
+            ],
+          },
+        })
+      );
+
+      executorMock.invoke.mockImplementation(async () => {
+        return {
+          actionId: '',
+          status: 'ok',
+          data: observableIntoEventSourceStream(source$, logger),
+        };
+      });
+
+      const response$ = inferenceAdapter.chatComplete({
+        ...defaultArgs,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: 'Hello',
+          },
+        ],
+        tools: {
+          load_skill: {
+            description: 'load a skill',
+            schema: { type: 'object', properties: {} },
+          },
+        },
+      });
+
+      const allChunks = await lastValueFrom(
+        response$.pipe(filter(isChatCompletionChunkEvent), toArray())
+      );
+
+      expect(allChunks).toEqual([
+        {
+          content: '',
+          tool_calls: [
+            {
+              index: 0,
+              toolCallId: 'call_1',
+              function: {
+                name: 'load_skill',
+                arguments: '{"skill":"attack-discovery-generator"}',
+              },
+            },
+          ],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+      ]);
+    });
+
+    it('passes a refusal through when tools are declared', async () => {
+      const source$ = of(
+        createOpenAIChunk({
+          delta: {
+            refusal: 'I cannot help with that.',
+          },
+        })
+      );
+
+      executorMock.invoke.mockImplementation(async () => {
+        return {
+          actionId: '',
+          status: 'ok',
+          data: observableIntoEventSourceStream(source$, logger),
+        };
+      });
+
+      const response$ = inferenceAdapter.chatComplete({
+        ...defaultArgs,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: 'Hello',
+          },
+        ],
+        tools: {
+          load_skill: {
+            description: 'load a skill',
+            schema: { type: 'object', properties: {} },
+          },
+        },
+      });
+
+      const allChunks = await lastValueFrom(
+        response$.pipe(filter(isChatCompletionChunkEvent), toArray())
+      );
+
+      expect(allChunks).toEqual([
+        {
+          content: '',
+          refusal: 'I cannot help with that.',
+          tool_calls: [],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+      ]);
+    });
+
+    it('leaves a harmony call to an undeclared tool in the content', async () => {
+      const content = 'assistantcommentary to=functions.delete_index json{}';
+
+      const source$ = of(createOpenAIChunk({ delta: { content } }));
+
+      executorMock.invoke.mockImplementation(async () => {
+        return {
+          actionId: '',
+          status: 'ok',
+          data: observableIntoEventSourceStream(source$, logger),
+        };
+      });
+
+      const response$ = inferenceAdapter.chatComplete({
+        ...defaultArgs,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: 'Hello',
+          },
+        ],
+        tools: {
+          load_skill: {
+            description: 'load a skill',
+            schema: { type: 'object', properties: {} },
+          },
+        },
+      });
+
+      const allChunks = await lastValueFrom(
+        response$.pipe(filter(isChatCompletionChunkEvent), toArray())
+      );
+
+      expect(allChunks).toEqual([
+        {
+          content,
+          tool_calls: [],
           type: ChatCompletionEventType.ChatCompletionChunk,
         },
       ]);

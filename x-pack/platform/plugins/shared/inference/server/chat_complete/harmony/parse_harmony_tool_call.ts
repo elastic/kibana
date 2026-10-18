@@ -42,11 +42,21 @@ export type HarmonyToolCallScan =
   | { type: 'pending' }
   | { type: 'call'; call: HarmonyToolCall };
 
+export interface HarmonyToolCallOptions {
+  /**
+   * The tool names the request declared. When provided, a call whose recipient
+   * is outside this set is reported as prose instead of being recovered, so a
+   * model quoting the leak (or naming a tool that does not exist) cannot turn
+   * text into an executed call.
+   */
+  declaredToolNames?: readonly string[];
+}
+
 /**
  * Longest prefix of a call that may still be split across chunks, so the tail of
  * a buffer shorter than this is never emitted as content early: the stripped
  * `assistantcommentary to=functions.` plus the `<|start|>`/`<|channel|>` markers
- * of the unstripped form.
+ * of the unstripped form (53 characters).
  */
 export const HARMONY_TOOL_CALL_HOLD = 64;
 
@@ -70,11 +80,13 @@ const skipWhitespace = (text: string, from: number): number => {
 };
 
 /**
- * End index (exclusive) of the JSON object that starts at `from`, or why it is
- * not usable yet. Brace/quote accounting is done by hand because arguments
- * routinely contain nested objects and braces inside strings.
+ * End index (exclusive) of the JSON object that starts at `from`, or
+ * `'incomplete'` while it is still streaming in. Brace/quote accounting is done
+ * by hand because arguments routinely contain nested objects and braces inside
+ * strings. Callers only pass the index of a `{`, so a scan that runs out of text
+ * is always an unfinished object — there is no "invalid" outcome.
  */
-const scanJsonObject = (text: string, from: number): number | 'incomplete' | 'invalid' => {
+const scanJsonObject = (text: string, from: number): number | 'incomplete' => {
   let depth = 0;
   let inString = false;
   let escaped = false;
@@ -105,10 +117,14 @@ const scanJsonObject = (text: string, from: number): number | 'incomplete' | 'in
     }
   }
 
-  return inString || depth > 0 ? 'incomplete' : 'invalid';
+  return 'incomplete';
 };
 
-const scanCallAt = (text: string, index: number): HarmonyToolCallScan => {
+const scanCallAt = (
+  text: string,
+  index: number,
+  declaredToolNames?: readonly string[]
+): HarmonyToolCallScan => {
   const channel = text.slice(0, index).match(CHANNEL_SUFFIX);
 
   // `to=functions.x` in prose, without the commentary channel, is not a call.
@@ -131,6 +147,13 @@ const scanCallAt = (text: string, index: number): HarmonyToolCallScan => {
 
   // The name is only complete once something delimits it (` `, `<|constrain|>`).
   if (!/[\s<]/.test(text[cursor])) {
+    return { type: 'none' };
+  }
+
+  // A recipient the request never declared is text, not a call. Checked after the
+  // delimiter test, so a name still streaming in (`load_sk`) keeps reporting
+  // `pending` instead of being emitted as content.
+  if (declaredToolNames && !declaredToolNames.includes(name)) {
     return { type: 'none' };
   }
 
@@ -158,9 +181,6 @@ const scanCallAt = (text: string, index: number): HarmonyToolCallScan => {
   if (argumentsEnd === 'incomplete') {
     return { type: 'pending' };
   }
-  if (argumentsEnd === 'invalid') {
-    return { type: 'none' };
-  }
 
   let end = argumentsEnd;
   if (text.startsWith(CALL_END_MARKER, end)) {
@@ -187,11 +207,15 @@ const scanCallAt = (text: string, index: number): HarmonyToolCallScan => {
  * assistant content, and `pending` means "buffer more chunks": a marker that is
  * genuinely not a call reports `none` and the text is emitted as content.
  */
-export const findHarmonyToolCall = (text: string, from = 0): HarmonyToolCallScan => {
+export const findHarmonyToolCall = (
+  text: string,
+  from = 0,
+  { declaredToolNames }: HarmonyToolCallOptions = {}
+): HarmonyToolCallScan => {
   let index = text.indexOf(RECIPIENT_PREFIX, from);
 
   while (index >= 0) {
-    const scan = scanCallAt(text, index);
+    const scan = scanCallAt(text, index, declaredToolNames);
     if (scan.type !== 'none') {
       return scan;
     }

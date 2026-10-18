@@ -53,7 +53,8 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
 
     // Only tools declared by the caller can be called, so a call recovered from
     // the content is only worth looking for when the request declares tools.
-    const hasNativeTools = Array.isArray(request.tools) && request.tools.length > 0;
+    const declaredToolNames = request.tools?.map((tool) => tool.function.name) ?? [];
+    const hasNativeTools = declaredToolNames.length > 0;
 
     return defer(() => {
       return executor.invoke({
@@ -76,7 +77,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       useSimulatedFunctionCalling
         ? parseInlineFunctionCalls({ logger })
         : hasNativeTools
-        ? recoverHarmonyToolCalls({ logger })
+        ? recoverHarmonyToolCalls({ logger, declaredToolNames })
         : identity
     );
   },

@@ -101,14 +101,44 @@ describe('findHarmonyToolCall', () => {
     expect(findHarmonyToolCall(text)).toEqual({ type: 'none' });
   });
 
+  it('ignores a call to a tool the request did not declare', () => {
+    const text = 'assistantcommentary to=functions.delete_index json{"index":"x"}';
+
+    expect(findHarmonyToolCall(text, 0, { declaredToolNames: ['load_skill'] })).toEqual({
+      type: 'none',
+    });
+    expect(findHarmonyToolCall(text, 0, { declaredToolNames: ['delete_index'] })).toMatchObject({
+      type: 'call',
+      call: { name: 'delete_index' },
+    });
+  });
+
+  it('keeps waiting for a declared name that is still streaming in', () => {
+    expect(
+      findHarmonyToolCall('assistantcommentary to=functions.load_sk', 0, {
+        declaredToolNames: ['load_skill'],
+      })
+    ).toEqual({ type: 'pending' });
+  });
+
   it('ignores a call whose arguments are not a JSON object', () => {
     expect(
       findHarmonyToolCall('assistantcommentary to=functions.load_skill json not-json')
     ).toEqual({ type: 'none' });
   });
 
+  it('reports pending while the arguments are still streaming in', () => {
+    expect(
+      findHarmonyToolCall('assistantcommentary to=functions.load_skill json{"skill":{"name":"a')
+    ).toEqual({ type: 'pending' });
+  });
+
   it('exposes the holdback and flush bounds used by the stream operator', () => {
-    expect(HARMONY_TOOL_CALL_HOLD).toBeGreaterThan('assistantcommentary to=functions.'.length);
+    // The longest prefix of a call that can arrive split across chunks: the
+    // stripped form with the harmony markers of the unstripped one in front.
+    const longestSplitPrefix = '<|start|>assistant<|channel|>commentary to=functions.';
+    expect(longestSplitPrefix).toHaveLength(53);
+    expect(HARMONY_TOOL_CALL_HOLD).toBeGreaterThanOrEqual(longestSplitPrefix.length);
     expect(MAX_HARMONY_TOOL_CALL_LENGTH).toBeGreaterThan(HARMONY_TOOL_CALL_HOLD);
   });
 });
