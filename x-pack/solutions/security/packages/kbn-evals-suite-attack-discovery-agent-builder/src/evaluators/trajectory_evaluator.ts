@@ -17,6 +17,30 @@ import type {
 // not collide.
 export const TRAJECTORY_EVALUATOR_NAME = 'StrictTrajectory';
 
+// Calls the harness pays on every run, whatever route the model picks.
+// `load_skill` is how the skill that carries the expected tool path is reached,
+// so it has never counted against precision.
+const HARNESS_TOOL_CALLS = ['load_skill'];
+
+/**
+ * Calls the EXAMPLE's own contract forces on a compliant run.
+ *
+ * An example that hands its alerts as an attachment cannot be answered without
+ * reading that attachment, so the read is the fixture's requirement and not a
+ * routing decision the model made. Counting it capped every compliant run of
+ * `provided-alerts` and `multiple-alert-sets` at `1 expected / (1 expected + 1
+ * attachment read)` = 0.5: the routing requirement was satisfied and the metric
+ * still could not reach its own ceiling, so it measured the fixture rather than
+ * the model (F23b, build 01a14b73).
+ *
+ * The exclusion is conditional on the example declaring attachments, so an
+ * attachment read on an example that ships none is still counted as the
+ * mis-route it is.
+ */
+const fixtureRequiredToolCalls = (
+  input: AttackDiscoveryAgentBuilderExample['input'] | undefined
+): string[] => (input?.attachments?.length ? ['attachments.read'] : []);
+
 export const createStrictTrajectoryEvaluator = ({
   extractToolCalls,
   goldenPathExtractor,
@@ -27,7 +51,7 @@ export const createStrictTrajectoryEvaluator = ({
   name: TRAJECTORY_EVALUATOR_NAME,
   kind: 'CODE',
   direction: 'maximize',
-  evaluate: async ({ output, expected }) => {
+  evaluate: async ({ input, output, expected }) => {
     const actual = extractToolCalls(output);
     const expectedPath = goldenPathExtractor(expected);
 
@@ -57,17 +81,28 @@ export const createStrictTrajectoryEvaluator = ({
       };
     }
 
-    // Natural routing always pays a load_skill call; exclude it from precision scoring.
-    const precisionDenominator = actual.filter((tool) => tool !== 'load_skill').length;
-    const score = expectedPath.length / Math.max(precisionDenominator, expectedPath.length);
+    // The routing requirement — the expected tools appearing in order — is
+    // asserted above. Precision then counts only the calls that ARE routing
+    // decisions: the harness calls and the steps the fixture's own contract
+    // requires are not choices the model made, so scoring them against the
+    // expected path penalises compliance.
+    const nonRoutingToolCalls = new Set([
+      ...HARNESS_TOOL_CALLS,
+      ...fixtureRequiredToolCalls(input),
+    ]);
+    const routingToolCalls = actual.filter((tool) => !nonRoutingToolCalls.has(tool));
+    const score = expectedPath.length / Math.max(routingToolCalls.length, expectedPath.length);
     return {
       score,
-      explanation: `Expected path found in order. ${
-        actual.length
-      } total tool calls (${precisionDenominator} excluding load_skill), ${
-        expectedPath.length
-      } expected. Precision: ${score.toFixed(3)}.`,
-      metadata: { actualPath: actual, expectedPath, precisionDenominator },
+      explanation: `Expected path found in order. ${actual.length} total tool calls (${
+        routingToolCalls.length
+      } routing, ${expectedPath.length} expected). Precision: ${score.toFixed(3)}.`,
+      metadata: {
+        actualPath: actual,
+        expectedPath,
+        routingToolCalls,
+        excludedToolCalls: actual.filter((tool) => nonRoutingToolCalls.has(tool)),
+      },
     };
   },
 });
