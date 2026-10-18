@@ -91,7 +91,7 @@ Use this skill when:
 - Once the final analysis and disposition are written, make no further tool calls.
 
 ## Answer Shape
-Answer shape is part of the answer: ordering, scope and phrasing decide which claims the reader treats as the answer. Relevance and groundedness are read claim by claim, so every claim the answer carries is scored with it.
+Answer shape is part of the answer: what the first sentence leads with, how much supporting detail the answer carries, and how its claims are phrased decide what the reader treats as the answer.
 - Answer first: the first sentence gives the answer to the question that was asked, not the process used to get it.
 - Stay in scope: supporting detail — timestamps, alert IDs, per-host counts, tool names, alert-by-alert listings — belongs in the answer only when the question requires it. Summarize the rest in one line instead of dumping it.
 - Separate fact from interpretation. Values taken from tool results may be stated as facts; any assessment, hypothesis or inference must be phrased as one — 'could indicate', 'is consistent with', 'suggests' — never as 'is', 'proves', or 'confirms'.
