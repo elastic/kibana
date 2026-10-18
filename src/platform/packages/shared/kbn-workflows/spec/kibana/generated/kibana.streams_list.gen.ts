@@ -15,7 +15,7 @@
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { get_streams_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
@@ -46,12 +46,12 @@ Fetches list of all streams<br/><br/>[Required authorization] Route required pri
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.object({
+  paramsSchema: lazySchema(() => z.object({
     ...getShapeAt(get_streams_request, 'body'),
     ...getShapeAt(get_streams_request, 'path'),
     ...getShapeAt(get_streams_request, 'query'),
     fetcher: FetcherConfigSchema,
     ...KibanaStepMetaSchema,
-  }),
-  outputSchema: z.optional(z.looseObject({})),
+  })),
+  outputSchema: lazySchema(() => z.optional(z.looseObject({}))),
 };

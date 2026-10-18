@@ -15,7 +15,7 @@
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   search1_request,
@@ -147,7 +147,7 @@ This situation can occur because the splitting criterion is based on Lucene docu
       'stats',
     ],
   },
-  paramsSchema: z.union([
+  paramsSchema: lazySchema(() => z.union([
     z.object({
       ...getShapeAt(search_request, 'body'),
       ...getShapeAt(search_request, 'path'),
@@ -168,6 +168,6 @@ This situation can occur because the splitting criterion is based on Lucene docu
       ...getShapeAt(search3_request, 'path'),
       ...getShapeAt(search3_request, 'query'),
     }),
-  ]),
-  outputSchema: z.union([search_response, search1_response, search2_response, search3_response]),
+  ])),
+  outputSchema: lazySchema(() => z.union([search_response, search1_response, search2_response, search3_response])),
 };

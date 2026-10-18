@@ -15,7 +15,7 @@
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   bulk1_request,
@@ -176,7 +176,7 @@ Refer to the linked documentation for step-by-step instructions using the index 
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
+  paramsSchema: lazySchema(() => z.union([
     z.object({
       ...getShapeAt(bulk_request, 'body'),
       ...getShapeAt(bulk_request, 'path'),
@@ -197,6 +197,6 @@ Refer to the linked documentation for step-by-step instructions using the index 
       ...getShapeAt(bulk3_request, 'path'),
       ...getShapeAt(bulk3_request, 'query'),
     }),
-  ]),
-  outputSchema: z.union([bulk_response, bulk1_response, bulk2_response, bulk3_response]),
+  ])),
+  outputSchema: lazySchema(() => z.union([bulk_response, bulk1_response, bulk2_response, bulk3_response])),
 };

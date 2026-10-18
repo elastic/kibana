@@ -26,12 +26,20 @@ import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 
 export type IValidationHelper = PublicMethodsOf<ValidationHelper>;
 
+const validatorCachesByRegistry = new WeakMap<
+  ISavedObjectTypeRegistry,
+  {
+    typeValidatorMap: Record<string, SavedObjectsTypeValidator>;
+    updateValidatorMap: Record<string, SavedObjectsTypeValidator | null>;
+  }
+>();
+
 export class ValidationHelper {
   private registry: ISavedObjectTypeRegistry;
   private logger: Logger;
   private kibanaVersion: string;
-  private typeValidatorMap: Record<string, SavedObjectsTypeValidator> = {};
-  private updateValidatorMap: Record<string, SavedObjectsTypeValidator | null> = {};
+  private typeValidatorMap: Record<string, SavedObjectsTypeValidator>;
+  private updateValidatorMap: Record<string, SavedObjectsTypeValidator | null>;
 
   constructor({
     registry,
@@ -45,6 +53,13 @@ export class ValidationHelper {
     this.registry = registry;
     this.logger = logger;
     this.kibanaVersion = kibanaVersion;
+    let caches = validatorCachesByRegistry.get(registry);
+    if (!caches) {
+      caches = { typeValidatorMap: {}, updateValidatorMap: {} };
+      validatorCachesByRegistry.set(registry, caches);
+    }
+    this.typeValidatorMap = caches.typeValidatorMap;
+    this.updateValidatorMap = caches.updateValidatorMap;
   }
 
   /** The `initialNamespaces` field (create, bulkCreate) is used to create an object in an initial set of spaces. */

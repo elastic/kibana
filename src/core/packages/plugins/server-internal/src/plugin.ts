@@ -10,7 +10,6 @@
 import type { Container, ContainerModule } from 'inversify';
 import { join } from 'path';
 import typeDetect from 'type-detect';
-import { firstValueFrom, Subject } from 'rxjs';
 import { isPromise } from '@kbn/std';
 import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
@@ -76,10 +75,24 @@ export class PluginWrapper<
     | PrebootPlugin<TSetup, TPluginsSetup>;
   private container?: Container;
 
-  private readonly startDependencies$ = new Subject<
-    [CoreStart, TPluginsStart, TStart | undefined]
-  >();
-  public readonly startDependencies = firstValueFrom(this.startDependencies$);
+  private startDependenciesPromise?: Promise<[CoreStart, TPluginsStart, TStart | undefined]>;
+  private resolveStartDependencies?: (
+    value: [CoreStart, TPluginsStart, TStart | undefined]
+  ) => void;
+  private resolvedStartDependencies?: [CoreStart, TPluginsStart, TStart | undefined];
+
+  public get startDependencies(): Promise<[CoreStart, TPluginsStart, TStart | undefined]> {
+    if (!this.startDependenciesPromise) {
+      if (this.resolvedStartDependencies) {
+        this.startDependenciesPromise = Promise.resolve(this.resolvedStartDependencies);
+      } else {
+        this.startDependenciesPromise = new Promise((resolve) => {
+          this.resolveStartDependencies = resolve;
+        });
+      }
+    }
+    return this.startDependenciesPromise;
+  }
 
   constructor(
     public readonly params: {
@@ -173,12 +186,28 @@ export class PluginWrapper<
 
     if (isPromise(contract)) {
       return contract.then((resolvedContract) => {
-        this.startDependencies$.next([startContext, plugins, resolvedContract]);
+        const tuple: [CoreStart, TPluginsStart, TStart | undefined] = [
+          startContext,
+          plugins,
+          resolvedContract,
+        ];
+        if (this.resolveStartDependencies) {
+          this.resolveStartDependencies(tuple);
+          this.resolveStartDependencies = undefined;
+        } else {
+          this.resolvedStartDependencies = tuple;
+        }
         return resolvedContract!;
       });
     }
 
-    this.startDependencies$.next([startContext, plugins, contract]);
+    const tuple: [CoreStart, TPluginsStart, TStart | undefined] = [startContext, plugins, contract];
+    if (this.resolveStartDependencies) {
+      this.resolveStartDependencies(tuple);
+      this.resolveStartDependencies = undefined;
+    } else {
+      this.resolvedStartDependencies = tuple;
+    }
 
     return contract;
   }
@@ -195,6 +224,9 @@ export class PluginWrapper<
     await this.container?.unbindAllAsync();
     this.instance = undefined;
     this.container = undefined;
+    this.resolvedStartDependencies = undefined;
+    this.startDependenciesPromise = undefined;
+    this.resolveStartDependencies = undefined;
   }
 
   public async getConfigDescriptor(): Promise<PluginConfigDescriptor | null> {

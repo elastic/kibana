@@ -15,7 +15,7 @@
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   get_case_default_space_request,
@@ -50,12 +50,12 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.object({
+  paramsSchema: lazySchema(() => z.object({
     ...getShapeAt(get_case_default_space_request, 'body'),
     ...getShapeAt(get_case_default_space_request, 'path'),
     ...getShapeAt(get_case_default_space_request, 'query'),
     fetcher: FetcherConfigSchema,
     ...KibanaStepMetaSchema,
-  }),
+  })),
   outputSchema: get_case_default_space_response,
 };

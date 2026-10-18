@@ -15,7 +15,7 @@
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { update_request, update_response } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
@@ -80,10 +80,10 @@ For usage examples such as partial updates, upserts, and scripted updates, see t
       'upsert',
     ],
   },
-  paramsSchema: z.object({
+  paramsSchema: lazySchema(() => z.object({
     ...getShapeAt(update_request, 'body'),
     ...getShapeAt(update_request, 'path'),
     ...getShapeAt(update_request, 'query'),
-  }),
+  })),
   outputSchema: update_response,
 };

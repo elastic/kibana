@@ -15,7 +15,7 @@
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { get_streams_name_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
@@ -46,12 +46,12 @@ Fetches a stream definition and associated dashboards<br/><br/>[Required authori
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.object({
+  paramsSchema: lazySchema(() => z.object({
     ...getShapeAt(get_streams_name_request, 'body'),
     ...getShapeAt(get_streams_name_request, 'path'),
     ...getShapeAt(get_streams_name_request, 'query'),
     fetcher: FetcherConfigSchema,
     ...KibanaStepMetaSchema,
-  }),
-  outputSchema: z.optional(z.looseObject({})),
+  })),
+  outputSchema: lazySchema(() => z.optional(z.looseObject({}))),
 };

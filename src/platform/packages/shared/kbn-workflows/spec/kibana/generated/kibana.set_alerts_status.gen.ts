@@ -15,7 +15,7 @@
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   set_alerts_status_request,
@@ -48,12 +48,12 @@ Set the status of one or more detection alerts.`,
     urlParams: [],
     bodyParams: ['reason', 'signal_ids', 'status', 'conflicts', 'query'],
   },
-  paramsSchema: z.object({
+  paramsSchema: lazySchema(() => z.object({
     ...getShapeAt(set_alerts_status_request, 'body'),
     ...getShapeAt(set_alerts_status_request, 'path'),
     ...getShapeAt(set_alerts_status_request, 'query'),
     fetcher: FetcherConfigSchema,
     ...KibanaStepMetaSchema,
-  }),
+  })),
   outputSchema: set_alerts_status_response,
 };

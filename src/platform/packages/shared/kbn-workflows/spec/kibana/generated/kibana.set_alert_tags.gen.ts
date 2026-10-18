@@ -15,7 +15,7 @@
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { set_alert_tags_request, set_alert_tags_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
@@ -48,12 +48,12 @@ And tags to detection alerts, and remove them from alerts.
     urlParams: [],
     bodyParams: ['ids', 'tags'],
   },
-  paramsSchema: z.object({
+  paramsSchema: lazySchema(() => z.object({
     ...getShapeAt(set_alert_tags_request, 'body'),
     ...getShapeAt(set_alert_tags_request, 'path'),
     ...getShapeAt(set_alert_tags_request, 'query'),
     fetcher: FetcherConfigSchema,
     ...KibanaStepMetaSchema,
-  }),
+  })),
   outputSchema: set_alert_tags_response,
 };

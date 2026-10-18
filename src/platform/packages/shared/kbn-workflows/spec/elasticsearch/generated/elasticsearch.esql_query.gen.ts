@@ -15,7 +15,7 @@
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { esql_query_request, esql_query_response } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
@@ -51,10 +51,10 @@ Get search results for an ES|QL (Elasticsearch query language) query.
       'include_execution_metadata',
     ],
   },
-  paramsSchema: z.object({
+  paramsSchema: lazySchema(() => z.object({
     ...getShapeAt(esql_query_request, 'body'),
     ...getShapeAt(esql_query_request, 'path'),
     ...getShapeAt(esql_query_request, 'query'),
-  }),
+  })),
   outputSchema: esql_query_response,
 };

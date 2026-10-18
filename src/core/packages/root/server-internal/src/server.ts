@@ -238,6 +238,8 @@ export class Server {
       environment: environmentPreboot,
       node: nodePreboot,
     });
+    // Release the 1,500 repo package manifests after plugin discovery has consumed them.
+    (this.env as { repoPackages?: unknown }).repoPackages = undefined;
 
     if (!disablePreboot) {
       // Immediately terminate in case of invalid configuration. This needs to be done after plugin discovery. We also

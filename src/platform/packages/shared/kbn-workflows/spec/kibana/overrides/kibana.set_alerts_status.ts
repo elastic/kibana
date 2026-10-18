@@ -16,6 +16,7 @@
 // import all needed request and response schemas generated from the OpenAPI spec
 import type { InternalConnectorContract } from '../../../types/latest';
 
+import { lazySchema } from '@kbn/zod/v4';
 import { insertFetcherToSchemaRecursively } from '../../lib/insert_fetcher_to_schema';
 import {
   set_alerts_status_request,
@@ -42,6 +43,6 @@ Set the status of one or more detection alerts.`,
     urlParams: [],
     bodyParams: ['reason', 'signal_ids', 'status', 'conflicts', 'query'],
   },
-  paramsSchema: insertFetcherToSchemaRecursively(set_alerts_status_request.shape.body),
+  paramsSchema: lazySchema(() => insertFetcherToSchemaRecursively(set_alerts_status_request.shape.body)),
   outputSchema: set_alerts_status_response,
 };

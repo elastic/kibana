@@ -22,6 +22,7 @@ const CHAINABLE_ZOD_METHODS = new Set([
   'describe',
   'exactOptional',
   'extend',
+  'loose',
   'merge',
   'nonoptional',
   'nullable',

@@ -127,6 +127,9 @@ export class PluginsService
 
     const prebootUiPlugins = this.prebootPluginsSystem.uiPlugins();
     const standardUiPlugins = this.standardPluginsSystem.uiPlugins();
+    const prebootBrowserConfigs = this.generateUiPluginsConfigs(prebootUiPlugins);
+    const standardBrowserConfigs = this.generateUiPluginsConfigs(standardUiPlugins);
+    this.pluginConfigDescriptors.clear();
     return {
       preboot: {
         pluginPaths: this.prebootPluginsSystem.getPlugins().map((plugin) => plugin.path),
@@ -134,7 +137,7 @@ export class PluginsService
         uiPlugins: {
           internal: this.prebootUiPluginInternalInfo,
           public: prebootUiPlugins,
-          browserConfigs: this.generateUiPluginsConfigs(prebootUiPlugins),
+          browserConfigs: prebootBrowserConfigs,
         },
       },
       standard: {
@@ -143,7 +146,7 @@ export class PluginsService
         uiPlugins: {
           internal: this.standardUiPluginInternalInfo,
           public: standardUiPlugins,
-          browserConfigs: this.generateUiPluginsConfigs(standardUiPlugins),
+          browserConfigs: standardBrowserConfigs,
         },
       },
     };
