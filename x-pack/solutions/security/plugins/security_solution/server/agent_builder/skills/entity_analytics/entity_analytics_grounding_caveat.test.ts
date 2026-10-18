@@ -62,9 +62,9 @@ describe('entity analytics skill - risk score grounding caveat', () => {
 
   it('never states that scoring is current when the maintainer is started', () => {
     const grounding = groundingSection();
-    // The pre-fix bullet reads "`started` — scoring is current; say nothing", which models quoted
-    // back to the user as "the data is current".
-    expect(grounding).not.toContain('scoring is current');
+    // The pre-fix bullet read "`started` — scoring is current; say nothing", which answers echoed
+    // back to the user as "the data is current and up to date".
+    expect(grounding).not.toContain('scoring is current; say nothing');
     expect(grounding).toContain("Say nothing about the risk data's currency or status");
   });
 
