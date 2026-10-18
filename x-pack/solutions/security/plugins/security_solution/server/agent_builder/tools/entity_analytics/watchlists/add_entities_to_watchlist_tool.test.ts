@@ -156,7 +156,8 @@ describe('addEntitiesToWatchlistTool', () => {
     it('stays available when the watchlist availability check reports unavailable', async () => {
       mockGetWatchlistToolAvailability.mockResolvedValueOnce({
         status: 'unavailable',
-        reason: 'Entity Store V2 is not enabled (required to sync watchlist membership onto entity records).',
+        reason:
+          'Entity Store V2 is not enabled (required to sync watchlist membership onto entity records).',
       });
       const result = await tool.availability!.handler(
         createToolAvailabilityContext(mocks.mockRequest, 'default')
