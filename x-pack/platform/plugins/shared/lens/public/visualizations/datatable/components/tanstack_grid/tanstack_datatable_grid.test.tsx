@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import axe from 'axe-core';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { EuiDataGridColumn } from '@elastic/eui';
@@ -449,6 +450,28 @@ describe('TanStackDatatableGrid', () => {
       const onRender = jest.fn();
       render(<TanStackDatatableGrid {...defaultProps} rowCount={0} onRender={onRender} />);
       await waitFor(() => expect(onRender).toHaveBeenCalledTimes(1));
+    });
+  });
+
+  describe('accessibility', () => {
+    it('has no axe violations', async () => {
+      const { container } = render(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          sorting={{ columns: [{ id: 'a', direction: 'asc' }], onSort: jest.fn() }}
+          renderFooterCellValue={({ columnId }) => <>{`Footer ${columnId}`}</>}
+          pagination={{
+            pageIndex: 0,
+            pageSize: 10,
+            pageSizeOptions: [10, 20],
+            onChangePage: jest.fn(),
+            onChangeItemsPerPage: jest.fn(),
+          }}
+        />
+      );
+      // Color contrast needs real layout and styles, which jsdom does not provide.
+      const results = await axe.run(container, { rules: { 'color-contrast': { enabled: false } } });
+      expect(results.violations.map(({ id, nodes }) => `${id}: ${nodes.length}`)).toEqual([]);
     });
   });
 
