@@ -10,5 +10,5 @@
 import type { z } from '@kbn/zod';
 import type { createRequestBodySchema, createResponseBodySchema } from './schemas';
 
-export type VegaCreateRequestBody = z.infer<typeof createRequestBodySchema>;
-export type VegaCreateResponseBody = z.infer<typeof createResponseBodySchema>;
+export type VegaCreateRequestBody = z.output<typeof createRequestBodySchema>;
+export type VegaCreateResponseBody = z.output<typeof createResponseBodySchema>;
