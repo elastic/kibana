@@ -6,7 +6,10 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills/tools';
-import type { ToolHandlerContext, ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import type {
+  ToolHandlerContext,
+  ToolHandlerStandardReturn,
+} from '@kbn/agent-builder-server/tools';
 import { alertAnalysisSkill } from './alert_analysis';
 import { alertTriageSkill } from './alert_triage';
 
