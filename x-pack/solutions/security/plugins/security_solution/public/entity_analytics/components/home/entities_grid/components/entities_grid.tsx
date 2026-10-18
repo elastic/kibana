@@ -30,7 +30,8 @@ import { EntityGridRowsContext, RenderEntityGridCell } from './entities_cell_ren
 import type { CellHandlers, EntityGridCellContext, EntityGridRows } from './entities_cell_renderer';
 import { RowActionsCell } from './cells/row_actions_cell';
 import type { RowActions } from './cells/row_actions_cell';
-import { EXPANDER_COLUMN, getGroupRecordsOptions } from './entities_expanded_row';
+import { EXPANDER_COLUMN } from './entities_expanded_row';
+import { getGroupRecordsOptions } from '../hooks/use_resolved_entity';
 import { EntityGridCustomBody } from './entities_grid_custom_body';
 import { getEntityGridToolbarVisibility } from './entities_grid_toolbar';
 import { EntityGridBodyContext, useEntityGridView } from './entities_grid_view_context';

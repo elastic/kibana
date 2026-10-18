@@ -17,7 +17,6 @@ import type {
   EuiThemeComputed,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { escapeStringValue } from '@kbn/esql-utils';
 import { renderEntityCell } from './entities_cell_renderer';
 import type { CellHandlers } from './entities_cell_renderer';
 import { useEntityGridView } from './entities_grid_view_context';
@@ -29,42 +28,15 @@ import {
   gridRowCss,
 } from './entities_grid_styles';
 import { useEntityGridData } from '../hooks/use_entity_grid_data';
-import type { UseEntityGridDataOptions } from '../hooks/use_entity_grid_context';
-import {
-  ENTITY_ID_FIELD,
-  GROUP_SIZE_FIELD,
-  RESOLVED_TO_FIELD,
-  RISK_SCORE_NORM_FIELD,
-  getEntityId,
-  getNumber,
-} from '../common';
+import { getGroupRecordsOptions } from '../hooks/use_resolved_entity';
+import { GROUP_SIZE_FIELD, getEntityId, getNumber } from '../common';
 import type { Row, TimeRange } from '../common';
-
-const MAX_GROUP_RECORDS = 100;
 
 const getTruncatedGroupLabel = (shown: number, total: number) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.getTruncatedGroupLabel', {
     defaultMessage: 'Showing {shown} of {total} records',
     values: { shown, total },
   });
-
-/** A group's records as individual rows; expanding is structural, so the table filters don't apply. */
-export const getGroupRecordsOptions = (
-  entityId: string,
-  timeRange: TimeRange,
-  keepFields: readonly string[]
-): UseEntityGridDataOptions => ({
-  keyScope: 'children',
-  rowsMode: 'individual',
-  entityExpression: `(${ENTITY_ID_FIELD} == ${escapeStringValue(
-    entityId
-  )} OR ${RESOLVED_TO_FIELD} == ${escapeStringValue(entityId)})`,
-  sortField: RISK_SCORE_NORM_FIELD,
-  sortDirection: 'desc',
-  pageSize: MAX_GROUP_RECORDS,
-  timeRange,
-  keepFields,
-});
 
 interface ExpandedEntityRowProps {
   child: Row;
