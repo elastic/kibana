@@ -261,8 +261,8 @@ export async function checkGoldQueries(
         hidden: false,
         type: 'Index' as const,
       })),
-    getColumnsFor: async ({ query } = {}) =>
-      fieldsForQuery(query ?? '') as ReturnType<
+    getColumnsFor: async (ctx) =>
+      fieldsForQuery(ctx?.query ?? '') as ReturnType<
         NonNullable<ValidateQueryCallbacks['getColumnsFor']>
       >,
   };
