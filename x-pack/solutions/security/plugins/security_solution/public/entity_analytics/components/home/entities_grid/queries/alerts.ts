@@ -22,6 +22,7 @@ import {
   SET_UNMAPPED_NULLIFY,
   toList,
   type EntityAggregation,
+  fetchInChunks,
 } from './esql';
 import {
   buildAlertEntityFilter,
@@ -32,7 +33,7 @@ import {
 } from './euid_pipeline';
 import {
   buildRollUpOverAliasesSteps,
-  getPartsByResolvedEntity,
+  getMergedRowsByEntity,
   withEntityAliases,
 } from './resolved_entities';
 import type { ColumnQuerySpec, EnrichedFields, SortPageContext } from './types';
@@ -83,7 +84,7 @@ const buildAlertSortWithValueQuery = (args: QueryArgs, limit: number): string[] 
 ];
 
 /** Every entity in view in one slow query; alerts and entity docs share the FROM since FORK can't nest. */
-const buildAlertSortAllQuery = (args: QueryArgs): string[] => {
+export const buildAlertSortAllQuery = (args: QueryArgs): string[] => {
   const isEntityDoc = `_index == "${args.concreteEntityIndexName}"`;
   const isAlert = `NOT ${isEntityDoc}`;
   const isEntityInView = [
@@ -112,9 +113,13 @@ const buildAlertSortAllQuery = (args: QueryArgs): string[] => {
       ...buildEntityAggregations(ALERT_AGGREGATIONS, `${IN_VIEW_FIELD} IS NULL`),
       ...buildEntityAggregations([IN_VIEW_AGGREGATION]),
     ]),
-    // 4. Aliases count for their resolved entity; then only entities in view, sorted.
+    // 4. Aliases count for their resolved entity; then only entities in view.
     ...buildRollUpOverAliasesSteps(args, [...ALERT_AGGREGATIONS, IN_VIEW_AGGREGATION]),
     `| WHERE ${IN_VIEW_FIELD} == 1`,
+    // 5. Entities without alerts count 0 here, but null in every other read, which sorts them last.
+    `| EVAL ${[...Object.values(SEVERITY_COUNT_FIELDS), ALERT_COUNT_FIELD]
+      .map((field) => `${field} = CASE(${ALERT_COUNT_FIELD} > 0, ${field})`)
+      .join(', ')}`,
     ...buildJoinedPageSteps(args, args.sort.field, ALERT_FIELDS),
   ];
 };
@@ -165,18 +170,14 @@ const fetchAlertFields = async (
   if (!getEntityIds(rows).length) return new Map();
   const entities =
     args.rowsMode === 'resolved' ? await withEntityAliases(rows, args, runQuery) : rows;
-  // A resolved entity and its aliases must share a query to be counted together.
-  const parts = getPartsByResolvedEntity(entities, MAX_ENTITIES_PER_ALERTS_QUERY);
-  const alertColumns = await Promise.all(
-    parts.map((part) =>
-      runQuery([
-        ...buildOpenAlertsOfSteps(args, part),
-        ALERT_COLUMNS_STATS,
-        ...buildRollUpOverAliasesSteps(args, ALERT_AGGREGATIONS),
-      ])
-    )
+  const alertColumns = await fetchInChunks(entities, MAX_ENTITIES_PER_ALERTS_QUERY, (part) =>
+    runQuery([
+      ...buildOpenAlertsOfSteps(args, part),
+      ALERT_COLUMNS_STATS,
+      ...buildRollUpOverAliasesSteps(args, ALERT_AGGREGATIONS),
+    ])
   );
-  return toAlertFields(rows, alertColumns.flat());
+  return toAlertFields(rows, getMergedRowsByEntity(alertColumns.flat(), ALERT_AGGREGATIONS));
 };
 
 /** One alerts query gives both alert count and last alert, so they share one column. */

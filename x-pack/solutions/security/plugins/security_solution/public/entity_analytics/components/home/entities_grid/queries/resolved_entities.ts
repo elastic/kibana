@@ -13,12 +13,12 @@ import {
   RESOLVED_TO_FIELD,
   getEntityId,
   getEntityIds,
-  getString,
 } from '../common';
 import type { QueryArgs, Row } from '../common';
 import {
   ENTITY_TYPE_FILTER,
-  ID_LIST_CHUNK_SIZE,
+  ESQL_MAX_RESULT_ROWS,
+  buildFilterClause,
   buildLookupJoinClause,
   buildRowFieldsSteps,
   buildStatsByEntityClause,
@@ -118,6 +118,8 @@ const buildResolvedEntityValuesQuery = (
   `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IN (${toList(targetIds)})`,
   ...buildResolvedEntityRowSteps(args),
   `| KEEP \`entity.id\`, ${GROUP_VALUE_FIELDS.join(', ')}`,
+  // One row per target; without a LIMIT, ES|QL returns only 1,000.
+  `| LIMIT ${targetIds.length}`,
 ];
 
 /** Rows whose main entity has aliases show the whole group's values. */
@@ -232,39 +234,61 @@ export const withEntityAliases = async (
 ): Promise<readonly Row[]> => {
   const ids = getEntityIds(rows);
   if (!ids.length) return rows;
-  const aliases = await runQuery([
-    `FROM ${getEntityAlias(args.namespace)}`,
-    `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IN (${toList(ids)})`,
-    ...buildRowFieldsSteps(args),
-    `| LIMIT ${ID_LIST_CHUNK_SIZE + 1}`,
-  ]);
-  // The ids and identities of the aliases go into the query of the read, which has a size limit.
-  if (aliases.length > ID_LIST_CHUNK_SIZE) {
-    throw new Error(
-      'The resolved entities of this page have too many aliases to read their columns'
-    );
-  }
+  const aliases: Row[] = [];
+  let page: Row[];
+  // A response holds at most ESQL_MAX_RESULT_ROWS rows, so a large group's aliases come in pages.
+  do {
+    const afterId = aliases.length ? getEntityId(aliases[aliases.length - 1]) : undefined;
+    page = await runQuery([
+      `FROM ${getEntityAlias(args.namespace)}`,
+      `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IN (${toList(ids)})`,
+      ...buildFilterClause(afterId && `${ENTITY_ID_FIELD} > ${escapeStringValue(afterId)}`),
+      `| SORT ${ENTITY_ID_FIELD} ASC`,
+      `| LIMIT ${ESQL_MAX_RESULT_ROWS}`,
+      ...buildRowFieldsSteps(args),
+    ]);
+    aliases.push(...page);
+  } while (page.length === ESQL_MAX_RESULT_ROWS);
   return [...rows, ...aliases];
 };
 
-/** A resolved entity and its aliases must share a query to be aggregated together. */
-export const getPartsByResolvedEntity = (rows: readonly Row[], maxRows: number): Row[][] => {
-  const byResolvedEntity = new Map<string, Row[]>();
-  rows.forEach((row) => {
-    const key = getString(row, RESOLVED_TO_FIELD) ?? getEntityId(row) ?? '';
-    byResolvedEntity.set(key, [...(byResolvedEntity.get(key) ?? []), row]);
+const mergeValues = (
+  aggregation: EntityAggregation['resolvedEntity'],
+  a: unknown,
+  b: unknown
+): unknown => {
+  if (a == null) return b;
+  if (b == null) return a;
+  if (aggregation === 'SUM') return Number(a) + Number(b);
+  // Latest-wins values are numbers, or ISO dates, which compare in order as strings.
+  if (typeof a === 'number' && typeof b === 'number') return Math.max(a, b);
+  return String(a) > String(b) ? a : b;
+};
+
+/**
+ * A group read in several queries comes back as a row per query; this merges them the way
+ * `buildRollUpOverAliasesSteps` merges aliases, so reads can split a group across queries.
+ */
+export const getMergedRowsByEntity = (
+  rows: readonly Row[],
+  aggregations: readonly EntityAggregation[]
+): Row[] => {
+  const mergeRows = (a: Row, b: Row): Row => ({
+    ...a,
+    ...Object.fromEntries(
+      aggregations.map(({ field, resolvedEntity }) => [
+        field,
+        mergeValues(resolvedEntity, a[field], b[field]),
+      ])
+    ),
   });
-  const parts: Row[][] = [];
-  let part: Row[] = [];
-  for (const group of byResolvedEntity.values()) {
-    if (group.length > maxRows) {
-      throw new Error('A resolved entity has too many aliases to read its columns');
+  const byId = new Map<string, Row>();
+  for (const row of rows) {
+    const id = getEntityId(row);
+    if (id != null) {
+      const merged = byId.get(id);
+      byId.set(id, merged ? mergeRows(merged, row) : row);
     }
-    if (part.length + group.length > maxRows) {
-      parts.push(part);
-      part = [];
-    }
-    part = [...part, ...group];
   }
-  return part.length ? [...parts, part] : parts;
+  return [...byId.values()];
 };

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { chunk } from 'lodash';
 import { escapeStringValue } from '@kbn/esql-utils';
 import { ENTITY_ID_FIELD, getEntityId, getEntityIds } from '../common';
 import type { QueryArgs, Row } from '../common';
@@ -23,6 +22,7 @@ import {
   fetchPerIdChunk,
   getSortedPage,
   toList,
+  fetchInChunks,
 } from './esql';
 import type { ColumnQuerySpec, EnrichedFields, SortPageContext } from './types';
 
@@ -93,8 +93,8 @@ const fetchValuesInChunks = async (
   args: QueryArgs,
   ctx: SortPageContext
 ): Promise<EnrichedFields> => {
-  const values = await Promise.all(
-    chunk(rows, VALUES_CHUNK_SIZE).map((rowsChunk) => column.fetchValues(rowsChunk, args, ctx))
+  const values = await fetchInChunks(rows, VALUES_CHUNK_SIZE, (rowsChunk) =>
+    column.fetchValues(rowsChunk, args, ctx)
   );
   return new Map(values.flatMap((chunkValues) => [...chunkValues]));
 };
