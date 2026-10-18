@@ -201,4 +201,90 @@ apiTest.describe('Bulk enable rules by IDs API', { tag: '@local-stateful-classic
       expect(stored.enabled).toBe(false);
     }
   );
+
+  // ---------------------------------------------------------------------------
+  // Step 5.3: managed-rule write gate on the bulk-enable path
+  // Ref: rule-ownership.md "Path by path"
+  // ---------------------------------------------------------------------------
+
+  apiTest(
+    'managed-rule gate: should refuse a managed rule with RULE_IS_MANAGED and leave it disabled',
+    async ({ apiClient, apiServices }) => {
+      const managedRule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'managed-enable' } })
+      );
+      // Disable first so the enable call has actual work to do.
+      await apiServices.alertingV2.rules.bulkDisable({ ids: [managedRule.id] });
+      try {
+        await apiServices.alertingV2.ruleSavedObject.setOwnership(managedRule.id, {
+          managed: true,
+          solution: 'security',
+          domain: 'detection',
+        });
+
+        const response = await apiClient.post(BULK_ENABLE_URL, {
+          headers: writerHeaders,
+          body: { ids: [managedRule.id] },
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.affected_count).toBe(0);
+        expect(response.body.errors).toHaveLength(1);
+        expect(response.body.errors[0]).toMatchObject({
+          id: managedRule.id,
+          error: { code: 'RULE_IS_MANAGED' },
+        });
+        // The rule must still be disabled.
+        const stored = await apiServices.alertingV2.rules.get(managedRule.id);
+        expect(stored.enabled).toBe(false);
+      } finally {
+        // Un-manage so the normal cleanup can delete this rule.
+        await apiServices.alertingV2.ruleSavedObject.setOwnership(managedRule.id, {
+          managed: false,
+        });
+      }
+    }
+  );
+
+  apiTest(
+    'managed-rule gate: should enable unmanaged rules and refuse managed ones in a mixed batch',
+    async ({ apiClient, apiServices }) => {
+      const managedRule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'managed-enable-batch' } })
+      );
+      const unmanagedRule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'unmanaged-enable-batch' } })
+      );
+      await apiServices.alertingV2.rules.bulkDisable({ ids: [managedRule.id, unmanagedRule.id] });
+      try {
+        await apiServices.alertingV2.ruleSavedObject.setOwnership(managedRule.id, {
+          managed: true,
+          solution: 'security',
+          domain: 'detection',
+        });
+
+        const response = await apiClient.post(BULK_ENABLE_URL, {
+          headers: writerHeaders,
+          body: { ids: [managedRule.id, unmanagedRule.id] },
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.affected_count).toBe(1);
+        expect(response.body.errors).toHaveLength(1);
+        expect(response.body.errors[0]).toMatchObject({
+          id: managedRule.id,
+          error: { code: 'RULE_IS_MANAGED' },
+        });
+        const storedManaged = await apiServices.alertingV2.rules.get(managedRule.id);
+        const storedUnmanaged = await apiServices.alertingV2.rules.get(unmanagedRule.id);
+        expect(storedManaged.enabled).toBe(false);
+        expect(storedUnmanaged.enabled).toBe(true);
+      } finally {
+        // Un-manage so the normal cleanup can delete this rule.
+        await apiServices.alertingV2.ruleSavedObject.setOwnership(managedRule.id, {
+          managed: false,
+        });
+      }
+    }
+  );
 });

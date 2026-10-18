@@ -16,6 +16,30 @@ import {
 import { apiKeyPendingInvalidationMappings } from './api_key_pending_invalidation_mappings';
 import { actionPolicyMappings } from './action_policy_mappings';
 import { ruleMappings } from './rule_mappings';
+import { BUILDER_FIELDS_MANIFESTS } from './builder_fields_manifests';
+import { globalFoldedVersions } from '../lib/builder_types/folded_versions';
+import { assertFoldCompleteness } from './assert_builder_fields_manifests';
+
+// ---------------------------------------------------------------------------
+// Fold-completeness check (step B.5)
+//
+// Verify that every version of every builder fields manifest has a fold line
+// in rule_model_versions.ts. assertFoldCompleteness runs at module load, after
+// ruleModelVersions is imported (which triggers fold registration via
+// fromBuilderFieldsManifest).
+//
+// A manifest version that no fold line gives a global number means that stored
+// rules were migrated without the sub-fields those rules should have indexed,
+// which is silently wrong. This check makes the omission a boot-time error.
+//
+// A spread fold (where .changes is spread into a squashed version, as on this
+// POC branch) counts the same as a whole one, because addFoldedManifest() is
+// called inside fromBuilderFieldsManifest() regardless of how its .changes are
+// consumed.
+//
+// Ref: builder-type-registration-redesign.md "Build-time checks"
+// ---------------------------------------------------------------------------
+assertFoldCompleteness(BUILDER_FIELDS_MANIFESTS, globalFoldedVersions);
 import type { ActionPolicySavedObjectAttributes } from './schemas/action_policy_saved_object_attributes';
 import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
 import {
