@@ -84,7 +84,7 @@ export const discoverSessionWarningsSchema = z
   )
   .meta({
     description:
-      'Warnings generated when saved Discover session content cannot be fully represented in the API response.',
+      'Warnings about content omitted from the API response due to conversion or validation errors. The saved session is not modified.',
   });
 
 export const discoverSessionGetResponseSchema = discoverSessionApiResponseSchema.extend({

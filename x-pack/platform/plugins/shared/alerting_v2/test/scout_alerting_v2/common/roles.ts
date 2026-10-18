@@ -248,6 +248,31 @@ export const ALERTING_V2_ACTION_POLICY_FORM_ROLE: KibanaRole = {
   ],
 };
 
+/**
+ * Owner of an action policy whose workflow destination really runs. The dispatcher
+ * schedules the workflow with the API key minted for the policy, so the owner needs:
+ *
+ * - `alerting_v2_action_policies: ['all']` and `alerting_v2_rules: ['read']` — the create
+ *   and upsert routes require `rules.read` on top of `actionPolicies.write`.
+ * - `workflowsManagement: [..., 'workflow_read', 'workflow_execute']` — the dispatcher
+ *   looks the workflow up and starts it as that user.
+ */
+export const ALERTING_V2_ACTION_POLICY_DISPATCH_ROLE: KibanaRole = {
+  elasticsearch: WRITER_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_action_policies: ['all'],
+        alerting_v2_rules: ['read'],
+        workflowsManagement: ['minimal_read', 'workflow_read', 'workflow_execute'],
+        discover: ['all'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
 export const ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE: KibanaRole = {
   elasticsearch: WRITER_ES_PRIVILEGES,
   kibana: [

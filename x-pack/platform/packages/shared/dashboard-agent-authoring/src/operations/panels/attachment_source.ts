@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
 
 /**
@@ -20,7 +19,6 @@ export const attachmentPanelInputSchema = z.object({
     .describe(
       "ID of a visualization attachment in this conversation, as returned by create_visualization. The panel is built from the attachment's latest version, so its renderer (Lens, Vega or custom content) determines the panel type."
     ),
-  grid: panelGridSchema,
 });
 
 export type AttachmentPanelInput = z.infer<typeof attachmentPanelInputSchema>;
