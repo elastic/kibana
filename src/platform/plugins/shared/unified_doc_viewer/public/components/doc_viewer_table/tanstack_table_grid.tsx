@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CSSProperties, FocusEvent, KeyboardEvent } from 'react';
+import type { CSSProperties } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   flexRender,
@@ -26,13 +26,7 @@ import type { IToasts } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { GridPosition } from '@kbn/unified-data-table';
-import {
-  GRID_CELL_SELECTOR,
-  GRID_KEYS,
-  getGridPosition,
-  getNextGridPosition,
-} from '@kbn/unified-data-table';
+import { useGridKeyboardNavigation } from '@kbn/unified-data-table';
 import type { FieldRow } from './field_row';
 import { PinControlCell } from './get_pin_control';
 import { useRestorableRef } from './restorable_state';
@@ -85,8 +79,6 @@ const getInitialNameColumnWidth = (containerWidth: number) =>
     Math.max(Math.round(containerWidth * 0.3), MIN_NAME_COLUMN_WIDTH),
     MAX_NAME_COLUMN_WIDTH
   );
-
-const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 /**
  * TanStack Table + Virtual based fields table, rendered as an alternative to the EuiDataGrid one.
@@ -349,90 +341,46 @@ export const TanStackTableGrid = ({
   const virtualItems = rowVirtualizer.getVirtualItems();
   const ariaRowIndexOffset = headerVisibility ? 2 : 1;
   const colCount = tableColumns.length;
-  const firstRow = headerVisibility ? 1 : ariaRowIndexOffset;
-  const lastRow = Math.max(rows.length + ariaRowIndexOffset - 1, firstRow);
   // aria-rowindex of the first virtualized row.
   const centerStartRow = topRows.length + ariaRowIndexOffset;
 
-  // Roving tabindex: the grid is a single tab stop, arrow keys move between its cells.
-  const [tabStop, setTabStop] = useState<GridPosition>({
-    row: ariaRowIndexOffset,
-    col: showPinColumn ? 2 : 1,
-  });
-  const effectiveTabStop = useMemo<GridPosition>(() => {
-    let row = clamp(tabStop.row, firstRow, lastRow);
-    // A virtualized row that is not rendered cannot be a tab stop, fall back to the first rendered one.
-    if (row >= centerStartRow && virtualItems.length > 0) {
+  const isBodyRowRendered = useCallback(
+    (row: number) => {
+      // Pinned rows are always rendered, and so is everything before the virtualizer measured.
+      if (row < centerStartRow || virtualItems.length === 0) {
+        return true;
+      }
       const index = row - centerStartRow;
-      const firstIndex = virtualItems[0].index;
-      const lastIndex = virtualItems[virtualItems.length - 1].index;
-      if (index < firstIndex || index > lastIndex) {
-        row = centerStartRow + firstIndex;
-      }
-    }
-    return { row, col: clamp(tabStop.col, 1, colCount) };
-  }, [tabStop, firstRow, lastRow, centerStartRow, virtualItems, colCount]);
-
-  const focusCell = useCallback(
-    (position: GridPosition) => {
-      const findCell = () =>
-        scrollRef.current?.querySelector<HTMLElement>(
-          `[role="row"][aria-rowindex="${position.row}"] [aria-colindex="${position.col}"]`
-        );
-      const cell = findCell();
-      if (cell) {
-        cell.focus();
-        return;
-      }
-      // The row is virtualized out, scroll it into view and focus it once it is rendered.
-      const centerIndex = position.row - centerStartRow;
-      if (centerIndex < 0 || centerIndex >= centerRows.length) {
-        return;
-      }
-      virtualizerRef.current?.scrollToIndex(centerIndex);
-      let attempts = 10;
-      const focusWhenRendered = () => {
-        const renderedCell = findCell();
-        if (renderedCell) {
-          renderedCell.focus();
-        } else if (--attempts > 0) {
-          requestAnimationFrame(focusWhenRendered);
-        }
-      };
-      requestAnimationFrame(focusWhenRendered);
+      return index >= virtualItems[0].index && index <= virtualItems[virtualItems.length - 1].index;
     },
-    [centerStartRow, centerRows.length]
+    [centerStartRow, virtualItems]
+  );
+  const scrollToBodyRow = useCallback(
+    (row: number) => virtualizerRef.current?.scrollToIndex(row - centerStartRow),
+    [centerStartRow]
+  );
+  const layout = useMemo(
+    () => ({
+      headerRow: headerVisibility ? 1 : undefined,
+      firstBodyRow: ariaRowIndexOffset,
+      lastBodyRow: rows.length + ariaRowIndexOffset - 1,
+    }),
+    [headerVisibility, ariaRowIndexOffset, rows.length]
   );
 
-  const onFocus = useCallback((event: FocusEvent<HTMLDivElement>) => {
-    const position = getGridPosition(event.target);
-    if (position) {
-      setTabStop((prev) =>
-        prev.row === position.row && prev.col === position.col ? prev : position
-      );
-    }
-  }, []);
-
-  const onKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      // Only while a cell or header itself is focused, not for content inside of it.
-      if (!(event.target instanceof Element) || !event.target.matches(GRID_CELL_SELECTOR)) {
-        return;
-      }
-      if (GRID_KEYS.has(event.key)) {
-        event.stopPropagation();
-      }
-      const position = getGridPosition(event.target);
-      const nextPosition =
-        position && getNextGridPosition(position, event, { firstRow, lastRow, colCount });
-      if (nextPosition) {
-        event.preventDefault();
-        event.stopPropagation();
-        focusCell(nextPosition);
-      }
-    },
-    [firstRow, lastRow, colCount, focusCell]
-  );
+  const {
+    tabStop: effectiveTabStop,
+    onFocus,
+    onKeyDown,
+  } = useGridKeyboardNavigation({
+    gridRef: scrollRef,
+    layout,
+    colCount,
+    initialPosition: { row: ariaRowIndexOffset, col: showPinColumn ? 2 : 1 },
+    isBodyRowRendered,
+    fallbackBodyRow: centerStartRow + (virtualItems[0]?.index ?? 0),
+    scrollToBodyRow,
+  });
 
   return (
     <FieldTableDataContext.Provider value={fieldTableData}>

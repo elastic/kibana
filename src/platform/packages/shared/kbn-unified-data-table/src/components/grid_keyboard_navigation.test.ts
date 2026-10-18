@@ -26,6 +26,32 @@ describe('grid keyboard navigation', () => {
       expect(getNextGridPosition(from, { key, ctrlKey }, bounds)).toEqual(expected);
     });
 
+    it('moves by pages with PageUp and PageDown when a page size is set', () => {
+      const withPages = { ...bounds, lastRow: 50, pageSize: 10 };
+      expect(
+        getNextGridPosition({ row: 5, col: 2 }, { key: 'PageDown', ctrlKey: false }, withPages)
+      ).toEqual({ row: 15, col: 2 });
+      expect(
+        getNextGridPosition({ row: 5, col: 2 }, { key: 'PageUp', ctrlKey: false }, withPages)
+      ).toEqual({ row: 1, col: 2 });
+      expect(
+        getNextGridPosition({ row: 45, col: 2 }, { key: 'PageDown', ctrlKey: false }, withPages)
+      ).toEqual({ row: 50, col: 2 });
+      expect(
+        getNextGridPosition({ row: 5, col: 2 }, { key: 'PageDown', ctrlKey: false }, bounds)
+      ).toBeUndefined();
+    });
+
+    it('leaves Alt combinations to the cells', () => {
+      expect(
+        getNextGridPosition(
+          { row: 2, col: 2 },
+          { key: 'ArrowRight', ctrlKey: false, altKey: true },
+          bounds
+        )
+      ).toBeUndefined();
+    });
+
     it('stays within the grid bounds', () => {
       expect(
         getNextGridPosition({ row: 1, col: 1 }, { key: 'ArrowUp', ctrlKey: false }, bounds)

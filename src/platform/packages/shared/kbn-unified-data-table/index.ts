@@ -57,6 +57,11 @@ export {
 } from './src/components/cell_actions_bubble/cell_actions_bubble';
 export { cellActionsHostStyles } from './src/components/cell_actions_bubble/cell_actions_bubble_styles';
 export type { GridBounds, GridPosition } from './src/components/grid_keyboard_navigation';
+export type {
+  GridNavigationLayout,
+  UseGridKeyboardNavigationParams,
+} from './src/components/use_grid_keyboard_navigation';
+export { useGridKeyboardNavigation } from './src/components/use_grid_keyboard_navigation';
 export {
   GRID_CELL_SELECTOR,
   GRID_KEYS,
