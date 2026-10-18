@@ -14,6 +14,8 @@ import { AttackDiscoveryRubricPrompt } from './attack_discovery_rubric_prompt';
 
 /** Label on a rubric score the judge could not produce. The score is `null`, never 0. */
 export const UNSCORED_LABEL = 'unscored';
+/** Label on a cell the rubric cannot measure because the example carries no expected discoveries. */
+export const NO_REFERENCE_LABEL = 'N/A';
 const DEFAULT_MAX_JUDGE_RETRIES = 2;
 
 export const createAttackDiscoveryRubricEvaluator = ({
@@ -56,9 +58,28 @@ export const createAttackDiscoveryRubricEvaluator = ({
         2
       );
 
+      // An absent annotation is not the same thing as "no discoveries were expected". Resolved
+      // examples can carry criteria but no expected output at all (example 7a17407b of the
+      // attack-discovery dataset in run bk-01a14b73). Defaulting the reference to `[]` made the
+      // judge grade every real submission against a fabricated empty reference: three models
+      // producing on-topic kill-chain discoveries scored 0/N, while an all-empty insight stub
+      // scored 1/Y ("PASS (vacuously - no content to compare)"). Report the cell as unmeasured
+      // instead — the same convention `createAttackDiscoveryCriteriaEvaluator` uses when its
+      // annotation is absent — and keep an explicitly stored empty array as the meaningful
+      // "no discoveries were expected" golden, which is still graded.
+      const expectedDiscoveries = expected?.attackDiscoveries;
+      if (!Array.isArray(expectedDiscoveries)) {
+        return {
+          score: null,
+          label: NO_REFERENCE_LABEL,
+          explanation:
+            'The example carries no expected attack discoveries, so the rubric is not applicable.',
+        };
+      }
+
       const reference = JSON.stringify(
         {
-          attackDiscoveries: expected?.attackDiscoveries ?? [],
+          attackDiscoveries: expectedDiscoveries,
         },
         null,
         2

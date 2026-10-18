@@ -12,7 +12,7 @@ import {
   createAttackDiscoveryRubricEvaluator,
   UNSCORED_LABEL,
 } from './attack_discovery_rubric_evaluator';
-import type { AttackDiscoveryTaskOutput } from '../types';
+import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
 
 jest.mock('@kbn/inference-prompt-utils', () => ({
   executeUntilValid: jest.fn(),
@@ -135,5 +135,79 @@ describe('createAttackDiscoveryRubricEvaluator judge failures', () => {
 
     expect(result).toMatchObject({ score: 0, label: 'task_error' });
     expect(executeUntilValidMock).not.toHaveBeenCalled();
+  });
+});
+
+const discovery = {
+  title: 'macOS stealer: fake installer, osascript password phishing, keychain theft',
+  summaryMarkdown:
+    'Trojanized macOS Setup.app launched a fake password dialog and read login.keychain-db.',
+  detailsMarkdown:
+    '- **Host**: macOS host\n- **Chain**: fake installer → osascript dialog → keychain access',
+  entitySummaryMarkdown: '{{ host.name mac-1 }}',
+  alertIds: ['alert-1'],
+  mitreAttackTactics: ['credential-access'],
+};
+
+const evaluateWith = (expected: AttackDiscoveryDatasetExample['output']) =>
+  createAttackDiscoveryRubricEvaluator({ inferenceClient, log }).evaluate({
+    input: { mode: 'bundledAlerts', anonymizedAlerts: [] },
+    output: {
+      insights: [{ title: 'macOS credential theft', alertIds: ['alert-1'] }],
+    } as unknown as AttackDiscoveryTaskOutput,
+    expected,
+    metadata: {},
+  } as unknown as Parameters<ReturnType<typeof createAttackDiscoveryRubricEvaluator>['evaluate']>[0]);
+
+const referenceHandedToJudge = () =>
+  (executeUntilValidMock.mock.calls[0][0] as unknown as { input: { reference: string } }).input
+    .reference;
+
+describe('createAttackDiscoveryRubricEvaluator reference handling', () => {
+  beforeEach(() => {
+    executeUntilValidMock.mockReset();
+  });
+
+  it('reports the cell as unmeasured (null, N/A) when the example has no expected discoveries', async () => {
+    // Pre-fix this mock is consumed: the evaluator built `{ attackDiscoveries: [] }` and graded
+    // the submission against a fabricated empty reference, which is the reported inversion
+    // (on-topic discoveries 0, an all-empty insight stub 1).
+    executeUntilValidMock.mockResolvedValue(
+      gradeResponse({ verdict: 'N', explanation: 'the expected response is empty' })
+    );
+
+    const result = await evaluateWith({} as AttackDiscoveryDatasetExample['output']);
+
+    expect(result).toEqual({
+      score: null,
+      label: 'N/A',
+      explanation: expect.stringContaining('rubric is not applicable'),
+    });
+    expect(executeUntilValidMock).not.toHaveBeenCalled();
+  });
+
+  it('still grades a stored-empty reference: a submission against "no discoveries expected" scores 0', async () => {
+    executeUntilValidMock.mockResolvedValueOnce(
+      gradeResponse({ verdict: 'N', explanation: 'no discoveries were expected' })
+    );
+
+    await expect(evaluateWith({ attackDiscoveries: [] })).resolves.toMatchObject({
+      score: 0,
+      label: 'N',
+    });
+    expect(executeUntilValidMock).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(referenceHandedToJudge())).toEqual({ attackDiscoveries: [] });
+  });
+
+  it('hands the judge the example’s real discoveries instead of an empty array', async () => {
+    executeUntilValidMock.mockResolvedValueOnce(gradeResponse({ verdict: 'Y', explanation: 'ok' }));
+
+    await expect(
+      evaluateWith({ attackDiscoveries: [discovery] } as AttackDiscoveryDatasetExample['output'])
+    ).resolves.toMatchObject({ score: 1, label: 'Y' });
+
+    const reference = JSON.parse(referenceHandedToJudge());
+    expect(reference.attackDiscoveries).toHaveLength(1);
+    expect(reference.attackDiscoveries[0].title).toBe(discovery.title);
   });
 });
