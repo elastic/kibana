@@ -11,6 +11,10 @@ import { parseInlineStyle, WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_he
 /**
  * Lens datatable cell / header reading helpers.
  */
+// Header content of the data columns (not the control columns), for EuiDataGrid and the TanStack grid.
+const HEADER_CONTENT_SELECTOR =
+  '.euiDataGridHeaderCell__content, [data-test-subj="lnsTanStackGridHeaderContent"]';
+
 export class LensDatatable {
   private readonly dataTable;
 
@@ -66,21 +70,21 @@ export class LensDatatable {
   }
 
   async getCountOfColumns(): Promise<number> {
-    // FTR parity: EuiDataGrid has no per-column test subj for content cells; `.euiDataGridHeaderCell__content`
-    // excludes the leading control column (same selector as FTR `getCountOfColumns`).
-    return this.dataTable.locator('.euiDataGridHeaderCell__content').count();
+    // FTR parity: EuiDataGrid has no per-column test subj for content cells; the header content
+    // selector excludes the leading control column (same as FTR `getCountOfColumns`).
+    return this.dataTable.locator(HEADER_CONTENT_SELECTOR).count();
   }
 
   async getHeaderText(index = 0): Promise<string> {
     // Prefer content nodes — columnheader innerText can include action glyphs like ↵.
     // Index matches getCountOfColumns (control column excluded).
     // FTR parity: EUI class selector until Lens exposes header content test subjects.
-    const headers = this.dataTable.locator('.euiDataGridHeaderCell__content');
+    const headers = this.dataTable.locator(HEADER_CONTENT_SELECTOR);
     await this.page.waitForFunction(
-      ({ minCount }) =>
-        document.querySelectorAll('[data-test-subj="lnsDataTable"] .euiDataGridHeaderCell__content')
-          .length > minCount,
-      { minCount: index },
+      ({ minCount, selector }) =>
+        document.querySelectorAll(`[data-test-subj="lnsDataTable"] :is(${selector})`).length >
+        minCount,
+      { minCount: index, selector: HEADER_CONTENT_SELECTOR },
       // waitForFunction has no Scout default (unlike expect/actionTimeout).
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );

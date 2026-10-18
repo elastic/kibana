@@ -60,6 +60,13 @@ describe('TanStackDatatableGrid', () => {
     ]);
     expect(screen.getByTestId('dataGridHeaderCell-a')).toHaveAttribute('aria-colindex', '1');
     expect(getCell('b1')).toHaveAttribute('aria-colindex', '2');
+    // Same attributes as EuiDataGrid, which tests use to find cells.
+    expect(getCell('b1')).toHaveAttribute('data-gridcell-column-index', '1');
+    expect(getCell('b1')).toHaveAttribute('data-gridcell-visible-row-index', '1');
+    expect(screen.getByTestId('dataGridHeaderCell-b')).toHaveAttribute(
+      'data-gridcell-column-index',
+      '1'
+    );
     expect(getCell('b1').closest('[role="row"]')).toHaveAttribute('aria-rowindex', '3');
   });
 

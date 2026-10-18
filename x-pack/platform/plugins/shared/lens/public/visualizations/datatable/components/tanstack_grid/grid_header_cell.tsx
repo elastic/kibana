@@ -120,11 +120,15 @@ export const GridHeaderCell = memo(
         className="kbnLensTanStackGridHeaderCell"
         data-test-subj={`dataGridHeaderCell-${id}`}
         data-gridcell-column-id={id}
+        data-gridcell-column-index={model.ariaColIndex - 1}
         css={styles.headerCell}
         style={flexStyle}
         {...control?.headerCellProps}
       >
-        <div css={styles.headerContent}>
+        <div
+          css={styles.headerContent}
+          data-test-subj={control ? undefined : 'lnsTanStackGridHeaderContent'}
+        >
           {HeaderCellRender ? <HeaderCellRender /> : column?.display ?? column?.displayAsText ?? id}
         </div>
         {(sortDirection || menuItems.length > 0) && (
@@ -141,14 +145,16 @@ export const GridHeaderCell = memo(
               <EuiPopover
                 isOpen={isMenuOpen}
                 closePopover={closeMenu}
+                display="block"
                 anchorPosition="downRight"
+                offset={7}
                 panelPaddingSize="none"
                 aria-label={columnActionsLabel}
                 button={
                   <EuiToolTip content={columnActionsLabel} disableScreenReaderOutput>
                     <EuiButtonIcon
-                      iconType="arrowDown"
-                      size="xs"
+                      iconType="ellipsis"
+                      iconSize="s"
                       color="text"
                       css={[styles.headerMenuButton, isMenuOpen && styles.headerMenuButtonOpen]}
                       aria-label={columnActionsLabel}

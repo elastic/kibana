@@ -128,7 +128,8 @@ export const getGridStyles = (themeContext: UseEuiTheme, gridStyle: EuiDataGridS
       alignItems: 'center',
       flex: '0 0 auto',
       gap: euiTheme.size.xxs,
-      marginInlineStart: euiTheme.size.xxs,
+      marginInlineStart: 'auto',
+      lineHeight: 0,
     }),
     // The menu button is revealed on hover and focus, it stays visible while its popover is open.
     headerMenuButton: css({

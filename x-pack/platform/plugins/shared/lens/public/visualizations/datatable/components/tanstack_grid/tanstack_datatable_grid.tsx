@@ -168,6 +168,8 @@ const GridCell = memo(
         tabIndex={isTabStop ? 0 : -1}
         data-test-subj="dataGridRowCell"
         data-gridcell-column-id={columnId}
+        // Same attributes as EuiDataGrid cells, which tests use to find cells.
+        data-gridcell-column-index={model.ariaColIndex - 1}
         data-gridcell-visible-row-index={visibleRowIndex}
         onMouseEnter={hasActions ? onActivate : undefined}
         onMouseLeave={hasActions ? onDeactivate : undefined}
