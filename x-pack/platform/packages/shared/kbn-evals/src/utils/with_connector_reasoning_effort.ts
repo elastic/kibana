@@ -8,11 +8,14 @@
 import type {
   BoundChatCompleteAPI,
   BoundInferenceClient,
+  BoundOutputAPI,
   BoundPromptAPI,
   ChatCompletionReasoning,
   ChatCompletionReasoningEffort,
   Prompt,
+  ToolSchema,
   UnboundChatCompleteOptions,
+  UnboundOutputOptions,
   UnboundPromptOptions,
 } from '@kbn/inference-common';
 import type { EvalConnector } from './eval_connector';
@@ -35,6 +38,13 @@ function withReasoningEffort(
     prompt: (<TPrompt extends Prompt, TOptions extends UnboundPromptOptions<TPrompt>>(
       options: { prompt: TPrompt } & TOptions
     ) => client.prompt({ ...options, reasoning: withEffort(options.reasoning) })) as BoundPromptAPI,
+    output: (<
+      TId extends string,
+      TOutputSchema extends ToolSchema | undefined,
+      TStream extends boolean
+    >(
+      options: UnboundOutputOptions<TId, TOutputSchema, TStream>
+    ) => client.output({ ...options, reasoning: withEffort(options.reasoning) })) as BoundOutputAPI,
   };
 }
 

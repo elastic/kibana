@@ -14,11 +14,13 @@ const createClient = () => {
   const bound = {
     chatComplete: jest.fn().mockResolvedValue({ content: 'bound' }),
     prompt: jest.fn().mockResolvedValue({ content: 'bound' }),
+    output: jest.fn().mockResolvedValue({ content: 'bound' }),
     bindTo: jest.fn(),
   };
   const client = {
     chatComplete: jest.fn().mockResolvedValue({ content: 'ok' }),
     prompt: jest.fn().mockResolvedValue({ content: 'ok' }),
+    output: jest.fn().mockResolvedValue({ content: 'ok' }),
     bindTo: jest.fn().mockReturnValue(bound),
   };
   return { client: client as unknown as BoundInferenceClient, mocks: client, bound };
@@ -57,6 +59,18 @@ describe('withConnectorReasoningEffort', () => {
     await withConnectorReasoningEffort(client, 'judge', connectors).prompt({ prompt, input: {} });
 
     expect(mocks.prompt).toHaveBeenCalledWith({ prompt, input: {}, reasoning: { effort: 'low' } });
+  });
+
+  it('asks for the effort on output when the call sets no reasoning', async () => {
+    const { client, mocks } = createClient();
+
+    await withConnectorReasoningEffort(client, 'task', connectors).output({ id: 'o', input: 'hi' });
+
+    expect(mocks.output).toHaveBeenCalledWith({
+      id: 'o',
+      input: 'hi',
+      reasoning: { effort: 'high' },
+    });
   });
 
   it('overrides an effort the call sets with the connector effort', async () => {
@@ -109,10 +123,14 @@ describe('withConnectorReasoningEffort', () => {
       });
       await rebound.chatComplete({ messages });
       await rebound.prompt({ prompt, input: {} });
+      await rebound.output({ id: 'o', input: 'hi' });
 
       expect(mocks.bindTo).toHaveBeenCalledWith({ connectorId: 'judge' });
       expect(bound.chatComplete).toHaveBeenCalledWith({ messages, reasoning: { effort: 'low' } });
       expect(bound.prompt).toHaveBeenCalledWith(
+        expect.objectContaining({ reasoning: { effort: 'low' } })
+      );
+      expect(bound.output).toHaveBeenCalledWith(
         expect.objectContaining({ reasoning: { effort: 'low' } })
       );
     });
