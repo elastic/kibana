@@ -18,6 +18,7 @@ import {
 } from './attack_discovery_generator_skill';
 import { GET_ATTACK_DISCOVERY_STATUS_TOOL_ID } from '../tools/get_attack_discovery_status_tool';
 import { GET_DEFAULT_ESQL_QUERY_TOOL_ID } from '../tools/get_default_esql_query_tool';
+import { RUN_ATTACK_DISCOVERY_TOOL_ID } from '../tools/run_attack_discovery_tool';
 
 const attackDiscoveryGeneratorSkill = createAttackDiscoveryGeneratorSkill({
   getEventLogIndex: async () => 'event-log-*',
@@ -387,6 +388,98 @@ describe('attackDiscoveryGeneratorSkill', () => {
 
     it('still forbids running Missed Detection Closure in the Mode C ground-truth gate', () => {
       expect(attackDiscoveryGeneratorSkill.content).toContain('Never run this pass in Mode C');
+    });
+  });
+
+  describe('audited-route contract (trajectory / cost / forbidden-tools gates)', () => {
+    // The eval suite scores a run against the audited route only: StrictTrajectory
+    // divides the expected path by every non-`load_skill` call the run made, and
+    // CostPerAlert divides every call by the passed alert count. Anything else this
+    // skill mandates is therefore scored as noise, so the content has to name the
+    // required calls and mark the corroboration / report extras optional.
+    //
+    // The expected routes below mirror the eval suite's fixtures:
+    // x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder/src/dataset.ts
+    // (`goldenPathExamples`) and .../src/datasets/dense_profile_live_retrieval.ts.
+    const EXPECTED_ROUTE_BY_LABEL: Array<[string, string[]]> = [
+      [
+        'Live retrieval',
+        [
+          GET_DEFAULT_ESQL_QUERY_TOOL_ID,
+          platformCoreTools.executeEsql,
+          RUN_ATTACK_DISCOVERY_TOOL_ID,
+        ],
+      ],
+      ['Provided alerts', [RUN_ATTACK_DISCOVERY_TOOL_ID]],
+      ['Status-only', [GET_ATTACK_DISCOVERY_STATUS_TOOL_ID]],
+      ['Missing alerts', [GET_DEFAULT_ESQL_QUERY_TOOL_ID, platformCoreTools.executeEsql]],
+    ];
+
+    const TOOL_ID_VOCABULARY = [
+      ...EXPECTED_ROUTE_BY_LABEL.flatMap(([, route]) => route),
+      platformCoreTools.generateEsql,
+      platformCoreTools.getDocumentById,
+      platformCoreTools.search,
+    ];
+
+    const routeFromContent = (label: string): string[] => {
+      const line = attackDiscoveryGeneratorSkill.content
+        .split('\n')
+        .find((candidate) => candidate.startsWith(`- **${label}**`));
+
+      if (line === undefined) return [];
+
+      return [...line.matchAll(/`([^`]+)`/g)]
+        .map((match) => match[1])
+        .filter((token) => TOOL_ID_VOCABULARY.includes(token));
+    };
+
+    it.each(EXPECTED_ROUTE_BY_LABEL)(
+      'documents the %s route the trajectory gate scores',
+      (label, expectedRoute) => {
+        expect(routeFromContent(label)).toEqual(expectedRoute);
+      }
+    );
+
+    it('short-circuits retrieval when the alerts are already provided', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('never re-derive it');
+    });
+
+    it('marks corroboration and graph rendering optional instead of mandated', () => {
+      const optionalSection = attackDiscoveryGeneratorSkill.content.split(
+        '**Optional — skip unless the result can change your next action:**'
+      )[1];
+
+      expect(optionalSection).toBeDefined();
+      expect(optionalSection).toContain('`threat-hunting`');
+      expect(optionalSection).toContain('`entity-analytics`');
+      expect(optionalSection).toContain('`alert-analysis`');
+      expect(optionalSection).toContain('`graph-creation`');
+    });
+
+    it('takes the alert-retrieval-builder skill out of the generator route', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        '`attack-discovery-alert-retrieval-builder`'
+      );
+      expect(attackDiscoveryGeneratorSkill.content).toContain('never load it');
+    });
+
+    it('forbids the ES|QL generation tool as the rewrite path', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        `Do **not** call \`${platformCoreTools.generateEsql}\``
+      );
+    });
+
+    it('forbids re-fetching alerts a query already returned', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        `Do **not** call \`${platformCoreTools.getDocumentById}\``
+      );
+    });
+
+    it('tells the agent to adapt the default query by editing its text', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        '**edit the query text yourself and execute the edited query**'
+      );
     });
   });
 

@@ -70,34 +70,53 @@ Use every skill and tool available to you to reach the best possible conclusion.
 
 The goal is to build a complete, evidence-backed picture before making a determination. A half-investigated chain that "looks bad" is not sufficient. The skill is intentionally non-prescriptive about which tools to call — choose based on what is available at runtime and what the evidence demands.
 
-If you do not yet have a curated alert set, the inline tool \`${GET_DEFAULT_ESQL_QUERY_TOOL_ID}\` returns a programmatically-built, space-specific default ES|QL query — a reasonable starting point you can run, adapt, or replace based on the investigation. Treat it as a convenience, not a recommendation: prefer corroborating with whatever evidence-gathering tools the conversation exposes before relying on a default.`;
+**This is not a licence to call every tool.** The audited run needs a small, fixed set of calls — see **Required Calls** below — and every other call has to earn its place: it lengthens the turn and is counted against the run's per-alert cost. When the evidence you already hold answers the question, make no further calls.
 
-const CROSS_SKILL_CORROBORATION = `## Cross-Skill Corroboration
+If you do not yet have a curated alert set, the inline tool \`${GET_DEFAULT_ESQL_QUERY_TOOL_ID}\` returns a programmatically-built, space-specific default ES|QL query. **Run it as returned** via \`${platformCoreTools.executeEsql}\`. When the investigation warrants a wider window, a different severity filter, or a specific host/user scope, **edit the query text yourself and execute the edited query** — that is the supported adaptation path, and it costs the same single \`execute_esql\` call. Do **not** call \`${platformCoreTools.generateEsql}\` to rewrite the default query, or to invent another query for evidence a query already returned: generated ES|QL is the dominant source of failed and speculative calls, and the pre-built query is already space-aware. Do **not** call \`${platformCoreTools.getDocumentById}\` for alerts an \`execute_esql\` or \`${platformCoreTools.search}\` call already returned — its result is a strict subset of what you already hold.`;
 
-You run inside an Agent Builder conversation that exposes other skills. Before finalizing, **enumerate the skills available** in this conversation and load the ones relevant to corroborating attack chains. At a minimum:
+const CROSS_SKILL_CORROBORATION = `## Cross-Skill Corroboration (optional, on demand)
 
-- **Load and use the \`threat-hunting\` skill** to pivot from alert indicators into raw telemetry — process trees, network connections, file modifications, and authentication events that confirm or refute each candidate chain.
-- **Load and use the \`entity-analytics\` skill** to pull host and user context (risk scores, asset criticality, entity profiles, behavioral baselines). High-risk entities or extreme-criticality assets strengthen a chain's credibility; low-risk entities with no prior history may indicate a false positive.
-- **Load and use the \`alert-analysis\` skill** to drill into the individual alerts that compose each candidate chain — which detection rule fired, the alert's reason and key fields, its severity / risk score, and whether it reflects genuine malicious activity or a benign / false-positive trigger. Use it to confirm each chain is built on sound alerts before reporting it.
-- **Load the \`graph-creation\` skill** so you can render an attack-flow graph for each discovery (see Output Requirements).
+You run inside an Agent Builder conversation that exposes other skills. **Enumerate the skills available** in this conversation, then load and use one only when its result can change your next action — see **Required Calls** above. A skill load that only confirms evidence you already hold does not change the answer; it lengthens the turn and is counted against the run's per-alert cost. When the alerts were provided, or you retrieved and read them yourself in this turn, the required route is already complete and corroboration is not needed:
 
-Do not stop there: use **every** other skill available that can gather supporting evidence (for example detection-rule context, threat intelligence, knowledge bases, or any customer-registered hunting / threat-intel skills). Choose based on what is exposed at runtime and what the evidence demands — the goal is a complete, evidence-backed picture before you finalize the report.
+- **\`threat-hunting\`** — pivot from alert indicators into raw telemetry (process trees, network connections, file modifications, authentication events) when the alert documents you hold leave a chain's causality open.
+- **\`entity-analytics\`** — pull host and user context (risk scores, asset criticality, entity profiles, behavioral baselines) when that context decides a keep/remove call. High-risk entities or extreme-criticality assets strengthen a chain's credibility; low-risk entities with no prior history may indicate a false positive.
+- **\`alert-analysis\`** — drill into the individual alerts that compose each candidate chain — which detection rule fired, the alert's reason and key fields, its severity / risk score, and whether it reflects genuine malicious activity or a benign / false-positive trigger — when those alert documents are not already in the conversation.
+- **\`graph-creation\`** — load it **only** when you are going to render an attack-flow graph as an attachment; when the chain's flow is already plain from the evidence you hold, use the text fallback in Output Requirements instead of spending a call on the graph.
 
-This cross-skill corroboration is **best-effort**: when a relevant skill is not available, skip it gracefully and never delay the audited pipeline waiting on a tool you do not have.`;
+Do not stop there: when corroboration is warranted, prefer whichever other skill available gathers the supporting evidence fastest (for example detection-rule context, threat intelligence, knowledge bases, or any customer-registered hunting / threat-intel skills) — choose based on what is exposed at runtime and what the evidence demands.
+
+This cross-skill corroboration is **best-effort**: when a relevant skill is not available, skip it gracefully and never delay the audited pipeline waiting on a tool you do not have.
+
+**Out of scope.** The \`attack-discovery-alert-retrieval-builder\` skill is not part of this skill's route — never load it. Retrieval is either already provided or done through the default ES|QL query above, and the retrieval builder only adds a skill load plus a parallel retrieval path the audited run does not need.`;
+
+const REQUIRED_CALLS = `## Required Calls (and what is optional)
+
+The audited run needs a small, fixed set of tool calls. Take the one route that matches the conversation, make exactly those calls in that order, and treat everything else as optional:
+
+- **Live retrieval** (the question asks you to find the alerts): \`${GET_DEFAULT_ESQL_QUERY_TOOL_ID}\` → \`${platformCoreTools.executeEsql}\` → \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` — three calls, then the report.
+- **Provided alerts** (the conversation, an attachment, or the user already hands you the alert set): \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` alone. The set you were given **is** the task input — never re-derive it, and never corroborate it with further retrieval.
+- **Status-only** (the user asks about an \`execution_uuid\`): \`${GET_ATTACK_DISCOVERY_STATUS_TOOL_ID}\` alone.
+- **Missing alerts** (live retrieval comes back empty): stop after \`${GET_DEFAULT_ESQL_QUERY_TOOL_ID}\` → \`${platformCoreTools.executeEsql}\`, broaden the window in the query text at most once, and report that nothing matched. Never invent alerts, and never keep issuing ad-hoc queries for the same evidence.
+
+**Optional — skip unless the result can change your next action:**
+
+- **Corroboration skill loads and telemetry pivots.** The \`threat-hunting\`, \`entity-analytics\` and \`alert-analysis\` skills and \`${platformCoreTools.search}\` raw-log pivots are extras, not part of the route. When the conversation already carries the evidence — the alerts were provided, or you retrieved and read them yourself in this turn — skip them and go straight to the pipeline.
+- **Graph rendering.** The \`graph-creation\` skill plus \`attachments.add\` are optional per report; when graph rendering is not exposed here, or the chain's flow is already plain from the evidence you hold, use the text fallback instead.
+- **Re-corroboration after the pipeline returns.** The pipeline's result is the source of truth — do not spend calls re-deriving it before you render the report.`;
 
 const UPFRONT_PIPELINE_PATTERN = `## Upfront Pipeline Pattern
 
 Before invoking \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\`, do all evidence-gathering work up front so the audited pipeline runs on alerts you have already retrieved and corroborated. The recommended shape is:
 
-1. **Retrieve alerts upstream.** Start from the space-aware default ES|QL query — call \`${GET_DEFAULT_ESQL_QUERY_TOOL_ID}\` to obtain the baseline query, then run it via \`execute_esql\` to fetch the alert documents. The default is space-specific, uses the correct anonymization fields for this deployment, and is bounded to the last 24 hours by design — treat it as a sensible **baseline**. Adapt it (wider time window, different severity filter, focus on specific hosts/users) when the investigation warrants it. Garbage in, garbage out: if the baseline returns nothing, broaden the window before falling back to bare retrieval modes.
+1. **Retrieve alerts upstream.** Start from the space-aware default ES|QL query — call \`${GET_DEFAULT_ESQL_QUERY_TOOL_ID}\` to obtain the baseline query, then run it via \`execute_esql\` to fetch the alert documents. The default is space-specific, uses the correct anonymization fields for this deployment, and is bounded to the last 24 hours by design — treat it as a sensible **baseline**. Adapt it (wider time window, different severity filter, focus on specific hosts/users) by **editing the query text yourself and executing the edited query** — never by calling the ES|QL generation tool for a rewrite. Garbage in, garbage out: if the baseline returns nothing, broaden the window in the query text and run that once more; if it is still empty, report that nothing matched rather than issuing further queries.
 
-2. **Corroborate with at least one additional tool when available (best-effort).** Pick whichever signal is fastest and most relevant to the alerts you retrieved — entity-context lookups, knowledge-base searches, threat-intel checks against IoCs, related-case search, or a complementary ES|QL slice (e.g. closed alerts on the same hosts in a wider window). Skip this step only when no corroborating tool is available; do **not** delay AD waiting on a tool you do not have. The audited pipeline is the priority.
+2. **Corroborate with at least one additional tool when available (best-effort).** Pick whichever signal is fastest and most relevant to the alerts you retrieved — entity-context lookups, knowledge-base searches, threat-intel checks against IoCs, related-case search, or a complementary ES|QL slice (e.g. closed alerts on the same hosts in a wider window). This step is an **extra, not part of the route**: skip it when the conversation already carries the evidence — the alerts were provided, or you retrieved and read them in this turn — and skip it when no corroborating tool is available; do **not** delay AD waiting on a tool you do not have. The audited pipeline is the priority.
 
 3. **Hand alerts plus corroboration insight to AD.** Invoke \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` in **\`provided\`** mode (\`alerts\` populated from your upstream retrieval) and pass your corroboration findings via \`additional_context\`. The audited pipeline runs on the alerts you actually examined, with the LLM seeing the extra signal you gathered.
 
 4. **Time budget.** Cap the upfront work — alert retrieval plus corroboration — at roughly the same budget AD itself uses (~90 seconds). The total turn (upfront + AD's sync soft deadline) should comfortably fit within the Agent Builder request timeout. If a corroborating tool is slow, skip it rather than starve AD.
 
-This is the **preferred** pattern. The fallback retrieval modes on \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` (\`esql\`, \`custom_only\`, \`custom_query\`) remain valid when upstream retrieval was not possible — they let the pipeline do its own retrieval inside the Anonymization Boundary — but they sacrifice the corroboration loop, so prefer the upfront pattern whenever possible.`;
+This is the **preferred** pattern. Its required calls are the live-retrieval row of **Required Calls** — three calls — and step 2 adds only what the evidence demands. The fallback retrieval modes on \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` (\`esql\`, \`custom_only\`, \`custom_query\`) remain valid when upstream retrieval was not possible — they let the pipeline do its own retrieval inside the Anonymization Boundary — but they sacrifice the corroboration loop, so prefer the upfront pattern whenever possible. When the alerts are already provided, skip this pattern entirely and go straight to \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\`.`;
 
 const KEY_PRINCIPLES = `## Key Principles
 
@@ -254,10 +273,10 @@ For each discovery in \`attack_discoveries\`, in order, emit a markdown section 
 - A level-3 heading with the discovery title, e.g. \`### {title}\`.
 - A short context line naming the primary host and user involved, e.g. \`**Host:** SRVWIN02 — **User:** Administrator\`. Resolve real values from your investigation evidence — do **not** copy raw \`{{ field uuid }}\` tokens into the markdown prose.
 - A **Narrative** paragraph paraphrased from \`summaryMarkdown\` and \`detailsMarkdown\` that reads like the story of the attack as it played out. Plain English, no double-brace tokens.
-- A **Raw Log Corroboration** checklist: the concrete raw-telemetry evidence you gathered (best-effort, via the \`threat-hunting\` skill / \`platform.core.search\` against \`logs-*\`) that confirms the chain — process trees, C2 connections, lateral-movement commands, authentication events, etc. If you could not corroborate part of the chain against raw logs, **say so explicitly** rather than dropping the chain.
+- A **Raw Log Corroboration** checklist: the concrete raw-telemetry evidence that confirms the chain — process trees, C2 connections, lateral-movement commands, authentication events, etc. Reuse the evidence already in this conversation (the alert documents you retrieved, plus any corroboration you already ran) rather than issuing new \`${platformCoreTools.search}\` calls for it: corroboration is **best-effort and optional**, so when the raw logs are not already in hand, **say so explicitly** rather than fetching more — an un-corroborated chain is reported, not dropped.
 - An **Evidence Table** with columns such as Time, Host, Process/Source, Command/Action, Parent, and Evidence Type — one row per key event.
 - An **Attack Chain** line listing the MITRE ATT&CK tactics for the chain (the same values that appear in \`mitreAttackTactics\`), comma-separated. Example: \`**Attack Chain:** Initial Access, Execution, Defense Evasion, Impact\`.
-- An **Attack Flow Graph**: use the \`graph-creation\` skill / \`attachments.add\` (type \`graph\`) to build a node-and-edge graph of the chain, then embed the returned token, e.g. \`<render_attachment id="..." />\`. If graph rendering is unavailable, include a short text fallback describing the flow.
+- An **Attack Flow Graph**: when the \`graph-creation\` skill is exposed in this conversation, use it with \`attachments.add\` (type \`graph\`) to build a node-and-edge graph of the chain, then embed the returned token, e.g. \`<render_attachment id="..." />\`. When it is not exposed, or the chain's flow is already plain from the evidence you hold, render the short **text fallback** describing the flow instead — the fallback is a complete answer, so do not spend a tool call loading a skill only to produce the graph.
 - A deep link to the Attack Discovery page so the user can view the persisted, fully-rendered chain: \`[Open in Attack Discovery](/app/security/attack_discovery)\`.
 
 #### 4. Overall Assessment
@@ -344,7 +363,9 @@ const MISSED_DETECTION_CLOSURE = `## Missed Detection Closure (mandatory post-re
 
 After rendering the Attack Discovery Report and emitting the insights JSON, perform a coverage-gap pass. This pass is **mandatory** on every path that renders a report — both the Mode A conversational path and the **Mode B status-resume path** (\`${GET_ATTACK_DISCOVERY_STATUS_TOOL_ID}\` returned \`status: succeeded\`). Closing detection gaps is the highest-leverage outcome of the investigation — do not skip it.
 
-On the **Mode B status-resume path you did not run your own upstream investigation** (you only polled status and rendered the persisted discoveries), so begin this pass with a best-effort, lightweight raw-log corroboration of the persisted chains — pivot from each chain's events into raw telemetry (via the \`threat-hunting\` skill / \`platform.core.search\` against \`logs-*\`) to surface malicious actions the curated alert set did not catch. Keep it bounded — do not pull large raw telemetry. On the Mode A path, reuse the corroboration you already gathered during your investigation instead of repeating it.
+On the **Mode B status-resume path you did not run your own upstream investigation** (you only polled status and rendered the persisted discoveries), so begin this pass with a best-effort, lightweight raw-log corroboration of the persisted chains — pivot from each chain's events into raw telemetry (via the \`threat-hunting\` skill / \`${platformCoreTools.search}\` against \`logs-*\`) to surface malicious actions the curated alert set did not catch. Keep it bounded — do not pull large raw telemetry. On the Mode A path, reuse the corroboration you already gathered during your investigation instead of repeating it.
+
+**This pass makes no calls of its own on the Mode A path.** Everything it needs is already in the conversation: drive the gap analysis and the proposed queries from the evidence you hold, and do not issue new retrieval calls to check a gap that your existing evidence already answers. The raw-log pivot above is reserved for the Mode B path, where no upstream investigation ran.
 
 ### Procedure
 
@@ -394,6 +415,7 @@ The set of valid MITRE ATT&CK tactic values is: ${MITRE_ATTACK_TACTICS.join(', '
 const SKILL_CONTENT = [
   ANALYST_HEADER,
   TOOL_USAGE_GUIDANCE,
+  REQUIRED_CALLS,
   CROSS_SKILL_CORROBORATION,
   UPFRONT_PIPELINE_PATTERN,
   KEY_PRINCIPLES,
