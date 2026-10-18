@@ -16,7 +16,7 @@ export function getNodeDownloadInfo(config: Config, platform: Platform) {
   const arch = platform.getNodeArch();
   let variants = ['default'];
   if (platform.isLinux()) {
-    if (platform.isServerless()) {
+    if (platform.isServerless() || platform.isCloud()) {
       variants.push('pointer-compression');
     } else {
       variants.push('glibc-217');

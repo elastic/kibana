@@ -22,6 +22,7 @@ import type {
 import {
   ExecutionStatus,
   isTerminalStatus,
+  isWorkflowStepTriggered,
   toWorkflowExecutionEngineModel,
   WorkflowRepository,
 } from '@kbn/workflows';
@@ -85,6 +86,7 @@ import {
   resolveInheritedWorkflowIdentity,
   WORKFLOW_SERVICE_ACCOUNT_TYPE,
 } from './service_account_execution';
+import { resolveWorkflowWorkloads } from './service_account_workload_resolver';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
 import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
@@ -260,13 +262,25 @@ export class WorkflowsExecutionEnginePlugin
     core.security.serviceAccounts.registerWorkloadType({
       type: WORKFLOW_SERVICE_ACCOUNT_TYPE,
       name: 'Workflow',
+      resolveWorkloads: async (workloads, options) => {
+        const [coreStart] = await core.getStartServices();
+        return resolveWorkflowWorkloads(
+          new WorkflowRepository({
+            esClient: coreStart.elasticsearch.client.asInternalUser,
+            logger,
+          }),
+          workloads,
+          options
+        );
+      },
     });
 
     initializeLogsRepositoryDataStream(core.dataStreams);
     initializeTriggerEventsDataStream(core.dataStreams);
 
     this.dataClientBundle = createDataClientBundle({
-      source: 'system_index',
+      source: config.storage.source,
+      dataRetention: config.storage.dataRetention,
       logger: this.logger,
     });
     void this.dataClientBundle.initSetup(core);
@@ -317,6 +331,7 @@ export class WorkflowsExecutionEnginePlugin
               const queueDelayMs = scheduledAt ? now - scheduledAt : null;
 
               const { default: apm } = await import('elastic-apm-node');
+
               const currentTransaction = apm.currentTransaction;
               if (currentTransaction) {
                 if (queueDelayMs !== null) {
@@ -586,9 +601,10 @@ export class WorkflowsExecutionEnginePlugin
                     spaceId
                   );
                   if (!execution || isTerminalStatus(execution.status)) {
-                    await new WorkflowTaskManager(
-                      pluginsStart.taskManager
-                    ).removeParkedImmediateResume(workflowRunId);
+                    await new WorkflowTaskManager(pluginsStart.taskManager).removeTasksForExecution(
+                      workflowRunId,
+                      { exceptTaskId: taskInstance.id }
+                    );
                     return;
                   }
                   isUserInteractive =
@@ -1422,7 +1438,7 @@ export class WorkflowsExecutionEnginePlugin
       // Child executions (triggered by a workflow step) must always be scheduled in their own task,
       // never run inline in the parent's task. Otherwise the parent's runtime is blocked until the
       // child becomes idle, and cancel/timeout on the parent cannot take effect until then.
-      const isChildExecution = (context.triggeredBy as string | undefined) === 'workflow-step';
+      const isChildExecution = isWorkflowStepTriggered(context.triggeredBy as string | undefined);
 
       if (!isRunningInTaskManager && !request) {
         throw new Error('Workflows cannot be executed without the user context');

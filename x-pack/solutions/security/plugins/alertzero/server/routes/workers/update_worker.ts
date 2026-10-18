@@ -28,20 +28,20 @@ const WORKER_ENABLE_BLOCKED_MESSAGES: Record<
   WorkerEnableBlockedReason,
   (displayName: string) => string
 > = {
-  alertAnalysisWorkflowDisabled: () =>
-    i18n.translate('xpack.alertzero.alertTriageAlertAnalysisWorkflowDisabledErrorMessage', {
+  huntSupplyPrerequisitesUnmet: () =>
+    i18n.translate('xpack.alertzero.huntSupplyPrerequisitesUnmetErrorMessage', {
       defaultMessage:
-        'Alert Triage requires the Alert Analysis workflow, which is disabled in this deployment. Enable it before turning on the Alert Triage Worker.',
+        'Hunt Watch needs Machine Learning embedding support for threat intel report supply. Finish ML and threat intel setup, then try again.',
     }),
-  alertAnalysisRuntimeDisabled: () =>
-    i18n.translate('xpack.alertzero.alertTriageAlertAnalysisRuntimeDisabledErrorMessage', {
+  huntSupplyReportsIndexUnmanaged: () =>
+    i18n.translate('xpack.alertzero.huntSupplyReportsIndexUnmanagedErrorMessage', {
       defaultMessage:
-        'Alert Triage requires alert analysis to be turned on for this space. Go to Alert analysis settings, then turn on the Alert Triage Worker.',
+        'The threat reports index (.kibana-threat-reports) exists without its template. Back up any reports you want to keep (see the Elasticsearch reindex API at https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex), then delete the index and restart Kibana to recreate it, then try turning on Hunt Watch again.',
     }),
-  ruleAttachmentUnavailable: () =>
-    i18n.translate('xpack.alertzero.alertTriageRuleAttachmentUnavailableErrorMessage', {
+  huntSupplyNotInstalled: () =>
+    i18n.translate('xpack.alertzero.huntSupplyNotInstalledErrorMessage', {
       defaultMessage:
-        'Alert Triage cannot be turned on because detection rules cannot be connected to it right now. Make sure Security is available in this space and try again.',
+        'Threat intel supply workflows are not installed in this deployment yet. Wait until setup finishes (Machine Learning embeddings available), then try turning on Hunt Watch again. If this persists after a restart, contact an administrator.',
     }),
   noModel: (displayName) =>
     i18n.translate('xpack.alertzero.workerEnableNoModelErrorMessage', {

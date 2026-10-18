@@ -10,8 +10,12 @@ import { skippedResult } from '../evaluator_utils';
 import {
   dashboardSkillActivatedEvaluator,
   dashboardSkillNotActivatedEvaluator,
+  getSkillReadPaths,
   visualizationSkillWithoutDashboardEvaluator,
 } from '../skill_selection_evaluators';
+
+/** Suffix of the enhance referenced-content file. */
+const ENHANCE_GUIDANCE_FILE = 'dashboards/enhance.md';
 
 export const DASHBOARD_ROUTING_EVALUATOR_NAME = 'Dashboard Skill Routing';
 
@@ -32,6 +36,23 @@ export const dashboardRoutingEvaluator: DashboardAgentEvaluator = {
       return skippedResult('No gold route.');
     }
     const result = await EVALUATOR_BY_ROUTE[route].evaluate(params);
-    return { ...result, metadata: { ...result.metadata, route } };
+    if (!params.expected?.enhance || result.score !== 1) {
+      return { ...result, metadata: { ...result.metadata, route } };
+    }
+
+    const skillReadPaths = getSkillReadPaths(params.output);
+    const readEnhanceGuidance = skillReadPaths.some((path) => path.includes(ENHANCE_GUIDANCE_FILE));
+    if (readEnhanceGuidance) {
+      return { ...result, metadata: { ...result.metadata, route, readEnhanceGuidance } };
+    }
+
+    return {
+      score: 0,
+      label: 'FAIL',
+      explanation: `Dashboards skill loaded, but ${ENHANCE_GUIDANCE_FILE} was not read. Paths: ${
+        skillReadPaths.join(', ') || 'none'
+      }`,
+      metadata: { ...result.metadata, route, skillReadPaths, readEnhanceGuidance },
+    };
   },
 };
