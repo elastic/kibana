@@ -81,9 +81,7 @@ export const InputSchema = z.object({
   template_variables: z
     .record(z.string(), z.unknown())
     .optional()
-    .describe(
-      'Variables for template_id. Ignored when the connector does not require a template.'
-    ),
+    .describe('Variables for template_id. Ignored when the connector does not require a template.'),
   /**
    * Optional attachments to provide to the agent.
    */
