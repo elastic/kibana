@@ -124,7 +124,9 @@ async function installEnrichPolicies({
   esClient: EsClient;
   log: ToolingLog;
 }): Promise<void> {
-  const goldPolicies = enrichPolicyNamesInGoldQueries(goldQueriesFromDataset(esqlGenerationDataset));
+  const goldPolicies = enrichPolicyNamesInGoldQueries(
+    goldQueriesFromDataset(esqlGenerationDataset)
+  );
   const installedPolicies = new Set(esqlFixtureEnrichPolicies.map((fixture) => fixture.policyName));
 
   const missing = goldPolicies.filter((name) => !installedPolicies.has(name));
@@ -146,10 +148,9 @@ async function installEnrichPolicies({
         wait_for_completion: true,
       });
     } catch (err) {
-      throw new Error(
-        `[esql-regression] failed to install enrich policy "${fixture.policyName}"`,
-        { cause: err instanceof Error ? err : new Error(String(err)) }
-      );
+      throw new Error(`[esql-regression] failed to install enrich policy "${fixture.policyName}"`, {
+        cause: err instanceof Error ? err : new Error(String(err)),
+      });
     }
   }
 

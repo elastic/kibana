@@ -80,7 +80,9 @@ const asEsClient = (esClient: FakeEsClient) =>
 
 describe('setupEsqlFixtures', () => {
   it('installs every enrich policy the dataset gold queries reference', () => {
-    const goldPolicies = enrichPolicyNamesInGoldQueries(goldQueriesFromDataset(esqlGenerationDataset));
+    const goldPolicies = enrichPolicyNamesInGoldQueries(
+      goldQueriesFromDataset(esqlGenerationDataset)
+    );
 
     // Guard the guard: the two ENRICH golds are what makes this test meaningful.
     expect(goldPolicies).toEqual(expect.arrayContaining(['win_events', 'ldap_lookup_new']));
@@ -129,7 +131,9 @@ describe('setupEsqlFixtures', () => {
 
     await setupEsqlFixtures({ esClient: asEsClient(esClient), log: makeLog() });
 
-    const probes = esClient.esql.query.mock.calls.map((call) => (call[0] as { query: string }).query);
+    const probes = esClient.esql.query.mock.calls.map(
+      (call) => (call[0] as { query: string }).query
+    );
     for (const fixture of esqlFixtureEnrichPolicies) {
       expect(probes).toContain(fixture.probeQuery);
       // The probe is only meaningful if it actually exercises the policy.
@@ -148,9 +152,9 @@ describe('setupEsqlFixtures', () => {
       },
     });
 
-    await expect(setupEsqlFixtures({ esClient: asEsClient(esClient), log: makeLog() })).rejects.toThrow(
-      /win_events/
-    );
+    await expect(
+      setupEsqlFixtures({ esClient: asEsClient(esClient), log: makeLog() })
+    ).rejects.toThrow(/win_events/);
   });
 
   it('fails fast when a gold references an enrich policy no fixture installs', async () => {
