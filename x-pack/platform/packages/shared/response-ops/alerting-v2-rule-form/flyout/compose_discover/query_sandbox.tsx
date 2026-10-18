@@ -42,7 +42,7 @@ import { CpsPicker } from './cps_picker';
 import { useResolveTimeField } from './use_resolve_time_field';
 import { extractFromSourceQuery } from './extract_from_source_query';
 import { MIN_EDITOR_HEIGHT, MAX_EDITOR_HEIGHT, ESQL_CODE_EDITOR_OPTIONS } from './constants';
-import { addPrettifyAction } from './esql_prettify_action';
+import { addPrettifyAction, PRETTIFY_ACTION_ID } from './esql_prettify_action';
 import { useQuerySandboxStyles } from './query_sandbox.styles';
 import { useEditorHeightResize } from './use_editor_height_resize';
 
@@ -150,7 +150,6 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     dateRangeItemCss,
     controlsRowCss,
     timeFieldSelectCss,
-    esqlMenuItemCss,
     loadingCenterCss,
     resultsSectionCss,
   } = useQuerySandboxStyles(euiThemeContext);
@@ -326,14 +325,37 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     [rows]
   );
 
+  // The editor the menu's Prettify button acts on: the single editor, or the base tab's editor
+  // (which remounts on every tab switch, so it re-registers here). Alert/recovery fragments can't
+  // be prettified on their own, so the button is hidden there.
+  const [prettifyEditor, setPrettifyEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(
+    null
+  );
+  const canPrettify =
+    prettifyEditor !== null && (!hasTabs || (tabProps?.activeTab === 'base' && !tabProps.readOnly));
+
+  const handlePrettifyQuery = useCallback(() => {
+    prettifyEditor?.getAction(PRETTIFY_ACTION_ID)?.run();
+  }, [prettifyEditor]);
+
   const handleSingleEditorMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       if (!isReadOnly) {
         addPrettifyAction(editor);
+        setPrettifyEditor(editor);
       }
       onSingleEditorMount?.(editor);
     },
     [isReadOnly, onSingleEditorMount]
+  );
+
+  const onBaseEditorMount = tabProps?.onBaseEditorMount;
+  const handleBaseEditorMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      setPrettifyEditor(editor);
+      onBaseEditorMount?.(editor);
+    },
+    [onBaseEditorMount]
   );
 
   const editorContent =
@@ -350,7 +372,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         tabs={tabProps.tabs}
         onAlertEditorMount={tabProps.onAlertEditorMount}
         onRecoveryEditorMount={tabProps.onRecoveryEditorMount}
-        onBaseEditorMount={tabProps.onBaseEditorMount}
+        onBaseEditorMount={handleBaseEditorMount}
         readOnly={tabProps.readOnly}
         hideTabBar
       />
@@ -409,31 +431,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
           wrap
           css={controlsRowCss}
         >
-          <EuiFlexItem grow={false} css={searchItemCss}>
-            <EuiToolTip
-              display="block"
-              content={i18n.translate(
-                'xpack.alertingV2.composeDiscover.querySandbox.searchTooltip',
-                {
-                  defaultMessage: 'Search ({shortcut})',
-                  values: { shortcut: RUN_SHORTCUT_LABEL },
-                }
-              )}
-            >
-              <EuiButton
-                size="s"
-                fullWidth
-                onClick={run}
-                isLoading={isLoading}
-                data-test-subj="querySandboxRunQuery"
-              >
-                {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.searchButtonLabel', {
-                  defaultMessage: 'Search',
-                })}
-              </EuiButton>
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} css={dateRangeItemCss}>
+          <EuiFlexItem grow css={dateRangeItemCss}>
             <AlertingDateRangePicker
               from={dateRange.dateStart}
               to={dateRange.dateEnd}
@@ -456,6 +454,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
               onChange={(e) => onTimeFieldChange?.(e.target.value)}
               disabled={!onTimeFieldChange}
               compressed
+              fullWidth
               prepend={i18n.translate(
                 'xpack.alertingV2.composeDiscover.querySandbox.timeFieldPrependLabel',
                 { defaultMessage: 'Time field' }
@@ -463,15 +462,50 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
               data-test-subj="querySandboxTimeField"
             />
           </EuiFlexItem>
-          {EsqlMenu && EsqlEditorActionsProvider && (
-            <EuiFlexItem grow={false} css={esqlMenuItemCss}>
-              <EsqlEditorActionsProvider>
-                {canWireRecommendedQueries && EsqlEditorActionsRegister && (
-                  <EsqlEditorActionsRegister
-                    currentQuery={query}
-                    submitEsqlQuery={handleSubmitRecommendedQuery}
-                  />
-                )}
+          <EuiFlexItem grow={false} css={searchItemCss}>
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.alertingV2.composeDiscover.querySandbox.searchTooltip',
+                {
+                  defaultMessage: 'Search ({shortcut})',
+                  values: { shortcut: RUN_SHORTCUT_LABEL },
+                }
+              )}
+            >
+              <EuiButton
+                size="s"
+                onClick={run}
+                isLoading={isLoading}
+                data-test-subj="querySandboxRunQuery"
+              >
+                {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.searchButtonLabel', {
+                  defaultMessage: 'Search',
+                })}
+              </EuiButton>
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <div css={editorBodyCss} style={{ height: editorHeight }}>
+          {editorContent}
+        </div>
+        {EsqlMenu && EsqlEditorActionsProvider && (
+          <>
+            <EuiSpacer size="xs" />
+            <EsqlEditorActionsProvider>
+              {canWireRecommendedQueries && EsqlEditorActionsRegister && (
+                <EsqlEditorActionsRegister
+                  currentQuery={query}
+                  submitEsqlQuery={handleSubmitRecommendedQuery}
+                />
+              )}
+              <EuiFlexGroup
+                justifyContent="flexEnd"
+                alignItems="center"
+                gutterSize="xs"
+                responsive={false}
+                wrap
+              >
                 {/* Visor (KQL / NL search) is owned by the full editor, which the sandbox
                     doesn't mount — hide the button so it isn't shown enabled but inert.
                     Recommended queries are hidden unless wired, so picks are always applicable. */}
@@ -480,15 +514,12 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
                   hideVisor
                   hideRecommendedQueries={!canWireRecommendedQueries}
                   docsFlyoutSize="s"
+                  onPrettifyQuery={canPrettify ? handlePrettifyQuery : undefined}
                 />
-              </EsqlEditorActionsProvider>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <div css={editorBodyCss} style={{ height: editorHeight }}>
-          {editorContent}
-        </div>
+              </EuiFlexGroup>
+            </EsqlEditorActionsProvider>
+          </>
+        )}
         <button
           type="button"
           role="slider"

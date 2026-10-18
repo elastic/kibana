@@ -6,7 +6,6 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
@@ -57,7 +56,6 @@ const esqlField = z
 
 const visPanelRequestBaseSchema = z.object({
   source: z.literal('request'),
-  grid: panelGridSchema,
   query: z
     .string()
     .max(2048)

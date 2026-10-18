@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import { deepFreeze } from '@kbn/std';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import {
   entitySchema,
   EntityDefinitionManagedBy,
@@ -15,17 +15,8 @@ import {
   type EntityDefinitionWithoutId,
 } from '../../../../common/domain/definitions/entity_schema';
 
-/**
- * Registry type names: lowercase alphanumeric segments separated by `.`, `_` or `-`, starting with
- * a letter. Separators cannot lead, trail or repeat. Examples: `host`, `k8s.pod`, `aws_s3-bucket`.
- * Length is capped separately by `ENTITY_DEFINITION_TYPE_MAX_LENGTH`.
- */
-export const ENTITY_DEFINITION_TYPE_PATTERN = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
-export const ENTITY_DEFINITION_TYPE_MAX_LENGTH = 64;
-
-/** A definition as accepted by the registry: the built-in shape with a wider type name and a required `managedBy`. */
-export type RegistrableEntityDefinition = Omit<EntityDefinitionWithoutId, 'type' | 'managedBy'> & {
-  type: EntityDefinitionType;
+/** A definition as accepted by the registry: any valid definition with a required `managedBy`. */
+export type RegistrableEntityDefinition = Omit<EntityDefinitionWithoutId, 'managedBy'> & {
   managedBy: EntityDefinitionManagedBy;
 };
 
@@ -40,13 +31,10 @@ export interface RegistrationRejection {
 }
 
 // Strict so unknown keys (notably a stale `id` from a full definition) are rejected, not kept.
+// The base schema validates the type name, so a bad name fails here with the rule it broke.
 const registrableEntityDefinitionSchema = entitySchema
   .omit({ id: true })
-  .extend({
-    // Any string here; the name pattern is checked separately.
-    type: z.string(),
-    managedBy: EntityDefinitionManagedBy,
-  })
+  .extend({ managedBy: EntityDefinitionManagedBy })
   .strict();
 
 const formatSchemaIssues = (error: z.ZodError): string =>
@@ -194,12 +182,6 @@ export class EntityDefinitionRegistry {
     const { type, managedBy } = parsed.data;
     if (managedBy.kind !== 'plugin') {
       return 'only plugin-managed definitions can be registered at setup';
-    }
-    if (type.length > ENTITY_DEFINITION_TYPE_MAX_LENGTH) {
-      return `type name exceeds the maximum length of ${ENTITY_DEFINITION_TYPE_MAX_LENGTH}`;
-    }
-    if (!ENTITY_DEFINITION_TYPE_PATTERN.test(type)) {
-      return `type name does not match pattern ${ENTITY_DEFINITION_TYPE_PATTERN}`;
     }
     if (this.entries.has(type)) {
       return 'type name is already registered';

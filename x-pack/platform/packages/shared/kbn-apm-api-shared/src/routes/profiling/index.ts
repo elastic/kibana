@@ -9,6 +9,8 @@ import { servicesFunctionsRoute } from './functions';
 import { profilingStatusRoute } from './status';
 import { profilingHostsFlamegraphRoute } from './hosts_flamegraph';
 import { profilingHostsFunctionsRoute } from './hosts_functions';
+import { servicesProfilingSchemasRoute } from './schemas';
+import { profilingHostsSchemasRoute } from './hosts_schemas';
 
 export const profilingRouteDefinitions = {
   flamegraph: servicesFlamegraphRoute,
@@ -16,6 +18,8 @@ export const profilingRouteDefinitions = {
   status: profilingStatusRoute,
   hostsFlamegraph: profilingHostsFlamegraphRoute,
   hostsFunctions: profilingHostsFunctionsRoute,
+  schemas: servicesProfilingSchemasRoute,
+  hostsSchemas: profilingHostsSchemasRoute,
 };
 
 export type { ServicesFlamegraphResponse } from './flamegraph';
@@ -23,3 +27,5 @@ export type { ServicesFunctionsResponse } from './functions';
 export type { ProfilingStatusResponse } from './status';
 export type { ProfilingHostsFlamegraphResponse } from './hosts_flamegraph';
 export type { ProfilingHostsFunctionsResponse } from './hosts_functions';
+export type { ServicesProfilingSchemasResponse } from './schemas';
+export type { ProfilingHostsSchemasResponse } from './hosts_schemas';
