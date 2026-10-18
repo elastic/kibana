@@ -18,6 +18,7 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
+
 // Only `buildElasticsearchRequest` is stubbed — `getElasticsearchConnectors` stays real so the
 // output normalization is driven by the actual connector contracts.
 jest.mock('@kbn/workflows', () => ({
@@ -63,6 +64,7 @@ describe('ElasticsearchActionStepImpl', () => {
       stepExecutionId: 'test-step-exec-id',
       node: {},
       abortController: new AbortController(),
+      getStepTimeoutMs: jest.fn(),
     } as unknown as jest.Mocked<StepExecutionRuntime>;
 
     mockWorkflowRuntime = {
@@ -319,13 +321,14 @@ describe('ElasticsearchActionStepImpl', () => {
       headers: { 'X-Custom-Header': 'value' },
     };
 
-    const runRawStep = async (timeout?: string) => {
+    const runRawStep = async (stepTimeoutMs?: number) => {
+      mockStepExecutionRuntime.getStepTimeoutMs.mockReturnValue(stepTimeoutMs);
       const step = {
         id: 'raw_step',
         type: 'elasticsearch.request',
         stepId: 'raw_step',
         stepType: 'elasticsearch.request',
-        configuration: { name: 'raw_step', type: 'elasticsearch.request', with: stepWith, timeout },
+        configuration: { name: 'raw_step', type: 'elasticsearch.request', with: stepWith },
       } as unknown as ElasticsearchGraphNode;
 
       const esStep = new ElasticsearchActionStepImpl(
@@ -340,7 +343,7 @@ describe('ElasticsearchActionStepImpl', () => {
     };
 
     it('should use the step timeout as the request timeout, with the abort signal and headers', async () => {
-      const options = await runRawStep('10m');
+      const options = await runRawStep(600_000);
 
       expect(options).toEqual(
         expect.objectContaining({
@@ -349,16 +352,6 @@ describe('ElasticsearchActionStepImpl', () => {
           headers: { 'X-Custom-Header': 'value' },
         })
       );
-    });
-
-    it('should render a templated step timeout', async () => {
-      mockContextManager.renderValueAccordingToContext.mockImplementation((value: unknown) =>
-        value === '{{ inputs.timeout }}' ? '2m' : value
-      );
-
-      const options = await runRawStep('{{ inputs.timeout }}');
-
-      expect(options.requestTimeout).toBe(120_000);
     });
 
     it('should keep the client request timeout when the step has no timeout', async () => {

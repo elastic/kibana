@@ -17,7 +17,6 @@ import type { ElasticsearchGraphNode } from '@kbn/workflows/graph/types';
 import { formatBytes, ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
-import { parseDuration, renderDuration } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -193,25 +192,13 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
     }
   }
 
-  private getStepTimeoutMs(): number | undefined {
-    const { timeout } = this.node.configuration;
-    if (!timeout) {
-      return undefined;
-    }
-    return parseDuration(
-      renderDuration(timeout, (value) =>
-        this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(value)
-      )
-    );
-  }
-
   private async executeElasticsearchRequest(
     esClient: ElasticsearchClient,
     stepType: string,
     params: any
   ): Promise<any> {
     const maxResponseBytes = this.getMaxResponseBytes();
-    const stepTimeoutMs = this.getStepTimeoutMs();
+    const stepTimeoutMs = this.stepExecutionRuntime.getStepTimeoutMs();
     // Without a step timeout, Kibana's `elasticsearch.requestTimeout` applies.
     const transportOptions = {
       signal: this.stepExecutionRuntime.abortController.signal,
