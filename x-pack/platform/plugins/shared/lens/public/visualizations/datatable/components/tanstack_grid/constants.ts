@@ -9,3 +9,5 @@ export const MIN_COLUMN_WIDTH = 100;
 export const OVERSCAN = 10;
 export const ESTIMATED_ROW_HEIGHT = 34;
 export const COLUMN_WIDTH_VAR_PREFIX = '--lnsTanStackGridColumnWidth';
+/** Rows moved by PageUp and PageDown. */
+export const PAGE_NAVIGATION_ROWS = 10;

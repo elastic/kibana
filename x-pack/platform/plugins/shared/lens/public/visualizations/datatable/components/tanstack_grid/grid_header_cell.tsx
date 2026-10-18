@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CSSProperties, PointerEvent } from 'react';
+import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react';
 import React, { memo, useCallback, useState } from 'react';
 import type { EuiDataGridSorting, EuiListGroupItemProps } from '@elastic/eui';
 import {
@@ -15,12 +15,16 @@ import {
   EuiListGroupItem,
   EuiPopover,
   EuiToolTip,
+  keys,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { GridStyles } from './styles';
 import type { GridColumnModel } from './types';
 
 type SortDirection = 'asc' | 'desc';
+
+/** Pixels a column is resized by with the keyboard. */
+const KEYBOARD_RESIZE_STEP = 10;
 
 const getMenuItems = (
   model: GridColumnModel,
@@ -70,6 +74,7 @@ interface GridHeaderCellProps {
   sorting?: EuiDataGridSorting;
   isResizing: boolean;
   onResizeStart: (model: GridColumnModel, event: PointerEvent<HTMLDivElement>) => void;
+  onResizeBy: (model: GridColumnModel, header: HTMLElement, delta: number) => void;
 }
 
 export const GridHeaderCell = memo(
@@ -82,6 +87,7 @@ export const GridHeaderCell = memo(
     sorting,
     isResizing,
     onResizeStart,
+    onResizeBy,
   }: GridHeaderCellProps) => {
     const { id, column, control } = model;
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -109,6 +115,30 @@ export const GridHeaderCell = memo(
     const HeaderCellRender = control?.headerCellRender;
     const isResizable = model.kind === 'data' && column?.isResizable !== false;
 
+    // Keyboard shortcuts of a focused header, like EuiDataGrid: Enter or F2 opens the menu, and Alt
+    // with the left or right arrow resizes the column.
+    const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.target !== event.currentTarget) {
+        return;
+      }
+      if ((event.key === keys.ENTER || event.key === keys.F2) && menuItems.length > 0) {
+        event.preventDefault();
+        setIsMenuOpen(true);
+        return;
+      }
+      if (
+        isResizable &&
+        event.altKey &&
+        (event.key === keys.ARROW_LEFT || event.key === keys.ARROW_RIGHT)
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        const isRtl = getComputedStyle(event.currentTarget).direction === 'rtl';
+        const direction = (event.key === keys.ARROW_RIGHT ? 1 : -1) * (isRtl ? -1 : 1);
+        onResizeBy(model, event.currentTarget, direction * KEYBOARD_RESIZE_STEP);
+      }
+    };
+
     return (
       <div
         role="columnheader"
@@ -117,12 +147,14 @@ export const GridHeaderCell = memo(
           sortDirection ? (sortDirection === 'asc' ? 'ascending' : 'descending') : undefined
         }
         tabIndex={isTabStop ? 0 : -1}
+        aria-keyshortcuts={isResizable ? 'Alt+ArrowLeft Alt+ArrowRight' : undefined}
         className="kbnLensTanStackGridHeaderCell"
         data-test-subj={`dataGridHeaderCell-${id}`}
         data-gridcell-column-id={id}
         data-gridcell-column-index={model.ariaColIndex - 1}
         css={styles.headerCell}
         style={flexStyle}
+        onKeyDown={onKeyDown}
         {...control?.headerCellProps}
       >
         <div
@@ -144,6 +176,7 @@ export const GridHeaderCell = memo(
             {menuItems.length > 0 && (
               <EuiPopover
                 isOpen={isMenuOpen}
+                ownFocus
                 closePopover={closeMenu}
                 display="block"
                 anchorPosition="downRight"
@@ -169,7 +202,7 @@ export const GridHeaderCell = memo(
                 <EuiListGroup data-test-subj={`dataGridHeaderCellActionGroup-${id}`}>
                   {menuItems.map(({ onClick, ...item }, index) => (
                     <EuiListGroupItem
-                      key={index}
+                      key={`${index}-${String(item.label)}`}
                       {...item}
                       onClick={(event) => {
                         onClick?.(event);

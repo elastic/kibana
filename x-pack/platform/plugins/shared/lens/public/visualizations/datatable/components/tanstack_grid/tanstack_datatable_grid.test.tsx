@@ -523,6 +523,116 @@ describe('TanStackDatatableGrid', () => {
     });
   });
 
+  describe('keyboard accessibility of the header', () => {
+    const sorting = { columns: [], onSort: jest.fn() };
+
+    it('opens the menu with Enter or F2 on the focused header', async () => {
+      render(<TanStackDatatableGrid {...defaultProps} sorting={sorting} />);
+      screen.getByTestId('dataGridHeaderCell-a').focus();
+      await userEvent.keyboard('{Enter}');
+      expect(await screen.findByTestId('dataGridHeaderCellActionGroup-a')).toBeInTheDocument();
+    });
+
+    it('resizes a column with Alt and the arrow keys', async () => {
+      const onColumnResize = jest.fn();
+      render(<TanStackDatatableGrid {...defaultProps} onColumnResize={onColumnResize} />);
+      const header = screen.getByTestId('dataGridHeaderCell-a');
+      jest.spyOn(header, 'getBoundingClientRect').mockReturnValue({ width: 200 } as DOMRect);
+      expect(header).toHaveAttribute('aria-keyshortcuts', 'Alt+ArrowLeft Alt+ArrowRight');
+
+      header.focus();
+      await userEvent.keyboard('{Alt>}{ArrowRight}{/Alt}');
+      expect(onColumnResize).toHaveBeenLastCalledWith({ columnId: 'a', width: 210 });
+      await userEvent.keyboard('{Alt>}{ArrowLeft}{/Alt}');
+      expect(onColumnResize).toHaveBeenLastCalledWith({ columnId: 'a', width: 190 });
+      // Alt with the arrow keys does not move the focus.
+      expect(header).toHaveFocus();
+    });
+
+    it('does not resize columns that are not resizable', async () => {
+      const onColumnResize = jest.fn();
+      render(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          columns={[{ id: 'a', displayAsText: 'Column A', isResizable: false }]}
+          onColumnResize={onColumnResize}
+        />
+      );
+      const header = screen.getByTestId('dataGridHeaderCell-a');
+      expect(header).not.toHaveAttribute('aria-keyshortcuts');
+      header.focus();
+      await userEvent.keyboard('{Alt>}{ArrowRight}{/Alt}');
+      expect(onColumnResize).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('footer navigation and pagination semantics', () => {
+    it('makes the footer reachable with the keyboard', async () => {
+      render(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          renderFooterCellValue={({ columnId }) => <>{`Footer ${columnId}`}</>}
+        />
+      );
+      getCell('a2').focus();
+      await userEvent.keyboard('{ArrowDown}');
+      expect(screen.getByTestId('dataGridFooterCell-a')).toHaveFocus();
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId('dataGridFooterCell-b')).toHaveFocus();
+      await userEvent.keyboard('{ArrowUp}');
+      expect(getCell('b2')).toHaveFocus();
+    });
+
+    it('moves by pages with PageUp and PageDown', async () => {
+      const manyRows = Array.from({ length: 40 }, (_, i) => i);
+      render(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          rowCount={manyRows.length}
+          renderCellValue={({ rowIndex, columnId }) => <>{`${columnId}${rowIndex}`}</>}
+        />
+      );
+      screen.getByText('a0').closest<HTMLElement>('[role="gridcell"]')!.focus();
+      await userEvent.keyboard('{PageDown}');
+      expect(screen.getByText('a10').closest('[role="gridcell"]')).toHaveFocus();
+      await userEvent.keyboard('{PageUp}');
+      expect(screen.getByText('a0').closest('[role="gridcell"]')).toHaveFocus();
+    });
+
+    it('links the pagination to the grid', () => {
+      const { container } = render(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          pagination={{
+            pageIndex: 0,
+            pageSize: 10,
+            onChangePage: jest.fn(),
+            onChangeItemsPerPage: jest.fn(),
+          }}
+        />
+      );
+      const grid = screen.getByRole('grid');
+      expect(grid.id).not.toBe('');
+      expect(container.querySelector(`[aria-controls="${grid.id}"]`)).toBeInTheDocument();
+    });
+
+    it('shows the content of truncated cells as a title when it does not fit', async () => {
+      render(<TanStackDatatableGrid {...defaultProps} />);
+      const content = getCell('a0').querySelector<HTMLElement>(
+        '[data-test-subj="lnsTanStackGridCellContent"]'
+      )!;
+      jest.spyOn(content, 'scrollWidth', 'get').mockReturnValue(300);
+      jest.spyOn(content, 'clientWidth', 'get').mockReturnValue(100);
+      await userEvent.hover(content);
+      expect(content).toHaveAttribute('title', 'a0');
+
+      jest.spyOn(content, 'scrollWidth', 'get').mockReturnValue(50);
+      await userEvent.unhover(content);
+      await userEvent.hover(content);
+      expect(content).toHaveAttribute('title', '');
+    });
+  });
+
   describe('keyboard navigation', () => {
     it('exposes a single tab stop', () => {
       render(<TanStackDatatableGrid {...defaultProps} />);
