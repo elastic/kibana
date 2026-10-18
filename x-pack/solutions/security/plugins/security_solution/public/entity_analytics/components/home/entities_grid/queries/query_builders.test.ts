@@ -357,21 +357,22 @@ describe('entities grid query builders', () => {
         steps.join('\n').includes('resolved_to IN ("host:big")');
 
       it('reads the alerts of a resolved group in parts and adds them up', async () => {
-        const runQuery = jest.fn(async (steps: readonly string[]) =>
-          isAliasRead(steps)
-            ? groupRows
-            : [
-                {
-                  'entity.id': GROUP,
-                  alert_count: 2,
-                  alert_critical: 1,
-                  alert_high: 1,
-                  alert_medium: 0,
-                  alert_low: 0,
-                  last_seen_alert: `2026-10-18T1${runQuery.mock.calls.length}:00:00.000Z`,
-                },
-              ]
-        );
+        let alertQueries = 0;
+        const runQuery = jest.fn(async (steps: readonly string[]): Promise<Row[]> => {
+          if (isAliasRead(steps)) return groupRows;
+          alertQueries += 1;
+          return [
+            {
+              'entity.id': GROUP,
+              alert_count: 2,
+              alert_critical: 1,
+              alert_high: 1,
+              alert_medium: 0,
+              alert_low: 0,
+              last_seen_alert: `2026-10-18T1${alertQueries}:00:00.000Z`,
+            },
+          ];
+        });
 
         const fields = await alertsEnricher.fetch(
           [{ 'entity.id': GROUP, 'entity.EngineMetadata.Type': 'host', 'host.id': 'big' }],
@@ -387,7 +388,7 @@ describe('entities grid query builders', () => {
           alert_high: 2,
           alert_medium: 0,
           alert_low: 0,
-          last_seen_alert: '2026-10-18T13:00:00.000Z',
+          last_seen_alert: '2026-10-18T12:00:00.000Z',
         });
       });
 
