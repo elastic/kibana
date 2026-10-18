@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { TanStackDatatableGrid } from './tanstack_datatable_grid';
@@ -301,6 +301,130 @@ describe('TanStackDatatableGrid', () => {
       expect(screen.getByText('a11').closest('[role="gridcell"]')).toHaveFocus();
       await userEvent.keyboard('{ArrowUp}{ArrowUp}');
       expect(screen.getByTestId('dataGridHeaderCell-a')).toHaveFocus();
+    });
+  });
+
+  describe('cell actions and expansion', () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    const onFilter = jest.fn();
+    const actionColumns: EuiDataGridColumn[] = [
+      {
+        id: 'a',
+        displayAsText: 'Column A',
+        cellActions: [
+          ({ rowIndex, Component }) => (
+            <Component
+              data-test-subj="filterFor"
+              aria-label={`Filter for ${rows[rowIndex].a}`}
+              iconType="plusCircle"
+              onClick={() => onFilter(rowIndex)}
+            >
+              Filter for
+            </Component>
+          ),
+          ({ Component }) => (
+            <Component
+              data-test-subj="disabledAction"
+              iconType="minusCircle"
+              disabled
+              title="Not filterable"
+            >
+              Filter out
+            </Component>
+          ),
+        ],
+      },
+      { id: 'b', displayAsText: 'Column B' },
+    ];
+
+    beforeEach(() => onFilter.mockClear());
+
+    // The cell is focused instead of hovered: jsdom reports the pointer leaving the cell when the
+    // open bubble moves to a portal, whereas focus keeps the cell active.
+    const openBubble = async (cell: HTMLElement) => {
+      cell.focus();
+      await user.click(await within(cell).findByTestId('tanStackCellActionsButton'));
+    };
+
+    it('only mounts the cell actions for the hovered cell and runs them', async () => {
+      render(<TanStackDatatableGrid {...defaultProps} columns={actionColumns} />);
+      expect(screen.queryAllByTestId('tanStackCellActionsButton')).toHaveLength(0);
+
+      await openBubble(getCell('a1'));
+      // jsdom has no layout, so the open bubble is rendered in a portal.
+      await user.click(await screen.findByTestId('filterFor'));
+      expect(onFilter).toHaveBeenCalledWith(1);
+    });
+
+    it('renders the actions in the popover footer and closes it after an action', async () => {
+      render(<TanStackDatatableGrid {...defaultProps} columns={actionColumns} />);
+      await openBubble(getCell('a0'));
+      await user.click(await screen.findByTestId('euiDataGridCellExpandButton'));
+
+      const popover = await screen.findByTestId('euiDataGridExpansionPopover');
+      expect(within(popover).getByText('a0')).toBeInTheDocument();
+      expect(within(popover).getByTestId('disabledAction')).toBeDisabled();
+
+      await user.click(within(popover).getByTestId('filterFor'));
+      expect(onFilter).toHaveBeenCalledWith(0);
+      expect(screen.queryByTestId('euiDataGridExpansionPopover')).not.toBeInTheDocument();
+    });
+
+    it('renders the cell value as expanded in the popover and supports a custom popover', async () => {
+      const Value = ({ columnId, rowIndex, isExpanded, isDetails }: TanStackCellValueProps) => (
+        <>{`${columnId}${rowIndex}${isExpanded ? '-expanded' : ''}${
+          isDetails ? '-details' : ''
+        }`}</>
+      );
+      render(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          columns={actionColumns}
+          renderCellValue={Value}
+          renderCellPopover={({ children, cellActions }) => (
+            <div data-test-subj="customPopover">
+              {children}
+              {cellActions}
+            </div>
+          )}
+        />
+      );
+      getCell('b1').focus();
+      await user.keyboard('{Enter}');
+      const popover = await screen.findByTestId('customPopover');
+      expect(popover).toHaveTextContent('b1-expanded-details');
+    });
+
+    it('does not offer expansion for columns that are not expandable', async () => {
+      render(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          columns={[{ id: 'a', displayAsText: 'Column A', isExpandable: false }, columns[1]]}
+        />
+      );
+      await user.hover(getCell('a0'));
+      expect(
+        within(getCell('a0')).queryByTestId('tanStackCellActionsButton')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('footer', () => {
+    it('renders a summary row when a footer renderer is provided', () => {
+      render(
+        <TanStackDatatableGrid
+          {...defaultProps}
+          renderFooterCellValue={({ columnId }) => (columnId === 'a' ? <>Total: 3</> : null)}
+        />
+      );
+      expect(screen.getByTestId('dataGridFooterCell-a')).toHaveTextContent('Total: 3');
+      expect(screen.getByTestId('dataGridFooterCell-b')).toBeEmptyDOMElement();
+      expect(screen.getByRole('grid')).toHaveAttribute('aria-rowcount', '5');
+    });
+
+    it('does not render a footer without a footer renderer', () => {
+      render(<TanStackDatatableGrid {...defaultProps} />);
+      expect(screen.queryByTestId('dataGridFooterCell-a')).not.toBeInTheDocument();
     });
   });
 

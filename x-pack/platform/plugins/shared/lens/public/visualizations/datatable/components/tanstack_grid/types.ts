@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
@@ -48,6 +48,21 @@ export interface TanStackDatatableGridProps {
   pagination?: TanStackGridPagination;
   /** Called once when a user finishes resizing a column. */
   onColumnResize?: (data: { columnId: string; width: number }) => void;
+  /** Rendered in a summary row below the data, when provided. */
+  renderFooterCellValue?: ComponentType<{ columnId: string; colIndex: number }>;
+  /** Replaces the content of the popover opened by expanding a cell. */
+  renderCellPopover?: ComponentType<TanStackCellPopoverProps>;
+}
+
+export interface TanStackCellPopoverProps {
+  rowIndex: number;
+  colIndex: number;
+  columnId: string;
+  schema?: string | null;
+  /** The cell value, rendered for the popover. */
+  children: ReactNode;
+  /** The cell actions of the column as buttons, undefined when the column has none. */
+  cellActions?: ReactNode;
 }
 
 export interface TanStackGridPagination {

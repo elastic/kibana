@@ -8,10 +8,12 @@
 import type { CSSProperties, FocusEvent, KeyboardEvent, PointerEvent } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiDataGridSetCellProps } from '@elastic/eui';
-import { EuiTablePagination, useEuiTheme, useResizeObserver } from '@elastic/eui';
+import { EuiTablePagination, keys, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { useVirtualizer, type Virtualizer } from '@tanstack/react-virtual';
 import type { GridPosition } from '@kbn/unified-data-table';
 import {
+  CellActionsBubble,
+  cellActionsHostStyles,
   GRID_CELL_SELECTOR,
   GRID_KEYS,
   getGridPosition,
@@ -23,6 +25,13 @@ import {
   MIN_COLUMN_WIDTH,
   OVERSCAN,
 } from './constants';
+import {
+  CellExpansionPopover,
+  DefaultCellPopover,
+  getBubbleActions,
+  renderPopoverFooter,
+  useCellExpansion,
+} from './grid_cell_actions';
 import { GridHeaderCell } from './grid_header_cell';
 import type { GridStyles } from './styles';
 import { getGridStyles } from './styles';
@@ -56,11 +65,14 @@ interface GridCellProps {
   rowIndex: number;
   visibleRowIndex: number;
   renderCellValue: TanStackDatatableGridProps['renderCellValue'];
+  renderCellPopover?: TanStackDatatableGridProps['renderCellPopover'];
   styles: GridStyles;
   contentCss: GridStyles['contentSingleLine'];
   flexStyle: CSSProperties;
   isTabStop: boolean;
 }
+
+const noop = () => {};
 
 const GridCell = memo(
   ({
@@ -68,38 +80,104 @@ const GridCell = memo(
     rowIndex,
     visibleRowIndex,
     renderCellValue: RenderCellValue,
+    renderCellPopover: RenderCellPopover = DefaultCellPopover,
     styles,
     contentCss,
     flexStyle,
     isTabStop,
   }: GridCellProps) => {
     const [cellProps, setCellProps] = useState<EuiDataGridSetCellProps>({});
-    const { isExpandable, ...htmlProps } = cellProps;
+    const [isActive, setIsActive] = useState(false);
+    const cellRef = useRef<HTMLDivElement>(null);
+    const expansion = useCellExpansion(cellRef);
+    const { anchorRect, open: openExpansion, close: closeExpansion } = expansion;
+    const { isExpandable: isExpandableByCell, ...htmlProps } = cellProps;
     const { id: columnId, kind, control, column } = model;
+
+    const colIndex = model.dataColIndex ?? model.ariaColIndex - 1;
+    const cellActions = column?.cellActions;
+    const isExpandable =
+      kind === 'data' && column?.isExpandable !== false && isExpandableByCell !== false;
+    const hasActions = kind === 'data' && ((cellActions?.length ?? 0) > 0 || isExpandable);
+    const isExpanded = anchorRect !== undefined;
 
     const valueProps: TanStackCellValueProps = {
       rowIndex,
       visibleRowIndex,
-      colIndex: model.dataColIndex ?? model.ariaColIndex - 1,
+      colIndex,
       columnId,
       schema: column?.schema,
       setCellProps,
-      isExpandable: false,
+      isExpandable,
       isExpanded: false,
       isDetails: false,
     };
     const CellRenderer = control ? control.rowCellRender : RenderCellValue;
 
+    const onActivate = useCallback(() => setIsActive(true), []);
+    const onDeactivate = useCallback(() => setIsActive(false), []);
+    const onBlur = useCallback((event: FocusEvent<HTMLDivElement>) => {
+      if (!event.currentTarget.contains(event.relatedTarget)) {
+        setIsActive(false);
+      }
+    }, []);
+    // Like EuiDataGrid, Enter or F2 on the focused cell expands it.
+    const onKeyDown = useCallback(
+      (event: KeyboardEvent<HTMLDivElement>) => {
+        if (
+          isExpandable &&
+          event.target === event.currentTarget &&
+          (event.key === keys.ENTER || event.key === keys.F2)
+        ) {
+          event.preventDefault();
+          openExpansion(event.currentTarget);
+        }
+      },
+      [isExpandable, openExpansion]
+    );
+
+    const actionArgs = { rowIndex, colIndex, columnId };
+    const bubbleActions = useMemo(
+      () =>
+        hasActions && (isActive || isExpanded)
+          ? getBubbleActions(
+              cellActions ?? [],
+              { rowIndex, colIndex, columnId },
+              {
+                isExpandable,
+                onExpand: openExpansion,
+              }
+            )
+          : [],
+      [
+        hasActions,
+        isActive,
+        isExpanded,
+        cellActions,
+        rowIndex,
+        colIndex,
+        columnId,
+        isExpandable,
+        openExpansion,
+      ]
+    );
+
     return (
       <div
         {...htmlProps}
+        ref={cellRef}
         role="gridcell"
         aria-colindex={model.ariaColIndex}
         tabIndex={isTabStop ? 0 : -1}
         data-test-subj="dataGridRowCell"
         data-gridcell-column-id={columnId}
         data-gridcell-visible-row-index={visibleRowIndex}
-        css={styles.cell}
+        onMouseEnter={hasActions ? onActivate : undefined}
+        onMouseLeave={hasActions ? onDeactivate : undefined}
+        onFocus={hasActions ? onActivate : undefined}
+        onBlur={hasActions ? onBlur : undefined}
+        onKeyDown={hasActions ? onKeyDown : undefined}
+        css={[styles.cell, hasActions && cellActionsHostStyles]}
         style={{ ...flexStyle, ...htmlProps.style }}
       >
         {kind === 'data' ? (
@@ -108,6 +186,24 @@ const GridCell = memo(
           </div>
         ) : (
           <CellRenderer {...valueProps} />
+        )}
+        {bubbleActions.length > 0 && (
+          <CellActionsBubble
+            anchorCellRef={cellRef}
+            actions={bubbleActions}
+            stayVisible={isExpanded}
+          />
+        )}
+        {anchorRect && (
+          <CellExpansionPopover anchorRect={anchorRect} onClose={closeExpansion}>
+            <RenderCellPopover
+              {...actionArgs}
+              schema={column?.schema}
+              cellActions={renderPopoverFooter(cellActions ?? [], actionArgs, closeExpansion)}
+            >
+              <CellRenderer {...valueProps} isExpanded isDetails setCellProps={noop} />
+            </RenderCellPopover>
+          </CellExpansionPopover>
         )}
       </div>
     );
@@ -124,6 +220,7 @@ interface GridRowProps {
   styles: GridStyles;
   contentCss: GridStyles['contentSingleLine'];
   renderCellValue: TanStackDatatableGridProps['renderCellValue'];
+  renderCellPopover?: TanStackDatatableGridProps['renderCellPopover'];
   /** Column index (1-based) of the grid's tab stop when it is in this row. */
   tabStopColIndex?: number;
   virtualIndex: number;
@@ -141,6 +238,7 @@ const GridRow = memo(
     styles,
     contentCss,
     renderCellValue,
+    renderCellPopover,
     tabStopColIndex,
     virtualIndex,
     measureElement,
@@ -159,6 +257,7 @@ const GridRow = memo(
           rowIndex={rowIndex}
           visibleRowIndex={visibleRowIndex}
           renderCellValue={renderCellValue}
+          renderCellPopover={renderCellPopover}
           styles={styles}
           contentCss={contentCss}
           flexStyle={flexStyles[index]}
@@ -182,6 +281,8 @@ export const TanStackDatatableGrid = ({
   sorting,
   pagination,
   onColumnResize,
+  renderFooterCellValue: RenderFooterCellValue,
+  renderCellPopover,
 }: TanStackDatatableGridProps) => {
   const themeContext = useEuiTheme();
   const styles = useMemo(() => getGridStyles(themeContext, gridStyle), [themeContext, gridStyle]);
@@ -317,6 +418,9 @@ export const TanStackDatatableGrid = ({
     scrollRef.current?.scrollTo?.({ top: 0 });
   }, [pageIndex]);
 
+  const hasFooter =
+    Boolean(RenderFooterCellValue) ||
+    columnModels.some((model) => Boolean(model.control?.footerCellRender));
   const colCount = columnModels.length;
   // Keyboard navigation works on rows of the current page: the header, then the visible rows.
   const firstRow = 1;
@@ -416,7 +520,7 @@ export const TanStackDatatableGrid = ({
         ref={scrollRef}
         role="grid"
         aria-label={ariaLabel}
-        aria-rowcount={rowCount + 1}
+        aria-rowcount={rowCount + 1 + (hasFooter ? 1 : 0)}
         aria-colcount={colCount}
         tabIndex={-1}
         onFocus={onFocus}
@@ -466,6 +570,7 @@ export const TanStackDatatableGrid = ({
                   styles={styles}
                   contentCss={contentCss}
                   renderCellValue={renderCellValue}
+                  renderCellPopover={renderCellPopover}
                   tabStopColIndex={
                     effectiveTabStop.row === ariaRowIndex ? effectiveTabStop.col : undefined
                   }
@@ -476,6 +581,35 @@ export const TanStackDatatableGrid = ({
             })}
           </div>
         </div>
+        {hasFooter && (
+          <div role="row" aria-rowindex={rowCount + 2} css={styles.footerRow}>
+            {columnModels.map((model, index) => {
+              const FooterCellRender = model.control
+                ? model.control.footerCellRender
+                : RenderFooterCellValue;
+              return (
+                <div
+                  key={model.id}
+                  role="gridcell"
+                  aria-colindex={model.ariaColIndex}
+                  data-test-subj={`dataGridFooterCell-${model.id}`}
+                  css={styles.cell}
+                  style={flexStyles[index]}
+                  {...model.control?.footerCellProps}
+                >
+                  {FooterCellRender && (
+                    <FooterCellRender
+                      {...({
+                        columnId: model.id,
+                        colIndex: model.dataColIndex ?? model.ariaColIndex - 1,
+                      } as TanStackCellValueProps)}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
       {pagination && (
         <EuiTablePagination
