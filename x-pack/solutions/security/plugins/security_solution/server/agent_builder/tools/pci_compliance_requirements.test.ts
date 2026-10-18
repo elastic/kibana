@@ -7,12 +7,14 @@
 
 import {
   DEFAULT_PCI_INDEX_PATTERNS,
+  PCI_LEGACY_REQUIREMENT_ID_ALIASES,
   PCI_REQUIREMENTS,
   buildPciTimeRangeParams,
   getIndexList,
   getIndexPattern,
   getTimeRangeForCheck,
   normalizeRequirementId,
+  resolveLegacyRequirementId,
   resolveRequirementIds,
 } from './pci_compliance_requirements';
 
@@ -145,6 +147,28 @@ describe('resolveRequirementIds', () => {
 
   it('silently drops unknown ids', () => {
     expect(resolveRequirementIds(['99', 'drop'])).toEqual([]);
+  });
+});
+
+describe('legacy requirement-id aliases', () => {
+  it('maps every alias onto an id the v4.0.1 catalog defines, without shadowing one', () => {
+    for (const [legacyId, canonicalId] of Object.entries(PCI_LEGACY_REQUIREMENT_ID_ALIASES)) {
+      expect(PCI_REQUIREMENTS[canonicalId]).toBeDefined();
+      expect(PCI_REQUIREMENTS[legacyId]).toBeUndefined();
+    }
+  });
+
+  it('resolves the pre-v4.0.1 weak-TLS requirement 4.1 to the v4.0.1 id 4.2.1', () => {
+    expect(resolveLegacyRequirementId('4.1')).toBe('4.2.1');
+    expect(normalizeRequirementId('4.1')).toBe('4.2.1');
+    expect(resolveRequirementIds(['4.1'])).toEqual(['4.2.1']);
+  });
+
+  it('leaves catalog ids and unknown ids untouched', () => {
+    expect(resolveLegacyRequirementId('4.2.1')).toBe('4.2.1');
+    expect(resolveLegacyRequirementId('8')).toBe('8');
+    expect(resolveLegacyRequirementId('99')).toBe('99');
+    expect(normalizeRequirementId('99')).toBeNull();
   });
 });
 
