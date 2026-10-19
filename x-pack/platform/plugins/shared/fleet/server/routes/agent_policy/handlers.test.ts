@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import { agentPolicyService, appContextService } from '../../services';
+import { agentPolicyService, appContextService, packagePolicyService } from '../../services';
 import { listFleetProxies } from '../../services/fleet_proxies';
 
 import type { FleetRequestHandlerContext } from '../..';
@@ -26,6 +26,7 @@ import {
   getFullAgentPolicy,
   GetListAgentPolicyOutputsHandler,
   getAgentPoliciesHandler,
+  getAgentPoliciesPackagePoliciesSummaryHandler,
   populateAssignedAgentsCount,
   updateAgentPolicyHandler,
 } from './handlers';
@@ -322,6 +323,43 @@ describe('Agent policy API handlers', () => {
         ['1'],
         expect.anything()
       );
+    });
+  });
+
+  describe('getAgentPoliciesPackagePoliciesSummaryHandler', () => {
+    const summary = {
+      count: 4301,
+      has_fleet_server: false,
+      has_managed: false,
+      has_root_integrations: true,
+      has_shared: false,
+    };
+
+    it('should return the summary by agent policy id using the user scoped client', async () => {
+      const getSummarySpy = jest
+        .spyOn(packagePolicyService, 'getSummaryForAgentPolicies')
+        .mockResolvedValueOnce(new Map([['policy-1', summary]]));
+      const request = httpServerMock.createKibanaRequest({ body: { ids: ['policy-1'] } });
+
+      await getAgentPoliciesPackagePoliciesSummaryHandler(context, request, response);
+
+      expect(getSummarySpy).toHaveBeenCalledWith((await context.core).savedObjects.client, [
+        'policy-1',
+      ]);
+      expect(response.ok).toHaveBeenCalledWith({ body: { items: { 'policy-1': summary } } });
+    });
+
+    it('should deduplicate ids', async () => {
+      const getSummarySpy = jest
+        .spyOn(packagePolicyService, 'getSummaryForAgentPolicies')
+        .mockResolvedValueOnce(new Map());
+      const request = httpServerMock.createKibanaRequest({
+        body: { ids: ['policy-1', 'policy-1', 'policy-2'] },
+      });
+
+      await getAgentPoliciesPackagePoliciesSummaryHandler(context, request, response);
+
+      expect(getSummarySpy).toHaveBeenCalledWith(expect.anything(), ['policy-1', 'policy-2']);
     });
   });
 

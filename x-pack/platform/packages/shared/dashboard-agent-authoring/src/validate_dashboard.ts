@@ -12,8 +12,8 @@ import type {
   DashboardSection,
 } from '@kbn/agent-builder-dashboards-common';
 import { isSection } from '@kbn/agent-builder-dashboards-common';
-import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
-import type { OperationFailure } from './utils';
+import { DASHBOARD_FAILURE_TYPES } from './failure_types';
+import type { DashboardFailure } from './utils';
 
 export interface DashboardValidationIssue {
   /** Location of the invalid value in the dashboard payload, e.g. `['time_range', 'from']`. */
@@ -35,20 +35,20 @@ type Control = NonNullable<DashboardAttachmentData['pinned_panels']>[number];
 
 interface ValidationResult {
   dashboardData: DashboardAttachmentData;
-  failures: OperationFailure[];
+  failures: DashboardFailure[];
   /** Ids of panels that were dropped or restored. */
   discardedPanelIds: ReadonlySet<string>;
 }
 
 const MAX_REPORTED_ISSUES = 10;
 
-const toFailure = (identifier: string, messages: string[], outcome: string): OperationFailure => {
+const toFailure = (identifier: string, messages: string[], outcome: string): DashboardFailure => {
   const reportedMessages = messages.slice(0, MAX_REPORTED_ISSUES);
   if (messages.length > MAX_REPORTED_ISSUES) {
     reportedMessages.push(`and ${messages.length - MAX_REPORTED_ISSUES} more`);
   }
   return {
-    type: DASHBOARD_OPERATION_FAILURE_TYPES.validateDashboard,
+    type: DASHBOARD_FAILURE_TYPES.validateDashboard,
     identifier,
     error: `${outcome} because the result does not match the dashboard schema: ${reportedMessages.join(
       '; '
@@ -153,7 +153,7 @@ export const discardInvalidChanges = ({
     originalDashboardData.panels.filter(isSection).map(({ id }) => id)
   );
 
-  const failures: OperationFailure[] = [];
+  const failures: DashboardFailure[] = [];
   const discardedPanelIds = new Set<string>();
 
   const resolvePanel = (panel: AttachmentPanel): AttachmentPanel[] => {
@@ -189,7 +189,7 @@ export const discardInvalidChanges = ({
       sectionPanels.length === 0
     ) {
       failures.push({
-        type: DASHBOARD_OPERATION_FAILURE_TYPES.validateDashboard,
+        type: DASHBOARD_FAILURE_TYPES.validateDashboard,
         identifier: section.id,
         error: `Section "${section.title}" was not added because none of its panels are valid.`,
       });

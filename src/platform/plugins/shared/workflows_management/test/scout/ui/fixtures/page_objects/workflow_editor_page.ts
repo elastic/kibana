@@ -106,11 +106,13 @@ export class WorkflowEditorPage {
   }
 
   /**
-   * Navigate to the workflow editor for a new workflow
+   * Navigate to the workflow editor for a new workflow. "Create workflow" opens the
+   * agentic-first landing; "Start manually" opens the blank editor.
    */
   async gotoNewWorkflow() {
     await this.page.gotoApp(PLUGIN_ID);
     await this.page.testSubj.click('createWorkflowButton');
+    await this.page.testSubj.click('agenticFirstStartManuallyButton');
     await this.waitForEditorToLoad();
   }
 

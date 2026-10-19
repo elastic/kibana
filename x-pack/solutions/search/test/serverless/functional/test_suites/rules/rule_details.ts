@@ -28,6 +28,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const retry = getService('retry');
   const toasts = getService('toasts');
+
+  async function readRuleEnabledBadge() {
+    if (await testSubjects.exists('ruleEnabledBadge')) {
+      return await testSubjects.getVisibleText('ruleEnabledBadge');
+    }
+    await testSubjects.click('appHeaderBadgesOverflow');
+    const text = await testSubjects.getVisibleText('ruleEnabledBadge');
+    await testSubjects.click('appHeaderBadgesOverflow');
+    return text;
+  }
   const alertingApi = getService('alertingApi');
 
   const openFirstRule = async (ruleName: string) => {
@@ -40,16 +50,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const openRulesSection = async () => {
     await svlSearchNavigation.navigateToLandingPage();
 
-    await svlCommonNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
+    // openPanel waits for the admin panel to be rendered before we click a link inside it;
+    // clicking the panel link while the panel is still animating in collapses it again.
+    await svlCommonNavigation.sidenav.openPanel('admin_and_settings');
     await svlCommonNavigation.sidenav.clickPanelLink('management:triggersActions');
   };
 
   const navigateToConnectors = async () => {
     await svlSearchNavigation.navigateToLandingPage();
 
-    await svlCommonNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
+    await svlCommonNavigation.sidenav.openPanel('admin_and_settings');
     await svlCommonNavigation.sidenav.clickPanelLink('management:triggersActionsConnectors');
-    // await testSubjects.click('app-card-triggersActionsConnectors');
   };
 
   const deleteConnector = async (connectorName: string) => {
@@ -141,9 +152,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should disable the rule', async () => {
-        const statusBadge = await testSubjects.find('ruleEnabledBadge');
         await retry.try(async () => {
-          expect(await statusBadge.getVisibleText()).toEqual('Enabled');
+          expect(await readRuleEnabledBadge()).toEqual('Enabled');
         });
 
         await testSubjects.click('ruleEnabledSwitch');
@@ -151,14 +161,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await (await testSubjects.find('confirmModalConfirmButton')).click();
 
         await retry.tryForTime(30 * 1000, async () => {
-          expect(await statusBadge.getVisibleText()).toEqual('Disabled');
+          expect(await readRuleEnabledBadge()).toEqual('Disabled');
         });
       });
 
       it('should allow you to snooze a disabled rule', async () => {
-        const statusBadge = await testSubjects.find('ruleEnabledBadge');
-
-        expect(await statusBadge.getVisibleText()).toEqual('Disabled');
+        expect(await readRuleEnabledBadge()).toEqual('Disabled');
 
         let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
         await snoozeBadge.click();
@@ -179,14 +187,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should reenable a disabled the rule', async () => {
-        const statusBadge = await testSubjects.find('ruleEnabledBadge');
-
-        expect(await statusBadge.getVisibleText()).toEqual('Disabled');
+        expect(await readRuleEnabledBadge()).toEqual('Disabled');
 
         await testSubjects.click('ruleEnabledSwitch');
 
         await retry.try(async () => {
-          expect(await statusBadge.getVisibleText()).toEqual('Enabled');
+          expect(await readRuleEnabledBadge()).toEqual('Enabled');
         });
       });
 
@@ -349,8 +355,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/259893
-    describe.skip('Edit rule with deleted connector', () => {
+    describe('Edit rule with deleted connector', () => {
       const RULE_TYPE_ID = '.es-query';
 
       afterEach(async () => {

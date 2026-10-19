@@ -320,10 +320,13 @@ consts:
     properties:
       verdicts:
         type: array
-        # Cap at consts.batch_size: a batch never has more than 50 real alerts, so
-        # more than 50 verdicts is hallucination/injection. Without this bound a
-        # 10 MB response can inflate all_verdicts across up to 20 batches.
-        maxItems: 50
+        # No maxItems on purpose: Gemini rejects this schema with a 400 ("Provider returned
+        # error") when an array cap above ~40 is combined with the per-verdict bounds below.
+        # The cap is applied after parsing, in filter_verdicts_to_batch (dedupe by id, then slice
+        # to consts.batch_size), so an oversize reply cannot inflate all_verdicts across up to 20
+        # batches. Without maxItems, tool-call validation (inference validate_tool_calls.ts)
+        # no longer rejects and retries oversize replies; the raw array stays in the step
+        # output, bounded only by max-step-size (10mb).
         description: One verdict per alert in the batch, in the order the alerts were given.
         items:
           type: object
@@ -1706,7 +1709,9 @@ steps:
               - name: filter_verdicts_to_batch
                 type: data.set
                 with:
-                  batch_verdicts: "${{ variables.batch_result_verdicts | where_exp: 'v', 'variables.batch_alert_ids contains v.id' }}"
+                  # group_by keeps first-seen order, so map 'items.first' is a dedupe by id: repeated
+                  # ids cannot evict real verdicts from the slice.
+                  batch_verdicts: "${{ variables.batch_result_verdicts | where_exp: 'v', 'variables.batch_alert_ids contains v.id' | group_by: 'id' | map: 'items.first' | slice: 0, consts.batch_size }}"
 
               - name: collect_batch_verdicts
                 type: data.set
