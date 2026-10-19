@@ -258,4 +258,43 @@ describe('queryHuntsArtifacts', () => {
       )
     ).toBe(true);
   });
+
+  it('is true when the query hunts every shared artifact as alternatives of one IN list', () => {
+    const key = artifactSetKey('seen at a.example and b.example', [
+      { type: 'domain', value: 'a.example' },
+      { type: 'domain', value: 'b.example' },
+    ])!;
+    expect(
+      queryHuntsArtifacts(
+        'FROM logs-* | WHERE destination.domain IN ("a.example", "b.example")',
+        key
+      )
+    ).toBe(true);
+  });
+
+  it('is true when the query hunts every shared artifact as OR alternatives', () => {
+    const key = artifactSetKey('seen at a.example and b.example', [
+      { type: 'domain', value: 'a.example' },
+      { type: 'domain', value: 'b.example' },
+    ])!;
+    expect(
+      queryHuntsArtifacts(
+        'FROM logs-* | WHERE destination.domain == "a.example" OR dns.question.name == "b.example"',
+        key
+      )
+    ).toBe(true);
+  });
+
+  it('is false when one shared artifact is only mentioned beside a filter on the other', () => {
+    const key = artifactSetKey('seen at a.example and b.example', [
+      { type: 'domain', value: 'a.example' },
+      { type: 'domain', value: 'b.example' },
+    ])!;
+    expect(
+      queryHuntsArtifacts(
+        'FROM logs-* | WHERE destination.domain == "a.example" AND dns.question.name != "b.example"',
+        key
+      )
+    ).toBe(false);
+  });
 });

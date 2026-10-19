@@ -64,18 +64,32 @@ export const artifactSetKey = (
  * siblings were collapsed for; a sibling marked `collapsed` against such a query would be
  * retired with a coverage claim nothing ever ran.
  *
- * Each artifact is checked on its own through the grounding gate with that one value as the
- * only thing the query may ground in, so an artifact counts only where the gate would count it:
- * in a `WHERE` that constrains rows to the value, not negated, not one alternative among
- * ungrounded branches, not sitting in an `EVAL` or a comment. Carrying the string is not hunting
- * it. This still says nothing about the action the sibling's technique implies around that
+ * Each artifact is read through the grounding gate rather than matched as text, so it counts
+ * only where the gate would count it: in a `WHERE` that constrains rows to the value, not
+ * negated, not beside an ungrounded branch, not sitting in an `EVAL` or a comment. Carrying the
+ * string is not hunting it. An artifact is searched when the query grounds in it alone, or,
+ * for a query that hunts several shared artifacts as alternatives (`IN (a, b)`, `a OR b`), when
+ * the query grounds in the whole shared set and stops grounding once this artifact is taken
+ * away: the alternative needs it, so rows for it come back. A query grounded on one artifact
+ * and merely mentioning another fails the second test, because removing the mention changes
+ * nothing. The second rule can miss an alternative nested under an `AND` whose other side
+ * grounds on its own; that errs toward generating a sibling that was covered, never toward
+ * retiring one that was not, which is the right way round for a reason marked final.
+ *
+ * This still says nothing about the action the sibling's technique implies around the
  * artifact; it establishes that the survivor's query searches the environment for the shared
  * artifacts, which is the coverage `collapsed` asserts.
  */
-export const queryHuntsArtifacts = (esql: string, key: string): boolean =>
-  key
-    .split('\u0000')
-    .every((value) => assertEsqlGroundedInReport(esql, { reportText: '', iocValues: [value] }).ok);
+export const queryHuntsArtifacts = (esql: string, key: string): boolean => {
+  const values = key.split('\u0000');
+  const grounds = (iocValues: string[]): boolean =>
+    assertEsqlGroundedInReport(esql, { reportText: '', iocValues }).ok;
+  const groundsInWholeSet = grounds(values);
+  return values.every(
+    (value) =>
+      grounds([value]) || (groundsInWholeSet && !grounds(values.filter((other) => other !== value)))
+  );
+};
 
 /** One behavior dropped because another behavior already covers the same artifact set. */
 export interface CollapsedBehavior {
