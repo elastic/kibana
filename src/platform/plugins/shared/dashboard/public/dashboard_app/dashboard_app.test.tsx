@@ -67,9 +67,7 @@ describe('Dashboard App', () => {
   });
 
   it('test the default behavior without an expandedPanel id passed as a prop to the DashboardApp', async () => {
-    render(
-      <DashboardApp redirectTo={jest.fn()} history={mockHistory} setDashboardAppApi={jest.fn()} />
-    );
+    render(<DashboardApp redirectTo={jest.fn()} history={mockHistory} />);
 
     await waitFor(() => {
       expect(expandPanelSpy).not.toHaveBeenCalled();
@@ -91,14 +89,7 @@ describe('Dashboard App', () => {
   });
 
   it('test that the expanded panel behavior subject and history is called when passed as a prop to the DashboardApp', async () => {
-    render(
-      <DashboardApp
-        redirectTo={jest.fn()}
-        history={mockHistory}
-        expandedPanelId="456"
-        setDashboardAppApi={jest.fn()}
-      />
-    );
+    render(<DashboardApp redirectTo={jest.fn()} history={mockHistory} expandedPanelId="456" />);
 
     await waitFor(() => {
       expect(expandPanelSpy).toHaveBeenCalledTimes(1);
@@ -113,6 +104,14 @@ describe('Dashboard App', () => {
       expect(historySpy).toHaveBeenCalledTimes(1);
       expect(mockHistory.location.pathname).toBe('/create');
     });
+  });
+
+  it('asks the renderer to publish its dashboard as the app client API', () => {
+    render(
+      <DashboardApp redirectTo={jest.fn()} history={mockHistory} savedDashboardId="dashboard-1" />
+    );
+
+    expect((DashboardRenderer as jest.Mock).mock.lastCall?.[0].publishAsAppClientApi).toBe(true);
   });
 
   describe('same-dashboard incoming embeddables', () => {
@@ -142,7 +141,6 @@ describe('Dashboard App', () => {
           redirectTo={jest.fn()}
           history={mockHistory}
           savedDashboardId="test-dashboard-123"
-          setDashboardAppApi={jest.fn()}
         />
       );
 
@@ -174,7 +172,6 @@ describe('Dashboard App', () => {
           redirectTo={jest.fn()}
           history={mockHistory}
           savedDashboardId="test-dashboard-123"
-          setDashboardAppApi={jest.fn()}
         />
       );
 
@@ -204,7 +201,6 @@ describe('Dashboard App', () => {
           redirectTo={jest.fn()}
           history={mockHistory}
           savedDashboardId="test-dashboard-456"
-          setDashboardAppApi={jest.fn()}
         />
       );
 
@@ -226,7 +222,6 @@ describe('Dashboard App', () => {
           redirectTo={jest.fn()}
           history={mockHistory}
           savedDashboardId="test-dashboard-789"
-          setDashboardAppApi={jest.fn()}
         />
       );
 
@@ -273,7 +268,6 @@ describe('Dashboard App', () => {
           redirectTo={jest.fn()}
           history={createMemoryHistory()}
           savedDashboardId={'1'}
-          setDashboardAppApi={jest.fn()}
         />
       );
 
@@ -297,13 +291,7 @@ describe('Dashboard App', () => {
             ],
           } as unknown as EmbeddableStateTransfer)
       );
-      render(
-        <DashboardApp
-          redirectTo={jest.fn()}
-          history={createMemoryHistory()}
-          setDashboardAppApi={jest.fn()}
-        />
-      );
+      render(<DashboardApp redirectTo={jest.fn()} history={createMemoryHistory()} />);
 
       await waitFor(() => {
         expect(screen.queryByText('mock DashboardRenderer')).toBeInTheDocument();
@@ -313,13 +301,7 @@ describe('Dashboard App', () => {
 
     test('should render no data page when isDashboardAppInNoDataState returns true', async () => {
       mockIsDashboardAppInNoDataState.mockResolvedValueOnce(true);
-      render(
-        <DashboardApp
-          redirectTo={jest.fn()}
-          history={createMemoryHistory()}
-          setDashboardAppApi={jest.fn()}
-        />
-      );
+      render(<DashboardApp redirectTo={jest.fn()} history={createMemoryHistory()} />);
 
       await waitFor(() => {
         expect(screen.queryByText('Mock no data page')).toBeInTheDocument();

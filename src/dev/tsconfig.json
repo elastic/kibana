@@ -16,6 +16,7 @@
     "type_check_validation_loader.js"
   ],
   "kbn_references": [
+    "@kbn/scout",
     "@kbn/core",
     "@kbn/screenshotting-plugin",
     "@kbn/test",
