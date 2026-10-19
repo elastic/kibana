@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 import {
   EuiFormRow,
@@ -17,7 +16,7 @@ import {
   EuiFormLabel,
   EuiIcon,
   EuiSpacer,
-  useGeneratedHtmlId,
+  useEuiFontSize,
 } from '@elastic/eui';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { EsFieldSelector } from '@kbn/securitysolution-autocomplete';
@@ -63,46 +62,24 @@ export function RiskScoreOverride({
   idAria,
   isDisabled,
 }: RiskScoreOverrideProps) {
-  const checkboxLabelId = useGeneratedHtmlId({ prefix: 'riskScoreMappingOverrideLabel' });
-  const checkboxDescriptionId = useGeneratedHtmlId({
-    prefix: 'riskScoreMappingOverrideDescription',
-  });
+  const { fontSize: formLabelFontSize } = useEuiFontSize('xs');
 
-  const riskScoreMappingLabel = useMemo(() => {
-    return (
-      <div>
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="s"
-          onClick={!isDisabled ? onToggleMappingChecked : noop}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiCheckbox
-              id="risk_score-mapping-override"
-              checked={isMappingChecked}
-              onChange={onToggleMappingChecked}
-              disabled={isDisabled}
-              aria-labelledby={checkboxLabelId}
-              aria-describedby={checkboxDescriptionId}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem id={checkboxLabelId}>{i18n.RISK_SCORE_MAPPING}</EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <NestedContent>
-          <EuiText size="xs" id={checkboxDescriptionId}>
-            {i18n.RISK_SCORE_MAPPING_DESCRIPTION}
-          </EuiText>
-        </NestedContent>
-      </div>
-    );
-  }, [
-    isDisabled,
-    isMappingChecked,
-    onToggleMappingChecked,
-    checkboxLabelId,
-    checkboxDescriptionId,
-  ]);
+  const riskScoreMappingLabel = (
+    <>
+      <EuiCheckbox
+        id="risk_score-mapping-override"
+        label={i18n.RISK_SCORE_MAPPING}
+        labelProps={{ css: { fontSize: formLabelFontSize } }}
+        checked={isMappingChecked}
+        onChange={onToggleMappingChecked}
+        disabled={isDisabled}
+      />
+      <EuiSpacer size="xs" />
+      <NestedContent>
+        <EuiText size="xs">{i18n.RISK_SCORE_MAPPING_DESCRIPTION}</EuiText>
+      </NestedContent>
+    </>
+  );
 
   const describedByIds = useMemo(() => (idAria ? [idAria] : undefined), [idAria]);
   const selectedField = useMemo(() => getFieldTypeByMapping(mapping, indices), [mapping, indices]);
@@ -110,6 +87,7 @@ export function RiskScoreOverride({
   return (
     <EuiFormRow
       label={riskScoreMappingLabel}
+      labelType="legend"
       helpText={
         isMappingChecked ? <NestedContent>{i18n.RISK_SCORE_MAPPING_DETAILS}</NestedContent> : ''
       }

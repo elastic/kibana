@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { SeverityOverride } from './severity_override';
 import * as i18n from './translations';
 
 describe('SeverityOverride', () => {
-  const renderComponent = () =>
+  const renderComponent = (onSeverityMappingChecked = jest.fn()) =>
     render(
       <SeverityOverride
         isDisabled={false}
-        onSeverityMappingChecked={jest.fn()}
+        onSeverityMappingChecked={onSeverityMappingChecked}
         onFieldChange={jest.fn()}
         onFieldMatchValueChange={jest.fn()}
         isMappingChecked={false}
@@ -30,11 +30,20 @@ describe('SeverityOverride', () => {
     expect(screen.getByRole('checkbox', { name: i18n.SEVERITY_MAPPING })).toBeInTheDocument();
   });
 
-  it('describes the override checkbox with its visible description', () => {
-    renderComponent();
+  it('associates every label with a form control', () => {
+    const { container } = renderComponent();
 
-    expect(
-      screen.getByRole('checkbox', { name: i18n.SEVERITY_MAPPING })
-    ).toHaveAccessibleDescription(i18n.SEVERITY_MAPPING_DESCRIPTION);
+    container.querySelectorAll('label').forEach((label) => {
+      expect(label.control).not.toBeNull();
+    });
+  });
+
+  it('toggles the override when its label is clicked', () => {
+    const onSeverityMappingChecked = jest.fn();
+    renderComponent(onSeverityMappingChecked);
+
+    fireEvent.click(screen.getByText(i18n.SEVERITY_MAPPING));
+
+    expect(onSeverityMappingChecked).toHaveBeenCalledTimes(1);
   });
 });

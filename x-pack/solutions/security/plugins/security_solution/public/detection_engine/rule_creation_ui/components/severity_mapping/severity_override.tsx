@@ -14,7 +14,7 @@ import {
   EuiFormLabel,
   EuiIcon,
   EuiSpacer,
-  useGeneratedHtmlId,
+  useEuiFontSize,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
@@ -51,52 +51,31 @@ export function SeverityOverride({
   mapping,
   indices,
 }: SeverityOverrideProps) {
-  const checkboxLabelId = useGeneratedHtmlId({ prefix: 'severityMappingOverrideLabel' });
-  const checkboxDescriptionId = useGeneratedHtmlId({
-    prefix: 'severityMappingOverrideDescription',
-  });
+  const { fontSize: formLabelFontSize } = useEuiFontSize('xs');
 
-  const severityMappingLabel = useMemo(() => {
-    return (
-      <div>
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="s"
-          onClick={isDisabled ? undefined : onSeverityMappingChecked}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiCheckbox
-              id="severity-mapping-override"
-              checked={isMappingChecked}
-              disabled={isDisabled}
-              onChange={onSeverityMappingChecked}
-              aria-labelledby={checkboxLabelId}
-              aria-describedby={checkboxDescriptionId}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem id={checkboxLabelId}>{i18n.SEVERITY_MAPPING}</EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <NestedContent>
-          <EuiText size="xs" id={checkboxDescriptionId}>
-            {i18n.SEVERITY_MAPPING_DESCRIPTION}
-          </EuiText>
-        </NestedContent>
-      </div>
-    );
-  }, [
-    onSeverityMappingChecked,
-    isDisabled,
-    isMappingChecked,
-    checkboxLabelId,
-    checkboxDescriptionId,
-  ]);
+  const severityMappingLabel = (
+    <>
+      <EuiCheckbox
+        id="severity-mapping-override"
+        label={i18n.SEVERITY_MAPPING}
+        labelProps={{ css: { fontSize: formLabelFontSize } }}
+        checked={isMappingChecked}
+        disabled={isDisabled}
+        onChange={onSeverityMappingChecked}
+      />
+      <EuiSpacer size="xs" />
+      <NestedContent>
+        <EuiText size="xs">{i18n.SEVERITY_MAPPING_DESCRIPTION}</EuiText>
+      </NestedContent>
+    </>
+  );
 
   const describedByIds = useMemo(() => (idAria ? [idAria] : undefined), [idAria]);
 
   return (
     <EuiFormRow
       label={severityMappingLabel}
+      labelType="legend"
       helpText={
         isMappingChecked ? <NestedContent>{i18n.SEVERITY_MAPPING_DETAILS}</NestedContent> : ''
       }

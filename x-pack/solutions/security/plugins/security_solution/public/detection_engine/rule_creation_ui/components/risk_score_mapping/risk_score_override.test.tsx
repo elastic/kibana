@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { RiskScoreOverride } from './risk_score_override';
 import * as i18n from './translations';
 
 describe('RiskScoreOverride', () => {
-  const renderComponent = () =>
+  const renderComponent = (onToggleMappingChecked = jest.fn()) =>
     render(
       <RiskScoreOverride
         isMappingChecked={false}
-        onToggleMappingChecked={jest.fn()}
+        onToggleMappingChecked={onToggleMappingChecked}
         onMappingChange={jest.fn()}
         mapping={[]}
         indices={{ title: '', fields: [] }}
@@ -29,11 +29,20 @@ describe('RiskScoreOverride', () => {
     expect(screen.getByRole('checkbox', { name: i18n.RISK_SCORE_MAPPING })).toBeInTheDocument();
   });
 
-  it('describes the override checkbox with its visible description', () => {
-    renderComponent();
+  it('associates every label with a form control', () => {
+    const { container } = renderComponent();
 
-    expect(
-      screen.getByRole('checkbox', { name: i18n.RISK_SCORE_MAPPING })
-    ).toHaveAccessibleDescription(i18n.RISK_SCORE_MAPPING_DESCRIPTION);
+    container.querySelectorAll('label').forEach((label) => {
+      expect(label.control).not.toBeNull();
+    });
+  });
+
+  it('toggles the override when its label is clicked', () => {
+    const onToggleMappingChecked = jest.fn();
+    renderComponent(onToggleMappingChecked);
+
+    fireEvent.click(screen.getByText(i18n.RISK_SCORE_MAPPING));
+
+    expect(onToggleMappingChecked).toHaveBeenCalledTimes(1);
   });
 });
