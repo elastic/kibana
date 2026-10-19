@@ -155,6 +155,7 @@ describe('runResolutionScoringStep', () => {
           logger,
         }),
         targetEntityIds: [TARGET_ID],
+        alertFilters: [],
         refresh: 'wait_for',
         collectScores: true,
         ...overrides,
