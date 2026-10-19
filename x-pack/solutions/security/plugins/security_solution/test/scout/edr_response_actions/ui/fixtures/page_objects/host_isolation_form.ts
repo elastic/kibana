@@ -39,7 +39,7 @@ interface IsolateActionResponseBody {
 /** Arms the action response listener before `submit` clicks Confirm. */
 export const captureEndpointAction = async (
   page: ScoutPage,
-  command: 'isolate' | 'unisolate',
+  command: 'isolate' | 'unisolate' | 'get_file',
   submit: () => Promise<void>
 ): Promise<ActionDetails> => {
   const responsePromise = page.waitForResponse(
