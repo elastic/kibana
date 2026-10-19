@@ -67,7 +67,7 @@ describe('AutomationsPage', () => {
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
     mockUseAutomationsRunsInRange.mockReturnValue([]);
     mockUseAutomationRunsInRange.mockReturnValue({
-      data: { runs: [], total: 0 },
+      data: { runs: [], total: 0, usedToday: 0 },
       isInitialLoading: false,
     });
     mockUseCreateAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
@@ -188,7 +188,7 @@ describe('AutomationsPage', () => {
         id: 'report',
         name: 'Daily report',
         isEnabled: false,
-        trigger: { rows: [{ kind: 'schedule' }] },
+        trigger: { rows: [{ kind: 'schedule', schedulePreset: 'daily', time: '09:00' }] },
         runtime: { dailyDispatchLimit: 5 },
         author: 'Daniel Hughes',
       }),
@@ -212,6 +212,7 @@ describe('AutomationsPage', () => {
         ids.map((id) => ({
           data: {
             total: startedAfter === todayStart.toISOString() ? totals[id].today : totals[id].range,
+            usedToday: totals[id].today,
             runs:
               id === 'triage'
                 ? [
@@ -225,6 +226,7 @@ describe('AutomationsPage', () => {
       mockUseAutomationRunsInRange.mockImplementation((id: string) => ({
         data: {
           total: totals[id].range,
+          usedToday: totals[id].today,
           runs: [{ status: 'completed', startedAt: new Date().toISOString() }],
         },
         isInitialLoading: false,

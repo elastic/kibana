@@ -1087,6 +1087,7 @@ describe('KnowledgeIndicatorClient.keepAlivePersistentIndicators', () => {
       query: {
         esql: 'FROM logs-app | WHERE error == true',
         query_type: 'match',
+        category: 'error',
         rule_backed: true,
         rule_id: 'rule-xyz',
       },
@@ -1107,6 +1108,7 @@ describe('KnowledgeIndicatorClient.keepAlivePersistentIndicators', () => {
     expect(written['@timestamp']).not.toBe(durableQuery['@timestamp']);
     expect(written.query.rule_backed).toBe(true);
     expect(written.query.rule_id).toBe('rule-xyz');
+    expect(written.query.category).toBe('error');
   });
 
   it('is a no-op when fetchLatestRevisions returns nothing', async () => {

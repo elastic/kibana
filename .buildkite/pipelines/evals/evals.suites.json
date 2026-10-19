@@ -190,6 +190,7 @@
       "scoutArch": "serverless",
       "scoutDomain": "observability_complete",
       "scoutHook": "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh",
+      "vaultSecret": "nightshift",
       "tags": [
         "observability",
         "nightshift-investigations"
@@ -491,6 +492,20 @@
       "ciLabels": [
         "evals:security-alert-analysis-workflow"
       ]
+    },
+    {
+      "id": "security-alert-analysis-workflow-batch",
+      "name": "Alert Analysis Workflow (batch reliability)",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow/batch.playwright.config.ts",
+      "tags": [
+        "security",
+        "alert-analysis"
+      ],
+      "ciLabels": [
+        "evals:security-alert-analysis-workflow-batch"
+      ],
+      "stepTimeoutInMinutes": 120
     },
     {
       "id": "detection-watch-rule-creation",

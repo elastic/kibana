@@ -1,5 +1,5 @@
 {
-  "sha1": "e9b0f5cce1421faa365c4c5347a609b8cef5dadf",
+  "sha1": "20d5747c1b0c5a42d0e9cef6c00d4fad019a190a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -557,8 +557,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 41,
-        "column": 59
+        "line": 46,
+        "column": 15
       }
     },
     {
@@ -570,8 +570,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 75,
-        "column": 24
+        "line": 77,
+        "column": 15
       }
     },
     {
@@ -583,8 +583,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 120,
-        "column": 25
+        "line": 122,
+        "column": 22
       }
     },
     {
@@ -596,8 +596,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 150,
-        "column": 22
+        "line": 152,
+        "column": 20
       }
     },
     {
@@ -783,68 +783,68 @@
       }
     },
     {
-      "id": "7be90204a8998f3-07610a376c199ae",
+      "id": "d127cd8722e2b7b-07610a376c199ae",
       "title": "Discover tabs - uninitialized search experience keeps a new tab uninitialized while switching between tabs",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/uninitialized_esql_history.spec.ts",
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/uninitialized_esql_tab.spec.ts",
         "line": 23,
         "column": 35
       }
     },
     {
-      "id": "7be90204a8998f3-17ca568b62bd21b",
-      "title": "Discover tabs - uninitialized search experience opens query history on a new ES|QL tab and closes it after searching",
+      "id": "d127cd8722e2b7b-2ec8dd390ba9d47",
+      "title": "Discover tabs - uninitialized search experience builds the recommended queries from the source of the previous tab",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/uninitialized_esql_history.spec.ts",
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/uninitialized_esql_tab.spec.ts",
         "line": 45,
         "column": 29
       }
     },
     {
-      "id": "7be90204a8998f3-76f9615b600b7ae",
-      "title": "Discover tabs - uninitialized search experience keeps manually opened query history open across searches",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/uninitialized_esql_history.spec.ts",
-        "line": 67,
-        "column": 7
-      }
-    },
-    {
-      "id": "7be90204a8998f3-58392c9db846013",
+      "id": "d127cd8722e2b7b-58392c9db846013",
       "title": "Discover tabs - uninitialized search experience switches to ES|QL from a new classic empty tab",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/uninitialized_esql_history.spec.ts",
-        "line": 77,
-        "column": 22
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/uninitialized_esql_tab.spec.ts",
+        "line": 60,
+        "column": 26
       }
     },
     {
-      "id": "7be90204a8998f3-5cab75fc0fdfe3c",
-      "title": "Discover tabs - uninitialized search experience shows keyboard shortcuts and disables search on an empty ES|QL tab until a query is entered",
+      "id": "d127cd8722e2b7b-04f7bca31c28277",
+      "title": "Discover tabs - uninitialized search experience shows recommended queries and disables search on an empty ES|QL tab until a query is entered and submitted",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/uninitialized_esql_history.spec.ts",
-        "line": 91,
-        "column": 30
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/uninitialized_esql_tab.spec.ts",
+        "line": 72,
+        "column": 24
+      }
+    },
+    {
+      "id": "d127cd8722e2b7b-017630bf15d5db7",
+      "title": "Discover tabs - uninitialized search experience runs a recommended query on a new ES|QL tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/uninitialized_esql_tab.spec.ts",
+        "line": 85,
+        "column": 22
       }
     },
     {

@@ -611,6 +611,7 @@ describe('DashboardCanvasAttachment', () => {
           viewMode: 'edit',
           title: 'Test Dashboard',
           description: 'Test Description',
+          changedBy: ['agent'],
         })
       );
     });
@@ -878,6 +879,13 @@ describe('DashboardCanvasAttachment', () => {
         }),
         {}
       );
+    });
+
+    it('labels the rendered dashboard state as an agent change', async () => {
+      await renderDashboardCanvasAttachment();
+
+      const { getCreationOptions } = (DashboardRenderer as jest.Mock).mock.calls[0][0];
+      await expect(getCreationOptions()).resolves.toMatchObject({ changedBy: ['agent'] });
     });
 
     it('renders a fallback callout when the dashboard renderer throws', async () => {

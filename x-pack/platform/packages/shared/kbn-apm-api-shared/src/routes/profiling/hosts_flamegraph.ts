@@ -13,6 +13,7 @@ import {
   kuerySchema,
   serviceTransactionDataSourceSchema,
 } from '../../default_api_types';
+import { profilingSchemaQuerySchema } from './profiling_schema_query';
 
 export interface ProfilingHostsFlamegraphResponse {
   flamegraph: BaseFlameGraph;
@@ -28,7 +29,8 @@ export const profilingHostsFlamegraphRoute = defineRoute<ProfilingHostsFlamegrap
       query: rangeSchema
         .merge(environmentSchema)
         .merge(serviceTransactionDataSourceSchema)
-        .merge(kuerySchema),
+        .merge(kuerySchema)
+        .merge(profilingSchemaQuerySchema),
     })
   ),
 });
