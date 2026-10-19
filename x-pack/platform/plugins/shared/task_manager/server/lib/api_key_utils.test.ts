@@ -278,7 +278,7 @@ describe('api_key_utils', () => {
       expect(coreStart.security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
     });
 
-    test('should skip the refresh when cloning with waitForApiKeyRefresh false', async () => {
+    test('should skip the refresh when cloning with refreshApiKey false', async () => {
       const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
       const request = httpServerMock.createKibanaRequest({
         headers: {
@@ -300,7 +300,7 @@ describe('api_key_utils', () => {
 
       await createApiKey([mockTask], request, coreStart.security, {
         cloneApiKey: true,
-        waitForApiKeyRefresh: false,
+        refreshApiKey: false,
       });
 
       expect(coreStart.security.authc.apiKeys.cloneAsInternalUser).toHaveBeenCalledWith(request, {
@@ -310,7 +310,7 @@ describe('api_key_utils', () => {
       });
     });
 
-    test('should skip the refresh when granting with waitForApiKeyRefresh false', async () => {
+    test('should skip the refresh when granting with refreshApiKey false', async () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = coreMock.createStart();
 
@@ -324,7 +324,7 @@ describe('api_key_utils', () => {
         api_key: 'apiKey',
       });
 
-      await createApiKey([mockTask], request, coreStart.security, { waitForApiKeyRefresh: false });
+      await createApiKey([mockTask], request, coreStart.security, { refreshApiKey: false });
 
       expect(coreStart.security.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
         request,

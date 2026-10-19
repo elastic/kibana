@@ -826,7 +826,7 @@ export interface ApiKeyOptions {
    * search-based lookup of the new key (e.g. `GET _security/api_key`) finds it when the task runs.
    * Set to false to skip the refresh: scheduling is faster, but that lookup may briefly miss the key.
    */
-  waitForApiKeyRefresh?: boolean;
+  refreshApiKey?: boolean;
   /**
    * When true with a request, grant only the Elasticsearch API key (skip UIAM). Intended for
    * tests and narrow internal flows that need tasks with ES credentials only.
