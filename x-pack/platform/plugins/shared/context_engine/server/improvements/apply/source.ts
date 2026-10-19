@@ -29,7 +29,6 @@ export interface SourceApplyContext {
   request: KibanaRequest;
 }
 
-/** Sources have no id of their own, so `value` is the only handle a suggestion can name. */
 const sameSource = (source: AiIndexSource, value: string): boolean => source.value === value;
 
 const writeSources = async (

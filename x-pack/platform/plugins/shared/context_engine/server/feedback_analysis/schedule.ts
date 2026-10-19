@@ -16,7 +16,6 @@ import {
 import type { AiIndexFeedbackAnalysis } from '../../common/http_api/ai_indices';
 import { parseIntervalMinutes } from '../../common/validation';
 
-/** 64 bits of SHA-256, hex-encoded: fixed width, and wide enough not to collide across spaces. */
 const SPACE_HASH_LENGTH = 16;
 
 /**
@@ -88,11 +87,6 @@ export interface FeedbackAnalysisScheduleService {
   remove(params: { aiIndexId: string; spaceId: string }): Promise<void>;
 }
 
-/**
- * What the execution engine marks a run it refused to start. Compared as a string rather than
- * imported as `ExecutionStatus.SKIPPED`, for the same reason the workflows calls above are
- * structural: importing the contract would close a project reference cycle.
- */
 const DROPPED_EXECUTION_STATUS = 'skipped';
 
 export const createFeedbackAnalysisScheduleService = ({
@@ -107,17 +101,6 @@ export const createFeedbackAnalysisScheduleService = ({
 }): FeedbackAnalysisScheduleService => {
   const log = logger.get('feedback_analysis_schedule');
 
-  /**
-   * A managed workflow document id is `<definition id>-<suffix>` and is the ES `_id`, which is
-   * unique per index regardless of the document's `spaceId`. An AI index id is only unique within
-   * its space, so the suffix has to carry the space too or the same id in two spaces shares one
-   * document: the second install silently keeps the first space's `spaceId`, and either space's
-   * delete tears down the other's schedule.
-   *
-   * The space is hashed rather than appended: both ids allow hyphens, so `<space>-<aiIndexId>`
-   * would make `('a-b', 'c')` and `('a', 'b-c')` collide, and space ids have no length cap while
-   * the `_id` does.
-   */
   const workflowIdSuffixFor = (aiIndexId: string, spaceId: string) =>
     `${aiIndexId}-${createHash('sha256')
       .update(spaceId)
@@ -127,23 +110,6 @@ export const createFeedbackAnalysisScheduleService = ({
   const workflowDocumentIdFor = (aiIndexId: string, spaceId: string) =>
     `${CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID}-${workflowIdSuffixFor(aiIndexId, spaceId)}`;
 
-  /**
-   * Whether the run that was just started was refused for colliding with one already in flight.
-   *
-   * The workflow declares `concurrency: { max: 1, strategy: drop }` per AI index, so the engine
-   * already prevents two analyses of the same index from overlapping. It just does not say so:
-   * a dropped run still gets an execution document, still gets its id returned, and is marked
-   * `skipped` on the way out — so starting a run and being ignored looks exactly like starting one.
-   * Reading the execution back is what tells the two apart. Nothing else skips a run at admission,
-   * so the status alone is the signal, without matching on a human-readable reason.
-   *
-   * The read is an mget by id, which is realtime in Elasticsearch, so the skip is visible even
-   * though it is written without waiting for a refresh.
-   *
-   * Fails open. Without workflows management there is nothing to ask, and a read that errors says
-   * nothing about the run; reporting "already running" on that basis would replace a run the user
-   * can retry with a message telling them not to.
-   */
   const wasDropped = async (executionId: string, spaceId: string): Promise<boolean> => {
     if (!workflowsManagement) {
       return false;

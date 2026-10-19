@@ -25,7 +25,6 @@ import { ApplyImprovementError } from './errors';
  * plain index, so there is a single code path rather than a branch per destination type.
  */
 
-/** Painless that assigns each provided top-level field, merging `attributes` key by key. */
 const UPDATE_FIELDS_SCRIPT = `
 for (entry in params.fields.entrySet()) {
   ctx._source[entry.getKey()] = entry.getValue();
@@ -40,7 +39,6 @@ if (params.attributes != null) {
 }
 `.trim();
 
-/** Strips keys the agent left unset so an edit never blanks a field it did not mention. */
 const definedEntries = (payload: KiPartialFields): Record<string, unknown> =>
   Object.fromEntries(
     Object.entries(payload).filter(([key, value]) => key !== 'attributes' && value !== undefined)

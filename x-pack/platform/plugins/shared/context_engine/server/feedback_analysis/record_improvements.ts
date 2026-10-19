@@ -37,12 +37,6 @@ interface Candidate {
   input: ImprovementRevisionInput;
 }
 
-/**
- * Returns the name of a required payload field that the proposal is missing, or undefined when the
- * payload is complete. Mirrors the `required()` checks in `apply/index.ts` so incomplete
- * suggestions are rejected at record time rather than only when the reviewer tries to apply them.
- * Missing target fields are caught separately by `buildImprovementId`.
- */
 const missingRequiredField = (proposal: ProposedImprovement): string | undefined => {
   const { action, payload } = proposal;
   if (action === 'add_ki' && !payload?.ki) return 'payload.ki';

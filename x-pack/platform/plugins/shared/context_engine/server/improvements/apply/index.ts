@@ -29,7 +29,6 @@ export interface ApplyImprovementDeps {
   logger: Logger;
 }
 
-/** Reads a required field off the suggestion, failing with a message the reviewer can act on. */
 const required = <T>(value: T | undefined, what: string, action: string): T => {
   if (value === undefined || value === null || value === '') {
     throw new ApplyImprovementError(

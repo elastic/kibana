@@ -81,7 +81,6 @@ export class ContextEnginePlugin
   private scheduleService?: FeedbackAnalysisScheduleService;
   /** Captured at setup because the schedule service, built at start, enables workflows with it. */
   private workflowsManagement?: WorkflowsManagementPort;
-  /** Registered by `contextEngineAgentBuilder`, which can depend on both this plugin and workflows. */
   private workflowProvider?: WorkflowProvider;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();

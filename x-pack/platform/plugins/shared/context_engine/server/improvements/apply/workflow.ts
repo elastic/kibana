@@ -18,7 +18,6 @@ import { ApplyImprovementError } from './errors';
  * already has. Removal disables and detaches rather than deletes, so it stays reversible.
  */
 
-/** Rejects YAML the workflows engine would not accept, before anything is written. */
 const assertValidYaml = async ({
   workflows,
   yaml,

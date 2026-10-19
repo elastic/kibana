@@ -115,18 +115,6 @@ const countByStatus = ({ by_status: byStatus }: ImprovementHistorySummary): stri
     )
     .join(', ');
 
-/**
- * What came before, as counts plus the query that reads it.
- *
- * A run does not know what it is about to propose until it has read the signals, so a briefing
- * cannot pick out the history that will turn out to be relevant. Listing all of it does not scale
- * either — an index accumulates more targets than fit in a prompt, and the ones that fit are not
- * the ones the run needs. So the briefing says only how much history exists, and hands over the
- * query to pull the lineage of whatever the run settles on.
- *
- * The query lives here rather than only in the skill because a briefing is the one part of a run
- * that cannot be replaced by configuring a different agent.
- */
 const renderHistory = (aiIndexId: string, history: ImprovementHistorySummary): string => {
   if (history.total === 0) {
     return [
@@ -160,14 +148,6 @@ const renderHistory = (aiIndexId: string, history: ImprovementHistorySummary): s
 
 const LOAD_SKILL_RULE = `- **Load the \`${ANALYZE_AND_IMPROVE_SKILL_ID}\` skill before you look at anything.** It carries the playbook for reading these signals. If you cannot load it, say so in \`summary\` and work from this briefing alone.`;
 
-/**
- * What grounding means for this run.
- *
- * With signal groups, evidence is the retrievals themselves and every proposal has to name the ones
- * it came from. Without them the index is the only thing to read, so the rule is not relaxed so
- * much as pointed elsewhere: say what was read instead of citing ids that do not exist. Dropping
- * the requirement entirely would let a run with nothing to go on invent work.
- */
 const groundingRules = (hasGroups: boolean): string[] =>
   hasGroups
     ? [

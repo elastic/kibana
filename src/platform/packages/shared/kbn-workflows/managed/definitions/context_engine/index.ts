@@ -50,7 +50,7 @@ export const CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW = {
    * to that check: the stored snapshot keeps whatever it was installed with, forever. This number is
    * the only thing that moves it.
    *
-   * 2: analysis no longer requires signals, so runs are gated on `can_analyze` instead.
+   * 2: gates runs on `can_analyze`, which does not require signals.
    */
   version: 2,
   billable: false,

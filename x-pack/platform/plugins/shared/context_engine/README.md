@@ -328,9 +328,8 @@ per-space `context-engine-signals-<space>` index.
 They have no panel on the AI index detail page. A `SignalsPanel` component
 exists — a grouped-by-tag list, a drill-down into a group's individual signals
 with a trace waterfall per signal, and an "Analyze & improve" button — but
-nothing renders it. It was a view of the evidence behind suggestions, and those
-are now shown in the panel they would change (see
-[Improvements](#improvements)), which left it without an audience of its own.
+nothing renders it: the suggestions they would evidence are shown in the panel
+they would change instead (see [Improvements](#improvements)).
 
 Its routes are still served — two internal, read-only ones, where reads run as
 the current user against the current space's signals index:
@@ -382,7 +381,7 @@ Suggestions are shown in the panel whose part of the AI index they would change
 source is a question about the sources, and answering it means looking at what
 is already configured. Each panel filters one cached list client-side, so the
 panels between them cost a single request, and a panel with nothing to review
-renders as it did before.
+renders with no trace of the feature.
 
 Approving is the authorization boundary: both the store access and the change it
 materializes run on the approving user's own Elasticsearch client and request,

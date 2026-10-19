@@ -21,7 +21,7 @@ export const feedbackContextOutputSchema = z.object({
   agent_id: z
     .string()
     .describe(
-      "The agent to run the analysis with, resolved from the AI index's feedback_analysis.agent_id or the default Elastic agent."
+      "The agent to run the analysis with, resolved from the AI index's feedback_analysis.agent_id or the Context Engine agent."
     ),
   briefing: z
     .string()

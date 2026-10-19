@@ -110,10 +110,6 @@ const rejectBodySchema = schema.object({
   reason: schema.maybe(schema.string({ maxLength: MAX_IMPROVEMENT_REJECT_REASON_LENGTH })),
 });
 
-/**
- * A decision that raced another one returns 409 rather than an error: the panel refreshes and shows
- * whichever decision won, which is a state the user can act on.
- */
 const handleImprovementError = (error: unknown, response: KibanaResponseFactory) => {
   if (error instanceof ImprovementConflictError) {
     return response.conflict({ body: { message: error.message } });
@@ -161,7 +157,6 @@ export const registerImprovementRoutes = ({
   getFeedbackLoopEnabled,
   logger,
 }: ImprovementRouteDeps) => {
-  /** Every route here is behind both the Context Engine and the feedback loop settings. */
   const gate = <P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> =>
     withContextEngineFeatureFlag<P, Q, B>(async (ctx, request, response) => {
       if (!(await getFeedbackLoopEnabled())) {
