@@ -39,7 +39,6 @@ const getRulesListMenu = ({
   createWithAgentDisabled?: boolean;
   createWithAgentTooltipText?: string;
 }): AppHeaderMenu => ({
-  items: [],
   primaryActionItem: {
     id: 'createRule',
     label: i18n.translate('xpack.alertingV2.rulesList.createRuleButton', {
