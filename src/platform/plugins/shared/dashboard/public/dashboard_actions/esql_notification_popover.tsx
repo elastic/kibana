@@ -16,16 +16,14 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiToolTip,
-  UseEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
-
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   apiCanLockHoverActions,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import type { EsqlNotificationActionApi } from './esql_notification_action';
 
