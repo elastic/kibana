@@ -13,7 +13,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common';
+import { ALL_SPACES_ID } from '@kbn/core-spaces-common';
 
 /**
  * The monitor page only resolves monitors in the active space, so a monitor
