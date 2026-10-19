@@ -19,6 +19,7 @@ import type { ContentsProps } from './popover_content';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
+import { usePopoverFetchOptions } from './popover_fetch_options_context';
 import { isMessagingExitSpan } from '../../../../../common/service_map/get_service_map_nodes';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 import { isEdge } from './utils';
@@ -73,6 +74,7 @@ export function EdgeContents({
     '/mobile-services/{serviceName}/transactions/view'
   );
   const { offset, comparisonEnabled, rangeFrom, rangeTo } = query;
+  const { showToastOnError } = usePopoverFetchOptions();
 
   const isEdgeSelection = isEdge(selection);
   const edgeSelectionData = isEdgeSelection ? selection.data : undefined;
@@ -108,9 +110,7 @@ export function EdgeContents({
       }
     },
     [environment, sourceServiceName, dependencies, start, end, offset, comparisonEnabled],
-    // Popovers surface their own empty state; suppress the global error toast
-    // (e.g. 403 when embedded outside a platinum-gated APM page).
-    { showToastOnError: false }
+    { showToastOnError }
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;

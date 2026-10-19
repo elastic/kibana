@@ -21,6 +21,7 @@ import {
 } from '../../../../../common/es_fields/apm';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
+import { PopoverFetchOptionsContext } from './popover_fetch_options_context';
 
 jest.mock('../../../../hooks/use_apm_params', () => ({
   useAnyOfApmParams: jest.fn(),
@@ -34,9 +35,10 @@ jest.mock('../../../shared/links/discover_links/open_in_discover', () => ({
   )),
 }));
 
+const mockUseFetcher = jest.fn((..._args: unknown[]) => ({ data: {}, status: 'success' }));
 jest.mock('../../../../hooks/use_fetcher', () => ({
   FETCH_STATUS: { LOADING: 'loading', SUCCESS: 'success' },
-  useFetcher: () => ({ data: {}, status: 'success' }),
+  useFetcher: (...args: unknown[]) => mockUseFetcher(...args),
 }));
 
 const mockedUseAnyOfApmParams = jest.mocked(useAnyOfApmParams);
@@ -123,6 +125,33 @@ describe('EdgeContents', () => {
       query: defaultApmQuery,
     } as unknown as ReturnType<typeof useAnyOfApmParams>);
     mockedOpenInDiscover.mockClear();
+  });
+
+  describe('fetch error toast', () => {
+    const renderEdge = (ui?: React.ReactElement) =>
+      render(
+        <IntlProvider locale="en">
+          {ui ?? <EdgeContents selection={createServiceToDependencyEdge()} {...defaultProps} />}
+        </IntlProvider>
+      );
+
+    beforeEach(() => mockUseFetcher.mockClear());
+
+    it('keeps the global error toast by default', () => {
+      renderEdge();
+
+      expect(mockUseFetcher.mock.calls[0][2]).toEqual({ showToastOnError: true });
+    });
+
+    it('suppresses the toast when the host opts out', () => {
+      renderEdge(
+        <PopoverFetchOptionsContext.Provider value={{ showToastOnError: false }}>
+          <EdgeContents selection={createServiceToDependencyEdge()} {...defaultProps} />
+        </PopoverFetchOptionsContext.Provider>
+      );
+
+      expect(mockUseFetcher.mock.calls[0][2]).toEqual({ showToastOnError: false });
+    });
   });
 
   it('shows stats for a producer edge (service to messaging queue)', () => {

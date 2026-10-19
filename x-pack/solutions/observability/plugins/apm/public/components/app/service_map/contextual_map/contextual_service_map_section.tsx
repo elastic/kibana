@@ -21,6 +21,7 @@ import { APM_EBT_ACTIONS } from '../../ebt_constants';
 import { DisabledPrompt } from '../disabled_prompt';
 import { SERVICE_MAP_EBT_ELEMENTS } from '../ebt_constants';
 import { ContextualServiceMapControls } from './contextual_service_map_controls';
+import { EXPLORE_IN_SERVICE_MAP_LABEL } from './i18n';
 import { useContextualServiceMapState } from './use_contextual_service_map_state';
 
 export const DEFAULT_CONTEXTUAL_SERVICE_MAP_PANEL_HEIGHT = 400;
@@ -28,12 +29,6 @@ export const DEFAULT_CONTEXTUAL_SERVICE_MAP_PANEL_HEIGHT = 400;
 const SERVICE_MAP_PANEL_TITLE = i18n.translate('xpack.apm.contextualServiceMap.panel.title', {
   defaultMessage: 'Service map',
 });
-
-/** Shared with the Agent Builder service-map attachment renderer. */
-export const EXPLORE_IN_SERVICE_MAP_LABEL = i18n.translate(
-  'xpack.apm.contextualServiceMap.panel.exploreInServiceMap',
-  { defaultMessage: 'Explore in Service map' }
-);
 
 export interface ContextualServiceMapSectionProps {
   serviceName: string;

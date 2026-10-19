@@ -20,6 +20,7 @@ import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
+import { usePopoverFetchOptions } from './popover_fetch_options_context';
 
 type DependencyReturn = APIReturnType<'GET /internal/apm/service-map/dependency'>;
 
@@ -37,6 +38,7 @@ export function DependencyContents({ selection, environment, start, end }: Conte
     '/mobile-services/{serviceName}/transactions/view'
   );
   const { offset, comparisonEnabled } = query;
+  const { showToastOnError } = usePopoverFetchOptions();
   const apmRouter = useApmRouter();
 
   const isNode = !isEdge(selection);
@@ -59,9 +61,7 @@ export function DependencyContents({ selection, environment, start, end }: Conte
       }
     },
     [environment, dependencyName, start, end, offset, comparisonEnabled],
-    // Popovers surface their own empty state; suppress the global error toast
-    // (e.g. 403 when embedded outside a platinum-gated APM page).
-    { showToastOnError: false }
+    { showToastOnError }
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
