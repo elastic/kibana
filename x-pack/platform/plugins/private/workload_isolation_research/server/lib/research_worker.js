@@ -64,6 +64,18 @@ setInterval(() => {
     if (lastHb > 0) {
       windowHbCount++;
       if (gap > windowMaxGap) windowMaxGap = gap;
+      if (gap > 1000) {
+        require('fs').writeSync(
+          2,
+          JSON.stringify({
+            research: 'stall',
+            start: lastHb,
+            end: hb,
+            gap_ms: gap,
+            pid: process.pid,
+          }) + '\n'
+        );
+      }
       if (gap > stallThresholdMs) {
         push({
           source: 'stall',
@@ -80,6 +92,20 @@ setInterval(() => {
   } else if (lastHb > 0 && now - lastHb > stallThresholdMs && !openStall) {
     openStall = { start: lastHb, detectedAt: now };
     push({ source: 'stall_open', ts: now, start: lastHb });
+  }
+  if (openStall && !openStall.logged && now - openStall.start > 1000) {
+    // Long stalls are also written straight to fd 2 (shipped by serverless log collection)
+    // so the evidence survives even if the process is killed before the next pull.
+    openStall.logged = true;
+    require('fs').writeSync(
+      2,
+      JSON.stringify({
+        research: 'stall_open',
+        ts: now,
+        start: openStall.start,
+        pid: process.pid,
+      }) + '\n'
+    );
   }
   if (supervisor && openStall && now - openStall.start > supervisor.killAfterMs) {
     // Emulated external supervision for non-terminating offenders. Written with a

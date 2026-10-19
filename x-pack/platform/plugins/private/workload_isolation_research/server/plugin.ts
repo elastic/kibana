@@ -22,6 +22,7 @@ import { Recorder } from './lib/recorder';
 import { registerRoutes } from './routes';
 import { registerResearchTasks, TickScheduler } from './tasks';
 import { registerTierBRoutes, registerTierBTasks } from './tier_b';
+import { registerMockLlmRoute } from './tier_b/mock_llm';
 import { API_BASE } from './routes';
 
 interface SetupDeps {
@@ -58,6 +59,7 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
     };
     const router = core.http.createRouter();
     registerTierBRoutes(router, API_BASE, getRecorder, getStart);
+    registerMockLlmRoute(router, API_BASE);
     registerRoutes({
       router,
       logger: this.logger,

@@ -90,6 +90,38 @@ export const SCENARIOS: Record<string, Scenario> = {
       ...sweep('microtask_chain', 'route', [10, 100, 1000, 10000], 8),
     ],
   },
+  /** Labelled stress points from the prod baseline (TM-blocked p99 23s, max 116s). Not part of every sweep. */
+  'tier-a-stress': {
+    name: 'tier-a-stress',
+    description: 'cpu_spin 30s and 120s via route and TM task (prod tail calibration).',
+    probe: { ...probe, timeoutMs: 300000 },
+    laptopProbe,
+    ticks,
+    phases: [
+      { name: 'warmup', durationS: 10 },
+      { name: 'baseline', durationS: 40 },
+      {
+        name: 'stress-cpu_spin-task-30000ms',
+        durationS: 20,
+        offender: { kind: 'cpu_spin', mode: 'task', doseMs: 30000 },
+      },
+      {
+        name: 'stress-cpu_spin-route-30000ms',
+        durationS: 20,
+        offender: { kind: 'cpu_spin', mode: 'route', doseMs: 30000 },
+      },
+      {
+        name: 'stress-cpu_spin-task-120000ms',
+        durationS: 30,
+        offender: { kind: 'cpu_spin', mode: 'task', doseMs: 120000 },
+      },
+      {
+        name: 'stress-cpu_spin-route-120000ms',
+        durationS: 30,
+        offender: { kind: 'cpu_spin', mode: 'route', doseMs: 120000 },
+      },
+    ],
+  },
   /** Variance probe: baseline only, used for paired-vs-shared baseline decision. */
   'baseline-only': {
     name: 'baseline-only',
@@ -142,6 +174,37 @@ export const SCENARIOS: Record<string, Scenario> = {
       },
     ],
   },
+  /** Tier B: Agent Builder multi-tool run with mocked LLM (prod worst tail: p99 110s). */
+  'tier-b-agent-builder': {
+    name: 'tier-b-agent-builder',
+    description:
+      '5 parallel execute_esql calls x 1000 wide rows, then answer; HTTP (local) and TM execution.',
+    probe,
+    laptopProbe,
+    ticks,
+    phases: [
+      {
+        name: 'seed',
+        durationS: 5,
+        action: 'seed',
+        actionParams: { kind: 'alerting_wide', rows: 1000, fields: 100 },
+      },
+      { name: 'warmup', durationS: 10 },
+      { name: 'baseline', durationS: 40 },
+      {
+        name: 'ab-local-5x1000',
+        durationS: 10,
+        action: 'agent-builder',
+        actionParams: { calls: 5, limit: 1000, mode: 'local' },
+      },
+      {
+        name: 'ab-task-5x1000',
+        durationS: 10,
+        action: 'agent-builder',
+        actionParams: { calls: 5, limit: 1000, mode: 'task_manager' },
+      },
+    ],
+  },
   /** Non-terminating offender with emulated external supervision (SIGKILL after 30s stall). */
   'infinite-loop-supervised': {
     name: 'infinite-loop-supervised',
@@ -156,7 +219,8 @@ export const SCENARIOS: Record<string, Scenario> = {
       {
         name: 'infinite_loop-task',
         durationS: 60,
-        offender: { kind: 'infinite_loop', mode: 'task', doseMs: 600000 },
+        // doseMs is only the safety cap (driver waits cap + 5s); the supervisor kills at 30s.
+        offender: { kind: 'infinite_loop', mode: 'task', doseMs: 60000 },
       },
     ],
   },

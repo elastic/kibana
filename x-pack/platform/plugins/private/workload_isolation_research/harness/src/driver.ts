@@ -264,6 +264,7 @@ export const runScenario = async (opts: RunOptions): Promise<{ runId: string; di
     const res = await kbn<Record<string, unknown>>(target, 'POST', `${API}/probe/_start`, {
       rps: scenario.probe.rps,
       path: scenario.probe.path,
+      ...(scenario.probe.timeoutMs ? { timeoutMs: scenario.probe.timeoutMs } : {}),
       runId,
     });
     probeBodies.push({ status: res.status, ...res.body });

@@ -17,11 +17,8 @@ export interface EsqlResult {
   values: unknown[][];
 }
 
-export const overviewEsql = async (query: string): Promise<EsqlResult> => {
-  const url = process.env.O11Y_KIBANA_QA_URL;
-  const key = process.env.O11Y_KIBANA_QA_API_KEY;
-  if (!url || !key) throw new Error('O11Y_KIBANA_QA_URL / O11Y_KIBANA_QA_API_KEY not set');
-  const res = await fetch(`${url.replace(/\/$/, '')}/internal/search/esql`, {
+const post = async (url: string, key: string, path: string, params: Record<string, unknown>) => {
+  const res = await fetch(`${url.replace(/\/$/, '')}${path}`, {
     method: 'POST',
     headers: {
       authorization: `ApiKey ${key}`,
@@ -30,12 +27,35 @@ export const overviewEsql = async (query: string): Promise<EsqlResult> => {
       'x-elastic-internal-origin': 'Kibana',
       'content-type': 'application/json',
     },
-    body: JSON.stringify({ params: { query } }),
+    body: JSON.stringify({ params }),
     signal: AbortSignal.timeout(120000),
   });
   const text = await res.text();
-  if (res.status !== 200) throw new Error(`overview esql ${res.status}: ${text.slice(0, 500)}`);
-  const body = JSON.parse(text);
+  if (res.status !== 200) throw new Error(`overview esql ${res.status}: ${text.slice(0, 300)}`);
+  return JSON.parse(text);
+};
+
+/** Async ES|QL (sync endpoint 502s beyond ~120s): submit with 1s wait, then poll by handle. */
+export const overviewEsql = async (
+  query: string,
+  maxWaitMs = 10 * 60 * 1000
+): Promise<EsqlResult> => {
+  const url = process.env.O11Y_KIBANA_QA_URL;
+  const key = process.env.O11Y_KIBANA_QA_API_KEY;
+  if (!url || !key) throw new Error('O11Y_KIBANA_QA_URL / O11Y_KIBANA_QA_API_KEY not set');
+  let body = await post(url, key, '/internal/search/esql_async', {
+    query,
+    wait_for_completion_timeout: '1s',
+    keep_alive: '10m',
+    keep_on_completion: false,
+  });
+  const deadline = Date.now() + maxWaitMs;
+  while (body.isRunning && body.id && Date.now() < deadline) {
+    body = await post(url, key, `/internal/search/esql_async/${encodeURIComponent(body.id)}`, {
+      wait_for_completion_timeout: '10s',
+      keep_alive: '10m',
+    });
+  }
   const raw = body.rawResponse ?? body;
   return { columns: raw.columns ?? [], values: raw.values ?? [] };
 };

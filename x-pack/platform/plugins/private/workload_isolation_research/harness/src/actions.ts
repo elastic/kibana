@@ -51,6 +51,59 @@ export const ACTIONS: Record<string, Action> = {
   },
 
   /**
+   * Agent Builder converse with a mocked LLM (served by the research plugin): N parallel
+   * execute_esql tool calls over wide rows, then a final answer. mode local = HTTP route,
+   * task_manager = background execution.
+   */
+  'agent-builder': async (params, { target, runId, log }) => {
+    const calls = Number(params.calls ?? 5);
+    const limit = Number(params.limit ?? 1000);
+    const hang = params.hangMs ? `-hang${params.hangMs}` : '';
+    const connector = must(
+      await kbn<{ id: string }>(target, 'POST', '/api/actions/connector', {
+        name: `wir-mock-llm-${runId}`.slice(0, 100),
+        connector_type_id: '.gen-ai',
+        config: {
+          apiProvider: 'OpenAI',
+          apiUrl: `${
+            process.env.WIR_KIBANA_SELF_URL ?? target.url
+          }${API}/mock_llm/${calls}-${limit}${hang}/chat/completions`,
+          defaultModel: 'gpt-4',
+          headers: { 'x-elastic-internal-origin': 'kibana' },
+        },
+        secrets: { apiKey: 'research-mock' },
+      }),
+      'create mock llm connector'
+    );
+    const results: Array<Record<string, unknown>> = [];
+    for (let i = 0; i < Number(params.runs ?? 1); i++) {
+      const t0 = Date.now();
+      const res = await kbn<Record<string, any>>(
+        target,
+        'POST',
+        '/api/agent_builder/converse',
+        {
+          input: 'Summarise the research rows.',
+          connector_id: connector.id,
+          _execution_mode: params.mode ?? 'local',
+        },
+        15 * 60 * 1000
+      ).catch((e) => ({ status: 0, body: { error: String(e) } as Record<string, any> }));
+      const steps = res.body?.steps ?? [];
+      results.push({
+        status: res.status,
+        ms: Date.now() - t0,
+        steps: steps.length,
+        tool_calls: steps.filter((s: Record<string, unknown>) => s.type === 'tool_call').length,
+        error: res.status >= 300 ? JSON.stringify(res.body).slice(0, 300) : undefined,
+      });
+    }
+    log(`agent-builder ${JSON.stringify(params)} -> ${JSON.stringify(results)}`);
+    await kbn(target, 'DELETE', `/api/actions/connector/${connector.id}`).catch(() => undefined);
+    return { results };
+  },
+
+  /**
    * ES|QL rule over wide rows (one alert per row) with N mustache-heavy actions per alert.
    * Exercises alerting -> actions renderActionParameterTemplates per alert x action.
    */
@@ -128,7 +181,8 @@ export const ACTIONS: Record<string, Action> = {
     await sleep(Number(params.drainS ?? 30) * 1000);
     await kbn(target, 'POST', `/api/alerting/rule/${rule.id}/_disable`).catch(() => undefined);
     await kbn(target, 'DELETE', `/api/alerting/rule/${rule.id}`).catch(() => undefined);
-    await kbn(target, 'DELETE', `/api/actions/connector/${connector.id}`).catch(() => undefined);
+    // Connector intentionally kept: queued action tasks still reference it (deleting it early
+    // fails them with "Saved object not found").
     return {
       rule_id: rule.id,
       execution_status: status.execution_status,

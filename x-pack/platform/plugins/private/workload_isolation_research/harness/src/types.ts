@@ -36,7 +36,7 @@ export interface Scenario {
   readonly name: string;
   readonly description: string;
   readonly phases: readonly Phase[];
-  readonly probe: { readonly rps: number; readonly path: string };
+  readonly probe: { readonly rps: number; readonly path: string; readonly timeoutMs?: number };
   readonly laptopProbe: { readonly rps: number; readonly path: string };
   readonly ticks: { readonly intervalMs: number };
   /** Optional emulated external supervisor (kill after stall ms) for non-terminating offenders. */
