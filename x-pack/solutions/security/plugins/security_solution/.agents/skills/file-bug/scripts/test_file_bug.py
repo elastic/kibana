@@ -2060,6 +2060,19 @@ class FileBugCliTest(unittest.TestCase):
                 json.loads(result.stdout)["body"], "See ![shot.png](https://img/shot.png)\n"
             )
 
+    def test_embed_uploads_cli_rejects_malformed_map(self):
+        with TemporaryDirectory() as tmp:
+            body = Path(tmp) / "body.md"
+            mapping = Path(tmp) / "uploaded.json"
+            body.write_text("See /tmp/shot.png\n", encoding="utf-8")
+            mapping.write_text(
+                json.dumps([["/tmp/shot.png", "https://img/shot.png"]]),
+                encoding="utf-8",
+            )
+            result = run_cli("embed-uploads", "--body", str(body), "--map", str(mapping))
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("path", result.stderr)
+
 
 TESTER_PARSE = (
     Path(__file__).resolve().parents[2]

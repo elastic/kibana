@@ -1,12 +1,21 @@
 #!/usr/bin/env python3
-"""Generate the two synthetic screenshots the media scenarios use (needs Pillow)."""
+"""Build the eval fixtures and render the scenarios into <out>/scenarios (needs Pillow).
+
+Usage: python3 make-fixtures.py <out-dir>
+Creates synthetic screenshots, a session dir for the Path B scenario, the s6 draft body,
+and copies each scenario with $FIXTURES / $SESSION_DIR replaced by real paths.
+"""
+import shutil
 import sys
 from pathlib import Path
 
 from PIL import Image, ImageDraw
 
+HERE = Path(__file__).resolve().parent
+
 
 def make(path: Path, lines: list) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     image = Image.new("RGB", (900, 260), "white")
     draw = ImageDraw.Draw(image)
     for index, line in enumerate(lines):
@@ -14,10 +23,11 @@ def make(path: Path, lines: list) -> None:
     image.save(path)
 
 
-out = Path(sys.argv[1])
-out.mkdir(parents=True, exist_ok=True)
+out = Path(sys.argv[1]).resolve()
+fixtures = out / "fixtures"
+session = out / "session"
 make(
-    out / "shot-sensitive.png",
+    fixtures / "shot-sensitive.png",
     [
         "Kibana  https://acme-prod-7f3a.kb.us-east-1.aws.found.io/app/security/alerts",
         "Host: ACME-FIN-LAPTOP-0042  IP 10.42.7.19",
@@ -26,10 +36,29 @@ make(
     ],
 )
 make(
-    out / "shot-clean.png",
+    fixtures / "shot-clean.png",
     [
         "Kibana  http://localhost:5601/app/security/alerts",
         "Host: demo-host-1  user: elastic",
         "Alerts table: 0 results (expected 12)",
     ],
 )
+make(
+    session / "screenshots" / "ea-flow1.png",
+    [
+        "Kibana http://localhost:5601/app/security/entity_analytics",
+        "Risk scores table: 0 entities  (toast: TypeError)",
+    ],
+)
+for name in ("findings-flow-1.md", "config.json"):
+    shutil.copy(HERE / "fixtures" / name, session / name)
+body = (HERE / "fixtures" / "s6-body.md").read_text(encoding="utf-8")
+(fixtures / "s6-body.md").write_text(body.replace("$FIXTURES", str(fixtures)), encoding="utf-8")
+
+rendered = out / "scenarios"
+rendered.mkdir(parents=True, exist_ok=True)
+for scenario in sorted((HERE / "scenarios").glob("*.txt")):
+    text = scenario.read_text(encoding="utf-8")
+    text = text.replace("$FIXTURES", str(fixtures)).replace("$SESSION_DIR", str(session))
+    (rendered / scenario.name).write_text(text, encoding="utf-8")
+print(f"fixtures and {len(list(rendered.glob('*.txt')))} scenarios written to {out}")

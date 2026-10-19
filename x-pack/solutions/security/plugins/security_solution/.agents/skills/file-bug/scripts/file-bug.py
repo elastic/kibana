@@ -372,12 +372,14 @@ def _cmd_upload(args: argparse.Namespace) -> int:
 def _uploaded_pairs(payload: object) -> list:
     entries = payload.get("uploaded", payload) if isinstance(payload, dict) else payload
     if not isinstance(entries, list):
-        return []
-    return [
-        (str(entry["path"]), str(entry["url"]))
-        for entry in entries
-        if isinstance(entry, dict)
-    ]
+        raise ValueError('embed-uploads --map must be a list or {"uploaded": [...]}')
+    for entry in entries:
+        if not isinstance(entry, dict) or "path" not in entry or "url" not in entry:
+            raise ValueError(
+                'each embed-uploads --map entry must be {"path": ..., "url": ...} '
+                "(use the output of `upload`)"
+            )
+    return [(str(entry["path"]), str(entry["url"])) for entry in entries]
 
 
 def _cmd_embed_uploads(args: argparse.Namespace) -> int:
