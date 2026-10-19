@@ -18,7 +18,7 @@ import { EmbeddedMap } from '../components/embeddables/embedded_map';
 import { LastEventTimeHeader } from '../../components/last_event_time_header';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { NetworkKpiComponent } from '../components/kpi_network';
-import { SearchWithDataView } from '../../components/search_with_data_view';
+import { SearchWithDataView } from '../../../common/components/search_with_data_view';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import {
   useGlobalFullScreen,
@@ -159,7 +159,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 />
               )}
               <Display show={!hasFullScreenContent}>
-                <SearchWithDataView dataView={dataView} />
+                <SearchWithDataView dataView={dataView} scope={PageScope.explore} />
 
                 <EuiSpacer size="l" />
 
