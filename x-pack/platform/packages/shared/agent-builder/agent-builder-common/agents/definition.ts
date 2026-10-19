@@ -131,6 +131,13 @@ export interface AgentConfiguration {
   enable_elastic_capabilities?: boolean;
 
   /**
+   * When false, the platform's internal tools (filesystem, todos, skills, HTTP API, attachments,
+   * sub-agents, user questions) are not added to the agent's runs, leaving only `tools` and
+   * `set_conversation_metadata` on a conversation template. Defaults to true.
+   */
+  enable_internal_tools?: boolean;
+
+  /**
    * Optional list of workflow IDs. When set, these workflows run before the agent is executed.
    */
   workflow_ids?: string[];

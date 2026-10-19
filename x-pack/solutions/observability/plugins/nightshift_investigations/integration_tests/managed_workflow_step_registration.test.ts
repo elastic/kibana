@@ -119,7 +119,6 @@ describe('agent hooks around the combined workflows', () => {
       cortexEnabled: true,
       memoryEnabled: true,
       decisionTreesEnabled: true,
-      investigationToolsEnabled: true,
       proposalsEnabled: true,
     }).baseConfiguration;
 

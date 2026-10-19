@@ -75,7 +75,11 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
   return { context, toolManager };
 };
 
-const register = async (context: AgentHandlerContext, subagentIds: string[] = ['other-agent']) => {
+const register = async (
+  context: AgentHandlerContext,
+  subagentIds: string[] = ['other-agent'],
+  extraConfiguration: Record<string, unknown> = {}
+) => {
   const params = {
     context,
     agentId: 'agent-1',
@@ -85,7 +89,7 @@ const register = async (context: AgentHandlerContext, subagentIds: string[] = ['
     relevantSkillsEnabled: false,
     subagentTracker: {},
     conversationExists: jest.fn(),
-    agentConfiguration: { subagent_ids: subagentIds },
+    agentConfiguration: { subagent_ids: subagentIds, ...extraConfiguration },
   } as unknown as RegisterInternalToolsParams;
   await registerInternalTools(params);
 };
@@ -158,5 +162,32 @@ describe('registerInternalTools - subagents', () => {
     expect(createSubagentTool).toHaveBeenCalledWith(
       expect.objectContaining({ transientOnly: false })
     );
+  });
+});
+
+describe('registerInternalTools - enable_internal_tools', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resolveAllowedSubagentsMock.mockResolvedValue([
+      { id: 'other-agent', description: 'Other agent' },
+    ]);
+  });
+
+  it('registers the platform tools by default', async () => {
+    const { context, toolManager } = createContext({ interactivity: { enabled: true } });
+
+    await register(context);
+
+    expect(addedToolIds(toolManager)).toEqual(
+      expect.arrayContaining(['read_file', 'list_files', 'describe_api', 'execute_api'])
+    );
+  });
+
+  it('registers none of the platform tools when the agent opts out', async () => {
+    const { context, toolManager } = createContext({ interactivity: { enabled: true } });
+
+    await register(context, ['other-agent'], { enable_internal_tools: false });
+
+    expect(addedToolIds(toolManager)).toEqual([]);
   });
 });

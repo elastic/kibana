@@ -63,25 +63,33 @@ export const selectTools = async ({
 }): Promise<SelectToolsResult> => {
   const formatContext: AttachmentFormatContext = { request, spaceId };
 
+  const internalToolsEnabled = agentConfiguration.enable_internal_tools !== false;
+
   // create tool selection for attachments types
-  const attachmentTypes = conversation.attachmentTypes.map((type) => type.type);
+  const attachmentTypes = internalToolsEnabled
+    ? conversation.attachmentTypes.map((type) => type.type)
+    : [];
   const attachmentToolIds = getToolsForAttachmentTypes(attachmentTypes, attachmentsService);
   const attachmentToolSelection: ToolSelection = {
     tool_ids: attachmentToolIds,
   };
 
-  const versionedAttachmentBoundTools = await getVersionedAttachmentBoundTools({
-    attachmentStateManager: conversation.attachmentStateManager,
-    attachmentsService,
-    formatContext,
-  });
+  const versionedAttachmentBoundTools = internalToolsEnabled
+    ? await getVersionedAttachmentBoundTools({
+        attachmentStateManager: conversation.attachmentStateManager,
+        attachmentsService,
+        formatContext,
+      })
+    : [];
 
-  const versionedAttachmentTools = createVersionedAttachmentTools({
-    attachmentStateManager: conversation.attachmentStateManager,
-    attachmentsService,
-    formatContext,
-    runner,
-  });
+  const versionedAttachmentTools = internalToolsEnabled
+    ? createVersionedAttachmentTools({
+        attachmentStateManager: conversation.attachmentStateManager,
+        attachmentsService,
+        formatContext,
+        runner,
+      })
+    : [];
 
   const hasMemoryEnabledAiIndex =
     aiIndexCatalog?.some(({ memoryEnabled }) => memoryEnabled) ?? false;
