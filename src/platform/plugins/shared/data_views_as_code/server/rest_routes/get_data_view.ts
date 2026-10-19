@@ -26,9 +26,10 @@ export const registerGetDataViewAsCodeRoute = ({
       path: GET_DATA_VIEW_AS_CODE_PATH,
       access: 'public',
       enableQueryVersion: true,
-      description: 'Get a data view by id',
+      summary: 'Get a data view',
+      description: 'Returns a data view by ID, including its field settings and runtime fields.',
       options: {
-        tags: ['oas-tag:data views'],
+        tags: ['oas-tag:data-views-v2'],
         availability: {
           stability: 'stable',
           since: '9.6.0',
@@ -56,7 +57,7 @@ export const registerGetDataViewAsCodeRoute = ({
                   minLength: 1,
                   maxLength: 1_000,
                   meta: {
-                    description: 'The id of the data view.',
+                    description: 'The ID of the data view to return.',
                   },
                 }),
               },

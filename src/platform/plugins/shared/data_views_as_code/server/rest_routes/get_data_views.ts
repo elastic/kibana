@@ -25,9 +25,11 @@ export const registerGetDataViewsAsCodeRoute = ({
       path: BASE_PATH,
       access: 'public',
       enableQueryVersion: true,
-      description: 'Get all data views paginated',
+      summary: 'Get data views',
+      description:
+        'Returns a paginated list of the data views in the current space. Each item includes only the name, index pattern, and time field. To get the full definition, use `GET /api/data_views/v2/{id}`.',
       options: {
-        tags: ['oas-tag:data views'],
+        tags: ['oas-tag:data-views-v2'],
         availability: {
           stability: 'stable',
           since: '9.6.0',
