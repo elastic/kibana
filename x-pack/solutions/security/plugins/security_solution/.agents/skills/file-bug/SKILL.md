@@ -11,20 +11,20 @@ disable-model-invocation: true
 
 Write a bug to `$TARGET_REPO` only after a **write-yes** (the explicit yes): a later message that clearly approves **this** shown draft (for example “yes, file it”). Do not offer to file anything on your own initiative. “Create a bug”, “file this ticket”, or “file finding 2” means **prepare a draft**, not write. `write` ends every body with the visible stamp `Filed via file-bug` and a hidden marker `<!-- filed-via: file-bug v1 -->`.
 
-Security-specific; does not build on repo-level `gh-create-issue`. Exploratory-tester may hand off here only after the human **names** the findings. Read `references/drafting.md` while collecting or drafting. `scripts/file-bug.py` is the source of truth (`--help` per command); `scripts/file_bug.py` is the library, not a CLI.
+Exploratory-tester may hand off here only after the human **names** the findings. Read `references/drafting.md` while collecting or drafting. `scripts/file-bug.py` is the source of truth (`--help` per command); `scripts/file_bug.py` is the library, not a CLI.
 
 ```bash
 FILE_BUG="x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug/scripts/file-bug.py"
 TARGET_REPO="elastic/kibana"   # becomes elastic/security-team after Classify says so
 ```
 
-Run commands as `python3 "$FILE_BUG" <cmd>`; GitHub label reads and writes go through it. JSON on stdout; exit `0` ok, `1` fail, `2` ask. Validate labels with `--search`, never `gh label list --limit 1000`.
+Run `python3 "$FILE_BUG" <cmd>`: JSON on stdout, exit `0` ok, `1` fail, `2` ask.
 
 “File 2 and 5” means **two full loops** — two drafts, two searches, two write-yes, **two issues**.
 
 ## Fileable checklist
 
-Do not ask for a write-yes until `check-draft` exits 0 (create: pass `--title`, `--repo` and every `--label`; comment/reopen: omit `--title`) or you have walked every remaining gap (`Unknown` is allowed). Field rules: `references/drafting.md`.
+No write-yes request until `check-draft` exits 0 (create: pass `--title`, `--repo` and every `--label`; comment/reopen: omit `--title`) or every remaining gap is walked (`Unknown` is allowed).
 
 | Gap or hit | Human must | Flag |
 |---|---|---|
@@ -56,7 +56,7 @@ Two collect paths; same later steps.
 
 ### 2. Search
 
-Search **open and closed issues** and **open PRs** (include drafts). Empty issue results are **not** proof the bug is new — run a **second** issue query before proposing create. Run `GH_PAGER=cat gh search issues --repo "$TARGET_REPO" --limit 10 --json number,state,title,body "<title and distinctive error strings>"` (and `gh search prs` for open PRs), pipe each through `parse-search --input -` into one `matches.json` (or pass raw JSON to `decide --matches -`). `decide --matches matches.json` exits 0 with `create` only when there are **no** matches. **One or more** matches exit 2 — show candidates (`gh issue view` / `gh pr view`), match the *work* not title keywords, and let the human pick create / comment / reopen.
+Search **open and closed issues** and **open PRs** (include drafts). Empty results are **not** proof the bug is new — run a **second** issue query before proposing create. Run `GH_PAGER=cat gh search issues --repo "$TARGET_REPO" --limit 10 --json number,state,title,body "<title and distinctive error strings>"` (and `gh search prs`), pipe each through `parse-search --input -` into one `matches.json`, then `decide --matches matches.json`. It exits 0 with `create` only when there are **no** matches. **One or more** matches exit 2 — show candidates (`gh issue view` / `gh pr view`), match the *work* not title keywords, and let the human pick create / comment / reopen.
 
 ### 3. Draft and stop
 
@@ -68,13 +68,11 @@ python3 "$FILE_BUG" check-draft --body body.md \
   --label bug --label triage_needed --label "Team:…"
 ```
 
-`--finding "$FINDING_JSON"` is Path B only; on Path A omit it (also on `scan-wip` and `write`). Path A drafts already end with the visible `Filed via file-bug` stamp that `check-draft` requires; `write` adds only the stamp or hidden marker that is missing, never a duplicate.
-
-Run `validate-labels --repo "$TARGET_REPO"` and `scan-wip` before `check-draft`. New issues always get `bug` and `triage_needed`. If `infer-release` is confident, pass that `vX.Y.Z` as `--label` on `check-draft` and `write` (`validate-labels` first; `write` does not infer one). Version `Unknown` → omit the `v*` label. Path B also `--label sec-eng-prod:exploratory-tester`.
+Run `validate-labels --repo "$TARGET_REPO"` (it uses `--search`; never `gh label list --limit 1000`) and `scan-wip` first. `--finding "$FINDING_JSON"` is Path B only; on Path A omit it everywhere. Path A drafts already end with the visible `Filed via file-bug` stamp that `check-draft` requires; `write` adds only what is missing, never a duplicate. New issues always get `bug` and `triage_needed`; add the `vX.Y.Z` label when `infer-release` is confident (omit it on `Unknown`), and `sec-eng-prod:exploratory-tester` on Path B.
 
 If `check-draft` reports `security_issue:file_in_security_team`, switch `TARGET_REPO` to `elastic/security-team` and re-run Search there; `write` refuses `elastic/kibana` for that hit unless `--security-ok`.
 
-**Media review.** Text scans do not read images. Open every screenshot and recording before upload (video: start, middle and failure frames). Real customer or host data — hostnames, IPs, emails, org names, cluster URLs, keys or tokens, including the URL bar and console/network panels — means the file is **not uploaded**: ask for a redacted or synthetic-data replacement. List each file under **Media reviewed** (file → clean / needs redaction), say what you could not check, and pass `--media-ok` only after the human confirms all files are clean.
+**Media review.** Text scans do not read images. Open every screenshot and recording before upload (video: start, middle and failure frames). Real customer or host data — hostnames, IPs, emails, org names, cluster URLs, keys or tokens, including the URL bar and console/network panels — means the file is **not uploaded**: ask for a redacted or synthetic-data replacement. List each file under **Media reviewed** (file → clean / needs redaction), say what you could not check, and pass `--media-ok` only after the human confirms.
 
 ### 4. Write (only after write-yes)
 
@@ -93,7 +91,7 @@ Path B adds `--label sec-eng-prod:exploratory-tester --finding "$FINDING_JSON"`;
 
 Comment / reopen also need `--number N`. `upload` posts to `uploads.github.com/user-attachments/assets` (undocumented; can change). Reply with the issue URL, action, uploaded URLs, leftovers.
 
-Never retry a failed **create** or **comment**. If `reopen_comment` reopens and the comment fails, report the partial write and do not reopen again.
+Never retry a failed **create** or **comment**. If `reopen_comment` reopens and the comment fails, report the partial write and do not reopen again. If `upload` fails or leaves leftovers, do not `write`: ask whether to retry once, hold, or file without the file — dropping it changes the approved draft, so re-show it and wait for a fresh write-yes.
 
 ## Red flags
 

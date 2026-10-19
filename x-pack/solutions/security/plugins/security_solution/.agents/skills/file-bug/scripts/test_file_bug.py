@@ -868,6 +868,24 @@ class CheckDraftTest(unittest.TestCase):
         self.assertNotIn("stamp", gaps)
         self.assertNotIn("body_describe", gaps)
 
+    def test_comment_without_finding_skips_template_gaps_but_keeps_safety_gates(self):
+        clean = check_draft(
+            body="Still reproducible on 9.3.0: 0 results for Last 24 hours.\n",
+            title=None,
+            finding={},
+            config={},
+        )
+        self.assertEqual(clean, [])
+        flagged = check_draft(
+            body="Ping ada@elastic.co, an authentication bypass, ![s](a.png)\n",
+            title=None,
+            finding={},
+            config={},
+        )
+        self.assertIn("sensitive:email", flagged)
+        self.assertIn("security_issue:file_in_security_team", flagged)
+        self.assertIn("media_review", flagged)
+
     def test_missing_stamp_and_bad_title(self):
         gaps = check_draft(
             body="**Steps to reproduce:**\n1. click\n",

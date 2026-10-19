@@ -52,8 +52,11 @@ make(
 )
 for name in ("findings-flow-1.md", "config.json"):
     shutil.copy(HERE / "fixtures" / name, session / name)
-body = (HERE / "fixtures" / "s6-body.md").read_text(encoding="utf-8")
-(fixtures / "s6-body.md").write_text(body.replace("$FIXTURES", str(fixtures)), encoding="utf-8")
+for source in (HERE / "fixtures").iterdir():
+    if source.name in ("findings-flow-1.md", "config.json"):
+        continue
+    text = source.read_text(encoding="utf-8")
+    (fixtures / source.name).write_text(text.replace("$FIXTURES", str(fixtures)), encoding="utf-8")
 
 rendered = out / "scenarios"
 rendered.mkdir(parents=True, exist_ok=True)

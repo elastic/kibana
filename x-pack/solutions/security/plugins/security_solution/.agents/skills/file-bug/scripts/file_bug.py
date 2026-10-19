@@ -1038,7 +1038,9 @@ def check_draft(
     media_ok: bool = False,
 ) -> list[str]:
     merged = _finding_with_body_answers(finding, body)
-    gaps = list(pack_gaps(merged, config))
+    # A comment/reopen without a finding adds to an existing issue that already holds the
+    # template answers, so only the sensitive/security/WIP/media gates apply to it.
+    gaps = [] if title is None and not finding else list(pack_gaps(merged, config))
     if title is not None:
         if len(title) > MAX_TITLE_LEN or not _TITLE_FORMAT_RE.match(title):
             gaps.append("title")
