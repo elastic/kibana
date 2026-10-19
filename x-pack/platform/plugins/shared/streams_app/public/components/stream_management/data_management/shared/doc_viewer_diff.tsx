@@ -103,6 +103,14 @@ function JsonDiffViewer({ hit, decreaseAvailableHeightBy }: DocViewRenderProps) 
 
   const editorRef = useRef<monaco.editor.IDiffEditor | null>(null);
 
+  // Registered before the editor below is created: Monaco falls back to the light theme for a theme
+  // id it does not know yet, and defining the theme later does not bring the editor back. Once the
+  // editor uses it, a later palette change is picked up by Monaco itself, since defining the
+  // active theme refreshes every editor.
+  useLayoutEffect(() => {
+    initializeRegisteredLanguagesTheme(euiTheme);
+  }, [euiTheme]);
+
   useLayoutEffect(() => {
     if (!wrapperRef.current) return;
     const oldModel = monaco.editor.createModel(originalValue, XJsonLang.ID);
@@ -144,13 +152,6 @@ function JsonDiffViewer({ hit, decreaseAvailableHeightBy }: DocViewRenderProps) 
     editorRef.current.getOriginalEditor().updateOptions(commonOptions);
     editorRef.current.getModifiedEditor().updateOptions(commonOptions);
   }, [originalValue, newValue, editorHeight]);
-
-  useEffect(() => {
-    initializeRegisteredLanguagesTheme(euiTheme);
-
-    // apply the updated theme so the diff editor reflects the current color mode
-    monaco.editor.setTheme(CODE_EDITOR_DEFAULT_THEME_ID);
-  }, [euiTheme]);
 
   return (
     <div
