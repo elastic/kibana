@@ -17,6 +17,7 @@ import { UnifiedDataTable, getRenderCustomToolbarWithElements } from '@kbn/unifi
 import { fetchAlertingEpisodes } from '@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes';
 import { fetchClassicAlertsAsEpisodes } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_episodes';
 import { useAlertingEpisodesDataView } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view';
+import { useBulkGetMaintenanceWindowsQuery } from '@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows';
 import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
 import { queryKeys } from '@kbn/alerting-v2-episodes-ui/query_keys';
 import userEvent from '@testing-library/user-event';
@@ -74,6 +75,10 @@ jest.mock('@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_episod
 // which requires heavy Kibana data-view infra. Mock the hook so useFetchAlertingEpisodesQuery
 // gets a ready dataView without going through the full data-view construction path.
 jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view');
+
+jest.mock('@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows', () => ({
+  useBulkGetMaintenanceWindowsQuery: jest.fn(() => ({ data: undefined, isFetching: false })),
+}));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
   createEpisodeActions: jest.fn(() => []),
@@ -178,6 +183,13 @@ const mockServices = {
   uiActions: { getTriggerCompatibleActions: jest.fn().mockResolvedValue([]) },
   spaces: mockSpaces,
   storage: mockStorage,
+  docLinks: {
+    links: {
+      alerting: {
+        viewAndManageAlerts: 'https://docs.test/view-and-manage-alerts',
+      },
+    },
+  },
 };
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -302,6 +314,7 @@ describe('AlertsListPage', () => {
       'tags',
       'rule_tags',
       'assignees',
+      'maintenance_windows',
     ]);
     expect(lastCall?.externalCustomRenderers).toHaveProperty('severity');
     expect(typeof lastCall?.externalCustomRenderers?.severity).toBe('function');
@@ -310,6 +323,7 @@ describe('AlertsListPage', () => {
   it.each([
     ['tags', 'Alert tags'],
     ['rule_tags', 'Rule tags'],
+    ['maintenance_windows', 'Maintenance windows'],
   ])('labels the %s column %p and takes its sort control away', (columnId, label) => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     const customize = lastCall?.customGridColumnsConfiguration?.[columnId];
@@ -332,6 +346,7 @@ describe('AlertsListPage', () => {
     'tags',
     'rule_tags',
     'assignees',
+    'maintenance_windows',
   ])('takes the remove column action away from the %s column', (columnId) => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     const customize = lastCall?.customGridColumnsConfiguration?.[columnId];
@@ -352,6 +367,19 @@ describe('AlertsListPage', () => {
     const customize = lastCall?.customGridColumnsConfiguration?.['rule.id'];
 
     expect(customize!({ column: { id: 'rule.id', actions: false } }).actions).toBe(false);
+  });
+
+  it('registers a cell renderer for the maintenance windows column', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+
+    expect(typeof lastCall?.externalCustomRenderers?.maintenance_windows).toBe('function');
+  });
+
+  it('resolves maintenance windows while the column is shown', () => {
+    expect(jest.mocked(useBulkGetMaintenanceWindowsQuery)).toHaveBeenLastCalledWith(
+      expect.objectContaining({ ids: [] }),
+      expect.objectContaining({ enabled: true })
+    );
   });
 
   it('does not pass key prop derived from tableKey (no tableKey state)', () => {
