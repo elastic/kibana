@@ -9,10 +9,10 @@ import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu } from '@kbn/app-header';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { useContentListPhase } from '@kbn/content-list-provider';
 import { ALERTING_V2_ACTION_POLICIES_APP_ID } from '@kbn/alerting-v2-constants';
 import { i18n } from '@kbn/i18n';
-import { experimentalBadge } from '../../components/experimental_badge';
 import {
   UniversalRulesOnlyCallout,
   universalRulesOnlyBadge,
@@ -110,6 +110,7 @@ export const ActionPoliciesListHeader = ({
   onCreateWithAgent,
 }: ActionPoliciesListHeaderProps) => {
   const phase = useContentListPhase();
+  const { links } = useService(CoreStart('docLinks'));
   const showHeaderMenu = canWrite && phase !== 'empty' && phase !== 'initialLoad';
   const showCreateWithAgent = useAlertingV2ExperimentalFeatures();
   const createWithAgentDisabled = !useAreAgentBuilderSkillsAvailable();
@@ -146,9 +147,10 @@ export const ActionPoliciesListHeader = ({
       <AppHeader
         sticky={false}
         title={ACTION_POLICIES_LIST_PAGE_TITLE}
-        badges={[universalRulesOnlyBadge, experimentalBadge]}
+        badges={[universalRulesOnlyBadge]}
         spacing="bleed"
         menu={headerMenu}
+        docLink={links.alerting.manageActionPolicies}
       />
       <EuiSpacer size="m" />
       <UniversalRulesOnlyCallout

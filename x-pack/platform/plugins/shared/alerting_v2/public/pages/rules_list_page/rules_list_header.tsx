@@ -15,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 import { canAccessTriggersActionsRules, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
 import { useHostTabs } from '../../application/tabs_context';
-import { experimentalBadge } from '../../components/experimental_badge';
 import { paths } from '../../constants';
 import {
   useAreAgentBuilderSkillsAvailable,
@@ -134,6 +133,7 @@ export const RulesListHeader = ({
 
   const application = useService(CoreStart('application'));
   const basePath = useService(CoreStart('http')).basePath;
+  const { links } = useService(CoreStart('docLinks'));
   const hostTabs = useHostTabs();
   const showBuildSequence = useAlertingV2ExperimentalFeatures();
   const showCreateWithAgent = useAlertingV2ExperimentalFeatures();
@@ -212,9 +212,9 @@ export const RulesListHeader = ({
         sticky={false}
         title={RULES_LIST_PAGE_TITLE}
         tabs={tabs}
-        badges={[experimentalBadge]}
         spacing="bleed"
         menu={headerMenu}
+        docLink={links.alerting.viewManageRules}
       />
       <EuiSpacer size="m" />
     </>

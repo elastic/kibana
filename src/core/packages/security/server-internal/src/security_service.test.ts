@@ -62,6 +62,75 @@ describe('SecurityService', function () {
           `"security API can only be registered once"`
         );
       });
+
+      it('returns the names of workload types, including ones registered later', () => {
+        const setup = service.setup();
+        const { serviceAccounts } = setup.registerSecurityDelegate(createStubInternalContract());
+
+        expect(serviceAccounts.getWorkloadTypeName('workflows', 'workflow')).toBeUndefined();
+
+        setup.serviceAccounts.registerWorkloadType('workflows', {
+          type: 'workflow',
+          name: 'Workflow',
+        });
+
+        expect(serviceAccounts.getWorkloadTypeName('workflows', 'workflow')).toBe('Workflow');
+        expect(serviceAccounts.getWorkloadTypeName('alerting', 'workflow')).toBeUndefined();
+      });
+
+      it('resolves bound workloads through their workload type', async () => {
+        const setup = service.setup();
+        const { serviceAccounts } = setup.registerSecurityDelegate(createStubInternalContract());
+        setup.serviceAccounts.registerWorkloadType('workflows', {
+          type: 'workflow',
+          name: 'Workflow',
+          resolveWorkloads: async (workloads) =>
+            workloads.map(({ workloadId }) => ({
+              title: `Workflow ${workloadId}`,
+              path: `/app/workflows/${workloadId}`,
+            })),
+        });
+
+        await expect(
+          serviceAccounts.resolveBoundWorkloads([
+            {
+              pluginId: 'workflows',
+              workloadType: 'workflow',
+              workloadId: 'w-1',
+              spaceId: 'marketing',
+            },
+          ])
+        ).resolves.toEqual([{ title: 'Workflow w-1', href: '/s/marketing/app/workflows/w-1' }]);
+      });
+
+      it('builds links under the configured base path', async () => {
+        configService = configServiceMock.create({
+          getConfig$: {
+            server: { basePath: '/kbn' },
+            xpack: { security: { fipsMode: { enabled: !!getFips() } } },
+          },
+        });
+        service = new SecurityService(mockCoreContext.create({ configService }));
+        const setup = service.setup();
+        const { serviceAccounts } = setup.registerSecurityDelegate(createStubInternalContract());
+        setup.serviceAccounts.registerWorkloadType('workflows', {
+          type: 'workflow',
+          name: 'Workflow',
+          resolveWorkloads: async (workloads) =>
+            workloads.map(({ workloadId }) => ({ path: `/app/workflows/${workloadId}` })),
+        });
+
+        await expect(
+          serviceAccounts.resolveBoundWorkloads([
+            {
+              pluginId: 'workflows',
+              workloadType: 'workflow',
+              workloadId: 'w-1',
+              spaceId: 'default',
+            },
+          ])
+        ).resolves.toEqual([{ href: '/kbn/app/workflows/w-1' }]);
+      });
     });
 
     describe('#fips', () => {

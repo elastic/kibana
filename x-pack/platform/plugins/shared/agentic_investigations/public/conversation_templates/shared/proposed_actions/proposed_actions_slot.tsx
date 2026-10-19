@@ -26,7 +26,7 @@ import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { ProposedActionButton } from '@kbn/agentic-investigations-common';
+import { ProposedActionButton, ProposedActionsList } from '@kbn/agentic-investigations-common';
 import { useCurrentUserProfile } from '../../../user_profiles';
 import { decisionErrorMessage } from './decision_errors';
 import {
@@ -154,16 +154,20 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      {proposals.map((proposal) => (
-        <ProposedActionRow
-          key={proposal.id}
-          proposal={proposal}
-          currentActorName={currentActorName}
-          onDecisionError={onDecisionError}
-          approve={approve}
-          dismiss={dismiss}
-        />
-      ))}
+      <EuiFlexItem>
+        <ProposedActionsList data-test-subj="investigationFlyoutProposedActionsList">
+          {proposals.map((proposal) => (
+            <ProposedActionRow
+              key={proposal.id}
+              proposal={proposal}
+              currentActorName={currentActorName}
+              onDecisionError={onDecisionError}
+              approve={approve}
+              dismiss={dismiss}
+            />
+          ))}
+        </ProposedActionsList>
+      </EuiFlexItem>
       {hasNextPage && (
         <EuiFlexItem>
           <EuiButtonEmpty
