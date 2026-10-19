@@ -905,18 +905,17 @@ steps:
     with:
       level: "{{ steps.read_ki.output.hits.hits[0]._source.attributes.autonomy | default: consts.default_autonomy }}"
 
-  # Two Investigations can reach the same host and each recommend the same
-  # containment. This step decides, per recommendation, whether a live AlertZero
-  # Proposal already holds it (raised by any Investigation, Hunt or Forensics) and
-  # returns what to create (`proposals`, each with the id to create it under) and
-  # what to leave alone (`converged`, each with a journal line). It also returns
-  # `expectedProposalCount`, the gate's creation barrier, baselined on what the
-  # investigation already holds: at least the approved handoff that requested
-  # this analysis. Same code Hunt's packaging runs.
+  # Two Investigations can reach the same host and recommend the same
+  # containment. For each recommendation, this step checks whether a live
+  # AlertZero Proposal already holds it, from any Investigation, Hunt or
+  # Forensics. It returns `proposals` to create (each with its id), `converged`
+  # to leave alone (each with a journal line), and `expectedProposalCount`, the
+  # gate's creation barrier, which is at least the approved handoff that
+  # requested this analysis. Same code Hunt's packaging runs.
   #
-  # Fails closed: if existing Proposals cannot be read, `mintSuppression` is
-  # `check_failed`, nothing is created, and `resolve_proposals` below retires the
-  # indicator as failed with that reason. A thrown step is treated the same way.
+  # Fails closed: if existing Proposals cannot be read (or the step throws),
+  # `mintSuppression` is `check_failed`, nothing is created, and
+  # `resolve_proposals` below retires the indicator as failed.
   - name: resolve_proposal_slots
     type: alertzero.resolveProposals
     if: >-
@@ -974,7 +973,7 @@ steps:
           {%- else -%}
           Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` found containment worth proposing, but every proposal it would have raised already exists, so none was created.
           {%- endif -%}
-          {%- if converged_count > 0 %} {{ converged_count }} already raised by another Investigation; the notes below say where.{% endif -%}
+          {%- if converged_count > 0 %} {{ converged_count }} already raised by another Investigation.{% endif -%}
           {%- if already_open_count > 0 %} {{ already_open_count }} already open on this investigation.{% endif -%}
           {%- if new_count > 0 %} The investigation closes once every proposal on it has been decided.{% else %} The investigation stays open until an analyst closes it.{% endif -%}
 

@@ -102,14 +102,12 @@ steps:
   # analysis omits `impact` and `category` on purpose so the action's own apply,
   # and `autoApprove` is a boolean the bridge's trigger would reject as `''`.
   #
-  # This is also where a lost race lands. The run resolves each Proposal's id
-  # against what already exists before it dispatches this gate, and two runs
-  # that reach one host at the same time can both find the subject free. The
-  # service creates the Proposal under `proposalId` or refuses with a conflict,
-  # so the loser's create fails before any gate is parked, and `continue`
-  # carries it on to the steps below. `journal_lost_race` says where the
-  # finding went; `expectedProposalCount` still counts the lost Proposal, so
-  # that Investigation stays open until an analyst closes it.
+  # A lost race also lands here: if two runs reach the same host at once, both
+  # can find the subject free, but only one create succeeds under `proposalId`.
+  # The loser fails before any gate is parked and `continue` moves it on.
+  # `journal_lost_race` records where the finding went. `expectedProposalCount`
+  # still counts the lost Proposal, so the Investigation stays open until an
+  # analyst closes it.
   - name: create_and_gate_proposal
     type: workflow.execute
     with:
@@ -127,11 +125,11 @@ steps:
     on-failure:
       continue: true
 
-  # Only when the create above failed under a caller-derived id: did another
-  # Investigation get there first? The Proposal under this id says which one
-  # raised it. Its document can take a moment to be searchable after the
-  # conflict, so the read is retried. A read that still fails is not an error:
-  # the loser just gets the generic note below.
+  # Get existing proposal when the previous create step failed under a
+  # caller-derived id: did another Investigation get there first? The
+  # Proposal under this id says which one raised it. Its document can
+  # take a moment to be searchable after the conflict, so the read is
+  # retried. A read that still fails is not an error - the loser just gets the generic note below.
   - name: fetch_existing_proposal
     type: kibana.request
     if: >-
@@ -150,13 +148,8 @@ steps:
         delay: 1s
       continue: true
 
-  # A lost race is a Proposal under this id that belongs to a different
-  # conversation. Any other failure is left to `journal_wrap_failed`, so the
-  # note here is only written when it can say something true.
-  #
-  # Unlike hunt_proposal_gate.yaml there is no level to compare: the id is
-  # derived from the action and its target, so the winner proposes the same
-  # containment of the same host or process this finding asked for.
+  # A lost race is a Proposal under this id owned by a different conversation.
+  # Any other failure is left to `journal_wrap_failed`.
   - name: resolve_lost_race
     type: data.set
     with:
