@@ -45,6 +45,8 @@ interface DeleteCaseAttachmentsArgs {
   /** Message of the not found error thrown for attachments of another case. */
   notInCaseMessage?: (ids: string[]) => string;
   recordUserActions?: RecordUserActions;
+  /** The caller updates the case totals and emits the event, so several steps count as 1 change. */
+  deferCaseUpdates?: boolean;
 }
 
 /** Deletes attachments read for deletion and their files; shared by the comment delete routes. */
@@ -55,6 +57,7 @@ export const deleteCaseAttachments = async (
     operation,
     notInCaseMessage = (ids) => doNotExistOnCaseMessage(ids, caseId),
     recordUserActions,
+    deferCaseUpdates = false,
   }: DeleteCaseAttachmentsArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
@@ -142,6 +145,7 @@ export const deleteCaseAttachments = async (
         attachments: decodedAttachments.filter(({ id }) => deletedIds.has(id)),
         fileIds: fileEntities.filter(({ id }) => !keptFileIds.has(id)).map(({ id }) => id),
         recordUserActions,
+        deferCaseUpdates,
       },
       clientArgs
     );
@@ -161,10 +165,11 @@ interface RecordDeletionArgs {
   attachments: DecodedAttachment[];
   fileIds: string[];
   recordUserActions?: RecordUserActions;
+  deferCaseUpdates: boolean;
 }
 
 const recordDeletion = async (
-  { caseId, attachments, fileIds, recordUserActions }: RecordDeletionArgs,
+  { caseId, attachments, fileIds, recordUserActions, deferCaseUpdates }: RecordDeletionArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
   const {
@@ -184,13 +189,15 @@ const recordDeletion = async (
     );
   }
 
-  // Recomputed from the index rather than decremented, so the stats are right for any subset.
-  await updateCaseAttachmentStats({
-    caseService,
-    attachmentService,
-    caseId,
-    user,
-  });
+  if (!deferCaseUpdates) {
+    // Recomputed from the index rather than decremented, so the stats are right for any subset.
+    await updateCaseAttachmentStats({
+      caseService,
+      attachmentService,
+      caseId,
+      user,
+    });
+  }
 
   if (recordUserActions != null) {
     await recordUserActions({ attachments });
@@ -213,7 +220,9 @@ const recordDeletion = async (
     caseId,
   });
 
-  emitAttachmentsDeletedEvents(clientArgs, caseId, attachments);
+  if (!deferCaseUpdates) {
+    emitAttachmentsDeletedEvents(clientArgs, caseId, attachments);
+  }
 };
 
 const hasOwner = (attachment: AttachmentForDeletion): attachment is OwnedAttachment =>
@@ -293,7 +302,7 @@ interface UpdateCaseAttachmentStats {
   user: CasesClientArgs['user'];
 }
 
-const updateCaseAttachmentStats = async ({
+export const updateCaseAttachmentStats = async ({
   caseService,
   attachmentService,
   caseId,
