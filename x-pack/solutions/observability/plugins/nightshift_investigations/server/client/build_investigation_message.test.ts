@@ -6,7 +6,10 @@
  */
 
 import { alertInvestigationContextSchema, type AlertSnapshot } from '../../common';
-import { buildInvestigationMessage } from './build_investigation_message';
+import {
+  buildAlertRecoveredFollowUpMessage,
+  buildInvestigationMessage,
+} from './build_investigation_message';
 
 /** What the client does at the boundary, reduced to accepted-or-not for these cases. */
 const accepts = (context: unknown) => alertInvestigationContextSchema.safeParse(context).success;
@@ -314,4 +317,38 @@ describe('buildInvestigationMessage', () => {
   // Which subjects get a composed brief and which keep the caller's message is now the client's
   // decision, so it is asserted in investigations_client.test.ts rather than here. This function
   // only ever receives a validated alert context.
+});
+
+describe('buildAlertRecoveredFollowUpMessage', () => {
+  const baseRecovery = {
+    alertUuid: 'alert-uuid-1',
+    alertId: 'service.name:checkout',
+    alertStart: '2026-08-24T12:00:00.000Z',
+    recoveredAt: '2026-08-24T12:15:30.000Z',
+    ruleId: 'rule-uuid-1',
+    ruleName: 'Latency is too high',
+    ruleTypeId: 'apm.transaction_duration',
+    ruleTags: ['prod'],
+  };
+
+  it('formats recovery message with and without alert.start and existing subject snapshot', () => {
+    const withStart = buildAlertRecoveredFollowUpMessage({
+      ...baseRecovery,
+      snapshot: alert({ grouping: { service: { name: 'checkout' } } }),
+    });
+    expect(withStart).toContain(
+      'Alert "Latency is too high" (UUID alert-uuid-1, instance "service.name:checkout", rule rule-uuid-1, type apm.transaction_duration) transitioned to recovered, first active at 2026-08-24T12:00:00.000Z (duration 15m 30s).'
+    );
+    expect(withStart).toContain('Affected entity: service.name: checkout');
+    expect(withStart).toContain('Rule tags: prod');
+    expect(withStart).toContain('confirmed, partly supported, contradicted, or unresolved');
+
+    const withoutStart = buildAlertRecoveredFollowUpMessage({
+      ...baseRecovery,
+      alertStart: null,
+      ruleTags: undefined,
+    });
+    expect(withoutStart).toContain('transitioned to recovered.');
+    expect(withoutStart).not.toContain('first active at');
+  });
 });
