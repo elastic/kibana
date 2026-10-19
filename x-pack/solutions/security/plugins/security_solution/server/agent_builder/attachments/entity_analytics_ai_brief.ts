@@ -7,10 +7,8 @@
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import {
-  ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE,
-  EntityAnalyticsScope,
-} from '../../../common/entity_analytics/ai_brief/scope';
+import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { EntityAnalyticsScope } from '../../../common/entity_analytics/ai_brief/scope';
 import { SECURITY_GENERATE_ENTITY_ANALYTICS_BRIEF_TOOL_ID } from '../tools/entity_analytics/generate_entity_analytics_brief_tool';
 import {
   describeScopeForAgent,
@@ -19,7 +17,7 @@ import {
 
 /** Attachment type for the Entity Analytics view captured by the "Generate AI brief" button. */
 export const createEntityAnalyticsAiBriefAttachmentType = (): AttachmentTypeDefinition => ({
-  id: ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE,
+  id: SecurityAgentBuilderAttachments.entityAnalyticsAiBrief,
   validate: (input) => {
     const result = EntityAnalyticsScope.safeParse(input);
     if (!result.success) {

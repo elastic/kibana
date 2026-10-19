@@ -17,11 +17,9 @@ import type {
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { isInferenceError } from '@kbn/inference-common';
+import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import type { ExperimentalFeatures } from '../../../../common';
-import {
-  ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE,
-  EntityAnalyticsScope,
-} from '../../../../common/entity_analytics/ai_brief/scope';
+import { EntityAnalyticsScope } from '../../../../common/entity_analytics/ai_brief/scope';
 import { RiskScoreDataClient } from '../../../lib/entity_analytics/risk_score/risk_score_data_client';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { securityTool } from '../constants';
@@ -48,7 +46,7 @@ const schema = lazySchema(() =>
       .max(512)
       .optional()
       .describe(
-        `Id of the ${ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE} attachment to brief on. Omit it to use the most recently attached view.`
+        `Id of the ${SecurityAgentBuilderAttachments.entityAnalyticsAiBrief} attachment to brief on. Omit it to use the most recently attached view.`
       ),
   })
 );
@@ -157,13 +155,13 @@ const getScopeData = (attachments: AttachmentStateManager, scopeAttachmentId?: s
     scopeAttachmentId ??
     attachments
       .getActive()
-      .filter(({ type }) => type === ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE)
+      .filter(({ type }) => type === SecurityAgentBuilderAttachments.entityAnalyticsAiBrief)
       .at(-1)?.id;
   if (attachmentId === undefined) {
     return undefined;
   }
   const attachment = attachments.get(attachmentId);
-  if (attachment?.type !== ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE) {
+  if (attachment?.type !== SecurityAgentBuilderAttachments.entityAnalyticsAiBrief) {
     return undefined;
   }
   return attachment.data.data;

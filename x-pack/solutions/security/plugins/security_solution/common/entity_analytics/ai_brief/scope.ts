@@ -8,9 +8,6 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { SIGNAL_CARD_IDS, TIME_RANGE_OPTIONS, type SignalCardId } from '../home/constants';
 
-/** Agent Builder attachment type holding the Entity Analytics view captured for the AI brief. */
-export const ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE = 'security.entity_analytics_ai_brief';
-
 /** Tiles can hold hundreds of entities. The server reads the riskiest of these first. */
 export const MAX_ENTITY_IDS_PER_TILE = 200;
 const MAX_FILTERS = 20;

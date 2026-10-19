@@ -13,11 +13,11 @@
 
 import { uniq } from 'lodash';
 import { z, lazySchema } from '@kbn/zod/v4';
+import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import type {
   EntityAnalyticsScope,
   EntityAnalyticsScopeTile,
 } from '../../../../../common/entity_analytics/ai_brief/scope';
-import { ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { SIGNAL_CARD_IDS } from '../../../../../common/entity_analytics/home/constants';
 import type { EntityFacts } from './types';
 import { BRIEF_PERIOD_LABELS, describeDelta, formatCount } from './describe_scope';
@@ -39,8 +39,11 @@ export const DRAFT_SYSTEM_PROMPT = `You write a short Entity Analytics brief for
 ## Output
 - summary: one or two sentences on what needs attention. Never comment on which or how many entities are listed: the brief states its coverage itself.
 - priorities: up to ${MAX_PRIORITIES} entities to look at first, most important first. Entities flagged several ways, with high criticality, privilege or high risk usually come first. Use fewer when the data doesn't support ${MAX_PRIORITIES}; never pad. Always include the field.
+- A priority's text sits under the entity's name: never name, mention or refer back to the entity in it ("its alerts", not "this user's alerts").
+- In a priority, write full sentences, not lists of labels. observed says what happened; whyItMatters says why that combination puts the entity ahead of the others, without repeating observed.
+- Name each piece of evidence by what it is: "asset criticality is High impact", "on the privileged watchlist", "risk score 82 (Critical)". Mention firstSeen only for an entity flagged as new.
 - recommendation: the one step to take first across the whole view, not only for the first priority. It must make sense on its own.
-- Mention an entity only as {{ entity.id <entityId> }}, copied exactly; the reader sees its name. Never write a name or EUID yourself, or "this account".
+- Mention an entity only as {{ entity.id <entityId> }}, copied exactly; the reader sees its name. Never write a name or EUID yourself, or refer to an entity any other way, such as "this account", "this identity" or "this host".
 - Keep to the word limits in the schema. The brief is read in about a minute.
 
 ## Accuracy
@@ -112,12 +115,12 @@ export const BriefDraft = lazySchema(() =>
           observed: z
             .string()
             .describe(
-              `What was observed, at most ${WORD_LIMITS.priority} words. Don't start with the entity name.`
+              `What happened, in one sentence of at most ${WORD_LIMITS.priority} words, naming each piece of evidence. Don't start with the entity name.`
             ),
           whyItMatters: z
             .string()
             .describe(
-              `Why it matters, at most ${WORD_LIMITS.priority} words: criticality and risk where the data supports it`
+              `Why this combination puts the entity ahead of the others, in one sentence of at most ${WORD_LIMITS.priority} words. Don't repeat observed.`
             ),
           nextStep: z
             .string()
@@ -146,9 +149,9 @@ export type BriefPriority = BriefDraft['priorities'][number];
 
 /** How the agent should treat the captured view, in every conversation it is attached to. */
 export const getAttachmentAgentDescription = (briefToolId: string): string =>
-  `An ${ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE} attachment is the Entity Analytics page view the user was looking at when they asked for an AI brief. When the user asks for the brief, call ${briefToolId} with this attachment's id as scopeAttachmentId. Reply with the returned \`brief\` string exactly as returned (every line, including any <render_attachment ... /> line, unchanged), then add one short sentence inviting a follow-up question. Copy each render_attachment id character for character, even when it looks like a type name: an altered id renders nothing. Do not rewrite, summarize, reorder or add numbers. While generating the brief, do not call tools that change data (watchlists, asset criticality, leads, entity resolution). For follow-up questions, use the entity analytics tools and say when a tool cannot honor the captured scope (period, search, filters).`;
+  `An ${SecurityAgentBuilderAttachments.entityAnalyticsAiBrief} attachment is the Entity Analytics page view the user was looking at when they asked for an AI brief. When the user asks for the brief, call ${briefToolId} with this attachment's id as scopeAttachmentId. Reply with the returned \`brief\` string exactly as returned (every line, including any <render_attachment ... /> line, unchanged), then add one short sentence inviting a follow-up question. Copy each render_attachment id character for character, even when it looks like a type name: an altered id renders nothing. Do not rewrite, summarize, reorder or add numbers. While generating the brief, do not call tools that change data (watchlists, asset criticality, leads, entity resolution). For follow-up questions, use the entity analytics tools and say when a tool cannot honor the captured scope (period, search, filters).`;
 
-export const BRIEF_TOOL_DESCRIPTION = `Generates the Entity Analytics AI brief for a captured Entity Analytics page view (a ${ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE} attachment). Use it when the user asks for the brief of an attached Entity Analytics view; for other entity questions use the entity search and lookup tools. It reads the counts captured from the page and the Entity Store records of the entities they flag, and returns a \`brief\` markdown string covering the scope, what needs attention, the counts and their changes, up to three priority entities with a supporting entity table, and a recommended next step.`;
+export const BRIEF_TOOL_DESCRIPTION = `Generates the Entity Analytics AI brief for a captured Entity Analytics page view (a ${SecurityAgentBuilderAttachments.entityAnalyticsAiBrief} attachment). Use it when the user asks for the brief of an attached Entity Analytics view; for other entity questions use the entity search and lookup tools. It reads the counts captured from the page and the Entity Store records of the entities they flag, and returns a \`brief\` markdown string covering the scope, what needs attention, the counts and their changes, up to three priority entities with a supporting entity table, and a recommended next step.`;
 
 /** Sent with the tool's result, next to the brief. */
 export const BRIEF_RESULT_INSTRUCTIONS =

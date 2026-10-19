@@ -9,18 +9,16 @@ import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import type { Filter, Query } from '@kbn/es-query';
+import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import type { TimeRange } from '../../../../../common/entity_analytics/home/constants';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
-import {
-  ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE,
-  MAX_ENTITY_IDS_PER_TILE,
-} from '../../../../../common/entity_analytics/ai_brief/scope';
+import { MAX_ENTITY_IDS_PER_TILE } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import type { SignalCardData, SignalCardId } from '../needs_attention_tiles/data';
-import type { EntityFilters } from '../use_entity_filters_param';
+import type { EntityFilters } from '../entities_grid/common';
 
 const BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.aiBrief.buttonLabel',
@@ -60,7 +58,7 @@ export const useGenerateAiBriefAction = ({
     [cards, timeRange, entityFilters, focusTileId, query, filters]
   );
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE,
+    attachmentType: SecurityAgentBuilderAttachments.entityAnalyticsAiBrief,
     attachmentData: scope,
     attachmentDescription: i18n.translate(
       'xpack.securitySolution.entityAnalytics.home.aiBrief.attachmentDescription',

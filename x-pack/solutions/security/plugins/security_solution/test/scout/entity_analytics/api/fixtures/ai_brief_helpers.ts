@@ -14,8 +14,8 @@ import {
   getEntitiesAlias,
   getLatestEntitiesIndexName,
 } from '@kbn/entity-store/common';
+import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
-import { ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE } from '../../../../../common/entity_analytics/ai_brief/scope';
 import type { BriefDraft } from '../../../../../server/agent_builder/tools/entity_analytics/brief/prompts';
 
 const BRIEF_TOOL_ID = 'security.generate_entity_analytics_brief';
@@ -146,7 +146,11 @@ export const buildBriefConverseBody = (connectorId: string, scope: EntityAnalyti
   _execution_mode: 'local',
   input: 'Generate the Entity Analytics brief for the attached view.',
   attachments: [
-    { id: SCOPE_ATTACHMENT_ID, type: ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE, data: scope },
+    {
+      id: SCOPE_ATTACHMENT_ID,
+      type: SecurityAgentBuilderAttachments.entityAnalyticsAiBrief,
+      data: scope,
+    },
   ],
 });
 

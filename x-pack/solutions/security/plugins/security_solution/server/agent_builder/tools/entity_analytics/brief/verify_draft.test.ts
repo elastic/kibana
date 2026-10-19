@@ -51,6 +51,11 @@ describe('verifyDraft', () => {
       },
     ],
     [
+      "turns a flagged entity's EUID written out into its mention",
+      draft([priority('host:a', 'Seen on user:b.')]),
+      { priorities: [priority('host:a', 'Seen on {{ entity.id user:b }}.')] },
+    ],
+    [
       'has no summary or recommendation without a priority',
       draft([priority('host:unknown')]),
       { summary: undefined, recommendation: undefined, priorities: [] },

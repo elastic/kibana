@@ -27,11 +27,22 @@ export interface VerifiedBrief {
  */
 export const verifyDraft = (draft: BriefDraft, facts: EntityFacts[]): VerifiedBrief => {
   const flaggedIds = new Set(facts.map(({ entityId }) => entityId));
+  const mention = (entityId: string) => `{{ entity.id ${entityId} }}`;
+  // Mentions sit at odd indexes. In the prose between them, a flagged entity's EUID written out
+  // becomes its mention, so it reads as the entity's name.
   const keepFlaggedMentions = (text: string): string =>
     text
-      .replace(MENTION_PATTERN, (mention, entityId: string) =>
-        flaggedIds.has(entityId) ? mention : ''
-      )
+      .split(MENTION_PATTERN)
+      .map((part, index) => {
+        if (index % 2 === 1) {
+          return flaggedIds.has(part) ? mention(part) : '';
+        }
+        return [...flaggedIds].reduce(
+          (prose, entityId) => prose.split(entityId).join(mention(entityId)),
+          part
+        );
+      })
+      .join('')
       .trim();
 
   const priorities = uniqBy(

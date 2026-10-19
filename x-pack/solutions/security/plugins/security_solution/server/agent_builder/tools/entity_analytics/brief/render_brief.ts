@@ -105,9 +105,11 @@ export const renderBrief = ({
 };
 
 const renderScope = (scope: EntityAnalyticsScope, spaceId: string): string => {
-  const { period, query, entityFilters = {} } = scope;
+  const { period, query, entityFilters = {}, focusTileId, tiles } = scope;
+  const selectedTitle = focusTileId && tiles[focusTileId]?.title;
   const parts = [
     `Last ${BRIEF_PERIOD_LABELS[period]}`,
+    selectedTitle ? `Selected: ${selectedTitle}` : undefined,
     ...Object.entries(entityFilters).map(([key, values]) => describeEntityFilter(key, values)),
     query?.query ? `Search "${query.query}"` : undefined,
     ...getScopeFilters(scope).map(filterLabel),

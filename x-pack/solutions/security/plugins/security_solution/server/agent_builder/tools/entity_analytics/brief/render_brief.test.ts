@@ -93,7 +93,7 @@ describe('renderBrief', () => {
       },
     });
     expect(brief)
-      .toBe(`**Scope:** Last 7 days · Risk level: High · On 2 selected watchlists · Search "host.name: web\\*" · Space soc
+      .toBe(`**Scope:** Last 7 days · Selected: Watchlisted · Risk level: High · On 2 selected watchlists · Search "host.name: web\\*" · Space soc
 _1 flagged entity was not found in the Entity Store._
 _Not checked, because the data couldn't be read: Entities with anomalies._
 
