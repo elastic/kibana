@@ -6,9 +6,11 @@
  */
 
 import {
+  applyResolvedEntityValueChanges,
   buildEntityFilterCountsRequest,
   parseEntityFilterCountsResponse,
 } from './use_entity_filter_bar_counts';
+import type { EntityFilterBarCounts } from './use_entity_filter_bar_counts';
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
 import { RiskSeverity } from '../../../../common/search_strategy';
 import { CriticalityLevelsForBulkUpload } from '../../../../common/entity_analytics/asset_criticality/constants';
@@ -68,7 +70,7 @@ describe('buildEntityFilterCountsRequest', () => {
   });
 
   it('has all five agg fields', () => {
-    const req = buildEntityFilterCountsRequest({ spaceId: 'default', rowsMode: 'resolved' });
+    const req = buildEntityFilterCountsRequest({ spaceId: 'default', rowsMode: 'individual' });
     expect(req.aggs).toMatchObject({
       entity_types: { terms: { field: 'entity.EngineMetadata.Type' } },
       risk_levels: { terms: { field: 'entity.risk.calculated_level' } },
@@ -79,8 +81,28 @@ describe('buildEntityFilterCountsRequest', () => {
   });
 
   it('counts unscored entities via missing: Unknown on risk_levels', () => {
+    const req = buildEntityFilterCountsRequest({ spaceId: 'default', rowsMode: 'individual' });
+    expect(req.aggs).toMatchObject({ risk_levels: { terms: { missing: RiskSeverity.Unknown } } });
+  });
+
+  it("counts a resolved entity by its group's risk level, else its own", () => {
     const req = buildEntityFilterCountsRequest({ spaceId: 'default', rowsMode: 'resolved' });
-    expect(req.aggs.risk_levels.terms.missing).toBe(RiskSeverity.Unknown);
+    const groupLevel = 'entity.relationships.resolution.risk.calculated_level';
+
+    expect(req.aggs).toMatchObject({
+      group_risk_levels: {
+        filter: { exists: { field: groupLevel } },
+        aggs: { levels: { terms: { field: groupLevel } } },
+      },
+      risk_levels: {
+        filter: { bool: { must_not: { exists: { field: groupLevel } } } },
+        aggs: {
+          levels: {
+            terms: { field: 'entity.risk.calculated_level', missing: RiskSeverity.Unknown },
+          },
+        },
+      },
+    });
   });
 
   it('counts unassigned entities via missing: unassigned on asset_criticality', () => {
@@ -121,5 +143,67 @@ describe('parseEntityFilterCountsResponse', () => {
       watchlists: { 'wl-1': 5 },
       data_sources: { okta: 7 },
     });
+  });
+
+  it("adds the resolved entities' group risk levels to the others' own", () => {
+    const aggs = {
+      risk_levels: { levels: { buckets: [{ key: 'High', doc_count: 2 }] } },
+      group_risk_levels: {
+        levels: {
+          buckets: [
+            { key: 'High', doc_count: 1 },
+            { key: 'Critical', doc_count: 4 },
+          ],
+        },
+      },
+    } as Parameters<typeof parseEntityFilterCountsResponse>[0];
+
+    expect(parseEntityFilterCountsResponse(aggs).risk_levels).toEqual({ High: 3, Critical: 4 });
+  });
+});
+
+describe('applyResolvedEntityValueChanges', () => {
+  const COUNTS: EntityFilterBarCounts = {
+    entity_types: { host: 3 },
+    risk_levels: {},
+    asset_criticality: { high_impact: 1, unassigned: 2 },
+    watchlists: {},
+    data_sources: { okta: 1 },
+  };
+
+  it("moves a resolved entity from its main entity's own values to its group's", () => {
+    const counts = applyResolvedEntityValueChanges(COUNTS, [
+      { field: 'asset.criticality', value: 'extreme_impact', change: 1 },
+      { field: 'asset.criticality', value: 'high_impact', change: -1 },
+      { field: 'entity.source', value: 'aws', change: 1 },
+      { field: 'entity.source', value: 'okta', change: 1 },
+      { field: 'entity.source', value: 'okta', change: -1 },
+      { field: 'entity.attributes.watchlists', value: 'wl-2', change: 1 },
+    ]);
+
+    expect(counts).toEqual({
+      ...COUNTS,
+      asset_criticality: { extreme_impact: 1, high_impact: 0, unassigned: 2 },
+      watchlists: { 'wl-2': 1 },
+      data_sources: { okta: 1, aws: 1 },
+    });
+  });
+
+  it('counts a missing criticality as unassigned, and skips missing sources and watchlists', () => {
+    const counts = applyResolvedEntityValueChanges(COUNTS, [
+      { field: 'asset.criticality', value: null, change: -1 },
+      { field: 'entity.source', value: null, change: 1 },
+    ]);
+
+    expect(counts.asset_criticality.unassigned).toBe(1);
+    expect(counts.data_sources).toEqual(COUNTS.data_sources);
+  });
+
+  it('never counts below zero', () => {
+    const counts = applyResolvedEntityValueChanges(COUNTS, [
+      { field: 'entity.source', value: 'okta', change: -3 },
+    ]);
+
+    expect(counts.data_sources.okta).toBe(0);
   });
 });

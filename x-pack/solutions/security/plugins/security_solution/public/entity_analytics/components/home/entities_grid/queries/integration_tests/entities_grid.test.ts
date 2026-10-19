@@ -16,8 +16,10 @@ import type { ActiveFilters } from '../../active_filters';
 import {
   applyResolvedEntityFilterOverrides,
   fetchResolvedEntityFilterOverrides,
+  fetchResolvedEntityValueChanges,
   withResolvedEntityValues,
 } from '../resolved_entities';
+import type { ResolvedEntityValueChange } from '../resolved_entities';
 import { buildAlertSortAllQuery } from '../alerts';
 import { buildEntitiesInViewCountQuery } from '../entities_in_view';
 import type { EsqlRunner } from '../types';
@@ -391,6 +393,37 @@ describe('entities grid on Elasticsearch', () => {
       const rows = await fetchGroupRows(['host:h2']);
 
       expect(rows.get('host:h2')).toEqual({ 'entity.id': 'host:h2' });
+    });
+
+    describe("the counts of the groups' values", () => {
+      /** The net change of each value the counts show, by field. */
+      const getNetChanges = (changes: readonly ResolvedEntityValueChange[]) =>
+        changes.reduce<Record<string, Record<string, number>>>((net, { field, value, change }) => {
+          if (value == null) return net;
+          const total = (net[field]?.[value] ?? 0) + change;
+          const { [value]: _, ...others } = net[field] ?? {};
+          return { ...net, [field]: total ? { ...others, [value]: total } : others };
+        }, {});
+
+      it("moves a group's count from its main entity's own values to the group's", async () => {
+        const changes = await fetchResolvedEntityValueChanges(BASE_ARGS, cluster.runQuery);
+
+        // host:h1 is high_impact on okta and on no watchlist; its aliases add the rest.
+        expect(getNetChanges(changes)).toEqual({
+          'asset.criticality': { extreme_impact: 1, high_impact: -1 },
+          'entity.source': { aws: 1, gcp: 1 },
+          'entity.attributes.watchlists': { 'wl-2': 1, 'wl-3': 1 },
+        });
+      });
+
+      it('counts only the groups whose main entity the search matches', async () => {
+        const changes = await fetchResolvedEntityValueChanges(
+          { ...BASE_ARGS, searchExpression: 'KQL("""entity.name: bob""")' },
+          cluster.runQuery
+        );
+
+        expect(getNetChanges(changes)).toEqual({});
+      });
     });
 
     it('has no value for a group in which no member has one', async () => {
