@@ -20,10 +20,16 @@ export const CATALOG_SOURCE_URLS = {
     'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
   'vendor_api:elastic-security-labs': 'https://www.elastic.co/security-labs/rss/feed.xml',
   'rss:cisa-alerts': 'https://www.cisa.gov/cybersecurity-advisories/all.xml',
+  // Open Government Licence v3.0 (attribution required):
+  // https://www.ncsc.gov.uk/section/about-this-website/terms-and-conditions
+  // The aggregate feed carries reports, guidance, and blog posts, not only advisories.
   'rss:uk-ncsc': 'https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml',
+  // Licence Ouverte / Open Licence 2.0 (attribution required):
+  // https://cert.cyber.gouv.fr/mentions-legales/
   'rss:cert-fr-alerts': 'https://cert.cyber.gouv.fr/alerte/feed/',
   'rss:cert-fr-threats': 'https://cert.cyber.gouv.fr/cti/feed/',
   'rss:cert-fr-iocs': 'https://cert.cyber.gouv.fr/ioc/feed/',
+  // CC BY 4.0 (attribution required): https://cert.europa.eu/legal-notice
   'rss:cert-eu-advisories': 'https://cert.europa.eu/publications/security-advisories-rss',
   'rss:cert-eu-threat-intelligence': 'https://cert.europa.eu/publications/threat-intelligence-rss',
 } as const satisfies Record<(typeof APPROVED_CATALOG_SOURCE_IDS)[number], string>;

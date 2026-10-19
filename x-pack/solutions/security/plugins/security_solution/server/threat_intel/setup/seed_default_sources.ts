@@ -10,6 +10,7 @@ import {
   GLOBAL_SPACE_ID,
   THREAT_INTEL_SOURCES_INDEX,
   APPROVED_SOURCE_IDS,
+  type APPROVED_CATALOG_SOURCE_IDS,
   type FetchAdapterType,
 } from '../../../common/threat_intel';
 
@@ -22,7 +23,11 @@ import {
  * CERT-FR, and CERT-EU. Operators can only list and enable / disable entries.
  */
 interface DefaultSource {
-  id: string;
+  /**
+   * Typed against the approved id list so a seeded row outside the catalog fails
+   * to compile instead of being disabled again by `disableLegacySources` on every boot.
+   */
+  id: (typeof APPROVED_CATALOG_SOURCE_IDS)[number];
   adapter_type: FetchAdapterType;
   name: string;
   tags: string[];

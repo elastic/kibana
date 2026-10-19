@@ -622,8 +622,9 @@ export const registerPromoteThreatIndicatorsTask = ({
           let latestExtractedAt = previousState.lastSyncedAt;
           // Only advance the cursor when the scan drained the backlog. A
           // completed scan that stored a mid-batch tick used to skip remaining
-          // siblings: `text_indicator_list` stamps one `lineage.extracted_at`
-          // across every chunk of a large list (5_000 nested objects), so `gt`
+          // siblings: the retired `text_indicator_list` adapter stamped one
+          // `lineage.extracted_at` across every chunk of a large list (5_000
+          // nested objects), and those reports are still in the index, so `gt`
           // on that tick dropped the rest. Writes are idempotent (stable `_id`
           // + report_id dedupe), so the range is `gte` and re-scanning the
           // handful of boundary-timestamp docs every 15m is cheap. Enrich is

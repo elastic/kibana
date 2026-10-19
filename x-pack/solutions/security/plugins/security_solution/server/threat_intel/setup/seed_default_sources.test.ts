@@ -7,6 +7,7 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
+  APPROVED_CATALOG_SOURCE_IDS,
   APPROVED_SOURCE_IDS,
   GLOBAL_SPACE_ID,
   CATALOG_SOURCE_URLS,
@@ -95,6 +96,15 @@ describe('DEFAULT_SOURCES approved catalog', () => {
   it('ships exactly nine sources enabled', () => {
     expect(DEFAULT_SOURCES).toHaveLength(9);
     expect(DEFAULT_SOURCES.every(({ enabled }) => enabled)).toBe(true);
+  });
+
+  // The list route and the PATCH route only admit approved ids, and reconciliation
+  // disables everything else, so an approved id that is never seeded is invisible
+  // and a seeded id outside the approved list is disabled again on every boot.
+  it('seeds every approved catalog id exactly once', () => {
+    expect(DEFAULT_SOURCES.map(({ id }) => id).sort()).toEqual(
+      [...APPROVED_CATALOG_SOURCE_IDS].sort()
+    );
   });
 
   it('dispatches Elastic Security Labs through the RSS adapter while preserving its stable ID', () => {

@@ -149,7 +149,7 @@ describe('rssAdapter', () => {
     expect(requested).not.toContain('https://acme.example/2');
   });
 
-  it('fetches the aggregate UK NCSC feed without filtering entry paths', async () => {
+  it('resolves the UK NCSC catalog URL and keeps every entry of the aggregate feed', async () => {
     const feed = FEED_BODY.replace(
       'https://acme.example/1',
       'https://www.ncsc.gov.uk/report/example'
