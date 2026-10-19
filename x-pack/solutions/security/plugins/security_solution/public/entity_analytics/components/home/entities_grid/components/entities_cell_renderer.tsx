@@ -10,6 +10,7 @@ import { assertNever } from '@kbn/std';
 import type { EuiThemeComputed, RenderCellValue } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
+import { ENTITY_TYPE_FIELD, getString } from '../common';
 import type { Row, RowsMode } from '../common';
 import { ENRICHED_FIELDS, isGridColumnId, type GridColumnId } from '../grid_columns';
 import { AlertCountCell } from './cells/alert_count_cell';
@@ -76,6 +77,13 @@ const cellLoadingPlaceholderCss = css`
   border-radius: 1px;
 `;
 
+// The alerts flyout has no service case yet, and the anomalies flyout takes only hosts and users.
+const ALERTS_FLYOUT_TYPES: ReadonlySet<string> = new Set(['host', 'user', 'generic']);
+const ANOMALIES_FLYOUT_TYPES: ReadonlySet<string> = new Set(['host', 'user']);
+
+const opensFor = <T,>(handler: T | undefined, types: ReadonlySet<string>, row: Row) =>
+  types.has(getString(row, ENTITY_TYPE_FIELD) ?? '') ? handler : undefined;
+
 /** Hours before a date shows as absolute: never, so the columns read as how long ago. */
 const ALWAYS_RELATIVE_HOURS = 24 * 365 * 100;
 
@@ -119,11 +127,17 @@ const renderKnownEntityCell = (
           value={value}
           row={row}
           euiTheme={euiTheme}
-          onAlertCountClick={onAlertCountClick}
+          onAlertCountClick={opensFor(onAlertCountClick, ALERTS_FLYOUT_TYPES, row)}
         />
       );
     case 'anomaly_count':
-      return <AnomalyCountCell value={value} row={row} onAnomalyCountClick={onAnomalyCountClick} />;
+      return (
+        <AnomalyCountCell
+          value={value}
+          row={row}
+          onAnomalyCountClick={opensFor(onAnomalyCountClick, ANOMALIES_FLYOUT_TYPES, row)}
+        />
+      );
     case 'case_count':
       return value == null || value === 0 ? <>{'—'}</> : <>{String(value)}</>;
     case 'entity.attributes.watchlists':
