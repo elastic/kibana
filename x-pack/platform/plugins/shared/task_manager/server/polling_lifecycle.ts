@@ -17,6 +17,7 @@ import {
   scan,
 } from 'rxjs';
 import { pipe } from 'fp-ts/pipeable';
+import { publishResearchTaskEvent } from './lib/research_channel';
 import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -141,6 +142,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   // all task related events (task claimed, task marked as running, etc.) are emitted through events$
   private events$ = new Subject<TaskLifecycleEvent>();
+  // RESEARCH ONLY (workload isolation harness): no-op unless the research plugin subscribes.
+  public readonly researchEvents = this.events$.subscribe(publishResearchTaskEvent);
 
   private middleware: Middleware;
 

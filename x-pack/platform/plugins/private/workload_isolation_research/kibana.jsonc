@@ -1,0 +1,29 @@
+{
+  "type": "plugin",
+  "id": "@kbn/workload-isolation-research-plugin",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "RESEARCH ONLY (never merge). Workload isolation measurement harness: synthetic offenders, in-pod neighbour probes, samples endpoint.",
+  "plugin": {
+    "id": "workloadIsolationResearch",
+    "browser": false,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "workload_isolation_research"
+    ],
+    "requiredPlugins": [
+      "taskManager"
+    ],
+    "optionalPlugins": [
+      "security",
+      "alerting",
+      "actions",
+      "workflowsManagement",
+      "agentBuilder"
+    ]
+  }
+}

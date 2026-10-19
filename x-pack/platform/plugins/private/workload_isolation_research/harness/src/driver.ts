@@ -1,0 +1,358 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { execSync } from 'child_process';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import { performance } from 'perf_hooks';
+import type { KibanaTarget } from './kibana_client';
+import { API, kbn } from './kibana_client';
+import type { Phase, RunManifest, Scenario } from './types';
+
+export const DRIVER_VERSION = '0.1.0';
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const now = () => performance.timeOrigin + performance.now();
+
+interface SamplesResponse {
+  pod: string;
+  boot_id: string;
+  pid: number;
+  main: { samples: Array<{ seq: number; item: Record<string, unknown> }>; dropped: number; last_seq: number };
+  worker: {
+    samples: Array<{ seq: number; item: Record<string, unknown> }>;
+    dropped: number;
+    last_seq: number;
+    probing: boolean;
+  };
+}
+
+/** Pull-with-dedup collector: the load balancer picks the pod; cursors are keyed per process boot. */
+export class Collector {
+  public readonly cursors: Record<string, { main: number; worker: number }> = {};
+  public readonly pods = new Map<string, { pod: string; boot_id: string; pid: number; probing: boolean; dropped: number }>();
+  private readonly out: fs.WriteStream;
+  public count = 0;
+  public pullErrors = 0;
+  private stopped = false;
+
+  constructor(private readonly target: KibanaTarget, file: string) {
+    this.out = fs.createWriteStream(file, { flags: 'a' });
+  }
+
+  public write(doc: Record<string, unknown>): void {
+    this.out.write(JSON.stringify(doc) + '\n');
+    this.count++;
+  }
+
+  public async pullOnce(): Promise<SamplesResponse | undefined> {
+    try {
+      const { status, body } = await kbn<SamplesResponse>(this.target, 'POST', `${API}/samples`, {
+        cursors: this.cursors,
+        limit: 50000,
+      }, 30000);
+      if (status !== 200) {
+        this.pullErrors++;
+        return undefined;
+      }
+      const { pod, boot_id: bootId } = body;
+      const cursor = this.cursors[bootId] ?? { main: 0, worker: 0 };
+      for (const { seq, item } of body.main.samples) {
+        this.write({ ...item, pod, boot_id: bootId, thread: 'main', seq });
+        cursor.main = seq;
+      }
+      for (const { seq, item } of body.worker.samples) {
+        this.write({ ...item, pod, boot_id: bootId, thread: 'worker', seq });
+        cursor.worker = seq;
+      }
+      this.cursors[bootId] = cursor;
+      const prev = this.pods.get(bootId);
+      this.pods.set(bootId, {
+        pod,
+        boot_id: bootId,
+        pid: body.pid,
+        probing: body.worker.probing,
+        dropped: (prev?.dropped ?? 0) + body.main.dropped + body.worker.dropped,
+      });
+      return body;
+    } catch {
+      this.pullErrors++;
+      return undefined;
+    }
+  }
+
+  public async loop(intervalMs: number): Promise<void> {
+    while (!this.stopped) {
+      await this.pullOnce();
+      await sleep(intervalMs);
+    }
+  }
+
+  public stop(): void {
+    this.stopped = true;
+  }
+
+  public close(): Promise<void> {
+    return new Promise((r) => this.out.end(r));
+  }
+}
+
+/** Low-rate laptop-side open-loop probe (cross-check of the in-pod probe; includes WAN). */
+class LaptopProbe {
+  private timer?: NodeJS.Timeout;
+  private next = 0;
+  constructor(
+    private readonly target: KibanaTarget,
+    private readonly rps: number,
+    private readonly probePath: string,
+    private readonly collector: Collector
+  ) {}
+
+  public start(): void {
+    const period = 1000 / this.rps;
+    this.next = now();
+    const tick = () => {
+      while (this.next <= now()) {
+        const intended = this.next;
+        const sent = now();
+        kbn(this.target, 'GET', this.probePath, undefined, 120000)
+          .then(({ status }) => {
+            const end = now();
+            this.collector.write({ source: 'probe', thread: 'driver', pod: 'driver', ts: intended, intended, sent, end, latency_ms: end - intended, service_ms: end - sent, status });
+          })
+          .catch((e) => {
+            const end = now();
+            this.collector.write({ source: 'probe', thread: 'driver', pod: 'driver', ts: intended, intended, sent, end, latency_ms: end - intended, service_ms: end - sent, status: 0, error: String(e?.name ?? e) });
+          });
+        this.next += period;
+      }
+      this.timer = setTimeout(tick, Math.max(0, this.next - now()));
+    };
+    tick();
+  }
+
+  public stop(): void {
+    if (this.timer) clearTimeout(this.timer);
+  }
+}
+
+const git = (cmd: string, cwd: string): string => {
+  try {
+    return execSync(`git ${cmd}`, { cwd, encoding: 'utf8' }).trim();
+  } catch {
+    return '';
+  }
+};
+
+export interface RunOptions {
+  readonly target: KibanaTarget;
+  readonly targetKind: 'local' | 'qaf';
+  readonly scenario: Scenario;
+  readonly lane: string;
+  readonly variant: string;
+  readonly hypothesis: string;
+  readonly expected: Record<string, unknown>;
+  readonly baselineCommit: string;
+  readonly imageDigest: string | null;
+  readonly qafProjectId: string | null;
+  readonly runsDir: string;
+  readonly repoDir: string;
+  readonly configOverrides: Record<string, unknown>;
+  readonly expectedPods: number;
+  readonly actions?: Record<string, (params: Record<string, unknown>, ctx: ActionContext) => Promise<Record<string, unknown>>>;
+}
+
+export interface ActionContext {
+  readonly target: KibanaTarget;
+  readonly runId: string;
+  readonly collector: Collector;
+  readonly log: (msg: string) => void;
+}
+
+const runPhase = async (
+  phase: Phase,
+  opts: RunOptions,
+  ctx: ActionContext
+): Promise<Record<string, unknown> | undefined> => {
+  let result: Record<string, unknown> | undefined;
+  if (phase.offender) {
+    const { status, body } = await kbn<Record<string, unknown>>(
+      opts.target,
+      'POST',
+      `${API}/offender`,
+      { ...phase.offender, runId: ctx.runId },
+      Math.max(120000, phase.offender.doseMs * 3)
+    ).catch((e) => ({ status: 0, body: { error: String(e) } as Record<string, unknown> }));
+    result = { status, ...body };
+    if (phase.offender.mode === 'task') {
+      // Allow the task to be claimed and to complete before the measurement tail.
+      await sleep(phase.offender.doseMs + 5000);
+    }
+  }
+  if (phase.action) {
+    const action = opts.actions?.[phase.action];
+    if (!action) throw new Error(`unknown action ${phase.action}`);
+    result = await action(phase.actionParams ?? {}, ctx);
+  }
+  await sleep(phase.durationS * 1000);
+  return result;
+};
+
+/** Executes one scenario run end to end and writes a self-contained run directory. */
+export const runScenario = async (opts: RunOptions): Promise<{ runId: string; dir: string }> => {
+  const { target, scenario } = opts;
+  const stamp = new Date().toISOString().replace(/[:.]/g, '').slice(0, 15);
+  const runId = `${opts.lane}-${scenario.name}-${opts.variant}-${stamp}`.toLowerCase();
+  const dir = path.join(opts.runsDir, runId);
+  fs.mkdirSync(dir, { recursive: true });
+  const log = (msg: string) => {
+    const line = `${new Date().toISOString()} ${msg}`;
+    fs.appendFileSync(path.join(dir, 'driver.log'), line + '\n');
+    // eslint-disable-next-line no-console
+    console.log(line);
+  };
+
+  const collector = new Collector(target, path.join(dir, 'samples.ndjson'));
+  const ctx: ActionContext = { target, runId, collector, log };
+
+  const health = await kbn<Record<string, any>>(target, 'GET', '/api/task_manager/_health').catch(() => ({ status: 0, body: {} as Record<string, any> }));
+  const tmConfig = health.body?.stats?.configuration?.value ?? {};
+
+  const manifest: RunManifest = {
+    run_id: runId,
+    '@timestamp': new Date().toISOString(),
+    lane: opts.lane,
+    hypothesis: opts.hypothesis,
+    expected: opts.expected,
+    variant: opts.variant,
+    source_commit: git('rev-parse HEAD', opts.repoDir),
+    source_dirty: git('status --porcelain', opts.repoDir).length > 0,
+    baseline_commit: opts.baselineCommit,
+    image_digest: opts.imageDigest,
+    qaf_project_id: opts.qafProjectId,
+    target: { kind: opts.targetKind, url: target.url },
+    workload_params: scenario,
+    utc_start: new Date().toISOString(),
+    driver_version: DRIVER_VERSION,
+    config_overrides: opts.configOverrides,
+    tm_poll_interval_ms: tmConfig.poll_interval ?? null,
+    tm_claim_strategy: tmConfig.claim_strategy ?? null,
+    pods: [],
+    host: {
+      hostname_hash: Buffer.from(os.hostname()).toString('base64').slice(0, 8),
+      loadavg_start: os.loadavg(),
+      cpus: os.cpus().length,
+      platform: os.platform(),
+      node: process.version,
+    },
+    phases: [],
+    notes: [],
+    status: 'running',
+  };
+  const writeManifest = () => fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+  writeManifest();
+  log(`run ${runId} start target=${opts.targetKind} poll_interval=${manifest.tm_poll_interval_ms}`);
+
+  // Drain any pre-existing buffered samples so the run only contains its own window.
+  for (let i = 0; i < Math.max(3, opts.expectedPods * 4); i++) {
+    const res = await collector.pullOnce();
+    if (res) collector.cursors[res.boot_id] = { main: res.main.last_seq, worker: res.worker.last_seq };
+  }
+  fs.writeFileSync(path.join(dir, 'samples.ndjson'), '');
+  collector.count = 0;
+
+  // Contract tracer baseline (cumulative since boot); the run stores the delta.
+  const edgesAtStart = await kbn<{ enabled: boolean; edges: Array<Record<string, any>> }>(target, 'GET', `${API}/edges`).catch(() => undefined);
+  const edgeKey = (e: Record<string, any>) => [e.direction, e.caller, e.callee, e.lifecycle, e.path].join('|');
+  const startEdges = new Map((edgesAtStart?.body?.edges ?? []).map((e) => [edgeKey(e), e]));
+
+  // Start in-pod probes; repeat so the load balancer reaches every pod.
+  const probeBodies: Array<Record<string, unknown>> = [];
+  for (let i = 0; i < Math.max(2, opts.expectedPods * 4); i++) {
+    const res = await kbn<Record<string, unknown>>(target, 'POST', `${API}/probe/_start`, {
+      rps: scenario.probe.rps,
+      path: scenario.probe.path,
+      runId,
+    });
+    probeBodies.push({ status: res.status, ...res.body });
+    if (scenario.superviseKillAfterMs) {
+      await kbn(target, 'POST', `${API}/supervise`, { killAfterMs: scenario.superviseKillAfterMs, signal: 'SIGKILL' });
+    }
+  }
+  const totalS = scenario.phases.reduce((s, p) => s + p.durationS + (p.offender ? p.offender.doseMs / 1000 + 10 : 0), 0) + 120;
+  await kbn(target, 'POST', `${API}/ticks/_start`, { intervalMs: scenario.ticks.intervalMs, durationS: Math.ceil(totalS), seriesId: runId.slice(-40) });
+
+  const laptop = new LaptopProbe(target, scenario.laptopProbe.rps, scenario.laptopProbe.path, collector);
+  laptop.start();
+  const loop = collector.loop(1000);
+
+  try {
+    for (const phase of scenario.phases) {
+      const start = now();
+      log(`phase ${phase.name} start ${phase.offender ? JSON.stringify(phase.offender) : phase.action ?? ''}`);
+      const result = await runPhase(phase, opts, ctx);
+      const end = now();
+      manifest.phases.push({ name: phase.name, start, end, offender_result: result });
+      writeManifest();
+    }
+    manifest.status = 'complete';
+  } catch (e) {
+    manifest.status = 'failed';
+    manifest.notes.push(`driver error: ${String(e)}`);
+    log(`ERROR ${String(e)}`);
+  } finally {
+    laptop.stop();
+    await kbn(target, 'POST', `${API}/ticks/_stop`).catch(() => undefined);
+    for (let i = 0; i < Math.max(2, opts.expectedPods * 4); i++) {
+      await kbn(target, 'POST', `${API}/probe/_stop`).catch(() => undefined);
+    }
+    collector.stop();
+    await loop;
+    // Final drains (multiple, to reach every pod behind the load balancer).
+    for (let i = 0; i < Math.max(3, opts.expectedPods * 6); i++) await collector.pullOnce();
+    await sleep(2000);
+    await collector.close();
+    const info = await kbn<Record<string, unknown>>(target, 'GET', `${API}/info`).catch(() => ({ status: 0, body: {} }));
+    const edges = await kbn<{ enabled: boolean; wrap_errors: number; edges: Array<Record<string, unknown>> }>(
+      target,
+      'GET',
+      `${API}/edges`
+    ).catch(() => undefined);
+    if (edges?.body?.enabled) {
+      fs.writeFileSync(
+        path.join(dir, 'edges.ndjson'),
+        edges.body.edges
+          .map((e) => {
+            const s = startEdges.get(edgeKey(e)) as Record<string, number> | undefined;
+            const delta = {
+              ...e,
+              calls: (e.calls as number) - (s?.calls ?? 0),
+              bytes_in: (e.bytes_in as number) - (s?.bytes_in ?? 0),
+              bytes_out: (e.bytes_out as number) - (s?.bytes_out ?? 0),
+              cumulative_calls: e.calls,
+            };
+            return delta;
+          })
+          .filter((e) => e.calls > 0)
+          .map((e) => JSON.stringify(e))
+          .join('\n') + '\n'
+      );
+      manifest.notes.push(`tracer: edges=${edges.body.edges.length} wrap_errors=${edges.body.wrap_errors}`);
+    }
+    manifest.pods = [...collector.pods.values()].map((p) => ({ ...p }));
+    manifest.notes.push(`probe_start_responses=${JSON.stringify(probeBodies.map((b) => ({ pod: b.pod, boot_id: b.boot_id, has_auth: b.has_auth, status: b.status })))}`);
+    manifest.config_overrides = { ...manifest.config_overrides, research_plugin_config: (info.body as Record<string, unknown>).config };
+    (manifest.host as Record<string, unknown>).loadavg_end = os.loadavg();
+    (manifest as unknown as Record<string, unknown>).kibana_info = info.body;
+    (manifest as unknown as Record<string, unknown>).collector = { samples: collector.count, pull_errors: collector.pullErrors };
+    manifest.utc_end = new Date().toISOString();
+    writeManifest();
+    log(`run ${runId} ${manifest.status} samples=${collector.count} pull_errors=${collector.pullErrors} pods=${collector.pods.size}`);
+  }
+  return { runId, dir };
+};

@@ -3003,6 +3003,8 @@
       "@kbn/workflows-ui/*": ["./src/platform/packages/shared/kbn-workflows-ui/*"],
       "@kbn/workflows-yaml": ["./src/platform/packages/shared/kbn-workflows-yaml"],
       "@kbn/workflows-yaml/*": ["./src/platform/packages/shared/kbn-workflows-yaml/*"],
+      "@kbn/workload-isolation-research-plugin": ["./x-pack/platform/plugins/private/workload_isolation_research"],
+      "@kbn/workload-isolation-research-plugin/*": ["./x-pack/platform/plugins/private/workload_isolation_research/*"],
       "@kbn/workspaces": ["./src/platform/packages/shared/kbn-workspaces"],
       "@kbn/workspaces/*": ["./src/platform/packages/shared/kbn-workspaces/*"],
       "@kbn/xstate-utils": ["./src/platform/packages/shared/kbn-xstate-utils"],

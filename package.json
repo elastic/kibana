@@ -1400,6 +1400,7 @@
     "@kbn/workflows-management-plugin": "workspace:*",
     "@kbn/workflows-ui": "workspace:*",
     "@kbn/workflows-yaml": "workspace:*",
+    "@kbn/workload-isolation-research-plugin": "workspace:*",
     "@kbn/xstate-utils": "workspace:*",
     "@kbn/yaml-loader": "workspace:*",
     "@kbn/yaml-rule-editor": "workspace:*",

@@ -4127,6 +4127,9 @@ importers:
       '@kbn/workflows-yaml':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-workflows-yaml
+      '@kbn/workload-isolation-research-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/private/workload_isolation_research
       '@kbn/xstate-utils':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-xstate-utils
@@ -9334,6 +9337,8 @@ importers:
   x-pack/platform/plugins/private/upgrade_assistant: {}
 
   x-pack/platform/plugins/private/watcher: {}
+
+  x-pack/platform/plugins/private/workload_isolation_research: {}
 
   x-pack/platform/plugins/shared/actions: {}
 

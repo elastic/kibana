@@ -12,6 +12,7 @@ import type { BackgroundTaskNode } from '../saved_objects/schemas/background_tas
 import type { TaskManagerConfig } from '../config';
 import { DISCOVERY_INTERVAL_AFTER_BLOCK_EXCEPTION_MS } from '../config';
 import { isClusterBlockException } from '../lib/errors';
+import { publishResearchDiscoveryHeartbeat } from '../lib/research_channel';
 
 interface DiscoveryServiceParams {
   config: TaskManagerConfig['discovery'];
@@ -67,11 +68,13 @@ export class KibanaDiscoveryService {
       const lastSeen = lastSeenDate.toISOString();
       try {
         await this.upsertCurrentNode({ id: this.currentNode, lastSeen });
+        publishResearchDiscoveryHeartbeat(true, lastSeen);
         if (!this.started) {
           this.logger.info('Kibana Discovery Service has been started');
           this.started = true;
         }
       } catch (e) {
+        publishResearchDiscoveryHeartbeat(false, lastSeen);
         if (isClusterBlockException(e)) {
           retryInterval = DISCOVERY_INTERVAL_AFTER_BLOCK_EXCEPTION_MS;
         }

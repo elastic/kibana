@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { traceContract } from './research_contract_tracer';
 import { withTimeout, isPromise } from '@kbn/std';
 import type { DiscoveredPlugin, PluginName } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -115,7 +116,13 @@ export class PluginsSystem<T extends PluginType> {
         // Only set if present. Could be absent if plugin does not have server-side code or is a
         // missing optional dependency.
         if (contracts.has(dependencyName)) {
-          depContracts[dependencyName] = contracts.get(dependencyName);
+          // RESEARCH ONLY: no-op unless KBN_RESEARCH_CONTRACT_TRACER=true.
+          depContracts[dependencyName] = traceContract(
+            pluginName,
+            dependencyName,
+            'setup',
+            contracts.get(dependencyName)
+          );
         }
 
         return depContracts;
@@ -189,7 +196,13 @@ export class PluginsSystem<T extends PluginType> {
         // Only set if present. Could be absent if plugin does not have server-side code or is a
         // missing optional dependency.
         if (contracts.has(dependencyName)) {
-          depContracts[dependencyName] = contracts.get(dependencyName);
+          // RESEARCH ONLY: no-op unless KBN_RESEARCH_CONTRACT_TRACER=true.
+          depContracts[dependencyName] = traceContract(
+            pluginName,
+            dependencyName,
+            'start',
+            contracts.get(dependencyName)
+          );
         }
 
         return depContracts;
