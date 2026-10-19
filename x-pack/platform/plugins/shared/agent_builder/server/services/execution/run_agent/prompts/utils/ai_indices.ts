@@ -10,8 +10,8 @@ import { kiRetrievalSkillId } from '@kbn/agent-builder-common';
 import type { AiIndexCatalogEntry } from '../../types';
 
 /**
- * Builds the AI INDICES prompt section from the resolved catalog. Empty when disabled or when
- * the catalog has no entries.
+ * Builds the AI INDICES prompt section from the resolved catalog. Empty when disabled.
+ * An empty catalog still renders the section, so the agent knows to look for indices in the space.
  */
 export const getAiIndicesInstructions = ({
   enabled,
@@ -22,7 +22,7 @@ export const getAiIndicesInstructions = ({
   catalog: AiIndexCatalogEntry[];
   spaceId: string;
 }): string => {
-  if (!enabled || catalog.length === 0) {
+  if (!enabled) {
     return '';
   }
 
@@ -35,8 +35,12 @@ export const getAiIndicesInstructions = ({
           description ? ` — ${description}` : ''
         }`
     );
-  const catalogSection =
-    entries.length > 0 ? `Available to this agent:\n\n${entries.join('\n')}` : '';
+  let catalogSection = '';
+  if (catalog.length === 0) {
+    catalogSection = `No AI Indices are assigned to this agent. The \`${kiRetrievalSkillId}\` skill can list the ones you can read in this space.`;
+  } else if (entries.length > 0) {
+    catalogSection = `Available to this agent:\n\n${entries.join('\n')}`;
+  }
 
   return cleanPrompt(`
 ## AI INDICES
