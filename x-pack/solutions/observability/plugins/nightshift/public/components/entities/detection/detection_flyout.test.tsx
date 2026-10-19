@@ -27,7 +27,7 @@ const mockOpenChat = jest.fn();
 
 const mockStreamFeatures = jest.fn();
 
-jest.mock('../hooks/use_fetch_source_features', () => ({
+jest.mock('../../../hooks/use_fetch_source_features', () => ({
   useFetchSourceFeatures: () => mockStreamFeatures(),
 }));
 
@@ -39,7 +39,7 @@ jest.mock('./change_point_lens_chart', () => ({
   ),
 }));
 
-jest.mock('../hooks/use_kibana', () => ({
+jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       http: { basePath: { prepend: (path: string) => `/base${path}` } },
