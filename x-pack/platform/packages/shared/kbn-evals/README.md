@@ -498,11 +498,6 @@ node scripts/evals start --suite agent-builder --judge eis-claude-4-5-sonnet
 
 Without `--judge` / `EVAL_CONNECTOR_ID`, the judge comes from `evaluationConnectorId` in the profile config (`dev-vault`, or a `config.<profile>.json` synced from Vault). Profiles without it, such as `local`, still prompt (or fail without a TTY).
 
-**Exceptions.** Suites that deliberately pin a different judge and document why:
-
-- `kbn-security-evals-matrix` runs a multi-judge jury configured in `config/security_matrix_persona.json`; it refuses a judge that is also a candidate.
-- `kbn-evals-suite-attack-discovery-fp-tp` README records the judge used for a specific measured commit as a historical note.
-
 #### Selecting evaluators at runtime
 
 Wrap evaluators with `selectEvaluators()` then control which run via environment variable:
