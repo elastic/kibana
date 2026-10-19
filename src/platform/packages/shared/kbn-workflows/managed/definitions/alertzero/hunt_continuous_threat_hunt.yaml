@@ -172,7 +172,7 @@ steps:
             # and `validated_esql` from them.
             reportIntentTargets: "${{ steps.hunt.output.report_intent_targets | compact }}"
             behaviors: "${{ steps.hunt.output.behaviors | compact }}"
-            tier2Invoked: "${{ steps.hunt.output.tier2_invoked == true }}"
+            tier2_invoked: "${{ steps.hunt.output.tier2_invoked == true }}"
 
       # Outcome derivation: find_or_create failing means no Investigation ever
       # existed, so no conclusion is possible (handled by

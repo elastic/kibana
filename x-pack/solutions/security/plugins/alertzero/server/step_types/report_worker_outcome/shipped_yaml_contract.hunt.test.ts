@@ -35,7 +35,7 @@ describe('shipped Continuous Threat Hunt Worker YAML and the reportWorkerOutcome
               hasConfirmedHit: false,
               huntStatus: 'success',
               investigationConversationId: '3f1c2b4a-5d6e-5f70-8a9b-0c1d2e3f4a5b',
-              tier2Invoked: true,
+              tier2_invoked: true,
             },
             steps: {
               decide_and_package: {

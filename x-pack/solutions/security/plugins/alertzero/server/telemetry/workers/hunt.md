@@ -24,7 +24,7 @@ The items are the selected threat reports: `candidates_found` is the reports sel
 
 ## Tier 2
 
-`hunt.yaml` outputs `tier2_invoked`, true when the coordinator's result has status `tier1_and_tier2`. The Worker passes it to packaging as `tier2Invoked`, and packaging sends it as `tier2_invoked`. Packaging leaves it out when the calling Worker hasn't picked up the version that passes it.
+`hunt.yaml` outputs `tier2_invoked`, true when the coordinator's result has status `tier1_and_tier2`. The Worker passes it to packaging under the same name, and packaging sends it on. Packaging leaves it out when the calling Worker hasn't picked up the version that passes it.
 
 ## Closes
 

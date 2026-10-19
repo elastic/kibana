@@ -55,7 +55,7 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
           hasConfirmedHit: false,
           huntStatus: 'success',
           investigationConversationId: INVESTIGATION_ID,
-          tier2Invoked: true,
+          tier2_invoked: true,
         },
         steps: {
           decide_and_package: {

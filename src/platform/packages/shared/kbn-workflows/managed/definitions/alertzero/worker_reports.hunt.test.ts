@@ -92,7 +92,7 @@ describe('Continuous Threat Hunt outcome reports', () => {
 
       expect(
         [{ tier2_invoked: true }, { tier2_invoked: false }, undefined].map((output) =>
-          renderValue(inputs.tier2Invoked, { steps: { hunt: output ? { output } : {} } })
+          renderValue(inputs.tier2_invoked, { steps: { hunt: output ? { output } : {} } })
         )
       ).toEqual([true, false, false]);
     });
@@ -310,7 +310,7 @@ describe('Continuous Threat Hunt outcome reports', () => {
 
     describeReportStep(steps, 'report_report_completed', 'hunt_report_completed', 'emit_result');
 
-    it('accepts tier2Invoked as an optional boolean input', () => {
+    it('accepts tier2_invoked as an optional boolean input', () => {
       const workflow = parse(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW.yaml) as {
         triggers: Array<{
           inputs: { properties: Record<string, { type: string }>; required: string[] };
@@ -319,8 +319,8 @@ describe('Continuous Threat Hunt outcome reports', () => {
       const [{ inputs }] = workflow.triggers;
 
       expect({
-        required: inputs.required.includes('tier2Invoked'),
-        type: inputs.properties.tier2Invoked?.type,
+        required: inputs.required.includes('tier2_invoked'),
+        type: inputs.properties.tier2_invoked?.type,
       }).toEqual({ required: false, type: 'boolean' });
     });
 
@@ -345,7 +345,7 @@ describe('Continuous Threat Hunt outcome reports', () => {
         hasConfirmedHit: hit,
         huntStatus,
         investigationConversationId: INVESTIGATION_ID,
-        ...(tier2Invoked === undefined ? {} : { tier2Invoked }),
+        ...(tier2Invoked === undefined ? {} : { tier2_invoked: tier2Invoked }),
       },
       steps: { decide_and_package: packaged ? { output: packaged } : {} },
       variables: {

@@ -97,7 +97,7 @@ triggers:
             type: object
             additionalProperties: true
           description: The coordinator's `tier2.behaviors` (the hunt child's `behaviors` output).
-        tier2Invoked:
+        tier2_invoked:
           type: boolean
           description: Whether the hunt ran Tier 2. Read only for product telemetry; omit when unknown.
       required:
@@ -361,7 +361,7 @@ steps:
         unknown
         {%- endif -%}
       has_confirmed_hit: "${{ inputs.hasConfirmedHit == true }}"
-      tier2_invoked: "${{ inputs.tier2Invoked }}"
+      tier2_invoked: "${{ inputs.tier2_invoked }}"
       package_status: "{% if variables.package_status == 'success' %}success{% else %}run_incomplete{% endif %}"
       closed_clean: "${{ steps.decide_and_package.output.dismiss == true and variables.dismiss_close_failed != true }}"
       proposals_prepared: "${{ steps.decide_and_package.output.proposals | size }}"
