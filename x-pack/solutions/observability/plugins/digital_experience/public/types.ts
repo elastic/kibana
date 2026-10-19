@@ -22,10 +22,8 @@ export interface DigitalExperienceStartDeps {
   data: DataPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  /** Undefined on serverless, which disables the ux plugin and so has no Classic RUM data. */
   ux?: UxPluginStart;
 }
 
-/** The app only mounts when ux is available (see `capabilities.ts`), so its services include it. */
-export type DigitalExperienceAppDeps = DigitalExperienceStartDeps & { ux: UxPluginStart };
-
-export type DigitalExperienceServices = CoreStart & DigitalExperienceAppDeps;
+export type DigitalExperienceServices = CoreStart & DigitalExperienceStartDeps;

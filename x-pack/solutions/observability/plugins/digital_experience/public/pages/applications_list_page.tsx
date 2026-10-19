@@ -98,6 +98,10 @@ export function ApplicationsListPage() {
     refresh,
   } = useAbortableAsync(
     async ({ signal }) => {
+      // Without ux (serverless) there is no Classic RUM data, so nothing is requested.
+      if (!ux) {
+        return [];
+      }
       // Throws on an invalid range (e.g. `rangeFrom=foo`), which surfaces as the load error.
       const { startDate, endDate } = getDateRange({
         from: timeRange.rangeFrom,

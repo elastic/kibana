@@ -82,4 +82,12 @@ describe('ApplicationPage', () => {
 
     expect(await screen.findByTestId('digitalExperienceOverviewEmpty')).toBeInTheDocument();
   });
+
+  it('renders an empty prompt without the ux plugin, as on serverless', async () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" />);
+
+    expect(await screen.findByTestId('digitalExperienceOverviewEmpty')).toBeInTheDocument();
+  });
 });

@@ -54,10 +54,12 @@ export function ApplicationPage({ serviceName }: { serviceName: string }) {
   useRouteBreadcrumb([{ text: serviceName }, { text: APPLICATION_TAB_LABELS[selectedTab] }]);
 
   // Wrapped in an object: a component is a function, which React state would call as an updater.
-  const { value: dashboard, error } = useAbortableAsync(
-    async () => ({ Component: await ux.getClassicRumDashboard() }),
-    [ux]
-  );
+  const { value: dashboard, error } = useAbortableAsync(async () => {
+    if (!ux) {
+      return undefined;
+    }
+    return { Component: await ux.getClassicRumDashboard() };
+  }, [ux]);
 
   const renderOverview = () => {
     if (dashboard) {
@@ -70,7 +72,11 @@ export function ApplicationPage({ serviceName }: { serviceName: string }) {
         />
       );
     }
-    return error ? overviewUnavailablePrompt : <EuiLoadingSpinner size="xl" />;
+    // Without ux (serverless) there is no Classic RUM dashboard to show.
+    if (error || !ux) {
+      return overviewUnavailablePrompt;
+    }
+    return <EuiLoadingSpinner size="xl" />;
   };
 
   return (

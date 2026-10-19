@@ -6,16 +6,11 @@
  */
 
 import type { Capabilities } from '@kbn/core/public';
-import type { UxPluginStart } from '@kbn/ux-plugin/public';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../common/feature';
 
 /**
- * Also requires the ux plugin and APM access because the Classic RUM data is read through them;
- * drop both checks (and the feature's `privilegesTooltip`) once Digital Experience no longer reads
- * Classic RUM.
+ * Also requires APM access because the Classic RUM data is read through its routes; drop that check
+ * (and the feature's `privilegesTooltip`) once Digital Experience no longer reads Classic RUM.
  */
-export const hasDigitalExperienceAccess = (
-  capabilities: Capabilities,
-  ux: UxPluginStart | undefined
-): ux is UxPluginStart =>
-  Boolean(ux && capabilities[DIGITAL_EXPERIENCE_FEATURE_ID]?.show && capabilities.apm?.show);
+export const hasDigitalExperienceAccess = (capabilities: Capabilities): boolean =>
+  Boolean(capabilities[DIGITAL_EXPERIENCE_FEATURE_ID]?.show && capabilities.apm?.show);

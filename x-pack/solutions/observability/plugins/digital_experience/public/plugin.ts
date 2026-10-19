@@ -27,8 +27,8 @@ export class DigitalExperiencePlugin
   public setup(core: CoreSetup<DigitalExperienceStartDeps>, plugins: DigitalExperienceSetupDeps) {
     plugins.observabilityShared.navigation.registerSections(
       from(core.getStartServices()).pipe(
-        map(([coreStart, pluginsStart]) =>
-          hasDigitalExperienceAccess(coreStart.application.capabilities, pluginsStart.ux)
+        map(([coreStart]) =>
+          hasDigitalExperienceAccess(coreStart.application.capabilities)
             ? [
                 {
                   label: DIGITAL_EXPERIENCE_LABEL,
@@ -64,30 +64,20 @@ export class DigitalExperiencePlugin
           core.getStartServices(),
         ]);
 
-        const { ux } = pluginsStart;
-        // Unreachable: the app is inaccessible without ux, so core never mounts it.
-        if (!ux) {
-          throw new Error('Digital Experience requires the ux plugin');
-        }
-
-        return renderApp({
-          core: coreStart,
-          pluginsStart: { ...pluginsStart, ux },
-          appMountParameters,
-        });
+        return renderApp({ core: coreStart, pluginsStart, appMountParameters });
       },
     });
   }
 
   public start(core: CoreStart, { ux }: DigitalExperienceStartDeps) {
-    if (!hasDigitalExperienceAccess(core.application.capabilities, ux)) {
+    if (!hasDigitalExperienceAccess(core.application.capabilities)) {
       this.appUpdater$.next(() => ({ status: AppStatus.inaccessible }));
       return;
     }
 
     this.appUpdater$.next(() => ({ status: AppStatus.accessible }));
     // Only users who can use Digital Experience lose the legacy User Experience entry.
-    ux.hideLegacyNavigation();
+    ux?.hideLegacyNavigation();
   }
 
   public stop() {}

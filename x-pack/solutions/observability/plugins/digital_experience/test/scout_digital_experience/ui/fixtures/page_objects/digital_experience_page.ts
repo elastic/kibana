@@ -13,10 +13,13 @@ const APP_PATH = '/app/digital_experience';
 export class DigitalExperiencePage {
   public readonly mainContainer: Locator;
   public readonly applicationsTable: Locator;
+  public readonly applicationsEmpty: Locator;
+  public readonly overviewEmpty: Locator;
   public readonly overviewTab: Locator;
   public readonly breadcrumbs: Locator;
   public readonly navEntry: Locator;
   public readonly legacyNavEntry: Locator;
+  public readonly projectNavEntry: Locator;
   public readonly appNotFound: Locator;
   public readonly permissionDenied: Locator;
   public readonly classicRumPageLoadMetric: Locator;
@@ -25,10 +28,13 @@ export class DigitalExperiencePage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.mainContainer = page.getByTestId('digitalExperienceMainContainer');
     this.applicationsTable = page.getByTestId('digitalExperienceApplicationsTable');
+    this.applicationsEmpty = page.getByTestId('digitalExperienceApplicationsEmpty');
+    this.overviewEmpty = page.getByTestId('digitalExperienceOverviewEmpty');
     this.overviewTab = page.getByTestId('digitalExperienceTab-overview');
     this.breadcrumbs = page.getByTestId('breadcrumbs');
     this.navEntry = page.getByTestId('observability-nav-digital_experience-applications');
     this.legacyNavEntry = page.getByTestId('observability-nav-ux-dashboard');
+    this.projectNavEntry = page.testSubj.locator('~nav-item-deepLinkId-digital_experience');
     this.appNotFound = page.getByTestId('appNotFoundPageContent');
     // The server denies the app route itself when the role has no digital_experience privilege.
     this.permissionDenied = page.getByTestId('ResetSessionButton');

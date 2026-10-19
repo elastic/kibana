@@ -10,7 +10,6 @@ import { firstValueFrom, take, toArray } from 'rxjs';
 import type { App, AppUpdater, CoreSetup, CoreStart } from '@kbn/core/public';
 import { AppStatus } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { UxPluginStart } from '@kbn/ux-plugin/public';
 import { hasDigitalExperienceAccess } from './capabilities';
 import { DigitalExperiencePlugin } from './plugin';
 import type { DigitalExperienceSetupDeps, DigitalExperienceStartDeps } from './types';
@@ -56,16 +55,13 @@ const setup = ({
 };
 
 describe('hasDigitalExperienceAccess', () => {
-  const ux = createUx() as unknown as UxPluginStart;
-
   it('reflects the digital_experience show capability', () => {
-    expect(hasDigitalExperienceAccess(createCapabilities(true), ux)).toBe(true);
-    expect(hasDigitalExperienceAccess(createCapabilities(false), ux)).toBe(false);
+    expect(hasDigitalExperienceAccess(createCapabilities(true))).toBe(true);
+    expect(hasDigitalExperienceAccess(createCapabilities(false))).toBe(false);
   });
 
-  it('requires APM access and the ux plugin, which the app reads its data through', () => {
-    expect(hasDigitalExperienceAccess(createCapabilities(true, false), ux)).toBe(false);
-    expect(hasDigitalExperienceAccess(createCapabilities(true), undefined)).toBe(false);
+  it('requires APM access, which the app reads its data through', () => {
+    expect(hasDigitalExperienceAccess(createCapabilities(true, false))).toBe(false);
   });
 });
 
@@ -102,15 +98,15 @@ describe('DigitalExperiencePlugin', () => {
     expect((afterStart as AppUpdater)(app)).toEqual({ status });
   });
 
-  it('makes the app inaccessible and registers no nav section without the ux plugin', async () => {
+  it('stays accessible with its nav section without the ux plugin, as on serverless', async () => {
     const { app, start, sections$ } = setup({ show: true, ux: null });
     const updates = firstValueFrom(app.updater$!.pipe(take(2), toArray()));
 
     start();
 
     const [, afterStart] = await updates;
-    expect((afterStart as AppUpdater)(app)).toEqual({ status: AppStatus.inaccessible });
-    expect(await firstValueFrom(sections$)).toEqual([]);
+    expect((afterStart as AppUpdater)(app)).toEqual({ status: AppStatus.accessible });
+    expect(await firstValueFrom(sections$)).toHaveLength(1);
   });
 
   it.each([

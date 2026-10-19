@@ -28,12 +28,12 @@ const mockTimeRange = (range: ReturnType<typeof useTimeRange>['timeRange']) =>
     setTimeRange: jest.fn(),
   });
 
-const renderPage = (fetchClassicRumApplications: jest.Mock) => {
+const renderPage = (fetchClassicRumApplications?: jest.Mock) => {
   jest.mocked(useKibanaServices).mockReturnValue({
     application: {
       getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
     },
-    ux: { fetchClassicRumApplications },
+    ux: fetchClassicRumApplications ? { fetchClassicRumApplications } : undefined,
   } as unknown as ReturnType<typeof useKibanaServices>);
   return render(<ApplicationsListPage />);
 };
@@ -70,6 +70,12 @@ describe('ApplicationsListPage', () => {
 
   it('shows the empty prompt when there are no applications', async () => {
     renderPage(jest.fn().mockResolvedValue([]));
+
+    expect(await screen.findByTestId('digitalExperienceApplicationsEmpty')).toBeInTheDocument();
+  });
+
+  it('shows the empty prompt without the ux plugin, as on serverless', async () => {
+    renderPage();
 
     expect(await screen.findByTestId('digitalExperienceApplicationsEmpty')).toBeInTheDocument();
   });
