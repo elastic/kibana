@@ -14,8 +14,10 @@ GIT_ABBREV_COMMIT=${BUILDKITE_COMMIT:0:12}
 KIBANA_IMAGE_TAG="sec-sol-qg-$GIT_ABBREV_COMMIT"
 
 
-KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
-export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
+# node scripts/build names the image kibana-ci/kibana-serverless; push follows the pipeline tier
+BUILD_OUTPUT_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless:$KIBANA_IMAGE_TAG"
+KIBANA_PUSH_REPOSITORY="$(kibana_ci_image_repository kibana-serverless)"
+export KIBANA_IMAGE="$KIBANA_PUSH_REPOSITORY:$KIBANA_IMAGE_TAG"
 
 echo "--- Verify manifest does not already exist"
 echo "Checking manifest for $KIBANA_IMAGE"
@@ -24,7 +26,7 @@ if docker manifest inspect $KIBANA_IMAGE &> /dev/null; then
   exit 0
 fi
 
-docker_with_retry pull $KIBANA_BASE_IMAGE:latest
+docker_with_retry pull "docker.elastic.co/kibana-ci/kibana-serverless:latest"
 
 echo "--- Build images"
 node scripts/build \
@@ -44,13 +46,13 @@ node scripts/build \
   --skip-cdn-assets
 
 echo "--- Tag images"
-docker rmi "$KIBANA_IMAGE"
+docker rmi "$BUILD_OUTPUT_IMAGE" || true
 docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-amd64.tar.gz"
-docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-amd64"
+docker tag "$BUILD_OUTPUT_IMAGE" "$KIBANA_IMAGE-amd64"
 
-docker rmi "$KIBANA_IMAGE"
+docker rmi "$BUILD_OUTPUT_IMAGE" || true
 docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-arm64.tar.gz"
-docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-arm64"
+docker tag "$BUILD_OUTPUT_IMAGE" "$KIBANA_IMAGE-arm64"
 
 echo "--- Push images"
 docker_with_retry push "$KIBANA_IMAGE-arm64"
@@ -65,10 +67,10 @@ docker manifest push "$KIBANA_IMAGE"
 
 if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
   docker manifest create \
-    "$KIBANA_BASE_IMAGE:latest" \
+    "$KIBANA_PUSH_REPOSITORY:latest" \
     --amend "$KIBANA_IMAGE-arm64" \
     --amend "$KIBANA_IMAGE-amd64"
-  docker manifest push "$KIBANA_BASE_IMAGE:latest"
+  docker manifest push "$KIBANA_PUSH_REPOSITORY:latest"
 fi
 
 cat << EOF | buildkite-agent annotate --style "info" --context image
