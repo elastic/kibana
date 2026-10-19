@@ -63,10 +63,25 @@ describe('artifactSetKey', () => {
     expect(forward).not.toBeNull();
   });
 
-  it('matches a value that sits inside a longer token in the quote', () => {
-    // No word-boundary check: `example.com` inside `evil.example.com` is an accepted match.
+  it('does not match a value that is only part of a longer indicator in the quote', () => {
+    // `example.com` inside `evil.example.com` is a different indicator; collapsing a behavior
+    // about the longer one onto a hunt for the shorter would retire it on a hunt that never ran.
     expect(artifactSetKey('traffic to evil.example.com was observed', [ioc('example.com')])).toBe(
-      'example.com'
+      null
+    );
+  });
+
+  it('does not match an IP that is a prefix of a longer IP in the quote', () => {
+    expect(artifactSetKey('scanned 10.0.0.10 for open ports', [ioc('10.0.0.1')])).toBe(null);
+    expect(artifactSetKey('beaconed to 10.0.0.1 nightly', [ioc('10.0.0.1')])).toBe('10.0.0.1');
+  });
+
+  it('matches an indicator that ends a sentence', () => {
+    expect(artifactSetKey('the beacon resolved evil.example.com.', [ioc('evil.example.com')])).toBe(
+      'evil.example.com'
+    );
+    expect(artifactSetKey('(see evil.example.com), then', [ioc('evil.example.com')])).toBe(
+      'evil.example.com'
     );
   });
 
@@ -306,6 +321,32 @@ describe('queryHuntsArtifacts', () => {
     expect(
       queryHuntsArtifacts(
         'FROM logs-* | WHERE destination.domain IN ("a.example", "b.example") AND destination.domain != "b.example"',
+        key
+      )
+    ).toBe(false);
+  });
+
+  it('is false when an artifact is excluded through an escaped NOT RLIKE pattern', () => {
+    const key = artifactSetKey('seen at a.example and b.example', [
+      { type: 'domain', value: 'a.example' },
+      { type: 'domain', value: 'b.example' },
+    ])!;
+    expect(
+      queryHuntsArtifacts(
+        String.raw`FROM logs-* | WHERE destination.domain IN ("a.example", "b.example") AND destination.domain NOT RLIKE "b\.example"`,
+        key
+      )
+    ).toBe(false);
+  });
+
+  it('is false when an artifact is excluded through a wildcarded NOT LIKE pattern', () => {
+    const key = artifactSetKey('seen at a.example and b.example', [
+      { type: 'domain', value: 'a.example' },
+      { type: 'domain', value: 'b.example' },
+    ])!;
+    expect(
+      queryHuntsArtifacts(
+        'FROM logs-* | WHERE destination.domain IN ("a.example", "b.example") AND destination.domain NOT LIKE "*b.example*"',
         key
       )
     ).toBe(false);

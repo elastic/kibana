@@ -32,14 +32,18 @@ const MIN_ARTIFACT_LENGTH = 4;
  * technique each is filed under, so collapsing on this key pays for one query instead of one
  * per technique.
  *
- * A value counts when its normalized form is at least `MIN_ARTIFACT_LENGTH` characters and
- * appears anywhere inside the normalized quote — a plain substring test, with no word-boundary
- * check, so `example.com` inside `evil.example.com` counts. Every IOC the caller passed
- * participates, not only the ones a prompt happened to show the model. The IOC's `type` is not
- * part of the key: two IOCs of different types with the same value still count once. The
- * matching values are sorted, deduplicated, and joined so the key does not depend on `iocs`'
- * order. An evidence quote that names no shared artifact gets `null`, which never equals another
- * `null` for collapsing purposes — such a behavior is always alone.
+ * A value counts when its normalized form is at least `MIN_ARTIFACT_LENGTH` characters and the
+ * quote names it as a whole indicator, not as part of a longer one: `10.0.0.1` is not named by a
+ * quote about `10.0.0.10`, and `example.com` is not named by one about `evil.example.com`, since
+ * a value buried inside a longer token is a different indicator and a behavior quoting the longer
+ * one would otherwise be collapsed onto a hunt for the shorter. That is stricter than the
+ * grounding gate's own word boundary, which lets a dot separate tokens; here a dot, dash, colon,
+ * slash or `@` inside an indicator is part of it. Every IOC the caller passed participates, not
+ * only the ones a prompt happened to show the model. The IOC's `type` is not part of the key: two
+ * IOCs of different types with the same value still count once. The matching values are sorted,
+ * deduplicated, and joined so the key does not depend on `iocs`' order. An evidence quote that
+ * names no shared artifact gets `null`, which never equals another `null` for collapsing
+ * purposes — such a behavior is always alone.
  */
 export const artifactSetKey = (
   evidenceQuote: string,
@@ -50,12 +54,35 @@ export const artifactSetKey = (
   for (const ioc of iocs ?? []) {
     const value = normalize(ioc.value);
     if (value.length < MIN_ARTIFACT_LENGTH) continue;
-    if (quote.includes(value)) {
+    if (namesIndicator(quote, value)) {
       matched.add(value);
     }
   }
   if (matched.size === 0) return null;
   return [...matched].sort().join('\u0000');
+};
+
+/**
+ * A character that continues an indicator rather than ending it. Letters, digits and underscore
+ * as in any word, plus the punctuation that sits inside domains, IPs, URLs, paths and accounts.
+ * Sentence punctuation (`,`, `;`, `)`, a closing quote, a full stop before a space or the end) is
+ * not here, so `evil.example.com.` at the end of a sentence still names `evil.example.com`.
+ */
+const INDICATOR_CHARACTER = /[\p{L}\p{N}_.\-:@/\\]/u;
+
+/** Whether `text` names `value` as a whole indicator, with nothing continuing it on either side. */
+const namesIndicator = (text: string, value: string): boolean => {
+  for (let at = text.indexOf(value); at !== -1; at = text.indexOf(value, at + 1)) {
+    const before = text[at - 1] ?? ' ';
+    const after = text[at + value.length] ?? ' ';
+    const afterNext = text[at + value.length + 1] ?? ' ';
+    // A full stop right after the value is sentence punctuation when nothing indicator-like
+    // follows it, and part of a longer indicator otherwise.
+    const endsHere =
+      !INDICATOR_CHARACTER.test(after) || (after === '.' && !INDICATOR_CHARACTER.test(afterNext));
+    if (!INDICATOR_CHARACTER.test(before) && endsHere) return true;
+  }
+  return false;
 };
 
 /**
@@ -113,7 +140,14 @@ const NEGATING_OPERATORS: ReadonlySet<string> = new Set([
   'not rlike',
 ]);
 
-/** Every normalized string literal that sits anywhere under a negating operator. */
+/**
+ * Every string literal that sits anywhere under a negating operator, read the way the value
+ * would match rather than as source text. A `NOT RLIKE "b\\.example"` excludes `b.example`, but
+ * its literal is `b\.example`, which does not contain `b.example` as text; and a `NOT LIKE
+ * "*b.example*"` carries wildcards the artifact does not. So each literal is also kept with its
+ * regex escapes dropped and its `LIKE` wildcards stripped. Reading a literal more ways than it
+ * can match only ever excludes more, which is the safe direction here.
+ */
 const excludedLiterals = (esql: string): string[] => {
   const { root, errors } = Parser.parse(esql);
   if (errors.length > 0) return [];
@@ -124,7 +158,8 @@ const excludedLiterals = (esql: string): string[] => {
       Walker.walk(fn, {
         visitLiteral: (literal) => {
           const value = 'valueUnquoted' in literal ? literal.valueUnquoted : literal.value;
-          excluded.push(normalize(String(value)).replace(/^["'`]+|["'`]+$/g, ''));
+          const text = normalize(String(value)).replace(/^["'`]+|["'`]+$/g, '');
+          excluded.push(text, text.replace(/\\(.)/g, '$1'), text.replace(/[*?]+/g, ''));
         },
       });
     },
