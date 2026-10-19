@@ -127,9 +127,35 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, isDisable
     serializer: formSerializer,
   });
 
-  const { submit, isValid: isFormValid, isSubmitted, getFields, isSubmitting } = form;
+  const {
+    submit,
+    isValid: isFormValid,
+    isSubmitted,
+    getFields,
+    isSubmitting,
+    updateFieldValues,
+  } = form;
 
   const nameFieldConfig = getNameFieldConfig(dataView, field);
+
+  // <ScriptField /> is remounted when switching between <FieldDetail /> and <CompositeEditor />
+  // and reads its initial value from the form default value, so we persist the current script
+  // there whenever the type changes
+  const persistScript = useCallback(
+    ({ script }: FieldFormInternal) => {
+      if (!script?.source?.trim()) {
+        return;
+      }
+
+      updateFieldValues(
+        { script: { source: script.source }, __meta__: { isValueVisible: true } },
+        { runDeserializer: false }
+      );
+    },
+    [updateFieldValues]
+  );
+
+  useFormData<FieldFormInternal>({ form, watch: 'type', onChange: persistScript });
 
   const [formData] = useFormData<FieldFormInternal>({ form });
   const isFormModified = useFormIsModified({
@@ -196,8 +222,6 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, isDisable
       });
 
       subfields$.next(modifiedFields);
-      // necessary to maintain script code when changing types
-      form.updateFieldValues({ ...form.getFormData() });
     });
 
     // first preview value is skipped for saved fields, need to populate for new fields and rerenders
@@ -210,7 +234,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, isDisable
     return () => {
       subChanges.unsubscribe();
     };
-  }, [form, fieldPreview$, subfields$, updatedName]);
+  }, [fieldPreview$, subfields$, updatedName]);
 
   useEffect(() => {
     if (onChange) {
