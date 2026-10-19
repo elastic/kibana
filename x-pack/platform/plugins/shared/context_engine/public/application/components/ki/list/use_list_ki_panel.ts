@@ -44,6 +44,11 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
     [submittedQuery]
   );
 
+  const onSearchSubmitClick = useCallback(
+    () => submitSearch(searchText),
+    [submitSearch, searchText]
+  );
+
   const { kis, total, summary, isLoading, isFetching, error } = useListKi({
     aiIndexId,
     size,
@@ -73,6 +78,6 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
     isFetching,
     error,
     loadMore,
-    onSearchSubmitClick: submitSearch,
+    onSearchSubmitClick,
   };
 };

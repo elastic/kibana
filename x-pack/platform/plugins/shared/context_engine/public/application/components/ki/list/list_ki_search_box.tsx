@@ -8,7 +8,6 @@
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import type { KeyboardEvent } from 'react';
 import React, { useCallback } from 'react';
 import { MAX_KI_SEARCH_QUERY_LENGTH } from '../../../../../common/constants';

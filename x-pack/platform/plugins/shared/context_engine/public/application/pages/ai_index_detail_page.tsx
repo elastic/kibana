@@ -90,7 +90,7 @@ export const AiIndexDetailPage = () => {
   const location = useLocation<AiIndexCreatedLocationState | undefined>();
   const history = useHistory<AiIndexCreatedLocationState | undefined>();
   const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
-  const { destValue, discoverHref, indexManagementHref } = useAiIndexDestLinks(aiIndex?.dest);
+  const { discoverHref, indexManagementHref } = useAiIndexDestLinks(aiIndex?.dest);
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const isMemoryEnabled = useMemoryEnabled();
   const [selectedTab, setSelectedTab] = useState<DetailTabId>('overview');
