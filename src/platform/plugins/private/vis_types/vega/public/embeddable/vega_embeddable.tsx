@@ -396,7 +396,18 @@ export const vegaEmbeddableFactory = (
             deps: deps.libraryEditorDependencies,
             id: libraryId,
             allowSaveAsNew: false,
+            panel: {
+              parentApi,
+              uuid,
+              onPreview: ({ spec, query, filters }) => {
+                const libraryItem = libraryItem$.getValue();
+                if (!libraryItem) return;
+                spec$.next(spec);
+                libraryItem$.next({ ...libraryItem, query, filters });
+              },
+            },
           });
+          // Shows the saved item again, which also reverts a preview that wasn't saved.
           await reloadLibraryItem(libraryId);
           returnFocus?.();
           return;

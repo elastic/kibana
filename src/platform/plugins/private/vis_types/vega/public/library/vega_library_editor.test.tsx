@@ -14,6 +14,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import type { VegaReadResponseBody } from '../../server';
+import type { VegaEditableState } from '../lib/library_draft';
 import { setData } from '../services';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { saveVegaToLibrary } from './save_to_library';
@@ -65,7 +66,12 @@ const lastPreviewState = () => mockPreview.mock.lastCall?.[0].serializedState;
 const renderEditor = ({
   canSave = true,
   allowSaveAsNew,
-}: { canSave?: boolean; allowSaveAsNew?: boolean } = {}) => {
+  onPreview,
+}: {
+  canSave?: boolean;
+  allowSaveAsNew?: boolean;
+  onPreview?: (state: VegaEditableState) => void;
+} = {}) => {
   const core = coreMock.createStart();
   core.uiSettings.get.mockReturnValue([]);
   const client = {
@@ -87,6 +93,7 @@ const renderEditor = ({
       item={item}
       canSave={canSave}
       allowSaveAsNew={allowSaveAsNew}
+      onPreview={onPreview}
       closeFlyout={closeFlyout}
       ariaLabelledBy="vegaLibraryEditorTitle"
     />
@@ -303,6 +310,40 @@ describe('VegaLibraryEditor', () => {
       renderEditor();
 
       expect(await screen.findByTestId('vegaLibraryEditorPreviewButton')).toBeDisabled();
+    });
+  });
+
+  describe('in a panel', () => {
+    it('previews in the panel instead of a preview flyout', async () => {
+      const onPreview = jest.fn();
+      renderEditor({ onPreview });
+
+      await userEvent.click(await screen.findByText('changeSpec'));
+      expect(screen.queryByTestId('mockPreview')).not.toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('vegaLibraryEditorPreviewButton'));
+
+      expect(onPreview).toHaveBeenLastCalledWith({
+        spec: { format: 'hjson', value: '{ mark: bar }' },
+      });
+      expect(screen.queryByTestId('mockPreview')).not.toBeInTheDocument();
+    });
+
+    it('follows query changes right away, keeping the previewed spec', async () => {
+      const onPreview = jest.fn();
+      const { getSearchBarProps } = renderEditor({ onPreview });
+      await userEvent.click(await screen.findByText('changeSpec'));
+
+      await act(async () => {
+        getSearchBarProps().onQuerySubmit?.({
+          query: { language: 'kuery', query: 'bytes > 10' },
+          dateRange: { from: 'now-15m', to: 'now' },
+        });
+      });
+
+      expect(onPreview).toHaveBeenLastCalledWith({
+        spec: { format: 'hjson', value: '{ mark: point }' },
+        query: { language: 'kql', expression: 'bytes > 10' },
+      });
     });
   });
 

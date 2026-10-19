@@ -37,7 +37,7 @@ import {
 } from '../components/vega_editor_body';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { fromDraft, isSameDraft, toDraft } from '../lib/library_draft';
-import type { VegaDraft } from '../lib/library_draft';
+import type { VegaDraft, VegaEditableState } from '../lib/library_draft';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { getData } from '../services';
 import { PreviewTimePicker } from './preview_time_picker';
@@ -75,6 +75,8 @@ export interface VegaLibraryEditorProps {
   canSave: boolean;
   /** Whether "Save as new" is offered. Dashboard panels can't switch to the new item. */
   allowSaveAsNew?: boolean;
+  /** Shows the preview in the panel being edited, instead of in a flyout. */
+  onPreview?: (state: VegaEditableState) => void;
   closeFlyout: () => void;
   ariaLabelledBy: string;
 }
@@ -99,6 +101,7 @@ export const VegaLibraryEditor = ({
   defaultDataView,
   canSave,
   allowSaveAsNew = true,
+  onPreview,
   closeFlyout,
   ariaLabelledBy,
 }: VegaLibraryEditorProps) => {
@@ -110,7 +113,7 @@ export const VegaLibraryEditor = ({
     format: initialDraft.format,
   });
   // The preview can only be closed while it is stacked over the editor on narrow screens.
-  const [isPreviewOpen, setIsPreviewOpen] = useState(true);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(!onPreview);
   const [specDataViews, setSpecDataViews] = useState<DataView[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false);
@@ -233,8 +236,14 @@ export const VegaLibraryEditor = ({
           dataViews={dataViews}
           query={draft.query}
           filters={draft.filters}
-          onQueryChange={(query) => setDraft((current) => ({ ...current, query }))}
-          onFiltersChange={(filters) => setDraft((current) => ({ ...current, filters }))}
+          onQueryChange={(query) => {
+            setDraft((current) => ({ ...current, query }));
+            onPreview?.(fromDraft({ ...previewedSpec, query, filters: draft.filters }));
+          }}
+          onFiltersChange={(filters) => {
+            setDraft((current) => ({ ...current, filters }));
+            onPreview?.(fromDraft({ ...previewedSpec, query: draft.query, filters }));
+          }}
           spec={draft.spec}
           initialFormat={initialDraft.format}
           onSpecChange={(spec) => setDraft((current) => ({ ...current, spec }))}
@@ -248,10 +257,14 @@ export const VegaLibraryEditor = ({
         previewAction={{
           onPreview: () => {
             setPreviewedSpec({ spec: draft.spec, format: draft.format });
-            setIsPreviewOpen(true);
+            if (onPreview) {
+              onPreview(fromDraft(draft));
+            } else {
+              setIsPreviewOpen(true);
+            }
           },
-          // Also reopens a closed preview.
-          isEnabled: canPreview || !isPreviewOpen,
+          // Also reopens a closed preview flyout.
+          isEnabled: canPreview || (!onPreview && !isPreviewOpen),
           'data-test-subj': 'vegaLibraryEditorPreviewButton',
         }}
         hideSave={!canSave}

@@ -861,5 +861,33 @@ describe('vegaEmbeddableFactory', () => {
         )
       );
     });
+
+    it('previews library item edits in the panel and reverts them when not saved', async () => {
+      const { api } = await buildByReference();
+      const previewedSpec = { format: 'hjson' as const, value: '{ mark: area }' };
+      mockOpenVegaLibraryEditor.mockImplementationOnce(async ({ panel }) => {
+        expect(panel?.uuid).toBe(api.uuid);
+        panel?.onPreview({
+          spec: previewedSpec,
+          query: { language: 'kql', expression: 'bytes > 10' },
+        });
+        await waitFor(() =>
+          expect(mockVegaRequestHandler).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              visParams: { spec: '{ mark: area }' },
+              query: expect.arrayContaining([expect.objectContaining({ query: 'bytes > 10' })]),
+            })
+          )
+        );
+      });
+
+      await api.onEdit();
+
+      await waitFor(() =>
+        expect(mockVegaRequestHandler).toHaveBeenLastCalledWith(
+          expect.objectContaining({ visParams: { spec: libraryItem.spec.value } })
+        )
+      );
+    });
   });
 });

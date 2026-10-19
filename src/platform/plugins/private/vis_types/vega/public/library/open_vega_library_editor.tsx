@@ -10,6 +10,7 @@
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { openLazySystemFlyout } from '@kbn/presentation-util';
+import type { VegaEditableState } from '../lib/library_draft';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { vegaTitleInWizard } from '../vega_icon';
 import { createVegaLibraryClient } from './vega_library_client';
@@ -22,27 +23,41 @@ export const openVegaLibraryEditor = async ({
   deps,
   id,
   allowSaveAsNew,
+  panel,
 }: {
   core: CoreStart;
   deps: Pick<VegaPluginStartDependencies, 'dataViews' | 'unifiedSearch' | 'savedObjectsTaggingOss'>;
   id: string;
   allowSaveAsNew?: boolean;
+  /** The dashboard or Canvas panel being edited, which shows the preview instead of a flyout. */
+  panel?: { parentApi: unknown; uuid: string; onPreview: (state: VegaEditableState) => void };
 }): Promise<void> => {
   const client = createVegaLibraryClient(core.http);
 
   const flyoutRef = openLazySystemFlyout({
     core,
-    flyoutProps: {
-      // No `size`: the default width pairs with the size `m` preview flyout, while EUI doesn't
-      // allow a parent and child flyout to both be `m`.
-      title: vegaTitleInWizard,
-      // The library page has no panel to push aside, so cover it like a dialog would.
-      type: 'overlay',
-      ownFocus: true,
-      // A stray click would otherwise discard unsaved edits.
-      outsideClickCloses: false,
-      'data-test-subj': 'vegaLibraryEditorFlyout',
-    },
+    parentApi: panel?.parentApi,
+    flyoutProps: panel
+      ? {
+          // Placed like the by-value editor, next to the panel it previews in.
+          focusedPanelId: panel.uuid,
+          title: vegaTitleInWizard,
+          size: 'm',
+          // A stray click would otherwise discard unsaved edits.
+          outsideClickCloses: false,
+          'data-test-subj': 'vegaLibraryEditorFlyout',
+        }
+      : {
+          // No `size`: the default width pairs with the size `m` preview flyout, while EUI doesn't
+          // allow a parent and child flyout to both be `m`.
+          title: vegaTitleInWizard,
+          // The library page has no panel to push aside, so cover it like a dialog would.
+          type: 'overlay',
+          ownFocus: true,
+          // A stray click would otherwise discard unsaved edits.
+          outsideClickCloses: false,
+          'data-test-subj': 'vegaLibraryEditorFlyout',
+        },
     loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
       const [item, defaultDataView, { VegaLibraryEditor }] = await Promise.all([
         client.get(id).then(({ data }) => ({ id, data })),
@@ -61,6 +76,7 @@ export const openVegaLibraryEditor = async ({
           defaultDataView={defaultDataView ?? undefined}
           canSave={Boolean(core.application.capabilities.visualize_v2?.save)}
           allowSaveAsNew={allowSaveAsNew}
+          onPreview={panel?.onPreview}
           closeFlyout={closeFlyout}
           ariaLabelledBy={ariaLabelledBy}
         />
