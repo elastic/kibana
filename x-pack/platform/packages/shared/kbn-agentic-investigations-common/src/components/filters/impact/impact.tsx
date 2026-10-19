@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -20,9 +20,7 @@ import {
   useResizeObserver,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
-import type { ImpactFilterable } from './entity_ids';
 import { entityTypeIcon } from './entity_type_icon';
-import { impactPills } from './impact_pills';
 import type { ImpactPill } from './impact_pills';
 import { IMPACT_LABELS } from './translations';
 import { findVisiblePills, isVisibleIndex, rowsAfterExpansions } from './visible_pills';
@@ -34,7 +32,7 @@ export const IMPACT_OVERFLOW_TEST_SUBJ = 'alertzeroImpactOverflow';
 export const IMPACT_COLLAPSE_TEST_SUBJ = 'alertzeroImpactCollapse';
 
 interface ImpactProps {
-  items: readonly ImpactFilterable[];
+  pills: readonly ImpactPill[];
   entityFilter: string | null;
   onEntityFilterChange: (entityId: string | null) => void;
 }
@@ -105,7 +103,7 @@ const PillBadge: React.FC<PillBadgeProps> = ({
   );
 };
 
-export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFilterChange }) => {
+export const Impact: React.FC<ImpactProps> = ({ pills, entityFilter, onEntityFilterChange }) => {
   const { euiTheme } = useEuiTheme();
   const [rowElement, setRowElement] = useState<HTMLDivElement | null>(null);
   const { width: observedWidth } = useResizeObserver(rowElement, 'width');
@@ -116,7 +114,6 @@ export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFil
   // How many times `+n` was clicked; each click reveals `ROWS_PER_EXPAND` more rows.
   const [expansions, setExpansions] = useState(0);
 
-  const pills = useMemo(() => impactPills(items), [items]);
   // `gutterSize="s"` on EuiFlexGroup renders `gap: euiTheme.size.s`.
   const gap = parseFloat(euiTheme.size.s);
 
