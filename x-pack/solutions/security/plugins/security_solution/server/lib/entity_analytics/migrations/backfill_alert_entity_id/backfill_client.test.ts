@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -192,6 +193,14 @@ describe('startBackfill', () => {
     );
   });
 
+  it('submits once and lets a failed submit through, rather than retrying it', async () => {
+    const connectionLost = new errors.ConnectionError('socket hang up');
+    esClient.updateByQuery.mockRejectedValue(connectionLost);
+
+    await expect(start()).rejects.toThrow(connectionLost);
+    expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
+  });
+
   it('throttles and tolerates concurrent modification', async () => {
     await start();
 
@@ -250,6 +259,12 @@ describe('cancelBackfill', () => {
       { task_id: 'node:123' },
       expect.objectContaining({ signal: SIGNAL })
     );
+  });
+
+  it('drops the stored result of the request it stopped', async () => {
+    await cancel();
+
+    expect(esClient.delete).toHaveBeenCalledWith({ index: '.tasks', id: 'node:123' });
   });
 
   it('does not throw when the request could not be stopped', async () => {
@@ -314,6 +329,65 @@ describe('pollBackfill', () => {
     expect(failures[0]).toContain('mapper_parsing_exception');
   });
 
+  it('drops the stored result once the request has finished', async () => {
+    esClient.tasks.get.mockResolvedValue({
+      completed: true,
+      task: { status: { updated: 10 } },
+      response: { failures: [] },
+    } as never);
+
+    await poll();
+
+    expect(esClient.delete).toHaveBeenCalledWith({ index: '.tasks', id: 'node:123' });
+  });
+
+  it('drops the stored result of a request that failed', async () => {
+    esClient.tasks.get.mockResolvedValue({
+      completed: true,
+      task: { status: { updated: 0 } },
+      error: { type: 'script_exception', reason: 'compile error' },
+    } as never);
+
+    await expect(poll()).rejects.toThrow(BackfillRequestFailedError);
+    expect(esClient.delete).toHaveBeenCalledWith({ index: '.tasks', id: 'node:123' });
+  });
+
+  it('keeps the result of a request still running', async () => {
+    esClient.tasks.get.mockResolvedValue({
+      completed: false,
+      task: { status: { updated: 4200, total: 10_000 } },
+    } as never);
+
+    await poll();
+
+    expect(esClient.delete).not.toHaveBeenCalled();
+  });
+
+  it('reports a result it was not allowed to delete, without failing the poll', async () => {
+    esClient.tasks.get.mockResolvedValue({
+      completed: true,
+      task: { status: { updated: 10 } },
+      response: { failures: [] },
+    } as never);
+    esClient.delete.mockRejectedValue(new errors.ResponseError({ statusCode: 403 } as never));
+
+    await expect(poll()).resolves.toMatchObject({ completed: true, updated: 10 });
+    expect(logger.warn).toHaveBeenCalled();
+  });
+
+  it('says nothing when the result has already gone', async () => {
+    esClient.tasks.get.mockResolvedValue({
+      completed: true,
+      task: { status: { updated: 10 } },
+      response: { failures: [] },
+    } as never);
+    esClient.delete.mockRejectedValue({ meta: { statusCode: 404 } });
+
+    await poll();
+
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
   it('reports a vanished task rather than treating it as finished', async () => {
     // The node running it restarted, or someone cancelled it. Alerts it had not reached are still
     // unstamped, so the request has to be reissued rather than the space marked done.
@@ -332,6 +406,26 @@ describe('pollBackfill', () => {
     await expect(poll()).rejects.toThrow(BackfillRequestFailedError);
     await expect(poll()).rejects.toThrow('script_exception - compile error');
     await expect(poll()).rejects.toMatchObject({ updated: 4200 });
+  });
+
+  it('reports a search that timed out, which completion alone does not show', async () => {
+    esClient.tasks.get.mockResolvedValue({
+      completed: true,
+      task: { status: { updated: 120, total: 10_000 } },
+      response: { timed_out: true, failures: [] },
+    } as never);
+
+    await expect(poll()).resolves.toMatchObject({ completed: true, timedOut: true });
+  });
+
+  it('reports the alerts it passed over and the retries the cluster made it do', async () => {
+    esClient.tasks.get.mockResolvedValue({
+      completed: true,
+      task: { status: { updated: 900 } },
+      response: { noops: 95, retries: { bulk: 3, search: 0 }, failures: [] },
+    } as never);
+
+    await expect(poll()).resolves.toMatchObject({ noops: 95, bulkRetries: 3 });
   });
 
   it('reports alerts another writer held', async () => {

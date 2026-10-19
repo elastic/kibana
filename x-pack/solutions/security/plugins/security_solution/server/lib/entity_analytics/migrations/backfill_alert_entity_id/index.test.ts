@@ -145,6 +145,9 @@ describe('the registered task runner', () => {
       total: 10_000,
       versionConflicts: 0,
       vanished: false,
+      timedOut: false,
+      noops: 0,
+      bulkRetries: 0,
       failures: [],
     });
   });
@@ -192,6 +195,9 @@ describe('runBackfillTask', () => {
       total: 10_000,
       versionConflicts: 0,
       vanished: false,
+      timedOut: false,
+      noops: 0,
+      bulkRetries: 0,
       failures: [],
     });
   });
@@ -362,6 +368,9 @@ describe('runBackfillTask', () => {
       total: 4200,
       versionConflicts: 0,
       vanished: false,
+      timedOut: false,
+      noops: 0,
+      bulkRetries: 0,
       failures: [],
     });
     const state = {
@@ -388,6 +397,9 @@ describe('runBackfillTask', () => {
       total: 10_000,
       versionConflicts: 0,
       vanished: false,
+      timedOut: false,
+      noops: 0,
+      bulkRetries: 0,
       failures: [],
     });
     const state = {
@@ -418,6 +430,9 @@ describe('runBackfillTask', () => {
       total: 10_000_000,
       versionConflicts: 0,
       vanished: false,
+      timedOut: false,
+      noops: 0,
+      bulkRetries: 0,
       failures: [],
     });
     const state = {
@@ -445,6 +460,9 @@ describe('runBackfillTask', () => {
       total: 10_000,
       versionConflicts: 0,
       vanished: false,
+      timedOut: false,
+      noops: 0,
+      bulkRetries: 0,
       failures: [],
     });
     const state = {
@@ -474,6 +492,9 @@ describe('runBackfillTask', () => {
       total: 10_000,
       versionConflicts: 0,
       vanished: true,
+      timedOut: false,
+      noops: 0,
+      bulkRetries: 0,
       failures: [],
     });
     const state = {
@@ -523,6 +544,42 @@ describe('runBackfillTask', () => {
     });
   });
 
+  it('counts a request whose search timed out as a failed pass', async () => {
+    pollBackfillMock.mockResolvedValue({
+      completed: true,
+      updated: 120,
+      total: 10_000,
+      versionConflicts: 0,
+      vanished: false,
+      timedOut: true,
+      noops: 0,
+      bulkRetries: 0,
+      failures: [],
+    });
+    const state = {
+      spaces: {
+        default: {
+          esTaskId: 'node:123',
+          done: false,
+          failures: 0,
+          conflictReissues: 0,
+          stamped: 0,
+        },
+      },
+      runs: 1,
+    };
+
+    const result = await runTask([{ spaceId: 'default' }], state);
+
+    expect(stateOf(result).spaces.default).toMatchObject({
+      esTaskId: undefined,
+      failures: 1,
+      done: false,
+      // What it reached before timing out stays stamped.
+      stamped: 120,
+    });
+  });
+
   it('counts a request that aborted on a document failure as a failed pass', async () => {
     const updatedBeforeFailing = 3;
     pollBackfillMock.mockResolvedValue({
@@ -531,6 +588,9 @@ describe('runBackfillTask', () => {
       total: 10_000,
       versionConflicts: 0,
       vanished: false,
+      timedOut: false,
+      noops: 0,
+      bulkRetries: 0,
       failures: ['{"index":"alerts-000003","cause":{"type":"document_parsing_exception"}}'],
     });
     const state = {
@@ -627,6 +687,9 @@ describe('runBackfillTask', () => {
       total: 10_000,
       versionConflicts: 0,
       vanished: false,
+      timedOut: false,
+      noops: 0,
+      bulkRetries: 0,
       failures: [],
     });
     const state = {
@@ -654,6 +717,9 @@ describe('runBackfillTask', () => {
       total: 10_000,
       versionConflicts: 0,
       vanished: false,
+      timedOut: false,
+      noops: 0,
+      bulkRetries: 0,
       failures: ['{"cause":{"type":"cluster_block_exception"}}'],
     });
     let state: LatestTaskStateSchema = {
@@ -720,6 +786,9 @@ describe('runBackfillTask', () => {
       total: 10_000,
       versionConflicts: 7,
       vanished: false,
+      timedOut: false,
+      noops: 0,
+      bulkRetries: 0,
       failures: [],
     });
     const state = {
@@ -754,6 +823,9 @@ describe('runBackfillTask', () => {
       total: 10_000,
       versionConflicts: 7,
       vanished: false,
+      timedOut: false,
+      noops: 0,
+      bulkRetries: 0,
       failures: [],
     });
     const state = {
@@ -844,6 +916,9 @@ describe('runBackfillTask', () => {
       total: MAX_DOCS_PER_REQUEST,
       versionConflicts: 0,
       vanished: false,
+      timedOut: false,
+      noops: 0,
+      bulkRetries: 0,
       failures: [],
     });
     const state = {
@@ -877,6 +952,9 @@ describe('runBackfillTask', () => {
       total: MAX_DOCS_PER_REQUEST,
       versionConflicts: 0,
       vanished: false,
+      timedOut: false,
+      noops: 0,
+      bulkRetries: 0,
       failures: [],
     });
     const state = {
@@ -976,6 +1054,9 @@ describe('runBackfillTask', () => {
       total: 10_000,
       versionConflicts: 0,
       vanished: false,
+      timedOut: false,
+      noops: 0,
+      bulkRetries: 0,
       failures: [],
     });
     const state = {
@@ -1007,6 +1088,9 @@ describe('runBackfillTask', () => {
         total: 4_200,
         versionConflicts: 0,
         vanished: false,
+        timedOut: false,
+        noops: 0,
+        bulkRetries: 0,
         failures: [],
       });
       const state = {
@@ -1044,6 +1128,9 @@ describe('runBackfillTask', () => {
         total: 1,
         versionConflicts: 0,
         vanished: false,
+        timedOut: false,
+        noops: 0,
+        bulkRetries: 0,
         failures: [],
       });
       const state = {
@@ -1190,6 +1277,9 @@ describe('runBackfillTask', () => {
         total: 10_000,
         versionConflicts: 0,
         vanished: false,
+        timedOut: false,
+        noops: 0,
+        bulkRetries: 0,
         failures: [],
       });
       const state = {

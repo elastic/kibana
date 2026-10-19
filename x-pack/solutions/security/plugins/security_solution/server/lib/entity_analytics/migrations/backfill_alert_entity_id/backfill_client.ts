@@ -244,33 +244,61 @@ export const startBackfill = async ({
     `ctx._source['${ALERT_ENTITY_ID}'] = euids;`
   );
 
-  const response = await retryTransientEsErrors(
-    () =>
-      esClient.updateByQuery(
-        {
-          index: alertsIndex,
-          query,
-          script: { lang: 'painless', source: script },
-          // Alerts are modified concurrently by rule execution and by workflow status changes; a
-          // document that moved under us is re-read on the next pass rather than failing this one.
-          conflicts: 'proceed',
-          // Refreshes the shards it touched once the request finishes, so the next request sees
-          // what this one stamped and matches only what is left.
-          refresh: true,
-          requests_per_second: alertsPerSecond,
-          // Bounds the transient disk growth and the running time of any one request; whatever is
-          // left over is picked up by the next one, which the query naturally excludes already.
-          max_docs: maxDocs,
-          wait_for_completion: false,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-        },
-        { signal }
-      ),
-    { logger }
+  const response = await esClient.updateByQuery(
+    {
+      index: alertsIndex,
+      query,
+      script: { lang: 'painless', source: script },
+      // Alerts are modified concurrently by rule execution and by workflow status changes; a
+      // document that moved under us is re-read on the next pass rather than failing this one.
+      conflicts: 'proceed',
+      // Refreshes the shards it touched once the request finishes, so the next request sees
+      // what this one stamped and matches only what is left.
+      refresh: true,
+      requests_per_second: alertsPerSecond,
+      // Bounds the transient disk growth and the running time of any one request; whatever is
+      // left over is picked up by the next one, which the query naturally excludes already.
+      max_docs: maxDocs,
+      wait_for_completion: false,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    },
+    { signal }
   );
 
   return typeof response.task === 'string' ? response.task : undefined;
+};
+
+/**
+ * Drops a finished update-by-query's stored result from the `.tasks` index.
+ *
+ * `wait_for_completion: false` means Elasticsearch keeps the result until someone deletes it, and
+ * nothing expires it, so every request this task issues leaves a document behind for good.
+ *
+ * Best effort. Tidying up must never affect whether a backfill succeeds.
+ */
+const deleteTaskResult = async ({
+  esClient,
+  logger,
+  esTaskId,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  esTaskId: string;
+}): Promise<void> => {
+  try {
+    await esClient.delete({ index: '.tasks', id: esTaskId });
+  } catch (e) {
+    const statusCode = e?.meta?.statusCode ?? e?.statusCode;
+    // Already gone, which is the state this was trying to reach.
+    if (statusCode === 404) {
+      return;
+    }
+
+    logger.warn(
+      `Could not delete the stored result of task "${esTaskId}" from the .tasks index: ${e.message}`
+    );
+  }
 };
 
 /**
@@ -289,6 +317,8 @@ export const cancelBackfill = async ({
 }): Promise<void> => {
   try {
     await esClient.tasks.cancel({ task_id: esTaskId }, { signal });
+    // A cancelled request stores a result too, and this one is certain to go unread.
+    await deleteTaskResult({ esClient, logger, esTaskId });
   } catch (e) {
     // Already finished, already cancelled, or the node running it is gone. Nothing left to stop.
     if (e?.meta?.statusCode === 404) {
@@ -311,6 +341,18 @@ export interface BackfillProgress {
   versionConflicts: number;
   /** True when the task id no longer resolves, so the request has to be started again. */
   vanished: boolean;
+  /**
+   * True when the request's search timed out part way through. Elasticsearch still reports the
+   * request as completed, so without this a request that never reached most of its alerts is
+   * indistinguishable from one that finished them.
+   */
+  timedOut: boolean;
+  /**
+   * Alerts the script declined to stamp because no entity id could be derived from them.
+   */
+  noops: number;
+  /** Bulk writes Elasticsearch retried itself, which is the cluster pushing back. */
+  bulkRetries: number;
   failures: string[];
 }
 
@@ -320,7 +362,7 @@ export interface BackfillProgress {
  */
 type UpdateByQueryTaskStatus = Pick<
   UpdateByQueryResponse,
-  'total' | 'updated' | 'version_conflicts'
+  'total' | 'updated' | 'version_conflicts' | 'noops' | 'retries'
 >;
 
 export class BackfillRequestFailedError extends Error {
@@ -365,6 +407,12 @@ export const pollBackfill = async ({
     // no response until the request finishes, so a running one is read from its live status.
     const counts = response ?? status;
 
+    if (task.completed === true) {
+      // Everything this read needs is already in hand, and a finished request is read for the last time.
+      // Drop the task result to avoid accumulating stale documents in the .tasks index.
+      await deleteTaskResult({ esClient, logger, esTaskId });
+    }
+
     if (task.error) {
       throw new BackfillRequestFailedError(
         `task "${esTaskId}" returned error: ${task.error.type} - ${
@@ -382,6 +430,9 @@ export const pollBackfill = async ({
       total: counts?.total ?? 0,
       versionConflicts: counts?.version_conflicts ?? 0,
       vanished: false,
+      timedOut: response?.timed_out === true,
+      noops: counts?.noops ?? 0,
+      bulkRetries: counts?.retries?.bulk ?? 0,
       failures,
     };
   } catch (e) {
@@ -395,6 +446,9 @@ export const pollBackfill = async ({
         total: 0,
         versionConflicts: 0,
         vanished: true,
+        timedOut: false,
+        noops: 0,
+        bulkRetries: 0,
         failures: [],
       };
     }

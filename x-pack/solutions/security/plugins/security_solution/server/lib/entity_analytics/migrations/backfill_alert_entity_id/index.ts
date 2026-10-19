@@ -174,7 +174,17 @@ const advanceSpace = async ({
       esTaskId: progress.esTaskId,
       signal,
     });
-    const { completed, updated, total, versionConflicts, vanished, failures } = backfill;
+    const {
+      completed,
+      updated,
+      total,
+      versionConflicts,
+      vanished,
+      timedOut,
+      noops,
+      bulkRetries,
+      failures,
+    } = backfill;
 
     if (vanished) {
       // Dropping the id reissues the request next run; alerts already stamped are excluded by the
@@ -185,12 +195,24 @@ const advanceSpace = async ({
     if (!completed) {
       // Left out of `stamped`, which only counts finished requests — a reissued request restarts
       // its own count from zero, so folding an in-flight figure in would make the total regress.
-      logger.debug(`Backfill in progress for space "${spaceId}": ${updated} alerts stamped.`);
+      logger.debug(
+        `Backfill in progress for space "${spaceId}": ${updated} of ${total} alerts stamped.`
+      );
       return {
         // if the request had a failure but then started to stamp without failing, the failures is reset to 0
         progress: { ...progress, window, failures: updated > 0 ? 0 : progress.failures },
         nextPollMs: nextPollDelayMs(backfill),
       };
+    }
+
+    if (timedOut) {
+      // Elasticsearch reports a timed-out request as completed, so treating this as a finished
+      // pass would retire the space having never reached most of its alerts. Thrown like a
+      // document failure: the next run reissues over what is left, and three in a row give up.
+      throw new BackfillRequestFailedError(
+        `update-by-query timed out having stamped ${updated} of ${total} alert(s)`,
+        updated
+      );
     }
 
     if (failures.length > 0) {
@@ -252,7 +274,9 @@ const advanceSpace = async ({
       );
     }
 
-    logger.info(`Backfill complete for space "${spaceId}". Alerts stamped: ${stamped}.`);
+    logger.info(
+      `Backfill complete for space "${spaceId}". Alerts stamped: ${stamped}. Last request: total=${total} noops=${noops} version_conflicts=${versionConflicts} bulk_retries=${bulkRetries}.`
+    );
     // A finished space needs neither its window nor its task id again; dropping them keeps the
     // task state small on deployments with many spaces, where it is rewritten on every run.
     return {
