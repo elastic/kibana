@@ -465,6 +465,8 @@ For each event candidate, decide from all signals that will appear in the final 
      `blast_radius` for how far the failure spreads beyond the signal that detected it.
    - First list each distinct core operation those descriptions show blocked. Several blocked at
      once is `critical` under the contract, not `high`.
+   - Apply the contract's ladder in order and stop at the first rung the confirming descriptions
+     satisfy, before weighing anything that was not measured.
    - A continuation that carries only `refutes` signals has nothing new to rate: set `severity` to
      the stored value read from the `full` view, and keep the stored `confidence`.
 5. Set `confidence` after severity:
