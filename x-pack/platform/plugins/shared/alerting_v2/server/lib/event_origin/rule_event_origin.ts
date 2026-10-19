@@ -8,19 +8,10 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import {
-  ruleEventAppTelemetrySchema,
-  type RuleEbtChannel,
-  type RuleEbtOrigin,
-} from './rule_ebt_schema';
-
-/** Options an in-process caller passes when it asks for a rules client. */
-export interface CreateRulesClientOptions {
-  /**
-   * The app making changes through this client, carried on every rule event.
-   * Takes precedence over the app derived from the request.
-   */
-  app?: string;
-}
+  ruleEventAppSchema,
+  type RuleEventChannel,
+  type RuleEventOrigin,
+} from './origin_schemas';
 
 /**
  * Headers Core's `core.http.fetch` attaches to every request the Kibana browser app makes.
@@ -37,11 +28,11 @@ const toBoundedApp = (app: string | undefined): string | undefined => {
     return undefined;
   }
 
-  const parsed = ruleEventAppTelemetrySchema.safeParse(app);
+  const parsed = ruleEventAppSchema.safeParse(app);
   return parsed.success ? parsed.data : undefined;
 };
 
-const getChannel = (request: KibanaRequest): RuleEbtChannel => {
+const getChannel = (request: KibanaRequest): RuleEventChannel => {
   if (request.isFakeRequest) {
     return 'system';
   }
@@ -69,13 +60,13 @@ const getAppFromExecutionContext = (request: KibanaRequest): string | undefined 
 /**
  * Resolves where a rule change came from: the channel is derived from the request, and
  * the app is the one configured by the calling plugin or, for UI requests, the one named in
- * the execution context. The app is omitted when it fails {@link ruleEventAppTelemetrySchema}, and
+ * the execution context. The app is omitted when it fails {@link ruleEventAppSchema}, and
  * undefined in every other case.
  */
-export const resolveRuleTelemetryEventOrigin = (
+export const resolveRuleEventOrigin = (
   request: KibanaRequest,
-  options?: CreateRulesClientOptions
-): RuleEbtOrigin => {
+  options?: { app?: string }
+): RuleEventOrigin => {
   const channel = getChannel(request);
   const app =
     toBoundedApp(options?.app) ||

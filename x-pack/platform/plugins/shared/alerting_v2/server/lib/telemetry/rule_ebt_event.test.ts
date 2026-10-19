@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleChangedEventOrigin } from './rule_ebt_schema';
+import type { RuleChangedEventOrigin } from '../event_origin/origin_schemas';
 import { createRuleResponse } from '../test_utils';
 import {
   buildRuleChangedEventData,

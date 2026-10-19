@@ -17,6 +17,8 @@ import {
   updateRuleDataSchema,
   type RuleKind,
 } from '@kbn/alerting-v2-schemas';
+import type { RuleEventOrigin } from '../event_origin/origin_schemas';
+import { resolveRuleEventOrigin } from '../event_origin/rule_event_origin';
 import { PluginStart } from '@kbn/core-di';
 import { Request, PluginInitializer } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -74,10 +76,7 @@ import type { UserServiceContract } from '../services/user_service/user_service'
 import { UserService } from '../services/user_service/user_service';
 import type { PluginConfig } from '../../config';
 import { convertEveryToSchedulesPerMinute, parseDurationToMs } from '../duration';
-import {
-  resolveRuleTelemetryEventOrigin,
-  type CreateRulesClientOptions,
-} from '../telemetry/rule_ebt_origin';
+import type { CreateRulesClientOptions } from './types';
 import { buildMatchingRulesFilter, buildRuleSoFilter } from './build_rule_filter';
 import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
 import { RulesClientOptionsToken } from './tokens';
@@ -239,9 +238,9 @@ export class RulesClient {
     return { spaceId: this.spaceId };
   }
 
-  /** Channel and app for a rule-change telemetry event. */
-  private resolveRuleTelemetryEventOrigin(): RuleEbtOrigin {
-    return resolveRuleTelemetryEventOrigin(this.request, this.rulesClientOptions);
+  /** Channel and app for a rule-change event. */
+  private resolveRuleEventOrigin(): RuleEventOrigin {
+    return resolveRuleEventOrigin(this.request, this.rulesClientOptions);
   }
 
   /**
@@ -663,7 +662,7 @@ export class RulesClient {
       references: persisted.references,
     });
     this.ruleEventPublisher.emitRuleCreated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleTelemetryEventOrigin() },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleEventOrigin() },
     ]);
     return rule;
   }
@@ -726,7 +725,7 @@ export class RulesClient {
         ruleId: rule.id,
         spaceId,
         rule,
-        ...this.resolveRuleTelemetryEventOrigin(),
+        ...this.resolveRuleEventOrigin(),
       });
     }
 
@@ -813,7 +812,7 @@ export class RulesClient {
     });
 
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleTelemetryEventOrigin() },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleEventOrigin() },
     ]);
 
     return rule;
@@ -883,7 +882,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleDeleted(this.eventContext, [
-      { ruleId: id, spaceId: this.spaceId, rule, ...this.resolveRuleTelemetryEventOrigin() },
+      { ruleId: id, spaceId: this.spaceId, rule, ...this.resolveRuleEventOrigin() },
     ]);
   }
 
@@ -989,7 +988,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleEnabled(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleTelemetryEventOrigin() },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleEventOrigin() },
     ]);
     return rule;
   }
@@ -1034,7 +1033,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleDisabled(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleTelemetryEventOrigin() },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleEventOrigin() },
     ]);
     return rule;
   }
@@ -1239,9 +1238,9 @@ export class RulesClient {
                 attrs: { ...doc.attrs, version: this.getNextVersion(doc.attrs.version) },
                 references: doc.references,
               }),
-              ...this.resolveRuleTelemetryEventOrigin(),
+              ...this.resolveRuleEventOrigin(),
             }
-          : { ruleId: result.id, spaceId, ...this.resolveRuleTelemetryEventOrigin() }
+          : { ruleId: result.id, spaceId, ...this.resolveRuleEventOrigin() }
       );
     }
 
@@ -1366,7 +1365,7 @@ export class RulesClient {
           ruleId: rule.id,
           spaceId,
           rule,
-          ...this.resolveRuleTelemetryEventOrigin(),
+          ...this.resolveRuleEventOrigin(),
         });
       }
 
@@ -1452,7 +1451,7 @@ export class RulesClient {
           ruleId: rule.id,
           spaceId,
           rule,
-          ...this.resolveRuleTelemetryEventOrigin(),
+          ...this.resolveRuleEventOrigin(),
         });
       }
     }
@@ -1581,7 +1580,7 @@ export class RulesClient {
         ruleId: rule.id,
         spaceId,
         rule,
-        ...this.resolveRuleTelemetryEventOrigin(),
+        ...this.resolveRuleEventOrigin(),
       });
     }
 
@@ -1899,7 +1898,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleTelemetryEventOrigin() },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleEventOrigin() },
     ]);
     return { rule, created: false };
   }
