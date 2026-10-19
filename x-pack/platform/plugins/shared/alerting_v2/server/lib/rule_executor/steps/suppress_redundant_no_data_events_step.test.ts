@@ -26,6 +26,7 @@ const heldState = (overrides: Partial<LatestAlertEventState> = {}): LatestAlertE
   last_episode_status: alertEpisodeStatus.active,
   last_episode_status_count: null,
   last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+  last_episode_phase_started_at: null,
   last_lifecycle_action_type: null,
   group_hash: 'hash-1',
   ...overrides,
