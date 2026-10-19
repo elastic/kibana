@@ -75,8 +75,9 @@ export const createEditAssigneeAction = (deps: EditAssigneeActionDeps): EpisodeA
   order: 50,
   displayName: i18n.EDIT_ASSIGNEE,
   iconType: 'user',
-  isCompatible: ({ episodes }: EpisodeActionContext) =>
-    episodes.filter(episodeSupportsActions).length > 0,
+  isCompatible: ({ episodes }: EpisodeActionContext) => episodes.some(episodeSupportsActions),
+  getBulkDisabledReason: (episodes) =>
+    episodes.every(episodeSupportsActions) ? undefined : i18n.EDIT_ASSIGNEE_NOT_AVAILABLE,
   renderMenuItem: ({ episodes, onSuccess, closeMenu }: EpisodeActionMenuItemContext) => (
     <EditEpisodeAssigneePopoverItem
       assigneeUid={getCurrentAssigneeUid(episodes)}
