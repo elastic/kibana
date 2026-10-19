@@ -168,6 +168,14 @@ export const SIGNAL_GENERATOR_SCHEDULE_INTERVAL = '1h';
 export const ANALYZE_AND_IMPROVE_SKILL_ID = 'analyze-and-improve';
 
 /**
+ * Id of the built-in Context Engine agent (registered by `contextEngineAgentBuilder`). Lives here,
+ * not there, because `contextEngine` cannot depend on `contextEngineAgentBuilder` — that plugin
+ * depends on this one — and both the feedback-analysis default and the agent registration itself
+ * need the same id.
+ */
+export const CONTEXT_ENGINE_SETUP_AGENT_ID = 'platform.context_engine.setup' as const;
+
+/**
  * Prefix for the per-space Agent Builder OTel traces indices (one per Kibana space). Kept
  * in-plugin — mirrors Agent Builder's exported `buildAgentBuilderTracesIndexPattern` contract —
  * so Context Engine does not take a dependency on `@kbn/agent-builder-plugin`.

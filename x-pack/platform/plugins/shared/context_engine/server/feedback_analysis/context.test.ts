@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { CONTEXT_ENGINE_SETUP_AGENT_ID } from '../../common/constants';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
 import type { SignalTag } from '../../common/http_api/signals';
@@ -79,7 +79,7 @@ describe('buildFeedbackContext', () => {
     const context = await build();
 
     expect(context).toMatchObject({
-      agent_id: agentBuilderDefaultAgentId,
+      agent_id: CONTEXT_ENGINE_SETUP_AGENT_ID,
       run: { signal_window: WINDOW, signal_spaces: ['default'], signal_count: 40 },
       has_signals: true,
     });
@@ -129,7 +129,7 @@ describe('buildFeedbackContext', () => {
   it('falls back to the defaults for an index that was never configured for analysis', async () => {
     const context = await build();
 
-    expect(context.agent_id).toBe(agentBuilderDefaultAgentId);
+    expect(context.agent_id).toBe(CONTEXT_ENGINE_SETUP_AGENT_ID);
     expect(context.output_schema).toMatchObject({
       properties: {
         improvements: { items: { properties: { action: { enum: [...IMPROVEMENT_ACTIONS] } } } },

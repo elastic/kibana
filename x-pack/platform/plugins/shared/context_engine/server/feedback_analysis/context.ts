@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { KI_SUMMARY_PAGE_SIZE } from '../../common/constants';
+import { CONTEXT_ENGINE_SETUP_AGENT_ID, KI_SUMMARY_PAGE_SIZE } from '../../common/constants';
 import type { FeedbackAnalysisContext } from '../../common/http_api/feedback_context';
 import type { ImprovementAction } from '../../common/http_api/improvement_actions';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
@@ -42,7 +41,7 @@ export const buildFeedbackContext = async (
   const allowedActions: ImprovementAction[] = (
     feedbackAnalysis?.allowed_actions ?? [...IMPROVEMENT_ACTIONS]
   ).filter((a) => !aiIndex.managed || managedSafeActions.includes(a));
-  const agentId = feedbackAnalysis?.agent_id ?? agentBuilderDefaultAgentId;
+  const agentId = feedbackAnalysis?.agent_id ?? CONTEXT_ENGINE_SETUP_AGENT_ID;
 
   const [selection, kiList, history] = await Promise.all([
     selectSignals(esClient, {
