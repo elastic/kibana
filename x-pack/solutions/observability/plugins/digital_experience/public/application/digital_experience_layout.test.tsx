@@ -39,9 +39,9 @@ describe('DigitalExperienceLayout', () => {
     renderHook(() => DigitalExperienceLayout());
 
     expect(useRouteBreadcrumb).toHaveBeenCalledWith([
-      { title: 'Digital Experience' },
+      { text: 'Digital Experience' },
       {
-        title: 'Applications',
+        text: 'Applications',
         href: '/app/digital_experience/?rangeFrom=now-7d&rangeTo=now',
       },
     ]);

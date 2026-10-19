@@ -51,7 +51,7 @@ export function ApplicationPage({ serviceName }: { serviceName: string }) {
 
   const selectedTab: ApplicationTabId = 'overview';
 
-  useRouteBreadcrumb([{ title: serviceName }, { title: APPLICATION_TAB_LABELS[selectedTab] }]);
+  useRouteBreadcrumb([{ text: serviceName }, { text: APPLICATION_TAB_LABELS[selectedTab] }]);
 
   // Wrapped in an object: a component is a function, which React state would call as an updater.
   const { value: dashboard, error } = useAbortableAsync(

@@ -12,10 +12,7 @@ import type { Route, RouteMatch } from '@kbn/typed-react-router-config';
 import { useMatchRoutes } from '@kbn/typed-react-router-config';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
-export interface RouteBreadcrumb {
-  title: string;
-  href?: string;
-}
+export type RouteBreadcrumb = Pick<ChromeBreadcrumb, 'text' | 'href'>;
 
 interface RouteBreadcrumbsApi {
   set(route: Route, breadcrumbs: RouteBreadcrumb[]): void;
@@ -24,36 +21,43 @@ interface RouteBreadcrumbsApi {
 
 export const RouteBreadcrumbsContext = createContext<RouteBreadcrumbsApi | undefined>(undefined);
 
-/** Joins the crumbs of each matched route, outermost first, leaving the current page unlinked. */
-export const toChromeBreadcrumbs = (
-  matches: RouteMatch[],
-  registered: ReadonlyMap<Route, RouteBreadcrumb[]>
+/** Joins each matched route's crumbs, leaving the current page (the last crumb) unlinked. */
+const toChromeBreadcrumbs = (
+  matchedRoutes: RouteMatch[],
+  breadcrumbsByRoute: ReadonlyMap<Route, RouteBreadcrumb[]>
 ): ChromeBreadcrumb[] => {
-  const breadcrumbs = matches.flatMap(({ route }) => registered.get(route) ?? []);
-  const parents = breadcrumbs.slice(0, -1);
-  const [current] = breadcrumbs.slice(-1);
+  // The order comes from the route tree (matches go root → leaf), not from when each page registered.
+  const breadcrumbs = matchedRoutes.flatMap(({ route }) => breadcrumbsByRoute.get(route) ?? []);
 
-  return [
-    ...parents.map(({ title, href }) => ({ text: title, href })),
-    ...(current ? [{ text: current.title }] : []),
-  ];
+  return breadcrumbs.map(({ text, href }, index) => {
+    const isCurrentPage = index === breadcrumbs.length - 1;
+    if (isCurrentPage) {
+      return { text };
+    }
+    return { text, href };
+  });
 };
 
-/** Sets the crumbs registered by the matched routes through Observability's `useBreadcrumbs`. */
+/**
+ * Each route registers its crumbs with `useRouteBreadcrumb`; this joins them in route-tree order and
+ * sets them through Observability's `useBreadcrumbs`.
+ */
 export function RouteBreadcrumbsContextProvider({ children }: { children: React.ReactNode }) {
-  const [registered, setRegistered] = useState<ReadonlyMap<Route, RouteBreadcrumb[]>>(new Map());
+  const [breadcrumbsByRoute, setBreadcrumbsByRoute] = useState<
+    ReadonlyMap<Route, RouteBreadcrumb[]>
+  >(new Map());
   const matches = useMatchRoutes();
 
   const api = useMemo<RouteBreadcrumbsApi>(
     () => ({
       set: (route, breadcrumbs) =>
-        setRegistered((current) =>
+        setBreadcrumbsByRoute((current) =>
           isEqual(current.get(route), breadcrumbs)
             ? current
             : new Map(current).set(route, breadcrumbs)
         ),
       unset: (route) =>
-        setRegistered((current) => {
+        setBreadcrumbsByRoute((current) => {
           if (!current.has(route)) {
             return current;
           }
@@ -66,8 +70,8 @@ export function RouteBreadcrumbsContextProvider({ children }: { children: React.
   );
 
   const breadcrumbs = useMemo(
-    () => toChromeBreadcrumbs(matches, registered),
-    [matches, registered]
+    () => toChromeBreadcrumbs(matches, breadcrumbsByRoute),
+    [matches, breadcrumbsByRoute]
   );
   useBreadcrumbs(breadcrumbs);
 

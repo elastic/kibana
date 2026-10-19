@@ -22,12 +22,12 @@ import { useRouteBreadcrumb } from './use_route_breadcrumb';
 jest.mock('@kbn/observability-shared-plugin/public');
 
 function Layout() {
-  useRouteBreadcrumb([{ title: 'Section' }, { title: 'List', href: '/list-href' }]);
+  useRouteBreadcrumb([{ text: 'Section' }, { text: 'List', href: '/list-href' }]);
   return <Outlet />;
 }
 
 function Detail() {
-  useRouteBreadcrumb([{ title: 'my-item' }, { title: 'Tab' }]);
+  useRouteBreadcrumb([{ text: 'my-item' }, { text: 'Tab' }]);
   return null;
 }
 

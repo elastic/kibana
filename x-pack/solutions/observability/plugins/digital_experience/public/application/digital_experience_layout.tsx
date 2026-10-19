@@ -25,8 +25,8 @@ export function DigitalExperienceLayout() {
   });
 
   useRouteBreadcrumb([
-    { title: DIGITAL_EXPERIENCE_LABEL },
-    { title: APPLICATIONS_LABEL, href: applicationsHref },
+    { text: DIGITAL_EXPERIENCE_LABEL },
+    { text: APPLICATIONS_LABEL, href: applicationsHref },
   ]);
 
   return <Outlet />;

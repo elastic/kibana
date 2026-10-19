@@ -41,7 +41,7 @@ describe('ApplicationPage', () => {
     render(<ApplicationPage serviceName="my-app" />);
 
     expect(await screen.findByTestId('classicRumDashboard')).toHaveTextContent('my-app');
-    expect(useRouteBreadcrumb).toHaveBeenCalledWith([{ title: 'my-app' }, { title: 'Overview' }]);
+    expect(useRouteBreadcrumb).toHaveBeenCalledWith([{ text: 'my-app' }, { text: 'Overview' }]);
     expect(ClassicRumDashboard.mock.calls[0][0]).toEqual({
       serviceName: 'my-app',
       timeRange,
