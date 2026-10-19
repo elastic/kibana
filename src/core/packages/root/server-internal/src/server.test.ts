@@ -533,6 +533,8 @@ describe('self client UIAM attestation getter', () => {
     expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
   });
 
+  // The security plugin's `isExternalApiKey` checks the external marker on fake requests (see
+  // `UiamAPIKeysType.isExternalApiKey`), so this test only covers the delegation.
   it('does not attest a fake request carrying a user-created (external) UIAM API key', async () => {
     const uiam = getUiamMock();
     uiam.isExternalApiKey.mockReturnValueOnce(true);
