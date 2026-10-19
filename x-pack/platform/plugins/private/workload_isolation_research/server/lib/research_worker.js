@@ -217,6 +217,7 @@ const fireOne = (p, intended) => {
         service_ms: end - sent,
         status: 0,
         error: String((err && err.name) || err),
+        error_code: String((err && err.cause && (err.cause.code || err.cause.name)) || ''),
         run_id: p.runId,
       });
     })

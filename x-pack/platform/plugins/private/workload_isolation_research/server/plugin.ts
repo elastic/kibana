@@ -86,8 +86,9 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
     });
   }
 
-  public start(): void {
+  public start(core: CoreStart): void {
     this.recorder.start();
+    this.recorder.startPush(async () => core.elasticsearch.client.asInternalUser);
   }
 
   public async stop(): Promise<void> {

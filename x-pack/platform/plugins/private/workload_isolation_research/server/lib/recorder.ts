@@ -12,7 +12,7 @@ import path from 'path';
 import type { IntervalHistogram } from 'perf_hooks';
 import { PerformanceObserver, monitorEventLoopDelay, performance } from 'perf_hooks';
 import { Worker } from 'worker_threads';
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WorkloadIsolationResearchConfig } from '../config';
 import { epochNow } from './clock';
 import { RingBuffer } from './ring_buffer';
@@ -21,6 +21,8 @@ import { RingBuffer } from './ring_buffer';
 export const TM_RESEARCH_CHANNEL = 'kbn:research:task_manager';
 
 export type Sample = Record<string, unknown> & { source: string; ts: number };
+
+export const PUSH_INDEX = '.kibana-research-samples';
 
 interface WorkerSamplesReply {
   entries: Array<{ seq: number; item: Sample }>;
@@ -204,6 +206,74 @@ export class Recorder {
         in_flight: worker.inFlight,
       },
     };
+  }
+
+  private pushed = { main: 0, worker: 0 };
+  private pushing = false;
+  private indexReady = false;
+  private lastPushError = 0;
+
+  /** Periodically bulk-indexes new samples into the project's ES (internal user). */
+  public startPush(getEs: () => Promise<ElasticsearchClient>): void {
+    if (!this.config.pushToEs) return;
+    const push = async () => {
+      if (this.pushing) return;
+      this.pushing = true;
+      try {
+        const es = await getEs();
+        if (!this.indexReady) {
+          await es.indices
+            .create({
+              index: PUSH_INDEX,
+              settings: { 'index.hidden': true, number_of_shards: 1 },
+              mappings: {
+                dynamic: true,
+                properties: {
+                  '@timestamp': { type: 'date' },
+                  ts: { type: 'double' },
+                  seq: { type: 'long' },
+                  pod: { type: 'keyword' },
+                  boot_id: { type: 'keyword' },
+                  thread: { type: 'keyword' },
+                  source: { type: 'keyword' },
+                  detail: { type: 'flattened' },
+                  stats: { type: 'flattened' },
+                },
+              },
+            })
+            .catch((e) => {
+              if (!String(e.message).includes('resource_already_exists')) throw e;
+            });
+          this.indexReady = true;
+        }
+        const data = await this.samples(this.pushed.main, this.pushed.worker, 5000);
+        const docs = [
+          ...data.main.samples.map(({ seq, item }) => ({ ...item, thread: 'main', seq })),
+          ...data.worker.samples.map(({ seq, item }) => ({ ...item, thread: 'worker', seq })),
+        ];
+        if (docs.length) {
+          const operations = docs.flatMap((d) => [
+            { create: { _index: PUSH_INDEX } },
+            { ...d, pod: this.pod, boot_id: this.bootId, '@timestamp': Math.round(d.ts as number) },
+          ]);
+          const res = await es.bulk({ operations, refresh: false });
+          if (res.errors)
+            throw new Error(JSON.stringify(res.items.find((i) => i.create?.error)?.create?.error));
+        }
+        const lastMain = data.main.samples.at(-1)?.seq;
+        const lastWorker = data.worker.samples.at(-1)?.seq;
+        if (lastMain) this.pushed.main = lastMain;
+        if (lastWorker) this.pushed.worker = lastWorker;
+      } catch (e) {
+        if (Date.now() - this.lastPushError > 60000) {
+          this.lastPushError = Date.now();
+          this.logger.warn(`research sample push failed: ${e.message}`);
+        }
+      } finally {
+        this.pushing = false;
+      }
+    };
+    this.timers.push(setInterval(() => void push(), this.config.pushIntervalMs));
   }
 
   public async stop(): Promise<void> {

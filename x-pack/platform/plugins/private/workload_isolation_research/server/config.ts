@@ -20,6 +20,12 @@ const configSchema = schema.object({
   stallThresholdMs: schema.number({ defaultValue: 20, min: 1, max: 60000 }),
   /** Ring buffer capacity (entries) for each sample source. */
   ringCapacity: schema.number({ defaultValue: 200000, min: 1000, max: 2000000 }),
+  /**
+   * Push samples to the project's ES (`.kibana-research-samples`) so pods that are not
+   * routable (serverless background-tasks pods) or that get killed still leave evidence.
+   */
+  pushToEs: schema.boolean({ defaultValue: true }),
+  pushIntervalMs: schema.number({ defaultValue: 2000, min: 200, max: 60000 }),
 });
 
 export type WorkloadIsolationResearchConfig = TypeOf<typeof configSchema>;

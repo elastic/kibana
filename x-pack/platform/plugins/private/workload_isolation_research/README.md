@@ -35,6 +35,8 @@ Offender kinds: `cpu_spin`, `json_stringify` (repeat-stringify of an `sizeMb` pa
 | `tick` | main | tiny TM task: `drift_ms` = start − intended runAt |
 | `offender`, `offender_start` | main | offender window and measured `blocked_ms` |
 
+**Serverless role split:** QAF observability projects run separate `kb-ui` and `kb-background-tasks` pods; only UI pods are routable. TM-task offenders, ticks and TM poll data live on the background pod. Every pod therefore also pushes its samples every 2 s to `.kibana-research-samples` (internal user, hidden index); the driver exports them via `POST samples_es` at the end of each run (deduplicated by boot/thread/seq, tagged `via: es_push`). Stalls > 1 s and supervisor kills are also written by the worker straight to fd 2, so they reach serverless logs (QA overview) even if the process dies.
+
 Ring buffers: 200k entries per thread (≈ hours at default rates; a 10 s block adds ≤ 100 probe entries). The samples endpoint is served by main, so pulls stall during blocks; the worker keeps recording.
 
 ## Run locally (paired)

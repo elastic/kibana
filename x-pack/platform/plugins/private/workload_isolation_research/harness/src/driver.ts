@@ -53,7 +53,10 @@ export class Collector {
     this.out = fs.createWriteStream(file, { flags: 'a' });
   }
 
+  public readonly seen = new Set<string>();
+
   public write(doc: Record<string, unknown>): void {
+    if (doc.thread !== 'driver') this.seen.add(`${doc.boot_id}|${doc.thread}|${doc.seq}`);
     this.out.write(JSON.stringify(doc) + '\n');
     this.count++;
   }
@@ -324,6 +327,32 @@ export const runScenario = async (opts: RunOptions): Promise<{ runId: string; di
     // Final drains (multiple, to reach every pod behind the load balancer).
     for (let i = 0; i < Math.max(3, opts.expectedPods * 6); i++) await collector.pullOnce();
     await sleep(2000);
+    // Pushed samples from the project ES: covers unroutable pods (serverless background-tasks)
+    // and pods killed before their last pull. Deduplicated against pulled samples.
+    let added = 0;
+    const exportFrom = new Date(manifest.utc_start).getTime() - 5000;
+    const exportTo = Date.now() + 5000;
+    await sleep(Math.max(3000, 0));
+    let searchAfter: unknown[] | null = null;
+    for (let page = 0; page < 500; page++) {
+      const res = await kbn<{ hits: Array<Record<string, unknown>>; last_sort: unknown[] | null }>(
+        target,
+        'POST',
+        `${API}/samples_es`,
+        { from: exportFrom, to: exportTo, size: 5000, ...(searchAfter ? { searchAfter } : {}) }
+      ).catch(() => undefined);
+      if (!res || res.status !== 200 || !res.body.hits.length) break;
+      for (const doc of res.body.hits) {
+        const key = `${doc.boot_id}|${doc.thread}|${doc.seq}`;
+        if (collector.seen.has(key)) continue;
+        const { '@timestamp': _ts, ...rest } = doc;
+        collector.write({ ...rest, via: 'es_push' });
+        added++;
+      }
+      searchAfter = res.body.last_sort;
+      if (!searchAfter) break;
+    }
+    manifest.notes.push(`es_push_export_added=${added}`);
     await collector.close();
     const info = await kbn<Record<string, unknown>>(target, 'GET', `${API}/info`).catch(() => ({
       status: 0,

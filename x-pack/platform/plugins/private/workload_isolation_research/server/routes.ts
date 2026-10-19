@@ -13,6 +13,7 @@ import { epochNow } from './lib/clock';
 import type { OffenderKind } from './lib/offenders';
 import { OFFENDER_KINDS, runOffender } from './lib/offenders';
 import type { Recorder } from './lib/recorder';
+import { PUSH_INDEX } from './lib/recorder';
 import { OFFENDER_TASK_TYPE } from './tasks';
 import type { TickScheduler } from './tasks';
 
@@ -58,6 +59,45 @@ export const registerRoutes = ({ router, getRecorder, getStart, getInfo }: Route
       const recorder = getRecorder();
       const cursor = req.body.cursors[recorder.bootId] ?? { main: 0, worker: 0 };
       return res.ok({ body: await recorder.samples(cursor.main, cursor.worker, req.body.limit) });
+    }
+  );
+
+  router.post(
+    {
+      path: `${API_BASE}/samples_es`,
+      security,
+      options,
+      validate: {
+        body: schema.object({
+          from: schema.number(),
+          to: schema.number(),
+          searchAfter: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 8 })),
+          size: schema.number({ defaultValue: 5000, min: 1, max: 10000 }),
+        }),
+      },
+    },
+    async (_ctx, req, res) => {
+      const { core } = await getStart();
+      const es = core.elasticsearch.client.asInternalUser;
+      const { from, to, searchAfter, size } = req.body;
+      const result = await es.search({
+        index: PUSH_INDEX,
+        ignore_unavailable: true,
+        size,
+        query: { range: { ts: { gte: from, lt: to } } },
+        sort: [
+          { ts: 'asc' },
+          { boot_id: { order: 'asc', unmapped_type: 'keyword' } },
+          { seq: 'asc' },
+        ],
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+      });
+      return res.ok({
+        body: {
+          hits: result.hits.hits.map((h) => h._source),
+          last_sort: result.hits.hits.at(-1)?.sort ?? null,
+        },
+      });
     }
   );
 
