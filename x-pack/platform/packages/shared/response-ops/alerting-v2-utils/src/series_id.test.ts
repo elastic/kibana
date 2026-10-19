@@ -137,6 +137,26 @@ describe('decodeSeriesId', () => {
       ref: { space_id: 'default', source: 'my team/pager duty', group_hash: GROUP_HASH },
     },
     {
+      name: 'a source ending in one colon',
+      ref: { space_id: 'default', source: 'pagerduty:', group_hash: GROUP_HASH },
+    },
+    {
+      name: 'a source ending in two colons',
+      ref: { space_id: 'default', source: 'pagerduty::', group_hash: GROUP_HASH },
+    },
+    {
+      name: 'a source ending in three colons',
+      ref: { space_id: 'default', source: 'pagerduty:::', group_hash: GROUP_HASH },
+    },
+    {
+      name: 'a source starting with colons',
+      ref: { space_id: 'default', source: '::pagerduty', group_hash: GROUP_HASH },
+    },
+    {
+      name: 'a source made only of colons',
+      ref: { space_id: 'default', source: ':::', group_hash: GROUP_HASH },
+    },
+    {
       name: 'a source with non-ASCII characters',
       ref: { space_id: 'default', source: 'zürich-🚀-東京', group_hash: GROUP_HASH },
     },

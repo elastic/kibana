@@ -10,7 +10,10 @@ import { ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
 const SERIES_ID_VERSION = '1';
 const SEPARATOR = '::';
 const INTERNAL_SOURCE = 'internal';
+const GROUP_HASH_LENGTH = 64;
 const GROUP_HASH_PATTERN = /^[a-f0-9]{64}$/;
+/** The segments read from the left of the payload: version, kind and space. */
+const LEADING_SEGMENTS = 3;
 const SPACE_ID_PATTERN = /^[a-z0-9_-]+$/;
 const BASE64URL_PATTERN = /^[A-Za-z0-9_-]+$/;
 
@@ -79,9 +82,33 @@ export const encodeSeriesId = ({
 };
 
 /**
- * Parses a series id into the indexed fields that identify the series. The hash
- * is always the last segment and the space the third, so an owner containing
- * the separator (only possible for an external `source`) still parses.
+ * Splits a payload into the version, kind and space read from the left, and the
+ * remainder (`{owner}::{group_hash}`). Reading by position rather than splitting
+ * on every separator keeps an owner that contains colons intact, including one
+ * ending in an odd number of them (`pagerduty:`), where splitting would attach
+ * the owner's last colon to the hash.
+ */
+const readLeadingSegments = (payload: string): { segments: string[]; remainder: string } => {
+  const segments: string[] = [];
+  let cursor = 0;
+
+  while (segments.length < LEADING_SEGMENTS) {
+    const end = payload.indexOf(SEPARATOR, cursor);
+    if (end === -1) {
+      break;
+    }
+    segments.push(payload.slice(cursor, end));
+    cursor = end + SEPARATOR.length;
+  }
+
+  return { segments, remainder: payload.slice(cursor) };
+};
+
+/**
+ * Parses a series id into the indexed fields that identify the series. The
+ * version, kind and space are the first three segments and the hash is always
+ * the last 64 characters, so an owner containing the separator, or colons at
+ * either end (only possible for an external `source`), still parses.
  *
  * @throws {InvalidSeriesIdError} when the id is not a version 1 series id.
  */
@@ -90,7 +117,8 @@ export const decodeSeriesId = (seriesId: string): DecodedSeriesId => {
     throw new InvalidSeriesIdError('not base64url');
   }
 
-  const [version, kind, spaceId, ...rest] = fromBase64Url(seriesId).split(SEPARATOR);
+  const { segments, remainder } = readLeadingSegments(fromBase64Url(seriesId));
+  const [version, kind, spaceId] = segments;
 
   if (version !== SERIES_ID_VERSION) {
     throw new InvalidSeriesIdError(`unsupported version [${version}]`);
@@ -102,13 +130,22 @@ export const decodeSeriesId = (seriesId: string): DecodedSeriesId => {
     throw new InvalidSeriesIdError('malformed space');
   }
 
-  const groupHash = rest[rest.length - 1];
-  const owner = rest.slice(0, -1).join(SEPARATOR);
+  // The remainder is `{owner}::{group_hash}`, so it holds at least one owner character.
+  const ownerEnd = remainder.length - GROUP_HASH_LENGTH - SEPARATOR.length;
+  if (ownerEnd < 1) {
+    throw new InvalidSeriesIdError('malformed owner');
+  }
 
-  if (groupHash === undefined || !GROUP_HASH_PATTERN.test(groupHash)) {
+  const owner = remainder.slice(0, ownerEnd);
+  const groupHash = remainder.slice(ownerEnd + SEPARATOR.length);
+
+  if (
+    remainder.slice(ownerEnd, ownerEnd + SEPARATOR.length) !== SEPARATOR ||
+    !GROUP_HASH_PATTERN.test(groupHash)
+  ) {
     throw new InvalidSeriesIdError('malformed group hash');
   }
-  if (owner.length === 0 || owner.length > ID_MAX_LENGTH) {
+  if (owner.length > ID_MAX_LENGTH) {
     throw new InvalidSeriesIdError('malformed owner');
   }
   // An `internal` source is rule-backed and never encoded as a `source` series;
