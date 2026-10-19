@@ -26,6 +26,11 @@ export interface RelatedAttachmentRef {
 /** An attachment a hook asked to shrink rather than delete, with the payload replacing its own. */
 export interface RelatedAttachmentUpdate extends RelatedAttachmentRef {
   payload: UnifiedAttachmentPayload;
+  /**
+   * The requested attachments the hook was asked about. A hook answers for all of them at once,
+   * so the update is only safe to apply once every one of them is gone.
+   */
+  requestedIds: string[];
 }
 
 export interface RelatedAttachments {
@@ -88,8 +93,9 @@ export const getRelatedAttachmentsToDelete = async ({
   const remainingTargets = remainingAttachments.map(({ id, attributes }) => ({ id, attributes }));
 
   const relatedIds = new Set<string>();
-  const updatesById = new Map<string, AttachmentUpdate>();
+  const updatesById = new Map<string, { update: AttachmentUpdate; requestedIds: string[] }>();
   for (const [onDelete, targets] of targetsByHook) {
+    const requestedIds = targets.map(({ id }) => id);
     const { relatedAttachmentIds, relatedAttachmentUpdates = [] } = await onDelete({
       caseId,
       request,
@@ -103,7 +109,9 @@ export const getRelatedAttachmentsToDelete = async ({
     }
     // Two hooks shrinking the same attachment would each have written over the other's result, so
     // the last one wins either way; keeping one update per id at least makes that a single write.
-    relatedAttachmentUpdates.forEach((update) => updatesById.set(update.id, update));
+    relatedAttachmentUpdates.forEach((update) =>
+      updatesById.set(update.id, { update, requestedIds })
+    );
   }
 
   // A hook can only take or shrink attachments that belong to this case. Only the reference is
@@ -114,19 +122,20 @@ export const getRelatedAttachmentsToDelete = async ({
     .map(({ id, type }) => ({ id, type: type as AttachmentSavedObjectType }));
 
   const updates = remainingAttachments.flatMap(({ id, type, attributes }) => {
-    const update = updatesById.get(id);
+    const entry = updatesById.get(id);
 
     // Deleting the attachment makes shrinking it pointless, and a hook may not use an update to
     // change what an attachment is or who owns it.
     const isApplicable =
-      update != null && !relatedIds.has(id) && update.payload.type === attributes.type;
+      entry != null && !relatedIds.has(id) && entry.update.payload.type === attributes.type;
 
     return isApplicable
       ? [
           {
             id,
             type: type as AttachmentSavedObjectType,
-            payload: { ...update.payload, owner: attributes.owner },
+            payload: { ...entry.update.payload, owner: attributes.owner },
+            requestedIds: entry.requestedIds,
           },
         ]
       : [];

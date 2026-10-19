@@ -215,6 +215,7 @@ export const deleteCaseAttachments = async (
   // Core's bulk delete reports per-object failures instead of throwing. The confirmed deletes are
   // still recorded before throwing, since a retry fails the not found check on those ids.
   const notDeletedIds = savedObjectIds.filter((id) => !deletedIds.has(id));
+  const failedUpdateIds: string[] = [];
 
   if (deletedIds.size > 0) {
     // A file is kept while any attachment that was not deleted still references it.
@@ -224,9 +225,17 @@ export const deleteCaseAttachments = async (
       )
     );
 
-    await applyAttachmentUpdates(
-      { caseId, updates: relatedUpdates, targets: updateTargets },
-      clientArgs
+    // An attachment that is still on the case keeps everything it claims. Its hook recomputes
+    // the updates when the caller retries the ids that failed.
+    const appliableUpdates = relatedUpdates.filter(({ requestedIds }) =>
+      requestedIds.every((id) => deletedIds.has(id))
+    );
+
+    failedUpdateIds.push(
+      ...(await applyAttachmentUpdates(
+        { caseId, updates: appliableUpdates, targets: updateTargets },
+        clientArgs
+      ))
     );
 
     await recordDeletion(
@@ -244,6 +253,14 @@ export const deleteCaseAttachments = async (
       `Failed to delete ${
         notDeletedIds.length === 1 ? 'attachment' : 'attachments'
       } ${notDeletedIds.join(', ')} on case ${caseId}.`
+    );
+  }
+
+  if (failedUpdateIds.length > 0) {
+    throw Boom.internal(
+      `Failed to update ${
+        failedUpdateIds.length === 1 ? 'attachment' : 'attachments'
+      } ${failedUpdateIds.join(', ')} on case ${caseId}.`
     );
   }
 };
@@ -320,11 +337,14 @@ interface ApplyAttachmentUpdatesArgs {
  * computed against, so two removals that shrink the same attachment cannot put back what the
  * other took out. Unlike the PUT route a conflict is not surfaced: the deletions are already in
  * the index, so the write is recomputed against the copy that won and tried again.
+ *
+ * Any other failed write is logged and its id returned rather than thrown, so the caller still
+ * records the deletions before failing the request.
  */
 const applyAttachmentUpdates = async (
   { caseId, updates, targets }: ApplyAttachmentUpdatesArgs,
   clientArgs: CasesClientArgs
-): Promise<void> => {
+): Promise<string[]> => {
   const {
     user,
     logger,
@@ -343,7 +363,7 @@ const applyAttachmentUpdates = async (
   });
 
   if (appliableUpdates.length === 0) {
-    return;
+    return [];
   }
 
   const updatedAt = new Date().toISOString();
@@ -352,22 +372,28 @@ const applyAttachmentUpdates = async (
   // leaves nothing behind, and one that was recomputed against a newer copy left different
   // alerts than the hook first asked for.
   const writtenUpdates = [];
+  const failedIds: string[] = [];
 
   for (const { id, type, payload, stored } of appliableUpdates) {
-    const written = await writeAttachmentUpdate(
-      { id, type, payload, stored, updatedAt },
-      clientArgs
-    );
+    try {
+      const written = await writeAttachmentUpdate(
+        { id, type, payload, stored, updatedAt },
+        clientArgs
+      );
 
-    if (written != null) {
-      writtenUpdates.push({ id, type, ...written });
+      if (written != null) {
+        writtenUpdates.push({ id, type, ...written });
+      }
+    } catch (error) {
+      logger.error(`Failed to update attachment ${id} on case ${caseId}: ${error}`);
+      failedIds.push(id);
     }
   }
 
   // An update that drops nothing only rewrites bookkeeping the attachment keeps about where it
   // came from. Nothing the analyst sees changed, so it gets no activity entry and no alert is
   // unlinked.
-  const shrunkAttachments = writtenUpdates.flatMap(({ id, type, payload, stored }) =>
+  const shrunkAttachments = writtenUpdates.flatMap(({ id, type, payload, stored, deleted }) =>
     dropsStoredContent(stored.requestAttributes, payload)
       ? [
           {
@@ -376,13 +402,14 @@ const applyAttachmentUpdates = async (
             savedObjectType: type,
             attachment: toDroppedPayload(stored.requestAttributes, payload),
             payload,
+            deleted,
           },
         ]
       : []
   );
 
   if (shrunkAttachments.length === 0) {
-    return;
+    return failedIds;
   }
 
   // What left the case is recorded as a deletion of the part that left, so the activity reads as
@@ -400,7 +427,10 @@ const applyAttachmentUpdates = async (
     user,
   });
 
-  for (const { id, owner, savedObjectType, payload } of shrunkAttachments) {
+  // An attachment the shrink emptied is gone, so there is nothing left for an update to put back.
+  for (const { id, owner, savedObjectType, payload } of shrunkAttachments.filter(
+    ({ deleted }) => !deleted
+  )) {
     await userActionService.creator.createUserAction({
       userAction: {
         type: UserActionTypes.comment,
@@ -420,6 +450,8 @@ const applyAttachmentUpdates = async (
   if (alerts.length > 0) {
     await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
   }
+
+  return failedIds;
 };
 
 /** How many times a shrink is recomputed against a copy that changed under it before giving up. */
@@ -446,12 +478,16 @@ interface WriteAttachmentUpdateArgs {
  * write that landed. Nothing is returned when nothing landed: the deletions are already in the
  * index, so a conflict that outlives the attempts leaves the attachment as it stands rather than
  * failing a delete that worked.
+ *
+ * A removal that won the race can take every alert this one meant to keep. The attachment is
+ * then deleted rather than written back holding no alerts.
  */
 const writeAttachmentUpdate = async (
   { id, type, payload, stored, updatedAt }: WriteAttachmentUpdateArgs,
   clientArgs: CasesClientArgs
 ): Promise<
-  { payload: RelatedAttachmentUpdate['payload']; stored: DecodedAttachment } | undefined
+  | { payload: RelatedAttachmentUpdate['payload']; stored: DecodedAttachment; deleted: boolean }
+  | undefined
 > => {
   const {
     user,
@@ -472,7 +508,7 @@ const writeAttachmentUpdate = async (
         options: { references: current.references, refresh: true, version: current.version },
       });
 
-      return { payload: currentPayload, stored: current };
+      return { payload: currentPayload, stored: current, deleted: false };
     } catch (error) {
       if (!isConflictError(error)) {
         throw error;
@@ -501,6 +537,14 @@ const writeAttachmentUpdate = async (
         current: fresh.requestAttributes,
       });
       current = fresh;
+
+      if (
+        'attachmentId' in currentPayload &&
+        toStringArray(currentPayload.attachmentId).length === 0
+      ) {
+        await attachmentService.bulkDelete({ savedObjectIds: [id], refresh: true });
+        return { payload: currentPayload, stored: current, deleted: true };
+      }
     }
   }
 };

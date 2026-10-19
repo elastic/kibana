@@ -1394,12 +1394,107 @@ describe('deleteCaseAttachments', () => {
           ).toEqual(expect.objectContaining({ sourceAttachmentIds: [] }));
         });
 
-        it('surfaces a write failure that is not a conflict', async () => {
+        it('deletes the attachment when the copy that won holds only what this removal drops', async () => {
+          // The other removal took alert-2, the one alert this removal meant to keep.
+          const onlyWhatWeDrop: AttachmentForDeletion = {
+            ...afterConcurrentRemoval,
+            attributes: {
+              ...afterConcurrentRemoval.attributes,
+              attachmentId: ['alert-1', 'alert-3'],
+              metadata: { index: ['index-1', 'index-3'] },
+            } as unknown as AttachmentAttributesV2,
+          };
+
+          argsWithHook.services.attachmentService.update.mockRejectedValueOnce(conflict());
+          argsWithHook.services.attachmentService.getter.bulkGetForDeletionByType.mockImplementation(
+            async (refs) =>
+              [
+                toAttachmentForDeletion(relatedComment),
+                toAttachmentForDeletion(relatedAlert),
+                argsWithHook.services.attachmentService.update.mock.calls.length > 0
+                  ? onlyWhatWeDrop
+                  : versioned,
+              ].filter(({ id }) => refs.some((ref) => ref.id === id))
+          );
+
+          await deleteWithRelated([attackAttachment]);
+
+          const { attachmentService, userActionService, alertsService } = argsWithHook.services;
+
+          expect(attachmentService.update).toHaveBeenCalledTimes(1);
+          expect(attachmentService.bulkDelete).toHaveBeenCalledWith({
+            savedObjectIds: ['shared-alerts-1'],
+            refresh: true,
+          });
+          expect(userActionService.creator.bulkCreateAttachmentDeletion).toHaveBeenCalledWith(
+            expect.objectContaining({
+              attachments: [
+                expect.objectContaining({
+                  id: 'shared-alerts-1',
+                  attachment: expect.objectContaining({ attachmentId: ['alert-1', 'alert-3'] }),
+                }),
+              ],
+            })
+          );
+          expect(userActionService.creator.createUserAction).not.toHaveBeenCalled();
+          expect(alertsService.removeCaseIdFromAlerts).toHaveBeenCalledWith({
+            caseId,
+            alerts: [
+              { id: 'alert-1', index: 'index-1' },
+              { id: 'alert-3', index: 'index-3' },
+            ],
+          });
+        });
+
+        it('records the deletion before surfacing a write failure that is not a conflict', async () => {
           argsWithHook.services.attachmentService.update.mockRejectedValue(Boom.badRequest('nope'));
 
-          await expect(deleteWithRelated([attackAttachment])).rejects.toThrow('nope');
+          await expect(deleteWithRelated([attackAttachment])).rejects.toThrow(
+            'Failed to update attachment shared-alerts-1 on case mock-id-1.'
+          );
+
           expect(argsWithHook.services.attachmentService.update).toHaveBeenCalledTimes(1);
+          expect(argsWithHook.logger.error).toHaveBeenCalledWith(expect.stringContaining('nope'));
+          expect(
+            argsWithHook.services.userActionService.creator.bulkCreateAttachmentDeletion
+          ).toHaveBeenCalledWith(
+            expect.objectContaining({
+              attachments: [expect.objectContaining({ id: 'attack-attachment-1' })],
+            })
+          );
+          expect(argsWithHook.services.caseService.patchCase).toHaveBeenCalled();
+          expect(
+            argsWithHook.services.userActionService.creator.createUserAction
+          ).not.toHaveBeenCalled();
         });
+      });
+
+      it('shrinks nothing when an attachment the hook answered for was not deleted', async () => {
+        const otherAttack = { ...attackAttachment, id: 'attack-attachment-2' };
+        argsWithHook.services.attachmentService.bulkDelete.mockResolvedValue([
+          'attack-attachment-1',
+        ]);
+
+        await expect(deleteWithRelated([attackAttachment, otherAttack])).rejects.toThrow(
+          'Failed to delete attachment attack-attachment-2 on case mock-id-1.'
+        );
+
+        expect(onDelete).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attachments: [
+              expect.objectContaining({ id: 'attack-attachment-1' }),
+              expect.objectContaining({ id: 'attack-attachment-2' }),
+            ],
+          })
+        );
+        expect(argsWithHook.services.attachmentService.update).not.toHaveBeenCalled();
+        expect(
+          argsWithHook.services.userActionService.creator.bulkCreateAttachmentDeletion
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attachments: [expect.objectContaining({ id: 'attack-attachment-1' })],
+          })
+        );
       });
     });
   });

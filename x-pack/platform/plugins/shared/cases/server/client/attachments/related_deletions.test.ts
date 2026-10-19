@@ -167,7 +167,14 @@ describe('getRelatedAttachmentsToDelete', () => {
 
       expect(related).toEqual({
         refs: [],
-        updates: [{ id: child.id, type: child.type, payload: relabelledChild.payload }],
+        updates: [
+          {
+            id: child.id,
+            type: child.type,
+            payload: relabelledChild.payload,
+            requestedIds: [parent.id],
+          },
+        ],
       });
     });
   });
@@ -197,7 +204,14 @@ describe('getRelatedAttachmentsToDelete', () => {
 
       expect(related).toEqual({
         refs: [{ id: unrelated.id, type: unrelated.type }],
-        updates: [{ id: child.id, type: child.type, payload: shrunkChild.payload }],
+        updates: [
+          {
+            id: child.id,
+            type: child.type,
+            payload: shrunkChild.payload,
+            requestedIds: [parent.id],
+          },
+        ],
       });
     });
 
@@ -270,7 +284,7 @@ describe('getRelatedAttachmentsToDelete', () => {
       });
 
       expect(related.updates).toEqual([
-        { id: child.id, type: child.type, payload: shrunkChild.payload },
+        { id: child.id, type: child.type, payload: shrunkChild.payload, requestedIds: [parent.id] },
       ]);
       expect(related.updates[0].payload.owner).toBe(child.attributes.owner);
     });
@@ -301,7 +315,9 @@ describe('getRelatedAttachmentsToDelete', () => {
 
       expect(onDelete).toHaveBeenCalledTimes(1);
       expect(otherOnDelete).toHaveBeenCalledTimes(1);
-      expect(related.updates).toEqual([{ id: child.id, type: child.type, payload: lastPayload }]);
+      expect(related.updates).toEqual([
+        { id: child.id, type: child.type, payload: lastPayload, requestedIds: [unrelated.id] },
+      ]);
     });
   });
 });

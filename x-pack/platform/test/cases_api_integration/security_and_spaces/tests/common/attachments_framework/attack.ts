@@ -445,6 +445,29 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
+      it('still takes the shared alert with the other attack after related attachments were excluded', async () => {
+        const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks();
+
+        await bulkDeleteAttachments({
+          supertest,
+          caseId,
+          savedObjectIds: [attackAttachmentId(ATTACK_A_ID)],
+          includeRelated: false,
+        });
+        await bulkDeleteAttachments({
+          supertest,
+          caseId,
+          savedObjectIds: [attackAttachmentId(ATTACK_B_ID)],
+        });
+
+        // The first removal hands A's attachment over to B, which still claims the shared alert.
+        // Without that, the shared alert would name a departed attack and nothing could take it.
+        // A's own alert was kept by the analyst and is not B's to take.
+        const remaining = await readAttachments(caseId);
+        expect(attackIdsOf(remaining)).to.eql([]);
+        expect(alertIdsOf(remaining)).to.eql([ATTACK_A_ONLY_ALERT_ID]);
+      });
+
       it('deletes nothing when one of the ids is not an attachment of the case', async () => {
         const { caseId, attachments, attackAttachmentId } = await seedCaseWithTwoAttacks();
 

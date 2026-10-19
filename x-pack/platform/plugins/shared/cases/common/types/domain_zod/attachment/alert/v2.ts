@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_ALERTS_PER_CASE, MAX_ATTACHMENT_ID_LENGTH } from '../../../../constants';
 import { STACK_ALERT_ATTACHMENT_TYPE } from '../../../../constants/attachments';
 
 /**
@@ -42,7 +43,10 @@ export const AlertAttachmentMetadataSchema = z
      * Several ids because an alert may be contributed by more than one source, and because a
      * partial removal relabels the remainder onto the sources that still hold it.
      */
-    sourceAttachmentIds: z.array(z.string()).optional(),
+    sourceAttachmentIds: z
+      .array(z.string().max(MAX_ATTACHMENT_ID_LENGTH))
+      .max(MAX_ALERTS_PER_CASE)
+      .optional(),
   })
   .strict();
 
