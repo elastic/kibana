@@ -59,18 +59,26 @@ apiTest.describe(
       ...(await samlAuth.asInteractiveUser(role)).cookieHeader,
     });
 
+    const putDashboard = async (
+      apiClient: ApiClient,
+      spaceId: string,
+      id: string,
+      body: Record<string, unknown>,
+      auth: Role = editorBothSpaces
+    ) =>
+      apiClient.put(`${spacePrefix(spaceId)}${DASHBOARD_API_PATH}/${id}`, {
+        headers: await headers(auth),
+        body,
+        responseType: 'json',
+      });
+
     const saveDashboard = async (
       apiClient: ApiClient,
       spaceId: string,
       title: string,
       auth: Role = editorBothSpaces,
       id: string = dashboardId
-    ) =>
-      apiClient.put(`${spacePrefix(spaceId)}${DASHBOARD_API_PATH}/${id}`, {
-        headers: await headers(auth),
-        body: { title },
-        responseType: 'json',
-      });
+    ) => putDashboard(apiClient, spaceId, id, { title }, auth);
 
     const getDashboard = async (apiClient: ApiClient, spaceId: string, id: string = dashboardId) =>
       apiClient.get(`${spacePrefix(spaceId)}${DASHBOARD_API_PATH}/${id}`, {
@@ -184,6 +192,90 @@ apiTest.describe(
       const original = await getChange(apiClient, spaceA, after[1].id);
       expect(original.body.snapshot.title).toBe('Version two');
       expect(original.body.isCurrent).toBe(false);
+    });
+
+    apiTest('restore brings back configured panels and their references', async ({ apiClient }) => {
+      const id = 'history-restore-panels';
+      const byValuePanel = {
+        id: 'by-value-lens-panel',
+        type: 'vis',
+        grid: { x: 0, y: 0, w: 24, h: 10 },
+        config: {
+          type: 'metric',
+          title: 'Request count',
+          data_source: { type: 'data_view_reference', ref_id: 'history-restore-data-view' },
+          metrics: [{ type: 'primary', operation: 'count' }],
+        },
+      };
+      const byRefPanel = {
+        id: 'by-ref-lens-panel',
+        type: 'vis',
+        grid: { x: 24, y: 0, w: 24, h: 10 },
+        config: { ref_id: 'history-restore-library-lens' },
+      };
+      const panelSummary = (panels: Array<{ id?: string; type: string; config: any }>) =>
+        panels.map((panel) => ({
+          id: panel.id,
+          type: panel.type,
+          dataViewId: panel.config.data_source?.ref_id,
+          lensId: panel.config.ref_id,
+          metricType: panel.config.type,
+        }));
+      const expectedPanels = [
+        {
+          id: 'by-value-lens-panel',
+          type: 'vis',
+          dataViewId: 'history-restore-data-view',
+          lensId: undefined,
+          metricType: 'metric',
+        },
+        {
+          id: 'by-ref-lens-panel',
+          type: 'vis',
+          dataViewId: undefined,
+          lensId: 'history-restore-library-lens',
+          metricType: undefined,
+        },
+      ];
+
+      // version 1 has the Lens panels, version 2 has none
+      expect(
+        await putDashboard(apiClient, spaceA, id, {
+          title: 'With panels',
+          panels: [byValuePanel, byRefPanel],
+        })
+      ).toHaveStatusCode(201);
+      const created = await getDashboard(apiClient, spaceA, id);
+      expect(panelSummary(created.body.data.panels)).toStrictEqual(expectedPanels);
+      expect(
+        await putDashboard(apiClient, spaceA, id, { title: 'Without panels', panels: [] })
+      ).toHaveStatusCode(200);
+      expect((await getDashboard(apiClient, spaceA, id)).body.data.panels).toStrictEqual([]);
+      const before = await waitForVersions(apiClient, spaceA, 2, id);
+      const versionOne = before[1];
+
+      // the snapshot itself holds the panels, otherwise restoring them could not work
+      const snapshot = await getChange(apiClient, spaceA, versionOne.id, editorBothSpaces, id);
+      expect(snapshot).toHaveStatusCode(200);
+      expect(snapshot.body.snapshot.panels).toHaveLength(2);
+
+      const restored = await restore(apiClient, spaceA, versionOne.id, editorBothSpaces, id);
+      expect(restored).toHaveStatusCode(200);
+      expect(panelSummary(restored.body.panels)).toStrictEqual(expectedPanels);
+
+      // the panels and their references are persisted, not just echoed back by the route
+      const saved = await getDashboard(apiClient, spaceA, id);
+      expect(saved).toHaveStatusCode(200);
+      expect(saved.body.data.title).toBe('With panels');
+      expect(panelSummary(saved.body.data.panels)).toStrictEqual(expectedPanels);
+      expect(saved.body.data.panels.map((panel: { grid: unknown }) => panel.grid)).toStrictEqual([
+        byValuePanel.grid,
+        byRefPanel.grid,
+      ]);
+      expect(saved.body.data.panels[0].config.title).toBe('Request count');
+      expect(saved.body.data.panels[0].config.metrics).toStrictEqual([
+        { type: 'primary', operation: 'count' },
+      ]);
     });
 
     apiTest(

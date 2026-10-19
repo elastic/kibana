@@ -10,8 +10,12 @@
 import type { ChangeHistoryClient } from '@kbn/change-history';
 import type { CoreStart, Logger } from '@kbn/core/server';
 
+const INITIAL_RETRY_DELAY_MS = 1000;
+const MAX_RETRY_DELAY_MS = 60000;
+
 let ready = false;
 let changeHistoryClient: ChangeHistoryClient;
+let retryTimer: ReturnType<typeof setTimeout> | undefined;
 
 export const startChangeHistoryClient = (
   client: ChangeHistoryClient,
@@ -19,15 +23,37 @@ export const startChangeHistoryClient = (
   logger: Logger
 ) => {
   changeHistoryClient = client;
-  changeHistoryClient
-    .initialize(core.elasticsearch.client.asInternalUser)
-    .then(() => {
-      ready = true;
-    })
-    .catch((cause) => {
-      const error = new Error(`Unable to initialize dashboard change history`, { cause });
-      logger.error(error);
-    });
+  ready = false;
+  stopChangeHistoryClient();
+
+  const attemptInitialize = (retryDelayMs: number) => {
+    changeHistoryClient
+      .initialize(core.elasticsearch.client.asInternalUser)
+      .then(() => {
+        ready = true;
+        retryTimer = undefined;
+      })
+      .catch((cause) => {
+        const error = new Error(
+          `Unable to initialize dashboard change history, retrying in ${retryDelayMs}ms`,
+          { cause }
+        );
+        logger.error(error);
+        retryTimer = setTimeout(
+          () => attemptInitialize(Math.min(retryDelayMs * 2, MAX_RETRY_DELAY_MS)),
+          retryDelayMs
+        );
+      });
+  };
+
+  attemptInitialize(INITIAL_RETRY_DELAY_MS);
+};
+
+export const stopChangeHistoryClient = () => {
+  if (retryTimer) {
+    clearTimeout(retryTimer);
+    retryTimer = undefined;
+  }
 };
 
 export const getChangeHistoryClient = () => {
