@@ -94,7 +94,7 @@ export const main = async (): Promise<void> => {
       await setupStore(es);
       const counts = await ingestRunDir(es, dir);
       const { manifest, rows } = await computeScorecard(es, runId);
-      await writeScorecard(es, rows);
+      await writeScorecard(es, rows, manifest);
       const md = scorecardMarkdown(manifest, rows);
       fs.writeFileSync(path.join(dir, 'scorecard.md'), md);
       fs.writeFileSync(path.join(dir, 'scorecard.json'), JSON.stringify(rows, null, 2));
@@ -110,7 +110,7 @@ export const main = async (): Promise<void> => {
     }
     case 'scorecard': {
       const { manifest, rows } = await computeScorecard(es, flags['run-id']);
-      await writeScorecard(es, rows);
+      await writeScorecard(es, rows, manifest);
       const md = scorecardMarkdown(manifest, rows);
       const dir = path.join(runsDir, flags['run-id']);
       if (fs.existsSync(dir)) {
@@ -244,6 +244,47 @@ export const main = async (): Promise<void> => {
         };
       }
       const out = { runs: perRun, summary };
+      if (flags.out) fs.writeFileSync(flags.out, JSON.stringify(out, null, 2));
+      // eslint-disable-next-line no-console
+      console.log(JSON.stringify(out, null, 2));
+      return;
+    }
+    case 'perturb': {
+      // Perturbation calibration summary: external-only idle runs per condition (variant).
+      const res = await es.search<Record<string, any>>({
+        index: 'research-scorecards',
+        size: 1000,
+        query: {
+          bool: {
+            filter: [
+              { term: { phase: 'baseline' } },
+              { term: { pod: 'cluster' } },
+              { prefix: { variant: flags['variant-prefix'] ?? 'perturb-' } },
+            ],
+          },
+        },
+      });
+      const by = new Map<string, Array<Record<string, number>>>();
+      for (const h of res.hits.hits) {
+        const r = h._source as Record<string, any>;
+        by.set(r.variant, [...(by.get(r.variant) ?? []), r.metrics]);
+      }
+      const agg = (xs: number[]) => {
+        const m = xs.reduce((a, b) => a + b, 0) / xs.length;
+        const sd = Math.sqrt(xs.reduce((a, b) => a + (b - m) ** 2, 0) / Math.max(1, xs.length - 1));
+        return { n: xs.length, mean: m, sd, values: xs };
+      };
+      const out = Object.fromEntries(
+        [...by.entries()].map(([variant, rows]) => [
+          variant,
+          {
+            laptop_probe_p50_ms: agg(rows.map((r) => r.laptop_probe_p50_ms)),
+            laptop_probe_p99_ms: agg(rows.map((r) => r.laptop_probe_p99_ms)),
+            kibana_cpu_pct: agg(rows.map((r) => r.ext_cpu_pct_mean)),
+            kibana_rss_max_mb: agg(rows.map((r) => r.ext_rss_max_mb)),
+          },
+        ])
+      );
       if (flags.out) fs.writeFileSync(flags.out, JSON.stringify(out, null, 2));
       // eslint-disable-next-line no-console
       console.log(JSON.stringify(out, null, 2));

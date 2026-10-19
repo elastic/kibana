@@ -38,7 +38,11 @@ export const computeScorecard = async (
   };
 };
 
-export const writeScorecard = async (es: Client, rows: ScorecardRow[]): Promise<void> => {
+export const writeScorecard = async (
+  es: Client,
+  rows: ScorecardRow[],
+  manifest?: Doc
+): Promise<void> => {
   if (!rows.length) return;
   await es.deleteByQuery({
     index: STREAMS.scorecards,
@@ -53,6 +57,9 @@ export const writeScorecard = async (es: Client, rows: ScorecardRow[]): Promise<
       { create: { _index: STREAMS.scorecards } },
       {
         ...r,
+        lane: manifest?.lane,
+        variant: manifest?.variant,
+        qaf_project_id: manifest?.qaf_project_id ?? null,
         '@timestamp': Math.round(r.window_start),
         row: r.kind === 'pod' ? `${r.phase}/${r.pod}/${r.boot_id}` : `${r.phase}/cluster`,
         pod: r.kind === 'pod' ? r.pod : 'cluster',
