@@ -189,7 +189,9 @@ export class DiscoverPlugin
 
     core.application.register({
       id: PLUGIN_ID,
-      title: 'Discover',
+      title: i18n.translate('discover.discoverTitle', {
+        defaultMessage: 'Discover',
+      }),
       updater$: this.appStateUpdater,
       order: 1000,
       euiIconType: 'logoKibana',

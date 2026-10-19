@@ -44,6 +44,7 @@ const createPluginConfigAccessor = ({
   const config: PluginConfig = {
     enabled: true,
     invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
+    retention: { ruleEvents: { enabled: false, dataRetention: '90d' } },
     rules: {
       minimumScheduleInterval: '1m',
       maxScheduledPerMinute: 400,

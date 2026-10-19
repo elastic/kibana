@@ -7,17 +7,19 @@
 
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
-import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 
 interface PreviewAttachmentInDashboardParams {
   attachment: DashboardAttachment;
   dashboardApi: DashboardApi;
+  dashboardLocator?: DashboardRendererProps['locator'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }
 
 export const previewAttachmentInDashboard = async ({
   attachment,
   dashboardApi,
+  dashboardLocator,
   checkSavedDashboardExist,
 }: PreviewAttachmentInDashboardParams) => {
   const dashboardState = attachmentDataToDashboardState(attachment.data);
@@ -42,7 +44,9 @@ export const previewAttachmentInDashboard = async ({
   }
 
   // c) Attachment linked to different existing dashboard -> navigate to linked dashboard or a new unsaved dashboard with the attachment's state
-  dashboardApi.locator?.navigate({
+  // A host app's own `dashboardApi.locator` (e.g. Security's) may keep only `dashboardId` and drop
+  // the attachment's panels, so navigate through the Dashboard app locator instead.
+  await dashboardLocator?.navigate({
     title: dashboardState.title,
     description: dashboardState.description,
     panels: dashboardState.panels,

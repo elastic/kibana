@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { toReadableAttackIndexPattern } from '@kbn/elastic-assistant-common';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   SECURITY_ALERT_ATTACHMENT_TYPE,
@@ -19,7 +20,12 @@ import type {
 import type { UnifiedAttachmentPayload } from '@kbn/cases-plugin/common/types/domain/attachment/v2';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
-import { secOnly, superUser } from '../../../../common/lib/authentication/users';
+import {
+  secOnly,
+  secOnlyNoIndexAttacks,
+  secOnlyReadAttackAlias,
+  superUser,
+} from '../../../../common/lib/authentication/users';
 import {
   bulkCreateAttachments,
   bulkDeleteAttachments,
@@ -257,9 +263,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('schema validation', () => {
-      // `metadata.index` is what the Cases platform reads for the "already attached" duplicate
-      // check and what status sync writes to, so it is required — unlike `security.alert`, the
-      // attack type has no legacy shape to stay compatible with.
+      // `metadata.index` is what status sync writes to and, mapped to its readable pattern, what the
+      // attack is authorized against; the "already attached" check reads `attachmentId` instead. It
+      // is required because, unlike `security.alert`, the attack type has no legacy shape to keep.
       const requiredMetadataFields = ['title', 'alertCount', 'index'] as const;
 
       for (const field of requiredMetadataFields) {
@@ -336,6 +342,24 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(response.message).to.contain('Referenced attack(s) not found');
+      });
+
+      it('rejects an attack whose index is outside the attack discovery index families', async () => {
+        // A valid attack document, but in an index that does not hold attack discoveries.
+        await es.index({
+          index: ALERT_INDEX,
+          id: 'attack-in-alerts-index',
+          document: buildAttackDocument(),
+          refresh: true,
+        });
+
+        const response = await attachAttack({
+          ...attackAttachment,
+          attachmentId: 'attack-in-alerts-index',
+          metadata: { ...attackMetadata, index: ALERT_INDEX },
+        });
+
+        expect(response.message).to.contain('is not an attack discovery index');
       });
 
       it('rejects an attack pointing at a document that is not an alert', async () => {
@@ -442,6 +466,83 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: { user: secOnly, space: 'space1' },
           expectedHttpCode: 403,
         });
+
+        expect(
+          await getAllComments({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            auth: { user: superUser, space: 'space1' },
+          })
+        ).to.eql([]);
+      });
+    });
+
+    /**
+     * An attachment carries the backing index, but roles are granted read on the alias in front of
+     * it, never on the backing index. The reference is therefore authorized by reading it, as the
+     * caller, through the pattern `toReadableAttackIndexPattern` maps the backing index to.
+     */
+    describe('index privileges', () => {
+      // Status sync also writes to `metadata.index` as the caller; it is off so that these tests
+      // assert on the authorization read alone.
+      const postCaseRequest = getPostCaseRequest({
+        owner: OWNER,
+        settings: { syncAlerts: false, extractObservables: false },
+      });
+
+      beforeEach(async () => {
+        await indexAttackDocuments({ es, attackIds: [ATTACK_ID], spaceId: 'space1' });
+      });
+
+      it('attaches an attack for a user who can read the alias but not the backing index', async () => {
+        // Without the rewrite this would only cover the pass-through branch.
+        expect(toReadableAttackIndexPattern(ATTACK_INDEX)).not.to.be(ATTACK_INDEX);
+
+        const postedCase = await createCase(supertestWithoutAuth, postCaseRequest, 200, {
+          user: superUser,
+          space: 'space1',
+        });
+
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          params: attackAttachment as unknown as AttachmentRequestV2,
+          auth: { user: secOnlyReadAttackAlias, space: 'space1' },
+        });
+
+        const comments = (await getAllComments({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          auth: { user: secOnlyReadAttackAlias, space: 'space1' },
+        })) as unknown as Array<{
+          type: string;
+          attachmentId?: string;
+          metadata?: { index?: string };
+        }>;
+        expect(comments.length).to.be(1);
+        expect(comments[0].type).to.eql(SECURITY_ATTACK_ATTACHMENT_TYPE);
+        expect(comments[0].attachmentId).to.eql(ATTACK_ID);
+        // Only the authorization read is rewritten; the attachment keeps the index it was given.
+        expect(comments[0].metadata?.index).to.eql(ATTACK_INDEX);
+      });
+
+      it('rejects an attack from a user with the same privileges but no read on the alias', async () => {
+        const postedCase = await createCase(supertestWithoutAuth, postCaseRequest, 200, {
+          user: superUser,
+          space: 'space1',
+        });
+
+        const response = (await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          params: attackAttachment as unknown as AttachmentRequestV2,
+          auth: { user: secOnlyNoIndexAttacks, space: 'space1' },
+          expectedHttpCode: 400,
+        })) as unknown as { message: string };
+
+        // The pattern resolves to nothing this user can read, so the attack is not found rather
+        // than forbidden.
+        expect(response.message).to.contain('Referenced attack(s) not found');
 
         expect(
           await getAllComments({
