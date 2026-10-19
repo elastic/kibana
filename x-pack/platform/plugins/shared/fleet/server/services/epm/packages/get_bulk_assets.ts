@@ -13,6 +13,8 @@ import type {
 } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { parse } from 'yaml';
+import pMap from 'p-map';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { AssetSOObject, GetBulkAssetsResponse, SimpleSOAssetType } from '../../../../common';
 import { ElasticsearchAssetType } from '../../../../common';
@@ -22,6 +24,8 @@ import { displayedAssetTypesLookup } from '../../../../common/constants';
 
 import type { SimpleSOAssetAttributes } from '../../../types';
 import { appContextService } from '../../app_context';
+
+const MAX_CONCURRENT_WORKFLOW_LOOKUPS = 10;
 
 type DisplayableSOAssetAttributes = SimpleSOAssetAttributes & {
   name?: string;
@@ -119,32 +123,39 @@ const parseWorkflowYaml = (yaml: unknown): { name?: unknown; description?: unkno
   }
 };
 
-// Workflows are not saved objects, so they are resolved through the managed workflows client.
-const getWorkflowAssets = async (workflowIds: string[]): Promise<BulkAssetItem[]> => {
+// Workflows are not saved objects, so they are resolved through the managed workflows client,
+// scoped to the space of the request like the saved objects client.
+const getWorkflowAssets = async (
+  workflowIds: string[],
+  spaceId: string
+): Promise<BulkAssetItem[]> => {
   const client = await appContextService.getManagedWorkflowsClient();
   if (!client || !workflowIds.length) {
     return [];
   }
 
-  const states = await client.listInstalledWorkflowStates();
-  const requestedIds = new Set(workflowIds);
+  const states = await pMap(
+    [...new Set(workflowIds)],
+    (workflowId) => client.getInstalledWorkflowState(workflowId, spaceId),
+    { concurrency: MAX_CONCURRENT_WORKFLOW_LOOKUPS }
+  );
 
-  return states
-    .filter(({ workflowId }) => requestedIds.has(workflowId))
-    .map(({ workflowId, templateValues }) => {
-      const { name, description } = parseWorkflowYaml(templateValues?.yaml);
+  return states.filter(isNotNull).map(({ workflowId, templateValues }) => {
+    const { name, description } = parseWorkflowYaml(templateValues?.yaml);
 
-      return {
-        id: workflowId,
-        type: KibanaSavedObjectType.workflow,
-        attributes: {
-          title: typeof name === 'string' ? name : workflowId,
-          description: typeof description === 'string' ? description : undefined,
-        },
-        appLink: `/app/workflows/${workflowId}`,
-      };
-    });
+    return {
+      id: workflowId,
+      type: KibanaSavedObjectType.workflow,
+      attributes: {
+        title: typeof name === 'string' ? name : workflowId,
+        description: typeof description === 'string' ? description : undefined,
+      },
+      appLink: `/app/workflows/${workflowId}`,
+    };
+  });
 };
+
+const isNotNull = <T>(value: T | null): value is T => value !== null;
 
 export async function getBulkAssets(
   soClient: SavedObjectsClientContract,
@@ -154,7 +165,8 @@ export async function getBulkAssets(
   const isWorkflow = ({ type }: AssetSOObject) => type === KibanaSavedObjectType.workflow;
   const assetIds = allAssetIds.filter((asset) => !isWorkflow(asset));
   const workflowAssets = await getWorkflowAssets(
-    allAssetIds.filter(isWorkflow).map(({ id }) => id)
+    allAssetIds.filter(isWorkflow).map(({ id }) => id),
+    soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID
   );
 
   const { resolved_objects: resolvedObjects } =

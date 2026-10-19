@@ -32,6 +32,7 @@ describe('getBulkAssets', () => {
           },
         ],
       }),
+      getCurrentNamespace: jest.fn().mockReturnValue(undefined),
     } as unknown as SavedObjectsClientContract;
 
     const soTypeRegistry = {
@@ -96,6 +97,7 @@ describe('getBulkAssets', () => {
           },
         ],
       }),
+      getCurrentNamespace: jest.fn().mockReturnValue(undefined),
     } as unknown as SavedObjectsClientContract;
 
     const soTypeRegistry = {
@@ -157,6 +159,7 @@ describe('getBulkAssets', () => {
           },
         ],
       }),
+      getCurrentNamespace: jest.fn().mockReturnValue(undefined),
     } as unknown as SavedObjectsClientContract;
 
     const soTypeRegistry = {
@@ -188,15 +191,20 @@ describe('getBulkAssets', () => {
     const createSoClient = () =>
       ({
         bulkResolve: jest.fn().mockResolvedValue({ resolved_objects: [] }),
+        getCurrentNamespace: jest.fn().mockReturnValue(undefined),
       } as unknown as jest.Mocked<SavedObjectsClientContract>);
-    const mockClient = (states: unknown[] | undefined) =>
+    const mockClient = (
+      states: Array<{ workflowId: string; templateValues?: unknown }> | undefined
+    ) => {
+      const getInstalledWorkflowState = jest.fn(
+        async (workflowId: string) =>
+          states?.find((state) => state.workflowId === workflowId) ?? null
+      );
       jest
         .spyOn(appContextService, 'getManagedWorkflowsClient')
-        .mockResolvedValue(
-          states
-            ? ({ listInstalledWorkflowStates: jest.fn().mockResolvedValue(states) } as any)
-            : undefined
-        );
+        .mockResolvedValue(states ? ({ getInstalledWorkflowState } as any) : undefined);
+      return getInstalledWorkflowState;
+    };
 
     afterEach(() => {
       jest.restoreAllMocks();
@@ -208,7 +216,6 @@ describe('getBulkAssets', () => {
           workflowId: 'wf-1',
           templateValues: { yaml: 'name: Hello\ndescription: Says hello\n' },
         },
-        { workflowId: 'not-requested', templateValues: { yaml: 'name: Other' } },
       ]);
       const soClient = createSoClient();
 
@@ -271,15 +278,28 @@ describe('getBulkAssets', () => {
       expect(assets).toEqual([]);
     });
 
-    it('does not list the installed workflows when no workflow is requested', async () => {
-      const listInstalledWorkflowStates = jest.fn().mockResolvedValue([]);
-      jest
-        .spyOn(appContextService, 'getManagedWorkflowsClient')
-        .mockResolvedValue({ listInstalledWorkflowStates } as any);
+    it('does not look up workflows when none is requested', async () => {
+      const getInstalledWorkflowState = mockClient([]);
 
       await getBulkAssets(createSoClient(), soTypeRegistry, []);
 
-      expect(listInstalledWorkflowStates).not.toHaveBeenCalled();
+      expect(getInstalledWorkflowState).not.toHaveBeenCalled();
+    });
+
+    it('looks up each requested workflow once in the space of the request', async () => {
+      const getInstalledWorkflowState = mockClient([
+        { workflowId: 'wf-1', templateValues: { yaml: 'name: One' } },
+      ]);
+      const soClient = createSoClient();
+      soClient.getCurrentNamespace.mockReturnValue('my-space');
+
+      await getBulkAssets(soClient, soTypeRegistry, [
+        { id: 'wf-1', type: KibanaSavedObjectType.workflow },
+        { id: 'wf-1', type: KibanaSavedObjectType.workflow },
+      ]);
+
+      expect(getInstalledWorkflowState).toHaveBeenCalledTimes(1);
+      expect(getInstalledWorkflowState).toHaveBeenCalledWith('wf-1', 'my-space');
     });
   });
 });
