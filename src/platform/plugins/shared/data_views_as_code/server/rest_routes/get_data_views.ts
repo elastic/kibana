@@ -25,7 +25,7 @@ export const registerGetDataViewsAsCodeRoute = ({
       path: BASE_PATH,
       access: 'public',
       enableQueryVersion: true,
-      summary: 'Get data views',
+      summary: 'Search data views',
       description:
         'Returns a paginated list of the data views in the current space. Each item includes only the name, index pattern, and time field. To get the full definition, use `GET /api/data_views/v2/{id}`.',
       options: {
