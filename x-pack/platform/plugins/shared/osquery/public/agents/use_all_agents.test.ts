@@ -131,7 +131,14 @@ describe('useAllAgents', () => {
 
     it('generates a valid kuery within the 4096 limit for a 253-character FQDN', () => {
       const fqdn =
-        'a'.repeat(63) + '.' + 'b'.repeat(63) + '.' + 'c'.repeat(63) + '.' + 'd'.repeat(57) + '.com';
+        'a'.repeat(63) +
+        '.' +
+        'b'.repeat(63) +
+        '.' +
+        'c'.repeat(63) +
+        '.' +
+        'd'.repeat(57) +
+        '.com';
       expect(fqdn).toHaveLength(253);
       const kuery = buildAgentSearchKuery(fqdn);
       expect(kuery.length).toBeLessThanOrEqual(4096);
