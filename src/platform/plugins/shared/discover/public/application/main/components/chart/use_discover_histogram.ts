@@ -420,6 +420,7 @@ export const useDiscoverHistogram = (
       enableLensVisService: true,
       services,
       localStorageKeyPrefix: 'discover',
+      lensTelemetrySource: 'discover',
       initialState: {
         chartHidden,
         topPanelHeight: options?.initialLayoutProps?.topPanelHeight,

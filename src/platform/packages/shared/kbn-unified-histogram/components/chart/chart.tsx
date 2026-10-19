@@ -17,6 +17,7 @@ import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
   LensEmbeddableOutput,
+  LensTelemetrySource,
 } from '@kbn/lens-plugin/public';
 import type { Datatable, DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
@@ -77,6 +78,7 @@ export interface UnifiedHistogramChartProps {
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
   withLensActions?: boolean;
+  lensTelemetrySource?: LensTelemetrySource;
   onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
 }
 
@@ -103,6 +105,7 @@ export function UnifiedHistogramChart({
   onChartLoad,
   onApiAvailable: consumerOnApiAvailable,
   withLensActions = true,
+  lensTelemetrySource,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
   const lensVisServiceCurrentSuggestionContext = lensVisServiceState.currentSuggestionContext;
@@ -408,7 +411,7 @@ export function UnifiedHistogramChart({
           onClose={() => setIsSaveModalVisible(false)}
           isSaveable={false}
           controlsState={controlsState}
-          telemetrySource="discover"
+          telemetrySource={lensTelemetrySource}
         />
       )}
       {isFlyoutVisible && !!visContext && !!lensVisServiceCurrentSuggestionContext && (

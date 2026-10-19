@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type {
+  EmbeddableComponentProps,
+  LensEmbeddableInput,
+  LensTelemetrySource,
+} from '@kbn/lens-plugin/public';
 import { useEffect, useMemo } from 'react';
 import type { UnifiedHistogramChartProps } from '../components/chart/chart';
 import type {
@@ -43,6 +47,11 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
    * Defaults to true.
    */
   withLensActions?: boolean;
+  /**
+   * Source reported to Lens telemetry when a visualization is saved from the chart.
+   * Nothing is reported when omitted.
+   */
+  lensTelemetrySource?: LensTelemetrySource;
   /**
    * Disabled action IDs for the Lens embeddable
    */
