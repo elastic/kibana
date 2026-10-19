@@ -98,6 +98,7 @@ describe('ApplyMaintenanceWindowStep', () => {
       expect.objectContaining({
         rule_id: alert.rule_id,
         reason: 'maintenance_window:mw-1',
+        action_subtype: 'maintenance_window',
         maintenance_window_id: 'mw-1',
       })
     );
@@ -241,6 +242,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     const previouslySuppressed = {
       ...createAlert({ alert_id: 'previously-suppressed' }),
       reason: 'snooze',
+      action_subtype: 'snooze' as const,
     };
     const state = createDispatcherPipelineState({
       dispatchable: [alert],

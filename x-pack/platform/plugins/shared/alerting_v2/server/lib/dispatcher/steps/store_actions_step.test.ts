@@ -91,7 +91,7 @@ describe('StoreActionsStep', () => {
     });
 
     const state = createDispatcherPipelineState({
-      suppressed: [{ ...alert, reason: 'user acknowledged' }],
+      suppressed: [{ ...alert, reason: 'user acknowledged', action_subtype: 'ack' }],
       throttled: [],
       dispatch: [],
       rules: createRules('rule-1'),
@@ -113,6 +113,7 @@ describe('StoreActionsStep', () => {
           rule_id: 'rule-1',
           source: 'internal',
           reason: 'user acknowledged',
+          action_subtype: 'ack',
           space_id: 'default',
         },
       ],
@@ -126,7 +127,14 @@ describe('StoreActionsStep', () => {
     const alert = createAlert({ alert_id: 'alert-9', rule_id: 'rule-1', group_hash: 'hash-1' });
 
     const state = createDispatcherPipelineState({
-      suppressed: [{ ...alert, reason: 'maintenance_window:mw-1', maintenance_window_id: 'mw-1' }],
+      suppressed: [
+        {
+          ...alert,
+          reason: 'maintenance_window:mw-1',
+          action_subtype: 'maintenance_window',
+          maintenance_window_id: 'mw-1',
+        },
+      ],
       throttled: [],
       dispatch: [],
       rules: createRules('rule-1'),
@@ -149,7 +157,7 @@ describe('StoreActionsStep', () => {
     const step = new StoreActionsStep(mockService);
 
     const state = createDispatcherPipelineState({
-      suppressed: [{ ...createAlert(), reason: 'user acknowledged' }],
+      suppressed: [{ ...createAlert(), reason: 'user acknowledged', action_subtype: 'ack' }],
       throttled: [],
       dispatch: [],
       rules: createRules('rule-1'),
@@ -201,6 +209,7 @@ describe('StoreActionsStep', () => {
           rule_id: 'rule-1',
           source: 'internal',
           reason: 'suppressed by throttled policy policy-1',
+          action_subtype: 'throttled',
           space_id: 'default',
         },
       ],
@@ -387,7 +396,9 @@ describe('StoreActionsStep', () => {
     });
 
     const state = createDispatcherPipelineState({
-      suppressed: [{ ...suppressedAlert, reason: 'manually suppressed' }],
+      suppressed: [
+        { ...suppressedAlert, reason: 'manually suppressed', action_subtype: 'unknown' },
+      ],
       throttled: [throttledGroup],
       dispatch: [dispatchGroup],
       policies: new Map([
@@ -417,6 +428,7 @@ describe('StoreActionsStep', () => {
       rule_id: 'rule-suppressed',
       source: 'internal',
       reason: 'manually suppressed',
+      action_subtype: 'unknown',
       space_id: 'default',
     });
 
@@ -429,6 +441,7 @@ describe('StoreActionsStep', () => {
       rule_id: 'rule-throttled',
       source: 'internal',
       reason: 'suppressed by throttled policy throttle-policy',
+      action_subtype: 'throttled',
       space_id: 'default',
     });
 
@@ -665,7 +678,7 @@ describe('StoreActionsStep', () => {
       });
 
       const state = createDispatcherPipelineState({
-        suppressed: [{ ...alert, reason: 'suppressed' }],
+        suppressed: [{ ...alert, reason: 'suppressed', action_subtype: 'unknown' }],
       });
 
       await step.execute(state, logger);
@@ -686,7 +699,7 @@ describe('StoreActionsStep', () => {
       });
 
       const state = createDispatcherPipelineState({
-        suppressed: [{ ...alert, reason: 'suppressed' }],
+        suppressed: [{ ...alert, reason: 'suppressed', action_subtype: 'unknown' }],
       });
 
       await step.execute(state, logger);
@@ -706,7 +719,7 @@ describe('StoreActionsStep', () => {
       });
 
       const state = createDispatcherPipelineState({
-        suppressed: [{ ...alert, reason: 'suppressed' }],
+        suppressed: [{ ...alert, reason: 'suppressed', action_subtype: 'unknown' }],
       });
 
       await step.execute(state, logger);
@@ -735,8 +748,8 @@ describe('StoreActionsStep', () => {
 
       const state = createDispatcherPipelineState({
         suppressed: [
-          { ...alert1, reason: 'suppressed' },
-          { ...alert2, reason: 'suppressed' },
+          { ...alert1, reason: 'suppressed', action_subtype: 'unknown' },
+          { ...alert2, reason: 'suppressed', action_subtype: 'unknown' },
         ],
       });
 
@@ -839,8 +852,8 @@ describe('StoreActionsStep', () => {
 
       const state = createDispatcherPipelineState({
         suppressed: [
-          { ...createAlert({ alert_id: 'ep-1' }), reason: 'acked' },
-          { ...createAlert({ alert_id: 'ep-2' }), reason: 'acked' },
+          { ...createAlert({ alert_id: 'ep-1' }), reason: 'acked', action_subtype: 'ack' },
+          { ...createAlert({ alert_id: 'ep-2' }), reason: 'acked', action_subtype: 'ack' },
         ],
         throttled: [],
         dispatch: [],
@@ -940,7 +953,9 @@ describe('StoreActionsStep', () => {
 
       const state = createDispatcherPipelineState({
         dispatchable: [dispatchedAlert, throttledAlert, unmatchedAlert],
-        suppressed: [{ ...createAlert({ alert_id: 'ep-sup' }), reason: 'acked' }],
+        suppressed: [
+          { ...createAlert({ alert_id: 'ep-sup' }), reason: 'acked', action_subtype: 'ack' },
+        ],
         throttled: [createActionGroup({ id: 'g-throttle', alerts: [throttledAlert] })],
         dispatch: [createActionGroup({ id: 'g-dispatch', alerts: [dispatchedAlert] })],
       });

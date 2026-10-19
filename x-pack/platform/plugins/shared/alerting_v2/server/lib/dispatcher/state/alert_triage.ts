@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import type { AlertActionSubtype } from '../../../resources/datastreams/alert_actions';
 import type { Alert, RuleId } from '../types';
 
-export type SuppressedAlert = Alert & { reason: string; maintenance_window_id?: string };
+export type SuppressedAlert = Alert & Suppression;
 
 /** A suppression verdict. */
 export interface Suppression {
   reason: string;
+  action_subtype: AlertActionSubtype;
   maintenance_window_id?: string;
 }
 

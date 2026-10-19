@@ -15,11 +15,11 @@ describe('AlertTriage', () => {
       const drop = createAlert({ alert_id: 'drop' });
 
       const triage = AlertTriage.partition([keep, drop], (alert) =>
-        alert.alert_id === 'drop' ? { reason: 'ack' } : undefined
+        alert.alert_id === 'drop' ? { reason: 'ack', action_subtype: 'ack' } : undefined
       );
 
       expect(triage.dispatchable).toEqual([keep]);
-      expect(triage.suppressed).toEqual([{ ...drop, reason: 'ack' }]);
+      expect(triage.suppressed).toEqual([{ ...drop, reason: 'ack', action_subtype: 'ack' }]);
     });
   });
 
@@ -31,11 +31,14 @@ describe('AlertTriage', () => {
           createAlert({ alert_id: 'e2' }),
           createAlert({ alert_id: 'e3' }),
         ],
-        (alert) => (alert.alert_id === 'e1' ? { reason: 'snooze' } : undefined)
+        (alert) =>
+          alert.alert_id === 'e1' ? { reason: 'snooze', action_subtype: 'snooze' } : undefined
       );
 
       const result = initial.suppressDispatchableWhere((alert) =>
-        alert.alert_id === 'e3' ? { reason: 'maintenance_window:mw-1' } : undefined
+        alert.alert_id === 'e3'
+          ? { reason: 'maintenance_window:mw-1', action_subtype: 'maintenance_window' }
+          : undefined
       );
 
       expect(result.dispatchable.map((e) => e.alert_id)).toEqual(['e2']);
@@ -56,8 +59,12 @@ describe('AlertTriage', () => {
 
       const result = initial.suppressDispatchableWhere((alert) =>
         alert.alert_id === 'e1'
-          ? { reason: 'maintenance_window:mw-1', maintenance_window_id: 'mw-1' }
-          : { reason: 'snooze' }
+          ? {
+              reason: 'maintenance_window:mw-1',
+              action_subtype: 'maintenance_window',
+              maintenance_window_id: 'mw-1',
+            }
+          : { reason: 'snooze', action_subtype: 'snooze' }
       );
 
       expect(result.suppressed.map((e) => [e.alert_id, e.reason, e.maintenance_window_id])).toEqual(
@@ -79,7 +86,7 @@ describe('AlertTriage', () => {
     it('replaces dispatchable alerts 1:1 and keeps suppressed intact', () => {
       const initial = AlertTriage.partition(
         [createAlert({ alert_id: 'e1' }), createAlert({ alert_id: 'e2' })],
-        (alert) => (alert.alert_id === 'e2' ? { reason: 'ack' } : undefined)
+        (alert) => (alert.alert_id === 'e2' ? { reason: 'ack', action_subtype: 'ack' } : undefined)
       );
 
       const result = initial.mapDispatchable((alert) => ({ ...alert, data: { a: 1 } }));
