@@ -19,18 +19,20 @@ interface ListKisArgs {
   aiIndexId: string;
   size?: number;
   type?: string;
+  lifecycleStatus?: KiLifecycleStatus[];
   signal?: AbortSignal;
 }
 
 export const listKis = (
   http: HttpStart,
-  { aiIndexId, size, type, signal }: ListKisArgs
+  { aiIndexId, size, type, lifecycleStatus, signal }: ListKisArgs
 ): Promise<ListKisResponse> =>
   http.get<ListKisResponse>(buildPath(AI_INDEX_KI_LIST_PATH, { aiIndexId }), {
     version: AI_INDEX_INTERNAL_API_VERSION,
     query: {
       ...(size !== undefined ? { size } : {}),
       ...(type !== undefined ? { type } : {}),
+      ...(lifecycleStatus !== undefined ? { lifecycle_status: lifecycleStatus } : {}),
     },
     ...(signal ? { signal } : {}),
   });

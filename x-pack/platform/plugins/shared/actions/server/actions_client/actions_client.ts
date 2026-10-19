@@ -18,6 +18,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
@@ -97,6 +98,11 @@ import { isSystemAction } from '../lib/is_system_action';
 import type { ConnectorExecuteParams } from '../application/connector/methods/execute/types';
 import { connectorFromInMemoryConnector } from '../application/connector/lib/connector_from_in_memory_connector';
 import { getAxiosInstance } from '../application/connector/methods/get_axios_instance';
+import { getSandboxCredentials } from '../application/connector/methods/get_sandbox_credentials';
+import type {
+  GetSandboxCredentialsOptions,
+  ResolvedSandboxCredentials,
+} from '../application/connector/methods/get_sandbox_credentials';
 import type { GetAxiosInstanceWithAuthFnOpts } from '../lib/get_axios_instance';
 import { invalidateInboundConnectorEventIdentity } from '../inbound/event_identity';
 import { deleteIngressCredentialForConnector } from '../inbound/ingress_credential';
@@ -117,7 +123,7 @@ export interface ConstructorOptions {
   /**
    * Optional space override. When set, connector operations and executions will be scoped to this spaceId
    */
-  spaceId?: string;
+  spaceId?: SpaceId;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
@@ -147,7 +153,7 @@ export interface ActionsClientContext {
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
   request: KibanaRequest;
-  spaceId?: string;
+  spaceId?: SpaceId;
   authorization: ActionsAuthorization;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   auditLogger?: AuditLogger;
@@ -701,6 +707,12 @@ export class ActionsClient {
 
   public async getAxiosInstance(actionId: string): Promise<AxiosInstance> {
     return getAxiosInstance(this.context, actionId);
+  }
+
+  public async getSandboxCredentials(
+    options: GetSandboxCredentialsOptions
+  ): Promise<ResolvedSandboxCredentials> {
+    return getSandboxCredentials(this.context, options);
   }
 
   public async bulkEnqueueExecution(

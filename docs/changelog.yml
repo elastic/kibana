@@ -25,6 +25,11 @@ products:
     - product: kibana
     - product: cloud-serverless
       # lifecycle: ga
+  # Products that a label-derived product implies. A team label names a solution; its entry
+  # must also reach the Kibana and Serverless release notes.
+  implies:
+    observability: [kibana, cloud-serverless]
+    security: [kibana, cloud-serverless]
 
 # Extraction configuration
 # Controls automatic extraction of information from PR descriptions

@@ -120,3 +120,10 @@ export const UNRESOLVE_NOT_AVAILABLE = i18n.translate(
     defaultMessage: 'Unresolve is not available for classic alerts',
   }
 );
+
+export const EDIT_ASSIGNEE_NOT_AVAILABLE = i18n.translate(
+  'xpack.alertingV2Episodes.actions.editAssigneeNotAvailable',
+  {
+    defaultMessage: 'Edit assignee is not available for classic alerts',
+  }
+);
