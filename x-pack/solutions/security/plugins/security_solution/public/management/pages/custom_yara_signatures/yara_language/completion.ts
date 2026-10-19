@@ -7,6 +7,12 @@
 
 import { last, uniq, uniqBy } from 'lodash';
 import { monaco } from '@kbn/code-editor';
+import {
+  MetaArchValue,
+  MetaOsValue,
+  MetaScanTypeValue,
+  YaraMetaKeyOfInterest,
+} from '../../../../../common/endpoint/types/libyara';
 import { YARA_LANG_ID } from './constants';
 import {
   BUILT_IN_KEYWORDS,
@@ -21,7 +27,8 @@ import { COMPLETION_DETAILS } from './translations';
 
 type Suggestion = Omit<monaco.languages.CompletionItem, 'range'>;
 
-const { CompletionItemKind, CompletionItemInsertTextRule } = monaco.languages;
+const { CompletionItemKind, CompletionItemInsertTextRule, CompletionTriggerKind } =
+  monaco.languages;
 const { InsertAsSnippet } = CompletionItemInsertTextRule;
 
 const STRING_REFERENCE_PREFIX_REGEX = /[$#@!]\w*$/;
@@ -29,6 +36,41 @@ const STRING_DEFINITION_REGEX = /^\s*\$(\w+)\s*=/gm;
 const RULE_DEFINITION_REGEX = /\brule\s+([a-zA-Z_]\w*)/g;
 const INTEGER_FUNCTION_REGEX = /^u?int\d+(?:be)?$/;
 const NON_CODE_TOKEN_REGEX = /^(?:comment|string|regexp)/;
+// The last match before the cursor tells the section, the capture group is empty in a rule header.
+const SECTION_REGEX = /\b(?:rule\s+[a-zA-Z_]\w*|(meta|strings|condition)\s*:)/g;
+const META_KEY_POSITION_REGEX = /^\s*\w*$/;
+const META_VALUE_POSITION_REGEX = new RegExp(
+  `^\\s*(${Object.values(YaraMetaKeyOfInterest).join('|')})\\s*=\\s*"([^"]*)$`
+);
+// Monaco closes the suggestions on typing a space, so it has to be a trigger character to keep
+// suggesting values after `, `.
+const META_VALUE_TRIGGER_CHARACTERS = ['"', ',', ' '];
+
+const META_FIELDS = new Map<string, { detail: string; values: readonly string[] }>([
+  [
+    YaraMetaKeyOfInterest.OS,
+    { detail: COMPLETION_DETAILS.metaOs, values: Object.values(MetaOsValue) },
+  ],
+  [
+    YaraMetaKeyOfInterest.ARCH,
+    { detail: COMPLETION_DETAILS.metaArch, values: Object.values(MetaArchValue) },
+  ],
+  [
+    YaraMetaKeyOfInterest.SCAN_TYPE,
+    { detail: COMPLETION_DETAILS.metaScanType, values: Object.values(MetaScanTypeValue) },
+  ],
+]);
+
+// Listed first, and the value suggestions are opened right after inserting the key.
+const META_KEY_SUGGESTIONS: Suggestion[] = Array.from(META_FIELDS, ([key, { detail }]) => ({
+  label: key,
+  kind: CompletionItemKind.Property,
+  detail,
+  insertText: `${key} = "$0"`,
+  insertTextRules: InsertAsSnippet,
+  sortText: `0-${key}`,
+  command: { id: 'editor.action.triggerSuggest', title: '' },
+}));
 
 const toKeywordSuggestions = (
   keywords: readonly string[],
@@ -118,19 +160,39 @@ const STATIC_SUGGESTIONS: Suggestion[] = uniqBy(
 const getCapturedNames = (text: string, regex: RegExp): string[] =>
   uniq(Array.from(text.matchAll(regex), ([, name]) => name));
 
-const isInsideNonCodeToken = (
-  model: monaco.editor.ITextModel,
-  { lineNumber, column }: monaco.Position
-): boolean => {
-  const textUntilPosition = model.getValueInRange({
-    startLineNumber: 1,
-    startColumn: 1,
-    endLineNumber: lineNumber,
-    endColumn: column,
-  });
-  const lastToken = last(last(monaco.editor.tokenize(textUntilPosition, YARA_LANG_ID)));
+const getLastTokenType = (text: string): string =>
+  last(last(monaco.editor.tokenize(text, YARA_LANG_ID)))?.type ?? '';
 
-  return lastToken !== undefined && NON_CODE_TOKEN_REGEX.test(lastToken.type);
+const isInsideMetaSection = (textUntilPosition: string): boolean =>
+  last(Array.from(textUntilPosition.matchAll(SECTION_REGEX)))?.[1] === 'meta';
+
+const getMetaValueSuggestions = (
+  key: string,
+  valueUntilPosition: string,
+  { lineNumber, column }: monaco.Position
+): monaco.languages.CompletionItem[] => {
+  const items = valueUntilPosition.split(',');
+  const currentItem = last(items) ?? '';
+  const typedItem = currentItem.trimStart();
+  const selectedItems = items.slice(0, -1).map((item) => item.trim());
+  const isRightAfterComma = items.length > 1 && currentItem === typedItem;
+  const range = {
+    startLineNumber: lineNumber,
+    endLineNumber: lineNumber,
+    startColumn: column - typedItem.length,
+    endColumn: column,
+  };
+
+  return (META_FIELDS.get(key)?.values ?? [])
+    .filter((value) => !selectedItems.includes(value))
+    .map((value) => ({
+      label: value,
+      kind: CompletionItemKind.EnumMember,
+      detail: `meta.${key}`,
+      insertText: isRightAfterComma ? ` ${value}` : value,
+      filterText: value,
+      range,
+    }));
 };
 
 const getStringReferenceSuggestions = (
@@ -155,7 +217,8 @@ const getStringReferenceSuggestions = (
 const getWordSuggestions = (
   text: string,
   typedWord: string,
-  range: monaco.IRange
+  range: monaco.IRange,
+  isMetaKeyPosition: boolean
 ): monaco.languages.CompletionItem[] => {
   const ruleSuggestions = getCapturedNames(text, RULE_DEFINITION_REGEX)
     .filter((ruleName) => ruleName !== typedWord)
@@ -168,7 +231,11 @@ const getWordSuggestions = (
       })
     );
 
-  return [...STATIC_SUGGESTIONS, ...ruleSuggestions].map((suggestion) => ({
+  return [
+    ...(isMetaKeyPosition ? META_KEY_SUGGESTIONS : []),
+    ...STATIC_SUGGESTIONS,
+    ...ruleSuggestions,
+  ].map((suggestion) => ({
     ...suggestion,
     range,
   }));
@@ -177,18 +244,38 @@ const getWordSuggestions = (
 /**
  * Suggests keywords, snippets, and the strings and rules defined in the editor.
  * String references are suggested after typing `$`, `#`, `@` or `!`.
+ * The meta fields that Elastic Defend uses are suggested with their allowed values.
  */
 export const yaraCompletionProvider: monaco.languages.CompletionItemProvider = {
-  triggerCharacters: ['$', '#', '@', '!'],
+  triggerCharacters: ['$', '#', '@', '!', ...META_VALUE_TRIGGER_CHARACTERS],
 
-  provideCompletionItems: (model, position) => {
-    if (isInsideNonCodeToken(model, position)) {
+  provideCompletionItems: (model, position, { triggerKind, triggerCharacter }) => {
+    const { lineNumber, column } = position;
+    const textUntilPosition = model.getValueInRange({
+      startLineNumber: 1,
+      startColumn: 1,
+      endLineNumber: lineNumber,
+      endColumn: column,
+    });
+    const lastTokenType = getLastTokenType(textUntilPosition);
+    const linePrefix = model.getLineContent(lineNumber).slice(0, column - 1);
+    const metaValueMatch = linePrefix.match(META_VALUE_POSITION_REGEX);
+
+    if (metaValueMatch && lastTokenType.startsWith('string')) {
+      const [, key, valueUntilPosition] = metaValueMatch;
+      return { suggestions: getMetaValueSuggestions(key, valueUntilPosition, position) };
+    }
+
+    const isMetaValueTrigger =
+      triggerKind === CompletionTriggerKind.TriggerCharacter &&
+      triggerCharacter !== undefined &&
+      META_VALUE_TRIGGER_CHARACTERS.includes(triggerCharacter);
+
+    if (isMetaValueTrigger || NON_CODE_TOKEN_REGEX.test(lastTokenType)) {
       return { suggestions: [] };
     }
 
-    const { lineNumber, column } = position;
     const text = model.getValue();
-    const linePrefix = model.getLineContent(lineNumber).slice(0, column - 1);
     const typedReference = linePrefix.match(STRING_REFERENCE_PREFIX_REGEX)?.[0];
 
     if (typedReference !== undefined) {
@@ -204,13 +291,16 @@ export const yaraCompletionProvider: monaco.languages.CompletionItemProvider = {
 
     const { word, startColumn, endColumn } = model.getWordUntilPosition(position);
 
+    const isMetaKeyPosition =
+      META_KEY_POSITION_REGEX.test(linePrefix) && isInsideMetaSection(textUntilPosition);
+
     return {
-      suggestions: getWordSuggestions(text, word, {
-        startLineNumber: lineNumber,
-        endLineNumber: lineNumber,
-        startColumn,
-        endColumn,
-      }),
+      suggestions: getWordSuggestions(
+        text,
+        word,
+        { startLineNumber: lineNumber, endLineNumber: lineNumber, startColumn, endColumn },
+        isMetaKeyPosition
+      ),
     };
   },
 };

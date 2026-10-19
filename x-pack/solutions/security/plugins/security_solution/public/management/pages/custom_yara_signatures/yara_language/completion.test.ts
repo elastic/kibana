@@ -44,8 +44,20 @@ const RULE_WITH_STRINGS = [
 const withCondition = (condition: string): string =>
   RULE_WITH_STRINGS.replace('CONDITION', condition);
 
+const withMeta = (metaLine: string): string =>
+  [
+    'rule a {',
+    '  meta:',
+    '    author = "me"',
+    `    ${metaLine}`,
+    '  condition:',
+    '    true',
+    '}',
+  ].join('\n');
+
 const getSuggestions = async (
-  textWithCursor: string
+  textWithCursor: string,
+  triggerCharacter?: string
 ): Promise<monaco.languages.CompletionItem[]> => {
   const model = monaco.editor.createModel(textWithCursor.replace(CURSOR, ''), YARA_LANG_ID);
   const position = model.getPositionAt(textWithCursor.indexOf(CURSOR));
@@ -53,7 +65,9 @@ const getSuggestions = async (
   const result = await yaraCompletionProvider.provideCompletionItems(
     model,
     position,
-    { triggerKind: CompletionTriggerKind.Invoke },
+    triggerCharacter === undefined
+      ? { triggerKind: CompletionTriggerKind.Invoke }
+      : { triggerKind: CompletionTriggerKind.TriggerCharacter, triggerCharacter },
     new monaco.CancellationTokenSource().token
   );
   model.dispose();
@@ -262,6 +276,112 @@ describe('YARA completion', () => {
         'filesize',
         'entrypoint',
       ]);
+    });
+  });
+
+  describe('meta fields', () => {
+    it('should suggest the meta keys of interest first in the meta section', async () => {
+      const suggestions = await getSuggestions(withMeta(CURSOR));
+
+      expect(suggestions.slice(0, 3)).toEqual([
+        expect.objectContaining({
+          label: 'os',
+          kind: CompletionItemKind.Property,
+          detail: 'Comma separated list of operating systems',
+          insertText: 'os = "$0"',
+          insertTextRules: CompletionItemInsertTextRule.InsertAsSnippet,
+          command: expect.objectContaining({ id: 'editor.action.triggerSuggest' }),
+        }),
+        expect.objectContaining({ label: 'arch', insertText: 'arch = "$0"' }),
+        expect.objectContaining({ label: 'scan_type', insertText: 'scan_type = "$0"' }),
+      ]);
+      expect(suggestions.slice(0, 3).map(({ sortText }) => sortText)).toEqual([
+        '0-os',
+        '0-arch',
+        '0-scan_type',
+      ]);
+    });
+
+    it('should suggest the meta keys while typing a key', async () => {
+      const suggestions = await getSuggestions(withMeta(`sc${CURSOR}`));
+
+      expect(getLabels(suggestions, CompletionItemKind.Property)).toEqual([
+        'os',
+        'arch',
+        'scan_type',
+      ]);
+    });
+
+    it.each([
+      ['after `=`', withMeta(`os = ${CURSOR}`)],
+      ['in the rule header', `rule a ${CURSOR}`],
+      ['in the strings section', `rule a {\n  meta:\n    os = "Linux"\n  strings:\n    ${CURSOR}`],
+      ['in the condition section', withCondition(CURSOR)],
+    ])('should not suggest the meta keys %s', async (_, text) => {
+      const suggestions = await getSuggestions(text);
+
+      expect(getLabels(suggestions, CompletionItemKind.Property)).toEqual([]);
+    });
+
+    it.each([
+      ['os', ['Windows', 'Linux', 'MacOS']],
+      ['arch', ['x86', 'arm64']],
+      ['scan_type', ['Memory']],
+    ])('should suggest the values of `meta.%s`', async (key, values) => {
+      const suggestions = await getSuggestions(withMeta(`${key} = "${CURSOR}"`), '"');
+
+      expect(suggestions.map(({ label }) => label)).toEqual(values);
+      expect(suggestions).toEqual(
+        Array(values.length).fill(
+          expect.objectContaining({ kind: CompletionItemKind.EnumMember, detail: `meta.${key}` })
+        )
+      );
+    });
+
+    it('should not suggest the values that are already listed', async () => {
+      const suggestions = await getSuggestions(withMeta(`os = "Windows, ${CURSOR}"`), ' ');
+
+      expect(suggestions.map(({ label }) => label)).toEqual(['Linux', 'MacOS']);
+      expect(suggestions[0]).toEqual(
+        expect.objectContaining({
+          insertText: 'Linux',
+          range: { startLineNumber: 4, endLineNumber: 4, startColumn: 20, endColumn: 20 },
+        })
+      );
+    });
+
+    it('should insert a space before the value right after a comma', async () => {
+      const suggestions = await getSuggestions(withMeta(`os = "Linux,${CURSOR}"`), ',');
+
+      expect(suggestions.map(({ label }) => label)).toEqual(['Windows', 'MacOS']);
+      expect(suggestions[0]).toEqual(
+        expect.objectContaining({ insertText: ' Windows', filterText: 'Windows' })
+      );
+    });
+
+    it('should replace the value being typed', async () => {
+      const suggestions = await getSuggestions(withMeta(`arch = "x86, ar${CURSOR}"`));
+
+      expect(suggestions).toEqual([
+        expect.objectContaining({
+          label: 'arm64',
+          insertText: 'arm64',
+          range: { startLineNumber: 4, endLineNumber: 4, startColumn: 18, endColumn: 20 },
+        }),
+      ]);
+    });
+
+    it('should not suggest values for other meta fields', async () => {
+      expect(await getSuggestions(withMeta(`description = "${CURSOR}"`), '"')).toEqual([]);
+    });
+
+    it.each([
+      ['`"` in a text string', `$a = "${CURSOR}"`, '"'],
+      ['`,` in a condition', withCondition(`any of ($a,${CURSOR})`), ','],
+      ['a space in a condition', withCondition(`any of ${CURSOR}`), ' '],
+      ['a space in a meta value', withMeta(`description = "foo ${CURSOR}"`), ' '],
+    ])('should not suggest anything when triggered by %s', async (_, text, triggerCharacter) => {
+      expect(await getSuggestions(text, triggerCharacter)).toEqual([]);
     });
   });
 

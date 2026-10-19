@@ -57,4 +57,15 @@ export const COMPLETION_DETAILS = {
     'xpack.securitySolution.customYaraSignatures.editor.completion.importSnippet',
     { defaultMessage: 'Import a module' }
   ),
+  metaOs: i18n.translate('xpack.securitySolution.customYaraSignatures.editor.completion.metaOs', {
+    defaultMessage: 'Comma separated list of operating systems',
+  }),
+  metaArch: i18n.translate(
+    'xpack.securitySolution.customYaraSignatures.editor.completion.metaArch',
+    { defaultMessage: 'Comma separated list of architectures' }
+  ),
+  metaScanType: i18n.translate(
+    'xpack.securitySolution.customYaraSignatures.editor.completion.metaScanType',
+    { defaultMessage: 'Scan type' }
+  ),
 };
