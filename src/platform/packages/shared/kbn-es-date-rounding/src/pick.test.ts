@@ -67,6 +67,20 @@ describe('pickDateRounding', () => {
   it('picks 1w for 1 year / 100', () => {
     expectPick(365 * day, 100, '1w');
   });
+
+  it('rejects 1h for a 100 hour Asia/Kolkata range that spans 101 local hours', () => {
+    const kolkata = ianaTimeZone('Asia/Kolkata');
+    const range: ZonedDateRange = {
+      from,
+      to: from + 100 * hour,
+      timeZone: kolkata,
+    };
+    const interval = pickDateRounding(100, range);
+    expect(interval.expression).toBe('3h');
+    expect(fitsInBuckets({ expression: '1h', kind: 'fixed', nominalMs: hour }, range, 100)).toBe(
+      false
+    );
+  });
 });
 
 describe('fitsInBuckets', () => {
