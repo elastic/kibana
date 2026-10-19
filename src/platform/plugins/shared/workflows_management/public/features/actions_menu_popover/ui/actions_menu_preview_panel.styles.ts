@@ -46,26 +46,16 @@ export const panelStyles = {
     width: '100%',
     overflow: 'hidden',
   }),
-  // One outer card; rows only add a bottom divider (last row omits it to avoid doubling the panel edge).
   fieldList: css({
     width: '100%',
     overflow: 'hidden',
-    borderRadius: 12,
   }),
-  fieldRow: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      borderRadius: 0,
-      borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-    }),
   // EuiText's prose `pre` margin also hits EuiCodeBlock's inner pre; the code block wrapper
   // already spaces consecutive blocks, so drop it to avoid a trailing gap under the last snippet.
   exampleMarkdown: css({
     pre: {
       marginBlockEnd: 0,
     },
-  }),
-  fieldRowLast: css({
-    borderBottom: 'none',
   }),
   resourceInset: ({ euiTheme }: UseEuiTheme) =>
     css({

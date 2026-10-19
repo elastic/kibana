@@ -511,13 +511,7 @@ function StepDetailPanel({
       </EuiTabs>
 
       <EuiSpacer size="s" />
-      <EuiPanel
-        hasBorder
-        hasShadow={false}
-        paddingSize="none"
-        borderRadius="none"
-        css={styles.fieldList}
-      >
+      <EuiPanel hasBorder hasShadow={false} paddingSize="none" css={styles.fieldList}>
         {activeTab === 'examples' ? (
           examples.length === 0 ? (
             <EuiPanel
@@ -535,17 +529,15 @@ function StepDetailPanel({
               </EuiText>
             </EuiPanel>
           ) : (
-            examples.map((example, idx) => {
-              const isLast = idx === examples.length - 1;
-              return (
+            examples.map((example, idx) => (
+              <React.Fragment key={idx}>
+                {idx > 0 && <EuiHorizontalRule margin="none" />}
                 <EuiPanel
-                  key={idx}
                   hasBorder={false}
                   hasShadow={false}
                   paddingSize="m"
                   color="transparent"
                   borderRadius="none"
-                  css={[styles.fieldRow, isLast && styles.fieldRowLast]}
                 >
                   <EuiMarkdownFormat
                     textSize="xs"
@@ -555,8 +547,8 @@ function StepDetailPanel({
                     {example}
                   </EuiMarkdownFormat>
                 </EuiPanel>
-              );
-            })
+              </React.Fragment>
+            ))
           )
         ) : fields.length === 0 ? (
           <EuiPanel
@@ -574,17 +566,15 @@ function StepDetailPanel({
             </EuiText>
           </EuiPanel>
         ) : (
-          fields.map((field, idx) => {
-            const isLast = idx === fields.length - 1;
-            return (
+          fields.map((field, idx) => (
+            <React.Fragment key={field.name}>
+              {idx > 0 && <EuiHorizontalRule margin="none" />}
               <EuiPanel
-                key={field.name}
                 hasBorder={false}
                 hasShadow={false}
                 paddingSize="m"
                 color="transparent"
                 borderRadius="none"
-                css={[styles.fieldRow, isLast && styles.fieldRowLast]}
               >
                 <EuiFlexGroup
                   alignItems="center"
@@ -626,8 +616,8 @@ function StepDetailPanel({
                   </>
                 )}
               </EuiPanel>
-            );
-          })
+            </React.Fragment>
+          ))
         )}
       </EuiPanel>
     </EuiPanel>
