@@ -17,7 +17,7 @@ When endpoint metadata includes `capabilities.templates.policy: required`, Kiban
 sends `{ template: { id, version, variables } }` and omits `messages`. If that
 block is absent, the connector keeps the messages path. Endpoints with
 `templates.policy: required` stay out of the EIS catalog, the global default, and
-every Model Settings row except AlertZero's Prompt template models row. That row
+every Model Settings row except AlertZero's Cyber domain models row. That row
 also lists ordinary models. Attack Discovery, alert triage, and the FP/TP judge
 use a model saved there. Until one is saved, Attack Discovery and the judge stay
 on Frontier models and alert triage stays on Efficient models.
