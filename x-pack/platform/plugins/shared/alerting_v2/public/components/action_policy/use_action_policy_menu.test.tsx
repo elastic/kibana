@@ -153,6 +153,27 @@ describe('useActionPolicyMenu', () => {
     expect(result.current.modal).toBeNull();
   });
 
+  it('switches Unsnooze back to Snooze when the snooze expires', () => {
+    jest.useFakeTimers({ now: new Date('2026-01-01T00:00:00.000Z') });
+    try {
+      const { result } = renderMenuHook({
+        policy: createPolicy({ snoozed_until: '2026-01-01T00:01:00.000Z' }),
+        onSnooze: jest.fn(),
+        onCancelSnooze: jest.fn(),
+      });
+      expect(findItem(getItems(result), 'unsnoozeActionPolicy-policy-1')).toBeDefined();
+
+      act(() => {
+        jest.advanceTimersByTime(60_000);
+      });
+
+      expect(findItem(getItems(result), 'unsnoozeActionPolicy-policy-1')).toBeUndefined();
+      expect(findItem(getItems(result), 'snoozeActionPolicy-policy-1')).toBeDefined();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('keeps the same panels across renders when its inputs do not change', () => {
     const { result, rerender } = renderMenuHook();
     const first = result.current.panels;

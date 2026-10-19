@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useMemo, useState } from 'react';
 import { formatSnoozeFullDate } from './format_snooze_date';
-import { isSnoozed } from './is_snoozed';
+import { useIsSnoozed } from './use_is_snoozed';
 import { ActionPolicySnoozeModal } from './action_policy_snooze_modal';
 import { ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE } from './labels';
 import { useIsActionPoliciesLicenseValid } from '../../hooks/use_is_action_policies_license_valid';
@@ -64,12 +64,12 @@ export const useActionPolicyMenu = ({
   const { euiTheme } = useEuiTheme();
   const isLicenseValid = useIsActionPoliciesLicenseValid();
   const [isSnoozeModalOpen, setIsSnoozeModalOpen] = useState(false);
+  const snoozedActive = useIsSnoozed(policy.snoozed_until);
 
   const panels = useMemo((): FlyoutFooterMenuPanel[] => {
     const licenseTooltip = isLicenseValid ? undefined : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE;
     const isEnableBlockedByLicense = !policy.enabled && !isLicenseValid;
     const canSnooze = onSnooze != null && onCancelSnooze != null && policy.enabled;
-    const snoozedActive = isSnoozed(policy.snoozed_until);
 
     const group1: FlyoutFooterMenuItem[] = [];
     if (onViewDetails) {
@@ -221,6 +221,7 @@ export const useActionPolicyMenu = ({
     onSnooze,
     onCancelSnooze,
     isSnoozeLoading,
+    snoozedActive,
     closeMenu,
     isLicenseValid,
     euiTheme.colors.textDanger,
