@@ -183,6 +183,13 @@ const mockServices = {
   uiActions: { getTriggerCompatibleActions: jest.fn().mockResolvedValue([]) },
   spaces: mockSpaces,
   storage: mockStorage,
+  docLinks: {
+    links: {
+      alerting: {
+        viewAndManageAlerts: 'https://docs.test/view-and-manage-alerts',
+      },
+    },
+  },
 };
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
