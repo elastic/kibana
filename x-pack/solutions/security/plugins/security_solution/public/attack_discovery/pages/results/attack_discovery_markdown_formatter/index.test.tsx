@@ -37,24 +37,28 @@ This appears to be a malware attack delivered via spearphishing, likely exploiti
     );
   });
 
-  it('renders the markdown at the xs text size by default', () => {
-    render(
-      <TestProviders>
-        <AttackDiscoveryMarkdownFormatter markdown={markdown} />
-      </TestProviders>
-    );
+  describe('textSize', () => {
+    const fontSizeOf = (textSize?: 'xs' | 's' | 'm') => {
+      const { unmount } = render(
+        <TestProviders>
+          <AttackDiscoveryMarkdownFormatter markdown={markdown} textSize={textSize} />
+        </TestProviders>
+      );
+      const fontSize = parseFloat(
+        getComputedStyle(screen.getByTestId('attackDiscoveryMarkdownFormatter')).fontSize
+      );
+      unmount();
+      return fontSize;
+    };
 
-    expect(screen.getByTestId('attackDiscoveryMarkdownFormatter').className).toContain('euiText-xs');
-  });
+    it('defaults to xs', () => {
+      expect(fontSizeOf()).toEqual(fontSizeOf('xs'));
+    });
 
-  it('renders the markdown at the given textSize', () => {
-    render(
-      <TestProviders>
-        <AttackDiscoveryMarkdownFormatter markdown={markdown} textSize="s" />
-      </TestProviders>
-    );
-
-    expect(screen.getByTestId('attackDiscoveryMarkdownFormatter').className).toContain('euiText-s');
+    it('renders larger text for a larger textSize', () => {
+      expect(fontSizeOf('s')).toBeGreaterThan(fontSizeOf('xs'));
+      expect(fontSizeOf('m')).toBeGreaterThan(fontSizeOf('s'));
+    });
   });
 
   it('renders interactive host entities', () => {

@@ -191,6 +191,16 @@ export const AttackDiscoveryInlineContent = ({
         min-width: 0;
         overflow-wrap: anywhere;
         padding: ${euiTheme.size.m};
+
+        /* Markdown headings in the details (e.g. "## Pattern") default to a size far larger than the
+           body text; keep them one step above it, like the "Details" title. */
+        && h1,
+        && h2,
+        && h3,
+        && h4 {
+          font-size: ${euiTheme.font.scale.m}rem;
+          line-height: ${euiTheme.font.lineHeightMultiplier * euiTheme.font.scale.m}rem;
+        }
       `}
       data-test-subj={ATTACK_DISCOVERY_INLINE_CONTENT_TEST_ID}
     >

@@ -7,6 +7,7 @@
 
 import {
   EuiMarkdownFormat,
+  type EuiMarkdownFormatProps,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
 } from '@elastic/eui';
@@ -25,7 +26,7 @@ interface Props {
   /** Wraps long text and field chip values to fit narrow containers, e.g. a chat card. */
   wrapFieldValues?: boolean;
   /** Text size of the markdown. Defaults to `xs`, as used on the Attacks page. */
-  textSize?: 'xs' | 's' | 'm';
+  textSize?: EuiMarkdownFormatProps['textSize'];
 }
 
 const wrappedMarkdownCss = css`
