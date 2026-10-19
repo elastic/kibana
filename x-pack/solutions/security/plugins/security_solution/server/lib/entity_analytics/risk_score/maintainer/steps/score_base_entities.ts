@@ -395,7 +395,7 @@ const scorePageFromAlerts = async ({
     { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
   );
 
-  return (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(alertsIndex));
+  return (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(alertsIndex, sampleSize));
 };
 
 const applyBaseScoreModifiers = ({
