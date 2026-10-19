@@ -81,13 +81,15 @@ Limits on QAF: `supervise` and `probe/_start` reach only the UI pod (background 
 - **Pod rows** are per (phase, pod, boot_id) and only read that pod+boot. **Cluster rows** (one per phase) carry ticks (run on any background pod), the laptop probe, offenders and Tier B results.
 - Every metric is computed through a drill spec that is stored as an ES query (`research-scorecards.drills`); `node $H verify-drills --run-id <id>` re-counts each drill in ES and must report 0 mismatches.
 - Interval samples (heartbeat gaps, TM poll gaps, offender/Tier B windows) are attributed by **overlap**; a gap spanning a boundary appears in both windows (overlap and full length reported, `spans_boundary` note). Probes are attributed by intended send time, ticks by intended runAt.
-- **INVALID, never green**: worker coverage < 0.8, TM node without poll telemetry in a window, no tick audit, ticks ran but samples missing, push drops/ring overflow, failed phase, invalid baseline row.
+- **INVALID, never green** (coverage is proven against the manifest's `expected_inventory` — roles/pods/sources derived from the routable pod's node roles and the enabled sources — so a pod or source that sends *nothing* is INVALID, with synthetic `expected:<role>` rows for missing pods): worker gap-window, main heartbeat, proc and in-pod probe coverage < 0.8; TM node without poll telemetry in a window; tick audit missing/incomplete (current series only, matched by full task id); ticks ran but samples missing; laptop probe coverage; push drops/ring overflow or **no terminal push watermark after the run stopped**; failed phase (background work must show **positive success evidence**: a TM `TASK_RUN ok=true` for the task id — disappearance from TM is not success; alerting requires outcome succeeded/warning); invalid baseline row. **Any invalid row makes the run invalid.** `verify-drills` re-fetches every drill from ES and recomputes counts **and metric values** (TM poll gaps use a gap drill that includes the adjacent endpoints).
 - Phases with background work wait for completion **by task id** (`POST tasks/_status`; alerting waits for the `actions:.index` queue to drain); timeout → run failed. Only the non-terminating offender waits a fixed safety cap.
 - Heap/RSS are **sampled lower bounds** (1 s point samples timestamped at acquisition).
 
 ## Comparing variants (rule, calibrated in the Track 0 fix pass)
 
 Noise of the in-pod ratio method was measured with A/A trials (matched 30 s idle windows, B_i/A_i, 10 rps in-pod probe): QAF 30 pairs over 3 runs on two clean image-4 projects, local 10 pairs (`evidence/aa-qaf.json`, `aa-local.json` in the Track 0 folder; `node $H aa --run-ids …`).
+
+**Planning estimates, not established guarantees.** The table below is the noise of a *single within-pod ratio*. Variant-vs-main comparisons are a **ratio of ratios** across two images (two independent arms), whose MDE is larger (√2 on the log scale, assuming equal within-pod variance and no between-boot variance): per arm n = 3/5/10/20 → p95 1.13/1.10/1.07/1.05×, p99 4.58/3.25/**2.30**/1.80×, heartbeat-gap 2.01/1.72/1.46/1.31×. The 30 QAF pairs cover only 2 UI boots, and p99 within-boot sd differed 3× between them (0.28 vs 0.80), so **between-pod/image precision is not established**; establishing it needs A/A (≈10 pairs) plus a known-dose A/B (≈5 pairs) on **≥ 4 separate boots** (fresh projects).
 
 | metric | QAF sd(log ratio) | QAF single-pair 95 % band | QAF MDE (80 % power) n=1/3/5/10 | local sd | local MDE n=1/5 |
 |---|---|---|---|---|---|
@@ -97,7 +99,7 @@ Noise of the in-pod ratio method was measured with A/A trials (matched 30 s idle
 | heartbeat-gap max (slice proxy) | 0.305 | 0.55–1.82 | 2.35/1.64/1.46/1.31 | 0.219 | 1.85/1.32 |
 
 Rules:
-- Use **p95** (and p50) of the in-pod probe for neighbour-latency comparisons on QAF; a single matched pair detects ≥ 1.16× at 80 % power. Report p99, but claims about p99 on QAF need ≥ 10 matched pairs (MDE 1.8×) or effects far above the band (10 s doses give ×60–×380).
+- Use **p95** (and p50) of the in-pod probe for neighbour-latency comparisons on QAF; a single matched within-pod pair detects ≥ 1.16× at 80 % power (cross-image ratio of ratios: ≥ 1.10× at 5 pairs per arm). Report p99, but cross-image claims about p99 on QAF need ≥ 20 pairs per arm (MDE 1.8×; 2.30× at 10) or effects far above the band (10 s doses give ×60–×380).
 - Pair within pod+boot (scorecard `vs_baseline`) and interleave A/B windows of equal duration; compare ratios across images, never raw percentiles across projects.
 - Slice proxy resolution floor (idle 1 s-window max heartbeat gap, p99): **≈ 20 ms local, ≈ 110 ms QAF UI pod**; idle 30 s-window max: local p99 30 ms, QAF UI p99 214 ms, QAF background p99 346 ms. "Longest slice ≤ 50 ms" is only testable locally; on QAF compare the treatment window against the same pod's idle distribution.
 - Calibration: for known route doses the main-side gap equals the measured block + 0.8–10.8 ms locally (10–200 ms), + 2.4–7 ms on QAF when no unrelated stall shares the window (unrelated stalls up to ~110 ms otherwise). The worker-observed view over-reports short blocks up to 2× and is only a live detector.
@@ -112,7 +114,7 @@ node $H overview --project-id <id> --from <iso> --to <iso> --out <file>     # lo
 node $H overview --query 'FROM serverless-metrics-*:metrics-service.kibana-* | ...'
 ```
 
-Caveats: the ops gauge `kibana.stats.process.event_loop_delay.ms` is a mean and hides single long blocks; the TM `event loop blocked … while running task X` warning names bystanders, not synchronous culprits (see Lane 0 report).
+Caveats: the ops gauge `kibana.stats.process.event_loop_delay.ms` is a mean and hides single long blocks; the TM `event loop blocked … while running task X` warning misses terminal synchronous blocks (monitoring stops before the delayed sample) and can attribute shared stalls to bystanders; culprits that block and then continue are measured (see Lane 0 report).
 
 ## Pre-push checklist (CI fail-fast cancels the image job)
 

@@ -18,8 +18,41 @@ import { computeScorecard, scorecardMarkdown, writeScorecard } from './scorecard
 import { drillToQuery, recomputeRow, scoreRun } from './score';
 import { fetchManifest, fetchRunSamples } from './store';
 
-const computeScorecardParts = async (es: ReturnType<typeof researchEs>, runId: string) => {
+const LEGACY_INVENTORY: Record<string, Record<string, unknown>> = {
+  // Topology is known for runs recorded before manifests carried an expected inventory.
+  qaf: {
+    roles: [
+      { role: 'ui', min_pods: 1, sources: ['gap_window', 'main_hb', 'proc', 'probe'] },
+      { role: 'background', min_pods: 1, sources: ['gap_window', 'main_hb', 'proc', 'tm_polls'] },
+    ],
+    ticks: { interval_ms: 1000 },
+    laptop_probe_rps: 2,
+    in_pod_probe_rps: 10,
+  },
+  local: {
+    roles: [
+      {
+        role: 'combined',
+        min_pods: 1,
+        sources: ['gap_window', 'main_hb', 'proc', 'probe', 'tm_polls'],
+      },
+    ],
+    ticks: { interval_ms: 1000 },
+    laptop_probe_rps: 2,
+    in_pod_probe_rps: 10,
+  },
+};
+
+const computeScorecardParts = async (
+  es: ReturnType<typeof researchEs>,
+  runId: string,
+  assumeInventory?: string
+) => {
   const manifest = await fetchManifest(es, runId);
+  if (assumeInventory && !manifest.expected_inventory) {
+    manifest.expected_inventory = LEGACY_INVENTORY[assumeInventory];
+    manifest.tick_series_id = manifest.tick_series_id ?? String(runId).slice(-40);
+  }
   const samples = await fetchRunSamples(es, runId);
   return scoreRun(manifest, samples);
 };
@@ -207,8 +240,14 @@ export const main = async (): Promise<void> => {
         hb_max: [],
       };
       const perRun: Record<string, unknown> = {};
+      const byBoot: Record<string, Record<string, number[]>> = {};
       for (const runId of String(flags['run-ids']).split(',')) {
-        const { pods } = await computeScorecardParts(es, runId);
+        const target = String(runId).includes('-local-') ? 'local' : 'qaf';
+        const { pods } = await computeScorecardParts(
+          es,
+          runId,
+          flags['assume-inventory'] === 'true' ? target : undefined
+        );
         let pairs = 0;
         for (const a of pods.filter(
           (p) => p.phase.startsWith('aa-A-') && p.valid && p.metrics.probe_n
@@ -226,7 +265,12 @@ export const main = async (): Promise<void> => {
           for (const k of Object.keys(logs)) {
             const x = (ma as Record<string, number | null>)[k];
             const y = (mb as Record<string, number | null>)[k];
-            if (x && y) logs[k].push(Math.log(y / x));
+            if (x && y) {
+              logs[k].push(Math.log(y / x));
+              const bk = `${a.pod}|${a.boot_id}`;
+              byBoot[k] = byBoot[k] ?? {};
+              (byBoot[k][bk] = byBoot[k][bk] ?? []).push(Math.log(y / x));
+            }
           }
         }
         perRun[runId] = { valid_pairs: pairs };
@@ -237,6 +281,7 @@ export const main = async (): Promise<void> => {
         const m = xs.reduce((a, b) => a + b, 0) / xs.length;
         const sd = Math.sqrt(xs.reduce((a, b) => a + (b - m) ** 2, 0) / Math.max(1, xs.length - 1));
         const mde = (n: number) => Math.exp(((1.96 + 0.84) * sd) / Math.sqrt(n));
+        const mdeRr = (n: number) => Math.exp(((1.96 + 0.84) * Math.SQRT2 * sd) / Math.sqrt(n));
         summary[k] = {
           pairs: xs.length,
           mean_ratio: Math.exp(m),
@@ -247,6 +292,24 @@ export const main = async (): Promise<void> => {
           sd_log_ratio: sd,
           single_pair_95pct_band: [Math.exp(-1.96 * sd), Math.exp(1.96 * sd)],
           mde_ratio_80pct_power: { n1: mde(1), n3: mde(3), n5: mde(5), n10: mde(10) },
+          // Cross-image design compares two independent ratios (variant arm vs baseline arm, n pairs
+          // each): sd of the difference of mean log ratios = sqrt(2) * sd / sqrt(n). Assumes equal
+          // within-pod variance and NO between-boot variance (not yet established).
+          mde_ratio_of_ratios_80pct_power_per_arm: {
+            n3: mdeRr(3),
+            n5: mdeRr(5),
+            n10: mdeRr(10),
+            n20: mdeRr(20),
+          },
+          per_boot: Object.fromEntries(
+            Object.entries(byBoot[k] ?? {}).map(([boot, v]) => {
+              const bm = v.reduce((a, b) => a + b, 0) / v.length;
+              const bsd = Math.sqrt(
+                v.reduce((a, b) => a + (b - bm) ** 2, 0) / Math.max(1, v.length - 1)
+              );
+              return [boot, { pairs: v.length, mean_ratio: Math.exp(bm), sd_log_ratio: bsd }];
+            })
+          ),
         };
       }
       const out = { runs: perRun, summary };

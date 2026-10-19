@@ -79,7 +79,7 @@ export const scorecardMarkdown = (manifest: Doc, rows: ScorecardRow[]): string =
   const cluster = rows.filter((r): r is ClusterRow => r.kind === 'cluster');
   const pods = rows.filter((r): r is PodRow => r.kind === 'pod');
   const ch =
-    '| phase | validity | ticks sched/ran/obs/lost | tick drift p50/p99/max ms | drift p99 × base | laptop p99 | offenders (pod kind/mode dose→blocked) |\n|---|---|---|---|---|---|---|\n';
+    '| phase | validity | ticks sched/ran/obs/lost | tick drift p50/p99/max ms | drift p99 × base | laptop p95 / p99 | offenders (pod kind/mode dose→blocked) |\n|---|---|---|---|---|---|---|\n';
   const cb = cluster
     .map((r) => {
       const m = r.metrics;
@@ -94,11 +94,13 @@ export const scorecardMarkdown = (manifest: Doc, rows: ScorecardRow[]): string =
         m.ticks_observed
       }/${m.ticks_lost} | ${r1(m.tick_drift_p50_ms)}/${r1(m.tick_drift_p99_ms)}/${r1(
         m.tick_drift_max_ms
-      )} | ${r1(r.vs_baseline.tick_drift_p99, 2)} | ${r1(m.laptop_probe_p99_ms)} | ${off} |`;
+      )} | ${r1(r.vs_baseline.tick_drift_p99, 2)} | ${r1(m.laptop_probe_p95_ms)} / ${r1(
+        m.laptop_probe_p99_ms
+      )} | ${off} |`;
     })
     .join('\n');
   const ph =
-    '| phase | pod / boot | validity | probe p50/p99/max ms (n, err) | p99 × base | hb-gap proxy max ms (overlap / full / 1 s-window max) | worker cov | TM polls / max gap / missed | ELU | heap sampled max MB | GC n/max ms |\n|---|---|---|---|---|---|---|---|---|---|---|\n';
+    '| phase | pod / boot | validity | probe p50/**p95**/p99/max ms (n, err) | **p95 × base** (p99 × base) | hb-gap proxy max ms (overlap / full / 1 s-window max) | worker cov | TM polls / max gap / missed | ELU | heap sampled max MB | GC n/max ms |\n|---|---|---|---|---|---|---|---|---|---|---|\n';
   const pb = pods
     .map((r) => {
       const m = r.metrics;
@@ -106,10 +108,10 @@ export const scorecardMarkdown = (manifest: Doc, rows: ScorecardRow[]): string =
         r.phase,
         `${r.pod.slice(0, 26)} / ${r.boot_id.slice(0, 8)}`,
         verdict(r),
-        `${r1(m.probe_p50_ms)}/${r1(m.probe_p99_ms)}/${r1(m.probe_max_ms)} (${m.probe_n}, ${
-          m.probe_errors
-        })`,
-        r1(r.vs_baseline.probe_p99, 2),
+        `${r1(m.probe_p50_ms)}/**${r1(m.probe_p95_ms)}**/${r1(m.probe_p99_ms)}/${r1(
+          m.probe_max_ms
+        )} (${m.probe_n}, ${m.probe_errors})`,
+        `**${r1(r.vs_baseline.probe_p95, 2)}** (${r1(r.vs_baseline.probe_p99, 2)})`,
         `${r1(m.hb_gap_max_overlap_ms)} / ${r1(m.hb_gap_max_full_ms)} / ${r1(m.hb_window_max_ms)}`,
         r1(m.worker_coverage, 2),
         `${m.tm_poll_cycles ?? '—'}/${r1(m.tm_poll_max_gap_ms)} (full ${r1(
