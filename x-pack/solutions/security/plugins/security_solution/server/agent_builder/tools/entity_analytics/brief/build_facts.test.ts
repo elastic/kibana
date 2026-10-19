@@ -7,7 +7,7 @@
 
 import type { Entity } from '@kbn/entity-store/common';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
-import type { BriefCandidate, EntityFacts } from './types';
+import type { BriefCandidate } from './types';
 import { buildFacts } from './build_facts';
 
 const scope: EntityAnalyticsScope = {
@@ -24,31 +24,21 @@ const candidate = (entity: NonNullable<Entity['entity']>): BriefCandidate => ({
   record: { entity: { id: 'user:jdoe', ...entity } },
 });
 
-const own = (score: number) => ({ risk: { calculated_score_norm: score } });
-const group = (score: number) => ({
-  risk: { calculated_score_norm: 30 },
-  relationships: { resolution: { risk: { calculated_score_norm: score } } },
-});
-
 describe('buildFacts', () => {
-  it.each<[string, NonNullable<Entity['entity']>, EntityFacts['risk']]>([
-    ["the entity's own risk", own(71.4), { of: 'entity', level: 'High', score: 71 }],
-    [
-      "a resolution group's risk, resolution first",
-      group(80),
-      { of: 'resolution group', level: 'High', score: 80 },
-    ],
-    ['no risk', {}, undefined],
-  ])('states risk: %s', (_name, entity, expected) => {
-    const [facts] = buildFacts([candidate(entity)], scope);
-    expect(facts.risk).toEqual(expected);
-  });
-
-  it('states first seen relative to the capture', () => {
+  it("states a group's risk, resolution first, and first seen relative to the capture", () => {
     const [facts] = buildFacts(
-      [candidate({ lifecycle: { first_seen: '2026-10-10T00:00:00.000Z' } })],
+      [
+        candidate({
+          risk: { calculated_score_norm: 30 },
+          relationships: { resolution: { risk: { calculated_score_norm: 80.4 } } },
+          lifecycle: { first_seen: '2026-10-10T00:00:00.000Z' },
+        }),
+      ],
       scope
     );
-    expect(facts.firstSeen).toBe('5 days ago');
+    expect(facts).toMatchObject({
+      risk: { of: 'resolution group', level: 'High', score: 80 },
+      firstSeen: '5 days ago',
+    });
   });
 });

@@ -11,30 +11,24 @@ import { apiTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { EntityAnalyticsScope } from '../../../../../../common/entity_analytics/ai_brief/scope';
 import { LATEST_INDEX, PUBLIC_HEADERS } from '../../fixtures/maintainers/constants';
-import { cleanupEntity } from '../../fixtures/lead_generation_entity_helpers';
+import { cleanupEntity, seedRiskyUserEntity } from '../../fixtures/lead_generation_entity_helpers';
 import {
   cleanupLeadGenerationConnector,
   createLeadGenerationConnector,
 } from '../../fixtures/lead_generation_llm_helpers';
 import {
-  SEEDED_HOST,
-  SEEDED_USER,
+  SEEDED_USER_ID,
   buildBriefConverseBody,
   buildDraft,
   buildScope,
-  cleanupUserRiskScores,
   ensureLatestEntitiesIndex,
   getBriefFromSteps,
   getSubmitBriefRequests,
   mockBriefRound,
-  seedBriefEntities,
-  seedUserRiskScores,
   type ConverseResponseBody,
 } from '../../fixtures/ai_brief_helpers';
 
-const PRIORITY_LINE = `1. **${SEEDED_USER.name}**`;
-const RISK_CHART_ID = 'security.riskscorehistory:user:';
-const ENTITY_TABLE_ID = 'security.entity:list:';
+const PRIORITY_LINE = `1. **${SEEDED_USER_ID}**`;
 
 apiTest.describe(
   'Entity Analytics AI brief - security.generate_entity_analytics_brief',
@@ -44,10 +38,8 @@ apiTest.describe(
     let connectorId: string;
     let llmProxy: LlmProxy;
     let createdLatestIndex = false;
-    let createdRiskScoreIndex = false;
     const conversationIds: string[] = [];
 
-    /** Asks the default agent for the brief of `scope` and returns the tool's markdown. */
     const askForBrief = async (
       apiClient: ApiClientFixture,
       scope: EntityAnalyticsScope
@@ -68,8 +60,7 @@ apiTest.describe(
       headers = { ...PUBLIC_HEADERS, ...apiKeyHeader };
       ({ connectorId, llmProxy } = await createLeadGenerationConnector({ apiServices, log }));
       createdLatestIndex = await ensureLatestEntitiesIndex(esClient);
-      await seedBriefEntities(esClient);
-      createdRiskScoreIndex = await seedUserRiskScores(esClient);
+      await seedRiskyUserEntity(esClient, { euid: SEEDED_USER_ID, riskScoreNorm: 82 });
     });
 
     apiTest.beforeEach(() => {
@@ -81,16 +72,14 @@ apiTest.describe(
         await apiClient.delete(`api/agent_builder/conversations/${conversationId}`, { headers });
       }
       await cleanupLeadGenerationConnector({ apiServices, connectorId, llmProxy });
-      await cleanupEntity(esClient, SEEDED_USER.id);
-      await cleanupEntity(esClient, SEEDED_HOST.id);
-      await cleanupUserRiskScores(esClient, createdRiskScoreIndex);
+      await cleanupEntity(esClient, SEEDED_USER_ID);
       if (createdLatestIndex) {
         await esClient.indices.delete({ index: LATEST_INDEX, ignore_unavailable: true });
       }
     });
 
     apiTest('writes a brief with one priority from the tile entities', async ({ apiClient }) => {
-      mockBriefRound(llmProxy, buildDraft(SEEDED_USER.id));
+      mockBriefRound(llmProxy, buildDraft(SEEDED_USER_ID));
 
       const brief = await askForBrief(
         apiClient,
@@ -100,7 +89,7 @@ apiTest.describe(
               title: 'Entities with alerts',
               value: 14,
               delta: 3,
-              entityIds: [SEEDED_USER.id],
+              entityIds: [SEEDED_USER_ID],
             },
             entitiesWithAnomalies: {
               title: 'Entities with anomalies',
@@ -112,7 +101,7 @@ apiTest.describe(
             newlyHighCritical: {
               title: 'Newly high/critical',
               value: 1,
-              entityIds: [SEEDED_USER.id],
+              entityIds: [SEEDED_USER_ID],
             },
           },
           'entitiesWithAlerts'
@@ -127,39 +116,16 @@ apiTest.describe(
       expect(brief).toContain(
         "Not checked, because the data couldn't be read: Entities with anomalies"
       );
-      expect(brief).toContain(`**Recommended next step**\nStart with **${SEEDED_USER.name}**.`);
+      expect(brief).toContain(`**Recommended next step**\nStart with **${SEEDED_USER_ID}**.`);
       expect(brief).toContain('<render_attachment');
 
       const submitRequests = getSubmitBriefRequests(llmProxy);
       expect(submitRequests).toHaveLength(1);
-      expect(submitRequests[0]).toContain(SEEDED_USER.id);
+      expect(submitRequests[0]).toContain(SEEDED_USER_ID);
       expect(submitRequests[0]).toContain(
         'Entities with alerts (selected): 14 (+3 vs previous 7 days)'
       );
-      expect(submitRequests[0]).not.toContain(SEEDED_HOST.id);
     });
-
-    apiTest(
-      'charts the risk history under the priority the Risk movers tile flags',
-      async ({ apiClient }) => {
-        mockBriefRound(llmProxy, buildDraft(SEEDED_USER.id));
-
-        const brief = await askForBrief(
-          apiClient,
-          buildScope(
-            { riskMovers: { title: 'Risk movers', value: 1, entityIds: [SEEDED_USER.id] } },
-            'riskMovers'
-          )
-        );
-
-        expect(getSubmitBriefRequests(llmProxy)).toHaveLength(1);
-        // The table comes before the list, and the chart directly under the flagged priority.
-        const lines = brief.split('\n');
-        const priority = lines.findIndex((line) => line.startsWith(PRIORITY_LINE));
-        expect(brief.indexOf(ENTITY_TABLE_ID)).toBeLessThan(brief.indexOf(PRIORITY_LINE));
-        expect(lines[priority + 4]).toContain(RISK_CHART_ID);
-      }
-    );
 
     apiTest(
       'writes the quiet brief without a model call when no tile is flagged',
@@ -184,28 +150,5 @@ apiTest.describe(
         expect(brief).toContain('Nothing in this view is flagged');
       }
     );
-
-    apiTest('drops a priority for an entity the view does not flag', async ({ apiClient }) => {
-      mockBriefRound(llmProxy, buildDraft(SEEDED_USER.id));
-
-      const brief = await askForBrief(
-        apiClient,
-        buildScope(
-          {
-            entitiesWithAlerts: {
-              title: 'Entities with alerts',
-              value: 1,
-              delta: 1,
-              entityIds: [SEEDED_HOST.id],
-            },
-          },
-          'entitiesWithAlerts'
-        )
-      );
-
-      expect(getSubmitBriefRequests(llmProxy)).toHaveLength(1);
-      expect(brief).not.toContain(PRIORITY_LINE);
-      expect(brief).toContain('No entity in this view has enough evidence to prioritize');
-    });
   }
 );

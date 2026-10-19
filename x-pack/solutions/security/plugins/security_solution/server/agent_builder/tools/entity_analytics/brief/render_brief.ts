@@ -104,7 +104,6 @@ export const renderBrief = ({
     .join('\n\n');
 };
 
-/** The period and every filter the page applied, as the page labels them. */
 const renderScope = (scope: EntityAnalyticsScope, spaceId: string): string => {
   const { period, query, entityFilters = {} } = scope;
   const parts = [
@@ -117,7 +116,6 @@ const renderScope = (scope: EntityAnalyticsScope, spaceId: string): string => {
   return `**Scope:** ${escapeMarkdown(compact(parts).join(' · '))}`;
 };
 
-/** What the reader should know about what was read. */
 const renderNotes = (scope: EntityAnalyticsScope, entities: CandidateEntities): string[] => {
   const unavailableTitles = SIGNAL_CARD_IDS.flatMap((tileId) => {
     const tile = scope.tiles[tileId];
@@ -190,7 +188,6 @@ const renderCounts = ({ tiles, period }: EntityAnalyticsScope): string[] => {
   ];
 };
 
-/** The entity table, then the numbered priorities, with the risk chart under its priority. */
 const renderPriorities = ({
   verified,
   entityTableTag,

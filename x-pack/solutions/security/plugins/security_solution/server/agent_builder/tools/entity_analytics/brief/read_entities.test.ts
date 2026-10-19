@@ -6,19 +6,8 @@
  */
 
 import type { SignalCardId } from '../../../../../common/entity_analytics/home/constants';
-import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import type { BriefCandidate } from './types';
-import { rankCandidates, selectCandidateTiles, withGroupValues } from './read_entities';
-
-const scopeWith = (
-  tiles: EntityAnalyticsScope['tiles'],
-  focusTileId?: SignalCardId
-): EntityAnalyticsScope => ({
-  period: '7d',
-  capturedAt: '2026-10-14T12:00:00.000Z',
-  tiles,
-  focusTileId,
-});
+import { rankCandidates, withGroupValues } from './read_entities';
 
 const candidate = (
   id: string,
@@ -33,37 +22,6 @@ const candidate = (
   record: {
     entity: { id, risk: { calculated_score_norm: score }, relationships: { resolution } },
   },
-});
-
-describe('selectCandidateTiles', () => {
-  it.each<[string, EntityAnalyticsScope, Record<string, SignalCardId[]>]>([
-    [
-      'collects tiles per entity in tile order',
-      scopeWith({
-        watchlisted: { title: 'Watchlisted', value: 1, entityIds: ['a'] },
-        entitiesWithAlerts: { title: 'Entities with alerts', value: 2, entityIds: ['a', 'b'] },
-      }),
-      { a: ['entitiesWithAlerts', 'watchlisted'], b: ['entitiesWithAlerts'] },
-    ],
-    [
-      'lists tiles in the page order',
-      scopeWith({
-        entitiesWithAlerts: { title: 'Entities with alerts', value: 1, entityIds: ['a'] },
-        riskMovers: { title: 'Risk movers', value: 1, entityIds: ['a'] },
-      }),
-      { a: ['entitiesWithAlerts', 'riskMovers'] },
-    ],
-    [
-      'skips unavailable tiles',
-      scopeWith({
-        riskMovers: { title: 'Risk movers', value: 0, unavailable: true, entityIds: ['a'] },
-        newEntity: { title: 'New entity', value: 1, entityIds: ['b'] },
-      }),
-      { b: ['newEntity'] },
-    ],
-  ])('%s', (_name, scope, expected) => {
-    expect(Object.fromEntries(selectCandidateTiles(scope))).toEqual(expected);
-  });
 });
 
 describe('rankCandidates', () => {

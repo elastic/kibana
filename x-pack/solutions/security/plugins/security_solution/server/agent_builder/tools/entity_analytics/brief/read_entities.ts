@@ -33,9 +33,7 @@ export interface CandidateEntities {
   candidates: BriefCandidate[];
   /** Distinct entity ids in the view's tiles. */
   capturedCount: number;
-  /** True when the cap left out flagged entities. */
   isTruncated: boolean;
-  /** Ids with no Entity Store record. */
   notFoundCount: number;
   /** Records the page's search kept. */
   matchedCount: number;

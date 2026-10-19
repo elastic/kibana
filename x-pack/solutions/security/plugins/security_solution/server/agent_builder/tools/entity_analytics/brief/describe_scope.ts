@@ -14,8 +14,6 @@ import type {
 } from '../../../../../common/entity_analytics/ai_brief/scope';
 import type { CandidateEntities } from './read_entities';
 
-// The period
-
 export const BRIEF_PERIOD_LABELS: Record<TimeRange, string> = {
   '24h': '24 hours',
   '7d': '7 days',
@@ -33,8 +31,6 @@ const PERIOD_MS: Record<TimeRange, number> = {
 export const getPeriodStart = ({ capturedAt, period }: EntityAnalyticsScope): Date =>
   new Date(new Date(capturedAt).getTime() - PERIOD_MS[period]);
 
-// The tiles
-
 /** A tile's change as the page shows it, where the period is already named: `+3` or `no change`. */
 export const describeDelta = ({ delta }: EntityAnalyticsScopeTile): string => {
   if (delta === undefined) {
@@ -45,8 +41,6 @@ export const describeDelta = ({ delta }: EntityAnalyticsScopeTile): string => {
   }
   return `${delta > 0 ? '+' : ''}${formatCount(delta)}`;
 };
-
-// The filters
 
 /** The scope validates filter pills as objects with `meta`; they are Kibana filters. */
 export const getScopeFilters = ({ filters }: EntityAnalyticsScope): Filter[] =>
@@ -86,8 +80,6 @@ export const describeEntityFilter = (key: string, values: readonly string[]): st
   return `${ENTITY_FILTER_LABELS[key] ?? key}: ${values.map(formatStoredValue).join(', ')}`;
 };
 
-// Formatting
-
 export const formatCount = (count: number): string => count.toLocaleString('en-US');
 
 export const formatCountOf = (count: number, one: string, many: string): string =>
@@ -95,8 +87,6 @@ export const formatCountOf = (count: number, one: string, many: string): string 
 
 /** A stored value as the page shows it: `extreme_impact` as "Extreme impact". */
 export const formatStoredValue = (value: string): string => upperFirst(value.replace(/_/g, ' '));
-
-// Coverage
 
 /** Only when a cap left out flagged entities: the brief, and the model, are told it is a sample. */
 export const describeSample = (
@@ -115,8 +105,6 @@ export const describeSample = (
     isSampled ? 'at least ' : ''
   }${formatCountOf(total, 'flagged entity', 'flagged entities')}.`;
 };
-
-// The agent
 
 /** The captured view for the agent's follow-up questions, without the entity ids. */
 export const describeScopeForAgent = (attachmentId: string, scope: EntityAnalyticsScope): string =>

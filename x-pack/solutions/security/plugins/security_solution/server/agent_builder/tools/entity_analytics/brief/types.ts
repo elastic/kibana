@@ -34,7 +34,6 @@ export interface EntityFacts {
   entityId: string;
   name: string;
   type: BriefEntityType;
-  /** The tiles that flag the entity; the prompt says what each means. */
   flaggedFor: SignalCardId[];
   risk?: {
     of: 'entity' | 'resolution group';
@@ -56,7 +55,6 @@ export interface GenerateBriefParams {
   esClient: ElasticsearchClient;
   /** The conversation's default model. */
   inferenceClient: BoundInferenceClient;
-  /** For the entity table attachment. */
   attachments: AttachmentStateManager;
   /** For the risk-history charts. Absent when risk score history is disabled. */
   riskScoreDataClient?: RiskScoreDataClient;

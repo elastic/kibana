@@ -9,11 +9,8 @@ import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import { isToolCallStep } from '@kbn/agent-builder-common';
 import { createToolCallMessage, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { EsClient } from '@kbn/scout-security';
-import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE } from '../../../../../common/entity_analytics/ai_brief/scope';
-import { getRiskScoreTimeSeriesIndex } from '../../../../../common/entity_analytics/risk_engine/indices';
-import { getPrivilegedUserWatchlistSavedObjectId } from '../../../../../common/entity_analytics/watchlists/constants';
 import type { BriefDraft } from '../../../../../server/agent_builder/tools/entity_analytics/brief/prompts';
 import { LATEST_ALIAS, LATEST_INDEX } from './maintainers/constants';
 
@@ -24,8 +21,8 @@ const BRIEF_TOOL_LLM_NAME = 'security_generate_entity_analytics_brief';
 const SUBMIT_BRIEF_TOOL_NAME = 'structuredOutput';
 const SCOPE_ATTACHMENT_ID = 'brief-scope';
 
-export const SEEDED_USER = { id: 'user:brief-scout-user', name: 'brief-scout-user' } as const;
-export const SEEDED_HOST = { id: 'host:brief-scout-host', name: 'brief-scout-host' } as const;
+/** Seeded with `seedRiskyUserEntity`, whose name is the EUID. */
+export const SEEDED_USER_ID = 'user:brief-scout-user';
 
 const TITLE_SYSTEM_PROMPT = 'You are a title-generation utility';
 
@@ -62,101 +59,6 @@ export const ensureLatestEntitiesIndex = async (esClient: EsClient): Promise<boo
   return true;
 };
 
-/** Seeds a High-risk, high-impact privileged user and a plain host in the default space. */
-export const seedBriefEntities = async (esClient: EsClient): Promise<void> => {
-  const now = new Date().toISOString();
-  const lifecycle = { first_seen: now, last_seen: now };
-  await esClient.bulk({
-    refresh: 'wait_for',
-    operations: [
-      { index: { _index: LATEST_ALIAS, _id: hashEuid(SEEDED_USER.id) } },
-      {
-        '@timestamp': now,
-        entity: {
-          id: SEEDED_USER.id,
-          name: SEEDED_USER.name,
-          EngineMetadata: { Type: 'user' },
-          lifecycle,
-          risk: { calculated_level: 'High', calculated_score_norm: 82 },
-          attributes: { watchlists: [getPrivilegedUserWatchlistSavedObjectId('default')] },
-        },
-        user: { name: SEEDED_USER.name },
-        asset: { criticality: 'high_impact' },
-      },
-      { index: { _index: LATEST_ALIAS, _id: hashEuid(SEEDED_HOST.id) } },
-      {
-        '@timestamp': now,
-        entity: {
-          id: SEEDED_HOST.id,
-          name: SEEDED_HOST.name,
-          EngineMetadata: { Type: 'host' },
-          lifecycle,
-        },
-        host: { name: SEEDED_HOST.name },
-      },
-    ],
-  });
-};
-
-const RISK_SCORE_INDEX = getRiskScoreTimeSeriesIndex('default');
-/**
- * Seeds two base risk scores for the user in a 7-day view, for the risk-history chart. Creates the risk
- * score index when the risk engine is not installed, and returns whether it did.
- */
-export const seedUserRiskScores = async (esClient: EsClient): Promise<boolean> => {
-  const created = !(await esClient.indices.exists({ index: RISK_SCORE_INDEX }));
-  if (created) {
-    await esClient.indices.create({
-      index: RISK_SCORE_INDEX,
-      mappings: {
-        dynamic_templates: [
-          { strings_as_keyword: { match_mapping_type: 'string', mapping: { type: 'keyword' } } },
-        ],
-        properties: { '@timestamp': { type: 'date' } },
-      },
-    });
-  }
-  const now = Date.now();
-  const threeDaysAgo = now - 3 * 24 * 3_600_000;
-  const scores: Array<[number, number]> = [
-    [threeDaysAgo, 38],
-    [now, 82],
-  ];
-  await esClient.bulk({
-    refresh: 'wait_for',
-    operations: scores.flatMap(([time, score]) => [
-      { create: { _index: RISK_SCORE_INDEX } },
-      {
-        '@timestamp': new Date(time).toISOString(),
-        user: {
-          name: SEEDED_USER.name,
-          risk: {
-            id_field: 'entity.id',
-            id_value: SEEDED_USER.id,
-            score_type: 'base',
-            calculated_score_norm: score,
-            calculated_level: score >= 70 ? 'High' : 'Moderate',
-          },
-        },
-      },
-    ]),
-  });
-  return created;
-};
-
-/** Removes the seeded risk scores, or the risk score index when the test created it. */
-export const cleanupUserRiskScores = async (esClient: EsClient, createdIndex: boolean) => {
-  if (createdIndex) {
-    await esClient.indices.delete({ index: RISK_SCORE_INDEX, ignore_unavailable: true });
-    return;
-  }
-  await esClient.deleteByQuery({
-    index: RISK_SCORE_INDEX,
-    refresh: true,
-    query: { term: { 'user.risk.id_value': SEEDED_USER.id } },
-  });
-};
-
 /** A 7-day view captured now, with only the given tiles. */
 export const buildScope = (
   tiles: EntityAnalyticsScope['tiles'],
@@ -168,7 +70,6 @@ export const buildScope = (
   tiles,
 });
 
-/** A model answer with one priority for `entityId`. */
 export const buildDraft = (entityId: string): BriefDraft => ({
   summary: 'Flagged entities in this view have alerts or newly reached High risk.',
   priorities: [
@@ -241,7 +142,6 @@ export const buildBriefConverseBody = (connectorId: string, scope: EntityAnalyti
   ],
 });
 
-/** The brief markdown from the brief tool's call step. */
 export const getBriefFromSteps = ({ steps }: ConverseResponseBody): string => {
   const result = steps
     .filter(isToolCallStep)
