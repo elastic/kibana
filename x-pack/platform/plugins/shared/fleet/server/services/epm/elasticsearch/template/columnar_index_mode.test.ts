@@ -410,6 +410,28 @@ describe('isLogsdbColumnarActive', () => {
     expect(esClient.indices.getIndexTemplate).toHaveBeenCalledTimes(2);
   });
 
+  it('counts the index templates of hidden logs data streams', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getIndexTemplate.mockImplementation(
+      async ({ name }: any) =>
+        ({
+          index_templates: [
+            {
+              name,
+              index_template: {
+                index_patterns: [],
+                template: { settings: { index: { mode: 'logsdb_columnar' } } },
+              },
+            },
+          ],
+        } as any)
+    );
+
+    await expect(
+      isLogsdbColumnarActive(esClient, [indexTemplate('.logs-pkg.hidden')])
+    ).resolves.toBe(true);
+  });
+
   it('is false when no logs index template is on logsdb_columnar', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.indices.getIndexTemplate.mockResponse({ index_templates: [] } as any);

@@ -186,7 +186,10 @@ export async function isLogsdbColumnarActive(
 ): Promise<boolean> {
   const templateNames = installedEs
     .filter(
-      ({ type, id }) => type === ElasticsearchAssetType.indexTemplate && id.startsWith('logs-')
+      ({ type, id }) =>
+        type === ElasticsearchAssetType.indexTemplate &&
+        // Hidden data streams have their index template named `.logs-<dataset>`.
+        (id.startsWith('logs-') || id.startsWith('.logs-'))
     )
     .map(({ id }) => id);
   if (templateNames.length === 0) {
