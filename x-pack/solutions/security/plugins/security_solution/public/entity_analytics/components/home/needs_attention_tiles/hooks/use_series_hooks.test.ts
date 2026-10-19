@@ -28,6 +28,7 @@ import { useAlertBasedTilesSeries } from './use_alert_based_tiles_series';
 import { useEntitiesWithAnomaliesSeries } from './use_entities_with_anomalies_series';
 import { useNewEntitySeries } from './use_new_entity_series';
 import { useRiskTilesSeries } from './use_risk_tiles_series';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 
 jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('../../../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
@@ -37,6 +38,7 @@ jest.mock('../../../../../common/components/ml/hooks/use_installed_security_jobs
 jest.mock('../../../../../common/hooks/use_resolved_latest_entities_index_name', () => ({
   useResolvedLatestEntitiesIndexName: jest.fn(),
 }));
+jest.mock('./use_tile_query_inputs', () => ({ useTileQueryInputs: jest.fn() }));
 
 /*
  * The four series hooks are thin wrappers over `getSeriesGate`, `getTileTrend` and
@@ -225,6 +227,14 @@ describe('series hooks', () => {
       services: { data: { search: { search: mockSearch } } },
     });
     mockIndex.mockReturnValue({ data: { indexName: '.entities-v1' }, isLoading: false });
+    // The index as the index hook resolves it, and the plain filter clauses: the group overrides of the
+    // filters have their own tests (use_tile_query_inputs.test.ts).
+    (useTileQueryInputs as jest.Mock).mockImplementation(
+      (spaceId: string, entityFilters: EntityFilters) => ({
+        ...mockIndex(spaceId),
+        entityFilterClauses: buildEntityFilterClauses(entityFilters),
+      })
+    );
     mockJobs.mockReturnValue({ jobIds: ['job_a'], loading: false });
     mockUseQuery.mockReturnValue(queryResult());
   });

@@ -81,6 +81,15 @@ jest.mock('@kbn/core-di-browser', () => {
       if (token === 'userProfile') {
         return { bulkGet: mockBulkGet };
       }
+      if (token === 'docLinks') {
+        return {
+          links: {
+            alerting: {
+              manageActionPolicies: 'https://docs.test/manage-action-policies',
+            },
+          },
+        };
+      }
       return {};
     },
     CoreStart: (key: string) => key,

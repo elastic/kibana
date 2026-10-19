@@ -13,12 +13,11 @@ import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
-import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildNewEntityCountQuery } from '../queries/new_entity_query';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
-import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 
 export const useNewEntityCount = ({
@@ -36,17 +35,15 @@ export const useNewEntityCount = ({
   const {
     data: resolvedIndex,
     isLoading: isIndexLoading,
+    entityFilterClauses,
     error: indexError,
-  } = useResolvedLatestEntitiesIndexName(spaceId);
+  } = useTileQueryInputs(spaceId, entityFilters);
 
   const index = resolvedIndex?.indexName;
 
   const query = useMemo(
-    () =>
-      index
-        ? buildNewEntityCountQuery(index, timeRange, buildEntityFilterClauses(entityFilters))
-        : null,
-    [index, timeRange, entityFilters]
+    () => (index ? buildNewEntityCountQuery(index, timeRange, entityFilterClauses) : null),
+    [index, timeRange, entityFilterClauses]
   );
 
   const isEnabled = !skip && !isIndexLoading && Boolean(index);

@@ -155,6 +155,7 @@
     "@kbn/content-list-common",
     "@kbn/core-ui-settings-server",
     "@kbn/licensing-plugin",
+    "@kbn/response-ops-alerts-table",
     "@kbn/licensing-types",
     "@kbn/workflows-yaml",
     "@kbn/tooling-log",

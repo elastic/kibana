@@ -65,7 +65,7 @@ Vault, so run with `--profile dev-vault` and there is nothing to configure:
 # Every eval (smoke + trace-only); prefix NIGHTSHIFT_DATASETS=trace-only to run only this one
 node scripts/evals start \
   --suite nightshift-investigations --profile dev-vault \
-  --model eis-anthropic-claude-4-6-sonnet \
+  --model eis-anthropic-claude-5-5-sonnet \
   --judge eis-anthropic-claude-4-6-sonnet
 ```
 
@@ -156,7 +156,7 @@ To run another file with the same loader and task:
 ```bash
 NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/absolute/path/examples.json \
   node scripts/evals run --suite nightshift-investigations --profile dev-vault \
-  --model eis-anthropic-claude-4-6-sonnet --judge eis-anthropic-claude-4-6-sonnet
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
 ```
 
 ```json
@@ -207,7 +207,7 @@ Select an existing evaluations dataset by its exact name in the evaluations UI:
 ```bash
 NIGHTSHIFT_DATASET_NAME='<dataset-name>' \
   node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
-  --model eis-anthropic-claude-4-6-sonnet \
+  --model eis-anthropic-claude-5-5-sonnet \
   --judge eis-anthropic-claude-4-6-sonnet
 ```
 
@@ -275,7 +275,7 @@ With those variables and the sandbox credentials configured:
 ```bash
 NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.json \
   node scripts/evals start --suite nightshift-investigations --profile dev-vault \
-  --model eis-anthropic-claude-4-6-sonnet --judge eis-anthropic-claude-4-6-sonnet
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
 ```
 
 The committed [`scout/kibana.telemetry.yml`](scout/kibana.telemetry.yml) creates the preconfigured `nightshift-evals-telemetry` webhook with a secret
@@ -484,7 +484,7 @@ as `nightshift-investigations`.
   `scoutHook` on it before starting Scout, and Buildkite agents must be able to reach the
   sandbox-api host.
 - **On a PR:** add the `evals:nightshift-investigations` label plus a `models:` label (for example
-  `models:eis/anthropic-claude-4.6-sonnet`) to choose which model investigates. Without a `models:`
+  `models:eis/anthropic-claude-5.5-sonnet`) to choose which model investigates. Without a `models:`
   label the suite is skipped, like other suites that run the real agent.
 - **Weekly:** a step in [`llm_evals.yml`](../../../../../.buildkite/pipelines/evals/llm_evals.yml)
   runs it against the weekly core models (`weekly_eis_core_models`).

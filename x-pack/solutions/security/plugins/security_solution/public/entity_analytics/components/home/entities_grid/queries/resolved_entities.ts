@@ -196,7 +196,7 @@ const buildResolvedEntityFilterOverridesQuery = (
 const EMPTY_OVERRIDES: ResolvedEntityFilterOverrides = { include: [], exclude: [] };
 
 export const fetchResolvedEntityFilterOverrides = async (
-  args: QueryArgs,
+  args: Pick<QueryArgs, 'namespace' | 'concreteEntityIndexName' | 'entityExpression' | 'rowsMode'>,
   runQuery: EsqlRunner
 ): Promise<ResolvedEntityFilterOverrides> => {
   const { entityExpression } = args;

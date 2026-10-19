@@ -62,7 +62,7 @@ import {
 import { createDataProviders } from '../../app/actions/add_to_timeline/data_provider';
 import { useInvestigateInTimeline } from '../../common/hooks/timeline/use_investigate_in_timeline';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
-import type { EntityViewMode } from '../../flyout/entity_details/shared/types';
+import type { EntityViewMode } from '../../../common/entity_analytics/entity_store/resolution_group';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
 import { useKibana } from '../../common/lib/kibana';
