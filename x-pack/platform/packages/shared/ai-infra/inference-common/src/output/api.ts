@@ -13,6 +13,7 @@ import type {
   ToolSchema,
   ChatCompleteMetadata,
   ChatCompleteRetryConfiguration,
+  ChatCompletionReasoning,
 } from '../chat_complete';
 import type { Output, OutputEvent } from './events';
 
@@ -140,6 +141,10 @@ export interface OutputOptions<
    * Optional metadata related to call execution.
    */
   metadata?: ChatCompleteMetadata;
+  /**
+   * Optional reasoning configuration, forwarded to the underlying chatComplete call.
+   */
+  reasoning?: ChatCompletionReasoning;
 }
 
 /**

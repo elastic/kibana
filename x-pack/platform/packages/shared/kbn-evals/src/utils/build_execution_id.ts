@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
+import { isReasoningEffort } from '@kbn/inference-common';
+
 interface BuildExecutionIdArgs {
   baseExecutionId?: string;
   suiteId?: string;
   modelId?: string;
+  reasoningEffort?: string;
 }
 
 /**
@@ -33,12 +37,32 @@ export function buildExecutionId({
   baseExecutionId,
   suiteId,
   modelId,
+  reasoningEffort,
 }: BuildExecutionIdArgs): string | undefined {
   if (!baseExecutionId) {
     return baseExecutionId;
   }
 
-  return [baseExecutionId, suiteId, modelId]
+  const modelSegment = modelId && reasoningEffort ? `${modelId}@${reasoningEffort}` : modelId;
+
+  return [baseExecutionId, suiteId, modelSegment]
     .filter((part): part is string => Boolean(part))
     .join('::');
+}
+
+/**
+ * Reads the model segment of a composite execution id back into its parts: `claude@high`
+ * -> `{ modelId: 'claude', reasoningEffort: 'high' }`, `claude` -> `{ modelId: 'claude' }`.
+ * A trailing `@...` that is not a reasoning effort level belongs to the model id.
+ */
+export function parseExecutionIdModelSegment(segment: string): {
+  modelId: string;
+  reasoningEffort?: ChatCompletionReasoningEffort;
+} {
+  const at = segment.lastIndexOf('@');
+  const suffix = at === -1 ? undefined : segment.slice(at + 1);
+  if (!isReasoningEffort(suffix)) {
+    return { modelId: segment };
+  }
+  return { modelId: segment.slice(0, at), reasoningEffort: suffix };
 }

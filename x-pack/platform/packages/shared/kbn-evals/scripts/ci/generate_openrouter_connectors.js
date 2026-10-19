@@ -21,6 +21,11 @@
  */
 
 const { slugifyId } = require('./slugify_id');
+const {
+  addReasoningEffortVariants,
+  parseModelGroup,
+  splitReasoningEffortVariantId,
+} = require('./connector_matching');
 
 const DEFAULT_BASE_URL = 'https://openrouter.ai/api/v1';
 
@@ -80,12 +85,14 @@ function parseModelList(raw) {
     .filter(Boolean);
 }
 
+// OpenRouter groups and native ids to resolve against GET /models/user, EIS groups dropped and any
+// `@<level>` stripped: a variant resolves to the same model as its base; the effort is added back
+// by `addReasoningEffortVariants` once the base definition exists.
 function filterRequestedModels(models) {
-  return models.filter((m) => {
-    if (!m) return false;
-    if (m.startsWith('eis/')) return false;
-    return true;
-  });
+  const bases = models
+    .filter((m) => m && !m.startsWith('eis/'))
+    .map((m) => parseModelGroup(m).base);
+  return [...new Set(bases)];
 }
 
 async function httpJson(url, apiKey) {
@@ -168,9 +175,13 @@ async function generateOpenrouterConnectors({
   httpJsonFn = httpJson,
 }) {
   const rawList = parseModelList(modelsRaw);
-  const evalConnectorId = String(evaluationConnectorId).trim();
+  // A judge named as a variant (`openrouter-x-effort-high`) needs its base resolved and the variant
+  // generated like any other `<group>@<level>` request.
+  const { baseId: evalConnectorId, reasoningEffort: judgeEffort } = splitReasoningEffortVariantId(
+    String(evaluationConnectorId).trim()
+  );
   if (rawList.length > 0 && evalConnectorId.startsWith('openrouter-')) {
-    rawList.push(evalConnectorId);
+    rawList.push(judgeEffort ? `${evalConnectorId}@${judgeEffort}` : evalConnectorId);
   }
 
   const requested = filterRequestedModels(rawList);
@@ -227,7 +238,7 @@ async function generateOpenrouterConnectors({
 
   const chatUrl = `${baseUrl}/chat/completions`;
   const connectors = {};
-  for (const modelId of resolved) {
+  for (const modelId of [...new Set(resolved)]) {
     const connectorId = `openrouter-${slugifyId(modelId)}`;
     connectors[connectorId] = {
       name: `OpenRouter ${modelId}`,
@@ -245,7 +256,7 @@ async function generateOpenrouterConnectors({
       },
     };
   }
-  return connectors;
+  return addReasoningEffortVariants(connectors, rawList);
 }
 
 async function main() {

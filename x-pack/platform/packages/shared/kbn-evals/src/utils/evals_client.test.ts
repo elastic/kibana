@@ -669,6 +669,120 @@ describe('EvalsClient', () => {
       );
     });
 
+    it('forwards reasoning_effort and picks only a baseline recorded at that effort', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({
+          experiments: [
+            makeExperiment('bk-old::smoke-tests::haiku@high', {
+              task_model: { id: 'haiku', reasoning_effort: 'high' },
+            }),
+          ],
+          total: 1,
+        })
+      );
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.findLatestBaselineExperiment({
+        suiteId: 'smoke-tests',
+        branch: 'main',
+        taskModelId: 'haiku',
+        reasoningEffort: 'high',
+      });
+
+      expect(kbnClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({ model_id: 'haiku', reasoning_effort: 'high' }),
+        })
+      );
+      expect(result?.executionId).toBe('bk-old::smoke-tests::haiku@high');
+    });
+
+    it('never picks a variant baseline for a target that set no reasoning effort', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({
+          experiments: [
+            makeExperiment('bk-newer::smoke-tests::haiku@high', {
+              task_model: { id: 'haiku', reasoning_effort: 'high' },
+            }),
+            makeExperiment('bk-older::smoke-tests::haiku', { task_model: { id: 'haiku' } }),
+          ],
+          total: 2,
+        })
+      );
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.findLatestBaselineExperiment({
+        suiteId: 'smoke-tests',
+        branch: 'main',
+        taskModelId: 'haiku',
+      });
+
+      const call = kbnClient.request.mock.calls[0][0] as { query: Record<string, unknown> };
+      expect(call.query).not.toHaveProperty('reasoning_effort');
+      expect(result?.executionId).toBe('bk-older::smoke-tests::haiku');
+    });
+
+    it('keeps paging past a full page of variant baselines until a matching one appears', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      const variants = Array.from({ length: 10 }, (_, i) =>
+        makeExperiment(`bk-${i}::smoke-tests::haiku@high`, {
+          task_model: { id: 'haiku', reasoning_effort: 'high' },
+        })
+      );
+      kbnClient.request
+        .mockResolvedValueOnce(asKbnResponse({ experiments: variants, total: 11 }))
+        .mockResolvedValueOnce(
+          asKbnResponse({
+            experiments: [
+              makeExperiment('bk-older::smoke-tests::haiku', { task_model: { id: 'haiku' } }),
+            ],
+            total: 11,
+          })
+        );
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.findLatestBaselineExperiment({
+        suiteId: 'smoke-tests',
+        branch: 'main',
+        taskModelId: 'haiku',
+      });
+
+      expect(kbnClient.request).toHaveBeenCalledTimes(2);
+      const second = kbnClient.request.mock.calls[1][0] as { query: Record<string, unknown> };
+      expect(second.query).toHaveProperty('page', 2);
+      expect(result?.executionId).toBe('bk-older::smoke-tests::haiku');
+    });
+
+    it('stops paging at a short page with no matching baseline', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({
+          experiments: [
+            makeExperiment('bk-newer::smoke-tests::haiku@high', {
+              task_model: { id: 'haiku', reasoning_effort: 'high' },
+            }),
+          ],
+          total: 1,
+        })
+      );
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.findLatestBaselineExperiment({
+        suiteId: 'smoke-tests',
+        branch: 'main',
+        taskModelId: 'haiku',
+      });
+
+      expect(kbnClient.request).toHaveBeenCalledTimes(1);
+      expect(result).toBeUndefined();
+    });
+
     it('omits model_id from query when taskModelId is not provided', async () => {
       const kbnClient = createMockKbnClient();
       const log = createLog();

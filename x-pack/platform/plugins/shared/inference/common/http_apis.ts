@@ -12,6 +12,7 @@ import type {
   InferenceConnector,
   Prompt,
   ChatCompleteMetadata,
+  ChatCompletionReasoning,
   ToolChoice,
 } from '@kbn/inference-common';
 
@@ -26,6 +27,7 @@ export interface ChatCompleteRequestBodyBase {
   };
   metadata?: ChatCompleteMetadata;
   toolChoice?: ToolChoice;
+  reasoning?: ChatCompletionReasoning;
 }
 
 export type ChatCompleteRequestBody = ChatCompleteRequestBodyBase & {

@@ -119,6 +119,19 @@ describe('buildModelFromConnector', () => {
       providerConfig: { model_id: 'anthropic/claude-sonnet-4.6' },
     };
 
+    it('carries the reasoning effort a variant definition asks for', () => {
+      expect(buildModelFromConnector({ ...eisEndpoint, reasoningEffort: 'high' })).toEqual({
+        family: ModelFamily.GPT,
+        provider: ModelProvider.Elastic,
+        id: 'gpt-4o',
+        reasoningEffort: 'high',
+      });
+    });
+
+    it('leaves reasoningEffort out when the definition does not set one', () => {
+      expect(buildModelFromConnector(eisEndpoint)).not.toHaveProperty('reasoningEffort');
+    });
+
     it('attributes a non-EIS endpoint to its own provider, not Elastic', () => {
       expect(buildModelFromConnector(openRouterEndpoint).provider).toBe(ModelProvider.OpenAI);
     });

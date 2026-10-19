@@ -155,6 +155,55 @@ describe('buildFanoutMatrix - weekly per-spec filter loop', () => {
   });
 });
 
+describe('buildFanoutMatrix - reasoning effort variants', () => {
+  const withVariants = {
+    ...CONNECTORS,
+    'eis-a-effort-low': { ...CONNECTORS['eis-a'], reasoningEffort: 'low' },
+    'eis-a-effort-high': { ...CONNECTORS['eis-a'], reasoningEffort: 'high' },
+  };
+
+  it('emits one step per requested variant and none for the base when only levels are asked', () => {
+    const rows = buildFanoutMatrix({
+      connectors: withVariants,
+      suiteInfo: {},
+      requestedModelGroups: ['eis/a@low', 'eis/a@high'],
+      perSpec: false,
+      grepOverride: false,
+    });
+
+    expect(rows.map((row) => row.connectorId)).toEqual(['eis-a-effort-low', 'eis-a-effort-high']);
+  });
+
+  it('keeps a bare group on the base definition even when its variants are provisioned', () => {
+    const rows = buildFanoutMatrix({
+      connectors: withVariants,
+      suiteInfo: {},
+      requestedModelGroups: ['eis/a'],
+      perSpec: false,
+      grepOverride: false,
+    });
+
+    expect(rows.map((row) => row.connectorId)).toEqual(['eis-a']);
+  });
+
+  it('resolves weekly per-spec models named with a level to their variants', () => {
+    const rows = buildFanoutMatrix({
+      connectors: withVariants,
+      suiteInfo: {
+        specModelGroups: [{ files: [DISCOVERY], models: ['eis/a@high'] }],
+        weeklyEisModelGroups: ['eis/a@high', 'eis/b'],
+      },
+      requestedModelGroups: ['eis/a@high', 'eis/b'],
+      perSpec: true,
+      grepOverride: false,
+    });
+
+    expect(rows).toEqual([
+      { connectorId: 'eis-a-effort-high', shardId: '', specFiles: [DISCOVERY] },
+    ]);
+  });
+});
+
 describe('buildFanoutMatrix - fail-fast', () => {
   it('throws when a listed spec model matches no connector', () => {
     expect(() =>

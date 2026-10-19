@@ -7,8 +7,14 @@
 
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import type { ToolCall } from '@kbn/inference-common';
-import { MessageRole, ModelFamily, ModelProvider, ToolChoiceType } from '@kbn/inference-common';
+import type { ChatCompletionReasoningEffort, ToolCall } from '@kbn/inference-common';
+import {
+  MessageRole,
+  ModelFamily,
+  ModelProvider,
+  REASONING_EFFORT_LEVELS,
+  ToolChoiceType,
+} from '@kbn/inference-common';
 import type { ChatCompleteRequestBody } from '../../common';
 import type { PromptRequestBody } from '../../common/http_apis';
 
@@ -55,6 +61,23 @@ export const messageOptionsSchema = schema.object({
   toolChoice: toolChoiceSchema,
 });
 
+export const reasoningEffortSchema: Type<ChatCompletionReasoningEffort> = schema.oneOf(
+  REASONING_EFFORT_LEVELS.map((level) => schema.literal(level)) as [
+    Type<ChatCompletionReasoningEffort>
+  ]
+);
+
+const reasoningSchema = schema.maybe(
+  schema.object({
+    effort: schema.maybe(reasoningEffortSchema),
+    enabled: schema.maybe(schema.boolean()),
+    summary: schema.maybe(
+      schema.oneOf([schema.literal('auto'), schema.literal('concise'), schema.literal('detailed')])
+    ),
+    exclude: schema.maybe(schema.boolean()),
+  })
+);
+
 export const chatCompleteBaseSchema = schema.object({
   connectorId: schema.string({ minLength: 1 }),
   maxRetries: schema.maybe(schema.number()),
@@ -95,6 +118,7 @@ export const chatCompleteBaseSchema = schema.object({
   functionCalling: schema.maybe(
     schema.oneOf([schema.literal('auto'), schema.literal('native'), schema.literal('simulated')])
   ),
+  reasoning: reasoningSchema,
 });
 
 const messageSchema = schema.oneOf([

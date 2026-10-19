@@ -21,6 +21,7 @@ import {
   buildExperimentsListingAggregation,
   parseExperimentsListingResponse,
   buildModelDisplayId,
+  buildModelDisplayLabel,
   escapeWildcard,
   buildExperimentRunsAggregation,
   parseExperimentRunsAggregation,
@@ -210,6 +211,7 @@ describe('query_builders', () => {
         aggs: {
           family: { terms: { field: 'evaluator.model.family', size: 1 } },
           provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+          reasoning_effort: { terms: { field: 'evaluator.model.reasoning_effort', size: 1 } },
         },
       });
     });
@@ -227,6 +229,7 @@ describe('query_builders', () => {
             aggs: {
               family: { terms: { field: 'evaluator.model.family', size: 1 } },
               provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+              reasoning_effort: { terms: { field: 'evaluator.model.reasoning_effort', size: 1 } },
             },
           },
         },
@@ -305,6 +308,7 @@ describe('query_builders', () => {
         aggs: {
           family: { terms: { field: 'evaluator.model.family', size: 1 } },
           provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+          reasoning_effort: { terms: { field: 'evaluator.model.reasoning_effort', size: 1 } },
         },
       });
     });
@@ -328,6 +332,32 @@ describe('query_builders', () => {
       ).toEqual([
         { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' },
         { id: 'claude-3', family: undefined, provider: undefined },
+      ]);
+    });
+
+    it('reports the reasoning effort a judge ran with, and omits it when unset', () => {
+      expect(
+        parseEvaluatorModelsAggregation({
+          evaluator_models: {
+            buckets: [
+              {
+                key: 'claude-opus',
+                family: { buckets: [{ key: 'Claude' }] },
+                provider: { buckets: [{ key: 'Anthropic' }] },
+                reasoning_effort: { buckets: [{ key: 'high' }] },
+              },
+              {
+                key: 'gpt-4o',
+                family: { buckets: [{ key: 'GPT' }] },
+                provider: { buckets: [{ key: 'OpenAI' }] },
+                reasoning_effort: { buckets: [] },
+              },
+            ],
+          },
+        })
+      ).toEqual([
+        { id: 'claude-opus', family: 'Claude', provider: 'Anthropic', reasoning_effort: 'high' },
+        { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' },
       ]);
     });
 
@@ -379,6 +409,16 @@ describe('query_builders', () => {
         bool: {
           must_not: [preflightExclusion],
           filter: [{ term: { 'task.model.id': 'gpt-4' } }],
+        },
+      });
+    });
+
+    it('filters by reasoningEffort', () => {
+      const query = buildExperimentsListingFilterQuery({ reasoningEffort: 'low' });
+      expect(query).toEqual({
+        bool: {
+          must_not: [preflightExclusion],
+          filter: [{ term: { 'task.model.reasoning_effort': 'low' } }],
         },
       });
     });
@@ -539,6 +579,7 @@ describe('query_builders', () => {
           'task_model_id',
           'task_model_family',
           'task_model_provider',
+          'task_model_reasoning_effort',
           'evaluator_models',
           'git_branch',
           'git_commit_sha',
@@ -557,6 +598,7 @@ describe('query_builders', () => {
         aggs: {
           family: { terms: { field: 'evaluator.model.family', size: 1 } },
           provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+          reasoning_effort: { terms: { field: 'evaluator.model.reasoning_effort', size: 1 } },
         },
       });
     });
@@ -631,6 +673,60 @@ describe('query_builders', () => {
         total_repetitions: 3,
         ci: { build_url: 'https://buildkite.com/build/1', pull_request: '12345' },
       });
+    });
+
+    it('reports the reasoning effort of the task model and judge when recorded', () => {
+      const aggs = {
+        total_experiments: { value: 1 },
+        experiments: {
+          buckets: [
+            makeBucket({
+              task_model_reasoning_effort: { buckets: [{ key: 'high' }] },
+              evaluator_models: {
+                buckets: [
+                  {
+                    key: 'claude-3',
+                    family: { buckets: [{ key: 'claude-3' }] },
+                    provider: { buckets: [{ key: 'anthropic' }] },
+                    reasoning_effort: { buckets: [{ key: 'low' }] },
+                  },
+                ],
+              },
+            }),
+          ],
+        },
+      };
+      const [experiment] = parseExperimentsListingResponse(aggs, {
+        page: 1,
+        perPage: 25,
+      }).experiments;
+
+      expect(experiment.task_model).toEqual({
+        id: 'gpt-4',
+        family: 'gpt-4',
+        provider: 'openai',
+        reasoning_effort: 'high',
+      });
+      expect(experiment.evaluator_model).toEqual({
+        id: 'claude-3',
+        family: 'claude-3',
+        provider: 'anthropic',
+        reasoning_effort: 'low',
+      });
+    });
+
+    it('leaves the reasoning effort out when the run did not record one', () => {
+      const aggs = {
+        total_experiments: { value: 1 },
+        experiments: { buckets: [makeBucket()] },
+      };
+      const [experiment] = parseExperimentsListingResponse(aggs, {
+        page: 1,
+        perPage: 25,
+      }).experiments;
+
+      expect(experiment.task_model).not.toHaveProperty('reasoning_effort');
+      expect(experiment.evaluator_model).not.toHaveProperty('reasoning_effort');
     });
 
     it('returns every distinct judge model when an experiment evaluators differ', () => {
@@ -772,6 +868,24 @@ describe('query_builders', () => {
     });
   });
 
+  describe('buildModelDisplayLabel', () => {
+    it('appends the reasoning effort to the display id when set', () => {
+      expect(buildModelDisplayLabel({ id: 'claude-opus', reasoning_effort: 'high' })).toBe(
+        'claude-opus (high)'
+      );
+    });
+
+    it('returns the plain display id when no reasoning effort was recorded', () => {
+      expect(buildModelDisplayLabel({ id: 'claude-opus' })).toBe('claude-opus');
+    });
+
+    it('falls back through family and provider like buildModelDisplayId', () => {
+      expect(
+        buildModelDisplayLabel({ family: 'gpt-4', provider: 'openai', reasoning_effort: 'low' })
+      ).toBe('openai/gpt-4 (low)');
+    });
+  });
+
   describe('parseStatsAggregationResponse', () => {
     it('returns empty array for undefined aggregations', () => {
       expect(parseStatsAggregationResponse(undefined)).toEqual([]);
@@ -873,6 +987,46 @@ describe('query_builders', () => {
         ['groundedness', { id: 'claude-sonnet-4', family: 'Claude', provider: 'Anthropic' }],
         ['latency', undefined],
       ]);
+    });
+
+    it('reports the reasoning effort a judge ran with in the stats', () => {
+      const aggs = {
+        by_dataset: {
+          buckets: [
+            {
+              key: 'ds-1',
+              dataset_name: { buckets: [{ key: 'Dataset One' }] },
+              example_count: { value: 5 },
+              by_evaluator: {
+                buckets: [
+                  {
+                    key: 'correctness',
+                    score_stats: {},
+                    score_median: { values: {} },
+                    evaluator_model_id: {
+                      buckets: [
+                        {
+                          key: 'gpt-4o',
+                          family: { buckets: [{ key: 'GPT' }] },
+                          provider: { buckets: [{ key: 'OpenAI' }] },
+                          reasoning_effort: { buckets: [{ key: 'medium' }] },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      };
+
+      expect(parseStatsAggregationResponse(aggs)[0].evaluator_model).toEqual({
+        id: 'gpt-4o',
+        family: 'GPT',
+        provider: 'OpenAI',
+        reasoning_effort: 'medium',
+      });
     });
 
     it('never attributes a model to a code evaluator, even when its bucket carries one', () => {

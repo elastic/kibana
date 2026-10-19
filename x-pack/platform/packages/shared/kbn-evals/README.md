@@ -44,18 +44,19 @@ Config files live in `scripts/vault/config.<profile>.json`. The golden cluster p
 
 #### Key flags
 
-| Flag                | Description                                                            |
-| ------------------- | ---------------------------------------------------------------------- |
-| `--suite <id>`      | Suite to run (interactive prompt if omitted)                           |
-| `--model <id>`      | Connector/model to evaluate (comma-separated OK)                       |
-| `--judge <id>`      | Connector for LLM-as-a-judge evaluators                                |
-| `--grep <pattern>`  | Filter tests by name                                                   |
-| `--repetitions <n>` | Repeat each example N times                                            |
-| `--concurrency <n>` | Examples each experiment runs at once (default 5)                      |
-| `--space-ids <ids>` | Spaces to assign datasets and scores to (the run works from the first) |
-| `--skip-server`     | Skip EDOT/Scout startup (use existing services)                        |
-| `--skip-init`       | Skip config and connector setup                                        |
-| `--dry-run`         | Print configuration and exit                                           |
+| Flag                         | Description                                                                         |
+| ---------------------------- | ----------------------------------------------------------------------------------- |
+| `--suite <id>`               | Suite to run (interactive prompt if omitted)                                        |
+| `--model <id>`               | Connector/model to evaluate (comma-separated OK)                                    |
+| `--reasoning-effort <level>` | Reasoning effort the task model runs at (see [Reasoning effort](#reasoning-effort)) |
+| `--judge <id>`               | Connector for LLM-as-a-judge evaluators                                             |
+| `--grep <pattern>`           | Filter tests by name                                                                |
+| `--repetitions <n>`          | Repeat each example N times                                                         |
+| `--concurrency <n>`          | Examples each experiment runs at once (default 5)                                   |
+| `--space-ids <ids>`          | Spaces to assign datasets and scores to (the run works from the first)              |
+| `--skip-server`              | Skip EDOT/Scout startup (use existing services)                                     |
+| `--skip-init`                | Skip config and connector setup                                                     |
+| `--dry-run`                  | Print configuration and exit                                                        |
 
 #### EIS connector setup
 
@@ -86,6 +87,18 @@ node scripts/evals start --suite agent-builder --concurrency 8
 `--concurrency` (or `EVAL_CONCURRENCY`) sets how many examples each experiment runs at once. It falls back to the `concurrency` passed to `createPlaywrightEvalsConfig`, then 5. A spec that passes its own `concurrency` to `runExperiment` still wins, and the run logs a warning when that overrides the value you asked for. Server-side limits such as Task Manager capacity stay with the suite's Scout config set.
 
 > **Rate limits:** Concurrent LLM calls are roughly workers × concurrency. Connectors such as EIS and OpenRouter enforce requests-per-minute limits, so a high `--concurrency` can cause 429 (rate limit) errors. If they occur, reduce `--concurrency` or set `KBN_EVALS_HTTP_RETRIES` to retry `fetch` requests (off by default).
+
+#### Reasoning effort
+
+Pass `--reasoning-effort` (or `EVAL_REASONING_EFFORT`) with one of `none`, `minimal`, `low`,
+`medium`, `high`, `xhigh`:
+
+```bash
+node scripts/evals start --suite significant-events --model eis-anthropic-claude-4.6-opus --reasoning-effort high
+node scripts/evals run   --suite significant-events --model eis-anthropic-claude-4.6-opus --reasoning-effort high
+```
+
+Note: **An unset effort is not "no reasoning".** A definition without `reasoningEffort` sends no effort and the provider applies its own default.
 
 #### Advanced options
 
@@ -198,6 +211,10 @@ Add GitHub labels to trigger evals in PR CI:
 
 Model groups follow the pattern `eis/<modelId>` for EIS or `openrouter/<provider>-<model>` for OpenRouter.
 
+Reasoning effort levels are not available through PR labels: a label per model and level would
+multiply the `models:*` labels in the repository. Use the CLI or an
+[on-demand build](#13-on-demand-evals-buildkite) with `@<level>` model groups instead.
+
 PRs touching the eval framework get `evals:smoke-tests` automatically
 ([`.github/paths-labeller.yml`](../../../../../.github/paths-labeller.yml)). Add
 `evals:skip-smoke-tests` to skip it.
@@ -216,15 +233,25 @@ fewer models, list it under `specModelGroups` in
 ```jsonc
 {
   "id": "significant-events",
-  "weeklyEisModelGroups": ["eis/openai-gpt-5.4", "eis/anthropic-claude-4.6-opus", "eis/openai-gpt-5.4-mini"],
+  "weeklyEisModelGroups": [
+    "eis/openai-gpt-5.4",
+    "eis/anthropic-claude-4.6-opus",
+    "eis/openai-gpt-5.4-mini"
+  ],
   "specModelGroups": [
     { "files": ["evals/discovery/discovery.spec.ts"], "models": ["eis/openai-gpt-5.4"] },
-    { "files": ["evals/ki_feature_extraction/ki_feature_extraction.spec.ts"], "models": ["eis/openai-gpt-5.4-mini"] }
+    {
+      "files": ["evals/ki_feature_extraction/ki_feature_extraction.spec.ts"],
+      "models": ["eis/openai-gpt-5.4-mini"]
+    }
   ]
 }
 ```
 
 - `files` are paths relative to the suite's config directory.
+- A model may name a reasoning effort level, e.g. `eis/anthropic-claude-4.6-opus@high`, in both
+  lists; the weekly run then evaluates the model at that level (see
+  [Reasoning effort](#reasoning-effort)).
 - A spec without an entry (or without `models`) runs against the whole `weeklyEisModelGroups` list.
 - Every model in `specModelGroups` must be in `weeklyEisModelGroups`, and every model there must
   be in the weekly step's `EVAL_MODEL_GROUPS` in `llm_evals.yml`. Both are checked in PR CI. The
@@ -266,20 +293,20 @@ Run a suite on any branch without a PR:
 2. Click **New build**, select branch/commit
 3. Add environment variables:
 
-| Variable                          | Required           | Description                                                                                                  |
-| --------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `EVAL_SUITE_ID`                   | yes                | Suite id from `evals.suites.json`. Comma-separate to run several suites                                      |
-| `EVAL_MODEL_GROUPS`               | yes                | Comma-separated model groups, e.g. `eis/openai-gpt-5.4,openrouter/openai-gpt-5.4`                            |
-| `EVAL_INCLUDE_EIS_MODELS`         | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                                                             |
-| `EVAL_CONNECTOR_ID`               | no                 | LLM-as-judge connector override                                                                              |
-| `EVAL_SERVER_CONFIG_SET`          | some suites        | From `serverConfigSet` in `evals.suites.json`                                                                |
-| `EVAL_SCOUT_ARCH` / `EVAL_SCOUT_DOMAIN` | some suites  | From `scoutArch` / `scoutDomain` in `evals.suites.json` (default `stateful` / `classic`)                     |
-| `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
-| `EVAL_GREP`                       | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
-| `EVAL_REPETITIONS`                | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
-| `EVAL_CONCURRENCY`                | no                 | Examples each experiment runs at once (same as `--concurrency`)                                              |
-| `EVAL_SPACE_IDS`                  | no                 | Comma-separated spaces to assign datasets and scores to (same as `--space-ids`)                              |
-| `EVAL_SLACK_NOTIFICATION_CHANNEL` | no                 | Slack channel or member ID to send the triage to. If unset, no Slack notification is sent for on-demand runs |
+| Variable                                | Required           | Description                                                                                                                                     |
+| --------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `EVAL_SUITE_ID`                         | yes                | Suite id from `evals.suites.json`. Comma-separate to run several suites                                                                         |
+| `EVAL_MODEL_GROUPS`                     | yes                | Comma-separated model groups, e.g. `eis/openai-gpt-5.4,openrouter/openai-gpt-5.4`. Append `@<level>` to run a model at a reasoning effort level |
+| `EVAL_INCLUDE_EIS_MODELS`               | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                                                                                                |
+| `EVAL_CONNECTOR_ID`                     | no                 | LLM-as-judge connector override                                                                                                                 |
+| `EVAL_SERVER_CONFIG_SET`                | some suites        | From `serverConfigSet` in `evals.suites.json`                                                                                                   |
+| `EVAL_SCOUT_ARCH` / `EVAL_SCOUT_DOMAIN` | some suites        | From `scoutArch` / `scoutDomain` in `evals.suites.json` (default `stateful` / `classic`)                                                        |
+| `KIBANA_BUILD_ID`                       | no                 | Reuse a Kibana build from another job (skips build step)                                                                                        |
+| `EVAL_GREP`                             | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                                                           |
+| `EVAL_REPETITIONS`                      | no                 | Repeat each example N times (same as `--repetitions`)                                                                                           |
+| `EVAL_CONCURRENCY`                      | no                 | Examples each experiment runs at once (same as `--concurrency`)                                                                                 |
+| `EVAL_SPACE_IDS`                        | no                 | Comma-separated spaces to assign datasets and scores to (same as `--space-ids`)                                                                 |
+| `EVAL_SLACK_NOTIFICATION_CHANNEL`       | no                 | Slack channel or member ID to send the triage to. If unset, no Slack notification is sent for on-demand runs                                    |
 
 Example (single suite):
 
@@ -296,6 +323,17 @@ EVAL_SUITE_ID=agent-builder,observability-ai,streams
 EVAL_MODEL_GROUPS=eis/openai-gpt-5.4
 EVAL_INCLUDE_EIS_MODELS=1
 ```
+
+Example (one model at several reasoning effort levels, one fanout step per level):
+
+```text
+EVAL_SUITE_ID=significant-events
+EVAL_MODEL_GROUPS=eis/anthropic-claude-4.6-opus@low,eis/anthropic-claude-4.6-opus@medium,eis/anthropic-claude-4.6-opus@high
+EVAL_INCLUDE_EIS_MODELS=1
+```
+
+A group without `@<level>` keeps selecting the model as defined, even when variants of it are
+provisioned in the same build.
 
 #### Where the triage summary is sent (on-demand)
 
@@ -464,13 +502,14 @@ Use `selectEvaluators<MyExample, MyTaskOutput>(...)` for typed evaluator callbac
 
 ### Available fixtures
 
-| Fixture            | Description                                                                |
-| ------------------ | -------------------------------------------------------------------------- |
-| `inferenceClient`  | Bound to the connector declared by the active Playwright project.          |
-| `executorClient`   | Runs experiments (in-Kibana executor by default).                          |
-| `evalsClient`      | Client for evals plugin APIs (scores, datasets, experiment stats).         |
-| `reportModelScore` | Displays results in terminal (overridable for custom reporting).           |
-| `traceEsClient`    | ES client for querying OTel traces (defaults to Scout `esClient` cluster). |
+| Fixture              | Description                                                                                                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `inferenceClient`    | Bound to the connector declared by the active Playwright project; sends the connector's `reasoningEffort` on every call, overriding any `reasoning.effort` the call sets. |
+| `agentBuilderClient` | Converse with Agent Builder on the project's connector; sends its `reasoningEffort` as `reasoning_level`.                                                                 |
+| `executorClient`     | Runs experiments (in-Kibana executor by default).                                                                                                                         |
+| `evalsClient`        | Client for evals plugin APIs (scores, datasets, experiment stats).                                                                                                        |
+| `reportModelScore`   | Displays results in terminal (overridable for custom reporting).                                                                                                          |
+| `traceEsClient`      | ES client for querying OTel traces (defaults to Scout `esClient` cluster).                                                                                                |
 
 ### Available evaluators
 
@@ -588,6 +627,14 @@ Model definitions come from two sources:
       "url": "https://openrouter.ai/api/v1/chat/completions"
     },
     "secrets": { "providerSecrets": { "api_key": "<api key>" } }
+  },
+  "eis-anthropic-claude-sonnet-4-6-effort-high": {
+    "name": "EIS anthropic-claude-sonnet-4-6 (high)",
+    "inferenceId": ".anthropic-claude-sonnet-4-6-chat_completion",
+    "provider": "elastic",
+    "taskType": "chat_completion",
+    "providerConfig": { "model_id": "anthropic-claude-sonnet-4-6" },
+    "reasoningEffort": "high"
   }
 }
 ```

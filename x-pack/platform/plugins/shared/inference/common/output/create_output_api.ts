@@ -41,6 +41,7 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
     maxRetries,
     retryConfiguration,
     metadata,
+    reasoning,
     retry,
   }: DefaultOutputOptions): OutputCompositeResponse<string, ToolSchema | undefined, boolean> {
     if (stream && retry !== undefined) {
@@ -64,6 +65,7 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
       maxRetries,
       retryConfiguration,
       metadata,
+      reasoning,
       system,
       messages,
       ...(schema
@@ -153,6 +155,7 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
               ),
               functionCalling,
               modelName,
+              reasoning,
               stream: false,
               retry: {
                 onValidationError: retriesLeft - 1,

@@ -89,11 +89,19 @@ export const DatasetFacets = lazySchema(() =>
 );
 export type DatasetFacets = z.infer<typeof DatasetFacets>;
 
+export const ReasoningEffort = lazySchema(() =>
+  z.enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
+);
+export type ReasoningEffort = z.infer<typeof ReasoningEffort>;
+export type ReasoningEffortEnum = typeof ReasoningEffort.enum;
+export const ReasoningEffortEnum = ReasoningEffort.enum;
+
 export const Model = lazySchema(() =>
   z.object({
     id: z.string().max(256),
     family: z.string().max(256).optional(),
     provider: z.string().max(256).optional(),
+    reasoning_effort: ReasoningEffort.optional(),
   })
 );
 export type Model = z.infer<typeof Model>;

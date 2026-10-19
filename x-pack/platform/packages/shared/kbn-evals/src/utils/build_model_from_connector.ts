@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { InferenceConnector, InferenceConnectorType, Model } from '@kbn/inference-common';
+import type {
+  ChatCompletionReasoningEffort,
+  InferenceConnector,
+  InferenceConnectorType,
+  Model,
+} from '@kbn/inference-common';
 import {
   getConnectorModel,
   getConnectorFamily,
@@ -14,6 +19,8 @@ import {
   ModelFamily,
 } from '@kbn/inference-common';
 import { isInferenceEndpointDefinition, type EvalConnector } from './eval_connector';
+
+export type EvalModel = Model & { reasoningEffort?: ChatCompletionReasoningEffort };
 
 /**
  * Infers the model family from a model id.
@@ -55,14 +62,19 @@ function providerStringToModel(
 }
 
 /** Describes the model behind a test connector, for attributing task and evaluator scores. */
-export function buildModelFromConnector(connector: EvalConnector): Model {
+export function buildModelFromConnector(connector: EvalConnector): EvalModel {
   if (isInferenceEndpointDefinition(connector)) {
     const modelId =
       typeof connector.providerConfig?.model_id === 'string'
         ? connector.providerConfig.model_id
         : undefined;
     const { provider, family } = providerStringToModel(connector.provider, modelId);
-    return { provider, family, id: modelId ?? connector.name };
+    return {
+      provider,
+      family,
+      id: modelId ?? connector.name,
+      ...(connector.reasoningEffort && { reasoningEffort: connector.reasoningEffort }),
+    };
   }
 
   // `.inference` stack connectors carry the same fields nested under `config`.

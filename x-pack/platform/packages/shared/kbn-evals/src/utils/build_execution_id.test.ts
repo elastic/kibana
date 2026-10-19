@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildExecutionId } from './build_execution_id';
+import { buildExecutionId, parseExecutionIdModelSegment } from './build_execution_id';
 
 describe('buildExecutionId', () => {
   it('combines build, suite, and model into a single key', () => {
@@ -31,6 +31,34 @@ describe('buildExecutionId', () => {
     });
 
     expect(suiteA).not.toBe(suiteB);
+  });
+
+  it('appends the reasoning effort to the model segment', () => {
+    expect(
+      buildExecutionId({
+        baseExecutionId: 'bk-build-1',
+        suiteId: 'significant-events',
+        modelId: 'claude-opus',
+        reasoningEffort: 'high',
+      })
+    ).toBe('bk-build-1::significant-events::claude-opus@high');
+  });
+
+  it('gives the same model at two reasoning efforts distinct execution ids', () => {
+    const low = buildExecutionId({
+      baseExecutionId: 'bk-build-1',
+      suiteId: 'significant-events',
+      modelId: 'claude-opus',
+      reasoningEffort: 'low',
+    });
+    const high = buildExecutionId({
+      baseExecutionId: 'bk-build-1',
+      suiteId: 'significant-events',
+      modelId: 'claude-opus',
+      reasoningEffort: 'high',
+    });
+
+    expect(low).not.toBe(high);
   });
 
   it('omits the suite id when no suite id is provided (e.g. in-tool evals)', () => {
@@ -63,5 +91,38 @@ describe('buildExecutionId', () => {
     expect(
       buildExecutionId({ baseExecutionId: '', suiteId: 'significant-events', modelId: 'gpt-4' })
     ).toBe('');
+  });
+});
+
+describe('parseExecutionIdModelSegment', () => {
+  it('reads the model and effort back out of a variant segment', () => {
+    expect(parseExecutionIdModelSegment('claude-opus@high')).toEqual({
+      modelId: 'claude-opus',
+      reasoningEffort: 'high',
+    });
+  });
+
+  it('leaves a plain model segment without an effort', () => {
+    expect(parseExecutionIdModelSegment('claude-opus')).toEqual({ modelId: 'claude-opus' });
+  });
+
+  it('keeps an @ that is not followed by a reasoning effort level in the model id', () => {
+    expect(parseExecutionIdModelSegment('mistral-large@2407')).toEqual({
+      modelId: 'mistral-large@2407',
+    });
+  });
+
+  it('round-trips what buildExecutionId produced', () => {
+    const executionId = buildExecutionId({
+      baseExecutionId: 'bk-build-1',
+      suiteId: 'significant-events',
+      modelId: 'claude-opus',
+      reasoningEffort: 'low',
+    })!;
+
+    expect(parseExecutionIdModelSegment(executionId.split('::').pop()!)).toEqual({
+      modelId: 'claude-opus',
+      reasoningEffort: 'low',
+    });
   });
 });

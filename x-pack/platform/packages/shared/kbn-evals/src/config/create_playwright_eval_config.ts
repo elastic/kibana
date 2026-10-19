@@ -14,11 +14,13 @@ import {
   type InferenceEndpointDefinition,
 } from '../utils/inference_endpoint_definition';
 import {
+  isInferenceEndpointDefinition,
   loadStackConnectors,
   type EvalConnector,
   type StackConnectorDefinition,
 } from '../utils/eval_connector';
 import { DEFAULT_EXPERIMENT_CONCURRENCY, getConcurrencyFromEnv } from '../utils/concurrency';
+import { getReasoningEffortFromEnv } from '../utils/reasoning_effort';
 
 export interface EvaluationTestOptions extends ScoutTestOptions {
   connectorParam: EvalConnector;
@@ -93,6 +95,12 @@ export function createPlaywrightEvalsConfig({
   const experimentConcurrency =
     getConcurrencyFromEnv() ?? concurrency ?? DEFAULT_EXPERIMENT_CONCURRENCY;
 
+  const runReasoningEffort = getReasoningEffortFromEnv();
+  const withRunReasoningEffort = (connector: EvalConnector): EvalConnector =>
+    runReasoningEffort && isInferenceEndpointDefinition(connector) && !connector.reasoningEffort
+      ? { ...connector, reasoningEffort: runReasoningEffort }
+      : connector;
+
   // Pass through Scout's setup AND teardown hook projects unchanged. Scout's `setup-local`
   // references its teardown via Playwright's `teardown` field; dropping the `teardown-local`
   // project would leave a dangling reference and Playwright fails with "Project 'setup-local'
@@ -113,7 +121,7 @@ export function createPlaywrightEvalsConfig({
             name: connector.id,
             use: {
               ...project.use,
-              connectorParam: connector,
+              connectorParam: withRunReasoningEffort(connector),
               evaluationConnectorParam: evaluationConnector,
               repetitions: experimentRepetitions,
               concurrency: experimentConcurrency,

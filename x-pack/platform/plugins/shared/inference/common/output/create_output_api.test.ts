@@ -218,6 +218,33 @@ describe('createOutputApi', () => {
     );
   });
 
+  it('propagates reasoning when provided, including on validation retries', async () => {
+    const validationError = createToolValidationError('validation failed', { toolCalls: [] });
+    chatComplete.mockRejectedValueOnce(validationError);
+    chatComplete.mockResolvedValueOnce(Promise.resolve({ content: 'content', toolCalls: [] }));
+
+    const output = createOutputApi(chatComplete);
+
+    await output({
+      id: 'id',
+      stream: false,
+      connectorId: '.my-connector',
+      input: 'input message',
+      reasoning: { effort: 'low' },
+      retry: { onValidationError: true },
+    });
+
+    expect(chatComplete).toHaveBeenCalledTimes(2);
+    expect(chatComplete).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ reasoning: { effort: 'low' } })
+    );
+    expect(chatComplete).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ reasoning: { effort: 'low' } })
+    );
+  });
+
   it('propagates retry options when provided', async () => {
     chatComplete.mockResolvedValue(Promise.resolve({ content: 'content', toolCalls: [] }));
 

@@ -146,7 +146,54 @@ describe('generateOpenrouterConnectors', () => {
   });
 });
 
+describe('reasoning effort variants', () => {
+  const models = [{ id: 'openai/gpt-5.4', supported_parameters: TOOLS }];
+
+  it('generates the base definition plus one variant per @<level>', async () => {
+    const connectors = await generateOpenrouterConnectors({
+      baseUrl: BASE_URL,
+      apiKey: API_KEY,
+      modelsRaw: 'openrouter/openai-gpt-5.4@low,openrouter/openai-gpt-5.4@high',
+      httpJsonFn: httpJsonFor(models),
+    });
+
+    expect(Object.keys(connectors)).toEqual([
+      'openrouter-openai-gpt-5-4',
+      'openrouter-openai-gpt-5-4-effort-low',
+      'openrouter-openai-gpt-5-4-effort-high',
+    ]);
+    expect(connectors['openrouter-openai-gpt-5-4-effort-high']).toEqual({
+      ...connectors['openrouter-openai-gpt-5-4'],
+      name: 'OpenRouter openai/gpt-5.4 (high)',
+      reasoningEffort: 'high',
+    });
+  });
+
+  it('resolves a judge named as a variant through its base model and generates the variant', async () => {
+    const connectors = await generateOpenrouterConnectors({
+      baseUrl: BASE_URL,
+      apiKey: API_KEY,
+      modelsRaw: 'openrouter/openai-gpt-5.4',
+      evaluationConnectorId: 'openrouter-openai-gpt-5-4-effort-low',
+      httpJsonFn: httpJsonFor(models),
+    });
+
+    expect(Object.keys(connectors)).toEqual([
+      'openrouter-openai-gpt-5-4',
+      'openrouter-openai-gpt-5-4-effort-low',
+    ]);
+  });
+});
+
 describe('filterRequestedModels', () => {
+  it('strips @<level> and dedupes, so a variant resolves to its base model', () => {
+    expect(
+      filterRequestedModels(
+        parseModelList('openrouter/openai-gpt-5.4@low,openrouter/openai-gpt-5.4@high')
+      )
+    ).toEqual(['openrouter/openai-gpt-5.4']);
+  });
+
   it('drops EIS groups and keeps OpenRouter groups and native ids', () => {
     expect(
       filterRequestedModels(

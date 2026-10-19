@@ -29,6 +29,7 @@ export {
   buildExperimentsListingAggregation,
   parseExperimentsListingResponse,
   buildModelDisplayId,
+  buildModelDisplayLabel,
   escapeWildcard,
 } from './impl/query_builders';
 export type {

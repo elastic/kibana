@@ -32,7 +32,7 @@ import {
 import { css } from '@emotion/css';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import type { EvaluatorStats } from '@kbn/evals-common';
+import { buildModelDisplayLabel, type EvaluatorStats } from '@kbn/evals-common';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useQueryClient } from '@kbn/react-query';
@@ -401,7 +401,7 @@ export const ExperimentDetailPage: React.FC = () => {
   // scored. Sorted so the tooltip reads the same here as everywhere else the set is listed;
   // the response orders them by how many evaluators used each.
   const evaluatorModelIds = useMemo(
-    () => (experimentDetail?.evaluator_models ?? []).map(({ id }) => id).sort(),
+    () => (experimentDetail?.evaluator_models ?? []).map(buildModelDisplayLabel).sort(),
     [experimentDetail?.evaluator_models]
   );
 
@@ -446,7 +446,7 @@ export const ExperimentDetailPage: React.FC = () => {
         name: i18n.COLUMN_EVALUATOR_MODEL,
         render: (model: EvaluatorStats['evaluator_model']) =>
           model ? (
-            <EuiBadge color="hollow">{model.id}</EuiBadge>
+            <EuiBadge color="hollow">{buildModelDisplayLabel(model)}</EuiBadge>
           ) : (
             <EuiToolTip content={i18n.EVALUATOR_MODEL_NOT_APPLICABLE_TOOLTIP}>
               <EuiText size="s" color="subdued" tabIndex={0}>
@@ -545,7 +545,11 @@ export const ExperimentDetailPage: React.FC = () => {
               <EuiFlexItem>
                 <EuiPanel hasShadow={false} hasBorder>
                   <EuiStat
-                    title={experimentDetail.task_model?.id ?? '-'}
+                    title={
+                      experimentDetail.task_model
+                        ? buildModelDisplayLabel(experimentDetail.task_model)
+                        : '-'
+                    }
                     description={i18n.STAT_TASK_MODEL}
                     titleSize="xs"
                   />

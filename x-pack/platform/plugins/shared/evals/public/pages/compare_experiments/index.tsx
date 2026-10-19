@@ -33,7 +33,13 @@ import { css } from '@emotion/css';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useHistory, useLocation } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
-import type { Direction, ComparisonResult, MetricType, StatisticalTestId } from '@kbn/evals-common';
+import {
+  buildModelDisplayLabel,
+  type Direction,
+  type ComparisonResult,
+  type MetricType,
+  type StatisticalTestId,
+} from '@kbn/evals-common';
 import {
   useCompareExperiments,
   useEvalsTraceFetcher,
@@ -184,7 +190,9 @@ const ExperimentHeader: React.FC<{
 
   const branch = experimentData?.git_branch;
   const timestamp = experimentData?.timestamp;
-  const taskModel = experimentData?.task_model?.id;
+  const taskModel = experimentData?.task_model
+    ? buildModelDisplayLabel(experimentData.task_model)
+    : undefined;
   const evaluatorModels = experimentData?.evaluator_models ?? [];
   const suiteId =
     experimentData?.suite_id !== 'unknown-suite' ? experimentData?.suite_id : undefined;
