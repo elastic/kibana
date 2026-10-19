@@ -9,6 +9,7 @@ import type { TimeRange } from '../../entities_grid/common';
 import { getRiskScoreIndex } from '../../entities_grid/queries/esql';
 import {
   BOUNDARY_WINDOW_HOURS,
+  RISK_MOVER_MIN_SCORE_CHANGE,
   buildRiskScoreAndLevelEvals,
   groupMarkerEval,
 } from './risk_history';
@@ -54,7 +55,7 @@ const slotHoursBack = (timeRange: TimeRange, slot: number): number =>
 /**
  * Builds the one query for the sparkline dots of the two risk tiles, all as columns of one row.
  *
- * Risk movers dot `k` counts the entities whose score rose by 10 or more over the range ending `k`
+ * Risk movers dot `k` counts the entities whose score rose by the minimum rise or more over the range ending `k`
  * steps ago, as the tile does; an entity without a score at the start of that range is not counted.
  * Newly high/critical dot `k` counts the entities that are High or Critical at the end of that range
  * and were not at its start (lower, or without a level), as the tile does.
@@ -76,7 +77,9 @@ export const buildRiskTilesSeriesQuery = (
     `${LEVEL_AT(slot)} = MAX(slot_level) WHERE ${SLOT_COLUMN} == ${slot}`,
   ]);
   const flags = dotIndexes.flatMap((k) => [
-    `${MOVER_FLAG(k)} = CASE(${SCORE_AT(k)} - ${SCORE_AT(k + dots)} >= 10, 1, null)`,
+    `${MOVER_FLAG(k)} = CASE(${SCORE_AT(k)} - ${SCORE_AT(
+      k + dots
+    )} >= ${RISK_MOVER_MIN_SCORE_CHANGE}, 1, null)`,
     `${NEWLY_HIGH_FLAG(k)} = CASE(${LEVEL_AT(k)} >= 3 AND (${LEVEL_AT(
       k + dots
     )} IS NULL OR ${LEVEL_AT(k)} > ${LEVEL_AT(k + dots)}), 1, null)`,

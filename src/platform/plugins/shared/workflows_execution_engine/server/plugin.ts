@@ -22,6 +22,7 @@ import type {
 import {
   ExecutionStatus,
   isTerminalStatus,
+  isWorkflowStepTriggered,
   toWorkflowExecutionEngineModel,
   WorkflowRepository,
 } from '@kbn/workflows';
@@ -1437,7 +1438,7 @@ export class WorkflowsExecutionEnginePlugin
       // Child executions (triggered by a workflow step) must always be scheduled in their own task,
       // never run inline in the parent's task. Otherwise the parent's runtime is blocked until the
       // child becomes idle, and cancel/timeout on the parent cannot take effect until then.
-      const isChildExecution = (context.triggeredBy as string | undefined) === 'workflow-step';
+      const isChildExecution = isWorkflowStepTriggered(context.triggeredBy as string | undefined);
 
       if (!isRunningInTaskManager && !request) {
         throw new Error('Workflows cannot be executed without the user context');

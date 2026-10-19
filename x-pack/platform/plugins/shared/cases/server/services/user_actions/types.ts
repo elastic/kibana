@@ -42,6 +42,7 @@ import type {
 } from '../../../common/types/api';
 import type { ObservablesActionType } from '../../../common/types/domain/user_action/observables/v1';
 import type { WorkflowUserActionPayload } from '../../../common/types/domain/user_action/workflow/v1';
+import type { BulkAttachmentsPayload } from '../../../common/types/domain/user_action/bulk_attachments/v1';
 import type {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
@@ -128,6 +129,9 @@ export interface BuilderParameters {
   };
   workflow: {
     parameters: { payload: WorkflowUserActionPayload };
+  };
+  bulkAttachments: {
+    parameters: { payload: { bulkAttachments: BulkAttachmentsPayload } };
   };
 }
 

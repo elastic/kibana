@@ -8,6 +8,12 @@
 /** Width of the window before a moment that is searched for an entity's last risk score. */
 export const BOUNDARY_WINDOW_HOURS = 2;
 
+/**
+ * The score rise, in points, that makes an entity a Risk movers entity: the count, its previous
+ * period, its sparkline and the tile's wording all read it from here.
+ */
+export const RISK_MOVER_MIN_SCORE_CHANGE = 10;
+
 const ENTITY_EUID = 'COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)';
 
 const entityEuidEval = (indent: string): string => `${indent}| EVAL entity_euid = ${ENTITY_EUID}`;

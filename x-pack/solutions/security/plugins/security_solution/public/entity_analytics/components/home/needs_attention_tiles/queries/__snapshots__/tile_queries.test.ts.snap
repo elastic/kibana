@@ -214,7 +214,7 @@ FROM (
 ), (
   FROM .entities.v2.latest.default-00001
   | WHERE \`entity.relationships.resolution.resolved_to\` IS NULL AND entity.name IS NOT NULL
-    AND (entity.risk.calculated_score_norm IS NOT NULL OR \`entity.relationships.resolution.risk.calculated_score_norm\` IS NOT NULL)
+    AND COALESCE(\`entity.relationships.resolution.risk.calculated_score_norm\`, entity.risk.calculated_score_norm) >= 10
   | EVAL current_score = COALESCE(\`entity.relationships.resolution.risk.calculated_score_norm\`, entity.risk.calculated_score_norm),
          effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
   | KEEP \`entity.id\`, current_score, effective_id
@@ -445,7 +445,7 @@ FROM (
 ), (
   FROM .entities.v2.latest.default-00001
   | WHERE \`entity.relationships.resolution.resolved_to\` IS NULL AND entity.name IS NOT NULL
-    AND (entity.risk.calculated_score_norm IS NOT NULL OR \`entity.relationships.resolution.risk.calculated_score_norm\` IS NOT NULL)
+    AND COALESCE(\`entity.relationships.resolution.risk.calculated_score_norm\`, entity.risk.calculated_score_norm) >= 10
   | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
   | EVAL current_score = COALESCE(\`entity.relationships.resolution.risk.calculated_score_norm\`, entity.risk.calculated_score_norm),
          effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)

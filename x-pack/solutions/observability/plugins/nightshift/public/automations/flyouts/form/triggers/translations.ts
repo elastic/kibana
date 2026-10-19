@@ -59,9 +59,6 @@ export const triggerLabels = {
   every: i18n.translate('xpack.nightshift.automations.flyout.everyOption', {
     defaultMessage: 'Every…',
   }),
-  customCron: i18n.translate('xpack.nightshift.automations.flyout.customCronOption', {
-    defaultMessage: 'Custom cron…',
-  }),
   whenAnAlert: i18n.translate('xpack.nightshift.automations.flyout.whenAnAlert', {
     defaultMessage: 'When an alert',
   }),
@@ -115,9 +112,6 @@ export const triggerLabels = {
   }),
   timezonePlaceholder: i18n.translate('xpack.nightshift.automations.flyout.timezonePlaceholder', {
     defaultMessage: 'City or timezone…',
-  }),
-  customCronLead: i18n.translate('xpack.nightshift.automations.flyout.customCronLead', {
-    defaultMessage: 'Custom cron',
   }),
   dailyLimit: i18n.translate('xpack.nightshift.automations.dailyLimitLabel', {
     defaultMessage: 'Daily trigger limit',
