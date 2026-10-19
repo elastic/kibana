@@ -941,9 +941,18 @@ describe('Attack Discovery worker chain', () => {
       });
 
       // Impact reads the correlated alerts through the Security step, and nothing reads the
-      // attack from Elasticsearch.
-      it('reads no Elasticsearch index itself', () => {
-        expect(reviewSteps.filter((step) => step.type.startsWith('elasticsearch.'))).toEqual([]);
+      // attack from Elasticsearch. The only direct reads are the two that retire the
+      // correlated alerts, and they read the detection alerts index.
+      it('reads Elasticsearch only to retire the correlated alerts', () => {
+        const reads = reviewSteps.filter((step) => step.type.startsWith('elasticsearch.'));
+
+        expect(reads.map((step) => step.name)).toEqual([
+          'find_open_correlated_alerts',
+          'verify_alerts_retired',
+        ]);
+        expect(new Set(reads.map((step) => step.with?.index))).toEqual(
+          new Set(['.alerts-security.alerts-{{ workflow.spaceId }}'])
+        );
       });
 
       it('does not run an agent against the Investigation', () => {
@@ -2038,42 +2047,67 @@ describe('Attack Discovery worker chain', () => {
   // tagged with the tag batched generation excludes. Without it, every Worker run
   // while the gate is parked correlates the same alerts into a near-duplicate attack.
   describe('retiring the correlated alerts', () => {
+    // Every step in order, between `resolve_escalation` and `escalation_gate`.
     const retireSteps = [
       'tag_correlated_alerts',
+      'find_open_correlated_alerts',
       'acknowledge_correlated_alerts',
+      'verify_alerts_retired',
+      'resolve_alerts_retired',
       'journal_alerts_retired',
     ] as const;
+    // Every step but the acknowledge, which runs only when there is an open alert.
+    const escalationGuarded = retireSteps.filter(
+      (name) => name !== 'acknowledge_correlated_alerts'
+    );
     const writes = ['tag_correlated_alerts', 'acknowledge_correlated_alerts'] as const;
+    const retried = [
+      'tag_correlated_alerts',
+      'find_open_correlated_alerts',
+      'acknowledge_correlated_alerts',
+      'verify_alerts_retired',
+    ] as const;
     const topLevelNames = review.steps.map((step) => step.name);
     const generation = parse(
       ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.yaml
     ) as YamlWorkflow;
 
-    const evaluateGuard = (name: string, escalate: boolean, alertIds?: string[]): unknown =>
+    const stripExpression = (expression: unknown): string =>
+      String(expression)
+        .replace(/^\$\{\{/, '')
+        .replace(/\}\}$/, '')
+        .trim();
+
+    const evaluateIf = (name: string, context: Record<string, unknown>): unknown =>
       createWorkflowLiquidEngine().evalValueSync(
-        String(stepIn(reviewSteps, name)?.if)
-          .replace(/^\$\{\{/, '')
-          .replace(/\}\}$/, '')
-          .trim(),
-        {
-          steps: { resolve_escalation: { output: { escalate } } },
-          inputs: alertIds === undefined ? {} : { alert_ids: alertIds },
-        }
+        stripExpression(stepIn(reviewSteps, name)?.if),
+        context
       );
 
-    const renderJournal = (errors: { tag?: unknown; ack?: unknown }): Promise<string> =>
+    const escalationContext = (escalate: boolean, alertIds?: string[]) => ({
+      steps: { resolve_escalation: { output: { escalate } } },
+      inputs: alertIds === undefined ? {} : { alert_ids: alertIds },
+    });
+
+    const evaluateResolved = (field: string, context: Record<string, unknown>): unknown =>
+      createWorkflowLiquidEngine().evalValueSync(
+        stripExpression(stepIn(reviewSteps, 'resolve_alerts_retired')?.with?.[field]),
+        context
+      );
+
+    const renderJournal = (retired: Record<string, unknown>): Promise<string> =>
       createWorkflowLiquidEngine().parseAndRender(
         asInputs(stepIn(reviewSteps, 'journal_alerts_retired')).message,
         {
           consts: review.consts,
           execution: { id: 'review-exec-1' },
-          inputs: { alert_ids: ['alert-1', 'alert-2'] },
-          steps: {
-            tag_correlated_alerts: errors.tag ? { error: errors.tag } : { output: {} },
-            acknowledge_correlated_alerts: errors.ack ? { error: errors.ack } : { output: {} },
-          },
+          steps: { resolve_alerts_retired: { output: retired } },
         }
       );
+
+    const searchFilters = (name: string) =>
+      ((stepIn(reviewSteps, name)?.with?.query as { bool?: { filter?: unknown[] } })?.bool
+        ?.filter ?? []) as unknown[];
 
     it('uses the az:ad_correlated tag', () => {
       expect(review.consts?.ad_correlated_tag).toBe('az:ad_correlated');
@@ -2091,29 +2125,26 @@ describe('Attack Discovery worker chain', () => {
 
     it.each([
       ['tag_correlated_alerts', 'security.setAlertTags'],
+      ['find_open_correlated_alerts', 'elasticsearch.search'],
       ['acknowledge_correlated_alerts', 'security.setAlertStatus'],
+      ['verify_alerts_retired', 'elasticsearch.search'],
+      ['resolve_alerts_retired', 'data.set'],
       ['journal_alerts_retired', 'workflow.execute'],
     ] as const)('implements %s as a real %s step', (name, type) => {
       expect(stepIn(reviewSteps, name)?.type).toBe(type);
     });
 
     // The gate can park the run for up to 168h, so retiring the alerts after the
-    // decision would leave them in the queue for every Worker run in that window.
-    it('retires the alerts after the escalation is resolved and before the gate', () => {
+    // decision would leave them in the queue for every Worker run in that window. The
+    // tag comes first, because it is what keeps the alerts out of the next run and so
+    // must not depend on the status write.
+    it('runs in order after the escalation is resolved and before the gate', () => {
       const order = ['resolve_escalation', ...retireSteps, 'escalation_gate'].map((name) =>
         topLevelNames.indexOf(name)
       );
 
       expect(order).not.toContain(-1);
       expect([...order].sort((a, b) => a - b)).toEqual(order);
-    });
-
-    // The tag is what keeps the alerts out of the next run, so it must not depend on
-    // the status write succeeding.
-    it('tags before it acknowledges', () => {
-      expect(topLevelNames.indexOf('tag_correlated_alerts')).toBeLessThan(
-        topLevelNames.indexOf('acknowledge_correlated_alerts')
-      );
     });
 
     // False positives are handled separately, and a failed analysis is not a verdict
@@ -2128,42 +2159,145 @@ describe('Attack Discovery worker chain', () => {
       ).toEqual([...writes]);
     });
 
-    it.each(retireSteps)('runs %s for an escalated attack with alerts', (name) => {
-      expect(evaluateGuard(name, true, ['alert-1'])).toBe(true);
+    it.each(escalationGuarded)('runs %s for an escalated attack with alerts', (name) => {
+      expect(evaluateIf(name, escalationContext(true, ['alert-1']))).toBe(true);
     });
 
-    it.each(retireSteps)('skips %s when the verdict does not escalate', (name) => {
-      expect(evaluateGuard(name, false, ['alert-1'])).toBe(false);
+    it.each(escalationGuarded)('skips %s when the verdict does not escalate', (name) => {
+      expect(evaluateIf(name, escalationContext(false, ['alert-1']))).toBe(false);
     });
 
-    // Both steps reject an empty id list.
-    it.each(retireSteps)('skips %s when the review was given no alerts', (name) => {
-      expect(evaluateGuard(name, true, [])).toBe(false);
-      expect(evaluateGuard(name, true)).toBe(false);
+    // Both writes reject an empty id list.
+    it.each(escalationGuarded)('skips %s when the review was given no alerts', (name) => {
+      expect(evaluateIf(name, escalationContext(true, []))).toBe(false);
+      expect(evaluateIf(name, escalationContext(true))).toBe(false);
     });
 
-    it('adds the tag without removing any', () => {
+    it('tags every correlated alert, adding the tag without removing any', () => {
       const tagStep = asWith(stepIn(reviewSteps, 'tag_correlated_alerts')) as Record<
         string,
         unknown
       >;
 
+      expect(tagStep.alert_ids).toBe('${{ inputs.alert_ids }}');
       expect(tagStep.tags_to_add).toEqual(['{{ consts.ad_correlated_tag }}']);
       expect(tagStep.tags_to_remove).toBeUndefined();
     });
 
-    it('acknowledges rather than closes the alerts', () => {
-      expect(asWith(stepIn(reviewSteps, 'acknowledge_correlated_alerts')).status).toBe(
-        'acknowledged'
-      );
+    // The status write has no current-status condition and drops `workflow_reason`, so a
+    // closed alert passed to it would be reopened and lose its close reason.
+    describe('acknowledging only open alerts', () => {
+      const acknowledge = stepIn(reviewSteps, 'acknowledge_correlated_alerts');
+      const find = stepIn(reviewSteps, 'find_open_correlated_alerts');
+
+      it('looks up the correlated alerts in this space’s alerts index', () => {
+        expect(asWith(find).index).toBe('.alerts-security.alerts-{{ workflow.spaceId }}');
+        expect(searchFilters('find_open_correlated_alerts')).toContainEqual({
+          ids: { values: '${{ inputs.alert_ids }}' },
+        });
+      });
+
+      it('keeps only the alerts that are still open', () => {
+        expect(searchFilters('find_open_correlated_alerts')).toContainEqual({
+          term: { 'kibana.alert.workflow_status': 'open' },
+        });
+      });
+
+      // `alert_ids` holds at most 1000 ids, so a smaller page would leave open alerts
+      // unacknowledged.
+      it('returns every open alert the review could be given', () => {
+        expect(find?.with?.size).toBe(1000);
+      });
+
+      it('acknowledges exactly the open alerts it found', () => {
+        expect(asWith(acknowledge).alert_ids).toBe(
+          "${{ steps.find_open_correlated_alerts.output.hits.hits | map: '_id' }}"
+        );
+        expect(asWith(acknowledge).status).toBe('acknowledged');
+      });
+
+      it('acknowledges when an open alert was found', () => {
+        expect(
+          evaluateIf('acknowledge_correlated_alerts', {
+            steps: { find_open_correlated_alerts: { output: { hits: { hits: [{ _id: 'a' }] } } } },
+          })
+        ).toBe(true);
+      });
+
+      // Covers a skipped lookup too: its output is absent.
+      it.each([
+        ['no alert is open', { output: { hits: { hits: [] } } }],
+        ['the lookup failed', { error: { type: 'Error' } }],
+      ])('acknowledges nothing when %s', (_case, lookup) => {
+        expect(
+          evaluateIf('acknowledge_correlated_alerts', {
+            steps: { find_open_correlated_alerts: lookup },
+          })
+        ).toBe(false);
+      });
     });
 
-    it.each(writes)('writes %s to the correlated detection alerts', (name) => {
-      expect(asWith(stepIn(reviewSteps, name)).alert_ids).toBe('${{ inputs.alert_ids }}');
+    describe('reading the alerts back', () => {
+      const verify = stepIn(reviewSteps, 'verify_alerts_retired');
+      const aggregations = (verify?.with?.aggregations ?? {}) as Record<
+        string,
+        { filter?: { term?: Record<string, string> } }
+      >;
+
+      it('reads back exactly the correlated alerts', () => {
+        expect(asWith(verify).index).toBe('.alerts-security.alerts-{{ workflow.spaceId }}');
+        expect(verify?.with?.query).toEqual({ ids: { values: '${{ inputs.alert_ids }}' } });
+      });
+
+      it.each([
+        ['tagged', 'kibana.alert.workflow_tags', '{{ consts.ad_correlated_tag }}'],
+        ['open', 'kibana.alert.workflow_status', 'open'],
+        ['acknowledged', 'kibana.alert.workflow_status', 'acknowledged'],
+        ['closed', 'kibana.alert.workflow_status', 'closed'],
+      ])('counts the %s alerts', (name, field, value) => {
+        expect(aggregations[name]?.filter?.term).toEqual({ [field]: value });
+      });
+
+      const readBack = {
+        steps: {
+          verify_alerts_retired: {
+            output: {
+              hits: { total: { value: 4 }, hits: [] },
+              aggregations: {
+                tagged: { doc_count: 4 },
+                open: { doc_count: 0 },
+                acknowledged: { doc_count: 3 },
+                closed: { doc_count: 1 },
+              },
+            },
+          },
+        },
+        inputs: { alert_ids: ['a', 'b', 'c', 'd'] },
+      };
+
+      it.each([
+        ['read', true],
+        ['requested', 4],
+        ['tagged', 4],
+        ['open', 0],
+        ['acknowledged', 3],
+        ['closed', 1],
+      ])('resolves %s from the read-back', (field, value) => {
+        expect(evaluateResolved(field, readBack)).toBe(value);
+      });
+
+      it('marks a failed read-back as unread', () => {
+        expect(
+          evaluateResolved('read', {
+            steps: { verify_alerts_retired: { error: { type: 'Error' } } },
+            inputs: { alert_ids: ['a'] },
+          })
+        ).toBe(false);
+      });
     });
 
-    // Bookkeeping, not the lifecycle: neither write may cancel the escalation.
-    it.each(writes)('retries %s and then continues', (name) => {
+    // Bookkeeping, not the lifecycle: nothing here may cancel the escalation.
+    it.each(retried)('retries %s and then continues', (name) => {
       const onFailure = stepIn(reviewSteps, name)?.['on-failure'];
 
       expect(onFailure?.retry?.['max-attempts']).toBe(3);
@@ -2174,38 +2308,64 @@ describe('Attack Discovery worker chain', () => {
       expect(stepIn(reviewSteps, 'journal_alerts_retired')?.['on-failure']?.continue).toBe(true);
     });
 
+    // The note reports the alerts as read back, because a write can return 200 and
+    // change nothing.
     describe('the journal note', () => {
-      const failure = { type: 'PermissionError', message: 'internal detail' };
-
-      it('reports both writes when they landed', async () => {
-        const rendered = await renderJournal({});
-
-        expect(rendered).toContain('Acknowledged the 2 correlated detection alert(s)');
-        expect(rendered).toContain('tagged them az:ad_correlated');
+      const retired = (overrides: Record<string, unknown> = {}) => ({
+        read: true,
+        requested: 4,
+        tagged: 4,
+        open: 0,
+        acknowledged: 4,
+        closed: 0,
+        ...overrides,
       });
 
-      it('says later runs may correlate the alerts again when the tag failed', async () => {
-        const rendered = await renderJournal({ tag: failure });
+      it('reports every alert tagged and acknowledged', async () => {
+        const rendered = await renderJournal(retired());
 
-        expect(rendered).toContain('Could not tag');
-        expect(rendered).toContain('Acknowledged them.');
+        expect(rendered).toContain(
+          'Tagged 4 of 4 correlated detection alert(s) az:ad_correlated, so later Worker runs skip them.'
+        );
+        expect(rendered).toContain('Acknowledged: 4.');
+        expect(rendered).not.toContain('review-exec-1');
+      });
+
+      it('says later runs may correlate the untagged alerts again', async () => {
+        const rendered = await renderJournal(retired({ tagged: 1 }));
+
+        expect(rendered).toContain('Tagged 1 of 4');
+        expect(rendered).toContain('later Worker runs may correlate the other 3 again');
         expect(rendered).toContain('review-exec-1');
       });
 
-      it('says the alerts are tagged but not acknowledged when the status write failed', async () => {
-        const rendered = await renderJournal({ ack: failure });
+      it('names alerts left closed rather than acknowledged', async () => {
+        const rendered = await renderJournal(retired({ acknowledged: 3, closed: 1 }));
 
-        expect(rendered).toContain('Tagged the 2 correlated detection alert(s) az:ad_correlated.');
-        expect(rendered).toContain('Could not acknowledge them.');
+        expect(rendered).toContain('Acknowledged: 3; already closed and left as they were: 1.');
+      });
+
+      it('names alerts the acknowledge did not reach', async () => {
+        const rendered = await renderJournal(retired({ acknowledged: 0, open: 4 }));
+
+        expect(rendered).toContain('still open, because acknowledging them did not land: 4');
+        expect(rendered).toContain('review-exec-1');
+      });
+
+      it('says the outcome is unknown when the read-back failed', async () => {
+        const rendered = await renderJournal(retired({ read: false }));
+
+        expect(rendered).toContain('Could not read the 4 correlated detection alert(s) back');
+        expect(rendered).not.toContain('Tagged');
         expect(rendered).toContain('review-exec-1');
       });
 
       // An internal failure's message would land in the Investigation, where every
       // later agent round reads it as user input.
-      it('never relays an error message', async () => {
-        const rendered = await renderJournal({ tag: failure, ack: failure });
-
-        expect(rendered).not.toContain('internal detail');
+      it('never relays an error', () => {
+        expect(asInputs(stepIn(reviewSteps, 'journal_alerts_retired')).message).not.toContain(
+          '.error'
+        );
       });
     });
   });
