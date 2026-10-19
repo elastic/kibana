@@ -2699,11 +2699,17 @@ describe('MS Defender response actions client', () => {
     });
 
     it('should use the requested id (not the raw doc value) as the policy agentId', async () => {
-      // Doc was matched via `mde_device_id`/array `cloud.instance.id`: only the bucket key is the MDE id
+      // Alert/incident docs store evidence instance ids on `cloud.instance.id` (an array). The
+      // policy must keep the requested machine id from the bucket key.
+      const evidenceInstanceId = '64a7162b-1111-2222-3333-444455556666';
+
       applyEsClientSearchMock({
         esClientMock: clientConstructorOptionsMock.esClient,
         index: MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN,
-        response: microsoftDefenderMock.createAgentLookupEsResponse({ '1-2-3': '1-2-3' }),
+        response: microsoftDefenderMock.createAgentLookupEsResponse(
+          { '1-2-3': '1-2-3' },
+          { '1-2-3': { cloud: { instance: { id: [evidenceInstanceId] } } } }
+        ),
       });
 
       await msClientMock.isolate(responseActionsClientMock.createIsolateOptions());

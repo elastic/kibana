@@ -40,7 +40,9 @@ export interface MicrosoftDefenderActionsClientOptionsMock
  * `undefined` for the whole entry) to simulate an id that has no matching document.
  */
 const createMsDefenderAgentLookupEsResponse = (
-  elasticAgentIdByMsAgentId: Record<string, string | null | undefined>
+  elasticAgentIdByMsAgentId: Record<string, string | null | undefined>,
+  /** Extra `_source` fields for a hit, keyed by the requested MDE id. */
+  sourceOverridesByMsAgentId: Record<string, object> = {}
 ) => {
   const response = new MicrosoftDefenderDataGenerator('seed').toEsSearchResponse([]);
 
@@ -59,7 +61,12 @@ const createMsDefenderAgentLookupEsResponse = (
                     : [
                         {
                           _index: '',
-                          _source: elasticAgentId ? { agent: { id: elasticAgentId } } : {},
+                          _source: elasticAgentId
+                            ? {
+                                agent: { id: elasticAgentId },
+                                ...sourceOverridesByMsAgentId[msAgentId],
+                              }
+                            : {},
                         },
                       ],
               },
