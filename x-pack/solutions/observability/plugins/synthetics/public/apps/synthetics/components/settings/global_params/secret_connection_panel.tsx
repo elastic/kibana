@@ -679,9 +679,12 @@ const SAVE_ERROR_TOAST = i18n.translate('xpack.synthetics.secretConnection.saveE
 const DELETE_ERROR_TOAST = i18n.translate('xpack.synthetics.secretConnection.deleteErrorToast', {
   defaultMessage: 'Failed to delete Vault connection',
 });
-const DELETE_CONFIRM_TITLE = i18n.translate('xpack.synthetics.secretConnection.deleteConfirmTitle', {
-  defaultMessage: 'Delete Vault connection?',
-});
+const DELETE_CONFIRM_TITLE = i18n.translate(
+  'xpack.synthetics.secretConnection.deleteConfirmTitle',
+  {
+    defaultMessage: 'Delete Vault connection?',
+  }
+);
 const LOAD_ERROR_TOAST = i18n.translate('xpack.synthetics.secretConnection.loadErrorToast', {
   defaultMessage: 'Failed to load Vault connections',
 });

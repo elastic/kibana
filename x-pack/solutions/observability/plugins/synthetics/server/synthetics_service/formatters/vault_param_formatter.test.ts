@@ -79,7 +79,9 @@ describe('stripSecretConnectionNames', () => {
   });
 
   it('rewrites references inside JSON strings (e.g. browser params)', () => {
-    expect(stripSecretConnectionNames('{"pw":"vault://prod@x/y#z"}')).toBe('{"pw":"vault://x/y#z"}');
+    expect(stripSecretConnectionNames('{"pw":"vault://prod@x/y#z"}')).toBe(
+      '{"pw":"vault://x/y#z"}'
+    );
   });
 });
 

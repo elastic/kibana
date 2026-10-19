@@ -252,7 +252,11 @@ export const formatSyntheticsPolicy = (
       throw new Error(VAULT_PACKAGE_UPGRADE_MESSAGE);
     }
     const connection = secretConnections?.length
-      ? selectSecretConnection(secretConnections, referencedSecretConnections, config[ConfigKey.NAME])
+      ? selectSecretConnection(
+          secretConnections,
+          referencedSecretConnections,
+          config[ConfigKey.NAME]
+        )
       : undefined;
     if (connection) {
       secretStoresItem.value = Buffer.from(

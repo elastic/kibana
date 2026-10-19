@@ -146,11 +146,12 @@ export const saveSecretConnectionRoute: SyntheticsRestApiRouteFactory<
     const encryptedClient = server.encryptedSavedObjects.getClient();
     let existing: SyntheticsSecretConnection | undefined;
     try {
-      const decrypted = await encryptedClient.getDecryptedAsInternalUser<SyntheticsSecretConnection>(
-        syntheticsSecretConnectionType,
-        id,
-        { namespace: spaceId }
-      );
+      const decrypted =
+        await encryptedClient.getDecryptedAsInternalUser<SyntheticsSecretConnection>(
+          syntheticsSecretConnectionType,
+          id,
+          { namespace: spaceId }
+        );
       existing = decrypted.attributes;
     } catch (e) {
       // Only a genuine "not found" means this is a brand-new connection. Any other
