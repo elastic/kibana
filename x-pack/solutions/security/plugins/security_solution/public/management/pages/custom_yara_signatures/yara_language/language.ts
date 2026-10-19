@@ -40,9 +40,19 @@ export const languageConfiguration: monaco.languages.LanguageConfiguration = {
  */
 export const lexerRules: monaco.languages.IMonarchLanguage = {
   tokenizer: {
-    root: [
-      [/[a-zA-Z_]\w*/, 'identifier'],
+    root: [{ include: '@whitespace' }, [/[a-zA-Z_]\w*/, 'identifier']],
+
+    whitespace: [
       [/\s+/, 'white'],
+      [/\/\*/, 'comment', '@blockComment'],
+      [/\/\/.*$/, 'comment'],
+    ],
+
+    // Block comments do not nest, so an inner `/*` is part of the comment.
+    blockComment: [
+      [/[^/*]+/, 'comment'],
+      [/\*\//, 'comment', '@pop'],
+      [/[/*]/, 'comment'],
     ],
   },
 };

@@ -53,4 +53,67 @@ describe('YARA language', () => {
       ],
     ]);
   });
+
+  describe('comments', () => {
+    it('should tokenize a line comment', () => {
+      expect(tokenize('// a comment')).toEqual([[['// a comment', 'comment']]]);
+    });
+
+    it('should tokenize a line comment after code', () => {
+      expect(tokenize('rule a // comment')).toEqual([
+        [
+          ['rule', 'identifier'],
+          [' ', 'white'],
+          ['a', 'identifier'],
+          [' ', 'white'],
+          ['// comment', 'comment'],
+        ],
+      ]);
+    });
+
+    it('should not start a block comment inside a line comment', () => {
+      expect(tokenize('// a /* b\nrule')).toEqual([
+        [['// a /* b', 'comment']],
+        [['rule', 'identifier']],
+      ]);
+    });
+
+    it('should tokenize an inline block comment', () => {
+      expect(tokenize('rule /* comment */ a')).toEqual([
+        [
+          ['rule', 'identifier'],
+          [' ', 'white'],
+          ['/* comment */', 'comment'],
+          [' ', 'white'],
+          ['a', 'identifier'],
+        ],
+      ]);
+    });
+
+    it('should tokenize a block comment spanning multiple lines', () => {
+      expect(tokenize('/*\n  rule a // b\n*/ rule')).toEqual([
+        [['/*', 'comment']],
+        [['  rule a // b', 'comment']],
+        [
+          ['*/', 'comment'],
+          [' ', 'white'],
+          ['rule', 'identifier'],
+        ],
+      ]);
+    });
+
+    it('should not nest block comments', () => {
+      expect(tokenize('/* a /* b */ c')).toEqual([
+        [
+          ['/* a /* b */', 'comment'],
+          [' ', 'white'],
+          ['c', 'identifier'],
+        ],
+      ]);
+    });
+
+    it('should keep `*` and `/` inside a block comment', () => {
+      expect(tokenize('/* a * b / c */')).toEqual([[['/* a * b / c */', 'comment']]]);
+    });
+  });
 });
