@@ -174,9 +174,15 @@ export const euidRankingSchema = lazySchema(() =>
 );
 
 // Any field used in the euid calculation must be mapped in the fields array,
-// otherwise we won't have guarantees of field being available
+// otherwise we won't have guarantees of field being available.
+//
+// Both identity variants are strict. Consumers hold the definition object as registered, not the
+// parsed copy, and tell the variants apart by key presence (`isSingleFieldIdentity`). A plain
+// object would let a calculated identity absorb a stray `singleField` by stripping it, so the
+// ranking is what gets validated while the stored object still carries the unvalidated single
+// field. Strictness makes an identity with keys of both variants fail every variant.
 const calculatedIdentityFieldLogicSchema = lazySchema(() =>
-  z.object({
+  z.strictObject({
     // Ranking mechanism for EUID: branches evaluated in order; first matching branch wins.
     // Branch with no `when` always matches (fallback). Used by ESQL, Painless, Memory, DSL.
     euidRanking: euidRankingSchema,
@@ -199,9 +205,10 @@ const calculatedIdentityFieldLogicSchema = lazySchema(() =>
 /**
  * Single-field identity: entity is identified by one field only (e.g. service.name, entity.id).
  * No composition, no field evaluations. ESQL/DSL use a simplified path for this shape.
+ * Strict for the same reason as the calculated variant above.
  */
 export const singleFieldIdentitySchema = lazySchema(() =>
-  z.object({
+  z.strictObject({
     singleField: z.string(),
     // When true, the entity id is not prefixed with the entity type (e.g. output "a" instead of "generic:a").
     skipTypePrepend: z.optional(z.boolean()),

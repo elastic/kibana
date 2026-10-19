@@ -180,7 +180,7 @@ A definition is an identity core plus two optional blocks, `extraction` and `dyn
 - `extraction`: the config the store's extraction engine, templates and CRUD API read (`fields`, `fieldEvaluations`, `postAggFilter`, `whenConditionTrueSetFieldsPreAgg`, `whenConditionTrueSetFieldsAfterStats`, `entityTypeFallback`, `creatableFromSingleDocument`, `priorityExtractionGate`, `nonPrioritySampling`). Its presence does not make the store extract the type: the store only materialises its four built-ins.
 - `dynamic`: what the inventory reads to generate ES|QL over raw telemetry for its list, count and detail views. See "The `dynamic` block" below.
 - There is no `indexPatterns` key. Source indices for extraction are API configuration (global state and per-engine overrides), not part of a definition.
-- Unknown keys are rejected, at the top level and inside each block.
+- Unknown keys are rejected, at the top level, inside each block and inside `identityField`. An identity is exactly one of its two variants (`singleField`, or `euidRanking` with `documentsFilter`); keys of both in one identity are rejected rather than stripped, because the registry stores the object as passed and the EUID helpers pick the variant by key presence.
 
 `@kbn/entity-store/common` exports the types `EntityDefinitionWithoutId` (a definition as registered), `ExtractionBlock` and `ExtractedEntityDefinition` (a definition with the block required), `DynamicBlock`, and the block zod schemas `extractionBlockSchema` and `dynamicBlockSchema`. `EntityDefinitionOfAnyType` remains as a deprecated alias of `EntityDefinitionWithoutId`.
 

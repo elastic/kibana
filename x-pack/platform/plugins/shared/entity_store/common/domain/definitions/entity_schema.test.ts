@@ -169,6 +169,44 @@ describe('entitySchema', () => {
     expect(entitySchema.safeParse({ ...core, description: 'a'.repeat(1025) }).success).toBe(false);
   });
 
+  describe('identityField', () => {
+    const calculated = {
+      euidRanking: { branches: [{ ranking: [[{ field: 'k8s.pod.uid' }]] }] },
+      documentsFilter: { field: 'k8s.pod.uid', exists: true },
+    };
+    const single = { singleField: 'k8s.pod.uid' };
+
+    it('accepts each variant on its own, unchanged', () => {
+      expect(entitySchema.parse({ ...core, identityField: calculated }).identityField).toEqual(
+        calculated
+      );
+      expect(entitySchema.parse({ ...core, identityField: single }).identityField).toEqual(single);
+    });
+
+    // Keys of both variants in one identity: neither variant may accept it by stripping the other's
+    // keys, since consumers hold the unparsed object and pick a variant by key presence.
+    it('rejects an identity that carries keys of both variants', () => {
+      expect(
+        entitySchema.safeParse({ ...core, identityField: { ...calculated, ...single } }).success
+      ).toBe(false);
+      expect(
+        entitySchema.safeParse({
+          ...core,
+          identityField: { ...single, euidRanking: calculated.euidRanking },
+        }).success
+      ).toBe(false);
+    });
+
+    it('rejects an unknown key in either variant', () => {
+      expect(
+        entitySchema.safeParse({ ...core, identityField: { ...calculated, typo: true } }).success
+      ).toBe(false);
+      expect(
+        entitySchema.safeParse({ ...core, identityField: { ...single, typo: true } }).success
+      ).toBe(false);
+    });
+  });
+
   describe('dynamic', () => {
     const dynamic = {
       sources: [

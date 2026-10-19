@@ -98,6 +98,51 @@ describe('EntityDefinitionRegistry', () => {
       expectRejected('bad_schema', /failed schema validation: extraction\.fields/);
     });
 
+    // The two identity variants are told apart at runtime by key presence (`isSingleFieldIdentity`),
+    // and the registry keeps the object it was given, not the parsed copy. An identity carrying
+    // keys of both variants must be rejected outright: if the schema merely stripped the stray
+    // keys, the EUID helpers would read a `singleField` that was never validated.
+    describe('mixed identity variants', () => {
+      const ranking = { branches: [{ ranking: [[{ field: 'mixed.id' }]] }] };
+
+      it('rejects a calculated identity that also carries a single field', () => {
+        const { identityField } = hostEntityDefinition;
+        const result = registry.register({
+          ...hostEntityDefinition,
+          identityField: { ...identityField, singleField: 'host.*' },
+        });
+
+        expect(result.ok).toBe(false);
+        expectRejected('host', /failed schema validation: identityField/);
+      });
+
+      it('rejects a single-field identity that also carries a ranking', () => {
+        const result = registry.register(
+          makeDefinition('mixed', {
+            identityField: { singleField: 'mixed.name', euidRanking: ranking },
+          })
+        );
+
+        expect(result.ok).toBe(false);
+        expectRejected('mixed', /failed schema validation: identityField/);
+      });
+
+      it('rejects an unknown key inside identityField', () => {
+        const result = registry.register(
+          makeDefinition('typo', {
+            identityField: {
+              singleField: 'typo.name',
+              skipTypePrepend: true,
+              skipTypePrefix: true,
+            },
+          } as unknown as Partial<RegistrableEntityDefinition>)
+        );
+
+        expect(result.ok).toBe(false);
+        expectRejected('typo', /failed schema validation: identityField/);
+      });
+    });
+
     it('accepts a definition with only the identity core', () => {
       const { extraction, ...coreOnly } = makeDefinition('core_only');
 
@@ -482,6 +527,20 @@ describe('EntityDefinitionRegistry', () => {
       expect(result.ok === false && result.reason).toContain(
         `identityField.documentsFilter: ${SERVABLE_IDENTITY_RULE}:`
       );
+    });
+
+    it('rejects an identity carrying both variants rather than validating only the ranking', () => {
+      // `host.*` is not a literal field path, so the servable identity rule would reject it as a
+      // `singleField`; it must not slip past the rule by riding on a valid ranking.
+      const { identityField } = hostDynamicDefinition;
+      const result = registry.register({
+        ...hostDynamicDefinition,
+        identityField: { ...identityField, singleField: 'host.*' },
+      });
+
+      expect(result.ok).toBe(false);
+      expect(result.ok === false && result.reason).toContain('identityField');
+      expect(registry.get('host')).toBeUndefined();
     });
 
     it('rejects an attribute that reads the identity field', () => {
