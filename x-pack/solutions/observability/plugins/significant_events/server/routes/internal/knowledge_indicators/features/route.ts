@@ -12,12 +12,14 @@ import {
   MAX_TEXT_LENGTH,
   baseFeatureSchema,
   featureUpsertSchema,
+  isRetryableSourceWriteConflict,
   type Feature,
 } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { getSourceWriteConflictReason } from '../../../../lib/errors/source_write_conflict_error';
 import { StatusError } from '../../../../lib/errors/status_error';
 import {
   filterReadableSourceIds,
@@ -364,7 +366,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<{ succeeded: number; failed: number; skipped: number }> => {
+  }): Promise<{ succeeded: number; failed: number; conflicts: number; skipped: number }> => {
     const scopedClients = await getScopedClients({
       request,
     });
@@ -407,9 +409,10 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     // kiClient.bulk silently drops exclude/restore ops targeting computed
     // features (and any stale UUIDs that slipped through between the lookup
     // and the bulk call). Both classes show up as additional `skipped` count.
-    // Only thrown batches count as `failed`.
+    // Only thrown batches count as `failed`, or as `conflicts` when the source was busy.
     let succeeded = 0;
     let failed = 0;
+    let conflicts = 0;
     let skipped = skippedFromLookup;
 
     const sourcesWithShrinkingOps = new Set<string>();
@@ -428,7 +431,12 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
             error instanceof Error ? error.message : String(error)
           }`
         );
-        failed += ops.length;
+        const reason = getSourceWriteConflictReason(error);
+        if (reason && isRetryableSourceWriteConflict(reason)) {
+          conflicts += ops.length;
+        } else {
+          failed += ops.length;
+        }
       }
     }
 
@@ -445,7 +453,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
       }
     }
 
-    return { succeeded, failed, skipped };
+    return { succeeded, failed, conflicts, skipped };
   },
 });
 

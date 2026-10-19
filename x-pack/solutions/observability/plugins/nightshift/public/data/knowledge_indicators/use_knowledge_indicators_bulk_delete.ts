@@ -50,7 +50,7 @@ export function useKnowledgeIndicatorsBulkDelete({
       const featuresPromise: Promise<BulkOperationResult> =
         features.length > 0
           ? deleteFeaturesInBulk(features)
-          : Promise.resolve({ succeededCount: 0, failedCount: 0 });
+          : Promise.resolve({ succeededCount: 0, failedCount: 0, conflictCount: 0 });
 
       const queriesPromise: Promise<BulkOperationResult> =
         queryIds.length > 0
@@ -62,8 +62,9 @@ export function useKnowledgeIndicatorsBulkDelete({
               .then(({ succeeded, failed }) => ({
                 succeededCount: succeeded,
                 failedCount: failed,
+                conflictCount: 0,
               }))
-          : Promise.resolve({ succeededCount: 0, failedCount: 0 });
+          : Promise.resolve({ succeededCount: 0, failedCount: 0, conflictCount: 0 });
 
       const [featuresSettled, queriesSettled] = await Promise.allSettled([
         featuresPromise,
