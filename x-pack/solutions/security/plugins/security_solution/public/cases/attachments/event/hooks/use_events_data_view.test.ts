@@ -10,9 +10,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 const render = () =>
-  renderHook((indexPattern: string = 'test') => useCaseEventsDataView(indexPattern), {
-    wrapper: TestProviders,
-  });
+  renderHook((indexPattern: string = 'test') => useCaseEventsDataView(indexPattern));
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -25,7 +23,6 @@ const mockDataView = new DataView({
 });
 
 import * as kibanaLib from '../../../../common/lib/kibana';
-import { TestProviders } from '../../../../common/mock';
 import { useCaseEventsDataView } from './use_events_data_view';
 
 describe('useEventsDataView', () => {
