@@ -110,6 +110,7 @@ describe('user-interactive task priority', () => {
 
     const initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
+      storage: { source: 'plain_index', dataRetention: '90d' },
       eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
     });
     const plugin = new WorkflowsExecutionEnginePlugin(initializerContext);

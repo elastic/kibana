@@ -233,6 +233,7 @@ describe('WorkflowsService (facade)', () => {
       expect(changeHistoryInstance.initialize).toHaveBeenCalledWith({
         elasticsearchClient: esClient,
         authService: coreStart.security!.authc,
+        userProfileService: coreStart.userProfile,
       });
     });
 
