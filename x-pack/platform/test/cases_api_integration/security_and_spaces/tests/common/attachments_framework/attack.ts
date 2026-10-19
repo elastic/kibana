@@ -353,11 +353,18 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const alertSets = attachments
           .filter(isAlertAttachment)
-          .map(({ alertId, attachmentId }) => toArray(alertId ?? attachmentId).sort().join(','))
+          .map(({ alertId, attachmentId }) =>
+            toArray(alertId ?? attachmentId)
+              .sort()
+              .join(',')
+          )
           .sort();
 
         expect(alertSets).to.eql(
-          [[ATTACK_A_ONLY_ALERT_ID, SHARED_ALERT_ID].sort().join(','), ATTACK_B_ONLY_ALERT_ID].sort()
+          [
+            [ATTACK_A_ONLY_ALERT_ID, SHARED_ALERT_ID].sort().join(','),
+            ATTACK_B_ONLY_ALERT_ID,
+          ].sort()
         );
       });
 
