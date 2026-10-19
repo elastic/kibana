@@ -32,10 +32,14 @@ export const isoDateTime = (options?: IsoDateTimeOptions): z.ZodString => {
   const { offset = false, message } =
     typeof options === 'string' ? { message: options } : options ?? {};
   const regex = offset ? ISO_DATETIME_OFFSET_REGEX : ISO_DATETIME_UTC_REGEX;
+  const errorMessage = message ?? 'Invalid ISO datetime';
 
-  return z
-    .string()
-    .max(ISO_DATETIME_MAX_LENGTH, { abort: true, message })
-    .refine((value) => regex.test(value), { message: message ?? 'Invalid ISO datetime' })
-    .meta({ format: 'date-time', pattern: regex.source });
+  return (
+    z
+      .string()
+      .max(ISO_DATETIME_MAX_LENGTH, { abort: true, message: errorMessage })
+      .refine((value) => regex.test(value), { message: errorMessage })
+      // `pattern` lets the workflow YAML editor flag invalid datetimes; the OAS converter strips it.
+      .meta({ format: 'date-time', pattern: regex.source })
+  );
 };

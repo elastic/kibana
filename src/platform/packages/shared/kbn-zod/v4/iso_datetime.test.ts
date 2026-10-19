@@ -24,8 +24,11 @@ describe('isoDateTime', () => {
     expect(schema.parse(utcMinute)).toBe(utcMinute);
     expect(schema.parse(utcSecond)).toBe(utcSecond);
     expect(schema.parse(utcFraction)).toBe(utcFraction);
+    expect(schema.parse('2024-02-29T10:00Z')).toBe('2024-02-29T10:00Z');
     expect(schema.safeParse(offsetMinute).success).toBe(false);
     expect(schema.safeParse(localMinute).success).toBe(false);
+    expect(schema.safeParse('2023-02-29T10:00Z').success).toBe(false);
+    expect(schema.safeParse('2024-01-01T24:00Z').success).toBe(false);
   });
 
   it('accepts minute and second precision when offset is enabled', () => {
@@ -34,6 +37,8 @@ describe('isoDateTime', () => {
     expect(schema.parse(offsetMinute)).toBe(offsetMinute);
     expect(schema.parse(offsetSecond)).toBe(offsetSecond);
     expect(schema.safeParse(localMinute).success).toBe(false);
+    expect(schema.safeParse('2024-01-01T10:00+24:00').success).toBe(false);
+    expect(schema.safeParse('2024-01-01T10:00+0100').success).toBe(false);
   });
 
   it('emits a single date-time string in JSON Schema', () => {
@@ -60,8 +65,9 @@ describe('isoDateTime', () => {
   });
 
   it('rejects values longer than 64 characters', () => {
-    const result = isoDateTime().safeParse(tooLong);
+    const result = isoDateTime().safeParse('x'.repeat(65));
     expect(result.error?.issues.map(({ code }) => code)).toEqual(['too_big']);
+    expect(result.error?.issues[0]?.message).toBe('Invalid ISO datetime');
   });
 
   it('uses the custom message for values longer than 64 characters', () => {
