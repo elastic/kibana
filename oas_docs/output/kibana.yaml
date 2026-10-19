@@ -535,7 +535,8 @@ paths:
         '200':
           description: Returns the OAuth callback script
       summary: ''
-      tags: []
+      tags:
+        - connectors
       x-state: Added in 9.4.0
       x-metaTags:
         - content: Kibana
