@@ -128,6 +128,8 @@ export {
   blastRadiusEntrySchema,
   causalFeatureSchema,
   signalEntrySchema,
+  signalInputEntrySchema,
+  type SignalInputEntry,
   SIGNAL_VERDICTS,
   significantEventSchema,
   significantEventStatusSchema,

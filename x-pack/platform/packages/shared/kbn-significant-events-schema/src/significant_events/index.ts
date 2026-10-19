@@ -30,6 +30,8 @@ export {
   blastRadiusEntrySchema,
   causalFeatureSchema,
   signalEntrySchema,
+  signalInputEntrySchema,
+  type SignalInputEntry,
   severitySchema,
   SIGNAL_VERDICTS,
   SEVERITY_OPTIONS,

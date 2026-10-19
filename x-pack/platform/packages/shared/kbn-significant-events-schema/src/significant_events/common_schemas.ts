@@ -260,11 +260,25 @@ const detectionSignalMetadataSchema = lazySchema(() =>
     )
 );
 
-const detectionSignalSchema = lazySchema(() =>
+/**
+ * What an agent sends to identify a detection: its `detection_id` and `rule_uuid`, copied from the
+ * input detection. The writer fills the rest of the metadata from the stored detection, so a field
+ * the agent drops or mistypes cannot reach storage.
+ */
+const detectionSignalInputMetadataSchema = lazySchema(() =>
+  detectionSignalMetadataSchema
+    .partial()
+    .required({ detection_id: true, rule_uuid: true })
+    .describe(
+      'Identifies the detection: copy detection_id and rule_uuid from the matching input detection. The other detection fields are filled in from the stored detection.'
+    )
+);
+
+const buildDetectionSignalSchema = <TMetadata extends z.ZodType>(metadata: TMetadata) =>
   signalBaseSchema
     .extend({
       type: z.literal('detection'),
-      metadata: detectionSignalMetadataSchema,
+      metadata,
     })
     .superRefine((signal, context) => {
       const result = signal.evidence?.result;
@@ -308,7 +322,14 @@ const detectionSignalSchema = lazySchema(() =>
           message: 'A not-checked verdict cannot include query evidence.',
         });
       }
-    })
+    });
+
+const detectionSignalSchema = lazySchema(() =>
+  buildDetectionSignalSchema(detectionSignalMetadataSchema)
+);
+
+const detectionSignalInputSchema = lazySchema(() =>
+  buildDetectionSignalSchema(detectionSignalInputMetadataSchema)
 );
 
 /** Extensible discriminated union of signal sources accepted from agents. */
@@ -316,6 +337,12 @@ export const signalEntrySchema = lazySchema(() =>
   z.discriminatedUnion('type', [detectionSignalSchema])
 );
 export type SignalEntry = z.infer<typeof signalEntrySchema>;
+
+/** The same union as agents send it: detection metadata is only identified, not spelled out. */
+export const signalInputEntrySchema = lazySchema(() =>
+  z.discriminatedUnion('type', [detectionSignalInputSchema])
+);
+export type SignalInputEntry = z.infer<typeof signalInputEntrySchema>;
 
 /** Canonical severity values in descending severity order (critical → low). info is not supported yet */
 export const SEVERITY_OPTIONS = [
@@ -338,16 +365,19 @@ export const SEVERITY_CONTRACT_RULE = dedent`
 
     Decide in order and stop at the first match:
     - "critical": a global outage affecting all or most customers; several distinct core operations confirmed blocked at once (for example balance, history, and payment together); a mandatory service, job, or platform-critical operation confirmed blocked end-to-end so the component can no longer perform its primary function — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "high"; or confirmed active exposure of PII, PCI DSS data, SSNs, credentials, secrets, or tokens.
-    - "high": the affected operation fails or is blocked on the verified path — a confirming row or measure shows it not completing (failed requests or jobs, refused or timed-out calls) — or is broadly degraded, intermittent, or partially failing for a significant subset. A single endpoint or lookup path stays here even when every caller hits it. An error signature on the operation's path with no row or measure showing the operation failing to complete is not enough: that is "medium". A share of attempts or a breadth that was not measured changes nothing here: a confirming row showing the operation failing or timing out is enough for "high".
-    - "medium": minor confirmed degradation with limited reach, or the evidence never settled whether the operation fails to complete versus only logs an error or slows. Not for a confirmed failing operation merely because its share or breadth was not measured.
+    - "high": the affected operation fails or is blocked on the verified path — a confirming row or measure shows it not completing (failed requests or jobs, refused or timed-out calls); a found row whose message says a request timed out, was refused, or failed is such a row — or is broadly degraded, intermittent, or partially failing for a significant subset. A single endpoint or lookup path stays here even when every caller hits it. An error signature on the operation's path with no row or measure showing the operation failing to complete is not enough: that is "medium".
+      A share of attempts or a breadth that was not measured changes nothing here: a confirming row showing the operation failing or timing out is enough for "high". If the operation fails to complete, the severity is "high" even if the share or breadth was not measured.
+    - "medium": minor confirmed degradation with limited reach, or the evidence never settled whether the operation fails to complete versus only logs an error or slows (the row names no timeout, refusal, or failure of the request). Not for a confirmed failing operation merely because its share or breadth was not measured.
     - "low": confirmed recovery, or confirmed absence of impact: noise, a false alarm, or a non-issue, including an internal dependency error the system demonstrably tolerates.
 
-    Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and whether it is still happening. Evidence that could not be collected (a query that timed out or returned nothing) leaves the question unsettled, and the ladder rates unsettled evidence "medium"; it is never grounds for "low". Weigh scope by what the operations do, not by how many detections fired. Signals on the same operation overlap: rate that operation from its most direct failure measure (the share of attempts that fail, otherwise the share of log lines), never by adding shares across signals or taking the highest of differently scoped ones.
+    Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and whether it is still happening. Evidence that could not be collected (a query that timed out or returned nothing) leaves the question unsettled.
+    When a failure signature was found but the evidence does not settle whether the operation completes, rate "medium"; when nothing was found, see "Nothing established". Weigh scope by what the operations do, not by how many detections fired.
+    Signals on the same operation overlap: rate that operation from its most direct failure measure (the share of attempts that fail, otherwise the share of log lines), never by adding shares across signals or taking the highest of differently scoped ones.
     A mandatory component is one that the event's blast_radius shows other services depending on; when it shows none, that clause does not apply.
 
     Tie-break: when two adjacent tiers both match the same evidence, choose the lower only when the evidence leaves genuinely unresolved whether the operation still completes, and never below "medium" on that ground.
 
-    Nothing established: when the evidence establishes no failure, degradation, or exposure, the event is "low" and the tie-break does not apply.
+    Nothing established: when no signal on the event shows a failure, degradation, or exposure (every query returned nothing, errored, or found only healthy rows), the event is "low" and the tie-break does not apply.
   `;
 
 /** Canonical severity used by storage, APIs, and tools. */

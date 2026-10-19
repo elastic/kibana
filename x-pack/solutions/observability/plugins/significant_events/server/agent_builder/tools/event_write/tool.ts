@@ -15,7 +15,9 @@ import {
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
+  signalInputEntrySchema,
   significantEventSchema,
+  MAX_ARRAY_LENGTH,
   UNCONFIRMED_EVENT_MAX_CONFIDENCE,
 } from '@kbn/significant-events-schema';
 import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
@@ -37,6 +39,7 @@ import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '../../agents/discovery/di
 import { eventsWriteBulkHandler, type EventsWriteInput } from './handler';
 import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
 import { assignStoredSourceIds } from '../../utils/stored_source_fields';
+import { fillDetectionMetadata } from './detection_metadata';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
 
@@ -57,6 +60,13 @@ export const eventsWriteItemSchema = lazySchema(() =>
       conversation_id: true,
     })
     .extend({
+      signals: z
+        .array(signalInputEntrySchema)
+        .max(MAX_ARRAY_LENGTH)
+        .optional()
+        .describe(
+          'Evidence signals associated with this incident record. Each entry represents one alerting rule associated with this event. '
+        ),
       slugs: nightshiftSourceSlugsField(
         'This event covers these sources. Nested signal, causal feature, and blast radius `source_id` values are slugs too. Disabled sources are accepted.'
       ),
@@ -354,14 +364,24 @@ export function createEventsWriteTool({
       const { request } = context;
       let storedItems: EventsWriteInput[] | undefined;
       try {
-        const { getEventSearchClient, getKnowledgeIndicatorClient, licensing, sourcesClient } =
-          await getScopedClients({
-            request,
-          });
+        const {
+          getEventSearchClient,
+          getDetectionClient,
+          getKnowledgeIndicatorClient,
+          licensing,
+          sourcesClient,
+        } = await getScopedClients({
+          request,
+        });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(sourcesClient);
-        const resolvedItems = toolParams.items.map((item) => assignStoredSourceIds(catalog, item));
+        const detectionClient = await getDetectionClient();
+        const identifiedItems = await fillDetectionMetadata({
+          items: toolParams.items,
+          findDetections: (detectionIds) => detectionClient.findByIds(detectionIds),
+        });
+        const resolvedItems = identifiedItems.map((item) => assignStoredSourceIds(catalog, item));
         storedItems = resolvedItems;
         const items = await enrichCausalFeatures(
           resolvedItems,

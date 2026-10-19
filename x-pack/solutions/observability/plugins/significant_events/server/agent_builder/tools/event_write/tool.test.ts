@@ -64,6 +64,9 @@ const createTool = (
 ) => {
   const getScopedClients = jest.fn().mockResolvedValue({
     getEventSearchClient: jest.fn().mockReturnValue({}),
+    getDetectionClient: jest
+      .fn()
+      .mockResolvedValue({ findByIds: jest.fn().mockResolvedValue({ hits: [] }) }),
     getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
     sourcesClient: mockSourcesClient(['logs.test', 'logs.batch', 'logs.web']),

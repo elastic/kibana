@@ -317,7 +317,7 @@ Each entry:
   - `time_range`: the absolute `{ from, to }` window bound at execution. Always record it: without
     it a placeholder query cannot be interpreted.
   - `result`: `"found"` | `"empty"` | `"error"`.
-- `metadata`: detection input.
+- `metadata`: `{ detection_id, rule_uuid }` copied from the detection input; the rest is filled in.
 - `causal_features`: array of cause entries (`<topology_entry_shapes>`); `[]` when empty.
 - `blast_radius`: array of dependency, entity, and infrastructure entries
   (`<topology_entry_shapes>`); `[]` when empty.
