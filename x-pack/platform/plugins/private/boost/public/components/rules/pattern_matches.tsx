@@ -12,7 +12,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiNotificationBadge,
   EuiPanel,
   EuiTab,
   EuiTabs,
@@ -24,6 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { BoostProfileType } from '../../../common/types';
 import { SupersedingRule, TargetName } from './target_name';
+import { TargetStatus } from './target_status';
 
 /** A data source an index pattern matches. */
 export interface TargetPreview {
@@ -74,10 +74,10 @@ type MatchKind = 'exact' | 'partial';
 
 // Each row shows whether the pattern matches it exactly or partly.
 const MATCH_ICONS: Readonly<
-  Record<MatchKind, { iconType: string; color: 'success' | 'subdued'; label: string }>
+  Record<MatchKind, { iconType: string; color: 'success' | 'text'; label: string }>
 > = {
   exact: {
-    iconType: 'checkCircleFill',
+    iconType: 'checkCircle',
     color: 'success',
     label: i18n.translate('xpack.boost.patternMatches.exactMatchIcon', {
       defaultMessage: 'Exact match',
@@ -85,7 +85,7 @@ const MATCH_ICONS: Readonly<
   },
   partial: {
     iconType: 'partial',
-    color: 'subdued',
+    color: 'text',
     label: i18n.translate('xpack.boost.patternMatches.partialMatchIcon', {
       defaultMessage: 'Partial match',
     }),
@@ -131,6 +131,33 @@ interface PatternMatchesProps {
   maxHeight: number;
 }
 
+interface PatternMatchStatusProps {
+  exactCount: number;
+  partialCount: number;
+}
+
+/** How well a pattern matches, for beside its label: exactly, partly, or not at all. */
+export const PatternMatchStatus = ({ exactCount, partialCount }: PatternMatchStatusProps) => (
+  <TargetStatus
+    label={
+      exactCount > 0
+        ? i18n.translate('xpack.boost.patternMatches.exactCount', {
+            defaultMessage: '{count, plural, one {# exact match} other {# exact matches}}',
+            values: { count: exactCount },
+          })
+        : partialCount > 0
+        ? i18n.translate('xpack.boost.patternMatches.partialCount', {
+            defaultMessage: '{count, plural, one {# partial match} other {# partial matches}}',
+            values: { count: partialCount },
+          })
+        : i18n.translate('xpack.boost.patternMatches.noMatchesCount', {
+            defaultMessage: '0 matches',
+          })
+    }
+    data-test-subj="boostRulePatternMatchCount"
+  />
+);
+
 /**
  * What an index pattern matches, or partly matches until it matches something, beside every data
  * source it could target, like the data view editor's preview.
@@ -161,11 +188,6 @@ export const PatternMatches = ({
     (hasExactMatches ? exactMatches : partialMatches).map(({ name }) => name)
   );
   const matchKind: MatchKind = hasExactMatches ? 'exact' : 'partial';
-  // How many each tab lists: what matches, exactly or else partly, and every data source.
-  const counts: Readonly<Record<MatchesTab, number>> = {
-    matching: !type || !pattern ? 0 : highlightedNames.size,
-    all: names.length,
-  };
 
   const renderEmpty = (message: string) => (
     <EuiText
@@ -181,10 +203,9 @@ export const PatternMatches = ({
   );
 
   // The scrolling area keeps 8px of padding, which its scroll mask fades.
-  const renderList = (label: string, rows: ReactNode, isSubdued = false) => (
+  const renderList = (label: string, rows: ReactNode) => (
     <EuiText
       size="s"
-      color={isSubdued ? 'subdued' : undefined}
       tabIndex={0}
       role="region"
       aria-label={label}
@@ -258,8 +279,8 @@ export const PatternMatches = ({
         })
       );
     }
-    // The tab counts the matches, and each row's icon shows how it matches, so the lists only name
-    // that for screen readers.
+    // The count beside the pattern's label and each row's icon show how they match, so the lists
+    // only name that for screen readers.
     if (hasExactMatches) {
       return renderList(
         i18n.translate('xpack.boost.patternMatches.exactMatchesLabel', {
@@ -269,13 +290,11 @@ export const PatternMatches = ({
       );
     }
     if (partialMatches.length > 0) {
-      // Subdued, since the rule doesn't apply to these yet.
       return renderList(
         i18n.translate('xpack.boost.patternMatches.partialMatchesLabel', {
           defaultMessage: 'Partial matches',
         }),
-        renderTargets(partialMatches, partialPattern, 'partial', 'boostRulePartialMatch'),
-        true
+        renderTargets(partialMatches, partialPattern, 'partial', 'boostRulePartialMatch')
       );
     }
     return renderEmpty(
@@ -324,17 +343,6 @@ export const PatternMatches = ({
             isSelected={selectedTab === id}
             disabled={!type}
             onClick={() => setTab(id)}
-            // Counted once a profile sets what's listed; exact matches count in the success color.
-            append={
-              type && (
-                <EuiNotificationBadge
-                  color={id === 'matching' && hasExactMatches ? 'success' : 'subdued'}
-                  data-test-subj={id === 'all' ? 'boostRuleAllCount' : 'boostRuleMatchingCount'}
-                >
-                  {counts[id]}
-                </EuiNotificationBadge>
-              )
-            }
             data-test-subj={id === 'all' ? 'boostRuleAllTab' : 'boostRuleMatchingTab'}
           >
             {TAB_LABELS[id][targetType]}

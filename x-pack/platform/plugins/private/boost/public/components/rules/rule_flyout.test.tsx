@@ -482,7 +482,7 @@ describe('RuleFlyout pattern matches', () => {
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
 
-    expect(screen.getByTestId('boostRuleMatchingCount')).toHaveTextContent('1');
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('1 exact match');
     expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('catalog-fall');
   });
 
@@ -511,7 +511,7 @@ describe('RuleFlyout pattern matches', () => {
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat');
 
-    expect(screen.getByTestId('boostRuleMatchingCount')).toHaveTextContent('1');
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('1 partial match');
     expect(screen.getByRole('region', { name: 'Partial matches' })).toBeInTheDocument();
     const [partialMatch] = screen.getAllByTestId('boostRulePartialMatch');
     expect(partialMatch).toHaveTextContent('catalog-fall');
@@ -520,22 +520,6 @@ describe('RuleFlyout pattern matches', () => {
       'catalog-fall'
     );
     expect(within(partialMatch).getByTestId('boostSupersedingRule')).toHaveTextContent('catalogs');
-  });
-
-  it('counts what each tab lists, in the success color for exact matches', async () => {
-    renderNewRule();
-    const getMatchingCount = () => screen.getByTestId('boostRuleMatchingCount');
-
-    expect(screen.getByTestId('boostRuleAllCount')).toHaveTextContent('2');
-    expect(getMatchingCount()).toHaveTextContent('0');
-
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat');
-    expect(getMatchingCount()).toHaveTextContent('1');
-    expect(getMatchingCount().className).toMatch(/subdued/);
-
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'alog-*');
-    expect(getMatchingCount()).toHaveTextContent('1');
-    expect(getMatchingCount().className).toMatch(/success/);
   });
 
   it('marks each exact match, or each partial match, with its icon', async () => {
@@ -547,18 +531,20 @@ describe('RuleFlyout pattern matches', () => {
         (icon) => icon.getAttribute('data-euiicon-type')
       ).filter((iconType) => iconType !== 'sortAscending');
 
+    const getIcon = () =>
+      screen.getByTestId('boostRulePatternMatches').querySelector('[data-euiicon-type]');
+
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
-    expect(getIcons()).toEqual(['checkCircleFill']);
+    expect(getIcons()).toEqual(['checkCircle']);
     // The saved catalogs rule ranks higher, so the match is subdued like its struck-through name.
-    expect(
-      screen
-        .getByTestId('boostRulePatternMatches')
-        .querySelector('[data-euiicon-type="checkCircleFill"]')
-    ).toHaveAttribute('color', 'subdued');
+    expect(getIcon()).toHaveAttribute('color', 'subdued');
 
     await userEvent.clear(screen.getByTestId('boostRulePattern'));
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat');
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'prod');
     expect(getIcons()).toEqual(['partial']);
+    // Nothing ranks higher for products, so its icon and name use the text color.
+    expect(getIcon()).toHaveAttribute('color', 'text');
+    expect(screen.queryByTestId('boostSupersededTarget')).not.toBeInTheDocument();
   });
 
   it('marks the matches among every data source, keeping the rest aligned', async () => {
@@ -596,7 +582,7 @@ describe('RuleFlyout pattern matches', () => {
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'nothing-*');
 
-    expect(screen.getByTestId('boostRuleMatchingCount')).toHaveTextContent('0');
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('0 matches');
     expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('No matches detected');
   });
 
@@ -632,7 +618,7 @@ describe('RuleFlyout pattern matches', () => {
     expect(screen.getByTestId('boostRulePatternMatchesEmpty')).toHaveTextContent(
       'Enter an index pattern to see matches'
     );
-    expect(screen.getByTestId('boostRuleMatchingCount')).toHaveTextContent('0');
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('0 matches');
   });
 
   it('lists every index, highlighting the same matches', async () => {
