@@ -15,6 +15,7 @@ import {
   filter,
   type Observable,
 } from 'rxjs';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import {
   AgentExecutionMode,
@@ -43,12 +44,14 @@ import type { CallbackDeliveryService } from './callback_delivery_service';
 export const deliverCallbackEvents = ({
   execution,
   events$,
+  request,
   callbackDeliveryService,
   surfacesService,
   logger,
 }: {
   execution: AgentExecution;
   events$: Observable<ChatEvent>;
+  request: KibanaRequest;
   callbackDeliveryService: CallbackDeliveryService;
   surfacesService: SurfacesService;
   logger: Logger;
@@ -131,14 +134,18 @@ export const deliverCallbackEvents = ({
               return EMPTY;
             }
 
+            const completedEvent: RoundCompleteEvent = roundCompleteEvent;
+
             // The response message ready to post on the round's surface, such as Slack.
-            const surfacePayload = surfacesService.renderPayload(roundCompleteEvent, {
+            const surfacePayload = surfacesService.renderPayload(completedEvent, {
               originType: execution.agentParams.origin?.type,
+              request,
+              spaceId: execution.spaceId,
             });
 
-            const event = { ...roundCompleteEvent, surface_payload: surfacePayload };
-
-            return deliverEvent(event);
+            return from(surfacePayload).pipe(
+              concatMap((payload) => deliverEvent({ ...completedEvent, surface_payload: payload }))
+            );
           })
         ),
         catchError((error) => {

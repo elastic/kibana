@@ -258,9 +258,11 @@ describe('buildHuntNarrative', () => {
       ctx
     );
 
-    // Efficient is unavailable too, but Tier 2 has no consumer for it, so it is not blamed.
-    expect(narrative).toContain('no model was available for the Balanced and Frontier tiers');
+    // Efficient and Balanced are unavailable too, but Tier 2 has no consumer for either, so
+    // neither is blamed.
+    expect(narrative).toContain('no model was available for the Frontier tier');
     expect(narrative).not.toContain('Efficient');
+    expect(narrative).not.toContain('Balanced');
   });
 
   it('explains every Tier 2 skip reason in plain words under the Tier 2 heading', () => {

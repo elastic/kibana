@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { test, CUSTOM_ROLES } from '../fixtures';
 
-test.describe('ES|QL Data Federation — Stack Management', { tag: tags.stateful.classic }, () => {
+test.describe('ES|QL Data Federation — Stack Management', { tag: tags.deploymentAgnostic }, () => {
   test('loads the management app and can open the connect data source flyout', async ({
     browserAuth,
     page,
