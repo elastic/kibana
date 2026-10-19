@@ -2,13 +2,14 @@
 name: file-bug
 description: >
   Use when the user asks to create, file, or comment a Kibana Security Solution
-  bug, or names exploratory-tester findings to file.
+  bug ("file this bug", "open a ticket for this"), or names exploratory-tester
+  findings to file.
 disable-model-invocation: true
 ---
 
 # File bug
 
-Write a Security Solution bug to `$TARGET_REPO` (`elastic/kibana`, or `elastic/security-team` for security-sensitive bugs) only after a **write-yes** (the explicit yes): a later message that clearly approves **this** shown draft (for example “yes, file it”). Do not offer to file anything on your own initiative. “Create a bug”, “file this ticket”, or “file finding 2” means **prepare a draft**, not write. `write` ends every body with the visible stamp `Filed via file-bug` and a hidden marker `<!-- filed-via: file-bug v1 -->`.
+Write a bug to `$TARGET_REPO` only after a **write-yes** (the explicit yes): a later message that clearly approves **this** shown draft (for example “yes, file it”). Do not offer to file anything on your own initiative. “Create a bug”, “file this ticket”, or “file finding 2” means **prepare a draft**, not write. `write` ends every body with the visible stamp `Filed via file-bug` and a hidden marker `<!-- filed-via: file-bug v1 -->`.
 
 Security-specific; does not build on repo-level `gh-create-issue` and must not change it. Exploratory-tester may hand off here only after the human **names** the findings. Read `references/drafting.md` while collecting or drafting. `scripts/file-bug.py` is the source of truth (`--help` per command); `scripts/file_bug.py` is the library — do not run it as a CLI.
 
@@ -21,7 +22,7 @@ All GitHub label reads and writes go through `python3 "$FILE_BUG" <cmd>`. JSON o
 
 | Step | Do |
 |---|---|
-| 0. Classify | Ask if the bug is security-sensitive. Yes → `TARGET_REPO=elastic/security-team`. |
+| 0. Classify | Security-sensitive signal → hard stop, `elastic/security-team`. Otherwise `elastic/kibana`. |
 | 1. Collect | Path A (scratch/media) or Path B (named tester finding). One bug per loop. |
 | 2. Search | Open **and** closed. Two issue queries, then open PRs. Empty search is not “new”. |
 | 3. Draft and stop | Full draft + media review, then **end the turn**. |
@@ -46,43 +47,28 @@ Do not ask for a write-yes until `check-draft` exits 0 (create: pass `--title`, 
 
 ### 0. Classify
 
-Before collecting or searching, ask once: “Does this expose a vulnerability, credentials or secrets, customer data or PII, or an exploit path?” **Hard stop.**
+Ask once, then **Hard stop**: “Does this expose a vulnerability, credentials or secrets, customer data or PII, or an exploit path?” — but only if the report (text or media) shows one of: a user reading or changing data or actions they lack access to; script or markup running from user-controlled input; credentials, tokens or keys; customer or host data. Otherwise do not ask: use `elastic/kibana` and show the target repo in the draft.
 
 - **Yes / unsure** → `TARGET_REPO="elastic/security-team"`; the human confirms the repo in the draft. Search, label, upload and write only against `$TARGET_REPO` — nothing in `elastic/kibana`.
-- **No** → `TARGET_REPO="elastic/kibana"`. If `scan-sensitive` later raises `security_issue`, ask again and switch repo instead of overriding.
+- **No** → `TARGET_REPO="elastic/kibana"`. If `scan-sensitive` later raises `security_issue`, ask and switch repo instead of overriding.
 
 Template, title format and `bug` / `triage_needed` are reused. `Team:*` and `v*` labels may not exist in `security-team`: `validate-labels --repo "$TARGET_REPO"`, drop what is missing, show the dropped labels in the draft.
 
 ### 1. Collect
 
-Two collect paths. Same later steps; only collection differs.
+Two collect paths; same later steps.
 
-**Path A — from scratch** — interview and/or watch media (recording / snapshots, pasted text, `.bug-fixer-session/reproduction-report.md`, an existing `#N`); hand-draft `templates/bug-report.md`; then `infer-team` + `format-title`.
-
-**Path B — exploratory-tester pack** — do **not** hand-map markdown:
+**Path A — from scratch** — interview and/or watch media (recording / snapshots, pasted text, `.bug-fixer-session/reproduction-report.md`, an existing `#N`); hand-draft `templates/bug-report.md`; then:
 
 ```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/parse-findings.py \
-  --session-dir "$SESSION_DIR"
-python3 "$FILE_BUG" from-findings \
-  --jsonl "$SESSION_DIR/findings.jsonl" --title "$FINDING_TITLE" \
-  --out "$FINDING_JSON"
-```
-
-`from-findings` prints the **bare** finding (`source: exploratory-tester`); pass that file to later `--finding` flags. Path B create always includes `sec-eng-prod:exploratory-tester` (`write --finding`). `--index` is **1-based** and skips `Observation` blocks; prefer `--title`.
-
-```bash
-python3 "$FILE_BUG" check-pack --finding "$FINDING_JSON" --config "$CONFIG_JSON"   # CONFIG_JSON = $SESSION_DIR/config.json
-python3 "$FILE_BUG" infer-deployment --finding "$FINDING_JSON" --config "$CONFIG_JSON"
-python3 "$FILE_BUG" infer-release --finding "$FINDING_JSON" --config "$CONFIG_JSON"
-python3 "$FILE_BUG" scan-sensitive --finding "$FINDING_JSON"
-python3 "$FILE_BUG" render-body --finding "$FINDING_JSON" --config "$CONFIG_JSON" --out body.md
 python3 "$FILE_BUG" infer-team --area "$AREA" --slug "$AREA_SLUG" --route "$ROUTE" \
   --knowledge x-pack/solutions/security/plugins/security_solution/.agents/references/security-domain-knowledge.md
 python3 "$FILE_BUG" format-title --label "$TEAM_LABEL" --symptom "$SYMPTOM"
 ```
 
 `--route` is the nav label (`Security > Alerts`) or the path (`/app/security/alerts`).
+
+**Path B — exploratory-tester pack** — read `references/path-b.md`. It gives `parse-findings.py`, `from-findings`, `check-pack`, `infer-deployment`, `infer-release`, `scan-sensitive` and `render-body`; then `infer-team` and `format-title` as above.
 
 ### 2. Search
 
@@ -107,13 +93,11 @@ python3 "$FILE_BUG" check-draft --finding "$FINDING_JSON" --body body.md \
   --label bug --label triage_needed --label "Team:…"
 ```
 
-New issues always get `bug` and `triage_needed`. If `infer-release` is confident, pass that `vX.Y.Z` as `--label` on `check-draft` and `write` (`validate-labels` first; `write` does not infer one). Version `Unknown` → omit the `v*` label; a concrete unparseable version (infer-release exits 2) → ask. Path B also `--label sec-eng-prod:exploratory-tester`.
+New issues always get `bug` and `triage_needed`. If `infer-release` is confident, pass that `vX.Y.Z` as `--label` on `check-draft` and `write` (`validate-labels` first; `write` does not infer one). Version `Unknown` → omit the `v*` label. Path B also `--label sec-eng-prod:exploratory-tester`.
 
 If `check-draft` reports `security_issue:file_in_security_team`, switch `TARGET_REPO` to `elastic/security-team` and re-run Search there; `write` refuses `elastic/kibana` for that hit unless `--security-ok`. On `wip_or_limitation`, ask whether to **file anyway** before any write-yes.
 
-#### Media review
-
-Open every screenshot and recording you will upload (for video, frames from start, middle and failure). Look for real customer or host data: hostnames, IPs, emails, usernames, org or customer names, cluster/deployment URLs, API keys and tokens (including the URL bar and network/console panels). Add a **Media reviewed** list to the draft: file → what you checked → clean / needs redaction. Anything not clean is not uploaded; ask for a redacted or synthetic-data replacement. Only after the human confirms all files are clean, `check-draft --media-ok`. Say what you could not check — a long video cannot be proven clean.
+**Media review.** Text scans do not read images. Open every screenshot and recording before upload (video: start, middle and failure frames). Real customer or host data — hostnames, IPs, emails, org names, cluster URLs, keys or tokens, including the URL bar and console/network panels — means the file is **not uploaded**: ask for a redacted or synthetic-data replacement. List each file under **Media reviewed** (file → clean / needs redaction), say what you could not check, and pass `--media-ok` only after the human confirms all files are clean.
 
 ### 4. Write (only after write-yes)
 
@@ -129,7 +113,7 @@ python3 "$FILE_BUG" write \
   --finding "$FINDING_JSON"
 ```
 
-Comment / reopen also need `--number N`. `--finding` is required on Path B. `upload` posts to `uploads.github.com/user-attachments/assets` (undocumented; can change). Reply with the issue URL, action, uploaded URLs, leftovers. Do not write back to `known_open_bugs`.
+Comment / reopen also need `--number N`. `--finding` is required on Path B. `upload` posts to `uploads.github.com/user-attachments/assets` (undocumented; can change). Reply with the issue URL, action, uploaded URLs, leftovers.
 
 Never retry a failed **create** or **comment**. If `reopen_comment` reopens and the comment fails, report the partial write and do not reopen again.
 
@@ -143,6 +127,6 @@ Stop. You are about to write without a write-yes, or to file the wrong thing:
 - “Same class of bug, I’ll add it to Expected.” → confirmed finding only. Never suggest the fix. Adjacent notes go in Additional information or a second ticket.
 - “I’ll `write --body-file body.md`.” → write `embedded.md`.
 - “It's probably fine to file the vulnerability in `elastic/kibana` and fix it later.” → `TARGET_REPO=elastic/security-team`. Public issues are cached and indexed even if deleted.
-- “The text scan passed, so the screenshot is fine.” / “It's only a demo cluster.” → text scans do not read media. Do the media review.
+- “The text scan passed, so the screenshot is fine.” → do the media review.
 - “Title is long, I’ll clip it.” → `format-title` exit 2.
-- Dropping `sec-eng-prod:exploratory-tester`. Writing `_unknown_`. Assuming Scout is always local (read `config.json` / URL / arch).
+- Writing `_unknown_`. Assuming Scout is always local (read `config.json` / URL / arch).

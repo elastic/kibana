@@ -2151,6 +2151,7 @@ class SkillProtocolTest(unittest.TestCase):
             [
                 self.skill,
                 (SKILL_ROOT / "references" / "drafting.md").read_text(encoding="utf-8"),
+                (SKILL_ROOT / "references" / "path-b.md").read_text(encoding="utf-8"),
                 (SKILL_ROOT / "templates" / "bug-report.md").read_text(encoding="utf-8"),
             ]
         )
@@ -2225,7 +2226,7 @@ class SkillProtocolTest(unittest.TestCase):
         self.assertIn("not already on that issue", self.text)
         self.assertIn("parse-findings.py", self.text)
         self.assertIn("from-findings", self.text)
-        self.assertIn("1-based", self.skill)
+        self.assertIn("1-based", self.text)
         self.assertIn("parse-search", self.text)
         self.assertIn("format-title", self.text)
         self.assertIn("infer-deployment", self.text)
