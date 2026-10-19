@@ -37,7 +37,10 @@ export const ChromeAppHeader = ({ menu, share, tabsBar }: ChromeAppHeaderProps) 
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
-  const sessionTitle = persistedDiscoverSession?.title;
+  const pendingSessionTitle = useInternalStateSelector(
+    (state) => state.saveSessionModal.initialTitle
+  );
+  const sessionTitle = persistedDiscoverSession?.title ?? pendingSessionTitle;
   const canRenameSession = Boolean(
     capabilities.discover_v2.save &&
       !persistedDiscoverSession?.managed &&

@@ -96,7 +96,8 @@ describe('ChromeAppHeader', () => {
     });
     // The title is not persisted until the session is actually saved through the modal
     expect(services.discoverSessionService.save).not.toHaveBeenCalled();
-    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('New session');
+    // While the modal is open the header keeps showing the title being saved, not the default
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('My draft');
   });
 
   it('should keep the editor open with an error when renaming fails', async () => {
