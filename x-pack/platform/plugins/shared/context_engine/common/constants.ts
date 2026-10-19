@@ -43,11 +43,11 @@ export const DEFAULT_SIGNALS_PAGE_SIZE = 25;
 export const MAX_SIGNALS_PAGE_SIZE = 100;
 
 /** Read and decision routes for the improvements a feedback analysis run proposed. */
-export const aiIndexImprovementsPath = `${internalApiPath}/ai_index/{aiIndexId}/improvements`;
+export const aiIndexImprovementsPath = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/improvements`;
 export const improvementApprovePath = `${aiIndexImprovementsPath}/{improvementId}/approve`;
 export const improvementRejectPath = `${aiIndexImprovementsPath}/{improvementId}/reject`;
 /** Triggers one analysis off-schedule. */
-export const aiIndexFeedbackAnalysisRunPath = `${aiIndexFeedbackAnalysisPath}/_run`;
+export const aiIndexFeedbackAnalysisRunPath = `${AI_INDEX_FEEDBACK_ANALYSIS_PATH}/_run`;
 
 /** Version of the internal Improvements API, shared between route registration and the browser client. */
 export const IMPROVEMENTS_INTERNAL_API_VERSION = '1';

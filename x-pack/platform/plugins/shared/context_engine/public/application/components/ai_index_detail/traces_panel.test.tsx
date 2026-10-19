@@ -17,7 +17,6 @@ import { TracesPanel } from './traces_panel';
 
 const mockUseAgentBuilderAgents = jest.fn();
 const mockUseIndices = jest.fn();
-const mockUseSearchDataStreams = jest.fn();
 const mockPutFeedbackAnalysis = jest.fn();
 const mockRunFeedbackAnalysis = jest.fn();
 const mockFeedbackLoopEnabled = jest.fn();

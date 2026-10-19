@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { AgentAccessControlMode } from '@kbn/agent-builder-common';
+import { AgentAccessControlMode, chatAgentTypeId } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import {
-  CONTEXT_ENGINE_SETUP_AGENT_ID,
-  CONTEXT_ENGINE_SETUP_AGENT_TYPE_ID,
-} from './context_engine_agent';
+import { CONTEXT_ENGINE_SETUP_AGENT_ID } from './context_engine_agent';
 
 export const installContextEngineAgent = async ({
   agentBuilder,
@@ -23,7 +20,7 @@ export const installContextEngineAgent = async ({
     spaceId,
     agent: {
       id: CONTEXT_ENGINE_SETUP_AGENT_ID,
-      type: CONTEXT_ENGINE_SETUP_AGENT_TYPE_ID,
+      type: chatAgentTypeId,
       name: 'Context Engine Setup',
       description:
         'Configures AI indices, chooses data sources, and generates workflow automations that ' +

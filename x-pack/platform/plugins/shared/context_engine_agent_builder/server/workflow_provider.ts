@@ -31,8 +31,8 @@ export const createWorkflowProvider = (
     };
   },
 
-  async get({ workflowId, spaceId }) {
-    const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId);
+  async get({ workflowId, spaceId, request }) {
+    const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId, request);
     if (!workflow) {
       return null;
     }

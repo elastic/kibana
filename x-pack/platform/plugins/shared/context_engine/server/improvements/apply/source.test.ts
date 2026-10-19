@@ -29,6 +29,7 @@ const aiIndex = (sources: AiIndexSource[]): AiIndexHttpItem => ({
   id: 'support',
   description: 'Support knowledge',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'index', value: 'ai-index-support' },
   automations: [{ type: 'workflow', value: 'wf-1' }],
   sources,
