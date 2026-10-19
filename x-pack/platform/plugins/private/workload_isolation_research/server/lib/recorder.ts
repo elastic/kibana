@@ -80,6 +80,9 @@ export class Recorder {
     this.ring = new RingBuffer<Sample>(config.ringCapacity);
   }
 
+  /** Node roles of this process (e.g. 'ui,background_tasks'), stamped on coverage samples. */
+  public roles = 'unknown';
+
   public push(sample: Sample): void {
     this.ring.push(sample);
   }
@@ -166,6 +169,7 @@ export class Recorder {
             max_gap_ms: windowMax,
             ticks,
             expected_ticks: Math.floor((now - windowStart) / interval),
+            roles: this.roles,
           });
           windowStart = now;
           windowMax = 0;
@@ -326,10 +330,7 @@ export class Recorder {
             });
           this.indexReady = true;
         }
-        if (Date.now() - this.lastStatsPush > 10000) {
-          this.lastStatsPush = Date.now();
-          this.push({ source: 'push_stats', ts: epochNow(), ...this.pushStats });
-        }
+
         const data = await this.samples(this.pushed.main, this.pushed.worker, 5000);
         this.pushStats.push_ring_overflow += data.main.dropped + data.worker.dropped;
         const docs = [
@@ -363,6 +364,20 @@ export class Recorder {
         const lastWorker = data.worker.samples.at(-1)?.seq;
         if (lastMain) this.pushed.main = lastMain;
         if (lastWorker) this.pushed.worker = lastWorker;
+        // Acknowledged accounting watermark: emitted after every batch that had docs (or every
+        // 10 s), so a push_stats sample newer than a run's end proves that all samples of that
+        // run were acknowledged (or counted as dropped) before it.
+        if (docs.length || Date.now() - this.lastStatsPush > 10000) {
+          this.lastStatsPush = Date.now();
+          this.push({
+            source: 'push_stats',
+            ts: epochNow(),
+            roles: this.roles,
+            acked_main_seq: this.pushed.main,
+            acked_worker_seq: this.pushed.worker,
+            ...this.pushStats,
+          });
+        }
       } catch (e) {
         // Whole-request failure (network, auth): cursors not advanced; retried next interval
         // with the same deterministic ids, so no duplicates.

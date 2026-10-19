@@ -43,6 +43,10 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
     this.logger = context.logger.get();
     this.config = context.config.get();
     this.recorder = new Recorder(this.config, this.logger);
+    const { roles } = context.node;
+    this.recorder.roles = [roles.ui ? 'ui' : '', roles.backgroundTasks ? 'background_tasks' : '']
+      .filter(Boolean)
+      .join(',');
   }
 
   public setup(core: CoreSetup<StartDeps>, { taskManager }: SetupDeps): void {

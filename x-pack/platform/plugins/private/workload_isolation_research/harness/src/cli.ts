@@ -15,7 +15,7 @@ import { runExternal } from './external';
 import { targetFromEnv } from './kibana_client';
 import { SCENARIOS } from './scenarios';
 import { computeScorecard, scorecardMarkdown, writeScorecard } from './scorecard';
-import { drillToQuery, scoreRun } from './score';
+import { drillToQuery, recomputeRow, scoreRun } from './score';
 import { fetchManifest, fetchRunSamples } from './store';
 
 const computeScorecardParts = async (es: ReturnType<typeof researchEs>, runId: string) => {
@@ -297,26 +297,75 @@ export const main = async (): Promise<void> => {
       return;
     }
     case 'verify-drills': {
-      // Re-runs every stored drill query against research-samples and compares the count with
-      // the count the scorer used. Any mismatch means a drill does not reproduce its row.
-      const { rows } = await computeScorecard(es, flags['run-id']);
-      let checked = 0;
+      // Re-runs every drill query against research-samples, (1) compares the count with the count
+      // the scorer used and (2) recomputes every metric VALUE from the ES-fetched docs alone.
+      const { manifest, rows } = await computeScorecard(es, flags['run-id']);
+      let checkedCounts = 0;
+      let checkedValues = 0;
       const mismatches: string[] = [];
+      const fetchAll = async (query: Record<string, unknown>) => {
+        const out: Array<Record<string, unknown>> = [];
+        let searchAfter: Array<string | number> | undefined;
+        for (;;) {
+          const res = await es.search<Record<string, unknown>>({
+            index: 'research-samples',
+            size: 10000,
+            query,
+            sort: [{ ts: 'asc' as const }, '_doc'],
+            search_after: searchAfter,
+          });
+          const hits = res.hits.hits;
+          for (const h of hits) out.push(h._source as Record<string, unknown>);
+          if (hits.length < 10000) break;
+          searchAfter = hits[hits.length - 1].sort as Array<string | number>;
+        }
+        return out;
+      };
+      const same = (a: number | null | undefined, b: number | null | undefined) =>
+        (a === null || a === undefined) && (b === null || b === undefined)
+          ? true
+          : typeof a === 'number' &&
+            typeof b === 'number' &&
+            Math.abs(a - b) <= 1e-6 * Math.max(1, Math.abs(a));
       for (const r of rows) {
+        const docs: Record<string, Array<Record<string, unknown>>> = {};
         for (const [name, d] of Object.entries(r.drills)) {
-          const { count } = await es.count({ index: 'research-samples', query: drillToQuery(d) });
-          checked++;
-          if (count !== r.drill_counts[name]) {
+          docs[name] = await fetchAll(drillToQuery(d));
+          checkedCounts++;
+          if (docs[name].length !== r.drill_counts[name]) {
             mismatches.push(
-              `${r.phase}/${r.kind === 'pod' ? r.pod : 'cluster'}/${name}: es=${count} scorer=${
-                r.drill_counts[name]
+              `count ${r.phase}/${r.kind === 'pod' ? r.pod : 'cluster'}/${name}: es=${
+                docs[name].length
+              } scorer=${r.drill_counts[name]}`
+            );
+          }
+        }
+        if (!Object.keys(r.drills).length) continue; // synthetic "expected pod missing" rows
+        const again = recomputeRow(r, docs, manifest);
+        for (const [k, v] of Object.entries(r.metrics)) {
+          checkedValues++;
+          if (!same(v, again[k])) {
+            mismatches.push(
+              `value ${r.phase}/${r.kind === 'pod' ? r.pod : 'cluster'}/${k}: row=${v} drilled=${
+                again[k]
               }`
             );
           }
         }
       }
       // eslint-disable-next-line no-console
-      console.log(JSON.stringify({ run_id: flags['run-id'], checked, mismatches }, null, 2));
+      console.log(
+        JSON.stringify(
+          {
+            run_id: flags['run-id'],
+            checked_counts: checkedCounts,
+            checked_values: checkedValues,
+            mismatches,
+          },
+          null,
+          2
+        )
+      );
       if (mismatches.length) process.exitCode = 1;
       return;
     }

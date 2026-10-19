@@ -15,6 +15,7 @@ import { API, kbn } from './kibana_client';
 import type { Phase, RunManifest, Scenario } from './types';
 import { LaptopProbe } from './laptop_probe';
 import { awaitTasks, taskStatus } from './await_tasks';
+import { buildExpected } from './expected';
 
 export const DRIVER_VERSION = '0.1.0';
 
@@ -56,6 +57,10 @@ export class Collector {
 
   public readonly seen = new Set<string>();
   public readonly tickScheduled: Array<Record<string, unknown>> = [];
+  /** boot_id -> pod for every boot that produced samples. */
+  public readonly boots = new Map<string, string>();
+  /** boot_id -> ts of the newest push_stats watermark seen. */
+  public readonly lastPushStatsTs = new Map<string, number>();
 
   public write(doc: Record<string, unknown>): void {
     if (doc.thread !== 'driver') {
@@ -64,6 +69,13 @@ export class Collector {
       this.seen.add(key);
     }
     if (doc.source === 'tick_scheduled') this.tickScheduled.push(doc);
+    if (doc.thread === 'main' || doc.thread === 'worker') {
+      this.boots.set(String(doc.boot_id), String(doc.pod));
+      if (doc.source === 'push_stats') {
+        const prev = this.lastPushStatsTs.get(String(doc.boot_id)) ?? 0;
+        this.lastPushStatsTs.set(String(doc.boot_id), Math.max(prev, Number(doc.ts)));
+      }
+    }
     this.out.write(JSON.stringify(doc) + '\n');
     this.count++;
   }
@@ -308,11 +320,20 @@ export const runScenario = async (opts: RunOptions): Promise<{ runId: string; di
       (s, p) => s + p.durationS + (p.offender ? p.offender.doseMs / 1000 + 10 : 0),
       0
     ) + 120;
-  await kbn(target, 'POST', `${API}/ticks/_start`, {
+  const seriesId = runId.slice(-40);
+  manifest.tick_series_id = seriesId;
+  const tickStart = await kbn(target, 'POST', `${API}/ticks/_start`, {
     intervalMs: scenario.ticks.intervalMs,
     durationS: Math.ceil(totalS) + 3600,
-    seriesId: runId.slice(-40),
+    seriesId,
   });
+  if (tickStart.status !== 200)
+    manifest.invalid_reasons.push(`ticks/_start failed: ${tickStart.status}`);
+  // Expected inventory (coverage must be proven for these even if zero samples arrive).
+  const startInfo = await kbn<Record<string, any>>(target, 'GET', `${API}/info`).catch(
+    () => undefined
+  );
+  manifest.expected_inventory = buildExpected(scenario, startInfo?.body ?? {}, opts.expectedPods);
 
   const laptop = new LaptopProbe(
     target,
@@ -351,7 +372,13 @@ export const runScenario = async (opts: RunOptions): Promise<{ runId: string; di
     log(`ERROR ${String(e)}`);
   } finally {
     laptop.stop();
-    await kbn(target, 'POST', `${API}/ticks/_stop`).catch(() => undefined);
+    const tickStop = await kbn<{ removed?: number }>(target, 'POST', `${API}/ticks/_stop`).catch(
+      () => undefined
+    );
+    if (tickStop?.status !== 200)
+      manifest.invalid_reasons.push(`ticks/_stop failed: ${tickStop?.status}`);
+    manifest.notes.push(`ticks/_stop removed_future=${tickStop?.body?.removed}`);
+    const stopAt = now();
     for (let i = 0; i < Math.max(2, opts.expectedPods * 4); i++) {
       await kbn(target, 'POST', `${API}/probe/_stop`).catch(() => undefined);
     }
@@ -364,42 +391,57 @@ export const runScenario = async (opts: RunOptions): Promise<{ runId: string; di
     // and pods killed before their last pull. Deduplicated against pulled samples.
     let added = 0;
     const exportFrom = new Date(manifest.utc_start).getTime() - 5000;
-    const exportTo = Date.now() + 5000;
-    await sleep(Math.max(3000, 0));
-    let searchAfter: unknown[] | null = null;
-    for (let page = 0; page < 500; page++) {
-      interface EsPage {
-        hits: Array<Record<string, unknown>>;
-        last_sort: unknown[] | null;
+    await sleep(3000);
+    // Terminal push watermark: every boot that produced samples must have a push_stats sample
+    // acknowledged after the run stopped (so late drops cannot escape the accounting).
+    for (let attempt = 0; attempt < 8; attempt++) {
+      const exportTo = Date.now() + 5000;
+      let searchAfter: unknown[] | null = null;
+      for (let page = 0; page < 500; page++) {
+        interface EsPage {
+          hits: Array<Record<string, unknown>>;
+          last_sort: unknown[] | null;
+        }
+        const res: { status: number; body: EsPage } | undefined = await kbn<EsPage>(
+          target,
+          'POST',
+          `${API}/samples_es`,
+          { from: exportFrom, to: exportTo, size: 5000, ...(searchAfter ? { searchAfter } : {}) }
+        ).catch(() => undefined);
+        if (!res || res.status !== 200 || !res.body.hits.length) break;
+        for (const doc of res.body.hits) {
+          const key = `${doc.boot_id}|${doc.thread}|${doc.seq}`;
+          if (collector.seen.has(key)) continue;
+          const { '@timestamp': _ts, ...rest } = doc;
+          collector.write({ ...rest, via: 'es_push' });
+          added++;
+        }
+        searchAfter = res.body.last_sort;
+        if (!searchAfter) break;
       }
-      const res: { status: number; body: EsPage } | undefined = await kbn<EsPage>(
-        target,
-        'POST',
-        `${API}/samples_es`,
-        { from: exportFrom, to: exportTo, size: 5000, ...(searchAfter ? { searchAfter } : {}) }
-      ).catch(() => undefined);
-      if (!res || res.status !== 200 || !res.body.hits.length) break;
-      for (const doc of res.body.hits) {
-        const key = `${doc.boot_id}|${doc.thread}|${doc.seq}`;
-        if (collector.seen.has(key)) continue;
-        const { '@timestamp': _ts, ...rest } = doc;
-        collector.write({ ...rest, via: 'es_push' });
-        added++;
+      const missing = [...collector.boots.keys()].filter(
+        (b) => (collector.lastPushStatsTs.get(b) ?? 0) < stopAt
+      );
+      if (!missing.length) break;
+      if (attempt === 7) {
+        manifest.invalid_reasons.push(
+          `no terminal push watermark after stop for boots: ${missing.join(',')}`
+        );
       }
-      searchAfter = res.body.last_sort;
-      if (!searchAfter) break;
+      await sleep(5000);
     }
     manifest.notes.push(`es_push_export_added=${added}`);
     // Tick audit: every scheduled tick (denominator) with its TM status. Ticks scheduled beyond
     // the stop time were removed by ticks/_stop and are excluded; pending ticks are not "lost".
-    const stopAt = now();
-    const scheduled = collector.tickScheduled.flatMap((t) =>
-      ((t.ids as string[]) ?? []).map((id, i) => ({
-        id,
-        runAt: (t.run_ats as number[])[i],
-        series_id: t.series_id,
-      }))
-    );
+    const scheduled = collector.tickScheduled
+      .filter((t) => t.series_id === seriesId)
+      .flatMap((t) =>
+        ((t.ids as string[]) ?? []).map((id, i) => ({
+          id,
+          runAt: (t.run_ats as number[])[i],
+          series_id: t.series_id,
+        }))
+      );
     const auditable = scheduled.filter((t) => t.runAt <= stopAt - 1000);
     const statuses: Record<string, string> = {};
     for (let i = 0; i < auditable.length; i += 1000) {

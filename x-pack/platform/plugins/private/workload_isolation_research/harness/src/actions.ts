@@ -295,8 +295,15 @@ ${fieldLines}
     log(
       `alerting-esql status=${JSON.stringify({ es: status.execution_status, lr: status.last_run })}`
     );
-    if (!status.last_run?.outcome && !status.execution_status) {
-      throw new Error(`alerting rule ${rule.id} did not execute within ${params.timeoutS ?? 600}s`);
+    // Positive success evidence only: a run outcome of succeeded/warning and a non-error status.
+    const outcome = status.last_run?.outcome;
+    const execStatus = status.execution_status?.status;
+    if (!outcome || !['succeeded', 'warning'].includes(outcome) || execStatus === 'error') {
+      throw new Error(
+        `alerting rule ${rule.id} did not succeed within ${
+          params.timeoutS ?? 600
+        }s: outcome=${outcome} status=${execStatus}`
+      );
     }
     // Phase completion: wait until the enqueued action tasks drained (fail on timeout).
     const drained = await awaitDrained(

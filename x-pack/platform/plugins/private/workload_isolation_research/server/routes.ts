@@ -118,6 +118,49 @@ export const registerRoutes = ({ router, getRecorder, getStart, getInfo }: Route
     }
   );
 
+  // Positive terminal evidence per task id: TM TASK_RUN events (ok true/false) recorded by the
+  // research channel on whichever pod ran the task and pushed to the project ES. A task that has
+  // disappeared from TM is NOT success by itself (TM also deletes exhausted failed tasks).
+  router.post(
+    {
+      path: `${API_BASE}/tasks/_outcome`,
+      security,
+      options,
+      validate: {
+        body: schema.object({
+          ids: schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 2000 }),
+        }),
+      },
+    },
+    async (_ctx, req, res) => {
+      const { core } = await getStart();
+      const es = core.elasticsearch.client.asInternalUser;
+      const result = await es.search<{ task_id: string; ok: boolean; ts: number }>({
+        index: PUSH_INDEX,
+        ignore_unavailable: true,
+        size: 10000,
+        query: {
+          bool: {
+            filter: [
+              { term: { source: 'tm' } },
+              { term: { tm_event: 'TASK_RUN' } },
+              { terms: { task_id: req.body.ids } },
+            ],
+          },
+        },
+      });
+      const outcomes: Record<string, 'success' | 'failed'> = {};
+      for (const h of result.hits.hits) {
+        const d = h._source;
+        if (!d) continue;
+        // A failed attempt followed by a success (retries) resolves to success.
+        if (d.ok) outcomes[d.task_id] = 'success';
+        else if (!outcomes[d.task_id]) outcomes[d.task_id] = 'failed';
+      }
+      return res.ok({ body: { outcomes } });
+    }
+  );
+
   router.post(
     {
       path: `${API_BASE}/samples_es`,
@@ -282,8 +325,8 @@ export const registerRoutes = ({ router, getRecorder, getStart, getInfo }: Route
     { path: `${API_BASE}/ticks/_stop`, security, options, validate: false },
     async (_ctx, _req, res) => {
       const { ticks } = await getStart();
-      ticks.stop();
-      return res.ok({ body: {} });
+      // Awaited: future ticks of this series are removed so they cannot run into the next run.
+      return res.ok({ body: await ticks.stopAndRemoveFuture() });
     }
   );
 

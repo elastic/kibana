@@ -109,6 +109,7 @@ export const registerResearchTasks = (
             drift_ms: startedAt - intendedRunAt,
             series_id: seriesId,
             index,
+            task_id: taskInstance.id,
           });
           return { state: {} };
         },

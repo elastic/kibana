@@ -79,5 +79,9 @@ export interface RunManifest {
   notes: string[];
   /** Reasons that make the whole run invalid (phase failures, audit failures, …). */
   invalid_reasons: string[];
+  /** Expected pod/source inventory (coverage is proven against it). */
+  expected_inventory?: import('./score').ExpectedInventory;
+  /** Tick series of this run (ticks/audits of other series never count). */
+  tick_series_id?: string;
   status: 'running' | 'complete' | 'failed';
 }
