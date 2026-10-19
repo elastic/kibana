@@ -8,7 +8,7 @@
 import type { DashboardAgentTaskOutput } from './types';
 import { dashboardRoutingEvaluator } from './evaluators/dashboard_routing';
 import {
-  dashboardSkillActivatedEvaluator,
+  dashboardSkillWithoutVisualizationEvaluator,
   dashboardSkillNotActivatedEvaluator,
   getSkillReadPaths,
   getToolIds,
@@ -22,7 +22,7 @@ const createOutput = (steps: DashboardAgentTaskOutput['steps']): DashboardAgentT
 });
 
 const evaluateOutput = async (
-  evaluator: typeof dashboardSkillActivatedEvaluator,
+  evaluator: typeof dashboardSkillWithoutVisualizationEvaluator,
   output: DashboardAgentTaskOutput
 ) =>
   evaluator.evaluate({
@@ -107,7 +107,7 @@ describe('skill selection evaluators', () => {
 
   it('passes when dashboard skill is loaded for dashboard requests', async () => {
     const result = await evaluateOutput(
-      dashboardSkillActivatedEvaluator,
+      dashboardSkillWithoutVisualizationEvaluator,
       createOutput([
         {
           type: 'tool_call',
