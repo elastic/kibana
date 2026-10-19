@@ -69,14 +69,13 @@ export const getBucketSize = (
   }
 
   const { from, to } = getTimerange(req);
-  const autoBucketData = calculateBucketData(
-    pickDateRounding(bars, {
-      from: from.valueOf(),
-      to: to.valueOf(),
-      timeZone: ianaTimeZoneOrUtc(capabilities.timezone),
-    }).expression,
-    capabilities
-  );
+  const picked = pickDateRounding(bars, {
+    from: from.valueOf(),
+    to: to.valueOf(),
+    timeZone: ianaTimeZoneOrUtc(capabilities.timezone),
+  });
+  const autoBucketData = calculateBucketData(picked.expression, capabilities);
+  autoBucketData.bucketSize = Math.max(1, Math.round(picked.nominalMs / 1000));
 
   const gteAutoMatch = Boolean(interval) && interval.match(GTE_INTERVAL_RE);
 
