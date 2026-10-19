@@ -186,4 +186,63 @@ describe('TanStackTableGrid', () => {
       '1001'
     );
   });
+
+  describe('with the react-data-grid engine', () => {
+    // react-data-grid sizes its viewport from the DOM, which jsdom does not lay out.
+    beforeAll(() => {
+      window.ResizeObserver ??= class {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      };
+      jest.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(600);
+      jest.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(800);
+      // The viewport is the bounding box minus borders and scrollbars (offset minus client size).
+      jest.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({
+        width: 800,
+        height: 600,
+        top: 0,
+        left: 0,
+        right: 800,
+        bottom: 600,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      });
+      Element.prototype.scrollIntoView ??= jest.fn();
+    });
+
+    it('renders field names and values in react-data-grid rows', async () => {
+      render(<TanStackTableGrid {...defaultProps} engine="rdg" />);
+      const body = screen.getByTestId('unifiedDocViewerRdgFieldsTable');
+      // react-data-grid sizes its viewport in an effect, so rows can render one pass later.
+      expect(await within(body).findByText('fieldA')).toBeInTheDocument();
+      expect(await within(body).findByText('valueB')).toBeInTheDocument();
+      expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual(
+        expect.arrayContaining(['Field', 'Value'])
+      );
+    });
+
+    it('renders pinned fields as sticky rows and toggles pinning', async () => {
+      const onTogglePinned = jest.fn();
+      const rows = [buildFieldRow('pinnedField', 'pinnedValue', true), ...mockRows];
+      render(
+        <TanStackTableGrid
+          {...defaultProps}
+          engine="rdg"
+          rows={rows}
+          onTogglePinned={onTogglePinned}
+        />
+      );
+
+      const body = screen.getByTestId('unifiedDocViewerRdgFieldsTable');
+      // Pinned fields are react-data-grid's sticky summary rows.
+      const pinnedField = await within(body).findByText('pinnedField');
+      expect(pinnedField.closest('.rdg-summary-row')).not.toBeNull();
+      expect((await within(body).findByText('fieldA')).closest('.rdg-summary-row')).toBeNull();
+
+      await userEvent.click(within(body).getByTestId('unifiedDocViewer_pinControlButton_fieldA'));
+      expect(onTogglePinned).toHaveBeenCalledWith('fieldA');
+    });
+  });
 });

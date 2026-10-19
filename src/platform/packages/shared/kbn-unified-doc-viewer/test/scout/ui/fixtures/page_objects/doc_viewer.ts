@@ -13,7 +13,7 @@ import { expect } from '@kbn/scout/ui';
 
 // EuiDataGrid's scroll container, or the TanStack fields table, which scrolls itself.
 const FIELDS_TABLE_SCROLL_CONTAINER =
-  '.euiDataGrid__virtualized, [data-test-subj="UnifiedDocViewerTableGrid"][role="grid"]';
+  '.euiDataGrid__virtualized, [data-test-subj="UnifiedDocViewerTableGrid"][role="grid"], [data-test-subj="unifiedDocViewerRdgFieldsTable"] [role="grid"]';
 
 interface MonacoJsonModel {
   getValue(): string;

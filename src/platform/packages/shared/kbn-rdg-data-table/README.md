@@ -6,4 +6,7 @@ Proof of concept: the Discover TanStack grid (`@kbn/tanstack-data-table`) with i
 - `RdgGridBody` renders the TanStack header and body cells inside react-data-grid, which virtualizes rows and columns. Pinned columns are frozen columns.
 - Pinned to `react-data-grid@7.0.0-beta.47`, the last release that supports React 18. Later releases need React 19.
 - Enable it in Discover with the `discover.enableRdgTable` feature flag, which takes precedence over `discover.enableTanstackTable`.
+- With the flag on, react-data-grid is also used by:
+  - **the Discover session embeddable** on dashboards, which renders the same `DiscoverGrid`;
+  - **the doc viewer fields table** (`gridImplementation: 'rdg'`): `TanStackTableGrid` with `engine="rdg"` renders its rows with react-data-grid (`rdg_fields_table_body.tsx` in the `unifiedDocViewer` plugin). Row heights are measured from the cell content, because react-data-grid needs explicit heights. Pinned fields are react-data-grid's sticky summary rows, which share one height (the tallest pinned field).
 - Differences from the TanStack body: auto row height uses the estimated height (react-data-grid needs explicit row heights), keyboard navigation is react-data-grid's, and rows can't be virtualized by a parent element (`useRowVirtualizer`, used by the cascade layout).

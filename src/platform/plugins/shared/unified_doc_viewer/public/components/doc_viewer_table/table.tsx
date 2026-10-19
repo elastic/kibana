@@ -411,8 +411,9 @@ const InternalDocViewerTable = ({
         </EuiSelectableMessage>
       ) : (
         <EuiFlexItem grow={Boolean(containerHeight)} css={styles.fieldsGridWrapper}>
-          {gridImplementation === 'tanstack' ? (
+          {gridImplementation === 'tanstack' || gridImplementation === 'rdg' ? (
             <TanStackTableGrid
+              engine={gridImplementation}
               key={`fields-table-${hit.id}`}
               id={`fields-table-${hit.id}`}
               containerWidth={containerWidth}

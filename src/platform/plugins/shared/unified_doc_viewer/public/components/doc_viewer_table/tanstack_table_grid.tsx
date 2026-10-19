@@ -8,22 +8,14 @@
  */
 
 import type { CSSProperties, FocusEvent, KeyboardEvent } from 'react';
-import React, {
-  createContext,
-  memo,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   flexRender,
   getCoreRowModel,
   useReactTable,
   type Cell,
   type ColumnDef,
+  type Header,
   type ColumnSizingState,
   type Row,
   type RowPinningState,
@@ -70,14 +62,19 @@ import { useRestorableRef } from './table';
 import type { TableGridProps } from './table_grid';
 import { GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE } from './table_grid';
 import { getCellPositionAfterPinToggle } from './utils';
+import { GridCellActiveContext, GridCellAnchorContext } from './table_grid_cell_contexts';
+import { RdgFieldsTableBody } from './rdg_fields_table_body';
 
 export type TanStackTableGridProps = Omit<
   TableGridProps,
   'customRenderCellValue' | 'customRenderCellPopover' | 'gridStyle'
->;
+> & {
+  /** Renders the rows below the pinned fields with react-data-grid (proof of concept). */
+  engine?: 'tanstack' | 'rdg';
+};
 
 type FieldColumnId = typeof GRID_COLUMN_FIELD_NAME | typeof GRID_COLUMN_FIELD_VALUE;
-type TableStyles = ReturnType<typeof useMemoCss<typeof componentStyles>>;
+export type TableStyles = ReturnType<typeof useMemoCss<typeof componentStyles>>;
 
 const PIN_COLUMN_ID = 'pin_field';
 const PIN_COLUMN_WIDTH = 32;
@@ -89,20 +86,14 @@ const OVERSCAN = 10;
 const NAME_COLUMN_WIDTH_VAR = '--kbnDocViewerNameColumnWidth';
 
 const estimateSize = () => ESTIMATED_ROW_HEIGHT;
+const RDG_CONTROL_COLUMN_IDS = [PIN_COLUMN_ID];
+const RDG_HEADER_ROW_HEIGHT = 32;
 
 const getInitialNameColumnWidth = (containerWidth: number) =>
   Math.min(
     Math.max(Math.round(containerWidth * 0.3), MIN_NAME_COLUMN_WIDTH),
     MAX_NAME_COLUMN_WIDTH
   );
-
-// Lets memoized cells know whether their grid cell is hovered or focused, so the
-// comparatively heavy cell actions only mount for that one cell.
-const GridCellActiveContext = createContext(false);
-
-const GridCellAnchorContext = createContext<React.RefObject<HTMLDivElement | null>>({
-  current: null,
-});
 
 const CellActionIconButton: typeof EuiButtonIcon = ({ children, title, ...rest }) => (
   <EuiToolTip content={title} disableScreenReaderOutput>
@@ -386,7 +377,9 @@ export const TanStackTableGrid = ({
   hidePinColumn = false,
   headerVisibility = true,
   hideFilteringOnComputedColumns,
+  engine = 'tanstack',
 }: TanStackTableGridProps) => {
+  const isRdg = engine === 'rdg';
   const styles = useMemoCss(componentStyles);
   const { toasts } = getUnifiedDocViewerServices();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -394,6 +387,7 @@ export const TanStackTableGrid = ({
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
   const tableRef = useRef<Table<FieldRow>>();
   const virtualizerRef = useRef<Virtualizer<HTMLDivElement, Element>>();
+  const rdgScrollToIndexRef = useRef<(index: number) => void>();
 
   // Header and pinned rows share one sticky block, which the virtualized rows scroll below.
   const [stickyElement, setStickyElement] = useState<HTMLDivElement | null>(null);
@@ -478,7 +472,11 @@ export const TanStackTableGrid = ({
         const centerIndex =
           getCellPositionAfterPinToggle({ field, pinnedRows, restRows }) - (pinnedRows.length - 1);
         if (centerIndex >= 0) {
-          virtualizerRef.current?.scrollToIndex(centerIndex);
+          if (isRdg) {
+            rdgScrollToIndexRef.current?.(centerIndex);
+          } else {
+            virtualizerRef.current?.scrollToIndex(centerIndex);
+          }
         }
       }
       requestAnimationFrame(() => {
@@ -489,7 +487,7 @@ export const TanStackTableGrid = ({
           ?.focus();
       });
     },
-    [rows]
+    [rows, isRdg]
   );
 
   const tableColumns = useMemo<Array<ColumnDef<FieldRow>>>(() => {
@@ -601,7 +599,8 @@ export const TanStackTableGrid = ({
   const getItemKey = useCallback((index: number) => centerRows[index]?.id ?? index, [centerRows]);
 
   const rowVirtualizer = useVirtualizer({
-    count: centerRows.length,
+    // react-data-grid virtualizes the rows instead.
+    count: isRdg ? 0 : centerRows.length,
     getScrollElement: () => scrollRef.current,
     estimateSize,
     overscan: OVERSCAN,
@@ -628,6 +627,113 @@ export const TanStackTableGrid = ({
   const virtualItems = rowVirtualizer.getVirtualItems();
   const ariaRowIndexOffset = headerVisibility ? 2 : 1;
 
+  // Header cell content for react-data-grid's header cells, which own the role and width.
+  const renderRdgHeaderCell = useCallback(
+    (header: Header<FieldRow, unknown>) => (
+      <div
+        data-test-subj={`dataGridHeaderCell-${header.column.id}`}
+        data-gridcell-column-id={header.column.id}
+        css={[styles.headerCell, styles.rdgHeaderCell]}
+      >
+        {flexRender(header.column.columnDef.header, header.getContext())}
+        {header.column.getCanResize() && (
+          <div
+            role="presentation"
+            onMouseDown={header.getResizeHandler()}
+            onTouchStart={header.getResizeHandler()}
+            onDoubleClick={() => header.column.resetSize()}
+            css={[styles.resizeHandle, header.column.getIsResizing() && styles.resizeHandleActive]}
+          />
+        )}
+      </div>
+    ),
+    [styles]
+  );
+
+  const stickyBlock = (
+    <div ref={setStickyElement} css={styles.stickyTop}>
+      {headerVisibility &&
+        table.getHeaderGroups().map((headerGroup) => (
+          <div key={headerGroup.id} role="row" css={styles.headerRow}>
+            {headerGroup.headers.map((header) => (
+              <div
+                key={header.id}
+                role="columnheader"
+                tabIndex={-1}
+                data-test-subj={`dataGridHeaderCell-${header.column.id}`}
+                data-gridcell-column-id={header.column.id}
+                css={[styles.headerCell, getColumnCss(styles, header.column.id)]}
+              >
+                {flexRender(header.column.columnDef.header, header.getContext())}
+                {header.column.getCanResize() && (
+                  <div
+                    role="presentation"
+                    onMouseDown={header.getResizeHandler()}
+                    onTouchStart={header.getResizeHandler()}
+                    onDoubleClick={() => header.column.resetSize()}
+                    css={[
+                      styles.resizeHandle,
+                      header.column.getIsResizing() && styles.resizeHandleActive,
+                    ]}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        ))}
+      {topRows.length > 0 && (
+        <div data-test-subj="unifiedDocViewerPinnedFields" css={styles.pinnedRows}>
+          {topRows.map((tableRow, index) => (
+            <GridRow
+              key={tableRow.id}
+              row={tableRow}
+              ariaRowIndex={index + ariaRowIndexOffset}
+              isStriped={index % 2 === 1}
+              styles={styles}
+              columns={tableColumns}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const fieldsGridLabel = i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
+    defaultMessage: 'Field values',
+  });
+
+  if (isRdg) {
+    return (
+      <div
+        ref={scrollRef}
+        onKeyDown={stopGridKeyPropagation}
+        data-test-subj="UnifiedDocViewerTableGrid"
+        className="kbnDocViewer__fieldsGrid"
+        css={[styles.scrollContainer, styles.rdgContainer]}
+        style={containerStyle}
+      >
+        <RdgFieldsTableBody
+          rows={centerRows}
+          pinnedRows={topRows}
+          headers={table.getHeaderGroups()[0]?.headers ?? []}
+          renderHeaderCell={renderRdgHeaderCell}
+          headerRowHeight={headerVisibility ? RDG_HEADER_ROW_HEIGHT : 0}
+          styles={styles}
+          fixedColumnWidths={{
+            ...(showPinColumn ? { [PIN_COLUMN_ID]: PIN_COLUMN_WIDTH } : {}),
+            [GRID_COLUMN_FIELD_NAME]: nameColumnWidth,
+          }}
+          valueColumnId={GRID_COLUMN_FIELD_VALUE}
+          controlColumnIds={RDG_CONTROL_COLUMN_IDS}
+          estimatedRowHeight={ESTIMATED_ROW_HEIGHT}
+          ariaLabel={fieldsGridLabel}
+          scrollTopRef={scrollTopRef}
+          scrollToIndexRef={rdgScrollToIndexRef}
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       ref={scrollRef}
@@ -637,59 +743,13 @@ export const TanStackTableGrid = ({
       role="grid"
       aria-rowcount={rows.length + (headerVisibility ? 1 : 0)}
       aria-colcount={tableColumns.length}
-      aria-label={i18n.translate('unifiedDocViewer.fieldsTable.ariaLabel', {
-        defaultMessage: 'Field values',
-      })}
+      aria-label={fieldsGridLabel}
       data-test-subj="UnifiedDocViewerTableGrid"
       className="kbnDocViewer__fieldsGrid"
       css={styles.scrollContainer}
       style={containerStyle}
     >
-      <div ref={setStickyElement} css={styles.stickyTop}>
-        {headerVisibility &&
-          table.getHeaderGroups().map((headerGroup) => (
-            <div key={headerGroup.id} role="row" css={styles.headerRow}>
-              {headerGroup.headers.map((header) => (
-                <div
-                  key={header.id}
-                  role="columnheader"
-                  tabIndex={-1}
-                  data-test-subj={`dataGridHeaderCell-${header.column.id}`}
-                  data-gridcell-column-id={header.column.id}
-                  css={[styles.headerCell, getColumnCss(styles, header.column.id)]}
-                >
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                  {header.column.getCanResize() && (
-                    <div
-                      role="presentation"
-                      onMouseDown={header.getResizeHandler()}
-                      onTouchStart={header.getResizeHandler()}
-                      onDoubleClick={() => header.column.resetSize()}
-                      css={[
-                        styles.resizeHandle,
-                        header.column.getIsResizing() && styles.resizeHandleActive,
-                      ]}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          ))}
-        {topRows.length > 0 && (
-          <div data-test-subj="unifiedDocViewerPinnedFields" css={styles.pinnedRows}>
-            {topRows.map((tableRow, index) => (
-              <GridRow
-                key={tableRow.id}
-                row={tableRow}
-                ariaRowIndex={index + ariaRowIndexOffset}
-                isStriped={index % 2 === 1}
-                styles={styles}
-                columns={tableColumns}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      {stickyBlock}
       <div css={styles.virtualOuter} style={{ height: rowVirtualizer.getTotalSize() }}>
         <div
           css={styles.virtualInner}
@@ -792,6 +852,16 @@ const componentStyles = {
     });
   },
   cellWithActions: tanStackCellActionsStyles.cellWithActions,
+  // The react-data-grid body scrolls itself, below the header and pinned fields.
+  rdgContainer: css({
+    display: 'flex',
+    flexDirection: 'column',
+    overflowY: 'hidden',
+  }),
+  rdgHeaderCell: css({
+    inlineSize: '100%',
+    blockSize: '100%',
+  }),
   stickyTop: css({
     position: 'sticky',
     top: 0,
