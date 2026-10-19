@@ -6,8 +6,8 @@
  */
 
 import {
-  EMPTY_MODEL_RESPONSE_ERROR_CODE,
   EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
+  isEmptyModelResponseError,
 } from '@kbn/langchain/server';
 
 /**
@@ -22,17 +22,10 @@ import {
 export const EMPTY_MODEL_RESPONSE_ERROR_MARKER = EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX;
 
 /** Returns true when a persisted graph error was produced for an empty model response. */
-export const isEmptyModelResponseError = (error: string): boolean =>
+export const isEmptyModelResponseErrorEntry = (error: string): boolean =>
   error.includes(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
 
-/**
- * Returns true when a thrown error is an empty-completion failure, even if LangChain re-wrapped it
- * (the guard in `@kbn/langchain`'s `ActionsClientLlm` carries a stable code for this reason).
- */
-export const isEmptyModelResponseErrorCode = (error: unknown): boolean =>
-  typeof error === 'object' &&
-  error != null &&
-  (error as { code?: unknown }).code === EMPTY_MODEL_RESPONSE_ERROR_CODE;
+export { isEmptyModelResponseError };
 
 /**
  * Builds the persisted error entry for a model response that contained no content.

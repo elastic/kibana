@@ -6,6 +6,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { EmptyModelResponseError } from '@kbn/langchain/server';
+import { getEmptyModelResponseError } from '../../../lib/langchain/output_chunking/nodes/helpers/empty_model_response';
 import { throwIfErrorCountsExceeded } from '.';
 
 const mockLogger = {
@@ -184,8 +186,19 @@ describe('throwIfErrorCountsExceeded', () => {
   });
 
   describe('when the errors are empty model responses', () => {
-    const emptyModelResponseError =
-      'generate node detected that the model returned an empty response (inference) on attempt 9; the response contained no content. This is a model or connector problem, not a prompt-size problem. Underlying error: the model returned an empty response (code: EMPTY_MODEL_RESPONSE); connectorId: test-connector-id; model: test-model; prompt tokens: 128390; completion tokens: 0;';
+    const emptyModelResponseError = getEmptyModelResponseError({
+      cause: new EmptyModelResponseError({
+        completionTokens: 0,
+        connectorId: 'test-connector-id',
+        contentLength: 0,
+        model: 'test-model',
+        promptTokens: 128390,
+        responseBody: '',
+      }),
+      generationAttempts: 9,
+      llmType: 'inference',
+      nodeName: 'generate',
+    });
 
     const getMessage = () => {
       try {

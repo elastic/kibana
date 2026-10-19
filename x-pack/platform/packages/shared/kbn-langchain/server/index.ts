@@ -15,6 +15,7 @@ import {
   EmptyModelResponseError,
   MAX_RESPONSE_PREVIEW_LENGTH,
   getBoundedResponsePreview,
+  isEmptyModelResponseError,
 } from './language_models/empty_model_response_error';
 import { InferenceClientLlm } from './language_models/inference_client_llm';
 import { parseBedrockStream } from './utils/bedrock';
@@ -27,6 +28,7 @@ export {
   EmptyModelResponseError,
   MAX_RESPONSE_PREVIEW_LENGTH,
   getBoundedResponsePreview,
+  isEmptyModelResponseError,
   parseBedrockStream,
   parseGeminiResponse,
   getDefaultArguments,

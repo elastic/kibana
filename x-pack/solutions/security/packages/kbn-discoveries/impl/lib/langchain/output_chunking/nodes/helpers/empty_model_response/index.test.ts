@@ -15,7 +15,7 @@ import {
   EMPTY_MODEL_RESPONSE_ERROR_MARKER,
   getEmptyModelResponseError,
   isEmptyModelResponseError,
-  isEmptyModelResponseErrorCode,
+  isEmptyModelResponseErrorEntry,
 } from '.';
 
 describe('EMPTY_MODEL_RESPONSE_ERROR_MARKER', () => {
@@ -126,7 +126,7 @@ describe('getEmptyModelResponseError', () => {
   });
 });
 
-describe('isEmptyModelResponseError', () => {
+describe('isEmptyModelResponseErrorEntry', () => {
   it('returns true for a persisted empty-response error', () => {
     const error = getEmptyModelResponseError({
       generationAttempts: 0,
@@ -134,18 +134,18 @@ describe('isEmptyModelResponseError', () => {
       nodeName: 'generate',
     });
 
-    expect(isEmptyModelResponseError(error)).toBe(true);
+    expect(isEmptyModelResponseErrorEntry(error)).toBe(true);
   });
 
   it('returns false for other persisted errors', () => {
-    expect(isEmptyModelResponseError('generate node is unable to parse (inference)')).toBe(false);
+    expect(isEmptyModelResponseErrorEntry('generate node is unable to parse (inference)')).toBe(false);
   });
 });
 
-describe('isEmptyModelResponseErrorCode', () => {
+describe('isEmptyModelResponseError', () => {
   it('returns true for an EmptyModelResponseError', () => {
     expect(
-      isEmptyModelResponseErrorCode(
+      isEmptyModelResponseError(
         new EmptyModelResponseError({
           connectorId: 'test-connector-id',
           contentLength: 0,
@@ -159,14 +159,14 @@ describe('isEmptyModelResponseErrorCode', () => {
     const wrapped = new Error('wrapped by a framework');
     Object.assign(wrapped, { code: EMPTY_MODEL_RESPONSE_ERROR_CODE });
 
-    expect(isEmptyModelResponseErrorCode(wrapped)).toBe(true);
+    expect(isEmptyModelResponseError(wrapped)).toBe(true);
   });
 
   it('returns false for parse errors, and for non-errors', () => {
-    expect(isEmptyModelResponseErrorCode(new SyntaxError('Unexpected end of JSON input'))).toBe(
+    expect(isEmptyModelResponseError(new SyntaxError('Unexpected end of JSON input'))).toBe(
       false
     );
-    expect(isEmptyModelResponseErrorCode(undefined)).toBe(false);
-    expect(isEmptyModelResponseErrorCode('boom')).toBe(false);
+    expect(isEmptyModelResponseError(undefined)).toBe(false);
+    expect(isEmptyModelResponseError('boom')).toBe(false);
   });
 });

@@ -238,6 +238,14 @@ export class ActionsClientLlm extends LLM {
         () => `${LLM_TYPE}#_call response\ntraceId: ${this.#traceId}\nresponse:\n${content}`
       );
 
+      this.#throwIfResponseIsEmpty({
+        content,
+        model: this.model,
+        toolCallCount: Array.isArray(get('data.choices[0].message.tool_calls', actionResult))
+          ? (get('data.choices[0].message.tool_calls', actionResult) as unknown[]).length
+          : undefined,
+      });
+
       return content; // per the contact of _call, return a string
     }
 

@@ -129,6 +129,22 @@ describe('ActionsClientLlm', () => {
       });
       expect(result).toEqual(mockActionResponse.message);
     });
+    it('rejects an empty unified completion when llmType is inference', async () => {
+      actionsClient.execute.mockResolvedValue({
+        data: { choices: [{ message: { content: '', tool_calls: [] } }] },
+        status: 'ok',
+      });
+      const actionsClientLlm = new ActionsClientLlm({
+        actionsClient,
+        connectorId,
+        isInferenceEndpoint: false,
+        llmType: 'inference',
+        logger: mockLogger,
+      });
+
+      await expect(actionsClientLlm._call(prompt)).rejects.toThrow(EmptyModelResponseError);
+    });
+
     it('returns the expected content when _call is invoked', async () => {
       const actionsClientLlm = new ActionsClientLlm({
         actionsClient,

@@ -461,6 +461,7 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
 
     // same state as the empty-completion branch above, whether the guard threw or the node noticed
     expect(state.combinedGenerations).toBe('{"insights":[');
+    expect(state.generations).toEqual(['{"insights":[']);
     expect(state.errors[0]).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
   });
 

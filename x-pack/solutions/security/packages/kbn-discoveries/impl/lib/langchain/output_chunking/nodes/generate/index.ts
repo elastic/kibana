@@ -20,7 +20,7 @@ import { generationsAreRepeating } from '../helpers/generations_are_repeating';
 import { getUseUnrefinedResults } from './helpers/get_use_unrefined_results';
 import {
   getEmptyModelResponseError,
-  isEmptyModelResponseErrorCode,
+  isEmptyModelResponseError,
 } from '../helpers/empty_model_response';
 import { parseCombinedOrThrow } from '../helpers/parse_combined_or_throw';
 
@@ -186,7 +186,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
         unrefinedResults,
       };
     } catch (error) {
-      const parsingError = isEmptyModelResponseErrorCode(error)
+      const parsingError = isEmptyModelResponseError(error)
         ? getEmptyModelResponseError({
             cause: error,
             generationAttempts,
@@ -219,7 +219,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
         }),
         errors: [...state.errors, persistedError],
         generationAttempts: generationAttempts + 1,
-        generations: [...generations, partialResponse],
+        generations: partialResponse.length > 0 ? [...generations, partialResponse] : generations,
       };
     }
   };

@@ -22,7 +22,7 @@ import { getMaxRetriesReached } from '../../helpers/get_max_retries_reached';
 import { getUseUnrefinedResults } from './helpers/get_use_unrefined_results';
 import {
   getEmptyModelResponseError,
-  isEmptyModelResponseErrorCode,
+  isEmptyModelResponseError,
 } from '../helpers/empty_model_response';
 import { parseCombinedOrThrow } from '../helpers/parse_combined_or_throw';
 
@@ -186,7 +186,7 @@ export const getRefineNode = <T extends GraphInsightTypes>({
         refinements: [...refinements, partialResponse],
       };
     } catch (error) {
-      const parsingError = isEmptyModelResponseErrorCode(error)
+      const parsingError = isEmptyModelResponseError(error)
         ? getEmptyModelResponseError({
             cause: error,
             generationAttempts,
@@ -243,7 +243,7 @@ export const getRefineNode = <T extends GraphInsightTypes>({
         }),
         errors: [...state.errors, persistedError],
         generationAttempts: generationAttempts + 1,
-        refinements: [...refinements, partialResponse],
+        refinements: partialResponse.length > 0 ? [...refinements, partialResponse] : refinements,
       };
     }
   };

@@ -434,6 +434,7 @@ ${ATTACK_DISCOVERY_REFINE}
 
     // same state as the empty-completion branch above, whether the guard threw or the node noticed
     expect(state.combinedRefinements).toBe('{"insights":[');
+    expect(state.refinements).toEqual(['{"insights":[']);
     expect(state.errors[0]).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
   });
 
