@@ -266,6 +266,8 @@ export interface ClusterCtx {
   ticks: { interval_ms: number } | null;
   laptopRps: number | null;
   minCoverage: number;
+  /** Exact scheduled run_at instants of this run's tick series (from tick_scheduled samples). */
+  scheduledRunAts?: number[];
 }
 
 const tickTaskId = (x: Doc) => (x.task_id as string) ?? `wir-tick-${x.series_id}-${x.index}`;
@@ -285,7 +287,12 @@ export const computeClusterMetrics = (
   const ran = audit.filter((x) => x.status === 'done');
   const lost = ran.filter((x) => !observedIds.has(x.id));
   if (ctx.ticks) {
-    const expected = Math.floor((ctx.to - ctx.from) / ctx.ticks.interval_ms);
+    // Denominator = ticks actually scheduled to run inside this window. A series may start after
+    // the phase began (e.g. mid-seed), so window/interval over-counts; fall back to it only when
+    // the run carries no tick_scheduled record (legacy runs).
+    const expected = ctx.scheduledRunAts
+      ? ctx.scheduledRunAts.filter((t) => t >= ctx.from && t < ctx.to).length
+      : Math.floor((ctx.to - ctx.from) / ctx.ticks.interval_ms);
     if (audit.length < Math.floor(expected * ctx.minCoverage)) {
       problems.push(
         `tick audit coverage ${audit.length}/${expected} scheduled ticks (denominator missing or incomplete)`
@@ -367,6 +374,11 @@ export const scoreRun = (
         (x.source !== 'tick' && x.source !== 'tick_audit' && x.source !== 'tick_scheduled') ||
         x.series_id === series
     );
+
+  const scheduledDocs = s.filter((x) => x.source === 'tick_scheduled');
+  const scheduledRunAts: number[] | undefined = scheduledDocs.length
+    ? scheduledDocs.flatMap((x) => (Array.isArray(x.run_ats) ? (x.run_ats as number[]) : []))
+    : undefined;
 
   const runReasons: string[] = [...(manifest.invalid_reasons ?? [])];
   if (manifest.status && manifest.status !== 'complete')
@@ -554,6 +566,7 @@ export const scoreRun = (
       ticks: expected?.ticks ?? null,
       laptopRps: expected?.laptop_probe_rps ?? null,
       minCoverage: minCov,
+      scheduledRunAts,
     });
     cluster.push({
       kind: 'cluster',
