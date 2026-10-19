@@ -24,7 +24,7 @@ const dataViewResponse = {
   meta: {
     managed: false,
     version: 'WzEsMV0=',
-    namespaces: ['default'],
+    spaces: ['default'],
   },
 };
 
@@ -64,7 +64,7 @@ export const getDataViewsOASOperationObject = {
                       updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
                       managed: false,
                       version: 'WzIsMV0=',
-                      namespaces: ['default'],
+                      spaces: ['default'],
                     },
                   },
                   {
@@ -75,7 +75,7 @@ export const getDataViewsOASOperationObject = {
                       updated_at: '2026-01-15T11:00:00.000Z',
                       managed: false,
                       version: 'WzMsMV0=',
-                      namespaces: ['default'],
+                      spaces: ['default'],
                     },
                   },
                 ],

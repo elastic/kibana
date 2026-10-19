@@ -16,7 +16,7 @@ import {
 } from '@kbn/as-code-shared-schemas';
 
 const dataViewsMetaSchema = asCodeMetaSchema.extend({
-  namespaces: z.array(z.string().max(1000)).max(100).optional(),
+  spaces: z.array(z.string().max(1000)).max(100).optional(),
 });
 
 export const asCodeResponseSchema = z
