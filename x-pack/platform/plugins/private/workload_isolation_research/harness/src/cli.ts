@@ -126,9 +126,10 @@ export const main = async (): Promise<void> => {
       if (flags['no-ingest'] === 'true') return;
       await setupStore(es);
       const counts = await ingestRunDir(es, dir);
-      const { manifest, rows } = await computeScorecard(es, runId);
-      await writeScorecard(es, rows, manifest);
-      const md = scorecardMarkdown(manifest, rows);
+      const scored = await computeScorecard(es, runId);
+      const { manifest, rows } = scored;
+      await writeScorecard(es, rows, manifest, scored);
+      const md = scorecardMarkdown(manifest, rows, scored);
       fs.writeFileSync(path.join(dir, 'scorecard.md'), md);
       fs.writeFileSync(path.join(dir, 'scorecard.json'), JSON.stringify(rows, null, 2));
       // eslint-disable-next-line no-console
@@ -142,9 +143,10 @@ export const main = async (): Promise<void> => {
       return;
     }
     case 'scorecard': {
-      const { manifest, rows } = await computeScorecard(es, flags['run-id']);
-      await writeScorecard(es, rows, manifest);
-      const md = scorecardMarkdown(manifest, rows);
+      const scored = await computeScorecard(es, flags['run-id']);
+      const { manifest, rows } = scored;
+      await writeScorecard(es, rows, manifest, scored);
+      const md = scorecardMarkdown(manifest, rows, scored);
       const dir = path.join(runsDir, flags['run-id']);
       if (fs.existsSync(dir)) {
         fs.writeFileSync(path.join(dir, 'scorecard.md'), md);

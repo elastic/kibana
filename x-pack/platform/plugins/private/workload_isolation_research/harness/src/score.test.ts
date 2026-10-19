@@ -7,6 +7,7 @@
 
 import type { Doc, Drill } from './score';
 import { drillMatches, drillToQuery, recomputeRow, scoreRun } from './score';
+import { scorecardMarkdown } from './scorecard';
 import fs from 'fs';
 import path from 'path';
 
@@ -319,6 +320,24 @@ describe('scoreRun — expected inventory: the re-review deletions must be INVAL
     expect(missing.every((r) => !r.valid)).toBe(true);
     expect(res.cluster.every((r) => !r.valid)).toBe(true);
     expect(res.run_valid).toBe(false);
+  });
+
+  it('the rendered scorecard header honours run-level validity for every deletion case', () => {
+    const header = (subset: Doc[]) => {
+      const res = scoreRun(manifest, subset);
+      const md = scorecardMarkdown(manifest, [...res.cluster, ...res.pods], res);
+      return md.split('\n').find((l) => l.includes('run-level:')) ?? '';
+    };
+    expect(header(samples)).toContain('run-level: valid');
+    const deletions: Array<(x: Doc) => boolean> = [
+      (x) => x.source !== 'tick' && x.source !== 'tick_audit',
+      (x) => x.source !== 'main_gap' && x.source !== 'main_gap_window',
+      (x) => !(x.source === 'probe' && x.pod === UI_POD),
+      (x) => !isBg(x) && x.source !== 'tick_audit',
+    ];
+    for (const keep of deletions) {
+      expect(header(samples.filter(keep))).toContain('run-level: **INVALID**');
+    }
   });
 
   it('ticks of a previous series never count, and loss is matched by full task id', () => {

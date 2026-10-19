@@ -41,7 +41,8 @@ export const computeScorecard = async (
 export const writeScorecard = async (
   es: Client,
   rows: ScorecardRow[],
-  manifest?: Doc
+  manifest: Doc | undefined,
+  validity: RunValidity
 ): Promise<void> => {
   if (!rows.length) return;
   await es.deleteByQuery({
@@ -60,6 +61,8 @@ export const writeScorecard = async (
         lane: manifest?.lane,
         variant: manifest?.variant,
         qaf_project_id: manifest?.qaf_project_id ?? null,
+        run_valid: validity.run_valid && rows.every((x) => x.valid),
+        run_invalid_reasons: validity.run_invalid_reasons,
         '@timestamp': Math.round(r.window_start),
         row: r.kind === 'pod' ? `${r.phase}/${r.pod}/${r.boot_id}` : `${r.phase}/cluster`,
         pod: r.kind === 'pod' ? r.pod : 'cluster',
@@ -75,7 +78,16 @@ export const writeScorecard = async (
 const verdict = (r: ScorecardRow) =>
   r.valid ? 'valid' : `**INVALID**: ${r.invalid_reasons.join('; ')}`;
 
-export const scorecardMarkdown = (manifest: Doc, rows: ScorecardRow[]): string => {
+export interface RunValidity {
+  run_valid: boolean;
+  run_invalid_reasons: string[];
+}
+
+export const scorecardMarkdown = (
+  manifest: Doc,
+  rows: ScorecardRow[],
+  validity: RunValidity
+): string => {
   const cluster = rows.filter((r): r is ClusterRow => r.kind === 'cluster');
   const pods = rows.filter((r): r is PodRow => r.kind === 'pod');
   const ch =
@@ -127,12 +139,12 @@ export const scorecardMarkdown = (manifest: Doc, rows: ScorecardRow[]): string =
   const tierB = cluster
     .flatMap((r) => r.tier_b.map((t) => `- ${r.phase}: ${JSON.stringify(t)}`))
     .join('\n');
-  const runValid = rows.every(
-    (r) =>
-      !r.invalid_reasons.some(
-        (x) => x.startsWith('run status') || x.startsWith('push loss') || x.startsWith('pull ring')
-      )
-  );
+  // Run-level validity comes from the scorer (inventory coverage, row invalidity propagation),
+  // never re-derived here from a subset of reason prefixes.
+  const runValid = validity.run_valid && rows.every((r) => r.valid);
+  const runReasons = validity.run_invalid_reasons.length
+    ? validity.run_invalid_reasons
+    : rows.filter((r) => !r.valid).flatMap((r) => r.invalid_reasons);
   return `# Scorecard ${manifest.run_id}
 
 - lane: ${manifest.lane} · variant: ${manifest.variant} · target: ${
@@ -142,7 +154,7 @@ export const scorecardMarkdown = (manifest: Doc, rows: ScorecardRow[]): string =
     manifest.qaf_project_id ?? 'n/a'
   } · TM poll interval: ${manifest.tm_poll_interval_ms} ms (${manifest.tm_claim_strategy})
 - window: ${manifest.utc_start} → ${manifest.utc_end} · run-level: ${
-    runValid ? 'valid' : '**INVALID**'
+    runValid ? 'valid' : `**INVALID**: ${[...new Set(runReasons)].join('; ')}`
   }
 - hypothesis: ${manifest.hypothesis}
 - Scoping: cluster rows hold cluster-wide metrics (ticks run on any background pod, laptop probe, offenders, Tier B); pod rows are per pod+boot only. Every metric's drill (ES query) is stored in \`research-scorecards.drills\` and reproduces the row. "hb-gap proxy" = main-side heartbeat gap (calibrated proxy for the longest uninterrupted slice; see Track 0 report). Heap/RSS are sampled lower bounds.
