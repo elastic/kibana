@@ -20,7 +20,7 @@ import {
 } from '../fixtures';
 
 const COUNT_QUERY =
-  'FROM logstash-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS COUNT(*) BY @timestamp = BUCKET(@timestamp, 100, ?_tstart, ?_tend)';
+  'FROM logstash-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS COUNT(*) BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)';
 const MAX_QUERY =
   'FROM logstash-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS MAX(bytes) BY @timestamp = BUCKET(@timestamp, 100, ?_tstart, ?_tend) | LIMIT 100';
 const X_DIMENSION = 'lnsXY_xDimensionPanel';

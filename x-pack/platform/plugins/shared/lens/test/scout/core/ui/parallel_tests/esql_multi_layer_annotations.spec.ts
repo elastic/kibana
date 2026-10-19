@@ -19,7 +19,7 @@ import {
 } from '../fixtures';
 
 const COUNT_QUERY =
-  'FROM logstash-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS COUNT(*) BY @timestamp = BUCKET(@timestamp, 100, ?_tstart, ?_tend)';
+  'FROM logstash-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS COUNT(*) BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)';
 const ANNOTATIONS_DIMENSION = 'lnsXY_xAnnotationsPanel';
 const REFERENCE_LINE_DIMENSION = 'lnsXY_yReferenceLineLeftPanel';
 
