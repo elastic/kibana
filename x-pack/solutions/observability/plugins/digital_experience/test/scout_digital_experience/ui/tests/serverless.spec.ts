@@ -30,11 +30,11 @@ test.describe(
         }
       });
 
-      await test.step('lists no applications', async () => {
+      await test.step('shows that applications are unavailable', async () => {
         await digitalExperience.gotoApplications();
 
         await expect(digitalExperience.projectNavEntry).toBeVisible();
-        await expect(digitalExperience.applicationsEmpty).toBeVisible();
+        await expect(digitalExperience.applicationsUnavailable).toBeVisible();
       });
 
       await test.step('shows no Overview', async () => {

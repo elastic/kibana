@@ -13,7 +13,7 @@ const APP_PATH = '/app/digital_experience';
 export class DigitalExperiencePage {
   public readonly mainContainer: Locator;
   public readonly applicationsTable: Locator;
-  public readonly applicationsEmpty: Locator;
+  public readonly applicationsUnavailable: Locator;
   public readonly overviewEmpty: Locator;
   public readonly overviewTab: Locator;
   public readonly breadcrumbs: Locator;
@@ -28,7 +28,7 @@ export class DigitalExperiencePage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.mainContainer = page.getByTestId('digitalExperienceMainContainer');
     this.applicationsTable = page.getByTestId('digitalExperienceApplicationsTable');
-    this.applicationsEmpty = page.getByTestId('digitalExperienceApplicationsEmpty');
+    this.applicationsUnavailable = page.getByTestId('digitalExperienceApplicationsUnavailable');
     this.overviewEmpty = page.getByTestId('digitalExperienceOverviewEmpty');
     this.overviewTab = page.getByTestId('digitalExperienceTab-overview');
     this.breadcrumbs = page.getByTestId('breadcrumbs');

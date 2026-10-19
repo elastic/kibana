@@ -74,10 +74,11 @@ describe('ApplicationsListPage', () => {
     expect(await screen.findByTestId('digitalExperienceApplicationsEmpty')).toBeInTheDocument();
   });
 
-  it('shows the empty prompt without the ux plugin, as on serverless', async () => {
+  it('shows that the data is unavailable, not the empty prompt, without the ux plugin', () => {
     renderPage();
 
-    expect(await screen.findByTestId('digitalExperienceApplicationsEmpty')).toBeInTheDocument();
+    expect(screen.getByTestId('digitalExperienceApplicationsUnavailable')).toBeInTheDocument();
+    expect(screen.queryByTestId('digitalExperienceApplicationsTable')).not.toBeInTheDocument();
   });
 
   it('shows the error with a retry, not the empty prompt, when the request fails', async () => {

@@ -61,6 +61,28 @@ const noApplicationsPrompt = (
   />
 );
 
+const dataUnavailablePrompt = (
+  <EuiEmptyPrompt
+    data-test-subj="digitalExperienceApplicationsUnavailable"
+    iconType="package"
+    title={
+      <h2>
+        {i18n.translate('xpack.digitalExperience.applications.unavailable.title', {
+          defaultMessage: 'Applications are not available yet',
+        })}
+      </h2>
+    }
+    body={
+      <p>
+        {i18n.translate('xpack.digitalExperience.applications.unavailable.body', {
+          defaultMessage:
+            'Digital Experience cannot read application data in this deployment yet. Applications will appear here once it can.',
+        })}
+      </p>
+    }
+  />
+);
+
 const LoadErrorPrompt = ({ error, onRetry }: { error: Error; onRetry: () => void }) => (
   <EuiEmptyPrompt
     data-test-subj="digitalExperienceApplicationsError"
@@ -98,7 +120,7 @@ export function ApplicationsListPage() {
     refresh,
   } = useAbortableAsync(
     async ({ signal }) => {
-      // Without ux (serverless) there is no Classic RUM data, so nothing is requested.
+      // Without ux (serverless) there is no Classic RUM data to request.
       if (!ux) {
         return [];
       }
@@ -153,6 +175,15 @@ export function ApplicationsListPage() {
     () => (applications ?? []).map((serviceName) => ({ serviceName })),
     [applications]
   );
+
+  if (!ux) {
+    return (
+      <>
+        <EuiPageHeader pageTitle={APPLICATIONS_LABEL} bottomBorder />
+        {dataUnavailablePrompt}
+      </>
+    );
+  }
 
   return (
     <>
