@@ -7,6 +7,7 @@
 
 import type { JsonObject } from '@kbn/utility-types';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { KibanaIsomerRuntime } from '@kbn/isomer';
 import { investigationNotificationDestinationSchema } from '../../../common';
 import type { InvestigationNotificationDestination, Severity } from '../../../common';
 import { InvalidNotificationDestinationError } from '../../client/errors';
@@ -49,6 +50,8 @@ export interface NotificationDelivery {
 }
 
 export interface NotificationDeliveryContext {
+  /** Renders the message. */
+  runtime: KibanaIsomerRuntime;
   notificationDestination: InvestigationNotificationDestination;
   investigation: NotifiableInvestigation;
   url: string;

@@ -13,6 +13,8 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { KibanaIsomerRuntime } from '@kbn/isomer';
+import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ZodObject } from '@kbn/zod/v4';
@@ -125,6 +127,7 @@ export class NightshiftInvestigationsPlugin
   private uiSettings?: CoreStart['uiSettings'];
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
+  private isomerStart?: IsomerPluginStart;
   private encryptedSavedObjectsStart?: NightshiftInvestigationsStartDeps['encryptedSavedObjects'];
   private securityStart?: NightshiftInvestigationsStartDeps['security'];
   private security?: CoreStart['security'];
@@ -359,6 +362,7 @@ export class NightshiftInvestigationsPlugin
             investigationLocator,
             getInvestigationsClient: this.getInvestigationsClient,
             getActions: () => this.actionsStart,
+            getRuntime: this.getIsomerRuntime,
             getRoutingClient: this.getNotificationRoutingClient,
           })
         );
@@ -367,6 +371,7 @@ export class NightshiftInvestigationsPlugin
             investigationLocator,
             getInvestigationsClient: this.getInvestigationsClient,
             getActions: () => this.actionsStart,
+            getRuntime: this.getIsomerRuntime,
             getRoutingClient: this.getNotificationRoutingClient,
             getTriggerEmitter,
           })
@@ -375,6 +380,7 @@ export class NightshiftInvestigationsPlugin
           renderSlackMessageStepDefinition({
             investigationLocator,
             getInvestigationsClient: this.getInvestigationsClient,
+            getRuntime: this.getIsomerRuntime,
           })
         );
         // Registered even when disabled: the combined workflow no-ops a writer branch instead
@@ -543,6 +549,7 @@ export class NightshiftInvestigationsPlugin
     this.uiSettings = coreStart.uiSettings;
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
+    this.isomerStart = plugins.isomer;
     this.encryptedSavedObjectsStart = plugins.encryptedSavedObjects;
     this.securityStart = plugins.security;
     this.security = coreStart.security;
@@ -671,6 +678,13 @@ export class NightshiftInvestigationsPlugin
       }
       return this.notificationRoutingService;
     };
+
+  private getIsomerRuntime = async (): Promise<KibanaIsomerRuntime> => {
+    if (!this.isomerStart) {
+      throw new Error('isomer is not available');
+    }
+    return this.isomerStart.getRuntime();
+  };
 
   private getNotificationRoutingClient = async (
     request: KibanaRequest,
