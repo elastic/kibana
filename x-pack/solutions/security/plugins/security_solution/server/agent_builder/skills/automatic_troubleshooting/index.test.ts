@@ -180,6 +180,7 @@ describe('createAutomaticTroubleshootingSkill', () => {
       expect(skill.content).toContain('rule.custom_yara_signature.entry_id');
       expect(skill.content).toContain('memory_protection.custom_yara_signatures');
       expect(skill.content).toContain('Do not invent version-specific bugs or remediation');
+      expect(skill.content).toContain('only treat items whose `name` matches it');
       expect(skill.content).toContain('endpoint-yararules');
       expect(skill.content).toContain('Endpoint.policy.applied.artifacts.user.identifiers');
       expect(skill.content).toContain(
