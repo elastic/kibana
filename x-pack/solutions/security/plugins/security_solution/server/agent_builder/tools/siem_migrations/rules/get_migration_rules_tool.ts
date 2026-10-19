@@ -82,7 +82,7 @@ const schema = lazySchema(() =>
       .enum(['summary', 'full'])
       .default('summary')
       .describe(
-        'Defaults to "summary" (id, titles, installed rule id, status, translation result) — enough to list, pick or link rules. Pass "full" only when you need the queries and comments of specific rules.'
+        'Defaults to "summary" (id, titles, installed rule id, status, translation result) — enough to list, pick or link rules. Pass "full" only when you need the queries of specific rules.'
       ),
   })
 );
@@ -101,17 +101,17 @@ const projectRule = (rule: GetRuleMigrationRulesResponse['data'][number]) => ({
   },
   elastic_rule: rule.elastic_rule
     ? {
-        id: rule.elastic_rule.id,
-        title: rule.elastic_rule.title,
-        prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
-        integration_ids: rule.elastic_rule.integration_ids,
-        query: rule.elastic_rule.query,
-        query_language: rule.elastic_rule.query_language,
-      }
+      id: rule.elastic_rule.id,
+      title: rule.elastic_rule.title,
+      prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
+      integration_ids: rule.elastic_rule.integration_ids,
+      query: rule.elastic_rule.query,
+      query_language: rule.elastic_rule.query_language,
+    }
     : undefined,
   translation_result: rule.translation_result,
   status: rule.status,
-  comments: rule.original_rule.vendor === 'splunk' ? [] : rule?.comments[0],
+  comments: rule.original_rule.vendor === 'splunk' ? [] : rule?.comments?.[0],
 });
 
 const projectRuleSummary = (rule: GetRuleMigrationRulesResponse['data'][number]) => ({
@@ -151,7 +151,7 @@ Results are paginated: \`total\` is the number of rules matching the filters, \`
 detail defaults to "summary", which is enough to list, count, pick or link rules. Pass detail "full" only when you need the queries and comments of specific rules (ids) — each full rule is large.
 
 Returns (summary, default): id, original and translated titles, installed rule id (elastic_rule.id, set once installed), translation result, status.
-Returns (full): id, original rule (title, description, vendor, query, query_language), translated elastic rule (installed rule id, title, prebuilt rule id, integration ids, ES|QL query, query language), translation result, status, comments.
+Returns (full): id, original rule (title, description, vendor, query, query_language), translated elastic rule (installed rule id, title, prebuilt rule id, integration ids, ES|QL query, query language), translation result, status, comments ( containes Natural language detection logic for QRadar and Sentinel).
 
 Read-only.`,
     schema,
