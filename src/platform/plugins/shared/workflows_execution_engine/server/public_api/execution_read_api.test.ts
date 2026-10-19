@@ -11,6 +11,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import { getStepExecutionsByIds } from './get_step_executions_by_ids';
 import { getStepFacets } from './get_step_facets';
+import { getWorkflowExecutionsById } from './get_workflow_executions_by_id';
 import { searchExecutionView } from './search_execution_view';
 import { searchExecutions } from './search_executions';
 import { searchSteps } from './search_steps';
@@ -105,6 +106,34 @@ describe('execution read API', () => {
       sourceIncludes: undefined,
       sourceExcludes: undefined,
     });
+  });
+
+  it('returns workflow executions in the requested space and leaves the rest out', async () => {
+    workflowExecutionsDataClient.getByIds.mockResolvedValue({
+      items: [
+        { document: { id: 'a', spaceId: 'default' }, index: 'executions' },
+        { document: { id: 'b', spaceId: 'other' }, index: 'executions' },
+      ],
+      missing: ['c'],
+    } as never);
+
+    const executions = await getWorkflowExecutionsById(deps, {
+      ids: ['a', 'b', 'c'],
+      spaceId: 'default',
+    });
+
+    expect(executions).toEqual([{ id: 'a', spaceId: 'default' }]);
+    expect(workflowExecutionsDataClient.getByIds).toHaveBeenCalledWith(['a', 'b', 'c'], {
+      sourceIncludes: undefined,
+      sourceExcludes: undefined,
+    });
+  });
+
+  it('does not query when no workflow execution ids are requested', async () => {
+    const executions = await getWorkflowExecutionsById(deps, { ids: [], spaceId: 'default' });
+
+    expect(executions).toEqual([]);
+    expect(workflowExecutionsDataClient.getByIds).not.toHaveBeenCalled();
   });
 
   it('does not query when no step ids are requested', async () => {

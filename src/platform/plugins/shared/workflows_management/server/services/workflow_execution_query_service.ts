@@ -161,6 +161,15 @@ export class WorkflowExecutionQueryService {
     if (ids.length === 0) {
       return [];
     }
+    // const { items } = await this.deps.workflowExecutionsDataClient.getByIds(ids, {
+    //   sourceIncludes: ['spaceId', 'workflowId', 'status'],
+    // });
+    const x = await this.deps.workflowsExecutionEngine.getStepExecutionsByIds({
+      ids,
+      spaceId,
+      sourceIncludes: ['spaceId', 'workflowId', 'status'],
+    });
+
     const { items } = await this.deps.workflowExecutionsDataClient.getByIds(ids, {
       sourceIncludes: ['spaceId', 'workflowId', 'status'],
     });

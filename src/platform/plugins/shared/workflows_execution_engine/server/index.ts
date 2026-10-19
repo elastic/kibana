@@ -43,6 +43,7 @@ export type {
   GetStepFacetsParams,
   GetStepParams,
   GetWaitingStepIdParams,
+  GetWorkflowExecutionsByIdParams,
   HasNonTerminalExecutionParams,
   SearchExecutionsParams,
   SearchExecutionViewParams,
@@ -64,6 +65,7 @@ export { getStep } from './public_api/get_step';
 export { getStepExecutionsByIds } from './public_api/get_step_executions_by_ids';
 export { getStepFacets } from './public_api/get_step_facets';
 export { getWaitingStepId } from './public_api/get_waiting_step_id';
+export { getWorkflowExecutionsById } from './public_api/get_workflow_executions_by_id';
 export { hasNonTerminalExecution } from './public_api/has_non_terminal_execution';
 export { searchExecutionView } from './public_api/search_execution_view';
 export { searchExecutions } from './public_api/search_executions';

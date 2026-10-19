@@ -199,6 +199,13 @@ export interface GetStepExecutionsByIdsParams {
   sourceExcludes?: ReadonlyArray<Extract<keyof EsWorkflowStepExecution, string>>;
 }
 
+export interface GetWorkflowExecutionsByIdParams {
+  ids: readonly string[];
+  spaceId: string;
+  sourceIncludes?: ReadonlyArray<Extract<keyof EsWorkflowExecution, string>>;
+  sourceExcludes?: ReadonlyArray<Extract<keyof EsWorkflowExecution, string>>;
+}
+
 export interface GetWaitingStepIdParams {
   executionId: string;
   spaceId: string;
@@ -219,6 +226,9 @@ export interface HasNonTerminalExecutionParams {
 
 export interface WorkflowExecutionReadApi {
   getExecution: (params: GetExecutionParams) => Promise<WorkflowExecutionRead | null>;
+  getWorkflowExecutionsById: (
+    params: GetWorkflowExecutionsByIdParams
+  ) => Promise<EsWorkflowExecution[]>;
   getExecutionSteps: (params: GetExecutionStepsParams) => Promise<ExecutionStepsPage>;
   getChildExecutions: (params: GetChildExecutionsParams) => Promise<ChildWorkflowExecutionItem[]>;
   searchExecutions: (params: SearchExecutionsParams) => Promise<WorkflowExecutionListDto>;

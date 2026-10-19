@@ -83,6 +83,7 @@ import { getStep } from './public_api/get_step';
 import { getStepExecutionsByIds } from './public_api/get_step_executions_by_ids';
 import { getStepFacets } from './public_api/get_step_facets';
 import { getWaitingStepId } from './public_api/get_waiting_step_id';
+import { getWorkflowExecutionsById } from './public_api/get_workflow_executions_by_id';
 import { hasNonTerminalExecution } from './public_api/has_non_terminal_execution';
 import { searchExecutionView } from './public_api/search_execution_view';
 import { searchExecutions } from './public_api/search_executions';
@@ -2096,6 +2097,7 @@ export class WorkflowsExecutionEnginePlugin
       triggerEvents,
       serviceAccountBindings: coreStart.security.serviceAccounts,
       getExecution: (params) => getExecution(executionReadDeps, params),
+      getWorkflowExecutionsById: (params) => getWorkflowExecutionsById(executionReadDeps, params),
       getExecutionSteps: (params) => getExecutionSteps(executionReadDeps, params),
       getChildExecutions: (params) => getChildExecutions(executionReadDeps, params),
       searchExecutions: (params) => searchExecutions(executionReadDeps, params),
