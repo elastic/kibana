@@ -18,6 +18,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { StartPlugins } from '../../../../plugin';
 import { startLeadGenerationTask } from '../tasks';
 import { createLeadIndexService } from '../indices/lead_index_service';
+import { getUserLeadPrivileges } from '../get_user_lead_privileges';
 import { upsertLeadGenerationConfig } from '../saved_object';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 
@@ -62,6 +63,19 @@ export const enableLeadGenerationRoute = (
             return siemResponse.error({
               statusCode: 500,
               body: 'Task Manager is not available',
+            });
+          }
+
+          // Enabling schedules runs that write leads as this user, so require write access up front.
+          const { has_write_permissions: hasWritePermissions } = await getUserLeadPrivileges(
+            request,
+            startPlugins.security,
+            spaceId
+          );
+          if (!hasWritePermissions) {
+            return siemResponse.error({
+              statusCode: 403,
+              body: 'You do not have permission to enable lead generation in this space.',
             });
           }
 

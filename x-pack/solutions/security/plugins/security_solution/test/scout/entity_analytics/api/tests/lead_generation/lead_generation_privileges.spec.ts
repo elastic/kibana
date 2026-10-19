@@ -6,6 +6,7 @@
  */
 
 import { apiTest } from '@kbn/scout-security';
+import type { SamlAuth } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
   LEAD_GENERATION_ROUTES,
@@ -13,13 +14,17 @@ import {
   LEAD_GENERATION_TAGS,
 } from '../../fixtures/lead_generation_constants';
 import { DEFAULT_SPACE_ID } from '../../fixtures/lead_generation_helpers';
-import { getLeadsIndexName } from '../../../../../../common/entity_analytics/lead_generation/constants';
+import {
+  getLeadsIndexName,
+  LEADS_INDEX_PATTERN,
+} from '../../../../../../common/entity_analytics/lead_generation/constants';
 
 /**
  * The leads index is shared, per-space infrastructure rather than per-user data, so it is
  * provisioned with the internal (kibana_system) client. These tests pin that contract: a user
- * holding only the Security feature privilege — and no Elasticsearch index privileges at all —
- * must still be able to enable lead generation and get the index created.
+ * with `read`/`write` on the leads index but no `manage`/`create_index` must still be able to
+ * enable lead generation and get the index created. Enabling and generating both write leads
+ * as the requesting user, so a user without index write access is rejected up front.
  */
 apiTest.describe(
   'Lead Generation - index provisioning privileges',
@@ -28,18 +33,34 @@ apiTest.describe(
     const leadsIndexName = getLeadsIndexName(DEFAULT_SPACE_ID);
 
     let adminHeaders: Record<string, string>;
+
+    // Scout reuses a single custom role per worker, so each call below overrides the previous
+    // role definition. Resolve these headers inside the test that needs them, never up front.
     // Security `all`, but zero Elasticsearch index privileges.
-    let noIndexPrivilegesHeaders: Record<string, string>;
-
-    apiTest.beforeAll(async ({ samlAuth }) => {
-      const admin = await samlAuth.asInteractiveUser('admin');
-      adminHeaders = { ...admin.cookieHeader, ...INTERNAL_HEADERS };
-
+    const getNoIndexPrivilegesHeaders = async (samlAuth: SamlAuth) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser({
         elasticsearch: { cluster: [] },
         kibana: [{ base: [], feature: { siemV5: ['all'] }, spaces: ['*'] }],
       });
-      noIndexPrivilegesHeaders = { ...cookieHeader, ...INTERNAL_HEADERS };
+      return { ...cookieHeader, ...INTERNAL_HEADERS };
+    };
+
+    // Security `all` plus `read`/`write` on the leads index, but no `manage`/`create_index`.
+    const getWriteWithoutManageHeaders = async (samlAuth: SamlAuth) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser({
+        elasticsearch: {
+          cluster: [],
+          // The privileges route checks the wildcard pattern, so grant on the pattern.
+          indices: [{ names: [LEADS_INDEX_PATTERN], privileges: ['read', 'write'] }],
+        },
+        kibana: [{ base: [], feature: { siemV5: ['all'] }, spaces: ['*'] }],
+      });
+      return { ...cookieHeader, ...INTERNAL_HEADERS };
+    };
+
+    apiTest.beforeAll(async ({ samlAuth }) => {
+      const admin = await samlAuth.asInteractiveUser('admin');
+      adminHeaders = { ...admin.cookieHeader, ...INTERNAL_HEADERS };
     });
 
     apiTest.beforeEach(async ({ esClient }) => {
@@ -62,22 +83,26 @@ apiTest.describe(
     });
 
     apiTest(
-      'POST /enable creates the leads index for a user without index privileges',
-      async ({ apiClient, esClient }) => {
-        await apiTest.step('the user really holds no leads index privileges', async () => {
-          const privileges = await apiClient.get(LEAD_GENERATION_ROUTES.PRIVILEGES, {
-            headers: noIndexPrivilegesHeaders,
-            responseType: 'json',
-          });
+      'POST /enable creates the leads index for a user with write but not manage privileges',
+      async ({ apiClient, esClient, samlAuth }) => {
+        const writeWithoutManageHeaders = await getWriteWithoutManageHeaders(samlAuth);
 
-          expect(privileges).toHaveStatusCode(200);
-          expect(privileges.body.has_all_required).toBe(false);
-          expect(privileges.body.has_write_permissions).toBe(false);
-        });
+        await apiTest.step(
+          'the user can write to the leads index but cannot manage it',
+          async () => {
+            const privileges = await apiClient.get(LEAD_GENERATION_ROUTES.PRIVILEGES, {
+              headers: writeWithoutManageHeaders,
+              responseType: 'json',
+            });
+
+            expect(privileges).toHaveStatusCode(200);
+            expect(privileges.body.has_write_permissions).toBe(true);
+          }
+        );
 
         await apiTest.step('enable creates the index anyway', async () => {
           const response = await apiClient.post(LEAD_GENERATION_ROUTES.ENABLE, {
-            headers: noIndexPrivilegesHeaders,
+            headers: writeWithoutManageHeaders,
             responseType: 'json',
             body: { connectorId: 'test-connector' },
           });
@@ -92,10 +117,11 @@ apiTest.describe(
 
     apiTest(
       'POST /enable stays idempotent when the leads index already exists',
-      async ({ apiClient, esClient }) => {
+      async ({ apiClient, esClient, samlAuth }) => {
+        const writeWithoutManageHeaders = await getWriteWithoutManageHeaders(samlAuth);
         for (let attempt = 0; attempt < 2; attempt++) {
           const response = await apiClient.post(LEAD_GENERATION_ROUTES.ENABLE, {
-            headers: noIndexPrivilegesHeaders,
+            headers: writeWithoutManageHeaders,
             responseType: 'json',
             body: { connectorId: 'test-connector' },
           });
@@ -108,9 +134,10 @@ apiTest.describe(
 
     apiTest(
       'GET /status reports the index as created once enable has run',
-      async ({ apiClient }) => {
+      async ({ apiClient, samlAuth }) => {
+        const writeWithoutManageHeaders = await getWriteWithoutManageHeaders(samlAuth);
         await apiClient.post(LEAD_GENERATION_ROUTES.ENABLE, {
-          headers: noIndexPrivilegesHeaders,
+          headers: writeWithoutManageHeaders,
           responseType: 'json',
           body: { connectorId: 'test-connector' },
         });
@@ -123,6 +150,35 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         expect(response.body.isEnabled).toBe(true);
         expect(response.body.indexExists).toBe(true);
+      }
+    );
+
+    apiTest(
+      'POST /enable is rejected with 403 for a user without index write permissions',
+      async ({ apiClient, esClient, samlAuth }) => {
+        const noIndexPrivilegesHeaders = await getNoIndexPrivilegesHeaders(samlAuth);
+        const response = await apiClient.post(LEAD_GENERATION_ROUTES.ENABLE, {
+          headers: noIndexPrivilegesHeaders,
+          responseType: 'json',
+          body: { connectorId: 'test-connector' },
+        });
+
+        expect(response).toHaveStatusCode(403);
+        expect(await esClient.indices.exists({ index: leadsIndexName })).toBe(false);
+      }
+    );
+
+    apiTest(
+      'POST /generate is rejected with 403 for a user without index write permissions',
+      async ({ apiClient, samlAuth }) => {
+        const noIndexPrivilegesHeaders = await getNoIndexPrivilegesHeaders(samlAuth);
+        const response = await apiClient.post(LEAD_GENERATION_ROUTES.GENERATE, {
+          headers: noIndexPrivilegesHeaders,
+          responseType: 'json',
+          body: { connectorId: 'test-connector' },
+        });
+
+        expect(response).toHaveStatusCode(403);
       }
     );
   }
