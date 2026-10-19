@@ -321,6 +321,12 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(fanOut().steps?.[0].with?.include_attack_discoveries).toBe(false);
     });
 
+    // The review's FP/TP analysis owns the false-positive decision. With the
+    // gate on, generation dropped false-positive chains before any review ran.
+    it('turns off the ground-truth gate on the run step', () => {
+      expect(fanOut().steps?.[0].with?.ground_truth_gate_enabled).toBe(false);
+    });
+
     // Step IO is keyed by step id and returns the latest execution, so two
     // concurrent branches running the same step name would race.
     it('keeps the branch body to a single step', () => {
