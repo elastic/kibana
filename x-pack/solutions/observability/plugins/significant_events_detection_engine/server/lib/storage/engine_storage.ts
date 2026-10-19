@@ -26,8 +26,11 @@ export interface IEngineStorage {
   records: IRecordsStore;
   /** Stored settings merged over the defaults, field by field. */
   getConfig(): Promise<EngineConfig>;
-  /** Removes what runs produced, keeping settings, cost, schedule and rules. */
-  clearRunData(): Promise<void>;
+  /**
+   * Removes what runs produced, keeping settings, cost, schedule and rules. What people taught
+   * the engine (labels, memory) and the detectors it learned stay unless `includeLearning`.
+   */
+  clearRunData(options?: { includeLearning?: boolean }): Promise<void>;
 }
 
 /** Merges a stored config over the defaults, so a config saved by an older build gains new fields. */
@@ -38,6 +41,15 @@ export function withConfigDefaults(stored: Partial<EngineConfig> | undefined): E
     strategies: { ...DEFAULT_ENGINE_CONFIG.strategies, ...stored?.strategies },
     agent: { ...DEFAULT_ENGINE_CONFIG.agent, ...stored?.agent },
     baseline: { ...DEFAULT_ENGINE_CONFIG.baseline, ...stored?.baseline },
+    learning: {
+      ...DEFAULT_ENGINE_CONFIG.learning,
+      ...stored?.learning,
+      autonomy: { ...DEFAULT_ENGINE_CONFIG.learning.autonomy, ...stored?.learning?.autonomy },
+      acceptance: {
+        ...DEFAULT_ENGINE_CONFIG.learning.acceptance,
+        ...stored?.learning?.acceptance,
+      },
+    },
   };
 }
 
@@ -66,11 +78,20 @@ export function createEngineStorage({
       return withConfigDefaults(await state.get('config'));
     },
 
-    async clearRunData() {
+    async clearRunData({ includeLearning = false } = {}) {
       await Promise.all([
         events.clear(),
         records.clear(),
-        state.clear({ keep: ['config', 'cost', 'auto_run', 'rules', 'lease'] }),
+        state.clear({
+          keep: [
+            'config',
+            'cost',
+            'auto_run',
+            'rules',
+            'lease',
+            ...(includeLearning ? [] : (['memory_notes', 'incident', 'candidate'] as const)),
+          ],
+        }),
       ]);
     },
   };

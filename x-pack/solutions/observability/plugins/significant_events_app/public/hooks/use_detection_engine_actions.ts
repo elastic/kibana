@@ -11,6 +11,7 @@ import type {
   DismissalReason,
   EngineConfigUpdate,
   EngineRunSummary,
+  LearningRunSummary,
 } from '@kbn/significant-events-detection-engine-plugin/common';
 import { useKibana } from './use_kibana';
 import { getFormattedError } from '../util/errors';
@@ -25,7 +26,13 @@ export type DetectionEngineActionKey =
   | 'reset'
   | 'dismiss'
   | 'close'
-  | 'verify';
+  | 'verify'
+  | 'confirm'
+  | 'reportMissed'
+  | 'learn'
+  | 'approve'
+  | 'reject'
+  | 'retireNote';
 
 interface IActionRequest {
   key: DetectionEngineActionKey;
@@ -51,6 +58,20 @@ export interface IDetectionEngineActions {
   }): Promise<unknown>;
   closeEvent(eventId: string): Promise<unknown>;
   verifyEvent(eventId: string): Promise<unknown>;
+  /** Labels the event a real problem; every future change must keep catching it. */
+  confirmEvent(params: { eventId: string; note?: string }): Promise<unknown>;
+  /** Labels a problem the engine did not raise; the next learning pass looks for a detector. */
+  reportMissed(params: {
+    services: string[];
+    from: string;
+    to?: string;
+    description: string;
+  }): Promise<unknown>;
+  runLearning(): Promise<unknown>;
+  approveCandidate(candidateId: string): Promise<unknown>;
+  /** Rejects a candidate, or rolls back one that is live. */
+  rejectCandidate(params: { candidateId: string; reason?: string }): Promise<unknown>;
+  retireNote(params: { noteId: string; reason: string }): Promise<unknown>;
 }
 
 function describeRun(result: unknown): string {
@@ -215,6 +236,89 @@ export function useDetectionEngineActions(): IDetectionEngineActions {
           }),
         describe: (result) =>
           (result as { verification?: { details: string } }).verification?.details,
+      }),
+
+    confirmEvent: ({ eventId, note }) =>
+      act({
+        key: 'confirm',
+        request: () =>
+          client.fetch('POST /internal/significant_events/detection_engine/events/{id}/_confirm', {
+            params: { path: { id: eventId }, body: { note } },
+            signal: null,
+          }),
+        describe: () =>
+          i18n.translate('xpack.significantEventsApp.detectionEngine.confirmToast', {
+            defaultMessage:
+              'Confirmed. It is now a kept incident every future change must catch, and memory the agent reads.',
+          }),
+      }),
+
+    reportMissed: (incident) =>
+      act({
+        key: 'reportMissed',
+        request: () =>
+          client.fetch('POST /internal/significant_events/detection_engine/incidents', {
+            params: { body: incident },
+            signal: null,
+          }),
+        describe: () =>
+          i18n.translate('xpack.significantEventsApp.detectionEngine.reportMissedToast', {
+            defaultMessage:
+              'Reported. The next learning pass looks for log patterns that would have caught it.',
+          }),
+      }),
+
+    runLearning: () =>
+      act({
+        key: 'learn',
+        request: () =>
+          client.fetch('POST /internal/significant_events/detection_engine/learning/_run', {
+            signal: null,
+          }),
+        describe: (result) => {
+          const summary = result as LearningRunSummary;
+          return summary.error
+            ? summary.error
+            : i18n.translate('xpack.significantEventsApp.detectionEngine.learnToast', {
+                defaultMessage:
+                  'Learning pass: {notes} memory notes, {proposed} candidates proposed, {advanced} moved on.',
+                values: {
+                  notes: summary.memory.added,
+                  proposed: summary.candidates.proposed,
+                  advanced: summary.candidates.advanced,
+                },
+              });
+        },
+      }),
+
+    approveCandidate: (candidateId) =>
+      act({
+        key: 'approve',
+        request: () =>
+          client.fetch(
+            'POST /internal/significant_events/detection_engine/candidates/{id}/_approve',
+            { params: { path: { id: candidateId } }, signal: null }
+          ),
+      }),
+
+    rejectCandidate: ({ candidateId, reason }) =>
+      act({
+        key: 'reject',
+        request: () =>
+          client.fetch(
+            'POST /internal/significant_events/detection_engine/candidates/{id}/_reject',
+            { params: { path: { id: candidateId }, body: { reason } }, signal: null }
+          ),
+      }),
+
+    retireNote: ({ noteId, reason }) =>
+      act({
+        key: 'retireNote',
+        request: () =>
+          client.fetch('POST /internal/significant_events/detection_engine/memory/{id}/_retire', {
+            params: { path: { id: noteId }, body: { reason } },
+            signal: null,
+          }),
       }),
   };
 }

@@ -11,6 +11,7 @@ export const DETECTION_STRATEGY_IDS = [
   'health_checks',
   'customer_alerts',
   'new_log_patterns',
+  'learned_detectors',
 ] as const;
 export type DetectionStrategyId = (typeof DETECTION_STRATEGY_IDS)[number];
 
@@ -62,6 +63,11 @@ export interface DetectionStrategyDescriptor {
    * query instead: the rule may not have run while the platform was down.
    */
   liveWindowMs?: number;
+  /**
+   * True when every run of the strategy's rule writes rows, as long as its source has data. A
+   * minute is then settled as soon as each rule has run after it, instead of after `settleMs`.
+   */
+  writesEveryRun?: boolean;
 }
 
 /** Per-strategy engine settings. */
@@ -80,7 +86,7 @@ export interface StrategyProposal {
   evidence: string;
 }
 
-/** How a strategy has performed, from recorded outcomes. */
+/** How a strategy has performed, from recorded outcomes and labelled incidents. */
 export interface StrategyScorecard {
   strategy: DetectionStrategyId;
   detections: number;
@@ -89,6 +95,14 @@ export interface StrategyScorecard {
   events_opened: number;
   events_dismissed: number;
   verifier_failures: number;
+  /** Confirmed incidents an event of this strategy held. */
+  incidents_caught: number;
+  /** Missed incidents on services this strategy watches. */
+  incidents_missed: number;
+  /** Median minutes from a confirmed incident's start to the event, when known. */
+  median_warning_minutes?: number;
+  /** The reward the learning loop ranks strategies by; see `scoreStrategies`. */
+  score: number;
 }
 
 /** The Alerting v2 rules one strategy runs on, as last reconciled. */

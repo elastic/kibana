@@ -9,6 +9,7 @@ import type { DetectionStrategyId } from '../../../common';
 import { customerAlertsStrategy } from './customer_alerts';
 import { healthChecksStrategy } from './health_checks';
 import { kiRulesStrategy } from './ki_rules';
+import { learnedDetectorsStrategy } from './learned_detectors';
 import { newLogPatternsStrategy } from './new_log_patterns';
 import type { IDetectionStrategy } from './types';
 
@@ -21,4 +22,5 @@ export const STRATEGIES: Record<DetectionStrategyId, IDetectionStrategy> = {
   health_checks: healthChecksStrategy,
   customer_alerts: customerAlertsStrategy,
   new_log_patterns: newLogPatternsStrategy,
+  learned_detectors: learnedDetectorsStrategy,
 };

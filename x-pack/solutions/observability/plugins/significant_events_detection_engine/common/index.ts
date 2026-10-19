@@ -20,6 +20,8 @@ export type {
   SeriesSample,
   EventSeriesResponse,
   ReplaySummary,
+  EngineHealth,
+  LearningOverviewResponse,
 } from './api';
 export type { EngineAgentKind, EngineConfig, EngineConfigUpdate } from './config';
 export { DEFAULT_ENGINE_CONFIG } from './config';
@@ -79,3 +81,37 @@ export type {
   EngineRulesState,
 } from './strategies';
 export { DETECTION_STRATEGY_IDS, STRATEGY_MODES } from './strategies';
+export type {
+  AutonomyLevel,
+  LearningCapability,
+  IncidentLabel,
+  IncidentOrigin,
+  LabelledIncident,
+  MemoryScope,
+  MemoryNoteKind,
+  MemoryNote,
+  CandidateKind,
+  CandidateStage,
+  CandidateOrigin,
+  AcceptanceCriteria,
+  LearnedDetector,
+  ThresholdChange,
+  CandidateReplay,
+  CandidateTrial,
+  CandidateHistoryEntry,
+  StrategyCandidate,
+  LearningRunSummary,
+  LearningConfig,
+  KiProposal,
+} from './learning';
+export {
+  AUTONOMY_LEVELS,
+  LEARNING_CAPABILITIES,
+  INCIDENT_LABELS,
+  INCIDENT_ORIGINS,
+  MEMORY_SCOPES,
+  MEMORY_NOTE_KINDS,
+  CANDIDATE_KINDS,
+  CANDIDATE_STAGES,
+  CANDIDATE_RUNNING_STAGES,
+} from './learning';

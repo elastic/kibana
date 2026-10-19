@@ -39,6 +39,12 @@ export const STRATEGY_LABELS: Record<DetectionStrategyId, string> = {
       defaultMessage: 'New log patterns',
     }
   ),
+  learned_detectors: i18n.translate(
+    'xpack.significantEventsApp.detectionEngine.strategy.learnedDetectors',
+    {
+      defaultMessage: 'Learned detectors',
+    }
+  ),
 };
 
 export const STRATEGY_ICONS: Record<DetectionStrategyId, string> = {
@@ -46,6 +52,7 @@ export const STRATEGY_ICONS: Record<DetectionStrategyId, string> = {
   health_checks: 'heart',
   customer_alerts: 'bell',
   new_log_patterns: 'sparkles',
+  learned_detectors: 'beaker',
 };
 
 export const MODE_LABELS: Record<StrategyMode, string> = {

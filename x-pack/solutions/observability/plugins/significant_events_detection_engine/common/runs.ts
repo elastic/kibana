@@ -52,6 +52,8 @@ export interface EngineRunSummary {
   agent: {
     calls: number;
     cooldown_skips: number;
+    /** Decisions the heuristic made because the model had no budget left in the run. */
+    heuristic_when_busy?: number;
     rejected_answers: number;
     failures: number;
     /** Model tokens spent in this run, prompt plus completion. */

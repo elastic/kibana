@@ -180,6 +180,10 @@ export function EventFlyout({
   const window = event ? latestWindow(event) : undefined;
   const reaction = window ? reactionOf({ window, activity: data?.activity }) : undefined;
   const earlierWindows = event ? event.open_windows.slice(0, -1) : [];
+  // Each episode is its own case; only the current one's confirmation shows here.
+  const currentConfirmation = event?.confirmations?.find(
+    (item) => item.episode === event.open_windows.length
+  );
   // Firing signals first, since they keep the event open; then this occurrence's, then older.
   const members = event
     ? [...event.members].sort(
@@ -416,6 +420,27 @@ export function EventFlyout({
                 />
               </>
             )}
+            {currentConfirmation && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCallOut
+                  announceOnMount
+                  size="s"
+                  color="success"
+                  iconType="checkCircle"
+                  title={i18n.translate(
+                    'xpack.significantEventsApp.detectionEngine.flyout.confirmed',
+                    {
+                      defaultMessage:
+                        'Confirmed as a real problem{note}. Every future change to the engine must keep catching it.',
+                      values: {
+                        note: currentConfirmation.note ? ` ("${currentConfirmation.note}")` : '',
+                      },
+                    }
+                  )}
+                />
+              </>
+            )}
             <EuiSpacer size="m" />
             <EuiTitle size="xs">
               <h3>
@@ -507,6 +532,22 @@ export function EventFlyout({
                 >
                   {i18n.translate('xpack.significantEventsApp.detectionEngine.flyout.close', {
                     defaultMessage: 'Close as operator',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+            {!currentConfirmation && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  color="success"
+                  iconType="checkCircle"
+                  data-test-subj="detectionEngineConfirmButton"
+                  isLoading={actions.pendingAction === 'confirm'}
+                  onClick={() => actions.confirmEvent({ eventId: event.event_id })}
+                >
+                  {i18n.translate('xpack.significantEventsApp.detectionEngine.flyout.confirm', {
+                    defaultMessage: 'Confirm real problem',
                   })}
                 </EuiButton>
               </EuiFlexItem>

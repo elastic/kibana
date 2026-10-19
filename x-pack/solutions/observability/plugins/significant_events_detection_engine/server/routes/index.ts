@@ -7,10 +7,12 @@
 
 import { engineRoutes } from './engine_routes';
 import { eventsRoutes } from './events_routes';
+import { learningRoutes } from './learning_routes';
 
 export const detectionEngineRouteRepository = {
   ...engineRoutes,
   ...eventsRoutes,
+  ...learningRoutes,
 };
 
 /** Every route of the engine, typed; the browser client is built from it. */

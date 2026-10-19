@@ -19,6 +19,7 @@
     "@kbn/es-types",
     "@kbn/inference-common",
     "@kbn/inference-plugin",
+    "@kbn/nightshift-decision-trees",
     "@kbn/nightshift-shared",
     "@kbn/nightshift-sources-plugin",
     "@kbn/server-route-repository",

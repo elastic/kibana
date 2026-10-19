@@ -28,6 +28,8 @@ export const STATE_INDEX: ManagedIndexDefinition = {
 
 /** Ids of memory notes are fingerprints; this many are read in one round trip. */
 const MGET_CHUNK = 500;
+/** Learning keeps a few hundred candidates, incidents and note groups per space at most. */
+const MAX_LISTED = 1_000;
 
 interface StoredState<TKind extends StateKind> {
   kind: TKind;
@@ -65,6 +67,8 @@ export interface IStateStore {
     options?: { key?: string; ifVersion?: DocVersion; create?: boolean; refresh?: boolean }
   ): Promise<DocVersion>;
   delete(kind: StateKind, options?: { key?: string; ifVersion?: DocVersion }): Promise<void>;
+  /** Every document of one kind, newest first, up to `size`. */
+  list<TKind extends StateKind>(kind: TKind, size?: number): Promise<Array<StateDocs[TKind]>>;
   /** Deletes every state document of the space except the kinds listed. */
   clear(options?: { keep?: StateKind[] }): Promise<void>;
 }
@@ -152,6 +156,17 @@ export function createStateStore({
         refresh: refresh ? 'wait_for' : false,
       });
       return { seq_no: response._seq_no!, primary_term: response._primary_term! };
+    },
+
+    async list(kind, size = MAX_LISTED) {
+      await ensure();
+      const response = await esClient.search<StoredState<typeof kind>>({
+        index,
+        size,
+        query: { bool: { filter: [{ term: { space_id: spaceId } }, { term: { kind } }] } },
+        sort: [{ updated_at: { order: 'desc' } }],
+      });
+      return response.hits.hits.flatMap((hit) => (hit._source ? [hit._source.doc] : []));
     },
 
     async delete(kind, { key, ifVersion } = {}) {

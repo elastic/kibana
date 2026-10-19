@@ -16,7 +16,9 @@ export interface Dependency {
 /** An open event a detection may join, with the reason code proposes it. */
 export interface JoinProposal {
   event: EngineEvent;
-  relation: 'same_service' | 'upstream' | 'downstream';
+  relation: 'same_service' | 'upstream' | 'downstream' | 'shared_dependency';
+  /** The service that links them: the one in the event, or the dependency both call. */
+  via: string;
   reason: string;
   minutesApart: number;
 }
@@ -25,6 +27,8 @@ const RELATION_RANK: Record<JoinProposal['relation'], number> = {
   same_service: 0,
   downstream: 1,
   upstream: 1,
+  // Siblings: weaker than a direct call, so a direct relation always ranks first.
+  shared_dependency: 2,
 };
 
 function relationOf({
@@ -51,6 +55,17 @@ function relationOf({
   );
   if (calledBy) {
     return { relation: 'upstream', via: calledBy.source };
+  }
+  // Both call the same service: one failing dependency makes all its callers complain.
+  const shared = dependencies.find(
+    (dependency) =>
+      dependency.source === service &&
+      dependencies.some(
+        (other) => other.target === dependency.target && eventServices.includes(other.source)
+      )
+  );
+  if (shared) {
+    return { relation: 'shared_dependency', via: shared.target };
   }
   return undefined;
 }
@@ -96,8 +111,10 @@ export function proposeJoins({
           ? `same service (${service})`
           : relation.relation === 'downstream'
           ? `${service} calls ${relation.via}, which is in this event`
-          : `${relation.via}, which is in this event, calls ${service}`;
-      return [{ event, relation: relation.relation, reason, minutesApart }];
+          : relation.relation === 'upstream'
+          ? `${relation.via}, which is in this event, calls ${service}`
+          : `${service} and a service in this event both call ${relation.via}`;
+      return [{ event, relation: relation.relation, via: relation.via, reason, minutesApart }];
     })
     .sort(
       (a, b) =>

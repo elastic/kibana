@@ -47,11 +47,19 @@ const WRITE_CHUNK = 5_000;
  * check, and KI heartbeats (stored under the source's name) tell a quiet KI from a missing rule.
  */
 const INTERNAL_SERIES_PREFIXES = ['health:traffic:', 'ki_watch:'];
+/** Samples one series read returns: three days of minutes for a handful of series. */
+const MAX_SERIES_SAMPLES = 10_000;
+const MAX_FOUND_DETECTIONS = 5_000;
 
 /** One past value of a series. */
 export interface HistorySample {
   bucket_start: string;
   value: number;
+}
+
+/** One stored evaluation, with whether the strategy's own trigger fired. */
+export interface StoredSample extends HistorySample {
+  looks_off: boolean;
 }
 
 /** A series to read history for, with the windows to leave out (its open incidents). */
@@ -91,7 +99,25 @@ export interface IRecordsStore {
      */
     activeOnly?: boolean;
   }): Promise<Array<{ fingerprint: string; service: string }>>;
+  /** Every stored sample of some series in [from, to), oldest first, live and replayed. */
+  readSeries(params: {
+    fingerprints: string[];
+    from: string;
+    to: string;
+  }): Promise<Map<string, StoredSample[]>>;
+  /** Per series with this prefix since a time: how many minutes were evaluated, and above zero. */
+  seriesCoverage(params: {
+    fingerprintPrefix: string;
+    since: string;
+  }): Promise<Array<{ fingerprint: string; minutes: number; nonZero: number }>>;
   writeDetections(docs: EngineDetection[]): Promise<void>;
+  /** Detections of some series since a time, oldest first; for judging a trial. */
+  findDetections(params: {
+    fingerprints: string[];
+    outcomes?: DetectionOutcome[];
+    since: string;
+    size?: number;
+  }): Promise<EngineDetection[]>;
   listDetections(params: {
     strategy?: DetectionStrategyId;
     outcome?: DetectionOutcome;
@@ -310,6 +336,112 @@ export function createRecordsStore({
         fingerprint: bucket.key,
         service: bucket.service.buckets[0]?.key ?? 'unknown',
       }));
+    },
+
+    async readSeries({ fingerprints, from, to }) {
+      if (fingerprints.length === 0) {
+        return new Map();
+      }
+      const client = await observations();
+      const response = await client.search({
+        space,
+        size: MAX_SERIES_SAMPLES,
+        query: {
+          bool: {
+            filter: [
+              { terms: { fingerprint: fingerprints } },
+              { range: { bucket_start: { gte: from, lt: to } } },
+            ],
+          },
+        },
+        sort: [{ bucket_start: 'asc' }],
+        _source: ['fingerprint', 'bucket_start', 'value', 'looks_off'],
+      });
+      return response.hits.hits.reduce((series, hit) => {
+        const source = hit._source as
+          | { fingerprint: string; bucket_start: string; value: number; looks_off: boolean }
+          | undefined;
+        if (source) {
+          series.set(source.fingerprint, [
+            ...(series.get(source.fingerprint) ?? []),
+            {
+              bucket_start: source.bucket_start,
+              value: source.value,
+              looks_off: source.looks_off,
+            },
+          ]);
+        }
+        return series;
+      }, new Map<string, StoredSample[]>());
+    },
+
+    async seriesCoverage({ fingerprintPrefix, since }) {
+      const client = await observations();
+      const response = await client.search({
+        space,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { prefix: { fingerprint: fingerprintPrefix } },
+              { range: { bucket_start: { gte: since } } },
+            ],
+          },
+        },
+        aggs: {
+          series: {
+            terms: { field: 'fingerprint', size: 10_000 },
+            aggs: {
+              minutes: { cardinality: { field: 'bucket_start' } },
+              non_zero: {
+                filter: { range: { value: { gt: 0 } } },
+                aggs: { minutes: { cardinality: { field: 'bucket_start' } } },
+              },
+            },
+          },
+        },
+      });
+      const buckets =
+        (
+          aggregation(response, 'series') as
+            | {
+                buckets: Array<{
+                  key: string;
+                  minutes: { value: number };
+                  non_zero: { minutes: { value: number } };
+                }>;
+              }
+            | undefined
+        )?.buckets ?? [];
+      return buckets.map((bucket) => ({
+        fingerprint: bucket.key,
+        minutes: bucket.minutes.value,
+        nonZero: bucket.non_zero.minutes.value,
+      }));
+    },
+
+    async findDetections({ fingerprints, outcomes, since, size = MAX_FOUND_DETECTIONS }) {
+      if (fingerprints.length === 0) {
+        return [];
+      }
+      const client = await detections();
+      const response = await client.search({
+        space,
+        size,
+        query: {
+          bool: {
+            filter: [
+              { terms: { fingerprint: fingerprints } },
+              { range: { '@timestamp': { gte: since } } },
+              ...(outcomes ? [{ terms: { outcome: outcomes } }] : []),
+            ],
+          },
+        },
+        sort: [{ '@timestamp': 'asc' }],
+      });
+      return response.hits.hits.flatMap((hit) =>
+        hit._source ? [hit._source as EngineDetection] : []
+      );
     },
 
     async writeDetections(docs) {

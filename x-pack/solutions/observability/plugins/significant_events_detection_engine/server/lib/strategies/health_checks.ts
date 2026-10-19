@@ -515,6 +515,8 @@ export const healthChecksStrategy: IDetectionStrategy = {
     settleMs: 150_000,
     // Each run re-emits its last three closed minutes: four minutes covers a late run.
     liveWindowMs: 270_000,
+    // Every service with traffic gives a row each run, so a fresh row proves the rule ran.
+    writesEveryRun: true,
   },
 
   evaluate: evaluateLive,

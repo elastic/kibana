@@ -19,6 +19,18 @@ export type AgentUnavailableReason = 'run_budget' | 'time_budget';
 export interface IAgentRunner {
   /** Undefined when the agent may take another case, or why not. */
   unavailable(): AgentUnavailableReason | undefined;
+  /**
+   * Decides with the heuristic agent alone, at no cost, when the model has no budget left in
+   * this run. A decision now beats a model's decision a minute later.
+   */
+  assessWithoutModel(
+    agentCase: AgentCase,
+    reason: string
+  ): Promise<{
+    answer: AgentAnswer;
+    agentKind: AgentKind;
+    corrections: string[];
+  }>;
   assess(agentCase: AgentCase): Promise<{
     answer: AgentAnswer;
     agentKind: AgentKind;
@@ -27,6 +39,11 @@ export interface IAgentRunner {
   /** Model usage of this run's calls, to price after the run. */
   usage(): AgentUsage[];
 }
+
+/** Reserved for the first model call of a run, before any call was timed. */
+const INITIAL_CALL_RESERVE_MS = 30_000;
+/** A new call starts only with this many times the slowest call so far left in the budget. */
+const CALL_RESERVE_FACTOR = 2;
 
 /**
  * Wraps the configured agent. Every answer is validated in code; a failed, invalid or late
@@ -56,6 +73,9 @@ export function createAgentRunner({
   const { summary } = recorder;
   let modelCalls = 0;
   let dayLimitLogged = false;
+  // What a call takes in practice. Reserving the full timeout before each call would stop the
+  // agent a minute and a half before the run ends, and defer everything after.
+  let slowestCallMs = INITIAL_CALL_RESERVE_MS;
 
   const activeAgent = (): IDiscoveryAgent => {
     if (!agent.usesModel || modelCallsToday + modelCalls < config.max_agent_calls_per_day) {
@@ -94,7 +114,10 @@ export function createAgentRunner({
       }
       // A call must be able to finish before the run stops starting new work.
       const heuristicOnly = !activeAgent().usesModel;
-      if (!heuristicOnly && Date.now() + agentTimeoutMs > deadline) {
+      if (
+        !heuristicOnly &&
+        Date.now() + Math.min(agentTimeoutMs, slowestCallMs * CALL_RESERVE_FACTOR) > deadline
+      ) {
         return 'time_budget';
       }
       return undefined;
@@ -108,7 +131,16 @@ export function createAgentRunner({
         if (current.usesModel) {
           modelCalls += 1;
         }
-        const { answer: raw, usage } = await current.assess(agentCase, { signal });
+        const started = Date.now();
+        // A call never outlives the run's budget; a late one falls back to the heuristic.
+        const callSignal = AbortSignal.any([
+          signal,
+          AbortSignal.timeout(Math.max(1, Math.min(agentTimeoutMs, deadline - started))),
+        ]);
+        const { answer: raw, usage } = await current.assess(agentCase, { signal: callSignal });
+        if (current.usesModel) {
+          slowestCallMs = Math.max(slowestCallMs, Date.now() - started);
+        }
         if (usage) {
           usages.push(usage);
         }
@@ -143,6 +175,11 @@ export function createAgentRunner({
         });
         return assessWithFallback(agentCase, 'after a failure');
       }
+    },
+
+    assessWithoutModel(agentCase, reason) {
+      summary.agent.heuristic_when_busy = (summary.agent.heuristic_when_busy ?? 0) + 1;
+      return assessWithFallback(agentCase, reason);
     },
 
     usage: () => usages,

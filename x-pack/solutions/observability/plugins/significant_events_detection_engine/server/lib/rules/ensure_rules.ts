@@ -11,6 +11,7 @@ import type { EngineConfig } from '../../../common';
 import type { EngineRulesRecord } from '../domain';
 import type { IEngineScope } from '../engine/engine_scope';
 import type { ActivityInput } from '../engine/run_recorder';
+import type { RunningDetector } from '../strategies/types';
 import { getErrorMessage } from '../errors';
 import { computeRulesInputsHash, reconcileRules } from './rule_provisioner';
 
@@ -33,6 +34,7 @@ export async function ensureRules({
   config,
   sources,
   getQueryLinks,
+  getLearnedDetectors,
   current,
   force = false,
   signal,
@@ -42,6 +44,7 @@ export async function ensureRules({
   config: EngineConfig;
   sources: NightshiftSource[];
   getQueryLinks: () => Promise<QueryLink[]>;
+  getLearnedDetectors: () => Promise<RunningDetector[]>;
   current: EngineRulesRecord | undefined;
   force?: boolean;
   signal: AbortSignal;
@@ -49,10 +52,12 @@ export async function ensureRules({
 }): Promise<EngineRulesRecord> {
   // Unreadable KIs hash as none: the rules are then rebuilt once they can be read again.
   const queryLinks = await getQueryLinks().catch(() => []);
+  const detectors = await getLearnedDetectors().catch(() => []);
   const inputsHash = computeRulesInputsHash({
     config,
     sources,
     queryLinks,
+    detectors,
     cpsEnabled: scope.cpsEnabled,
   });
   const reconciledAt = current?.reconciled_at ? Date.parse(current.reconciled_at) : 0;
@@ -76,6 +81,7 @@ export async function ensureRules({
           dataEsClient: scope.dataEsClient,
           cpsEnabled: scope.cpsEnabled,
           getQueryLinks: async () => queryLinks,
+          getLearnedDetectors: async () => detectors,
           signal,
         },
         previous: current,

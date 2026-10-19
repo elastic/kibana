@@ -162,6 +162,11 @@ export async function persistAndPublish({
     })
   );
   // A conflict here only means an operator acted since; their write published again anyway.
-  await storage.events.write(outcomes);
+  const published = await storage.events.write(outcomes);
+  published.forEach((result, position) => {
+    if (result.ok) {
+      events.sync(outcomes[position].event, result.version);
+    }
+  });
   return conflicted;
 }

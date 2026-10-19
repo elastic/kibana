@@ -9,7 +9,8 @@ import type { DismissalReason, EngineEvent, EventVerification } from '../../../c
 import type { IEngineScope } from '../engine/engine_scope';
 import { checkEvidence } from '../engine/verifier_step';
 import { DetectionEngineError, getErrorMessage } from '../errors';
-import { rememberDismissal } from '../learning/learning';
+import { labelConfirmed, labelDismissed } from '../learning/incidents';
+import { rememberConfirmation, rememberDismissal } from '../learning/learning';
 import { publishToAlertingV2 } from '../pipeline/publish';
 import { nextEventStatus } from '../pipeline/state_machine';
 import type { VersionedEvent } from '../storage/events_store';
@@ -122,15 +123,26 @@ export async function applyOperatorInput({
     };
   });
 
-  if (input === 'dismiss') {
-    await rememberDismissal({
-      storage: scope.storage,
-      event: after,
-      reason: after.dismissal!.reason,
-      note,
-    });
-  }
   const config = await scope.storage.getConfig();
+  const learned =
+    input === 'dismiss'
+      ? await Promise.all([
+          config.learning.autonomy.memory === 'off'
+            ? 0
+            : rememberDismissal({
+                storage: scope.storage,
+                event: after,
+                reason: after.dismissal!.reason,
+                note,
+              }),
+          labelDismissed({
+            state: scope.storage.state,
+            event: after,
+            reason: after.dismissal!.reason,
+            note,
+          }),
+        ])
+      : undefined;
   await scope.storage.records.appendActivity([
     {
       '@timestamp': now,
@@ -142,9 +154,7 @@ export async function applyOperatorInput({
         input === 'dismiss'
           ? `Dismissed "${before.title}" as ${after.dismissal!.reason}${
               note ? ` ("${note}")` : ''
-            }. It stays quiet until the problem is ${Math.round(
-              config.worse_margin * 100
-            )}% worse; memory notes added for ${before.members.length} series.`
+            }. It stays quiet until the problem is ${Math.round(config.worse_margin * 100)}% worse.`
           : `Closed "${before.title}" by operator (${before.status} -> ${after.status}).`,
     },
     {
@@ -154,7 +164,11 @@ export async function applyOperatorInput({
       event_id: eventId,
       message:
         input === 'dismiss'
-          ? 'The dismissal reason is now memory the agent reads on its next case for these series.'
+          ? `${learned?.[0] ?? 0} memory note(s) added for its series, KIs and services${
+              learned?.[1]
+                ? `; labelled a false positive (${learned[1].incident_id}), a case every future change is checked against`
+                : '; a duplicate is not labelled'
+            }.`
           : 'Operator close recorded as evidence for the strategy scorecard.',
     },
   ]);
@@ -186,6 +200,72 @@ export async function verifyEvent({
       event_id: eventId,
       strategy: event.origin_strategy,
       message: `Verifier (manual) on "${event.title}": ${verification.details}`,
+    },
+  ]);
+  return after;
+}
+
+/**
+ * A person confirms an event was a real problem. It becomes a labelled incident every future
+ * change must keep catching, and memory the agent reads on the next case for these series. The
+ * event's status does not change: confirming is a label, not an input to the state machine.
+ */
+export async function confirmEvent({
+  scope,
+  eventId,
+  note,
+  episode,
+}: {
+  scope: IEngineScope;
+  eventId: string;
+  note?: string;
+  /** 1-based episode to confirm; the current one when absent. */
+  episode?: number;
+}): Promise<EngineEvent> {
+  const { event } = await load(scope, eventId);
+  const target = episode ?? event.open_windows.length;
+  if (target < 1 || target > Math.max(1, event.open_windows.length)) {
+    throw new DetectionEngineError(
+      `Event ${eventId} has ${event.open_windows.length} episode(s); ${target} does not exist`,
+      400
+    );
+  }
+  if (event.confirmations?.some((item) => item.episode === target)) {
+    return event;
+  }
+  const incident = await labelConfirmed({
+    state: scope.storage.state,
+    event,
+    note,
+    episode: target,
+  });
+  const config = await scope.storage.getConfig();
+  const added =
+    config.learning.autonomy.memory === 'off'
+      ? 0
+      : await rememberConfirmation({ storage: scope.storage, event, note });
+  const now = new Date().toISOString();
+  const { after } = await updateEvent(scope, eventId, (latest) => ({
+    ...latest,
+    confirmations: [
+      ...(latest.confirmations ?? []),
+      { episode: target, at: now, note, incident_id: incident.incident_id },
+    ],
+  }));
+  await scope.storage.records.appendActivity([
+    {
+      '@timestamp': now,
+      step: 'learning',
+      action: 'confirmed',
+      event_id: eventId,
+      strategy: event.origin_strategy,
+      message: `A person confirmed episode ${target} of "${event.title}" as a real problem${
+        note ? ` ("${note}")` : ''
+      }: labelled incident ${incident.incident_id}${
+        incident.warning_minutes === undefined
+          ? ''
+          : `, raised ${incident.warning_minutes.toFixed(1)} min after it started`
+      }; ${added} memory note(s) added.`,
     },
   ]);
   return after;

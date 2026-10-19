@@ -43,6 +43,13 @@ export interface IEventWorkingSet {
   setVersion(eventId: string, version: DocVersion): void;
   /** Forgets an event another writer changed; this run's changes to it are dropped. */
   drop(eventId: string): void;
+  /** Marks everything written: later changes in the run start from `none` again. */
+  clearDirty(): void;
+  /**
+   * Takes what the run itself wrote after a change, such as the publication result, without
+   * marking it dirty: a later write in the same run must present this version, not the old one.
+   */
+  sync(event: EngineEvent, version: DocVersion): void;
   size(): number;
 }
 
@@ -121,6 +128,24 @@ export function createEventWorkingSet(loaded: VersionedEvent[]): IEventWorkingSe
       }
       entries.delete(eventId);
       touched.delete(eventId);
+    },
+    sync(event, version) {
+      const existing = entries.get(event.event_id);
+      if (!existing) {
+        return;
+      }
+      unindex(existing.event);
+      index(event);
+      entries.set(event.event_id, { ...existing, event, version });
+    },
+    clearDirty() {
+      touched.forEach((eventId) => {
+        const entry = entries.get(eventId);
+        if (entry) {
+          entries.set(eventId, { ...entry, change: 'none' });
+        }
+      });
+      touched.clear();
     },
     size: () => entries.size,
   };

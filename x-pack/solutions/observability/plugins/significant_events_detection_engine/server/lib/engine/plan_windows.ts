@@ -33,6 +33,7 @@ export function planWindows({
   progress,
   limits,
   only,
+  settledByRules = {},
 }: {
   now: number;
   config: EngineConfig;
@@ -40,6 +41,11 @@ export function planWindows({
   limits: EngineLimits;
   /** Backtests evaluate one bucket for every strategy, regardless of settle delays. */
   only?: { bucketEnd: number };
+  /**
+   * End of the last minute every rule of a strategy has provably run after, for strategies
+   * whose rules write on every run. It can settle a minute before `settleMs` has passed.
+   */
+  settledByRules?: Partial<Record<DetectionStrategyId, number>>;
 }): StrategyWindow[] {
   return DETECTION_STRATEGY_IDS.filter((strategy) => config.strategies[strategy].mode !== 'off')
     .map((strategy): StrategyWindow => {
@@ -52,7 +58,10 @@ export function planWindows({
           skippedMinutes: 0,
         };
       }
-      const settledEnd = floorToBucket(now - descriptor.settleMs);
+      const settledEnd = Math.min(
+        floorToBucket(now),
+        Math.max(floorToBucket(now - descriptor.settleMs), settledByRules[strategy] ?? 0)
+      );
       const stored = progress.watermarks[strategy];
       const watermark = stored ? Date.parse(stored) : settledEnd - BUCKET_MS;
       // Strategies that read the present (active alerts) never evaluate the past.

@@ -12,6 +12,7 @@ import { BUCKET_MS } from '../../../common';
 import type { OwnedRule, TaggedObservation } from '../domain';
 import { getErrorMessage } from '../errors';
 import { STRATEGIES } from '../strategies/strategy_registry';
+import type { RunningDetector } from '../strategies/types';
 import type { IEngineScope } from './engine_scope';
 import type { StrategyWindow } from './plan_windows';
 import type { IRunRecorder } from './run_recorder';
@@ -37,6 +38,7 @@ export async function evaluateStrategies({
   sources,
   ownedRules,
   getQueryLinks,
+  getLearnedDetectors,
   recorder,
   signal,
   backtest = false,
@@ -48,6 +50,7 @@ export async function evaluateStrategies({
   sources: NightshiftSource[];
   ownedRules: OwnedRule[];
   getQueryLinks: () => Promise<QueryLink[]>;
+  getLearnedDetectors: () => Promise<RunningDetector[]>;
   recorder: IRunRecorder;
   signal: AbortSignal;
   /**
@@ -75,6 +78,7 @@ export async function evaluateStrategies({
           sources,
           dataEsClient: scope.dataEsClient,
           getQueryLinks,
+          getLearnedDetectors,
           from,
           to,
           signal,

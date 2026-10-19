@@ -18,17 +18,30 @@ import type {
   ReplaySummary,
 } from '../../common';
 import {
+  AUTONOMY_LEVELS,
   DETECTION_ENGINE_API_BASE_PATH,
   DETECTION_STRATEGY_IDS,
+  LEARNING_CAPABILITIES,
   STRATEGY_MODES,
 } from '../../common';
 import { createRunKnowledge } from '../lib/engine/knowledge';
 import { replayEngine } from '../lib/engine/replay';
 import { runEngine } from '../lib/engine/run_engine';
+import { learningDue, runLearning } from '../lib/learning/learning_loop';
 import { buildOverview } from '../lib/overview/overview';
 import { ensureRules } from '../lib/rules/ensure_rules';
 import { withConfigDefaults } from '../lib/storage/engine_storage';
 import { abortSignalOf, createRoute } from './create_route';
+
+/** What rule reconciliation reads from knowledge. */
+const knowledgeFor = (knowledge: ReturnType<typeof createRunKnowledge>) => ({
+  getQueryLinks: () => knowledge.getQueryLinks(),
+  getLearnedDetectors: () => knowledge.getLearnedDetectors(),
+});
+
+/** A scheduled learning pass needs at least this long, and never takes more. */
+const MIN_LEARNING_BUDGET_MS = 30_000;
+const MAX_LEARNING_BUDGET_MS = 90_000;
 
 const READ = { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read] } };
 const MANAGE = { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } };
@@ -64,6 +77,42 @@ const configUpdateSchema = z.object({
   max_agent_calls_per_run: z.number().int().min(0).max(100).optional(),
   max_agent_calls_per_day: z.number().int().min(0).max(100_000).optional(),
   publish_to_alerting_v2: z.boolean().optional(),
+  learning: z
+    .object({
+      autonomy: z.partialRecord(z.enum(LEARNING_CAPABILITIES), z.enum(AUTONOMY_LEVELS)).optional(),
+      interval_minutes: z
+        .number()
+        .int()
+        .min(1)
+        .max(24 * 60)
+        .optional(),
+      acceptance: z
+        .object({
+          max_warning_minutes: z
+            .number()
+            .min(1)
+            .max(24 * 60)
+            .optional(),
+          max_false_opens_per_day: z.number().min(0).max(1_000).optional(),
+          min_trial_minutes: z
+            .number()
+            .int()
+            .min(0)
+            .max(30 * 24 * 60)
+            .optional(),
+          rollback_dismissals: z.number().int().min(1).max(100).optional(),
+          watch_minutes: z
+            .number()
+            .int()
+            .min(0)
+            .max(30 * 24 * 60)
+            .optional(),
+        })
+        .optional(),
+      replay_hours: z.number().min(1).max(72).optional(),
+      max_model_calls_per_pass: z.number().int().min(0).max(50).optional(),
+    })
+    .optional(),
 });
 
 const overviewRoute = createRoute({
@@ -94,6 +143,12 @@ const updateConfigRoute = createRoute({
       strategies: { ...current.strategies, ...body.strategies },
       agent: body.agent ?? current.agent,
       baseline: { ...current.baseline, ...body.baseline },
+      learning: {
+        ...current.learning,
+        ...body.learning,
+        autonomy: { ...current.learning.autonomy, ...body.learning?.autonomy },
+        acceptance: { ...current.learning.acceptance, ...body.learning?.acceptance },
+      },
     });
     // Conditional on what was read: two admins saving at once cannot silently undo each other.
     await scope.storage.state.put('config', next, {
@@ -137,7 +192,7 @@ const updateConfigRoute = createRoute({
       scope,
       config: next,
       sources,
-      getQueryLinks: createRunKnowledge({ scope, sources }).getQueryLinks,
+      ...knowledgeFor(createRunKnowledge({ scope, sources })),
       current: await scope.storage.state.get('rules'),
       signal: abortSignalOf(request),
       log: (entry) => activity.push({ ...entry, '@timestamp': new Date().toISOString() }),
@@ -189,7 +244,20 @@ const tickRoute = createRoute({
   handler: async ({ request, getStartServices }): Promise<EngineRunSummary> => {
     const { createScope } = await getStartServices();
     const scope = await createScope(request);
-    return runEngine(scope, { trigger: 'schedule', signal: abortSignalOf(request) });
+    const startedAt = Date.now();
+    const summary = await runEngine(scope, { trigger: 'schedule', signal: abortSignalOf(request) });
+    // Learning runs after the detection it learns from, and only with time left over: it gives
+    // way to live detection by construction.
+    const config = await scope.storage.getConfig();
+    const left = startedAt + scope.limits.timeBudgetMs - Date.now();
+    if (left > MIN_LEARNING_BUDGET_MS && (await learningDue(scope, config))) {
+      await runLearning(scope, {
+        trigger: 'schedule',
+        deadline: Date.now() + Math.min(left, MAX_LEARNING_BUDGET_MS),
+        signal: abortSignalOf(request),
+      });
+    }
+    return summary;
   },
 });
 
@@ -249,7 +317,7 @@ const reconcileRulesRoute = createRoute({
       scope,
       config: await scope.storage.getConfig(),
       sources,
-      getQueryLinks: createRunKnowledge({ scope, sources }).getQueryLinks,
+      ...knowledgeFor(createRunKnowledge({ scope, sources })),
       current: await scope.storage.state.get('rules'),
       force: true,
       signal: abortSignalOf(request),
@@ -290,13 +358,16 @@ const resetRoute = createRoute({
     summary: 'Delete what the detection engine produced in this space',
   },
   security: MANAGE,
-  params: z.object({}),
-  handler: async ({ request, getStartServices }): Promise<{ reset: true }> => {
+  params: z.object({
+    body: z.object({ include_learning: z.boolean().optional() }).nullish(),
+  }),
+  handler: async ({ request, params, getStartServices }): Promise<{ reset: true }> => {
     const { createScope } = await getStartServices();
     const scope = await createScope(request);
     // Settings, the schedule, the rules it owns and the cost counter stay: the counter feeds the
-    // daily model budget, and the rules and schedule keep running after a reset.
-    await scope.storage.clearRunData();
+    // daily model budget, and the rules and schedule keep running after a reset. What people
+    // taught the engine stays too, unless asked.
+    await scope.storage.clearRunData({ includeLearning: params?.body?.include_learning });
     return { reset: true };
   },
 });

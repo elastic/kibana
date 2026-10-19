@@ -141,6 +141,11 @@ export interface EngineEvent {
   dismissal?: EventDismissal;
   assessment?: EventAssessment;
   verification?: EventVerification;
+  /**
+   * Episodes a person confirmed as a real problem, each a labelled incident. An event can be
+   * confirmed once per episode: each repeat is its own case.
+   */
+  confirmations?: Array<{ episode: number; at: string; note?: string; incident_id: string }>;
   /** Publication as an Alerting v2 alert in `.rule-events`. */
   published?: { at: string; ok: boolean; error?: string; pending?: boolean };
 }

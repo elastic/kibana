@@ -14,7 +14,13 @@ import type {
   EngineProgress,
   EngineRulesState,
   EngineRunSummary,
+  LabelledIncident,
+  LearningRunSummary,
+  MemoryNote,
+  MemoryScope,
+  StrategyCandidate,
 } from '../../common';
+import type { ObservedTopology } from './learning/topology';
 
 /**
  * One evaluation of one series in one bucket, as a strategy reports it. Strategies report every
@@ -48,6 +54,11 @@ export interface StrategyObservation {
    * proves the strategy looked in a minute; the baseline counts those minutes as zeros.
    */
   heartbeat?: string;
+  /**
+   * Set when this one series runs as a trial while its strategy is live, such as a detector the
+   * engine wrote that has not proved itself yet. It records what it would raise, nothing more.
+   */
+  trial?: boolean;
 }
 
 export interface TaggedObservation extends StrategyObservation {
@@ -90,7 +101,15 @@ export interface StateDocs {
   config: EngineConfig;
   progress: EngineProgress;
   last_run: EngineRunSummary;
-  memory: { fingerprint: string; notes: string[] };
+  /** Memory notes about one series, KI or service, keyed `<scope>:<key>`. */
+  memory_notes: { scope: MemoryScope; key: string; notes: MemoryNote[] };
+  /** A labelled incident, keyed by its id. */
+  incident: LabelledIncident;
+  /** A change on the evolution path, keyed by its id. */
+  candidate: StrategyCandidate;
+  learning_run: LearningRunSummary;
+  /** Dependencies the engine observed in the data. */
+  topology: ObservedTopology;
   cost: EngineCostLedger;
   auto_run: EngineAutoRunState;
   rules: EngineRulesRecord;

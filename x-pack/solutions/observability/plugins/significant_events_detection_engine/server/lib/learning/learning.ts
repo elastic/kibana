@@ -12,38 +12,87 @@ import type {
   StrategyProposal,
   StrategyScorecard,
 } from '../../../common';
-import { DETECTION_STRATEGY_IDS } from '../../../common';
+import { DAY_MS, DETECTION_STRATEGY_IDS } from '../../../common';
 import type { IEngineStorage } from '../storage/engine_storage';
+import { listIncidents } from './incidents';
+import { createMemory, kiIdOf, type NewMemoryNote } from './memory';
 
 /** A trial strategy needs this many would-raise detections before promotion is proposed. */
 const MIN_TRIAL_EVIDENCE = 1;
 /** A live strategy whose events are dismissed this often is proposed back to trial. */
 const DISMISSAL_RATE_FOR_ROLLBACK = 0.5;
 const MIN_EVENTS_FOR_ROLLBACK = 5;
-const MAX_MEMORY_NOTES = 10;
 
-/** Scores each strategy from what it actually did, read as aggregations. */
+/** Reward weights: an incident caught or missed matters most, noise and wrong calls cost less. */
+const SCORE_WEIGHTS = { caught: 10, missed: 10, dismissed: 3, verifierFailure: 2 } as const;
+
+function median(values: number[]): number | undefined {
+  if (values.length === 0) {
+    return undefined;
+  }
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
+}
+
+/**
+ * Scores each strategy from what it actually did and what people and the Verifier said about
+ * it. The score is the learning loop's reward: incidents caught, minus incidents missed on
+ * services it watches, minus dismissed events and conclusions that did not hold.
+ */
 export async function scoreStrategies(
   storage: IEngineStorage
 ): Promise<Record<DetectionStrategyId, StrategyScorecard>> {
-  const [detections, events, verifierFailures] = await Promise.all([
+  const [detections, events, verifierFailures, incidents, watched] = await Promise.all([
     storage.records.detectionCounts(),
     storage.events.strategyStats(),
     storage.records.verifierFailures(),
+    listIncidents(storage.state),
+    storage.records.serviceActivity(new Date(Date.now() - DAY_MS).toISOString()),
   ]);
+  const watchedBy = (strategy: DetectionStrategyId) =>
+    new Set(
+      watched
+        .filter((item) => item.strategies.some((entry) => entry.strategy === strategy))
+        .map((item) => item.service)
+    );
   return Object.fromEntries(
-    DETECTION_STRATEGY_IDS.map((strategy) => [
-      strategy,
-      {
+    DETECTION_STRATEGY_IDS.map((strategy) => {
+      const caught = incidents.filter(
+        (incident) => incident.label === 'confirmed' && incident.strategies.includes(strategy)
+      );
+      const services = watchedBy(strategy);
+      const missed = incidents.filter(
+        (incident) =>
+          incident.label === 'missed' && incident.services.some((service) => services.has(service))
+      ).length;
+      const dismissed = events[strategy]?.dismissed ?? 0;
+      const failures = verifierFailures.get(strategy) ?? 0;
+      return [
         strategy,
-        detections: detections[strategy]?.detections ?? 0,
-        above_normal: detections[strategy]?.above_normal ?? 0,
-        would_raise_in_trial: detections[strategy]?.would_raise_in_trial ?? 0,
-        events_opened: events[strategy]?.opened ?? 0,
-        events_dismissed: events[strategy]?.dismissed ?? 0,
-        verifier_failures: verifierFailures.get(strategy) ?? 0,
-      },
-    ])
+        {
+          strategy,
+          detections: detections[strategy]?.detections ?? 0,
+          above_normal: detections[strategy]?.above_normal ?? 0,
+          would_raise_in_trial: detections[strategy]?.would_raise_in_trial ?? 0,
+          events_opened: events[strategy]?.opened ?? 0,
+          events_dismissed: dismissed,
+          verifier_failures: failures,
+          incidents_caught: caught.length,
+          incidents_missed: missed,
+          median_warning_minutes: median(
+            caught.flatMap((incident) =>
+              incident.warning_minutes === undefined ? [] : [incident.warning_minutes]
+            )
+          ),
+          score:
+            caught.length * SCORE_WEIGHTS.caught -
+            missed * SCORE_WEIGHTS.missed -
+            dismissed * SCORE_WEIGHTS.dismissed -
+            failures * SCORE_WEIGHTS.verifierFailure,
+        },
+      ];
+    })
   ) as Record<DetectionStrategyId, StrategyScorecard>;
 }
 
@@ -92,8 +141,9 @@ export function proposeStrategyChanges({
 }
 
 /**
- * Turns a dismissal into memory notes the agent reads next time. The notes only inform the AI;
- * code never reads them to decide anything.
+ * Turns a dismissal into memory notes the agent reads next time: on each series, on the KI a
+ * series counts (a harmless match), and on the service. The notes only inform the AI; code never
+ * reads them to decide anything.
  */
 export async function rememberDismissal({
   storage,
@@ -105,28 +155,79 @@ export async function rememberDismissal({
   event: EngineEvent;
   reason: string;
   note?: string;
-}): Promise<void> {
+}): Promise<number> {
   const day = new Date().toISOString().slice(0, 10);
-  const existing = await storage.state.getMany(
-    'memory',
-    event.members.map((member) => member.fingerprint)
-  );
-  await Promise.all(
-    event.members.map((member) => {
-      const entry = `${day}: an event with "${member.title}" was dismissed as ${reason}${
-        note ? ` ("${note}")` : ''
-      } at value ${member.value} ${member.unit}.`;
-      return storage.state.put(
-        'memory',
-        {
-          fingerprint: member.fingerprint,
-          notes: [entry, ...(existing.get(member.fingerprint)?.notes ?? [])].slice(
-            0,
-            MAX_MEMORY_NOTES
-          ),
-        },
-        { key: member.fingerprint }
-      );
-    })
-  );
+  const evidence = `dismissal of event ${event.event_id} on ${day}`;
+  const why = `dismissed as ${reason}${note ? ` ("${note}")` : ''}`;
+  return createMemory(storage.state).add([
+    ...event.members.map(
+      (member): NewMemoryNote => ({
+        scope: 'series',
+        key: member.fingerprint,
+        kind: 'dismissal',
+        text: `${day}: "${member.title}" at ${member.value} ${member.unit} was ${why}.`,
+        evidence,
+      })
+    ),
+    ...event.members.flatMap((member): NewMemoryNote[] => {
+      const kiId = kiIdOf(member.fingerprint);
+      return kiId
+        ? [
+            {
+              scope: 'ki',
+              key: kiId,
+              kind: 'harmless_match',
+              text: `${day}: matches of this KI on ${member.service} were ${why}.`,
+              evidence,
+            },
+          ]
+        : [];
+    }),
+    ...event.services.map(
+      (service): NewMemoryNote => ({
+        scope: 'service',
+        key: service,
+        kind: 'dismissal',
+        text: `${day}: "${event.title}" on ${service} was ${why}.`,
+        evidence,
+      })
+    ),
+  ]);
+}
+
+/** Turns a confirmation into notes on what the problem looked like, for the next case. */
+export async function rememberConfirmation({
+  storage,
+  event,
+  note,
+}: {
+  storage: IEngineStorage;
+  event: EngineEvent;
+  note?: string;
+}): Promise<number> {
+  const day = new Date().toISOString().slice(0, 10);
+  const evidence = `confirmation of event ${event.event_id} on ${day}`;
+  const what = `${day}: a person confirmed "${event.title}" (${event.severity}) as a real problem${
+    note ? `: ${note}` : ''
+  }.`;
+  return createMemory(storage.state).add([
+    ...event.members.map(
+      (member): NewMemoryNote => ({
+        scope: 'series',
+        key: member.fingerprint,
+        kind: 'confirmed',
+        text: `${what} This series peaked at ${member.peak_value} ${member.unit}.`,
+        evidence,
+      })
+    ),
+    ...event.services.map(
+      (service): NewMemoryNote => ({
+        scope: 'service',
+        key: service,
+        kind: 'confirmed',
+        text: what,
+        evidence,
+      })
+    ),
+  ]);
 }

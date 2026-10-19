@@ -10,6 +10,14 @@ import type { EngineConfig } from './config';
 import type { EngineCostSummary } from './cost';
 import type { EngineDetection } from './detections';
 import type { EngineEvent } from './events';
+import type {
+  LabelledIncident,
+  KiProposal,
+  LearningConfig,
+  LearningRunSummary,
+  MemoryNote,
+  StrategyCandidate,
+} from './learning';
 import type { EngineProgress, EngineRunSummary } from './runs';
 import type {
   DetectionStrategyDescriptor,
@@ -52,6 +60,27 @@ export interface EngineOverviewResponse {
   rules: EngineRulesState;
   /** False when Agent Builder is not available; only the heuristic agent can run. */
   agent_builder_available: boolean;
+  health: EngineHealth;
+}
+
+/**
+ * Whether the engine itself is working. No events must never read as "nothing is wrong" when
+ * the engine stopped running, fell behind, or keeps failing.
+ */
+export interface EngineHealth {
+  status: 'healthy' | 'degraded' | 'stalled' | 'off';
+  reasons: string[];
+}
+
+/** Everything the learning loop knows and is doing in this space. */
+export interface LearningOverviewResponse {
+  config: LearningConfig;
+  last_run?: LearningRunSummary;
+  candidates: StrategyCandidate[];
+  incidents: LabelledIncident[];
+  memory: MemoryNote[];
+  /** Proposals about the customer's KIs, from how they matched over the last day. */
+  ki_proposals: KiProposal[];
 }
 
 export interface ServiceSummary {

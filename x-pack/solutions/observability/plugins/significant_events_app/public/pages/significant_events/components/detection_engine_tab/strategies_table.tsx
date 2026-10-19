@@ -129,6 +129,21 @@ export function StrategiesTable({ overview, actions }: IStrategiesTableProps) {
       }),
       render: (scorecard: StrategyRow['scorecard']) => (
         <EuiText size="xs">
+          <strong>
+            {i18n.translate('xpack.significantEventsApp.detectionEngine.strategies.score', {
+              defaultMessage:
+                'Score {score}: {caught} incidents caught, {missed} missed{warning}. ',
+              values: {
+                score: scorecard.score,
+                caught: scorecard.incidents_caught,
+                missed: scorecard.incidents_missed,
+                warning:
+                  scorecard.median_warning_minutes === undefined
+                    ? ''
+                    : `, raised ${scorecard.median_warning_minutes.toFixed(1)} min after the start`,
+              },
+            })}
+          </strong>
           {i18n.translate('xpack.significantEventsApp.detectionEngine.strategies.scorecardBody', {
             defaultMessage:
               '{detections} detections, {above} above normal, {trial} would raise in trial, {opened} events opened, {dismissed} dismissed, {verifier} verifier failures',

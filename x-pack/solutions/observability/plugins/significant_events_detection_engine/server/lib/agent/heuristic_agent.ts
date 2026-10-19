@@ -10,6 +10,11 @@ import type { AgentAnswer, AgentCase, CaseEvidence, IDiscoveryAgent } from './ty
 
 /** Joins across a dependency are confirmed only when the symptoms are this close in time. */
 const DEPENDENCY_JOIN_MAX_MINUTES = 30;
+/**
+ * A joining detection this much more important than everything in the event leads its text: a
+ * service going silent must not hide inside an event about routine rejections.
+ */
+const ESCALATION_MARGIN = 15;
 
 const SEVERITY_ORDER: EngineSeverity[] = ['low', 'medium', 'high', 'critical'];
 
@@ -59,6 +64,15 @@ function mentions(rows: CaseEvidence['rows'], service: string): boolean {
  */
 function evidenceLinksServices(agentCase: AgentCase): boolean {
   const [own, ...eventEvidence] = agentCase.evidence;
+  // Siblings are one problem when both sides name the dependency they share.
+  if (agentCase.join_proposal?.relation === 'shared_dependency') {
+    const via = agentCase.join_proposal.via;
+    return (
+      own !== undefined &&
+      mentions(own.rows, via) &&
+      eventEvidence.some((evidence) => mentions(evidence.rows, via))
+    );
+  }
   const eventServices = agentCase.event?.services ?? [];
   const ownLinks =
     own !== undefined && eventServices.some((service) => mentions(own.rows, service));
@@ -116,7 +130,13 @@ function assessHeuristically(agentCase: AgentCase): AgentAnswer {
 
   const confirming = verdicts.filter((verdict) => verdict.verdict === 'confirms').length;
   const { detection } = agentCase;
-  const keepEventText = agentCase.event && (joinConfirmed || agentCase.kind === 'reopen');
+  const eventImportance = Math.max(
+    0,
+    ...(agentCase.event?.members ?? []).map((member) => member.importance)
+  );
+  const escalates = detection.importance >= eventImportance + ESCALATION_MARGIN;
+  const keepEventText =
+    agentCase.event && (joinConfirmed || agentCase.kind === 'reopen') && !escalates;
 
   return {
     join_decision: proposal ? (joinConfirmed ? 'confirm' : 'veto') : undefined,
@@ -139,6 +159,10 @@ function assessHeuristically(agentCase: AgentCase): AgentAnswer {
         } evidence check(s) confirm it.${
           agentCase.firing_customer_alerts.length > 0
             ? ` ${agentCase.firing_customer_alerts.length} customer alert(s) firing at the same time.`
+            : ''
+        }${
+          escalates && joinConfirmed && agentCase.event
+            ? ` It joined an event that was about: ${agentCase.event.title}.`
             : ''
         }`,
   };

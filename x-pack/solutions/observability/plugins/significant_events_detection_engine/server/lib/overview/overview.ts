@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import type { EngineOverviewResponse, EngineServicesResponse } from '../../../common';
-import { DETECTION_STRATEGY_IDS, HOUR_MS } from '../../../common';
+import type {
+  EngineAutoRunState,
+  EngineHealth,
+  EngineOverviewResponse,
+  EngineProgress,
+  EngineRulesState,
+  EngineServicesResponse,
+} from '../../../common';
+import { DETECTION_STRATEGY_IDS, HOUR_MS, MINUTE_MS } from '../../../common';
 import { emptyLedger, resolveModelKey, toPricePerMillion } from '../cost/cost';
 import type { IEngineScope } from '../engine/engine_scope';
 import { createRunKnowledge } from '../engine/knowledge';
@@ -14,6 +21,64 @@ import { EMPTY_PROGRESS } from '../engine/run_engine';
 import { proposeStrategyChanges, scoreStrategies } from '../learning/learning';
 import { EMPTY_RULES_RECORD } from '../rules/ensure_rules';
 import { STRATEGIES } from '../strategies/strategy_registry';
+
+/** No run for this long while the schedule is on means the engine stopped, not that all is well. */
+const STALLED_AFTER_MS = 5 * MINUTE_MS;
+/** Behind real time by more than this, events arrive too late to act on. */
+const DEGRADED_LAG_MS = 15 * MINUTE_MS;
+const DEGRADED_AFTER_FAILURES = 3;
+
+/**
+ * Whether the engine is working. Silence is not proof of health: a stopped schedule, a run that
+ * keeps failing or a strategy far behind all show here, so an empty event list never reads as
+ * "nothing is wrong" when the engine is simply not looking.
+ */
+export function engineHealth({
+  autoRun,
+  progress,
+  lagMs,
+  rules,
+  now,
+}: {
+  autoRun: EngineAutoRunState;
+  progress: EngineProgress;
+  lagMs?: number;
+  rules: EngineRulesState;
+  now: number;
+}): EngineHealth {
+  if (!autoRun.enabled) {
+    return {
+      status: 'off',
+      reasons: ['The schedule is off: nothing is watched unless someone presses Run now.'],
+    };
+  }
+  const sinceRun = progress.last_run_at ? now - Date.parse(progress.last_run_at) : undefined;
+  if (autoRun.error || sinceRun === undefined || sinceRun > STALLED_AFTER_MS) {
+    return {
+      status: 'stalled',
+      reasons: [
+        autoRun.error
+          ? `The schedule could not be set: ${autoRun.error}`
+          : sinceRun === undefined
+          ? 'The schedule is on but the engine has never run.'
+          : `The engine has not run for ${Math.round(sinceRun / MINUTE_MS)} min.`,
+      ],
+    };
+  }
+  const reasons = [
+    ...(progress.consecutive_failures >= DEGRADED_AFTER_FAILURES
+      ? [`${progress.consecutive_failures} runs in a row failed: ${progress.last_error ?? ''}`]
+      : []),
+    ...(lagMs !== undefined && lagMs > DEGRADED_LAG_MS
+      ? [`The slowest strategy is ${Math.round(lagMs / MINUTE_MS)} min behind real time.`]
+      : []),
+    ...(rules.error ? [`Rules could not be reconciled: ${rules.error}`] : []),
+    ...rules.strategies.flatMap((strategy) =>
+      strategy.errors.map((error) => `${strategy.strategy} rules: ${error}`)
+    ),
+  ];
+  return { status: reasons.length > 0 ? 'degraded' : 'healthy', reasons };
+}
 
 /** Everything the detection page shows at a glance. */
 export async function buildOverview(scope: IEngineScope): Promise<EngineOverviewResponse> {
@@ -71,6 +136,16 @@ export async function buildOverview(scope: IEngineScope): Promise<EngineOverview
     }
   );
 
+  const lagMs = lags.length > 0 ? Math.max(...lags) : undefined;
+  const rulesState: EngineRulesState = {
+    reconciled_at: rulesRecord.reconciled_at,
+    created: rulesRecord.created,
+    deleted: rulesRecord.deleted,
+    strategies: rulesRecord.strategies,
+    error: rulesRecord.error,
+  };
+  const autoRunState = autoRun ?? { enabled: false };
+
   return {
     config,
     strategies: DETECTION_STRATEGY_IDS.map((id) => ({
@@ -83,7 +158,7 @@ export async function buildOverview(scope: IEngineScope): Promise<EngineOverview
     proposals: proposeStrategyChanges({ config, scorecards }),
     last_run: lastRun,
     progress: currentProgress,
-    lag_ms: lags.length > 0 ? Math.max(...lags) : undefined,
+    lag_ms: lagMs,
     counts: {
       open_events: counts.open,
       events: counts.events,
@@ -97,15 +172,16 @@ export async function buildOverview(scope: IEngineScope): Promise<EngineOverview
       prices_available: prices !== null,
       prices_fetched_at: prices?.fetchedAt,
     },
-    auto_run: autoRun ?? { enabled: false },
-    rules: {
-      reconciled_at: rulesRecord.reconciled_at,
-      created: rulesRecord.created,
-      deleted: rulesRecord.deleted,
-      strategies: rulesRecord.strategies,
-      error: rulesRecord.error,
-    },
+    auto_run: autoRunState,
+    rules: rulesState,
     agent_builder_available: scope.agentBuilderAvailable,
+    health: engineHealth({
+      autoRun: autoRunState,
+      progress: currentProgress,
+      lagMs,
+      rules: rulesState,
+      now,
+    }),
   };
 }
 

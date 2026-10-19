@@ -54,14 +54,31 @@ export interface AgentCase {
     severity: EngineSeverity;
     status: EngineEventStatus;
     services: string[];
-    members: Array<{ title: string; service: string; strategy: DetectionStrategyId }>;
+    members: Array<{
+      title: string;
+      service: string;
+      strategy: DetectionStrategyId;
+      importance: number;
+    }>;
   };
-  join_proposal?: { event_id: string; reason: string; relation: string; minutes_apart: number };
+  join_proposal?: {
+    event_id: string;
+    reason: string;
+    relation: string;
+    /** The service linking them; for a shared dependency, the one both call. */
+    via: string;
+    minutes_apart: number;
+  };
   evidence: CaseEvidence[];
   firing_customer_alerts: Array<{ title: string; service: string }>;
   related_services: string[];
-  /** Notes the learning loop kept for these series, such as past dismissals. */
+  /** Notes the learning loop kept for these series, KIs and services, such as past dismissals. */
   memory: string[];
+  /**
+   * Pages investigations wrote about these services (Semantic Memory, Cortex). Written by an AI
+   * with no review: context to weigh, never proof.
+   */
+  investigation_context: Array<{ kind: 'semantic_memory' | 'cortex'; title: string; text: string }>;
 }
 
 /** The one shape the agent answers in. It reports facts and judgments, never a status. */

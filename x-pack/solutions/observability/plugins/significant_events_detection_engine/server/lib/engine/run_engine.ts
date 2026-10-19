@@ -13,8 +13,8 @@ import type {
   EngineProgress,
   EngineRunSummary,
 } from '../../../common';
-import { BUCKET_MS, HOUR_MS } from '../../../common';
-import type { TaggedObservation } from '../domain';
+import { BUCKET_MS, DETECTION_STRATEGY_IDS, HOUR_MS, MINUTE_MS } from '../../../common';
+import type { OwnedRule, TaggedObservation } from '../domain';
 import { getErrorMessage } from '../errors';
 import { RunAbortedError } from '../run_aborted_error';
 import { checkBaseline, fillSparseHistory } from '../pipeline/baseline';
@@ -34,6 +34,8 @@ import { persistAndPublish } from './persist_step';
 import { planWindows, type StrategyWindow } from './plan_windows';
 import { createRunRecorder, type IRunRecorder } from './run_recorder';
 import { verifyRecentEvents } from './verifier_step';
+import type { InvestigationPage } from '../learning/investigation_knowledge';
+import { createMemory } from '../learning/memory';
 
 /** The baseline reads at least this far back, so a long incident still leaves normal samples. */
 const HISTORY_LOOKBACK_MS = 6 * HOUR_MS;
@@ -41,6 +43,10 @@ const HISTORY_LOOKBACK_MS = 6 * HOUR_MS;
 const MAX_OPEN_EVENTS = 5_000;
 /** Recently closed events loaded so the verifier can re-check a fresh close. */
 const RECENTLY_CLOSED_EVENTS = 50;
+/** A rule's rows are trusted this long after their minute ends: late log lines still arrive. */
+const INGEST_GRACE_MS = 20_000;
+/** How far back the engine looks for proof that a rule ran. */
+const RULE_WRITES_LOOKBACK_MS = 5 * MINUTE_MS;
 /** A detection that waited this long for budget describes a moment that has passed. */
 const MAX_PENDING_AGE_MS = HOUR_MS;
 
@@ -184,6 +190,7 @@ async function executeRun({
           config,
           sources,
           getQueryLinks: knowledge.getQueryLinks,
+          getLearnedDetectors: () => knowledge.getLearnedDetectors(),
           current: storedRules,
           signal,
           log: recorder.log,
@@ -195,6 +202,16 @@ async function executeRun({
     config,
     progress,
     limits,
+    settledByRules:
+      trigger === 'backtest'
+        ? {}
+        : await settledByRuleWrites({
+            scope,
+            config,
+            owned: rules.owned,
+            now: evaluationNow,
+            signal,
+          }),
     only:
       trigger === 'backtest'
         ? { bucketEnd: Math.floor(evaluationNow / BUCKET_MS) * BUCKET_MS }
@@ -230,6 +247,7 @@ async function executeRun({
     sources,
     ownedRules: rules.owned,
     getQueryLinks: knowledge.getQueryLinks,
+    getLearnedDetectors: () => knowledge.getLearnedDetectors(),
     recorder,
     signal,
     backtest: trigger === 'backtest',
@@ -283,16 +301,15 @@ async function executeRun({
     agentTimeoutMs: limits.agentTimeoutMs,
     signal,
   });
-  const memoryCache = new Map<string, string[]>();
-  const memoryFor = async (fingerprints: string[]): Promise<string[]> => {
-    const missing = fingerprints.filter((fingerprint) => !memoryCache.has(fingerprint));
-    if (missing.length > 0) {
-      const found = await storage.state.getMany('memory', missing);
-      missing.forEach((fingerprint) =>
-        memoryCache.set(fingerprint, found.get(fingerprint)?.notes ?? [])
-      );
-    }
-    return fingerprints.flatMap((fingerprint) => memoryCache.get(fingerprint) ?? []);
+  const memory = createMemory(storage.state);
+  const thresholds = await knowledge.getThresholds();
+  const pagesCache = new Map<string, Promise<InvestigationPage[]>>();
+  // One read per set of services and run: several detections of one service share it.
+  const pagesFor = (services: string[]) => {
+    const key = [...services].sort().join('|');
+    const cached = pagesCache.get(key) ?? scope.investigations.pagesFor(services);
+    pagesCache.set(key, cached);
+    return cached;
   };
   const discovery = createDiscoveryStep({
     scope,
@@ -302,7 +319,8 @@ async function executeRun({
     dependencies,
     agent,
     openedToday: new Map(Object.entries(createdToday)) as Map<DetectionStrategyId, number>,
-    memoryFor,
+    memoryFor: (keys) => memory.recall(keys),
+    pagesFor,
     signal,
     maxPending: limits.maxPendingDetections,
     maxDetections: limits.maxDetectionsPerRun,
@@ -336,6 +354,18 @@ async function executeRun({
     ]),
   ].sort((a, b) => a - b);
 
+  // Written and published as soon as a minute opens or changes an event, so the first event of
+  // a busy run does not wait for every agent call after it.
+  const conflicted = new Set<string>();
+  const cooledDown = new Set<string>();
+  const flush = async () => {
+    logCooldowns({ events, recorder, cooledDown });
+    (await persistAndPublish({ scope, config, events, recorder })).forEach((eventId) =>
+      conflicted.add(eventId)
+    );
+    events.clearDirty();
+  };
+
   let processedUpTo = earliest;
   for (const bucketStart of buckets) {
     // Sequential by design: a minute's events and statuses are the next minute's input.
@@ -363,11 +393,28 @@ async function executeRun({
       events,
       discovery,
       recorder,
+      thresholds,
     });
     processedUpTo = bucketStart + BUCKET_MS;
+    if (events.dirty().some(({ change }) => change === 'changed')) {
+      const before = conflicted.size;
+      await flush();
+      if (conflicted.size > before) {
+        // Someone changed an event mid-run; later minutes would work from a stale copy.
+        recorder.log({
+          step: 'run',
+          action: 'stopped_on_conflict',
+          message: `An event changed while the run worked on it; the run stops after ${new Date(
+            processedUpTo
+          ).toISOString()} and the next run continues from there.`,
+        });
+        summary.budget_exhausted = true;
+        break;
+      }
+    }
   }
 
-  // 5. The verifier re-checks recent openings and closings; cooldown is what remains.
+  // 5. The verifier re-checks recent openings and closings.
   await verifyRecentEvents({
     dataEsClient: scope.dataEsClient,
     events,
@@ -376,29 +423,8 @@ async function executeRun({
     recorder,
     signal,
   });
-  // Cooldown: an event whose problem continued, with nothing new, gets no agent call.
-  const continued = new Set(
-    recorder
-      .detections()
-      .filter((detection) => detection.outcome === 'continued' && detection.event_id)
-      .map((detection) => detection.event_id!)
-  );
-  events
-    .dirty()
-    .filter(({ event, change }) => change === 'facts' && continued.has(event.event_id))
-    .forEach(({ event }) => {
-      summary.agent.cooldown_skips += 1;
-      recorder.log({
-        step: 'agent',
-        action: 'cooldown',
-        event_id: event.event_id,
-        message:
-          'Nothing new joined and the problem did not return; facts updated, agent not called.',
-      });
-    });
-
-  // 6. Persist and hand off.
-  const conflicted = await persistAndPublish({ scope, config, events, recorder });
+  // 6. Persist and hand off what is left: facts, status changes and the verifier's findings.
+  await flush();
   await storage.records.writeDetections(
     recorder.detections().map((detection) =>
       detection.event_id && conflicted.has(detection.event_id)
@@ -481,6 +507,92 @@ async function executeRun({
   return summary;
 }
 
+/**
+ * For strategies whose rules write on every run, the end of the last minute every one of their
+ * rules has run after, less a grace for late log lines. A rule run at W wrote the minutes that
+ * closed before W, so the engine need not wait the fixed settle delay for them.
+ */
+async function settledByRuleWrites({
+  scope,
+  config,
+  owned,
+  now,
+  signal,
+}: {
+  scope: IEngineScope;
+  config: EngineConfig;
+  owned: OwnedRule[];
+  now: number;
+  signal: AbortSignal;
+}): Promise<Partial<Record<DetectionStrategyId, number>>> {
+  const strategies = DETECTION_STRATEGY_IDS.filter(
+    (id) => config.strategies[id].mode !== 'off' && STRATEGIES[id].descriptor.writesEveryRun
+  );
+  const rules = owned.filter((rule) => strategies.includes(rule.strategy));
+  if (rules.length === 0) {
+    return {};
+  }
+  const latest = await scope.ruleEvents
+    .latestWrites({
+      ruleIds: rules.map((rule) => rule.rule_id),
+      since: now - RULE_WRITES_LOOKBACK_MS,
+      signal,
+    })
+    // Without proof the rules ran, the fixed settle delay applies, as before.
+    .catch(() => new Map<string, number>());
+  return Object.fromEntries(
+    strategies.flatMap((strategy) => {
+      const writes = rules
+        .filter((rule) => rule.strategy === strategy)
+        .map((rule) => latest.get(rule.rule_id));
+      // A rule that wrote nothing may not have run, or its source went quiet: wait as before.
+      if (writes.length === 0 || writes.some((write) => write === undefined)) {
+        return [];
+      }
+      const oldest = Math.min(...(writes as number[]));
+      return [[strategy, Math.floor((oldest - INGEST_GRACE_MS) / BUCKET_MS) * BUCKET_MS]];
+    })
+  );
+}
+
+/**
+ * Cooldown: an event whose problem continued, with nothing new, gets no agent call. Logged once
+ * per event and run, however many times the run writes.
+ */
+function logCooldowns({
+  events,
+  recorder,
+  cooledDown,
+}: {
+  events: ReturnType<typeof createEventWorkingSet>;
+  recorder: IRunRecorder;
+  cooledDown: Set<string>;
+}): void {
+  const continued = new Set(
+    recorder
+      .detections()
+      .filter((detection) => detection.outcome === 'continued' && detection.event_id)
+      .map((detection) => detection.event_id!)
+  );
+  events
+    .dirty()
+    .filter(
+      ({ event, change }) =>
+        change === 'facts' && continued.has(event.event_id) && !cooledDown.has(event.event_id)
+    )
+    .forEach(({ event }) => {
+      cooledDown.add(event.event_id);
+      recorder.summary.agent.cooldown_skips += 1;
+      recorder.log({
+        step: 'agent',
+        action: 'cooldown',
+        event_id: event.event_id,
+        message:
+          'Nothing new joined and the problem did not return; facts updated, agent not called.',
+      });
+    });
+}
+
 function bucketsOf(window: StrategyWindow): number[] {
   const count = Math.max(0, Math.floor((window.to - window.from) / BUCKET_MS));
   return Array.from({ length: count }, (_, index) => window.from + index * BUCKET_MS);
@@ -558,6 +670,7 @@ async function processBucket({
   events,
   discovery,
   recorder,
+  thresholds,
 }: {
   bucketStart: number;
   config: EngineConfig;
@@ -568,6 +681,8 @@ async function processBucket({
   events: ReturnType<typeof createEventWorkingSet>;
   discovery: ReturnType<typeof createDiscoveryStep>;
   recorder: IRunRecorder;
+  /** Learned per-series `mad_k` values that passed the evolution path. */
+  thresholds: Map<string, number>;
 }): Promise<void> {
   const inBucket = visible.filter((observation) => observation.bucket_start === bucketStart);
   const firing = inBucket.filter((observation) => observation.looks_off).sort(byImportance);
@@ -598,7 +713,10 @@ async function processBucket({
         ? fillSparseHistory({ samples: own, heartbeat: pastOf(observation.heartbeat) })
         : own,
       excludeWindows: owner?.open_windows ?? [],
-      settings: config.baseline,
+      settings: {
+        ...config.baseline,
+        mad_k: thresholds.get(observation.fingerprint) ?? config.baseline.mad_k,
+      },
     });
     recorder.countBaseline(baseline.decision);
     gates.set(observation.fingerprint, baseline.decision);

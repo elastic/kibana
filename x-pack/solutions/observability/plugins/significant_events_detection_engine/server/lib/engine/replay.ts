@@ -67,6 +67,7 @@ export async function replayEngine(
             sources,
             dataEsClient: scope.dataEsClient,
             getQueryLinks: knowledge.getQueryLinks,
+            getLearnedDetectors: () => knowledge.getLearnedDetectors(),
             signal: abortSignal,
             logger: scope.logger,
             from: slice.from,

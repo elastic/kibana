@@ -9,10 +9,17 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { QueryLink } from '@kbn/significant-events-schema';
-import type { DetectionStrategyDescriptor } from '../../../common';
+import type { DetectionStrategyDescriptor, LearnedDetector, StrategyMode } from '../../../common';
 import type { OwnedRule, StrategyObservation } from '../domain';
 import type { IRecordsStore } from '../storage/records_store';
 import type { IRuleEventsReader } from './rule_events_reader';
+
+/** A detector the learning loop wrote, with how it runs right now. */
+export interface RunningDetector extends LearnedDetector {
+  candidate_id: string;
+  /** Trial until it passes its acceptance criteria; live after. */
+  mode: Exclude<StrategyMode, 'off'>;
+}
 
 /** What every strategy evaluation gets. */
 interface BaseStrategyContext {
@@ -23,6 +30,8 @@ interface BaseStrategyContext {
   dataEsClient: ElasticsearchClient;
   /** Knowledge indicator queries of the enabled sources, read once per run. */
   getQueryLinks: () => Promise<QueryLink[]>;
+  /** Detectors the learning loop wrote that are in trial or live. */
+  getLearnedDetectors: () => Promise<RunningDetector[]>;
   signal: AbortSignal;
   logger: Logger;
 }
@@ -69,6 +78,8 @@ export interface RuleSpecContext {
   cpsEnabled: boolean;
   /** Knowledge indicator queries of the enabled sources. */
   getQueryLinks: () => Promise<QueryLink[]>;
+  /** Detectors the learning loop wrote that are in trial or live. */
+  getLearnedDetectors: () => Promise<RunningDetector[]>;
   signal: AbortSignal;
 }
 

@@ -27,11 +27,12 @@ import { EngineKpis } from './engine_kpis';
 import { EventFlyout } from './event_flyout';
 import { EventsTable } from './events_table';
 import { HowToRead } from './how_to_read';
+import { LearningPanel } from './learning_panel';
 import { PipelineSummary } from './pipeline_summary';
 import { ServicesPanel } from './services_panel';
 import { StrategiesTable } from './strategies_table';
 
-type InnerTab = 'events' | 'strategies' | 'detections' | 'activity';
+type InnerTab = 'events' | 'strategies' | 'learning' | 'detections' | 'activity';
 
 /**
  * Prototype of the detection engine architecture. Status, last run and services stay in view
@@ -61,9 +62,15 @@ export function DetectionEngineTab() {
     {
       id: 'strategies',
       label: i18n.translate('xpack.significantEventsApp.detectionEngine.tabs.strategies', {
-        defaultMessage: 'Strategies and learning',
+        defaultMessage: 'Strategies',
       }),
       count: overview.proposals.length,
+    },
+    {
+      id: 'learning',
+      label: i18n.translate('xpack.significantEventsApp.detectionEngine.tabs.learning', {
+        defaultMessage: 'Learning',
+      }),
     },
     {
       id: 'detections',
@@ -119,6 +126,12 @@ export function DetectionEngineTab() {
             />
           )}
           {innerTab === 'strategies' && <StrategiesTable overview={overview} actions={actions} />}
+          {innerTab === 'learning' && (
+            <LearningPanel
+              actions={actions}
+              services={(servicesData?.services ?? []).map((item) => item.service)}
+            />
+          )}
           {innerTab === 'detections' && <DetectionsTable onOpenEvent={setOpenEventId} />}
           {innerTab === 'activity' && <ActivityLog onOpenEvent={setOpenEventId} />}
         </EuiFlexItem>

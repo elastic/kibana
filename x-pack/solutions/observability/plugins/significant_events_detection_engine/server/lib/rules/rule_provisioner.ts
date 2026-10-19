@@ -16,7 +16,7 @@ import type { EngineRulesRecord, OwnedRule } from '../domain';
 import { getErrorMessage } from '../errors';
 import { ENGINE_RULE_TAG, STRATEGY_TAG_PREFIX } from '../strategies/rule_definitions';
 import { STRATEGIES } from '../strategies/strategy_registry';
-import type { DesiredRule, RuleSpecContext } from '../strategies/types';
+import type { DesiredRule, RuleSpecContext, RunningDetector } from '../strategies/types';
 
 /** Alerting v2 accepts at most this many rules per bulk call. */
 const BULK_CHUNK = 100;
@@ -37,12 +37,15 @@ export function computeRulesInputsHash({
   config,
   sources,
   queryLinks,
+  detectors,
   cpsEnabled,
 }: {
   config: EngineConfig;
   sources: NightshiftSource[];
   /** A KI added, removed or edited changes the rule that counts KI matches. */
   queryLinks: QueryLink[];
+  /** A detector added or retired changes the rule that counts learned detectors. */
+  detectors: RunningDetector[];
   cpsEnabled: boolean;
 }): string {
   const inputs = {
@@ -56,6 +59,15 @@ export function computeRulesInputsHash({
     kis: queryLinks
       .filter((link) => link.query.type === 'match')
       .map((link) => [link.source_id, link.query.id, link.query.esql.query])
+      .sort((a, b) => a.join('|').localeCompare(b.join('|'))),
+    // The mode is left out: a detector moving from trial to live keeps the same rule.
+    detectors: detectors
+      .map((detector) => [
+        detector.source_id,
+        detector.detector_id,
+        detector.service,
+        detector.condition,
+      ])
       .sort((a, b) => a.join('|').localeCompare(b.join('|'))),
     cpsEnabled,
   };

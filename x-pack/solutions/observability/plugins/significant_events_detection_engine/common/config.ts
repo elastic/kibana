@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { LearningConfig } from './learning';
 import type { DetectionStrategyId, StrategyConfig } from './strategies';
 
 /** Which discovery agent the engine asks. */
@@ -38,6 +39,8 @@ export interface EngineConfig {
   max_agent_calls_per_day: number;
   /** Also write events to `.rule-events` as Alerting v2 alerts. */
   publish_to_alerting_v2: boolean;
+  /** The learning loop: how far it may act, and the bar new candidates must pass. */
+  learning: LearningConfig;
 }
 
 /** Settings a person can change through the API; strategies merge field by field. */
@@ -51,6 +54,13 @@ export interface EngineConfigUpdate {
   max_agent_calls_per_run?: number;
   max_agent_calls_per_day?: number;
   publish_to_alerting_v2?: boolean;
+  learning?: {
+    autonomy?: Partial<LearningConfig['autonomy']>;
+    interval_minutes?: number;
+    acceptance?: Partial<LearningConfig['acceptance']>;
+    replay_hours?: number;
+    max_model_calls_per_pass?: number;
+  };
 }
 
 export const DEFAULT_ENGINE_CONFIG: EngineConfig = {
@@ -60,6 +70,9 @@ export const DEFAULT_ENGINE_CONFIG: EngineConfig = {
     customer_alerts: { mode: 'live', daily_cap: 20 },
     // The riskiest strategy starts as a trial, as the evolution path requires.
     new_log_patterns: { mode: 'trial', daily_cap: 5 },
+    // Detectors the engine wrote. Each one runs as a trial until it proves itself, whatever
+    // this mode says; `off` stops them all.
+    learned_detectors: { mode: 'live', daily_cap: 5 },
   },
   agent: { kind: 'heuristic' },
   baseline: { min_samples: 10, history_buckets: 60, mad_k: 3 },
@@ -69,4 +82,18 @@ export const DEFAULT_ENGINE_CONFIG: EngineConfig = {
   max_agent_calls_per_run: 8,
   max_agent_calls_per_day: 500,
   publish_to_alerting_v2: true,
+  learning: {
+    // Memory only informs the AI, so it acts; engine-owned changes wait for a person at first.
+    autonomy: { memory: 'act', tuning: 'suggest', detectors: 'suggest' },
+    interval_minutes: 5,
+    acceptance: {
+      max_warning_minutes: 10,
+      max_false_opens_per_day: 2,
+      min_trial_minutes: 30,
+      rollback_dismissals: 2,
+      watch_minutes: 24 * 60,
+    },
+    replay_hours: 24,
+    max_model_calls_per_pass: 4,
+  },
 };

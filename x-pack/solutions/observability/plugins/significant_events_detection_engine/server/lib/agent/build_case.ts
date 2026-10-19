@@ -70,6 +70,7 @@ export async function buildCase({
   firingAlerts,
   relatedServices,
   memory,
+  investigationPages,
 }: {
   dataEsClient: ElasticsearchClient;
   signal: AbortSignal;
@@ -81,6 +82,7 @@ export async function buildCase({
   firingAlerts: Array<{ title: string; service: string }>;
   relatedServices: string[];
   memory: string[];
+  investigationPages: AgentCase['investigation_context'];
 }): Promise<AgentCase> {
   const sources = [
     {
@@ -134,6 +136,7 @@ export async function buildCase({
             title: member.title,
             service: member.service,
             strategy: member.strategy,
+            importance: member.importance,
           })),
         }
       : undefined,
@@ -142,6 +145,7 @@ export async function buildCase({
           event_id: proposal.event.event_id,
           reason: proposal.reason,
           relation: proposal.relation,
+          via: proposal.via,
           minutes_apart: Math.round(proposal.minutesApart),
         }
       : undefined,
@@ -149,5 +153,6 @@ export async function buildCase({
     firing_customer_alerts: firingAlerts.filter((alert) => watchedServices.has(alert.service)),
     related_services: relatedServices,
     memory,
+    investigation_context: investigationPages,
   };
 }

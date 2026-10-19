@@ -23,6 +23,10 @@ import type { IDiscoveryAgentInstaller } from '../agent/discovery_agent_type';
 import { createHeuristicAgent } from '../agent/heuristic_agent';
 import type { IDiscoveryAgent } from '../agent/types';
 import { DetectionEngineError } from '../errors';
+import {
+  createInvestigationKnowledge,
+  type IInvestigationKnowledge,
+} from '../learning/investigation_knowledge';
 import { createEngineStorage, type IEngineStorage } from '../storage/engine_storage';
 import type { IManagedIndexInstaller } from '../storage/managed_index';
 import { createRuleEventsReader, type IRuleEventsReader } from '../strategies/rule_events_reader';
@@ -86,6 +90,8 @@ export interface IEngineScope {
   inferenceClient: InferenceClient;
   getPrices(): Promise<PriceResult | null>;
   agentBuilderAvailable: boolean;
+  /** What investigations learned in this space, read-only. */
+  investigations: IInvestigationKnowledge;
   /** The agent the settings ask for; the heuristic when Agent Builder is not available. */
   createAgent(config: EngineConfig): IDiscoveryAgent;
 }
@@ -158,6 +164,11 @@ export function createEngineScopeFactory({
       inferenceClient: plugins.inference.getClient({ request }),
       getPrices: () => plugins.significantEvents.getPrices(),
       agentBuilderAvailable: agentBuilder !== undefined && agentInstaller !== undefined,
+      investigations: createInvestigationKnowledge({
+        esClient: core.elasticsearch.client.asScoped(request).asCurrentUser,
+        spaceId,
+        logger: logger.get(spaceId, 'investigations'),
+      }),
       createAgent(config) {
         if (config.agent.kind === 'agent_builder' && agentBuilder && agentInstaller) {
           return createAgentBuilderAgent({

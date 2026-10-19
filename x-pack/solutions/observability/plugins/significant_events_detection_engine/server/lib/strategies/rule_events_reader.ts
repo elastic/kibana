@@ -35,6 +35,12 @@ export interface IRuleEventsReader {
     maxRows: number;
     signal?: AbortSignal;
   }): Promise<{ rows: RuleEventRow[]; truncated: boolean }>;
+  /** When each rule last wrote, for rules that wrote since `since`. */
+  latestWrites(params: {
+    ruleIds: string[];
+    since: number;
+    signal?: AbortSignal;
+  }): Promise<Map<string, number>>;
 }
 
 interface StoredRuleEvent {
@@ -55,6 +61,53 @@ export function createRuleEventsReader({
   spaceId: string;
 }): IRuleEventsReader {
   return {
+    async latestWrites({ ruleIds, since, signal }) {
+      if (ruleIds.length === 0) {
+        return new Map();
+      }
+      try {
+        const response = await esClient.search(
+          {
+            index: RULE_EVENTS_DATA_STREAM,
+            size: 0,
+            query: {
+              bool: {
+                filter: [
+                  { term: { type: 'signal' } },
+                  { term: { space_id: spaceId } },
+                  { terms: { 'rule.id': ruleIds } },
+                  { range: { '@timestamp': { gte: new Date(since).toISOString() } } },
+                ],
+              },
+            },
+            aggs: {
+              rules: {
+                terms: { field: 'rule.id', size: ruleIds.length },
+                aggs: { latest: { max: { field: '@timestamp' } } },
+              },
+            },
+          },
+          { signal }
+        );
+        const buckets =
+          (
+            response.aggregations?.rules as
+              | { buckets: Array<{ key: string; latest: { value: number | null } }> }
+              | undefined
+          )?.buckets ?? [];
+        return new Map(
+          buckets.flatMap((bucket) =>
+            bucket.latest.value === null ? [] : [[bucket.key, bucket.latest.value] as const]
+          )
+        );
+      } catch (error) {
+        if (isNotFoundError(error)) {
+          return new Map();
+        }
+        throw error;
+      }
+    },
+
     async read({ ruleIds, since, maxRows, signal }) {
       if (ruleIds.length === 0) {
         return { rows: [], truncated: false };

@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiCallOut,
   EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
@@ -380,9 +381,26 @@ export function EngineHeader({ overview, actions }: IEngineHeaderProps) {
         >
           {i18n.translate('xpack.significantEventsApp.detectionEngine.resetBody', {
             defaultMessage:
-              'Deletes what the engine produced in this space: observations, detections, events, activity, runs and notes kept from dismissals, so baselines start again. Settings, Auto-run, the rules it owns and the cost counter stay, and events already published to Alerting v2 stay there.',
+              'Deletes what the engine produced in this space: observations, detections, events, activity and runs, so baselines start again. Settings, Auto-run, the rules it owns, the cost counter and what people taught it (labels, memory notes, learned detectors) stay, and events already published to Alerting v2 stay there.',
           })}
         </EuiConfirmModal>
+      )}
+      {(overview.health.status === 'degraded' || overview.health.status === 'stalled') && (
+        <EuiCallOut
+          announceOnMount
+          size="s"
+          color={overview.health.status === 'stalled' ? 'danger' : 'warning'}
+          iconType="warning"
+          data-test-subj="detectionEngineHealthCallout"
+          title={i18n.translate('xpack.significantEventsApp.detectionEngine.header.health', {
+            defaultMessage:
+              'The engine is {status}: no events does not mean nothing is wrong. {reasons}',
+            values: {
+              status: overview.health.status,
+              reasons: overview.health.reasons.join(' '),
+            },
+          })}
+        />
       )}
     </div>
   );
