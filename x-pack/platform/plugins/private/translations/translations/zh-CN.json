@@ -42137,7 +42137,6 @@
     "xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel": "取消",
     "xpack.securitySolution.detectionEngine.createRule.contextMenu.aiRuleCreation": "AI 规则创建",
     "xpack.securitySolution.detectionEngine.createRule.contextMenu.buttonLabel": "创建规则",
-    "xpack.securitySolution.detectionEngine.createRule.contextMenu.manual": "手动创建规则",
     "xpack.securitySolution.detectionEngine.createRule.editRuleButton": "编辑",
     "xpack.securitySolution.detectionEngine.createRule.eqlQueryLabel": "EQL 查询",
     "xpack.securitySolution.detectionEngine.createRule.eqlRuleTypeDescription": "事件关联",

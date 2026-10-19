@@ -41996,7 +41996,6 @@
     "xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel": "Abbrechen",
     "xpack.securitySolution.detectionEngine.createRule.contextMenu.aiRuleCreation": "KI-Regelerstellung",
     "xpack.securitySolution.detectionEngine.createRule.contextMenu.buttonLabel": "Eine Regel erstellen",
-    "xpack.securitySolution.detectionEngine.createRule.contextMenu.manual": "Manuelle Regelerstellung",
     "xpack.securitySolution.detectionEngine.createRule.editRuleButton": "Bearbeiten",
     "xpack.securitySolution.detectionEngine.createRule.eqlQueryLabel": "EQL-Abfrage",
     "xpack.securitySolution.detectionEngine.createRule.eqlRuleTypeDescription": "Ereigniskorrelation",

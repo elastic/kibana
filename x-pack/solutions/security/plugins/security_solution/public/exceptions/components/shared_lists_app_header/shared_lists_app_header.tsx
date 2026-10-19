@@ -88,12 +88,6 @@ export const SharedListsAppHeader = React.memo<SharedListsAppHeaderProps>(
             secondaryButtonAriaLabel: i18n.CREATE_MORE_OPTIONS,
             items: [
               {
-                id: 'createSharedList',
-                label: i18n.CREATE_SHARED_LIST_BUTTON,
-                run: (params) => onCreateSharedList(params?.returnFocus),
-                testId: 'manageExceptionListCreateExceptionListButton',
-              },
-              {
                 id: 'createExceptionItem',
                 label: i18n.CREATE_BUTTON_ITEM_BUTTON,
                 run: onCreateExceptionItem,

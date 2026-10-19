@@ -84,10 +84,9 @@ describe('useCreateRulePrimaryAction', () => {
       expect(action.items).toBeUndefined();
     });
 
-    it('lists AI and manual rule creation in the split button menu', () => {
+    it('lists only AI rule creation in the split button menu', () => {
       expect(getAction().splitButtonProps?.items?.map(({ testId }) => testId)).toEqual([
         'ai-rule-creation',
-        'manual-rule-creation',
       ]);
     });
 
@@ -100,12 +99,6 @@ describe('useCreateRulePrimaryAction', () => {
 
       expect(action.disableButton).toBe(true);
       expect(action.splitButtonProps?.isSecondaryButtonDisabled).toBe(true);
-    });
-
-    it('links manual rule creation to the rule creation page', () => {
-      const manualItem = getAction().splitButtonProps?.items?.[1];
-
-      expect(manualItem?.href).toBe(`/app/security/${SecurityPageName.rulesCreate}`);
     });
 
     it('starts an AI rule creation session in the agent chat', () => {

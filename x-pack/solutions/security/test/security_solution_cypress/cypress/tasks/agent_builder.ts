@@ -12,7 +12,6 @@ import {
   CREATE_RULE_MORE_OPTIONS_BUTTON,
   CREATE_RULE_CONTEXT_MENU_POPOVER,
   AI_RULE_CREATION_MENU_ITEM,
-  MANUAL_RULE_CREATION_MENU_ITEM,
 } from '../screens/agent_builder';
 
 export const clickNewAgentBuilderAttachmentButton = () => {
@@ -30,10 +29,6 @@ export const openCreateRuleMenu = () => {
 
 export const clickAiRuleCreationMenuItem = () => {
   cy.get(AI_RULE_CREATION_MENU_ITEM).should('be.visible').click();
-};
-
-export const clickManualRuleCreationMenuItem = () => {
-  cy.get(MANUAL_RULE_CREATION_MENU_ITEM).should('be.visible').click();
 };
 
 export const assertAgentBuilderSidebarIsOpen = () => {

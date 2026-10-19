@@ -46,10 +46,3 @@ export const AI_RULE_CREATION = i18n.translate(
     defaultMessage: 'AI rule creation',
   }
 );
-
-export const MANUAL_RULE_CREATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.contextMenu.manual',
-  {
-    defaultMessage: 'Manual rule creation',
-  }
-);

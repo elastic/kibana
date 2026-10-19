@@ -171,7 +171,7 @@ export const MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION =
   '[data-test-subj="manageExceptionListCreateExceptionButton"]';
 
 export const MANAGE_EXCEPTION_CREATE_LIST_BUTTON =
-  '[data-test-subj="manageExceptionListCreateExceptionListButton"]';
+  '[data-test-subj="manageExceptionListCreateButton"]';
 
 export const RULE_ACTION_LINK_RULE_SWITCH = '[data-test-subj="ruleActionLinkRuleSwitch"]';
 

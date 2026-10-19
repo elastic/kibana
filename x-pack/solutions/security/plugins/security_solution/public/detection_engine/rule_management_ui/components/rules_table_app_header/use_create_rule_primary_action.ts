@@ -104,12 +104,6 @@ export const useCreateRulePrimaryAction = ({
             run: startAiRuleCreation,
             testId: 'ai-rule-creation',
           },
-          {
-            id: 'manualRuleCreation',
-            label: i18n.MANUAL_RULE_CREATION,
-            href: createRuleUrl,
-            testId: 'manual-rule-creation',
-          },
         ],
       },
     };

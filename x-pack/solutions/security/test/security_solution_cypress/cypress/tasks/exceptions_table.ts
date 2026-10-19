@@ -133,7 +133,6 @@ export const createSharedExceptionList = (
   { name, description }: { name: string; description?: string },
   submit: boolean
 ) => {
-  cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_MENU).first().click();
   cy.get(MANAGE_EXCEPTION_CREATE_LIST_BUTTON).first().click();
 
   cy.get(CREATE_SHARED_EXCEPTION_LIST_NAME_INPUT).type(`${name}`);

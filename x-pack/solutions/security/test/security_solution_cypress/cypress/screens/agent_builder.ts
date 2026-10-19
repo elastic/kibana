@@ -26,5 +26,3 @@ export const CREATE_RULE_CONTEXT_MENU_POPOVER =
   '[data-test-subj="create-rule-context-menu-popover"]';
 
 export const AI_RULE_CREATION_MENU_ITEM = '[data-test-subj="ai-rule-creation"]';
-
-export const MANUAL_RULE_CREATION_MENU_ITEM = '[data-test-subj="manual-rule-creation"]';
