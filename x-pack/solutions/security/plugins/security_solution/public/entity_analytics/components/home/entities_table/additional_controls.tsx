@@ -17,6 +17,7 @@ const ENTITY_ANALYTICS_FIELDS_SELECTOR_OPEN_BUTTON = 'entityAnalyticsFieldsSelec
 export const AdditionalControls = ({
   total,
   title,
+  totalLabel,
   columns,
   onAddColumn,
   onRemoveColumn,
@@ -24,6 +25,8 @@ export const AdditionalControls = ({
 }: {
   total: number;
   title: string;
+  /** Replaces the default `{total} {title}` text. */
+  totalLabel?: React.ReactNode;
   columns: string[];
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
@@ -48,9 +51,9 @@ export const AdditionalControls = ({
       )}
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <span className="entityAnalyticsDataTableTotal">{`${getAbbreviatedNumber(
-            total
-          )} ${title}`}</span>
+          <span className="entityAnalyticsDataTableTotal">
+            {totalLabel ?? `${getAbbreviatedNumber(total)} ${title}`}
+          </span>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

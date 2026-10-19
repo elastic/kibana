@@ -729,7 +729,7 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
           block-size: 100%;
         `}
       >
-        {cards.map((card) => {
+        {cards.map((card, index) => {
           const selected = activeFilter?.type === 'card' && activeFilter.cardId === card.id;
 
           return (
@@ -754,6 +754,24 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
                 timeRange={timeRange}
                 onToggle={() => onFilterForCard(card.id)}
               />
+              {index === 0 && (
+                // Zero-size product-tour anchor at the card's top-right corner. The tour
+                // popover moves the anchor into its own wrapper, so it must be out of flow.
+                <div
+                  aria-hidden="true"
+                  css={css`
+                    position: absolute;
+                    inset-block-start: 50%;
+                    inset-inline-end: 0;
+                    inline-size: 0;
+                    block-size: 0;
+                    line-height: 0;
+                    pointer-events: none;
+                  `}
+                >
+                  <span data-test-subj="eaFaceliftTourMetricsAnchor" />
+                </div>
+              )}
             </div>
           );
         })}

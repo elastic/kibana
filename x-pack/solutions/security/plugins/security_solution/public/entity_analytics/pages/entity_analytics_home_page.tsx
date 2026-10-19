@@ -103,11 +103,6 @@ const ADD_INTEGRATIONS_BUTTON_LABEL = i18n.translate(
   { defaultMessage: 'Add integrations' }
 );
 
-const GENERATE_AI_BRIEF_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.homePage.generateAiBriefButtonLabel',
-  { defaultMessage: 'Generate AI brief' }
-);
-
 const UEBA_INTEGRATIONS_PATH = '/app/integrations/browse/security/advanced_analytics_ueba';
 
 const ENTITY_ANALYTICS_DOC_LINK =
@@ -162,7 +157,7 @@ const EntityAnalyticsHomePageContent = () => {
   const spaceId = useSpaceId();
   const { dataView, isLoading: dataViewLoading } = useEntityStoreDataView(spaceId);
   const [faceliftVersion] = useActiveFaceliftVersion();
-  const { agentBuilder, chrome, http } = useKibana().services;
+  const { chrome, http } = useKibana().services;
   const uebaIntegrationsHref = http.basePath.prepend(UEBA_INTEGRATIONS_PATH);
 
   /**
@@ -215,10 +210,6 @@ const EntityAnalyticsHomePageContent = () => {
     navigateTo({ url: watchlistsManagementHref });
   }, [navigateTo, watchlistsManagementHref]);
 
-  const openAgentBuilder = useCallback(() => {
-    agentBuilder?.openChat({ newConversation: true, sessionTag: 'security' });
-  }, [agentBuilder]);
-
   const selectedWatchlistId = useMemo(() => {
     const params = new URLSearchParams(search);
     return params.get('watchlistId') || undefined;
@@ -248,20 +239,7 @@ const EntityAnalyticsHomePageContent = () => {
     // v.8+: Add integrations then Settings in the overflow menu so the native
     // static items (Feedback, Documentation) render below a divider.
     if (isFaceliftV8OrLater(faceliftVersion)) {
-      const isV9 = faceliftVersion === 'v9';
       return {
-        // v.9: Generate AI brief is the primary action; Hunt with AI lives in the metrics header.
-        ...(isV9
-          ? {
-              primaryActionItem: {
-                id: 'entityAnalyticsGenerateAiBrief',
-                label: GENERATE_AI_BRIEF_BUTTON_LABEL,
-                iconType: 'sparkles',
-                run: openAgentBuilder,
-                testId: 'eaFaceliftGenerateAiBriefButton',
-              },
-            }
-          : {}),
         items: [
           {
             id: 'addIntegrations',
@@ -326,7 +304,6 @@ const EntityAnalyticsHomePageContent = () => {
   }, [
     faceliftVersion,
     managementHref,
-    openAgentBuilder,
     openCreateWatchlist,
     uebaIntegrationsHref,
     watchlistsManagementHref,

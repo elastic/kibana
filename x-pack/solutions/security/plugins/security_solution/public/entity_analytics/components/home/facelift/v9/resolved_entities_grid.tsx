@@ -43,6 +43,7 @@ import {
 } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useGrouping, isNoneGroup, type GroupOption, type RawBucket } from '@kbn/grouping';
@@ -150,7 +151,9 @@ const rowHeightsOptions: EuiDataGridRowHeightsOptions = {};
 const detailsRowHeightsOptions: EuiDataGridRowHeightsOptions = { defaultHeight: 'auto' };
 const detailsCellStyle: CSSProperties = { width: '100%', height: 'auto' };
 
-const PAGE_SIZE_OPTIONS = [10, 25, 50];
+/** Infinite scroll stops here; the count label reports the rest as the total. */
+const MAX_LOADED_ROWS = 1000;
+const SCROLL_BATCH_SIZE = 50;
 
 const ROW_TYPE_LABEL = 'resolved entities';
 const INSPECT_TITLE = 'Entities';
@@ -1128,7 +1131,7 @@ const FaceliftEntitiesDataGrid: React.FC<FaceliftEntitiesDataGridProps> = ({
   const isResolvedView = view === 'resolved';
   const containerRef = useRef<HTMLDivElement>(null);
   const selectAllId = useRef(`eaFaceliftSelectAll-${Math.random().toString(36).slice(2)}`);
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
+  const [loadedCount, setLoadedCount] = useState(SCROLL_BATCH_SIZE);
   const [expandedIds, setExpandedIds] = useState<string[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
@@ -1141,23 +1144,29 @@ const FaceliftEntitiesDataGrid: React.FC<FaceliftEntitiesDataGridProps> = ({
     setExpandedIds([]);
     setSelectedIds(new Set());
     setIsBulkActionsOpen(false);
-    setPagination((current) => ({ ...current, pageIndex: 0 }));
+    setLoadedCount(SCROLL_BATCH_SIZE);
   }, [rowsIdentity]);
 
-  const pageIndex = Math.min(
-    pagination.pageIndex,
-    Math.max(Math.ceil(rows.length / pagination.pageSize) - 1, 0)
-  );
+  const cappedCount = Math.min(rows.length, MAX_LOADED_ROWS);
+  const renderedCount = Math.min(loadedCount, cappedCount);
+  const hasMoreToLoad = renderedCount < cappedCount;
 
-  const onChangePage = useCallback(
-    (nextPageIndex: number) =>
-      setPagination((current) => ({ ...current, pageIndex: nextPageIndex })),
-    []
-  );
-  const onChangeItemsPerPage = useCallback(
-    (pageSize: number) => setPagination({ pageIndex: 0, pageSize }),
-    []
-  );
+  // Re-observed after every batch so a sentinel that stays in view keeps loading.
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const sentinel = loadMoreRef.current;
+    if (!sentinel || !hasMoreToLoad) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setLoadedCount((current) => current + SCROLL_BATCH_SIZE);
+        }
+      },
+      { rootMargin: '200px 0px' }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMoreToLoad, renderedCount]);
 
   const toggleExpanded = useCallback((id: string) => {
     setExpandedIds((current) =>
@@ -1381,6 +1390,20 @@ const FaceliftEntitiesDataGrid: React.FC<FaceliftEntitiesDataGridProps> = ({
                 <AdditionalControls
                   total={rows.length}
                   title={isResolvedView ? ROW_TYPE_LABEL : 'entity records'}
+                  totalLabel={
+                    <FormattedMessage
+                      id="xpack.securitySolution.entityAnalytics.facelift.v9.showingRowsOfTotal"
+                      defaultMessage="Showing {shown} of {total}"
+                      values={{
+                        shown: <strong>{cappedCount.toLocaleString()}</strong>,
+                        total: (
+                          <strong>{`${rows.length.toLocaleString()} ${
+                            isResolvedView ? entitiesUnit(rows.length) : recordsUnit(rows.length)
+                          }`}</strong>
+                        ),
+                      }}
+                    />
+                  }
                   columns={visibleColumnIds}
                   onAddColumn={onAddColumn}
                   onRemoveColumn={onRemoveColumn}
@@ -1456,6 +1479,7 @@ const FaceliftEntitiesDataGrid: React.FC<FaceliftEntitiesDataGridProps> = ({
     }),
     [
       rows.length,
+      cappedCount,
       isResolvedView,
       visibleColumnIds,
       onAddColumn,
@@ -1477,7 +1501,11 @@ const FaceliftEntitiesDataGrid: React.FC<FaceliftEntitiesDataGridProps> = ({
       css={css`
         .entityAnalyticsDataTableTotal {
           font-size: ${euiTheme.size.m};
-          font-weight: ${euiTheme.font.weight.bold};
+          font-weight: ${euiTheme.font.weight.regular};
+
+          strong {
+            font-weight: ${euiTheme.font.weight.bold};
+          }
           border-right: ${euiTheme.border.thin};
           margin-inline-start: 0;
           margin-inline-end: ${euiTheme.size.s};
@@ -1515,25 +1543,17 @@ const FaceliftEntitiesDataGrid: React.FC<FaceliftEntitiesDataGridProps> = ({
         }}
         leadingControlColumns={leadingControlColumns}
         trailingControlColumns={trailingControlColumns}
-        rowCount={rows.length}
+        rowCount={renderedCount}
         renderCellValue={renderCellValue}
         renderCustomGridBody={renderCustomGridBody}
         sorting={{ columns: sortingColumns, onSort: setSortingColumns }}
-        pagination={
-          rows.length > 0
-            ? {
-                pageIndex,
-                pageSize: pagination.pageSize,
-                pageSizeOptions: PAGE_SIZE_OPTIONS,
-                onChangePage,
-                onChangeItemsPerPage,
-              }
-            : undefined
-        }
         toolbarVisibility={toolbarVisibility}
         rowHeightsOptions={rowHeightsOptions}
         gridStyle={gridStyle}
       />
+      {hasMoreToLoad && (
+        <div ref={loadMoreRef} aria-hidden="true" data-test-subj="eaFaceliftTableLoadMore" />
+      )}
     </div>
   );
 };

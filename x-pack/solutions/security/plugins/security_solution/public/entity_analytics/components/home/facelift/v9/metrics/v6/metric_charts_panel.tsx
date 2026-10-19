@@ -44,6 +44,11 @@ const HUNT_WITH_AI_LABEL = i18n.translate(
   { defaultMessage: 'Hunt with AI' }
 );
 
+const GENERATE_AI_BRIEF_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.overview.generateAiBrief',
+  { defaultMessage: 'Generate AI brief' }
+);
+
 const HOW_IT_WORKS_HREF =
   'https://www.elastic.co/docs/solutions/security/advanced-entity-analytics/entities-that-need-your-attention';
 export interface MetricChartsPanelV6Props {
@@ -70,9 +75,29 @@ export const MetricChartsPanelV6: React.FC<MetricChartsPanelV6Props> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { agentBuilder } = useKibana().services;
-  const onHuntWithAiClick = useCallback(() => {
+  const openAgentBuilder = useCallback(() => {
     agentBuilder?.openChat({ newConversation: true, sessionTag: 'security' });
   }, [agentBuilder]);
+  // AiButton hard-codes the deprecated 4px radius and a gradient hover fill, and its
+  // inline-block gradient label blocks EUI's flush underline; restore EUI flush states.
+  const aiButtonCss = css`
+    border-radius: ${euiTheme.border.radius.control};
+
+    && .euiButtonEmpty__text > span {
+      padding-inline: 0;
+      text-decoration-color: ${euiTheme.colors.textPrimary};
+    }
+
+    &&:hover:not(:disabled),
+    &&:focus:not(:disabled) {
+      background: transparent !important;
+
+      .euiButtonEmpty__text > span {
+        text-decoration: underline;
+        text-decoration-color: ${euiTheme.colors.textPrimary};
+      }
+    }
+  `;
 
   return (
     <div
@@ -137,7 +162,7 @@ export const MetricChartsPanelV6: React.FC<MetricChartsPanelV6Props> = ({
                 justify-content: center;
               `}
             >
-              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">
                     <EuiLink
@@ -152,15 +177,25 @@ export const MetricChartsPanelV6: React.FC<MetricChartsPanelV6Props> = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <AiButton
-                    variant="outlined"
+                    variant="empty"
                     size="s"
+                    flush="both"
+                    iconType="sparkles"
+                    css={aiButtonCss}
+                    onClick={openAgentBuilder}
+                    data-test-subj="eaFaceliftGenerateAiBriefButton"
+                  >
+                    {GENERATE_AI_BRIEF_LABEL}
+                  </AiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <AiButton
+                    variant="empty"
+                    size="s"
+                    flush="both"
                     iconType="productAgent"
-                    css={css`
-                      /* AiButton still hard-codes the deprecated 4px radius; EUI buttons use
-                       * the control token. The gradient border inherits this radius. */
-                      border-radius: ${euiTheme.border.radius.control};
-                    `}
-                    onClick={onHuntWithAiClick}
+                    css={aiButtonCss}
+                    onClick={openAgentBuilder}
                     data-test-subj="eaFaceliftHuntWithAiButton"
                   >
                     {HUNT_WITH_AI_LABEL}

@@ -28,6 +28,7 @@ import { ResolvedEntitiesGrid } from './resolved_entities_grid';
 import { getEntitySummary } from './resolved_entities_data';
 import { useSyncEntityFilters } from './overview_filter';
 import { TimeRangeButtonGroup } from './time_range_button_group';
+import { ProductTour, ProductTourCallout, useProductTour } from './product_tour';
 
 const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => ({
   query,
@@ -98,8 +99,23 @@ export const FaceliftHome: React.FC<FaceliftHomeProps> = ({
   // Strip leftover Overview KQL pills; card filters stay in React state only.
   useSyncEntityFilters();
 
+  const tour = useProductTour();
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
+      {tour.isCalloutVisible && (
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            /* 16px below the banner instead of the column's 24px gutter. */
+            margin-block-end: -${euiTheme.size.s};
+          `}
+        >
+          <ProductTourCallout tour={tour} />
+        </EuiFlexItem>
+      )}
+      <ProductTour tour={tour} />
       <EuiFlexItem grow={false}>
         {/* 8px between KQL and filter group (eui size s) */}
         <EuiFlexGroup direction="column" gutterSize="s">
