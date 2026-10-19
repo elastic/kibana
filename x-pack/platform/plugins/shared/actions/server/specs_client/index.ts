@@ -6,4 +6,11 @@
  */
 
 export { SpecsClient } from './specs_client';
-export type { ISpecsClient, SpecsClientOpts, GetSpecParams } from './types';
+export { UnsecuredSpecsClient } from './unsecured_specs_client';
+export type {
+  ISpecsClient,
+  SpecsClientOpts,
+  UnsecuredSpecsClientOpts,
+  GetSpecParams,
+  GetAllSpecsParams,
+} from './types';

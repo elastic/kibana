@@ -9,6 +9,8 @@
 
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
+import type { ConnectorSpec } from '@kbn/connector-specs';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { z } from '@kbn/zod/v4';
 import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -44,6 +46,7 @@ import {
 } from './constants/saved_objects';
 import { LeasePool } from './lib';
 import { defaultInboundEventsLimitConfigs } from './config';
+import { ActionsAuthorization } from './authorization/actions_authorization';
 
 function getConfig(overrides = {}) {
   return {
@@ -666,6 +669,63 @@ describe('Actions Plugin', () => {
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
+      });
+    });
+
+    describe('SpecsClient factories', () => {
+      const stubSpec = {
+        metadata: {
+          id: '.stub-spec-client',
+          displayName: 'Stub Spec Client',
+          description: 'Plugin start spec',
+          minimumLicense: 'gold',
+          supportedFeatureIds: ['workflows'],
+        },
+        auth: null,
+        schema: null,
+        actions: {
+          ping: {
+            scope: 'read',
+            input: z.object({}),
+            handler: async () => ({}),
+          },
+        },
+        test: { handler: async () => ({}), enabled: false },
+      } as unknown as ConnectorSpec;
+
+      it('exposes getUnsecuredSpecsClient and lists registered spec-backed types', async () => {
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        pluginSetup.registerType(serverLogConnectorType);
+        pluginSetup.registerType(
+          getConnectorType({
+            id: stubSpec.metadata.id,
+            name: stubSpec.metadata.displayName,
+            minimumLicenseRequired: 'gold',
+            supportedFeatureIds: stubSpec.metadata.supportedFeatureIds,
+            source: ACTION_TYPE_SOURCES.spec,
+            spec: stubSpec,
+          })
+        );
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+        const summaries = await pluginStart.getUnsecuredSpecsClient().getAll();
+        expect(summaries.map((summary) => summary.id)).toEqual(['.stub-spec-client']);
+      });
+
+      it('getSpecsClientWithRequest rejects classic types with 404 and checks authorization', async () => {
+        const ensureAuthorizedSpy = jest.spyOn(ActionsAuthorization.prototype, 'ensureAuthorized');
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        pluginSetup.registerType(serverLogConnectorType);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+        await expect(
+          pluginStart.getSpecsClientWithRequest(httpServerMock.createKibanaRequest()).get({
+            id: '.server-log',
+          })
+        ).rejects.toMatchObject({ output: { statusCode: 404 } });
+
+        expect(ensureAuthorizedSpy).toHaveBeenCalledWith({ operation: 'get' });
+        ensureAuthorizedSpy.mockRestore();
       });
     });
 

@@ -13,6 +13,8 @@ import type { ActionsAuthorization as ActionsAuthorizationClass } from './author
 
 export type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 export { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
+export type { ISpecsClient, GetSpecParams, GetAllSpecsParams } from './specs_client';
+export { SpecsClient } from './specs_client';
 export type ActionsClient = PublicMethodsOf<ActionsClientClass>;
 export type ActionsAuthorization = PublicMethodsOf<ActionsAuthorizationClass>;
 

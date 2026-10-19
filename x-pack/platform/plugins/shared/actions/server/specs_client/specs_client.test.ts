@@ -158,4 +158,104 @@ describe('SpecsClient', () => {
       });
     });
   });
+
+  describe('getAll', () => {
+    const workflowsSpec = createSpec({
+      metadata: {
+        id: '.stub-workflows',
+        displayName: 'Stub Workflows',
+        description: 'Workflows feature spec',
+        minimumLicense: 'gold',
+        supportedFeatureIds: ['workflows'],
+      },
+      actions: {
+        run: {
+          scope: 'write',
+          input: z4.object({}),
+          handler: async () => ({}),
+        },
+      },
+      skill: 'Do not leak this into summaries.',
+    });
+
+    const agentBuilderSpec = createSpec({
+      metadata: {
+        id: '.stub-agent-builder',
+        displayName: 'Stub Agent Builder',
+        description: 'Agent Builder feature spec',
+        minimumLicense: 'gold',
+        supportedFeatureIds: ['agentBuilder'],
+      },
+    });
+
+    const missingSpecRow: ActionType = createActionType('.missing-spec', {
+      name: 'Missing spec',
+      minimumLicenseRequired: 'gold',
+      supportedFeatureIds: ['workflows'],
+    });
+
+    beforeEach(() => {
+      const workflowsRow = listRow(workflowsSpec);
+      const agentBuilderRow = listRow(agentBuilderSpec);
+      const getAllRows = [serverLogRow, workflowsRow, agentBuilderRow, missingSpecRow];
+
+      actionTypeRegistry.getSpec.mockImplementation((id: string) => {
+        if (id === workflowsSpec.metadata.id) {
+          return workflowsSpec;
+        }
+        if (id === agentBuilderSpec.metadata.id) {
+          return agentBuilderSpec;
+        }
+        return undefined;
+      });
+      actionTypeRegistry.list.mockImplementation((opts?: { featureId?: string }) => {
+        const { featureId } = opts ?? {};
+        return featureId
+          ? getAllRows.filter((row) => row.supportedFeatureIds.includes(featureId))
+          : getAllRows;
+      });
+    });
+
+    it('returns summaries for spec-backed types only', async () => {
+      const summaries = await createClient().getAll();
+      expect(summaries.map((summary) => summary.id)).toEqual([
+        '.stub-workflows',
+        '.stub-agent-builder',
+      ]);
+    });
+
+    it('filters by featureId', async () => {
+      const workflows = await createClient().getAll({ featureId: 'workflows' });
+      expect(workflows.map((summary) => summary.id)).toEqual(['.stub-workflows']);
+
+      const none = await createClient().getAll({ featureId: 'nope' });
+      expect(none).toEqual([]);
+    });
+
+    describe('authorization', () => {
+      it('ensures the user is authorised to get before listing specs', async () => {
+        await createClient().getAll();
+        expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
+      });
+
+      it('rethrows, logs connector_get failure, and does not call list when unauthorized', async () => {
+        authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+        await expect(createClient().getAll()).rejects.toMatchInlineSnapshot(
+          `[Error: Unauthorized]`
+        );
+
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            event: expect.objectContaining({
+              action: 'connector_get',
+              outcome: 'failure',
+            }),
+            error: { code: 'Error', message: 'Unauthorized' },
+          })
+        );
+        expect(actionTypeRegistry.list).not.toHaveBeenCalled();
+      });
+    });
+  });
 });

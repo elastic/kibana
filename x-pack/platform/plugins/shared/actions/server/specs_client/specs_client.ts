@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import type { ConnectorSpecDetail } from '../../common/connector_spec';
+import type { ConnectorSpecDetail, ConnectorSpecSummary } from '../../common/connector_spec';
 import { ConnectorAuditAction, connectorAuditEvent } from '../lib/audit_events';
-import { getRegisteredSpec } from './lib/get_registered_spec';
-import { serializeSpecDetail } from './lib/serialize_spec_detail';
-import type { GetSpecParams, ISpecsClient, SpecsClientOpts } from './types';
+import { getSpecDetail } from './lib/get_spec_detail';
+import { listSpecSummaries } from './lib/list_spec_summaries';
+import type { GetAllSpecsParams, GetSpecParams, ISpecsClient, SpecsClientOpts } from './types';
 
 export class SpecsClient implements ISpecsClient {
   constructor(private readonly opts: SpecsClientOpts) {}
 
   public async get({ id }: GetSpecParams): Promise<ConnectorSpecDetail> {
     await this.ensureAuthorized();
-    const registered = getRegisteredSpec(this.opts.actionTypeRegistry, id);
-    return serializeSpecDetail(registered, this.opts.configurationUtilities);
+    return getSpecDetail(this.opts, id);
+  }
+
+  public async getAll(params: GetAllSpecsParams = {}): Promise<ConnectorSpecSummary[]> {
+    await this.ensureAuthorized();
+    return listSpecSummaries(this.opts, params);
   }
 
   private async ensureAuthorized(): Promise<void> {
