@@ -21,6 +21,7 @@ import {
   testIndexName,
   uniqueSuffix,
   updateSource,
+  validateSourceQuery,
 } from '../fixtures';
 
 const TITLE_PREFIX = 'scout-sources-validation';
@@ -175,6 +176,29 @@ apiTest.describe(
       expect(fetched.body.health).toBe('ok');
 
       await deleteSource(apiClient, manager.cookieHeader, response.body.source.id);
+    });
+
+    apiTest('answers validate with what create would do', async ({ apiClient }) => {
+      const accepted = await validateSourceQuery(apiClient, manager.cookieHeader, {
+        esql: `FROM ${index}-logs-none-* | WHERE status >= 500`,
+      });
+      expect(accepted).toHaveStatusCode(200);
+      expect(accepted.body).toStrictEqual({ valid: true, type: 'logs', index_exists: false });
+
+      const existing = await validateSourceQuery(apiClient, manager.cookieHeader, {
+        esql: `FROM ${index} | WHERE status >= 500`,
+      });
+      expect(existing).toHaveStatusCode(200);
+      expect(existing.body).toStrictEqual({ valid: true, type: 'unknown', index_exists: true });
+
+      const disallowed = await validateSourceQuery(apiClient, manager.cookieHeader, {
+        esql: `FROM ${index} | STATS c = COUNT(*)`,
+      });
+      expect(disallowed).toHaveStatusCode(200);
+      expect(disallowed.body).toStrictEqual({
+        valid: false,
+        error: expect.stringContaining('Command "STATS" is not allowed'),
+      });
     });
 
     apiTest(

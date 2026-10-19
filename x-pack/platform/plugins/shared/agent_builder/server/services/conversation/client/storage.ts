@@ -20,6 +20,7 @@ import type {
   ActiveExecution,
 } from '@kbn/agent-builder-common/chat';
 import type { SerializedMetadataValue, UserPrincipalType } from '@kbn/agent-builder-common';
+import type { ConversationRoundFeedback } from '@kbn/agent-builder-common';
 import type {
   ConversationPinnedByEntry,
   ConversationReadByEntry,
@@ -47,19 +48,7 @@ const storageSettings = {
       updated_at: types.date({}),
       conversation_rounds: types.object({
         dynamic: false,
-        properties: {
-          feedback: types.object({
-            dynamic: false,
-            properties: {
-              vote: types.keyword({}),
-              chips: types.keyword({}),
-              comment: types.text({}),
-              submitted_at: types.date({}),
-              connector_id: types.keyword({}),
-              model: types.keyword({}),
-            },
-          }),
-        },
+        properties: {},
       }),
       events: types.nested({
         properties: {
@@ -141,6 +130,7 @@ const storageSettings = {
         },
         dynamic: false,
       }),
+      feedback: types.object({ dynamic: false, properties: {} }),
       metadata: types.flattened({}),
       template_id: types.keyword({}),
       template_version: types.long({}),
@@ -183,6 +173,7 @@ export interface ConversationProperties {
   access_control?: Optional<ConversationAccessControl, 'entries'>;
   parent_conversation?: PersistentConversationParentLink;
   origin?: ConversationOrigin;
+  feedback?: Record<string, ConversationRoundFeedback>;
   metadata?: Record<string, SerializedMetadataValue>;
   template_id?: string;
   template_version?: number;

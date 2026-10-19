@@ -46,6 +46,7 @@ import {
   useRiskMoversDelta,
   useRiskTilesSeries,
 } from '../components/home/needs_attention_tiles/hooks';
+import { RISK_MOVER_MIN_SCORE_CHANGE } from '../components/home/needs_attention_tiles/queries/risk_history';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
 import {
   EMPTY_ENTITY_IDS,
@@ -449,15 +450,16 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
             ? i18n.translate(
                 'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.description24h',
                 {
-                  defaultMessage: 'Entities whose risk score rose ≥10 points vs yesterday',
+                  defaultMessage: 'Entities whose risk score rose ≥{points} points vs yesterday',
+                  values: { points: RISK_MOVER_MIN_SCORE_CHANGE },
                 }
               )
             : i18n.translate(
                 'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.description',
                 {
                   defaultMessage:
-                    'Entities whose risk score rose ≥10 points vs the previous {timeRange}',
-                  values: { timeRange },
+                    'Entities whose risk score rose ≥{points} points vs the previous {timeRange}',
+                  values: { timeRange, points: RISK_MOVER_MIN_SCORE_CHANGE },
                 }
               ),
         filterLabel: i18n.translate(

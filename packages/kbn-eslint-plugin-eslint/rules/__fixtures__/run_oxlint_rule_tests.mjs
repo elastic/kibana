@@ -58,6 +58,7 @@ const parityTests = {
   no_constructor_args_in_property_initializers: () =>
     require('../no_constructor_args_in_property_initializers.test.js'),
   no_export_all: () => require('../no_export_all.test.js'),
+  no_feature_flag_snapshot: () => require('../no_feature_flag_snapshot.test.js'),
   no_npx_playwright: () => require('../no_npx_playwright.test.js'),
   no_sync_import_from_plugin: () => require('../no_sync_import_from_plugin.test.js'),
   no_this_in_property_initializers: () => require('../no_this_in_property_initializers.test.js'),
