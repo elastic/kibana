@@ -137,4 +137,3 @@ describe('SignificantEventsPlugin setup', () => {
     });
   });
 });
-
