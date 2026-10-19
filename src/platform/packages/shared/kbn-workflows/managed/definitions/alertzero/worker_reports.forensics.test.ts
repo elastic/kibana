@@ -252,6 +252,30 @@ describe('Endpoint Analysis outcome reports', () => {
           timeline_found: true,
         },
       ],
+      [
+        'a supervised run whose agent recommended nothing, so no gate was asked to auto-approve',
+        { supervised: true },
+        {
+          ...NOTHING,
+          analysis_outcome: 'processed',
+          findings_attached: true,
+          iocs_found: true,
+          timeline_found: true,
+        },
+      ],
+      [
+        'a supervised run whose only proposal failed to launch',
+        { actions: 1, dispatchFailed: 1, supervised: true },
+        {
+          ...NOTHING,
+          actions_recommended: 1,
+          analysis_outcome: 'proposals_lost',
+          findings_attached: true,
+          iocs_found: true,
+          proposals_dispatch_failed: 1,
+          timeline_found: true,
+        },
+      ],
       // The agent does not run again, so the run cannot vouch for the earlier run's outcome and
       // retires the indicator as `failed`.
       [

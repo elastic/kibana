@@ -1243,7 +1243,8 @@ steps:
       actions_recommended: "${{ steps.forensic_analysis.output.structured_output.recommendedActions | size }}"
       proposals_dispatched: "${{ steps.propose_actions.output.succeeded | default: 0 }}"
       proposals_dispatch_failed: "${{ steps.resolve_proposal_dispatch.output.failed | default: 0 }}"
-      auto_approve_requested: "${{ steps.resolve_autonomy.output.level == 'supervised' }}"
+      # Only a gate a proposal reached was asked to auto-approve.
+      auto_approve_requested: "${{ steps.resolve_autonomy.output.level == 'supervised' and steps.propose_actions.output.succeeded > 0 }}"
 
   - name: emit_result
     type: workflow.output
