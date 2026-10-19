@@ -39,6 +39,8 @@ import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_
 import { useAnomalyPrivileges } from '../api/hooks/use_anomaly_privileges';
 import { EntityAnalyticsReadPrivilegesCallout } from '../components/entity_analytics_read_privileges_callout';
 import { NoPrivileges } from '../../common/components/no_privileges';
+import { useUserPrivileges } from '../../common/components/user_privileges';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useGetWatchlists } from '../api/hooks/use_get_watchlists';
 import { useErrorToast } from '../../common/hooks/use_error_toast';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
@@ -196,10 +198,76 @@ const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePa
   defaultMessage: 'Entity analytics',
 });
 
+/**
+ * Whether the user can read each source the page queries: `undefined` while its check loads, and
+ * `true` when the check fails, so the page still works.
+ */
+interface ReadAccess {
+  alerts?: boolean;
+  risk?: boolean;
+  anomalies?: boolean;
+}
+
+const ML_GET_JOBS_PRIVILEGE = 'ui:ml/canGetJobs';
+
+const NO_ALERTS_ACCESS_MESSAGE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.tiles.noAlertsAccess',
+  { defaultMessage: 'Requires read access to alerts' }
+);
+const NO_ANOMALIES_ACCESS_MESSAGE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.tiles.noAnomaliesAccess',
+  { defaultMessage: 'Requires read access to ML anomalies' }
+);
+const NO_RISK_ACCESS_MESSAGE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.tiles.noRiskAccess',
+  { defaultMessage: 'Requires read access to risk scores' }
+);
+
+const getReadAccess = ({
+  isLoading,
+  isError,
+  canRead,
+}: {
+  isLoading: boolean;
+  isError: boolean;
+  canRead: boolean | undefined;
+}): boolean | undefined => {
+  if (isError) return true;
+  return isLoading ? undefined : canRead;
+};
+
 export const EntityAnalyticsNewHomePage: React.FC = () => {
   const riskEngineReadPrivileges = useMissingRiskEnginePrivileges({ readonly: true });
   const entityEnginePrivilegesQuery = useEntityEnginePrivileges();
   const anomalyPrivilegesQuery = useAnomalyPrivileges();
+  const {
+    detectionEnginePrivileges: { error: alertsPrivilegesError },
+  } = useUserPrivileges();
+  const { hasIndexRead: hasAlertsIndexRead, loading: isAlertsPrivilegesLoading } =
+    useAlertsPrivileges();
+
+  const alerts = getReadAccess({
+    isLoading: isAlertsPrivilegesLoading,
+    isError: alertsPrivilegesError != null,
+    canRead: hasAlertsIndexRead ?? undefined,
+  });
+  const risk = getReadAccess({
+    isLoading: riskEngineReadPrivileges.isLoading,
+    isError: riskEngineReadPrivileges.isError ?? false,
+    canRead:
+      !riskEngineReadPrivileges.isLoading && riskEngineReadPrivileges.hasAllRequiredPrivileges,
+  });
+  const anomalies = getReadAccess({
+    isLoading: anomalyPrivilegesQuery.isLoading,
+    isError: anomalyPrivilegesQuery.isError,
+    canRead:
+      anomalyPrivilegesQuery.data?.has_read_permissions === true &&
+      anomalyPrivilegesQuery.data.privileges.kibana?.[ML_GET_JOBS_PRIVILEGE] !== false,
+  });
+  const readAccess = useMemo(
+    (): ReadAccess => ({ alerts, risk, anomalies }),
+    [alerts, risk, anomalies]
+  );
 
   const isRiskEngineReadPrivilegesLoading =
     riskEngineReadPrivileges.isLoading && !riskEngineReadPrivileges.isError;
@@ -232,13 +300,15 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
         </>
       ) : (
-        <EntityAnalyticsNewHomePageContent />
+        <EntityAnalyticsNewHomePageContent readAccess={readAccess} />
       )}
     </>
   );
 };
 
-const EntityAnalyticsNewHomePageContent: React.FC = () => {
+const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = ({
+  readAccess,
+}) => {
   const spaceId = useSpaceId();
   const {
     dataView,
@@ -450,6 +520,13 @@ const EntityAnalyticsNewHomePageContent: React.FC = () => {
     !spaceId || entityStoreStatusLoading || entityStoreDisabled || entityStoreInstalling;
 
   const resolvedSpaceId = spaceId ?? 'default';
+  const skipAlertTiles = skipTileQueries || !readAccess.alerts;
+  const skipAnomaliesTile = skipTileQueries || !readAccess.anomalies;
+  const skipRiskTiles = skipTileQueries || !readAccess.risk;
+  // Skipped queries read as loading, so the tiles of a source the user can't read stop loading here.
+  const canReadAlerts = readAccess.alerts !== false;
+  const canReadAnomalies = readAccess.anomalies !== false;
+  const canReadRisk = readAccess.risk !== false;
 
   const {
     severeAlertsCount,
@@ -462,7 +539,7 @@ const EntityAnalyticsNewHomePageContent: React.FC = () => {
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
-    skip: skipTileQueries,
+    skip: skipAlertTiles,
   });
   const {
     count: anomaliesCount,
@@ -473,7 +550,7 @@ const EntityAnalyticsNewHomePageContent: React.FC = () => {
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
-    skip: skipTileQueries,
+    skip: skipAnomaliesTile,
   });
   const {
     count: newEntityCount,
@@ -496,7 +573,7 @@ const EntityAnalyticsNewHomePageContent: React.FC = () => {
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
-    skip: skipTileQueries,
+    skip: skipRiskTiles,
   });
   const {
     count: newlyHCCount,
@@ -508,7 +585,7 @@ const EntityAnalyticsNewHomePageContent: React.FC = () => {
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
-    skip: skipTileQueries,
+    skip: skipRiskTiles,
   });
 
   // Count first, for the whole page: the deltas start only once every count has loaded, so a delta
@@ -534,6 +611,7 @@ const EntityAnalyticsNewHomePageContent: React.FC = () => {
     reachesBack: alertBasedReachesBack,
   } = useAlertBasedTilesDelta({
     ...deltaOptions,
+    skip: skipAlertTiles,
     severeAlertsCount,
     watchlistedCount,
   });
@@ -542,7 +620,11 @@ const EntityAnalyticsNewHomePageContent: React.FC = () => {
     isDeltaLoading: anomaliesDeltaLoading,
     isHistoryMissing: anomaliesHistoryMissing,
     reachesBack: anomaliesReachesBack,
-  } = useEntitiesWithAnomaliesDelta({ ...deltaOptions, count: anomaliesCount });
+  } = useEntitiesWithAnomaliesDelta({
+    ...deltaOptions,
+    skip: skipAnomaliesTile,
+    count: anomaliesCount,
+  });
   const {
     delta: newEntityDelta,
     isDeltaLoading: newEntityDeltaLoading,
@@ -554,18 +636,27 @@ const EntityAnalyticsNewHomePageContent: React.FC = () => {
     isDeltaLoading: riskMoversDeltaLoading,
     isHistoryMissing: riskMoversHistoryMissing,
     reachesBack: riskMoversReachesBack,
-  } = useRiskMoversDelta({ ...deltaOptions, count: riskMoversCount });
+  } = useRiskMoversDelta({
+    ...deltaOptions,
+    skip: skipRiskTiles,
+    count: riskMoversCount,
+  });
   const {
     delta: newlyHCDelta,
     isDeltaLoading: newlyHCDeltaLoading,
     isHistoryMissing: newlyHCHistoryMissing,
     reachesBack: newlyHCReachesBack,
-  } = useNewlyHighCriticalDelta({ ...deltaOptions, count: newlyHCCount });
+  } = useNewlyHighCriticalDelta({
+    ...deltaOptions,
+    skip: skipRiskTiles,
+    count: newlyHCCount,
+  });
 
   // The sparklines follow the deltas: they start once the counts and the deltas have settled, and
   // only for a tile whose history reaches back twice the range, so they never delay them.
   const { alertsTrend, watchlistedTrend } = useAlertBasedTilesSeries({
     ...deltaOptions,
+    skip: skipAlertTiles,
     isReady: areCountsLoaded && !isDeltaLoading,
     reachesBack: alertBasedReachesBack,
     severeAlertsCount,
@@ -573,6 +664,7 @@ const EntityAnalyticsNewHomePageContent: React.FC = () => {
   });
   const { trend: anomaliesTrend } = useEntitiesWithAnomaliesSeries({
     ...deltaOptions,
+    skip: skipAnomaliesTile,
     isReady: areCountsLoaded && !anomaliesDeltaLoading,
     reachesBack: anomaliesReachesBack,
     count: anomaliesCount,
@@ -586,6 +678,7 @@ const EntityAnalyticsNewHomePageContent: React.FC = () => {
   // The two risk tiles read the same risk score history, so one query serves both sparklines.
   const { riskMoversTrend, newlyHighCriticalTrend: newlyHCTrend } = useRiskTilesSeries({
     ...deltaOptions,
+    skip: skipRiskTiles,
     isReady: areCountsLoaded && !riskMoversDeltaLoading && !newlyHCDeltaLoading,
     riskMoversReachesBack,
     newlyHighCriticalReachesBack: newlyHCReachesBack,
@@ -721,7 +814,8 @@ const EntityAnalyticsNewHomePageContent: React.FC = () => {
         isDeltaLoading,
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: alertsTrend,
-        isLoading: alertBasedLoading,
+        isLoading: canReadAlerts && alertBasedLoading,
+        noDataMessage: canReadAlerts ? undefined : NO_ALERTS_ACCESS_MESSAGE,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
           {
@@ -751,7 +845,8 @@ const EntityAnalyticsNewHomePageContent: React.FC = () => {
         isDeltaLoading: anomaliesDeltaLoading,
         isDeltaUnavailable: anomaliesHistoryMissing,
         trend: anomaliesTrend,
-        isLoading: anomaliesLoading,
+        isLoading: canReadAnomalies && anomaliesLoading,
+        noDataMessage: canReadAnomalies ? undefined : NO_ANOMALIES_ACCESS_MESSAGE,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
           {
@@ -780,8 +875,10 @@ const EntityAnalyticsNewHomePageContent: React.FC = () => {
         isDeltaLoading: riskMoversDeltaLoading,
         isDeltaUnavailable: riskMoversHistoryMissing,
         trend: riskMoversTrend,
-        isLoading: riskMoversLoading,
-        noDataMessage: riskMoversMissingIndex
+        isLoading: canReadRisk && riskMoversLoading,
+        noDataMessage: !canReadRisk
+          ? NO_RISK_ACCESS_MESSAGE
+          : riskMoversMissingIndex
           ? i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.noData', {
               defaultMessage: 'Requires risk score history data',
             })
@@ -823,8 +920,10 @@ const EntityAnalyticsNewHomePageContent: React.FC = () => {
         isDeltaLoading: newlyHCDeltaLoading,
         isDeltaUnavailable: newlyHCHistoryMissing,
         trend: newlyHCTrend,
-        isLoading: newlyHCLoading,
-        noDataMessage: newlyHCMissingIndex
+        isLoading: canReadRisk && newlyHCLoading,
+        noDataMessage: !canReadRisk
+          ? NO_RISK_ACCESS_MESSAGE
+          : newlyHCMissingIndex
           ? i18n.translate(
               'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.noData',
               {
@@ -869,7 +968,8 @@ const EntityAnalyticsNewHomePageContent: React.FC = () => {
         isDeltaLoading,
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: watchlistedTrend,
-        isLoading: alertBasedLoading,
+        isLoading: canReadAlerts && alertBasedLoading,
+        noDataMessage: canReadAlerts ? undefined : NO_ALERTS_ACCESS_MESSAGE,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
           {
@@ -914,6 +1014,9 @@ const EntityAnalyticsNewHomePageContent: React.FC = () => {
       },
     ],
     [
+      canReadAlerts,
+      canReadAnomalies,
+      canReadRisk,
       severeAlertsCount,
       alertsDelta,
       alertsTrend,
