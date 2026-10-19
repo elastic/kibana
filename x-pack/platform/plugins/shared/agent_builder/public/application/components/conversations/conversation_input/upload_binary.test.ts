@@ -66,9 +66,9 @@ describe('uploadBinary', () => {
     const { binaryFilesClient, attachmentsService, controller } = setup();
 
     await uploadBinary({
-      file: createDocument({ name: 'notes.md', type: '' }),
-      name: 'notes.md',
-      mimeType: 'text/markdown',
+      file: createDocument({ name: 'invoice.pdf', type: '' }),
+      name: 'invoice.pdf',
+      mimeType: 'application/pdf',
       conversationId: 'conv-1',
       binaryFilesClient: binaryFilesClient as never,
       attachmentsService: attachmentsService as never,
@@ -76,11 +76,11 @@ describe('uploadBinary', () => {
     });
 
     expect(binaryFilesClient.create).toHaveBeenCalledWith({
-      name: 'notes.md',
-      mimeType: 'text/markdown',
+      name: 'invoice.pdf',
+      mimeType: 'application/pdf',
     });
     expect(binaryFilesClient.upload).toHaveBeenCalledWith(
-      expect.objectContaining({ contentType: 'text/markdown' })
+      expect.objectContaining({ contentType: 'application/pdf' })
     );
   });
 

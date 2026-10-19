@@ -9,7 +9,7 @@ import { MAX_TEXT_FILE_LENGTH } from './file_type';
 import { readTextFile } from './read_text_file';
 
 const createFile = (bytes: Uint8Array): File => {
-  const file = new File([bytes], 'notes.txt', { type: 'text/plain' });
+  const file = new File([new Uint8Array(bytes)], 'notes.txt', { type: 'text/plain' });
   const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
   Object.defineProperty(file, 'arrayBuffer', { value: () => Promise.resolve(buffer) });
   return file;

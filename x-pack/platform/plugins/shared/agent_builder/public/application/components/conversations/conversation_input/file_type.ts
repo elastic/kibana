@@ -45,7 +45,7 @@ const TYPE_LABEL_BY_MIME_TYPE: Readonly<Record<FileMimeType, string>> = {
 export const isTextFileMimeType = (value: unknown): value is TextFileMimeType =>
   TEXT_FILE_MIME_TYPES.some((mimeType) => mimeType === value);
 
-const isFileMimeType = (value: unknown): value is FileMimeType =>
+const isFileMimeType = (value: string | undefined): value is FileMimeType =>
   isSupportedBinaryMimeType(value) || isTextFileMimeType(value);
 
 const getExtension = (name: string): string | undefined => {
