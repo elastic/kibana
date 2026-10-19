@@ -21,9 +21,24 @@ describe('schedule filter labels', () => {
       )
     ).toEqual([
       { label: 'Every 10 seconds', count: 1 },
-      { label: 'Every 10 minutes', count: 2 },
       { label: 'Every 5 minutes', count: 3 },
+      { label: 'Every 10 minutes', count: 2 },
     ]);
+  });
+
+  it('orders frequency options by duration', () => {
+    expect(
+      getSyntheticsFilterDisplayValues(
+        [
+          { label: '3m', count: 1 },
+          { label: '5m', count: 1 },
+          { label: '10m', count: 1 },
+          { label: '10s', count: 1 },
+        ],
+        'schedules',
+        []
+      ).map(({ label }) => label)
+    ).toEqual(['Every 10 seconds', 'Every 3 minutes', 'Every 5 minutes', 'Every 10 minutes']);
   });
 
   it('keeps the unit when a frequency label is selected', () => {

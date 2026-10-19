@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { invert } from 'lodash';
+import { scheduleToSeconds } from '../../../../../common/lib/schedule_to_time';
 import type { ServiceLocations } from '../../../../../common/runtime_types';
 import { MonitorTypeEnum, ScheduleUnit } from '../../../../../common/runtime_types';
 import type { MonitorFilterState } from '../../state';
@@ -62,10 +63,14 @@ export function getSyntheticsFilterDisplayValues(
         count,
       }));
     case 'schedules':
-      return values.map(({ label, count }: { label: string; count: number }) => ({
-        label: scheduleFrequencyDisplayLabel(label),
-        count,
-      }));
+      return [...values]
+        .sort(
+          (left, right) => scheduleFilterDuration(left.label) - scheduleFilterDuration(right.label)
+        )
+        .map(({ label, count }: { label: string; count: number }) => ({
+          label: scheduleFrequencyDisplayLabel(label),
+          count,
+        }));
     case 'locations':
       return values.map(({ label, count }) => {
         const foundLocation = locations.find(
@@ -130,6 +135,11 @@ const scheduleFrequencyLabel = (count: number, unit: ScheduleUnit): string => {
 const scheduleFrequencyDisplayLabel = (value: string): string => {
   const parsed = parseScheduleFilterKey(value);
   return parsed ? scheduleFrequencyLabel(Number(parsed.number), parsed.unit) : value;
+};
+
+const scheduleFilterDuration = (value: string): number => {
+  const parsed = parseScheduleFilterKey(value);
+  return parsed ? scheduleToSeconds(parsed) : Number.POSITIVE_INFINITY;
 };
 
 const scheduleKeyForLabel = (value: string): string => {
