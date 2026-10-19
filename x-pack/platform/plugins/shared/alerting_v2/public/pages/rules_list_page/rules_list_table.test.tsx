@@ -218,20 +218,20 @@ describe('RulesListTable', () => {
       expect(screen.getByText('prod')).toBeInTheDocument();
     });
 
-    it('truncates tags to show only the first 1 and a +N badge for overflow', () => {
+    it('shows the first 2 tags and a +N badge for overflow', () => {
       renderTable({
         items: mockRulesWithManyTags as any,
         totalItemCount: 1,
       });
 
-      // First tag should be visible
       expect(screen.getByText('new')).toBeInTheDocument();
+      expect(screen.getByText('rna')).toBeInTheDocument();
 
-      // Remaining 8 tags should be hidden behind +8 badge
-      expect(screen.getByTestId('overflowTagsBadge')).toHaveTextContent('+8');
+      // Remaining 7 tags should be hidden behind +7 badge
+      expect(screen.getByTestId('overflowTagsBadge')).toHaveTextContent('+7');
 
       // Overflow tags should not be directly visible
-      expect(screen.queryByText('rna')).not.toBeInTheDocument();
+      expect(screen.queryByText('production')).not.toBeInTheDocument();
     });
 
     it('renders long tag text with native EuiBadge truncation', () => {
@@ -262,15 +262,16 @@ describe('RulesListTable', () => {
       ).toBeInTheDocument();
     });
 
-    it('truncates routing tags to the first one and a +N badge, like regular tags', () => {
+    it('shows the first 2 routing tags and a +N badge, like regular tags', () => {
       renderTable({
         items: mockRulesWithRoutingTags as any,
         totalItemCount: 1,
       });
 
       expect(screen.getByTestId('routingTagsContainer')).toHaveTextContent('team-a');
-      expect(screen.getByTestId('overflowRoutingTagsBadge')).toHaveTextContent('+2');
-      expect(screen.queryByText('team-b')).not.toBeInTheDocument();
+      expect(screen.getByTestId('routingTagsContainer')).toHaveTextContent('team-b');
+      expect(screen.getByTestId('overflowRoutingTagsBadge')).toHaveTextContent('+1');
+      expect(screen.queryByText('team-c')).not.toBeInTheDocument();
     });
 
     it('shows the overflowing routing tags in a tooltip', async () => {
@@ -281,7 +282,7 @@ describe('RulesListTable', () => {
 
       fireEvent.mouseOver(screen.getByTestId('overflowRoutingTagsBadge'));
 
-      expect(await screen.findByText('team-b, team-c')).toBeInTheDocument();
+      expect(await screen.findByText('team-c')).toBeInTheDocument();
     });
 
     it('renders an empty value for rules without routing tags', () => {

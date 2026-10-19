@@ -8,7 +8,6 @@
 import React, { useMemo } from 'react';
 import {
   EuiBadge,
-  EuiBadgeGroup,
   EuiBasicTable,
   EuiButtonIcon,
   EuiCheckbox,
@@ -34,24 +33,8 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { RuleKindBadge } from '../../components/rule_details/rule_summary_header';
 import { RuleActionsMenu } from './rule_actions_menu';
+import { RuleTagsCell } from './rule_tags_cell';
 import { RulesBulkActions } from './rules_bulk_actions';
-
-const labelsContainerStyle = css`
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  overflow: hidden;
-`;
-
-const labelBadgeStyle = css`
-  min-width: 0;
-  flex-shrink: 1;
-`;
-
-const overflowTooltipStyle = css`
-  flex-shrink: 0;
-  line-height: 0;
-`;
 
 const descriptionTextStyle = css`
   text-overflow: ellipsis;
@@ -61,48 +44,6 @@ const descriptionTextStyle = css`
   overflow: hidden;
   word-break: break-word;
 `;
-
-interface RuleTagsCellProps {
-  tags?: string[];
-  containerTestSubj: string;
-  overflowTestSubj: string;
-}
-
-const RuleTagsCell: React.FC<RuleTagsCellProps> = ({
-  tags,
-  containerTestSubj,
-  overflowTestSubj,
-}) => {
-  if (!tags || tags.length === 0) {
-    return <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />;
-  }
-  const overflowCount = tags.length - 1;
-  return (
-    <EuiBadgeGroup gutterSize="xs" css={labelsContainerStyle} data-test-subj={containerTestSubj}>
-      <EuiBadge color="hollow" css={overflowCount > 0 ? labelBadgeStyle : undefined}>
-        {tags[0]}
-      </EuiBadge>
-      {overflowCount > 0 && (
-        <span css={overflowTooltipStyle}>
-          <EuiToolTip content={tags.slice(1).join(', ')}>
-            <EuiBadge
-              tabIndex={0}
-              color="hollow"
-              data-test-subj={overflowTestSubj}
-              iconType="tag"
-              title=""
-            >
-              {i18n.translate('xpack.alertingV2.rulesList.tags.overflow', {
-                defaultMessage: '+{count}',
-                values: { count: overflowCount },
-              })}
-            </EuiBadge>
-          </EuiToolTip>
-        </span>
-      )}
-    </EuiBadgeGroup>
-  );
-};
 
 export type RulesListTableSortField = 'kind' | 'enabled' | 'metadata';
 
@@ -293,7 +234,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.tags" defaultMessage="Tags" />
         ),
-        width: '15%',
+        width: '18%',
         render: (metadata: RuleApiResponse['metadata']) => (
           <RuleTagsCell
             tags={metadata?.tags}
@@ -329,7 +270,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        width: '15%',
+        width: '18%',
         render: (metadata: RuleApiResponse['metadata']) => (
           <RuleTagsCell
             tags={metadata?.routing_tags}
