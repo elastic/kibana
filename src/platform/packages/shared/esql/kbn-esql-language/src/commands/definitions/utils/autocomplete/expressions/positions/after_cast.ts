@@ -10,12 +10,12 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLInlineCast } from '@elastic/esql/types';
 import { Walker, within } from '@elastic/esql';
+import { inlineCasts as inlineCastsMapping } from '@elastic/esql-definitions/inline-cast';
 import type { SupportedDataType } from '../../../../..';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import { getFunctionDefinition } from '../../../functions';
 import type { ExpressionContext } from '../types';
 import { getExpressionType } from '../../..';
-import { inlineCastsMapping } from '../../../../generated/inline_casts_mapping';
 import { getMatchingSignatures } from '../../../signatures';
 
 /**
