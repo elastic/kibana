@@ -63,7 +63,7 @@ describe('nightshift.renderSlackMessage step', () => {
         setup(spaceId);
       const { output } = (await definition.handler(
         context({ investigation_id: 'inv-1', phase: 'completed' })
-      )) as { output: { text: string; blocks: SlackBlock[] } };
+      )) as { output: { text: string; blocks: SlackBlock[]; metadata: { entities: unknown[] } } };
 
       expect(getInvestigationsClient).toHaveBeenCalledWith(request, spaceId);
       expect(getNotifiableInvestigation).toHaveBeenCalledWith('inv-1');
@@ -74,6 +74,12 @@ describe('nightshift.renderSlackMessage step', () => {
         new RegExp(`^https://kibana\\.example${prefix}/app/r\\?`)
       );
       expect(output.text).toContain(buttonUrl(output.blocks));
+      expect(output.metadata.entities).toEqual([
+        expect.objectContaining({
+          url: buttonUrl(output.blocks),
+          external_ref: { id: 'inv-1', type: 'investigation' },
+        }),
+      ]);
     }
   );
 

@@ -247,10 +247,120 @@ export const buildInvestigationSlackBlocks = ({
   return blocks;
 };
 
-/** The message to post: Block Kit blocks, and the mrkdwn text Slack falls back to. */
+const WORK_OBJECT_ENTITY_TYPE = 'slack#/entities/incident';
+const MAX_WORK_OBJECT_TITLE_LENGTH = 150;
+const MAX_WORK_OBJECT_DESCRIPTION_LENGTH = 120;
+const MAX_WORK_OBJECT_VALUE_LENGTH = 150;
+
+const WORK_OBJECT_STATUS: Record<NotificationPhase, string> = {
+  started: 'Investigating',
+  completed: 'Completed',
+  failed: 'Failed',
+};
+
+export type SlackWorkObjectMetadata = JsonObject & {
+  entities: Array<JsonObject & { entity_type: string }>;
+};
+
+const truncateLine = (text: string | undefined, max: number): string => {
+  const line = oneLine(text ?? '');
+  if (line.length <= max) {
+    return line;
+  }
+  const cut = line.slice(0, max - 1);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${(lastSpace > max / 2 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
+};
+
+/**
+ * The Slack Work Object card for an investigation message. `external_ref.id` groups threads in
+ * Slack's related conversations view and never routes one.
+ * https://docs.slack.dev/messaging/work-objects-implementation
+ */
+export const buildInvestigationWorkObject = ({
+  investigation,
+  url,
+  phase = 'completed',
+  reason,
+}: {
+  investigation: NotifiableInvestigation;
+  url: string;
+  phase?: NotificationPhase;
+  reason?: string;
+}): SlackWorkObjectMetadata => {
+  const fields: Record<string, JsonObject> = {
+    status: { value: WORK_OBJECT_STATUS[phase] },
+  };
+  const customFields: JsonObject[] = [];
+
+  if (phase === 'failed') {
+    const failureReason = truncateLine(
+      reason || investigation.error,
+      MAX_WORK_OBJECT_DESCRIPTION_LENGTH
+    );
+    if (failureReason) {
+      fields.description = { value: failureReason };
+    }
+  }
+
+  if (phase === 'completed') {
+    const description = truncateLine(
+      investigation.verdict || investigation.impact?.summary || investigation.summary,
+      MAX_WORK_OBJECT_DESCRIPTION_LENGTH
+    );
+    if (description) {
+      fields.description = { value: description };
+    }
+
+    const service = truncateLine(
+      investigation.impact?.entities?.[0]?.name,
+      MAX_WORK_OBJECT_VALUE_LENGTH
+    );
+    if (service) {
+      fields.service = { value: service };
+    }
+
+    const topHypothesis = [...(investigation.hypotheses ?? [])]
+      .sort((a, b) => b.confidence - a.confidence)
+      .find(({ status }) => status === 'confirmed' || status === 'investigating');
+    if (topHypothesis) {
+      customFields.push({
+        key: 'top_hypothesis',
+        label: 'Top hypothesis',
+        value: `${capitalize(topHypothesis.status)} · ${Math.round(
+          topHypothesis.confidence * 100
+        )}%`,
+        type: 'string',
+      });
+    }
+  }
+
+  return {
+    entities: [
+      {
+        entity_type: WORK_OBJECT_ENTITY_TYPE,
+        url,
+        external_ref: { id: investigation.investigation_id, type: 'investigation' },
+        entity_payload: {
+          attributes: {
+            title: {
+              text:
+                truncateLine(investigation.title, MAX_WORK_OBJECT_TITLE_LENGTH) || 'Investigation',
+            },
+            display_type: 'Investigation',
+          },
+          fields,
+          ...(customFields.length > 0 ? { custom_fields: customFields } : {}),
+        },
+      },
+    ],
+  };
+};
+
 export const renderInvestigationSlackMessage = (
   params: Parameters<typeof buildInvestigationSlackBlocks>[0]
-): { text: string; blocks: SlackBlock[] } => ({
+): { text: string; blocks: SlackBlock[]; metadata: SlackWorkObjectMetadata } => ({
   text: formatInvestigationSlackMessage(params),
   blocks: buildInvestigationSlackBlocks(params),
+  metadata: buildInvestigationWorkObject(params),
 });

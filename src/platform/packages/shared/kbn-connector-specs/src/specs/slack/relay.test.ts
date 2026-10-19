@@ -165,6 +165,31 @@ describe('relaySendMessage', () => {
     expect(trigger).toHaveBeenCalledWith(expect.objectContaining({ message: 'hi', blocks }));
   });
 
+  it('forwards Work Object metadata when posting', async () => {
+    const trigger = jest.fn().mockResolvedValue({
+      ref: '1700.0002',
+      tenantKey: 'team-A',
+      channel: CHANNEL_ID,
+    });
+    const metadata = { entities: [{ entity_type: 'slack#/entities/incident', url: 'https://k' }] };
+
+    await send({ channel: CHANNEL_ID, text: 'hi', metadata }, { trigger });
+
+    expect(trigger).toHaveBeenCalledWith(expect.objectContaining({ metadata }));
+  });
+
+  it('omits metadata when there is none', async () => {
+    const trigger = jest.fn().mockResolvedValue({
+      ref: '1700.0002',
+      tenantKey: 'team-A',
+      channel: CHANNEL_ID,
+    });
+
+    await send({ channel: CHANNEL_ID, text: 'hi' }, { trigger });
+
+    expect(trigger.mock.calls[0][0]).not.toHaveProperty('metadata');
+  });
+
   it('rejects a blank channel before calling Relay', async () => {
     const trigger = jest.fn();
 
@@ -267,6 +292,22 @@ describe('relayUpdateMessage', () => {
     await update({ channel: CHANNEL_ID, messageTs: '1700.0002', text: 'Done', blocks }, trigger);
 
     expect(trigger).toHaveBeenCalledWith(expect.objectContaining({ blocks }));
+  });
+
+  it('never sends metadata on an edit', async () => {
+    const trigger = jest.fn().mockResolvedValue({
+      ref: '1700.0002',
+      tenantKey: 'team-A',
+      channel: CHANNEL_ID,
+    });
+    const metadata = { entities: [{ entity_type: 'slack#/entities/incident', url: 'https://k' }] };
+
+    await update(
+      { channel: CHANNEL_ID, messageTs: '1700.0002', text: 'Done', metadata } as never,
+      trigger
+    );
+
+    expect(trigger.mock.calls[0][0]).not.toHaveProperty('metadata');
   });
 
   it('rejects a blank channel before calling Relay', async () => {

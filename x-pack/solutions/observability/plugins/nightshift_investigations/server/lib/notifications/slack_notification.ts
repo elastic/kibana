@@ -43,7 +43,7 @@ export const slackNotificationHandler: NotificationHandler = {
     const { channel, thread_ts: threadTs } = parseSlackNotificationParams(
       notificationDestination.params
     );
-    const { text, blocks } = renderInvestigationSlackMessage({
+    const { text, blocks, metadata } = renderInvestigationSlackMessage({
       investigation,
       url,
       phase,
@@ -57,7 +57,7 @@ export const slackNotificationHandler: NotificationHandler = {
         }
       : {
           subAction: 'sendMessage',
-          subActionParams: { channel, text, blocks, ...(threadTs ? { threadTs } : {}) },
+          subActionParams: { channel, text, blocks, metadata, ...(threadTs ? { threadTs } : {}) },
         };
     return {
       params,

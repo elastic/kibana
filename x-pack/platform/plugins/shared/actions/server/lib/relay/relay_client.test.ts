@@ -585,6 +585,29 @@ describe('RelayClient', () => {
       expect((requestMock.mock.calls[1][0] as { data: object }).data).not.toHaveProperty('blocks');
     });
 
+    it('sends metadata only when it has entities', async () => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ref: '1700000000.000200', tenant_key: 'team-A' },
+      } as never);
+      const metadata = {
+        entities: [{ entity_type: 'slack#/entities/incident', url: 'https://k' }],
+      };
+      const base = { tenantKey: 'team-A', channel: 'C123', message: 'hi' };
+
+      await createClient().trigger({ ...base, metadata });
+      await createClient().trigger({ ...base, metadata: { entities: [] } });
+      await createClient().trigger(base);
+
+      expect(requestMock.mock.calls[0][0]).toMatchObject({ data: { metadata } });
+      expect((requestMock.mock.calls[1][0] as { data: object }).data).not.toHaveProperty(
+        'metadata'
+      );
+      expect((requestMock.mock.calls[2][0] as { data: object }).data).not.toHaveProperty(
+        'metadata'
+      );
+    });
+
     it('sends message_ts and drops thread_ts when editing a posted message', async () => {
       requestMock.mockResolvedValue({
         status: 200,
