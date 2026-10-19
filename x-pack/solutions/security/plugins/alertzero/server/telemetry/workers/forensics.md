@@ -4,7 +4,7 @@ The Worker reports its sweep, each analysis run reports how it settled its indic
 
 | Workflow | Step | `event` | Where |
 |---|---|---|---|
-| `forensics_endpoint_analysis.yaml` | `report_worker_run_completed` | `worker_run_completed` | Right before `emit_result`, only when the sweep started or refused a dispatch or its search failed |
+| `forensics_endpoint_analysis.yaml` | `report_worker_run_completed` | `worker_run_completed` | Right before `emit_result`, only when the sweep started a new analysis, had a dispatch refused, or its search failed |
 | `forensics_run_endpoint_analysis.yaml` | `report_analysis_completed` | `endpoint_analysis_completed` | Right before `mark_processed`, once every verdict condition is decided |
 | `forensics_proposal_gate.yaml` | `report_investigation_closed_settled` | `worker_investigation_closed` | Right after `close_if_settled` |
 
@@ -19,7 +19,7 @@ The Worker polls every minute, so a sweep that started nothing, refused nothing 
 - `degraded_partial`: some were (`dependency_unavailable`).
 - `produced`: otherwise.
 
-A dispatch the engine drops as a duplicate still counts as started. While one analysis holds its indicator's slot, the next polls dispatch it again, so a long analysis reports one `produced` run per minute.
+An indicator stays pending while its analysis runs, so every poll dispatches it again, and the engine drops that duplicate. `start_run` returns `skipped` for it, and the report counts only the other starts (`resolve_reported_starts`), so a poll that only re-dispatched running analyses sends nothing, and each analysis is counted once, by the poll that started it. The sweep's own `emit_result.started` still counts the duplicates.
 
 ## Analysis outcome
 

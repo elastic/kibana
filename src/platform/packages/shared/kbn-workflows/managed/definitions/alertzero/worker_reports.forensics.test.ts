@@ -60,36 +60,74 @@ describe('Endpoint Analysis outcome reports', () => {
 
     describeReportStep(steps, 'report_worker_run_completed', 'worker_run_completed', 'emit_result');
 
+    // `start_runs` as the engine's parallel step returns it: a dispatch the engine dropped as a
+    // duplicate still completes its branch, with `start_run`'s output saying `skipped`.
+    const dispatched = (status: string) => ({ output: { status }, status: 'completed' });
     const sweepContext = ({
       pending = 0,
       refused = 0,
       searchFailed = false,
+      skipped = 0,
       started = 0,
     }: {
       pending?: number;
       refused?: number;
       searchFailed?: boolean;
+      skipped?: number;
       started?: number;
-    }): Record<string, unknown> => ({
-      steps: {
-        search_pending_indicators: searchFailed
-          ? { error: { message: 'search failed' } }
-          : { output: { hits: { hits: [], total: { value: pending } } } },
-        ...(started + refused > 0
-          ? {
-              start_runs: {
-                output: { failed: refused, succeeded: started, total: started + refused },
-              },
-            }
-          : {}),
-      },
+    }): Record<string, unknown> => {
+      const context = {
+        steps: {
+          search_pending_indicators: searchFailed
+            ? { error: { message: 'search failed' } }
+            : { output: { hits: { hits: [], total: { value: pending } } } },
+          ...(started + skipped + refused > 0
+            ? {
+                start_runs: {
+                  output: {
+                    failed: refused,
+                    results: [
+                      ...Array.from({ length: started }, () => dispatched('pending')),
+                      ...Array.from({ length: skipped }, () => dispatched('skipped')),
+                      ...Array.from({ length: refused }, () => ({
+                        error: { message: 'refused' },
+                        status: 'failed',
+                      })),
+                    ],
+                    succeeded: started + skipped,
+                    total: started + skipped + refused,
+                  },
+                },
+              }
+            : {}),
+        },
+      };
+      return {
+        steps: {
+          ...context.steps,
+          resolve_reported_starts: {
+            output: renderReport(stepNamed(steps, 'resolve_reported_starts'), context),
+          },
+        },
+      };
+    };
+
+    it('counts the starts in a step that never fails the sweep', () => {
+      expect(stepNamed(steps, 'resolve_reported_starts')['on-failure']?.continue).toBe(true);
     });
 
-    // The Worker polls every minute; an empty poll must not send an event.
+    // The Worker polls every minute; an empty poll must not send an event. Neither may a poll that
+    // only re-dispatched an indicator whose analysis is still running.
     it.each([
       ['an empty poll', {}, false],
       ['a poll whose batch the engine dropped entirely', { pending: 0, started: 0 }, false],
       ['a poll that started analyses', { pending: 2, started: 2 }, true],
+      ['a poll whose only dispatch was a running analysis', { pending: 1, skipped: 1 }, false],
+      [
+        'a poll that started one next to a running one',
+        { pending: 2, skipped: 1, started: 1 },
+        true,
+      ],
       ['a poll whose dispatch the engine refused', { pending: 1, refused: 1 }, true],
       ['a poll whose search failed', { searchFailed: true }, true],
     ])('reports %s: %s', (_scenario, scenario, expected) => {
@@ -106,6 +144,19 @@ describe('Endpoint Analysis outcome reports', () => {
           items_dispatched: 2,
           items_failed: 0,
           items_in_flight: 2,
+          run_outcome: 'produced',
+          source_read_failed: false,
+        },
+      ],
+      [
+        'one analysis started next to one still running, which counts once, when it started',
+        { pending: 2, skipped: 1, started: 1 },
+        {
+          candidates_found: 2,
+          degraded_reason: 'none',
+          items_dispatched: 1,
+          items_failed: 0,
+          items_in_flight: 1,
           run_outcome: 'produced',
           source_read_failed: false,
         },

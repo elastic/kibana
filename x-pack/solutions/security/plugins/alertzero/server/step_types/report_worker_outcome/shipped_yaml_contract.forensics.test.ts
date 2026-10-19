@@ -81,7 +81,9 @@ describe('shipped Endpoint Analysis Worker YAML and the reportWorkerOutcome sche
           {
             steps: {
               search_pending_indicators: { output: { hits: { total: { value: 3 } } } },
-              start_runs: { output: { failed: 0, succeeded: 2 } },
+              start_runs: { output: { failed: 0, succeeded: 3 } },
+              // One of the three dispatches was an indicator whose analysis is still running.
+              resolve_reported_starts: { output: { started: 2 } },
             },
           },
           SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID
