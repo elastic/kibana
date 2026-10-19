@@ -12,7 +12,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import React, { useMemo } from 'react';
-import { NightshiftPage } from '../nightshift_page';
+import { NightshiftPage } from './nightshift_page';
 import type { NightshiftStartDependencies } from '../types';
 
 const queryClient = new QueryClient();
