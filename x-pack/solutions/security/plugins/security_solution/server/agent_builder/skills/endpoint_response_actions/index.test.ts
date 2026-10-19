@@ -108,6 +108,22 @@ describe('createEndpointResponseActionsSkill', () => {
       expect(skill.content).not.toContain('Never use `platform.core.search`');
     });
 
+    it('dispatches multi-host requests sequentially and closes with an incident summary', () => {
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const reference =
+        skill.referencedContent?.find((entry) => entry.name === 'reference')?.content ?? '';
+
+      expect(skill.content).toContain('Multiple hosts or actions');
+      expect(skill.content).toMatch(/one tool call per host per action/);
+      expect(skill.content).toMatch(/Never batch/i);
+      expect(skill.content).toContain('Do not retry or re-issue a declined');
+      expect(skill.content).toContain('Closing incident summary');
+      expect(skill.content).toContain('actions declined or cancelled');
+      expect(skill.content).toContain('outstanding items');
+      expect(reference).toContain('one tool call per host per action');
+      expect(reference).toContain('incident summary');
+    });
+
     it('exposes detailed reference material via referencedContent', () => {
       const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
 

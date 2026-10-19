@@ -52,6 +52,24 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(endpointForensicAnalysisSkill.content).toContain('Do not also render the indicators');
   });
 
+  it('hands IoCs to threat-hunting and containment to endpoint-response-actions, with a UI fallback', () => {
+    const { content, description } = endpointForensicAnalysisSkill;
+
+    expect(description).not.toContain('no dedicated Agent Builder skill yet');
+    expect(description).toContain('endpoint-response-actions');
+
+    expect(content).toContain('## Cross-Skill Handoff');
+    expect(content).toContain('`threat-hunting`');
+    for (const category of ['shas', 'ips', 'file_paths', 'malicious_commands', 'affected_hosts']) {
+      expect(content).toContain(`\`${category}\``);
+    }
+    expect(content).toContain('`endpoint-response-actions`');
+    expect(content).toContain('If that skill is not available');
+    expect(content).toContain('Endpoint response actions in Security');
+    expect(content).toMatch(/Kill process, get-file, execute.*not available from chat/s);
+    expect(content).toContain('Never** call response-action tools from this skill');
+  });
+
   it('routes conflicting antivirus / configuration issues to elastic-defend-configuration-troubleshooting', () => {
     expect(endpointForensicAnalysisSkill.description).toContain('antivirus');
     expect(endpointForensicAnalysisSkill.description).toContain(
