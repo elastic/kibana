@@ -16,6 +16,8 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+import { EntityViewMode } from '../common/common.gen';
+
 export const AnomalyScoreRange = lazySchema(() =>
   z.object({
     /**
@@ -45,7 +47,7 @@ export const AnomalyEntityModeEnum = AnomalyEntityMode.enum;
 
 export const AnomalySummaryRequestBody = lazySchema(() =>
   z.object({
-    mode: AnomalyEntityMode.optional().default('single'),
+    mode: EntityViewMode.optional().default('single'),
     /**
      * Page number (1-indexed)
      */
@@ -236,7 +238,7 @@ export type AnomalySummaryResponse = z.infer<typeof AnomalySummaryResponse>;
 
 export const AnomalyOverviewRequestBody = lazySchema(() =>
   z.object({
-    mode: AnomalyEntityMode.optional().default('single'),
+    mode: EntityViewMode.optional().default('single'),
     /**
      * Start time as epoch milliseconds; defaults to now-30d when omitted
      */

@@ -73,7 +73,7 @@ export interface ContentProps {
   entityStoreV2Enabled: boolean;
   /** Entity store entity ID for the host. */
   entityStoreEntityId?: string;
-  /** Entity view mode of the panel; `resolved` loads anomalies for the whole resolution group. */
+  /** Entity view mode of the panel; `resolved` loads anomalies and the AI summary for the whole resolution group. */
   mode?: EntityViewMode;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.host>;
@@ -177,6 +177,7 @@ export const Content = ({
           entityType={EntityType.host}
           entityRecord={entityRecord}
           refetchEntityRecord={refetchEntityRecord}
+          mode={mode}
         />
       )}
       {!noEntityInStore &&

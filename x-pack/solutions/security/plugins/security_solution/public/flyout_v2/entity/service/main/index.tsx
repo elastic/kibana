@@ -359,6 +359,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             onShowEntity={onShowRelatedEntityFromResolution}
             riskScoreQueryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
             isGroupView={isGroupView}
+            mode={mode}
             hideHeaderIcons
           />
         )}
