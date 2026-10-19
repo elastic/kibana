@@ -7,11 +7,13 @@
 
 export { componentsPack, componentsPrimitives } from './src/pack';
 export {
+  type ActionsNode,
   type ContextNode,
   type DividerNode,
   type HeaderNode,
   type MarkdownNode,
   type QuoteNode,
+  actions,
   context,
   divider,
   header,
