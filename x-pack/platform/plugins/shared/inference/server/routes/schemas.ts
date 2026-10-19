@@ -19,7 +19,7 @@ export const MAX_ID_LENGTH = 512;
 export const MAX_NAME_LENGTH = 256;
 
 /** Tool and prompt descriptions. */
-export const MAX_DESCRIPTION_LENGTH = 10_000;
+export const MAX_DESCRIPTION_LENGTH = 1_000_000;
 
 /**
  * Free-form LLM content: message content, system prompts and prompt templates.
