@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import { messageWithNowrapDate } from '../model_status/message_with_nowrap_date';
 
 interface ModelCardMetaRowProps {
   modelName: string;
@@ -52,6 +53,7 @@ export const ModelCardMetaRow = ({
           component="span"
           size="s"
           color={textColor}
+          css={{ whiteSpace: 'nowrap' }}
           data-test-subj={`eisModelCardMetaDate-${modelName}`}
         >
           {message}
@@ -68,7 +70,7 @@ export const ModelCardMetaRow = ({
     <EuiToolTip
       position="bottom"
       title={tooltipTitle}
-      content={tooltip}
+      content={messageWithNowrapDate(tooltip, message)}
       anchorProps={{ style: { alignSelf: 'flex-start' } }}
       data-test-subj={tooltipTestSubj}
     >

@@ -13,6 +13,7 @@ import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 
 import { useFormattedEOLDate } from '../../hooks/use_formatted_eol_date';
 import { getModelDeprecatedMessage } from '../../utils/eis_utils';
+import { messageWithNowrapDate } from './message_with_nowrap_date';
 
 interface ModelDeprecatedBadgeProps {
   id: string;
@@ -23,7 +24,7 @@ interface ModelDeprecatedBadgeProps {
 export const ModelDeprecatedBadge = ({ id, metadata, iconOnly }: ModelDeprecatedBadgeProps) => {
   const eolDate = useFormattedEOLDate(metadata);
 
-  const tooltipContent = getModelDeprecatedMessage(eolDate);
+  const tooltipContent = messageWithNowrapDate(getModelDeprecatedMessage(eolDate), eolDate);
 
   return (
     <EuiToolTip content={tooltipContent}>

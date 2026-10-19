@@ -13,6 +13,7 @@ import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 
 import { useFormattedEOLDate } from '../../hooks/use_formatted_eol_date';
 import { getModelEOLMessage } from '../../utils/eis_utils';
+import { messageWithNowrapDate } from './message_with_nowrap_date';
 
 interface ModelEOLBadgeProps {
   id: string;
@@ -23,7 +24,7 @@ interface ModelEOLBadgeProps {
 export const ModelEOLBadge = ({ id, metadata, iconOnly }: ModelEOLBadgeProps) => {
   const eolDate = useFormattedEOLDate(metadata);
 
-  const tooltipContent = getModelEOLMessage(eolDate);
+  const tooltipContent = messageWithNowrapDate(getModelEOLMessage(eolDate), eolDate);
 
   return (
     <EuiToolTip content={tooltipContent}>
