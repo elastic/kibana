@@ -8,8 +8,20 @@
 import type { DefaultPackTypes, StyledRenderContext } from '@elastic/isomer-sdk';
 import { definePrimitiveFor } from '@elastic/isomer-sdk';
 
+/** A place in a Kibana app: its app id, and a path inside it. */
+export interface AppLinkTarget {
+  app: string;
+  path?: string;
+}
+
+/** The pack's render context: the styling hooks, plus what a host resolves for it. */
+export interface ComponentsRenderContext extends StyledRenderContext {
+  /** Resolves a Kibana app path to a URL, such as through `application.getUrlForApp`; `undefined` when it can't. */
+  resolveAppLink?: (target: AppLinkTarget) => string | undefined;
+}
+
 export interface ComponentsPackTypes extends DefaultPackTypes {
-  context: StyledRenderContext;
+  context: ComponentsRenderContext;
 }
 
 /** `definePrimitive` bound to this pack's render context. */
