@@ -77,13 +77,13 @@ export interface ReportFlakySuiteIssuesOptions {
   /**
    * Refresh the suite issues of `githubRepo` that the report finds flaky again: the body's
    * metadata is brought up to this report, a comment with its numbers posted when the suite
-   * failed since the last notification, and an issue closed before such a failure reopened. The
-   * body's text stays as filed. Off, they are skipped as tracked.
+   * failed since the issue was filed or last commented on, and an issue closed before such a
+   * failure reopened. The body's text stays as filed. Off, they are skipped as tracked.
    */
   updateIssues: boolean;
   /**
-   * Days between two comments on the same issue, counted from the report that last notified the
-   * owners (the one that filed it, or commented). Failures in between are covered by the next one.
+   * Days between two comments on the same issue, counted from the newest report posted on it (the
+   * one that filed it, or the latest comment). Failures in between are covered by the next one.
    */
   commentIntervalDays: number;
   dryRun: boolean;
