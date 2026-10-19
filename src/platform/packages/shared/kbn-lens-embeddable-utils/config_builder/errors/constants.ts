@@ -12,7 +12,7 @@
  * render a translated message instead of the developer-facing error message.
  */
 export const LENS_ERROR_CODES = {
-  /** Generic fallback for any conversion failure without a more specific code */
+  /** Generic fallback for any conversion failure without a more specific error */
   INVALID_CONFIGURATION: 'lens_invalid_configuration',
   /** A layer references a data view that cannot be resolved */
   DATA_VIEW_NOT_FOUND: 'lens_data_view_not_found',
@@ -24,9 +24,12 @@ export const LENS_ERROR_CODES = {
 
 export type LensErrorCode = (typeof LENS_ERROR_CODES)[keyof typeof LENS_ERROR_CODES];
 
-export class LensConversionError extends Error {
-  constructor(message: string, public readonly code: LensErrorCode) {
-    super(message);
-    this.name = 'LensConversionError';
-  }
-}
+const lensErrorCodes: readonly unknown[] = Object.values(LENS_ERROR_CODES);
+
+export const isLensErrorCode = (value: unknown): value is LensErrorCode =>
+  lensErrorCodes.includes(value);
+
+/**
+ * Marks an error, or the `attributes` of an error response, as coming from Lens.
+ */
+export const LENS_ERROR_TYPE = 'lens_error';

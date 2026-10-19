@@ -21,7 +21,7 @@ import type {
   UserMessagesDisplayLocationId,
 } from '@kbn/lens-common';
 import { BehaviorSubject } from 'rxjs';
-import { LENS_ERROR_CODES } from '@kbn/lens-embeddable-utils';
+import { LENS_ERROR_CODES, LENS_ERROR_TYPE } from '@kbn/lens-embeddable-utils';
 import {
   EDITOR_LOAD_ERROR,
   EDITOR_MISSING_VIS_TYPE,
@@ -232,7 +232,9 @@ describe('User Messages API', () => {
 
     describe('when the document failed to load', () => {
       const loadError = Object.assign(new Error('Internal Server Error'), {
-        body: { attributes: { code: LENS_ERROR_CODES.DATASOURCE_NOT_FOUND } },
+        body: {
+          attributes: { type: LENS_ERROR_TYPE, code: LENS_ERROR_CODES.DATASOURCE_NOT_FOUND },
+        },
       });
 
       it('should only return the load error, ignoring messages about the fallback document', () => {

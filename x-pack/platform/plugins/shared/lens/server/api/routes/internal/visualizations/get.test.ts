@@ -11,7 +11,8 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import {
   LENS_ERROR_CODES,
-  LensConversionError,
+  DatasourceNotFoundError,
+  LENS_ERROR_TYPE,
   type LensConfigBuilder,
 } from '@kbn/lens-embeddable-utils';
 
@@ -71,10 +72,7 @@ describe('Lens internal API - Visualizations Get Route', () => {
 
   it('returns a 422 with the code of a tagged conversion error', async () => {
     getLensInternalResponseItemMock.mockImplementation(() => {
-      throw new LensConversionError(
-        'No layers could be built',
-        LENS_ERROR_CODES.DATASOURCE_NOT_FOUND
-      );
+      throw new DatasourceNotFoundError();
     });
 
     const res = await invoke();
@@ -82,8 +80,8 @@ describe('Lens internal API - Visualizations Get Route', () => {
     expect(res.customError).toHaveBeenCalledWith({
       statusCode: 422,
       body: {
-        message: 'No layers could be built',
-        attributes: { code: LENS_ERROR_CODES.DATASOURCE_NOT_FOUND },
+        message: new DatasourceNotFoundError().message,
+        attributes: { type: LENS_ERROR_TYPE, code: LENS_ERROR_CODES.DATASOURCE_NOT_FOUND },
       },
     });
   });
@@ -99,7 +97,7 @@ describe('Lens internal API - Visualizations Get Route', () => {
       statusCode: 422,
       body: {
         message: 'something else',
-        attributes: { code: LENS_ERROR_CODES.INVALID_CONFIGURATION },
+        attributes: { type: LENS_ERROR_TYPE, code: LENS_ERROR_CODES.INVALID_CONFIGURATION },
       },
     });
   });

@@ -24,7 +24,7 @@ import {
 } from './get_application_user_messages';
 import { cleanup, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { LENS_ERROR_CODES } from '@kbn/lens-embeddable-utils';
+import { LENS_ERROR_CODES, LENS_ERROR_TYPE } from '@kbn/lens-embeddable-utils';
 import { EDITOR_LOAD_ERROR, FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../user_messages_ids';
 import { getLongMessage } from '../user_messages_utils';
 
@@ -38,7 +38,9 @@ jest.mock('@kbn/shared-ux-link-redirect-app', () => {
 
 describe('getLoadErrorMessage', () => {
   const httpError = (code: string) =>
-    Object.assign(new Error('Internal Server Error'), { body: { attributes: { code } } });
+    Object.assign(new Error('Internal Server Error'), {
+      body: { attributes: { type: LENS_ERROR_TYPE, code } },
+    });
 
   it.each(Object.values(LENS_ERROR_CODES))(
     'replaces the raw error message with a translated one for "%s"',

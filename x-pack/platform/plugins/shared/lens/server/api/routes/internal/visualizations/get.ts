@@ -6,7 +6,7 @@
  */
 
 import { boomify, isBoom } from '@hapi/boom';
-import { LENS_ERROR_CODES, LensConversionError } from '@kbn/lens-embeddable-utils';
+import { InvalidConfigurationError, LENS_ERROR_TYPE, LensError } from '@kbn/lens-embeddable-utils';
 
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import {
@@ -94,16 +94,15 @@ export const registerLensInternalVisualizationsGetAPIRoute: RegisterAPIRouteFn =
         try {
           responseItem = getLensInternalResponseItem(builder, result.item, resultMeta);
         } catch (conversionError) {
+          const lensError =
+            conversionError instanceof LensError
+              ? conversionError
+              : new InvalidConfigurationError(conversionError.message);
           return res.customError({
             statusCode: 422,
             body: {
-              message: conversionError.message,
-              attributes: {
-                code:
-                  conversionError instanceof LensConversionError
-                    ? conversionError.code
-                    : LENS_ERROR_CODES.INVALID_CONFIGURATION,
-              },
+              message: lensError.message,
+              attributes: { type: LENS_ERROR_TYPE, code: lensError.code },
             },
           });
         }

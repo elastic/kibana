@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { LENS_ERROR_CODES, type LensErrorCode } from '@kbn/lens-embeddable-utils';
-
-const lensErrorCodes: readonly string[] = Object.values(LENS_ERROR_CODES);
+import { LENS_ERROR_TYPE, isLensErrorCode, type LensErrorCode } from '@kbn/lens-embeddable-utils';
 
 /**
  * Reads the Lens error code from an http error response, if any.
@@ -17,11 +15,17 @@ export const getLensErrorCode = (error: unknown): LensErrorCode | undefined => {
   const { body } = error;
   if (typeof body !== 'object' || body === null || !('attributes' in body)) return undefined;
   const { attributes } = body;
-  if (typeof attributes !== 'object' || attributes === null || !('code' in attributes)) {
-    return undefined;
-  }
+  if (!isLensErrorAttributes(attributes)) return undefined;
   const { code } = attributes;
-  return typeof code === 'string' && lensErrorCodes.includes(code)
-    ? (code as LensErrorCode)
-    : undefined;
+  return isLensErrorCode(code) ? code : undefined;
 };
+
+const isLensErrorAttributes = (
+  attributes: unknown
+): attributes is { type: typeof LENS_ERROR_TYPE; code: string } =>
+  typeof attributes === 'object' &&
+  attributes !== null &&
+  'type' in attributes &&
+  attributes.type === LENS_ERROR_TYPE &&
+  'code' in attributes &&
+  typeof attributes.code === 'string';

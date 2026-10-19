@@ -18,7 +18,7 @@ import { LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
-import { LENS_ERROR_CODES, LensConversionError } from '../../errors';
+import { DatasourceUnsupportedError } from '../../errors';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import {
@@ -107,10 +107,7 @@ function reverseBuildVisualizationState(
   );
 
   if (!dataSource || dataSource.type == null || isEsqlTableTypeDataSource(dataSource)) {
-    throw new LensConversionError(
-      'Unsupported DataSource type',
-      LENS_ERROR_CODES.DATASOURCE_UNSUPPORTED
-    );
+    throw new DatasourceUnsupportedError();
   }
 
   const props: DeepPartial<DeepMutable<LegacyMetricConfig>> = {
