@@ -63,4 +63,16 @@ describe('UxPlugin legacy navigation', () => {
     expect(await firstValueFrom(sections$)).toEqual([]);
     expect(await currentAppUpdate(app)).toEqual({ visibleIn: [] });
   });
+
+  it('drops the nav section when hideLegacyNavigation is called after it was shown', async () => {
+    const { contract, sections$ } = setup();
+    const emitted: Array<Array<{ label: string }>> = [];
+    const subscription = sections$.subscribe((sections) => emitted.push(sections));
+    await new Promise(process.nextTick);
+
+    contract.hideLegacyNavigation();
+
+    expect(emitted.map((sections) => sections.length)).toEqual([1, 0]);
+    subscription.unsubscribe();
+  });
 });

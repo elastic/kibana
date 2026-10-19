@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import qs from 'query-string';
+import { getDateRange } from '@kbn/timerange';
 import { useDigitalExperienceParams } from './use_digital_experience_params';
 import { useKibanaServices } from './use_kibana_services';
 
@@ -20,6 +21,16 @@ export interface TimeRange {
 // Unsorted, so the other params keep their order like in the typed router's links.
 const withTimeRange = (search: string, timeRange: TimeRange): string =>
   qs.stringify({ ...qs.parse(search), ...timeRange }, { sort: false });
+
+/** Whether both bounds parse as dates, e.g. `now-15m` or an ISO date, unlike `rangeFrom=foo`. */
+export const isValidTimeRange = ({ rangeFrom, rangeTo }: TimeRange): boolean => {
+  try {
+    getDateRange({ from: rangeFrom, to: rangeTo });
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 /**
  * Time range from the `rangeFrom` / `rangeTo` URL params, falling back to the global timefilter;
@@ -53,7 +64,7 @@ export const useTimeRange = (): {
   return { timeRange, isTimeRangeInUrl, setTimeRange };
 };
 
-/** Writes the time range into a URL without one and mirrors it into the global timefilter. */
+/** Writes the time range into a URL without one and mirrors a valid one into the global timefilter. */
 export const useSyncTimeRange = (): void => {
   const { data } = useKibanaServices();
   const { timefilter } = data.query.timefilter;
@@ -67,7 +78,10 @@ export const useSyncTimeRange = (): void => {
     }
   }, [history, location, timeRange, isTimeRangeInUrl]);
 
+  // An invalid range would be stored in the timefilter and its "Recently used" list.
   useEffect(() => {
-    timefilter.setTime({ from: timeRange.rangeFrom, to: timeRange.rangeTo });
+    if (isValidTimeRange(timeRange)) {
+      timefilter.setTime({ from: timeRange.rangeFrom, to: timeRange.rangeTo });
+    }
   }, [timefilter, timeRange]);
 };

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { useRouteBreadcrumb } from '../breadcrumbs/use_route_breadcrumb';
 import { useKibanaServices } from '../hooks/use_kibana_services';
-import { useTimeRange } from '../hooks/use_time_range';
+import { isValidTimeRange, useTimeRange } from '../hooks/use_time_range';
 
 /** Tabs of the Application view, in display order. */
 const APPLICATION_TAB_IDS = ['overview'] as const;
@@ -64,7 +64,8 @@ export function ApplicationPage({ serviceName }: { serviceName: string }) {
       return (
         <dashboard.Component
           serviceName={serviceName}
-          timeRange={timeRange}
+          // An invalid range is left out, so the dashboard falls back to the global timefilter.
+          timeRange={isValidTimeRange(timeRange) ? timeRange : undefined}
           onTimeRangeChange={setTimeRange}
         />
       );

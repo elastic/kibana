@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
+import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../common/feature';
 import { useKibanaServices } from '../hooks/use_kibana_services';
 import { useTimeRange } from '../hooks/use_time_range';
 
@@ -31,7 +32,7 @@ export function TimeRangePicker({ onRefresh }: { onRefresh: () => void }) {
 
   return (
     <unifiedSearch.ui.SearchBar
-      appName="digitalExperience"
+      appName={DIGITAL_EXPERIENCE_FEATURE_ID}
       displayStyle="inPage"
       showDatePicker
       showQueryInput={false}

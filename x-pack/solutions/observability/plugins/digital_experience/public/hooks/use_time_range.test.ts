@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useSyncTimeRange, useTimeRange } from './use_time_range';
+import { isValidTimeRange, useSyncTimeRange, useTimeRange } from './use_time_range';
 import { useDigitalExperienceParams } from './use_digital_experience_params';
 import { useKibanaServices } from './use_kibana_services';
 
@@ -100,5 +100,29 @@ describe('useSyncTimeRange', () => {
 
     expect(replace).not.toHaveBeenCalled();
     expect(setTime).toHaveBeenCalledWith({ from: 'now-7d', to: 'now' });
+  });
+
+  it('keeps an invalid range out of the timefilter', () => {
+    mockRoute({ rangeFrom: 'foo', rangeTo: 'now' }, '?rangeFrom=foo&rangeTo=now');
+
+    renderHook(() => useSyncTimeRange());
+
+    expect(setTime).not.toHaveBeenCalled();
+  });
+});
+
+describe('isValidTimeRange', () => {
+  it('accepts relative and absolute dates', () => {
+    expect(isValidTimeRange({ rangeFrom: 'now-15m', rangeTo: 'now' })).toBe(true);
+    expect(
+      isValidTimeRange({
+        rangeFrom: '2026-10-01T00:00:00.000Z',
+        rangeTo: '2026-10-02T00:00:00.000Z',
+      })
+    ).toBe(true);
+  });
+
+  it('rejects a bound that does not parse', () => {
+    expect(isValidTimeRange({ rangeFrom: 'foo', rangeTo: 'now' })).toBe(false);
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import type { ComponentType } from 'react';
-import { BehaviorSubject, from, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type {
   FetchDataParams,
@@ -97,16 +97,13 @@ async function getDataStartPlugin(core: CoreSetup) {
 }
 
 export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
-  private legacyNavigationHidden = false;
-  // Assigned in setup, which core always runs before start.
-  private pluginSetupDeps!: ApmPluginSetupDeps;
+  private readonly legacyNavigationHidden$ = new BehaviorSubject(false);
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
     const pluginSetupDeps = plugins;
-    this.pluginSetupDeps = plugins;
     if (plugins.observability) {
       const getUxDataHelper = async () => {
         const { fetchUxOverviewDate, hasRumData, createCallApmApi } = await import(
@@ -161,11 +158,11 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
 
     // register observability nav if user has access to plugin
     plugins.observabilityShared.navigation.registerSections(
-      from(core.getStartServices()).pipe(
-        map(([coreStart]) => {
+      combineLatest([from(core.getStartServices()), this.legacyNavigationHidden$]).pipe(
+        map(([[coreStart], legacyNavigationHidden]) => {
           // checking apm capability, since ux for now doesn't have it's
           // own capability
-          if (!this.legacyNavigationHidden && coreStart.application.capabilities.apm.show) {
+          if (!legacyNavigationHidden && coreStart.application.capabilities.apm.show) {
             return [
               // UX navigation
               {
@@ -249,7 +246,6 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
         ]).then(([{ createClassicRumDashboard }, activeSpace]) =>
           createClassicRumDashboard({
             core,
-            setupDeps: this.pluginSetupDeps,
             startDeps: plugins,
             isDev: this.initContext.env.mode.dev,
             spaceId: activeSpace?.id ?? 'default',
@@ -267,9 +263,8 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
         );
         return fetchClassicRumApplications({ ...params, core, data: plugins.data });
       },
-      // Nav sections are read after all plugins start, so calling this during start is in time.
       hideLegacyNavigation: () => {
-        this.legacyNavigationHidden = true;
+        this.legacyNavigationHidden$.next(true);
         this.appUpdater$.next(() => ({ visibleIn: [] }));
       },
     };

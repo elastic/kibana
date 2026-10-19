@@ -10,6 +10,7 @@ import type { History } from 'history';
 import type { CoreStart } from '@kbn/core/public';
 import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import type { KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DatePickerContextProvider } from '@kbn/observability-plugin/public';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
@@ -21,7 +22,7 @@ import { PluginContext } from '../context/plugin_context';
 const uxRouter = createRouter({});
 
 /** The contexts the RUM dashboard needs, shared by the ux app and the embedded dashboard. */
-export function UxProviders({
+export function UxProviders<Services extends KibanaServices>({
   core,
   services,
   pluginContext,
@@ -29,7 +30,7 @@ export function UxProviders({
   children,
 }: {
   core: CoreStart;
-  services: Record<string, unknown>;
+  services: Services;
   pluginContext: PluginContextValue;
   history: History;
   children: React.ReactElement;

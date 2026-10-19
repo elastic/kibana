@@ -14,7 +14,10 @@ import { useTimeRange } from '../hooks/use_time_range';
 
 jest.mock('../hooks/use_kibana_services');
 jest.mock('../breadcrumbs/use_route_breadcrumb');
-jest.mock('../hooks/use_time_range');
+jest.mock('../hooks/use_time_range', () => ({
+  ...jest.requireActual('../hooks/use_time_range'),
+  useTimeRange: jest.fn(),
+}));
 
 const useKibanaServicesMock = jest.mocked(useKibanaServices);
 const timeRange = { rangeFrom: 'now-7d', rangeTo: 'now' };
@@ -49,6 +52,25 @@ describe('ApplicationPage', () => {
     });
     expect(getClassicRumDashboard).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('digitalExperienceTab-overview')).toBeInTheDocument();
+  });
+
+  it('leaves an invalid time range out, so the dashboard uses the global timefilter', async () => {
+    const ClassicRumDashboard = jest.fn((_props: { timeRange?: object }) => (
+      <div data-test-subj="classicRumDashboard" />
+    ));
+    useKibanaServicesMock.mockReturnValue({
+      ux: { getClassicRumDashboard: jest.fn().mockResolvedValue(ClassicRumDashboard) },
+    } as unknown as ReturnType<typeof useKibanaServices>);
+    jest.mocked(useTimeRange).mockReturnValue({
+      timeRange: { rangeFrom: 'foo', rangeTo: 'now' },
+      isTimeRangeInUrl: true,
+      setTimeRange,
+    });
+
+    render(<ApplicationPage serviceName="my-app" />);
+
+    await screen.findByTestId('classicRumDashboard');
+    expect(ClassicRumDashboard.mock.calls[0][0].timeRange).toBeUndefined();
   });
 
   it('renders an empty prompt when the dashboard cannot be loaded', async () => {

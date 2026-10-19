@@ -13,20 +13,18 @@ import { RumOverview } from '../app/rum_dashboard';
 import type { PluginContextValue } from '../../context/plugin_context';
 import { UxProviders } from '../../application/ux_providers';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
-import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../../plugin';
+import type { ApmPluginStartDeps } from '../../plugin';
 import type { ClassicRumDashboardProps } from './types';
 import { useEmbeddedHistory } from './use_embedded_history';
 
 /** Builds the dashboard inside the ux app's providers, on an in-memory URL and pinned to one service. */
 export const createClassicRumDashboard = ({
   core,
-  setupDeps,
   startDeps,
   isDev,
   spaceId,
 }: {
   core: CoreStart;
-  setupDeps: ApmPluginSetupDeps;
   startDeps: ApmPluginStartDeps;
   isDev: boolean;
   spaceId: string;
@@ -34,7 +32,7 @@ export const createClassicRumDashboard = ({
   // The ux app does this on mount; the dashboard can render without the app ever being mounted.
   createCallApmApi(core);
 
-  const services = { ...core, ...setupDeps, ...startDeps };
+  const services = { ...core, ...startDeps };
   const pluginContext: PluginContextValue = {
     exploratoryView: startDeps.exploratoryView,
     observabilityShared: startDeps.observabilityShared,
@@ -42,7 +40,11 @@ export const createClassicRumDashboard = ({
     isDev,
   };
 
-  return ({ serviceName, timeRange, onTimeRangeChange }) => {
+  const ClassicRumDashboard = ({
+    serviceName,
+    timeRange,
+    onTimeRangeChange,
+  }: ClassicRumDashboardProps) => {
     // An in-memory URL keeps the dashboard state out of the host app's URL.
     const history = useEmbeddedHistory({ serviceName, timeRange, onTimeRangeChange });
 
@@ -63,4 +65,6 @@ export const createClassicRumDashboard = ({
       </UxProviders>
     );
   };
+
+  return ClassicRumDashboard;
 };

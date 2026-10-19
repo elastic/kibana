@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
-  EuiBasicTable,
+  EuiInMemoryTable,
   EuiButton,
   EuiEmptyPrompt,
   EuiLink,
@@ -84,6 +84,8 @@ const LoadErrorPrompt = ({ error, onRetry }: { error: Error; onRetry: () => void
   />
 );
 
+const SORT_BY_NAME = { sort: { field: 'serviceName', direction: 'asc' } } as const;
+
 export function ApplicationsListPage() {
   const { application, ux } = useKibanaServices();
   const router = useDigitalExperienceRouter();
@@ -119,26 +121,34 @@ export function ApplicationsListPage() {
     return noApplicationsPrompt;
   };
 
-  const columns: Array<EuiBasicTableColumn<ApplicationRow>> = [
-    {
-      field: 'serviceName',
-      name: NAME_COLUMN,
-      render: (serviceName: string) => (
-        <EuiLink
-          data-test-subj="digitalExperienceApplicationLink"
-          {...getEbtProps({
-            action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
-            element: APPLICATIONS_LIST_EBT_ELEMENTS.APPLICATION_LINK,
-          })}
-          href={application.getUrlForApp(DIGITAL_EXPERIENCE_FEATURE_ID, {
-            path: router.link('/{serviceName}', { path: { serviceName }, query: timeRange }),
-          })}
-        >
-          {serviceName}
-        </EuiLink>
-      ),
-    },
-  ];
+  const columns = useMemo<Array<EuiBasicTableColumn<ApplicationRow>>>(
+    () => [
+      {
+        field: 'serviceName',
+        name: NAME_COLUMN,
+        sortable: true,
+        render: (serviceName: string) => (
+          <EuiLink
+            data-test-subj="digitalExperienceApplicationLink"
+            {...getEbtProps({
+              action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
+              element: APPLICATIONS_LIST_EBT_ELEMENTS.APPLICATION_LINK,
+            })}
+            href={application.getUrlForApp(DIGITAL_EXPERIENCE_FEATURE_ID, {
+              path: router.link('/{serviceName}', { path: { serviceName }, query: timeRange }),
+            })}
+          >
+            {serviceName}
+          </EuiLink>
+        ),
+      },
+    ],
+    [application, router, timeRange]
+  );
+  const items = useMemo(
+    () => (applications ?? []).map((serviceName) => ({ serviceName })),
+    [applications]
+  );
 
   return (
     <>
@@ -146,11 +156,13 @@ export function ApplicationsListPage() {
       <EuiSpacer size="m" />
       <TimeRangePicker onRefresh={refresh} />
       <EuiSpacer size="m" />
-      <EuiBasicTable<ApplicationRow>
+      <EuiInMemoryTable<ApplicationRow>
         data-test-subj="digitalExperienceApplicationsTable"
         tableCaption={APPLICATIONS_LABEL}
-        items={(applications ?? []).map((serviceName) => ({ serviceName }))}
+        items={items}
         columns={columns}
+        pagination={true}
+        sorting={SORT_BY_NAME}
         loading={isLoading}
         noItemsMessage={getNoItemsMessage()}
       />
