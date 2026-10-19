@@ -15,6 +15,7 @@ import {
   getEuidCompositeQuery,
   getResolutionCompositeQuery,
   getResolutionScoreESQLByIds,
+  getResolutionScoreESQLByRange,
 } from './calculate_esql_risk_scores';
 import type { RiskScoreBucket } from '../types';
 import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
@@ -141,6 +142,69 @@ describe('Calculate risk scores with ESQL', () => {
       const renameIndex = query.indexOf('| RENAME @timestamp as time');
       expect(renameIndex).toBeGreaterThan(-1);
       expect(renameIndex).toBeLessThan(query.indexOf('| LOOKUP JOIN'));
+    });
+
+    it('selects a page of resolution groups by target range and lookup row', () => {
+      const query = getResolutionScoreESQLByRange(
+        EntityType.user,
+        { lower: 'user:target-a', upper: 'user:target-m' },
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain(
+        '| WHERE resolution_target_id IS NOT NULL AND resolution_target_id > "user:target-a" AND resolution_target_id <= "user:target-m"'
+      );
+      expect(query).not.toContain('resolution_target_id IN (');
+      expect(query).toContain('BY resolution_target_id');
+      expect(query.indexOf('| RENAME @timestamp as time')).toBeLessThan(
+        query.indexOf('| LOOKUP JOIN')
+      );
+    });
+
+    it('omits the lower bound on the first page of resolution groups', () => {
+      const query = getResolutionScoreESQLByRange(
+        EntityType.user,
+        { upper: 'user:target-m' },
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain(
+        '| WHERE resolution_target_id IS NOT NULL AND resolution_target_id <= "user:target-m"'
+      );
+      expect(query).not.toContain('resolution_target_id >');
+    });
+
+    it('escapes quote and backslash characters in resolution target bounds', () => {
+      const query = getResolutionScoreESQLByRange(
+        EntityType.user,
+        { lower: 'user:with"quote', upper: 'user:with\\slash' },
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain('resolution_target_id > "user:with\\"quote"');
+      expect(query).toContain('resolution_target_id <= "user:with\\\\slash"');
+    });
+
+    it('throws when resolution target bounds contain a control character', () => {
+      expect(() =>
+        getResolutionScoreESQLByRange(
+          EntityType.user,
+          { lower: 'user:target-a', upper: 'user:bad\u000A' },
+          5000,
+          1000,
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
+        )
+      ).toThrow('Entity ID contains an unsupported control character');
     });
 
     it('escapes quote and backslash characters in resolution target ID list', () => {

@@ -29,6 +29,7 @@ const runId = 'run-abc';
 
 const isolateHost: ActionCatalogEntry = {
   workflowId: 'system-security-action-isolate-host',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Isolate host',
   category: 'respond',
   inputSchema: {
@@ -42,6 +43,7 @@ const isolateHost: ActionCatalogEntry = {
 
 const killProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-kill-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Kill process',
   category: 'respond',
   inputSchema: {
@@ -56,6 +58,7 @@ const killProcess: ActionCatalogEntry = {
 
 const suspendProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-suspend-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Suspend process',
   category: 'respond',
   inputSchema: {
@@ -68,18 +71,15 @@ const suspendProcess: ActionCatalogEntry = {
   },
 };
 
-const setAssetCriticality: ActionCatalogEntry = {
+// An installed catalog can still carry the retired action; packaging must never fill it.
+const staleSetAssetCriticality: ActionCatalogEntry = {
   workflowId: 'system-alertzero-action-set-asset-criticality',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Set asset criticality',
   category: 'respond',
-  subjects: ['user', 'service'],
   inputSchema: {
     type: 'object',
-    properties: {
-      id_field: { type: 'string' },
-      id_value: { type: 'string' },
-      criticality_level: { type: 'string' },
-    },
+    properties: { id_field: { type: 'string' }, id_value: { type: 'string' } },
     required: ['id_field', 'id_value'],
   },
 };
@@ -630,7 +630,7 @@ describe('runPackageReport', () => {
     }
   });
 
-  it('mints an asset-criticality proposal for an implicated user alongside the host action', async () => {
+  it('proposes only the host action for an implicated user, and never changes its criticality', async () => {
     const result = await runPackageReport({
       spaceId: 'default',
       reportId,
@@ -641,33 +641,24 @@ describe('runPackageReport', () => {
       expectedSseCount: 1,
       attachments: [sseAttachment({ hit: true, hostName: 'host-a', userName: 'dev-user' })],
       deps: deps({
-        listRespondActions: async () => ({ ok: true, actions: [isolateHost, setAssetCriticality] }),
+        listRespondActions: async () => ({
+          ok: true,
+          actions: [isolateHost, staleSetAssetCriticality],
+        }),
       }),
     });
     expect(result.status).toBe('packaged');
     if (result.status !== 'packaged') {
       return;
     }
-    // Host action, identity action, then the recommendation that says credential
-    // revocation is still manual.
+    // The host action, then the recommendation that names the user a host action cannot reach.
     expect(result.proposals.map((p) => p.actionWorkflowId)).toEqual([
       isolateHost.workflowId,
-      setAssetCriticality.workflowId,
       undefined,
     ]);
-    expect(result.proposals[2].title).toBe('Analyst recommendation');
-    expect(result.proposals[2].comment).toContain(
-      'Asset criticality is proposed for dev-user (user)'
-    );
-    expect(result.expectedProposalCount).toBe(3);
-    const identity = result.proposals[1];
-    expect(identity.hostName).toBeUndefined();
-    expect(identity.subject).toEqual({ kind: 'user', value: 'dev-user' });
-    expect(identity.actionInput).toEqual({
-      id_field: 'user.name',
-      id_value: 'dev-user',
-      criticality_level: 'high_impact',
-    });
+    expect(result.proposals[1].title).toBe('Analyst recommendation');
+    expect(result.proposals[1].comment).toContain('Identity dev-user (user) is implicated');
+    expect(result.expectedProposalCount).toBe(2);
   });
 
   describe('open-Proposal dismiss guard', () => {
@@ -843,7 +834,7 @@ describe('runPackageReport', () => {
         {
           listRespondActions: async () => ({
             ok: true,
-            actions: [isolateHost, setAssetCriticality],
+            actions: [isolateHost],
           }),
           resolveProposalSlot: async ({ subjectKey }) =>
             subjectKey === isolateKey
@@ -860,10 +851,7 @@ describe('runPackageReport', () => {
         { userName: 'dev-user' }
       );
 
-      expect(result.proposals.map((p) => p.actionWorkflowId)).toEqual([
-        setAssetCriticality.workflowId,
-        undefined,
-      ]);
+      expect(result.proposals.map((p) => p.actionWorkflowId)).toEqual([undefined]);
       expect(result.converged.map((c) => c.proposalId)).toEqual([live.proposalId]);
     });
 
@@ -928,14 +916,14 @@ describe('runPackageReport', () => {
     });
 
     it('settles the Investigation only against what this run mints, never what converged', async () => {
-      // 2 Proposals already on this Investigation, 2 minted now, and a third finding that
-      // converged onto another Investigation's: the gate's all-time count has to reach 2 + 2.
+      // 2 Proposals already on this Investigation, 1 minted now, and another finding that
+      // converged onto another Investigation's: the gate's all-time count has to reach 2 + 1.
       // The converged one lives in the other Investigation's conversation, so it adds nothing.
       const result = await packaged(
         {
           listRespondActions: async () => ({
             ok: true,
-            actions: [isolateHost, setAssetCriticality],
+            actions: [isolateHost],
           }),
           countExistingProposals: async () => 2,
           resolveProposalSlot: async ({ subjectKey }) =>
@@ -953,8 +941,8 @@ describe('runPackageReport', () => {
         { userName: 'dev-user' }
       );
 
-      expect(result.proposals).toHaveLength(2);
-      expect(result.expectedProposalCount).toBe(2 + 2);
+      expect(result.proposals).toHaveLength(1);
+      expect(result.expectedProposalCount).toBe(2 + 1);
     });
 
     describe('when it cannot tell what already exists', () => {
@@ -993,7 +981,7 @@ describe('runPackageReport', () => {
           {
             listRespondActions: async () => ({
               ok: true,
-              actions: [isolateHost, setAssetCriticality],
+              actions: [isolateHost],
             }),
             resolveProposalSlot: async () => {
               calls += 1;

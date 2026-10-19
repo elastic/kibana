@@ -19,14 +19,20 @@ import {
 import {
   bulkCreateAttachments,
   bulkDeleteAttachments,
+  createAndUploadFile,
   createCase,
   createComment,
   deleteAllCaseItems,
+  deleteAllFiles,
   findCaseUserActions,
   getAllComments,
   getCase,
+  listFiles,
+  seedOwnerlessAttachment,
   superUserSpace1Auth,
+  unifiedAttachmentExists,
 } from '../../../../common/lib/api';
+import { SECURITY_SOLUTION_FILE_KIND } from '../../../../common/lib/constants';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -120,6 +126,91 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(updatedCase.totalAlerts).to.eql(0);
     });
 
+    describe('file attachments', () => {
+      afterEach(async () => {
+        await deleteAllFiles({ supertest });
+      });
+
+      it('deletes a file attachment together with its file', async () => {
+        const postedCase = await createCase(
+          supertest,
+          getPostCaseRequest({ owner: 'securitySolution' })
+        );
+
+        const { create } = await createAndUploadFile({
+          supertest,
+          createFileParams: {
+            name: 'testfile',
+            kind: SECURITY_SOLUTION_FILE_KIND,
+            mimeType: 'text/plain',
+            meta: { caseIds: [postedCase.id], owner: [postedCase.owner] },
+          },
+          data: 'abc',
+        });
+
+        const caseWithFile = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            getUnifiedFilesAttachmentReq({
+              attachmentId: create.file.id,
+              owner: 'securitySolution',
+            }),
+          ],
+        });
+
+        await bulkDeleteAttachments({
+          supertest,
+          caseId: postedCase.id,
+          savedObjectIds: [caseWithFile.comments![0].id],
+        });
+
+        const comments = await getAllComments({ supertest, caseId: postedCase.id });
+        const files = await listFiles({ supertest, params: { kind: SECURITY_SOLUTION_FILE_KIND } });
+
+        expect(comments.length).to.eql(0);
+        expect(files.total).to.be(0);
+      });
+
+      it('deletes a file attachment whose file does not exist', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        const caseWithFile = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [getUnifiedFilesAttachmentReq()],
+        });
+
+        await bulkDeleteAttachments({
+          supertest,
+          caseId: postedCase.id,
+          savedObjectIds: [caseWithFile.comments![0].id],
+        });
+
+        const comments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(comments.length).to.eql(0);
+      });
+    });
+
+    it('deletes an attachment with no stored owner', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const theCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+      });
+      const ownerlessId = await seedOwnerlessAttachment({ es, caseId: postedCase.id });
+
+      await bulkDeleteAttachments({
+        supertest,
+        caseId: postedCase.id,
+        savedObjectIds: [theCase.comments![0].id, ownerlessId],
+      });
+
+      expect(await unifiedAttachmentExists({ es, id: ownerlessId })).to.be(false);
+      expect((await getAllComments({ supertest, caseId: postedCase.id })).length).to.eql(0);
+    });
+
     describe('errors', () => {
       it('returns a 404 and deletes nothing when one of the ids does not exist', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
@@ -167,40 +258,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect((await getAllComments({ supertest, caseId: firstCase.id })).length).to.eql(1);
         expect((await getAllComments({ supertest, caseId: secondCase.id })).length).to.eql(1);
-      });
-
-      it('returns a 400 and deletes nothing when one of the ids is a file attachment', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-
-        const caseWithComment = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postCommentUserReq,
-        });
-        const userCommentId = caseWithComment.comments![0].id;
-
-        // Built as an attachment payload rather than a real upload: the file kind is only
-        // registered for the real plugin owners, not the fixture ones, and the route only cares
-        // that the attachment resolves to the `file` type.
-        const caseWithFile = await bulkCreateAttachments({
-          supertest,
-          caseId: postedCase.id,
-          params: [getUnifiedFilesAttachmentReq()],
-        });
-
-        const fileAttachmentId = caseWithFile.comments!.find(
-          (comment) => comment.id !== userCommentId
-        )!.id;
-
-        await bulkDeleteAttachments({
-          supertest,
-          caseId: postedCase.id,
-          savedObjectIds: [userCommentId, fileAttachmentId],
-          expectedHttpCode: 400,
-        });
-
-        const comments = await getAllComments({ supertest, caseId: postedCase.id });
-        expect(comments.length).to.eql(2);
       });
 
       it('returns a 400 when the ids are empty', async () => {
@@ -292,6 +349,37 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(comments.length).to.eql(1);
+      });
+
+      it('authorizes an attachment with no stored owner on the case owner', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          superUserSpace1Auth
+        );
+        const ownerlessId = await seedOwnerlessAttachment({
+          es,
+          caseId: postedCase.id,
+          space: 'space1',
+        });
+
+        await bulkDeleteAttachments({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          savedObjectIds: [ownerlessId],
+          auth: { user: obsOnly, space: 'space1' },
+          expectedHttpCode: 403,
+        });
+        expect(await unifiedAttachmentExists({ es, id: ownerlessId })).to.be(true);
+
+        await bulkDeleteAttachments({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          savedObjectIds: [ownerlessId],
+          auth: { user: secOnly, space: 'space1' },
+        });
+        expect(await unifiedAttachmentExists({ es, id: ownerlessId })).to.be(false);
       });
 
       for (const user of [globalRead, secOnlyRead, noKibanaPrivileges]) {

@@ -653,28 +653,38 @@ describe('Endpoint analysis run', () => {
     });
 
     // `system-alertzero-journal-note` bounds `message` at 8000 characters and rejects a
-    // longer one whole. The note prefixes the assessment, and the longer prefix is
-    // "Rationale for ending investigation: " (36 characters), so the schema cap
-    // stays under that.
+    // longer one whole. The note prefixes the assessment, and a blank line keeps the
+    // first markdown block on its own line. The schema cap stays under that bound
+    // for either label.
     it('caps the assessment at the length a journal note can carry', () => {
       const schema = stepByName('forensic_analysis')?.with?.schema as {
         properties?: { rationale?: { maxLength?: number } };
       };
       const journal = stepByName('journal_rationale');
       const rationaleCap = schema?.properties?.rationale?.maxLength ?? 0;
-      const longerPrefix = 'Rationale for ending investigation: ';
+      const message = (journal?.with as { inputs?: { message?: string } })?.inputs?.message ?? '';
+      const rendered = (propose: boolean) =>
+        liquid.parseAndRenderSync(message, {
+          steps: {
+            forensic_analysis: {
+              output: { structured_output: { propose, rationale: 'x'.repeat(rationaleCap) } },
+            },
+          },
+        });
 
       expect(rationaleCap).toBe(7900);
-      expect(rationaleCap + longerPrefix.length).toBeLessThanOrEqual(JOURNAL_MESSAGE_MAX_LENGTH);
       expect(journal?.type).toBe('workflow.execute');
       expect((journal?.with as { 'workflow-id'?: string })?.['workflow-id']).toBe(
         'system-alertzero-journal-note'
       );
-      const message = (journal?.with as { inputs?: { message?: string } })?.inputs?.message ?? '';
       expect(message).toContain('{{ steps.forensic_analysis.output.structured_output.rationale }}');
       expect(message).toContain('Rationale for proposed actions');
       expect(message).toContain('Rationale for ending investigation');
       expect(message).toContain('steps.forensic_analysis.output.structured_output.propose == true');
+      expect(rendered(true).startsWith('# Rationale for proposed actions\n\n')).toBe(true);
+      expect(rendered(false).startsWith('# Rationale for ending investigation\n\n')).toBe(true);
+      expect(rendered(true).length).toBeLessThanOrEqual(JOURNAL_MESSAGE_MAX_LENGTH);
+      expect(rendered(false).length).toBeLessThanOrEqual(JOURNAL_MESSAGE_MAX_LENGTH);
     });
 
     // The three notes before the agent are the only record of why this run stopped.
@@ -769,12 +779,33 @@ describe('Endpoint analysis run', () => {
     it('requires an assessment with something in it', () => {
       const schema = stepByName('forensic_analysis')?.with?.schema as {
         required?: string[];
-        properties?: { rationale?: { minLength?: number } };
+        properties?: { rationale?: { minLength?: number; description?: string } };
       };
 
       expect(schema?.required).toContain('rationale');
       expect(schema?.properties?.rationale?.minLength).toBeGreaterThan(0);
       expect(stepByName('journal_rationale')?.if).toContain('rationale != blank');
+    });
+
+    // The journal renders this note as markdown. The sentences stay in the same
+    // controlled language coverage, rule creation, and rule tuning ask for.
+    it('asks for the assessment as markdown in simplified technical English', () => {
+      const message = String(stepByName('forensic_analysis')?.with?.message);
+      const schema = stepByName('forensic_analysis')?.with?.schema as {
+        properties?: { rationale?: { description?: string } };
+      };
+
+      expect(message).toContain(
+        'Write `rationale` as markdown, in ASD-STE100 Simplified Technical English.'
+      );
+      expect(message).toContain('`## Affected hosts`');
+      expect(message).toContain('`## Data gaps`');
+      expect(message).toContain('Do not list the actions.');
+      expect(message).not.toContain('`## Recommended actions`');
+      expect(schema?.properties?.rationale?.description).toContain(
+        'markdown in ASD-STE100 Simplified Technical English'
+      );
+      expect(schema?.properties?.rationale?.description).not.toContain('`## Recommended actions`');
     });
 
     // `attach_timeline` and `attach_iocs` hand these payloads straight to attachment
