@@ -7,6 +7,7 @@
 
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
+import type { ChildProcess } from 'node:child_process';
 import { once } from 'node:events';
 import { closeSync, openSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -86,7 +87,7 @@ const checkpoint = (): void =>
 try {
   for (const scenario of scenarios) {
     const fd = openSync(join(evidence, `${projectName}_${scenario}_driver.log`), 'w', 0o600);
-    const child = spawn(
+    const child: ChildProcess = spawn(
       process.execPath,
       [
         'x-pack/platform/plugins/private/workload_isolation_research/harness/run.js',
@@ -135,7 +136,9 @@ try {
     const resource = { pid: child.pid, scenario, stopped: false };
     resources.push(resource);
     checkpoint();
-    const [exit] = await once(child, 'exit', { signal: controller.signal });
+    const [exit]: [number | null, NodeJS.Signals | null] = (await once(child, 'exit', {
+      signal: controller.signal,
+    })) as [number | null, NodeJS.Signals | null];
     resource.stopped = true;
     checkpoint();
     assert.equal(exit, 0, 'Driver failed; inspect raw manifest and never accept INVALID');

@@ -7,7 +7,6 @@
     "allowImportingTsExtensions": true,
     "types": ["node"],
     "typeRoots": ["../../../../../../node_modules/@types"],
-    "typeRoots": ["/Users/jloleysens/repos/work/kibana/node_modules/@types"],
     "outDir": "target/types",
   },
   "include": ["task_execution/*.ts", "task_capsule/*.ts", "task_capsule/*.cts"],
