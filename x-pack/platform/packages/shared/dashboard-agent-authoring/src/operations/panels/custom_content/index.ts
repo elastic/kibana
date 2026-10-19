@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { panelGridSchema, type AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
@@ -56,7 +56,6 @@ const customContentPanelRequestSchema = z.object({
     .describe(
       'Render an HTML/CSS layout generated server-side. A last resort for content Lens and Vega cannot express.'
     ),
-  grid: panelGridSchema,
   query: z
     .string()
     .min(1)
