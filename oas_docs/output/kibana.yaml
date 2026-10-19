@@ -665,7 +665,7 @@ paths:
       responses:
         '200':
           description: Returns the OAuth callback script
-      summary: ''
+      summary: Get OAuth callback script
       tags:
         - connectors
       x-state: Added in 9.4.0
@@ -1020,7 +1020,7 @@ paths:
             type: string
       requestBody:
         content:
-          application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*:
+          'application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*':
             schema: {}
             examples:
               ingestEventsRequest:
@@ -1030,7 +1030,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*:
+            'application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*':
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_ingest_events_ack_response'
               examples:
@@ -1039,7 +1039,7 @@ paths:
           description: Connector HTTP 200 ack. No event is emitted. JSON or a plain-text body.
         '202':
           content:
-            application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*:
+            'application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*':
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_ingest_events_response'
               examples:
@@ -3624,7 +3624,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update the origin reference for an attachment. Use this after saving a by-value attachment to link it to its persistent store.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+        Update the origin reference for an attachment. Use this after saving a by-value attachment to link it to its persistent store.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read. Extended privileges (optional, expand functionality when granted): agentBuilder:manageAgents.
       operationId: put-agent-builder-conversations-conversation-id-attachments-attachment-id-origin
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -16002,7 +16002,7 @@ paths:
                       count: 1
                   time_field: '@timestamp'
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_rule'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_put_rule'
       responses:
         '200':
           content:
@@ -51693,7 +51693,7 @@ paths:
               postInstallByUploadRequestExample:
                 description: Upload a .zip or .tar.gz package archive (max 100MB)
                 value: <binary package archive>
-          application/gzip; application/zip:
+          'application/gzip; application/zip':
             examples:
               postInstallByUploadRequestExample:
                 description: Upload a .zip or .tar.gz package archive (max 100MB)
@@ -51704,7 +51704,7 @@ paths:
       responses:
         '200':
           content:
-            application/gzip; application/zip:
+            'application/gzip; application/zip':
               examples:
                 postInstallByUploadExample:
                   description: Package successfully installed from upload
@@ -51729,7 +51729,7 @@ paths:
           description: Successful response
         '400':
           content:
-            application/gzip; application/zip:
+            'application/gzip; application/zip':
               examples:
                 genericErrorResponseExample:
                   description: Example of a generic error response
@@ -51766,7 +51766,7 @@ paths:
           description: Bad Request
         '403':
           content:
-            application/gzip; application/zip:
+            'application/gzip; application/zip':
               examples:
                 insufficientPrivilegesExample:
                   description: Caller lacks a privilege required by a gated asset type in the archive
@@ -154961,6 +154961,56 @@ components:
       required:
         - name
         - destinations
+    Kibana_HTTP_APIs_alerting_put_rule:
+      additionalProperties: false
+      type: object
+      properties:
+        artifacts:
+          description: 'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear.'
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
+          maxItems: 100
+          minItems: 1
+          type: array
+        enabled:
+          description: Whether the rule is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state.
+          type: boolean
+        grouping:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
+        kind:
+          anyOf:
+            - description: Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.
+              enum:
+                - alert
+              type: string
+            - description: Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.
+              enum:
+                - signal
+              type: string
+          description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
+        metadata:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
+        no_data:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
+        recovery:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
+        schedule:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
+        state_transition:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
+        time_field:
+          default: '@timestamp'
+          description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.
+          maxLength: 256
+          minLength: 1
+          type: string
+      required:
+        - kind
+        - metadata
+        - schedule
+        - query
     Kibana_HTTP_APIs_alerting_rule_artifact:
       additionalProperties: false
       type: object
@@ -189852,7 +189902,7 @@ components:
       type: object
       properties:
         fill:
-          default: solid
+          default: gradient
           description: 'Area fill type: solid or gradient.'
           enum:
             - solid

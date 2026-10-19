@@ -9,10 +9,10 @@ import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { Request } from '@kbn/core-di-server';
 import type { z } from '@kbn/zod/v4';
 import {
-  createRuleDataSchema,
+  putRuleDataSchema,
   errorResponseSchema,
   ruleResponseSchema,
-  type CreateRuleData,
+  type PutRuleData,
 } from '@kbn/alerting-v2-schemas';
 
 import { BaseAlertingRoute } from '../base_alerting_route';
@@ -43,7 +43,7 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
   } as const;
   static schemas = {
     request: {
-      body: createRuleDataSchema,
+      body: putRuleDataSchema,
       params: ruleIdParamsSchema,
     },
     response: {
@@ -74,7 +74,7 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
     private readonly request: KibanaRequest<
       z.infer<typeof ruleIdParamsSchema>,
       unknown,
-      CreateRuleData
+      PutRuleData
     >,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {
