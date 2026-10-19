@@ -17,6 +17,7 @@ import {
   markdown,
   quote,
   section,
+  table,
 } from './primitives';
 
 export const componentsPrimitives = [
@@ -29,6 +30,7 @@ export const componentsPrimitives = [
   actions,
   fields,
   code,
+  table,
 ] as const;
 
 /** Kibana's content and layout primitives. */
@@ -44,7 +46,7 @@ export const componentsPack = definePrimitivePack({
         title: 'Message layout',
         types: ['header', 'section', 'context', 'divider', 'quote', 'actions'],
       },
-      { title: 'Data', types: ['fields', 'code'] },
+      { title: 'Data', types: ['fields', 'code', 'table'] },
     ],
   },
 });
