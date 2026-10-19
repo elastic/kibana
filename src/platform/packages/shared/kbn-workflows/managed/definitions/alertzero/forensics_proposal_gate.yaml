@@ -101,6 +101,15 @@ steps:
   # bridge as undefined rather than `''` (see create_proposal.yaml): Endpoint
   # analysis omits `impact` and `category` on purpose so the action's own apply,
   # and `autoApprove` is a boolean the bridge's trigger would reject as `''`.
+  #
+  # This is also where a lost race lands. The run resolves each Proposal's id
+  # against what already exists before it dispatches this gate, and two runs
+  # that reach one host at the same time can both find the subject free. The
+  # service creates the Proposal under `proposalId` or refuses with a conflict,
+  # so the loser's create fails before any gate is parked, and `continue`
+  # carries it on to the steps below. `journal_lost_race` says where the
+  # finding went; `expectedProposalCount` still counts the lost Proposal, so
+  # that Investigation stays open until an analyst closes it.
   - name: create_and_gate_proposal
     type: workflow.execute
     with:
@@ -118,16 +127,71 @@ steps:
     on-failure:
       continue: true
 
+  # Only when the create above failed under a caller-derived id: did another
+  # Investigation get there first? The Proposal under this id says which one
+  # raised it. Its document can take a moment to be searchable after the
+  # conflict, so the read is retried. A read that still fails is not an error:
+  # the loser just gets the generic note below.
+  - name: fetch_existing_proposal
+    type: kibana.request
+    if: >-
+      ${{ steps.create_and_gate_proposal.error.message != nil
+        and steps.create_and_gate_proposal.error.message != empty
+        and inputs.proposalId != nil
+        and inputs.proposalId != empty }}
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals/{{ inputs.proposalId }}"
+      headers:
+        elastic-api-version: "1"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 1s
+      continue: true
+
+  # A lost race is a Proposal under this id that belongs to a different
+  # conversation. Any other failure is left to `journal_wrap_failed`, so the
+  # note here is only written when it can say something true.
+  #
+  # Unlike hunt_proposal_gate.yaml there is no level to compare: the id is
+  # derived from the action and its target, so the winner proposes the same
+  # containment of the same host or process this finding asked for.
+  - name: resolve_lost_race
+    type: data.set
+    with:
+      lost_race: >-
+        ${{ steps.fetch_existing_proposal.output.conversationId != nil
+          and steps.fetch_existing_proposal.output.conversationId != empty
+          and steps.fetch_existing_proposal.output.conversationId != inputs.conversationId }}
+      lost_race_note: >-
+        A containment proposal for "{{ inputs.title | default: 'the proposed action' }}" was raised by
+        [another Investigation]({% if workflow.spaceId != 'default' %}/s/{{ workflow.spaceId }}{% endif %}/app/alertzero?selectedConversationId={{ steps.fetch_existing_proposal.output.conversationId }})
+        at the same moment as this one, so no second Proposal was created and this finding is covered by that one.
+        This Investigation stays open until an analyst closes it.
+
+  - name: journal_lost_race
+    type: workflow.execute
+    if: "${{ variables.lost_race == true }}"
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        conversation_id: "{{ inputs.investigationConversationId }}"
+        message: "{{ variables.lost_race_note }}"
+    on-failure:
+      continue: true
+
   # A wrap that errors before settling may mean this Proposal was never created, in
   # which case the settlement counts below can never reach `expectedProposalCount`
   # and the Investigation stays open with nothing saying why. Journal it so the
   # analyst can see that. Best-effort: a failed note must not stop the requery/close
   # steps. No `error.message`, same as journal_analysis_problem in
   # forensics_run_endpoint_analysis.yaml: later agent rounds read the journal as
-  # user input.
+  # user input. A lost race already has its own note above.
   - name: journal_wrap_failed
     type: workflow.execute
-    if: "${{ steps.create_and_gate_proposal.error != blank }}"
+    if: "${{ steps.create_and_gate_proposal.error != blank and variables.lost_race != true }}"
     with:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
