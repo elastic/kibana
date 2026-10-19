@@ -26,6 +26,8 @@ export interface ConversationsActionsGroupProps {
    * be able to resolve one; the control still works as a button without it.
    */
   chatHref?: string;
+  /** Disables the chat control; `chatDisabledReason` is what the tooltip tells the user. */
+  chatDisabledReason?: string;
   /** When true escalation actions are shown. Requires the manage escalations capability. */
   canManageEscalations?: boolean;
   /**
@@ -49,6 +51,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
     onClickAction,
     onOpenChat,
     chatHref,
+    chatDisabledReason,
     canManageEscalations,
     canCloseInvestigation,
     onCopyLink,
@@ -76,8 +79,10 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             size="s"
             iconType="productAgent"
             withToolTip
+            toolTipContent={chatDisabledReason}
+            isDisabled={Boolean(chatDisabledReason)}
             aria-label={ACTIONS_TRANSLATIONS.tooltips.openInChat}
-            href={chatHref}
+            href={chatDisabledReason ? undefined : chatHref}
             onClick={handleChatClick}
             data-test-subj="conversationCardOpenInChat"
           />

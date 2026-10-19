@@ -31,7 +31,12 @@ const renderGroup = (
   {
     withRecommendedAction = true,
     canManageEscalations = false,
-  }: { withRecommendedAction?: boolean; canManageEscalations?: boolean } = {}
+    chatDisabledReason,
+  }: {
+    withRecommendedAction?: boolean;
+    canManageEscalations?: boolean;
+    chatDisabledReason?: string;
+  } = {}
 ) => {
   const onClickRecommendedAction = jest.fn();
   const onClickAction = jest.fn();
@@ -45,6 +50,7 @@ const renderGroup = (
       onCopyLink={jest.fn()}
       onOpenChat={onOpenChat}
       canManageEscalations={canManageEscalations}
+      chatDisabledReason={chatDisabledReason}
     />
   );
 
@@ -61,6 +67,20 @@ describe('ConversationsActionsGroup', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Open in chat' }));
 
       expect(onOpenChat).toHaveBeenCalled();
+    });
+
+    it('disables opening the chat and explains why when a reason is given', async () => {
+      const { onOpenChat } = renderGroup(makeInvestigation(), {
+        chatDisabledReason: 'Needs a privilege',
+      });
+      const chatButton = screen.getByRole('button', { name: 'Open in chat' });
+
+      fireEvent.click(chatButton);
+      fireEvent.mouseOver(chatButton);
+
+      expect(chatButton).toBeDisabled();
+      expect(onOpenChat).not.toHaveBeenCalled();
+      expect(await screen.findByText('Needs a privilege')).toBeInTheDocument();
     });
 
     it('does not put the recommended action on the card', () => {
