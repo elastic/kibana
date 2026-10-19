@@ -125,7 +125,7 @@ export const ListDetailsAppHeader = React.memo<ListDetailsAppHeaderProps>(
         {
           id: 'exportList',
           label: i18n.EXPORT_LIST,
-          iconType: 'download',
+          iconType: 'upload',
           overflow: true,
           run: onExportList,
           testId: `${TEST_SUBJ_PREFIX}ExportAction`,
