@@ -57,6 +57,7 @@ export const resolveAbsolutePath = (filePath: string): string => {
 };
 
 export interface SandboxCallContext {
+  agentId?: string;
   request: KibanaRequest;
   /** Per-agent connector allow-list; credentials are never injected for connectors outside it. */
   allowedConnectorIds: readonly string[];

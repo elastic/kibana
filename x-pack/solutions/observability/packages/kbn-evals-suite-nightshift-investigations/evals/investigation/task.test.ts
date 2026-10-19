@@ -321,3 +321,23 @@ it('reports an investigation that never appeared', async () => {
     clock.mockRestore();
   }
 });
+
+it.each(['c0', 'orca', 'none'])(
+  'passes telemetry target %s separately from the LLM connector',
+  async (target) => {
+    const fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ investigation_id: 'investigation' })
+      .mockResolvedValueOnce({ status: 'failed' })
+      .mockResolvedValueOnce({});
+    await runInvestigation(
+      fetch,
+      { ...example, input: { ...example.input, telemetry_target: target } },
+      connector
+    );
+    expect(JSON.parse(fetch.mock.calls[0][1].body)).toMatchObject({
+      connector_id: connector.id,
+      telemetry_target: target,
+    });
+  }
+);

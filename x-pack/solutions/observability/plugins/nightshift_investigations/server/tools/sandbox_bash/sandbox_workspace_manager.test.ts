@@ -356,6 +356,93 @@ describe('createSandboxWorkspaceManager', () => {
       });
     });
 
+    it('keeps concurrent c0 and ORCA workspace guidance isolated', async () => {
+      const baseConnector = actions.inMemoryConnectors[0];
+      actions.inMemoryConnectors = ['c0', 'orca'].map((id) => ({ ...baseConnector, id }));
+      const telemetryTargets = [
+        { connectorId: 'c0', readableIndices: 'remote:logs-*' },
+        { connectorId: 'orca', readableIndices: 'logs-orcabench.*' },
+      ];
+      const named = createSandboxWorkspaceManager({
+        getDeps: () => ({ actions }),
+        telemetryTargets,
+        logger,
+      });
+      const c0Session = createSessionMock(false);
+      const orcaSession = createSessionMock(false);
+      const noneSession = createSessionMock(false);
+      await Promise.all([
+        named.ensureWorkspaceReady({ session: c0Session, callContext: createCallContext(['c0']) }),
+        named.ensureWorkspaceReady({
+          session: orcaSession,
+          callContext: createCallContext(['orca']),
+        }),
+        named.ensureWorkspaceReady({ session: noneSession, callContext: createCallContext([]) }),
+      ]);
+      expect(mockWriteElasticManifest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          session: c0Session,
+          connectorId: 'c0',
+          readableIndices: 'remote:logs-*',
+        })
+      );
+      expect(mockWriteElasticManifest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          session: orcaSession,
+          connectorId: 'orca',
+          readableIndices: 'logs-orcabench.*',
+        })
+      );
+      expect(mockWriteElasticManifest).toHaveBeenCalledTimes(2);
+      expect(noneSession.writeFiles).toHaveBeenCalledWith([
+        {
+          path: '/workspace/elastic.md',
+          content: Buffer.from('No telemetry connector is available.\n'),
+        },
+      ]);
+      await expect(
+        named.ensureWorkspaceReady({
+          session: c0Session,
+          callContext: createCallContext(['c0', 'orca']),
+        })
+      ).rejects.toThrow('only one telemetry connector');
+    });
+
+    it('resolves target-specific hints when targets share a connector', async () => {
+      const named = createSandboxWorkspaceManager({
+        getDeps: () => ({ actions }),
+        telemetryTargets: [{ connectorId: 'elasticsearch-telemetry' }],
+        getTelemetryTarget: (agentId) => ({
+          connectorId: 'elasticsearch-telemetry',
+          readableIndices: agentId === 'nightshift.investigation.c0' ? 'c0:logs-*' : 'orca:logs-*',
+        }),
+        logger,
+      });
+      const session = createSessionMock(false);
+      await named.ensureWorkspaceReady({
+        session,
+        callContext: {
+          ...createCallContext(['elasticsearch-telemetry']),
+          agentId: 'nightshift.investigation.c0',
+        },
+      });
+      await named.ensureWorkspaceReady({
+        session,
+        callContext: {
+          ...createCallContext(['elasticsearch-telemetry']),
+          agentId: 'nightshift.investigation.orca',
+        },
+      });
+      expect(mockWriteElasticManifest).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ readableIndices: 'c0:logs-*' })
+      );
+      expect(mockWriteElasticManifest).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ readableIndices: 'orca:logs-*' })
+      );
+    });
+
     it('writes elastic manifest alongside connector manifest on reset', async () => {
       const session = createSessionMock(true);
       await managerWithTelemetry.ensureWorkspaceReady({

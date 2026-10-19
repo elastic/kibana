@@ -96,6 +96,7 @@ const makeConversation = ({
   status,
   owner = true,
   templateId = 'investigation',
+  agentId = 'nightshift.investigation',
   workflowExecutionIds,
 }: {
   id: string;
@@ -103,11 +104,13 @@ const makeConversation = ({
   status?: 'open' | 'closed';
   owner?: boolean;
   templateId?: string;
+  agentId?: string;
   workflowExecutionIds?: string[];
 }) => ({
   id,
   title,
   template_id: templateId,
+  agent_id: agentId,
   metadata: {
     ...(status ? { status } : {}),
     ...(workflowExecutionIds ? { workflow_execution_ids: workflowExecutionIds } : {}),
@@ -287,6 +290,44 @@ describe('NightshiftInvestigationsClient.start()', () => {
       expect.anything(),
       'nightshift-investigations'
     );
+  });
+
+  it('passes the telemetry default separately from the LLM and creates its selected agent conversation', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-123');
+    await makeClient({
+      telemetryConfig: {
+        default_telemetry_target: 'c0',
+        telemetry_targets: { c0: { connector_id: 'telemetry-c0' } },
+      },
+    }).start({ subject: { type: 'manual', id: 'question' }, trigger_type: 'manual' });
+    expect(mockManagement.runWorkflow.mock.calls[0][2]).toMatchObject({ telemetry_target: 'c0' });
+    expect(installInvestigationAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ telemetryTarget: 'c0' })
+    );
+    expect(conversations.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        agentId: 'nightshift.investigation.c0',
+        templateId: 'investigation',
+      })
+    );
+    expect(getConnectorById).toHaveBeenCalledWith(
+      NIGHTSHIFT_DEFAULT_MODELS.investigation,
+      mockRequest
+    );
+  });
+
+  it('rejects an unknown telemetry target before launching or claiming', async () => {
+    await expect(
+      makeClient().start({
+        subject: { type: 'manual', id: 'question' },
+        trigger_type: 'manual',
+        telemetry_target: 'unknown',
+      })
+    ).rejects.toThrow('Unknown telemetry target');
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
+    expect(conversations.create).not.toHaveBeenCalled();
   });
 
   it('rejects an unknown custom connector before launching or claiming', async () => {
@@ -1095,6 +1136,37 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-1');
   });
 
+  const telemetryConfig = {
+    default_telemetry_target: 'orca',
+    telemetry_targets: { c0: { connector_id: 'c0' }, orca: { connector_id: 'orca' } },
+  };
+
+  it('keeps a matched investigation target when the follow-up omits it', async () => {
+    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
+    withConversations(makeConversation({ id: 'inv-1', agentId: 'nightshift.investigation.c0' }));
+    await makeClient({ telemetryConfig }).start({
+      subject: { type: 'manual', id: 'question' },
+      trigger_type: 'manual',
+    });
+    expect(runInputs()).toMatchObject({ investigation_id: 'inv-1', telemetry_target: 'c0' });
+    expect(conversations.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects changing a matched investigation target before launching its follow-up', async () => {
+    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
+    withConversations(makeConversation({ id: 'inv-1', agentId: 'nightshift.investigation.c0' }));
+    await expect(
+      makeClient({ telemetryConfig }).start({
+        subject: { type: 'manual', id: 'question' },
+        trigger_type: 'manual',
+        telemetry_target: 'orca',
+      })
+    ).rejects.toThrow('cannot change its telemetry target');
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+  });
+
   it('claims the subjects, runs the workflow, and leaves recording the subjects to it', async () => {
     await expect(startAlerts('alert-1', 'alert-2')).resolves.toEqual({
       investigation_id: 'inv-new',
@@ -1410,6 +1482,63 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       status,
       context: { inputs },
     });
+
+  const telemetryConfig = {
+    default_telemetry_target: 'orca',
+    telemetry_targets: { c0: { connector_id: 'c0' }, orca: { connector_id: 'orca' } },
+  };
+
+  it.each(['c0', 'orca', 'none'])(
+    'binds the %s target to a new shared investigation conversation',
+    async (target) => {
+      withExecution({ inputs: { investigation_id: 'inv-1', subjects, telemetry_target: target } });
+      await makeClient({ telemetryConfig }).ensureOrCreate('inv-1', 'exec-1');
+      expect(conversations.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agentId: `nightshift.investigation.${target}`,
+          templateId: 'investigation',
+        })
+      );
+      expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
+    }
+  );
+
+  it('keeps the conversation target when a later run omits it', async () => {
+    withExecution();
+    withConversations(makeConversation({ id: 'inv-1', agentId: 'nightshift.investigation.c0' }));
+    const client = makeClient({ telemetryConfig });
+    await client.ensureOrCreate('inv-1', 'exec-1');
+    await expect(client.getConversationAgentId('inv-1')).resolves.toBe(
+      'nightshift.investigation.c0'
+    );
+    expect(conversations.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects another target before reopening or recording subjects and execution metadata', async () => {
+    withExecution({ inputs: { investigation_id: 'inv-1', subjects, telemetry_target: 'orca' } });
+    withConversations(
+      makeConversation({ id: 'inv-1', status: 'closed', agentId: 'nightshift.investigation.c0' })
+    );
+    await expect(makeClient({ telemetryConfig }).ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
+      'cannot change its telemetry target'
+    );
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
+  });
+
+  it('installs and binds the selected agent when materializing an early failure', async () => {
+    withExecution({
+      inputs: { investigation_id: 'inv-1', telemetry_target: 'c0' },
+      status: ExecutionStatus.FAILED,
+    });
+    await makeClient({ telemetryConfig }).ensureForFailure('inv-1', 'exec-1');
+    expect(installInvestigationAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ telemetryTarget: 'c0' })
+    );
+    expect(conversations.create).toHaveBeenCalledWith(
+      expect.objectContaining({ agentId: 'nightshift.investigation.c0' })
+    );
+  });
 
   it('creates the investigation conversation and records the run subjects', async () => {
     withExecution();
