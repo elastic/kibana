@@ -14,7 +14,7 @@ import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 export interface UseAutomationRowMenuItemsParams {
   editHref: string;
   isReadOnly: boolean;
-  isDisabled: boolean;
+  isBusy: boolean;
   canRun: boolean;
   isRunDisabled: boolean;
   onCloseMenu: () => void;
@@ -26,7 +26,7 @@ export interface UseAutomationRowMenuItemsParams {
 export const useAutomationRowMenuItems = ({
   editHref,
   isReadOnly,
-  isDisabled,
+  isBusy,
   canRun,
   isRunDisabled,
   onCloseMenu,
@@ -101,7 +101,7 @@ export const useAutomationRowMenuItems = ({
         <EuiContextMenuItem
           key="delete"
           icon="trash"
-          disabled={isDisabled}
+          disabled={isBusy}
           data-test-subj="contextRemoveAutomationButton"
           {...getEbtProps({
             element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
@@ -123,7 +123,7 @@ export const useAutomationRowMenuItems = ({
   }, [
     canRun,
     editHref,
-    isDisabled,
+    isBusy,
     isReadOnly,
     isRunDisabled,
     onCloseMenu,

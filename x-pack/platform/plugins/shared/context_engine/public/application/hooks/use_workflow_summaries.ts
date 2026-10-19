@@ -14,7 +14,7 @@ export interface WorkflowSummary {
   id: string;
   name?: string;
   enabled?: boolean;
-  definition: WorkflowYaml | null | undefined;
+  definition?: WorkflowYaml | null;
 }
 
 const is403 = (error: unknown): boolean => {
@@ -25,13 +25,10 @@ const is403 = (error: unknown): boolean => {
 };
 
 /**
- * Resolves display metadata (name, enabled state) for the workflows referenced
- * by an AI index's automations. Keyed by workflow id so rows can render a name
- * instead of the raw id.
+ * Fetches workflow summary data.
  *
- * `missingReadPrivilege` is true when the server returned 403 — the caller
- * should surface a clear "missing permissions" message rather than treating
- * the empty summaries as a transient failure.
+ * When `missingReadPrivilege` is true when the server returned 403 — the caller
+ * should surface a clear "missing permissions" message.
  */
 export const useWorkflowSummaries = (workflowIds: string[]) => {
   const api = useWorkflowsApi();

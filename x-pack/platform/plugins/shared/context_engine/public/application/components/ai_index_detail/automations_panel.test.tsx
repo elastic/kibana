@@ -45,14 +45,14 @@ jest.mock('@kbn/workflows-ui', () => ({
 
 jest.mock('./automation_row', () => ({
   AutomationRow: ({
-    name,
+    workflowSummary,
     onDelete,
   }: {
-    name: string | undefined;
+    workflowSummary?: { name?: string };
     onDelete: () => Promise<void>;
   }) => (
     <div data-test-subj="contextAiIndexAutomationRow">
-      {name}
+      {workflowSummary?.name}
       <button type="button" data-test-subj="stubAutomationRowDelete" onClick={() => onDelete()}>
         Delete
       </button>

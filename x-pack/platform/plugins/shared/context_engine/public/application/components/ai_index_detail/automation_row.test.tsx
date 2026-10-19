@@ -9,8 +9,10 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { WorkflowYaml } from '@kbn/workflows';
+import type { RunWorkflowInputsModalProps } from '@kbn/workflows-ui';
 import React from 'react';
 import type { AiIndexAutomation } from '../../../../common/http_api/ai_indices';
+import type { WorkflowSummary } from '../../hooks/use_workflow_summaries';
 import { AutomationRow } from './automation_row';
 
 const mockRunAutomation = jest.fn();
@@ -18,7 +20,7 @@ const mockRunAutomation = jest.fn();
 jest.mock('../../hooks/use_run_automation', () => ({
   useRunAutomation: () => ({
     runAutomation: mockRunAutomation,
-    isRunning: false,
+    isLoading: false,
   }),
 }));
 
@@ -26,11 +28,7 @@ jest.mock('@kbn/workflows-ui', () => ({
   RunWorkflowInputsModal: ({
     onSubmit,
     onCancel,
-  }: {
-    workflowName: string;
-    onSubmit: (values: Record<string, string>) => void;
-    onCancel: () => void;
-  }) => (
+  }: Pick<RunWorkflowInputsModalProps, 'onSubmit' | 'onCancel'>) => (
     <div data-test-subj="contextRunWorkflowInputsModalStub">
       <button type="button" onClick={() => onSubmit({ ticketId: 'T-1' })}>
         Submit inputs
@@ -120,16 +118,21 @@ const defaultAutomation: AiIndexAutomation = {
   value: 'workflow-value-id',
 };
 
+const createWorkflowSummary = (overrides: Partial<WorkflowSummary> = {}): WorkflowSummary => ({
+  id: defaultAutomation.value,
+  name: 'My Workflow',
+  enabled: true,
+  ...overrides,
+});
+
 const createDefaultProps = (
   overrides: Partial<React.ComponentProps<typeof AutomationRow>> = {}
 ): React.ComponentProps<typeof AutomationRow> => ({
   automation: defaultAutomation,
-  name: 'My Workflow',
-  enabled: true,
+  workflowSummary: createWorkflowSummary(),
   editHref: '/app/workflows/workflow-1',
   isReadOnly: false,
-  isDisabled: false,
-  definition: undefined,
+  isBusy: false,
   canRun: false,
   onDelete: jest.fn().mockResolvedValue(true),
   ...overrides,
@@ -153,7 +156,9 @@ describe('AutomationRow', () => {
   });
 
   it('renders the resolved workflow name when provided', () => {
-    renderAutomationRow({ name: 'Resolved Workflow Name' });
+    renderAutomationRow({
+      workflowSummary: createWorkflowSummary({ name: 'Resolved Workflow Name' }),
+    });
 
     expect(screen.getByTestId('contextAiIndexAutomationRow')).toHaveTextContent(
       'Resolved Workflow Name'
@@ -162,7 +167,7 @@ describe('AutomationRow', () => {
 
   it('falls back to automation.value as the display name when name is undefined', () => {
     renderAutomationRow({
-      name: undefined,
+      workflowSummary: { id: 'fallback-workflow-id' },
       automation: { type: 'workflow', value: 'fallback-workflow-id' },
     });
 
@@ -172,26 +177,26 @@ describe('AutomationRow', () => {
   });
 
   it('renders an Enabled badge when enabled is true', () => {
-    renderAutomationRow({ enabled: true });
+    renderAutomationRow({ workflowSummary: createWorkflowSummary({ enabled: true }) });
 
     expect(screen.getByText('Enabled')).toBeInTheDocument();
   });
 
   it('renders a Disabled badge when enabled is false', () => {
-    renderAutomationRow({ enabled: false });
+    renderAutomationRow({ workflowSummary: createWorkflowSummary({ enabled: false }) });
 
     expect(screen.getByText('Disabled')).toBeInTheDocument();
   });
 
   it('renders no badge when enabled is undefined', () => {
-    renderAutomationRow({ enabled: undefined });
+    renderAutomationRow({ workflowSummary: createWorkflowSummary({ enabled: undefined }) });
 
     expect(screen.queryByText('Enabled')).not.toBeInTheDocument();
     expect(screen.queryByText('Disabled')).not.toBeInTheDocument();
   });
 
   it('opens the YAML preview flyout when View is chosen from the actions menu', () => {
-    renderAutomationRow({ name: 'My Workflow' });
+    renderAutomationRow({ workflowSummary: createWorkflowSummary({ name: 'My Workflow' }) });
 
     openActionsMenu();
     fireEvent.click(screen.getByTestId('contextPreviewWorkflowButton'));
@@ -223,8 +228,8 @@ describe('AutomationRow', () => {
     expect(screen.getByTestId('contextRemoveAutomationButton')).toBeInTheDocument();
   });
 
-  it('disables the delete menu item when isDisabled is true', () => {
-    renderAutomationRow({ isDisabled: true });
+  it('disables the delete menu item when isBusy is true', () => {
+    renderAutomationRow({ isBusy: true });
 
     openActionsMenu();
 
@@ -280,7 +285,7 @@ describe('AutomationRow', () => {
   it('runs the workflow directly when Run is chosen and no manual inputs are required', () => {
     renderAutomationRow({
       canRun: true,
-      definition: workflowWithoutManualInputs,
+      workflowSummary: createWorkflowSummary({ definition: workflowWithoutManualInputs }),
     });
 
     openActionsMenu();
@@ -293,7 +298,7 @@ describe('AutomationRow', () => {
   it('opens the inputs modal when Run is chosen and manual inputs are required', () => {
     renderAutomationRow({
       canRun: true,
-      definition: workflowWithRequiredInputs,
+      workflowSummary: createWorkflowSummary({ definition: workflowWithRequiredInputs }),
     });
 
     openActionsMenu();
@@ -306,7 +311,7 @@ describe('AutomationRow', () => {
   it('runs the workflow with submitted input values from the inputs modal', () => {
     renderAutomationRow({
       canRun: true,
-      definition: workflowWithRequiredInputs,
+      workflowSummary: createWorkflowSummary({ definition: workflowWithRequiredInputs }),
     });
 
     openActionsMenu();

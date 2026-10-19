@@ -261,14 +261,12 @@ export const AutomationsPanel = ({
                 <React.Fragment key={automation.value}>
                   <AutomationRow
                     automation={automation}
-                    name={summary?.name}
-                    enabled={summary?.enabled}
-                    definition={summary?.definition}
+                    workflowSummary={summary}
                     editHref={application.getUrlForApp(WORKFLOWS_APP_ID, {
                       path: `/${encodeURIComponent(automation.value)}${returnSearch}`,
                     })}
                     isReadOnly={isManaged}
-                    isDisabled={isBusy}
+                    isBusy={isBusy}
                     canRun={canExecuteWorkflow}
                     onDelete={() => deleteAutomation(automation.value)}
                   />

@@ -9,11 +9,12 @@ import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
 import { useRunWorkflow } from '@kbn/workflows-ui';
 import { getErrorMessage } from '../utils/get_error_message';
+import { getWorkflowExecutionPath } from '../utils/get_workflow_execution_path';
 import { useKibana } from './use_kibana';
 
 export interface UseRunAutomationResult {
   runAutomation: (id: string, inputs?: Record<string, unknown>) => void;
-  isRunning: boolean;
+  isLoading: boolean;
 }
 
 export const useRunAutomation = (): UseRunAutomationResult => {
@@ -22,11 +23,9 @@ export const useRunAutomation = (): UseRunAutomationResult => {
   } = useKibana();
 
   const { mutate, isLoading } = useRunWorkflow({
-    onSuccess: (data, variables) => {
+    onSuccess: (data, { id: automationId }) => {
       const executionHref = application.getUrlForApp(WORKFLOWS_APP_ID, {
-        path: `/${encodeURIComponent(variables.id)}?tab=executions&executionId=${encodeURIComponent(
-          data.workflowExecutionId
-        )}`,
+        path: getWorkflowExecutionPath(automationId, data.workflowExecutionId),
       });
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.contextEngine.aiIndexDetail.automations.runSuccessTitle', {
@@ -41,7 +40,6 @@ export const useRunAutomation = (): UseRunAutomationResult => {
               }
             ),
             href: executionHref,
-            target: '_blank',
             'data-test-subj': 'contextViewAutomationExecutionLink',
           },
         },
@@ -60,6 +58,6 @@ export const useRunAutomation = (): UseRunAutomationResult => {
 
   return {
     runAutomation: (id, inputs = {}) => mutate({ id, inputs }),
-    isRunning: isLoading,
+    isLoading,
   };
 };

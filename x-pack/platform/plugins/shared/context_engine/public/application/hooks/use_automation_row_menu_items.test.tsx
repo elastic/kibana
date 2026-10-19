@@ -19,7 +19,7 @@ const createDefaultParams = (
 ): UseAutomationRowMenuItemsParams => ({
   editHref: '/app/workflows/wf-1',
   isReadOnly: false,
-  isDisabled: false,
+  isBusy: false,
   canRun: true,
   isRunDisabled: false,
   onCloseMenu: jest.fn(),

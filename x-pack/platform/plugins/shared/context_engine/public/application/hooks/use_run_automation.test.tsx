@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RunWorkflowResponseDto } from '@kbn/workflows';
+import type { RunWorkflowParams } from '@kbn/workflows-ui';
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { useRunAutomation } from './use_run_automation';
@@ -17,12 +19,23 @@ const mockMutate = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 
+type HttpError = IHttpFetchError<ResponseErrorBody>;
+
 interface RunWorkflowHookOptions {
-  onSuccess: (data: RunWorkflowResponseDto, variables: { id: string; inputs?: object }) => void;
-  onError: (error: Error) => void;
+  onSuccess: (data: RunWorkflowResponseDto, variables: RunWorkflowParams) => void;
+  onError: (error: HttpError) => void;
 }
 
 let capturedRunWorkflowOptions: RunWorkflowHookOptions | undefined;
+
+const createRunFailedHttpError = (): HttpError => {
+  const body: ResponseErrorBody = { message: 'run failed', statusCode: 500 };
+  return Object.assign(new Error('run failed'), {
+    name: 'HttpFetchError',
+    request: new Request('http://localhost'),
+    body,
+  });
+};
 
 jest.mock('@kbn/workflows-ui', () => ({
   useRunWorkflow: (options: RunWorkflowHookOptions) => {
@@ -40,7 +53,7 @@ const renderUseRunAutomation = () => {
   core.notifications.toasts.addSuccess = mockAddSuccess;
   core.notifications.toasts.addError = mockAddError;
 
-  renderHook(() => useRunAutomation(), {
+  const { result } = renderHook(() => useRunAutomation(), {
     wrapper: ({ children }) => (
       <I18nProvider>
         <KibanaContextProvider services={core}>{children}</KibanaContextProvider>
@@ -48,7 +61,7 @@ const renderUseRunAutomation = () => {
     ),
   });
 
-  return core;
+  return { core, result };
 };
 
 describe('useRunAutomation', () => {
@@ -58,15 +71,7 @@ describe('useRunAutomation', () => {
   });
 
   it('delegates runAutomation to useRunWorkflow mutate', () => {
-    const { result } = renderHook(() => useRunAutomation(), {
-      wrapper: ({ children }) => (
-        <I18nProvider>
-          <KibanaContextProvider services={coreMock.createStart()}>
-            {children}
-          </KibanaContextProvider>
-        </I18nProvider>
-      ),
-    });
+    const { result } = renderUseRunAutomation();
 
     result.current.runAutomation('workflow-1', { ticketId: 'T-1' });
 
@@ -97,7 +102,7 @@ describe('useRunAutomation', () => {
 
   it('shows an error toast when the run fails', () => {
     renderUseRunAutomation();
-    const error = new Error('run failed');
+    const error = createRunFailedHttpError();
 
     capturedRunWorkflowOptions?.onError(error);
 
