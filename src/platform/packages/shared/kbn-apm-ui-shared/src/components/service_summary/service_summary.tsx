@@ -31,6 +31,9 @@ import type { SparklinePoint } from '../sparkline/utils';
 
 const PANEL_WIDTH = 380;
 const SPARKLINE_HEIGHT = 24;
+// Fixed label/value column width for the stacked layout so every chart starts at the same x and
+// they all share one width (otherwise shorter labels like "Error rate" give wider charts).
+const METRIC_LABEL_COLUMN_WIDTH = 112;
 
 /** Whether a metric change is an improvement, a regression, or neutral — the caller decides. */
 export type ServiceMetricEvaluation = 'good' | 'bad' | 'neutral';
@@ -89,6 +92,8 @@ export interface ServiceSummaryProps {
   health?: ServiceSummaryHealth;
   /** Ordered metrics (typically latency, throughput, failed transaction rate). */
   metrics: ServiceSummaryMetric[];
+  /** Lay the metrics out side by side (`row`, default) or stacked (`column`). */
+  metricsDirection?: 'row' | 'column';
   /** When false, renders values without charts (Design B). Defaults to true. */
   showSparklines?: boolean;
   isLoading?: boolean;
@@ -121,6 +126,7 @@ export function ServiceSummary({
   icon,
   health,
   metrics,
+  metricsDirection = 'row',
   showSparklines = true,
   isLoading = false,
   links = [],
@@ -171,7 +177,12 @@ export function ServiceSummary({
 
       <EuiHorizontalRule margin="none" />
       <Section>
-        <MetricsSection metrics={metrics} showSparklines={showSparklines} isLoading={isLoading} />
+        <MetricsSection
+          metrics={metrics}
+          direction={metricsDirection}
+          showSparklines={showSparklines}
+          isLoading={isLoading}
+        />
       </Section>
 
       {links.length > 0 ? (
@@ -309,13 +320,27 @@ function getSloLabel(slo: NonNullable<ServiceSummaryHealth['slo']>): string {
 
 function MetricsSection({
   metrics,
+  direction,
   showSparklines,
   isLoading,
 }: {
   metrics: ServiceSummaryMetric[];
+  direction: 'row' | 'column';
   showSparklines: boolean;
   isLoading: boolean;
 }) {
+  if (direction === 'column') {
+    return (
+      <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+        {metrics.map((metric) => (
+          <EuiFlexItem key={metric.label} grow={false}>
+            <MetricRow metric={metric} showSparkline={showSparklines} isLoading={isLoading} />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
+  }
+
   return (
     <EuiFlexGroup gutterSize="m" responsive={false}>
       {metrics.map((metric) => (
@@ -323,6 +348,43 @@ function MetricsSection({
           <MetricColumn metric={metric} showSparkline={showSparklines} isLoading={isLoading} />
         </EuiFlexItem>
       ))}
+    </EuiFlexGroup>
+  );
+}
+
+// Stacked layout: label + value on the left, chart on the right, so the charts line up vertically.
+function MetricRow({
+  metric,
+  showSparkline,
+  isLoading,
+}: {
+  metric: ServiceSummaryMetric;
+  showSparkline: boolean;
+  isLoading: boolean;
+}) {
+  const { label, valueLabel, change } = metric;
+
+  return (
+    <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          width: ${METRIC_LABEL_COLUMN_WIDTH}px;
+        `}
+      >
+        <EuiText size="xs" color="subdued">
+          {label}
+        </EuiText>
+        <EuiText size="s">
+          <strong>{valueLabel}</strong>
+        </EuiText>
+        {change ? <MetricChangeLabel change={change} /> : null}
+      </EuiFlexItem>
+      {showSparkline ? (
+        <EuiFlexItem>
+          <MetricSparkline metric={metric} isLoading={isLoading} fullWidth />
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 }
@@ -336,8 +398,7 @@ function MetricColumn({
   showSparkline: boolean;
   isLoading: boolean;
 }) {
-  const { label, valueLabel, color, series, comparisonSeries, comparisonColor, change } = metric;
-  const hasSeries = !!series?.some((point) => point.y !== null);
+  const { label, valueLabel, change } = metric;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
@@ -358,23 +419,42 @@ function MetricColumn({
       ) : null}
       {showSparkline ? (
         <EuiFlexItem grow={false}>
-          {hasSeries || isLoading ? (
-            <Sparkline
-              color={color}
-              series={series ?? null}
-              comparisonSeries={comparisonSeries}
-              comparisonSeriesColor={comparisonColor}
-              compact
-              fill
-              isLoading={isLoading && !hasSeries}
-            />
-          ) : (
-            <NoDataPlaceholder color={color} />
-          )}
+          <MetricSparkline metric={metric} isLoading={isLoading} />
         </EuiFlexItem>
       ) : null}
     </EuiFlexGroup>
   );
+}
+
+// Shared chart renderer for both metric layouts: the sparkline, or a dashed placeholder for no data.
+function MetricSparkline({
+  metric,
+  isLoading,
+  fullWidth = false,
+}: {
+  metric: ServiceSummaryMetric;
+  isLoading: boolean;
+  fullWidth?: boolean;
+}) {
+  const { color, series, comparisonSeries, comparisonColor } = metric;
+  const hasSeries = !!series?.some((point) => point.y !== null);
+
+  if (hasSeries || isLoading) {
+    return (
+      <Sparkline
+        color={color}
+        series={series ?? null}
+        comparisonSeries={comparisonSeries}
+        comparisonSeriesColor={comparisonColor}
+        compact={!fullWidth}
+        fullWidth={fullWidth}
+        fill
+        isLoading={isLoading && !hasSeries}
+      />
+    );
+  }
+
+  return <NoDataPlaceholder color={color} />;
 }
 
 function NoDataPlaceholder({ color }: { color: string }) {

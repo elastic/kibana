@@ -38,6 +38,8 @@ export interface SparklineProps {
   isLoading?: boolean;
   /** Render a translucent area fill beneath the line, instead of a bare line. */
   fill?: boolean;
+  /** Stretch the chart to the width of its container instead of a fixed width. */
+  fullWidth?: boolean;
 }
 
 const AREA_FILL_OPACITY = 0.2;
@@ -56,14 +58,18 @@ export function Sparkline({
   compact = false,
   isLoading = false,
   fill = false,
+  fullWidth = false,
 }: SparklineProps) {
   const { euiTheme } = useEuiTheme();
   const { theme: defaultTheme, baseTheme } = useChartThemes();
   const hasComparisonSeries = !!comparisonSeries?.length;
 
   const lineStyle = fill ? { strokeWidth: FILLED_LINE_WIDTH } : {};
+  // A flat series sits on the plot edge; reserve half the stroke so it isn't clipped (and so a
+  // constant line doesn't look thinner than a varying one). Only needed for the thicker filled line.
+  const edgeInset = fill ? FILLED_LINE_WIDTH / 2 : 0;
   const sparklineTheme = {
-    chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
+    chartMargins: { left: 0, right: 0, top: edgeInset, bottom: edgeInset },
     lineSeriesStyle: { point: { opacity: 0 }, line: lineStyle },
     areaSeriesStyle: {
       point: { opacity: 0 },
@@ -75,7 +81,7 @@ export function Sparkline({
 
   const chartSize = {
     height: CHART_HEIGHT,
-    width: compact ? COMPACT_WIDTH : DEFAULT_WIDTH,
+    width: fullWidth ? '100%' : compact ? COMPACT_WIDTH : DEFAULT_WIDTH,
   };
 
   if (isLoading) {

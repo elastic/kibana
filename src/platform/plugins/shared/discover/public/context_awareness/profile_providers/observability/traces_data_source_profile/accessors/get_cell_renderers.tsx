@@ -17,5 +17,5 @@ export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRend
   (params) => ({
     ...prev(params),
     [SOURCE_COLUMN]: getTracesSummaryColumn(params, toolkit),
-    [SERVICE_NAME_FIELD]: getServiceSummaryCell(SERVICE_NAME_FIELD, toolkit),
+    [SERVICE_NAME_FIELD]: getServiceSummaryCell(SERVICE_NAME_FIELD),
   });
