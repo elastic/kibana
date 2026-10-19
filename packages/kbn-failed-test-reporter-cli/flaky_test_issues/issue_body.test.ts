@@ -496,6 +496,24 @@ describe('renderFlakySuiteIssueBody', () => {
     expect(renderFlakySuiteIssueBody(suite, { report, relatedIssues: [7, 8] })).toMatchSnapshot();
   });
 
+  it('names the closed issues it takes over from before the possibly related ones', () => {
+    const { suite, report } = singleTestReport();
+    const body = renderFlakySuiteIssueBody(suite, {
+      report,
+      relatedIssues: [9],
+      supersededIssues: [7, 8],
+    });
+
+    const superseded = body.indexOf(
+      'Previously tracked in #7, #8, closed before the suite failed again.'
+    );
+    expect(superseded).toBeGreaterThan(-1);
+    expect(body.indexOf('Possibly related: #9.')).toBeGreaterThan(superseded);
+    expect(renderFlakySuiteIssueBody(suite, { report, supersededIssues: [] })).not.toContain(
+      'Previously tracked'
+    );
+  });
+
   it('records the suite and the first report snapshot in the metadata', () => {
     const { suite, report } = singleTestReport();
     const body = renderFlakySuiteIssueBody(suite, { report });

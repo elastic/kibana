@@ -11,7 +11,8 @@ set -euo pipefail
 #     every flaky test already has a failed-test issue in FLAKY_TESTS_TRACKING_REPO (elastic/kibana);
 #   - elastic/kibana: live.
 # Every open failed-test issue is fetched, plus those closed in the last
-# FLAKY_TESTS_CLOSED_ISSUES_DAYS days; both count as tracking a suite. At most
+# FLAKY_TESTS_CLOSED_ISSUES_DAYS days; both count as tracking a suite, a closed one only until
+# the test it is about fails again, the new suite issue then links it. At most
 # FLAKY_TESTS_MAX_NEW_ISSUES issues are created per run. FLAKY_TESTS_OMIT_SKIPPED_TESTS leaves
 # out flaky tests that were skipped since. Unless FLAKY_TESTS_UPDATE_ISSUES is 'false', a suite
 # that has an issue of its own gets it refreshed with the report's numbers, a comment when it
@@ -129,6 +130,7 @@ section() {
       + (if .issue then " [\(.issue.repo // "")#\(.issue.number)](\(.issue.url))" else "" end)
       + (if .issue and .issue.state == "closed" then " (closed)" else "" end)
       + (if .reopened then " (reopened)" elif .commented then " (commented)" else "" end)
+      + (if .supersedes then " (previously " + ([.supersedes[] | "[#\(.number)](\(.url))"] | join(", ")) + ")" else "" end)
       + (if .match then " (\(.match))" else "" end)
       + (if .reason then ": \(.reason)" else "" end)
       + (if .error then ": \(.error)" else "" end)' "$SUMMARY_PATH"

@@ -48,6 +48,11 @@ export interface FlakySuiteIssueContext {
   report: FlakyTestReport;
   /** Numbers of issues that mention the suite's file without being about it. */
   relatedIssues?: number[];
+  /**
+   * Numbers of closed issues about one of the suite's tests that failed after they were closed,
+   * which this issue takes over from.
+   */
+  supersededIssues?: number[];
   /** Metadata of the issue being refreshed, merged into the new one; absent for a new issue. */
   previous?: RecordedFlakySuiteIssueMetadata;
   /** The refresh comes with a comment, so this report notified the owners. */
@@ -674,9 +679,19 @@ const failuresByPipeline = (suite: FlakySuite, report: FlakyTestReport): string 
   ].join('\n');
 };
 
+const issueList = (numbers: readonly number[]): string =>
+  numbers.map((number) => `#${number}`).join(', ');
+
+const supersededIssues = (ctx: FlakySuiteIssueContext): string | undefined =>
+  ctx.supersededIssues && ctx.supersededIssues.length > 0
+    ? `Previously tracked in ${issueList(
+        ctx.supersededIssues
+      )}, closed before the suite failed again.`
+    : undefined;
+
 const relatedIssues = (ctx: FlakySuiteIssueContext): string | undefined =>
   ctx.relatedIssues && ctx.relatedIssues.length > 0
-    ? `Possibly related: ${ctx.relatedIssues.map((number) => `#${number}`).join(', ')}.`
+    ? `Possibly related: ${issueList(ctx.relatedIssues)}.`
     : undefined;
 
 /** Full issue body for a suite, including the hidden metadata. */
@@ -699,6 +714,7 @@ export const renderFlakySuiteIssueBody = (
     failuresByBranch(suite),
     failuresByTarget(suite),
     failuresByPipeline(suite, ctx.report),
+    supersededIssues(ctx),
     relatedIssues(ctx),
   ];
   return updateIssueMetadata(

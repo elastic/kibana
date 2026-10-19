@@ -33,8 +33,13 @@ distinct errors with their share of its failures and the pipelines, branches, ta
 was last seen in, and breakdowns by branch (with the ones every setup skips it on marked ⏭️), by Scout target (deployment mode and location, for
 suites that recorded one) and by pipeline naming the branches each failed on; issues that merely
 mention the file are linked as possibly related. A suite is
-skipped, and the issue recorded, when every one of its tests has an issue, open or closed, a
-per-test one or one about the suite or its file.
+skipped, and the issue recorded, when every one of its tests has an issue, a per-test one or one
+about the suite or its file, open or closed after the test last failed. A closed issue about a
+test that failed after it was closed no longer counts: the per-test issues `report_failed_tests`
+filed get no further comments once it stops writing, the stale sweep closes them, and they would
+otherwise keep the suite silent for `--closed-since-days`. The new suite issue names them as
+previously tracking the suite (`supersedes` in the summary). The suite's own issue is the
+exception, it is reopened instead (below).
 
 A suite whose issue is its own, one this command filed for that `describe` block rather than for
 the whole file, has it refreshed instead (`--no-update-issues` turns this off):
@@ -42,7 +47,8 @@ the whole file, has it refreshed instead (`--no-update-issues` turns this off):
 - the body is rewritten with the report's numbers, and its metadata keeps the test ids and branches
   recorded before, so `/skip` still covers a branch the suite stopped failing on this week;
 - a comment is posted when the suite failed since the owners were last notified, saying it still
-  appears to be flaky and how to skip it, at most every `--comment-interval-days` (default 3). The
+  appears to be flaky and how to skip it, at most every `--comment-interval-days` (default 3, the
+  daily pipeline starts at 7 as every comment is a Slack message to the owning team). The
   last notification is recorded as `report.notifiedAt`: the report that filed the issue, whose team
   label gets the owners pinged, or the latest one that commented, so failures in between are
   covered by the next comment. Comments by `kibanamachine` are what the Slack notifications of
@@ -79,9 +85,10 @@ API, about a hundred requests against the core rate limit, and matches locally. 
 `--tracking-repo owner/name` (default `elastic/kibana`) the same listing runs against a second
 repository that is never written to: while the issues are filed in a sandbox, a suite gets none
 there when every one of its flaky tests already has an issue in `elastic/kibana`, a per-test issue
-about that test or an issue about the suite or its file. One test without an issue is enough for
-the suite issue to be filed. Empty disables the check; it is skipped when it names `--github-repo`
-itself. It deliberately
+about that test or an issue about the suite or its file, open or closed after the test last
+failed. One test without an issue is enough for the suite issue to be filed; its closed issues
+in the tracking repository are not linked. Empty disables the check; it is skipped when it names
+`--github-repo` itself. It deliberately
 avoids the search API, whose 30-requests-a-minute limit is shared with every other CI job using the
 same token and whose 1000-result cap and 256-character queries lose issues silently. Issues are
 indexed by the file names they mention (after restoring JUnit's `path·ts` spelling), the Jest

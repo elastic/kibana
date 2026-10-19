@@ -380,6 +380,118 @@ describe('reportFlakySuiteIssues', () => {
     });
   });
 
+  describe('issues closed before the test failed again', () => {
+    // The fixture's newest failure is at 06:12 on 2026-09-09
+    const closedBefore = { state: 'closed' as const, closed_at: '2026-09-05T00:00:00Z' };
+    const closedAfter = { state: 'closed' as const, closed_at: '2026-09-09T08:00:00Z' };
+
+    it('files a suite issue over a per-test issue closed before the test failed again, linking it', async () => {
+      const previous = scoutTestIssue(43, 'pw-1', closedBefore);
+      const github = createGithubApi([previous]);
+
+      const summary = await run(github, { report: flakyReport([trackedTest()]) });
+
+      expect(github.createIssue).toHaveBeenCalledTimes(1);
+      const [, body] = github.createIssue.mock.calls[0];
+      expect(body).toContain('Previously tracked in #43, closed before the suite failed again.');
+      expect(body).not.toContain('Possibly related');
+      expect(summary.actions).toEqual([
+        {
+          action: 'created',
+          filePath: SUITE_PATH,
+          suiteTitle: 'Default status alert',
+          issue: expect.objectContaining({ number: 900 }),
+          supersedes: [
+            { number: 43, url: previous.html_url, title: previous.title, state: 'closed' },
+          ],
+        },
+      ]);
+    });
+
+    it('keeps counting a per-test issue closed after the test last failed, or at an unknown time', async () => {
+      const after = createGithubApi([scoutTestIssue(43, 'pw-1', closedAfter)]);
+      const unknown = createGithubApi([scoutTestIssue(43, 'pw-1', { state: 'closed' })]);
+
+      const summaries = [
+        await run(after, { report: flakyReport([trackedTest()]) }),
+        await run(unknown, { report: flakyReport([trackedTest()]) }),
+      ];
+
+      expectNoWrites(after);
+      expectNoWrites(unknown);
+      for (const summary of summaries) {
+        expect(summary.actions[0]).toMatchObject({
+          action: 'skipped',
+          reason: 'tracked',
+          issue: { number: 43, state: 'closed' },
+        });
+      }
+    });
+
+    it('judges each per-test issue by the failures of its own test', async () => {
+      // pw-1 last failed before its issue was closed, pw-2 after
+      const quietSince = new Date('2026-09-03T00:00:00.000Z');
+      const [branch] = flakyTest().byBranch;
+      const report = flakyReport([
+        trackedTest({
+          byBranch: [{ ...branch, lastFailedAt: quietSince }],
+          lastFailedAt: quietSince,
+        }),
+        flakyTest({ testId: 'pw-2', title: 'another test' }),
+      ]);
+      const github = createGithubApi([
+        scoutTestIssue(43, 'pw-1', closedBefore),
+        scoutTestIssue(44, 'pw-2', closedBefore),
+      ]);
+
+      const summary = await run(github, { report });
+
+      expect(summary.actions[0]).toMatchObject({
+        action: 'created',
+        supersedes: [expect.objectContaining({ number: 44 })],
+      });
+      const [, body] = github.createIssue.mock.calls[0];
+      expect(body).toContain('Previously tracked in #44, closed before the suite failed again.');
+      expect(body).toContain('Possibly related: #43.');
+    });
+
+    it('gives a describe block its own issue over a file-wide issue closed before it failed again', async () => {
+      const github = createGithubApi([fileWideIssue(44, closedBefore)]);
+
+      const summary = await run(github, { report: flakyReport([flakyTest()]) });
+
+      expect(summary.actions[0]).toMatchObject({
+        action: 'created',
+        suiteTitle: 'Default status alert',
+        supersedes: [expect.objectContaining({ number: 44, state: 'closed' })],
+      });
+    });
+
+    it("reopens the suite's own closed issue rather than superseding it, and keeps it tracked with updates off", async () => {
+      const refreshed = createGithubApi([suiteIssue(42, closedBefore)]);
+      const frozen = createGithubApi([suiteIssue(42, closedBefore)]);
+
+      const refreshedSummary = await run(refreshed, { report: flakyReport([flakyTest()]) });
+      const frozenSummary = await run(frozen, {
+        report: flakyReport([flakyTest()]),
+        updateIssues: false,
+      });
+
+      expect(refreshed.createIssue).not.toHaveBeenCalled();
+      expect(refreshed.editIssue).toHaveBeenCalledWith(42, {
+        body: expect.any(String),
+        state: 'open',
+      });
+      expect(refreshedSummary.actions[0]).toMatchObject({ action: 'updated', reopened: true });
+      expectNoWrites(frozen);
+      expect(frozenSummary.actions[0]).toMatchObject({
+        action: 'skipped',
+        reason: 'tracked',
+        issue: { number: 42, state: 'closed' },
+      });
+    });
+  });
+
   describe('flaky tests skipped since', () => {
     const skippedTest = (overrides: Parameters<typeof flakyTest>[0] = {}) =>
       flakyTest({
@@ -652,6 +764,23 @@ describe('reportFlakySuiteIssues', () => {
         reason: 'tracked-upstream',
         issue: { number: 123, state: 'closed', repo: TRACKING_REPO },
       });
+    });
+
+    it('files the issue when that issue was closed before the test failed again, without linking it', async () => {
+      const github = createGithubApi();
+      const tracking = trackingRepo([
+        scoutTestIssue(123, 'pw-1', { state: 'closed', closed_at: '2026-09-05T00:00:00Z' }),
+      ]);
+
+      const summary = await run(github, { report: flakyReport([trackedTest()]), tracking });
+
+      expect(github.createIssue).toHaveBeenCalledTimes(1);
+      const [, body] = github.createIssue.mock.calls[0];
+      expect(body).not.toContain('Previously tracked');
+      expect(summary.actions[0]).toEqual(
+        expect.not.objectContaining({ supersedes: expect.anything() })
+      );
+      expect(summary.actions[0]).toMatchObject({ action: 'created' });
     });
 
     it('files the issue when the tracking repository only mentions the file, without linking it', async () => {
